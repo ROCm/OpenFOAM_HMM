@@ -2,7 +2,7 @@
 coordinateTransform
 {
     type    fieldCoordinateSystemTransform;
-    libs    ("libfieldFunctionObjects.so");
+    libs    (fieldFunctionObjects);
     log     true;
     fields  ( U );
 

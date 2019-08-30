@@ -54,7 +54,7 @@ functions
     probes
     {
         type            thermoCoupleProbes;
-        libs            ("libutilityFunctionObjects.so");
+        libs            (utilityFunctionObjects);
         writeControl    timeStep;
         writeInterval   1;
 

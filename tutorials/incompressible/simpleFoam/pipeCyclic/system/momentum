@@ -3,7 +3,7 @@
 momentum
 {
     type    momentum;
-    libs    ("libfieldFunctionObjects.so");
+    libs    (fieldFunctionObjects);
     log     true;
 
     executeInterval 10;

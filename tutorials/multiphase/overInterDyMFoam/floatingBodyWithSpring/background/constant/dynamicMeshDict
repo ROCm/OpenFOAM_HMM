@@ -34,7 +34,7 @@ solvers
 
     cube
     {
-        motionSolverLibs    ("libsixDoFRigidBodyMotion.so");
+        motionSolverLibs    ("sixDoFRigidBodyMotion");
         motionSolver          sixDoFRigidBodyMotion;
 
         cellSet         c1;

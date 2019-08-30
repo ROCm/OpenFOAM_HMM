@@ -56,7 +56,7 @@ functions
     timeStepping
     {
         type            setTimeStep;
-        libs            ("libutilityFunctionObjects.so");
+        libs            (utilityFunctionObjects);
         enabled         yes;
         deltaT          tableFile;
         file            "system/deltaTvalues";
@@ -65,7 +65,7 @@ functions
     minMaxp
     {
         type        fieldMinMax;
-        libs        ("libfieldFunctionObjects.so");
+        libs        (fieldFunctionObjects);
         fields
         (
              p

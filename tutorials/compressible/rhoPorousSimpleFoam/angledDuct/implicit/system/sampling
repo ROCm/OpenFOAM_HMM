@@ -9,7 +9,7 @@
 cellZoneID
 {
     type    coded;
-    libs    ("utilityFunctionObjects");
+    libs    (utilityFunctionObjects);
     name    cellZoneID;
 
     executeControl  writeTime;
@@ -96,7 +96,7 @@ cellZoneID
 plane
 {
     type    surfaces;
-    libs    ("sampling");
+    libs    (sampling);
 
     writeControl    writeTime;
 

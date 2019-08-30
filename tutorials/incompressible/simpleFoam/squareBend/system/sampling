@@ -36,7 +36,7 @@ FoamFile
 __surfaceFieldValue
 {
     type            surfaceFieldValue;
-    libs            ("libfieldFunctionObjects.so");
+    libs            (fieldFunctionObjects);
     log             on;
     enabled         true;
 
@@ -60,7 +60,7 @@ __surfaceFieldValue
 sampled
 {
     type    surfaces;
-    libs    ("libsampling.so");
+    libs    (sampling);
     log     true;
 
     executeControl  timeStep;

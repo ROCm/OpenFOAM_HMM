@@ -49,7 +49,7 @@ functions
     forces
     {
         type                forces;
-        libs                ( "libforces.so" );
+        libs                (forces);
         outputControl       timeStep;
         outputInterval      10;
         patches             (wing);

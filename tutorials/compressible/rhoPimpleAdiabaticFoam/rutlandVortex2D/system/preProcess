@@ -21,7 +21,7 @@ functions
     {
         name    createVortices;
         type    coded;
-        libs    ("libutilityFunctionObjects.so");
+        libs    (utilityFunctionObjects);
         enabled yes;
 
         codeInclude

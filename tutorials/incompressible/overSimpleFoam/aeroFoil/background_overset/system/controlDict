@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-libs            ("liboverset.so" "libfvMotionSolvers.so");
+libs            (overset fvMotionSolvers);
 
 application     overSimpleFoam;
 

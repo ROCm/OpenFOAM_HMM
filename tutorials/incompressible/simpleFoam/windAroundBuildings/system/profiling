@@ -10,7 +10,7 @@ profiling
 {
     type  parProfiling;
 
-    libs  ("libutilityFunctionObjects.so");
+    libs  (utilityFunctionObjects);
 
     // Report stats on exit only (instead of every time step)
     executeControl  onEnd;

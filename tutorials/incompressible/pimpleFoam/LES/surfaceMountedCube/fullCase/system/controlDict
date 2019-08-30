@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-libs ("libturbulenceModelSchemes.so");
+libs (turbulenceModelSchemes);
 
 application     pimpleFoam;
 
@@ -51,38 +51,38 @@ functions
     minMax
     {
         type            fieldMinMax;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         fields          (U p);
     }
     DESField
     {
         type            DESModelRegions;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         //region "region0";
         writeControl    writeTime;
     }
     Q1
     {
         type            Q;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         writeControl    writeTime;
     }
     vorticity1
     {
         type            vorticity;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         writeControl    writeTime;
     }
     yPlus
     {
         type            yPlus;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         writeControl    writeTime;
     }
     fieldAverage1
     {
         type            fieldAverage;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         writeControl    writeTime;
         timeStart       10;
 

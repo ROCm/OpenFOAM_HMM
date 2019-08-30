@@ -15,7 +15,7 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // For patchSummary to find the boundary conditions
-libs            ("libincompressibleTurbulenceModels.so");
+libs            (incompressibleTurbulenceModels);
 
 application     simpleFoam;
 

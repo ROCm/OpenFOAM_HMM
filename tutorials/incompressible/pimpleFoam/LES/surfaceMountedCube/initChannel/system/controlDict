@@ -52,7 +52,7 @@ functions
     turbulenceFields
     {
         type            turbulenceFields;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         writeControl    writeTime;
         fields          (R nuTilda k epsilon omega L);
     }

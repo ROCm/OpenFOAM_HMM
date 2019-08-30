@@ -50,7 +50,7 @@ functions
     sample1
     {
         type            sets;
-        libs            ("libsampling.so");
+        libs            (sampling);
         writeControl    outputTime;
         region          solid;
         fields          (T jouleHeatingSource:V jouleHeatingSource:sigma);

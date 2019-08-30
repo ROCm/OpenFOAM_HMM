@@ -51,7 +51,7 @@ functions
     surfaceFieldValue1
     {
         type            surfaceFieldValue;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         enabled         yes;
         writeControl    writeTime;
         log             yes;

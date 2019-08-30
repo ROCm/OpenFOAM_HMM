@@ -3,7 +3,7 @@
 vtkWrite
 {
     type    vtkWrite;
-    libs    ("libutilityFunctionObjects.so");
+    libs    (utilityFunctionObjects);
     writeControl    writeTime;
 
     boundary false;

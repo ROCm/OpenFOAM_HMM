@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-libs            ("libblockMesh.so");
+libs            (blockMesh);
 
 DebugSwitches
 {

@@ -15,7 +15,7 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Library defines new boundary conditions
-libs            ("libOpenFOAM.so" "libfieldFunctionObjects.so");
+libs            (OpenFOAM fieldFunctionObjects);
 
 application     rhoPimpleFoam;
 
@@ -56,7 +56,7 @@ functions
     minMax
     {
         type    fieldMinMax;
-        libs    ("libfieldFunctionObjects.so");
+        libs    (fieldFunctionObjects);
         fields  (T);
     }
 }

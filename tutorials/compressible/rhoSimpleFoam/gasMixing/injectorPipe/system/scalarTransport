@@ -3,7 +3,7 @@
 tracer0
 {
     type  scalarTransport;
-    libs  ("libsolverFunctionObjects.so");
+    libs  (solverFunctionObjects);
     log   off;
 
     resetOnStartUp  false;

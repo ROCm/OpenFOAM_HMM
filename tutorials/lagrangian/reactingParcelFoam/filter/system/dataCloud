@@ -3,7 +3,7 @@
 dataCloud
 {
     type    dataCloud;
-    libs    ("liblagrangianFunctionObjects.so");
+    libs    (lagrangianFunctionObjects);
     log     true;
 
     // Nothing happens before this anyhow

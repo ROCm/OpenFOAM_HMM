@@ -3,7 +3,7 @@
 abort
 {
     type    abort;
-    libs    ("libutilityFunctionObjects.so");
+    libs    (utilityFunctionObjects);
 
     file    "<case>/ABORT";   // Instead of default name
 

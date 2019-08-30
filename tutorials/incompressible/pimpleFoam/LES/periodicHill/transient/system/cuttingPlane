@@ -20,7 +20,7 @@ functions
 cuttingPlane
 {
     type            surfaces;
-    libs            ("libsampling.so");
+    libs            (sampling);
     writeControl    writeTime;
 
     surfaceFormat   vtk;

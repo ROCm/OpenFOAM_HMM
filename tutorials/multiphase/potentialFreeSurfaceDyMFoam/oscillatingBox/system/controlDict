@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-libs            ("libfvMotionSolvers.so");
+libs            (fvMotionSolvers);
 
 application     potentialFreeSurfaceDyMFoam;
 
@@ -58,7 +58,7 @@ functions
     forces
     {
         type            forces;
-        libs            ("libforces.so");
+        libs            (forces);
         writeControl    writeTime;
         patches         (floatingObject);
         rho             rhoInf;
@@ -70,7 +70,7 @@ functions
     poolHeight
     {
         type            surfaceFieldValue;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         writeControl   timeStep;
         writeInterval  1;
         log             yes;

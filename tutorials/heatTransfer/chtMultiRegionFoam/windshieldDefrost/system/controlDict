@@ -56,7 +56,7 @@ functions
     massFlux
     {
         type            surfaceFieldValue;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         enabled         yes;
         writeControl    timeStep; //writeTime;
         writeInterval   1;

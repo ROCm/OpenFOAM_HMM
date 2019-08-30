@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-libs            ("liboverset.so" "libfvMotionSolvers.so");
+libs            (overset fvMotionSolvers);
 
 application     overInterDyMFoam ;
 
@@ -57,7 +57,7 @@ functions
     probes
     {
         type            probes;
-        libs            ("libsampling.so");
+        libs            (sampling);
 
         // Name of the directory for probe data
         name            probes;
@@ -81,7 +81,7 @@ functions
 
     alphaVol
     {
-        libs            ("libutilityFunctionObjects.so");
+        libs            (utilityFunctionObjects);
         type            coded;
         name            alphaVolume;
         writeControl    timeStep;

@@ -4,7 +4,7 @@
 areaWrite
 {
     type    areaWrite;
-    libs    ("libutilityFunctionObjects.so");
+    libs    (utilityFunctionObjects);
     log     true;
 
     writeControl    writeTime;

@@ -15,7 +15,7 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Where to load it from (if not already in solver)
-libs            ("libfieldFunctionObjects.so");
+libs            (fieldFunctionObjects);
 
 DebugSwitches
 {
@@ -61,7 +61,7 @@ functions
         type            processorField;
 
         // Where to load it from (if not already in solver)
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
 
         // Function object enabled flag
         enabled         true;

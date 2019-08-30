@@ -4,7 +4,7 @@
 ensightWrite
 {
     type    ensightWrite;
-    libs    ("libutilityFunctionObjects.so");
+    libs    (utilityFunctionObjects);
     log     true;
 
     nodeValues  true;

@@ -5,7 +5,7 @@
 debug
 {
     type    surfaces;
-    libs    ("libsampling.so");
+    libs    (sampling);
     log     true;
     writeControl  timeStep;
     writeInterval 1;

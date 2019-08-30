@@ -59,7 +59,7 @@ functions
     inletFlux
     {
         type            surfaceFieldValue;
-        libs            ( "libfieldFunctionObjects.so" );
+        libs            (fieldFunctionObjects);
         writeControl    timeStep;
         log             true;
         writeFields     false;
@@ -72,7 +72,7 @@ functions
     outletFlux
     {
         type            surfaceFieldValue;
-        libs            ( "libfieldFunctionObjects.so" );
+        libs            (fieldFunctionObjects);
         writeControl    timeStep;
         log             true;
         writeFields     false;
@@ -85,7 +85,7 @@ functions
     atmosphereFlux
     {
         type            surfaceFieldValue;
-        libs            ( "libfieldFunctionObjects.so" );
+        libs            (fieldFunctionObjects);
         writeControl    timeStep;
         log             true;
         writeFields     false;

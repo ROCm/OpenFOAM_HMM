@@ -50,7 +50,7 @@ functions
     forces
     {
         type            forceCoeffs;
-        libs            ("libforces.so");
+        libs            (forces);
         writeControl    writeTime;
 
         patches

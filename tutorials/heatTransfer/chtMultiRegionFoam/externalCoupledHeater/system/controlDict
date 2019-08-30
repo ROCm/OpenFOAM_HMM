@@ -16,7 +16,7 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Library defines new boundary conditions
-libs            ("libOpenFOAM.so" "libfieldFunctionObjects.so");
+libs            (OpenFOAM fieldFunctionObjects);
 
 application     chtMultiRegionFoam;
 

@@ -56,7 +56,7 @@ functions
 {
     sensitivityAnalysis
     {
-        libs                ("libfieldFunctionObjects.so");
+        libs                (fieldFunctionObjects);
         type                psiReactionsSensitivityAnalysis;
         writeControl        writeTime;
     }

@@ -1,5 +1,5 @@
 type            patchProbes;
-libs            ("libsampling.so");
+libs            (sampling);
 writeControl    writeTime;
 
 patch           lowerWall;

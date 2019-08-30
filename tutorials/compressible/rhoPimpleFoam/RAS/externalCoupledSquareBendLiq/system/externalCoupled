@@ -4,7 +4,7 @@
 externalCoupled
 {
     type    externalCoupled;
-    libs    ("libfieldFunctionObjects.so");
+    libs    (fieldFunctionObjects);
     log     true;
 
     executeControl timeStep;

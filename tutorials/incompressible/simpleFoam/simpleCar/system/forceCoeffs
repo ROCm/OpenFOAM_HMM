@@ -9,7 +9,7 @@
 forceCoeffs1
 {
     type            forceCoeffs;
-    libs            ("libforces.so");
+    libs            (forces);
     writeControl    writeTime;
     writeFields     true;
 

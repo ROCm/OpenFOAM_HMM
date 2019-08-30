@@ -3,7 +3,7 @@
 vtkWrite
 {
     type    vtkWrite;
-    libs    ("libutilityFunctionObjects.so");
+    libs    (utilityFunctionObjects);
     log     true;
 
     // Fields to output (words or regex)
@@ -29,7 +29,7 @@ vtkWrite
 subset
 {
     type    vtkWrite;
-    libs    ("libutilityFunctionObjects.so");
+    libs    (utilityFunctionObjects);
     log     true;
 
     // boundary    false;

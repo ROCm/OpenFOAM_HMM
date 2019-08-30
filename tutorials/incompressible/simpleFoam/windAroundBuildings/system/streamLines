@@ -10,7 +10,7 @@ streamLines
 {
     type  streamLine;
 
-    libs  ("libfieldFunctionObjects.so");
+    libs  (fieldFunctionObjects);
 
     // Time control etc
     ${_visualization};

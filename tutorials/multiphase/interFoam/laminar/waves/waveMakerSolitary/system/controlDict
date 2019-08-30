@@ -42,7 +42,7 @@ functions
     lineMOVING
     {
         type            sets;
-        libs ("libsampling.so");
+        libs (sampling);
         enabled         true;
         writeControl    writeTime;
         outputInterval  1;
@@ -80,7 +80,7 @@ functions
     lineFIXED
     {
         type            sets;
-        libs ("libsampling.so");
+        libs (sampling);
         enabled         true;
         writeControl    writeTime;
         outputInterval  1;

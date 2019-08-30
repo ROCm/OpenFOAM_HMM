@@ -3,7 +3,7 @@
 cloudWrite1
 {
     type    vtkCloud;
-    libs    ("liblagrangianFunctionObjects.so");
+    libs    (lagrangianFunctionObjects);
     log     true;
 
     // Cloud name

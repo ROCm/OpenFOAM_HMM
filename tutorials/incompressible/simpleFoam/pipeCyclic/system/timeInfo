@@ -3,7 +3,7 @@
 time
 {
     type    timeInfo;
-    libs    ("libutilityFunctionObjects.so");
+    libs    (utilityFunctionObjects);
     log     true;
 
     // writeToFile     true;

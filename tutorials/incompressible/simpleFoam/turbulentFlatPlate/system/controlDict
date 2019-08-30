@@ -50,14 +50,14 @@ functions
     minMax
     {
         type          fieldMinMax;
-        libs          ("libfieldFunctionObjects.so");
+        libs          (fieldFunctionObjects);
         writeControl  timeStep; //writeTime;
         fields        (U);
     }
     yPlus
     {
         type            yPlus;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         patches         (fixedWall);
         writeControl    writeTime;
     }

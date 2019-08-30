@@ -59,7 +59,7 @@ functions
     patchInlet_phi
     {
         type                surfaceFieldValue;
-        libs                ("libfieldFunctionObjects.so");
+        libs                (fieldFunctionObjects);
         writeControl        timeStep;
         writeInterval       200;
         log                 true;
@@ -73,7 +73,7 @@ functions
     wallPanel_qin
     {
         type                patchProbes;
-        libs                ("libsampling.so");
+        libs                (sampling);
         writeControl        timeStep;
         writeInterval       200;
         log                 true;
@@ -90,7 +90,7 @@ functions
     inletqr_qin
     {
         type                patchProbes;
-        libs                ("libsampling.so");
+        libs                (sampling);
         writeControl        timeStep;
         writeInterval       200;
         log                 true;
@@ -109,7 +109,7 @@ functions
     thermoCouple
     {
         type            thermoCoupleProbes;
-        libs            ("libutilityFunctionObjects.so");
+        libs            (utilityFunctionObjects);
         writeControl    timeStep;
         writeInterval   100;
 
@@ -153,7 +153,7 @@ functions
     probes_O2
     {
         type                probes;
-        libs                ("libsampling.so");
+        libs                (sampling);
         writeControl        timeStep;
         writeInterval       200;
         probeLocations

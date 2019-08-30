@@ -52,7 +52,7 @@ functions
     energySpectrum1
     {
         type            energySpectrum;
-        libs            ("librandomProcessesFunctionObjects.so");
+        libs            (randomProcessesFunctionObjects);
         writeControl    writeTime;
     }
 }

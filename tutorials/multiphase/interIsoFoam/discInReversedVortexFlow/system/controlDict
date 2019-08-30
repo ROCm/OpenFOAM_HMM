@@ -59,7 +59,7 @@ functions
     setVelocity
     {
         type            setFlow;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         writeControl    writeTime;
         mode            vortex2D;
         scale           sine;

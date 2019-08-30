@@ -1,5 +1,5 @@
 type            pressure;
-libs            ("libfieldFunctionObjects.so");
+libs            (fieldFunctionObjects);
 
 writeControl    writeTime;
 

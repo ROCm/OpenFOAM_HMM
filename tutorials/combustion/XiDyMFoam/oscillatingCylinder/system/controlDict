@@ -49,7 +49,7 @@ adjustTimeStep  yes;
 
 maxCo           0.4;
 
-libs            ( "libfvMotionSolvers.so" );
+libs            (fvMotionSolvers);
 
 
 // ************************************************************************* //

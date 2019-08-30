@@ -57,7 +57,7 @@ functions
     extractEulerianParticles1
     {
         type            extractEulerianParticles;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         writeControl    writeTime;
         faceZone        collector;
         alpha           alpha.water;

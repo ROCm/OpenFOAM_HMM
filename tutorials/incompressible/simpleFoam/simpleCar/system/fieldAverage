@@ -1,7 +1,7 @@
 fieldAverage1
 {
     type            fieldAverage;
-    libs            ("libfieldFunctionObjects.so");
+    libs            (fieldFunctionObjects);
     triggerStart    1;
     timeStart       500;
     controlMode     timeOrTrigger;

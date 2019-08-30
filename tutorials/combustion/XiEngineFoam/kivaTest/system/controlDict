@@ -57,7 +57,7 @@ functions
     {
         name    setDeltaT;
         type    coded;
-        libs    ("libutilityFunctionObjects.so");
+        libs    (utilityFunctionObjects);
 
         code
         #{

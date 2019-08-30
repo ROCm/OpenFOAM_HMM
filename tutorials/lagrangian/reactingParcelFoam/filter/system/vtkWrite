@@ -3,7 +3,7 @@
 vtkWrite
 {
     type    vtkWrite;
-    libs    ("libutilityFunctionObjects.so");
+    libs    (utilityFunctionObjects);
     log     true;
 
     // Nothing happens before this anyhow

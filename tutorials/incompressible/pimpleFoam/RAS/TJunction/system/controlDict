@@ -54,7 +54,7 @@ functions
     probes
     {
         // Where to load it from
-        libs            ("libsampling.so");
+        libs            (sampling);
 
         type            probes;
 
@@ -83,7 +83,7 @@ functions
     sTransport
     {
         type            scalarTransport;
-        libs            ("libsolverFunctionObjects.so");
+        libs            (solverFunctionObjects);
 
         enabled         true;
         writeControl    outputTime;

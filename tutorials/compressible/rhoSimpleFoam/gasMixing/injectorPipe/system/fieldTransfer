@@ -4,7 +4,7 @@
 sampled
 {
     type    surfaces;
-    libs    ("libsampling.so");
+    libs    (sampling);
     log     true;
     verbose true;
 

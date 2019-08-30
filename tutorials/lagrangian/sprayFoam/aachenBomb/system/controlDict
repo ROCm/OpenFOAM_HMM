@@ -54,7 +54,7 @@ functions
     distribtion1
     {
         type            particleDistribution;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         writeControl    writeTime;
         cloud           sprayCloud;
         nameVsBinWidth

@@ -9,7 +9,7 @@
 AMIWeights
 {
     type          AMIWeights;
-    libs          ("libfieldFunctionObjects.so");
+    libs          (fieldFunctionObjects);
     writeControl  writeTime;
     writeFields   no;
     // writeFields   yes;

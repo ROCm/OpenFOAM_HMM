@@ -18,7 +18,7 @@ FoamFile
 fieldAverage1
 {
     type                fieldAverage;
-    libs                ("libfieldFunctionObjects.so");
+    libs                (fieldFunctionObjects);
     writeControl        writeTime;
     timeStart           ${/timeStart};
 
@@ -37,7 +37,7 @@ fieldAverage1
 inletSampling
 {
     type                sets;
-    libs                ("libsampling.so");
+    libs                (sampling);
     writeControl        writeTime;
     timeStart           ${/timeStart};
 

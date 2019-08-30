@@ -3,7 +3,7 @@
 cloudWrite
 {
     type    vtkCloud;
-    libs    ("liblagrangianFunctionObjects.so");
+    libs    (lagrangianFunctionObjects);
     log     true;
 
     // Nothing happens before this anyhow

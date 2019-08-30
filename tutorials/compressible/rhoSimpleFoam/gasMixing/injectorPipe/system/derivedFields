@@ -6,7 +6,7 @@
 derivedFields
 {
     type    derivedFields;
-    libs    ("libfieldFunctionObjects.so");
+    libs    (fieldFunctionObjects);
     log     true;
 
     writeControl    none;

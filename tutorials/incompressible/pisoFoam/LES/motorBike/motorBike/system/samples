@@ -9,7 +9,7 @@
 samples
 {
     type            surfaces;
-    libs            ("libsampling.so");
+    libs            (sampling);
 
     // Time control etc
     ${_visualization};

@@ -17,7 +17,7 @@ FoamFile
 
 #include "solverControls"
 
-libs            ("libliquidPropertiesFvPatchFields.so");
+libs            (liquidPropertiesFvPatchFields);
 
 application     chtMultiRegionFoam;
 
@@ -56,7 +56,7 @@ functions
     H2O
     {
         type            scalarTransport;
-        libs            ("libsolverFunctionObjects.so");
+        libs            (solverFunctionObjects);
         resetOnStartUp  no;
         region          cabin;
         field           H2O;
@@ -69,7 +69,7 @@ functions
     fileUpdate
     {
         type                timeActivatedFileUpdate;
-        libs                ("libutilityFunctionObjects.so");
+        libs                (utilityFunctionObjects);
         writeControl        timeStep;
         writeInterval       1;
         region              cabin;

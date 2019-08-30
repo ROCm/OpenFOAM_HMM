@@ -1,7 +1,7 @@
 runTimeControl1
 {
     type            runTimeControl;
-    libs            ("libutilityFunctionObjects.so");
+    libs            (utilityFunctionObjects);
     conditions
     {
         condition1
@@ -21,7 +21,7 @@ runTimeControl1
 runTimeControl2
 {
     type            runTimeControl;
-    libs            ("libutilityFunctionObjects.so");
+    libs            (utilityFunctionObjects);
     controlMode     trigger;
     triggerStart    1;
     conditions
@@ -39,7 +39,7 @@ runTimeControl2
     runTimeControl3
     {
         type            runTimeControl;
-        libs            ("libutilityFunctionObjects.so");
+        libs            (utilityFunctionObjects);
         conditions
         {
             condition1

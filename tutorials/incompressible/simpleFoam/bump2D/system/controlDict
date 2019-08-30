@@ -50,7 +50,7 @@ functions
     pressure
     {
         type            pressure;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         writeControl    writeTime;
         result          Cp;
         mode            staticCoeff;
@@ -63,8 +63,8 @@ functions
 
     forceCoeffs
     {
-        libs            ("libforces.so");
         type            forceCoeffs;
+        libs            (forces);
         writeControl    writeTime;
         rho             rhoInf;
         rhoInf          1;
@@ -81,7 +81,7 @@ functions
     wallShearStress
     {
         type            wallShearStress;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         writeControl    writeTime;
         patches         (bump);
     }
@@ -89,7 +89,7 @@ functions
     yPlus
     {
         type            yPlus;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         writeControl    writeTime;
         patches         (bump);
     }
@@ -97,14 +97,14 @@ functions
     cellCentres
     {
         type            writeCellCentres;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         writeControl    writeTime;
     }
 
     residuals
     {
         type            solverInfo;
-        libs            ("libutilityFunctionObjects.so");
+        libs            (utilityFunctionObjects);
         fields          (".*");
     }
 }

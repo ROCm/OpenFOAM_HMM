@@ -55,7 +55,7 @@ functions
     sTransport
     {
         type            energyTransport;
-        libs             ("libsolverFunctionObjects.so");
+        libs             (solverFunctionObjects);
 
         enabled         true;
         writeControl    outputTime;

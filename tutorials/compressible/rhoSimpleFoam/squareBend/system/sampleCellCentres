@@ -3,7 +3,7 @@
 sampleSets
 {
     type    sets;
-    libs    ("libsampling.so");
+    libs    (sampling);
     log     on;
     enabled true;
 

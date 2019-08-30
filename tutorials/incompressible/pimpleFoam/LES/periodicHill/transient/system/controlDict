@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-libs            ("libturbulenceModelSchemes.so");
+libs            (turbulenceModelSchemes);
 
 application     pimpleFoam;
 
@@ -54,7 +54,7 @@ functions
     fieldAverage1
     {
         type            fieldAverage;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         writeControl    writeTime;
         timeStart       1500.5; // approx 2x flow-throughs
         fields
@@ -78,7 +78,7 @@ functions
     columnAverage
     {
         type            columnAverage;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
 
         executeControl  writeTime;
         writeControl    none;
@@ -98,7 +98,7 @@ functions
     sample
     {
         type            sets;
-        libs            ("libsampling.so");
+        libs            (sampling);
         writeControl    writeTime;
         timeStart       1500.5; // approx 2x flow-throughs
 

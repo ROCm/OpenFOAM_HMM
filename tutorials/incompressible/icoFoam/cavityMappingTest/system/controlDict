@@ -50,7 +50,7 @@ functions
     meshInterp1
     {
         type            mapFields;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         writeControl    timeStep;
         writeInterval   1;
 

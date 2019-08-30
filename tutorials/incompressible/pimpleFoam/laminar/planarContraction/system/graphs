@@ -19,7 +19,7 @@ Description
 // setConfig { type midPoint; }
 
 type            sets;
-libs            ("libsampling.so");
+libs            (sampling);
 
 writeControl    writeTime;
 

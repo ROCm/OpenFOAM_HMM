@@ -58,7 +58,7 @@ functions
     minMax
     {
       type          fieldMinMax;
-      libs          ("libfieldFunctionObjects.so");
+      libs          (fieldFunctionObjects);
       writeControl  timeStep; //writeTime;
       fields        (U);
     }

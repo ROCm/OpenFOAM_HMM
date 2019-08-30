@@ -51,7 +51,7 @@ functions
     {
         type probes;
 
-        libs ("libsampling.so");
+        libs (sampling);
 
         probeLocations
         (

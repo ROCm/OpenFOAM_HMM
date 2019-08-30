@@ -9,7 +9,7 @@
 residuals
 {
     type                solverInfo;
-    libs                ("libutilityFunctionObjects.so");
+    libs                (utilityFunctionObjects);
     writeResidualFields true;
     writeControl        outputTime;
     fields              (p);
@@ -18,7 +18,7 @@ residuals
 blendingFactor
 {
     type                stabilityBlendingFactor;
-    libs                ("libfieldFunctionObjects.so");
+    libs                (fieldFunctionObjects);
     log                 true;
     writeToFile         false;
 

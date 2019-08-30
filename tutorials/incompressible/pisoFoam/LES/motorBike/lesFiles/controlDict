@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-libs            ("libOpenFOAM.so" "libfieldFunctionObjects.so");
+libs            (OpenFOAM fieldFunctionObjects);
 
 application     pisoFoam;
 

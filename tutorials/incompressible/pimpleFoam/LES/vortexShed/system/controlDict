@@ -49,14 +49,14 @@ functions
 {
     minMax1
     {
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         type            fieldMinMax;
         fields          (U p);
     }
 
     curle
     {
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         type            Curle;
         writeControl    writeTime;
         timeStart       0.1;
@@ -68,7 +68,7 @@ functions
     cuttingPlane
     {
         type            surfaces;
-        libs            ("libsampling.so");
+        libs            (sampling);
         writeControl    timeStep;
         writeInterval   2;
         timeStart       0.1;
@@ -105,7 +105,7 @@ functions
     forces
     {
         type            forces;
-        libs            ("libforces.so");
+        libs            (forces);
         writeControl    writeTime;
         timeStart       0.1;
 
@@ -120,7 +120,7 @@ functions
     probes
     {
         type            patchProbes;
-        libs            ("libsampling.so");
+        libs            (sampling);
         writeControl    timeStep;
         timeStart       0.1;
 

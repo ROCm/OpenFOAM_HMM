@@ -5,7 +5,7 @@
 flux
 {
     type            fluxSummary;
-    libs            ("libfieldFunctionObjects.so");
+    libs            (fieldFunctionObjects);
     log             on;
     enabled         true;
 
