@@ -1223,8 +1223,7 @@ void* Foam::dlOpen(const fileName& libName, const bool check)
     else if (check)
     {
         WarningInFunction
-            << "dlopen error : " << MSwindows::lastError()
-            << endl;
+            << "dlopen error : " << MSwindows::lastError() << endl;
     }
 
     if (MSwindows::debug)
@@ -1233,6 +1232,26 @@ void* Foam::dlOpen(const fileName& libName, const bool check)
             << "dlOpen(const fileName&)"
             << " : dlopen of " << libName
             << " handle " << handle << std::endl;
+    }
+
+    return handle;
+}
+
+
+void* Foam::dlOpen(const fileName& libName, std::string& errorMsg)
+{
+    // Call without emitting error message - we capture that ourselves
+    void* handle = Foam::dlOpen(libName, false);
+
+    if (!handle)
+    {
+        // Capture error message
+        errorMsg = MSwindows::lastError();
+    }
+    else
+    {
+        // No errors
+        errorMsg.clear();
     }
 
     return handle;

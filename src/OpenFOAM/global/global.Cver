@@ -94,7 +94,8 @@ const std::string Foam::foamVersion::buildArch
 #elif defined (WM_BIG_ENDIAN)
     "MSB"
 #else
-    "???"
+#warning Cannot determine BIG or LITTLE endian. This should never happen.
+    "_SB"
 #endif
     ";label="  + std::to_string(8*sizeof(Foam::label))
   + ";scalar=" + std::to_string(8*sizeof(Foam::scalar))

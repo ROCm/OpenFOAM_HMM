@@ -27,6 +27,7 @@ License
 
 #include "dlLibraryTable.H"
 #include "OSspecific.H"
+#include "IOstreams.H"
 #include "int.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -37,10 +38,47 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void* Foam::dlLibraryTable::openLibrary
+(
+    const fileName& libName,
+    bool verbose
+)
+{
+    if (libName.empty())
+    {
+        return nullptr;
+    }
+
+    std::string msg;
+    void* ptr = Foam::dlOpen(fileName(libName).expand(), msg);
+
+    DebugInFunction
+        << "Opened " << libName
+        << " resulting in handle " << Foam::name(ptr) << nl;
+
+    if (!ptr)
+    {
+        // Even with details turned off, we want some feedback about failure
+        OSstream& os = (verbose ? WarningInFunction : Serr);
+        os << "Could not load " << libName << nl << msg.c_str() << endl;
+    }
+
+    return ptr;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::dlLibraryTable::dlLibraryTable()
-{}
+Foam::dlLibraryTable::dlLibraryTable
+(
+    const UList<fileName>& libNames,
+    bool verbose
+)
+{
+    dlLibraryTable::open(libNames, verbose);
+}
 
 
 Foam::dlLibraryTable::dlLibraryTable
@@ -49,7 +87,7 @@ Foam::dlLibraryTable::dlLibraryTable
     const word& libsEntry
 )
 {
-    open(dict, libsEntry);
+    dlLibraryTable::open(dict, libsEntry);
 }
 
 
@@ -57,87 +95,225 @@ Foam::dlLibraryTable::dlLibraryTable
 
 Foam::dlLibraryTable::~dlLibraryTable()
 {
-    forAllReverse(libPtrs_, i)
-    {
-        if (libPtrs_[i])
-        {
-            DebugInFunction
-                << "Closing " << libNames_[i]
-                << " with handle " << name(libPtrs_[i]) << nl;
-
-            if (!dlClose(libPtrs_[i]))
-            {
-                WarningInFunction<< "Failed closing " << libNames_[i]
-                    << " with handle " << name(libPtrs_[i]) << endl;
-            }
-        }
-    }
+    clear();
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::dlLibraryTable::open
-(
-    const fileName& libName,
-    const bool verbose
-)
+bool Foam::dlLibraryTable::empty() const
 {
-    if (libName.empty())
+    for (const void* ptr : libPtrs_)
+    {
+        if (ptr != nullptr)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+Foam::label Foam::dlLibraryTable::size() const
+{
+    label nLoaded = 0;
+
+    for (const void* ptr : libPtrs_)
+    {
+        if (ptr != nullptr)
+        {
+            ++nLoaded;
+        }
+    }
+
+    return nLoaded;
+}
+
+
+void Foam::dlLibraryTable::clear(bool verbose)
+{
+    label nLoaded = 0;
+
+    forAllReverse(libPtrs_, i)
+    {
+        void* ptr = libPtrs_[i];
+
+        if (ptr == nullptr)
+        {
+            libNames_[i].clear();
+        }
+        else if (Foam::dlClose(ptr))
+        {
+            DebugInFunction
+                << "Closed [" << i << "] " << libNames_[i]
+                << " with handle " << Foam::name(ptr) << nl;
+
+            libPtrs_[i] = nullptr;
+            libNames_[i].clear();
+        }
+        else
+        {
+            ++nLoaded;  // Still loaded
+
+            if (verbose)
+            {
+                WarningInFunction
+                    << "Failed closing " << libNames_[i]
+                    << " with handle " << Foam::name(ptr) << endl;
+            }
+        }
+    }
+
+
+    // Compact the lists
+    if (nLoaded && nLoaded != libPtrs_.size())
+    {
+        nLoaded = 0;
+
+        forAll(libPtrs_, i)
+        {
+            if (libPtrs_[i] != nullptr)
+            {
+                if (nLoaded != i)
+                {
+                    libPtrs_[nLoaded] = libPtrs_[i];
+                    libNames_[nLoaded] = std::move(libNames_[i]);
+                }
+
+                ++nLoaded;
+            }
+        }
+    }
+
+    libPtrs_.resize(nLoaded);
+    libNames_.resize(nLoaded);
+}
+
+
+bool Foam::dlLibraryTable::append(const fileName& libName)
+{
+    if (libName.empty() || libNames_.found(libName))
     {
         return false;
     }
 
-    void* ptr = dlOpen(fileName(libName).expand(), verbose);
+    libPtrs_.append(nullptr);
+    libNames_.append(libName);
 
-    DebugInFunction
-        << "Opened " << libName
-        << " resulting in handle " << name(ptr) << endl;
+    return true;
+}
+
+
+Foam::label Foam::dlLibraryTable::append(const UList<fileName>& libNames)
+{
+    label nAdded = 0;
+
+    for (const fileName& libName : libNames)
+    {
+        if (append(libName))
+        {
+            ++nAdded;
+        }
+    }
+
+    return nAdded;
+}
+
+
+bool Foam::dlLibraryTable::open(bool verbose)
+{
+    label nOpen = 0;
+    label nCand = 0;  // Number of candidates (have libName but no pointer)
+
+    forAll(libPtrs_, i)
+    {
+        const fileName& libName = libNames_[i];
+
+        if (libPtrs_[i] == nullptr && !libName.empty())
+        {
+            ++nCand;
+            void* ptr = openLibrary(libName, verbose);
+
+            if (ptr)
+            {
+                ++nOpen;
+                libPtrs_[i] = ptr;
+            }
+            else
+            {
+                libNames_[i].clear();  // Avoid trying again
+            }
+        }
+    }
+
+    return nOpen && nOpen == nCand;
+}
+
+
+void* Foam::dlLibraryTable::open
+(
+    const fileName& libName,
+    bool verbose
+)
+{
+    void* ptr = openLibrary(libName, verbose);
 
     if (ptr)
     {
         libPtrs_.append(ptr);
         libNames_.append(libName);
-        return true;
     }
 
-    if (verbose)
+    return ptr;
+}
+
+
+bool Foam::dlLibraryTable::open
+(
+    const UList<fileName>& libNames,
+    bool verbose
+)
+{
+    label nOpen = 0;
+
+    for (const fileName& libName : libNames)
     {
-        WarningInFunction
-            << "could not load " << libName
-            << endl;
+        const label index = libNames_.find(libName);
+
+        if (index >= 0 && libPtrs_[index] != nullptr)
+        {
+            // Already known and opened
+            ++nOpen;
+        }
+        else if (dlLibraryTable::open(libName, verbose))
+        {
+            ++nOpen;
+        }
     }
 
-    return false;
+    return nOpen && nOpen == libNames.size();
 }
 
 
 bool Foam::dlLibraryTable::close
 (
     const fileName& libName,
-    const bool verbose
+    bool verbose
 )
 {
-    label index = -1;
-    forAllReverse(libNames_, i)
-    {
-        if (libName == libNames_[i])
-        {
-            index = i;
-            break;
-        }
-    }
+    const label index = libNames_.rfind(libName);
 
-    if (index == -1)
+    if (index < 0)
     {
         return false;
     }
 
     DebugInFunction
         << "Closing " << libName
-        << " with handle " << name(libPtrs_[index]) << nl;
+        << " with handle " << Foam::name(libPtrs_[index]) << nl;
 
-    const bool ok = dlClose(libPtrs_[index]);
+    const bool ok = Foam::dlClose(libPtrs_[index]);
 
     libPtrs_[index] = nullptr;
     libNames_[index].clear();
@@ -145,8 +321,7 @@ bool Foam::dlLibraryTable::close
     if (!ok && verbose)
     {
         WarningInFunction
-            << "could not close " << libName
-            << endl;
+            << "Could not close " << libName << endl;
     }
 
     return ok;
@@ -155,22 +330,14 @@ bool Foam::dlLibraryTable::close
 
 void* Foam::dlLibraryTable::findLibrary(const fileName& libName)
 {
-    label index = -1;
-    forAllReverse(libNames_, i)
+    const label index = libNames_.rfind(libName);
+
+    if (index < 0)
     {
-        if (libName == libNames_[i])
-        {
-            index = i;
-            break;
-        }
+        return nullptr;
     }
 
-    if (index != -1)
-    {
-        return libPtrs_[index];
-    }
-
-    return nullptr;
+    return libPtrs_[index];
 }
 
 
@@ -187,7 +354,7 @@ bool Foam::dlLibraryTable::open
 
     for (const fileName& libName : libNames)
     {
-        if (dlLibraryTable::open(libName))
+        if (dlLibraryTable::open(libName))  // verbose = true
         {
             ++nOpen;
         }

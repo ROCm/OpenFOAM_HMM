@@ -99,15 +99,13 @@ SourceFiles
 #define argList_H
 
 #include "stringList.H"
-#include "SubList.H"
 #include "SLList.H"
 #include "HashSet.H"
-#include "HashTable.H"
-#include "word.H"
 #include "fileName.H"
 #include "parRun.H"
-#include "OSspecific.H"
 #include "ITstream.H"
+#include "dlLibraryTable.H"
+#include "OSspecific.H"
 #include <utility>
 
 // Transitional features - older style access (including 1712 release)
@@ -141,6 +139,9 @@ class argList
 
         //- The extracted options
         HashTable<string> options_;
+
+        //- Additional libraries
+        dlLibraryTable libs_;
 
         word executable_;
         fileName rootPath_;
@@ -194,7 +195,7 @@ class argList
 
 public:
 
-    // Static data members
+    // Static Data Members
 
         //- A list of valid (mandatory) arguments
         static SLList<string> validArgs;
@@ -235,6 +236,7 @@ public:
         static word postProcessOptionName;
 
         //! \cond internalClass
+        //  The constructor populates the standard options
         struct initValidTables
         {
             initValidTables();
@@ -340,7 +342,13 @@ public:
         //- Return the ParRunControl
         inline const ParRunControl& parRunControl() const;
 
-        //- Return the number of arguments
+        //- Access to the loaded libraries
+        inline const dlLibraryTable& libs() const;
+
+        //- Access to the loaded libraries
+        inline dlLibraryTable& libs();
+
+        //- The number of arguments
         inline label size() const;
 
         //- Return arguments
@@ -703,7 +711,6 @@ public:
         }
 
     #endif  /* Foam_argList_1712 */
-
 };
 
 

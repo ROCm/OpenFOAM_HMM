@@ -1711,8 +1711,7 @@ void* Foam::dlOpen(const fileName& libName, const bool check)
     if (!handle && check)
     {
         WarningInFunction
-            << "dlopen error : " << ::dlerror()
-            << endl;
+            << "dlopen error : " << ::dlerror() << endl;
     }
 
     if (POSIX::debug)
@@ -1721,6 +1720,26 @@ void* Foam::dlOpen(const fileName& libName, const bool check)
             << "dlOpen(const fileName&)"
             << " : dlopen of " << libName
             << " handle " << handle << std::endl;
+    }
+
+    return handle;
+}
+
+
+void* Foam::dlOpen(const fileName& libName, std::string& errorMsg)
+{
+    // Call without emitting error message - we capture that ourselves
+    void* handle = Foam::dlOpen(libName, false);
+
+    if (!handle)
+    {
+        // Capture error message
+        errorMsg = ::dlerror();
+    }
+    else
+    {
+        // No errors
+        errorMsg.clear();
     }
 
     return handle;

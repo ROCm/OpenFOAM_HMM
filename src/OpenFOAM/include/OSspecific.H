@@ -257,6 +257,11 @@ int system(const CStringList& command, const bool bg = false);
 //  Prints warning if a library cannot be loaded (suppress with check=false)
 void* dlOpen(const fileName& libName, const bool check=true);
 
+//- Open a shared library and return handle to library.
+//  A leading "lib" and ".so" suffix are added silently as required.
+//  Captures any error messages in the second parameter (empty if no errors).
+void* dlOpen(const fileName& libName, std::string& errorMsg);
+
 //- Open shared libraries and return number of libraries loaded.
 //  A leading "lib" and ".so" suffix are added silently as required.
 //  Prints warning if a library cannot be loaded (suppress with check=false)

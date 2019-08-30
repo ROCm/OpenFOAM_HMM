@@ -76,6 +76,14 @@ Foam::argList::initValidTables::initValidTables()
         "dir",
         "Specify case directory to use (instead of the cwd)"
     );
+    argList::addOption
+    (
+        "lib",
+        "name",
+        "Additional library/libraries to load (can be used multiple times)",
+        true  // advanced option
+    );
+
     argList::addBoolOption("parallel", "Run in parallel");
     validParOptions.set("parallel", "");
     argList::addOption
@@ -114,7 +122,8 @@ Foam::argList::initValidTables::initValidTables()
     argList::addBoolOption
     (
         "noFunctionObjects",
-        "Do not execute function objects"
+        "Do not execute function objects",
+        true  // advanced option
     );
 
     argList::addOption
@@ -412,7 +421,8 @@ void Foam::argList::noFunctionObjects(bool addWithOption)
         addBoolOption
         (
             "withFunctionObjects",
-            "Execute functionObjects"
+            "Execute functionObjects",
+            true  // advanced option
         );
     }
 }
@@ -430,7 +440,7 @@ void Foam::argList::noLibs()
     (
         "no-libs",
         "Disable use of the controlDict libs entry",
-        true  // advanced
+        true  // advanced option
     );
 }
 
@@ -698,10 +708,11 @@ Foam::argList::argList
 )
 :
     args_(argc),
-    options_(argc)
+    options_(argc),
+    libs_()
 {
     // Check for -fileHandler, which requires an argument.
-    word handlerType(getEnv("FOAM_FILEHANDLER"));
+    word handlerType;
     for (int argi = argc-2; argi > 0; --argi)
     {
         if (argv[argi][0] == '-')
@@ -717,7 +728,11 @@ Foam::argList::argList
     }
     if (handlerType.empty())
     {
-        handlerType = fileOperation::defaultFileHandler;
+        handlerType = Foam::getEnv("FOAM_FILEHANDLER");
+        if (handlerType.empty())
+        {
+            handlerType = fileOperation::defaultFileHandler;
+        }
     }
 
     // Detect any parallel options
@@ -793,8 +808,19 @@ Foam::argList::argList
 
                 commandLine_ += ' ';
                 commandLine_ += args_[argi];
-                // Handle duplicates by taking the last -option specified
-                options_.set(optName, args_[argi]);
+
+                if (strcmp(optName, "lib") == 0)
+                {
+                    // The '-lib' option:
+                    // Append name(s) to libs_ for later opening
+                    libs_.append(this->getList<fileName>(argi));
+                }
+                else
+                {
+                    // Regular option:
+                    // Duplicates handled by using the last -option specified
+                    options_.set(optName, args_[argi]);
+                }
             }
             else
             {
@@ -832,6 +858,7 @@ Foam::argList::argList
     parRunControl_(args.parRunControl_),
     args_(args.args_),
     options_(options),
+    libs_(),
     executable_(args.executable_),
     rootPath_(args.rootPath_),
     globalCase_(args.globalCase_),
@@ -972,26 +999,29 @@ void Foam::argList::parse
             }
             jobInfo.add("foamBuild", build);
         }
+
+        // Load additional libraries
+        libs_.open(bannerEnabled());
     }
 
 
     // Set fileHandler. In increasing order of priority:
     // 1. default = uncollated
-    // 2. environment var FOAM_FILEHANDLER
+    // 2. env variable "FOAM_FILEHANDLER"
     // 3. etc/controlDict optimisationSwitches 'fileHandler'
     // 4. system/controlDict 'fileHandler' (not handled here; done in TimeIO.C)
     // 5. '-fileHandler' commmand-line option
 
     {
-        word fileHandlerName =
-            options_.lookup("fileHandler", getEnv("FOAM_FILEHANDLER"));
+        word handlerType =
+            options_.lookup("fileHandler", Foam::getEnv("FOAM_FILEHANDLER"));
 
-        if (fileHandlerName.empty())
+        if (handlerType.empty())
         {
-            fileHandlerName = fileOperation::defaultFileHandler;
+            handlerType = fileOperation::defaultFileHandler;
         }
 
-        auto handler = fileOperation::New(fileHandlerName, bannerEnabled());
+        auto handler = fileOperation::New(handlerType, bannerEnabled());
         Foam::fileHandler(handler);
     }
 

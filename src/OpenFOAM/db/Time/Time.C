@@ -524,11 +524,11 @@ Foam::Time::Time
     runTimeModifiable_(false),
     functionObjects_(*this, false)
 {
-    // Enable/disable functions
+    // Functions
     //
-    //  '-withFunctionObjects' exists and used = enable
-    //  '-noFunctionObjects' exists and used = disable
-    //  default: no functions if there is no way to enable/disable them
+    // * '-withFunctionObjects' exists and used = enable
+    // * '-noFunctionObjects' exists and used = disable
+    // * default: no functions if there is no way to enable/disable them
     if
     (
         argList::validOptions.found("withFunctionObjects")
@@ -541,16 +541,10 @@ Foam::Time::Time
         functionObjects_.on();
     }
 
-    // Allow/disallow libs
+    // Libraries
     //
-    //  '-no-libs' exists and used = disable
-    //  default: enable
-    if
-    (
-        argList::validOptions.found("no-libs")
-      ? !args.found("no-libs")
-      : true
-    )
+    // * enabled unless '-no-libs' option was used
+    if (!args.found("no-libs"))
     {
         libs_.open(controlDict_, "libs");
     }
@@ -619,7 +613,6 @@ Foam::Time::Time
     writeStreamOption_(IOstream::ASCII),
     graphFormat_("raw"),
     runTimeModifiable_(false),
-
     functionObjects_(*this, false)
 {
     if (enableFunctionObjects)
@@ -694,7 +687,6 @@ Foam::Time::Time
     writeStreamOption_(IOstream::ASCII),
     graphFormat_("raw"),
     runTimeModifiable_(false),
-
     functionObjects_(*this, false)
 {
     if (enableFunctionObjects)

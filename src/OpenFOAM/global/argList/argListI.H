@@ -111,6 +111,18 @@ inline const Foam::ParRunControl& Foam::argList::parRunControl() const
 }
 
 
+inline const Foam::dlLibraryTable& Foam::argList::libs() const
+{
+    return libs_;
+}
+
+
+inline Foam::dlLibraryTable& Foam::argList::libs()
+{
+    return libs_;
+}
+
+
 inline Foam::label Foam::argList::size() const
 {
     return args_.size();
