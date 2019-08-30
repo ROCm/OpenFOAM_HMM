@@ -15,10 +15,10 @@ surfaces
     surfaceFormat   vtk;
     fields          (p U Q);
 
-    interpolationScheme cellPoint;
+    // interpolationScheme cellPoint;  //<- default
 
     surfaces
-    (
+    {
         zNormal
         {
             type            cuttingPlane;
@@ -44,8 +44,10 @@ surfaces
             type            patch;
             patches         ("propeller.*");
             interpolate     true;
+            invariant       true;  // Unaffected by mesh motion
+            surfaceFormat   ensight;
         }
-    );
+    }
 }
 
 

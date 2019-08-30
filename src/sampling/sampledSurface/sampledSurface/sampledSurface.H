@@ -54,7 +54,14 @@ Description
         name        | Alternative name                      | no  |
         enabled     | Enable/disable the surface?           | no  | yes
         interpolate | Sample to nodes instead of faces      | no  | false
+        invariant   | Invariant with geometry change (use with caution!) | no  | false
     \endtable
+
+Note
+    The invariant switch is an advanced feature to declare that the surface is
+    unaffected by changes in the general mesh geometry.  For example, if sampling
+    on a static patch while some other motion occurs elsewhere. If used improperly,
+    there is a significant possibility for problems (caveat emptor).
 
 SourceFiles
     sampledSurface.C
@@ -109,6 +116,9 @@ private:
 
         //- Should surface sampling be enabled?
         bool enabled_;
+
+        //- Geometry is invariant (never changes)
+        bool invariant_;
 
         //- Interpolate information to the nodes?
         bool interpolate_;
@@ -281,7 +291,13 @@ public:
             return enabled_;
         }
 
-        //- interpolation to nodes requested for surface
+        //- Surface is invariant with geometry change (caution)
+        bool invariant() const
+        {
+            return invariant_;
+        }
+
+        //- Interpolation to nodes requested for surface
         bool interpolate() const
         {
             return interpolate_;

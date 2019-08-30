@@ -299,7 +299,9 @@ class sampledSurfaces
 
         //- Mark the surfaces as needing an update.
         //  Return false if all surfaces were already marked as expired.
-        virtual bool expire();
+        //  Optionally force expire, even if a surface has been marked as
+        //  invariant.
+        virtual bool expire(const bool force=false);
 
         //- Update the surfaces as required.
         //  Return false if no surfaces required an update.

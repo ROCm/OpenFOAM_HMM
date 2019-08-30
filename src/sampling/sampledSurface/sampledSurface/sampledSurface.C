@@ -95,6 +95,7 @@ Foam::sampledSurface::sampledSurface(const word& name, std::nullptr_t)
     name_(name),
     mesh_(NullObjectRef<polyMesh>()),
     enabled_(true),
+    invariant_(false),
     interpolate_(false),
     area_(-1)
 {}
@@ -110,6 +111,7 @@ Foam::sampledSurface::sampledSurface
     name_(name),
     mesh_(mesh),
     enabled_(true),
+    invariant_(false),
     interpolate_(interpolate),
     area_(-1)
 {}
@@ -125,6 +127,7 @@ Foam::sampledSurface::sampledSurface
     name_(dict.lookupOrDefault<word>("name", name)),
     mesh_(mesh),
     enabled_(dict.lookupOrDefault("enabled", true)),
+    invariant_(dict.lookupOrDefault("invariant", false)),
     interpolate_(dict.lookupOrDefault("interpolate", false)),
     area_(-1)
 {}

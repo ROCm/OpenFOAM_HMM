@@ -480,7 +480,7 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
     }
 
     // Ensure all surfaces and merge information are expired
-    expire();
+    expire(true);
 
     return true;
 }
@@ -657,6 +657,7 @@ void Foam::sampledSurfaces::readUpdate(const polyMesh::readUpdateState state)
 {
     if (state != polyMesh::UNCHANGED)
     {
+        // May want to use force expiration here
         expire();
     }
 }
@@ -676,7 +677,7 @@ bool Foam::sampledSurfaces::needsUpdate() const
 }
 
 
-bool Foam::sampledSurfaces::expire()
+bool Foam::sampledSurfaces::expire(const bool force)
 {
     // Dimension as fraction of mesh bounding box
     const scalar mergeDim = mergeTol_ * mesh_.bounds().mag();
@@ -687,6 +688,11 @@ bool Foam::sampledSurfaces::expire()
     {
         sampledSurface& s = (*this)[surfi];
 
+        if (s.invariant() && !force)
+        {
+            // 'Invariant' - does not change when geometry does
+            continue;
+        }
         if (s.expire())
         {
             ++nChanged;
