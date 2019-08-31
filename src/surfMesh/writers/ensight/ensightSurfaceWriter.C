@@ -62,7 +62,7 @@ void Foam::surfaceWriters::ensightWriter::printTimeset
         << "time set:               " << ts << nl
         << "number of steps:        " << 1 << nl;
 
-    // Assume to be contiguous numbering
+    // Single value - starts at index 0
     os  << "filename start number:  0" << nl
         << "filename increment:     1" << nl
         << "time values:" << nl;
@@ -79,25 +79,91 @@ void Foam::surfaceWriters::ensightWriter::printTimeset
     const UList<scalar>& values
 )
 {
-    label count = values.size();
+    label pos_;
+
     os
         << "time set:               " << ts << nl
-        << "number of steps:        " << count << nl;
+        << "number of steps:        " << values.size() << nl;
 
-    // Assume to be contiguous numbering
+    // Assume contiguous numbering - starts at index 0
     os  << "filename start number:  0" << nl
-        << "filename increment:     1" << nl
-        << "time values:" << nl;
+        << "filename increment:     1" << nl;
 
-    count = 0;
-    for (const scalar& t : values)
+
+    os  << "time values:" << nl;
+    pos_ = 0;
+    for (const scalar& val : values)
     {
-        os << ' ' << setw(12) << t;
-
-        if (++count % 6 == 0)
+        if (pos_ == 6)
         {
-            os << nl;
+            os  << nl;
+            pos_ = 0;
         }
+        ++pos_;
+
+        os  << ' ' << setf(ios_base::right) << setw(12) << val;
+    }
+    os  << nl << nl;
+}
+
+
+void Foam::surfaceWriters::ensightWriter::printTimeset
+(
+    OSstream& os,
+    const label ts,
+    const UList<scalar>& values,
+    const bitSet& indices
+)
+{
+    label pos_;
+
+    // Check if continuous numbering can be used
+    if
+    (
+        values.empty()
+     || (indices.size() == values.size() && indices.all())
+    )
+    {
+        // Can simply emit as 0-based with increment
+        printTimeset(os, ts, values);
+        return;
+    }
+
+
+    // Generate time set
+    os
+        << "time set:               " << ts << nl
+        << "number of steps:        " << indices.count() << nl;
+
+
+    os  << "filename numbers:" << nl;
+    pos_ = 0;
+    for (const label& idx : indices)
+    {
+        if (pos_ == 6)
+        {
+            os  << nl;
+            pos_ = 0;
+        }
+        ++pos_;
+
+        os  << ' ' << setf(ios_base::right) << setw(8) << idx;
+    }
+    os  << nl;
+
+
+    os  << "time values:" << nl;
+    pos_ = 0;
+    for (const label& idx : indices)
+    {
+        if (pos_ == 6)
+        {
+            os  << nl;
+            pos_ = 0;
+        }
+        ++pos_;
+
+        os  << ' ' << setf(ios_base::right) << setw(12) << values[idx];
     }
     os  << nl << nl;
 }
@@ -121,7 +187,7 @@ Foam::surfaceWriters::ensightWriter::ensightWriter
     surfaceWriter(options),
     writeFormat_
     (
-        IOstreamOption::formatNames.lookupOrDefault
+        IOstreamOption::formatNames.getOrDefault
         (
             "format",
             options,
@@ -129,7 +195,7 @@ Foam::surfaceWriters::ensightWriter::ensightWriter
             true  // Failsafe behaviour
         )
     ),
-    collateTimes_(options.lookupOrDefault("collateTimes", true))
+    collateTimes_(options.getOrDefault("collateTimes", true))
 {}
 
 
@@ -163,6 +229,14 @@ Foam::surfaceWriters::ensightWriter::ensightWriter
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::surfaceWriters::ensightWriter::close()
+{
+    times_.clear();
+    meshes_.clear();
+    surfaceWriter::close();
+}
+
 
 // Note that ensight does supports geometry in a separate file,
 // but setting this true leaves mesh files in the wrong places

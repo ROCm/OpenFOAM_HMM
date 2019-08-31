@@ -47,6 +47,10 @@ Description
         collateTimes | use common geometry for times        | no  | true
     \endtable
 
+    The collated format maintains an internal list of the known times
+    as well as a file-cached version with the field information.
+    The information is used for restarts.
+
 SourceFiles
     ensightSurfaceWriter.C
 
@@ -56,6 +60,8 @@ SourceFiles
 #define ensightSurfaceWriter_H
 
 #include "surfaceWriter.H"
+#include "bitSet.H"
+#include "DynamicList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -80,10 +86,35 @@ class ensightWriter
         //- Collate times (default: true)
         bool collateTimes_;
 
+        //- The collated output times
+        DynamicList<scalar> times_;
+
+        //- Indices in times_ when a geometry (mesh) has been written
+        bitSet meshes_;
+
+        // NOTE: Could also maintain fieldsDict here,
+        // or as a HashTable of info.
+
 
     // Private Member Functions
 
-        //- Print time-set for ensight case file
+        //- Read time information from baseDir / dictName.
+        //  Returns timeIndex corresponding to timeValue
+        label readPreviousTimes
+        (
+            const fileName& baseDir,
+            const word& dictName,
+            const scalar& timeValue
+        );
+
+        //- The geometry can be any of the following:
+        //
+        // 0: constant/static
+        // 1: moving, with the same frequency as the data
+        // 2: moving, with different frequency as the data
+        int geometryTimeset() const;
+
+        //- Print time-set for ensight case file with a single time
         static void printTimeset
         (
             OSstream& os,
@@ -91,12 +122,41 @@ class ensightWriter
             const scalar& timeValue
         );
 
-        //- Print time-set for ensight case file
+        //- Print time-set for ensight case file, with N times and 0-based
+        //- file numbering
+        //
+        //  \verbatim
+        //  TIME
+        //  time set: ts
+        //  number of steps: ns
+        //  filename start number: 0
+        //  filename increment: 1
+        //  time values: time_1 time_2 ... time_ns
+        //  \endverbatim
         static void printTimeset
         (
             OSstream& os,
             const label ts,
             const UList<scalar>& times
+        );
+
+
+        //- Print time-set for ensight case file, with N times, 0-based
+        //- file numbering but perhaps non-contiguous
+        //
+        //  \verbatim
+        //  TIME
+        //  time set: ts
+        //  number of steps: ns
+        //  filename numbers: idx_1 idx_2 ... idx_ns
+        //  time values: time_1 time_2 ... time_ns
+        //  \endverbatim
+        static void printTimeset
+        (
+            OSstream& os,
+            const label ts,
+            const UList<scalar>& times,
+            const bitSet& indices
         );
 
 
@@ -169,6 +229,10 @@ public:
 
 
     // Member Functions
+
+        //- Finish output, clears output times.
+        //  Later reuse will rebuild times from fieldsDict file cache.
+        virtual void close(); // override
 
         //- True if the surface format supports geometry in a separate file.
         //  False if geometry and field must be in a single file

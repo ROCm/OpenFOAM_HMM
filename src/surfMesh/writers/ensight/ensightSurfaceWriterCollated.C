@@ -35,6 +35,7 @@ static const equalOp<scalar> equalTimes(ROOTSMALL);
 
 // Use ListOps findLower (with tolerance), to find the location of the next
 // time-related index.
+// The returned index is always 0 or larger (no negative values).
 static label findTimeIndex(const UList<scalar>& list, const scalar val)
 {
     label idx =
@@ -58,6 +59,96 @@ static label findTimeIndex(const UList<scalar>& list, const scalar val)
 }
 
 } // End namespace Foam
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::label Foam::surfaceWriters::ensightWriter::readPreviousTimes
+(
+    const fileName& baseDir,
+    const word& dictName,
+    const scalar& timeValue
+)
+{
+    // In 1906 and earlier, the fieldsDict contained "meshes" and "times"
+    // entries, each with their own time values.
+    // This makes it more difficult to define the exact correspondence
+    // between geometry intervals and times.
+    //
+    // We now instead track used geometry intervals as a bitSet.
+
+
+    // Only called from master
+
+    label timeIndex = 0;
+
+    labelList geomIndices;
+    scalarList meshTimes;
+
+    dictionary dict;
+
+    const fileName dictFile(baseDir/dictName);
+
+    if (isFile(dictFile))
+    {
+        IFstream is(dictFile);
+
+        if (is.good() && dict.read(is))
+        {
+            meshes_.clear();
+
+            dict.readIfPresent("times", times_);
+            timeIndex = findTimeIndex(times_, timeValue);
+
+            if (dict.readIfPresent("geometry", geomIndices))
+            {
+                // Convert indices to bitSet entries
+                meshes_.set(geomIndices);
+            }
+            else if (dict.readIfPresent("meshes", meshTimes))
+            {
+                WarningInFunction
+                    << nl
+                    << "Setting geometry timeset information from time values"
+                    << " (fieldsDict from an older OpenFOAM version)." << nl
+                    << "This may not be fully reliable." << nl
+                    << nl;
+
+                for (const scalar& meshTime : meshTimes)
+                {
+                    const label meshIndex = findTimeIndex(times_, meshTime);
+                    meshes_.set(meshIndex);
+                }
+            }
+
+            // Make length consistent with time information.
+            // We read/write the indices instead of simply dumping the bitSet.
+            // This makes the contents more human readable.
+            meshes_.resize(times_.size());
+        }
+    }
+
+    return timeIndex;
+}
+
+
+int Foam::surfaceWriters::ensightWriter::geometryTimeset() const
+{
+    if (meshes_.count() <= 1)
+    {
+        // Static
+        return 0;
+    }
+
+    if (meshes_.size() == times_.size() && meshes_.all())
+    {
+        // Geometry changing is the same as fields changing
+        return 1;
+    }
+
+    // Geometry changing differently from fields
+    return 2;
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -121,6 +212,7 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
     // Mesh changed since last output? Do before any merging.
     const bool meshChanged = (!upToDate_);
 
+
     // geometry merge() implicit
     tmp<Field<Type>> tfield = mergeField(localValues);
 
@@ -133,95 +225,94 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
             mkDir(outputFile.path());
         }
 
-        scalar meshValue = timeValue;
-        label meshIndex = 0;
-        label timeIndex = 0;
+        bool stateChanged = meshChanged;
 
-        fileName geometryName;
+        const label timeIndex =
+        (
+            times_.empty()
+          ? readPreviousTimes(baseDir, "fieldsDict", timeValue)
+          : findTimeIndex(times_, timeValue)
+        );
+
+
+        // Update stored times list and mesh index
+
+        if (timeIndex < meshes_.size()-1)
+        {
+            // Clear old content when shrinking
+            meshes_.unset(timeIndex);
+        }
+
+        // Extend or truncate list
+        meshes_.resize(timeIndex+1);
+        times_.resize(timeIndex+1, VGREAT);
+
+        if (meshChanged)
+        {
+            meshes_.set(timeIndex);
+        }
+
+        if (!equalTimes(times_[timeIndex], timeValue))
+        {
+            stateChanged = true;
+            times_[timeIndex] = timeValue;
+        }
+
+
+        // The most current geometry index
+        const label geomIndex(max(0, meshes_.find_last()));
+
+
+        // This will be used for the name of a static geometry,
+        // or just the masking part for moving geometries.
+        const fileName geometryName
+        (
+            "data"/word::printf(fmt, geomIndex)/ensightCase::geometryName
+        );
+
 
         // Do case file
         {
             dictionary dict;
-            scalarList meshes;
-            scalarList times;
-            bool stateChanged = meshChanged;
 
-            if (isFile(baseDir/"fieldsDict"))
+            // Add time information to dictionary
+            dict.set("geometry", meshes_.sortedToc());
+            dict.set("times", times_);
+
+            // Debugging, or if needed for older versions:
+            //// dict.set
+            //// (
+            ////     "meshes",
+            ////     IndirectList<scalar>(times_, meshes_.sortedToc())
+            //// );
+
+
+            // Add field information to dictionary?
+            bool hasField = false;
+
+            dictionary* fieldsDictPtr = dict.findDict("fields");
+            if (fieldsDictPtr)
             {
-                IFstream is(baseDir/"fieldsDict");
-                if (is.good() && dict.read(is))
-                {
-                    dict.readIfPresent("meshes", meshes);
-                    dict.readIfPresent("times", times);
-
-                    timeIndex = findTimeIndex(times, timeValue);
-
-                    if (meshChanged)
-                    {
-                        meshValue = timeValue;
-                        meshIndex = findTimeIndex(meshes, meshValue);
-                    }
-                    else if (meshes.size())
-                    {
-                        meshIndex = meshes.size()-1;
-                        meshValue = meshes.last();
-                    }
-                }
+                hasField = fieldsDictPtr->found(fieldName);
+            }
+            else
+            {
+                // No "fields" dictionary - create first
+                fieldsDictPtr = dict.set("fields", dictionary())->dictPtr();
             }
 
-            // Update stored times list
-            meshes.resize(meshIndex+1, -1);
-            times.resize(timeIndex+1, -1);
-
-            if
-            (
-                !equalTimes(meshes[meshIndex], meshValue)
-             || !equalTimes(times[timeIndex], timeValue)
-            )
+            if (!hasField)
             {
+                dictionary fieldDict;
+                fieldDict.set("type", ensightPTraits<Type>::typeName);
+                fieldDict.set("name", varName); // ensight variable name
+
+                fieldsDictPtr->set(fieldName, fieldDict);
                 stateChanged = true;
             }
 
-            meshes[meshIndex] = meshValue;
-            times[timeIndex] = timeValue;
 
-            geometryName =
-                "data"/word::printf(fmt, meshIndex)/ensightCase::geometryName;
-
-
-            // Add my information to dictionary
-            {
-                dict.set("meshes", meshes);
-                dict.set("times", times);
-                if (dict.found("fields"))
-                {
-                    dictionary& fieldsDict = dict.subDict("fields");
-                    if (!fieldsDict.found(fieldName))
-                    {
-                        dictionary fieldDict;
-                        fieldDict.set("type", ensightPTraits<Type>::typeName);
-                        fieldDict.set("name", varName); // ensight variable name
-
-                        fieldsDict.set(fieldName, fieldDict);
-
-                        stateChanged = true;
-                    }
-                }
-                else
-                {
-                    dictionary fieldDict;
-                    fieldDict.set("type", ensightPTraits<Type>::typeName);
-                    fieldDict.set("name", varName); // ensight variable name
-
-                    dictionary fieldsDict;
-                    fieldsDict.set(fieldName, fieldDict);
-
-                    dict.set("fields", fieldsDict);
-
-                    stateChanged = true;
-                }
-            }
-
+            const dictionary& fieldsDict = *fieldsDictPtr;
 
             if (stateChanged)
             {
@@ -252,8 +343,7 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
                 // 1: moving, with the same frequency as the data
                 // 2: moving, with different frequency as the data
 
-                const label tsGeom =
-                    (meshes.size() == 1 ? 0 : meshes == times ? 1 : 2);
+                const label tsGeom = geometryTimeset();
 
                 osCase
                     << "FORMAT" << nl
@@ -281,16 +371,19 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
                     << nl
                     << "VARIABLE" << nl;
 
-                const dictionary& fieldsDict = dict.subDict("fields");
+
                 for (const entry& dEntry : fieldsDict)
                 {
                     const dictionary& subDict = dEntry.dict();
 
                     const word fieldType(subDict.get<word>("type"));
-                    const word varName = subDict.lookupOrDefault
+                    const word varName
                     (
-                        "name",
-                        dEntry.keyword() // fieldName as fallback
+                        subDict.getOrDefault<word>
+                        (
+                            "name",
+                            dEntry.keyword() // fieldName as fallback
+                        )
                     );
 
                     osCase
@@ -309,10 +402,10 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
                     << nl
                     << "TIME" << nl;
 
-                printTimeset(osCase, 1, times);
+                printTimeset(osCase, 1, times_);
                 if (tsGeom == 2)
                 {
-                    printTimeset(osCase, 2, meshes);
+                    printTimeset(osCase, 2, times_, meshes_);
                 }
 
                 osCase << "# end" << nl;
