@@ -6,6 +6,7 @@
 #include "syncTools.H"
 #include "tetPointRef.H"
 #include "regionSplit.H"
+#include "wallDist.H"
 
 using namespace Foam;
 
@@ -281,6 +282,7 @@ void Foam::writeFields
 
     // Aspect ratio
     // ~~~~~~~~~~~~
+
     if (selectedFields.found("aspectRatio"))
     {
         volScalarField aspectRatio
@@ -496,6 +498,20 @@ void Foam::writeFields
         cellRegion.correctBoundaryConditions();
         Info<< "    Writing cell region to " << cellRegion.name() << endl;
         cellRegion.write();
+    }
+
+    if (selectedFields.found("wallDistance"))
+    {
+        // Wall distance
+        //const volScalarField& y = wallDist::New(mesh).y();
+        volScalarField y("wallDistance", wallDist::New(mesh).y());
+        Info<< "    Writing wall distance to " << y.name() << endl;
+        y.write();
+
+        // Wall-reflection vectors
+        //const volVectorField& n = wallDist::New(mesh).n();
+        //Info<< "    Writing wall normal to " << n.name() << endl;
+        //n.write();
     }
 
     Info<< endl;

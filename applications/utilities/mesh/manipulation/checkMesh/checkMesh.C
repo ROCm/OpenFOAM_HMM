@@ -160,7 +160,8 @@ int main(int argc, char *argv[])
             "cellVolume",
             "cellVolumeRatio",
             "minTetVolume",
-            "cellRegion"
+            "cellRegion",
+            "wallDistance"
         });
     }
 
