@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2015-2017 OpenFOAM Foundation
@@ -58,7 +58,10 @@ Foam::patchDistMethods::advectionDiffusion::advectionDiffusion
 )
 :
     patchDistMethod(mesh, patchIDs),
-    coeffs_(dict.optionalSubDict(type() + "Coeffs")),
+    //- We do not want to recurse into 'advectionDiffusion' again so
+    //  make sure we pick up 'method' always from the subdictionary.
+    //coeffs_(dict.optionalSubDict(type() + "Coeffs")),
+    coeffs_(dict.subDict(type() + "Coeffs")),
     pdmPredictor_
     (
         patchDistMethod::New
