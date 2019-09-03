@@ -591,7 +591,8 @@ Foam::polyMesh::polyMesh
     {
         WarningInFunction
             << "Found " << nDefaultFaces
-            << " undefined faces in mesh; adding to default patch." << endl;
+            << " undefined faces in mesh; adding to default patch "
+            << defaultBoundaryPatchName << endl;
 
         // Check if there already exists a defaultFaces patch as last patch
         // and reuse it.
@@ -864,7 +865,8 @@ Foam::polyMesh::polyMesh
     {
         WarningInFunction
             << "Found " << nDefaultFaces
-            << " undefined faces in mesh; adding to default patch." << endl;
+            << " undefined faces in mesh; adding to default patch "
+            << defaultBoundaryPatchName << endl;
 
         // Check if there already exists a defaultFaces patch as last patch
         // and reuse it.
