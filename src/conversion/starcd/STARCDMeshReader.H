@@ -36,6 +36,9 @@ Description
     - trimmed and degenerate cells are saved as polyhedral.
     - the boundaries corresponds to cells and their faces.
 
+Notes
+    - Shell entries are read, yet ignored.
+
 SourceFiles
     STARCDMeshReader.C
 

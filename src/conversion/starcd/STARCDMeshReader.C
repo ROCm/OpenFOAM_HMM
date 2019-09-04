@@ -341,6 +341,12 @@ void Foam::fileFormats::STARCDMeshReader::readCells(const fileName& inputName)
     // construct cellFaces_ and possibly cellShapes_
     if (nCells <= 0)
     {
+        if (nShells != 0)
+        {
+            WarningInFunction
+                << inputName << "consists of only shell entries (typeId=4)."
+                << endl;
+        }
         FatalErrorInFunction
             << "no cells in file " << inputName
             << abort(FatalError);
