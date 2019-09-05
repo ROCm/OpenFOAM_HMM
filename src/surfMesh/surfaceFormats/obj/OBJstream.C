@@ -122,7 +122,7 @@ Foam::Ostream& Foam::OBJstream::writeQuoted
     }
 
 
-    OFstream::write(token::BEGIN_STRING);
+    OFstream::write(static_cast<const char>(token::BEGIN_STRING));
 
     unsigned backslash = 0;
     for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
@@ -156,7 +156,7 @@ Foam::Ostream& Foam::OBJstream::writeQuoted
 
     // silently drop any trailing backslashes
     // they would otherwise appear like an escaped end-quote
-    OFstream::write(token::END_STRING);
+    OFstream::write(static_cast<const char>(token::END_STRING));
 
     return *this;
 }
