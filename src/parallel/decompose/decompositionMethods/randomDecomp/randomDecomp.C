@@ -88,6 +88,25 @@ Foam::randomDecomp::randomDecomp
 
 Foam::labelList Foam::randomDecomp::decompose
 (
+    const pointField& points,
+    const scalarField& pointWeights
+) const
+{
+    return randomMap(points.size());
+}
+
+
+Foam::labelList Foam::randomDecomp::decompose
+(
+    const pointField& points
+) const
+{
+    return randomMap(points.size());
+}
+
+
+Foam::labelList Foam::randomDecomp::decompose
+(
     const polyMesh& mesh,
     const pointField&,
     const scalarField&
