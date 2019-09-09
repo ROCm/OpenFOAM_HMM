@@ -415,7 +415,7 @@ bool Foam::functionObjects::sizeDistribution::execute()
 bool Foam::functionObjects::sizeDistribution::write()
 {
     writeFileHeader();
-    writeTime(file());
+    writeCurrentTime(file());
 
     Log << type() << " " << name() << " write" << nl;
 

@@ -254,7 +254,7 @@ bool Foam::functionObjects::fieldValues::volFieldValue::write()
 
     if (Pstream::master())
     {
-        writeTime(file());
+        writeCurrentTime(file());
     }
 
     // Only some operations need the cell volume

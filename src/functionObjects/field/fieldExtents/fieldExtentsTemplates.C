@@ -86,7 +86,7 @@ void Foam::functionObjects::fieldExtents::calcFieldExtents
 
     Log << "field: " << fieldName << nl;
 
-    writeTime(file());
+    writeCurrentTime(file());
 
     tmp<volScalarField> tmask = calcMask<Type>(*fieldPtr);
     const volScalarField& mask = tmask();

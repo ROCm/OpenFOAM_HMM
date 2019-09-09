@@ -728,7 +728,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::write()
 
     if (writeToFile_)
     {
-        writeTime(file());
+        writeCurrentTime(file());
 
         file()
             << tab << nCellsScheme1

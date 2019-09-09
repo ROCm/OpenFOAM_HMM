@@ -103,7 +103,7 @@ bool Foam::functionObjects::timeInfo::write()
 {
     if (Pstream::master())
     {
-        writeTime(file());
+        writeCurrentTime(file());
 
         const scalar cpuTimeNow(time_.elapsedCpuTime());
         const scalar clockTimeNow(time_.elapsedClockTime());

@@ -186,7 +186,7 @@ public:
         virtual void writeHeader(Ostream& os, const string& str) const;
 
         //- Write the current time to stream
-        virtual void writeTime(Ostream& os) const;
+        virtual void writeCurrentTime(Ostream& os) const;
 
         //- Write a break marker to the stream
         virtual void writeBreak(Ostream& os) const;

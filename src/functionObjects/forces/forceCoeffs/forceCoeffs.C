@@ -209,7 +209,7 @@ void Foam::functionObjects::forceCoeffs::writeBinData
     Ostream& os
 ) const
 {
-    writeTime(os);
+    writeCurrentTime(os);
 
     for (label bini = 0; bini < nBin_; ++bini)
     {
@@ -411,7 +411,7 @@ bool Foam::functionObjects::forceCoeffs::execute()
 
     if (writeToFile())
     {
-        writeTime(coeffFilePtr_());
+        writeCurrentTime(coeffFilePtr_());
         coeffFilePtr_()
             << tab << CdTot << tab << CsTot << tab << ClTot
             << tab << CmRollTot << tab << CmPitchTot << tab << CmYawTot
