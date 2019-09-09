@@ -153,19 +153,34 @@ Foam::Omanip<int> Foam::functionObjects::writeFile::valueWidth
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::functionObjects::writeFile::writeFile(const writeFile& wf)
+:
+    fileObr_(wf.fileObr_),
+    prefix_(wf.prefix_),
+    fileName_(wf.fileName_),
+    filePtr_(),
+    writePrecision_(wf.writePrecision_),
+    writeToFile_(wf.writeToFile_),
+    writtenHeader_(wf.writtenHeader_),
+    useUserTime_(wf.useUserTime_),
+    startTime_(wf.startTime_)
+{}
+
+
 Foam::functionObjects::writeFile::writeFile
 (
     const objectRegistry& obr,
-    const word& prefix,
-    const word& file
+    const fileName& prefix,
+    const word& name,
+    const bool writeToFile
 )
 :
     fileObr_(obr),
     prefix_(prefix),
-    fileName_(file),
+    fileName_(name),
     filePtr_(),
     writePrecision_(IOstream::defaultPrecision()),
-    writeToFile_(true),
+    writeToFile_(writeToFile),
     writtenHeader_(false),
     useUserTime_(true),
     startTime_(obr.time().startTime().value())
@@ -175,12 +190,13 @@ Foam::functionObjects::writeFile::writeFile
 Foam::functionObjects::writeFile::writeFile
 (
     const objectRegistry& obr,
-    const word& prefix,
-    const word& file,
-    const dictionary& dict
+    const fileName& prefix,
+    const word& name,
+    const dictionary& dict,
+    const bool writeToFile
 )
 :
-    writeFile(obr, prefix, file)
+    writeFile(obr, prefix, name, writeToFile)
 {
     read(dict);
 
@@ -200,7 +216,7 @@ bool Foam::functionObjects::writeFile::read(const dictionary& dict)
 
     // Only write on master
     writeToFile_ =
-        Pstream::master() && dict.lookupOrDefault("writeToFile", true);
+        Pstream::master() && dict.lookupOrDefault("writeToFile", writeToFile_);
 
     // Use user time, e.g. CA deg in preference to seconds
     useUserTime_ = dict.lookupOrDefault("useUserTime", true);
