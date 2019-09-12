@@ -115,14 +115,14 @@ void Foam::functionObjects::mapFields::evaluateConstraintTypes
 
 
 template<class Type>
-bool Foam::functionObjects::mapFields::writeFieldType() const
+bool Foam::functionObjects::mapFields::mapFieldType() const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
 
     const fvMesh& mapRegion = mapRegionPtr_();
 
     wordList fieldNames(this->mesh_.names(VolFieldType::typeName));
-    labelList selected = findStrings(fieldNames_, fieldNames);
+    const labelList selected = findStrings(fieldNames_, fieldNames);
     for (const label fieldi : selected)
     {
         const word& fieldName = fieldNames[fieldi];
@@ -149,17 +149,38 @@ bool Foam::functionObjects::mapFields::writeFieldType() const
         }
 
         VolFieldType& mappedField =
-            mapRegion.lookupObjectRef<VolFieldType>(fieldName);
+            mapRegion.template lookupObjectRef<VolFieldType>(fieldName);
 
         mappedField = interpPtr_->mapTgtToSrc(field);
 
         Log << "    " << fieldName << ": interpolated";
 
         evaluateConstraintTypes(mappedField);
+    }
+
+    return selected.size() > 0;
+}
+
+
+template<class Type>
+bool Foam::functionObjects::mapFields::writeFieldType() const
+{
+    typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
+
+    const fvMesh& mapRegion = mapRegionPtr_();
+
+    wordList fieldNames(this->mesh_.names(VolFieldType::typeName));
+    const labelList selected = findStrings(fieldNames_, fieldNames);
+    for (const label fieldi : selected)
+    {
+        const word& fieldName = fieldNames[fieldi];
+
+        const VolFieldType& mappedField =
+            mapRegion.template lookupObject<VolFieldType>(fieldName);
 
         mappedField.write();
 
-        Log << " and written" << nl;
+        Log << "    " << fieldName << ": written";
     }
 
     return selected.size() > 0;

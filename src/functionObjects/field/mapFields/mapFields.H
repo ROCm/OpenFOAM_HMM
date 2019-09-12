@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -119,7 +119,11 @@ class mapFields
             GeometricField<Type, fvPatchField, volMesh>& fld
         ) const;
 
-        //- Helper function to interpolate and write the field
+        //- Helper function to map the \<Type\> fields
+        template<class Type>
+        bool mapFieldType() const;
+
+        //- Helper function to write the \<Type\> fields
         template<class Type>
         bool writeFieldType() const;
 

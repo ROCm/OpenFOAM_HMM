@@ -177,6 +177,25 @@ bool Foam::functionObjects::mapFields::read(const dictionary& dict)
 
 bool Foam::functionObjects::mapFields::execute()
 {
+    Log << type() << " " << name() << " execute:" << nl;
+
+    bool ok = false;
+
+    ok = mapFieldType<scalar>() || ok;
+    ok = mapFieldType<vector>() || ok;
+    ok = mapFieldType<sphericalTensor>() || ok;
+    ok = mapFieldType<symmTensor>() || ok;
+    ok = mapFieldType<tensor>() || ok;
+
+    if (log)
+    {
+        if (!ok)
+        {
+            Info<< "    none" << nl;
+        }
+
+        Info<< endl;
+    }
     return true;
 }
 
