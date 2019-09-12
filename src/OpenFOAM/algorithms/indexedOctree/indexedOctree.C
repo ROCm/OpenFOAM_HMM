@@ -2239,8 +2239,10 @@ Foam::indexedOctree<Type>::indexedOctree
     {
         // Count number of references into shapes (i.e. contents)
         label nEntries = 0;
+        label maxEntries = 0;
         forAll(contents, i)
         {
+            maxEntries = max(maxEntries, contents[i].size());
             nEntries += contents[i].size();
         }
 
@@ -2252,6 +2254,8 @@ Foam::indexedOctree<Type>::indexedOctree
                 << nl
                 << "    nEntries per shape (duplicity):"
                 << nEntries/shapes.size()
+                << nl
+                << "    max nEntries:" << maxEntries
                 << nl
                 << endl;
         }
@@ -2328,8 +2332,10 @@ Foam::indexedOctree<Type>::indexedOctree
     if (debug)
     {
         label nEntries = 0;
+        label maxEntries = 0;
         forAll(contents_, i)
         {
+            maxEntries = max(maxEntries, contents_[i].size());
             nEntries += contents_[i].size();
         }
 
@@ -2348,6 +2354,8 @@ Foam::indexedOctree<Type>::indexedOctree
             << scalar(nEntries)/contents.size() << nl
             << "        per shape (duplicity):"
             << scalar(nEntries)/shapes.size() << nl
+            << "    max nEntries:" << maxEntries
+            << nl
             << "    total memory:" << memSize-oldMemSize
             << endl;
     }
