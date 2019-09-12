@@ -330,7 +330,6 @@ bool Foam::dynamicOversetFvMesh::updateAddressing() const
             << " lower:" << addr.lowerAddr().size()
             << " upper:" << addr.upperAddr().size() << endl;
 
-        lduInterfacePtrsList iFaces = this->interfaces();
         // Using lduAddressing::patch
         forAll(patchAddr, patchI)
         {
@@ -340,17 +339,16 @@ bool Foam::dynamicOversetFvMesh::updateAddressing() const
         }
 
         // Using interfaces
-        Pout<< "iFaces:" << iFaces.size() << endl;
+        const lduInterfacePtrsList& iFaces = allInterfaces_;
+        Pout<< "Adapted interFaces:" << iFaces.size() << endl;
         forAll(iFaces, patchI)
         {
             if (iFaces.set(patchI))
             {
-                Pout<< "    " << patchI << "\tiFace:" << iFaces[patchI].type()
-                        << endl;
+                Pout<< "    " << patchI << "\tinterface:"
+                    << iFaces[patchI].type() << endl;
             }
         }
-
-        Pout<< "end of printing." << endl;
     }
 
     return true;

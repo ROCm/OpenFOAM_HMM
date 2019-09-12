@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2014-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -149,14 +149,14 @@ Foam::tmp<Foam::scalarField> Foam::dynamicOversetFvMesh::normalisation
     const fvMatrix<Type>& m
 ) const
 {
-    // Determine normalisation. This is normally the original diagonal.
-    // This needs to be stabilised for hole cells
+    // Determine normalisation. This is normally the original diagonal plus
+    // remote contributions. This needs to be stabilised for hole cells
     // which can have a zero diagonal. Assume that if any component has
     // a non-zero diagonal the cell does not need stabilisation.
     tmp<scalarField> tnorm(tmp<scalarField>::New(m.diag()));
     scalarField& norm = tnorm.ref();
 
-    // Add boundary coeffs to duplicate behaviour of fvMatrix::addBoundaryDiag
+    // Add remote coeffs to duplicate behaviour of fvMatrix::addBoundaryDiag
     const FieldField<Field, Type>& internalCoeffs = m.internalCoeffs();
     for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
     {
@@ -174,10 +174,14 @@ Foam::tmp<Foam::scalarField> Foam::dynamicOversetFvMesh::normalisation
 
     // Count number of problematic cells
     label nZeroDiag = 0;
-    for (const scalar n : norm)
+    forAll(norm, celli)
     {
+        const scalar& n = norm[celli];
         if (magSqr(n) < sqr(SMALL))
         {
+            //Pout<< "For field " << m.psi().name()
+            //    << " have diagonal " << n << " for cell " << celli
+            //    << " at:" << cellCentres()[celli] << endl;
             nZeroDiag++;
         }
     }
@@ -302,21 +306,18 @@ Foam::tmp<Foam::scalarField> Foam::dynamicOversetFvMesh::normalisation
         forAll(norm, celli)
         {
             scalar& n = norm[celli];
-            if (mag(n) < SMALL)
+            if (magSqr(n) < sqr(SMALL))
             {
+                //Pout<< "For field " << m.psi().name()
+                //    << " for cell " << celli
+                //    << " at:" << cellCentres()[celli]
+                //    << " have norm " << n
+                //    << " have extrapolated norm " << extrapolatedNorm[celli]
+                //    << endl;
+                // Override the norm
                 n = extrapolatedNorm[celli];
             }
-            else
-            {
-                // Use original diagonal
-                n = m.diag()[celli];
-            }
         }
-    }
-    else
-    {
-        // Use original diagonal
-        norm = m.diag();
     }
     return tnorm;
 }
