@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2008-2011 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -133,5 +133,19 @@ inline bool Foam::radiation::fvDOM::useSolarLoad() const
 {
     return useSolarLoad_;
 }
+
+
+inline bool Foam::radiation::fvDOM::useExternalBeam() const
+{
+    return useExternalBeam_;
+}
+
+
+inline  const Foam::scalarList& Foam::radiation::fvDOM::
+spectralDistribution() const
+{
+    return spectralDistribution_;
+}
+
 
 // ************************************************************************* //

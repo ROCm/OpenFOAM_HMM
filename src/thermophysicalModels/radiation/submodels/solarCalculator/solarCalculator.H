@@ -264,6 +264,12 @@ public:
                 return diffuseSolarRad_;
             }
 
+            //- Return diffuse solar irradiation
+            const scalar& diffuseSolarRad() const
+            {
+                return diffuseSolarRad_;
+            }
+
             //- Return C constant
             scalar C()
             {

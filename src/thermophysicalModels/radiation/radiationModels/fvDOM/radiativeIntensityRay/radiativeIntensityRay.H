@@ -201,6 +201,12 @@ public:
             //- Return the average vector inside the solid angle
             inline const vector& dAve() const;
 
+             //- Return direction
+            inline vector& d();
+
+            //- Return the average vector inside the solid angle
+            inline vector& dAve();
+
             //- Return the number of bands
             inline scalar nLambda() const;
 

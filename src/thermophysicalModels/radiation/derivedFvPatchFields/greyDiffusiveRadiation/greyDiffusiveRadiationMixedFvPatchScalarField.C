@@ -33,6 +33,7 @@ License
 
 #include "fvDOM.H"
 #include "constants.H"
+#include "unitConversion.H"
 
 using namespace Foam::constant;
 using namespace Foam::constant::mathematical;
@@ -98,6 +99,7 @@ greyDiffusiveRadiationMixedFvPatchScalarField
 
         fvPatchScalarField::operator=(refValue());
     }
+
 }
 
 
@@ -178,6 +180,13 @@ updateCoeffs()
 
     const scalarField& emissivity = temissivity();
 
+    const tmp<scalarField> ttransmissivity
+    (
+        boundaryRadiation.transmissivity(patch().index())
+    );
+
+    const scalarField& transmissivity = ttransmissivity();
+
     scalarField& qem = ray.qem().boundaryFieldRef()[patchi];
     scalarField& qin = ray.qin().boundaryFieldRef()[patchi];
 
@@ -211,6 +220,39 @@ updateCoeffs()
         }
     }
 
+    scalarField Iexternal(this->size(), 0.0);
+
+    if (dom.useExternalBeam())
+    {
+        const vector sunDir = dom.solarCalc().direction();
+        const scalar directSolarRad = dom.solarCalc().directSolarRad();
+
+        //label nRaysBeam = dom.nRaysBeam();
+        label SunRayId(-1);
+        scalar maxSunRay = -GREAT;
+
+        // Looking for the ray closest to the Sun direction
+        for (label rayI=0; rayI < dom.nRay(); rayI++)
+        {
+            const vector& iD = dom.IRay(rayI).d();
+            scalar dir = sunDir & iD;
+            if (dir > maxSunRay)
+            {
+                maxSunRay = dir;
+                SunRayId = rayI;
+            }
+        }
+
+        if (rayId == SunRayId)
+        {
+            const scalarField nAve(n & dom.IRay(rayId).dAve());
+            forAll(Iexternal, faceI)
+            {
+                Iexternal[faceI] = directSolarRad/mag(dom.IRay(rayId).dAve());
+            }
+        }
+    }
+
     forAll(Iw, faceI)
     {
         if ((-n[faceI] & myRayId) > 0.0)
@@ -219,7 +261,8 @@ updateCoeffs()
             refGrad()[faceI] = 0.0;
             valueFraction()[faceI] = 1.0;
             refValue()[faceI] =
-                (
+                Iexternal[faceI]*transmissivity[faceI]
+              + (
                     Ir[faceI]*(scalar(1) - emissivity[faceI])
                   + emissivity[faceI]*physicoChemical::sigma.value()
                   * pow4(Tp[faceI])

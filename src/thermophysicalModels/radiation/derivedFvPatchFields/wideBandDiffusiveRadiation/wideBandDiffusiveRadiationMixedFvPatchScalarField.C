@@ -78,7 +78,7 @@ wideBandDiffusiveRadiationMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF)
 {
-    if (dict.found("value"))
+    if (dict.found("refValue"))
     {
         fvPatchScalarField::operator=
         (
@@ -176,8 +176,13 @@ updateCoeffs()
     (
         boundaryRadiation.emissivity(patch().index(), lambdaId)
     );
-
     const scalarField& emissivity = temissivity();
+
+    const tmp<scalarField> ttransmissivity
+    (
+        boundaryRadiation.transmissivity(patch().index(), lambdaId)
+    );
+    const scalarField& transmissivity = ttransmissivity();
 
     scalarField& qem = ray.qem().boundaryFieldRef()[patchi];
     scalarField& qin = ray.qin().boundaryFieldRef()[patchi];
@@ -232,6 +237,41 @@ updateCoeffs()
         }
     }
 
+    scalarField Iexternal(this->size(), 0.0);
+
+    if (dom.useExternalBeam())
+    {
+        const vector sunDir = dom.solarCalc().direction();
+        const scalar directSolarRad =
+            dom.solarCalc().directSolarRad()
+           *dom.spectralDistribution()[lambdaId];
+
+        //label nRaysBeam = dom.nRaysBeam();
+        label SunRayId(-1);
+        scalar maxSunRay = -GREAT;
+
+        // Looking for the ray closest to the Sun direction
+        for (label rayI=0; rayI < dom.nRay(); rayI++)
+        {
+            const vector& iD = dom.IRay(rayI).d();
+            scalar dir = sunDir & iD;
+            if (dir > maxSunRay)
+            {
+                maxSunRay = dir;
+                SunRayId = rayI;
+            }
+        }
+
+        if (rayId == SunRayId)
+        {
+            const scalarField nAve(n & dom.IRay(rayId).dAve());
+            forAll(Iexternal, faceI)
+            {
+                Iexternal[faceI] = directSolarRad/mag(dom.IRay(rayId).dAve());
+            }
+        }
+    }
+
     forAll(Iw, facei)
     {
         const vector& d = dom.IRay(rayId).d();
@@ -242,7 +282,8 @@ updateCoeffs()
             refGrad()[facei] = 0.0;
             valueFraction()[facei] = 1.0;
             refValue()[facei] =
-                (
+                Iexternal[facei]*transmissivity[facei]
+              + (
                     Ir[facei]*(1.0 - emissivity[facei])
                   + emissivity[facei]*Eb[facei]
                 )/pi;

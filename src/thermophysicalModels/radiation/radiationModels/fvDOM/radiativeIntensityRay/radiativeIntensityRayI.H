@@ -82,6 +82,18 @@ inline const Foam::vector& Foam::radiation::radiativeIntensityRay::dAve() const
 }
 
 
+inline Foam::vector& Foam::radiation::radiativeIntensityRay::d()
+{
+    return d_;
+}
+
+
+inline Foam::vector& Foam::radiation::radiativeIntensityRay::dAve()
+{
+    return dAve_;
+}
+
+
 inline Foam::scalar Foam::radiation::radiativeIntensityRay::nLambda() const
 {
     return nLambda_;

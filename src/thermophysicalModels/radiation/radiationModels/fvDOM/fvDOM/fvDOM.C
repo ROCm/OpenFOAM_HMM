@@ -29,6 +29,7 @@ License
 #include "absorptionEmissionModel.H"
 #include "scatterModel.H"
 #include "constants.H"
+#include "unitConversion.H"
 #include "fvm.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -49,22 +50,125 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+void Foam::radiation::fvDOM::rotateInitialRays(const vector& sunDir)
+{
+    // Rotate Y spherical cordinates to Sun direction.
+    // Solid angles on the equator are better fit for planar radiation
+    const tensor coordRot = rotationTensor(vector(0, 1, 0), sunDir);
+
+    forAll(IRay_, rayId)
+    {
+        IRay_[rayId].dAve() = coordRot & IRay_[rayId].dAve();
+        IRay_[rayId].d() = coordRot & IRay_[rayId].d();
+    }
+}
+
+
+void Foam::radiation::fvDOM:: alignClosestRayToSun(const vector& sunDir)
+{
+    label SunRayId(-1);
+    scalar maxSunRay = -GREAT;
+
+    // Looking for the ray closest to the Sun direction
+    forAll(IRay_, rayId)
+    {
+        const vector& iD = IRay_[rayId].d();
+        scalar dir = sunDir & iD;
+        if (dir > maxSunRay)
+        {
+            maxSunRay = dir;
+            SunRayId = rayId;
+        }
+    }
+
+    // Second rotation to align colimated radiation with the closest ray
+    const tensor coordRot = rotationTensor(IRay_[SunRayId].d(), sunDir);
+
+    forAll(IRay_, rayId)
+    {
+        IRay_[rayId].dAve() = coordRot & IRay_[rayId].dAve();
+        IRay_[rayId].d() = coordRot & IRay_[rayId].d();
+    }
+
+    Info << "Sun direction : " << sunDir << nl << endl;
+    Info << "Sun ray ID : " << SunRayId << nl << endl;
+}
+
+
+void Foam::radiation::fvDOM::updateRaysDir()
+{
+    solarCalculator_->correctSunDirection();
+    const vector sunDir = solarCalculator_->direction();
+
+    // First iteration
+    if (updateTimeIndex_ == 0)
+    {
+        rotateInitialRays(sunDir);
+        alignClosestRayToSun(sunDir);
+    }
+    else if (updateTimeIndex_ > 0)
+    {
+        alignClosestRayToSun(sunDir);
+    }
+}
+
+
 void Foam::radiation::fvDOM::initialise()
 {
+    coeffs_.readIfPresent("useExternalBeam", useExternalBeam_);
+
+    if (useExternalBeam_)
+    {
+        coeffs_.readEntry("spectralDistribution", spectralDistribution_);
+
+        spectralDistribution_ =
+            spectralDistribution_/sum(spectralDistribution_);
+
+        const dictionary& solarDict = this->subDict("solarCalculatorCoeffs");
+        solarCalculator_.reset(new solarCalculator(solarDict, mesh_));
+
+        if (mesh_.nSolutionD() != 3)
+        {
+            FatalErrorInFunction
+                << "External beam model only available in 3D meshes "
+                << abort(FatalError);
+        }
+
+        if (solarCalculator_->diffuseSolarRad() > 0)
+        {
+            FatalErrorInFunction
+                << "External beam model does not support Diffuse "
+                << "Solar Radiation. Set diffuseSolarRad to zero"
+                << abort(FatalError);
+        }
+        if (spectralDistribution_.size() != nLambda_)
+        {
+            FatalErrorInFunction
+                << "The epectral energy distribution has different bands "
+                << "than the absoprtivity model "
+                << abort(FatalError);
+        }
+    }
+
     // 3D
     if (mesh_.nSolutionD() == 3)
     {
         nRay_ = 4*nPhi_*nTheta_;
+
         IRay_.setSize(nRay_);
-        const scalar deltaPhi = pi/(2.0*nPhi_);
+
+        const scalar deltaPhi = pi/(2*nPhi_);
         const scalar deltaTheta = pi/nTheta_;
+
         label i = 0;
+
         for (label n = 1; n <= nTheta_; n++)
         {
             for (label m = 1; m <= 4*nPhi_; m++)
             {
-                const scalar thetai = (2*n - 1)*deltaTheta/2.0;
-                const scalar phii = (2*m - 1)*deltaPhi/2.0;
+                scalar thetai = (2*n - 1)*deltaTheta/2.0;
+                scalar phii = (2*m - 1)*deltaPhi/2.0;
+
                 IRay_.set
                 (
                     i,
@@ -176,15 +280,27 @@ void Foam::radiation::fvDOM::initialise()
     Info<< "fvDOM : Allocated " << IRay_.size()
         << " rays with average orientation:" << nl;
 
+    if (useExternalBeam_)
+    {
+        // Rotate rays for Sun direction
+        updateRaysDir();
+    }
+
+    scalar totalOmega = 0;
     forAll(IRay_, rayId)
     {
         if (omegaMax_ <  IRay_[rayId].omega())
         {
             omegaMax_ = IRay_[rayId].omega();
         }
+        totalOmega += IRay_[rayId].omega();
         Info<< '\t' << IRay_[rayId].I().name() << " : " << "dAve : "
-            << '\t' << IRay_[rayId].dAve() << nl;
+            << '\t' << IRay_[rayId].dAve() << " : " << "omega : "
+            << '\t' << IRay_[rayId].omega() << " : " << "d : "
+            << '\t' << IRay_[rayId].d() << nl;
     }
+
+    Info << "Total omega : " << totalOmega << endl;
 
     Info<< endl;
 
@@ -192,6 +308,13 @@ void Foam::radiation::fvDOM::initialise()
 
     if (useSolarLoad_)
     {
+        if (useExternalBeam_)
+        {
+            FatalErrorInFunction
+                << "External beam with fvDOM can not be used "
+                << "with the solar load model"
+                << abort(FatalError);
+        }
         const dictionary& solarDict = this->subDict("solarLoadCoeffs");
         solarLoad_.reset(new solarLoad(solarDict, T_));
 
@@ -296,7 +419,11 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
     meshOrientation_
     (
         coeffs_.lookupOrDefault<vector>("meshOrientation", Zero)
-    )
+    ),
+    useExternalBeam_(false),
+    spectralDistribution_(),
+    solarCalculator_(),
+    updateTimeIndex_(0)
 {
     initialise();
 }
@@ -392,7 +519,11 @@ Foam::radiation::fvDOM::fvDOM
     meshOrientation_
     (
         coeffs_.lookupOrDefault<vector>("meshOrientation", Zero)
-    )
+    ),
+    useExternalBeam_(false),
+    spectralDistribution_(),
+    solarCalculator_(),
+    updateTimeIndex_(0)
 {
     initialise();
 }
@@ -433,6 +564,33 @@ void Foam::radiation::fvDOM::calculate()
     if (useSolarLoad_)
     {
         solarLoad_->calculate();
+    }
+
+    if (useExternalBeam_)
+    {
+        switch (solarCalculator_->sunDirectionModel())
+        {
+            case solarCalculator::mSunDirConstant:
+            {
+                break;
+            }
+            case solarCalculator::mSunDirTracking:
+            {
+                label updateIndex = label
+                (
+                    mesh_.time().value()
+                   /solarCalculator_->sunTrackingUpdateInterval()
+                );
+
+                if (updateIndex > updateTimeIndex_)
+                {
+                    Info << "Updating Sun position..." << endl;
+                    updateTimeIndex_ = updateIndex;
+                    updateRaysDir();
+                }
+                break;
+            }
+        }
     }
 
     // Set rays convergence false
@@ -594,6 +752,12 @@ void Foam::radiation::fvDOM::setRayIdLambdaId
 
     rayId    = readLabel(name.substr(i1+1, i2-i1-1));
     lambdaId = readLabel(name.substr(i2+1));
+}
+
+
+const Foam::solarCalculator& Foam::radiation::fvDOM::solarCalc() const
+{
+    return solarCalculator_();
 }
 
 

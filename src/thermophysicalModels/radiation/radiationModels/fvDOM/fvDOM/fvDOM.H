@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -32,12 +32,19 @@ Group
 Description
 
     Finite Volume Discrete Ordinates Method. Solves the RTE equation for n
-    directions in a participating media, not including scatter.
+    directions in a participating media, not including scatter and reflective
+    walls.
 
     Available absorption models:
+
     - constantAbsorptionEmission
     - greyMeanAbsoprtionEmission
     - wideBandAbsorptionEmission
+    - multiBandAbsorptionEmission
+
+    This model can handle non-grey participating media using
+    multiBandAbsorptionEmission model. Accordingly the BC for rays should
+    be wideBandDiffussive type
 
 Usage
     \verbatim
@@ -50,6 +57,10 @@ Usage
                                     // iteration
             maxIter     4;          // maximum number of iterations
             meshOrientation    (1 1 1); //Mesh orientation used for 2D and 1D
+
+            useSolarLoad      false;
+            useExternalBeam   true;
+            spectralDistribution (2 1);
         }
 
         solverFreq   1; // Number of flow iterations per radiation iteration
@@ -70,6 +81,16 @@ Usage
     - 3-D:
       - rays geberated in 3-D using the \c nPhi and \c nTheta entries
       - \c meshOrientation vector is not applicable.
+
+    useSolarLoad calculates the primary and diffusive Sun fluxes on walls in
+    addition to the RTE equations
+
+    useExternalBeam add an external collimated beam to the domain. This option
+    is not available if useSolarLoad is true.
+
+    spectralDistribution is the energy spectral distribution of the collimated
+    external beam.
+
 
 SourceFiles
     fvDOM.C
@@ -156,6 +177,18 @@ class fvDOM
         //- Mesh orientation vector
         vector meshOrientation_;
 
+        //- Use external parallel irradiation beam
+        bool useExternalBeam_;
+
+        //- Spectral energy distribution for the external beam
+        scalarList spectralDistribution_;
+
+        //- Solar calculator
+        autoPtr<solarCalculator> solarCalculator_;
+
+        //- Update Sun position index
+        label updateTimeIndex_;
+
 
     // Private Member Functions
 
@@ -213,6 +246,16 @@ public:
                 label& lambdaId
             ) const;
 
+
+            //- Rotate rays according to Sun direction
+            void updateRaysDir();
+
+            //- Rotate rays spheric equator to sunDir
+            void rotateInitialRays(const vector& sunDir);
+
+            //- Align closest ray to sunDir
+            void alignClosestRayToSun(const vector& sunDir);
+
             //- Source term component (for power of T^4)
             virtual tmp<volScalarField> Rp() const;
 
@@ -221,6 +264,9 @@ public:
 
 
         // Access
+
+            //- Solar calculator
+            const solarCalculator& solarCalc() const;
 
             //- Ray intensity for rayI
             inline const radiativeIntensityRay& IRay(const label rayI) const;
@@ -276,6 +322,12 @@ public:
 
             //- Use solar load
             inline bool useSolarLoad() const;
+
+            //- Use external beam
+            inline bool useExternalBeam() const;
+
+            //- Energy spectral distribution for external beam
+            inline const scalarList& spectralDistribution() const;
 };
 
 
