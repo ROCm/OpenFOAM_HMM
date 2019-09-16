@@ -19,24 +19,28 @@ base
 {
     type            lookup;
     emissivity      1.0;
+    transmissivity  0.0;
 }
 
 outlet
 {
     type            lookup;
     emissivity      1.0;
+    transmissivity  0.0;
 }
 
 sides
 {
     type            lookup;
     emissivity      1.0;
+    transmissivity  0.0;
 }
 
 inlet
 {
     type            lookup;
     emissivity      1.0;
+    transmissivity  0.0;
 }
 
 // ************************************************************************* //

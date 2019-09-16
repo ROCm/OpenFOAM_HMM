@@ -20,6 +20,7 @@ FoamFile
     type            lookup;
     emissivity      0.8;
     absorptivity    0.8;
+    transmissivity  0.0;
 }
 
 inlet
@@ -27,6 +28,7 @@ inlet
     type            lookup;
     emissivity      0.9;
     absorptivity    0.9;
+    transmissivity  0.0;
 }
 
 // ************************************************************************* //
