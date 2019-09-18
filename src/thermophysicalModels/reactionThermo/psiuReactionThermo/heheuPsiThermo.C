@@ -626,7 +626,7 @@ Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::psib() const
         forAll(ppsib, facei)
         {
             ppsib[facei] =
-                this->patchFaceReactants
+                this->patchFaceProducts
                 (patchi, facei).psi(pp[facei], pTb[facei]);
         }
     }
