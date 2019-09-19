@@ -502,16 +502,25 @@ void Foam::writeFields
 
     if (selectedFields.found("wallDistance"))
     {
-        // Wall distance
-        //const volScalarField& y = wallDist::New(mesh).y();
-        volScalarField y("wallDistance", wallDist::New(mesh).y());
-        Info<< "    Writing wall distance to " << y.name() << endl;
-        y.write();
+        // See if wallDist.method entry in fvSchemes before calling factory
+        // method of wallDist. Have 'failing' version of wallDist::New instead?
+        const dictionary& schemesDict =
+            static_cast<const fvSchemes&>(mesh).schemesDict();
+        if (schemesDict.found("wallDist"))
+        {
+            if (schemesDict.subDict("wallDist").found("method"))
+            {
+                // Wall distance
+                volScalarField y("wallDistance", wallDist::New(mesh).y());
+                Info<< "    Writing wall distance to " << y.name() << endl;
+                y.write();
 
-        // Wall-reflection vectors
-        //const volVectorField& n = wallDist::New(mesh).n();
-        //Info<< "    Writing wall normal to " << n.name() << endl;
-        //n.write();
+                // Wall-reflection vectors
+                //const volVectorField& n = wallDist::New(mesh).n();
+                //Info<< "    Writing wall normal to " << n.name() << endl;
+                //n.write();
+            }
+        }
     }
 
     Info<< endl;
