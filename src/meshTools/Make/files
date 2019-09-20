@@ -306,6 +306,8 @@ output/foamVtkWriteFaceSet.C
 output/foamVtkWritePointSet.C
 output/foamVtkWriteCellSetFaces.C
 
+regionModel/regionProperties/regionProperties.C
+
 regionCoupled/patches/regionCoupledPolyPatch/regionCoupledBase.C
 regionCoupled/patches/regionCoupledPolyPatch/regionCoupledPolyPatch.C
 regionCoupled/patches/regionCoupledPolyPatch/regionCoupledWallPolyPatch.C
