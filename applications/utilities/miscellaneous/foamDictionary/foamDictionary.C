@@ -595,6 +595,7 @@ int main(int argc, char *argv[])
         dictFile.clear();
         OFstream os(dictFileName);
         IOobject::writeBanner(os);
+        IOobject::writeDivider(os);
         dict.write(os, false);
         IOobject::writeEndDivider(os);
     }
