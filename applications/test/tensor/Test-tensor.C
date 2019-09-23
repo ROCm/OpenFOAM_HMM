@@ -40,7 +40,7 @@ int main()
         Info<< "tensor " << t3 << nl;
 
         t3.row<2>(Zero);
-        Info<< "replaced row<1> = " << t3.row<2>() << nl;
+        Info<< "replaced row<2> = " << t3.row<2>() << nl;
         Info<< "tensor " << t3 << nl;
 
         triad tr3(t3);

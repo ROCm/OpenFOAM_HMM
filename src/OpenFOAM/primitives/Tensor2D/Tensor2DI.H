@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -171,6 +171,146 @@ template<class Cmpt>
 inline Foam::Vector2D<Cmpt> Foam::Tensor2D<Cmpt>::cy() const
 {
     return Vector2D<Cmpt>(this->v_[XY], this->v_[YY]);
+}
+
+
+template<class Cmpt>
+template<Foam::direction Col>
+inline Foam::Vector2D<Cmpt> Foam::Tensor2D<Cmpt>::col() const
+{
+    if (Col == 0) return cx();
+    else if (Col == 1) return cy();
+
+    static_assert(Col < 2, "Invalid column access");
+    return Zero;
+}
+
+
+template<class Cmpt>
+inline Foam::Vector2D<Cmpt> Foam::Tensor2D<Cmpt>::col(const direction c) const
+{
+    switch (c)
+    {
+        case 0: return cx(); break;
+        case 1: return cy(); break;
+    }
+
+    FatalErrorInFunction
+        << "Invalid column access " << c << abort(FatalError);
+
+    return Zero;
+}
+
+
+template<class Cmpt>
+template<Foam::direction Row>
+inline Foam::Vector2D<Cmpt> Foam::Tensor2D<Cmpt>::row() const
+{
+    if (Row == 0) return x();
+    else if (Row == 1) return y();
+
+    static_assert(Row < 2, "Invalid row access");
+    return Zero;
+}
+
+
+template<class Cmpt>
+inline Foam::Vector2D<Cmpt> Foam::Tensor2D<Cmpt>::row(const direction r) const
+{
+    switch (r)
+    {
+        case 0: return x(); break;
+        case 1: return y(); break;
+    }
+
+    FatalErrorInFunction
+        << "Invalid row access " << r << abort(FatalError);
+
+    return Zero;
+}
+
+
+template<class Cmpt>
+template<Foam::direction Col>
+inline void Foam::Tensor2D<Cmpt>::col(const Vector2D<Cmpt>& v)
+{
+    if (Col == 0)
+    {
+        this->v_[XX] = v.x();
+        this->v_[YX] = v.y();
+    }
+    else if (Col == 1)
+    {
+        this->v_[XY] = v.x();
+        this->v_[YY] = v.y();
+    }
+
+    static_assert(Col < 2, "Invalid column access");
+}
+
+
+template<class Cmpt>
+template<Foam::direction Row>
+inline void Foam::Tensor2D<Cmpt>::row(const Vector2D<Cmpt>& v)
+{
+    if (Row == 0)
+    {
+        this->v_[XX] = v.x(); this->v_[XY] = v.y();
+    }
+    else if (Row == 1)
+    {
+        this->v_[YX] = v.x(); this->v_[YY] = v.y();
+    }
+
+    static_assert(Row < 2, "Invalid row access");
+}
+
+
+template<class Cmpt>
+inline void Foam::Tensor2D<Cmpt>::col
+(
+    const direction c,
+    const Vector2D<Cmpt>& v
+)
+{
+    switch (c)
+    {
+        case 0: col<0>(v); break;
+        case 1: col<1>(v); break;
+        default:
+            FatalErrorInFunction
+                << "Invalid column access " << c << abort(FatalError);
+            break;
+    }
+}
+
+
+template<class Cmpt>
+inline void Foam::Tensor2D<Cmpt>::row
+(
+    const direction r,
+    const Vector2D<Cmpt>& v
+)
+{
+    switch (r)
+    {
+        case 0: row<0>(v); break;
+        case 1: row<1>(v); break;
+        default:
+            FatalErrorInFunction
+                << "Invalid row access " << r << abort(FatalError);
+            break;
+    }
+}
+
+
+template<class Cmpt>
+inline Foam::Vector2D<Cmpt> Foam::Tensor2D<Cmpt>::vectorComponent
+(
+    const direction cmpt
+) const
+{
+    return row(cmpt);
 }
 
 

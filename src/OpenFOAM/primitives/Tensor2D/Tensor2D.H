@@ -91,13 +91,13 @@ public:
         inline Tensor2D(const Foam::zero);
 
         //- Construct given VectorSpace
-        inline Tensor2D(const VectorSpace<Tensor2D<Cmpt>, Cmpt, 4>&);
+        inline Tensor2D(const VectorSpace<Tensor2D<Cmpt>, Cmpt, 4>& vs);
 
         //- Construct given SymmTensor2D
-        inline Tensor2D(const SymmTensor2D<Cmpt>&);
+        inline Tensor2D(const SymmTensor2D<Cmpt>& st);
 
         //- Construct given SphericalTensor2D
-        inline Tensor2D(const SphericalTensor2D<Cmpt>&);
+        inline Tensor2D(const SphericalTensor2D<Cmpt>& st);
 
         //- Construct given the two row vectors
         inline Tensor2D
@@ -114,7 +114,7 @@ public:
         );
 
         //- Construct from Istream
-        Tensor2D(Istream&);
+        inline Tensor2D(Istream&);
 
 
     // Member Functions
@@ -140,6 +140,24 @@ public:
             //- Extract vector for column 1
             inline Vector2D<Cmpt> cy() const;
 
+            //- Extract vector for given column.
+            //  Compile-time check of column index.
+            template<direction Col>
+            inline Vector2D<Cmpt> col() const;
+
+            //- Extract vector for given column (0,1).
+            //  Runtime check of column index.
+            inline Vector2D<Cmpt> col(const direction c) const;
+
+            //- Set values of given column
+            //  Compile-time check of column index.
+            template<direction Col>
+            inline void col(const Vector2D<Cmpt>& v);
+
+            //- Set values of given column (0,1)
+            //  Runtime check of column index.
+            inline void col(const direction c, const Vector2D<Cmpt>& v);
+
 
         // Row-vector access.
 
@@ -149,10 +167,32 @@ public:
             //- Extract vector for row 1
             inline Vector2D<Cmpt> y() const;
 
+            //- Extract vector for given row.
+            //  Compile-time check of row index.
+            template<direction Row>
+            inline Vector2D<Cmpt> row() const;
+
+            //- Extract vector for given row (0,1)
+            //  Runtime check of row index.
+            inline Vector2D<Cmpt> row(const direction r) const;
+
+            //- Set values of given row
+            //  Compile-time check of row index.
+            template<direction Row>
+            inline void row(const Vector2D<Cmpt>& v);
+
+            //- Set values of given row (0,1)
+            //  Runtime check of row index.
+            inline void row(const direction r, const Vector2D<Cmpt>& v);
+
+            //- Return vector for given row (0,1)
+            //  Runtime check of row index.
+            inline Vector2D<Cmpt> vectorComponent(const direction cmpt) const;
+
 
     // Tensor Operations
 
-        //- Transpose
+        //- Return transpose
         inline Tensor2D<Cmpt> T() const;
 
         //- Inner-product of this with another Tensor2D.
@@ -164,10 +204,10 @@ public:
 
     // Member Operators
 
-        //- Copy SymmTensor2D
+        //- Copy assign from SymmTensor2D
         inline void operator=(const SymmTensor2D<Cmpt>&);
 
-        //- Copy SphericalTensor2D
+        //- Copy assign from SphericalTensor2D
         inline void operator=(const SphericalTensor2D<Cmpt>&);
 };
 
