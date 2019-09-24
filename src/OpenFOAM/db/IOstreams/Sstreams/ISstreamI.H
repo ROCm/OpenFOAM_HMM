@@ -74,11 +74,15 @@ inline int Foam::ISstream::peek()
 }
 
 
-inline Foam::ISstream& Foam::ISstream::getLine(std::string& str)
+inline Foam::ISstream& Foam::ISstream::getLine(std::string& str, char delim)
 {
-    std::getline(is_, str);
+    std::getline(is_, str, delim);
     setState(is_.rdstate());
-    ++lineNumber_;
+
+    if (delim == '\n')
+    {
+        ++lineNumber_;
+    }
 
     return *this;
 }
