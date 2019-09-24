@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2012 OpenFOAM Foundation
@@ -349,6 +349,13 @@ namespace stringOps
 
     //- Trim leading and trailing whitespace inplace
     void inplaceTrim(std::string& s);
+
+
+    //- Return string with C/C++ comments removed
+    string removeComments(const string& original);
+
+    //- Remove C/C++ comments inplace
+    void inplaceRemoveComments(std::string& s);
 
 
     //- Return string transformed with std::tolower on each character

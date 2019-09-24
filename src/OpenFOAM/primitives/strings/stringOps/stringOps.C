@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -1101,6 +1101,90 @@ void Foam::stringOps::inplaceTrim(std::string& s)
 {
     inplaceTrimRight(s);
     inplaceTrimLeft(s);
+}
+
+
+Foam::string Foam::stringOps::removeComments(const string& original)
+{
+    string s(original);
+    inplaceRemoveComments(s);
+    return s;
+}
+
+
+void Foam::stringOps::inplaceRemoveComments(std::string& s)
+{
+    const auto len = s.length();
+
+    if (len < 2)
+    {
+        return;
+    }
+
+    std::string::size_type n = 0;
+
+    for (std::string::size_type i = 0; i < len; ++i)
+    {
+        char c = s[i];
+
+        if (n != i)
+        {
+            s[n] = c;
+        }
+        ++n;
+
+        // The start of a C/C++ comment?
+        if (c == '/')
+        {
+            ++i;
+
+            if (i == len)
+            {
+                // No further characters
+                break;
+            }
+
+            c = s[i];
+
+            if (c == '/')
+            {
+                // C++ comment - search for end-of-line
+                --n;
+                i = s.find('\n', ++i);
+
+                if (i == std::string::npos)
+                {
+                    // Trucated - done
+                    break;
+                }
+            }
+            else if (c == '*')
+            {
+                // C comment - search for '*/'
+                --n;
+                i = s.find("*/", ++i, 2);
+
+                if (i == std::string::npos)
+                {
+                    // Trucated - done
+                    break;
+                }
+
+                ++i;
+            }
+            else
+            {
+                // Not a C/C++ comment
+                if (n != i)
+                {
+                    s[n] = c;
+                }
+                ++n;
+            }
+        }
+    }
+
+    s.resize(n);
 }
 
 
