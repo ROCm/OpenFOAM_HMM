@@ -317,6 +317,7 @@ $(schemes)/pointLinear/pointLinear.C
 $(schemes)/midPoint/midPoint.C
 $(schemes)/downwind/downwind.C
 $(schemes)/weighted/weighted.C
+$(schemes)/weightedFlux/weightedFlux.C
 $(schemes)/cubic/cubic.C
 $(schemes)/skewCorrected/skewCorrectionVectors.C
 $(schemes)/skewCorrected/skewCorrected.C
