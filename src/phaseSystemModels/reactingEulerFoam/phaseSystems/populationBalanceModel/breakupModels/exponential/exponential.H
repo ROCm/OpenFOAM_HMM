@@ -79,8 +79,7 @@ public:
 
 
     //- Destructor
-    virtual ~exponential()
-    {}
+    virtual ~exponential() = default;
 
 
     // Member Functions

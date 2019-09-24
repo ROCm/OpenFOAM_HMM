@@ -69,8 +69,7 @@ public:
 
 
     //- Destructor
-    virtual ~densityChangeDrift()
-    {}
+    virtual ~densityChangeDrift() = default;
 
 
     // Member Functions

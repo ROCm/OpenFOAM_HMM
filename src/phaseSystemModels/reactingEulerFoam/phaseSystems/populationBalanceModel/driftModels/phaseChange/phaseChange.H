@@ -86,8 +86,7 @@ public:
 
 
     //- Destructor
-    virtual ~phaseChange()
-    {}
+    virtual ~phaseChange() = default;
 
 
     // Member Functions

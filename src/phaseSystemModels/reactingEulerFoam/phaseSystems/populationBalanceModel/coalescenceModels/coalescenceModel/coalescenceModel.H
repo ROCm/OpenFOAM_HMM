@@ -127,8 +127,7 @@ public:
 
 
     //- Destructor
-    virtual ~coalescenceModel()
-    {}
+    virtual ~coalescenceModel() = default;
 
 
     // Member Functions

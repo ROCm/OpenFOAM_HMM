@@ -90,8 +90,7 @@ public:
 
 
     //- Destructor
-    virtual ~diagonalPreconditioner()
-    {}
+    virtual ~diagonalPreconditioner() = default;
 
 
     // Member Functions

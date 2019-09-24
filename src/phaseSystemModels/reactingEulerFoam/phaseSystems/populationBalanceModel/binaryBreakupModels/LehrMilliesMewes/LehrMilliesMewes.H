@@ -120,8 +120,7 @@ public:
 
 
     //- Destructor
-    virtual ~LehrMilliesMewes()
-    {}
+    virtual ~LehrMilliesMewes() = default;
 
 
     // Member Functions

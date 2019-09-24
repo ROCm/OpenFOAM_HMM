@@ -123,8 +123,7 @@ public:
 
 
     //- Destructor
-    virtual ~LaakkonenAlopaeusAittamaa()
-    {}
+    virtual ~LaakkonenAlopaeusAittamaa() = default;
 
 
     // Member Functions

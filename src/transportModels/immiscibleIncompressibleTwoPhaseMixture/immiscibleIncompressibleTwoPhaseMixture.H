@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2014-2017 OpenFOAM Foundation
@@ -68,8 +68,7 @@ public:
 
 
     //- Destructor
-    virtual ~immiscibleIncompressibleTwoPhaseMixture()
-    {}
+    virtual ~immiscibleIncompressibleTwoPhaseMixture() = default;
 
 
     // Member Functions

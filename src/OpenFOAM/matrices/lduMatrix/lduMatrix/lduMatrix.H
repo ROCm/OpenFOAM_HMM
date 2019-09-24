@@ -216,8 +216,7 @@ public:
 
 
         //- Destructor
-        virtual ~solver()
-        {}
+        virtual ~solver() = default;
 
 
         // Member functions
@@ -377,8 +376,7 @@ public:
 
 
         //- Destructor
-        virtual ~smoother()
-        {}
+        virtual ~smoother() = default;
 
 
         // Member functions
@@ -500,8 +498,7 @@ public:
 
 
         //- Destructor
-        virtual ~preconditioner()
-        {}
+        virtual ~preconditioner() = default;
 
 
         // Member functions

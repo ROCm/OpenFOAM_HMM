@@ -127,8 +127,7 @@ public:
 
 
     //- Destructor
-    virtual ~driftModel()
-    {}
+    virtual ~driftModel() = default;
 
 
     // Member Functions

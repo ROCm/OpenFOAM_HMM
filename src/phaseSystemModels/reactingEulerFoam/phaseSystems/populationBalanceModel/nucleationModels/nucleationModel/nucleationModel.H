@@ -127,8 +127,7 @@ public:
 
 
     //- Destructor
-    virtual ~nucleationModel()
-    {}
+    virtual ~nucleationModel() = default;
 
 
     // Member Functions

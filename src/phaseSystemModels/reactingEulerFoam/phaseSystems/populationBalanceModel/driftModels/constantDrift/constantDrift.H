@@ -78,8 +78,7 @@ public:
 
 
     //- Destructor
-    virtual ~constantDrift()
-    {}
+    virtual ~constantDrift() = default;
 
 
     // Member Functions

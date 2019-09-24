@@ -76,8 +76,7 @@ public:
 
 
     //- Destructor
-    virtual ~constantCoalescence()
-    {}
+    virtual ~constantCoalescence() = default;
 
 
     // Member Functions

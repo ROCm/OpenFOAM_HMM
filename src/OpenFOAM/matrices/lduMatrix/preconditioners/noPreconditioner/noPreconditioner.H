@@ -81,8 +81,7 @@ public:
 
 
     //- Destructor
-    virtual ~noPreconditioner()
-    {}
+    virtual ~noPreconditioner() = default;
 
 
     // Member Functions

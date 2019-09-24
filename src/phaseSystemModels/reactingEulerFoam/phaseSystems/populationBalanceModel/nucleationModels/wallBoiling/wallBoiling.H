@@ -84,8 +84,7 @@ public:
 
 
     //- Destructor
-    virtual ~wallBoiling()
-    {}
+    virtual ~wallBoiling() = default;
 
 
     // Member Functions

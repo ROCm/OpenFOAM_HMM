@@ -133,8 +133,7 @@ public:
 
 
     //- Destructor
-    virtual ~Luo()
-    {}
+    virtual ~Luo() = default;
 
 
     // Member Functions

@@ -77,8 +77,7 @@ public:
 
 
     //- Destructor
-    virtual ~powerLawUniformBinary()
-    {}
+    virtual ~powerLawUniformBinary() = default;
 
 
     // Member Functions

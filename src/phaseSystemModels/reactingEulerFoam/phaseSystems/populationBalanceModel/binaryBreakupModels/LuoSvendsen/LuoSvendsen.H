@@ -196,8 +196,7 @@ public:
 
 
     //- Destructor
-    virtual ~LuoSvendsen()
-    {}
+    virtual ~LuoSvendsen() = default;
 
 
     // Member Functions

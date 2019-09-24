@@ -179,8 +179,7 @@ public:
 
 
     //- Destructor
-    virtual ~energyRegionCoupledFvPatchScalarField()
-    {}
+    virtual ~energyRegionCoupledFvPatchScalarField() = default;
 
 
     // Member functions

@@ -76,8 +76,7 @@ public:
 
 
     //- Destructor
-    virtual ~powerLaw()
-    {}
+    virtual ~powerLaw() = default;
 
 
     // Member Functions

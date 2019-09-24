@@ -181,8 +181,7 @@ public:
 
 
     //- Destructor
-    virtual ~PrinceBlanch()
-    {}
+    virtual ~PrinceBlanch() = default;
 
 
     // Member Functions

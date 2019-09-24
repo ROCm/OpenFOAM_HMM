@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2015-2016 OpenFOAM Foundation
@@ -139,8 +139,7 @@ public:
 
 
     //- Destructor
-    virtual ~WALE()
-    {}
+    virtual ~WALE() = default;
 
 
     // Member Functions

@@ -120,8 +120,7 @@ public:
 
 
     //- Destructor
-    virtual ~CoulaloglouTavlaridesCoalescence()
-    {}
+    virtual ~CoulaloglouTavlaridesCoalescence() = default;
 
 
     // Member Functions

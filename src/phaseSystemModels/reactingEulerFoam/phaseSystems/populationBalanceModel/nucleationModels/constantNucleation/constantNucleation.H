@@ -80,8 +80,7 @@ public:
 
 
     //- Destructor
-    virtual ~constantNucleation()
-    {}
+    virtual ~constantNucleation() = default;
 
 
     // Member Functions

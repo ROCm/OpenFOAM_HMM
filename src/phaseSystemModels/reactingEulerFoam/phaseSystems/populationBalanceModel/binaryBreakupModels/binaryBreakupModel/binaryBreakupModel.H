@@ -129,8 +129,7 @@ public:
 
 
     //- Destructor
-    virtual ~binaryBreakupModel()
-    {}
+    virtual ~binaryBreakupModel() = default;
 
 
     // Member Functions

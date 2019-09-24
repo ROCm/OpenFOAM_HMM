@@ -80,8 +80,7 @@ public:
 
 
     //- Destructor
-    virtual ~DILUPreconditioner()
-    {}
+    virtual ~DILUPreconditioner() = default;
 
 
     // Member Functions

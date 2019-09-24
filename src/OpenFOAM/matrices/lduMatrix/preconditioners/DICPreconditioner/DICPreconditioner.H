@@ -80,8 +80,7 @@ public:
 
 
     //- Destructor
-    virtual ~DICPreconditioner()
-    {}
+    virtual ~DICPreconditioner() = default;
 
 
     // Member Functions

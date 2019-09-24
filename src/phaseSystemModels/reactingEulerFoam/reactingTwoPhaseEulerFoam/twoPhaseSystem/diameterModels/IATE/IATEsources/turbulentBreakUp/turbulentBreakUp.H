@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2018 OpenFOAM Foundation
@@ -84,8 +84,7 @@ public:
 
 
     //- Destructor
-    virtual ~turbulentBreakUp()
-    {}
+    virtual ~turbulentBreakUp() = default;
 
 
     // Member Functions

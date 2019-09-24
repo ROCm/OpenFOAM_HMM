@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2013 OpenFOAM Foundation
@@ -66,8 +66,7 @@ public:
         explicit meshSearchMeshObject(const polyMesh& mesh);
 
     //- Destructor
-    virtual ~meshSearchMeshObject()
-    {}
+    virtual ~meshSearchMeshObject() = default;
 };
 
 

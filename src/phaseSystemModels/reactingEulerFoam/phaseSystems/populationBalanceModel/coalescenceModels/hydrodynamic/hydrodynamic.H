@@ -70,8 +70,7 @@ public:
 
 
     //- Destructor
-    virtual ~hydrodynamic()
-    {}
+    virtual ~hydrodynamic() = default;
 
 
     // Member Functions

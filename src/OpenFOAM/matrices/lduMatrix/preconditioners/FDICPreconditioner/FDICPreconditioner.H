@@ -93,8 +93,7 @@ public:
 
 
     //- Destructor
-    virtual ~FDICPreconditioner()
-    {}
+    virtual ~FDICPreconditioner() = default;
 
 
     // Member Functions

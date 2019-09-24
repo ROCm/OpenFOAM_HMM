@@ -127,8 +127,7 @@ public:
 
 
     //- Destructor
-    virtual ~LehrMilliesMewesCoalescence()
-    {}
+    virtual ~LehrMilliesMewesCoalescence() = default;
 
 
     // Member Functions
