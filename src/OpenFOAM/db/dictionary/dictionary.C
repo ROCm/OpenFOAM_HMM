@@ -131,7 +131,7 @@ Foam::dictionary::dictionary
     parent_(parentDict)
 {
     transfer(dict);
-    name() = parentDict.name() + '.' + name();
+    name() = fileName::concat(parentDict.name(), name(), '.');
 }
 
 
@@ -563,7 +563,8 @@ Foam::dictionary Foam::dictionary::subOrEmptyDict
             << name() << endl;
     }
 
-    return dictionary(*this, dictionary(name() + '.' + keyword));
+    // The move constructor properly qualifies the dictionary name
+    return dictionary(*this, dictionary(fileName(keyword)));
 }
 
 
@@ -659,7 +660,8 @@ Foam::entry* Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
 
         if (hashedEntries_.insert(entryPtr->keyword(), entryPtr))
         {
-            entryPtr->name() = name() + '.' + entryPtr->keyword();
+            entryPtr->name() =
+                fileName::concat(name(), entryPtr->keyword(), '.');
 
             if (entryPtr->keyword().isPattern())
             {
@@ -684,7 +686,9 @@ Foam::entry* Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
 
     if (hashedEntries_.insert(entryPtr->keyword(), entryPtr))
     {
-        entryPtr->name() = name() + '.' + entryPtr->keyword();
+        entryPtr->name() =
+            fileName::concat(name(), entryPtr->keyword(), '.');
+
         parent_type::append(entryPtr);
 
         if (entryPtr->keyword().isPattern())

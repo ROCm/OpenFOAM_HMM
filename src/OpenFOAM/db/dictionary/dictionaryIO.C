@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -39,7 +39,7 @@ Foam::dictionary::dictionary
     bool keepHeader
 )
 :
-    name_(parentDict.name() + '.' + name),
+    name_(fileName::concat(parentDict.name(), name, '.')),
     parent_(parentDict)
 {
     read(is, keepHeader);
