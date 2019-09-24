@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2011 2019 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011, 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -28,7 +28,7 @@ License
 inline const Foam::radiation::radiativeIntensityRay&
 Foam::radiation::fvDOM::IRay(const label rayI) const
 {
-    return  IRay_[rayI];
+    return IRay_[rayI];
 }
 
 
@@ -141,7 +141,7 @@ inline bool Foam::radiation::fvDOM::useExternalBeam() const
 }
 
 
-inline  const Foam::scalarList& Foam::radiation::fvDOM::
+inline const Foam::scalarList& Foam::radiation::fvDOM::
 spectralDistribution() const
 {
     return spectralDistribution_;

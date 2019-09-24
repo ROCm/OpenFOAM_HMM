@@ -108,6 +108,13 @@ Foam::label Foam::fileFormats::STARCDMeshReader::readPoints
         }
     }
 
+    if (!nPoints)
+    {
+        FatalErrorInFunction
+            << "No points in file " << inputName << nl
+            << abort(FatalError);
+    }
+
     Info<< "Number of points  = " << nPoints << endl;
 
     // Set sizes and reset to invalid values
@@ -125,13 +132,6 @@ Foam::label Foam::fileFormats::STARCDMeshReader::readPoints
     // Pass 2:
     // construct pointList and conversion table
     // from Star vertex numbers to Foam point labels
-    if (!nPoints)
-    {
-        FatalErrorInFunction
-            << "no points in file " << inputName
-            << abort(FatalError);
-    }
-    else
     {
         IFstream is(inputName);
         readHeader(is, STARCDCore::HEADER_VRT);
@@ -274,7 +274,6 @@ void Foam::fileFormats::STARCDMeshReader::readCells(const fileName& inputName)
                     cellTable_.setName(cellTableId);
                     cellTable_.setMaterial(cellTableId, "solid");
                 }
-
             }
             else if (typeId == STARCDCore::starcdBaffleType)
             {
@@ -291,31 +290,30 @@ void Foam::fileFormats::STARCDMeshReader::readCells(const fileName& inputName)
                     cellTable_.setMaterial(cellTableId, "shell");
                 }
             }
-
         }
     }
 
+    const label nCells = nFluids + (keepSolids_ ? nSolids : 0);
+
     Info<< "Number of fluids  = " << nFluids << nl
-        << "Number of baffles = " << nBaffles << nl;
-    if (keepSolids_)
-    {
-        Info<< "Number of solids  = " << nSolids << nl;
-    }
-    else
-    {
-        Info<< "Ignored   solids  = " << nSolids << nl;
-    }
-    Info<< "Ignored   shells  = " << nShells << endl;
+        << "Number of baffles = " << nBaffles << nl
+        << "Number of solids  = " << nSolids
+        << (keepSolids_ ? " (treat as fluid)" : " (ignored)") << nl
+        << "Number of shells  = " << nShells << " (ignored)" << nl;
 
+    if (!nCells)
+    {
+        OSstream& err = FatalErrorInFunction;
 
-    label nCells;
-    if (keepSolids_)
-    {
-        nCells = nFluids + nSolids;
-    }
-    else
-    {
-        nCells = nFluids;
+        err << "No cells in file " << inputName << nl;
+
+        if (nShells)
+        {
+            err << "Consists of shells only (typeId=4)." << nl;
+        }
+
+        err << nl
+            << abort(FatalError);
     }
 
     cellFaces_.setSize(nCells);
@@ -339,19 +337,6 @@ void Foam::fileFormats::STARCDMeshReader::readCells(const fileName& inputName)
 
     // Pass 2:
     // construct cellFaces_ and possibly cellShapes_
-    if (nCells <= 0)
-    {
-        if (nShells != 0)
-        {
-            WarningInFunction
-                << inputName << "consists of only shell entries (typeId=4)."
-                << endl;
-        }
-        FatalErrorInFunction
-            << "no cells in file " << inputName
-            << abort(FatalError);
-    }
-    else
     {
         IFstream is(inputName);
         readHeader(is, STARCDCore::HEADER_CEL);
