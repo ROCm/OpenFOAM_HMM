@@ -124,7 +124,8 @@ Foam::fileName Foam::fileName::validate
 Foam::fileName Foam::fileName::concat
 (
     const std::string& s1,
-    const std::string& s2
+    const std::string& s2,
+    const char delim
 )
 {
     const auto n1 = s1.length();
@@ -135,10 +136,10 @@ Foam::fileName Foam::fileName::concat
 
     out += s1;
 
-    if (n1 && n2 && s1.back() != '/' && s2.front() != '/')
+    if (n1 && n2 && s1.back() != delim && s2.front() != delim)
     {
-        // Add separator
-        out += '/';
+        // Add delimiter
+        out += delim;
     }
 
     out += s2;
@@ -473,9 +474,9 @@ bool Foam::fileName::hasExt(const wordRe& ending) const
 }
 
 
-Foam::wordList Foam::fileName::components(const char delimiter) const
+Foam::wordList Foam::fileName::components(const char delim) const
 {
-    const auto parsed = stringOps::split<string>(*this, delimiter);
+    const auto parsed = stringOps::split<string>(*this, delim);
 
     wordList words(parsed.size());
 
@@ -495,10 +496,10 @@ Foam::wordList Foam::fileName::components(const char delimiter) const
 Foam::word Foam::fileName::component
 (
     const size_type cmpt,
-    const char delimiter
+    const char delim
 ) const
 {
-    const auto parsed = stringOps::split<string>(*this, delimiter);
+    const auto parsed = stringOps::split<string>(*this, delim);
 
     if (cmpt < parsed.size())
     {

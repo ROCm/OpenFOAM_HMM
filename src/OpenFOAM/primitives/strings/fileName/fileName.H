@@ -149,11 +149,16 @@ public:
         //- removing duplicate or trailing slashes, etc.
         static fileName validate(const std::string& s, const bool doClean=true);
 
-        //- Join two strings with '/' as a path separator.
-        //  No '/' separator is added if either argument is an empty string or
+        //- Join two strings with a path separator ('/' by default).
+        //  No separator is added if either argument is an empty string or
         //  if the arguments already had the path separator at the junction.
         //  Invalid characters are \em not stripped (ie, retained).
-        static fileName concat(const std::string& s1, const std::string& s2);
+        static fileName concat
+        (
+            const std::string& s1,
+            const std::string& s2,
+            const char delim = '/'
+        );
 
         //- This is a specialized (possibly slower) version of compare()
         //- that ignores duplicate or trailing slashes.
@@ -343,14 +348,10 @@ public:
         //    "/abc/def"      ("abc", "def")
         //    "/abc/def/"     ("abc", "def")
         // \endverbatim
-        wordList components(const char delimiter = '/') const;
+        wordList components(const char delim = '/') const;
 
         //- Return a single component of the path
-        word component
-        (
-            const size_type cmpt,
-            const char delimiter = '/'
-        ) const;
+        word component(const size_type cmpt, const char delim = '/') const;
 
 
     // Member Operators
