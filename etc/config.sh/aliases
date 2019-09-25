@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #                           | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -111,15 +111,16 @@ foamPV()
 unset -f foamPwd 2>/dev/null
 foamPwd()
 {
-    if [ -d "$WM_PROJECT_DIR" ]
+    if [ -n "$WM_PROJECT_DIR" ]
     then
-        echo "$PWD" | sed \
-        -e "s#^${FOAM_RUN}#\$FOAM_RUN#;" \
-        -e "s#^${WM_PROJECT_DIR}#\$WM_PROJECT_DIR#;" \
-        -e "s#^${WM_PROJECT_USER_DIR}#\$WM_PROJECT_USER_DIR#;" \
-        -e "s#^${HOME}#\$HOME#";
+        echo "$PWD/" | sed \
+        -e "s#^${FOAM_RUN}/#\$FOAM_RUN/#" \
+        -e "s#^${WM_PROJECT_DIR}/#\$WM_PROJECT_DIR/#" \
+        -e "s#^${WM_PROJECT_USER_DIR}/#\$WM_PROJECT_USER_DIR/#" \
+        -e "s#^${HOME}/#~/#" \
+        ;
     else
-        echo "$PWD" | sed -e "s#^${HOME}#\$HOME#;"
+        echo "$PWD/" | sed -e "s#^${HOME}/#~/#";
     fi
 }
 

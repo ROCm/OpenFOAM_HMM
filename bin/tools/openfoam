@@ -1,0 +1,191 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#-------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
+#
+# Script
+#     openfoam [args]
+#
+# Description
+#     Open an interactive bash session with an OpenFOAM environment,
+#     or run an OpenFOAM application (with arguments) after first sourcing
+#     the OpenFOAM etc/bashrc file from the project directory.
+#
+#     This script normally exists in $WM_PROJECT_DIR/bin/tools but can also
+#     be modified to use a hard-coded PROJECT_DIR entry and placed elsewhere
+#     in the filesystem (eg, /usr/bin).
+#
+#------------------------------------------------------------------------------
+# Hard-coded value (eg, with autoconfig)
+projectDir="@PROJECT_DIR@"
+
+if [ -z "$projectDir" ] || [ "${projectDir#@}" != "$projectDir" ]
+then
+    # Auto-detect from location
+    toolsDir="${0%/*}"                              # The bin/tools dir
+    projectDir="${toolsDir%/bin/tools}"             # Project dir
+
+    case "$projectDir" in
+        (/bin | /usr/bin | /usr/local/bin)
+        # This shouldn't happen.
+        # If copied to a system dir, should also be using hard-coded values!
+        echo "Warning: suspicious looking project dir: $projectDir" 1>&2
+        ;;
+
+        ("$toolsDir")
+        # Eg, called as ./openfoam etc - need to try harder
+        projectDir="$(\cd $(dirname $0)/../.. && \pwd -L)" || unset projectDir
+        ;;
+    esac
+fi
+
+#------------------------------------------------------------------------------
+usage() {
+    exec 1>&2
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
+
+Usage: ${0##*/} [OPTION] [application ...]
+
+options:
+  -prefix=DIR       Specify alternative OpenFOAM directory
+  -sp               Single precision
+  -dp               Double precision
+  -spdp             Mixed single/double precision
+  -int32 | -int64   The label-size
+  -help             Print the usage
+
+Open an interactive bash session with an OpenFOAM environment,
+or run an OpenFOAM application (with arguments) after first sourcing
+the OpenFOAM etc/bashrc file from the project directory:
+($projectDir)
+
+For more information: www.OpenFOAM.com
+
+USAGE
+    exit 1
+}
+
+
+#-------------------------------------------------------------------------------
+
+# Only preserve settings for non-interactive?
+
+if [ "$#" -eq 0 ]
+then
+    unset _foamSettings FOAM_SETTINGS
+else
+    _foamSettings="$FOAM_SETTINGS"
+fi
+
+
+# Parse options
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help*)
+        usage
+        ;;
+    -prefix=* | -foam=*)
+        projectDir="${1#*=}"
+        ;;
+
+    -sp | -SP)
+        # WM_PRECISION_OPTION=...
+        _foamSettings="$_foamSettings${_foamSettings:+ }WM_PRECISION_OPTION=SP"
+        ;;
+
+    -dp | -DP)
+        # WM_PRECISION_OPTION=...
+        _foamSettings="$_foamSettings${_foamSettings:+ }WM_PRECISION_OPTION=DP"
+        ;;
+
+    -spdp | -SPDP)
+        # WM_PRECISION_OPTION=...
+        _foamSettings="$_foamSettings${_foamSettings:+ }WM_PRECISION_OPTION=SPDP"
+        ;;
+
+    -int32 | -int64)
+        # WM_LABEL_SIZE=...
+        _foamSettings="$_foamSettings${_foamSettings:+ }WM_LABEL_SIZE=${1#-int}"
+        ;;
+
+    --)
+        shift
+        break
+        ;;
+    -*)
+        echo "Error: unknown option: '$1'" 1>&2
+        exit 1
+        ;;
+    *)
+        break
+        ;;
+    esac
+    shift
+done
+
+#-------------------------------------------------------------------------------
+
+# Remove current OpenFOAM environment
+if [ -d "$WM_PROJECT_DIR" ] && [ -f "$WM_PROJECT_DIR/etc/config.sh/unset" ]
+then
+    . "$WM_PROJECT_DIR/etc/config.sh/unset"
+fi
+
+[ -d "$projectDir" ] || {
+    echo "Error: no project dir: $projectDir" 1>&2
+    exit 2
+}
+
+_foamSourceBashEnv="$projectDir/etc/bashrc"
+
+if [ "$#" -eq 0 ]
+then
+    # Interactive shell
+    _foamSourceBashEnv="$projectDir/bin/tools/source-bashrc"
+fi
+
+[ -f "$_foamSourceBashEnv" ] || {
+    echo "Error: file not found: $_foamSourceBashEnv" 1>&2
+    exit 2
+}
+
+if [ "$#" -eq 0 ]
+then
+    # Source user ~/.bashrc and OpenFOAM etc/bashrc.
+    # 1) Can either use a tmp file, or 2) chain off to a dedicated file
+    # We use a dedicated file.
+
+    if [ -n "$_foamSettings" ]
+    then
+        export FOAM_SETTINGS="$_foamSettings"
+    fi
+
+    ## echo "Source with $_foamSourceBashEnv with '$FOAM_SETTINGS'" 1>&2
+
+    # Interactive shell (newer bash can use --init-file instead of --rcfile)
+    exec bash --rcfile "$_foamSourceBashEnv" -i
+
+else
+    # Non-interactive
+
+    # Source bashrc within a function to preserve command-line arguments
+    # - this will not have aliases, but working non-interactively anyhow
+    sourceBashrc()
+    {
+        . "$_foamSourceBashEnv" $_foamSettings
+    }
+
+    sourceBashrc
+    exec "$@"
+fi
+
+#------------------------------------------------------------------------------

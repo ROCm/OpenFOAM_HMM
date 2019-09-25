@@ -1,0 +1,93 @@
+#----------------------------------*-sh-*--------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
+#
+# File
+#     bin/tools/source-bashrc
+#
+# Description
+#     Source user ~/.bashrc and OpenFOAM etc/bashrc
+#
+#     This file is normally not sourced manually,
+#     but from bash with the --rcfile option.
+#------------------------------------------------------------------------------
+# Hard-coded value (eg, with autoconfig)
+projectDir="@PROJECT_DIR@"
+
+if [ -z "$projectDir" ] || [ "${projectDir#@}" != "$projectDir" ]
+then
+    # Auto-detect (as per OpenFOAM etc/bashrc)
+    # --
+    # Assuming this file is $WM_PROJECT_DIR/bin/tools/source-bashrc,
+    # the next lines should work when sourced by BASH or ZSH shells.
+    # --
+
+    projectDir="${BASH_SOURCE:-${ZSH_NAME:+$0}}"
+    [ -n "$projectDir" ] && projectDir="$(\cd $(dirname $projectDir)/../.. && \pwd -L)" || unset projectDir
+fi
+
+#------------------------------------------------------------------------------
+
+if [ -d "$projectDir" ]
+then
+    _foamSourceBashEnv="$projectDir/etc/bashrc"
+else
+    unset _foamSourceBashEnv
+fi
+
+
+# Source the user bashrc first.
+# Simply hope that they don't unset/reset _foamSourceBashEnv !!
+
+if [ -f "$HOME/.bashrc" ]
+then
+    . "$HOME/.bashrc"
+fi
+
+
+# Source the OpenFOAM etc/bashrc
+
+if [ -f "$_foamSourceBashEnv" ]
+then
+    . "$_foamSourceBashEnv" $FOAM_SETTINGS
+
+    # Avoid further inheritance
+    unset FOAM_SETTINGS
+
+    # Some feedback
+    if [ -n "$PS1" ] && [ -d "$WM_PROJECT_DIR" ]
+    then
+        info="$(foamEtcFile -show-patch 2>/dev/null)"
+
+        # echo "Using: OpenFOAM-$WM_PROJECT_VERSION ($FOAM_API${info:+ patch=$info}) - see www.OpenFOAM.com" 1>&2
+        echo "Using: OpenFOAM-$WM_PROJECT_VERSION${info:+ (patch=$info)} - see www.OpenFOAM.com" 1>&2
+        echo "Arch:  $WM_OPTIONS (mpi=$FOAM_MPI)" 1>&2
+
+        ## echo "$WM_PROJECT_DIR" 1>&2
+        ## echo 1>&2
+
+        # Set prompt as reminder that this is a shell session
+
+        # Chalmers likes this one:
+        # PS1="OpenFOAM${FOAM_API:+-$FOAM_API}:"'$(foamPwd)\n\u\$ '
+
+        PS1="OpenFOAM${FOAM_API:+-$FOAM_API}:"'\w/\n\u\$ '
+    fi
+else
+    echo "Could not locate OpenFOAM etc/bashrc in '$projectDir'" 1>&2
+fi
+
+echo "OpenFOAM shell session - use exit to quit" 1>&2
+echo 1>&2
+
+# Cleanup variables (done as final statement for a clean exit code)
+unset _foamSourceBashEnv projectDir
+
+#------------------------------------------------------------------------------
