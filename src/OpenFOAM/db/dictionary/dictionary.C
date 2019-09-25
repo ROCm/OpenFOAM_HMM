@@ -531,6 +531,46 @@ Foam::dictionary& Foam::dictionary::subDict
 }
 
 
+Foam::dictionary& Foam::dictionary::subDictOrAdd
+(
+    const word& keyword,
+    enum keyType::option matchOpt
+)
+{
+    searcher finder(search(keyword, matchOpt));
+
+    dictionary* ptr = finder.dictPtr();
+
+    if (ptr)
+    {
+        // Found and a sub-dictionary
+        return *ptr;
+    }
+
+    if (finder.good())
+    {
+        FatalIOErrorInFunction(*this)
+            << "Entry '" << keyword
+            << "' is not a sub-dictionary in dictionary "
+            << name() << nl
+            << exit(FatalIOError);
+    }
+
+    ptr = this->set(keyword, dictionary())->dictPtr();
+
+    if (!ptr)
+    {
+        FatalIOErrorInFunction(*this)
+            << "Failed to insert sub-dictionary '" << keyword
+            << "' in dictionary "
+            << name() << nl
+            << exit(FatalIOError);
+    }
+
+    return *ptr;
+}
+
+
 Foam::dictionary Foam::dictionary::subOrEmptyDict
 (
     const word& keyword,
@@ -551,7 +591,7 @@ Foam::dictionary Foam::dictionary::subOrEmptyDict
         FatalIOErrorInFunction(*this)
             << "Entry '" << keyword
             << "' is not a sub-dictionary in dictionary "
-            << name()
+            << name() << nl
             << exit(FatalIOError);
     }
 
@@ -809,7 +849,7 @@ bool Foam::dictionary::merge(const dictionary& dict)
     {
         FatalIOErrorInFunction(*this)
             << "Attempted merge to self for dictionary "
-            << name()
+            << name() << nl
             << abort(FatalIOError);
     }
 
@@ -878,7 +918,7 @@ void Foam::dictionary::operator=(const dictionary& rhs)
     {
         FatalIOErrorInFunction(*this)
             << "Attempted assignment to self for dictionary "
-            << name()
+            << name() << nl
             << abort(FatalIOError);
     }
 
@@ -900,8 +940,8 @@ void Foam::dictionary::operator+=(const dictionary& rhs)
     if (this == &rhs)
     {
         FatalIOErrorInFunction(*this)
-            << "attempted addition assignment to self for dictionary "
-            << name()
+            << "Attempted addition assignment to self for dictionary "
+            << name() << nl
             << abort(FatalIOError);
     }
 
@@ -917,8 +957,8 @@ void Foam::dictionary::operator|=(const dictionary& rhs)
     if (this == &rhs)
     {
         FatalIOErrorInFunction(*this)
-            << "attempted assignment to self for dictionary "
-            << name()
+            << "Attempted assignment to self for dictionary "
+            << name() << nl
             << abort(FatalIOError);
     }
 
@@ -937,8 +977,8 @@ void Foam::dictionary::operator<<=(const dictionary& rhs)
     if (this == &rhs)
     {
         FatalIOErrorInFunction(*this)
-            << "attempted assignment to self for dictionary "
-            << name()
+            << "Attempted assignment to self for dictionary "
+            << name() << nl
             << abort(FatalIOError);
     }
 

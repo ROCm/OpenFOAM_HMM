@@ -749,6 +749,16 @@ public:
             enum keyType::option matchOpt = keyType::REGEX
         );
 
+        //- Find and return a sub-dictionary for manipulation.
+        //  Fatal if the entry exist and is not a sub-dictionary.
+        //
+        //  \param matchOpt the default search is non-recursive with patterns
+        dictionary& subDictOrAdd
+        (
+            const word& keyword,
+            enum keyType::option matchOpt = keyType::REGEX
+        );
+
         //- Find and return a sub-dictionary as a copy, otherwise return
         //- an empty dictionary.
         //  Warn if the entry exists but is not a sub-dictionary.
