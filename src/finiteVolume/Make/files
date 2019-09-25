@@ -467,6 +467,7 @@ $(convectionSchemes)/boundedConvectionScheme/boundedConvectionSchemes.C
 laplacianSchemes = finiteVolume/laplacianSchemes
 $(laplacianSchemes)/laplacianScheme/laplacianSchemes.C
 $(laplacianSchemes)/gaussLaplacianScheme/gaussLaplacianSchemes.C
+$(laplacianSchemes)/relaxedNonOrthoGaussLaplacianScheme/relaxedNonOrthoGaussLaplacianSchemes.C
 
 finiteVolume/fvc/fvcFlux.C
 finiteVolume/fvc/fvcMeshPhi.C
