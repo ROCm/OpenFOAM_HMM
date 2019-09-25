@@ -53,17 +53,17 @@ namespace Detail
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class isPointer Declaration
+                        Class isPointerLike Declaration
 \*---------------------------------------------------------------------------*/
 
 //- Pointer-like behaviour
-template<class T> struct isPointer : std::is_pointer<T> {};
+template<class T> struct isPointerLike : std::false_type {};
 
 //- Pointer-like behaviour for autoPtr
-template<class T> struct isPointer<autoPtr<T>> : std::true_type {};
+template<class T> struct isPointerLike<autoPtr<T>> : std::true_type {};
 
 //- Pointer-like behaviour for std::unique_ptr
-template<class T> struct isPointer<std::unique_ptr<T>> : std::true_type {};
+template<class T> struct isPointerLike<std::unique_ptr<T>> : std::true_type {};
 
 
 /*---------------------------------------------------------------------------*\
@@ -86,7 +86,7 @@ struct HashTablePair
         typedef V mapped_type;
 
         //- This struct stores a value
-        static constexpr bool stores_value()
+        static constexpr bool stores_value() noexcept
         {
             return true;
         }
@@ -134,21 +134,28 @@ struct HashTablePair
             return key_;
         }
 
-        //- The mapped value
-        const mapped_type& mapped() const
+        //- Const access to the mapped value
+        const mapped_type& cval() const
         {
             return val_;
         }
 
-        //- The mapped value
-        mapped_type& mapped()
+        //- Non-const access to the mapped value
+        mapped_type& val()
         {
             return val_;
         }
 
         //- Write (key, val) pair - for pointer types
         template<class TypeT = V>
-        typename std::enable_if<Detail::isPointer<TypeT>::value, void>::type
+        typename std::enable_if
+        <
+            (
+                std::is_pointer<TypeT>::value
+             || Detail::isPointerLike<TypeT>::value
+            ),
+            void
+        >::type
         print(Ostream& os) const
         {
             os << key_;
@@ -161,7 +168,14 @@ struct HashTablePair
 
         //- Write (key, val) pair - for non-pointer types
         template<class TypeT = V>
-        typename std::enable_if<!Detail::isPointer<TypeT>::value, void>::type
+        typename std::enable_if
+        <
+            (
+                !std::is_pointer<TypeT>::value
+             && !Detail::isPointerLike<TypeT>::value
+            ),
+            void
+        >::type
         print(Ostream& os) const
         {
             os << key_ << ' ' << val_;
@@ -190,10 +204,11 @@ struct HashTableSingle
         typedef key_type value_type;
 
         //- This struct does not store a value
-        static constexpr bool stores_value()
+        static constexpr bool stores_value() noexcept
         {
             return false;
         }
+
 
     // Member Data
 
@@ -233,14 +248,14 @@ struct HashTableSingle
             return key_;
         }
 
-        //- The mapped value (dummy)
-        const mapped_type& mapped() const
+        //- Const access to the (dummy) mapped value
+        const mapped_type& cval() const
         {
             return Foam::zero::null::dummy;
         }
 
-        //- The mapped value (dummy)
-        mapped_type& mapped()
+        //- Non-const access to the (dummy) mapped value
+        mapped_type& val()
         {
             return Foam::zero::null::dummy;
         }

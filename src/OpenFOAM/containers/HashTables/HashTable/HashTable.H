@@ -170,11 +170,11 @@ public:
         //- The third template parameter, the hash index method.
         typedef Hash hasher;
 
-        //- The type used for storing into value_type objects.
+        //- Reference to the stored value_type.
         //  This type is usually 'value_type&'.
         typedef T& reference;
 
-        //- The type used for reading from constant value_type objects.
+        //- Const reference to the stored value_type.
         typedef const T& const_reference;
 
         //- The type to represent the difference between two iterators
@@ -647,19 +647,6 @@ protected:
             //- Increment to the next position
             inline void increment();
 
-            //- The value associated with the iterator
-            inline mapped_type& val() const
-            {
-                return entry_->mapped();
-            }
-
-            //- The object (value) associated with the iterator
-            //  \deprecated(2019-01) use val() method
-            inline mapped_type& object() const
-            {
-                return entry_->mapped();
-            }
-
             //- Permit an explicit cast to the other (const/non-const) searcher
             inline explicit operator const Iterator<!Const>&() const
             {
@@ -689,6 +676,8 @@ public:
             using mapped_type = this_type::mapped_type;
             using value_type  = this_type::value_type;
             using reference   = this_type::reference;
+            using const_reference = this_type::const_reference;
+
 
         // Constructors
 
@@ -704,15 +693,25 @@ public:
 
         // Member Functions/Operators
 
+            //- Const access to referenced object (value)
+            inline const_reference val() const
+            {
+                return Iterator<false>::entry_->cval();
+            }
+
             //- Non-const access to referenced object (value)
-            using Iterator<false>::val;
+            inline reference val()
+            {
+                return Iterator<false>::entry_->val();
+            }
 
-            //- Non-const access to referenced object
-            using Iterator<false>::object;
+            //- Const access to referenced object (value)
+            inline const_reference operator*() const  { return this->val(); }
+            inline const_reference operator()() const { return this->val(); }
 
-            //- Non-const access to referenced object
-            inline reference operator*() const  { return this->val(); }
-            inline reference operator()() const { return this->val(); }
+            //- Non-const access to referenced object (value)
+            inline reference operator*()  { return this->val(); }
+            inline reference operator()() { return this->val(); }
 
             inline iterator& operator++();
             inline iterator operator++(int);
@@ -735,6 +734,7 @@ public:
             using mapped_type = const this_type::mapped_type;
             using value_type  = const this_type::value_type;
             using reference   = this_type::const_reference;
+
 
         // Constructors
 
@@ -765,13 +765,13 @@ public:
 
         // Member Functions/Operators
 
-            //- Const access to referenced value
-            using Iterator<true>::val;
+            //- Const access to referenced object (value)
+            inline const reference val() const
+            {
+                return Iterator<true>::entry_->cval();
+            }
 
             //- Const access to referenced object (value)
-            using Iterator<true>::object;
-
-            //- Const access to referenced value
             inline reference operator*() const  { return this->val(); }
             inline reference operator()() const { return this->val(); }
 
