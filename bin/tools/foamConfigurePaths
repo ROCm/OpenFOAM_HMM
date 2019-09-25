@@ -30,9 +30,9 @@ usage: ${0##*/} options
 Basic
   -project-path DIR   specify 'WM_PROJECT_DIR' (eg, /opt/openfoam1806-patch1)
   -version VER        specify project version (eg, v1806)
-  -SP | -float32      single precision (WM_PRECISION_OPTION)
-  -DP | -float64      double precision (WM_PRECISION_OPTION)
-  -SPDP               mixed single/double precision
+  -sp | -SP | -float32 single precision (WM_PRECISION_OPTION)
+  -dp | -DP | -float64 double precision (WM_PRECISION_OPTION)
+  -spdp | -SPDP       mixed single/double precision
   -int32 | -int64     the 'WM_LABEL_SIZE'
 
 Compiler
@@ -312,21 +312,21 @@ do
         shift
         ;;
 
-    -SP | -float32)
+    -sp | -SP | -float32)
         # Replace WM_PRECISION_OPTION=...
         replace    etc/bashrc  WM_PRECISION_OPTION "SP"
         replaceCsh etc/cshrc   WM_PRECISION_OPTION "SP"
         adjusted=true
         ;;
 
-    -DP | -float64)
+    -dp | -DP | -float64)
         # Replace WM_PRECISION_OPTION=...
         replace    etc/bashrc  WM_PRECISION_OPTION "DP"
         replaceCsh etc/cshrc   WM_PRECISION_OPTION "DP"
         adjusted=true
         ;;
 
-    -SPDP)
+    -spdp | -SPDP)
         # Replace WM_PRECISION_OPTION=...
         replace    etc/bashrc  WM_PRECISION_OPTION "SPDP"
         replaceCsh etc/cshrc   WM_PRECISION_OPTION "SPDP"
