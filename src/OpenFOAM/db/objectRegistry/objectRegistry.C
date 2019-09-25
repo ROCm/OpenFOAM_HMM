@@ -370,7 +370,7 @@ bool Foam::objectRegistry::erase(const iterator& iter)
 
     if (iter.found())
     {
-        regIOobject* ptr = iter.val();
+        regIOobject* ptr = const_cast<iterator&>(iter).val();
 
         const bool ok = HashTable<regIOobject*>::erase(iter);
 
@@ -395,7 +395,7 @@ bool Foam::objectRegistry::erase(const word& key)
 
 Foam::label Foam::objectRegistry::erase(std::initializer_list<word> keys)
 {
-     return eraseImpl(*this, keys.begin(), keys.end());
+    return eraseImpl(*this, keys.begin(), keys.end());
 }
 
 
