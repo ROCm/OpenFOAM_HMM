@@ -44,7 +44,7 @@ bool Foam::foamVersion::patched()
 void Foam::foamVersion::printBuildInfo(const bool full)
 {
     Info<< "Using: OpenFOAM-" << foamVersion::version.c_str()
-        << " (" << foamVersion::api << ") (see www.OpenFOAM.com)\n"
+        << " (" << foamVersion::api << ") - see www.OpenFOAM.com\n"
         << "Build: " << foamVersion::build.c_str();
 
     if (foamVersion::patched())

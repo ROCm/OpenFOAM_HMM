@@ -98,6 +98,8 @@ set projectDir=`lsof +p $$ |& \
 # set projectDir="/opt/openfoam/OpenFOAM-$WM_PROJECT_VERSION"
 # set projectDir="/usr/local/OpenFOAM/OpenFOAM-$WM_PROJECT_VERSION"
 ################################################################################
+# Or optionally hard-coded (eg, with autoconfig)
+# set projectDir="@PROJECT_DIR@"
 
 # [FOAM_SIGFPE] - Trap floating-point exceptions.
 #               - overrides the 'trapFpe' controlDict entry

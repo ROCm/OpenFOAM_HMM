@@ -95,6 +95,8 @@ projectDir="$HOME/OpenFOAM/OpenFOAM-$WM_PROJECT_VERSION"
 # projectDir="/opt/openfoam/OpenFOAM-$WM_PROJECT_VERSION"
 # projectDir="/usr/local/OpenFOAM/OpenFOAM-$WM_PROJECT_VERSION"
 ################################################################################
+# Or optionally hard-coded (eg, with autoconfig)
+# projectDir="@PROJECT_DIR@"
 : # Safety statement (if the user removed all fallback values)
 
 # [FOAM_SIGFPE] - Trap floating-point exceptions.

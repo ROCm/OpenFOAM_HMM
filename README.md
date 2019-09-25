@@ -68,7 +68,7 @@ not guaranteed to have any correspondence to the OpenFOAM release
 information is embedded into each application. For example, as
 displayed from `blockMesh -help`:
 ```
-Using: OpenFOAM-v1812.local (1812) (see www.OpenFOAM.com)
+Using: OpenFOAM-v1812.local (1812) - see www.OpenFOAM.com
 Build: 65d6551ff7-20190530 (patch=190531)
 Arch:  LSB;label=32;scalar=64
 ```
