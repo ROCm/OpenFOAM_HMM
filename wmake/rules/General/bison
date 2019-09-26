@@ -4,15 +4,15 @@ ytoo = $E $(call QUIET_MESSAGE,bison,$(<F)) \
     $(WM_SCHEDULER) bison -v -d -y $< $(AND) \
     mv y.tab.c $(@D)/$(<F).c $(AND) \
     mv y.tab.h $(@D)/$(<F).h $(AND) \
-    $(cc) $(cFLAGS) -c  $(@D)/$(<F).c -o $@
+    $(cc) $(cFLAGS) -c $(@D)/$(<F).c -o $@
 
 Ytoo = $E $(call QUIET_MESSAGE,bison,$(<F)) \
     $(WM_SCHEDULER) bison -v -d -y $< $(AND) \
     mv y.tab.c $(@D)/$(<F).C $(AND) \
     mv y.tab.h $(@D)/$(<F).H $(AND) \
-    $(CC) $(c++FLAGS) -c  $(@D)/$(<F).C -o $@
+    $(CC) $(c++FLAGS) -c $(@D)/$(<F).C -o $@
 
 yytoo = $E $(call QUIET_MESSAGE,bison,$(<F)) \
     $(WM_SCHEDULER) $(WM_SCRIPTS)/wrap-bison \
     -input=$< -output=$(@D)/$(*F).tab.cc -v -d $(AND) \
-    $(cc) $(cFLAGS) -c $(@D)/$(*F).tab.cc -o $@
+    $(CC) $(c++FLAGS) -c $(@D)/$(*F).tab.cc -o $@
