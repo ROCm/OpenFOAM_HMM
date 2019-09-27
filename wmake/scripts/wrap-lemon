@@ -25,10 +25,81 @@
 binDir="${WMAKE_BIN:-$WM_PROJECT_DIR/wmake/platforms/$WM_ARCH$WM_COMPILER}"
 etcDir="${WM_DIR:-$WM_PROJECT_DIR/wmake}/etc"
 
-# Or another location
-"$binDir/lemon" "-T${etcDir}/lempar.c" $*
+# Executable and skeleton locations
+lemon="$binDir/lemon"
+skel="-T${etcDir}/lempar.c"
+
+usage() {
+    exec 1>&2
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
+
+Usage: ${0##*/} [options] [lemon args/options]
+
+options:
+  -header           Generate header only, suppressing other output
+  -h, -help         Print the usage
+
+A lemon wrapper using predefined executable and skeleton locations
+
+USAGE
+    exit 1
+}
+
+#------------------------------------------------------------------------------
+# Parse arguments and options
+#------------------------------------------------------------------------------
+
+# wrap-lemon -header-only
+unset optHeader
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    (-h | -help*) usage ;;
+
+    (-header*)    optHeader=true ;;
+
+    (*) break ;;
+    esac
+    shift
+done
+
+
+#------------------------------------------------------------------------------
+
+# No special handling
+if [ -z "$optHeader" ]
+then
+    "$lemon" "$skel" $*
+    exit $?
+fi
+
+
+# Header only, which means we create a temp directory for the output
+tmpDir="lemonWrapper-$$"
+rm -rf "$tmpDir" 2>/dev/null
+mkdir "$tmpDir" 2>/dev/null
+
+# DO WE WANT THIS?
+# trap 'rm -f $tmpDir 2>/dev/null; exit $rc' EXIT TERM INT
+
+"$lemon" "$skel" "-d$tmpDir" $*
 rc=$?
 
+for src in "$tmpDir"/*.h
+do
+    dst="${src##*/}"
+    if [ -f "$src" ]
+    then
+        if ! cmp "$src" "$dst" 2>/dev/null
+        then
+            mv "$src" "$dst"
+            echo "Updating $dst" 1>&2
+        fi
+    fi
+done
+
+rm -rf "$tmpDir" 2>/dev/null
 exit "$rc"   # Exit with lemon return code
 
 #------------------------------------------------------------------------------

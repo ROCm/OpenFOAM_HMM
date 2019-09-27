@@ -1,0 +1,102 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
+#
+# Script
+#     makeParser
+#
+# Description
+#     Pregenerate ragel code and/or lemon parser headers
+#
+#------------------------------------------------------------------------------
+usage() {
+    exec 1>&2
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
+
+Usage: ${0##*/} [options]
+
+options:
+  -parser=FILE      Generate lemon parser header
+  -scanner=FILE     Generate ragel scanner code
+  -remove           Remove generated code
+  -h, -help         Print the usage
+
+Pregenerate ragel code and/or lemon parser headers
+
+USAGE
+    exit 1
+}
+
+#------------------------------------------------------------------------------
+# Parse arguments and options
+#------------------------------------------------------------------------------
+
+unset parser scanner optRemove
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    (-h | -help*) usage ;;
+
+    (-parser=*)   parser="${1#*=}" ;;
+    (-scanner=*)  scanner="${1#*=}" ;;
+    (-remove)     optRemove=true ;;
+
+    (*) break ;;
+    esac
+    shift
+done
+
+#------------------------------------------------------------------------------
+
+# Remove file, with feedback. $1 = file, $2 = message
+removeFile() {
+   if test -f "$1" && rm -f "$1" 2>/dev/null
+   then
+       echo "Removed generated $2 file"
+   else
+       echo "No generated $2 file to remove"
+   fi
+}
+
+
+case "$scanner" in
+(*.rl)
+    output="${scanner%.*}.cc"
+
+    if [ "$optRemove" = true ]
+    then
+        removeFile "$output"  "ragel scanner"
+    elif command -v ragel >/dev/null
+    then
+        echo "Generating ragel scanner"
+        ragel -G2 -o "$output" "$scanner"
+    else
+        echo "No ragel, leaving scanner intact"
+    fi
+    ;;
+esac
+
+case "$parser" in
+(*.ly | *.lyy)
+    output="${parser%.*}.h"
+
+    if [ "$optRemove" = true ]
+    then
+        removeFile "$output"  "lemon header"
+    else
+        echo "Generating lemon parser header"
+        "$WM_PROJECT_DIR/wmake/scripts/wrap-lemon" -header "$parser"
+    fi
+    ;;
+esac
+
+#------------------------------------------------------------------------------

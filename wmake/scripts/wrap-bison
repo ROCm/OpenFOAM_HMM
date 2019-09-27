@@ -49,20 +49,20 @@ usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 
-Usage: ${0##*/} -file=<name> [bison-options]
+Usage: ${0##*/} [options] [bison args/options]
 
 options:
   -input=NAME       Perform the renaming actions
   -output=NAME      Perform the renaming actions
   -h, -help         Print the usage
 
-A bison wrapper to handle renaming of the skeleton files
+A bison wrapper with renaming of skeleton files
 
 USAGE
     exit 1
 }
 
-# The file extensions used
+# File extensions used
 extCode="cc"
 extHead="hh"
 
@@ -70,15 +70,15 @@ extHead="hh"
 # Parse arguments and options
 #------------------------------------------------------------------------------
 
-# bison -input=... -output=...
+# wrap-bison -input=... -output=...
 unset inputFile outputFile
 while [ "$#" -gt 0 ]
 do
     case "$1" in
     (-h | -help*) usage ;;
 
-    (-input=*)   inputFile="${1#*=}" ;;
-    (-output=*)  outputFile="${1#*=}" ;;
+    (-input=*)    inputFile="${1#*=}" ;;
+    (-output=*)   outputFile="${1#*=}" ;;
 
     (*) break ;;
     esac
@@ -112,7 +112,7 @@ then
     outputFile="$(dirname ${inputFile})/${baseName}.$extCode"
 fi
 
-# Run bison in temporary directory (keeps files together)
+# Execute in a temporary directory (keeps files together)
 cwd="$(pwd -L)"
 tmpDir="Make/bisonWrapper-$baseName"
 rm -rf "$tmpDir" 2>/dev/null
@@ -131,7 +131,7 @@ cd "../.." || exit 1
 
 if [ "$rc" -ne 0 ]
 then
-    rm -rf $tmpDir 2>/dev/null
+    rm -rf "$tmpDir" 2>/dev/null
     exit "$rc"   # Exit with bison return code
 fi
 
@@ -185,7 +185,7 @@ filterRename \
     "${outputFile}"
 
 
-rm -rf $tmpDir 2>/dev/null
+rm -rf "$tmpDir" 2>/dev/null
 exit "$rc"   # Exit with bison return code
 
 #------------------------------------------------------------------------------
