@@ -120,8 +120,8 @@ class HashTable
         typedef typename std::conditional
         <
             std::is_same<zero::null, typename std::remove_cv<T>::type>::value,
-            Detail::HashTableSingle<T, Key>,
-            Detail::HashTablePair<T, Key>
+            Detail::HashTableSingle<Key>,
+            Detail::HashTablePair<Key, T>
         >::type node_type;
 
 
@@ -323,7 +323,7 @@ public:
         ) const;
 
 
-      // Counting
+    // Counting
 
         //- Count the number of keys that satisfy the unary predicate
         //  \param invert changes the logic to select when the predicate
@@ -835,7 +835,7 @@ public:
         };
 
 
-    //- Iterating over keys only
+    // Iterator (keys)
 
         //- An iterator wrapper for returning a reference to the key
         template<class Iter>

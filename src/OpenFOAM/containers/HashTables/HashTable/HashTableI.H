@@ -64,7 +64,7 @@ inline bool Foam::HashTable<T, Key, Hash>::empty() const
 template<class T, class Key, class Hash>
 inline T& Foam::HashTable<T, Key, Hash>::at(const Key& key)
 {
-    const iterator iter(this->find(key));
+    iterator iter(this->find(key));
 
     if (!iter.good())
     {
@@ -166,10 +166,10 @@ template<class T, class Key, class Hash>
 inline bool Foam::HashTable<T, Key, Hash>::insert
 (
     const Key& key,
-    const T& val
+    const T& obj
 )
 {
-    return this->setEntry(false, key, val);
+    return this->setEntry(false, key, obj);
 }
 
 
@@ -177,10 +177,10 @@ template<class T, class Key, class Hash>
 inline bool Foam::HashTable<T, Key, Hash>::insert
 (
     const Key& key,
-    T&& val
+    T&& obj
 )
 {
-    return this->setEntry(false, key, std::forward<T>(val));
+    return this->setEntry(false, key, std::forward<T>(obj));
 }
 
 
@@ -188,10 +188,10 @@ template<class T, class Key, class Hash>
 inline bool Foam::HashTable<T, Key, Hash>::set
 (
     const Key& key,
-    const T& val
+    const T& obj
 )
 {
-    return this->setEntry(true, key, val);   // Overwrite
+    return this->setEntry(true, key, obj);   // Overwrite
 }
 
 
@@ -199,10 +199,10 @@ template<class T, class Key, class Hash>
 inline bool Foam::HashTable<T, Key, Hash>::set
 (
     const Key& key,
-    T&& val
+    T&& obj
 )
 {
-    return this->setEntry(true, key, std::forward<T>(val));  // Overwrite
+    return this->setEntry(true, key, std::forward<T>(obj));  // Overwrite
 }
 
 
@@ -223,48 +223,28 @@ inline const T& Foam::HashTable<T, Key, Hash>::lookup
 template<class T, class Key, class Hash>
 inline T& Foam::HashTable<T, Key, Hash>::operator[](const Key& key)
 {
-    const iterator iter(this->find(key));
-
-    if (!iter.good())
-    {
-        FatalErrorInFunction
-            << key << " not found in table.  Valid entries: "
-            << toc()
-            << exit(FatalError);
-    }
-
-    return iter.val();
+    return this->at(key);
 }
 
 
 template<class T, class Key, class Hash>
 inline const T& Foam::HashTable<T, Key, Hash>::operator[](const Key& key) const
 {
-    const const_iterator iter(this->cfind(key));
-
-    if (!iter.good())
-    {
-        FatalErrorInFunction
-            << key << " not found in table.  Valid entries: "
-            << toc()
-            << exit(FatalError);
-    }
-
-    return iter.val();
+    return this->at(key);
 }
 
 
 template<class T, class Key, class Hash>
 inline T& Foam::HashTable<T, Key, Hash>::operator()(const Key& key)
 {
-    const iterator iter(this->find(key));
+    iterator iter(this->find(key));
 
     if (iter.good())
     {
         return iter.val();
     }
 
-    this->insert(key, mapped_type());
+    this->emplace(key);
     return find(key).val();
 }
 
@@ -276,7 +256,7 @@ inline T& Foam::HashTable<T, Key, Hash>::operator()
     const T& deflt
 )
 {
-    const iterator iter(this->find(key));
+    iterator iter(this->find(key));
 
     if (iter.good())
     {

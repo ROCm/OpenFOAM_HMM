@@ -181,7 +181,7 @@ public:
         //  not previously exist in the set.
         bool insert(const Key& key)
         {
-            return this->parent_type::insert(key, zero::null());
+            return this->parent_type::emplace(key);
         }
 
         //- Same as insert (no value to overwrite)

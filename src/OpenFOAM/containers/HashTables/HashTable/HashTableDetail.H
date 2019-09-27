@@ -56,17 +56,14 @@ namespace Detail
                           Class isPointer Declaration
 \*---------------------------------------------------------------------------*/
 
-//- Test for pointer-like behaviour
-template<class T>
-struct isPointer : public std::is_pointer<T> {};
+//- Pointer-like behaviour
+template<class T> struct isPointer : std::is_pointer<T> {};
 
-//- An autoPtr is pointer-like
-template<class T>
-struct isPointer<autoPtr<T>> : public std::true_type {};
+//- Pointer-like behaviour for autoPtr
+template<class T> struct isPointer<autoPtr<T>> : std::true_type {};
 
-//- A unique_ptr is pointer-like
-template<class T>
-struct isPointer<std::unique_ptr<T>> : public std::true_type {};
+//- Pointer-like behaviour for std::unique_ptr
+template<class T> struct isPointer<std::unique_ptr<T>> : std::true_type {};
 
 
 /*---------------------------------------------------------------------------*\
@@ -77,16 +74,16 @@ struct isPointer<std::unique_ptr<T>> : public std::true_type {};
 //  Structure with a (K,V) tuple and a linked-list for collisions
 //  Could store key/val as std::pair, but no particular advantage
 //  unless the iterator dereference type changes.
-template<class T, class Key>
+template<class K, class V>
 struct HashTablePair
 {
     // Types
 
         //- Type of key
-        typedef Key key_type;
+        typedef K key_type;
 
         //- Type of content
-        typedef T mapped_type;
+        typedef V mapped_type;
 
         //- This struct stores a value
         static constexpr bool stores_value()
@@ -150,7 +147,7 @@ struct HashTablePair
         }
 
         //- Write (key, val) pair - for pointer types
-        template<class TypeT = T>
+        template<class TypeT = V>
         typename std::enable_if<Detail::isPointer<TypeT>::value, void>::type
         print(Ostream& os) const
         {
@@ -163,7 +160,7 @@ struct HashTablePair
         }
 
         //- Write (key, val) pair - for non-pointer types
-        template<class TypeT = T>
+        template<class TypeT = V>
         typename std::enable_if<!Detail::isPointer<TypeT>::value, void>::type
         print(Ostream& os) const
         {
@@ -178,13 +175,13 @@ struct HashTablePair
 
 //- Internal storage type for HashSet entries
 //  Structure with a single (K) value and a linked-list for collisions
-template<class T, class Key>
+template<class K>
 struct HashTableSingle
 {
     // Types
 
         //- Type of key
-        typedef Key key_type;
+        typedef K key_type;
 
         //- Type of content
         typedef Foam::zero::null mapped_type;
