@@ -31,7 +31,7 @@ endTime         90;
 
 deltaT          0.01;
 
-writeControl    adjustableRunTime;
+writeControl    adjustable;
 
 purgeWrite      0;
 

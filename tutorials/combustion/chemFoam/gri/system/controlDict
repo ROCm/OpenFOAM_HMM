@@ -31,7 +31,7 @@ maxDeltaT       1e-4;
 
 adjustTimeStep  on;
 
-writeControl    adjustableRunTime;
+writeControl    adjustable;
 
 writeInterval   0.01;
 

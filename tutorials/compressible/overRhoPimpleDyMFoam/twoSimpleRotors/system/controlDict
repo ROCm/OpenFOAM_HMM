@@ -35,7 +35,7 @@ endTime         0.5;
 
 deltaT          2e-5;
 
-writeControl    adjustableRunTime;
+writeControl    adjustable;
 
 writeInterval   0.01;
 

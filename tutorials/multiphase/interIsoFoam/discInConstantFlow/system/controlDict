@@ -27,7 +27,7 @@ stopAt          endTime;
 
 endTime         4;
 
-writeControl    adjustableRunTime;
+writeControl    adjustable;
 
 writeInterval   0.1;
 

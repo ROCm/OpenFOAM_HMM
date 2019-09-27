@@ -26,7 +26,7 @@ stopAt          endTime;
 endTime         0.1;
 
 deltaT          1e-5;
-writeControl    adjustableRunTime;
+writeControl    adjustable;
 writeInterval   0.001;
 
 ////- For testing with moveDynamicMesh
