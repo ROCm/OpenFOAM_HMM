@@ -360,7 +360,7 @@ int main(int argc, char *argv[])
 
         forAllConstIters(objects, iter)
         {
-            const word& headerClassName = iter->headerClassName();
+            const word& headerClassName = (*iter)->headerClassName();
 
             if
             (
@@ -390,11 +390,11 @@ int main(int argc, char *argv[])
             )
             {
                 Info<< "        Reading " << headerClassName
-                    << " : " << iter->name() << endl;
+                    << " : " << (*iter)->name() << endl;
 
                 fieldDictionary fDict(*iter(), headerClassName);
 
-                Info<< "        Writing " << iter->name() << endl;
+                Info<< "        Writing " << (*iter)->name() << endl;
                 fDict.regIOobject::write();
             }
         }

@@ -30,6 +30,7 @@ Description
 
 #include "argList.H"
 #include "HashTable.H"
+#include "HashPtrTable.H"
 #include "Map.H"
 #include "cpuTime.H"
 

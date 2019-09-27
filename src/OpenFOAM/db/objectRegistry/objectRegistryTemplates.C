@@ -451,7 +451,7 @@ const Type& Foam::objectRegistry::lookupObject
             << "    lookup of " << name << " from objectRegistry "
             << this->name()
             << " successful\n    but it is not a " << Type::typeName
-            << ", it is a " << iter->type()
+            << ", it is a " << (*iter)->type()
             << abort(FatalError);
     }
     else if (recursive && this->parentNotTime())

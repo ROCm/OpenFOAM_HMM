@@ -125,7 +125,7 @@ void Foam::meshObject::movePoints(objectRegistry& obr)
         {
             if (meshObject::debug)
             {
-                Pout<< "    Moving " << iter->name() << endl;
+                Pout<< "    Moving " << (*iter)->name() << endl;
             }
             objectPtr->movePoints();
         }
@@ -133,7 +133,7 @@ void Foam::meshObject::movePoints(objectRegistry& obr)
         {
             if (meshObject::debug)
             {
-                Pout<< "    Destroying " << iter->name() << endl;
+                Pout<< "    Destroying " << (*iter)->name() << endl;
             }
             obr.checkOut(*iter);
         }
@@ -165,7 +165,7 @@ void Foam::meshObject::updateMesh(objectRegistry& obr, const mapPolyMesh& mpm)
         {
             if (meshObject::debug)
             {
-                Pout<< "    Updating " << iter->name() << endl;
+                Pout<< "    Updating " << (*iter)->name() << endl;
             }
             objectPtr->updateMesh(mpm);
         }
@@ -173,7 +173,7 @@ void Foam::meshObject::updateMesh(objectRegistry& obr, const mapPolyMesh& mpm)
         {
             if (meshObject::debug)
             {
-                Pout<< "    Destroying " << iter->name() << endl;
+                Pout<< "    Destroying " << (*iter)->name() << endl;
             }
             obr.checkOut(*iter);
         }
@@ -200,7 +200,7 @@ void Foam::meshObject::clear(objectRegistry& obr)
     {
         if (meshObject::debug)
         {
-            Pout<< "    Destroying " << iter->name() << endl;
+            Pout<< "    Destroying " << (*iter)->name() << endl;
         }
         obr.checkOut(*iter);
     }
@@ -236,7 +236,7 @@ void Foam::meshObject::clearUpto(objectRegistry& obr)
         {
             if (meshObject::debug)
             {
-                Pout<< "    Destroying " << iter->name() << endl;
+                Pout<< "    Destroying " << (*iter)->name() << endl;
             }
             obr.checkOut(*iter);
         }

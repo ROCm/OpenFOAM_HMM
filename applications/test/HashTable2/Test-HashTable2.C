@@ -174,8 +174,7 @@ int main(int argc, char *argv[])
                 Info<< "have " << k << nl
                     << "    addr: " << name(*iter) << nl
                     << "    info: " << (*iter)->info() << nl
-                    << "    info: " << iter->info() << nl
-                    << "    incr: " << iter->increment() << nl
+                    << "    incr: " << (*iter)->increment() << nl
                     ;
             }
 
@@ -185,7 +184,6 @@ int main(int argc, char *argv[])
             {
                 Info<< "have " << k << nl
                     << "    incr: " << (*iter2)->increment() << nl
-                    << "    incr: " << iter2->increment() << nl
                     ;
             }
         }
@@ -216,8 +214,7 @@ int main(int argc, char *argv[])
                 Info<< "have " << k << nl
                     << "    addr: " << name(*iter1) << nl
                     << "    info: " << (*iter1)->info() << nl
-                    << "    info: " << iter1->info() << nl
-                    << "    incr: " << iter1->increment() << nl
+                    << "    incr: " << (*iter1)->increment() << nl
                     ;
             }
 
@@ -227,7 +224,6 @@ int main(int argc, char *argv[])
                 Info<< "have " << k << nl
                     << "    addr: " << name(*iter2) << nl
                     << "    info: " << (*iter2)->info() << nl
-                    << "    info: " << iter2->info() << nl
                     // Good: does not compile
                     // << "    incr: " << iter2->increment() << nl
                     ;
@@ -239,7 +235,6 @@ int main(int argc, char *argv[])
                 Info<< "have " << k << nl
                     << "    addr: " << name(*iter3) << nl
                     << "    info: " << (*iter3)->info() << nl
-                    << "    info: " << iter3->info() << nl
                     // Good: does not compile
                     // << "    incr: " << iter3->increment() << nl
                     ;
@@ -276,7 +271,7 @@ int main(int argc, char *argv[])
 
         if (iter)
         {
-            Info<< "got with " << iter->size() << nl;
+            Info<< "got with " << (*iter).size() << nl;
         }
 
     }

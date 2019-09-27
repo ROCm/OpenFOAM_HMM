@@ -171,15 +171,8 @@ public:
         typedef Hash hasher;
 
         //- The type used for storing into value_type objects.
-        //  This type is usually 'value_type*'.
-        typedef T* pointer;
-
-        //- The type used for storing into value_type objects.
         //  This type is usually 'value_type&'.
         typedef T& reference;
-
-        //- The type used for reading from constant value_type objects.
-        typedef const T* const_pointer;
 
         //- The type used for reading from constant value_type objects.
         typedef const T& const_reference;
@@ -695,7 +688,6 @@ public:
             using key_type    = this_type::key_type;
             using mapped_type = this_type::mapped_type;
             using value_type  = this_type::value_type;
-            using pointer     = this_type::pointer;
             using reference   = this_type::reference;
 
         // Constructors
@@ -722,22 +714,6 @@ public:
             inline reference operator*() const  { return this->val(); }
             inline reference operator()() const { return this->val(); }
 
-            //- Direct pointer dereferencing (pointer types)
-            template<class TypeT = T>
-            typename std::enable_if
-            <
-                Detail::isPointer<TypeT>::value,
-                T
-            >::type operator->() const { return this->val(); }
-
-            //- Address of iterated value (non-pointer types)
-            template<class TypeT = T>
-            typename std::enable_if
-            <
-                !Detail::isPointer<TypeT>::value,
-                T*
-            >::type operator->() const { return &(this->val()); }
-
             inline iterator& operator++();
             inline iterator operator++(int);
         };
@@ -758,7 +734,6 @@ public:
             using key_type    = this_type::key_type;
             using mapped_type = const this_type::mapped_type;
             using value_type  = const this_type::value_type;
-            using pointer     = this_type::const_pointer;
             using reference   = this_type::const_reference;
 
         // Constructors
@@ -800,25 +775,8 @@ public:
             inline reference operator*() const  { return this->val(); }
             inline reference operator()() const { return this->val(); }
 
-            //- Direct pointer dereferencing (pointer types)
-            template<class TypeT = T>
-            typename std::enable_if
-            <
-                Detail::isPointer<TypeT>::value,
-                const T
-            >::type operator->() const { return this->val(); }
-
-            //- Address of iterated value (non-pointer types)
-            template<class TypeT = T>
-            typename std::enable_if
-            <
-                !Detail::isPointer<TypeT>::value,
-                const T*
-            >::type operator->() const { return &(this->val()); }
-
             inline const_iterator& operator++();
             inline const_iterator operator++(int);
-
 
         // Assignment
 
@@ -845,7 +803,6 @@ public:
         {
         public:
             using value_type = this_type::key_type;
-            using pointer    = const Key*;
             using reference  = const Key&;
 
             //- Implicit conversion

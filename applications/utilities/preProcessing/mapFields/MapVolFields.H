@@ -57,7 +57,7 @@ void MapVolFields
     {
         IOobject fieldTargetIOobject
         (
-            fieldIter->name(),
+            (*fieldIter)->name(),
             meshTarget.time().timeName(),
             meshTarget,
             IOobject::MUST_READ,
@@ -66,7 +66,7 @@ void MapVolFields
 
         if (fieldTargetIOobject.typeHeaderOk<fieldType>(true))
         {
-            Info<< "    interpolating " << fieldIter->name() << endl;
+            Info<< "    interpolating " << (*fieldIter)->name() << endl;
 
             // Read field fieldSource. Do not auto-load old-time fields
             fieldType fieldSource(*fieldIter(), meshSource, false);

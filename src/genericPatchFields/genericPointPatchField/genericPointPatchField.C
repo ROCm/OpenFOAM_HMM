@@ -377,27 +377,27 @@ void Foam::genericPointPatchField<Type>::autoMap
 {
     forAllIters(scalarFields_, iter)
     {
-        iter->autoMap(m);
+        (*iter)->autoMap(m);
     }
 
     forAllIters(vectorFields_, iter)
     {
-        iter->autoMap(m);
+        (*iter)->autoMap(m);
     }
 
     forAllIters(sphTensorFields_, iter)
     {
-        iter->autoMap(m);
+        (*iter)->autoMap(m);
     }
 
     forAllIters(symmTensorFields_, iter)
     {
-        iter->autoMap(m);
+        (*iter)->autoMap(m);
     }
 
     forAllIters(tensorFields_, iter)
     {
-        iter->autoMap(m);
+        (*iter)->autoMap(m);
     }
 }
 
@@ -418,7 +418,7 @@ void Foam::genericPointPatchField<Type>::rmap
 
         if (iter2.found())
         {
-            iter->rmap(*iter2(), addr);
+            (*iter)->rmap(*iter2(), addr);
         }
     }
 
@@ -428,7 +428,7 @@ void Foam::genericPointPatchField<Type>::rmap
 
         if (iter2.found())
         {
-            iter->rmap(*iter2(), addr);
+            (*iter)->rmap(*iter2(), addr);
         }
     }
 
@@ -438,7 +438,7 @@ void Foam::genericPointPatchField<Type>::rmap
 
         if (iter2.found())
         {
-            iter->rmap(*iter2(), addr);
+            (*iter)->rmap(*iter2(), addr);
         }
     }
 
@@ -448,7 +448,7 @@ void Foam::genericPointPatchField<Type>::rmap
 
         if (iter2.found())
         {
-            iter->rmap(*iter2(), addr);
+            (*iter)->rmap(*iter2(), addr);
         }
     }
 
@@ -458,7 +458,7 @@ void Foam::genericPointPatchField<Type>::rmap
 
         if (iter2.found())
         {
-            iter->rmap(*iter2(), addr);
+            (*iter)->rmap(*iter2(), addr);
         }
     }
 }
@@ -494,23 +494,23 @@ void Foam::genericPointPatchField<Type>::write(Ostream& os) const
         {
             if (scalarFields_.found(key))
             {
-                scalarFields_.cfind(key)->writeEntry(key, os);
+                scalarFields_.cfind(key)()->writeEntry(key, os);
             }
             else if (vectorFields_.found(key))
             {
-                vectorFields_.cfind(key)->writeEntry(key, os);
+                vectorFields_.cfind(key)()->writeEntry(key, os);
             }
             else if (sphTensorFields_.found(key))
             {
-                sphTensorFields_.cfind(key)->writeEntry(key, os);
+                sphTensorFields_.cfind(key)()->writeEntry(key, os);
             }
             else if (symmTensorFields_.found(key))
             {
-                symmTensorFields_.cfind(key)->writeEntry(key, os);
+                symmTensorFields_.cfind(key)()->writeEntry(key, os);
             }
             else if (tensorFields_.found(key))
             {
-                tensorFields_.cfind(key)->writeEntry(key, os);
+                tensorFields_.cfind(key)()->writeEntry(key, os);
             }
         }
         else

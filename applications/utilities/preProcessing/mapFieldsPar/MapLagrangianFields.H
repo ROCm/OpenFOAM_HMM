@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -62,7 +62,7 @@ void MapLagrangianFields
 
         forAllConstIters(fields, fieldIter)
         {
-            const word& fieldName = fieldIter->name();
+            const word& fieldName = (*fieldIter)->name();
 
             Info<< "    mapping lagrangian field " << fieldName << endl;
 
@@ -101,7 +101,7 @@ void MapLagrangianFields
 
         forAllConstIters(fieldFields, fieldIter)
         {
-            const word& fieldName = fieldIter->name();
+            const word& fieldName = (*fieldIter)->name();
 
             Info<< "    mapping lagrangian fieldField " << fieldName << endl;
 
@@ -153,7 +153,7 @@ void MapLagrangianFields
 
         forAllConstIters(fieldFields, fieldIter)
         {
-            const word& fieldName = fieldIter->name();
+            const word& fieldName = (*fieldIter)->name();
 
             Info<< "    mapping lagrangian fieldField " << fieldName << endl;
 
