@@ -1,0 +1,136 @@
+--- lempar.c.orig	2019-08-30 17:49:01.815549795 +0200
++++ lempar.c	2019-09-26 16:09:17.880373536 +0200
+@@ -251,12 +251,14 @@
+ ** Outputs:
+ ** None.
+ */
++%namespace_begin
+ void ParseTrace(FILE *TraceFILE, char *zTracePrompt){
+   yyTraceFILE = TraceFILE;
+   yyTracePrompt = zTracePrompt;
+   if( yyTraceFILE==0 ) yyTracePrompt = 0;
+   else if( yyTracePrompt==0 ) yyTraceFILE = 0;
+ }
++%namespace_end
+ #endif /* NDEBUG */
+ 
+ #if defined(YYCOVERAGE) || !defined(NDEBUG)
+@@ -320,6 +322,7 @@
+ 
+ /* Initialize a new parser that has already been allocated.
+ */
++%namespace_begin
+ void ParseInit(void *yypRawParser ParseCTX_PDECL){
+   yyParser *yypParser = (yyParser*)yypRawParser;
+   ParseCTX_STORE
+@@ -344,6 +347,7 @@
+ #if YYSTACKDEPTH>0
+   yypParser->yystackEnd = &yypParser->yystack[YYSTACKDEPTH-1];
+ #endif
++%namespace_end
+ }
+ 
+ #ifndef Parse_ENGINEALWAYSONSTACK
+@@ -359,6 +363,7 @@
+ ** A pointer to a parser.  This pointer is used in subsequent calls
+ ** to Parse and ParseFree.
+ */
++%namespace_begin
+ void *ParseAlloc(void *(*mallocProc)(YYMALLOCARGTYPE) ParseCTX_PDECL){
+   yyParser *yypParser;
+   yypParser = (yyParser*)(*mallocProc)( (YYMALLOCARGTYPE)sizeof(yyParser) );
+@@ -368,6 +373,7 @@
+   }
+   return (void*)yypParser;
+ }
++%namespace_end
+ #endif /* Parse_ENGINEALWAYSONSTACK */
+ 
+ 
+@@ -427,6 +433,7 @@
+ /*
+ ** Clear all secondary memory allocations from the parser
+ */
++%namespace_begin
+ void ParseFinalize(void *p){
+   yyParser *pParser = (yyParser*)p;
+   while( pParser->yytos>pParser->yystack ) yy_pop_parser_stack(pParser);
+@@ -434,6 +441,7 @@
+   if( pParser->yystack!=&pParser->yystk0 ) free(pParser->yystack);
+ #endif
+ }
++%namespace_end
+ 
+ #ifndef Parse_ENGINEALWAYSONSTACK
+ /*
+@@ -444,6 +452,7 @@
+ ** is defined in a %include section of the input grammar) then it is
+ ** assumed that the input pointer is never NULL.
+ */
++%namespace_begin
+ void ParseFree(
+   void *p,                    /* The parser to be deleted */
+   void (*freeProc)(void*)     /* Function used to reclaim memory */
+@@ -454,16 +463,19 @@
+   ParseFinalize(p);
+   (*freeProc)(p);
+ }
++%namespace_end
+ #endif /* Parse_ENGINEALWAYSONSTACK */
+ 
+ /*
+ ** Return the peak depth of the stack for a parser.
+ */
+ #ifdef YYTRACKMAXSTACKDEPTH
++%namespace_begin
+ int ParseStackPeak(void *p){
+   yyParser *pParser = (yyParser*)p;
+   return pParser->yyhwm;
+ }
++%namespace_end
+ #endif
+ 
+ /* This array of booleans keeps track of the parser statement
+@@ -484,6 +496,7 @@
+ ** Return the number of missed state/lookahead combinations.
+ */
+ #if defined(YYCOVERAGE)
++%namespace_begin
+ int ParseCoverage(FILE *out){
+   int stateno, iLookAhead, i;
+   int nMissed = 0;
+@@ -501,6 +514,7 @@
+   }
+   return nMissed;
+ }
++%namespace_end
+ #endif
+ 
+ /*
+@@ -893,6 +907,7 @@
+ ** Outputs:
+ ** None.
+ */
++%namespace_begin
+ void Parse(
+   void *yyp,                   /* The parser */
+   int yymajor,                 /* The major token code number */
+@@ -1062,11 +1077,13 @@
+ #endif
+   return;
+ }
++%namespace_end
+ 
+ /*
+ ** Return the fallback token corresponding to canonical token iToken, or
+ ** 0 if iToken has no fallback.
+ */
++%namespace_begin
+ int ParseFallback(int iToken){
+ #ifdef YYFALLBACK
+   if( iToken<(int)(sizeof(yyFallback)/sizeof(yyFallback[0])) ){
+@@ -1077,3 +1094,4 @@
+ #endif
+   return 0;
+ }
++%namespace_end

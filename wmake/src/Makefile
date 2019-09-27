@@ -64,7 +64,7 @@ archTarget  := $(shell basename $(WMAKE_BIN))
 
 .PHONY: all clean message
 
-all: $(WMAKE_BIN)/wmkdepend$(EXT_EXE) message
+all: $(WMAKE_BIN)/lemon$(EXT_EXE) $(WMAKE_BIN)/wmkdepend$(EXT_EXE) message
 
 message:
 ifneq ($(archHost),$(archTarget))
@@ -77,6 +77,11 @@ clean:
 	@echo "clean wmake-bin ($(archTarget))"
 	@rm -rf $(WMAKE_BIN) 2>/dev/null
 	@rmdir $(shell dirname $(WMAKE_BIN)) 2>/dev/null || true
+
+$(WMAKE_BIN)/lemon$(EXT_EXE): lemon.c
+	@mkdir -p $(WMAKE_BIN)
+	$(call QUIET_MESSAGE,lemon,$(<F))
+	$(cc) $(cFLAGS) $(<F) -o $@
 
 $(WMAKE_BIN)/wmkdep$(EXT_EXE): wmkdep.l
 	@mkdir -p $(WMAKE_BIN)
