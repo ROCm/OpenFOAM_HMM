@@ -39,6 +39,7 @@ Foam::timeControl::timeControlNames_
     { timeControl::ocTimeStep, "timeStep" },
     { timeControl::ocWriteTime, "writeTime" },
     { timeControl::ocOutputTime, "outputTime" },
+    { timeControl::ocAdjustableRunTime, "adjustable" },
     { timeControl::ocAdjustableRunTime, "adjustableRunTime" },
     { timeControl::ocRunTime, "runTime" },
     { timeControl::ocClockTime, "clockTime" },

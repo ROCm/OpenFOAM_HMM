@@ -53,8 +53,7 @@ Foam::Time::stopAtControlNames
     { stopAtControls::saNoWriteNow, "noWriteNow" },
     { stopAtControls::saWriteNow, "writeNow" },
     { stopAtControls::saNextWrite, "nextWrite" },
-    // NOTE: stopAtControls::saUnknown is left untabulated here so that it can
-    // be used as fallback value to flag unknown settings
+    // Leave saUnknown untabulated - fallback to flag unknown settings
 });
 
 
@@ -64,11 +63,14 @@ const Foam::Enum
 >
 Foam::Time::writeControlNames
 ({
+    { writeControls::wcNone, "none" },
     { writeControls::wcTimeStep, "timeStep" },
     { writeControls::wcRunTime, "runTime" },
+    { writeControls::wcAdjustableRunTime, "adjustable" },
     { writeControls::wcAdjustableRunTime, "adjustableRunTime" },
     { writeControls::wcClockTime, "clockTime" },
     { writeControls::wcCpuTime, "cpuTime" },
+    // Leave wcUnknown untabulated - fallback to flag unknown settings
 });
 
 
@@ -1170,6 +1172,10 @@ Foam::Time& Foam::Time::operator++()
 
         switch (writeControl_)
         {
+            case wcNone:
+            case wcUnknown:
+            break;
+
             case wcTimeStep:
                 writeTime_ = !(timeIndex_ % label(writeInterval_));
             break;
