@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,7 +59,7 @@ Foam::multiphaseSystem::multiphaseSystem
 )
 :
     phaseSystem(mesh),
-    cAlphas_(mesh.solverDict("alpha").lookup("cAlphas")),
+    cAlphas_(),
     ddtAlphaMax_(0.0),
     limitedPhiAlphas_(phaseModels_.size()),
     Su_(phaseModels_.size()),
@@ -72,6 +72,8 @@ Foam::multiphaseSystem::multiphaseSystem
         phaseModel& pm = iter()();
         phases_.set(phasei++, &pm);
     }
+
+    mesh.solverDict("alpha").readEntry("cAlphas", cAlphas_);
 
     // Initiate Su and Sp
     forAllConstIters(phaseModels_, iter)
