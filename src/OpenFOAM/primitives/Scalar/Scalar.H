@@ -382,6 +382,12 @@ inline Scalar cmptMag(const Scalar s)
 }
 
 
+inline Scalar cmptMagSqr(const Scalar s)
+{
+    return magSqr(s);
+}
+
+
 inline Scalar sqrtSumSqr(const Scalar a, const Scalar b)
 {
     const Scalar maga = mag(a);

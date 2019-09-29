@@ -45,6 +45,7 @@ void printInfo(const vector& vec)
         << " sum:" << cmptSum(vec)
         << " prod:" << cmptProduct(vec)
         << " mag:" << cmptMag(vec)
+        << " magSqr:" << cmptMagSqr(vec)
         << nl << nl;
 }
 

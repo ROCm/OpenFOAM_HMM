@@ -322,6 +322,30 @@ tmp<Field<Type>> cmptMag(const tmp<Field<Type>>& tf)
 }
 
 
+template<class Type>
+void cmptMagSqr(Field<Type>& res, const UList<Type>& f)
+{
+    TFOR_ALL_F_OP_FUNC_F(Type, res, =, cmptMagSqr, Type, f)
+}
+
+template<class Type>
+tmp<Field<Type>> cmptMagSqr(const UList<Type>& f)
+{
+    auto tres = tmp<Field<Type>>::New(f.size());
+    cmptMagSqr(tres.ref(), f);
+    return tres;
+}
+
+template<class Type>
+tmp<Field<Type>> cmptMagSqr(const tmp<Field<Type>>& tf)
+{
+    auto tres = New(tf);
+    cmptMagSqr(tres.ref(), tf());
+    tf.clear();
+    return tres;
+}
+
+
 #define TMP_UNARY_FUNCTION(ReturnType, Func)                                   \
                                                                                \
 template<class Type>                                                           \

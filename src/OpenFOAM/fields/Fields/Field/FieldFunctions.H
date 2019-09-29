@@ -167,6 +167,16 @@ template<class Type>
 tmp<Field<Type>> cmptMag(const tmp<Field<Type>>& tf);
 
 
+template<class Type>
+void cmptMagSqr(Field<Type>& res, const UList<Type>& f);
+
+template<class Type>
+tmp<Field<Type>> cmptMagSqr(const UList<Type>& f);
+
+template<class Type>
+tmp<Field<Type>> cmptMagSqr(const tmp<Field<Type>>& tf);
+
+
 #define TMP_UNARY_FUNCTION(ReturnType, Func)                                   \
                                                                                \
 /** \brief  Apply the \c Func() function on the tmp field */                   \

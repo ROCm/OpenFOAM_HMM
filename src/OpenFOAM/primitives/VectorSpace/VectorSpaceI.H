@@ -636,6 +636,18 @@ inline Form cmptMag
 
 
 template<class Form, class Cmpt, direction Ncmpts>
+inline Form cmptMagSqr
+(
+    const VectorSpace<Form, Cmpt, Ncmpts>& vs
+)
+{
+    Form v;
+    VectorSpaceOps<Ncmpts,0>::eqOp(v, vs, eqMagSqrOp<Cmpt>());
+    return v;
+}
+
+
+template<class Form, class Cmpt, direction Ncmpts>
 inline Form max
 (
     const VectorSpace<Form, Cmpt, Ncmpts>& vs1,
