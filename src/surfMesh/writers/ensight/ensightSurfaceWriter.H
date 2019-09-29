@@ -89,11 +89,11 @@ class ensightWriter
         //- The collated output times
         DynamicList<scalar> times_;
 
-        //- Indices in times_ when a geometry (mesh) has been written
+        //- Indices in times_ when geometry (mesh) has been written (collated)
         bitSet meshes_;
 
-        // NOTE: Could also maintain fieldsDict here,
-        // or as a HashTable of info.
+        //- Cached information for times, geometry, fields (collated)
+        dictionary cache_;
 
 
     // Private Member Functions

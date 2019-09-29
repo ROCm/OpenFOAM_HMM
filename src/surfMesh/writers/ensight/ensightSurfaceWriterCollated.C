@@ -85,7 +85,7 @@ Foam::label Foam::surfaceWriters::ensightWriter::readPreviousTimes
     labelList geomIndices;
     scalarList meshTimes;
 
-    dictionary dict;
+    cache_.clear();
 
     const fileName dictFile(baseDir/dictName);
 
@@ -93,19 +93,19 @@ Foam::label Foam::surfaceWriters::ensightWriter::readPreviousTimes
     {
         IFstream is(dictFile);
 
-        if (is.good() && dict.read(is))
+        if (is.good() && cache_.read(is))
         {
             meshes_.clear();
 
-            dict.readIfPresent("times", times_);
+            cache_.readIfPresent("times", times_);
             timeIndex = findTimeIndex(times_, timeValue);
 
-            if (dict.readIfPresent("geometry", geomIndices))
+            if (cache_.readIfPresent("geometry", geomIndices))
             {
                 // Convert indices to bitSet entries
                 meshes_.set(geomIndices);
             }
-            else if (dict.readIfPresent("meshes", meshTimes))
+            else if (cache_.readIfPresent("meshes", meshTimes))
             {
                 WarningInFunction
                     << nl
@@ -273,46 +273,28 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
 
         // Do case file
         {
-            dictionary dict;
-
             // Add time information to dictionary
-            dict.set("geometry", meshes_.sortedToc());
-            dict.set("times", times_);
+            cache_.set("geometry", meshes_.sortedToc());
+            cache_.set("times", times_);
 
             // Debugging, or if needed for older versions:
-            //// dict.set
+            //// cache_.set
             //// (
             ////     "meshes",
             ////     IndirectList<scalar>(times_, meshes_.sortedToc())
             //// );
 
+            // Add field information to dictionary
+            dictionary& fieldsDict = cache_.subDictOrAdd("fields");
+            dictionary& fieldDict = fieldsDict.subDictOrAdd(fieldName);
 
-            // Add field information to dictionary?
-            bool hasField = false;
-
-            dictionary* fieldsDictPtr = dict.findDict("fields");
-            if (fieldsDictPtr)
+            if (fieldDict.empty())
             {
-                hasField = fieldsDictPtr->found(fieldName);
-            }
-            else
-            {
-                // No "fields" dictionary - create first
-                fieldsDictPtr = dict.set("fields", dictionary())->dictPtr();
-            }
-
-            if (!hasField)
-            {
-                dictionary fieldDict;
                 fieldDict.set("type", ensightPTraits<Type>::typeName);
                 fieldDict.set("name", varName); // ensight variable name
-
-                fieldsDictPtr->set(fieldName, fieldDict);
                 stateChanged = true;
             }
 
-
-            const dictionary& fieldsDict = *fieldsDictPtr;
 
             if (stateChanged)
             {
@@ -323,7 +305,7 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
                 {
                     OFstream os(baseDir/"fieldsDict");
                     os << "// Summary of Ensight fields, times" << nl << nl;
-                    dict.write(os, false);
+                    cache_.write(os, false);
                 }
 
                 OFstream osCase(outputFile, IOstream::ASCII);
@@ -489,7 +471,7 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
             OFstream timeStamp(dataDir/"time");
             timeStamp
                 << "#   timestep time" << nl
-                << dataDir.name() << " " << timeValue << nl;
+                << dataDir.name() << ' ' << timeValue << nl;
         }
     }
 

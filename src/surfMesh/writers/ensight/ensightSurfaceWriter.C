@@ -234,6 +234,7 @@ void Foam::surfaceWriters::ensightWriter::close()
 {
     times_.clear();
     meshes_.clear();
+    cache_.clear();
     surfaceWriter::close();
 }
 
