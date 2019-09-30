@@ -100,12 +100,6 @@ Foam::cyclicGAMGInterfaceField::cyclicGAMGInterfaceField
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cyclicGAMGInterfaceField::~cyclicGAMGInterfaceField()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::cyclicGAMGInterfaceField::updateInterfaceMatrix

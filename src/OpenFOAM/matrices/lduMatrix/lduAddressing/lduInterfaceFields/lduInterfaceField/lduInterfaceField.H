@@ -133,8 +133,8 @@ public:
                 return true;
             }
 
-            //- Initialise neighbour matrix update. Add
-            //  or subtract coupled contributions to matrix
+            //- Initialise neighbour matrix update.
+            //- Add/subtract coupled contributions to matrix
             virtual void initInterfaceMatrixUpdate
             (
                 solveScalarField& result,
@@ -146,8 +146,8 @@ public:
             ) const
             {}
 
-            //- Update result field based on interface functionality. Add
-            //  or subtract coupled contributions to matrix
+            //- Update result field based on interface functionality.
+            //- Add/subtract coupled contributions to matrix
             virtual void updateInterfaceMatrix
             (
                 solveScalarField& result,
@@ -158,8 +158,7 @@ public:
                 const Pstream::commsTypes commsType
             ) const = 0;
 
-            //- Helper: add (or subtract) weighted contributions to internal
-            //  field
+            //- Add/subtract weighted contributions to internal field
             template<class Type>
             void addToInternalField
             (

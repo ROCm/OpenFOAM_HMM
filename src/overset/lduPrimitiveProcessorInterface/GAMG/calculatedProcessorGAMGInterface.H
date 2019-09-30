@@ -126,7 +126,7 @@ public:
 
 
     //- Destructor
-    virtual ~calculatedProcessorGAMGInterface();
+    virtual ~calculatedProcessorGAMGInterface() = default;
 
 
     // Member Functions

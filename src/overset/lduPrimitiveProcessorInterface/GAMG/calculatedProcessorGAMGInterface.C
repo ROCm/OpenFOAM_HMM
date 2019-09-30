@@ -176,12 +176,6 @@ Foam::calculatedProcessorGAMGInterface::calculatedProcessorGAMGInterface
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
-
-Foam::calculatedProcessorGAMGInterface::~calculatedProcessorGAMGInterface()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::calculatedProcessorGAMGInterface::initInternalFieldTransfer

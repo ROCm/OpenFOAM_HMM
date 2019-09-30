@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011 OpenFOAM Foundation
@@ -47,23 +47,12 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 /*---------------------------------------------------------------------------*\
                      Class lduInterface Declaration
 \*---------------------------------------------------------------------------*/
 
 class lduInterface
 {
-    // Private Member Functions
-
-        //- No copy construct
-        lduInterface(const lduInterface&) = delete;
-
-        //- No copy assignment
-        void operator=(const lduInterface&) = delete;
-
-
 public:
 
     //- Runtime type information
@@ -73,12 +62,11 @@ public:
     // Constructors
 
         //- Construct null
-        lduInterface()
-        {}
+        lduInterface() = default;
 
 
     //- Destructor
-    virtual ~lduInterface();
+    virtual ~lduInterface() = default;
 
 
     // Member Functions

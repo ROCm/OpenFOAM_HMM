@@ -146,7 +146,7 @@ public:
             ) const;
 
 
-        //- Processor interface functions
+        // Processor interface functions
 
             //- Return communicator used for sending
             virtual label comm() const

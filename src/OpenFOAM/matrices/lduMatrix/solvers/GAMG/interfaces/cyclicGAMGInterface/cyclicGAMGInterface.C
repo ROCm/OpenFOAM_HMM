@@ -161,12 +161,6 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cyclicGAMGInterface::~cyclicGAMGInterface()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::labelField> Foam::cyclicGAMGInterface::internalFieldTransfer

@@ -101,7 +101,7 @@ public:
 
 
     //- Destructor
-    virtual ~cyclicGAMGInterfaceField();
+    virtual ~cyclicGAMGInterfaceField() = default;
 
 
     // Member Functions

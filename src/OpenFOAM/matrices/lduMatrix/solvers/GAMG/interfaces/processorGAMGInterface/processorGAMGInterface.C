@@ -178,12 +178,6 @@ Foam::processorGAMGInterface::processorGAMGInterface
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
-
-Foam::processorGAMGInterface::~processorGAMGInterface()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::processorGAMGInterface::initInternalFieldTransfer

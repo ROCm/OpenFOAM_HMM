@@ -120,7 +120,7 @@ public:
 
 
     //- Destructor
-    virtual ~processorGAMGInterfaceField();
+    virtual ~processorGAMGInterfaceField() = default;
 
 
     // Member Functions

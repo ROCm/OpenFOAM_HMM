@@ -84,12 +84,6 @@ Foam::processorGAMGInterfaceField::processorGAMGInterfaceField
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::processorGAMGInterfaceField::~processorGAMGInterfaceField()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate

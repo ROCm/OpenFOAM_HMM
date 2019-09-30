@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2012 OpenFOAM Foundation
@@ -31,38 +31,19 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(processorLduInterface, 0);
+    defineTypeNameAndDebug(processorLduInterface, 0);
 }
 
 
 // * * * * * * * * * * * * * Private Member Functions *  * * * * * * * * * * //
 
-void Foam::processorLduInterface::resizeBuf
-(
-    List<char>& buf,
-    const label size
-) const
+void Foam::processorLduInterface::resizeBuf(List<char>& buf, const label size)
 {
     if (buf.size() < size)
     {
-        buf.setSize(size);
+        buf.resize(size);
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::processorLduInterface::processorLduInterface()
-:
-    sendBuf_(0),
-    receiveBuf_(0)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::processorLduInterface::~processorLduInterface()
-{}
 
 
 // ************************************************************************* //
