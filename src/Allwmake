@@ -95,7 +95,6 @@ fvAgglomerationMethods/Allwmake $targetType $*
 wmake $targetType waveModels
 
 wmake $targetType engine
-wmake $targetType regionCoupled
 
 conversion/Allwmake $targetType $*
 functionObjects/Allwmake $targetType $*
