@@ -130,9 +130,13 @@ $(strings)/wordRe/wordRe.C
 $(strings)/wordRes/wordRes.C
 $(strings)/lists/CStringList.C
 $(strings)/lists/hashedWordList.C
+$(strings)/parsing/parsing.C
+$(strings)/parsing/genericRagelLemonDriver.C
 $(strings)/stringOps/stringOps.C
 $(strings)/stringOps/stringOpsSort.C
-$(strings)/parsing/parsing.C
+$(strings)/stringOps/toScalar/evalStringToScalarDriver.C
+$(strings)/stringOps/toScalar/evalStringToScalarLemonParser.lyy
+$(strings)/stringOps/toScalar/evalStringToScalarScanner.cc
 
 ops = primitives/ops
 $(ops)/flipOp.C
@@ -248,6 +252,7 @@ $(dictionaryListEntry)/dictionaryListEntryIO.C
 functionEntries = $(dictionary)/functionEntries
 $(functionEntries)/calcEntry/calcEntry.C
 $(functionEntries)/codeStream/codeStream.C
+$(functionEntries)/evalEntry/evalEntry.C
 $(functionEntries)/functionEntry/functionEntry.C
 $(functionEntries)/includeEntry/includeEntry.C
 $(functionEntries)/includeEtcEntry/includeEtcEntry.C

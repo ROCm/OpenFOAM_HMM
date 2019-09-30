@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,62 +21,97 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namespace
-    Foam::parsing
+Class
+    Foam::parsing::evalStringToScalar::parseDriver
 
 Description
-    Collection of static functions and data related to parsing
-    and an isolated namespace for lexers, parsers, scanners.
+    Driver for stringOps::toScalar parsing
 
 SourceFiles
-    parsing.C
-    parsingI.H
+    evalStringToScalarDriver.C
 
 \*---------------------------------------------------------------------------*/
-#ifndef parsing_H
-#define parsing_H
 
-#include "Enum.H"
-#include <cerrno>
+#ifndef evalStringToScalarDriver_H
+#define evalStringToScalarDriver_H
+
+#include "scalar.H"
+#include "className.H"
+#include "genericRagelLemonDriver.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-/*---------------------------------------------------------------------------*\
-                        Namespace parsing Declaration
-\*---------------------------------------------------------------------------*/
-
 namespace parsing
 {
-    //- Enumeration for possible parsing error
-    enum class errorType
-    {
-        NONE = 0,         //!< No error encountered
-        GENERAL = 1,      //!< General parsing error
-        RANGE = 2,        //!< Range error
-        TRAILING = 3,     //!< Trailing content detected
-    };
+namespace evalStringToScalar
+{
+
+/*---------------------------------------------------------------------------*\
+                         Class parseDriver Declaration
+\*---------------------------------------------------------------------------*/
+
+class parseDriver
+:
+    public genericRagelLemonDriver
+{
+protected:
+
+    // Protected Data
+
+        //- The result
+        scalar value_;
 
 
-    //- Strings corresponding to the errorType
-    extern const Foam::Enum<errorType> errorNames;
+    // Protected Member Functions
 
-    //- Sanity check after strtof, strtod, etc.
-    //  Should set errno = 0 prior to the conversion.
-    inline errorType checkConversion(const char* buf, char* endptr);
+        // No copy copy construct
+        parseDriver(const parseDriver&) = delete;
+
+        // No copy assignment
+        void operator=(const parseDriver&) = delete;
 
 
-} // End namespace parsing
+public:
+
+    ClassName("evalStringToScalar::driver");
+
+    // Constructors
+
+        //- Construct null
+        parseDriver();
+
+
+    //- Destructor
+    virtual ~parseDriver() = default;
+
+
+    // Member Functions
+
+        // Perform parsing on string
+        scalar execute(const std::string& s);
+
+        //- Get value
+        scalar value() const
+        {
+            return value_;
+        }
+
+        //- Set value
+        void setValue(scalar val)
+        {
+            value_ = val;
+        }
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace evalStringToScalar
+} // End namespace parsing
 } // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "parsingI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

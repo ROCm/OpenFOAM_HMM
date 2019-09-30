@@ -1,8 +1,8 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,62 +21,76 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namespace
-    Foam::parsing
+Class
+    Foam::parsing::evalStringToScalar::scanner
 
 Description
-    Collection of static functions and data related to parsing
-    and an isolated namespace for lexers, parsers, scanners.
+    Ragel lexer interface for lemon grammar of a simple string to
+    scalar evaluation, which is used by stringOps::toScalar
 
-SourceFiles
-    parsing.C
-    parsingI.H
+Note
+    Ragel code generated with the ./createCode script.
 
 \*---------------------------------------------------------------------------*/
-#ifndef parsing_H
-#define parsing_H
 
-#include "Enum.H"
-#include <cerrno>
+#ifndef evalStringToScalarScanner_H
+#define evalStringToScalarScanner_H
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include <string>
 
 namespace Foam
 {
-
-/*---------------------------------------------------------------------------*\
-                        Namespace parsing Declaration
-\*---------------------------------------------------------------------------*/
-
 namespace parsing
 {
-    //- Enumeration for possible parsing error
-    enum class errorType
-    {
-        NONE = 0,         //!< No error encountered
-        GENERAL = 1,      //!< General parsing error
-        RANGE = 2,        //!< Range error
-        TRAILING = 3,     //!< Trailing content detected
-    };
+namespace evalStringToScalar
+{
+
+// Forward Declarations
+class parser;
+class parseDriver;
+
+/*---------------------------------------------------------------------------*\
+                         Class scanner Declaration
+\*---------------------------------------------------------------------------*/
+
+class scanner
+{
+    // Private Data
+
+        //- Wrapped lemon parser
+        parser* parser_;
+
+        // Ragel code state, action
+        int cs, act;
+
+public:
+
+    //- Debug/tracing of scan
+    static int debug;
 
 
-    //- Strings corresponding to the errorType
-    extern const Foam::Enum<errorType> errorNames;
+    // Constructors
 
-    //- Sanity check after strtof, strtod, etc.
-    //  Should set errno = 0 prior to the conversion.
-    inline errorType checkConversion(const char* buf, char* endptr);
+        //- Construct null
+        scanner() : parser_(nullptr) {}
 
 
-} // End namespace parsing
+    //- Destructor, deletes parser
+    ~scanner();
+
+
+    // Member Functions
+
+        //- Evaluate string
+        bool process(const std::string& str, parseDriver& driver);
+};
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace evalStringToScalar
+} // End namespace parsing
 } // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "parsingI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

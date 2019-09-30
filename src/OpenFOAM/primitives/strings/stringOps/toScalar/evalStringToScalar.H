@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,61 +22,45 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Namespace
-    Foam::parsing
+    Foam::parsing::evalStringToScalar
 
 Description
-    Collection of static functions and data related to parsing
-    and an isolated namespace for lexers, parsers, scanners.
-
-SourceFiles
-    parsing.C
-    parsingI.H
+    Parsing encapsulation for stringOps::toScalar
 
 \*---------------------------------------------------------------------------*/
-#ifndef parsing_H
-#define parsing_H
+#ifndef evalStringToScalar_H
+#define evalStringToScalar_H
 
-#include "Enum.H"
-#include <cerrno>
+#include "scalar.H"
+#include "string.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-/*---------------------------------------------------------------------------*\
-                        Namespace parsing Declaration
-\*---------------------------------------------------------------------------*/
-
-namespace parsing
+namespace stringOps
 {
-    //- Enumeration for possible parsing error
-    enum class errorType
-    {
-        NONE = 0,         //!< No error encountered
-        GENERAL = 1,      //!< General parsing error
-        RANGE = 2,        //!< Range error
-        TRAILING = 3,     //!< Trailing content detected
-    };
 
+    //- A simple string to scalar evaluation that handles various basic
+    //- expressions. For trivial input, use readScalar instead (faster).
+    //
+    //  The evaluation supports the following:
+    //  - operations:  - + * /
+    //  - functions:  exp, log, log10, pow, sqrt, cbrt, sqr, mag, magSqr
+    //  - trigonometric:  sin, cos, tan, asin, acos, atan, atan2, hypot
+    //  - hyperbolic:  sinh, cosh, tanh
+    //  - conversions:  degToRad, radToDeg
+    //  - constants:  pi()
+    //  - misc: rand(), rand(seed)
+    //
+    //  \note The rand() function returns a uniform scalar on [0-1] interval
+    scalar toScalar(const std::string& s);
 
-    //- Strings corresponding to the errorType
-    extern const Foam::Enum<errorType> errorNames;
-
-    //- Sanity check after strtof, strtod, etc.
-    //  Should set errno = 0 prior to the conversion.
-    inline errorType checkConversion(const char* buf, char* endptr);
-
-
-} // End namespace parsing
+} // End namespace stringOps
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "parsingI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

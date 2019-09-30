@@ -1,8 +1,8 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,62 +21,73 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namespace
-    Foam::parsing
+Class
+    Foam::parsing::evalStringToScalar::parser
 
 Description
-    Collection of static functions and data related to parsing
-    and an isolated namespace for lexers, parsers, scanners.
-
-SourceFiles
-    parsing.C
-    parsingI.H
+    Interface to lemon parser to simple string to scalar evaluation, which
+    is used by stringOps::toScalar
 
 \*---------------------------------------------------------------------------*/
-#ifndef parsing_H
-#define parsing_H
 
-#include "Enum.H"
-#include <cerrno>
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#ifndef evalStringToScalarParser_H
+#define evalStringToScalarParser_H
 
 namespace Foam
 {
-
-/*---------------------------------------------------------------------------*\
-                        Namespace parsing Declaration
-\*---------------------------------------------------------------------------*/
-
 namespace parsing
 {
-    //- Enumeration for possible parsing error
-    enum class errorType
+namespace evalStringToScalar
+{
+
+// Forward Declarations
+class parseDriver;
+
+
+/*---------------------------------------------------------------------------*\
+                           Class parser Declaration
+\*---------------------------------------------------------------------------*/
+
+class parser
+{
+    // Private Data
+
+        //- The lemon parser (demand-driven)
+        void* lemon_;
+
+public:
+
+    // Constructors
+
+        //- Construct null
+        parser() : lemon_(nullptr) {}
+
+
+    //- Destructor, delete lemon parser
+    ~parser()
     {
-        NONE = 0,         //!< No error encountered
-        GENERAL = 1,      //!< General parsing error
-        RANGE = 2,        //!< Range error
-        TRAILING = 3,     //!< Trailing content detected
-    };
+        stop();
+    }
 
 
-    //- Strings corresponding to the errorType
-    extern const Foam::Enum<errorType> errorNames;
+    // Member Functions
 
-    //- Sanity check after strtof, strtod, etc.
-    //  Should set errno = 0 prior to the conversion.
-    inline errorType checkConversion(const char* buf, char* endptr);
+        //- Start parsing, with given driver context
+        void start(parseDriver& driver);
 
+        //- Stop parsing, freeing the allocated parser
+        void stop();
 
-} // End namespace parsing
+        //- Push token/value to parser
+        void parse(int tokenId, Foam::scalar val);
+};
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace evalStringToScalar
+} // End namespace parsing
 } // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "parsingI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

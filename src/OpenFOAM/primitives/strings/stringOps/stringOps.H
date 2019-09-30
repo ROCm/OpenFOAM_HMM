@@ -38,6 +38,7 @@ SourceFiles
 #ifndef stringOps_H
 #define stringOps_H
 
+#include "scalar.H"
 #include "string.H"
 #include "SubStrings.H"
 #include "word.H"
@@ -45,6 +46,8 @@ SourceFiles
 #include "HashTable.H"
 #include "stringOpsSort.H"
 #include "wordRes.H"
+
+#include "evalStringToScalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

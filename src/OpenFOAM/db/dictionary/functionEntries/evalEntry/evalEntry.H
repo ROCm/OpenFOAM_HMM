@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,62 +21,78 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namespace
-    Foam::parsing
+Class
+    Foam::functionEntries::evalEntry
 
 Description
-    Collection of static functions and data related to parsing
-    and an isolated namespace for lexers, parsers, scanners.
+    Uses stringOps::toScalar to evaluate mathematical expressions.
+
+    The input can any form of string or, for convenience,
+    a '{}' delimited string literal.  In all cases, C/C++ comment stripping
+    is also performed.
+
+    For example,
+
+    \verbatim
+    a 1;
+    b 3;
+    c #eval "sin(pi()*$a/$b)";
+
+    d #eval{
+        // ignore: sin(pi()*$a/$b)
+        sin(degToRad(45))
+    };
+    \endverbatim
 
 SourceFiles
-    parsing.C
-    parsingI.H
+    evalEntry.C
 
 \*---------------------------------------------------------------------------*/
-#ifndef parsing_H
-#define parsing_H
 
-#include "Enum.H"
-#include <cerrno>
+#ifndef evalEntry_H
+#define evalEntry_H
+
+#include "functionEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace functionEntries
+{
 
 /*---------------------------------------------------------------------------*\
-                        Namespace parsing Declaration
+                          Class evalEntry Declaration
 \*---------------------------------------------------------------------------*/
 
-namespace parsing
+class evalEntry
+:
+    public functionEntry
 {
-    //- Enumeration for possible parsing error
-    enum class errorType
-    {
-        NONE = 0,         //!< No error encountered
-        GENERAL = 1,      //!< General parsing error
-        RANGE = 2,        //!< Range error
-        TRAILING = 3,     //!< Trailing content detected
-    };
+
+    //- Evaluate and return a scalar
+    static scalar evaluate(const dictionary& parentDict, Istream& is);
 
 
-    //- Strings corresponding to the errorType
-    extern const Foam::Enum<errorType> errorNames;
+public:
 
-    //- Sanity check after strtof, strtod, etc.
-    //  Should set errno = 0 prior to the conversion.
-    inline errorType checkConversion(const char* buf, char* endptr);
+    //- Execute in a primitiveEntry context
+    static bool execute
+    (
+        const dictionary& parentDict,
+        primitiveEntry& thisEntry,
+        Istream& is
+    );
 
+    //- Execute in a sub-dict context
+    static bool execute(dictionary& parentDict, Istream& is);
+};
 
-} // End namespace parsing
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace functionEntries
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "parsingI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
