@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -28,11 +28,14 @@ Class
 
 Description
     A class representing the concept of 0 (zero), which can be used to avoid
-    manipulating objects that are known to be 'zero' at compile-time.
+    manipulating objects that are known to be \em zero at compile-time.
 
 SourceFiles
     zero.C
     zeroI.H
+
+SeeAlso
+    Foam::one
 
 \*---------------------------------------------------------------------------*/
 
@@ -112,7 +115,7 @@ public:
     static null dummy;
 
     //- Null constructible
-    constexpr null() noexcept{}
+    constexpr null() noexcept {}
 
     //- Construct from Istream consumes no content.
     explicit constexpr null(Istream&) noexcept {}
@@ -121,7 +124,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Global zero
+//- Global zero
 static constexpr const zero Zero;
 
 // IOstream Operators

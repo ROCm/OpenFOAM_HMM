@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -54,7 +54,6 @@ class oneField
 :
     public one
 {
-
 public:
 
     // Public typedefs
@@ -65,21 +64,21 @@ public:
     // Constructors
 
         //- Construct null
-        oneField()
-        {}
+        oneField() = default;
 
 
     // Member Operators
 
-        inline one operator[](const label) const;
+        inline one operator[](const label) const
+        {
+            return one();
+        }
 
-        inline oneField field() const;
+        inline oneField field() const
+        {
+            return oneField();
+        }
 };
-
-
-inline const oneField& operator*(const oneField&, const oneField&);
-
-inline const oneField& operator/(const oneField&, const oneField&);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

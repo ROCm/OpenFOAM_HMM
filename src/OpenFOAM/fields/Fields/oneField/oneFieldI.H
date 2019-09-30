@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -25,40 +25,25 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "oneField.H"
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+inline const oneField& operator*(const oneField& of, const oneField&)
+{
+    return of;
+}
+
+
+inline const oneField& operator/(const oneField& of, const oneField&)
+{
+    return of;
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline Foam::one Foam::oneField::operator[](const label) const
-{
-    return one();
-}
-
-
-inline Foam::oneField Foam::oneField::field() const
-{
-    return oneField();
-}
-
-
-inline const Foam::oneField& Foam::operator*
-(
-    const oneField& of,
-    const oneField&
-)
-{
-    return of;
-}
-
-
-inline const Foam::oneField& Foam::operator/
-(
-    const oneField& of,
-    const oneField&
-)
-{
-    return of;
-}
+} // End namespace Foam
 
 
 // ************************************************************************* //

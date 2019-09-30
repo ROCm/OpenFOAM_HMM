@@ -28,10 +28,13 @@ Class
 
 Description
     A class representing the concept of 1 (one), which can be used to avoid
-    manipulating objects that are known to be 'one' at compile-time.
+    manipulating objects that are known to be \em one at compile-time.
 
 SourceFiles
     oneI.H
+
+SeeAlso
+    Foam::zero
 
 \*---------------------------------------------------------------------------*/
 

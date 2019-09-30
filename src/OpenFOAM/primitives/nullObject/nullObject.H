@@ -31,11 +31,9 @@ Description
 
     Its contents occupy enough space to also be reinterpreted
     as another class with a null pointer or zero long for its first
-    member. There is an additional zero second parameter for safe
-    casting to List etc.
+    member, with additional zero parameters for safe casting to List etc.
 
 SourceFiles
-    nullObjectI.H
     nullObject.C
 
 \*---------------------------------------------------------------------------*/
@@ -137,59 +135,79 @@ public:
 };
 
 
-// IOstream Operators
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Read from Istream consumes no content.
-inline Istream& operator>>(Istream& is, NullObject&)
-{
-    return is;
-}
-
-//- Write to Ostream emits no content.
-inline Ostream& operator<<(Ostream& os, const NullObject&)
-{
-    return os;
-}
-
+// Globals
 
 //- Pointer to the unique nullObject
 extern const NullObject* nullObjectPtr;
 
 
-//- Reference to the nullObject of type T
+// IOstream Operators
+
+//- Read from Istream consumes no content.
+inline Istream& operator>>(Istream& is, NullObject&) noexcept
+{
+    return is;
+}
+
+//- Write to Ostream emits no content.
+inline Ostream& operator<<(Ostream& os, const NullObject&) noexcept
+{
+    return os;
+}
+
+
+// Global Functions
+
+//- Pointer (of type T) to the nullObject
 template<class T>
-inline const T& NullObjectRef();
+inline const T* NullObjectPtr()
+{
+    return reinterpret_cast<const T*>(nullObjectPtr);
+}
 
-//- Pointer to the nullObject of type T
+//- Reference (of type T) to the nullObject
 template<class T>
-inline const T* NullObjectPtr();
+inline const T& NullObjectRef()
+{
+    return *reinterpret_cast<const T*>(nullObjectPtr);
+}
 
 
-//- True if t is a reference to the nullObject of type T
+//- True if ptr is a pointer (of type T) to the nullObject
 template<class T>
-inline bool isNull(const T& t);
+inline bool isNull(const T* ptr)
+{
+    return ptr == NullObjectPtr<T>();
+}
 
-//- True if t is not a reference to the nullObject of type T
+//- True if obj is a reference (of type T) to the nullObject
 template<class T>
-inline bool notNull(const T& t);
+inline bool isNull(const T& obj)
+{
+    return &obj == NullObjectPtr<T>();
+}
 
 
-//- True if t is a pointer to the nullObject of type T
+//- True if ptr is not a pointer (of type T) to the nullObject
 template<class T>
-inline bool isNull(const T* t);
+inline bool notNull(const T* ptr)
+{
+    return ptr != NullObjectPtr<T>();
+}
 
-//- True if t is not a pointer to the nullObject of type T
+//- True if obj is not a reference (of type T) to the nullObject
 template<class T>
-inline bool notNull(const T* t);
+inline bool notNull(const T& obj)
+{
+    return &obj != NullObjectPtr<T>();
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "nullObjectI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
