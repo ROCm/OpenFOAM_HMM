@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2016 OpenFOAM Foundation
@@ -125,7 +125,7 @@ void Foam::featurePointConformer::addMasterAndSlavePoints
     const label ptI
 ) const
 {
-    typedef DynamicList<autoPtr<plane>>        planeDynList;
+    typedef DynamicList<autoPtr<plane>> planeDynList;
     typedef Foam::indexedVertexEnum::vertexType vertexType;
 
     forAll(masterPoints, pI)
@@ -134,8 +134,6 @@ void Foam::featurePointConformer::addMasterAndSlavePoints
 
         const Foam::point& masterPt = masterPoints[pI];
         const vertexType masterType = masterPointsTypes[pI];
-
-//        Info<< "    Master = " << masterPt << endl;
 
         pts.append
         (
@@ -161,8 +159,6 @@ void Foam::featurePointConformer::addMasterAndSlavePoints
             const plane& reflPlane = masterPointPlanes[planeI]();
 
             const Foam::point slavePt = reflPlane.mirror(masterPt);
-
-//            Info<< "        Slave " << planeI << " = " << slavePt << endl;
 
             const vertexType slaveType =
             (
@@ -270,7 +266,7 @@ void Foam::featurePointConformer::createMasterAndSlavePoints
             Foam::point pt = featPt + pointMotionDirection;
 
             planeDynList firstPlane;
-            firstPlane.append(autoPtr<plane>(new plane(featPt, n)));
+            firstPlane.append(autoPtr<plane>::New(featPt, n));
 
             masterPoints.append(pt);
 
@@ -281,18 +277,10 @@ void Foam::featurePointConformer::createMasterAndSlavePoints
               : Vb::vtInternalFeaturePoint // false
             );
 
-            //Info<< "    " << " " << firstPlane << endl;
-
-//            const Foam::point reflectedPoint = reflectPointInPlane
-//            (
-//                masterPoints.last(),
-//                firstPlane.last()()
-//            );
-
             masterPointReflections.insert
             (
                 masterPoints.size() - 1,
-                firstPlane
+                std::move(firstPlane)
             );
         }
 //        else if
@@ -305,7 +293,7 @@ void Foam::featurePointConformer::createMasterAndSlavePoints
 //            Foam::point pt = featPt + pointMotionDirection;
 //
 //            planeDynList firstPlane;
-//            firstPlane.append(autoPtr<plane>(new plane(featPt, n)));
+//            firstPlane.append(autoPtr<plane>::New(featPt, n));
 //
 //            masterPoints.append(pt);
 //
@@ -338,7 +326,7 @@ void Foam::featurePointConformer::createMasterAndSlavePoints
 
             masterPointReflections[masterPoints.size() - 1].append
             (
-                autoPtr<plane>(new plane(featPt, n))
+                autoPtr<plane>::New(featPt, n)
             );
         }
 
