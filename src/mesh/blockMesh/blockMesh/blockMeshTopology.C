@@ -351,13 +351,15 @@ Foam::autoPtr<Foam::polyMesh> Foam::blockMesh::createTopology
         dictPtr->readIfPresent("type", defaultPatchType);
     }
 
-    // Optional 'convertToMeters' or 'scale' scaling factor
-    if (!meshDescription.readIfPresent("convertToMeters", scaleFactor_))
-    {
-        meshDescription.readIfPresent("scale", scaleFactor_);
-    }
+    // Optional 'scale' factor. Was 'convertToMeters' until OCT-2008
+    meshDescription.readIfPresentCompat
+    (
+        "scale",
+        {{"convertToMeters", 1012}},  // Mark as changed from 2010 onwards
+        scaleFactor_
+    );
 
-    // Require (scale > 0), treat (scale <= 0) as scaling == 1 (no scaling).
+    // Treat (scale <= 0) as scaling == 1 (no scaling).
     if (scaleFactor_ <= 0)
     {
         scaleFactor_ = 1.0;
