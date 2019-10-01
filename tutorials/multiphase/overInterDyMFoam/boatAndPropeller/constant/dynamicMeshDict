@@ -15,7 +15,7 @@ FoamFile
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-motionSolverLibs    ("librigidBodyMeshMotion.so");
+motionSolverLibs    (rigidBodyMeshMotion);
 
 dynamicFvMesh       dynamicOversetFvMesh;
 

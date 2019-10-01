@@ -16,7 +16,7 @@ FoamFile
 
 dynamicFvMesh   dynamicMotionSolverFvMesh;
 
-motionSolverLibs   ("librigidBodyMeshMotion.so");
+motionSolverLibs (rigidBodyMeshMotion);
 
 motionSolver    rigidBodyMotion;
 

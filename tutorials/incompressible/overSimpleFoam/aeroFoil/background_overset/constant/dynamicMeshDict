@@ -14,7 +14,9 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-motionSolverLibs ( "libfvMotionSolvers.so" );
+dynamicFvMesh   dynamicOversetFvMesh;
+
+motionSolverLibs (fvMotionSolvers);
 
 solver          displacementLaplacian;
 
@@ -23,6 +25,5 @@ displacementLaplacianCoeffs
     diffusivity     uniform 1;
 }
 
-dynamicFvMesh       dynamicOversetFvMesh;
 
 // ************************************************************************* //

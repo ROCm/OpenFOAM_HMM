@@ -14,13 +14,13 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dynamicFvMesh       dynamicOversetFvMesh;
+dynamicFvMesh   dynamicOversetFvMesh;
 
 solvers
 {
      VF
      {
-        motionSolverLibs ("libfvMotionSolvers.so" );
+        motionSolverLibs (fvMotionSolvers);
 
         motionSolver            solidBody;
         solidBodyMotionFunction drivenLinearMotion;
@@ -32,8 +32,8 @@ solvers
 
     cube
     {
-        motionSolverLibs    ("sixDoFRigidBodyMotion");
-        motionSolver          sixDoFRigidBodyMotion;
+        motionSolverLibs   (sixDoFRigidBodyMotion);
+        motionSolver        sixDoFRigidBodyMotion;
 
         cellSet         c1;
 
@@ -108,9 +108,6 @@ solvers
 
         }
     }
-
-
-
 }
 
 // ************************************************************************* //

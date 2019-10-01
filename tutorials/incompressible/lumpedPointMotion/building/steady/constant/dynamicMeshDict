@@ -16,11 +16,11 @@ FoamFile
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dynamicFvMesh dynamicMotionSolverFvMesh;
+dynamicFvMesh   dynamicMotionSolverFvMesh;
 
-motionSolverLibs ("libfvMotionSolvers.so");
+motionSolverLibs (fvMotionSolvers);
 
-solver  displacementLaplacian;
+solver          displacementLaplacian;
 
 displacementLaplacianCoeffs
 {

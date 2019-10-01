@@ -15,13 +15,13 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 dynamicFvMesh       dynamicMotionSolverFvMesh;
-motionSolverLibs    ("libfvMotionSolvers.so");
+motionSolverLibs    (fvMotionSolvers);
 
 solver              displacementLaplacian;
 
 displacementLaplacianCoeffs
 {
-    diffusivity         inverseDistance (leftwall);
+    diffusivity     inverseDistance (leftwall);
 }
 
 

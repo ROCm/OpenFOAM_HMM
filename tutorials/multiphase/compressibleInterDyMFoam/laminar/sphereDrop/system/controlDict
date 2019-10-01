@@ -53,8 +53,8 @@ maxAlphaCo      0.1;
 
 libs
 (
-    "sixDoFRigidBodyMotion"
-    "libtopoChangerFvMesh.so"
+    sixDoFRigidBodyMotion
+    topoChangerFvMesh
 );
 
 

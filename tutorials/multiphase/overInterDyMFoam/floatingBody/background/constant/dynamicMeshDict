@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-motionSolverLibs    ("sixDoFRigidBodyMotion");
+motionSolverLibs    (sixDoFRigidBodyMotion);
 
 dynamicFvMesh       dynamicOversetFvMesh;
 
