@@ -29,7 +29,7 @@ boundaryField
 
     "(walls|hole|inlet|outlet)"
     {
-        type            compressible::alphatWallFunction;;
+        type            compressible::alphatWallFunction;
         value           $internalField;
     }
 }
