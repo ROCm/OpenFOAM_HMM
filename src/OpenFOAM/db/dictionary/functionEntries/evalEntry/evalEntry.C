@@ -64,9 +64,11 @@ Foam::scalar Foam::functionEntries::evalEntry::evaluate
     Istream& is
 )
 {
+    #ifdef FULLDEBUG
     DetailInfo
         << "Using #eval at line " << is.lineNumber()
         << " in file " <<  parentDict.name() << nl;
+    #endif
 
     // String to evaluate
     string s;
