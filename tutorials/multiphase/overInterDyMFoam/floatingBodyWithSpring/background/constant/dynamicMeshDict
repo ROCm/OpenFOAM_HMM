@@ -14,8 +14,6 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-
 dynamicFvMesh       dynamicOversetFvMesh;
 
 solvers
@@ -55,7 +53,7 @@ solvers
         rhoSolid        500;
 
         // Cuboid mass
-        mass            #calc "$rhoSolid*$Lx*$Ly*$Lz";
+        mass            #eval{ $rhoSolid*$Lx*$Ly*$Lz };
 
         // Cuboid moment of inertia about the centre of mass
         momentOfInertia #codeStream

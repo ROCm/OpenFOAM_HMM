@@ -16,10 +16,11 @@ FoamFile
 
 scale   1;
 
-L #calc "20*M_PI";
-H #calc "1";
-H2 #calc "2*$H";
-W #calc "M_PI";
+L   #eval{ 20*pi() };
+H   1.0;
+H2  #eval{ 2*$H };
+W   #eval{ pi() };
+
 
 vertices
 (

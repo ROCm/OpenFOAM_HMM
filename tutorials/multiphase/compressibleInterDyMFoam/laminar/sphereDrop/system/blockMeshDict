@@ -32,83 +32,79 @@ sphereLayerThickness    2.0; // Total layer thickness in sphere radii
 sphereRadius            0.028;
 sphereCentreHeight      0.147; // y-coord of sphere centre
 
-pi                      #calc "Foam::constant::mathematical::pi";
-
 // Calculated positions
-sphereRadiusPosition    #calc "-1.0*(1.0 + $sphereLayerThickness)*$sphereRadius"; //"-1.0* $sphereRadius";
-AMIBlockPosition        #calc "2.0*$sphereRadiusPosition  + $sphereRadius";
+sphereRadiusPosition    #eval{ -1.0*(1.0 + $sphereLayerThickness)*$sphereRadius };
+AMIBlockPosition        #eval{ 2.0*$sphereRadiusPosition + $sphereRadius };
 // Centre plane is z=0, so use half of wedge angle to calculate pos and neg
 // z-positions
-halfAngleRad            #calc "0.5*$wedgeAngle*$pi/180.0";
-tanAlpha                #calc "tan($halfAngleRad)";
+tanAlpha                #eval{ tan(0.5*degToRad($wedgeAngle)) };
 // Multiply by -1 because tan give negative value
-firstBlockPosDepth      #calc "-1.0*$tanAlpha*$sphereRadiusPosition";
-firstBlockNegDepth      #calc "-1.0*$firstBlockPosDepth";
-AMIBlockPosDepth        #calc "-1.0*$tanAlpha*$AMIBlockPosition";
-AMIBlockNegDepth        #calc "-1.0*$AMIBlockPosDepth";
-farFieldPosDepth        #calc "-1.0*$tanAlpha*$farFieldWall";
-farFieldNegDepth        #calc "-1.0*$farFieldPosDepth";
+firstBlockPosDepth      #eval{ -1.0*$tanAlpha*$sphereRadiusPosition };
+firstBlockNegDepth      #eval{ -1.0*$firstBlockPosDepth };
+AMIBlockPosDepth        #eval{ -1.0*$tanAlpha*$AMIBlockPosition };
+AMIBlockNegDepth        #eval{ -1.0*$AMIBlockPosDepth };
+farFieldPosDepth        #eval{ -1.0*$tanAlpha*$farFieldWall };
+farFieldNegDepth        #eval{ -1.0*$farFieldPosDepth };
 
-bottomBlockTopHeight    #calc "$sphereCentreHeight - $lowerSphereBlock*$sphereRadius";
-topBlockBottomHeight    #calc "$sphereCentreHeight + $upperSphereBlock*$sphereRadius";
+bottomBlockTopHeight    #eval{ $sphereCentreHeight - $lowerSphereBlock*$sphereRadius };
+topBlockBottomHeight    #eval{ $sphereCentreHeight + $upperSphereBlock*$sphereRadius };
 
-topSphere               #calc "$sphereCentreHeight + $sphereRadius";
-bottomSphere            #calc "$sphereCentreHeight - $sphereRadius";
-topSphereLayer          #calc "$sphereCentreHeight + (1.0 + $sphereLayerThickness)*$sphereRadius";
-bottomSphereLayer       #calc "$sphereCentreHeight - (1.0 + $sphereLayerThickness)*$sphereRadius";
+topSphere               #eval{ $sphereCentreHeight + $sphereRadius };
+bottomSphere            #eval{ $sphereCentreHeight - $sphereRadius };
+topSphereLayer          #eval{ $sphereCentreHeight + (1.0 + $sphereLayerThickness)*$sphereRadius };
+bottomSphereLayer       #eval{ $sphereCentreHeight - (1.0 + $sphereLayerThickness)*$sphereRadius };
 
 // Layer block below sphere
-innerBottomLayerX       #calc "-1.0*cos(45.0*$pi/180.0)*$sphereRadius";
-innerBottomLayerY       #calc "$sphereCentreHeight - cos(45.0*$pi/180.0)*$sphereRadius";
-innerBottomLayerZPos    #calc "-1.0*$tanAlpha*$innerBottomLayerX";
-innerBottomLayerZNeg    #calc "-1.0*$innerBottomLayerZPos";
+innerBottomLayerX       #eval{ -1.0*cos(degToRad(45.0))*$sphereRadius };
+innerBottomLayerY       #eval{ $sphereCentreHeight - cos(degToRad(45.0))*$sphereRadius };
+innerBottomLayerZPos    #eval{ -1.0*$tanAlpha*$innerBottomLayerX };
+innerBottomLayerZNeg    #eval{ -1.0*$innerBottomLayerZPos };
 
-innerBottomArcX1        #calc "-1.0*sin(22.5*$pi/180.0)*$sphereRadius";
-innerBottomArcY1        #calc "$sphereCentreHeight - cos(22.5*$pi/180.0)*$sphereRadius";
-innerBottomArcZ1Pos     #calc "$innerBottomArcX1*$tanAlpha";
-innerBottomArcZ1Neg     #calc "-1.0*$innerBottomArcZ1Pos";
+innerBottomArcX1        #eval{ -1.0*sin(degToRad(22.5))*$sphereRadius };
+innerBottomArcY1        #eval{ $sphereCentreHeight - cos(degToRad(22.5))*$sphereRadius };
+innerBottomArcZ1Pos     #eval{ $innerBottomArcX1*$tanAlpha };
+innerBottomArcZ1Neg     #eval{ -1.0*$innerBottomArcZ1Pos };
 
-outerBottomArcX1        #calc "-1.0*sin(22.5*$pi/180.0)*$sphereRadius*(1.0 + $sphereLayerThickness)";
-outerBottomArcY1        #calc #{ $sphereCentreHeight - cos(22.5*$pi/180.0)*$sphereRadius*(1.0 + $sphereLayerThickness) #};
-outerBottomArcZ1Pos     #calc "$outerBottomArcX1*$tanAlpha";
-outerBottomArcZ1Neg     #calc "-1.0*$outerBottomArcZ1Pos";
+outerBottomArcX1        #eval{ -1.0*sin(degToRad(22.5))*$sphereRadius*(1.0 + $sphereLayerThickness) };
+outerBottomArcY1        #eval{ $sphereCentreHeight - cos(degToRad(22.5))*$sphereRadius*(1.0 + $sphereLayerThickness) };
+outerBottomArcZ1Pos     #eval{ $outerBottomArcX1*$tanAlpha };
+outerBottomArcZ1Neg     #eval{ -1.0*$outerBottomArcZ1Pos };
 
-outerBottomLayerX       #calc "-1.0*cos(45.0*$pi/180.0)*(1.0 + $sphereLayerThickness)*$sphereRadius";
-outerBottomLayerY       #calc "$sphereCentreHeight - cos(45.0*$pi/180.0)*(1.0 + $sphereLayerThickness)*$sphereRadius";
-outerBottomLayerZPos    #calc "-1.0*$tanAlpha*$outerBottomLayerX";
-outerBottomLayerZNeg    #calc "-1.0*$outerBottomLayerZPos";
+outerBottomLayerX       #eval{ -1.0*cos(degToRad(45.0))*(1.0 + $sphereLayerThickness)*$sphereRadius };
+outerBottomLayerY       #eval{ $sphereCentreHeight - cos(degToRad(45.0))*(1.0 + $sphereLayerThickness)*$sphereRadius };
+outerBottomLayerZPos    #eval{ -1.0*$tanAlpha*$outerBottomLayerX };
+outerBottomLayerZNeg    #eval{ -1.0*$outerBottomLayerZPos };
 
 // Layer block above sphere
-innerTopLayerX          #calc "cos(135.0*$pi/180.0)*$sphereRadius";
-innerTopLayerY          #calc "$sphereCentreHeight - cos(135.0*$pi/180.0)*$sphereRadius";
-innerTopLayerZPos       #calc "-1.0*$tanAlpha*$innerBottomLayerX";
-innerTopLayerZNeg       #calc "-1.0*$innerBottomLayerZPos";
+innerTopLayerX          #eval{ cos(degToRad(135.0))*$sphereRadius };
+innerTopLayerY          #eval{ $sphereCentreHeight - cos(degToRad(135.0))*$sphereRadius };
+innerTopLayerZPos       #eval{ -1.0*$tanAlpha*$innerBottomLayerX };
+innerTopLayerZNeg       #eval{ -1.0*$innerBottomLayerZPos };
 
-innerTopArcX1           #calc "-1.0*sin(157.5*$pi/180.0)*$sphereRadius";
-innerTopArcY1           #calc "$sphereCentreHeight - cos(157.5*$pi/180.0)*$sphereRadius";
-innerTopArcZ1Pos        #calc "$innerTopArcX1*$tanAlpha";
-innerTopArcZ1Neg        #calc "-1.0*$innerTopArcZ1Pos";
+innerTopArcX1           #eval{ -1.0*sin(degToRad(157.5))*$sphereRadius };
+innerTopArcY1           #eval{ $sphereCentreHeight - cos(degToRad(157.5))*$sphereRadius };
+innerTopArcZ1Pos        #eval{ $innerTopArcX1*$tanAlpha };
+innerTopArcZ1Neg        #eval{ -1.0*$innerTopArcZ1Pos };
 
-outerTopArcX1           #calc "-1.0*sin(157.5*$pi/180.0)*$sphereRadius*(1.0 + $sphereLayerThickness)";
-outerTopArcY1           #calc "$sphereCentreHeight - cos(157.5*$pi/180.0)*$sphereRadius*(1.0 + $sphereLayerThickness)";
-outerTopArcZ1Pos        #calc "$outerTopArcX1*$tanAlpha";
-outerTopArcZ1Neg        #calc "-1.0*$outerTopArcZ1Pos";
+outerTopArcX1           #eval{ -1.0*sin(degToRad(157.5))*$sphereRadius*(1.0 + $sphereLayerThickness) };
+outerTopArcY1           #eval{ $sphereCentreHeight - cos(degToRad(157.5))*$sphereRadius*(1.0 + $sphereLayerThickness) };
+outerTopArcZ1Pos        #eval{ $outerTopArcX1*$tanAlpha };
+outerTopArcZ1Neg        #eval{ -1.0*$outerTopArcZ1Pos };
 
-outerTopLayerX          #calc "cos(135.0*$pi/180.0)*(1.0 + $sphereLayerThickness)*$sphereRadius";
-outerTopLayerY          #calc "$sphereCentreHeight - cos(135.0*$pi/180.0)*(1.0 + $sphereLayerThickness)*$sphereRadius";
-outerTopLayerZPos       #calc "-1.0*$tanAlpha*$outerTopLayerX";
-outerTopLayerZNeg       #calc "-1.0*$outerTopLayerZPos";
+outerTopLayerX          #eval{ cos(degToRad(135.0))*(1.0 + $sphereLayerThickness)*$sphereRadius };
+outerTopLayerY          #eval{ $sphereCentreHeight - cos(degToRad(135.0))*(1.0 + $sphereLayerThickness)*$sphereRadius };
+outerTopLayerZPos       #eval{ -1.0*$tanAlpha*$outerTopLayerX };
+outerTopLayerZNeg       #eval{ -1.0*$outerTopLayerZPos };
 
 // Layer block left of sphere
-innerLeftArcX           #calc "-1.0*$sphereRadius";
-innerLeftArcY           #calc "$sphereCentreHeight";
-innerLeftArcZPos        #calc "-1.0*$tanAlpha*$innerLeftArcX";
-innerLeftArcZNeg        #calc "-1.0*$innerLeftArcZPos";
+innerLeftArcX           #eval{ -1.0*$sphereRadius };
+innerLeftArcY           #eval{ $sphereCentreHeight };
+innerLeftArcZPos        #eval{ -1.0*$tanAlpha*$innerLeftArcX };
+innerLeftArcZNeg        #eval{ -1.0*$innerLeftArcZPos };
 
-outerLeftArcX           #calc "-1.0*(1.0 + $sphereLayerThickness)*$sphereRadius";
-outerLeftArcZPos        #calc "-1.0*$tanAlpha*$outerLeftArcX";
-outerLeftArcZNeg        #calc "-1.0*$outerLeftArcZPos";
-
+outerLeftArcX           #eval{ -1.0*(1.0 + $sphereLayerThickness)*$sphereRadius };
+outerLeftArcZPos        #eval{ -1.0*$tanAlpha*$outerLeftArcX };
+outerLeftArcZNeg        #eval{ -1.0*$outerLeftArcZPos };
 
 
 vertices
@@ -159,9 +155,10 @@ vertices
 edgeNumber 1; // 0.707;
 
 layerGrading 0.5;
-invLayerGrading #calc "1.0/$layerGrading";
+invLayerGrading #eval{ 1.0/$layerGrading };
+
 blockGrading 0.3;
-invBlockGrading #calc "1.0/$blockGrading";
+invBlockGrading #eval{ 1.0/$blockGrading };
 
 blocks
 (

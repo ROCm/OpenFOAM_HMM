@@ -25,43 +25,41 @@ t -10;
 u 10;
 o 10;
 
-d2r #calc "constant::mathematical::pi/180";
+r0CosT  #eval{ $r0*cos(degToRad($t   )) };
+r0CosTO #eval{ $r0*cos(degToRad($t+$o)) };
+r0CosU  #eval{ $r0*cos(degToRad($u   )) };
+r0CosUO #eval{ $r0*cos(degToRad($u+$o)) };
+r0SinT  #eval{ $r0*sin(degToRad($t   )) };
+r0SinTO #eval{ $r0*sin(degToRad($t+$o)) };
+r0SinU  #eval{ $r0*sin(degToRad($u   )) };
+r0SinUO #eval{ $r0*sin(degToRad($u+$o)) };
 
-r0CosT  #calc "$r0*cos($d2r*($t   ))";
-r0CosTO #calc "$r0*cos($d2r*($t+$o))";
-r0CosU  #calc "$r0*cos($d2r*($u   ))";
-r0CosUO #calc "$r0*cos($d2r*($u+$o))";
-r0SinT  #calc "$r0*sin($d2r*($t   ))";
-r0SinTO #calc "$r0*sin($d2r*($t+$o))";
-r0SinU  #calc "$r0*sin($d2r*($u   ))";
-r0SinUO #calc "$r0*sin($d2r*($u+$o))";
+r1CosT  #eval{ $r1*cos(degToRad($t   )) };
+r1CosTO #eval{ $r1*cos(degToRad($t+$o)) };
+r1CosU  #eval{ $r1*cos(degToRad($u   )) };
+r1CosUO #eval{ $r1*cos(degToRad($u+$o)) };
+r1SinT  #eval{ $r1*sin(degToRad($t   )) };
+r1SinTO #eval{ $r1*sin(degToRad($t+$o)) };
+r1SinU  #eval{ $r1*sin(degToRad($u   )) };
+r1SinUO #eval{ $r1*sin(degToRad($u+$o)) };
 
-r1CosT  #calc "$r1*cos($d2r*($t   ))";
-r1CosTO #calc "$r1*cos($d2r*($t+$o))";
-r1CosU  #calc "$r1*cos($d2r*($u   ))";
-r1CosUO #calc "$r1*cos($d2r*($u+$o))";
-r1SinT  #calc "$r1*sin($d2r*($t   ))";
-r1SinTO #calc "$r1*sin($d2r*($t+$o))";
-r1SinU  #calc "$r1*sin($d2r*($u   ))";
-r1SinUO #calc "$r1*sin($d2r*($u+$o))";
+r2CosT  #eval{ $r2*cos(degToRad($t   )) };
+r2CosTO #eval{ $r2*cos(degToRad($t+$o)) };
+r2CosU  #eval{ $r2*cos(degToRad($u   )) };
+r2CosUO #eval{ $r2*cos(degToRad($u+$o)) };
+r2SinT  #eval{ $r2*sin(degToRad($t   )) };
+r2SinTO #eval{ $r2*sin(degToRad($t+$o)) };
+r2SinU  #eval{ $r2*sin(degToRad($u   )) };
+r2SinUO #eval{ $r2*sin(degToRad($u+$o)) };
 
-r2CosT  #calc "$r2*cos($d2r*($t   ))";
-r2CosTO #calc "$r2*cos($d2r*($t+$o))";
-r2CosU  #calc "$r2*cos($d2r*($u   ))";
-r2CosUO #calc "$r2*cos($d2r*($u+$o))";
-r2SinT  #calc "$r2*sin($d2r*($t   ))";
-r2SinTO #calc "$r2*sin($d2r*($t+$o))";
-r2SinU  #calc "$r2*sin($d2r*($u   ))";
-r2SinUO #calc "$r2*sin($d2r*($u+$o))";
-
-r3CosT  #calc "$r3*cos($d2r*($t   ))";
-r3CosTO #calc "$r3*cos($d2r*($t+$o))";
-r3CosU  #calc "$r3*cos($d2r*($u   ))";
-r3CosUO #calc "$r3*cos($d2r*($u+$o))";
-r3SinT  #calc "$r3*sin($d2r*($t   ))";
-r3SinTO #calc "$r3*sin($d2r*($t+$o))";
-r3SinU  #calc "$r3*sin($d2r*($u   ))";
-r3SinUO #calc "$r3*sin($d2r*($u+$o))";
+r3CosT  #eval{ $r3*cos(degToRad($t   )) };
+r3CosTO #eval{ $r3*cos(degToRad($t+$o)) };
+r3CosU  #eval{ $r3*cos(degToRad($u   )) };
+r3CosUO #eval{ $r3*cos(degToRad($u+$o)) };
+r3SinT  #eval{ $r3*sin(degToRad($t   )) };
+r3SinTO #eval{ $r3*sin(degToRad($t+$o)) };
+r3SinU  #eval{ $r3*sin(degToRad($u   )) };
+r3SinUO #eval{ $r3*sin(degToRad($u+$o)) };
 
 vertices
 (

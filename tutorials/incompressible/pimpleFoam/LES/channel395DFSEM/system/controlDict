@@ -45,6 +45,10 @@ timePrecision   6;
 
 runTimeModifiable true;
 
+// Allow 10% run-up before calculating mean
+timeStart       #eval #{ 0.1 * ${/endTime} #};
+
+
 functions
 {
     Q1
@@ -84,7 +88,7 @@ functions
         type            fieldAverage;
         libs            (fieldFunctionObjects);
         writeControl    writeTime;
-        timeStart       8.5;
+        timeStart       ${/timeStart};
 
         fields
         (

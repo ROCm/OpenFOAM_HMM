@@ -48,7 +48,7 @@ runTimeModifiable false;
 adjustTimeStep  false;
 
 // Allow 10% run-up before calculating mean
-timeStart       #calc #{ 0.1 * ${/endTime} #};
+timeStart       #eval #{ 0.1 * ${/endTime} #};
 
 functions
 {

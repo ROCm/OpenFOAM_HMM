@@ -14,12 +14,12 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-scale 1;
+scale   1;
 
-L 0.125664;// "20*M_PI";
-H #calc "1";
-H2 #calc "2*$H";
-W #calc "M_PI";
+L   0.125664;
+H   1.0;
+H2  #eval{ 2*$H };
+W   #eval{ pi() };
 
 vertices
 (

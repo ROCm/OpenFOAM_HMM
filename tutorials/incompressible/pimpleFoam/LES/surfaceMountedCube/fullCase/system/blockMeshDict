@@ -23,17 +23,17 @@ z_pad       1;
 
 x0          0;
 x1          $x_up;
-x2          #calc "$x1 + 1";
-x3          #calc "$x2 + $x_down";
+x2          #eval{ $x1 + 1 };
+x3          #eval{ $x2 + $x_down };
 
 y0          0;
 y1          $y_pad;
-y2          #calc "$y1 + 1";
-y3          #calc "$y2 + $y_pad";
+y2          #eval{ $y1 + 1 };
+y3          #eval{ $y2 + $y_pad };
 
 z0          0;
 z1          1;
-z2          #calc "$z1 + $z_pad";
+z2          #eval{ $z1 + $z_pad };
 
 nx1         40;
 nx2         40;
