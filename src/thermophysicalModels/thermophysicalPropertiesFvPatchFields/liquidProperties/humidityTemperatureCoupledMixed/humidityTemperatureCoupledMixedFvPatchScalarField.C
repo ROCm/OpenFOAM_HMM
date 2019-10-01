@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -128,7 +128,14 @@ humidityTemperatureCoupledMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    temperatureCoupledBase(patch(), "fluidThermo", "undefined", "undefined-K"),
+    temperatureCoupledBase
+    (
+        patch(),
+        "fluidThermo",
+        "undefined",
+        "undefined-K",
+        "undefined-alpha"
+    ),
     mode_(mtConstantMass),
     pName_("p"),
     UName_("U"),

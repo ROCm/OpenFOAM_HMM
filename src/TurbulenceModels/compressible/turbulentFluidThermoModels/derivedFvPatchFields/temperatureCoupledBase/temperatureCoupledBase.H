@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -42,10 +42,11 @@ Description
 
     \par Keywords provided by this class:
       \table
-        Property     | Description                | Required    | Default value
-        kappaMethod  | Thermal conductivity method        | yes |
-        kappa        | Name of thermal conductivity field | no  | none
-        alphaAni     | Name of the non-isotropic alpha    | no  | Anialpha
+        Property     | Description                          | Required | Default
+        kappaMethod  | Thermal conductivity method          | yes |
+        kappa        | Name of thermal conductivity field   | no  | none
+        alpha        | Name of thermal diffusivity field    | no  | none
+        alphaAni     | Name of non-isotropic alpha          | no  | none
       \endtable
 
 Usage
@@ -85,7 +86,7 @@ class temperatureCoupledBase
 {
 public:
 
-    // Public enumerations
+    // Public Enumerations
 
         //- Type of supplied Kappa
         enum KMethodType
@@ -99,7 +100,7 @@ public:
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         static const Enum<KMethodType> KMethodTypeNames_;
 
@@ -115,6 +116,9 @@ protected:
         //- Name of the non-Isotropic alpha (default: Anialpha)
         const word alphaAniName_;
 
+        //- Name of thermal diffusivity
+        const word alphaName_;
+
 
 public:
 
@@ -126,7 +130,8 @@ public:
             const fvPatch& patch,
             const word& calculationMethod,
             const word& kappaName,
-            const word& alphaAniName
+            const word& alphaAniName,
+            const word& alphaName
         );
 
         //- Construct from patch and dictionary
@@ -136,7 +141,7 @@ public:
             const dictionary& dict
         );
 
-         //- Construct from patch and temperatureCoupledBase
+        //- Construct from patch and temperatureCoupledBase
         temperatureCoupledBase
         (
             const fvPatch& patch,
@@ -145,7 +150,8 @@ public:
 
 
     //- Destructor
-    virtual ~temperatureCoupledBase();
+    virtual ~temperatureCoupledBase() = default;
+
 
     // Member functions
 
@@ -161,11 +167,20 @@ public:
             return kappaName_;
         }
 
+        //- Name of thermal diffusivity field
+        const word& alphaName() const
+        {
+            return alphaName_;
+        }
+
         //- Given patch temperature calculate corresponding K field
         virtual tmp<scalarField> kappa(const scalarField& Tp) const;
 
+        //- Given patch temperature calculate corresponding alphaEff field
+        virtual tmp<scalarField> alpha(const scalarField& Tp) const;
+
         //- Write
-        void write(Ostream&) const;
+        void write(Ostream& os) const;
 };
 
 

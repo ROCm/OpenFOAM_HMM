@@ -88,7 +88,6 @@ pyrModel() const
         modelNames.append(iter()->regionMesh().name());
     }
 
-
     FatalErrorInFunction
         << "Unable to locate pyrolysis region " << pyrolysisRegionName_
         << ".  Available regions include: " << modelNames
@@ -108,7 +107,14 @@ filmPyrolysisRadiativeCoupledMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    temperatureCoupledBase(patch(), "undefined", "undefined", "undefined-K"),
+    temperatureCoupledBase
+    (
+        patch(),
+        "undefined",
+        "undefined",
+        "undefined-K",
+        "undefined-alpha"
+    ),
     filmRegionName_("surfaceFilmProperties"),
     pyrolysisRegionName_("pyrolysisProperties"),
     TnbrName_("undefined-Tnbr"),
