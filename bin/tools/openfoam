@@ -18,7 +18,9 @@
 #     or run an OpenFOAM application (with arguments) after first sourcing
 #     the OpenFOAM etc/bashrc file from the project directory.
 #
-#     This script normally exists in $WM_PROJECT_DIR/bin/tools
+#     This script normally exists in $WM_PROJECT_DIR/bin/tools but can also
+#     be modified to use a hard-coded PROJECT_DIR entry and placed elsewhere
+#     in the filesystem (eg, /usr/bin).
 #
 #------------------------------------------------------------------------------
 # Hard-coded value (eg, with autoconfig)
@@ -30,10 +32,18 @@ then
     toolsDir="${0%/*}"                              # The bin/tools dir
     projectDir="${toolsDir%/bin/tools}"             # Project dir
 
-    if [ "$projectDir" = "$toolsDir" ]              # Need to try harder
-    then
+    case "$projectDir" in
+        (/bin | /usr/bin | /usr/local/bin)
+        # This shouldn't happen.
+        # If copied to a system dir, should also be using hard-coded values!
+        echo "Warning: suspicious looking project dir: $projectDir" 1>&2
+        ;;
+
+        ("$toolsDir")
+        # Eg, called as ./openfoam etc - need to try harder
         projectDir="$(\cd $(dirname $0)/../.. && \pwd -L)" || unset projectDir
-    fi
+        ;;
+    esac
 fi
 
 #------------------------------------------------------------------------------
@@ -45,7 +55,7 @@ usage() {
 Usage: ${0##*/} [OPTION] [application ...]
 
 options:
-  -foam=DIR         Specify alternative OpenFOAM directory
+  -prefix=DIR       Specify alternative OpenFOAM directory
   -sp               Single precision
   -dp               Double precision
   -spdp             Mixed single/double precision
@@ -54,7 +64,8 @@ options:
 
 Open an interactive bash session with an OpenFOAM environment,
 or run an OpenFOAM application (with arguments) after first sourcing
-the OpenFOAM etc/bashrc file from the project directory
+the OpenFOAM etc/bashrc file from the project directory:
+($projectDir)
 
 USAGE
     exit 1
@@ -80,7 +91,7 @@ do
     -h | -help*)
         usage
         ;;
-    -foam=*)
+    -prefix=* | -foam=*)
         projectDir="${1#*=}"
         ;;
 
