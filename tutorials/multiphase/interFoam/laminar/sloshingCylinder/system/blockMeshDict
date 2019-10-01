@@ -14,6 +14,9 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+scale   1;
+verbose no;
+
 radius      0.081;
 radiusNeg  -0.081;
 box         0.025;
@@ -23,8 +26,6 @@ zMin       -0.150;
 
 nR          7;
 nZ          20;
-
-verbose no;
 
 geometry
 {
@@ -36,8 +37,6 @@ geometry
         radius  $radius;
     }
 }
-
-scale 1;
 
 
 vertices
