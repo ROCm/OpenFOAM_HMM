@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Class
     Foam::radiation::lookup
 
 Description
-    Look up type of boundary radiation properties.
+    Lookup type of boundary radiation properties.
 
 Usage
     \verbatim
@@ -35,6 +35,7 @@ Usage
             type            lookup;
             absorptivity    0.1;
             emissivity      0.1;
+            transmissivity  0;
         }
 
     \endverbatim
@@ -62,7 +63,6 @@ class lookup
 :
     public boundaryRadiationPropertiesPatch
 {
-
 protected:
 
     // Protected data
@@ -70,7 +70,7 @@ protected:
         //- Reference to the polyPatch
         const polyPatch& pp_;
 
-        //-Dictionary
+        //- Dictionary
         const dictionary dict_;
 
 
@@ -87,6 +87,7 @@ public:
 
     //- Destructor
     virtual ~lookup() = default;
+
 
     // Member Functions
 
@@ -124,7 +125,7 @@ public:
             const scalar T
         ) const;
 
-        //- Return transmissivity on patch
+        //- Return transmissivity on patch (default: 0)
         virtual tmp<scalarField> t
         (
             const label bandI,
@@ -132,7 +133,7 @@ public:
             scalarField* T
         ) const;
 
-        //- Return transmissivity on face
+        //- Return transmissivity on face (default: 0)
         virtual scalar t
         (
             const label faceI,
@@ -162,7 +163,7 @@ public:
         virtual tmp<scalarField> rDiff
         (
             const label bandI,
-            vectorField* incomingDirection ,
+            vectorField* incomingDirection,
             scalarField* T
         ) const;
 

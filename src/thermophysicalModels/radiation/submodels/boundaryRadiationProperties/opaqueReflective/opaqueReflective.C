@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,7 +53,7 @@ Foam::radiation::opaqueReflective::opaqueReflective
 :
     boundaryRadiationPropertiesPatch(dict, pp),
     pp_(pp),
-    fd_(dict.lookupOrDefault<scalar>("fd", 1))
+    fd_(dict.getOrDefault<scalar>("fd", 1))
 {
     const dictionary& absorptionDict =
         dict.subDict("wallAbsorptionEmissionModel");

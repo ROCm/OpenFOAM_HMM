@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -82,7 +82,7 @@ Foam::scalar Foam::radiation::lookup::e
     const scalar T
 ) const
 {
-    return(dict_.get<scalar>("emissivity"));
+    return dict_.get<scalar>("emissivity");
 }
 
 
@@ -110,7 +110,7 @@ Foam::scalar Foam::radiation::lookup::a
     const scalar T
 ) const
 {
-     return(dict_.get<scalar>("absorptivity"));
+     return dict_.get<scalar>("absorptivity");
 }
 
 
@@ -124,7 +124,7 @@ Foam::tmp<Foam::scalarField> Foam::radiation::lookup::t
     return tmp<scalarField>::New
     (
         pp_.size(),
-        dict_.get<scalar>("transmissivity")
+        dict_.getOrDefault<scalar>("transmissivity", 0)
     );
 }
 
@@ -137,7 +137,7 @@ Foam::scalar Foam::radiation::lookup::t
     const scalar T
 ) const
 {
-    return(dict_.get<scalar>("transmissivity"));
+    return dict_.getOrDefault<scalar>("transmissivity", 0);
 }
 
 
