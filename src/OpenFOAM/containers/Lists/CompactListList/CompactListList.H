@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -141,11 +141,11 @@ public:
 
         // Access
 
-            //- Return the primary size, i.e. the number of rows
-            inline label size() const;
+            //- The primary size (the number of rows)
+            inline label size() const noexcept;
 
-            //- Return true if the number of rows is zero
-            inline bool empty() const;
+            //- True if the number of rows is zero
+            inline bool empty() const noexcept;
 
             //- Return the offset table (= size()+1)
             inline const List<label>& offsets() const;

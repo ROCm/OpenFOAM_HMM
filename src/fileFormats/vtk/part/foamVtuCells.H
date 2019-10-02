@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -174,10 +174,10 @@ public:
         inline bool decomposeRequested() const;
 
         //- True if no cellTypes are populated.
-        inline bool empty() const;
+        inline bool empty() const noexcept;
 
         //- The size of populated cellTypes.
-        inline label size() const;
+        inline label size() const noexcept;
 
 
     // Edit

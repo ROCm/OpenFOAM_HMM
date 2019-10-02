@@ -153,11 +153,11 @@ public:
 
     // Member Functions
 
-        //- Return number of elements in list
-        inline label size() const;
+        //- The number of elements in list
+        inline label size() const noexcept;
 
-        //- Return true if the list is empty
-        inline bool empty() const;
+        //- True if the list is empty
+        inline bool empty() const noexcept;
 
         //- Return first entry
         inline link* first();

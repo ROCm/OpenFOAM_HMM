@@ -90,7 +90,7 @@ inline Foam::PtrDynList<T, SizeMin>::PtrDynList(UList<T*>& list)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T, int SizeMin>
-inline Foam::label Foam::PtrDynList<T, SizeMin>::capacity() const
+inline Foam::label Foam::PtrDynList<T, SizeMin>::capacity() const noexcept
 {
     return capacity_;
 }

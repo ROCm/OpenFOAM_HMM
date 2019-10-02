@@ -138,11 +138,11 @@ public:
 
     // Access
 
-        //- Return the number of elements in the list
-        inline label size() const;
+        //- The number of elements in the list
+        inline label size() const noexcept;
 
-        //- Return true if the list is empty (ie, size() is zero)
-        inline bool empty() const;
+        //- True if the list is empty (ie, size() is zero)
+        inline bool empty() const noexcept;
 
         //- Return reference to the first element of the list
         inline T& first();

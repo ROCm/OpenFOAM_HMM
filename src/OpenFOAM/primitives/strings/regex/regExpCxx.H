@@ -137,16 +137,17 @@ public:
     // Access
 
         //- Return true if expression is empty
-        inline bool empty() const;
+        inline bool empty() const noexcept;
 
         //- Return true if expression is non-empty
-        inline bool exists() const;
+        inline bool exists() const noexcept;
 
         //- The number of capture groups for a non-empty expression
         inline unsigned ngroups() const;
 
         //  \return True if the pattern was set with ignore-case.
         inline bool nocase() const;
+
 
     // Editing
 
@@ -164,6 +165,7 @@ public:
         //- Compile pattern into a regular expression, optionally ignore case.
         //  \return True if the pattern was compiled
         bool set(const std::string& pattern, bool ignoreCase=false);
+
 
     // Matching/Searching
 

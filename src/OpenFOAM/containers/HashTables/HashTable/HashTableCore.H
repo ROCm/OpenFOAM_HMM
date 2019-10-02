@@ -62,8 +62,7 @@ struct HashTableCore
     static label canonicalSize(const label requested_size);
 
     //- Construct null
-    HashTableCore()
-    {}
+    HashTableCore() = default;
 
     //- Define template name and debug
     ClassName("HashTable");
@@ -105,8 +104,8 @@ struct HashTableCore
 
         inline const_iterator_pair(const TableType& tbl);
 
-        inline label size() const;
-        inline bool empty() const;
+        label size() const noexcept { return size_; }
+        bool empty() const noexcept { return !size_; }
 
         inline IteratorType begin() const;
         inline IteratorType cbegin() const;

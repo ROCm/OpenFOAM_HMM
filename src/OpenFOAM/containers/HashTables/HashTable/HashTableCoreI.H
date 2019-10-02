@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,22 +71,6 @@ inline Foam::HashTableCore::const_iterator_pair<IteratorType, TableType>
     size_(tbl.size()),
     iter_(tbl.begin())
 {}
-
-
-template<class IteratorType, class TableType>
-inline Foam::label
-Foam::HashTableCore::const_iterator_pair<IteratorType, TableType>::size() const
-{
-    return size_;
-}
-
-
-template<class IteratorType, class TableType>
-inline bool
-Foam::HashTableCore::const_iterator_pair<IteratorType, TableType>::empty() const
-{
-    return !size_;
-}
 
 
 template<class IteratorType, class TableType>

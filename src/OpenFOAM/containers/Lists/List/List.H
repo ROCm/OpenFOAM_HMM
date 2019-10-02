@@ -55,7 +55,6 @@ namespace Foam
 {
 
 // Forward declarations
-
 class Istream;
 class Ostream;
 
@@ -111,6 +110,12 @@ class List
 
 
 public:
+
+    // Related types
+
+        //- Declare type of subList
+        typedef SubList<T> subList;
+
 
     // Static Member Functions
 
@@ -197,12 +202,6 @@ public:
 
     //- Destructor
     ~List();
-
-
-    // Related types
-
-        //- Declare type of subList
-        typedef SubList<T> subList;
 
 
     // Member Functions

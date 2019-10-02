@@ -82,12 +82,11 @@ class DynamicList
 {
     static_assert(SizeMin > 0, "Invalid min size parameter");
 
-    // Private data
+    // Private Data
 
         //- The capacity (allocated size) of the underlying list.
         label capacity_;
 
-private:
 
     // Private Member Functions
 
@@ -96,7 +95,6 @@ private:
 
         //- Subset elements in range
         label subsetElements(const labelRange& slice);
-
 
 protected:
 
@@ -174,13 +172,13 @@ public:
 
     // Member Functions
 
-      // Access
+    // Access
 
         //- Normal lower capacity limit - the SizeMin template parameter
-        inline label min_size() const;
+        static constexpr label min_size() noexcept { return SizeMin; }
 
         //- Size of the underlying storage.
-        inline label capacity() const;
+        inline label capacity() const noexcept;
 
 
         // Edit

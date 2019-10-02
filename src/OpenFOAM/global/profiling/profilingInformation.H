@@ -46,11 +46,10 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class profilingInformation;
 class Ostream;
 
-// Forward declaration of friend functions and operators
 Ostream& operator<<(Ostream& os, const profilingInformation& info);
 
 

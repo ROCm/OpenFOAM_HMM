@@ -541,7 +541,7 @@ void Foam::List<T>::operator=(std::initializer_list<T> list)
         List_ACCESS(T, (*this), vp);
 
         label i = 0;
-        for (const auto& val : list)
+        for (const T& val : list)
         {
             vp[i] = val;
             ++i;

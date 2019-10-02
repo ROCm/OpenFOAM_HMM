@@ -222,7 +222,7 @@ inline Foam::DynamicField<T, SizeMin>::DynamicField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T, int SizeMin>
-inline Foam::label Foam::DynamicField<T, SizeMin>::capacity() const
+inline Foam::label Foam::DynamicField<T, SizeMin>::capacity() const noexcept
 {
     return capacity_;
 }

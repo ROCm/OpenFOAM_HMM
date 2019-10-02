@@ -111,13 +111,13 @@ inline void Foam::CStringList::clear()
 }
 
 
-inline bool Foam::CStringList::empty() const
+inline bool Foam::CStringList::empty() const noexcept
 {
     return !argc_;
 }
 
 
-inline int Foam::CStringList::size() const
+inline int Foam::CStringList::size() const noexcept
 {
     return argc_;
 }

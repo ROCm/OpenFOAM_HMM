@@ -356,28 +356,21 @@ Foam::UList<T>::crend() const
 
 
 template<class T>
-inline void Foam::UList<T>::size(const label n)
+inline void Foam::UList<T>::size(const label n) noexcept
 {
     size_ = n;
 }
 
 
 template<class T>
-inline Foam::label Foam::UList<T>::size() const
+inline Foam::label Foam::UList<T>::size() const noexcept
 {
     return size_;
 }
 
 
 template<class T>
-inline Foam::label Foam::UList<T>::max_size() const
-{
-    return labelMax;
-}
-
-
-template<class T>
-inline bool Foam::UList<T>::empty() const
+inline bool Foam::UList<T>::empty() const noexcept
 {
     return !size_;
 }

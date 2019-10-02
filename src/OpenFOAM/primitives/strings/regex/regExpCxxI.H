@@ -112,13 +112,13 @@ inline Foam::regExpCxx::regExpCxx(const std::string& pattern, bool ignoreCase)
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-inline bool Foam::regExpCxx::empty() const
+inline bool Foam::regExpCxx::empty() const noexcept
 {
     return !ok_;
 }
 
 
-inline bool Foam::regExpCxx::exists() const
+inline bool Foam::regExpCxx::exists() const noexcept
 {
     return ok_;
 }

@@ -103,7 +103,8 @@ public:
     // Access
 
         //- Size of the underlying storage.
-        inline label capacity() const;
+        inline label capacity() const noexcept;
+
 
     // Edit
 

@@ -122,7 +122,7 @@ public:
         inline void operator=(const UList<T>& list);
 
         //- Assignment of all entries to the given value
-        inline void operator=(const T& t);
+        inline void operator=(const T& val);
 };
 
 

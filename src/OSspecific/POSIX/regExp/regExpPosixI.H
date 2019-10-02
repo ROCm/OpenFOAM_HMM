@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -98,15 +98,15 @@ inline Foam::regExpPosix::~regExpPosix()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-inline bool Foam::regExpPosix::empty() const
+inline bool Foam::regExpPosix::empty() const noexcept
 {
     return !preg_;
 }
 
 
-inline bool Foam::regExpPosix::exists() const
+inline bool Foam::regExpPosix::exists() const noexcept
 {
-    return preg_ ? true : false;
+    return preg_;
 }
 
 

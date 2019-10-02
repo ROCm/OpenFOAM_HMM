@@ -220,14 +220,7 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T, int SizeMin>
-inline Foam::label Foam::DynamicList<T, SizeMin>::min_size() const
-{
-    return SizeMin;
-}
-
-
-template<class T, int SizeMin>
-inline Foam::label Foam::DynamicList<T, SizeMin>::capacity() const
+inline Foam::label Foam::DynamicList<T, SizeMin>::capacity() const noexcept
 {
     return capacity_;
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -182,10 +182,10 @@ public:
     // Member Functions
 
         //- True if there are no data sets
-        inline bool empty() const;
+        inline bool empty() const noexcept;
 
         //- The number of data sets
-        inline label size() const;
+        inline label size() const noexcept;
 
 
     // Content Management

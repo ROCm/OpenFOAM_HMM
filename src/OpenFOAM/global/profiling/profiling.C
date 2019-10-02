@@ -309,7 +309,7 @@ const Foam::Time& Foam::profiling::owner() const
 }
 
 
-Foam::label Foam::profiling::size() const
+Foam::label Foam::profiling::size() const noexcept
 {
     return stack_.size();
 }

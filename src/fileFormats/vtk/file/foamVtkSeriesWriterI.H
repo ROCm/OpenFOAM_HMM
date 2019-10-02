@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,13 +25,13 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::vtk::seriesWriter::empty() const
+inline bool Foam::vtk::seriesWriter::empty() const noexcept
 {
     return entries_.empty();
 }
 
 
-inline Foam::label Foam::vtk::seriesWriter::size() const
+inline Foam::label Foam::vtk::seriesWriter::size() const noexcept
 {
     return entries_.size();
 }

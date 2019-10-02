@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -118,14 +118,14 @@ Foam::CompactListList<T, Container>::null()
 
 
 template<class T, class Container>
-inline Foam::label Foam::CompactListList<T, Container>::size() const
+inline Foam::label Foam::CompactListList<T, Container>::size() const noexcept
 {
     return size_;
 }
 
 
 template<class T, class Container>
-inline bool Foam::CompactListList<T, Container>::empty() const
+inline bool Foam::CompactListList<T, Container>::empty() const noexcept
 {
     return !size_;
 }

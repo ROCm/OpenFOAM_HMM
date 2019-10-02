@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,13 +41,13 @@ inline bool Foam::vtk::vtuCells::decomposeRequested() const
 }
 
 
-inline bool Foam::vtk::vtuCells::empty() const
+inline bool Foam::vtk::vtuCells::empty() const noexcept
 {
     return cellTypes_.empty();
 }
 
 
-inline Foam::label Foam::vtk::vtuCells::size() const
+inline Foam::label Foam::vtk::vtuCells::size() const noexcept
 {
     return cellTypes_.size();
 }

@@ -349,7 +349,7 @@ public:
         inline dlLibraryTable& libs();
 
         //- The number of arguments
-        inline label size() const;
+        inline label size() const noexcept;
 
         //- Return arguments
         inline const stringList& args() const;

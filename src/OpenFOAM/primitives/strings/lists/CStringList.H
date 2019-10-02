@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -137,10 +137,10 @@ public:
     // Access
 
         //- True if the size is zero.
-        inline bool empty() const;
+        inline bool empty() const noexcept;
 
         //- Return the number of C-strings (ie, argc)
-        inline int size() const;
+        inline int size() const noexcept;
 
         //- Return the list of C-strings (ie, argv)
         //  The position at argc is a nullptr

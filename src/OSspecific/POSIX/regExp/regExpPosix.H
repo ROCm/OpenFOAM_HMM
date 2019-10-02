@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011, 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011, 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -125,13 +125,14 @@ public:
     // Access
 
         //- Return true if a precompiled expression does not exist
-        inline bool empty() const;
+        inline bool empty() const noexcept;
 
         //- Return true if a precompiled expression exists
-        inline bool exists() const;
+        inline bool exists() const noexcept;
 
         //- The number of capture groups for a non-empty expression
         inline unsigned ngroups() const;
+
 
     // Editing
 
@@ -149,6 +150,7 @@ public:
         //- Compile pattern into a regular expression, optionally ignore case.
         //  \return True if the pattern was compiled
         bool set(const std::string& pattern, bool ignoreCase=false);
+
 
     // Matching/Searching
 

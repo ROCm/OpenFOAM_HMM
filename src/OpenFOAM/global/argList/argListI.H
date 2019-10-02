@@ -123,7 +123,7 @@ inline Foam::dlLibraryTable& Foam::argList::libs()
 }
 
 
-inline Foam::label Foam::argList::size() const
+inline Foam::label Foam::argList::size() const noexcept
 {
     return args_.size();
 }

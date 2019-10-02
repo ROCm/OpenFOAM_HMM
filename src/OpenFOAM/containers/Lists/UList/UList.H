@@ -95,26 +95,13 @@ class UList
         T* __restrict__ v_;
 
 
-    // Private Member Functions
-
-        //- No copy assignment (shallow copy)
-        //
-        //  Assignment of UList<T> may need to be either shallow (copy pointer)
-        //  or deep (copy elements) depending on context or the particular type
-        //  of list derived from UList and it is confusing and prone to error
-        //  for the default assignment to be either.  The solution is to
-        //  disallow default assignment and provide separate 'shallowCopy' and
-        //  'deepCopy' member functions
-        UList<T>& operator=(const UList<T>&) = delete;
-
-
 protected:
 
     // Protected Member Functions
 
         //- Override size to be inconsistent with allocated storage.
         //  Use with care
-        inline void size(const label n);
+        inline void size(const label n) noexcept;
 
         //- Write the UList with its compound type
         void writeEntry(Ostream& os) const;
@@ -123,6 +110,14 @@ protected:
         //- always addresses a valid section of the list.
         labelRange validateRange(const labelRange& range) const;
 
+
+        //- No copy assignment (default: shallow copy)
+        //
+        //  Assignment may need to be shallow (copy pointer)
+        //  or deep (copy elements) depending on context or type of list.
+        //  Disallow default assignment and provide separate 'shallowCopy' and
+        //  'deepCopy' member functions.
+        UList<T>& operator=(const UList<T>&) = delete;
 
 public:
 
@@ -415,14 +410,14 @@ public:
 
     // STL member functions
 
-        //- Return the number of elements in the UList
-        inline label size() const;
+        //- The number of elements in the UList
+        inline label size() const noexcept;
 
-        //- Return size of the largest possible UList
-        inline label max_size() const;
+        //- True if the UList is empty (ie, size() is zero)
+        inline bool empty() const noexcept;
 
-        //- Return true if the UList is empty (ie, size() is zero)
-        inline bool empty() const;
+        //- The size of the largest possible UList
+        static constexpr label max_size() noexcept { return labelMax; }
 
         //- Swap content with another UList of the same type in constant time
         inline void swap(UList<T>& list);
@@ -468,7 +463,7 @@ public:
         friend Istream& operator>> <T>
         (
             Istream& os,
-            UList<T>& L
+            UList<T>& list
         );
 
 

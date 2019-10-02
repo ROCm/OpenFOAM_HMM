@@ -283,7 +283,7 @@ public:
         //- Number of entries.
         inline label size() const noexcept;
 
-        //- Return true if the list is empty (ie, size() is zero).
+        //- True if the list is empty (ie, size() is zero).
         inline bool empty() const noexcept;
 
         //- The number of elements that can be stored with reallocating

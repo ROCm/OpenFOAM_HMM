@@ -241,7 +241,7 @@ public:
         const Time& owner() const;
 
         //- The size of the current stack
-        label size() const;
+        label size() const noexcept;
 
         //- writeData member function required by regIOobject
         virtual bool writeData(Ostream& os) const;
@@ -254,7 +254,6 @@ public:
             IOstream::compressionType ignoreAlwaysUncompressed,
             const bool valid
         ) const;
-
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

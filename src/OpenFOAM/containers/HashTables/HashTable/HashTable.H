@@ -233,13 +233,13 @@ public:
     // Access
 
         //- The size of the underlying table
-        inline label capacity() const;
+        inline label capacity() const noexcept;
 
-        //- Return number of elements in table
-        inline label size() const;
+        //- The number of elements in table
+        inline label size() const noexcept;
 
-        //- Return true if the hash table is empty
-        inline bool empty() const;
+        //- True if the hash table is empty
+        inline bool empty() const noexcept;
 
         //- Find and return a hashed entry. FatalError if it does not exist.
         inline T& at(const Key& key);
