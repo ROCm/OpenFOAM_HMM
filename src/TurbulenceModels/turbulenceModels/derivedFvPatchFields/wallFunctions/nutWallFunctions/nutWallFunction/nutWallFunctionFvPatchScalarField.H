@@ -5,7 +5,7 @@
     \\  /    A nd           |
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016 OpenFOAM Foundation
+                            | Copyright (C) 2011-2016, 2019 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -172,7 +172,32 @@ public:
         );
 
 
-    // Member functions
+    // Member Functions
+
+        //- Return Cmu
+        scalar Cmu() const
+        {
+            return Cmu_;
+        }
+
+        //- Return kappa
+        scalar kappa() const
+        {
+            return kappa_;
+        }
+
+        //- Return E
+        scalar E() const
+        {
+            return E_;
+        }
+
+        //- Return the nut patchField for the given wall patch
+        static const nutWallFunctionFvPatchScalarField& nutw
+        (
+            const turbulenceModel& turbModel,
+            const label patchi
+        );
 
         //- Calculate the Y+ at the edge of the laminar sublayer
         static scalar yPlusLam(const scalar kappa, const scalar E);

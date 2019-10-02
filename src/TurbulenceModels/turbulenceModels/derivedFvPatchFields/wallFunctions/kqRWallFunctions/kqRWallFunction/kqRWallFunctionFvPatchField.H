@@ -5,7 +5,7 @@
     \\  /    A nd           |
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2017 OpenFOAM Foundation
+                            | Copyright (C) 2011-2017, 2019 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,12 +72,6 @@ class kqRWallFunctionFvPatchField
 :
     public zeroGradientFvPatchField<Type>
 {
-
-    // Private Member Functions
-
-        //- Check the type of the patch
-        void checkType();
-
 
 public:
 
@@ -148,7 +142,7 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         //- Evaluate the patchField
         virtual void evaluate

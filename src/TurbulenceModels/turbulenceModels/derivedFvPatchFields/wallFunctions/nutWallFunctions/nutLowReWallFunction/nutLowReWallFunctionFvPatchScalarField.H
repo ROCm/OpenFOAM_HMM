@@ -5,7 +5,7 @@
     \\  /    A nd           |
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016 OpenFOAM Foundation
+                            | Copyright (C) 2011-2016, 2019 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -146,7 +146,7 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         //- Calculate and return the yPlus at the boundary
         virtual tmp<scalarField> yPlus() const;

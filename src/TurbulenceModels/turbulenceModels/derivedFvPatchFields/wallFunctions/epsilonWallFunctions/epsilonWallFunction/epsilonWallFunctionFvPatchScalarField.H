@@ -5,7 +5,7 @@
     \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016 OpenFOAM Foundation
+                            | Copyright (C) 2011-2016, 2019 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +47,7 @@ Description
     The low-Re correction is activated by setting the entry
     \c lowReCorrection to 'on'; in this mode the model switches between
     laminar and turbulent functions based on the laminar-to-turbulent y+ value
-    derived from kappa and E.  When the \c lowReCorrection is inactive, the
+    derived from the kappa and E specified in the corresponding nutWallFunction. When the \c lowReCorrection is inactive, the
     wall function operates in high-Re mode.
 
 Usage
@@ -103,18 +103,6 @@ protected:
         //- Tolerance used in weighted calculations
         static scalar tolerance_;
 
-        //- Cmu coefficient
-        scalar Cmu_;
-
-        //- Von Karman constant
-        scalar kappa_;
-
-        //- E coefficient
-        scalar E_;
-
-        //- y+ at the edge of the laminar sublayer
-        scalar yPlusLam_;
-
         //- Local copy of turbulence G field
         scalarField G_;
 
@@ -135,12 +123,6 @@ protected:
 
 
     // Protected Member Functions
-
-        //- Check the type of the patch
-        virtual void checkType();
-
-        //- Write local wall function variables
-        virtual void writeLocalEntries(Ostream&) const;
 
         //- Set the master patch - master is responsible for updating all
         //  wall function patches
@@ -253,7 +235,7 @@ public:
     virtual ~epsilonWallFunctionFvPatchScalarField() = default;
 
 
-    // Member functions
+    // Member Functions
 
         // Access
 
@@ -281,12 +263,6 @@ public:
                 fvMatrix<scalar>& matrix,
                 const scalarField& weights
             );
-
-
-        // I-O
-
-            //- Write
-            virtual void write(Ostream&) const;
 };
 
 

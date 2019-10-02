@@ -5,7 +5,7 @@
     \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016 OpenFOAM Foundation
+                            | Copyright (C) 2011-2016, 2019 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,10 +28,7 @@ License
 #include "epsilonWallFunctionFvPatchScalarField.H"
 #include "nutWallFunctionFvPatchScalarField.H"
 #include "turbulenceModel.H"
-#include "fvPatchFieldMapper.H"
 #include "fvMatrix.H"
-#include "volFields.H"
-#include "wallFvPatch.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -39,31 +36,6 @@ License
 Foam::scalar Foam::epsilonWallFunctionFvPatchScalarField::tolerance_ = 1e-5;
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
-
-void Foam::epsilonWallFunctionFvPatchScalarField::checkType()
-{
-    if (!isA<wallFvPatch>(patch()))
-    {
-        FatalErrorInFunction
-            << "Invalid wall function specification" << nl
-            << "    Patch type for patch " << patch().name()
-            << " must be wall" << nl
-            << "    Current patch type is " << patch().type() << nl << endl
-            << abort(FatalError);
-    }
-}
-
-
-void Foam::epsilonWallFunctionFvPatchScalarField::writeLocalEntries
-(
-    Ostream& os
-) const
-{
-    os.writeEntry("Cmu", Cmu_);
-    os.writeEntry("kappa", kappa_);
-    os.writeEntry("E", E_);
-}
-
 
 void Foam::epsilonWallFunctionFvPatchScalarField::setMaster()
 {
@@ -213,23 +185,23 @@ void Foam::epsilonWallFunctionFvPatchScalarField::calculate
 {
     const label patchi = patch.index();
 
+    const nutWallFunctionFvPatchScalarField& nutw =
+        nutWallFunctionFvPatchScalarField::nutw(turbModel, patchi);
+
     const scalarField& y = turbModel.y()[patchi];
-
-    const scalar Cmu25 = pow025(Cmu_);
-    const scalar Cmu75 = pow(Cmu_, 0.75);
-
-    const tmp<volScalarField> tk = turbModel.k();
-    const volScalarField& k = tk();
 
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
-    const tmp<scalarField> tnutw = turbModel.nut(patchi);
-    const scalarField& nutw = tnutw();
+    const tmp<volScalarField> tk = turbModel.k();
+    const volScalarField& k = tk();
 
     const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
 
     const scalarField magGradUw(mag(Uw.snGrad()));
+
+    const scalar Cmu25 = pow025(nutw.Cmu());
+    const scalar Cmu75 = pow(nutw.Cmu(), 0.75);
 
     // Set epsilon and G
     forAll(nutw, facei)
@@ -241,15 +213,15 @@ void Foam::epsilonWallFunctionFvPatchScalarField::calculate
         const scalar w = cornerWeights[facei];
 
         // Default high-Re form
-        scalar epsilonc = w*Cmu75*pow(k[celli], 1.5)/(kappa_*y[facei]);
+        scalar epsilonc = w*Cmu75*pow(k[celli], 1.5)/(nutw.kappa()*y[facei]);
         scalar Gc =
             w
            *(nutw[facei] + nuw[facei])
            *magGradUw[facei]
            *Cmu25*sqrt(k[celli])
-           /(kappa_*y[facei]);
+           /(nutw.kappa()*y[facei]);
 
-        if (lowReCorrection_ && yPlus < yPlusLam_)
+        if (lowReCorrection_ && yPlus < nutw.yPlusLam())
         {
             epsilonc = w*2.0*k[celli]*nuw[facei]/sqr(y[facei]);
             Gc = 0;
@@ -272,19 +244,13 @@ epsilonWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF),
-    Cmu_(0.09),
-    kappa_(0.41),
-    E_(9.8),
-    yPlusLam_(nutWallFunctionFvPatchScalarField::yPlusLam(kappa_, E_)),
     G_(),
     epsilon_(),
     lowReCorrection_(false),
     initialised_(false),
     master_(-1),
     cornerWeights_()
-{
-    checkType();
-}
+{}
 
 
 Foam::epsilonWallFunctionFvPatchScalarField::
@@ -297,19 +263,13 @@ epsilonWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(ptf, p, iF, mapper),
-    Cmu_(ptf.Cmu_),
-    kappa_(ptf.kappa_),
-    E_(ptf.E_),
-    yPlusLam_(ptf.yPlusLam_),
     G_(),
     epsilon_(),
     lowReCorrection_(ptf.lowReCorrection_),
     initialised_(false),
     master_(-1),
     cornerWeights_()
-{
-    checkType();
-}
+{}
 
 
 Foam::epsilonWallFunctionFvPatchScalarField::
@@ -321,10 +281,6 @@ epsilonWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF, dict),
-    Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
-    E_(dict.lookupOrDefault<scalar>("E", 9.8)),
-    yPlusLam_(nutWallFunctionFvPatchScalarField::yPlusLam(kappa_, E_)),
     G_(),
     epsilon_(),
     lowReCorrection_(dict.lookupOrDefault("lowReCorrection", false)),
@@ -332,8 +288,6 @@ epsilonWallFunctionFvPatchScalarField
     master_(-1),
     cornerWeights_()
 {
-    checkType();
-
     // Apply zero-gradient condition on start-up
     this->operator==(patchInternalField());
 }
@@ -346,19 +300,13 @@ epsilonWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(ewfpsf),
-    Cmu_(ewfpsf.Cmu_),
-    kappa_(ewfpsf.kappa_),
-    E_(ewfpsf.E_),
-    yPlusLam_(ewfpsf.yPlusLam_),
     G_(),
     epsilon_(),
     lowReCorrection_(ewfpsf.lowReCorrection_),
     initialised_(false),
     master_(-1),
     cornerWeights_()
-{
-    checkType();
-}
+{}
 
 
 Foam::epsilonWallFunctionFvPatchScalarField::
@@ -369,19 +317,13 @@ epsilonWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(ewfpsf, iF),
-    Cmu_(ewfpsf.Cmu_),
-    kappa_(ewfpsf.kappa_),
-    E_(ewfpsf.E_),
-    yPlusLam_(ewfpsf.yPlusLam_),
     G_(),
     epsilon_(),
     lowReCorrection_(ewfpsf.lowReCorrection_),
     initialised_(false),
     master_(-1),
     cornerWeights_()
-{
-    checkType();
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -579,14 +521,6 @@ void Foam::epsilonWallFunctionFvPatchScalarField::manipulateMatrix
     matrix.setValues(constraintCells, constraintValues);
 
     fvPatchField<scalar>::manipulateMatrix(matrix);
-}
-
-
-void Foam::epsilonWallFunctionFvPatchScalarField::write(Ostream& os) const
-{
-    writeLocalEntries(os);
-    fixedValueFvPatchField<scalar>::write(os);
-    os.writeEntry("lowReCorrection", lowReCorrection_);
 }
 
 

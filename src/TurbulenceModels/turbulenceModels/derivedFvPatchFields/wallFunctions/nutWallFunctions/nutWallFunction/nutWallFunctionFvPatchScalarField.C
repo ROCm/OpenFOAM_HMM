@@ -5,7 +5,7 @@
     \\  /    A nd           |
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016 OpenFOAM Foundation
+                            | Copyright (C) 2011-2016, 2019 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -177,6 +177,21 @@ Foam::nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+const Foam::nutWallFunctionFvPatchScalarField&
+Foam::nutWallFunctionFvPatchScalarField::nutw
+(
+    const turbulenceModel& turbModel,
+    const label patchi
+)
+{
+    return
+        refCast<const nutWallFunctionFvPatchScalarField>
+        (
+            turbModel.nut()().boundaryField()[patchi]
+        );
+}
+
 
 Foam::scalar Foam::nutWallFunctionFvPatchScalarField::yPlusLam
 (

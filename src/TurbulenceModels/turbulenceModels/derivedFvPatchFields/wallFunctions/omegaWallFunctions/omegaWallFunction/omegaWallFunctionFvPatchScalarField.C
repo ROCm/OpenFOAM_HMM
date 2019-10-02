@@ -5,7 +5,7 @@
     \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016 OpenFOAM Foundation
+                            | Copyright (C) 2011-2016, 2019 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,10 +28,7 @@ License
 #include "omegaWallFunctionFvPatchScalarField.H"
 #include "nutWallFunctionFvPatchScalarField.H"
 #include "turbulenceModel.H"
-#include "fvPatchFieldMapper.H"
 #include "fvMatrix.H"
-#include "volFields.H"
-#include "wallFvPatch.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -44,30 +41,6 @@ namespace Foam
 scalar omegaWallFunctionFvPatchScalarField::tolerance_ = 1e-5;
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-void omegaWallFunctionFvPatchScalarField::checkType()
-{
-    if (!isA<wallFvPatch>(patch()))
-    {
-        FatalErrorInFunction
-            << "Invalid wall function specification" << nl
-            << "    Patch type for patch " << patch().name()
-            << " must be wall" << nl
-            << "    Current patch type is " << patch().type() << nl << endl
-            << abort(FatalError);
-    }
-}
-
-
-void omegaWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
-{
-    os.writeEntry("Cmu", Cmu_);
-    os.writeEntry("kappa", kappa_);
-    os.writeEntry("E", E_);
-    os.writeEntry("beta1", beta1_);
-    os.writeEntry("blended", blended_);
-}
-
 
 void omegaWallFunctionFvPatchScalarField::setMaster()
 {
@@ -218,18 +191,18 @@ void omegaWallFunctionFvPatchScalarField::calculate
 {
     const label patchi = patch.index();
 
+    const nutWallFunctionFvPatchScalarField& nutw =
+        nutWallFunctionFvPatchScalarField::nutw(turbModel, patchi);
+
     const scalarField& y = turbModel.y()[patchi];
 
-    const scalar Cmu25 = pow025(Cmu_);
+    const scalar Cmu25 = pow025(nutw.Cmu());
 
     const tmp<volScalarField> tk = turbModel.k();
     const volScalarField& k = tk();
 
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
-
-    const tmp<scalarField> tnutw = turbModel.nut(patchi);
-    const scalarField& nutw = tnutw();
 
     const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
 
@@ -245,7 +218,7 @@ void omegaWallFunctionFvPatchScalarField::calculate
         const scalar w = cornerWeights[facei];
 
         const scalar omegaVis = 6*nuw[facei]/(beta1_*sqr(y[facei]));
-        const scalar omegaLog = sqrt(k[celli])/(Cmu25*kappa_*y[facei]);
+        const scalar omegaLog = sqrt(k[celli])/(Cmu25*nutw.kappa()*y[facei]);
 
         // Switching between the laminar sub-layer and the log-region rather
         // than blending has been found to provide more accurate results over a
@@ -264,7 +237,7 @@ void omegaWallFunctionFvPatchScalarField::calculate
         }
         else
         {
-            if (yPlus > yPlusLam_)
+            if (yPlus > nutw.yPlusLam())
             {
                 omega0[celli] += w*omegaLog;
             }
@@ -282,7 +255,7 @@ void omegaWallFunctionFvPatchScalarField::calculate
                *(nutw[facei] + nuw[facei])
                *magGradUw[facei]
                *Cmu25*sqrt(k[celli])
-               /(kappa_*y[facei]);
+               /(nutw.kappa()*y[facei]);
         }
     }
 }
@@ -297,20 +270,14 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF),
-    Cmu_(0.09),
-    kappa_(0.41),
-    E_(9.8),
     beta1_(0.075),
     blended_(true),
-    yPlusLam_(nutWallFunctionFvPatchScalarField::yPlusLam(kappa_, E_)),
     G_(),
     omega_(),
     initialised_(false),
     master_(-1),
     cornerWeights_()
-{
-    checkType();
-}
+{}
 
 
 omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
@@ -322,20 +289,14 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(ptf, p, iF, mapper),
-    Cmu_(ptf.Cmu_),
-    kappa_(ptf.kappa_),
-    E_(ptf.E_),
     beta1_(ptf.beta1_),
     blended_(ptf.blended_),
-    yPlusLam_(ptf.yPlusLam_),
     G_(),
     omega_(),
     initialised_(false),
     master_(-1),
     cornerWeights_()
-{
-    checkType();
-}
+{}
 
 
 omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
@@ -346,20 +307,14 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF, dict),
-    Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
-    E_(dict.lookupOrDefault<scalar>("E", 9.8)),
     beta1_(dict.lookupOrDefault<scalar>("beta1", 0.075)),
     blended_(dict.lookupOrDefault<Switch>("blended", true)),
-    yPlusLam_(nutWallFunctionFvPatchScalarField::yPlusLam(kappa_, E_)),
     G_(),
     omega_(),
     initialised_(false),
     master_(-1),
     cornerWeights_()
 {
-    checkType();
-
     // apply zero-gradient condition on start-up
     this->operator==(patchInternalField());
 }
@@ -371,20 +326,14 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(owfpsf),
-    Cmu_(owfpsf.Cmu_),
-    kappa_(owfpsf.kappa_),
-    E_(owfpsf.E_),
     beta1_(owfpsf.beta1_),
     blended_(owfpsf.blended_),
-    yPlusLam_(owfpsf.yPlusLam_),
     G_(),
     omega_(),
     initialised_(false),
     master_(-1),
     cornerWeights_()
-{
-    checkType();
-}
+{}
 
 
 omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
@@ -394,20 +343,14 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(owfpsf, iF),
-    Cmu_(owfpsf.Cmu_),
-    kappa_(owfpsf.kappa_),
-    E_(owfpsf.E_),
     beta1_(owfpsf.beta1_),
     blended_(owfpsf.blended_),
-    yPlusLam_(owfpsf.yPlusLam_),
     G_(),
     omega_(),
     initialised_(false),
     master_(-1),
     cornerWeights_()
-{
-    checkType();
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -607,7 +550,8 @@ void omegaWallFunctionFvPatchScalarField::manipulateMatrix
 
 void omegaWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
-    writeLocalEntries(os);
+    os.writeEntry("beta1", beta1_);
+    os.writeEntry("blended", blended_);
     fixedValueFvPatchField<scalar>::write(os);
 }
 

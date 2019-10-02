@@ -5,7 +5,7 @@
     \\  /    A nd           |
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016 OpenFOAM Foundation
+                            | Copyright (C) 2011-2016, 2019 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,11 +56,12 @@ Description
     \endverbatim
 
     or switched between these values based on the laminar-to-turbulent y+ value
-    derived from kappa and E.  Recent tests have shown that the standard
-    switching method provides more accurate results for 10 < y+ < 30 when used
-    with high Reynolds number wall-functions and both methods provide accurate
-    results when used with continuous wall-functions.  Based on this the
-    standard switching method is used by default.
+    derived from kappa and E specified in the corresponding nutWallFunction.
+    Recent tests have shown that the standard switching method provides more
+    accurate results for 10 < y+ < 30 when used with high Reynolds number
+    wall-functions and both methods provide accurate results when used with
+    continuous wall-functions.  Based on this the standard switching method is
+    used by default.
 
 Usage
     \table
@@ -116,23 +117,11 @@ protected:
         //- Tolerance used in weighted calculations
         static scalar tolerance_;
 
-        //- Cmu coefficient
-        scalar Cmu_;
-
-        //- Von Karman constant
-        scalar kappa_;
-
-        //- E coefficient
-        scalar E_;
-
         //- beta1 coefficient
         scalar beta1_;
 
         //- beta1 coefficient
         Switch blended_;
-
-        //- y+ at the edge of the laminar sublayer
-        scalar yPlusLam_;
 
         //- Local copy of turbulence G field
         scalarField G_;
@@ -151,12 +140,6 @@ protected:
 
 
     // Protected Member Functions
-
-        //- Check the type of the patch
-        virtual void checkType();
-
-        //- Write local wall function variables
-        virtual void writeLocalEntries(Ostream&) const;
 
         //- Set the master patch - master is responsible for updating all
         //  wall function patches
@@ -266,7 +249,7 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         // Access
 
