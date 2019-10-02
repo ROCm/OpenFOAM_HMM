@@ -766,7 +766,7 @@ public:
         // Member Functions/Operators
 
             //- Const access to referenced object (value)
-            inline const reference val() const
+            inline reference val() const
             {
                 return Iterator<true>::entry_->cval();
             }
