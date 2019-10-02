@@ -117,14 +117,14 @@ inline Foam::Pair<T>::Pair(Istream& is)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-inline const T& Foam::Pair<T>::second() const
+inline const T& Foam::Pair<T>::second() const noexcept
 {
     return last();
 }
 
 
 template<class T>
-inline T& Foam::Pair<T>::second()
+inline T& Foam::Pair<T>::second() noexcept
 {
     return last();
 }

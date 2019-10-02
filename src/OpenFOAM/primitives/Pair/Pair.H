@@ -110,10 +110,10 @@ public:
         using FixedList<T, 2>::last;
 
         //- Return second element, which is also the last element
-        inline const T& second() const;
+        inline const T& second() const noexcept;
 
         //- Return second element, which is also the last element
-        inline T& second();
+        inline T& second() noexcept;
 
         //- Return other element
         inline const T& other(const T& a) const;

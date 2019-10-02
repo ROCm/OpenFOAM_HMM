@@ -161,7 +161,7 @@ Foam::FixedList<T, N>::clone() const
 
 template<class T, unsigned N>
 inline const T*
-Foam::FixedList<T, N>::cdata() const
+Foam::FixedList<T, N>::cdata() const noexcept
 {
     return v_;
 }
@@ -169,35 +169,35 @@ Foam::FixedList<T, N>::cdata() const
 
 template<class T, unsigned N>
 inline T*
-Foam::FixedList<T, N>::data()
+Foam::FixedList<T, N>::data() noexcept
 {
     return v_;
 }
 
 
 template<class T, unsigned N>
-inline T& Foam::FixedList<T, N>::first()
+inline T& Foam::FixedList<T, N>::first() noexcept
 {
     return v_[0];
 }
 
 
 template<class T, unsigned N>
-inline const T& Foam::FixedList<T, N>::first() const
+inline const T& Foam::FixedList<T, N>::first() const noexcept
 {
     return v_[0];
 }
 
 
 template<class T, unsigned N>
-inline T& Foam::FixedList<T, N>::last()
+inline T& Foam::FixedList<T, N>::last() noexcept
 {
     return v_[N-1];
 }
 
 
 template<class T, unsigned N>
-inline const T& Foam::FixedList<T, N>::last() const
+inline const T& Foam::FixedList<T, N>::last() const noexcept
 {
     return v_[N-1];
 }

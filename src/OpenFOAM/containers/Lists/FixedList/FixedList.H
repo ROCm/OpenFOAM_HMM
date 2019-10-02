@@ -189,24 +189,24 @@ public:
         //- Return a const pointer to the first data element.
         //  Similar to the STL front() method and the string::data() method
         //  This can be used (with caution) when interfacing with C code
-        inline const T* cdata() const;
+        inline const T* cdata() const noexcept;
 
         //- Return a pointer to the first data element.
         //  Similar to the STL front() method and the string::data() method
         //  This can be used (with caution) when interfacing with C code
-        inline T* data();
+        inline T* data() noexcept;
 
         //- The first element of the list, position [0]
-        inline T& first();
+        inline T& first() noexcept;
 
         //- The first element of the list, position [0]
-        inline const T& first() const;
+        inline const T& first() const noexcept;
 
         //- The last element of the list, position [N-1]
-        inline T& last();
+        inline T& last() noexcept;
 
         //- The last element of the list, position [N-1]
-        inline const T& last() const;
+        inline const T& last() const noexcept;
 
 
         //- Return the forward circular index, i.e. next index
