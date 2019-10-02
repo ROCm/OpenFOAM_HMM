@@ -2,10 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016, 2019 OpenFOAM Foundation
+                            | Copyright (C) 2011-2019 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,16 +30,26 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a turbulent kinematic viscosity condition
-    when using wall functions, based on turbulence kinetic energy.
-    - replicates OpenFOAM v1.5 (and earlier) behaviour
+    This boundary condition provides a wall constraint on the turbulent
+    kinematic viscosity, i.e. \c nut, when using wall functions,
+    based on turbulent kinetic energy, \c k.
 
 Usage
+    \table
+        Property     | Description                 | Required  | Default value
+        Cmu          | Model coefficient           | no        | 0.09
+        kappa        | Von Karman constant         | no        | 0.41
+        E            | Model coefficient           | no        | 9.8
+    \endtable
+
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
+        // Mandatory entries
         type            nutkWallFunction;
+
+        // Optional entries
     }
     \endverbatim
 
@@ -101,8 +111,8 @@ public:
         );
 
         //- Construct by mapping given
-        //  nutkWallFunctionFvPatchScalarField
-        //  onto a new patch
+        //- nutkWallFunctionFvPatchScalarField
+        //- onto a new patch
         nutkWallFunctionFvPatchScalarField
         (
             const nutkWallFunctionFvPatchScalarField&,

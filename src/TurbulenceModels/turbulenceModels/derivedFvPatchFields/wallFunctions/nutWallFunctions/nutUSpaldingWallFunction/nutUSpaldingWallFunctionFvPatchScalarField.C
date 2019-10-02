@@ -31,14 +31,11 @@ License
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcNut() const
+Foam::tmp<Foam::scalarField>
+Foam::nutUSpaldingWallFunctionFvPatchScalarField::calcNut() const
 {
     const label patchi = patch().index();
 
@@ -91,7 +88,8 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcNut() const
 }
 
 
-tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
+Foam::tmp<Foam::scalarField>
+Foam::nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
 (
     const scalarField& magGradU
 ) const
@@ -101,7 +99,8 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
 }
 
 
-tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
+Foam::tmp<Foam::scalarField>
+Foam::nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
 (
     const scalarField& magGradU,
     const label maxIter,
@@ -140,7 +139,7 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
         // Note: for exact restart seed with laminar viscosity only:
         //scalar ut = sqrt(nuw[facei]*magGradU[facei]);
 
-        if (ut > ROOTVSMALL)
+        if (ROOTVSMALL < ut)
         {
             int iter = 0;
 
@@ -204,7 +203,7 @@ void Foam::nutUSpaldingWallFunctionFvPatchScalarField::writeLocalEntries
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-nutUSpaldingWallFunctionFvPatchScalarField::
+Foam::nutUSpaldingWallFunctionFvPatchScalarField::
 nutUSpaldingWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
@@ -221,7 +220,7 @@ nutUSpaldingWallFunctionFvPatchScalarField
 {}
 
 
-nutUSpaldingWallFunctionFvPatchScalarField::
+Foam::nutUSpaldingWallFunctionFvPatchScalarField::
 nutUSpaldingWallFunctionFvPatchScalarField
 (
     const nutUSpaldingWallFunctionFvPatchScalarField& ptf,
@@ -240,7 +239,7 @@ nutUSpaldingWallFunctionFvPatchScalarField
 {}
 
 
-nutUSpaldingWallFunctionFvPatchScalarField::
+Foam::nutUSpaldingWallFunctionFvPatchScalarField::
 nutUSpaldingWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
@@ -258,7 +257,7 @@ nutUSpaldingWallFunctionFvPatchScalarField
 {}
 
 
-nutUSpaldingWallFunctionFvPatchScalarField::
+Foam::nutUSpaldingWallFunctionFvPatchScalarField::
 nutUSpaldingWallFunctionFvPatchScalarField
 (
     const nutUSpaldingWallFunctionFvPatchScalarField& wfpsf
@@ -274,7 +273,7 @@ nutUSpaldingWallFunctionFvPatchScalarField
 {}
 
 
-nutUSpaldingWallFunctionFvPatchScalarField::
+Foam::nutUSpaldingWallFunctionFvPatchScalarField::
 nutUSpaldingWallFunctionFvPatchScalarField
 (
     const nutUSpaldingWallFunctionFvPatchScalarField& wfpsf,
@@ -293,7 +292,7 @@ nutUSpaldingWallFunctionFvPatchScalarField
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-nutUSpaldingWallFunctionFvPatchScalarField::
+Foam::nutUSpaldingWallFunctionFvPatchScalarField::
 ~nutUSpaldingWallFunctionFvPatchScalarField()
 {
     //if (debug)
@@ -314,7 +313,8 @@ nutUSpaldingWallFunctionFvPatchScalarField::
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::yPlus() const
+Foam::tmp<Foam::scalarField>
+Foam::nutUSpaldingWallFunctionFvPatchScalarField::yPlus() const
 {
     const label patchi = patch().index();
 
@@ -335,7 +335,10 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::yPlus() const
 }
 
 
-void nutUSpaldingWallFunctionFvPatchScalarField::write(Ostream& os) const
+void Foam::nutUSpaldingWallFunctionFvPatchScalarField::write
+(
+    Ostream& os
+) const
 {
     fvPatchField<scalar>::write(os);
     writeLocalEntries(os);
@@ -345,14 +348,14 @@ void nutUSpaldingWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchScalarField,
-    nutUSpaldingWallFunctionFvPatchScalarField
-);
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchScalarField,
+        nutUSpaldingWallFunctionFvPatchScalarField
+    );
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

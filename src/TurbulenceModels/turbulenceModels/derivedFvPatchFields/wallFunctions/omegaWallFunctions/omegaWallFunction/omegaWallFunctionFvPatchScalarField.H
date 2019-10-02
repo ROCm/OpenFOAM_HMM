@@ -2,10 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016, 2019 OpenFOAM Foundation
+                            | Copyright (C) 2011-2019 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,8 +30,9 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a wall constraint on turbulence specific
-    dissipation, omega for both low and high Reynolds number turbulence models.
+    This boundary condition provides a wall constraint on specific turbulent
+    kinetic energy dissipation rate, i.e. \c omega, for low- and high-Reynolds
+    number turbulence models.
 
     The near-wall omega may be either blended between the viscous region and
     logarithmic region values using:
@@ -55,20 +56,12 @@ Description
         Nov. 2001
     \endverbatim
 
-    or switched between these values based on the laminar-to-turbulent y+ value
-    derived from kappa and E specified in the corresponding nutWallFunction.
-    Recent tests have shown that the standard switching method provides more
-    accurate results for 10 < y+ < 30 when used with high Reynolds number
-    wall-functions and both methods provide accurate results when used with
-    continuous wall-functions.  Based on this the standard switching method is
-    used by default.
+    or switched between these values based on the viscous-to-turbulent \c y+
+    value derived from \c kappa and \c E.
 
 Usage
     \table
         Property     | Description             | Required    | Default value
-        Cmu          | Model coefficient       | no          | 0.09
-        kappa        | von Karman constant     | no          | 0.41
-        E            | Model coefficient       | no          | 9.8
         beta1        | Model coefficient       | no          | 0.075
         blended      | Blending switch         | no          | false
     \endtable
@@ -77,9 +70,24 @@ Usage
     \verbatim
     <patchName>
     {
+        // Mandatory entries
         type            omegaWallFunction;
+
+        // Optional entries
     }
     \endverbatim
+
+Note
+    The coefficients \c Cmu, \c kappa, and \c E are obtained from
+    the specified \c nutWallFunction in order to ensure that each patch
+    possesses the same set of values for these coefficients.
+
+    Some tests have shown that the stepwise switching method provides
+    more accurate predictions for 10 < y+ < 30 when used with high Reynolds
+    number wall-functions.
+
+    In addition, the stepwise switching method provides accurate predictions
+    when used with continuous wall-functions.
 
 See also
     Foam::fixedInternalValueFvPatchField
@@ -112,28 +120,28 @@ class omegaWallFunctionFvPatchScalarField
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Tolerance used in weighted calculations
         static scalar tolerance_;
 
-        //- beta1 coefficient
-        scalar beta1_;
-
-        //- beta1 coefficient
-        Switch blended_;
-
-        //- Local copy of turbulence G field
-        scalarField G_;
-
-        //- Local copy of turbulence omega field
-        scalarField omega_;
+        //- Blending switch
+        bool blended_;
 
         //- Initialised flag
         bool initialised_;
 
         //- Master patch ID
         label master_;
+
+        //- beta1 coefficient
+        scalar beta1_;
+
+        //- Local copy of turbulence G field
+        scalarField G_;
+
+        //- Local copy of turbulence omega field
+        scalarField omega_;
 
         //- List of averaging corner weights
         List<List<scalar>> cornerWeights_;
@@ -142,11 +150,11 @@ protected:
     // Protected Member Functions
 
         //- Set the master patch - master is responsible for updating all
-        //  wall function patches
+        //- wall function patches
         virtual void setMaster();
 
         //- Create the averaging weights for cells which are bounded by
-        //  multiple wall function faces
+        //- multiple wall function faces
         virtual void createAveragingWeights();
 
         //- Helper function to return non-const access to an omega patch
@@ -204,8 +212,8 @@ public:
         );
 
         //- Construct by mapping given
-        // omegaWallFunctionFvPatchScalarField
-        //  onto a new patch
+        //- omegaWallFunctionFvPatchScalarField
+        //- onto a new patch
         omegaWallFunctionFvPatchScalarField
         (
             const omegaWallFunctionFvPatchScalarField&,

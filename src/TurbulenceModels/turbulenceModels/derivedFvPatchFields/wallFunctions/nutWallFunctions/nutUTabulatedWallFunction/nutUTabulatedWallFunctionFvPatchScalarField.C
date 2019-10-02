@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -31,14 +31,11 @@ License
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-tmp<scalarField> nutUTabulatedWallFunctionFvPatchScalarField::calcNut() const
+Foam::tmp<Foam::scalarField>
+Foam::nutUTabulatedWallFunctionFvPatchScalarField::calcNut() const
 {
     const label patchi = patch().index();
 
@@ -68,7 +65,8 @@ tmp<scalarField> nutUTabulatedWallFunctionFvPatchScalarField::calcNut() const
 }
 
 
-tmp<scalarField> nutUTabulatedWallFunctionFvPatchScalarField::calcUPlus
+Foam::tmp<Foam::scalarField>
+Foam::nutUTabulatedWallFunctionFvPatchScalarField::calcUPlus
 (
     const scalarField& Rey
 ) const
@@ -87,7 +85,7 @@ tmp<scalarField> nutUTabulatedWallFunctionFvPatchScalarField::calcUPlus
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-nutUTabulatedWallFunctionFvPatchScalarField::
+Foam::nutUTabulatedWallFunctionFvPatchScalarField::
 nutUTabulatedWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
@@ -112,7 +110,7 @@ nutUTabulatedWallFunctionFvPatchScalarField
 {}
 
 
-nutUTabulatedWallFunctionFvPatchScalarField::
+Foam::nutUTabulatedWallFunctionFvPatchScalarField::
 nutUTabulatedWallFunctionFvPatchScalarField
 (
     const nutUTabulatedWallFunctionFvPatchScalarField& ptf,
@@ -127,7 +125,7 @@ nutUTabulatedWallFunctionFvPatchScalarField
 {}
 
 
-nutUTabulatedWallFunctionFvPatchScalarField::
+Foam::nutUTabulatedWallFunctionFvPatchScalarField::
 nutUTabulatedWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
@@ -153,7 +151,7 @@ nutUTabulatedWallFunctionFvPatchScalarField
 {}
 
 
-nutUTabulatedWallFunctionFvPatchScalarField::
+Foam::nutUTabulatedWallFunctionFvPatchScalarField::
 nutUTabulatedWallFunctionFvPatchScalarField
 (
     const nutUTabulatedWallFunctionFvPatchScalarField& wfpsf
@@ -165,7 +163,7 @@ nutUTabulatedWallFunctionFvPatchScalarField
 {}
 
 
-nutUTabulatedWallFunctionFvPatchScalarField::
+Foam::nutUTabulatedWallFunctionFvPatchScalarField::
 nutUTabulatedWallFunctionFvPatchScalarField
 (
     const nutUTabulatedWallFunctionFvPatchScalarField& wfpsf,
@@ -180,7 +178,8 @@ nutUTabulatedWallFunctionFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-tmp<scalarField> nutUTabulatedWallFunctionFvPatchScalarField::yPlus() const
+Foam::tmp<Foam::scalarField>
+Foam::nutUTabulatedWallFunctionFvPatchScalarField::yPlus() const
 {
     const label patchi = patch().index();
 
@@ -203,7 +202,10 @@ tmp<scalarField> nutUTabulatedWallFunctionFvPatchScalarField::yPlus() const
 }
 
 
-void nutUTabulatedWallFunctionFvPatchScalarField::write(Ostream& os) const
+void Foam::nutUTabulatedWallFunctionFvPatchScalarField::write
+(
+    Ostream& os
+) const
 {
     fvPatchField<scalar>::write(os);
     os.writeEntry("uPlusTable", uPlusTableName_);
@@ -213,14 +215,14 @@ void nutUTabulatedWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchScalarField,
-    nutUTabulatedWallFunctionFvPatchScalarField
-);
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchScalarField,
+        nutUTabulatedWallFunctionFvPatchScalarField
+    );
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

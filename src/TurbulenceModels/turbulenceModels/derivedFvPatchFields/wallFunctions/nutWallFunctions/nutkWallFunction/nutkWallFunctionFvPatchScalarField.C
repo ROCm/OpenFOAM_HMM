@@ -2,10 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016, 2019 OpenFOAM Foundation
+                            | Copyright (C) 2011-2019 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,14 +32,11 @@ License
 #include "wallFvPatch.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-tmp<scalarField> nutkWallFunctionFvPatchScalarField::calcNut() const
+Foam::tmp<Foam::scalarField> Foam::nutkWallFunctionFvPatchScalarField::
+calcNut() const
 {
     const label patchi = patch().index();
 
@@ -65,11 +62,11 @@ tmp<scalarField> nutkWallFunctionFvPatchScalarField::calcNut() const
 
     forAll(nutw, facei)
     {
-        label celli = patch().faceCells()[facei];
+        const label celli = patch().faceCells()[facei];
 
-        scalar yPlus = Cmu25*y[facei]*sqrt(k[celli])/nuw[facei];
+        const scalar yPlus = Cmu25*y[facei]*sqrt(k[celli])/nuw[facei];
 
-        if (yPlus > yPlusLam_)
+        if (yPlusLam_ < yPlus)
         {
             nutw[facei] = nuw[facei]*(yPlus*kappa_/log(E_*yPlus) - 1.0);
         }
@@ -81,7 +78,7 @@ tmp<scalarField> nutkWallFunctionFvPatchScalarField::calcNut() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
+Foam::nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -91,7 +88,7 @@ nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
 {}
 
 
-nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
+Foam::nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
 (
     const nutkWallFunctionFvPatchScalarField& ptf,
     const fvPatch& p,
@@ -103,7 +100,7 @@ nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
 {}
 
 
-nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
+Foam::nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -114,7 +111,7 @@ nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
 {}
 
 
-nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
+Foam::nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
 (
     const nutkWallFunctionFvPatchScalarField& wfpsf
 )
@@ -123,7 +120,7 @@ nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
 {}
 
 
-nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
+Foam::nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
 (
     const nutkWallFunctionFvPatchScalarField& wfpsf,
     const DimensionedField<scalar, volMesh>& iF
@@ -135,7 +132,8 @@ nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-tmp<scalarField> nutkWallFunctionFvPatchScalarField::yPlus() const
+Foam::tmp<Foam::scalarField> Foam::nutkWallFunctionFvPatchScalarField::
+yPlus() const
 {
     const label patchi = patch().index();
 
@@ -161,14 +159,14 @@ tmp<scalarField> nutkWallFunctionFvPatchScalarField::yPlus() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchScalarField,
-    nutkWallFunctionFvPatchScalarField
-);
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchScalarField,
+        nutkWallFunctionFvPatchScalarField
+    );
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

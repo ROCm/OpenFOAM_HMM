@@ -2,10 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2017, 2019 OpenFOAM Foundation
+                            | Copyright (C) 2011-2019 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,17 +30,16 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a suitable condition for turbulence
-    \c k, \c q, and \c R fields for the case of high Reynolds number flow using
-    wall functions.
-
-    It is a simple wrapper around the zero-gradient condition.
+    This boundary condition provides a simple wrapper around the zero-gradient
+    condition, which can be used for \c k, \c q, and \c R fields for
+    the case of high Reynolds number flow using wall functions.
 
 Usage
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
+        // Mandatory entries
         type            kqRWallFunction;
     }
     \endverbatim
@@ -72,7 +71,6 @@ class kqRWallFunctionFvPatchField
 :
     public zeroGradientFvPatchField<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -97,8 +95,8 @@ public:
         );
 
         //- Construct by mapping given
-        // kqRWallFunctionFvPatchField
-        //  onto a new patch
+        //- kqRWallFunctionFvPatchField
+        //- onto a new patch
         kqRWallFunctionFvPatchField
         (
             const kqRWallFunctionFvPatchField&,

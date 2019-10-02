@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2016, 2019 OpenFOAM Foundation
@@ -117,6 +117,9 @@ void fWallFunctionFvPatchScalarField::updateCoeffs()
 
     const scalarField& y = turbModel.y()[patchi];
 
+    const tmp<scalarField> tnuw = turbModel.nu(patchi);
+    const scalarField& nuw = tnuw();
+
     const tmp<volScalarField> tk = turbModel.k();
     const volScalarField& k = tk();
 
@@ -126,28 +129,25 @@ void fWallFunctionFvPatchScalarField::updateCoeffs()
     const tmp<volScalarField> tv2 = v2fModel.v2();
     const volScalarField& v2 = tv2();
 
-    const tmp<scalarField> tnuw = turbModel.nu(patchi);
-    const scalarField& nuw = tnuw();
-
     const scalar Cmu25 = pow025(nutw.Cmu());
+    const scalar N = 6.0;
 
     scalarField& f = *this;
 
     // Set f wall values
     forAll(f, facei)
     {
-        label celli = patch().faceCells()[facei];
+        const label celli = patch().faceCells()[facei];
 
-        scalar uTau = Cmu25*sqrt(k[celli]);
+        const scalar uTau = Cmu25*sqrt(k[celli]);
 
-        scalar yPlus = uTau*y[facei]/nuw[facei];
+        const scalar yPlus = uTau*y[facei]/nuw[facei];
 
-        if (yPlus > nutw.yPlusLam())
+        if (nutw.yPlusLam() < yPlus)
         {
-            scalar N = 6.0;
-            scalar v2c = v2[celli];
-            scalar epsc = epsilon[celli];
-            scalar kc = k[celli];
+            const scalar v2c = v2[celli];
+            const scalar epsc = epsilon[celli];
+            const scalar kc = k[celli];
 
             f[facei] = N*v2c*epsc/(sqr(kc) + ROOTVSMALL);
             f[facei] /= sqr(uTau) + ROOTVSMALL;

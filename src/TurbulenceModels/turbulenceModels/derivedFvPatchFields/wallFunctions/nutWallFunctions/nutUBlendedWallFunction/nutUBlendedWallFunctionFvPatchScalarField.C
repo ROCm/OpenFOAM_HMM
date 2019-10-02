@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 201-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -99,11 +99,12 @@ Foam::nutUBlendedWallFunctionFvPatchScalarField::calcUTau
             label iter = 0;
             while (iter++ < 10 && error > 0.001)
             {
-                scalar yPlus = y[facei]*ut/nuw[facei];
-                scalar uTauVis = magUp[facei]/yPlus;
-                scalar uTauLog = kappa_*magUp[facei]/log(E_*yPlus);
+                const scalar yPlus = y[facei]*ut/nuw[facei];
+                const scalar uTauVis = magUp[facei]/yPlus;
+                const scalar uTauLog = kappa_*magUp[facei]/log(E_*yPlus);
 
-                scalar utNew = pow(pow(uTauVis, n_) + pow(uTauLog, n_), 1.0/n_);
+                const scalar utNew =
+                    pow(pow(uTauVis, n_) + pow(uTauLog, n_), 1.0/n_);
                 error = mag(ut - utNew)/(ut + ROOTVSMALL);
                 ut = 0.5*(ut + utNew);
             }
@@ -204,7 +205,10 @@ Foam::nutUBlendedWallFunctionFvPatchScalarField::yPlus() const
 }
 
 
-void Foam::nutUBlendedWallFunctionFvPatchScalarField::write(Ostream& os) const
+void Foam::nutUBlendedWallFunctionFvPatchScalarField::write
+(
+    Ostream& os
+) const
 {
     fvPatchField<scalar>::write(os);
     writeLocalEntries(os);

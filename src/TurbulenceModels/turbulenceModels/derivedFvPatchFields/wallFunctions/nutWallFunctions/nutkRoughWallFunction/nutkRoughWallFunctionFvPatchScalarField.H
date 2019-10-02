@@ -2,10 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016, 2019 OpenFOAM Foundation
+                            | Copyright (C) 2011-2019 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,10 +30,10 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a turbulent kinematic viscosity condition
-    when using wall functions for rough walls, based on turbulence kinetic
-    energy.  The condition manipulates the E parameter to account for roughness
-    effects.
+    This boundary condition provides a wall constraint on the turbulent
+    kinematic viscosity, i.e. \c nut, when using wall functions for rough walls,
+    based on turbulent kinetic energy, \c k. The condition manipulates the \c E
+    parameter to account for roughness effects.
 
     Parameter ranges
     - roughness height = sand-grain roughness (0 for smooth walls)
@@ -41,18 +41,24 @@ Description
 
 Usage
     \table
-        Property     | Description             | Required    | Default value
-        Ks           | sand-grain roughness height | yes     |
-        Cs           | roughness constant      | yes         |
+        Property     | Description                 | Required  | Default value
+        Ks           | Sand-grain roughness height | yes       |
+        Cs           | Roughness constant          | yes       |
+        Cmu          | Model coefficient           | no        | 0.09
+        kappa        | Von Karman constant         | no        | 0.41
+        E            | Model coefficient           | no        | 9.8
     \endtable
 
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
+        // Mandatory entries
         type            nutkRoughWallFunction;
         Ks              uniform 0;
         Cs              uniform 0.5;
+
+        // Optional entries
     }
     \endverbatim
 
@@ -84,7 +90,7 @@ class nutkRoughWallFunctionFvPatchScalarField
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Roughness height
         scalarField Ks_;
@@ -126,8 +132,8 @@ public:
         );
 
         //- Construct by mapping given
-        //  nutkRoughWallFunctionFvPatchScalarField
-        //  onto a new patch
+        //- nutkRoughWallFunctionFvPatchScalarField
+        //- onto a new patch
         nutkRoughWallFunctionFvPatchScalarField
         (
             const nutkRoughWallFunctionFvPatchScalarField&,

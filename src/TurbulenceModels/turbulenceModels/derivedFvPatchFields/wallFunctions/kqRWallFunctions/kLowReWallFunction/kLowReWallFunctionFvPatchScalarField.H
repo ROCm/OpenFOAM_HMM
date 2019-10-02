@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2016, 2019 OpenFOAM Foundation
@@ -30,29 +30,36 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a turbulence kinetic energy wall function
-    condition for low- and high-Reynolds number turbulent flow cases.
+    This boundary condition provides a wall constraint on turbulent kinetic
+    energy, i.e. \c k, for low- and high-Reynolds number turbulence models.
 
-    The model operates in two modes, based on the computed laminar-to-turbulent
-    switch-over y+ value derived from kappa and E specified in the corresponding
-    nutWallFunction.
+    The model operates in two modes, based on the computed viscous-to-turbulent
+    switch-over \c y+ value derived from \c kappa and \c E.
 
 Usage
     \table
         Property     | Description             | Required    | Default value
-        Cmu          | model coefficient       | no          | 0.09
-        kappa        | Von Karman constant     | no          | 0.41
-        E            | model coefficient       | no          | 9.8
-        Ceps2        | model coefficient       | no          | 1.9
+        Ceps2        | Model coefficient       | no          |  1.9
+        Ck           | Model coefficient       | no          | -0.416
+        Bk           | Model coefficient       | no          |  8.366
+        C            | Model coefficient       | no          |  11.0
     \endtable
 
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
+        // Mandatory entries
         type            kLowReWallFunction;
+
+        // Optional entries
     }
     \endverbatim
+
+Note
+    The coefficients \c Cmu, \c kappa, and \c E are obtained from
+    the specified \c nutWallFunction in order to ensure that each patch
+    possesses the same set of values for these coefficients.
 
 See also
     Foam::fixedValueFvPatchField
@@ -82,10 +89,19 @@ class kLowReWallFunctionFvPatchScalarField
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Ceps2 coefficient
         scalar Ceps2_;
+
+        //- Ck coefficient
+        scalar Ck_;
+
+        //- Bk coefficient
+        scalar Bk_;
+
+        //- C coefficient
+        scalar C_;
 
 
 public:
@@ -156,7 +172,7 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         // Evaluation functions
 

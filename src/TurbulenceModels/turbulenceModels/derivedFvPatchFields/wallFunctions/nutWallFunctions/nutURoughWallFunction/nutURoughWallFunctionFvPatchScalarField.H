@@ -30,16 +30,20 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a turbulent kinematic viscosity condition
-    when using wall functions for rough walls, based on velocity.
+    This boundary condition provides a wall constraint on the turbulent
+    kinematic viscosity, i.e. \c nut, when using wall functions for rough walls,
+    based on velocity, \c U.
 
 Usage
     \table
         Property     | Description             | Required    | Default value
-        roughnessHeight | roughness height     | yes         |
-        roughnessConstant | roughness constanr | yes         |
-        roughnessFactor | scaling factor       | yes         |
-        maxIter    | Number of N-R iterations  | no          | 10
+        roughnessHeight | Roughness height     | yes         |
+        roughnessConstant | Roughness constanr | yes         |
+        roughnessFactor | Scaling factor       | yes         |
+        Cmu        | Model coefficient         | no          | 0.09
+        kappa      | Von Karman constant       | no          | 0.41
+        E          | Model coefficient         | no          | 9.8
+        maxIter    | Number of Newton-Raphson iterations  | no          | 10
         tolerance  | Convergence tolerance     | no          | 0.0001
     \endtable
 
@@ -47,10 +51,13 @@ Usage
     \verbatim
     <patchName>
     {
+        // Mandatory entries
         type            nutURoughWallFunction;
-        roughnessHeight 1e-5;
-        roughnessConstant 0.5;
-        roughnessFactor 1;
+        roughnessHeight     1e-5;
+        roughnessConstant   0.5;
+        roughnessFactor     1;
+
+        // Optional entries
     }
     \endverbatim
 
@@ -88,7 +95,7 @@ class nutURoughWallFunctionFvPatchScalarField
 :
     public nutWallFunctionFvPatchScalarField
 {
-    // Private data
+    // Private Data
 
         // Roughness model parameters
 
@@ -145,8 +152,8 @@ public:
         );
 
         //- Construct by mapping given
-        //  nutURoughWallFunctionFvPatchScalarField
-        //  onto a new patch
+        //- nutURoughWallFunctionFvPatchScalarField
+        //- onto a new patch
         nutURoughWallFunctionFvPatchScalarField
         (
             const nutURoughWallFunctionFvPatchScalarField&,
@@ -190,7 +197,7 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         // Access
 
@@ -226,14 +233,12 @@ public:
             }
 
             //- Return reference to the roughness scale factor to allow
-            //  adjustment
+            //- adjustment
             scalar& roughnessFactor()
             {
                 return roughnessFactor_;
             }
 
-
-    // I-O
 
         // Evaluation functions
 

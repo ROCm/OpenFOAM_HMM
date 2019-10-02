@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           |  Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016, 2019 OpenFOAM Foundation
@@ -133,10 +133,10 @@ Foam::nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict),
-    UName_(dict.lookupOrDefault<word>("U", word::null)),
-    Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
-    E_(dict.lookupOrDefault<scalar>("E", 9.8)),
+    UName_(dict.getOrDefault<word>("U", word::null)),
+    Cmu_(dict.getOrDefault<scalar>("Cmu", 0.09)),
+    kappa_(dict.getOrDefault<scalar>("kappa", 0.41)),
+    E_(dict.getOrDefault<scalar>("E", 9.8)),
     yPlusLam_(yPlusLam(kappa_, E_))
 {
     checkType();
@@ -201,7 +201,7 @@ Foam::scalar Foam::nutWallFunctionFvPatchScalarField::yPlusLam
 {
     scalar ypl = 11.0;
 
-    for (int i=0; i<10; i++)
+    for (int i = 0; i < 10; ++i)
     {
         ypl = log(max(E*ypl, 1))/kappa;
     }
@@ -229,7 +229,10 @@ void Foam::nutWallFunctionFvPatchScalarField::updateCoeffs()
 }
 
 
-void Foam::nutWallFunctionFvPatchScalarField::write(Ostream& os) const
+void Foam::nutWallFunctionFvPatchScalarField::write
+(
+    Ostream& os
+) const
 {
     fvPatchField<scalar>::write(os);
     writeLocalEntries(os);

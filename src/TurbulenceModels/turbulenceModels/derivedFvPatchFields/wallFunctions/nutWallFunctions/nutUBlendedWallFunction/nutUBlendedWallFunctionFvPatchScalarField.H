@@ -28,9 +28,9 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a turbulent kinematic viscosity condition
-    when using wall functions, based on a blending of laminar sub-layer and
-    log region contributions.
+    This boundary condition provides a wall constraint on the turbulent
+    kinematic viscosity, i.e. \c nut, when using wall functions based on
+    a blending of laminar sub-layer and log region contributions.
 
         \f[
             u_\tau = (u_{\tau,v}^n + u_{\tau,l}^n)^{1/n}
@@ -43,24 +43,32 @@ Description
         u_{\tau,l} | friction velocity in the log region
     \endvartable
 
-
-Usage
-
-    Example of the boundary condition specification:
-    \verbatim
-    myPatch
-    {
-        type            nutUBlendedWallFunction;
-    }
-    \endverbatim
-
     Reference:
     See the section that describes 'automatic wall treatment'
     \verbatim
-        Menter, F., Carregal Ferreira, J., Esch, T., Konno, B. (2003).
+        Menter, F., Ferreira, J. C., Esch, T., Konno, B. (2003).
         The SST Turbulence Model with Improved Wall Treatment
         for Heat Transfer Predictions in Gas Turbines.
         Proceedings of the International Gas Turbine Congress 2003 Tokyo
+    \endverbatim
+
+Usage
+    \table
+        Property     | Description                 | Required  | Default value
+        Cmu          | Model coefficient           | no        | 0.09
+        kappa        | Von Karman constant         | no        | 0.41
+        E            | Model coefficient           | no        | 9.8
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    <patchName>
+    {
+        // Mandatory entries
+        type            nutUBlendedWallFunction;
+
+        // Optional entries
+     }
     \endverbatim
 
 Note
@@ -100,7 +108,7 @@ class nutUBlendedWallFunctionFvPatchScalarField
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Model coefficient; default = 4
         scalar n_;
@@ -139,8 +147,8 @@ public:
         );
 
         //- Construct by mapping given
-        //  nutUBlendedWallFunctionFvPatchScalarField
-        //  onto a new patch
+        //- nutUBlendedWallFunctionFvPatchScalarField
+        //- onto a new patch
         nutUBlendedWallFunctionFvPatchScalarField
         (
             const nutUBlendedWallFunctionFvPatchScalarField&,
@@ -184,7 +192,7 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         // Evaluation functions
 

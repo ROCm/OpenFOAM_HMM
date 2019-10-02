@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           |  Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016, 2019 OpenFOAM Foundation
@@ -30,9 +30,19 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a turbulent kinematic viscosity condition
-    when using wall functions, based on turbulence kinetic energy.
-    - replicates OpenFOAM v1.5 (and earlier) behaviour
+    The class \c nutWallFunction is a base class that parents the derived
+    boundary conditions which provide a wall constraint on various fields, such
+    as turbulence kinematic viscosity, i.e. \c nut, for low- and high-Reynolds
+    number turbulence models.
+
+    Reference:
+    \verbatim
+        Default model coefficients:
+            Versteeg, H. K., & Malalasekera, W. (2011).
+            An introduction to computational fluid dynamics: the finite
+            volume method. Harlow: Pearson Education.
+            Subsection "3.5.2 k-epsilon model".
+    \endverbatim
 
 Usage
     \table
@@ -46,16 +56,11 @@ Usage
     \verbatim
     <patchName>
     {
+        // Mandatory entries
         type            nutWallFunction;
-        value           uniform 0.0;
-    }
-    \endverbatim
 
-    Reference for the default model coefficients:
-    \verbatim
-        H. Versteeg, W. Malalasekera
-        An Introduction to Computational Fluid Dynamics: The Finite Volume
-        Method, subsection "3.5.2 k-epsilon model"
+        // Optional entries
+    }
     \endverbatim
 
 See also
@@ -88,7 +93,7 @@ class nutWallFunctionFvPatchScalarField
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Name of velocity field
         //  Defult is null (not specified) in which case the velocity is
@@ -104,7 +109,7 @@ protected:
         //- E coefficient
         scalar E_;
 
-        //- Y+ at the edge of the laminar sublayer
+        //- Estimated y+ value at the edge of the viscous sublayer
         scalar yPlusLam_;
 
 
@@ -148,8 +153,8 @@ public:
         );
 
         //- Construct by mapping given
-        //  nutWallFunctionFvPatchScalarField
-        //  onto a new patch
+        //- nutWallFunctionFvPatchScalarField
+        //- onto a new patch
         nutWallFunctionFvPatchScalarField
         (
             const nutWallFunctionFvPatchScalarField&,
@@ -199,10 +204,10 @@ public:
             const label patchi
         );
 
-        //- Calculate the Y+ at the edge of the laminar sublayer
+        //- Calculate the y+ at the edge of the viscous sublayer
         static scalar yPlusLam(const scalar kappa, const scalar E);
 
-        //- Return the Y+ at the edge of the laminar sublayer
+        //- Return the y+ at the edge of the viscous sublayer
         scalar yPlusLam() const;
 
         //- Calculate and return the yPlus at the boundary

@@ -30,9 +30,10 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a turbulent kinematic viscosity condition
-    when using wall functions for rough walls, based on velocity,  using
-    Spalding's law to give a continuous nut profile to the wall (y+ = 0)
+    This boundary condition provides a wall constraint on the turbulent
+    kinematic viscosity, i.e. \c nut, when using wall functions for rough walls,
+    based on velocity, \c U, using Spalding's law to give a continuous \c nut
+    profile to the wall (y+ = 0)
 
         \f[
             y^+ = u^+ + \frac{1}{E} \left[exp(\kappa u^+) - 1 - \kappa u^+\,
@@ -46,25 +47,26 @@ Description
         \kappa  | Von Karman constant
     \endvartable
 
-
 Usage
+    \table
+        Property   | Description             | Required    | Default value
+        Cmu        | Model coefficient       | no          | 0.09
+        kappa      | Von Karman constant     | no          | 0.41
+        E          | Model coefficient       | no          | 9.8
+        maxIter    | Number of Newton-Raphson iterations   | no          | 10
+        tolerance  | Convergence tolerance   | no          | 0.0001
+    \endtable
+
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
+        // Mandatory entries
         type            nutUSpaldingWallFunction;
 
-        // .. nutWallFunctionFvPatchScalarField entries ..
-
+        // Optional entries
     }
     \endverbatim
-
-    Additional entries (see below)
-    \table
-        Property  | Description               | Required   | Default value
-        maxIter   | Number of N-R iterations  | no         | 10
-        tolerance | Convergence tolerance     | no         | 0.01
-    \endtable
 
 See also
     Foam::nutWallFunctionFvPatchScalarField
@@ -111,7 +113,7 @@ class nutUSpaldingWallFunctionFvPatchScalarField
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Max iterations in calcNut
         const label maxIter_;
@@ -135,7 +137,7 @@ protected:
         virtual tmp<scalarField> calcUTau(const scalarField& magGradU) const;
 
         //- Calculate the friction velocity and number of iterations for
-        //  convergence
+        //- convergence
         virtual tmp<scalarField> calcUTau
         (
             const scalarField& magGradU,
@@ -171,8 +173,8 @@ public:
         );
 
         //- Construct by mapping given
-        //  nutUSpaldingWallFunctionFvPatchScalarField
-        //  onto a new patch
+        //- nutUSpaldingWallFunctionFvPatchScalarField
+        //- onto a new patch
         nutUSpaldingWallFunctionFvPatchScalarField
         (
             const nutUSpaldingWallFunctionFvPatchScalarField&,
@@ -220,7 +222,7 @@ public:
     virtual ~nutUSpaldingWallFunctionFvPatchScalarField();
 
 
-    // Member functions
+    // Member Functions
 
         // Evaluation functions
 

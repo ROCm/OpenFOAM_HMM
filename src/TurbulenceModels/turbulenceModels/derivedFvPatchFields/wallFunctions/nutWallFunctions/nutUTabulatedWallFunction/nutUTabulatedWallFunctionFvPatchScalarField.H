@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -30,23 +30,33 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a turbulent kinematic viscosity condition
-    when using wall functions.  As input, the user specifies a look-up table
-    of U+ as a function of near-wall Reynolds number.  The table should be
-    located in the $FOAM_CASE/constant directory.
+    This boundary condition provides a wall constraint on the turbulent
+    kinematic viscosity, i.e. \c nut, when using wall functions, based on
+    velocity, i.e. \c U.
+
+    As input, the user specifies a look-up table of \c U+ as a function of
+    near-wall Reynolds number.
+
+    The table should be located in the $FOAM_CASE/constant directory.
 
 Usage
     \table
         Property     | Description             | Required    | Default value
         uPlusTable   | U+ as a function of Re table name | yes |
+        Cmu          | Model coefficient       | no          | 0.09
+        kappa        | Von Karman constant     | no          | 0.41
+        E            | Model coefficient       | no          | 9.8
     \endtable
 
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
+        // Mandatory entries
         type            nutTabulatedWallFunction;
         uPlusTable      myUPlusTable;
+
+        // Optional entries
     }
     \endverbatim
 
@@ -83,12 +93,12 @@ class nutUTabulatedWallFunctionFvPatchScalarField
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Name of u+ table
         word uPlusTableName_;
 
-        //- U+ table
+        //- u+ table
         uniformInterpolationTable<scalar> uPlusTable_;
 
 
@@ -125,8 +135,8 @@ public:
         );
 
         //- Construct by mapping given
-        //  nutUTabulatedWallFunctionFvPatchScalarField
-        //  onto a new patch
+        //- nutUTabulatedWallFunctionFvPatchScalarField
+        //- onto a new patch
         nutUTabulatedWallFunctionFvPatchScalarField
         (
             const nutUTabulatedWallFunctionFvPatchScalarField&,
@@ -170,7 +180,7 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         // Evaluation functions
 

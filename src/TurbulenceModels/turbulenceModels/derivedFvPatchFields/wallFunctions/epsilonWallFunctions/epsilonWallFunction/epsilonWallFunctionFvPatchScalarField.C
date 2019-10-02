@@ -2,10 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016, 2019 OpenFOAM Foundation
+                            | Copyright (C) 2011-2019 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,7 @@ License
 #include "turbulenceModel.H"
 #include "fvMatrix.H"
 #include "addToRunTimeSelectionTable.H"
+
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -127,7 +128,10 @@ void Foam::epsilonWallFunctionFvPatchScalarField::createAveragingWeights()
 
 
 Foam::epsilonWallFunctionFvPatchScalarField&
-Foam::epsilonWallFunctionFvPatchScalarField::epsilonPatch(const label patchi)
+Foam::epsilonWallFunctionFvPatchScalarField::epsilonPatch
+(
+    const label patchi
+)
 {
     const volScalarField& epsilon =
         static_cast<const volScalarField&>(this->internalField());
@@ -244,11 +248,11 @@ epsilonWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF),
-    G_(),
-    epsilon_(),
     lowReCorrection_(false),
     initialised_(false),
     master_(-1),
+    G_(),
+    epsilon_(),
     cornerWeights_()
 {}
 
@@ -263,11 +267,11 @@ epsilonWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(ptf, p, iF, mapper),
-    G_(),
-    epsilon_(),
     lowReCorrection_(ptf.lowReCorrection_),
     initialised_(false),
     master_(-1),
+    G_(),
+    epsilon_(),
     cornerWeights_()
 {}
 
@@ -281,11 +285,11 @@ epsilonWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF, dict),
-    G_(),
-    epsilon_(),
-    lowReCorrection_(dict.lookupOrDefault("lowReCorrection", false)),
+    lowReCorrection_(dict.getOrDefault("lowReCorrection", false)),
     initialised_(false),
     master_(-1),
+    G_(),
+    epsilon_(),
     cornerWeights_()
 {
     // Apply zero-gradient condition on start-up
@@ -300,11 +304,11 @@ epsilonWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(ewfpsf),
-    G_(),
-    epsilon_(),
     lowReCorrection_(ewfpsf.lowReCorrection_),
     initialised_(false),
     master_(-1),
+    G_(),
+    epsilon_(),
     cornerWeights_()
 {}
 
@@ -317,18 +321,21 @@ epsilonWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(ewfpsf, iF),
-    G_(),
-    epsilon_(),
     lowReCorrection_(ewfpsf.lowReCorrection_),
     initialised_(false),
     master_(-1),
+    G_(),
+    epsilon_(),
     cornerWeights_()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalarField& Foam::epsilonWallFunctionFvPatchScalarField::G(bool init)
+Foam::scalarField& Foam::epsilonWallFunctionFvPatchScalarField::G
+(
+    bool init
+)
 {
     if (patch().index() == master_)
     {
@@ -398,7 +405,7 @@ void Foam::epsilonWallFunctionFvPatchScalarField::updateCoeffs()
 
     forAll(*this, facei)
     {
-        label celli = patch().faceCells()[facei];
+        const label celli = patch().faceCells()[facei];
 
         G[celli] = G0[celli];
         epsilon[celli] = epsilon0[celli];
@@ -449,11 +456,11 @@ void Foam::epsilonWallFunctionFvPatchScalarField::updateWeightedCoeffs
     // Only set the values if the weights are > tolerance
     forAll(weights, facei)
     {
-        scalar w = weights[facei];
+        const scalar w = weights[facei];
 
-        if (w > tolerance_)
+        if (tolerance_ < w)
         {
-            label celli = patch().faceCells()[facei];
+            const label celli = patch().faceCells()[facei];
 
             G[celli] = (1.0 - w)*G[celli] + w*G0[celli];
             epsilon[celli] = (1.0 - w)*epsilon[celli] + w*epsilon0[celli];
@@ -501,7 +508,7 @@ void Foam::epsilonWallFunctionFvPatchScalarField::manipulateMatrix
     forAll(weights, facei)
     {
         // Only set the values if the weights are > tolerance
-        if (weights[facei] > tolerance_)
+        if (tolerance_ < weights[facei])
         {
             const label celli = faceCells[facei];
 
@@ -521,6 +528,16 @@ void Foam::epsilonWallFunctionFvPatchScalarField::manipulateMatrix
     matrix.setValues(constraintCells, constraintValues);
 
     fvPatchField<scalar>::manipulateMatrix(matrix);
+}
+
+
+void Foam::epsilonWallFunctionFvPatchScalarField::write
+(
+    Ostream& os
+) const
+{
+    os.writeEntry("lowReCorrection", lowReCorrection_);
+    fixedValueFvPatchField<scalar>::write(os);
 }
 
 

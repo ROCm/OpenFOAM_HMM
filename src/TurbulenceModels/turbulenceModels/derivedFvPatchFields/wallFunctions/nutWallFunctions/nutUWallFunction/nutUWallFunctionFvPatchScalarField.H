@@ -30,15 +30,26 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a turbulent kinematic viscosity condition
-    when using wall functions, based on velocity.
+    This boundary condition provides a wall constraint on the turbulent
+    kinematic viscosity, i.e. \c nut, when using wall functions, based on
+    velocity, \c U.
 
 Usage
+    \table
+        Property     | Description             | Required    | Default value
+        Cmu        | Model coefficient         | no          | 0.09
+        kappa      | Von Karman constant       | no          | 0.41
+        E          | Model coefficient         | no          | 9.8
+    \endtable
+
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
+        // Mandatory entries
         type            nutUWallFunction;
+
+        // Optional entries
     }
     \endverbatim
 
@@ -108,8 +119,8 @@ public:
         );
 
         //- Construct by mapping given
-        //  nutUWallFunctionFvPatchScalarField
-        //  onto a new patch
+        //- nutUWallFunctionFvPatchScalarField
+        //- onto a new patch
         nutUWallFunctionFvPatchScalarField
         (
             const nutUWallFunctionFvPatchScalarField&,
@@ -153,7 +164,7 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         // Evaluation functions
 

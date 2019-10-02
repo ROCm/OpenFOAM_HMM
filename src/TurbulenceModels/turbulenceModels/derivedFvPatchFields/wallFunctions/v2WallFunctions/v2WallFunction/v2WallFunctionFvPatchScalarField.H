@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2016, 2019 OpenFOAM Foundation
@@ -30,30 +30,34 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a turbulence stress normal to streamlines
-    wall function condition for low- and high-Reynolds number, turbulent flow
-    cases.
+    This boundary condition provides a wall constraint on wall-normal velocity
+    scale, i.e. \c v2, for low- and high-Reynolds number turbulence models.
 
-    The model operates in two modes, based on the computed laminar-to-turbulent
-    switch-over y+ value derived from kappa and E specified in the corresponding
-    nutWallFunction.
-
+    The model operates in two modes, based on the computed viscous-to-turbulent
+    switch-over \c y+ value derived from \c kappa and \c E.
 
 Usage
     \table
         Property     | Description             | Required    | Default value
-        Cmu          | model coefficient       | no          | 0.09
-        kappa        | Von Karman constant     | no          | 0.41
-        E            | model coefficient       | no          | 9.8
+        Cv2          | model coefficient       | no          |  0.193
+        Bv2          | model coefficient       | no          | -0.94
     \endtable
 
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
+        // Mandatory entries
         type            v2WallFunction;
+
+        // Optional entries
     }
     \endverbatim
+
+Note
+    The coefficients \c Cmu, \c kappa, and \c E are obtained from
+    the specified \c nutWallFunction in order to ensure that each patch
+    possesses the same set of values for these coefficients.
 
 See also
     Foam::fixedValueFvPatchField
@@ -83,6 +87,16 @@ class v2WallFunctionFvPatchScalarField
 :
     public fixedValueFvPatchField<scalar>
 {
+protected:
+
+    // Protected Data
+
+        //- Cv2 coefficient
+        scalar Cv2_;
+
+        //- Bv2 coefficient
+        scalar Bv2_;
+
 
 public:
 
@@ -108,7 +122,7 @@ public:
         );
 
         //- Construct by mapping given v2WallFunctionFvPatchScalarField
-        //  onto a new patch
+        //- onto a new patch
         v2WallFunctionFvPatchScalarField
         (
             const v2WallFunctionFvPatchScalarField&,
@@ -158,6 +172,12 @@ public:
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
+
+
+        // I-O
+
+            //- Write
+            virtual void write(Ostream&) const;
 };
 
 

@@ -30,32 +30,31 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a turbulence dissipation wall constraint
-    for low- and high-Reynolds number turbulence models.
+    This boundary condition provides a wall constraint on turbulent kinetic
+    energy dissipation rate, i.e. \c epsilon, for low- and high-Reynolds number
+    turbulence models.
 
     The condition can be applied to wall boundaries for which it
     - calculates \c epsilon and \c G
-    - specifies the near-wall epsilon value
+    - specifies the near-wall \c epsilon value
 
     where
-
     \vartable
-        epsilon | turblence dissipation field
-        G       | turblence generation field
+        epsilon | turbulent kinetic energy dissipation rate field
+        G       | turbulent kinetic energy production field (divergence-free)
     \endvartable
 
     The low-Re correction is activated by setting the entry
     \c lowReCorrection to 'on'; in this mode the model switches between
-    laminar and turbulent functions based on the laminar-to-turbulent y+ value
-    derived from the kappa and E specified in the corresponding nutWallFunction. When the \c lowReCorrection is inactive, the
-    wall function operates in high-Re mode.
+    viscous and turbulent functions based on the viscous-to-turbulent
+    \c y+ value derived from the \c kappa and \c E.
+
+    When the \c lowReCorrection is inactive, the wall function operates
+    in high-Re mode.
 
 Usage
     \table
         Property        | Description              | Required  | Default value
-        Cmu             | model coefficient        | no        | 0.09
-        kappa           | Von Karman constant      | no        | 0.41
-        E               | model coefficient        | no        | 9.8
         lowReCorrection | Low-Re correction active | no        | off
     \endtable
 
@@ -63,13 +62,20 @@ Usage
     \verbatim
     <patchName>
     {
+        // Mandatory entries
         type            epsilonWallFunction;
+
+        // Optional entries
     }
     \endverbatim
 
+Note
+    The coefficients \c Cmu, \c kappa, and \c E are obtained from
+    the specified \c nutWallFunction in order to ensure that each patch
+    possesses the same set of values for these coefficients.
+
 See also
     Foam::fixedInternalValueFvPatchField
-    Foam::omegaWallFunctionFvPatchScalarField
 
 SourceFiles
     epsilonWallFunctionFvPatchScalarField.C
@@ -98,16 +104,10 @@ class epsilonWallFunctionFvPatchScalarField
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Tolerance used in weighted calculations
         static scalar tolerance_;
-
-        //- Local copy of turbulence G field
-        scalarField G_;
-
-        //- Local copy of turbulence epsilon field
-        scalarField epsilon_;
 
         //- Apply low-Re correction term; default = no
         bool lowReCorrection_;
@@ -118,6 +118,12 @@ protected:
         //- Master patch ID
         label master_;
 
+        //- Local copy of turbulence G field
+        scalarField G_;
+
+        //- Local copy of turbulence epsilon field
+        scalarField epsilon_;
+
         //- List of averaging corner weights
         List<List<scalar>> cornerWeights_;
 
@@ -125,11 +131,11 @@ protected:
     // Protected Member Functions
 
         //- Set the master patch - master is responsible for updating all
-        //  wall function patches
+        //- wall function patches
         virtual void setMaster();
 
         //- Create the averaging weights for cells which are bounded by
-        //  multiple wall function faces
+        //- multiple wall function faces
         virtual void createAveragingWeights();
 
         //- Helper function to return non-const access to an epsilon patch
@@ -187,8 +193,8 @@ public:
         );
 
         //- Construct by mapping given
-        //  epsilonWallFunctionFvPatchScalarField
-        //  onto a new patch
+        //- epsilonWallFunctionFvPatchScalarField
+        //- onto a new patch
         epsilonWallFunctionFvPatchScalarField
         (
             const epsilonWallFunctionFvPatchScalarField&,
@@ -231,6 +237,7 @@ public:
             );
         }
 
+
     //- Destructor
     virtual ~epsilonWallFunctionFvPatchScalarField() = default;
 
@@ -263,6 +270,12 @@ public:
                 fvMatrix<scalar>& matrix,
                 const scalarField& weights
             );
+
+
+        // I-O
+
+            //- Write
+            virtual void write(Ostream&) const;
 };
 
 

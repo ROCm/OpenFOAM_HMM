@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2016, 2019 OpenFOAM Foundation
@@ -30,28 +30,43 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a turbulence damping function, f, wall
-    function condition for low- and high Reynolds number, turbulent flow cases
+    This boundary condition provides a wall constraint on the elliptic
+    relaxation factor, \c f, which is executed in the \c v2-f eddy viscosity
+    turbulence model. The condition is applicable for low- and high-Reynolds
+    number turbulent flow cases.
 
-    The model operates in two modes, based on the computed laminar-to-turbulent
-    switch-over y+ value derived from kappa and E specified in the corresponding
-    nutWallFunction.
+    For \c f, the viscous sublayer and log-law region blending approaches are
+    claimed to be inviable (Popovac and Hanjalić (2007), p. 194). Therefore,
+    the only boundary condition blending mode is the stepwise mode
+    where the viscous sublayer and log-law region contributions switch over
+    \c y+ value derived from the \c kappa and \c E.
+
+    Reference:
+    \verbatim
+        Remark on the blending approach:
+            Popovac, M., & Hanjalić, K. (2007).
+            Compound wall treatment for RANS computation of complex
+            turbulent flows and heat transfer.
+            Flow, turbulence and combustion, 78(2), 177-202.
+            doi:10.1007/s10494-006-9067-x
+    \endverbatim
 
 Usage
-    \table
-        Property     | Description             | Required    | Default value
-        Cmu          | model coefficient       | no          | 0.09
-        kappa        | Von Karman constant     | no          | 0.41
-        E            | model coefficient       | no          | 9.8
-    \endtable
-
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
+        // Mandatory entries
         type            fWallFunction;
+
+        // No optional entry
     }
     \endverbatim
+
+Note
+    The coefficients \c Cmu, \c kappa, and \c E are obtained from
+    the specified \c nutWallFunction in order to ensure that each patch
+    possesses the same set of values for these coefficients.
 
 See also
     Foam::fixedValueFvPatchField
@@ -81,7 +96,6 @@ class fWallFunctionFvPatchScalarField
 :
     public fixedValueFvPatchField<scalar>
 {
-
 public:
 
     //- Runtime type information
@@ -106,7 +120,7 @@ public:
         );
 
         //- Construct by mapping given fWallFunctionFvPatchScalarField
-        //  onto a new patch
+        //- onto a new patch
         fWallFunctionFvPatchScalarField
         (
             const fWallFunctionFvPatchScalarField&,

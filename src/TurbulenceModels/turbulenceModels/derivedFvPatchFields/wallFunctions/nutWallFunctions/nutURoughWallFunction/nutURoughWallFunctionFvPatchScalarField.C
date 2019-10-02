@@ -31,14 +31,11 @@ License
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-tmp<scalarField> nutURoughWallFunctionFvPatchScalarField::calcNut() const
+Foam::tmp<Foam::scalarField>
+Foam::nutURoughWallFunctionFvPatchScalarField::calcNut() const
 {
     const label patchi = patch().index();
 
@@ -66,7 +63,7 @@ tmp<scalarField> nutURoughWallFunctionFvPatchScalarField::calcNut() const
 
     forAll(yPlus, facei)
     {
-        if (yPlus[facei] > yPlusLam_)
+        if (yPlusLam_ < yPlus[facei])
         {
             const scalar Re = magUp[facei]*y[facei]/nuw[facei] + ROOTVSMALL;
             nutw[facei] = nuw[facei]*(sqr(yPlus[facei])/Re - 1);
@@ -77,7 +74,8 @@ tmp<scalarField> nutURoughWallFunctionFvPatchScalarField::calcNut() const
 }
 
 
-tmp<scalarField> nutURoughWallFunctionFvPatchScalarField::calcYPlus
+Foam::tmp<Foam::scalarField>
+Foam::nutURoughWallFunctionFvPatchScalarField::calcYPlus
 (
     const scalarField& magUp
 ) const
@@ -99,7 +97,7 @@ tmp<scalarField> nutURoughWallFunctionFvPatchScalarField::calcYPlus
     tmp<scalarField> tyPlus(new scalarField(patch().size(), Zero));
     scalarField& yPlus = tyPlus.ref();
 
-    if (roughnessHeight_ > 0.0)
+    if (0.0 < roughnessHeight_)
     {
         // Rough Walls
         const scalar c_1 = 1/(90 - 2.25) + roughnessConstant_;
@@ -207,7 +205,7 @@ tmp<scalarField> nutURoughWallFunctionFvPatchScalarField::calcYPlus
 }
 
 
-void nutURoughWallFunctionFvPatchScalarField::writeLocalEntries
+void Foam::nutURoughWallFunctionFvPatchScalarField::writeLocalEntries
 (
     Ostream& os
 ) const
@@ -223,7 +221,8 @@ void nutURoughWallFunctionFvPatchScalarField::writeLocalEntries
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-nutURoughWallFunctionFvPatchScalarField::nutURoughWallFunctionFvPatchScalarField
+Foam::nutURoughWallFunctionFvPatchScalarField::
+nutURoughWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -238,7 +237,8 @@ nutURoughWallFunctionFvPatchScalarField::nutURoughWallFunctionFvPatchScalarField
 {}
 
 
-nutURoughWallFunctionFvPatchScalarField::nutURoughWallFunctionFvPatchScalarField
+Foam::nutURoughWallFunctionFvPatchScalarField::
+nutURoughWallFunctionFvPatchScalarField
 (
     const nutURoughWallFunctionFvPatchScalarField& ptf,
     const fvPatch& p,
@@ -255,7 +255,8 @@ nutURoughWallFunctionFvPatchScalarField::nutURoughWallFunctionFvPatchScalarField
 {}
 
 
-nutURoughWallFunctionFvPatchScalarField::nutURoughWallFunctionFvPatchScalarField
+Foam::nutURoughWallFunctionFvPatchScalarField::
+nutURoughWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -271,7 +272,8 @@ nutURoughWallFunctionFvPatchScalarField::nutURoughWallFunctionFvPatchScalarField
 {}
 
 
-nutURoughWallFunctionFvPatchScalarField::nutURoughWallFunctionFvPatchScalarField
+Foam::nutURoughWallFunctionFvPatchScalarField::
+nutURoughWallFunctionFvPatchScalarField
 (
     const nutURoughWallFunctionFvPatchScalarField& rwfpsf
 )
@@ -285,7 +287,8 @@ nutURoughWallFunctionFvPatchScalarField::nutURoughWallFunctionFvPatchScalarField
 {}
 
 
-nutURoughWallFunctionFvPatchScalarField::nutURoughWallFunctionFvPatchScalarField
+Foam::nutURoughWallFunctionFvPatchScalarField::
+nutURoughWallFunctionFvPatchScalarField
 (
     const nutURoughWallFunctionFvPatchScalarField& rwfpsf,
     const DimensionedField<scalar, volMesh>& iF
@@ -302,7 +305,8 @@ nutURoughWallFunctionFvPatchScalarField::nutURoughWallFunctionFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-tmp<scalarField> nutURoughWallFunctionFvPatchScalarField::yPlus() const
+Foam::tmp<Foam::scalarField>
+Foam::nutURoughWallFunctionFvPatchScalarField::yPlus() const
 {
     const label patchi = patch().index();
 
@@ -321,7 +325,10 @@ tmp<scalarField> nutURoughWallFunctionFvPatchScalarField::yPlus() const
 }
 
 
-void nutURoughWallFunctionFvPatchScalarField::write(Ostream& os) const
+void Foam::nutURoughWallFunctionFvPatchScalarField::write
+(
+    Ostream& os
+) const
 {
     fvPatchField<scalar>::write(os);
     writeLocalEntries(os);
@@ -331,14 +338,13 @@ void nutURoughWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchScalarField,
-    nutURoughWallFunctionFvPatchScalarField
-);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchScalarField,
+        nutURoughWallFunctionFvPatchScalarField
+    );
+}
 
 // ************************************************************************* //

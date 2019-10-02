@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2016, 2019 OpenFOAM Foundation
@@ -45,7 +45,9 @@ v2WallFunctionFvPatchScalarField::v2WallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchField<scalar>(p, iF)
+    fixedValueFvPatchField<scalar>(p, iF),
+    Cv2_(0.193),
+    Bv2_(-0.94)
 {}
 
 
@@ -57,7 +59,9 @@ v2WallFunctionFvPatchScalarField::v2WallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchField<scalar>(ptf, p, iF, mapper)
+    fixedValueFvPatchField<scalar>(ptf, p, iF, mapper),
+    Cv2_(ptf.Cv2_),
+    Bv2_(ptf.Bv2_)
 {}
 
 
@@ -68,7 +72,9 @@ v2WallFunctionFvPatchScalarField::v2WallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchField<scalar>(p, iF, dict)
+    fixedValueFvPatchField<scalar>(p, iF, dict),
+    Cv2_(dict.getOrDefault<scalar>("Cv2", 0.193)),
+    Bv2_(dict.getOrDefault<scalar>("Bv2", -0.94))
 {}
 
 
@@ -77,7 +83,9 @@ v2WallFunctionFvPatchScalarField::v2WallFunctionFvPatchScalarField
     const v2WallFunctionFvPatchScalarField& v2wfpsf
 )
 :
-    fixedValueFvPatchField<scalar>(v2wfpsf)
+    fixedValueFvPatchField<scalar>(v2wfpsf),
+    Cv2_(v2wfpsf.Cv2_),
+    Bv2_(v2wfpsf.Bv2_)
 {}
 
 
@@ -87,7 +95,9 @@ v2WallFunctionFvPatchScalarField::v2WallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchField<scalar>(v2wfpsf, iF)
+    fixedValueFvPatchField<scalar>(v2wfpsf, iF),
+    Cv2_(v2wfpsf.Cv2_),
+    Bv2_(v2wfpsf.Bv2_)
 {}
 
 
@@ -116,11 +126,11 @@ void v2WallFunctionFvPatchScalarField::updateCoeffs()
 
     const scalarField& y = turbModel.y()[patchi];
 
-    const tmp<volScalarField> tk = turbModel.k();
-    const volScalarField& k = tk();
-
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
+
+    const tmp<volScalarField> tk = turbModel.k();
+    const volScalarField& k = tk();
 
     const scalar Cmu25 = pow025(nutw.Cmu());
 
@@ -129,22 +139,19 @@ void v2WallFunctionFvPatchScalarField::updateCoeffs()
     // Set v2 wall values
     forAll(v2, facei)
     {
-        label celli = patch().faceCells()[facei];
+        const label celli = patch().faceCells()[facei];
 
-        scalar uTau = Cmu25*sqrt(k[celli]);
+        const scalar uTau = Cmu25*sqrt(k[celli]);
 
-        scalar yPlus = uTau*y[facei]/nuw[facei];
+        const scalar yPlus = uTau*y[facei]/nuw[facei];
 
-        if (yPlus > nutw.yPlusLam())
+        if (nutw.yPlusLam() < yPlus)
         {
-            scalar Cv2 = 0.193;
-            scalar Bv2 = -0.94;
-            v2[facei] = Cv2/nutw.kappa()*log(yPlus) + Bv2;
+            v2[facei] = Cv2_/nutw.kappa()*log(yPlus) + Bv2_;
         }
         else
         {
-            scalar Cv2 = 0.193;
-            v2[facei] = Cv2*pow4(yPlus);
+            v2[facei] = Cv2_*pow4(yPlus);
         }
 
         v2[facei] *= sqr(uTau);
@@ -153,6 +160,17 @@ void v2WallFunctionFvPatchScalarField::updateCoeffs()
     fixedValueFvPatchField<scalar>::updateCoeffs();
 
     // TODO: perform averaging for cells sharing more than one boundary face
+}
+
+
+void v2WallFunctionFvPatchScalarField::write
+(
+    Ostream& os
+) const
+{
+    os.writeEntry("Cv2", Cv2_);
+    os.writeEntry("Bv2", Bv2_);
+    fixedValueFvPatchField<scalar>::write(os);
 }
 
 
