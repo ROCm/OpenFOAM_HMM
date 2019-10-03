@@ -28,6 +28,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "searchableSurface.H"
 #include "Time.H"
+#include "mergePoints.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -126,14 +127,57 @@ void Foam::patchEdgeSet::genSamples()
     samplingSegments.shrink();
     samplingCurveDist.shrink();
 
-    setSamples
+
+    labelList pointMap;
+    const label nMerged = mergePoints
     (
         samplingPts,
-        samplingCells,
-        samplingFaces,
-        samplingSegments,
-        samplingCurveDist
+        SMALL,          //const scalar mergeTol,
+        false,          //const bool verbose,
+        pointMap,
+        origin_
     );
+
+    if (nMerged == 0)
+    {
+        setSamples
+        (
+            samplingPts,
+            samplingCells,
+            samplingFaces,
+            samplingSegments,
+            samplingCurveDist
+        );
+    }
+    else
+    {
+        // Compress out duplicates
+
+        List<point> newSamplingPts(nMerged);
+        List<label> newSamplingCells(nMerged);
+        List<label> newSamplingFaces(nMerged);
+        List<label> newSamplingSegments(nMerged);
+        List<scalar> newSamplingCurveDist(nMerged);
+
+        forAll(pointMap, i)
+        {
+            const label newi = pointMap[i];
+            newSamplingPts[newi] = samplingPts[i];
+            newSamplingCells[newi] = samplingCells[i];
+            newSamplingFaces[newi] = samplingFaces[i];
+            newSamplingSegments[newi] = samplingSegments[i];
+            newSamplingCurveDist[newi] = samplingCurveDist[i];
+        }
+
+        setSamples
+        (
+            newSamplingPts,
+            newSamplingCells,
+            newSamplingFaces,
+            newSamplingSegments,
+            newSamplingCurveDist
+        );
+    }
 
     if (debug)
     {

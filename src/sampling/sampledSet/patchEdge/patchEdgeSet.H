@@ -49,6 +49,8 @@ Usage
                 type        patchEdge;
                 axis        x;
 
+                // List of patches to sample (into single file). Note: supports
+                // wildcards.
                 patches     (movingWall);
 
                 // Surface type
