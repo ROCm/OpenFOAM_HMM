@@ -94,8 +94,12 @@ Usage
     \endtable
 
 Note
-    The ordering of the points is according to the distance to the specified
+    - The ordering of the points is according to the distance to the specified
     origin.
+    - Collocated points get merged if closer than SMALL (1e-15 in double prec).
+    (hardcoded). Collocated points can occur if patch points are exactly
+    on the sampling plane. Note that (in parallel) any point merging gets
+    done locally before sending to the master.
 
 SourceFiles
     patchEdgeSet.C

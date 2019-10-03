@@ -138,8 +138,9 @@ void Foam::patchEdgeSet::genSamples()
         origin_
     );
 
-    if (nMerged == 0)
+    if (nMerged == samplingPts.size())
     {
+        // Nothing merged
         setSamples
         (
             samplingPts,
