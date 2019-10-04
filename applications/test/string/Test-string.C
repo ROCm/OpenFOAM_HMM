@@ -172,35 +172,6 @@ int main(int argc, char *argv[])
     Info<<"trimRight: " << stringOps::trimRight(test) << endl;
     Info<<"trim: " << stringOps::trim(test) << endl;
 
-    // Test comment stripping
-    {
-        Info<< nl << "Test comment stripping" << nl;
-        testCommentStripping
-        (
-            "/String without comments/"
-        );
-        testCommentStripping
-        (
-            "Removed some/* C-comments */ / C comments"
-        );
-        testCommentStripping
-        (
-            "Removed some//C++ comments\n / C++ comments"
-        );
-        testCommentStripping
-        (
-            "Partly degenerate C comment </*/ C-comment..."
-        );
-        testCommentStripping
-        (
-            "Truncated C comment </* C-comment..."
-        );
-        testCommentStripping
-        (
-            "Truncated C++ comment <// C++ comment..."
-        );
-    }
-
     if (false)
     {
         Info<<"test move construct - string size:" << test.size() << nl;
