@@ -31,22 +31,84 @@ License
 
 Foam::parsing::genericRagelLemonDriver::genericRagelLemonDriver()
 :
-    content_(std::cref<std::string>(string::null)),
+    content_(std::cref<std::string>(Foam::string::null)),
+    start_(0),
+    length_(0),
     position_(0)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::parsing::genericRagelLemonDriver::clear()
+{
+    content_ = std::cref<std::string>(Foam::string::null);
+    start_ = 0;
+    length_ = 0;
+    position_ = 0;
+}
+
+
+void Foam::parsing::genericRagelLemonDriver::content
+(
+    const std::string& s,
+    size_t pos,
+    size_t len
+)
+{
+    content_ = std::cref<std::string>(s);
+    start_ = pos;
+    length_ = len;
+    position_ = 0;
+}
+
+
+std::string::const_iterator
+Foam::parsing::genericRagelLemonDriver::cbegin() const
+{
+    const std::string& s = content_.get();
+
+    if (start_ >= s.length())
+    {
+        return s.cend();
+    }
+
+    return s.cbegin() + start_;
+}
+
+
+std::string::const_iterator
+Foam::parsing::genericRagelLemonDriver::cend() const
+{
+    const std::string& s = content_.get();
+
+    if (length_ == std::string::npos || start_ >= s.length())
+    {
+        return s.cend();
+    }
+
+    const size_t strEnd = start_ + length_;
+
+    if (strEnd >= s.length())
+    {
+        return s.cend();
+    }
+
+    return s.cbegin() + strEnd;
+}
+
+
 Foam::Ostream& Foam::parsing::genericRagelLemonDriver::printBuffer
 (
     Ostream& os
 ) const
 {
-    const std::string& s = content_.get();
+    const auto endIter = cend();
 
-    for (char c : s)
+    for (auto iter = cbegin(); iter != endIter; ++iter)
     {
+        char c(*iter);
+
         // if (!c) break;
 
         if (c == '\t')
@@ -111,9 +173,10 @@ void Foam::parsing::genericRagelLemonDriver::reportFatal
         << " in expression at position:" << long(pos) << nl
         << "<<<<\n";
 
-    const auto begIter = content().cbegin();
-    const auto endIter = content().cend();
+    const auto begIter = cbegin();
+    const auto endIter = cend();
 
+    // Position of newline(s)
     size_t newline0 = 0, newline1 = 0;
 
     auto iter = begIter;
@@ -157,6 +220,7 @@ void Foam::parsing::genericRagelLemonDriver::reportFatal
     size_t col = std::min(newline0, newline1);
     if (col < pos)
     {
+        // This still isn't quite right
         col = pos - col;
         if (col) --col;
 

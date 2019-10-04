@@ -89,8 +89,14 @@ public:
 
     // Member Functions
 
-        // Perform parsing on string
-        scalar execute(const std::string& s);
+        //- Perform parsing on (sub) string
+        //  \return evaluated value
+        scalar execute
+        (
+            const std::string& s,
+            size_t strPos = 0,
+            size_t strLen = std::string::npos
+        );
 
         //- Get value
         scalar value() const

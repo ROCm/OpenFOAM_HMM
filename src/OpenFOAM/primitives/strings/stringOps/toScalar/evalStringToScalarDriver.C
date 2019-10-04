@@ -21,10 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Ragel lexer interface for lemon grammar of a simple string to
-    scalar evaluation
-
 \*---------------------------------------------------------------------------*/
 
 #include "evalStringToScalar.H"
@@ -45,12 +41,14 @@ Foam::parsing::evalStringToScalar::parseDriver::parseDriver()
 
 Foam::scalar Foam::parsing::evalStringToScalar::parseDriver::execute
 (
-    const std::string& s
+    const std::string& s,
+    size_t pos,
+    size_t len
 )
 {
     // scanner::debug = 1;
 
-    scanner().process(s, *this);
+    scanner().process(s, pos, len, *this);
 
     return value_;
 }
@@ -58,11 +56,16 @@ Foam::scalar Foam::parsing::evalStringToScalar::parseDriver::execute
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::stringOps::toScalar(const std::string& s)
+Foam::scalar Foam::stringOps::toScalar
+(
+    const std::string& s,
+    size_t pos,
+    size_t len
+)
 {
     Foam::parsing::evalStringToScalar::parseDriver driver;
 
-    scalar val = driver.execute(s);
+    scalar val = driver.execute(s, pos, len);
     // val = driver.value();
 
     return val;

@@ -51,10 +51,15 @@ namespace stringOps
     //  - hyperbolic:  sinh, cosh, tanh
     //  - conversions:  degToRad, radToDeg
     //  - constants:  pi()
-    //  - misc: rand(), rand(seed)
+    //  - misc: floor, ceil, round, rand, rand(seed)
     //
     //  \note The rand() function returns a uniform scalar on [0-1] interval
-    scalar toScalar(const std::string& s);
+    scalar toScalar
+    (
+        const std::string& s,
+        size_t pos = 0,
+        size_t len = std::string::npos
+    );
 
 } // End namespace stringOps
 

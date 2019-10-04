@@ -26,7 +26,7 @@ Class
 
 Description
     Generic interface code for Ragel/Lemon combination
-    Subclasses should implement the process() method.
+    Subclasses should implement one or more process() methods.
 
     The scanner will often be implemented as localized lexer class.
     The parser may be embedded into the scanner as file-scope, or
@@ -64,6 +64,12 @@ protected:
         //- Reference to the input string
         std::reference_wrapper<const std::string> content_;
 
+        //- Start position within input string
+        size_t start_;
+
+        //- Length of input (sub)string
+        size_t length_;
+
         //- The last known parser position
         size_t position_;
 
@@ -96,11 +102,7 @@ public:
     // Member Functions
 
         //- Reset references
-        void clear()
-        {
-            content_ = std::cref<std::string>(string::null);
-            position_ = 0;
-        }
+        void clear();
 
         //- Get reference to the input buffer content
         const std::string& content() const
@@ -108,20 +110,28 @@ public:
             return content_.get();
         }
 
-        //- Set reference to the input buffer content
-        void content(const std::string& s)
-        {
-            content_ = std::cref<std::string>(s);
-            position_ = 0;
-        }
+        //- Set reference to the input buffer content,
+        //- which acts like a std::string_view
+        void content
+        (
+            const std::string& s,
+            size_t pos = 0,
+            size_t len = std::string::npos
+        );
 
-        //- The last parse position
+        //- Iterator to begin of content (sub)string
+        std::string::const_iterator cbegin() const;
+
+        //- Iterator to end of content (sub)string
+        std::string::const_iterator cend() const;
+
+        //- The relative parse position with the content (sub)string
         size_t parsePosition() const
         {
             return position_;
         }
 
-        //- The last parse position
+        //- The relative parse position with the content (sub)string
         size_t& parsePosition()
         {
             return position_;

@@ -32,4 +32,7 @@
 #define TOK_MAX                             32
 #define TOK_MAG                             33
 #define TOK_MAGSQR                          34
-#define TOK_RAND                            35
+#define TOK_FLOOR                           35
+#define TOK_CEIL                            36
+#define TOK_ROUND                           37
+#define TOK_RAND                            38

@@ -81,9 +81,30 @@ public:
 
     // Member Functions
 
+        //- Evaluate sub-string
+        bool process
+        (
+            const std::string& str, size_t pos, size_t len,
+            parseDriver& driver
+        );
+
+        //- Evaluate sub-string
+        bool process
+        (
+            const std::string& str, size_t pos,
+            parseDriver& driver
+        )
+        {
+            return process(str, pos, std::string::npos, driver);
+        }
+
         //- Evaluate string
-        bool process(const std::string& str, parseDriver& driver);
+        bool process(const std::string& str, parseDriver& driver)
+        {
+            return process(str, 0, std::string::npos, driver);
+        }
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

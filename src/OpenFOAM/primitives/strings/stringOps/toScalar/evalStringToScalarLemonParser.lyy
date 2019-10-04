@@ -237,6 +237,21 @@ exp(lhs) ::= MAGSQR LPAREN exp(a) RPAREN.
     lhs = Foam::magSqr(a);
 }
 
+exp(lhs) ::= FLOOR LPAREN exp(a) RPAREN.
+{
+    lhs = std::floor(a);
+}
+
+exp(lhs) ::= CEIL LPAREN exp(a) RPAREN.
+{
+    lhs = std::ceil(a);
+}
+
+exp(lhs) ::= ROUND LPAREN exp(a) RPAREN.
+{
+    lhs = std::round(a);
+}
+
 exp(lhs) ::= RAND LPAREN RPAREN.
 {
     lhs = Foam::Random().sample01<Foam::scalar>();
