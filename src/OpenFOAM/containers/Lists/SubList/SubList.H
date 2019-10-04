@@ -77,6 +77,9 @@ public:
 
     // Constructors
 
+        //- Construct from UList, the entire size
+        inline explicit SubList(const UList<T>& list);
+
         //- Construct from UList and sub-list size, start at 0
         inline SubList
         (
@@ -112,17 +115,20 @@ public:
 
     // Member Operators
 
-        //- Allow cast to a const List<T>&
+        //- Allow cast to a const List\<T\>&
         inline operator const Foam::List<T>&() const;
 
-        //- Assignment of all entries to the given sub-list
+        //- Copy assign entries from given sub-list
         inline void operator=(const SubList<T>& list);
 
-        //- Assignment of all entries to the given list
+        //- Copy assign entries to the given list
         inline void operator=(const UList<T>& list);
 
-        //- Assignment of all entries to the given value
+        //- Assign all entries to the given value
         inline void operator=(const T& val);
+
+        //- Assign all entries to zero
+        inline void operator=(const zero);
 };
 
 

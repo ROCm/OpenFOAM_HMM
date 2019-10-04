@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -26,6 +26,16 @@ License
 \*---------------------------------------------------------------------------*/
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class T>
+inline Foam::SubList<T>::SubList
+(
+    const UList<T>& list
+)
+:
+    UList<T>(list.v_, list.size())
+{}
+
 
 template<class T>
 inline Foam::SubList<T>::SubList
@@ -128,6 +138,13 @@ template<class T>
 inline void Foam::SubList<T>::operator=(const T& val)
 {
     UList<T>::operator=(val);
+}
+
+
+template<class T>
+inline void Foam::SubList<T>::operator=(const zero)
+{
+    UList<T>::operator=(Zero);
 }
 
 

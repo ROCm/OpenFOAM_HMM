@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -73,20 +73,23 @@ public:
 
     // Constructors
 
-        //- Copy construct from a SubList
+        //- Copy construct (shallow copy)
+        inline SubField(const SubField<Type>& sfield);
+
+        //- Copy construct from SubList
         inline SubField(const SubList<Type>& list);
 
-        //- Construct from a UList, the entire size
+        //- Construct from UList, the entire size
         inline explicit SubField(const UList<Type>& list);
 
-        //- Construct from a UList with a given sub-list size, start at 0
+        //- Construct from UList with a given sub-list size, start at 0
         inline SubField
         (
             const UList<Type>& list,
             const label subSize
         );
 
-        //- Construct from a UList with a given size and start index
+        //- Construct from UList with a given size and start index
         inline SubField
         (
             const UList<Type>& list,
@@ -111,9 +114,6 @@ public:
             const UList<Type>& list
         );
 
-        //- Copy construct
-        inline SubField(const SubField<Type>& sfield);
-
 
     // Member Functions
 
@@ -127,7 +127,10 @@ public:
         tmp<Field<Type>> T() const;
 
 
-    // Member operators
+    // Member Operators
+
+        //- Allow cast to a const Field\<Type\>&
+        inline operator const Foam::Field<Type>&() const;
 
         //- Copy assign via UList operator. Takes linear time.
         inline void operator=(const SubField<Type>&);
@@ -135,12 +138,27 @@ public:
         //- Copy assign via UList operator. Takes linear time.
         inline void operator=(const Field<Type>&);
 
+        //- Assign all entries to the given value
+        inline void operator=(const Type& val);
+
+        //- Assign all entries to zero
+        inline void operator=(const zero);
+
         //- Copy assign via UList operator. Takes linear time.
         template<class Form, direction Ncmpts>
-        inline void operator=(const VectorSpace<Form, Type, Ncmpts>&);
+        inline void operator=(const VectorSpace<Form, Type, Ncmpts>& rhs);
 
-        //- Allow cast to a const Field\<Type\>&
-        inline operator const Field<Type>&() const;
+        //- Add value to each entry
+        inline void operator+=(const Type& val);
+
+        //- Subtract value from each entry
+        inline void operator-=(const Type& val);
+
+        //- Multiply each entry by value
+        inline void operator*=(const scalar& s);
+
+        //- Divide each entry by value
+        inline void operator/=(const scalar& s);
 };
 
 

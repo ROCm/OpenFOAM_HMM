@@ -203,8 +203,8 @@ public:
             const bool applyFlip = true
         );
 
-        //- Construct by mapping from the given tmp field. Supplied uniform
-        //- value for unmapped items
+        //- Construct by mapping from the given tmp field.
+        //- Uses supplied uniform value for unmapped items
         Field
         (
             const tmp<Field<Type>>& tmapF,
@@ -213,8 +213,8 @@ public:
             const bool applyFlip = true
         );
 
-        //- Construct by mapping from the given tmp field. Supplied values
-        //- for unmapped items
+        //- Construct by mapping from the given tmp field.
+        //- Uses supplied values for unmapped items
         Field
         (
             const tmp<Field<Type>>& tmapF,
@@ -245,7 +245,7 @@ public:
         }
 
         //- Return a pointer to a new calculatedFvPatchFieldField created on
-        //  freestore without setting patchField values
+        //- freestore without setting patchField values
         template<class Type2>
         static tmp<Field<Type>> NewCalculatedType(const Field<Type2>& f)
         {
@@ -363,7 +363,7 @@ public:
         void writeEntry(const word& keyword, Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
         //- Copy assignment
         void operator=(const Field<Type>&);
