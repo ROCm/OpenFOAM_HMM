@@ -11,20 +11,40 @@ endif()
 #-----------------------------------------------------------------------------
 # Simple discovery and sanity checks
 
+unset(VTK_VERSION)
+unset(VTK_VERSION_MAJOR)
+
 if (EXISTS "$ENV{VTK_DIR}")
     message("Building with VTK from $ENV{VTK_DIR}")
     find_package(VTK REQUIRED HINTS $ENV{VTK_DIR})
-    include(${VTK_USE_FILE})
 elseif (EXISTS "$ENV{ParaView_DIR}")
     message("Building with Paraview from $ENV{ParaView_DIR}")
     find_package(ParaView REQUIRED HINTS $ENV{ParaView_DIR})
-    include(${VTK_USE_FILE})
-    set(
-        VTK_VERSION
-        "${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}.${VTK_BUILD_VERSION}"
-    )
 else()
     message(FATAL_ERROR "VTK not found using VTK_DIR or ParaView_DIR")
+endif()
+
+if (VTK_USE_FILE)
+    message("VTK from ${VTK_USE_FILE}")
+    include(${VTK_USE_FILE})
+endif()
+
+#-----------------------------------------------------------------------------
+# Handle name changes (eg, VTK_MAJOR_VERSION to VTK_VERSION_MAJOR etc.)
+
+if (VTK_MAJOR_VERSION AND NOT VTK_VERSION_MAJOR)
+    message("Found older VTK version naming")
+    set(VTK_VERSION_MAJOR ${VTK_MAJOR_VERSION})
+    set(VTK_VERSION_MINOR ${VTK_MINOR_VERSION})
+    set(VTK_VERSION_PATCH ${VTK_BUILD_VERSION})
+
+    if (NOT VTK_VERSION)
+        set(
+            VTK_VERSION
+            "${VTK_VERSION_MAJOR}.${VTK_VERSION_MINOR}.${VTK_VERSION_PATCH}"
+        )
+        message("Synthesized VTK version: " ${VTK_VERSION})
+    endif()
 endif()
 
 #-----------------------------------------------------------------------------

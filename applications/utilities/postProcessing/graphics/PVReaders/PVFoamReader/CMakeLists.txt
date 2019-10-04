@@ -13,7 +13,9 @@ endif()
 # Simple discovery and sanity checks
 
 find_package(ParaView REQUIRED)
-include(${PARAVIEW_USE_FILE})
+if (PARAVIEW_USE_FILE)
+    include(${PARAVIEW_USE_FILE})
+endif()
 
 #-----------------------------------------------------------------------------
 

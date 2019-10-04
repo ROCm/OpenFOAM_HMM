@@ -1,15 +1,9 @@
 #-----------------------------------------------------------------------------
 project(runTimePostProcessing)
 
-include(${VTK_USE_FILE})
+message("VTK version: " ${VTK_VERSION})
 
-if(VTK_LIBRARIES)
-    message("Found VTK LIBRARIES: " ${VTK_USE_FILE})
-endif()
-
-if(${VTK_VERSION} VERSION_GREATER "6")
-    message("VTK version: " ${VTK_VERSION})
-else()
+if(${VTK_VERSION_MAJOR} LESS 6)
     message(FATAL_ERROR " VTK version is too old - requires VTK6 or newer")
 endif()
 
@@ -67,7 +61,7 @@ set(LIBRARY_OUTPUT_PATH $ENV{FOAM_LIBBIN}
 ## Record VTK version for general bookkeeping
 # file(WRITE
 #     ${CMAKE_BINARY_DIR}/version
-#     "VTK_VERSION=${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}.${VTK_BUILD_VERSION}\n"
+#     "VTK_VERSION=${VTK_VERSION}\n"
 # )
 
 file(GLOB SOURCE_FILES
@@ -119,8 +113,8 @@ add_library(
 set_target_properties(
     runTimePostProcessing
     PROPERTIES
-    VERSION ${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}.${VTK_BUILD_VERSION}
-    SOVERSION ${VTK_MAJOR_VERSION}
+    VERSION ${VTK_VERSION}
+    SOVERSION ${VTK_VERSION_MAJOR}
 )
 
 target_link_libraries(

@@ -27,11 +27,7 @@ set(
 )
 
 
-if (PARAVIEW_QT_VERSION VERSION_GREATER "4")
-  qt5_wrap_cpp(MOC_SRCS pqFoamBlockMeshControls.h)
-else()
-  qt4_wrap_cpp(MOC_SRCS pqFoamBlockMeshControls.h)
-endif()
+qt5_wrap_cpp(MOC_SRCS pqFoamBlockMeshControls.h)
 
 add_paraview_property_group_widget(IFACES0 IFACES0_SRCS
     TYPE "openfoam_blockMesh_general_controls"
