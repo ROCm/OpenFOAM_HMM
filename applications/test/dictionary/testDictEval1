@@ -30,15 +30,20 @@ eval2 #eval{    degToRad() *
 
 eval3   (#eval{hypot(3,4)}, #eval{sqrt(2)}, #eval{pi()});
 
+noeval3 (5, 1.41421, 3.14159);
+
 eval4   #eval{$eval1 * 10};
 
 pi()    #eval{pi()};
 
 rand()  #eval{100*rand(123456)};
 
-sinh(0.1)  #eval{sinh(0.1)};
-cosh(0.1)  #eval{cosh(0.1)};
+sinh(0.1)   #eval{sinh(0.1)};
+cosh(0.1)   #eval{cosh(0.1)};
 
-sqrt100    #eval{((sqrt(100)))};
+sqrt100     #eval{((sqrt(100)))};
+
+random      #eval{ floor(1000*rand()) };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

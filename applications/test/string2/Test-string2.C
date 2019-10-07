@@ -56,6 +56,42 @@ void testCommentStripping(const std::string& s)
 }
 
 
+void testNumericEvaluation(const std::string& s)
+{
+    Info<< "input" << nl
+        << "========" << nl
+        << s << nl
+        << "========" << nl;
+
+    const bool throwingIOError = FatalIOError.throwExceptions();
+
+    try
+    {
+        std::string expanded(stringOps::expand(s));
+
+        if (expanded == s)
+        {
+            Info<< "DID NOT EXPAND" << nl;
+        }
+        else
+        {
+            Info<< "output" << nl
+                << "========" << nl
+                << expanded << nl;
+        }
+    }
+    catch (const Foam::IOerror& err)
+    {
+        Info<< "Expand triggered FatalIOError:"
+            << err.message().c_str() << nl;
+    }
+
+    Info<< "========" << nl << nl;
+
+    FatalIOError.throwExceptions(throwingIOError);
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
@@ -80,6 +116,26 @@ int main(int argc, char *argv[])
         )
         {
             testCommentStripping(cstr);
+        }
+    }
+
+    // Test numeric
+    {
+        Info<< nl << "Test numeric evaluation" << nl;
+        for
+        (
+            const auto& cstr
+          :
+            {
+                "My value <${{ round(100 / 15) }}> as int",
+                "sqrt(2) = (${{ sqrt(2) }})",
+                "sqrt(2) = (${{ sqrt(2) }/* Truncated */",
+                "sqrt(2) = (${{ sqrt(2) * foo() }})/* bad expr */",
+                "huge = (${{ sqrt(123E+5000) }})/* range error */",
+            }
+        )
+        {
+            testNumericEvaluation(cstr);
         }
     }
 

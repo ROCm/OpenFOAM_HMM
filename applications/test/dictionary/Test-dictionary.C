@@ -50,9 +50,9 @@ int main(int argc, char *argv[])
 
     {
         dictionary dict;
-        dict.add(word("aa" + getEnv("WM_MPLIB") + "cc"), 16);
+        dict.add(word("ab" + getEnv("WM_MPLIB") + "cd"), 16);
 
-        string s("DDD_${aa${WM_MPLIB}cc}_EEE");
+        string s("DDD_${ab${WM_MPLIB}cd}_EEE");
         stringOps::inplaceExpand(s, dict, true, false);
         Info<< "variable expansion:" << s << endl;
     }

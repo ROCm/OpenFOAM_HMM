@@ -1,0 +1,62 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  Any                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      testDictEval1;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+expr1   "hypot(3,4)";
+
+expr2   hypot(3,4);
+
+expr3   #{  hypot(3,4)  #};
+
+eval1   #eval " pi() * 2 * $expr1";
+
+eval2   #eval " pi() * 2 * $expr2";
+
+eval3   #eval " pi() * 2 * $expr3";
+
+
+factor  "pi()";
+
+factor10  10;
+
+hypot_a 3;
+hypot_b 4;
+
+eval4   #eval "$factor * 2 * hypot(${hypot_xx:-0}, $hypot_b)";
+
+//eval5   #eval " pi() * 2 * ${{ hypot(3,4) * 100 }}";
+
+eval6   #eval " pi() * 2 * ${{ ${factor:-0} * ${{ 15 * 3 }} }} + 5";
+
+eval6a  #eval " pi() * 2 * ${{ ${factor:+-$factor} * ${{ 15 * 3 }} }} + 5";
+
+eval6b  #eval " pi() * 2 * ${{ ${unknown:-0} * ${{ 15 * 3 }} }} + 5";
+
+eval6c  #eval " pi() * 2 * ${{ -${unknown:-0} * ${{ 15 * 3 }} }} + 5";
+
+// Even this work
+eval7a   #eval " pi() * 1 * ${factor${{2*5}}:-100}";
+
+// Even this work
+eval7b   #eval " pi() * 1 * ${factorXYZ${{2*5}}:-100}";
+
+index   10;
+
+eval8a  #eval " pi() * 2 * ${{ ${factor$index} + ${factor10} }}";
+
+eval8b  #eval " pi() * 2 * $factor * ${{ 100 }}";
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
