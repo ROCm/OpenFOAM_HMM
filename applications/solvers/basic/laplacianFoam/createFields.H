@@ -14,23 +14,36 @@ volScalarField T
 );
 
 
-Info<< "Reading transportProperties\n" << endl;
+Info<< "Reading diffusivity DT\n" << endl;
 
-IOdictionary transportProperties
+volScalarField DT
 (
     IOobject
     (
-        "transportProperties",
-        runTime.constant(),
+        "DT",
+        runTime.timeName(),
         mesh,
-        IOobject::MUST_READ_IF_MODIFIED,
-        IOobject::NO_WRITE
-    )
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
+    ),
+    mesh,
+    dimensionedScalar(dimViscosity, Zero)
 );
 
-
-Info<< "Reading diffusivity DT\n" << endl;
-
-dimensionedScalar DT("DT", dimViscosity, transportProperties);
+if (!DT.headerOk())
+{
+    IOdictionary transportProperties
+    (
+        IOobject
+        (
+            "transportProperties",
+            runTime.constant(),
+            mesh,
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE
+        )
+    );
+    DT = dimensionedScalar("DT", dimViscosity, transportProperties);
+}
 
 #include "createFvOptions.H"
