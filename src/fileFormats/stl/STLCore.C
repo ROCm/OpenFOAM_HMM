@@ -35,7 +35,7 @@ License
 //! \cond fileScope
 
 // The number of bytes in the STL binary header
-static const unsigned STLHeaderSize = 80;
+static constexpr const unsigned STLHeaderSize = 80;
 
 // Check if "SOLID" or "solid" appears as the first non-space content.
 // Assume that any leading space is less than 75 chars or so, otherwise

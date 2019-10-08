@@ -149,7 +149,7 @@ void Foam::ISstream::readWordToken(token& t)
 
 Foam::Istream& Foam::ISstream::read(token& t)
 {
-    static const unsigned maxLen = 128;  // When parsing labels or scalars
+    constexpr const unsigned maxLen = 128; // Max length for labels/scalars
     static char buf[maxLen];
 
     // Return the put back token if it exists
@@ -404,7 +404,7 @@ Foam::Istream& Foam::ISstream::read(char& c)
 
 Foam::Istream& Foam::ISstream::read(word& str)
 {
-    static const unsigned maxLen = 1024;
+    constexpr const unsigned maxLen = 1024;
     static char buf[maxLen];
 
     unsigned nChar = 0;
@@ -483,7 +483,7 @@ Foam::Istream& Foam::ISstream::read(word& str)
 
 Foam::Istream& Foam::ISstream::read(string& str)
 {
-    static const unsigned maxLen = 1024;
+    constexpr const unsigned maxLen = 1024;
     static char buf[maxLen];
 
     char c;
@@ -583,7 +583,7 @@ Foam::Istream& Foam::ISstream::read(string& str)
 
 Foam::Istream& Foam::ISstream::readVariable(std::string& str)
 {
-    static const unsigned maxLen = 1024;
+    constexpr const unsigned maxLen = 1024;
     static char buf[maxLen];
 
     unsigned nChar = 0;
@@ -707,7 +707,7 @@ Foam::Istream& Foam::ISstream::readVariable(std::string& str)
 
 Foam::Istream& Foam::ISstream::readVerbatim(std::string& str)
 {
-    static const unsigned maxLen = 8000;
+    constexpr const unsigned maxLen = 8000;
     static char buf[maxLen];
 
     unsigned nChar = 0;
