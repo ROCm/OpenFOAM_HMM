@@ -70,15 +70,14 @@ class ISstream
         //- Get a word token
         void readWordToken(token& t);
 
-
         //- Read a verbatim string (excluding block delimiters).
         //  The leading "#{" has been removed prior to calling,
         //  continues until the closing "#}" has been found.
-        Istream& readVerbatim(string& str);
+        Istream& readVerbatim(std::string& str);
 
         //- Read a variable name starting with '$'.
-        //  Handles both "$var" and "${var}" forms.
-        Istream& readVariable(string& str);
+        //  Handles "$var" and "${var}" forms, permits '/' scoping character.
+        Istream& readVariable(std::string& str);
 
         //- No copy assignment
         void operator=(const ISstream&) = delete;

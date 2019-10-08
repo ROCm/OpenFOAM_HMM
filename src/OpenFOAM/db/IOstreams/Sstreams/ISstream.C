@@ -33,7 +33,7 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 // Truncate error message for readability
-static const unsigned errLen = 80;
+static constexpr const unsigned errLen = 80;
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
@@ -581,7 +581,7 @@ Foam::Istream& Foam::ISstream::read(string& str)
 }
 
 
-Foam::Istream& Foam::ISstream::readVariable(string& str)
+Foam::Istream& Foam::ISstream::readVariable(std::string& str)
 {
     static const unsigned maxLen = 1024;
     static char buf[maxLen];
@@ -698,14 +698,14 @@ Foam::Istream& Foam::ISstream::readVariable(string& str)
     }
 
     // Finalize
-    str = buf;
+    str.assign(buf, nChar);
     putback(c);
 
     return *this;
 }
 
 
-Foam::Istream& Foam::ISstream::readVerbatim(string& str)
+Foam::Istream& Foam::ISstream::readVerbatim(std::string& str)
 {
     static const unsigned maxLen = 8000;
     static char buf[maxLen];
