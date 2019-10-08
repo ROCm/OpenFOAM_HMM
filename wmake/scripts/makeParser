@@ -25,8 +25,12 @@ usage() {
 Usage: ${0##*/} [options]
 
 options:
+  -prefix=NAME      Common prefix for parser and scanner
   -parser=FILE      Generate lemon parser header
   -scanner=FILE     Generate ragel scanner code
+  -parser           Use 'LemonParser.lyy' for non-prefixed parser name
+  -scanner          Use 'Scanner.rl' for non-prefixed scanner name
+  -code             Generate lemon parser code
   -remove           Remove generated code
   -h, -help         Print the usage
 
@@ -40,14 +44,19 @@ USAGE
 # Parse arguments and options
 #------------------------------------------------------------------------------
 
-unset parser scanner optRemove
+unset prefix parser scanner optCode optRemove
 while [ "$#" -gt 0 ]
 do
     case "$1" in
     (-h | -help*) usage ;;
 
+    (-prefix=*)   prefix="${1#*=}" ;;
     (-parser=*)   parser="${1#*=}" ;;
     (-scanner=*)  scanner="${1#*=}" ;;
+
+    (-parser)     parser=LemonParser.lyy ;;
+    (-scanner)    scanner=Scanner.rl ;;
+    (-code)       optCode=true ;;
     (-remove)     optRemove=true ;;
 
     (*) break ;;
@@ -70,7 +79,8 @@ removeFile() {
 
 case "$scanner" in
 (*.rl)
-    output="${scanner%.*}.cc"
+    input="${prefix}${scanner}"
+    output="${prefix}${scanner%.*}.cc"
 
     if [ "$optRemove" = true ]
     then
@@ -78,24 +88,33 @@ case "$scanner" in
     elif command -v ragel >/dev/null
     then
         echo "Generating ragel scanner"
-        ragel -G2 -o "$output" "$scanner"
+        ragel -G2 -o "$output" "$input"
     else
         echo "No ragel, leaving scanner intact"
     fi
+    echo
     ;;
 esac
 
+
 case "$parser" in
 (*.ly | *.lyy)
+    extCode=cc
+    input="${prefix}${parser}"
     output="${parser%.*}.h"
 
     if [ "$optRemove" = true ]
     then
         removeFile "$output"  "lemon header"
+    elif [ "$optCode" = true ]
+    then
+        echo "Generating lemon parser code ($extCode)"
+        "$WM_PROJECT_DIR/wmake/scripts/wrap-lemon" -e"$extCode" -s "$input"
     else
         echo "Generating lemon parser header"
-        "$WM_PROJECT_DIR/wmake/scripts/wrap-lemon" -header "$parser"
+        "$WM_PROJECT_DIR/wmake/scripts/wrap-lemon" -header -s "$input"
     fi
+    echo
     ;;
 esac
 

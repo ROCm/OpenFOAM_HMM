@@ -1,11 +1,13 @@
 #!/bin/sh
 cd ${0%/*} || exit 1                        # Run from this directory
 
-# Manually create ragel scanner and the lemon parser header
+# Manually create ragel scanner and lemon parser header
+prefix=evalStringToScalar
 
 "$WM_PROJECT_DIR/wmake/scripts/makeParser" \
-    -scanner=evalStringToScalarScanner.rl \
-    -parser=evalStringToScalarLemonParser.lyy \
-    ;
+    -prefix="$prefix" \
+    -scanner=Scanner.rl \
+    -parser=LemonParser.lyy \
+    "$@"
 
 #------------------------------------------------------------------------------
