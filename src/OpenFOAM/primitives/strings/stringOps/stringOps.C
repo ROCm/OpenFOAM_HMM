@@ -277,7 +277,9 @@ namespace
 //
 // Similar to word::valid(), except we don't have the benefit of a parser
 // to filter out other unacceptable entries for us.
-
+//
+// Does not currently accept '/' in a variable name.
+// We would like "$file/$name" to expand as two variables.
 static inline bool validVariableChar(char c)
 {
     return

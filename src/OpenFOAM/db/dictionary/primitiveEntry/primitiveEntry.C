@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -85,14 +85,15 @@ bool Foam::primitiveEntry::expandVariable
     if (!eptr)
     {
         // Not found - revert to environment variable
-        const string str(getEnv(varName));
+        const string str(Foam::getEnv(varName));
 
         if (str.empty())
         {
             FatalIOErrorInFunction(dict)
                 << "Illegal dictionary entry or environment variable name "
-                << varName << endl << "Valid dictionary entries are "
-                << dict.toc() << exit(FatalIOError);
+                << varName << nl
+                << "Known dictionary entries: " << dict.toc() << nl
+                << exit(FatalIOError);
 
             return false;
         }

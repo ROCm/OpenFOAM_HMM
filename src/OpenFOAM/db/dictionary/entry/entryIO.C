@@ -192,7 +192,7 @@ bool Foam::entry::New
     }
 
 
-    if (keyword[0] == '#')
+    if (keyword[0] == token::HASH)
     {
         // Function entry - #function
 
@@ -215,7 +215,7 @@ bool Foam::entry::New
     }
 
 
-    if (!disableFunctionEntries && keyword[0] == '$')
+    if (!disableFunctionEntries && keyword[0] == token::DOLLAR)
     {
         // Substitution entry - $variable
 

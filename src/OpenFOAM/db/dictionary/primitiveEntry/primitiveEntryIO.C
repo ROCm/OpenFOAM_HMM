@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -81,12 +81,8 @@ bool Foam::primitiveEntry::acceptToken
         accept =
         (
             disableFunctionEntries
-         || key.size() <= 3
-         || !(
-                key[0] == '$'
-             && key[1] == token::BEGIN_BLOCK
-             && expandVariable(key.substr(1), dict)
-            )
+         || key.size() == 1
+         || !(key[0] == '$' && expandVariable(key.substr(1), dict))
         );
     }
 

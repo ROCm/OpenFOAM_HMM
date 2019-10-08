@@ -20,7 +20,7 @@ fieldAverage1
     type                fieldAverage;
     libs                (fieldFunctionObjects);
     writeControl        writeTime;
-    timeStart           ${/timeStart};
+    timeStart           $/timeStart;
 
     fields
     (
@@ -39,7 +39,7 @@ inletSampling
     type                sets;
     libs                (sampling);
     writeControl        writeTime;
-    timeStart           ${/timeStart};
+    timeStart           $/timeStart;
 
     interpolationScheme cellPoint;
     setFormat           raw;
