@@ -89,7 +89,7 @@ public:
         WORD,             //!< Contents represent a Foam::word
         STRING,           //!< Contents represent a Foam::string
         VARIABLE,         //!< Contents are a Foam::string representing a
-                          //!< dictionary \c $variable expansion
+                          //!< dictionary \c \$variable expansion
         VERBATIMSTRING,   //!< Contents are a Foam::string representing verbatim
                           //!< content
         COMPOUND,         //!< Compound type such as \c List\<label\> etc.
@@ -110,10 +110,10 @@ public:
     //- Standard punctuation tokens (a character)
     enum punctuationToken : char
     {
-        NULL_TOKEN     = '\0',
-        SPACE          = ' ',
-        TAB            = '\t',
-        NL             = '\n',
+        NULL_TOKEN     = '\0',  //!< Nul character
+        SPACE          = ' ',   //!< Space [isspace]
+        TAB            = '\t',  //!< Tab [isspace]
+        NL             = '\n',  //!< Newline [isspace]
 
         END_STATEMENT  = ';',   //!< End entry [#isseparator]
         BEGIN_LIST     = '(',   //!< Begin list [#isseparator]
@@ -124,19 +124,20 @@ public:
         END_BLOCK      = '}',   //!< End block [#isseparator]
         COLON          = ':',   //!< Colon [#isseparator]
         COMMA          = ',',   //!< Comma [#isseparator]
-        HASH           = '#',
-        ATSYM          = '@',
+        HASH           = '#',   //!< Hash - directive or verbatim string
+        DOLLAR         = '$',   //!< Dollar - start variable
+        ATSYM          = '@',   //!< At
         SQUOTE         = '\'',  //!< Single quote
         DQUOTE         = '"',   //!< Double quote
 
-        BEGIN_STRING   = DQUOTE, //!< Double quote for begin string
-        END_STRING     = DQUOTE, //!< Double quote for end string
+        ASSIGN         = '=',   //!< Assignment/equals [#isseparator]
+        ADD            = '+',   //!< Addition [#isseparator]
+        SUBTRACT       = '-',   //!< Substract or start of negative number
+        MULTIPLY       = '*',   //!< Multiply [#isseparator]
+        DIVIDE         = '/',   //!< Divide [#isseparator]
 
-        ASSIGN         = '=', //!< Assignment/equals [#isseparator]
-        ADD            = '+', //!< Addition [#isseparator]
-        SUBTRACT       = '-', //!< Substract or start of negative number
-        MULTIPLY       = '*', //!< Multiply [#isseparator]
-        DIVIDE         = '/'  //!< Divide [#isseparator]
+        BEGIN_STRING   = DQUOTE, //!< Begin string with double quote
+        END_STRING     = DQUOTE  //!< End string with double quote
     };
 
 
@@ -390,55 +391,55 @@ public:
         //- True if token is not UNDEFINED or ERROR
         inline bool good() const;
 
-        //- True if token is UNDEFINED
+        //- Token is UNDEFINED
         inline bool undefined() const;
 
-        //- True if token is ERROR
+        //- Token is ERROR
         inline bool error() const;
 
-        //- True if token is BOOL
+        //- Token is BOOL
         inline bool isBool() const;
 
-        //- True if token is FLAG
+        //- Token is FLAG
         inline bool isFlag() const;
 
-        //- True if token is PUNCTUATION
+        //- Token is PUNCTUATION
         inline bool isPunctuation() const;
 
-        //- True if token is PUNCTUATION and isseparator
+        //- Token is PUNCTUATION and isseparator
         inline bool isSeparator() const;
 
-        //- True if token is LABEL
+        //- Token is LABEL
         inline bool isLabel() const;
 
-        //- True if token is FLOAT_SCALAR
+        //- Token is FLOAT_SCALAR
         inline bool isFloatScalar() const;
 
-        //- True if token is DOUBLE_SCALAR
+        //- Token is DOUBLE_SCALAR
         inline bool isDoubleScalar() const;
 
-        //- True if token is FLOAT_SCALAR or DOUBLE_SCALAR
+        //- Token is FLOAT_SCALAR or DOUBLE_SCALAR
         inline bool isScalar() const;
 
-        //- True if token is LABEL, FLOAT_SCALAR or DOUBLE_SCALAR
+        //- Token is LABEL, FLOAT_SCALAR or DOUBLE_SCALAR
         inline bool isNumber() const;
 
-        //- True if token is WORD
+        //- Token is WORD
         inline bool isWord() const;
 
-        //- True if token is STRING, VARIABLE or VERBATIM string
+        //- Token is STRING, VARIABLE or VERBATIM string
         inline bool isString() const;
 
-        //- True if token is VARIABLE
+        //- Token is VARIABLE
         inline bool isVariable() const;
 
-        //- True if token is VERBATIM string
+        //- Token is VERBATIM string
         inline bool isVerbatim() const;
 
-        //- True if token is WORD, STRING, VARIABLE or VERBATIM
+        //- Token is WORD, STRING, VARIABLE or VERBATIM
         inline bool isStringType() const;
 
-        //- True if token is COMPOUND
+        //- Token is COMPOUND
         inline bool isCompound() const;
 
 
