@@ -27,7 +27,6 @@ License
 
 #include "dictionary.H"
 #include "IFstream.H"
-#include "regExp.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
