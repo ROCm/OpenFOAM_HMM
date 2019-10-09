@@ -40,7 +40,7 @@ Description
 #pragma GCC diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wsign-compare"
-}
+}  // End of %include
 
 %namespace      {}
 
@@ -51,17 +51,17 @@ Description
 
 %token_prefix TOK_
 
-%token_type     { Foam::scalar }
+%token_type     {Foam::scalar}
+%type exp       {Foam::scalar}
 
 %left PLUS MINUS.
 %left TIMES DIVIDE.
 %left NEGATE.
 
 
-eval(lhs) ::= exp(a).
+evaluate ::= exp(a).
 {
-    lhs = a;
-    driver->setValue(lhs);
+    driver->setValue(a);
 }
 
 exp(lhs) ::= NUMBER(a).
@@ -69,7 +69,7 @@ exp(lhs) ::= NUMBER(a).
     lhs = a;
 }
 
-exp(lhs) ::= MINUS exp(a).
+exp(lhs) ::= MINUS exp(a).  // Could add [NEGATE] precedence
 {
     lhs = -a;
 }
@@ -299,7 +299,7 @@ void Foam::parsing::evalStringToScalar::parser::parse
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-}  // Code
+}  // End of %code
 
 
 // ************************************************************************* //
