@@ -612,6 +612,28 @@ Foam::wordList Foam::polyBoundaryMesh::physicalTypes() const
 }
 
 
+Foam::labelList Foam::polyBoundaryMesh::patchStarts() const
+{
+    return
+        getMethodImpl<labelList>
+        (
+            *this,
+            [](const polyPatch& p) { return p.start(); }
+        );
+}
+
+
+Foam::labelList Foam::polyBoundaryMesh::patchSizes() const
+{
+    return
+        getMethodImpl<labelList>
+        (
+            *this,
+            [](const polyPatch& p) { return p.size(); }
+        );
+}
+
+
 Foam::label Foam::polyBoundaryMesh::start() const
 {
     return mesh_.nInternalFaces();

@@ -167,6 +167,12 @@ public:
         //- Return a list of physical types
         wordList physicalTypes() const;
 
+        //- Return a list of patch start face indices
+        labelList patchStarts() const;
+
+        //- Return a list of patch sizes
+        labelList patchSizes() const;
+
         //- The start label of the boundary faces in the polyMesh face list
         //  Same as mesh.nInternalFaces()
         label start() const;
