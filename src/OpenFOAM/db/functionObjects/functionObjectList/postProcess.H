@@ -112,18 +112,31 @@ if (argList::postProcess(argc, argv))
 
         Info<< "Time = " << runTime.timeName() << endl;
 
-        if (mesh.readUpdate() != polyMesh::UNCHANGED)
+        switch (mesh.readUpdate())
         {
-            // Update functionObjects if mesh changes
-            // Note clearing the dictionary to avoid merge warning
-            functionsDict.clear();
-            functionsPtr = functionObjectList::New
-            (
-                args,
-                runTime,
-                functionsDict,
-                selectedFields
-            );
+            case polyMesh::POINTS_MOVED:
+            {
+                functionsPtr->movePoints(mesh);
+                break;
+            }
+            case polyMesh::TOPO_CHANGE:
+            case polyMesh::TOPO_PATCH_CHANGE:
+            {
+                mapPolyMesh mpm(mesh);
+                functionsPtr->updateMesh(mpm);
+                break;
+            }
+            case polyMesh::UNCHANGED:
+            {
+                // No additional work
+                break;
+            }
+            default:
+            {
+                FatalErrorIn(args.executable())
+                    << "Unhandled enumeration"
+                    << abort(FatalError);
+            }
         }
 
         FatalIOError.throwExceptions();
