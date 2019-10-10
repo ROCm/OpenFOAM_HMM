@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -29,6 +29,71 @@ License
 #include "polyMesh.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::mapPolyMesh::mapPolyMesh(const polyMesh& mesh)
+:
+    mesh_(mesh),
+    nOldPoints_(mesh.nPoints()),
+    nOldFaces_(mesh.nFaces()),
+    nOldCells_(mesh.nCells()),
+    pointMap_(identity(mesh.nPoints())),
+    pointsFromPointsMap_(),
+    faceMap_(identity(mesh.nFaces())),
+    facesFromPointsMap_(),
+    facesFromEdgesMap_(),
+    facesFromFacesMap_(),
+    cellMap_(identity(mesh.nCells())),
+    cellsFromPointsMap_(),
+    cellsFromEdgesMap_(),
+    cellsFromFacesMap_(),
+    cellsFromCellsMap_(),
+    reversePointMap_(identity(mesh.nPoints())),
+    reverseFaceMap_(identity(mesh.nFaces())),
+    reverseCellMap_(identity(mesh.nCells())),
+    flipFaceFlux_(),
+    patchPointMap_(mesh.boundaryMesh().size()),
+    pointZoneMap_(mesh.pointZones().size()),
+    faceZonePointMap_(mesh.faceZones().size()),
+    faceZoneFaceMap_(mesh.faceZones().size()),
+    cellZoneMap_(mesh.cellZones().size()),
+    preMotionPoints_(mesh.points()),
+    oldPatchSizes_(mesh.boundaryMesh().patchSizes()),
+    oldPatchStarts_(mesh.boundaryMesh().patchStarts()),
+    oldPatchNMeshPoints_(mesh.boundaryMesh().size()),
+    oldCellVolumesPtr_()
+{
+    // Identity map for patch points
+    forAll(patchPointMap_, patchi)
+    {
+        const label nPoints = mesh.boundaryMesh()[patchi].meshPoints().size();
+        oldPatchNMeshPoints_[patchi] = nPoints;
+        patchPointMap_[patchi] = identity(nPoints);
+    }
+
+    // Identity maps for zones
+
+    forAll(pointZoneMap_, zonei)
+    {
+        pointZoneMap_[zonei] = identity(mesh.pointZones()[zonei].size());
+    }
+
+    forAll(faceZonePointMap_, zonei)
+    {
+        faceZonePointMap_[zonei] =
+            identity(mesh.faceZones()[zonei]().meshPoints().size());
+    }
+
+    forAll(faceZoneFaceMap_, zonei)
+    {
+        pointZoneMap_[zonei] = identity(mesh.faceZones()[zonei].size());
+    }
+
+    forAll(cellZoneMap_, zonei)
+    {
+        cellZoneMap_[zonei] = identity(mesh.cellZones()[zonei].size());
+    }
+}
+
 
 Foam::mapPolyMesh::mapPolyMesh
 (

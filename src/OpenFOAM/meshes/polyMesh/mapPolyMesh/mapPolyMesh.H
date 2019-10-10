@@ -233,27 +233,27 @@ class mapPolyMesh
         const labelHashSet flipFaceFlux_;
 
         //- Patch mesh point renumbering
-        const labelListList patchPointMap_;
+        labelListList patchPointMap_;
 
         //- Point zone renumbering
         //  For every preserved point in zone give the old position.
         //  For added points, the index is set to -1
-        const labelListList pointZoneMap_;
+        labelListList pointZoneMap_;
 
         //- Face zone point renumbering
         //  For every preserved point in zone give the old position.
         //  For added points, the index is set to -1
-        const labelListList faceZonePointMap_;
+        labelListList faceZonePointMap_;
 
         //- Face zone face renumbering
         //  For every preserved face in zone give the old position.
         //  For added faces, the index is set to -1
-        const labelListList faceZoneFaceMap_;
+        labelListList faceZoneFaceMap_;
 
         //- Cell zone renumbering
         //  For every preserved cell in zone give the old position.
         //  For added cells, the index is set to -1
-        const labelListList cellZoneMap_;
+        labelListList cellZoneMap_;
 
         //- Pre-motion point positions.
         //  This specifies the correct way of blowing up zero-volume objects
@@ -266,7 +266,7 @@ class mapPolyMesh
         const labelList oldPatchStarts_;
 
         //- List of numbers of mesh points per old patch
-        const labelList oldPatchNMeshPoints_;
+        labelList oldPatchNMeshPoints_;
 
         //- Optional old cell volumes (for mapping)
         autoPtr<scalarField> oldCellVolumesPtr_;
@@ -284,6 +284,9 @@ class mapPolyMesh
 public:
 
     // Constructors
+
+        //- Construct from mesh
+        mapPolyMesh(const polyMesh& mesh);
 
         //- Construct from components. Copy (except for oldCellVolumes).
         mapPolyMesh
