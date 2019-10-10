@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -25,7 +25,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Vector2D.H"
 #include "Tensor2D.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -116,6 +115,20 @@ template<class Cmpt>
 inline Cmpt& Foam::SymmTensor2D<Cmpt>::yy()
 {
     return this->v_[YY];
+}
+
+
+template<class Cmpt>
+inline Foam::Vector2D<Cmpt> Foam::SymmTensor2D<Cmpt>::diag() const
+{
+    return Vector2D<Cmpt>(this->v_[XX], this->v_[YY]);
+}
+
+
+template<class Cmpt>
+inline void Foam::SymmTensor2D<Cmpt>::diag(const Vector2D<Cmpt>& v)
+{
+    this->v_[XX] = v.x(); this->v_[YY] = v.y();
 }
 
 

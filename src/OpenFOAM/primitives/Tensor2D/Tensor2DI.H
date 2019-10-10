@@ -305,12 +305,16 @@ inline void Foam::Tensor2D<Cmpt>::row
 
 
 template<class Cmpt>
-inline Foam::Vector2D<Cmpt> Foam::Tensor2D<Cmpt>::vectorComponent
-(
-    const direction cmpt
-) const
+inline Foam::Vector2D<Cmpt> Foam::Tensor2D<Cmpt>::diag() const
 {
-    return row(cmpt);
+    return Vector2D<Cmpt>(this->v_[XX], this->v_[YY]);
+}
+
+
+template<class Cmpt>
+inline void Foam::Tensor2D<Cmpt>::diag(const Vector2D<Cmpt>& v)
+{
+    this->v_[XX] = v.x(); this->v_[YY] = v.y();
 }
 
 

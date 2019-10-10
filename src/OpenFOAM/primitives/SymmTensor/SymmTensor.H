@@ -41,7 +41,7 @@ SourceFiles
 #define SymmTensor_H
 
 #include "contiguous.H"
-#include "VectorSpace.H"
+#include "Vector.H"
 #include "SphericalTensor.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -104,12 +104,12 @@ public:
         );
 
         //- Construct from Istream
-        SymmTensor(Istream&);
+        inline SymmTensor(Istream&);
 
 
     // Member Functions
 
-        // Access
+        // Component access
 
             inline const Cmpt& xx() const;
             inline const Cmpt& xy() const;
@@ -124,6 +124,18 @@ public:
             inline Cmpt& yy();
             inline Cmpt& yz();
             inline Cmpt& zz();
+
+
+        // Diagonal access.
+
+            //- Extract the diagonal as a vector
+            inline Vector<Cmpt> diag() const;
+
+            //- Set values of the diagonal
+            inline void diag(const Vector<Cmpt>& v);
+
+
+    // Tensor Operations
 
         //- Transpose
         inline const SymmTensor<Cmpt>& T() const;

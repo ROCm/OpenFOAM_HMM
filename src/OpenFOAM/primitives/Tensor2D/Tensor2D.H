@@ -185,9 +185,14 @@ public:
             //  Runtime check of row index.
             inline void row(const direction r, const Vector2D<Cmpt>& v);
 
-            //- Return vector for given row (0,1)
-            //  Runtime check of row index.
-            inline Vector2D<Cmpt> vectorComponent(const direction cmpt) const;
+
+        // Diagonal access.
+
+            //- Extract the diagonal as a vector
+            inline Vector2D<Cmpt> diag() const;
+
+            //- Set values of the diagonal
+            inline void diag(const Vector2D<Cmpt>& v);
 
 
     // Tensor Operations
@@ -209,6 +214,16 @@ public:
 
         //- Copy assign from SphericalTensor2D
         inline void operator=(const SphericalTensor2D<Cmpt>&);
+
+
+    // Housekeeping
+
+        //- Deprecated(2018-12) Return vector for given row (0,1)
+        //  \deprecated(2018-12) use row() method
+        Vector2D<Cmpt> vectorComponent(const direction cmpt) const
+        {
+            return row(cmpt);
+        }
 };
 
 

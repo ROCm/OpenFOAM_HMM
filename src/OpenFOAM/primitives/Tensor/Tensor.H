@@ -229,9 +229,14 @@ public:
             //  Runtime check of row index.
             inline void row(const direction r, const Vector<Cmpt>& v);
 
-            //- Return vector for given row (0,1,2)
-            //  Runtime check of row index.
-            inline Vector<Cmpt> vectorComponent(const direction cmpt) const;
+
+        // Diagonal access.
+
+            //- Extract the diagonal as a vector
+            inline Vector<Cmpt> diag() const;
+
+            //- Set values of the diagonal
+            inline void diag(const Vector<Cmpt>& v);
 
 
     // Tensor Operations
@@ -269,6 +274,16 @@ public:
 
         //- Assign to a triad of row vectors
         inline void operator=(const Vector<Vector<Cmpt>>&);
+
+
+    // Housekeeping
+
+        //- Deprecated(2018-12) Return vector for given row (0,1)
+        //  \deprecated(2018-12) use row() method
+        Vector<Cmpt> vectorComponent(const direction cmpt) const
+        {
+            return row(cmpt);
+        }
 };
 
 

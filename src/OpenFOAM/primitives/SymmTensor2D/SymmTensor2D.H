@@ -41,7 +41,7 @@ SourceFiles
 #define SymmTensor2D_H
 
 #include "contiguous.H"
-#include "VectorSpace.H"
+#include "Vector2D.H"
 #include "SphericalTensor2D.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -102,7 +102,7 @@ public:
         );
 
         //- Construct from Istream
-        SymmTensor2D(Istream&);
+        inline SymmTensor2D(Istream&);
 
 
     // Member Functions
@@ -116,6 +116,16 @@ public:
             inline Cmpt& xx();
             inline Cmpt& xy();
             inline Cmpt& yy();
+
+
+        // Diagonal access.
+
+            //- Extract the diagonal as a vector
+            inline Vector2D<Cmpt> diag() const;
+
+            //- Set values of the diagonal
+            inline void diag(const Vector2D<Cmpt>& v);
+
 
         //- Transpose
         inline const SymmTensor2D<Cmpt>& T() const;

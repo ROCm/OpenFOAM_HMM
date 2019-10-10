@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -460,12 +460,16 @@ inline void Foam::Tensor<Cmpt>::row(const direction r, const Vector<Cmpt>& v)
 
 
 template<class Cmpt>
-inline Foam::Vector<Cmpt> Foam::Tensor<Cmpt>::vectorComponent
-(
-    const direction cmpt
-) const
+inline Foam::Vector<Cmpt> Foam::Tensor<Cmpt>::diag() const
 {
-    return row(cmpt);
+    return Vector<Cmpt>(this->v_[XX], this->v_[YY], this->v_[ZZ]);
+}
+
+
+template<class Cmpt>
+inline void Foam::Tensor<Cmpt>::diag(const Vector<Cmpt>& v)
+{
+    this->v_[XX] = v.x(); this->v_[YY] = v.y(); this->v_[ZZ] = v.z();
 }
 
 
