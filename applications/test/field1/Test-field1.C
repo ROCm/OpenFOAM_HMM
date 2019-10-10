@@ -5,8 +5,6 @@
     \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011 OpenFOAM Foundation
--------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
@@ -23,64 +21,50 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::labelField
-
 Description
-    Specialisation of Field\<T\> for label.
-
-SourceFiles
-    labelField.C
+    Simple field tests
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef labelField_H
-#define labelField_H
+#include "primitiveFields.H"
+#include "IOstreams.H"
 
-#include "label.H"
-#include "Field.H"
-
-#define TEMPLATE
-#include "FieldFunctionsM.H"
+using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Main program:
 
-namespace Foam
+int main(int argc, char *argv[])
 {
+    scalarField sfield(10, one());
 
-typedef Field<label> labelField;
+    forAll(sfield, i)
+    {
+        sfield[i] = (i % 4) ? i : 0;
+    }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    Info<< "scalarField: " << sfield << nl;
+    sfield.negate();
 
-BINARY_TYPE_OPERATOR(label, label, label, +, add)
-BINARY_TYPE_OPERATOR(label, label, label, -, subtract)
+    Info<< "negated: " << sfield << nl;
 
+    // Does not compile (ambiguous)
+    // boolField lfield(10, one());
 
-template<>
-tmp<labelField> labelField::component(const direction) const;
+    boolField lfield(10, true);
 
-template<>
-void component
-(
-    labelField& lf,
-    const labelUList& f,
-    const direction
-);
+    forAll(lfield, i)
+    {
+        lfield[i] = (i % 4) ? i : 0;
+    }
 
-template<>
-void labelField::replace(const direction, const labelUList& lf);
+    Info<< "boolField: " << lfield << nl;
+    lfield.negate();
 
+    Info<< "negated: " << lfield << nl;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    return 0;
+}
 
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "undefFieldFunctionsM.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

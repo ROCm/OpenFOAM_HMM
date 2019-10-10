@@ -205,51 +205,50 @@ inline Scalar component(const Scalar s, const direction)
 }
 
 
-//- Return 1 if s is positive or 0 otherwise -1
+//- Return 1 if s is greater_equal zero, or otherwise -1
 inline Scalar sign(const Scalar s)
 {
     return (s >= 0)? 1: -1;
 }
 
 
-//- Return 1 if s is positive but not 0
+//- Return 1 if s is greater than zero, otherwise 1
 inline Scalar pos(const Scalar s)
 {
     return (s > 0)? 1: 0;
 }
 
 
-//- Return 1 if s is positive or 0
+//- Return 1 if s is greater_equal zero, or otherwise 0
 inline Scalar pos0(const Scalar s)
 {
     return (s >= 0)? 1: 0;
 }
 
 
-//- Return 1 if s is negative but not 0
+//- Return 1 if s is less than zero, or otherwise 0
 inline Scalar neg(const Scalar s)
 {
     return (s < 0)? 1: 0;
 }
 
 
-//- Return 1 if s is negative or 0
+//- Return 1 if s is less_equal zero, or otherwise 0
 inline Scalar neg0(const Scalar s)
 {
     return (s <= 0)? 1: 0;
 }
 
 
-//- Return the positive part of s
+//- Return the positive part of s, otherwise zero. Same as max(0, s).
 inline Scalar posPart(const Scalar s)
 {
     return (s > 0)? s: 0;
 }
 
 
-//- Return the negative part of s.
-//  Note: this function returns the actual negative part of s as a
-//  negative number and does not change the sign
+//- Return the negative part of s, otherwise zero. Same as min(0, s).
+//  Does not change the sign
 inline Scalar negPart(const Scalar s)
 {
     return (s < 0)? s: 0;

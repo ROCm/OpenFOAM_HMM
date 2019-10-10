@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -408,6 +408,25 @@ Foam::orientedType Foam::atan2
     {
         FatalErrorInFunction
             << "Operator atan2 is undefined for "
+            << orientedType::orientedOptionNames[ot1.oriented()] << " and "
+            << orientedType::orientedOptionNames[ot2.oriented()] << "types"
+            << abort(FatalError);
+    }
+
+    return ot1;
+}
+
+
+Foam::orientedType Foam::hypot
+(
+    const orientedType& ot1,
+    const orientedType& ot2
+)
+{
+    if (!orientedType::checkType(ot1, ot2))
+    {
+        FatalErrorInFunction
+            << "Operator hypot is undefined for "
             << orientedType::orientedOptionNames[ot1.oriented()] << " and "
             << orientedType::orientedOptionNames[ot2.oriented()] << "types"
             << abort(FatalError);

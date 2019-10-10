@@ -47,6 +47,7 @@ tmp<labelField> labelField::component(const direction) const
     return *this;
 }
 
+
 template<>
 void component
 (
@@ -57,6 +58,7 @@ void component
 {
     lf = f;
 }
+
 
 template<>
 void labelField::replace(const direction, const labelUList& lf)

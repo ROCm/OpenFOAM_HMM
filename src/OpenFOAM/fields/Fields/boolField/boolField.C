@@ -5,8 +5,6 @@
     \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011 OpenFOAM Foundation
--------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
@@ -23,52 +21,43 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::labelField
-
 Description
-    Specialisation of Field\<T\> for label.
-
-SourceFiles
-    labelField.C
+    Specialisation of Field\<T\> for bool.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef labelField_H
-#define labelField_H
-
-#include "label.H"
-#include "Field.H"
+#include "boolField.H"
+#include "unitConversion.H"
 
 #define TEMPLATE
-#include "FieldFunctionsM.H"
+#include "FieldFunctionsM.C"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-typedef Field<label> labelField;
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-BINARY_TYPE_OPERATOR(label, label, label, +, add)
-BINARY_TYPE_OPERATOR(label, label, label, -, subtract)
+template<>
+void boolField::negate()
+{
+    TFOR_ALL_F_OP_OP_F(bool, *this, =, !, bool, *this)
+}
 
 
 template<>
-tmp<labelField> labelField::component(const direction) const;
+tmp<boolField> boolField::component(const direction) const
+{
+    return *this;
+}
+
 
 template<>
-void component
-(
-    labelField& lf,
-    const labelUList& f,
-    const direction
-);
-
-template<>
-void labelField::replace(const direction, const labelUList& lf);
+void boolField::replace(const direction, const boolUList& bf)
+{
+    *this = bf;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -78,9 +67,5 @@ void labelField::replace(const direction, const labelUList& lf);
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "undefFieldFunctionsM.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

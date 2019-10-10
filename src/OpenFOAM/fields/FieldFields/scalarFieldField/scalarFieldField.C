@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -97,6 +97,9 @@ BINARY_TYPE_FUNCTION(scalar, scalar, scalar, pow)
 
 BINARY_FUNCTION(scalar, scalar, scalar, atan2)
 BINARY_TYPE_FUNCTION(scalar, scalar, scalar, atan2)
+
+BINARY_FUNCTION(scalar, scalar, scalar, hypot)
+BINARY_TYPE_FUNCTION(scalar, scalar, scalar, hypot)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

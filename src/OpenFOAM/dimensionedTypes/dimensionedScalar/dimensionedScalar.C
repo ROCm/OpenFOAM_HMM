@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -158,21 +158,6 @@ dimensionedScalar cbrt(const dimensionedScalar& ds)
         "cbrt(" + ds.name() + ')',
         pow(ds.dimensions(), dimensionedScalar("(1|3)", dimless, 1.0/3.0)),
         ::cbrt(ds.value())
-    );
-}
-
-
-dimensionedScalar hypot
-(
-    const dimensionedScalar& x,
-    const dimensionedScalar& y
-)
-{
-    return dimensionedScalar
-    (
-        "hypot(" + x.name() + ',' + y.name() + ')',
-        x.dimensions() + y.dimensions(),
-        ::hypot(x.value(), y.value())
     );
 }
 
@@ -333,6 +318,21 @@ dimensionedScalar atan2
         "atan2(" + x.name() + ',' + y.name() + ')',
         atan2(x.dimensions(), y.dimensions()),
         ::atan2(x.value(), y.value())
+    );
+}
+
+
+dimensionedScalar hypot
+(
+    const dimensionedScalar& x,
+    const dimensionedScalar& y
+)
+{
+    return dimensionedScalar
+    (
+        "hypot(" + x.name() + ',' + y.name() + ')',
+        hypot(x.dimensions(), y.dimensions()),
+        ::hypot(x.value(), y.value())
     );
 }
 

@@ -101,6 +101,9 @@ BINARY_TYPE_FUNCTION(scalar, scalar, scalar, pow)
 BINARY_FUNCTION(scalar, scalar, scalar, atan2)
 BINARY_TYPE_FUNCTION(scalar, scalar, scalar, atan2)
 
+BINARY_FUNCTION(scalar, scalar, scalar, hypot)
+BINARY_TYPE_FUNCTION(scalar, scalar, scalar, hypot)
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

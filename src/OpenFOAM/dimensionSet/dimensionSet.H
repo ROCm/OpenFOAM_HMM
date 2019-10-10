@@ -330,8 +330,11 @@ dimensionSet inv(const dimensionSet& ds);
 //- Check the argument is dimensionless (for transcendental functions)
 dimensionSet trans(const dimensionSet& ds);
 
-//- Check that the arguments have the same dimensions
+//- Arguments need the same dimensions. Return dimensionless.
 dimensionSet atan2(const dimensionSet& ds1, const dimensionSet& ds2);
+
+//- Arguments need the same dimensions. Does not change the dimension.
+dimensionSet hypot(const dimensionSet& ds1, const dimensionSet& ds2);
 
 //- Return the argument; transformations do not change the dimensions
 dimensionSet transform(const dimensionSet& ds);

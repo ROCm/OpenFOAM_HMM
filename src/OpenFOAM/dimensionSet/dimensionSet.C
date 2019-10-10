@@ -498,6 +498,17 @@ Foam::dimensionSet Foam::atan2(const dimensionSet& ds1, const dimensionSet& ds2)
 }
 
 
+Foam::dimensionSet Foam::hypot(const dimensionSet& ds1, const dimensionSet& ds2)
+{
+    if (dimensionSet::debug)
+    {
+        checkDims("hypot(a, b)", ds1, ds2);
+    }
+
+    return ds1;
+}
+
+
 Foam::dimensionSet Foam::transform(const dimensionSet& ds)
 {
     return ds;

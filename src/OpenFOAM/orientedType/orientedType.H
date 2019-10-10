@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -179,6 +179,7 @@ orientedType inv(const orientedType& ot);
 
 orientedType trans(const orientedType& ot);
 orientedType atan2(const orientedType& ot1, const orientedType& ot2);
+orientedType hypot(const orientedType& ot1, const orientedType& ot2);
 orientedType transform(const orientedType& ot);
 
 orientedType operator-(const orientedType& ot);

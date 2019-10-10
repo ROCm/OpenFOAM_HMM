@@ -46,6 +46,7 @@ namespace Foam
 
 template<class Type> class Field;
 
+typedef Field<bool> boolField;
 typedef Field<label> labelField;
 typedef Field<scalar> scalarField;
 typedef Field<solveScalar> solveScalarField;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -66,7 +66,6 @@ dimensionedScalar pow025(const dimensionedScalar&);
 
 dimensionedScalar sqrt(const dimensionedScalar&);
 dimensionedScalar cbrt(const dimensionedScalar&);
-dimensionedScalar hypot(const dimensionedScalar&, const dimensionedScalar&);
 
 dimensionedScalar sign(const dimensionedScalar&);
 dimensionedScalar pos(const dimensionedScalar&);
@@ -86,6 +85,7 @@ dimensionedScalar asin(const dimensionedScalar&);
 dimensionedScalar acos(const dimensionedScalar&);
 dimensionedScalar atan(const dimensionedScalar&);
 dimensionedScalar atan2(const dimensionedScalar&, const dimensionedScalar&);
+dimensionedScalar hypot(const dimensionedScalar&, const dimensionedScalar&);
 dimensionedScalar sinh(const dimensionedScalar&);
 dimensionedScalar cosh(const dimensionedScalar&);
 dimensionedScalar tanh(const dimensionedScalar&);
