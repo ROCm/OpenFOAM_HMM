@@ -29,8 +29,10 @@ options:
   -parser=FILE      Generate lemon parser header
   -scanner=FILE     Generate ragel scanner code
   -parser           Use 'LemonParser.lyy' for non-prefixed parser name
+  -parser-m4        Use 'LemonParser.lyy-m4' for non-prefixed parser name
   -scanner          Use 'Scanner.rl' for non-prefixed scanner name
   -code             Generate lemon parser code
+  -with-debug       Retain intermediate files (eg, m4 output)
   -remove           Remove generated code
   -h, -help         Print the usage
 
@@ -44,7 +46,7 @@ USAGE
 # Parse arguments and options
 #------------------------------------------------------------------------------
 
-unset prefix parser scanner optCode optRemove
+unset prefix parser scanner optCode optDebug optRemove
 while [ "$#" -gt 0 ]
 do
     case "$1" in
@@ -55,8 +57,10 @@ do
     (-scanner=*)  scanner="${1#*=}" ;;
 
     (-parser)     parser=LemonParser.lyy ;;
+    (-parser-m4)  parser=LemonParser.lyy-m4 ;;
     (-scanner)    scanner=Scanner.rl ;;
     (-code)       optCode=true ;;
+    (-with-debug) optDebug=true ;;
     (-remove)     optRemove=true ;;
 
     (*) break ;;
@@ -98,21 +102,28 @@ esac
 
 
 case "$parser" in
-(*.ly | *.lyy)
+(*.ly | *.lyy | *.ly*m4)
     extCode=cc
     input="${prefix}${parser}"
     output="${parser%.*}.h"
+
+    # Pass -with-debug to wrap-lemon
+    [ -n "$optDebug" ] && optDebug="-with-debug"
+
+    # Additional message (eg, using m4 etc)
+    unset message
+    case "$parser" in (*m4) message=", using m4 filtering" ;; esac
 
     if [ "$optRemove" = true ]
     then
         removeFile "$output"  "lemon header"
     elif [ "$optCode" = true ]
     then
-        echo "Generating lemon parser code ($extCode)"
-        "$WM_PROJECT_DIR/wmake/scripts/wrap-lemon" -e"$extCode" -s "$input"
+        echo "Generating lemon parser code ($extCode)$message"
+        "$WM_PROJECT_DIR/wmake/scripts/wrap-lemon" $optDebug -e"$extCode" -s "$input"
     else
-        echo "Generating lemon parser header"
-        "$WM_PROJECT_DIR/wmake/scripts/wrap-lemon" -header -s "$input"
+        echo "Generating lemon parser header$message"
+        "$WM_PROJECT_DIR/wmake/scripts/wrap-lemon" $optDebug -header -s "$input"
     fi
     echo
     ;;

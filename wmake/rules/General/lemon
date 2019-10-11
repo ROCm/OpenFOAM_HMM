@@ -1,4 +1,4 @@
-SUFFIXES += .ly .lyy
+SUFFIXES += .ly .lyy .lyy-m4
 
 lytoo = $E $(call QUIET_MESSAGE,lemon,$(<F)) \
     $(WM_SCHEDULER) $(WM_SCRIPTS)/wrap-lemon -d$(@D) $< $(AND) \
@@ -7,3 +7,11 @@ lytoo = $E $(call QUIET_MESSAGE,lemon,$(<F)) \
 lyytoo = $E $(call QUIET_MESSAGE,lemon,$(<F)) \
     $(WM_SCHEDULER) $(WM_SCRIPTS)/wrap-lemon -d$(@D) -ecc $< $(AND) \
     $(CC) $(c++FLAGS) -c $(@D)/$(*F).cc -o $@
+
+# Retain intermediate files (-with-debug) to help when something goes wrong,
+# and to verify that the generated grammar looks correct.
+lyy-m4too = $E $(call QUIET_MESSAGE,lemon-m4,$(<F)) \
+    $(WM_SCHEDULER) $(WM_SCRIPTS)/wrap-lemon -with-debug -d$(@D) -ecc $< $(AND) \
+    $(CC) $(c++FLAGS) -c $(@D)/$(*F).cc -o $@
+
+#------------------------------------------------------------------------------

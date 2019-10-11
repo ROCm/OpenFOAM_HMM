@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #------------------------------------------------------------------------------
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
@@ -14,7 +14,7 @@
 #     wrap-lemon
 #
 # Usage
-#     wrap-lemon [lemon-options]
+#     wrap-lemon [options] [lemon args/options]
 #
 # Description
 #     A wrapper to use lemon compiled with OpenFOAM with the appropriate
@@ -38,9 +38,13 @@ Usage: ${0##*/} [options] [lemon args/options]
 
 options:
   -header           Generate header only, suppressing other output
+  -with-debug       Retain intermediate files (eg, m4 output)
   -h, -help         Print the usage
 
-A lemon wrapper using predefined executable and skeleton locations
+A lemon wrapper using predefined executable and skeleton locations.
+Files ending with 'm4' (eg, .lyym4, .lyy-m4) will be filtered through
+the m4(1) macro processor and lemon will be called with 'm4' as a macro
+definition, which can be used in conditions (%ifdef m4, %ifndef m4)
 
 USAGE
     exit 1
@@ -50,56 +54,146 @@ USAGE
 # Parse arguments and options
 #------------------------------------------------------------------------------
 
-# wrap-lemon -header-only
-unset optHeader
+# wrap-lemon -header
+unset optHeader optDebug
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-    (-h | -help*) usage ;;
+    (-h | -help*)   usage ;;
 
-    (-header*)    optHeader=true ;;
+    (-head*)        optHeader=true ;;
+    (-with-debug)   optDebug=true ;;
 
     (*) break ;;
     esac
     shift
 done
 
-
 #------------------------------------------------------------------------------
+# Get some information based on the lemon options
+# * '-dXX' for the output directory
+# * '-eXX' for the output extension
+# The last argument is the input file
 
-# No special handling
-if [ -z "$optHeader" ]
+unset tmpDir tmpFile outputDir parser extCode
+findLemonOptions()
+{
+    while [ "$#" -gt 1 ]
+    do
+        case "$1" in
+        (-d*) outputDir="${1#-d}" ;;
+        (-e*) extCode="${1#-e}" ;;
+        esac
+        shift
+    done
+
+    if [ "$#" -eq 1 ]
+    then
+        parser="$1"
+    fi
+}
+
+findLemonOptions "$@"
+
+# Detect m4 use (defines lemon macro too) and get extension without m4
+unset extLemon usingMacros
+case "$parser" in
+(*.*m4)
+    extLemon=".${parser##*.}"       # The extension (with dot)
+    extLemon="${extLemon%m4}"       # Without trailing m4
+    extLemon="${extLemon/%[-_]/}"   # Without - or _ separators
+    usingMacros="-Dm4"
+    ;;
+esac
+
+rc=1  # Assume some failure
+
+
+if [ -n "$optHeader" ]
 then
-    "$lemon" "$skel" $*
-    exit $?
+    # Drop last argument (the parser input file)
+    set -- "${@:1:${#}-1}"
+
+    # Header only, which means we create a temp directory for the output
+    tmpDir="lemonWrapper-$$"
+    rm -rf "$tmpDir" 2>/dev/null
+    mkdir "$tmpDir" 2>/dev/null
+
+    if [ -n "$usingMacros" ]
+    then
+        # Using m4 - redirect to a temporary file
+        tmpFile="$tmpDir/${parser##*/}"
+        tmpFile="${tmpFile%.*}$extLemon"   # Eg, from .lyy-m4 -> .lyy
+
+        if m4 "$parser" > "$tmpFile" && [ -f "$tmpFile" ]
+        then
+            parser="$tmpFile"
+        else
+            echo "m4 stage failed on $parser" 2>/dev/null
+        fi
+    fi
+
+    # DO WE WANT THIS?
+    # trap 'rm -f $tmpDir 2>/dev/null; exit $rc' EXIT TERM INT
+    "$lemon" "$skel" "-d$tmpDir" "$@" $usingMacros "$parser"
+    rc=$?
+
+    for src in "$tmpDir"/*.h
+    do
+        dst="${src##*/}"
+        if [ -f "$src" ]
+        then
+            if ! cmp "$src" "$dst" 2>/dev/null
+            then
+                mv "$src" "$dst"
+                echo "Updating $dst" 1>&2
+            fi
+        fi
+    done
+
+    rm -rf "$tmpDir" 2>/dev/null
+
+elif [ -n "$usingMacros" ]
+then
+    # Drop last argument (the parser input file)
+    set -- "${@:1:${#}-1}"
+
+    # Filter via m4
+    if [ -n "$outputDir" ]
+    then
+        tmpFile="$outputDir/${parser##*/}"
+    else
+        tmpFile="${parser}"
+    fi
+    tmpFile="${tmpFile%.*}$extLemon"   # Eg, from .lyy-m4 -> .lyy
+
+    # DO WE WANT THIS?
+    # trap 'rm -f $tmpFile 2>/dev/null; exit $rc' EXIT TERM INT
+
+    if m4 "$parser" > "$tmpFile" && [ -f "$tmpFile" ]
+    then
+        "$lemon" "$skel" "$@" $usingMacros "$tmpFile"
+        rc=$?
+    else
+        echo "m4 stage failed on $parser" 2>/dev/null
+    fi
+
+    if [ -n "$optDebug" ]
+    then
+        echo "Retaining intermediate: $tmpFile" 2>/dev/null
+    else
+        rm -f "$tmpFile" 2>/dev/null
+    fi
+
+else
+
+    # No special handling
+
+    "$lemon" "$skel" "$@"
+    rc=$?
 fi
 
 
-# Header only, which means we create a temp directory for the output
-tmpDir="lemonWrapper-$$"
-rm -rf "$tmpDir" 2>/dev/null
-mkdir "$tmpDir" 2>/dev/null
-
-# DO WE WANT THIS?
-# trap 'rm -f $tmpDir 2>/dev/null; exit $rc' EXIT TERM INT
-
-"$lemon" "$skel" "-d$tmpDir" $*
-rc=$?
-
-for src in "$tmpDir"/*.h
-do
-    dst="${src##*/}"
-    if [ -f "$src" ]
-    then
-        if ! cmp "$src" "$dst" 2>/dev/null
-        then
-            mv "$src" "$dst"
-            echo "Updating $dst" 1>&2
-        fi
-    fi
-done
-
-rm -rf "$tmpDir" 2>/dev/null
 exit "$rc"   # Exit with lemon return code
 
 #------------------------------------------------------------------------------
