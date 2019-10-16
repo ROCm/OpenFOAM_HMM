@@ -10,7 +10,7 @@ mechanics and electromagnetics.
 
 OpenFOAM is professionally released every six months to include
 customer sponsored developments and contributions from the community -
-individual and group contributors, fork re-integrations (including from
+individual and group contributors, re-integrations (including from
 FOAM-extend and OpenFOAM Foundation Ltd) - in this Official Release
 sanctioned by the OpenFOAM Worldwide Trademark Owner aiming towards
 one OpenFOAM.
@@ -74,13 +74,17 @@ Arch:  LSB;label=32;scalar=64
 ```
 This output contains all of the more interesting information that we need:
 
-| item          | value         |
-|---------------|---------------|
-| version       | v1812.local   |
-| api           | 1812          |
-| commit        | 65d6551ff7    |
-| author date   | 20190530      |
-| patch-level   | (20)190531    |
+| item                  | value         |
+|-----------------------|---------------|
+| version               | v1812.local   |
+| api                   | 1812          |
+| commit                | 65d6551ff7    |
+| author date           | 20190530      |
+| patch-level           | (20)190531    |
+| label/scalar size     | 32/64 bits    |
+
+The Arch information may also include the `solveScalar` size
+if different than the `scalar` size.
 
 As can be seen in this example, the git build information is
 supplemented by the date when the last change was authored, which can
