@@ -58,7 +58,7 @@ class passivePositionParticle
     // Private Member Data
 
         //- Cached position
-        point position_;
+        point cachedPosition_;
 
 
 public:
@@ -75,7 +75,7 @@ public:
         )
         :
             passiveParticle(mesh, is, readFields, newFormat),
-            position_(position())
+            cachedPosition_(position())
         {}
 
         //- Construct from a position and a cell.
@@ -88,14 +88,14 @@ public:
         )
         :
             passiveParticle(mesh, position, celli),
-            position_(position)
+            cachedPosition_(position)
         {}
 
         //- Construct as copy
         passivePositionParticle(const passivePositionParticle& p)
         :
             passiveParticle(p),
-            position_(p.position_)
+            cachedPosition_(p.cachedPosition_)
         {}
 
         //- Construct and return a clone
@@ -128,6 +128,12 @@ public:
         };
 
 
+        const point& cachedPosition() const
+        {
+            return cachedPosition_;
+        }
+
+
     // Friend Operators
 
         friend Ostream& operator<<
@@ -140,7 +146,7 @@ public:
             // particleIO.C reading old format.
             particle::positionsCompat1706 p;
 
-            p.position = ppi.position_;
+            p.position = ppi.cachedPosition_;
             p.celli = ppi.cell();
             p.facei = ppi.face();
             p.stepFraction = ppi.stepFraction();

@@ -135,6 +135,8 @@ Foam::parLagrangianRedistributor::redistributeLagrangianPositions
 {
     //Debug(lpi.size());
 
+    const label oldLpi = lpi.size();
+
     labelListList subMap;
 
 
@@ -229,17 +231,49 @@ Foam::parLagrangianRedistributor::redistributeLagrangianPositions
             }
         }
 
-        // Write coordinates file
-        IOPosition<passivePositionParticleCloud>(lagrangianPositions).write();
-
-        // Optionally write positions file in v1706 format and earlier
-        if (particle::writeLagrangianPositions)
+        if (lagrangianPositions.size())
         {
+            // Write coordinates file
             IOPosition<passivePositionParticleCloud>
             (
-                 lagrangianPositions,
-                 cloud::geometryType::POSITIONS
-             ).write();
+                lagrangianPositions
+            ).write();
+
+            // Optionally write positions file in v1706 format and earlier
+            if (particle::writeLagrangianPositions)
+            {
+                IOPosition<passivePositionParticleCloud>
+                (
+                     lagrangianPositions,
+                     cloud::geometryType::POSITIONS
+                 ).write();
+            }
+        }
+        else if (oldLpi)
+        {
+            // When running with -overwrite it should also delete the old
+            // files. Below works but is not optimal.
+
+            // Remove any existing coordinates
+            const fileName oldCoords
+            (
+                IOPosition<passivePositionParticleCloud>
+                (
+                    lagrangianPositions
+                ).objectPath()
+            );
+            Foam::rm(oldCoords);
+
+            // Remove any existing positions
+            const fileName oldPos
+            (
+                IOPosition<passivePositionParticleCloud>
+                (
+                    lagrangianPositions,
+                    cloud::geometryType::POSITIONS
+                ).objectPath()
+            );
+            Foam::rm(oldPos);
         }
 
         // Restore cloud name

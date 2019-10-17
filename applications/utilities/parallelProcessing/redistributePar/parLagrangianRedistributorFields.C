@@ -111,22 +111,32 @@ Foam::label Foam::parLagrangianRedistributor::redistributeFields
         map.distribute(field);
 
 
+        const IOobject fieldIO
+        (
+            objectName,
+            tgtMesh_.time().timeName(),
+            cloud::prefix/cloudName,
+            tgtMesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        );
+
         if (field.size())
         {
             IOField<Type>
             (
-                IOobject
-                (
-                    objectName,
-                    tgtMesh_.time().timeName(),
-                    cloud::prefix/cloudName,
-                    tgtMesh_,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE,
-                    false
-                ),
+                fieldIO,
                 std::move(field)
             ).write();
+        }
+        else
+        {
+            // When running with -overwrite it should also delete the old
+            // files. Below works but is not optimal.
+
+            const fileName fldName(fieldIO.objectPath());
+            Foam::rm(fldName);
         }
     }
 
@@ -197,22 +207,32 @@ Foam::label Foam::parLagrangianRedistributor::redistributeFieldFields
         map.distribute(field);
 
         // Write
+        const IOobject fieldIO
+        (
+            objectName,
+            tgtMesh_.time().timeName(),
+            cloud::prefix/cloudName,
+            tgtMesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        );
+
         if (field.size())
         {
             CompactIOField<Field<Type>, Type>
             (
-                IOobject
-                (
-                    objectName,
-                    tgtMesh_.time().timeName(),
-                    cloud::prefix/cloudName,
-                    tgtMesh_,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE,
-                    false
-                ),
+                fieldIO,
                 std::move(field)
             ).write();
+        }
+        else
+        {
+            // When running with -overwrite it should also delete the old
+            // files. Below works but is not optimal.
+
+            const fileName fldName(fieldIO.objectPath());
+            Foam::rm(fldName);
         }
     }
 
@@ -297,22 +317,32 @@ Foam::label Foam::parLagrangianRedistributor::redistributeStoredFields
 
         map.distribute(field);
 
+        const IOobject fieldIO
+        (
+            field.name(),
+            tgtMesh_.time().timeName(),
+            cloud::prefix/cloud.name(),
+            tgtMesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        );
+
         if (field.size())
         {
             Container
             (
-                IOobject
-                (
-                    field.name(),
-                    tgtMesh_.time().timeName(),
-                    cloud::prefix/cloud.name(),
-                    tgtMesh_,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE,
-                    false
-                ),
+                fieldIO,
                 std::move(field)
             ).write();
+        }
+        else
+        {
+            // When running with -overwrite it should also delete the old
+            // files. Below works but is not optimal.
+
+            const fileName fldName(fieldIO.objectPath());
+            Foam::rm(fldName);
         }
     }
 
