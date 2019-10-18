@@ -564,7 +564,7 @@ void Foam::cellCellStencils::inverseDistance::markDonors
     forAll(tgtCellMap, tgtCelli)
     {
         label celli = tgtCellMap[tgtCelli];
-        if (allStencil[celli].empty())
+        if (srcOverlapProcs.size())
         {
             treeBoundBox subBb(cellBb(mesh_, celli));
             subBb.min() -= smallVec_;

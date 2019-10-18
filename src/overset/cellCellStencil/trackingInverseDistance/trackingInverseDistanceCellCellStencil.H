@@ -108,6 +108,7 @@ protected:
             PstreamBuffers& pBufs,
             const List<treeBoundBoxList>& meshBb,
             const PtrList<voxelMeshSearch>& meshSearches,
+            const labelList& allCellTypes,
 
             const label srcI,
             const label tgtI,
