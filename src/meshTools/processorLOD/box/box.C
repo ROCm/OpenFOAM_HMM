@@ -430,7 +430,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::processorLODs::box::createMap
     // Store elements to send - will be used to build the mapDistribute
     List<labelHashSet> fixedSendElems(Pstream::nProcs());
 
-    // List of local tgt elems to optimise searching fot tgt elements inside
+    // List of local tgt elems to optimise searching for tgt elements inside
     // remote src boxes
     List<List<labelList>> localTgtElems(Pstream::nProcs());
 

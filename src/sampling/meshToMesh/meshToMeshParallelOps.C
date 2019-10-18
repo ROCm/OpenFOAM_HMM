@@ -131,9 +131,8 @@ Foam::autoPtr<Foam::mapDistribute> Foam::meshToMesh::calcProcMap
             // Create processor map of overlapping faces. This map gets
             // (possibly remote) cells from the tgt mesh such that they
             // (together) cover all of the src mesh
-            label nGlobalSrcCells =
-                returnReduce(src.cells().size(), sumOp<label>());
-            label cellsPerBox = max(1, 0.001*nGlobalSrcCells);
+            const label nGlobalSrcCells = src.globalData().nTotalCells();
+            const label cellsPerBox = max(1, 0.001*nGlobalSrcCells);
             typename processorLODs::cellBox boxLOD
             (
                 src.cells(),
