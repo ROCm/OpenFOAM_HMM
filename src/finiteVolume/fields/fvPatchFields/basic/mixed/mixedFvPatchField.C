@@ -56,6 +56,7 @@ Foam::mixedFvPatchField<Type>::mixedFvPatchField
     refGrad_("refGradient", dict, p.size()),
     valueFraction_("valueFraction", dict, p.size())
 {
+    // Could also check/clip fraction to 0-1 range
     evaluate();
 }
 

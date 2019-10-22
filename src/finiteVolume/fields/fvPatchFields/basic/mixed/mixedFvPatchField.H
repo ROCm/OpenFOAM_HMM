@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -44,18 +44,17 @@ Description
     \vartable
         x_p   | patch values
         x_c   | patch internal cell values
-        w     | weight field
         \Delta| inverse distance from face centre to internal cell centre
-        w     | weighting (0-1)
+        w     | weighting values (0-1)
     \endvartable
 
 
 Usage
     \table
-        Property     | Description             | Required    | Default value
-        valueFraction | weight field           | yes         |
-        refValue     | fixed value             | yes         |
-        refGrad      | patch normal gradient   | yes         |
+        Property     | Description                          | Required | Default
+        refValue     | fixed value                          | yes |
+        refGradient  | patch normal gradient                | yes |
+        valueFraction | value weighting (0-1)               | yes |
     \endtable
 
 Note
