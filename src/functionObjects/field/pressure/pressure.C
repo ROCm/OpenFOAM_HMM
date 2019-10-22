@@ -29,6 +29,7 @@ License
 #include "pressure.H"
 #include "volFields.H"
 #include "basicThermo.H"
+#include "uniformDimensionedFields.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -55,6 +56,17 @@ Foam::functionObjects::pressure::modeNames
     { TOTAL_COEFF, "totalCoeff" },
 });
 
+const Foam::Enum
+<
+    Foam::functionObjects::pressure::hydrostaticMode
+>
+Foam::functionObjects::pressure::hydrostaticModeNames
+({
+    { NONE, "none" },
+    { ADD, "add" },
+    { SUBTRACT, "subtract" },
+});
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 Foam::word Foam::functionObjects::pressure::resultName() const
@@ -78,6 +90,26 @@ Foam::word Foam::functionObjects::pressure::resultName() const
         FatalErrorInFunction
             << "Unhandled calculation mode " << modeNames[mode_]
             << abort(FatalError);
+    }
+
+    switch (hydrostaticMode_)
+    {
+        case NONE:
+        {
+            break;
+        }
+        case ADD:
+        {
+            rName = rName + "+rgh";
+
+            break;
+        }
+        case SUBTRACT:
+        {
+            rName = rName + "-rgh";
+
+            break;
+        }
     }
 
     if (mode_ & COEFF)
@@ -141,18 +173,90 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::rhoScale
 }
 
 
+void Foam::functionObjects::pressure::addHydrostaticContribution
+(
+    volScalarField& p
+) const
+{
+    // Add/subtract hydrostatic contribution
+
+    if (hydrostaticMode_ == NONE)
+    {
+        return;
+    }
+
+    if (!gInitialised_)
+    {
+        g_ = mesh_.time().lookupObject<uniformDimensionedVectorField>("g");
+    }
+
+    if (!hRefInitialised_)
+    {
+        hRef_ = mesh_.lookupObject<uniformDimensionedScalarField>("hRef");
+    }
+
+    const dimensionedScalar ghRef
+    (
+        (g_ & (cmptMag(g_.value())/mag(g_.value())))*hRef_
+    );
+
+    tmp<volScalarField> rgh = rhoScale(p, (g_ & mesh_.C()) - ghRef);
+
+    switch (hydrostaticMode_)
+    {
+        case ADD:
+        {
+            p += rgh;
+            break;
+        }
+        case SUBTRACT:
+        {
+            p -= rgh;
+            break;
+        }
+        default:
+        {}
+    }
+}
+
+
 Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::calcPressure
 (
     const volScalarField& p,
     const tmp<volScalarField>& tp
 ) const
 {
+    // Initialise to the pressure reference level
+    auto tresult =
+        tmp<volScalarField>::New
+        (
+            IOobject
+            (
+                name() + ":p",
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ
+            ),
+            mesh_,
+            dimensionedScalar("p", dimPressure, pRef_)
+        );
+
+    volScalarField& result = tresult.ref();
+
+    addHydrostaticContribution(result);
+
+    if (mode_ & STATIC)
+    {
+        result += tp;
+        return tresult;
+    }
+
     if (mode_ & TOTAL)
     {
-        return
+        result +=
             tp
-          + dimensionedScalar("pRef", dimPressure, pRef_)
           + rhoScale(p, 0.5*magSqr(lookupObject<volVectorField>(UName_)));
+        return tresult;
     }
 
     if (mode_ & ISENTROPIC)
@@ -175,10 +279,12 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::calcPressure
            /sqrt(gamma*tp.ref()/thermoPtr->rho())
         );
 
-        return tp()*(pow(1 + (gamma - 1)/2*sqr(Mb), gamma/(gamma - 1)));
+        result += tp*(pow(1 + (gamma - 1)/2*sqr(Mb), gamma/(gamma - 1)));
+        return tresult;
     }
 
-    return tp + dimensionedScalar("pRef", dimPressure, pRef_);
+
+    return tresult;
 }
 
 
@@ -246,13 +352,18 @@ Foam::functionObjects::pressure::pressure
 :
     fieldExpression(name, runTime, dict, "p"),
     mode_(STATIC),
+    hydrostaticMode_(NONE),
     UName_("U"),
     rhoName_("rho"),
     pRef_(0),
     pInf_(0),
     UInf_(Zero),
     rhoInf_(1),
-    rhoInfInitialised_(false)
+    rhoInfInitialised_(false),
+    g_(dimAcceleration),
+    gInitialised_(false),
+    hRef_(dimLength),
+    hRefInitialised_(false)
 {
     read(dict);
 }
@@ -300,9 +411,33 @@ bool Foam::functionObjects::pressure::read(const dictionary& dict)
         }
     }
 
-    Info<< "    operating mode: " << modeNames[mode_] << nl;
+    Info<< "    Operating mode: " << modeNames[mode_] << nl;
 
     pRef_ = dict.lookupOrDefault<scalar>("pRef", 0);
+
+    if
+    (
+        hydrostaticModeNames.readIfPresent
+        (
+            "hydrostaticMode",
+            dict,
+            hydrostaticMode_
+        )
+     && hydrostaticMode_
+    )
+    {
+        Info<< "    Hydrostatic mode: "
+            << hydrostaticModeNames[hydrostaticMode_]
+            << nl;
+        gInitialised_ = dict.readIfPresent("g", g_);
+        hRefInitialised_ = dict.readIfPresent("hRef", hRef_);
+    }
+    else
+    {
+        Info<< "    Not including hydrostatic effects" << nl;
+    }
+
+
 
     if (mode_ & COEFF)
     {

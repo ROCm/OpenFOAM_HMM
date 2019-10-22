@@ -100,6 +100,7 @@ Usage
         pInf         | Freestream pressure for coefficient calculation | no |
         UInf         | Freestream velocity for coefficient calculation | no |
         rhoInf       | Freestream density for coefficient calculation  | no |
+        hydrostaticMode | Hydrostatic contributions (see below) | no | none
     \endtable
 
     The \c mode entry is used to select the type of pressure that is calculated.
@@ -109,6 +110,13 @@ Usage
     - isentropic
     - staticCoeff
     - totalCoeff
+
+    The optional \c hydrostaticMode entry provides handling for the term
+    \f$ \rho (\vec{g} \dot \vec{h})\f$ where options include
+    - \c none : not included
+    - \c add : add the term, e.g. to convert from p_rgh to p
+    - \c subtract : subtract the term, e.g. to convert from p to p_rgh
+
 
 See also
     Foam::functionObjects::fieldExpression
@@ -124,6 +132,7 @@ SourceFiles
 
 #include "fieldExpression.H"
 #include "volFieldsFwd.H"
+#include "dimensionedVector.H"
 #include "dimensionedScalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -148,15 +157,25 @@ public:
         //- Enumeration for pressure calculation mode
         enum mode : unsigned
         {
-            STATIC = 0x1,           //!< Static pressure
-            TOTAL = 0x2,            //!< Total pressure
-            ISENTROPIC = 0x4,       //!< Isentropic pressure
-            COEFF = 0x8,            //!< Coefficient manipulator
+            STATIC       = (1 << 0), //!< Static pressure
+            TOTAL        = (1 << 1), //!< Total pressure
+            ISENTROPIC   = (1 << 2), //!< Isentropic pressure
+            COEFF        = (1 << 3), //!< Coefficient manipulator
             STATIC_COEFF = (STATIC | COEFF),
-            TOTAL_COEFF = (TOTAL | COEFF)
+            TOTAL_COEFF  = (TOTAL | COEFF),
         };
 
         static const Enum<mode> modeNames;
+
+        //- Enumeration for hydrostatic contributions
+        enum hydrostaticMode : unsigned
+        {
+            NONE = 0,
+            ADD,
+            SUBTRACT
+        };
+
+        static const Enum<hydrostaticMode> hydrostaticModeNames;
 
 
 private:
@@ -165,6 +184,9 @@ private:
 
         //- Calculation mode
         mode mode_;
+
+        //- Hydrostatic constribution mode
+        hydrostaticMode hydrostaticMode_;
 
         //- Name of velocity field, default is "U"
         word UName_;
@@ -194,6 +216,21 @@ private:
             bool rhoInfInitialised_;
 
 
+        //- p +/- rgh calculation
+
+            //- Gravity vector
+            mutable dimensionedVector g_;
+
+            //- Flag to show whether g has been initialised
+            bool gInitialised_;
+
+            //- Reference height
+            mutable dimensionedScalar hRef_;
+
+            //- Flag to show whether hRef has been initialised
+            bool hRefInitialised_;
+
+
     // Private Member Functions
 
         //- Return the name of the derived pressure field
@@ -209,8 +246,8 @@ private:
             const tmp<volScalarField>& tsf
         ) const;
 
-        //- Return the reference pressure
-        tmp<volScalarField> pRef(const tmp<volScalarField>& tp) const;
+        //- Add the hydrostatic contribution
+        void addHydrostaticContribution(volScalarField& p) const;
 
         //- Calculate and return the pressure
         tmp<volScalarField> calcPressure
