@@ -1,5 +1,6 @@
 turbulenceModel.C
 RAS/v2f/v2fBase.C
+RAS/kEpsilonPhitF/kEpsilonPhitFBase.C
 
 LESdelta = LES/LESdeltas
 
