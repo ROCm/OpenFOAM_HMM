@@ -79,8 +79,6 @@ public:
 
             const label UIndex_;
 
-            const bool trackForward_;
-
             const label nSubCycle_;
 
             const scalar trackLength_;
@@ -101,7 +99,6 @@ public:
                 const PtrList<interpolation<scalar>>& vsInterp,
                 const PtrList<interpolation<vector>>& vvInterp,
                 const label UIndex,
-                const bool trackForward,
                 const label nSubCycle,
                 const scalar trackLength,
                 DynamicList<List<point>>& allPositions,
@@ -113,7 +110,6 @@ public:
                 vsInterp_(vsInterp),
                 vvInterp_(vvInterp),
                 UIndex_(UIndex),
-                trackForward_(trackForward),
                 nSubCycle_(nSubCycle),
                 trackLength_(trackLength),
                 allPositions_(allPositions),
@@ -126,6 +122,9 @@ public:
 private:
 
     // Private data
+
+        //- Whether particle transports with +U or -U
+        bool trackForward_;
 
         //- Lifetime of particle. Particle dies when reaches 0.
         label lifeTime_;
@@ -162,6 +161,7 @@ public:
             const polyMesh& c,
             const vector& position,
             const label celli,
+            const bool trackForward,
             const label lifeTime
         );
 
@@ -170,7 +170,8 @@ public:
         (
             const polyMesh& c,
             Istream& is,
-            bool readFields = true
+            bool readFields = true,
+            bool newFormat = true
         );
 
         //- Construct copy

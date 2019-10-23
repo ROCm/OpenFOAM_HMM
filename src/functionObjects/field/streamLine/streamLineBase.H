@@ -45,6 +45,7 @@ SourceFiles
 #include "writer.H"
 #include "indirectPrimitivePatch.H"
 #include "interpolation.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,6 +66,22 @@ class streamLineBase
 :
     public fvMeshFunctionObject
 {
+public:
+
+    // Public data types
+
+        //- Enumeration defining the track direction
+        enum trackDirType : char
+        {
+            FORWARD,
+            BACKWARD,
+            BIDIRECTIONAL
+        };
+
+        //- Names for the trackDir
+        static const Enum<trackDirType> trackDirTypeNames;
+
+
 protected:
 
         //- Seed set engine
@@ -85,8 +102,8 @@ protected:
         //- Interpolation scheme to use
         word interpolationScheme_;
 
-        //- Whether to use +u or -u
-        bool trackForward_;
+        //- Whether to use +u or -u or both
+        trackDirType trackDir_;
 
         //- Maximum lifetime (= number of cells) of particle
         label lifeTime_;

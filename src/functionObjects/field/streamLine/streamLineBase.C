@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2015 OpenFOAM Foundation
@@ -45,6 +45,18 @@ namespace functionObjects
     defineTypeNameAndDebug(streamLineBase, 0);
 }
 }
+
+
+const Foam::Enum
+<
+    Foam::functionObjects::streamLineBase::trackDirType
+>
+Foam::functionObjects::streamLineBase::trackDirTypeNames
+({
+    { trackDirType::FORWARD, "forward" },
+    { trackDirType::BACKWARD, "backward" },
+    { trackDirType::BIDIRECTIONAL, "bidirectional" }
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -886,7 +898,27 @@ bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
 
     Info<< "    Employing velocity field " << UName_ << endl;
 
-    dict.readEntry("trackForward", trackForward_);
+    bool trackForward;
+    if (dict.readIfPresent("trackForward", trackForward))
+    {
+        trackDir_ =
+        (
+            trackForward
+          ? trackDirType::FORWARD
+          : trackDirType::BACKWARD
+        );
+
+        if (dict.found("direction"))
+        {
+            FatalIOErrorInFunction(dict) << "Cannot specify both "
+                << "\"trackForward\" and \"direction\""
+                << exit(FatalIOError);
+        }
+    }
+    else
+    {
+        trackDir_ = trackDirTypeNames.get("direction", dict);
+    }
     dict.readEntry("lifeTime", lifeTime_);
     if (lifeTime_ < 1)
     {

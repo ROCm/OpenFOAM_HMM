@@ -82,7 +82,6 @@ public:
         const PtrList<interpolation<scalar>>& vsInterp_;
         const PtrList<interpolation<vector>>& vvInterp_;
         const label UIndex_;
-        const bool trackForward_;
         const scalar trackLength_;
 
         DynamicList<vectorList>& allPositions_;
@@ -99,7 +98,6 @@ public:
                 const PtrList<interpolation<scalar>>& vsInterp,
                 const PtrList<interpolation<vector>>& vvInterp,
                 const label UIndex,
-                const bool trackForward,
                 const scalar trackLength,
                 const bitSet& isWallPatch,
 
@@ -116,7 +114,6 @@ public:
                 vsInterp_(vsInterp),
                 vvInterp_(vvInterp),
                 UIndex_(UIndex),
-                trackForward_(trackForward),
                 trackLength_(trackLength),
 
                 allPositions_(allPositions),
@@ -131,6 +128,9 @@ public:
 protected:
 
     // Protected data
+
+        //- Track with +U or -U
+        bool trackForward_;
 
         //- Lifetime of particle. Particle dies when reaches 0.
         label lifeTime_;
@@ -172,6 +172,7 @@ public:
             const label tetPti,
             const label meshEdgeStart,
             const label diagEdge,
+            const bool trackForward,
             const label lifeTime
         );
 

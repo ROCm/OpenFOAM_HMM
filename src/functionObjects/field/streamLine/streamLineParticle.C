@@ -86,10 +86,12 @@ Foam::streamLineParticle::streamLineParticle
     const polyMesh& mesh,
     const vector& position,
     const label celli,
+    const bool trackForward,
     const label lifeTime
 )
 :
     particle(mesh, position, celli),
+    trackForward_(trackForward),
     lifeTime_(lifeTime)
 {}
 
@@ -98,17 +100,19 @@ Foam::streamLineParticle::streamLineParticle
 (
     const polyMesh& mesh,
     Istream& is,
-    bool readFields
+    bool readFields,
+    bool newFormat
 )
 :
-    particle(mesh, is, readFields)
+    particle(mesh, is, readFields, newFormat)
 {
     if (readFields)
     {
         List<scalarList> sampledScalars;
         List<vectorList> sampledVectors;
 
-        is  >> lifeTime_ >> sampledPositions_ >> sampledScalars
+        is  >> trackForward_ >> lifeTime_
+            >> sampledPositions_ >> sampledScalars
             >> sampledVectors;
 
         sampledScalars_.setSize(sampledScalars.size());
@@ -133,9 +137,11 @@ Foam::streamLineParticle::streamLineParticle
 )
 :
     particle(p),
+    trackForward_(p.trackForward_),
     lifeTime_(p.lifeTime_),
     sampledPositions_(p.sampledPositions_),
-    sampledScalars_(p.sampledScalars_)
+    sampledScalars_(p.sampledScalars_),
+    sampledVectors_(p.sampledVectors_)
 {}
 
 
@@ -168,7 +174,7 @@ bool Foam::streamLineParticle::move
             sampledPositions_.append(position());
             vector U = interpolateFields(td, position(), cell(), face());
 
-            if (!td.trackForward_)
+            if (!trackForward_)
             {
                 U = -U;
             }
@@ -366,11 +372,7 @@ void Foam::streamLineParticle::hitWallPatch
 
 void Foam::streamLineParticle::readFields(Cloud<streamLineParticle>& c)
 {
-//    if (!c.size())
-//    {
-//        return;
-//    }
-    bool valid = c.size();
+    const bool valid = c.size();
 
     particle::readFields(c);
 
@@ -433,6 +435,7 @@ void Foam::streamLineParticle::writeFields(const Cloud<streamLineParticle>& c)
 Foam::Ostream& Foam::operator<<(Ostream& os, const streamLineParticle& p)
 {
     os  << static_cast<const particle&>(p)
+        << token::SPACE << p.trackForward_
         << token::SPACE << p.lifeTime_
         << token::SPACE << p.sampledPositions_
         << token::SPACE << p.sampledScalars_

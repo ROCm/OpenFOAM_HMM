@@ -51,7 +51,8 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::tetIndices Foam::functionObjects::wallBoundedStreamLine::findNearestTet
+Foam::Tuple2<Foam::tetIndices, Foam::point>
+Foam::functionObjects::wallBoundedStreamLine::findNearestTet
 (
     const bitSet& isWallPatch,
     const point& seedPt,
@@ -63,6 +64,7 @@ Foam::tetIndices Foam::functionObjects::wallBoundedStreamLine::findNearestTet
     label minFacei = -1;
     label minTetPti = -1;
     scalar minDistSqr = sqr(GREAT);
+    point nearestPt(GREAT, GREAT, GREAT);
 
     for (label facei : cFaces)
     {
@@ -76,14 +78,17 @@ Foam::tetIndices Foam::functionObjects::wallBoundedStreamLine::findNearestTet
             for (label i = 2; i < f.size(); i++)
             {
                 const point& thisPoint = mesh_.points()[f[fp]];
-                label nextFp = f.fcIndex(fp);
+                const label nextFp = f.fcIndex(fp);
                 const point& nextPoint = mesh_.points()[f[nextFp]];
 
                 const triPointRef tri(basePoint, thisPoint, nextPoint);
 
-                scalar d2 = magSqr(tri.centre() - seedPt);
+                //const scalar d2 = magSqr(tri.centre() - seedPt);
+                const pointHit nearInfo(tri.nearestPoint(seedPt));
+                const scalar d2 = nearInfo.distance();
                 if (d2 < minDistSqr)
                 {
+                    nearestPt = nearInfo.rawPoint();
                     minDistSqr = d2;
                     minFacei = facei;
                     minTetPti = i-1;
@@ -93,13 +98,34 @@ Foam::tetIndices Foam::functionObjects::wallBoundedStreamLine::findNearestTet
         }
     }
 
-    // Put particle in tet
-    return tetIndices
+    // Return tet and nearest point on wall triangle
+    return Tuple2<Foam::tetIndices, Foam::point>
     (
-        celli,
-        minFacei,
-        minTetPti
+        tetIndices
+        (
+            celli,
+            minFacei,
+            minTetPti
+        ),
+        nearestPt
     );
+}
+
+
+Foam::point Foam::functionObjects::wallBoundedStreamLine::pushIn
+(
+    const triPointRef& tri,
+    const point& pt
+) const
+{
+    //pointHit nearPt(tri.nearestPoint(pt));
+    //if (nearPt.distance() > ROOTSMALL)
+    //{
+    //    FatalErrorInFunction << "tri:" << tri
+    //        << " seed:" << pt << exit(FatalError);
+    //}
+
+    return (1.0-ROOTSMALL)*pt+ROOTSMALL*tri.centre();
 }
 
 
@@ -130,14 +156,18 @@ void Foam::functionObjects::wallBoundedStreamLine::track()
 
         const sampledSet& seedPoints = sampledSetPoints();
 
-        forAll(seedPoints, i)
+        forAll(seedPoints, seedi)
         {
-            const label celli = seedPoints.cells()[i];
+            const label celli = seedPoints.cells()[seedi];
 
             if (celli != -1)
             {
-                const point& seedPt = seedPoints[i];
-                tetIndices ids(findNearestTet(isWallPatch, seedPt, celli));
+                const point& seedPt = seedPoints[seedi];
+                Tuple2<tetIndices, point> nearestId
+                (
+                    findNearestTet(isWallPatch, seedPt, celli)
+                );
+                const tetIndices& ids = nearestId.first();
 
                 if (ids.face() != -1 && isWallPatch[ids.face()])
                 {
@@ -154,15 +184,38 @@ void Foam::functionObjects::wallBoundedStreamLine::track()
                         new wallBoundedStreamLineParticle
                         (
                             mesh_,
-                            ids.faceTri(mesh_).centre(),
+                            // Perturb seed point to be inside triangle
+                            pushIn(ids.faceTri(mesh_), nearestId.second()),
                             ids.cell(),
                             ids.face(),     // tetFace
                             ids.tetPt(),
                             -1,             // not on a mesh edge
                             -1,             // not on a diagonal edge
+                            (trackDir_ == trackDirType::FORWARD), // forward?
                             lifeTime_       // lifetime
                         )
                     );
+
+                    if (trackDir_ == trackDirType::BIDIRECTIONAL)
+                    {
+                        // Additional particle for other half of track
+                        particles.addParticle
+                        (
+                            new wallBoundedStreamLineParticle
+                            (
+                                mesh_,
+                                // Perturb seed point to be inside triangle
+                                pushIn(ids.faceTri(mesh_), nearestId.second()),
+                                ids.cell(),
+                                ids.face(),     // tetFace
+                                ids.tetPt(),
+                                -1,             // not on a mesh edge
+                                -1,             // not on a diagonal edge
+                                true,           // forward
+                                lifeTime_       // lifetime
+                            )
+                        );
+                    }
                 }
                 else
                 {
@@ -173,7 +226,7 @@ void Foam::functionObjects::wallBoundedStreamLine::track()
         }
     }
 
-    label nSeeds = returnReduce(particles.size(), sumOp<label>());
+    const label nSeeds = returnReduce(particles.size(), sumOp<label>());
 
     Log << type() << " : seeded " << nSeeds << " particles." << endl;
 
@@ -204,7 +257,6 @@ void Foam::functionObjects::wallBoundedStreamLine::track()
         vsInterp,
         vvInterp,
         UIndex,         // index of U in vvInterp
-        trackForward_,  // track in +u direction?
         trackLength_,   // fixed track length
         isWallPatch,    // which faces are to follow
 

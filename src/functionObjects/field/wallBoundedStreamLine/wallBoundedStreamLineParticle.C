@@ -96,7 +96,7 @@ Foam::vector Foam::wallBoundedStreamLineParticle::sample
 {
     vector U = interpolateFields(td, localPosition_, cell(), face());
 
-    if (!td.trackForward_)
+    if (!trackForward_)
     {
         U = -U;
     }
@@ -127,6 +127,7 @@ Foam::wallBoundedStreamLineParticle::wallBoundedStreamLineParticle
     const label tetPti,
     const label meshEdgeStart,
     const label diagEdge,
+    const bool trackForward,
     const label lifeTime
 )
 :
@@ -140,6 +141,7 @@ Foam::wallBoundedStreamLineParticle::wallBoundedStreamLineParticle
         meshEdgeStart,
         diagEdge
     ),
+    trackForward_(trackForward),
     lifeTime_(lifeTime)
 {}
 
@@ -159,7 +161,7 @@ Foam::wallBoundedStreamLineParticle::wallBoundedStreamLineParticle
         List<scalarList> sampledScalars;
         List<vectorList> sampledVectors;
 
-        is  >> lifeTime_
+        is  >> trackForward_ >> lifeTime_
             >> sampledPositions_ >> sampledScalars >> sampledVectors;
 
         sampledScalars_.setSize(sampledScalars.size());
@@ -184,6 +186,7 @@ Foam::wallBoundedStreamLineParticle::wallBoundedStreamLineParticle
 )
 :
     wallBoundedParticle(p),
+    trackForward_(p.trackForward_),
     lifeTime_(p.lifeTime_),
     sampledPositions_(p.sampledPositions_),
     sampledScalars_(p.sampledScalars_),
@@ -269,6 +272,7 @@ Foam::Ostream& Foam::operator<<
 )
 {
     os  << static_cast<const wallBoundedParticle&>(p)
+        << token::SPACE << p.trackForward_
         << token::SPACE << p.lifeTime_
         << token::SPACE << p.sampledPositions_
         << token::SPACE << p.sampledScalars_

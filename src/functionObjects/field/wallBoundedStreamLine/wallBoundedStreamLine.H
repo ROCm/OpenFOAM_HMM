@@ -46,7 +46,8 @@ Usage
 
         setFormat       vtk;
         U               UNear;
-        trackForward    yes;
+        //Deprecated: trackForward    yes;
+        direction       bidirectional;    // or forward/backward
 
         fields
         (
@@ -76,6 +77,7 @@ Usage
         setFormat    | Output data type        | yes         |
         U            | Tracking velocity field name | yes    |
         fields       | Fields to sample        | yes         |
+        direction    | Direction to track    | yes         |
         lifetime     | Maximum number of particle tracking steps | yes |
         trackLength  | Tracking segment length | no          |
         nSubCycle    | Number of tracking steps per cell | no|
@@ -139,11 +141,19 @@ protected:
     // Protected Member Functions
 
         //- Find wall tet on cell
-        tetIndices findNearestTet
+        Tuple2<tetIndices, point> findNearestTet
         (
             const bitSet& isWallPatch,
             const point& seedPt,
             const label celli
+        ) const;
+
+        //- Push a point a tiny bit towards the centre of the triangle it is in
+        //  to avoid tracking problems
+        point pushIn
+        (
+            const triPointRef& tri,
+            const point& pt
         ) const;
 
 

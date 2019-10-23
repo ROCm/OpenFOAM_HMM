@@ -45,7 +45,8 @@ Usage
 
         setFormat       vtk;
         U               U;
-        trackForward    yes;
+        //Deprecated: trackForward    yes;
+        direction       bidirectional;    // or forward/backward
 
         fields
         (
@@ -77,6 +78,7 @@ Usage
         setFormat    | Output data type        | yes         |
         U            | Tracking velocity field name | no     | U
         fields       | Fields to sample        | yes         |
+        direction    | Direction to track    | yes         |
         lifetime     | Maximum number of particle tracking steps | yes |
         trackLength  | Tracking segment length | no          |
         nSubCycle    | Number of tracking steps per cell | no|

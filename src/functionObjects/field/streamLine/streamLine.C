@@ -56,18 +56,35 @@ void Foam::functionObjects::streamLine::track()
 
     const sampledSet& seedPoints = sampledSetPoints();
 
-    forAll(seedPoints, i)
+    forAll(seedPoints, seedi)
     {
         particles.addParticle
         (
             new streamLineParticle
             (
                 mesh_,
-                seedPoints[i],
-                seedPoints.cells()[i],
+                seedPoints[seedi],
+                seedPoints.cells()[seedi],
+                (trackDir_ == trackDirType::FORWARD),
                 lifeTime_
             )
         );
+
+        if (trackDir_ == trackDirType::BIDIRECTIONAL)
+        {
+            // Add additional particle for the forward bit of the track
+            particles.addParticle
+            (
+                new streamLineParticle
+                (
+                    mesh_,
+                    seedPoints[seedi],
+                    seedPoints.cells()[seedi],
+                    true,
+                    lifeTime_
+                )
+            );
+        }
     }
 
     label nSeeds = returnReduce(particles.size(), sumOp<label>());
@@ -99,7 +116,6 @@ void Foam::functionObjects::streamLine::track()
         vsInterp,
         vvInterp,
         UIndex,         // index of U in vvInterp
-        trackForward_,  // track in +u direction?
         nSubCycle_,     // automatic track control:step through cells in steps?
         trackLength_,   // fixed track length
 
