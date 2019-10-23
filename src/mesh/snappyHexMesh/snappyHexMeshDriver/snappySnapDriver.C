@@ -2709,6 +2709,7 @@ void Foam::snappySnapDriver::doSnap
             meshMoverPtr()
         );
 
+        // TBD. Include re-patching?
 
 
         //- Only if in feature attraction mode:
