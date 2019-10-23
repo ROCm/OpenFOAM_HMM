@@ -70,7 +70,7 @@ INFORMATION
 # -> HAVE_PETSC, PETSC_INC_DIR, PETSC_LIB_DIR
 have_petsc()
 {
-    local prefix header library incName libName settings warn
+    local prefix header library incName libName pkgName settings warn
     warn="==> skip petsc"
 
     # Setup - prefer current environment value? (TDB)
@@ -89,6 +89,7 @@ have_petsc()
     prefix="$PETSC_ARCH_PATH"
     incName="petsc.h"
     libName="libpetsc"
+    pkgName="PETSc"
 
     # ----------------------------------
     if isNone "$prefix"
@@ -103,6 +104,19 @@ have_petsc()
     then
         header=$(findFirstFile "/usr/local/include/$incName" "/usr/include/$incName")
         prefix=$(sysPrefix "$header")
+
+        # No system header, attempt discovery with pkg-config
+        if [ -z "$header" ] && pkg-config --exists "$pkgName" 2>/dev/null
+        then
+            header=$(pkg-config --cflags-only-I "$pkgName" | sed -e 's/^-[IL]//')
+            library=$(pkg-config --libs-only-L "$pkgName" | sed -e 's/^-[IL]//')
+
+            prefix="${header%/*}"     # Basename
+
+            # Artifically adjust names (for later)
+            [ -n "$header" ] && header="$header/$incName"
+            [ -n "$library" ] && library="$library/$libName"
+        fi
     else
         unset prefix
     fi
@@ -125,7 +139,7 @@ have_petsc()
 
     # ----------------------------------
 
-    # TODO: check size of petsc integer vs label
+    # TODO: check size of petsc integer vs label, real vs double?
 
     # OK
     export HAVE_PETSC=true
