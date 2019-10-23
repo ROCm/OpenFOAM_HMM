@@ -5,6 +5,8 @@
     \\  /    A nd           | Copyright (C) 2004-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
+-------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
@@ -190,15 +192,6 @@ inline Omanip<IOstream::versionNumber> setversion
 )
 {
     return Omanip<IOstream::versionNumber>(&IOstream::version, ver);
-}
-
-
-inline Omanip<IOstream::compressionType> setcompression
-(
-    const IOstream::compressionType cmp
-)
-{
-    return Omanip<IOstream::compressionType>(&IOstream::compression, cmp);
 }
 
 
