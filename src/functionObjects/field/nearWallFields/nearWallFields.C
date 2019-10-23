@@ -78,6 +78,7 @@ void Foam::functionObjects::nearWallFields::calcAddressing()
         const vectorField nf(patch.nf());
         const vectorField faceCellCentres(patch.patch().faceCellCentres());
         const labelUList& faceCells = patch.patch().faceCells();
+        const vectorField::subField& faceCentres = patch.patch().faceCentres();
 
         forAll(patch, patchFacei)
         {
@@ -129,7 +130,11 @@ void Foam::functionObjects::nearWallFields::calcAddressing()
                 start = faceCellCentres[patchFacei];
             }
 
-            const point end = start-distance_*nf[patchFacei];
+
+            // TBD: why use start? and not faceCentres[patchFacei]
+            //const point end = start-distance_*nf[patchFacei];
+            const point end = faceCentres[patchFacei]-distance_*nf[patchFacei];
+
 
             // Add a particle to the cloud with originating face as passive data
             cloud.addParticle

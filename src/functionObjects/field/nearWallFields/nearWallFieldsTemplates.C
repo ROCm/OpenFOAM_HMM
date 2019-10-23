@@ -62,9 +62,17 @@ void Foam::functionObjects::nearWallFields::createFields
                 IOobject io(fld);
                 io.readOpt() = IOobject::NO_READ;
                 io.writeOpt() = IOobject::NO_WRITE;
+
+                // Override bc to be calculated
+                wordList fldTypes(fld.boundaryField().types());
+                for (const label patchi : patchSet_)
+                {
+                    fldTypes[patchi] = calculatedFvPatchField<Type>::typeName;
+                }
+
                 io.rename(sampleFldName);
 
-                sflds.set(sz, new VolFieldType(io, fld));
+                sflds.set(sz, new VolFieldType(io, fld, fldTypes));
 
                 Log << "    created " << sflds[sz].name()
                     << " to sample " << fld.name() << endl;
