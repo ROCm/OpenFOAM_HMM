@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2018 OpenFOAM Foundation
@@ -339,7 +339,7 @@ Foam::simpleObjectRegistry& Foam::debug::debugObjects()
 {
     if (!debugObjectsPtr_)
     {
-        debugObjectsPtr_ = new simpleObjectRegistry(1000);
+        debugObjectsPtr_ = new simpleObjectRegistry(128);
     }
 
     return *debugObjectsPtr_;
@@ -350,7 +350,7 @@ Foam::simpleObjectRegistry& Foam::debug::infoObjects()
 {
     if (!infoObjectsPtr_)
     {
-        infoObjectsPtr_ = new simpleObjectRegistry(100);
+        infoObjectsPtr_ = new simpleObjectRegistry(128);
     }
 
     return *infoObjectsPtr_;
@@ -361,7 +361,7 @@ Foam::simpleObjectRegistry& Foam::debug::optimisationObjects()
 {
     if (!optimisationObjectsPtr_)
     {
-        optimisationObjectsPtr_ = new simpleObjectRegistry(100);
+        optimisationObjectsPtr_ = new simpleObjectRegistry(128);
     }
 
     return *optimisationObjectsPtr_;
@@ -372,7 +372,7 @@ Foam::simpleObjectRegistry& Foam::debug::dimensionSetObjects()
 {
     if (!dimensionSetObjectsPtr_)
     {
-        dimensionSetObjectsPtr_ = new simpleObjectRegistry(100);
+        dimensionSetObjectsPtr_ = new simpleObjectRegistry(128);
     }
 
     return *dimensionSetObjectsPtr_;
@@ -383,7 +383,7 @@ Foam::simpleObjectRegistry& Foam::debug::dimensionedConstantObjects()
 {
     if (!dimensionedConstantObjectsPtr_)
     {
-        dimensionedConstantObjectsPtr_ = new simpleObjectRegistry(100);
+        dimensionedConstantObjectsPtr_ = new simpleObjectRegistry(128);
     }
 
     return *dimensionedConstantObjectsPtr_;

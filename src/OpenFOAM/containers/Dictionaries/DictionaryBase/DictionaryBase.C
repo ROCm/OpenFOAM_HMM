@@ -158,15 +158,10 @@ T* Foam::DictionaryBase<IDLListType, T>::lookup(const word& keyword)
 template<class IDLListType, class T>
 Foam::wordList Foam::DictionaryBase<IDLListType, T>::toc() const
 {
-    wordList keywords(this->size());
-
-    label i = 0;
-    for (auto iter = this->cbegin(); iter != this->cend(); ++iter)
-    {
-        keywords[i++] = iter().keyword();
-    }
-
-    return keywords;
+    // Cannot rely on the items themselves having a keyword() method
+    // so simply return the toc() from the hashed entries
+    // Make it sorted, since anything else would have no meaning.
+    return hashedTs_.sortedToc();
 }
 
 
