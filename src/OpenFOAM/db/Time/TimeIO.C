@@ -109,39 +109,7 @@ void Foam::Time::readDict()
             << "Overriding DebugSwitches according to "
             << controlDict_.name() << nl;
 
-        simpleObjectRegistry& objs = debug::debugObjects();
-
-        for (const entry& dEntry : *localDict)
-        {
-            const word& name = dEntry.keyword();
-
-            simpleObjectRegistryEntry* objPtr = objs.lookupPtr(name);
-
-            if (objPtr)
-            {
-                const List<simpleRegIOobject*>& objects = *objPtr;
-
-                DetailInfo << "    " << dEntry << nl;
-
-                if (dEntry.isDict())
-                {
-                    for (simpleRegIOobject* obj : objects)
-                    {
-                        OStringStream os(IOstream::ASCII);
-                        os  << dEntry.dict();
-                        IStringStream is(os.str());
-                        obj->readData(is);
-                    }
-                }
-                else
-                {
-                    for (simpleRegIOobject* obj : objects)
-                    {
-                        obj->readData(dEntry.stream());
-                    }
-                }
-            }
-        }
+        debug::debugObjects().setValues(*localDict, true);
     }
 
 
@@ -156,39 +124,7 @@ void Foam::Time::readDict()
             << "Overriding InfoSwitches according to "
             << controlDict_.name() << nl;
 
-        simpleObjectRegistry& objs = debug::infoObjects();
-
-        for (const entry& dEntry : *localDict)
-        {
-            const word& name = dEntry.keyword();
-
-            simpleObjectRegistryEntry* objPtr = objs.lookupPtr(name);
-
-            if (objPtr)
-            {
-                const List<simpleRegIOobject*>& objects = *objPtr;
-
-                DetailInfo << "    " << dEntry << nl;
-
-                if (dEntry.isDict())
-                {
-                    for (simpleRegIOobject* obj : objects)
-                    {
-                        OStringStream os(IOstream::ASCII);
-                        os  << dEntry.dict();
-                        IStringStream is(os.str());
-                        obj->readData(is);
-                    }
-                }
-                else
-                {
-                    for (simpleRegIOobject* obj : objects)
-                    {
-                        obj->readData(dEntry.stream());
-                    }
-                }
-            }
-        }
+        debug::infoObjects().setValues(*localDict, true);
     }
 
     // OptimisationSwitches
@@ -202,39 +138,7 @@ void Foam::Time::readDict()
             << "Overriding OptimisationSwitches according to "
             << controlDict_.name() << nl;
 
-        simpleObjectRegistry& objs = debug::optimisationObjects();
-
-        for (const entry& dEntry : *localDict)
-        {
-            const word& name = dEntry.keyword();
-
-            simpleObjectRegistryEntry* objPtr = objs.lookupPtr(name);
-
-            if (objPtr)
-            {
-                DetailInfo << "    " << dEntry << nl;
-
-                const List<simpleRegIOobject*>& objects = *objPtr;
-
-                if (dEntry.isDict())
-                {
-                    for (simpleRegIOobject* obj : objects)
-                    {
-                        OStringStream os(IOstream::ASCII);
-                        os  << dEntry.dict();
-                        IStringStream is(os.str());
-                        obj->readData(is);
-                    }
-                }
-                else
-                {
-                    for (simpleRegIOobject* obj : objects)
-                    {
-                        obj->readData(dEntry.stream());
-                    }
-                }
-            }
-        }
+        debug::optimisationObjects().setValues(*localDict, true);
     }
 
 

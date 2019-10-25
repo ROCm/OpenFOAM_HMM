@@ -52,31 +52,32 @@ class RegisterSwitch
 :
     public simpleRegIOobject
 {
-    Type& optSwitch_;
-
 public:
+
+    //- Reference to the switch variable that has been registered
+    Type& value;
 
     RegisterSwitch
     (
         void (*registryFn)(const char* name, simpleRegIOobject*),
         const char* name,
-        Type& optSwitch
+        Type& switchVar
     )
     :
         simpleRegIOobject(registryFn, name),
-        optSwitch_(optSwitch)
+        value(switchVar)
     {}
 
     virtual ~RegisterSwitch() = default;
 
-    virtual void readData(Foam::Istream& is)
+    virtual void readData(Istream& is)
     {
-        is >> optSwitch_;
+        is >> value;
     }
 
-    virtual void writeData(Foam::Ostream& os) const
+    virtual void writeData(Ostream& os) const
     {
-        os << optSwitch_;
+        os << value;
     }
 };
 
@@ -87,14 +88,14 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define registerOptSwitch(Name, Type, Switch)                                  \
+#define registerOptSwitch(Name, Type, SwitchVar)                               \
     static Foam::RegisterSwitch<Type> FILE_UNIQUE(_addToOpt_)                  \
-        (Foam::debug::addOptimisationObject, Name, Switch)
+    (Foam::debug::addOptimisationObject, Name, SwitchVar)
 
 
-#define registerInfoSwitch(Name, Type, Switch)                                 \
+#define registerInfoSwitch(Name, Type, SwitchVar)                              \
     static Foam::RegisterSwitch<Type> FILE_UNIQUE(_addToOpt_)                  \
-        (Foam::debug::addInfoObject, Name, Switch)
+    (Foam::debug::addInfoObject, Name, SwitchVar)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -149,11 +149,11 @@ public:
 
 
         //- Construct as copy
-        ITstream(const ITstream& its)
+        ITstream(const ITstream& is)
         :
             Istream(ASCII, currentVersion),
-            tokenList(its),
-            name_(its.name_),
+            tokenList(is),
+            name_(is.name_),
             tokenIndex_(0)
         {
             setOpened();

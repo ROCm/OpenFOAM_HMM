@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -146,6 +146,7 @@ HEADER
 #   -help-man     Internal option
 #   -hostRoots    Advanced distributed run option
 #   -roots        Advanced distributed run option
+#   -debug-switch, -opt-switch, -info-switch, -lib  Advanced options
 #
 # Begin parsing after first appearance of "^[Oo]ptions:"
 # Terminate parsing on first appearance of "-help-full"
@@ -159,6 +160,8 @@ extractOptions()
         sed -ne '1,/^[Oo]ptions:/d' \
             -e 's/^ *//; /^$/d; /^[^-]/d; /^--/d; /^-help-man/d;' \
             -e '/^-hostRoots /d; /^-roots /d;' \
+            -e '/^-lib /d;' \
+            -e '/^-[a-z]*-switch /d;' \
             -e 'y/,/ /; s/=.*$/=/;' \
             -e '/^-[^ ]* </{ s/^\(-[^ ]* <\).*$/\1/; p; d }' \
             -e 's/^\(-[^ ]*\).*$/\1/; p; /^-help-full/q;' \

@@ -7,6 +7,7 @@ global/clock/clock.C
 global/clockTime/clockTime.C
 global/clockValue/clockValue.C
 global/cpuTime/cpuTimeCxx.C
+global/debug/simpleObjectRegistry.C
 global/profiling/profiling.C
 global/profiling/profilingInformation.C
 global/profiling/profilingSysInfo.C

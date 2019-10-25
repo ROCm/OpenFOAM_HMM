@@ -42,7 +42,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class Istream;
 class Ostream;
 
@@ -74,11 +74,10 @@ public:
     // Member Functions
 
         //- Read
-        virtual void readData(Istream&) = 0;
+        virtual void readData(Istream& is) = 0;
 
         //- Write
-        virtual void writeData(Ostream&) const = 0;
-
+        virtual void writeData(Ostream& os) const = 0;
 };
 
 

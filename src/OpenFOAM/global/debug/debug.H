@@ -68,13 +68,13 @@ namespace debug
     //  \sa Foam::findEtcFile()
     dictionary& controlDict();
 
-    //- The DebugSwitches sub-dictionary in the central controlDict.
+    //- The DebugSwitches sub-dictionary in the central controlDict(s).
     dictionary& debugSwitches();
 
-    //- The InfoSwitches sub-dictionary in the central controlDict.
+    //- The InfoSwitches sub-dictionary in the central controlDict(s).
     dictionary& infoSwitches();
 
-    //- The OptimisationSwitches sub-dictionary in the central controlDict.
+    //- The OptimisationSwitches sub-dictionary in the central controlDict(s).
     dictionary& optimisationSwitches();
 
     //- Lookup debug switch or add default value.
@@ -114,22 +114,22 @@ namespace debug
         void addDimensionedConstantObject(const char* name, simpleRegIOobject*);
 
 
-        //- Get access to registered debug switch objects
+        //- Access to registered DebugSwitch objects
         simpleObjectRegistry& debugObjects();
 
-        //- Get access to registered info switch objects
+        //- Access to registered InfoSwitch objects
         simpleObjectRegistry& infoObjects();
 
-        //- Get access to registered optimisation switch objects
+        //- Access to registered OptimisationSwitch objects
         simpleObjectRegistry& optimisationObjects();
 
-        //- Get access to registered dimensionSets switch objects
+        //- Access to registered DimensionSets objects
         simpleObjectRegistry& dimensionSetObjects();
 
-        //- Get access to registered dimensionedConstant switch objects
+        //- Access to registered DimensionedConstants objects
         simpleObjectRegistry& dimensionedConstantObjects();
 
-        //- List registered debug switches
+        //- List registered debug/info/optimisation switches
         void listRegisteredSwitches(const bool unset);
 
 } // End namespace debug

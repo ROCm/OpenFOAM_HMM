@@ -30,6 +30,7 @@ Description
     Object registry for simpleRegIOobject. Maintains ordering.
 
 SourceFiles
+    simpleObjectRegistry.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -38,11 +39,15 @@ SourceFiles
 
 #include "Dictionary.H"
 #include "simpleRegIOobject.H"
+#include <string>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward declarations
+class dictionary;
 
 /*---------------------------------------------------------------------------*\
                    Class simpleObjectRegistryEntry Declaration
@@ -55,7 +60,14 @@ class simpleObjectRegistryEntry
 {
 public:
 
-    simpleObjectRegistryEntry(const List<simpleRegIOobject*>& data)
+    //- Construct with a single object (list size == 1)
+    explicit simpleObjectRegistryEntry(simpleRegIOobject* obj)
+    :
+        List<simpleRegIOobject*>(label(1), obj)
+    {}
+
+    //- Construct with a List of objects
+    explicit simpleObjectRegistryEntry(const List<simpleRegIOobject*>& data)
     :
         List<simpleRegIOobject*>(data)
     {}
@@ -79,6 +91,17 @@ public:
         :
             Dictionary<simpleObjectRegistryEntry>(size)
         {}
+
+
+    // Member Functions
+
+        //- Set values (invoke callbacks) from dictionary entries
+        //  Reporting honours the infoDetailLevel
+        void setValues(const dictionary& dict, bool report=false);
+
+        //- Set named value, but also handle embedded name=value syntax
+        //  Reporting honours the infoDetailLevel
+        void setNamedInt(std::string name, int val, bool report=false);
 };
 
 

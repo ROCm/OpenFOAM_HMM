@@ -87,7 +87,6 @@ int Foam::Time::printExecutionFormat_
     Foam::debug::infoSwitch("printExecutionFormat", 0)
 );
 
-
 registerInfoSwitch
 (
     "printExecutionFormat",
