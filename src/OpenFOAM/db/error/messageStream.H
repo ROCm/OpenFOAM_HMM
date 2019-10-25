@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -76,10 +76,11 @@ public:
     //- Message type, or error severity flags
     enum errorSeverity
     {
-        INFO,       //!< General information output, not necessarily an error.
+        INFO = 1,   //!< General information output
         WARNING,    //!< Warning of possible problem.
         SERIOUS,    //!< A serious problem - eg, data corruption.
-        FATAL       //!< A fatal error.
+        FATAL,      //!< A fatal error.
+        INFO_STDERR = INFO | 0x10,  //!< Information, but on stderr
     };
 
 
@@ -227,6 +228,9 @@ extern int infoDetailLevel;
 
 //- Information stream (uses stdout - output is on the master only)
 extern messageStream Info;
+
+//- Information stream (uses stderr - output is on the master only)
+extern messageStream InfoErr;
 
 //- Warning stream (uses stdout - output is on the master only),
 //- with additional 'FOAM Warning' header text.
