@@ -28,6 +28,30 @@ License
 #include "dictionary.H"
 #include "primitiveEntry.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class T>
+void Foam::dictionary::reportDefault
+(
+    const word& keyword,
+    const T& deflt,
+    const bool added
+) const
+{
+    InfoErr
+        << "Dictionary: " << relativeName(true).c_str()
+        << " Entry: " << keyword;
+
+    if (added)
+    {
+        InfoErr
+            << " Added";
+    }
+    InfoErr
+        << " Default: " << deflt << nl;
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Compare>
@@ -118,15 +142,13 @@ T Foam::dictionary::getOrDefault
         if (writeOptionalEntries > 1)
         {
             FatalIOErrorInFunction(*this)
-                << "Optional entry '" << keyword
-                << "' not found. Default '" << deflt << "' ignored" << nl
+                << "No optional entry: " << keyword
+                << " Default: " << deflt << nl
                 << exit(FatalIOError);
         }
         else
         {
-            IOInfoInFunction(*this)
-                << "Optional entry '" << keyword
-                << "' not found. Using default '" << deflt << "'" << nl;
+            reportDefault(keyword, deflt);
         }
     }
 
@@ -160,15 +182,13 @@ T Foam::dictionary::getOrAdd
         if (writeOptionalEntries > 1)
         {
             FatalIOErrorInFunction(*this)
-                << "Optional entry '" << keyword
-                << "' not found. Default '" << deflt << "' ignored" << nl
+                << "No optional entry: " << keyword
+                << " Default: " << deflt << nl
                 << exit(FatalIOError);
         }
         else
         {
-            IOInfoInFunction(*this)
-                << "Optional entry '" << keyword
-                << "' not found. Adding default '" << deflt << "'" << nl;
+            reportDefault(keyword, deflt, true);
         }
     }
 
@@ -218,15 +238,13 @@ T Foam::dictionary::getCheckOrDefault
         if (writeOptionalEntries > 1)
         {
             FatalIOErrorInFunction(*this)
-                << "Optional entry '" << keyword
-                << "' not found. Default '" << deflt << "' ignored" << nl
+                << "No optional entry: " << keyword
+                << " Default: " << deflt << nl
                 << exit(FatalIOError);
         }
         else
         {
-            IOInfoInFunction(*this)
-                << "Optional entry '" << keyword
-                << "' not found. Using default '" << deflt << "'" << nl;
+            reportDefault(keyword, deflt);
         }
     }
 
@@ -275,15 +293,13 @@ T Foam::dictionary::getCheckOrAdd
         if (writeOptionalEntries > 1)
         {
             FatalIOErrorInFunction(*this)
-                << "Optional entry '" << keyword
-                << "' not found. Default '" << deflt << "' ignored" << nl
+                << "No optional entry: " << keyword
+                << " Default: " << deflt << nl
                 << exit(FatalIOError);
         }
         else
         {
-            IOInfoInFunction(*this)
-                << "Optional entry '" << keyword
-                << "' not found. Adding default '" << deflt << "'" << nl;
+            reportDefault(keyword, deflt, true);
         }
     }
 
@@ -449,15 +465,13 @@ T Foam::dictionary::getOrDefaultCompat
         if (writeOptionalEntries > 1)
         {
             FatalIOErrorInFunction(*this)
-                << "Optional entry '" << keyword
-                << "' not found. Default '" << deflt << "' ignored" << nl
+                << "No optional entry: " << keyword
+                << " Default: " << deflt << nl
                 << exit(FatalIOError);
         }
         else
         {
-            IOInfoInFunction(*this)
-                << "Optional entry '" << keyword
-                << "' not found. Using default '" << deflt << "'" << nl;
+            reportDefault(keyword, deflt);
         }
     }
 

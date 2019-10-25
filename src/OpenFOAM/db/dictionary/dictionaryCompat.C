@@ -65,9 +65,8 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchCompat
 
         if (finder.good())
         {
-            // Only want a single warning (on master), but guard with a
-            // parRun check to avoid Pstream::master() when Pstream has not
-            // yet been initialized
+            // Want single warning (on master), but guard with parRun to avoid
+            // Pstream::master() when Pstream has not yet been initialized
             if
             (
                 shouldWarnVersion(iter.second)

@@ -284,11 +284,6 @@ private:
 
     // Private Data
 
-        //- Report optional keywords and values if not present in dictionary
-        //  For value greater than 1: fatal.
-        //  Set/unset via an InfoSwitch
-        static int writeOptionalEntries;
-
         //- The dictionary name
         fileName name_;
 
@@ -363,11 +358,28 @@ private:
         //- Emit IOError about bad input for the entry
         void raiseBadInput(const word& keyword) const;
 
+        //- The case-relative dictionary name. Uses FOAM_CASE
+        fileName relativeName(const bool caseTag=false) const;
+
+        //- Report (on stderr) that the keyword default value was used
+        template<class T>
+        void reportDefault
+        (
+            const word& keyword,
+            const T& deflt,
+            const bool added = false
+        ) const;
+
 
 public:
 
     // Declare name of the class and its debug switch
     ClassName("dictionary");
+
+    //- Report optional keywords and values if not present in dictionary
+    //  For value greater than 1: fatal.
+    //  Set/unset via an InfoSwitch
+    static int writeOptionalEntries;
 
     //- An empty dictionary, which is also the parent for all dictionaries
     static const dictionary null;

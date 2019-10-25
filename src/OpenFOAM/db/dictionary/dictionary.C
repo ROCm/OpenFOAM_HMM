@@ -32,6 +32,8 @@ License
 #include "dictionaryEntry.H"
 #include "regExp.H"
 #include "OSHA1stream.H"
+#include "argList.H"
+#include "registerSwitch.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
@@ -46,6 +48,31 @@ int Foam::dictionary::writeOptionalEntries
 (
     Foam::debug::infoSwitch("writeOptionalEntries", 0)
 );
+
+
+registerInfoSwitch
+(
+    "writeOptionalEntries",
+    int,
+    Foam::dictionary::writeOptionalEntries
+);
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::fileName Foam::dictionary::relativeName(const bool caseTag) const
+{
+    const fileName caseDir(argList::envGlobalPath());
+
+    if (!caseDir.empty() && name().isAbsolute())
+    {
+        return name().relative(caseDir, caseTag);
+    }
+    else
+    {
+        return name();
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

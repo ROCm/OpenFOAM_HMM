@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -78,20 +78,16 @@ namespace debug
     dictionary& optimisationSwitches();
 
     //- Lookup debug switch or add default value.
-    int debugSwitch(const char* name, const int defaultValue=0);
+    int debugSwitch(const char* name, const int deflt = 0);
 
     //- Lookup info switch or add default value.
-    int infoSwitch(const char* name, const int defaultValue=0);
+    int infoSwitch(const char* name, const int deflt = 0);
 
     //- Lookup optimisation switch or add default value.
-    int optimisationSwitch(const char* name, const int defaultValue=0);
+    int optimisationSwitch(const char* name, const int deflt = 0);
 
     //- Lookup optimisation switch or add default value.
-    float floatOptimisationSwitch
-    (
-        const char* name,
-        const float defaultValue=0
-    );
+    float floatOptimisationSwitch(const char* name, const float deflt = 0);
 
     //- Internal function to lookup a sub-dictionary from controlDict.
     dictionary& switchSet(const char* subDictName, dictionary*& subDictPtr);

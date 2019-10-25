@@ -62,13 +62,8 @@ simpleObjectRegistry* dimensionedConstantObjectsPtr_(nullptr);
 
 
 // To ensure controlDictPtr_ is deleted at the end of the run
-class deleteControlDictPtr
+struct deleteControlDictPtr
 {
-public:
-
-    deleteControlDictPtr()
-    {}
-
     ~deleteControlDictPtr()
     {
         deleteDemandDrivenData(debugObjectsPtr_);
@@ -89,6 +84,35 @@ deleteControlDictPtr deleteControlDictPtr_;
 
 
 } // End namespace debug
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Like dictionary getOrAdd (default), but circumventing
+// writeOptionalEntries to avoid extremely noisy output
+template<class T>
+static inline T getOrAdd
+(
+    dictionary& dict,
+    const char* name,
+    const T deflt
+)
+{
+    const entry* eptr = dict.findEntry(name, keyType::LITERAL);
+
+    if (eptr)
+    {
+        return eptr->get<T>();
+    }
+
+    dict.add(new primitiveEntry(name, deflt));
+    return deflt;
+}
+
 } // End namespace Foam
 
 
@@ -142,7 +166,8 @@ Foam::dictionary& Foam::debug::switchSet
 
         if (!eptr || !eptr->isDict())
         {
-            cerr<< "debug::switchSet(const char*, dictionary*&):\n"
+            std::cerr
+                << "debug::switchSet(const char*, dictionary*&):\n"
                 << "    Cannot find " <<  subDictName << " in dictionary "
                 << controlDict().name().c_str()
                 << std::endl << std::endl;
@@ -175,43 +200,31 @@ Foam::dictionary& Foam::debug::optimisationSwitches()
 }
 
 
-int Foam::debug::debugSwitch(const char* name, const int defaultValue)
+int Foam::debug::debugSwitch(const char* name, const int deflt)
 {
-    return debugSwitches().lookupOrAddDefault
-    (
-        name, defaultValue, keyType::LITERAL
-    );
+    return getOrAdd(debugSwitches(), name, deflt);
 }
 
 
-int Foam::debug::infoSwitch(const char* name, const int defaultValue)
+int Foam::debug::infoSwitch(const char* name, const int deflt)
 {
-    return infoSwitches().lookupOrAddDefault
-    (
-        name, defaultValue, keyType::LITERAL
-    );
+    return getOrAdd(infoSwitches(), name, deflt);
 }
 
 
-int Foam::debug::optimisationSwitch(const char* name, const int defaultValue)
+int Foam::debug::optimisationSwitch(const char* name, const int deflt)
 {
-    return optimisationSwitches().lookupOrAddDefault
-    (
-        name, defaultValue, keyType::LITERAL
-    );
+    return getOrAdd(optimisationSwitches(), name, deflt);
 }
 
 
 float Foam::debug::floatOptimisationSwitch
 (
     const char* name,
-    const float defaultValue
+    const float deflt
 )
 {
-    return optimisationSwitches().lookupOrAddDefault
-    (
-        name, defaultValue, keyType::LITERAL
-    );
+    return getOrAdd(optimisationSwitches(), name, deflt);
 }
 
 
@@ -393,7 +406,7 @@ Foam::simpleObjectRegistry& Foam::debug::dimensionedConstantObjects()
 namespace Foam
 {
 
-void listSwitches
+static void listSwitches
 (
     const wordList& debugSwitches,
     const wordList& infoSwitches,
@@ -431,26 +444,26 @@ void listSwitches
         wordHashSet hashset;
         hashset = debugSwitches;
         hashset -= controlDictDebug;
-        Info<< "Unset DebugSwitches" << hashset.sortedToc() << endl;
+        Info<< "Unset DebugSwitches" << hashset.sortedToc() << nl;
 
         hashset = infoSwitches;
         hashset -= controlDictInfo;
-        Info<< "Unset InfoSwitches" << hashset.sortedToc() << endl;
+        Info<< "Unset InfoSwitches" << hashset.sortedToc() << nl;
 
         hashset = optSwitches;
         hashset -= controlDictOpt;
-        Info<< "Unset OptimisationSwitches" << hashset.sortedToc() << endl;
+        Info<< "Unset OptimisationSwitches" << hashset.sortedToc() << nl;
     }
     else
     {
         IOobject::writeDivider(Info);
-        Info<< "DebugSwitches" << debugSwitches << endl;
-        Info<< "InfoSwitches" << infoSwitches << endl;
-        Info<< "OptimisationSwitches" << optSwitches << endl;
+        Info<< "DebugSwitches" << debugSwitches << nl
+            << "InfoSwitches" << infoSwitches << nl
+            << "OptimisationSwitches" << optSwitches << nl;
     }
 }
 
-}
+} // End namespace Foam
 
 
 void Foam::debug::listSwitches(const bool unset)
