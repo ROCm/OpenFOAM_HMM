@@ -89,6 +89,9 @@ ThirdParty)
     Gcc91*)
         gcc_version=gcc-9.1.0
         ;;
+    Gcc92*)
+        gcc_version=gcc-9.2.0
+        ;;
     Clang | Clang37*)
         clang_version=llvm-3.7.1
         ;;
@@ -111,7 +114,10 @@ ThirdParty)
         clang_version=llvm-7.0.1
         ;;
     Clang80*)
-        clang_version=llvm-8.0.0
+        clang_version=llvm-8.0.1
+        ;;
+    Clang90*)
+        clang_version=llvm-9.0.0
         ;;
     *)
         /bin/cat << UNKNOWN_COMPILER 1>&2
