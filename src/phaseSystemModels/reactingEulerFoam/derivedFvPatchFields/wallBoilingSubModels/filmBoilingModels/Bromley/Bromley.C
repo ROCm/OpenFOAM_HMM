@@ -26,6 +26,9 @@ License
 #include "Bromley.H"
 #include "addToRunTimeSelectionTable.H"
 #include "uniformDimensionedFields.H"
+#include "constants.H"
+
+using namespace Foam::constant;
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -55,7 +58,9 @@ Foam::wallBoilingModels::filmBoilingModels::Bromley::Bromley
 )
 :
     filmBoilingModel(),
-    Cn_(dict.lookupOrDefault<scalar>("Cn", 0.62))
+    Cn_(dict.lookupOrDefault<scalar>("Cn", 0.62)),
+    emissivity_(dict.lookupOrDefault<scalar>("emissivity", 1)),
+    L_(dict.get<scalar>("L"))
 {}
 
 
@@ -84,7 +89,11 @@ Foam::wallBoilingModels::filmBoilingModels::Bromley::htcFilmBoil
     const uniformDimensionedVectorField& g =
         liquid.mesh().time().lookupObject<uniformDimensionedVectorField>("g");
 
-    const scalarField rhoVapor(vapor.thermo().rho(patchi));
+    const fvPatchScalarField& rhoVaporw
+    (
+        vapor.thermo().rho()().boundaryField()[patchi]
+    );
+
     const scalarField rhoLiq(liquid.thermo().rho(patchi));
     const scalarField kappaVapor(vapor.kappa(patchi));
 
@@ -93,17 +102,23 @@ Foam::wallBoilingModels::filmBoilingModels::Bromley::htcFilmBoil
     const scalarField& CpVapor = Cp.boundaryField()[patchi];
 
     const scalarField muVapor(vapor.mu(patchi));
-    const scalarField dbVapor(vapor.d()().boundaryField()[patchi]);
+    //const scalarField dbVapor(vapor.d()().boundaryField()[patchi]);
+
+    const scalarField htcRad
+    (
+        emissivity_*physicoChemical::sigma.value()*(pow4(Tw) - pow4(Tsatw))
+      / max((Tw - Tsatw), scalar(1e-4))
+    );
 
     return
         Cn_*pow
         (
             pow3(kappaVapor)
-           *rhoVapor*(rhoLiq - rhoVapor)*mag(g.value())
+           *rhoVaporw*(rhoLiq - rhoVaporw)*mag(g.value())
            *(L + 0.4*CpVapor*max((Tw-Tsatw), scalar(0)))
-           /(dbVapor*muVapor*max((Tw-Tsatw), scalar(1e-4))),
+           /(L_*muVapor*max((Tw-Tsatw), scalar(1e-4))),
             0.25
-        );
+        ) + 0.75*htcRad;
 }
 
 
@@ -114,6 +129,7 @@ void Foam::wallBoilingModels::filmBoilingModels::Bromley::write
 {
     filmBoilingModel::write(os);
     os.writeKeyword("Cn") << Cn_ << token::END_STATEMENT << nl;
+    os.writeKeyword("emissivity") << emissivity_ << token::END_STATEMENT << nl;
 }
 
 

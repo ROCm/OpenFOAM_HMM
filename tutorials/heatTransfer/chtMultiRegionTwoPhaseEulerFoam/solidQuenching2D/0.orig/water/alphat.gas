@@ -43,23 +43,13 @@ boundaryField
         Cmu             0.09;
         kappa           0.41;
         E               9.8;
+        relax           constant 1;
         partitioningModel
         {
             type        Lavieville;
             alphaCrit   0.2;
         }
-
-        LeidenfrostModel
-        {
-            type        Spiegler;
-            Tcrit       647;
-        }
-
-        filmBoilingModel
-        {
-            type        Bromley;
-        }
-        value           uniform 0;
+        value           uniform 1e-8;
     }
     maxY
     {

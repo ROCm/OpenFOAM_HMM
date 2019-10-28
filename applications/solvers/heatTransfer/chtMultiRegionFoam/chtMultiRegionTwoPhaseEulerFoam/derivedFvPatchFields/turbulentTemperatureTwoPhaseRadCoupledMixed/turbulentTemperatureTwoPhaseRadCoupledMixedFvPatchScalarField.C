@@ -378,8 +378,11 @@ updateCoeffs()
         // TvNbr: vapour Tp
         scalarField c(TcNbr*KDeltaLiqNbr + TvNbr*KDeltaVapNbr);
 
-        valueFraction() = KDeltaNbr/(KDeltaNbr + KDelta);
-        refValue() = c/KDeltaNbr;
+        //valueFraction() = KDeltaNbr/(KDeltaNbr + KDelta);
+        //refValue() = c/KDeltaNbr;
+        scalarField KDeltaLiqVapNbr(KDeltaLiqNbr + KDeltaVapNbr);
+        valueFraction() = KDeltaLiqVapNbr/(KDeltaLiqVapNbr + KDelta);
+        refValue() = c/KDeltaLiqVapNbr;
         refGrad() = (qr + qrNbr)/kappa(Tp);
 
         if (debug)
@@ -393,7 +396,7 @@ updateCoeffs()
                     << " walltemperature "
                     << " min:" << gMin(Tp)
                     << " max:" << gMax(Tp)
-                    << " avg:" << gAverage(Tp)
+                    << " avg:" << gAverage(Tp) << nl
                     << endl;
         }
     }

@@ -56,3 +56,16 @@
     pimpleControl& pimple = pimpleFluid[i];
 
     const dimensionedScalar& pMin = pMinFluid[i];
+
+    // Debug fields
+/*
+    volScalarField& faceRegimes = faceRegimesFluid[i];
+    volScalarField& qc = qcFluid[i];
+    volScalarField& qFilm = qFilmFluid[i];
+    volScalarField& htcFilmBoiling = htcFilmBoilingFluid[i];
+    volScalarField& qtb = qtbFluid[i];
+    volScalarField& qSubCool = qSubCoolFluid[i];
+    volScalarField& CHFtotal = CHFtotalFluid[i];
+    volScalarField& Tdnb = TdnbFluid[i];
+    volScalarField& phiTb = phiFluid[i];
+*/

@@ -43,6 +43,7 @@ boundaryField
         Cmu             0.09;
         kappa           0.41;
         E               9.8;
+        relax           constant 1;
         dmdt            uniform 0;
         partitioningModel
         {
@@ -88,6 +89,7 @@ boundaryField
         filmBoilingModel
         {
             type        Bromley;
+            L           1e-3;
         }
         value           uniform 1e-8;
     }

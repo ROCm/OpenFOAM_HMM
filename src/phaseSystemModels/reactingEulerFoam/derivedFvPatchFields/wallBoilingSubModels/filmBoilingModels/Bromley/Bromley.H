@@ -66,6 +66,12 @@ class Bromley
         //- Coefficient for nucleation site density
         scalar Cn_;
 
+        //- Wall emissivity
+        scalar emissivity_;
+
+        //- Characteristic lenght-scale
+        scalar L_;
+
 public:
 
     //- Runtime type information

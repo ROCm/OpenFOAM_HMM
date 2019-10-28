@@ -224,6 +224,8 @@ SourceFiles
 #ifndef compressible_alphatWallBoilingWallFunctionFvPatchScalarField_H
 #define compressible_alphatWallBoilingWallFunctionFvPatchScalarField_H
 
+#include "Function1.H"
+
 #include "alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField.H"
 #include "partitioningModel.H"
 #include "nucleationSiteModel.H"
@@ -287,7 +289,7 @@ private:
         phaseType phaseType_;
 
         //- dmdt relaxationFactor
-        scalar relax_;
+         autoPtr<Function1<scalar>> relax_;
 
         //- Patch face area by cell volume
         scalarField AbyV_;

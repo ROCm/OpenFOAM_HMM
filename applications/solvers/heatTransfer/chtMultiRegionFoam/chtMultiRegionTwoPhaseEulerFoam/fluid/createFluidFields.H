@@ -21,7 +21,178 @@ const uniformDimensionedVectorField& g = meshObjects::gravity::New(runTime);
 
 PtrList<pimpleControl> pimpleFluid(fluidRegions.size());
 
-// Populate fluid field pointer lists
+
+//Debug Fields
+/*
+PtrList<volScalarField> faceRegimesFluid(fluidRegions.size());
+PtrList<volScalarField> qcFluid(fluidRegions.size());
+PtrList<volScalarField> qFilmFluid(fluidRegions.size());
+PtrList<volScalarField> htcFilmBoilingFluid(fluidRegions.size());
+PtrList<volScalarField> qtbFluid(fluidRegions.size());
+PtrList<volScalarField> qSubCoolFluid(fluidRegions.size());
+PtrList<volScalarField> CHFtotalFluid(fluidRegions.size());
+PtrList<volScalarField> TdnbFluid(fluidRegions.size());
+PtrList<volScalarField> phiFluid(fluidRegions.size());
+
+forAll(fluidRegions, i)
+{
+    faceRegimesFluid.set
+    (
+        i,
+        new volScalarField
+        (
+            IOobject
+            (
+                "faceRegimes",
+                runTime.timeName(),
+                fluidRegions[i],
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            fluidRegions[i],
+            dimensionedScalar(dimless, Zero)
+
+        )
+    );
+    qcFluid.set
+    (
+        i,
+        new volScalarField
+        (
+            IOobject
+            (
+                "qc",
+                runTime.timeName(),
+                fluidRegions[i],
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            fluidRegions[i],
+            dimensionedScalar(dimless, Zero)
+        )
+    );
+    qFilmFluid.set
+    (
+        i,
+        new volScalarField
+        (
+            IOobject
+            (
+                "qFilm",
+                runTime.timeName(),
+                fluidRegions[i],
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            fluidRegions[i],
+            dimensionedScalar(dimless, Zero)
+        )
+    );
+    htcFilmBoilingFluid.set
+    (
+        i,
+        new volScalarField
+        (
+            IOobject
+            (
+                "htcFilmBoiling",
+                runTime.timeName(),
+                fluidRegions[i],
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            fluidRegions[i],
+            dimensionedScalar(dimless, Zero)
+        )
+    );
+    qtbFluid.set
+    (
+        i,
+        new volScalarField
+        (
+            IOobject
+            (
+                "qtb",
+                runTime.timeName(),
+                fluidRegions[i],
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            fluidRegions[i],
+            dimensionedScalar(dimless, Zero)
+        )
+    );
+    qSubCoolFluid.set
+    (
+        i,
+        new volScalarField
+        (
+            IOobject
+            (
+                "qSubCool",
+                runTime.timeName(),
+                fluidRegions[i],
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            fluidRegions[i],
+            dimensionedScalar(dimless, Zero)
+        )
+    );
+    CHFtotalFluid.set
+    (
+        i,
+        new volScalarField
+        (
+            IOobject
+            (
+                "CHFtotal",
+                runTime.timeName(),
+                fluidRegions[i],
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            fluidRegions[i],
+            dimensionedScalar(dimless, Zero)
+        )
+    );
+     TdnbFluid.set
+    (
+        i,
+        new volScalarField
+        (
+            IOobject
+            (
+                "Tdnb",
+                runTime.timeName(),
+                fluidRegions[i],
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            fluidRegions[i],
+            dimensionedScalar(dimless, Zero)
+        )
+    );
+     phiFluid.set
+    (
+        i,
+        new volScalarField
+        (
+            IOobject
+            (
+                "phiTb",
+                runTime.timeName(),
+                fluidRegions[i],
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            fluidRegions[i],
+            dimensionedScalar(dimless, Zero)
+        )
+    );
+}
+*/
+
 forAll(fluidRegions, i)
 {
     Info<< "*** Reading fluid mesh thermophysical properties for region "

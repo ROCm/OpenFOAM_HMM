@@ -58,7 +58,7 @@ Foam::wallBoilingModels::TDNBModels::Schroeder::Schroeder
 )
 :
     TDNBModel(),
-    kg_(dict.lookupOrDefault<scalar>("kg", 5/3))
+    kg_(dict.lookupOrDefault<scalar>("kg", 1.666))
 {}
 
 
