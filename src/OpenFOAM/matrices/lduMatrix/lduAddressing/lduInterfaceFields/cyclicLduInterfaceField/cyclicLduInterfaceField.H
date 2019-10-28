@@ -60,13 +60,12 @@ public:
 
     // Constructors
 
-        //- Construct given coupled patch
-        cyclicLduInterfaceField()
-        {}
+        //- Construct null
+        cyclicLduInterfaceField() = default;
 
 
     //- Destructor
-    virtual ~cyclicLduInterfaceField();
+    virtual ~cyclicLduInterfaceField() = default;
 
 
     // Member Functions

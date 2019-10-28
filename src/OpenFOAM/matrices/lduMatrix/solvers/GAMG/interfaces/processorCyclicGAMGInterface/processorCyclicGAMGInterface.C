@@ -86,10 +86,4 @@ Foam::processorCyclicGAMGInterface::processorCyclicGAMGInterface
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::processorCyclicGAMGInterface::~processorCyclicGAMGInterface()
-{}
-
-
 // ************************************************************************* //

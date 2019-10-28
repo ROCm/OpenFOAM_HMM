@@ -94,10 +94,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~processorCyclicGAMGInterface();
-
+    //- Destructor
+    virtual ~processorCyclicGAMGInterface() = default;
 };
 
 

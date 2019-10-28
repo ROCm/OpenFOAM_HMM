@@ -113,7 +113,7 @@ public:
     );
 
 
-    // Destructor
+    //- Destructor
     virtual ~faPatchMapper();
 
 

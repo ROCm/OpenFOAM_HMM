@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011 OpenFOAM Foundation
@@ -51,7 +51,6 @@ namespace Foam
 
 class cyclicLduInterface
 {
-
 public:
 
     //- Runtime type information
@@ -59,8 +58,12 @@ public:
 
     // Constructors
 
+        //- Construct null
+        cyclicLduInterface() = default;
+
+
     //- Destructor
-    virtual ~cyclicLduInterface();
+    virtual ~cyclicLduInterface() = default;
 
 
     // Member Functions

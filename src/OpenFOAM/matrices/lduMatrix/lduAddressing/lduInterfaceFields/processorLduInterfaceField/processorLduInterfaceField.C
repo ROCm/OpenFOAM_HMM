@@ -36,12 +36,6 @@ defineTypeNameAndDebug(processorLduInterfaceField, 0);
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::processorLduInterfaceField::~processorLduInterfaceField()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::processorLduInterfaceField::transformCoupleField

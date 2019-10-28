@@ -35,10 +35,4 @@ defineTypeNameAndDebug(cyclicAMILduInterface, 0);
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cyclicAMILduInterface::~cyclicAMILduInterface()
-{}
-
-
 // ************************************************************************* //

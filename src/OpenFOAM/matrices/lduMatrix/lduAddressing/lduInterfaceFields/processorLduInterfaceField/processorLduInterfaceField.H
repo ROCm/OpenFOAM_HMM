@@ -60,13 +60,12 @@ public:
 
     // Constructors
 
-        //- Construct given coupled patch
-        processorLduInterfaceField()
-        {}
+        //- Construct null
+        processorLduInterfaceField() = default;
 
 
     //- Destructor
-    virtual ~processorLduInterfaceField();
+    virtual ~processorLduInterfaceField() = default;
 
 
     // Member Functions

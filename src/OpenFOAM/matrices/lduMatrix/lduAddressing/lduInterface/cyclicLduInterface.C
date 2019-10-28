@@ -26,7 +26,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cyclicLduInterface.H"
-#include "diagTensorField.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -34,12 +33,6 @@ namespace Foam
 {
 defineTypeNameAndDebug(cyclicLduInterface, 0);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cyclicLduInterface::~cyclicLduInterface()
-{}
 
 
 // ************************************************************************* //

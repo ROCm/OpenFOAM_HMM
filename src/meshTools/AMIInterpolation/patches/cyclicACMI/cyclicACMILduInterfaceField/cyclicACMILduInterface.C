@@ -35,10 +35,4 @@ defineTypeNameAndDebug(cyclicACMILduInterface, 0);
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cyclicACMILduInterface::~cyclicACMILduInterface()
-{}
-
-
 // ************************************************************************* //

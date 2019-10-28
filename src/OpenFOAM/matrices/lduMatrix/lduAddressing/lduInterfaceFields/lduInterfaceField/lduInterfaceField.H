@@ -85,7 +85,7 @@ public:
     // Constructors
 
         //- Construct given coupled patch
-        lduInterfaceField(const lduInterface& patch)
+        explicit lduInterfaceField(const lduInterface& patch)
         :
             interface_(patch),
             updatedMatrix_(false)

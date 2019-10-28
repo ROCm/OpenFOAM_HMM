@@ -36,12 +36,6 @@ defineTypeNameAndDebug(cyclicLduInterfaceField, 0);
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cyclicLduInterfaceField::~cyclicLduInterfaceField()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::cyclicLduInterfaceField::transformCoupleField

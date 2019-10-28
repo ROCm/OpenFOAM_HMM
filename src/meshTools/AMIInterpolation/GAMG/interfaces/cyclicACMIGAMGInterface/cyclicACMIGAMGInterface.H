@@ -82,7 +82,7 @@ public:
     // Constructors
 
         //- Construct from fine level interface,
-        //  local and neighbour restrict addressing
+        //- local and neighbour restrict addressing
         cyclicACMIGAMGInterface
         (
             const label index,
