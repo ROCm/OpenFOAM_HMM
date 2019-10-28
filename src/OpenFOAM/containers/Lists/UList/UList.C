@@ -117,7 +117,10 @@ void Foam::UList<T>::deepCopy(const UList<T>& list)
         #ifdef USEMEMCPY
         if (is_contiguous<T>::value)
         {
-            memcpy(this->v_, list.v_, this->byteSize());
+            std::memcpy
+            (
+                static_cast<void*>(this->v_), list.v_, this->byteSize()
+            );
         }
         else
         #endif

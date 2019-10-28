@@ -67,7 +67,7 @@ static inline uint32_t swapBytes(uint32_t n)
 //  *(uint32_t *) cp = val
 static inline void set_uint32(unsigned char *dst, uint32_t v)
 {
-    memcpy(dst, &v, sizeof(uint32_t));
+    std::memcpy(dst, &v, sizeof(uint32_t));
 }
 //! \endcond
 
@@ -95,7 +95,7 @@ void Foam::SHA1::processBytes(const void *data, size_t len)
 
         unsigned char* bufp = reinterpret_cast<unsigned char*>(buffer_);
 
-        memcpy(&bufp[remaining], data, add);
+        std::memcpy(&bufp[remaining], data, add);
         bufLen_ += add;
 
         if (bufLen_ > 64)
@@ -105,7 +105,7 @@ void Foam::SHA1::processBytes(const void *data, size_t len)
             bufLen_ &= 63;
             // The regions in the following copy operation do not
             // (cannot) overlap
-            memcpy(buffer_, &bufp[(remaining + add) & ~63], bufLen_);
+            std::memcpy(buffer_, &bufp[(remaining + add) & ~63], bufLen_);
         }
 
         data = reinterpret_cast<const unsigned char*>(data) + add;
@@ -115,7 +115,7 @@ void Foam::SHA1::processBytes(const void *data, size_t len)
     // Process available complete blocks
     while (len >= 64)
     {
-        processBlock(memcpy(buffer_, data, 64), 64);
+        processBlock(std::memcpy(buffer_, data, 64), 64);
         data = reinterpret_cast<const unsigned char*>(data) + 64;
         len -= 64;
     }
@@ -126,13 +126,13 @@ void Foam::SHA1::processBytes(const void *data, size_t len)
         unsigned char* bufp = reinterpret_cast<unsigned char*>(buffer_);
         size_t remaining = bufLen_;
 
-        memcpy(&bufp[remaining], data, len);
+        std::memcpy(&bufp[remaining], data, len);
         remaining += len;
         if (remaining >= 64)
         {
             processBlock(buffer_, 64);
             remaining -= 64;
-            memcpy(buffer_, &buffer_[16], remaining);
+            std::memcpy(buffer_, &buffer_[16], remaining);
         }
         bufLen_ = remaining;
     }
@@ -355,7 +355,7 @@ bool Foam::SHA1::finalize()
 
         unsigned char* bufp = reinterpret_cast<unsigned char *>(buffer_);
 
-        memcpy(&bufp[bytes], fillbuf, (size-2) * sizeof(uint32_t) - bytes);
+        std::memcpy(&bufp[bytes], fillbuf, (size-2) * sizeof(uint32_t) - bytes);
 
         // Process remaining bytes
         processBlock(buffer_, size * sizeof(uint32_t));

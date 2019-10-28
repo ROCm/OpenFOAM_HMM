@@ -50,7 +50,7 @@ void Foam::processorLduInterface::send
         (
             commsType,
             neighbProcNo(),
-            reinterpret_cast<const char*>(f.begin()),
+            reinterpret_cast<const char*>(f.cdata()),
             nBytes,
             tag(),
             comm()
@@ -64,20 +64,23 @@ void Foam::processorLduInterface::send
         (
             commsType,
             neighbProcNo(),
-            receiveBuf_.begin(),
+            receiveBuf_.data(),
             nBytes,
             tag(),
             comm()
         );
 
         resizeBuf(sendBuf_, nBytes);
-        memcpy(sendBuf_.begin(), f.begin(), nBytes);
+        std::memcpy
+        (
+            static_cast<void*>(sendBuf_.data()), f.cdata(), nBytes
+        );
 
         OPstream::write
         (
             commsType,
             neighbProcNo(),
-            sendBuf_.begin(),
+            sendBuf_.cdata(),
             nBytes,
             tag(),
             comm()
@@ -109,7 +112,7 @@ void Foam::processorLduInterface::receive
         (
             commsType,
             neighbProcNo(),
-            reinterpret_cast<char*>(f.begin()),
+            reinterpret_cast<char*>(f.data()),
             f.byteSize(),
             tag(),
             comm()
@@ -117,7 +120,10 @@ void Foam::processorLduInterface::receive
     }
     else if (commsType == Pstream::commsTypes::nonBlocking)
     {
-        memcpy(f.begin(), receiveBuf_.begin(), f.byteSize());
+        std::memcpy
+        (
+            static_cast<void*>(f.data()), receiveBuf_.cdata(), f.byteSize()
+        );
     }
     else
     {
@@ -156,10 +162,10 @@ void Foam::processorLduInterface::compressedSend
         label nFloats = nm1 + nlast;
         label nBytes = nFloats*sizeof(float);
 
-        const scalar *sArray = reinterpret_cast<const scalar*>(f.begin());
+        const scalar *sArray = reinterpret_cast<const scalar*>(f.cdata());
         const scalar *slast = &sArray[nm1];
         resizeBuf(sendBuf_, nBytes);
-        float *fArray = reinterpret_cast<float*>(sendBuf_.begin());
+        float *fArray = reinterpret_cast<float*>(sendBuf_.data());
 
         for (label i=0; i<nm1; i++)
         {
@@ -178,7 +184,7 @@ void Foam::processorLduInterface::compressedSend
             (
                 commsType,
                 neighbProcNo(),
-                sendBuf_.begin(),
+                sendBuf_.cdata(),
                 nBytes,
                 tag(),
                 comm()
@@ -192,7 +198,7 @@ void Foam::processorLduInterface::compressedSend
             (
                 commsType,
                 neighbProcNo(),
-                receiveBuf_.begin(),
+                receiveBuf_.data(),
                 nBytes,
                 tag(),
                 comm()
@@ -202,7 +208,7 @@ void Foam::processorLduInterface::compressedSend
             (
                 commsType,
                 neighbProcNo(),
-                sendBuf_.begin(),
+                sendBuf_.cdata(),
                 nBytes,
                 tag(),
                 comm()
@@ -249,7 +255,7 @@ void Foam::processorLduInterface::compressedReceive
             (
                 commsType,
                 neighbProcNo(),
-                receiveBuf_.begin(),
+                receiveBuf_.data(),
                 nBytes,
                 tag(),
                 comm()
@@ -263,9 +269,9 @@ void Foam::processorLduInterface::compressedReceive
         }
 
         const float *fArray =
-            reinterpret_cast<const float*>(receiveBuf_.begin());
+            reinterpret_cast<const float*>(receiveBuf_.cdata());
         f.last() = reinterpret_cast<const Type&>(fArray[nm1]);
-        scalar *sArray = reinterpret_cast<scalar*>(f.begin());
+        scalar *sArray = reinterpret_cast<scalar*>(f.data());
         const scalar *slast = &sArray[nm1];
 
         for (label i=0; i<nm1; i++)

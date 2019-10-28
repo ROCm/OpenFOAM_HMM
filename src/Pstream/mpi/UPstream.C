@@ -573,7 +573,7 @@ void Foam::UPstream::allToAll
                 << " does not equal bytes to receive " << recvSizes[0]
                 << Foam::abort(FatalError);
         }
-        memmove(recvData, &sendData[sendOffsets[0]], recvSizes[0]);
+        std::memmove(recvData, &sendData[sendOffsets[0]], recvSizes[0]);
     }
     else
     {
@@ -639,7 +639,7 @@ void Foam::UPstream::gather
 
     if (!UPstream::parRun())
     {
-        memmove(recvData, sendData, sendSize);
+        std::memmove(recvData, sendData, sendSize);
     }
     else
     {
@@ -702,7 +702,7 @@ void Foam::UPstream::scatter
 
     if (!UPstream::parRun())
     {
-        memmove(recvData, sendData, recvSize);
+        std::memmove(recvData, sendData, recvSize);
     }
     else
     {

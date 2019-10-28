@@ -1427,7 +1427,7 @@ bool Foam::ping
     }
 
     // Fill sockaddr_in structure with dest address and port
-    memset(reinterpret_cast<char *>(&destAddr), '\0', sizeof(destAddr));
+    std::memset(reinterpret_cast<char *>(&destAddr), '\0', sizeof(destAddr));
     destAddr.sin_family = AF_INET;
     destAddr.sin_port = htons(ushort(destPort));
     destAddr.sin_addr.s_addr = addr;
