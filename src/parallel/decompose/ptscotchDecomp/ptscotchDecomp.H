@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -89,10 +89,10 @@ class ptscotchDecomp
         //- Decompose. Handles size 0 arrays
         label decompose
         (
-            const labelUList& adjncy,
-            const labelUList& xadj,
-            const UList<scalar>& cWeights,
-            List<label>& finalDecomp
+            const labelList& adjncy,
+            const labelList& xadj,
+            const List<scalar>& cWeights,
+            labelList& finalDecomp
         ) const;
 
         //- Low level decompose
@@ -102,8 +102,8 @@ class ptscotchDecomp
             const label adjncy[],
             const label xadjSize,
             const label xadj[],
-            const UList<scalar>& cWeights,
-            List<label>& finalDecomp
+            const List<scalar>& cWeights,
+            labelList& finalDecomp
         ) const;
 
 
@@ -181,7 +181,6 @@ public:
             const pointField& cc,
             const scalarField& cWeights
         ) const;
-
 };
 
 

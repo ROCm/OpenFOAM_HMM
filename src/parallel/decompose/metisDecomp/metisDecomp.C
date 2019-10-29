@@ -49,7 +49,7 @@ License
 //);
 //#endif
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
@@ -71,14 +71,14 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 Foam::label Foam::metisDecomp::decomposeSerial
 (
-    const labelUList& adjncy,
-    const labelUList& xadj,
-    const UList<scalar>& cWeights,
-    List<label>& decomp
+    const labelList& adjncy,
+    const labelList& xadj,
+    const List<scalar>& cWeights,
+    labelList& decomp
 ) const
 {
     // Method of decomposition

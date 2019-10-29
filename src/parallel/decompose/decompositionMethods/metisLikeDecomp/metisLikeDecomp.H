@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,18 +51,9 @@ class metisLikeDecomp
 :
     public decompositionMethod
 {
-    // Private Member Functions
-
-        //- No copy construct
-        metisLikeDecomp(const metisLikeDecomp&) = delete;
-
-        //- No copy assignment
-        void operator=(const metisLikeDecomp&) = delete;
-
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Coefficients for all derived methods
         const dictionary& coeffsDict_;
@@ -73,20 +64,27 @@ protected:
         //- Serial and/or collect/distribute for parallel operation
         virtual label decomposeGeneral
         (
-            const labelUList& adjncy,
-            const labelUList& xadj,
-            const UList<scalar>& cellWeights,
-            List<label>& decomp
+            const labelList& adjncy,
+            const labelList& xadj,
+            const List<scalar>& cellWeights,
+            labelList& decomp
         ) const;
 
         //- Decomposition with metis-like parameters
         virtual label decomposeSerial
         (
-            const labelUList& adjncy,
-            const labelUList& xadj,
-            const UList<scalar>& cellWeights,
-            List<label>& decomp
+            const labelList& adjncy,
+            const labelList& xadj,
+            const List<scalar>& cellWeights,
+            labelList& decomp
         ) const = 0;
+
+        //- No copy construct
+        metisLikeDecomp(const metisLikeDecomp&) = delete;
+
+        //- No copy assignment
+        void operator=(const metisLikeDecomp&) = delete;
+
 
 public:
 

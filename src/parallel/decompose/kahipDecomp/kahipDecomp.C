@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,14 +70,14 @@ Foam::kahipDecomp::configNames
 });
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 Foam::label Foam::kahipDecomp::decomposeSerial
 (
-    const labelUList& adjncy,
-    const labelUList& xadj,
-    const UList<scalar>& cWeights,
-    List<label>& decomp
+    const labelList& adjncy,
+    const labelList& xadj,
+    const List<scalar>& cWeights,
+    labelList& decomp
 ) const
 {
     // Default setup
@@ -159,7 +159,7 @@ Foam::label Foam::kahipDecomp::decomposeSerial
         // Verify sizing
 
         int n = 1;
-        for (auto val : labels)
+        for (const auto val : labels)
         {
             n *= val;
             vec.push_back(val);
@@ -220,8 +220,8 @@ Foam::label Foam::kahipDecomp::decomposeSerial
     #if WM_LABEL_SIZE == 32
 
     // Input:
-    int* xadjPtr   = const_cast<UList<int>&>(xadj).begin();
-    int* adjncyPtr = const_cast<UList<int>&>(adjncy).begin();
+    int* xadjPtr   = const_cast<int*>(xadj.begin());
+    int* adjncyPtr = const_cast<int*>(adjncy.begin());
 
     // Output: cell -> processor addressing
     decomp.setSize(numCells);

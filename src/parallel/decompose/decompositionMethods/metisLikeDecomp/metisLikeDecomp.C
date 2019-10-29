@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,10 +31,10 @@ License
 
 Foam::label Foam::metisLikeDecomp::decomposeGeneral
 (
-    const labelUList& adjncy,
-    const labelUList& xadj,
-    const UList<scalar>& cWeights,
-    List<label>& decomp
+    const labelList& adjncy,
+    const labelList& xadj,
+    const List<scalar>& cWeights,
+    labelList& decomp
 ) const
 {
     if (!Pstream::parRun())
@@ -131,7 +131,9 @@ Foam::label Foam::metisLikeDecomp::decomposeGeneral
                 Pstream::commsTypes::scheduled,
                 Pstream::masterNo()
             );
-            toMaster<< adjncy << SubList<label>(xadj, xadj.size()-1)
+            toMaster
+                << adjncy
+                << SubList<label>(xadj, xadj.size()-1)
                 << cWeights;
         }
 

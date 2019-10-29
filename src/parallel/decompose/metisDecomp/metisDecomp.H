@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -75,16 +75,17 @@ class metisDecomp
 :
     public metisLikeDecomp
 {
+protected:
 
-    // Private Member Functions
+    // Protected Member Functions
 
-        //- Call Metis with options from dictionary.
+        //- Decompose non-parallel
         virtual label decomposeSerial
         (
-            const labelUList& adjncy,
-            const labelUList& xadj,
-            const UList<scalar>& cellWeights,
-            List<label>& decomp
+            const labelList& adjncy,
+            const labelList& xadj,
+            const List<scalar>& cellWeights,
+            labelList& decomp
         ) const;
 
 
@@ -93,7 +94,6 @@ class metisDecomp
 
         //- No copy assignment
         void operator=(const metisDecomp&) = delete;
-
 
 
 public:
@@ -125,7 +125,6 @@ public:
         {
             return true;
         }
-
 };
 
 

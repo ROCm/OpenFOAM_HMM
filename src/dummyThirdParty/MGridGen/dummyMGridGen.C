@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -37,13 +37,9 @@ using namespace Foam;
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 static const char* notImplementedMessage =
-"You are trying to use MGridGen but do not have the MGridGen library loaded.\n"
-"This message is from the dummy MGridGen stub library instead.\n"
-"\n"
-"Normally the MGridGen library will be loaded through the LD_LIBRARY_PATH\n"
-"environment variable but you are picking up this dummy library from the\n"
-"$FOAM_LIBBIN/dummy directory. Please install MGridGen and make sure the\n"
-"libMGridGen.so is in your LD_LIBRARY_PATH.";
+"Attempted use <MGridGen> without the MGridGen library loaded.\n"
+"This message is from the dummy MGridGen stub library instead.\n\n"
+"Please install <MGridGen> and ensure libMGridGen.so is in LD_LIBRARY_PATH.\n";
 
 #ifdef __cplusplus
 extern "C"

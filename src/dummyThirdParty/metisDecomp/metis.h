@@ -1,12 +1,13 @@
 #ifndef METIS_H
 #define METIS_H
 
-/* *** DUMMY VERSION of metis.h - this file should not be included if you have metis
- *     installed in the correct position in $WM_THIRD_PARTY_DIR - see
- *     decompositionMethods/metisDecomp/Make/options
+/* *** DUMMY VERSION of metis.h
+ *     This file should not be included if you have metis correctly installed.
+ *     See: etc/config.sh/metis
+ *     See: src/parallel/decompose/metisDecomp/Make/options
  */
 
-#warning "Dummy metis.h - gets included since it cannot find metis installation."
+#warning "Dummy metis.h - could not find METIS installation."
 
 // Integer type: OpenFOAM uses WM_LABEL_SIZE, metis.h uses IDXTYPEWIDTH
 #if WM_LABEL_SIZE == 32

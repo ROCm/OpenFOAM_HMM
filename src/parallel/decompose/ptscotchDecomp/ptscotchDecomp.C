@@ -23,183 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-    From scotch forum:
-
-    By: Francois PELLEGRINI RE: Graph mapping 'strategy' string [ reply ]
-    2008-08-22 10:09 Strategy handling in Scotch is a bit tricky. In order
-    not to be confused, you must have a clear view of how they are built.
-    Here are some rules:
-
-    1- Strategies are made up of "methods" which are combined by means of
-    "operators".
-
-    2- A method is of the form "m{param=value,param=value,...}", where "m"
-    is a single character (this is your first error: "f" is a method name,
-    not a parameter name).
-
-    3- There exist different sort of strategies : bipartitioning strategies,
-    mapping strategies, ordering strategies, which cannot be mixed. For
-    instance, you cannot build a bipartitioning strategy and feed it to a
-    mapping method (this is your second error).
-
-    To use the "mapCompute" routine, you must create a mapping strategy, not
-    a bipartitioning one, and so use stratGraphMap() and not
-    stratGraphBipart(). Your mapping strategy should however be based on the
-    "recursive bipartitioning" method ("b"). For instance, a simple (and
-    hence not very efficient) mapping strategy can be :
-
-    "b{sep=f}"
-
-    which computes mappings with the recursive bipartitioning method "b",
-    this latter using the Fiduccia-Mattheyses method "f" to compute its
-    separators.
-
-    If you want an exact partition (see your previous post), try
-    "b{sep=fx}".
-
-    However, these strategies are not the most efficient, as they do not
-    make use of the multi-level framework.
-
-    To use the multi-level framework, try for instance:
-
-    "b{sep=m{vert=100,low=h,asc=f}x}"
-
-    The current default mapping strategy in Scotch can be seen by using the
-    "-vs" option of program dgpart. It is, to date:
-
-    r
-    {
-        sep=m
-        {
-            asc=b
-            {
-                width=3,
-                bnd=(d{pass=40,dif=1,rem=0,type=b}|)
-                q{strat=f{move=80,pass=-1,bal=0.01,type=b}}
-                x{sbbt=5,bal=0.05},
-                org=q{strat=f{move=80,pass=-1,bal=0.01,type=b}}
-                x{sbbt=5,bal=0.05}
-            },
-            low=q
-            {
-                strat=
-                (
-                    m
-                    {
-                        asc=b
-                        {
-                            bnd=(d{pass=40,type=b}|)
-                            f{move=80,pass=-1,bal=0.05,type=b},
-                            org=f{move=80,pass=-1,bal=0.05,type=b},
-                            width=3
-                        },
-                        low=h{pass=10}
-                        f{move=80,pass=-1,bal=0.05,type=b},
-                        vert=80,
-                        rat=0.8
-                    }
-                   |m
-                    {
-                        asc=b
-                        {
-                            bnd=(d{pass=40,type=b}|)
-                            f{move=80,pass=-1,bal=0.05,type=b},
-                            org=f{move=80,pass=-1,bal=0.05,type=b},
-                            width=3
-                        },
-                        low=h{pass=10}
-                        f{move=80,pass=-1,bal=0.05,type=b},
-                        vert=80,
-                        rat=0.8
-                    }
-                )
-            },
-            seq=q
-            {
-                strat=
-                (
-                    m
-                    {
-                        asc=b
-                        {
-                            bnd=(d{pass=40,type=b}|)
-                            f{move=80,pass=-1,bal=0.05,type=b},
-                            org=f{move=80,pass=-1,bal=0.05,type=b},
-                            width=3
-                        },
-                        low=h{pass=10}
-                        f{move=80,pass=-1,bal=0.05,type=b},
-                        vert=80,
-                        rat=0.8
-                    }
-                   |m
-                    {
-                        asc=b
-                        {
-                            bnd=(d{pass=40,type=b}|)
-                            f{move=80,pass=-1,bal=0.05,type=b},
-                            org=f{move=80,pass=-1,bal=0.05,type=b},
-                            width=3
-                        },
-                        low=h{pass=10}
-                        f{move=80,pass=-1,bal=0.05,type=b},
-                        vert=80,
-                        rat=0.8
-                    }
-                )
-            },
-            pass=5,
-            vert=10000,
-            rat=0.8
-        },
-        seq=r
-        {
-            job=t,
-            bal=0.05,
-            map=t,
-            poli=S,
-            sep=
-            (
-                m
-                {
-                    asc=b
-                    {
-                        bnd=(d{pass=40,type=b}|)
-                        f{move=80,pass=-1,bal=0.05,type=b},
-                        org=f{move=80,pass=-1,bal=0.05,type=b},
-                        width=3
-                    },
-                    low=h{pass=10}
-                    f{move=80,pass=-1,bal=0.05,type=b},
-                    vert=80,
-                    rat=0.8
-                }
-               |m
-                {
-                    asc=b
-                    {
-                        bnd=(d{pass=40,type=b}|)
-                        f{move=80,pass=-1,bal=0.05,type=b},
-                        org=f{move=80,pass=-1,bal=0.05,type=b},
-                        width=3
-                    },
-                    low=h{pass=10}
-                    f{move=80,pass=-1,bal=0.05,type=b},
-                    vert=80,
-                    rat=0.8
-                }
-            )
-        },
-        bal=0.05
-    }
-
-    Note: writeGraph=true : writes out .dgr files for debugging. Run with e.g.
-
-        mpirun -np 4 dgpart 2 'region0_%r.dgr'
-
-    - %r gets replaced by current processor rank
-    - decompose into 2 domains
-
 \*---------------------------------------------------------------------------*/
 
 #include "ptscotchDecomp.H"
@@ -232,8 +55,7 @@ static_assert
     "sizeof(Foam::label) == sizeof(SCOTCH_Num), check your scotch headers"
 );
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
@@ -268,7 +90,7 @@ void Foam::ptscotchDecomp::check(const int retVal, const char* str)
     if (retVal)
     {
         FatalErrorInFunction
-            << "Call to scotch routine " << str << " failed."
+            << "Call to scotch routine " << str << " failed.\n"
             << exit(FatalError);
     }
 }
@@ -277,10 +99,10 @@ void Foam::ptscotchDecomp::check(const int retVal, const char* str)
 ////- Does prevention of 0 cell domains and calls ptscotch.
 //Foam::label Foam::ptscotchDecomp::decomposeZeroDomains
 //(
-//    const labelUList& initadjncy,
-//    const labelUList& initxadj,
-//    const UList<scalar>& initcWeights,
-//    List<label>& finalDecomp
+//    const labelList& initadjncy,
+//    const labelList& initxadj,
+//    const List<scalar>& initcWeights,
+//    labelList& finalDecomp
 //) const
 //{
 //    globalIndex globalCells(initxadj.size()-1);
@@ -465,10 +287,10 @@ void Foam::ptscotchDecomp::check(const int retVal, const char* str)
 
 Foam::label Foam::ptscotchDecomp::decompose
 (
-    const labelUList& adjncy,
-    const labelUList& xadj,
-    const UList<scalar>& cWeights,
-    List<label>& finalDecomp
+    const labelList& adjncy,
+    const labelList& xadj,
+    const List<scalar>& cWeights,
+    labelList& finalDecomp
 ) const
 {
     List<label> dummyAdjncy;
@@ -492,8 +314,8 @@ Foam::label Foam::ptscotchDecomp::decompose
     const label adjncy[],
     const label xadjSize,
     const label xadj[],
-    const UList<scalar>& cWeights,
-    List<label>& finalDecomp
+    const List<scalar>& cWeights,
+    labelList& finalDecomp
 ) const
 {
     if (debug)

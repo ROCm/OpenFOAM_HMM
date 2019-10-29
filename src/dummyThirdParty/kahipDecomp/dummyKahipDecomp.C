@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,17 +25,15 @@ License
 
 #include "kahipDecomp.H"
 #include "addToRunTimeSelectionTable.H"
-#include "Time.H"
 
 static const char* notImplementedMessage =
-"You are trying to use kahip but do not have the kahipDecomp library loaded."
-"\nThis message is from the dummy kahipDecomp stub library instead.\n"
-"\n"
-"Please install kahip and make sure that libkahip.so is in your "
-"LD_LIBRARY_PATH.\n"
+"Attempted to use <kahip> without the kahipDecomp library loaded.\n"
+"This message is from the dummy kahipDecomp stub library instead.\n\n"
+"Please install <kahip> and ensure libkahip.so is in LD_LIBRARY_PATH.\n"
 "The kahipDecomp library can then be built from "
-"src/parallel/decompose/kahipDecomp and dynamically loading or linking"
-" this library will add kahip as a decomposition method.\n";
+"src/parallel/decompose/kahipDecomp.\n"
+"Dynamically loading or linking this library will add "
+"<kahip> as a decomposition method.\n";
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,14 +50,14 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 Foam::label Foam::kahipDecomp::decomposeSerial
 (
-    const labelUList& adjncy,
-    const labelUList& xadj,
-    const UList<scalar>& cellWeights,
-    List<label>& decomp
+    const labelList& adjncy,
+    const labelList& xadj,
+    const List<scalar>& cellWeights,
+    labelList& decomp
 ) const
 {
     FatalErrorInFunction
