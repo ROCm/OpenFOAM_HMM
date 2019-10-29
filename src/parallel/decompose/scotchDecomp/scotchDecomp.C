@@ -127,10 +127,10 @@ Foam::label Foam::scotchDecomp::decomposeSerial
         const label numericflag = 10*hasEdgeWeights+hasVertexWeights;
         str << baseval << ' ' << numericflag << nl;
 
-        for (label celli = 0; celli < xadj.size()-1; ++celli)
+        for (label celli = 1; celli < xadj.size(); ++celli)
         {
-            const label start = xadj[celli];
-            const label end = xadj[celli+1];
+            const label start = xadj[celli-1];
+            const label end = xadj[celli];
 
             str << end-start; // size
 

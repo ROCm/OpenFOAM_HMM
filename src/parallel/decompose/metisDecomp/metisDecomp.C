@@ -190,12 +190,12 @@ Foam::label Foam::metisDecomp::decomposeSerial
     idx_t nProcs = nDomains_;
 
     // Addressing
-    ConstPrecisionAdaptor<idx_t, label, List> xadj_metis(xadj);
-    ConstPrecisionAdaptor<idx_t, label, List> adjncy_metis(adjncy);
+    ConstPrecisionAdaptor<idx_t, label, List> xadj_param(xadj);
+    ConstPrecisionAdaptor<idx_t, label, List> adjncy_param(adjncy);
 
     // Output: cell -> processor addressing
-    PrecisionAdaptor<idx_t, label, List> decomp_metis(decomp);
-    decomp_metis.ref().setSize(numCells);
+    decomp.resize(numCells);
+    PrecisionAdaptor<idx_t, label, List> decomp_param(decomp);
 
     // Output: number of cut edges
     idx_t edgeCut = 0;
@@ -206,8 +206,8 @@ Foam::label Foam::metisDecomp::decomposeSerial
         (
             &numCells,                  // num vertices in graph
             &ncon,                      // num balancing constraints
-            xadj_metis.ref().data(),    // indexing into adjncy
-            adjncy_metis.ref().data(),  // neighbour info
+            xadj_param.constCast().data(),      // indexing into adjncy
+            adjncy_param.constCast().data(),    // neighbour info
             cellWeights.data(),         // vertex wts
             nullptr,                    // vsize: total communication vol
             faceWeights.data(),         // edge wts
@@ -216,7 +216,7 @@ Foam::label Foam::metisDecomp::decomposeSerial
             nullptr,                    // ubvec: processor imbalance (default)
             options.data(),
             &edgeCut,
-            decomp_metis.ref().data()
+            decomp_param.ref().data()
         );
     }
     else
@@ -225,8 +225,8 @@ Foam::label Foam::metisDecomp::decomposeSerial
         (
             &numCells,                  // num vertices in graph
             &ncon,                      // num balancing constraints
-            xadj_metis.ref().data(),    // indexing into adjncy
-            adjncy_metis.ref().data(),  // neighbour info
+            xadj_param.constCast().data(),      // indexing into adjncy
+            adjncy_param.constCast().data(),    // neighbour info
             cellWeights.data(),         // vertex wts
             nullptr,                    // vsize: total communication vol
             faceWeights.data(),         // edge wts
@@ -235,7 +235,7 @@ Foam::label Foam::metisDecomp::decomposeSerial
             nullptr,                    // ubvec: processor imbalance (default)
             options.data(),
             &edgeCut,
-            decomp_metis.ref().data()
+            decomp_param.ref().data()
         );
     }
 
