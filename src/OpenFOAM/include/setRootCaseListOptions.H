@@ -7,19 +7,21 @@
 argList::addBoolOption
 (
     "listSwitches",
-    "List switches declared in libraries but not set in etc/controlDict",
+    "List switches declared in libraries"
+    " (see -listUnsetSwitches option)",
     true // advanced
 );
 argList::addBoolOption
 (
     "listRegisteredSwitches",
-    "List switches registered for run-time modification",
+    "List switches registered for run-time modification"
+    " (see -listUnsetSwitches option)",
     true // advanced
 );
 argList::addBoolOption
 (
     "listUnsetSwitches",
-    "List switches declared in libraries but not set in etc/controlDict",
+    "Modifies switch listing to display values not set in etc/controlDict",
     true // advanced
 );
 

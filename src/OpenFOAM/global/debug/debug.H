@@ -92,9 +92,6 @@ namespace debug
     //- Internal function to lookup a sub-dictionary from controlDict.
     dictionary& switchSet(const char* subDictName, dictionary*& subDictPtr);
 
-    //- List debug switches
-    void listSwitches(const bool unset);
-
 
     // Registered debug switches
 
@@ -129,8 +126,33 @@ namespace debug
         //- Access to registered DimensionedConstants objects
         simpleObjectRegistry& dimensionedConstantObjects();
 
-        //- List registered debug/info/optimisation switches
-        void listRegisteredSwitches(const bool unset);
+
+    // List switches
+
+    //- List debug/info/optimisation switches
+    void listSwitches(const bool unset = false);
+
+    //- List debug switches
+    void listDebugSwitches(const bool unset = false);
+
+    //- List info switches
+    void listInfoSwitches(const bool unset = false);
+
+    //- List optimisation switches
+    void listOptimisationSwitches(const bool unset = false);
+
+
+    //- List registered debug/info/optimisation switches
+    void listRegisteredSwitches(const bool unset = false);
+
+    //- List debug switches
+    void listRegisteredDebugSwitches(const bool unset = false);
+
+    //- List info switches
+    void listRegisteredInfoSwitches(const bool unset = false);
+
+    //- List optimisation switches
+    void listRegisteredOptimisationSwitches(const bool unset = false);
 
 } // End namespace debug
 

@@ -9,13 +9,13 @@
 
     if (args.found("listSwitches"))
     {
-        debug::listSwitches(args.found("includeUnsetSwitches"));
+        debug::listSwitches(args.found("listUnsetSwitches"));
         listOptions = true;
     }
 
     if (args.found("listRegisteredSwitches"))
     {
-        debug::listRegisteredSwitches(args.found("includeUnsetSwitches"));
+        debug::listRegisteredSwitches(args.found("listUnsetSwitches"));
         listOptions = true;
     }
 

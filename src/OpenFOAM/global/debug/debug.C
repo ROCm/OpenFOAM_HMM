@@ -37,6 +37,7 @@ Description
 #include "simpleObjectRegistry.H"
 #include "IOobject.H"
 #include "HashSet.H"
+#include "nullObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -341,6 +342,8 @@ Foam::simpleObjectRegistry& Foam::debug::dimensionedConstantObjects()
 }
 
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
 namespace Foam
 {
 
@@ -356,6 +359,8 @@ static void listSwitches
     const bool unset
 )
 {
+    IOobject::writeDivider(Info);
+
     if (unset)
     {
         fileNameList controlDictFiles = findEtcFiles("controlDict", true);
@@ -367,48 +372,68 @@ static void listSwitches
             controlDict.merge(dictionary(is));
         }
 
-        IOobject::writeDivider(Info);
-
         // Use a HashSet to track switches that have not been set
         wordHashSet hashed;
 
         // DebugSwitches
-        hashed = debugSwitches;
-        hashed.unset(controlDict.subDict("DebugSwitches").toc());
+        if (notNull(debugSwitches))
+        {
+            hashed = debugSwitches;
+            hashed.unset(controlDict.subDict("DebugSwitches").toc());
 
-        Info<< "Unset DebugSwitches"
-            << flatOutput(hashed.sortedToc(), -1) << nl;
-
+            Info<< "Unset DebugSwitches"
+                << flatOutput(hashed.sortedToc(), -1) << nl;
+        }
 
         // InfoSwitches
-        hashed = infoSwitches;
-        hashed.unset(controlDict.subDict("InfoSwitches").toc());
+        if (notNull(infoSwitches))
+        {
+            hashed = infoSwitches;
+            hashed.unset(controlDict.subDict("InfoSwitches").toc());
 
-        Info<< "Unset InfoSwitches"
-            << flatOutput(hashed.sortedToc(), -1) << nl;
-
+            Info<< "Unset InfoSwitches"
+                << flatOutput(hashed.sortedToc(), -1) << nl;
+        }
 
         // OptimisationSwitches
-        hashed = optSwitches;
-        hashed.unset(controlDict.subDict("OptimisationSwitches").toc());
+        if (notNull(optSwitches))
+        {
+            hashed = optSwitches;
+            hashed.unset(controlDict.subDict("OptimisationSwitches").toc());
 
-        Info<< "Unset OptimisationSwitches"
-            << flatOutput(hashed.sortedToc(), -1) << nl;
+            Info<< "Unset OptimisationSwitches"
+                << flatOutput(hashed.sortedToc(), -1) << nl;
+        }
     }
     else
     {
-        IOobject::writeDivider(Info);
-        Info<< "DebugSwitches"
-            << flatOutput(debugSwitches, -1) << nl
-            << "InfoSwitches"
-            << flatOutput(infoSwitches, -1) << nl
-            << "OptimisationSwitches"
-            << flatOutput(optSwitches, -1) << nl;
+        // DebugSwitches
+        if (notNull(debugSwitches))
+        {
+            Info<< "DebugSwitches"
+                << flatOutput(debugSwitches, -1) << nl;
+        }
+
+        // InfoSwitches
+        if (notNull(infoSwitches))
+        {
+            Info<< "InfoSwitches"
+                << flatOutput(infoSwitches, -1) << nl;
+        }
+
+        // OptimisationSwitches
+        if (notNull(optSwitches))
+        {
+            Info<< "OptimisationSwitches"
+                << flatOutput(optSwitches, -1) << nl;
+        }
     }
 }
 
 } // End namespace Foam
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void Foam::debug::listSwitches(const bool unset)
 {
@@ -422,12 +447,84 @@ void Foam::debug::listSwitches(const bool unset)
 }
 
 
+void Foam::debug::listDebugSwitches(const bool unset)
+{
+    listSwitches
+    (
+        debug::debugSwitches().sortedToc(),
+        wordList::null(),
+        wordList::null(),
+        unset
+    );
+}
+
+
+void Foam::debug::listInfoSwitches(const bool unset)
+{
+    listSwitches
+    (
+        wordList::null(),
+        debug::infoObjects().sortedToc(),
+        wordList::null(),
+        unset
+    );
+}
+
+
+void Foam::debug::listOptimisationSwitches(const bool unset)
+{
+    listSwitches
+    (
+        wordList::null(),
+        wordList::null(),
+        debug::optimisationSwitches().sortedToc(),
+        unset
+    );
+}
+
+
 void Foam::debug::listRegisteredSwitches(const bool unset)
 {
     listSwitches
     (
         debug::debugObjects().sortedToc(),
         debug::infoObjects().sortedToc(),
+        debug::optimisationObjects().sortedToc(),
+        unset
+    );
+}
+
+
+void Foam::debug::listRegisteredDebugSwitches(const bool unset)
+{
+    listSwitches
+    (
+        debug::debugObjects().sortedToc(),
+        wordList::null(),
+        wordList::null(),
+        unset
+    );
+}
+
+
+void Foam::debug::listRegisteredInfoSwitches(const bool unset)
+{
+    listSwitches
+    (
+        wordList::null(),
+        debug::infoObjects().sortedToc(),
+        wordList::null(),
+        unset
+    );
+}
+
+
+void Foam::debug::listRegisteredOptimisationSwitches(const bool unset)
+{
+    listSwitches
+    (
+        wordList::null(),
+        wordList::null(),
         debug::optimisationObjects().sortedToc(),
         unset
     );
