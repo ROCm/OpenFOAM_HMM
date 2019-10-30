@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -141,10 +141,20 @@ inline const Foam::word& Foam::Enum<EnumType>::operator[]
 
 
 template<class EnumType>
+inline const Foam::word& Foam::Enum<EnumType>::operator()
+(
+    const EnumType e
+) const
+{
+    return get(e);
+}
+
+
+template<class EnumType>
 inline EnumType Foam::Enum<EnumType>::operator()
 (
     const word& enumName,
-    const EnumType defaultValue
+    const EnumType deflt
 ) const
 {
     const label idx = find(enumName);
@@ -154,7 +164,7 @@ inline EnumType Foam::Enum<EnumType>::operator()
         return EnumType(vals_[idx]);
     }
 
-    return defaultValue;
+    return deflt;
 }
 
 
