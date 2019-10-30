@@ -73,7 +73,7 @@ Foam::porosityModels::powerLawLopesdaCostaZone::powerLawLopesdaCostaZone
 
     // Functional form of the porosity surface area per unit volume as a
     // function of the normalized vertical position
-    autoPtr<Function1<scalar >> SigmaFunc
+    autoPtr<Function1<scalar>> SigmaFunc
     (
         Function1<scalar>::New("Sigma", dict)
     );

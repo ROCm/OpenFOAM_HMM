@@ -107,7 +107,7 @@ public:
         //- Construct and return a clone
         virtual tmp<fvPatchScalarField> clone() const
         {
-            return tmp<fvPatchScalarField >
+            return tmp<fvPatchScalarField>
             (
                 new interfaceCompressionFvPatchScalarField(*this)
             );

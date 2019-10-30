@@ -102,9 +102,9 @@ public:
         );
 
         //- Construct and return a clone
-        virtual tmp<fvPatch${FieldType} > clone() const
+        virtual tmp<fvPatch${FieldType}> clone() const
         {
-            return tmp<fvPatch${FieldType} >
+            return tmp<fvPatch${FieldType}>
             (
                 new ${typeName}MixedValueFvPatch${FieldType}(*this)
             );
@@ -118,12 +118,12 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatch${FieldType} > clone
+        virtual tmp<fvPatch${FieldType}> clone
         (
             const DimensionedField<${TemplateType}, volMesh>& iF
         ) const
         {
-            return tmp<fvPatch${FieldType} >
+            return tmp<fvPatch${FieldType}>
             (
                 new ${typeName}MixedValueFvPatch${FieldType}(*this, iF)
             );

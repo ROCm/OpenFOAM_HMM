@@ -157,7 +157,7 @@ public:
 // * * * * * * * * * * * Template Specialisations  * * * * * * * * * * * * * //
 
 template<>
-tmp<scalarField > wedgeFvPatchField<scalar>::snGrad() const;
+tmp<scalarField> wedgeFvPatchField<scalar>::snGrad() const;
 
 template<>
 void wedgeFvPatchField<scalar>::evaluate
