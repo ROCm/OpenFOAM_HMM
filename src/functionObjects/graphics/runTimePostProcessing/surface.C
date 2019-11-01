@@ -115,11 +115,15 @@ void Foam::functionObjects::runTimePostPro::surface::setRepresentation
         case rtGlyph:
         case rtSurface:
         {
+            actor->GetProperty()->SetBackfaceCulling(backFaceCulling_);
+            actor->GetProperty()->SetFrontfaceCulling(frontFaceCulling_);
             actor->GetProperty()->SetRepresentationToSurface();
             break;
         }
         case rtSurfaceWithEdges:
         {
+            actor->GetProperty()->SetBackfaceCulling(backFaceCulling_);
+            actor->GetProperty()->SetFrontfaceCulling(frontFaceCulling_);
             actor->GetProperty()->SetRepresentationToSurface();
             actor->GetProperty()->EdgeVisibilityOn();
             break;
@@ -211,7 +215,9 @@ Foam::functionObjects::runTimePostPro::surface::surface
     edgeColour_(nullptr),
     surfaceActor_(),
     edgeActor_(),
-    maxGlyphLength_(0)
+    maxGlyphLength_(0),
+    backFaceCulling_(false),
+    frontFaceCulling_(true)
 {
     surfaceActor_ = vtkSmartPointer<vtkActor>::New();
     edgeActor_ = vtkSmartPointer<vtkActor>::New();
@@ -238,6 +244,9 @@ Foam::functionObjects::runTimePostPro::surface::surface
     {
         dict.readEntry("maxGlyphLength", maxGlyphLength_);
     }
+
+    dict.readIfPresent("backFaceCulling", backFaceCulling_);
+    dict.readIfPresent("frontFaceCulling", frontFaceCulling_);
 }
 
 

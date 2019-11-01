@@ -38,6 +38,8 @@ Description
         edgeColour    | Override edge colour                | no  |
         featureEdges  | Display surface feature edges       | no  | false
         maxGlyphLength | Limit for glyph representation     | yes | 0
+        backFaceCulling | Cull back face                    | no  | false
+        frontFaceCulling | Cull front face                  | no  | true
     \endtable
 
 SourceFiles
@@ -182,6 +184,12 @@ protected:
 
         //- Max glyph length for representation type rtGlyph
         scalar maxGlyphLength_;
+
+        //- Back face culling option; default = off
+        bool backFaceCulling_;
+
+        //- Front face culling option; default = on
+        bool frontFaceCulling_;
 
 
     // Protected Member Functions
