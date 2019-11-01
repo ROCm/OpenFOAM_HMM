@@ -37,7 +37,7 @@ License
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  VERSION                               |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
@@ -85,7 +85,7 @@ Foam::Ostream& Foam::IOobject::writeBanner(Ostream& os, bool noHint)
         "|  \\\\    /   O peration     |"
         " Version:  " << paddedVersion << "|\n"
         "|   \\\\  /    A nd           |"
-        " Web:      www.OpenFOAM.com                      |\n"
+        " Website:  www.openfoam.com                      |\n"
         "|    \\\\/     M anipulation  |"
         "                                                 |\n"
         "\\*-----------------------------------------"

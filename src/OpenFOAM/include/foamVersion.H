@@ -106,9 +106,9 @@ namespace Foam
         //
         //  Eg,
         //  \code
-        //      Using: OpenFOAM-<MAJOR> (see www.OpenFOAM.com)
-        //      Build: <BUILD>
-        //      Arch:  "<ARCH_INFO>"
+        //      Using: OpenFOAM-<VER> (API) - visit www.openfoam.com
+        //      Build: <BUILD> (patch=...)
+        //      Arch:  <ARCH_INFO>
         //  \endcode
         //
         //  \param full includes Arch information

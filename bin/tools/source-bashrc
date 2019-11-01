@@ -66,8 +66,8 @@ then
     then
         info="$(foamEtcFile -show-patch 2>/dev/null)"
 
-        # echo "Using: OpenFOAM-$WM_PROJECT_VERSION ($FOAM_API${info:+ patch=$info}) - see www.OpenFOAM.com" 1>&2
-        echo "Using: OpenFOAM-$WM_PROJECT_VERSION${info:+ (patch=$info)} - see www.OpenFOAM.com" 1>&2
+        # echo "Using: OpenFOAM-$WM_PROJECT_VERSION ($FOAM_API${info:+ patch=$info}) - visit www.openfoam.com" 1>&2
+        echo "Using: OpenFOAM-$WM_PROJECT_VERSION${info:+ (patch=$info)} - visit www.openfoam.com" 1>&2
         echo "Arch:  $WM_OPTIONS (mpi=$FOAM_MPI)" 1>&2
 
         ## echo "$WM_PROJECT_DIR" 1>&2
