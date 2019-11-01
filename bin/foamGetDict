@@ -45,7 +45,7 @@ Usage: ${0##*/} [OPTIONS] <file>
 options:
   -case <dir>       Alternative case directory, default is the cwd
   -ext  <ext>       File extension
-  -cfg              Same as '-e cfg' for '.cfg' files
+  -cfg              Same as '-ext cfg' for '.cfg' files
   -f | -force       Force overwrite of existing files
   -no-ext           Files without extension
   -target <dir>     Target directory (default: system, or auto-detected)
