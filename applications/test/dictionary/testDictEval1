@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  Any                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -43,7 +43,9 @@ cosh(0.1)   #eval{cosh(0.1)};
 
 sqrt100     #eval{((sqrt(100)))};
 
-random      #eval{ floor(1000*rand()) };
+float       12.345;
+ceil        #eval{ ceil($float) };
+floor       #eval{ floor($float) };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

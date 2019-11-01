@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,13 +34,11 @@ Description
 #include "evalStringToScalarLemonParser.h"
 #include "evalStringToScalarParser.H"
 #include "error.H"
+#include "macros.H"
 
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 
-#ifndef FULLDEBUG
-#define NDEBUG
-#endif
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -62,7 +62,7 @@ int Foam::parsing::evalStringToScalar::scanner::debug = 0;
 #define TOKEN_OF(T)         TOK_##T
 #define EMIT_TOKEN(T)                                                         \
     driver.parsePosition() = (ts-buf);                                        \
-    DebugInfo<< "TOKEN_" #T << " at " << driver.parsePosition() << nl;        \
+    DebugInfo<< STRINGIFY(T) << ": " << driver.parsePosition() << nl;         \
     parser_->parse(TOKEN_OF(T), 0);                                           \
     driver.parsePosition() = (p-buf);
 
@@ -86,64 +86,75 @@ int Foam::parsing::evalStringToScalar::scanner::debug = 0;
         }
         else
         {
-            // Catch range errors
+            // Range error
             driver.reportFatal("Error parsing number");
         }
 
         driver.parsePosition() = (p-buf);
     }
 
+    action emit_ident {
+        driver.parsePosition() = (ts-buf);
+        const word ident = word::validate(ts, te);
+
+        driver.reportFatal("Unknown function/type: " + ident);
+        driver.parsePosition() = (p-buf);
+    }
+
     decimal = ((digit* '.' digit+) | (digit+ '.'?)) ;
     number  = (digit+ | decimal) ([Ee][\-+]? digit+)? ;
-    lfunc   = space* '(';           # Require functions to have '('
+    ident   = ((alpha|'_') . ((alnum|'_')**)) ;
 
-    operators = (
-        '('  @{ EMIT_TOKEN(LPAREN); }
-      | ')'  @{ EMIT_TOKEN(RPAREN); }
-      | '+'  @{ EMIT_TOKEN(PLUS); }
-      | '-'  @{ EMIT_TOKEN(MINUS); }
-      | '*'  @{ EMIT_TOKEN(TIMES); }
-      | '/'  @{ EMIT_TOKEN(DIVIDE); }
-      | ','  @{ EMIT_TOKEN(COMMA); }
-    );
 
-    functions = (
-        'pi'         lfunc  @{ fhold; EMIT_TOKEN(PI); }
-      | 'degToRad'   lfunc  @{ fhold; EMIT_TOKEN(DEG_TO_RAD); }
-      | 'radToDeg'   lfunc  @{ fhold; EMIT_TOKEN(RAD_TO_DEG); }
-      | 'exp'        lfunc  @{ fhold; EMIT_TOKEN(EXP); }
-      | 'log'        lfunc  @{ fhold; EMIT_TOKEN(LOG); }
-      | 'log10'      lfunc  @{ fhold; EMIT_TOKEN(LOG10); }
-      | 'pow'        lfunc  @{ fhold; EMIT_TOKEN(POW); }
-      | 'sqr'        lfunc  @{ fhold; EMIT_TOKEN(SQR); }
-      | 'sqrt'       lfunc  @{ fhold; EMIT_TOKEN(SQRT); }
-      | 'cbrt'       lfunc  @{ fhold; EMIT_TOKEN(CBRT); }
-      | 'sin'        lfunc  @{ fhold; EMIT_TOKEN(SIN); }
-      | 'cos'        lfunc  @{ fhold; EMIT_TOKEN(COS); }
-      | 'tan'        lfunc  @{ fhold; EMIT_TOKEN(TAN); }
-      | 'asin'       lfunc  @{ fhold; EMIT_TOKEN(ASIN); }
-      | 'acos'       lfunc  @{ fhold; EMIT_TOKEN(ACOS); }
-      | 'atan'       lfunc  @{ fhold; EMIT_TOKEN(ATAN); }
-      | 'atan2'      lfunc  @{ fhold; EMIT_TOKEN(ATAN2); }
-      | 'hypot'      lfunc  @{ fhold; EMIT_TOKEN(HYPOT); }
-      | 'sinh'       lfunc  @{ fhold; EMIT_TOKEN(SINH); }
-      | 'cosh'       lfunc  @{ fhold; EMIT_TOKEN(COSH); }
-      | 'tanh'       lfunc  @{ fhold; EMIT_TOKEN(TANH); }
-      | 'min'        lfunc  @{ fhold; EMIT_TOKEN(MIN); }
-      | 'max'        lfunc  @{ fhold; EMIT_TOKEN(MAX); }
-      | 'mag'        lfunc  @{ fhold; EMIT_TOKEN(MAG); }
-      | 'magSqr'     lfunc  @{ fhold; EMIT_TOKEN(MAGSQR); }
-      | 'floor'      lfunc  @{ fhold; EMIT_TOKEN(FLOOR); }
-      | 'ceil'       lfunc  @{ fhold; EMIT_TOKEN(CEIL); }
-      | 'round'      lfunc  @{ fhold; EMIT_TOKEN(ROUND); }
-      | 'rand'       lfunc  @{ fhold; EMIT_TOKEN(RAND); }
-    );
-
+    ## The scanner
     main := |*
         space*;
+
         number => emit_number;
-        operators;
-        functions;
+
+    ## operators
+    '('  => { EMIT_TOKEN(LPAREN); };
+    ')'  => { EMIT_TOKEN(RPAREN); };
+    '+'  => { EMIT_TOKEN(PLUS); };
+    '-'  => { EMIT_TOKEN(MINUS); };
+    '*'  => { EMIT_TOKEN(TIMES); };
+    '/'  => { EMIT_TOKEN(DIVIDE); };
+    ','  => { EMIT_TOKEN(COMMA); };
+
+    ## Regular functions
+    'pi'        => { EMIT_TOKEN(PI); };
+    'degToRad'  => { EMIT_TOKEN(DEG_TO_RAD); };
+    'radToDeg'  => { EMIT_TOKEN(RAD_TO_DEG); };
+    'exp'       => { EMIT_TOKEN(EXP); };
+    'log'       => { EMIT_TOKEN(LOG); };
+    'log10'     => { EMIT_TOKEN(LOG10); };
+    'pow'       => { EMIT_TOKEN(POW); };
+    'sqr'       => { EMIT_TOKEN(SQR); };
+    'sqrt'      => { EMIT_TOKEN(SQRT); };
+    'cbrt'      => { EMIT_TOKEN(CBRT); };
+    'sin'       => { EMIT_TOKEN(SIN); };
+    'cos'       => { EMIT_TOKEN(COS); };
+    'tan'       => { EMIT_TOKEN(TAN); };
+    'asin'      => { EMIT_TOKEN(ASIN); };
+    'acos'      => { EMIT_TOKEN(ACOS); };
+    'atan'      => { EMIT_TOKEN(ATAN); };
+    'atan2'     => { EMIT_TOKEN(ATAN2); };
+    'hypot'     => { EMIT_TOKEN(HYPOT); };
+    'sinh'      => { EMIT_TOKEN(SINH); };
+    'cosh'      => { EMIT_TOKEN(COSH); };
+    'tanh'      => { EMIT_TOKEN(TANH); };
+    'min'       => { EMIT_TOKEN(MIN); };
+    'max'       => { EMIT_TOKEN(MAX); };
+    'mag'       => { EMIT_TOKEN(MAG); };
+    'magSqr'    => { EMIT_TOKEN(MAGSQR); };
+    'floor'     => { EMIT_TOKEN(FLOOR); };
+    'ceil'      => { EMIT_TOKEN(CEIL); };
+    'round'     => { EMIT_TOKEN(ROUND); };
+    'rand'      => { fhold; EMIT_TOKEN(RAND); };
+
+    ## Catch-all for identifiers/errors
+    ident       => emit_ident;
+
         space*;
     *|;
 }%%

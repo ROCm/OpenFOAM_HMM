@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,6 +56,7 @@ namespace stringOps
     //  - misc: floor, ceil, round, rand, rand(seed)
     //
     //  \note The rand() function returns a uniform scalar on [0-1] interval
+    //  and uses a constant seed
     scalar toScalar
     (
         const std::string& s,

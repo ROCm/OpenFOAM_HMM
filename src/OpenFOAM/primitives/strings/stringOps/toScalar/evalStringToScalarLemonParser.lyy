@@ -3,8 +3,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,71 +53,42 @@ Description
 
 %token_prefix TOK_
 
+// Terminals
 %token_type     {Foam::scalar}
+// Non-terminals
 %type exp       {Foam::scalar}
 
 %left PLUS MINUS.
 %left TIMES DIVIDE.
 %left NEGATE.
 
+%start_symbol evaluate
 
 evaluate ::= exp(a).
 {
     driver->setValue(a);
 }
 
-exp(lhs) ::= NUMBER(a).
-{
-    lhs = a;
-}
+exp(lhs) ::= NUMBER(a).             { lhs = a; }
+exp(lhs) ::= MINUS exp(a). [NEGATE] { lhs = -a; }
 
-exp(lhs) ::= MINUS exp(a).  // Could add [NEGATE] precedence
-{
-    lhs = -a;
-}
+// Operations
 
-exp(lhs) ::= exp(a) PLUS exp(b).
-{
-    lhs = a + b;
-}
+exp(lhs) ::= exp(a) PLUS exp(b).    { lhs = a + b; }
+exp(lhs) ::= exp(a) MINUS exp(b).   { lhs = a - b; }
+exp(lhs) ::= exp(a) TIMES exp(b).   { lhs = a * b; }
+exp(lhs) ::= exp(a) DIVIDE exp(b).  { lhs = a / b; }
+exp(lhs) ::= LPAREN exp(a) RPAREN.  { lhs = a; }
 
-exp(lhs) ::= exp(a) MINUS exp(b).
-{
-    lhs = a - b;
-}
 
-exp(lhs) ::= exp(a) TIMES exp(b).
-{
-    lhs = a * b;
-}
+// Constants
 
-exp(lhs) ::= exp(a) DIVIDE exp(b).
-{
-    lhs = a / b;
-}
-
-exp(lhs) ::= LPAREN exp(a) RPAREN.
-{
-    lhs = a;
-}
+exp(lhs) ::= PI LPAREN RPAREN.  { lhs = Foam::constant::mathematical::pi; }
+exp(lhs) ::= DEG_TO_RAD LPAREN RPAREN.  { lhs = Foam::degToRad(); }
+exp(lhs) ::= RAD_TO_DEG LPAREN RPAREN.  { lhs = Foam::radToDeg(); }
 
 
 // Functions
-
-exp(lhs) ::= PI LPAREN RPAREN.
-{
-    lhs = Foam::constant::mathematical::pi;
-}
-
-exp(lhs) ::= DEG_TO_RAD LPAREN RPAREN.
-{
-    lhs = Foam::degToRad();
-}
-
-exp(lhs) ::= RAD_TO_DEG LPAREN RPAREN.
-{
-    lhs = Foam::radToDeg();
-}
 
 exp(lhs) ::= DEG_TO_RAD LPAREN exp(a) RPAREN.
 {
@@ -294,6 +267,27 @@ void Foam::parsing::evalStringToScalar::parser::parse
 )
 {
     Parse(lemon_, tokenId, val);
+}
+
+
+Foam::word Foam::parsing::evalStringToScalar::parser::nameOfToken
+(
+    int tokenId
+) const
+{
+    #ifndef NDEBUG
+    if
+    (
+        tokenId > 0
+     && unsigned(tokenId) < (sizeof(yyTokenName) / sizeof(char*))
+    )
+    {
+        return yyTokenName[tokenId];
+    }
+    return "<invalid>";
+    #else
+    return word();
+    #endif
 }
 
 
