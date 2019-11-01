@@ -44,7 +44,7 @@ boundaryField
 
     bump
     {
-        type            fixedValue; 
+        type            nutLowReWallFunction;
         value           uniform 0;
     }
 

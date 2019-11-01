@@ -1,9 +1,46 @@
 #!/bin/sh
 cd ${0%/*} || exit 1                        # Run from this directory
 . $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/CleanFunctions  # Tutorial clean functions
 
 runApplication blockMesh
-runApplication $(getApplication)
 
+# Turbulence closure models
+models="
+kOmegaSST
+SpalartAllmaras
+"
+
+for model in $models
+do
+    echo "Processing model: $model"
+
+    \cp constant/turbulenceProperties.template constant/turbulenceProperties
+    runApplication -s "$model" foamDictionary -entry RAS.RASModel \
+        -set "$model" constant/turbulenceProperties
+
+    runApplication $(getApplication)
+
+    timeDir=$(foamListTimes -latestTime)
+
+    # Create datasets for benchmark comparisons
+    echo "# ccx tau_xx tau_yy tau_zz cp" > profiles.dat
+    foamDictionary -entry boundaryField.bump.value -value $timeDir/Cx | \
+        sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' > Cx.$$
+    foamDictionary -entry boundaryField.bump.value -value $timeDir/wallShearStress | \
+        sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' > tau.$$
+    foamDictionary -entry boundaryField.bump.value -value $timeDir/Cp | \
+        sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' > cp.$$
+    \paste -d ' ' Cx.$$ tau.$$ cp.$$ >> profiles.dat
+    \rm -f Cx.$$ tau.$$ cp.$$
+
+    # Store model results
+    modelDir="$model"
+    \rm -rf "$modelDir"
+    \mkdir "$modelDir"
+    \mv log* profiles.dat "$timeDir" postProcessing "$modelDir"
+
+    cleanTimeDirectories
+done
 
 #------------------------------------------------------------------------------
