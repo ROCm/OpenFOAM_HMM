@@ -25,6 +25,7 @@ boundaryField
     #includeEtc "caseDicts/setConstraintTypes"
 
     #include "include/fixedInlet"
+    #include "include/environ"
 
     outlet
     {
@@ -44,8 +45,6 @@ boundaryField
         type            epsilonWallFunction;
         value           $internalField;
     }
-
-    #include "include/environ"
 }
 
 // ************************************************************************* //

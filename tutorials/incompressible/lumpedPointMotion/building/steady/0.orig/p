@@ -24,6 +24,8 @@ boundaryField
 {
     #includeEtc "caseDicts/setConstraintTypes"
 
+    #include "include/environ"
+
     inlet
     {
         type            zeroGradient;
@@ -44,8 +46,6 @@ boundaryField
     {
         type            zeroGradient;
     }
-
-    #include "include/environ"
 }
 
 // ************************************************************************* //

@@ -25,6 +25,7 @@ boundaryField
     #includeEtc "caseDicts/setConstraintTypes"
 
     #include "include/fixedInlet"
+    #include "include/environ"
 
     outlet
     {
@@ -33,7 +34,7 @@ boundaryField
         value           $internalField;
     }
 
-    // the ground
+    // Ground
     z_
     {
         type            noSlip;
@@ -43,8 +44,6 @@ boundaryField
     {
         type            noSlip;
     }
-
-    #include "include/environ"
 }
 
 // ************************************************************************* //

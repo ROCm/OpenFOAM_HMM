@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  v1906                                 |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -61,7 +61,7 @@ boundary
     }
     y_ // -ve Y
     {
-        type wall;
+        type patch; // (slip)
         faces
         (
             ( 0 1 5 4)
@@ -69,7 +69,7 @@ boundary
     }
     _y // +ve Y
     {
-        type wall;
+        type patch; // (slip)
         faces
         (
             ( 3 7 6 2)
@@ -85,7 +85,7 @@ boundary
     }
     _z // +ve Z = sky
     {
-        type wall;
+        type patch; // (slip)
         faces
         (
             ( 4 5 6 7)

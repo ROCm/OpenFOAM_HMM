@@ -57,7 +57,7 @@ boundaryField
         uniformValue    (0 0 0);
     }
 
-    // the ground
+    // Ground
     z_
     {
         type            slip;

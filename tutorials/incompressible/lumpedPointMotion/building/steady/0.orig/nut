@@ -22,22 +22,30 @@ boundaryField
 {
     #includeEtc "caseDicts/setConstraintTypes"
 
+    #include "include/environ"
+
+    inlet
+    {
+        type            calculated;
+        value           $internalField;
+    }
+
+    outlet
+    {
+        type            calculated;
+        value           $internalField;
+    }
+
     z_
     {
         type            nutkWallFunction;
-        value           uniform 0;
+        value           $internalField;
     }
 
     "(?i).*building.*"
     {
         type            nutkWallFunction;
-        value           uniform 0;
-    }
-
-    ".*"
-    {
-        type            nutkWallFunction;
-        value           uniform 0;
+        value           $internalField;
     }
 }
 
