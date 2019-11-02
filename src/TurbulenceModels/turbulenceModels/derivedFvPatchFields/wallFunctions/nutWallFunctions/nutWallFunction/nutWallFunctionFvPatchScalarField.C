@@ -188,7 +188,8 @@ Foam::nutWallFunctionFvPatchScalarField::nutw
     return
         refCast<const nutWallFunctionFvPatchScalarField>
         (
-            turbModel.nut()().boundaryField()[patchi]
+            turbModel.nut()().boundaryField()[patchi],
+            patchi
         );
 }
 

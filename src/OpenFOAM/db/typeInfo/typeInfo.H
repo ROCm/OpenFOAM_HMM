@@ -148,6 +148,30 @@ inline To& refCast(From& r)
 //- Reference type cast template function.
 //  As per dynamicCast, but handles type names for the error messages
 //  via the virtual type() method.
+//  Can use index to convey the context.
+template<class To, class From>
+inline To& refCast(From& r, const label index)
+{
+    try
+    {
+        return dynamic_cast<To&>(r);
+    }
+    catch (const std::bad_cast&)
+    {
+        FatalErrorInFunction
+            << "Attempt to cast type " << r.type()
+            << " to type " << To::typeName
+            << " at index " << index
+            << abort(FatalError);
+
+        return dynamic_cast<To&>(r);
+    }
+}
+
+
+//- Reference type cast template function.
+//  As per dynamicCast, but handles type names for the error messages
+//  via the virtual type() method.
 template<class To, class From>
 inline To& refCast(From& r, const dictionary& d)
 {
