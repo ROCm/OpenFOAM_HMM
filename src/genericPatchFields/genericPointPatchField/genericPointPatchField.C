@@ -480,8 +480,9 @@ void Foam::genericPointPatchField<Type>::write(Ostream& os) const
     {
         const keyType& key = dEntry.keyword();
 
-        if (key == "type" || key == "value")
+        if (key == "type")
         {
+            // NB: "type" written first, no special treatment for "value"
             continue;
         }
         else if

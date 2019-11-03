@@ -699,6 +699,7 @@ void Foam::genericFvsPatchField<Type>::write(Ostream& os) const
 
         if (key == "type" || key == "value")
         {
+            // NB: "type" written first, "value" written last
             continue;
         }
         else if
