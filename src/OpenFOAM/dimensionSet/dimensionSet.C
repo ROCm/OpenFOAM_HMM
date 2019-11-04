@@ -137,6 +137,12 @@ Foam::FixedList<Foam::scalar,7>& Foam::dimensionSet::values()
 }
 
 
+void Foam::dimensionSet::clear()
+{
+    exponents_ = Zero;
+}
+
+
 void Foam::dimensionSet::reset(const dimensionSet& ds)
 {
     exponents_ = ds.exponents_;

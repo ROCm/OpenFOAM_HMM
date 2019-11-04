@@ -217,6 +217,9 @@ public:
         //- Return non-const access to the exponents as a list
         FixedList<scalar,7>& values();
 
+        //- Reset exponents to be dimensionless
+        void clear();
+
         //- Copy assign the exponents from the dimensionSet
         void reset(const dimensionSet& ds);
 
