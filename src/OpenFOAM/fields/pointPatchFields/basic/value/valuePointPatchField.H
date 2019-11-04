@@ -54,11 +54,6 @@ class valuePointPatchField
     public pointPatchField<Type>,
     public Field<Type>
 {
-    // Private Member Functions
-
-        void checkFieldSize() const;
-
-
 public:
 
     //- Runtime type information

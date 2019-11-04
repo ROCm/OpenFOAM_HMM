@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,55 +32,54 @@ License
 #include "demandDrivenData.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(facePointPatch, 0);
+    defineRunTimeSelectionTable(facePointPatch, polyPatch);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+    addToRunTimeSelectionTable
+    (
+        facePointPatch,
+        facePointPatch,
+        polyPatch
+    );
 
-defineTypeNameAndDebug(facePointPatch, 0);
-defineRunTimeSelectionTable(facePointPatch, polyPatch);
-
-addToRunTimeSelectionTable
-(
-    facePointPatch,
-    facePointPatch,
-    polyPatch
-);
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-void facePointPatch::initGeometry(PstreamBuffers&)
+void Foam::facePointPatch::initGeometry(PstreamBuffers&)
 {}
 
 
-void facePointPatch::calcGeometry(PstreamBuffers&)
+void Foam::facePointPatch::calcGeometry(PstreamBuffers&)
 {}
 
 
-void facePointPatch::initMovePoints(PstreamBuffers&, const pointField&)
+void Foam::facePointPatch::initMovePoints(PstreamBuffers&, const pointField&)
 {}
 
 
-void facePointPatch::movePoints(PstreamBuffers&, const pointField&)
+void Foam::facePointPatch::movePoints(PstreamBuffers&, const pointField&)
 {}
 
 
-void facePointPatch::initUpdateMesh(PstreamBuffers& pBufs)
+void Foam::facePointPatch::initUpdateMesh(PstreamBuffers& pBufs)
 {
     facePointPatch::initGeometry(pBufs);
 }
 
 
-void facePointPatch::updateMesh(PstreamBuffers&)
+void Foam::facePointPatch::updateMesh(PstreamBuffers&)
 {}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-facePointPatch::facePointPatch
+Foam::facePointPatch::facePointPatch
 (
     const polyPatch& p,
     const pointBoundaryMesh& bm
@@ -89,9 +89,5 @@ facePointPatch::facePointPatch
     polyPatch_(p)
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

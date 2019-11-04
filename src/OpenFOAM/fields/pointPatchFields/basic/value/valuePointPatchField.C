@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,22 +28,6 @@ License
 
 #include "valuePointPatchField.H"
 #include "pointPatchFieldMapper.H"
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-template<class Type>
-void Foam::valuePointPatchField<Type>::checkFieldSize() const
-{
-    if (this->size() != this->patch().size())
-    {
-        FatalErrorInFunction
-            << "field does not correspond to patch. " << endl
-            << "Field size: " << size() << " patch size: "
-            << this->patch().size()
-            << abort(FatalError);
-    }
-}
-
 
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * * //
 
@@ -84,7 +69,7 @@ Foam::valuePointPatchField<Type>::valuePointPatchField
     else
     {
         FatalIOErrorInFunction(dict)
-            << "Essential entry 'value' missing"
+            << "Essential entry 'value' missing on patch " << p.name()
             << exit(FatalIOError);
     }
 }

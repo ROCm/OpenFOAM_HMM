@@ -129,7 +129,7 @@ Foam::fvPatchField<Type>::fvPatchField
         else
         {
             FatalIOErrorInFunction(dict)
-                << "Essential entry 'value' missing"
+                << "Essential entry 'value' missing on patch " << p.name() << nl
                 << exit(FatalIOError);
         }
     }
