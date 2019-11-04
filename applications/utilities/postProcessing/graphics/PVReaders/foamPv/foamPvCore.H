@@ -44,7 +44,6 @@ SourceFiles
 #include "Hash.H"
 #include "HashSet.H"
 #include "Map.H"
-#include "hashedWordList.H"
 #include "labelRange.H"
 
 // * * * * * * * * * * * * * Forward Declarations  * * * * * * * * * * * * * //
@@ -250,20 +249,20 @@ public:
     );
 
 
-    //- Retrieve the current selections as a hashedWordList,
-    //  while stripping off any prefix or suffix
-    static hashedWordList getSelected
+    //- Retrieve the current selections as a wordHashSet,
+    //- while stripping off any prefix or suffix
+    static wordHashSet getSelected
     (
         vtkDataArraySelection* select
     );
 
 
-    //- Retrieve a sub-list of the current selections as a hashedWordList,
-    //  while stripping off any prefix or suffix
-    static hashedWordList getSelected
+    //- Retrieve sub-list of the current selections as a wordHashSet,
+    //- while stripping off any prefix or suffix
+    static wordHashSet getSelected
     (
         vtkDataArraySelection* select,
-        const arrayRange& selector
+        const labelRange& selector
     );
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -128,44 +128,44 @@ void Foam::foamPvCore::addToBlock
 }
 
 
-Foam::hashedWordList Foam::foamPvCore::getSelected
+Foam::wordHashSet Foam::foamPvCore::getSelected
 (
     vtkDataArraySelection* select
 )
 {
     const int n = select->GetNumberOfArrays();
-    DynamicList<word> selected(n);
+    wordHashSet selected(2*n);
 
     for (int i=0; i < n; ++i)
     {
         if (select->GetArraySetting(i))
         {
-            selected.append(getFoamName(select->GetArrayName(i)));
+            selected.set(getFoamName(select->GetArrayName(i)));
         }
     }
 
-    return hashedWordList(selected, true);
+    return selected;
 }
 
 
-Foam::hashedWordList Foam::foamPvCore::getSelected
+Foam::wordHashSet Foam::foamPvCore::getSelected
 (
     vtkDataArraySelection* select,
-    const arrayRange& selector
+    const labelRange& selector
 )
 {
     const int n = select->GetNumberOfArrays();
-    DynamicList<word> selected(n);
+    wordHashSet selected(2*n);
 
     for (auto i : selector)
     {
         if (select->GetArraySetting(i))
         {
-            selected.append(getFoamName(select->GetArrayName(i)));
+            selected.set(getFoamName(select->GetArrayName(i)));
         }
     }
 
-    return hashedWordList(selected, true);
+    return selected;
 }
 
 

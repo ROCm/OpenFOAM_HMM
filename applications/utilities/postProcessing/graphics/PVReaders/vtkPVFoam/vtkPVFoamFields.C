@@ -49,9 +49,12 @@ void Foam::vtkPVFoam::convertVolFields()
     const fvMesh& mesh = *volMeshPtr_;
 
     const bool interpFields = reader_->GetInterpolateVolFields();
-    hashedWordList selectedFields = getSelected
+    wordHashSet selectedFields
     (
-        reader_->GetVolFieldSelection()
+        getSelected
+        (
+            reader_->GetVolFieldSelection()
+        )
     );
 
     if (selectedFields.empty())
@@ -124,9 +127,12 @@ void Foam::vtkPVFoam::convertPointFields()
 {
     const fvMesh& mesh = *volMeshPtr_;
 
-    hashedWordList selectedFields = getSelected
+    wordHashSet selectedFields
     (
-        reader_->GetPointFieldSelection()
+        getSelected
+        (
+            reader_->GetPointFieldSelection()
+        )
     );
 
     if (selectedFields.empty())
@@ -184,7 +190,10 @@ void Foam::vtkPVFoam::convertAreaFields()
 
     vtkDataArraySelection* select = reader_->GetVolFieldSelection();
 
-    hashedWordList selectedFields = getSelected(select);
+    wordHashSet selectedFields
+    (
+        getSelected(select)
+    );
 
     if (selectedFields.empty())
     {
@@ -233,9 +242,12 @@ void Foam::vtkPVFoam::convertLagrangianFields()
 
     const fvMesh& mesh = *volMeshPtr_;
 
-    hashedWordList selectedFields = getSelected
+    wordHashSet selectedFields
     (
-        reader_->GetLagrangianFieldSelection()
+        getSelected
+        (
+            reader_->GetLagrangianFieldSelection()
+        )
     );
 
     if (selectedFields.empty())
