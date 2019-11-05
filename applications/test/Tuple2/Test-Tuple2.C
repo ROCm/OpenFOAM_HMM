@@ -39,6 +39,7 @@ Description
 #include "List.H"
 #include "ListOps.H"
 #include "ops.H"
+#include "PstreamCombineReduceOps.H"
 #include <functional>
 
 using namespace Foam;
@@ -120,6 +121,43 @@ int main()
     }
 
     Info<< "Unsorted tuples:" << nl << list1 << nl;
+
+    // Test minFirst, maxFirst functors
+    {
+        indexedScalar minIndexed(labelMax, Zero);
+        indexedScalar maxIndexed(labelMin, Zero);
+
+        for (const auto& item : list1)
+        {
+            minFirstEqOp<label>()(minIndexed, item);
+            maxFirstEqOp<label>()(maxIndexed, item);
+        }
+
+        Foam::combineReduce(minIndexed, minFirstEqOp<label>());
+        Foam::combineReduce(maxIndexed, maxFirstEqOp<label>());
+
+        Info<< "Min indexed: " << minIndexed << nl
+            << "Max indexed: " << maxIndexed << nl;
+    }
+
+    // Test minFirst, maxFirst functors
+    {
+        indexedScalar minIndexed(labelMax, Zero);
+        indexedScalar maxIndexed(labelMin, Zero);
+
+        for (const auto& item : list1)
+        {
+            minIndexed = minFirstOp<label>()(minIndexed, item);
+            maxIndexed = maxFirstOp<label>()(maxIndexed, item);
+        }
+
+        Foam::combineReduce(minIndexed, minFirstEqOp<label>());
+        Foam::combineReduce(maxIndexed, maxFirstEqOp<label>());
+
+        Info<< "Min indexed: " << minIndexed << nl
+            << "Max indexed: " << maxIndexed << nl;
+    }
+
 
     Foam::sort(list1, std::less<indexedScalar>());
 

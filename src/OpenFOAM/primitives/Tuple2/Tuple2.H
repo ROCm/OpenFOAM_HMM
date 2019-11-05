@@ -42,6 +42,7 @@ See also
 
 #include "Istream.H"
 #include "Ostream.H"
+#include "Pair.H"
 #include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -140,6 +141,8 @@ public:
 };
 
 
+// * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
+
 //- Return reverse of a Tuple2
 template<class T1, class T2>
 inline Tuple2<T2, T1> reverse(const Tuple2<T1,T2>& t)
@@ -147,6 +150,8 @@ inline Tuple2<T2, T1> reverse(const Tuple2<T1,T2>& t)
     return Tuple2<T2, T1>(t.second(), t.first());
 }
 
+
+// * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * * //
 
 template<class T1, class T2>
 inline bool operator==(const Tuple2<T1,T2>& a, const Tuple2<T1,T2>& b)
@@ -173,7 +178,6 @@ inline bool operator<(const Tuple2<T1,T2>& a, const Tuple2<T1,T2>& b)
 }
 
 
-
 template<class T1, class T2>
 inline bool operator<=(const Tuple2<T1,T2>& a, const Tuple2<T1,T2>& b)
 {
@@ -195,7 +199,83 @@ inline bool operator>=(const Tuple2<T1,T2>& a, const Tuple2<T1,T2>& b)
 }
 
 
-// IOstream Operators
+// * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
+
+// Comparing first only
+
+//- Compare tuple-like containers
+//  \return reference to the container with the smaller value of first
+template<class T1>
+struct minFirstOp
+{
+    const Pair<T1>& operator()(const Pair<T1>& a, const Pair<T1>& b) const
+    {
+        return (b.first() < a.first()) ? b : a;
+    }
+
+    template<class T2>
+    const Tuple2<T1,T2>&
+    operator()(const Tuple2<T1,T2>& a, const Tuple2<T1,T2>& b) const
+    {
+        return (b.first() < a.first()) ? b : a;
+    }
+};
+
+
+//- Assign tuple-like container to use the one with the smaller value of first
+template<class T1>
+struct minFirstEqOp
+{
+    void operator()(Pair<T1>& x, const Pair<T1>& y) const
+    {
+        if (y.first() < x.first()) x = y;
+    }
+
+    template<class T2>
+    void operator()(Tuple2<T1,T2>& x, const Tuple2<T1,T2>& y) const
+    {
+        if (y.first() < x.first()) x = y;
+    }
+};
+
+
+//- Compare tuple-like containers
+//  \return reference to the container with the larger value of first
+template<class T1>
+struct maxFirstOp
+{
+    const Pair<T1>& operator()(const Pair<T1>& a, const Pair<T1>& b) const
+    {
+        return (a.first() < b.first()) ? b : a;
+    }
+
+    template<class T2>
+    const Tuple2<T1,T2>&
+    operator()(const Tuple2<T1,T2>& a, const Tuple2<T1,T2>& b) const
+    {
+        return (a.first() < b.first()) ? b : a;
+    }
+};
+
+
+//- Assign tuple-like container to use the one with the larger value of first
+template<class T1>
+struct maxFirstEqOp
+{
+    void operator()(Pair<T1>& x, const Pair<T1>& y) const
+    {
+        if (x.first() < y.first()) x = y;
+    }
+
+    template<class T2>
+    void operator()(Tuple2<T1,T2>& x, const Tuple2<T1,T2>& y) const
+    {
+        if (x.first() < y.first()) x = y;
+    }
+};
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 //- Read Tuple2 from Istream, discarding contents of existing Tuple2.
 template<class T1, class T2>
