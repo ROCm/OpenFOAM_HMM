@@ -1805,12 +1805,9 @@ void Foam::surfaceFeatures::nearestFeatEdge
 
 void Foam::surfaceFeatures::operator=(const surfaceFeatures& rhs)
 {
-    // Check for assignment to self
     if (this == &rhs)
     {
-        FatalErrorInFunction
-            << "Attempted assignment to self"
-            << abort(FatalError);
+        return;  // Self-assignment is a no-op
     }
 
     if (&surf_ != &rhs.surface())

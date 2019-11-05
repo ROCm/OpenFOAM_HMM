@@ -170,10 +170,9 @@ inline void Foam::keyType::clear()
 
 inline void Foam::keyType::swap(keyType& s)
 {
-    // Self-swapping is a no-op
     if (this == &s)
     {
-        return;
+        return;  // Self-swap is a no-op
     }
 
     word::swap(static_cast<word&>(s));
@@ -191,10 +190,9 @@ inline bool Foam::keyType::operator()(const std::string& text) const
 
 inline void Foam::keyType::operator=(const keyType& s)
 {
-    // Self-assignment is a no-op
     if (this == &s)
     {
-        return;
+        return;  // Self-assignment is a no-op
     }
 
     assign(s); // Bypasses char checking
@@ -204,10 +202,9 @@ inline void Foam::keyType::operator=(const keyType& s)
 
 inline void Foam::keyType::operator=(keyType&& s)
 {
-    // Self-assignment is a no-op
     if (this == &s)
     {
-        return;
+        return;  // Self-assignment is a no-op
     }
 
     clear();

@@ -147,12 +147,9 @@ void Foam::refinementHistory::splitCell8::operator=(const splitCell8& s)
 {
     // Assignment operator since autoPtr otherwise 'steals' storage.
 
-    // Check for assignment to self
     if (this == &s)
     {
-        FatalErrorInFunction
-            << "Attempted assignment to self"
-            << abort(FatalError);
+        return;  // Self-assignment is a no-op
     }
 
     parent_ = s.parent_;

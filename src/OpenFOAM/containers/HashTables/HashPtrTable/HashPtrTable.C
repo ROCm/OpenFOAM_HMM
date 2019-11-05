@@ -149,9 +149,7 @@ void Foam::HashPtrTable<T, Key, Hash>::operator=
 {
     if (this == &rhs)
     {
-        FatalErrorInFunction
-            << "attempted copy assignment to self"
-            << abort(FatalError);
+        return;  // Self-assignment is a no-op
     }
 
     this->clear();
@@ -179,9 +177,7 @@ void Foam::HashPtrTable<T, Key, Hash>::operator=
 {
     if (this == &rhs)
     {
-        FatalErrorInFunction
-            << "attempted move assignment to self"
-            << abort(FatalError);
+        return;  // Self-assignment is a no-op
     }
 
     this->clear();

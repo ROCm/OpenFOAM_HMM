@@ -281,6 +281,11 @@ inline void Foam::token::reset()
 
 inline void Foam::token::swap(token& tok)
 {
+    if (this == &tok)
+    {
+        return;  // Self-swap is a no-op
+    }
+
     std::swap(data_, tok.data_);
     std::swap(type_, tok.type_);
     std::swap(lineNumber_, tok.lineNumber_);
@@ -642,6 +647,11 @@ inline void Foam::token::setBad()
 
 inline void Foam::token::operator=(const token& tok)
 {
+    if (this == &tok)
+    {
+        return;  // Self-assignment is a no-op
+    }
+
     reset();
 
     type_ = tok.type_;
@@ -683,6 +693,11 @@ inline void Foam::token::operator=(const token& tok)
 
 inline void Foam::token::operator=(token&& tok)
 {
+    if (this == &tok)
+    {
+        return;  // Self-assignment is a no-op
+    }
+
     reset();
     lineNumber_ = 0;
     swap(tok);

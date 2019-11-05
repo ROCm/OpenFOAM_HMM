@@ -179,12 +179,9 @@ void Foam::entry::checkITstream(const ITstream& is) const
 
 void Foam::entry::operator=(const entry& e)
 {
-    // check for assignment to self
     if (this == &e)
     {
-        FatalErrorInFunction
-            << "attempted assignment to self"
-            << abort(FatalError);
+        return;  // Self-assignment is a no-op
     }
 
     keyword_ = e.keyword_;
@@ -193,20 +190,24 @@ void Foam::entry::operator=(const entry& e)
 
 bool Foam::entry::operator==(const entry& e) const
 {
+    if (this == &e)
+    {
+        return true;
+    }
     if (keyword_ != e.keyword_)
     {
         return false;
     }
-    else
-    {
-        OStringStream oss1;
-        oss1 << *this;
 
-        OStringStream oss2;
-        oss2 << e;
+    // Compare contents (as strings)
 
-        return oss1.str() == oss2.str();
-    }
+    OStringStream oss1;
+    oss1 << *this;
+
+    OStringStream oss2;
+    oss2 << e;
+
+    return oss1.str() == oss2.str();
 }
 
 

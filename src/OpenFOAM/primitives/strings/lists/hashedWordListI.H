@@ -146,6 +146,11 @@ inline bool Foam::hashedWordList::found(const word& name) const
 
 inline void Foam::hashedWordList::swap(hashedWordList& list)
 {
+    if (this == &list)
+    {
+        return;  // Self-swap is a no-op
+    }
+
     wordList::swap(static_cast<wordList&>(list));
     lookup_.swap(list.lookup_);
 }

@@ -193,7 +193,7 @@ inline void Foam::List<T>::append(const UList<T>& list)
     if (this == &list)
     {
         FatalErrorInFunction
-            << "attempted appending to self" << abort(FatalError);
+            << "Attempted appending to self" << abort(FatalError);
     }
 
     label idx = this->size();

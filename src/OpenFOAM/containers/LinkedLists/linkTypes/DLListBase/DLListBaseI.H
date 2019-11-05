@@ -185,6 +185,11 @@ inline void Foam::DLListBase::clear()
 
 inline void Foam::DLListBase::swap(DLListBase& lst)
 {
+    if (this == &lst)
+    {
+        return;  // Self-swap is a no-op
+    }
+
     std::swap(first_, lst.first_);
     std::swap(last_, lst.last_);
     std::swap(size_, lst.size_);
@@ -193,6 +198,11 @@ inline void Foam::DLListBase::swap(DLListBase& lst)
 
 inline void Foam::DLListBase::transfer(DLListBase& lst)
 {
+    if (this == &lst)
+    {
+        return;  // Self-assignment is a no-op
+    }
+
     first_ = lst.first_;
     last_  = lst.last_;
     size_  = lst.size_;

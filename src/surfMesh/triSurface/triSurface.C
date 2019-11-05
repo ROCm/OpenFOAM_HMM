@@ -549,6 +549,11 @@ void Foam::triSurface::clearOut()
 
 void Foam::triSurface::swap(triSurface& surf)
 {
+    if (this == &surf)
+    {
+        return;  // Self-swap is a no-op
+    }
+
     clearOut();
     surf.clearOut();
 

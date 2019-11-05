@@ -215,6 +215,11 @@ void Foam::CompactIOField<T, BaseType>::operator=
     const CompactIOField<T, BaseType>& rhs
 )
 {
+    if (this == &rhs)
+    {
+        return;  // Self-assigment is a no-op
+    }
+
     Field<T>::operator=(rhs);
 }
 

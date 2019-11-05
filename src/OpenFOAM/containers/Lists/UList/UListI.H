@@ -380,6 +380,11 @@ inline bool Foam::UList<T>::empty() const noexcept
 template<class T>
 inline void Foam::UList<T>::swap(UList<T>& list)
 {
+    if (&list == this)
+    {
+        return;  // Self-swap is a no-op
+    }
+
     Foam::Swap(size_, list.size_);
     Foam::Swap(v_, list.v_);
 }

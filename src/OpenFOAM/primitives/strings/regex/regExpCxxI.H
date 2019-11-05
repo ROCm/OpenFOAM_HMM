@@ -154,8 +154,12 @@ inline bool Foam::regExpCxx::clear()
 
 inline void Foam::regExpCxx::swap(regExpCxx& rgx)
 {
-    re_.swap(rgx.re_);
-    std::swap(ok_, rgx.ok_);
+    if (this != &rgx)
+    {
+        // Self-swap is a no-op
+        re_.swap(rgx.re_);
+        std::swap(ok_, rgx.ok_);
+    }
 }
 
 

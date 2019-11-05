@@ -331,6 +331,11 @@ inline void Foam::FixedList<T, N>::setSize(const label n)
 template<class T, unsigned N>
 inline void Foam::FixedList<T, N>::swap(FixedList<T, N>& list)
 {
+    if (this == &list)
+    {
+        return;  // Self-swap is a no-op
+    }
+
     for (unsigned i=0; i<N; ++i)
     {
         Foam::Swap(v_[i], list.v_[i]);
@@ -341,6 +346,11 @@ inline void Foam::FixedList<T, N>::swap(FixedList<T, N>& list)
 template<class T, unsigned N>
 inline void Foam::FixedList<T, N>::transfer(FixedList<T, N>& list)
 {
+    if (this == &list)
+    {
+        return;  // Self-assignment is a no-op
+    }
+
     for (unsigned i=0; i<N; ++i)
     {
         v_[i] = std::move(list[i]);
@@ -428,6 +438,11 @@ inline void Foam::FixedList<T, N>::operator=(const T& val)
 template<class T, unsigned N>
 inline void Foam::FixedList<T, N>::operator=(const FixedList<T, N>& list)
 {
+    if (this == &list)
+    {
+        return;  // Self-assignment is a no-op
+    }
+
     for (unsigned i=0; i<N; ++i)
     {
         v_[i] = list.v_[i];
@@ -437,6 +452,11 @@ inline void Foam::FixedList<T, N>::operator=(const FixedList<T, N>& list)
 template<class T, unsigned N>
 inline void Foam::FixedList<T, N>::operator=(FixedList<T, N>&& list)
 {
+    if (this == &list)
+    {
+        return;  // Self-assignment is a no-op
+    }
+
     // No significant speedup observed for copy assignment on simple types,
     // use move assignment for generality with more complex types
     for (unsigned i=0; i<N; ++i)

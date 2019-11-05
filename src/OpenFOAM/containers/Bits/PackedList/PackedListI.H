@@ -320,6 +320,7 @@ inline void Foam::PackedList<Width>::reference::operator=
     const reference& other
 )
 {
+    // Accepts self-assignment
     this->set(other.get());
 }
 
@@ -556,6 +557,11 @@ inline std::streamsize Foam::PackedList<Width>::byteSize() const
 template<unsigned Width>
 inline void Foam::PackedList<Width>::swap(PackedList<Width>& rhs)
 {
+    if (this == &rhs)
+    {
+        return;  // Self-swap is a no-op
+    }
+
     blocks_.swap(rhs.blocks_);
     Foam::Swap(size_, rhs.size_);
 }
@@ -564,8 +570,12 @@ inline void Foam::PackedList<Width>::swap(PackedList<Width>& rhs)
 template<unsigned Width>
 inline void Foam::PackedList<Width>::transfer(PackedList<Width>& rhs)
 {
-    blocks_.transfer(rhs.blocks_);
+    if (this == &rhs)
+    {
+        return;  // Self-assignment is a no-op
+    }
 
+    blocks_.transfer(rhs.blocks_);
     size_ = rhs.size_;
     rhs.size_ = 0;
 }

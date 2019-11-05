@@ -303,6 +303,11 @@ inline void Foam::CompactListList<T, Container>::operator=
     const CompactListList<T, Container>& lst
 )
 {
+    if (this == &lst)
+    {
+        return;  // Self-assignment is a no-op
+    }
+
     size_ = lst.size_;
     offsets_ = lst.offsets_,
     m_ = lst.m_;
@@ -315,6 +320,11 @@ inline void Foam::CompactListList<T, Container>::operator=
     CompactListList<T, Container>&& lst
 )
 {
+    if (this == &lst)
+    {
+        return;  // Self-assignment is a no-op
+    }
+
     transfer(lst);
 }
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2016, OpenCFD Ltd.
+    Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -839,6 +839,12 @@ Foam::mapDistributeBase::mapDistributeBase(Istream& is)
 
 void Foam::mapDistributeBase::transfer(mapDistributeBase& rhs)
 {
+    if (this == &rhs)
+    {
+        // Self-assignment is a no-op
+        return;
+    }
+
     constructSize_ = rhs.constructSize_;
     subMap_.transfer(rhs.subMap_);
     constructMap_.transfer(rhs.constructMap_);
@@ -1264,11 +1270,9 @@ void Foam::mapDistributeBase::operator=(const mapDistributeBase& rhs)
 {
     if (this == &rhs)
     {
-        // Avoid self assignment
-        FatalErrorInFunction
-            << "Attempted assignment to self"
-            << abort(FatalError);
+        return;  // Self-assignment is a no-op
     }
+
     constructSize_ = rhs.constructSize_;
     subMap_ = rhs.subMap_;
     constructMap_ = rhs.constructMap_;

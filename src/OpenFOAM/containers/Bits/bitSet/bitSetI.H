@@ -197,6 +197,7 @@ inline void Foam::bitSet::reference::operator=
     const reference& other
 )
 {
+    // Accepts self-assignment
     set(other.get());
 }
 

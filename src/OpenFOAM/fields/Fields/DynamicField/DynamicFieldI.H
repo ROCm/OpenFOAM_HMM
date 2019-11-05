@@ -399,6 +399,11 @@ inline void Foam::DynamicField<T, SizeMin>::swap
     DynamicField<T, AnySizeMin>& lst
 )
 {
+    if (this == &lst)
+    {
+        return;  // Self-swap is a no-op
+    }
+
     DynamicList<T, SizeMin>& cur = *this;
 
     // Make addressable size identical to the allocated capacity
@@ -450,6 +455,11 @@ inline void Foam::DynamicField<T, SizeMin>::transfer
     DynamicField<T, AnySizeMin>& list
 )
 {
+    if (this == &list)
+    {
+        return;  // Self-assignment is a no-op
+    }
+
     // Take over storage as-is (without shrink, without using SizeMin)
     // clear addressing and storage for old list.
     capacity_ = list.capacity();
@@ -484,7 +494,7 @@ Foam::DynamicField<T, SizeMin>::append
     if (this == &list)
     {
         FatalErrorInFunction
-            << "attempted appending to self" << abort(FatalError);
+            << "Attempted appending to self" << abort(FatalError);
     }
 
     label idx = List<T>::size();
@@ -563,8 +573,7 @@ inline void Foam::DynamicField<T, SizeMin>::operator=
 {
     if (this == &list)
     {
-        FatalErrorInFunction
-            << "Attempted assignment to self" << abort(FatalError);
+        return;  // Self-assignment is a no-op
     }
 
     assignDynField(list);

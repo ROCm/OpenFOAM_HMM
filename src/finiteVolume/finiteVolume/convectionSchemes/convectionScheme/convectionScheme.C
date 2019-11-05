@@ -159,9 +159,7 @@ void convectionScheme<Type>::operator=(const convectionScheme<Type>& cs)
 {
     if (this == &cs)
     {
-        FatalErrorInFunction
-            << "attempted assignment to self"
-            << abort(FatalError);
+        return;  // Self-assignment is a no-op
     }
 }
 

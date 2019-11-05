@@ -259,10 +259,9 @@ inline void Foam::wordRe::set(const char* str, const compOption opt)
 
 inline void Foam::wordRe::swap(wordRe& str)
 {
-    // Self-swapping is a no-op
     if (this == &str)
     {
-        return;
+        return;  // Self-swap is a no-op
     }
 
     word::swap(static_cast<word&>(str));
@@ -280,10 +279,9 @@ inline bool Foam::wordRe::operator()(const std::string& text) const
 
 inline void Foam::wordRe::operator=(const wordRe& str)
 {
-    // Self-assignment is a no-op
     if (this == &str)
     {
-        return;
+        return;  // Self-assignment is a no-op
     }
 
     assign(str);
@@ -342,10 +340,9 @@ inline void Foam::wordRe::operator=(const char* str)
 
 inline void Foam::wordRe::operator=(wordRe&& str)
 {
-    // Self-assignment is a no-op
     if (this == &str)
     {
-        return;
+        return;  // Self-assignment is a no-op
     }
 
     clear();

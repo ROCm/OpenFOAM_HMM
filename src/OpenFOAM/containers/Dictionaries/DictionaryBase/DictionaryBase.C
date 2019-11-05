@@ -232,6 +232,11 @@ void Foam::DictionaryBase<IDLListType, T>::transfer
     DictionaryBase<IDLListType, T>& dict
 )
 {
+    if (this == &dict)
+    {
+        return;  // Self-assignment is a no-op
+    }
+
     IDLListType::transfer(dict);
     hashedTs_.transfer(dict.hashedTs_);
 }
@@ -247,9 +252,7 @@ void Foam::DictionaryBase<IDLListType, T>::operator=
 {
     if (this == &dict)
     {
-        FatalErrorInFunction
-            << "attempted assignment to self"
-            << abort(FatalError);
+        return;  // Self-assignment is a no-op
     }
 
     IDLListType::operator=(dict);

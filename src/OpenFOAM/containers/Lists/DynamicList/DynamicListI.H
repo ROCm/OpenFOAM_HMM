@@ -397,6 +397,11 @@ inline void Foam::DynamicList<T, SizeMin>::swap
     DynamicList<T, AnySizeMin>& lst
 )
 {
+    if (this == &lst)
+    {
+        return;  // Self-swap is a no-op
+    }
+
     DynamicList<T, SizeMin>& cur = *this;
 
     // Make addressable size identical to the allocated capacity
@@ -434,6 +439,11 @@ Foam::DynamicList<T, SizeMin>::transfer
     DynamicList<T, AnySizeMin>& lst
 )
 {
+    if (this == &lst)
+    {
+        return;  // Self-assignment is a no-op
+    }
+
     // Take over storage as-is (without shrink, without using SizeMin)
     // clear addressing and storage for old lst.
     capacity_ = lst.capacity();
@@ -793,8 +803,7 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
 {
     if (this == &lst)
     {
-        FatalErrorInFunction
-            << "Attempted assignment to self" << abort(FatalError);
+        return;  // Self-assignment is a no-op
     }
 
     assignDynList(lst);
@@ -808,6 +817,11 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
     const DynamicList<T, SizeMin2>& lst
 )
 {
+    if (this == &lst)
+    {
+        return;  // Self-assignment is a no-op
+    }
+
     assignDynList(lst);
 }
 
@@ -852,8 +866,7 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
 {
     if (this == &lst)
     {
-        FatalErrorInFunction
-            << "Attempted assignment to self" << abort(FatalError);
+        return;  // Self-assignment is a no-op
     }
 
     clear();
@@ -868,6 +881,11 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
     DynamicList<T, SizeMin2>&& lst
 )
 {
+    if (this == &lst)
+    {
+        return;  // Self-assignment is a no-op
+    }
+
     clear();
     transfer(lst);
 }
@@ -887,7 +905,11 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class T, int SizeMin1, int SizeMin2>
-inline void Foam::Swap(DynamicList<T, SizeMin1>& a, DynamicList<T, SizeMin2>& b)
+inline void Foam::Swap
+(
+    DynamicList<T, SizeMin1>& a,
+    DynamicList<T, SizeMin2>& b
+)
 {
     a.swap(b);
 }

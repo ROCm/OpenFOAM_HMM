@@ -265,9 +265,9 @@ inline bool Foam::string::match(const std::string& text) const
 
 inline void Foam::string::swap(std::string& str)
 {
-    // Self-swapping is a no-op
     if (this != &str)
     {
+        // Self-swap is a no-op
         std::string::swap(str);
     }
 }

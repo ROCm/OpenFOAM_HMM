@@ -102,12 +102,9 @@ void Foam::CLASSNAME<TemplateArgument>::operator=
     const CLASSNAME<TemplateArgument>& rhs
 )
 {
-    // Check for assignment to self
     if (this == &rhs)
     {
-        FatalErrorInFunction
-            << "Attempted assignment to self"
-            << abort(FatalError);
+        return;  // Self-assignment is a no-op
     }
 }
 

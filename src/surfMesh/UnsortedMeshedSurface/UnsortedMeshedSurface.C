@@ -603,6 +603,11 @@ void Foam::UnsortedMeshedSurface<Face>::swap
     UnsortedMeshedSurface<Face>& surf
 )
 {
+    if (this == &surf)
+    {
+        return;  // Self-swap is a no-op
+    }
+
     this->clearOut();  // Topology changes
     surf.clearOut();   // Topology changes
 
@@ -622,6 +627,11 @@ void Foam::UnsortedMeshedSurface<Face>::transfer
     UnsortedMeshedSurface<Face>& surf
 )
 {
+    if (this == &surf)
+    {
+        return;  // Self-assignment is a no-op
+    }
+
     this->clear();
 
     this->storedPoints().transfer(surf.storedPoints());

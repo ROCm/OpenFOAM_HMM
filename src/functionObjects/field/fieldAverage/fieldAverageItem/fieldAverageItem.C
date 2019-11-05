@@ -228,12 +228,9 @@ void Foam::functionObjects::fieldAverageItem::operator=
     const fieldAverageItem& rhs
 )
 {
-    // Check for assignment to self
     if (this == &rhs)
     {
-        FatalErrorInFunction
-            << "Attempted assignment to self" << nl
-            << abort(FatalError);
+        return;  // Self-assignment is a no-op
     }
 
     // Set updated values

@@ -98,9 +98,7 @@ void Foam::cuttingSurfaceBase::operator=(const cuttingSurfaceBase& rhs)
 {
     if (this == &rhs)
     {
-        FatalErrorInFunction
-            << "Attempted assignment to self"
-            << abort(FatalError);
+        return;  // Self-assignment is a no-op
     }
 
     static_cast<MeshStorage&>(*this) = rhs;

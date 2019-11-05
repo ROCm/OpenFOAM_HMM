@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2017 OpenCFD Ltd.
+    Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -492,12 +492,9 @@ void Foam::DimensionedField<Type, GeoMesh>::operator=
     const DimensionedField<Type, GeoMesh>& df
 )
 {
-    // Check for assignment to self
     if (this == &df)
     {
-        FatalErrorInFunction
-            << "attempted assignment to self"
-            << abort(FatalError);
+        return;  // Self-assignment is a no-op
     }
 
     checkField(*this, df, "=");
@@ -516,12 +513,9 @@ void Foam::DimensionedField<Type, GeoMesh>::operator=
 {
     auto& df = tdf.constCast();
 
-    // Check for assignment to self
     if (this == &df)
     {
-        FatalErrorInFunction
-            << "attempted assignment to self"
-            << abort(FatalError);
+        return;  // Self-assignment is a no-op
     }
 
     checkField(*this, df, "=");

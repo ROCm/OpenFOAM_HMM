@@ -126,7 +126,11 @@ inline bool Foam::regExpPosix::search(const std::string& text) const
 
 inline void Foam::regExpPosix::swap(regExpPosix& rgx)
 {
-    std::swap(preg_, rgx.preg_);
+    if (this != &rgx)
+    {
+        // Self-swap is a no-op
+        std::swap(preg_, rgx.preg_);
+    }
 }
 
 

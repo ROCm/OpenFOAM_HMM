@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -211,12 +212,9 @@ void Foam::bufferedAccumulator<Type>::operator=
     const bufferedAccumulator<Type>& rhs
 )
 {
-    // Check for assignment to self
     if (this == &rhs)
     {
-        FatalErrorInFunction
-            << "Attempted assignment to self"
-            << abort(FatalError);
+        return;  // Self-assignment is a no-op
     }
 
     List<Field<Type>>::operator=(rhs);
@@ -229,6 +227,6 @@ void Foam::bufferedAccumulator<Type>::operator=
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    #include "bufferedAccumulatorIO.C"
+#include "bufferedAccumulatorIO.C"
 
 // ************************************************************************* //

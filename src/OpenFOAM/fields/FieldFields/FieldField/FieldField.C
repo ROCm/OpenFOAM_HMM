@@ -292,10 +292,9 @@ void FieldField<Field, Type>::operator=(const FieldField<Field, Type>& ff)
 {
     if (this == &ff)
     {
-        FatalErrorInFunction
-            << "attempted assignment to self"
-            << abort(FatalError);
+        return;  // Self-assignment is a no-op
     }
+
     // No size checking done
 
     forAll(*this, i)
@@ -310,9 +309,7 @@ void FieldField<Field, Type>::operator=(FieldField<Field, Type>&& ff)
 {
     if (this == &ff)
     {
-        FatalErrorInFunction
-            << "attempted assignment to self"
-            << abort(FatalError);
+        return;  // Self-assignment is a no-op
     }
 
     PtrList<Field<Type>>::transfer(ff);
@@ -325,9 +322,7 @@ void FieldField<Field, Type>::operator=(const tmp<FieldField>& tf)
     // The cref() method also checks that tmp is not nullptr.
     if (this == &(tf.cref()))
     {
-        FatalErrorInFunction
-            << "attempted assignment to self"
-            << abort(FatalError);
+        return;  // Self-assignment is a no-op
     }
 
     PtrList<Field<Type>>::clear();
@@ -414,6 +409,6 @@ Ostream& operator<<(Ostream& os, const tmp<FieldField<Field, Type>>& tf)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    #include "FieldFieldFunctions.C"
+#include "FieldFieldFunctions.C"
 
 // ************************************************************************* //

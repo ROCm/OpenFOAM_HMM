@@ -319,6 +319,11 @@ inline void Foam::tmpNrc<T>::cref(const T& obj) noexcept
 template<class T>
 inline void Foam::tmpNrc<T>::swap(tmpNrc<T>& other) noexcept
 {
+    if (&other == this)
+    {
+        return;  // Self-swap is a no-op
+    }
+
     // Copy/assign for pointer types
     T* p = ptr_;
     ptr_ = other.ptr_;
@@ -403,6 +408,11 @@ inline void Foam::tmpNrc<T>::operator=(T* p)
 template<class T>
 inline void Foam::tmpNrc<T>::operator=(const tmpNrc<T>& t)
 {
+    if (&t == this)
+    {
+        return;  // Self-assignment is a no-op
+    }
+
     clear();
 
     if (t.isTmp())
