@@ -24,7 +24,7 @@
 #
 # Provides Functions
 #     have_pvplugin_support, no_paraview, echo_paraview
-#     cmakeVtk, cmakePv
+#     cmakeVtk, cmakePv, cmakePvInstall
 #
 # Variables on success
 #     HAVE_PVPLUGIN_SUPPORT
@@ -73,6 +73,12 @@ cmakeVtk()
 cmakePv()
 {
     cmakeVersioned "ParaView_DIR=$ParaView_DIR" "$1"
+}
+
+# CMake into objectsDir with ParaView_DIR dependency
+cmakePvInstall()
+{
+    cmakeVersionedInstall "ParaView_DIR=$ParaView_DIR" "$1"
 }
 
 #
