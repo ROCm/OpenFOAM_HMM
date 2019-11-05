@@ -6,8 +6,8 @@ EXE_INC = \
     -I$(LIB_SRC)/mesh/blockMesh/lnInclude \
     -I$(PARAVIEW_INC_DIR) \
     -I$(PARAVIEW_INC_DIR)/vtkkwiml \
-    -I../foamPv \
-    -I../PVblockMeshReader
+    -I../../foamPv \
+    -I../plugin/reader
 
 LIB_LIBS = \
     -lmeshTools \

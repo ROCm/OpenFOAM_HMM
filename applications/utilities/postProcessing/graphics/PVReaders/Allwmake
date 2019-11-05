@@ -17,13 +17,28 @@ if have_pvplugin_support
 then
 (
     wmakeLibPv foamPv
-    wmakeLibPv vtkPVblockMesh
-    wmakeLibPv vtkPVFoam
+    wmakeLibPv blockMeshReader/library
+    wmakeLibPv foamReader/library
+
+    unset cmakeType
 
     if [ "$targetType" != objects ]
     then
-        cmakePv $PWD/PVblockMeshReader || warnIncomplete "BlockMesh"
-        cmakePv $PWD/PVFoamReader || warnIncomplete "OpenFOAM"
+        case "$PARAVIEW_API" in
+        (5.[0-6])
+            cmakeType="cmakePv"
+            ;;
+        (*)
+            # cmakeType="cmakePvInstall"
+            warnIncomplete "(unknown/unsupported version: $PARAVIEW_API)"
+            ;;
+        esac
+    fi
+
+    if [ -n "$cmakeType" ]
+    then
+        "$cmakeType" $PWD/blockMeshReader || warnIncomplete "blockMesh"
+        "$cmakeType" $PWD/foamReader || warnIncomplete "OpenFOAM"
     fi
 )
 fi
