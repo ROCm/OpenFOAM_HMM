@@ -211,7 +211,7 @@ void Foam::searchableCone::findNearestAndNormal
     dist[2] = magSqr(disk2Point-sample);
     dist[3] = magSqr(iCnearCone-sample);
 
-    label minI = findMin(dist);
+    const label minI = findMin(dist);
 
 
     // Snap the point to the corresponding surface

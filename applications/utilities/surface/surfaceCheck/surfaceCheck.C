@@ -576,8 +576,10 @@ int main(int argc, char *argv[])
         }
         Info<< endl;
 
-        label minIndex = findMin(triQ);
-        label maxIndex = findMax(triQ);
+        labelPair minMaxIds = findMinMax(triQ);
+
+        const label minIndex = minMaxIds.first();
+        const label maxIndex = minMaxIds.second();
 
         Info<< "    min " << triQ[minIndex] << " for triangle " << minIndex
             << nl
@@ -656,8 +658,10 @@ int main(int argc, char *argv[])
             edgeMag[edgei] = edges[edgei].mag(localPoints);
         }
 
-        label minEdgei = findMin(edgeMag);
-        label maxEdgei = findMax(edgeMag);
+        labelPair minMaxIds = findMinMax(edgeMag);
+
+        const label minEdgei = minMaxIds.first();
+        const label maxEdgei = minMaxIds.second();
 
         const edge& minE = edges[minEdgei];
         const edge& maxE = edges[maxEdgei];

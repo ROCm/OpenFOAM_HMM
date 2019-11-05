@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2017 OpenCFD Ltd.
+    Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -122,45 +122,36 @@ void Foam::functionObjects::fieldMinMax::calcMinMaxFieldType
 {
     const label proci = Pstream::myProcNo();
 
-    // Find min internal field value info
-    List<Type> minVs(Pstream::nProcs());
-    labelList minCells(Pstream::nProcs());
-    List<vector> minCs(Pstream::nProcs());
+    // Find min/max internal field value info
 
-    label minProci = findMin(field);
-    if (minProci != -1)
-    {
-        minVs[proci] = field[minProci];
-        minCells[proci] = minProci;
-        minCs[proci] = mesh_.C()[minProci];
-    }
-    else
-    {
-        minVs[proci] = pTraits<Type>::max;
-        minCells[proci] = -1;
-        minCs[proci] = vector::max;
-    }
+    List<Type> minVs(Pstream::nProcs(), pTraits<Type>::max);
+    labelList minCells(Pstream::nProcs(), Zero);
+    List<vector> minCs(Pstream::nProcs(), Zero);
 
-    // Find max internal field value info
-    List<Type> maxVs(Pstream::nProcs());
-    labelList maxCells(Pstream::nProcs());
-    List<vector> maxCs(Pstream::nProcs());
+    List<Type> maxVs(Pstream::nProcs(), pTraits<Type>::min);
+    labelList maxCells(Pstream::nProcs(), Zero);
+    List<vector> maxCs(Pstream::nProcs(), Zero);
 
-    label maxProci = findMax(field);
-    if (maxProci != -1)
+    labelPair minMaxIds = findMinMax(field);
+
+    label minId = minMaxIds.first();
+    if (minId != -1)
     {
-        maxVs[proci] = field[maxProci];
-        maxCells[proci] = maxProci;
-        maxCs[proci] = mesh_.C()[maxProci];
-    }
-    else
-    {
-        maxVs[proci] = pTraits<Type>::min;
-        maxCells[proci] = -1;
-        maxCs[proci] = vector::max;
+        minVs[proci] = field[minId];
+        minCells[proci] = minId;
+        minCs[proci] = mesh_.C()[minId];
     }
 
-    // Find min and max boundary field info
+    label maxId = minMaxIds.second();
+    if (maxId != -1)
+    {
+        maxVs[proci] = field[maxId];
+        maxCells[proci] = maxId;
+        maxCs[proci] = mesh_.C()[maxId];
+    }
+
+
+    // Find min/max boundary field info
     const auto& fieldBoundary = field.boundaryField();
     const auto& CfBoundary = mesh_.C().boundaryField();
 
@@ -174,20 +165,22 @@ void Foam::functionObjects::fieldMinMax::calcMinMaxFieldType
             const labelList& faceCells =
                 fieldBoundary[patchi].patch().faceCells();
 
-            label minPi = findMin(fp);
-            if (fp[minPi] < minVs[proci])
+            minMaxIds = findMinMax(fp);
+
+            minId = minMaxIds.first();
+            if (minVs[proci] > fp[minId])
             {
-                minVs[proci] = fp[minPi];
-                minCells[proci] = faceCells[minPi];
-                minCs[proci] = Cfp[minPi];
+                minVs[proci] = fp[minId];
+                minCells[proci] = faceCells[minId];
+                minCs[proci] = Cfp[minId];
             }
 
-            label maxPi = findMax(fp);
-            if (fp[maxPi] > maxVs[proci])
+            maxId = minMaxIds.second();
+            if (maxVs[proci] < fp[maxId])
             {
-                maxVs[proci] = fp[maxPi];
-                maxCells[proci] = faceCells[maxPi];
-                maxCs[proci] = Cfp[maxPi];
+                maxVs[proci] = fp[maxId];
+                maxCells[proci] = faceCells[maxId];
+                maxCs[proci] = Cfp[maxId];
             }
         }
     }
@@ -207,15 +200,15 @@ void Foam::functionObjects::fieldMinMax::calcMinMaxFieldType
     Pstream::gatherList(maxCs);
     Pstream::scatterList(maxCs);
 
-    label mini = findMin(minVs);
-    const Type& minValue = minVs[mini];
-    const label minCell = minCells[mini];
-    const vector& minC = minCs[mini];
+    minId = findMin(minVs);
+    const Type& minValue = minVs[minId];
+    const label minCell = minCells[minId];
+    const vector& minC = minCs[minId];
 
-    label maxi = findMax(maxVs);
-    const Type& maxValue = maxVs[maxi];
-    const label maxCell = maxCells[maxi];
-    const vector& maxC = maxCs[maxi];
+    maxId = findMax(maxVs);
+    const Type& maxValue = maxVs[maxId];
+    const label maxCell = maxCells[maxId];
+    const vector& maxC = maxCs[maxId];
 
     output
     (
@@ -225,8 +218,8 @@ void Foam::functionObjects::fieldMinMax::calcMinMaxFieldType
         maxCell,
         minC,
         maxC,
-        mini,
-        maxi,
+        minId,
+        maxId,
         minValue,
         maxValue
     );
