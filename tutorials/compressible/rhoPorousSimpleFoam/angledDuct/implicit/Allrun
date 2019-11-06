@@ -9,8 +9,8 @@ rm -rf 0 constant
 \cp -r ../common/constant constant
 
 m4 system/blockMeshDict.m4 > system/blockMeshDict
-
 runApplication blockMesh
+
 runApplication $(getApplication)
 
 #------------------------------------------------------------------------------

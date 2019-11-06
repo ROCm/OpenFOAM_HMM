@@ -3,13 +3,12 @@ cd ${0%/*} || exit 1                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-# create the blockMesh file with the parametric one
 m4 system/blockMeshDict.m4 > system/blockMeshDict
-
 runApplication blockMesh
+
 runApplication topoSet
 
-runApplication  snappyHexMesh -overwrite
+runApplication snappyHexMesh -overwrite
 
 runApplication extrudeToRegionMesh -overwrite
 
