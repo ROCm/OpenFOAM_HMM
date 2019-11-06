@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2015-2018 OpenCFD Ltd.
+#     Copyright (C) 2015-2019 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -27,14 +27,14 @@ cleanTimeDirectories()
     while [ ${#zeros} -lt 8 ]
     do
         timeDir="0.${zeros}[1-9]*"
-        rm -rf ./${timeDir} ./-${timeDir} > /dev/null 2>&1
+        rm -rf ./${timeDir} ./-${timeDir}
         zeros="0$zeros"
     done
     rm -rf \
         ./[1-9]* ./-[1-9]* ./log ./log.* ./log-* ./logSummary.* \
         ./.fxLock ./*.xml ./ParaView* ./paraFoam* \
         ./*.blockMesh ./*.foam ./*.OpenFOAM \
-        ./.setSet > /dev/null 2>&1
+        ./.setSet
 }
 
 
@@ -42,7 +42,7 @@ cleanAdiosOutput()
 {
     if [ -d adiosData ] && [ -d system ]
     then
-        rm -rf adiosData > /dev/null 2>&1
+        rm -rf adiosData
     fi
 }
 
@@ -51,7 +51,7 @@ cleanDynamicCode()
 {
     if [ -d dynamicCode ] && [ -d system ]
     then
-        rm -rf dynamicCode > /dev/null 2>&1
+        rm -rf dynamicCode
     fi
 }
 
@@ -63,23 +63,23 @@ cleanSnappyFiles()
         constant/polyMesh/pointLevel \
         constant/polyMesh/refinementHistory \
         constant/polyMesh/level0Edge \
-        constant/polyMesh/surfaceIndex > /dev/null 2>&1
+        constant/polyMesh/surfaceIndex
     rm -f \
         processor*/constant/polyMesh/cellLevel \
         processor*/constant/polyMesh/pointLevel \
         processor*/constant/polyMesh/refinementHistory \
         processor*/constant/polyMesh/level0Edge \
-        processor*/constant/polyMesh/surfaceIndex > /dev/null 2>&1
+        processor*/constant/polyMesh/surfaceIndex
     rm -f \
         constant/cellLevel \
         constant/pointLevel \
         0/cellLevel \
-        0/pointLevel > /dev/null 2>&1
+        0/pointLevel
     rm -f \
         processor*/constant/cellLevel \
         processor*/constant/pointLevel \
         processor*/0/cellLevel \
-        processor*/0/pointLevel > /dev/null 2>&1
+        processor*/0/pointLevel
 }
 
 
@@ -92,11 +92,11 @@ cleanOptimisation()
 
 cleanPostProcessing()
 {
-    rm -rf Ensight EnSight ensightWrite insitu VTK > /dev/null 2>&1
-    rm -rf postProcessing > /dev/null 2>&1
-    rm -rf postProcessing-dry-run > /dev/null 2>&1
-    rm -rf cuttingPlane > /dev/null 2>&1
-    rm -rf surfaceSampling > /dev/null 2>&1
+    rm -rf Ensight EnSight ensightWrite insitu VTK
+    rm -rf postProcessing
+    rm -rf postProcessing-*
+    rm -rf cuttingPlane
+    rm -rf surfaceSampling
 }
 
 
@@ -108,19 +108,19 @@ cleanCase()
     cleanDynamicCode
     cleanOptimisation
 
-    rm -rf processor* > /dev/null 2>&1
-    rm -rf TDAC > /dev/null 2>&1
-    rm -rf probes* > /dev/null 2>&1
-    rm -rf forces* > /dev/null 2>&1
-    rm -rf graphs* > /dev/null 2>&1
-    rm -rf sets > /dev/null 2>&1
-    rm -rf system/machines > /dev/null 2>&1
+    rm -rf processor*
+    rm -rf TDAC
+    rm -rf probes*
+    rm -rf forces*
+    rm -rf graphs*
+    rm -rf sets
+    rm -rf system/machines
 
     # From mpirunDebug
     rm -f gdbCommands  mpirun.schema
 
     cleanSnappyFiles
-    rm -f 0/cellDist > /dev/null 2>&1
+    rm -f 0/cellDist
 
     (
         cd constant 2>/dev/null || exit 0
@@ -128,13 +128,13 @@ cleanCase()
         rm -rf \
           cellDecomposition cellToRegion cellLevel* pointLevel* \
           tetDualMesh \
-          > /dev/null 2>&1
+          ;
 
         # Old constant/polyMesh location for blockMeshDict still in use?
         # - emit a gentle warning
         if [ -e polyMesh/blockMeshDict.m4 ]
         then
-            rm -f polyMesh/blockMeshDict > /dev/null 2>&1
+            rm -f polyMesh/blockMeshDict
             echo
             echo "Warning: not removing constant/polyMesh/ "
             echo "   it contains a blockMeshDict, which should normally be under system/ instead"
@@ -147,13 +147,13 @@ cleanCase()
             echo
         else
             # Remove polyMesh entirely if there is no blockMeshDict
-            rm -rf polyMesh > /dev/null 2>&1
+            rm -rf polyMesh
         fi
     )
 
     if [ -e system/blockMeshDict.m4 ]
     then
-        rm -f system/blockMeshDict > /dev/null 2>&1
+        rm -f system/blockMeshDict
     fi
 }
 
@@ -175,24 +175,22 @@ removeCase()
 
 cleanSamples()
 {
-    rm -rf sets samples sampleSurfaces > /dev/null 2>&1
+    rm -rf sets samples sampleSurfaces
 }
 
 
 cleanUcomponents()
 {
-    rm -rf 0/Ux 0/Uy 0/Uz > /dev/null 2>&1
+    rm -rf 0/Ux 0/Uy 0/Uz
 }
 
 
 cleanFaMesh ()
 {
-    (
-        cd constant/faMesh 2>/dev/null && \
-        rm -rf \
-          faceLabels* faBoundary* \
-          > /dev/null 2>&1 \
-    )
+    rm -rf \
+        constant/faMesh/faceLabels* \
+        constant/faMesh/faBoundary* \
+    ;
 }
 
 

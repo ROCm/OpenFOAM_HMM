@@ -113,8 +113,8 @@ done
 rm -rf latex man
 
 # Remove html directory in background
-mv html html-stagedRemove$$ 2> /dev/null
-rm -rf html-stagedRemove$$ >/dev/null 2>&1 &
+mv html html-stagedRemove$$ 2>/dev/null
+rm -rf html-stagedRemove$$ 2>/dev/null &
 
 # Ensure that created files are readable by everyone
 umask 22

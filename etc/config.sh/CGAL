@@ -58,7 +58,7 @@ then
     echo "Using CGAL ($cgal_version)  ->  $CGAL_ARCH_PATH" 1>&2
 fi
 
-if command -v _foamAddLibAuto > /dev/null 2>&1  # Normal sourcing (not makeCGAL)
+if command -v _foamAddLibAuto >/dev/null  # Normal sourcing (not makeCGAL)
 then
     _foamAddLibAuto $BOOST_ARCH_PATH  lib$WM_COMPILER_LIB_ARCH
     _foamAddLibAuto $CGAL_ARCH_PATH   lib$WM_COMPILER_LIB_ARCH

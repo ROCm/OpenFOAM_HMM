@@ -36,7 +36,7 @@ refGrad=0
 valueFraction=1
 
 # Remove any old junk
-\rm -f $lockFile 2>/dev/null
+rm -f "$lockFile"
 
 log()
 {
@@ -208,7 +208,7 @@ case "$action" in
         log "done"
 
         # Cleanup. Remove the lock file
-        \rm -f $lockFile 2>/dev/null
+        rm -f "$lockFile"
         ;;
 esac
 

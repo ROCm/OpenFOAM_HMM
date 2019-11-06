@@ -62,7 +62,7 @@ copyParallelPointDisplacement()
             if [ -d "$proc/$latestTime" -a ! -d "$proc/$deltaT" ]
             then
                 mv $proc/$latestTime $proc/$deltaT
-                \rm -rf $proc/$deltaT/uniform
+                rm -rf "$proc/$deltaT/uniform"
             fi
         done
     )

@@ -128,7 +128,7 @@ then
     [ -d "$outputDir" ] && [ -w "$outputDir" ] || \
         die "Cannot write to $outputDir" "Not a directory, or no permission?"
 else
-    mkdir -p "$outputDir" 2> /dev/null || \
+    mkdir -p "$outputDir" 2>/dev/null || \
         die "Cannot create directory: $outputDir"
 fi
 
@@ -138,7 +138,7 @@ echo 1>&2
 # Use a tmp file so that we confirm that the content was
 # generated and looks somewhat like a manpage (has a SYNOPSIS)
 tmpFile="$outputDir/${0##*/}-tmp$$"
-trap "rm -fv $tmpFile >/dev/null; exit 0" EXIT TERM INT
+trap "rm -fv $tmpFile 2>/dev/null; exit 0" EXIT TERM INT
 
 
 # Any special filter requirements?
@@ -148,12 +148,12 @@ outputExt="1"
 case "$outputType" in
     pdf)
         outputExt="pdf"
-        command -v groff  > /dev/null || die "Missing program: groff"
-        command -v ps2pdf > /dev/null || die "Missing program: ps2pdf"
+        command -v groff  >/dev/null || die "Missing program: groff"
+        command -v ps2pdf >/dev/null || die "Missing program: ps2pdf"
         ;;
     gz)
         outputExt="1.gz"
-        command -v gzip   > /dev/null || die "Missing program: gzip"
+        command -v gzip   >/dev/null || die "Missing program: gzip"
     ;;
 esac
 
@@ -212,7 +212,7 @@ do
         do
             process $appName
         done
-    elif command -v "$item" > /dev/null 2>&1
+    elif command -v "$item" >/dev/null
     then
         process $item
     else

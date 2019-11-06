@@ -201,7 +201,7 @@ esac
 
 #------------------------------------------------------------------------------
 
-if command -v _foamAddLib > /dev/null 2>&1  # normal sourcing
+if command -v _foamAddLib >/dev/null  # normal sourcing
 then
     unset ParaView_VERSION ParaView_QT
 fi

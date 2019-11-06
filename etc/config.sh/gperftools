@@ -48,7 +48,7 @@ then
     echo "Using gperftools ($gperftools_version)  ->  $GPERFTOOLS_ARCH_PATH" 1>&2
 fi
 
-if command -v _foamAddLib > /dev/null 2>&1      # Normal sourcing
+if command -v _foamAddLib >/dev/null  # Normal sourcing
 then
 
     # If GPERFTOOLS_ARCH_PATH does not end with '-system' or '-none',

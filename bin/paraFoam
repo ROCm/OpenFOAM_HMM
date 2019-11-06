@@ -226,7 +226,7 @@ proc*)
     for i in processor*
     do
     (
-        cd "$i" 2> /dev/null && touch "${caseFile%.*}#${i#processor}.$extension"
+        cd "$i" 2>/dev/null && touch "${caseFile%.*}#${i#processor}.$extension"
     )
     done
     echo "Created '$caseFile' for processor directories" 1>&2

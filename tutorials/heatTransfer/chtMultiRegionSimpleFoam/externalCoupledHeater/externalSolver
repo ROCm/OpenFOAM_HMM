@@ -32,7 +32,7 @@ refGrad=0
 valueFraction=1
 
 # Remove any old junk
-\rm -f $lockFile 2>/dev/null
+rm -f "$lockFile"
 
 log()
 {
@@ -169,7 +169,7 @@ done
 log "done"
 
 # Remove the lock file too
-\rm -f $lockFile 2>/dev/null
+rm -f "$lockFile"
 
 # For log collector:
 echo "End"

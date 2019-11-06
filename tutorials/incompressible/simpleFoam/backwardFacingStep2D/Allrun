@@ -10,8 +10,8 @@ if notTest $@
 then
     # Create validation plots
 
-    # Test if gnuplot exists on the system
-    command -v gnuplot >/dev/null 2>&1 || {
+    # Require gnuplot
+    command -v gnuplot >/dev/null || {
         echo "gnuplot not found - skipping graph creation" 1>&2
         exit 1
     }
@@ -25,8 +25,8 @@ then
         exit 1
     }
 
-    # Test if awk exists on the system
-    command -v awk >/dev/null 2>&1 || {
+    # Require awk
+    command -v awk >/dev/null || {
         echo "awk not found - skipping graph creation" 1>&2
         exit 1
     }
@@ -71,7 +71,7 @@ EOF1
     foamDictionary -entry boundaryField.lowerWall.value -value $timeDir/wallShearStress | \
         sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' > tau.$$
     paste -d ' ' Cx.$$ tau.$$ >> tauw.dat
-    \rm -f Cx.$$ tau.$$
+    rm -f Cx.$$ tau.$$
 
     graphNameTau="backwardStep2D_tau.png"
     echo "Creating wallshear stress graph to $graphNameTau"

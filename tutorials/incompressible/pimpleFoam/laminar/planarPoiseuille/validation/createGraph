@@ -3,8 +3,8 @@
 tail -n +4 ../postProcessing/probes/0/U  | \
     tr -s " " | tr -d '(' | cut -d " " -f2-3 > ../Numerical.dat
 
-# Test if gnuplot exists on the system
-command -v gnuplot >/dev/null 2>&1 || {
+# Require gnuplot
+command -v gnuplot >/dev/null || {
     echo "gnuplot not found - skipping graph creation" 1>&2
     exit 1
 }

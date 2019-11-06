@@ -13,7 +13,7 @@ runApplication blockMesh
 # Serial
 # ------
 #runApplication snappyHexMesh -overwrite
-#\rm -f constant/polyMesh/refinementHistory*
+#rm -f constant/polyMesh/refinementHistory*
 # - set the initial fields
 # restore0Dir
 #runApplication setFields

@@ -5,7 +5,7 @@ cd ${0%/*} || exit 1                                # Run from this directory
 
 cleanCase
 
-rm -rf 0/polyMesh > /dev/null 2>&1
-rm system/topoSetDict > /dev/null 2>&1
+rm -rf 0/polyMesh
+rm -f system/topoSetDict
 
 #------------------------------------------------------------------------------

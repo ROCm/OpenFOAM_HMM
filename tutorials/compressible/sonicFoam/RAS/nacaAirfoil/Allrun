@@ -15,8 +15,8 @@ rm -f \
    constant/cellTable \
    constant/polyMesh/cellTableId \
    constant/polyMesh/interfaces  \
-   constant/polyMesh/origCellId  > /dev/null 2>&1
-
+   constant/polyMesh/origCellId  \
+   ;
 
 if isParallel "$@"
 then

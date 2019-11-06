@@ -1,6 +1,7 @@
 #!/bin/sh
 
-command -v gnuplot >/dev/null 2>&1 || {
+# Require gnuplot
+command -v gnuplot >/dev/null || {
     echo "gnuplot not found - skipping graph creation" 1>&2
     exit 1
 }
@@ -21,4 +22,3 @@ gnuplot<<EOF
 EOF
 
 #------------------------------------------------------------------------------
-

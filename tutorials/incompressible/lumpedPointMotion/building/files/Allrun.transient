@@ -4,7 +4,7 @@ cd ${0%/*} || exit 1                                # Run from this directory
 #------------------------------------------------------------------------------
 
 # Cleanup old junk that may prevent things from starting
-\rm -f comms/OpenFOAM.lock
+rm -f comms/OpenFOAM.lock
 
 # If OpenFOAM stops prematurely, trigger the external solver to stop
 trap '[ -e comms/OpenFOAM.lock ] && echo "status=done" > comms/OpenFOAM.lock' EXIT TERM INT

@@ -22,7 +22,7 @@ then
     # ## Can verify parallel operation of createExternalCoupledPatchGeometry
     if [ "$coupling" = true ] && [ "$testCreate" = true ]
     then
-        \rm -f log.createExternalCoupledPatchGeometry
+        rm -f log.createExternalCoupledPatchGeometry
         runParallel createExternalCoupledPatchGeometry \
             coupleGroup \
             -commsDir $PWD/comms

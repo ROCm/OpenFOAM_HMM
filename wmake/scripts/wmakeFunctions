@@ -193,7 +193,7 @@ removeObjectDir()
     local objectsDir=$(findObjectDir ${1:-.})
     if [ -d "$objectsDir" ]
     then
-        rm -rf "$objectsDir" > /dev/null 2>&1
+        rm -rf "$objectsDir" 2>/dev/null
     fi
 }
 

@@ -434,7 +434,7 @@ restore0Dir()
         (
             echo "Filter #include directives in processors/0:"
             \cd processors/0 2>/dev/null || exit 0
-            for file in $(grep -l "#include" * 2> /dev/null)
+            for file in $(grep -l "#include" * 2>/dev/null)
             do
                 foamDictionary "$file" > "$file.$$." && mv "$file.$$." "$file"
                 echo "    $file"

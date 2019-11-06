@@ -5,6 +5,6 @@ cd ${0%/*} || exit 1                                # Run from this directory
 
 cleanCase0
 
-rm -f ppGeometry.vtp 2>/dev/null
+rm -f ppGeometry.vtp
 
 #------------------------------------------------------------------------------

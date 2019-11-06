@@ -10,7 +10,7 @@ cp $FOAM_TUTORIALS/resources/geometry/building_wtc2.obj constant/triSurface/
 # runApplication surfaceFeatureExtract
 runApplication blockMesh
 
-\rm -f constant/polyMesh/*Level
+rm -f constant/polyMesh/*Level
 
 unset parallel
 parallel=true
@@ -23,7 +23,7 @@ then
     # Serial
 
     runApplication snappyHexMesh -overwrite
-    \rm -f constant/polyMesh/refinementHistory*
+    rm -f constant/polyMesh/refinementHistory*
 
     restore0Dir
 

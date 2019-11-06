@@ -11,7 +11,7 @@ restore0Dir
 # initialise with potentialFoam solution
 runApplication potentialFoam
 
-\rm -f 0/phi
+rm -f 0/phi
 
 # run the solver
 runApplication $(getApplication)

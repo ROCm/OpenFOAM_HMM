@@ -26,7 +26,7 @@ cd ${0%/*} || exit 1                                # Run from this directory
 (
     cd wingMotion2D_pimpleFoam || exit 1
 
-    \rm -rf constant/polyMesh
+    rm -rf constant/polyMesh
     \cp -r ../wingMotion2D_simpleFoam/constant/polyMesh constant
     restore0Dir
     runApplication mapFields ../wingMotion2D_simpleFoam -sourceTime latestTime -consistent

@@ -5,8 +5,8 @@ cd ${0%/*} || exit 1                                # Run from this directory
 
 cleanCase
 
-rm -rf constant/extendedFeatureEdgeMesh > /dev/null 2>&1
-rm -rf constant/triSurface/jaggedBoundary.eMesh > /dev/null 2>&1
-rm -rf MeshedSurface.obj > /dev/null 2>&1
+rm -rf constant/extendedFeatureEdgeMesh
+rm -rf constant/triSurface/jaggedBoundary.eMesh
+rm -rf MeshedSurface.obj
 
 #------------------------------------------------------------------------------

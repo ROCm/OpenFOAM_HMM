@@ -16,7 +16,7 @@ intersectSurfaces()
 }
 
 
-\rm -rf 0
+rm -rf 0
 
 
 # Run the surface preparation script
@@ -76,7 +76,7 @@ then
     runApplication reconstructParMesh -latestTime
 
     \cp -r $latestTime/polyMesh constant
-    \rm -rf $latestTime
+    rm -rf $latestTime
 fi
 
 

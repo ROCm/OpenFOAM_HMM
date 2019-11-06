@@ -32,7 +32,7 @@ then
     echo "Using adios ($adios2_version)  ->  $ADIOS2_ARCH_PATH" 1>&2
 fi
 
-if command -v _foamAddLibAuto > /dev/null 2>&1
+if command -v _foamAddLibAuto >/dev/null
 then
     # Normal sourcing (not makeAdios2)
     # Only add to PATH if the directory really exists

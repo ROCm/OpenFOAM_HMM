@@ -82,7 +82,7 @@ OPENMPI)
     fi
 
     # Could be sourced from ThirdParty with incomplete environment
-    if command -v _foamAddLibAuto > /dev/null 2>&1  # Normal sourcing
+    if command -v _foamAddLibAuto >/dev/null  # Normal sourcing
     then
         _foamAddPath    $MPI_ARCH_PATH/bin
         _foamAddMan     $MPI_ARCH_PATH/share/man
@@ -151,7 +151,7 @@ MPICH)
     export MPI_HOME=$MPI_ARCH_PATH
 
     # Could be sourced from ThirdParty with incomplete environment
-    if command -v _foamAddLibAuto > /dev/null 2>&1  # Normal sourcing
+    if command -v _foamAddLibAuto >/dev/null  # Normal sourcing
     then
         _foamAddPath    $MPI_ARCH_PATH/bin
         _foamAddMan     $MPI_ARCH_PATH/share/man
@@ -175,7 +175,7 @@ MVA2MPI)  # MVAMPICH2
     export MPI_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
 
     # Could be sourced from ThirdParty with incomplete environment
-    if command -v _foamAddLibAuto > /dev/null 2>&1  # Normal sourcing
+    if command -v _foamAddLibAuto >/dev/null  # Normal sourcing
     then
         _foamAddPath    $MPI_ARCH_PATH/bin
         _foamAddMan     $MPI_ARCH_PATH/share/man
@@ -341,7 +341,7 @@ esac
 
 # Add (non-dummy) MPI implementation
 # - dummy MPI already in lib-path and has no external libraries
-if [ "$FOAM_MPI" != dummy ] && type _foamAddLib > /dev/null 2>&1
+if [ "$FOAM_MPI" != dummy ] && command -v _foamAddLib >/dev/null
 then
     if [ -n "$FOAM_EXT_LIBBIN" ]    # External libraries (allowed to be unset)
     then

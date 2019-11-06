@@ -27,7 +27,7 @@ then
     depend=ignore
 elif [ -n "$depend" ]
 then
-    if command -v cmake > /dev/null 2>&1
+    if command -v cmake >/dev/null
     then
         cmakeVersioned "$depend" $PWD || {
             echo

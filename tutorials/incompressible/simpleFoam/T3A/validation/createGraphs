@@ -1,8 +1,9 @@
 #!/bin/sh
 cd ${0%/*} || exit 1                        # Run from this directory
+#------------------------------------------------------------------------------
 
-# Test if gnuplot exists on the system
-command -v gnuplot >/dev/null 2>&1 || {
+# Require gnuplot
+command -v gnuplot >/dev/null || {
     echo "gnuplot not found - skipping graph creation" 1>&2
     exit 1
 }

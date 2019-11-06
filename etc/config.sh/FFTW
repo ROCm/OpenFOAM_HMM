@@ -45,7 +45,7 @@ then
     echo "Using fftw ($fftw_version)  ->  $FFTW_ARCH_PATH" 1>&2
 fi
 
-if command -v _foamAddLibAuto > /dev/null 2>&1  # Normal sourcing (not makeFFTW)
+if command -v _foamAddLibAuto >/dev/null  # Normal sourcing (not makeFFTW)
 then
 
     _foamAddLibAuto $FFTW_ARCH_PATH  lib$WM_COMPILER_LIB_ARCH

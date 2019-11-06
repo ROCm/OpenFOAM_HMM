@@ -25,7 +25,7 @@ nz=2
 
 
 tmpSetSet='patchify.setSet'
-rm -f patchify.setSet >/dev/null 2>&1
+rm -f patchify.setSet
 
 
 initialiseFaceSet()

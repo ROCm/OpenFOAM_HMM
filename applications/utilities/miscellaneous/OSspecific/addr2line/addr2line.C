@@ -186,7 +186,7 @@ std::string getLine(const std::string& filename, const std::string& addr)
           + "' -o '"
           + "target module load -f "
           + filename
-          + " __TEXT 0x0' 2> /dev/null"
+          + " __TEXT 0x0' 2>/dev/null"
           + " | grep LineEntry"
         );
 

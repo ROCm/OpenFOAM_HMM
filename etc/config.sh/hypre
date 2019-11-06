@@ -38,9 +38,9 @@ then
     echo "Using hypre ($hypre_version)  ->  $HYPRE_ARCH_PATH" 1>&2
 fi
 
-if command -v _foamAddLibAuto > /dev/null 2>&1  # Normal sourcing (not makeHYPRE)
+if command -v _foamAddLibAuto >/dev/null
 then
-
+    # Normal sourcing (not makeHYPRE)
     _foamAddLibAuto $HYPRE_ARCH_PATH
 
     unset hypre_version

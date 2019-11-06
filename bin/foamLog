@@ -296,7 +296,7 @@ say
 # Generate Awk program
 #-----------------------------
 
-rm -f $AWKFILE 2> /dev/null
+rm -f $AWKFILE
 cat << AWK_CONTENTS > $AWKFILE
 # Awk script for OpenFOAM log file extraction
 BEGIN {

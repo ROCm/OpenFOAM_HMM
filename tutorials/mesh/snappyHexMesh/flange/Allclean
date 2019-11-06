@@ -5,11 +5,11 @@ cd ${0%/*} || exit 1                                # Run from this directory
 
 cleanCase0
 
-rm -f ./flange ./*.obj > /dev/null 2>&1
+rm -f ./flange ./*.obj
 
 # Remove surface and features
-rm -f constant/triSurface/flange.stl.gz > /dev/null 2>&1
-rm -f constant/triSurface/flange.eMesh  > /dev/null 2>&1
-rm -rf constant/extendedFeatureEdgeMesh > /dev/null 2>&1
+rm -f constant/triSurface/flange.stl.gz
+rm -f constant/triSurface/flange.eMesh
+rm -rf constant/extendedFeatureEdgeMesh
 
 #------------------------------------------------------------------------------

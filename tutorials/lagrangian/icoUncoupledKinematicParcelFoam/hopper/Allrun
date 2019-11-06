@@ -10,7 +10,7 @@ cd ${0%/*} || exit 1                                # Run from this directory
     runApplication decomposePar
     runParallel $(getApplication)
     runApplication reconstructPar -latestTime
-    rm log.reconstructPar
+    rm -f log.reconstructPar
     runApplication reconstructPar -lagrangianFields \
         '(collisionRecordsPairAccessed collisionRecordsPairData \
           collisionRecordsPairOrigIdOfOther \

@@ -5,7 +5,7 @@ cd ${0%/*} || exit 1                                # Run from this directory
 
 cleanCase0
 
-rm externalCoupled.control 2> /dev/null
+rm -f externalCoupled.control
 
 rm -rf comms
 ### rm -rf VTK

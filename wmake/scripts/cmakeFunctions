@@ -94,7 +94,7 @@ cmakeVersioned()
 
     # Version changed
     sentinel=$(sameDependency "$depend" "$sourceDir") || \
-        rm -rf "$objectsDir" > /dev/null 2>&1
+        rm -rf "$objectsDir" 2>/dev/null
 
     mkdir -p "$objectsDir" \
     && (cd "$objectsDir" && _cmake "$@" "$sourceDir" && make) \
@@ -120,7 +120,7 @@ cmakeVersionedInstall()
 
     # Version changed
     sentinel=$(sameDependency "$depend" "$sourceDir") || \
-        rm -rf "$objectsDir" > /dev/null 2>&1
+        rm -rf "$objectsDir" 2>/dev/null
 
     mkdir -p "$objectsDir" \
     && (cd "$objectsDir" && _cmake "$@" "$sourceDir" && make install) \
@@ -147,7 +147,7 @@ wmakeVersioned()
 
     # Version changed
     sentinel=$(sameDependency "$depend" "$sourceDir") || \
-        rm -rf "$objectsDir" > /dev/null 2>&1
+        rm -rf "$objectsDir" 2>/dev/null
 
     mkdir -p "$objectsDir" \
     && wmake "$@" \

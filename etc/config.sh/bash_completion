@@ -78,7 +78,7 @@ foamAddCompletion()
                 # echo "complete ${appName##*/}" 1>&2
             done
 
-        elif command -v "$appName" > /dev/null 2>&1
+        elif command -v "$appName" >/dev/null
         then
             complete -o filenames -F _of_complete_ "${appName##*/}"
             # echo "complete ${appName##*/}" 1>&2

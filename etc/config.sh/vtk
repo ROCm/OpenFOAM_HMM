@@ -51,7 +51,7 @@ then
     echo "    llvm ($mesa_llvm) $LLVM_ARCH_PATH" 1>&2
 fi
 
-if command -v _foamAddLib > /dev/null 2>&1  # normal sourcing
+if command -v _foamAddLib >/dev/null  # normal sourcing
 then
 
     # Set paths if binaries are present

@@ -92,14 +92,14 @@ if notTest $@
 then
     # Create validation plots
 
-    # Test if gnuplot exists on the system
-    command -v gnuplot >/dev/null 2>&1 || {
+    # Require gnuplot
+    command -v gnuplot >/dev/null || {
         echo "gnuplot not found - skipping graph creation" 1>&2
         exit 1
     }
 
-    # Test if awk exists on the system
-    command -v awk >/dev/null 2>&1 || {
+    # Require awk
+    command -v awk >/dev/null || {
         echo "awk not found - skipping graph creation" 1>&2
         exit 1
     }
