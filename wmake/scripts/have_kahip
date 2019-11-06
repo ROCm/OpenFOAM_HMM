@@ -30,7 +30,7 @@
 #     KAHIP_LIB_DIR
 #
 #------------------------------------------------------------------------------
-. $WM_PROJECT_DIR/wmake/scripts/sysFunctions # General system functions
+. ${WM_PROJECT_DIR:?}/wmake/scripts/sysFunctions    # General system functions
 
 #------------------------------------------------------------------------------
 
@@ -60,7 +60,7 @@ have_kahip()
     local prefix header library incName libName settings warn
     warn="==> skip kahip"
 
-    #  Setup
+    # Setup
     if settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/kahip)
     then
         . "$settings"

@@ -20,7 +20,7 @@
 #
 # Usage
 #     # Parse the arguments by sourcing this script
-#     . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
+#     . ${WM_PROJECT_DIR:?}/wmake/scripts/AllwmakeParseArguments
 #
 #------------------------------------------------------------------------------
 

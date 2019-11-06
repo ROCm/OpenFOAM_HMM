@@ -1,6 +1,7 @@
 #!/bin/sh
-cd ${0%/*} || exit 1                        # Run from this directory
-. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
+cd ${0%/*} || exit 1                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
 
 # Make 3D mesh in slab of cells.
 runApplication blockMesh

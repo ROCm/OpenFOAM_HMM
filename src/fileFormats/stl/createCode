@@ -1,8 +1,9 @@
 #!/bin/sh
-cd ${0%/*} || exit 1                        # Run from this directory
-# Manually create ragel code
+cd ${0%/*} || exit 1                                # Run from this directory
 
-"$WM_PROJECT_DIR/wmake/scripts/makeParser" \
+# Manually create ragel scanner
+
+"${WM_PROJECT_DIR:?}/wmake/scripts/makeParser" \
     -scanner=STLAsciiParseRagel.rl \
     "$@"
 

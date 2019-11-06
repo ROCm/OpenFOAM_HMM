@@ -120,10 +120,10 @@ case "$parser" in
     elif [ "$optCode" = true ]
     then
         echo "Generating lemon parser code ($extCode)$message"
-        "$WM_PROJECT_DIR/wmake/scripts/wrap-lemon" $optDebug -e"$extCode" -s "$input"
+        "${WM_PROJECT_DIR:?}/wmake/scripts/wrap-lemon" $optDebug -e"$extCode" -s "$input"
     else
         echo "Generating lemon parser header$message"
-        "$WM_PROJECT_DIR/wmake/scripts/wrap-lemon" $optDebug -header -s "$input"
+        "${WM_PROJECT_DIR:?}/wmake/scripts/wrap-lemon" $optDebug -header -s "$input"
     fi
     echo
     ;;

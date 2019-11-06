@@ -1,6 +1,7 @@
 #!/bin/sh
-cd ${0%/*} || exit 1                            # Run from this directory
-. $WM_PROJECT_DIR/wmake/scripts/wmakeFunctions  # Source wmake functions
+cd ${0%/*} || exit 1                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/wmake/scripts/wmakeFunctions  # Require wmake functions
+#------------------------------------------------------------------------------
 
 # This cleanup handles both cmake runTimePostProcessing and the dummy version
 

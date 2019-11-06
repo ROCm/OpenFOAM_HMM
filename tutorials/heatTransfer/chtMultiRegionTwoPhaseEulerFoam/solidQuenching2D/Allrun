@@ -1,13 +1,10 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
-
-# Source tutorial run functions
-. $WM_PROJECT_DIR/bin/tools/RunFunctions
-
-application=$(getApplication)
+cd ${0%/*} || exit 1                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
 
 ./Allrun.pre
 
-runApplication $application
+runApplication $(getApplication)
 
 #------------------------------------------------------------------------------

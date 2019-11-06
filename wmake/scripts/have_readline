@@ -29,7 +29,7 @@
 #     READLINE_LIB_DIR
 #
 #------------------------------------------------------------------------------
-. $WM_PROJECT_DIR/wmake/scripts/sysFunctions # General system functions
+. ${WM_PROJECT_DIR:?}/wmake/scripts/sysFunctions    # General system functions
 
 #------------------------------------------------------------------------------
 

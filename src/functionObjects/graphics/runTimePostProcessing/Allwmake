@@ -1,7 +1,6 @@
 #!/bin/sh
-cd ${0%/*} || exit 1                            # Run from this directory
-. $WM_PROJECT_DIR/wmake/scripts/cmakeFunctions  # The CMake functions
-
+cd ${0%/*} || exit 1                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/wmake/scripts/cmakeFunctions  # Require cmake functions
 # -----------------------------------------------------------------------------
 
 echo "======================================================================"

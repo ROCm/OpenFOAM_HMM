@@ -1,7 +1,7 @@
 #!/bin/sh
-cd ${0%/*} || exit 1                        # Run from this directory
-. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
-
+cd ${0%/*} || exit 1                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
 
 # 1) First run steady-state to establish a good initial field.
 # 2) Copy the latest state-state results for the transient case,

@@ -104,8 +104,8 @@ do
     shift
 done
 
-# Set FOAM_TUTORIALS directory location, as required.
-. "${WM_PROJECT_DIR:?}/bin/tools/RunFunctions"
+# Sets FOAM_TUTORIALS directory location, as required
+. "${WM_PROJECT_DIR:?}"/bin/tools/RunFunctions
 
 
 #------------------------------------------------------------------------------

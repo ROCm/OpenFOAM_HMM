@@ -17,7 +17,7 @@
 # Description
 #     Helper functions for CMake
 #------------------------------------------------------------------------------
-. $WM_PROJECT_DIR/wmake/scripts/wmakeFunctions  # Require some wmake functions
+. ${WM_PROJECT_DIR:?}/wmake/scripts/wmakeFunctions  # Require wmake functions
 
 # Export compiler information for cmake
 export CC="$(wmake -show-c)"

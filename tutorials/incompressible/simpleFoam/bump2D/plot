@@ -1,12 +1,13 @@
 #!/bin/sh
+cd ${0%/*} || exit 1                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
 # Note: CFL3D data available from:
 # https://turbmodels.larc.nasa.gov/bump_sa.html
 # The CFL3D-SpalartAllmaras datasets of Cf and Cp:
 # Cf = https://turbmodels.larc.nasa.gov/Bump/SA/cf_bump.dat
 # Cp = https://turbmodels.larc.nasa.gov/Bump/SA/cp_bump.dat
-
-cd ${0%/*} || exit 1                        # Run from this directory
-. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
 
 
 plotCf() {
