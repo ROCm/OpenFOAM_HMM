@@ -1,7 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 cd ${0%/*} || exit 1                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
+
+# Turbulence closure models
+models=('kOmegaSST' 'SpalartAllmaras')
 
 # Note: CFL3D data available from:
 # https://turbmodels.larc.nasa.gov/bump_sa.html
@@ -9,6 +12,7 @@ cd ${0%/*} || exit 1                                # Run from this directory
 # Cf = https://turbmodels.larc.nasa.gov/Bump/SA/cf_bump.dat
 # Cp = https://turbmodels.larc.nasa.gov/Bump/SA/cp_bump.dat
 
+#------------------------------------------------------------------------------
 
 plotCf() {
     declare -a resultSet=("${!1}")
@@ -103,9 +107,6 @@ then
         echo "awk not found - skipping graph creation" 1>&2
         exit 1
     }
-
-    # Turbulence closure models
-    models=('kOmegaSST' 'kEpsilon')
 
     modelResults=()
     n=0

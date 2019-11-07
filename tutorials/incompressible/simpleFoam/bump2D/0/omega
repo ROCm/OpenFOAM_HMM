@@ -46,7 +46,7 @@ boundaryField
 
     bump
     {
-        type            omegaWallFunction; 
+        type            omegaWallFunction;
         value           $internalField;
     }
 

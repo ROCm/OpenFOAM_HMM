@@ -12,36 +12,73 @@ kOmegaSST
 SpalartAllmaras
 "
 
-for model in $models
-do
-    echo "Processing model: $model"
+# Extract a value (Eg, from boundaryField/bump/value)
+#
+# $1 = dictEntry
+# $2 = inputFile
+# $3 = outputFile
+#
+# only retain values between, but not including the ( ) delimiters.
+# For example,
+# ----
+# value           nonuniform List<scalar>
+# 110
+# (
+# 0.0041520092
+# 0.012577691
+# 0.021250264
+# 0.030176962
+# )
+# ;
+# ----
+extractVal()
+{
+    if [ -f "$2" ]
+    then
+        foamDictionary -entry "$1" -value "$2" | \
+            sed -n '/(/,/)/{ s/[()]//g; /^ *$/d; p}' \
+            > "$3"
+    else
+        # Or some other tag?
+        echo "Not such file: $2" 1>&2
+        echo "0" > "$3"
+    fi
+}
 
-    \cp constant/turbulenceProperties.template constant/turbulenceProperties
-    runApplication -s "$model" foamDictionary -entry RAS.RASModel \
-        -set "$model" constant/turbulenceProperties
 
-    runApplication $(getApplication)
+# Possibly disable for test: if notTest $@
 
-    timeDir=$(foamListTimes -latestTime)
+if :
+then
+    for model in $models
+    do
+        echo "Processing model: $model"
 
-    # Create datasets for benchmark comparisons
-    echo "# ccx tau_xx tau_yy tau_zz cp" > profiles.dat
-    foamDictionary -entry boundaryField.bump.value -value $timeDir/Cx | \
-        sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' > Cx.$$
-    foamDictionary -entry boundaryField.bump.value -value $timeDir/wallShearStress | \
-        sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' > tau.$$
-    foamDictionary -entry boundaryField.bump.value -value $timeDir/Cp | \
-        sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' > cp.$$
-    \paste -d ' ' Cx.$$ tau.$$ cp.$$ >> profiles.dat
-    \rm -f Cx.$$ tau.$$ cp.$$
+        sed -e "s/RAS_MODEL/$model/g" \
+            constant/turbulenceProperties.template \
+          > constant/turbulenceProperties
 
-    # Store model results
-    modelDir="$model"
-    \rm -rf "$modelDir"
-    \mkdir "$modelDir"
-    \mv log* profiles.dat "$timeDir" postProcessing "$modelDir"
+        runApplication $(getApplication)
 
-    cleanTimeDirectories
-done
+        timeDir=$(foamListTimes -latestTime)
+
+        # Create datasets for benchmark comparisons
+        extractVal boundaryField.bump.value "$timeDir/Cx" "Cx.$$"
+        extractVal boundaryField.bump.value "$timeDir/wallShearStress" "tau.$$"
+        extractVal boundaryField.bump.value "$timeDir/Cp" "cp.$$"
+
+        echo "# ccx tau_xx tau_yy tau_zz cp" > profiles.dat
+        paste -d ' ' Cx.$$ tau.$$ cp.$$ >> profiles.dat
+        rm -f Cx.$$ tau.$$ cp.$$
+
+        # Store results in directory of the same name as the model
+        modelDir="$model"
+        rm -rf "$modelDir"
+        mkdir "$modelDir"
+        mv -f log* profiles.dat "$timeDir" postProcessing "$modelDir"
+
+        cleanTimeDirectories
+    done
+fi
 
 #------------------------------------------------------------------------------
