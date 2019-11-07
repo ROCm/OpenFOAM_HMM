@@ -562,48 +562,6 @@ private:
                     labelList& patchNLayers
                 ) const;
 
-                // Calculate medial axis fields
-                void medialAxisSmoothingInfo
-                (
-                    const motionSmoother& meshMover,
-                    const label nSmoothNormals,
-                    const label nSmoothSurfaceNormals,
-                    const scalar minMedialAxisAngleCos,
-                    const scalar featureAngle,
-
-                    pointVectorField& dispVec,
-                    pointScalarField& medialRatio,
-                    pointScalarField& medialDist,
-                    pointVectorField& medialVec
-                ) const;
-
-                //- Main routine to shrink mesh
-                void shrinkMeshMedialDistance
-                (
-                    motionSmoother& meshMover,
-                    const dictionary& meshQualityDict,
-                    const List<labelPair>& baffles,
-                    const label nSmoothPatchThickness,
-                    const label nSmoothDisplacement,
-                    const scalar maxThicknessToMedialRatio,
-                    const label nAllowableErrors,
-                    const label nSnap,
-                    const scalar minCosLayerTermination,
-
-                    const scalarField& layerThickness,
-                    const scalarField& minThickness,
-
-                    const pointVectorField& dispVec,
-                    const pointScalarField& medialRatio,
-                    const pointScalarField& medialDist,
-                    const pointVectorField& medialVec,
-
-                    List<extrudeMode>& extrudeStatus,
-                    pointField& patchDisp,
-                    labelList& patchNLayers
-                ) const;
-
-
 
         //- No copy construct
         snappyLayerDriver(const snappyLayerDriver&) = delete;
