@@ -4194,7 +4194,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::removeLimitShells
     if (debug&meshRefinement::MESH)
     {
         const_cast<Time&>(mesh_.time())++;
-        Pout<< "Writing mesh after removing limitShells "
+        Pout<< "Writing mesh after removing limitShells"
             << " to time " << timeName() << endl;
         write
         (

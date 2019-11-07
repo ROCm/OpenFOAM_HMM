@@ -36,6 +36,7 @@ License
 #include "OBJstream.H"
 #include "PointData.H"
 #include "zeroFixedValuePointPatchFields.H"
+#include "pointSet.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -568,6 +569,33 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
         maxInfo.shrink();
         maxPoints.shrink();
 
+
+        if (debug)
+        {
+            mkDir(mesh().time().timePath());
+            OBJstream str(mesh().time().timePath()/"medialSurfacePoints.obj");
+
+            pointSet seedPoints
+            (
+                mesh(),
+                "medialSurfacePoints",
+                maxPoints
+            );
+
+            Info<< typeName
+                << " : Writing estimated medial surface:" << nl << incrIndent
+                << indent << "locations : " << str.name() << nl
+                << indent << "pointSet  : " << seedPoints.name() << nl
+                << decrIndent << endl;
+
+            for (const auto& info : maxInfo)
+            {
+                str.write(info.origin());
+            }
+            seedPoints.write();
+        }
+
+
         // Do all calculations
         PointEdgeWave<pointEdgePoint> medialDistCalc
         (
@@ -658,18 +686,16 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
     if (debug)
     {
         Info<< typeName
-            << " : Writing medial axis fields:" << nl
-            << incrIndent
-            << "ratio of medial distance to wall distance : "
+            << " : Writing medial axis fields:" << nl << incrIndent
+            << indent << "ratio of medial distance to wall distance : "
             << medialRatio_.name() << nl
-            << "distance to nearest medial axis           : "
+            << indent << "distance to nearest medial axis           : "
             << medialDist_.name() << nl
-            << "nearest medial axis location              : "
+            << indent << "nearest medial axis location              : "
             << medialVec_.name() << nl
-            << "normal at nearest wall                    : "
+            << indent << "normal at nearest wall                    : "
             << dispVec_.name() << nl
-            << decrIndent << nl
-            << endl;
+            << decrIndent << endl;
 
         dispVec_.write();
         medialRatio_.write();
