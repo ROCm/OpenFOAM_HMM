@@ -7,7 +7,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2018 OpenCFD Ltd.
+#     Copyright (C) 2018-2019 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -25,19 +25,18 @@
 #     When this is detected, the case will be skipped.
 #
 #------------------------------------------------------------------------------
-. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions    # Tutorial run functions
 
 # Normally use standard "make"
 make="make"
 
-thisScript=$0
+thisScript="$0"
 if [ "/${thisScript#/}" != "$thisScript" ]
 then
     thisScript="$PWD/$thisScript"
 fi
 
-unset passArgs runTests
-skipFirst=false
+unset passArgs runTests skipFirst
 
 # Parse options
 while [ "$#" -gt 0 ]
@@ -59,17 +58,17 @@ do
     shift
 done
 
-if ! $skipFirst && $runTests && test -f Alltest
+if [ -z "$skipFirst" ] && [ -n "$runTests" ] && test -f Alltest
 then
     # Run specialized Alltest script
     ./Alltest $passArgs $*
-elif ! $skipFirst && test -f Allrun
+elif [ -z "$skipFirst" ] && test -f Allrun
 then
     # Run specialized Allrun script
     ./Allrun $passArgs $*
-elif ! $skipFirst && test -f Allrun-optional
+elif [ -z "$skipFirst" ] && test -f Allrun-optional
 then
-    # Found Allrun-optional script - skip this tutorial.
+    # Has Allrun-optional script - skip this tutorial.
     echo "Skipped optional case $PWD"
 elif [ -d system ]
 then
@@ -80,9 +79,9 @@ else
     # Loop over sub-directories and compile any applications
     for caseName in *
     do
-        if [ -d $caseName -a -d "$caseName/Make" ]
+        if [ -d "$caseName" ] && [ -d "$caseName/Make" ]
         then
-            ( compileApplication $caseName )
+            ( compileApplication "$caseName" )
         fi
     done
     FOAM_TARGETS=$(for d in *; do [ -d "$d" ] && echo "$d"; done | xargs)

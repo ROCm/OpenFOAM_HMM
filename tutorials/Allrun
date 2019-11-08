@@ -67,11 +67,11 @@ do
 done
 
 #------------------------------------------------------------------------------
-. ${WM_PROJECT_DIR:?}/bin/LogFunctions      # Tutorial log-file functions
+. ${WM_PROJECT_DIR:?}/bin/tools/LogFunctions    # Tutorial log-file functions
 
 if [ -z "$optCollect" ]
 then
-    foamRunTutorials -skipFirst $*          # Run tutorials recursively
+    foamRunTutorials -skipFirst $*              # Run recursively
 fi
 
 collectLogs
