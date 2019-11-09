@@ -159,6 +159,25 @@ areaIntegrate
     fields          ( p pTotal );
 }
 
+nonWeightedAreaAverage
+{
+    ${__surfaceFieldValue}
+    enabled         false;
+
+    regionType      sampledSurface;
+    name            sampledTriSurf;
+    sampledSurfaceDict
+    {
+        type        sampledTriSurfaceMesh;
+        surface     angledPlane.obj;
+        source      insideCells;
+        interpolate true;
+    }
+
+    operation       areaAverage;
+    fields          ( U );
+}
+
 // Inflow uniformity
 UI1
 {
