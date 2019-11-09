@@ -83,11 +83,11 @@ bool Foam::dimensioned<Type>::readEntry
     // Largely identical to dictionary::readEntry(),
     // but with optional handling of checkDims
 
-    const auto finder(dict.csearch(key, matchOpt));
+    const entry* eptr = dict.findEntry(key, matchOpt);
 
-    if (finder.found())
+    if (eptr)
     {
-        ITstream& is = finder.ptr()->stream();
+        ITstream& is = eptr->stream();
 
         initialize(is, checkDims);
 

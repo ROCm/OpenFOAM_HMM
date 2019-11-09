@@ -731,7 +731,7 @@ public:
             enum keyType::option matchOpt = keyType::REGEX
         ) const;
 
-        //- Check if entry is found and and is a sub-dictionary.
+        //- Check if entry is found and is a sub-dictionary.
         //
         //  \param matchOpt the default search is non-recursive with patterns
         //
