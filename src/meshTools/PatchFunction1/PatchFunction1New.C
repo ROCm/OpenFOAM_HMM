@@ -38,11 +38,21 @@ Foam::autoPtr<Foam::PatchFunction1<Type>> Foam::PatchFunction1<Type>::New
     const bool faceValues
 )
 {
-    if (dict.isDict(entryName))
-    {
-        const dictionary& coeffsDict(dict.subDict(entryName));
+    const entry* eptr = dict.findEntry(entryName, keyType::LITERAL);
 
-        const word modelType(coeffsDict.getWord("type"));
+    if (!eptr)
+    {
+        FatalIOErrorInFunction(dict)
+            << "No PatchFunction1 dictionary entry: "
+            << entryName << nl << nl
+            << exit(FatalIOError);
+    }
+
+    if (eptr->isDict())
+    {
+        const dictionary& coeffsDict = eptr->dict();
+
+        const word modelType(coeffsDict.getWord("type", keyType::LITERAL));
 
         auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
@@ -50,9 +60,8 @@ Foam::autoPtr<Foam::PatchFunction1<Type>> Foam::PatchFunction1<Type>::New
         {
             FatalIOErrorInFunction(coeffsDict)
                 << "Unknown PatchFunction1 type "
-                << modelType << " for PatchFunction1 "
-                << entryName << nl << nl
-                << "Valid PatchFunction1 types :" << nl
+                << modelType << " for " << entryName
+                << "\n\nValid PatchFunction1 types :\n"
                 << dictionaryConstructorTablePtr_->sortedToc() << nl
                 << exit(FatalIOError);
         }
@@ -61,7 +70,7 @@ Foam::autoPtr<Foam::PatchFunction1<Type>> Foam::PatchFunction1<Type>::New
     }
     else
     {
-        ITstream& is = dict.lookup(entryName, keyType::LITERAL);
+        ITstream& is = eptr->stream();
 
         token firstToken(is);
 
@@ -110,15 +119,15 @@ Foam::autoPtr<Foam::PatchFunction1<Type>> Foam::PatchFunction1<Type>::New
             );
         }
 
+
         auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
         if (!cstrIter.found())
         {
             FatalIOErrorInFunction(dict)
                 << "Unknown PatchFunction1 type "
-                << modelType << " for PatchFunction1 "
-                << entryName << nl << nl
-                << "Valid PatchFunction1 types :" << nl
+                << modelType << " for " << entryName
+                << "\n\nValid PatchFunction1 types :\n"
                 << dictionaryConstructorTablePtr_->sortedToc() << nl
                 << exit(FatalIOError);
         }
@@ -128,9 +137,7 @@ Foam::autoPtr<Foam::PatchFunction1<Type>> Foam::PatchFunction1<Type>::New
             pp,
             modelType,
             entryName,
-            dict.found(entryName + "Coeffs")
-          ? dict.subDict(entryName + "Coeffs")
-          : dict,
+            dict.optionalSubDict(entryName + "Coeffs"),
             faceValues
         );
     }

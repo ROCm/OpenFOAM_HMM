@@ -38,26 +38,38 @@ Foam::autoPtr<Foam::Function1<Type>> Foam::Function1<Type>::New
     const word& redirectType
 )
 {
-    if (dict.isDict(entryName))
-    {
-        const dictionary& coeffsDict(dict.subDict(entryName));
+    word modelType(redirectType);
 
-        const word Function1Type
+    const entry* eptr = dict.findEntry(entryName, keyType::LITERAL);
+
+    if (!eptr && modelType.empty())
+    {
+        FatalIOErrorInFunction(dict)
+            << "No Function1 dictionary entry: "
+            << entryName << nl << nl
+            << exit(FatalIOError);
+    }
+
+    if (eptr->isDict())
+    {
+        const dictionary& coeffsDict = eptr->dict();
+
+        coeffsDict.readEntry
         (
-            redirectType.empty()
-          ? coeffsDict.get<word>("type")
-          : coeffsDict.lookupOrDefault<word>("type", redirectType)
+            "type",
+            modelType,
+            keyType::LITERAL,
+            redirectType.empty()  // mandatory when redirectType is empty
         );
 
-        auto cstrIter = dictionaryConstructorTablePtr_->cfind(Function1Type);
+        auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
         if (!cstrIter.found())
         {
             FatalIOErrorInFunction(dict)
                 << "Unknown Function1 type "
-                << Function1Type << " for "
-                << entryName << nl << nl
-                << "Valid Function1 types :" << nl
+                << modelType << " for " << entryName
+                << "\n\nValid Function1 types :\n"
                 << dictionaryConstructorTablePtr_->sortedToc() << nl
                 << exit(FatalIOError);
         }
@@ -66,66 +78,40 @@ Foam::autoPtr<Foam::Function1<Type>> Foam::Function1<Type>::New
     }
     else
     {
-        const dictionary::const_searcher finder
-        (
-            dict.csearch(entryName, keyType::REGEX)
-        );
+        Istream& is = eptr->stream();
 
-        word Function1Type;
-        if (finder.found())
-        {
-            Istream& is = finder.ref().stream();
+        token firstToken(is);
 
-            token firstToken(is);
-
-            if (!firstToken.isWord())
-            {
-                is.putBack(firstToken);
-                return autoPtr<Function1<Type>>
-                (
-                    new Function1Types::Constant<Type>(entryName, is)
-                );
-            }
-            else
-            {
-                Function1Type = firstToken.wordToken();
-            }
-        }
-        else if (redirectType != word::null)
+        if (!firstToken.isWord())
         {
-            Function1Type = redirectType;
-        }
-        else
-        {
-            FatalIOErrorInFunction(dict)
-                << "Cannot find specification for Function1 "
-                << entryName << nl << nl
-                << "Valid Function1 types :" << nl
-                << dictionaryConstructorTablePtr_->sortedToc() << nl
-                << exit(FatalIOError);
+            is.putBack(firstToken);
+            return autoPtr<Function1<Type>>
+            (
+                new Function1Types::Constant<Type>(entryName, is)
+            );
         }
 
-        auto cstrIter = dictionaryConstructorTablePtr_->cfind(Function1Type);
-
-        if (!cstrIter.found())
-        {
-            FatalIOErrorInFunction(dict)
-                << "Unknown Function1 type "
-                << Function1Type << " for "
-                << entryName << nl << nl
-                << "Valid Function1 types :" << nl
-                << dictionaryConstructorTablePtr_->sortedToc() << nl
-                << exit(FatalIOError);
-        }
-
-        return cstrIter()
-        (
-            entryName,
-            dict.found(entryName + "Coeffs")
-          ? dict.subDict(entryName + "Coeffs")
-          : dict
-        );
+        modelType = firstToken.wordToken();
     }
+
+
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+
+    if (!cstrIter.found())
+    {
+        FatalIOErrorInFunction(dict)
+            << "Unknown Function1 type "
+            << modelType << " for " << entryName
+            << "\n\nValid Function1 types :\n"
+            << dictionaryConstructorTablePtr_->sortedToc() << nl
+            << exit(FatalIOError);
+    }
+
+    return cstrIter()
+    (
+        entryName,
+        dict.optionalSubDict(entryName + "Coeffs")
+    );
 }
 
 
