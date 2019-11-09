@@ -49,6 +49,7 @@ boundaryField
         Cmu             0.09;
         kappa           0.41;
         E               9.8;
+        relax           1.0;
         partitioningModel
         {
             type        Lavieville;
