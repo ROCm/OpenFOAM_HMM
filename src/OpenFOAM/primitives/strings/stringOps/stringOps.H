@@ -83,7 +83,7 @@ namespace stringOps
     //  \sa stringOps::inplaceExpand() for details
     string expand
     (
-        const std::string& original,
+        const std::string& str,
         const HashTable<string, word, string::hash>& mapping,
         const char sigil = '$'
     );
@@ -206,7 +206,7 @@ namespace stringOps
     //  \sa stringOps::inplaceExpand(std::string&, const dictionary&, char)
     string expand
     (
-        const std::string& original,
+        const std::string& str,
         const dictionary& dict,
         const char sigil = '$'
     );
@@ -232,7 +232,7 @@ namespace stringOps
     //  stringOps::inplaceExpand(std::string&, bool);
     string expand
     (
-        const std::string& original,
+        const std::string& str,
         const bool allowEmpty = false
     );
 
@@ -271,27 +271,27 @@ namespace stringOps
     void inplaceTrimRight(std::string& s);
 
     //- Return string trimmed of leading and trailing whitespace
-    string trim(const std::string& original);
+    string trim(const std::string& str);
 
     //- Trim leading and trailing whitespace inplace
     void inplaceTrim(std::string& s);
 
 
     //- Return string with C/C++ comments removed
-    string removeComments(const std::string& original);
+    string removeComments(const std::string& str);
 
     //- Remove C/C++ comments inplace
     void inplaceRemoveComments(std::string& s);
 
 
     //- Return string transformed with std::tolower on each character
-    string lower(const std::string& original);
+    string lower(const std::string& str);
 
     //- Inplace transform string with std::tolower on each character
     void inplaceLower(std::string& s);
 
     //- Return string transformed with std::toupper on each character
-    string upper(const std::string& original);
+    string upper(const std::string& str);
 
     //- Inplace transform string with std::toupper on each character
     void inplaceUpper(std::string& s);

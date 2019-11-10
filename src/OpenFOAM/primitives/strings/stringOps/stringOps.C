@@ -742,12 +742,12 @@ std::string::size_type Foam::stringOps::count(const char* str, const char c)
 
 Foam::string Foam::stringOps::expand
 (
-    const std::string& original,
+    const std::string& str,
     const HashTable<string, word, string::hash>& mapping,
     const char sigil
 )
 {
-    string s(original);
+    string s(str);
     inplaceExpand(s, mapping);
     return s;
 }
@@ -877,12 +877,12 @@ void Foam::stringOps::inplaceExpand
 
 Foam::string Foam::stringOps::expand
 (
-    const std::string& original,
+    const std::string& str,
     const dictionary& dict,
     const char sigil
 )
 {
-    string s(original);
+    string s(str);
     inplaceExpand(s, dict, sigil);
     return s;
 }
@@ -917,11 +917,11 @@ void Foam::stringOps::inplaceExpand
 
 Foam::string Foam::stringOps::expand
 (
-    const std::string& original,
+    const std::string& str,
     const bool allowEmpty
 )
 {
-    string s(original);
+    string s(str);
     inplaceExpand(s, allowEmpty);
     return s;
 }
@@ -1036,11 +1036,24 @@ void Foam::stringOps::inplaceTrimRight(std::string& s)
 }
 
 
-Foam::string Foam::stringOps::trim(const std::string& original)
+Foam::string Foam::stringOps::trim(const std::string& str)
 {
-    string s(original);
-    inplaceTrim(s);
-    return s;
+    std::string::size_type beg = 0;
+    std::string::size_type end = str.size();
+
+    // Right
+    while (beg < end && std::isspace(str[end-1]))
+    {
+        --end;
+    }
+
+    // Left
+    while (beg < end && std::isspace(str[beg]))
+    {
+        ++beg;
+    }
+
+    return str.substr(beg, end-beg);
 }
 
 
@@ -1051,9 +1064,9 @@ void Foam::stringOps::inplaceTrim(std::string& s)
 }
 
 
-Foam::string Foam::stringOps::removeComments(const std::string& original)
+Foam::string Foam::stringOps::removeComments(const std::string& str)
 {
-    string s(original);
+    string s(str);
     inplaceRemoveComments(s);
     return s;
 }
@@ -1135,9 +1148,9 @@ void Foam::stringOps::inplaceRemoveComments(std::string& s)
 }
 
 
-Foam::string Foam::stringOps::lower(const std::string& original)
+Foam::string Foam::stringOps::lower(const std::string& str)
 {
-    string s(original);
+    string s(str);
     inplaceLower(s);
     return s;
 }
@@ -1155,9 +1168,9 @@ void Foam::stringOps::inplaceLower(std::string& s)
 }
 
 
-Foam::string Foam::stringOps::upper(const std::string& original)
+Foam::string Foam::stringOps::upper(const std::string& str)
 {
-    string s(original);
+    string s(str);
     inplaceUpper(s);
     return s;
 }

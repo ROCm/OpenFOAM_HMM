@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
         " $(DONOTSUBST) some other <${USER}> with '${__UNKNOWN:-some default}'"
         " value "
         " or with '${HOME:+Home was set}' via :+ alternative"
-        " or with '${__UNKNOWN:+unknown}' empty"
+        " or with '${__UNKNOWN:+unknown}' empty  "
     );
 
     setEnv("FOAM_CASE", cwd(), true);
