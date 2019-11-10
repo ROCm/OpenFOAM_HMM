@@ -88,6 +88,7 @@ options:
   -show-cxxflags    Print C++ compiler flags
   -show-cflags-arch     The C compiler arch flag (eg, -m64 etc)
   -show-cxxflags-arch   The C++ compiler arch flag (eg, -m64 etc)
+  -version | --version  Print the api value
   -h | -help        Print the usage
 
 
@@ -195,6 +196,11 @@ do
         -update)
             update=true
             : ${all:=all}  # implies 'all', unless previous set to 'queue' etc.
+            ;;
+        -version | --version)
+            $make -f $WM_DIR/makefiles/info api
+            optShow=true
+            break;
             ;;
         --)
             shift
