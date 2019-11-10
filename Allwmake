@@ -11,7 +11,7 @@ cd ${0%/*} && wmakeCheckPwd "$WM_PROJECT_DIR" 2>/dev/null || {
     exit 1
 }
 
-. $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
+. "$WM_PROJECT_DIR"/wmake/scripts/AllwmakeParseArguments
 
 #------------------------------------------------------------------------------
 # Preamble. Report compiler version
@@ -19,9 +19,15 @@ case "$WM_COMPILER" in
     Gcc*)    gcc --version 2>/dev/null | sed -ne '1p' ;;
     Clang*)  clang --version 2>/dev/null | sed -ne '1p' ;;
 esac
-# Preamble. Report mpirun location
-command -v mpirun 2>/dev/null || true
 
+# Preamble. Report tools or at least the mpirun location
+if [ -f "$WM_PROJECT_DIR"/wmake/scripts/list_tools ]
+then  . "$WM_PROJECT_DIR"/wmake/scripts/list_tools ]
+else
+    echo "mpirun=$(command -v mpirun || true)"
+fi
+
+echo
 echo "========================================"
 date "+%Y-%m-%d %H:%M:%S %z" 2>/dev/null || echo "date is unknown"
 echo "Starting compile ${WM_PROJECT_DIR##*/} ${0##*/}"
@@ -36,7 +42,7 @@ echo
 # Compile ThirdParty libraries and applications
 if [ -d "$WM_THIRD_PARTY_DIR" ]
 then
-    $WM_THIRD_PARTY_DIR/Allwmake
+    "$WM_THIRD_PARTY_DIR/Allwmake"
 else
     echo "No ThirdParty directory found - skipping"
 fi
@@ -57,7 +63,7 @@ then
     echo "========================================"
     echo "Compile OpenFOAM modules"
     echo
-    (cd $WM_PROJECT_DIR/modules 2>/dev/null && wmake -all)
+    (cd "$WM_PROJECT_DIR/modules" 2>/dev/null && wmake -all)
 fi
 
 # Count files in given directory. Ignore "Test-*" binaries.
