@@ -38,9 +38,9 @@ License
 
 #ifndef FOAM_RESOURCE_USER_CONFIG_DIRNAME
 #define FOAM_RESOURCE_USER_CONFIG_DIRNAME ".OpenFOAM"
-#elif defined FULLDEBUG
-    #warning FOAM_RESOURCE_USER_CONFIG_DIRNAME \
-    is undefined (was this intentional?)
+#ifdef FULLDEBUG
+    #warning FOAM_RESOURCE_USER_CONFIG_DIRNAME was undefined (now ".OpenFOAM")
+#endif
 #endif
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
