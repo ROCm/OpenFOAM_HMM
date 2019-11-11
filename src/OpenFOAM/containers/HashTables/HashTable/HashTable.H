@@ -222,6 +222,7 @@ public:
         HashTable(this_type&& rhs);
 
         //- Construct from an initializer list
+        //  Duplicate entries are handled by overwriting
         HashTable(std::initializer_list<std::pair<Key, T>> list);
 
 
@@ -518,6 +519,7 @@ public:
         void operator=(const this_type& rhs);
 
         //- Copy assign from an initializer list
+        //  Duplicate entries are handled by overwriting
         void operator=(std::initializer_list<std::pair<Key, T>> rhs);
 
         //- Move assign
