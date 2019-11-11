@@ -100,7 +100,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::getFieldValues
             {
                 const interpolationCellPoint<Type> interp(fld);
 
-                return sampledPtr_().sample(interp);
+                return sampledPtr_().interpolate(interp);
             }
             else
             {
