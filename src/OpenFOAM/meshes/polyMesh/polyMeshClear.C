@@ -76,6 +76,86 @@ void Foam::polyMesh::clearGeom()
 }
 
 
+void Foam::polyMesh::updateGeom
+(
+    pointIOField& newPoints,
+    autoPtr<labelIOList>& newTetBasePtIsPtr
+)
+{
+    if (debug)
+    {
+        InfoInFunction << "Updating geometric data with newPoints:"
+            << newPoints.size() << " newTetBasePtIs:"
+            << newTetBasePtIsPtr.valid() << endl;
+    }
+
+    if (points_.size() != 0 && points_.size() != newPoints.size())
+    {
+        FatalErrorInFunction
+            << "Point motion detected but number of points "
+            << newPoints.size() << " in "
+            << newPoints.objectPath() << " does not correspond to "
+            << " current " << points_.size()
+            << exit(FatalError);
+    }
+
+    // Clear all geometric mesh objects that are not 'moveable'
+    meshObject::clearUpto
+    <
+        pointMesh,
+        TopologicalMeshObject,
+        MoveableMeshObject
+    >
+    (
+        *this
+    );
+    meshObject::clearUpto
+    <
+        polyMesh,
+        TopologicalMeshObject,
+        MoveableMeshObject
+    >
+    (
+        *this
+    );
+
+    primitiveMesh::clearGeom();
+
+    boundary_.clearGeom();
+
+    // Reset valid directions (could change with rotation)
+    geometricD_ = Zero;
+    solutionD_ = Zero;
+
+    // Remove the cell tree
+    cellTreePtr_.clear();
+
+    // Update local data
+    points_.instance() = newPoints.instance();
+    points_.transfer(newPoints);
+
+    // Optional new tet base points
+    if (newTetBasePtIsPtr.valid())
+    {
+        tetBasePtIsPtr_ = std::move(newTetBasePtIsPtr);
+    }
+
+    // Calculate the geometry for the patches (transformation tensors etc.)
+    boundary_.calcGeometry();
+
+    // Derived info
+    bounds_ = boundBox(points_);
+
+    // Rotation can cause direction vector to change
+    geometricD_ = Zero;
+    solutionD_ = Zero;
+
+    // Update all 'moveable' objects
+    meshObject::movePoints<polyMesh>(*this);
+    meshObject::movePoints<pointMesh>(*this);
+}
+
+
 void Foam::polyMesh::clearAddressing(const bool isMeshUpdate)
 {
     if (debug)

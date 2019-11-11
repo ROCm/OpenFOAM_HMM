@@ -29,7 +29,6 @@ License
 #include "polyMesh.H"
 #include "Time.H"
 #include "cellIOList.H"
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::polyMesh::setInstance
@@ -422,13 +421,6 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
             Info<< "Point motion" << endl;
         }
 
-        clearGeom();
-
-
-        label nOldPoints = points_.size();
-
-        points_.clear();
-
         pointIOField newPoints
         (
             IOobject
@@ -443,35 +435,11 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
             )
         );
 
-        if (nOldPoints != 0 && nOldPoints != newPoints.size())
-        {
-            FatalErrorInFunction
-                << "Point motion detected but number of points "
-                << newPoints.size() << " in "
-                << newPoints.objectPath() << " does not correspond to "
-                << " current " << nOldPoints
-                << exit(FatalError);
-        }
-
-        points_.transfer(newPoints);
-        points_.instance() = pointsInst;
-
         // Re-read tet base points
         autoPtr<labelIOList> newTetBasePtIsPtr = readTetBasePtIs();
-        if (newTetBasePtIsPtr.valid())
-        {
-            tetBasePtIsPtr_ = std::move(newTetBasePtIsPtr);
-        }
 
-        // Calculate the geometry for the patches (transformation tensors etc.)
-        boundary_.calcGeometry();
-
-        // Derived info
-        bounds_ = boundBox(points_);
-
-        // Rotation can cause direction vector to change
-        geometricD_ = Zero;
-        solutionD_ = Zero;
+        // Update all geometry
+        updateGeom(newPoints, newTetBasePtIsPtr);
 
         return polyMesh::POINTS_MOVED;
     }

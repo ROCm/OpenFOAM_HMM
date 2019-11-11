@@ -627,6 +627,13 @@ public:
             //- Clear geometry
             void clearGeom();
 
+            //- Update geometry; keep topology. Optional new face decomposition
+            void updateGeom
+            (
+                pointIOField& newPoints,
+                autoPtr<labelIOList>& newTetBasePtIsPtr
+            );
+
             //- Clear addressing
             void clearAddressing(const bool isMeshUpdate = false);
 
