@@ -51,7 +51,7 @@
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
-set ParaView_VERSION=5.6.0
+set ParaView_VERSION=5.6.3
 set ParaView_QT=qt-system
 set cmake_version=cmake-system
 
