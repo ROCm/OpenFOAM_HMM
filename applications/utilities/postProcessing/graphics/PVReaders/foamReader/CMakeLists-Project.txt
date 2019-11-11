@@ -13,7 +13,7 @@ include_directories(
     ${LIB_SRC}/conversion/lnInclude
     ${LIB_SRC}/finiteArea/lnInclude
     ${LIB_SRC}/finiteVolume/lnInclude
-    ${PROJECT_SOURCE_DIR}/../foamPv
+    ${PROJECT_SOURCE_DIR}/../common
     ${PROJECT_SOURCE_DIR}/library
     ${PROJECT_SOURCE_DIR}/plugin
     ${PROJECT_SOURCE_DIR}/plugin/reader
@@ -43,7 +43,7 @@ add_paraview_property_group_widget(IFACES0 IFACES0_SRCS
 )
 
 add_paraview_plugin(
-    PVFoamReader_SM "1.0"
+    PVFoamReader_SM "${foam_api}"
     SERVER_MANAGER_XML
         plugin/PVFoamReader_SM.xml
     SERVER_MANAGER_SOURCES
@@ -56,11 +56,10 @@ add_paraview_plugin(
         plugin/pqFoamReaderControls.cxx
 )
 
-
 target_link_libraries(
     PVFoamReader_SM
     LINK_PUBLIC
-    foamPv${foamPvLibQualifier}
+    vtkPVFoamCommon${foamPvLibQualifier}
     vtkPVFoam${foamPvLibQualifier}
     ${OPENFOAM_LIBNAMES}
 )

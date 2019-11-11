@@ -7,7 +7,7 @@ cd ${0%/*} || exit 1                                # Run from this directory
 get_pvplugin_api || echo "No ParaView plugin information found" 1>&2
 
 # Cleanup libraries
-wclean libso foamPv
+wclean libso common
 wclean libso blockMeshReader/library
 wclean libso foamReader/library
 

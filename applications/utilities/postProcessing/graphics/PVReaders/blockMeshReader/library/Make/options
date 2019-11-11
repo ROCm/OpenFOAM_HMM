@@ -6,11 +6,11 @@ EXE_INC = \
     -I$(LIB_SRC)/mesh/blockMesh/lnInclude \
     -I$(PARAVIEW_INC_DIR) \
     -I$(PARAVIEW_INC_DIR)/vtkkwiml \
-    -I../../foamPv \
+    -I../../common \
     -I../plugin/reader
 
 LIB_LIBS = \
     -lmeshTools \
     -lblockMesh \
-    -L$(FOAM_LIBBIN) -lfoamPv-pv${PARAVIEW_API} \
+    -L$(FOAM_LIBBIN) -lvtkPVFoamCommon-pv${PARAVIEW_API} \
     $(GLIBS)

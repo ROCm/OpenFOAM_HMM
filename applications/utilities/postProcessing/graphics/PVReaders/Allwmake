@@ -15,7 +15,7 @@ warnIncomplete()
 if have_pvplugin_support
 then
 (
-    wmakeLibPv foamPv
+    wmakeLibPv common
     wmakeLibPv blockMeshReader/library
     wmakeLibPv foamReader/library
 
