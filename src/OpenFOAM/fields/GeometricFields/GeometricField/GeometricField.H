@@ -33,7 +33,7 @@ Description
 SourceFiles
     GeometricFieldI.H
     GeometricField.C
-    Boundary.C
+    GeometricBoundaryField.C
     GeometricFieldFunctions.H
     GeometricFieldFunctions.C
 
