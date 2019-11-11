@@ -23,7 +23,7 @@
 #     PV_PLUGIN_PATH
 #
 # Provides Functions
-#     have_pvplugin_support, no_paraview, echo_paraview
+#     get_pvplugin_api, have_pvplugin_support, no_paraview, echo_paraview
 #     cmakeVtk, cmakePv, cmakePvInstall
 #
 # Variables on success
@@ -106,6 +106,39 @@ wmakeLibPv()
 }
 
 
+# Extract ParaView plugin api number from PV_PLUGIN_PATH
+# On success, return 0 and export variables
+# -> FOAM_PV_PLUGIN_LIBBIN, PARAVIEW_API
+#
+get_pvplugin_api()
+{
+    # OK
+    unset FOAM_PV_PLUGIN_LIBBIN  PARAVIEW_API
+    local pv_api targetDir
+
+    # The OpenFOAM plugin must be the first in PV_PLUGIN_PATH
+    # and must have the paraview major+minor version encoded in its name!
+    # Eg, PV_PLUGIN_PATH="$FOAM_LIBBIN/paraview-5.5"
+
+    # Get the first entry from PV_PLUGIN_PATH=dir1;dir2;...
+    targetDir="${PV_PLUGIN_PATH##;}"
+    targetDir="${targetDir%%;*}"
+
+    # Extract paraview major+minor version from the directory name
+    # From /path/paraview-5.6 -> 5.6
+    pv_api=$(echo "$targetDir" | \
+        sed -ne 's@^.*/@@;s/^[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\).*/\1/p')
+
+    [ -n "$pv_api" ] || return 1
+
+    # OK
+    export FOAM_PV_PLUGIN_LIBBIN="$targetDir"
+    export PARAVIEW_API="$pv_api"
+
+    return 0 # success
+}
+
+
 # Test if a ParaView plugin can be built.
 # On success, return 0 and export variables
 # -> HAVE_PVPLUGIN_SUPPORT, FOAM_PV_PLUGIN_LIBBIN,
@@ -124,30 +157,19 @@ have_pvplugin_support()
         return 1
     }
 
+    if get_pvplugin_api
+    then
+        targetDir="$FOAM_PV_PLUGIN_LIBBIN"
+        pv_api="$PARAVIEW_API"
+    fi
+    unset FOAM_PV_PLUGIN_LIBBIN PARAVIEW_API
 
-    # The OpenFOAM plugin must be the first in PV_PLUGIN_PATH
-    # and must have the paraview major+minor version encoded in its name!
-    # Eg, PV_PLUGIN_PATH="$FOAM_LIBBIN/paraview-5.5"
-
-    # Get the first entry from PV_PLUGIN_PATH=dir1;dir2;...
-    targetDir="${PV_PLUGIN_PATH##;}"
-    targetDir="${targetDir%%;*}"
-
-    # Extract the paraview major+minor version from the directory name
-    # From /path/paraview-5.6 -> 5.6
-    pv_api=$(echo "$targetDir" | \
-        sed -ne 's@^.*/@@;s/^[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\).*/\1/p')
-
-    [ -n "$targetDir" ] || {
-        echo "$warn (could not determine target)"
+    if [ -z "$targetDir" ] || [ -z "$pv_api" ]
+    then
+        echo "$warn (could not determine target or major.minor version)"
         echo "    PV_PLUGIN_PATH=${PV_PLUGIN_PATH:-???}"
         return 1
-    }
-
-    [ -n "$pv_api" ] || {
-        echo "$warn (could not determine major.minor version)"
-        return 1
-    }
+    fi
 
     # Include/library names
     header="pqServerManagerModel.h"

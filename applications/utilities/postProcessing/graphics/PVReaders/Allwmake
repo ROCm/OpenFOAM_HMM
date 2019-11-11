@@ -19,7 +19,7 @@ then
     wmakeLibPv blockMeshReader/library
     wmakeLibPv foamReader/library
 
-    unset cmakeType
+    unset cmakeOpts cmakeType
 
     if [ "$targetType" != objects ]
     then
@@ -36,8 +36,8 @@ then
 
     if [ -n "$cmakeType" ]
     then
-        "$cmakeType" $PWD/blockMeshReader || warnIncomplete "blockMesh"
-        "$cmakeType" $PWD/foamReader || warnIncomplete "OpenFOAM"
+        "$cmakeType" $PWD/blockMeshReader "$cmakeOpts" || warnIncomplete "blockMesh"
+        "$cmakeType" $PWD/foamReader "$cmakeOpts" || warnIncomplete "OpenFOAM"
     fi
 )
 fi
