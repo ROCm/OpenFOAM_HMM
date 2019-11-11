@@ -618,7 +618,7 @@ Foam::label Foam::vtk::seriesWriter::scan
             return
             (
                 minLen < file.length()
-             && file.hasExt(ext) && file.startsWith(stem)
+             && file.hasExt(ext) && file.starts_with(stem)
             );
         };
 

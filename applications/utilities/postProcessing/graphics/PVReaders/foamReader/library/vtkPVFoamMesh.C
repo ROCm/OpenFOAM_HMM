@@ -179,7 +179,7 @@ void Foam::vtkPVFoam::convertMeshPatches()
             }
         }
 
-        if (longName.startsWith("group/"))
+        if (longName.starts_with("group/"))
         {
             // Patch group. Collect patch faces.
 

@@ -97,17 +97,6 @@ namespace Foam
 }
 
 
-// file-scope
-//
-// A file is 'outside' of the case if it has been specified using an
-// absolute path (starts with '/')
-//
-static inline bool isOutsideOfCase(const std::string& file)
-{
-    return !file.empty() && file[0] == '/';
-}
-
-
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
 bool Foam::IOobject::fileNameComponents
@@ -119,7 +108,7 @@ bool Foam::IOobject::fileNameComponents
 )
 {
     // Convert explicit relative file-system path to absolute file-system path.
-    if (path.startsWith("./") || path.startsWith("../"))
+    if (path.starts_with("./") || path.starts_with("../"))
     {
         fileName absPath = cwd()/path;
         absPath.clean();
@@ -461,7 +450,10 @@ const Foam::fileName& Foam::IOobject::caseName() const
 
 Foam::fileName Foam::IOobject::path() const
 {
-    if (isOutsideOfCase(instance()))
+    // A file is 'outside' of the case if it has been specified using an
+    // absolute path (starts with '/')
+
+    if (instance().starts_with('/'))
     {
         return instance();
     }

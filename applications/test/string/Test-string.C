@@ -353,7 +353,7 @@ int main(int argc, char *argv[])
             << word::printf("formatted '%08d'", val) << "\n";
     }
 
-    // test startsWith, endsWith methods
+    // test starts_with, ends_with methods
     {
         string empty; //;
         string input1 = "shorter input";
@@ -362,64 +362,64 @@ int main(int argc, char *argv[])
         stringList checks{"match", "long", "", "short", "text", "s", "l", "t"};
 
         Info<< nl;
-        Info<< "check startsWith:" << nl
+        Info<< "check starts_with:" << nl
             << "~~~~~~~~~~~~~~~~~" << nl;
 
         Info<<"input: " << empty << nl;
         for (const string& test : checks)
         {
-            Info<< "    startsWith(" << test << ") = "
-                << Switch(empty.startsWith(test)) << nl;
+            Info<< "    starts_with(" << test << ") = "
+                << Switch(empty.starts_with(test)) << nl;
         }
         Info<<"input: " << input1 << nl;
         for (const string& test : checks)
         {
-            Info<< "    startsWith(" << test << ") = "
-                << Switch(input1.startsWith(test)) << nl;
+            Info<< "    starts_with(" << test << ") = "
+                << Switch(input1.starts_with(test)) << nl;
         }
         Info<<"input: " << input2 << nl;
         for (const string& test : checks)
         {
-            Info<< "    startsWith(" << test << ") = "
-                << Switch(input2.startsWith(test)) << nl;
+            Info<< "    starts_with(" << test << ") = "
+                << Switch(input2.starts_with(test)) << nl;
         }
 
 
         Info<< nl;
-        Info<< "check endsWith:" << nl
+        Info<< "check ends_with:" << nl
             << "~~~~~~~~~~~~~~~~~" << nl;
 
         Info<<"input: " << empty << nl;
         for (const string& test : checks)
         {
-            Info<< "    endsWith(" << test << ") = "
-                << Switch(empty.endsWith(test)) << nl;
+            Info<< "    ends_with(" << test << ") = "
+                << Switch(empty.ends_with(test)) << nl;
         }
         Info<<"input: " << input1 << nl;
         for (const string& test : checks)
         {
-            Info<< "    endsWith(" << test << ") = "
-                << Switch(input1.endsWith(test)) << nl;
+            Info<< "    ends_with(" << test << ") = "
+                << Switch(input1.ends_with(test)) << nl;
         }
         Info<<"input: " << input2 << nl;
         for (const string& test : checks)
         {
-            Info<< "    endsWith(" << test << ") = "
-                << Switch(input2.endsWith(test)) << nl;
+            Info<< "    ends_with(" << test << ") = "
+                << Switch(input2.ends_with(test)) << nl;
         }
 
         Info<< nl;
-        Info<< "check endsWith as applied to field names:" << nl
+        Info<< "check ends_with as applied to field names:" << nl
             << "~~~~~~~~~~~~~~~~~" << nl;
 
         string input3 = "field_0";
         string input4 = "_0";
 
-        Info<<input3 << " endsWith(\"_0\") = "
-            << Switch(input3.endsWith("_0")) << nl;
+        Info<<input3 << " ends_with(\"_0\") = "
+            << Switch(input3.ends_with("_0")) << nl;
 
-        Info<<input4 << " endsWith(\"_0\") = "
-            << Switch(input4.endsWith("_0")) << nl;
+        Info<<input4 << " ends_with(\"_0\") = "
+            << Switch(input4.ends_with("_0")) << nl;
     }
 
 

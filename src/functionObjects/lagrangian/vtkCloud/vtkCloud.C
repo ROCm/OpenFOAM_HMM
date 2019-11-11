@@ -256,7 +256,7 @@ bool Foam::functionObjects::vtkCloud::writeCloud
     (
         [](const word& k)
         {
-            return k.startsWith("position") || k.startsWith("coordinate");
+            return k.starts_with("position") || k.starts_with("coordinate");
         },
         true  // prune
     );

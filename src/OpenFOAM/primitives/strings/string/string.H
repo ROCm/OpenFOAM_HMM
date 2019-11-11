@@ -40,6 +40,7 @@ See also
     configuration directory
 
 SourceFiles
+    stringI.H
     string.C
     stringIO.C
     stringTemplates.C
@@ -51,7 +52,6 @@ SourceFiles
 
 #include "char.H"
 #include "Hasher.H"
-
 #include <string>
 #include <cstring>
 #include <cstdlib>
@@ -136,9 +136,12 @@ protected:
 
 public:
 
-    // Static data members
+    // Static Data Members
 
+        //- The type name "string"
         static const char* const typeName;
+
+        //- The debug flag
         static int debug;
 
         //- An empty string
@@ -183,12 +186,7 @@ public:
         explicit string(Istream& is);
 
 
-    // Member Functions
-
-        //- Count the number of occurrences of the specified character
-        //- in the string
-        //  Partially deprecated (NOV-2017) in favour of stringOps::count
-        size_type count(const char c) const;
+    // Static Member Functions
 
         //- Does the string contain valid characters only?
         template<class String>
@@ -215,6 +213,9 @@ public:
             const char quote = '\\'
         );
 
+
+    // Member Functions
+
         //- Test for equality.
         //  \return True when strings match literally.
         inline bool match(const std::string& text) const;
@@ -222,22 +223,23 @@ public:
         //- Avoid masking the normal std::string replace
         using std::string::replace;
 
-        //- Replace first occurrence of sub-string oldStr with newStr,
-        //- beginning at start
+        //- Replace first occurrence of sub-string s1 with s2,
+        //- beginning at pos
         string& replace
         (
-            const string& oldStr,
-            const string& newStr,
-            const size_type start = 0
+            const std::string& s1,
+            const std::string& s2,
+            size_type pos = 0
         );
 
-        //- Replace all occurrences of sub-string oldStr with newStr,
-        //- beginning at start. This is a no-op if oldStr is empty.
+        //- Replace all occurrences of sub-string s1 with s2,
+        //- beginning at pos in the string.
+        //  This is a no-op if s1 is empty.
         string& replaceAll
         (
-            const string& oldStr,
-            const string& newStr,
-            const size_type start = 0
+            const std::string& s1,
+            const std::string& s2,
+            size_type pos = 0
         );
 
         //- Inplace expand initial tags, tildes, and all occurrences of
@@ -252,34 +254,21 @@ public:
         //  \return True if string changed
         bool removeRepeated(const char character);
 
-        //- Return string with repeated characters removed
-        string removeRepeated(const char character) const;
-
-        //- Remove trailing character, unless string is a single character
-        //  \return True if string changed
-        bool removeTrailing(const char character);
-
-        //- Return string with trailing character removed,
-        //  unless string is a single character
-        string removeTrailing(const char character) const;
-
         //- Remove the given text from the start of the string.
-        //  \return True if the removal occurred or the given text is empty.
+        //  \return True if the removal occurred
         bool removeStart(const std::string& text);
 
+        //- Remove leading character, unless string is a single character
+        //  \return True if the removal occurred
+        bool removeStart(const char c);
+
         //- Remove the given text from the end of the string.
-        //  Always true if the removal occurred or the given text is empty.
+        //  \return True if the removal occurred
         bool removeEnd(const std::string& text);
 
-        //- True if the string starts with the given text.
-        //  Always true if the given text is empty or if the string
-        //  is identical to the given text.
-        bool startsWith(const std::string& text) const;
-
-        //- True if the string ends with the given text.
-        //  Always true if the given text is empty or if the string
-        //  is identical to the given text.
-        bool endsWith(const std::string& text) const;
+        //- Remove trailing character, unless string is a single character
+        //  \return True if the removal occurred
+        bool removeEnd(const char c);
 
 
     // Editing
@@ -293,6 +282,50 @@ public:
         //- Test for equality. Allows use as a predicate.
         //  \return True when strings match literally.
         inline bool operator()(const std::string& text) const;
+
+
+    // Housekeeping
+
+        //- True if string starts with the given prefix (cf. C++20)
+        bool starts_with(const std::string& s) const
+        {
+            return (size() >= s.size() && !compare(0, s.size(), s));
+        }
+
+        //- True if string starts with the given character (cf. C++20)
+        bool starts_with(const char c) const
+        {
+            return (!empty() && front() == c);
+        }
+
+        //- True if string ends with the given suffix (cf. C++20)
+        bool ends_with(const std::string& s) const
+        {
+            return (size() >= s.size() && !compare(size()-s.size(), npos, s));
+        }
+
+        //- True if string ends with the given character (cf. C++20)
+        bool ends_with(const char c) const
+        {
+            return (!empty() && back() == c);
+        }
+
+        //- Count the number of occurrences of the specified character
+        //- in the string
+        //  Partially deprecated (NOV-2017) in favour of stringOps::count
+        size_type count(const char c) const;
+
+        //- Deprecated(2019-11)
+        //  \deprecated(2019-11) use starts_with instead
+        bool startsWith(const std::string& s) const { return starts_with(s); }
+
+        //- Deprecated(2019-11)
+        //  \deprecated(2019-11) use ends_with instead
+        bool endsWith(const std::string& s) const { return ends_with(s); }
+
+        //- Deprecated(2019-11)
+        //  \deprecated(2019-11) use removeEnd instead
+        bool removeTrailing(const char c) { return removeEnd(c); }
 };
 
 

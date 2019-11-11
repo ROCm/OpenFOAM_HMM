@@ -1674,7 +1674,7 @@ void* Foam::dlOpen(const fileName& libName, const bool check)
         if
         (
             libName.find('/') == std::string::npos
-         && !libName.startsWith("lib")
+         && !libName.starts_with("lib")
         )
         {
             // Try with 'lib' prefix

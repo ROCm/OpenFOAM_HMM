@@ -611,7 +611,7 @@ bool Foam::dynamicOversetFvMesh::update()
 
 Foam::word Foam::dynamicOversetFvMesh::baseName(const word& name)
 {
-    if (name.endsWith("_0"))
+    if (name.ends_with("_0"))
     {
         return baseName(name.substr(0, name.size()-2));
     }

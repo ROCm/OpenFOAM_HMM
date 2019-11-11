@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
     {
         nodeStream.getLine(line);
     }
-    while (line.size() && line[0] == '#');
+    while (line.starts_with('#'));
 
     IStringStream nodeLine(line);
 
@@ -252,7 +252,7 @@ int main(int argc, char *argv[])
     {
         eleStream.getLine(line);
     }
-    while (line.size() && line[0] == '#');
+    while (line.starts_with('#'));
 
     IStringStream eleLine(line);
 
@@ -368,7 +368,7 @@ int main(int argc, char *argv[])
         {
             faceStream.getLine(line);
         }
-        while (line.size() && line[0] == '#');
+        while (line.starts_with('#'));
 
         IStringStream faceLine(line);
 

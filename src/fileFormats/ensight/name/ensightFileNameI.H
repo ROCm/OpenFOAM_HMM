@@ -71,7 +71,7 @@ inline void Foam::ensight::FileName::stripInvalid()
     string::stripInvalid<FileName>(*this);
 
     removeRepeated('/');
-    removeTrailing('/');
+    removeEnd('/');
 
     if (empty())
     {

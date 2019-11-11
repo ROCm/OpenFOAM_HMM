@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +52,7 @@ string getLine(std::ifstream& is)
     {
         std::getline(is, line);
     }
-    while (line.size() && line[0] == '#');
+    while (line.starts_with('#'));
 
     return line;
 }

@@ -1164,7 +1164,7 @@ void Foam::argList::parse
                 }
 
                 // Case-relative if not absolute and not "./" etc
-                if (!source.isAbsolute() && !source.startsWith("."))
+                if (!source.isAbsolute() && !source.starts_with('.'))
                 {
                     source = rootPath_/globalCase_/source;
                     adjustOpt = true;
@@ -1632,8 +1632,8 @@ void Foam::argList::displayDoc(bool source) const
 
     for (const fileName& dir : docDirs)
     {
-        // http protocols are last in the list
-        if (dir.startsWith("http:") || dir.startsWith("https:"))
+        // The http protocols are last in the list
+        if (dir.starts_with("http:") || dir.starts_with("https:"))
         {
             url = dir/executable_ + docExt;
             break;
@@ -1643,7 +1643,7 @@ void Foam::argList::displayDoc(bool source) const
 
         if
         (
-            docFile.startsWith("file://")
+            docFile.starts_with("file://")
           ? isFile(docFile.substr(7))   // check part after "file://"
           : isFile(docFile)
         )

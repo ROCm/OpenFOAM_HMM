@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,7 +34,9 @@ License
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
 const char* const Foam::string::typeName = "string";
-int Foam::string::debug(Foam::debug::debugSwitch(string::typeName, 0));
+
+int Foam::string::debug(Foam::debug::debugSwitch(Foam::string::typeName, 0));
+
 const Foam::string Foam::string::null;
 
 
@@ -117,16 +119,14 @@ Foam::string::size_type Foam::string::count(const char c) const
 
 Foam::string& Foam::string::replace
 (
-    const string& oldStr,
-    const string& newStr,
-    const size_type start
+    const std::string& s1,
+    const std::string& s2,
+    size_type pos
 )
 {
-    size_type pos = start;
-
-    if ((pos = find(oldStr, pos)) != npos)
+    if ((pos = find(s1, pos)) != npos)
     {
-        std::string::replace(pos, oldStr.size(), newStr);
+        std::string::replace(pos, s1.size(), s2);
     }
 
     return *this;
@@ -135,24 +135,20 @@ Foam::string& Foam::string::replace
 
 Foam::string& Foam::string::replaceAll
 (
-    const string& oldStr,
-    const string& newStr,
-    const size_type start
+    const std::string& s1,
+    const std::string& s2,
+    size_type pos
 )
 {
-    const size_type lenOld = oldStr.size();
-    const size_type lenNew = newStr.size();
+    const auto n1 = s1.length();
+    const auto n2 = s2.length();
 
-    if (lenOld)
+    if (n1)
     {
-        for
-        (
-            size_type pos = start;
-            (pos = find(oldStr, pos)) != npos;
-            pos += lenNew
-        )
+        while ((pos = find(s1, pos)) != npos)
         {
-            std::string::replace(pos, lenOld, newStr);
+            std::string::replace(pos, n1, s2);
+            pos += n2;
         }
     }
 
@@ -201,47 +197,14 @@ bool Foam::string::removeRepeated(const char character)
 }
 
 
-Foam::string Foam::string::removeRepeated(const char character) const
-{
-    string str(*this);
-    str.removeRepeated(character);
-    return str;
-}
-
-
-bool Foam::string::removeTrailing(const char character)
-{
-    const string::size_type nChar = size();
-    if (character && nChar > 1 && operator[](nChar-1) == character)
-    {
-        resize(nChar-1);
-        return true;
-    }
-
-    return false;
-}
-
-
-Foam::string Foam::string::removeTrailing(const char character) const
-{
-    string str(*this);
-    str.removeTrailing(character);
-    return str;
-}
-
-
 bool Foam::string::removeStart(const std::string& text)
 {
-    const size_type txtLen = text.size();
-    if (!txtLen)
-    {
-        return true;
-    }
+    const auto txtLen = text.length();
+    const auto strLen = length();
 
-    const size_type strLen = this->size();
-    if (strLen >= txtLen && !compare(0, txtLen, text))
+    if (txtLen && strLen >= txtLen && !compare(0, txtLen, text))
     {
-        this->erase(0, txtLen);
+        erase(0, txtLen);
         return true;
     }
 
@@ -251,16 +214,12 @@ bool Foam::string::removeStart(const std::string& text)
 
 bool Foam::string::removeEnd(const std::string& text)
 {
-    const size_type txtLen = text.size();
-    if (!txtLen)
-    {
-        return true;
-    }
+    const auto txtLen = text.length();
+    const auto strLen = length();
 
-    const size_type strLen = this->size();
-    if (strLen >= txtLen && !compare(strLen - txtLen, npos, text))
+    if (txtLen && strLen >= txtLen && !compare(strLen - txtLen, npos, text))
     {
-        this->resize(strLen - txtLen);
+        resize(strLen - txtLen);
         return true;
     }
 
@@ -268,29 +227,28 @@ bool Foam::string::removeEnd(const std::string& text)
 }
 
 
-bool Foam::string::startsWith(const std::string& text) const
+bool Foam::string::removeStart(const char c)
 {
-    const size_type strLen = this->size();
-    const size_type txtLen = text.size();
+    if (length() > 1 && front() == c)
+    {
+        erase(0, 1);
+        return true;
+    }
 
-    return
-    (
-        !txtLen
-     || (strLen >= txtLen && !compare(0, txtLen, text))
-    );
+    return false;
 }
 
 
-bool Foam::string::endsWith(const std::string& text) const
+bool Foam::string::removeEnd(const char c)
 {
-    const size_type strLen = this->size();
-    const size_type txtLen = text.size();
+    const auto n = length();
+    if (n > 1 && back() == c)
+    {
+        resize(n-1);
+        return true;
+    }
 
-    return
-    (
-        !txtLen
-     || (strLen >= txtLen && !compare(strLen - txtLen, npos, text))
-    );
+    return false;
 }
 
 

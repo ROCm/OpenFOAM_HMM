@@ -382,7 +382,7 @@ Foam::label Foam::IOobjectList::prune_0()
     return
         HashPtrTable<IOobject>::filterKeys
         (
-            [](const word& k){ return k.endsWith("_0"); },
+            [](const word& k){ return k.ends_with("_0"); },
             true  // prune
         );
 }

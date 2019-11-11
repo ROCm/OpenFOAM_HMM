@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
             const word& item
           : DirLister::files(".").where
             (
-                [](const word& val){ return val.startsWith("T"); }
+                [](const word& val){ return val.starts_with('T'); }
             )
         )
         {
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
             << "~~~~~~~~~~" << nl
             <<  DirLister(".").list<fileName>
                 (
-                    [](const word& val){ return val.startsWith("D"); },
+                    [](const word& val){ return val.starts_with('D'); },
                     false
                 )
             << nl;

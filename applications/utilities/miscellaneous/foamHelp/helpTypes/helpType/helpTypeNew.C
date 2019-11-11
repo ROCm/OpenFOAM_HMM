@@ -40,7 +40,7 @@ Foam::autoPtr<Foam::helpType> Foam::helpType::New
     {
         // special treatment for -help
         // exit without stack trace
-        if (helpTypeName.startsWith("-help"))
+        if (helpTypeName.starts_with("-help"))
         {
             FatalErrorInFunction
                 << "Valid helpType selections:" << nl

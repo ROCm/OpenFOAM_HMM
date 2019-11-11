@@ -191,36 +191,31 @@ bool Foam::fileName::equals(const std::string& s1, const std::string& s2)
 }
 
 
-bool Foam::fileName::isBackup(const std::string& str)
+bool Foam::fileName::isBackup(const std::string& s)
 {
-    if (str.empty())
+    if (s.empty())
     {
         return false;
     }
-    else if (str.back() == '~')
+    else if (s.back() == '~')
     {
         return true;
     }
 
     // Now check the extension
-    const auto dot = find_ext(str);
+    auto dot = find_ext(s);
 
     if (dot == npos)
     {
         return false;
     }
 
-    const std::string ending = str.substr(dot+1);
-
-    if (ending.empty())
-    {
-        return false;
-    }
+    ++dot;
 
     return
     (
-        ending == "bak" || ending == "BAK"
-     || ending == "old" || ending == "save"
+        !s.compare(dot, npos, "bak") || !s.compare(dot, npos, "BAK")
+     || !s.compare(dot, npos, "old") || !s.compare(dot, npos, "save")
     );
 }
 
@@ -448,7 +443,7 @@ Foam::fileName Foam::fileName::relative
     if
     (
         top && (f.size() > (top+1)) && f[top] == '/'
-     && f.startsWith(parent)
+     && f.starts_with(parent)
     )
     {
         if (caseTag)

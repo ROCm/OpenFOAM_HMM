@@ -77,11 +77,11 @@ void Foam::solution::read(const dictionary& dict)
             {
                 scalar value = relaxDict.get<scalar>(e);
 
-                if (e.startsWith("p"))
+                if (e.starts_with('p'))
                 {
                     fieldRelaxDict_.add(e, value);
                 }
-                else if (e.startsWith("rho"))
+                else if (e.starts_with("rho"))
                 {
                     fieldRelaxDict_.add(e, value);
                 }

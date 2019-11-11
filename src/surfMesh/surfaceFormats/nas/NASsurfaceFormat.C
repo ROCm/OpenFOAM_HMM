@@ -149,7 +149,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
         // ANSA extension
         // line 1: $ANSA_NAME;<int>;<word>;
         // line 2: $partName
-        if (line.startsWith("$ANSA_NAME"))
+        if (line.starts_with("$ANSA_NAME"))
         {
             const auto sem0 = line.find(';', 0);
             const auto sem1 = line.find(';', sem0+1);
@@ -167,7 +167,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
 
                 string rawName;
                 is.getLine(rawName);
-                rawName.removeEnd("\r");  // Possible CR-NL
+                rawName.removeEnd('\r');  // Possible CR-NL
                 ansaName = word::validate(rawName.substr(1));
 
                 // Info<< "ANSA tag for NastranID:" << ansaId
@@ -179,7 +179,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
 
         // HYPERMESH extension
         // $HMNAME COMP                   1"partName"
-        if (line.startsWith("$HMNAME COMP") && line.find('"') != string::npos)
+        if (line.starts_with("$HMNAME COMP") && line.find('"') != string::npos)
         {
             label groupId = readLabel(line.substr(16, 16));
 

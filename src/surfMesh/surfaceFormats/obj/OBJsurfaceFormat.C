@@ -83,7 +83,7 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
         string line = this->getLineNoComment(is);
 
         // Line continuations
-        while (line.removeEnd("\\"))
+        while (line.removeEnd('\\'))
         {
             line += this->getLineNoComment(is);
         }
