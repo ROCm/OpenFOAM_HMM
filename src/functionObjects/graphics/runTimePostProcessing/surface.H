@@ -170,6 +170,12 @@ protected:
         //- Activate feature edges
         bool featureEdges_;
 
+        //- Back face culling option; default = off
+        bool backFaceCulling_;
+
+        //- Front face culling option; default = on
+        bool frontFaceCulling_;
+
         //- Surface colour
         autoPtr<Function1<vector>> surfaceColour_;
 
