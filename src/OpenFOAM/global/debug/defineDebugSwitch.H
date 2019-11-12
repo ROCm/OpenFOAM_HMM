@@ -52,9 +52,15 @@ public:
     //- The unique RegisterDebugSwitch object
     static const RegisterDebugSwitch registerDebugSwitch;
 
-    RegisterDebugSwitch(const char* name)
+    //- No copy construct
+    RegisterDebugSwitch(const RegisterDebugSwitch<Type>&) = delete;
+
+    //- No copy assignment
+    void operator=(const RegisterDebugSwitch<Type>&) = delete;
+
+    explicit RegisterDebugSwitch(const char* name)
     :
-        ::Foam::simpleRegIOobject(Foam::debug::addDebugObject, name)
+        ::Foam::simpleRegIOobject(::Foam::debug::addDebugObject, name)
     {}
 
     virtual ~RegisterDebugSwitch() = default;
@@ -72,6 +78,7 @@ public:
 
 } // End namespace Foam
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #define registerTemplateDebugSwitchWithName(Type,Name)                         \
@@ -87,19 +94,26 @@ public:
         public ::Foam::simpleRegIOobject                                       \
     {                                                                          \
     public:                                                                    \
-        add##Tag##ToDebug(const char* name)                                    \
+                                                                               \
+        explicit add##Tag##ToDebug(const char* name)                           \
         :                                                                      \
             ::Foam::simpleRegIOobject(::Foam::debug::addDebugObject, name)     \
         {}                                                                     \
+                                                                               \
         virtual ~add##Tag##ToDebug() = default;                                \
+                                                                               \
         virtual void readData(::Foam::Istream& is)                             \
         {                                                                      \
             is >> Type::debug;                                                 \
         }                                                                      \
+                                                                               \
         virtual void writeData(::Foam::Ostream& os) const                      \
         {                                                                      \
             os << Type::debug;                                                 \
         }                                                                      \
+                                                                               \
+        add##Tag##ToDebug(const add##Tag##ToDebug&) = delete;                  \
+        void operator=(const add##Tag##ToDebug&) = delete;                     \
     };                                                                         \
     add##Tag##ToDebug add##Tag##ToDebug_(Name)
 

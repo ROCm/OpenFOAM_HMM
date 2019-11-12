@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,6 +45,8 @@ dictionary* dimensionSystemsPtr_(nullptr);
 HashTable<dimensionedScalar>* unitSetPtr_(nullptr);
 dimensionSets* writeUnitSetPtr_(nullptr);
 
+//! \cond file-scope
+
 // Helper class to
 //   register re-reader
 //   deallocate demand-driven data
@@ -52,17 +55,22 @@ class addDimensionSetsToDebug
     public ::Foam::simpleRegIOobject
 {
 public:
-    addDimensionSetsToDebug(const char* name)
+
+    addDimensionSetsToDebug(const addDimensionSetsToDebug&) = delete;
+    void operator=(const addDimensionSetsToDebug&) = delete;
+
+    explicit addDimensionSetsToDebug(const char* name)
     :
         ::Foam::simpleRegIOobject(Foam::debug::addDimensionSetObject, name)
     {}
+
     virtual ~addDimensionSetsToDebug()
     {
         deleteDemandDrivenData(dimensionSystemsPtr_);
         deleteDemandDrivenData(unitSetPtr_);
         deleteDemandDrivenData(writeUnitSetPtr_);
-
     }
+
     virtual void readData(Foam::Istream& is)
     {
         deleteDemandDrivenData(dimensionSystemsPtr_);
@@ -70,19 +78,23 @@ public:
         deleteDemandDrivenData(writeUnitSetPtr_);
         dimensionSystemsPtr_ = new dictionary(is);
     }
+
     virtual void writeData(Foam::Ostream& os) const
     {
         os << dimensionSystems();
     }
 };
+
 addDimensionSetsToDebug addDimensionSetsToDebug_("DimensionSets");
+
+//! \endcond
 
 
 dictionary& dimensionSystems()
 {
     if (!dimensionSystemsPtr_)
     {
-        dictionary* cachedPtr = nullptr;
+        dictionary* cachedPtr(nullptr);
         dimensionSystemsPtr_ = new dictionary
         (
             debug::switchSet
@@ -158,8 +170,8 @@ const HashTable<dimensionedScalar>& unitSet()
         }
 
         writeUnitSetPtr_ = new dimensionSets(*unitSetPtr_, writeUnitNames);
-
     }
+
     return *unitSetPtr_;
 }
 
@@ -207,6 +219,7 @@ const dimensionSet dimDynamicViscosity(dimDensity*dimViscosity);
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

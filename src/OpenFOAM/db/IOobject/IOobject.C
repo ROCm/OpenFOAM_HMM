@@ -61,6 +61,7 @@ Foam::IOobject::fileCheckTypes Foam::IOobject::fileModificationChecking
 );
 
 
+//! \cond file-scope
 namespace Foam
 {
     // Register re-reader
@@ -70,7 +71,13 @@ namespace Foam
     {
     public:
 
-        addfileModificationCheckingToOpt(const char* name)
+        addfileModificationCheckingToOpt
+            (const addfileModificationCheckingToOpt&) = delete;
+
+        void operator=
+            (const addfileModificationCheckingToOpt&) = delete;
+
+        explicit addfileModificationCheckingToOpt(const char* name)
         :
             ::Foam::simpleRegIOobject(Foam::debug::addOptimisationObject, name)
         {}
@@ -94,7 +101,9 @@ namespace Foam
     (
         "fileModificationChecking"
     );
-}
+
+} // End namespace Foam
+//! \endcond
 
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //

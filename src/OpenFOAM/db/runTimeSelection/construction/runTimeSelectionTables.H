@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,7 +75,7 @@ Description
             return autoPtr<baseType>(new baseType##Type parList);              \
         }                                                                      \
                                                                                \
-        add##argNames##ConstructorToTable                                      \
+        explicit add##argNames##ConstructorToTable                             \
         (                                                                      \
             const word& lookup = baseType##Type::typeName                      \
         )                                                                      \
@@ -93,6 +94,12 @@ Description
         {                                                                      \
             destroy##argNames##ConstructorTables();                            \
         }                                                                      \
+                                                                               \
+        add##argNames##ConstructorToTable                                      \
+            (const add##argNames##ConstructorToTable&) = delete;               \
+                                                                               \
+        void operator=                                                         \
+            (const add##argNames##ConstructorToTable&) = delete;               \
     };                                                                         \
                                                                                \
     /* Class to add constructor from argList to table */                       \
@@ -100,22 +107,21 @@ Description
     template<class baseType##Type>                                             \
     class addRemovable##argNames##ConstructorToTable                           \
     {                                                                          \
-        /* retain lookup name for later removal */                             \
-        const word& lookup_;                                                   \
-                                                                               \
     public:                                                                    \
+                                                                               \
+        const word name;  /* Lookup name for later removal */                  \
                                                                                \
         static autoPtr<baseType> New argList                                   \
         {                                                                      \
             return autoPtr<baseType>(new baseType##Type parList);              \
         }                                                                      \
                                                                                \
-        addRemovable##argNames##ConstructorToTable                             \
+        explicit addRemovable##argNames##ConstructorToTable                    \
         (                                                                      \
             const word& lookup = baseType##Type::typeName                      \
         )                                                                      \
         :                                                                      \
-            lookup_(lookup)                                                    \
+            name(lookup)                                                       \
         {                                                                      \
             construct##argNames##ConstructorTables();                          \
             argNames##ConstructorTablePtr_->set(lookup, New);                  \
@@ -125,9 +131,15 @@ Description
         {                                                                      \
             if (argNames##ConstructorTablePtr_)                                \
             {                                                                  \
-                argNames##ConstructorTablePtr_->erase(lookup_);                \
+                argNames##ConstructorTablePtr_->erase(name);                   \
             }                                                                  \
         }                                                                      \
+                                                                               \
+        addRemovable##argNames##ConstructorToTable                             \
+            (const addRemovable##argNames##ConstructorToTable&) = delete;      \
+                                                                               \
+        void operator=                                                         \
+            (const addRemovable##argNames##ConstructorToTable&) = delete;      \
     };
 
 
@@ -163,7 +175,7 @@ Description
             return autoPtr<baseType>(baseType##Type::New parList.ptr());       \
         }                                                                      \
                                                                                \
-        add##argNames##ConstructorToTable                                      \
+        explicit add##argNames##ConstructorToTable                             \
         (                                                                      \
             const word& lookup = baseType##Type::typeName                      \
         )                                                                      \
@@ -189,28 +201,33 @@ Description
         {                                                                      \
             destroy##argNames##ConstructorTables();                            \
         }                                                                      \
+                                                                               \
+        add##argNames##ConstructorToTable                                      \
+            (const add##argNames##ConstructorToTable&) = delete;               \
+                                                                               \
+        void operator=                                                         \
+            (const add##argNames##ConstructorToTable&) = delete;               \
     };                                                                         \
                                                                                \
     /* Class to add constructor from argList to table */                       \
     template<class baseType##Type>                                             \
     class addRemovable##argNames##ConstructorToTable                           \
     {                                                                          \
-        /* retain lookup name for later removal */                             \
-        const word& lookup_;                                                   \
-                                                                               \
     public:                                                                    \
+                                                                               \
+        const word name;  /* Lookup name for later removal */                  \
                                                                                \
         static autoPtr<baseType> New##baseType argList                         \
         {                                                                      \
             return autoPtr<baseType>(baseType##Type::New parList.ptr());       \
         }                                                                      \
                                                                                \
-        addRemovable##argNames##ConstructorToTable                             \
+        explicit addRemovable##argNames##ConstructorToTable                    \
         (                                                                      \
             const word& lookup = baseType##Type::typeName                      \
         )                                                                      \
         :                                                                      \
-            lookup_(lookup)                                                    \
+            name(lookup)                                                       \
         {                                                                      \
             construct##argNames##ConstructorTables();                          \
             argNames##ConstructorTablePtr_->set                                \
@@ -224,9 +241,15 @@ Description
         {                                                                      \
             if (argNames##ConstructorTablePtr_)                                \
             {                                                                  \
-                argNames##ConstructorTablePtr_->erase(lookup_);                \
+                argNames##ConstructorTablePtr_->erase(name);                   \
             }                                                                  \
         }                                                                      \
+                                                                               \
+        addRemovable##argNames##ConstructorToTable                             \
+            (const addRemovable##argNames##ConstructorToTable&) = delete;      \
+                                                                               \
+        void operator=                                                         \
+            (const addRemovable##argNames##ConstructorToTable&) = delete;      \
     };
 
 
@@ -265,7 +288,7 @@ Description
                                                                                \
     /* Define the constructor function table */                                \
     baseType::argNames##ConstructorTable*                                      \
-        baseType::argNames##ConstructorTablePtr_ = nullptr
+        baseType::argNames##ConstructorTablePtr_(nullptr)
 
 
 
@@ -329,7 +352,7 @@ Description
                                                                                \
     /* Define the constructor function table */                                \
     baseType<Targ>::argNames##ConstructorTable*                                \
-        baseType<Targ>::argNames##ConstructorTablePtr_ = nullptr
+        baseType<Targ>::argNames##ConstructorTablePtr_(nullptr)
 
 
 //- Define run-time selection table for template classes

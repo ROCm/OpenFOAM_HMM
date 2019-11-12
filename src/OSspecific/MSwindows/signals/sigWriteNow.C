@@ -58,7 +58,11 @@ struct addwriteNowSignalToOpt
 :
     public ::Foam::simpleRegIOobject
 {
-    addwriteNowSignalToOpt(const char* name)
+    addwriteNowSignalToOpt(const addwriteNowSignalToOpt&) = delete;
+
+    void operator=(const addwriteNowSignalToOpt&) = delete;
+
+    explicit addwriteNowSignalToOpt(const char* name)
     :
         ::Foam::simpleRegIOobject(Foam::debug::addOptimisationObject, name)
     {}
@@ -67,7 +71,7 @@ struct addwriteNowSignalToOpt
 
     virtual void readData(Foam::Istream& is)
     {
-        sigWriteNow::signal_ = readLabel(is);
+        is >> sigWriteNow::signal_;
         sigWriteNow::set(true);
     }
 
