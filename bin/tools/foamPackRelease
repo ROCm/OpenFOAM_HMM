@@ -52,6 +52,7 @@ options:
    -no-modules      Exclude submodules
    -no-patch        Ignore _patch number for the output tar-file
    -compress=TYPE   Compress with specified type
+   -sep=SEP         Change the patch, version separator from '_' to SEP
    -tgz             Alias for -compress=tgz
    -help            Print help
 
@@ -85,6 +86,7 @@ die()
 outputDir="."
 unset skipModules skipPatchNum
 unset gitbase head commit compress
+versionSeparator='_'
 
 while [ "$#" -gt 0 ]
 do
@@ -109,6 +111,9 @@ do
     -compress=*)
         compress="${1#*=}"
         ;;
+    -sep=*)
+        versionSeparator="${1#*=}"
+        ;;
     -tgz)
         compress="${1#*-}"
         ;;
@@ -125,6 +130,8 @@ done
 commit="$1"
 [ "$#" -eq 1 ] && [ -n "$commit" ] || usage "Requires one argument"
 
+# Failsafe patch, version separator
+: "${versionSeparator:=_}"
 
 #-------------------------------------------------------------------------------
 # Resolve the output directory
@@ -202,7 +209,7 @@ then
     echo "Ignoring patch number for output name" 1>&2
 elif [ "${patch:-0}" -gt 0 ]
 then
-    tarName="${tarName}_${patch}"
+    tarName="${tarName}${versionSeparator}${patch}"
 fi
 
 echo 1>&2
