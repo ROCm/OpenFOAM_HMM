@@ -31,6 +31,7 @@ Group
     grpFieldFunctionObjects
 
 Description
+    Intermediate class for handling field expressions (add, subtract etc).
 
 See also
     Foam::functionObjects::fvMeshFunctionObject

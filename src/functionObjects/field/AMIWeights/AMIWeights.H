@@ -30,6 +30,9 @@ Group
     grpFieldFunctionObjects
 
 Description
+    Reports the min/max/average AMI weights to text file and optionally
+    writes VTK surfaces of the sum of the weights, and mask field for
+    ACMI patches.
 
 Usage
     Example of function object specification:
