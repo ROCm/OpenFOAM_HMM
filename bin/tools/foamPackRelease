@@ -84,9 +84,8 @@ die()
 
 #-------------------------------------------------------------------------------
 outputDir="."
-unset skipModules skipPatchNum
-unset gitbase head commit compress
 versionSeparator='_'
+unset compress skipModules skipPatchNum
 
 while [ "$#" -gt 0 ]
 do
@@ -135,7 +134,7 @@ commit="$1"
 
 #-------------------------------------------------------------------------------
 # Resolve the output directory
-outputDir="$(cd $outputDir 2>/dev/null && pwd -L)" || \
+outputDir="$(cd "$outputDir" 2>/dev/null && pwd -L)" || \
     die "Cannot resolve output directory"
 
 [ -w "$outputDir" ] || \
@@ -198,7 +197,10 @@ patch="$(git --git-dir="$gitbase/.git" show "$sha1" | sed -ne s/patch=//p)"
 
 [ -n "$api" ] || die "Could resolve api value"
 
-echo "Detected api, patch as '$api' and '$patch'" 1>&2
+# Determine the BUILD information from git, as per wmakeBuildInfo.
+build="$(git --git-dir="$gitbase/.git" log -1 --date=short --format='%h=%ad' 2>/dev/null|sed 's/-//g;s/=/-/')"
+
+echo "Detected api, patch, build as '$api', '$patch', '$build'" 1>&2
 
 # Define the output names
 dirPrefix="OpenFOAM-v${api}"
@@ -220,26 +222,35 @@ echo 1>&2
 #-------------------------------------------------------------------------------
 
 # Create main tar
-echo "#!/bin/bash"
-echo "cd \""$gitbase/"\" || exit 1"
-echo "api=\""$api"\""
-echo "patch=\""${patch:-0}"\""
-echo "head=\""$head"\""
-echo "outputDir=\""$outputDir"\""
-echo "dirPrefix=\""$dirPrefix"\""
-echo "tarName=\""$tarName"\""
+echo '#!/bin/bash'
+echo "cd '$gitbase/' || exit"
+echo "api='$api'"
+echo "patch='${patch:-0}'"
+echo "build='$build'"
+echo "head='$head'"
+echo "outputDir='$outputDir'"
+echo "dirPrefix='$dirPrefix'"
+echo "tarName='$tarName'"
 # Note - directory separator '/' encoded as '@' for manifest name
-echo "manifest=\""${dirPrefix}"@META-INFO@"manifest.txt"\""
-echo
+echo 'manifest="${dirPrefix}@META-INFO@manifest.txt"'
+echo 'buildInfo="${dirPrefix}@META-INFO@build-info"'
+echo '#--------'
 echo 'set -x'
 echo 'umask 0022'
 echo 'git -c tar.umask=user archive --format=tar --prefix="$dirPrefix/" -o "$outputDir/$tarName.tar" "$head"'
 
-echo 'echo "api=$api" > "$outputDir/$manifest"'
-echo 'echo "patch=$patch" >> "$outputDir/$manifest"'
-echo 'echo "head=$head"  >> "$outputDir/$manifest"'
-echo 'echo >> "$outputDir/$manifest"'
-echo 'git ls-tree -r "$head" >> "$outputDir/$manifest"'
+
+# Tag build information with underscore to distinguish from "real" build
+# information when git is available.
+echo 'echo build="${build:+_}$build" > "$outputDir/$buildInfo"'
+
+echo '{'
+echo '  echo api="$api"'
+echo '  echo patch="$patch"'
+echo '  echo head="$head"'
+echo '  echo'
+echo '  git ls-tree -r "$head"'
+echo '} > "$outputDir/$manifest"'
 
 
 #------------------------------------------------------------------------------
@@ -255,35 +266,35 @@ then
         echo "module=\""$module"\""
         echo "commit=\""$sha1"\""
         echo "tarModule=\""$tarName-${module##*/}"\""
-
         echo
-        echo 'pushd "$module"'
+        echo 'if pushd "$module"; then'
         echo 'git -c tar.umask=user archive --format=tar --prefix="$dirPrefix/$module/" -o "$outputDir/$tarModule.tar" "$commit"'
-        echo 'git ls-tree -r "$commit" >> "$outputDir/$manifest"'
-
-        echo 'echo >> "$outputDir/$manifest"'
-        echo 'echo "$module" >> "$outputDir/$manifest"'
-        echo 'echo "commit=$commit" >> "$outputDir/$manifest"'
-        echo 'echo >> "$outputDir/$manifest"'
-        echo 'git ls-tree -r "$commit" >> "$outputDir/$manifest"'
-
         echo 'tar -Af "$outputDir/$tarName.tar" "$outputDir/$tarModule.tar"'
         echo 'rm -f "$outputDir/$tarModule.tar"'
-        echo 'popd'
-        echo
+        echo '{'
+        echo '  echo'
+        echo '  echo "$module"'
+        echo '  echo commit="$commit"'
+        echo '  echo'
+        echo '  git ls-tree -r "$commit"'
+        echo '} >> "$outputDir/$manifest"'
+        echo 'popd; fi'
     done
 fi
 
 #------------------------------------------------------------------------------
-# Add in manifest
-# Decode '@' in manifest as '/' directory separator
+# Add in build-info and manifest files
+# Decode '@' in the names as '/' directory separator
 
 echo
-echo "echo 'Adding manifest'"
-echo 'pushd "$outputDir"'
-echo "tar --append --owner=root --group=root --transform='s|@|/|g' -v -f \"\$tarName.tar\" \"\$manifest\""
-echo 'rm -f "$manifest"'
-echo 'popd'
+echo '{ echo; echo "# End"; } >> "$outputDir/$manifest"'
+
+echo
+echo "echo 'Adding build-info and manifest files'"
+echo 'if pushd "$outputDir"; then'
+echo "tar --owner=root --group=root --append --transform='s|@|/|g' -v -f \"\$tarName.tar\" \"\$buildInfo\" \"\$manifest\""
+echo 'rm -f "$buildInfo" "$manifest"'
+echo 'popd; fi'
 
 echo
 echo "# End of creating archive"
@@ -300,22 +311,30 @@ case "$compress" in
     (gz | gzip)
     echo "Using gzip compression" 1>&2
     echo 'gzip -9 "$outputDir/$tarName.tar"'
+    echo
+    echo '# End of compression'
     ;;
 
     (tgz)
     echo "Using gzip compression with tgz ending" 1>&2
     echo 'gzip -c -9 "$outputDir/$tarName.tar" > "$outputDir/$tarName.tgz"'
     echo 'rm -f "$outputDir/$tarName.tar"'
+    echo
+    echo '# End of compression'
     ;;
 
     (bz | bzip | bzip2)
     echo "Using bzip2 compression" 1>&2
     echo 'bzip2 -9 "$outputDir/$tarName.tar"'
+    echo
+    echo '# End of compression'
     ;;
 
     (xz)
     echo "Using xz compression" 1>&2
     echo 'xz -9 "$outputDir/$tarName.tar"'
+    echo
+    echo '# End of compression'
     ;;
 
     (*)
