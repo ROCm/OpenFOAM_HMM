@@ -23,9 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Declaration of IOList ClassNames for IOLists that do not have .C files.
-
 \*---------------------------------------------------------------------------*/
 
 #include "labelIOList.H"

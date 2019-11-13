@@ -41,6 +41,8 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 Foam::Ostream& Foam::printTable
 (
     const UList<wordList>& tbl,
