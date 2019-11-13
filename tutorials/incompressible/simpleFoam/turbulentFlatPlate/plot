@@ -1,5 +1,5 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # run from this directory
+cd "${0%/*}" || exit    # run from this directory
 
 Uinf=$1
 nuInf=$2

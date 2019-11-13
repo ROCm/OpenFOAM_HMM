@@ -118,7 +118,7 @@ tmpDir="Make/bisonWrapper-$baseName"
 rm -rf "$tmpDir" 2>/dev/null
 mkdir "$tmpDir" 2>/dev/null
 
-cd "$tmpDir" || exit 1
+cd "$tmpDir" || exit
 rc=1
 
 # DO WE WANT THIS?
@@ -127,7 +127,7 @@ rc=1
 bison "$@" "../../$inputFile"
 rc=$?
 
-cd "../.." || exit 1
+cd "../.." || exit
 
 if [ "$rc" -ne 0 ]
 then

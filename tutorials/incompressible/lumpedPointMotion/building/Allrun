@@ -1,5 +1,5 @@
 #!/bin/sh
-cd ${0%/*} || exit 1                                # Run from this directory
+cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
@@ -31,7 +31,7 @@ copyParallelPointDisplacement()
     if [ -n "$dstTime" ]
     then
     (
-        cd $src || exit 1
+        cd "$src" || exit
 
         for proc in processor*
         do
@@ -55,7 +55,7 @@ copyParallelPointDisplacement()
     if [ -n "$latestTime" -a "$deltaT" != "$latestTime" ]
     then
     (
-        cd $src || exit 1
+        cd "$src" || exit
 
         for proc in processor*
         do

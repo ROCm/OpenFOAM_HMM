@@ -1,5 +1,5 @@
 #!/bin/sh
-cd ${0%/*} || exit 1                                # Run from this directory
+cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
 #------------------------------------------------------------------------------
 
@@ -12,7 +12,7 @@ rm -rf constant/targetCellSize
 rm -rf constant/internalDelaunayVertices
 
 (
-    cd constant/backgroundMeshDecomposition/polyMesh 2>/dev/null || exit 1
+    cd constant/backgroundMeshDecomposition/polyMesh 2>/dev/null || exit
     rm -f boundary faces neighbour owner points
 )
 

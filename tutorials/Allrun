@@ -20,7 +20,7 @@
 #     Run tutorial cases and summarize the outcome as 'testLoopReport'
 #
 #------------------------------------------------------------------------------
-cd ${0%/*} || exit 1    # Run from this directory
+cd "${0%/*}" || exit    # Run from this directory
 
 usage()
 {

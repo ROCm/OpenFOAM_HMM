@@ -1,5 +1,5 @@
 #!/bin/sh
-cd ${0%/*} || exit 1                                # Run from this directory
+cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
@@ -13,10 +13,10 @@ run()
         ln -s blockMeshDict.${1}Boundary blockMeshDict.caseBoundary
     )
 
-    cloneCase . ${1}
+    cloneCase . "$1"
 
     (
-        cd ${1}
+        cd "$1" || exit
         runApplication blockMesh
         runApplication decomposePar
         runParallel $(getApplication)

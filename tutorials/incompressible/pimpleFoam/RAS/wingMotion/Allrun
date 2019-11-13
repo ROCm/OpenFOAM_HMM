@@ -1,11 +1,11 @@
 #!/bin/sh
-cd ${0%/*} || exit 1                                # Run from this directory
+cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
 # Make 3D mesh in slab of cells.
 (
-    cd wingMotion_snappyHexMesh || exit 1
+    cd wingMotion_snappyHexMesh || exit
 
     runApplication blockMesh
     runApplication snappyHexMesh -overwrite
@@ -13,7 +13,7 @@ cd ${0%/*} || exit 1                                # Run from this directory
 
 # Make a 2D mesh by extruding a patch and solve to steady state.
 (
-    cd wingMotion2D_simpleFoam || exit 1
+    cd wingMotion2D_simpleFoam || exit
 
     runApplication extrudeMesh
     runApplication createPatch -overwrite
@@ -24,7 +24,7 @@ cd ${0%/*} || exit 1                                # Run from this directory
 # Copy mesh from the steady state case, map the results to a mesh motion case,
 # then solve transient.
 (
-    cd wingMotion2D_pimpleFoam || exit 1
+    cd wingMotion2D_pimpleFoam || exit
 
     rm -rf constant/polyMesh
     \cp -r ../wingMotion2D_simpleFoam/constant/polyMesh constant

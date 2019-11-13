@@ -1,6 +1,7 @@
 #!/bin/sh
 # Run from OPENFOAM top-level directory only
-cd ${0%/*} && wmakeCheckPwd "$WM_PROJECT_DIR" 2>/dev/null || {
+cd "${0%/*}" || exit
+wmakeCheckPwd "$WM_PROJECT_DIR" 2>/dev/null || {
     echo "Error (${0##*/}) : not located in \$WM_PROJECT_DIR"
     echo "    Check your OpenFOAM environment and installation"
     exit 1

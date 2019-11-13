@@ -23,7 +23,7 @@
 #     The entire OpenFOAM environment (WM_PROJECT_DIR, etc)
 #
 #------------------------------------------------------------------------------
-cd "${0%/*}" || exit 1      # Run from this directory
+cd "${0%/*}" || exit  # Run from this directory
 
 usage()
 {
@@ -247,7 +247,7 @@ else
     cp -a "$rootDir" "$TEST_RUN_DIR"
 fi
 
-cd "$TEST_RUN_DIR" || exit 1
+cd "$TEST_RUN_DIR" || exit
 
 
 # Generate Alltest script (replacement for this one)

@@ -1,10 +1,10 @@
 #!/bin/sh
-cd ${0%/*} || exit 1                                # Run from this directory
+cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
 (
-    cd hopperInitialState || exit 1
+    cd hopperInitialState || exit
 
     runApplication blockMesh
     runApplication decomposePar
@@ -21,7 +21,7 @@ cd ${0%/*} || exit 1                                # Run from this directory
 )
 
 (
-    cd hopperEmptying || exit 1
+    cd hopperEmptying || exit
 
     restore0Dir
     runApplication blockMesh
