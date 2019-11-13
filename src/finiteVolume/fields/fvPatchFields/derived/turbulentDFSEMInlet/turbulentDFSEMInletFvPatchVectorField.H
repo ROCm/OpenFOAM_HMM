@@ -36,15 +36,16 @@ Description
 
     Reference:
     \verbatim
-        Poletto, R., Craft, T., and Revell, A.,
-        "A New Divergence Free Synthetic Eddy Method for the Reproduction
-         of Inlet Flow Conditions for LES",
-        Flow Turbulence Combust (2013) 91:519-539
+        Poletto, R., Craft, T., & Revell, A. (2013).
+        A new divergence free synthetic eddy method for
+        the reproduction of inlet flow conditions for LES.
+        Flow, turbulence and combustion, 91(3), 519-539.
+        DOI:10.1007/s10494-013-9488-2
     \endverbatim
 
     Reynolds stress, velocity and turbulence length scale values can either
-    be sepcified directly, or mapped.  If mapping, the values should be
-    entered in the same form as the timeVaryingMappedFixedValue condition,
+    be specified directly, or mapped.  If mapping, the values should be
+    entered in the same form as the \c timeVaryingMappedFixedValue condition,
     except that no interpolation in time is supported.  These should be
     located in the directory:
 
@@ -55,26 +56,31 @@ Description
 
 Usage
     \table
-        Property  | Description         | Required         | Default value
-        value     | Restart value       | yes              |
-        delta     | Local limiting length scale  | yes     |
-        R         | Reynolds stress field | no             |
-        U         | Velocity field      | no               |
-        L         | Turbulence length scale field | no     |
-        d         | Eddy density(fill fraction) | no       | 1
-        kappa     | Von Karman constant | no               | 0.41
-        mapMethod | Method to map reference values | no | planarInterpolation
-        perturb   | Point perturbation for interpolation | no | 1e-5
-        writeEddies | Flag to write eddies as OBJ file | no | no
+        Property  | Description         | Required             | Default value
+        value     | Restart value       | yes                  |
+        delta     | Local limiting length scale          | yes |
+        R         | Reynolds stress field                | no  |
+        U         | Velocity field                       | no  |
+        L         | Turbulence length scale field        | no  |
+        d         | Eddy density (fill fraction)         | no  | 1
+        kappa     | Von Karman constant                  | no  | 0.41
+        mapMethod | Method to map reference values       | no  | nearestCell
+        perturb   | Point perturbation for interpolation | no  | 1e-5
+        interpolateR | Flag to interpolate the R field   | no  | false
+        interpolateL | Flag to interpolate the L field   | no  | false
+        interpolateU | Flag to interpolate the U field   | no  | false
+        writeEddies | Flag to write eddies as OBJ file   | no  | no
     \endtable
 
 Note
-    - The \c delta value typically represents a channel half-height
-    - For R, U and L specification: if the entry is not user input, it is
-      assumed that the data will be mapped
+    - The \c delta value typically represents the characteristic scale of flow
+      or flow domain, e.g. a channel half-height
+    - For \c R, \c U and \c L specification: if the entry is not user input,
+      it is assumed that the data will be mapped
 
 SeeAlso
     timeVaryingMappedFixedValueFvPatchField
+    turbulentDigitalFilterInlet
 
 SourceFiles
     turbulentDFSEMInletFvPatchVectorField.C
@@ -110,7 +116,7 @@ class turbulentDFSEMInletFvPatchVectorField
         //- Maximum number of attempts when seeding eddies
         static label seedIterMax_;
 
-        //- Typical length scale, e.g. half channel height
+        //- Characteristic length scale, e.g. half channel height
         const scalar delta_;
 
         //- Ratio of sum of eddy volumes to eddy box volume; default = 1
@@ -128,7 +134,7 @@ class turbulentDFSEMInletFvPatchVectorField
             //- Fraction of perturbation (fraction of bounding box) to add
             scalar perturb_;
 
-            //- Interpolation scheme to use
+            //- Interpolation scheme to use (nearestCell | planarInterpolation)
             word mapMethod_;
 
             //- 2D interpolation (for 'planarInterpolation' mapMethod)
@@ -232,7 +238,7 @@ class turbulentDFSEMInletFvPatchVectorField
         vector uDashEddy(const List<eddy>& eddies, const point& globalX) const;
 
         //- Helper function to interpolate values from the boundary data or
-        //  read from dictionary
+        //- read from dictionary
         template<class Type>
         tmp<Field<Type>> interpolateOrRead
         (
@@ -258,7 +264,7 @@ class turbulentDFSEMInletFvPatchVectorField
         const pointToPointPlanarInterpolation& patchMapper() const;
 
         //- Return eddies from remote processors that interact with local
-        //  processor
+        //- processor
         void calcOverlappingProcEddies
         (
             List<List<eddy>>& overlappingEddies
@@ -289,7 +295,7 @@ public:
         );
 
         //- Construct by mapping given turbulentDFSEMInletFvPatchVectorField
-        //  onto a new patch
+        //- onto a new patch
         turbulentDFSEMInletFvPatchVectorField
         (
             const turbulentDFSEMInletFvPatchVectorField&,
@@ -337,7 +343,7 @@ public:
     virtual ~turbulentDFSEMInletFvPatchVectorField() = default;
 
 
-    // Member functions
+    // Member Functions
 
         //- Helper function to check that Reynold stresses are valid
         static bool checkStresses(const symmTensorField& Rf);

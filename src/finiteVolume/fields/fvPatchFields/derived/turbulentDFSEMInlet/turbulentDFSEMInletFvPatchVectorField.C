@@ -730,12 +730,12 @@ turbulentDFSEMInletFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF),
-    delta_(0),
-    d_(0),
-    kappa_(0),
+    delta_(Zero),
+    d_(Zero),
+    kappa_(Zero),
 
     perturb_(1e-5),
-    mapMethod_("planarInterpolation"),
+    mapMethod_("nearestCell"),
     mapperPtr_(nullptr),
     interpolateR_(false),
     interpolateL_(false),
@@ -751,14 +751,14 @@ turbulentDFSEMInletFvPatchVectorField
     triCumulativeMagSf_(),
     sumTriMagSf_(Pstream::nProcs() + 1, Zero),
 
-    eddies_(0),
+    eddies_(Zero),
     nCellPerEddy_(5),
     patchNormal_(Zero),
-    v0_(0),
+    v0_(Zero),
     rndGen_(Pstream::myProcNo()),
-    sigmax_(size(), 0),
-    maxSigmaX_(0),
-    nEddy_(0),
+    sigmax_(size(), Zero),
+    maxSigmaX_(Zero),
+    nEddy_(Zero),
     curTimeIndex_(-1),
     patchBounds_(boundBox::invertedBox),
     singleProc_(false),
@@ -804,7 +804,7 @@ turbulentDFSEMInletFvPatchVectorField
     rndGen_(ptf.rndGen_),
     sigmax_(ptf.sigmax_, mapper),
     maxSigmaX_(ptf.maxSigmaX_),
-    nEddy_(0),
+    nEddy_(Zero),
     curTimeIndex_(-1),
     patchBounds_(ptf.patchBounds_),
     singleProc_(ptf.singleProc_),
@@ -822,15 +822,15 @@ turbulentDFSEMInletFvPatchVectorField
 :
     fixedValueFvPatchField<vector>(p, iF, dict),
     delta_(dict.get<scalar>("delta")),
-    d_(dict.lookupOrDefault<scalar>("d", 1)),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
+    d_(dict.getOrDefault<scalar>("d", 1.0)),
+    kappa_(dict.getOrDefault<scalar>("kappa", 0.41)),
 
-    perturb_(dict.lookupOrDefault<scalar>("perturb", 1e-5)),
-    mapMethod_(dict.getOrDefault<word>("mapMethod", "planarInterpolation")),
+    perturb_(dict.getOrDefault<scalar>("perturb", 1e-5)),
+    mapMethod_(dict.getOrDefault<word>("mapMethod", "nearestCell")),
     mapperPtr_(nullptr),
-    interpolateR_(false),
-    interpolateL_(false),
-    interpolateU_(false),
+    interpolateR_(dict.getOrDefault<bool>("interpolateR", false)),
+    interpolateL_(dict.getOrDefault<bool>("interpolateL", false)),
+    interpolateU_(dict.getOrDefault<bool>("interpolateU", false)),
     R_(interpolateOrRead<symmTensor>("R", dict, interpolateR_)),
     L_(interpolateOrRead<scalar>("L", dict, interpolateL_)),
     U_(interpolateOrRead<vector>("U", dict, interpolateU_)),
@@ -843,17 +843,17 @@ turbulentDFSEMInletFvPatchVectorField
     sumTriMagSf_(Pstream::nProcs() + 1, Zero),
 
     eddies_(),
-    nCellPerEddy_(dict.lookupOrDefault<label>("nCellPerEddy", 5)),
+    nCellPerEddy_(dict.getOrDefault<label>("nCellPerEddy", 5)),
     patchNormal_(Zero),
-    v0_(0),
+    v0_(Zero),
     rndGen_(0, -1),
     sigmax_(size(), Zero),
-    maxSigmaX_(0),
-    nEddy_(0),
+    maxSigmaX_(Zero),
+    nEddy_(Zero),
     curTimeIndex_(-1),
     patchBounds_(boundBox::invertedBox),
     singleProc_(false),
-    writeEddies_(dict.lookupOrDefault("writeEddies", false))
+    writeEddies_(dict.getOrDefault<bool>("writeEddies", false))
 {
     eddy::debug = debug;
 
@@ -899,7 +899,7 @@ turbulentDFSEMInletFvPatchVectorField
     rndGen_(ptf.rndGen_),
     sigmax_(ptf.sigmax_),
     maxSigmaX_(ptf.maxSigmaX_),
-    nEddy_(0),
+    nEddy_(Zero),
     curTimeIndex_(-1),
     patchBounds_(ptf.patchBounds_),
     singleProc_(ptf.singleProc_),
@@ -943,7 +943,7 @@ turbulentDFSEMInletFvPatchVectorField
     rndGen_(ptf.rndGen_),
     sigmax_(ptf.sigmax_),
     maxSigmaX_(ptf.maxSigmaX_),
-    nEddy_(0),
+    nEddy_(Zero),
     curTimeIndex_(-1),
     patchBounds_(ptf.patchBounds_),
     singleProc_(ptf.singleProc_),
@@ -1203,7 +1203,7 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::write(Ostream& os) const
         os.writeEntryIfDifferent<word>
         (
             "mapMethod",
-            "planarInterpolation",
+            "nearestCell",
             mapMethod_
         );
     }
