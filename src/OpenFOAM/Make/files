@@ -658,6 +658,7 @@ Fields = fields/Fields
 
 $(Fields)/Field/FieldBase.C
 $(Fields)/boolField/boolField.C
+$(Fields)/boolField/boolIOField.C
 $(Fields)/labelField/labelField.C
 $(Fields)/labelField/labelIOField.C
 $(Fields)/labelField/labelFieldIOField.C

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,8 +32,9 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "IOField.H"
 #include "argList.H"
+#include "IOField.H"
+#include "primitiveFields.H"
 #include "polyMesh.H"
 #include "Time.H"
 
@@ -40,23 +42,38 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void write(const IOobject& io, const label sz)
+template<class Type>
+void doWrite(const IOobject& io, const label sz)
 {
-    IOField<label> fld(io, sz);
+    IOField<Type> fld(io, sz);
     forAll(fld, i)
     {
-        fld[i] = i+1000;
+        fld[i] = i + 1000.25 + (0.25 * i);
     }
     Pout<< "writing:" << fld << endl;
     fld.write(sz > 0);
 }
 
 
-void read(const IOobject& io, const label sz)
+template<>
+void doWrite<bool>(const IOobject& io, const label sz)
+{
+    IOField<bool> fld(io, sz);
+    forAll(fld, i)
+    {
+        fld[i] = i % 2;
+    }
+    Pout<< "writing:" << fld << endl;
+    fld.write(sz > 0);
+}
+
+
+template<class Type>
+void doRead(const IOobject& io, const label sz)
 {
     bool valid = (sz > 0);
     Pout<< "    valid:" << valid << endl;
-    IOField<label> fld(io, valid);
+    IOField<Type> fld(io, valid);
     Pout<< "    wanted:" << sz << " actually read:" << fld.size() << endl;
 
     if (fld.size() != sz)
@@ -66,6 +83,7 @@ void read(const IOobject& io, const label sz)
 }
 
 
+template<class Type>
 void writeAndRead
 (
     const IOobject& io,
@@ -87,7 +105,7 @@ void writeAndRead
 
     // Write
     Pout<< "Writing:" << fileHandler().objectPath(io, io.name()) << endl;
-    write(io, sz);
+    doWrite<Type>(io, sz);
 
     autoPtr<fileOperation> readHandler(fileOperation::New(readType, true));
     fileHandler(readHandler);
@@ -97,13 +115,14 @@ void writeAndRead
     readIO.readOpt() = readOpt;
     Pout<< "Reading:"
         << fileHandler().filePath(readIO.objectPath()) << endl;
-    read(readIO, sz);
+    doRead<Type>(readIO, sz);
 
     Pout<< "** Done writing:" << writeType
         << " Reading:" << readType << nl << nl << endl;
 }
 
 
+template<class Type>
 void readIfPresent
 (
     IOobject& io,
@@ -117,15 +136,54 @@ void readIfPresent
     // Read
     Pout<< "Reading:" << fileHandler().filePath(io.objectPath()) << endl;
     io.readOpt() = IOobject::READ_IF_PRESENT;
-    read(io, sz);
+    doRead<Type>(io, sz);
 }
 
 
-// Main program:
+
+template<class Type>
+void doTests(IOobject& io, const label sz)
+{
+    const wordList handlers
+    (
+        Foam::fileOperation::wordConstructorTablePtr_->sortedToc()
+    );
+
+    Info<< "Found handlers: " << flatOutput(handlers) << nl
+        << "Running tests with " << pTraits<Type>::typeName << nl << nl;
+
+    // for (const word& readHandler : handlers)
+    // {
+    //     readIfPresent<Type>(io, sz, readHandler);
+    // }
+
+    for (const word& writeHandler : handlers)
+    {
+        for (const word& readHandler : handlers)
+        {
+            writeAndRead<Type>
+            (
+                io,
+                sz,
+                writeHandler,
+                IOobject::READ_IF_PRESENT,
+                readHandler
+            );
+        }
+    }
+}
+
+
+// Main program
 
 int main(int argc, char *argv[])
 {
+    argList::addBoolOption("bool", "Use bool for tests");
+    argList::addBoolOption("scalar", "Use scalar for tests");
+    argList::addBoolOption("label", "Use label for tests (default)");
+
     #include "addTimeOptions.H"
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createPolyMesh.H"
@@ -134,6 +192,12 @@ int main(int argc, char *argv[])
     if (Pstream::myProcNo() % 2)
     {
         sz = 1;
+    }
+
+    if (!Pstream::parRun())
+    {
+        sz = 10;
+        Info<< "Serial: using " << sz << nl;
     }
 
     IOobject io
@@ -145,45 +209,26 @@ int main(int argc, char *argv[])
         IOobject::NO_WRITE
     );
 
-    wordList handlers
-    (
-        Foam::fileOperation::wordConstructorTablePtr_->sortedToc()
-    );
 
-    Info<< "Found handlers:" << handlers << endl;
+    label tested = 0;
 
-
-/*
-    forAll(handlers, readi)
+    if (args.found("bool"))
     {
-        const word& readHandler = handlers[readi];
-
-        readIfPresent(io, sz, readHandler);
+        doTests<bool>(io, sz);
+        ++tested;
     }
-*/
-
-
-    forAll(handlers, writei)
+    if (args.found("scalar"))
     {
-        const word& writeHandler = handlers[writei];
-
-        forAll(handlers, readi)
-        {
-            const word& readHandler = handlers[readi];
-
-            writeAndRead
-            (
-                io,
-                sz,
-                writeHandler,
-                IOobject::READ_IF_PRESENT,
-                readHandler
-            );
-        }
+        doTests<scalar>(io, sz);
+        ++tested;
+    }
+    if (!tested || args.found("label"))
+    {
+        doTests<label>(io, sz);
     }
 
 
-    Pout<< "End\n" << endl;
+    Pout<< "\nEnd\n" << endl;
 
     return 0;
 }
