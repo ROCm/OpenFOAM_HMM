@@ -91,6 +91,25 @@ inline Foam::SquareMatrix<Type>::SquareMatrix
 
 
 template<class Type>
+template<class AnyType>
+inline Foam::SquareMatrix<Type>::SquareMatrix
+(
+    const labelPair& dims,
+    const Identity<AnyType>
+)
+:
+    Matrix<SquareMatrix<Type>, Type>(dims, Zero)
+{
+    CHECK_MATRIX_IS_SQUARE(dims.first(), dims.second());
+
+    for (label i = 0; i < dims.first(); ++i)
+    {
+        this->operator()(i, i) = pTraits<Type>::one;
+    }
+}
+
+
+template<class Type>
 inline Foam::SquareMatrix<Type>::SquareMatrix
 (
     const labelPair& dims
@@ -207,6 +226,19 @@ inline void Foam::SquareMatrix<Type>::resize(const label m)
 
 
 template<class Type>
+inline void Foam::SquareMatrix<Type>::resize(const label m, const label n)
+{
+    if (m != n)
+    {
+        FatalErrorInFunction<< "Disallowed use of resize() for SquareMatrix"
+            << abort(FatalError);
+    }
+
+    Matrix<SquareMatrix<Type>, Type>::resize(m, m);
+}
+
+
+template<class Type>
 inline void Foam::SquareMatrix<Type>::setSize(const label m)
 {
     Matrix<SquareMatrix<Type>, Type>::resize(m, m);
@@ -217,6 +249,49 @@ template<class Type>
 inline void Foam::SquareMatrix<Type>::shallowResize(const label m)
 {
     Matrix<SquareMatrix<Type>, Type>::shallowResize(m, m);
+}
+
+
+template<class Type>
+inline bool Foam::SquareMatrix<Type>::symmetric() const
+{
+    for (label n = 0; n < this->n() - 1; ++n)
+    {
+        for (label m = this->m() - 1; n < m; --m)
+        {
+            if (SMALL < mag((*this)(n, m) - (*this)(m, n)))
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+
+template<class Type>
+inline bool Foam::SquareMatrix<Type>::tridiagonal() const
+{
+    for (label i = 0; i < this->m(); ++i)
+    {
+        for (label j = 0; j < this->n(); ++j)
+        {
+            const Type& val = (*this)(i, j);
+
+            if ((i == j) || (i - 1 == j) || (i + 1 == j))
+            {
+                if (mag(val) < SMALL)
+                {
+                    return false;
+                }
+            }
+            else if (SMALL < mag(val))
+            {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 
