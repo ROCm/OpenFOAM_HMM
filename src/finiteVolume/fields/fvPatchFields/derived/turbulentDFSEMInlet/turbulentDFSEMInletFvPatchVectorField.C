@@ -826,7 +826,7 @@ turbulentDFSEMInletFvPatchVectorField
     kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
 
     perturb_(dict.lookupOrDefault<scalar>("perturb", 1e-5)),
-    mapMethod_(dict.lookup("mapMethod")),
+    mapMethod_(dict.getOrDefault<word>("mapMethod", "planarInterpolation")),
     mapperPtr_(nullptr),
     interpolateR_(false),
     interpolateL_(false),
