@@ -4,31 +4,92 @@ cd ${0%/*} || exit 1                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
 #------------------------------------------------------------------------------
 
-# Test with different synthetic inflow models
-modelTypes="reducedDigitalFilter digitalFilter DFSEM"
+endTime=10
+\cp system/controlDict.template system/controlDict
+if notTest $@
+then
+    endTime=85
+fi
+\sed -i "s|END_TIME|$endTime|g" system/controlDict
 
-runApplication blockMesh
-restore0Dir
 
-# Compute (serial) and collect data
-for modelType in $modelTypes
-do
-    echo
-    echo "Running with model: $modelType"
-    (cd 0 && ln -snf "inlet.$modelType" inlet)
-    (cd constant/boundaryData && ln -snf "inlet.$modelType" inlet)
-
-    runApplication -s "$modelType" pimpleFoam
-    ./createGraphs
-
-    # Collect data in 'results' directory
-    results="results/$modelType"
-    echo "Placing summary in $results"
-    mkdir -p "$results"
-    mv -f log.* *.png postProcessing "$results" 2>/dev/null
+# Collect data into the 'results' directory,
+# and clean the case for the next run
+#
+# $1 = model
+# ----
+collectData(){
+    model=$1
+    \echo "    Moving results into 'results/$model'"
+    results="results/$model"
+    \mkdir -p "$results"
+    timeDir=$(foamListTimes -latestTime)
+    \mv -f log* *.png postProcessing "$timeDir" "$results" 2>/dev/null
 
     cleanTimeDirectories
-    rm -rf processor*
-done
+    \rm -rf processor* > /dev/null 2>&1
+}
+
+
+# Compute the case in 'serial' mode,
+# and collect the data
+#
+# $* = models
+# ----
+serialRun(){
+    models=$*
+    for model in $models
+    do
+        \echo "    Running with the synthetic turbulence model: $model"
+        (\cd 0 && \ln -snf "inlet.$model" inlet)
+        (\cd constant/boundaryData && \ln -snf "inlet.$model" inlet)
+
+        runApplication -s "$model" $(getApplication)
+        ./plot
+        collectData $model
+    done
+}
+
+
+# Compute the case in 'parallel' mode,
+# and collect the data
+#
+# $* = models
+# ----
+parallelRun(){
+    models=$*
+    for model in $models
+    do
+        \echo "    Running with the synthetic turbulence model: $model"
+        (\cd 0 && \ln -snf "inlet.$model" inlet)
+        (\cd constant/boundaryData && \ln -snf "inlet.$model" inlet)
+
+        runApplication -s "$model" decomposePar
+        runParallel -s "$model" $(getApplication)
+        ./plot
+
+        collectData $model
+    done
+}
+
+
+#------------------------------------------------------------------------------
+
+# Synthetic inflow models
+models="
+reducedDigitalFilter
+digitalFilter
+DFSEM
+"
+
+# Prepare the numerical setup
+runApplication blockMesh
+restore0Dir
+\rm -rf "results"
+
+# Run with the synthetic turbulence models
+serialRun $models
+#parallelRun $models
+
 
 #------------------------------------------------------------------------------

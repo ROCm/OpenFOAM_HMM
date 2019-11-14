@@ -29,11 +29,11 @@ boundaryField
     {
         type            zeroGradient;
     }
-    sides_half0
+    left
     {
         type            cyclic;
     }
-    sides_half1
+    right
     {
         type            cyclic;
     }

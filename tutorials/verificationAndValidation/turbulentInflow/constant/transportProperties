@@ -17,15 +17,12 @@ FoamFile
 
 transportModel  Newtonian;
 
-// Re_tau = u_tau L / nu
-// Re_tau = 395
-// L = half channel height = 1
-// Ubulk/u_tau = 17.55
-// U_bulk = 17.55 -> u_tau = 1
-// -> nu = 1*1/395 = 2.532e-3
+// ReTau = uTau delta / nuFluid
+// ReTau = 395 [-]
+// delta = half channel height = 1 [m]
+// -> nuFluid = 1*1/395 = 2.532e-3 [m2/s]
 
-nu              nu [ 0 2 -1 0 0 0 0 ] 2.532e-3;
-
+nu              2.532e-3;
 
 
 // ************************************************************************* //

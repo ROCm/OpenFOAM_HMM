@@ -10,25 +10,25 @@ examined through a single-cell-domain smooth-wall plane channel flow setup:
 
 The input statistics are obtained from:
 
-    Moser, Kim & Mansour
-    "DNS of Turbulent Channel Flow up to Re_tau=590",
-    Physics of Fluids (1999) vol 11, 943-945.
-    doi.org/10.1063/1.869966
+    Moser, R. D., Kim, J., & Mansour, N. N. (1999).
+    Direct numerical simulation of turbulent channel flow up to Reτ=590.
+    Physics of fluids, 11(4), 943-945.
+    DOI:10.1063/1.869966
 
-from which the input first-/second-order turbulence statistics data for the 
-smooth-wall plane channel flow at Re=395 were used.
+from which the input first-/second-order turbulence statistics data for the
+smooth-wall plane channel flow at ReTau=395 were used.
 
 The data is available online from (Retrieved: 21-06-2019):
 
-    http://turbulence.ices.utexas.edu/MKM_1999.html
+    https://turbulence.oden.utexas.edu/data/MKM/chan395/
 
-Serial executing:
+Serial executing (comment out 'parallelRun'):
 
 ./Allrun
 
-Parallel (decompositionMethod=scotch) executing:
+Parallel (decompositionMethod=scotch) executing (comment out 'serialRun'):
 
-./Allrunparallel
+./Allrun
 
-Both scripts run the test case, and collect the OpenFOAM samples, and plots into
-the 'results' directory. 
+The script will run the test case, and collect the plots and samples into
+the 'results' directory.

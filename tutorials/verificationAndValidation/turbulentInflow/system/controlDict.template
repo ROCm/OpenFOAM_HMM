@@ -10,13 +10,50 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    note        "mesh decomposition control dictionary";
-    object      decomposeParDict;
+    location    "system";
+    object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-numberOfSubdomains  3;
+application     pimpleFoam;
 
-method          scotch;
+startFrom       latestTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         END_TIME;
+
+deltaT          4e-3;
+
+writeControl    timeStep;
+
+writeInterval   1250;
+
+purgeWrite      3;
+
+writeFormat     ascii;
+
+writePrecision  8;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   8;
+
+runTimeModifiable false;
+
+adjustTimeStep  false;
+
+// Allow 10% of time for initialisation before sampling
+timeStart       #eval #{ 0.1 * ${/endTime} #};
+
+functions
+{
+    #include "fieldAverage"
+    #include "sampling"
+}
 
 // ************************************************************************* //

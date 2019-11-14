@@ -60,16 +60,16 @@ boundary
         type            wall;
         faces           ((4 3 9 10));
     }
-    sides_half0
+    left
     {
         type            cyclic;
-        neighbourPatch  sides_half1;
+        neighbourPatch  right;
         faces           ((1 2 5 0)(2 3 4 5));
     }
-    sides_half1
+    right
     {
         type            cyclic;
-        neighbourPatch  sides_half0;
+        neighbourPatch  left;
         faces           ((6 11 8 7)(11 10 9 8));
     }
     inlet

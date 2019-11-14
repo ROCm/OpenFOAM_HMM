@@ -15,25 +15,6 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-fieldAverage1
-{
-    type                fieldAverage;
-    libs                (fieldFunctionObjects);
-    writeControl        writeTime;
-    timeStart           $/timeStart;
-
-    fields
-    (
-        U
-        {
-            mean        on;
-            prime2Mean  on;
-            base        time;
-        }
-    );
-}
-
-
 inletSampling
 {
     type                sets;
@@ -56,7 +37,7 @@ inletSampling
         }
         inletCell
         {
-            type        face;
+            type        midPoint;
             axis        y;
             start       (0.062832 0 1.57);
             end         (0.062832 2 1.57);

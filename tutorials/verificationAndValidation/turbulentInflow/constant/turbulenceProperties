@@ -19,19 +19,14 @@ simulationType LES;
 
 LES
 {
-    turbulence      on;
-
     LESModel        Smagorinsky;
     SmagorinskyCoeffs
     {
-        Ce              1.05;
-        Ck              0.0266; // Updated to give Cs = 0.065
+        Ce              1.048;
+        Ck              0.02654; // Updated to give Cs = 0.065
     }
 
-    printCoeffs     on;
-
     delta           vanDriest;
-
     vanDriestCoeffs
     {
         delta           cubeRootVol;
@@ -42,6 +37,9 @@ LES
         Aplus           26;
         Cdelta          0.158;
     }
+
+    printCoeffs     on;
+    turbulence      on;
 }
 
 

@@ -31,11 +31,11 @@ boundaryField
         type            fixedValue;
         value           uniform (0 0 0);
     }
-    sides_half0
+    left
     {
         type            cyclic;
     }
-    sides_half1
+    right
     {
         type            cyclic;
     }
