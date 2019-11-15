@@ -66,10 +66,12 @@ inline Foam::Tensor<Cmpt>::Tensor
 
 template<class Cmpt>
 inline Foam::Tensor<Cmpt>::Tensor(const SphericalTensor<Cmpt>& st)
+:
+    Tensor::msType(Zero)
 {
-    this->v_[XX] = st.ii(); this->v_[XY] = 0; this->v_[XZ] = 0;
-    this->v_[YX] = 0; this->v_[YY] = st.ii(); this->v_[YZ] = 0;
-    this->v_[ZX] = 0; this->v_[ZY] = 0; this->v_[ZZ] = st.ii();
+    this->v_[XX] = st.ii();
+    this->v_[YY] = st.ii();
+    this->v_[ZZ] = st.ii();
 }
 
 
@@ -83,20 +85,14 @@ inline Foam::Tensor<Cmpt>::Tensor(const SymmTensor<Cmpt>& st)
 
 
 template<class Cmpt>
-inline Foam::Tensor<Cmpt>::Tensor(const Vector<Vector<Cmpt>>& tr)
-{
-    this->v_[XX] = tr.x().x();
-    this->v_[XY] = tr.x().y();
-    this->v_[XZ] = tr.x().z();
-
-    this->v_[YX] = tr.y().x();
-    this->v_[YY] = tr.y().y();
-    this->v_[YZ] = tr.y().z();
-
-    this->v_[ZX] = tr.z().x();
-    this->v_[ZY] = tr.z().y();
-    this->v_[ZZ] = tr.z().z();
-}
+inline Foam::Tensor<Cmpt>::Tensor
+(
+    const Vector<Vector<Cmpt>>& vecs,
+    const bool transposed
+)
+:
+    Tensor<Cmpt>(vecs.x(), vecs.y(), vecs.z(), transposed)
+{}
 
 
 template<class Cmpt>
@@ -104,12 +100,18 @@ inline Foam::Tensor<Cmpt>::Tensor
 (
     const Vector<Cmpt>& x,
     const Vector<Cmpt>& y,
-    const Vector<Cmpt>& z
+    const Vector<Cmpt>& z,
+    const bool transposed
 )
 {
-    this->v_[XX] = x.x(); this->v_[XY] = x.y(); this->v_[XZ] = x.z();
-    this->v_[YX] = y.x(); this->v_[YY] = y.y(); this->v_[YZ] = y.z();
-    this->v_[ZX] = z.x(); this->v_[ZY] = z.y(); this->v_[ZZ] = z.z();
+    if (transposed)
+    {
+        this->cols(x, y, z);
+    }
+    else
+    {
+        this->rows(x, y, z);
+    }
 }
 
 
@@ -425,6 +427,34 @@ inline void Foam::Tensor<Cmpt>::row(const Vector<Cmpt>& v)
     }
 
     static_assert(Row < 3, "Invalid row access");
+}
+
+
+template<class Cmpt>
+inline void Foam::Tensor<Cmpt>::cols
+(
+    const Vector<Cmpt>& x,
+    const Vector<Cmpt>& y,
+    const Vector<Cmpt>& z
+)
+{
+    this->v_[XX] = x.x(); this->v_[XY] = y.x(); this->v_[XZ] = z.x();
+    this->v_[YX] = x.y(); this->v_[YY] = y.y(); this->v_[YZ] = z.y();
+    this->v_[ZX] = x.z(); this->v_[ZY] = y.z(); this->v_[ZZ] = z.z();
+}
+
+
+template<class Cmpt>
+inline void Foam::Tensor<Cmpt>::rows
+(
+    const Vector<Cmpt>& x,
+    const Vector<Cmpt>& y,
+    const Vector<Cmpt>& z
+)
+{
+    this->v_[XX] = x.x(); this->v_[XY] = x.y(); this->v_[XZ] = x.z();
+    this->v_[YX] = y.x(); this->v_[YY] = y.y(); this->v_[YZ] = y.z();
+    this->v_[ZX] = z.x(); this->v_[ZY] = z.y(); this->v_[ZZ] = z.z();
 }
 
 

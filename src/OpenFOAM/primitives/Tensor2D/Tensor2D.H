@@ -159,6 +159,9 @@ public:
             //  Runtime check of column index.
             inline void col(const direction c, const Vector2D<Cmpt>& v);
 
+            //- Set column values
+            inline void cols(const Vector2D<Cmpt>& x, const Vector2D<Cmpt>& y);
+
 
         // Row-vector access.
 
@@ -185,6 +188,9 @@ public:
             //- Set values of given row (0,1)
             //  Runtime check of row index.
             inline void row(const direction r, const Vector2D<Cmpt>& v);
+
+            //- Set row values
+            inline void rows(const Vector2D<Cmpt>& x, const Vector2D<Cmpt>& y);
 
 
         // Diagonal access.

@@ -60,9 +60,11 @@ inline Foam::Tensor2D<Cmpt>::Tensor2D(const SymmTensor2D<Cmpt>& st)
 
 template<class Cmpt>
 inline Foam::Tensor2D<Cmpt>::Tensor2D(const SphericalTensor2D<Cmpt>& st)
+:
+    Tensor2D::msType(Zero)
 {
-    this->v_[XX] = st.ii(); this->v_[XY] = 0;
-    this->v_[YX] = 0; this->v_[YY] = st.ii();
+    this->v_[XX] = st.ii();
+    this->v_[YY] = st.ii();
 }
 
 
@@ -264,6 +266,30 @@ inline void Foam::Tensor2D<Cmpt>::row(const Vector2D<Cmpt>& v)
     }
 
     static_assert(Row < 2, "Invalid row access");
+}
+
+
+template<class Cmpt>
+inline void Foam::Tensor2D<Cmpt>::cols
+(
+    const Vector2D<Cmpt>& x,
+    const Vector2D<Cmpt>& y
+)
+{
+    this->v_[XX] = x.x(); this->v_[XY] = y.x();
+    this->v_[YX] = x.y(); this->v_[YY] = y.y();
+}
+
+
+template<class Cmpt>
+inline void Foam::Tensor2D<Cmpt>::rows
+(
+    const Vector2D<Cmpt>& x,
+    const Vector2D<Cmpt>& y
+)
+{
+    this->v_[XX] = x.x(); this->v_[XY] = x.y();
+    this->v_[YX] = y.x(); this->v_[YY] = y.y();
 }
 
 

@@ -111,15 +111,22 @@ public:
         //- Construct given SymmTensor
         inline Tensor(const SymmTensor<Cmpt>& st);
 
-        //- Construct given triad of row vectors
-        inline Tensor(const Vector<Vector<Cmpt>>& tr);
+        //- Construct given triad of row vectors,
+        //- optionally treated as transposed (ie, column vectors)
+        inline Tensor
+        (
+            const Vector<Vector<Cmpt>>& vecs,
+            const bool transposed = false
+        );
 
-        //- Construct given the three row vectors
+        //- Construct given the three row vectors,
+        //- optionally treated as transposed (ie, column vectors)
         inline Tensor
         (
             const Vector<Cmpt>& x,
             const Vector<Cmpt>& y,
-            const Vector<Cmpt>& z
+            const Vector<Cmpt>& z,
+            const bool transposed = false
         );
 
         //- Construct given the nine components
@@ -200,6 +207,14 @@ public:
             //  Runtime check of column index.
             inline void col(const direction c, const Vector<Cmpt>& v);
 
+            //- Set column values
+            inline void cols
+            (
+                const Vector<Cmpt>& x,
+                const Vector<Cmpt>& y,
+                const Vector<Cmpt>& z
+            );
+
 
         // Row-vector access.
 
@@ -229,6 +244,14 @@ public:
             //- Set values of given row (0,1,2)
             //  Runtime check of row index.
             inline void row(const direction r, const Vector<Cmpt>& v);
+
+            //- Set row values
+            inline void rows
+            (
+                const Vector<Cmpt>& x,
+                const Vector<Cmpt>& y,
+                const Vector<Cmpt>& z
+            );
 
 
         // Diagonal access.
