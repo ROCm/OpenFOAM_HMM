@@ -462,49 +462,58 @@ public:
         //- Clone
         tmp<GeometricField<Type, PatchField, GeoMesh>> clone() const;
 
-        //- Return a temporary field constructed from name, mesh, dimensionSet
-        //  and patch type.
+        //- Return tmp field from name, mesh, dimensions and patch type.
+        //  The field is NO_READ, NO_WRITE, unregistered and uses the
+        //  current timeName from the mesh registry
         static tmp<GeometricField<Type, PatchField, GeoMesh>> New
         (
             const word& name,
-            const Mesh&,
-            const dimensionSet&,
-            const word& patchFieldType=PatchField<Type>::calculatedType()
+            const Mesh& mesh,
+            const dimensionSet& ds,
+            const word& patchFieldType = PatchField<Type>::calculatedType()
         );
 
-        //- Return a temporary field constructed from mesh, dimensioned<Type>
-        //  and patch type.
+        //- Return tmp field from name, mesh, dimensioned\<Type\>
+        //- and patch type.
+        //  The field is NO_READ, NO_WRITE, unregistered and uses the
+        //  current timeName from the mesh registry
         static tmp<GeometricField<Type, PatchField, GeoMesh>> New
         (
             const word& name,
-            const Mesh&,
-            const dimensioned<Type>&,
-            const word& patchFieldType=PatchField<Type>::calculatedType()
+            const Mesh& mesh,
+            const dimensioned<Type>& dt,
+            const word& patchFieldType = PatchField<Type>::calculatedType()
         );
 
-        //- Return a temporary field constructed from mesh, dimensioned<Type>
-        //  and patch types.
+        //- Return tmp field from name, mesh, dimensioned\<Type\>
+        //- and patch types.
+        //  The field is NO_READ, NO_WRITE, unregistered and uses the
+        //  current timeName from the mesh registry
         static tmp<GeometricField<Type, PatchField, GeoMesh>> New
         (
             const word& name,
-            const Mesh&,
-            const dimensioned<Type>&,
+            const Mesh& mesh,
+            const dimensioned<Type>& dt,
             const wordList& patchFieldTypes,
             const wordList& actualPatchTypes = wordList()
         );
 
-        //- Rename temporary field and return
+        //- Return renamed tmp field
+        //  The field is NO_READ, NO_WRITE, unregistered and uses the
+        //  current timeName from the mesh registry
         static tmp<GeometricField<Type, PatchField, GeoMesh>> New
         (
             const word& newName,
-            const tmp<GeometricField<Type, PatchField, GeoMesh>>&
+            const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf
         );
 
-        //- Rename and reset patch fields types of temporary field and return
+        //- Rename tmp field and reset patch field types and return
+        //  The field is NO_READ, NO_WRITE, unregistered and uses the
+        //  current timeName from the mesh registry
         static tmp<GeometricField<Type, PatchField, GeoMesh>> New
         (
             const word& newName,
-            const tmp<GeometricField<Type, PatchField, GeoMesh>>&,
+            const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf,
             const wordList& patchFieldTypes,
             const wordList& actualPatchTypes = wordList()
         );
@@ -621,7 +630,7 @@ public:
         void writeMinMax(Ostream& os) const;
 
 
-    // Member function *this operators
+    // Member Function *this Operators
 
         //- Negate the field inplace
         void negate();

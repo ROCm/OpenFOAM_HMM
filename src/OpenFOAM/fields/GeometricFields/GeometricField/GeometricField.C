@@ -709,23 +709,20 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
     const word& patchFieldType
 )
 {
-    return tmp<GeometricField<Type, PatchField, GeoMesh>>
+    return tmp<GeometricField<Type, PatchField, GeoMesh>>::New
     (
-        new GeometricField<Type, PatchField, GeoMesh>
+        IOobject
         (
-            IOobject
-            (
-                name,
-                mesh.thisDb().time().timeName(),
-                mesh.thisDb(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            mesh,
-            ds,
-            patchFieldType
-        )
+            name,
+            mesh.thisDb().time().timeName(),
+            mesh.thisDb(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        mesh,
+        ds,
+        patchFieldType
     );
 }
 
@@ -740,26 +737,22 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
     const word& patchFieldType
 )
 {
-    return tmp<GeometricField<Type, PatchField, GeoMesh>>
+    return tmp<GeometricField<Type, PatchField, GeoMesh>>::New
     (
-        new GeometricField<Type, PatchField, GeoMesh>
+        IOobject
         (
-            IOobject
-            (
-                name,
-                mesh.thisDb().time().timeName(),
-                mesh.thisDb(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            mesh,
-            dt,
-            patchFieldType
-        )
+            name,
+            mesh.thisDb().time().timeName(),
+            mesh.thisDb(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        mesh,
+        dt,
+        patchFieldType
     );
 }
-
 
 
 template<class Type, template<class> class PatchField, class GeoMesh>
@@ -773,24 +766,21 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
     const wordList& actualPatchTypes
 )
 {
-    return tmp<GeometricField<Type, PatchField, GeoMesh>>
+    return tmp<GeometricField<Type, PatchField, GeoMesh>>::New
     (
-        new GeometricField<Type, PatchField, GeoMesh>
+        IOobject
         (
-            IOobject
-            (
-                name,
-                mesh.thisDb().time().timeName(),
-                mesh.thisDb(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            mesh,
-            dt,
-            patchFieldTypes,
-            actualPatchTypes
-        )
+            name,
+            mesh.thisDb().time().timeName(),
+            mesh.thisDb(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        mesh,
+        dt,
+        patchFieldTypes,
+        actualPatchTypes
     );
 }
 
@@ -803,22 +793,19 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
     const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf
 )
 {
-    return tmp<GeometricField<Type, PatchField, GeoMesh>>
+    return tmp<GeometricField<Type, PatchField, GeoMesh>>::New
     (
-        new GeometricField<Type, PatchField, GeoMesh>
+        IOobject
         (
-            IOobject
-            (
-                newName,
-                tgf().instance(),
-                tgf().local(),
-                tgf().db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            tgf
-        )
+            newName,
+            tgf().instance(),
+            tgf().local(),
+            tgf().db(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        tgf
     );
 }
 
@@ -833,24 +820,21 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
     const wordList& actualPatchTypes
 )
 {
-    return tmp<GeometricField<Type, PatchField, GeoMesh>>
+    return tmp<GeometricField<Type, PatchField, GeoMesh>>::New
     (
-        new GeometricField<Type, PatchField, GeoMesh>
+        IOobject
         (
-            IOobject
-            (
-                newName,
-                tgf().instance(),
-                tgf().local(),
-                tgf().db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            tgf,
-            patchFieldTypes,
-            actualPatchTypes
-        )
+            newName,
+            tgf().instance(),
+            tgf().local(),
+            tgf().db(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        tgf,
+        patchFieldTypes,
+        actualPatchTypes
     );
 }
 
