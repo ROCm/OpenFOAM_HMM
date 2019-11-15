@@ -28,6 +28,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "SpalartAllmaras.H"
+#include "wallDist.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -77,7 +78,7 @@ SpalartAllmaras::SpalartAllmaras
     nutPtr_ = mesh_.getObjectPtr<volScalarField>("nut");
 
     hasDist_ = true;
-    dPtr_ = mesh_.getObjectPtr<volScalarField>("yWall");
+    dPtr_ = &(const_cast<volScalarField&>(wallDist::New(mesh_).y()));
 
     allocateInitValues();
     allocateMeanFields();
