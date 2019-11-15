@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,16 +27,45 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "GeometricSphericalTensorField.H"
+#include "sphericalTensorFieldField.H"
 
 #define TEMPLATE template<template<class> class PatchField, class GeoMesh>
 #include "GeometricFieldFunctionsM.C"
+
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void Foam::zip
+(
+    GeometricField<SphericalTensor<Cmpt>, PatchField, GeoMesh>& result,
+    const GeometricField<Cmpt, PatchField, GeoMesh>& ii
+)
+{
+    Foam::zip(result.primitiveFieldRef(), ii.primitiveField());
+
+    Foam::zip(result.boundaryFieldRef(), ii.boundaryField());
+}
+
+
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void Foam::unzip
+(
+    const GeometricField<SphericalTensor<Cmpt>, PatchField, GeoMesh>& input,
+    GeometricField<Cmpt, PatchField, GeoMesh>& ii
+)
+{
+    Foam::unzip(input.primitiveField(), ii.primitiveFieldRef());
+
+    Foam::unzip(input.boundaryField(), ii.boundaryFieldRef());
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * global functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 UNARY_FUNCTION(scalar, sphericalTensor, tr, transform)
 UNARY_FUNCTION(sphericalTensor, sphericalTensor, sph, transform)

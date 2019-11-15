@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,6 +50,110 @@ SourceFiles
 namespace Foam
 {
 
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+//- Zip together tensor field from components
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void zip
+(
+    GeometricField<Tensor<Cmpt>, PatchField, GeoMesh>& result,
+    const GeometricField<Cmpt, PatchField, GeoMesh>& xx,
+    const GeometricField<Cmpt, PatchField, GeoMesh>& xy,
+    const GeometricField<Cmpt, PatchField, GeoMesh>& xz,
+    const GeometricField<Cmpt, PatchField, GeoMesh>& yx,
+    const GeometricField<Cmpt, PatchField, GeoMesh>& yy,
+    const GeometricField<Cmpt, PatchField, GeoMesh>& yz,
+    const GeometricField<Cmpt, PatchField, GeoMesh>& zx,
+    const GeometricField<Cmpt, PatchField, GeoMesh>& zy,
+    const GeometricField<Cmpt, PatchField, GeoMesh>& zz
+);
+
+//- Unzip tensor field into components
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void unzip
+(
+    const GeometricField<Tensor<Cmpt>, PatchField, GeoMesh>& input,
+    GeometricField<Cmpt, PatchField, GeoMesh>& xx,
+    GeometricField<Cmpt, PatchField, GeoMesh>& xy,
+    GeometricField<Cmpt, PatchField, GeoMesh>& xz,
+    GeometricField<Cmpt, PatchField, GeoMesh>& yx,
+    GeometricField<Cmpt, PatchField, GeoMesh>& yy,
+    GeometricField<Cmpt, PatchField, GeoMesh>& yz,
+    GeometricField<Cmpt, PatchField, GeoMesh>& zx,
+    GeometricField<Cmpt, PatchField, GeoMesh>& zy,
+    GeometricField<Cmpt, PatchField, GeoMesh>& zz
+);
+
+
+
+//- Zip together tensor field field from row components
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void zipRows
+(
+    GeometricField<Tensor<Cmpt>, PatchField, GeoMesh>& result,
+    const GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& x,
+    const GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& y,
+    const GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& z
+);
+
+//- Zip together tensor field from column components
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void zipCols
+(
+    GeometricField<Tensor<Cmpt>, PatchField, GeoMesh>& result,
+    const GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& x,
+    const GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& y,
+    const GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& z
+);
+
+//- Extract tensor field field rows
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void unzipRows
+(
+    const GeometricField<Tensor<Cmpt>, PatchField, GeoMesh>& input,
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& x,
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& y,
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& z
+);
+
+//- Extract tensor field field columns
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void unzipCols
+(
+    const GeometricField<Tensor<Cmpt>, PatchField, GeoMesh>& input,
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& x,
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& y,
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& z
+);
+
+
+//- Extract a tensor field row (x,y,z) == (0,1,2)
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void unzipRow
+(
+    const GeometricField<Tensor<Cmpt>, PatchField, GeoMesh>& input,
+    const vector::components cmpt,
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& result
+);
+
+//- Extract a tensor field column (x,y,z) == (0,1,2)
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void unzipCol
+(
+    const GeometricField<Tensor<Cmpt>, PatchField, GeoMesh>& input,
+    const vector::components cmpt,
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& result
+);
+
+//- Extract a tensor field diagonal
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void unzipDiag
+(
+    const GeometricField<Tensor<Cmpt>, PatchField, GeoMesh>& input,
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& result
+);
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 UNARY_FUNCTION(tensor, tensor, T, transform)
@@ -69,7 +174,7 @@ UNARY_FUNCTION(vector, symmTensor, eigenValues, transform)
 UNARY_FUNCTION(symmTensor, symmTensor, eigenVectors, sign)
 
 
-// * * * * * * * * * * * * * * * global operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 UNARY_OPERATOR(vector, tensor, *, hdual, transform)
 UNARY_OPERATOR(tensor, vector, *, hdual, transform)

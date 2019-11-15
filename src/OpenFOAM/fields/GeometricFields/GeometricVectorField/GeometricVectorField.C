@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011 OpenFOAM Foundation
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -24,26 +23,65 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InClass
-    Foam::GeometricFields
-
-Description
-    The standard GeometricField types
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef GeometricFields_H
-#define GeometricFields_H
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "GeometricScalarField.H"
 #include "GeometricVectorField.H"
-#include "GeometricTensorField.H"
-#include "GeometricSphericalTensorField.H"
+#include "vectorFieldField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-#endif
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void Foam::zip
+(
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& result,
+    const GeometricField<Cmpt, PatchField, GeoMesh>& x,
+    const GeometricField<Cmpt, PatchField, GeoMesh>& y,
+    const GeometricField<Cmpt, PatchField, GeoMesh>& z
+)
+{
+    Foam::zip
+    (
+        result.primitiveFieldRef(),
+        x.primitiveField(),
+        y.primitiveField(),
+        z.primitiveField()
+    );
+
+    Foam::zip
+    (
+        result.boundaryFieldRef(),
+        x.boundaryField(),
+        y.boundaryField(),
+        z.boundaryField()
+    );
+}
+
+
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void Foam::unzip
+(
+    const GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& input,
+    GeometricField<Cmpt, PatchField, GeoMesh>& x,
+    GeometricField<Cmpt, PatchField, GeoMesh>& y,
+    GeometricField<Cmpt, PatchField, GeoMesh>& z
+)
+{
+    Foam::unzip
+    (
+        input.primitiveField(),
+        x.primitiveFieldRef(),
+        y.primitiveFieldRef(),
+        z.primitiveFieldRef()
+    );
+
+    Foam::unzip
+    (
+        input.boundaryField(),
+        x.boundaryFieldRef(),
+        y.boundaryFieldRef(),
+        z.boundaryFieldRef()
+    );
+}
+
 
 // ************************************************************************* //

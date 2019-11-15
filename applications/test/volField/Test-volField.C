@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,12 +30,96 @@ Application
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "GeometricFields.H"
 #include "transformGeometricField.H"
+
+
+template<class GeoField>
+void setDims(UPtrList<GeoField>& list, const dimensionSet& ds)
+{
+    forAll(list, i)
+    {
+        if (list.set(i))
+        {
+            list[i].dimensions().reset(ds);
+        }
+    }
+}
+
+
+template<class GeoField>
+void rename(UPtrList<GeoField>& list, const word& baseName)
+{
+    forAll(list, i)
+    {
+        if (list.set(i))
+        {
+            list[i].rename(IOobject::groupName(baseName, name(i)));
+        }
+    }
+}
+
+
+template<class GeoField, class GeoField2>
+void setDims(UPtrList<GeoField>& list, const GeoField2& refField)
+{
+    setDims(list, refField.dimensions());
+}
+
+
+template<class GeoField>
+void write
+(
+    UPtrList<GeoField>& list,
+    label len
+)
+{
+    len = min(len, list.size());
+
+    for (label i=0; i < len; ++i)
+    {
+        if (list.set(i))
+        {
+            list[i].write();
+        }
+    }
+}
+
+
+template<class GeoField>
+PtrList<GeoField> create
+(
+    const fvMesh& mesh,
+    const label len
+)
+{
+    PtrList<GeoField> list(len);
+
+    forAll(list, i)
+    {
+        list.set
+        (
+            i,
+            GeoField::New
+            (
+                word("cmpt." + name(i)),
+                mesh,
+                dimensioned<typename GeoField::value_type>(Zero)
+            ).ptr()
+        );
+    }
+
+    return list;
+}
+
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
+    argList::addBoolOption("zip", "run zip/unzip tests");
+
     #include "setRootCase.H"
 
     #include "createTime.H"
@@ -89,6 +174,21 @@ int main(int argc, char *argv[])
         zeroGradientFvPatchSymmTensorField::typeName
     );
 
+    GeometricField<tensor, fvPatchField, volMesh> tensf
+    (
+        IOobject
+        (
+            "tf",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensioned<tensor>("tf", dimless, tensor(1,2,3,4,5,6,7,8,9)),
+        zeroGradientFvPatchScalarField::typeName
+    );
+
     SolverPerformance<symmTensor> sP =
     (
         solve
@@ -117,6 +217,66 @@ int main(int argc, char *argv[])
     Info<< nl
         << "solverPerformanceDict: "
         << mesh.solverPerformanceDict() << endl;
+
+
+    if (args.found("zip"))
+    {
+        Info<< nl << "Running some zip/unzip tests" << nl;
+
+        auto cmpts = create<volScalarField>(mesh, 9);
+        auto slice = create<volVectorField>(mesh, 3);
+
+        // vector
+        {
+            setDims(cmpts, U);
+            setDims(slice, U);
+            rename(cmpts, U.name());
+            rename(slice, U.name() + "-slice");
+
+            Info<< "unzip: " << U.name() << nl;
+
+            unzip(U, cmpts[0], cmpts[1], cmpts[2]);
+
+            zip(U, cmpts[0], cmpts[1], cmpts[2]);
+
+            U.rename(IOobject::groupName(U.name(), "rezip"));
+
+            write(cmpts, 3);
+            U.write();
+        }
+
+        // tensor
+        {
+            setDims(cmpts, tensf);
+            setDims(slice, tensf);
+            rename(cmpts, tensf.name());
+            rename(slice, tensf.name() + "-slice");
+
+            Info<< "unzip: " << tensf.name() << nl;
+
+            unzip
+            (
+                tensf,
+                cmpts[0], cmpts[1], cmpts[2],
+                cmpts[3], cmpts[4], cmpts[5],
+                cmpts[6], cmpts[7], cmpts[8]
+            );
+
+            unzipRows(tensf, slice[0], slice[1], slice[2]);
+
+            // reszip transposed
+            zipCols(tensf, slice[0], slice[1], slice[2]);
+
+            tensf.rename(tensf.name() + "-T");
+
+            write(cmpts, 9);
+            write(slice, 3);
+            tensf.write();
+        }
+    }
+
+
+    Info<< "\nEnd\n" << nl;
 
     return 0;
 }

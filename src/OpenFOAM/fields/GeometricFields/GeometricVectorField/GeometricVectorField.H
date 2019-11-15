@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011 OpenFOAM Foundation
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -25,22 +24,56 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 InClass
-    Foam::GeometricFields
+    Foam::GeometricVectorField
 
 Description
-    The standard GeometricField types
+    Vector specific part of the implementation of GeometricField.
+
+SourceFiles
+    GeometricVectorField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef GeometricFields_H
-#define GeometricFields_H
+#ifndef GeometricVectorField_H
+#define GeometricVectorField_H
+
+#include "GeometricScalarField.H"
+#include "DimensionedScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "GeometricScalarField.H"
-#include "GeometricVectorField.H"
-#include "GeometricTensorField.H"
-#include "GeometricSphericalTensorField.H"
+namespace Foam
+{
+
+// * * * * * * * * * * * * * * * Global Functions * * * * * * * * * * * * * * //
+
+//- Compose a vector field from components
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void zip
+(
+    GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& result,
+    const GeometricField<Cmpt, PatchField, GeoMesh>& x,
+    const GeometricField<Cmpt, PatchField, GeoMesh>& y,
+    const GeometricField<Cmpt, PatchField, GeoMesh>& z
+);
+
+//- Unzip vector field into components
+template<class Cmpt, template<class> class PatchField, class GeoMesh>
+void unzip
+(
+    const GeometricField<Vector<Cmpt>, PatchField, GeoMesh>& input,
+    GeometricField<Cmpt, PatchField, GeoMesh>& x,
+    GeometricField<Cmpt, PatchField, GeoMesh>& y,
+    GeometricField<Cmpt, PatchField, GeoMesh>& z
+);
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "GeometricVectorField.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
