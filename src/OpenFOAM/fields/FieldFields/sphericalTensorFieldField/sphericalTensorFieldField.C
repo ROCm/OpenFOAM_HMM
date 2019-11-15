@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,12 +34,42 @@ Description
 #define TEMPLATE template<template<class> class Field>
 #include "FieldFieldFunctionsM.C"
 
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+template<template<class> class Field, class Cmpt>
+void Foam::zip
+(
+    FieldField<Field, SphericalTensor<Cmpt>>& result,
+    const FieldField<Field, Cmpt>& ii
+)
+{
+    forAll(result, i)
+    {
+        Foam::zip(result[i], ii[i]);
+    }
+}
+
+
+template<template<class> class Field, class Cmpt>
+void Foam::unzip
+(
+    const FieldField<Field, SphericalTensor<Cmpt>>& input,
+    FieldField<Field, Cmpt>& ii
+)
+{
+    forAll(input, i)
+    {
+        Foam::unzip(input[i], ii[i]);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * global functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 UNARY_FUNCTION(scalar, sphericalTensor, tr)
 UNARY_FUNCTION(sphericalTensor, sphericalTensor, sph)

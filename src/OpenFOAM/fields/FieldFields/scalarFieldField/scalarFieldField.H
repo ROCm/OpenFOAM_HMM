@@ -38,8 +38,8 @@ SourceFiles
 #ifndef scalarFieldField_H
 #define scalarFieldField_H
 
+#include "scalarField.H"
 #include "FieldField.H"
-#include "scalar.H"
 
 #define TEMPLATE template<template<class> class Field>
 #include "FieldFieldFunctionsM.H"

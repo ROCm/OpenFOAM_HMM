@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,6 +48,43 @@ SourceFiles
 
 namespace Foam
 {
+
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+//- Zip together symmTensor field field from components
+template<template<class> class Field, class Cmpt>
+void zip
+(
+    FieldField<Field, SymmTensor<Cmpt>>& result,
+    const FieldField<Field, Cmpt>& xx,
+    const FieldField<Field, Cmpt>& xy,
+    const FieldField<Field, Cmpt>& xz,
+    const FieldField<Field, Cmpt>& yy,
+    const FieldField<Field, Cmpt>& yz,
+    const FieldField<Field, Cmpt>& zz
+);
+
+//- Unzip symmTensor field field into components
+template<template<class> class Field, class Cmpt>
+void unzip
+(
+    const FieldField<Field, SymmTensor<Cmpt>>& input,
+    FieldField<Field, Cmpt>& xx,
+    FieldField<Field, Cmpt>& xy,
+    FieldField<Field, Cmpt>& xz,
+    FieldField<Field, Cmpt>& yy,
+    FieldField<Field, Cmpt>& yz,
+    FieldField<Field, Cmpt>& zz
+);
+
+//- Extract a symmTensor field field diagonal
+template<template<class> class Field, class Cmpt>
+void unzipDiag
+(
+    const FieldField<Field, SymmTensor<Cmpt>>& input,
+    FieldField<Field, Vector<Cmpt>>& result
+);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

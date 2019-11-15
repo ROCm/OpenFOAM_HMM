@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,12 +34,178 @@ Description
 #define TEMPLATE template<template<class> class Field>
 #include "FieldFieldFunctionsM.C"
 
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+template<template<class> class Field, class Cmpt>
+void Foam::zip
+(
+    FieldField<Field, Tensor<Cmpt>>& result,
+    const FieldField<Field, Cmpt>& xx,
+    const FieldField<Field, Cmpt>& xy,
+    const FieldField<Field, Cmpt>& xz,
+    const FieldField<Field, Cmpt>& yx,
+    const FieldField<Field, Cmpt>& yy,
+    const FieldField<Field, Cmpt>& yz,
+    const FieldField<Field, Cmpt>& zx,
+    const FieldField<Field, Cmpt>& zy,
+    const FieldField<Field, Cmpt>& zz
+)
+{
+    forAll(result, i)
+    {
+        Foam::zip
+        (
+            result[i],
+            xx[i], xy[i], xz[i],
+            yx[i], yy[i], yz[i],
+            zx[i], zy[i], zz[i]
+        );
+    }
+}
+
+
+template<template<class> class Field, class Cmpt>
+void Foam::unzip
+(
+    const FieldField<Field, Tensor<Cmpt>>& input,
+    FieldField<Field, Cmpt>& xx,
+    FieldField<Field, Cmpt>& xy,
+    FieldField<Field, Cmpt>& xz,
+    FieldField<Field, Cmpt>& yx,
+    FieldField<Field, Cmpt>& yy,
+    FieldField<Field, Cmpt>& yz,
+    FieldField<Field, Cmpt>& zx,
+    FieldField<Field, Cmpt>& zy,
+    FieldField<Field, Cmpt>& zz
+)
+{
+    forAll(input, i)
+    {
+        Foam::unzip
+        (
+            input[i],
+            xx[i], xy[i], xz[i],
+            yx[i], yy[i], yz[i],
+            zx[i], zy[i], zz[i]
+        );
+    }
+}
+
+
+template<template<class> class Field, class Cmpt>
+void Foam::zipRows
+(
+    FieldField<Field, Tensor<Cmpt>>& result,
+    const FieldField<Field, Vector<Cmpt>>& x,
+    const FieldField<Field, Vector<Cmpt>>& y,
+    const FieldField<Field, Vector<Cmpt>>& z
+)
+{
+    forAll(result, i)
+    {
+        Foam::zipRows(result[i], x[i], y[i], z[i]);
+    }
+}
+
+
+template<template<class> class Field, class Cmpt>
+void Foam::zipCols
+(
+    FieldField<Field, Tensor<Cmpt>>& result,
+    const FieldField<Field, Vector<Cmpt>>& x,
+    const FieldField<Field, Vector<Cmpt>>& y,
+    const FieldField<Field, Vector<Cmpt>>& z
+)
+{
+    forAll(result, i)
+    {
+        Foam::zipCols(result[i], x[i], y[i], z[i]);
+    }
+}
+
+
+template<template<class> class Field, class Cmpt>
+void Foam::unzipRows
+(
+    const FieldField<Field, Tensor<Cmpt>>& input,
+    FieldField<Field, Vector<Cmpt>>& x,
+    FieldField<Field, Vector<Cmpt>>& y,
+    FieldField<Field, Vector<Cmpt>>& z
+)
+{
+    forAll(input, i)
+    {
+        Foam::unzipRows(input[i], x[i], y[i], z[i]);
+    }
+}
+
+
+template<template<class> class Field, class Cmpt>
+void Foam::unzipCols
+(
+    const FieldField<Field, Tensor<Cmpt>>& input,
+    FieldField<Field, Vector<Cmpt>>& x,
+    FieldField<Field, Vector<Cmpt>>& y,
+    FieldField<Field, Vector<Cmpt>>& z
+)
+{
+    forAll(input, i)
+    {
+        Foam::unzipCols(input[i], x[i], y[i], z[i]);
+    }
+}
+
+
+template<template<class> class Field, class Cmpt>
+void Foam::unzipRow
+(
+    const FieldField<Field, Tensor<Cmpt>>& input,
+    const vector::components cmpt,
+    FieldField<Field, Vector<Cmpt>>& result
+)
+{
+    forAll(input, i)
+    {
+        Foam::unzipRow(input[i], cmpt, result[i]);
+    }
+}
+
+
+template<template<class> class Field, class Cmpt>
+void Foam::unzipCol
+(
+    const FieldField<Field, Tensor<Cmpt>>& input,
+    const vector::components cmpt,
+    FieldField<Field, Vector<Cmpt>>& result
+)
+{
+    forAll(input, i)
+    {
+        Foam::unzipCol(input[i], cmpt, result[i]);
+    }
+}
+
+
+template<template<class> class Field, class Cmpt>
+void Foam::unzipDiag
+(
+    const FieldField<Field, Tensor<Cmpt>>& input,
+    FieldField<Field, Vector<Cmpt>>& result
+)
+{
+    forAll(input, i)
+    {
+        Foam::unzipDiag(input[i], result[i]);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * global operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 UNARY_FUNCTION(scalar, tensor, tr)
 UNARY_FUNCTION(sphericalTensor, tensor, sph)
@@ -57,7 +224,7 @@ UNARY_FUNCTION(vector, symmTensor, eigenValues)
 UNARY_FUNCTION(symmTensor, symmTensor, eigenVectors)
 
 
-// * * * * * * * * * * * * * * * global operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 UNARY_OPERATOR(vector, tensor, *, hdual)
 UNARY_OPERATOR(tensor, vector, *, hdual)

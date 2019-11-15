@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -25,61 +24,48 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 InClass
-    Foam::sphericalTensorFieldField
+    Foam::vectorFieldField
 
 Description
-    Specialisation of FieldField<Field, T> for sphericalTensor.
+    Specialisation of FieldField\<T\> for vector.
 
 SourceFiles
-    sphericalTensorFieldField.C
+    vectorFieldField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sphericalTensorFieldField_H
-#define sphericalTensorFieldField_H
+#ifndef vectorFieldField_H
+#define vectorFieldField_H
 
-#include "FieldField.H"
-#include "sphericalTensor.H"
-
-#define TEMPLATE template<template<class> class Field>
-#include "FieldFieldFunctionsM.H"
+#include "scalarFieldField.H"
+#include "vectorField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Functions * * * * * * * * * * * * * * //
 
-//- Zip together sphericalTensor field field from components
+//- Compose a vector field field from components
 template<template<class> class Field, class Cmpt>
 void zip
 (
-    FieldField<Field, SphericalTensor<Cmpt>>& result,
-    const FieldField<Field, Cmpt>& ii
+    FieldField<Field, Vector<Cmpt>>& result,
+    const FieldField<Field, Cmpt>& x,
+    const FieldField<Field, Cmpt>& y,
+    const FieldField<Field, Cmpt>& z
 );
 
-//- Unzip sphericalTensor field field into components
+//- Unzip vector field field into components
 template<template<class> class Field, class Cmpt>
 void unzip
 (
-    const FieldField<Field, SphericalTensor<Cmpt>>& input,
-    FieldField<Field, Cmpt>& ii
+    const FieldField<Field, Vector<Cmpt>>& input,
+    FieldField<Field, Cmpt>& x,
+    FieldField<Field, Cmpt>& y,
+    FieldField<Field, Cmpt>& z
 );
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-UNARY_FUNCTION(scalar, sphericalTensor, tr)
-UNARY_FUNCTION(sphericalTensor, sphericalTensor, sph)
-UNARY_FUNCTION(scalar, sphericalTensor, det)
-UNARY_FUNCTION(sphericalTensor, sphericalTensor, inv)
-
-
-// * * * * * * * * * * * * * * * global operators  * * * * * * * * * * * * * //
-
-BINARY_OPERATOR(sphericalTensor, scalar, sphericalTensor, /, divide)
-BINARY_TYPE_OPERATOR(sphericalTensor, scalar, sphericalTensor, /, divide)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -88,10 +74,8 @@ BINARY_TYPE_OPERATOR(sphericalTensor, scalar, sphericalTensor, /, divide)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "undefFieldFunctionsM.H"
-
 #ifdef NoRepository
-    #include "sphericalTensorFieldField.C"
+    #include "vectorFieldField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

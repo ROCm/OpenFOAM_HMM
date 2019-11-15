@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +33,72 @@ Description
 
 #define TEMPLATE template<template<class> class Field>
 #include "FieldFieldFunctionsM.C"
+
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+template<template<class> class Field, class Cmpt>
+void Foam::zip
+(
+    FieldField<Field, SymmTensor<Cmpt>>& result,
+    const FieldField<Field, Cmpt>& xx,
+    const FieldField<Field, Cmpt>& xy,
+    const FieldField<Field, Cmpt>& xz,
+    const FieldField<Field, Cmpt>& yy,
+    const FieldField<Field, Cmpt>& yz,
+    const FieldField<Field, Cmpt>& zz
+)
+{
+    forAll(result, i)
+    {
+        Foam::zip
+        (
+            result[i],
+            xx[i], xy[i], xz[i],
+            /*yx*/ yy[i], yz[i],
+            /*zx   zy */  zz[i]
+        );
+    }
+}
+
+
+template<template<class> class Field, class Cmpt>
+void Foam::unzip
+(
+    const FieldField<Field, SymmTensor<Cmpt>>& input,
+    FieldField<Field, Cmpt>& xx,
+    FieldField<Field, Cmpt>& xy,
+    FieldField<Field, Cmpt>& xz,
+    FieldField<Field, Cmpt>& yy,
+    FieldField<Field, Cmpt>& yz,
+    FieldField<Field, Cmpt>& zz
+)
+{
+    forAll(input, i)
+    {
+        Foam::unzip
+        (
+            input[i],
+            xx[i], xy[i], xz[i],
+            /*yx*/ yy[i], yz[i],
+            /*zx   zy */  zz[i]
+        );
+    }
+}
+
+
+template<template<class> class Field, class Cmpt>
+void Foam::unzipDiag
+(
+    const FieldField<Field, SymmTensor<Cmpt>>& input,
+    FieldField<Field, Vector<Cmpt>>& result
+)
+{
+    forAll(input, i)
+    {
+        Foam::unzipDiag(input[i], result[i]);
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
