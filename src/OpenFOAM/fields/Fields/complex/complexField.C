@@ -43,21 +43,75 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
+void Foam::zip
+(
+    complexField& result,
+    const UList<scalar>& re,
+    const UList<scalar>& im
+)
+{
+    const label len = result.size();
+
+    #ifdef FULLDEBUG
+    if (len != re.size() || len != im.size())
+    {
+        FatalErrorInFunction
+            << "Components sizes do not match: " << len << " ("
+            << re.size() << ' ' << im.size() << ')'
+            << nl
+            << abort(FatalError);
+    }
+    #endif
+
+    for (label i=0; i < len; ++i)
+    {
+        result[i].Re() = re[i];
+        result[i].Im() = im[i];
+    }
+}
+
+
+void Foam::unzip
+(
+    const UList<complex>& input,
+    scalarField& re,
+    scalarField& im
+)
+{
+    const label len = input.size();
+
+    #ifdef FULLDEBUG
+    if (len != re.size() || len != im.size())
+    {
+        FatalErrorInFunction
+            << "Components sizes do not match: " << len << " ("
+            << re.size() << ' ' << im.size() << ')'
+            << nl
+            << abort(FatalError);
+    }
+    #endif
+
+    for (label i=0; i < len; ++i)
+    {
+        re[i] = input[i].Re();
+        im[i] = input[i].Im();
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 Foam::complexField Foam::ComplexField
 (
     const UList<scalar>& re,
     const UList<scalar>& im
 )
 {
-    complexField cf(re.size());
+    complexField result(re.size());
 
-    forAll(cf, i)
-    {
-        cf[i].Re() = re[i];
-        cf[i].Im() = im[i];
-    }
+    Foam::zip(result, re, im);
 
-    return cf;
+    return result;
 }
 
 
@@ -68,7 +122,7 @@ Foam::complexField Foam::ReComplexField(const UList<scalar>& re)
     forAll(cf, i)
     {
         cf[i].Re() = re[i];
-        cf[i].Im() = 0.0;
+        cf[i].Im() = Zero;
     }
 
     return cf;
@@ -81,7 +135,7 @@ Foam::complexField Foam::ImComplexField(const UList<scalar>& im)
 
     forAll(cf, i)
     {
-        cf[i].Re() = 0.0;
+        cf[i].Re() = Zero;
         cf[i].Im() = im[i];
     }
 

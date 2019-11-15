@@ -33,14 +33,15 @@ Description
 #include "argList.H"
 #include "complex.H"
 #include "complexFields.H"
-#include "ops.H"
+#include "scalarField.H"
 #include "ListOps.H"
+#include "ops.H"
 
 using namespace Foam;
 
 void print1(const complex& z)
 {
-    Info<<"r: " << z.real() << " i: " << z.imag() << nl;
+    Info<< "r: " << z.real() << " i: " << z.imag() << nl;
 }
 
 
@@ -82,6 +83,40 @@ int main(int argc, char *argv[])
         // }
     }
 
+
+    // Test zip/unzip
+    {
+        scalarField reals(4);
+        scalarField imags(4);
+
+        forAll(reals, i)
+        {
+            reals[i] = i;
+        }
+        forAll(imags, i)
+        {
+            imags[i] = (i % 2) ? -i : i;
+        }
+
+        complexField cmplx(4);
+
+        zip(cmplx, reals, imags);
+        Info<< nl
+            << "zip " << reals << nl
+            << "    " << imags << nl
+            << " => " << cmplx << nl;
+
+        reverse(cmplx);
+
+        Info<< "reverse order: " << cmplx << nl;
+
+        unzip(cmplx, reals, imags);
+
+        Info<< "unzip " << cmplx << nl
+            << " => " << reals << nl
+            << " => " << imags << nl;
+    }
+
     complexField fld1(3, complex(2.0, 1.0));
     complexField fld2(fld1);
 
@@ -90,8 +125,9 @@ int main(int argc, char *argv[])
         c = ~c;
     }
 
-    Info<< "Field " << flatOutput(fld1) << nl;
-    Info<< "Conjugate: " << flatOutput(fld2) << nl;
+    Info<< nl
+        << "Field " << flatOutput(fld1) << nl
+        << "Conjugate: " << flatOutput(fld2) << nl;
 
     // Some arbitrary change
     for (complex& c : fld2)

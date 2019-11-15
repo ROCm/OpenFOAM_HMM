@@ -53,6 +53,25 @@ namespace Foam
 
 typedef Field<complex> complexField;
 
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+//- Zip together complex field from components
+void zip
+(
+    complexField& result,
+    const UList<scalar>& re,
+    const UList<scalar>& im
+);
+
+//- Unzip complex field into components
+void unzip
+(
+    const UList<complex>& input,
+    scalarField& re,
+    scalarField& im
+);
+
+
 //- Zip up two lists of values into a list of complex
 complexField ComplexField
 (
@@ -74,6 +93,7 @@ scalarField Im(const UList<complex>& cf);
 
 //- Sum real and imag components
 scalarField ReImSum(const UList<complex>& cf);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
