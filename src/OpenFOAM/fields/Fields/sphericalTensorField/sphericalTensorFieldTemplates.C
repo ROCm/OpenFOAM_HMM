@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011 OpenFOAM Foundation
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -24,86 +23,79 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::sphericalTensorField
-
-Description
-    Specialisation of Field\<T\> for sphericalTensor.
-
-SourceFiles
-    sphericalTensorField.C
-
 \*---------------------------------------------------------------------------*/
-
-#ifndef sphericalTensorField_H
-#define sphericalTensorField_H
-
-#include "scalarField.H"
-#include "sphericalTensor.H"
-
-#define TEMPLATE
-#include "FieldFunctionsM.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-typedef Field<sphericalTensor> sphericalTensorField;
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-//- Zip together sphericalTensor field from components
 template<class Cmpt>
-void zip
+void Foam::zip
 (
     Field<SphericalTensor<Cmpt>>& result,
     const UList<Cmpt>& ii
-);
+)
+{
+    typedef SphericalTensor<Cmpt> value_type;
 
-//- Unzip sphericalTensor field into components
+    const label len = result.size();
+
+    #ifdef FULLDEBUG
+    if (len != ii.size())
+    {
+        FatalErrorInFunction
+            << "Components sizes do not match: " << len << " ("
+            << ii.size() << ')'
+            << nl
+            << abort(FatalError);
+    }
+    #endif
+
+    for (label i=0; i < len; ++i)
+    {
+        result[i] = value_type(ii[i]);
+    }
+}
+
+
 template<class Cmpt>
-void unzip
+void Foam::unzip
 (
     const UList<SphericalTensor<Cmpt>>& input,
     Field<Cmpt>& ii
-);
+)
+{
+    const label len = input.size();
 
-//- Zip together sphericalTensor field from components
+    #ifdef FULLDEBUG
+    if (len != ii.size())
+    {
+        FatalErrorInFunction
+            << "Components sizes do not match: " << len << " ("
+            << ii.size() << ')'
+            << nl
+            << abort(FatalError);
+    }
+    #endif
+
+    for (label i=0; i < len; ++i)
+    {
+        ii[i] = input[i].ii();
+    }
+}
+
+
 template<class Cmpt>
-tmp<Field<SphericalTensor<Cmpt>>> zip
+Foam::tmp<Foam::Field<Foam::SphericalTensor<Cmpt>>>
+Foam::zip
 (
     const Field<Cmpt>& ii
-);
+)
+{
+    auto tresult = tmp<Field<SphericalTensor<Cmpt>>>::New(ii.size());
 
+    Foam::zip(tresult.ref(), ii);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    return tresult;
+}
 
-UNARY_FUNCTION(scalar, sphericalTensor, tr)
-UNARY_FUNCTION(sphericalTensor, sphericalTensor, sph)
-UNARY_FUNCTION(scalar, sphericalTensor, det)
-UNARY_FUNCTION(sphericalTensor, sphericalTensor, inv)
-
-BINARY_OPERATOR(sphericalTensor, scalar, sphericalTensor, /, divide)
-BINARY_TYPE_OPERATOR(sphericalTensor, scalar, sphericalTensor, /, divide)
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "undefFieldFunctionsM.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "sphericalTensorFieldTemplates.C"
-#endif
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

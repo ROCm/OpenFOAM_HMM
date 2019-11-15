@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,6 +54,54 @@ namespace Foam
 
 typedef Field<symmTensor> symmTensorField;
 
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+//- Zip together symmTensor field from components
+template<class Cmpt>
+void zip
+(
+    Field<SymmTensor<Cmpt>>& result,
+    const UList<Cmpt>& xx, const UList<Cmpt>& xy, const UList<Cmpt>& xz,
+    const UList<Cmpt>& yy, const UList<Cmpt>& yz,
+    const UList<Cmpt>& zz
+);
+
+//- Unzip symmTensor field into components
+template<class Cmpt>
+void unzip
+(
+    const UList<SymmTensor<Cmpt>>& input,
+    Field<Cmpt>& xx, Field<Cmpt>& xy, Field<Cmpt>& xz,
+    Field<Cmpt>& yy, Field<Cmpt>& yz,
+    Field<Cmpt>& zz
+);
+
+//- Zip together symmTensor field from components
+template<class Cmpt>
+tmp<Field<SymmTensor<Cmpt>>> zip
+(
+    const Field<Cmpt>& xx, const Field<Cmpt>& xy, const Field<Cmpt>& xz,
+    const Field<Cmpt>& yy, const Field<Cmpt>& yz,
+    const Field<Cmpt>& zz
+);
+
+
+//- Extract a symmTensor field diagonal
+template<class Cmpt>
+void unzipDiag
+(
+    const UList<SymmTensor<Cmpt>>& input,
+    Field<Vector<Cmpt>>& result
+);
+
+//- Extract a  symmTensor field diagonal
+template<class Cmpt>
+tmp<Field<Vector<Cmpt>>> unzipDiag
+(
+    const Field<SymmTensor<Cmpt>>& input
+);
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 UNARY_FUNCTION(symmTensor, vector, sqr)
@@ -84,6 +133,12 @@ BINARY_TYPE_OPERATOR(tensor, symmTensor, symmTensor, &, dot)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "undefFieldFunctionsM.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "symmTensorFieldTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

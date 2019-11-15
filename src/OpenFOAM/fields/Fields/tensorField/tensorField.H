@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,6 +54,130 @@ namespace Foam
 
 typedef Field<tensor> tensorField;
 
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+//- Zip together tensor field from components
+template<class Cmpt>
+void zip
+(
+    Field<Tensor<Cmpt>>& result,
+    const UList<Cmpt>& xx, const UList<Cmpt>& xy, const UList<Cmpt>& xz,
+    const UList<Cmpt>& yx, const UList<Cmpt>& yy, const UList<Cmpt>& yz,
+    const UList<Cmpt>& zx, const UList<Cmpt>& zy, const UList<Cmpt>& zz
+);
+
+//- Unzip tensor field into components
+template<class Cmpt>
+void unzip
+(
+    const UList<Tensor<Cmpt>>& input,
+    Field<Cmpt>& xx, Field<Cmpt>& xy, Field<Cmpt>& xz,
+    Field<Cmpt>& yx, Field<Cmpt>& yy, Field<Cmpt>& yz,
+    Field<Cmpt>& zx, Field<Cmpt>& zy, Field<Cmpt>& zz
+);
+
+//- Zip together tensor field from components
+template<class Cmpt>
+tmp<Field<Tensor<Cmpt>>> zip
+(
+    const Field<Cmpt>& xx, const Field<Cmpt>& xy, const Field<Cmpt>& xz,
+    const Field<Cmpt>& yx, const Field<Cmpt>& yy, const Field<Cmpt>& yz,
+    const Field<Cmpt>& zx, const Field<Cmpt>& zy, const Field<Cmpt>& zz
+);
+
+
+//- Zip together tensor field from row components
+template<class Cmpt>
+void zipRows
+(
+    Field<Tensor<Cmpt>>& result,
+    const UList<Vector<Cmpt>>& x,
+    const UList<Vector<Cmpt>>& y,
+    const UList<Vector<Cmpt>>& z
+);
+
+//- Zip together tensor field from column components
+template<class Cmpt>
+void zipCols
+(
+    Field<Tensor<Cmpt>>& result,
+    const UList<Vector<Cmpt>>& x,
+    const UList<Vector<Cmpt>>& y,
+    const UList<Vector<Cmpt>>& z
+);
+
+
+//- Extract tensor field rows
+template<class Cmpt>
+void unzipRows
+(
+    const UList<Tensor<Cmpt>>& input,
+    Field<Vector<Cmpt>>& x,
+    Field<Vector<Cmpt>>& y,
+    Field<Vector<Cmpt>>& z
+);
+
+//- Extract tensor field columns
+template<class Cmpt>
+void unzipCols
+(
+    const UList<Tensor<Cmpt>>& input,
+    Field<Vector<Cmpt>>& x,
+    Field<Vector<Cmpt>>& y,
+    Field<Vector<Cmpt>>& z
+);
+
+
+//- Extract a tensor field row (x,y,z) == (0,1,2)
+template<class Cmpt>
+void unzipRow
+(
+    const UList<Tensor<Cmpt>>& input,
+    const vector::components cmpt,
+    Field<Vector<Cmpt>>& result
+);
+
+//- Extract a tensor field column (x,y,z) == (0,1,2)
+template<class Cmpt>
+void unzipCol
+(
+    const UList<Tensor<Cmpt>>& input,
+    const vector::components cmpt,
+    Field<Vector<Cmpt>>& result
+);
+
+//- Extract a tensor field diagonal
+template<class Cmpt>
+void unzipDiag
+(
+    const UList<Tensor<Cmpt>>& input,
+    Field<Vector<Cmpt>>& result
+);
+
+//- Extract a tensor field row (x,y,z) == (0,1,2)
+template<class Cmpt>
+tmp<Field<Vector<Cmpt>>> unzipRow
+(
+    const Field<Tensor<Cmpt>>& input,
+    const vector::components cmpt
+);
+
+//- Extract a tensor field column (x,y,z) == (0,1,2)
+template<class Cmpt>
+tmp<Field<Vector<Cmpt>>> unzipCol
+(
+    const Field<Tensor<Cmpt>>& input,
+    const vector::components cmpt
+);
+
+//- Extract a tensor field diagonal
+template<class Cmpt>
+tmp<Field<Vector<Cmpt>>> unzipDiag
+(
+    const Field<Tensor<Cmpt>>& input
+);
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 UNARY_FUNCTION(scalar, tensor, tr)
@@ -88,6 +213,12 @@ BINARY_TYPE_OPERATOR(vector, vector, tensor, /, divide)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "undefFieldFunctionsM.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "tensorFieldTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

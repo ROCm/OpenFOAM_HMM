@@ -36,7 +36,7 @@ License
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * global functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 UNARY_FUNCTION(scalar, sphericalTensor, tr)
 UNARY_FUNCTION(sphericalTensor, sphericalTensor, sph)
