@@ -34,7 +34,7 @@
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
-SCOTCH_VERSION=scotch_6.0.8
+SCOTCH_VERSION=scotch_6.0.9
 export SCOTCH_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER$WM_PRECISION_OPTION$WM_LABEL_OPTION/$SCOTCH_VERSION
 
 # END OF (NORMAL) USER EDITABLE PART

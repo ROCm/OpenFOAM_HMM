@@ -32,97 +32,41 @@ case ThirdParty:
 
     switch ("$WM_COMPILER")
     case Gcc:
-    case Gcc48*:
-        set gcc_version=gcc-4.8.5
-        breaksw
-    case Gcc49*:
-        set gcc_version=gcc-4.9.4
-        breaksw
-    case Gcc51*:
-        set gcc_version=gcc-5.1.0
-        breaksw
-    case Gcc52*:
-        set gcc_version=gcc-5.2.0
-        breaksw
-    case Gcc53*:
-        set gcc_version=gcc-5.3.0
-        breaksw
-    case Gcc54*:
-        set gcc_version=gcc-5.4.0
-        breaksw
-    case Gcc55*:
-        set gcc_version=gcc-5.5.0
-        breaksw
-    case Gcc61*:
-        set gcc_version=gcc-6.1.0
-        breaksw
-    case Gcc62*:
-        set gcc_version=gcc-6.2.0
-        breaksw
-    case Gcc63*:
-        set gcc_version=gcc-6.3.0
-        breaksw
-    case Gcc64*:
-        set gcc_version=gcc-6.4.0
-        breaksw
-    case Gcc65*:
-        set gcc_version=gcc-6.5.0
-        breaksw
-    case Gcc71*:
-        set gcc_version=gcc-7.1.0
-        breaksw
-    case Gcc72*:
-        set gcc_version=gcc-7.2.0
-        breaksw
-    case Gcc73*:
-        set gcc_version=gcc-7.3.0
-        breaksw
-    case Gcc74*:
-        set gcc_version=gcc-7.4.0
-        breaksw
-    case Gcc81*:
-        set gcc_version=gcc-8.1.0
-        breaksw
-    case Gcc82*:
-        set gcc_version=gcc-8.2.0
-        breaksw
-    case Gcc83*:
-        set gcc_version=gcc-8.3.0
-        breaksw
-    case Gcc91*:
-        set gcc_version=gcc-9.1.0
-        breaksw
-    case Gcc92*:
-        set gcc_version=gcc-9.2.0
-        breaksw
+    case Gcc48*: set gcc_version=gcc-4.8.5 ; breaksw
+    case Gcc49*: set gcc_version=gcc-4.9.4 ; breaksw
+    case Gcc51*: set gcc_version=gcc-5.1.0 ; breaksw
+    case Gcc52*: set gcc_version=gcc-5.2.0 ; breaksw
+    case Gcc53*: set gcc_version=gcc-5.3.0 ; breaksw
+    case Gcc54*: set gcc_version=gcc-5.4.0 ; breaksw
+    case Gcc55*: set gcc_version=gcc-5.5.0 ; breaksw
+    case Gcc61*: set gcc_version=gcc-6.1.0 ; breaksw
+    case Gcc62*: set gcc_version=gcc-6.2.0 ; breaksw
+    case Gcc63*: set gcc_version=gcc-6.3.0 ; breaksw
+    case Gcc64*: set gcc_version=gcc-6.4.0 ; breaksw
+    case Gcc65*: set gcc_version=gcc-6.5.0 ; breaksw
+    case Gcc71*: set gcc_version=gcc-7.1.0 ; breaksw
+    case Gcc72*: set gcc_version=gcc-7.2.0 ; breaksw
+    case Gcc73*: set gcc_version=gcc-7.3.0 ; breaksw
+    case Gcc74*: set gcc_version=gcc-7.4.0 ; breaksw
+    case Gcc75*: set gcc_version=gcc-7.5.0 ; breaksw
+    case Gcc81*: set gcc_version=gcc-8.1.0 ; breaksw
+    case Gcc82*: set gcc_version=gcc-8.2.0 ; breaksw
+    case Gcc83*: set gcc_version=gcc-8.3.0 ; breaksw
+    case Gcc91*: set gcc_version=gcc-9.1.0 ; breaksw
+    case Gcc92*: set gcc_version=gcc-9.2.0 ; breaksw
+
     case Clang:
-    case Clang37*:
-        set clang_version=llvm-3.7.1
-        breaksw
-    case Clang38*:
-        set clang_version=llvm-3.8.1
-        breaksw
-    case Clang39*:
-        set clang_version=llvm-3.9.1
-        breaksw
-    case Clang40*:
-        set clang_version=llvm-4.0.1
-        breaksw
-    case Clang50*:
-        set clang_version=llvm-5.0.2
-        breaksw
-    case Clang60*:
-        set clang_version=llvm-6.0.1
-        breaksw
-    case Clang70*:
-        set clang_version=llvm-7.0.1
-        breaksw
-    case Clang80*:
-        set clang_version=llvm-8.0.1
-        breaksw
-    case Clang00*:
-        set clang_version=llvm-9.0.0
-        breaksw
+    case Clang37*: set clang_version=llvm-3.7.1 ; breaksw
+    case Clang38*: set clang_version=llvm-3.8.1 ; breaksw
+    case Clang39*: set clang_version=llvm-3.9.1 ; breaksw
+    case Clang40*: set clang_version=llvm-4.0.1 ; breaksw
+    case Clang50*: set clang_version=llvm-5.0.2 ; breaksw
+    case Clang60*: set clang_version=llvm-6.0.1 ; breaksw
+    case Clang70*: set clang_version=llvm-7.0.1 ; breaksw
+    case Clang71*: set clang_version=llvm-7.1.0 ; breaksw
+    case Clang80*: set clang_version=llvm-8.0.1 ; breaksw
+    case Clang90*: set clang_version=llvm-9.0.0 ; breaksw
+
     default:
         /bin/cat << UNKNOWN_COMPILER
 ===============================================================================
