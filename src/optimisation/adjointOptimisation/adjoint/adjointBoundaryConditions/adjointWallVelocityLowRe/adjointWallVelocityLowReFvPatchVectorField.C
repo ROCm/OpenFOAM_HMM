@@ -41,7 +41,7 @@ adjointWallVelocityLowReFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(p, iF),
-    adjointBoundaryCondition(p, iF, "Ua")
+    adjointBoundaryCondition(p, iF, word::null)
 {}
 
 
@@ -55,7 +55,7 @@ adjointWallVelocityLowReFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(ptf, p, iF, mapper),
-    adjointBoundaryCondition(p, iF, "Ua")
+    adjointBoundaryCondition(p, iF, ptf.adjointSolverName_)
 {}
 
 
@@ -68,7 +68,7 @@ adjointWallVelocityLowReFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(p, iF),
-    adjointBoundaryCondition(p, iF, "Ua")
+    adjointBoundaryCondition(p, iF, dict.get<word>("solverName"))
 {
     fvPatchField<vector>::operator=
     (
