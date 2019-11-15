@@ -30,7 +30,7 @@ Description
     Specialisation of Field\<T\> for triad.
 
 SourceFiles
-    triadField.C
+    triadField.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -40,10 +40,8 @@ SourceFiles
 #include "triadFieldFwd.H"
 #include "Field.H"
 
-#define TEMPLATE
-#include "FieldFunctionsM.H"
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "undefFieldFunctionsM.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -23,14 +23,8 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::triadField
-
 Description
-    Forward declarations of the specialisation of Field\<T\> for triad.
-
-SourceFiles
-    triadField.C
+    Forward declarations of Field\<T\> triad specialisation.
 
 \*---------------------------------------------------------------------------*/
 
@@ -47,6 +41,7 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type> class Field;
+
 typedef Field<triad> triadField;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

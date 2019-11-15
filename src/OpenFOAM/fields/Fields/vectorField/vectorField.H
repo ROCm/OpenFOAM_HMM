@@ -51,13 +51,6 @@ typedef Field<vector> vectorField;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-tmp<vectorField> zip
-(
-    const tmp<scalarField>& x,
-    const tmp<scalarField>& y,
-    const tmp<scalarField>& z
-);
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

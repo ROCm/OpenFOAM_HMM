@@ -665,10 +665,8 @@ $(Fields)/labelField/labelFieldIOField.C
 $(Fields)/scalarField/scalarField.C
 $(Fields)/scalarField/scalarIOField.C
 $(Fields)/scalarField/scalarFieldIOField.C
-$(Fields)/vectorField/vectorField.C
 $(Fields)/vectorField/vectorIOField.C
 $(Fields)/vectorField/vectorFieldIOField.C
-$(Fields)/vector2DField/vector2DField.C
 $(Fields)/vector2DField/vector2DIOField.C
 $(Fields)/vector2DField/vector2DFieldIOField.C
 $(Fields)/sphericalTensorField/sphericalTensorField.C
@@ -685,7 +683,6 @@ $(Fields)/tensorField/tensorIOField.C
 $(Fields)/tensorField/tensorFieldIOField.C
 $(Fields)/quaternionField/quaternionField.C
 $(Fields)/quaternionField/quaternionIOField.C
-$(Fields)/triadField/triadField.C
 $(Fields)/triadField/triadIOField.C
 $(Fields)/complex/complexField.C
 $(Fields)/complex/complexVectorField.C
