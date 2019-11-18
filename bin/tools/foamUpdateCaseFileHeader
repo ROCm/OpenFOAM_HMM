@@ -29,10 +29,11 @@
 #     foamUpdateCaseFileHeader
 #
 # Description
-#     Updates the header of application files.
-#     By default, writes current version in the header.
-#     The version can alternatively be specified with the -v option.
-#     Also removes consecutive blank lines from the file.
+#     Updates the header of application files and removes consecutive
+#     blank lines.
+#
+#     Uses the API value by default, but the version can also be specified
+#     with the -version option.
 #
 #------------------------------------------------------------------------------
 usage() {
@@ -43,12 +44,12 @@ usage() {
 Usage: ${0##*/} [OPTION] <file1> ... <fileN>
 
 options:
-  -version <ver>    specifies the version to be written in the header
-  -help             print the usage
+  -version=VER      Specifies version for header (default: $FOAM_API)
+  -h | -help        Print the usage
 
-  Updates the header of application files and removes consecutive blank lines.
-  By default, writes current OpenFOAM API number version in the header.
-  An alternative version can be specified with the -version option.
+Updates the header of application files and removes consecutive blank lines.
+By default, writes current OpenFOAM API number version in the header.
+An alternative version can be specified with the -version option.
 
 USAGE
     exit 1
@@ -63,10 +64,13 @@ do
     -h | -help*)
         usage
         ;;
+    -version=*)
+        version="${1#*=}"
+        ;;
     -v | -version)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         version="$2"
-        shift 2
+        shift
         ;;
     -*)
         usage "unknown option: '$1'"
@@ -75,74 +79,133 @@ do
         break
         ;;
     esac
+    shift
 done
-
-# Constant width for version - default to FOAM_API
-
-: ${version:=$FOAM_API}
-: ${version:=$WM_PROJECT_VERSION}
-
-version=$(printf %-36s ${version:-OPENFOAM})
 
 [ $# -ge 1 ] || usage
 
 #------------------------------------------------------------------------------
 
-printHeader()
+# Constant width for version.
+# Default to v{FOAM_API}, project version or OPENFOAM
+
+if [ -z "$version" ]
+then
+    if [ -n "$FOAM_API" ]
+    then
+        version="v$FOAM_API"
+    else
+        version="$WM_PROJECT_VERSION"
+    fi
+fi
+
+version=$(printf %-38s "${version:-OPENFOAM}")
+
+#------------------------------------------------------------------------------
+
+printBanner()
 {
-    cat<<HEADER
+    cat<<BANNER
 /*--------------------------------*- C++ -*----------------------------------*\\
 | =========                 |                                                 |
 | \\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\\\    /   O peration     | Version:  $version  |
+|  \\\\    /   O peration     | Version:  $version|
 |   \\\\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\\\/     M anipulation  |                                                 |
 \\*---------------------------------------------------------------------------*/
-FoamFile
+BANNER
+}
+
+
+printFoamFile()
 {
-    version     2.0;
-    format      $1;
-    class       $2;
-    object      $3;
+echo "FoamFile"
+echo "{"
+echo "    version     2.0;"
+echo "    format      $1;"
+echo "    class       $2;"
+echo "    object      $3;"
+echo "}"
 }
-HEADER
+
+
+printFoamFileM4()
+{
+echo "FoamFile"
+echo "{"
+echo "    version     2.0;"
+echo "    \`format'      $1;"
+echo "    class       $2;"
+echo "    object      $3;"
+echo "}"
 }
+
 
 
 #
-# extract attribute '$1' from file '$2'
+# Extract attribute '$1' from file '$2'
 #
 FoamFileAttribute()
 {
-    sed -n -e 's/[ ;]*$//' -e "s/^ *$1 *//p" $2
+    sed -n -e 's/[ ;]*$//' -e "s/^ *$1 *//p" "$2"
 }
 
 
 #
-# main
+# Extract attribute `format' (m4) from file '$1'
+#
+FoamFileFormatM4()
+{
+    sed -n -e 's/[ ;]*$//' -e "s/^ *.format' *//p" "$1"
+}
+
+
+#
+# Main
 #
 
-tmpFile=FoamFile.tmp$$
+tmpFile="FoamFile.tmp$$"
 for caseFile
 do
-    if grep -q FoamFile $caseFile 2>/dev/null
+    if grep -q FoamFile "$caseFile" 2>/dev/null
     then
         echo "Updating case file: $caseFile"
-        sed -n '/FoamFile/,/}/p' $caseFile > $tmpFile
+        sed -n '/FoamFile/,/}/p' "$caseFile" > "$tmpFile"
 
-        format=$(FoamFileAttribute format $tmpFile)
-        class=$(FoamFileAttribute  class  $tmpFile)
-        object=$(FoamFileAttribute object $tmpFile)
+        format=$(FoamFileAttribute format "$tmpFile")
+        class=$(FoamFileAttribute  class  "$tmpFile")
+        object=$(FoamFileAttribute object "$tmpFile")
         # extract note? - needs special handling
-        unset note
+        unset m4format note
 
-        printHeader $format $class $object "$note" > $tmpFile
+        if [ -n "$format" ]
+        then
+            printBanner > "$tmpFile"
+            printFoamFile "$format" "$class" "$object" >> "$tmpFile"
+        else
+            # No format? Could be an m4 file with `format'
+            format=$(FoamFileFormatM4 "$tmpFile")
 
-        sed '1,/}/d' $caseFile | sed '/./,/^$/!d' >> $tmpFile
+            if [ -n "$format" ]
+            then
+                printBanner > "$tmpFile"
+                printFoamFileM4 "$format" "$class" "$object" >> "$tmpFile"
+            else
+                echo "Missing format: $caseFile" 1>&2
+                continue
+            fi
+        fi
 
-        # use cat to avoid removing/replace soft-links
-        [ -s $tmpFile ] && cat $tmpFile >| $caseFile
-        rm -f $tmpFile 2>/dev/null
+        sed '1,/}/d' "$caseFile" | sed '/./,/^$/!d' >> "$tmpFile"
+
+        # Use cat to avoid removing/replace soft-links
+        [ -s "$tmpFile" ] && cat "$tmpFile" >| "$caseFile"
+        rm -f "$tmpFile"
+
+        if [ "$format" = binary ]
+        then
+            echo "Changed binary file?  $caseFile" 1>&2
+        fi
     else
         echo "Invalid case file: $caseFile" 1>&2
     fi
