@@ -42,15 +42,17 @@ Foam::autoPtr<Foam::Function1<Type>> Foam::Function1<Type>::New
 
     const entry* eptr = dict.findEntry(entryName, keyType::LITERAL);
 
-    if (!eptr && modelType.empty())
+    if (!eptr)
     {
-        FatalIOErrorInFunction(dict)
-            << "No Function1 dictionary entry: "
-            << entryName << nl << nl
-            << exit(FatalIOError);
+        if (modelType.empty())
+        {
+            FatalIOErrorInFunction(dict)
+                << "No Function1 dictionary entry: "
+                << entryName << nl << nl
+                << exit(FatalIOError);
+        }
     }
-
-    if (eptr->isDict())
+    else if (eptr->isDict())
     {
         const dictionary& coeffsDict = eptr->dict();
 

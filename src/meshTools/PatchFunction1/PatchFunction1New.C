@@ -46,9 +46,10 @@ Foam::autoPtr<Foam::PatchFunction1<Type>> Foam::PatchFunction1<Type>::New
             << "No PatchFunction1 dictionary entry: "
             << entryName << nl << nl
             << exit(FatalIOError);
-    }
 
-    if (eptr->isDict())
+        return nullptr;
+    }
+    else if (eptr->isDict())
     {
         const dictionary& coeffsDict = eptr->dict();
 
