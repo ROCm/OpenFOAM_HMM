@@ -145,6 +145,12 @@ $(expr)/exprEntry/expressionEntryBool.C
 $(expr)/exprEntry/expressionEntryDimensioned.C
 $(expr)/exprEntry/expressionEntryStrings.C
 $(expr)/exprEntry/expressionEntryVectors.C
+$(expr)/exprResult/exprResult.C
+$(expr)/exprResult/exprResultGlobals.C
+$(expr)/exprResult/exprResultDelayed.C
+$(expr)/exprResult/exprResultStack.C
+$(expr)/exprResult/exprResultStored.C
+$(expr)/exprResult/exprResultStoredStack.C
 $(expr)/exprString/exprString.C
 $(expr)/exprTools/exprTools.C
 

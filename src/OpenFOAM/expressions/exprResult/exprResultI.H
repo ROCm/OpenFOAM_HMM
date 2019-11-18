@@ -1,0 +1,790 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | www.openfoam.com
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2012-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
+    Copyright (C) 2019 OpenCFD Ltd.
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+\*---------------------------------------------------------------------------*/
+
+// * * * * * * * * * * * * Template Specializations  * * * * * * * * * * * * //
+
+namespace Foam
+{
+    #undef  defineExpressionMethod
+    #define defineExpressionMethod(Type, Var)                                 \
+        template<> inline const Type&                                         \
+        expressions::exprResult::singleValue::get<Type>() const               \
+        {                                                                     \
+            return Var;                                                       \
+        }                                                                     \
+                                                                              \
+        template<> inline const Type&                                         \
+        expressions::exprResult::singleValue::set(const Type& val)            \
+        {                                                                     \
+            Var = val;                                                        \
+            return Var;                                                       \
+        }
+
+    defineExpressionMethod(bool, bool_);
+    defineExpressionMethod(scalar, scalar_);
+    defineExpressionMethod(vector, vector_);
+    defineExpressionMethod(tensor, tensor_);
+    defineExpressionMethod(symmTensor, symmTensor_);
+    defineExpressionMethod(sphericalTensor, sphTensor_);
+
+    #undef defineExpressionMethod
+}
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class Type>
+inline bool Foam::expressions::exprResult::deleteChecked()
+{
+    const bool ok = isType<Type>();
+    if (ok && fieldPtr_ != nullptr)
+    {
+        delete static_cast<Field<Type>*>(fieldPtr_);
+        fieldPtr_ = nullptr;
+        size_ = 0;
+    }
+
+    return ok;
+}
+
+
+template<class Type>
+inline bool Foam::expressions::exprResult::createUniformChecked
+(
+    const word& key,
+    const dictionary& dict,
+    const label len
+)
+{
+    const bool ok = isType<Type>();
+    if (ok)
+    {
+        uglyDelete();
+
+        const Type val(dict.get<Type>(key));
+
+        size_ = len;
+        fieldPtr_ = new Field<Type>(size_, val);
+
+        single_.set(val);
+        isUniform_ = true;
+    }
+
+    return ok;
+}
+
+
+template<class Type>
+inline bool Foam::expressions::exprResult::createNonUniformChecked
+(
+    const word& key,
+    const dictionary& dict,
+    const label len
+)
+{
+    const bool ok = isType<Type>();
+    if (ok)
+    {
+        uglyDelete();
+
+        size_ = len;
+        fieldPtr_ = new Field<Type>(key, dict, size_);
+
+        isUniform_ = false;
+    }
+
+    return ok;
+}
+
+
+template<class Type>
+bool Foam::expressions::exprResult::getUniformChecked
+(
+    exprResult& result,
+    const label size,
+    const bool noWarn,
+    const bool parRun
+) const
+{
+    if (!isType<Type>())
+    {
+        return false;
+    }
+
+    result.clear();
+
+    const Field<Type>& fld = *static_cast<const Field<Type>*>(fieldPtr_);
+
+    const Type avg = (parRun ? gAverage(fld) : average(fld));
+
+    if (!noWarn)
+    {
+        const MinMax<Type> limits = (parRun ? gMinMax(fld) : minMax(fld));
+
+        if (limits.mag() > SMALL)
+        {
+            WarningInFunction
+                << "Different min/max values: " << limits
+                << " Using the average " << avg << nl;
+        }
+    }
+
+    result.setResult(avg, size);
+
+    return true;
+}
+
+
+template<class Type>
+bool Foam::expressions::exprResult::plusEqChecked
+(
+    const exprResult& b
+)
+{
+    const bool ok = isType<Type>();
+
+    if (ok)
+    {
+          *static_cast<Field<Type>*>(fieldPtr_)
+       += *static_cast<const Field<Type>*>(b.fieldPtr_);
+    }
+
+    return ok;
+}
+
+
+template<class Type>
+bool Foam::expressions::exprResult::multiplyEqChecked
+(
+    const scalar& b
+)
+{
+    const bool ok = isType<Type>();
+
+    if (ok)
+    {
+        *static_cast<Field<Type>*>(fieldPtr_) *= b;
+    }
+
+    return ok;
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class Type>
+Foam::expressions::exprResult::exprResult(const Field<Type>& f)
+:
+    exprResult()
+{
+    DebugInFunction << nl;
+
+    setResult(f);
+}
+
+
+template<class Type>
+Foam::expressions::exprResult::exprResult(Field<Type>&& f)
+:
+    exprResult()
+{
+    DebugInFunction << nl;
+
+    setResult(std::move(f));
+}
+
+
+template<class Type>
+Foam::expressions::exprResult::exprResult(autoPtr<Type>& o)
+:
+    exprResult()
+{
+    setObjectResult(o);
+}
+
+
+template<class Type>
+Foam::expressions::exprResult::exprResult(autoPtr<Type>&& o)
+:
+    exprResult()
+{
+    setObjectResult(o);
+}
+
+
+template<class Type>
+Foam::expressions::exprResult::exprResult(const dimensioned<Type>& f)
+:
+    exprResult()
+{
+    DebugInFunction << nl;
+    setSingleValue(f.value());
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+inline bool Foam::expressions::exprResult::hasValue() const
+{
+    return (!valType_.empty() && fieldPtr_ != nullptr);
+}
+
+
+inline const Foam::word& Foam::expressions::exprResult::valueType() const
+{
+    return valType_;
+}
+
+
+inline bool Foam::expressions::exprResult::isPointValue
+(
+    const bool isPointVal
+) const
+{
+    return isPointVal_ == isPointVal;
+}
+
+
+inline bool Foam::expressions::exprResult::isUniform() const
+{
+    return isUniform_;
+}
+
+
+template<class Type>
+inline bool Foam::expressions::exprResult::isType() const
+{
+    return valType_ == pTraits<Type>::typeName;
+}
+
+
+inline bool Foam::expressions::exprResult::isBool() const
+{
+    return valType_ == pTraits<bool>::typeName;
+}
+
+
+inline bool Foam::expressions::exprResult::isObject() const
+{
+    return objectPtr_.valid();
+}
+
+
+inline Foam::label Foam::expressions::exprResult::size() const
+{
+    return size_;
+}
+
+
+template<class Type>
+void Foam::expressions::exprResult::setResult
+(
+    const Field<Type>& val,
+    bool isPointVal
+)
+{
+    DebugInFunction << nl;
+
+    target().setResultImpl(val, isPointVal);
+}
+
+
+template<class Type>
+void Foam::expressions::exprResult::setResult
+(
+    Field<Type>&& val,
+    bool isPointVal
+)
+{
+    DebugInFunction << nl;
+
+    target().setResultImpl(val, isPointVal);
+}
+
+
+template<class Type>
+void Foam::expressions::exprResult::setResultImpl
+(
+    const Field<Type>& fld,
+    bool isPointVal
+)
+{
+    DebugInFunction << nl;
+
+    clear();
+
+    isUniform_ = false;
+    isPointVal_ = isPointVal;
+
+    size_ = fld.size();
+    valType_ = pTraits<Type>::typeName;
+    fieldPtr_ = new Field<Type>(fld);
+
+    DebugInFunction << nl;
+}
+
+
+template<class Type>
+void Foam::expressions::exprResult::setResultImpl
+(
+    Field<Type>&& fld,
+    bool isPointVal
+)
+{
+    DebugInFunction << nl;
+
+    clear();
+
+    isUniform_ = false;
+    isPointVal_ = isPointVal;
+
+    size_ = fld.size();
+    valType_ = pTraits<Type>::typeName;
+    fieldPtr_ = new Field<Type>(std::move(fld));
+
+    DebugInFunction << nl;
+}
+
+
+template<class Type>
+void Foam::expressions::exprResult::setObjectResult(autoPtr<Type>& ap)
+{
+    target().setObjectResultImpl(ap.ptr());
+}
+
+
+template<class Type>
+void Foam::expressions::exprResult::setObjectResult(autoPtr<Type>&& ap)
+{
+    target().setObjectResultImpl(ap.ptr());
+}
+
+
+template<class T>
+void Foam::expressions::exprResult::setObjectResultImpl(T* ptr)
+{
+    DebugInFunction << nl;
+
+    isUniform_ = false;
+    isPointVal_ = false;
+
+    size_ = ptr->size();
+    valType_ = ptr->typeName;
+    objectPtr_.reset(ptr);
+}
+
+
+template<class T>
+void Foam::expressions::exprResult::setObjectResultImpl(autoPtr<T>& o)
+{
+    setObjectResultImpl(o.ptr());
+}
+
+
+template<class T>
+void Foam::expressions::exprResult::setObjectResultImpl(autoPtr<T>&& o)
+{
+    setObjectResultImpl(o.ptr());
+}
+
+
+template<class Type>
+void Foam::expressions::exprResult::setResult
+(
+    Field<Type>* fldPtr,
+    bool isPointVal
+)
+{
+    target().setResultImpl(fldPtr, isPointVal);
+}
+
+
+template<class Type>
+void Foam::expressions::exprResult::setResultImpl
+(
+    Field<Type>* fldPtr,
+    bool isPointVal
+)
+{
+    DebugInFunction << nl;
+
+    clear();
+
+    isPointVal_ = isPointVal;
+    isUniform_ = false;
+
+    size_ = fldPtr->size();
+    valType_ = pTraits<Type>::typeName;
+    fieldPtr_ = fldPtr;
+}
+
+
+template<class Type>
+void Foam::expressions::exprResult::setResult
+(
+    const Type& val,
+    const label size
+)
+{
+    target().setResultImpl(val, size);
+}
+
+
+template<class Type>
+void Foam::expressions::exprResult::setResultImpl
+(
+    const Type& val,
+    const label len
+)
+{
+    DebugInFunction << nl;
+
+    clear();
+
+    isPointVal_ = false;
+
+    size_ = len;
+    valType_ = pTraits<Type>::typeName;
+    fieldPtr_ = new Field<Type>(size_, val);
+
+    isUniform_ = true;
+    single_.set(val);
+}
+
+
+template<class Type>
+void Foam::expressions::exprResult::setSingleValue(const Type& val)
+{
+    target().setSingleValueImpl(val);
+}
+
+
+template<class Type>
+bool Foam::expressions::exprResult::writeValueChecked(Ostream& os) const
+{
+    if (!isType<Type>())
+    {
+        return false;
+    }
+
+    if (this->size() <= 0)
+    {
+        if (isUniform_)
+        {
+            const Type& val = single_.get<Type>();
+            os.writeEntry("value", val);
+        }
+        else
+        {
+            // Zero-sized
+            const Field<Type> fld;
+            fld.writeEntry("value", os);
+        }
+    }
+    else
+    {
+        const Field<Type>& fld = *static_cast<const Field<Type>*>(fieldPtr_);
+
+        if (isUniform_)
+        {
+            os.writeEntry("value", fld.first());
+        }
+        else
+        {
+            fld.writeEntry("value", os);
+        }
+    }
+
+    return true;
+}
+
+
+template<class Type>
+bool Foam::expressions::exprResult::writeEntryChecked
+(
+    const word& keyword,
+    Ostream& os
+) const
+{
+    if (!isType<Type>())
+    {
+        return false;
+    }
+
+    if (this->size() <= 0)
+    {
+        if (isUniform_ && is_contiguous<Type>::value)
+        {
+            const Type& val = single_.get<Type>();
+
+            os  << "uniform " << val
+                << token::END_STATEMENT << nl;
+        }
+        else
+        {
+            // Zero-sized
+            const Field<Type> fld;
+            fld.writeEntry(keyword, os);
+        }
+    }
+    else
+    {
+        const Field<Type>& fld = *static_cast<const Field<Type>*>(fieldPtr_);
+
+        if (isUniform_ && is_contiguous<Type>::value)
+        {
+            os  << "uniform " << fld.first()
+                << token::END_STATEMENT << nl;
+        }
+        else
+        {
+            fld.writeEntry(keyword, os);
+        }
+    }
+
+    return true;
+}
+
+
+template<class Type>
+bool Foam::expressions::exprResult::setAverageValueChecked()
+{
+    if (!isType<Type>())
+    {
+        return false;
+    }
+
+    const Field<Type>& fld = *static_cast<const Field<Type>*>(fieldPtr_);
+
+    const MinMax<Type> limits = gMinMax(fld);
+
+    isUniform_ = (limits.mag() <= SMALL);
+
+    const Type avg = limits.centre();
+
+    single_.set(avg);
+
+    return true;
+}
+
+
+template<class Type>
+bool Foam::expressions::exprResult::duplicateFieldChecked(const void* ptr)
+{
+    if (!isType<Type>())
+    {
+        return false;
+    }
+
+    if (fieldPtr_)
+    {
+        deleteChecked<Type>();
+    }
+
+    const Field<Type>& fld = *static_cast<const Field<Type>*>(ptr);
+
+    size_ = fld.size();
+    fieldPtr_ = new Field<Type>(fld);
+
+    return true;
+}
+
+
+template<class Type>
+void Foam::expressions::exprResult::setSingleValueImpl(const Type& val)
+{
+    DebugInFunction << nl;
+
+    clear();
+
+    isPointVal_ = false;
+    isUniform_ = true;
+
+    single_.set(val);
+    size_ = 1;
+
+    valType_ = pTraits<Type>::typeName;
+    fieldPtr_ = new Field<Type>(size_, val);
+}
+
+
+template<class Type>
+inline Foam::tmp<Foam::Field<Type>>
+Foam::expressions::exprResult::getResult(bool cacheCopy)
+{
+    DebugInFunction << nl;
+
+    if (!isType<Type>())
+    {
+        FatalErrorInFunction
+            << "The expected return type " << pTraits<Type>::typeName
+            << " is different from the stored result type "
+            << valType_ << nl << nl
+            << exit(FatalError);
+    }
+
+    if (fieldPtr_ == nullptr)
+    {
+        FatalErrorInFunction
+            << "Cannot create tmp from nullptr." << nl
+            << "This error message should never appear!!" << nl
+            << exit(FatalError);
+    }
+
+    Field<Type>* ptr = static_cast<Field<Type>*>(fieldPtr_);
+
+    if (cacheCopy)
+    {
+        // Leave field intact, return a duplicate field
+        // Or return reference instead??
+        return tmp<Field<Type>>::New(*ptr);
+    }
+
+
+    tmp<Field<Type>> result(ptr);
+
+    fieldPtr_ = nullptr;  // Took ownership of field pointer
+    clear();
+
+    return result;
+}
+
+
+template<class Type>
+inline const Foam::Field<Type>&
+Foam::expressions::exprResult::cref() const
+{
+    DebugInFunction << nl;
+
+    if (!isType<Type>())
+    {
+        FatalErrorInFunction
+            << "The expected return type " << pTraits<Type>::typeName
+            << " is different from the stored result type "
+            << valType_ << nl << nl
+            << exit(FatalError);
+    }
+
+    if (fieldPtr_ == nullptr)
+    {
+        FatalErrorInFunction
+            << "Cannot return reference from nullptr." << nl
+            << "This error message should never appear!!" << nl
+            << exit(FatalError);
+    }
+
+    return *static_cast<const Field<Type>*>(fieldPtr_);
+}
+
+
+template<class Type>
+inline Foam::Field<Type>&
+Foam::expressions::exprResult::ref()
+{
+    return const_cast<Field<Type>&>(this->cref<Type>());
+}
+
+
+template<class Type>
+inline Foam::Field<Type>&
+Foam::expressions::exprResult::getRef() const
+{
+    return const_cast<Field<Type>&>(this->cref<Type>());
+}
+
+
+template<class Type>
+inline Foam::tmp<Type>
+Foam::expressions::exprResult::getObjectResult(bool cacheCopy)
+{
+    DebugInFunction << nl;
+
+    if (!isType<Type>())
+    {
+        FatalErrorInFunction
+            << "The expected return type " << pTraits<Type>::typeName
+            << " is different from the stored result type "
+            << valType_ << nl << nl
+            << exit(FatalError);
+    }
+
+    Type* ptr = dynamic_cast<Type*>(objectPtr_.get());
+
+    if (!ptr)
+    {
+        WarningInFunction
+            << "Cannot cast object pointer to " << pTraits<Type>::typeName
+            << nl << nl;
+
+        return nullptr;
+    }
+
+    if (cacheCopy)
+    {
+        // Return duplicated content
+        return tmp<Type>::New(*ptr);
+    }
+
+    objectPtr_.release();  // Take ownership in ptr
+
+    clear();
+
+    return tmp<Type>(ptr);
+}
+
+
+template<template<class> class BinaryOp, class Type>
+inline Type Foam::expressions::exprResult::getReduced
+(
+    const BinaryOp<Type>& bop,
+    const Type& initial
+)
+{
+    if (!isType<Type>())
+    {
+        FatalErrorInFunction
+            << "The expected return type " << pTraits<Type>::typeName
+            << " is different from the stored result type "
+            << valType_ << nl << nl
+            << exit(FatalError);
+    }
+
+    Type result = initial;
+
+    const Field<Type>& fld = *static_cast<Field<Type>*>(fieldPtr_);
+
+    for (const Type& val : fld)
+    {
+        result = bop(result, val);
+    }
+
+    return returnReduce(result, bop);
+}
+
+
+// ************************************************************************* //
