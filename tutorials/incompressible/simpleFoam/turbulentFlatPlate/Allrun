@@ -35,7 +35,8 @@ then
     do
         echo "Processing model: $model"
 
-        runApplication -s $model foamDictionary -entry RAS.RASModel -set $model constant/turbulenceProperties
+        foamDictionary -entry RAS.RASModel -set "$model" \
+            constant/turbulenceProperties > /dev/null
 
         for i in "${!grading_vs_yp[@]}"
         do
