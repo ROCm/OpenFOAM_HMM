@@ -114,6 +114,9 @@ class dimensioned
 
 public:
 
+    //- The underlying data type
+    typedef Type value_type;
+
     //- Component type
     typedef typename pTraits<Type>::cmptType cmptType;
 
@@ -157,7 +160,7 @@ public:
         //  If the optional dimensions are present, they are read and
         //  used without further verification.
         //  If no dimensions are found, the quantity is dimensionless.
-        //  Fatal if not a primitiveEntry or if the number of tokens is incorrect.
+        //  Fatal if not primitiveEntry or if number of tokens is incorrect.
         explicit dimensioned(const primitiveEntry& e);
 
         //- Construct from primitive entry with given name and dimensions.
@@ -168,7 +171,7 @@ public:
         //  If the optional name is found, it is used for renaming.
         //  If the optional dimensions are present, they are read and
         //  verified against the expected dimensions.
-        //  Fatal if not a primitiveEntry or if the number of tokens is incorrect.
+        //  Fatal if not primitiveEntry or if number of tokens is incorrect.
         explicit dimensioned(const primitiveEntry& e, const dimensionSet& dims);
 
         //- Construct from dictionary lookup with a given name.

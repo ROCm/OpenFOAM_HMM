@@ -189,6 +189,12 @@ public:
         );
 
 
+    // Static Member Functions
+
+        //- A string representation of bool as "false" / "true"
+        static const char* name(const bool b) noexcept;
+
+
     // Member Functions
 
         //- True if the Switch represents a valid enumeration

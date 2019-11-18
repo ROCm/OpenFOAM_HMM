@@ -56,6 +56,12 @@ static const char* names[9] =
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
+const char* Foam::Switch::name(const bool b) noexcept
+{
+    return names[(b ? 0 : 1)];
+}
+
+
 Foam::Switch::switchType Foam::Switch::parse
 (
     const std::string& str,

@@ -44,7 +44,7 @@ void testTransfer1(autoPtr<labelList> ap)
     // Passed in copy, so automatically removes content
     // Transfer would be nice, but not actually needed
 
-    Info<< "recv " << Switch(ap.valid()).c_str() << nl;
+    Info<< "recv " << Switch::name(ap.valid()) << nl;
 }
 
 
@@ -53,7 +53,7 @@ void testTransfer1(autoPtr<labelList> ap)
 void testTransfer2(autoPtr<labelList>&& ap)
 {
     // As rvalue, so this time we actually get to manage content
-    Info<< "recv " << Switch(ap.valid()).c_str() << nl;
+    Info<< "recv " << Switch::name(ap.valid()) << nl;
 }
 
 
@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
 
         testTransfer2(std::move(list));
 
-        Info<<"now have valid=" << Switch(list.valid()).c_str();
+        Info<<"now have valid=" << Switch::name(list.valid());
 
         if (list)
         {
@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
 
         testTransfer2(std::move(list));
 
-        Info<<"now have valid=" << Switch(list.valid()).c_str();
+        Info<<"now have valid=" << Switch::name(list.valid());
 
         if (list.valid())
         {
