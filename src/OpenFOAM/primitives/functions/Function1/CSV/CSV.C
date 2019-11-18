@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,6 @@ License
 
 #include "CSV.H"
 #include "DynamicList.H"
-//#include "IFstream.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -36,7 +35,7 @@ template<>
 Foam::label Foam::Function1Types::CSV<Foam::label>::readValue
 (
     const List<string>& splitted
-)
+) const
 {
     if (componentColumns_[0] >= splitted.size())
     {
@@ -54,7 +53,7 @@ template<>
 Foam::scalar Foam::Function1Types::CSV<Foam::scalar>::readValue
 (
     const List<string>& splitted
-)
+) const
 {
     if (componentColumns_[0] >= splitted.size())
     {
@@ -69,7 +68,10 @@ Foam::scalar Foam::Function1Types::CSV<Foam::scalar>::readValue
 
 
 template<class Type>
-Type Foam::Function1Types::CSV<Type>::readValue(const List<string>& splitted)
+Type Foam::Function1Types::CSV<Type>::readValue
+(
+    const List<string>& splitted
+) const
 {
     Type result;
 
@@ -94,7 +96,6 @@ template<class Type>
 void Foam::Function1Types::CSV<Type>::read()
 {
     fileName expandedFile(fName_);
-    //IFstream is(expandedFile.expand());
     autoPtr<ISstream> isPtr(fileHandler().NewIFstream(expandedFile.expand()));
     ISstream& is = isPtr();
 
@@ -214,17 +215,24 @@ Foam::Function1Types::CSV<Type>::CSV
     TableBase<Type>(entryName, dict),
     nHeaderLine_(dict.get<label>("nHeaderLine")),
     refColumn_(dict.get<label>("refColumn")),
-    componentColumns_(dict.lookup("componentColumns")),
-    separator_(dict.lookupOrDefault<string>("separator", ",")[0]),
+    componentColumns_(),
+    separator_(dict.getOrDefault<string>("separator", ",")[0]),
     mergeSeparators_(dict.get<bool>("mergeSeparators")),
     fName_(fName.empty() ? dict.get<fileName>("file") : fName)
 {
+    // Writing of "componentColumns" was forced to be ASCII,
+    // do the same when reading
+    ITstream& is = dict.lookup("componentColumns");
+    is.format(IOstream::ASCII);
+    is >> componentColumns_;
+    dict.checkITstream(is, "componentColumns");
+
     if (componentColumns_.size() != pTraits<Type>::nComponents)
     {
-        FatalErrorInFunction
+        FatalIOErrorInFunction(dict)
             << componentColumns_ << " does not have the expected length of "
-            << pTraits<Type>::nComponents << endl
-            << exit(FatalError);
+            << pTraits<Type>::nComponents << nl
+            << exit(FatalIOError);
     }
 
     read();
@@ -243,13 +251,6 @@ Foam::Function1Types::CSV<Type>::CSV(const CSV<Type>& csv)
     separator_(csv.separator_),
     mergeSeparators_(csv.mergeSeparators_),
     fName_(csv.fName_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::Function1Types::CSV<Type>::~CSV()
 {}
 
 

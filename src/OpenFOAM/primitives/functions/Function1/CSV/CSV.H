@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -105,7 +105,7 @@ class CSV
         void read();
 
         //- Read the next value from the splitted string
-        Type readValue(const List<string>&);
+        Type readValue(const List<string>& splitted) const;
 
         //- No copy assignment
         void operator=(const CSV<Type>&) = delete;
@@ -138,7 +138,7 @@ public:
 
 
     //- Destructor
-    virtual ~CSV();
+    virtual ~CSV() = default;
 
 
     // Member Functions
@@ -149,13 +149,6 @@ public:
         //- Write in dictionary format
         virtual void writeData(Ostream& os) const;
 };
-
-
-template<>
-label CSV<label>::readValue(const List<string>& splitted);
-
-template<>
-Foam::scalar CSV<scalar>::readValue(const List<string>& splitted);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
