@@ -151,6 +151,14 @@ public:
 };
 
 
+// Template specialisations
+template<>
+label CSV<label>::readValue(const List<string>& splitted) const;
+
+template<>
+Foam::scalar CSV<scalar>::readValue(const List<string>& splitted) const;
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Function1Types
