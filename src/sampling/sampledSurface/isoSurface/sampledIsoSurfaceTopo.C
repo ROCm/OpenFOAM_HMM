@@ -180,10 +180,10 @@ Foam::sampledIsoSurfaceTopo::sampledIsoSurfaceTopo
     prevTimeIndex_(-1),
     meshCells_()
 {
-    if (triangulate_ && filter_ != isoSurfaceBase::filterType::NONE)
+    if (triangulate_ && filter_ == isoSurfaceBase::filterType::NONE)
     {
         FatalIOErrorInFunction(dict)
-            << "Cannot both use triangulate and regularise" << nl
+            << "Cannot triangulate without a regularise filter" << nl
             << exit(FatalIOError);
     }
 }

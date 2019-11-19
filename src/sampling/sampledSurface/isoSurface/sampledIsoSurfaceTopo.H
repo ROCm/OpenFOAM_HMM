@@ -102,7 +102,7 @@ class sampledIsoSurfaceTopo
         //- Filtering for iso-surface triangles
         const isoSurfaceBase::filterType filter_;
 
-        //- Whether to triangulate
+        //- Whether to triangulate (after filtering)
         const bool triangulate_;
 
 
