@@ -65,7 +65,7 @@ public:
 
     // Member Operators
 
-        inline oneField operator[](const label) const
+        oneField operator[](const label) const
         {
             return oneField();
         }

@@ -34,7 +34,7 @@ License
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 inline constexpr zero operator+(const zero&, const zero&) noexcept
 {
@@ -92,6 +92,9 @@ inline constexpr zero operator/(const zero&, const Type& val) noexcept
 {
     return Zero;
 }
+
+
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 inline zero min(const zero&, const zero&)
 {

@@ -68,16 +68,19 @@ public:
         oneField() = default;
 
 
-    // Member Operators
+    // Member Functions
 
-        inline one operator[](const label) const
-        {
-            return one();
-        }
-
-        inline oneField field() const
+        oneField field() const
         {
             return oneField();
+        }
+
+
+    // Member Operators
+
+        one operator[](const label) const
+        {
+            return one();
         }
 };
 

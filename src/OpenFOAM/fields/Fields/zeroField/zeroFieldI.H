@@ -25,40 +25,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "zeroField.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-inline Foam::scalar Foam::zeroField::operator[](const label) const
-{
-    return scalar(0);
-}
-
-
-inline Foam::zeroField Foam::zeroField::field() const
-{
-    return zeroField();
-}
-
-
-inline Foam::zeroField Foam::zeroField::operator()() const
-{
-    return zeroField();
-}
-
-
-inline Foam::zeroField Foam::zeroField::operator-() const
-{
-    return zeroField();
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 inline const zeroField operator+(const zeroField&, const zeroField&)
 {
