@@ -66,8 +66,8 @@ Foam::scalar Foam::functionEntries::evalEntry::evaluate
 {
     #ifdef FULLDEBUG
     DetailInfo
-        << "Using #eval at line " << is.lineNumber()
-        << " in file " <<  parentDict.name() << nl;
+        << "Using #eval - line "
+        << is.lineNumber() << " in file " <<  parentDict.name() << nl;
     #endif
 
     // String to evaluate
@@ -109,11 +109,30 @@ Foam::scalar Foam::functionEntries::evalEntry::evaluate
 
     stringOps::inplaceRemoveComments(s);
     stringOps::inplaceExpand(s, parentDict, true, true);
+    stringOps::inplaceTrim(s);
+
+    // A common input error, so catch it now
+    if (std::string::npos != s.find(';'))
+    {
+        FatalIOErrorInFunction(is)
+            << "Invalid input for #eval" << nl
+            << s << endl
+            << exit(FatalIOError);
+    }
 
     #ifdef FULLDEBUG
     DetailInfo
         << "expanded: " << s << endl;
     #endif
+
+    if (s.empty())
+    {
+        InfoErr
+            << "Empty #eval (treat as 0) - line "
+            << is.lineNumber() << " in file " <<  parentDict.name() << nl;
+
+        return scalar(0);
+    }
 
     return stringOps::toScalar(s);
 }

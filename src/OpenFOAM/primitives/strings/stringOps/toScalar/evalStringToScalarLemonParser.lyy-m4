@@ -1,0 +1,399 @@
+%include
+{
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | www.openfoam.com
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2019 OpenCFD Ltd.
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+Description
+    Lemon grammar of a simple string to scalar evaluation.
+
+    The generated parser is localized in an anonymous namespace.
+    Interface code wrapping is near the bottom of the file.
+
+\*---------------------------------------------------------------------------*/
+}
+
+/*---------------------------------------------------------------------------*\
+dnl Begin m4 definitions
+dnl
+undefine(`substr')dnl> Avoid collision with C++ string substr() method
+dnl
+dnl
+dnl ---------------------------------------------------------------------------
+dnl rule_binary_op(out, in1, in2, tok, op)
+dnl Production rule for binary field operations
+dnl
+dnl Example:
+dnl rule_binary_op(sfield, sfield, sfield, PLUS, +)
+dnl
+dnl sfield (lhs) ::= sfield (a) PLUS sfield (b) .
+dnl {
+dnl     lhs = (a) + (b);
+dnl }
+dnl
+dnl ---------------------------------------------------------------------------
+define(`rule_binary_op',
+`$1 (lhs) ::= $2 (a) $4 $3 (b) .
+{
+    lhs = (a) $5 (b);
+}'
+)dnl>
+dnl
+dnl ---------------------------------------------------------------------------
+dnl rule_binary_logical_op(type, valType, compare, tok, op)
+dnl Production rule for binary logical field operations
+dnl Operates on identical field types, producing an lfield.
+dnl
+dnl Example:
+dnl rule_binary_logical_op(vfield, Foam::vector, greaterOp, GREATER, >)
+dnl
+dnl lfield (lhs) ::= vfield (a) GREATER vfield (b) .
+dnl {
+dnl    lhs = Foam::greaterOp<Foam::vector>()(a, b);
+dnl }
+dnl ---------------------------------------------------------------------------
+define(`rule_binary_logical_op',
+`lfield (lhs) ::= $1 (a) $4 $1 (b) .
+{
+    lhs = Foam::$3<$2>()(a, b);
+}'
+)dnl>
+dnl
+dnl ---------------------------------------------------------------------------
+dnl rule_ternary_op(inOut)
+dnl Production rule for ternary field operations
+dnl
+dnl Example:
+dnl rule_ternary_op(sfield)
+dnl
+dnl sfield (lhs) ::= lfield(cond) QUESTION sfield (a) COLON sfield (b) .
+dnl {
+dnl     lhs = (cond ? a : b);
+dnl }
+dnl
+define(`rule_ternary_op',
+`$1 (lhs) ::= lfield(cond) QUESTION $1 (a) COLON $1 (b) .
+{
+    lhs = (cond ? a : b);
+}'
+)dnl>
+dnl
+dnl ---------------------------------------------------------------------------
+dnl rule_unary_func(out, in1, tok, func)
+dnl Production rule for unary functions:
+dnl
+dnl Example:
+dnl rule_unary_func(sfield, vfield, MAG, Foam::mag)
+dnl
+dnl sfield (lhs) ::= MAG LPAREN vfield (a) RPAREN .
+dnl {
+dnl     lhs = Foam::mag(a);
+dnl }
+dnl
+define(`rule_unary_func',
+`$1 (lhs) ::= $3 LPAREN $2 (a) RPAREN .
+{
+    lhs = $4 (a);
+}'
+)dnl>
+dnl
+dnl ---------------------------------------------------------------------------
+dnl rule_binary_func(out, in1, in2, tok, func)
+dnl Production rule for binary functions:
+dnl
+dnl Example:
+dnl rule_binary_func(sfield, sfield, sfield, POW, Foam::pow)
+dnl
+dnl sfield (lhs) ::= POW LPAREN sfield (a) COMMA sfield (b) RPAREN .
+dnl {
+dnl     lhs = Foam::pow((a), (b));
+dnl }
+dnl
+define(`rule_binary_func',
+`$1 (lhs) ::= $4 LPAREN $2 (a) COMMA $3 (b) RPAREN .
+{
+    lhs = $5((a), (b));
+}'
+)dnl>
+dnl
+dnl End m4 definitions
+\*---------------------------------------------------------------------------*/
+
+%include
+{
+#include "evalStringToScalarDriver.H"
+#include "evalStringToScalarParser.H"
+#include "unitConversion.H"
+#include "Random.H"
+#include "Switch.H"
+#include "error.H"
+
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wsign-compare"
+
+// Enable ParseTrace
+#undef NDEBUG
+
+// Local Functions
+
+//- Test for value close to zero
+template<class T>
+bool equalZero(const T& val)
+{
+    return (Foam::mag(val) < Foam::ROOTVSMALL);
+}
+
+
+} // %include
+
+// ------------------------------------------------------------------------- //
+
+%namespace      {}
+
+// Use extra argument for the return value
+%extra_context  { Foam::parsing::evalStringToScalar::parseDriver* driver }
+%parse_failure  { driver->reportFatal("Parse failure, giving up..."); }
+%syntax_error   { driver->reportFatal("Syntax error"); }
+
+%token_prefix TOK_
+
+// Terminals
+%token_type     {Foam::scalar}
+// Non-terminals
+%type lfield    {bool}
+%type sfield    {Foam::scalar}
+
+
+// (https://en.cppreference.com/w/cpp/language/operator_precedence)
+
+%right QUESTION COLON .                 // 16: right-to-left
+%left LOR  .                            // 15:
+%left LAND .                            // 14:
+// %left BIT_OR  .                         // 13
+// %left BIT_XOR  .                        // 12
+// %left BIT_AND  .                        // 11
+%left EQUAL NOT_EQUAL .                 // 10
+%left LESS_EQ GREATER_EQ LESS GREATER . // 9
+%left PLUS MINUS .                      // 6
+%left TIMES DIVIDE PERCENT .            // 5
+%right NEGATE NOT .                     // 3: right-to-left
+
+%start_symbol evaluate
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+/*---------------------------------------------------------------------------*\
+ * Productions (Foam::scalar)
+\*---------------------------------------------------------------------------*/
+
+evaluate ::= sfield(a).
+{
+    driver->setValue(a);
+}
+
+
+// Basics
+
+sfield(lhs) ::= NUMBER(a).                  { lhs = a; }  // From scanToken
+sfield(lhs) ::= LPAREN sfield(a) RPAREN.    { lhs = a; }
+sfield(lhs) ::= MINUS sfield(a). [NEGATE]   { lhs = -a; }
+
+// Conversion (cast)
+sfield(lhs) ::= MAG LPAREN lfield(a) RPAREN . { lhs = Foam::scalar(a); }
+
+// Constants
+
+sfield(lhs) ::= PI LPAREN RPAREN.   { lhs = Foam::constant::mathematical::pi; }
+sfield(lhs) ::= DEG_TO_RAD LPAREN RPAREN.   { lhs = Foam::degToRad(); }
+sfield(lhs) ::= RAD_TO_DEG LPAREN RPAREN.   { lhs = Foam::radToDeg(); }
+
+// Operations
+
+rule_ternary_op(sfield)
+
+rule_binary_op(sfield, sfield, sfield, PLUS, +)
+rule_binary_op(sfield, sfield, sfield, MINUS, -)
+rule_binary_op(sfield, sfield, sfield, TIMES, *)
+
+sfield(lhs) ::= sfield(a) DIVIDE sfield(b).
+{
+    lhs = equalZero(b) ? Foam::scalar(0) : (a / b);
+}
+sfield(lhs) ::= sfield(a) PERCENT sfield(b).
+{
+    lhs = equalZero(b) ? Foam::scalar(0) : std::fmod(a, b);
+}
+
+// Functions
+
+rule_unary_func(sfield, sfield, DEG_TO_RAD, Foam::degToRad)
+rule_unary_func(sfield, sfield, RAD_TO_DEG, Foam::radToDeg)
+
+rule_unary_func(sfield, sfield, EXP, Foam::exp)
+rule_unary_func(sfield, sfield, LOG, Foam::log)
+rule_unary_func(sfield, sfield, LOG10, Foam::log10)
+rule_unary_func(sfield, sfield, SQR, Foam::sqr)
+rule_unary_func(sfield, sfield, SQRT, Foam::sqrt)
+rule_unary_func(sfield, sfield, CBRT, Foam::cbrt)
+rule_unary_func(sfield, sfield, SIN, Foam::sin)
+rule_unary_func(sfield, sfield, COS, Foam::cos)
+rule_unary_func(sfield, sfield, TAN, Foam::tan)
+rule_unary_func(sfield, sfield, ASIN, Foam::asin)
+rule_unary_func(sfield, sfield, ACOS, Foam::acos)
+rule_unary_func(sfield, sfield, ATAN, Foam::atan)
+rule_unary_func(sfield, sfield, SINH, Foam::sinh)
+rule_unary_func(sfield, sfield, COSH, Foam::cosh)
+rule_unary_func(sfield, sfield, TANH, Foam::tanh)
+rule_unary_func(sfield, sfield, MAG, Foam::mag)
+rule_unary_func(sfield, sfield, MAGSQR, Foam::magSqr)
+rule_unary_func(sfield, sfield, FLOOR, std::floor)
+rule_unary_func(sfield, sfield, CEIL, std::ceil)
+rule_unary_func(sfield, sfield, ROUND, std::round)
+
+rule_binary_func(sfield, sfield, sfield, POW, Foam::pow)
+rule_binary_func(sfield, sfield, sfield, ATAN2, Foam::atan2)
+rule_binary_func(sfield, sfield, sfield, HYPOT, Foam::hypot)
+rule_binary_func(sfield, sfield, sfield, MIN, Foam::min)
+rule_binary_func(sfield, sfield, sfield, MAX, Foam::max)
+
+sfield(lhs) ::= RAND LPAREN RPAREN.
+{
+    lhs = Foam::Random().sample01<Foam::scalar>();
+}
+
+sfield(lhs) ::= RAND LPAREN sfield(seed) RPAREN.
+{
+    lhs = Foam::Random(seed).sample01<Foam::scalar>();
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Productions for bool (logical) fields
+
+evaluate ::= lfield(a).
+{
+    driver->setValue(Foam::scalar(a));
+}
+
+// Basics
+
+lfield(lhs) ::= BOOL_FALSE .                { lhs = false; }
+lfield(lhs) ::= BOOL_TRUE .                 { lhs = true; }
+lfield(lhs) ::= LPAREN lfield(a) RPAREN .   { lhs = a; }
+lfield(lhs) ::= NOT lfield(a). [NEGATE]     { lhs = !a; }
+
+// Conversion (cast)
+lfield(lhs) ::= BOOL LPAREN lfield(a) RPAREN . { lhs = a; }
+lfield(lhs) ::= BOOL LPAREN sfield(a) RPAREN . { lhs = Foam::Switch(a); }
+
+// Operations
+
+rule_ternary_op(lfield)
+
+rule_binary_logical_op(lfield, bool, andOp, LAND, &&)
+rule_binary_logical_op(lfield, bool, orOp, LOR, ||)
+
+rule_binary_logical_op(sfield, Foam::scalar, equalOp, EQUAL, ==)
+rule_binary_logical_op(sfield, Foam::scalar, notEqualOp, NOT_EQUAL, !=)
+rule_binary_logical_op(sfield, Foam::scalar, lessOp, LESS, <)
+rule_binary_logical_op(sfield, Foam::scalar, lessEqOp, LESS_EQ, <=)
+rule_binary_logical_op(sfield, Foam::scalar, greaterOp, GREATER, >)
+rule_binary_logical_op(sfield, Foam::scalar, greaterEqOp, GREATER_EQ, >=)
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+%code
+{
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::parsing::evalStringToScalar::parser::stop()
+{
+    if (lemon_)
+    {
+        ParseFree(lemon_, ::operator delete);
+        #ifndef NDEBUG
+        ParseTrace(nullptr, nullptr);
+        #endif
+        lemon_ = nullptr;
+    }
+}
+
+
+void Foam::parsing::evalStringToScalar::parser::start(parseDriver& driver)
+{
+    this->stop();
+    lemon_ = ParseAlloc(::operator new, &driver);
+
+    if (debug & 2)
+    {
+        #ifndef NDEBUG
+        ParseTrace(stderr, const_cast<char*>(prompt_));
+        #endif
+    }
+}
+
+
+void Foam::parsing::evalStringToScalar::parser::parse
+(
+    int tokenId,
+    Foam::scalar val    /* The value for the token */
+)
+{
+    Parse(lemon_, tokenId, val);
+}
+
+
+Foam::word Foam::parsing::evalStringToScalar::parser::nameOfToken
+(
+    int tokenId
+) const
+{
+    #ifndef NDEBUG
+    if
+    (
+        tokenId > 0
+     && unsigned(tokenId) < (sizeof(yyTokenName) / sizeof(char*))
+    )
+    {
+        return yyTokenName[tokenId];
+    }
+    return "<invalid>";
+    #else
+    return word();
+    #endif
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+}  // End of %code
+
+
+// ************************************************************************* //

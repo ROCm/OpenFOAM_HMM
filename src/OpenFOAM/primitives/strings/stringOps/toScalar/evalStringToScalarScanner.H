@@ -67,10 +67,6 @@ class scanner
 
 public:
 
-    //- Debug/tracing of scan
-    static int debug;
-
-
     // Constructors
 
         //- Construct null

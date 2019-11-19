@@ -47,16 +47,22 @@ namespace stringOps
     //- expressions. For trivial input, use readScalar instead (faster).
     //
     //  The evaluation supports the following:
-    //  - operations:  - + * /
+    //  - operations:  - + * / %
     //  - functions:  exp, log, log10, pow, sqrt, cbrt, sqr, mag, magSqr
     //  - trigonometric:  sin, cos, tan, asin, acos, atan, atan2, hypot
     //  - hyperbolic:  sinh, cosh, tanh
     //  - conversions:  degToRad, radToDeg
-    //  - constants:  pi()
-    //  - misc: floor, ceil, round, rand, rand(seed)
+    //  - constants:  pi(), true, false
+    //  - misc: floor, ceil, round, rand, rand(seed), bool()
+    //  - logic: ! ? : ==  !=  <=  => < >
     //
-    //  \note The rand() function returns a uniform scalar on [0-1] interval
-    //  and uses a constant seed
+    //  \note
+    //  Unlike C/C++, the ternary and logical operations are \b not
+    //  short-circuiting. So additional guards may be required.
+    //
+    //  \note
+    //  The rand() function returns a uniform scalar on [0-1] interval
+    //  and uses a constant seed.
     scalar toScalar
     (
         const std::string& s,

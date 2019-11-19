@@ -50,6 +50,12 @@ namespace parsing
 namespace evalStringToScalar
 {
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+//- The debug flag. 2 = debug parser, 4 = debug scanner
+extern int debug;
+
+
 /*---------------------------------------------------------------------------*\
                          Class parseDriver Declaration
 \*---------------------------------------------------------------------------*/

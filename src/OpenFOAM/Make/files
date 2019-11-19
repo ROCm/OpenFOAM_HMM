@@ -136,7 +136,7 @@ $(strings)/parsing/genericRagelLemonDriver.C
 $(strings)/stringOps/stringOps.C
 $(strings)/stringOps/stringOpsSort.C
 $(strings)/stringOps/toScalar/evalStringToScalarDriver.C
-$(strings)/stringOps/toScalar/evalStringToScalarLemonParser.lyy
+$(strings)/stringOps/toScalar/evalStringToScalarLemonParser.lyy-m4
 $(strings)/stringOps/toScalar/evalStringToScalarScanner.cc
 
 ops = primitives/ops

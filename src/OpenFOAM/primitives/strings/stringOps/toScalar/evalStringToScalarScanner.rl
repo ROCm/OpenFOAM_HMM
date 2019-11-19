@@ -40,11 +40,6 @@ Description
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-int Foam::parsing::evalStringToScalar::scanner::debug = 0;
-
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // Ragel lexer with lemon parser integration
@@ -59,10 +54,15 @@ int Foam::parsing::evalStringToScalar::scanner::debug = 0;
     write  data;
 }%%
 
+
+#undef DebugScannerInfo
+#define DebugScannerInfo if (debug & 4) InfoErr
+
+
 #define TOKEN_OF(T)         TOK_##T
 #define EMIT_TOKEN(T)                                                         \
     driver.parsePosition() = (ts-buf);                                        \
-    DebugInfo<< STRINGIFY(T) << ": " << driver.parsePosition() << nl;         \
+    DebugScannerInfo << STRINGIFY(T) << ": "<< driver.parsePosition() << nl;  \
     parser_->parse(TOKEN_OF(T), 0);                                           \
     driver.parsePosition() = (p-buf);
 
@@ -73,7 +73,7 @@ int Foam::parsing::evalStringToScalar::scanner::debug = 0;
     action emit_number {
         driver.parsePosition() = (ts-buf);
 
-        DebugInfo
+        DebugScannerInfo
             << "Number:" << std::string(ts, te-ts).c_str()
             << " at " << driver.parsePosition() << nl;
 
@@ -113,13 +113,29 @@ int Foam::parsing::evalStringToScalar::scanner::debug = 0;
         number => emit_number;
 
     ## operators
+    '!'  => { EMIT_TOKEN(NOT); };
+    '%'  => { EMIT_TOKEN(PERCENT); };
     '('  => { EMIT_TOKEN(LPAREN); };
     ')'  => { EMIT_TOKEN(RPAREN); };
+    '*'  => { EMIT_TOKEN(TIMES); };
     '+'  => { EMIT_TOKEN(PLUS); };
     '-'  => { EMIT_TOKEN(MINUS); };
-    '*'  => { EMIT_TOKEN(TIMES); };
-    '/'  => { EMIT_TOKEN(DIVIDE); };
     ','  => { EMIT_TOKEN(COMMA); };
+    '/'  => { EMIT_TOKEN(DIVIDE); };
+    '!'  => { EMIT_TOKEN(NOT); };
+    '?'  => { EMIT_TOKEN(QUESTION); };
+    ':'  => { EMIT_TOKEN(COLON); };
+    '<'  => { EMIT_TOKEN(LESS); };
+    '<=' => { EMIT_TOKEN(LESS_EQ); };
+    '>'  => { EMIT_TOKEN(GREATER); };
+    '>=' => { EMIT_TOKEN(GREATER_EQ); };
+    '==' => { EMIT_TOKEN(EQUAL); };
+    '!=' => { EMIT_TOKEN(NOT_EQUAL); };
+    '&&' => { EMIT_TOKEN(LAND); };
+    '||' => { EMIT_TOKEN(LOR); };
+## Not needed  '&'  => { EMIT_TOKEN(BIT_AND); };
+## Not needed  '|'  => { EMIT_TOKEN(BIT_OR); };
+## Not needed  '^'  => { EMIT_TOKEN(BIT_XOR); };
 
     ## Regular functions
     'pi'        => { EMIT_TOKEN(PI); };
@@ -150,7 +166,12 @@ int Foam::parsing::evalStringToScalar::scanner::debug = 0;
     'floor'     => { EMIT_TOKEN(FLOOR); };
     'ceil'      => { EMIT_TOKEN(CEIL); };
     'round'     => { EMIT_TOKEN(ROUND); };
-    'rand'      => { fhold; EMIT_TOKEN(RAND); };
+    'rand'      => { EMIT_TOKEN(RAND); };
+    'bool'      => { EMIT_TOKEN(BOOL); };
+
+    ## Constants
+    'false'     =>{ EMIT_TOKEN(BOOL_FALSE); };
+    'true'      =>{ EMIT_TOKEN(BOOL_TRUE); };
 
     ## Catch-all for identifiers/errors
     ident       => emit_ident;

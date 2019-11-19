@@ -29,4 +29,11 @@ FoamFile
 #endif
 
 
+#if #eval "${FOAM_API:-0} >= 1910"
+    evalType hasEvalWithConditionals;
+#else
+    evalType none;
+#endif
+
+
 // ************************************************************************* //

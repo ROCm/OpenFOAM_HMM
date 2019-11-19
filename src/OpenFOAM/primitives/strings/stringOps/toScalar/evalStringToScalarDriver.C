@@ -30,6 +30,28 @@ License
 #include "evalStringToScalarScanner.H"
 #include "error.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace parsing
+{
+
+int evalStringToScalar::debug
+(
+    ::Foam::debug::debugSwitch("stringToScalar", 0)
+);
+registerDebugSwitchWithName
+(
+    evalStringToScalar,
+    evalStringToScalar,
+    "stringToScalar"
+);
+
+} // End namespace parsing
+} // End namespace Foam
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::parsing::evalStringToScalar::parseDriver::parseDriver()
@@ -65,12 +87,11 @@ Foam::scalar Foam::stringOps::toScalar
     size_t len
 )
 {
-    Foam::parsing::evalStringToScalar::parseDriver driver;
+    parsing::evalStringToScalar::parseDriver driver;
 
-    scalar val = driver.execute(s, pos, len);
-    // val = driver.value();
+    driver.execute(s, pos, len);
 
-    return val;
+    return driver.value();
 }
 
 

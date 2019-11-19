@@ -54,8 +54,12 @@ class parser
 {
     // Private Data
 
+        //- Prompt for parser tracing
+        static constexpr const char* const prompt_ = "#eval:";
+
         //- The lemon parser (demand-driven)
         void* lemon_;
+
 
 public:
 

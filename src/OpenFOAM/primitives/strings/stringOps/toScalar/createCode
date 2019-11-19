@@ -7,7 +7,7 @@ prefix=evalStringToScalar
 "${WM_PROJECT_DIR:?}/wmake/scripts/makeParser" \
     -prefix="$prefix" \
     -scanner=Scanner.rl \
-    -parser=LemonParser.lyy \
+    -parser=LemonParser.lyy-m4 \
     "$@"
 
 #------------------------------------------------------------------------------
