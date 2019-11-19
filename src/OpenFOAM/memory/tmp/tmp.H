@@ -63,12 +63,12 @@ namespace Foam
 template<class T>
 class tmp
 {
-    // Private data
+    // Private Data
 
         //- Object types
         enum refType
         {
-            PTR,    //!< Managing a (ref-counted) pointer
+            PTR,    //!< Managing a pointer (ref-counted)
             CREF    //!< Using a const-reference to an object
         };
 
@@ -218,14 +218,17 @@ public:
         //- Delete managed temporary object and set to new given pointer
         inline void reset(T* p) noexcept;
 
+        //- Clear existing and transfer ownership.
+        inline void reset(tmp<T>&& other) noexcept;
+
         //- Delete managed temporary object and set to const reference
         inline void cref(const T& obj) noexcept;
 
-        //- Swaps the managed object with other tmp.
+        //- Swaps the managed object with other.
         inline void swap(tmp<T>& other) noexcept;
 
 
-    // Member operators
+    // Member Operators
 
         //- Return const reference to the object.
         //  Identical to cref() method.
@@ -242,6 +245,9 @@ public:
         //  Fatal for a null managed pointer or if the object is const.
         inline T* operator->();
 
+        //- Is non-null managed pointer or const object reference : valid()
+        explicit inline operator bool() const noexcept;
+
         //- Take ownership of the pointer.
         //  Fatal for a null pointer, or when the pointer is non-unique.
         inline void operator=(T* p);
@@ -249,6 +255,9 @@ public:
         //- Transfer ownership of the managed pointer.
         //  Fatal for a null managed pointer or if the object is const.
         inline void operator=(const tmp<T>& t);
+
+        //- Clear existing and transfer ownership.
+        inline void operator=(tmp<T>&& other) noexcept;
 
 
     // Housekeeping

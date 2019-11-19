@@ -35,16 +35,14 @@ SourceFiles
 
 See also
     Foam::autoPtr
+    Foam::tmp
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef tmpNrc_H
 #define tmpNrc_H
 
-#include "refCount.H"
-#include "word.H"
 #include "tmp.H"
-#include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,7 +56,7 @@ namespace Foam
 template<class T>
 class tmpNrc
 {
-    // Private data
+    // Private Data
 
         //- Object types
         enum refType
@@ -123,13 +121,13 @@ public:
         //- Construct for a const reference to an object.
         inline tmpNrc(const T& obj) noexcept;
 
-        //- Move construct
-        inline tmpNrc(tmpNrc<T>&& t);
+        //- Move construct, transferring ownership.
+        inline tmpNrc(tmpNrc<T>&& t) noexcept;
 
         //- Copy construct
         inline tmpNrc(const tmpNrc<T>& t);
 
-        //- Construct copy, transferring content of temporary if required
+        //- Copy construct. Optionally reusing pointer.
         inline tmpNrc(const tmpNrc<T>& t, bool reuse);
 
 
@@ -200,14 +198,17 @@ public:
         //- Delete managed temporary object and set to new given pointer
         inline void reset(T* p) noexcept;
 
+        //- Clear existing and transfer ownership.
+        inline void reset(tmpNrc<T>&& other) noexcept;
+
         //- Delete managed temporary object and set to const reference
         inline void cref(const T& obj) noexcept;
 
-        //- Swaps the managed object with other tmpNrc.
+        //- Swaps the managed object with other.
         inline void swap(tmpNrc<T>& other) noexcept;
 
 
-    // Member operators
+    // Member Operators
 
         //- Return const reference to the object.
         //  Identical to cref() method.
@@ -224,6 +225,9 @@ public:
         //  Fatal for a null managed pointer or if the object is const.
         inline T* operator->();
 
+        //- Is non-null managed pointer or const object reference : valid()
+        explicit inline operator bool() const noexcept;
+
         //- Take ownership of the pointer.
         //  Fatal for a null pointer, or when the pointer is non-unique.
         inline void operator=(T* p);
@@ -232,14 +236,24 @@ public:
         //  Fatal for a null managed pointer or if the object is const.
         inline void operator=(const tmpNrc<T>& t);
 
+        //- Clear existing and transfer ownership.
+        inline void operator=(tmpNrc<T>&& other) noexcept;
+
         //- Conversion to tmp
         inline operator tmp<T>();
+
+
+    // Housekeeping
+
+        //- No assignment from literal nullptr.
+        //  Consistent with run-time check for nullptr on assignment.
+        void operator=(std::nullptr_t) = delete;
 };
 
 
 // Global Functions
 
-//- Specializes the Swap algorithm for tmp.
+//- Specializes the Swap algorithm for tmpNrc.
 //  Swaps the pointers and types of lhs and rhs. Calls \c lhs.swap(rhs)
 template<class T>
 void Swap(tmpNrc<T>& lhs, tmpNrc<T>& rhs)

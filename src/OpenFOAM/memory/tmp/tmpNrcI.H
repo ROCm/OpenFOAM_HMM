@@ -82,7 +82,7 @@ inline Foam::tmpNrc<T>::tmpNrc(const T& obj) noexcept
 
 
 template<class T>
-inline Foam::tmpNrc<T>::tmpNrc(tmpNrc<T>&& t)
+inline Foam::tmpNrc<T>::tmpNrc(tmpNrc<T>&& t) noexcept
 :
     ptr_(t.ptr_),
     type_(t.type_)
@@ -308,6 +308,23 @@ inline void Foam::tmpNrc<T>::reset(T* p) noexcept
 
 
 template<class T>
+inline void Foam::tmpNrc<T>::reset(tmpNrc<T>&& other) noexcept
+{
+    if (&other == this)
+    {
+        return;  // Self-assignment is a no-op
+    }
+
+    clear();
+    ptr_ = other.ptr_;
+    type_ = other.type_;
+
+    other.ptr_ = nullptr;
+    other.type_ = PTR;
+}
+
+
+template<class T>
 inline void Foam::tmpNrc<T>::cref(const T& obj) noexcept
 {
     clear();
@@ -389,6 +406,13 @@ inline T* Foam::tmpNrc<T>::operator->()
 
 
 template<class T>
+inline Foam::tmpNrc<T>::operator bool() const noexcept
+{
+    return (ptr_ || type_ == CREF);
+}
+
+
+template<class T>
 inline void Foam::tmpNrc<T>::operator=(T* p)
 {
     clear();
@@ -435,6 +459,23 @@ inline void Foam::tmpNrc<T>::operator=(const tmpNrc<T>& t)
             << " of type " << typeid(T).name()
             << abort(FatalError);
     }
+}
+
+
+template<class T>
+inline void Foam::tmpNrc<T>::operator=(tmpNrc<T>&& other) noexcept
+{
+    if (&other == this)
+    {
+        return;  // Self-assignment is a no-op
+    }
+
+    clear();
+    ptr_ = other.ptr_;
+    type_ = other.type_;
+
+    other.ptr_ = nullptr;
+    other.type_ = PTR;
 }
 
 

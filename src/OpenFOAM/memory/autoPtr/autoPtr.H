@@ -241,7 +241,7 @@ public:
         //- Cast to pointer type
         operator T*() noexcept { return get(); }
 
-        //- True if the managed pointer is non-null
+        //- True if the managed pointer is non-null - same as valid()
         explicit inline operator bool() const noexcept;
 
         //- Transfer object ownership from parameter
