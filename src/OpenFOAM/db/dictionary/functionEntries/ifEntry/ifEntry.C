@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,6 +52,24 @@ namespace functionEntries
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+bool Foam::functionEntries::ifEntry::isTrue(ITstream& its)
+{
+    Switch logic;
+
+    if (its.size() && its.first().isScalar())
+    {
+        // Use default rounding tolerance
+        logic = Switch(its.first().scalarToken());
+    }
+    else
+    {
+        its >> logic;
+    }
+
+    return logic;
+}
+
+
 bool Foam::functionEntries::ifEntry::execute
 (
     DynamicList<filePos>& stack,
@@ -68,13 +87,14 @@ bool Foam::functionEntries::ifEntry::execute
     line += ';';
     IStringStream lineStream(line);
     const primitiveEntry e("ifEntry", parentDict, lineStream);
-    const Switch doIf(e.stream());
 
-    // Info<< "Using #" << typeName << " " << doIf
+    const bool doIf = ifEntry::isTrue(e.stream());
+
+    // Info<< "Using #" << typeName << " " << Switch::name(doIf)
     //     << " at line " << stack.last().second()
     //     << " in file " <<  stack.last().first() << endl;
 
-    bool ok = ifeqEntry::execute(doIf, stack, parentDict, is);
+    const bool ok = ifeqEntry::execute(doIf, stack, parentDict, is);
 
     if (stack.size() != nNested)
     {

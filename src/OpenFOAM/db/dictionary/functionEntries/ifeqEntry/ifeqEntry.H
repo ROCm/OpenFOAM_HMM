@@ -139,7 +139,7 @@ protected:
         );
 
         //- Main driver: depending on 'equal' starts evaluating or
-        //  skips forward to #else
+        //- skips forward to #else
         static bool execute
         (
             const bool equal,
@@ -149,7 +149,7 @@ protected:
         );
 
         //- Main driver: depending on 'equal' starts evaluating or
-        //  skips forward to #else
+        //- skips forward to #else
         static bool execute
         (
             DynamicList<filePos>& stack,

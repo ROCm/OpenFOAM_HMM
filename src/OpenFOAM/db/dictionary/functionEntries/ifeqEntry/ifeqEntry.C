@@ -27,9 +27,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ifeqEntry.H"
-#include "stringOps.H"
 #include "ifEntry.H"
-#include "Switch.H"
+#include "stringOps.H"
 #include "addToMemberFunctionSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -367,9 +366,8 @@ bool Foam::functionEntries::ifeqEntry::execute
                 line += ';';
                 IStringStream lineStream(line);
                 const primitiveEntry e("ifEntry", parentDict, lineStream);
-                const Switch doIf(e.stream());
 
-                if (doIf)
+                if (ifEntry::isTrue(e.stream()))
                 {
                     // Info<< "Using #elif " << doIf << " at line " << lineNo
                     //     << " in file " << is.name() << endl;

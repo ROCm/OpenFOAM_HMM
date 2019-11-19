@@ -43,7 +43,7 @@ Description
     Note:
     - only supports single line, '\' is not supported
     - condition should be readable as a \c Switch
-      (supports 0,1, true, false, etc.)
+      (0,1, true, false, etc.) or a scalar (0.0, ...)
 
 See also
     Foam::functionEntries::ifeqEntry
@@ -77,6 +77,9 @@ class ifEntry
     friend class ifeqEntry;
 
     // Private Member Functions
+
+        //- Test first token (label, scalar, word) for true/false
+        static bool isTrue(ITstream& is);
 
         //- Execute the functionEntry in a sub-dict context
         static bool execute

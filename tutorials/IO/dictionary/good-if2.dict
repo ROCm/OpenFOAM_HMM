@@ -14,17 +14,19 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#ifeq $WM_PROJECT_VERSION plus
-    // Get version number as dictionary entry
-    versionNo ${FOAM_API};
-    // Do comparison
-    #if #calc "$versionNo<1812";
-        version "pre-1812";
-    #else
-        version "post-1812";
-    #endif
+// Do comparison
+
+#if #eval "${FOAM_API:-0}"
+    foamApi nonZero;
 #else
-    version "other";
+    foamApi zeroValue;
 #endif
+
+#if #eval "${XX_XXX_FOAM_API:-1000}"
+    other "some entry";
+#else
+    other "unexpected";
+#endif
+
 
 // ************************************************************************* //
