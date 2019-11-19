@@ -35,6 +35,7 @@ Description
 #ifndef products_H
 #define products_H
 
+#include "direction.H"
 #include "pTraits.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -70,6 +71,16 @@ class typeOfRank
 template<class Cmpt, direction rank>
 class symmTypeOfRank
 {};
+
+
+//- The extended precision type (solveScalar for float)
+template<class Type>
+class typeOfSolve
+{
+public:
+
+    typedef Type type;
+};
 
 
 //- The magnitude type for given argument.

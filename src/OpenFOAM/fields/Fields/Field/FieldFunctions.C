@@ -390,14 +390,16 @@ TMP_UNARY_FUNCTION(Type, min)
 template<class Type>
 Type sum(const UList<Type>& f)
 {
-    Type Sum = Zero;
+    typedef typename Foam::typeOfSolve<Type>::type solveType;
+
+    solveType Sum = Zero;
 
     if (f.size())
     {
-        TFOR_ALL_S_OP_F(Type, Sum, +=, Type, f)
+        TFOR_ALL_S_OP_FUNC_F(solveType, Sum, +=, solveType, Type, f)
     }
 
-    return Sum;
+    return Type(Sum);
 }
 
 TMP_UNARY_FUNCTION(Type, sum)

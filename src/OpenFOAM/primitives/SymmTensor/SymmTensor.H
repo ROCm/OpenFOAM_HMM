@@ -176,6 +176,15 @@ public:
 };
 
 
+template<class Cmpt>
+class typeOfSolve<SymmTensor<Cmpt>>
+{
+public:
+
+    typedef SymmTensor<solveScalar> type;
+};
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

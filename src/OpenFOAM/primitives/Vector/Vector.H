@@ -167,6 +167,15 @@ public:
 };
 
 
+template<class Cmpt>
+class typeOfSolve<Vector<Cmpt>>
+{
+public:
+
+    typedef Vector<solveScalar> type;
+};
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

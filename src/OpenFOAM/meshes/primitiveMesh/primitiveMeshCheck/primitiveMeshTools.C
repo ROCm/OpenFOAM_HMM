@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -420,6 +420,7 @@ Foam::tmp<Foam::scalarField> Foam::primitiveMeshTools::faceFlatness
     tmp<scalarField> tfaceFlatness(new scalarField(mesh.nFaces(), 1.0));
     scalarField& faceFlatness = tfaceFlatness.ref();
 
+    typedef Vector<solveScalar> solveVector;
 
     forAll(fcs, facei)
     {
@@ -427,20 +428,20 @@ Foam::tmp<Foam::scalarField> Foam::primitiveMeshTools::faceFlatness
 
         if (f.size() > 3 && magAreas[facei] > ROOTVSMALL)
         {
-            const point& fc = fCtrs[facei];
+            const solveVector fc = fCtrs[facei];
 
             // Calculate the sum of magnitude of areas and compare to magnitude
             // of sum of areas.
 
-            scalar sumA = 0.0;
+            solveScalar sumA = 0.0;
 
             forAll(f, fp)
             {
-                const point& thisPoint = p[f[fp]];
-                const point& nextPoint = p[f.nextLabel(fp)];
+                const solveVector thisPoint = p[f[fp]];
+                const solveVector nextPoint = p[f.nextLabel(fp)];
 
                 // Triangle around fc.
-                vector n = 0.5*((nextPoint - thisPoint)^(fc - thisPoint));
+                solveVector n = 0.5*((nextPoint - thisPoint)^(fc - thisPoint));
                 sumA += mag(n);
             }
 

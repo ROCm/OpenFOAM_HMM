@@ -30,6 +30,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "primitiveMesh.H"
+#include "PrecisionAdaptor.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -75,10 +76,17 @@ void Foam::primitiveMesh::makeCellCentresAndVols
 (
     const vectorField& fCtrs,
     const vectorField& fAreas,
-    vectorField& cellCtrs,
-    scalarField& cellVols
+    vectorField& cellCtrs_s,
+    scalarField& cellVols_s
 ) const
 {
+    typedef Vector<solveScalar> solveVector;
+
+    PrecisionAdaptor<solveVector, vector> tcellCtrs(cellCtrs_s);
+    Field<solveVector>& cellCtrs = tcellCtrs.ref();
+    PrecisionAdaptor<solveScalar, scalar> tcellVols(cellVols_s);
+    Field<solveScalar>& cellVols = tcellVols.ref();
+
     // Clear the fields for accumulation
     cellCtrs = Zero;
     cellVols = 0.0;
@@ -89,18 +97,18 @@ void Foam::primitiveMesh::makeCellCentresAndVols
     // first estimate the approximate cell centre as the average of
     // face centres
 
-    vectorField cEst(nCells(), Zero);
+    Field<solveVector> cEst(nCells(), Zero);
     labelField nCellFaces(nCells(), Zero);
 
     forAll(own, facei)
     {
-        cEst[own[facei]] += fCtrs[facei];
+        cEst[own[facei]] += solveVector(fCtrs[facei]);
         ++nCellFaces[own[facei]];
     }
 
     forAll(nei, facei)
     {
-        cEst[nei[facei]] += fCtrs[facei];
+        cEst[nei[facei]] += solveVector(fCtrs[facei]);
         ++nCellFaces[nei[facei]];
     }
 
@@ -111,12 +119,15 @@ void Foam::primitiveMesh::makeCellCentresAndVols
 
     forAll(own, facei)
     {
+        const solveVector fc(fCtrs[facei]);
+        const solveVector fA(fAreas[facei]);
+
         // Calculate 3*face-pyramid volume
-        scalar pyr3Vol =
-            fAreas[facei] & (fCtrs[facei] - cEst[own[facei]]);
+        solveScalar pyr3Vol =
+            fA & (fc - cEst[own[facei]]);
 
         // Calculate face-pyramid centre
-        vector pc = (3.0/4.0)*fCtrs[facei] + (1.0/4.0)*cEst[own[facei]];
+        solveVector pc = (3.0/4.0)*fc + (1.0/4.0)*cEst[own[facei]];
 
         // Accumulate volume-weighted face-pyramid centre
         cellCtrs[own[facei]] += pyr3Vol*pc;
@@ -127,12 +138,15 @@ void Foam::primitiveMesh::makeCellCentresAndVols
 
     forAll(nei, facei)
     {
+        const solveVector fc(fCtrs[facei]);
+        const solveVector fA(fAreas[facei]);
+
         // Calculate 3*face-pyramid volume
-        scalar pyr3Vol =
-            fAreas[facei] & (cEst[nei[facei]] - fCtrs[facei]);
+        solveScalar pyr3Vol =
+            fA & (cEst[nei[facei]] - fc);
 
         // Calculate face-pyramid centre
-        vector pc = (3.0/4.0)*fCtrs[facei] + (1.0/4.0)*cEst[nei[facei]];
+        solveVector pc = (3.0/4.0)*fc + (1.0/4.0)*cEst[nei[facei]];
 
         // Accumulate volume-weighted face-pyramid centre
         cellCtrs[nei[facei]] += pyr3Vol*pc;

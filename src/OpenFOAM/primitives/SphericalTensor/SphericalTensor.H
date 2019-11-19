@@ -137,6 +137,15 @@ struct is_contiguous_scalar<SphericalTensor<Cmpt>>
 {};
 
 
+template<class Cmpt>
+class typeOfSolve<SphericalTensor<Cmpt>>
+{
+public:
+
+    typedef SphericalTensor<solveScalar> type;
+};
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

@@ -84,7 +84,7 @@ void Foam::primitiveMesh::makeFaceCentresAndAreas
     forAll(fs, facei)
     {
         const labelList& f = fs[facei];
-        label nPoints = f.size();
+        const label nPoints = f.size();
 
         // If the face is a triangle, do a direct calculation for efficiency
         // and to avoid round-off error-related problems
@@ -95,26 +95,29 @@ void Foam::primitiveMesh::makeFaceCentresAndAreas
         }
         else
         {
-            vector sumN = Zero;
-            scalar sumA = 0.0;
-            vector sumAc = Zero;
+            typedef Vector<solveScalar> solveVector;
 
-            point fCentre = p[f[0]];
+            solveVector sumN = Zero;
+            solveScalar sumA = 0.0;
+            solveVector sumAc = Zero;
+
+            solveVector fCentre = p[f[0]];
             for (label pi = 1; pi < nPoints; pi++)
             {
-                fCentre += p[f[pi]];
+                fCentre += solveVector(p[f[pi]]);
             }
 
             fCentre /= nPoints;
 
             for (label pi = 0; pi < nPoints; pi++)
             {
-                const point& nextPoint = p[f[(pi + 1) % nPoints]];
+                const label nextPi(pi == nPoints-1 ? 0 : pi+1);
+                const solveVector nextPoint(p[f[nextPi]]);
+                const solveVector thisPoint(p[f[pi]]);
 
-                vector c = p[f[pi]] + nextPoint + fCentre;
-                vector n = (nextPoint - p[f[pi]])^(fCentre - p[f[pi]]);
-                scalar a = mag(n);
-
+                solveVector c = thisPoint + nextPoint + fCentre;
+                solveVector n = (nextPoint - thisPoint)^(fCentre - thisPoint);
+                solveScalar a = mag(n);
                 sumN += n;
                 sumA += a;
                 sumAc += a*c;

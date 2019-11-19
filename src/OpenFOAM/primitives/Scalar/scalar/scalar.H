@@ -154,7 +154,7 @@ namespace Foam
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Additional transcendental functions
+// Additional transcendental functions and specialisations
 
 namespace Foam
 {
@@ -172,6 +172,15 @@ namespace Foam
 
     //- Lower incomplete gamma function
     scalar incGamma_P(const scalar a, const scalar x);
+
+    //- Type to use for extended precision
+    template<>
+    class typeOfSolve<scalar>
+    {
+    public:
+
+        typedef solveScalar type;
+    };
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
