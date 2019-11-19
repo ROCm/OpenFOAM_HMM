@@ -46,6 +46,15 @@ Description
     };
     \endverbatim
 
+Note
+    The string expansions support use of environment variables.
+    Unknown variables will expand to an empty string, so it can be advisable
+    to an expansion with an alternative. For example,
+
+    \verbatim
+    d #eval{ sin(degToRad( ${angle:-0} )) };
+    \endverbatim
+
 SourceFiles
     evalEntry.C
 

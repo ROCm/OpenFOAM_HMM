@@ -105,10 +105,10 @@ Foam::scalar Foam::functionEntries::evalEntry::evaluate
         << "input: " << s << endl;
     #endif
 
-    // Expanding without env-variables, with empty
+    // Expanding with env-variables, with empty
 
     stringOps::inplaceRemoveComments(s);
-    stringOps::inplaceExpand(s, parentDict, false, true);
+    stringOps::inplaceExpand(s, parentDict, true, true);
 
     #ifdef FULLDEBUG
     DetailInfo
