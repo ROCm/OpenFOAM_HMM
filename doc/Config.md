@@ -17,14 +17,15 @@ These source the following files in the `config.sh/` or
 * `scotch` : application settings for compiling against scotch
 * `metis` : application settings for compiling against metis
 
-The `config.*/example` directories contain additional example configuration
-files for the corresponding shell:
+The `config.{csh,sh}/example/` directories contain additional example
+configuration files for the corresponding shell:
 
 * `compiler` : an example of fine tuning ThirdParty compiler settings
 * `openmpi` : an example of fine tuning openmpi settings for OpenFOAM
 * `paraview` : an example of chaining to the standard config/paraview
    with a different ParaView_VERSION
-* `prefs`: an example of supplying alternative site-defined settings
+* `prefs.csh`, `prefs.sh`: examples of supplying alternative site-defined
+  settings
 
 
 ## OpenFOAM configuration layers
@@ -95,8 +96,11 @@ variants as well.
    some general OpenFOAM-specific settings, which you can use for
    guidance but in general you should note the following:
 
-   * Changes made to this `bashrc` file will be lost with the next upgrade.
-   * Should override via a `prefs.sh` file instead of editing this file.
+   * Changes made to this `etc/bashrc` file ___will be lost___ with
+     the next upgrade.
+   * Overrides should defined in the `etc/prefs.sh` instead.
+     See the comments section of the `etc/bashrc` file for more details.
+
 
 2. The `etc/bashrc` file (our entry point) passes control to the
    `etc/config.sh/setup` file, which dispatches the rest of the

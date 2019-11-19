@@ -4,7 +4,7 @@ OpenFOAM requires a functioning C++11 compiler and `make` build toolchain.
 
 ### Minimum recommended versions
 
-- gcc: 4.8.5
+- gcc : 4.8.5
 - cmake: 3.3 (required for ParaView and CGAL build)
 - boost: 1.48 (required for CGAL build and some functionality)
 - fftw: 3.3.7 (recommended - required for FFT-related functionality)
@@ -20,6 +20,7 @@ To check the installed versions
 |---------------|-----------------------|
 | gcc           | gcc --version         |
 | icc           | icc --version         |
+| openmpi       | orterun --version     |
 | cmake         | cmake --version       |
 | openmpi       | orterun --version     |
 
@@ -27,8 +28,9 @@ To check the installed versions
 
 ### Additional utilities
 
-- flex
-- QT: 5.9 (optional - for ParaView build)
+- flex : **not 2.6.2, 2.6.3** (fails for building scotch)
+- m4 : no known minimum level
+- QT : 5.9 (optional - for ParaView build)
 
 
 ### Ubuntu (eg, 19.04)
@@ -74,11 +76,13 @@ sudo apt-cache show fftw3-dev
 | openmpi   | 19.04     | 3.1.3           |
 | cmake     | 19.04     | 3.13.4          |
 | flex      | 19.04     | 2.6.4           |
+| m4        | 15.1      | 1.4.18          |
 
 
-### openSUSE (eg, Leap-15.0)
+### openSUSE (eg, Leap-15.1)
 
-Install the dependencies by copying and pasting the following lines to the command line:
+Install the dependencies by copying and pasting the following lines to
+the command line:
 
 ```
 sudo zypper install -t pattern devel_C_C++
@@ -89,10 +93,11 @@ This installs
 
 | Program   | openSUSE  | Program version |
 |-----------|-----------|-----------------|
-| gcc       | 15.0      | 7.4.3           |
-| openmpi   | 15.0      | 1.10.7          |
-| cmake     | 15.0      | 3.10.2          |
-| flex      | 15.0      | 2.6.4           |
+| gcc       | 15.1      | 7.4.3           |
+| openmpi   | 15.1      | 1.10.7          |
+| cmake     | 15.1      | 3.10.2          |
+| flex      | 15.1      | 2.6.4           |
+| m4        | 15.1      | 1.4.18          |
 
 
 #### OpenMPI
