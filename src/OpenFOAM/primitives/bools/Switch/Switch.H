@@ -82,7 +82,7 @@ public:
         FALSE   = 0 /*!< "false" */, TRUE = 1 /*!< "true" */,
         NO      = 2 /*!< "no" */,    YES  = 3 /*!< "yes" */,
         OFF     = 4 /*!< "off" */,   ON   = 5 /*!< "on" */,
-        NONE    = 6 /*!< "none" */,
+        NONE    = 6 /*!< "none" */,  ANY  = 7 /*!< "any" */,
         INVALID = 8 /*!< "invalid" */
     };
 
@@ -123,11 +123,19 @@ public:
             switch_(b ? switchType::TRUE : switchType::FALSE)
         {}
 
-        //- Construct from integer values (treats integer as bool value)
+        //- Construct from int (treat integer as bool value)
         constexpr Switch(const int i) noexcept
         :
             switch_(i ? switchType::TRUE : switchType::FALSE)
         {}
+
+        //- Construct from float with rounding to zero given by
+        //- the tolerance (default: 0.5)
+        explicit Switch(const float val, const float tol=0.5);
+
+        //- Construct from double with rounding to zero given by
+        //- the tolerance (default: 0.5)
+        explicit Switch(const double val, const double tol=0.5);
 
         //- Construct from string - catches bad input.
         explicit Switch(const std::string& str)
