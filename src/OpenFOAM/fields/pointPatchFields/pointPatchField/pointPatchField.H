@@ -54,27 +54,18 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 
 class objectRegistry;
 class dictionary;
 class pointPatchFieldMapper;
 class pointMesh;
 
-// Forward declaration of friend functions and operators
+template<class Type> class pointPatchField;
+template<class Type> class calculatedPointPatchField;
 
 template<class Type>
-class pointPatchField;
-
-template<class Type>
-class calculatedPointPatchField;
-
-template<class Type>
-Ostream& operator<<
-(
-    Ostream&,
-    const pointPatchField<Type>&
-);
+Ostream& operator<<(Ostream&, const pointPatchField<Type>&);
 
 
 /*---------------------------------------------------------------------------*\
@@ -104,6 +95,7 @@ class pointPatchField
 
 public:
 
+    typedef Type value_type;
     typedef pointPatch Patch;
     typedef calculatedPointPatchField<Type> Calculated;
 
