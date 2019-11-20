@@ -139,6 +139,15 @@ $(strings)/stringOps/toScalar/evalStringToScalarDriver.C
 $(strings)/stringOps/toScalar/evalStringToScalarLemonParser.lyy-m4
 $(strings)/stringOps/toScalar/evalStringToScalarScanner.cc
 
+expr = expressions
+$(expr)/exprEntry/expressionEntry.C
+$(expr)/exprEntry/expressionEntryBool.C
+$(expr)/exprEntry/expressionEntryDimensioned.C
+$(expr)/exprEntry/expressionEntryStrings.C
+$(expr)/exprEntry/expressionEntryVectors.C
+$(expr)/exprString/exprString.C
+$(expr)/exprTools/exprTools.C
+
 ops = primitives/ops
 $(ops)/flipOp.C
 
