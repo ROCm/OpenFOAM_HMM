@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +28,7 @@ Class
     Foam::flipOp
 
 Description
-    Class containing functor to negate primitives. Dummy for all other types.
+    Functor to negate primitives. Dummy for most other types.
 
     Used in mesh transformations where face can flip.
 
@@ -50,34 +51,40 @@ namespace Foam
                            Class flipOp Declaration
 \*---------------------------------------------------------------------------*/
 
-class flipOp
+struct flipOp
 {
-public:
-
-    template<class Type>
-    Type operator()(const Type& val) const
+    template<class T>
+    T operator()(const T& val) const
     {
         return val;
     }
 };
 
 
-class noOp
+//- Pass through value. Should never be specialized.
+struct noOp
 {
-public:
-
-    template<class Type>
-    Type operator()(const Type& val) const
+    template<class T>
+    const T& operator()(const T& val) const noexcept
     {
         return val;
     }
 };
 
 
-class flipLabelOp
+//- Invert boolean value
+struct flipBoolOp
 {
-public:
+    bool operator()(const bool& val) const noexcept
+    {
+        return !val;
+    }
+};
 
+
+//- Negate integer values
+struct flipLabelOp
+{
     label operator()(const label& val) const
     {
         return -val;

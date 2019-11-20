@@ -29,8 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<>
-Foam::scalar Foam::flipOp::operator()(const scalar& v) const
+template<> Foam::scalar Foam::flipOp::operator()(const scalar& v) const
 {
     return -v;
 }
@@ -42,7 +41,7 @@ template<> Foam::vector Foam::flipOp::operator()(const vector& v) const
 }
 
 
-template<>Foam::sphericalTensor Foam::flipOp::operator()
+template<> Foam::sphericalTensor Foam::flipOp::operator()
 (
     const sphericalTensor& v
 ) const
