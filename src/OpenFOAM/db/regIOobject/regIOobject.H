@@ -134,34 +134,35 @@ public:
 
     // Constructors
 
-        //- Construct from IOobject with optional flag if IOobject is the
-        //- top-level regIOobject.
-        regIOobject(const IOobject&, const bool isTime = false);
+        //- Construct from IOobject. The optional flag adds special handling
+        //- if the object is the top-level regIOobject (eg, Time).
+        regIOobject(const IOobject& io, const bool isTime = false);
 
         //- Copy construct
-        regIOobject(const regIOobject&);
+        regIOobject(const regIOobject& rio);
 
         //- Copy construct, transferring registry registration to the copy
         //- if registerCopy is true
-        regIOobject(const regIOobject&, bool registerCopy);
+        regIOobject(const regIOobject& rio, bool registerCopy);
 
         //- Copy construct with new name, transferring registry registration
         //- to the copy f registerCopy is true
         regIOobject(const word& newName, const regIOobject&, bool registerCopy);
 
-        //- Construct as copy with new IO parameters
-        regIOobject(const IOobject&, const regIOobject&);
+        //- Copy construct with new IO parameters
+        regIOobject(const IOobject& io, const regIOobject& rio);
 
 
     //- Destructor
     virtual ~regIOobject();
 
 
-    // Member functions
+    // Member Functions
 
         // Registration
 
-            //- Add object to registry
+            //- Add object to registry, if not already registered
+            //  \return true if object was newly registered
             bool checkIn();
 
             //- Remove all file watches and remove object from registry
@@ -178,17 +179,17 @@ public:
             inline void store();
 
             //- Transfer ownership of the given object pointer to its registry
-            //  and return reference to object.
+            //  \return reference to the object.
             template<class Type>
             inline static Type& store(Type* p);
 
             //- Transfer ownership of the given object pointer to its registry
-            //- and return reference to object.
+            //  \return reference to the object.
             template<class Type>
             inline static Type& store(autoPtr<Type>& aptr);
 
             //- Transfer ownership of the given object pointer to its registry
-            //- and return reference to object.
+            //  \return reference to the object.
             template<class Type>
             inline static Type& store(autoPtr<Type>&& aptr);
 
@@ -206,11 +207,9 @@ public:
             inline label& eventNo();
 
             //- Return true if up-to-date with respect to given object
-            //  otherwise false
             bool upToDate(const regIOobject&) const;
 
             //- Return true if up-to-date with respect to given objects
-            //  otherwise false
             bool upToDate
             (
                 const regIOobject&,
@@ -218,7 +217,6 @@ public:
             ) const;
 
             //- Return true if up-to-date with respect to given objects
-            //  otherwise false
             bool upToDate
             (
                 const regIOobject&,
@@ -227,7 +225,6 @@ public:
             ) const;
 
             //- Return true if up-to-date with respect to given objects
-            //  otherwise false
             bool upToDate
             (
                 const regIOobject&,
@@ -236,7 +233,8 @@ public:
                 const regIOobject&
             ) const;
 
-            //- Set up to date (obviously)
+
+            //- Set as up-to-date
             void setUpToDate();
 
 

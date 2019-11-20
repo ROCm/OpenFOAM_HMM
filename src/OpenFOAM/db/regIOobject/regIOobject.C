@@ -62,16 +62,11 @@ Foam::regIOobject::regIOobject(const IOobject& io, const bool isTime)
     registered_(false),
     ownedByRegistry_(false),
     watchIndices_(),
-    eventNo_                // Do not get event for top level Time database
-    (
-        isTime
-      ? 0
-      : db().getEvent()
-    )
+    eventNo_(isTime ? 0 : db().getEvent()) // No event for top-level Time
 {
-    // Register with objectRegistry if requested
     if (registerObject())
     {
+        // Register (check-in) with objectRegistry if requested
         checkIn();
     }
 }
