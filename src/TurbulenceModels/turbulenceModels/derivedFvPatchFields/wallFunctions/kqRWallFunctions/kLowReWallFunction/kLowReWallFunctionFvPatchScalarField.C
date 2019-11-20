@@ -72,7 +72,15 @@ Foam::kLowReWallFunctionFvPatchScalarField::kLowReWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF, dict),
-    Ceps2_(dict.getOrDefault<scalar>("Ceps2", 1.9)),
+    Ceps2_
+    (
+        dict.getCheckOrDefault<scalar>
+        (
+            "Ceps2",
+            1.9,
+            scalarMinMax::ge(SMALL)
+        )
+    ),
     Ck_(dict.getOrDefault<scalar>("Ck", -0.416)),
     Bk_(dict.getOrDefault<scalar>("Bk", 8.366)),
     C_(dict.getOrDefault<scalar>("C", 11.0))
@@ -145,12 +153,10 @@ void Foam::kLowReWallFunctionFvPatchScalarField::updateCoeffs()
     forAll(kw, facei)
     {
         const label celli = patch().faceCells()[facei];
-
         const scalar uTau = Cmu25*sqrt(k[celli]);
-
         const scalar yPlus = uTau*y[facei]/nuw[facei];
 
-        if (nutw.yPlusLam() < yPlus)
+        if (yPlus > nutw.yPlusLam())
         {
             kw[facei] = Ck_/nutw.kappa()*log(yPlus) + Bk_;
         }

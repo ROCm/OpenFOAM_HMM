@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2019 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,30 +32,34 @@ Group
 
 Description
     This boundary condition provides a wall constraint on the turbulent
-    kinematic viscosity, i.e. \c nut, when using wall functions,
-    based on turbulent kinetic energy, \c k.
+    viscosity, i.e. \c nut, when using wall functions,
+    based on the turbulent kinetic energy, \c k.
 
 Usage
-    \table
-        Property     | Description                 | Required  | Default value
-        Cmu          | Model coefficient           | no        | 0.09
-        kappa        | Von Karman constant         | no        | 0.41
-        E            | Model coefficient           | no        | 9.8
-    \endtable
-
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
-        // Mandatory entries
+        // Mandatory entries (unmodifiable)
         type            nutkWallFunction;
 
-        // Optional entries
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-See also
-    Foam::nutWallFunctionFvPatchScalarField
+    where the entries mean:
+    \table
+      Property  | Description                   | Type | Req'd  | Dflt
+      type      | Type name: nutkWallFunction   | word | yes    | -
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link nutWallFunctionFvPatchScalarField.H \endlink
+
+Note
+    - See \link nutWallFunctionFvPatchScalarField.H \endlink for the wall
+    function blending treatments.
 
 SourceFiles
     nutkWallFunctionFvPatchScalarField.C
@@ -84,7 +88,7 @@ protected:
 
     // Protected Member Functions
 
-        //- Calculate the turbulence viscosity
+        //- Calculate the turbulent viscosity
         virtual tmp<scalarField> calcNut() const;
 
 

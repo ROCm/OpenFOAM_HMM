@@ -155,7 +155,7 @@ nutUBlendedWallFunctionFvPatchScalarField
 )
 :
     nutWallFunctionFvPatchScalarField(p, iF, dict),
-    n_(dict.getOrDefault<scalar>("n", 4))
+    n_(dict.getOrDefault<scalar>("n", 4.0))
 {}
 
 
@@ -214,8 +214,8 @@ void Foam::nutUBlendedWallFunctionFvPatchScalarField::write
 {
     fvPatchField<scalar>::write(os);
     writeLocalEntries(os);
-    writeEntry("value", os);
     os.writeEntry("n", n_);
+    writeEntry("value", os);
 }
 
 

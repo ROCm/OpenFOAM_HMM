@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,46 +32,51 @@ Group
 
 Description
     This boundary condition provides a wall constraint on the turbulent
-    kinematic viscosity, i.e. \c nut, when using wall functions for rough walls,
+    viscosity, i.e. \c nut, when using wall functions for rough walls,
     based on velocity, \c U.
 
 Usage
-    \table
-        Property     | Description             | Required    | Default value
-        roughnessHeight | Roughness height     | yes         |
-        roughnessConstant | Roughness constanr | yes         |
-        roughnessFactor | Scaling factor       | yes         |
-        Cmu        | Model coefficient         | no          | 0.09
-        kappa      | Von Karman constant       | no          | 0.41
-        E          | Model coefficient         | no          | 9.8
-        maxIter    | Number of Newton-Raphson iterations  | no          | 10
-        tolerance  | Convergence tolerance     | no          | 0.0001
-    \endtable
-
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
-        // Mandatory entries
-        type            nutURoughWallFunction;
+        // Mandatory entries (unmodifiable)
+        type                nutURoughWallFunction;
         roughnessHeight     1e-5;
         roughnessConstant   0.5;
         roughnessFactor     1;
 
-        // Optional entries
+        // Optional entries (unmodifiable)
+        maxIter             10;
+        tolerance           0.0001;
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-Note
-    Suffers from non-exact restart since correctNut() (called through
-    turbulence->validate) returns a slightly different value every time
-    it is called. See nutUSpaldingWallFunctionFvPatchScalarField.C.
-    Can be avoided by seeding the NR with e.g. the laminar viscosity
-    or tightening the convergence tolerance
-    to e.g. 1e-7 and the max number of iterations to 100.
+    where the entries mean:
+    \table
+      Property  | Description                         | Type | Req'd  | Dflt
+      type      | Type name: nutURoughWallFunction    | word | yes    | -
+      roughnessHeight   | Roughness height            | scalar | yes  | -
+      roughnessConstant | Roughness constant          | scalar | yes  | -
+      roughnessFactor   | Scaling factor              | scalar | yes  | -
+      maxIter   | Number of Newton-Raphson iterations | label  | no   | 10
+      tolerance | Convergence tolerance               | scalar | no   | 0.0001
+    \endtable
 
-See also
-    Foam::nutWallFunctionFvPatchScalarField
+    The inherited entries are elaborated in:
+      - \link nutWallFunctionFvPatchScalarField.H \endlink
+
+Note
+    - Suffers from non-exact restart since \c correctNut() (called through
+    \c turbulence->validate) returns a slightly different value every time
+    it is called.
+    See \link nutUSpaldingWallFunctionFvPatchScalarField.C \endlink.
+    - Can be avoided by seeding the NR with e.g. the laminar viscosity
+    or tightening the convergence tolerance to e.g. 1e-7 and the max
+    number of iterations to 100.
 
 SourceFiles
     nutURoughWallFunctionFvPatchScalarField.C
@@ -213,7 +218,6 @@ public:
             {
                 return roughnessHeight_;
             }
-
 
             //- Return the roughness constant scale
             scalar roughnessConstant() const

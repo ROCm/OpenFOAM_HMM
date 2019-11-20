@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017, 2019 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,13 +40,22 @@ Usage
     \verbatim
     <patchName>
     {
-        // Mandatory entries
+        // Mandatory entries (unmodifiable)
         type            kqRWallFunction;
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-See also
-    Foam::zeroGradientFvPatchField
+    where the entries mean:
+    \table
+      Property  | Description                   | Type | Req'd  | Dflt
+      type      | Type name: kqRWallFunction    | word | yes    | -
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link zeroGradientFvPatchField.H \endlink
 
 SourceFiles
     kqRWallFunctionFvPatchField.C
