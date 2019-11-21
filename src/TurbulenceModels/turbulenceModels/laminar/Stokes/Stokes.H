@@ -25,7 +25,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::Stokes
+    Foam::laminarModels::Stokes
+
+Group
+    grpLaminar
 
 Description
     Turbulence model for Stokes flow.
@@ -127,7 +130,7 @@ public:
         virtual tmp<volScalarField> k() const;
 
         //- Return the turbulence kinetic energy dissipation rate,
-        //  i.e. 0 for Stokes flow
+        //- i.e. 0 for Stokes flow
         virtual tmp<volScalarField> epsilon() const;
 
         //- Return the Reynolds stress tensor, i.e. 0 for Stokes flow
