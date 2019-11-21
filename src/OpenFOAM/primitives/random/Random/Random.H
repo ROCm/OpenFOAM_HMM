@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,7 @@ template<class T> class UList;
 
 class Random
 {
-    // Private data
+    // Private Data
 
         //- Initial random number seed
         label seed_;
@@ -84,6 +84,11 @@ class Random
 
 
 public:
+
+        // Forward declarations - generator classes
+        template<class T> class uniformGeneratorOp;
+        template<class T> class gaussianGeneratorOp;
+
 
     // Public Static Data
 
@@ -201,6 +206,131 @@ scalar Random::globalPosition<scalar>(const scalar& start, const scalar& end);
 
 template<>
 label Random::globalPosition<label>(const label& start, const label& end);
+
+
+/*---------------------------------------------------------------------------*\
+                 Class Random::uniformGeneratorOp Declaration
+\*---------------------------------------------------------------------------*/
+
+//- A generator class returning a uniformly distributed random number
+//- on the given interval.
+//
+//  \sa std::generate()
+template<class T>
+class Random::uniformGeneratorOp
+:
+    public Random
+{
+    // Private data
+
+        //- The interval
+        const T min_;
+        const T max_;
+
+
+    // Private Member Functions
+
+        //- Generate a random number. Treat as mutable.
+        T generate() const
+        {
+            return const_cast<uniformGeneratorOp&>(*this)
+                .position<T>(min_, max_);
+        }
+
+
+public:
+
+    // Constructors
+
+        //- Construct null or with seed value. Uses default [0,1] interval
+        explicit uniformGeneratorOp(const label seed = Random::defaultSeed)
+        :
+            uniformGeneratorOp(seed, pTraits<T>::zero, pTraits<T>::one)
+        {}
+
+        //- Construct with specified interval, using default seed
+        uniformGeneratorOp(const T& minval, const T& maxval)
+        :
+            uniformGeneratorOp(Random::defaultSeed, minval, maxval)
+        {}
+
+        //- Construct with seed value and specified interval
+        uniformGeneratorOp(const label seed, const T& minval, const T& maxval)
+        :
+            Random(seed),
+            min_(minval),
+            max_(maxval)
+        {}
+
+
+    // Member Operators
+
+        //- Generate a random number
+        T operator()()
+        {
+            return generate();
+        }
+
+        //- Ignore parameter and generate a random number, which allows it
+        //- to be used as a replacement for general unary operators.
+        template<class U>
+        T operator()(const U&) const
+        {
+            return generate();
+        }
+};
+
+
+/*---------------------------------------------------------------------------*\
+                 Class Random::gaussianGeneratorOp Declaration
+\*---------------------------------------------------------------------------*/
+
+//- A generator class returning a gaussian distributed random number.
+//
+//  \sa std::generate()
+template<class T>
+class Random::gaussianGeneratorOp
+:
+    public Random
+{
+
+    // Private Member Functions
+
+        //- Generate a random number. Treat as mutable.
+        T generate() const
+        {
+            return const_cast<gaussianGeneratorOp&>(*this)
+                .GaussNormal<T>();
+        }
+
+
+public:
+
+    // Constructors
+
+        //- Construct null or with seed value. Uses default [0,1] interval
+        explicit gaussianGeneratorOp(const label seed = Random::defaultSeed)
+        :
+            Random(seed)
+        {}
+
+
+    // Member Operators
+
+        //- Generate a random number
+        T operator()()
+        {
+            return generate();
+        }
+
+        //- Ignore parameter and generate a random number, which allows it
+        //- to be used as a replacement for general unary operators.
+        template<class U>
+        T operator()(const U&) const
+        {
+            return generate();
+        }
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

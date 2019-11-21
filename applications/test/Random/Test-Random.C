@@ -31,7 +31,6 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "Rand48.H"
 #include "Random.H"
 
 #include <cstdlib>
@@ -217,6 +216,59 @@ int main(int argc, char *argv[])
     // Test uniformity of random
     testPosition(20);
     testPosition(3);
+
+
+    // Generators
+    {
+        const label n = 20;
+        List<label> samples(n, Zero);
+
+        Random::uniformGeneratorOp<label> gen(0, n-1);
+
+        // Test uniformity of random
+        samples = Zero;
+        for (label i=0; i < 100000*n; ++i)
+        {
+            // Calling with/without parameter is the same
+            if (i % 3)
+            {
+                ++samples[gen()];
+            }
+            else
+            {
+                // Unary ignores any parameter
+                ++samples[gen(3.14159)];
+            }
+        }
+
+        Info<< nl << "Uniform generator [0," << n << ")\n  "
+            << flatOutput(samples) << nl;
+    }
+
+    {
+        Random::gaussianGeneratorOp<scalar> gen;
+
+        Info<< "Some gaussian generated values" << nl;
+
+        for (label i=0; i < 20; ++i)
+        {
+            Info<< ' ';
+
+            // Calling with/without parameter is the same
+            if (i % 3)
+            {
+                Info<< gen();
+            }
+            else
+            {
+                // Unary ignores any parameter
+                Info<< gen(3.14159);
+            }
+        }
+
+        Info<< nl;
+    }
+
 
     // This should fail (in FULLDEBUG)
     const bool throwingError = FatalError.throwExceptions();
