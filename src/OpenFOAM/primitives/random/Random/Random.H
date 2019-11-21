@@ -85,10 +85,16 @@ class Random
 
 public:
 
+    // Public Static Data
+
+        //- The default seed value (name may change in the future)
+        static constexpr label defaultSeed = 123456;
+
+
     // Constructors
 
         //- Construct with seed value
-        Random(const label seedValue = 123456);
+        explicit Random(const label seedValue = defaultSeed);
 
         //- Copy construct with optional reset of seed
         Random(const Random& r, const bool reset = false);

@@ -846,7 +846,7 @@ turbulentDFSEMInletFvPatchVectorField
     nCellPerEddy_(dict.getOrDefault<label>("nCellPerEddy", 5)),
     patchNormal_(Zero),
     v0_(Zero),
-    rndGen_(0, -1),
+    rndGen_(),
     sigmax_(size(), Zero),
     maxSigmaX_(Zero),
     nEddy_(Zero),
