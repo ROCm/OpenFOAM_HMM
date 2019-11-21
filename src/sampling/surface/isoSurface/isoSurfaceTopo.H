@@ -80,6 +80,10 @@ class isoSurfaceTopo
         //- Optional cells to ignore
         const bitSet& ignoreCells_;
 
+        //- Optional boundary faces to ignore. Used to exclude cyclicACMI
+        //  (since duplicate faces)
+        bitSet ignoreBoundaryFaces_;
+
         //- Corrected version of tetBasePtIs
         labelList tetBasePtIs_;
 

@@ -34,6 +34,7 @@ License
 #include "DynamicField.H"
 #include "syncTools.H"
 #include "polyMeshTetDecomposition.H"
+#include "cyclicACMIPolyPatch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -85,6 +86,15 @@ Foam::isoSurfaceTopo::cellCutType Foam::isoSurfaceTopo::calcCutType
     {
         for (const label facei : cFaces)
         {
+            if
+            (
+               !mesh_.isInternalFace(facei)
+             && ignoreBoundaryFaces_.test(facei-mesh_.nInternalFaces())
+            )
+            {
+                continue;
+            }
+
             const face& f = mesh_.faces()[facei];
 
             for (label fp = 1; fp < f.size() - 1; ++fp)
@@ -106,6 +116,15 @@ Foam::isoSurfaceTopo::cellCutType Foam::isoSurfaceTopo::calcCutType
 
     for (const label facei : cFaces)
     {
+        if
+        (
+           !mesh_.isInternalFace(facei)
+         && ignoreBoundaryFaces_.test(facei-mesh_.nInternalFaces())
+        )
+        {
+            continue;
+        }
+
         const face& f = mesh_.faces()[facei];
 
         // Check pyramids cut
@@ -837,7 +856,8 @@ void Foam::isoSurfaceTopo::generateTriPoints
         label facei = cFaces[0];
         const face& f0 = faces[facei];
 
-        // Get the other point
+        // Get the other point from f1. Tbd: check if not duplicate face
+        // (ACMI / ignoreBoundaryFaces_).
         const face& f1 = faces[cFaces[1]];
         label oppositeI = -1;
         forAll(f1, fp)
@@ -914,6 +934,15 @@ void Foam::isoSurfaceTopo::generateTriPoints
 
         for (const label facei : cFaces)
         {
+            if
+            (
+               !mesh_.isInternalFace(facei)
+             && ignoreBoundaryFaces_.test(facei-mesh_.nInternalFaces())
+            )
+            {
+                continue;
+            }
+
             const face& f = faces[facei];
 
             label fp0 = tetBasePtIs_[facei];
@@ -1193,6 +1222,27 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
             << " / " << cVals_.size() << nl
             << endl;
     }
+
+    // Determine boundary pyramids to ignore (since originating from ACMI faces)
+    // Maybe needs to be optional argument or more general detect colocated
+    // faces.
+    {
+        const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
+        forAll(pbm, patchi)
+        {
+            const polyPatch& pp = pbm[patchi];
+            if (isA<cyclicACMIPolyPatch>(pp))
+            {
+                ignoreBoundaryFaces_.setSize(mesh_.nBoundaryFaces());
+                forAll(pp, i)
+                {
+                    label facei = pp.start()+i;
+                    ignoreBoundaryFaces_.set(facei-mesh_.nInternalFaces());
+                }
+            }
+        }
+    }
+
 
     fixTetBasePtIs();
 
