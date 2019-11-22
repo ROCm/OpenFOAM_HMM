@@ -61,25 +61,39 @@ class bitSet;
 class topoSet;
 
 /*---------------------------------------------------------------------------*\
-                           Class topoSetSource Declaration
+                        Class topoSetSource Declaration
 \*---------------------------------------------------------------------------*/
 
 class topoSetSource
 {
 public:
 
-    // Public data types
+    // Public Data Types
 
         //- Enumeration defining the types of sources
         enum sourceType
         {
-            CELLSETSOURCE = 0x1,        //!< Cells
-            FACESETSOURCE = 0x2,        //!< Faces
-            POINTSETSOURCE = 0x4,       //!< Points
+            UNKNOWN_SOURCE = 0, //!< Placeholder
+            SET_SOURCE = 0x10,  //!< Source based on topoSet
+            ZONE_SOURCE = 0x20, //!< Source based on mesh zone
+            CELL_TYPE = 0x1,    //!< Geometric type is "cell"
+            FACE_TYPE = 0x2,    //!< Geometric type is "face"
+            POINT_TYPE = 0x4,   //!< Geometric type is "point"
 
-            CELLZONESOURCE = 0x11,      //!< Cells as zone
-            FACEZONESOURCE = 0x12,      //!< Faces as zone
-            POINTZONESOURCE = 0x14,     //!< Points as zone
+            CELLSET_SOURCE = (CELL_TYPE | SET_SOURCE),      //!< Cells as set
+            FACESET_SOURCE = (FACE_TYPE | SET_SOURCE),      //!< Faces as set
+            POINTSET_SOURCE = (POINT_TYPE | SET_SOURCE),    //!< Points as set
+
+            CELLZONE_SOURCE = (CELL_TYPE | ZONE_SOURCE),    //!< Cells as zone
+            FACEZONE_SOURCE = (FACE_TYPE | ZONE_SOURCE),    //!< Faces as zone
+            POINTZONE_SOURCE = (POINT_TYPE | ZONE_SOURCE),  //!< Points as zone
+
+            CELLSETSOURCE = CELLSET_SOURCE,     // Compat (2019-11)
+            FACESETSOURCE = FACESET_SOURCE,     // Compat (2019-11)
+            POINTSETSOURCE = POINTSET_SOURCE,   // Compat (2019-11)
+            CELLZONESOURCE = CELLZONE_SOURCE,   // Compat (2019-11)
+            FACEZONESOURCE = FACEZONE_SOURCE,   // Compat (2019-11)
+            POINTZONESOURCE = POINTZONE_SOURCE, // Compat (2019-11)
         };
 
         //- Enumeration defining the valid actions
@@ -101,6 +115,8 @@ public:
 
 
 protected:
+
+        static const string illegalSource_;
 
         //- A table of usage strings
         static HashTable<string>* usageTablePtr_;
@@ -165,13 +181,6 @@ protected:
         ) const;
 
 
-private:
-
-        static const string illegalSource_;
-
-
-    // Private Member Functions
-
         //- No copy construct
         topoSetSource(const topoSetSource&) = delete;
 
@@ -187,15 +196,38 @@ public:
 
     // Static Functions
 
-        //- Deprecated(2018-07) convert string to action
-        //  \deprecated(2018-07) - use actionNames[] directly
-        static setAction toAction(const word& actionName)
-        {
-            return actionNames[actionName];
-        }
-
         //- Check state of stream.
         static Istream& checkIs(Istream& is);
+
+        //- True if a "set" source
+        static inline bool isSetSource(const sourceType t)
+        {
+            return (t & SET_SOURCE);
+        }
+
+        //- True if a "zone" source
+        static inline bool isZoneSource(const sourceType t)
+        {
+            return (t & ZONE_SOURCE);
+        }
+
+        //- True if "cell" geometric type
+        static inline bool isCell(const sourceType t)
+        {
+            return (t & CELL_TYPE);
+        }
+
+        //- True if "face" geometric type
+        static inline bool isFace(const sourceType t)
+        {
+            return (t & FACE_TYPE);
+        }
+
+        //- True if "point" geometric type
+        static inline bool isPoint(const sourceType t)
+        {
+            return (t & POINT_TYPE);
+        }
 
 
     // Declare run-time constructor selection table
@@ -319,16 +351,25 @@ public:
 
     // Member Functions
 
-        //- The type of set being used by the source
+        //- The source category (set/zone, cell/face/point)
         virtual sourceType setType() const = 0;
 
         //- Apply specified action to the topoSet
         virtual void applyToSet
         (
-            const setAction action,
+            const topoSetSource::setAction action,
             topoSet& set
-        ) const = 0;
+        )  const = 0;
 
+
+    // Housekeeping
+
+        //- Deprecated(2018-07) convert string to action
+        //  \deprecated(2018-07) - use actionNames[] directly
+        static setAction toAction(const word& actionName)
+        {
+            return actionNames[actionName];
+        }
 };
 
 

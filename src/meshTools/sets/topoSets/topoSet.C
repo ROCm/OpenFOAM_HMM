@@ -309,6 +309,8 @@ void Foam::topoSet::writeDebug
 }
 
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
 Foam::IOobject Foam::topoSet::findIOobject
 (
     const polyMesh& mesh,

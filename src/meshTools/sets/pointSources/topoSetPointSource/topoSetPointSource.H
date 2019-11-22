@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -124,9 +124,10 @@ public:
 
     // Member Functions
 
+        //- The source category is a pointSet
         virtual topoSetSource::sourceType setType() const
         {
-            return POINTSETSOURCE;
+            return POINTSET_SOURCE;
         }
 };
 

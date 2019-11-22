@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,9 +94,10 @@ public:
 
     // Member Functions
 
-        virtual sourceType setType() const
+        //- The source category is a faceZone
+        virtual topoSetSource::sourceType setType() const
         {
-            return FACEZONESOURCE;
+            return FACEZONE_SOURCE;
         }
 
         virtual void applyToSet
@@ -104,7 +105,6 @@ public:
             const topoSetSource::setAction action,
             topoSet& set
         ) const;
-
 };
 
 
