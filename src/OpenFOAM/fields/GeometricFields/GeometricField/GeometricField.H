@@ -462,6 +462,9 @@ public:
         //- Clone
         tmp<GeometricField<Type, PatchField, GeoMesh>> clone() const;
 
+
+    // Static Constructors
+
         //- Return tmp field from name, mesh, dimensions and patch type.
         //  The field is NO_READ, NO_WRITE, unregistered and uses the
         //  current timeName from the mesh registry
@@ -470,6 +473,32 @@ public:
             const word& name,
             const Mesh& mesh,
             const dimensionSet& ds,
+            const word& patchFieldType = PatchField<Type>::calculatedType()
+        );
+
+        //- Return tmp field from name, mesh, dimensions,
+        //- copy of internal field, with specified patch type.
+        //  The field is NO_READ, NO_WRITE, unregistered and uses the
+        //  current timeName from the mesh registry
+        static tmp<GeometricField<Type, PatchField, GeoMesh>> New
+        (
+            const word& name,
+            const Mesh& mesh,
+            const dimensionSet& ds,
+            const Field<Type>& iField,
+            const word& patchFieldType = PatchField<Type>::calculatedType()
+        );
+
+        //- Return tmp field from name, mesh, dimensions,
+        //- moved internal field contents, with specified patch type.
+        //  The field is NO_READ, NO_WRITE, unregistered and uses the
+        //  current timeName from the mesh registry
+        static tmp<GeometricField<Type, PatchField, GeoMesh>> New
+        (
+            const word& name,
+            const Mesh& mesh,
+            const dimensionSet& ds,
+            Field<Type>&& iField,
             const word& patchFieldType = PatchField<Type>::calculatedType()
         );
 
