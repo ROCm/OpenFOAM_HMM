@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,12 +24,19 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Note
+    Many functions are not required or supported on pointPatchFields
+    but are made available as dummy operations to ensure that various
+    FieldFieldFunctions will be definable.
+
 \*---------------------------------------------------------------------------*/
+
+#include "pointPatchField.H"
 
 namespace Foam
 {
 
-/* * * * * * * * * * * * * * * * Global functions  * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * */
 
 template<class Type>
 inline void component
@@ -129,7 +137,22 @@ BINARY_FUNCTION(cmptMultiply)
 BINARY_FUNCTION(cmptDivide)
 
 
-/* * * * * * * * * * * * * * * * Global operators  * * * * * * * * * * * * * */
+// Returns Type max to ensure that it does not participate in reductions
+template<class Type>
+inline Type min(const pointPatchField<Type>&)
+{
+    return pTraits<Type>::max;
+}
+
+// Returns Type min to ensure that it does not participate in reductions
+template<class Type>
+inline Type max(const pointPatchField<Type>&)
+{
+    return pTraits<Type>::min;
+}
+
+
+/* * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * */
 
 #define UNARY_OPERATOR(op, opFunc)                                             \
                                                                                \
@@ -337,6 +360,58 @@ inline void eigenVectors
 )
 {}
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace FieldOps
+{
+
+// Workarounds for missing functionality.
+// See FieldOps.H, and GeometricFieldOps.H
+
+template<class Tout, class T1, class UnaryOp>
+inline void assign
+(
+    pointPatchField<Tout>& result,
+    const pointPatchField<T1>& a,
+    const UnaryOp& op
+)
+{}
+
+
+template<class Tout, class T1, class T2, class BinaryOp>
+inline void assign
+(
+    pointPatchField<Tout>& result,
+    const pointPatchField<T1>& a,
+    const pointPatchField<T2>& b,
+    const BinaryOp& bop
+)
+{}
+
+template<class T, class BinaryOp>
+inline void ternary
+(
+    pointPatchField<T>& result,
+    const pointPatchField<T>& a,
+    const pointPatchField<T>& b,
+    const BinaryOp& bop
+)
+{}
+
+template<class T, class BoolType, class FlipOp>
+inline void ternarySelect
+(
+    pointPatchField<T>& result,
+    const pointPatchField<BoolType>& cond,
+    const pointPatchField<T>& a,
+    const pointPatchField<T>& b,
+    const FlipOp& flip
+)
+{}
+
+
+} // End namespace FieldOps
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
