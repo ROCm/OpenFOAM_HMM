@@ -28,7 +28,8 @@ Class
 
 Description
     Enum is a wrapper around a list of names/values that represent particular
-    enumeration values. All dictionary searches use a literal (not regex).
+    enumeration (or int) values.
+    All dictionary searches use a literal (not regex).
 
 SourceFiles
     Enum.C
@@ -41,6 +42,7 @@ SourceFiles
 
 #include "wordList.H"
 #include <initializer_list>
+#include <ostream>
 #include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -73,7 +75,7 @@ public:
     //- The type of enumeration represented by the Enum
     typedef EnumType value_type;
 
-    // Normally only enum, but be generous and allow integrals as well
+    // Allow enums and integrals (should fit within an int)
     static_assert
     (
         std::is_enum<EnumType>::value || std::is_integral<EnumType>::value,
@@ -82,6 +84,9 @@ public:
 
 
     // Constructors
+
+        //- Construct null (empty list)
+        Enum() = default;
 
         //- Construct from a values/names list.
         //  Duplicate values are permitted (eg, for aliases).
@@ -110,6 +115,19 @@ public:
 
         //- The list of enum values, in construction order.
         inline const List<int>& values() const;
+
+
+    // Modify
+
+        //- Clear all entries
+        inline void clear();
+
+        //- Append value/key pairs to the lists of known enumerations
+        //  Does not check for duplicate entries
+        void append
+        (
+            std::initializer_list<std::pair<EnumType, const char*>> list
+        );
 
 
     // Query
@@ -197,6 +215,15 @@ public:
         //- Read a word from Istream and return the corresponding enumeration
         EnumType read(Istream& is) const;
 
+        //- Read a word from Istream, lookup named enumeration.
+        //  \return true on success. Fatal if mandatory and not found.
+        bool read
+        (
+            Istream& is,
+            EnumType& val,
+            const bool mandatory = true
+        ) const;
+
         //- Write the name representation of the enumeration to an Ostream
         //  A noop if the enumeration wasn't found.
         inline void write(const EnumType e, Ostream& os) const;
@@ -265,6 +292,10 @@ public:
 //- Write enumeration names, without line-breaks (ie, FlatOutput)
 template<class EnumType>
 inline Ostream& operator<<(Ostream& os, const Enum<EnumType>& list);
+
+//- Write enumeration names, without line-breaks (ie, FlatOutput)
+template<class EnumType>
+inline std::ostream& operator<<(std::ostream& os, const Enum<EnumType>& list);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

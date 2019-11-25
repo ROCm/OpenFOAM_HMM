@@ -44,7 +44,6 @@ Foam::Enum<EnumType>::Enum
     {
         keys_[i] = pair.second;
         vals_[i] = int(pair.first);
-
         ++i;
     }
 }
@@ -60,6 +59,26 @@ Foam::List<Foam::word> Foam::Enum<EnumType>::sortedToc() const
     Foam::sort(list);
 
     return list;
+}
+
+
+template<class EnumType>
+void Foam::Enum<EnumType>::append
+(
+    std::initializer_list<std::pair<EnumType, const char*>> list
+)
+{
+    label i = size();
+
+    keys_.resize(i + list.size());
+    vals_.resize(i + list.size());
+
+    for (const auto& pair : list)
+    {
+        keys_[i] = pair.second;
+        vals_[i] = int(pair.first);
+        ++i;
+    }
 }
 
 
@@ -112,6 +131,35 @@ EnumType Foam::Enum<EnumType>::read(Istream& is) const
     }
 
     return EnumType(vals_[idx]);
+}
+
+
+template<class EnumType>
+bool Foam::Enum<EnumType>::read
+(
+    Istream& is,
+    EnumType& e,
+    const bool mandatory
+) const
+{
+    const word enumName(is);
+
+    const label idx = find(enumName);
+
+    if (idx >= 0)
+    {
+        e = EnumType(vals_[idx]);
+        return true;
+    }
+
+    if (mandatory)
+    {
+        FatalIOErrorInFunction(is)
+            << enumName << " is not in enumeration: " << *this << nl
+            << exit(FatalIOError);
+    }
+
+    return false;
 }
 
 

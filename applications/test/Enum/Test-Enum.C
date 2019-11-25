@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,7 +73,7 @@ const Foam::Enum<int> otherNames1
 
 
 // Can use for integers as well, but not scalar etc.
-const Foam::Enum<int> otherNames2
+Foam::Enum<int> otherNames2
 ({
     { 0, "a" },
     { 2, "b" },
@@ -109,6 +109,34 @@ int main(int argc, char *argv[])
         << "    names:  " << otherNames2 << nl
         << "    values: " << flatOutput(otherNames2.values())
         << nl << nl;
+
+    otherNames2.append
+    ({
+        { 15, "fifteen"},
+        { 16, "sixteen"}
+    });
+
+    Info<<"Other Enum (appended)" << nl
+        << "    names:  " << otherNames2 << nl
+        << "    values: " << flatOutput(otherNames2.values())
+        << nl << nl;
+
+    std::cout
+        <<"stdout: "<< otherNames2
+        << nl << nl;
+
+
+    otherNames2.clear();
+    otherNames2.append
+    ({
+        { 1, "one"},
+        { 2, "two"}
+    });
+
+    Info<<"After clear and append:" << nl
+        << otherNames2 << nl
+        << otherNames2.values() << nl
+        << nl;
 
 
     dictionary testDict;

@@ -56,6 +56,14 @@ inline const Foam::List<int>& Foam::Enum<EnumType>::values() const
 
 
 template<class EnumType>
+inline void Foam::Enum<EnumType>::clear()
+{
+    keys_.clear();
+    vals_.clear();
+}
+
+
+template<class EnumType>
 inline Foam::label Foam::Enum<EnumType>::find(const word& enumName) const
 {
     return keys_.find(enumName);
@@ -173,9 +181,36 @@ inline EnumType Foam::Enum<EnumType>::operator()
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class EnumType>
-inline Foam::Ostream& Foam::operator<<(Ostream& os, const Enum<EnumType>& list)
+inline Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const Enum<EnumType>& list
+)
 {
     return list.names().writeList(os, 0);
+}
+
+
+template<class EnumType>
+inline std::ostream& Foam::operator<<
+(
+    std::ostream& os,
+    const Enum<EnumType>& list
+)
+{
+    os << '(';
+
+    unsigned i = 0;
+
+    for (const word& k : list.names())
+    {
+        if (i++) os << ' ';
+        os << k;
+    }
+
+    os << ')';
+
+    return os;
 }
 
 
