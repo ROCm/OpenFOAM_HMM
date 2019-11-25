@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,25 +56,37 @@ Foam::Istream& Foam::ensightReadFile::read(string& value)
 {
     if (format() == IOstream::BINARY)
     {
-        char buf[80];
+        auto& iss = stdStream();
 
-        read(reinterpret_cast<char*>(buf), sizeof(buf));
+        // Binary string is *exactly* 80 characters
+        value.resize(80, '\0');
+        iss.read(&value[0], 80);
 
-        string strBuf(value);
-
-        const size_t iEnd = strBuf.find('\0', 0);
-        if (iEnd == string::npos)
+        if (!iss)
         {
-            value = buf;
+            // Truncated - could also exit here, but no real advantage
+            value.erase(iss.gcount());
         }
-        else
+
+        // Truncate at the first embedded '\0'
+        auto endp = value.find('\0');
+
+        if (endp != std::string::npos)
         {
-            value = strBuf.substr(0, iEnd - 1);
+            value.erase(endp);
+        }
+
+        // May have been padded with trailing spaces - remove those
+        endp = value.find_last_not_of(" \t\f\v\n\r");
+
+        if (endp != std::string::npos)
+        {
+            value.erase(endp + 1);
         }
     }
     else
     {
-        value = "";
+        value.clear();
         while (value.empty() && !eof())
         {
             getLine(value);
