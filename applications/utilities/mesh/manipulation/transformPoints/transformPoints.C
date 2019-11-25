@@ -37,6 +37,10 @@ Description
 Usage
     Options are:
 
+    -time value
+        Specify the time to search from and apply the transformation
+        (default is latest)
+
     -translate vector
         Translates the points by the given vector before rotations
 
@@ -156,6 +160,13 @@ int main(int argc, char *argv[])
     );
     argList::addOption
     (
+        "time",
+        "time",
+        "Specify the time to search from and apply the transformation"
+        " (default is latest)"
+    );
+    argList::addOption
+    (
         "translate",
         "vector",
         "Translate by specified <vector> - eg, '(1 0 0)' before rotations"
@@ -246,6 +257,19 @@ int main(int argc, char *argv[])
     if (args.readIfPresent("region", regionName))
     {
         meshDir = regionName/polyMesh::meshSubDir;
+    }
+
+    if (args.found("time"))
+    {
+        if (args.opt("time") == "constant")
+        {
+            runTime.setTime(instant(0, "constant"), 0);
+        }
+        else
+        {
+            scalar timeValue = args.opt<scalar>("time");
+            runTime.setTime(instant(timeValue), 0);
+        }
     }
 
     pointIOField points
