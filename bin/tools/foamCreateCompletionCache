@@ -155,11 +155,15 @@ HEADER
 # - options with '=' (eg, -mode=ugo) are not handled very well at all.
 # - alternatives (eg, -a, -all) are not handled nicely either,
 #   for these treat ',' like a space to catch the worst of them.
+#
+# Remove anything that starts with more than 8 spaces to avoid parsing
+# any of the option description text
 extractOptions()
 {
     local appName="$1"
     local helpText=$($appName -help-full 2>/dev/null | \
         sed -ne '1,/^[Oo]ptions:/d' \
+            -e '/^ \{8\}/d;' \
             -e 's/^ *//; /^$/d; /^[^-]/d; /^--/d; /^-help-man/d;' \
             -e '/^-hostRoots /d; /^-roots /d;' \
             -e '/^-lib /d;' \
