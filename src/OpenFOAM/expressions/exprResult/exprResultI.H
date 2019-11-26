@@ -30,16 +30,18 @@ License
 
 namespace Foam
 {
+namespace expressions
+{
     #undef  defineExpressionMethod
     #define defineExpressionMethod(Type, Var)                                 \
-        template<> inline const Type&                                         \
-        expressions::exprResult::singleValue::get<Type>() const               \
+        template<>                                                            \
+        inline const Type& exprResult::singleValue::get<Type>() const         \
         {                                                                     \
             return Var;                                                       \
         }                                                                     \
                                                                               \
-        template<> inline const Type&                                         \
-        expressions::exprResult::singleValue::set(const Type& val)            \
+        template<>                                                            \
+        inline const Type& exprResult::singleValue::set(const Type& val)      \
         {                                                                     \
             Var = val;                                                        \
             return Var;                                                       \
@@ -53,7 +55,9 @@ namespace Foam
     defineExpressionMethod(sphericalTensor, sphTensor_);
 
     #undef defineExpressionMethod
-}
+
+} // End namespace expressions
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
