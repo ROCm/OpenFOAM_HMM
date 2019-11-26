@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
     const bool addPoint     = args.found("points");
     const bool mergeRegions = args.found("mergeRegions");
 
-    const scalar scaleFactor = args.opt<scalar>("scale", -1);
+    const scalar scaleFactor = args.get<scalar>("scale", -1);
 
     if (addPoint)
     {

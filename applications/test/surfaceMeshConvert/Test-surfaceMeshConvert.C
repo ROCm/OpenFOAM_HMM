@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
 
     const bool     optStdout = args.found("stdout");
-    const scalar scaleFactor = args.opt<scalar>("scale", 0);
+    const scalar scaleFactor = args.get<scalar>("scale", 0);
 
     const fileName importName = args[1];
     const fileName exportName = optStdout ? "-stdout" : args[2];

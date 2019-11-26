@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
     triSurface surf
     (
         inFileName,
-        args.opt<scalar>("scale", -1)
+        args.get<scalar>("scale", -1)
     );
     surf.writeStats(Info);
 

@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    const scalar scaleFactor = args.opt<scalar>("scale", -1);
+    const scalar scaleFactor = args.get<scalar>("scale", -1);
 
     const word outputFile(args.executable() + ".obj");
 
@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
     word mergeOp;
     if (args.found("mergePoints"))
     {
-        cuts.mergePoints(args.opt<scalar>("mergePoints"));
+        cuts.mergePoints(args.get<scalar>("mergePoints"));
         mergeOp = "mergePoints";
     }
     else if (args.found("mergeEdges"))

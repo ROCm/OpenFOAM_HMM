@@ -191,22 +191,22 @@ namespace Foam
     }
 
 
-    template<> inline int32_t argList::opt<int32_t>(const word& optName) const
+    template<> inline int32_t argList::get<int32_t>(const word& optName) const
     {
         return Foam::readInt32(options_[optName]);
     }
 
-    template<> inline int64_t argList::opt<int64_t>(const word& optName) const
+    template<> inline int64_t argList::get<int64_t>(const word& optName) const
     {
         return Foam::readInt64(options_[optName]);
     }
 
-    template<> inline float argList::opt<float>(const word& optName) const
+    template<> inline float argList::get<float>(const word& optName) const
     {
         return Foam::readFloat(options_[optName]);
     }
 
-    template<> inline double argList::opt<double>(const word& optName) const
+    template<> inline double argList::get<double>(const word& optName) const
     {
         return Foam::readDouble(options_[optName]);
     }
@@ -232,19 +232,19 @@ namespace Foam
 
 
     template<>
-    inline string argList::opt<Foam::string>(const word& optName) const
+    inline string argList::get<Foam::string>(const word& optName) const
     {
         return options_[optName];
     }
 
     template<>
-    inline word argList::opt<Foam::word>(const word& optName) const
+    inline word argList::get<Foam::word>(const word& optName) const
     {
         return options_[optName];
     }
 
     template<>
-    inline fileName argList::opt<Foam::fileName>(const word& optName) const
+    inline fileName argList::get<Foam::fileName>(const word& optName) const
     {
         return options_[optName];
     }
@@ -268,7 +268,7 @@ inline T Foam::argList::get(const label index) const
 
 
 template<class T>
-inline T Foam::argList::opt(const word& optName) const
+inline T Foam::argList::get(const word& optName) const
 {
     ITstream is(optName, options_[optName]);
 
@@ -282,11 +282,11 @@ inline T Foam::argList::opt(const word& optName) const
 
 
 template<class T>
-inline T Foam::argList::opt(const word& optName, const T& deflt) const
+inline T Foam::argList::get(const word& optName, const T& deflt) const
 {
     if (found(optName))
     {
-        return opt<T>(optName);
+        return get<T>(optName);
     }
 
     return deflt;
@@ -302,7 +302,7 @@ inline bool Foam::argList::readIfPresent
 {
     if (found(optName))
     {
-        val = opt<T>(optName);
+        val = get<T>(optName);
         return true;
     }
 
@@ -337,7 +337,7 @@ inline T Foam::argList::getOrDefault
 {
     if (found(optName))
     {
-        return opt<T>(optName);
+        return get<T>(optName);
     }
 
     return deflt;

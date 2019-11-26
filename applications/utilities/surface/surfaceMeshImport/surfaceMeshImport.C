@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
 
 
     const fileName importName = args[1];
-    const word exportName = args.opt<word>("name", "default");
+    const word exportName = args.get<word>("name", "default");
 
     // check that reading is supported
     if (!MeshedSurface<face>::canRead(importName, true))
@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
                 IOobject::NO_WRITE,
                 false
             ),
-            args.opt<fileName>("dict", "")
+            args.get<fileName>("dict", "")
         );
 
         if (!ioCsys.typeHeaderOk<coordinateSystems>(false))

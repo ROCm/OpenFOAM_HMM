@@ -237,12 +237,12 @@ int main(int argc, char *argv[])
     }
 
 
-    const int divisions = args.opt<int>("divisions", 1);
+    const int divisions = args.get<int>("divisions", 1);
     Info<< "Using " << divisions << " per time interval" << nl << endl;
 
 
     const word interpolationType =
-        args.opt<word>("interpolationType", "linear");
+        args.get<word>("interpolationType", "linear");
 
     Info<< "Using interpolation " << interpolationType << nl << endl;
 

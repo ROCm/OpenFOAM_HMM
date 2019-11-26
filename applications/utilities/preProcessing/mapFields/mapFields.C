@@ -69,7 +69,7 @@ int readNumProcs
                     IOobject::NO_WRITE,
                     false // do not register
                 ),
-                args.opt<fileName>(optionName, "")
+                args.get<fileName>(optionName, "")
             )
         )
     );

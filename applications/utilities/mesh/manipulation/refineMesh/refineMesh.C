@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
         const word dictName("refineMeshDict");
 
         // Obtain dictPath here for messages
-        fileName dictPath = args.opt<fileName>("dict", "");
+        fileName dictPath = args.get<fileName>("dict", "");
 
         IOobject dictIO = IOobject::selectIO
         (

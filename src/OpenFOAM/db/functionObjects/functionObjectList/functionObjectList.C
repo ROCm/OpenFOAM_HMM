@@ -403,7 +403,7 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
 
     dictionary& functionsDict = controlDict.subDict("functions");
 
-    const word regionName = args.opt<word>("region", "");
+    const word regionName = args.get<word>("region", "");
 
     bool modifiedControlDict = false;
 

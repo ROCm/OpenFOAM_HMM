@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
     Time runTime(args.rootPath(), args.caseName());
 
     const fileName exportName = args[1];
-    const word importName = args.opt<word>("name", "default");
+    const word importName = args.get<word>("name", "default");
 
     // check that writing is supported
     if (!MeshedSurface<face>::canWriteType(exportName.ext(), true))
@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
                 IOobject::NO_WRITE,
                 false
             ),
-            args.opt<fileName>("dict", "")
+            args.get<fileName>("dict", "")
         );
 
         if (!ioCsys.typeHeaderOk<coordinateSystems>(false))

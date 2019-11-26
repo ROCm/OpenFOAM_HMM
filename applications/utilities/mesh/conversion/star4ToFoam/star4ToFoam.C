@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
         prefix,
         runTime,
         // Default rescale from [mm] to [m]
-        args.opt<scalar>("scale", 0.001),
+        args.get<scalar>("scale", 0.001),
         args.found("solids")
     );
 

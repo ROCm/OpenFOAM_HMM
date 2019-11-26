@@ -40,7 +40,7 @@ if (args.found("initialiseUBCs"))
 // converting fixed-value BCs to zero-gradient and vice versa.
 
 // Allow override from command-line -pName option
-const word pName = args.opt<word>("pName", "p");
+const word pName = args.get<word>("pName", "p");
 
 // Infer the pressure BCs from the velocity
 wordList pBCTypes

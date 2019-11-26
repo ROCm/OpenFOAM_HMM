@@ -612,8 +612,8 @@ int main(int argc, char *argv[])
     const scalar distance(args.get<scalar>(2));
     const scalar extendFactor(args.get<scalar>(3));
     const bool checkSelfIntersect = args.found("checkSelfIntersection");
-    const label nSmooth = args.opt<label>("nSmooth", 10);
-    const scalar featureAngle = args.opt<scalar>("featureAngle", 180);
+    const label nSmooth = args.get<label>("nSmooth", 10);
+    const scalar featureAngle = args.get<scalar>("featureAngle", 180);
     const bool debug = args.found("debug");
 
 

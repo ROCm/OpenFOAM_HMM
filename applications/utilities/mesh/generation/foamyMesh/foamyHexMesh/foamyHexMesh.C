@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 
     // Allow override of decomposeParDict location
     const fileName decompDictFile =
-        args.opt<fileName>("decomposeParDict", "");
+        args.get<fileName>("decomposeParDict", "");
 
     IOdictionary foamyHexMeshDict
     (

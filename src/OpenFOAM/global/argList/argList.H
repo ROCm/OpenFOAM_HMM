@@ -364,16 +364,6 @@ public:
         //- Return non-const access to the command options
         inline HashTable<string>& options();
 
-        //- Get a value from the argument at index.
-        //  Index 1 is the first (non-option) argument.
-        template<class T>
-        inline T get(const label index) const;
-
-        //- Read a value from the argument at index.
-        //  Index 1 is the first (non-option) argument.
-        template<class T>
-        inline List<T> getList(const label index) const;
-
         //- Return true if the named option is found
         inline bool found(const word& optName) const;
 
@@ -386,15 +376,25 @@ public:
         //- Return an input stream from the named option
         inline ITstream lookup(const word& optName) const;
 
+        //- Get a value from the argument at index.
+        //  Index 1 is the first (non-option) argument.
+        template<class T>
+        inline T get(const label index) const;
+
+        //- Get a List of values from the argument at index.
+        //  Index 1 is the first (non-option) argument.
+        template<class T>
+        inline List<T> getList(const label index) const;
+
         //- Get a value from the named option
         //  The default template parameter is string (ie, no conversion).
         template<class T=string>
-        inline T opt(const word& optName) const;
+        inline T get(const word& optName) const;
 
         //- Get a value from the named option if present, or return default.
         //  Identical to getOrDefault().
         template<class T>
-        inline T opt(const word& optName, const T& deflt) const;
+        inline T get(const word& optName, const T& deflt) const;
 
         //- Read a value from the named option if present.
         //  \return true if the named option was found.
@@ -414,11 +414,7 @@ public:
 
         //- Get a value from the named option if present, or return default.
         template<class T>
-        inline T getOrDefault
-        (
-            const word& optName,
-            const T& deflt
-        ) const;
+        inline T getOrDefault(const word& optName, const T& deflt) const;
 
         //- Get a List of values from the named option,
         //- treating a single entry like a list of size 1.
@@ -433,6 +429,21 @@ public:
         //  \return true if the named option was found.
         template<class T>
         inline bool readListIfPresent(const word& optName, List<T>& list) const;
+
+
+        //- Alternative name for option get(const word& optName)
+        template<class T=string>
+        T opt(const word& optName) const
+        {
+            return this->get<T>(optName);
+        }
+
+        //- Alternative name for option get(const word& optName, ...)
+        template<class T>
+        T opt(const word& optName, const T& deflt) const
+        {
+            return this->get<T>(optName, deflt);
+        }
 
 
     // Edit
@@ -650,12 +661,12 @@ public:
         }
 
         //- Deprecated(2018-01) read a value from the named option
-        //  \deprecated(2018-01) - use opt() method
+        //  \deprecated(2018-01) - use get() method
         template<class T>
-        T FOAM_DEPRECATED_FOR(2018-01, "opt() method")
+        T FOAM_DEPRECATED_FOR(2018-01, "get() method")
         optionRead(const word& optName) const
         {
-            return opt<T>(optName);
+            return get<T>(optName);
         }
 
         //- Deprecated(2018-01) read a value from the named option if present.

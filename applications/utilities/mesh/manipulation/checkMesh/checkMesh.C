@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
     const bool allTopology = args.found("allTopology");
     const bool meshQuality = args.found("meshQuality");
 
-    const word surfaceFormat = args.opt<word>("writeSets", "");
+    const word surfaceFormat = args.get<word>("writeSets", "");
     const bool writeSets = surfaceFormat.size();
 
     wordHashSet selectedFields;

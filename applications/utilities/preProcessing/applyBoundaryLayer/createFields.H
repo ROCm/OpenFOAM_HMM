@@ -64,12 +64,12 @@ dimensionedScalar ybl("ybl", dimLength, Zero);
 if (args.found("ybl"))
 {
     // If the boundary-layer thickness is provided use it
-    ybl.value() = args.opt<scalar>("ybl");
+    ybl.value() = args.get<scalar>("ybl");
 }
 else if (args.found("Cbl"))
 {
     // Calculate boundary layer thickness as Cbl*mean distance to wall
-    ybl.value() = gAverage(y)*args.opt<scalar>("Cbl");
+    ybl.value() = gAverage(y)*args.get<scalar>("Cbl");
 }
 
 Info<< "\nCreating boundary-layer for U of thickness "

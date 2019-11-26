@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 
     bool useBSpline = args.found("B");
     bool useCatmullRom = args.found("CMR");
-    const label nSeg = args.opt<label>("n", 20);
+    const label nSeg = args.get<label>("n", 20);
 
     if (!useCatmullRom && !useBSpline)
     {

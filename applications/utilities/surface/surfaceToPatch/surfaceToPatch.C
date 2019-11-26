@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
             << " triangle ..." << endl;
     }
 
-    const scalar searchTol = args.opt<scalar>("tol", 1e-3);
+    const scalar searchTol = args.get<scalar>("tol", 1e-3);
 
     // Get search box. Anything not within this box will not be considered.
     const boundBox& meshBb = mesh.bounds();

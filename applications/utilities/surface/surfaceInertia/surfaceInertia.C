@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     argList args(argc, argv);
 
     const fileName surfFileName = args[1];
-    const scalar density = args.opt<scalar>("density", 1);
+    const scalar density = args.get<scalar>("density", 1);
 
     vector refPt = Zero;
     bool calcAroundRefPt = args.readIfPresent("referencePoint", refPt);

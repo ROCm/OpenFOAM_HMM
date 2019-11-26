@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv, false, true);
 
-    const scalar currTime = args.opt<scalar>("time", GREAT);
+    const scalar currTime = args.get<scalar>("time", GREAT);
 
     Info<< "Using currTime = " << currTime << nl
         << "when loading " << (args.size()-1) << " files" << nl << nl;
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
     {
         vtk::seriesWriter writer;
 
-        writer.scan(args.opt<fileName>("scan"));
+        writer.scan(args.get<fileName>("scan"));
 
         Info<< "scanned for files" << nl;
         writer.print(Info);

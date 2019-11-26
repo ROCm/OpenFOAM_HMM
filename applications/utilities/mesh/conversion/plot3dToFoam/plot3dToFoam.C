@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
          FatalError.exit();
     }
 
-    const scalar scaleFactor = args.opt<scalar>("scale", 1);
+    const scalar scaleFactor = args.get<scalar>("scale", 1);
 
     const bool readBlank = !args.found("noBlank");
     const bool singleBlock = args.found("singleBlock");

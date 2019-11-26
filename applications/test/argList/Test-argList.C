@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -126,7 +126,8 @@ int main(int argc, char *argv[])
     Info<< nl;
     if (args.found("label"))
     {
-        Info<< "-label = " << args.opt<label>("label")
+        Info<< "-label = " << args.get<label>("label")
+            << " or " << args.opt<label>("label")
             #ifdef Foam_argList_1712
             << " or " << args.optionRead<label>("label")  // old-compat
             #endif
@@ -136,7 +137,8 @@ int main(int argc, char *argv[])
 
     if (args.found("scalar"))
     {
-        Info<< "-scalar = " << args.opt<scalar>("scalar")
+        Info<< "-scalar = " << args.get<scalar>("scalar")
+            << " or " << args.opt<scalar>("label")
             #ifdef Foam_argList_1712
             << " or " << args.optionRead<scalar>("scalar") // old-compat
             #endif
@@ -146,7 +148,8 @@ int main(int argc, char *argv[])
 
     if (args.found("string"))
     {
-        Info<< "-string = " << args.opt("string")
+        Info<< "-string = " << args.get("string")
+            << " or " << args.opt("string")
             #ifdef Foam_argList_1712
             << " or " << args.optionRead<scalar>("string")  // old-compat
             #endif

@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    const scalar scaleFactor = args.opt<scalar>("scale", -1);
+    const scalar scaleFactor = args.get<scalar>("scale", -1);
 
     Info<< "Reading : " << importName << endl;
     triSurface surf(importName, scaleFactor);

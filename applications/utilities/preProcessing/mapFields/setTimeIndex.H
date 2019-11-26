@@ -11,7 +11,7 @@
             sourceTimeIndex = Time::findClosestTimeIndex
             (
                 sourceTimes,
-                args.opt<scalar>("sourceTime")
+                args.get<scalar>("sourceTime")
             );
         }
     }

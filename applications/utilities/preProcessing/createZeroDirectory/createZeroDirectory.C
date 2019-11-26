@@ -252,7 +252,7 @@ int main(int argc, char *argv[])
 
     fileName baseDir
     (
-        args.opt<fileName>
+        args.get<fileName>
         (
             "templateDir",
             "${WM_PROJECT_DIR}/etc/caseDicts/createZeroDirectoryTemplates"

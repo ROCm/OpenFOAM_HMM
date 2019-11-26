@@ -477,7 +477,7 @@ int main(int argc, char *argv[])
     else if (args.found("patch"))
     {
         exposedPatchIDs.first() =
-            getExposedPatchId(mesh, args.opt<word>("patch"));
+            getExposedPatchId(mesh, args.get<word>("patch"));
     }
     else
     {

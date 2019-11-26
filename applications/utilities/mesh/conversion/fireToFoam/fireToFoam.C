@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
     (
         args[1],
         // Default no scaling
-        args.opt<scalar>("scale", 1)
+        args.get<scalar>("scale", 1)
     );
 
 

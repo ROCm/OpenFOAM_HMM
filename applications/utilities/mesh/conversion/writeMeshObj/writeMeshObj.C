@@ -468,19 +468,19 @@ int main(int argc, char *argv[])
             }
             if (doCell)
             {
-                const label celli = args.opt<label>("cell");
+                const label celli = args.get<label>("cell");
 
                 writePoints(mesh, celli, runTime.timeName());
             }
             if (doPoint)
             {
-                const label pointi = args.opt<label>("point");
+                const label pointi = args.get<label>("point");
 
                 writePointCells(mesh, pointi, runTime.timeName());
             }
             if (doFace)
             {
-                const label facei = args.opt<label>("face");
+                const label facei = args.get<label>("face");
 
                 fileName fName
                 (

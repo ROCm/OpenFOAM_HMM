@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
 
     fileName exportName = args[1];
 
-    const scalar scaleFactor = args.opt<scalar>("scale", 0);
+    const scalar scaleFactor = args.get<scalar>("scale", 0);
     const bool doTriangulate = args.found("tri");
 
     fileName exportBase = exportName.lessExt();

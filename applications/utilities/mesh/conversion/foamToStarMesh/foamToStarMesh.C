@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     }
 
     // Default rescale from [m] to [mm]
-    const scalar scaleFactor = args.opt<scalar>("scale", 1000);
+    const scalar scaleFactor = args.get<scalar>("scale", 1000);
     const bool  writeBndFile = !args.found("noBnd");
 
     #include "createPolyMesh.H"

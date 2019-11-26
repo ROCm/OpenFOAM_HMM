@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
 
     if (args.found("fixed"))
     {
-        const label width = args.opt<label>("fixed");
+        const label width = args.get<label>("fixed");
 
         Info<< "split on fixed width = " << width << nl
             << "~~~~~~~~~~~~~~" << nl;

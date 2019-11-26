@@ -1952,7 +1952,7 @@ int main(int argc, char *argv[])
 
         if (insidePoint)
         {
-            const point insidePoint = args.opt<point>("insidePoint");
+            const point insidePoint = args.get<point>("insidePoint");
 
             label regionI = -1;
 

@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
     }
     if (args.found("field"))
     {
-        fields.resetFieldFilters(args.opt<wordRe>("field"));
+        fields.resetFieldFilters(args.get<wordRe>("field"));
     }
 
     // Externally stored dictionary for functionObjectList

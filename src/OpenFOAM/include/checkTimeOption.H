@@ -2,7 +2,7 @@
 
 if (args.found("time"))
 {
-    Foam::scalar timeValue = args.opt<scalar>("time");
+    Foam::scalar timeValue = args.get<scalar>("time");
 
     startTime = Foam::Time::findClosestTimeIndex(Times, timeValue);
 }

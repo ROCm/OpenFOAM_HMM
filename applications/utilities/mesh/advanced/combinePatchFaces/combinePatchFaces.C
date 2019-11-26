@@ -383,7 +383,7 @@ int main(int argc, char *argv[])
 
     // Sin of angle between two consecutive edges on a face.
     // If sin(angle) larger than this the face will be considered concave.
-    const scalar concaveAngle = args.opt<scalar>("concaveAngle", 30);
+    const scalar concaveAngle = args.get<scalar>("concaveAngle", 30);
 
     const scalar concaveSin = Foam::sin(degToRad(concaveAngle));
 

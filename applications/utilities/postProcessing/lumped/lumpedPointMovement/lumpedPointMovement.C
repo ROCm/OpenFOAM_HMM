@@ -93,10 +93,10 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
-    const label maxOut = Foam::max(0, args.opt<label>("max", 0));
-    const label span   = Foam::max(1, args.opt<label>("span", 1));
+    const label maxOut = Foam::max(0, args.get<label>("max", 0));
+    const label span   = Foam::max(1, args.get<label>("span", 1));
 
-    const scalar relax = args.opt<scalar>("scale", 1);
+    const scalar relax = args.get<scalar>("scale", 1);
 
     const bool slave = args.found("slave");
     const bool removeLock = args.found("removeLock");
