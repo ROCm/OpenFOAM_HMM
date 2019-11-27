@@ -222,44 +222,77 @@ Foam::functionEntries::codeStream::getFunction
             off_t masterSize = mySize;
             Pstream::scatter(masterSize);
 
-            DebugPout
-                << nl << "on processor " << Pstream::myProcNo()
-                << " have masterSize:" << masterSize
-                << " and localSize:" << mySize << endl;
-
-            if (mySize < masterSize)
+            for
+            (
+                label iter = 0;
+                iter < regIOobject::maxFileModificationPolls;
+                iter++
+            )
             {
                 DebugPout
-                    << "Local file " << libPath
-                    << " not of same size (" << mySize
-                    << ") as master ("
-                    << masterSize << "). Waiting for "
-                    << regIOobject::fileModificationSkew
-                    << " seconds." << endl;
+                    << "on processor " << Pstream::myProcNo()
+                    << "masterSize:" << masterSize
+                    << " and localSize:" << mySize
+                    << endl;
 
-                Foam::sleep(regIOobject::fileModificationSkew);
-
-                // Recheck local size
-                mySize = Foam::fileSize(libPath);
-
-                if (mySize < masterSize)
+                if (mySize == masterSize)
                 {
-                    FatalIOErrorInFunction(parentDict)
-                        << "Cannot read (NFS mounted) library " << nl
-                        << libPath << nl
+                    break;
+                }
+                else if (mySize > masterSize)
+                {
+                    FatalIOErrorInFunction(context.dict())
+                        << "Excessive size when reading (NFS mounted) library "
+                        << nl << libPath << nl
                         << "on processor " << Pstream::myProcNo()
                         << " detected size " << mySize
                         << " whereas master size is " << masterSize
                         << " bytes." << nl
-                        << "If your case is not NFS mounted"
+                        << "If your case is NFS mounted increase"
+                        << " fileModificationSkew or maxFileModificationPolls;"
+                        << nl << "If your case is not NFS mounted"
                         << " (so distributed) set fileModificationSkew"
                         << " to 0"
                         << exit(FatalIOError);
                 }
+                else
+                {
+                    DebugPout
+                        << "Local file " << libPath
+                        << " not of same size (" << mySize
+                        << ") as master ("
+                        << masterSize << "). Waiting for "
+                        << regIOobject::fileModificationSkew
+                        << " seconds." << endl;
+
+                    Foam::sleep(regIOobject::fileModificationSkew);
+
+                    // Recheck local size
+                    mySize = Foam::fileSize(libPath);
+                }
+            }
+
+
+            // Finished doing iterations. Do final check
+            if (mySize != masterSize)
+            {
+                FatalIOErrorInFunction(context.dict())
+                    << "Cannot read (NFS mounted) library " << nl
+                    << libPath << nl
+                    << "on processor " << Pstream::myProcNo()
+                    << " detected size " << mySize
+                    << " whereas master size is " << masterSize
+                    << " bytes." << nl
+                    << "If your case is NFS mounted increase"
+                    << " fileModificationSkew or maxFileModificationPolls;"
+                    << nl << "If your case is not NFS mounted"
+                    << " (so distributed) set fileModificationSkew"
+                    << " to 0"
+                    << exit(FatalIOError);
             }
 
             DebugPout
-                << nl << "on processor " << Pstream::myProcNo()
+                << "on processor " << Pstream::myProcNo()
                 << " after waiting: have masterSize:" << masterSize
                 << " and localSize:" << mySize << endl;
         }

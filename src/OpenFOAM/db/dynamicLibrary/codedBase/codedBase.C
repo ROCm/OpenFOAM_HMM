@@ -250,54 +250,79 @@ void Foam::codedBase::createLibrary
         off_t masterSize = mySize;
         Pstream::scatter(masterSize);
 
-        if (debug)
+        for
+        (
+            label iter = 0;
+            iter < regIOobject::maxFileModificationPolls;
+            iter++
+        )
         {
-            Pout<< endl<< "on processor " << Pstream::myProcNo()
+            DebugPout
+                << "on processor " << Pstream::myProcNo()
                 << " have masterSize:" << masterSize
                 << " and localSize:" << mySize
                 << endl;
-        }
 
-
-        if (mySize < masterSize)
-        {
-            if (debug)
+            if (mySize == masterSize)
             {
-                Pout<< "Local file " << libPath
+                break;
+            }
+            else if (mySize > masterSize)
+            {
+                FatalIOErrorInFunction(context.dict())
+                    << "Excessive size when reading (NFS mounted) library "
+                    << nl << libPath << nl
+                    << "on processor " << Pstream::myProcNo()
+                    << " detected size " << mySize
+                    << " whereas master size is " << masterSize
+                    << " bytes." << nl
+                    << "If your case is NFS mounted increase"
+                    << " fileModificationSkew or maxFileModificationPolls;"
+                    << nl << "If your case is not NFS mounted"
+                    << " (so distributed) set fileModificationSkew"
+                    << " to 0"
+                    << exit(FatalIOError);
+            }
+            else
+            {
+                DebugPout
+                    << "Local file " << libPath
                     << " not of same size (" << mySize
                     << ") as master ("
                     << masterSize << "). Waiting for "
                     << regIOobject::fileModificationSkew
                     << " seconds." << endl;
-            }
-            Foam::sleep(regIOobject::fileModificationSkew);
 
-            // Recheck local size
-            mySize = Foam::fileSize(libPath);
+                Foam::sleep(regIOobject::fileModificationSkew);
 
-            if (mySize < masterSize)
-            {
-                FatalIOErrorInFunction(context.dict())
-                    << "Cannot read (NFS mounted) library " << nl
-                    << libPath << nl
-                    << "on processor " << Pstream::myProcNo()
-                    << " detected size " << mySize
-                    << " whereas master size is " << masterSize
-                    << " bytes." << nl
-                    << "If your case is not NFS mounted"
-                    << " (so distributed) set fileModificationSkew"
-                    << " to 0"
-                    << exit(FatalIOError);
+                // Recheck local size
+                mySize = Foam::fileSize(libPath);
             }
         }
 
-        if (debug)
+
+        // Finished doing iterations. Do final check
+        if (mySize != masterSize)
         {
-            Pout<< endl<< "on processor " << Pstream::myProcNo()
-                << " after waiting: have masterSize:" << masterSize
-                << " and localSize:" << mySize
-                << endl;
+            FatalIOErrorInFunction(context.dict())
+                << "Cannot read (NFS mounted) library " << nl
+                << libPath << nl
+                << "on processor " << Pstream::myProcNo()
+                << " detected size " << mySize
+                << " whereas master size is " << masterSize
+                << " bytes." << nl
+                << "If your case is NFS mounted increase"
+                << " fileModificationSkew or maxFileModificationPolls;"
+                << nl << "If your case is not NFS mounted"
+                << " (so distributed) set fileModificationSkew"
+                << " to 0"
+                << exit(FatalIOError);
         }
+
+        DebugPout
+            << "on processor " << Pstream::myProcNo()
+            << " after waiting: have masterSize:" << masterSize
+            << " and localSize:" << mySize << endl;
     }
     reduce(create, orOp<bool>());
 }

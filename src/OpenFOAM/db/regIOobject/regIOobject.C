@@ -50,6 +50,17 @@ registerOptSwitch
     Foam::regIOobject::fileModificationSkew
 );
 
+int Foam::regIOobject::maxFileModificationPolls
+(
+    Foam::debug::optimisationSwitch("maxFileModificationPolls", 1)
+);
+registerOptSwitch
+(
+    "maxFileModificationPolls",
+    int,
+    Foam::regIOobject::maxFileModificationPolls
+);
+
 
 bool Foam::regIOobject::masterOnlyReading = false;
 

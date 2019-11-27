@@ -82,6 +82,10 @@ OptimisationSwitches
     // updated. Set to 0 on distributed case.
     fileModificationSkew 10;
 
+    // How often retest (using above fileModificationSkew) before giving up.
+    // Default is 1.
+    //maxFileModificationPolls 100;
+
     //- Modification checking:
     //  - timeStamp         : use modification time on file
     //  - inotify           : use inotify framework

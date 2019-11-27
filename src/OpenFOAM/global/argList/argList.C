@@ -1501,8 +1501,27 @@ void Foam::argList::parse
                 )
             )
             {
-                Info<< " (fileModificationSkew "
-                    << regIOobject::fileModificationSkew << ")";
+                if (regIOobject::maxFileModificationPolls == 1)
+                {
+                    Info<< " (fileModificationSkew "
+                        << regIOobject::fileModificationSkew
+                        << ")";
+                }
+                else if (regIOobject::maxFileModificationPolls > 1)
+                {
+                    Info<< " (fileModificationSkew "
+                        << regIOobject::fileModificationSkew
+                        << ", maxFileModificationPolls "
+                        << regIOobject::maxFileModificationPolls
+                        << ")";
+                }
+                else
+                {
+                    FatalErrorInFunction
+                        << "Invalid setting for maxFileModificationPolls "
+                        << regIOobject::maxFileModificationPolls
+                        << exit(FatalError);
+                }
             }
             Info<< nl;
 
