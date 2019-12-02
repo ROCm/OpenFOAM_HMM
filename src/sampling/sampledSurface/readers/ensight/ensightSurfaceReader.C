@@ -37,6 +37,29 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Read and discard specified number of elements
+template<class Type>
+static inline void discard(label n, ensightReadFile& is)
+{
+    Type val;
+
+    while (n > 0)
+    {
+        is.read(val);
+        --n;
+    }
+}
+
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
 void Foam::ensightSurfaceReader::skip(const label n, Istream& is) const
 {
     label i = 0;
@@ -53,20 +76,28 @@ void Foam::ensightSurfaceReader::skip(const label n, Istream& is) const
     if (i != n)
     {
         WarningInFunction
-            << "Requested to skip " << n << "tokens, but stream exited after "
+            << "Requested to skip " << n << " tokens, but stream exited after "
             << i << " tokens. Last token read: " << tok
             << nl;
     }
 }
 
 
-void Foam::ensightSurfaceReader::readLine(IFstream& is, string& buffer) const
+void Foam::ensightSurfaceReader::readLine(IFstream& is, string& line) const
 {
-    buffer.clear();
-    while (is.good() && buffer.empty())
+    do
     {
-        is.getLine(buffer);
+        is.getLine(line);
+
+        // Trim out any '#' comments
+        const auto pos = line.find('#');
+        if (pos != std::string::npos)
+        {
+            line.erase(pos);
+        }
+        stringOps::inplaceTrimRight(line);
     }
+    while (line.empty() && is.good());
 }
 
 
@@ -83,7 +114,7 @@ void Foam::ensightSurfaceReader::debugSection
     {
         FatalIOErrorInFunction(is)
             << "Expected section header '" << expected
-            << "' but read the word '" << actual << "'"
+            << "' but read " << actual << nl
             << exit(FatalIOError);
     }
 
@@ -92,12 +123,15 @@ void Foam::ensightSurfaceReader::debugSection
 }
 
 
-void Foam::ensightSurfaceReader::readGeometryHeader(ensightReadFile& is) const
+Foam::Pair<Foam::ensightSurfaceReader::idTypes>
+Foam::ensightSurfaceReader::readGeometryHeader(ensightReadFile& is) const
 {
     // Binary flag string if applicable
     is.readBinaryHeader();
 
     string buffer;
+
+    Pair<idTypes> idHandling(idTypes::NONE, idTypes::NONE);
 
     // Ensight Geometry File
     is.read(buffer);
@@ -107,30 +141,63 @@ void Foam::ensightSurfaceReader::readGeometryHeader(ensightReadFile& is) const
     is.read(buffer);
     DebugInfo<< "buffer [" << buffer.length() << "] " << buffer << nl;
 
-    // Node info
+    // "node id (off|assign|given|ignore)" - "given" is not actually supported
     is.read(buffer);
     DebugInfo<< "buffer [" << buffer.length() << "] " << buffer << nl;
 
-    // Element info
+    if (buffer.find("ignore") != std::string::npos)
+    {
+        idHandling.first() = idTypes::IGNORE;
+    }
+    else if (buffer.find("given") != std::string::npos)
+    {
+        idHandling.first() = idTypes::GIVEN;
+    }
+
+    // "element id (off|assign|given|ignore)"
     is.read(buffer);
     DebugInfo<< "buffer [" << buffer.length() << "] " << buffer << nl;
 
-    // Part
+    if (buffer.find("ignore") != std::string::npos)
+    {
+        idHandling.second() = idTypes::IGNORE;
+    }
+    else if (buffer.find("given") != std::string::npos)
+    {
+        idHandling.second() = idTypes::GIVEN;
+    }
+
+
+    // "part" - but could also be an optional "extents"
     is.read(buffer);
     DebugInfo<< "buffer [" << buffer.length() << "] " << buffer << nl;
 
-    // Part number
-    label ibuffer;
-    is.read(ibuffer);
-    DebugInfo<< "ibuffer: " << ibuffer << nl;
+    if (buffer.find("extents") != std::string::npos)
+    {
+        // Optional extents - read and discard 6 floats
+        // (xmin, xmax, ymin, ymax, zmin, zmax)
 
-    // Description - 2
+        discard<scalar>(6, is);
+
+        // Part
+        is.read(buffer);
+        DebugInfo<< "buffer [" << buffer.length() << "] " << buffer << nl;
+    }
+
+    // The part number
+    label ivalue;
+    is.read(ivalue);
+    DebugInfo<< "ivalue: " << ivalue << nl;
+
+    // Part description / name
     is.read(buffer);
     DebugInfo<< "buffer [" << buffer.length() << "] " << buffer << nl;
 
-    // Coordinates
+    // "coordinates"
     is.read(buffer);
     DebugInfo<< "buffer [" << buffer.length() << "] " << buffer << nl;
+
+    return idHandling;
 }
 
 
@@ -166,8 +233,8 @@ void Foam::ensightSurfaceReader::readCase(IFstream& is)
     debugSection("VARIABLE", is);
 
     // Read the field description
-    DynamicList<word> fieldNames(10);
-    DynamicList<string> fieldFileNames(10);
+    DynamicList<word> fieldNames(16);
+    DynamicList<string> fieldFileNames(16);
 
     while (is.good())
     {
@@ -228,7 +295,7 @@ void Foam::ensightSurfaceReader::readCase(IFstream& is)
     // Read the time values
     readLine(is, buffer); // time values:
     timeValues_.setSize(nTimeSteps_);
-    for (label i = 0; i < nTimeSteps_; i++)
+    for (label i = 0; i < nTimeSteps_; ++i)
     {
         scalar t(readScalar(is));
 
@@ -329,7 +396,7 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry()
         DebugInfo
             << "File: " << is.name() << nl;
 
-        readGeometryHeader(is);
+        Pair<idTypes> idHandling = readGeometryHeader(is);
 
         label nPoints;
         is.read(nPoints);
@@ -337,17 +404,31 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry()
         DebugInfo
             << "nPoints: " << nPoints << nl;
 
-        pointField points(nPoints);
+        if (idHandling.first() == idTypes::GIVEN)
         {
-            scalarField x(nPoints);
-            for (label dir = 0; dir < 3; dir++)
-            {
-                forAll(points, pointI)
-                {
-                    is.read(x[pointI]);
-                }
+            WarningInFunction
+                << "Treating node id 'given' as being 'ignore'" << nl
+                << "If something fails, this could be the reason" << nl
+                << endl;
 
-                points.replace(dir, x);
+            idHandling.first() = idTypes::IGNORE;
+        }
+
+        if (idHandling.first() == idTypes::IGNORE)
+        {
+            DebugInfo
+                << "Ignore " << nPoints << " node ids" << nl;
+
+            // Read and discard labels
+            discard<label>(nPoints, is);
+        }
+
+        pointField points(nPoints);
+        for (direction cmpt = 0; cmpt < vector::nComponents; ++cmpt)
+        {
+            for (point& pt : points)
+            {
+                is.read(pt[cmpt]);
             }
         }
 
@@ -375,6 +456,19 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry()
                     << "faceType <" << faceType.c_str() << "> count: "
                     << nFace << nl;
 
+                if
+                (
+                    idHandling.second() == idTypes::IGNORE
+                 || idHandling.second() == idTypes::GIVEN
+                )
+                {
+                    DebugInfo
+                        << "Ignore " << nFace << " element ids" << nl;
+
+                    // Read and discard labels
+                    discard<label>(nFace, is);
+                }
+
                 face f(3);
                 for (label facei = 0; facei < nFace; ++facei)
                 {
@@ -394,6 +488,19 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry()
                     << "faceType <" << faceType.c_str() << "> count: "
                     << nFace << nl;
 
+                if
+                (
+                    idHandling.second() == idTypes::IGNORE
+                 || idHandling.second() == idTypes::GIVEN
+                )
+                {
+                    DebugInfo
+                        << "Ignore " << nFace << " element ids" << nl;
+
+                    // Read and discard labels
+                    discard<label>(nFace, is);
+                }
+
                 face f(4);
                 for (label facei = 0; facei < nFace; ++facei)
                 {
@@ -412,6 +519,19 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry()
                 DebugInfo
                     << "faceType <" << faceType.c_str() << "> count: "
                     << nFace << nl;
+
+                if
+                (
+                    idHandling.second() == idTypes::IGNORE
+                 || idHandling.second() == idTypes::GIVEN
+                )
+                {
+                    DebugInfo
+                        << "Ignore " << nFace << " element ids" << nl;
+
+                    // Read and discard labels
+                    discard<label>(nFace, is);
+                }
 
                 labelList np(nFace);
                 for (label facei = 0; facei < nFace; ++facei)
