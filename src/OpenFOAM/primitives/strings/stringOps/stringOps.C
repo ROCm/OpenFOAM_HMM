@@ -1108,8 +1108,26 @@ void Foam::stringOps::inplaceRemoveComments(std::string& s)
 
             if (c == '/')
             {
-                // C++ comment - search for end-of-line
+                // C++ comment - remove to end-of-line
+
                 --n;
+                s[n] = '\n';
+
+                // Backtrack to eliminate leading spaces,
+                // up to the previous newline
+
+                while (n && std::isspace(s[n-1]))
+                {
+                    --n;
+
+                    if (s[n] == '\n')
+                    {
+                        break;
+                    }
+
+                    s[n] = '\n';
+                }
+
                 i = s.find('\n', ++i);
 
                 if (i == std::string::npos)
@@ -1117,6 +1135,8 @@ void Foam::stringOps::inplaceRemoveComments(std::string& s)
                     // Trucated - done
                     break;
                 }
+
+                ++n;  // Include newline in output
             }
             else if (c == '*')
             {
@@ -1130,7 +1150,7 @@ void Foam::stringOps::inplaceRemoveComments(std::string& s)
                     break;
                 }
 
-                ++i;
+                ++i;  // Index past first of "*/", loop increment does the rest
             }
             else
             {
@@ -1144,7 +1164,7 @@ void Foam::stringOps::inplaceRemoveComments(std::string& s)
         }
     }
 
-    s.resize(n);
+    s.erase(n);
 }
 
 
