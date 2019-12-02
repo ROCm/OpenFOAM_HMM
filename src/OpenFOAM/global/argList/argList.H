@@ -427,6 +427,21 @@ public:
         inline bool readListIfPresent(const word& optName, List<T>& list) const;
 
 
+        //- Alternative name for option opt(const word& optName)
+        template<class T=string>
+        T get(const word& optName) const
+        {
+            return this->opt<T>(optName);
+        }
+
+        //- Alternative name for option opt(const word& optName, ...)
+        template<class T>
+        T get(const word& optName, const T& deflt) const
+        {
+            return this->opt<T>(optName, deflt);
+        }
+
+
     // Edit
 
         //- Append a (mandatory) argument to validArgs
