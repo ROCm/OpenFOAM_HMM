@@ -28,7 +28,7 @@ Class
     Foam::exprMixedFvPatchField
 
 Description
-    Foam::exprMixedFvPatchField
+    A mixed boundary condition with expressions.
 
 Usage
     \table

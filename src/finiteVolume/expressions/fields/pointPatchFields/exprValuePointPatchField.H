@@ -28,7 +28,7 @@ Class
     Foam::exprValuePointPatchField
 
 Description
-    A fixed value boundary condition with expressions.
+    A fixed value point boundary condition with expressions.
 
 Usage
     \table
