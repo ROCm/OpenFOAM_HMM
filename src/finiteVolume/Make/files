@@ -250,6 +250,15 @@ $(constraintFvsPatchFields)/wedge/wedgeFvsPatchFields.C
 fields/volFields/volFields.C
 fields/surfaceFields/surfaceFields.C
 
+expr = expressions
+$(expr)/base/exprDriverWriter.C
+
+$(expr)/base/fvExprDriver.C
+$(expr)/base/fvExprDriverFields.C
+$(expr)/base/fvExprDriverIO.C
+$(expr)/base/fvExprDriverNew.C
+
+
 fvMatrices/fvMatrices.C
 fvMatrices/fvScalarMatrix/fvScalarMatrix.C
 fvMatrices/solvers/MULES/MULES.C
