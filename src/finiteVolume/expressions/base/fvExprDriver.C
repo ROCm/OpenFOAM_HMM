@@ -96,7 +96,7 @@ Foam::expressions::fvExprDriver::fvExprDriver
 (
     bool cacheReadFields,
     bool searchInMemory,
-    bool searchOnDisc,
+    bool searchFiles,
     const dictionary& dict
 )
 :
@@ -104,7 +104,7 @@ Foam::expressions::fvExprDriver::fvExprDriver
     (
         cacheReadFields,
         searchInMemory,
-        searchOnDisc,
+        searchFiles,
         dict
     ),
     globalScopes_(),
@@ -142,7 +142,7 @@ Foam::expressions::fvExprDriver::fvExprDriver
     (
         dict.lookupOrDefault("cacheReadFields", false),
         dict.lookupOrDefault("searchInMemory", true),
-        dict.lookupOrDefault("searchOnDisc", false),
+        dict.lookupOrDefault("searchFiles", false),
         dict
     )
 {
@@ -603,7 +603,7 @@ Foam::word Foam::expressions::fvExprDriver::getFieldClassName
         }
     }
 
-    if (searchOnDisc())
+    if (searchFiles())
     {
         return getHeaderClassName(this->mesh(), name);
     }

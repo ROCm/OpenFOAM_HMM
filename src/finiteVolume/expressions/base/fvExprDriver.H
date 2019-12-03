@@ -382,7 +382,7 @@ public:
         (
             bool cacheReadFields = false,
             bool searchInMemory = true,
-            bool searchOnDisc = false,
+            bool searchFiles = false,
             const dictionary& dict = dictionary::null
         );
 

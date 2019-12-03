@@ -265,6 +265,13 @@ $(patchExpr)/patchExprDriverFields.C
 $(patchExpr)/patchExprLemonParser.lyy-m4
 $(patchExpr)/patchExprScanner.cc
 
+volumeExpr = $(expr)/volume
+$(volumeExpr)/volumeExpr.C
+$(volumeExpr)/volumeExprDriver.C
+$(volumeExpr)/volumeExprDriverFields.C
+$(volumeExpr)/volumeExprLemonParser.lyy-m4
+$(volumeExpr)/volumeExprScanner.cc
+
 
 fvMatrices/fvMatrices.C
 fvMatrices/fvScalarMatrix/fvScalarMatrix.C

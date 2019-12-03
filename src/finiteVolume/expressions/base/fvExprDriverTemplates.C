@@ -140,8 +140,8 @@ bool Foam::expressions::fvExprDriver::foundField
     {
         Info<< "fvExprDriver::foundField. Name: " << name
             << " Type: " << Type::typeName
-            << " search memory:" << searchInMemory()
-            << " disc:" << searchOnDisc() << endl;
+            << " registry:" << searchInMemory()
+            << " disk:" << searchFiles() << endl;
     }
 
     // if (std::is_void<Type>::value) ...
@@ -155,30 +155,29 @@ bool Foam::expressions::fvExprDriver::foundField
         {
             if (debug)
             {
-                Info<< "Found " << name << " in memory" << endl;
+                Info<< "Found registered: " << name << endl;
             }
             return true;
         }
 
         if (debug)
         {
-            Info<< "No " << name << " of type " << Type::typeName
-                << " found in memory";
+            Info<< "Registered " << name;
 
             if (ioptr)
             {
-                Info<< " but of type " << ioptr->headerClassName();
+                Info<< " type:" << ioptr->headerClassName();
             }
-            Info<< endl;
+            Info<< ", not type:" << Type::typeName << nl;
         }
     }
 
 
-    if (searchOnDisc() && getTypeOfField(name) == Type::typeName)
+    if (searchFiles() && getTypeOfField(name) == Type::typeName)
     {
         if (debug)
         {
-            Info<< "Found " << name << " on disc" << endl;
+            Info<< "Found file: " << name << nl;
         }
         return true;
     }
@@ -326,7 +325,7 @@ Foam::tmp<GeomField> Foam::expressions::fvExprDriver::getOrReadFieldImpl
     {
         if (debug)
         {
-            Info<< "Getting " << name << " from memory" << endl;
+            Info<< "Retrieve registered: " << name << nl;
         }
 
         const GeomField& origFld = obr.lookupObject<GeomField>(name);
@@ -356,7 +355,7 @@ Foam::tmp<GeomField> Foam::expressions::fvExprDriver::getOrReadFieldImpl
             }
         }
     }
-    else if (searchOnDisc() && getTypeOfField(name) == GeomField::typeName)
+    else if (searchFiles() && getTypeOfField(name) == GeomField::typeName)
     {
         if (debug)
         {
@@ -415,7 +414,7 @@ Foam::tmp<GeomField> Foam::expressions::fvExprDriver::getOrReadFieldImpl
     {
         FatalErrorInFunction
             << "Could not find field " << name
-            << " in memory or on disc" << endl
+            << " in registry or on file-system" << nl
             << exit(FatalError);
     }
 
