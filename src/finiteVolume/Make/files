@@ -258,6 +258,13 @@ $(expr)/base/fvExprDriverFields.C
 $(expr)/base/fvExprDriverIO.C
 $(expr)/base/fvExprDriverNew.C
 
+patchExpr = $(expr)/patch
+$(patchExpr)/patchExpr.C
+$(patchExpr)/patchExprDriver.C
+$(patchExpr)/patchExprDriverFields.C
+$(patchExpr)/patchExprLemonParser.lyy-m4
+$(patchExpr)/patchExprScanner.cc
+
 
 fvMatrices/fvMatrices.C
 fvMatrices/fvScalarMatrix/fvScalarMatrix.C
