@@ -1,4 +1,4 @@
-SUFFIXES += .Y .y .yy
+SUFFIXES += .Y .y .yy .yy-m4
 
 ytoo = $E $(call QUIET_MESSAGE,bison,$(<F)) \
     $(WM_SCHEDULER) bison -v -d -y $< $(AND) \
@@ -14,5 +14,13 @@ Ytoo = $E $(call QUIET_MESSAGE,bison,$(<F)) \
 
 yytoo = $E $(call QUIET_MESSAGE,bison,$(<F)) \
     $(WM_SCHEDULER) $(WM_SCRIPTS)/wrap-bison \
-    -input=$< -output=$(@D)/$(*F).tab.cc -v -d $(AND) \
+    -output=$(@D)/$(*F).tab.cc -v -d $< $(AND) \
     $(CC) $(c++FLAGS) -c $(@D)/$(*F).tab.cc -o $@
+
+# Retains intermediate m4-filtered files (-no-tmp to suppress)
+yy-m4too = $E $(call QUIET_MESSAGE,bison-m4,$(<F)) \
+    $(WM_SCHEDULER) $(WM_SCRIPTS)/wrap-bison \
+    -output=$(@D)/$(*F).tab.cc -v -d $< $(AND) \
+    $(CC) $(c++FLAGS) -c $(@D)/$(*F).tab.cc -o $@
+
+#------------------------------------------------------------------------------

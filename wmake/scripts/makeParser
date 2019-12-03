@@ -28,11 +28,10 @@ options:
   -prefix=NAME      Common prefix for parser and scanner
   -parser=FILE      Generate lemon parser header
   -scanner=FILE     Generate ragel scanner code
-  -parser           Use 'LemonParser.lyy' for non-prefixed parser name
-  -parser-m4        Use 'LemonParser.lyy-m4' for non-prefixed parser name
-  -scanner          Use 'Scanner.rl' for non-prefixed scanner name
-  -code             Generate lemon parser code
-  -with-debug       Retain intermediate files (eg, m4 output)
+  -code             Generate parser code, not header
+  -header           Generate parser header, not code (default)
+  -dry-run          Process m4 only (output on stdout)
+  -no-tmp           Do not retain temporary m4 processed files
   -remove           Remove generated code
   -h, -help         Print the usage
 
@@ -46,7 +45,7 @@ USAGE
 # Parse arguments and options
 #------------------------------------------------------------------------------
 
-unset prefix parser scanner optCode optDebug optRemove
+unset prefix parser scanner optHeader optDryRun optRemoveFile optRemoveTmp
 while [ "$#" -gt 0 ]
 do
     case "$1" in
@@ -56,12 +55,11 @@ do
     (-parser=*)   parser="${1#*=}" ;;
     (-scanner=*)  scanner="${1#*=}" ;;
 
-    (-parser)     parser=LemonParser.lyy ;;
-    (-parser-m4)  parser=LemonParser.lyy-m4 ;;
-    (-scanner)    scanner=Scanner.rl ;;
-    (-code)       optCode=true ;;
-    (-with-debug) optDebug=true ;;
-    (-remove)     optRemove=true ;;
+    (-code)       optHeader=false ;;
+    (-head*)      optHeader=true ;;
+    (-dry-run)    optDryRun="-dry-run" ;;   # Pass verbatim to wrapper
+    (-no-tmp)     optRemoveTmp="-no-tmp" ;; # Pass verbatim to wrapper
+    (-remove)     optRemoveFile=true ;;
 
     (*) break ;;
     esac
@@ -72,11 +70,11 @@ done
 
 # Remove file, with feedback. $1 = file, $2 = message
 removeFile() {
-   if test -f "$1" && rm -f "$1" 2>/dev/null
+   if test -f "$1" && rm -f "$1"
    then
-       echo "Removed generated $2 file"
+       echo "Removed generated $2 file" 1>&2
    else
-       echo "No generated $2 file to remove"
+       echo "No generated $2 file to remove" 1>&2
    fi
 }
 
@@ -86,44 +84,100 @@ case "$scanner" in
     input="${prefix}${scanner}"
     output="${prefix}${scanner%.*}.cc"
 
-    if [ "$optRemove" = true ]
+    if [ "$optRemoveFile" = true ]
     then
         removeFile "$output"  "ragel scanner"
     elif command -v ragel >/dev/null
     then
-        echo "Generating ragel scanner"
+        echo "Generating ragel scanner" 1>&2
         ragel -G2 -o "$output" "$input"
     else
-        echo "No ragel, leaving scanner intact"
+        echo "No ragel, leaving scanner intact" 1>&2
     fi
     echo
     ;;
 esac
 
 
+# The output code extension is .c (default) or .cc, but also possibly .C
+# - mapping here consistent with wmake/rules/General/{bison,lemon}
+
+extCode=c
 case "$parser" in
-(*.ly | *.lyy | *.ly*m4)
-    extCode=cc
+    (*.Y) extCode=C ;;
+    (*.yy | *.yy-m4 | *.lyy | *.lyy-m4) extCode=cc ;;
+esac
+
+# Detect m4, any additional messages (eg, using m4 etc)
+unset usingM4 message
+case "$parser" in
+(*m4)
+    usingM4=true
+    message=", using m4 filtering"
+    ;;
+esac
+
+case "$parser" in
+(*.ly | *.lyy | *.ly-m4 | *.lyy-m4)  # Lemon
     input="${prefix}${parser}"
     output="${parser%.*}.h"
 
-    # Pass -with-debug to wrap-lemon
-    [ -n "$optDebug" ] && optDebug="-with-debug"
-
-    # Additional message (eg, using m4 etc)
-    unset message
-    case "$parser" in (*m4) message=", using m4 filtering" ;; esac
-
-    if [ "$optRemove" = true ]
+    if [ "$optRemoveFile" = true ]
     then
         removeFile "$output"  "lemon header"
-    elif [ "$optCode" = true ]
-    then
-        echo "Generating lemon parser code ($extCode)$message"
-        "${WM_PROJECT_DIR:?}/wmake/scripts/wrap-lemon" $optDebug -e"$extCode" -s "$input"
     else
-        echo "Generating lemon parser header$message"
-        "${WM_PROJECT_DIR:?}/wmake/scripts/wrap-lemon" $optDebug -header -s "$input"
+
+        # Touch parser file time when using m4.
+        # This ensures that we have a better correspondence between
+        # generated and compiled versions since changes to the m4 macros
+        # may otherwise not be noticed.
+
+        if [ "$usingM4" = true ] && [ -f "$input" ]
+        then
+            message="$message (touching input file time)"
+            touch "$input"
+        fi
+
+        if [ "$optHeader" = false ]
+        then
+            echo "Generating lemon parser code ($extCode)$message" 1>&2
+            "${WM_PROJECT_DIR:?}/wmake/scripts/wrap-lemon" \
+                $optDryRun $optRemoveTmp -e"$extCode" -p -s "$input"
+        else
+            echo "Generating lemon parser header$message" 1>&2
+            "${WM_PROJECT_DIR:?}/wmake/scripts/wrap-lemon" \
+                $optDryRun $optRemoveTmp -header -p -s "$input"
+        fi
+    fi
+    echo
+    ;;
+
+(*.[Yy] | *.yy | *.y-m4 | *.yy-m4)  # Bison
+    input="${prefix}${parser}"
+
+    if [ "$optRemoveFile" = true ]
+    then
+        echo "File removal not yet supported for bison" 1>&2
+    else
+        # Touch parser file time when using m4.
+        # This ensures that we have a better correspondence between
+        # generated and compiled versions since changes to the m4 macros
+        # may otherwise not be noticed.
+
+        if [ "$usingM4" = true ] && [ -f "$input" ]
+        then
+            message="$message (touching input file time)"
+            touch "$input"
+        fi
+
+        if [ -n "$optDryRun" ]
+        then
+            echo "Generating bison parser code ($extCode)$message" 1>&2
+            "${WM_PROJECT_DIR:?}/wmake/scripts/wrap-bison" \
+                $optDryRun $optRemoveTmp "$input"
+        else
+            echo "Currently only -dry-run is supported for bison" 1>&2
+        fi
     fi
     echo
     ;;
