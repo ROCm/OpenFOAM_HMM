@@ -154,6 +154,11 @@ $(expr)/exprResult/exprResultStoredStack.C
 $(expr)/exprString/exprString.C
 $(expr)/exprTools/exprTools.C
 
+$(expr)/exprDriver/exprDriver.C
+$(expr)/exprDriver/exprDriverFields.C
+$(expr)/exprDriver/exprDriverIO.C
+
+
 ops = primitives/ops
 $(ops)/flipOp.C
 
