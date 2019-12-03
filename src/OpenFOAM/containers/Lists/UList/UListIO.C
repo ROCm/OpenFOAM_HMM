@@ -42,7 +42,7 @@ void Foam::UList<T>::writeEntry(Ostream& os) const
         const word tag = "List<" + word(pTraits<T>::typeName) + '>';
         if (token::compound::isCompound(tag))
         {
-            os  << tag << ' ';
+            os  << tag << token::SPACE;
         }
         os << *this;
     }
@@ -64,7 +64,10 @@ void Foam::UList<T>::writeEntry(Ostream& os) const
 template<class T>
 void Foam::UList<T>::writeEntry(const word& keyword, Ostream& os) const
 {
-    os.writeKeyword(keyword);
+    if (keyword.size())
+    {
+        os.writeKeyword(keyword);
+    }
     writeEntry(os);
     os << token::END_STATEMENT << endl;
 }

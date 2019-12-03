@@ -266,7 +266,10 @@ void Foam::PackedList<Width>::writeEntry
     Ostream& os
 ) const
 {
-    os.writeKeyword(keyword);
+    if (keyword.size())
+    {
+        os.writeKeyword(keyword);
+    }
     writeEntry(os);
     os  << token::END_STATEMENT << endl;
 }

@@ -630,18 +630,21 @@ Foam::tmp<Foam::Field<Type>> Foam::Field<Type>::T() const
 template<class Type>
 void Foam::Field<Type>::writeEntry(const word& keyword, Ostream& os) const
 {
-    os.writeKeyword(keyword);
+    if (keyword.size())
+    {
+        os.writeKeyword(keyword);
+    }
 
     // The contents are 'uniform' if the list is non-empty
     // and all entries have identical values.
 
     if (is_contiguous<Type>::value && List<Type>::uniform())
     {
-        os << "uniform " << this->first();
+        os << word("uniform") << token::SPACE << this->first();
     }
     else
     {
-        os << "nonuniform ";
+        os << word("nonuniform") << token::SPACE;
         List<Type>::writeEntry(os);
     }
 
