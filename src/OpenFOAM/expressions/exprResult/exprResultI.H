@@ -546,12 +546,16 @@ bool Foam::expressions::exprResult::writeEntryChecked
         {
             const Type& val = single_.get<Type>();
 
-            os  << "uniform " << val
+            if (keyword.size())
+            {
+                os.writeKeyword(keyword);
+            }
+            os  << word("uniform") << token::SPACE << val
                 << token::END_STATEMENT << nl;
         }
         else
         {
-            // Zero-sized
+            // Zero-sized - written as nonuniform
             const Field<Type> fld;
             fld.writeEntry(keyword, os);
         }
@@ -562,7 +566,11 @@ bool Foam::expressions::exprResult::writeEntryChecked
 
         if (isUniform_ && is_contiguous<Type>::value)
         {
-            os  << "uniform " << fld.first()
+            if (keyword.size())
+            {
+                os.writeKeyword(keyword);
+            }
+            os  << word("uniform") << token::SPACE << fld.first()
                 << token::END_STATEMENT << nl;
         }
         else
