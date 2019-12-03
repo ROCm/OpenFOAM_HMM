@@ -98,6 +98,8 @@ wmake $targetType waveModels
 wmake $targetType engine
 
 conversion/Allwmake $targetType $*
+
+phaseSystemModels/Allwmake $targetType $*
 functionObjects/Allwmake $targetType $*
 
 wmake $targetType lumpedPointMotion
@@ -109,7 +111,10 @@ wmake $targetType semiPermeableBaffle
 wmake $targetType atmosphericModels
 wmake $targetType optimisation/adjointOptimisation/adjoint
 
-phaseSystemModels/Allwmake $targetType $*
+
+# interfaceTracking libs
+wmake dynamicFvMesh/interfaceTrackingFvMesh
+
 
 # Needs access to Turbulence
 

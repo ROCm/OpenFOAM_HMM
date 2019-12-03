@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,22 +125,30 @@ void Foam::velocityLaplacianFvMotionSolver::solve()
 
     fv::options& fvOptions(fv::options::New(fvMesh_));
 
-    fvVectorMatrix UEqn
+    const label nNonOrthCorr
     (
-        fvm::laplacian
-        (
-            dimensionedScalar("viscosity", dimViscosity, 1.0)
-           *diffusivityPtr_->operator()(),
-            cellMotionU_,
-            "laplacian(diffusivity,cellMotionU)"
-        )
-     ==
-        fvOptions(cellMotionU_)
+        lookupOrDefault<label>("nNonOrthogonalCorrectors", 1)
     );
 
-    fvOptions.constrain(UEqn);
-    UEqn.solveSegregatedOrCoupled(UEqn.solverDict());
-    fvOptions.correct(cellMotionU_);
+    for (label i=0; i<nNonOrthCorr; ++i)
+    {
+        fvVectorMatrix UEqn
+        (
+            fvm::laplacian
+            (
+                dimensionedScalar("viscosity", dimViscosity, 1.0)
+              * diffusivityPtr_->operator()(),
+                cellMotionU_,
+                "laplacian(diffusivity,cellMotionU)"
+            )
+         ==
+            fvOptions(cellMotionU_)
+        );
+
+        fvOptions.constrain(UEqn);
+        UEqn.solveSegregatedOrCoupled(UEqn.solverDict());
+        fvOptions.correct(cellMotionU_);
+    }
 }
 
 
