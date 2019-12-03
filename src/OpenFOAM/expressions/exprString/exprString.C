@@ -35,10 +35,10 @@ Foam::expressions::exprString&
 Foam::expressions::exprString::expand
 (
     const dictionary& dict,
-    const bool removeComments
+    const bool stripComments
 )
 {
-    if (removeComments)
+    if (stripComments)
     {
         stringOps::inplaceRemoveComments(*this);
     }

@@ -141,13 +141,13 @@ public:
             const dictionary& dict
         );
 
-        //- Get and expand expression with dictionary entries
-        //  Optionally strip C/C++ comments from the input
+        //- Get and expand expression with dictionary entries,
+        //- and strip C/C++ comments from the input
         static expressions::exprString getExpression
         (
             const word& name,
             const dictionary& dict,
-            const bool removeComments = false
+            const bool stripComments = false
         );
 
 

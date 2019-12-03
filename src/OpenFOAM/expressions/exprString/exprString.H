@@ -83,31 +83,31 @@ public:
         //- Construct as copy of character array
         inline explicit exprString(const char* s, bool doValidate=true);
 
-        //- Copy construct and expand with dictionary variables
-        //  Optionally strip C/C++ comments from the input
+        //- Copy construct and expand with dictionary variables,
+        //- and strip C/C++ comments from the input
         inline exprString
         (
             const std::string& str,
             const dictionary& dict,
-            const bool removeComments = false
+            const bool stripComments = true
         );
 
-        //- Move construct and expand with dictionary variables
-        //  Optionally strip C/C++ comments from the input
+        //- Move construct and expand with dictionary variables,
+        //- and strip C/C++ comments from the input
         inline exprString
         (
             std::string&& str,
             const dictionary& dict,
-            const bool removeComments = false
+            const bool stripComments = true
         );
 
-        //- Construct from Istream and expand with dictionary variables
-        //  Optionally strip C/C++ comments from the input
+        //- Construct from Istream and expand with dictionary variables,
+        //- and strip C/C++ comments from the input
         inline exprString
         (
             Istream& is,
             const dictionary& dict,
-            const bool removeComments = false
+            const bool stripComments = true
         );
 
 
@@ -125,12 +125,12 @@ public:
         //  No expansions, know what you are doing.
         inline static exprString toExpr(std::string&& str);
 
-        //- Inplace expansion with dictionary variables
-        //  Optionally strip C/C++ comments from the input
+        //- Inplace expansion with dictionary variables,
+        //- and strip C/C++ comments from the input
         exprString& expand
         (
             const dictionary& dict,
-            const bool removeComments = false
+            const bool stripComments = true
         );
 
         //- Check for unexpanded '$' entries. Fatal if any exist.
@@ -145,13 +145,13 @@ public:
         //- Move assign
         exprString& operator=(exprString&& str) = default;
 
-        //- Copy assign from c-string (no expansions)
+        //- Copy assign from c-string. No expansions, no comment stripping
         inline exprString& operator=(const char* str);
 
-        //- Copy assign from string (no expansions)
+        //- Copy assign from string. No expansions, no comment stripping
         inline exprString& operator=(const std::string& str);
 
-        //- Move assign from string (no expansions)
+        //- Move assign from string. No expansions, no comment stripping
         inline exprString& operator=(std::string&& str);
 };
 

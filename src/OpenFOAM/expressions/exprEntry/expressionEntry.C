@@ -361,12 +361,12 @@ Foam::exprTools::expressionEntry::getExpression
 (
     const word& name,
     const dictionary& dict,
-    const bool removeComments
+    const bool stripComments
 )
 {
     string str(dict.get<string>(name));
 
-    if (removeComments)
+    if (stripComments)
     {
         stringOps::inplaceRemoveComments(str);
     }
