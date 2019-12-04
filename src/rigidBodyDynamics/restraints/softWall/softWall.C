@@ -77,7 +77,8 @@ Foam::RBD::restraints::softWall::~softWall()
 void Foam::RBD::restraints::softWall::restrain
 (
     scalarField& tau,
-    Field<spatialVector>& fx
+    Field<spatialVector>& fx,
+    const rigidBodyModelState& state
 ) const
 {
 

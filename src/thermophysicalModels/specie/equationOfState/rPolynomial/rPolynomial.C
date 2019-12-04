@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2019 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,67 +25,40 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "CrankNicolson.H"
-#include "addToRunTimeSelectionTable.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-namespace RBD
-{
-namespace rigidBodySolvers
-{
-    defineTypeNameAndDebug(CrankNicolson, 0);
-    addToRunTimeSelectionTable(rigidBodySolver, CrankNicolson, dictionary);
-}
-}
-}
-
+#include "rPolynomial.H"
+#include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::RBD::rigidBodySolvers::CrankNicolson::CrankNicolson
-(
-    rigidBodyMotion& body,
-    const dictionary& dict
-)
+template<class Specie>
+Foam::rPolynomial<Specie>::rPolynomial(const dictionary& dict)
 :
-    rigidBodySolver(body),
-    aoc_(dict.lookupOrDefault<scalar>("aoc", 0.5)),
-    voc_(dict.lookupOrDefault<scalar>("voc", 0.5))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::RBD::rigidBodySolvers::CrankNicolson::~CrankNicolson()
+    Specie(dict),
+    C_(dict.subDict("equationOfState").lookup("C"))
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::RBD::rigidBodySolvers::CrankNicolson::solve
-(
-    const scalarField& tau,
-    const Field<spatialVector>& fx
-)
+template<class Specie>
+void Foam::rPolynomial<Specie>::write(Ostream& os) const
 {
-    // Accumulate the restraint forces
-    scalarField rtau(tau);
-    Field<spatialVector> rfx(fx);
-    model_.applyRestraints(rtau, rfx, state());
+    Specie::write(os);
 
-    // Calculate the accelerations for the given state and forces
-    model_.forwardDynamics(state(), rtau, rfx);
+    dictionary dict("equationOfState");
+    dict.add("C", C_);
 
-    // Correct velocity
-    qDot() = qDot0() + deltaT()*(aoc_*qDdot() + (1 - aoc_)*qDdot0());
+    os  << indent << dict.dictName() << dict;
+}
 
-    // Correct position
-    q() = q0() + deltaT()*(voc_*qDot() + (1 - voc_)*qDot0());
 
-    correctQuaternionJoints();
+// * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
+
+template<class Specie>
+Foam::Ostream& Foam::operator<<(Ostream& os, const rPolynomial<Specie>& pf)
+{
+    pf.write(os);
+    return os;
 }
 
 

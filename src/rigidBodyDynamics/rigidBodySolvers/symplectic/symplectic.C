@@ -83,7 +83,7 @@ void Foam::RBD::rigidBodySolvers::symplectic::solve
     // Accumulate the restraint forces
     scalarField rtau(tau);
     Field<spatialVector> rfx(fx);
-    model_.applyRestraints(rtau, rfx);
+    model_.applyRestraints(rtau, rfx, state());
 
     // Calculate the body acceleration for the given state
     // and restraint forces

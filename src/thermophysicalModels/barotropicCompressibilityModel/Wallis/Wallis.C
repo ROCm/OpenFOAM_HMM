@@ -54,6 +54,12 @@ Foam::compressibilityModels::Wallis::Wallis
 )
 :
     barotropicCompressibilityModel(compressibilityProperties, gamma, psiName),
+    pSat_
+    (
+       "pSat",
+       dimPressure,
+       compressibilityProperties_
+    ),
     psiv_
     (
         "psiv",
@@ -66,12 +72,7 @@ Foam::compressibilityModels::Wallis::Wallis
         dimCompressibility,
         compressibilityProperties_
     ),
-    rhovSat_
-    (
-        "rhovSat",
-        dimDensity,
-        compressibilityProperties_
-    ),
+    rhovSat_(psiv_*pSat_),
     rholSat_
     (
         "rholSat",
@@ -89,7 +90,7 @@ void Foam::compressibilityModels::Wallis::correct()
 {
     psi_ =
         (gamma_*rhovSat_ + (scalar(1) - gamma_)*rholSat_)
-       *(gamma_*psiv_/rhovSat_ + (scalar(1) - gamma_)*psil_/rholSat_);
+       *(gamma_/pSat_ + (scalar(1) - gamma_)*psil_/rholSat_);
 }
 
 
@@ -100,9 +101,10 @@ bool Foam::compressibilityModels::Wallis::read
 {
     barotropicCompressibilityModel::read(compressibilityProperties);
 
+    compressibilityProperties_.readEntry("pSat", pSat_);
     compressibilityProperties_.readEntry("psiv", psiv_);
     compressibilityProperties_.readEntry("psil", psil_);
-    compressibilityProperties_.readEntry("rhovSat", rhovSat_);
+    rhovSat_ = psiv_*pSat_;
     compressibilityProperties_.readEntry("rholSat", rholSat_);
 
     return true;

@@ -38,6 +38,7 @@ Description
 #include "specie.H"
 #include "perfectGas.H"
 #include "incompressiblePerfectGas.H"
+#include "rPolynomial.H"
 #include "perfectFluid.H"
 #include "adiabaticPerfectFluid.H"
 #include "rhoConst.H"
@@ -154,6 +155,20 @@ namespace Foam
         >
     >
     constFluidHThermoPhysics;
+
+    typedef
+    constTransport
+    <
+        species::thermo
+        <
+            hConstThermo
+            <
+                rPolynomial<specie>
+            >,
+            sensibleEnthalpy
+        >
+    >
+    constrPolFluidHThermoPhysics;
 
     typedef
     constTransport
@@ -279,6 +294,20 @@ namespace Foam
         >
     >
     constFluidEThermoPhysics;
+
+    typedef
+    constTransport
+    <
+        species::thermo
+        <
+            eConstThermo
+            <
+                perfectFluid<specie>
+            >,
+            sensibleInternalEnergy
+        >
+    >
+    constrPolFluidEThermoPhysics;
 
     typedef
     constTransport

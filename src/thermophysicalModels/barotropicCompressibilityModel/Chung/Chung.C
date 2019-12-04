@@ -54,6 +54,12 @@ Foam::compressibilityModels::Chung::Chung
 )
 :
     barotropicCompressibilityModel(compressibilityProperties, gamma, psiName),
+    pSat_
+    (
+        "pSat",
+        dimPressure,
+        compressibilityProperties_
+    ),
     psiv_
     (
         "psiv",
@@ -64,12 +70,6 @@ Foam::compressibilityModels::Chung::Chung
     (
         "psil",
         dimCompressibility,
-        compressibilityProperties_
-    ),
-    rhovSat_
-    (
-        "rhovSat",
-        dimDensity,
         compressibilityProperties_
     ),
     rholSat_
@@ -91,8 +91,8 @@ void Foam::compressibilityModels::Chung::correct()
     (
         sqrt
         (
-            (rhovSat_/psiv_)
-           /((scalar(1) - gamma_)*rhovSat_/psiv_ + gamma_*rholSat_/psil_)
+            pSat_
+           /((scalar(1) - gamma_)*pSat_ + gamma_*rholSat_/psil_)
         )
     );
 
@@ -111,9 +111,9 @@ bool Foam::compressibilityModels::Chung::read
 {
     barotropicCompressibilityModel::read(compressibilityProperties);
 
+    compressibilityProperties_.readEntry("pSat", pSat_);
     compressibilityProperties_.readEntry("psiv", psiv_);
     compressibilityProperties_.readEntry("psil", psil_);
-    compressibilityProperties_.readEntry("rhovSat", rhovSat_);
     compressibilityProperties_.readEntry("rholSat", rholSat_);
 
     return true;

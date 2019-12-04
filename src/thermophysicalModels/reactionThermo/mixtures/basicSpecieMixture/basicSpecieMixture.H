@@ -89,6 +89,9 @@ public:
             //- Molecular weight of the given specie [kg/kmol]
             virtual scalar W(const label speciei) const = 0;
 
+            //- Chemical enthalpy [J/kg]
+            virtual scalar Hc(const label speciei) const = 0;
+
 
         // Per specie thermo properties
 
@@ -102,6 +105,14 @@ public:
 
             //- Heat capacity at constant volume [J/(kg K)]
             virtual scalar Cv
+            (
+                const label speciei,
+                const scalar p,
+                const scalar T
+            ) const = 0;
+
+            //- Enthalpy/Internal energy [J/kg]
+            virtual scalar HE
             (
                 const label speciei,
                 const scalar p,
@@ -124,8 +135,6 @@ public:
                 const scalar T
             ) const = 0;
 
-            //- Chemical enthalpy [J/kg]
-            virtual scalar Hc(const label speciei) const = 0;
 
             //- Entropy [J/(kg K)]
             virtual scalar S

@@ -50,6 +50,7 @@ SourceFiles
 #include "point.H"
 #include "scalarField.H"
 #include "runTimeSelectionTables.H"
+#include "rigidBodyModelState.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -164,7 +165,8 @@ public:
         virtual void restrain
         (
             scalarField& tau,
-            Field<spatialVector>& fx
+            Field<spatialVector>& fx,
+            const rigidBodyModelState& state
         ) const = 0;
 
         //- Update properties from given dictionary

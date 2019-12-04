@@ -81,7 +81,7 @@ void Foam::RBD::rigidBodySolvers::Newmark::solve
     // Accumulate the restraint forces
     scalarField rtau(tau);
     Field<spatialVector> rfx(fx);
-    model_.applyRestraints(rtau, rfx);
+    model_.applyRestraints(rtau, rfx, state());
 
     // Calculate the accelerations for the given state and forces
     model_.forwardDynamics(state(), rtau, rfx);
