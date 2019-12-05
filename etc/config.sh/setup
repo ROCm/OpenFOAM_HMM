@@ -2,8 +2,10 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+#   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+#     Copyright (C) 2018 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -150,12 +152,6 @@ _foamClean LD_LIBRARY_PATH
 if [ -n "$MANPATH" ]
 then
     MANPATH="${MANPATH}:"
-fi
-
-if [ -n "$LD_PRELOAD" ]
-then
-    export LD_PRELOAD
-    _foamClean LD_PRELOAD
 fi
 
 

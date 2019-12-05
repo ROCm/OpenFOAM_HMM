@@ -2,10 +2,11 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -299,7 +300,7 @@ Foam::DimensionedField<Type, GeoMesh>::DimensionedField
     const DimensionedField<Type, GeoMesh>& df
 )
 :
-    regIOobject(newName, df, newName == df.name()),
+    regIOobject(newName, df, newName != df.name()),
     Field<Type>(df),
     mesh_(df.mesh_),
     dimensions_(df.dimensions_),

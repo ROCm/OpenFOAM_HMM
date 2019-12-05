@@ -2,10 +2,11 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -259,7 +260,7 @@ inline Foam::quaternion::quaternion
               - rotationTensor.zz()
             );
 
-            w_ = (rotationTensor.xz() - rotationTensor.xz())/s;
+            w_ = (rotationTensor.xz() - rotationTensor.zx())/s;
             v_[0] = (rotationTensor.xy() + rotationTensor.yx())/s;
             v_[1] = 0.25*s;
             v_[2] = (rotationTensor.yz() + rotationTensor.zy())/s;

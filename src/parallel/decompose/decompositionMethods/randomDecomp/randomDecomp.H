@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,6 +92,18 @@ public:
         {
             return true;
         }
+
+    // No topology (implemented by geometric decomposers)
+
+        //- Return for every coordinate the wanted processor number.
+        virtual labelList decompose
+        (
+            const pointField& points,
+            const scalarField& pointWeights
+        ) const;
+
+        //- Decompose with uniform weights on the points
+        virtual labelList decompose(const pointField& points) const;
 
         //- Return for every coordinate the wanted processor number.
         virtual labelList decompose

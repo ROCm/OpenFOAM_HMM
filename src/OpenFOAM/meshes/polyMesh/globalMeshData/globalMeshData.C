@@ -2,10 +2,11 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1185,29 +1186,37 @@ void Foam::globalMeshData::calcGlobalEdgeOrientation() const
 
         forAll(coupledPatch().edges(), edgeI)
         {
-            const edge& e = coupledPatch().edges()[edgeI];
-            const labelPair masterE
-            (
-                masterPoint[e[0]],
-                masterPoint[e[1]]
-            );
-
-            label stat = labelPair::compare
-            (
-                masterE,
-                masterEdgeVerts[edgeI]
-            );
-            if (stat == 0)
+            // Test that edge is not single edge on cyclic baffle
+            if (masterEdgeVerts[edgeI] != labelPair(labelMax, labelMax))
             {
-                FatalErrorInFunction
-                    << "problem : my edge:" << e
-                    << " in master points:" << masterE
-                    << " v.s. masterEdgeVerts:" << masterEdgeVerts[edgeI]
-                    << exit(FatalError);
+                const edge& e = coupledPatch().edges()[edgeI];
+                const labelPair masterE
+                (
+                    masterPoint[e[0]],
+                    masterPoint[e[1]]
+                );
+
+                const int stat = labelPair::compare
+                (
+                    masterE,
+                    masterEdgeVerts[edgeI]
+                );
+                if (stat == 0)
+                {
+                    FatalErrorInFunction
+                        << "problem : my edge:" << e
+                        << " in master points:" << masterE
+                        << " v.s. masterEdgeVerts:" << masterEdgeVerts[edgeI]
+                        << exit(FatalError);
+                }
+                else
+                {
+                    globalEdgeOrientation.set(edgeI, (stat == 1));
+                }
             }
             else
             {
-                globalEdgeOrientation.set(edgeI, (stat == 1));
+                globalEdgeOrientation.set(edgeI, true);
             }
         }
     }

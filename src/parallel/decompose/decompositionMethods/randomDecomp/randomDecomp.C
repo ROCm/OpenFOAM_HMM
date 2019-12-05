@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,6 +87,25 @@ Foam::randomDecomp::randomDecomp
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::labelList Foam::randomDecomp::decompose
+(
+    const pointField& points,
+    const scalarField& pointWeights
+) const
+{
+    return randomMap(points.size());
+}
+
+
+Foam::labelList Foam::randomDecomp::decompose
+(
+    const pointField& points
+) const
+{
+    return randomMap(points.size());
+}
+
 
 Foam::labelList Foam::randomDecomp::decompose
 (

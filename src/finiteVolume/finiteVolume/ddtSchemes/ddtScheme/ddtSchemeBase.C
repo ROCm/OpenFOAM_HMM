@@ -2,10 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2018 OPenCFD Ltd.
+    Copyright (C) 2018 OPenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.

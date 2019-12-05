@@ -2,11 +2,12 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2007-2019 PCOpt/NTUA
-                            | Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2019 PCOpt/NTUA
+    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.

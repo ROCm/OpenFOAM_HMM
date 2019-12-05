@@ -2,10 +2,11 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +43,7 @@ int Foam::fileName::debug(Foam::debug::debugSwitch(fileName::typeName, 0));
 int Foam::fileName::allowSpaceInFileName
 (
     #ifdef _WIN32
-    Foam::debug::infoSwitch("allowSpaceInFileName", 1)
+    1  // Windows: expect spaces to occur
     #else
     Foam::debug::infoSwitch("allowSpaceInFileName", 0)
     #endif

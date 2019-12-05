@@ -2,10 +2,11 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1213,10 +1214,10 @@ bool Foam::mv(const fileName& src, const fileName& dst, const bool followLink)
     {
         const fileName dstName(dst/src.name());
 
-        return (0 == ::rename(src.c_str(), dstName.c_str()));
+        return (0 == std::rename(src.c_str(), dstName.c_str()));
     }
 
-    return (0 == ::rename(src.c_str(), dst.c_str()));
+    return (0 == std::rename(src.c_str(), dst.c_str()));
 }
 
 
@@ -1241,7 +1242,7 @@ bool Foam::mvBak(const fileName& src, const std::string& ext)
 
     if (exists(src, false))
     {
-        const int maxIndex = 99;
+        constexpr const int maxIndex = 99;
         char index[3];
 
         for (int n = 0; n <= maxIndex; ++n)
@@ -1257,7 +1258,7 @@ bool Foam::mvBak(const fileName& src, const std::string& ext)
             // possible index where we have no choice
             if (!exists(dstName, false) || n == maxIndex)
             {
-                return (0 == ::rename(src.c_str(), dstName.c_str()));
+                return (0 == std::rename(src.c_str(), dstName.c_str()));
             }
         }
     }

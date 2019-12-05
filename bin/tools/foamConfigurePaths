@@ -3,10 +3,11 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+#   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#                           | Copyright (C) 2011-2016 OpenFOAM Foundation
+#     Copyright (C) 2011-2016 OpenFOAM Foundation
+#     Copyright (C) 2016-2019 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -68,7 +69,7 @@ Components
   -scotch-path DIR    specify 'SCOTCH_ARCH_PATH' (eg, /opt/scotch_6.0.4)
 
 Graphics
-  -paraview VER       specify 'ParaView_VERSION' (eg, 5.4.1)
+  -paraview VER       specify 'ParaView_VERSION' (eg, 5.4.1 or system)
   -paraview-qt VER    specify 'ParaView_QT' (eg, qt-system)
   -paraview-path DIR  specify 'ParaView_DIR' (eg, /opt/ParaView-5.4.1)
   -vtk  VER           specify 'vtk_version' (eg, VTK-7.1.0)
@@ -600,11 +601,11 @@ do
 
     -paraview | -paraviewVersion | --paraviewVersion)
         # Replace ParaView_VERSION=...
-        expected="[5-9][.0-9]*"
+        expected="[5-9][.0-9]*"  # but also accept system
         optionValue=$(getOptionValue "$@")
         _matches "$optionValue" "$expected" || \
+            [ "$optionValue" != "${optionValue%system}" ] || \
             die "'$1' has bad value: '$optionValue'"
-
         replace etc/config.sh/paraview   ParaView_VERSION "$optionValue"
         replace etc/config.csh/paraview  ParaView_VERSION "$optionValue"
         adjusted=true

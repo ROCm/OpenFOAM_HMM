@@ -2,10 +2,11 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) OpenCFD Ltd. 2017
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) OpenCFD OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -118,7 +119,7 @@ int main(int argc, char *argv[])
             turbulence.correctPhasePhi();
 
             #include "UEqn.H"
-            volScalarField divU(fvc::div(fvc::absolute(phi, U)));
+            volScalarField divUp("divUp", fvc::div(fvc::absolute(phi, U), p));
             #include "TEqn.H"
 
             // --- Pressure corrector loop

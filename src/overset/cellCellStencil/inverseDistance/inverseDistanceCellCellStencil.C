@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -564,7 +566,7 @@ void Foam::cellCellStencils::inverseDistance::markDonors
     forAll(tgtCellMap, tgtCelli)
     {
         label celli = tgtCellMap[tgtCelli];
-        if (allStencil[celli].empty())
+        if (srcOverlapProcs.size())
         {
             treeBoundBox subBb(cellBb(mesh_, celli));
             subBb.min() -= smallVec_;

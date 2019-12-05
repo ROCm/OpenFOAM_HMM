@@ -2,10 +2,11 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -20,7 +21,7 @@ License
     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
     for more details.
 
-    You should have received a copy of the GNU General Public License
+//     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
@@ -424,7 +425,8 @@ Foam::tmp<Foam::vectorField> Foam::faPatch::edgeFaceCentres() const
 
 Foam::tmp<Foam::vectorField> Foam::faPatch::delta() const
 {
-    return edgeCentres() - edgeFaceCentres();
+    return edgeNormals()*(edgeNormals() & (edgeCentres() - edgeFaceCentres()));
+    //return edgeCentres() - edgeFaceCentres();
 }
 
 

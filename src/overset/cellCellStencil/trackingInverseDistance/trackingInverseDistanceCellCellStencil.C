@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -322,6 +324,7 @@ void Foam::cellCellStencils::trackingInverseDistance::markDonors
     PstreamBuffers& pBufs,
     const List<treeBoundBoxList>& meshBb,
     const PtrList<voxelMeshSearch>& meshSearches,
+    const labelList& allCellTypes,
 
     const label srcI,
     const label tgtI,
@@ -344,13 +347,19 @@ void Foam::cellCellStencils::trackingInverseDistance::markDonors
         forAll(tgtCellMap, tgtCelli)
         {
             label srcCelli = meshSearch.findCell(tgtCc[tgtCelli]);
-            if (srcCelli != -1)
+            if (srcCelli != -1 && allCellTypes[srcCellMap[srcCelli]] != HOLE)
             {
-                label globalDonor = globalCells_.toGlobal(srcCellMap[srcCelli]);
                 label celli = tgtCellMap[tgtCelli];
-                allStencil[celli].setSize(1);
-                allStencil[celli][0] = globalDonor;
-                allDonor[celli] = srcI;
+
+                // TBD: check for multiple donors. Maybe better one? For
+                //      now check 'nearer' mesh
+                if (betterDonor(tgtI, allDonor[celli], srcI))
+                {
+                    allStencil[celli].setSize(1);
+                    allStencil[celli][0] =
+                        globalCells_.toGlobal(srcCellMap[srcCelli]);
+                    allDonor[celli] = srcI;
+                }
             }
         }
     }
@@ -393,9 +402,11 @@ void Foam::cellCellStencils::trackingInverseDistance::markDonors
     forAll(tgtCellMap, tgtCelli)
     {
         label celli = tgtCellMap[tgtCelli];
-        if (allStencil[celli].empty())
+        if (srcOverlapProcs.size())
         {
-            const treeBoundBox subBb(cellBb(mesh_, celli));
+            treeBoundBox subBb(cellBb(mesh_, celli));
+            subBb.min() -= smallVec_;
+            subBb.max() += smallVec_;
 
             forAll(srcOverlapProcs, i)
             {
@@ -434,7 +445,7 @@ void Foam::cellCellStencils::trackingInverseDistance::markDonors
         forAll(samples, sampleI)
         {
             label srcCelli = meshSearch.findCell(samples[sampleI]);
-            if (srcCelli != -1)
+            if (srcCelli != -1 && allCellTypes[srcCellMap[srcCelli]] != HOLE)
             {
                 donors[sampleI] = globalCells_.toGlobal(srcCellMap[srcCelli]);
             }
@@ -469,7 +480,7 @@ void Foam::cellCellStencils::trackingInverseDistance::markDonors
                 label celli = tgtCellMap[cellIDs[donorI]];
 
                 // TBD: check for multiple donors. Maybe better one?
-                if (allStencil[celli].empty())
+                if (betterDonor(tgtI, allDonor[celli], srcI))
                 {
                     allStencil[celli].setSize(1);
                     allStencil[celli][0] = globalDonor;
@@ -798,6 +809,7 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
                 pBufs,
                 meshBb,
                 meshSearches,
+                allCellTypes,   // to exclude hole donors
 
                 tgti,
                 srci,
@@ -809,6 +821,7 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
                 pBufs,
                 meshBb,
                 meshSearches,
+                allCellTypes,   // to exclude hole donors
 
                 srci,
                 tgti,

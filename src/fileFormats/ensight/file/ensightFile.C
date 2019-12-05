@@ -2,10 +2,11 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -165,8 +166,15 @@ Foam::Ostream& Foam::ensightFile::write
 
 Foam::Ostream& Foam::ensightFile::write(const char* value)
 {
+    // Parentheses around strncpy to silence the GCC -Wstringop-truncation
+    // warning, which is spurious here.
+    // The max-size and buffer-size *are* identical, which means the buffer
+    // may not have a nul terminator. However, this is properly handled in
+    // the subsequent binary write and the ASCII write explicitly adds
+    // a nul terminator.
+
     char buf[80];
-    strncpy(buf, value, 80); // max 80 chars or padded with nul if smaller
+    (strncpy(buf, value, 80)); // max 80 chars or padded with nul if smaller
 
     if (format() == IOstream::BINARY)
     {

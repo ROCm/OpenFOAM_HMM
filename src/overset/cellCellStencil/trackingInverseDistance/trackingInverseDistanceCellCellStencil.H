@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -108,6 +110,7 @@ protected:
             PstreamBuffers& pBufs,
             const List<treeBoundBoxList>& meshBb,
             const PtrList<voxelMeshSearch>& meshSearches,
+            const labelList& allCellTypes,
 
             const label srcI,
             const label tgtI,

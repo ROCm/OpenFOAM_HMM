@@ -2,10 +2,11 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,10 +89,11 @@ int main(int argc, char *argv[])
     {
         #include "readDyMControls.H"
 
-        // Store divU from the previous mesh so that it can be mapped
+        // Store divU and divUp from the previous mesh so that it can be mapped
         // and used in correctPhi to ensure the corrected phi has the
         // same divergence
         volScalarField divU("divU0", fvc::div(fvc::absolute(phi, U)));
+        volScalarField divUp("divUp", fvc::div(fvc::absolute(phi, U), p));
 
         if (LTS)
         {

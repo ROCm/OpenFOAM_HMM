@@ -2,10 +2,11 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -611,7 +612,7 @@ Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::psib() const
     forAll(psibCells, celli)
     {
         psibCells[celli] =
-            this->cellReactants(celli).psi(pCells[celli], TbCells[celli]);
+            this->cellProducts(celli).psi(pCells[celli], TbCells[celli]);
     }
 
     volScalarField::Boundary& psibBf = psib.boundaryFieldRef();
@@ -626,7 +627,7 @@ Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::psib() const
         forAll(ppsib, facei)
         {
             ppsib[facei] =
-                this->patchFaceReactants
+                this->patchFaceProducts
                 (patchi, facei).psi(pp[facei], pTb[facei]);
         }
     }

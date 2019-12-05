@@ -2,10 +2,11 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -146,44 +147,38 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::calcPressure
     const tmp<volScalarField>& tp
 ) const
 {
-    switch (mode_)
+    if (mode_ & TOTAL)
     {
-        case TOTAL:
-        {
-            return
-                tp
-              + dimensionedScalar("pRef", dimPressure, pRef_)
-              + rhoScale(p, 0.5*magSqr(lookupObject<volVectorField>(UName_)));
-        }
-        case ISENTROPIC:
-        {
-            const basicThermo* thermoPtr =
-                p.mesh().lookupObjectPtr<basicThermo>(basicThermo::dictName);
-
-            if (!thermoPtr)
-            {
-                FatalErrorInFunction
-                    << "Isentropic pressure calculation requires a "
-                    << "thermodynamics package"
-                    << exit(FatalError);
-            }
-
-            const volScalarField gamma(thermoPtr->gamma());
-            const volScalarField Mb
-            (
-                mag(lookupObject<volVectorField>(UName_))
-               /sqrt(gamma*tp.ref()/thermoPtr->rho())
-            );
-
-            return tp()*(pow(1 + (gamma - 1)/2*sqr(Mb), gamma/(gamma - 1)));
-        }
-        default:
-        {
-            return
-                tp
-              + dimensionedScalar("pRef", dimPressure, pRef_);
-        }
+        return
+            tp
+          + dimensionedScalar("pRef", dimPressure, pRef_)
+          + rhoScale(p, 0.5*magSqr(lookupObject<volVectorField>(UName_)));
     }
+
+    if (mode_ & ISENTROPIC)
+    {
+        const basicThermo* thermoPtr =
+            p.mesh().lookupObjectPtr<basicThermo>(basicThermo::dictName);
+
+        if (!thermoPtr)
+        {
+            FatalErrorInFunction
+                << "Isentropic pressure calculation requires a "
+                << "thermodynamics package"
+                << exit(FatalError);
+        }
+
+        const volScalarField gamma(thermoPtr->gamma());
+        const volScalarField Mb
+        (
+            mag(lookupObject<volVectorField>(UName_))
+           /sqrt(gamma*tp.ref()/thermoPtr->rho())
+        );
+
+        return tp()*(pow(1 + (gamma - 1)/2*sqr(Mb), gamma/(gamma - 1)));
+    }
+
+    return tp + dimensionedScalar("pRef", dimPressure, pRef_);
 }
 
 
@@ -207,10 +202,8 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::coeff
 
         return tpCoeff;
     }
-    else
-    {
-        return std::move(tp);
-    }
+
+    return std::move(tp);
 }
 
 
