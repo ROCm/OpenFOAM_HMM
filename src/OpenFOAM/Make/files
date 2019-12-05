@@ -158,6 +158,13 @@ $(expr)/exprDriver/exprDriver.C
 $(expr)/exprDriver/exprDriverFields.C
 $(expr)/exprDriver/exprDriverIO.C
 
+fieldExpr = $(expr)/fields
+$(fieldExpr)/fieldExpr.C
+$(fieldExpr)/fieldExprDriver.C
+$(fieldExpr)/fieldExprDriverFields.C
+$(fieldExpr)/fieldExprLemonParser.lyy-m4
+$(fieldExpr)/fieldExprScanner.cc
+
 
 ops = primitives/ops
 $(ops)/flipOp.C
