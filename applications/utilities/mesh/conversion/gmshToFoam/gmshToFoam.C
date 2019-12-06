@@ -1357,12 +1357,6 @@ int main(int argc, char *argv[])
     {
         string line;
         inFile.getLine(line);
-
-        if (line.empty())
-        {
-            continue;
-        }
-
         IStringStream lineStr(line);
 
         // This implies the end of while has been reached
