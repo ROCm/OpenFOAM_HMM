@@ -76,15 +76,6 @@ class primitiveEntry
             Istream& is
         );
 
-        //- Copy append the given tokens at the current tokenIndex
-        //  No filtering on the tokens.
-        void appendTokenList(const UList<token>& toks);
-
-        //- Move append the given tokens at the current tokenIndex
-        //  No filtering on the tokens.
-        void appendTokenList(List<token>&& toks);
-
-
         //- Expand the given variable.
         //  The keyword starts with '$', but has been removed by the caller
         //  and thus passed as a varName.

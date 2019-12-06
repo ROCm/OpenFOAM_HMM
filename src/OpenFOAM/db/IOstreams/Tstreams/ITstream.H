@@ -73,6 +73,15 @@ class ITstream
         //  \return the number of tokens in the resulting list.
         static label parseStream(ISstream& input, tokenList& tokens);
 
+        //- An ad hoc combination of reserve and setCapacity somewhat
+        //- similar to DynamicList.
+        //
+        //  In lazy mode, increase list size if needed, but leave any
+        //  excess capacity - works like reserve.
+        //
+        //  In non-lazy mode, set exact capacity
+        void reserveCapacity(const label nElem, const bool lazy);
+
 
 public:
 
@@ -149,7 +158,7 @@ public:
         );
 
 
-        //- Construct as copy
+        //- Copy construct
         ITstream(const ITstream& is)
         :
             Istream(ASCII, currentVersion),
@@ -209,13 +218,13 @@ public:
                 return name_;
             }
 
-            //- Return the current token index
+            //- The current token index when reading, or the insertion point.
             label tokenIndex() const
             {
                 return tokenIndex_;
             }
 
-            //- Return non-const access to the current token index
+            //- Non-const access to the current token index
             label& tokenIndex()
             {
                 return tokenIndex_;
@@ -280,8 +289,29 @@ public:
             //- Rewind the stream so that it may be read again
             virtual void rewind();
 
+            //- Move the tokenIndex to the specified position.
+            //  Using seek(0) is identical to rewind.
+            //  Using seek(-1) moves to the end.
+            void seek(label pos);
+
 
         // Edit
+
+            //- Copy append a tokenList at the current tokenIndex,
+            //- incrementing the index.
+            //
+            //  \param newTokens the list of tokens to copy append
+            //  \param lazy leaves any excess capacity for further appends.
+            //      The caller will be responsible for resizing later.
+            void append(const tokenList& newTokens, const bool lazy);
+
+            //- Move append a tokenList at the current tokenIndex,
+            //- incrementing the index.
+            //
+            //  \param newTokens the list of tokens to move append
+            //  \param lazy leaves any excess capacity for further appends.
+            //      The caller will be responsible for resizing later.
+            void append(tokenList&& newTokens, const bool lazy);
 
             //- Set flags of stream
             ios_base::fmtflags flags(const ios_base::fmtflags)

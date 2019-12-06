@@ -100,6 +100,39 @@ Foam::tokenList Foam::ITstream::parse
 }
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::ITstream::reserveCapacity
+(
+    const label nElem,
+    const bool lazy
+)
+{
+    if (lazy)
+    {
+        // Reserve - leave excess capacity for further appends
+
+        label n = tokenList::size();
+
+        if (nElem >= n)
+        {
+            do
+            {
+                n *= 2;
+            }
+            while (nElem >= n);
+
+            tokenList::resize(n);
+        }
+    }
+    else
+    {
+        // Strict capacity
+        tokenList::resize(nElem);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::ITstream::ITstream
@@ -317,16 +350,81 @@ Foam::Istream& Foam::ITstream::read(char*, std::streamsize)
 
 void Foam::ITstream::rewind()
 {
-    tokenIndex_ = 0;
-    lineNumber_ = 0;
+    seek(0);
+}
 
-    if (size())
+
+void Foam::ITstream::seek(label pos)
+{
+    lineNumber_ = 0;
+    tokenList& toks = *this;
+
+    if (!pos)
     {
-        lineNumber_ = tokenList::first().lineNumber();
+        // Seek begin (rewind)
+        tokenIndex_ = 0;
+
+        if (!toks.empty())
+        {
+            lineNumber_ = toks.first().lineNumber();
+        }
+
+        setOpened();
+        setGood();
+    }
+    else if (pos < 0 || pos >= toks.size())
+    {
+        // Seek end or seek is out of range
+        tokenIndex_ = toks.size();
+
+        if (!toks.empty())
+        {
+            lineNumber_ = toks.last().lineNumber();
+        }
+
+        setEof();
+    }
+    else
+    {
+        // Seek middle (from the beginning)
+        tokenIndex_ = pos;
+
+        if (!toks.empty())
+        {
+            lineNumber_ = toks[tokenIndex_].lineNumber();
+        }
+
+        setOpened();
+        setGood();
+    }
+}
+
+
+void Foam::ITstream::append(const tokenList& newTokens, const bool lazy)
+{
+    reserveCapacity(tokenIndex_ + newTokens.size(), lazy);
+    tokenList& toks = *this;
+
+    for (const token& t : newTokens)
+    {
+        toks[tokenIndex_] = t;  // copy append
+        ++tokenIndex_;
+    }
+}
+
+
+void Foam::ITstream::append(tokenList&& newTokens, const bool lazy)
+{
+    reserveCapacity(tokenIndex_ + newTokens.size(), lazy);
+    tokenList& toks = *this;
+
+    for (token& t : newTokens)
+    {
+        toks[tokenIndex_] = std::move(t);  // move append
+        ++tokenIndex_;
     }
 
-    setOpened();
-    setGood();
+    newTokens.clear();
 }
 
 

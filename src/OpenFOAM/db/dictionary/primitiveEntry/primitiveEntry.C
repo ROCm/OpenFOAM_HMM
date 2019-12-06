@@ -33,26 +33,6 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::primitiveEntry::appendTokenList(const UList<token>& toks)
-{
-    for (const token& tok : toks)
-    {
-        newElmt(tokenIndex()++) = tok;  // copy append
-    }
-}
-
-
-void Foam::primitiveEntry::appendTokenList(List<token>&& toks)
-{
-    for (token& tok : toks)
-    {
-        newElmt(tokenIndex()++) = std::move(tok);  // move append
-    }
-
-    toks.clear();
-}
-
-
 bool Foam::primitiveEntry::expandVariable
 (
     const string& varName,
@@ -103,7 +83,7 @@ bool Foam::primitiveEntry::expandVariable
 
         tokenList toks(ITstream::parse(str, IOstream::ASCII));
 
-        appendTokenList(std::move(toks));
+        ITstream::append(std::move(toks), true);  // Lazy resizing
     }
     else if (eptr->isDict())
     {
@@ -111,12 +91,12 @@ bool Foam::primitiveEntry::expandVariable
 
         tokenList toks(eptr->dict().tokens());
 
-        appendTokenList(std::move(toks));
+        ITstream::append(std::move(toks), true);  // Lazy resizing
     }
     else
     {
-        // Found primitive entry
-        appendTokenList(eptr->stream());
+        // Found primitive entry - copy tokens
+        ITstream::append(eptr->stream(), true);  // Lazy resizing
     }
 
     return true;

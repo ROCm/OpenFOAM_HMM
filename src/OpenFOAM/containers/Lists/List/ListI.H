@@ -159,11 +159,17 @@ inline void Foam::List<T>::setSize(const label len, const T& val)
 template<class T>
 inline T& Foam::List<T>::newElmt(const label i)
 {
-    const label n = this->size();
+    label n = this->size();
 
     if (i >= n)
     {
-        resize(2*n);
+        do
+        {
+            n *= 2;
+        }
+        while (i >= n);
+
+        resize(n);
     }
 
     return UList<T>::operator[](i);

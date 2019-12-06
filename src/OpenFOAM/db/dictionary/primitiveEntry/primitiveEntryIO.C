@@ -304,7 +304,7 @@ void Foam::primitiveEntry::write(Ostream& os) const
 }
 
 
-// * * * * * * * * * * * * * Ostream operator  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * * * //
 
 template<>
 Foam::Ostream& Foam::operator<<
