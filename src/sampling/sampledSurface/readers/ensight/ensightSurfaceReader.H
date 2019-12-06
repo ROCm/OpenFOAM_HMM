@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,6 +40,7 @@ SourceFiles
 #include "surfaceReader.H"
 #include "ensightReadFile.H"
 #include "StringStream.H"
+#include "Pair.H"
 #include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -58,6 +59,14 @@ class ensightSurfaceReader
 protected:
 
     // Protected Data
+
+        //- Handling of node/element id types (off, assign, ignore, given)
+        enum idTypes : unsigned char
+        {
+            NONE = 0,       //!< "off", "assign"
+            IGNORE = 1,     //!< Read but "ignore"
+            GIVEN = 2       //!< Use "given" values (not supported)
+        };
 
         //- Format flag
         IOstream::streamFormat streamFormat_;
@@ -103,8 +112,9 @@ protected:
         //- Read and check a section header
         void debugSection(const word& expected, IFstream& is) const;
 
-        //- Read (and throw away) geometry file header
-        void readGeometryHeader(ensightReadFile& is) const;
+        //- Read (and discard) geometry file header.
+        //  \return information about node/element id handling
+        Pair<idTypes> readGeometryHeader(ensightReadFile& is) const;
 
         //- Read the case file
         void readCase(IFstream& is);
