@@ -54,6 +54,124 @@ namespace expressions
 const Foam::expressions::exprResult Foam::expressions::exprResult::null;
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+bool Foam::expressions::exprResult::setAverageValueCheckedBool
+(
+    const bool parRun
+)
+{
+    typedef bool Type;
+
+    if (!isType<Type>())
+    {
+        return false;
+    }
+
+    const Field<Type>& fld = *static_cast<const Field<Type>*>(fieldPtr_);
+    label len = fld.size();
+
+    // The average of a bool is slightly dodgy
+
+    label nTrue = 0;
+    for (const Type val : fld)
+    {
+        if (val)
+        {
+            ++nTrue;
+        }
+    }
+
+    if (parRun)
+    {
+        reduce(nTrue, sumOp<label>());
+    }
+
+    if (!nTrue)
+    {
+        isUniform_ = true;
+        single_.set(false);
+        return true;
+    }
+
+    if (parRun)
+    {
+        reduce(len, sumOp<label>());
+    }
+
+    if (nTrue == len)
+    {
+        isUniform_ = true;
+        single_.set(true);
+    }
+    else
+    {
+        isUniform_ = false;
+
+        if (nTrue > len/2)
+        {
+            single_.set(true);
+        }
+        else
+        {
+            single_.set(false);
+        }
+    }
+
+    return true;
+}
+
+
+bool Foam::expressions::exprResult::getUniformCheckedBool
+(
+    exprResult& result,
+    const label size,
+    const bool noWarn,
+    const bool parRun
+) const
+{
+    typedef bool Type;
+
+    if (!isType<Type>())
+    {
+        return false;
+    }
+
+    result.clear();
+
+    const Field<Type>& fld = *static_cast<const Field<Type>*>(fieldPtr_);
+    label len = fld.size();
+
+    // The average of a bool is slightly dodgy
+
+    label nTrue = 0;
+    for (const Type val : fld)
+    {
+        if (val)
+        {
+            ++nTrue;
+        }
+    }
+
+    if (parRun)
+    {
+        reduce(nTrue, sumOp<label>());
+        reduce(len, sumOp<label>());
+    }
+
+    const Type avg = (nTrue > len/2);
+
+    if (!noWarn)
+    {
+        // TODO?
+    }
+
+    result.setResult(avg, size);
+
+    return true;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::expressions::exprResult::singleValue::singleValue()
@@ -139,64 +257,37 @@ Foam::expressions::exprResult::exprResult
 
     if (dict.found("value"))
     {
+        const bool uniform = isUniform_;
+
         const label len =
         (
-            isUniform_
+            uniform
           ? dict.getOrDefault<label>("fieldSize", 1)
           : dict.get<label>("fieldSize")
         );
 
-        if (isUniform_)
+        const bool ok =
+        (
+            readChecked<bool>("value", dict, len, uniform)
+         || readChecked<scalar>("value", dict, len, uniform)
+         || readChecked<vector>("value", dict, len, uniform)
+         || readChecked<tensor>("value", dict, len, uniform)
+         || readChecked<symmTensor>("value", dict, len, uniform)
+         || readChecked<sphericalTensor>("value", dict, len, uniform)
+        );
+
+        if (!ok)
         {
-            const bool created =
-            (
-                createUniformChecked<bool>("value", dict, len)
-             || createUniformChecked<scalar>("value", dict, len)
-             || createUniformChecked<vector>("value", dict, len)
-             || createUniformChecked<tensor>("value", dict, len)
-             || createUniformChecked<symmTensor>("value", dict, len)
-             || createUniformChecked<sphericalTensor>("value", dict, len)
-            );
-
-            if (!created)
+            if (valType_.empty())
             {
-                if (valType_.empty())
-                {
-                    // For the error message only
-                    valType_ = "None";
-                }
-
-                FatalErrorInFunction
-                    << "Don't know how to read data type "
-                    << valType_
-                    << " as a single value" << nl
-                    << exit(FatalError);
+                // For the error message only
+                valType_ = "None";
             }
-        }
-        else
-        {
-            const bool created =
-            (
-                createNonUniformChecked<bool>("value", dict, len)
-             || createNonUniformChecked<scalar>("value", dict, len)
-             || createNonUniformChecked<vector>("value", dict, len)
-             || createNonUniformChecked<tensor>("value", dict, len)
-             || createNonUniformChecked<symmTensor>("value", dict, len)
-             || createNonUniformChecked<sphericalTensor>("value", dict, len)
-            );
 
-            if (!created)
-            {
-                if (valType_.empty())
-                {
-                    // For the error message only
-                    valType_ = "None";
-                }
-
-                FatalErrorInFunction
-                    << "Don't know how to read data type " << valType_ << nl
-                    << exit(FatalError);
-            }
+            FatalErrorInFunction
+                << "Do not know how to read data type " << valType_
+                << (uniform ? " as a single value." : ".") << nl
+                << exit(FatalError);
         }
     }
     else if (needsValue)
@@ -365,36 +456,29 @@ Foam::expressions::exprResult::getUniform
 }
 
 
-void Foam::expressions::exprResult::testIfSingleValue()
+void Foam::expressions::exprResult::testIfSingleValue(const bool parRun)
 {
     if (fieldPtr_ == nullptr)
     {
-        FatalErrorInFunction
-            << "Not set. Cannot determine if uniform" << nl
-            << exit(FatalError);
+        WarningInFunction
+            << "Not set - cannot determine if uniform" << nl << endl;
+        return;
     }
 
     const bool ok =
     (
-        setAverageValueChecked<scalar>()
-     || setAverageValueChecked<vector>()
-     || setAverageValueChecked<tensor>()
-     || setAverageValueChecked<symmTensor>()
-     || setAverageValueChecked<sphericalTensor>()
+        setAverageValueChecked<scalar>(parRun)
+     || setAverageValueChecked<vector>(parRun)
+     || setAverageValueChecked<tensor>(parRun)
+     || setAverageValueChecked<symmTensor>(parRun)
+     || setAverageValueChecked<sphericalTensor>(parRun)
+     || setAverageValueCheckedBool(parRun)
     );
 
     if (!ok)
     {
-        if (isBool())
-        {
-            FatalErrorInFunction
-                << "This specialisation is not implemented" << nl
-                << exit(FatalError);
-        }
-
-        FatalErrorInFunction
-            << "Unknown type " << valType_ << nl
-            << exit(FatalError);
+        WarningInFunction
+            << "Unknown type " << valType_ << nl << endl;
     }
 }
 
@@ -527,12 +611,12 @@ void Foam::expressions::exprResult::writeDict
 
         const bool ok =
         (
-            writeValueChecked<scalar>(os)
-         || writeValueChecked<vector>(os)
-         || writeValueChecked<tensor>(os)
-         || writeValueChecked<symmTensor>(os)
-         || writeValueChecked<sphericalTensor>(os)
-         || writeValueChecked<bool>(os)
+            writeValueFieldChecked<scalar>(os)
+         || writeValueFieldChecked<vector>(os)
+         || writeValueFieldChecked<tensor>(os)
+         || writeValueFieldChecked<symmTensor>(os)
+         || writeValueFieldChecked<sphericalTensor>(os)
+         || writeValueFieldChecked<bool>(os)
         );
 
         if (!ok)
@@ -548,6 +632,37 @@ void Foam::expressions::exprResult::writeDict
     }
 
     // os.format(oldFmt);
+}
+
+
+void Foam::expressions::exprResult::writeValue
+(
+    Ostream& os
+) const
+{
+    // const auto oldFmt = os.format(IOstream::ASCII);
+
+    DebugInFunction
+        << Foam::name(this) << nl
+        << "Format: "
+        << IOstreamOption::formatNames[os.format()] << nl;
+
+    const bool ok =
+    (
+        writeSingleValueChecked<scalar>(os)
+     || writeSingleValueChecked<vector>(os)
+     || writeSingleValueChecked<tensor>(os)
+     || writeSingleValueChecked<symmTensor>(os)
+     || writeSingleValueChecked<sphericalTensor>(os)
+     || writeSingleValueChecked<label>(os)
+     || writeSingleValueChecked<bool>(os)
+    );
+
+    if (!ok)
+    {
+        WarningInFunction
+            << "Unknown data type " << valType_ << endl;
+    }
 }
 
 

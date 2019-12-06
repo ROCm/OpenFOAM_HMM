@@ -105,6 +105,7 @@ class exprResult
         union singleValue
         {
             bool bool_;
+            label label_;
             scalar scalar_;
             vector vector_;
             tensor tensor_;
@@ -124,7 +125,8 @@ class exprResult
             template<class T>
             inline const T& get() const
             {
-                NotImplemented;
+                WarningInFunction
+                    << "Not implemented for type " << pTraits<T>::typeName << nl;
                 return pTraits<T>::zero;
             }
 
@@ -132,8 +134,9 @@ class exprResult
             template<class T>
             inline const T& set(const T& val)
             {
-                NotImplemented;
-                return pTraits<T>::zero;
+                WarningInFunction
+                    << "Not implemented for type " << pTraits<T>::typeName << nl;
+                return val;
             }
         };
 
@@ -157,24 +160,15 @@ class exprResult
         //- Dispatch to type-checked pointer deletion
         void uglyDelete();
 
-        //- Type-checked creation of uniform field from dictionary
+        //- Type-checked creation of field from dictionary
         //  \return True if the type check was satisfied
         template<class Type>
-        inline bool createUniformChecked
+        inline bool readChecked
         (
             const word& key,
             const dictionary& dict,
-            const label len
-        );
-
-        //- Type-checked creation of non-uniform field from dictionary
-        //  \return True if the type check was satisfied
-        template<class Type>
-        inline bool createNonUniformChecked
-        (
-            const word& key,
-            const dictionary& dict,
-            const label len
+            const label len,
+            const bool uniform
         );
 
         //- Type-checked retrieval of uniform field from current results
@@ -185,23 +179,42 @@ class exprResult
             exprResult& result,
             const label size,
             const bool noWarn,
-            const bool parallel
+            const bool parRun
+        ) const;
+
+        //- Type-checked retrieval of uniform field from current results
+        //  \return True if the type check was satisfied
+        bool getUniformCheckedBool
+        (
+            exprResult& result,
+            const label size,
+            const bool noWarn,
+            const bool parRun
         ) const;
 
         //- Type-checked determination of centre value (min/max)
         //  \return True if the type check was satisfied
         template<class Type>
-        bool setAverageValueChecked();
+        bool setAverageValueChecked(const bool parRun = Pstream::parRun());
+
+        //- Type-checked determination of average bool value
+        //  \return True if the type check was satisfied
+        bool setAverageValueCheckedBool(const bool parRun = Pstream::parRun());
 
         //- Type-checked copy of field
         //  \return True if the type check was satisfied
         template<class Type>
         bool duplicateFieldChecked(const void* ptr);
 
-        //- Type-checked writing of "value" entry
+        //- Type-checked writing of the single value (uniform) entry
         //  \return True if the type check was satisfied
         template<class Type>
-        bool writeValueChecked(Ostream& os) const;
+        bool writeSingleValueChecked(Ostream& os) const;
+
+        //- Type-checked writing of "value" field entry
+        //  \return True if the type check was satisfied
+        template<class Type>
+        bool writeValueFieldChecked(Ostream& os) const;
 
         //- Type-checked forwarding to Field::writeEntry
         //  \return True if the type check was satisfied
@@ -415,8 +428,8 @@ public:
 
         //- Test if field corresponds to a single-value and thus uniform.
         //  Uses field min/max to establish uniformity.
-        void testIfSingleValue();
-
+        //  Test afterwards with isUniform()
+        void testIfSingleValue(const bool parRun = Pstream::parRun());
 
 
     // Set results
@@ -498,6 +511,9 @@ public:
 
         //- Write entry as dictionary contents
         void writeDict(Ostream& os, const bool subDict=true) const;
+
+        //- Write the single value, or the first value from field
+        void writeValue(Ostream& os) const;
 
 
     // Member Operators

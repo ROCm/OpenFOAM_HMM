@@ -48,6 +48,7 @@ namespace expressions
         }
 
     defineExpressionMethod(bool, bool_);
+    defineExpressionMethod(label, label_);
     defineExpressionMethod(scalar, scalar_);
     defineExpressionMethod(vector, vector_);
     defineExpressionMethod(tensor, tensor_);
@@ -78,11 +79,12 @@ inline bool Foam::expressions::exprResult::deleteChecked()
 
 
 template<class Type>
-inline bool Foam::expressions::exprResult::createUniformChecked
+inline bool Foam::expressions::exprResult::readChecked
 (
     const word& key,
     const dictionary& dict,
-    const label len
+    const label len,
+    const bool uniform
 )
 {
     const bool ok = isType<Type>();
@@ -90,36 +92,22 @@ inline bool Foam::expressions::exprResult::createUniformChecked
     {
         uglyDelete();
 
-        const Type val(dict.get<Type>(key));
+        if (uniform)
+        {
+            const Type val(dict.get<Type>(key));
 
-        size_ = len;
-        fieldPtr_ = new Field<Type>(size_, val);
+            size_ = len;
+            fieldPtr_ = new Field<Type>(size_, val);
 
-        single_.set(val);
-        isUniform_ = true;
-    }
+            single_.set(val);
+        }
+        else
+        {
+            size_ = len;
+            fieldPtr_ = new Field<Type>(key, dict, size_);
+        }
 
-    return ok;
-}
-
-
-template<class Type>
-inline bool Foam::expressions::exprResult::createNonUniformChecked
-(
-    const word& key,
-    const dictionary& dict,
-    const label len
-)
-{
-    const bool ok = isType<Type>();
-    if (ok)
-    {
-        uglyDelete();
-
-        size_ = len;
-        fieldPtr_ = new Field<Type>(key, dict, size_);
-
-        isUniform_ = false;
+        isUniform_ = uniform;
     }
 
     return ok;
@@ -489,7 +477,38 @@ void Foam::expressions::exprResult::setSingleValue(const Type& val)
 
 
 template<class Type>
-bool Foam::expressions::exprResult::writeValueChecked(Ostream& os) const
+bool Foam::expressions::exprResult::writeSingleValueChecked(Ostream& os) const
+{
+    if (!isType<Type>())
+    {
+        return false;
+    }
+
+    if (this->size() <= 0)
+    {
+        if (isUniform_)
+        {
+            os << single_.get<Type>();
+        }
+        else
+        {
+            // Zero-sized - could write nothing, or a zero value
+            os << pTraits<Type>::zero;
+        }
+    }
+    else
+    {
+        const Field<Type>& fld = *static_cast<const Field<Type>*>(fieldPtr_);
+
+        os << fld.first();
+    }
+
+    return true;
+}
+
+
+template<class Type>
+bool Foam::expressions::exprResult::writeValueFieldChecked(Ostream& os) const
 {
     if (!isType<Type>())
     {
@@ -584,7 +603,7 @@ bool Foam::expressions::exprResult::writeEntryChecked
 
 
 template<class Type>
-bool Foam::expressions::exprResult::setAverageValueChecked()
+bool Foam::expressions::exprResult::setAverageValueChecked(const bool parRun)
 {
     if (!isType<Type>())
     {
@@ -593,7 +612,7 @@ bool Foam::expressions::exprResult::setAverageValueChecked()
 
     const Field<Type>& fld = *static_cast<const Field<Type>*>(fieldPtr_);
 
-    const MinMax<Type> limits = gMinMax(fld);
+    const MinMax<Type> limits = (parRun ? gMinMax(fld) : minMax(fld));
 
     isUniform_ = (limits.mag() <= SMALL);
 
