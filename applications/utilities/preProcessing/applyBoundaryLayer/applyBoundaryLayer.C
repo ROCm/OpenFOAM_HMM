@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,12 +71,10 @@ void correctProcessorPatches
         return;
     }
 
-    typedef GeometricField<Type, fvPatchField, volMesh> volFieldType;
-
     // Not possible to use correctBoundaryConditions on fields as they may
     // use local info as opposed to the constraint values employed here,
     // but still need to update processor patches
-    typename volFieldType::Boundary& bf = vf.boundaryFieldRef();
+    auto& bf = vf.boundaryFieldRef();
 
     forAll(bf, patchi)
     {
@@ -296,8 +294,12 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
-        "write-nut",
-        "Write the turbulence viscosity field"
+        "writeTurbulenceFields",  // (until 1906 was write-nut)
+        "Write the turbulence fields"
+    );
+    argList::addOptionCompat
+    (
+        "writeTurbulenceFields", {"write-nut", 1906}
     );
 
     #include "setRootCase.H"
@@ -319,7 +321,7 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    const bool writeNut = args.found("write-nut");
+    const bool writeTurbulenceFields = args.found("writeTurbulenceFields");
 
     #include "createTime.H"
     #include "createNamedMesh.H"
@@ -343,35 +345,36 @@ int main(int argc, char *argv[])
     mask.correctBoundaryConditions();
     correctProcessorPatches<vector>(U);
 
-    // Retrieve nut from turbulence model
-    volScalarField nut(calcNut(mesh, U));
-
-    // Blend nut using boundary layer profile
-    volScalarField S("S", mag(dev(symm(fvc::grad(U)))));
-    nut = (1 - mask)*nut + mask*sqr(kappa*min(y, ybl))*::sqrt(2)*S;
-
-    // Do not correct BC - wall functions will 'undo' manipulation above
-    // by using nut from turbulence model
-    correctProcessorPatches<scalar>(nut);
-    if (writeNut)
+    if (writeTurbulenceFields)
     {
+        // Retrieve nut from turbulence model
+        volScalarField nut(calcNut(mesh, U));
+
+        // Blend nut using boundary layer profile
+        volScalarField S("S", mag(dev(symm(fvc::grad(U)))));
+        nut = (1 - mask)*nut + mask*sqr(kappa*min(y, ybl))*::sqrt(2)*S;
+
+        // Do not correct BC - wall functions will 'undo' manipulation above
+        // by using nut from turbulence model
+        correctProcessorPatches<scalar>(nut);
+
         Info<< "Writing nut\n" << endl;
         nut.write();
+
+        // Boundary layer turbulence kinetic energy
+        scalar ck0 = pow025(Cmu)*kappa;
+        scalarField kBL(sqr(nut/(ck0*min(y, ybl))));
+
+        // Boundary layer turbulence dissipation
+        scalar ce0 = ::pow(Cmu, 0.75)/kappa;
+        scalarField epsilonBL(ce0*kBL*sqrt(kBL)/min(y, ybl));
+
+        // Process fields if they are present
+        blendField("k", mesh, mask, kBL);
+        blendField("epsilon", mesh, mask, epsilonBL);
+        calcOmegaField(mesh, mask, kBL, epsilonBL);
+        setField(mesh, "nuTilda", nut);
     }
-
-    // Boundary layer turbulence kinetic energy
-    scalar ck0 = pow025(Cmu)*kappa;
-    scalarField kBL(sqr(nut/(ck0*min(y, ybl))));
-
-    // Boundary layer turbulence dissipation
-    scalar ce0 = ::pow(Cmu, 0.75)/kappa;
-    scalarField epsilonBL(ce0*kBL*sqrt(kBL)/min(y, ybl));
-
-    // Process fields if they are present
-    blendField("k", mesh, mask, kBL);
-    blendField("epsilon", mesh, mask, epsilonBL);
-    calcOmegaField(mesh, mask, kBL, epsilonBL);
-    if (writeNut) setField(mesh, "nuTilda", nut);
 
     // Write the updated U field
     Info<< "Writing U\n" << endl;
