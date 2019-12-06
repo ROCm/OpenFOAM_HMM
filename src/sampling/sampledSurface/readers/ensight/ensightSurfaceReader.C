@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -101,23 +101,23 @@ void Foam::ensightSurfaceReader::readGeometryHeader(ensightReadFile& is) const
 
     // Ensight Geometry File
     is.read(buffer);
-    DebugInfo<< "buffer: " << buffer << nl;
+    DebugInfo<< "buffer [" << buffer.length() << "] " << buffer << nl;
 
     // Description - 1
     is.read(buffer);
-    DebugInfo<< "buffer: " << buffer << nl;
+    DebugInfo<< "buffer [" << buffer.length() << "] " << buffer << nl;
 
     // Node info
     is.read(buffer);
-    DebugInfo<< "buffer: " << buffer << nl;
+    DebugInfo<< "buffer [" << buffer.length() << "] " << buffer << nl;
 
     // Element info
     is.read(buffer);
-    DebugInfo<< "buffer: " << buffer << nl;
+    DebugInfo<< "buffer [" << buffer.length() << "] " << buffer << nl;
 
     // Part
     is.read(buffer);
-    DebugInfo<< "buffer: " << buffer << nl;
+    DebugInfo<< "buffer [" << buffer.length() << "] " << buffer << nl;
 
     // Part number
     label ibuffer;
@@ -126,11 +126,11 @@ void Foam::ensightSurfaceReader::readGeometryHeader(ensightReadFile& is) const
 
     // Description - 2
     is.read(buffer);
-    DebugInfo<< "buffer: " << buffer << nl;
+    DebugInfo<< "buffer [" << buffer.length() << "] " << buffer << nl;
 
     // Coordinates
     is.read(buffer);
-    DebugInfo<< "buffer: " << buffer << nl;
+    DebugInfo<< "buffer [" << buffer.length() << "] " << buffer << nl;
 }
 
 
@@ -280,29 +280,30 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry()
 
         streamFormat_ = IOstream::BINARY;
         {
-            istream& is = isBinary.stdStream();
+            istream& iss = isBinary.stdStream();
 
-            char buffer[80];
-            is.read(buffer, 80);
+            // Binary string is *exactly* 80 characters
+            string buf(size_t(80), '\0');
+            iss.read(&buf[0], 80);
 
-            char test[80];
-            label nChar = 0;
-            for (label i = 0; i < 80; ++i)
+            if (!iss)
             {
-                if (buffer[i] == '\0')
-                {
-                    break;
-                }
-                test[i] = buffer[i];
-                nChar++;
+                // Truncated?
+                buf.erase(iss.gcount());
             }
 
-            string testStr(test, nChar);
+            // Truncate at the first embedded '\0'
+            const auto endp = buf.find('\0');
+            if (endp != std::string::npos)
+            {
+                buf.erase(endp);
+            }
 
+            // Contains "C Binary" ?
             if
             (
-                (testStr.find("binary", 0) == string::npos)
-             && (testStr.find("Binary", 0) == string::npos)
+                (buf.find("binary") == std::string::npos)
+             && (buf.find("Binary") == std::string::npos)
             )
             {
                 streamFormat_ = IOstream::ASCII;
@@ -354,8 +355,7 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry()
         // Read faces - may be a mix of tris, quads and polys
         DynamicList<face> faces(ceil(nPoints/3));
         DynamicList<Tuple2<string, label>> schema(faces.size());
-        string faceType = "";
-        label nFace = 0;
+        string faceType;
         while (is.good()) // (is.peek() != EOF)
         {
             is.read(faceType);
@@ -365,20 +365,22 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry()
                 break;
             }
 
-            DebugInfo
-                << "faceType: " << faceType << endl;
+            label nFace = 0;
 
             if (faceType == "tria3")
             {
                 is.read(nFace);
 
-                const label np = 3;
-                for (label faceI = 0; faceI < nFace; ++faceI)
+                DebugInfo
+                    << "faceType <" << faceType.c_str() << "> count: "
+                    << nFace << nl;
+
+                face f(3);
+                for (label facei = 0; facei < nFace; ++facei)
                 {
-                    face f(np);
-                    for (label fpI = 0; fpI < np; fpI++)
+                    for (label& fp : f)
                     {
-                        is.read(f[fpI]);
+                        is.read(fp);
                     }
 
                     faces.append(f);
@@ -388,13 +390,16 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry()
             {
                 is.read(nFace);
 
-                const label np = 4;
-                for (label faceI = 0; faceI < nFace; ++faceI)
+                DebugInfo
+                    << "faceType <" << faceType.c_str() << "> count: "
+                    << nFace << nl;
+
+                face f(4);
+                for (label facei = 0; facei < nFace; ++facei)
                 {
-                    face f(np);
-                    for (label fpI = 0; fpI < np; fpI++)
+                    for (label& fp : f)
                     {
-                        is.read(f[fpI]);
+                        is.read(fp);
                     }
 
                     faces.append(f);
@@ -404,17 +409,21 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry()
             {
                 is.read(nFace);
 
+                DebugInfo
+                    << "faceType <" << faceType.c_str() << "> count: "
+                    << nFace << nl;
+
                 labelList np(nFace);
-                for (label faceI = 0; faceI < nFace; ++faceI)
+                for (label facei = 0; facei < nFace; ++facei)
                 {
-                    is.read(np[faceI]);
+                    is.read(np[facei]);
                 }
-                for (label faceI = 0; faceI < nFace; ++faceI)
+                for (label facei = 0; facei < nFace; ++facei)
                 {
-                    face f(np[faceI]);
-                    for (label fpI = 0; fpI < f.size(); ++fpI)
+                    face f(np[facei]);
+                    for (label& fp : f)
                     {
-                        is.read(f[fpI]);
+                        is.read(fp);
                     }
 
                     faces.append(f);
@@ -425,11 +434,10 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry()
                 if (debug)
                 {
                     WarningInFunction
-                        << "Unknown face type: " << faceType
-                        << ".  Aborting read and continuing with current "
+                        << "Unknown face type: <" << faceType.c_str()
+                        << ">. Stopping read and continuing with current "
                         << "elements only" << endl;
                 }
-
                 break;
             }
             schema.append(Tuple2<string, label>(faceType, nFace));

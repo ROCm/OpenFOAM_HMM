@@ -113,10 +113,11 @@ Foam::tmp<Foam::Field<Type>> Foam::ensightSurfaceReader::readField
 
     if (primitiveType != pTraits<Type>::typeName)
     {
-        FatalIOErrorInFunction(is)
-            << "Expected " << pTraits<Type>::typeName << "values "
-            << "but found type " << primitiveType
-            << exit(FatalIOError);
+        IOWarningInFunction(is)
+            << "Expected '" << pTraits<Type>::typeName
+            << "' values but found type " << primitiveType << nl
+            << "    This may be okay, but could also indicate an error"
+            << nl << nl;
     }
 
     scalar value;

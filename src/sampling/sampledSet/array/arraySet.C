@@ -69,7 +69,7 @@ void Foam::arraySet::calcSamples
             for (label i=1; i<=pointsDensity_.x(); ++i)
             {
                 // Local Cartesian
-                point pt(i*dx*i , j*dy, k*dz);
+                point pt(i*dx, j*dy, k*dz);
 
                 // Global Cartesian
                 pt = csys_.globalPosition(pt);
