@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -166,6 +167,17 @@ void Foam::subModelBase::cacheFields(const bool)
 bool Foam::subModelBase::writeTime() const
 {
     return active();
+}
+
+
+Foam::fileName Foam::subModelBase::localPath() const
+{
+    if (modelName_ != word::null)
+    {
+        return modelName_;
+    }
+
+    return baseName_;
 }
 
 

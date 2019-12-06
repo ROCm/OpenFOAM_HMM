@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "CloudSubModelBase.H"
+#include "cloud.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -122,6 +123,18 @@ bool Foam::CloudSubModelBase<CloudType>::writeTime() const
         active()
      && owner_.solution().transient()
      && owner_.db().time().writeTime();
+}
+
+
+template<class CloudType>
+Foam::fileName Foam::CloudSubModelBase<CloudType>::localPath() const
+{
+    if (modelName_ != word::null)
+    {
+        return cloud::prefix/owner_.name()/modelName_;
+    }
+
+    return cloud::prefix/owner_.name()/baseName_;
 }
 
 
