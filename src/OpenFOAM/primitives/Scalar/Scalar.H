@@ -30,6 +30,26 @@ Typedef
 Description
     Floating-point number (float or double)
 
+Note
+    The floor/ceil/round operations could easily be extended to handle
+    VectorSpace when the need arises. For example,
+
+    \code
+    template<class T>
+    struct floorOp
+    {
+        T operator()(const T& x) const WARNRETURN
+        {
+            T ret;
+            for (direction cmpt=0; cmpt < pTraits<T>::nComponents; ++cmpt)
+            {
+                component(ret, cmpt) = std::floor(component(x, cmpt));
+            }
+            return ret;
+        }
+    };
+    \endcode
+
 SourceFiles
     Scalar.C
 
@@ -459,7 +479,7 @@ struct equalOp<Scalar>
 
     bool operator()(const Scalar& a, const Scalar& b) const
     {
-        return Foam::mag(a - b) <= tolerance;
+        return mag(a - b) <= tolerance;
     }
 };
 
@@ -481,7 +501,50 @@ struct notEqualOp<Scalar>
 
     bool operator()(const Scalar& a, const Scalar& b) const
     {
-        return Foam::mag(a - b) > tolerance;
+        return mag(a - b) > tolerance;
+    }
+};
+
+
+
+// Default definition in ops.H (future?)
+template<class T> struct floorOp;
+
+//- Round scalar downwards - functor version of std::floor
+template<>
+struct floorOp<Scalar>
+{
+    Scalar operator()(const Scalar& x) const
+    {
+        return std::floor(x);
+    }
+};
+
+
+// Default definition in ops.H (future?)
+template<class T> struct ceilOp;
+
+//- Round scalar upwards - functor version of std::ceil
+template<>
+struct ceilOp<Scalar>
+{
+    Scalar operator()(const Scalar& x) const
+    {
+        return std::ceil(x);
+    }
+};
+
+
+// Default definition in ops.H (future?)
+template<class T> struct roundOp;
+
+//- Round scalar - functor version of std::round
+template<>
+struct roundOp<Scalar>
+{
+    Scalar operator()(const Scalar& x) const
+    {
+        return std::round(x);
     }
 };
 
