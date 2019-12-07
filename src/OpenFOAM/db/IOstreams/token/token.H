@@ -87,12 +87,10 @@ public:
         DOUBLE_SCALAR,    //!< double (double-precision) type
 
         // Pointer types
-        WORD,             //!< Contents represent a Foam::word
-        STRING,           //!< Contents represent a Foam::string
-        VARIABLE,         //!< Contents are a Foam::string representing a
-                          //!< dictionary \c \$variable expansion
-        VERBATIMSTRING,   //!< Contents are a Foam::string representing verbatim
-                          //!< content
+        WORD,             //!< A Foam::word
+        STRING,           //!< A string
+        VARIABLE,         //!< A dictionary \c \$variable (string variant)
+        VERBATIMSTRING,   //!< Verbatim string content
         COMPOUND,         //!< Compound type such as \c List\<label\> etc.
 
         ERROR             //!< A token error encountered
@@ -133,7 +131,7 @@ public:
 
         ASSIGN         = '=',   //!< Assignment/equals [#isseparator]
         ADD            = '+',   //!< Addition [#isseparator]
-        SUBTRACT       = '-',   //!< Substract or start of negative number
+        SUBTRACT       = '-',   //!< Subtract or start of negative number
         MULTIPLY       = '*',   //!< Multiply [#isseparator]
         DIVIDE         = '/',   //!< Divide [#isseparator]
 
