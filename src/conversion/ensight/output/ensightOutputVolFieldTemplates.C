@@ -320,6 +320,8 @@ bool Foam::ensightOutput::Serial::writeVolField
     ensightFile& os
 )
 {
+    constexpr bool parallel = false; // serial
+
     const label patchi = part.patchIndex();
 
     if (patchi >= 0 && patchi < vf.boundaryField().size())
@@ -329,7 +331,7 @@ bool Foam::ensightOutput::Serial::writeVolField
             vf.boundaryField()[patchi],
             part,
             os,
-            false // serial
+            parallel
         );
     }
 
@@ -345,12 +347,14 @@ bool Foam::ensightOutput::Serial::writeVolField
     ensightFile& os
 )
 {
+    constexpr bool parallel = false; // serial
+
     return ensightOutput::Detail::writeCellField
     (
         vf.internalField(),
         part,
         os,
-        false // serial
+        parallel
     );
 }
 

@@ -28,6 +28,7 @@ License
 
 #include "ensightParts.H"
 #include "bitSet.H"
+#include "emptyPolyPatch.H"
 #include "processorPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -51,44 +52,48 @@ void Foam::ensightParts::recalculate(const polyMesh& mesh)
     // Track which cells are in a zone or not
     bitSet selection(mesh.nCells());
 
-    // Do cell zones
+    // Do all cell zones
     for (const cellZone& zn : mesh.cellZones())
     {
-        if (zn.size())
+        if (returnReduce(!zn.empty(), orOp<bool>()))
         {
             selection.set(zn);
             this->append(new ensightPartCells(nPart++, mesh, zn));
         }
     }
 
-    if (selection.none())
+    if (!nPart)
     {
-        // No zones at all? - do entire mesh
-        this->append(new ensightPartCells(nPart++, mesh));
+        // No zones at all? - do entire mesh. Name as per ensightMesh
+        this->append(new ensightPartCells(nPart++, mesh, "internalMesh"));
     }
     else
     {
         // Flip from zoned to unzoned
         selection.flip();
 
-        if (selection.any())
+        if (returnReduce(selection.any(), orOp<bool>()))
         {
-            this->append(new ensightPartCells(nPart++, mesh, selection));
+            this->append
+            (
+                new ensightPartCells(nPart++, mesh, selection, "__internal__")
+            );
         }
     }
 
 
     // Do boundaries, skipping empty and processor patches
-    for (const polyPatch& patch : mesh.boundaryMesh())
+    for (const polyPatch& p : mesh.boundaryMesh())
     {
-        if (isA<processorPolyPatch>(patch))
+        if (isA<processorPolyPatch>(p))
         {
             // No processor patches
             break;
         }
-        if (patch.size())
+
+        if (returnReduce(!p.empty(), orOp<bool>()))
         {
-            this->append(new ensightPartFaces(nPart++, mesh, patch));
+            this->append(new ensightPartFaces(nPart++, mesh, p));
         }
     }
 }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,12 +49,6 @@ SourceFiles
 
 namespace Foam
 {
-
-// Forward declarations
-class ensightPart;
-
-ensightGeoFile& operator<<(ensightGeoFile&, const ensightPart&);
-
 
 /*---------------------------------------------------------------------------*\
                          Class ensightPart Declaration
@@ -114,7 +108,7 @@ public:
     // Constructors
 
         //- Construct with description
-        ensightPart(const string& description);
+        explicit ensightPart(const string& description);
 
 
     //- Destructor
@@ -139,7 +133,7 @@ public:
         }
 
         //- Change the part name or description
-        void name(string value)
+        void rename(string value)
         {
             name_ = std::move(value);
         }
@@ -147,30 +141,35 @@ public:
 
     // Output
 
-        //- Write geometry
-        virtual void write(ensightGeoFile&) const = 0;
-
-        //- Helper: write geometry with given pointField
-        virtual void write
-        (
-            ensightGeoFile&,
-            const pointField&
-        ) const = 0;
-
-
         //- Write summary information about the object
-        virtual void writeSummary(Ostream&) const = 0;
+        virtual void writeSummary(Ostream& os) const = 0;
 
         //- Print various types of debugging information
-        virtual void dumpInfo(Ostream&) const = 0;
-
-
-    // IOstream Operators
+        virtual void dumpInfo(Ostream& os) const = 0;
 
         //- Write geometry
-        friend ensightGeoFile& operator<<(ensightGeoFile&, const ensightPart&);
+        virtual void write(ensightGeoFile& os) const = 0;
 
+        //- Helper: write geometry with given pointField
+        virtual void write(ensightGeoFile& os, const pointField&) const = 0;
+
+
+    // Housekeeping
+
+        //- Deprecated(2019-12) - use rename() method
+        //  \deprecated(2019-12) - use rename() method
+        void FOAM_DEPRECATED_FOR(2019-12, "rename() method")
+        name(string value)
+        {
+            name_ = std::move(value);
+        }
 };
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+//- IOstream Operator to write geometry
+ensightGeoFile& operator<<(ensightGeoFile& os, const ensightPart& part);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

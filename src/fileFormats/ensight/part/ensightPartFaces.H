@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,10 +64,10 @@ class ensightPartFaces
         //- Patch index
         const label patchIndex_;
 
-        //- Faces referenced
+        //- The referenced faces
         const faceList& faces_;
 
-        //- pointField referenced
+        //- The referenced pointField
         const pointField& points_;
 
         //- Can skip local point renumbering when points are contiguous
@@ -127,11 +127,22 @@ public:
         );
 
         //- Construct from polyMesh and polyPatch
+        //- Part receives the name of the patch unless otherwise specified.
         ensightPartFaces
         (
             label partIndex,
             const polyMesh& mesh,
-            const polyPatch& patch
+            const polyPatch& patch,
+            const string& partName = ""
+        );
+
+        //- Construct from polyPatch
+        //- Part receives the name of the patch unless otherwise specified.
+        ensightPartFaces
+        (
+            label partIndex,
+            const polyPatch& patch,
+            const string& partName = ""
         );
 
 
@@ -169,15 +180,14 @@ public:
         //- Write summary information about the object
         virtual void writeSummary(Ostream& os) const;
 
+        //- Print various types of debugging information
+        virtual void dumpInfo(Ostream& os) const;
+
         //- Write geometry
         virtual void write(ensightGeoFile& os) const;
 
         //- Helper: write geometry given the pointField
         virtual void write(ensightGeoFile& os, const pointField& points) const;
-
-
-        //- Print various types of debugging information
-        virtual void dumpInfo(Ostream& os) const;
 };
 
 

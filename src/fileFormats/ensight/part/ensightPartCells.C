@@ -85,11 +85,12 @@ Foam::ensightPart::localPoints Foam::ensightPartCells::calcLocalPoints() const
 Foam::ensightPartCells::ensightPartCells
 (
     label partIndex,
-    const polyMesh& mesh
+    const polyMesh& mesh,
+    const string& partName
 )
 :
     ensightCells(partIndex),
-    ensightPart("cells"),
+    ensightPart(partName),
     mesh_(mesh)
 {
     classify(mesh);
@@ -100,11 +101,12 @@ Foam::ensightPartCells::ensightPartCells
 (
     label partIndex,
     const polyMesh& mesh,
-    const labelUList& cellIds
+    const labelUList& cellIds,
+    const string& partName
 )
 :
     ensightCells(partIndex),
-    ensightPart("cells"),
+    ensightPart(partName),
     mesh_(mesh)
 {
     classify(mesh, cellIds);
@@ -115,13 +117,15 @@ Foam::ensightPartCells::ensightPartCells
 (
     label partIndex,
     const polyMesh& mesh,
-    const cellZone& zn
+    const bitSet& selection,
+    const string& partName
 )
 :
-    ensightPartCells(partIndex, mesh, static_cast<const labelList&>(zn))
+    ensightCells(partIndex),
+    ensightPart(partName),
+    mesh_(mesh)
 {
-    // Rename according to the zone name
-    name(zn.name());
+    classify(mesh, selection);
 }
 
 
@@ -129,14 +133,22 @@ Foam::ensightPartCells::ensightPartCells
 (
     label partIndex,
     const polyMesh& mesh,
-    const bitSet& selection
+    const cellZone& zn,
+    const string& partName
 )
 :
-    ensightCells(partIndex),
-    ensightPart("cells"),
-    mesh_(mesh)
+    ensightPartCells
+    (
+        partIndex,
+        mesh,
+        static_cast<const labelList&>(zn),
+        zn.name()
+    )
 {
-    classify(mesh, selection);
+    if (!partName.empty())
+    {
+        rename(partName);
+    }
 }
 
 
@@ -322,14 +334,7 @@ void Foam::ensightPartCells::dumpInfo(Ostream& os) const
 
         os.writeKeyword(ensightCells::key(what));
 
-        // DIY flat output
-        os << addr.size() << '(';
-        forAll(addr, i)
-        {
-            if (i) os << ' ';
-            os << addr[i];
-        }
-        os << ')' << endEntry;
+        addr.writeList(os, 0) << endEntry;  // Flat output
     }
 
     os.endBlock();

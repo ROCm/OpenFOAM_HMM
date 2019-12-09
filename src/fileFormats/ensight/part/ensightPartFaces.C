@@ -35,6 +35,7 @@ namespace Foam
     defineTypeNameAndDebug(ensightPartFaces, 0);
 }
 
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 Foam::ensightPart::localPoints Foam::ensightPartFaces::calcLocalPoints() const
@@ -113,7 +114,8 @@ Foam::ensightPartFaces::ensightPartFaces
 (
     label partIndex,
     const polyMesh& mesh,
-    const polyPatch& patch
+    const polyPatch& patch,
+    const string& partName
 )
 :
     ensightFaces(partIndex),
@@ -124,9 +126,25 @@ Foam::ensightPartFaces::ensightPartFaces
     points_(mesh.points()),
     contiguousPoints_(false)
 {
+    if (!partName.empty())
+    {
+        rename(partName);
+    }
+
     // Classify the face shapes
     classify(patch);
 }
+
+
+Foam::ensightPartFaces::ensightPartFaces
+(
+    label partIndex,
+    const polyPatch& patch,
+    const string& partName
+)
+:
+    ensightPartFaces(partIndex, patch.boundaryMesh().mesh(), patch, partName)
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -274,14 +292,7 @@ void Foam::ensightPartFaces::dumpInfo(Ostream& os) const
 
         os.writeKeyword(ensightFaces::key(what));
 
-        // DIY flat output
-        os << addr.size() << '(';
-        forAll(addr, i)
-        {
-            if (i) os << ' ';
-            os << addr[i];
-        }
-        os << ')' << endEntry;
+        addr.writeList(os, 0) << endEntry;  // Flat output
     }
 
     os.endBlock();

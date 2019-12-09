@@ -83,15 +83,14 @@ public:
 
     // Member Functions
 
-        //- Clear old information and construct anew from polyMesh
-        void recalculate(const polyMesh& mesh);
-
         //- Number of parts
         using StorageType::size;
 
+        //- Clear old information and construct anew from polyMesh
+        void recalculate(const polyMesh& mesh);
 
-        //- Write the geometry
-        void write(ensightGeoFile& os) const;
+
+    // Output
 
         //- Write summary information about the objects
         void writeSummary(Ostream& os) const;
@@ -99,6 +98,14 @@ public:
         //- Print various types of debugging information
         void dumpInfo(Ostream& os) const;
 
+        //- Write the geometry to file
+        void write(autoPtr<ensightGeoFile>& os) const
+        {
+            write(os.ref());
+        }
+
+        //- Write the geometry to file
+        void write(ensightGeoFile& os) const;
 };
 
 

@@ -58,7 +58,7 @@ class ensightPartCells
 {
     // Private Data
 
-        //- Mesh referenced
+        //- The referenced mesh
         const polyMesh& mesh_;
 
 
@@ -89,37 +89,46 @@ public:
     //- Runtime type information
     TypeName("ensightCells");
 
+
     // Constructors
 
-        //- Construct from polyMesh without zones
-        ensightPartCells
-        (
-            label partIndex,
-            const polyMesh& mesh
-        );
-
-        //- Construct a "cells" part from polyMesh and list of cells
+        //- Construct from entire polyMesh without zones.
+        //- Part receives the specified name (default: "cells").
         ensightPartCells
         (
             label partIndex,
             const polyMesh& mesh,
-            const labelUList& cellIds
+            const string& partName = "cells"
         );
 
-        //- Construct from polyMesh and cellZone with name of the zone.
+        //- Construct a part from polyMesh and list of cells.
+        //- Part receives the specified name (default: "cells").
         ensightPartCells
         (
             label partIndex,
             const polyMesh& mesh,
-            const cellZone& zn
+            const labelUList& cellIds,
+            const string& partName = "cells"
         );
 
-        //- Construct a "cells" part from polyMesh and selection of cells
+        //- Construct a part from polyMesh and selection of cells.
+        //- Part receives the specified name (default: "cells").
         ensightPartCells
         (
             label partIndex,
             const polyMesh& mesh,
-            const bitSet& selection
+            const bitSet& selection,
+            const string& partName = "cells"
+        );
+
+        //- Construct from polyMesh and cellZone.
+        //- Part receives the name of the zone unless otherwise specified.
+        ensightPartCells
+        (
+            label partIndex,
+            const polyMesh& mesh,
+            const cellZone& zn,
+            const string& partName = ""
         );
 
 
@@ -146,19 +155,17 @@ public:
 
     // Output
 
-        //- Write geometry
-        virtual void write(ensightGeoFile& os) const;
-
-        //- Helper: write geometry given the pointField
-        virtual void write(ensightGeoFile& os, const pointField& points) const;
-
-
         //- Write summary information about the object
         virtual void writeSummary(Ostream& os) const;
 
         //- Print various types of debugging information
         virtual void dumpInfo(Ostream& os) const;
 
+        //- Write geometry
+        virtual void write(ensightGeoFile& os) const;
+
+        //- Helper: write geometry with given pointField
+        virtual void write(ensightGeoFile& os, const pointField& points) const;
 };
 
 
