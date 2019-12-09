@@ -101,7 +101,7 @@ void assign
 (
     GeometricField<Tout, PatchField, GeoMesh>& result,
     const GeometricField<T1, PatchField, GeoMesh>& a,
-    const GeometricField<T1, PatchField, GeoMesh>& b,
+    const GeometricField<T2, PatchField, GeoMesh>& b,
     const BinaryOp& bop
 )
 {
