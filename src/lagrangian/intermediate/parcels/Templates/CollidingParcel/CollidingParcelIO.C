@@ -292,6 +292,30 @@ void Foam::CollidingParcel<ParcelType>::writeFields(const CloudType& c)
 
 
 template<class ParcelType>
+void Foam::CollidingParcel<ParcelType>::writeProperties
+(
+    Ostream& os,
+    const wordRes& filters,
+    const word& delim,
+    const bool namesOnly
+) const
+{
+    ParcelType::writeProperties(os, filters, delim, namesOnly);
+
+    #undef  writeProp
+    #define writeProp(Name, Value)                                            \
+        ParcelType::writeProperty(os, Name, Value, namesOnly, delim, filters)
+
+    writeProp("f", f_);
+    writeProp("angularMomentum", angularMomentum_);
+    writeProp("torque", torque_);
+    //writeProp("collisionRecords", collisionRecords_);
+
+    #undef writeProp
+}
+
+
+template<class ParcelType>
 template<class CloudType>
 void Foam::CollidingParcel<ParcelType>::readObjects
 (

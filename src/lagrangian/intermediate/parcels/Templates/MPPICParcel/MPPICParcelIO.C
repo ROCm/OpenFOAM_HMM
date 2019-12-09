@@ -134,6 +134,27 @@ void Foam::MPPICParcel<ParcelType>::writeFields(const CloudType& c)
 
 
 template<class ParcelType>
+void Foam::MPPICParcel<ParcelType>::writeProperties
+(
+    Ostream& os,
+    const wordRes& filters,
+    const word& delim,
+    const bool namesOnly
+) const
+{
+    ParcelType::writeProperties(os, filters, delim, namesOnly);
+
+    #undef  writeProp
+    #define writeProp(Name, Value)                                            \
+        ParcelType::writeProperty(os, Name, Value, namesOnly, delim, filters)
+
+    writeProp("UCorrect", UCorrect_);
+
+    #undef writeProp
+}
+
+
+template<class ParcelType>
 template<class CloudType>
 void Foam::MPPICParcel<ParcelType>::readObjects
 (

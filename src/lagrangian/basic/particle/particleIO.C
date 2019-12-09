@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -190,6 +190,32 @@ Foam::particle::particle
 
     // Check state of Istream
     is.check(FUNCTION_NAME);
+}
+
+
+void Foam::particle::writeProperties
+(
+    Ostream& os,
+    const wordRes& filters,
+    const word& delim,
+    const bool namesOnly
+) const
+{
+    #undef  writeProp
+    #define writeProp(Name, Value)                                            \
+        particle::writeProperty(os, Name, Value, namesOnly, delim, filters)
+
+    writeProp("coordinates", coordinates_);
+    writeProp("position", position());
+    writeProp("celli", celli_);
+    writeProp("tetFacei", tetFacei_);
+    writeProp("tetPti", tetPti_);
+    writeProp("facei", facei_);
+    writeProp("stepFraction", stepFraction_);
+    writeProp("origProc", origProc_);
+    writeProp("origId", origId_);
+
+    #undef writeProp
 }
 
 

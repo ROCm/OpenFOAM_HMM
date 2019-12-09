@@ -172,6 +172,29 @@ void Foam::injectedParticle::writeFields(const Cloud<injectedParticle>& c)
 }
 
 
+void Foam::injectedParticle::writeProperties
+(
+    Ostream& os,
+    const wordRes& filters,
+    const word& delim,
+    const bool namesOnly
+) const
+{
+    particle::writeProperties(os, filters, delim, namesOnly);
+
+    #undef  writeProp
+    #define writeProp(Name, Value)                                            \
+        particle::writeProperty(os, Name, Value, namesOnly, delim, filters)
+
+    writeProp("tag", tag_);
+    writeProp("soi", soi_);
+    writeProp("d", d_);
+    writeProp("U", U_);
+
+    #undef  writeProp
+}
+
+
 void Foam::injectedParticle::readObjects
 (
     Cloud<injectedParticle>& c,

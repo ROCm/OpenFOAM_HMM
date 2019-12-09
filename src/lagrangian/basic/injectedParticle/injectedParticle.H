@@ -219,6 +219,15 @@ public:
             //- Read fields
             static void readFields(Cloud<injectedParticle>& c);
 
+            //- Write individual parcel properties to stream
+            void writeProperties
+            (
+                Ostream& os,
+                const wordRes& filters,
+                const word& delim,
+                const bool namesOnly
+            ) const;
+
             //- Write fields
             static void writeFields(const Cloud<injectedParticle>& c);
 

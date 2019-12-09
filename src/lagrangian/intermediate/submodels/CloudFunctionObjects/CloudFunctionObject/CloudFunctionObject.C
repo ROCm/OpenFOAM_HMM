@@ -66,7 +66,7 @@ Foam::CloudFunctionObject<CloudType>::CloudFunctionObject
     (
         owner.mesh().time().globalPath()
       / functionObject::outputPrefix
-      / this->localPath();
+      / this->localPath()
     );
 
     outputDir_.clean();  // Remove unneeded ".."

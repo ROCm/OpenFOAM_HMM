@@ -294,6 +294,18 @@ public:
         );
 
 
+        // I-O
+
+            //- Write individual parcel properties to stream
+            void writeProperties
+            (
+                Ostream& os,
+                const wordRes& filters,
+                const word& delim,
+                const bool namesOnly = false
+            ) const;
+
+
     // Ostream Operator
 
         friend Ostream& operator<<(Ostream& os, const DTRMParticle& p);

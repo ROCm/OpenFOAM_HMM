@@ -371,6 +371,15 @@ public:
             template<class CloudType>
             static void writeFields(const CloudType& c);
 
+            //- Write individual parcel properties to stream
+            void writeProperties
+            (
+                Ostream& os,
+                const wordRes& filters,
+                const word& delim,
+                const bool namesOnly
+            ) const;
+
             //- Read particle fields as objects from the obr registry
             //  - no composition
             template<class CloudType>

@@ -267,6 +267,36 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const CloudType& c)
 
 
 template<class ParcelType>
+void Foam::KinematicParcel<ParcelType>::writeProperties
+(
+    Ostream& os,
+    const wordRes& filters,
+    const word& delim,
+    const bool namesOnly
+) const
+{
+    ParcelType::writeProperties(os, filters, delim, namesOnly);
+
+    #undef  writeProp
+    #define writeProp(Name, Value)                                            \
+        ParcelType::writeProperty(os, Name, Value, namesOnly, delim, filters)
+
+    writeProp("active", active_);
+    writeProp("typeId", typeId_);
+    writeProp("nParticle", nParticle_);
+    writeProp("d", d_);
+    writeProp("dTarget", dTarget_);
+    writeProp("U", U_);
+    writeProp("rho", rho_);
+    writeProp("age", age_);
+    writeProp("tTurb", tTurb_);
+    writeProp("UTurb", UTurb_);
+
+    #undef writeProp
+}
+
+
+template<class ParcelType>
 template<class CloudType>
 void Foam::KinematicParcel<ParcelType>::readObjects
 (

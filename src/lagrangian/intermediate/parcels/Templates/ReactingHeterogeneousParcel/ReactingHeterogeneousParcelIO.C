@@ -252,6 +252,28 @@ void Foam::ReactingHeterogeneousParcel<ParcelType>::writeFields
 
 
 template<class ParcelType>
+void Foam::ReactingHeterogeneousParcel<ParcelType>::writeProperties
+(
+    Ostream& os,
+    const wordRes& filters,
+    const word& delim,
+    const bool namesOnly
+) const
+{
+    ParcelType::writeProperties(os, filters, delim, namesOnly);
+
+    #undef  writeProp
+    #define writeProp(Name, Value)                                            \
+        ParcelType::writeProperty(os, Name, Value, namesOnly, delim, filters)
+
+    writeProp("F", F_);
+    writeProp("canCombust", canCombust_);
+
+    #undef writeProp
+}
+
+
+template<class ParcelType>
 template<class CloudType>
 void Foam::ReactingHeterogeneousParcel<ParcelType>::readObjects
 (

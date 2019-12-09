@@ -88,6 +88,31 @@ Foam::DTRMParticle::DTRMParticle
 }
 
 
+void Foam::DTRMParticle::writeProperties
+(
+    Ostream& os,
+    const wordRes& filters,
+    const word& delim,
+    const bool namesOnly
+) const
+{
+    particle::writeProperties(os, filters, delim, namesOnly);
+
+    #undef  writeProp
+    #define writeProp(Name, Value)                                            \
+        particle::writeProperty(os, Name, Value, namesOnly, delim, filters)
+
+    writeProp("p0", p0_);
+    writeProp("p1", p1_);
+    writeProp("I0", I0_);
+    writeProp("I", I_);
+    writeProp("dA", dA_);
+    writeProp("transmissiveId", transmissiveId_);
+
+    #undef writeProp
+}
+
+
 Foam::Ostream& Foam::operator<<(Ostream& os, const DTRMParticle& p)
 {
     if (os.format() == IOstream::ASCII)
