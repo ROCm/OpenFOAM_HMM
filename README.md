@@ -1,13 +1,14 @@
 # About OpenFOAM
-OpenFOAM is a free, open source CFD software [released and developed primarily by OpenCFD Ltd](http://www.openfoam.com) since 2004. It has a large user base across most areas of engineering and science, from both commercial and academic organisations. OpenFOAM has an extensive range of features to solve anything from complex fluid flows involving chemical reactions, turbulence and heat transfer, to acoustics, solid mechanics and electromagnetics.  [More...](http://www.openfoam.com/documentation)
-
+OpenFOAM is a free, open source CFD software [released and developed by OpenCFD Ltd since 2004](http://www.openfoam.com/history/).
+It has a large user base across most areas of engineering and science, from both commercial and academic organisations.
+OpenFOAM has an extensive range of features to solve anything from complex fluid flows involving chemical reactions, turbulence and heat transfer, to acoustics, solid mechanics and electromagnetics.
+[See documentation](http://www.openfoam.com/documentation)
 
 OpenFOAM is professionally released every six months to include
 customer sponsored developments and contributions from the community -
-individual and group contributors, re-integrations (including from
-FOAM-extend and OpenFOAM Foundation Ltd) - in this Official Release
-sanctioned by the OpenFOAM Worldwide Trademark Owner aiming towards
-one OpenFOAM.
+individual and group contributors, integrations
+(eg, from FOAM-extend and OpenFOAM Foundation Ltd) as well as
+[governance guided activities](https://www.openfoam.com/governance/).
 
 
 # Copyright
@@ -168,17 +169,17 @@ ThirdParty directory will contain either an `Allwmake` file or a
 
 <!-- OpenFOAM -->
 
-[repo openfoam]: https://develop.openfoam.com/Development/OpenFOAM-plus/
-[repo third]: https://develop.openfoam.com/Development/ThirdParty-plus/
+[repo openfoam]: https://develop.openfoam.com/Development/openfoam/
+[repo third]: https://develop.openfoam.com/Development/ThirdParty-common/
 
-[link openfoam-readme]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/README.md
-[link openfoam-issues]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/BuildIssues.md
-[link openfoam-config]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Config.md
-[link openfoam-build]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Build.md
-[link openfoam-require]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Requirements.md
-[link third-readme]: https://develop.openfoam.com/Development/ThirdParty-plus/blob/develop/README.md
-[link third-build]: https://develop.openfoam.com/Development/ThirdParty-plus/blob/develop/BUILD.md
-[link third-require]: https://develop.openfoam.com/Development/ThirdParty-plus/blob/develop/Requirements.md
+[link openfoam-readme]: https://develop.openfoam.com/Development/openfoam/blob/develop/README.md
+[link openfoam-issues]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/BuildIssues.md
+[link openfoam-config]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/Config.md
+[link openfoam-build]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/Build.md
+[link openfoam-require]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/Requirements.md
+[link third-readme]: https://develop.openfoam.com/Development/ThirdParty-common/blob/develop/README.md
+[link third-build]: https://develop.openfoam.com/Development/ThirdParty-common/blob/develop/BUILD.md
+[link third-require]: https://develop.openfoam.com/Development/ThirdParty-common/blob/develop/Requirements.md
 
 
 # Useful Links

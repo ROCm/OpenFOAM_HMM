@@ -30,8 +30,7 @@ USAGE
 # -----------------------------------------------------------------------------
 
 defineURL() {
-    WEB_PATH="https://develop.openfoam.com"
-    FOAM_REPO_VERSION="$WM_PROJECT-plus"
+    export FOAM_BASE_REPO="https://develop.openfoam.com/Development/openfoam"
 
     case "$WM_PROJECT_VERSION" in
     v[1-9][.0-9]*)
@@ -42,7 +41,6 @@ defineURL() {
         ;;
     esac
 
-    export FOAM_BASE_REPO="$WEB_PATH/Development/$FOAM_REPO_VERSION"
     export FOAM_ONLINE_REPO="$FOAM_BASE_REPO/blob/${FOAM_REPO_TAG}"
 }
 

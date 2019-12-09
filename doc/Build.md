@@ -122,18 +122,18 @@ More details in the [ThirdParty build guide][link third-build].
 
 <!-- OpenFOAM -->
 
-[repo openfoam]: https://develop.openfoam.com/Development/OpenFOAM-plus/
-[repo third]: https://develop.openfoam.com/Development/ThirdParty-plus/
+[repo openfoam]: https://develop.openfoam.com/Development/openfoam/
+[repo third]: https://develop.openfoam.com/Development/ThirdParty-common/
 
-[link openfoam-readme]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/README.md
-[link openfoam-issues]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/BuildIssues.md
-[link openfoam-config]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Config.md
-[link openfoam-build]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Build.md
-[link openfoam-cross]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Cross-Compile-mingw.md
-[link openfoam-require]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Requirements.md
-[link third-readme]: https://develop.openfoam.com/Development/ThirdParty-plus/blob/develop/README.md
-[link third-build]: https://develop.openfoam.com/Development/ThirdParty-plus/blob/develop/BUILD.md
-[link third-require]: https://develop.openfoam.com/Development/ThirdParty-plus/blob/develop/Requirements.md
+[link openfoam-readme]: https://develop.openfoam.com/Development/openfoam/blob/develop/README.md
+[link openfoam-issues]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/BuildIssues.md
+[link openfoam-config]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/Config.md
+[link openfoam-build]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/Build.md
+[link openfoam-cross]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/Cross-Compile-mingw.md
+[link openfoam-require]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/Requirements.md
+[link third-readme]: https://develop.openfoam.com/Development/ThirdParty-common/blob/develop/README.md
+[link third-build]: https://develop.openfoam.com/Development/ThirdParty-common/blob/develop/BUILD.md
+[link third-require]: https://develop.openfoam.com/Development/ThirdParty-common/blob/develop/Requirements.md
 
 ---
 Copyright 2019 OpenCFD Ltd
