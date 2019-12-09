@@ -777,6 +777,19 @@ Foam::label Foam::snappyRefineDriver::surfaceProximityBlock
         if (debug)
         {
             const_cast<Time&>(mesh.time())++;
+            Pout<< "Writing gap blocking iteration "
+                << iter << " mesh to time " << meshRefiner_.timeName()
+                << endl;
+            meshRefiner_.write
+            (
+                meshRefinement::debugType(debug),
+                meshRefinement::writeType
+                (
+                    meshRefinement::writeLevel()
+                  | meshRefinement::WRITEMESH
+                ),
+                mesh.time().path()/meshRefiner_.timeName()
+            );
         }
     }
     return iter;
@@ -3010,6 +3023,18 @@ void Foam::snappyRefineDriver::doRefine
         refineParams,
         100    // maxIter
     );
+
+    //// Re-remove cells inbetween two surfaces. The shell refinement/
+    //// directional shell refinement might have caused new small
+    //// gaps to be resolved. This is currently disabled since it finds
+    //// gaps just because it very occasionally walks around already removed
+    //// gaps and still finds 'opposite' surfaces. This probably need additional
+    //// path-length counting to avoid walking huge distances.
+    //surfaceProximityBlock
+    //(
+    //    refineParams,
+    //    1  //100     // maxIter
+    //);
 
     if
     (

@@ -15,6 +15,7 @@ meshRefinement/meshRefinementProblemCells.C
 meshRefinement/meshRefinementRefine.C
 meshRefinement/meshRefinementGapRefine.C
 meshRefinement/meshRefinementBlock.C
+meshRefinement/wallPoints.C
 meshRefinement/patchFaceOrientation.C
 
 refinementFeatures/refinementFeatures.C

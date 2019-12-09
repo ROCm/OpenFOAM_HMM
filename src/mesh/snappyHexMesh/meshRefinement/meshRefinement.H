@@ -533,6 +533,47 @@ private:
                 label& nRefine
             ) const;
 
+            void markMultiRegionCell
+            (
+                const label celli,
+                //const label globalRegion,
+                //const label zonei,
+                const FixedList<label, 3>& surface,
+
+                Map<FixedList<label, 3>>& cellToRegions,
+                bitSet& isMultiRegion
+            ) const;
+
+            void detectMultiRegionCells
+            (
+                const labelListList& faceZones,
+                const labelList& testFaces,
+
+                const labelList& surface1,
+                const List<pointIndexHit>& hit1,
+                const labelList& region1,
+
+                const labelList& surface2,
+                const List<pointIndexHit>& hit2,
+                const labelList& region2,
+
+                bitSet& isMultiRegion
+            ) const;
+
+            //- Mark cells for surface proximity based refinement.
+            label markProximityRefinementWave
+            (
+                const scalar planarCos,
+                const labelList& blockedSurfaces,
+                const label nAllowRefine,
+                const labelList& neiLevel,
+                const pointField& neiCc,
+
+                labelList& refineCell,
+                label& nRefine
+            ) const;
+
+
         // Baffle handling
 
             //- Get faces to repatch. Returns map from face to patch.
