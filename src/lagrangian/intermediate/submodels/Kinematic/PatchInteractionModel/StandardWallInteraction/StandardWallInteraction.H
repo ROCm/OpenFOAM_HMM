@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,19 +85,21 @@ protected:
         //- Restitution coefficient
         scalar mu_;
 
-    // Bookkeeping for particle fates
 
-        //- Number of parcels escaped
-        List<List<label>> nEscape_;
+        // Bookkeeping for particle fates
 
-        //- Mass of parcels escaped
-        List<List<scalar>> massEscape_;
+            //- Number of parcels escaped
+            List<List<label>> nEscape_;
 
-        //- Number of parcels stuck to patches
-        List<List<label>> nStick_;
+            //- Mass of parcels escaped
+            List<List<scalar>> massEscape_;
 
-        //- Mass of parcels stuck to patches
-        List<List<scalar>> massStick_;
+            //- Number of parcels stuck to patches
+            List<List<label>> nStick_;
+
+            //- Mass of parcels stuck to patches
+            List<List<scalar>> massStick_;
+
 
         //- Flag to output escaped/mass particles sorted by injectorID
         bool outputByInjectorId_;
@@ -105,6 +107,12 @@ protected:
         //- InjectorId to index map, when outputting escaped/stick/...
         //  particles sorted by injectorID
         Map<label> injIdToIndex_;
+
+
+    // Protected Member Functions
+
+        //- Output file header information
+        virtual void writeFileHeader(Ostream& os);
 
 
 public:

@@ -121,6 +121,8 @@ subModels
                 type escape;
             }
         );
+
+        writeToFile     yes;
     }
 
     RanzMarshallCoeffs

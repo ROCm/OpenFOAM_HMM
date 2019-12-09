@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,6 +49,7 @@ SourceFiles
 #include "wallPolyPatch.H"
 #include "tetIndices.H"
 #include "CloudSubModelBase.H"
+#include "writeFile.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,7 +63,8 @@ namespace Foam
 template<class CloudType>
 class PatchInteractionModel
 :
-    public CloudSubModelBase<CloudType>
+    public CloudSubModelBase<CloudType>,
+    public functionObjects::writeFile
 {
 public:
 
@@ -82,7 +85,7 @@ public:
 
 protected:
 
-    // Private data
+    // Protected data
 
         //- Name of velocity field - default = "U"
         const word UName_;
@@ -96,6 +99,11 @@ protected:
             //- Mass of parcels escaped
             scalar escapedMass_;
 
+
+    // Protected Member Functions
+
+        //- Output file header information
+        virtual void writeFileHeader(Ostream& os);
 
 
 public:
