@@ -177,31 +177,37 @@ Foam::waveMakerPointPatchVectorField::waveMakerPointPatchVectorField
     waveAngle_(dict.get<scalar>("waveAngle")),
     startTime_
     (
-        dict.lookupOrDefault<scalar>
+        dict.getOrDefault<scalar>
         (
             "startTime",
             db().time().startTime().value()
         )
     ),
     rampTime_(dict.get<scalar>("rampTime")),
-    secondOrder_(dict.lookupOrDefault<bool>("secondOrder", false)),
-    nPaddle_(readScalar(dict.lookup("nPaddle")))
+    secondOrder_(dict.getOrDefault<bool>("secondOrder", false)),
+    nPaddle_(dict.getOrDefault<label>("nPaddle", 1))
 {
     // Create the co-ordinate system
     if (mag(n_) < SMALL)
     {
         FatalIOErrorInFunction(dict)
-            << "Patch normal direction vector is not set.  'n' = " << n_
+            << "Patch normal direction vector is not set. 'n' = " << n_
             << exit(FatalIOError);
     }
-    n_ /= mag(n_);
+    n_.normalise();
 
     gHat_ = (g() - n_*(n_&g()));
-    gHat_ /= mag(gHat_);
+    if (mag(gHat_) < SMALL)
+    {
+        FatalIOErrorInFunction(dict)
+            << "Patch normal and gravity directions must not be aligned. "
+            << "'n' = " << n_ << " 'g' = " << g()
+            << exit(FatalIOError);
+    }
+    gHat_.normalise();
 
     waveAngle_ *= constant::mathematical::pi/180;
 
-    Info << " Initialise geometry... " << endl;
     initialiseGeometry();
 
     waterDepthRef_.setSize(nPaddle_, -1);
@@ -268,156 +274,142 @@ void Foam::waveMakerPointPatchVectorField::updateCoeffs()
         return;
     }
 
-    if (firstTime==0)
+    if (firstTime == 0)
     {
-	// Set the reference water depth
-	if (initialDepth_ != 0 )
-	{
-	    forAll(waterDepthRef_,paddlei)
-	    {
-	    	waterDepthRef_[paddlei] = initialDepth_;
-	    }
-	}
-	else
-	{
-	    FatalErrorInFunction
-                << "initialDepth is not set.  Please update "
-                << abort(FatalError);
-	}
+        // Set the reference water depth
+        if (initialDepth_ != 0 )
+        {
+            forAll(waterDepthRef_,paddlei)
+            {
+                waterDepthRef_[paddlei] = initialDepth_;
+            }
+        }
+        else
+        {
+            FatalErrorInFunction
+               << "initialDepth is not set.  Please update "
+               << abort(FatalError);
+        }
 
 
-	Info << " WaterDepth at the wavepaddles = " << waterDepthRef_ << endl;
-	firstTime = 1;
+        Info << " WaterDepth at the wavepaddles = " << waterDepthRef_ << endl;
+        firstTime = 1;
     }
 
     const scalar t = db().time().value() - startTime_;
 
     scalarField waveLength_(nPaddle_,-1);
 
-    scalarField waveK(nPaddle_,-1);
-    scalarField waveKx(nPaddle_,-1);
-    scalarField waveKy(nPaddle_,-1);
+    scalarField waveK(nPaddle_, -1);
+    scalarField waveKx(nPaddle_, -1);
+    scalarField waveKy(nPaddle_, -1);
 
-    forAll (waveK, labelP)
+    forAll(waveK, pointi)
     {
-        waveLength_[labelP] = waveLength (waterDepthRef_[labelP], wavePeriod_);
+        waveLength_[pointi] = waveLength(waterDepthRef_[pointi], wavePeriod_);
 
-        waveK[labelP] = constant::mathematical::twoPi/waveLength_[labelP];
-        waveKx[labelP] = waveK[labelP]*cos(waveAngle_);
-        waveKy[labelP] = waveK[labelP]*sin(waveAngle_);
+        waveK[pointi] = constant::mathematical::twoPi/waveLength_[pointi];
+        waveKx[pointi] = waveK[pointi]*cos(waveAngle_);
+        waveKy[pointi] = waveK[pointi]*sin(waveAngle_);
     }
-    const scalar sigma_ = (2.0*constant::mathematical::pi) / wavePeriod_;
+    const scalar sigma = 2*constant::mathematical::pi/wavePeriod_;
 
     switch (motionType_)
     {
         case motionTypes::flap:
         {
             const pointField& points = patch().localPoints();
-	    scalarField motionX (patch().localPoints().size(),-1);
+            scalarField motionX(patch().localPoints().size(), -1);
 
-	    forAll (points, labelP)
-	    {
+            forAll(points, pointi)
+            {
+                const label paddlei = pointToPaddle_[pointi];
 
-	       const label paddlei = pointToPaddle_[labelP];
+                const scalar phaseTot =
+                   waveKx[paddlei]*xPaddle_[paddlei]
+                 + waveKy[paddlei]*yPaddle_[paddlei];
 
-	       scalar phaseTot = waveKx[paddlei]*xPaddle_[paddlei] + waveKy[paddlei]*yPaddle_[paddlei];
+                const scalar depthRef = waterDepthRef_[paddlei];
+                const scalar kh = waveK[paddlei]*depthRef;
+                const scalar pz = points[pointi].component(2);
 
-	        if (secondOrder_)
-	        {
-	    	    scalar m1_ = ((4.0*sinh(waveK[paddlei]*waterDepthRef_[paddlei]))
-	        		/ (sinh(2.0*waveK[paddlei]*waterDepthRef_[paddlei])+2.0*waveK[paddlei]*waterDepthRef_[paddlei]))
-				* ( sinh(waveK[paddlei]*waterDepthRef_[paddlei]) + 1.0/(waveK[paddlei]*waterDepthRef_[paddlei])
-				* (1.0-cosh(waveK[paddlei]*waterDepthRef_[paddlei])));
+                const scalar m1 =
+                    (4*sinh(kh)/(sinh(2*kh) + 2*kh))
+                  * (sinh(kh) + 1/kh*(1 - cosh(kh)));
 
-	    	    motionX[labelP] = waveHeight_/(2.0*m1_)*sin(phaseTot - sigma_*t)
-	        		+ pow(waveHeight_,2)/(16.0*waterDepthRef_[paddlei])*(3.0*cosh(waveK[paddlei]*waterDepthRef_[paddlei])
-				/ pow(sinh(waveK[paddlei]*waterDepthRef_[paddlei]),3) -2.0/m1_)*sin(phaseTot - 2.0*sigma_*t);
+                const scalar boardStroke = waveHeight_/m1;
 
-	    	    motionX[labelP] = timeCoeff(t)
-	        	        * (1.0+((points[labelP].component(2)-zMinGb_)-waterDepthRef_[paddlei])
-		  	        / (waterDepthRef_[paddlei])) * motionX[labelP];
-		}
-		else
-		{
-	    	    scalar waveBoardStroke_ = (sinh(2.0*waveK[paddlei]*waterDepthRef_[paddlei])
-	        	+ 2.0*waveK[paddlei]*waterDepthRef_[paddlei])
-			/ (4.0*sinh(waveK[paddlei]*waterDepthRef_[paddlei]))
-			* (1.0 / ( sinh(waveK[paddlei]*waterDepthRef_[paddlei])
-			+ (1.0-cosh(waveK[paddlei]*waterDepthRef_[paddlei]))
-			/ (waveK[paddlei]*waterDepthRef_[paddlei]) ) ) * waveHeight_;
+                motionX[pointi] = 0.5*boardStroke*sin(phaseTot - sigma*t);
 
-	            motionX[labelP] = timeCoeff(t)
-	        	* (1.0+((points[labelP].component(2)-zMinGb_)-waterDepthRef_[paddlei])
-			/ (waterDepthRef_[paddlei]))*(waveBoardStroke_/2.0)*sin(phaseTot-sigma_*t);
-		}
+                if (secondOrder_)
+                {
+                    motionX[pointi] +=
+                        sqr(waveHeight_)/(16*depthRef)
+                      * (3*cosh(kh)/pow3(sinh(kh)) - 2/m1)
+                      * sin(phaseTot - 2*sigma*t);
 
-	    }
+                }
 
-            Field<vector>::operator=
-            (
-                n_*motionX
-            );
+                motionX[pointi] *= 1.0 + (pz - zMinGb_ - depthRef)/depthRef;
+
+            }
+
+            Field<vector>::operator=(timeCoeff(t)*n_*motionX);
 
             break;
         }
         case motionTypes::piston:
         {
             const pointField& points = patch().localPoints();
-	    scalarField motionX (patch().localPoints().size(),-1);
+            scalarField motionX(patch().localPoints().size(), -1);
 
-	    forAll (points, labelP)
-	    {
-	       const label paddlei = pointToPaddle_[labelP];
+            forAll(points, pointi)
+            {
+                const label paddlei = pointToPaddle_[pointi];
 
-	       scalar phaseTot = waveKx[paddlei]*xPaddle_[paddlei] + waveKy[paddlei]*yPaddle_[paddlei];
+                const scalar phaseTot =
+                    waveKx[paddlei]*xPaddle_[paddlei]
+                  + waveKy[paddlei]*yPaddle_[paddlei];
 
-               if (secondOrder_)
-               {
- 	           const scalar m1_ = 2.0*(cosh(2.0*waveK[paddlei]*waterDepthRef_[paddlei]) - 1.0)
-		       / (sinh(2.0*waveK[paddlei]*waterDepthRef_[paddlei])
-		       + 2.0*waveK[paddlei]*waterDepthRef_[paddlei]);
+                const scalar depthRef = waterDepthRef_[paddlei];
+                const scalar kh = waveK[paddlei]*depthRef;
+                const scalar m1 = 2*(cosh(2*kh) - 1.0)/(sinh(2*kh) + 2*kh);
+                const scalar boardStroke = waveHeight_/m1;
 
-                   motionX[labelP] = timeCoeff(t) * (waveHeight_/(2.0*m1_)
-	               * sin(phaseTot - sigma_*t) + pow(waveHeight_,2)
-	               / (32.0*waterDepthRef_[paddlei])*(3.0*cosh(waveK[paddlei]*waterDepthRef_[paddlei])
-	               / pow(sinh(waveK[paddlei]*waterDepthRef_[paddlei]),3)-2.0/m1_)
-	               * sin(phaseTot - 2.0*sigma_*t));
-               }
-	       else
-	       {
-		   scalar waveBoardStroke_ = (sinh(2.0*waveK[paddlei]*waterDepthRef_[paddlei])
-	               + 2.0*waveK[paddlei]*waterDepthRef_[paddlei])
-	               / (2.0*(cosh(2.0*waveK[paddlei]*waterDepthRef_[paddlei])
-	               - 1.0)) * waveHeight_;
-		   motionX[labelP] = timeCoeff(t)*(waveBoardStroke_/2.0)
-				     * sin(phaseTot-sigma_*t);
-	       }
-	    }
+                motionX[pointi] = 0.5*boardStroke*sin(phaseTot - sigma*t);
 
-	    Field<vector>::operator=
-	    (
-	        n_*motionX
-	    );
+                if (secondOrder_)
+                {
+                    motionX[pointi] +=
+                      + sqr(waveHeight_)
+                      / (32*depthRef)*(3*cosh(kh)/pow3(sinh(kh)) - 2.0/m1)
+                      * sin(phaseTot - 2*sigma*t);
+                }
+            }
+
+            Field<vector>::operator=(timeCoeff(t)*n_*motionX);
 
             break;
         }
         case motionTypes::solitary:
         {
             const pointField& points = patch().localPoints();
-	    scalarField motionX (patch().localPoints().size(),-1);
+            scalarField motionX(patch().localPoints().size(), -1);
+            const scalar magG = mag(g());
 
-	    forAll (points, labelP)
-	    {
-	        const label paddlei = pointToPaddle_[labelP];
+            forAll(points, pointi)
+            {
+                const label paddlei = pointToPaddle_[pointi];
+                const scalar depthRef = waterDepthRef_[paddlei];
 
-                scalar kappa = sqrt(0.75*waveHeight_/(pow3(waterDepthRef_[paddlei])));
-                scalar waveCelerity = sqrt(mag(g())*(waterDepthRef_[paddlei] + waveHeight_));
-                scalar stroke = sqrt(16.0*waveHeight_*waterDepthRef_[paddlei]/3.0);
-                scalar hr = waveHeight_/waterDepthRef_[paddlei];
-                wavePeriod_ = (2.0/(kappa*waveCelerity))*(3.8 + hr);
-                scalar tSolitary = -0.5*wavePeriod_ + t;
+                const scalar kappa = sqrt(0.75*waveHeight_/pow3(depthRef));
+                const scalar celerity = sqrt(magG*(depthRef + waveHeight_));
+                const scalar stroke = sqrt(16*waveHeight_*depthRef/3.0);
+                const scalar hr = waveHeight_/depthRef;
+                wavePeriod_ = 2.0/(kappa*celerity)*(3.8 + hr);
+                const scalar tSolitary = -0.5*wavePeriod_ + t;
 
-                // Newton-Rapshon
+                // Newton-Raphson
                 scalar theta1 = 0;
                 scalar theta2 = 0;
                 scalar er = 10000;
@@ -426,16 +418,16 @@ void Foam::waveMakerPointPatchVectorField::updateCoeffs()
                 {
                     theta2 =
                         theta1
-                        - (theta1 - kappa*waveCelerity*tSolitary + hr*tanh(theta1))
-                        /(1.0 + hr*(1.0/cosh(theta1))*(1.0/cosh(theta1)));
+                      - (theta1 - kappa*celerity*tSolitary + hr*tanh(theta1))
+                       /(1.0 + hr*(1.0/cosh(theta1))*(1.0/cosh(theta1)));
 
                     er = mag(theta1 - theta2);
                     theta1 = theta2;
                 }
 
-                motionX[labelP] =
-                    waveHeight_/(kappa*waterDepthRef_[paddlei])*tanh(theta1) + 0.5*stroke;
-	    }
+                motionX[pointi] =
+                    waveHeight_/(kappa*depthRef)*tanh(theta1) + 0.5*stroke;
+            }
 
             Field<vector>::operator=(n_*motionX);
 
@@ -448,7 +440,6 @@ void Foam::waveMakerPointPatchVectorField::updateCoeffs()
                 << abort(FatalError);
         }
     }
-
 
     fixedValuePointPatchField<vector>::updateCoeffs();
 }

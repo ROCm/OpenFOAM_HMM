@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018-2019 IH-Cantabria
-    Copyright (C) 2018
+    Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -136,8 +136,8 @@ class waveMakerPointPatchVectorField
         //- Wave phase
         scalar wavePhase_;
 
-	//wave angle
-	scalar waveAngle_;
+        //- Wave angle
+        scalar waveAngle_;
 
         //- Wave length
         scalar waveLength_;
@@ -151,8 +151,8 @@ class waveMakerPointPatchVectorField
         //- On/off second order calculation switch
         scalar secondOrder_;
 
-	// number wavepaddles
-        scalar nPaddle_;
+        //- Number of wave paddles
+        label nPaddle_;
 
         //- Rotation tensor from global to local system
         tensor Rgl_;
@@ -188,16 +188,16 @@ class waveMakerPointPatchVectorField
         scalarField zMin_;
 
         //- Global Minimum z (point) / [m]
-	scalar zMinGb_;
+        scalar zMinGb_;
 
         //- Maximum z (point) height per patch face / [m]
         scalarField zMax_;
 
-	// calculated water depth at the patch
+        //- Calculated water depth at the patch
         scalarField waterDepthRef_;
 
         //
-	scalar firstTime = 0;
+        scalar firstTime = 0;
 
 
     // Protected Member Functions
@@ -213,6 +213,7 @@ class waveMakerPointPatchVectorField
 
         //- Initialise
         virtual void initialiseGeometry();
+
 
 public:
 
