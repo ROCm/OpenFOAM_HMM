@@ -25,73 +25,81 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "evalStringToScalar.H"
-#include "evalStringToScalarDriver.H"
-#include "evalStringToScalarScanner.H"
+#include "stringOpsEvaluate.H"
+#include "stringOps.H"
+#include "StringStream.H"
+#include "fieldExprDriver.H"
 #include "error.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-namespace parsing
-{
-
-int evalStringToScalar::debug
-(
-    ::Foam::debug::debugSwitch("stringToScalar", 0)
-);
-registerDebugSwitchWithName
-(
-    evalStringToScalar,
-    evalStringToScalar,
-    "stringToScalar"
-);
-
-} // End namespace parsing
-} // End namespace Foam
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::parsing::evalStringToScalar::parseDriver::parseDriver()
-:
-    genericRagelLemonDriver(),
-    value_(0)
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::scalar Foam::parsing::evalStringToScalar::parseDriver::execute
-(
-    const std::string& s,
-    size_t pos,
-    size_t len
-)
-{
-    // scanner::debug = 1;
-
-    scanner().process(s, pos, len, *this);
-
-    return value_;
-}
-
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::stringOps::toScalar
+Foam::string Foam::stringOps::evaluate
 (
-    const std::string& s,
+    const std::string& str,
     size_t pos,
     size_t len
 )
 {
-    parsing::evalStringToScalar::parseDriver driver;
+    /// InfoErr<< "Evaluate " << str.substr(pos, len) << nl;
 
-    driver.execute(s, pos, len);
+    size_t end = str.length();
+    if (pos > end)
+    {
+        pos = end;
+    }
+    else if (len != std::string::npos)
+    {
+        len += pos;
 
-    return driver.value();
+        if (len < end)
+        {
+            end = len;
+        }
+    }
+
+    // Adjust like inplaceTrim
+
+    // Right
+    while (pos < end && std::isspace(str[end-1]))
+    {
+        --end;
+    }
+
+    // Left
+    while (pos < end && std::isspace(str[pos]))
+    {
+        ++pos;
+    }
+
+    if ((pos >= end) || std::isspace(str[pos]))
+    {
+        return "";
+    }
+
+    len = (end - pos);
+
+    /// InfoErr<< "Evaluate " << str.substr(pos, len) << nl;
+
+    expressions::exprResult result;
+    {
+        expressions::fieldExprDriver driver(1);
+        driver.parse(str, pos, len);
+        result = std::move(driver.result());
+    }
+
+    if (!result.hasValue() || !result.size())
+    {
+        InfoErr
+            << "Failed evaluation: "
+            << str.substr(pos, len) << nl;
+
+        return "";
+    }
+
+    OStringStream os;
+    result.writeValue(os);
+
+    return os.str();
 }
 
 

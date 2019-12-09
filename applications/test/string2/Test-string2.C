@@ -132,6 +132,9 @@ int main(int argc, char *argv[])
                 "sqrt(2) = (${{ sqrt(2) }/* Truncated */",
                 "sqrt(2) = (${{ sqrt(2) * foo() }})/* bad expr */",
                 "huge = (${{ sqrt(123E+5000) }})/* range error */",
+
+                "vector=${{   5 * vector(1,2,3)   }}=",
+                "empty=${{    }}=",
             }
         )
         {

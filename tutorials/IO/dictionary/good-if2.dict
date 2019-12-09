@@ -36,4 +36,13 @@ FoamFile
 #endif
 
 
+// Silly example, but can also force cast from scalar to bool
+
+#if #eval "bool(2 * pi())"
+    condition true;
+#else
+    condition false;
+#endif
+
+
 // ************************************************************************* //

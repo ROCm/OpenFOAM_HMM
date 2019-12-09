@@ -27,7 +27,8 @@ Class
     Foam::functionEntries::evalEntry
 
 Description
-    Uses stringOps::toScalar to evaluate mathematical expressions.
+    Uses expressions::fieldExprDriver to evaluate mathematical expressions
+    with scalars, vectors etc.
 
     The input can any form of string or, for convenience,
     a '{}' delimited string literal.  In all cases, C/C++ comment stripping
@@ -81,8 +82,8 @@ class evalEntry
     public functionEntry
 {
 
-    //- Evaluate and return a scalar
-    static scalar evaluate(const dictionary& parentDict, Istream& is);
+    //- Evaluate and return a token list
+    static tokenList evaluate(const dictionary& parentDict, Istream& is);
 
 
 public:
@@ -94,9 +95,6 @@ public:
         primitiveEntry& thisEntry,
         Istream& is
     );
-
-    //- Execute in a sub-dict context
-    static bool execute(dictionary& parentDict, Istream& is);
 };
 
 

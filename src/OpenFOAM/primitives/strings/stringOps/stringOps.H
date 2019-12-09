@@ -46,9 +46,8 @@ SourceFiles
 #include "dictionary.H"
 #include "HashTable.H"
 #include "stringOpsSort.H"
+#include "stringOpsEvaluate.H"
 #include "wordRes.H"
-
-#include "evalStringToScalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -137,7 +136,7 @@ namespace stringOps
     //    - \c ${VAR}
     //    - \c ${VAR:-defValue}
     //    - \c ${VAR:+altValue}
-    //  -# numeric (scalar) evaluation using stringOps::toScalar
+    //  -# mathematical evaluation using stringOps::evaluate
     //    - \c ${{EXPR}}
     //  -# current directory
     //    - leading "./"
@@ -183,7 +182,7 @@ namespace stringOps
     //  \param sigil The leading sigil. Can be changed to avoid conflict
     //      with other string expansions. (default: '$')
     //
-    //  \sa Foam::findEtcEntry(), Foam::findEtcEntries(), stringOps::toScalar()
+    //  \sa Foam::findEtcEntry(), Foam::findEtcEntries(), stringOps::evaluate()
     //
     //  \note this function has too many parameters and should generally
     //      be avoided in user coding.

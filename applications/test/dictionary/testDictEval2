@@ -58,5 +58,7 @@ eval8a  #eval " pi() * 2 * ${{ ${factor$index} + ${factor10} }}";
 
 eval8b  #eval " pi() * 2 * $factor * ${{ 100 }}";
 
+eval10a  #eval "vector(1,2,3) * 5";
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

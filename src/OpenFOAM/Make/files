@@ -134,10 +134,8 @@ $(strings)/lists/hashedWordList.C
 $(strings)/parsing/parsing.C
 $(strings)/parsing/genericRagelLemonDriver.C
 $(strings)/stringOps/stringOps.C
+$(strings)/stringOps/stringOpsEvaluate.C
 $(strings)/stringOps/stringOpsSort.C
-$(strings)/stringOps/toScalar/evalStringToScalarDriver.C
-$(strings)/stringOps/toScalar/evalStringToScalarLemonParser.lyy-m4
-$(strings)/stringOps/toScalar/evalStringToScalarScanner.cc
 
 expr = expressions
 $(expr)/exprEntry/expressionEntry.C

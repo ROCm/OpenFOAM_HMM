@@ -25,8 +25,14 @@ License
 
 #include "evalEntry.H"
 #include "dictionary.H"
+#include "OTstream.H"
 #include "stringOps.H"
+#include "fieldExprDriver.H"
 #include "addToMemberFunctionSelectionTable.H"
+
+#undef  DetailInfo
+#define DetailInfo  if (::Foam::infoDetailLevel > 0) InfoErr
+
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -34,15 +40,6 @@ namespace Foam
 {
 namespace functionEntries
 {
-    addNamedToMemberFunctionSelectionTable
-    (
-        functionEntry,
-        evalEntry,
-        execute,
-        dictionaryIstream,
-        eval
-    );
-
     addNamedToMemberFunctionSelectionTable
     (
         functionEntry,
@@ -58,7 +55,7 @@ namespace functionEntries
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::scalar Foam::functionEntries::evalEntry::evaluate
+Foam::tokenList Foam::functionEntries::evalEntry::evaluate
 (
     const dictionary& parentDict,
     Istream& is
@@ -80,7 +77,8 @@ Foam::scalar Foam::functionEntries::evalEntry::evaluate
         FatalIOErrorInFunction(is)
             << "Bad token - could not get string to evaluate"
             << exit(FatalIOError);
-        return 0;
+
+        return tokenList();
     }
 
     if (tok.isString())
@@ -111,7 +109,9 @@ Foam::scalar Foam::functionEntries::evalEntry::evaluate
     stringOps::inplaceExpand(s, parentDict, true, true);
     stringOps::inplaceTrim(s);
 
-    // A common input error, so catch it now
+    // An extraneous trailing ';' is a common input error, catch it now.
+    // May need to relax in the future, trim or something else
+
     if (std::string::npos != s.find(';'))
     {
         FatalIOErrorInFunction(is)
@@ -128,13 +128,35 @@ Foam::scalar Foam::functionEntries::evalEntry::evaluate
     if (s.empty())
     {
         InfoErr
-            << "Empty #eval (treat as 0) - line "
+            << "Empty #eval - line "
             << is.lineNumber() << " in file " <<  parentDict.name() << nl;
 
-        return scalar(0);
+        return tokenList();
     }
 
-    return stringOps::toScalar(s);
+    expressions::exprResult result;
+    {
+        expressions::fieldExprDriver driver(1);
+        driver.parse(s);
+        result = std::move(driver.result());
+    }
+
+    if (!result.hasValue() || !result.size())
+    {
+        InfoErr
+            << "Failed #eval - line "
+            << is.lineNumber() << " in file " <<  parentDict.name() << nl;
+
+        return tokenList();
+    }
+
+    // Could average/reduce to a single value, but probably not needed
+    //// result.testIfSingleValue(false);  // No parallel check
+
+    OTstream toks;
+    result.writeValue(toks);
+
+    return toks;
 }
 
 
@@ -147,37 +169,9 @@ bool Foam::functionEntries::evalEntry::execute
     Istream& is
 )
 {
-    const scalar value = evaluate(parentDict, is);
+    tokenList toks(evaluate(parentDict, is));
 
-    // The result as terminated token entry
-    ITstream result
-    (
-        "eval",
-        tokenList({token(value), token(token::END_STATEMENT)})
-    );
-
-    entry.read(parentDict, result);
-
-    return true;
-}
-
-
-bool Foam::functionEntries::evalEntry::execute
-(
-    dictionary& parentDict,
-    Istream& is
-)
-{
-    const scalar value = evaluate(parentDict, is);
-
-    // The result as terminated token entry
-    ITstream result
-    (
-        "eval",
-        tokenList({token(value), token(token::END_STATEMENT)})
-    );
-
-    parentDict.read(result);
+    entry.append(std::move(toks), true);  // Lazy resizing
 
     return true;
 }

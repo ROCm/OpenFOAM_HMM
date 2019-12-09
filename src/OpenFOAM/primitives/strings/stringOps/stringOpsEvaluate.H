@@ -23,80 +23,59 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::parsing::evalStringToScalar::parser
+InNamespace
+    Foam::stringOps
 
 Description
-    Interface to lemon parser to simple string to scalar evaluation, which
-    is used by stringOps::toScalar
+    String expression evaluation.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef evalStringToScalarParser_H
-#define evalStringToScalarParser_H
+#ifndef stringOpsEvaluate_H
+#define stringOpsEvaluate_H
 
-namespace Foam
-{
-namespace parsing
-{
-namespace evalStringToScalar
-{
-
-// Forward Declarations
-class parseDriver;
-
-
-/*---------------------------------------------------------------------------*\
-                           Class parser Declaration
-\*---------------------------------------------------------------------------*/
-
-class parser
-{
-    // Private Data
-
-        //- Prompt for parser tracing
-        static constexpr const char* const prompt_ = "#eval:";
-
-        //- The lemon parser (demand-driven)
-        void* lemon_;
-
-
-public:
-
-    // Constructors
-
-        //- Construct null
-        parser() : lemon_(nullptr) {}
-
-
-    //- Destructor, delete lemon parser
-    ~parser()
-    {
-        stop();
-    }
-
-
-    // Member Functions
-
-        //- Start parsing, with given driver context
-        void start(parseDriver& driver);
-
-        //- Stop parsing, freeing the allocated parser
-        void stop();
-
-        //- Push token/value to parser
-        void parse(int tokenId, Foam::scalar val);
-
-        //- The text name corresponding to the tokenId
-        word nameOfToken(int tokenId) const;
-};
+#include "string.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace evalStringToScalar
-} // End namespace parsing
-} // End namespace Foam
+namespace Foam
+{
+namespace stringOps
+{
+    //- A simple string evaluation that handles various basic
+    //- expressions. For trivial input, use readScalar instead (faster).
+    //
+    //  The evaluation supports the following:
+    //  - operations:  - + * / %
+    //  - functions:  exp, log, log10, pow, sqrt, cbrt, sqr, mag, magSqr
+    //  - trigonometric:  sin, cos, tan, asin, acos, atan, atan2, hypot
+    //  - hyperbolic:  sinh, cosh, tanh
+    //  - conversions:  degToRad, radToDeg
+    //  - type conversion:  bool, mag
+    //  - constants:  pi(), true, false
+    //  - limits: neg, pos, neg0, pos0, sign, floor, ceil, round
+    //  - other: rand, rand(seed)
+    //  - logic: ! ? : ==  !=  <=  => < >
+    //
+    //  \note
+    //  Unlike C/C++, the ternary and logical operations are \b not
+    //  short-circuiting. So additional guards may be required.
+    //
+    //  \note
+    //  The rand() function returns a uniform scalar on [0-1] interval
+    //  and uses a constant seed.
+    string evaluate
+    (
+        const std::string& s,
+        size_t pos = 0,
+        size_t len = std::string::npos
+    );
 
+} // End namespace stringOps
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

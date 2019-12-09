@@ -570,9 +570,10 @@ static Foam::string recursiveExpand
 
                 ///Info<< "eval <" << out << ">" << endl;
 
-                // Even with allow empty, expressions need content
-                const scalar sval = stringOps::toScalar(out);
-                const word val(Foam::name(sval));
+                // Even with allow empty, expressions may need content
+
+                string val(stringOps::evaluate(out));
+                stringOps::inplaceTrim(val);
 
                 return val;
             }
