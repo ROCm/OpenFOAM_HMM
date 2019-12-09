@@ -164,6 +164,7 @@ cloudFunctions
     patchPostProcessing1
     {
         type            patchPostProcessing;
+        fields          (position "U.*" d T nParticle);
         maxStoredParcels 20;
         patches
         (
