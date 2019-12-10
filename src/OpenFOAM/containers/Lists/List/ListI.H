@@ -163,6 +163,8 @@ inline T& Foam::List<T>::newElmt(const label i)
 
     if (i >= n)
     {
+        if (!n) n = 1;  // Avoid dead-lock when starting from zero-sized
+
         do
         {
             n *= 2;

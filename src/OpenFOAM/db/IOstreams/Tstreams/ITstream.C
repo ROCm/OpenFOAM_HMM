@@ -114,8 +114,10 @@ void Foam::ITstream::reserveCapacity
 
         label n = tokenList::size();
 
-        if (nElem >= n)
+        if (nElem > n)
         {
+            if (!n) n = 1;  // Avoid dead-lock when starting from zero-sized
+
             do
             {
                 n *= 2;
