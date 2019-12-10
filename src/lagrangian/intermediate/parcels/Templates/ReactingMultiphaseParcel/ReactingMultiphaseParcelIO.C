@@ -283,6 +283,30 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeFields
 
 
 template<class ParcelType>
+void Foam::ReactingMultiphaseParcel<ParcelType>::writeProperties
+(
+    Ostream& os,
+    const wordRes& filters,
+    const word& delim,
+    const bool namesOnly
+) const
+{
+    ParcelType::writeProperties(os, filters, delim, namesOnly);
+
+    #undef  writeProp
+    #define writeProp(Name, Value)                                            \
+        ParcelType::writeProperty(os, Name, Value, namesOnly, delim, filters)
+
+    writeProp("YGas", YGas_);
+    writeProp("YLiquid", YLiquid_);
+    writeProp("YSolid", YSolid_);
+    writeProp("canCombust", canCombust_);
+
+    #undef writeProp
+}
+
+
+template<class ParcelType>
 template<class CloudType>
 void Foam::ReactingMultiphaseParcel<ParcelType>::readObjects
 (

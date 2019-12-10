@@ -121,7 +121,7 @@ bool Foam::functionObjects::continuityError::write()
 
     Ostream& os = file();
 
-    writeTime(os);
+    writeCurrentTime(os);
 
     os  << local << tab
         << global << tab

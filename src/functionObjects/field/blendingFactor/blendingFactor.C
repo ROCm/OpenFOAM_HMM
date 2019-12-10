@@ -174,7 +174,7 @@ bool Foam::functionObjects::blendingFactor::write()
             << "    blended cells  :  " << nCellsBlended << nl
             << endl;
 
-        writeTime(file());
+        writeCurrentTime(file());
 
         file()
             << token::TAB << nCellsScheme1

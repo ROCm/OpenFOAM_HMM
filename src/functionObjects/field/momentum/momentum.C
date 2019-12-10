@@ -334,7 +334,7 @@ void Foam::functionObjects::momentum::writeValues(Ostream& os)
 
     if (writeToFile())
     {
-        writeTime(os);
+        writeCurrentTime(os);
 
         os << tab << sumMomentum_;
 

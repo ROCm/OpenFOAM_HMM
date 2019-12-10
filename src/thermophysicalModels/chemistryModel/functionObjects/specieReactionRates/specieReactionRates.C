@@ -120,7 +120,7 @@ bool Foam::functionObjects::specieReactionRates<ChemistryModelType>::write()
 
     for (label ri=0; ri<nReaction; ri++)
     {
-        writeTime(file());
+        writeCurrentTime(file());
         file() << token::TAB << ri;
 
         for (label si=0; si<nSpecie; si++)

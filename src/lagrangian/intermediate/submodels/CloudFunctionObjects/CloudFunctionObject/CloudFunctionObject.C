@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2011-2019 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,9 +66,7 @@ Foam::CloudFunctionObject<CloudType>::CloudFunctionObject
     (
         owner.mesh().time().globalPath()
       / functionObject::outputPrefix
-      / cloud::prefix
-      / owner.name()
-      / this->modelName()
+      / this->localPath()
     );
 
     outputDir_.clean();  // Remove unneeded ".."

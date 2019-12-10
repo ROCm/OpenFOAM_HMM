@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,29 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "StandardWallInteraction.H"
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class CloudType>
+void Foam::StandardWallInteraction<CloudType>::writeFileHeader(Ostream& os)
+{
+    PatchInteractionModel<CloudType>::writeFileHeader(os);
+
+    forAll(nEscape_, patchi)
+    {
+        const word& patchName = mesh_.boundary()[patchi].name();
+
+        forAll(nEscape_[patchi], injectori)
+        {
+            const word suffix = Foam::name(injectori);
+            this->writeTabbed(os, patchName + "_nEscape_" + suffix);
+            this->writeTabbed(os, patchName + "_massEscape_" + suffix);
+            this->writeTabbed(os, patchName + "_nStick_" + suffix);
+            this->writeTabbed(os, patchName + "_massStick_" + suffix);
+        }
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -51,8 +74,8 @@ Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
     massStick_(nEscape_.size()),
     injIdToIndex_()
 {
-    const bool outputByInjectorId
-        = this->coeffDict().lookupOrDefault("outputByInjectorId", false);
+    const bool outputByInjectorId =
+        this->coeffDict().lookupOrDefault("outputByInjectorId", false);
 
     switch (interactionType_)
     {
@@ -277,33 +300,48 @@ void Foam::StandardWallInteraction<CloudType>::info(Ostream& os)
             indexToInjector[iter.val()] = iter.key();
         }
 
-        forAll(npe, i)
+        forAll(npe, patchi)
         {
-            forAll(mpe[i], idx)
+            forAll(mpe[patchi], indexi)
             {
-                os  << "    Parcel fate: patch " <<  mesh_.boundary()[i].name()
+                const word& patchName = mesh_.boundary()[patchi].name() ;
+
+                os  << "    Parcel fate: patch " <<  patchName
                     << " (number, mass)" << nl
-                    << "      - escape  (injector " << indexToInjector[idx]
-                    << ")  = " << npe[i][idx]
-                    << ", " << mpe[i][idx] << nl
-                    << "      - stick   (injector " << indexToInjector[idx]
-                    << ")  = " << nps[i][idx]
-                    << ", " << mps[i][idx] << nl;
+                    << "      - escape  (injector " << indexToInjector[indexi]
+                    << ")  = " << npe[patchi][indexi]
+                    << ", " << mpe[patchi][indexi] << nl
+                    << "      - stick   (injector " << indexToInjector[indexi]
+                    << ")  = " << nps[patchi][indexi]
+                    << ", " << mps[patchi][indexi] << nl;
+
+                this->file()
+                    << tab << npe[patchi][indexi] << tab << mpe[patchi][indexi]
+                    << tab << nps[patchi][indexi] << tab << mps[patchi][indexi];
             }
         }
+
+        this->file() << endl;
     }
     else
     {
-        forAll(npe, i)
+        forAll(npe, patchi)
         {
-            os  << "    Parcel fate: patch (number, mass) "
-                << mesh_.boundary()[i].name() << nl
-                << "      - escape                      = "
-                << npe[i][0] << ", " << mpe[i][0] << nl
-                << "      - stick                       = "
-                << nps[i][0] << ", " << mps[i][0] << nl;
+            const word& patchName = mesh_.boundary()[patchi].name();
 
+            os  << "    Parcel fate: patch (number, mass) "
+                << patchName << nl
+                << "      - escape                      = "
+                << npe[patchi][0] << ", " << mpe[patchi][0] << nl
+                << "      - stick                       = "
+                << nps[patchi][0] << ", " << mps[patchi][0] << nl;
+
+            this->file()
+                << tab << npe[patchi][0] << tab << mpe[patchi][0]
+                << tab << nps[patchi][0] << tab << mps[patchi][0];
         }
+
+        this->file() << endl;
     }
 
     if (this->writeTime())

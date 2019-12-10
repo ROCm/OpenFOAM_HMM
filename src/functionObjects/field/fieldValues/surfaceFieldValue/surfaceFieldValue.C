@@ -992,7 +992,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::write()
 
     if (operation_ != opNone)
     {
-        writeTime(file());
+        writeCurrentTime(file());
     }
 
     if (writeArea_)

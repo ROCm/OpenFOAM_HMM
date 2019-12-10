@@ -232,6 +232,28 @@ void Foam::ReactingParcel<ParcelType>::writeFields
 
 
 template<class ParcelType>
+void Foam::ReactingParcel<ParcelType>::writeProperties
+(
+    Ostream& os,
+    const wordRes& filters,
+    const word& delim,
+    const bool namesOnly
+) const
+{
+    ParcelType::writeProperties(os, filters, delim, namesOnly);
+
+    #undef  writeProp
+    #define writeProp(Name, Value)                                            \
+        ParcelType::writeProperty(os, Name, Value, namesOnly, delim, filters)
+
+    writeProp("mass0", mass0_);
+    writeProp("Y", Y_);
+
+    #undef writeProp
+}
+
+
+template<class ParcelType>
 template<class CloudType>
 void Foam::ReactingParcel<ParcelType>::readObjects
 (

@@ -109,6 +109,9 @@ public:
             //- Flag to indicate when to write a property
             virtual bool writeTime() const;
 
+            //- Output directory
+            virtual fileName localPath() const;
+
 
         // Edit
 

@@ -659,6 +659,15 @@ public:
             template<class TrackCloudType>
             static void writeFields(const TrackCloudType& c);
 
+            //- Write individual parcel properties to stream
+            void writeProperties
+            (
+                Ostream& os,
+                const wordRes& filters,
+                const word& delim,
+                const bool namesOnly = false
+            ) const;
+
             //- Read particle fields as objects from the obr registry
             template<class CloudType>
             static void readObjects(CloudType& c, const objectRegistry& obr);

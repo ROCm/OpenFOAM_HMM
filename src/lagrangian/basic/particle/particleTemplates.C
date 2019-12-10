@@ -40,6 +40,102 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+template<class Type>
+void Foam::particle::writePropertyName
+(
+    Ostream& os,
+    const word& name,
+    const word& delim
+)
+{
+    if (pTraits<Type>::nComponents == 1)
+    {
+        os  << name;
+    }
+    else
+    {
+        os  << '(';
+        for (int i = 0; i < pTraits<Type>::nComponents; ++i)
+        {
+            if (i) os  << delim;
+
+            os   << name << Foam::name(i);
+        }
+        os  << ')';
+    }
+}
+
+
+template<class Type>
+void Foam::particle::writeProperty
+(
+    Ostream& os,
+    const word& name,
+    const Type& value,
+    const bool nameOnly,
+    const word& delim,
+    const wordRes& filters
+)
+{
+    if (!filters.empty() && !filters.match(name))
+    {
+        return;
+    }
+
+    os  << delim;
+    if (nameOnly)
+    {
+        writePropertyName<Type>(os, name, delim);
+    }
+    else
+    {
+        os  << value;
+    }
+}
+
+
+template<class Type>
+void Foam::particle::writeProperty
+(
+    Ostream& os,
+    const word& name,
+    const Field<Type>& values,
+    const bool nameOnly,
+    const word& delim,
+    const wordRes& filters
+)
+{
+    if (!filters.empty() && !filters.match(name))
+    {
+        return;
+    }
+
+    if (nameOnly)
+    {
+        os  << delim;
+        os  << "N(";
+        if (values.size())
+        {
+            forAll(values, i)
+            {
+                if (i) os  << delim;
+                const word tag(name + Foam::name(i));
+                writePropertyName<Type>(os, tag, delim);
+            }
+        }
+        else
+        {
+            os  << name;
+        }
+        os << ')';
+    }
+    else
+    {
+        os  << delim << values;
+    }
+}
+
+
 template<class TrackCloudType>
 void Foam::particle::readFields(TrackCloudType& c)
 {

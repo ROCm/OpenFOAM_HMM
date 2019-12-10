@@ -165,7 +165,7 @@ bool Foam::functionObjects::sixDoFRigidBodyState::write()
         }
     }
 
-    writeTime(file());
+    writeCurrentTime(file());
     file()
         << tab
         << motion.centreOfRotation()  << tab

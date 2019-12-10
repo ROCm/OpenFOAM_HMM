@@ -152,7 +152,7 @@ bool Foam::functionObjects::fieldMinMax::write()
 {
     writeFileHeader(file());
 
-    if (!location_) writeTime(file());
+    if (!location_) writeCurrentTime(file());
     Log << type() << " " << name() <<  " write:" << nl;
 
     for (const word& fieldName : fieldSet_.selectionNames())
