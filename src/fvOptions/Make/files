@@ -18,6 +18,7 @@ $(derivedSources)/explicitPorositySource/explicitPorositySource.C
 $(derivedSources)/jouleHeatingSource/jouleHeatingSource.C
 $(derivedSources)/meanVelocityForce/meanVelocityForce.C
 $(derivedSources)/meanVelocityForce/patchMeanVelocityForce/patchMeanVelocityForce.C
+$(derivedSources)/multiphaseStabilizedTurbulence/multiphaseStabilizedTurbulence.C
 $(derivedSources)/phaseLimitStabilization/phaseLimitStabilization.C
 $(derivedSources)/radialActuationDiskSource/radialActuationDiskSource.C
 $(derivedSources)/rotorDiskSource/rotorDiskSource.C
@@ -56,5 +57,6 @@ $(derivedConstraints)/velocityDampingConstraint/velocityDampingConstraint.C
 
 corrections/limitTemperature/limitTemperature.C
 corrections/limitVelocity/limitVelocity.C
+
 
 LIB = $(FOAM_LIBBIN)/libfvOptions
