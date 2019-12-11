@@ -9,7 +9,7 @@ include $(RULES)/c++$(WM_COMPILE_OPTION)
 
 c++FLAGS    = $(c++ARCH) $(GFLAGS) $(c++WARN) $(c++OPT) $(c++DBUG) $(ptFLAGS) $(LIB_HEADER_DIRS)
 
-Ctoo        = $(WM_SCHEDULER) $(CC) $(c++FLAGS) -c $< -o $@
+Ctoo        = $(WM_SCHEDULER) $(CC) $(c++FLAGS) -Wno-alloc-size-larger-than -c $< -o $@
 cxxtoo      = $(Ctoo)
 cctoo       = $(Ctoo)
 cpptoo      = $(Ctoo)
