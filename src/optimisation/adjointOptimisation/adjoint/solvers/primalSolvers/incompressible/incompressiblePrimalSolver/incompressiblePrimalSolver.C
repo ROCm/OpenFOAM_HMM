@@ -58,7 +58,6 @@ Foam::incompressiblePrimalSolver::incompressiblePrimalSolver
 )
 :
     primalSolver(mesh, managerType, dict),
-    vars_(nullptr),
     phiReconstructionTol_
     (
         dict.subOrEmptyDict("fieldReconstruction").
@@ -69,11 +68,7 @@ Foam::incompressiblePrimalSolver::incompressiblePrimalSolver
         dict.subOrEmptyDict("fieldReconstruction").
             lookupOrDefault<label>("iters", label(10))
     ),
-    fvOptions_
-    (
-        mesh_,
-        dict.subOrEmptyDict("fvOptions")
-    )
+    fvOptions_(nullptr)
 {}
 
 
@@ -115,7 +110,7 @@ bool Foam::incompressiblePrimalSolver::readDict(const dictionary& dict)
 {
     if (primalSolver::readDict(dict))
     {
-        fvOptions_.read(dict.subOrEmptyDict("fvOptions"));
+        fvOptions_().read(dict.subOrEmptyDict("fvOptions"));
 
         return true;
     }
@@ -158,22 +153,26 @@ bool Foam::incompressiblePrimalSolver::useSolverNameForFields() const
 
 
 const Foam::incompressibleVars&
-Foam::incompressiblePrimalSolver::getVars() const
+Foam::incompressiblePrimalSolver::getIncoVars() const
 {
-    return vars_();
+    const incompressibleVars& incoVars = 
+        refCast<incompressibleVars>(const_cast<variablesSet&>(vars_()));
+    return incoVars;
 }
 
 
 Foam::incompressibleVars&
-Foam::incompressiblePrimalSolver::getVars()
+Foam::incompressiblePrimalSolver::getIncoVars()
 {
-    return vars_.ref();
+    incompressibleVars& incoVars = 
+        refCast<incompressibleVars>(const_cast<variablesSet&>(vars_()));
+    return incoVars;
 }
 
 
 void Foam::incompressiblePrimalSolver::correctBoundaryConditions()
 {
-    incompressibleVars& vars = vars_();
+    incompressibleVars& vars = getIncoVars();
     // Update boundary conditions for all primal volFields,
     // including averaged ones, if present
     vars.correctBoundaryConditions();
@@ -201,11 +200,11 @@ void Foam::incompressiblePrimalSolver::correctBoundaryConditions()
             fvm::div(phi, U)
           + turbulence->divDevReff(U)
           ==
-            fvOptions_(U)
+            fvOptions_()(U)
         );
         fvVectorMatrix& UEqn = tUEqn.ref();
         UEqn.relax();
-        fvOptions_.constrain(UEqn);
+        fvOptions_().constrain(UEqn);
 
         // Pressure equation will give the Rhie-Chow correction
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -217,7 +216,7 @@ void Foam::incompressiblePrimalSolver::correctBoundaryConditions()
         surfaceScalarField phiHbyA("phiHbyA", fvc::flux(HbyA));
         adjustPhi(phiHbyA, U, p);
 
-        //fvOptions_.makeRelative(phiHbyA);
+        //fvOptions_().makeRelative(phiHbyA);
 
         fvScalarMatrix pEqn
         (

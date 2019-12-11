@@ -41,6 +41,7 @@ SourceFiles
 #define sensitivitySurfaceIncompressible_H
 
 #include "adjointSensitivityIncompressible.H"
+#include "shapeSensitivitiesBase.H"
 #include "adjointEikonalSolverIncompressible.H"
 #include "adjointMeshMovementSolverIncompressible.H"
 #include "deltaBoundary.H"
@@ -54,19 +55,18 @@ namespace incompressible
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class sensitivitySurface Declaration
+                      Class sensitivitySurface Declaration
 \*---------------------------------------------------------------------------*/
 
 class sensitivitySurface
 :
-    public adjointSensitivity
+    public adjointSensitivity,
+    public shapeSensitivitiesBase
 {
 protected:
 
     // Protected data
 
-        //- Scalar normal sens
-        scalarField derivatives_;
 
         //- Include surface area in sens computation
         bool includeSurfaceArea_;
@@ -107,12 +107,12 @@ protected:
 
     // Protected Member Functions
 
-        //- Read controls and update solver pointers if necessary
-        void read();
-
         //- Add sensitivities from dSd/db and dnf/db computed at points and
         //- mapped to faces
         void addGeometricSens();
+
+        //- Set suffix name for sensitivity fields
+        void setSuffixName();
 
 
 private:
@@ -152,19 +152,44 @@ public:
 
     // Member Functions
 
+        //- Read controls and update solver pointers if necessary
+        void read();
+
        //- Read dict if changed
        virtual bool readDict(const dictionary& dict);
 
        //- Compute the number of faces on sensitivityPatchIDs_
        void computeDerivativesSize();
 
-       //- Calculates sensitivities at wall surface points
-       const scalarField& calculateSensitivities();
+       //- Accumulate sensitivity integrands
+       virtual void accumulateIntegrand(const scalar dt);
+
+       //- Assemble sensitivities 
+       virtual void assembleSensitivities();
+
+       //- Zero sensitivity fields and their constituents
+       virtual void clearSensitivities();
 
        //- Get adjoint eikonal solver
        autoPtr<adjointEikonalSolver>& getAdjointEikonalSolver();
 
+       //- Write sensitivity maps
        virtual void write(const word& baseName = word::null);
+
+       // Inline geters and setters
+
+           //- Get access to the includeObjective bool
+           inline bool getIncludeObjective() const;
+
+           //- Get access to the includeSurfaceArea bool
+           inline bool getIncludeSurfaceArea() const;
+
+           //- Set includeObjective bool
+           inline void setIncludeObjective(const bool includeObjective);
+
+           //- Set includeSurfaceArea bool
+           inline void setIncludeSurfaceArea(const bool includeSurfaceArea);
+
 };
 
 
@@ -172,6 +197,10 @@ public:
 
 } // End namespace incompressible
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "sensitivitySurfaceIncompressibleI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

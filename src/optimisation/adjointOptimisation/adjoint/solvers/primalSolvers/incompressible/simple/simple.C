@@ -45,9 +45,16 @@ namespace Foam
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+Foam::incompressibleVars& Foam::simple::allocateVars()
+{
+    vars_.reset(new incompressibleVars(mesh_, solverControl_()));
+    return getIncoVars();
+}
+
+
 void Foam::simple::addExtraSchemes()
 {
-    if (vars_().useSolverNameForFields())
+    if (incoVars_.useSolverNameForFields())
     {
         WarningInFunction
             << "useSolverNameForFields is set to true for primalSolver "
@@ -61,7 +68,7 @@ void Foam::simple::addExtraSchemes()
 
 void Foam::simple::continuityErrors()
 {
-    surfaceScalarField& phi = vars_().phiInst();
+    surfaceScalarField& phi = incoVars_.phiInst();
     volScalarField contErr(fvc::div(phi));
 
     scalar sumLocalContErr = mesh_.time().deltaTValue()*
@@ -89,15 +96,19 @@ Foam::simple::simple
 :
     incompressiblePrimalSolver(mesh, managerType, dict),
     solverControl_(SIMPLEControl::New(mesh, managerType, *this)),
+    incoVars_(allocateVars()),
     MRF_(mesh),
     cumulativeContErr_(Zero),
     objectives_(0)
 {
-    vars_.reset(new incompressibleVars(mesh, solverControl_()));
+    fvOptions_.reset
+    (
+        new fv::optionList(mesh_, dict.subOrEmptyDict("fvOptions"))
+    );
     addExtraSchemes();
     setRefCell
     (
-        vars_().pInst(),
+        incoVars_.pInst(),
         solverControl_().dict(),
         solverControl_().pRefCell(),
         solverControl_().pRefValue()
@@ -123,11 +134,11 @@ void Foam::simple::solveIter()
     Info<< "Time = " << time.timeName() << "\n" << endl;
 
     // Grab references
-    incompressibleVars& vars = vars_();
-    volScalarField& p = vars.pInst();
-    volVectorField& U = vars.UInst();
-    surfaceScalarField& phi = vars.phiInst();
-    autoPtr<incompressible::turbulenceModel>& turbulence = vars.turbulence();
+    volScalarField& p = incoVars_.pInst();
+    volVectorField& U = incoVars_.UInst();
+    surfaceScalarField& phi = incoVars_.phiInst();
+    autoPtr<incompressible::turbulenceModel>& turbulence = 
+        incoVars_.turbulence();
     label&  pRefCell  = solverControl_().pRefCell();
     scalar& pRefValue = solverControl_().pRefValue();
 
@@ -142,7 +153,7 @@ void Foam::simple::solveIter()
       + MRF_.DDt(U)
       + turbulence->divDevReff(U)
       ==
-        fvOptions_(U)
+        fvOptions_()(U)
     );
     fvVectorMatrix& UEqn = tUEqn.ref();
 
@@ -150,13 +161,13 @@ void Foam::simple::solveIter()
 
     UEqn.relax();
 
-    fvOptions_.constrain(UEqn);
+    fvOptions_().constrain(UEqn);
 
     if (solverControl_().momentumPredictor())
     {
         Foam::solve(UEqn == -fvc::grad(p));
 
-        fvOptions_.correct(U);
+        fvOptions_().correct(U);
     }
 
     // Pressure Eq
@@ -209,10 +220,10 @@ void Foam::simple::solveIter()
         // Momentum corrector
         U = HbyA - rAtU()*fvc::grad(p);
         U.correctBoundaryConditions();
-        fvOptions_.correct(U);
+        fvOptions_().correct(U);
     }
 
-    vars_().laminarTransport().correct();
+    incoVars_.laminarTransport().correct();
     turbulence->correct();
 
     solverControl_().write();
@@ -227,7 +238,7 @@ void Foam::simple::solveIter()
     }
 
     // Average fields if necessary
-    vars.computeMeanFields();
+    incoVars_.computeMeanFields();
 
     // Print execution time
     time.printExecutionTime(Info);
@@ -247,10 +258,10 @@ void Foam::simple::solve()
 
         // Reset initial and mean fields before solving
         restoreInitValues();
-        vars_().resetMeanFields();
+        incoVars_.resetMeanFields();
 
         // Validate turbulence model fields
-        vars_().turbulence()->validate();
+        incoVars_.turbulence()->validate();
 
         while (solverControl_().loop())
         {
@@ -271,7 +282,7 @@ bool Foam::simple::loop()
 
 void Foam::simple::restoreInitValues()
 {
-    vars_().restoreInitValues();
+    incoVars_.restoreInitValues();
 }
 
 

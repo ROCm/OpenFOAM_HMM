@@ -171,12 +171,40 @@ void objectiveManager::update()
 }
 
 
+void objectiveManager::updateOrNullify()
+{
+    //- Update contributions to adjoint if true, otherwise return nulls
+    for (objective& obj : objectives_)
+    {
+        if (obj.isWithinIntegrationTime())
+        {
+            obj.update();
+        }
+        else
+        {
+            obj.nullify();
+        }
+    }
+}
+
+
+void objectiveManager::incrementIntegrationTimes(const scalar timeSpan)
+{
+    // Update start and end integration times by adding the timeSpan 
+    // of the optimisation cycle
+    for (objective& obj : objectives_)
+    {
+        obj.incrementIntegrationTimes(timeSpan);
+    }
+}
+
+
 scalar objectiveManager::print()
 {
     scalar objValue(Zero);
     for (objective& obj : objectives_)
     {
-        scalar cost = obj.J();
+        scalar cost = obj.JCycle();
         scalar weight = obj.weight();
         objValue += weight*cost;
 
@@ -233,6 +261,21 @@ const word& objectiveManager::adjointSolverName() const
 const word& objectiveManager::primalSolverName() const
 {
     return primalSolverName_;
+}
+
+
+void objectiveManager::checkIntegrationTimes() const
+{
+    for (const objective& obj : objectives_)
+    {
+        if (!obj.hasIntegrationStartTime() || !obj.hasIntegrationEndTime())
+        {
+            FatalErrorInFunction()
+                << "Objective function " << obj.objectiveName()
+                << " does not have a defined integration start or end time "
+                << exit(FatalError);
+        }
+    }
 }
 
 

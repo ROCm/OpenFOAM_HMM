@@ -55,27 +55,36 @@ kOmegaSST::kOmegaSST
     RASModelVariables(mesh, SolverControl)
 {
     hasTMVar1_ = true;
-    TMVar1Ptr_ = mesh_.getObjectPtr<volScalarField>("k");
+    TMVar1Ptr_.reset
+    (
+        new tmp<volScalarField>
+        (
+            mesh_.lookupObjectRef<volScalarField>("k")
+        )
+    );
     TMVar1BaseName_ = "k";
 
     hasTMVar2_ = true;
-    TMVar2Ptr_ = mesh_.getObjectPtr<volScalarField>("omega");
+    TMVar2Ptr_.reset
+    (
+        new tmp<volScalarField>
+        (
+            mesh_.lookupObjectRef<volScalarField>("omega")
+        )
+    );
     TMVar2BaseName_ = "omega";
 
     hasNut_ = true;
-    nutPtr_ = mesh_.getObjectPtr<volScalarField>("nut");
+    nutPtr_.reset
+    (
+        new tmp<volScalarField>
+        (
+            mesh_.lookupObjectRef<volScalarField>("nut")
+        )
+    );
 
     allocateInitValues();
     allocateMeanFields();
-}
-
-
-kOmegaSST::~kOmegaSST()
-{
-    // nullify pointers
-    TMVar1Ptr_ = nullptr;
-    TMVar2Ptr_ = nullptr;
-    nutPtr_    = nullptr;
 }
 
 

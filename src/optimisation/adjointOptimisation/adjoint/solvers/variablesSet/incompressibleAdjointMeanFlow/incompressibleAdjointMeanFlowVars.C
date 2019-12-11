@@ -139,6 +139,11 @@ incompressibleAdjointMeanFlowVars::incompressibleAdjointMeanFlowVars
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+const incompressibleVars& incompressibleAdjointMeanFlowVars::primalVars() const
+{
+    return primalVars_;
+}
+
 const volScalarField& incompressibleAdjointMeanFlowVars::pa() const
 {
     if (solverControl_.useAveragedFields())
@@ -262,6 +267,14 @@ bool incompressibleAdjointMeanFlowVars::computeMeanFields() const
 const solverControl& incompressibleAdjointMeanFlowVars::getSolverControl() const
 {
     return solverControl_;
+}
+
+
+void incompressibleAdjointMeanFlowVars::nullify()
+{
+    variablesSet::nullifyField(paPtr_());
+    variablesSet::nullifyField(UaPtr_());
+    variablesSet::nullifyField(phiaPtr_());
 }
 
 

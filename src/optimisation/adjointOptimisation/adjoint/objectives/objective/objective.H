@@ -69,11 +69,16 @@ protected:
         const word primalSolverName_;
         const word objectiveName_;
         bool computeMeanFields_;
+        bool nullified_;
 
         // Objective function value and weight
         scalar J_;
         scalar JMean_;  //average value
         scalar weight_;
+
+        // Objective integration start and end times (for unsteady flows)
+        autoPtr<scalar> integrationStartTimePtr_;
+        autoPtr<scalar> integrationEndTimePtr_;
 
         // Contribution to field sensitivity derivatives
         // Topology optimisation
@@ -219,14 +224,29 @@ public:
 
         virtual bool readDict(const dictionary& dict);
 
-        //- Return the objective function value
+        //- Return the instantaneous objective function value
         virtual scalar J() = 0;
 
+        //- Return the mean objective function value, if it exists, 
+        //- otherwise the mean one
+        scalar JCycle() const;
+
         //- Accumulate contribution for the mean objective value
+        //  For steady-state runs
         void accumulateJMean(solverControl& solverControl);
+
+        //- Accumulate contribution for the mean objective value
+        //  For unsteady runs
+        void accumulateJMean();
 
         //- Return the objective function weight
         scalar weight() const;
+
+        //- Check whether this is an objective integration time
+        bool isWithinIntegrationTime() const;
+
+        //- Increment integration times
+        void incrementIntegrationTimes(const scalar timeSpan);
 
         //- Contribution to field sensitivities
         const volScalarField& dJdb();
@@ -286,6 +306,9 @@ public:
         //- Update objective function derivatives
         virtual void update() = 0;
 
+        //- Nullify adjoint contributions
+        virtual void nullify();
+
         //- Update normalization factors, for objectives in
         //- which the factor is not known a priori
         virtual void updateNormalizationFactor();
@@ -338,16 +361,20 @@ public:
 
         // Inline functions for checking whether pointers are set or not
         inline const word& objectiveName() const;
-        inline bool hasdJdb();
-        inline bool hasBoundarydJdb();
-        inline bool hasdSdbMult();
-        inline bool hasdndbMult();
-        inline bool hasdxdbMult();
-        inline bool hasdxdbDirectMult();
-        inline bool hasBoundaryEdgeContribution();
-        inline bool hasBoundarydJdStress();
-        inline bool hasDivDxDbMult();
-        inline bool hasGradDxDbMult();
+        inline bool hasdJdb() const;
+        inline bool hasBoundarydJdb() const;
+        inline bool hasdSdbMult() const;
+        inline bool hasdndbMult() const;
+        inline bool hasdxdbMult() const;
+        inline bool hasdxdbDirectMult() const;
+        inline bool hasBoundaryEdgeContribution() const;
+        inline bool hasBoundarydJdStress() const;
+        inline bool hasDivDxDbMult() const;
+        inline bool hasGradDxDbMult() const;
+
+        // Inline functions for checking whether integration times are set
+        inline bool hasIntegrationStartTime() const;
+        inline bool hasIntegrationEndTime() const;
 };
 
 

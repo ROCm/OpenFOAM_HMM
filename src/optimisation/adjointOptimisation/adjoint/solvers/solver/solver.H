@@ -40,6 +40,7 @@ Description
 #include "fvMesh.H"
 #include "fvMatrix.H"
 #include "localIOdictionary.H"
+#include "variablesSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -89,6 +90,10 @@ protected:
         //  in the destructor
         const volScalarField* optTypeSource_;
 
+        //- Base variableSet pointer. 
+        //  To be allocated in derived classes
+        autoPtr<variablesSet> vars_;
+
 
 public:
 
@@ -120,6 +125,9 @@ public:
 
         // Access
 
+            //- Return the solver mesh
+            const fvMesh& mesh() const;
+
             //- Return the solver name
             const word& solverName() const;
 
@@ -131,6 +139,12 @@ public:
 
             //- Return the solver dictionary
             virtual const dictionary& dict() const;
+
+            //- Return constant reference to variableSet used by the solver
+            const variablesSet& getVariablesSet() const;
+
+            //- Return non-constant reference to variableSet used by the solver
+            variablesSet& getVariablesSet();
 
 
         // Evolution
@@ -146,6 +160,12 @@ public:
 
             //- Restore initial field values if necessary
             virtual void restoreInitValues();
+
+            //- Functions to be called before loop
+            virtual void preLoop();
+
+            //- Functions to be called after loop
+            virtual void postLoop();
 
             //- Update source term related to optimisationType
             void updateOptTypeSource

@@ -99,7 +99,10 @@ protected:
         //  needed for post-processing
         word correctionFolder_;
 
-        // scalar -- matrix multiplications
+        //- Whether to use gSum or sum in the inner products
+        bool globalSum_;
+
+        // Scalar -- matrix multiplications
         const scalarField leftMult
         (
             const scalarField&,
@@ -119,6 +122,15 @@ protected:
         );
 
         SquareMatrix<scalar> inv(SquareMatrix<scalar> A);
+
+        //- Compute either global or local sum, based on globalSum flag
+        scalar globalSum(const scalarField& field);
+
+        //- Compute either global or local sum, based on globalSum flag
+        scalar globalSum(tmp<scalarField>& tfield);
+
+        //- Return optional dictionary with parameters specific to each method
+        dictionary coeffsDict();
 
 
 private:
@@ -193,6 +205,10 @@ public:
 
        //- Set step for optimisation methods
        void setStep(const scalar eta);
+
+       //- Set globalSum variable. 
+       //  Should be set by the optimisationType owining the updateMethod
+       void setGlobalSum(const bool useGlobalSum);
 
        //- Return the correction of the design variables
        virtual void computeCorrection()=0;

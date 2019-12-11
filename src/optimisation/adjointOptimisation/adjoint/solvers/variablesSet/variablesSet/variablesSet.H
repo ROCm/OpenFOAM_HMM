@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class variablesSet Declaration
+                         Class variablesSet Declaration
 \*---------------------------------------------------------------------------*/
 
 class variablesSet
@@ -100,6 +100,23 @@ protected:
         bool useSolverNameForFields_;
 
 
+    // Protected Member Functions 
+
+        template<class Type, template<class> class PatchField, class GeoMesh>
+        autoPtr<GeometricField<Type, PatchField, GeoMesh>> allocateRenamedField
+        (
+            const autoPtr<GeometricField<Type, PatchField, GeoMesh>>& bf
+        );
+
+        //- Swap autoPtrs and rename managed fields
+        template<class Type, template<class> class PatchField, class GeoMesh>
+        void swapAndRename
+        (
+            autoPtr<GeometricField<Type, PatchField, GeoMesh>>& p1, 
+            autoPtr<GeometricField<Type, PatchField, GeoMesh>>& p2
+        );
+
+
 public:
 
 
@@ -117,6 +134,10 @@ public:
             fvMesh& mesh,
             const dictionary& dict
         );
+
+        //- Clone the variablesSet
+        //  Not implemented in base. Should be overloaded in derived classes
+        virtual autoPtr<variablesSet> clone() const;
 
 
     //- Destructor
@@ -193,6 +214,16 @@ public:
                 const word& name,
                 const dimensionSet& dims
             );
+
+            //- Nullify field and old times, if present
+            template<class Type, template<class> class PatchField, class GeoMesh>
+            static void nullifyField
+            (
+                GeometricField<Type, PatchField, GeoMesh>& fieldPtr
+            );
+
+            //- Transfer the fields of another variablesSet to this
+            virtual void transfer(variablesSet& vars);
 };
 
 

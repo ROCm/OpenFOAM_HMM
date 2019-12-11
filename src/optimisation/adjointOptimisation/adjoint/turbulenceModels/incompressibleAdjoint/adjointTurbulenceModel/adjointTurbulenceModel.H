@@ -204,6 +204,9 @@ public:
         {
             return true;
         }
+
+        //- Nullify all adjoint turbulence model fields and their old times
+        virtual void nullify() = 0;
 };
 
 

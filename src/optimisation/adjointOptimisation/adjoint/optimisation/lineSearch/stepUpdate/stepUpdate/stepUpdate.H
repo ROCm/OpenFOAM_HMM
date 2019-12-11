@@ -30,7 +30,7 @@ Class
     Foam::stepUpdate
 
 Description
-    Abstract base class for optimisation methods
+    Abstract base class for step update methods used in line search
 
 SourceFiles
     stepUpdate.C
@@ -49,7 +49,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class stepUpdate Declaration
+                          Class stepUpdate Declaration
 \*---------------------------------------------------------------------------*/
 
 class stepUpdate
@@ -59,6 +59,12 @@ protected:
     // Protected data
 
         const dictionary dict_;
+
+
+    // Protected Member Functions
+        
+        //- Optional coeffs dict
+        const dictionary& coeffsDict();
 
 
 private:
@@ -116,14 +122,11 @@ public:
        //- Set objective derivative
        virtual void setDeriv(const scalar deriv);
 
-       //- Set new objective value
+       //- Set new merit value
        virtual void setNewMeritValue(const scalar value);
 
-       //- Set old objective value
+       //- Set old merit value
        virtual void setOldMeritValue(const scalar value);
-
-       //- Set old objective value
-       virtual void setInitialStep(const scalar value);
 };
 
 

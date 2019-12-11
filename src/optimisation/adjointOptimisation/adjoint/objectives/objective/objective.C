@@ -112,10 +112,14 @@ objective::objective
     primalSolverName_(primalSolverName),
     objectiveName_(dict.dictName()),
     computeMeanFields_(false), // is reset in derived classes
+    nullified_(false),
 
     J_(Zero),
     JMean_(Zero),
     weight_(Zero),
+
+    integrationStartTimePtr_(nullptr),
+    integrationEndTimePtr_(nullptr),
 
     // Initialize pointers to nullptr.
     // Not all of them are required for each objective function.
@@ -138,6 +142,37 @@ objective::objective
     meanValueFilePtr_(nullptr)
 {
     makeFolder();
+    // Read integration start and end times, if present. 
+    // For unsteady runs only
+    if (dict.found("integrationStartTime"))
+    {
+        integrationStartTimePtr_.reset
+        (
+            new scalar(dict.get<scalar>("integrationStartTime"))
+        );
+    }
+    if (dict.found("integrationEndTime"))
+    {
+        integrationEndTimePtr_.reset
+        (
+            new scalar(dict.get<scalar>("integrationEndTime"))
+        );
+    }
+
+    // Read JMean from dictionary, if present
+    IOobject headObjectiveIODict
+    (
+        "objectiveDict",
+        mesh_.time().timeName(),
+        "uniform",
+        mesh_,
+        IOobject::READ_IF_PRESENT,
+        IOobject::NO_WRITE
+    );
+    if (headObjectiveIODict.typeHeaderOk<IOdictionary>(false))
+    {
+        JMean_ = IOdictionary(headObjectiveIODict).get<scalar>("JMean");
+    }
 }
 
 
@@ -187,6 +222,21 @@ bool objective::readDict(const dictionary& dict)
 }
 
 
+scalar objective::JCycle() const
+{
+    scalar J(J_);
+    if 
+    (
+        computeMeanFields_ 
+     || (hasIntegrationStartTime() && hasIntegrationEndTime())
+    )
+    {
+        J = JMean_;
+    }
+    return J;
+}
+
+
 void objective::updateNormalizationFactor()
 {
     // Does nothing in base
@@ -210,9 +260,68 @@ void objective::accumulateJMean(solverControl& solverControl)
 }
 
 
+void objective::accumulateJMean()
+{
+    if (hasIntegrationStartTime() && hasIntegrationEndTime())
+    {
+        const scalar time = mesh_.time().value();
+        if (isWithinIntegrationTime())
+        {
+            const scalar dt = mesh_.time().deltaT().value();
+            const scalar elapsedTime = time - integrationStartTimePtr_();
+            const scalar denom = elapsedTime + dt;
+            JMean_ = (JMean_*elapsedTime + J_*dt)/denom;
+        }
+    }
+    else
+    {
+        FatalErrorInFunction
+            << "Unallocated integration start or end time"
+            << exit(FatalError);
+    }
+}
+
+
 scalar objective::weight() const
 {
     return weight_;
+}
+
+
+bool objective::isWithinIntegrationTime() const
+{
+    if (hasIntegrationStartTime() && hasIntegrationEndTime())
+    {
+        const scalar time = mesh_.time().value();
+        return 
+            (
+                time >= integrationStartTimePtr_() 
+             && time <= integrationEndTimePtr_()
+            );
+    }
+    else
+    {
+        FatalErrorInFunction
+            << "Unallocated integration start or end time"
+            << exit(FatalError);
+    }
+    return false;
+}
+
+
+void objective::incrementIntegrationTimes(const scalar timeSpan)
+{
+    if (hasIntegrationStartTime() && hasIntegrationEndTime())
+    {
+        integrationStartTimePtr_() += timeSpan; 
+        integrationEndTimePtr_() += timeSpan; 
+    }
+    else
+    {
+        FatalErrorInFunction
+            << "Unallocated integration start or end time"
+            << exit(FatalError);
+    }
 }
 
 
@@ -426,6 +535,61 @@ const volTensorField& objective::gradDxDbMultiplier()
 }
 
 
+void objective::nullify()
+{
+    if (!nullified_)
+    {
+        if (hasdJdb())
+        {
+            dJdbPtr_() == dimensionedScalar(dJdbPtr_().dimensions(), Zero);
+        }
+        if (hasBoundarydJdb())
+        {
+            bdJdbPtr_() == vector::zero;
+        }
+        if (hasdSdbMult())
+        {
+            bdSdbMultPtr_() == vector::zero;
+        }
+        if (hasdndbMult())
+        {
+            bdndbMultPtr_() == vector::zero;
+        }
+        if (hasdxdbMult())
+        {
+            bdxdbMultPtr_() == vector::zero;
+        }
+        if (hasdxdbDirectMult())
+        {
+            bdxdbDirectMultPtr_() == vector::zero;
+        }
+        if (hasBoundaryEdgeContribution())
+        {
+            for (Field<vectorField>& field : bEdgeContribution_())
+            {
+                field = vector::zero;
+            }
+        }
+        if (hasBoundarydJdStress())
+        {
+            bdJdStressPtr_() == tensor::zero;
+        }
+        if (hasDivDxDbMult())
+        {
+            divDxDbMultPtr_() == 
+                dimensionedScalar(divDxDbMultPtr_().dimensions(), Zero);
+        }
+        if (hasGradDxDbMult())
+        {
+            gradDxDbMultPtr_() == 
+                dimensionedTensor(gradDxDbMultPtr_().dimensions(), Zero);
+        }
+
+        nullified_ = true;
+    }
+}
+
+
 void objective::write() const
 {
     if (Pstream::master())
@@ -465,7 +629,12 @@ void objective::writeMeanValue() const
     if (Pstream::master())
     {
         // Write mean value if necessary
-        if (computeMeanFields_)
+        // Covers both steady and unsteady runs
+        if 
+        (
+            computeMeanFields_ 
+         || (hasIntegrationStartTime() && hasIntegrationEndTime())
+        )
         {
             // File is opened only upon invocation of the write function
             // in order to avoid various instantiations of the same objective
@@ -479,6 +648,22 @@ void objective::writeMeanValue() const
                 << mesh_.time().value() << tab << JMean_ << endl;
         }
     }
+    // Write mean value under time/uniform, to allow for lineSearch to work
+    // appropriately in continuation runs, when field averaging is used
+    IOdictionary objectiveDict
+    (
+        IOobject
+        (
+            "objectiveDict",
+            mesh_.time().timeName(),
+            "uniform",
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        )
+    );
+    objectiveDict.add<scalar>("JMean", JMean_);
+    objectiveDict.regIOobject::write();
 }
 
 

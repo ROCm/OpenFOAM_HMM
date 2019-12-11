@@ -61,7 +61,14 @@ optimisationType::optimisationType
         updateMethod::New(mesh_, dict_.subDict("updateMethod"))
     ),
     sourcePtr_(nullptr),
-    lineSearch_(lineSearch::New(dict_.subDict("updateMethod"), mesh.time()))
+    lineSearch_
+    (
+        lineSearch::New
+        (
+            dict_.subDict("updateMethod").subOrEmptyDict("lineSearch"), 
+            mesh.time()
+        )
+    )
 {
     // Figure out number of adjoint solvers corresponding to constraints.
     // Looks in all operating poitns

@@ -54,65 +54,66 @@ laminar::laminar
 :
     RASModelVariables(mesh, SolverControl)
 {
-    TMVar1Ptr_ =
-        new volScalarField
+    TMVar1Ptr_.reset
+    (
+        new tmp<volScalarField>
         (
-            IOobject
+            new volScalarField
             (
-                "dummylaminarVar1",
-                mesh.time().timeName(),
+                IOobject
+                (
+                    "dummylaminarVar1",
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
                 mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh,
-            dimensionedScalar(dimless, Zero)
-        );
+                dimensionedScalar(dimless, Zero)
+            )
+        )
+    );
 
-    TMVar2Ptr_ =
-        new volScalarField
+    TMVar2Ptr_.reset
+    (
+        new tmp<volScalarField>
         (
-            IOobject
+            new volScalarField
             (
-                "dummylaminarVar2",
-                mesh.time().timeName(),
+                IOobject
+                (
+                    "dummylaminarVar2",
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
                 mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh,
-            dimensionedScalar(dimless, Zero)
-        );
+                dimensionedScalar(dimless, Zero)
+            )
+        )
+    );
 
-    nutPtr_ =
-        new volScalarField
+    nutPtr_.reset
+    (
+        new tmp<volScalarField>
         (
-            IOobject
+            new volScalarField
             (
-                "dummylaminarNut",
-                mesh.time().timeName(),
+                IOobject
+                (
+                    "dummylaminarNut",
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
                 mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh,
-            dimensionedScalar(sqr(dimLength)/dimTime, Zero)
-        );
-        allocateInitValues();
-}
-
-
-laminar::~laminar()
-{
-    // nullify pointer and delete allocated fields
-    delete TMVar1Ptr_;
-    TMVar1Ptr_ = nullptr;
-
-    delete TMVar2Ptr_;
-    TMVar2Ptr_ = nullptr;
-
-    delete nutPtr_;
-    nutPtr_ = nullptr;
+                dimensionedScalar(sqr(dimLength)/dimTime, Zero)
+            )
+        )
+    );
+    allocateInitValues();
 }
 
 

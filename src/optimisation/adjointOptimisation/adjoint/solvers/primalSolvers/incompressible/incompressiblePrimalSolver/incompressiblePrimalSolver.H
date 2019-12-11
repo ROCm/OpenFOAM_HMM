@@ -71,12 +71,6 @@ protected:
 
     // Protected data
 
-        //- Set with incompressible variables
-        //- Needs to be allocated in each derived class since it requires
-        //- a solverControl variable which is specifically allocated there
-        //  (e.g. SIMPLEControl for simple)
-        autoPtr<incompressibleVars> vars_;
-
         //- Convergence criterion for reconstructing phi from U and p
         scalar phiReconstructionTol_;
 
@@ -84,7 +78,7 @@ protected:
         label phiReconstructionIters_;
 
         //- optionList for source terms addition
-        fv::optionList fvOptions_;
+        autoPtr<fv::optionList> fvOptions_;
 
 
 public:
@@ -153,10 +147,10 @@ public:
             List<objective*> getObjectiveFunctions() const;
 
             //- Access to the incompressible variables set
-            const incompressibleVars& getVars() const;
+            const incompressibleVars& getIncoVars() const;
 
             //- Access to the incompressible variables set
-            incompressibleVars& getVars();
+            incompressibleVars& getIncoVars();
 
 
         // Evolution
@@ -174,7 +168,7 @@ public:
             {
                 if (mesh_.time().writeTime())
                 {
-                    return vars_().write();
+                    return getIncoVars().write();
                 }
 
                 return false;
@@ -185,7 +179,7 @@ public:
             //- continuation
             virtual bool writeNow() const
             {
-                return vars_().write();
+                return getIncoVars().write();
             }
 };
 

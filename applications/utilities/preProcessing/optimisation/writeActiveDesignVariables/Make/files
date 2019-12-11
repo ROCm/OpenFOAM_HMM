@@ -1,0 +1,3 @@
+writeActiveDesignVariables.C
+
+EXE = $(FOAM_APPBIN)/writeActiveDesignVariables

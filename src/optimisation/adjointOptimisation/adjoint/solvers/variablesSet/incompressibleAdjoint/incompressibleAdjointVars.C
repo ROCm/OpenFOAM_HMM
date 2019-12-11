@@ -116,6 +116,13 @@ void incompressibleAdjointVars::computeMeanFields()
 }
 
 
+void incompressibleAdjointVars::nullify()
+{
+    incompressibleAdjointMeanFlowVars::nullify();
+    adjointTurbulence_->nullify();
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

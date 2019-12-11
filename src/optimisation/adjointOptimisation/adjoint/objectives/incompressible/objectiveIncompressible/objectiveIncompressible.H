@@ -226,7 +226,10 @@ public:
         const boundaryScalarField& boundarydJdTMvar2();
 
         //- Update objective function derivatives
-        void update();
+        virtual void update();
+
+        //- Update objective function derivatives
+        virtual void nullify();
 
         //- Update vol and boundary fields and derivatives
         //  Do nothing in the base. The relevant ones should be overwritten
@@ -303,18 +306,18 @@ public:
         virtual void write() const;
 
         //- Inline functions for checking whether pointers are set or not
-        inline bool hasdJdv();
-        inline bool hasdJdp();
-        inline bool hasdJdT();
-        inline bool hasdJdTMVar1();
-        inline bool hasdJdTMVar2();
-        inline bool hasBoundarydJdv();
-        inline bool hasBoundarydJdvn();
-        inline bool hasBoundarydJdvt();
-        inline bool hasBoundarydJdp();
-        inline bool hasBoundarydJdT();
-        inline bool hasBoundarydJdTMVar1();
-        inline bool hasBoundarydJdTMVar2();
+        inline bool hasdJdv() const;
+        inline bool hasdJdp() const;
+        inline bool hasdJdT() const;
+        inline bool hasdJdTMVar1() const;
+        inline bool hasdJdTMVar2() const;
+        inline bool hasBoundarydJdv() const;
+        inline bool hasBoundarydJdvn() const;
+        inline bool hasBoundarydJdvt() const;
+        inline bool hasBoundarydJdp() const;
+        inline bool hasBoundarydJdT() const;
+        inline bool hasBoundarydJdTMVar1() const;
+        inline bool hasBoundarydJdTMVar2() const;
 };
 
 

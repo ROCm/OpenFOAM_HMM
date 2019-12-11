@@ -41,6 +41,7 @@ SourceFiles
 #define sensitivitySurfacePointsIncompressible_H
 
 #include "adjointSensitivityIncompressible.H"
+#include "shapeSensitivitiesBase.H"
 #include "adjointEikonalSolverIncompressible.H"
 #include "adjointMeshMovementSolverIncompressible.H"
 #include "deltaBoundary.H"
@@ -59,14 +60,13 @@ namespace incompressible
 
 class sensitivitySurfacePoints
 :
-    public adjointSensitivity
+    public adjointSensitivity,
+    public shapeSensitivitiesBase
 {
 protected:
 
     // Protected data
 
-        //- Scalar normal sens
-        scalarField derivatives_;
 
         //- Include surface area in sens computation
         bool includeSurfaceArea_;
@@ -96,11 +96,41 @@ protected:
 
         autoPtr<adjointMeshMovementSolver> meshMovementSolver_;
 
+        //- The face-based part of the sensitivities
+        //  i.e. terms that multiply dxFace/dxPoint. 
+        //  Sensitivities DO include locale surface area, to get
+        //  the correct weighting from the contributions of various faces.
+        //  Normalized at the end.
+        autoPtr<boundaryVectorField> wallFaceSens_;
+
+        //- Multipliers of d(Sf)/db and d(nf)/db
+        autoPtr<boundaryVectorField> dSfdbMult_;
+        autoPtr<boundaryVectorField> dnfdbMult_;
+
 
     // Protected Member Functions
 
         //- Read controls and update solver pointers if necessary
         void read();
+
+        //- Add terms related to post-processing PDEs
+        //- (i.e. adjoint Eikonal, adjoint mesh movement) 
+        //- and add local face area
+        void finaliseFaceMultiplier();
+
+        //- Converts face sensitivities to point sensitivities and adds the 
+        //- ones directly computed in points (i.e. dSf/db and dnf/db). 
+        void finalisePointSensitivities();
+
+        //- Construct globally correct point normals and point areas
+        void constructGlobalPointNormalsAndAreas
+        (
+            vectorField& pointNormals,
+            scalarField& pointMagSf
+        );
+
+        //- Set suffix name for sensitivity fields
+        void setSuffixName();
 
 
 private:
@@ -143,8 +173,14 @@ public:
        //- Read dict if changed
        virtual bool readDict(const dictionary& dict);
 
-       //- Calculates sensitivities at wall surface points
-       const scalarField& calculateSensitivities();
+       //- Accumulate sensitivity integrands
+       virtual void accumulateIntegrand(const scalar dt);
+
+       //- Assemble sensitivities 
+       virtual void assembleSensitivities();
+
+       //- Zero sensitivity fields and their constituents
+       virtual void clearSensitivities();
 
        virtual void write(const word& baseName = word::null);
 };

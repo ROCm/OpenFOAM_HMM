@@ -118,6 +118,9 @@ public:
             //- Const access to the manager name
             const word& managerName() const;
 
+            //- Const access to the primal solver name
+            const word& primalSolverName() const;
+
             //- Const access to the construction dictionary
             const dictionary& dict() const;
 
@@ -154,8 +157,10 @@ public:
 
             //- Compute sensitivities for all adjoint solvers
             //- (both objective- and constraint-related ones)
-            //- Clears previous sensitivity fields
             void computeAllSensitivities();
+
+            //- Clear sensitivity fields from all adjoint solvers
+            void clearSensitivities();
 
             //- Get objective value
             scalar objectiveValue();

@@ -172,6 +172,29 @@ Foam::updateMethod::inv(SquareMatrix<scalar> A)
 }
 
 
+Foam::scalar Foam::updateMethod::globalSum(const scalarField& field)
+{
+    scalar value(0);
+    if (globalSum_)
+    {
+        value = gSum(field);
+    }
+    else
+    {
+        value = sum(field);
+    }
+    return value;
+}
+
+
+Foam::scalar Foam::updateMethod::globalSum(tmp<scalarField>& tfield)
+{
+    scalar value = globalSum(tfield());
+    tfield.clear();
+    return value;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::updateMethod::updateMethod
@@ -202,12 +225,16 @@ Foam::updateMethod::updateMethod
     cumulativeCorrection_(0),
     eta_(1),
     initialEtaSet_(false),
-    correctionFolder_("correction")
+    correctionFolder_(mesh_.time().globalPath()/"optimisation"/"correction"),
+    globalSum_
+    (
+        dict.lookupOrDefault<bool>("globalSum", false)
+    )
 {
     // Create folder to store corrections
     if (Pstream::master())
     {
-        mkDir(mesh_.time().globalPath()/"optimisation"/correctionFolder_);
+        mkDir(correctionFolder_);
     }
 
     // Set initial eta, if present. It might be set either in the
@@ -221,6 +248,12 @@ Foam::updateMethod::updateMethod
     {
         initialEtaSet_ = true;
     }
+}
+
+
+Foam::dictionary Foam::updateMethod::coeffsDict()
+{
+    return dict_.subOrEmptyDict(type());
 }
 
 
@@ -288,6 +321,12 @@ void Foam::updateMethod::setStep(const scalar eta)
 }
 
 
+void Foam::updateMethod::setGlobalSum(const bool useGlobalSum)
+{
+    globalSum_ = useGlobalSum;
+}
+
+
 Foam::scalarField& Foam::updateMethod::returnCorrection()
 {
     computeCorrection();
@@ -309,11 +348,11 @@ void Foam::updateMethod::writeCorrection()
 
         fileName correctionFile
         (
-            correctionFolder_/"correction"+mesh_.time().timeName()
+            correctionFolder_/"correction" + mesh_.time().timeName()
         );
         fileName cumulativeCorrectionFile
         (
-            correctionFolder_/"cumulativeCorrection"+mesh_.time().timeName()
+            correctionFolder_/"cumulativeCorrection" + mesh_.time().timeName()
         );
 
         OFstream corFile(correctionFile.c_str());
@@ -364,8 +403,21 @@ void Foam::updateMethod::write()
         optMethodIODict_.add<scalar>("eta", eta_, true);
     }
 
+    optMethodIODict_.add<scalarField>("correction", correction_, true);
+
     // Write IOdictionary
-    optMethodIODict_.regIOobject::write();
+    // Always write in ASCII format. 
+    // Even when choosing to write in binary through controlDict, 
+    // the content is written in ASCII format but with a binary header. 
+    // This creates problems when the content is read back in 
+    // (e.g. continuation)
+    optMethodIODict_.regIOobject::writeObject
+    (
+        IOstream::ASCII,
+        IOstream::currentVersion,
+        mesh_.time().writeCompression(),
+        true
+    );
 }
 
 

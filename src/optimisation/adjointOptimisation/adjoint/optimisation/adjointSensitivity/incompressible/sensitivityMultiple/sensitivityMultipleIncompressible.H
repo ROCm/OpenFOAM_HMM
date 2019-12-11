@@ -66,8 +66,6 @@ protected:
 
         PtrList<adjointSensitivity> sens_;
 
-        scalarField derivatives_;
-
 
 private:
 
@@ -109,8 +107,17 @@ public:
        //- Read dict if changed
        virtual bool readDict(const dictionary& dict);
 
+       //- Accumulate sensitivity integrands
+       virtual void accumulateIntegrand(const scalar dt);
+
+       //- Assemble sensitivities 
+       virtual void assembleSensitivities();
+
        //- Calculates sensitivities at wall surface points
        const scalarField& calculateSensitivities();
+
+       //- Zero sensitivity fields and their constituents
+       virtual void clearSensitivities();
 
        //- Write sensitivities to file
        virtual void write(const word& baseName = word::null);

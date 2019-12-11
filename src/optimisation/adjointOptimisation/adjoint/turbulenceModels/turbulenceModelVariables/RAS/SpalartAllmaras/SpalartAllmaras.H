@@ -76,7 +76,7 @@ public:
 
 
     //- Destructor
-    virtual ~SpalartAllmaras();
+    virtual ~SpalartAllmaras() = default;
 
     // Member Functions
         //- return nut Jacobian wrt the TM vars

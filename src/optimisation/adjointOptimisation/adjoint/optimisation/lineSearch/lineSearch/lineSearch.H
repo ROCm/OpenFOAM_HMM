@@ -30,7 +30,7 @@ Class
     Foam::lineSearch
 
 Description
-    Abstract base class for optimisation methods
+    Abstract base class for line search methods
 
 SourceFiles
     lineSearch.C
@@ -51,7 +51,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class lineSearch Declaration
+                          Class lineSearch Declaration
 \*---------------------------------------------------------------------------*/
 
 class lineSearch
@@ -60,9 +60,16 @@ protected:
 
     // Protected data
 
+        //- Subdict within updateMethod
         const dictionary dict_;
+
+        //- IOdictionary under time/uniform for continuation
         IOdictionary lineSearchDict_;
+
+        //- Directional derivative of the merit function
         scalar directionalDeriv_;
+
+        //- Update direction
         scalarField direction_;
 
         //- Old merit value from this opt cycle
@@ -73,13 +80,35 @@ protected:
 
         //- Merit directional deriv from the previous opt cycle
         scalar prevMeritDeriv_;
+
+        //- Correction multiplier at the first step of line search
         scalar initialStep_;
+
+        //- Minimum allowed correction multiplier
         scalar minStep_;
+
+        //- Correction multiplier
         scalar step_;
+
+        //- Inner line search iteration
         label iter_;
+
+        //- Maximum line search iterations
         label maxIters_;
+
+        //- Whether to extrapolate the correction multiplier for 
+        //- this optimisation cycle based on the previous ones. 
+        //  Usefull for non-quasi Newton methods
         bool extrapolateInitialStep_;
+
+        //- Mechanism to update method if line search conditions are not set
         autoPtr<stepUpdate> stepUpdate_;
+
+
+    // Protected Member Functions
+        
+        //- Optional coeffs dict
+        const dictionary& coeffsDict();
 
 
 private:

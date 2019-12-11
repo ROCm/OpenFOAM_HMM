@@ -224,6 +224,7 @@ void incompressibleVars::correctTurbulentBoundaryConditions()
     RASModelVariables_().correctBoundaryConditions(turbulence_());
 }
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 incompressibleVars::incompressibleVars
@@ -258,6 +259,44 @@ incompressibleVars::incompressibleVars
     setFields();
     setInitFields();
     setMeanFields();
+}
+
+
+incompressibleVars::incompressibleVars
+(
+    const incompressibleVars& vs
+)
+:
+    variablesSet(vs.mesh_, vs.solverControl_.solverDict()),
+    solverControl_(vs.solverControl_),
+    pPtr_(allocateRenamedField(vs.pPtr_)),
+    UPtr_(allocateRenamedField(vs.UPtr_)),
+    phiPtr_(allocateRenamedField(vs.phiPtr_)),
+    laminarTransportPtr_(nullptr),
+    turbulence_(nullptr),
+    RASModelVariables_(vs.RASModelVariables_.clone()),
+
+    pInitPtr_(allocateRenamedField(vs.pInitPtr_)),
+    UInitPtr_(allocateRenamedField(vs.UInitPtr_)),
+    phiInitPtr_(allocateRenamedField(vs.phiInitPtr_)),
+
+    pMeanPtr_(allocateRenamedField(vs.pMeanPtr_)),
+    UMeanPtr_(allocateRenamedField(UMeanPtr_)),
+    phiMeanPtr_(allocateRenamedField(vs.phiMeanPtr_)),
+
+    correctBoundaryConditions_(vs.correctBoundaryConditions_)
+{
+    DebugInfo
+        << "Calling incompressibleVars copy constructor" << endl;
+}
+
+
+autoPtr<variablesSet> incompressibleVars::clone() const
+{
+    DebugInfo
+        << "Calling incompressibleVars::clone" << endl;
+
+    return autoPtr<variablesSet>(new incompressibleVars(*this));
 }
 
 
@@ -480,6 +519,20 @@ bool incompressibleVars::storeInitValues() const
 bool incompressibleVars::computeMeanFields() const
 {
     return solverControl_.average();
+}
+
+
+void incompressibleVars::transfer(variablesSet& vars)
+{
+    incompressibleVars& incoVars = refCast<incompressibleVars>(vars);
+    // Copy source fields to the ones known by the object
+    swapAndRename(pPtr_, incoVars.pPtr_);
+    swapAndRename(UPtr_, incoVars.UPtr_);
+    swapAndRename(phiPtr_, incoVars.phiPtr_);
+
+    // Transfer turbulent fields. Copies fields since original fields are 
+    // not owned by RASModelVariables but from the turbulence model
+    RASModelVariables_->transfer(incoVars.RASModelVariables()());
 }
 
 

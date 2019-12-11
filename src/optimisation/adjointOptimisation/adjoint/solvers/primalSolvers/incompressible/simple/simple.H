@@ -73,6 +73,11 @@ protected:
         //- Solver control
         autoPtr<SIMPLEControl> solverControl_;
 
+        //- Reference to incompressibleVars
+        //  Used for convenience and to avoid repetitive dynamic_casts
+        //  Same as getIncoVars()
+        incompressibleVars& incoVars_;
+
         //- MRF zones
         IOMRFZoneList MRF_;
 
@@ -81,6 +86,13 @@ protected:
 
         //- List of objectives related to this primal solver
         List<objective*> objectives_;
+
+
+    //- Protected Member Functions
+
+        //- Allocate incompressibleVars and return reference to be used for 
+        //- convenience in the rest of the class. 
+        incompressibleVars& allocateVars();
 
         //- In case variable names are different than the base ones,
         //- add extra schemes and relaxation factors to the appropriate dicts

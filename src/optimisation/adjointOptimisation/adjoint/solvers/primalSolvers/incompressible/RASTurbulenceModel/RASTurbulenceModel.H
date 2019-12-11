@@ -71,6 +71,17 @@ protected:
         //- Solver control
         autoPtr<SIMPLEControl> solverControl_;
 
+        //- Reference to incompressibleVars
+        //  Used for convenience and to avoid repetitive dynamic_casts
+        //  Same as getIncoVars()
+        incompressibleVars& incoVars_;
+
+    //- Protected Member Functions
+
+        //- Allocate incompressibleVars and return reference to be used for 
+        //- convenience in the rest of the class. 
+        incompressibleVars& allocateVars();
+
 
 public:
 

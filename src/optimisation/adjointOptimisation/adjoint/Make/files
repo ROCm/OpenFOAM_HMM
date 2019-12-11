@@ -16,6 +16,7 @@ solvers/variablesSet/incompressibleAdjoint/incompressibleAdjointVars.C
 solvers/solverControl/solverControl/solverControl.C
 solvers/solverControl/SIMPLEControl/SIMPLEControl/SIMPLEControl.C
 solvers/solverControl/SIMPLEControl/singleRun/SIMPLEControlSingleRun.C
+solvers/solverControl/SIMPLEControl/optimisation/SIMPLEControlOpt.C
 
 /* SOLVERS */
 solvers/solver/solver.C
@@ -52,6 +53,8 @@ objectives/incompressible/objectiveIncompressible/objectiveIncompressible.C
 objectives/incompressible/objectiveForce/objectiveForce.C
 objectives/incompressible/objectiveMoment/objectiveMoment.C
 objectives/incompressible/objectivePtLosses/objectivePtLosses.C
+objectives/incompressible/objectiveForceTarget/objectiveForceTarget.C
+objectives/incompressible/objectivePartialVolume/objectivePartialVolume.C
 
 /* OBJECTIVE MANAGER*/
 objectiveManager/objectiveManager/objectiveManager.C
@@ -87,8 +90,39 @@ adjointBoundaryConditions/adjointOutletVelocityFlux/adjointOutletVelocityFluxFvP
 /* DELTA BOUNDARY */
 deltaBoundary/deltaBoundary.C
 
+/* NURBS */
+NURBS=parameterization/NURBS
+$(NURBS)/NURBSbasis/NURBSbasis.C
+$(NURBS)/NURBS3DCurve/NURBS3DCurve.C
+$(NURBS)/NURBS3DSurface/NURBS3DSurface.C
+$(NURBS)/NURBS3DVolume/NURBS3DVolume/NURBS3DVolume.C
+$(NURBS)/NURBS3DVolume/cartesian/NURBS3DVolumeCartesian.C
+$(NURBS)/NURBS3DVolume/cylindrical/NURBS3DVolumeCylindrical.C
+$(NURBS)/NURBS3DVolume/volBSplinesBase/volBSplinesBase.C
+
+/* BEZIER */
+parameterization/Bezier/Bezier.C
+
+/* MOTION SOLVERS */
+dynamicMesh/motionSolver/volumetricBSplinesMotionSolver/volumetricBSplinesMotionSolver.C
+dynamicMesh/motionSolver/elasticityMotionSolver/elasticityMotionSolver.C
+dynamicMesh/motionSolver/laplacianMotionSolver/laplacianMotionSolver.C
+
+/* DISPLACEMENT METHOD */
+displacementMethod/displacementMethod/displacementMethod.C
+displacementMethod/displacementMethodvolumetricBSplinesMotionSolver/displacementMethodvolumetricBSplinesMotionSolver.C
+displacementMethod/displacementMethoddisplacementLaplacian/displacementMethoddisplacementLaplacian.C
+displacementMethod/displacementMethodvelocityLaplacian/displacementMethodvelocityLaplacian.C
+displacementMethod/displacementMethodelasticityMotionSolver/displacementMethodelasticityMotionSolver.C
+displacementMethod/displacementMethodlaplacianMotionSolver/displacementMethodlaplacianMotionSolver.C
+
+/* INTERPOLATION SCHEMES */
+interpolation/pointVolInterpolation/pointVolInterpolation.C
+
+
 /* ADJOINT SENSITIVITY */
 optimisation/adjointSensitivity/sensitivity/sensitivity.C
+optimisation/adjointSensitivity/shapeSensitivitiesBase/shapeSensitivitiesBase.C
 incoSens=optimisation/adjointSensitivity/incompressible
 $(incoSens)/adjointSensitivity/adjointSensitivityIncompressible.C
 $(incoSens)/adjointEikonalSolver/adjointEikonalSolverIncompressible.C
@@ -96,21 +130,49 @@ $(incoSens)/adjointMeshMovementSolver/adjointMeshMovementSolverIncompressible.C
 $(incoSens)/sensitivitySurface/sensitivitySurfaceIncompressible.C
 $(incoSens)/sensitivitySurfacePoints/sensitivitySurfacePointsIncompressible.C
 $(incoSens)/sensitivityMultiple/sensitivityMultipleIncompressible.C
+$(incoSens)/SIBase/SIBaseIncompressible.C
+$(incoSens)/FIBase/FIBaseIncompressible.C
+$(incoSens)/sensitivityVolBSplines/sensitivityVolBSplinesIncompressible.C
+$(incoSens)/sensitivityVolBSplinesFI/sensitivityVolBSplinesFIIncompressible.C
+$(incoSens)/sensitivityBezier/sensitivityBezierIncompressible.C
+$(incoSens)/sensitivityBezierFI/sensitivityBezierFIIncompressible.C
 
 /* LINE SEARCH */
 optimisation/lineSearch/lineSearch/lineSearch.C
+optimisation/lineSearch/ArmijoConditions/ArmijoConditions.C
 optimisation/lineSearch/stepUpdate/stepUpdate/stepUpdate.C
+optimisation/lineSearch/stepUpdate/bisection/bisection.C
+optimisation/lineSearch/stepUpdate/quadratic/quadratic.C
 
 /* UPDATE METHOD */
-optimisation/updateMethod/updateMethod/updateMethod.C
-optimisation/updateMethod/constrainedOptimisationMethod/constrainedOptimisationMethod.C
+updateMethod=optimisation/updateMethod/
+$(updateMethod)/updateMethod/updateMethod.C
+$(updateMethod)/constrainedOptimisationMethod/constrainedOptimisationMethod.C
+$(updateMethod)/steepestDescent/steepestDescent.C
+$(updateMethod)/BFGS/BFGS.C
+$(updateMethod)/DBFGS/DBFGS.C
+$(updateMethod)/LBFGS/LBFGS.C
+$(updateMethod)/SR1/SR1.C
+$(updateMethod)/conjugateGradient/conjugateGradient.C
+$(updateMethod)/constraintProjection/constraintProjection.C
+$(updateMethod)/SQP/SQP.C
+
+/* OPT MESH MOVEMENT */
+optMeshMovement=optimisation/optMeshMovement
+$(optMeshMovement)/optMeshMovement/optMeshMovement.C
+$(optMeshMovement)/optMeshMovementVolumetricBSplines/optMeshMovementVolumetricBSplines.C
+$(optMeshMovement)/optMeshMovementVolumetricBSplinesExternalMotionSolver/optMeshMovementVolumetricBSplinesExternalMotionSolver.C
+$(optMeshMovement)/optMeshMovementBezier/optMeshMovementBezier.C
+$(optMeshMovement)/optMeshMovementNULL/optMeshMovementNULL.C
 
 /* OPTIMIZATION TYPE */
 incoOptType=optimisation/optimisationType/incompressible
 $(incoOptType)/optimisationType/optimisationTypeIncompressible.C
+$(incoOptType)/shapeOptimisation/shapeOptimisationIncompressible.C
 
 /* OPTIMIZATION MANAGER */
 optimisation/optimisationManager/optimisationManager/optimisationManager.C
 optimisation/optimisationManager/singleRun/singleRun.C
+optimisation/optimisationManager/steadyOptimisation/steadyOptimisation.C
 
 LIB = $(FOAM_LIBBIN)/libadjointOptimisation

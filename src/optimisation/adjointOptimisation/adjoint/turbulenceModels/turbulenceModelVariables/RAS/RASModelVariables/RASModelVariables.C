@@ -42,7 +42,7 @@ namespace incompressible
 defineTypeNameAndDebug(RASModelVariables, 0);
 defineRunTimeSelectionTable(RASModelVariables, dictionary);
 
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void RASModelVariables::allocateInitValues()
 {
@@ -149,6 +149,45 @@ void RASModelVariables::allocateMeanFields()
 }
 
 
+RASModelVariables::autoTmp 
+RASModelVariables::cloneAutoTmp(const autoTmp& source) const
+{
+    autoTmp returnField(nullptr);
+    if (source.valid() && source().valid())
+    {
+        const volScalarField& sf = source()();
+        DebugInfo 
+            << "Cloning " << sf.name() << endl;
+        const word timeName = mesh_.time().timeName();
+        returnField.reset
+        (
+            new tmp<volScalarField>
+            (
+                new volScalarField(sf.name() + timeName, sf)
+            )
+        );
+    }
+    return returnField;
+}
+
+
+void RASModelVariables::copyAndRename
+(
+    volScalarField& f1,
+    volScalarField& f2
+)
+{
+    f1 == f2;
+    const word name1 = f1.name();
+    const word name2 = f2.name();
+
+    // Extra rename to avoid databese collision
+    f2.rename("temp");
+    f1.rename(name2);
+    f2.rename(name1);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 RASModelVariables::RASModelVariables
@@ -178,6 +217,39 @@ RASModelVariables::RASModelVariables
     nutMeanPtr_(nullptr)
 {}
 
+
+RASModelVariables::RASModelVariables
+(
+    const RASModelVariables& rmv
+)
+:    
+    mesh_(rmv.mesh_),
+    solverControl_(rmv.solverControl_),
+    hasTMVar1_(rmv.hasTMVar1_),
+    hasTMVar2_(rmv.hasTMVar2_),
+    hasNut_(rmv.hasNut_),
+    hasDist_(rmv.hasDist_),
+    TMVar1Ptr_(cloneAutoTmp(rmv.TMVar1Ptr_)),
+    TMVar2Ptr_(cloneAutoTmp(rmv.TMVar2Ptr_)),
+    nutPtr_(cloneAutoTmp(rmv.nutPtr_)),
+    dPtr_(cloneAutoTmp(rmv.dPtr_)),
+    TMVar1BaseName_(rmv.TMVar1BaseName_),
+    TMVar2BaseName_(rmv.TMVar2BaseName_),
+    nutBaseName_(rmv.nutBaseName_),
+    TMVar1InitPtr_(nullptr),
+    TMVar2InitPtr_(nullptr),
+    nutInitPtr_(nullptr),
+    TMVar1MeanPtr_(nullptr),
+    TMVar2MeanPtr_(nullptr),
+    nutMeanPtr_(nullptr)
+{
+}
+
+
+autoPtr<RASModelVariables> RASModelVariables::clone() const
+{
+    return autoPtr<RASModelVariables>::New(*this);
+}
 
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
@@ -275,7 +347,7 @@ const volScalarField& RASModelVariables::TMVar1() const
     }
     else
     {
-        return *TMVar1Ptr_;
+        return TMVar1Ptr_()();
     }
 }
 
@@ -288,7 +360,7 @@ volScalarField& RASModelVariables::TMVar1()
     }
     else
     {
-        return *TMVar1Ptr_;
+        return TMVar1Ptr_().constCast();
     }
 }
 
@@ -301,7 +373,7 @@ const volScalarField& RASModelVariables::TMVar2() const
     }
     else
     {
-        return *TMVar2Ptr_;
+        return TMVar2Ptr_()();
     }
 }
 
@@ -313,7 +385,7 @@ volScalarField& RASModelVariables::TMVar2()
     }
     else
     {
-        return *TMVar2Ptr_;
+        return TMVar2Ptr_().constCast();
     }
 }
 
@@ -325,7 +397,7 @@ const volScalarField& RASModelVariables::nutRef() const
     }
     else
     {
-        return *nutPtr_;
+        return nutPtr_()();
     }
 }
 
@@ -338,56 +410,56 @@ volScalarField& RASModelVariables::nutRef()
     }
     else
     {
-        return *nutPtr_;
+        return nutPtr_().constCast();
     }
 }
 
 
 const volScalarField& RASModelVariables::d() const
 {
-    return *dPtr_;
+    return dPtr_()();
 }
 
 
 volScalarField& RASModelVariables::d()
 {
-    return *dPtr_;
+    return dPtr_().constCast();
 }
 
 
 const volScalarField& RASModelVariables::TMVar1Inst() const
 {
-    return *TMVar1Ptr_;
+    return TMVar1Ptr_()();
 }
 
 
 volScalarField& RASModelVariables::TMVar1Inst()
 {
-    return *TMVar1Ptr_;
+    return TMVar1Ptr_().constCast();
 }
 
 
 const volScalarField& RASModelVariables::TMVar2Inst() const
 {
-    return *TMVar2Ptr_;
+    return TMVar2Ptr_()();
 }
 
 
 volScalarField& RASModelVariables::TMVar2Inst()
 {
-    return *TMVar2Ptr_;
+    return TMVar2Ptr_().constCast();
 }
 
 
 const volScalarField& RASModelVariables::nutRefInst() const
 {
-    return *nutPtr_;
+    return nutPtr_()();
 }
 
 
 volScalarField& RASModelVariables::nutRefInst()
 {
-    return *nutPtr_;
+    return nutPtr_().constCast();
 }
 
 
@@ -550,7 +622,7 @@ void RASModelVariables::correctBoundaryConditions
 {
     if (hasTMVar1())
     {
-        TMVar1Ptr_->correctBoundaryConditions();
+        TMVar1Ptr_().constCast().correctBoundaryConditions();
         if (solverControl_.average())
         {
             TMVar1MeanPtr_().correctBoundaryConditions();
@@ -559,7 +631,7 @@ void RASModelVariables::correctBoundaryConditions
 
     if (hasTMVar2())
     {
-        TMVar2Ptr_->correctBoundaryConditions();
+        TMVar2Ptr_().constCast().correctBoundaryConditions();
         if (solverControl_.average())
         {
             TMVar2MeanPtr_().correctBoundaryConditions();
@@ -568,11 +640,35 @@ void RASModelVariables::correctBoundaryConditions
 
     if (hasNut())
     {
-        nutPtr_->correctBoundaryConditions();
+        nutPtr_().constCast().correctBoundaryConditions();
         if (solverControl_.average())
         {
             nutMeanPtr_().correctBoundaryConditions();
         }
+    }
+}
+
+
+void RASModelVariables::transfer(RASModelVariables& rmv)
+{
+    if (rmv.hasTMVar1() && hasTMVar1_)
+    {
+        copyAndRename(TMVar1Inst(), rmv.TMVar1Inst());
+    }
+
+    if (rmv.hasTMVar2() && hasTMVar2_)
+    {
+        copyAndRename(TMVar2Inst(), rmv.TMVar2Inst());
+    }
+
+    if (rmv.hasNut() && hasNut_)
+    {
+        copyAndRename(nutRef(), rmv.nutRef());
+    }
+
+    if (rmv.hasDist() && hasDist_)
+    {
+        copyAndRename(d(), rmv.d());
     }
 }
 

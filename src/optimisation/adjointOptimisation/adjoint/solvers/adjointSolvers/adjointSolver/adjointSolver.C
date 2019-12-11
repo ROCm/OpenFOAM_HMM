@@ -107,6 +107,22 @@ Foam::autoPtr<Foam::adjointSolver> Foam::adjointSolver::New
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+const Foam::primalSolver& Foam::adjointSolver::getPrimalSolver() const
+{
+    return mesh_.lookupObject<primalSolver>(primalSolverName_);
+}
+
+
+Foam::primalSolver& Foam::adjointSolver::getPrimalSolver()
+{
+    return 
+        const_cast<primalSolver&>
+        (
+            mesh_.lookupObject<primalSolver>(primalSolverName_)
+        );
+}
+
+
 bool Foam::adjointSolver::readDict(const dictionary& dict)
 {
     if (solver::readDict(dict))

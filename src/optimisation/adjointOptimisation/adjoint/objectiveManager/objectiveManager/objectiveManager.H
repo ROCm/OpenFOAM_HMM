@@ -136,6 +136,12 @@ public:
         //- Update objective function related values
         void update();
 
+        //- Update contributions to adjoint if true, otherwise return nulls
+        void updateOrNullify();
+
+        //- Increment integration times by the optimisation cycle time-span 
+        void incrementIntegrationTimes(const scalar timeSpan);
+
         //- Print to screen
         scalar print();
 
@@ -160,6 +166,9 @@ public:
 
         //- Return name of the primalSolver
         const word& primalSolverName() const;
+
+        //- Check integration times for unsteady runs
+        void checkIntegrationTimes() const;
 
         //- Add contribution to adjoint momentum PDEs
         virtual void addUaEqnSource(fvVectorMatrix& UaEqn) = 0;

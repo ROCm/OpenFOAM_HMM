@@ -60,9 +60,8 @@ Foam::incompressibleAdjointSolver::incompressibleAdjointSolver
     primalVars_
     (
         mesh.lookupObjectRef<incompressiblePrimalSolver>(primalSolverName).
-            getVars()
+            getIncoVars()
     ),
-    adjointVars_(nullptr),
     ATCModel_(nullptr),
     fvOptionsAdjoint_
     (
@@ -136,14 +135,18 @@ Foam::incompressibleAdjointSolver::getPrimalVars() const
 const Foam::incompressibleAdjointVars&
 Foam::incompressibleAdjointSolver::getAdjointVars() const
 {
-    return adjointVars_();
+    const incompressibleAdjointVars& adjointVars = 
+        refCast<incompressibleAdjointVars>(const_cast<variablesSet&>(vars_()));
+    return adjointVars;
 }
 
 
 Foam::incompressibleAdjointVars&
 Foam::incompressibleAdjointSolver::getAdjointVars()
 {
-    return adjointVars_.ref();
+    incompressibleAdjointVars& adjointVars = 
+        refCast<incompressibleAdjointVars>(const_cast<variablesSet&>(vars_()));
+    return adjointVars;
 }
 
 
@@ -170,7 +173,10 @@ Foam::incompressibleAdjointSolver::getFvOptionsAdjoint()
 
 void Foam::incompressibleAdjointSolver::updatePrimalBasedQuantities()
 {
-    getAdjointVars().adjointTurbulence()->setChangedPrimalSolution();
+    if (vars_.valid())
+    {
+        getAdjointVars().adjointTurbulence()->setChangedPrimalSolution();
+    }
 }
 
 

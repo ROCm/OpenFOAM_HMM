@@ -77,12 +77,6 @@ protected:
         //- Primal variable set
         incompressibleVars& primalVars_;
 
-        //- Adjoint variable set
-        //- Needs to be allocated in each derived class since it requires
-        //- a solverControl variable which is specifically allocated there
-        //  (e.g. SIMPLEControl for simple)
-        autoPtr<incompressibleAdjointVars> adjointVars_;
-
         //- Adjoint Transpose Convection options
         autoPtr<ATCModel> ATCModel_;
 
@@ -150,7 +144,7 @@ public:
         virtual bool readDict(const dictionary& dict);
 
         //- Should solver name be appended to fields
-        bool useSolverNameForFields() const;
+        virtual bool useSolverNameForFields() const;
 
 
         // Access

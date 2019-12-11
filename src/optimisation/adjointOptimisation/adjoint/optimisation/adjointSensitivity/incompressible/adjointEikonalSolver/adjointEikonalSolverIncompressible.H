@@ -170,7 +170,7 @@ protected:
         autoPtr<Foam::incompressibleAdjoint::adjointRASModel>&
             adjointTurbulence_;
 
-        const labelList& sensitivityPatchIDs_;
+        const labelHashSet& sensitivityPatchIDs_;
 
         label nEikonalIters_;
 
@@ -181,6 +181,8 @@ protected:
         labelHashSet wallPatchIDs_;
 
         volScalarField da_;
+
+        volScalarField source_;
 
         //- Wall face sens w.r.t. (x,y.z)
         autoPtr<boundaryVectorField> distanceSensPtr_;
@@ -215,7 +217,7 @@ public:
             const autoPtr<incompressible::RASModelVariables>& RASModelVars,
             autoPtr<Foam::incompressibleAdjoint::adjointRASModel>&
                   adjointTurbulence,
-            const labelList& sensitivityPatchIDs
+            const labelHashSet& sensitivityPatchIDs
         );
 
     // Destructor
@@ -228,8 +230,14 @@ public:
        //- Read dict if changed
        virtual bool readDict(const dictionary& dict);
 
+       //- Accumulate source term
+       void accumulateIntegrand(const scalar dt);
+
        //- Calculate the adjoint distance field
        void solve();
+
+       //- Reset source term
+       void reset();
 
        //- Return the sensitivity term depending on da
        boundaryVectorField& distanceSensitivities();

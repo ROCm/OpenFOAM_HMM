@@ -122,6 +122,9 @@ public:
         //- Returns zero field
         virtual tmp<volTensorField> FISensitivityTerm();
 
+        //- Nullify all adjoint turbulence model fields and their old times
+        virtual void nullify();
+
         //- Correct the primal viscosity field. Redundant?
         virtual void correct();
 

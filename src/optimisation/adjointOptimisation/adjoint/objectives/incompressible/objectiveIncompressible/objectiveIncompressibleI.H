@@ -30,73 +30,73 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::objectiveIncompressible::hasdJdv()
+inline bool Foam::objectiveIncompressible::hasdJdv() const
 {
     return dJdvPtr_.valid();
 }
 
 
-inline bool Foam::objectiveIncompressible::hasdJdp()
+inline bool Foam::objectiveIncompressible::hasdJdp() const
 {
     return dJdpPtr_.valid();
 }
 
 
-inline bool Foam::objectiveIncompressible::hasdJdT()
+inline bool Foam::objectiveIncompressible::hasdJdT() const
 {
     return dJdTPtr_.valid();
 }
 
 
-inline bool Foam::objectiveIncompressible::hasdJdTMVar1()
+inline bool Foam::objectiveIncompressible::hasdJdTMVar1() const
 {
     return dJdTMvar1Ptr_.valid();
 }
 
 
-inline bool Foam::objectiveIncompressible::hasdJdTMVar2()
+inline bool Foam::objectiveIncompressible::hasdJdTMVar2() const
 {
     return dJdTMvar2Ptr_.valid();
 }
 
 
-inline bool Foam::objectiveIncompressible::hasBoundarydJdv()
+inline bool Foam::objectiveIncompressible::hasBoundarydJdv() const
 {
     return bdJdvPtr_.valid();
 }
 
 
-inline bool Foam::objectiveIncompressible::hasBoundarydJdvn()
+inline bool Foam::objectiveIncompressible::hasBoundarydJdvn() const
 {
     return bdJdvnPtr_.valid();
 }
 
 
-inline bool Foam::objectiveIncompressible::hasBoundarydJdvt()
+inline bool Foam::objectiveIncompressible::hasBoundarydJdvt() const
 {
     return bdJdvtPtr_.valid();
 }
 
 
-inline bool Foam::objectiveIncompressible::hasBoundarydJdp()
+inline bool Foam::objectiveIncompressible::hasBoundarydJdp() const
 {
     return bdJdpPtr_.valid();
 }
 
 
-inline bool Foam::objectiveIncompressible::hasBoundarydJdT()
+inline bool Foam::objectiveIncompressible::hasBoundarydJdT() const
 {
     return bdJdTPtr_.valid();
 }
 
 
-inline bool Foam::objectiveIncompressible::hasBoundarydJdTMVar1()
+inline bool Foam::objectiveIncompressible::hasBoundarydJdTMVar1() const
 {
     return bdJdTMvar1Ptr_.valid();
 }
 
 
-inline bool Foam::objectiveIncompressible::hasBoundarydJdTMVar2()
+inline bool Foam::objectiveIncompressible::hasBoundarydJdTMVar2() const
 {
     return bdJdTMvar2Ptr_.valid();
 }
