@@ -39,9 +39,9 @@ Violations of the Trademark are monitored, and will be duly prosecuted.
 
 If OpenFOAM has already been compiled on your system, simply source
 the appropriate `etc/bashrc` or `etc/cshrc` file and get started.
-For example, for the OpenFOAM-v1906 version:
+For example, for the OpenFOAM-v1912 version:
 ```
-source /installation/path/OpenFOAM-v1906/etc/bashrc
+source /installation/path/OpenFOAM-v1912/etc/bashrc
 ```
 
 # Compiling OpenFOAM
@@ -121,8 +121,8 @@ These 3rd-party sources are normally located in a directory parallel
 to the OpenFOAM directory. For example,
 ```
 /path/parent
-|-- OpenFOAM-v1906
-\-- ThirdParty-v1906
+|-- OpenFOAM-v1912
+\-- ThirdParty-v1912
 ```
 There are, however, many cases where this simple convention is inadequate:
 
@@ -130,7 +130,7 @@ There are, however, many cases where this simple convention is inadequate:
   operating system or cluster installation provides it)
 
 * When we have changed the OpenFOAM directory name to some arbitrary
-  directory name, e.g. openfoam-sandbox1906, etc..
+  directory name, e.g. openfoam-sandbox1912, etc..
 
 * When we would like any additional 3rd party software to be located
   inside of the OpenFOAM directory to ensure that the installation is
@@ -150,18 +150,17 @@ when locating the ThirdParty directory with the following precedence:
 2. PREFIX/ThirdParty-VERSION
    * this corresponds to the traditional approach
 3. PREFIX/ThirdParty-vAPI
-   * allows for an updated value of VERSION, *eg*, `v1906-myCustom`,
+   * allows for an updated value of VERSION, *eg*, `v1912-myCustom`,
      without requiring a renamed ThirdParty. The API value would still
-     be `1906` and the original `ThirdParty-v1906/` would be found.
+     be `1912` and the original `ThirdParty-v1912/` would be found.
 4. PREFIX/ThirdParty-API
    * this is the same as the previous example, but using an unadorned
      API value. This also makes sense if the chosen version name also
      uses the unadorned API value in its naming, *eg*,
-     `1906-patch190131`, `1906.19W03`
+     `1912-patch190131`, `1912.19W03`
 5. PREFIX/ThirdParty-common
-   * permits maximum reuse for various versions, but only for
-     experienced user who are aware of potential version
-     incompatibilities
+   * permits maximum reuse for various versions, for experienced user
+     who are aware of potential version incompatibilities
 
 If none of these directories are found to be suitable, it reverts to
 using PROJECT/ThirdParty as a dummy location (even if the directory
@@ -174,7 +173,7 @@ side-effects. In the above, the following notation has been used:
 | PROJECT       | `$WM_PROJECT_DIR`     | The OpenFOAM directory |
 | PREFIX        | `dirname $WM_PROJECT_DIR` | The OpenFOAM parent directory |
 | API           | `foamEtcFiles -show-api` |  The api or release version |
-| VERSION       | `$WM_PROJECT_VERSION` | The version we've chosen |
+| VERSION       | `$WM_PROJECT_VERSION` | The version we have chosen |
 
 To reduce the potential of false positive matches (perhaps some other
 software also uses ThirdParty-xxx for its naming), the directory test
