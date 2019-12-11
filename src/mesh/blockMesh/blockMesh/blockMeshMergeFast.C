@@ -328,8 +328,7 @@ void Foam::blockMesh::calcMergeInfoFast()
 
     if (verboseOutput)
     {
-        Info<< "Creating merge list using the fast topological search"
-            << flush;
+        Info<< "Creating merge list with fast topological search.." << flush;
     }
 
     // Size merge list and initialize to -1
@@ -550,7 +549,7 @@ void Foam::blockMesh::calcMergeInfoFast()
 
         if (verboseOutput)
         {
-            Info<< "." << flush;
+            Info<< '.' << flush;
         }
 
         if (nPasses > 100)
@@ -562,6 +561,10 @@ void Foam::blockMesh::calcMergeInfoFast()
 
     } while (changedPointMerge);
 
+    if (verboseOutput)
+    {
+        Info<< endl;
+    }
 
     // Sort merge list and count number of unique points
     label nUniqPoints = 0;

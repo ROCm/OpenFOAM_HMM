@@ -54,7 +54,7 @@ void Foam::blockMesh::calcMergeInfo()
 
     if (verboseOutput)
     {
-        Info<< "Creating merge list " << flush;
+        Info<< "Creating merge list.." << flush;
     }
 
     // set unused to -1
@@ -408,7 +408,7 @@ void Foam::blockMesh::calcMergeInfo()
         }
         if (verboseOutput)
         {
-            Info<< "." << flush;
+            Info<< '.' << flush;
         }
 
         if (nPasses > 100)
