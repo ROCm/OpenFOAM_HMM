@@ -28,7 +28,14 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class EnumType>
-inline Foam::label Foam::Enum<EnumType>::size() const
+inline bool Foam::Enum<EnumType>::empty() const noexcept
+{
+    return keys_.empty();
+}
+
+
+template<class EnumType>
+inline Foam::label Foam::Enum<EnumType>::size() const noexcept
 {
     return keys_.size();
 }

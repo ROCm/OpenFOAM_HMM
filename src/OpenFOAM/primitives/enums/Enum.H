@@ -101,8 +101,11 @@ public:
 
     // Access
 
+        //- True if the enumeration list is empty.
+        inline bool empty() const noexcept;
+
         //- The number of name/value pairs for the enumeration.
-        inline label size() const;
+        inline label size() const noexcept;
 
         //- The list of enum names, in construction order. Same as toc()
         inline const List<word>& names() const;
