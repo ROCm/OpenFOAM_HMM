@@ -9,8 +9,8 @@ divert(-1)dnl
 #     Copyright (C) 2019 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GNU General Public
+#     License GPL-3.0 or later <https://www.gnu.org/licenses/gpl-3.0>
 #
 # Description
 #     Rules for vector/tensor `zip' functions, which are used to combine
@@ -117,7 +117,10 @@ define([rule_tensor_transpose],
 # rule_vector_zip(target, sources, tok)
 #
 # Description
-#     Combine scalars to produce a vector
+#     Combine three scalars to produce a vector
+#     - vector(x, y, z)
+#
+# A rule such as [x y z] does not reduce well - needs more investigation.
 #
 # Example
 # rule_vector_zip(vfield, sfield, VECTOR)
@@ -143,7 +146,8 @@ define([rule_vector_zip],
 # rule_sphTensor_zip(target, sources, tok)
 #
 # Description
-#     Combine scalars to produce a sphericalTensor
+#     Combine one scalar to produce a sphericalTensor
+#     - sphericalTensor(ii)
 #------------------------------------------------------------------------------
 
 define([rule_sphTensor_zip],
@@ -164,7 +168,8 @@ define([rule_sphTensor_zip],
 # rule_symTensor_zip(target, sources, tok)
 #
 # Description
-#     Combine scalars to produce a symmTensor
+#     Combine six scalars to produce a symmTensor
+#     - symmTensor(xx, xy, xy, yy, yz, zz)
 #------------------------------------------------------------------------------
 
 define([rule_symTensor_zip],

@@ -77,6 +77,18 @@ public:
     }
 
 
+    // Static Member Functions
+
+        //- Return the text name corresponding to the tokenId
+        static word tokenName(int tokenId);
+
+        //- Print all token names
+        static void printTokenNames(Ostream& os);
+
+        //- Print all rules
+        static void printRules(Ostream& os);
+
+
     // Member Functions
 
         //- Start parsing, with the given driver context
@@ -87,9 +99,6 @@ public:
 
         //- Push token/value to parser
         void parse(int tokenId, scanToken* tokenVal);
-
-        //- Return the text name corresponding to the tokenId
-        word nameOfToken(int tokenId) const;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

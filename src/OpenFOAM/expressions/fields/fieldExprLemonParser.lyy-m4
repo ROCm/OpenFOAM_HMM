@@ -92,7 +92,7 @@ TBD
 } // %include
 
 /*
- * include[fieldExprLemonParserMacros.m4]
+ * include fieldExprLemonParserMacros.m4
  *include(`fieldExprLemonParserMacros.m4')dnl
  !done in a comment since many editors have issues matching m4 quotes!
  */
@@ -103,6 +103,7 @@ TBD
 #include "fieldExprScanner.H"
 #include "unitConversion.H"
 #include "error.H"
+#include "IOmanip.H"
 #include "exprOps.H"
 #include "exprDriverOps.H"
 
@@ -345,12 +346,20 @@ rule_tensor_unzipAll(vfield, tfield)
 
 // ************************************************************************* //
 
-dnl/* Standard m4 quoting
-changequote([`],['])dnl
-dnl*/
+/*
+ * include m4/lemon/parser-methods.m4
+include([m4/lemon/parser-methods.m4])dnl
+dnl Can revert to standard m4 quoting
+dnl ... Or not changequote([`],['])dnl Revert to standard m4 quoting
+ */
 
 %code
 {
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+parser_code_static_methods(Foam::expressions::fieldExpr::parser)
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -388,27 +397,6 @@ void Foam::expressions::fieldExpr::parser::parse
 )
 {
     Parse(lemon_, tokenId, tokenVal);
-}
-
-
-Foam::word Foam::expressions::fieldExpr::parser::nameOfToken
-(
-    int tokenId
-) const
-{
-    #ifndef NDEBUG
-    if
-    (
-        tokenId > 0
-     && unsigned(tokenId) < (sizeof(yyTokenName) / sizeof(char*))
-    )
-    {
-        return yyTokenName[tokenId];
-    }
-    return "<invalid>";
-    #else
-    return word();
-    #endif
 }
 
 

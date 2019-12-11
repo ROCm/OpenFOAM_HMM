@@ -39,6 +39,7 @@ Description
 #include "fileName.H"
 #include "stringList.H"
 #include "stringOps.H"
+#include "fieldExprFwd.H"
 
 using namespace Foam;
 
@@ -122,6 +123,9 @@ int main(int argc, char *argv[])
     // Test numeric
     {
         Info<< nl << "Test numeric evaluation" << nl;
+
+        // expressions::fieldExpr::debug = 2;
+
         for
         (
             const auto& cstr
@@ -135,6 +139,9 @@ int main(int argc, char *argv[])
 
                 "vector=${{   5 * vector(1,2,3)   }}=",
                 "empty=${{    }}=",
+
+                "vector=${{   5 * vector(1, 2, 3) ^ vector(4, 5, 6) }}=",
+// NOT YET WORKING: "vector=${{   5 * [1 2 3 ] ^ [ 4 5 6 ] }}=",
             }
         )
         {

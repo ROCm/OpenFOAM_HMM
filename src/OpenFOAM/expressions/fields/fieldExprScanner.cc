@@ -56,6 +56,9 @@ namespace Foam
 //- An {int, c_str} enum pairing
 #define TOKEN_PAIR(Name,T)  { TOKEN_OF(T), Name }
 
+//- An {int, c_str} enum pairing for field types
+#define FIELD_PAIR(Fld,T)  { TOKEN_OF(T), Fld::typeName.c_str() }
+
 #undef HAS_LOOKBEHIND_TOKENS
 
 // Special handling of predefined method types. Eg, .x(), .y(), ...
@@ -89,7 +92,7 @@ static const Enum<int> funcTokenEnums
     TOKEN_PAIR("ceil", CEIL),
     TOKEN_PAIR("round", ROUND),
 #endif
-#ifdef TOK_HYPOT  /* Can use hypot? */
+#ifdef TOK_HYPOT
     TOKEN_PAIR("hypot", HYPOT),
 #endif
 });
@@ -160,7 +163,7 @@ static int driverTokenType
 
 
 
-#line 164 "fieldExprScanner.cc"
+#line 167 "fieldExprScanner.cc"
 static const int fieldExpr_start = 11;
 static const int fieldExpr_first_final = 11;
 static const int fieldExpr_error = 0;
@@ -168,7 +171,7 @@ static const int fieldExpr_error = 0;
 static const int fieldExpr_en_main = 11;
 
 
-#line 300 "fieldExprScanner.rl"
+#line 303 "fieldExprScanner.rl"
 
 
 
@@ -246,7 +249,7 @@ bool Foam::expressions::fieldExpr::scanner::dispatch_ident
         {
             DebugInfo
                 << "Emit:" << ident << " function:"
-                << parser_->nameOfToken(tokType) << nl;
+                << parser_->tokenName(tokType) << nl;
 
             parser_->parse(tokType, nullptr);
             return true;
@@ -260,7 +263,7 @@ bool Foam::expressions::fieldExpr::scanner::dispatch_ident
         {
             DebugInfo
                 << "Emit:" << ident << " as look-behind:"
-                << parser_->nameOfToken(tokType) << nl;
+                << parser_->tokenName(tokType) << nl;
 
             driver_.resetStashedTokenId(tokType);
             parser_->parse(tokType, nullptr);
@@ -279,7 +282,7 @@ bool Foam::expressions::fieldExpr::scanner::dispatch_ident
     {
         DebugInfo
             << "Emit:" << ident << " token:"
-            << parser_->nameOfToken(tokType) << nl;
+            << parser_->tokenName(tokType) << nl;
 
         scanTok.name = new Foam::word(std::move(ident));
         parser_->parse(tokType, &scanTok);
@@ -307,9 +310,9 @@ bool Foam::expressions::fieldExpr::scanner::dispatch_ident
     {
         DebugInfo
             << "Emit:" << ident.substr(0, dot).c_str() << " token:"
-            << parser_->nameOfToken(tokType) << " with "
+            << parser_->tokenName(tokType) << " with "
             << ident.substr(dot).c_str() << " token:"
-            << parser_->nameOfToken(methType) << nl;
+            << parser_->tokenName(methType) << nl;
 
         // The field (before the ".")
         ident.erase(dot);
@@ -395,7 +398,7 @@ bool Foam::expressions::fieldExpr::scanner::process
 
     // Initialize FSM variables
     
-#line 399 "fieldExprScanner.cc"
+#line 402 "fieldExprScanner.cc"
 	{
 	cs = fieldExpr_start;
 	ts = 0;
@@ -403,18 +406,18 @@ bool Foam::expressions::fieldExpr::scanner::process
 	act = 0;
 	}
 
-#line 525 "fieldExprScanner.rl"
+#line 528 "fieldExprScanner.rl"
    /* ^^^ FSM initialization here ^^^ */;
 
     
-#line 411 "fieldExprScanner.cc"
+#line 414 "fieldExprScanner.cc"
 	{
 	if ( p == pe )
 		goto _test_eof;
 	switch ( cs )
 	{
 tr2:
-#line 186 "fieldExprScanner.rl"
+#line 189 "fieldExprScanner.rl"
 	{te = p+1;{
         driver_.parsePosition() = (ts-buf);
         dispatch_ident(driver_, scanTok, word(ts, te-ts, false));
@@ -422,7 +425,7 @@ tr2:
     }}
 	goto st11;
 tr4:
-#line 186 "fieldExprScanner.rl"
+#line 189 "fieldExprScanner.rl"
 	{te = p+1;{
         driver_.parsePosition() = (ts-buf);
         dispatch_ident(driver_, scanTok, word(ts, te-ts, false));
@@ -430,7 +433,7 @@ tr4:
     }}
 	goto st11;
 tr5:
-#line 164 "fieldExprScanner.rl"
+#line 167 "fieldExprScanner.rl"
 	{{p = ((te))-1;}{
         driver_.parsePosition() = (ts-buf);
 
@@ -454,91 +457,91 @@ tr5:
     }}
 	goto st11;
 tr8:
-#line 229 "fieldExprScanner.rl"
+#line 232 "fieldExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(EQUAL); }}
 	goto st11;
 tr9:
-#line 281 "fieldExprScanner.rl"
+#line 284 "fieldExprScanner.rl"
 	{{p = ((te))-1;}{ EMIT_TOKEN(TENSOR); }}
 	goto st11;
 tr11:
-#line 289 "fieldExprScanner.rl"
+#line 292 "fieldExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(UNIT_TENSOR); }}
 	goto st11;
 tr12:
-#line 232 "fieldExprScanner.rl"
+#line 235 "fieldExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(LOR); }}
 	goto st11;
 tr16:
-#line 214 "fieldExprScanner.rl"
+#line 217 "fieldExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(PERCENT); }}
 	goto st11;
 tr19:
-#line 215 "fieldExprScanner.rl"
+#line 218 "fieldExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(LPAREN); }}
 	goto st11;
 tr20:
-#line 216 "fieldExprScanner.rl"
+#line 219 "fieldExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(RPAREN); }}
 	goto st11;
 tr21:
-#line 217 "fieldExprScanner.rl"
+#line 220 "fieldExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(TIMES); }}
 	goto st11;
 tr22:
-#line 218 "fieldExprScanner.rl"
+#line 221 "fieldExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(PLUS); }}
 	goto st11;
 tr23:
-#line 220 "fieldExprScanner.rl"
+#line 223 "fieldExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(COMMA); }}
 	goto st11;
 tr24:
-#line 219 "fieldExprScanner.rl"
+#line 222 "fieldExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(MINUS); }}
 	goto st11;
 tr26:
-#line 222 "fieldExprScanner.rl"
+#line 225 "fieldExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(DIVIDE); }}
 	goto st11;
 tr28:
-#line 224 "fieldExprScanner.rl"
+#line 227 "fieldExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(COLON); }}
 	goto st11;
 tr32:
-#line 223 "fieldExprScanner.rl"
+#line 226 "fieldExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(QUESTION); }}
 	goto st11;
 tr35:
-#line 235 "fieldExprScanner.rl"
+#line 238 "fieldExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(BIT_XOR); }}
 	goto st11;
 tr51:
-#line 208 "fieldExprScanner.rl"
+#line 211 "fieldExprScanner.rl"
 	{te = p;p--;}
 	goto st11;
 tr52:
-#line 213 "fieldExprScanner.rl"
+#line 216 "fieldExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(NOT); }}
 	goto st11;
 tr53:
-#line 230 "fieldExprScanner.rl"
+#line 233 "fieldExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(NOT_EQUAL); }}
 	goto st11;
 tr54:
-#line 233 "fieldExprScanner.rl"
+#line 236 "fieldExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(BIT_AND); }}
 	goto st11;
 tr55:
-#line 231 "fieldExprScanner.rl"
+#line 234 "fieldExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(LAND); }}
 	goto st11;
 tr56:
-#line 221 "fieldExprScanner.rl"
+#line 224 "fieldExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(DOT); }}
 	goto st11;
 tr59:
-#line 164 "fieldExprScanner.rl"
+#line 167 "fieldExprScanner.rl"
 	{te = p;p--;{
         driver_.parsePosition() = (ts-buf);
 
@@ -562,7 +565,7 @@ tr59:
     }}
 	goto st11;
 tr61:
-#line 192 "fieldExprScanner.rl"
+#line 195 "fieldExprScanner.rl"
 	{te = p;p--;{
         // Tokenized ".method" - dispatch '.' and "method" separately
         driver_.parsePosition() = (ts-buf);
@@ -571,23 +574,23 @@ tr61:
     }}
 	goto st11;
 tr62:
-#line 225 "fieldExprScanner.rl"
+#line 228 "fieldExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(LESS); }}
 	goto st11;
 tr63:
-#line 226 "fieldExprScanner.rl"
+#line 229 "fieldExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(LESS_EQ); }}
 	goto st11;
 tr64:
-#line 227 "fieldExprScanner.rl"
+#line 230 "fieldExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(GREATER); }}
 	goto st11;
 tr65:
-#line 228 "fieldExprScanner.rl"
+#line 231 "fieldExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(GREATER_EQ); }}
 	goto st11;
 tr66:
-#line 186 "fieldExprScanner.rl"
+#line 189 "fieldExprScanner.rl"
 	{te = p;p--;{
         driver_.parsePosition() = (ts-buf);
         dispatch_ident(driver_, scanTok, word(ts, te-ts, false));
@@ -698,43 +701,43 @@ tr68:
 	}
 	goto st11;
 tr82:
-#line 257 "fieldExprScanner.rl"
+#line 260 "fieldExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(ATAN); }}
 	goto st11;
 tr97:
-#line 253 "fieldExprScanner.rl"
+#line 256 "fieldExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(COS); }}
 	goto st11;
 tr114:
-#line 246 "fieldExprScanner.rl"
+#line 249 "fieldExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(LOG); }}
 	goto st11;
 tr121:
-#line 262 "fieldExprScanner.rl"
+#line 265 "fieldExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(MAG); }}
 	goto st11;
 tr128:
-#line 266 "fieldExprScanner.rl"
+#line 269 "fieldExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(NEG); }}
 	goto st11;
 tr134:
-#line 265 "fieldExprScanner.rl"
+#line 268 "fieldExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(POS); }}
 	goto st11;
 tr153:
-#line 252 "fieldExprScanner.rl"
+#line 255 "fieldExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(SIN); }}
 	goto st11;
 tr169:
-#line 249 "fieldExprScanner.rl"
+#line 252 "fieldExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(SQR); }}
 	goto st11;
 tr184:
-#line 254 "fieldExprScanner.rl"
+#line 257 "fieldExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(TAN); }}
 	goto st11;
 tr190:
-#line 281 "fieldExprScanner.rl"
+#line 284 "fieldExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(TENSOR); }}
 	goto st11;
 st11:
@@ -745,7 +748,7 @@ st11:
 case 11:
 #line 1 "NONE"
 	{ts = p;}
-#line 749 "fieldExprScanner.cc"
+#line 752 "fieldExprScanner.cc"
 	switch( (*p) ) {
 		case 32: goto st12;
 		case 33: goto st13;
@@ -872,7 +875,7 @@ st16:
 	if ( ++p == pe )
 		goto _test_eof16;
 case 16:
-#line 876 "fieldExprScanner.cc"
+#line 879 "fieldExprScanner.cc"
 	switch( (*p) ) {
 		case 69: goto st5;
 		case 101: goto st5;
@@ -923,7 +926,7 @@ st19:
 	if ( ++p == pe )
 		goto _test_eof19;
 case 19:
-#line 927 "fieldExprScanner.cc"
+#line 930 "fieldExprScanner.cc"
 	switch( (*p) ) {
 		case 46: goto tr57;
 		case 69: goto st5;
@@ -973,194 +976,194 @@ case 22:
 tr67:
 #line 1 "NONE"
 	{te = p+1;}
-#line 186 "fieldExprScanner.rl"
+#line 189 "fieldExprScanner.rl"
 	{act = 67;}
 	goto st23;
 tr71:
 #line 1 "NONE"
 	{te = p+1;}
-#line 286 "fieldExprScanner.rl"
+#line 289 "fieldExprScanner.rl"
 	{act = 63;}
 	goto st23;
 tr77:
 #line 1 "NONE"
 	{te = p+1;}
-#line 256 "fieldExprScanner.rl"
+#line 259 "fieldExprScanner.rl"
 	{act = 40;}
 	goto st23;
 tr79:
 #line 1 "NONE"
 	{te = p+1;}
-#line 255 "fieldExprScanner.rl"
+#line 258 "fieldExprScanner.rl"
 	{act = 39;}
 	goto st23;
 tr83:
 #line 1 "NONE"
 	{te = p+1;}
-#line 258 "fieldExprScanner.rl"
+#line 261 "fieldExprScanner.rl"
 	{act = 42;}
 	goto st23;
 tr88:
 #line 1 "NONE"
 	{te = p+1;}
-#line 274 "fieldExprScanner.rl"
+#line 277 "fieldExprScanner.rl"
 	{act = 55;}
 	goto st23;
 tr91:
 #line 1 "NONE"
 	{te = p+1;}
-#line 279 "fieldExprScanner.rl"
+#line 282 "fieldExprScanner.rl"
 	{act = 58;}
 	goto st23;
 tr95:
 #line 1 "NONE"
 	{te = p+1;}
-#line 251 "fieldExprScanner.rl"
+#line 254 "fieldExprScanner.rl"
 	{act = 35;}
 	goto st23;
 tr98:
 #line 1 "NONE"
 	{te = p+1;}
-#line 260 "fieldExprScanner.rl"
+#line 263 "fieldExprScanner.rl"
 	{act = 44;}
 	goto st23;
 tr105:
 #line 1 "NONE"
 	{te = p+1;}
-#line 243 "fieldExprScanner.rl"
+#line 246 "fieldExprScanner.rl"
 	{act = 27;}
 	goto st23;
 tr107:
 #line 1 "NONE"
 	{te = p+1;}
-#line 245 "fieldExprScanner.rl"
+#line 248 "fieldExprScanner.rl"
 	{act = 29;}
 	goto st23;
 tr111:
 #line 1 "NONE"
 	{te = p+1;}
-#line 288 "fieldExprScanner.rl"
+#line 291 "fieldExprScanner.rl"
 	{act = 65;}
 	goto st23;
 tr116:
 #line 1 "NONE"
 	{te = p+1;}
-#line 247 "fieldExprScanner.rl"
+#line 250 "fieldExprScanner.rl"
 	{act = 31;}
 	goto st23;
 tr120:
 #line 1 "NONE"
 	{te = p+1;}
-#line 273 "fieldExprScanner.rl"
+#line 276 "fieldExprScanner.rl"
 	{act = 54;}
 	goto st23;
 tr124:
 #line 1 "NONE"
 	{te = p+1;}
-#line 263 "fieldExprScanner.rl"
+#line 266 "fieldExprScanner.rl"
 	{act = 47;}
 	goto st23;
 tr125:
 #line 1 "NONE"
 	{te = p+1;}
-#line 272 "fieldExprScanner.rl"
+#line 275 "fieldExprScanner.rl"
 	{act = 53;}
 	goto st23;
 tr129:
 #line 1 "NONE"
 	{te = p+1;}
-#line 268 "fieldExprScanner.rl"
+#line 271 "fieldExprScanner.rl"
 	{act = 51;}
 	goto st23;
 tr130:
 #line 1 "NONE"
 	{te = p+1;}
-#line 242 "fieldExprScanner.rl"
+#line 245 "fieldExprScanner.rl"
 	{act = 26;}
 	goto st23;
 tr133:
 #line 1 "NONE"
 	{te = p+1;}
-#line 248 "fieldExprScanner.rl"
+#line 251 "fieldExprScanner.rl"
 	{act = 32;}
 	goto st23;
 tr135:
 #line 1 "NONE"
 	{te = p+1;}
-#line 267 "fieldExprScanner.rl"
+#line 270 "fieldExprScanner.rl"
 	{act = 50;}
 	goto st23;
 tr143:
 #line 1 "NONE"
 	{te = p+1;}
-#line 244 "fieldExprScanner.rl"
+#line 247 "fieldExprScanner.rl"
 	{act = 28;}
 	goto st23;
 tr144:
 #line 1 "NONE"
 	{te = p+1;}
-#line 276 "fieldExprScanner.rl"
+#line 279 "fieldExprScanner.rl"
 	{act = 57;}
 	goto st23;
 tr152:
 #line 1 "NONE"
 	{te = p+1;}
-#line 269 "fieldExprScanner.rl"
+#line 272 "fieldExprScanner.rl"
 	{act = 52;}
 	goto st23;
 tr154:
 #line 1 "NONE"
 	{te = p+1;}
-#line 259 "fieldExprScanner.rl"
+#line 262 "fieldExprScanner.rl"
 	{act = 43;}
 	goto st23;
 tr167:
 #line 1 "NONE"
 	{te = p+1;}
-#line 283 "fieldExprScanner.rl"
+#line 286 "fieldExprScanner.rl"
 	{act = 62;}
 	goto st23;
 tr170:
 #line 1 "NONE"
 	{te = p+1;}
-#line 250 "fieldExprScanner.rl"
+#line 253 "fieldExprScanner.rl"
 	{act = 34;}
 	goto st23;
 tr171:
 #line 1 "NONE"
 	{te = p+1;}
-#line 275 "fieldExprScanner.rl"
+#line 278 "fieldExprScanner.rl"
 	{act = 56;}
 	goto st23;
 tr179:
 #line 1 "NONE"
 	{te = p+1;}
-#line 282 "fieldExprScanner.rl"
+#line 285 "fieldExprScanner.rl"
 	{act = 61;}
 	goto st23;
 tr185:
 #line 1 "NONE"
 	{te = p+1;}
-#line 261 "fieldExprScanner.rl"
+#line 264 "fieldExprScanner.rl"
 	{act = 45;}
 	goto st23;
 tr193:
 #line 1 "NONE"
 	{te = p+1;}
-#line 287 "fieldExprScanner.rl"
+#line 290 "fieldExprScanner.rl"
 	{act = 64;}
 	goto st23;
 tr198:
 #line 1 "NONE"
 	{te = p+1;}
-#line 280 "fieldExprScanner.rl"
+#line 283 "fieldExprScanner.rl"
 	{act = 59;}
 	goto st23;
 st23:
 	if ( ++p == pe )
 		goto _test_eof23;
 case 23:
-#line 1164 "fieldExprScanner.cc"
+#line 1167 "fieldExprScanner.cc"
 	switch( (*p) ) {
 		case 46: goto tr67;
 		case 95: goto tr67;
@@ -2926,7 +2929,7 @@ st120:
 	if ( ++p == pe )
 		goto _test_eof120;
 case 120:
-#line 2930 "fieldExprScanner.cc"
+#line 2933 "fieldExprScanner.cc"
 	switch( (*p) ) {
 		case 46: goto tr67;
 		case 58: goto st8;
@@ -3347,7 +3350,7 @@ case 10:
 	_out: {}
 	}
 
-#line 527 "fieldExprScanner.rl"
+#line 530 "fieldExprScanner.rl"
    /* ^^^ FSM execution here ^^^ */;
 
     if (0 == cs)

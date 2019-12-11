@@ -36,7 +36,7 @@ Description
 } // %include
 
 /*
- * include[patchExprLemonParserMacros.m4]
+ * include patchExprLemonParserMacros.m4
  *include(`patchExprLemonParserMacros.m4')dnl
  !done in a comment since many editors have issues matching m4 quotes!
  */
@@ -46,8 +46,9 @@ Description
 #include "patchExprParser.H"
 #include "patchExprScanner.H"
 #include "unitConversion.H"
-#include "error.H"
 #include "volFields.H"
+#include "error.H"
+#include "IOmanip.H"
 #include "exprOps.H"
 #include "exprDriverOps.H"
 #include "GeometricFieldOps.H"
@@ -491,12 +492,20 @@ rule_faceToPoint(phfield, hfield)
 
 // ************************************************************************* //
 
-dnl/* Standard m4 quoting
-changequote([`],['])dnl
-dnl*/
+/*
+ * include m4/lemon/parser-methods.m4
+include([m4/lemon/parser-methods.m4])dnl
+dnl Can revert to standard m4 quoting
+dnl ... Or not changequote([`],['])dnl Revert to standard m4 quoting
+ */
 
 %code
 {
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+parser_code_static_methods(Foam::expressions::patchExpr::parser)
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -534,27 +543,6 @@ void Foam::expressions::patchExpr::parser::parse
 )
 {
     Parse(lemon_, tokenId, tokenVal);
-}
-
-
-Foam::word Foam::expressions::patchExpr::parser::nameOfToken
-(
-    int tokenId
-) const
-{
-    #ifndef NDEBUG
-    if
-    (
-        tokenId > 0
-     && unsigned(tokenId) < (sizeof(yyTokenName) / sizeof(char*))
-    )
-    {
-        return yyTokenName[tokenId];
-    }
-    return "<invalid>";
-    #else
-    return word();
-    #endif
 }
 
 

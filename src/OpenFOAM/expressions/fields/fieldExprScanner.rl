@@ -54,6 +54,9 @@ namespace Foam
 //- An {int, c_str} enum pairing
 #define TOKEN_PAIR(Name,T)  { TOKEN_OF(T), Name }
 
+//- An {int, c_str} enum pairing for field types
+#define FIELD_PAIR(Fld,T)  { TOKEN_OF(T), Fld::typeName.c_str() }
+
 #undef HAS_LOOKBEHIND_TOKENS
 
 // Special handling of predefined method types. Eg, .x(), .y(), ...
@@ -87,7 +90,7 @@ static const Enum<int> funcTokenEnums
     TOKEN_PAIR("ceil", CEIL),
     TOKEN_PAIR("round", ROUND),
 #endif
-#ifdef TOK_HYPOT  /* Can use hypot? */
+#ifdef TOK_HYPOT
     TOKEN_PAIR("hypot", HYPOT),
 #endif
 });
@@ -374,7 +377,7 @@ bool Foam::expressions::fieldExpr::scanner::dispatch_ident
         {
             DebugInfo
                 << "Emit:" << ident << " function:"
-                << parser_->nameOfToken(tokType) << nl;
+                << parser_->tokenName(tokType) << nl;
 
             parser_->parse(tokType, nullptr);
             return true;
@@ -388,7 +391,7 @@ bool Foam::expressions::fieldExpr::scanner::dispatch_ident
         {
             DebugInfo
                 << "Emit:" << ident << " as look-behind:"
-                << parser_->nameOfToken(tokType) << nl;
+                << parser_->tokenName(tokType) << nl;
 
             driver_.resetStashedTokenId(tokType);
             parser_->parse(tokType, nullptr);
@@ -407,7 +410,7 @@ bool Foam::expressions::fieldExpr::scanner::dispatch_ident
     {
         DebugInfo
             << "Emit:" << ident << " token:"
-            << parser_->nameOfToken(tokType) << nl;
+            << parser_->tokenName(tokType) << nl;
 
         scanTok.name = new Foam::word(std::move(ident));
         parser_->parse(tokType, &scanTok);
@@ -435,9 +438,9 @@ bool Foam::expressions::fieldExpr::scanner::dispatch_ident
     {
         DebugInfo
             << "Emit:" << ident.substr(0, dot).c_str() << " token:"
-            << parser_->nameOfToken(tokType) << " with "
+            << parser_->tokenName(tokType) << " with "
             << ident.substr(dot).c_str() << " token:"
-            << parser_->nameOfToken(methType) << nl;
+            << parser_->tokenName(methType) << nl;
 
         // The field (before the ".")
         ident.erase(dot);

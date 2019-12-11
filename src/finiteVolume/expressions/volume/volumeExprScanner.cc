@@ -56,6 +56,10 @@ namespace Foam
 //- An {int, c_str} enum pairing
 #define TOKEN_PAIR(Name,T)  { TOKEN_OF(T), Name }
 
+//- An {int, c_str} enum pairing for field types
+#define FIELD_PAIR(Fld,T)  { TOKEN_OF(T), Fld::typeName.c_str() }
+
+
 // Special handling for these known (stashed) look-back types
 static const Enum<int> lookBehindTokenEnums
 ({
@@ -92,36 +96,46 @@ static const Enum<int> fieldMethodEnums
 
 
 // Known field-token types
-static const Enum<int> fieldTokenEnums
-({
-#ifdef TOK_SCALAR_ID
-    TOKEN_PAIR(volScalarField::typeName.c_str(), SCALAR_ID),
-    TOKEN_PAIR(volVectorField::typeName.c_str(), VECTOR_ID),
-    TOKEN_PAIR(volTensorField::typeName.c_str(), TENSOR_ID),
-    TOKEN_PAIR(volSymmTensorField::typeName.c_str(), SYM_TENSOR_ID),
-    TOKEN_PAIR(volSphericalTensorField::typeName.c_str(), SPH_TENSOR_ID),
-#else
-#error TOK_SCALAR_ID not defined
-#endif
-#ifdef TOK_SSCALAR_ID
-    TOKEN_PAIR(surfaceScalarField::typeName.c_str(), SSCALAR_ID),
-    TOKEN_PAIR(surfaceVectorField::typeName.c_str(), SVECTOR_ID),
-    TOKEN_PAIR(surfaceTensorField::typeName.c_str(), STENSOR_ID),
-    TOKEN_PAIR(surfaceSymmTensorField::typeName.c_str(), SSYM_TENSOR_ID),
-    TOKEN_PAIR(surfaceSphericalTensorField::typeName.c_str(), SSPH_TENSOR_ID),
-#else
-#warning TOK_SSCALAR_ID not defined
-#endif
-#ifdef TOK_PSCALAR_ID
-    TOKEN_PAIR(pointScalarField::typeName.c_str(), PSCALAR_ID),
-    TOKEN_PAIR(pointVectorField::typeName.c_str(), PVECTOR_ID),
-    TOKEN_PAIR(pointTensorField::typeName.c_str(), PTENSOR_ID),
-    TOKEN_PAIR(pointSymmTensorField::typeName.c_str(), PSYM_TENSOR_ID),
-    TOKEN_PAIR(pointSphericalTensorField::typeName.c_str(), PSPH_TENSOR_ID),
-#else
-#warning TOK_PSCALAR_ID not defined
-#endif
-});
+static const Enum<int>& fieldTokenEnums()
+{
+    static Enum<int> enums_;
+
+    if (enums_.empty())
+    {
+        enums_.append
+        ({
+        #ifdef TOK_SCALAR_ID
+            FIELD_PAIR(volScalarField, SCALAR_ID),
+            FIELD_PAIR(volVectorField, VECTOR_ID),
+            FIELD_PAIR(volTensorField, TENSOR_ID),
+            FIELD_PAIR(volSymmTensorField, SYM_TENSOR_ID),
+            FIELD_PAIR(volSphericalTensorField, SPH_TENSOR_ID),
+        #else
+            #error TOK_SCALAR_ID not defined
+        #endif
+        #ifdef TOK_SSCALAR_ID
+            FIELD_PAIR(surfaceScalarField, SSCALAR_ID),
+            FIELD_PAIR(surfaceVectorField, SVECTOR_ID),
+            FIELD_PAIR(surfaceTensorField, STENSOR_ID),
+            FIELD_PAIR(surfaceSymmTensorField, SSYM_TENSOR_ID),
+            FIELD_PAIR(surfaceSphericalTensorField, SSPH_TENSOR_ID),
+        #else
+            #warning TOK_SSCALAR_ID not defined
+        #endif
+        #ifdef TOK_PSCALAR_ID
+            FIELD_PAIR(pointScalarField, PSCALAR_ID),
+            FIELD_PAIR(pointVectorField, PVECTOR_ID),
+            FIELD_PAIR(pointTensorField, PTENSOR_ID),
+            FIELD_PAIR(pointSymmTensorField, PSYM_TENSOR_ID),
+            FIELD_PAIR(pointSphericalTensorField, PSPH_TENSOR_ID),
+        #else
+            #warning TOK_PSCALAR_ID not defined
+        #endif
+        });
+    }
+
+    return enums_;
+}
 
 
 // Simple compile-time function name declarations.
@@ -134,7 +148,7 @@ static const Enum<int> funcTokenEnums
     TOKEN_PAIR("ceil", CEIL),
     TOKEN_PAIR("round", ROUND),
 #endif
-#ifdef TOK_HYPOT  /* Can use hypot? */
+#ifdef TOK_HYPOT
     TOKEN_PAIR("hypot", HYPOT),
 #endif
 
@@ -273,7 +287,7 @@ static int driverTokenType
     {
         const word fieldType(driver_.getFieldClassName(ident));
 
-        int tokType = fieldTokenEnums.get(fieldType, -1);
+        int tokType = fieldTokenEnums().get(fieldType, -1);
 
         if (tokType > 0)
         {
@@ -302,7 +316,7 @@ static int driverTokenType
 
 
 
-#line 306 "volumeExprScanner.cc"
+#line 320 "volumeExprScanner.cc"
 static const int volumeExpr_start = 11;
 static const int volumeExpr_first_final = 11;
 static const int volumeExpr_error = 0;
@@ -310,7 +324,7 @@ static const int volumeExpr_error = 0;
 static const int volumeExpr_en_main = 11;
 
 
-#line 444 "volumeExprScanner.rl"
+#line 458 "volumeExprScanner.rl"
 
 
 
@@ -388,7 +402,7 @@ bool Foam::expressions::volumeExpr::scanner::dispatch_ident
         {
             DebugInfo
                 << "Emit:" << ident << " function:"
-                << parser_->nameOfToken(tokType) << nl;
+                << parser_->tokenName(tokType) << nl;
 
             parser_->parse(tokType, nullptr);
             return true;
@@ -402,7 +416,7 @@ bool Foam::expressions::volumeExpr::scanner::dispatch_ident
         {
             DebugInfo
                 << "Emit:" << ident << " as look-behind:"
-                << parser_->nameOfToken(tokType) << nl;
+                << parser_->tokenName(tokType) << nl;
 
             driver_.resetStashedTokenId(tokType);
             parser_->parse(tokType, nullptr);
@@ -421,7 +435,7 @@ bool Foam::expressions::volumeExpr::scanner::dispatch_ident
     {
         DebugInfo
             << "Emit:" << ident << " token:"
-            << parser_->nameOfToken(tokType) << nl;
+            << parser_->tokenName(tokType) << nl;
 
         scanTok.name = new Foam::word(std::move(ident));
         parser_->parse(tokType, &scanTok);
@@ -449,9 +463,9 @@ bool Foam::expressions::volumeExpr::scanner::dispatch_ident
     {
         DebugInfo
             << "Emit:" << ident.substr(0, dot).c_str() << " token:"
-            << parser_->nameOfToken(tokType) << " with "
+            << parser_->tokenName(tokType) << " with "
             << ident.substr(dot).c_str() << " token:"
-            << parser_->nameOfToken(methType) << nl;
+            << parser_->tokenName(methType) << nl;
 
         // The field (before the ".")
         ident.erase(dot);
@@ -537,7 +551,7 @@ bool Foam::expressions::volumeExpr::scanner::process
 
     // Initialize FSM variables
     
-#line 541 "volumeExprScanner.cc"
+#line 555 "volumeExprScanner.cc"
 	{
 	cs = volumeExpr_start;
 	ts = 0;
@@ -545,18 +559,18 @@ bool Foam::expressions::volumeExpr::scanner::process
 	act = 0;
 	}
 
-#line 669 "volumeExprScanner.rl"
+#line 683 "volumeExprScanner.rl"
    /* ^^^ FSM initialization here ^^^ */;
 
     
-#line 553 "volumeExprScanner.cc"
+#line 567 "volumeExprScanner.cc"
 	{
 	if ( p == pe )
 		goto _test_eof;
 	switch ( cs )
 	{
 tr2:
-#line 328 "volumeExprScanner.rl"
+#line 342 "volumeExprScanner.rl"
 	{te = p+1;{
         driver_.parsePosition() = (ts-buf);
         dispatch_ident(driver_, scanTok, word(ts, te-ts, false));
@@ -564,7 +578,7 @@ tr2:
     }}
 	goto st11;
 tr4:
-#line 328 "volumeExprScanner.rl"
+#line 342 "volumeExprScanner.rl"
 	{te = p+1;{
         driver_.parsePosition() = (ts-buf);
         dispatch_ident(driver_, scanTok, word(ts, te-ts, false));
@@ -572,7 +586,7 @@ tr4:
     }}
 	goto st11;
 tr5:
-#line 306 "volumeExprScanner.rl"
+#line 320 "volumeExprScanner.rl"
 	{{p = ((te))-1;}{
         driver_.parsePosition() = (ts-buf);
 
@@ -596,91 +610,91 @@ tr5:
     }}
 	goto st11;
 tr8:
-#line 371 "volumeExprScanner.rl"
+#line 385 "volumeExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(EQUAL); }}
 	goto st11;
 tr9:
-#line 425 "volumeExprScanner.rl"
+#line 439 "volumeExprScanner.rl"
 	{{p = ((te))-1;}{ EMIT_TOKEN(TENSOR); }}
 	goto st11;
 tr11:
-#line 433 "volumeExprScanner.rl"
+#line 447 "volumeExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(UNIT_TENSOR); }}
 	goto st11;
 tr12:
-#line 374 "volumeExprScanner.rl"
+#line 388 "volumeExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(LOR); }}
 	goto st11;
 tr16:
-#line 356 "volumeExprScanner.rl"
+#line 370 "volumeExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(PERCENT); }}
 	goto st11;
 tr19:
-#line 357 "volumeExprScanner.rl"
+#line 371 "volumeExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(LPAREN); }}
 	goto st11;
 tr20:
-#line 358 "volumeExprScanner.rl"
+#line 372 "volumeExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(RPAREN); }}
 	goto st11;
 tr21:
-#line 359 "volumeExprScanner.rl"
+#line 373 "volumeExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(TIMES); }}
 	goto st11;
 tr22:
-#line 360 "volumeExprScanner.rl"
+#line 374 "volumeExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(PLUS); }}
 	goto st11;
 tr23:
-#line 362 "volumeExprScanner.rl"
+#line 376 "volumeExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(COMMA); }}
 	goto st11;
 tr24:
-#line 361 "volumeExprScanner.rl"
+#line 375 "volumeExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(MINUS); }}
 	goto st11;
 tr26:
-#line 364 "volumeExprScanner.rl"
+#line 378 "volumeExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(DIVIDE); }}
 	goto st11;
 tr28:
-#line 366 "volumeExprScanner.rl"
+#line 380 "volumeExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(COLON); }}
 	goto st11;
 tr32:
-#line 365 "volumeExprScanner.rl"
+#line 379 "volumeExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(QUESTION); }}
 	goto st11;
 tr35:
-#line 377 "volumeExprScanner.rl"
+#line 391 "volumeExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(BIT_XOR); }}
 	goto st11;
 tr52:
-#line 350 "volumeExprScanner.rl"
+#line 364 "volumeExprScanner.rl"
 	{te = p;p--;}
 	goto st11;
 tr53:
-#line 355 "volumeExprScanner.rl"
+#line 369 "volumeExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(NOT); }}
 	goto st11;
 tr54:
-#line 372 "volumeExprScanner.rl"
+#line 386 "volumeExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(NOT_EQUAL); }}
 	goto st11;
 tr55:
-#line 375 "volumeExprScanner.rl"
+#line 389 "volumeExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(BIT_AND); }}
 	goto st11;
 tr56:
-#line 373 "volumeExprScanner.rl"
+#line 387 "volumeExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(LAND); }}
 	goto st11;
 tr57:
-#line 363 "volumeExprScanner.rl"
+#line 377 "volumeExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(DOT); }}
 	goto st11;
 tr60:
-#line 306 "volumeExprScanner.rl"
+#line 320 "volumeExprScanner.rl"
 	{te = p;p--;{
         driver_.parsePosition() = (ts-buf);
 
@@ -704,7 +718,7 @@ tr60:
     }}
 	goto st11;
 tr62:
-#line 334 "volumeExprScanner.rl"
+#line 348 "volumeExprScanner.rl"
 	{te = p;p--;{
         // Tokenized ".method" - dispatch '.' and "method" separately
         driver_.parsePosition() = (ts-buf);
@@ -713,23 +727,23 @@ tr62:
     }}
 	goto st11;
 tr63:
-#line 367 "volumeExprScanner.rl"
+#line 381 "volumeExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(LESS); }}
 	goto st11;
 tr64:
-#line 368 "volumeExprScanner.rl"
+#line 382 "volumeExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(LESS_EQ); }}
 	goto st11;
 tr65:
-#line 369 "volumeExprScanner.rl"
+#line 383 "volumeExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(GREATER); }}
 	goto st11;
 tr66:
-#line 370 "volumeExprScanner.rl"
+#line 384 "volumeExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(GREATER_EQ); }}
 	goto st11;
 tr67:
-#line 328 "volumeExprScanner.rl"
+#line 342 "volumeExprScanner.rl"
 	{te = p;p--;{
         driver_.parsePosition() = (ts-buf);
         dispatch_ident(driver_, scanTok, word(ts, te-ts, false));
@@ -849,43 +863,43 @@ tr69:
 	}
 	goto st11;
 tr83:
-#line 399 "volumeExprScanner.rl"
+#line 413 "volumeExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(ATAN); }}
 	goto st11;
 tr98:
-#line 395 "volumeExprScanner.rl"
+#line 409 "volumeExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(COS); }}
 	goto st11;
 tr115:
-#line 388 "volumeExprScanner.rl"
+#line 402 "volumeExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(LOG); }}
 	goto st11;
 tr122:
-#line 404 "volumeExprScanner.rl"
+#line 418 "volumeExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(MAG); }}
 	goto st11;
 tr129:
-#line 408 "volumeExprScanner.rl"
+#line 422 "volumeExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(NEG); }}
 	goto st11;
 tr135:
-#line 407 "volumeExprScanner.rl"
+#line 421 "volumeExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(POS); }}
 	goto st11;
 tr154:
-#line 394 "volumeExprScanner.rl"
+#line 408 "volumeExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(SIN); }}
 	goto st11;
 tr170:
-#line 391 "volumeExprScanner.rl"
+#line 405 "volumeExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(SQR); }}
 	goto st11;
 tr186:
-#line 396 "volumeExprScanner.rl"
+#line 410 "volumeExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(TAN); }}
 	goto st11;
 tr192:
-#line 425 "volumeExprScanner.rl"
+#line 439 "volumeExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(TENSOR); }}
 	goto st11;
 st11:
@@ -896,7 +910,7 @@ st11:
 case 11:
 #line 1 "NONE"
 	{ts = p;}
-#line 900 "volumeExprScanner.cc"
+#line 914 "volumeExprScanner.cc"
 	switch( (*p) ) {
 		case 32: goto st12;
 		case 33: goto st13;
@@ -1024,7 +1038,7 @@ st16:
 	if ( ++p == pe )
 		goto _test_eof16;
 case 16:
-#line 1028 "volumeExprScanner.cc"
+#line 1042 "volumeExprScanner.cc"
 	switch( (*p) ) {
 		case 69: goto st5;
 		case 101: goto st5;
@@ -1075,7 +1089,7 @@ st19:
 	if ( ++p == pe )
 		goto _test_eof19;
 case 19:
-#line 1079 "volumeExprScanner.cc"
+#line 1093 "volumeExprScanner.cc"
 	switch( (*p) ) {
 		case 46: goto tr58;
 		case 69: goto st5;
@@ -1125,212 +1139,212 @@ case 22:
 tr68:
 #line 1 "NONE"
 	{te = p+1;}
-#line 328 "volumeExprScanner.rl"
+#line 342 "volumeExprScanner.rl"
 	{act = 70;}
 	goto st23;
 tr72:
 #line 1 "NONE"
 	{te = p+1;}
-#line 430 "volumeExprScanner.rl"
+#line 444 "volumeExprScanner.rl"
 	{act = 65;}
 	goto st23;
 tr78:
 #line 1 "NONE"
 	{te = p+1;}
-#line 398 "volumeExprScanner.rl"
+#line 412 "volumeExprScanner.rl"
 	{act = 40;}
 	goto st23;
 tr80:
 #line 1 "NONE"
 	{te = p+1;}
-#line 397 "volumeExprScanner.rl"
+#line 411 "volumeExprScanner.rl"
 	{act = 39;}
 	goto st23;
 tr84:
 #line 1 "NONE"
 	{te = p+1;}
-#line 400 "volumeExprScanner.rl"
+#line 414 "volumeExprScanner.rl"
 	{act = 42;}
 	goto st23;
 tr89:
 #line 1 "NONE"
 	{te = p+1;}
-#line 416 "volumeExprScanner.rl"
+#line 430 "volumeExprScanner.rl"
 	{act = 55;}
 	goto st23;
 tr92:
 #line 1 "NONE"
 	{te = p+1;}
-#line 423 "volumeExprScanner.rl"
+#line 437 "volumeExprScanner.rl"
 	{act = 60;}
 	goto st23;
 tr96:
 #line 1 "NONE"
 	{te = p+1;}
-#line 393 "volumeExprScanner.rl"
+#line 407 "volumeExprScanner.rl"
 	{act = 35;}
 	goto st23;
 tr99:
 #line 1 "NONE"
 	{te = p+1;}
-#line 402 "volumeExprScanner.rl"
+#line 416 "volumeExprScanner.rl"
 	{act = 44;}
 	goto st23;
 tr106:
 #line 1 "NONE"
 	{te = p+1;}
-#line 385 "volumeExprScanner.rl"
+#line 399 "volumeExprScanner.rl"
 	{act = 27;}
 	goto st23;
 tr108:
 #line 1 "NONE"
 	{te = p+1;}
-#line 387 "volumeExprScanner.rl"
+#line 401 "volumeExprScanner.rl"
 	{act = 29;}
 	goto st23;
 tr112:
 #line 1 "NONE"
 	{te = p+1;}
-#line 432 "volumeExprScanner.rl"
+#line 446 "volumeExprScanner.rl"
 	{act = 67;}
 	goto st23;
 tr117:
 #line 1 "NONE"
 	{te = p+1;}
-#line 389 "volumeExprScanner.rl"
+#line 403 "volumeExprScanner.rl"
 	{act = 31;}
 	goto st23;
 tr121:
 #line 1 "NONE"
 	{te = p+1;}
-#line 415 "volumeExprScanner.rl"
+#line 429 "volumeExprScanner.rl"
 	{act = 54;}
 	goto st23;
 tr125:
 #line 1 "NONE"
 	{te = p+1;}
-#line 405 "volumeExprScanner.rl"
+#line 419 "volumeExprScanner.rl"
 	{act = 47;}
 	goto st23;
 tr126:
 #line 1 "NONE"
 	{te = p+1;}
-#line 414 "volumeExprScanner.rl"
+#line 428 "volumeExprScanner.rl"
 	{act = 53;}
 	goto st23;
 tr130:
 #line 1 "NONE"
 	{te = p+1;}
-#line 410 "volumeExprScanner.rl"
+#line 424 "volumeExprScanner.rl"
 	{act = 51;}
 	goto st23;
 tr131:
 #line 1 "NONE"
 	{te = p+1;}
-#line 384 "volumeExprScanner.rl"
+#line 398 "volumeExprScanner.rl"
 	{act = 26;}
 	goto st23;
 tr134:
 #line 1 "NONE"
 	{te = p+1;}
-#line 390 "volumeExprScanner.rl"
+#line 404 "volumeExprScanner.rl"
 	{act = 32;}
 	goto st23;
 tr136:
 #line 1 "NONE"
 	{te = p+1;}
-#line 409 "volumeExprScanner.rl"
+#line 423 "volumeExprScanner.rl"
 	{act = 50;}
 	goto st23;
 tr144:
 #line 1 "NONE"
 	{te = p+1;}
-#line 386 "volumeExprScanner.rl"
+#line 400 "volumeExprScanner.rl"
 	{act = 28;}
 	goto st23;
 tr145:
 #line 1 "NONE"
 	{te = p+1;}
-#line 420 "volumeExprScanner.rl"
+#line 434 "volumeExprScanner.rl"
 	{act = 59;}
 	goto st23;
 tr153:
 #line 1 "NONE"
 	{te = p+1;}
-#line 411 "volumeExprScanner.rl"
+#line 425 "volumeExprScanner.rl"
 	{act = 52;}
 	goto st23;
 tr155:
 #line 1 "NONE"
 	{te = p+1;}
-#line 401 "volumeExprScanner.rl"
+#line 415 "volumeExprScanner.rl"
 	{act = 43;}
 	goto st23;
 tr168:
 #line 1 "NONE"
 	{te = p+1;}
-#line 427 "volumeExprScanner.rl"
+#line 441 "volumeExprScanner.rl"
 	{act = 64;}
 	goto st23;
 tr171:
 #line 1 "NONE"
 	{te = p+1;}
-#line 392 "volumeExprScanner.rl"
+#line 406 "volumeExprScanner.rl"
 	{act = 34;}
 	goto st23;
 tr172:
 #line 1 "NONE"
 	{te = p+1;}
-#line 417 "volumeExprScanner.rl"
+#line 431 "volumeExprScanner.rl"
 	{act = 56;}
 	goto st23;
 tr180:
 #line 1 "NONE"
 	{te = p+1;}
-#line 426 "volumeExprScanner.rl"
+#line 440 "volumeExprScanner.rl"
 	{act = 63;}
 	goto st23;
 tr187:
 #line 1 "NONE"
 	{te = p+1;}
-#line 403 "volumeExprScanner.rl"
+#line 417 "volumeExprScanner.rl"
 	{act = 45;}
 	goto st23;
 tr195:
 #line 1 "NONE"
 	{te = p+1;}
-#line 434 "volumeExprScanner.rl"
+#line 448 "volumeExprScanner.rl"
 	{act = 69;}
 	goto st23;
 tr197:
 #line 1 "NONE"
 	{te = p+1;}
-#line 431 "volumeExprScanner.rl"
+#line 445 "volumeExprScanner.rl"
 	{act = 66;}
 	goto st23;
 tr202:
 #line 1 "NONE"
 	{te = p+1;}
-#line 424 "volumeExprScanner.rl"
+#line 438 "volumeExprScanner.rl"
 	{act = 61;}
 	goto st23;
 tr215:
 #line 1 "NONE"
 	{te = p+1;}
-#line 418 "volumeExprScanner.rl"
+#line 432 "volumeExprScanner.rl"
 	{act = 57;}
 	goto st23;
 tr217:
 #line 1 "NONE"
 	{te = p+1;}
-#line 419 "volumeExprScanner.rl"
+#line 433 "volumeExprScanner.rl"
 	{act = 58;}
 	goto st23;
 st23:
 	if ( ++p == pe )
 		goto _test_eof23;
 case 23:
-#line 1334 "volumeExprScanner.cc"
+#line 1348 "volumeExprScanner.cc"
 	switch( (*p) ) {
 		case 46: goto tr68;
 		case 95: goto tr68;
@@ -3097,7 +3111,7 @@ st120:
 	if ( ++p == pe )
 		goto _test_eof120;
 case 120:
-#line 3101 "volumeExprScanner.cc"
+#line 3115 "volumeExprScanner.cc"
 	switch( (*p) ) {
 		case 46: goto tr68;
 		case 58: goto st8;
@@ -3839,7 +3853,7 @@ case 10:
 	_out: {}
 	}
 
-#line 671 "volumeExprScanner.rl"
+#line 685 "volumeExprScanner.rl"
   /* ^^^ FSM execution here ^^^ */;
 
     if (0 == cs)

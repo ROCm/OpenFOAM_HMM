@@ -56,6 +56,9 @@ namespace Foam
 //- An {int, c_str} enum pairing
 #define TOKEN_PAIR(Name,T)  { TOKEN_OF(T), Name }
 
+//- An {int, c_str} enum pairing for field types
+#define FIELD_PAIR(Fld,T)  { TOKEN_OF(T), Fld::typeName.c_str() }
+
 #undef HAS_LOOKBEHIND_TOKENS
 
 // Special handling of predefined method types. Eg, .x(), .y(), ...
@@ -78,37 +81,49 @@ static const Enum<int> fieldMethodEnums
     TOKEN_PAIR("T", TRANSPOSE), /* tensors only */
 });
 
+
 // Known field-token types
-static const Enum<int> fieldTokenEnums
-({
-#ifdef TOK_SCALAR_ID
-    TOKEN_PAIR(volScalarField::typeName.c_str(), SCALAR_ID),
-    TOKEN_PAIR(volVectorField::typeName.c_str(), VECTOR_ID),
-    TOKEN_PAIR(volTensorField::typeName.c_str(), TENSOR_ID),
-    TOKEN_PAIR(volSymmTensorField::typeName.c_str(), SYM_TENSOR_ID),
-    TOKEN_PAIR(volSphericalTensorField::typeName.c_str(), SPH_TENSOR_ID),
-#else
-#error TOK_SCALAR_ID not defined
-#endif
-#ifdef TOK_SSCALAR_ID
-    TOKEN_PAIR(surfaceScalarField::typeName.c_str(), SSCALAR_ID),
-    TOKEN_PAIR(surfaceVectorField::typeName.c_str(), SVECTOR_ID),
-    TOKEN_PAIR(surfaceTensorField::typeName.c_str(), STENSOR_ID),
-    TOKEN_PAIR(surfaceSymmTensorField::typeName.c_str(), SSYM_TENSOR_ID),
-    TOKEN_PAIR(surfaceSphericalTensorField::typeName.c_str(), SSPH_TENSOR_ID),
-#else
-#error TOK_SSCALAR_ID not defined
-#endif
-#ifdef TOK_PSCALAR_ID
-    TOKEN_PAIR(pointScalarField::typeName.c_str(), PSCALAR_ID),
-    TOKEN_PAIR(pointVectorField::typeName.c_str(), PVECTOR_ID),
-    TOKEN_PAIR(pointTensorField::typeName.c_str(), PTENSOR_ID),
-    TOKEN_PAIR(pointSymmTensorField::typeName.c_str(), PSYM_TENSOR_ID),
-    TOKEN_PAIR(pointSphericalTensorField::typeName.c_str(), PSPH_TENSOR_ID),
-#else
-#warning TOK_PSCALAR_ID not defined
-#endif
-});
+// - delay populating until run-time
+static const Enum<int>& fieldTokenEnums()
+{
+    static Enum<int> enums_;
+
+    if (enums_.empty())
+    {
+        enums_.append
+        ({
+        #ifdef TOK_SCALAR_ID
+            FIELD_PAIR(volScalarField, SCALAR_ID),
+            FIELD_PAIR(volVectorField, VECTOR_ID),
+            FIELD_PAIR(volTensorField, TENSOR_ID),
+            FIELD_PAIR(volSymmTensorField, SYM_TENSOR_ID),
+            FIELD_PAIR(volSphericalTensorField, SPH_TENSOR_ID),
+        #else
+            #error TOK_SCALAR_ID not defined
+        #endif
+        #ifdef TOK_SSCALAR_ID
+            FIELD_PAIR(surfaceScalarField, SSCALAR_ID),
+            FIELD_PAIR(surfaceVectorField, SVECTOR_ID),
+            FIELD_PAIR(surfaceTensorField, STENSOR_ID),
+            FIELD_PAIR(surfaceSymmTensorField, SSYM_TENSOR_ID),
+            FIELD_PAIR(surfaceSphericalTensorField, SSPH_TENSOR_ID),
+        #else
+            #error TOK_SSCALAR_ID not defined
+        #endif
+        #ifdef TOK_PSCALAR_ID
+            FIELD_PAIR(pointScalarField, PSCALAR_ID),
+            FIELD_PAIR(pointVectorField, PVECTOR_ID),
+            FIELD_PAIR(pointTensorField, PTENSOR_ID),
+            FIELD_PAIR(pointSymmTensorField, PSYM_TENSOR_ID),
+            FIELD_PAIR(pointSphericalTensorField, PSPH_TENSOR_ID),
+        #else
+            #warning TOK_PSCALAR_ID not defined
+        #endif
+        });
+    }
+
+    return enums_;
+}
 
 
 // Simple compile-time function name declarations.
@@ -121,7 +136,7 @@ static const Enum<int> funcTokenEnums
     TOKEN_PAIR("ceil", CEIL),
     TOKEN_PAIR("round", ROUND),
 #endif
-#ifdef TOK_HYPOT  /* Can use hypot? */
+#ifdef TOK_HYPOT
     TOKEN_PAIR("hypot", HYPOT),
 #endif
 
@@ -243,7 +258,7 @@ static int driverTokenType
     {
         const word fieldType(driver_.getFieldClassName(ident));
 
-        int tokType = fieldTokenEnums.get(fieldType, -1);
+        int tokType = fieldTokenEnums().get(fieldType, -1);
 
         if (tokType > 0)
         {
@@ -272,7 +287,7 @@ static int driverTokenType
 
 
 
-#line 276 "patchExprScanner.cc"
+#line 291 "patchExprScanner.cc"
 static const int patchExpr_start = 11;
 static const int patchExpr_first_final = 11;
 static const int patchExpr_error = 0;
@@ -280,7 +295,7 @@ static const int patchExpr_error = 0;
 static const int patchExpr_en_main = 11;
 
 
-#line 414 "patchExprScanner.rl"
+#line 429 "patchExprScanner.rl"
 
 
 
@@ -358,7 +373,7 @@ bool Foam::expressions::patchExpr::scanner::dispatch_ident
         {
             DebugInfo
                 << "Emit:" << ident << " function:"
-                << parser_->nameOfToken(tokType) << nl;
+                << parser_->tokenName(tokType) << nl;
 
             parser_->parse(tokType, nullptr);
             return true;
@@ -372,7 +387,7 @@ bool Foam::expressions::patchExpr::scanner::dispatch_ident
         {
             DebugInfo
                 << "Emit:" << ident << " as look-behind:"
-                << parser_->nameOfToken(tokType) << nl;
+                << parser_->tokenName(tokType) << nl;
 
             driver_.resetStashedTokenId(tokType);
             parser_->parse(tokType, nullptr);
@@ -391,7 +406,7 @@ bool Foam::expressions::patchExpr::scanner::dispatch_ident
     {
         DebugInfo
             << "Emit:" << ident << " token:"
-            << parser_->nameOfToken(tokType) << nl;
+            << parser_->tokenName(tokType) << nl;
 
         scanTok.name = new Foam::word(std::move(ident));
         parser_->parse(tokType, &scanTok);
@@ -419,9 +434,9 @@ bool Foam::expressions::patchExpr::scanner::dispatch_ident
     {
         DebugInfo
             << "Emit:" << ident.substr(0, dot).c_str() << " token:"
-            << parser_->nameOfToken(tokType) << " with "
+            << parser_->tokenName(tokType) << " with "
             << ident.substr(dot).c_str() << " token:"
-            << parser_->nameOfToken(methType) << nl;
+            << parser_->tokenName(methType) << nl;
 
         // The field (before the ".")
         ident.erase(dot);
@@ -507,7 +522,7 @@ bool Foam::expressions::patchExpr::scanner::process
 
     // Initialize FSM variables
     
-#line 511 "patchExprScanner.cc"
+#line 526 "patchExprScanner.cc"
 	{
 	cs = patchExpr_start;
 	ts = 0;
@@ -515,18 +530,18 @@ bool Foam::expressions::patchExpr::scanner::process
 	act = 0;
 	}
 
-#line 639 "patchExprScanner.rl"
+#line 654 "patchExprScanner.rl"
    /* ^^^ FSM initialization here ^^^ */;
 
     
-#line 523 "patchExprScanner.cc"
+#line 538 "patchExprScanner.cc"
 	{
 	if ( p == pe )
 		goto _test_eof;
 	switch ( cs )
 	{
 tr2:
-#line 298 "patchExprScanner.rl"
+#line 313 "patchExprScanner.rl"
 	{te = p+1;{
         driver_.parsePosition() = (ts-buf);
         dispatch_ident(driver_, scanTok, word(ts, te-ts, false));
@@ -534,7 +549,7 @@ tr2:
     }}
 	goto st11;
 tr4:
-#line 298 "patchExprScanner.rl"
+#line 313 "patchExprScanner.rl"
 	{te = p+1;{
         driver_.parsePosition() = (ts-buf);
         dispatch_ident(driver_, scanTok, word(ts, te-ts, false));
@@ -542,7 +557,7 @@ tr4:
     }}
 	goto st11;
 tr5:
-#line 276 "patchExprScanner.rl"
+#line 291 "patchExprScanner.rl"
 	{{p = ((te))-1;}{
         driver_.parsePosition() = (ts-buf);
 
@@ -566,91 +581,91 @@ tr5:
     }}
 	goto st11;
 tr8:
-#line 341 "patchExprScanner.rl"
+#line 356 "patchExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(EQUAL); }}
 	goto st11;
 tr9:
-#line 395 "patchExprScanner.rl"
+#line 410 "patchExprScanner.rl"
 	{{p = ((te))-1;}{ EMIT_TOKEN(TENSOR); }}
 	goto st11;
 tr11:
-#line 403 "patchExprScanner.rl"
+#line 418 "patchExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(UNIT_TENSOR); }}
 	goto st11;
 tr12:
-#line 344 "patchExprScanner.rl"
+#line 359 "patchExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(LOR); }}
 	goto st11;
 tr16:
-#line 326 "patchExprScanner.rl"
+#line 341 "patchExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(PERCENT); }}
 	goto st11;
 tr19:
-#line 327 "patchExprScanner.rl"
+#line 342 "patchExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(LPAREN); }}
 	goto st11;
 tr20:
-#line 328 "patchExprScanner.rl"
+#line 343 "patchExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(RPAREN); }}
 	goto st11;
 tr21:
-#line 329 "patchExprScanner.rl"
+#line 344 "patchExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(TIMES); }}
 	goto st11;
 tr22:
-#line 330 "patchExprScanner.rl"
+#line 345 "patchExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(PLUS); }}
 	goto st11;
 tr23:
-#line 332 "patchExprScanner.rl"
+#line 347 "patchExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(COMMA); }}
 	goto st11;
 tr24:
-#line 331 "patchExprScanner.rl"
+#line 346 "patchExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(MINUS); }}
 	goto st11;
 tr26:
-#line 334 "patchExprScanner.rl"
+#line 349 "patchExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(DIVIDE); }}
 	goto st11;
 tr28:
-#line 336 "patchExprScanner.rl"
+#line 351 "patchExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(COLON); }}
 	goto st11;
 tr32:
-#line 335 "patchExprScanner.rl"
+#line 350 "patchExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(QUESTION); }}
 	goto st11;
 tr35:
-#line 347 "patchExprScanner.rl"
+#line 362 "patchExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(BIT_XOR); }}
 	goto st11;
 tr52:
-#line 320 "patchExprScanner.rl"
+#line 335 "patchExprScanner.rl"
 	{te = p;p--;}
 	goto st11;
 tr53:
-#line 325 "patchExprScanner.rl"
+#line 340 "patchExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(NOT); }}
 	goto st11;
 tr54:
-#line 342 "patchExprScanner.rl"
+#line 357 "patchExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(NOT_EQUAL); }}
 	goto st11;
 tr55:
-#line 345 "patchExprScanner.rl"
+#line 360 "patchExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(BIT_AND); }}
 	goto st11;
 tr56:
-#line 343 "patchExprScanner.rl"
+#line 358 "patchExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(LAND); }}
 	goto st11;
 tr57:
-#line 333 "patchExprScanner.rl"
+#line 348 "patchExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(DOT); }}
 	goto st11;
 tr60:
-#line 276 "patchExprScanner.rl"
+#line 291 "patchExprScanner.rl"
 	{te = p;p--;{
         driver_.parsePosition() = (ts-buf);
 
@@ -674,7 +689,7 @@ tr60:
     }}
 	goto st11;
 tr62:
-#line 304 "patchExprScanner.rl"
+#line 319 "patchExprScanner.rl"
 	{te = p;p--;{
         // Tokenized ".method" - dispatch '.' and "method" separately
         driver_.parsePosition() = (ts-buf);
@@ -683,23 +698,23 @@ tr62:
     }}
 	goto st11;
 tr63:
-#line 337 "patchExprScanner.rl"
+#line 352 "patchExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(LESS); }}
 	goto st11;
 tr64:
-#line 338 "patchExprScanner.rl"
+#line 353 "patchExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(LESS_EQ); }}
 	goto st11;
 tr65:
-#line 339 "patchExprScanner.rl"
+#line 354 "patchExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(GREATER); }}
 	goto st11;
 tr66:
-#line 340 "patchExprScanner.rl"
+#line 355 "patchExprScanner.rl"
 	{te = p+1;{ EMIT_TOKEN(GREATER_EQ); }}
 	goto st11;
 tr67:
-#line 298 "patchExprScanner.rl"
+#line 313 "patchExprScanner.rl"
 	{te = p;p--;{
         driver_.parsePosition() = (ts-buf);
         dispatch_ident(driver_, scanTok, word(ts, te-ts, false));
@@ -819,43 +834,43 @@ tr69:
 	}
 	goto st11;
 tr83:
-#line 369 "patchExprScanner.rl"
+#line 384 "patchExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(ATAN); }}
 	goto st11;
 tr98:
-#line 365 "patchExprScanner.rl"
+#line 380 "patchExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(COS); }}
 	goto st11;
 tr115:
-#line 358 "patchExprScanner.rl"
+#line 373 "patchExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(LOG); }}
 	goto st11;
 tr122:
-#line 374 "patchExprScanner.rl"
+#line 389 "patchExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(MAG); }}
 	goto st11;
 tr129:
-#line 378 "patchExprScanner.rl"
+#line 393 "patchExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(NEG); }}
 	goto st11;
 tr135:
-#line 377 "patchExprScanner.rl"
+#line 392 "patchExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(POS); }}
 	goto st11;
 tr154:
-#line 364 "patchExprScanner.rl"
+#line 379 "patchExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(SIN); }}
 	goto st11;
 tr170:
-#line 361 "patchExprScanner.rl"
+#line 376 "patchExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(SQR); }}
 	goto st11;
 tr186:
-#line 366 "patchExprScanner.rl"
+#line 381 "patchExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(TAN); }}
 	goto st11;
 tr192:
-#line 395 "patchExprScanner.rl"
+#line 410 "patchExprScanner.rl"
 	{te = p;p--;{ EMIT_TOKEN(TENSOR); }}
 	goto st11;
 st11:
@@ -866,7 +881,7 @@ st11:
 case 11:
 #line 1 "NONE"
 	{ts = p;}
-#line 870 "patchExprScanner.cc"
+#line 885 "patchExprScanner.cc"
 	switch( (*p) ) {
 		case 32: goto st12;
 		case 33: goto st13;
@@ -994,7 +1009,7 @@ st16:
 	if ( ++p == pe )
 		goto _test_eof16;
 case 16:
-#line 998 "patchExprScanner.cc"
+#line 1013 "patchExprScanner.cc"
 	switch( (*p) ) {
 		case 69: goto st5;
 		case 101: goto st5;
@@ -1045,7 +1060,7 @@ st19:
 	if ( ++p == pe )
 		goto _test_eof19;
 case 19:
-#line 1049 "patchExprScanner.cc"
+#line 1064 "patchExprScanner.cc"
 	switch( (*p) ) {
 		case 46: goto tr58;
 		case 69: goto st5;
@@ -1095,212 +1110,212 @@ case 22:
 tr68:
 #line 1 "NONE"
 	{te = p+1;}
-#line 298 "patchExprScanner.rl"
+#line 313 "patchExprScanner.rl"
 	{act = 70;}
 	goto st23;
 tr72:
 #line 1 "NONE"
 	{te = p+1;}
-#line 400 "patchExprScanner.rl"
+#line 415 "patchExprScanner.rl"
 	{act = 65;}
 	goto st23;
 tr78:
 #line 1 "NONE"
 	{te = p+1;}
-#line 368 "patchExprScanner.rl"
+#line 383 "patchExprScanner.rl"
 	{act = 40;}
 	goto st23;
 tr80:
 #line 1 "NONE"
 	{te = p+1;}
-#line 367 "patchExprScanner.rl"
+#line 382 "patchExprScanner.rl"
 	{act = 39;}
 	goto st23;
 tr84:
 #line 1 "NONE"
 	{te = p+1;}
-#line 370 "patchExprScanner.rl"
+#line 385 "patchExprScanner.rl"
 	{act = 42;}
 	goto st23;
 tr89:
 #line 1 "NONE"
 	{te = p+1;}
-#line 386 "patchExprScanner.rl"
+#line 401 "patchExprScanner.rl"
 	{act = 55;}
 	goto st23;
 tr92:
 #line 1 "NONE"
 	{te = p+1;}
-#line 393 "patchExprScanner.rl"
+#line 408 "patchExprScanner.rl"
 	{act = 60;}
 	goto st23;
 tr96:
 #line 1 "NONE"
 	{te = p+1;}
-#line 363 "patchExprScanner.rl"
+#line 378 "patchExprScanner.rl"
 	{act = 35;}
 	goto st23;
 tr99:
 #line 1 "NONE"
 	{te = p+1;}
-#line 372 "patchExprScanner.rl"
+#line 387 "patchExprScanner.rl"
 	{act = 44;}
 	goto st23;
 tr106:
 #line 1 "NONE"
 	{te = p+1;}
-#line 355 "patchExprScanner.rl"
+#line 370 "patchExprScanner.rl"
 	{act = 27;}
 	goto st23;
 tr108:
 #line 1 "NONE"
 	{te = p+1;}
-#line 357 "patchExprScanner.rl"
+#line 372 "patchExprScanner.rl"
 	{act = 29;}
 	goto st23;
 tr112:
 #line 1 "NONE"
 	{te = p+1;}
-#line 402 "patchExprScanner.rl"
+#line 417 "patchExprScanner.rl"
 	{act = 67;}
 	goto st23;
 tr117:
 #line 1 "NONE"
 	{te = p+1;}
-#line 359 "patchExprScanner.rl"
+#line 374 "patchExprScanner.rl"
 	{act = 31;}
 	goto st23;
 tr121:
 #line 1 "NONE"
 	{te = p+1;}
-#line 385 "patchExprScanner.rl"
+#line 400 "patchExprScanner.rl"
 	{act = 54;}
 	goto st23;
 tr125:
 #line 1 "NONE"
 	{te = p+1;}
-#line 375 "patchExprScanner.rl"
+#line 390 "patchExprScanner.rl"
 	{act = 47;}
 	goto st23;
 tr126:
 #line 1 "NONE"
 	{te = p+1;}
-#line 384 "patchExprScanner.rl"
+#line 399 "patchExprScanner.rl"
 	{act = 53;}
 	goto st23;
 tr130:
 #line 1 "NONE"
 	{te = p+1;}
-#line 380 "patchExprScanner.rl"
+#line 395 "patchExprScanner.rl"
 	{act = 51;}
 	goto st23;
 tr131:
 #line 1 "NONE"
 	{te = p+1;}
-#line 354 "patchExprScanner.rl"
+#line 369 "patchExprScanner.rl"
 	{act = 26;}
 	goto st23;
 tr134:
 #line 1 "NONE"
 	{te = p+1;}
-#line 360 "patchExprScanner.rl"
+#line 375 "patchExprScanner.rl"
 	{act = 32;}
 	goto st23;
 tr136:
 #line 1 "NONE"
 	{te = p+1;}
-#line 379 "patchExprScanner.rl"
+#line 394 "patchExprScanner.rl"
 	{act = 50;}
 	goto st23;
 tr144:
 #line 1 "NONE"
 	{te = p+1;}
-#line 356 "patchExprScanner.rl"
+#line 371 "patchExprScanner.rl"
 	{act = 28;}
 	goto st23;
 tr145:
 #line 1 "NONE"
 	{te = p+1;}
-#line 390 "patchExprScanner.rl"
+#line 405 "patchExprScanner.rl"
 	{act = 59;}
 	goto st23;
 tr153:
 #line 1 "NONE"
 	{te = p+1;}
-#line 381 "patchExprScanner.rl"
+#line 396 "patchExprScanner.rl"
 	{act = 52;}
 	goto st23;
 tr155:
 #line 1 "NONE"
 	{te = p+1;}
-#line 371 "patchExprScanner.rl"
+#line 386 "patchExprScanner.rl"
 	{act = 43;}
 	goto st23;
 tr168:
 #line 1 "NONE"
 	{te = p+1;}
-#line 397 "patchExprScanner.rl"
+#line 412 "patchExprScanner.rl"
 	{act = 64;}
 	goto st23;
 tr171:
 #line 1 "NONE"
 	{te = p+1;}
-#line 362 "patchExprScanner.rl"
+#line 377 "patchExprScanner.rl"
 	{act = 34;}
 	goto st23;
 tr172:
 #line 1 "NONE"
 	{te = p+1;}
-#line 387 "patchExprScanner.rl"
+#line 402 "patchExprScanner.rl"
 	{act = 56;}
 	goto st23;
 tr180:
 #line 1 "NONE"
 	{te = p+1;}
-#line 396 "patchExprScanner.rl"
+#line 411 "patchExprScanner.rl"
 	{act = 63;}
 	goto st23;
 tr187:
 #line 1 "NONE"
 	{te = p+1;}
-#line 373 "patchExprScanner.rl"
+#line 388 "patchExprScanner.rl"
 	{act = 45;}
 	goto st23;
 tr195:
 #line 1 "NONE"
 	{te = p+1;}
-#line 404 "patchExprScanner.rl"
+#line 419 "patchExprScanner.rl"
 	{act = 69;}
 	goto st23;
 tr197:
 #line 1 "NONE"
 	{te = p+1;}
-#line 401 "patchExprScanner.rl"
+#line 416 "patchExprScanner.rl"
 	{act = 66;}
 	goto st23;
 tr202:
 #line 1 "NONE"
 	{te = p+1;}
-#line 394 "patchExprScanner.rl"
+#line 409 "patchExprScanner.rl"
 	{act = 61;}
 	goto st23;
 tr215:
 #line 1 "NONE"
 	{te = p+1;}
-#line 388 "patchExprScanner.rl"
+#line 403 "patchExprScanner.rl"
 	{act = 57;}
 	goto st23;
 tr217:
 #line 1 "NONE"
 	{te = p+1;}
-#line 389 "patchExprScanner.rl"
+#line 404 "patchExprScanner.rl"
 	{act = 58;}
 	goto st23;
 st23:
 	if ( ++p == pe )
 		goto _test_eof23;
 case 23:
-#line 1304 "patchExprScanner.cc"
+#line 1319 "patchExprScanner.cc"
 	switch( (*p) ) {
 		case 46: goto tr68;
 		case 95: goto tr68;
@@ -3067,7 +3082,7 @@ st120:
 	if ( ++p == pe )
 		goto _test_eof120;
 case 120:
-#line 3071 "patchExprScanner.cc"
+#line 3086 "patchExprScanner.cc"
 	switch( (*p) ) {
 		case 46: goto tr68;
 		case 58: goto st8;
@@ -3809,7 +3824,7 @@ case 10:
 	_out: {}
 	}
 
-#line 641 "patchExprScanner.rl"
+#line 656 "patchExprScanner.rl"
   /* ^^^ FSM execution here ^^^ */;
 
     if (0 == cs)

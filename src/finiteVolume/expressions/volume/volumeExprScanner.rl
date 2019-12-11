@@ -54,6 +54,10 @@ namespace Foam
 //- An {int, c_str} enum pairing
 #define TOKEN_PAIR(Name,T)  { TOKEN_OF(T), Name }
 
+//- An {int, c_str} enum pairing for field types
+#define FIELD_PAIR(Fld,T)  { TOKEN_OF(T), Fld::typeName.c_str() }
+
+
 // Special handling for these known (stashed) look-back types
 static const Enum<int> lookBehindTokenEnums
 ({
@@ -90,36 +94,46 @@ static const Enum<int> fieldMethodEnums
 
 
 // Known field-token types
-static const Enum<int> fieldTokenEnums
-({
-#ifdef TOK_SCALAR_ID
-    TOKEN_PAIR(volScalarField::typeName.c_str(), SCALAR_ID),
-    TOKEN_PAIR(volVectorField::typeName.c_str(), VECTOR_ID),
-    TOKEN_PAIR(volTensorField::typeName.c_str(), TENSOR_ID),
-    TOKEN_PAIR(volSymmTensorField::typeName.c_str(), SYM_TENSOR_ID),
-    TOKEN_PAIR(volSphericalTensorField::typeName.c_str(), SPH_TENSOR_ID),
-#else
-#error TOK_SCALAR_ID not defined
-#endif
-#ifdef TOK_SSCALAR_ID
-    TOKEN_PAIR(surfaceScalarField::typeName.c_str(), SSCALAR_ID),
-    TOKEN_PAIR(surfaceVectorField::typeName.c_str(), SVECTOR_ID),
-    TOKEN_PAIR(surfaceTensorField::typeName.c_str(), STENSOR_ID),
-    TOKEN_PAIR(surfaceSymmTensorField::typeName.c_str(), SSYM_TENSOR_ID),
-    TOKEN_PAIR(surfaceSphericalTensorField::typeName.c_str(), SSPH_TENSOR_ID),
-#else
-#warning TOK_SSCALAR_ID not defined
-#endif
-#ifdef TOK_PSCALAR_ID
-    TOKEN_PAIR(pointScalarField::typeName.c_str(), PSCALAR_ID),
-    TOKEN_PAIR(pointVectorField::typeName.c_str(), PVECTOR_ID),
-    TOKEN_PAIR(pointTensorField::typeName.c_str(), PTENSOR_ID),
-    TOKEN_PAIR(pointSymmTensorField::typeName.c_str(), PSYM_TENSOR_ID),
-    TOKEN_PAIR(pointSphericalTensorField::typeName.c_str(), PSPH_TENSOR_ID),
-#else
-#warning TOK_PSCALAR_ID not defined
-#endif
-});
+static const Enum<int>& fieldTokenEnums()
+{
+    static Enum<int> enums_;
+
+    if (enums_.empty())
+    {
+        enums_.append
+        ({
+        #ifdef TOK_SCALAR_ID
+            FIELD_PAIR(volScalarField, SCALAR_ID),
+            FIELD_PAIR(volVectorField, VECTOR_ID),
+            FIELD_PAIR(volTensorField, TENSOR_ID),
+            FIELD_PAIR(volSymmTensorField, SYM_TENSOR_ID),
+            FIELD_PAIR(volSphericalTensorField, SPH_TENSOR_ID),
+        #else
+            #error TOK_SCALAR_ID not defined
+        #endif
+        #ifdef TOK_SSCALAR_ID
+            FIELD_PAIR(surfaceScalarField, SSCALAR_ID),
+            FIELD_PAIR(surfaceVectorField, SVECTOR_ID),
+            FIELD_PAIR(surfaceTensorField, STENSOR_ID),
+            FIELD_PAIR(surfaceSymmTensorField, SSYM_TENSOR_ID),
+            FIELD_PAIR(surfaceSphericalTensorField, SSPH_TENSOR_ID),
+        #else
+            #warning TOK_SSCALAR_ID not defined
+        #endif
+        #ifdef TOK_PSCALAR_ID
+            FIELD_PAIR(pointScalarField, PSCALAR_ID),
+            FIELD_PAIR(pointVectorField, PVECTOR_ID),
+            FIELD_PAIR(pointTensorField, PTENSOR_ID),
+            FIELD_PAIR(pointSymmTensorField, PSYM_TENSOR_ID),
+            FIELD_PAIR(pointSphericalTensorField, PSPH_TENSOR_ID),
+        #else
+            #warning TOK_PSCALAR_ID not defined
+        #endif
+        });
+    }
+
+    return enums_;
+}
 
 
 // Simple compile-time function name declarations.
@@ -132,7 +146,7 @@ static const Enum<int> funcTokenEnums
     TOKEN_PAIR("ceil", CEIL),
     TOKEN_PAIR("round", ROUND),
 #endif
-#ifdef TOK_HYPOT  /* Can use hypot? */
+#ifdef TOK_HYPOT
     TOKEN_PAIR("hypot", HYPOT),
 #endif
 
@@ -271,7 +285,7 @@ static int driverTokenType
     {
         const word fieldType(driver_.getFieldClassName(ident));
 
-        int tokType = fieldTokenEnums.get(fieldType, -1);
+        int tokType = fieldTokenEnums().get(fieldType, -1);
 
         if (tokType > 0)
         {
@@ -518,7 +532,7 @@ bool Foam::expressions::volumeExpr::scanner::dispatch_ident
         {
             DebugInfo
                 << "Emit:" << ident << " function:"
-                << parser_->nameOfToken(tokType) << nl;
+                << parser_->tokenName(tokType) << nl;
 
             parser_->parse(tokType, nullptr);
             return true;
@@ -532,7 +546,7 @@ bool Foam::expressions::volumeExpr::scanner::dispatch_ident
         {
             DebugInfo
                 << "Emit:" << ident << " as look-behind:"
-                << parser_->nameOfToken(tokType) << nl;
+                << parser_->tokenName(tokType) << nl;
 
             driver_.resetStashedTokenId(tokType);
             parser_->parse(tokType, nullptr);
@@ -551,7 +565,7 @@ bool Foam::expressions::volumeExpr::scanner::dispatch_ident
     {
         DebugInfo
             << "Emit:" << ident << " token:"
-            << parser_->nameOfToken(tokType) << nl;
+            << parser_->tokenName(tokType) << nl;
 
         scanTok.name = new Foam::word(std::move(ident));
         parser_->parse(tokType, &scanTok);
@@ -579,9 +593,9 @@ bool Foam::expressions::volumeExpr::scanner::dispatch_ident
     {
         DebugInfo
             << "Emit:" << ident.substr(0, dot).c_str() << " token:"
-            << parser_->nameOfToken(tokType) << " with "
+            << parser_->tokenName(tokType) << " with "
             << ident.substr(dot).c_str() << " token:"
-            << parser_->nameOfToken(methType) << nl;
+            << parser_->tokenName(methType) << nl;
 
         // The field (before the ".")
         ident.erase(dot);
