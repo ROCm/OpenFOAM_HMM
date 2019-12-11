@@ -402,6 +402,26 @@ void Foam::ITstream::seek(label pos)
 }
 
 
+void Foam::ITstream::append(const token& t, const bool lazy)
+{
+    reserveCapacity(tokenIndex_ + 1, lazy);
+    tokenList& toks = *this;
+
+    toks[tokenIndex_] = t;  // copy append
+    ++tokenIndex_;
+}
+
+
+void Foam::ITstream::append(token&& t, const bool lazy)
+{
+    reserveCapacity(tokenIndex_ + 1, lazy);
+    tokenList& toks = *this;
+
+    toks[tokenIndex_] = std::move(t);  // move append
+    ++tokenIndex_;
+}
+
+
 void Foam::ITstream::append(const tokenList& newTokens, const bool lazy)
 {
     reserveCapacity(tokenIndex_ + newTokens.size(), lazy);

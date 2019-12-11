@@ -297,6 +297,14 @@ public:
 
         // Edit
 
+            //- Copy append a token at the current tokenIndex,
+            //- incrementing the index.
+            void append(const token& t, const bool lazy);
+
+            //- Move append a token at the current tokenIndex,
+            //- incrementing the index.
+            void append(token&& t, const bool lazy);
+
             //- Copy append a tokenList at the current tokenIndex,
             //- incrementing the index.
             //
