@@ -88,7 +88,6 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
         return autoPtr<dynamicFvMesh>(cstrIter()(io));
     }
 
-
     return autoPtr<dynamicFvMesh>(new staticFvMesh(io));
 }
 
