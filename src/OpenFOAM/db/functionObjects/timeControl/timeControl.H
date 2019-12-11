@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +29,16 @@ Class
 
 Description
     General time dependent execution controller.
-    The default to execute every time-step.
+    The execution parameters are given by the "Control" and (optionally)
+    the "Interval", with the default being to execute every time-step.
+
+    For example, an "execute" control every tenth write time:
+    \verbatim
+        executeControl  writeTime;
+        executeInterval 10;
+    \endverbatim
+
+    See Foam::functionObject for a list of known selection types.
 
 SourceFiles
     timeControl.C
@@ -56,39 +66,40 @@ public:
     //- The time control options
     enum timeControls
     {
-        ocTimeStep,           //!< execution is coupled to the time-step
-        ocWriteTime,          //!< execution is coupled to the write-time
-        ocOutputTime,         //!< execution is coupled to the output-time
-        ocAdjustableRunTime,  //!< Adjust time step for execution
-        ocRunTime,            //!< run time for execution
-        ocClockTime,          //!< clock time for execution
-        ocCpuTime,            //!< CPU time for execution
-        ocOnEnd,              //!< on end of run
-        ocNone                //!< no execution
+        ocNone = 0,           //!< No execution
+        ocAlways,             //!< Always execute
+        ocTimeStep,           //!< Execution coupled to time-step (default)
+        ocWriteTime,          //!< Execution coupled to write-time
+        ocRunTime,            //!< Use run-time for execution
+        ocAdjustableRunTime,  //!< Currently identical to "runTime"
+        ocClockTime,          //!< Use clock time for execution
+        ocCpuTime,            //!< Use CPU time for execution
+        ocOnEnd               //!< Execute on end of run
     };
 
 
 private:
 
-    // Private data
+        //- The selection names for timeControls enumerations
+        static const Enum<timeControls> controlNames_;
+
+
+    // Private Data
 
         //- Time object
         const Time& time_;
 
-        //- Prefix
+        //- The prefix for the control name (eg, "write", "execute", ...)
         const word prefix_;
-
-        //- String representation of timeControls enums
-        static const Enum<timeControls> timeControlNames_;
 
         //- Type of time control
         timeControls timeControl_;
 
-        //- Execution interval steps for timeStep mode
-        //  a value <= 1 means execute at every time step
+        //- Execution interval steps (timeStep | writeTime).
+        //  A value <= 1 means execute at every time-step or writeTime.
         label intervalSteps_;
 
-        //- Execution interval
+        //- Execution interval (clockTime | runTime | cpuTime | adjustable)
         scalar interval_;
 
         //- Index of previous execution
@@ -108,11 +119,17 @@ public:
 
     // Constructors
 
-        //- Construct from Time object and dictionary
+        //- Construct a control object that executes each time-step.
+        //  For places where a time control object is required, but should
+        //  not actually intervene.
+        explicit timeControl(const Time& runTime, const word& prefix = "");
+
+        //- Construct from Time object, dictionary and the prefix for the
+        //- control name.
         timeControl
         (
-            const Time&,
-            const dictionary&,
+            const Time& runTime,
+            const dictionary& dict,
             const word& prefix
         );
 
@@ -123,21 +140,30 @@ public:
 
     // Member Functions
 
-        //- Helper function to identify if a timeControl object is present
-        //  in the dictionary
+        //- Identify if a timeControl object is present in the dictionary
+        //  Matches prefix + "Control"
         static bool entriesPresent(const dictionary& dict, const word& prefix);
 
         //- Read from dictionary
-        void read(const dictionary&);
+        void read(const dictionary& dict);
 
-        //- Return Time
+        //- Return the Time
         inline const Time& time() const;
+
+        //- Return the name (prefix)
+        inline const word& name() const;
+
+        //- Return the named control enumeration as its 'type'
+        inline const word& type() const;
+
+        //- Return the control enumeration
+        inline timeControls control() const;
+
+        //- Return true if the control will always execute - ie, no intervention
+        inline bool always() const;
 
         //- Flag to indicate whether to execute
         bool execute();
-
-        //- Return control
-        inline timeControls control() const;
 
         //- Return interval
         inline scalar interval() const;

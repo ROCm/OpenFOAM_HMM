@@ -62,30 +62,31 @@ Description
 
     Where:
     \table
-        Property | Description                           | Required | Default
-        type     | Type of function object               | yes      |
-        libs     | Libraries containing implementation   | yes      |
-        region   | Name of region for multi-region cases | no       |
-        enabled  | On/off switch                         | no       | yes
-        log      | Log information to standard output    | no       | yes
-        timeStart| Start time                            | no       |
-        timeEnd  | End time                              | no       |
-        executeControl  | See time controls below        | no       | timeStep
-        executeInterval | Steps between each execute phase | no     |
-        writeControl    | See time controls below        | no       | timeStep
-        writeInterval   | Steps between each write phase | no       |
+        Property | Description                              | Required | Default
+        type     | Type of function object                  | yes |
+        libs     | Libraries containing implementation      | yes |
+        region   | Name of region for multi-region cases    | no  |
+        enabled  | On/off switch                            | no  | yes
+        log      | Log information to standard output       | no  | yes
+        timeStart| Start time                               | no  |
+        timeEnd  | End time                                 | no  |
+        executeControl  | See time controls below           | no  | timeStep
+        executeInterval | Steps/time between execute phases | no  | 1
+        writeControl    | See time controls below           | no  | timeStep
+        writeInterval   | Steps/time between write phases   | no  | 1
     \endtable
 
     Time controls:
     \table
         Option            | Description
-        timeStep          | Execute/write every 'Interval' time-steps
-        writeTime         | Execute/write every 'Interval' output times
-        adjustableRunTime | Execute/write every 'Interval' run time period
-        runTime           | Execute/write every 'Interval' run time period
-        clockTime         | Execute/write every 'Interval' clock time period
-        cpuTime           | Execute/write every 'Interval' CPU time period
-        none              | Execute/write disabled
+        none              | Trigger is disabled
+        timeStep          | Trigger every 'Interval' time-steps
+        writeTime         | Trigger every 'Interval' output times
+        runTime           | Trigger every 'Interval' run time period
+        adjustableRunTime | Currently identical to "runTime"
+        clockTime         | Trigger every 'Interval' clock time period
+        cpuTime           | Trigger every 'Interval' CPU time period
+        onEnd             | Trigger on end of run
     \endtable
 
     The sub-dictionary name \c \<functionObjectName\> is chosen by the user, and

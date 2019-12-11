@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,18 +35,19 @@ const Foam::Enum
 <
     Foam::timeControl::timeControls
 >
-Foam::timeControl::timeControlNames_
+Foam::timeControl::controlNames_
 ({
+    { timeControl::ocNone, "none" },
+    { timeControl::ocAlways, "always" },
     { timeControl::ocTimeStep, "timeStep" },
     { timeControl::ocWriteTime, "writeTime" },
-    { timeControl::ocOutputTime, "outputTime" },
+    { timeControl::ocWriteTime, "outputTime" },
+    { timeControl::ocRunTime, "runTime" },
     { timeControl::ocAdjustableRunTime, "adjustable" },
     { timeControl::ocAdjustableRunTime, "adjustableRunTime" },
-    { timeControl::ocRunTime, "runTime" },
     { timeControl::ocClockTime, "clockTime" },
     { timeControl::ocCpuTime, "cpuTime" },
     { timeControl::ocOnEnd, "onEnd" },
-    { timeControl::ocNone, "none" },
 });
 
 
@@ -54,17 +55,27 @@ Foam::timeControl::timeControlNames_
 
 Foam::timeControl::timeControl
 (
-    const Time& t,
+    const Time& runTime,
+    const word& prefix
+)
+:
+    time_(runTime),
+    prefix_(prefix),
+    timeControl_(ocAlways),
+    intervalSteps_(0),
+    interval_(-1),
+    executionIndex_(0)
+{}
+
+
+Foam::timeControl::timeControl
+(
+    const Time& runTime,
     const dictionary& dict,
     const word& prefix
 )
 :
-    time_(t),
-    prefix_(prefix),
-    timeControl_(ocTimeStep),
-    intervalSteps_(0),
-    interval_(-1),
-    executionIndex_(0)
+    timeControl(runTime, prefix)
 {
     read(dict);
 }
@@ -97,27 +108,21 @@ void Foam::timeControl::read(const dictionary& dict)
             << "Using deprecated 'outputControl'" << nl
             << "    Please use 'writeControl' with 'writeInterval'"
             << endl;
+        error::warnAboutAge("outputControl", 1606);
 
         // Change to the old names for this option
         controlName = "outputControl";
         intervalName = "outputInterval";
     }
 
-    timeControl_ =
-        timeControlNames_.lookupOrDefault(controlName, dict, ocTimeStep);
+    timeControl_ = controlNames_.getOrDefault(controlName, dict, ocTimeStep);
 
     switch (timeControl_)
     {
         case ocTimeStep:
-        {
-            intervalSteps_ = dict.lookupOrDefault<label>(intervalName, 0);
-            break;
-        }
-
         case ocWriteTime:
-        case ocOutputTime:
         {
-            intervalSteps_ = dict.lookupOrDefault<label>(intervalName, 1);
+            intervalSteps_ = dict.getOrDefault<label>(intervalName, 0);
             break;
         }
 
@@ -131,7 +136,6 @@ void Foam::timeControl::read(const dictionary& dict)
             break;
         }
 
-        case ocOnEnd:
         default:
         {
             break;
@@ -144,6 +148,18 @@ bool Foam::timeControl::execute()
 {
     switch (timeControl_)
     {
+        case ocNone:
+        {
+            return false;
+            break;
+        }
+
+        case ocAlways:
+        {
+            return true;
+            break;
+        }
+
         case ocTimeStep:
         {
             return
@@ -155,12 +171,15 @@ bool Foam::timeControl::execute()
         }
 
         case ocWriteTime:
-        case ocOutputTime:
         {
             if (time_.writeTime())
             {
-                executionIndex_++;
-                return !(executionIndex_ % intervalSteps_);
+                ++executionIndex_;
+                return
+                (
+                    (intervalSteps_ <= 1)
+                 || !(executionIndex_ % intervalSteps_)
+                );
             }
             break;
         }
@@ -222,16 +241,11 @@ bool Foam::timeControl::execute()
             break;
         }
 
-        case ocNone:
-        {
-            return false;
-        }
-
         default:
         {
             FatalErrorInFunction
                 << "Undefined time control: "
-                << timeControlNames_[timeControl_] << nl
+                << controlNames_[timeControl_] << nl
                 << abort(FatalError);
             break;
         }

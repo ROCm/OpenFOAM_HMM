@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,9 +34,31 @@ inline const Foam::Time& Foam::timeControl::time() const
 }
 
 
+inline const Foam::word& Foam::timeControl::name() const
+{
+    return prefix_;
+}
+
+
+inline const Foam::word& Foam::timeControl::type() const
+{
+    return controlNames_[timeControl_];
+}
+
+
 inline Foam::timeControl::timeControls Foam::timeControl::control() const
 {
     return timeControl_;
+}
+
+
+inline bool Foam::timeControl::always() const
+{
+    return
+    (
+        (timeControls::ocAlways == timeControl_)
+     || (timeControls::ocTimeStep == timeControl_ && intervalSteps_ <= 1)
+    );
 }
 
 
