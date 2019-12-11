@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1906                                 |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|  \\    /   O peration     | Version:  v1912                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -14,13 +14,14 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+fastMerge   true;   // Use fast topological search
+
 scale   1;
 
 L   #eval{ 20*pi() };
 H   1.0;
 H2  #eval{ 2*$H };
 W   #eval{ pi() };
-
 
 vertices
 (
@@ -74,7 +75,6 @@ boundary
         neighbourPatch  sides_half0;
         faces           ((6 11 8 7)(11 10 9 8));
     }
-
 
     inlet
     {
