@@ -636,7 +636,7 @@ void kkLOmega::correct()
        *fINT()
        *Cmu(sqrt(S2))*sqrt(ktS)*lambdaEff
     );
-    const volScalarField Pkt(nuts*S2);
+    volScalarField Pkt(this->GName(), nuts*S2);
 
     const volScalarField ktL(kt_ - ktS);
     const volScalarField ReOmega(sqr(y_)*Omega/nu());
