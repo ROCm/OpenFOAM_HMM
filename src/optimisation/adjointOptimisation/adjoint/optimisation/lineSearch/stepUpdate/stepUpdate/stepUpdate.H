@@ -62,7 +62,7 @@ protected:
 
 
     // Protected Member Functions
-        
+
         //- Optional coeffs dict
         const dictionary& coeffsDict();
 
@@ -71,10 +71,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         stepUpdate(const stepUpdate&);
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const stepUpdate&);
 
 

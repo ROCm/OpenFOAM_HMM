@@ -62,7 +62,7 @@ protected:
 
         //- Parameterization based on NURBS curves
         Bezier Bezier_;
-        
+
         //- Boundary movement due to change of NURBS control points
         pointVectorField dx_;
 
@@ -79,10 +79,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         optMeshMovementBezier(const optMeshMovementBezier&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const optMeshMovementBezier&) = delete;
 
 

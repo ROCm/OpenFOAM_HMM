@@ -25,7 +25,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-
 Class
     Foam::incompressible::sensitivityMultiple
 
@@ -71,10 +70,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         sensitivityMultiple(const sensitivityMultiple&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const sensitivityMultiple&) = delete;
 
 
@@ -110,7 +109,7 @@ public:
        //- Accumulate sensitivity integrands
        virtual void accumulateIntegrand(const scalar dt);
 
-       //- Assemble sensitivities 
+       //- Assemble sensitivities
        virtual void assembleSensitivities();
 
        //- Calculates sensitivities at wall surface points

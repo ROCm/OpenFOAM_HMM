@@ -135,7 +135,7 @@ Foam::incompressibleAdjointSolver::getPrimalVars() const
 const Foam::incompressibleAdjointVars&
 Foam::incompressibleAdjointSolver::getAdjointVars() const
 {
-    const incompressibleAdjointVars& adjointVars = 
+    const incompressibleAdjointVars& adjointVars =
         refCast<incompressibleAdjointVars>(const_cast<variablesSet&>(vars_()));
     return adjointVars;
 }
@@ -144,7 +144,7 @@ Foam::incompressibleAdjointSolver::getAdjointVars() const
 Foam::incompressibleAdjointVars&
 Foam::incompressibleAdjointSolver::getAdjointVars()
 {
-    incompressibleAdjointVars& adjointVars = 
+    incompressibleAdjointVars& adjointVars =
         refCast<incompressibleAdjointVars>(const_cast<variablesSet&>(vars_()));
     return adjointVars;
 }

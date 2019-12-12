@@ -96,8 +96,8 @@ protected:
         //- Maximum line search iterations
         label maxIters_;
 
-        //- Whether to extrapolate the correction multiplier for 
-        //- this optimisation cycle based on the previous ones. 
+        //- Whether to extrapolate the correction multiplier for
+        //- this optimisation cycle based on the previous ones.
         //  Usefull for non-quasi Newton methods
         bool extrapolateInitialStep_;
 
@@ -106,7 +106,7 @@ protected:
 
 
     // Protected Member Functions
-        
+
         //- Optional coeffs dict
         const dictionary& coeffsDict();
 
@@ -115,10 +115,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         lineSearch(const lineSearch&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const lineSearch&) = delete;
 
 

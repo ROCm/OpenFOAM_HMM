@@ -154,12 +154,12 @@ public:
             {
                 return primalSolverName_;
             }
-           
-            //- Return a const-reference to the primal solver 
+
+            //- Return a const-reference to the primal solver
             //- corresponding to this adjoint solver
             const primalSolver& getPrimalSolver() const;
 
-            //- Return a non const-reference to the primal solver 
+            //- Return a non const-reference to the primal solver
             //- corresponding to this adjoint solver
             primalSolver& getPrimalSolver();
 

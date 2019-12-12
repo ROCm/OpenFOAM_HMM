@@ -44,7 +44,7 @@ namespace Foam
 
 Foam::scalar Foam::optMeshMovement::getMaxAllowedDisplacement() const
 {
-    if (maxAllowedDisplacement_.empty()) 
+    if (maxAllowedDisplacement_.empty())
     {
         FatalErrorInFunction
             << "maxAllowedDisplacement requested but not set" << nl
@@ -106,7 +106,7 @@ Foam::autoPtr<Foam::optMeshMovement> Foam::optMeshMovement::New
     {
         FatalIOErrorInLookup
         (
-            dict, 
+            dict,
             "type",
             modelType,
             *dictionaryConstructorTablePtr_
@@ -138,7 +138,7 @@ void Foam::optMeshMovement::moveMesh()
 }
 
 
-Foam::autoPtr<Foam::displacementMethod>& 
+Foam::autoPtr<Foam::displacementMethod>&
 Foam::optMeshMovement::returnDisplacementMethod()
 {
     return displMethodPtr_;

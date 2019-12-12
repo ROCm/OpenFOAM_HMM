@@ -216,14 +216,14 @@ NURBS3DCurve::NURBS3DCurve
     const word name
 )
 :
-    vectorField(nPts, vector::zero),
+    vectorField(nPts, Zero),
     CPs_(CPs),
     weights_(weights),
     u_(u),
     name_(name),
     basis_(basis),
 
-    givenInitNrm_(vector::zero),
+    givenInitNrm_(Zero),
 
     nrmOrientation_(ALLIGNED)
 
@@ -241,14 +241,14 @@ NURBS3DCurve::NURBS3DCurve
     const word name
 )
 :
-    vectorField(nPts, vector::zero),
+    vectorField(nPts, Zero),
     CPs_(CPs),
     weights_(weights),
     u_(nPts, Zero),
     name_(name),
     basis_(basis),
 
-    givenInitNrm_(vector::zero),
+    givenInitNrm_(Zero),
 
     nrmOrientation_(ALLIGNED)
 
@@ -266,14 +266,14 @@ NURBS3DCurve::NURBS3DCurve
     const word name
 )
 :
-    vectorField(nPts, vector::zero),
+    vectorField(nPts, Zero),
     CPs_(CPs),
     weights_(CPs.size(), scalar(1)),
     u_(nPts, Zero),
     name_(name),
     basis_(basis),
 
-    givenInitNrm_(vector::zero),
+    givenInitNrm_(Zero),
 
     nrmOrientation_(1)
 
@@ -322,7 +322,7 @@ void NURBS3DCurve::setNrm2DOrientation
     givenInitNrm_ = givenNrm;
 
     const vector tan(curveDerivativeU(Zero));
-    vector curveNrm(vector::zero);
+    vector curveNrm(Zero);
 
     curveNrm.x() = -tan.y();
     curveNrm.y() =  tan.x();
@@ -410,7 +410,7 @@ void NURBS3DCurve::invert()
     Info<< "Inverting NURBS curve " << name_ << endl;
 
     const label nCPs(CPs_.size());
-    List<vector> invertedCPs(nCPs, vector::zero);
+    List<vector> invertedCPs(nCPs, Zero);
     List<scalar> invertedWeights(nCPs, Zero);
 
     for (label CPI = 0; CPI<nCPs; CPI++)
@@ -466,7 +466,7 @@ vector NURBS3DCurve::curvePoint(const scalar u) const
     }
 
     // Compute curve point.
-    vector point(vector::zero);
+    vector point(Zero);
 
     forAll(CPs_, CPI)
     {
@@ -611,7 +611,7 @@ scalar NURBS3DCurve::findClosestCurvePoint
 
 const vector NURBS3DCurve::nrm3D(const vector& refTan, const scalar u) const
 {
-    vector curveNrm(vector::zero);
+    vector curveNrm(Zero);
 
     if (nrmOrientation_ == ALLIGNED)
     {
@@ -631,7 +631,7 @@ const vector NURBS3DCurve::nrm3D(const vector& refTan, const scalar u) const
 const vector NURBS3DCurve::nrm2D(const scalar zVal, const scalar u) const
 {
     const vector tan(curveDerivativeU(u));
-    vector curveNrm(vector::zero);
+    vector curveNrm(Zero);
 
     curveNrm.x()  = -nrmOrientation_*tan.y();
     curveNrm.y()  =  nrmOrientation_*tan.x();
@@ -653,7 +653,7 @@ void NURBS3DCurve::insertKnot
     // Insertion into curve of non-uniform weight is not currently supported.
     const label degree(basis_.degree());
     const label nCPs(basis_.nCPs());
-    List<vector> newCPs(nCPs, vector::zero);
+    List<vector> newCPs(nCPs, Zero);
     List<scalar> newWeights(nCPs, scalar(1));
 
     // Compute the new CPs and their weights.
@@ -737,7 +737,7 @@ scalar NURBS3DCurve::length(const label uIStart, const label uIEnd) const
 {
     // Compute derivatives wrt u for the given u interval.
     const label lenSize(uIEnd - uIStart + 1);
-    vectorField dxdu(lenSize, vector::zero);
+    vectorField dxdu(lenSize, Zero);
     scalar length(Zero);
 
     forAll(dxdu, uI)
@@ -768,7 +768,7 @@ scalar NURBS3DCurve::length
     // Compute derivatives wrt u for the given u interval.
     scalar length(Zero);
     scalarField localU(nPts, Zero);
-    vectorField dxdu(nPts, vector::zero);
+    vectorField dxdu(nPts, Zero);
 
     forAll(localU, uI)
     {
@@ -800,8 +800,8 @@ scalar NURBS3DCurve::length() const
 vector NURBS3DCurve::curveDerivativeU(const scalar u) const
 {
     const label degree(basis_.degree());
-    vector NWP(vector::zero);
-    vector dNduWP(vector::zero);
+    vector NWP(Zero);
+    vector dNduWP(Zero);
     scalar NW(Zero);
     scalar dNduW(Zero);
 
@@ -825,9 +825,9 @@ vector NURBS3DCurve::curveDerivativeU(const scalar u) const
 vector NURBS3DCurve::curveDerivativeUU(const scalar u) const
 {
     const label degree(basis_.degree());
-    vector NWP(vector::zero);
-    vector dNduWP(vector::zero);
-    vector d2Ndu2WP(vector::zero);
+    vector NWP(Zero);
+    vector dNduWP(Zero);
+    vector d2Ndu2WP(Zero);
     scalar NW(Zero);
     scalar dNduW(Zero);
     scalar d2Ndu2W(Zero);
@@ -890,7 +890,7 @@ vector NURBS3DCurve::curveDerivativeWeight
 {
     // Compute nominator, denominator.
     const label degree(basis_.degree());
-    vector NWP(vector::zero);
+    vector NWP(Zero);
     scalar NW(Zero);
 
     forAll(CPs_, CPJ)
@@ -916,8 +916,8 @@ scalar NURBS3DCurve::lengthDerivativeU
 )
 {
     // compute derivatives wrt u for the given u interval
-    vectorField dxdu(nPts, vector::zero);
-    vectorField d2xdu2(nPts, vector::zero);
+    vectorField dxdu(nPts, Zero);
+    vectorField d2xdu2(nPts, Zero);
     scalarField localU(nPts, Zero);
     scalar lDerivative(Zero);
 

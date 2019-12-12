@@ -25,7 +25,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-
 Class
     Foam::objectiveManager
 
@@ -72,10 +71,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         objectiveManager(const objectiveManager&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const objectiveManager&) = delete;
 
 
@@ -139,7 +138,7 @@ public:
         //- Update contributions to adjoint if true, otherwise return nulls
         void updateOrNullify();
 
-        //- Increment integration times by the optimisation cycle time-span 
+        //- Increment integration times by the optimisation cycle time-span
         void incrementIntegrationTimes(const scalar timeSpan);
 
         //- Print to screen

@@ -67,13 +67,13 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         boundaryAdjointContributionIncompressible
         (
             const boundaryAdjointContributionIncompressible&
         ) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=
         (
             const boundaryAdjointContributionIncompressible&

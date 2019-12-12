@@ -190,7 +190,7 @@ void objectiveManager::updateOrNullify()
 
 void objectiveManager::incrementIntegrationTimes(const scalar timeSpan)
 {
-    // Update start and end integration times by adding the timeSpan 
+    // Update start and end integration times by adding the timeSpan
     // of the optimisation cycle
     for (objective& obj : objectives_)
     {

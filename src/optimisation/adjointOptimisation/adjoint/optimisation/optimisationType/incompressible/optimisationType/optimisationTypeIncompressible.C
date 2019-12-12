@@ -65,7 +65,7 @@ optimisationType::optimisationType
     (
         lineSearch::New
         (
-            dict_.subDict("updateMethod").subOrEmptyDict("lineSearch"), 
+            dict_.subDict("updateMethod").subOrEmptyDict("lineSearch"),
             mesh.time()
         )
     )

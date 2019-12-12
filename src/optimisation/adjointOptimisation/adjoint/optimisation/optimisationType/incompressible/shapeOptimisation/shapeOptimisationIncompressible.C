@@ -129,9 +129,9 @@ shapeOptimisation::shapeOptimisation
     );
 
     // Sanity checks: at least one of eta or maxAllowedDisplacement must be set
-    if 
+    if
     (
-        !updateMethod_->initialEtaSet() 
+        !updateMethod_->initialEtaSet()
      && !optMeshMovement_().maxAllowedDisplacementSet()
     )
     {

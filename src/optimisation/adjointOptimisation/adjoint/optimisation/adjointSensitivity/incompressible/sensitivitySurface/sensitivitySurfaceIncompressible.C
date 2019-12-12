@@ -80,8 +80,8 @@ void sensitivitySurface::addGeometricSens()
             vectorField& patchdSdb = pointSensdSdb()[patchI];
             vectorField& patchdndb = pointSensdndb()[patchI];
 
-            vectorField dSdbMultiplierTot(patch.size(), vector::zero);
-            vectorField dndbMultiplierTot(patch.size(), vector::zero);
+            vectorField dSdbMultiplierTot(patch.size(), Zero);
+            vectorField dndbMultiplierTot(patch.size(), Zero);
             forAll(functions, funcI)
             {
                 dSdbMultiplierTot +=
@@ -116,7 +116,7 @@ void sensitivitySurface::addGeometricSens()
                     const face& faceI = faces[globalFaceIndex];
                     // Point coordinates. All indices in global numbering
                     pointField p(faceI.points(mesh_.points()));
-                    tensorField p_d(faceI.size(), tensor::zero);
+                    tensorField p_d(faceI.size(), Zero);
                     forAll(faceI, facePointI)
                     {
                         if (faceI[facePointI] == meshPoints[ppI])
@@ -141,8 +141,8 @@ void sensitivitySurface::addGeometricSens()
         }
         // Do parallel communications to avoid wrong values at processor
         // boundaries
-        vectorField dSdbGlobal(mesh_.nPoints(), vector::zero);
-        vectorField dndbGlobal(mesh_.nPoints(), vector::zero);
+        vectorField dSdbGlobal(mesh_.nPoints(), Zero);
+        vectorField dndbGlobal(mesh_.nPoints(), Zero);
         for (const label patchI : sensitivityPatchIDs_)
         {
             const labelList& meshPoints =
@@ -310,7 +310,7 @@ sensitivitySurface::sensitivitySurface
 
     // Allocate appropriate space for the sensitivity field
     computeDerivativesSize();
-};
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -544,7 +544,7 @@ void sensitivitySurface::accumulateIntegrand(const scalar dt)
               * nf;
         }
 
-        vectorField gradStressTerm(patch.size(), vector::zero);
+        vectorField gradStressTerm(patch.size(), Zero);
         if (includeGradStressTerm_)
         {
             // Terms corresponding to contributions from converting delta to
@@ -563,7 +563,7 @@ void sensitivitySurface::accumulateIntegrand(const scalar dt)
         }
 
         // Adjoint pressure terms
-        vectorField pressureTerm(patch.size(), vector::zero);
+        vectorField pressureTerm(patch.size(), Zero);
         if (includePressureTerm_)
         {
             pressureTerm =
@@ -577,7 +577,7 @@ void sensitivitySurface::accumulateIntegrand(const scalar dt)
             (objectiveManager_.getObjectiveFunctions());
 
         // Term from objectives including x directly (e.g. moments)
-        vectorField dxdbMultiplierTot(pressureTerm.size(), vector::zero);
+        vectorField dxdbMultiplierTot(pressureTerm.size(), Zero);
         if (includeObjective_)
         {
             forAll(functions, funcI)

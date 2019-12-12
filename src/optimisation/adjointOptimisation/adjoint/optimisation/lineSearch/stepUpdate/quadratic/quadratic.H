@@ -70,10 +70,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         quadratic(const quadratic&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const quadratic&) = delete;
 
 

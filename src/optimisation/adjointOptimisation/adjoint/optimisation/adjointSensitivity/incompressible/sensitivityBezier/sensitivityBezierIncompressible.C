@@ -72,17 +72,17 @@ sensitivityBezier::sensitivityBezier
     ),
     //Bezier_(mesh, dict), // AJH Read locally?
     Bezier_(mesh, mesh.lookupObject<IOdictionary>("optimisationDict")),
-    sens_(Bezier_.nBezier(), vector::zero),
-    flowSens_(Bezier_.nBezier(), vector::zero),
-    dSdbSens_(Bezier_.nBezier(), vector::zero),
-    dndbSens_(Bezier_.nBezier(), vector::zero),
-    dxdbDirectSens_(Bezier_.nBezier(), vector::zero),
+    sens_(Bezier_.nBezier(), Zero),
+    flowSens_(Bezier_.nBezier(), Zero),
+    dSdbSens_(Bezier_.nBezier(), Zero),
+    dndbSens_(Bezier_.nBezier(), Zero),
+    dxdbDirectSens_(Bezier_.nBezier(), Zero),
     derivativesFolder_("optimisation"/type() + "Derivatives")
 {
     derivatives_ = scalarField(3*Bezier_.nBezier(), Zero);
     // Create folder to store sensitivities
     mkDir(derivativesFolder_);
-};
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -90,7 +90,7 @@ sensitivityBezier::sensitivityBezier
 void sensitivityBezier::assembleSensitivities()
 {
     // Assemble the sensitivity map
-    // Solves for the post-processing equations and adds their contribution to 
+    // Solves for the post-processing equations and adds their contribution to
     // the sensitivity map
     surfaceSensitivity_.assembleSensitivities();
 
@@ -182,12 +182,12 @@ void sensitivityBezier::assembleSensitivities()
 
 void sensitivityBezier::clearSensitivities()
 {
-    sens_ = vector::zero;
-    flowSens_ = vector::zero;
-    dSdbSens_ = vector::zero;
-    dndbSens_ = vector::zero;
-    dxdbDirectSens_ = vector::zero;
-    
+    sens_ = Zero;
+    flowSens_ = Zero;
+    dSdbSens_ = Zero;
+    dndbSens_ = Zero;
+    dxdbDirectSens_ = Zero;
+
     SIBase::clearSensitivities();
 }
 

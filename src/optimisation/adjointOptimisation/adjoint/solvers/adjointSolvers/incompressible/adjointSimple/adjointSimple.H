@@ -25,7 +25,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-
 Class
     Foam::adjointSimple
 
@@ -101,7 +100,7 @@ protected:
     // Protected Member Functions
 
         //- Allocate incompressibleAdjointVars and return reference to be used
-        //- for convenience in the rest of the class. 
+        //- for convenience in the rest of the class.
         incompressibleAdjointVars& allocateVars();
 
         //- In case variable names are different than the base ones,

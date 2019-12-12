@@ -106,7 +106,7 @@ tmp<Field<scalar>> adjointOutletFluxFvPatchScalarField::valueInternalCoeffs
     const tmp<scalarField>&
 ) const
 {
-    return tmp<Field<scalar>>::New(this->size(), pTraits<scalar>::zero);
+    return tmp<Field<scalar>>::New(this->size(), Zero);
 }
 
 
@@ -115,21 +115,21 @@ tmp<Field<scalar>> adjointOutletFluxFvPatchScalarField::valueBoundaryCoeffs
     const tmp<scalarField>&
 ) const
 {
-    return tmp<Field<scalar>>::New(this->size(), pTraits<scalar>::zero);
+    return tmp<Field<scalar>>::New(this->size(), Zero);
 }
 
 
 tmp<Field<scalar>>
 adjointOutletFluxFvPatchScalarField::gradientBoundaryCoeffs() const
 {
-    return tmp<Field<scalar>>::New(this->size(), pTraits<scalar>::zero);
+    return tmp<Field<scalar>>::New(this->size(), Zero);
 }
 
 
 tmp<Field<scalar>>
 adjointOutletFluxFvPatchScalarField::gradientInternalCoeffs() const
 {
-    return tmp<Field<scalar>>::New(this->size(), pTraits<scalar>::zero);
+    return tmp<Field<scalar>>::New(this->size(), Zero);
 }
 
 

@@ -90,17 +90,17 @@ sensitivityVolBSplinesFI::sensitivityVolBSplinesFI
 
     label nCPs = volBSplinesBase_.getTotalControlPointsNumber();
     derivatives_ = scalarField(3*nCPs, Zero);
-    flowSens_ = vectorField(nCPs, vector::zero);
-    dSdbSens_ = vectorField(nCPs, vector::zero);
-    dndbSens_ = vectorField(nCPs, vector::zero);
-    dxdbDirectSens_ = vectorField(nCPs, vector::zero);
-    dVdbSens_ = vectorField(nCPs, vector::zero);
-    distanceSens_ = vectorField(nCPs, vector::zero);
-    optionsSens_ = vectorField(nCPs, vector::zero);
+    flowSens_ = vectorField(nCPs, Zero);
+    dSdbSens_ = vectorField(nCPs, Zero);
+    dndbSens_ = vectorField(nCPs, Zero);
+    dxdbDirectSens_ = vectorField(nCPs, Zero);
+    dVdbSens_ = vectorField(nCPs, Zero);
+    distanceSens_ = vectorField(nCPs, Zero);
+    optionsSens_ = vectorField(nCPs, Zero);
 
     // Create folder to store sensitivities
     mkDir(derivativesFolder_);
-};
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -138,7 +138,7 @@ void sensitivityVolBSplinesFI::assembleSensitivities()
     forAll(boxes, iNURB)
     {
         label nb = boxes[iNURB].getControlPoints().size();
-        vectorField boxSensitivities(nb, vector::zero);
+        vectorField boxSensitivities(nb, Zero);
 
         vectorField dxdbSens = boxes[iNURB].computeControlPointSensitivities
         (

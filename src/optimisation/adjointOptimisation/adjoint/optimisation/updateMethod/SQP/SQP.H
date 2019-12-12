@@ -114,10 +114,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         SQP(const SQP&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const SQP&) = delete;
 
         //- Make folder holding the Lagrangian file

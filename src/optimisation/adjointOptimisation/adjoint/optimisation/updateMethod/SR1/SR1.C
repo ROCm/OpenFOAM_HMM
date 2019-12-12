@@ -62,8 +62,8 @@ void Foam::SR1::allocateMatrices()
     SquareMatrix<scalar> temp(activeDesignVars_.size(), Zero);
     forAll(activeDesignVars_, i)
     {
-        temp[i][i] = 1.;
-    };
+        temp[i][i] = scalar(1);
+    }
 
     // Allocate correct size and content to HessianInv matrices
     // has a max. capability of approximately 34000 variables.
@@ -91,7 +91,8 @@ void Foam::SR1::updateHessian()
     if (tempMag > ratioThreshold_ * yMag * HessYMag)
     {
         HessianInv_ =
-            HessianInvOld_ + (1./(globalSum(temp*y)))*outerProd(temp, temp);
+            HessianInvOld_
+          + (scalar(1)/(globalSum(temp*y)))*outerProd(temp, temp);
     }
     else
     {
@@ -161,7 +162,7 @@ Foam::SR1::SR1(const fvMesh& mesh, const dictionary& dict)
     // Construct null matrix since we dont know the dimension yet
     etaHessian_
     (
-        coeffsDict().lookupOrDefault<scalar>("etaHessian", 1.)
+        coeffsDict().lookupOrDefault<scalar>("etaHessian", 1)
     ),
     nSteepestDescent_
     (
@@ -169,7 +170,7 @@ Foam::SR1::SR1(const fvMesh& mesh, const dictionary& dict)
     ),
     ratioThreshold_
     (
-        coeffsDict().lookupOrDefault<scalar>("ratioThreshold", 1.e-08)
+        coeffsDict().lookupOrDefault<scalar>("ratioThreshold", 1e-08)
     ),
     activeDesignVars_(0),
     HessianInv_(),
@@ -191,7 +192,7 @@ Foam::SR1::SR1(const fvMesh& mesh, const dictionary& dict)
 
     // Read old hessian, correction and derivatives, if present
     readFromDict();
-};
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -221,14 +222,14 @@ void Foam::SR1::updateOldCorrection(const scalarField& oldCorrection)
 
 void Foam::SR1::write()
 {
-    optMethodIODict_.add < SquareMatrix<scalar>>
+    optMethodIODict_.add<SquareMatrix<scalar>>
     (
         "HessianInvOld",
         HessianInvOld_,
         true
     );
-    optMethodIODict_.add <scalarField>("derivativesOld", derivativesOld_, true);
-    optMethodIODict_.add <scalarField>("correctionOld", correctionOld_, true);
+    optMethodIODict_.add<scalarField>("derivativesOld", derivativesOld_, true);
+    optMethodIODict_.add<scalarField>("correctionOld", correctionOld_, true);
     optMethodIODict_.add<label>("counter", counter_, true);
 
     updateMethod::write();

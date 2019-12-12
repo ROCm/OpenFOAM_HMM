@@ -64,10 +64,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         optMeshMovement(const optMeshMovement&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const optMeshMovement&) = delete;
 
 
@@ -87,11 +87,11 @@ protected:
         //- Fall back points in case line-search is used
         vectorField pointsInit_;
 
-        //- Mesh movement engine and interface for applying mesh movement 
+        //- Mesh movement engine and interface for applying mesh movement
         //- boundary conditions
         autoPtr<displacementMethod> displMethodPtr_;
 
-        //- Whether to write the mesh quality metrics to files each time the 
+        //- Whether to write the mesh quality metrics to files each time the
         //- mesh is updated
         bool writeMeshQualityMetrics_;
 
@@ -184,7 +184,7 @@ public:
        //- Whether maxAllowedDisplacement has been set
        bool maxAllowedDisplacementSet() const;
 
-       //- Return active design variables. 
+       //- Return active design variables.
        //  Implemented only for certain parametetisations
        virtual labelList getActiveDesignVariables() const;
 };

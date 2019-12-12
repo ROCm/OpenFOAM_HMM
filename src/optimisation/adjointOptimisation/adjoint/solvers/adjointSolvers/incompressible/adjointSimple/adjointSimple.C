@@ -341,13 +341,13 @@ void Foam::adjointSimple::computeObjectiveSensitivities()
         const scalarField& sens = adjointSensitivity_->calculateSensitivities();
         if (sensitivities_.empty())
         {
-            sensitivities_.reset(new scalarField(sens.size(), scalar(0)));
+            sensitivities_.reset(new scalarField(sens.size(), Zero));
         }
         sensitivities_.ref() = sens;
     }
     else
     {
-        sensitivities_.reset(new scalarField(0));
+        sensitivities_.reset(new scalarField());
     }
 }
 
@@ -375,21 +375,17 @@ void Foam::adjointSimple::clearSensitivities()
 
 Foam::sensitivity& Foam::adjointSimple::getSensitivityBase()
 {
-    if (adjointSensitivity_.valid())
-    {
-        return adjointSensitivity_();
-    }
-    else
+    if (!adjointSensitivity_.valid())
     {
         FatalErrorInFunction
-            << "Sensitivity object not allocated \n"
+            << "Sensitivity object not allocated" << nl
             << "Turn computeSensitivities on in "
             << solverName_
             << nl << nl
             << exit(FatalError);
-
-        return adjointSensitivity_();
     }
+
+    return adjointSensitivity_();
 }
 
 

@@ -77,7 +77,7 @@ protected:
 
 
     // Protected Member Fuctions
-        
+
         //- Read options from dict
         void read();
 
@@ -86,10 +86,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         SIBase(const SIBase&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const SIBase&) = delete;
 
 
@@ -121,11 +121,11 @@ public:
 
         //- Read dict if changed
         virtual bool readDict(const dictionary& dict);
- 
+
         //- Accumulate sensitivity integrands
         virtual void accumulateIntegrand(const scalar dt);
 
-        //- Assemble sensitivities 
+        //- Assemble sensitivities
         virtual void assembleSensitivities() = 0;
 
         //- Zero sensitivity fields and their constituents

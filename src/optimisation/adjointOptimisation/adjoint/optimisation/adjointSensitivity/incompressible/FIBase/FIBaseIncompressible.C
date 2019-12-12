@@ -108,7 +108,7 @@ FIBase::FIBase
         dimensionedTensor(sqr(dimLength)/pow3(dimTime), Zero)
     ),
     divDxDbMult_(mesh_.nCells(), Zero),
-    optionsDxDbMult_(mesh_.nCells(), vector::zero),
+    optionsDxDbMult_(mesh_.nCells(), Zero),
     dSfdbMult_(createZeroBoundaryPtr<vector>(mesh_)),
     dnfdbMult_(createZeroBoundaryPtr<vector>(mesh_)),
     dxdbDirectMult_(createZeroBoundaryPtr<vector>(mesh_)),
@@ -117,7 +117,7 @@ FIBase::FIBase
     eikonalSolver_(nullptr)
 {
     read();
-};
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -147,7 +147,7 @@ void FIBase::accumulateIntegrand(const scalar dt)
     PtrList<objective>& functions(objectiveManager_.getObjectiveFunctions());
     for (objective& func : functions)
     {
-        divDxDbMult_ += 
+        divDxDbMult_ +=
             func.weight()*func.divDxDbMultiplier().primitiveField()*dt;
     }
 
@@ -173,7 +173,7 @@ void FIBase::accumulateIntegrand(const scalar dt)
             const scalar wei = func.weight();
             dSfdbMult_()[patchI] += wei*func.dSdbMultiplier(patchI)*dt;
             dnfdbMult_()[patchI] += wei*func.dndbMultiplier(patchI)*magSfDt;
-            dxdbDirectMult_()[patchI] += 
+            dxdbDirectMult_()[patchI] +=
                 wei*func.dxdbDirectMultiplier(patchI)*magSfDt;
         }
     }
@@ -193,7 +193,7 @@ void FIBase::clearSensitivities()
     {
         eikonalSolver_->reset();
     }
-    
+
     adjointSensitivity::clearSensitivities();
     shapeSensitivitiesBase::clear();
 }

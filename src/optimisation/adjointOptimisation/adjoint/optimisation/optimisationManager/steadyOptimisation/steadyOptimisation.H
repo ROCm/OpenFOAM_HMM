@@ -63,10 +63,10 @@ private:
         //- Update optimisationType source for all primal and adjoint solvers
         void updateOptTypeSource();
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         steadyOptimisation(const steadyOptimisation&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const steadyOptimisation&) = delete;
 
 

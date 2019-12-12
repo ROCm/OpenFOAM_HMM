@@ -67,10 +67,10 @@ protected:
 
     // Protected Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         incompressibleAdjointVars(const incompressibleAdjointVars&);
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const incompressibleAdjointVars&);
 
 

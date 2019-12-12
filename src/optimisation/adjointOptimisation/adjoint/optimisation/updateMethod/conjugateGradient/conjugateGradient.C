@@ -159,10 +159,10 @@ void Foam::conjugateGradient::computeCorrection()
         }
         else if (betaType_ == "PolakRibiereRestarted")
         {
-            beta = 
+            beta =
             max
             (
-                scalar(0), 
+                scalar(0),
                 globalSum(dx*(dx - dxOld_))/globalSum(dxOld_ * dxOld_)
             );
             if (beta == scalar(0))

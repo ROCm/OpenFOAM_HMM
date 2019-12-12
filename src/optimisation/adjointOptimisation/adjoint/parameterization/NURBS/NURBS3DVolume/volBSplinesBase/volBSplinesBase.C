@@ -204,7 +204,7 @@ Foam::scalar Foam::volBSplinesBase::computeMaxBoundaryDisplacement
     forAll(volume_, iNURB)
     {
         const label nb = volume_[iNURB].getControlPoints().size();
-        vectorField localControlPointsMovement(nb, vector::zero);
+        vectorField localControlPointsMovement(nb, Zero);
 
         // Set localControlPointsMovement
         forAll(localControlPointsMovement, iCPM)
@@ -239,7 +239,7 @@ void Foam::volBSplinesBase::boundControlPointsMovement
     forAll(volume_, iNURB)
     {
         label nb = volume_[iNURB].getControlPoints().size();
-        vectorField localControlPointsMovement(nb, vector::zero);
+        vectorField localControlPointsMovement(nb, Zero);
 
         // set localControlPointsMovement
         forAll (localControlPointsMovement, iCPM)
@@ -271,7 +271,7 @@ void Foam::volBSplinesBase::moveControlPoints
     forAll(volume_, iNURB)
     {
         const label nb = volume_[iNURB].getControlPoints().size();
-        vectorField localControlPointsMovement(nb, vector::zero);
+        vectorField localControlPointsMovement(nb, Zero);
 
         // set localControlPointsMovement
         forAll (localControlPointsMovement, iCPM)
@@ -282,7 +282,7 @@ void Foam::volBSplinesBase::moveControlPoints
 
         const vectorField newCps
         (
-            volume_[iNURB].getControlPoints() 
+            volume_[iNURB].getControlPoints()
           + localControlPointsMovement
         );
 

@@ -62,8 +62,8 @@ void Foam::LBFGS::allocateMatrices()
     label nVars(activeDesignVars_.size());
     for (label i = 0; i < nPrevSteps_; i++)
     {
-        y_.set(i, scalarField(nVars, scalar(0)));
-        s_.set(i, scalarField(nVars, scalar(0)));
+        y_.set(i, scalarField(nVars, Zero));
+        s_.set(i, scalarField(nVars, Zero));
     }
 }
 
@@ -77,10 +77,10 @@ void Foam::LBFGS::pivotFields(PtrList<scalarField>& list, const scalarField& f)
         newOrder[0] = nPrevSteps_ - 1;
         for (label i = 1; i < nPrevSteps_; ++i)
         {
-            newOrder[i] = i - 1;  
+            newOrder[i] = i - 1;
         }
         list.reorder(newOrder);
-        
+
         // Fill in last element with the provided field
         list[nPrevSteps_ - 1] = f;
     }
@@ -93,12 +93,12 @@ void Foam::LBFGS::pivotFields(PtrList<scalarField>& list, const scalarField& f)
 
 void Foam::LBFGS::updateVectors()
 {
-    // Update list of y. Can only be done here since objectiveDerivatives_ 
+    // Update list of y. Can only be done here since objectiveDerivatives_
     // was not known at the end of the previous loop
     scalarField yRecent
         (objectiveDerivatives_ - derivativesOld_, activeDesignVars_);
     pivotFields(y_, yRecent);
-    // Update list of s. 
+    // Update list of s.
     // correction_ holds the previous correction
     scalarField sActive(correctionOld_, activeDesignVars_);
     pivotFields(s_, sActive);
@@ -129,11 +129,11 @@ void Foam::LBFGS::LBFGSUpdate()
     for (label i = nLast; i > -1; --i)
     {
         r[i] = 1./globalSum(y_[i]*s_[i]);
-        a[i] = r[i]*globalSum(s_[i]*q);    
+        a[i] = r[i]*globalSum(s_[i]*q);
         q -= a[i]*y_[i];
     }
 
-    scalar gamma = 
+    scalar gamma =
         globalSum(y_[nLast]*s_[nLast])/globalSum(y_[nLast]*y_[nLast]);
     q *= gamma;
 
@@ -183,7 +183,7 @@ void Foam::LBFGS::readFromDict()
         optMethodIODict_.readEntry("eta", eta_);
         optMethodIODict_.readEntry("correctionOld", correctionOld_);
 
-        correction_ = scalarField(correctionOld_.size(), scalar(0));
+        correction_ = scalarField(correctionOld_.size(), Zero);
     }
 }
 
@@ -230,7 +230,7 @@ Foam::LBFGS::LBFGS
 
     // Read old Hessian, correction and derivatives, if present
     readFromDict();
-};
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

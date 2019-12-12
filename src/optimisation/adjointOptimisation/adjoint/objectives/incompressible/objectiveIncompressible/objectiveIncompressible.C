@@ -439,7 +439,7 @@ void objectiveIncompressible::nullify()
         }
         if (hasdJdTMVar1())
         {
-            dJdTMvar1Ptr_() == 
+            dJdTMvar1Ptr_() ==
                 dimensionedScalar(dJdTMvar1Ptr_().dimensions(), Zero);
         }
         if (hasdJdTMVar2())

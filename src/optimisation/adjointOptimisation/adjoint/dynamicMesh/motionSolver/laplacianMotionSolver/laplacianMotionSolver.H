@@ -102,10 +102,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         laplacianMotionSolver(const laplacianMotionSolver&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const laplacianMotionSolver&) = delete;
 
 public:

@@ -58,10 +58,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         primalSolver(const primalSolver&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const primalSolver&) = delete;
 
 

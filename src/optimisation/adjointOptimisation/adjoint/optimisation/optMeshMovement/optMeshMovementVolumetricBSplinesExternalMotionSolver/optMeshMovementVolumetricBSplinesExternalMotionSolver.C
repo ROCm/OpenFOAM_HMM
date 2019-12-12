@@ -37,7 +37,7 @@ namespace Foam
 {
     defineTypeNameAndDebug
     (
-        optMeshMovementVolumetricBSplinesExternalMotionSolver, 
+        optMeshMovementVolumetricBSplinesExternalMotionSolver,
         0
     );
     addToRunTimeSelectionTable
@@ -131,7 +131,7 @@ optMeshMovementVolumetricBSplinesExternalMotionSolver
         pointMesh::New(mesh),
         dimensionedVector(dimless, Zero)
     ),
-    cpMovement_(volBSplinesBase_.getTotalControlPointsNumber(), vector::zero)
+    cpMovement_(volBSplinesBase_.getTotalControlPointsNumber(), Zero)
 {}
 
 
@@ -146,7 +146,7 @@ void Foam::optMeshMovementVolumetricBSplinesExternalMotionSolver::moveMesh()
     displMethodPtr_->setMotionField(dx_);
 
     // Positions of control points have not changed since only the boundary dx
-    // has been computed. 
+    // has been computed.
     // Use correction to update them
     volBSplinesBase_.moveControlPoints(cpMovement_);
 
@@ -158,7 +158,7 @@ void Foam::optMeshMovementVolumetricBSplinesExternalMotionSolver::moveMesh()
 }
 
 
-Foam::scalar 
+Foam::scalar
 Foam::optMeshMovementVolumetricBSplinesExternalMotionSolver::computeEta
 (
     const scalarField& correction
@@ -180,7 +180,7 @@ Foam::optMeshMovementVolumetricBSplinesExternalMotionSolver::computeEta
 
 
 Foam::labelList
-Foam::optMeshMovementVolumetricBSplinesExternalMotionSolver::getActiveDesignVariables() 
+Foam::optMeshMovementVolumetricBSplinesExternalMotionSolver::getActiveDesignVariables()
 const
 {
     return volBSplinesBase_.getActiveDesignVariables();

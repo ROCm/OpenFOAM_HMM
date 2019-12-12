@@ -62,8 +62,8 @@ void sensitivityVolBSplines::computeObjectiveContributions()
             label nb = boxes[iNURB].getControlPoints().size();
             for (label cpI = 0; cpI < nb; cpI++)
             {
-                vector dSdbSensCP(vector::zero);
-                vector dndbSensCP(vector::zero);
+                vector dSdbSensCP(Zero);
+                vector dndbSensCP(Zero);
                 for (const label patchI : sensitivityPatchIDs_)
                 {
                     tensorField dSdb
@@ -149,14 +149,14 @@ sensitivityVolBSplines::sensitivityVolBSplines
     // No boundary field pointers need to be allocated
     label nCPs = volBSplinesBase_.getTotalControlPointsNumber();
     derivatives_ = scalarField(3*nCPs, Zero);
-    flowSens_ = vectorField(nCPs, vector::zero);
-    dSdbSens_ = vectorField(nCPs, vector::zero);
-    dndbSens_ = vectorField(nCPs, vector::zero);
-    dxdbDirectSens_ = vectorField(nCPs, vector::zero);
+    flowSens_ = vectorField(nCPs, Zero);
+    dSdbSens_ = vectorField(nCPs, Zero);
+    dndbSens_ = vectorField(nCPs, Zero);
+    dxdbDirectSens_ = vectorField(nCPs, Zero);
 
     // Create folder to store sensitivities
     mkDir(derivativesFolder_);
-};
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -164,7 +164,7 @@ sensitivityVolBSplines::sensitivityVolBSplines
 void sensitivityVolBSplines::assembleSensitivities()
 {
     // Assemble the sensitivity map
-    // Solves for the post-processing equations and adds their contribution to 
+    // Solves for the post-processing equations and adds their contribution to
     // the sensitivity map
     surfaceSensitivity_.assembleSensitivities();
 

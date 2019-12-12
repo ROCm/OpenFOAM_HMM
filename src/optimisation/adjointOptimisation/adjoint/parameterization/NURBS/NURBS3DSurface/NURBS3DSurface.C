@@ -179,9 +179,9 @@ void NURBS3DSurface::setEquidistantR
     {
         const scalar& RPrev(R[ptI - 1]);
         scalar& RCurr(R[ptI]);
-        scalar direc(scalar(1));
-        scalar xDiff(scalar(0));
-        scalar delta(scalar(0));
+        scalar direc(1);
+        scalar xDiff(0);
+        scalar delta(0);
         bool overReached(false);
 
         RCurr = RPrev + rLength;
@@ -314,7 +314,7 @@ NURBS3DSurface::NURBS3DSurface
     const word name
 )
 :
-    vectorField (nUPts*nVPts, vector::zero),
+    vectorField (nUPts*nVPts, Zero),
 
     CPs_(CPs),
     u_(nUPts*nVPts, Zero),
@@ -326,7 +326,7 @@ NURBS3DSurface::NURBS3DSurface
     uBasis_(uBasis),
     vBasis_(vBasis),
 
-    givenInitNrm_(vector::zero),
+    givenInitNrm_(Zero),
 
     CPsUCPIs_(0),
     CPsVCPIs_(0),
@@ -352,7 +352,7 @@ NURBS3DSurface::NURBS3DSurface
     const word name
 )
 :
-    vectorField(nUPts*nVPts, vector::zero),
+    vectorField(nUPts*nVPts, Zero),
 
     CPs_(CPs),
     u_(nUPts*nVPts, Zero),
@@ -364,7 +364,7 @@ NURBS3DSurface::NURBS3DSurface
     uBasis_(uBasis),
     vBasis_(vBasis),
 
-    givenInitNrm_(vector::zero),
+    givenInitNrm_(Zero),
 
     CPsUCPIs_(0),
     CPsVCPIs_(0),
@@ -391,7 +391,7 @@ NURBS3DSurface::NURBS3DSurface
     const word name
 )
 :
-    vectorField(nUPts*nVPts, vector::zero),
+    vectorField(nUPts*nVPts, Zero),
 
     CPs_(CPs),
     u_(nUPts*nVPts, Zero),
@@ -403,7 +403,7 @@ NURBS3DSurface::NURBS3DSurface
     uBasis_(nCPsU, uDegree),
     vBasis_(nCPsV, vDegree),
 
-    givenInitNrm_(vector::zero),
+    givenInitNrm_(Zero),
 
     CPsUCPIs_(0),
     CPsVCPIs_(0),
@@ -441,7 +441,7 @@ NURBS3DSurface::NURBS3DSurface
     const word name
 )
 :
-    vectorField(nUPts*nVPts, vector::zero),
+    vectorField(nUPts*nVPts, Zero),
 
     CPs_(CPs),
     u_(nUPts*nVPts, Zero),
@@ -453,7 +453,7 @@ NURBS3DSurface::NURBS3DSurface
     uBasis_(nCPsU, uDegree, knotsU),
     vBasis_(nCPsV, vDegree, knotsV),
 
-    givenInitNrm_(vector::zero),
+    givenInitNrm_(Zero),
 
     CPsUCPIs_(0),
     CPsVCPIs_(0),
@@ -490,7 +490,7 @@ NURBS3DSurface::NURBS3DSurface
     const word name
 )
 :
-    vectorField(nUPts*nVPts, vector::zero),
+    vectorField(nUPts*nVPts, Zero),
 
     CPs_(CPs),
     u_(nUPts*nVPts, Zero),
@@ -502,7 +502,7 @@ NURBS3DSurface::NURBS3DSurface
     uBasis_(nCPsU, uDegree),
     vBasis_(nCPsV, vDegree),
 
-    givenInitNrm_(vector::zero),
+    givenInitNrm_(Zero),
 
     CPsUCPIs_(0),
     CPsVCPIs_(0),
@@ -542,7 +542,7 @@ NURBS3DSurface::NURBS3DSurface
     const word name
 )
 :
-    vectorField(nUPts*nVPts, vector::zero),
+    vectorField(nUPts*nVPts, Zero),
 
     CPs_(CPs),
     u_(nUPts*nVPts, Zero),
@@ -554,7 +554,7 @@ NURBS3DSurface::NURBS3DSurface
     uBasis_(nCPsU, uDegree, knotsU),
     vBasis_(nCPsV, vDegree, knotsV),
 
-    givenInitNrm_(vector::zero),
+    givenInitNrm_(Zero),
 
     CPsUCPIs_(0),
     CPsVCPIs_(0),
@@ -706,7 +706,7 @@ void NURBS3DSurface::invertU()
 
     const label  uNCPs(uBasis_.nCPs());
     const label  vNCPs(vBasis_.nCPs());
-    List<vector> invertedCPs(CPs_.size(), vector::zero);
+    List<vector> invertedCPs(CPs_.size(), Zero);
     List<scalar> invertedWeights(CPs_.size(), Zero);
 
     for (label vCPI = 0; vCPI<vNCPs; vCPI++)
@@ -735,7 +735,7 @@ void NURBS3DSurface::invertV()
 
     const label uNCPs(uBasis_.nCPs());
     const label vNCPs(vBasis_.nCPs());
-    List<vector> invertedCPs(CPs_.size(), vector::zero);
+    List<vector> invertedCPs(CPs_.size(), Zero);
     List<scalar> invertedWeights(CPs_.size(), Zero);
 
     for (label vCPI = 0; vCPI<vNCPs; vCPI++)
@@ -764,7 +764,7 @@ void NURBS3DSurface::invertUV()
 
     const label uNCPs(uBasis_.nCPs());
     const label vNCPs(vBasis_.nCPs());
-    List<vector> invertedCPs(CPs_.size(), vector::zero);
+    List<vector> invertedCPs(CPs_.size(), Zero);
     List<scalar> invertedWeights(CPs_.size(), Zero);
 
     for (label vCPI = 0; vCPI<vNCPs; vCPI++)
@@ -901,7 +901,7 @@ vector NURBS3DSurface::surfacePoint
     }
 
     // Compute the points.
-    vector point(vector::zero);
+    vector point(Zero);
 
     for (label vCPI = 0; vCPI<vNCPs; vCPI++)
     {
@@ -1072,11 +1072,9 @@ tmp<vector2DField> NURBS3DSurface::findClosestSurfacePoint
     const scalar tolerance
 )
 {
-    tmp<vector2DField> tparamCoors
-    (
-        new vector2DField(targetPoints.size(), vector2D::zero)
-    );
-    vector2DField& paramCoors = tparamCoors.ref();
+    auto tparamCoors = tmp<vector2DField>::New(targetPoints.size(), Zero);
+    auto& paramCoors = tparamCoors.ref();
+
     const vectorField& surface(*this);
     label nBoundedPoints(0);
     scalar maxResidual(0);
@@ -1266,7 +1264,7 @@ scalarList NURBS3DSurface::findClosestSurfacePoint
 
 const vector NURBS3DSurface::nrm(scalar u, scalar v)
 {
-    vector surfaceNrm(vector::zero);
+    vector surfaceNrm(Zero);
 
     if (nrmOrientation_ == ALLIGNED)
     {
@@ -1470,7 +1468,7 @@ scalar NURBS3DSurface::lengthU
 {
     // Compute derivatives wrt u for the given u interval.
     const label uLenSize(uIEnd - uIStart + 1);
-    vectorField dxdu(uLenSize, vector::zero);
+    vectorField dxdu(uLenSize, Zero);
     scalar uLength(Zero);
 
     forAll(dxdu, uI)
@@ -1504,7 +1502,7 @@ scalar NURBS3DSurface::lengthU
 ) const
 {
     // Compute derivatives wrt u for the given u interval.
-    vectorField dxdu(nPts, vector::zero);
+    vectorField dxdu(nPts, Zero);
     scalarField localU(nPts, Zero);
     scalar uLength(Zero);
 
@@ -1547,7 +1545,7 @@ scalar NURBS3DSurface::lengthV
 {
     // Compute derivatives wrt v for the given v interval.
     const label vLenSize(vIEnd - vIStart + 1);
-    vectorField dxdv(vLenSize, vector::zero);
+    vectorField dxdv(vLenSize, Zero);
     scalar vLength(Zero);
 
     forAll(dxdv, vI)
@@ -1581,7 +1579,7 @@ scalar NURBS3DSurface::lengthV
 ) const
 {
     // Compute derivatives wrt v for the given v interval.
-    vectorField dxdv(nPts, vector::zero);
+    vectorField dxdv(nPts, Zero);
     scalarField localV(nPts, Zero);
     scalar vLength(Zero);
 
@@ -1627,8 +1625,8 @@ vector NURBS3DSurface::surfaceDerivativeU
     const label vDegree(vBasis_.degree());
     const label uNCPs(uBasis_.nCPs());
     const label vNCPs(vBasis_.nCPs());
-    vector NMWP(vector::zero);
-    vector dNduMWP(vector::zero);
+    vector NMWP(Zero);
+    vector dNduMWP(Zero);
     scalar NMW(Zero);
     scalar dNduMW(Zero);
 
@@ -1669,8 +1667,8 @@ vector NURBS3DSurface::surfaceDerivativeV
     const label vDegree(vBasis_.degree());
     const label uNCPs(uBasis_.nCPs());
     const label vNCPs(vBasis_.nCPs());
-    vector NMWP(vector::zero);
-    vector dMdvNWP(vector::zero);
+    vector NMWP(Zero);
+    vector dMdvNWP(Zero);
     scalar NMW(Zero);
     scalar dMdvNW(Zero);
 
@@ -1711,10 +1709,10 @@ vector NURBS3DSurface::surfaceDerivativeUV
     const label vDegree(vBasis_.degree());
     const label uNCPs(uBasis_.nCPs());
     const label vNCPs(vBasis_.nCPs());
-    vector NMWP(vector::zero);
-    vector dNduMWP(vector::zero);
-    vector dMdvNWP(vector::zero);
-    vector dNMduvWP(vector::zero);
+    vector NMWP(Zero);
+    vector dNduMWP(Zero);
+    vector dMdvNWP(Zero);
+    vector dNMduvWP(Zero);
     scalar NMW(Zero);
     scalar dNduMW(Zero);
     scalar dMdvNW(Zero);
@@ -1773,9 +1771,9 @@ vector NURBS3DSurface::surfaceDerivativeUU
     const label vDegree(vBasis_.degree());
     const label uNCPs(uBasis_.nCPs());
     const label vNCPs(vBasis_.nCPs());
-    vector NMWP(vector::zero);
-    vector dNduMWP(vector::zero);
-    vector d2Ndu2MWP(vector::zero);
+    vector NMWP(Zero);
+    vector dNduMWP(Zero);
+    vector d2Ndu2MWP(Zero);
     scalar NMW(Zero);
     scalar dNduMW(Zero);
     scalar d2Ndu2MW(Zero);
@@ -1829,9 +1827,9 @@ vector NURBS3DSurface::surfaceDerivativeVV
     const label vDegree(vBasis_.degree());
     const label uNCPs(uBasis_.nCPs());
     const label vNCPs(vBasis_.nCPs());
-    vector NMWP(vector::zero);
-    vector dMdvNWP(vector::zero);
-    vector d2Mdv2NWP(vector::zero);
+    vector NMWP(Zero);
+    vector dMdvNWP(Zero);
+    vector d2Mdv2NWP(Zero);
     scalar NMW(Zero);
     scalar dMdvNW(Zero);
     scalar d2Mdv2NW(Zero);
@@ -1931,7 +1929,7 @@ vector NURBS3DSurface::surfaceDerivativeW
     const label vNCPs(vBasis_.nCPs());
     const label uCPI(CPsUCPIs_[CPI]);
     const label vCPI(CPsVCPIs_[CPI]);
-    vector NMWP(vector::zero);
+    vector NMWP(Zero);
     scalar NMW(Zero);
 
     for (label vCPJ=0; vCPJ<vNCPs; vCPJ++)
@@ -1969,8 +1967,8 @@ scalar NURBS3DSurface::lengthDerivativeU
 ) const
 {
     // compute derivatives wrt u for the given u interval
-    vectorField dxdu(nPts, vector::zero);
-    vectorField d2xdu2(nPts, vector::zero);
+    vectorField dxdu(nPts, Zero);
+    vectorField d2xdu2(nPts, Zero);
     scalarField localU(nPts, Zero);
     scalar ulDerivative(Zero);
 
@@ -2007,8 +2005,8 @@ scalar NURBS3DSurface::lengthDerivativeV
 ) const
 {
     // Compute derivatives wrt v for the given v interval.
-    vectorField dxdv(nPts, vector::zero);
-    vectorField d2xdv2(nPts, vector::zero);
+    vectorField dxdv(nPts, Zero);
+    vectorField d2xdv2(nPts, Zero);
     scalarField localV(nPts, Zero);
     scalar vlDerivative(Zero);
 

@@ -90,7 +90,7 @@ void Foam::NURBS3DVolumeCartesian::updateLocalCoordinateSystem
     {
         getParametricCoordinates();
     }
-};
+}
 
 
 // ************************************************************************* //

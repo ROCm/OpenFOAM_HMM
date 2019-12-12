@@ -25,7 +25,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-
 Class
     Foam::Bezier
 
@@ -64,10 +63,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         Bezier(const Bezier&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const Bezier&) = delete;
 
 
@@ -124,7 +123,7 @@ public:
         //- Info about confining movement in all directions
         const boolListList& confineMovement() const;
 
-        //- Compute derivative of the normal vector for a Bezier 
+        //- Compute derivative of the normal vector for a Bezier
         //- parameterized patch
         tmp<tensorField> dndbBasedSensitivities
         (

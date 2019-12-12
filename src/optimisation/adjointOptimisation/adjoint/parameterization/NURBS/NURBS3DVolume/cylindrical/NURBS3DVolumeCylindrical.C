@@ -91,7 +91,7 @@ void Foam::NURBS3DVolumeCylindrical::updateLocalCoordinateSystem
     forAll(cartesianPoints, pI)
     {
         const vector& point = cartesianPoints[pI];
-        vector cylindricalCoors(vector::zero);
+        vector cylindricalCoors(Zero);
 
         scalar R = Foam::sqrt(sqr(point.x()) + sqr(point.y()));
         scalar theta = atan2(point.y(), point.x());
@@ -136,7 +136,7 @@ Foam::NURBS3DVolumeCylindrical::NURBS3DVolumeCylindrical
     {
         getParametricCoordinates();
     }
-};
+}
 
 
 // ************************************************************************* //

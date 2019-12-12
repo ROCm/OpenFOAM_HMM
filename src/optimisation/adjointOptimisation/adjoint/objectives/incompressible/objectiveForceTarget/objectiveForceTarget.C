@@ -91,7 +91,7 @@ void objectiveForceTarget::write() const
                 << setw(width) << "J" << " "
                 << setw(width) << "Force" << " "
                 << setw(width) << "Target" << endl;
-        };
+        }
 
         objFunctionFilePtr_()
             << setw(3) << mesh_.time().value() << " "

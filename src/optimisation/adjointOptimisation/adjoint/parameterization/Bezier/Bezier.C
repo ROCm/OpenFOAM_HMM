@@ -84,7 +84,7 @@ Bezier::Bezier(const fvMesh& mesh, const dictionary& dict)
     confineMovement_[0] = confineXmovement_;
     confineMovement_[1] = confineYmovement_;
     confineMovement_[2] = confineZmovement_;
-    
+
     // Determine active design variables
     label iActive(0);
     for (label iDir = 0; iDir < 3; ++iDir)
@@ -171,8 +171,8 @@ tmp<tensorField> Bezier::dndbBasedSensitivities
     const polyPatch& ppatch = patch.patch();
 
     // Return field
-    tmp<tensorField> tdndbSens(new tensorField(patch.size(), tensor::zero));
-    tensorField& dndbSens = tdndbSens.ref();
+    auto tdndbSens = tmp<tensorField>::New(patch.size(), Zero);
+    auto& dndbSens = tdndbSens.ref();
 
     // Auxilary quantities
     deltaBoundary deltaBoundary(mesh_);
@@ -186,7 +186,7 @@ tmp<tensorField> Bezier::dndbBasedSensitivities
         const pointField facePoints = fGlobal.points(mesh_.points());
 
         // Loop over face points
-        tensorField facePointDerivs(facePoints.size(), tensor::zero);
+        tensorField facePointDerivs(facePoints.size(), Zero);
         forAll(fGlobal, pI)
         {
             facePointDerivs[pI] = dxdbInt[fGlobal[pI]];
@@ -228,14 +228,14 @@ tmp<vectorField> Bezier::dndbBasedSensitivities
     const polyPatch& ppatch = patch.patch();
 
     // Return field
-    tmp<vectorField> tdndbSens(new vectorField(patch.size(), vector::zero));
-    vectorField& dndbSens = tdndbSens.ref();
+    auto tdndbSens = tmp<vectorField>::New(patch.size(), Zero);
+    auto& dndbSens = tdndbSens.ref();
 
     // Auxilary quantities
     deltaBoundary deltaBoundary(mesh_);
     const label patchStart = ppatch.start();
     const tensorField& dxdbInt = dxidXj_[cpI].primitiveField();
-    vectorField dxdbDir(dxdbInt.size(), vector::zero);
+    vectorField dxdbDir(dxdbInt.size(), Zero);
     dxdbDir.replace(0, dxdbInt.component(3*idir));
     dxdbDir.replace(1, dxdbInt.component(3*idir + 1));
     dxdbDir.replace(2, dxdbInt.component(3*idir + 2));
@@ -247,7 +247,7 @@ tmp<vectorField> Bezier::dndbBasedSensitivities
         const pointField facePoints = fGlobal.points(mesh_.points());
 
         // Loop over face points
-        vectorField facePointDerivs(facePoints.size(), vector::zero);
+        vectorField facePointDerivs(facePoints.size(), Zero);
         forAll(fGlobal, pI)
         {
             facePointDerivs[pI] = dxdbDir[fGlobal[pI]];
@@ -287,8 +287,8 @@ tmp<tensorField> Bezier::dxdbFace
     const polyPatch& patch = mesh_.boundary()[patchI].patch();
 
     // Return field
-    tmp<tensorField> tdxdbFace(new tensorField(patch.size(), tensor::zero));
-    tensorField& dxdbFace = tdxdbFace.ref();
+    auto tdxdbFace = tmp<tensorField>::New(patch.size(), Zero);
+    auto& dxdbFace = tdxdbFace.ref();
     if (useChainRule)
     {
         // Auxilary quantities
@@ -303,7 +303,7 @@ tmp<tensorField> Bezier::dxdbFace
             const pointField facePoints = fGlobal.points(mesh_.points());
 
             // Loop over face points
-            tensorField facePointDerivs(facePoints.size(), tensor::zero);
+            tensorField facePointDerivs(facePoints.size(), Zero);
             forAll(fGlobal, pI)
             {
                 facePointDerivs[pI] = dxdbInt[fGlobal[pI]];
@@ -340,8 +340,8 @@ tmp<vectorField> Bezier::dxdbFace
     const polyPatch& patch = mesh_.boundary()[patchI].patch();
 
     // Return field
-    tmp<vectorField> tdxdbFace(new vectorField(patch.size(), vector::zero));
-    vectorField& dxdbFace = tdxdbFace.ref();
+    auto tdxdbFace = tmp<vectorField>::New(patch.size(), Zero);
+    auto& dxdbFace = tdxdbFace.ref();
 
     if (useChainRule)
     {
@@ -349,7 +349,7 @@ tmp<vectorField> Bezier::dxdbFace
         deltaBoundary deltaBoundary(mesh_);
         const label patchStart = patch.start();
         const tensorField& dxdbInt = dxidXj_[cpI].primitiveField();
-        vectorField dxdbDir(dxdbInt.size(), vector::zero);
+        vectorField dxdbDir(dxdbInt.size(), Zero);
         dxdbDir.replace(0, dxdbInt.component(3*idir));
         dxdbDir.replace(1, dxdbInt.component(3*idir + 1));
         dxdbDir.replace(2, dxdbInt.component(3*idir + 2));
@@ -361,7 +361,7 @@ tmp<vectorField> Bezier::dxdbFace
             const pointField facePoints = fGlobal.points(mesh_.points());
 
             // Loop over face points
-            vectorField facePointDerivs(facePoints.size(), vector::zero);
+            vectorField facePointDerivs(facePoints.size(), Zero);
             forAll(fGlobal, pI)
             {
                 facePointDerivs[pI] = dxdbDir[fGlobal[pI]];
@@ -378,7 +378,7 @@ tmp<vectorField> Bezier::dxdbFace
     else
     {
         PrimitivePatchInterpolation<polyPatch> patchInter(patch);
-        vectorField dxdb(patch.nPoints(), vector::zero);
+        vectorField dxdb(patch.nPoints(), Zero);
         dxdb.replace
         (
             idir,
@@ -398,7 +398,7 @@ tensorField Bezier::facePoints_d
 ) const
 {
     const face& faceI(mesh_.faces()[globalFaceI]);
-    tensorField fPoints_d(faceI.size(), tensor::zero);
+    tensorField fPoints_d(faceI.size(), Zero);
     forAll(faceI, fpI)
     {
         fPoints_d[fpI] = dxidXj_[cpI].primitiveField()[faceI[fpI]];
@@ -415,7 +415,7 @@ vectorField Bezier::facePoints_d
 ) const
 {
     const face& faceI(mesh_.faces()[globalFaceI]);
-    vectorField fPoints_d(faceI.size(), vector::zero);
+    vectorField fPoints_d(faceI.size(), Zero);
     forAll(faceI, fpI)
     {
         const tensor& dxdbTensor = dxidXj_[cpI].primitiveField()[faceI[fpI]];

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2004-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -223,7 +223,7 @@ private:
 
     // Private Member Functions
 
-        //- No copy construct and assignment
+        //- No copy construct
         smoothDelta(const smoothDelta&) = delete;
 
         //- No copy assignment

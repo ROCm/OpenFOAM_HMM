@@ -137,7 +137,7 @@ void Foam::simple::solveIter()
     volScalarField& p = incoVars_.pInst();
     volVectorField& U = incoVars_.UInst();
     surfaceScalarField& phi = incoVars_.phiInst();
-    autoPtr<incompressible::turbulenceModel>& turbulence = 
+    autoPtr<incompressible::turbulenceModel>& turbulence =
         incoVars_.turbulence();
     label&  pRefCell  = solverControl_().pRefCell();
     scalar& pRefValue = solverControl_().pRefValue();

@@ -25,7 +25,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-
 Class
     Foam::incompressibleVars
 
@@ -110,7 +109,7 @@ protected:
         //- Update boundary conditions of turbulent fields
         void correctTurbulentBoundaryConditions();
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const incompressibleVars&);
 
 
@@ -132,12 +131,12 @@ public:
         );
 
         //- Copy constructor
-        //  turbulence_ and laminarTransport_ are unitialized since there is 
+        //  turbulence_ and laminarTransport_ are unitialized since there is
         //  no clear way (and possibly no usage) of cloning them.
         //  The resulting incompressibleVars is hence incomplete.
-        //  Additionally, copied fields have the original name, appended with 
-        //  the timeName, to avoid database collisions. 
-        //  To be used as storing space during the solutiuon of the unsteady 
+        //  Additionally, copied fields have the original name, appended with
+        //  the timeName, to avoid database collisions.
+        //  To be used as storing space during the solutiuon of the unsteady
         //  adjoint equations
         incompressibleVars(const incompressibleVars& vs);
 
@@ -249,7 +248,7 @@ public:
             //- Transfer the fields of another variablesSet to this
             virtual void transfer(variablesSet& vars);
 
-            //- Write dummy turbulent fields to allow for continuation in 
+            //- Write dummy turbulent fields to allow for continuation in
             //- multi-point, turbulent runs
             bool write() const;
 };

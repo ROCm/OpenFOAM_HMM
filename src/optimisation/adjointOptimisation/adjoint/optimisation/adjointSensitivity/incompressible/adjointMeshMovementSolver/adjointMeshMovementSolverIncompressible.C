@@ -94,7 +94,7 @@ adjointMeshMovementSolver::adjointMeshMovementSolver
     adjointEikonalSolverPtr_(adjointEikonalSolverPtr)
 {
     read();
-};
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

@@ -25,7 +25,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-
 Class
     Foam::updateMethod
 
@@ -137,10 +136,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         updateMethod(const updateMethod&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const updateMethod&) = delete;
 
 
@@ -206,7 +205,7 @@ public:
        //- Set step for optimisation methods
        void setStep(const scalar eta);
 
-       //- Set globalSum variable. 
+       //- Set globalSum variable.
        //  Should be set by the optimisationType owining the updateMethod
        void setGlobalSum(const bool useGlobalSum);
 

@@ -64,7 +64,7 @@ Foam::volumetricBSplinesMotionSolver::volumetricBSplinesMotionSolver
     controlPointsMovement_
     (
         volBSplinesBase_.getTotalControlPointsNumber(),
-        vector::zero
+        Zero
     )
 {}
 
@@ -82,7 +82,7 @@ Foam::volumetricBSplinesMotionSolver::curPoints() const
     forAll(boxes, iNURB)
     {
         const label nb = boxes[iNURB].getControlPoints().size();
-        vectorField localControlPointsMovement(nb, vector::zero);
+        vectorField localControlPointsMovement(nb, Zero);
 
         forAll(localControlPointsMovement, iCP)
         {

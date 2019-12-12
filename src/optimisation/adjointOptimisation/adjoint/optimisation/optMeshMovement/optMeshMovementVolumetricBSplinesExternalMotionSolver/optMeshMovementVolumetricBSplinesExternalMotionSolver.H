@@ -30,7 +30,7 @@ Class
 
 Description
     Converts NURBS volume control points update to actual mesh movement.
-    Internal points are moved based on a motionSolver other than 
+    Internal points are moved based on a motionSolver other than
     volumetricBSplinesExternalMotionSolver.
 
 SourceFiles
@@ -80,13 +80,13 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         optMeshMovementVolumetricBSplinesExternalMotionSolver
         (
             const optMeshMovementVolumetricBSplinesExternalMotionSolver&
         ) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=
         (
             const optMeshMovementVolumetricBSplinesExternalMotionSolver&

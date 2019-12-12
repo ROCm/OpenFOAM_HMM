@@ -167,7 +167,7 @@ Foam::adjointOutletVelocityFluxFvPatchVectorField::valueInternalCoeffs
     const tmp<scalarField>&
 ) const
 {
-    return tmp<Field<vector>>::New(this->size(), pTraits<vector>::zero);
+    return tmp<Field<vector>>::New(this->size(), Zero);
 }
 
 
@@ -177,7 +177,7 @@ Foam::adjointOutletVelocityFluxFvPatchVectorField::valueBoundaryCoeffs
     const tmp<scalarField>&
 ) const
 {
-    return tmp<Field<vector>>::New(this->size(), pTraits<vector>::zero);
+    return tmp<Field<vector>>::New(this->size(), Zero);
 }
 
 
@@ -185,7 +185,7 @@ Foam::tmp<Foam::Field<Foam::vector>>
 Foam::adjointOutletVelocityFluxFvPatchVectorField::
 gradientBoundaryCoeffs() const
 {
-    return tmp<Field<vector>>::New(this->size(), pTraits<vector>::zero);
+    return tmp<Field<vector>>::New(this->size(), Zero);
 }
 
 
@@ -193,7 +193,7 @@ Foam::tmp<Foam::Field<Foam::vector>>
 Foam::adjointOutletVelocityFluxFvPatchVectorField::
 gradientInternalCoeffs() const
 {
-    return tmp<Field<vector>>::New(this->size(), pTraits<vector>::zero);
+    return tmp<Field<vector>>::New(this->size(), Zero);
 }
 
 

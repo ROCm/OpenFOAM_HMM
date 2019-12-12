@@ -155,7 +155,7 @@ bool Foam::incompressiblePrimalSolver::useSolverNameForFields() const
 const Foam::incompressibleVars&
 Foam::incompressiblePrimalSolver::getIncoVars() const
 {
-    const incompressibleVars& incoVars = 
+    const incompressibleVars& incoVars =
         refCast<incompressibleVars>(const_cast<variablesSet&>(vars_()));
     return incoVars;
 }
@@ -164,7 +164,7 @@ Foam::incompressiblePrimalSolver::getIncoVars() const
 Foam::incompressibleVars&
 Foam::incompressiblePrimalSolver::getIncoVars()
 {
-    incompressibleVars& incoVars = 
+    incompressibleVars& incoVars =
         refCast<incompressibleVars>(const_cast<variablesSet&>(vars_()));
     return incoVars;
 }

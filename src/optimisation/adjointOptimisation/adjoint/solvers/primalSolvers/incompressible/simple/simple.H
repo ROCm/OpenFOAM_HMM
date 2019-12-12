@@ -25,7 +25,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-
 Class
     Foam::simple
 
@@ -59,10 +58,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         simple(const simple&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const simple&) = delete;
 
 
@@ -90,8 +89,8 @@ protected:
 
     //- Protected Member Functions
 
-        //- Allocate incompressibleVars and return reference to be used for 
-        //- convenience in the rest of the class. 
+        //- Allocate incompressibleVars and return reference to be used for
+        //- convenience in the rest of the class.
         incompressibleVars& allocateVars();
 
         //- In case variable names are different than the base ones,

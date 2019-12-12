@@ -136,8 +136,8 @@ Foam::updateMethod::inv(SquareMatrix<scalar> A)
     // Compute inverse of A by successive back-substitutions.
     for (label j = 0; j < n; j++)
     {
-        scalarField rhs(n, 0.);
-        rhs[j] = 1.;
+        scalarField rhs(n, Zero);
+        rhs[j] = scalar(1);
         LUBacksubstitute(A, pivotIndices, rhs);
         // After LUBacksubstitute, rhs contains the j-th column of the inverse
         for (label i = 0; i < n; i++)
@@ -406,10 +406,10 @@ void Foam::updateMethod::write()
     optMethodIODict_.add<scalarField>("correction", correction_, true);
 
     // Write IOdictionary
-    // Always write in ASCII format. 
-    // Even when choosing to write in binary through controlDict, 
-    // the content is written in ASCII format but with a binary header. 
-    // This creates problems when the content is read back in 
+    // Always write in ASCII format.
+    // Even when choosing to write in binary through controlDict,
+    // the content is written in ASCII format but with a binary header.
+    // This creates problems when the content is read back in
     // (e.g. continuation)
     optMethodIODict_.regIOobject::writeObject
     (

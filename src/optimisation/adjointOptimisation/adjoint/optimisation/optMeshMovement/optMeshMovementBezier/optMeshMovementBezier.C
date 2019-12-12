@@ -59,7 +59,7 @@ void Foam::optMeshMovementBezier::computeBoundaryMovement
     const boolList& confineXmovement = Bezier_.confineXmovement();
     const boolList& confineYmovement = Bezier_.confineYmovement();
     const boolList& confineZmovement = Bezier_.confineZmovement();
-    vectorField actualMovement(nBezier, vector::zero);
+    vectorField actualMovement(nBezier, Zero);
     for (label iCP = 0; iCP < nBezier; iCP++)
     {
         // Confine x movement
@@ -112,7 +112,7 @@ Foam::optMeshMovementBezier::optMeshMovementBezier
         pointMesh::New(mesh),
         dimensionedVector(dimless, Zero)
     ),
-    cumulativeChange_(Bezier_.nBezier(), vector::zero)
+    cumulativeChange_(Bezier_.nBezier(), Zero)
 {}
 
 
@@ -131,7 +131,7 @@ void Foam::optMeshMovementBezier::moveMesh()
 }
 
 
-Foam::scalar 
+Foam::scalar
 Foam::optMeshMovementBezier::computeEta(const scalarField& correction)
 {
     // Set unscaled correction

@@ -142,7 +142,7 @@ objective::objective
     meanValueFilePtr_(nullptr)
 {
     makeFolder();
-    // Read integration start and end times, if present. 
+    // Read integration start and end times, if present.
     // For unsteady runs only
     if (dict.found("integrationStartTime"))
     {
@@ -225,9 +225,9 @@ bool objective::readDict(const dictionary& dict)
 scalar objective::JCycle() const
 {
     scalar J(J_);
-    if 
+    if
     (
-        computeMeanFields_ 
+        computeMeanFields_
      || (hasIntegrationStartTime() && hasIntegrationEndTime())
     )
     {
@@ -293,9 +293,9 @@ bool objective::isWithinIntegrationTime() const
     if (hasIntegrationStartTime() && hasIntegrationEndTime())
     {
         const scalar time = mesh_.time().value();
-        return 
+        return
             (
-                time >= integrationStartTimePtr_() 
+                time >= integrationStartTimePtr_()
              && time <= integrationEndTimePtr_()
             );
     }
@@ -313,8 +313,8 @@ void objective::incrementIntegrationTimes(const scalar timeSpan)
 {
     if (hasIntegrationStartTime() && hasIntegrationEndTime())
     {
-        integrationStartTimePtr_() += timeSpan; 
-        integrationEndTimePtr_() += timeSpan; 
+        integrationStartTimePtr_() += timeSpan;
+        integrationEndTimePtr_() += timeSpan;
     }
     else
     {
@@ -576,12 +576,12 @@ void objective::nullify()
         }
         if (hasDivDxDbMult())
         {
-            divDxDbMultPtr_() == 
+            divDxDbMultPtr_() ==
                 dimensionedScalar(divDxDbMultPtr_().dimensions(), Zero);
         }
         if (hasGradDxDbMult())
         {
-            gradDxDbMultPtr_() == 
+            gradDxDbMultPtr_() ==
                 dimensionedTensor(gradDxDbMultPtr_().dimensions(), Zero);
         }
 
@@ -630,9 +630,9 @@ void objective::writeMeanValue() const
     {
         // Write mean value if necessary
         // Covers both steady and unsteady runs
-        if 
+        if
         (
-            computeMeanFields_ 
+            computeMeanFields_
          || (hasIntegrationStartTime() && hasIntegrationEndTime())
         )
         {

@@ -62,13 +62,13 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         boundaryAdjointContribution
         (
             const boundaryAdjointContribution&
         ) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const boundaryAdjointContribution&) = delete;
 
 

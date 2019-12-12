@@ -193,7 +193,7 @@ tmp<volVectorField> variablesSet::autoCreateMeshMovementField
 }
 
 
-void variablesSet::transfer(variablesSet& vars) 
+void variablesSet::transfer(variablesSet& vars)
 {
     // Does nothing in base
 }

@@ -64,7 +64,7 @@ void Foam::elasticityMotionSolver::setBoundaryConditions()
             pointMotionU_.boundaryFieldRef()[patchI];
         if (isA<fixedValuePointPatchVectorField>(pointBCs))
         {
-            auto& fixedValueBCs = 
+            auto& fixedValueBCs =
                 refCast<fixedValuePointPatchVectorField>(pointBCs);
             fixedValueBCs == fixedValueBCs/scalar(nSteps_);
         }
@@ -132,12 +132,7 @@ Foam::elasticityMotionSolver::elasticityMotionSolver
             IOobject::AUTO_WRITE
         ),
         fvMesh_,
-        dimensionedVector
-        (
-            "cellMotionU",
-            pointMotionU_.dimensions(),
-            vector::zero
-        ),
+        dimensionedVector(pointMotionU_.dimensions(), Zero),
         pointMotionU_.boundaryField().types()
     ),
     interpolationPtr_

@@ -53,7 +53,7 @@ Foam::vectorField Foam::optMeshMovementVolumetricBSplines::controlPointMovement
 )
 {
     const label nControlPoints(correction.size()/3);
-    vectorField cpMovement(nControlPoints, vector::zero);
+    vectorField cpMovement(nControlPoints, Zero);
 
     for (label iCP = 0; iCP < nControlPoints; ++iCP)
     {

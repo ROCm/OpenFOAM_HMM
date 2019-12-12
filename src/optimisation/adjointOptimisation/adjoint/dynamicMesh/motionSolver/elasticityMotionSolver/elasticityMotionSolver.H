@@ -25,7 +25,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-
 Class
     Foam::elasticityMotionSolver
 
@@ -75,8 +74,8 @@ protected:
 
     // Protected data
 
-        //- Since the mesh deformation is broken down to multiple steps, 
-        //- mesh points need to be moved here. 
+        //- Since the mesh deformation is broken down to multiple steps,
+        //- mesh points need to be moved here.
         //- Hence, the non-const mesh reference
         fvMesh& fvMesh_;
         pointVectorField pointMotionU_;
@@ -155,8 +154,8 @@ public:
         //- Return point location. Mesh is actually moved in solve()
         virtual tmp<pointField> curPoints() const;
 
-        //- Solve for motion. 
-        //  Does the actual mesh displacement here, since it is broken down 
+        //- Solve for motion.
+        //  Does the actual mesh displacement here, since it is broken down
         //  into multiple steps
         virtual void solve();
 

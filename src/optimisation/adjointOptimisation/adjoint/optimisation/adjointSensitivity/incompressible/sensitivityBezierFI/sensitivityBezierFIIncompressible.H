@@ -25,7 +25,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-
 Class
     Foam::incompressible::sensitivityBezierFI
 
@@ -104,7 +103,7 @@ protected:
 
         tmp<volVectorField> solveMeshMovementEqn
         (
-            const label iCP, 
+            const label iCP,
             const label idir
         );
 
@@ -113,10 +112,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         sensitivityBezierFI(const sensitivityBezierFI&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const sensitivityBezierFI&) = delete;
 
 
@@ -146,7 +145,7 @@ public:
 
     // Member Functions
 
-        //- Assemble sensitivities 
+        //- Assemble sensitivities
         virtual void assembleSensitivities();
 
         //- Zero sensitivity fields and their constituents

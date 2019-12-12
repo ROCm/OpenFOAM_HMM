@@ -41,7 +41,7 @@ namespace Foam
 tensor deltaBoundary::tensorCrossVector(const tensor& T, const vector& v)
 {
     // The correct approach when T is not a diagonal tensor
-    tensor res(tensor::zero);
+    tensor res(Zero);
     vector vec1(T.xx(), T.yx(), T.zx());
     vector res1(vec1 ^ v);
     res.xx() = res1.x(); res.yx() = res1.y(); res.zx() = res1.z();
@@ -74,12 +74,12 @@ vectorField deltaBoundary::makeFaceCentresAndAreas_d
     const pointField& p_d
 )
 {
-    vector fCtrs_d(vector::zero);
-    vector fAreas_d(vector::zero);
-    vector unitVector_d(vector::zero);
+    vector fCtrs_d(Zero);
+    vector fAreas_d(Zero);
+    vector unitVector_d(Zero);
 
     // Container field to return results
-    vectorField deltaVecs(3, vector::zero);
+    vectorField deltaVecs(3, Zero);
 
     label nPoints = p.size();
 
@@ -103,12 +103,12 @@ vectorField deltaBoundary::makeFaceCentresAndAreas_d
     }
     else
     {
-        vector sumN(vector::zero);
-        vector sumN_d(vector::zero);
-        scalar sumA = Zero;
-        scalar sumA_d = Zero;
-        vector sumAc = vector::zero;
-        vector sumAc_d = vector::zero;
+        vector sumN(Zero);
+        vector sumN_d(Zero);
+        scalar sumA(0);
+        scalar sumA_d(0);
+        vector sumAc(Zero);
+        vector sumAc_d(Zero);
 
         point fCentre = p[0];
         point fCentre_d = p_d[0];
@@ -182,12 +182,12 @@ tensorField deltaBoundary::makeFaceCentresAndAreas_d
 )
 {
     label nPoints = p.size();
-    tensor fCtrs_d(tensor::zero);
-    tensor fAreas_d(tensor::zero);
-    tensor unitVector_d(tensor::zero);
+    tensor fCtrs_d(Zero);
+    tensor fAreas_d(Zero);
+    tensor unitVector_d(Zero);
 
     // Container field to return results
-    tensorField deltaVecs(3, tensor::zero);
+    tensorField deltaVecs(3, Zero);
 
     // If the face is a triangle, do a direct calculation for efficiency
     // and to avoid round-off error-related problems
@@ -209,12 +209,12 @@ tensorField deltaBoundary::makeFaceCentresAndAreas_d
     }
     else
     {
-        vector sumN(vector::zero);
-        tensor sumN_d(tensor::zero);
-        scalar sumA = Zero;
-        vector sumA_d(vector::zero);
-        vector sumAc(vector::zero);
-        tensor sumAc_d(tensor::zero);
+        vector sumN(Zero);
+        tensor sumN_d(Zero);
+        scalar sumA(0);
+        vector sumA_d(Zero);
+        vector sumAc(Zero);
+        tensor sumAc_d(Zero);
 
         point fCentre = p[0];
         tensor fCentre_d = p_d[0];
@@ -287,18 +287,18 @@ tmp<tensorField> deltaBoundary::cellCenters_d(const label pointI)
     const labelListList& pointCells(mesh_.pointCells());
     const labelList& pointCellsI(pointCells[pointI]);
     const pointField& points(mesh_.points());
-    tmp<tensorField> tC_d(new tensorField(pointCellsI.size(), tensor::zero));
-    tensorField& C_d(tC_d.ref());
+    auto tC_d = tmp<tensorField>::New(pointCellsI.size(), Zero);
+    auto& C_d = tC_d.ref();
 
     const labelList& pointFaces(mesh_.pointFaces()[pointI]);
-    tensorField Cf_d(pointFaces.size(), tensor::zero);
-    tensorField Sf_d(pointFaces.size(), tensor::zero);
+    tensorField Cf_d(pointFaces.size(), Zero);
+    tensorField Sf_d(pointFaces.size(), Zero);
 
     forAll(pointFaces, pfI)
     {
         const label pointFaceI = pointFaces[pfI];
         const face& faceI = mesh_.faces()[pointFaceI];
-        tensorField p_d(faceI.size(), tensor::zero);
+        tensorField p_d(faceI.size(), Zero);
         forAll(faceI, pI)
         {
             if (faceI[pI] == pointI)
@@ -321,10 +321,10 @@ tmp<tensorField> deltaBoundary::cellCenters_d(const label pointI)
     {
         const label pointCellI = pointCellsI[pcI];
         const cell& cellI(mesh_.cells()[pointCellI]);
-        vectorField fAreas(cellI.size(), vector::zero);
-        vectorField fCtrs(cellI.size(), vector::zero);
-        tensorField fAreas_d(cellI.size(), tensor::zero);
-        tensorField fCtrs_d(cellI.size(), tensor::zero);
+        vectorField fAreas(cellI.size(), Zero);
+        vectorField fCtrs(cellI.size(), Zero);
+        tensorField fAreas_d(cellI.size(), Zero);
+        tensorField fCtrs_d(cellI.size(), Zero);
         forAll(cellI, fI)
         {
             const label globalFaceI = cellI[fI];

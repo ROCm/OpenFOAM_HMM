@@ -162,7 +162,7 @@ bool variablesSet::readFieldOK
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-autoPtr<GeometricField<Type, PatchField, GeoMesh>> 
+autoPtr<GeometricField<Type, PatchField, GeoMesh>>
 variablesSet::allocateRenamedField
 (
     const autoPtr<GeometricField<Type, PatchField, GeoMesh>>& bf
@@ -174,11 +174,11 @@ variablesSet::allocateRenamedField
     {
         const word timeName = bf().mesh().time().timeName();
         returnField.reset
-        ( 
+        (
             new fieldType
             (
-                bf().name() + timeName, 
-                bf() 
+                bf().name() + timeName,
+                bf()
             )
         );
     }
@@ -193,10 +193,10 @@ void variablesSet::swapAndRename
     autoPtr<GeometricField<Type, PatchField, GeoMesh>>& p2
 )
 {
-    // Swaping pointers is OK for the mean flow fields known by the 
-    // variablesSet (and, in essence, by the solver). 
-    // The problem is that turbulence models know references to U and phi 
-    // which cannot be swapped. 
+    // Swaping pointers is OK for the mean flow fields known by the
+    // variablesSet (and, in essence, by the solver).
+    // The problem is that turbulence models know references to U and phi
+    // which cannot be swapped.
     /*
     const word name1 = p1().name();
     const word name2 = p2().name();
@@ -207,7 +207,7 @@ void variablesSet::swapAndRename
     p2().rename(name2);
     */
 
-    // Copy back-up fields to original instead. Slower but there seems to be 
+    // Copy back-up fields to original instead. Slower but there seems to be
     // no other way
     GeometricField<Type, PatchField, GeoMesh> temp("temp", p1());
     p1() == p2();

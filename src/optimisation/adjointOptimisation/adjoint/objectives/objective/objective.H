@@ -25,7 +25,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-
 Class
     Foam::objective
 
@@ -158,10 +157,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         objective(const objective&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const objective&) = delete;
 
         //- Make objective Function Folder
@@ -227,7 +226,7 @@ public:
         //- Return the instantaneous objective function value
         virtual scalar J() = 0;
 
-        //- Return the mean objective function value, if it exists, 
+        //- Return the mean objective function value, if it exists,
         //- otherwise the mean one
         scalar JCycle() const;
 

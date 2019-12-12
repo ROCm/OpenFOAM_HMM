@@ -65,7 +65,7 @@ void Foam::optMeshMovementNULL::moveMesh()
 }
 
 
-Foam::scalar 
+Foam::scalar
 Foam::optMeshMovementNULL::computeEta(const scalarField& correction)
 {
     return scalar(0);

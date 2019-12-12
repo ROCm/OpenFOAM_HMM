@@ -25,7 +25,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-
 Class
     Foam::incompressible::sensitivitySurfacePoints
 
@@ -97,7 +96,7 @@ protected:
         autoPtr<adjointMeshMovementSolver> meshMovementSolver_;
 
         //- The face-based part of the sensitivities
-        //  i.e. terms that multiply dxFace/dxPoint. 
+        //  i.e. terms that multiply dxFace/dxPoint.
         //  Sensitivities DO include locale surface area, to get
         //  the correct weighting from the contributions of various faces.
         //  Normalized at the end.
@@ -114,12 +113,12 @@ protected:
         void read();
 
         //- Add terms related to post-processing PDEs
-        //- (i.e. adjoint Eikonal, adjoint mesh movement) 
+        //- (i.e. adjoint Eikonal, adjoint mesh movement)
         //- and add local face area
         void finaliseFaceMultiplier();
 
-        //- Converts face sensitivities to point sensitivities and adds the 
-        //- ones directly computed in points (i.e. dSf/db and dnf/db). 
+        //- Converts face sensitivities to point sensitivities and adds the
+        //- ones directly computed in points (i.e. dSf/db and dnf/db).
         void finalisePointSensitivities();
 
         //- Construct globally correct point normals and point areas
@@ -137,10 +136,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         sensitivitySurfacePoints(const sensitivitySurfacePoints&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const sensitivitySurfacePoints&) = delete;
 
 
@@ -176,7 +175,7 @@ public:
        //- Accumulate sensitivity integrands
        virtual void accumulateIntegrand(const scalar dt);
 
-       //- Assemble sensitivities 
+       //- Assemble sensitivities
        virtual void assembleSensitivities();
 
        //- Zero sensitivity fields and their constituents

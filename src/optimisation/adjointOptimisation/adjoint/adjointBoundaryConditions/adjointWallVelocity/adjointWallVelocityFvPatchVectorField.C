@@ -193,7 +193,7 @@ void Foam::adjointWallVelocityFvPatchVectorField::updateCoeffs()
 
     // Tangential adjoint velocity in the t1 direction depends on the primal
     // wall function used
-    vectorField Uap_t1(patch().size(), vector::zero);
+    vectorField Uap_t1(patch().size(), Zero);
     typedef Foam::nutUSpaldingWallFunctionFvPatchScalarField
         SAwallFunctionPatchField;
 

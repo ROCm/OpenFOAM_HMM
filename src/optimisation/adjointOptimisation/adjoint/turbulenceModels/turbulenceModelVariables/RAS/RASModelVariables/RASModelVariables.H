@@ -25,7 +25,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-
 Class
     Foam::incompressible::RASModelVariables
 
@@ -115,7 +114,7 @@ private:
     // Private Member Functions
 
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const RASModelVariables&) = delete;
 
 
@@ -150,9 +149,9 @@ public:
         );
 
         //- Copy constructor
-        //  Will allocate new fields (instead of referencing the ones in the 
+        //  Will allocate new fields (instead of referencing the ones in the
         //  turbulence model), so cannot be used directly to access the fields
-        //  of the turbulence model. 
+        //  of the turbulence model.
         //  Mainly used for checkpointing in unsteady adjoint
         RASModelVariables
         (
@@ -160,9 +159,9 @@ public:
         );
 
         //- Clone
-        //  Will allocate new fields (instead of referencing the ones in the 
+        //  Will allocate new fields (instead of referencing the ones in the
         //  turbulence model), so cannot be used directly to access the fields
-        //  of the turbulence model. 
+        //  of the turbulence model.
         //  Mainly used for checkpointing in unsteady adjoint
         autoPtr<RASModelVariables> clone() const;
 

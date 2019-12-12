@@ -149,14 +149,14 @@ void RASModelVariables::allocateMeanFields()
 }
 
 
-RASModelVariables::autoTmp 
+RASModelVariables::autoTmp
 RASModelVariables::cloneAutoTmp(const autoTmp& source) const
 {
     autoTmp returnField(nullptr);
     if (source.valid() && source().valid())
     {
         const volScalarField& sf = source()();
-        DebugInfo 
+        DebugInfo
             << "Cloning " << sf.name() << endl;
         const word timeName = mesh_.time().timeName();
         returnField.reset
@@ -222,7 +222,7 @@ RASModelVariables::RASModelVariables
 (
     const RASModelVariables& rmv
 )
-:    
+:
     mesh_(rmv.mesh_),
     solverControl_(rmv.solverControl_),
     hasTMVar1_(rmv.hasTMVar1_),

@@ -656,7 +656,7 @@ Foam::NURBS3DVolume::NURBS3DVolume
     mapPtr_(nullptr),
     reverseMapPtr_(nullptr),
     parametricCoordinatesPtr_(nullptr),
-    localSystemCoordinates_(mesh_.nPoints(), vector::zero),
+    localSystemCoordinates_(mesh_.nPoints(), Zero),
     confineX1movement_(dict.lookupOrDefault<bool>("confineX1movement", false)),
     confineX2movement_(dict.lookupOrDefault<bool>("confineX2movement", false)),
     confineX3movement_(dict.lookupOrDefault<bool>("confineX3movement", false)),
@@ -737,7 +737,8 @@ Foam::NURBS3DVolume::NURBS3DVolume
         if (cps_.size() != (basisU_.nCPs()*basisV_.nCPs()*basisW_.nCPs()))
         {
             FatalErrorInFunction
-               << "Number of control points does not agree with nCPsU*nCPv*nCPsW"
+               << "Number of control points does not agree with "
+               << "nCPsU*nCPv*nCPsW"
                << exit(FatalError);
         }
     }
@@ -842,7 +843,7 @@ Foam::vector Foam::NURBS3DVolume::volumeDerivativeU
     const label nCPsV = basisV_.nCPs();
     const label nCPsW = basisW_.nCPs();
 
-    vector derivative(vector::zero);
+    vector derivative(Zero);
 
     for (label iCPw = 0; iCPw < nCPsW; ++iCPw)
     {
@@ -878,7 +879,7 @@ Foam::vector Foam::NURBS3DVolume::volumeDerivativeV
     const label nCPsV = basisV_.nCPs();
     const label nCPsW = basisW_.nCPs();
 
-    vector derivative(vector::zero);
+    vector derivative(Zero);
 
     for (label iCPw = 0; iCPw < nCPsW; ++iCPw)
     {
@@ -914,7 +915,7 @@ Foam::vector Foam::NURBS3DVolume::volumeDerivativeW
     const label nCPsV = basisV_.nCPs();
     const label nCPsW = basisW_.nCPs();
 
-    vector derivative(vector::zero);
+    vector derivative(Zero);
 
     for (label iCPw = 0; iCPw < nCPsW; iCPw++)
     {
@@ -948,7 +949,7 @@ Foam::tensor Foam::NURBS3DVolume::JacobianUVW
     vector vDeriv = volumeDerivativeV(u, v, w);
     vector wDeriv = volumeDerivativeW(u, v, w);
 
-    tensor Jacobian(tensor::zero);
+    tensor Jacobian(Zero);
 
     Jacobian[0] = uDeriv.component(0);
     Jacobian[1] = vDeriv.component(0);
@@ -1003,7 +1004,7 @@ Foam::vectorField Foam::NURBS3DVolume::computeControlPointSensitivities
     const labelList& sensitivityPatchIDs
 )
 {
-    vectorField controlPointDerivs(cps_.size(), vector::zero);
+    vectorField controlPointDerivs(cps_.size(), Zero);
 
     // Get parametric coordinates
     const vectorField& parametricCoordinates = getParametricCoordinates();
@@ -1070,7 +1071,7 @@ Foam::vectorField Foam::NURBS3DVolume::computeControlPointSensitivities
 )
 {
     // Return field
-    vectorField controlPointDerivs(cps_.size(), vector::zero);
+    vectorField controlPointDerivs(cps_.size(), Zero);
 
     // Get parametric coordinates
     const vectorField& parametricCoordinates = getParametricCoordinates();
@@ -1094,7 +1095,7 @@ Foam::vectorField Foam::NURBS3DVolume::computeControlPointSensitivities
                 const face& fGlobal = mesh_.faces()[fI + patchStart];
                 const pointField facePoints = fGlobal.points(mesh_.points());
                 // loop over face points
-                tensorField facePointDerivs(facePoints.size(), tensor::zero);
+                tensorField facePointDerivs(facePoints.size(), Zero);
                 forAll(fGlobal, pI)
                 {
                     const label globalIndex = fGlobal[pI]; //global point index
@@ -1142,7 +1143,7 @@ Foam::vector Foam::NURBS3DVolume::computeControlPointSensitivities
 )
 {
     // Return vector
-    vector cpSens(vector::zero);
+    vector cpSens(Zero);
     // Get parametric coordinates
     const vectorField& parametricCoordinates = getParametricCoordinates();
 
@@ -1158,7 +1159,7 @@ Foam::vector Foam::NURBS3DVolume::computeControlPointSensitivities
         const face& fGlobal = mesh_.faces()[fI + patchStart];
         const pointField facePoints = fGlobal.points(mesh_.points());
         // Loop over face points
-        tensorField facePointDerivs(facePoints.size(), tensor::zero);
+        tensorField facePointDerivs(facePoints.size(), Zero);
         forAll(fGlobal, pI)
         {
             const label globalIndex = fGlobal[pI];  //global point index
@@ -1204,7 +1205,7 @@ Foam::tmp<Foam::tensorField> Foam::NURBS3DVolume::dndbBasedSensitivities
     const fvPatch& patch = mesh_.boundary()[patchI];
     const polyPatch& ppatch = patch.patch();
     // Return field
-    tmp<tensorField> tdndbSens(new tensorField(patch.size(), tensor::zero));
+    tmp<tensorField> tdndbSens(new tensorField(patch.size(), Zero));
     tensorField& dndbSens = tdndbSens.ref();
     // Auxilary quantities
     deltaBoundary deltaBoundary(mesh_);
@@ -1220,7 +1221,7 @@ Foam::tmp<Foam::tensorField> Foam::NURBS3DVolume::dndbBasedSensitivities
         const face& fGlobal = mesh_.faces()[fI + patchStart];
         const pointField facePoints = fGlobal.points(mesh_.points());
         // Loop over face points
-        tensorField facePointDerivs(facePoints.size(), tensor::zero);
+        tensorField facePointDerivs(facePoints.size(), Zero);
         forAll(fGlobal, pI)
         {
             const label globalIndex = fGlobal[pI];  //global point index
@@ -1277,8 +1278,8 @@ Foam::tmp<Foam::tensorField> Foam::NURBS3DVolume::patchDxDb
     const labelList& meshPoints = patch.meshPoints();
 
     // Return field
-    tmp<tensorField> tdxdb(new tensorField(patch.nPoints(), tensor::zero));
-    tensorField& dxdb = tdxdb.ref();
+    auto tdxdb = tmp<tensorField>::New(patch.nPoints(), Zero);
+    auto& dxdb = tdxdb.ref();
 
     forAll(meshPoints, pI)
     {
@@ -1316,8 +1317,8 @@ Foam::tmp<Foam::tensorField> Foam::NURBS3DVolume::patchDxDbFace
     const label patchStart = patch.start();
 
     // Return field
-    tmp<tensorField> tdxdb(new tensorField(patch.size(), tensor::zero));
-    tensorField& dxdb = tdxdb.ref();
+    auto tdxdb = tmp<tensorField>::New(patch.size(), Zero);
+    auto& dxdb = tdxdb.ref();
 
     // Mesh differentiation engine
     deltaBoundary deltaBound(mesh_);
@@ -1327,7 +1328,7 @@ Foam::tmp<Foam::tensorField> Foam::NURBS3DVolume::patchDxDbFace
         const face& fGlobal = mesh_.faces()[fI + patchStart];
         const pointField facePoints = fGlobal.points(mesh_.points());
         // Loop over face points
-        tensorField facePointDerivs(facePoints.size(), tensor::zero);
+        tensorField facePointDerivs(facePoints.size(), Zero);
         forAll(fGlobal, pI)
         {
             const label globalIndex = fGlobal[pI];  //global point index
@@ -1374,8 +1375,8 @@ Foam::tmp<Foam::vectorField> Foam::NURBS3DVolume::coordinates
     const label nCPsW = basisW_.nCPs();
 
     const label nPoints = mapPtr_().size();
-    tmp<vectorField> tpoints(new vectorField(nPoints, vector::zero));
-    vectorField& points = tpoints.ref();
+    auto tpoints = tmp<vectorField>::New(nPoints, Zero);
+    auto& points = tpoints.ref();
 
     forAll(points, pI)
     {
@@ -1420,7 +1421,7 @@ Foam::vector Foam::NURBS3DVolume::coordinates
     const scalar v = uVector.y();
     const scalar w = uVector.z();
 
-    vector point(vector::zero);
+    vector point(Zero);
     for (label iCPw = 0; iCPw < nCPsW; iCPw++)
     {
         for (label iCPv = 0; iCPv < nCPsV; iCPv++)
@@ -1787,7 +1788,7 @@ void Foam::NURBS3DVolume::writeCps(const string fileName) const
     const label nCPsU = basisU_.nCPs();
     const label nCPsV = basisV_.nCPs();
 
-    vectorField cpsInCartesian(cps_.size(), vector::zero);
+    vectorField cpsInCartesian(cps_.size(), Zero);
     forAll(cpsInCartesian, cpI)
     {
         cpsInCartesian[cpI] = transformPointToCartesian(cps_[cpI]);
@@ -1843,10 +1844,10 @@ void Foam::NURBS3DVolume::writeCpsInDict() const
         );
 
         cpsDict.add("controlPoints", cps_);
-        // Always write in ASCII format. 
-        // Even when choosing to write in binary through controlDict, 
-        // the content is written in ASCII format but with a binary header. 
-        // This creates problems when the content is read back in 
+        // Always write in ASCII format.
+        // Even when choosing to write in binary through controlDict,
+        // the content is written in ASCII format but with a binary header.
+        // This creates problems when the content is read back in
         // (e.g. continuation)
         cpsDict.regIOobject::writeObject
         (

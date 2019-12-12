@@ -126,7 +126,7 @@ void adjointSensitivity::clearSensitivities()
     derivatives_ = scalar(0);
     if (fieldSensPtr_.valid())
     {
-        fieldSensPtr_().primitiveFieldRef() = scalar(0); 
+        fieldSensPtr_().primitiveFieldRef() = scalar(0);
     }
 }
 

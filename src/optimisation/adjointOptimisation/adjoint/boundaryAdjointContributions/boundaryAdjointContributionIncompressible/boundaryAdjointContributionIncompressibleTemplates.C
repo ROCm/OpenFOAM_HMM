@@ -38,9 +38,8 @@ Foam::boundaryAdjointContributionIncompressible::sumContributions
 )
 {
     // Objective function contribution
-    tmp<Field<returnType>> tdJtotdvar
-        (new Field<returnType>(patch_.size(), pTraits<returnType>::zero));
-    Field<returnType>& dJtotdvar = tdJtotdvar.ref();
+    auto tdJtotdvar = tmp<Field<returnType>>::New(patch_.size(), Zero);
+    auto& dJtotdvar = tdJtotdvar.ref();
 
     // Get weighthed contribution
     for (sourceType& funcI : sourceList)

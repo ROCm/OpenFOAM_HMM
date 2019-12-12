@@ -157,7 +157,7 @@ bool Foam::SIMPLEControlOpt::loop()
         runTime.write();
         solver_.write();
 
-        // Check whether mean fields have not been computed due to an 
+        // Check whether mean fields have not been computed due to an
         // unexpectedly early convergence
         checkMeanSolution();
 

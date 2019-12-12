@@ -110,7 +110,7 @@ void sensitivitySurfacePoints::read()
 void sensitivitySurfacePoints::finaliseFaceMultiplier()
 {
     // Solve extra equations if necessary
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     autoPtr<boundaryVectorField> distanceSensPtr(nullptr);
     if (includeDistance_)
     {
@@ -157,7 +157,7 @@ void sensitivitySurfacePoints::finaliseFaceMultiplier()
         }
 
         // Add local face area
-        //~~~~~~~~~~~~~~~~~~~~ 
+        //~~~~~~~~~~~~~~~~~~~~
         // Sensitivities DO include locale surface area, to get
         // the correct weighting from the contributions of various faces.
         // Normalized at the end.
@@ -216,7 +216,7 @@ void sensitivitySurfacePoints::finalisePointSensitivities()
 
                 // Point coordinates. All indices in global numbering
                 pointField p(faceI.points(mesh_.points()));
-                tensorField p_d(faceI.size(), tensor::zero);
+                tensorField p_d(faceI.size(), Zero);
                 forAll(faceI, facePointI)
                 {
                     if (faceI[facePointI] == meshPoints[ppI])
@@ -378,7 +378,7 @@ sensitivitySurfacePoints::sensitivitySurfacePoints
 
     // Derivatives for all (x,y,z) components of the displacement are kept
     derivatives_ = scalarField(3*nTotalPoints, Zero);
-};
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -492,7 +492,7 @@ void sensitivitySurfacePoints::accumulateIntegrand(const scalar dt)
         << "    Calculating adjoint sensitivity. " << endl;
 
     // The face-based part of the sensitivities, i.e. terms that multiply
-    // dxFace/dxPoint. 
+    // dxFace/dxPoint.
     for (const label patchI : sensitivityPatchIDs_)
     {
         const fvPatch& patch = mesh_.boundary()[patchI];
@@ -517,7 +517,7 @@ void sensitivitySurfacePoints::accumulateIntegrand(const scalar dt)
           * nf
         );
 
-        vectorField gradStressTerm(patch.size(), vector::zero);
+        vectorField gradStressTerm(patch.size(), Zero);
         if (includeGradStressTerm_)
         {
             // Terms corresponding to contributions from converting delta to
@@ -561,7 +561,7 @@ void sensitivitySurfacePoints::accumulateIntegrand(const scalar dt)
         }
 
         // Adjoint pressure terms
-        vectorField pressureTerm(patch.size(), vector::zero);
+        vectorField pressureTerm(patch.size(), Zero);
         if (includePressureTerm_)
         {
             pressureTerm =
@@ -572,7 +572,7 @@ void sensitivitySurfacePoints::accumulateIntegrand(const scalar dt)
            *nf;
         }
 
-        vectorField dxdbMultiplierTot(patch.size(), vector::zero);
+        vectorField dxdbMultiplierTot(patch.size(), Zero);
         if (includeObjective_)
         {
             // Term from objectives multiplying dxdb
@@ -584,9 +584,9 @@ void sensitivitySurfacePoints::accumulateIntegrand(const scalar dt)
                     wei*functions[funcI].dxdbDirectMultiplier(patchI);
 
                 // Fill in multipliers of d(Sf)/db and d(nf)/db
-                dSfdbMult_()[patchI] += 
+                dSfdbMult_()[patchI] +=
                     wei*dt*functions[funcI].dSdbMultiplier(patchI);
-                dnfdbMult_()[patchI] += 
+                dnfdbMult_()[patchI] +=
                     wei*dt*functions[funcI].dndbMultiplier(patchI);
             }
         }
@@ -620,13 +620,13 @@ void sensitivitySurfacePoints::assembleSensitivities()
     // belonging to multiple patches or patch-processorPatch intersections.
     // Keeping a mesh-wide field to allow easy reduction using syncTools.
     // A bit expensive? Better way?
-    vectorField pointNormals(mesh_.nPoints(), vector::zero);
+    vectorField pointNormals(mesh_.nPoints(), Zero);
     scalarField pointMagSf(mesh_.nPoints(), Zero);
     constructGlobalPointNormalsAndAreas(pointNormals, pointMagSf);
 
     // Do parallel communications to avoid wrong values at processor boundaries
     // Global field for accumulation
-    vectorField pointSensGlobal(mesh_.nPoints(), vector::zero);
+    vectorField pointSensGlobal(mesh_.nPoints(), Zero);
     for (const label patchI : sensitivityPatchIDs_)
     {
         const labelList& meshPoints = mesh_.boundaryMesh()[patchI].meshPoints();
@@ -736,7 +736,7 @@ void sensitivitySurfacePoints::clearSensitivities()
         meshMovementSolver_->reset();
     }
 
-    // Reset local fields to zero 
+    // Reset local fields to zero
     wallFaceSens_() = vector::zero;
     dSfdbMult_() = vector::zero;
     dnfdbMult_() = vector::zero;

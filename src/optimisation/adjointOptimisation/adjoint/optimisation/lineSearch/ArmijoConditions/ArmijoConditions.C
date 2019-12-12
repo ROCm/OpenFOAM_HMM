@@ -48,7 +48,7 @@ namespace Foam
 
 Foam::ArmijoConditions::ArmijoConditions
 (
-    const dictionary& dict, 
+    const dictionary& dict,
     const Time& time
 )
 :

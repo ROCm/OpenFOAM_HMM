@@ -25,7 +25,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-
 Class
     Foam::incompressible::adjointSensitivity
 
@@ -94,10 +93,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         adjointSensitivity(const adjointSensitivity&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const adjointSensitivity&) = delete;
 
 
@@ -170,7 +169,7 @@ public:
        //  Corresponds to the flow and adjoint part of the sensitivities
        virtual void accumulateIntegrand(const scalar dt) = 0;
 
-       //- Assemble sensitivities 
+       //- Assemble sensitivities
        //  Adds the geometric part of the sensitivities
        virtual void assembleSensitivities() = 0;
 

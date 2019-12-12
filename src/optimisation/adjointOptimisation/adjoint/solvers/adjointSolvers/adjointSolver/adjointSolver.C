@@ -115,7 +115,7 @@ const Foam::primalSolver& Foam::adjointSolver::getPrimalSolver() const
 
 Foam::primalSolver& Foam::adjointSolver::getPrimalSolver()
 {
-    return 
+    return
         const_cast<primalSolver&>
         (
             mesh_.lookupObject<primalSolver>(primalSolverName_)

@@ -25,12 +25,11 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-
 Class
     Foam::LBFGS
 
 Description
-    The quasi-Newton Limited-memory BFGS formula. Keeps nPrevSteps_ of the 
+    The quasi-Newton Limited-memory BFGS formula. Keeps nPrevSteps_ of the
     y and s vectors and approximates the inverse areas through them.
     Values of 3 < nPrevSteps_ < 20 are suggested.
 
@@ -62,10 +61,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         LBFGS(const LBFGS&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const LBFGS&) = delete;
 
 
@@ -103,7 +102,7 @@ protected:
         //- Allocate matrices in the first optimisation cycle
         void allocateMatrices();
 
-        //- Move pointers in PtrList to the left and replace last element with 
+        //- Move pointers in PtrList to the left and replace last element with
         //- given field
         void pivotFields(PtrList<scalarField>& list, const scalarField& f);
 

@@ -25,7 +25,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-
 Class
     Foam::ArmijoConditions
 
@@ -59,7 +58,7 @@ protected:
 
     // Protected data
 
-        //- Multiplier of the merit function reduction computed using 
+        //- Multiplier of the merit function reduction computed using
         //- a first-order Taylor expansion
         scalar c1_;
 
@@ -68,10 +67,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         ArmijoConditions(const ArmijoConditions&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const ArmijoConditions&) = delete;
 
 

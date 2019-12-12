@@ -101,7 +101,7 @@ NURBSbasis::NURBSbasis
 :
     nCPs_(nCPs),
     basisDegree_(degree),
-    knots_((nCPs_ + basisDegree_ + 1), scalar(0))
+    knots_((nCPs_ + basisDegree_ + 1), Zero)
 {
     computeKnots();
 }
@@ -114,7 +114,7 @@ NURBSbasis::NURBSbasis
 :
     nCPs_(dict.get<label>("nCPs")),
     basisDegree_(dict.get<label>("basisDegree")),
-    knots_((nCPs_ + basisDegree_ + 1), scalar(0))
+    knots_((nCPs_ + basisDegree_ + 1), Zero)
 {
     computeKnots();
 }
@@ -143,7 +143,7 @@ scalar NURBSbasis::basisValue
     const scalar u
 ) const
 {
-    scalar value(scalar(0));
+    scalar value(0);
 
     if (checkRange(u, iCP, degree))
     {
@@ -196,7 +196,7 @@ scalar NURBSbasis::basisDerivativeU
     // Zero  basis function has a zero derivative,
     // irrespective of the knot span: ignore that case
     // - else, call recursively until reaching zero degree
-    scalar derivative(scalar(0));
+    scalar derivative(0);
 
     if ((degree != 0) && checkRange(u, iCP, degree))
     {
@@ -237,7 +237,7 @@ scalar NURBSbasis::basisDerivativeUU
     // Zero  basis function has a zero derivative,
     // irrespective of the knot span: ignore that case
     // - else, call recursively until reaching zero degree
-    scalar derivative(scalar(0));
+    scalar derivative(0);
 
     if ((degree != 0) && checkRange(u, iCP, degree))
     {
@@ -300,7 +300,7 @@ label NURBSbasis::insertKnot
 )
 {
     // Find the index of insertion, accounting for uBar=1.
-    scalarList newKnots((knots_.size()+1), scalar(0));
+    scalarList newKnots((knots_.size()+1), Zero);
     label kInsert(-1);
 
     for (label kI = 0; kI < (knots_.size()-1); kI++)

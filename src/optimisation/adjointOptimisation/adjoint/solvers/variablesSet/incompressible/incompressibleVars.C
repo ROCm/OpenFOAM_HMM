@@ -530,7 +530,7 @@ void incompressibleVars::transfer(variablesSet& vars)
     swapAndRename(UPtr_, incoVars.UPtr_);
     swapAndRename(phiPtr_, incoVars.phiPtr_);
 
-    // Transfer turbulent fields. Copies fields since original fields are 
+    // Transfer turbulent fields. Copies fields since original fields are
     // not owned by RASModelVariables but from the turbulence model
     RASModelVariables_->transfer(incoVars.RASModelVariables()());
 }

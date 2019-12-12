@@ -68,10 +68,10 @@ private:
         //- Create IO object if dictionary is present
         IOobject createIOobject(const fvMesh& mesh) const;
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         IOoptionListAdjoint(const IOoptionListAdjoint&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const IOoptionListAdjoint&) = delete;
 
 

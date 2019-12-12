@@ -77,10 +77,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         displacementMethod(const displacementMethod&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const displacementMethod&) = delete;
 
 

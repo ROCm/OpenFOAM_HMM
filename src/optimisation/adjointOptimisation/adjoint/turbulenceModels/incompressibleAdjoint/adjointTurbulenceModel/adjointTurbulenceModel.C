@@ -104,11 +104,12 @@ autoPtr<adjointTurbulenceModel> adjointTurbulenceModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << modelType << nl << nl
-            << "Valid adjointTurbulenceModel types:" << endl
-            << adjointTurbulenceModelConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "adjointTurbulenceModel",
+            modelType,
+            *adjointTurbulenceModelConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<adjointTurbulenceModel>

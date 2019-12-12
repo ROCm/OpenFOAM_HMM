@@ -25,7 +25,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-
 Class
     Foam::variablesSet
 
@@ -54,10 +53,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         variablesSet(const variablesSet&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const variablesSet&) = delete;
 
         //- Add the solverName to every patch entry read from the boundaryField
@@ -100,7 +99,7 @@ protected:
         bool useSolverNameForFields_;
 
 
-    // Protected Member Functions 
+    // Protected Member Functions
 
         template<class Type, template<class> class PatchField, class GeoMesh>
         autoPtr<GeometricField<Type, PatchField, GeoMesh>> allocateRenamedField
@@ -112,7 +111,7 @@ protected:
         template<class Type, template<class> class PatchField, class GeoMesh>
         void swapAndRename
         (
-            autoPtr<GeometricField<Type, PatchField, GeoMesh>>& p1, 
+            autoPtr<GeometricField<Type, PatchField, GeoMesh>>& p1,
             autoPtr<GeometricField<Type, PatchField, GeoMesh>>& p2
         );
 

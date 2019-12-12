@@ -156,7 +156,7 @@ Foam::shapeSensitivitiesBase::shapeSensitivitiesBase
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::labelHashSet& 
+const Foam::labelHashSet&
 Foam::shapeSensitivitiesBase::sensitivityPatchIDs() const
 {
     return sensitivityPatchIDs_;
@@ -226,7 +226,7 @@ void Foam::shapeSensitivitiesBase::setSuffix(const word& suffix)
 }
 
 
-Foam::tmp<Foam::volVectorField> 
+Foam::tmp<Foam::volVectorField>
 Foam::shapeSensitivitiesBase::getWallFaceSensVec()
 {
     if (wallFaceSensVecPtr_.valid())
@@ -257,7 +257,7 @@ Foam::shapeSensitivitiesBase::getWallFaceSensVec()
 }
 
 
-Foam::tmp<Foam::volScalarField> 
+Foam::tmp<Foam::volScalarField>
 Foam::shapeSensitivitiesBase::getWallFaceSensNormal()
 {
     if (wallFaceSensNormalPtr_.valid())
@@ -319,7 +319,7 @@ Foam::shapeSensitivitiesBase::getWallFaceSensNormalVec()
 }
 
 
-Foam::tmp<Foam::pointVectorField> 
+Foam::tmp<Foam::pointVectorField>
 Foam::shapeSensitivitiesBase::getWallPointSensVec()
 {
     tmp<volVectorField> tWallFaceSensVec = getWallFaceSensVec();
@@ -329,7 +329,7 @@ Foam::shapeSensitivitiesBase::getWallPointSensVec()
 }
 
 
-Foam::tmp<Foam::pointScalarField> 
+Foam::tmp<Foam::pointScalarField>
 Foam::shapeSensitivitiesBase::getWallPointSensNormal()
 {
     tmp<volScalarField> tWallFaceSensNormal = getWallFaceSensNormal();

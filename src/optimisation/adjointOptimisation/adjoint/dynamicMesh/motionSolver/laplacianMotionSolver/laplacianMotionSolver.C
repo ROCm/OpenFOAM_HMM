@@ -105,12 +105,7 @@ Foam::laplacianMotionSolver::laplacianMotionSolver
             IOobject::AUTO_WRITE
         ),
         fvMesh_,
-        dimensionedVector
-        (
-            "cellMotionU",
-            pointMotionU_.dimensions(),
-            vector::zero
-        ),
+        dimensionedVector(pointMotionU_.dimensions(), Zero),
         pointMotionU_.boundaryField().types()
     ),
     interpolationPtr_

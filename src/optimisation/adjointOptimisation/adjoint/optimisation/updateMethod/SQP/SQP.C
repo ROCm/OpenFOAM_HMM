@@ -66,11 +66,7 @@ void Foam::SQP::allocateMatrices()
     }
 
     // Set previous Hessian to be a diagonal matrix
-    SquareMatrix<scalar> temp(activeDesignVars_.size(), Zero);
-    forAll(activeDesignVars_, i)
-    {
-        temp[i][i] = 1.;
-    };
+    SquareMatrix<scalar> temp(activeDesignVars_.size(), I);
 
     // Allocate correct size and content to Hessian matrices
     // Has a max. capability of approximately 34000 variables.
@@ -130,7 +126,7 @@ void Foam::SQP::updateHessian()
             << " y*s is below threshold. Using damped form" << endl;
         theta = (1 - dumpingThreshold_)*sBs/(sBs - ys);
     }
-    scalarField r(theta*y + (1. - theta)*rightMult(HessianOld_, s));
+    scalarField r(theta*y + (scalar(1) - theta)*rightMult(HessianOld_, s));
     DebugInfo
         << "Unmodified Hessian curvature index " << ys << endl;
     DebugInfo
@@ -264,7 +260,7 @@ void Foam::SQP::readFromDict()
         );
         optMethodIODict_.readEntry
         (
-            "constraintDerivativesOld", 
+            "constraintDerivativesOld",
             constraintDerivativesOld_
         );
         optMethodIODict_.readEntry("correctionOld", correctionOld_);
@@ -272,7 +268,7 @@ void Foam::SQP::readFromDict()
         optMethodIODict_.readEntry("counter", counter_);
         optMethodIODict_.readEntry("eta", eta_);
 
-        correction_ = scalarField(correctionOld_.size(), scalar(0));
+        correction_ = scalarField(correctionOld_.size(), Zero);
     }
 }
 
@@ -285,7 +281,7 @@ Foam::SQP::SQP(const fvMesh& mesh, const dictionary& dict)
 
     etaHessian_
     (
-        coeffsDict().lookupOrDefault<scalar>("etaHessian", 1.)
+        coeffsDict().lookupOrDefault<scalar>("etaHessian", 1)
     ),
     activeDesignVars_(0),
     scaleFirstHessian_
@@ -331,7 +327,7 @@ Foam::SQP::SQP(const fvMesh& mesh, const dictionary& dict)
 
     // Read old hessian, correction and derivatives, if present
     readFromDict();
-};
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

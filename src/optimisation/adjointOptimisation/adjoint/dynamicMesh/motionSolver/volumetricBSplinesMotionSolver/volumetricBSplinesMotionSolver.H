@@ -82,13 +82,13 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         volumetricBSplinesMotionSolver
         (
             const volumetricBSplinesMotionSolver&
         ) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const volumetricBSplinesMotionSolver&) = delete;
 
 

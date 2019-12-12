@@ -51,8 +51,8 @@ pT deltaBoundary::makeCellCentres_d
 
     // First estimate the approximate cell centre as the average of
     // face centres
-    vector cEst(vector::zero);
-    vector cellCtrs(vector::zero);
+    vector cEst(Zero);
+    vector cellCtrs(Zero);
     scalar cellVols(Zero);
     pT cEst_d(pTraits<pT>::zero);
     pT cellCtrs_d(pTraits<pT>::zero);

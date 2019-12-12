@@ -37,11 +37,11 @@ Description
         For a short introduction to a volumetric B-Splines morpher and its use
         in shape optimisation
 
-            Papoutsis-Kiachagias, E., Magoulas, N., Mueller, J., 
+            Papoutsis-Kiachagias, E., Magoulas, N., Mueller, J.,
             Othmer, C., & Giannakoglou, K. (2015).
             Noise reduction in car aerodynamics using a surrogate objective
             function and the continuous adjoint method with wall functions.
-            Computers & Fluids, 122, 223–232. 
+            Computers & Fluids, 122, 223-232.
             http://doi.org/10.1016/j.compfluid.2015.09.002
     \endverbatim
 

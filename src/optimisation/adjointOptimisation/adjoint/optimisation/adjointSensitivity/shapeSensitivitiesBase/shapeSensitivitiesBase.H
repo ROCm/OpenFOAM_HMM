@@ -25,7 +25,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-
 Class
     Foam::incompressible::shapeSensitivitiesBase
 
@@ -144,10 +143,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         shapeSensitivitiesBase(const shapeSensitivitiesBase&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const shapeSensitivitiesBase&) = delete;
 
 
@@ -186,7 +185,7 @@ public:
         //  If valid, copies boundaryFields to volFields and writes them.
         void write();
 
-        //- Set suffix 
+        //- Set suffix
         void setSuffix(const word& suffix);
 
         //- Get wall face sensitivity vectors field

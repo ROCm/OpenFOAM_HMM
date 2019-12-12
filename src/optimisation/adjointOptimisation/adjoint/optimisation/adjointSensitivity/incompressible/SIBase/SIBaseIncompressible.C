@@ -51,8 +51,8 @@ void SIBase::read()
     includeObjective_ =
         dict().lookupOrDefault<bool>("includeObjectiveContribution", true);
 
-    // If includeObjective is set to true both here and in the surface 
-    // sensitivities, set the one in the latter to false to avoid double 
+    // If includeObjective is set to true both here and in the surface
+    // sensitivities, set the one in the latter to false to avoid double
     // contributions
     bool surfSensIncludeObjective(surfaceSensitivity_.getIncludeObjective());
     if (includeObjective_ && surfSensIncludeObjective)
@@ -96,9 +96,9 @@ SIBase::SIBase
     surfaceSensitivity_
     (
         mesh,
-        // Ideally, subOrEmptyDict would be used. 
+        // Ideally, subOrEmptyDict would be used.
         // Since we need a recursive search in shapeSensitivitiesBase though
-        // and the dict returned by subOrEmptyDict (if found) 
+        // and the dict returned by subOrEmptyDict (if found)
         // does not know its parent, optionalSubDict is used
         dict.optionalSubDict("surfaceSensitivities"),
         primalVars,
@@ -112,7 +112,7 @@ SIBase::SIBase
     includeObjective_(true)
 {
     read();
-};
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -153,7 +153,7 @@ void SIBase::accumulateIntegrand(const scalar dt)
                 const scalar wei = func.weight();
                 dSfdbMult_()[patchI] += wei*func.dSdbMultiplier(patchI)*dt;
                 dnfdbMult_()[patchI] += wei*func.dndbMultiplier(patchI)*magSfDt;
-                dxdbDirectMult_()[patchI] += 
+                dxdbDirectMult_()[patchI] +=
                     wei*func.dxdbDirectMultiplier(patchI)*magSfDt;
             }
         }
@@ -167,7 +167,7 @@ void SIBase::clearSensitivities()
     dSfdbMult_() = vector::zero;
     dnfdbMult_() = vector::zero;
     dxdbDirectMult_() = vector::zero;
-    
+
     adjointSensitivity::clearSensitivities();
     shapeSensitivitiesBase::clear();
 }

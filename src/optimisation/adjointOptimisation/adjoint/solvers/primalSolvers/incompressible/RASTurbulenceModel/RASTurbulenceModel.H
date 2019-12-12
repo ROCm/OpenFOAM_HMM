@@ -25,7 +25,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-
 Class
     Foam::RASTurbulenceModel
 
@@ -57,10 +56,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         RASTurbulenceModel(const RASTurbulenceModel&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const RASTurbulenceModel&) = delete;
 
 
@@ -78,8 +77,8 @@ protected:
 
     //- Protected Member Functions
 
-        //- Allocate incompressibleVars and return reference to be used for 
-        //- convenience in the rest of the class. 
+        //- Allocate incompressibleVars and return reference to be used for
+        //- convenience in the rest of the class.
         incompressibleVars& allocateVars();
 
 

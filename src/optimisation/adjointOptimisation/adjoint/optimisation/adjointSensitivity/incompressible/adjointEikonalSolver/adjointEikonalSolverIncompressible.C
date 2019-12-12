@@ -157,7 +157,7 @@ adjointEikonalSolver::adjointEikonalSolver
     distanceSensPtr_(createZeroBoundaryPtr<vector>(mesh_))
 {
     read();
-};
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

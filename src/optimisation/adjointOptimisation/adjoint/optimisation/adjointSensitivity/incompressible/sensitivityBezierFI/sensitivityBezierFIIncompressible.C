@@ -57,7 +57,7 @@ void sensitivityBezierFI::read()
     meshMovementIters_ = dxdbDict.lookupOrDefault<label>("iters", 1000);
     meshMovementResidualLimit_ =
         dxdbDict.lookupOrDefault<scalar>("tolerance", 1.e-07);
-    
+
     // Read variables related to the adjoint eikonal solver
     FIBase::read();
 }
@@ -166,7 +166,7 @@ sensitivityBezierFI::sensitivityBezierFI
     derivatives_ = scalarField(3*Bezier_.nBezier(), Zero),
     // Create folder to store sensitivities
     mkDir(derivativesFolder_);
-};
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -247,7 +247,7 @@ void sensitivityBezierFI::assembleSensitivities()
                 tmp<vectorField> tdxdbFace =
                     Bezier_.dxdbFace(patchI, iCP, idir);
                 const vectorField& dxdbFace = tdxdbFace();
-                dxdbDirectSens_[iDV] += 
+                dxdbDirectSens_[iDV] +=
                     gSum(dxdbDirectMult_()[patchI] & dxdbFace);
             }
 

@@ -25,7 +25,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-
 Class
     Foam::incompressible::FIBase
 
@@ -66,13 +65,13 @@ protected:
     // Protected data
 
         //- grad(dx/db) multiplier
-        volTensorField gradDxDbMult_; 
+        volTensorField gradDxDbMult_;
 
         //- div(dx/db) multiplier
-        scalarField divDxDbMult_; 
+        scalarField divDxDbMult_;
 
         //- dx/db multiplier coming from fvOptions
-        vectorField optionsDxDbMult_; 
+        vectorField optionsDxDbMult_;
 
         //- Fields related to direct sensitivities
         autoPtr<boundaryVectorField> dSfdbMult_;
@@ -96,10 +95,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         FIBase(const FIBase&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const FIBase&) = delete;
 
 
@@ -131,11 +130,11 @@ public:
 
         //- Read dict if changed
         virtual bool readDict(const dictionary& dict);
- 
+
         //- Accumulate sensitivity integrands
         virtual void accumulateIntegrand(const scalar dt);
 
-        //- Assemble sensitivities 
+        //- Assemble sensitivities
         virtual void assembleSensitivities() = 0;
 
         //- Zero sensitivity fields and their constituents

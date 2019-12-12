@@ -59,11 +59,7 @@ void Foam::DBFGS::allocateMatrices()
     }
 
     // Set previous Hessian to be a diagonal matrix
-    SquareMatrix<scalar> temp(activeDesignVars_.size(), Zero);
-    forAll(activeDesignVars_, i)
-    {
-        temp[i][i] = 1.;
-    };
+    SquareMatrix<scalar> temp(activeDesignVars_.size(), I);
 
     // Allocate correct size and content to Hessian matrices
     // has a max. capability of approximately 34000 variables.
@@ -100,13 +96,13 @@ void Foam::DBFGS::updateHessian()
     {
         WarningInFunction
             << " y*s is below threshold. Using damped form" << endl;
-        theta = (1.-gamma_)*sBs/(sBs - ys);
+        theta = (scalar(1)-gamma_)*sBs/(sBs - ys);
     }
 
     DebugInfo
         << "Hessian curvature index " << ys << endl;
 
-    scalarField r(theta*y + (1.-theta)*rightMult(HessianOld_, s));
+    scalarField r(theta*y + (scalar(1)-theta)*rightMult(HessianOld_, s));
 
     // Construct the inverse Hessian
     Hessian_ =
@@ -183,7 +179,7 @@ Foam::DBFGS::DBFGS
     // Construct null matrix since we dont know the dimension yet
     etaHessian_
     (
-        coeffsDict().lookupOrDefault<scalar>("etaHessian", 1.)
+        coeffsDict().lookupOrDefault<scalar>("etaHessian", 1)
     ),
     nSteepestDescent_
     (
@@ -196,7 +192,7 @@ Foam::DBFGS::DBFGS
     ),
     curvatureThreshold_
     (
-        coeffsDict().lookupOrDefault<scalar>("curvatureThreshold", 1.e-10)
+        coeffsDict().lookupOrDefault<scalar>("curvatureThreshold", 1e-10)
     ),
     Hessian_(),
     HessianOld_(),
@@ -219,7 +215,7 @@ Foam::DBFGS::DBFGS
 
     // read old hessian, correction and derivatives, if present
     readFromDict();
-};
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

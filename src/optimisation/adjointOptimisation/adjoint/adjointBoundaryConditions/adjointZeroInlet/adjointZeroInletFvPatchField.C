@@ -100,7 +100,7 @@ Foam::adjointZeroInletFvPatchField<Type>::valueBoundaryCoeffs
     const tmp<scalarField>&
 ) const
 {
-    return tmp<Field<Type>>::New(this->size(), pTraits<Type>::zero);
+    return tmp<Field<Type>>::New(this->size(), Zero);
 }
 
 

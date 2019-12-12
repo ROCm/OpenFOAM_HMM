@@ -25,7 +25,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-
 \*---------------------------------------------------------------------------*/
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -36,7 +35,7 @@ inline Foam::pointVectorField& Foam::elasticityMotionSolver::pointMotionU()
 }
 
 
-inline const Foam::pointVectorField& 
+inline const Foam::pointVectorField&
 Foam::elasticityMotionSolver::pointMotionU() const
 {
     return pointMotionU_;
@@ -49,7 +48,7 @@ inline Foam::volVectorField& Foam::elasticityMotionSolver::cellMotionU()
 }
 
 
-inline const Foam::volVectorField& 
+inline const Foam::volVectorField&
 Foam::elasticityMotionSolver::cellMotionU() const
 {
     return cellMotionU_;

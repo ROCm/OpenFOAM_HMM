@@ -125,7 +125,7 @@ Foam::adjointInletVelocityFvPatchVectorField::valueBoundaryCoeffs
     const tmp<scalarField>&
 ) const
 {
-    return tmp<Field<vector>>::New(this->size(), pTraits<vector>::zero);
+    return tmp<Field<vector>>::New(this->size(), Zero);
 }
 
 

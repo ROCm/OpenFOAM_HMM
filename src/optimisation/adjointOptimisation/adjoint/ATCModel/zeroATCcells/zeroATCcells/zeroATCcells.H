@@ -25,7 +25,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-
 Class
     Foam::zeroATCcells
 
@@ -61,10 +60,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- No copy construct
         zeroATCcells(const zeroATCcells&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- No copy assignment
         void operator=(const zeroATCcells&) = delete;
 
 

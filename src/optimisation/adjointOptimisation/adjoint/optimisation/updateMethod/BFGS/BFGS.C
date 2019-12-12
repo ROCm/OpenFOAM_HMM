@@ -59,11 +59,7 @@ void Foam::BFGS::allocateMatrices()
     }
 
     // Set previous HessianInv to be a diagonal matrix
-    SquareMatrix<scalar> temp(activeDesignVars_.size(), Zero);
-    forAll(activeDesignVars_, i)
-    {
-        temp[i][i] = 1.;
-    };
+    SquareMatrix<scalar> temp(activeDesignVars_.size(), I);
 
     // Allocate correct size and content to HessianInv matrices
     // has a max. capability of approximately 34000 variables.
@@ -106,7 +102,7 @@ void Foam::BFGS::updateHessian()
     HessianInv_ =
         HessianInvOld_
       + (ys + globalSum(leftMult(y, HessianInvOld_)*y))/sqr(ys)*outerProd(s, s)
-      - (1./ys)*
+      - (scalar(1)/ys)*
         (
            outerProd(rightMult(HessianInvOld_, y), s)
          + outerProd(s, leftMult(y, HessianInvOld_))
@@ -160,8 +156,8 @@ void Foam::BFGS::readFromDict()
         optMethodIODict_.readEntry("eta", eta_);
 
         label n = HessianInvOld_.n();
-        HessianInv_ = SquareMatrix<scalar>(n, scalar(0));
-        correction_ = scalarField(correctionOld_.size(), scalar(0));
+        HessianInv_ = SquareMatrix<scalar>(n, Zero);
+        correction_ = scalarField(correctionOld_.size(), Zero);
     }
 }
 
@@ -177,7 +173,7 @@ Foam::BFGS::BFGS
     updateMethod(mesh, dict),
     etaHessian_
     (
-        coeffsDict().lookupOrDefault<scalar>("etaHessian", 1.)
+        coeffsDict().lookupOrDefault<scalar>("etaHessian", 1)
     ),
     nSteepestDescent_
     (
@@ -190,7 +186,7 @@ Foam::BFGS::BFGS
     ),
     curvatureThreshold_
     (
-        coeffsDict().lookupOrDefault<scalar>("curvatureThreshold", 1.e-10)
+        coeffsDict().lookupOrDefault<scalar>("curvatureThreshold", 1e-10)
     ),
     // Construct null matrix since we dont know the dimension yet
     HessianInv_(),
@@ -206,13 +202,13 @@ Foam::BFGS::BFGS
     {
         // If not, all available design variables will be used. Number is not
         // know at the moment
-        Info<< "\t Did not find explicit definition of active design variables. "
-            << "Treating all available ones as active " << endl;
+        Info<< "\t Did not find explicit definition of active design variables."
+            << " Treating all available ones as active" << endl;
     }
 
     // Read old hessian, correction and derivatives, if present
     readFromDict();
-};
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

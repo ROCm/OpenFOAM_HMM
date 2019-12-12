@@ -116,7 +116,7 @@ adjointOutletNuaTildaFluxFvPatchScalarField::valueInternalCoeffs
     const tmp<scalarField>&
 ) const
 {
-    return tmp<Field<scalar>>::New(this->size(), pTraits<scalar>::zero);
+    return tmp<Field<scalar>>::New(this->size(), Zero);
 }
 
 
@@ -126,21 +126,21 @@ adjointOutletNuaTildaFluxFvPatchScalarField::valueBoundaryCoeffs
     const tmp<scalarField>&
 ) const
 {
-    return tmp<Field<scalar>>::New(this->size(), pTraits<scalar>::zero);
+    return tmp<Field<scalar>>::New(this->size(), Zero);
 }
 
 
 tmp<Field<scalar>>
 adjointOutletNuaTildaFluxFvPatchScalarField::gradientBoundaryCoeffs() const
 {
-    return tmp<Field<scalar>>::New(this->size(), pTraits<scalar>::zero);
+    return tmp<Field<scalar>>::New(this->size(), Zero);
 }
 
 
 tmp<Field<scalar>>
 adjointOutletNuaTildaFluxFvPatchScalarField::gradientInternalCoeffs() const
 {
-    return tmp<Field<scalar>>::New(this->size(), pTraits<scalar>::zero);
+    return tmp<Field<scalar>>::New(this->size(), Zero);
 }
 
 

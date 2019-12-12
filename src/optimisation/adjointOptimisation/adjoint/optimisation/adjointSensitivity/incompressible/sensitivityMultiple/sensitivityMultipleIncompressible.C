@@ -88,7 +88,7 @@ sensitivityMultiple::sensitivityMultiple
             )
         );
     }
-};
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
