@@ -6,7 +6,8 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
-#                           | Copyright (C) 2015 OpenFOAM Foundation
+#    Copyright (C) 2015 OpenFOAM Foundation
+#    Copyright (C) 2019 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -40,11 +41,12 @@ usage() {
 
 Usage: ${0##*/} [OPTION] <file>
 options:
-  -h | -help            print the usage
+  -h | -help            prints the usage
   -i | -idle <time>     stops if <file> unchanging for <time> sec (default = 60)
   -l | -logscale        plots data (y-axis) on log scale, e.g. for residuals
   -r | -refresh <time>  refreshes display every <time> sec (default = 10)
   -y | -yrange <range>  sets data (y-axis) <range>, format "[0:1]"
+  -g | -grid            draws grid lines on the plot
 
 Monitor data with Gnuplot from time-value(s) graphs written by OpenFOAM
 e.g. by functionObjects
@@ -62,6 +64,7 @@ plotFileHeader() {
 set term x11 1 font "helvetica,17" linewidth 1.5 persist noraise
 $LOGSCALE
 $YRANGE
+$GRID
 set title "Data Monitoring"
 set xlabel "$XLABEL"
 plot \\
@@ -82,6 +85,7 @@ IDLE=60
 REFRESH=10
 LOGSCALE=""
 YRANGE=""
+GRID=""
 GNUPLOT=$(which gnuplot)
 ! [ "x$GNUPLOT" = "x" ] || usage "Gnuplot not installed"
 
@@ -110,6 +114,10 @@ do
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         YRANGE="set yrange $2"
         shift 2
+        ;;
+    -g | -grid)
+        GRID="set grid"
+        shift 1
         ;;
     -*)
         usage "unknown option: '$*'"
