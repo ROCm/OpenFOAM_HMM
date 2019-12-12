@@ -19,7 +19,7 @@ disk1
 {
     type            actuationDiskSource;
 
-    fields      (U);
+    fields          (U);
 
     selectionMode   cellSet;
     cellSet         actuationDisk1;
@@ -34,7 +34,7 @@ disk2
 {
     type            actuationDiskSource;
 
-    fields      (U);
+    fields          (U);
 
     selectionMode   cellSet;
     cellSet         actuationDisk2;
