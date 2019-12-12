@@ -15,7 +15,7 @@ runApplication snappyHexMesh -overwrite
 restore0Dir
 
 # Initialise with potentialFoam solution
-runApplication potentialFoam -pName p_rgh
+runApplication potentialFoam -pName p_rgh -writephi
 
 # Run the solver
 runApplication $(getApplication)

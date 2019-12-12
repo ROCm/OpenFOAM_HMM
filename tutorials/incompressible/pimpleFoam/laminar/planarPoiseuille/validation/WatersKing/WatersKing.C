@@ -37,9 +37,10 @@ Description
         Rheologica Acta, 9, 345-355.
 
         Amoreira, L. J., & Oliveira, P. J. (2010).
-        Comparison of different formulations for the numerical
-        calculation of unsteady incompressible viscoelastic fluid
-        flow. Adv. Appl. Math. Mech, 4, 483-502.
+        Comparison of different formulations for the numerical calculation of
+        unsteady incompressible viscoelastic fluid flow.
+        Adv. Appl. Math. Mech, 4, 483-502.
+        DOI:10.4208/aamm.10-m1010
     \endverbatim
 
 \*---------------------------------------------------------------------------*/

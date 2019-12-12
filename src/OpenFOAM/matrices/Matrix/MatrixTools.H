@@ -62,6 +62,7 @@ bool equal
     const Matrix<Form1, Type>& A,
     const Matrix<Form2, Type>& B,
     const bool verbose = false,
+    const label lenDiffs = 10,
     const scalar relTol = 1e-5,
     const scalar absTol = 1e-8
 );

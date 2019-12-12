@@ -81,6 +81,23 @@ inline Foam::RectangularMatrix<Type>::RectangularMatrix
 
 
 template<class Type>
+template<class AnyType>
+inline Foam::RectangularMatrix<Type>::RectangularMatrix
+(
+    const labelPair& dims,
+    const Identity<AnyType>
+)
+:
+    Matrix<RectangularMatrix<Type>, Type>(dims.first(), dims.second(), Zero)
+{
+    for (label i = 0; i < min(dims.first(), dims.second()); ++i)
+    {
+        this->operator()(i, i) = pTraits<Type>::one;
+    }
+}
+
+
+template<class Type>
 inline Foam::RectangularMatrix<Type>::RectangularMatrix
 (
     const labelPair& dims

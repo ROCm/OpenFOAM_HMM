@@ -1,14 +1,97 @@
 #!/bin/sh
 cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+. ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
 #------------------------------------------------------------------------------
 
-runApplication blockMesh
-runApplication $(getApplication)
+models="
+Maxwell
+Stokes
+"
 
-wmake validation/WatersKing
-runApplication WatersKing
+endTime=2
+if notTest $@
+then
+    endTime=25
+fi
 
-( cd validation && ./createGraph )
+#------------------------------------------------------------------------------
+
+# Compute the case in 'serial' mode, and collect the data
+#
+# $1 = endTime
+# $* = models
+# ----
+serialRun() {
+    endTime=$1
+    shift 1
+    models=$*
+
+    sed "s|END_TIME|$endTime|g" system/controlDict.template \
+        > system/controlDict
+    resultDir="results"
+
+    runApplication blockMesh
+    wmake validation/WatersKing
+
+    for model in $models
+    do
+        sed "s|LAMINAR_MODEL|$model|g" constant/turbulenceProperties.template \
+            > constant/turbulenceProperties
+
+        # Compute numerical data
+        runApplication $(getApplication)
+        tail -n +4 postProcessing/probes/0/U  | \
+            tr -s " " | tr -d '(' | cut -d " " -f2-3 > "${model}.txt"
+
+        # Collect numerical data
+        modelDir="$resultDir/$model"
+        [ -d "$modelDir" ] || mkdir -p "$modelDir"
+        mv -f postProcessing log.* "$modelDir"
+        cleanTimeDirectories
+    done
+
+    runApplication WatersKing
+}
+
+
+# Plot streamwise flow speed at y=1.0 [m] as a function of time
+#
+# $* = models
+# ----
+plot() {
+    # Require gnuplot
+    command -v gnuplot >/dev/null || {
+        echo "gnuplot not found - skipping graph creation" 1>&2
+        exit 1
+    }
+
+    models=$*
+    endTime=$(foamDictionary -entry endTime -value system/controlDict)
+
+    gnuplot<<PLT
+    set terminal pngcairo font "helvetica,16" size 800,600
+    set output "planarPoiseuille.png"
+    set grid
+    set key right top
+    set xrange [0:"$endTime"]
+    set yrange [0:8]
+    set xlabel "t [s]"
+    set ylabel "U_x [m/s]" rotate by 0 offset 3,0,0
+
+    results=system("ls *.txt")
+    names="${models[*]}"
+    plot \
+        "WatersKing.dat" w lines t "Analytical" lt -1, \
+        for [i=1:words(results)] word(results, i) t word(names, i) \
+            w linespoints pointinterval 100 lt i pt 6 ps 1.5
+
+PLT
+}
+
+#------------------------------------------------------------------------------
+
+serialRun $endTime $models
+plot $models
 
 #------------------------------------------------------------------------------

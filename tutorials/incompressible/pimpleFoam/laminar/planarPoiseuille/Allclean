@@ -4,8 +4,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 #------------------------------------------------------------------------------
 
 cleanCase
-rm -rf *.dat validation/*.eps
-
+rm -rf *.{dat,png,txt} system/controlDict constant/turbulenceProperties results
 wclean validation/WatersKing
 
 #------------------------------------------------------------------------------

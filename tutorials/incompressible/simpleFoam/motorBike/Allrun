@@ -33,7 +33,7 @@ runParallel $decompDict snappyHexMesh -overwrite
 restore0Dir -processor
 
 runParallel $decompDict patchSummary
-runParallel $decompDict potentialFoam
+runParallel $decompDict potentialFoam -writephi
 runParallel $decompDict checkMesh -writeFields '(nonOrthoAngle)' -constant
 
 runParallel $decompDict $(getApplication)

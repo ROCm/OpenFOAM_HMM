@@ -80,6 +80,11 @@ public:
         //- initializing all elements to the given value
         inline RectangularMatrix(const label m, const label n, const Type& val);
 
+        //- Construct for given number of rows/columns
+        //- initializing all elements to zero, and diagonal to one
+        template<class AnyType>
+        inline RectangularMatrix(const labelPair& dims, const Identity<AnyType>);
+
         //- Construct given number of rows/columns
         inline explicit RectangularMatrix(const labelPair& dims);
 

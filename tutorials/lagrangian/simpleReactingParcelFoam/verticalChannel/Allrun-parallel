@@ -9,9 +9,6 @@ runApplication blockMesh
 
 runApplication potentialFoam
 
-# Remove incompatible (volumetric) flux field
-rm -f 0/phi
-
 runApplication decomposePar
 
 runParallel $(getApplication)

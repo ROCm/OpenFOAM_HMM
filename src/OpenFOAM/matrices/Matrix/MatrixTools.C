@@ -35,6 +35,7 @@ bool Foam::MatrixTools::equal
     const Matrix<Form1, Type>& A,
     const Matrix<Form2, Type>& B,
     const bool verbose,
+    const label lenDiffs,
     const scalar relTol,
     const scalar absTol
 )
@@ -54,6 +55,8 @@ bool Foam::MatrixTools::equal
     auto iter1 = A.cbegin();
     auto iter2 = B.cbegin();
 
+    label j = 0;
+
     for (label i = 0; i < len; ++i)
     {
         if ((absTol + relTol*mag(*iter2)) < Foam::mag(*iter1 - *iter2))
@@ -63,8 +66,15 @@ bool Foam::MatrixTools::equal
                 Info<< "Matrix element " << i
                     << " differs beyond tolerance: "
                     << *iter1 << " vs " << *iter2 << nl;
+                ++j;
             }
-            return false;
+            if (lenDiffs < j)
+            {
+                Info<< "Number of different elements exceeds = " << lenDiffs
+                    << " Ceasing comparisons for the remaining of elements."
+                    << nl;
+                return false;
+            }
         }
 
         ++iter1;

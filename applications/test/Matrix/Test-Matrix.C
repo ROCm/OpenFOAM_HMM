@@ -37,6 +37,7 @@ License
 using namespace Foam;
 using namespace Foam::MatrixTools;
 
+#define RUNALL true
 #define isEqual MatrixTools::equal
 
 void horizontalLine()
@@ -113,7 +114,7 @@ int main(int argc, char *argv[])
 
     Random rndGen(1234);
 
-    #if 1
+    #if (0 | RUNALL)
     {
         horizontalLine();
 
@@ -218,7 +219,7 @@ int main(int argc, char *argv[])
     #endif
 
 
-    #if 1
+    #if (0 | RUNALL)
     {
         horizontalLine();
 
@@ -254,7 +255,7 @@ int main(int argc, char *argv[])
     #endif
 
 
-    #if 1
+    #if (0 | RUNALL)
     {
         horizontalLine();
 
@@ -299,7 +300,7 @@ int main(int argc, char *argv[])
     #endif
 
 
-    #if 1
+    #if (0 | RUNALL)
     {
         horizontalLine();
 
@@ -410,7 +411,7 @@ int main(int argc, char *argv[])
     #endif
 
 
-    #if 1
+    #if (0 | RUNALL)
     {
         horizontalLine();
 
@@ -494,7 +495,7 @@ int main(int argc, char *argv[])
     #endif
 
 
-    #if 1
+    #if (0 | RUNALL)
     {
         horizontalLine();
 
@@ -683,7 +684,7 @@ int main(int argc, char *argv[])
     #endif
 
 
-    #if 1
+    #if (0 | RUNALL)
     {
         horizontalLine();
 
@@ -804,7 +805,7 @@ int main(int argc, char *argv[])
                 << nl;
         }
 
-        #if 1
+        #if (0 | RUNALL)
         {
             Info<< nl << "# Implicit inner/outer products:" << nl;
 
@@ -860,7 +861,65 @@ int main(int argc, char *argv[])
     #endif
 
 
-    #if 1
+    #if (0 | RUNALL)
+    {
+        horizontalLine();
+
+        Info<< "## Query to determine if a square matrix is symmetric:" << nl;
+
+        {
+            const label mRows = 100;
+            SMatrix A(makeRandomMatrix<SMatrix>({mRows, mRows}, rndGen));
+
+            Info<< "# SquareMatrix<scalar>.symmetric():" << nl
+                << A.symmetric() << nl;
+
+            // Symmetrise
+            for (label n = 0; n < A.n() - 1; ++n)
+            {
+                for (label m = A.m() - 1; n < m; --m)
+                {
+                    A(n, m) = A(m, n);
+                }
+            }
+
+            Info<< "# SquareMatrix<scalar>.symmetric():" << nl
+                << A.symmetric() << nl;
+        }
+
+        {
+            const label mRows = 100;
+
+            SCMatrix A(mRows);
+
+            for (auto& val : A)
+            {
+                val.Re() = rndGen.GaussNormal<scalar>();
+                val.Im() = rndGen.GaussNormal<scalar>();
+            }
+
+            Info<< "# SquareMatrix<complex>.symmetric():" << nl
+                << A.symmetric() << nl;
+
+            // Symmetrise
+            for (label n = 0; n < A.n() - 1; ++n)
+            {
+                for (label m = A.m() - 1; n < m; --m)
+                {
+                    A(n, m) = A(m, n);
+                }
+            }
+
+            Info<< "# SquareMatrix<complex>.symmetric():" << nl
+                << A.symmetric() << nl;
+        }
+
+        horizontalLine();
+    }
+    #endif
+
+
+    #if (0 | RUNALL)
     {
         horizontalLine();
 
@@ -898,7 +957,7 @@ int main(int argc, char *argv[])
     #endif
 
 
-    #if 1
+    #if (0 | RUNALL)
     {
         scalarSquareMatrix squareMatrix(3, Zero);
 

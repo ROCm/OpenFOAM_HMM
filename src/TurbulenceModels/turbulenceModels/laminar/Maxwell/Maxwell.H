@@ -47,6 +47,7 @@ Description
         Comparison of different formulations for the numerical calculation
         of unsteady incompressible viscoelastic fluid flow.
         Adv. Appl. Math. Mech, 4, 483-502.
+        DOI:10.4208/aamm.10-m1010
     \endverbatim
 
 SourceFiles
@@ -78,7 +79,7 @@ class Maxwell
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         // Model coefficients
 
@@ -153,7 +154,7 @@ public:
         ) const;
 
         //- Solve the turbulence equations and correct eddy-Viscosity and
-        //  related properties
+        //- related properties
         virtual void correct();
 };
 

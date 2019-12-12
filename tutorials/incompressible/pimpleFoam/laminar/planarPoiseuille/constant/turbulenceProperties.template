@@ -10,45 +10,23 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      controlDict;
+    object      turbulenceProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     pimpleFoam;
+simulationType laminar;
 
-startFrom       startTime;
-
-startTime       0;
-
-stopAt          endTime;
-
-endTime         25;
-
-deltaT          5e-3;
-
-writeControl    runTime;
-
-writeInterval   1;
-
-purgeWrite      0;
-
-writeFormat     ascii;
-
-writePrecision   8;
-
-writeCompression off;
-
-timeFormat      general;
-
-timePrecision   6;
-
-runTimeModifiable true;
-
-functions
+laminar
 {
-    #includeFunc residuals
-    #includeFunc singleGraph
-    #includeFunc probes
+    laminarModel        LAMINAR_MODEL;
+
+    MaxwellCoeffs
+    {
+        nuM             1;
+        lambda          5;
+    }
+
+    printCoeffs         on;
 }
 
 // ************************************************************************* //

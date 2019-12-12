@@ -28,132 +28,99 @@ License
 
 #include "QRMatrix.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class MatrixType>
-Foam::QRMatrix<MatrixType>::QRMatrix(const MatrixType& mat)
+void Foam::QRMatrix<MatrixType>::qr
+(
+    MatrixType& A
+)
 {
-    decompose(mat);
+    const label nIter = min(A.m() - 1, A.n());
+
+    // Loop through all subcolumns of which the diagonal elem is the first elem
+    for (label k = 0; k < nIter; ++k)
+    {
+        const RMatrix u(householderReflector(A.subColumn(k, k)));
+
+        applyHouseholder(A, u, k);
+    }
+
+    if (outputType_ == outputTypes::REDUCED_R)
+    {
+        A.resize(A.n(), A.n());
+    }
 }
 
 
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
 template<class MatrixType>
-void Foam::QRMatrix<MatrixType>::decompose(const MatrixType& mat)
+void Foam::QRMatrix<MatrixType>::qrPivot
+(
+    MatrixType& A
+)
 {
-    const label m = mat.m();
-    const label n = mat.n();
+    const label nCols = A.n();
+    const label nIter = min(A.m() - 1, A.n());
 
-    // Initialize the R-matrix to M
-    R_ = mat;
+    // Initialise permutation vector, and column norm vector
+    P_ = identity(nCols);
 
-    // Initialize the Q-matrix to I
-    Q_.setSize(m);
-    Q_ = I;
-
-    // Pre-allocate temporary storage for the Householder steps
-    QMatrixType Qk(m);
-    QMatrixType Rk(m);
-    Field<cmptType> uk(m);
-
-    for (label k=0; k<n; k++)
+    // Initialise vector norms of each column of A
+    List<scalar> colNorms(nCols);
+    for (label k = 0; k < nCols; ++k)
     {
-        // alpha = -|column k of Rk|
-        cmptType alpha = Zero;
-        for (label bi=k; bi<m; bi++)
-        {
-            alpha += sqr(R_(bi, k));
-        }
-        alpha = sqrt(alpha);
+        colNorms[k] = A.columnNorm(k, true);
+    }
 
-        if (R_(k, k) > 0)
-        {
-            alpha = -alpha;
-        }
+    // Loop through all subcolumns of which the diagonal elem is the first elem
+    for (label k = 0; k < nIter; ++k)
+    {
+        const labelRange colRange(k, nCols);
+        const SubList<scalar> subColNorms(colNorms, colRange);
 
-        // uk = column k of Rk - alpha*ek
-        // rSumSqrUk = 2/sum(sqr(uk))
-        uk[k] = R_(k, k) - alpha;
-        cmptType rSumSqrUk = sqr(uk[k]);
-        for (label bi=k+1; bi<m; bi++)
-        {
-            uk[bi] = R_(bi, k);
-            rSumSqrUk += sqr(uk[bi]);
-        }
-        rSumSqrUk = 2/rSumSqrUk;
+        // Column pivoting
+        const label maxColNormi =
+            std::distance
+            (
+                subColNorms.cbegin(),
+                std::max_element(subColNorms.cbegin(), subColNorms.cend())
+            );
 
-        // Qk = I - 2*u*uT/sum(sqr(uk))
-        for (label bi=k; bi<m; bi++)
+        // Swap R_, P_ and colNorms_ according to pivot column if the current
+        // column is not the max norm column by avoiding any column swap where
+        // the leading elem is very small
+        if (maxColNormi != 0 && SMALL < mag(A(k, k + maxColNormi)))
         {
-            for (label bj=k; bj<m; bj++)
-            {
-                Qk(bi, bj) = -rSumSqrUk*uk[bi]*uk[bj];
-            }
-            Qk(bi, bi) += 1;
+            const RMatrix R1(A.subColumn(k));
+            const RMatrix R2(A.subColumn(maxColNormi + k));
+            A.subColumn(k) = R2;
+            A.subColumn(maxColNormi + k) = R1;
+
+            Swap(P_[k], P_[maxColNormi + k]);
+            Swap(colNorms[k], colNorms[maxColNormi + k]);
         }
 
-        // Rk = Qk*R
-        for (label bi=k; bi<m; bi++)
         {
-            for (label bk=k; bk<n; bk++)
-            {
-                Rk(bi, bk) = Zero;
-                for (label bj=k; bj<n; bj++)
-                {
-                    Rk(bi, bk) += Qk(bi, bj)*R_(bj, bk);
-                }
-            }
+            const RMatrix u(householderReflector(A.subColumn(k, k)));
+
+            applyHouseholder(A, u, k);
         }
 
-        // Ensure diagonal is positive
-        if (R_(k, k) < 0)
+        // Update norms
+        if (k < nIter - 1)
         {
-            // R = -Rk
-            // Q = -Q
-            for (label bi=k; bi<m; bi++)
+            label q = k + 1;
+            for (const auto& val : RMatrix(A.subRow(k, q)))
             {
-                for (label bj=k; bj<n; bj++)
-                {
-                    R_(bi, bj) = -Rk(bi, bj);
-                }
-                for (label bj=k; bj<m; bj++)
-                {
-                    Q_(bi, bj) = -Q_(bi, bj);
-                }
+                colNorms[q] -= magSqr(val);
+                ++q;
             }
         }
-        else
-        {
-            // R = Rk
-            for (label bi=k; bi<m; bi++)
-            {
-                for (label bj=k; bj<n; bj++)
-                {
-                    R_(bi, bj) = Rk(bi, bj);
-                }
-            }
-        }
+    }
 
-        // Q = Q*Qk (using Rk as temporary storage)
-        for (label bi=0; bi<m; bi++)
-        {
-            for (label bk=k; bk<m; bk++)
-            {
-                Rk(bi, bk) = Zero;
-                for (label bj=k; bj<m; bj++)
-                {
-                    Rk(bi, bk) += Q_(bi, bj)*Qk(bj, bk);
-                }
-            }
-        }
-        for (label bi=0; bi<m; bi++)
-        {
-            for (label bj=k; bj<n; bj++)
-            {
-                Q_(bi, bj) = Rk(bi, bj);
-            }
-        }
+    if (outputType_ == outputTypes::REDUCED_R)
+    {
+        A.resize(A.n(), A.n());
     }
 }
 
@@ -167,7 +134,7 @@ void Foam::QRMatrix<MatrixType>::solvex
 {
     const label n = R_.n();
 
-    for (label i = n - 1; i >= 0; --i)
+    for (label i = n - 1; 0 <= i; --i)
     {
         cmptType sum = x[i];
 
@@ -199,7 +166,7 @@ void Foam::QRMatrix<MatrixType>::solveImpl
     // Assert (&x != &source) ?
     const label m = Q_.m();
 
-    // x = Q_.T()*source;  ie, Q_.Tmul(source)
+    // x = Q_.T()*source;  i.e., Q_.Tmul(source)
     for (label i = 0; i < m; ++i)
     {
         x[i] = 0;
@@ -213,6 +180,179 @@ void Foam::QRMatrix<MatrixType>::solveImpl
 }
 
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class MatrixType>
+Foam::QRMatrix<MatrixType>::QRMatrix()
+:
+    outputType_(),
+    storeMethod_(),
+    colPivot_()
+{}
+
+
+template<class MatrixType>
+Foam::QRMatrix<MatrixType>::QRMatrix
+(
+    const outputTypes outputType,
+    const storeMethods storeMethod,
+    const colPivoting colPivot
+)
+:
+    outputType_(outputType),
+    storeMethod_(storeMethod),
+    colPivot_(colPivot),
+    Q_(),
+    R_(),
+    P_()
+{}
+
+
+template<class MatrixType>
+Foam::QRMatrix<MatrixType>::QRMatrix
+(
+    MatrixType& A,
+    const outputTypes outputType,
+    const storeMethods storeMethod,
+    const colPivoting colPivot
+)
+:
+    outputType_(outputType),
+    storeMethod_(storeMethod),
+    colPivot_(colPivot),
+    Q_(),
+    R_(),
+    P_()
+{
+    decompose(A);
+}
+
+
+template<class MatrixType>
+Foam::QRMatrix<MatrixType>::QRMatrix
+(
+    const MatrixType& A,
+    const outputTypes outputType,
+    const colPivoting colPivot
+)
+:
+    outputType_(outputType),
+    storeMethod_(storeMethods::OUT_OF_PLACE),
+    colPivot_(colPivot),
+    Q_(),
+    R_(),
+    P_()
+{
+    decompose(A);
+}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+template<class MatrixType>
+void Foam::QRMatrix<MatrixType>::decompose
+(
+    MatrixType& A
+)
+{
+    // Check whether settings and input are consistent for reduced QRMatrix
+    if (A.m() <= A.n() && outputType_ == outputTypes::REDUCED_R)
+    {
+        outputType_ = outputTypes::FULL_R;
+
+        #if FULLDEBUG
+        WarningInFunction
+            << "Reduced QR decomposition is by definition limited to matrices"
+            << " wherein rows > columns, thus computing FULL decomposition."
+            << nl;
+        #endif
+    }
+
+    // Allocate resources for Q_, if need be
+    if (outputType_ == outputTypes::FULL_QR)
+    {
+        Q_ = MatrixType({A.m(), A.m()}, I);
+    }
+
+    // Allocate resources for R_ and execute decomposition
+    switch (storeMethod_)
+    {
+        case storeMethods::IN_PLACE:
+        {
+            if (colPivot_)
+            {
+                qrPivot(A);
+            }
+            else
+            {
+                qr(A);
+            }
+            break;
+        }
+
+        case storeMethods::OUT_OF_PLACE:
+        {
+            R_ = A;
+
+            if (colPivot_)
+            {
+                qrPivot(R_);
+            }
+            else
+            {
+                qr(R_);
+            }
+            break;
+        }
+    }
+}
+
+
+template<class MatrixType>
+void Foam::QRMatrix<MatrixType>::decompose
+(
+    const MatrixType& A
+)
+{
+    if (storeMethod_ == storeMethods::IN_PLACE)
+    {
+        WarningInFunction
+            << "const type qualifier invalidates storeMethods::IN_PLACE." << nl;
+    }
+
+    // Check whether settings and input are consistent for reduced QRMatrix
+    if (A.m() <= A.n() && outputType_ == outputTypes::REDUCED_R)
+    {
+        outputType_ = outputTypes::FULL_R;
+
+        #if FULLDEBUG
+        WarningInFunction
+            << "Reduced QR decomposition is by definition limited to matrices"
+            << " wherein rows > columns, thus computing FULL decomposition."
+            << nl;
+        #endif
+    }
+
+    // Allocate resources for Q_, if need be
+    if (outputType_ == outputTypes::FULL_QR)
+    {
+        Q_ = MatrixType({A.m(), A.m()}, I);
+    }
+
+    // Allocate resources for R_ and execute decomposition
+    R_ = A;
+
+    if (colPivot_)
+    {
+        qrPivot(R_);
+    }
+    else
+    {
+        qr(R_);
+    }
+}
+
+
 template<class MatrixType>
 void Foam::QRMatrix<MatrixType>::solve
 (
@@ -268,13 +408,13 @@ Foam::QRMatrix<MatrixType>::solve
 
 
 template<class MatrixType>
-typename Foam::QRMatrix<MatrixType>::QMatrixType
+typename Foam::QRMatrix<MatrixType>::SMatrix
 Foam::QRMatrix<MatrixType>::inv() const
 {
     const label m = Q_.m();
 
     Field<cmptType> x(m);
-    QMatrixType inv(m);
+    SMatrix inv(m);
 
     for (label i = 0; i < m; ++i)
     {
@@ -289,5 +429,169 @@ Foam::QRMatrix<MatrixType>::inv() const
     return inv;
 }
 
+
+template<class MatrixType>
+Foam::RectangularMatrix<typename MatrixType::cmptType>
+Foam::QRMatrix<MatrixType>::backSubstitution
+(
+    const SMatrix& A,
+    const RMatrix& rhs
+)
+{
+    const label mRows = A.m();
+    const label nCols = A.n();
+    const label pCols = rhs.n();
+
+    #ifdef FULLDEBUG
+    {
+        const label qRows = rhs.m();
+        if (mRows != qRows)
+        {
+            FatalErrorInFunction
+                << "Linear system is not solvable since the number of rows of"
+                << "A and rhs are not equal:" << tab << mRows << "vs." << qRows
+                << abort(FatalError);
+        }
+
+        const List<cmptType> diag(A.diag());
+        for (const auto& val : diag)
+        {
+            if (mag(val) < SMALL)
+            {
+                WarningInFunction
+                    << "SMALL-valued diagonal elem in back-substitution." << nl;
+            }
+        }
+    }
+    #endif
+
+    RMatrix X({nCols, pCols}, Zero);
+
+    for (label i = 0; i < pCols; ++i)
+    {
+        for (label j = mRows - 1; -1 < j; --j)
+        {
+            cmptType alpha(rhs(j, i));
+
+            for (label k = j + 1; k < mRows; ++k)
+            {
+                alpha -= X(k, i)*A(j, k);
+            }
+
+            X(j, i) = alpha/A(j, j);
+        }
+    }
+
+    return X;
+}
+
+
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+template<class MatrixType>
+MatrixType Foam::pinv
+(
+    const MatrixType& A,
+    const scalar tol
+)
+{
+    typedef typename MatrixType::cmptType cmptType;
+
+    #if FULLDEBUG
+    if (A.empty())
+    {
+        FatalErrorInFunction
+            << "Empty matrix." << abort(FatalError);
+    }
+
+    // Check if A is full-rank
+    #endif
+
+    QRMatrix<MatrixType> QRM
+    (
+        A,
+        QRMatrix<MatrixType>::outputTypes::FULL_QR,
+        QRMatrix<MatrixType>::colPivoting::TRUE
+    );
+    const MatrixType& R(QRM.R());
+    const MatrixType& Q(QRM.Q());
+
+    // R1 (KP:p. 648)
+    // Find the first diagonal element index with (almost) zero value in R
+    label firstZeroElemi = 0;
+    {
+        const List<cmptType> diag(R.diag());
+
+        auto lessT = [&](const cmptType& x) { return mag(x) < tol; };
+
+        firstZeroElemi =
+            std::distance
+            (
+                diag.cbegin(),
+                std::find_if(diag.cbegin(), diag.cend(), lessT)
+            );
+    }
+
+    if (firstZeroElemi == 0)
+    {
+        FatalErrorInFunction
+            << "The largest (magnitude) diagonal element is (almost) zero."
+            << abort(FatalError);
+    }
+
+    // Exclude the first (almost) zero diagonal row and the rows below
+    // since R diagonal is already descending due to the QR column pivoting
+    const RectangularMatrix<cmptType> R1(R.subMatrix(0, 0, firstZeroElemi));
+
+    // R2 (KP:p. 648)
+    if (R1.n() < R1.m())
+    {
+        const SquareMatrix<cmptType> C(R1&R1);
+
+        QRMatrix<SquareMatrix<cmptType>> QRSolve
+        (
+            C,
+            QRMatrix<SquareMatrix<cmptType>>::outputTypes::FULL_QR
+        );
+
+        RectangularMatrix<cmptType> R2
+        (
+            QRSolve.backSubstitution
+            (
+                QRSolve.R(),
+                QRSolve.Q() & (R1.T())
+            )
+        );
+
+        // R3 (KP:p. 648)
+        R2.resize(R.m(), R.n());
+
+        return MatrixType((QRM.P()^R2)^Q);
+    }
+    else
+    {
+        const SquareMatrix<cmptType> C(R1^R1);
+
+        QRMatrix<SquareMatrix<cmptType>> QRSolve
+        (
+            C,
+            QRMatrix<SquareMatrix<cmptType>>::outputTypes::FULL_QR
+        );
+
+        RectangularMatrix<cmptType> R2
+        (
+            QRSolve.backSubstitution
+            (
+                QRSolve.R(),
+                QRSolve.Q() & R1
+            )
+        );
+
+        // R3
+        R2.resize(R.m(), R.n());
+
+        return MatrixType((QRM.P()^R2)^Q);
+    }
+}
 
 // ************************************************************************* //
