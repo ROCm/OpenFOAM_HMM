@@ -57,7 +57,7 @@ Foam::turbulentInletFvPatchField<Type>::turbulentInletFvPatchField
     ranGen_(label(0)),
     fluctuationScale_(dict.get<Type>("fluctuationScale")),
     referenceField_("referenceField", dict, p.size()),
-    alpha_(dict.lookupOrDefault<scalar>("alpha", 0.1)),
+    alpha_(dict.getOrDefault<scalar>("alpha", 0.1)),
     curTimeIndex_(-1)
 {
     if (dict.found("value"))

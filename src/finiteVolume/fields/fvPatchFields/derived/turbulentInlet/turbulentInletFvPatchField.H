@@ -30,44 +30,68 @@ Group
     grpInletBoundaryConditions
 
 Description
-    This boundary condition generates a fluctuating inlet condition by adding
-    a random component to a reference (mean) field.
+    This boundary condition produces spatiotemporal-variant field by summing
+    a set of pseudo-random numbers and a given spatiotemporal-invariant mean
+    field. The field can be any type, e.g. scalarField. At a single point and
+    time, all components are summed by the same random number, e.g. velocity
+    components (u, v, w) are summed by the same random number, p; thus, output
+    is (u+p, v+p, w+p).
+
+    The pseudo-random number generator obeys the probability density function
+    of the uniform distribution constrained by the range [0:1]. The seed for
+    the random number generator is hard-coded; therefore, it will produce the
+    same sequence of random numbers at every execution.
 
     \f[
-        x_p = (1 - \alpha) x_p^{n-1} + \alpha (x_{ref} + s C_{RMS} x_{ref})
+        x_p = (1 - \alpha) x_p^{n - 1} + \alpha (x_{ref} + c s R |x_{ref}|)
     \f]
-
     where
 
     \vartable
-        x_p     | patch values
-        x_{ref} | reference patch values
+        x_p     | patch field
+        x_{ref} | spatiotemporal-invariant patch scalar
         n       | time level
-        \alpha  | fraction of new random component added to previous time value
-        C_{RMS} | RMS coefficient
-        s       | fluctuation scale
+        \alpha  | a scalar attempting to build two-temporal-point correlations
+                  by heuristically adding a fraction of the new random component
+                  to the previous time patch field
+        c       | a heuristic automatically calculated correction term
+                  to compensate energy level losses due to the alpha scalar
+        R       | pseudo-random number [HARD-CODED seed]
+        s       | fluctuation scale (proportional to the xRef)
     \endvartable
 
 Usage
     \table
-        Property     | Description             | Required    | Default value
+        Property         | Description             | Required    | Default value
         fluctuationScale | RMS fluctuation scale (fraction of mean) | yes |
-        referenceField | reference (mean) field | yes        |
-        alpha | fraction of new random component added to previous| no| 0.1
+        referenceField   | reference (mean) field  | yes         |
+        alpha | fraction of new random component added to previous  | no | 0.1
     \endtable
 
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
-        type            turbulentInlet;
-        fluctuationScale 0.1;
-        referenceField  uniform 10;
-        alpha           0.1;
+        // Mandatory entries
+        type             turbulentInlet;
+        fluctuationScale 0.1;               // the term `s` above
+        referenceField   uniform 10;        // the term `xRef` above
+
+        // Optional entries
+        alpha            0.1;               // the term `alpha` above
     }
     \endverbatim
 
-See also
+Note
+    This boundary condition should not be used for DES or LES computations as a
+    turbulent velocity inflow condition, because the BC will not produce
+    turbulence-alike time-series, and will decay almost immediately downstream
+    of the inlet boundary although its historical name suggests the opposite.
+
+    Nevertheless, the BC may be still used for other applications, e.g. as a
+    uniform-random noise source in aeroacoustics.
+
+SeeAlso
     Foam::fixedValueFvPatchField
 
 SourceFiles
@@ -95,7 +119,7 @@ class turbulentInletFvPatchField
 :
     public fixedValueFvPatchField<Type>
 {
-    // Private data
+    // Private Data
 
         //- Random number generator
         Random ranGen_;
@@ -137,7 +161,7 @@ public:
         );
 
         //- Construct by mapping given turbulentInletFvPatchField
-        //  onto a new patch
+        //- onto a new patch
         turbulentInletFvPatchField
         (
             const turbulentInletFvPatchField<Type>&,
@@ -181,7 +205,7 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         // Access
 
