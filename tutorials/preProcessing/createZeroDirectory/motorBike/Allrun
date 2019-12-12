@@ -15,7 +15,7 @@ runParallel snappyHexMesh -overwrite
 runParallel createZeroDirectory
 
 runParallel patchSummary
-runParallel potentialFoam -noFunctionObjects
+runParallel potentialFoam -noFunctionObjects -writephi
 runParallel $(getApplication)
 
 runApplication reconstructParMesh -constant

@@ -22,7 +22,7 @@ find . -iname '*level*' -type f -delete
 restore0Dir -processor
 
 runParallel renumberMesh -overwrite
-runParallel potentialFoam -initialiseUBCs
+runParallel potentialFoam -initialiseUBCs -writephi
 runParallel checkMesh -writeFields '(nonOrthoAngle)' -constant
 runParallel $(getApplication)
 
