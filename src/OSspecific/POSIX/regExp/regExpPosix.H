@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2004-2011, 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,6 +49,13 @@ SourceFiles
 #include <regex.h>
 #include <string>
 
+// Transitional feature - support std::smatch as per C++11 regex
+#undef Foam_regExpPosix_cxx
+
+#ifdef Foam_regExpPosix_cxx
+#include <regex>
+#endif
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -71,8 +78,16 @@ class regExpPosix
 
 public:
 
-    //- Type for matches
-    typedef SubStrings<std::string> results_type;
+    // Public Types
+
+        #ifdef Foam_regExpPosix_cxx
+        //- Type for matches, as per C++11 regex
+        typedef std::smatch results_type;
+        #else
+        //- Type for matches, use OpenFOAM SubStrings container
+        typedef SubStrings<std::string> results_type;
+        #endif
+
 
     // Static Member Data
 
@@ -190,7 +205,6 @@ public:
         //- Assign and compile pattern from string.
         //  Matching is case sensitive.
         inline void operator=(const std::string& pattern);
-
 };
 
 

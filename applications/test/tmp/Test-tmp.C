@@ -2,13 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-     \\/     M anipulation  |
--------------------------------------------------------------------------------
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2011-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,7 +70,7 @@ int main()
             f1 = f2 + f3 + f2 + f3;
         }
 
-        Info<<"f1 = " << f1 << nl;
+        Info<< "f1 = " << f1 << nl;
     }
 
     {
@@ -83,7 +80,7 @@ int main()
 
         if (tfld1.valid())
         {
-            Info<<"tmp: " << tfld1() << nl;
+            Info<< "tmp: " << tfld1() << nl;
         }
 
         // Hold on to the old content for a bit
@@ -94,18 +91,42 @@ int main()
         printInfo(tfld2);
         if (tfld2.valid())
         {
-            Info<<"tmp: " << tfld2() << nl;
+            Info<< "tmp: " << tfld2() << nl;
         }
 
         tfld2.clear();
 
-        Info<<"After clear : ";
+        Info<< "After clear : ";
         printInfo(tfld2);
 
         tfld2.cref(f1);
 
-        Info<<"Reset const-ref : ";
+        Info<< "Reset to const-ref : ";
         printInfo(tfld2);
+
+        Info<< "Clear const-ref does not affect tmp: ";
+        tfld2.clear();
+        printInfo(tfld2);
+
+        Info<< "Reset const-ref affects tmp: ";
+        tfld2.reset();
+        printInfo(tfld2);
+
+
+        // Reset tfld2 from tfld1
+        Info<< "Fld2 : ";
+        printInfo(tfld2);
+
+        for (label i = 0; i < 2; ++i)
+        {
+            tfld2.reset
+            (
+                tmp<scalarField>::NewFrom<myScalarField>(4, Zero)
+            );
+
+            Info<< "Reset to some other tmp content : ";
+            printInfo(tfld2);
+        }
     }
 
     Info<< "\nEnd" << endl;

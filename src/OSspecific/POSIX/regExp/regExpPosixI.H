@@ -27,7 +27,6 @@ License
 
 #include <algorithm>
 
-
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 inline bool Foam::regExpPosix::meta(char c)

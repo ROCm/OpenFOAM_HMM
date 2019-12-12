@@ -84,8 +84,11 @@ class regExpCxx
 
 public:
 
-    //- Type for matches
-    typedef std::smatch results_type;
+    // Public Types
+
+        //- Type for matches
+        typedef std::smatch results_type;
+
 
     // Static Member Data
 
