@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,12 +37,36 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::dynamicFvMesh::readDict()
+{
+    IOdictionary dict
+    (
+        IOobject
+        (
+            "dynamicMeshDict",
+            thisDb().time().constant(),
+            thisDb(),
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE,
+            false // Do not register
+        )
+    );
+
+    timeControl_.read(dict);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::dynamicFvMesh::dynamicFvMesh(const IOobject& io)
 :
-    fvMesh(io)
-{}
+    fvMesh(io),
+    timeControl_(io.time(), "update")
+{
+    readDict();
+}
 
 
 Foam::dynamicFvMesh::dynamicFvMesh
@@ -52,8 +76,11 @@ Foam::dynamicFvMesh::dynamicFvMesh
     const bool syncPar
 )
 :
-    fvMesh(io, Zero, syncPar)
-{}
+    fvMesh(io, Zero, syncPar),
+    timeControl_(io.time(), "update")
+{
+    readDict();
+}
 
 
 Foam::dynamicFvMesh::dynamicFvMesh
@@ -74,8 +101,11 @@ Foam::dynamicFvMesh::dynamicFvMesh
         std::move(allOwner),
         std::move(allNeighbour),
         syncPar
-    )
-{}
+    ),
+    timeControl_(io.time(), "update")
+{
+    readDict();
+}
 
 
 Foam::dynamicFvMesh::dynamicFvMesh
@@ -94,8 +124,28 @@ Foam::dynamicFvMesh::dynamicFvMesh
         std::move(faces),
         std::move(cells),
         syncPar
-    )
-{}
+    ),
+    timeControl_(io.time(), "update")
+{
+    readDict();
+}
+
+
+bool Foam::dynamicFvMesh::controlledUpdate()
+{
+    if (timeControl_.execute())
+    {
+        if (!timeControl_.always())
+        {
+            // Feedback that update has been triggered
+            Info<< "Mesh update triggered based on " << timeControl_.name() << nl;
+        }
+
+        return this->update();
+    }
+
+    return false;
+}
 
 
 // ************************************************************************* //

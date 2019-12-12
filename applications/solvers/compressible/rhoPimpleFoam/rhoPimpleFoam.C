@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,6 +36,10 @@ Description
 
     Uses the flexible PIMPLE (PISO-SIMPLE) solution for time-resolved and
     pseudo-transient simulations.
+
+Note
+   The motion frequency of this solver can be influenced by the presence
+   of "updateControl" and "updateInterval" in the dynamicMeshDict.
 
 \*---------------------------------------------------------------------------*/
 
@@ -131,7 +136,7 @@ int main(int argc, char *argv[])
                 }
 
                 // Do any mesh changes
-                mesh.update();
+                mesh.controlledUpdate();
 
                 if (mesh.changing())
                 {

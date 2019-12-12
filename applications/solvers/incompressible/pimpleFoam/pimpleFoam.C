@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,6 +68,10 @@ Description
         \<turbulence fields\> | As required by user selection
     \endplaintable
 
+Note
+   The motion frequency of this solver can be influenced by the presence
+   of "updateControl" and "updateInterval" in the dynamicMeshDict.
+
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
@@ -121,7 +126,8 @@ int main(int argc, char *argv[])
         {
             if (pimple.firstIter() || moveMeshOuterCorrectors)
             {
-                mesh.update();
+                // Do any mesh changes
+                mesh.controlledUpdate();
 
                 if (mesh.changing())
                 {

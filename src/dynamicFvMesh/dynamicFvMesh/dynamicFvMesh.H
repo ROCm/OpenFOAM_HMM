@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,16 @@ Class
 Description
     Abstract base class for geometry and/or topology changing fvMesh.
 
+    Supports optional update controls that may be used by custom solvers:
+    \table
+        Property | Description                              | Required | Default
+        updateControl   | See time controls below           | no  | timeStep
+        updateInterval  | Steps/time between update phases  | no  | 1
+    \endtable
+
+See also
+    Foam::timeControl
+
 SourceFiles
     dynamicFvMesh.C
     dynamicFvMeshNew.C
@@ -40,6 +50,7 @@ SourceFiles
 #define dynamicFvMesh_H
 
 #include "fvMesh.H"
+#include "timeControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,14 +58,23 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class dynamicFvMesh Declaration
+                        Class dynamicFvMesh Declaration
 \*---------------------------------------------------------------------------*/
 
 class dynamicFvMesh
 :
     public fvMesh
 {
+    // Private Data
+
+        //- Optional update control
+        timeControl timeControl_;
+
+
     // Private Member Functions
+
+        //- Read the updateControl/updateInterval from dynamicMeshDict
+        void readDict();
 
         //- No copy construct
         dynamicFvMesh(const dynamicFvMesh&) = delete;
@@ -83,7 +103,7 @@ public:
 
     // Constructors
 
-        //- Construct from objectRegistry, and read/write options
+        //- Construct from an IOobject
         explicit dynamicFvMesh(const IOobject& io);
 
         //- Construct from components without boundary.
@@ -143,6 +163,9 @@ public:
         {
             return true;
         }
+
+        //- Update the mesh if controller permits
+        virtual bool controlledUpdate();
 
         //- Update the mesh for both mesh motion and topology change
         virtual bool update() = 0;
