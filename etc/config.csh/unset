@@ -31,10 +31,13 @@ endif
 # The old dirs to be cleaned from the environment variables
 set foamOldDirs="$WM_PROJECT_DIR $WM_THIRD_PARTY_DIR $HOME/$WM_PROJECT/$LOGNAME $FOAM_SITE_APPBIN $FOAM_SITE_LIBBIN"
 if ( $?WM_PROJECT_SITE ) then
-   set foamOldDirs="$foamOldDirs $WM_PROJECT_SITE"
+    set foamOldDirs="$foamOldDirs $WM_PROJECT_SITE"
 endif
 if ( $?ParaView_DIR ) then
-   set foamOldDirs="$foamOldDirs $ParaView_DIR"
+    set foamOldDirs="$foamOldDirs $ParaView_DIR"
+endif
+if ( $?ParaView_MESA_DIR ) then
+    set foamOldDirs="$foamOldDirs $ParaView_MESA_DIR"
 endif
 
 
@@ -109,10 +112,10 @@ unsetenv OPAL_PREFIX
 
 
 #------------------------------------------------------------------------------
-# Unset Ensight/ParaView-related environment variables
+# Unset ParaView/VTK-related environment variables
 
-unsetenv ENSIGHT9_READER
 unsetenv ParaView_DIR
+unsetenv ParaView_MESA_DIR
 unsetenv ParaView_INCLUDE_DIR
 unsetenv ParaView_VERSION
 unsetenv PV_PLUGIN_PATH

@@ -1,3 +1,33 @@
+## Known Build Issues (OpenFOAM-v1912)
+
+### ParaView, ParaView-Catalyst
+
+ParaView v5.7.0 received an extensive reworking of its CMake setup,
+including a complete change in its macros for building external
+plugins.
+
+- We can currently build the reader plugins for this new 5.7.0 system,
+  but the installation is not as smooth as it should be.
+
+These CMake changes also affect our ability to build with Catalyst.
+This is independent of the removal of Catalyst _editions_
+(to be reintroduced in 5.8.0).
+
+- The builds with the Catalyst function-object with 5.7.0 are even
+  more of a _work-in-progress_ at this stage as we cope with the new
+  CMake system.
+
+We thus currently do not build with ParaView-5.7. If building plugins or with
+Catalyst, please use the latest ParaView-5.6 version instead for now.
+Or simply use ParaView with the regular, builtin VTK readers.
+
+### Windows cross-compilation
+
+The reacting Euler multiphase solvers currently do not build for
+Windows. Compile with the `-k` option to skip over these applications
+for now.
+
+
 ## Known Build Issues (OpenFOAM-v1906)
 
 ### Thermo problems with Clang

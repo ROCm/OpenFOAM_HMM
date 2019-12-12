@@ -8,6 +8,12 @@ echo "${PWD##*/} : $PWD"
 
 unset depend runTimePostProDebug
 
+# If available, prefer use of ParaView MESA
+if [ -d "$ParaView_MESA_DIR" ]
+then
+    export ParaView_DIR="$ParaView_MESA_DIR"
+fi
+
 if [ -d "$VTK_DIR" ]
 then
     depend="VTK_DIR=$VTK_DIR"

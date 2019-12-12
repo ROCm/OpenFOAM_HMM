@@ -26,7 +26,8 @@
 #       - vtk_version, mesa_version variables are retained.
 #         (for future integration into ThirdParty build)
 #
-# It is recommended to use VTK sources from ParaView (5.0.1 or later)
+# It is recommended to use VTK sources from ParaView (5.0.1 or later).
+# When doing so, the ParaView_MESA_DIR variable can be set accordingly.
 #
 # See doc/BuildIssues.md about problems that can be encountered when using
 # the 'plain' VTK sources.
@@ -41,6 +42,9 @@ export VTK_DIR="$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$vtk_version"
 export MESA_ARCH_PATH="$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$mesa_version"
 export LLVM_ARCH_PATH="$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH/$mesa_llvm"
 
+# Define paraview-mesa directory as required
+unset ParaView_MESA_DIR
+
 # END OF (NORMAL) USER EDITABLE PART
 #------------------------------------------------------------------------------
 if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
@@ -49,6 +53,10 @@ then
     echo "    vtk  ($vtk_version) $VTK_DIR" 1>&2
     echo "    mesa ($mesa_version) $MESA_ARCH_PATH" 1>&2
     echo "    llvm ($mesa_llvm) $LLVM_ARCH_PATH" 1>&2
+    if [ -d "$ParaView_MESA_DIR" ]
+    then
+    echo "    paraview-mesa $ParaView_MESA_DIR" 1>&2
+    fi
 fi
 
 if command -v _foamAddLib >/dev/null  # normal sourcing

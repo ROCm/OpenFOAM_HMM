@@ -25,7 +25,8 @@
 #     Changes made here MUST be made in the equivalent config.sh version too,
 #     since that is the one used in the build process.
 #
-# It is recommended to use VTK sources from ParaView (5.0.1 or later)
+# It is recommended to use VTK sources from ParaView (5.0.1 or later).
+# When doing so, the ParaView_MESA_DIR variable can be set accordingly.
 #
 # See doc/BuildIssues.md about problems that can be encountered when using
 # the 'plain' VTK sources.
@@ -39,6 +40,9 @@ set mesa_llvm=none
 setenv VTK_DIR "$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$vtk_version"
 setenv MESA_ARCH_PATH "$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$mesa_version"
 setenv LLVM_ARCH_PATH "$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH/$mesa_llvm"
+
+# Define paraview-mesa directory as required
+unsetenv ParaView_MESA_DIR
 
 # END OF (NORMAL) USER EDITABLE PART
 #------------------------------------------------------------------------------
