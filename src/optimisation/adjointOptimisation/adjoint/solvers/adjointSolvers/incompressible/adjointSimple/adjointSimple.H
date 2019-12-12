@@ -86,6 +86,11 @@ protected:
         //- Solver control
         autoPtr<SIMPLEControl> solverControl_;
 
+        //- Reference to incompressibleAdjointVars
+        //  Used for convenience and to avoid repetitive dynamic_casts
+        //  Same as getAdjointVars()
+        incompressibleAdjointVars& adjointVars_;
+
         //- Cumulative continuity error
         scalar cumulativeContErr_;
 
@@ -94,6 +99,10 @@ protected:
 
 
     // Protected Member Functions
+
+        //- Allocate incompressibleAdjointVars and return reference to be used
+        //- for convenience in the rest of the class. 
+        incompressibleAdjointVars& allocateVars();
 
         //- In case variable names are different than the base ones,
         //- add extra schemes and relaxation factors to the appropriate dicts
@@ -152,6 +161,10 @@ public:
 
             //- Grab a reference to the computed sensitivities
             virtual const scalarField& getObjectiveSensitivities();
+
+            //- Clears the sensitivity field known by the adjoint solver
+            //- and zeros sensitivities constituents
+            virtual void clearSensitivities();
 
             //- Return the base sensitivity object
             virtual sensitivity& getSensitivityBase();

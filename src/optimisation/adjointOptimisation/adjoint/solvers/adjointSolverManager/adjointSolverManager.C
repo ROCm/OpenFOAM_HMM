@@ -143,6 +143,12 @@ const Foam::word& Foam::adjointSolverManager::managerName() const
 }
 
 
+const Foam::word& Foam::adjointSolverManager::primalSolverName() const
+{
+    return primalSolverName_;
+}
+
+
 const Foam::dictionary& Foam::adjointSolverManager::dict() const
 {
     return dict_;
@@ -191,11 +197,6 @@ void Foam::adjointSolverManager::solveAdjointEquations()
 {
     for (adjointSolver& solver : adjointSolvers_)
     {
-        objectiveManager& objManager = solver.getObjectiveManager();
-
-        // Update objective function related quantities
-        objManager.updateAndWrite();
-
         // Solve the adjoint equations taking into consideration the weighted
         // contribution of possibly multiple objectives
         solver.solve();
@@ -249,8 +250,16 @@ void Foam::adjointSolverManager::computeAllSensitivities()
 {
     for (adjointSolver& adjSolver : adjointSolvers_)
     {
-        adjSolver.clearSensitivities();
         adjSolver.computeObjectiveSensitivities();
+    }
+}
+
+
+void Foam::adjointSolverManager::clearSensitivities()
+{
+    for (adjointSolver& adjSolver : adjointSolvers_)
+    {
+        adjSolver.clearSensitivities();
     }
 }
 

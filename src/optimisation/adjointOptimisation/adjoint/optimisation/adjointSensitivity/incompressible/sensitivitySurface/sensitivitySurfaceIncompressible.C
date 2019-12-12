@@ -50,63 +50,7 @@ addToRunTimeSelectionTable
     dictionary
 );
 
-// * * * * * * * * * * * Private  Member Functions  * * * * * * * * * * * * * //
-
-void sensitivitySurface::read()
-{
-    includeSurfaceArea_ =
-        dict().lookupOrDefault<bool>("includeSurfaceArea", true);
-    includePressureTerm_ =
-        dict().lookupOrDefault<bool>("includePressure", true);
-    includeGradStressTerm_ =
-        dict().lookupOrDefault<bool>("includeGradStressTerm", true);
-    includeTransposeStresses_ =
-        dict().lookupOrDefault<bool>("includeTransposeStresses", true);
-    includeDivTerm_ = dict().lookupOrDefault<bool>("includeDivTerm", false);
-    includeDistance_ =
-        dict().lookupOrDefault<bool>
-        (
-            "includeDistance",
-            adjointVars_.adjointTurbulence().ref().includeDistance()
-        );
-    includeMeshMovement_ =
-        dict().lookupOrDefault<bool>("includeMeshMovement", true);
-    includeObjective_ =
-        dict().lookupOrDefault<bool>("includeObjectiveContribution", true);
-    writeGeometricInfo_ =
-        dict().lookupOrDefault<bool>("writeGeometricInfo", false);
-
-    // Allocate new solvers if necessary
-    if (includeDistance_ && eikonalSolver_.empty())
-    {
-        eikonalSolver_.reset
-        (
-            new adjointEikonalSolver
-            (
-                mesh_,
-                dict_,
-                primalVars_.RASModelVariables(),
-                adjointVars_.adjointTurbulence(),
-                sensitivityPatchIDs_
-            )
-        );
-    }
-    if (includeMeshMovement_ && meshMovementSolver_.empty())
-    {
-        meshMovementSolver_.reset
-        (
-            new adjointMeshMovementSolver
-            (
-                mesh_,
-                dict_,
-                *this,
-                sensitivityPatchIDs_,
-                eikonalSolver_
-            )
-        );
-    }
-}
-
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void sensitivitySurface::addGeometricSens()
 {
@@ -127,9 +71,8 @@ void sensitivitySurface::addGeometricSens()
         );
         // Geometric (or "direct") sensitivities are better computed directly
         // on the points
-        forAll(sensitivityPatchIDs_, pI)
+        for (const label patchI : sensitivityPatchIDs_)
         {
-            const label patchI = sensitivityPatchIDs_[pI];
             const fvPatch& patch = mesh_.boundary()[patchI];
             vectorField nf(patch.nf());
 
@@ -200,9 +143,8 @@ void sensitivitySurface::addGeometricSens()
         // boundaries
         vectorField dSdbGlobal(mesh_.nPoints(), vector::zero);
         vectorField dndbGlobal(mesh_.nPoints(), vector::zero);
-        forAll(sensitivityPatchIDs_, pI)
+        for (const label patchI : sensitivityPatchIDs_)
         {
-            const label patchI = sensitivityPatchIDs_[pI];
             const labelList& meshPoints =
                 mesh_.boundaryMesh()[patchI].meshPoints();
             forAll(meshPoints, ppI)
@@ -222,9 +164,8 @@ void sensitivitySurface::addGeometricSens()
             mesh_, dndbGlobal, plusEqOp<vector>(), vector::zero
         );
         // Transfer back to local fields and map to faces
-        forAll(sensitivityPatchIDs_, pI)
+        for (const label patchI : sensitivityPatchIDs_)
         {
-            const label patchI = sensitivityPatchIDs_[pI];
             const fvPatch& patch = mesh_.boundary()[patchI];
             const labelList& meshPoints = patch.patch().meshPoints();
             const scalarField& magSf = patch.magSf();
@@ -252,6 +193,20 @@ void sensitivitySurface::addGeometricSens()
 }
 
 
+void sensitivitySurface::setSuffixName()
+{
+    // Determine suffix for fields holding the sens
+    if (includeMeshMovement_)
+    {
+        shapeSensitivitiesBase::setSuffix(adjointVars_.solverName() + "ESI");
+    }
+    else
+    {
+        shapeSensitivitiesBase::setSuffix(adjointVars_.solverName() + "SI");
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 sensitivitySurface::sensitivitySurface
@@ -273,7 +228,7 @@ sensitivitySurface::sensitivitySurface
         objectiveManager,
         fvOptionsAdjoint
     ),
-    derivatives_(0),
+    shapeSensitivitiesBase(mesh, dict),
     includeSurfaceArea_(false),
     includePressureTerm_(false),
     includeGradStressTerm_(false),
@@ -291,6 +246,7 @@ sensitivitySurface::sensitivitySurface
     CfOnPatchPtr_(nullptr)
 {
     read();
+    setSuffixName();
 
     // Allocate boundary field pointer
     wallFaceSensVecPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
@@ -359,6 +315,62 @@ sensitivitySurface::sensitivitySurface
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void sensitivitySurface::read()
+{
+    includeSurfaceArea_ =
+        dict().lookupOrDefault<bool>("includeSurfaceArea", true);
+    includePressureTerm_ =
+        dict().lookupOrDefault<bool>("includePressure", true);
+    includeGradStressTerm_ =
+        dict().lookupOrDefault<bool>("includeGradStressTerm", true);
+    includeTransposeStresses_ =
+        dict().lookupOrDefault<bool>("includeTransposeStresses", true);
+    includeDivTerm_ = dict().lookupOrDefault<bool>("includeDivTerm", false);
+    includeDistance_ =
+        dict().lookupOrDefault<bool>
+        (
+            "includeDistance",
+            adjointVars_.adjointTurbulence().ref().includeDistance()
+        );
+    includeMeshMovement_ =
+        dict().lookupOrDefault<bool>("includeMeshMovement", true);
+    includeObjective_ =
+        dict().lookupOrDefault<bool>("includeObjectiveContribution", true);
+    writeGeometricInfo_ =
+        dict().lookupOrDefault<bool>("writeGeometricInfo", false);
+
+    // Allocate new solvers if necessary
+    if (includeDistance_ && eikonalSolver_.empty())
+    {
+        eikonalSolver_.reset
+        (
+            new adjointEikonalSolver
+            (
+                mesh_,
+                dict_,
+                primalVars_.RASModelVariables(),
+                adjointVars_.adjointTurbulence(),
+                sensitivityPatchIDs_
+            )
+        );
+    }
+    if (includeMeshMovement_ && meshMovementSolver_.empty())
+    {
+        meshMovementSolver_.reset
+        (
+            new adjointMeshMovementSolver
+            (
+                mesh_,
+                dict_,
+                *this,
+                sensitivityPatchIDs_,
+                eikonalSolver_
+            )
+        );
+    }
+}
+
+
 bool sensitivitySurface::readDict(const dictionary& dict)
 {
     if (sensitivity::readDict(dict))
@@ -383,16 +395,15 @@ bool sensitivitySurface::readDict(const dictionary& dict)
 void sensitivitySurface::computeDerivativesSize()
 {
     label nFaces(0);
-    forAll(sensitivityPatchIDs_, pI)
+    for (const label patchI : sensitivityPatchIDs_)
     {
-        const label patchI = sensitivityPatchIDs_[pI];
         nFaces += mesh_.boundary()[patchI].size();
     }
     derivatives_.setSize(nFaces);
 }
 
 
-const scalarField& sensitivitySurface::calculateSensitivities()
+void sensitivitySurface::accumulateIntegrand(const scalar dt)
 {
     // Grab references
     const volScalarField& p = primalVars_.p();
@@ -402,27 +413,6 @@ const scalarField& sensitivitySurface::calculateSensitivities()
     const volVectorField& Ua = adjointVars_.Ua();
     autoPtr<incompressibleAdjoint::adjointRASModel>& adjointTurbulence =
         adjointVars_.adjointTurbulence();
-
-    // Restore to zero
-    derivatives_ = Zero;
-
-    // Update geometric fields for use by external users
-    if (writeGeometricInfo_)
-    {
-        forAll(sensitivityPatchIDs_, pI)
-        {
-            const label patchI = sensitivityPatchIDs_[pI];
-            const fvPatch& patch = mesh_.boundary()[patchI];
-            tmp<vectorField> tnf = patch.nf();
-            const vectorField& nf = tnf();
-            const vectorField& Sf = patch.Sf();
-            const vectorField& Cf = patch.Cf();
-
-            nfOnPatchPtr_().boundaryFieldRef()[patchI] = nf;
-            SfOnPatchPtr_().boundaryFieldRef()[patchI] = Sf;
-            CfOnPatchPtr_().boundaryFieldRef()[patchI] = Cf;
-        }
-    }
 
     Info<< "    Calculating auxilary quantities " << endl;
     // Fields needed to calculate adjoint sensitivities
@@ -479,38 +469,23 @@ const scalarField& sensitivitySurface::calculateSensitivities()
     volTensorField gradStressY(fvc::grad(stressYPtr()));
     volTensorField gradStressZ(fvc::grad(stressZPtr()));
 
-    // Solve extra equations if necessary
-    autoPtr<boundaryVectorField> distanceSensPtr(nullptr);
+    // Accumulate source for additional post-processing PDEs, if necessary
     if (includeDistance_)
     {
-        eikonalSolver_->solve();
-        distanceSensPtr.reset(createZeroBoundaryPtr<vector>(mesh_));
-        const boundaryVectorField& sens =
-            eikonalSolver_->distanceSensitivities();
-        for (const label patchI : sensitivityPatchIDs_)
-        {
-            distanceSensPtr()[patchI] = sens[patchI];
-        }
+        eikonalSolver_->accumulateIntegrand(dt);
     }
 
-    autoPtr<boundaryVectorField> meshMovementSensPtr(nullptr);
     if (includeMeshMovement_)
     {
-        meshMovementSolver_->solve();
-        meshMovementSensPtr.reset(createZeroBoundaryPtr<vector>(mesh_));
-        const boundaryVectorField& sens =
-            meshMovementSolver_->meshMovementSensitivities();
-        for (const label patchI : sensitivityPatchIDs_)
-        {
-            meshMovementSensPtr()[patchI] = sens[patchI];
-        }
+        meshMovementSolver_->accumulateIntegrand(dt);
     }
 
     // Terms from the adjoint turbulence model
     const boundaryVectorField& adjointTMsensitivities =
         adjointTurbulence->wallShapeSensitivities();
 
-    Info<< "    Calculating adjoint sensitivity. " << endl;
+    DebugInfo
+        << "    Calculating adjoint sensitivity. " << endl;
 
     // Sensitivities do not include locale surface area by default.
     // Part of the sensitivities that multiplies dxFace/db
@@ -598,20 +573,6 @@ const scalarField& sensitivitySurface::calculateSensitivities()
             )* nf;
         }
 
-        // Distance related terms
-        vectorField distanceTerm(pressureTerm.size(), vector::zero);
-        if (includeDistance_)
-        {
-            distanceTerm = distanceSensPtr()[patchI];
-        }
-
-        // Mesh movement related terms
-        vectorField meshMovementTerm(pressureTerm.size(), vector::zero);
-        if (includeMeshMovement_)
-        {
-            meshMovementTerm = meshMovementSensPtr()[patchI];
-        }
-
         PtrList<objective>& functions
             (objectiveManager_.getObjectiveFunctions());
 
@@ -630,19 +591,69 @@ const scalarField& sensitivitySurface::calculateSensitivities()
         }
 
         // Fill in sensitivity fields
-        wallFaceSensVecPtr_()[patchI] =
+        wallFaceSensVecPtr_()[patchI] +=
+        (
             stressTerm
           + gradStressTerm
           + pressureTerm
-          + distanceTerm
-          + meshMovementTerm
           + adjointTMsensitivities[patchI]
-          + dxdbMultiplierTot;
+          + dxdbMultiplierTot
+        )*dt;
     }
 
     // Add the sensitivity part corresponding to changes of the normal vector
     // Computed at points and mapped to faces
     addGeometricSens();
+}
+
+
+void sensitivitySurface::assembleSensitivities()
+{
+    // Update geometric fields for use by external users
+    if (writeGeometricInfo_)
+    {
+        for (const label patchI : sensitivityPatchIDs_)
+        {
+            const fvPatch& patch = mesh_.boundary()[patchI];
+            tmp<vectorField> tnf = patch.nf();
+            const vectorField& nf = tnf();
+            const vectorField& Sf = patch.Sf();
+            const vectorField& Cf = patch.Cf();
+
+            nfOnPatchPtr_().boundaryFieldRef()[patchI] = nf;
+            SfOnPatchPtr_().boundaryFieldRef()[patchI] = Sf;
+            CfOnPatchPtr_().boundaryFieldRef()[patchI] = Cf;
+        }
+    }
+
+    // Solve extra equations if necessary
+    // Solved using accumulated sources over time
+    autoPtr<boundaryVectorField> distanceSensPtr(nullptr);
+    if (includeDistance_)
+    {
+        eikonalSolver_->solve();
+        distanceSensPtr.reset(createZeroBoundaryPtr<vector>(mesh_));
+        const boundaryVectorField& sens =
+            eikonalSolver_->distanceSensitivities();
+        for (const label patchI : sensitivityPatchIDs_)
+        {
+            distanceSensPtr()[patchI] = sens[patchI];
+        }
+    }
+
+    autoPtr<boundaryVectorField> meshMovementSensPtr(nullptr);
+    if (includeMeshMovement_)
+    {
+        meshMovementSolver_->solve();
+        meshMovementSensPtr.reset(createZeroBoundaryPtr<vector>(mesh_));
+        const boundaryVectorField& sens =
+            meshMovementSolver_->meshMovementSensitivities();
+        for (const label patchI : sensitivityPatchIDs_)
+        {
+            meshMovementSensPtr()[patchI] = sens[patchI];
+        }
+    }
+
 
     // Project to normal face vector
     label nPassedFaces(0);
@@ -651,11 +662,22 @@ const scalarField& sensitivitySurface::calculateSensitivities()
         const fvPatch& patch = mesh_.boundary()[patchI];
         tmp<vectorField> tnf(patch.nf());
         const vectorField& nf = tnf();
-        const scalarField& magSf = patch.magSf();
+
+        // Distance related terms
+        if (includeDistance_)
+        {
+            wallFaceSensVecPtr_()[patchI] += distanceSensPtr()[patchI];
+        }
+
+        // Mesh movement related terms
+        if (includeMeshMovement_)
+        {
+            wallFaceSensVecPtr_()[patchI] += meshMovementSensPtr()[patchI];
+        }
 
         if (includeSurfaceArea_)
         {
-            wallFaceSensVecPtr_()[patchI] *= magSf;
+            wallFaceSensVecPtr_()[patchI] *= patch.magSf();
         }
 
         wallFaceSensNormalPtr_()[patchI] = wallFaceSensVecPtr_()[patchI] & nf;
@@ -669,11 +691,23 @@ const scalarField& sensitivitySurface::calculateSensitivities()
         }
         nPassedFaces += patch.size();
     }
+}
 
-    // Write sens fields
-    write(type());
 
-    return (derivatives_);
+void sensitivitySurface::clearSensitivities()
+{
+    // Reset terms in post-processing PDEs
+    if (includeDistance_)
+    {
+        eikonalSolver_->reset();
+    }
+    if (includeMeshMovement_)
+    {
+        meshMovementSolver_->reset();
+    }
+    // Reset sensitivity fields
+    adjointSensitivity::clearSensitivities();
+    shapeSensitivitiesBase::clear();
 }
 
 
@@ -685,16 +719,9 @@ autoPtr<adjointEikonalSolver>& sensitivitySurface::getAdjointEikonalSolver()
 
 void sensitivitySurface::write(const word& baseName)
 {
-    // Determine suffix for fields holding the sens
-    if (includeMeshMovement_)
-    {
-        surfaceFieldSuffix_ = word("ESI");
-    }
-    else
-    {
-        surfaceFieldSuffix_ = word("SI");
-    }
+    setSuffixName();
     adjointSensitivity::write();
+    shapeSensitivitiesBase::write();
 
     if (writeGeometricInfo_)
     {

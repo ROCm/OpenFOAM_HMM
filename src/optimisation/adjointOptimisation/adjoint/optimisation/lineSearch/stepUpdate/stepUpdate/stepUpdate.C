@@ -29,19 +29,26 @@ License
 
 #include "stepUpdate.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(stepUpdate, 0);
+    defineRunTimeSelectionTable(stepUpdate, dictionary);
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(stepUpdate, 0);
-defineRunTimeSelectionTable(stepUpdate, dictionary);
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+const Foam::dictionary& Foam::stepUpdate::coeffsDict()
+{
+    return dict_.optionalSubDict(type() + "Coeffs");
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-stepUpdate::stepUpdate(const dictionary& dict)
+Foam::stepUpdate::stepUpdate(const dictionary& dict)
 :
     dict_(dict)
 {}
@@ -49,14 +56,14 @@ stepUpdate::stepUpdate(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * * Selectors  * * * * * * * * * * * * * * //
 
-autoPtr<stepUpdate> stepUpdate::New(const dictionary& dict)
+Foam::autoPtr<Foam::stepUpdate> Foam::stepUpdate::New(const dictionary& dict)
 {
-    const word modelType =
+    const word type =
         dict.lookupOrDefault<word>("stepUpdateType", "bisection");
 
-    Info<< "stepUpdate type : " << modelType << endl;
+    Info<< "stepUpdate type : " << type << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(type);
 
     if (!cstrIter.found())
     {
@@ -64,7 +71,7 @@ autoPtr<stepUpdate> stepUpdate::New(const dictionary& dict)
         (
             dict,
             "stepUpdate",
-            modelType,
+            type,
             *dictionaryConstructorTablePtr_
         ) << exit(FatalIOError);
     }
@@ -75,32 +82,22 @@ autoPtr<stepUpdate> stepUpdate::New(const dictionary& dict)
 
 // * * * * * * * * * * * * * * *  Member Functions   * * * * * * * * * * * * //
 
-void stepUpdate::setDeriv(const scalar deriv)
+void Foam::stepUpdate::setDeriv(const scalar deriv)
 {
     // Does nothing in base
 }
 
 
-void stepUpdate::setNewMeritValue(const scalar value)
+void Foam::stepUpdate::setNewMeritValue(const scalar value)
 {
     // Does nothing in base
 }
 
 
-void stepUpdate::setOldMeritValue(const scalar value)
+void Foam::stepUpdate::setOldMeritValue(const scalar value)
 {
     // Does nothing in base
 }
 
-
-void stepUpdate::setInitialStep(const scalar value)
-{
-    // Does nothing in base
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

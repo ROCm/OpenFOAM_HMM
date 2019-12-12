@@ -58,7 +58,7 @@ adjointMeshMovementSolver::adjointMeshMovementSolver
     const fvMesh& mesh,
     const dictionary& dict,
     Foam::incompressible::adjointSensitivity& adjointSensitivity,
-    const labelList& sensitivityPatchIDs,
+    const labelHashSet& sensitivityPatchIDs,
     const autoPtr<adjointEikonalSolver>& adjointEikonalSolverPtr
 )
 :
@@ -77,6 +77,19 @@ adjointMeshMovementSolver::adjointMeshMovementSolver
             dimensionSet(pow3(dimLength/dimTime))
         )
     ),
+    source_
+    (
+        IOobject
+        (
+            "sourceAdjointMeshMovement",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedVector(dimLength/pow3(dimTime), Zero)
+    ),
     meshMovementSensPtr_(createZeroBoundaryPtr<vector>(mesh_)),
     adjointEikonalSolverPtr_(adjointEikonalSolverPtr)
 {
@@ -94,24 +107,28 @@ bool adjointMeshMovementSolver::readDict(const dictionary& dict)
 }
 
 
+void adjointMeshMovementSolver::accumulateIntegrand(const scalar dt)
+{
+    // Accumulate integrand from the current time step
+    source_ += adjointSensitivity_.adjointMeshMovementSource()*dt;
+
+    // Part of the source depending on the adjoint distance can be added only
+    // after solving the adjoint eikonal equation. Added in solve()
+}
+
+
 void adjointMeshMovementSolver::solve()
 {
     read();
 
-    // Compute source term
-    tmp<volVectorField> tsource
-    (
-        adjointSensitivity_.adjointMeshMovementSource()
-    );
-    volVectorField& source = tsource.ref();
-
+    // Add source from the adjoint eikonal equation
     if (adjointEikonalSolverPtr_.valid())
     {
-        source -=
+        source_ -=
             fvc::div(adjointEikonalSolverPtr_().getFISensitivityTerm()().T());
     }
 
-    // Iterate the adjoint to the eikonal equation
+    // Iterate the adjoint to the mesh movement equation
     for (label iter = 0; iter < nLaplaceIters_; iter++)
     {
         Info<< "Adjoint Mesh Movement Iteration: " << iter << endl;
@@ -119,7 +136,7 @@ void adjointMeshMovementSolver::solve()
         fvVectorMatrix maEqn
         (
             fvm::laplacian(ma_)
-          + source
+          + source_
         );
 
         maEqn.boundaryManipulate(ma_.boundaryFieldRef());
@@ -142,6 +159,13 @@ void adjointMeshMovementSolver::solve()
         }
     }
     ma_.write();
+}
+
+
+void adjointMeshMovementSolver::reset()
+{
+    source_ == dimensionedVector(source_.dimensions(), Zero);
+    meshMovementSensPtr_() = vector::zero;
 }
 
 

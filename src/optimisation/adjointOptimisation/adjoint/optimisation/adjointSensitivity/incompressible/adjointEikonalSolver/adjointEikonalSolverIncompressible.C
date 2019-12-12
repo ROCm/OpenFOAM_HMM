@@ -115,7 +115,7 @@ adjointEikonalSolver::adjointEikonalSolver
     const dictionary& dict,
     const autoPtr<incompressible::RASModelVariables>& RASModelVars,
     autoPtr<Foam::incompressibleAdjoint::adjointRASModel>& adjointTurbulence,
-    const labelList& sensitivityPatchIDs
+    const labelHashSet& sensitivityPatchIDs
 )
 :
     mesh_(mesh),
@@ -141,6 +141,19 @@ adjointEikonalSolver::adjointEikonalSolver
         dimensionedScalar(sqr(dimLength)/pow3(dimTime), Zero),
         patchTypes()
     ),
+    source_
+    (
+        IOobject
+        (
+            "sourceEikonal",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar(dimLength/pow3(dimTime), Zero)
+    ),
     distanceSensPtr_(createZeroBoundaryPtr<vector>(mesh_))
 {
     read();
@@ -157,17 +170,19 @@ bool adjointEikonalSolver::readDict(const dictionary& dict)
 }
 
 
+void adjointEikonalSolver::accumulateIntegrand(const scalar dt)
+{
+    // Accumulate integrand from the current time step
+    source_ += adjointTurbulence_->distanceSensitivities()*dt;
+}
+
+
 void adjointEikonalSolver::solve()
 {
     read();
 
     // Primal distance field
     const volScalarField& d = RASModelVars_().d();
-
-    // Populate the source term. Not dependent from da, so only
-    // need to update it once per optimisation cycle
-    tmp<volScalarField> tsource = adjointTurbulence_->distanceSensitivities();
-    const volScalarField& source = tsource();
 
     // Convecting flux
     tmp<surfaceScalarField> tyPhi = computeYPhi();
@@ -185,7 +200,7 @@ void adjointEikonalSolver::solve()
             2*fvm::div(-yPhi, da_)
           + fvm::SuSp(-epsilon_*fvc::laplacian(d), da_)
           - epsilon_*fvm::laplacian(d, da_)
-          + source
+          + source_
         );
 
         daEqn.relax();
@@ -205,6 +220,13 @@ void adjointEikonalSolver::solve()
         }
     }
     da_.write();
+}
+
+
+void adjointEikonalSolver::reset()
+{
+    source_ == dimensionedScalar(source_.dimensions(), Zero);
+    distanceSensPtr_() = vector::zero;
 }
 
 

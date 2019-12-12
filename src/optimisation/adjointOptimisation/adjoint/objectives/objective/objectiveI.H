@@ -36,64 +36,75 @@ inline const Foam::word& Foam::objective::objectiveName() const
 }
 
 
-inline bool Foam::objective::hasdJdb()
+inline bool Foam::objective::hasdJdb() const
 {
     return dJdbPtr_.valid();
 }
 
 
-inline bool Foam::objective::hasBoundarydJdb()
+inline bool Foam::objective::hasBoundarydJdb() const
 {
     return bdJdbPtr_.valid();
 }
 
 
-inline bool Foam::objective::hasdSdbMult()
+inline bool Foam::objective::hasdSdbMult() const
 {
     return bdSdbMultPtr_.valid();
 }
 
 
-inline bool Foam::objective::hasdndbMult()
+inline bool Foam::objective::hasdndbMult() const
 {
     return bdndbMultPtr_.valid();
 }
 
 
-inline bool Foam::objective::hasdxdbMult()
+inline bool Foam::objective::hasdxdbMult() const
 {
     return bdxdbMultPtr_.valid();
 }
 
 
-inline bool Foam::objective::hasdxdbDirectMult()
+inline bool Foam::objective::hasdxdbDirectMult() const
 {
     return bdxdbDirectMultPtr_.valid();
 }
 
 
-inline bool Foam::objective::hasBoundaryEdgeContribution()
+inline bool Foam::objective::hasBoundaryEdgeContribution() const
 {
     return bEdgeContribution_.valid();
 }
 
 
-inline bool Foam::objective::hasDivDxDbMult()
+inline bool Foam::objective::hasDivDxDbMult() const
 {
     return divDxDbMultPtr_.valid();
 }
 
 
-inline bool Foam::objective::hasGradDxDbMult()
+inline bool Foam::objective::hasGradDxDbMult() const
 {
     return gradDxDbMultPtr_.valid();
 }
 
 
-inline bool Foam::objective::hasBoundarydJdStress()
+inline bool Foam::objective::hasBoundarydJdStress() const
 {
     return bdJdStressPtr_.valid();
 }
 
+
+inline bool Foam::objective::hasIntegrationStartTime() const
+{
+    return integrationStartTimePtr_.valid();
+}
+
+
+inline bool Foam::objective::hasIntegrationEndTime() const
+{
+    return integrationEndTimePtr_.valid();
+}
 
 // ************************************************************************* //

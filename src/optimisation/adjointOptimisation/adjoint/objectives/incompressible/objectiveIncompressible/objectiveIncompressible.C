@@ -63,7 +63,7 @@ objectiveIncompressible::objectiveIncompressible
     vars_
     (
         mesh.lookupObject<incompressiblePrimalSolver>(primalSolverName).
-            getVars()
+            getIncoVars()
     ),
 
     // Initialize pointers to nullptr.
@@ -418,6 +418,67 @@ void objectiveIncompressible::update()
     update_dxdbDirectMultiplier();
     update_boundaryEdgeContribution();
     update_dJdStressMultiplier();
+}
+
+
+void objectiveIncompressible::nullify()
+{
+    if (!nullified_)
+    {
+        if (hasdJdv())
+        {
+            dJdvPtr_() == dimensionedVector(dJdvPtr_().dimensions(), Zero);
+        }
+        if (hasdJdp())
+        {
+            dJdpPtr_() == dimensionedScalar(dJdpPtr_().dimensions(), Zero);
+        }
+        if (hasdJdT())
+        {
+            dJdTPtr_() == dimensionedScalar(dJdTPtr_().dimensions(), Zero);
+        }
+        if (hasdJdTMVar1())
+        {
+            dJdTMvar1Ptr_() == 
+                dimensionedScalar(dJdTMvar1Ptr_().dimensions(), Zero);
+        }
+        if (hasdJdTMVar2())
+        {
+            dJdTMvar2Ptr_() ==
+                dimensionedScalar(dJdTMvar2Ptr_().dimensions(), Zero);
+        }
+        if (hasBoundarydJdv())
+        {
+            bdJdvPtr_() == vector::zero;
+        }
+        if (hasBoundarydJdvn())
+        {
+            bdJdvnPtr_() == scalar(0);
+        }
+        if (hasBoundarydJdvt())
+        {
+            bdJdvtPtr_() == vector::zero;
+        }
+        if (hasBoundarydJdp())
+        {
+            bdJdpPtr_() == vector::zero;
+        }
+        if (hasBoundarydJdT())
+        {
+            bdJdTPtr_() == scalar(0);
+        }
+        if (hasBoundarydJdTMVar1())
+        {
+            bdJdTMvar1Ptr_() == scalar(0);
+        }
+        if (hasBoundarydJdTMVar2())
+        {
+            bdJdTMvar2Ptr_() == scalar(0);
+        }
+
+        // Nullify geometric fields and sets nullified_ to true
+        objective::nullify();
+    }
 }
 
 

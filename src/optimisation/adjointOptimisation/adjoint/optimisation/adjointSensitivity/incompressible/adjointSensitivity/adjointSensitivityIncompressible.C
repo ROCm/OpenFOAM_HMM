@@ -58,7 +58,8 @@ adjointSensitivity::adjointSensitivity
     fv::optionAdjointList& fvOptionsAdjoint
 )
 :
-    sensitivity(mesh, dict, objectiveManager.adjointSolverName()),
+    sensitivity(mesh, dict),
+    derivatives_(0),
     primalVars_(primalVars),
     adjointVars_(adjointVars),
     objectiveManager_(objectiveManager),
@@ -111,6 +112,24 @@ autoPtr<adjointSensitivity> adjointSensitivity::New
 
 
 // * * * * * * * * * * * * * * *  Member Functions   * * * * * * * * * * * * //
+
+const scalarField& adjointSensitivity::calculateSensitivities()
+{
+    assembleSensitivities();
+    write(type());
+    return derivatives_;
+}
+
+
+void adjointSensitivity::clearSensitivities()
+{
+    derivatives_ = scalar(0);
+    if (fieldSensPtr_.valid())
+    {
+        fieldSensPtr_().primitiveFieldRef() = scalar(0); 
+    }
+}
+
 
 void adjointSensitivity::write(const word& baseName)
 {
@@ -276,29 +295,6 @@ tmp<volTensorField> adjointSensitivity::computeGradDxDbMultiplier()
         // Term 7, term from objective functions
       + objectiveContributions;
 
-    // Correct boundary conditions for the flow term.
-    // Needed since the div of this term is often used
-    forAll(mesh_.boundary(), pI)
-    {
-        const fvPatch& patch = mesh_.boundary()[pI];
-        bool isSensPatch(false);
-        forAll(sensitivityPatchIDs_, pJ)
-        {
-            label patchJ = sensitivityPatchIDs_[pJ];
-            if (patchJ == pI)
-            {
-                isSensPatch = true;
-                break;
-            }
-        }
-
-        if (!isSensPatch && !isA<coupledFvPatch>(patch))
-        {
-            flowTerm.boundaryFieldRef()[pI] =
-                tensorField(patch.size(), tensor::zero);
-        }
-    }
-
     flowTerm.correctBoundaryConditions();
 
     return (tflowTerm);
@@ -330,6 +326,12 @@ tmp<volVectorField> adjointSensitivity::adjointMeshMovementSource()
     volVectorField& source = tadjointMeshMovementSource.ref();
 
     source -= fvc::div(gradDxDbMult.T());
+
+    // Terms from fvOptions
+    forAll(fvOptionsAdjoint_, oI)
+    {
+        source += fvOptionsAdjoint_[oI].dxdbMult(adjointVars_);
+    }
 
     return (tadjointMeshMovementSource);
 }

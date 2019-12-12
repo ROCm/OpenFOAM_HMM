@@ -128,6 +128,9 @@ public:
 
         // Access
 
+            // Const access to the primal vars related to the adjoint vars
+            const incompressibleVars& primalVars() const;
+
             // Access to adjoint fields. Might be averaged or not depending on
             // the correspondign switch. Averaged fields are used to compute
             // an "average" sensitivity field
@@ -177,6 +180,9 @@ public:
 
             //- Return const reference to solverControl
             const solverControl& getSolverControl() const;
+
+            //- Nullify all adjoint fields
+            virtual void nullify();
 };
 
 

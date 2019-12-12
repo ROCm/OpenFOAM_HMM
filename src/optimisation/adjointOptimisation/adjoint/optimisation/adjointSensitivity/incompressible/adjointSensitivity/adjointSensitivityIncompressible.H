@@ -83,6 +83,7 @@ protected:
 
     // Protected data
 
+        scalarField derivatives_;
         incompressibleVars& primalVars_;
         incompressibleAdjointVars& adjointVars_;
         objectiveManager& objectiveManager_;
@@ -165,9 +166,20 @@ public:
 
     // Member Functions
 
+       //- Accumulate sensitivity integrands
+       //  Corresponds to the flow and adjoint part of the sensitivities
+       virtual void accumulateIntegrand(const scalar dt) = 0;
+
+       //- Assemble sensitivities 
+       //  Adds the geometric part of the sensitivities
+       virtual void assembleSensitivities() = 0;
+
        //- Calculates and returns sensitivity fields.
        //  Used with optimisation libraries
-       virtual const scalarField& calculateSensitivities() = 0;
+       virtual const scalarField& calculateSensitivities();
+
+       //- Zero sensitivity fields and their constituents
+       virtual void clearSensitivities();
 
        //- Write sensitivity fields.
        //  If valid, copies boundaryFields to volFields and writes them.

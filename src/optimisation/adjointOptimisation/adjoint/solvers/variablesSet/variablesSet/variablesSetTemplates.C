@@ -161,6 +161,62 @@ bool variablesSet::readFieldOK
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+template<class Type, template<class> class PatchField, class GeoMesh>
+autoPtr<GeometricField<Type, PatchField, GeoMesh>> 
+variablesSet::allocateRenamedField
+(
+    const autoPtr<GeometricField<Type, PatchField, GeoMesh>>& bf
+)
+{
+    typedef GeometricField<Type, PatchField, GeoMesh> fieldType;
+    autoPtr<fieldType> returnField(nullptr);
+    if (bf.valid())
+    {
+        const word timeName = bf().mesh().time().timeName();
+        returnField.reset
+        ( 
+            new fieldType
+            (
+                bf().name() + timeName, 
+                bf() 
+            )
+        );
+    }
+    return returnField;
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+void variablesSet::swapAndRename
+(
+    autoPtr<GeometricField<Type, PatchField, GeoMesh>>& p1,
+    autoPtr<GeometricField<Type, PatchField, GeoMesh>>& p2
+)
+{
+    // Swaping pointers is OK for the mean flow fields known by the 
+    // variablesSet (and, in essence, by the solver). 
+    // The problem is that turbulence models know references to U and phi 
+    // which cannot be swapped. 
+    /*
+    const word name1 = p1().name();
+    const word name2 = p2().name();
+    p1.swap(p2);
+
+    p2().rename("temp");
+    p1().rename(name1);
+    p2().rename(name2);
+    */
+
+    // Copy back-up fields to original instead. Slower but there seems to be 
+    // no other way
+    GeometricField<Type, PatchField, GeoMesh> temp("temp", p1());
+    p1() == p2();
+    p2() == temp;
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 template<class Type>
 void variablesSet::setField
 (
@@ -282,6 +338,22 @@ void variablesSet::renameTurbulenceField
                 customBoundary[patchI].clone(baseField.ref())
             );
         }
+    }
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+void variablesSet::nullifyField
+(
+    GeometricField<Type, PatchField, GeoMesh>& field
+)
+{
+    typedef GeometricField<Type, PatchField, GeoMesh> fieldType;
+    field == dimensioned<Type>(field.dimensions(), Zero);
+    if (field.nOldTimes())
+    {
+        fieldType& oldTime = field.oldTime();
+        variablesSet::nullifyField(oldTime);
     }
 }
 

@@ -335,6 +335,9 @@ public:
 
         virtual tmp<volTensorField> FISensitivityTerm();
 
+        //- Nullify all adjoint turbulence model fields and their old times
+        virtual void nullify();
+
         //- Solve the adjoint turbulence equations
         virtual void correct();
 

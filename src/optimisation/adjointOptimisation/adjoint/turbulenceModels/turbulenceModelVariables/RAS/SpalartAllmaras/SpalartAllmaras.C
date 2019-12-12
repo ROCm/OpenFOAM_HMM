@@ -56,45 +56,57 @@ SpalartAllmaras::SpalartAllmaras
     RASModelVariables(mesh, SolverControl)
 {
     hasTMVar1_ = true;
-    TMVar1Ptr_ = mesh_.getObjectPtr<volScalarField>("nuTilda");
+    TMVar1Ptr_.reset
+    (
+        new tmp<volScalarField>
+        (
+            mesh_.lookupObjectRef<volScalarField>("nuTilda")
+        )
+    );
     TMVar1BaseName_ = "nuTilda";
 
-    TMVar2Ptr_ =
-        new volScalarField
+    TMVar2Ptr_.reset
+    (
+        new tmp<volScalarField>
         (
-            IOobject
+            new volScalarField
             (
-                "dummySpalartAllmarasVar2",
-                mesh.time().timeName(),
+                IOobject
+                (
+                    "dummySpalartAllmarasVar2",
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
                 mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh,
-            dimensionedScalar(dimless, Zero)
-        );
+                dimensionedScalar(dimless, Zero)
+            )
+        )
+    );
 
     hasNut_ = true;
-    nutPtr_ = mesh_.getObjectPtr<volScalarField>("nut");
+    nutPtr_.reset
+    (
+        new tmp<volScalarField>
+        (
+            mesh_.lookupObjectRef<volScalarField>("nut")
+        )
+    );
 
     hasDist_ = true;
-    dPtr_ = &(const_cast<volScalarField&>(wallDist::New(mesh_).y()));
+    dPtr_.reset
+    (
+        new tmp<volScalarField>
+        (
+            // The wall dist name can vary depending on how wallDist was
+            // constructed. Grab the field directly from wallDist
+            const_cast<volScalarField&>(wallDist::New(mesh_).y())
+        )
+    );
 
     allocateInitValues();
     allocateMeanFields();
-}
-
-
-SpalartAllmaras::~SpalartAllmaras ()
-{
-    // nullify pointer
-    TMVar1Ptr_ = nullptr;
-    nutPtr_ = nullptr;
-    dPtr_ = nullptr;
-
-    // nullify pointer and delete allocated field
-    delete TMVar2Ptr_;
-    TMVar2Ptr_ = nullptr;
 }
 
 
@@ -135,6 +147,7 @@ tmp<volScalarField> SpalartAllmaras::nutJacobianVar1
 
     return tnutJacobian;
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

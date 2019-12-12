@@ -30,19 +30,26 @@ License
 #include "lineSearch.H"
 #include "Time.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(lineSearch, 0);
+    defineRunTimeSelectionTable(lineSearch, dictionary);
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(lineSearch, 0);
-defineRunTimeSelectionTable(lineSearch, dictionary);
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+const Foam::dictionary& Foam::lineSearch::coeffsDict()
+{
+    return dict_.optionalSubDict(type() + "Coeffs");
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-lineSearch::lineSearch(const dictionary& dict, const Time& time)
+Foam::lineSearch::lineSearch(const dictionary& dict, const Time& time)
 :
     dict_(dict),
     lineSearchDict_
@@ -66,11 +73,11 @@ lineSearch::lineSearch(const dictionary& dict, const Time& time)
     (
         lineSearchDict_.lookupOrDefault<scalar>("prevMeritDeriv", Zero)
     ),
-    initialStep_(dict.lookupOrDefault<scalar>("initialStep", 1)),
+    initialStep_(dict.lookupOrDefault<scalar>("initialStep", 1.)),
     minStep_(dict.lookupOrDefault<scalar>("minStep", 0.3)),
     step_(Zero),
     iter_(lineSearchDict_.lookupOrDefault<label>("iter", 0)),
-    maxIters_(dict.lookupOrDefault<scalar>("maxIters", 10)),
+    maxIters_(dict.lookupOrDefault<label>("maxIters", 4)),
     extrapolateInitialStep_
     (
         dict.lookupOrDefault<bool>
@@ -85,7 +92,7 @@ lineSearch::lineSearch(const dictionary& dict, const Time& time)
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-autoPtr<lineSearch> lineSearch::New
+Foam::autoPtr<Foam::lineSearch> Foam::lineSearch::New
 (
     const dictionary& dict,
     const Time& time
@@ -93,7 +100,7 @@ autoPtr<lineSearch> lineSearch::New
 {
     autoPtr<lineSearch> lineSrch(nullptr);
 
-    const word modelType(dict.getOrDefault<word>("lineSearchType", "none"));
+    const word modelType(dict.getOrDefault<word>("type", "none"));
 
     Info<< "lineSearch type : " << modelType << endl;
 
@@ -126,34 +133,34 @@ autoPtr<lineSearch> lineSearch::New
 
 // * * * * * * * * * * * * * * *  Member Functions   * * * * * * * * * * * * //
 
-void lineSearch::setDeriv(const scalar deriv)
+void Foam::lineSearch::setDeriv(const scalar deriv)
 {
     directionalDeriv_ = deriv;
     stepUpdate_->setDeriv(deriv);
 }
 
 
-void lineSearch::setDirection(const scalarField& direction)
+void Foam::lineSearch::setDirection(const scalarField& direction)
 {
     direction_ = direction;
 }
 
 
-void lineSearch::setNewMeritValue(const scalar value)
+void Foam::lineSearch::setNewMeritValue(const scalar value)
 {
     newMeritValue_ = value;
     stepUpdate_->setNewMeritValue(value);
 }
 
 
-void lineSearch::setOldMeritValue(const scalar value)
+void Foam::lineSearch::setOldMeritValue(const scalar value)
 {
     oldMeritValue_ = value;
     stepUpdate_->setOldMeritValue(value);
 }
 
 
-void lineSearch::reset()
+void Foam::lineSearch::reset()
 {
     if (extrapolateInitialStep_ && iter_ != 0)
     {
@@ -173,44 +180,46 @@ void lineSearch::reset()
 }
 
 
-label lineSearch::maxIters() const
+Foam::label Foam::lineSearch::maxIters() const
 {
     return maxIters_;
 }
 
 
-scalar lineSearch::step() const
+Foam::scalar Foam::lineSearch::step() const
 {
     return step_;
 }
 
 
-void lineSearch::updateStep(const scalar newStep)
+void Foam::lineSearch::updateStep(const scalar newStep)
 {
     step_ = newStep;
 }
 
 
-lineSearch& lineSearch::operator++()
+Foam::lineSearch& Foam::lineSearch::operator++()
 {
     iter_++;
     prevMeritDeriv_ = directionalDeriv_;
-    lineSearchDict_.add<scalar>("prevMeritDeriv_", prevMeritDeriv_, true);
+    lineSearchDict_.add<scalar>("prevMeritDeriv", prevMeritDeriv_, true);
     lineSearchDict_.add<label>("iter", iter_, true);
-    lineSearchDict_.regIOobject::write();
+    lineSearchDict_.regIOobject::writeObject
+    (
+        IOstream::ASCII,
+        IOstream::currentVersion,
+        IOstream::UNCOMPRESSED,
+        true
+    );
 
     return *this;
 }
 
 
-lineSearch& lineSearch::operator++(int)
+Foam::lineSearch& Foam::lineSearch::operator++(int)
 {
     return operator++();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

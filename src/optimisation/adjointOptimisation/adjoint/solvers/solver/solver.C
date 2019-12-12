@@ -64,7 +64,8 @@ Foam::solver::solver
     dict_(dict),
     solverName_(dict.dictName()),
     active_(dict.lookupOrDefault<bool>("active", true)),
-    optTypeSource_(nullptr)
+    optTypeSource_(nullptr),
+    vars_(nullptr)
 {}
 
 
@@ -92,6 +93,11 @@ bool Foam::solver::readDict(const dictionary& dict)
 }
 
 
+const Foam::fvMesh& Foam::solver::mesh() const
+{
+    return mesh_;
+}
+
 const Foam::word& Foam::solver::solverName() const
 {
     return solverName_;
@@ -110,7 +116,31 @@ const Foam::dictionary& Foam::solver::dict() const
 }
 
 
+const Foam::variablesSet& Foam::solver::getVariablesSet() const
+{
+    return vars_();
+}
+
+
+Foam::variablesSet& Foam::solver::getVariablesSet()
+{
+    return vars_();
+}
+
+
 void Foam::solver::restoreInitValues()
+{
+    // Does nothing in the base class
+}
+
+
+void Foam::solver::preLoop()
+{
+    restoreInitValues();
+}
+
+
+void Foam::solver::postLoop()
 {
     // Does nothing in the base class
 }

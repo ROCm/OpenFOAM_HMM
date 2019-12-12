@@ -1011,6 +1011,12 @@ tmp<volTensorField> adjointSpalartAllmaras::FISensitivityTerm()
 }
 
 
+void adjointSpalartAllmaras::nullify()
+{
+    variablesSet::nullifyField(nuaTilda());
+}
+
+
 void adjointSpalartAllmaras::correct()
 {
     if (!adjointTurbulence_)

@@ -55,10 +55,6 @@ int main(int argc, char *argv[])
 
     for (om++; !om.end(); om++)
     {
-        Info<< "* * * * * * * * * * * * * * * * * * *" << endl;
-        Info<< "Time = " << runTime.timeName()         << endl;
-        Info<< "* * * * * * * * * * * * * * * * * * *" << endl;
-
         if (om.update())
         {
             // Update design variables and solve all primal equations

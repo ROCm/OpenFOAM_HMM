@@ -70,8 +70,7 @@ sensitivityMultiple::sensitivityMultiple
         fvOptionsAdjoint
     ),
     sensTypes_(dict.subDict("sensTypes").toc()),
-    sens_(sensTypes_.size()),
-    derivatives_(0)
+    sens_(sensTypes_.size())
 {
     forAll(sensTypes_, sI)
     {
@@ -113,16 +112,43 @@ bool sensitivityMultiple::readDict(const dictionary& dict)
 }
 
 
+void sensitivityMultiple::accumulateIntegrand(const scalar dt)
+{
+    forAll(sens_, sI)
+    {
+        sens_[sI].accumulateIntegrand(dt);
+    }
+}
+
+
+void sensitivityMultiple::assembleSensitivities()
+{
+    forAll(sens_, sI)
+    {
+        sens_[sI].assembleSensitivities();
+    }
+}
+
+
 const scalarField& sensitivityMultiple::calculateSensitivities()
 {
     forAll(sens_, sI)
     {
         Info<< "Computing sensitivities " << sensTypes_[sI] << endl;
-        sens_[sI].calculateSensitivities();
+        derivatives_ = sens_[sI].calculateSensitivities();
     }
     write(type());
 
-    return (derivatives_);
+    return derivatives_;
+}
+
+
+void sensitivityMultiple::clearSensitivities()
+{
+    forAll(sens_, sI)
+    {
+        sens_[sI].clearSensitivities();
+    }
 }
 
 

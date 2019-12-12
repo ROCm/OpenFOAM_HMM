@@ -49,7 +49,7 @@ addToRunTimeSelectionTable
     dictionary
 );
 
-// * * * * * * * * * * * Private  Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void sensitivitySurfacePoints::read()
 {
@@ -107,6 +107,217 @@ void sensitivitySurfacePoints::read()
 }
 
 
+void sensitivitySurfacePoints::finaliseFaceMultiplier()
+{
+    // Solve extra equations if necessary
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+    autoPtr<boundaryVectorField> distanceSensPtr(nullptr);
+    if (includeDistance_)
+    {
+        eikonalSolver_->solve();
+        distanceSensPtr.reset(createZeroBoundaryPtr<vector>(mesh_));
+        const boundaryVectorField& sens =
+            eikonalSolver_->distanceSensitivities();
+        for (const label patchI : sensitivityPatchIDs_)
+        {
+            distanceSensPtr()[patchI] = sens[patchI];
+        }
+    }
+
+    autoPtr<boundaryVectorField> meshMovementSensPtr(nullptr);
+    if (includeMeshMovement_)
+    {
+        meshMovementSolver_->solve();
+        meshMovementSensPtr.reset(createZeroBoundaryPtr<vector>(mesh_));
+        const boundaryVectorField& sens =
+            meshMovementSolver_->meshMovementSensitivities();
+        for (const label patchI : sensitivityPatchIDs_)
+        {
+            meshMovementSensPtr()[patchI] = sens[patchI];
+        }
+    }
+
+    // Add to other terms multiplying dxFace/dxPoints
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    for (const label patchI : sensitivityPatchIDs_)
+    {
+        const fvPatch& patch = mesh_.boundary()[patchI];
+        tmp<vectorField> tnf = patch.nf();
+        const scalarField& magSf = patch.magSf();
+        // Distance related terms
+        if (includeDistance_)
+        {
+            wallFaceSens_()[patchI] += distanceSensPtr()[patchI];
+        }
+
+        // Mesh movement related terms
+        if (includeMeshMovement_)
+        {
+            wallFaceSens_()[patchI] += meshMovementSensPtr()[patchI];
+        }
+
+        // Add local face area
+        //~~~~~~~~~~~~~~~~~~~~ 
+        // Sensitivities DO include locale surface area, to get
+        // the correct weighting from the contributions of various faces.
+        // Normalized at the end.
+        // dSfdbMult already includes the local area. No need to re-multiply
+        wallFaceSens_()[patchI] *= magSf;
+        dnfdbMult_()[patchI] *= magSf;
+    }
+}
+
+
+void sensitivitySurfacePoints::finalisePointSensitivities()
+{
+    // Geometric (or "direct") sensitivities are better computed directly on
+    // the points. Compute them and add the ones that depend on dxFace/dxPoint
+    for (const label patchI : sensitivityPatchIDs_)
+    {
+        const fvPatch& patch = mesh_.boundary()[patchI];
+        vectorField nf(patch.nf());
+
+        // Point sens result for patch
+        vectorField& pointPatchSens = wallPointSensVecPtr_()[patchI];
+
+        // Face sens for patch
+        const vectorField& facePatchSens = wallFaceSens_()[patchI];
+
+        // Geometry variances
+        const vectorField& dSfdbMultPatch = dSfdbMult_()[patchI];
+        const vectorField& dnfdbMultPatch = dnfdbMult_()[patchI];
+
+        // Correspondance of local point addressing to global point addressing
+        const labelList& meshPoints = patch.patch().meshPoints();
+
+        // List with mesh faces. Global addressing
+        const faceList& faces = mesh_.faces();
+
+        // Each local patch point belongs to these local patch faces
+        // (local numbering)
+        const labelListList& patchPointFaces = patch.patch().pointFaces();
+
+        // Index of first face in patch
+        const label patchStartIndex = patch.start();
+
+        // Geometry differentiation engine
+        deltaBoundary dBoundary(mesh_);
+
+        // Loop over patch points.
+        // Collect contributions from each boundary face this point belongs to
+        forAll(meshPoints, ppI)
+        {
+            const labelList& pointFaces = patchPointFaces[ppI];
+            forAll(pointFaces, pfI)
+            {
+                label localFaceIndex = pointFaces[pfI];
+                label globalFaceIndex = patchStartIndex + localFaceIndex;
+                const face& faceI = faces[globalFaceIndex];
+
+                // Point coordinates. All indices in global numbering
+                pointField p(faceI.points(mesh_.points()));
+                tensorField p_d(faceI.size(), tensor::zero);
+                forAll(faceI, facePointI)
+                {
+                    if (faceI[facePointI] == meshPoints[ppI])
+                    {
+                        p_d[facePointI] = tensor::I;
+                    }
+                }
+                tensorField deltaNormals =
+                    dBoundary.makeFaceCentresAndAreas_d(p, p_d);
+
+                // Element [0] is the variation in the face center
+                // (dxFace/dxPoint)
+                const tensor& deltaCf = deltaNormals[0];
+                pointPatchSens[ppI] += facePatchSens[localFaceIndex] & deltaCf;
+
+                // Term multiplying d(Sf)/d(point displacement) and
+                // d(nf)/d(point displacement)
+                //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                if (includeObjective_)
+                {
+                    // Element [1] is the variation in the (dimensional) normal
+                    const tensor& deltaSf = deltaNormals[1];
+                    pointPatchSens[ppI] +=
+                        dSfdbMultPatch[localFaceIndex] & deltaSf;
+
+                    // Element [2] is the variation in the unit normal
+                    const tensor& deltaNf = deltaNormals[2];
+                    pointPatchSens[ppI] +=
+                        dnfdbMultPatch[localFaceIndex] & deltaNf;
+                }
+            }
+        }
+    }
+}
+
+
+void sensitivitySurfacePoints::constructGlobalPointNormalsAndAreas
+(
+    vectorField& pointNormals,
+    scalarField& pointMagSf
+)
+{
+    for (const label patchI : sensitivityPatchIDs_)
+    {
+        const fvPatch& patch = mesh_.boundary()[patchI];
+        const scalarField& magSf = patch.magSf();
+        vectorField nf(patch.nf());
+
+        // Correspondance of local point addressing to global point addressing
+        const labelList& meshPoints = patch.patch().meshPoints();
+
+        // Each local patch point belongs to these local patch faces
+        // (local numbering)
+        const labelListList& patchPointFaces = patch.patch().pointFaces();
+
+        // Loop over patch points
+        forAll(meshPoints, ppI)
+        {
+            const labelList& pointFaces = patchPointFaces[ppI];
+            forAll(pointFaces, pfI)
+            {
+                const label localFaceIndex = pointFaces[pfI];
+
+                // Accumulate information for point normals
+                pointNormals[meshPoints[ppI]] += nf[localFaceIndex];
+                pointMagSf[meshPoints[ppI]] += magSf[localFaceIndex];
+            }
+        }
+    }
+
+    syncTools::syncPointList
+    (
+        mesh_,
+        pointNormals,
+        plusEqOp<vector>(),
+        vector::zero
+    );
+    syncTools::syncPointList
+    (
+        mesh_,
+        pointMagSf,
+        plusEqOp<scalar>(),
+        scalar(0)
+    );
+}
+
+
+void sensitivitySurfacePoints::setSuffixName()
+{
+    // Determine suffix for fields holding the sens
+    if (includeMeshMovement_)
+    {
+        shapeSensitivitiesBase::setSuffix(adjointVars_.solverName() + "ESI");
+    }
+    else
+    {
+        shapeSensitivitiesBase::setSuffix(adjointVars_.solverName() + "SI");
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 sensitivitySurfacePoints::sensitivitySurfacePoints
@@ -128,7 +339,7 @@ sensitivitySurfacePoints::sensitivitySurfacePoints
         objectiveManager,
         fvOptionsAdjoint
     ),
-    derivatives_(0),
+    shapeSensitivitiesBase(mesh, dict),
     includeSurfaceArea_(false),
     includePressureTerm_(false),
     includeGradStressTerm_(false),
@@ -138,7 +349,11 @@ sensitivitySurfacePoints::sensitivitySurfacePoints
     includeMeshMovement_(false),
     includeObjective_(false),
     eikonalSolver_(nullptr),
-    meshMovementSolver_(nullptr)
+    meshMovementSolver_(nullptr),
+    wallFaceSens_(createZeroBoundaryPtr<vector>(mesh_)),
+    dSfdbMult_(createZeroBoundaryPtr<vector>(mesh_)),
+    dnfdbMult_(createZeroBoundaryPtr<vector>(mesh_))
+
 {
     read();
 
@@ -189,7 +404,7 @@ bool sensitivitySurfacePoints::readDict(const dictionary& dict)
 }
 
 
-const scalarField& sensitivitySurfacePoints::calculateSensitivities()
+void sensitivitySurfacePoints::accumulateIntegrand(const scalar dt)
 {
     // Grab references
     const volScalarField& p = primalVars_.p();
@@ -200,16 +415,8 @@ const scalarField& sensitivitySurfacePoints::calculateSensitivities()
     autoPtr<incompressibleAdjoint::adjointRASModel>& adjointTurbulence =
         adjointVars_.adjointTurbulence();
 
-    // Restore to zero
-    derivatives_ = Zero;
-    forAll(mesh_.boundary(), patchI)
-    {
-        wallPointSensVecPtr_()[patchI] = vector::zero;
-        wallPointSensNormalPtr_()[patchI] = Zero;
-        wallPointSensNormalVecPtr_()[patchI] = vector::zero;
-    }
-
-    Info<< "    Calculating auxilary quantities " << endl;
+    DebugInfo
+        << "    Calculating auxilary quantities " << endl;
 
     // Fields needed to calculate adjoint sensitivities
     volScalarField nuEff(adjointTurbulence->nuEff());
@@ -262,31 +469,16 @@ const scalarField& sensitivitySurfacePoints::calculateSensitivities()
     volTensorField gradStressY(fvc::grad(stressYPtr()));
     volTensorField gradStressZ(fvc::grad(stressZPtr()));
 
-    // solve extra equations if necessary
-    autoPtr<boundaryVectorField> distanceSensPtr(nullptr);
+    // Solve extra equations if necessary
     if (includeDistance_)
     {
-        eikonalSolver_->solve();
-        distanceSensPtr.reset(createZeroBoundaryPtr<vector>(mesh_));
-        const boundaryVectorField& sens =
-            eikonalSolver_->distanceSensitivities();
-        for (const label patchI : sensitivityPatchIDs_)
-        {
-            distanceSensPtr()[patchI] = sens[patchI];
-        }
+        eikonalSolver_->accumulateIntegrand(dt);
     }
 
     autoPtr<boundaryVectorField> meshMovementSensPtr(nullptr);
     if (includeMeshMovement_)
     {
-        meshMovementSolver_->solve();
-        meshMovementSensPtr.reset(createZeroBoundaryPtr<vector>(mesh_));
-        const boundaryVectorField& sens =
-            meshMovementSolver_->meshMovementSensitivities();
-        for (const label patchI : sensitivityPatchIDs_)
-        {
-            meshMovementSensPtr()[patchI] = sens[patchI];
-        }
+        meshMovementSolver_->accumulateIntegrand(dt);
     }
 
     // Terms from the adjoint turbulence model
@@ -296,23 +488,16 @@ const scalarField& sensitivitySurfacePoints::calculateSensitivities()
     // Objective references
     PtrList<objective>& functions(objectiveManager_.getObjectiveFunctions());
 
-    Info<< "    Calculating adjoint sensitivity. " << endl;
+    DebugInfo
+        << "    Calculating adjoint sensitivity. " << endl;
 
     // The face-based part of the sensitivities, i.e. terms that multiply
-    // dxFace/dxPoint. Sensitivities DO include locale surface area, to get
-    // the correct weighting from the contributions of various faces.
-    // Normalized at the end.
-    autoPtr<boundaryVectorField> wallFaceSens
-    (
-        createZeroBoundaryPtr<vector>(mesh_)
-    );
-
+    // dxFace/dxPoint. 
     for (const label patchI : sensitivityPatchIDs_)
     {
         const fvPatch& patch = mesh_.boundary()[patchI];
         tmp<vectorField> tnf = patch.nf();
         const vectorField& nf = tnf();
-        const scalarField& magSf = patch.magSf();
 
         // Adjoint stress term
         // vectorField stressTerm
@@ -387,49 +572,49 @@ const scalarField& sensitivitySurfacePoints::calculateSensitivities()
            *nf;
         }
 
-        // Distance related terms
-        vectorField distanceTerm(pressureTerm.size(), vector::zero);
-        if (includeDistance_)
-        {
-            distanceTerm = distanceSensPtr()[patchI];
-        }
-
-        // Mesh movement related terms
-        vectorField meshMovementTerm(pressureTerm.size(), vector::zero);
-        if (includeMeshMovement_)
-        {
-            meshMovementTerm = meshMovementSensPtr()[patchI];
-        }
-
-
-        vectorField dxdbMultiplierTot
-        (
-            mesh_.boundary()[patchI].size(), vector::zero
-        );
+        vectorField dxdbMultiplierTot(patch.size(), vector::zero);
         if (includeObjective_)
         {
             // Term from objectives multiplying dxdb
             forAll(functions, funcI)
             {
+                const scalar wei = functions[funcI].weight();
+                // dt added in wallFaceSens_
                 dxdbMultiplierTot +=
-                    functions[funcI].weight()
-                  * functions[funcI].dxdbDirectMultiplier(patchI);
+                    wei*functions[funcI].dxdbDirectMultiplier(patchI);
+
+                // Fill in multipliers of d(Sf)/db and d(nf)/db
+                dSfdbMult_()[patchI] += 
+                    wei*dt*functions[funcI].dSdbMultiplier(patchI);
+                dnfdbMult_()[patchI] += 
+                    wei*dt*functions[funcI].dndbMultiplier(patchI);
             }
         }
 
         // Fill in dxFace/dxPoint multiplier.
         // Missing geometric contributions which are directly computed on the
         // points
-        wallFaceSens()[patchI] =
+        wallFaceSens_()[patchI] +=
+        (
             stressTerm
           + gradStressTerm
           + pressureTerm
-          + distanceTerm
-          + meshMovementTerm
           + adjointTMsensitivities[patchI]
-          + dxdbMultiplierTot;
-        wallFaceSens()[patchI] *= magSf;
+          + dxdbMultiplierTot
+        )*dt;
     }
+}
+
+
+void sensitivitySurfacePoints::assembleSensitivities()
+{
+    // Add remaining parts to term multiplying dxFace/dxPoints
+    // Solves for post-processing PDEs
+    finaliseFaceMultiplier();
+
+    // Geometric (or "direct") sensitivities are better computed directly on
+    // the points. Compute them and add the ones that depend on dxFace/dxPoint
+    finalisePointSensitivities();
 
     // polyPatch::pointNormals will give the wrong result for points
     // belonging to multiple patches or patch-processorPatch intersections.
@@ -437,104 +622,10 @@ const scalarField& sensitivitySurfacePoints::calculateSensitivities()
     // A bit expensive? Better way?
     vectorField pointNormals(mesh_.nPoints(), vector::zero);
     scalarField pointMagSf(mesh_.nPoints(), Zero);
-
-    // Geometric (or "direct") sensitivities are better computed directly on
-    // the points. Compute them and add the ones that depend on dxFace/dxPoint
-    for (const label patchI : sensitivityPatchIDs_)
-    {
-        const fvPatch& patch = mesh_.boundary()[patchI];
-        const scalarField& magSf = patch.magSf();
-        vectorField nf(patch.nf());
-
-        // Point sens result for patch
-        vectorField& pointPatchSens = wallPointSensVecPtr_()[patchI];
-
-        // Face sens for patch
-        const vectorField& facePatchSens = wallFaceSens()[patchI];
-
-        vectorField dSdbMultiplierTot(patch.size(), vector::zero);
-        vectorField dndbMultiplierTot(patch.size(), vector::zero);
-        forAll(functions, funcI)
-        {
-            dSdbMultiplierTot +=
-                functions[funcI].weight() //includes surface by itself
-               *functions[funcI].dSdbMultiplier(patchI);
-            dndbMultiplierTot +=
-                functions[funcI].weight()
-               *functions[funcI].dndbMultiplier(patchI)
-               *magSf;
-        }
-
-        // Correspondance of local point addressing to global point addressing
-        const labelList& meshPoints = patch.patch().meshPoints();
-
-        // List with mesh faces. Global addressing
-        const faceList& faces = mesh_.faces();
-
-        // Each local patch point belongs to these local patch faces
-        // (local numbering)
-        const labelListList& patchPointFaces = patch.patch().pointFaces();
-
-        // Index of first face in patch
-        const label patchStartIndex = patch.start();
-
-        // Geometry differentiation engine
-        deltaBoundary dBoundary(mesh_);
-
-        // Loop over patch points.
-        // Collect contributions from each boundary face this point belongs to
-        forAll(meshPoints, ppI)
-        {
-            const labelList& pointFaces = patchPointFaces[ppI];
-            forAll(pointFaces, pfI)
-            {
-                label localFaceIndex = pointFaces[pfI];
-                label globalFaceIndex = patchStartIndex + localFaceIndex;
-                const face& faceI = faces[globalFaceIndex];
-
-                // Point coordinates. All indices in global numbering
-                pointField p(faceI.points(mesh_.points()));
-                tensorField p_d(faceI.size(), tensor::zero);
-                forAll(faceI, facePointI)
-                {
-                    if (faceI[facePointI] == meshPoints[ppI])
-                    {
-                        p_d[facePointI] = tensor::I;
-                    }
-                }
-                tensorField deltaNormals =
-                    dBoundary.makeFaceCentresAndAreas_d(p, p_d);
-
-                // Element [0] is the variation in the face center
-                // (dxFace/dxPoint)
-                const tensor& deltaCf = deltaNormals[0];
-                pointPatchSens[ppI] += facePatchSens[localFaceIndex] & deltaCf;
-
-                // Term multiplying d(Sf)/d(point displacement) and
-                // d(nf)/d(point displacement)
-                //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                if (includeObjective_)
-                {
-                    // Element [1] is the variation in the (dimensional) normal
-                    const tensor& deltaSf = deltaNormals[1];
-                    pointPatchSens[ppI] +=
-                        dSdbMultiplierTot[localFaceIndex] & deltaSf;
-
-                    // Element [2] is the variation in the unit normal
-                    const tensor& deltaNf = deltaNormals[2];
-                    pointPatchSens[ppI] +=
-                        dndbMultiplierTot[localFaceIndex] & deltaNf;
-                }
-
-                // Accumulate information for point normals
-                pointNormals[meshPoints[ppI]] += nf[localFaceIndex];
-                pointMagSf[meshPoints[ppI]] += magSf[localFaceIndex];
-            }
-        }
-    }
+    constructGlobalPointNormalsAndAreas(pointNormals, pointMagSf);
 
     // Do parallel communications to avoid wrong values at processor boundaries
-    // - global field for accumulation
+    // Global field for accumulation
     vectorField pointSensGlobal(mesh_.nPoints(), vector::zero);
     for (const label patchI : sensitivityPatchIDs_)
     {
@@ -547,27 +638,13 @@ const scalarField& sensitivitySurfacePoints::calculateSensitivities()
         }
     }
 
-    // Accumulate dJ/dx_i, pointNormals and pointFaces number
+    // Accumulate dJ/dx_i
     syncTools::syncPointList
     (
         mesh_,
         pointSensGlobal,
         plusEqOp<vector>(),
         vector::zero
-    );
-    syncTools::syncPointList
-    (
-        mesh_,
-        pointNormals,
-        plusEqOp<vector>(),
-        vector::zero
-    );
-    syncTools::syncPointList
-    (
-        mesh_,
-        pointMagSf,
-        plusEqOp<scalar>(),
-        scalar(0)
     );
 
     // Transfer back to local fields
@@ -588,7 +665,7 @@ const scalarField& sensitivitySurfacePoints::calculateSensitivities()
         {
             const labelList& meshPoints = patch.meshPoints();
 
-            // avoid storing unit point normals in the global list since we
+            // Avoid storing unit point normals in the global list since we
             // might divide multiple times with the number of faces belonging
             // to the point. Instead do the division locally, per patch use
             vectorField patchPointNormals(pointNormals, meshPoints);
@@ -644,26 +721,37 @@ const scalarField& sensitivitySurfacePoints::calculateSensitivities()
             }
         }
     }
+}
 
-    // Write sens fields
-    write(type());
 
-    return (derivatives_);
+void sensitivitySurfacePoints::clearSensitivities()
+{
+    // Reset terms in post-processing PDEs
+    if (includeDistance_)
+    {
+        eikonalSolver_->reset();
+    }
+    if (includeMeshMovement_)
+    {
+        meshMovementSolver_->reset();
+    }
+
+    // Reset local fields to zero 
+    wallFaceSens_() = vector::zero;
+    dSfdbMult_() = vector::zero;
+    dnfdbMult_() = vector::zero;
+
+    // Reset sensitivity fields
+    adjointSensitivity::clearSensitivities();
+    shapeSensitivitiesBase::clear();
 }
 
 
 void sensitivitySurfacePoints::write(const word& baseName)
 {
-    //determine suffix for fields holding the sens
-    if (includeMeshMovement_)
-    {
-        surfaceFieldSuffix_ = "ESI";
-    }
-    else
-    {
-        surfaceFieldSuffix_ = "SI";
-    }
+    setSuffixName();
     adjointSensitivity::write();
+    shapeSensitivitiesBase::write();
 }
 
 

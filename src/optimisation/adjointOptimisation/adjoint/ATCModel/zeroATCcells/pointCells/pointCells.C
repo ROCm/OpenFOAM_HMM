@@ -52,6 +52,9 @@ pointCells::pointCells
 :
     zeroATCcells(mesh, dict)
 {
+    boolList isZeroed(mesh_.nCells(), false);
+    labelList zeroedIDs(mesh_.nCells(), -1);
+    label i(0);
     forAll(mesh_.boundary(), patchI)
     {
         const fvPatch& patch = mesh_.boundary()[patchI];
@@ -65,7 +68,14 @@ pointCells::pointCells
                 for (const label pointI : meshPoints)
                 {
                     const labelList& pointCells = mesh_.pointCells()[pointI];
-                    zeroATCcells_.append(pointCells);
+                    for (const label cellI : pointCells)
+                    {
+                        if (!isZeroed[cellI])
+                        {
+                            zeroedIDs[i++] = cellI;
+                            isZeroed[cellI] = true;
+                        }
+                    }
                 }
             }
         }
@@ -76,14 +86,22 @@ pointCells::pointCells
         if (zoneID != -1)
         {
             const labelList& zoneCells = mesh_.cellZones()[zoneID];
-            zeroATCcells_.append(zoneCells);
+            for (const label cellI : zoneCells)
+            {
+                if (!isZeroed[cellI])
+                {
+                    zeroedIDs[i++] = cellI;
+                    isZeroed[cellI] = true;
+                }
+            }
         }
     }
-    /*
+    zeroedIDs.setSize(i);
+    zeroATCcells_ = zeroedIDs;
+
     label size = zeroATCcells_.size();
     reduce(size, sumOp<label>());
     Info<< "Zeroing ATC on "<< size << " cells" << nl << endl;
-    */
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

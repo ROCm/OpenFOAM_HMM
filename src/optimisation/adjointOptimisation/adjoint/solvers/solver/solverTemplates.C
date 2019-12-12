@@ -41,8 +41,8 @@ void Foam::solver::solveWithArgs
     // Iterate
     if (active_)
     {
-        restoreInitValues();
-        while(loop())
+        preLoop();
+        while (loop())
         {
             solveIter();
             forAll(funcs, fI)
@@ -50,8 +50,7 @@ void Foam::solver::solveWithArgs
                 (type.*funcs[fI])();
             }
         }
-
-        mesh_.time().printExecutionTime(Info);
+        postLoop();
     }
 }
 

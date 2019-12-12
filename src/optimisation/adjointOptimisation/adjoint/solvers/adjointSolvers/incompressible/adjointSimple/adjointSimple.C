@@ -49,9 +49,25 @@ namespace Foam
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+Foam::incompressibleAdjointVars& Foam::adjointSimple::allocateVars()
+{
+    vars_.reset
+    (
+        new incompressibleAdjointVars
+        (
+            mesh_,
+            solverControl_(),
+            objectiveManagerPtr_(),
+            primalVars_
+        )
+    );
+    return getAdjointVars();
+}
+
+
 void Foam::adjointSimple::addExtraSchemes()
 {
-    if (getAdjointVars().useSolverNameForFields())
+    if (adjointVars_.useSolverNameForFields())
     {
         WarningInFunction
             << "useSolverNameForFields is set to true for adjointSolver "
@@ -65,7 +81,7 @@ void Foam::adjointSimple::addExtraSchemes()
 
 void Foam::adjointSimple::continuityErrors()
 {
-    const surfaceScalarField& phia = getAdjointVars().phiaInst();
+    const surfaceScalarField& phia = adjointVars_.phiaInst();
     volScalarField contErr(fvc::div(phia));
 
     scalar sumLocalContErr = mesh_.time().deltaTValue()*
@@ -94,26 +110,17 @@ Foam::adjointSimple::adjointSimple
 :
     incompressibleAdjointSolver(mesh, managerType, dict, primalSolverName),
     solverControl_(SIMPLEControl::New(mesh, managerType, *this)),
+    adjointVars_(allocateVars()),
     cumulativeContErr_(Zero),
     adjointSensitivity_(nullptr)
 {
-    adjointVars_.reset
-    (
-        new incompressibleAdjointVars
-        (
-            mesh,
-            solverControl_(),
-            objectiveManagerPtr_(),
-            primalVars_
-        )
-    ),
     ATCModel_.reset
     (
         ATCModel::New
         (
             mesh,
             primalVars_,
-            getAdjointVars(),
+            adjointVars_,
             dict.subDict("ATCModel")
         ).ptr()
     );
@@ -121,7 +128,7 @@ Foam::adjointSimple::adjointSimple
     addExtraSchemes();
     setRefCell
     (
-        getAdjointVars().paInst(),
+        adjointVars_.paInst(),
         solverControl_().dict(),
         solverControl_().pRefCell(),
         solverControl_().pRefValue()
@@ -139,7 +146,7 @@ Foam::adjointSimple::adjointSimple
                 mesh,
                 optDict.subDict("optimisation").subDict("sensitivities"),
                 primalVars_,
-                getAdjointVars(),
+                adjointVars_,
                 objectiveManagerPtr_(),
                 fvOptionsAdjoint_
             ).ptr()
@@ -180,12 +187,11 @@ void Foam::adjointSimple::solveIter()
     // Grab primal references
     const surfaceScalarField& phi = primalVars_.phi();
     // Grab adjoint references
-    incompressibleAdjointVars& adjointVars = getAdjointVars();
-    volScalarField& pa = adjointVars.paInst();
-    volVectorField& Ua = adjointVars.UaInst();
-    surfaceScalarField& phia = adjointVars.phiaInst();
+    volScalarField& pa = adjointVars_.paInst();
+    volVectorField& Ua = adjointVars_.UaInst();
+    surfaceScalarField& phia = adjointVars_.phiaInst();
     autoPtr<incompressibleAdjoint::adjointRASModel>& adjointTurbulence =
-        adjointVars.adjointTurbulence();
+        adjointVars_.adjointTurbulence();
     const label&  paRefCell  = solverControl_().pRefCell();
     const scalar& paRefValue = solverControl_().pRefValue();
 
@@ -295,7 +301,7 @@ void Foam::adjointSimple::solveIter()
     solverControl_().write();
 
     // Average fields if necessary
-    adjointVars.computeMeanFields();
+    adjointVars_.computeMeanFields();
 
     // Print execution time
     time.printExecutionTime(Info);
@@ -306,8 +312,11 @@ void Foam::adjointSimple::solve()
 {
     if (active_)
     {
+        // Update objective function related quantities
+        objectiveManagerPtr_->updateAndWrite();
+
         // Reset mean fields before solving
-        getAdjointVars().resetMeanFields();
+        adjointVars_.resetMeanFields();
 
         // Iterate
         while (solverControl_().loop())
@@ -328,10 +337,13 @@ void Foam::adjointSimple::computeObjectiveSensitivities()
 {
     if (computeSensitivities_)
     {
-        sensitivities_.reset
-        (
-            new scalarField(adjointSensitivity_().calculateSensitivities())
-        );
+        adjointSensitivity_->accumulateIntegrand(scalar(1));
+        const scalarField& sens = adjointSensitivity_->calculateSensitivities();
+        if (sensitivities_.empty())
+        {
+            sensitivities_.reset(new scalarField(sens.size(), scalar(0)));
+        }
+        sensitivities_.ref() = sens;
     }
     else
     {
@@ -348,6 +360,16 @@ const Foam::scalarField& Foam::adjointSimple::getObjectiveSensitivities()
     }
 
     return sensitivities_();
+}
+
+
+void Foam::adjointSimple::clearSensitivities()
+{
+    if (computeSensitivities_)
+    {
+        adjointSensitivity_->clearSensitivities();
+        adjointSolver::clearSensitivities();
+    }
 }
 
 

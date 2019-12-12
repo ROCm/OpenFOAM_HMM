@@ -69,7 +69,7 @@ protected:
         autoPtr<volVectorField> UPtr_;
         autoPtr<surfaceScalarField> phiPtr_;
         autoPtr<singlePhaseTransportModel> laminarTransportPtr_;
-        autoPtr<incompressible::turbulenceModel>turbulence_;
+        autoPtr<incompressible::turbulenceModel> turbulence_;
         autoPtr<incompressible::RASModelVariables> RASModelVariables_;
         //autoPtr<volScalarField> TPtr_;
 
@@ -89,6 +89,9 @@ protected:
         //  (e.g. averaging, redistribution)
         bool correctBoundaryConditions_;
 
+
+    // Protected Member Functions
+
         //- Read fields and set turbulence
         void setFields();
 
@@ -106,9 +109,6 @@ protected:
 
         //- Update boundary conditions of turbulent fields
         void correctTurbulentBoundaryConditions();
-
-        //- Disallow default bitwise copy construct
-        incompressibleVars(const incompressibleVars&);
 
         //- Disallow default bitwise assignment
         void operator=(const incompressibleVars&);
@@ -130,6 +130,20 @@ public:
             fvMesh& mesh,
             solverControl& SolverControl
         );
+
+        //- Copy constructor
+        //  turbulence_ and laminarTransport_ are unitialized since there is 
+        //  no clear way (and possibly no usage) of cloning them.
+        //  The resulting incompressibleVars is hence incomplete.
+        //  Additionally, copied fields have the original name, appended with 
+        //  the timeName, to avoid database collisions. 
+        //  To be used as storing space during the solutiuon of the unsteady 
+        //  adjoint equations
+        incompressibleVars(const incompressibleVars& vs);
+
+        //- Clone the incompressibleVars
+        virtual autoPtr<variablesSet> clone() const;
+
 
 
     //- Destructor
@@ -232,7 +246,10 @@ public:
             volScalarField& T();
             */
 
-            //- Write dummy turbulent fields to allow for continuation in
+            //- Transfer the fields of another variablesSet to this
+            virtual void transfer(variablesSet& vars);
+
+            //- Write dummy turbulent fields to allow for continuation in 
             //- multi-point, turbulent runs
             bool write() const;
 };

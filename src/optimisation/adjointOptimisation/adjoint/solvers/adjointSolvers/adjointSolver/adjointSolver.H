@@ -43,6 +43,7 @@ Description
 #include "solver.H"
 #include "objectiveManager.H"
 #include "sensitivity.H"
+#include "primalSolver.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -153,6 +154,14 @@ public:
             {
                 return primalSolverName_;
             }
+           
+            //- Return a const-reference to the primal solver 
+            //- corresponding to this adjoint solver
+            const primalSolver& getPrimalSolver() const;
+
+            //- Return a non const-reference to the primal solver 
+            //- corresponding to this adjoint solver
+            primalSolver& getPrimalSolver();
 
             //- Return a const reference to the objective manager
             const objectiveManager& getObjectiveManager() const;

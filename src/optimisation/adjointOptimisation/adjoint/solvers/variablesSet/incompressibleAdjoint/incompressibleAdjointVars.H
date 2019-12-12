@@ -116,6 +116,9 @@ public:
 
             //- Compute mean fields on the fly
             void computeMeanFields();
+
+            //- Nullify all adjoint fields
+            virtual void nullify();
 };
 
 

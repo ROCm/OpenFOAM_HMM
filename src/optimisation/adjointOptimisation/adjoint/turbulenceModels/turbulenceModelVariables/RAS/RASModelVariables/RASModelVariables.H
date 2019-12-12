@@ -60,9 +60,16 @@ namespace incompressible
 class RASModelVariables
 {
 
+public:
+
+    // Public typedefs
+
+        typedef autoPtr<tmp<volScalarField>> autoTmp;
+
 protected:
 
     // Protected data
+
 
         const fvMesh& mesh_;
         const solverControl& solverControl_;
@@ -74,11 +81,10 @@ protected:
         bool hasTMVar2_;
         bool hasNut_;
         bool hasDist_;
-        volScalarField* TMVar1Ptr_;
-        volScalarField* TMVar2Ptr_;
-        volScalarField* nutPtr_;
-        volScalarField* dPtr_;
-
+        autoTmp TMVar1Ptr_;
+        autoTmp TMVar2Ptr_;
+        autoTmp nutPtr_;
+        autoTmp dPtr_;
         // Base names of the turbulent fields
         word TMVar1BaseName_;
         word TMVar2BaseName_;
@@ -96,24 +102,25 @@ protected:
         autoPtr<volScalarField> nutMeanPtr_;
 
 
-    // Protected functions
+    // Protected Member functions
 
         void allocateInitValues();
         void allocateMeanFields();
+        autoTmp cloneAutoTmp(const autoTmp& source) const;
+        void copyAndRename(volScalarField& f1, volScalarField& f2);
 
 
 private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        RASModelVariables(const RASModelVariables&) = delete;
 
         //- Disallow default bitwise assignment
         void operator=(const RASModelVariables&) = delete;
 
 
 public:
+
 
     //- Runtime type information
     TypeName("RASModelVariables");
@@ -141,6 +148,23 @@ public:
             const fvMesh& mesh,
             const solverControl& SolverControl
         );
+
+        //- Copy constructor
+        //  Will allocate new fields (instead of referencing the ones in the 
+        //  turbulence model), so cannot be used directly to access the fields
+        //  of the turbulence model. 
+        //  Mainly used for checkpointing in unsteady adjoint
+        RASModelVariables
+        (
+            const RASModelVariables& rmv
+        );
+
+        //- Clone
+        //  Will allocate new fields (instead of referencing the ones in the 
+        //  turbulence model), so cannot be used directly to access the fields
+        //  of the turbulence model. 
+        //  Mainly used for checkpointing in unsteady adjoint
+        autoPtr<RASModelVariables> clone() const;
 
 
     // Selectors
@@ -226,6 +250,11 @@ public:
         (
             const incompressible::turbulenceModel& turbulence
         );
+
+        //- Transfer turbulence fields from an another object
+        //  Copies values since the ownership of the original fields is held
+        //  by the turbulence model
+        virtual void transfer(RASModelVariables& rmv);
 };
 
 

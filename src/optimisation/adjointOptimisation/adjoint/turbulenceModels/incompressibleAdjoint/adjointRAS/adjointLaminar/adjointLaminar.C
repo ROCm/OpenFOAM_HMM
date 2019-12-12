@@ -121,18 +121,6 @@ tmp<volVectorField> adjointLaminar::adjointMeanFlowSource()
 }
 
 
-bool adjointLaminar::read()
-{
-    return adjointRASModel::read();
-}
-
-
-void adjointLaminar::correct()
-{
-    adjointTurbulenceModel::correct();
-}
-
-
 const boundaryVectorField& adjointLaminar::adjointMomentumBCSource() const
 {
     // zero contribution
@@ -185,6 +173,24 @@ tmp<volTensorField> adjointLaminar::FISensitivityTerm()
             mesh_,
             dimensionedTensor(dimensionSet(0, 2, -3, 0, 0), Zero)
        );
+}
+
+
+void adjointLaminar::nullify()
+{
+    // Does nothing. No fields to nullify
+}
+
+
+bool adjointLaminar::read()
+{
+    return adjointRASModel::read();
+}
+
+
+void adjointLaminar::correct()
+{
+    adjointTurbulenceModel::correct();
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -72,6 +72,13 @@ variablesSet::variablesSet
 {}
 
 
+autoPtr<variablesSet> variablesSet::clone() const
+{
+    NotImplemented
+    return autoPtr<variablesSet>();
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const word& variablesSet::solverName() const
@@ -183,6 +190,12 @@ tmp<volVectorField> variablesSet::autoCreateMeshMovementField
         dimensionedVector(dims, Zero),
         fixedValueFvPatchVectorField::typeName
     );
+}
+
+
+void variablesSet::transfer(variablesSet& vars) 
+{
+    // Does nothing in base
 }
 
 

@@ -75,10 +75,11 @@ protected:
         const fvMesh& mesh_;
         dictionary dict_;
         Foam::incompressible::adjointSensitivity& adjointSensitivity_;
-        const labelList& sensitivityPatchIDs_;
+        const labelHashSet& sensitivityPatchIDs_;
         label nLaplaceIters_;
         scalar tolerance_;
         volVectorField ma_;
+        volVectorField source_;
 
         //- Wall face sens w.r.t.(x, y.z) //wall face sens w.r.t. (x,y.z)
         autoPtr<boundaryVectorField> meshMovementSensPtr_;
@@ -113,7 +114,7 @@ public:
             const fvMesh& mesh,
             const dictionary& dict,
             Foam::incompressible::adjointSensitivity& adjointSensitivity,
-            const labelList& sensitivityPatchIDs,
+            const labelHashSet& sensitivityPatchIDs,
             const autoPtr<adjointEikonalSolver>& adjointEikonalSolverPtr
         );
 
@@ -126,8 +127,14 @@ public:
        //- Read dict if changed
        virtual bool readDict(const dictionary& dict);
 
+       //- Accumulate source term
+       void accumulateIntegrand(const scalar dt);
+
        //- Calculate the adjoint distance field
        void solve();
+
+       //- Reset source term
+       void reset();
 
        //- Return the sensitivity term depending on da
        boundaryVectorField& meshMovementSensitivities();

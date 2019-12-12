@@ -311,6 +311,9 @@ public:
 
         //- Should the adjoint to the eikonal equation be computed
         bool includeDistance() const;
+
+        //- Nullify all adjoint turbulence model fields and their old times
+        virtual void nullify() = 0;
 };
 
 

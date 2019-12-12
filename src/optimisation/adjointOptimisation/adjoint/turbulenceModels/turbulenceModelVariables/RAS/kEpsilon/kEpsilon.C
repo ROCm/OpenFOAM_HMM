@@ -55,27 +55,36 @@ kEpsilon::kEpsilon
     RASModelVariables(mesh, SolverControl)
 {
     hasTMVar1_ = true;
-    TMVar1Ptr_ = mesh_.getObjectPtr<volScalarField>("k");
+    TMVar1Ptr_.reset
+    (
+        new tmp<volScalarField>
+        (
+            mesh_.lookupObjectRef<volScalarField>("k")
+        )
+    );
     TMVar1BaseName_ = "k";
 
     hasTMVar2_ = true;
-    TMVar2Ptr_ = mesh_.getObjectPtr<volScalarField>("epsilon");
+    TMVar2Ptr_.reset
+    (
+        new tmp<volScalarField>
+        (
+            mesh_.lookupObjectRef<volScalarField>("epsilon")
+        )
+    );
     TMVar2BaseName_ = "epsilon";
 
     hasNut_ = true;
-    nutPtr_ = mesh_.getObjectPtr<volScalarField>("nut");
+    nutPtr_.reset
+    (
+        new tmp<volScalarField>
+        (
+            mesh_.lookupObjectRef<volScalarField>("nut")
+        )
+    );
 
     allocateInitValues();
     allocateMeanFields();
-}
-
-
-kEpsilon::~kEpsilon()
-{
-    // nullify pointer
-    TMVar1Ptr_ = nullptr;
-    TMVar2Ptr_ = nullptr;
-    nutPtr_    = nullptr;
 }
 
 

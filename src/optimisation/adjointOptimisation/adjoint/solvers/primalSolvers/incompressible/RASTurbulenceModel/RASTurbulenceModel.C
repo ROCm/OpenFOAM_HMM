@@ -45,6 +45,16 @@ namespace Foam
     );
 }
 
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+Foam::incompressibleVars& Foam::RASTurbulenceModel::allocateVars()
+{
+    vars_.reset(new incompressibleVars(mesh_, solverControl_()));
+    return getIncoVars();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::RASTurbulenceModel::RASTurbulenceModel
@@ -55,12 +65,12 @@ Foam::RASTurbulenceModel::RASTurbulenceModel
 )
 :
     incompressiblePrimalSolver(mesh, managerType, dict),
-    solverControl_(SIMPLEControl::New(mesh, managerType, *this))
+    solverControl_(SIMPLEControl::New(mesh, managerType, *this)),
+    incoVars_(allocateVars())
 {
-    vars_.reset(new incompressibleVars(mesh, solverControl_()));
     setRefCell
     (
-        vars_().pInst(),
+        incoVars_.pInst(),
         solverControl_().dict(),
         solverControl_().pRefCell(),
         solverControl_().pRefValue()
@@ -76,13 +86,14 @@ void Foam::RASTurbulenceModel::solveIter()
     Info<< "Time = " << time.timeName() << "\n" << endl;
 
     // Grab references
-    autoPtr<incompressible::turbulenceModel>& turbulence = vars_().turbulence();
+    autoPtr<incompressible::turbulenceModel>& turbulence =
+        incoVars_.turbulence();
     turbulence->correct();
 
     solverControl_().write();
 
     // Average fields if necessary
-    vars_().computeMeanFields();
+    incoVars_.computeMeanFields();
 
     time.printExecutionTime(Info);
 }
