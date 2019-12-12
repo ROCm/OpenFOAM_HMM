@@ -34,7 +34,7 @@ Description
 Usage
     \table
         Property     | Description             | Required    | Default value
-        scale        | Time varing scale       | yes         |
+        scale        | Time varying scale      | yes         |
         patch        | patchField providing the raw patch value | yes |
     \endtable
 
@@ -65,7 +65,7 @@ SourceFiles
     scaledFixedValueFvPatchField.C
 
 SeeAlso
-    PatchFunction1.H
+    Foam::PatchFunction1
 
 \*---------------------------------------------------------------------------*/
 
