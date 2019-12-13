@@ -20,6 +20,11 @@ motionSolverLibs (sixDoFRigidBodyMotion);
 
 motionSolver    sixDoFRigidBodyMotion;
 
+// Not necessarily useful here, but can have different motion updates types
+updateControl   timeStep;
+updateInterval  1;
+
+
 patches         (wing);
 innerDistance   0.3;
 outerDistance   1;

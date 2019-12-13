@@ -41,20 +41,33 @@ namespace Foam
 
 void Foam::dynamicFvMesh::readDict()
 {
-    IOdictionary dict
+    IOobject dictHeader
     (
-        IOobject
-        (
-            "dynamicMeshDict",
-            thisDb().time().constant(),
-            thisDb(),
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE,
-            false // Do not register
-        )
+        "dynamicMeshDict",
+        thisDb().time().constant(),
+        thisDb(),
+        IOobject::MUST_READ_IF_MODIFIED,
+        IOobject::NO_WRITE,
+        false // Do not register
     );
 
-    timeControl_.read(dict);
+    if (dictHeader.typeHeaderOk<IOdictionary>(false, false))
+    {
+        IOdictionary dict(dictHeader);
+        timeControl_.read(dict);
+
+        if (!timeControl_.always())
+        {
+            // Feedback about the trigger mechanism
+            Info<< "Controlled mesh update triggered on "
+                << timeControl_.type() << nl;
+        }
+    }
+    else
+    {
+        // Ensure it is pass-through
+        timeControl_.clear();
+    }
 }
 
 
@@ -138,7 +151,8 @@ bool Foam::dynamicFvMesh::controlledUpdate()
         if (!timeControl_.always())
         {
             // Feedback that update has been triggered
-            Info<< "Mesh update triggered based on " << timeControl_.name() << nl;
+            Info<< "Mesh update triggered based on "
+                << timeControl_.type() << nl;
         }
 
         return this->update();
