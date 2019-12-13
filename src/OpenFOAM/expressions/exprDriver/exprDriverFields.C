@@ -26,65 +26,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "exprDriver.H"
-#include "Tuple2.H"
 #include "FieldOps.H"
 #include "Random.H"
-
-// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-//! \cond file-scope
-
-template<class T1, class T2>
-static Foam::Tuple2<T1,T2> findMinData
-(
-    const Field<T1>& vals,
-    const Field<T2>& data
-)
-{
-    typedef Tuple2<T1,T2> retType;
-
-    retType result(pTraits<T1>::max, Zero);
-
-    const label i = findMin(vals);
-    if (i != -1)
-    {
-        result.first() = vals[i];
-        result.second() = data[i];
-    }
-
-    Foam::combineReduce(result, minFirstEqOp<T1>());
-    return result;
-}
-
-
-template<class T1, class T2>
-static Foam::Tuple2<T1,T2> findMaxData
-(
-     const Field<T1>& vals,
-     const Field<T2>& data
-)
-{
-    typedef Tuple2<T1,T2> retType;
-
-    retType result(pTraits<T1>::min, Zero);
-
-    const label i = findMax(vals);
-    if (i != -1)
-    {
-        result.first() = vals[i];
-        result.second() = data[i];
-    }
-
-    Foam::combineReduce(result, maxFirstEqOp<T1>());
-    return result;
-}
-
-//! \endcond
-} // End namespace Foam
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -98,13 +41,11 @@ void Foam::expressions::exprDriver::fill_random
     if (gaussian)
     {
         Random::gaussianGeneratorOp<scalar> gen(seed);
-
         FieldOps::assign(field, field, gen);
     }
     else
     {
         Random::uniformGeneratorOp<scalar> gen(seed);
-
         FieldOps::assign(field, field, gen);
     }
 }
@@ -116,7 +57,7 @@ Foam::point Foam::expressions::exprDriver::getPositionOfMinimum
     const pointField& locs
 )
 {
-    return findMinData(vals, locs).second();
+    return FieldOps::findMinData(vals, locs).second();
 }
 
 
@@ -126,7 +67,7 @@ Foam::point Foam::expressions::exprDriver::getPositionOfMaximum
     const pointField& locs
 )
 {
-    return findMaxData(vals, locs).second();
+    return FieldOps::findMaxData(vals, locs).second();
 }
 
 

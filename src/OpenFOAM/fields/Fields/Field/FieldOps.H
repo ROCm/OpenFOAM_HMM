@@ -39,6 +39,7 @@ SourceFiles
 
 #include "flipOp.H"
 #include "ListOps.H"
+#include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -187,6 +188,26 @@ void ternarySelect
 {
     ternarySelect(result, cond, a, b, noOp());
 }
+
+
+//- Locate the min value in a field and return it and associated data
+//  This can be used, for example, to return a value/position combination.
+template<class T1, class T2>
+Tuple2<T1,T2> findMinData
+(
+    const Field<T1>& vals,
+    const Field<T2>& data
+);
+
+
+//- Locate the max value in a field and return it and associated data
+//  This can be used, for example, to return a value/position combination.
+template<class T1, class T2>
+Tuple2<T1,T2> findMaxData
+(
+    const Field<T1>& vals,
+    const Field<T2>& data
+);
 
 
 } // End namespace FieldOps

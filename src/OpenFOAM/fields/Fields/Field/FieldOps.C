@@ -25,6 +25,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "PstreamCombineReduceOps.H"
 #include <algorithm>
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
@@ -151,6 +152,48 @@ void Foam::FieldOps::ternarySelect
     {
         result[i] = flip(cond[i]) ? a[i] : b[i];
     }
+}
+
+
+template<class T1, class T2>
+Foam::Tuple2<T1,T2> Foam::FieldOps::findMinData
+(
+    const Field<T1>& vals,
+    const Field<T2>& data
+)
+{
+    Tuple2<T1,T2> result(pTraits<T1>::max, Zero);
+
+    const label i = findMin(vals);
+    if (i != -1)
+    {
+        result.first()  = vals[i];
+        result.second() = data[i];
+    }
+
+    Foam::combineReduce(result, minFirstEqOp<T1>());
+    return result;
+}
+
+
+template<class T1, class T2>
+Foam::Tuple2<T1,T2> Foam::FieldOps::findMaxData
+(
+    const Field<T1>& vals,
+    const Field<T2>& data
+)
+{
+    Tuple2<T1,T2> result(pTraits<T1>::min, Zero);
+
+    const label i = findMax(vals);
+    if (i != -1)
+    {
+        result.first()  = vals[i];
+        result.second() = data[i];
+    }
+
+    Foam::combineReduce(result, maxFirstEqOp<T1>());
+    return result;
 }
 
 
