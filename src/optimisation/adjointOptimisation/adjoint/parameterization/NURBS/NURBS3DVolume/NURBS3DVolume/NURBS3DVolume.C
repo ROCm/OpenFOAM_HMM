@@ -1625,7 +1625,10 @@ Foam::tmp<Foam::vectorField> Foam::NURBS3DVolume::getPointsInBox()
     {
         findPointsInBox(localSystemCoordinates_);
     }
-    tmp<vectorField> pointsInBox(new vectorField(mesh_.points(), mapPtr_()));
+    tmp<vectorField> pointsInBox
+    (
+        new vectorField(localSystemCoordinates_, mapPtr_())
+    );
 
     return pointsInBox;
 }
