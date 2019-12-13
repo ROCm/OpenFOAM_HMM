@@ -34,6 +34,7 @@ nearWallFields/findCellParticle.C
 nearWallFields/findCellParticleCloud.C
 
 processorField/processorField.C
+proudmanAcousticPower/proudmanAcousticPower.C
 readFields/readFields.C
 
 setFlow/setFlow.C
