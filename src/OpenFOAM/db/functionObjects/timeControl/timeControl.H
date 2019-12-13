@@ -97,7 +97,7 @@ private:
 
         //- Execution interval steps (timeStep | writeTime).
         //  A value <= 1 means execute at every time-step or writeTime.
-        label intervalSteps_;
+        label intInterval_;
 
         //- Execution interval (clockTime | runTime | cpuTime | adjustable)
         scalar interval_;

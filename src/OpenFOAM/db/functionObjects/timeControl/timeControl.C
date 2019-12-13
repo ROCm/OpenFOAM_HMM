@@ -62,8 +62,8 @@ Foam::timeControl::timeControl
     time_(runTime),
     prefix_(prefix),
     timeControl_(ocAlways),
-    intervalSteps_(0),
-    interval_(-1),
+    intInterval_(0),
+    interval_(0),
     executionIndex_(0)
 {}
 
@@ -100,8 +100,8 @@ bool Foam::timeControl::entriesPresent
 void Foam::timeControl::clear()
 {
     timeControl_ = ocAlways;
-    intervalSteps_ = 0;
-    interval_ = -1;
+    intInterval_ = 0;
+    interval_ = 0;
     executionIndex_ = 0;
 }
 
@@ -110,6 +110,8 @@ void Foam::timeControl::read(const dictionary& dict)
 {
     // Default is timeStep
     timeControl_ = ocTimeStep;
+    intInterval_ = 0;
+    interval_ = 0;
 
     word controlName(prefix_ + "Control");
     word intervalName(prefix_ + "Interval");
@@ -142,7 +144,8 @@ void Foam::timeControl::read(const dictionary& dict)
         case ocTimeStep:
         case ocWriteTime:
         {
-            intervalSteps_ = dict.getOrDefault<label>(intervalName, 0);
+            intInterval_ = dict.getOrDefault<label>(intervalName, 0);
+            interval_ = intInterval_;  // Mirrored as scalar (for output)
             break;
         }
 
@@ -184,8 +187,8 @@ bool Foam::timeControl::execute()
         {
             return
             (
-                (intervalSteps_ <= 1)
-             || !(time_.timeIndex() % intervalSteps_)
+                (intInterval_ <= 1)
+             || !(time_.timeIndex() % intInterval_)
             );
             break;
         }
@@ -197,8 +200,8 @@ bool Foam::timeControl::execute()
                 ++executionIndex_;
                 return
                 (
-                    (intervalSteps_ <= 1)
-                 || !(executionIndex_ % intervalSteps_)
+                    (intInterval_ <= 1)
+                 || !(executionIndex_ % intInterval_)
                 );
             }
             break;

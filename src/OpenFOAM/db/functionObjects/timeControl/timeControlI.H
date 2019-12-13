@@ -57,7 +57,7 @@ inline bool Foam::timeControl::always() const
     return
     (
         (timeControls::ocAlways == timeControl_)
-     || (timeControls::ocTimeStep == timeControl_ && intervalSteps_ <= 1)
+     || (timeControls::ocTimeStep == timeControl_ && intInterval_ <= 1)
     );
 }
 
