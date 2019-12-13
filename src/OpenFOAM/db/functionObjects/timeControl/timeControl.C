@@ -81,7 +81,7 @@ Foam::timeControl::timeControl
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 bool Foam::timeControl::entriesPresent
 (
@@ -95,27 +95,47 @@ bool Foam::timeControl::entriesPresent
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::timeControl::clear()
+{
+    timeControl_ = ocAlways;
+    intervalSteps_ = 0;
+    interval_ = -1;
+    executionIndex_ = 0;
+}
+
+
 void Foam::timeControl::read(const dictionary& dict)
 {
+    // Default is timeStep
+    timeControl_ = ocTimeStep;
+
     word controlName(prefix_ + "Control");
     word intervalName(prefix_ + "Interval");
 
-    // For backward compatibility support the deprecated 'outputControl' option
-    // now superseded by 'writeControl' for compatibility with Time
-    if (prefix_ == "write" && dict.found("outputControl"))
+    if (prefix_ == "write")
     {
-        IOWarningInFunction(dict)
-            << "Using deprecated 'outputControl'" << nl
-            << "    Please use 'writeControl' with 'writeInterval'"
-            << endl;
-        error::warnAboutAge("outputControl", 1606);
+        // TBD: Could have   timeControl_ = ocWriteTime;
 
-        // Change to the old names for this option
-        controlName = "outputControl";
-        intervalName = "outputInterval";
+        if (dict.found("outputControl"))
+        {
+            // Accept deprecated 'outputControl' instead of 'writeControl'
+
+            IOWarningInFunction(dict)
+                << "Using deprecated 'outputControl'" << nl
+                << "    Please use 'writeControl' with 'writeInterval'"
+                << endl;
+            error::warnAboutAge("outputControl", 1606);
+
+            // Change to the old names for this option
+            controlName = "outputControl";
+            intervalName = "outputInterval";
+        }
     }
 
-    timeControl_ = controlNames_.getOrDefault(controlName, dict, ocTimeStep);
+
+    timeControl_ = controlNames_.getOrDefault(controlName, dict, timeControl_);
 
     switch (timeControl_)
     {

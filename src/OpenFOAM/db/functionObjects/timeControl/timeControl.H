@@ -156,6 +156,9 @@ public:
         //- Return the named control enumeration as its 'type'
         inline const word& type() const;
 
+        //- Reset control to 'always' - ie, no intervention
+        void clear();
+
         //- Return the control enumeration
         inline timeControls control() const;
 
