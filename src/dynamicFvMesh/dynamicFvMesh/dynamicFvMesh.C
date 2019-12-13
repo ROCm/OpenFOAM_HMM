@@ -60,12 +60,13 @@ void Foam::dynamicFvMesh::readDict()
         {
             // Feedback about the trigger mechanism
             Info<< "Controlled mesh update triggered on "
-                << timeControl_.type() << nl;
+                << timeControl_.type() << " interval "
+                << timeControl_.interval() << nl;
         }
     }
     else
     {
-        // Ensure it is pass-through
+        // Ensure it is indeed pass-through
         timeControl_.clear();
     }
 }
