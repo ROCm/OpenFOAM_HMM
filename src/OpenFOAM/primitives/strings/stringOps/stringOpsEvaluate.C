@@ -42,41 +42,15 @@ Foam::string Foam::stringOps::evaluate
 {
     /// InfoErr<< "Evaluate " << str.substr(pos, len) << nl;
 
-    size_t end = str.length();
-    if (pos > end)
-    {
-        pos = end;
-    }
-    else if (len != std::string::npos)
-    {
-        len += pos;
+    const auto trimPoints = stringOps::findTrim(str, pos, len);
 
-        if (len < end)
-        {
-            end = len;
-        }
-    }
+    pos = trimPoints.first;
+    len = (trimPoints.second - trimPoints.first);
 
-    // Adjust like inplaceTrim
-
-    // Right
-    while (pos < end && std::isspace(str[end-1]))
-    {
-        --end;
-    }
-
-    // Left
-    while (pos < end && std::isspace(str[pos]))
-    {
-        ++pos;
-    }
-
-    if ((pos >= end) || std::isspace(str[pos]))
+    if (!len)
     {
         return "";
     }
-
-    len = (end - pos);
 
     /// InfoErr<< "Evaluate " << str.substr(pos, len) << nl;
 

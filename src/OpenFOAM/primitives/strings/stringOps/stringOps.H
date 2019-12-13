@@ -36,6 +36,7 @@ SourceFiles
     stringOpsTemplates.C
 
 \*---------------------------------------------------------------------------*/
+
 #ifndef stringOps_H
 #define stringOps_H
 
@@ -48,6 +49,7 @@ SourceFiles
 #include "stringOpsSort.H"
 #include "stringOpsEvaluate.H"
 #include "wordRes.H"
+#include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -256,6 +258,16 @@ namespace stringOps
     //  Return true if a replacement was successful.
     bool inplaceReplaceVar(std::string& s, const word& varName);
 
+
+    //- Find (first, last) non-space locations in string or sub-string.
+    //  This may change to std::string_view in the future.
+    std::pair<size_t, size_t>
+    findTrim
+    (
+        const std::string& s,
+        size_t pos = 0,
+        size_t len = std::string::npos
+    );
 
     //- Return string trimmed of leading whitespace
     string trimLeft(const std::string& s);

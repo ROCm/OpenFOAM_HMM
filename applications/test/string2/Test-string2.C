@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -93,6 +95,30 @@ void testNumericEvaluation(const std::string& s)
 }
 
 
+// Test findTrim - uses '<' and '>' as pseudo-placeholders
+void testFindTrim(const std::string& s)
+{
+    auto pos = s.find('<');
+    auto len = s.find('>');
+
+    // Conform with expected value for substr
+
+    if (pos == std::string::npos) pos = 0; else ++pos;
+    if (len != std::string::npos) len = (len - pos);
+
+    const auto pts = stringOps::findTrim(s, pos, len);
+
+    Info<< "input" << nl
+        << "========" << nl
+        << s << nl
+        << "pos=" << pos << " len=" << int(len) << nl
+        << s.substr(pos, len) << nl
+        << "trim=" << pts.first << " to " << pts.second << nl
+        << s.substr(pts.first, pts.second-pts.first) << nl
+        << "========" << nl;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
@@ -146,6 +172,28 @@ int main(int argc, char *argv[])
         )
         {
             testNumericEvaluation(cstr);
+        }
+    }
+
+
+    // Test findTrim - uses '<' and '>' as pseudo-placeholders
+    {
+        Info<< nl << "Test findTrim" << nl;
+
+        for
+        (
+            const auto& cstr
+          :
+            {
+                "",     // Empty
+                "   \n\t   ",   // whitespace only
+                "   Leading and trailing   ",
+                "   Alt end and trai>ling   ",
+                "   Alt start<   space      ",
+            }
+        )
+        {
+            testFindTrim(cstr);
         }
     }
 

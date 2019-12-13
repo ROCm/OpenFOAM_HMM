@@ -947,15 +947,17 @@ Foam::string Foam::stringOps::trimLeft(const std::string& s)
 {
     if (!s.empty())
     {
-        std::string::size_type beg = 0;
-        while (beg < s.size() && std::isspace(s[beg]))
+        std::string::size_type pos = 0;
+        const auto end = s.length();
+
+        while (pos < end && std::isspace(s[pos]))
         {
-            ++beg;
+            ++pos;
         }
 
-        if (beg)
+        if (pos)
         {
-            return s.substr(beg);
+            return s.substr(pos);
         }
     }
 
@@ -967,15 +969,17 @@ void Foam::stringOps::inplaceTrimLeft(std::string& s)
 {
     if (!s.empty())
     {
-        std::string::size_type beg = 0;
-        while (beg < s.size() && std::isspace(s[beg]))
+        std::string::size_type pos = 0;
+        const auto end = s.length();
+
+        while (pos < end && std::isspace(s[pos]))
         {
-            ++beg;
+            ++pos;
         }
 
-        if (beg)
+        if (pos)
         {
-            s.erase(0, beg);
+            s.erase(0, pos);
         }
     }
 }
@@ -985,15 +989,15 @@ Foam::string Foam::stringOps::trimRight(const std::string& s)
 {
     if (!s.empty())
     {
-        auto n = s.size();
-        while (n && std::isspace(s[n-1]))
+        auto end = s.length();
+        while (end && std::isspace(s[end-1]))
         {
-            --n;
+            --end;
         }
 
-        if (n < s.size())
+        if (end < s.length())
         {
-            return s.substr(0, n);
+            return s.substr(0, end);
         }
     }
 
@@ -1005,35 +1009,74 @@ void Foam::stringOps::inplaceTrimRight(std::string& s)
 {
     if (!s.empty())
     {
-        auto n = s.size();
-        while (n && std::isspace(s[n-1]))
+        auto end = s.length();
+        while (end && std::isspace(s[end-1]))
         {
-            --n;
+            --end;
         }
 
-        s.resize(n);
+        s.erase(end);
     }
+}
+
+
+std::pair<std::size_t, std::size_t>
+Foam::stringOps::findTrim
+(
+    const std::string& s,
+    std::size_t pos,
+    std::size_t len
+)
+{
+    size_t end = s.length();
+    if (pos >= end)
+    {
+        pos = end;
+    }
+    else if (len != std::string::npos)
+    {
+        len += pos;
+
+        if (len < end)
+        {
+            end = len;
+        }
+    }
+
+    // Right = last
+    while (pos < end && std::isspace(s[end-1]))
+    {
+        --end;
+    }
+
+    // Left = first
+    while (pos < end && std::isspace(s[pos]))
+    {
+        ++pos;
+    }
+
+    return std::pair<std::size_t, std::size_t>(pos, end);
 }
 
 
 Foam::string Foam::stringOps::trim(const std::string& str)
 {
-    std::string::size_type beg = 0;
-    std::string::size_type end = str.size();
+    std::string::size_type pos = 0;
+    std::string::size_type end = str.length();
 
     // Right
-    while (beg < end && std::isspace(str[end-1]))
+    while (pos < end && std::isspace(str[end-1]))
     {
         --end;
     }
 
     // Left
-    while (beg < end && std::isspace(str[beg]))
+    while (pos < end && std::isspace(str[pos]))
     {
-        ++beg;
+        ++pos;
     }
 
-    return str.substr(beg, end-beg);
+    return str.substr(pos, end-pos);
 }
 
 
