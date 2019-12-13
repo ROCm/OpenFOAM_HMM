@@ -537,7 +537,7 @@ static Foam::string recursiveExpand
             }
             else
             {
-                // Perhaps received something like '$[ ]' ? - pass through
+                // Something like '$()', '$[]', etc - pass through
                 out += s[index];    // Append char
             }
         }
@@ -654,8 +654,9 @@ static void expandString
                 s.replace(replaceBeg, varBeg - replaceBeg, varValue);
                 varBeg = replaceBeg+varValue.size();
             }
-            else
+            else if (validVariableChar(s[varBeg+1]))
             {
+                // A regular $var expansion without surrounding {}.
                 const auto varLen(findVariableLen(s, varBeg, sigil));
                 const word varName(s.substr(varBeg+1, varLen), false);
 
@@ -673,6 +674,10 @@ static void expandString
 
                 s.replace(varBeg, varName.size()+1, varValue);
                 varBeg += varValue.size();
+            }
+            else
+            {
+                ++varBeg;
             }
         }
         else
@@ -794,8 +799,8 @@ void Foam::stringOps::inplaceExpand
             }
             else if (varEnd == varBeg)
             {
-                // Parsed '${}' or $badChar  - skip over
-                varBeg = varEnd + 1;
+                // Something like '$()', '$[]', etc - pass through
+                ++varBeg;
             }
             else
             {
