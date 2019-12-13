@@ -27,6 +27,8 @@ heatTransferCoeff/heatTransferCoeffModels/fixedReferenceTemperature/fixedReferen
 heatTransferCoeff/heatTransferCoeffModels/localReferenceTemperature/localReferenceTemperature.C
 heatTransferCoeff/heatTransferCoeffModels/ReynoldsAnalogy/ReynoldsAnalogy.C
 
+limitFields/limitFields.C
+
 nearWallFields/nearWallFields.C
 nearWallFields/findCellParticle.C
 nearWallFields/findCellParticleCloud.C
