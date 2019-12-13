@@ -57,7 +57,13 @@ class NURBS3DVolumeCylindrical
 {
 protected:
 
-    // Protected data
+    // Protected Data
+        
+        //- Translation vector
+        vector origin_;
+
+
+    // Protected Member Functions
 
         //- Transform a point from its coordinate system to a cartesian system
         vector transformPointToCartesian(const vector& localCoordinates) const;
