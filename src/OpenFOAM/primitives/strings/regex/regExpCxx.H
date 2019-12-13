@@ -45,6 +45,10 @@ Note
     For example, gcc 4.8 is known to fail.
     For these systems the POSIX implementation or alternative must be used.
 
+Warning
+    This class should not be used directly.
+    Use the Foam::regExp typedef instead.
+
 SourceFiles
     regExpCxxI.H
     regExpCxx.C
@@ -209,7 +213,6 @@ public:
         //- Assign and compile pattern from string.
         //  Matching is case sensitive.
         inline void operator=(const std::string& pattern);
-
 };
 
 

@@ -203,7 +203,7 @@ static void expandLeading(std::string& s)
             }
             else if (s[1] == '/')
             {
-                s.std::string::replace(0, 1, cwd());
+                s.replace(0, 1, cwd());
             }
             break;
         }
@@ -651,13 +651,7 @@ static void expandString
                     )
                 );
 
-                s.std::string::replace
-                (
-                    replaceBeg,
-                    varBeg - replaceBeg,
-                    varValue
-                );
-
+                s.replace(replaceBeg, varBeg - replaceBeg, varValue);
                 varBeg = replaceBeg+varValue.size();
             }
             else
@@ -677,12 +671,7 @@ static void expandString
                     )
                 );
 
-                s.std::string::replace
-                (
-                    varBeg,
-                    varName.size()+1,
-                    varValue
-                );
+                s.replace(varBeg, varName.size()+1, varValue);
                 varBeg += varValue.size();
             }
         }
@@ -842,29 +831,19 @@ void Foam::stringOps::inplaceExpand
                     // Found and ":+" alternative
                     // Not-found and ":-" alternative
 
-                    s.std::string::replace
-                    (
-                        varBeg,
-                        varEnd - varBeg + 1,
-                        altValue
-                    );
+                    s.replace(varBeg, varEnd - varBeg + 1, altValue);
                     varBeg += altValue.size();
                 }
                 else if (fnd.found())
                 {
                     // Found: use value
-                    s.std::string::replace
-                    (
-                        varBeg,
-                        varEnd - varBeg + 1,
-                        *fnd
-                    );
+                    s.replace(varBeg, varEnd - varBeg + 1, *fnd);
                     varBeg += (*fnd).size();
                 }
                 else
                 {
                     // Not-found: empty value
-                    s.std::string::erase(varBeg, varEnd - varBeg + 1);
+                    s.erase(varBeg, varEnd - varBeg + 1);
                 }
             }
         }

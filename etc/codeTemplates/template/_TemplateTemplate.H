@@ -67,7 +67,7 @@ class CLASSNAME
 :
     public baseClassName
 {
-    // Private data
+    // Private Data
 
         dataType data_;
 
@@ -83,10 +83,21 @@ class CLASSNAME
 
 public:
 
-    // Static data members
+    // Static Data Members
 
         //- Static data someStaticData
         static const dataType staticData;
+
+    // Generated Methods
+
+//        //- Construct null
+//        CLASSNAME() = default;
+//
+//        //- Copy construct
+//        CLASSNAME(const CLASSNAME&) = default;
+//
+//        //- Copy assignment
+//        CLASSNAME& operator=(const CLASSNAME&) = default;
 
 
     // Constructors

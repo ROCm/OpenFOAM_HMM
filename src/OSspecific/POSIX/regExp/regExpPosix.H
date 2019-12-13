@@ -33,9 +33,20 @@ Description
     The PCRE '(?i)' extension is provided to compile the regular expression
     as being case-insensitive.
 
-See also
+SeeAlso
     The manpage regex(7) for more information about POSIX regular expressions.
     These differ somewhat from \c Perl and \c sed regular expressions.
+
+SeeAlso
+    Foam::regExp and Foam::regExpCxx
+
+Warning
+    This class should not be used directly.
+    Use the Foam::regExp typedef instead.
+
+\deprecated
+    This class will be superseded by Foam::regExpCxx as compiler support
+    for regular expressions continues to improve.
 
 SourceFiles
     regExpPosixI.H
@@ -48,13 +59,6 @@ SourceFiles
 
 #include <regex.h>
 #include <string>
-
-// Transitional feature - support std::smatch as per C++11 regex
-#undef Foam_regExpPosix_cxx
-
-#ifdef Foam_regExpPosix_cxx
-#include <regex>
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -80,18 +84,13 @@ public:
 
     // Public Types
 
-        #ifdef Foam_regExpPosix_cxx
-        //- Type for matches, as per C++11 regex
-        typedef std::smatch results_type;
-        #else
-        //- Type for matches, use OpenFOAM SubStrings container
+        //- Type for matches - similar to std::smatch
         typedef SubStrings<std::string> results_type;
-        #endif
 
 
     // Static Member Data
 
-        //- The default grammar (unused) - for future-compatibility
+        //- Grammar (unused) - for compatibility with Foam::regExpCxx
         static int grammar;
 
 

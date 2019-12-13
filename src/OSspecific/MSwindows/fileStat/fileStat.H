@@ -159,14 +159,6 @@ public:
 
         friend Istream& operator>>(Istream& is, fileStat& fs);
         friend Ostream& operator<<(Ostream& os, const fileStat& fs);
-
-
-    // Housekeeping
-
-        //- Deprecated(2019-04) Was file-stat successful?
-        //  \deprecated(2019-04) - use valid() method
-        bool isValid() const { return valid_; }
-
 };
 
 
