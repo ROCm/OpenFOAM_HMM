@@ -21,6 +21,17 @@ We thus currently do not build with ParaView-5.7. If building plugins or with
 Catalyst, please use the latest ParaView-5.6 version instead for now.
 Or simply use ParaView with the regular, builtin VTK readers.
 
+
+### Gcc-9
+
+In the newest version, gcc will emit warnings that some compiler-generated
+copy constructors and assignment operators are deprecated.
+It is possible to suppress these with the `-Wno-deprecated-copy` flag
+until such time that these occurances are changd in the OpenFOAM source code.
+However, be aware that doing so may prevent CMake-based tool chains
+from working properly.
+
+
 ### Windows cross-compilation
 
 The reacting Euler multiphase solvers currently do not build for

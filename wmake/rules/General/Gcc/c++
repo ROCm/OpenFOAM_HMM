@@ -13,7 +13,7 @@ ptFLAGS     = -DNoRepository -ftemplate-depth-100
 c++WARN     = \
     -Wall -Wextra -Wold-style-cast \
     -Wnon-virtual-dtor -Wno-unused-parameter -Wno-invalid-offsetof \
-    -Wno-attributes -Wno-unknown-pragmas -Wno-deprecated-copy
+    -Wno-attributes -Wno-unknown-pragmas
 
 c++LESSWARN = \
     -Wno-old-style-cast -Wno-unused-local-typedefs -Wno-array-bounds \
