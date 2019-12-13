@@ -134,20 +134,18 @@ public:
         //- Generic concatenate tokens to space-separated string.
         inline static string evaluate(const entry& e);
 
+        //- Inplace expand expression with dictionary entries
+        static void inplaceExpand
+        (
+            std::string& s,
+            const dictionary& dict
+        );
+
         //- Expand expression with dictionary entries
         static expressions::exprString expand
         (
             const std::string& str,
             const dictionary& dict
-        );
-
-        //- Get and expand expression with dictionary entries,
-        //- and strip C/C++ comments from the input
-        static expressions::exprString getExpression
-        (
-            const word& name,
-            const dictionary& dict,
-            const bool stripComments = false
         );
 
 

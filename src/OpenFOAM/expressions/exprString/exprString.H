@@ -115,7 +115,25 @@ public:
     ~exprString() = default;
 
 
-    // Member Functions
+    // Static Member Functions
+
+        //- Inplace expansion with dictionary variables,
+        //- and strip C/C++ comments from the input
+        static void inplaceExpand
+        (
+            std::string& str,
+            const dictionary& dict,
+            const bool stripComments = true
+        );
+
+        //- Get and expand expression with dictionary entries,
+        //- optionally strip C/C++ comments from the input
+        static exprString getExpression
+        (
+            const word& name,
+            const dictionary& dict,
+            const bool stripComments = false
+        );
 
         //- Copy convert string to exprString.
         //  No expansions, know what you are doing.
@@ -124,6 +142,9 @@ public:
         //- Move convert string to exprString.
         //  No expansions, know what you are doing.
         inline static exprString toExpr(std::string&& str);
+
+
+    // Member Functions
 
         //- Inplace expansion with dictionary variables,
         //- and strip C/C++ comments from the input

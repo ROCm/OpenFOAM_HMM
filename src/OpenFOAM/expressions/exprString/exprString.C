@@ -29,6 +29,44 @@ License
 #include "stringOps.H"
 #include "expressionEntry.H"
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+void Foam::expressions::exprString::inplaceExpand
+(
+    std::string& str,
+    const dictionary& dict,
+    const bool stripComments
+)
+{
+    if (stripComments)
+    {
+        stringOps::inplaceRemoveComments(str);
+    }
+
+    exprTools::expressionEntry::inplaceExpand(str, dict);
+}
+
+
+Foam::expressions::exprString
+Foam::expressions::exprString::getExpression
+(
+    const word& name,
+    const dictionary& dict,
+    const bool stripComments
+)
+{
+    string orig(dict.get<string>(name));
+
+    // No validation
+    expressions::exprString expr;
+    expr.assign(std::move(orig));
+
+    inplaceExpand(expr, dict, stripComments);
+
+    return expr;
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::expressions::exprString&
@@ -38,22 +76,11 @@ Foam::expressions::exprString::expand
     const bool stripComments
 )
 {
-    if (stripComments)
-    {
-        stringOps::inplaceRemoveComments(*this);
-    }
+    inplaceExpand(*this, dict, stripComments);
 
-    // Not quite as efficient as it could be, but wish to have a copy
-    // of the original input for the sake of reporting errors
-
-    if (std::string::npos != find('$'))
-    {
-        (*this) = exprTools::expressionEntry::expand(*this, dict);
-
-        #ifdef FULLDEBUG
-        (void)valid();
-        #endif
-    }
+    #ifdef FULLDEBUG
+    (void)valid();
+    #endif
 
     return *this;
 }

@@ -81,70 +81,8 @@ addNamedToRunTimeSelectionTable
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-namespace
-{
-// Same code as in stringOps.C
-
-// Acceptable values for $variable names.
-//
-// Similar to word::valid(), except we don't have the benefit of a parser
-// to filter out other unacceptable entries for us.
-//
-// Does not currently accept '/' in a variable name.
-// We would like "$file/$name" to expand as two variables.
-static inline bool validVariableChar(char c)
-{
-    return
-    (
-        std::isalnum(c)
-     || c == '.'
-     || c == ':'
-     || c == '_'
-    );
-}
-
-
-// For input string of "$variable with other" return the length of
-// the variable.
-//
-// Intentionally will not capture ':+', ':-' alterations. Use ${ .. } for that
-static inline std::string::size_type findVariableLen
-(
-    const std::string& s,
-    std::string::size_type pos,
-    const char sigil = '$'
-)
-{
-    std::string::size_type len = 0;
-
-    if (pos < s.length())
-    {
-        if (s[pos] == sigil)
-        {
-            // Skip leading '$' in the count!
-            ++pos;
-        }
-
-        for
-        (
-            auto iter = s.cbegin() + pos;
-            iter != s.cend() && validVariableChar(*iter);
-            ++iter
-        )
-        {
-            ++len;
-        }
-    }
-
-    return len;
-}
-
-} // End anonymous namespace
-
-
 namespace Foam
 {
-
 inline static const entry* getVariableOrDie
 (
     const word& name,
@@ -169,7 +107,6 @@ inline static const entry* getVariableOrDie
 
     return eptr;
 }
-
 
 } // End namespace Foam
 
@@ -200,60 +137,51 @@ Foam::exprTools::expressionEntry::New
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::expressions::exprString
-Foam::exprTools::expressionEntry::expand
+void Foam::exprTools::expressionEntry::inplaceExpand
 (
-    const std::string& orig,
+    std::string& s,
     const dictionary& dict
 )
 {
     // This is much like stringOps::inplaceExpand
     constexpr const char sigil = '$';
 
-    // Copy to a exprString, without any validation (using assign)
-    expressions::exprString s;
-    s.assign(orig);
+    // Step 1:
+    // Handle $[] special expansions first
 
     std::string::size_type varBeg = 0;
 
     while
     (
         (varBeg = s.find(sigil, varBeg)) != std::string::npos
-     // && varBeg < s.size()-1
+     && varBeg < s.size()-1
     )
     {
-        // No handling of escape characters
-
-        if (varBeg == s.size()-1)
+        if (varBeg && s[varBeg-1] == '\\')
         {
-            // Die if we ended with a '$'
-            FatalErrorInFunction
-                << "'" << sigil << "' found at end of " << s
-                << "(originally " << orig << ')' << nl
-                << exit(FatalError);
+            // Escaped character - pass through
+            ++varBeg;
+            continue;
         }
-
-        std::string::size_type varEnd = varBeg;
-        std::string::size_type delim = 0;
-
-        word castTo, varName;
 
         if (s[varBeg+1] == '[')
         {
             // An expression pattern with $[...]
 
-            varEnd = s.find(']', varBeg);
-            delim = 1;
+            std::string::size_type varEnd = s.find(']', varBeg);
+            std::string::size_type delim = 1;
 
             if (varEnd == std::string::npos)
             {
+                // Parsed '$[...' without closing ']' - error
                 FatalErrorInFunction
-                    << "No correct terminating ']' found in " << s
-                    << " (originally " << orig << ")" << nl
+                    << "No correct terminating ']' found in " << s << nl
                     << exit(FatalError);
+                break;
             }
 
             // Look for embedded (type) cast
+            word castTo, varName;
 
             const auto lparen = varBeg+2;
             if (lparen < s.size() && s[lparen] == '(')
@@ -276,8 +204,7 @@ Foam::exprTools::expressionEntry::expand
                     }
 
                     err << " substring "
-                        << s.substr(varBeg, varEnd-varBeg)
-                        << " (" << orig << ')' << nl
+                        << s.substr(varBeg, varEnd-varBeg) << nl
                         << exit(FatalError);
                 }
 
@@ -292,86 +219,63 @@ Foam::exprTools::expressionEntry::expand
                 );
             }
 
+            // Likely no spaces there, but for extra safety...
             stringOps::inplaceTrim(varName);
-        }
-        else
-        {
-            if (s[varBeg+1] == '{')
+
+            // Allow recursive plain expansion for the *variable* name.
+            // This means "$[(vector) var${index] ]" should work
+            stringOps::inplaceExpand(varName, dict);
+
+            // Length of original text to replace (incl. decorators)
+            const auto replaceLen = (varEnd - varBeg + 1);
+
+            const entry* eptr = getVariableOrDie(varName, dict);
+
+            std::string varValue;
+
+            if (castTo.empty())
             {
-                varEnd = s.find('}', varBeg);
-                delim = 1;
+                // Serialized with spaces
+                varValue = eptr->stream().toString();
             }
             else
             {
-                // Handling regular $var construct
-                varEnd += findVariableLen(s, varBeg, sigil);
+                varValue = expressionEntry::New(castTo)->toExpr(*eptr);
             }
 
-            if (varEnd == std::string::npos)
-            {
-                // Likely parsed '${...' without closing '}' - abort
-                break;
-            }
-            else if (varEnd == varBeg)
-            {
-                // Parsed '${}' or $badChar  - skip over or die?
-                FatalErrorInFunction
-                    << "No valid character after the $ in " << s
-                    << "(originally " << orig << ")" << endl
-                    << exit(FatalError);
-            }
-            else
-            {
-                // Assign - assumed to be validated with findVariableLen()
-                varName.assign
-                (
-                    s.substr(varBeg + 1 + delim, varEnd - varBeg - 2*delim)
-                );
-            }
-        }
-
-
-        // Length of original text to replace (incl. decorators)
-        const auto replaceLen = (varEnd - varBeg + 1);
-
-        const entry* eptr = getVariableOrDie(varName, dict);
-
-        std::string varValue;
-
-        if (castTo.empty())
-        {
-            // Serialized with spaces
-            varValue = eptr->stream().toString();
+            s.std::string::replace(varBeg, replaceLen, varValue);
+            varBeg += varValue.size();
         }
         else
         {
-            varValue = expressionEntry::New(castTo)->toExpr(*eptr);
+            ++varBeg;
         }
-
-        s.std::string::replace(varBeg, replaceLen, varValue);
-        varBeg += varValue.size();
     }
 
-    return s;
+
+    // Step 2:
+    // Handle all ${}, $var and ${{ ... }} expansions.
+    // - this is done second such that $[(vector) xyz] entries will have
+    //   been properly expanded by this stage
+
+    stringOps::inplaceExpand(s, dict);
 }
 
 
 Foam::expressions::exprString
-Foam::exprTools::expressionEntry::getExpression
+Foam::exprTools::expressionEntry::expand
 (
-    const word& name,
-    const dictionary& dict,
-    const bool stripComments
+    const std::string& orig,
+    const dictionary& dict
 )
 {
-    string str(dict.get<string>(name));
+    // Copy without validation (use assign)
+    expressions::exprString s;
+    s.assign(orig);
 
-    if (stripComments)
-    {
-        stringOps::inplaceRemoveComments(str);
-    }
+    inplaceExpand(s, dict);
 
-    return expand(str, dict);
+    return s;
 }
 
 
