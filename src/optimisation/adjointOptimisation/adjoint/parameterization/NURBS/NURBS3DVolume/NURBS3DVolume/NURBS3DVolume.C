@@ -1786,6 +1786,51 @@ Foam::tmp<Foam::volTensorField> Foam::NURBS3DVolume::getDxCellsDb
 }
 
 
+Foam::label Foam::NURBS3DVolume::nUSymmetry() const
+{
+    label nU(basisU_.nCPs());
+    if (nU % 2 == 0)
+    {
+        nU /=2;
+    }
+    else
+    {
+        nU = (nU - 1)/2 + 1;
+    }    
+    return nU;
+}
+
+
+Foam::label Foam::NURBS3DVolume::nVSymmetry() const
+{
+    label nV(basisV_.nCPs());
+    if (nV % 2 == 0)
+    {
+        nV /=2;
+    }
+    else
+    {
+        nV = (nV - 1)/2 + 1;
+    }    
+    return nV;
+}
+
+
+Foam::label Foam::NURBS3DVolume::nWSymmetry() const
+{
+    label nW(basisW_.nCPs());
+    if (nW % 2 == 0)
+    {
+        nW /=2;
+    }
+    else
+    {
+        nW = (nW - 1)/2 + 1;
+    }    
+    return nW;
+}
+
+
 void Foam::NURBS3DVolume::writeCps(const string fileName) const
 {
     const label nCPsU = basisU_.nCPs();
