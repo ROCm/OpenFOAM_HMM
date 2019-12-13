@@ -213,7 +213,7 @@ void Foam::exprValuePointPatchField<Type>::write(Ostream& os) const
 
     this->writeEntry("value",os);
 
-    // driver_.writeCommon(os,this->debug_ || debug);
+    driver_.writeCommon(os,this->debug_ || debug);
 }
 
 // ************************************************************************* //

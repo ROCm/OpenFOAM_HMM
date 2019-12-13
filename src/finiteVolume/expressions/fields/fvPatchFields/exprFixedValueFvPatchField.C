@@ -208,7 +208,7 @@ void Foam::exprFixedValueFvPatchField<Type>::write(Ostream& os) const
     fixedValueFvPatchField<Type>::write(os);
     expressions::patchExprFieldBase::write(os);
 
-    // driver_.writeCommon(os, this->debug_ || debug);
+    driver_.writeCommon(os, this->debug_ || debug);
 }
 
 

@@ -302,7 +302,7 @@ void Foam::exprMixedFvPatchField<Type>::write(Ostream& os) const
     mixedFvPatchField<Type>::write(os);
     expressions::patchExprFieldBase::write(os);
 
-    // driver_.writeCommon(os, this->debug_ || debug);
+    driver_.writeCommon(os, this->debug_ || debug);
 }
 
 
