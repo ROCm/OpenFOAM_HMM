@@ -12,7 +12,7 @@ wmakeCheckPwd "$WM_PROJECT_DIR/applications" 2>/dev/null || {
     exit 1
 }
 
-. $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
+. "$WM_PROJECT_DIR"/wmake/scripts/AllwmakeParseArguments
 
 #------------------------------------------------------------------------------
 
