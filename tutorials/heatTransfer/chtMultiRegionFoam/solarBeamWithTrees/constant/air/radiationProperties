@@ -1,0 +1,104 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1906                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      radiationProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+radiation       on;
+
+radiationModel  fvDOM;
+
+fvDOMCoeffs
+{
+    nPhi        3;      // azimuthal angles in PI/2 on X-Y.(from Y to X)
+    nTheta      6;      // polar angles in PI (from Z to X-Y plane)
+    maxIter     25;     // maximum number of iterations
+    tolerance   2e-2;   // convergence criteria for radiation iteration
+
+    useSolarLoad      false;
+
+    useExternalBeam   true;
+
+    // Energy spectrum for the external beam
+    spectralDistribution (2 1);
+}
+
+solarCalculatorCoeffs
+{
+    // (solar calculator)
+    sunDirectionModel   sunDirTracking; //sunDirConstant
+
+    // Time interval to update Sun position (sec)
+    sunTrackingUpdateInterval 800;
+
+    //sunDirection        (1 0 -1);
+
+    localStandardMeridian   9;      // GMT offset (hours)
+    startDay                204;    // day of the year
+    startTime               15;     // time of the day (hours decimal)
+    longitude               139.74; // longitude (degrees)
+    latitude                35.658; // latitude (degrees)
+
+
+    // Grid orientation
+    gridUp                  (0 0 1);
+    gridEast                (1 0 0);
+
+    // sunLoadConstant-sunLoadFairWeatherConditions-SunLoadTheoreticalMaximum;
+    sunLoadModel sunLoadFairWeatherConditions;//sunLoadConstant;//;
+
+    // Sun load constant model
+    //directSolarRad  500;    // [w/m2]
+    //diffuseSolarRad 0;     // [w/m2]
+
+    // Fair Weather Conditions Model Constants.
+    // Calculate beta from the Solar calculator or input
+    A       500;        // Apparent solar irradiation at air mass m = 0
+    B       0.142;      // Atmospheric extinction coefficient
+    //beta    45;         // Solar altitude (in degrees) above the horizontal
+
+    // Theoretical maximum model constants
+    Setrn       10;
+    SunPrime    1;
+
+    // Ground reflectivity
+    groundReflectivity 0.2;
+
+    // Solar diffusivity constants
+    C   0.058;  // Model constant
+
+}
+
+// Number of flow iterations per radiation iteration
+solverFreq 10;
+
+absorptionEmissionModel multiBandZoneAbsorptionEmission;
+
+multiBandZoneAbsorptionEmissionCoeffs
+{
+    absorptivity  (0.01 0.01);
+    emissivity    (0.01 0.01);
+
+    zones
+    {
+        absorptivity  ("trees" (20 20));
+        emissivity    ("trees" (20 20));
+    }
+}
+
+scatterModel    none;
+
+sootModel       none;
+
+// ************************************************************************* //

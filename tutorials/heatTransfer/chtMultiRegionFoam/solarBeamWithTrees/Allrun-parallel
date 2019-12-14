@@ -1,0 +1,25 @@
+#!/bin/sh
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
+
+# Setup case
+./Allrun.pre
+
+#-- Run in parallel
+
+# Decompose
+runApplication decomposePar -allRegions -constant
+
+# Set the initial fields
+restore0Dir
+
+runParallel $(getApplication)
+
+# Reconstruct
+runApplication reconstructPar -allRegions
+
+echo
+echo "Use paraFoam -touch-all to create files for paraview post-processing"
+echo
+
+#------------------------------------------------------------------------------
