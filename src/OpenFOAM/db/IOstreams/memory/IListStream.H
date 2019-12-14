@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -128,7 +128,7 @@ public:
 
 /*---------------------------------------------------------------------------*\
                          Class IListStream Declaration
-\*----------------------------------------------d-----------------------------*/
+\*---------------------------------------------------------------------------*/
 
 //- An ISstream with internal List storage
 class IListStream
@@ -158,7 +158,7 @@ public:
         //- Move construct from List
         IListStream
         (
-            List<char>&& buffer,
+            ::Foam::List<char>&& buffer,  // Fully qualify (issue #1521)
             streamFormat format=ASCII,
             versionNumber version=currentVersion,
             const Foam::string& name="input"
