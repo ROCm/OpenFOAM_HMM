@@ -81,39 +81,6 @@ addNamedToRunTimeSelectionTable
 } // End namespace Foam
 
 
-// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    static label getPatchID(const fvMesh& mesh, const word& patchName)
-    {
-        const auto& bMesh = mesh.boundaryMesh();
-
-        const label patchId = bMesh.findPatchID(patchName);
-
-        if (patchId < 0)
-        {
-            FatalErrorInFunction
-                << "No patch " << patchName << " found in "
-                << flatOutput(bMesh.names()) << nl
-                << exit(FatalError);
-        }
-        return patchId;
-    }
-
-
-    static inline const polyPatch& findPolyPatch
-    (
-        const fvMesh& mesh,
-        const word& patchName
-    )
-    {
-        return mesh.boundaryMesh()[getPatchID(mesh, patchName)];
-    }
-
-} // End namespace Foam
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::expressions::volumeExpr::parseDriver::parseDriver

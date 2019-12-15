@@ -324,7 +324,7 @@ void verification_QRMatrix
     // QRMatrix Constructors
     #if (0 | RUNALL)
     {
-        QRMatrix<MatrixType> QRNull();
+        QRMatrix<MatrixType> QRNull;
     }
     #endif
 
@@ -967,14 +967,14 @@ void verification_tsqr
     typedef RectangularMatrix<Type> RMatrix;
 
     // Size of the full matrix and its partitions
-    const label nColsSum = rndGen.position(1, 100);
-    const label qParts = rndGen.position(10, 30);
+    const label nColsSum = rndGen.position<label>(1, 100);
+    const label qParts = rndGen.position<label>(10, 30);
     List<label> mRowsList(qParts, Zero);
 
     label mRowsSum = 0;
     for (label i = 0; i < qParts; ++i)
     {
-        const label mRows = rndGen.position(nColsSum, 10*nColsSum);
+        const label mRows = rndGen.position<label>(nColsSum, 10*nColsSum);
         mRowsList[i] = mRows;
         mRowsSum += mRows;
     }
@@ -1084,7 +1084,7 @@ void verification_backSubstitution
     {
         Info<< nl << "# A*X = b:" << nl;
         const RMatrix AX(A*X);
-        equal(AX, b, verbose, 1e-3, 1e-3);
+        equal(AX, b, verbose, 10, 1e-3, 1e-3);
     }
     #endif
 }
@@ -1170,7 +1170,7 @@ int main(int argc, char *argv[])
 
         for (label i = 0; i < numberOfTests; ++i)
         {
-            const label mRows = rndGen.position(1, 50);
+            const label mRows = rndGen.position<label>(1, 50);
             Info<< nl << nl << "# Random A with random mRows = " << mRows << nl;
 
             SMatrix A(makeRandomMatrix<SMatrix>({mRows, mRows}, rndGen));
@@ -1199,8 +1199,8 @@ int main(int argc, char *argv[])
 
         for (label i = 0; i < numberOfTests; ++i)
         {
-            const label mRows = rndGen.position(1, 50);
-            const label nCols = rndGen.position(1, 50);
+            const label mRows = rndGen.position<label>(1, 50);
+            const label nCols = rndGen.position<label>(1, 50);
             Info<< nl << nl << "# Random matrix A with"
                 << " random mRows = " << mRows
                 << " random nCols = " << nCols << nl;
@@ -1231,7 +1231,7 @@ int main(int argc, char *argv[])
 
         for (label i = 0; i < numberOfTests; ++i)
         {
-            const label mRows = rndGen.position(1, 50);
+            const label mRows = rndGen.position<label>(1, 50);
             Info<< nl << nl << "# Random A with random mRows = " << mRows << nl;
 
             SCMatrix A({mRows, mRows}, complex(0, 0));
@@ -1258,7 +1258,7 @@ int main(int argc, char *argv[])
 
         for (label i = 0; i < numberOfTests; ++i)
         {
-            const label mRows = rndGen.position(1, 50);
+            const label mRows = rndGen.position<label>(1, 50);
             Info<< nl << nl << "# Random A with random mRows = " << mRows << nl;
 
             SCMatrix A(makeRandomMatrix<SCMatrix>({mRows, mRows}, rndGen));
@@ -1287,8 +1287,8 @@ int main(int argc, char *argv[])
 
         for (label i = 0; i < numberOfTests; ++i)
         {
-            const label mRows = rndGen.position(1, 50);
-            const label nCols = rndGen.position(1, 50);
+            const label mRows = rndGen.position<label>(1, 50);
+            const label nCols = rndGen.position<label>(1, 50);
             Info<< nl << nl << "# Random matrix A with"
                 << " random mRows = " << mRows
                 << " random nCols = " << nCols << nl;
@@ -1363,8 +1363,8 @@ int main(int argc, char *argv[])
 
             for (label i = 0; i < numberOfTests; ++i)
             {
-                const label mRows = rndGen.position(20, 50);
-                const label pCols = rndGen.position(20, 50);
+                const label mRows = rndGen.position<label>(20, 50);
+                const label pCols = rndGen.position<label>(20, 50);
                 Info<< nl << nl << "# Random square matrix A with"
                     << " random mRows = " << mRows
                     << " random nCols = " << mRows << nl;
@@ -1422,8 +1422,8 @@ int main(int argc, char *argv[])
 
             for (label i = 0; i < numberOfTests; ++i)
             {
-                const label mRows = rndGen.position(20, 50);
-                const label pCols = rndGen.position(20, 50);
+                const label mRows = rndGen.position<label>(20, 50);
+                const label pCols = rndGen.position<label>(20, 50);
                 Info<< nl << nl << "# Random square matrix A with"
                     << " random mRows = " << mRows
                     << " random nCols = " << mRows << nl;
