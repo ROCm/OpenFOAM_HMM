@@ -29,14 +29,9 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline Foam::Tensor2D<Cmpt>::Tensor2D()
-{}
-
-
-template<class Cmpt>
 inline Foam::Tensor2D<Cmpt>::Tensor2D(const Foam::zero)
 :
-    Tensor2D::msType(Zero)
+    Tensor2D::vsType(Zero)
 {}
 
 
@@ -46,7 +41,7 @@ inline Foam::Tensor2D<Cmpt>::Tensor2D
     const VectorSpace<Tensor2D<Cmpt>, Cmpt, 4>& vs
 )
 :
-    Tensor2D::msType(vs)
+    Tensor2D::vsType(vs)
 {}
 
 
@@ -61,7 +56,7 @@ inline Foam::Tensor2D<Cmpt>::Tensor2D(const SymmTensor2D<Cmpt>& st)
 template<class Cmpt>
 inline Foam::Tensor2D<Cmpt>::Tensor2D(const SphericalTensor2D<Cmpt>& st)
 :
-    Tensor2D::msType(Zero)
+    Tensor2D::vsType(Zero)
 {
     this->v_[XX] = st.ii();
     this->v_[YY] = st.ii();
@@ -95,7 +90,7 @@ inline Foam::Tensor2D<Cmpt>::Tensor2D
 template<class Cmpt>
 inline Foam::Tensor2D<Cmpt>::Tensor2D(Istream& is)
 :
-    Tensor2D::msType(is)
+    Tensor2D::vsType(is)
 {}
 
 

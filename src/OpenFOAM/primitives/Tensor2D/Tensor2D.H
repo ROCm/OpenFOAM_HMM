@@ -82,11 +82,13 @@ public:
     //- Component labeling enumeration
     enum components { XX, XY, YX, YY };
 
-
-    // Constructors
+    // Generated Methods
 
         //- Construct null
-        inline Tensor2D();
+        Tensor2D() = default;
+
+
+    // Constructors
 
         //- Construct initialized to zero
         inline Tensor2D(const Foam::zero);
