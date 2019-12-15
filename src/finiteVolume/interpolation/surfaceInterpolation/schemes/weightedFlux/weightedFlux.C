@@ -82,7 +82,7 @@ void Foam::weightedFlux<Type>::makeDeltas() const
     const labelUList& owner = mesh.owner();
     const labelUList& neighbour = mesh.neighbour();
 
-    const surfaceVectorField n = mesh.Sf()/mesh.magSf();
+    const surfaceVectorField n(mesh.Sf()/mesh.magSf());
 
     const vectorField& C = mesh.cellCentres();
     const vectorField& Cf = mesh.faceCentres();
@@ -104,7 +104,7 @@ void Foam::weightedFlux<Type>::makeDeltas() const
         const fvPatch& currPatch = mesh.boundary()[patchi];
 
         // Patch normal vector
-        const vectorField nPatch = currPatch.Sf()/currPatch.magSf();
+        const vectorField nPatch(currPatch.Sf()/currPatch.magSf());
 
         // Processor patch
         if (currPatch.coupled())
@@ -201,11 +201,13 @@ Foam::weightedFlux<Type>::interpolate
             // e.g. processor patches have to calculated separately
 
             const labelUList& pOwner = mesh.boundary()[patchi].faceCells();
-            scalarField sigmaN =
-                sigma_.boundaryField()[patchi].patchNeighbourField();
+            scalarField sigmaN
+            (
+                sigma_.boundaryField()[patchi].patchNeighbourField()
+            );
 
-            Field<Type> vfO = vf.boundaryField()[patchi].patchInternalField();
-            Field<Type> vfN = vf.boundaryField()[patchi].patchNeighbourField();
+            Field<Type> vfO(vf.boundaryField()[patchi].patchInternalField());
+            Field<Type> vfN(vf.boundaryField()[patchi].patchNeighbourField());
 
             forAll(pOwner, facei)
             {
