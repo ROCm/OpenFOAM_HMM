@@ -59,10 +59,11 @@
 Script="${0##*/}"           # Use 'Script' for error messages in wmakeFunctions
 . "${0%/*}/scripts/wmakeFunctions"              # Source wmake functions
 
+unset optHelpFull
 usage() {
     exec 1>&2
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
-    cat<<USAGE
+    cat<<HELP_HEAD
 
 Usage: $Script [OPTION] [dir]
        $Script [OPTION] target [dir [MakeDir]]
@@ -70,27 +71,37 @@ Usage: $Script [OPTION] [dir]
 options:
   -s | -silent      Quiet mode (does not echo commands)
   -a | -all         wmake all sub-directories, running Allwmake if present
-  -q | -queue       wmakeCollect all sub-directories, running Allwmake if present
+  -q | -queue       wmakeCollect sub-directories, running Allwmake if present
   -k | -keep-going  Keep going even when errors occur (-non-stop)
-  -debug            Define c++DBUG='-DFULLDEBUG -g -O0' as override
-  -j                Compile using all local cores/hyperthreads
-  -jN | -j N        Compile using N cores/hyperthreads
-  -no-scheduler     Disable scheduled parallel compilation
-  -pwd              Print root directory containing a Make/ directory
+  -j | -jN | -j N   Compile using all or specified N cores/hyperthreads
   -update           Update lnInclude dirs, dep files, remove deprecated files/dirs
+HELP_HEAD
+
+if [ "$optHelpFull" = true ]
+then
+cat<<HELP_FULL
+  -debug            Define c++DBUG='-DFULLDEBUG -g -O0' as override
+  -no-scheduler     Disable scheduled parallel compilation
   -show-api         Print api value
   -show-ext-so      Print shared library extension (with '.' separator)
-  -show-compile-c   Same as '-show-c -show-cflags'
-  -show-compile-cxx Same as '-show-cxx -show-cxxflags'
   -show-c           Print C compiler value
   -show-cflags      Print C compiler flags
   -show-cxx         Print C++ compiler value
   -show-cxxflags    Print C++ compiler flags
   -show-cflags-arch     The C compiler arch flag (eg, -m64 etc)
   -show-cxxflags-arch   The C++ compiler arch flag (eg, -m64 etc)
-  -version | --version  Print the api value
-  -h | -help        Print the usage
+  -show-compile-c   Same as '-show-c -show-cflags'
+  -show-compile-cxx Same as '-show-cxx -show-cxxflags'
+  -show-path-c      Print path to C compiler
+  -show-path-cxx    Print path to C++ compiler
+HELP_FULL
+fi
 
+cat<<HELP_TAIL
+  -pwd              Print root directory containing a Make/ directory
+  -version | --version  Print version, which is the same as -show-api
+  -h | -help        Display short help and exit
+  -help-full        Display full help and exit
 
 A general, easy-to-use make system for multi-platform development
 with support for local and network parallel compilation.
@@ -99,8 +110,7 @@ The 'target' is a Makefile target:
   e.g., platforms/linux64GccDPOpt/.../fvMesh.o
 
 or a special target:
-  all               wmake all sub-directories, running Allwmake if present
-  queue             wmakeCollect all sub-directories, running Allwmake if present
+  all | queue       Same as -all | -queue options
   exe               Compile statically linked executable
   lib               Compile statically linked archive lib (.a)
   libo              Compile statically linked lib (.o)
@@ -109,7 +119,7 @@ or a special target:
   updatedep         Compile dependencies only (in case of broken dependencies)
   objects           Compile but not link
 
-USAGE
+HELP_TAIL
     exit 1
 }
 
@@ -138,8 +148,11 @@ unset all update optDebug optShow optPrintRootDir
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-        # Print help
-        -h | -help*)
+        -help-f*)   # Full help
+            optHelpFull=true
+            usage
+            ;;
+        -h | -help*) # Short help
             usage
             ;;
         -s | -silent)
@@ -152,6 +165,10 @@ do
         -show-compile-c   | -show-c   | -show-cflags   | -show-cflags-arch | \
         -show-compile-cxx | -show-cxx | -show-cxxflags | -show-cxxflags-arch )
             $make -f $WM_DIR/makefiles/info "${1#-show-}"
+            optShow=true
+            ;;
+        -show-path-c | -show-path-cxx )
+            command -v $($make -f $WM_DIR/makefiles/info "${1#-show-path-}")
             optShow=true
             ;;
         -a | -all | all)
