@@ -73,8 +73,8 @@ Note
 #include <unordered_set>
 #include <vector>
 
-// Ragel switches may have several implicit fallthroughs
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+#pragma GCC diagnostic ignored "-Wunused-const-variable"
 
 // Length of the input read buffer
 #define INBUFLEN 16384
@@ -313,6 +313,7 @@ namespace Files
 
 %%{
     machine wmkdep;
+    write   data nofinal;
 
     action  buffer  { tok = p;  /* Local token start */ }
     action  process
@@ -341,13 +342,6 @@ namespace Files
         dnl;                            # Discard all other lines
     *|;
 }%%
-
-
-//
-// FSM globals
-//
-
-%% write data nofinal;
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -385,6 +379,7 @@ void processFile(std::string fileName)
     char *ts, *te;
     int act, cs;
 
+    // Initialize FSM variables
     %%{write init;}%%   /* ^^^ FSM initialization here ^^^ */;
 
     // Local token start

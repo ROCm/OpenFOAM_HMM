@@ -36,7 +36,7 @@ Description
 #include "macros.H"
 
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
-#pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wunused-const-variable"
 
 // Debugging to stderr
 #undef  DebugInfo
@@ -286,7 +286,7 @@ static int driverTokenType
 
 %%{
     machine patchExpr;
-    write  data;
+    write   data;
 
     action emit_number {
         driver_.parsePosition() = (ts-buf);
@@ -653,7 +653,7 @@ bool Foam::expressions::patchExpr::scanner::process
     // Initialize FSM variables
     %%{write init;}%%   /* ^^^ FSM initialization here ^^^ */;
 
-    %%{write exec;}%%  /* ^^^ FSM execution here ^^^ */;
+    %%{write exec;}%%   /* ^^^ FSM execution here ^^^ */;
 
     if (%%{write error;}%% == cs)
     {

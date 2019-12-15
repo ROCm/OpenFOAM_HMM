@@ -38,7 +38,7 @@ Description
 #include "macros.H"
 
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
-#pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wunused-const-variable"
 
 // Debugging to stderr
 #undef  DebugInfo
@@ -3825,7 +3825,7 @@ case 10:
 	}
 
 #line 656 "patchExprScanner.rl"
-  /* ^^^ FSM execution here ^^^ */;
+   /* ^^^ FSM execution here ^^^ */;
 
     if (0 == cs)
     {

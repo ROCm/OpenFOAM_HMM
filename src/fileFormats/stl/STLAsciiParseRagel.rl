@@ -35,8 +35,8 @@ Description
 #include "STLReader.H"
 #include "OSspecific.H"
 
-// Ragel switch/case logic may have several implicit fallthroughs
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+#pragma GCC diagnostic ignored "-Wunused-const-variable"
 
 // https://en.wikipedia.org/wiki/STL_%28file_format%29#ASCII_STL
 //
@@ -205,6 +205,7 @@ void Foam::Detail::STLAsciiParseRagel::execute(std::istream& is)
     // cs = code state
     int cs;
 
+    // Initialize FSM variables
     %%{write init;}%%   /* ^^^ FSM initialization here ^^^ */;
 
     // Local token start

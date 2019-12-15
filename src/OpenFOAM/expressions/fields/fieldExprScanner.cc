@@ -38,7 +38,7 @@ Description
 #include "macros.H"
 
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
-#pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wunused-const-variable"
 
 // Debugging to stderr
 #undef  DebugInfo

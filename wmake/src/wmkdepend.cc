@@ -75,8 +75,8 @@ Note
 #include <unordered_set>
 #include <vector>
 
-// Ragel switches may have several implicit fallthroughs
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+#pragma GCC diagnostic ignored "-Wunused-const-variable"
 
 // Length of the input read buffer
 #define INBUFLEN 16384
@@ -314,23 +314,15 @@ namespace Files
 // Can use 'variable p xxx;' etc to change these names
 
 
-#line 341 "wmkdepend.rl"
-
-
-
-//
-// FSM globals
-//
-
-
-#line 325 "wmkdepend.cc"
+#line 318 "wmkdepend.cc"
 static const int wmkdep_start = 21;
 static const int wmkdep_error = 0;
 
 static const int wmkdep_en_main = 21;
 
 
-#line 349 "wmkdepend.rl"
+#line 344 "wmkdepend.rl"
+
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -368,8 +360,9 @@ void processFile(std::string fileName)
     char *ts, *te;
     int act, cs;
 
+    // Initialize FSM variables
     
-#line 371 "wmkdepend.cc"
+#line 366 "wmkdepend.cc"
 	{
 	cs = wmkdep_start;
 	ts = 0;
@@ -377,7 +370,7 @@ void processFile(std::string fileName)
 	act = 0;
 	}
 
-#line 386 "wmkdepend.rl"
+#line 383 "wmkdepend.rl"
    /* ^^^ FSM initialization here ^^^ */;
 
     // Local token start
@@ -422,7 +415,7 @@ void processFile(std::string fileName)
         }
 
         
-#line 424 "wmkdepend.cc"
+#line 419 "wmkdepend.cc"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -441,35 +434,35 @@ tr0:
 	}
 	goto st21;
 tr2:
-#line 339 "wmkdepend.rl"
+#line 342 "wmkdepend.rl"
 	{te = p+1;}
 	goto st21;
 tr17:
-#line 339 "wmkdepend.rl"
+#line 342 "wmkdepend.rl"
 	{{p = ((te))-1;}}
 	goto st21;
 tr21:
-#line 334 "wmkdepend.rl"
+#line 337 "wmkdepend.rl"
 	{te = p+1;}
 	goto st21;
 tr29:
-#line 337 "wmkdepend.rl"
+#line 340 "wmkdepend.rl"
 	{te = p+1;}
 	goto st21;
 tr31:
-#line 336 "wmkdepend.rl"
+#line 339 "wmkdepend.rl"
 	{te = p+1;}
 	goto st21;
 tr36:
-#line 331 "wmkdepend.rl"
+#line 334 "wmkdepend.rl"
 	{te = p;p--;}
 	goto st21;
 tr37:
-#line 339 "wmkdepend.rl"
+#line 342 "wmkdepend.rl"
 	{te = p;p--;}
 	goto st21;
 tr38:
-#line 337 "wmkdepend.rl"
+#line 340 "wmkdepend.rl"
 	{te = p;p--;}
 	goto st21;
 st21:
@@ -482,7 +475,7 @@ st21:
 case 21:
 #line 1 "NONE"
 	{ts = p;}
-#line 484 "wmkdepend.cc"
+#line 479 "wmkdepend.cc"
 	switch( (*p) ) {
 		case 10: goto st23;
 		case 11: goto tr34;
@@ -503,14 +496,14 @@ case 1:
 tr32:
 #line 1 "NONE"
 	{te = p+1;}
-#line 331 "wmkdepend.rl"
+#line 334 "wmkdepend.rl"
 	{act = 1;}
 	goto st22;
 st22:
 	if ( ++p == pe )
 		goto _test_eof22;
 case 22:
-#line 512 "wmkdepend.cc"
+#line 507 "wmkdepend.cc"
 	switch( (*p) ) {
 		case 10: goto st23;
 		case 11: goto tr34;
@@ -532,14 +525,14 @@ case 23:
 tr34:
 #line 1 "NONE"
 	{te = p+1;}
-#line 331 "wmkdepend.rl"
+#line 334 "wmkdepend.rl"
 	{act = 1;}
 	goto st24;
 st24:
 	if ( ++p == pe )
 		goto _test_eof24;
 case 24:
-#line 541 "wmkdepend.cc"
+#line 536 "wmkdepend.cc"
 	switch( (*p) ) {
 		case 10: goto st23;
 		case 32: goto tr34;
@@ -637,14 +630,14 @@ case 10:
 	}
 	goto tr12;
 tr12:
-#line 315 "wmkdepend.rl"
+#line 318 "wmkdepend.rl"
 	{ tok = p;  /* Local token start */ }
 	goto st11;
 st11:
 	if ( ++p == pe )
 		goto _test_eof11;
 case 11:
-#line 646 "wmkdepend.cc"
+#line 641 "wmkdepend.cc"
 	switch( (*p) ) {
 		case 10: goto tr15;
 		case 34: goto tr16;
@@ -653,7 +646,7 @@ case 11:
 tr13:
 #line 1 "NONE"
 	{te = p+1;}
-#line 315 "wmkdepend.rl"
+#line 318 "wmkdepend.rl"
 	{ tok = p;  /* Local token start */ }
 	goto st25;
 tr15:
@@ -664,7 +657,7 @@ st25:
 	if ( ++p == pe )
 		goto _test_eof25;
 case 25:
-#line 666 "wmkdepend.cc"
+#line 661 "wmkdepend.cc"
 	if ( (*p) == 34 )
 		goto tr19;
 	goto st12;
@@ -676,7 +669,7 @@ case 12:
 		goto tr19;
 	goto st12;
 tr19:
-#line 317 "wmkdepend.rl"
+#line 320 "wmkdepend.rl"
 	{
         processFile(tok, p);
         tok = nullptr;          /* Done with buffer */
@@ -686,12 +679,12 @@ st13:
 	if ( ++p == pe )
 		goto _test_eof13;
 case 13:
-#line 688 "wmkdepend.cc"
+#line 683 "wmkdepend.cc"
 	if ( (*p) == 10 )
 		goto tr21;
 	goto st13;
 tr16:
-#line 317 "wmkdepend.rl"
+#line 320 "wmkdepend.rl"
 	{
         processFile(tok, p);
         tok = nullptr;          /* Done with buffer */
@@ -701,7 +694,7 @@ st14:
 	if ( ++p == pe )
 		goto _test_eof14;
 case 14:
-#line 703 "wmkdepend.cc"
+#line 698 "wmkdepend.cc"
 	if ( (*p) == 10 )
 		goto tr21;
 	goto st14;
@@ -732,7 +725,7 @@ st26:
 	if ( ++p == pe )
 		goto _test_eof26;
 case 26:
-#line 734 "wmkdepend.cc"
+#line 729 "wmkdepend.cc"
 	if ( (*p) == 42 )
 		goto st18;
 	goto st17;
@@ -765,14 +758,14 @@ case 19:
 tr30:
 #line 1 "NONE"
 	{te = p+1;}
-#line 337 "wmkdepend.rl"
+#line 340 "wmkdepend.rl"
 	{act = 4;}
 	goto st27;
 st27:
 	if ( ++p == pe )
 		goto _test_eof27;
 case 27:
-#line 774 "wmkdepend.cc"
+#line 769 "wmkdepend.cc"
 	if ( (*p) == 10 )
 		goto tr2;
 	goto st1;
@@ -847,7 +840,7 @@ cs = 0;
 	_out: {}
 	}
 
-#line 429 "wmkdepend.rl"
+#line 426 "wmkdepend.rl"
        /* ^^^ FSM execution here ^^^ */;
 
         if (0 == cs)

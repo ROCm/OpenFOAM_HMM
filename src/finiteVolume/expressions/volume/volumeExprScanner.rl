@@ -36,7 +36,7 @@ Description
 #include "macros.H"
 
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
-#pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wunused-const-variable"
 
 // Debugging to stderr
 #undef  DebugInfo
@@ -682,7 +682,7 @@ bool Foam::expressions::volumeExpr::scanner::process
     // Initialize FSM variables
     %%{write init;}%%   /* ^^^ FSM initialization here ^^^ */;
 
-    %%{write exec;}%%  /* ^^^ FSM execution here ^^^ */;
+    %%{write exec;}%%   /* ^^^ FSM execution here ^^^ */;
 
     if (%%{write error;}%% == cs)
     {

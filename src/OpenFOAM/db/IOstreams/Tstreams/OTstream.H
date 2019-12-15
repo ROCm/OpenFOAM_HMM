@@ -27,7 +27,10 @@ Class
     Foam::OTstream
 
 Description
-    A simple output token stream
+    A simple output token stream that can be used to build token lists.
+
+Note
+    Appending single characters to token list is fragile.
 
 SourceFiles
     OTstream.C
@@ -55,7 +58,6 @@ typedef DynamicList<token> tokenDynList;
                           Class OTstream Declaration
 \*---------------------------------------------------------------------------*/
 
-//- Output to string buffer, using a OSstream
 class OTstream
 :
     public Ostream,
@@ -126,6 +128,7 @@ public:
         virtual bool write(const token& tok);
 
         //- Write token to stream or otherwise handle it.
+        //  The stream is permitted to transfer/clear token contents.
         //  \return false if the token type was not handled by this method
         virtual bool write(token&& tok);
 
