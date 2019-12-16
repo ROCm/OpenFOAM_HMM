@@ -162,7 +162,7 @@ objective::objective
     // Read JMean from dictionary, if present
     IOobject headObjectiveIODict
     (
-        "objectiveDict",
+        "objectiveDict" + objectiveName_,
         mesh_.time().timeName(),
         "uniform",
         mesh_,
@@ -654,7 +654,7 @@ void objective::writeMeanValue() const
     (
         IOobject
         (
-            "objectiveDict",
+            "objectiveDict" + objectiveName_,
             mesh_.time().timeName(),
             "uniform",
             mesh_,
