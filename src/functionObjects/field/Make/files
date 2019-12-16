@@ -37,6 +37,8 @@ processorField/processorField.C
 proudmanAcousticPower/proudmanAcousticPower.C
 readFields/readFields.C
 
+surfaceDistance/surfaceDistance.C
+
 setFlow/setFlow.C
 
 streamLine/streamLine.C
