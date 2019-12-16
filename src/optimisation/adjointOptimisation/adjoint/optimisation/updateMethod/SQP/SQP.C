@@ -300,7 +300,11 @@ Foam::SQP::SQP(const fvMesh& mesh, const dictionary& dict)
     correctionOld_(0),
     lamdas_(0),
     counter_(0),
-    objFunctionFolder_("objective"),
+    objFunctionFolder_
+    (
+        mesh_.time().globalPath()/"optimisation"/"objective"/
+        mesh_.time().timeName()
+    ),
     meritFunctionFile_(nullptr),
     mu_(Zero),
     delta_
@@ -322,7 +326,7 @@ Foam::SQP::SQP(const fvMesh& mesh, const dictionary& dict)
     // Create folder to merit function
     if (Pstream::master())
     {
-        mkDir(mesh_.time().globalPath()/"optimisation"/objFunctionFolder_);
+        mkDir(objFunctionFolder_);
     }
 
     // Read old hessian, correction and derivatives, if present
