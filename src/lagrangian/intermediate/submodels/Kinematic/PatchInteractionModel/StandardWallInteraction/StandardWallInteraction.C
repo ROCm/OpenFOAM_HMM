@@ -248,16 +248,23 @@ void Foam::StandardWallInteraction<CloudType>::info(Ostream& os)
 {
     PatchInteractionModel<CloudType>::info(os);
 
-    labelListList npe0(nEscape_);
+    labelListList npe0(nEscape_.size());
+    labelListList mpe0(nEscape_.size());
+    labelListList nps0(nEscape_.size());
+    labelListList mps0(nEscape_.size());
+    
+    forAll(nEscape_, patchi)
+    {
+        label lsd = nEscape_[patchi].size();
+        npe0[patchi].setSize(lsd, Zero);
+        mpe0[patchi].setSize(lsd, Zero);
+        nps0[patchi].setSize(lsd, Zero);
+        mps0[patchi].setSize(lsd, Zero);
+    }
+    
     this->getModelProperty("nEscape", npe0);
-
-    scalarListList mpe0(massEscape_);
     this->getModelProperty("massEscape", mpe0);
-
-    labelListList nps0(nStick_);
     this->getModelProperty("nStick", nps0);
-
-    scalarListList mps0(massStick_);
     this->getModelProperty("massStick", mps0);
 
     // Accumulate current data

@@ -470,7 +470,7 @@ inline Foam::scalar Foam::KinematicParcel<ParcelType>::Eo
 )
 {
     const vector dir = U/max(mag(U), ROOTVSMALL);
-    return mag(g & dir)*(rho - rhoc)*sqr(d)/max(sigma, ROOTVSMALL);
+    return mag(g & dir)*mag(rho - rhoc)*sqr(d)/max(sigma, ROOTVSMALL);
 }
 
 

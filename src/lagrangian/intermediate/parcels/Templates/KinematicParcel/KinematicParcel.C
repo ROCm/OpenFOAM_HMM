@@ -353,14 +353,14 @@ bool Foam::KinematicParcel<ParcelType>::move
 
         p.age() += dt;
 
-        if (p.onFace())
+        if (p.active() && p.onFace())
         {
             cloud.functions().postFace(p, ttd.keepParticle);
         }
 
         cloud.functions().postMove(p, dt, start, ttd.keepParticle);
 
-        if (p.onFace() && ttd.keepParticle)
+        if (p.active() && p.onFace() && ttd.keepParticle)
         {
             p.hitFace(s, cloud, ttd);
         }
@@ -399,6 +399,9 @@ bool Foam::KinematicParcel<ParcelType>::hitPatch
     }
     else
     {
+        // This does not take into account the wall interation model
+        // Just the polyPatch type. Then, a patch type which has 'rebound'
+        // interation model will count as escaped parcel while it is not
         if (!isA<wallPolyPatch>(pp) && !polyPatch::constraintType(pp.type()))
         {
             cloud.patchInteraction().addToEscapedParcels(nParticle_*mass());

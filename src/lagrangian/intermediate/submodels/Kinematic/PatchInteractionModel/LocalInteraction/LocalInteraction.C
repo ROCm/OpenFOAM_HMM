@@ -334,16 +334,24 @@ void Foam::LocalInteraction<CloudType>::info(Ostream& os)
     PatchInteractionModel<CloudType>::info(os);
 
     // retrieve any stored data
-    labelListList npe0(nEscape_);
-    this->getModelProperty("nEscape", npe0);
+    labelListList npe0(patchData_.size());
+    labelListList mpe0(patchData_.size());
+    labelListList nps0(patchData_.size());
+    labelListList mps0(patchData_.size());
+    
+    forAll(patchData_, patchi)
+    {
+        label lsd = nEscape_[patchi].size();
+        npe0[patchi].setSize(lsd, Zero);
+        mpe0[patchi].setSize(lsd, Zero);
+        nps0[patchi].setSize(lsd, Zero);
+        mps0[patchi].setSize(lsd, Zero);
+    }
 
-    scalarListList mpe0(massEscape_);
+    
+    this->getModelProperty("nEscape", npe0);   
     this->getModelProperty("massEscape", mpe0);
-
-    labelListList nps0(nStick_);
     this->getModelProperty("nStick", nps0);
-
-    scalarListList mps0(massStick_);
     this->getModelProperty("massStick", mps0);
 
     // accumulate current data
