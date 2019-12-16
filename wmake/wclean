@@ -46,7 +46,6 @@ usage() {
 
 Usage: $Script [OPTION] [dir]
        $Script [OPTION] target [dir [MakeDir]]
-
 options:
   -a | -all         Same as the 'all' target
   -s | -silent      Ignored - for compatibility with wmake

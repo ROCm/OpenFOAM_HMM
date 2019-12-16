@@ -39,11 +39,12 @@
 #         - local site-specific directory, uses WM_PROJECT_DIR/site if unset
 #
 # Note
-#     Changes made to this cshrc file may be lost with the next upgrade.
+#     Changes made to this file will be lost with the next upgrade.
 #
 #------------------------------------------------------------------------------
 
-setenv WM_PROJECT OpenFOAM
+# [WM_PROJECT_VERSION] - A human-readable version name
+# A development version is often named 'com' - as in www.openfoam.com
 setenv WM_PROJECT_VERSION com
 
 #------------------------------------------------------------------------------
@@ -67,7 +68,7 @@ setenv WM_PRECISION_OPTION DP
 # = 32 | 64
 setenv WM_LABEL_SIZE 32
 
-# [WM_COMPILE_OPTION] - Optimised, debug, profiling, other:
+# [WM_COMPILE_OPTION] - Optimised(default), debug, profiling, other:
 # = Opt | Debug | Prof
 # Other is processor or packaging specific (eg, OptKNL)
 setenv WM_COMPILE_OPTION Opt
@@ -81,6 +82,9 @@ setenv WM_MPLIB SYSTEMOPENMPI
 
 #------------------------------------------------------------------------------
 # (advanced / legacy)
+
+# [WM_PROJECT] - This project is "OpenFOAM" - do not change
+setenv WM_PROJECT OpenFOAM
 
 # [projectDir] - directory containing this OpenFOAM version.
 # \- When this file is located as $WM_PROJECT_DIR/etc/cshrc, the next lines

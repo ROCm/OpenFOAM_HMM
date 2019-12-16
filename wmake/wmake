@@ -59,15 +59,12 @@
 Script="${0##*/}"           # Use 'Script' for error messages in wmakeFunctions
 . "${0%/*}/scripts/wmakeFunctions"              # Source wmake functions
 
-unset optHelpFull
-usage() {
-    exec 1>&2
-    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+# Print help to stdout so that it can be captured
+printHelp() {
     cat<<HELP_HEAD
 
 Usage: $Script [OPTION] [dir]
        $Script [OPTION] target [dir [MakeDir]]
-
 options:
   -s | -silent      Quiet mode (does not echo commands)
   -a | -all         wmake all sub-directories, running Allwmake if present
@@ -77,7 +74,7 @@ options:
   -update           Update lnInclude dirs, dep files, remove deprecated files/dirs
 HELP_HEAD
 
-if [ "$optHelpFull" = true ]
+if [ -n "$1" ]
 then
 cat<<HELP_FULL
   -debug            Define c++DBUG='-DFULLDEBUG -g -O0' as override
@@ -123,6 +120,19 @@ HELP_TAIL
     exit 1
 }
 
+# Report error and exit
+die()
+{
+    exec 1>&2
+    echo
+    echo "Error encountered:"
+    while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
+    echo
+    echo "See '${0##*/} -help' for usage"
+    echo
+    exit 1
+}
+
 # Default make is the "make" in the path
 make="make"
 
@@ -149,11 +159,10 @@ while [ "$#" -gt 0 ]
 do
     case "$1" in
         -help-f*)   # Full help
-            optHelpFull=true
-            usage
+            printHelp -full
             ;;
         -h | -help*) # Short help
-            usage
+            printHelp
             ;;
         -s | -silent)
             export WM_QUIET=true
@@ -224,7 +233,7 @@ do
             break
             ;;
         -*)
-            usage "unknown option: '$1'"
+            die "unknown option: '$1'"
             ;;
         *)
             break
