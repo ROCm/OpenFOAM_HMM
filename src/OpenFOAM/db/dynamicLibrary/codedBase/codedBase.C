@@ -124,7 +124,6 @@ void* Foam::codedBase::loadLibrary
         if (fun)
         {
             (*fun)(true);    // force load
-            ok = true;
         }
         else
         {
