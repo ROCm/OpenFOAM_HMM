@@ -45,10 +45,11 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
 //! \cond fileScope
 static inline void writeEntryIfPresent
 (
@@ -70,8 +71,11 @@ static inline void writeEntryIfPresent
     }
 }
 //! \endcond
-}
 
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 void Foam::codedBase::writeCodeDict(Ostream& os, const dictionary& dict)
 {
@@ -88,111 +92,113 @@ void Foam::codedBase::writeCodeDict(Ostream& os, const dictionary& dict)
 void* Foam::codedBase::loadLibrary
 (
     const fileName& libPath,
-    const string& globalFuncName,
+    const std::string& funcName,
     const dynamicCodeContext& context
 ) const
 {
     // Avoid compilation by loading an existing library
 
-    void* lib =
+    void* handle =
     (
         !libPath.empty() && libs().open(libPath, false)
       ? libs().findLibrary(libPath)
       : nullptr
     );
 
-    if (!lib)
+    if (!handle)
     {
-        return lib;
+        return handle;
     }
 
-    // verify the loaded version and unload if needed
+    // Verify the loaded version and unload if needed
 
-    // provision for manual execution of code after loading
-    if (dlSymFound(lib, globalFuncName))
+    // Manual execution of code after loading.
+    // This is mandatory for codedBase.
+
+    void* rawSymbol = dlSymFind(handle, funcName);
+
+    if (rawSymbol)
     {
-        loaderFunctionType function =
-            reinterpret_cast<loaderFunctionType>
-            (
-                dlSym(lib, globalFuncName)
-            );
+        loaderType fun = reinterpret_cast<loaderType>(rawSymbol);
 
-        if (function)
+        if (fun)
         {
-            (*function)(true);    // force load
+            (*fun)(true);    // force load
+            ok = true;
         }
         else
         {
             FatalIOErrorInFunction(context.dict())
-                << "Failed looking up symbol " << globalFuncName
-                << nl << "from " << libPath << exit(FatalIOError);
+                << "Failed symbol lookup " << funcName.c_str() << nl
+                << "from " << libPath << nl
+                << exit(FatalIOError);
         }
     }
     else
     {
         FatalIOErrorInFunction(context.dict())
-            << "Failed looking up symbol " << globalFuncName << nl
-            << "from " << libPath << exit(FatalIOError);
+            << "Failed symbol lookup " << funcName.c_str() << nl
+            << "from " << libPath << nl
+            << exit(FatalIOError);
 
-        lib = nullptr;
+        handle = nullptr;
         if (!libs().close(libPath, false))
         {
             FatalIOErrorInFunction(context.dict())
-                << "Failed unloading library "
-                << libPath
+                << "Failed unloading library " << libPath << nl
                 << exit(FatalIOError);
         }
     }
 
-    return lib;
+    return handle;
 }
 
 
 void Foam::codedBase::unloadLibrary
 (
     const fileName& libPath,
-    const string& globalFuncName,
+    const std::string& funcName,
     const dynamicCodeContext& context
 ) const
 {
-
-    void* lib =
+    void* handle =
     (
         !libPath.empty() && libs().open(libPath, false)
       ? libs().findLibrary(libPath)
       : nullptr
     );
 
-    if (!lib)
+    if (!handle)
     {
         return;
     }
 
-    // provision for manual execution of code before unloading
-    if (dlSymFound(lib, globalFuncName))
-    {
-        loaderFunctionType function =
-            reinterpret_cast<loaderFunctionType>
-            (
-                dlSym(lib, globalFuncName)
-            );
+    // Manual execution of code before unloading.
+    // This is mandatory for codedBase.
 
-        if (function)
+    void* rawSymbol = dlSymFind(handle, funcName);
+
+    if (rawSymbol)
+    {
+        loaderType fun = reinterpret_cast<loaderType>(rawSymbol);
+
+        if (fun)
         {
-            (*function)(false);    // force unload
+            (*fun)(false);    // force unload
         }
         else
         {
             FatalIOErrorInFunction(context.dict())
-                << "Failed looking up symbol " << globalFuncName << nl
-                << "from " << libPath << exit(FatalIOError);
+                << "Failed symbol lookup " << funcName.c_str() << nl
+                << "from " << libPath << nl
+                << exit(FatalIOError);
         }
     }
 
     if (!libs().close(libPath, false))
     {
         FatalIOErrorInFunction(context.dict())
-            << "Failed unloading library " << libPath
+            << "Failed unloading library " << libPath << nl
             << exit(FatalIOError);
     }
 }

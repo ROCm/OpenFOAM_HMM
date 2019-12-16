@@ -75,24 +75,28 @@ class codedBase
         mutable fileName oldLibPath_;
 
 
-    // Private Member Functions
+    // Data Types
 
         //- Global loader/unloader function type
-        typedef void (*loaderFunctionType)(bool);
+        //  Called with true on load, false on unload.
+        typedef void (*loaderType)(bool);
 
-        //- Load specified library and execute globalFuncName(true)
+
+    // Private Member Functions
+
+        //- Load specified library and execute funcName(true)
         void* loadLibrary
         (
             const fileName& libPath,
-            const string& globalFuncName,
+            const std::string& funcName,
             const dynamicCodeContext& context
         ) const;
 
-        //- Execute globalFuncName(false) and unload specified library
+        //- Execute funcName(false) and unload specified library
         void unloadLibrary
         (
             const fileName& libPath,
-            const string& globalFuncName,
+            const std::string& funcName,
             const dynamicCodeContext& context
         ) const;
 

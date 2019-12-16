@@ -143,8 +143,10 @@ void Foam::dlLibraryTable::clear(bool verbose)
         if (ptr == nullptr)
         {
             libNames_[i].clear();
+            continue;
         }
-        else if (Foam::dlClose(ptr))
+
+        if (Foam::dlClose(ptr))
         {
             DebugInFunction
                 << "Closed [" << i << "] " << libNames_[i]
