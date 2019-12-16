@@ -27,7 +27,7 @@ Namespace
     Foam::MatrixTools
 
 Description
-    Collection of static functions for matrix-related verifications.
+    Collection of functions for matrix-related verifications.
 
 SourceFiles
     MatrixTools.C
@@ -47,7 +47,6 @@ namespace Foam
 // Forward declarations
 class Ostream;
 
-
 /*---------------------------------------------------------------------------*\
                        Namespace MatrixTools Declaration
 \*---------------------------------------------------------------------------*/
@@ -56,13 +55,14 @@ namespace MatrixTools
 {
 
 //- Compare matrix elements for absolute or relative equality
+//
 template<class Form1, class Form2, class Type>
 bool equal
 (
     const Matrix<Form1, Type>& A,
     const Matrix<Form2, Type>& B,
     const bool verbose = false,
-    const label lenDiffs = 10,
+    const label maxDiffs = 10, //!< Stop reporting after maxDiffs (0 to disable)
     const scalar relTol = 1e-5,
     const scalar absTol = 1e-8
 );

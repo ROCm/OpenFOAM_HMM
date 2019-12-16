@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,11 +72,11 @@ class exact
 
         const distributedTriSurfaceMesh& patchSurface() const;
 
-        //- Disallow default bitwise copy construct
-        exact(const exact&);
+        //- No copy construct
+        exact(const exact&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const exact&);
+        //- No copy assignment
+        void operator=(const exact&) = delete;
 
 
 public:

@@ -63,9 +63,12 @@ archTarget  := $(shell basename $(WMAKE_BIN))
 # Targets
 #------------------------------------------------------------------------------
 
-.PHONY: all clean message
+.PHONY: all clean message old
 
 all: $(WMAKE_BIN)/lemon$(EXT_EXE) $(WMAKE_BIN)/wmkdepend$(EXT_EXE) message
+
+# Flex-based processing
+old: $(WMAKE_BIN)/wmkdep$(EXT_EXE)
 
 message:
 ifneq ($(archHost),$(archTarget))
@@ -76,7 +79,7 @@ endif
 
 clean:
 	@echo "clean wmake-bin ($(archTarget))"
-	@rm -rf $(WMAKE_BIN) 2>/dev/null
+	@rm -rf $(WMAKE_BIN)
 	@rmdir $(shell dirname $(WMAKE_BIN)) 2>/dev/null || true
 
 $(WMAKE_BIN)/lemon$(EXT_EXE): lemon.c
@@ -88,17 +91,17 @@ $(WMAKE_BIN)/wmkdep$(EXT_EXE): wmkdep.l
 	@mkdir -p $(WMAKE_BIN)
 	$(call QUIET_MESSAGE,flex,$(<F))
 	$E flex -o $@.c $(<F) && $(cc) $(cFLAGS) $@.c -o $@
-	@rm -f $@.c 2>/dev/null
+	@rm -f $@.c
 
 $(WMAKE_BIN)/wmkdepend$(EXT_EXE): wmkdepend.cc
 	@mkdir -p $(WMAKE_BIN)
 	$(call QUIET_MESSAGE,wmkdepend,$(<F))
-	$E $(CC) $(c++FLAGS) $(c++LESSWARN) $(<F) -o $@
+	$E $(CC) $(c++FLAGS) $(<F) -o $@
 
-# $(WMAKE_BIN)/wmkdepend$(EXT_EXE): wmkdepend.rl
-# 	@mkdir -p $(WMAKE_BIN)
-# 	$(call QUIET_MESSAGE,ragel,$(<F))
-# 	$E ragel -G2 -o $@.cc $(<F) && $(CC) $(c++FLAGS) $(c++LESSWARN) $@.cc -o $@
-# 	@rm -f $@.cc 2>/dev/null
+#$(WMAKE_BIN)/wmkdepend$(EXT_EXE): wmkdepend.rl
+#	@mkdir -p $(WMAKE_BIN)
+#	$(call QUIET_MESSAGE,ragel,$(<F))
+#	$E ragel -G2 -o $@.cc $(<F) && $(CC) $(c++FLAGS) $@.cc -o $@
+#	@rm -f $@.cc
 
 #------------------------------------------------------------------------------
