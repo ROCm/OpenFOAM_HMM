@@ -31,28 +31,38 @@ Group
     grpFvOptionsConstraints
 
 Description
-    Constraint for velocity to dampen velocity fluctuations in
-    steady simulations
+    Constraint on velocity field to dampen velocity fluctuations.
 
-    In case of velocity exceeding limit applies
-    a source sink to remove the excess velocity by adding a term
-    that drives the velocity to 0 (note that we cannot use the old
-    term velocity since it most likely is already excessive). This
-    additional constraint is scaled with (U-UMax)/dt
-    where dt is a local time scale (= velocity/cellsize) so it switches off
-    if the velocity is below UMax.
+    This constraint is primarily used to dampen velocity fluctuations in
+    the start-up phase of simulations. When the local velocity magnitude
+    exceeds the user-supplied maximum value a sink term is activated in
+    the affected region to lower the velocity to the limiting value.
 
-    Constraint described by:
+Usage
+    Example of functionality specification in \c fvOptions:
+    \verbatim
+    velocityDamper
+    {
+        // Mandatory entries
+        type            velocityDampingConstraint;
+        UMax            200;
 
-        velocityDampingConstraintCoeffs
-        {
-            UMax        100;
+        // Optional entries
+        selectionMode   all;
+        UNames          (U);    // names of given velocity fields
+        U               U;      // name of given velocity field if
+                                //`UNames` is not present (default: U)
 
-            // Optional: name of velocity field (default: U)
-            //U         U;
-            //UNames    (U);
-        }
+        // Optional fvOptions entries
+        active          true;
+    }
+    \endverbatim
 
+Note
+    When active, this constraint manipulates the system of equations.
+    Users should ensure that it is not active when the case is converged
+    (steady-state) or during the period of interest (transient) to ensure
+    that its presence does not pollute the results.
 
 SourceFiles
     velocityDampingConstraint.C
@@ -82,9 +92,9 @@ class velocityDampingConstraint
 
 protected:
 
-    // Protected data
+    // Protected Data
 
-        //- Maximum velocity
+        //- Maximum velocity magnitude
         scalar UMax_;
 
 

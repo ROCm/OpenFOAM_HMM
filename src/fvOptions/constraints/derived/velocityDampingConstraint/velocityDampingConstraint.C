@@ -55,7 +55,7 @@ void Foam::fv::velocityDampingConstraint::addDamping(fvMatrix<vector>& eqn)
     // Note: we want to add
     //      deltaU/deltaT
     // where deltaT is a local time scale:
-    //  U/(cbrt of volume)
+    //      U/(cbrt of volume)
     // Since directly manipulating the diagonal we multiply by volume.
 
     const scalarField& vol = mesh_.V();
@@ -66,10 +66,10 @@ void Foam::fv::velocityDampingConstraint::addDamping(fvMatrix<vector>& eqn)
 
     forAll(U, cellI)
     {
-        scalar magU = mag(U[cellI]);
+        const scalar magU = mag(U[cellI]);
         if (magU > UMax_)
         {
-            scalar scale = sqr(Foam::cbrt(vol[cellI]));
+            const scalar scale = sqr(Foam::cbrt(vol[cellI]));
 
             diag[cellI] += scale*(magU-UMax_);
 
@@ -129,7 +129,7 @@ bool Foam::fv::velocityDampingConstraint::read(const dictionary& dict)
         if (!coeffs_.readIfPresent("UNames", fieldNames_))
         {
             fieldNames_.resize(1);
-            fieldNames_.first() = coeffs_.lookupOrDefault<word>("U", "U");
+            fieldNames_.first() = coeffs_.getOrDefault<word>("U", "U");
         }
 
         applied_.setSize(fieldNames_.size(), false);
