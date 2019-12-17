@@ -1,0 +1,98 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1912                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+ddtSchemes
+{
+    default         Euler;
+}
+
+gradSchemes
+{
+    default         Gauss linear;
+    grad(p)         Gauss linear;
+    grad(b)         fourth;
+}
+
+divSchemes
+{
+    default         Gauss upwind;
+/*
+    div(phi,U)      Gauss limitedLinearV 1;
+    div(phiU,p)     Gauss limitedLinear 1;
+    div(phid,p)     Gauss limitedLinear 1;
+    div(phi,k)      Gauss limitedLinear 1;
+    div(phi,epsilon) Gauss limitedLinear 1;
+
+    div(phiXi,Xi)   Gauss limitedLinear 1;
+    div(phiSt,b)    Gauss limitedLinear01 1;
+
+    div(phi,K)      Gauss limitedLinear 1;
+*/
+    div(phi,ft_b_h_hu) Gauss multivariateSelection
+    {
+        ft              upwind;//limitedLinear01 1;
+        b               upwind;//limitedLinear01 1;
+        Xi              upwind;//limitedLinear 1;
+        h               upwind;//limitedLinear 1;
+        hu              upwind;//limitedLinear 1;
+        Xp              upwind;
+        Ep              upwind;
+    };
+
+    div((Su*grad(b)))               Gauss linear;
+    div((U+((Su*Xi)*grad(b))))      Gauss linear;
+    //div((muEff*dev2(T(grad(U)))))   Gauss linear;
+    div(U)                          Gauss linear;
+    div((muEff*dev2(T(grad(Ubet)))))  Gauss linear;
+    div(phi,Ubet)       Gauss linear;
+}
+
+laplacianSchemes
+{
+    default none;
+
+    laplacian(muEff,Ubet)  Gauss linear limited 0.333;
+    laplacian(DkEff,k) Gauss linear limited 0.333;
+    laplacian(DepsilonEff,epsilon) Gauss linear limited 0.333;
+    laplacian((rho*inv((((1)*A(Ubet))+tDragDcu))),p) Gauss linear limited 0.333;
+    //laplacian((rho*inv((((1)*A(U))+((((0.5*rho)*CR)*mag(U))+((((Csu*(1))*betav)*muEff)*sqr(Aw)))))),p) Gauss linear limited 0.333;
+    laplacian(Db,b) Gauss linear limited 0.333;
+    laplacian(Db,ft) Gauss linear limited 0.333;
+    laplacian(Db,h) Gauss linear limited 0.333;
+    laplacian(Db,hu) Gauss linear limited 0.333;
+    laplacian(Db,Ep) Gauss linear limited 0.333;
+    laplacian(Db,GRxp) Gauss linear limited 0.333;
+    laplacian(Db,GRep) Gauss linear limited 0.333;
+}
+
+interpolationSchemes
+{
+    default linear;
+}
+
+snGradSchemes
+{
+    default limited 0.333;
+}
+
+fluxRequired
+{
+    default no;
+    p;
+}
+
+// ************************************************************************* //
