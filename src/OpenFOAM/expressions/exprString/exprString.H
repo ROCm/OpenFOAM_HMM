@@ -118,7 +118,14 @@ public:
     // Static Member Functions
 
         //- Inplace expansion with dictionary variables,
-        //- and strip C/C++ comments from the input
+        //- and strip C/C++ comments from the input.
+        //
+        // \par Expansion behaviour
+        // - alternatives = True
+        // - environment = True
+        // - allow empty = True
+        // - subDict = False
+        // .
         static void inplaceExpand
         (
             std::string& str,
@@ -127,7 +134,9 @@ public:
         );
 
         //- Get and expand expression with dictionary entries,
-        //- optionally strip C/C++ comments from the input
+        //- optionally strip C/C++ comments from the input.
+        //
+        // Expansion behaviour as per inplaceExpand
         static exprString getExpression
         (
             const word& name,

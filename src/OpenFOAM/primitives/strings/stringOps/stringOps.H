@@ -28,8 +28,7 @@ Namespace
     Foam::stringOps
 
 Description
-    Collection of static functions to do various simple string-related
-    operations
+    Collection of static functions for various string-related operations
 
 SourceFiles
     stringOps.C
@@ -93,34 +92,37 @@ namespace stringOps
     //- Does \b not use environment values.
     //
     //  Expansion includes:
-    //  -# variables
+    //  -# Variables
     //    - \c $VAR
     //    - \c ${VAR}
-    //    - \c ${VAR:-defValue}
-    //    - \c ${VAR:+altValue}
     //
-    //  Default and alternative values as per the POSIX shell:
-    //  \code
-    //      1.  ${parameter:-defValue}
-    //      2.  ${parameter:+altValue}
-    //  \endcode
-    //  -# If parameter is unset or null, the \c defValue is substituted.
-    //     Otherwise, the value of parameter is substituted.
-    //  -# If parameter is unset or null, nothing is substituted.
-    //     Otherwise the \c altValue is substituted.
+    //  -# Default and alternative values as per the POSIX shell:
+    //     - \c ${parameter:-defValue}
+    //       If parameter is unset or null, the \c defValue is substituted.
+    //       Otherwise, the value of parameter is substituted.
+    //     - \c ${parameter:+altValue}
+    //       If parameter is unset or null, nothing is substituted.
+    //       Otherwise the \c altValue is substituted.
     //  .
     //
     // General behaviour:
     //  - Unknown entries are removed silently.
-    //  - Malformed entries (eg, brace mismatch, sigil followed by bad chars)
-    //    are left as is.
-    //
-    //  Currently only used by dynamicCode.
+    //  - Malformed entries (eg, brace mismatch, sigil followed by unknown
+    //    characters) are left as is.
     //
     //  \param[in,out] s The string to modify inplace.
     //  \param mapping The lookup table
     //  \param sigil The leading sigil. Can be changed to avoid conflict
     //      with other string expansions. (default: '$')
+    //
+    // \par Expansion behaviour
+    // - alternatives = True
+    // - environment = False
+    // - allow empty = True
+    // - subDict = Not applicable
+    // .
+    //
+    // \note Currently only used by Foam::dynamicCode.
     void inplaceExpand
     (
         std::string& s,
@@ -133,17 +135,17 @@ namespace stringOps
     //- and (optionally) environment variables.
     //
     //  Expansion includes:
-    //  -# dictionary variables and (optionally) environment variables
+    //  -# Dictionary variables and (optionally) environment variables
     //    - \c $VAR
     //    - \c ${VAR}
     //    - \c ${VAR:-defValue}
     //    - \c ${VAR:+altValue}
-    //  -# mathematical evaluation using stringOps::evaluate
+    //  -# Mathematical evaluation using stringOps::evaluate
     //    - \c ${{EXPR}}
-    //  -# current directory
+    //  -# Current directory
     //    - leading "./"
     //          : the current directory - Foam::cwd()
-    //  -# leading tag expansion for commonly used directories
+    //  -# Leading tag expansion for commonly used directories
     //    - <b> \<etc\>/ </b>
     //          : user/group/other OpenFOAM etc directory
     //    - <b> \<etc:</b><em>[ugoa]+</em>)<b>\>/ </b>
@@ -154,24 +156,21 @@ namespace stringOps
     //          : The \c $FOAM_CASE/constant directory
     //    - <b> \<system\>/ </b>
     //          : The \c $FOAM_CASE/system directory
-    //  -# tilde expansion
+    //  -# Tilde expansion
     //    - leading "~/" : home directory
     //    - leading "~user" : home directory for specified user
-    //
-    //  Default and alternative values as per the POSIX shell:
-    //  \code
-    //      1.  ${parameter:-defValue}
-    //      2.  ${parameter:+altValue}
-    //  \endcode
-    //  -# If parameter is unset or null, the \c defValue is substituted.
-    //     Otherwise, the value of parameter is substituted.
-    //  -# If parameter is unset or null, nothing is substituted.
-    //     Otherwise the \c altValue is substituted.
+    //  -# Default and alternative values as per the POSIX shell:
+    //     - \c ${parameter:-defValue}
+    //       If parameter is unset or null, the \c defValue is substituted.
+    //       Otherwise, the value of parameter is substituted.
+    //     - \c ${parameter:+altValue}
+    //       If parameter is unset or null, nothing is substituted.
+    //       Otherwise the \c altValue is substituted.
     //  .
     //
     // General behaviour:
-    //  - Malformed entries (eg, brace mismatch, sigil followed by bad chars)
-    //    are left as is.
+    //  - Malformed entries (eg, brace mismatch, sigil followed by unknown
+    //    characters) are left as is.
     //  - Supports recursive variable expansions.
     //    For example, "${var${num}}" and "${{100 + ${var}}}"
     //
@@ -186,7 +185,14 @@ namespace stringOps
     //
     //  \sa Foam::findEtcEntry(), Foam::findEtcEntries(), stringOps::evaluate()
     //
-    //  \note this function has too many parameters and should generally
+    // \par Expansion behaviour
+    // - alternatives = True
+    // - environment = Given by parameter
+    // - allow empty = Given by parameter
+    // - subDict = Given by parameter (default: False)
+    // .
+    //
+    //  \note This function has too many parameters and should generally
     //      be avoided in user coding.
     void inplaceExpand
     (
@@ -217,7 +223,16 @@ namespace stringOps
     //  Empty expansions are allowed.
     //  Serialization of subDict entries is permitted.
     //
-    //  \sa stringOps::inplaceExpand(std::string&, const dictionary&, bool, bool, bool, char)
+    //  \sa
+    //  stringOps::inplaceExpand
+    //  (std::string&, const dictionary&, bool, bool, bool, char)
+    //
+    // \par Expansion behaviour
+    // - alternatives = True
+    // - environment = True
+    // - allow empty = True
+    // - subDict = True
+    // .
     void inplaceExpand
     (
         std::string& s,
@@ -242,9 +257,17 @@ namespace stringOps
     //- variables
     //
     //  The expansion behaviour is identical to
-    //  stringOps::inplaceExpand(std::string&, const dictionary&, bool, bool, bool, char)
+    //  stringOps::inplaceExpand
+    //  (std::string&, const dictionary&, bool, bool, bool, char)
     //  except that there is no dictionary and the environment variables
     //  are always enabled.
+    //
+    // \par Expansion behaviour
+    // - alternatives = True
+    // - environment = True
+    // - allow empty = Given by parameter (default: False)
+    // - subDict = Not applicable
+    // .
     void inplaceExpand
     (
         std::string& s,

@@ -223,12 +223,15 @@ void Foam::exprTools::expressionEntry::inplaceExpand
             stringOps::inplaceTrim(varName);
 
             // Allow recursive plain expansion for the *variable* name.
-            // This means "$[(vector) var${index] ]" should work
-            stringOps::inplaceExpand(varName, dict);
+            // This means "$[(vector) var${index} ]" should work
+
+            // Expand with env=true, empty=true, subDict=false
+            stringOps::inplaceExpand(varName, dict, true, true, false);
 
             // Length of original text to replace (incl. decorators)
             const auto replaceLen = (varEnd - varBeg + 1);
 
+            // Get primitiveEntry with env=false, subDict=false
             const entry* eptr = getVariableOrDie(varName, dict);
 
             std::string varValue;
@@ -236,7 +239,17 @@ void Foam::exprTools::expressionEntry::inplaceExpand
             if (castTo.empty())
             {
                 // Serialized with spaces
-                varValue = eptr->stream().toString();
+                ITstream& its = eptr->stream();
+
+                if (its.size() == 1 && its[0].isStringType())
+                {
+                    // Already a string-type (WORD, STRING, ...). Just copy.
+                    varValue = its[0].stringToken();
+                }
+                else
+                {
+                    varValue = its.toString();
+                }
             }
             else
             {
@@ -258,7 +271,8 @@ void Foam::exprTools::expressionEntry::inplaceExpand
     // - this is done second such that $[(vector) xyz] entries will have
     //   been properly expanded by this stage
 
-    stringOps::inplaceExpand(s, dict);
+    // Expand with env=true, empty=true, subDict=false
+    stringOps::inplaceExpand(s, dict, true, true, false);
 }
 
 

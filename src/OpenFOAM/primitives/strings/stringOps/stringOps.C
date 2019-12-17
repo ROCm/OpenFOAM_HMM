@@ -252,7 +252,7 @@ static inline std::string entryToString
 
             if (pe.size() == 1 && pe[0].isStringType())
             {
-                // Already a string-type. Just copy.
+                // Already a string-type (WORD, STRING, ...). Just copy.
                 str = pe[0].stringToken();
             }
             else

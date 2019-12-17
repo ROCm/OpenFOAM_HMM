@@ -134,7 +134,14 @@ public:
         //- Generic concatenate tokens to space-separated string.
         inline static string evaluate(const entry& e);
 
-        //- Inplace expand expression with dictionary entries
+        //- Inplace expand expression with dictionary variables/entries
+        //
+        // \par Expansion behaviour
+        // - alternatives = True
+        // - environment = True
+        // - allow empty = True
+        // - subDict = False
+        // .
         static void inplaceExpand
         (
             std::string& s,

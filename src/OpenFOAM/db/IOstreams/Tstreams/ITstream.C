@@ -231,6 +231,9 @@ std::string Foam::ITstream::toString() const
 
     label len = tokens.size();
 
+    // NOTE: may wish to have special handling if there is a single token
+    // and it is already a string or word
+
     for (const token& tok : tokens)
     {
         buf << tok;

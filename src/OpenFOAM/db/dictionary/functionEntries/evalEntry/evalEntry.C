@@ -105,10 +105,10 @@ Foam::tokenList Foam::functionEntries::evalEntry::evaluate
         << "input: " << s << endl;
     #endif
 
-    // Expanding with env-variables, with empty
-
-    stringOps::inplaceRemoveComments(s);
-    stringOps::inplaceExpand(s, parentDict, true, true);
+    // Expand with env=true, empty=true, subDict=false
+    // with comments stripped.
+    // Special handling of $[...] syntax enabled.
+    expressions::exprString::inplaceExpand(s, parentDict, true);
     stringOps::inplaceTrim(s);
 
     // An extraneous trailing ';' is a common input error, catch it now.
