@@ -21,7 +21,6 @@
 #
 #------------------------------------------------------------------------------
 export WM_ARCH="$(uname -s)"                # System name
-: ${WM_COMPILE_OPTION:=Opt}; export WM_COMPILE_OPTION  # Default: Optimize
 
 archOption="${WM_ARCH_OPTION:-64}"
 unset WM_ARCH_OPTION        # Compiling 32-bit on 64-bit system
@@ -290,8 +289,8 @@ CLANG_NOT_FOUND
     fi
     ;;
 
-system-* | ThirdParty-*)
-    # Using system compiler or other ThirdParty compiler
+-* | system-* | ThirdParty-*)
+    # Using empty (system), system compiler or other ThirdParty compiler
     ;;
 
 *)
