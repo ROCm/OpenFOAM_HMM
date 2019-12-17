@@ -423,6 +423,15 @@ public:
                 //- Get dxCartesiandb for a certain control point on cells
                 tmp<volTensorField> getDxCellsDb(const label cpI);
 
+                //- Get number of variables if CPs are moved symmetrically in U
+                label nUSymmetry() const;
+
+                //- Get number of variables if CPs are moved symmetrically in V
+                label nVSymmetry() const;
+
+                //- Get number of variables if CPs are moved symmetrically in W
+                label nWSymmetry() const;
+
 
             // Inline access functions
 

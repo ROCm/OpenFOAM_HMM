@@ -61,6 +61,7 @@ Foam::vector Foam::NURBS3DVolumeCylindrical::transformPointToCartesian
         localSystemCoordinates.x()*sin(localSystemCoordinates.y()),
         localSystemCoordinates.z()
     );
+    cartesianCoors += origin_;
 
     return cartesianCoors;
 }
@@ -90,11 +91,11 @@ void Foam::NURBS3DVolumeCylindrical::updateLocalCoordinateSystem
 {
     forAll(cartesianPoints, pI)
     {
-        const vector& point = cartesianPoints[pI];
+        const vector point(cartesianPoints[pI] - origin_);
         vector cylindricalCoors(Zero);
 
-        scalar R = Foam::sqrt(sqr(point.x()) + sqr(point.y()));
-        scalar theta = atan2(point.y(), point.x());
+        const scalar R(Foam::sqrt(sqr(point.x()) + sqr(point.y())));
+        const scalar theta(atan2(point.y(), point.x()));
         cylindricalCoors.x() = R;
         cylindricalCoors.y() = theta;
         cylindricalCoors.z() = cartesianPoints[pI].z();
@@ -105,7 +106,7 @@ void Foam::NURBS3DVolumeCylindrical::updateLocalCoordinateSystem
     (
         IOobject
         (
-           "cylindricalCoors",
+           "cylindricalCoors" + name_,
            mesh_.time().timeName(),
            mesh_,
            IOobject::NO_READ,
@@ -128,7 +129,8 @@ Foam::NURBS3DVolumeCylindrical::NURBS3DVolumeCylindrical
     bool computeParamCoors
 )
 :
-    NURBS3DVolume(dict, mesh, computeParamCoors)
+    NURBS3DVolume(dict, mesh, computeParamCoors),
+    origin_(dict.get<vector>("origin"))
 {
     updateLocalCoordinateSystem(mesh.points());
     writeCps("cpsBsplines" + mesh_.time().timeName());
