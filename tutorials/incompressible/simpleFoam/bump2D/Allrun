@@ -10,6 +10,7 @@ runApplication blockMesh
 models="
 kOmegaSST
 SpalartAllmaras
+kEpsilonPhitF
 "
 
 # Extract a value (Eg, from boundaryField/bump/value)

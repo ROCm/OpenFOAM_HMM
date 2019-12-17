@@ -10,13 +10,13 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      nuTilda;
+    object      epsilon;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -1 0 0 0 0];
+dimensions      [ 0 2 -3 0 0 0 0 ];
 
-internalField   uniform 6.93e-5; // 3*nu_inf
+internalField   uniform 469.872; // computed from omega and k
 
 boundaryField
 {
@@ -45,8 +45,9 @@ boundaryField
 
     bump
     {
-        type            fixedValue;
-        value           uniform 0;
+        type            epsilonWallFunction;
+        value           $internalField;
+        lowReCorrection on;
     }
 
     frontAndBack

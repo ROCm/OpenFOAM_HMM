@@ -10,27 +10,24 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      nuTilda;
+    object      phit;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -1 0 0 0 0];
+dimensions      [ 0 0 0 0 0 0 0 ];
 
-internalField   uniform 6.93e-5; // 3*nu_inf
+internalField   uniform 0.66;
 
 boundaryField
 {
     inlet
     {
-        type            fixedValue;
-        value           $internalField;
+        type            zeroGradient;
     }
 
     outlet
     {
-        type            inletOutlet;
-        inletValue      $internalField;
-        value           $internalField;
+        type            zeroGradient;
     }
 
     top
@@ -46,7 +43,7 @@ boundaryField
     bump
     {
         type            fixedValue;
-        value           uniform 0;
+        value           uniform 1e-10;
     }
 
     frontAndBack

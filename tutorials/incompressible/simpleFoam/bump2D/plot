@@ -4,7 +4,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 #------------------------------------------------------------------------------
 
 # Turbulence closure models
-models=('kOmegaSST' 'SpalartAllmaras')
+models=('kOmegaSST' 'SpalartAllmaras' 'kEpsilonPhitF')
 
 # Note: CFL3D data available from:
 # https://turbmodels.larc.nasa.gov/bump_sa.html

@@ -43,7 +43,7 @@ boundaryField
 
     bump
     {
-        type            zeroGradient; 
+        type            zeroGradient;
     }
 
     frontAndBack
