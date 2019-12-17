@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2019OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -193,13 +193,23 @@ updateCoeffs()
 
     const vector& myRayId = dom.IRay(rayId).d();
 
-    // Use updated Ir while iterating over rays
-    // avoids to used lagged qin
-    scalarField Ir = dom.IRay(0).qin().boundaryField()[patchi];
-
-    for (label rayI=1; rayI < dom.nRay(); rayI++)
+    scalarField Ir(patch().size(), Zero);
+    forAll(Iw, facei)
     {
-        Ir += dom.IRay(rayI).qin().boundaryField()[patchi];
+        for (label rayi=0; rayi < dom.nRay(); rayi++)
+        {
+            const vector& d = dom.IRay(rayi).d();
+
+            if ((-n[facei] & d) < 0.0)
+            {
+                // q into the wall
+                const scalarField& IFace =
+                    dom.IRay(rayi).ILambda(lambdaId).boundaryField()[patchi];
+
+                const vector& rayDave = dom.IRay(rayi).dAve();
+                Ir[facei] += IFace[facei]*(n[facei] & rayDave);
+            }
+        }
     }
 
     if (dom.useSolarLoad())

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -187,17 +187,6 @@ updateCoeffs()
 
     scalarField& qem = ray.qem().boundaryFieldRef()[patchi];
     scalarField& qin = ray.qin().boundaryFieldRef()[patchi];
-
-    // Use updated Ir while iterating over rays
-    // avoids to used lagged qin
-    /*
-    scalarField Ir = dom.IRay(0).qin().boundaryField()[patchi];
-
-    for (label rayI=1; rayI < dom.nRay(); rayI++)
-    {
-        Ir += dom.IRay(rayI).qin().boundaryField()[patchi];
-    }
-    */
 
     // Calculate Ir into the wall on the same lambdaId
     scalarField Ir(patch().size(), Zero);

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd
+    Copyright (C) 2018-2019 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -270,6 +270,8 @@ Foam::scalar Foam::radiation::radiativeIntensityRay::correct()
 {
     // Reset boundary heat flux to zero
     qr_.boundaryFieldRef() = 0.0;
+    qem_.boundaryFieldRef() = 0.0;
+    qin_.boundaryFieldRef() = 0.0;
 
     scalar maxResidual = -GREAT;
 
