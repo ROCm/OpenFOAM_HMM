@@ -202,6 +202,13 @@ void Foam::MPPICCloud<CloudType>::motion
 
     if (dampingModel_->active())
     {
+        if (this->mesh().moving())
+        {
+            FatalErrorInFunction
+                << "MPPIC damping modelling does not support moving meshes."
+                << exit(FatalError);
+        }
+
         // update averages
         td.updateAverages(cloud);
 
@@ -226,6 +233,13 @@ void Foam::MPPICCloud<CloudType>::motion
 
     if (packingModel_->active())
     {
+        if (this->mesh().moving())
+        {
+            FatalErrorInFunction
+                << "MPPIC packing modelling does not support moving meshes."
+                << exit(FatalError);
+        }
+
         // same procedure as for damping
         td.updateAverages(cloud);
         packingModel_->cacheFields(true);

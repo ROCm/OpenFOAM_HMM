@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2019 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,23 +24,39 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::RBD::restraints::linearAxialAngularSpring
+    Foam::RBD::restraints::externalForce
 
 Group
     grpRigidBodyDynamicsRestraints
 
 Description
-    Linear axial angular spring restraint.
+    Time-dependent external force restraint using Function1.
+
+Usage
+    Example applying a constant force to the floatingObject:
+    \verbatim
+    restraints
+    {
+        force
+        {
+            type        externalForce;
+            body        floatingObject;
+            location    (0 0 0);
+            force       (100 0 0);
+        }
+    }
+    \endverbatim
 
 SourceFiles
-    linearAxialAngularSpring.C
+    externalForce.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef linearAxialAngularSpring_H
-#define linearAxialAngularSpring_H
+#ifndef RBD_restraints_externalForce_H
+#define RBD_restraints_externalForce_H
 
 #include "rigidBodyRestraint.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,38 +68,32 @@ namespace restraints
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class linearAxialAngularSpring Declaration
+                          Class externalForce Declaration
 \*---------------------------------------------------------------------------*/
 
-class linearAxialAngularSpring
+class externalForce
 :
     public restraint
 {
     // Private data
 
-        //- Reference orientation where there is no moment
-        tensor refQ_;
+        //- External force (N)
+        autoPtr<Function1<vector>> externalForce_;
 
-        //- Global unit axis around which the motion is sprung
-        vector axis_;
-
-        //- Spring stiffness coefficient [Nm/rad]
-        scalar stiffness_;
-
-        //- Damping coefficient [Nms/rad]
-        scalar damping_;
+        //- Point of application of the force
+        vector location_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("linearAxialAngularSpring");
+    TypeName("externalForce");
 
 
     // Constructors
 
         //- Construct from components
-        linearAxialAngularSpring
+        externalForce
         (
             const word& name,
             const dictionary& dict,
@@ -95,18 +105,18 @@ public:
         {
             return autoPtr<restraint>
             (
-                new linearAxialAngularSpring(*this)
+                new externalForce(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~linearAxialAngularSpring();
+    virtual ~externalForce();
 
 
     // Member Functions
 
-        //- Accumulate the restraint internal joint forces into the tau field and
+        //- Accumulate the retraint internal joint forces into the tau field and
         //  external forces into the fx field
         virtual void restrain
         (
@@ -125,7 +135,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RBD
+} // End namespace restraints
 } // End namespace RBD
 } // End namespace Foam
 

@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    fileName vtkPath(runTime.path()/"VTK");
+    const fileName vtkPath(runTime.rootPath()/runTime.globalCaseName()/"VTK");
     mkDir(vtkPath);
 
     Info<< "Scanning times to determine track data for cloud " << cloudName

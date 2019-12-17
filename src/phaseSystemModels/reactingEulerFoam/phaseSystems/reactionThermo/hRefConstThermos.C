@@ -33,6 +33,7 @@ License
 
 #include "specie.H"
 #include "perfectGas.H"
+#include "rPolynomial.H"
 #include "perfectFluid.H"
 #include "rhoConst.H"
 
@@ -89,6 +90,19 @@ constTransport
 <
     species::thermo
     <
+        hRefConstThermo
+        <
+            rPolynomial<specie>
+        >,
+        sensibleEnthalpy
+    >
+> constRefrPolFluidHThermoPhysics;
+
+typedef
+constTransport
+<
+    species::thermo
+    <
         eRefConstThermo
         <
             perfectGas<specie>
@@ -109,6 +123,19 @@ constTransport
         sensibleInternalEnergy
     >
 > constRefFluidEThermoPhysics;
+
+typedef
+constTransport
+<
+    species::thermo
+    <
+        eRefConstThermo
+        <
+            rPolynomial<specie>
+        >,
+        sensibleInternalEnergy
+    >
+> constRefrPolFluidEThermoPhysics;
 
 typedef
 constTransport
@@ -159,6 +186,18 @@ makeThermos
     constTransport,
     sensibleEnthalpy,
     hRefConstThermo,
+    rPolynomial,
+    specie
+);
+
+makeThermos
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    constTransport,
+    sensibleEnthalpy,
+    hRefConstThermo,
     perfectFluid,
     specie
 );
@@ -187,6 +226,18 @@ makeThermos
     sensibleInternalEnergy,
     eRefConstThermo,
     perfectGas,
+    specie
+);
+
+makeThermos
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    constTransport,
+    sensibleInternalEnergy,
+    eRefConstThermo,
+    rPolynomial,
     specie
 );
 
@@ -241,6 +292,15 @@ makeThermoPhysicsReactionThermos
     rhoReactionThermo,
     heRhoThermo,
     multiComponentMixture,
+    constRefrPolFluidEThermoPhysics
+);
+
+makeThermoPhysicsReactionThermos
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoThermo,
+    multiComponentMixture,
     constRefRhoConstEThermoPhysics
 );
 
@@ -263,6 +323,15 @@ makeThermoPhysicsReactionThermos
     heRhoThermo,
     multiComponentMixture,
     constRefFluidHThermoPhysics
+);
+
+makeThermoPhysicsReactionThermos
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoThermo,
+    multiComponentMixture,
+    constRefrPolFluidHThermoPhysics
 );
 
 makeThermoPhysicsReactionThermos

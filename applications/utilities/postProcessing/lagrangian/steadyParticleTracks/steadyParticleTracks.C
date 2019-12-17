@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    fileName vtkPath(runTime.path()/"VTK");
+    const fileName vtkPath(runTime.rootPath()/runTime.globalCaseName()/"VTK");
     mkDir(vtkPath);
 
     forAll(timeDirs, timeI)
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
         runTime.setTime(timeDirs[timeI], timeI);
         Info<< "Time = " << runTime.timeName() << endl;
 
-        fileName vtkTimePath(runTime.path()/"VTK"/runTime.timeName());
+        const fileName vtkTimePath(vtkPath/runTime.timeName());
         mkDir(vtkTimePath);
 
         Info<< "    Reading particle positions" << endl;

@@ -57,6 +57,7 @@ class Wallis
 {
     // Private data
 
+        dimensionedScalar pSat_;
         dimensionedScalar psiv_;
         dimensionedScalar psil_;
 

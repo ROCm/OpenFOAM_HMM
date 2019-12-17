@@ -61,6 +61,13 @@ Foam::scalar Foam::SpecieMixture<MixtureType>::W
 
 
 template<class MixtureType>
+Foam::scalar Foam::SpecieMixture<MixtureType>::Hc(const label speciei) const
+{
+    return this->getLocalThermo(speciei).Hc();
+}
+
+
+template<class MixtureType>
 Foam::scalar Foam::SpecieMixture<MixtureType>::Cp
 (
     const label speciei,
@@ -85,6 +92,18 @@ Foam::scalar Foam::SpecieMixture<MixtureType>::Cv
 
 
 template<class MixtureType>
+Foam::scalar Foam::SpecieMixture<MixtureType>::HE
+(
+    const label speciei,
+    const scalar p,
+    const scalar T
+) const
+{
+    return this->getLocalThermo(speciei).HE(p, T);
+}
+
+
+template<class MixtureType>
 Foam::scalar Foam::SpecieMixture<MixtureType>::Ha
 (
     const label speciei,
@@ -105,16 +124,6 @@ Foam::scalar Foam::SpecieMixture<MixtureType>::Hs
 ) const
 {
     return this->getLocalThermo(speciei).Hs(p, T);
-}
-
-
-template<class MixtureType>
-Foam::scalar Foam::SpecieMixture<MixtureType>::Hc
-(
-    const label speciei
-) const
-{
-    return this->getLocalThermo(speciei).Hc();
 }
 
 

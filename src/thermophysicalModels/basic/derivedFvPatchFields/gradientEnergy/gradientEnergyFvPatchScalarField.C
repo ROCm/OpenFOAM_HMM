@@ -119,6 +119,13 @@ void Foam::gradientEnergyFvPatchScalarField::updateCoeffs()
 }
 
 
+void Foam::gradientEnergyFvPatchScalarField::write(Ostream& os) const
+{
+    fixedGradientFvPatchScalarField::write(os);
+    os.writeEntry("value", *this);
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam

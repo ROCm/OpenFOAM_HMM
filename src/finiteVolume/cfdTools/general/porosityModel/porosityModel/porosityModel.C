@@ -42,12 +42,13 @@ namespace Foam
 
 void Foam::porosityModel::adjustNegativeResistance(dimensionedVector& resist)
 {
-    scalar maxCmpt = max(0, cmptMax(resist.value()));
+    scalar maxCmpt = cmptMax(resist.value());
 
     if (maxCmpt < 0)
     {
         FatalErrorInFunction
-            << "Negative resistances are invalid, resistance = " << resist
+            << "Cannot have all resistances set to negative, resistance = "
+            << resist
             << exit(FatalError);
     }
     else

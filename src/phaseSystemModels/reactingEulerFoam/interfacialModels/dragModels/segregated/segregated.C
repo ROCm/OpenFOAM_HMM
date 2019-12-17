@@ -109,7 +109,7 @@ Foam::tmp<Foam::volScalarField> Foam::dragModels::segregated::K() const
     L.primitiveFieldRef() = cbrt(mesh.V());
     L.correctBoundaryConditions();
 
-    volScalarField I
+    const volScalarField I
     (
         alpha1
        /max
@@ -118,7 +118,7 @@ Foam::tmp<Foam::volScalarField> Foam::dragModels::segregated::K() const
             pair_.phase1().residualAlpha() + pair_.phase2().residualAlpha()
         )
     );
-    volScalarField magGradI
+    const volScalarField magGradI
     (
         max
         (
@@ -127,28 +127,36 @@ Foam::tmp<Foam::volScalarField> Foam::dragModels::segregated::K() const
         )
     );
 
-    volScalarField muI
+    const volScalarField muI
     (
         rho1*nu1*rho2*nu2
        /(rho1*nu1 + rho2*nu2)
     );
-    volScalarField muAlphaI
+
+    const volScalarField limitedAlpha1
     (
-        alpha1*rho1*nu1*alpha2*rho2*nu2
-       /(
-           max(alpha1, pair_.phase1().residualAlpha())*rho1*nu1
-         + max(alpha2, pair_.phase2().residualAlpha())*rho2*nu2
-        )
+        max(alpha1, pair_.phase1().residualAlpha())
     );
 
-    volScalarField ReI
+    const volScalarField limitedAlpha2
+    (
+        max(alpha2, pair_.phase2().residualAlpha())
+    );
+
+    const volScalarField muAlphaI
+    (
+        alpha1*rho1*nu1*alpha2*rho2*nu2
+       /(limitedAlpha1*rho1*nu1 + limitedAlpha2*rho2*nu2)
+    );
+
+    const volScalarField ReI
     (
         pair_.rho()
        *pair_.magUr()
-       /(magGradI*muI)
+       /(magGradI*limitedAlpha1*limitedAlpha2*muI)
     );
 
-    volScalarField lambda(m_*ReI + n_*muAlphaI/muI);
+    const volScalarField lambda(m_*ReI + n_*muAlphaI/muI);
 
     return lambda*sqr(magGradI)*muI;
 }

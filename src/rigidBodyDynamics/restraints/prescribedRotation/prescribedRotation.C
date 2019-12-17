@@ -78,7 +78,8 @@ Foam::RBD::restraints::prescribedRotation::~prescribedRotation()
 void Foam::RBD::restraints::prescribedRotation::restrain
 (
     scalarField& tau,
-    Field<spatialVector>& fx
+    Field<spatialVector>& fx,
+    const rigidBodyModelState& state
 ) const
 {
     vector refDir = rotationTensor(vector(1, 0, 0), axis_) & vector(0, 1, 0);
