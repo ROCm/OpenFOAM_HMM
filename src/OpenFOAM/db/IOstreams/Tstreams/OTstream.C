@@ -43,18 +43,6 @@ bool Foam::OTstream::write(const token& tok)
 }
 
 
-bool Foam::OTstream::write(token&& tok)
-{
-    if (tok.good())
-    {
-        append(std::move(tok));
-        return true;
-    }
-
-    return false;
-}
-
-
 Foam::Ostream& Foam::OTstream::write(const char c)
 {
     if (!std::isspace(c) && std::isprint(c))
