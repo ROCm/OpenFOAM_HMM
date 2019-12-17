@@ -332,7 +332,7 @@ public:
                 {}
 
                 //- Solve returning the solution statistics given convergence
-                //  tolerance. Use the given solver controls
+                //- tolerance. Use the given solver controls
                 virtual SolverPerformance<scalar> solve
                 (
                     fvMatrix<scalar>&,
@@ -340,7 +340,7 @@ public:
                 ) const;
 
                 //- Solve returning the solution statistics given convergence
-                //  tolerance. Use the given solver controls
+                //- tolerance. Use the given solver controls
                 virtual SolverPerformance<vector> solve
                 (
                     fvMatrix<vector>&,
@@ -348,7 +348,15 @@ public:
                 ) const;
 
                 //- Solve returning the solution statistics given convergence
-                //  tolerance. Use the given solver controls
+                //- tolerance. Use the given solver controls
+                virtual SolverPerformance<sphericalTensor> solve
+                (
+                    fvMatrix<sphericalTensor>&,
+                    const dictionary&
+                ) const;
+
+                //- Solve returning the solution statistics given convergence
+                //- tolerance. Use the given solver controls
                 virtual SolverPerformance<symmTensor> solve
                 (
                     fvMatrix<symmTensor>&,
@@ -356,7 +364,7 @@ public:
                 ) const;
 
                 //- Solve returning the solution statistics given convergence
-                //  tolerance. Use the given solver controls
+                //- tolerance. Use the given solver controls
                 virtual SolverPerformance<tensor> solve
                 (
                     fvMatrix<tensor>&,

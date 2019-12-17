@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -447,6 +447,17 @@ Foam::SolverPerformance<Foam::scalar> Foam::fvMesh::solve
 Foam::SolverPerformance<Foam::vector> Foam::fvMesh::solve
 (
     fvMatrix<vector>& m,
+    const dictionary& dict
+) const
+{
+    // Redirect to fvMatrix solver
+    return m.solveSegregatedOrCoupled(dict);
+}
+
+
+Foam::SolverPerformance<Foam::sphericalTensor> Foam::fvMesh::solve
+(
+    fvMatrix<sphericalTensor>& m,
     const dictionary& dict
 ) const
 {
