@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018-2019 IH-Cantabria
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -136,6 +136,9 @@ class waveMakerPointPatchVectorField
         //- Wave phase
         scalar wavePhase_;
 
+        //- Wave angle
+        scalar waveAngle_;
+
         //- Wave length
         scalar waveLength_;
 
@@ -148,6 +151,54 @@ class waveMakerPointPatchVectorField
         //- On/off second order calculation switch
         scalar secondOrder_;
 
+        //- Number of wave paddles
+        label nPaddle_;
+
+        //- Rotation tensor from global to local system
+        tensor Rgl_;
+
+        //- Rotation tensor from local to global system
+        tensor Rlg_;
+
+        //- Paddle x co-ordinates / [m]
+        scalarField xPaddle_;
+
+        //- Paddle y co-ordinates / [m]
+        scalarField yPaddle_;
+
+        //- Addressing from point patch index to paddle index
+        labelList pointToPaddle_;
+
+        //- Addressing from patch face index to paddle index
+        labelList faceToPaddle_;
+
+        //- Patch face centre x co-ordinates / [m]
+        scalarField x_;
+
+        //- Patch face centre y co-ordinates / [m]
+        scalarField y_;
+
+        //- Patch face centre z co-ordinates / [m]
+        scalarField z_;
+
+        //- Overall (point) span in z-direction / [m]
+        scalar zSpan_;
+
+        //- Minimum z (point) height per patch face / [m]
+        scalarField zMin_;
+
+        //- Global Minimum z (point) / [m]
+        scalar zMinGb_;
+
+        //- Maximum z (point) height per patch face / [m]
+        scalarField zMax_;
+
+        //- Calculated water depth at the patch
+        scalarField waterDepthRef_;
+
+        //
+        scalar firstTime = 0;
+
 
     // Protected Member Functions
 
@@ -159,6 +210,9 @@ class waveMakerPointPatchVectorField
 
         //- Return the time scaling coefficient
         virtual scalar timeCoeff(const scalar t) const;
+
+        //- Initialise
+        virtual void initialiseGeometry();
 
 
 public:
