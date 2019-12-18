@@ -16,15 +16,15 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-combustionModel infinitelyFastChemistry;
+combustionModel  EDM;
 
-active  on;
-
-infinitelyFastChemistryCoeffs
+EDMCoeffs
 {
-    semiImplicit no;
-    C       5.0;
+    semiImplicit    no;
+    Cd              1;
+    CEDC            1;
 }
 
+active  on;
 
 // ************************************************************************* //
