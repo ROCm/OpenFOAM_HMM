@@ -47,7 +47,8 @@ inline bool writeMeshObject
     const word& name,
     const fileName& meshDir,
     Time& runTime,
-    bool disableHeaderChecking = false
+    const bool strictTypeChecking = true,
+    const bool disableHeaderChecking = false
 )
 {
     IOobject io
@@ -63,7 +64,7 @@ inline bool writeMeshObject
 
     bool writeOk = false;
 
-    if (io.typeHeaderOk<CheckType>(true, true, false))
+    if (io.typeHeaderOk<CheckType>(strictTypeChecking, true, false))
     {
         Info<< "        Reading " << io.headerClassName()
             << " : " << name << endl;

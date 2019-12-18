@@ -315,7 +315,8 @@ int main(int argc, char *argv[])
         (
             "cells",
             meshDir,
-            runTime
+            runTime,
+            false   // do not check typeName since varies between binary/ascii
         );
         writeMeshObject<labelIOList>("owner", meshDir, runTime);
         writeMeshObject<labelIOList>("neighbour", meshDir, runTime);
@@ -323,7 +324,8 @@ int main(int argc, char *argv[])
         (
             "faces",
             meshDir,
-            runTime
+            runTime,
+            false   // do not check typeName since varies between binary/ascii
         );
         writeMeshObject<pointIOField>("points", meshDir, runTime);
         // Write boundary in ascii. This is only needed for fileHandler to
