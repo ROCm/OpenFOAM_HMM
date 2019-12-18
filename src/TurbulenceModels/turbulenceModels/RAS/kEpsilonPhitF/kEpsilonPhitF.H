@@ -44,7 +44,7 @@ Description
     \verbatim
         Standard model (Tag:LUU):
             Laurence, D. R., Uribe, J. C., & Utyuzhnikov, S. V. (2005).
-            A robust formulation of the v2−f model.
+            A robust formulation of the v2-f model.
             Flow, Turbulence and Combustion, 73(3-4), 169–185.
             DOI:10.1007/s10494-005-1974-8
     \endverbatim
@@ -168,10 +168,10 @@ protected:
         virtual void correctNut();
 
         //- Return the turbulent time scale, T
-        volScalarField Ts() const;
+        tmp<volScalarField> Ts() const;
 
         //- Return the turbulent length scale, L
-        volScalarField Ls() const;
+        tmp<volScalarField> Ls() const;
 
 
 public:

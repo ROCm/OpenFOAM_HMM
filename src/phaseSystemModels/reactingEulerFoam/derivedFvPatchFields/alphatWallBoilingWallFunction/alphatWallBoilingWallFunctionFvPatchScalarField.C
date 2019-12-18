@@ -153,9 +153,6 @@ alphatWallBoilingWallFunctionFvPatchScalarField
                     dict.subDict("partitioningModel")
                 );
 
-            const dictionary* LeidenfrostDict =
-                dict.findDict("LeidenfrostModel");
-
             dmdt_ = 0;
 
             break;

@@ -51,7 +51,7 @@ void kEpsilonPhitF<BasicTurbulenceModel>::correctNut()
 
 
 template<class BasicTurbulenceModel>
-volScalarField kEpsilonPhitF<BasicTurbulenceModel>::Ts() const
+tmp<volScalarField> kEpsilonPhitF<BasicTurbulenceModel>::Ts() const
 {
     // (LUU:Eq. 7)
     return
@@ -71,7 +71,7 @@ volScalarField kEpsilonPhitF<BasicTurbulenceModel>::Ts() const
 
 
 template<class BasicTurbulenceModel>
-volScalarField kEpsilonPhitF<BasicTurbulenceModel>::Ls() const
+tmp<volScalarField> kEpsilonPhitF<BasicTurbulenceModel>::Ls() const
 {
     // (LUU:Eq. 7)
     return
@@ -440,7 +440,7 @@ void kEpsilonPhitF<BasicTurbulenceModel>::correct()
       ==
         alpha()*rho()*G()
       - fvm::SuSp(2.0/3.0*alpha()*rho()*divU, k_)
-      - fvm::Sp(alpha()*rho()/T_(), k_)
+      - fvm::Sp(alpha()*rho()*(1.0/T_()), k_)
       + fvOptions(alpha, rho, k_)
     );
 
