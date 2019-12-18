@@ -32,24 +32,24 @@ Group
 
 Description
     This boundary condition provides a wall constraint on the elliptic
-    relaxation factor, \c f, which is executed in the \c v2-f eddy viscosity
-    turbulence model. The condition is applicable for low- and high-Reynolds
-    number turbulent flow cases.
-
-    For \c f, the viscous sublayer and log-law region blending approaches are
-    claimed to be inviable (Popovac and Hanjalić (2007), p. 194). Therefore,
-    the only boundary condition blending mode is the stepwise mode
-    where the viscous sublayer and log-law region contributions switch over
-    \c y+ value derived from the \c kappa and \c E.
+    relaxation factor, \c f, which is executed in the \c v2-f based
+    turbulence closure models for low- and high-Reynolds number
+    turbulent flow cases.
 
     Reference:
     \verbatim
-        Remark on the blending approach:
-            Popovac, M., & Hanjalić, K. (2007).
-            Compound wall treatment for RANS computation of complex
-            turbulent flows and heat transfer.
-            Flow, turbulence and combustion, 78(2), 177-202.
-            doi:10.1007/s10494-006-9067-x
+    Remark on the blending approach for f (tag:PH):
+        Popovac, M., & Hanjalić, K. (2007).
+        Compound wall treatment for RANS computation of complex
+        turbulent flows and heat transfer.
+        Flow, turbulence and combustion, 78(2), 177-202.
+        DOI:10.1007/s10494-006-9067-x
+
+    Wall-boundary expression for f in kEpsilonPhitF model (tag:LUU):
+        Laurence, D. R., Uribe, J. C., & Utyuzhnikov, S. V. (2005).
+        A robust formulation of the v2−f model.
+        Flow, Turbulence and Combustion, 73(3-4), 169–185.
+        DOI:10.1007/s10494-005-1974-8
     \endverbatim
 
 Usage
@@ -68,6 +68,12 @@ Note
     The coefficients \c Cmu, \c kappa, and \c E are obtained from
     the specified \c nutWallFunction in order to ensure that each patch
     possesses the same set of values for these coefficients.
+
+    For \c f, the viscous and inertial sublayer blending approaches were
+    claimed to be inviable (PH:p. 194). Therefore, the only blending mode
+    for the v2-f model is the stepwise mode where the viscous and inertial
+    sublayer contributions switch over a sublayer-intersection value of
+    \c y+ estimated from the \c kappa and \c E.
 
 See also
     Foam::fixedValueFvPatchField

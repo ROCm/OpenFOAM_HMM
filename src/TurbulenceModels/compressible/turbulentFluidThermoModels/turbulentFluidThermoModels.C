@@ -94,6 +94,9 @@ makeRASModel(LRR);
 #include "SSG.H"
 makeRASModel(SSG);
 
+#include "kEpsilonPhitF.H"
+makeRASModel(kEpsilonPhitF);
+
 
 // -------------------------------------------------------------------------- //
 // LES models

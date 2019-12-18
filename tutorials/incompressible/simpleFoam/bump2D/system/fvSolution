@@ -25,10 +25,18 @@ solvers
         relTol          0.1;
     }
 
-    "(U|k|epsilon|omega|nuTilda)"
+    "(U|k|epsilon|omega|nuTilda|phit)"
     {
         solver          PBiCGStab;
         preconditioner  DILU;
+        tolerance       1e-8;
+        relTol          0;
+    }
+
+    f
+    {
+        solver          PBiCGStab;
+        preconditioner  DIC;
         tolerance       1e-8;
         relTol          0;
     }
@@ -42,7 +50,7 @@ SIMPLE
     {
         p               1e-5;
         U               1e-5;
-        "(k|epsilon|omega|nuTilda)" 1e-5;
+        "(k|epsilon|omega|nuTilda|phit|f)" 1e-5;
     }
 }
 
@@ -51,7 +59,7 @@ relaxationFactors
     equations
     {
         U               0.9;
-        "(k|epsilon|omega|nuTilda)" 0.7;
+        "(k|epsilon|omega|nuTilda|phit|f)" 0.7;
     }
 }
 
@@ -59,6 +67,8 @@ relaxationFactors
 cache
 {
     grad(U);
+    grad(k);
+    grad(phit);
 }
 
 // ************************************************************************* //

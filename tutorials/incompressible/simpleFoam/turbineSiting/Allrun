@@ -4,18 +4,19 @@ cd "${0%/*}" || exit                                # Run from this directory
 #------------------------------------------------------------------------------
 
 # Make dummy 0 directory
+rm -rf 0
 mkdir 0
 
 runApplication blockMesh
-\cp system/decomposeParDict.hierarchical system/decomposeParDict
+cp system/decomposeParDict.hierarchical system/decomposeParDict
 runApplication decomposePar
 
-\cp system/decomposeParDict.ptscotch system/decomposeParDict
+cp system/decomposeParDict.ptscotch system/decomposeParDict
 runParallel snappyHexMesh -overwrite
 
 find . -iname '*level*' -type f -delete
 
-# - Set the initial fields
+# Set the initial fields
 restore0Dir -processor
 
 runParallel topoSet

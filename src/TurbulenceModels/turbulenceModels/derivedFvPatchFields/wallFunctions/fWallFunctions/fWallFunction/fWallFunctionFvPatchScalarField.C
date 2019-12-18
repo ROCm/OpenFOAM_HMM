@@ -29,6 +29,7 @@ License
 #include "fWallFunctionFvPatchScalarField.H"
 #include "nutWallFunctionFvPatchScalarField.H"
 #include "v2f.H"
+#include "kEpsilonPhitF.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -111,7 +112,6 @@ void fWallFunctionFvPatchScalarField::updateCoeffs()
             internalField().group()
         )
     );
-    const v2fBase& v2fModel = refCast<const v2fBase>(turbModel);
 
     const nutWallFunctionFvPatchScalarField& nutw =
         nutWallFunctionFvPatchScalarField::nutw(turbModel, patchi);
@@ -121,42 +121,59 @@ void fWallFunctionFvPatchScalarField::updateCoeffs()
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
-    const tmp<volScalarField> tk = turbModel.k();
-    const volScalarField& k = tk();
-
-    const tmp<volScalarField> tepsilon = turbModel.epsilon();
-    const volScalarField& epsilon = tepsilon();
-
-    const tmp<volScalarField> tv2 = v2fModel.v2();
-    const volScalarField& v2 = tv2();
-
-    const scalar Cmu25 = pow025(nutw.Cmu());
-    const scalar N = 6.0;
-
     scalarField& f = *this;
 
-    // Set f wall values
-    forAll(f, facei)
+    if (isA<v2fBase>(turbModel))
     {
-        const label celli = patch().faceCells()[facei];
+        const v2fBase& v2fModel = refCast<const v2fBase>(turbModel);
 
-        const scalar uTau = Cmu25*sqrt(k[celli]);
+        const tmp<volScalarField> tk = turbModel.k();
+        const volScalarField& k = tk();
 
-        const scalar yPlus = uTau*y[facei]/nuw[facei];
+        const tmp<volScalarField> tepsilon = turbModel.epsilon();
+        const volScalarField& epsilon = tepsilon();
 
-        if (nutw.yPlusLam() < yPlus)
+        const tmp<volScalarField> tv2 = v2fModel.v2();
+        const volScalarField& v2 = tv2();
+
+        const scalar Cmu25 = pow025(nutw.Cmu());
+        const scalar N = 6.0;
+
+        // Set f wall values
+        forAll(f, facei)
         {
-            const scalar v2c = v2[celli];
-            const scalar epsc = epsilon[celli];
-            const scalar kc = k[celli];
+            const label celli = patch().faceCells()[facei];
 
-            f[facei] = N*v2c*epsc/(sqr(kc) + ROOTVSMALL);
-            f[facei] /= sqr(uTau) + ROOTVSMALL;
+            const scalar uTau = Cmu25*sqrt(k[celli]);
+
+            const scalar yPlus = uTau*y[facei]/nuw[facei];
+
+            if (nutw.yPlusLam() < yPlus)
+            {
+                const scalar v2c = v2[celli];
+                const scalar epsc = epsilon[celli];
+                const scalar kc = k[celli];
+
+                f[facei] = N*v2c*epsc/(sqr(kc) + ROOTVSMALL);
+                f[facei] /= sqr(uTau) + ROOTVSMALL;
+            }
+            else
+            {
+                f[facei] = 0.0;
+            }
         }
-        else
-        {
-            f[facei] = 0.0;
-        }
+    }
+    else if (isA<kEpsilonPhitFBase>(turbModel))
+    {
+        // (LUU:p. 176)
+        f = 0.0;
+    }
+    else
+    {
+        FatalErrorInFunction
+            << "The RAS model is neither the v2f nor kEpsilonPhitF model. "
+            << "Therefore, fWallFunction is not usable." << nl
+            << exit(FatalError);
     }
 
     fixedValueFvPatchField<scalar>::updateCoeffs();
