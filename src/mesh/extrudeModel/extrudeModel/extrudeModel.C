@@ -49,7 +49,7 @@ Foam::extrudeModel::extrudeModel
 {
     DebugInfo
         << "Selected extrudeModel for " << modelType
-        << "using coeffs " << coeffDict_ << nl;
+        << " using coeffs " << coeffDict_ << nl;
 }
 
 
