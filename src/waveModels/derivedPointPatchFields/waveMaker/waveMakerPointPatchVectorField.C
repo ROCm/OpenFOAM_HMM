@@ -174,7 +174,7 @@ Foam::waveMakerPointPatchVectorField::waveMakerPointPatchVectorField
     wavePeriod_(dict.get<scalar>("wavePeriod")),
     waveHeight_(dict.get<scalar>("waveHeight")),
     wavePhase_(dict.get<scalar>("wavePhase")),
-    waveAngle_(dict.get<scalar>("waveAngle")),
+    waveAngle_(dict.getOrDefault<scalar>("waveAngle", 0)),
     startTime_
     (
         dict.getOrDefault<scalar>
@@ -279,7 +279,7 @@ void Foam::waveMakerPointPatchVectorField::updateCoeffs()
         // Set the reference water depth
         if (initialDepth_ != 0 )
         {
-            forAll(waterDepthRef_,paddlei)
+            forAll(waterDepthRef_, paddlei)
             {
                 waterDepthRef_[paddlei] = initialDepth_;
             }
@@ -292,25 +292,26 @@ void Foam::waveMakerPointPatchVectorField::updateCoeffs()
         }
 
 
-        Info << " WaterDepth at the wavepaddles = " << waterDepthRef_ << endl;
+        Info<< " WaterDepth at the wavepaddles = " << waterDepthRef_ << endl;
         firstTime = 1;
     }
 
     const scalar t = db().time().value() - startTime_;
 
-    scalarField waveLength_(nPaddle_,-1);
+    scalarField waveLength_(nPaddle_, -1);
 
     scalarField waveK(nPaddle_, -1);
     scalarField waveKx(nPaddle_, -1);
     scalarField waveKy(nPaddle_, -1);
 
-    forAll(waveK, pointi)
+    forAll(waveK, padddlei)
     {
-        waveLength_[pointi] = waveLength(waterDepthRef_[pointi], wavePeriod_);
+        waveLength_[padddlei] =
+            waveLength(waterDepthRef_[padddlei], wavePeriod_);
 
-        waveK[pointi] = constant::mathematical::twoPi/waveLength_[pointi];
-        waveKx[pointi] = waveK[pointi]*cos(waveAngle_);
-        waveKy[pointi] = waveK[pointi]*sin(waveAngle_);
+        waveK[padddlei] = constant::mathematical::twoPi/waveLength_[padddlei];
+        waveKx[padddlei] = waveK[padddlei]*cos(waveAngle_);
+        waveKy[padddlei] = waveK[padddlei]*sin(waveAngle_);
     }
     const scalar sigma = 2*constant::mathematical::pi/wavePeriod_;
 

@@ -64,9 +64,11 @@ Usage
         wavePeriod   | wave period                  | yes      |
         waveHeight   | Wave height                  | yes      |
         wavePhase    | wave phase                   | yes      |
+        waveAngle    | wave angle                   | no       | 0
         startTime    | Start time                   | no       | case start time
         rampTime     | Time to reach maximum motion | yes      |
         secondOrder  | Second order calculation     | no       | no
+        nPaddle      | Number of paddles            | no       | 1
     \endtable
 
     Available motion types include:
