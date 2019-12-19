@@ -58,9 +58,10 @@ Foam::fv::option::option
     coeffs_(dict.optionalSubDict(modelType + "Coeffs")),
     active_(dict_.lookupOrDefault<Switch>("active", true)),
     fieldNames_(),
-    applied_()
+    applied_(),
+    log(true)
 {
-    Info<< incrIndent << indent << "Source: " << name_ << endl << decrIndent;
+    Log << incrIndent << indent << "Source: " << name_ << endl << decrIndent;
 }
 
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,6 +55,8 @@ void Foam::fv::option::writeData(Ostream& os) const
 bool Foam::fv::option::read(const dictionary& dict)
 {
     dict.readIfPresent("active", active_);
+
+    log = dict.getOrDefault("log", true);
 
     coeffs_ = dict.optionalSubDict(modelType_ + "Coeffs");
 

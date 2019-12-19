@@ -231,22 +231,24 @@ void kEpsilon<BasicTurbulenceModel>::correct()
     const rhoField& rho = this->rho_;
     const surfaceScalarField& alphaRhoPhi = this->alphaRhoPhi_;
     const volVectorField& U = this->U_;
-    volScalarField& nut = this->nut_;
+    const volScalarField::Internal unlimitedNut(Cmu_*sqr(k_())/epsilon_());
+    const volScalarField& nut = this->nut_;
+
     fv::options& fvOptions(fv::options::New(this->mesh_));
 
     eddyViscosity<RASModel<BasicTurbulenceModel>>::correct();
 
-    volScalarField::Internal divU
+    const volScalarField::Internal divU
     (
         fvc::div(fvc::absolute(this->phi(), U))().v()
     );
 
     tmp<volTensorField> tgradU = fvc::grad(U);
-    volScalarField::Internal G
+    const volScalarField::Internal GbyNu
     (
-        this->GName(),
-        nut.v()*(dev(twoSymm(tgradU().v())) && tgradU().v())
+        tgradU().v() && dev(twoSymm(tgradU().v()))
     );
+    const volScalarField::Internal G(this->GName(), unlimitedNut*GbyNu);
     tgradU.clear();
 
     // Update epsilon and G at the wall
@@ -280,7 +282,7 @@ void kEpsilon<BasicTurbulenceModel>::correct()
       + fvm::div(alphaRhoPhi, k_)
       - fvm::laplacian(alpha*rho*DkEff(), k_)
      ==
-        alpha()*rho()*G
+        alpha()*rho()*GbyNu*nut()
       - fvm::SuSp((2.0/3.0)*alpha()*rho()*divU, k_)
       - fvm::Sp(alpha()*rho()*epsilon_()/k_(), k_)
       + kSource()

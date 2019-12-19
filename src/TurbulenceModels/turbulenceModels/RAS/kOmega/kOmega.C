@@ -191,19 +191,23 @@ void kOmega<BasicTurbulenceModel>::correct()
     const rhoField& rho = this->rho_;
     const surfaceScalarField& alphaRhoPhi = this->alphaRhoPhi_;
     const volVectorField& U = this->U_;
-    volScalarField& nut = this->nut_;
+    const volScalarField::Internal unlimitedNut(k_()/omega_());
+    const volScalarField& nut = this->nut_;
     fv::options& fvOptions(fv::options::New(this->mesh_));
 
     eddyViscosity<RASModel<BasicTurbulenceModel>>::correct();
 
-    volScalarField divU(fvc::div(fvc::absolute(this->phi(), U)));
+    const volScalarField::Internal divU
+    (
+        fvc::div(fvc::absolute(this->phi(), U))().v()
+    );
 
     tmp<volTensorField> tgradU = fvc::grad(U);
-    volScalarField G
+    const volScalarField::Internal GbyNu
     (
-        this->GName(),
-        nut*(tgradU() && dev(twoSymm(tgradU())))
+        tgradU().v() && dev(twoSymm(tgradU().v()))
     );
+    const volScalarField::Internal G(this->GName(), unlimitedNut*GbyNu);
     tgradU.clear();
 
     // Update omega and G at the wall
@@ -216,9 +220,9 @@ void kOmega<BasicTurbulenceModel>::correct()
       + fvm::div(alphaRhoPhi, omega_)
       - fvm::laplacian(alpha*rho*DomegaEff(), omega_)
      ==
-        gamma_*alpha*rho*G*omega_/k_
-      - fvm::SuSp(((2.0/3.0)*gamma_)*alpha*rho*divU, omega_)
-      - fvm::Sp(beta_*alpha*rho*omega_, omega_)
+        gamma_*alpha()*rho()*G*omega_()/k_()
+      - fvm::SuSp(((2.0/3.0)*gamma_)*alpha()*rho()*divU, omega_)
+      - fvm::Sp(beta_*alpha()*rho()*omega_(), omega_)
       + fvOptions(alpha, rho, omega_)
     );
 
@@ -237,9 +241,9 @@ void kOmega<BasicTurbulenceModel>::correct()
       + fvm::div(alphaRhoPhi, k_)
       - fvm::laplacian(alpha*rho*DkEff(), k_)
      ==
-        alpha*rho*G
-      - fvm::SuSp((2.0/3.0)*alpha*rho*divU, k_)
-      - fvm::Sp(Cmu_*alpha*rho*omega_, k_)
+        alpha()*rho()*GbyNu*nut()
+      - fvm::SuSp((2.0/3.0)*alpha()*rho()*divU, k_)
+      - fvm::Sp(Cmu_*alpha()*rho()*omega_(), k_)
       + fvOptions(alpha, rho, k_)
     );
 
