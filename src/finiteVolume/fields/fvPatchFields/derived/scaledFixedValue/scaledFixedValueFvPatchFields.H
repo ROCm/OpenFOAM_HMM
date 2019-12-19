@@ -25,8 +25,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef scaledFvPatchFields_H
-#define scaledFvPatchFields_H
+#ifndef scaledFixedValueFvPatchFields_H
+#define scaledFixedValueFvPatchFields_H
 
 #include "scaledFixedValueFvPatchField.H"
 #include "fieldTypes.H"

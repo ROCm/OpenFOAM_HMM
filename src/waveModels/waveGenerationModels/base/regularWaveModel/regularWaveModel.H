@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef waveModels_reguarWaveModel_H
-#define waveModels_reguarWaveModel_H
+#ifndef waveModels_regularWaveModel_H
+#define waveModels_regularWaveModel_H
 
 #include "irregularWaveModel.H"
 

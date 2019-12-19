@@ -8,12 +8,6 @@
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
 #     Copyright (C) 2016 OpenCFD Ltd.
-#     Copyright (C) checkCopyright() checkCopyright()
-#     Modified code yright (C) [ [ "$optCopyright" = true ] && checkCopyright
-#     Copyright (C) endYear=`grep endYear=`grep "Copyright.*-.*OpenCFD" $f | sed 's/[^-]*-([0-9]*).*/1/g'`
-#     Copyright (C) optCopyright=false optCopyright=false
-#     Copyright (C) optCopyright=true optCopyright=true
-#     Copyright (C) startYear=`grep startYear=`grep "Copyright.*OpenCFD" $f | sed 's/[^0-9]*([0-9]*).*/1/g'`
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.

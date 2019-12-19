@@ -1063,7 +1063,7 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
                     (
                         relax*fLiquid*nFilms*htcFilmBoiling*(Tw - Tsatw)
                     );
-                
+
                     scalar QFilm = gSum(qFilm*patch().magSf());
                     Info<< " Film boiling heat transfer: " << QFilm << endl;
 
@@ -1071,7 +1071,7 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
                         << gMin(nFilms*htcFilmBoiling)
                         << " - "
                         << gMax(nFilms*htcFilmBoiling) << endl;
-                    
+
                     scalar Qtbtot =
                         gSum(fLiquid*nTransients*Qtb*patch().magSf());
                     Info<< " Transient boiling heat transfer:" << Qtbtot
@@ -1089,8 +1089,8 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
                             + qe() + qq()
                         )
                     );
-                    
-                    
+
+
                     scalar QsubCool = gSum(qSubCool*patch().magSf());
 
                     Info<< " Sub Cool boiling heat transfer: " << QsubCool

@@ -26,6 +26,8 @@ License
 Class
     Foam::scaledFixedValueFvPatchField
 
+Group
+    grpGenericBoundaryConditions
 
 Description
     This condition applies a scalar multiplier to the value of another

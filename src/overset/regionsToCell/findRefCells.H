@@ -38,8 +38,8 @@ SeeAlso
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef findRefCell_H
-#define findRefCell_H
+#ifndef findRefCells_H
+#define findRefCells_H
 
 #include "label.H"
 #include "volFields.H"

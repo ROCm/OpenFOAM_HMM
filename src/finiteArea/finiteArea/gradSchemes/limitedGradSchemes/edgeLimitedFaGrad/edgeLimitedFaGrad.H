@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef edgeLimitedGrad_H
-#define edgeLimitedGrad_H
+#ifndef edgeLimitedFaGrad_H
+#define edgeLimitedFaGrad_H
 
 #include "faGradScheme.H"
 

@@ -33,8 +33,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SurfactantProperties_H
-#define SurfactantProperties_H
+#ifndef surfactantProperties_H
+#define surfactantProperties_H
 
 #include "fvCFD.H"
 #include "faCFD.H"
