@@ -45,9 +45,9 @@ Description
     \verbatim
         gradSchemes
         {
-            grad(T)             Gauss weightedFlux "lambda";
-            grad(u)             Gauss weightedFlux "D";
-            grad(potential)     Gauss weightedFlux "sigma";
+            grad(T)             Gauss weightedFlux lambda;
+            grad(u)             Gauss weightedFlux D;
+            grad(potential)     Gauss weightedFlux sigma;
         }
     \endverbatim
 

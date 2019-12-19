@@ -29,7 +29,7 @@ runApplication -s 2 $(getApplication)
 # ----
 echo "Run weightedFlux (3)"
 foamDictionary -entry endTime -set 3 system/controlDict >/dev/null
-sed -i '/^ *grad/s/Gauss.*;/Gauss weightedFlux "DT";/' system/fvSchemes
+sed -i '/^ *grad/s/Gauss.*;/Gauss weightedFlux DT;/' system/fvSchemes
 
 runApplication -s 3 $(getApplication)
 
