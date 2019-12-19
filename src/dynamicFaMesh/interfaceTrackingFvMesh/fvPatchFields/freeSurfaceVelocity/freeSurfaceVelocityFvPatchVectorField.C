@@ -1,0 +1,131 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | www.openfoam.com
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2019 Zeljko Tukovic, FSB Zagreb.
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+\*---------------------------------------------------------------------------*/
+
+#include "freeSurfaceVelocityFvPatchVectorField.H"
+#include "addToRunTimeSelectionTable.H"
+#include "fvPatchFieldMapper.H"
+#include "volFields.H"
+#include "surfaceFields.H"
+#include "interfaceTrackingFvMesh.H"
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::freeSurfaceVelocityFvPatchVectorField::
+freeSurfaceVelocityFvPatchVectorField
+(
+    const fvPatch& p,
+    const DimensionedField<vector, volMesh>& iF
+)
+:
+    fixedGradientFvPatchVectorField(p, iF)
+{}
+
+
+Foam::freeSurfaceVelocityFvPatchVectorField::
+freeSurfaceVelocityFvPatchVectorField
+(
+    const freeSurfaceVelocityFvPatchVectorField& ptf,
+    const fvPatch& p,
+    const DimensionedField<vector, volMesh>& iF,
+    const fvPatchFieldMapper& mapper
+)
+:
+    fixedGradientFvPatchVectorField(ptf, p, iF, mapper)
+{}
+
+
+Foam::freeSurfaceVelocityFvPatchVectorField::
+freeSurfaceVelocityFvPatchVectorField
+(
+    const fvPatch& p,
+    const DimensionedField<vector, volMesh>& iF,
+    const dictionary& dict
+)
+:
+    fixedGradientFvPatchVectorField(p, iF)
+{
+    patchType() = dict.lookupOrDefault<word>("patchType", word::null);
+    fvPatchVectorField::operator=(patchInternalField());
+}
+
+
+Foam::freeSurfaceVelocityFvPatchVectorField::
+freeSurfaceVelocityFvPatchVectorField
+(
+    const freeSurfaceVelocityFvPatchVectorField& fcvpvf,
+    const DimensionedField<vector, volMesh>& iF
+)
+:
+    fixedGradientFvPatchVectorField(fcvpvf, iF)
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::freeSurfaceVelocityFvPatchVectorField::updateCoeffs()
+{
+    if (updated())
+    {
+        return;
+    }
+
+    const fvMesh& mesh = patch().boundaryMesh().mesh();
+
+    interfaceTrackingFvMesh& itm =
+        refCast<interfaceTrackingFvMesh>
+        (
+            const_cast<dynamicFvMesh&>
+            (
+                mesh.lookupObject<dynamicFvMesh>("fvSolution")
+            )
+        );
+
+    gradient() = itm.freeSurfaceSnGradU();
+
+    fixedGradientFvPatchVectorField::updateCoeffs();
+}
+
+
+void Foam::freeSurfaceVelocityFvPatchVectorField::write(Ostream& os) const
+{
+    fixedGradientFvPatchVectorField::write(os);
+    writeEntry("value", os);
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchVectorField,
+        freeSurfaceVelocityFvPatchVectorField
+    );
+}
+
+// ************************************************************************* //
