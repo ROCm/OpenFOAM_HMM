@@ -15,17 +15,21 @@ wmakeCheckPwd "$WM_PROJECT_DIR" 2>/dev/null || {
 . "$WM_PROJECT_DIR"/wmake/scripts/AllwmakeParseArguments
 
 #------------------------------------------------------------------------------
-# Preamble. Report compiler version
-case "$WM_COMPILER" in
-    Gcc*)    gcc --version 2>/dev/null | sed -ne '1p' ;;
-    Clang*)  clang --version 2>/dev/null | sed -ne '1p' ;;
-esac
-
 # Preamble. Report tools or at least the mpirun location
 if [ -f "$WM_PROJECT_DIR"/wmake/scripts/list_tools ]
-then  . "$WM_PROJECT_DIR"/wmake/scripts/list_tools ]
+then  . "$WM_PROJECT_DIR"/wmake/scripts/list_tools
 else
     echo "mpirun=$(command -v mpirun || true)"
+fi
+echo
+# Report compiler information
+compiler="$(wmake -show-path-cxx 2>/dev/null || true)"
+if [ -x "$compiler" ]
+then
+    echo "compiler=$compiler"
+    "$compiler" --version 2>/dev/null | sed -ne '1p'
+else
+    echo "compiler=unknown"
 fi
 
 echo
