@@ -1,3 +1,0 @@
-Test-parserInfo.C
-
-EXE = $(FOAM_USER_APPBIN)/Test-parserInfo

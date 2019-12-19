@@ -36,7 +36,7 @@ Description
     \endtable
 
     In addition to the standard mathematical functions, operations and
-    logical and relational operations, the volume expression support the
+    logical and relational operations, the volume expressions support the
     following driver-specific functions:
 
     Functions
@@ -69,6 +69,10 @@ Description
         fzone   | Logical surf field corresponding to faceZone  | 1 |
         pzone   | Logical point field corresponding to pointZone| 1 |
     \endtable
+
+Note
+    Use namespace debug switch \c volumeExpr for scanner (2), parser (4)
+    or dictionary controls as per Foam::expressions::exprDriver.
 
 SourceFiles
     volumeExprDriver.C
@@ -242,7 +246,8 @@ public:
         //- Perform parsing on (sub) string
         using genericRagelLemonDriver::content;
 
-        //- Execute the parser
+        //- Execute the parser.
+        //  The return value currently has no meaning.
         virtual unsigned parse
         (
             const std::string& expr,

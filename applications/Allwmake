@@ -19,4 +19,7 @@ wmakeCheckPwd "$WM_PROJECT_DIR/applications" 2>/dev/null || {
 wmake -all $targetType solvers
 wmake -all $targetType utilities
 
+# Optional
+## wmake -all $targetType tools
+
 #------------------------------------------------------------------------------

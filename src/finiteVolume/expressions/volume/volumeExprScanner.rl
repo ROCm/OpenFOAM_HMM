@@ -40,7 +40,7 @@ Description
 
 // Debugging to stderr
 #undef  DebugInfo
-#define DebugInfo if (debug) InfoErr
+#define DebugInfo if (debug & 0x2) InfoErr
 
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -308,7 +308,7 @@ static int driverTokenType
 
 #define EMIT_TOKEN(T)                                                         \
     driver_.parsePosition() = (ts-buf);                                       \
-    DebugInfo<< STRINGIFY(T) << ": " << driver_.parsePosition() << nl;        \
+    DebugInfo<< STRINGIFY(T) << " at " << driver_.parsePosition() << nl;      \
     parser_->parse(TOKEN_OF(T), nullptr);                                     \
     driver_.parsePosition() = (p-buf);
 
@@ -632,9 +632,14 @@ bool Foam::expressions::volumeExpr::scanner::process
     // Save debug value
     const int oldDebug = debug;
 
-    if (driver_.debugScanner())
+    if (driver_.debugScanner()) { debug |= 0x2; }
+    if (driver_.debugParser())  { debug |= 0x4; }
+
+    if (debug & 0x6)
     {
-        debug |= 4;
+        InfoErr
+            << "Begin parse {"
+            << str.substr(strBeg, strLen).c_str() << '}' << nl;
     }
 
     if (!parser_)
@@ -666,12 +671,12 @@ bool Foam::expressions::volumeExpr::scanner::process
     // Scan token type
     scanToken scanTok;
 
-    // Ragel token start/end (required naming)
+    // Token start/end (Ragel naming)
     const char* ts;
     const char* te;
 
     // Local buffer data.
-    // - p, pe, eof are required Ragel naming
+    // - p, pe, eof are Ragel naming
     // - buf is our own naming
 
     const char* buf = &(str[strBeg]);
@@ -697,6 +702,11 @@ bool Foam::expressions::volumeExpr::scanner::process
     // Terminate parser execution
     parser_->parse(0, nullptr);
     parser_->stop();
+
+    if (debug & 0x6)
+    {
+        InfoErr<< "Done parse." << nl;
+    }
 
     // Restore debug value
     debug = oldDebug;

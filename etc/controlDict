@@ -542,6 +542,7 @@ DebugSwitches
     faceZone            0;
     fan                 0;
     featureEdgeMesh     0;
+    fieldExpr           0;
     fieldToCell         0;
     file                0;
     fileName            2;
@@ -759,6 +760,7 @@ DebugSwitches
     partialSlip         0;
     passiveParticle     0;
     patch               0;
+    patchExpr           0;
     patchToFace         0;
     patchZones          0;
     pdf                 0;
@@ -966,6 +968,7 @@ DebugSwitches
     volTensorField::Internal 0;
     volVectorField      0;
     volVectorField::Internal 0;
+    volumeExpr          0;
     vtk                 0;
     walkPatch           0;
     wall                0;

@@ -30,13 +30,12 @@ Description
     Driver for patch expressions
 
     In addition to the standard mathematical functions, operations and
-    logical and relational operations, the volume expression support the
+    logical and relational operations, the patch expressions support the
     following driver-specific functions:
 
     Functions
     \table
         Function    | Description                      | Number of arguments |
-        vol         | The cell volumes                      | 0 |
         pos         | The face centres                      | 0 |
         pts         | The face points                       | 0 |
         area        | The face area magnitudes              | 0 |
@@ -48,6 +47,10 @@ Description
         pointToFace | Interpolate point values onto faces   | 1 |
         rand        | Random field                          | 0/1 |
     \endtable
+
+Note
+    Use namespace debug switch \c patchExpr for scanner (2), parser (4)
+    or dictionary controls as per Foam::expressions::exprDriver.
 
 SourceFiles
     patchExprDriver.C
@@ -176,7 +179,8 @@ public:
         //- Perform parsing on (sub) string
         using genericRagelLemonDriver::content;
 
-        //- Execute the parser
+        //- Execute the parser.
+        //  The return value currently has no meaning.
         virtual unsigned parse
         (
             const std::string& expr,

@@ -395,7 +395,8 @@ public:
 
     // Evaluation
 
-        //- Execute the parser
+        //- Execute the parser.
+        //  The return value currently has no meaning.
         virtual unsigned parse
         (
             const std::string& expr,

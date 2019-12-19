@@ -39,6 +39,9 @@ Description
         rand        | Random field                          | 0/1 |
     \endtable
 
+Note
+    Use namespace debug switch \c fieldExpr for scanner (2), parser (4)
+
 SourceFiles
     fieldExprDriver.C
     fieldExprDriverFields.C
@@ -133,6 +136,7 @@ public:
         using genericRagelLemonDriver::content;
 
         //- Execute the parser
+        //  The return value currently has no meaning.
         virtual unsigned parse
         (
             const std::string& expr,

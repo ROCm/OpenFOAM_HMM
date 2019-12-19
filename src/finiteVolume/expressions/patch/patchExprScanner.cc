@@ -42,7 +42,7 @@ Description
 
 // Debugging to stderr
 #undef  DebugInfo
-#define DebugInfo if (debug) InfoErr
+#define DebugInfo if (debug & 0x2) InfoErr
 
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -281,7 +281,7 @@ static int driverTokenType
 
 #define EMIT_TOKEN(T)                                                         \
     driver_.parsePosition() = (ts-buf);                                       \
-    DebugInfo<< STRINGIFY(T) << ": " << driver_.parsePosition() << nl;        \
+    DebugInfo<< STRINGIFY(T) << " at " << driver_.parsePosition() << nl;      \
     parser_->parse(TOKEN_OF(T), nullptr);                                     \
     driver_.parsePosition() = (p-buf);
 
@@ -473,9 +473,14 @@ bool Foam::expressions::patchExpr::scanner::process
     // Save debug value
     const int oldDebug = debug;
 
-    if (driver_.debugScanner())
+    if (driver_.debugScanner()) { debug |= 0x2; }
+    if (driver_.debugParser())  { debug |= 0x4; }
+
+    if (debug & 0x6)
     {
-        debug |= 4;
+        InfoErr
+            << "Begin parse {"
+            << str.substr(strBeg, strLen).c_str() << '}' << nl;
     }
 
     if (!parser_)
@@ -507,12 +512,12 @@ bool Foam::expressions::patchExpr::scanner::process
     // Scan token type
     scanToken scanTok;
 
-    // Ragel token start/end (required naming)
+    // Token start/end (Ragel naming)
     const char* ts;
     const char* te;
 
     // Local buffer data.
-    // - p, pe, eof are required Ragel naming
+    // - p, pe, eof are Ragel naming
     // - buf is our own naming
 
     const char* buf = &(str[strBeg]);
@@ -522,7 +527,7 @@ bool Foam::expressions::patchExpr::scanner::process
 
     // Initialize FSM variables
     
-#line 526 "patchExprScanner.cc"
+#line 531 "patchExprScanner.cc"
 	{
 	cs = patchExpr_start;
 	ts = 0;
@@ -530,11 +535,11 @@ bool Foam::expressions::patchExpr::scanner::process
 	act = 0;
 	}
 
-#line 654 "patchExprScanner.rl"
+#line 659 "patchExprScanner.rl"
    /* ^^^ FSM initialization here ^^^ */;
 
     
-#line 538 "patchExprScanner.cc"
+#line 543 "patchExprScanner.cc"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -881,7 +886,7 @@ st11:
 case 11:
 #line 1 "NONE"
 	{ts = p;}
-#line 885 "patchExprScanner.cc"
+#line 890 "patchExprScanner.cc"
 	switch( (*p) ) {
 		case 32: goto st12;
 		case 33: goto st13;
@@ -1009,7 +1014,7 @@ st16:
 	if ( ++p == pe )
 		goto _test_eof16;
 case 16:
-#line 1013 "patchExprScanner.cc"
+#line 1018 "patchExprScanner.cc"
 	switch( (*p) ) {
 		case 69: goto st5;
 		case 101: goto st5;
@@ -1060,7 +1065,7 @@ st19:
 	if ( ++p == pe )
 		goto _test_eof19;
 case 19:
-#line 1064 "patchExprScanner.cc"
+#line 1069 "patchExprScanner.cc"
 	switch( (*p) ) {
 		case 46: goto tr58;
 		case 69: goto st5;
@@ -1315,7 +1320,7 @@ st23:
 	if ( ++p == pe )
 		goto _test_eof23;
 case 23:
-#line 1319 "patchExprScanner.cc"
+#line 1324 "patchExprScanner.cc"
 	switch( (*p) ) {
 		case 46: goto tr68;
 		case 95: goto tr68;
@@ -3082,7 +3087,7 @@ st120:
 	if ( ++p == pe )
 		goto _test_eof120;
 case 120:
-#line 3086 "patchExprScanner.cc"
+#line 3091 "patchExprScanner.cc"
 	switch( (*p) ) {
 		case 46: goto tr68;
 		case 58: goto st8;
@@ -3824,7 +3829,7 @@ case 10:
 	_out: {}
 	}
 
-#line 656 "patchExprScanner.rl"
+#line 661 "patchExprScanner.rl"
    /* ^^^ FSM execution here ^^^ */;
 
     if (0 == cs)
@@ -3840,6 +3845,11 @@ case 10:
     // Terminate parser execution
     parser_->parse(0, nullptr);
     parser_->stop();
+
+    if (debug & 0x6)
+    {
+        InfoErr<< "Done parse." << nl;
+    }
 
     // Restore debug value
     debug = oldDebug;

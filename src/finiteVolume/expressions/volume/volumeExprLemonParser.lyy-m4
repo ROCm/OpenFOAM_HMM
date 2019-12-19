@@ -790,7 +790,7 @@ void Foam::expressions::volumeExpr::parser::start(parseDriver& driver_)
     this->stop();
     lemon_ = ParseAlloc(::operator new, &driver_);
 
-    if (debug || driver_.debugParser())
+    if ((debug & 0x4) || driver_.debugParser())
     {
         #ifndef NDEBUG
         ParseTrace(stderr, const_cast<char*>(prompt_));
