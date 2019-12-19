@@ -15,6 +15,9 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Currently optional dependency for pimpleFoam
+libs            (interfaceTrackingFvMesh);
+
 application     pimpleFoam;
 
 startFrom       startTime;

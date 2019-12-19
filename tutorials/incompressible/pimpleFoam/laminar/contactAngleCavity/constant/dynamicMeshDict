@@ -15,9 +15,9 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dynamicFvMesh   interfaceTrackingFvMesh;
+motionSolverLibs (fvMotionSolvers interfaceTrackingFvMesh);
 
-motionSolverLibs (fvMotionSolvers);
+dynamicFvMesh   interfaceTrackingFvMesh;
 
 motionSolver    velocityLaplacian;
 

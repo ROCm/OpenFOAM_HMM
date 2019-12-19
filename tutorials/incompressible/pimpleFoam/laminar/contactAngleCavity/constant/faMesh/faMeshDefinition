@@ -32,7 +32,7 @@ boundary
     }
     frontAndBack
     {
-        type                patch;
+        type                empty;
         ownerPolyPatch      top;
         neighbourPolyPatch  frontAndBack;
     }

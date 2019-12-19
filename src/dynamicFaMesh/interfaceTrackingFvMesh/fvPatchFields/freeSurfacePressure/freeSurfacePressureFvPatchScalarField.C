@@ -5,8 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
     Copyright (C) 2019 Zeljko Tukovic, FSB Zagreb.
 -------------------------------------------------------------------------------
 License

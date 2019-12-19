@@ -113,7 +113,7 @@ wmake $targetType optimisation/adjointOptimisation/adjoint
 
 
 # interfaceTracking libs
-wmake dynamicFvMesh/interfaceTrackingFvMesh
+dynamicFaMesh/Allwmake $targetType $*
 
 
 # Needs access to Turbulence
