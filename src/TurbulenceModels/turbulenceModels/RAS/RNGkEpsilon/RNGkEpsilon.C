@@ -251,7 +251,6 @@ void RNGkEpsilon<BasicTurbulenceModel>::correct()
     const rhoField& rho = this->rho_;
     const surfaceScalarField& alphaRhoPhi = this->alphaRhoPhi_;
     const volVectorField& U = this->U_;
-    const volScalarField::Internal unlimitedNut(Cmu_*sqr(k_())/epsilon_());
     const volScalarField& nut = this->nut_;
     fv::options& fvOptions(fv::options::New(this->mesh_));
 
@@ -269,7 +268,7 @@ void RNGkEpsilon<BasicTurbulenceModel>::correct()
     );
     tgradU.clear();
 
-    const volScalarField::Internal G(this->GName(), unlimitedNut*GbyNu);
+    const volScalarField::Internal G(this->GName(), nut()*GbyNu);
 
     const volScalarField::Internal eta(sqrt(mag(GbyNu))*k_/epsilon_);
     const volScalarField::Internal eta3(eta*sqr(eta));
@@ -289,7 +288,7 @@ void RNGkEpsilon<BasicTurbulenceModel>::correct()
       + fvm::div(alphaRhoPhi, epsilon_)
       - fvm::laplacian(alpha*rho*DepsilonEff(), epsilon_)
      ==
-        (C1_ - R)*alpha()*rho()*G*epsilon_()/k_()
+        (C1_ - R)*alpha()*rho()*GbyNu*Cmu_*k_()
       - fvm::SuSp(((2.0/3.0)*C1_ - C3_)*alpha()*rho()*divU, epsilon_)
       - fvm::Sp(C2_*alpha()*rho()*epsilon_()/k_(), epsilon_)
       + epsilonSource()
@@ -312,7 +311,7 @@ void RNGkEpsilon<BasicTurbulenceModel>::correct()
       + fvm::div(alphaRhoPhi, k_)
       - fvm::laplacian(alpha*rho*DkEff(), k_)
      ==
-        alpha()*rho()*GbyNu*nut()
+        alpha()*rho()*G
       - fvm::SuSp((2.0/3.0)*alpha()*rho()*divU, k_)
       - fvm::Sp(alpha()*rho()*epsilon_()/k_(), k_)
       + kSource()

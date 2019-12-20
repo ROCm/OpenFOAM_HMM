@@ -191,7 +191,6 @@ void kOmega<BasicTurbulenceModel>::correct()
     const rhoField& rho = this->rho_;
     const surfaceScalarField& alphaRhoPhi = this->alphaRhoPhi_;
     const volVectorField& U = this->U_;
-    const volScalarField::Internal unlimitedNut(k_()/omega_());
     const volScalarField& nut = this->nut_;
     fv::options& fvOptions(fv::options::New(this->mesh_));
 
@@ -207,7 +206,7 @@ void kOmega<BasicTurbulenceModel>::correct()
     (
         tgradU().v() && dev(twoSymm(tgradU().v()))
     );
-    const volScalarField::Internal G(this->GName(), unlimitedNut*GbyNu);
+    const volScalarField::Internal G(this->GName(), nut()*GbyNu);
     tgradU.clear();
 
     // Update omega and G at the wall
@@ -220,7 +219,7 @@ void kOmega<BasicTurbulenceModel>::correct()
       + fvm::div(alphaRhoPhi, omega_)
       - fvm::laplacian(alpha*rho*DomegaEff(), omega_)
      ==
-        gamma_*alpha()*rho()*G*omega_()/k_()
+        gamma_*alpha()*rho()*GbyNu
       - fvm::SuSp(((2.0/3.0)*gamma_)*alpha()*rho()*divU, omega_)
       - fvm::Sp(beta_*alpha()*rho()*omega_(), omega_)
       + fvOptions(alpha, rho, omega_)
@@ -241,7 +240,7 @@ void kOmega<BasicTurbulenceModel>::correct()
       + fvm::div(alphaRhoPhi, k_)
       - fvm::laplacian(alpha*rho*DkEff(), k_)
      ==
-        alpha()*rho()*GbyNu*nut()
+        alpha()*rho()*G
       - fvm::SuSp((2.0/3.0)*alpha()*rho()*divU, k_)
       - fvm::Sp(Cmu_*alpha()*rho()*omega_(), k_)
       + fvOptions(alpha, rho, k_)
