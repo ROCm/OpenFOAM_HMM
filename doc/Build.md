@@ -41,6 +41,9 @@ foam
 ```
 ./Allwmake -s -l
 ```
+- This will start the build process, where the `-s` option is used to reduce
+  the level of output, and the `-l` option to record the output in a log file.
+  To see all available options use `./Allwmake -help`
 - In case you need to stop the compilation, continue later by running
 `./Allwmake` again.
 
