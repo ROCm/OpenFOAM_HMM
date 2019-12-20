@@ -131,6 +131,7 @@ void Foam::wallBoilingModels::filmBoilingModels::Bromley::write
 {
     filmBoilingModel::write(os);
     os.writeKeyword("Cn") << Cn_ << token::END_STATEMENT << nl;
+    os.writeKeyword("L") << L_ << token::END_STATEMENT << nl;
     os.writeKeyword("emissivity") << emissivity_ << token::END_STATEMENT << nl;
 }
 
