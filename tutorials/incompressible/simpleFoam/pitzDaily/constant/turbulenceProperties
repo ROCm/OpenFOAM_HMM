@@ -19,7 +19,7 @@ simulationType RAS;
 
 RAS
 {
-    // Tested with kEpsilon, realizableKE, kOmega, kOmegaSST, v2f,
+    // Tested with kEpsilon, realizableKE, kOmega, kOmegaSST,
     // ShihQuadraticKE, LienCubicKE.
     RASModel        kEpsilon;
 
