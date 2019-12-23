@@ -335,9 +335,9 @@ void Foam::LocalInteraction<CloudType>::info(Ostream& os)
 
     // retrieve any stored data
     labelListList npe0(patchData_.size());
-    labelListList mpe0(patchData_.size());
+    scalarListList mpe0(patchData_.size());
     labelListList nps0(patchData_.size());
-    labelListList mps0(patchData_.size());
+    scalarListList mps0(patchData_.size());
     
     forAll(patchData_, patchi)
     {

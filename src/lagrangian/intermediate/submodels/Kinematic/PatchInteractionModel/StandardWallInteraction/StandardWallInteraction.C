@@ -249,9 +249,9 @@ void Foam::StandardWallInteraction<CloudType>::info(Ostream& os)
     PatchInteractionModel<CloudType>::info(os);
 
     labelListList npe0(nEscape_.size());
-    labelListList mpe0(nEscape_.size());
+    scalarListList mpe0(nEscape_.size());
     labelListList nps0(nEscape_.size());
-    labelListList mps0(nEscape_.size());
+    scalarListList mps0(nEscape_.size());
     
     forAll(nEscape_, patchi)
     {
