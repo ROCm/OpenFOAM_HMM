@@ -45,7 +45,7 @@
 
 # [WM_PROJECT_VERSION] - A human-readable version name
 # A development version is often named 'com' - as in www.openfoam.com
-export WM_PROJECT_VERSION=v1912
+export WM_PROJECT_VERSION=com
 
 #------------------------------------------------------------------------------
 # Configuration environment variables.
