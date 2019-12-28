@@ -18,7 +18,7 @@ plotCf() {
     declare -a resultSet=("${!1}")
     declare -a modelSet=("${!2}")
 
-    graphNameCf="hill2D_cf.png"
+    graphNameCf="bump2D_cf.png"
     echo "Creating skin friction coefficient graph to $graphNameCf"
     gnuplot<<PLT_CF
     set terminal pngcairo font "helvetica,20" size 1000, 1000
@@ -58,7 +58,7 @@ plotCp() {
     declare -a resultSet=("${!1}")
     declare -a modelSet=("${!2}")
 
-    graphNameCp="hill2D_cp.png"
+    graphNameCp="bump2D_cp.png"
     echo "Creating pressure coefficient graph to $graphNameCp"
     gnuplot<<PLT_CP
     set terminal pngcairo font "helvetica,20" size 1000, 1000
