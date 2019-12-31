@@ -51,11 +51,7 @@ void Foam::conjugateGradient::allocateFields()
     // Set active design variables, if necessary
     if (activeDesignVars_.empty())
     {
-        activeDesignVars_.setSize(objectiveDerivatives_.size());
-        forAll(activeDesignVars_, dvI)
-        {
-            activeDesignVars_[dvI] = dvI;
-        }
+        activeDesignVars_ = identity(objectiveDerivatives_.size());
     }
 
     // Allocate old fields
@@ -75,6 +71,11 @@ void Foam::conjugateGradient::readFromDict()
 
         label nDVs = optMethodIODict_.get<label>("nDVs");
         correction_ = scalarField(nDVs, Zero);
+
+        if (activeDesignVars_.empty())
+        {
+            activeDesignVars_ = identity(nDVs);
+        }
     }
 }
 

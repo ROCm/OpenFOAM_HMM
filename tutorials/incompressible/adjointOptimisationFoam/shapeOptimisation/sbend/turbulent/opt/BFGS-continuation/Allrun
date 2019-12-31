@@ -1,0 +1,17 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+resourcesDir=$FOAM_TUTORIALS/incompressible/adjointOptimisationFoam/resources
+
+\cp -r $resourcesDir/meshes/sbend/polyMesh constant
+runApplication decomposePar
+runParallel $(getApplication)
+mv log.adjointOptimisationFoam log.adjointOptimisationFoamFirstPhase
+sed -i 's/endTime           5/endTime           10/g' system/controlDict
+sed -i 's/axisAligned/fromFile/g' constant/dynamicMeshDict
+runParallel $(getApplication)
+runParallel cumulativeDisplacement
+
+#------------------------------------------------------------------------------

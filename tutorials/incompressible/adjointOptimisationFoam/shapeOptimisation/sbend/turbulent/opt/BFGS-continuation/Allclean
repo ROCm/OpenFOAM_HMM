@@ -1,0 +1,10 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
+#------------------------------------------------------------------------------
+
+cleanCase
+sed -i 's/endTime           10/endTime           5/g' system/controlDict
+sed -i 's/fromFile/axisAligned/g' constant/dynamicMeshDict
+
+#------------------------------------------------------------------------------

@@ -51,11 +51,7 @@ void Foam::LBFGS::allocateMatrices()
     // Set active design variables, if necessary
     if (activeDesignVars_.empty())
     {
-        activeDesignVars_.setSize(objectiveDerivatives_.size());
-        forAll(activeDesignVars_, dvI)
-        {
-            activeDesignVars_[dvI] = dvI;
-        }
+        activeDesignVars_ = identity(objectiveDerivatives_.size());
     }
 
     // Allocate vectors
@@ -184,6 +180,11 @@ void Foam::LBFGS::readFromDict()
         optMethodIODict_.readEntry("correctionOld", correctionOld_);
 
         correction_ = scalarField(correctionOld_.size(), Zero);
+
+        if (activeDesignVars_.empty())
+        {
+            activeDesignVars_ = identity(derivativesOld_.size());
+        }
     }
 }
 
