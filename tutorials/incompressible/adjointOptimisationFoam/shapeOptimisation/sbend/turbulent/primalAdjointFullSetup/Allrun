@@ -7,6 +7,7 @@ resourcesDir=$FOAM_TUTORIALS/incompressible/adjointOptimisationFoam/resources
 
 \cp $resourcesDir/param/sbend/* 0
 \cp -r $resourcesDir/meshes/sbend/polyMesh constant
+runApplication writeMorpherCPs
 runApplication decomposePar
 runParallel $(getApplication)
 
