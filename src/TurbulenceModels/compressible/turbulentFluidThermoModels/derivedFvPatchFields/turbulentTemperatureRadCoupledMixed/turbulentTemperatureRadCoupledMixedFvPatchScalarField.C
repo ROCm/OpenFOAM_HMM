@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -210,22 +210,21 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
                 nbrPatch.lookupPatchField<volScalarField, scalar>(TnbrName_)
             );
 
-    // Swap to obtain full local values of neighbour internal field
-    scalarField TcNbr(nbrField.patchInternalField());
-    mpp.distribute(TcNbr);
-
-
     // Swap to obtain full local values of neighbour K*delta
     scalarField KDeltaNbr;
+    tmp<scalarField> TcNbr(new scalarField(nbrField.size(), Zero));
     if (contactRes_ == 0.0)
     {
+        TcNbr.ref() = nbrField.patchInternalField();
         KDeltaNbr = nbrField.kappa(nbrField)*nbrPatch.deltaCoeffs();
     }
     else
     {
+        TcNbr.ref() = nbrField;
         KDeltaNbr.setSize(nbrField.size(), contactRes_);
     }
     mpp.distribute(KDeltaNbr);
+    mpp.distribute(TcNbr.ref());
 
     scalarField KDelta(kappa(Tp)*patch().deltaCoeffs());
 
