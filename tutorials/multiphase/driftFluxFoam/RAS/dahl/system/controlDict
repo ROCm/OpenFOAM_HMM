@@ -31,7 +31,7 @@ writeControl    adjustable;
 
 writeInterval   50;
 
-purgeWrite      0;
+purgeWrite      10;
 
 writeFormat     binary;
 
