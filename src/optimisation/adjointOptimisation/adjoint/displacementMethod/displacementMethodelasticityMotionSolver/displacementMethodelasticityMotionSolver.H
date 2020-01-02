@@ -86,7 +86,7 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("displacementMethodelasticityMotionSolver");
+    TypeName("elasticityMotionSolver");
 
 
     // Constructors

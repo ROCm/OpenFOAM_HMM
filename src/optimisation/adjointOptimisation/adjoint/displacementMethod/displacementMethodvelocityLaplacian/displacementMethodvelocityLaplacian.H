@@ -84,7 +84,7 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("displacementMethodvelocityLaplacian");
+    TypeName("velocityLaplacian");
 
 
     // Constructors
