@@ -78,14 +78,13 @@ SourceFiles
     kEpsilonPhitF.C
 
 SeeAlso
-    v2f.H
+    kEpsilon.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef kEpsilonPhitF_H
 #define kEpsilonPhitF_H
 
-#include "kEpsilonPhitFBase.H"
 #include "RASModel.H"
 #include "eddyViscosity.H"
 
@@ -103,8 +102,7 @@ namespace RASModels
 template<class BasicTurbulenceModel>
 class kEpsilonPhitF
 :
-    public eddyViscosity<RASModel<BasicTurbulenceModel>>,
-    public kEpsilonPhitFBase
+    public eddyViscosity<RASModel<BasicTurbulenceModel>>
 {
     // Private Member Functions
 

@@ -119,7 +119,6 @@ kEpsilonPhitF<BasicTurbulenceModel>::kEpsilonPhitF
         transport,
         propertiesName
     ),
-    kEpsilonPhitFBase(),
 
     Cmu_
     (
