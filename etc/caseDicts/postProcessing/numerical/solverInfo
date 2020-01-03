@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
-   \\    /   O peration     |
+   \\    /   O peration     | Version:  v1912
     \\  /    A nd           | Website:  www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
@@ -12,8 +12,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#includeEtc "caseDicts/postProcessing/numerical/residuals.cfg"
+#includeEtc "caseDicts/postProcessing/numerical/solverInfo.cfg"
 
-fields (p sigma);
+fields (p U);
 
 // ************************************************************************* //

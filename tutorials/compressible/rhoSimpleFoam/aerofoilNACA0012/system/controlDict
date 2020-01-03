@@ -47,7 +47,7 @@ runTimeModifiable true;
 functions
 {
     #includeFunc MachNo
-    #includeFunc residuals
+    #includeFunc solverInfo
 }
 
 // ************************************************************************* //
