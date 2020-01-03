@@ -82,7 +82,7 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("displacementMethoddisplacementLaplacian");
+    TypeName("displacementLaplacian");
 
 
     // Constructors

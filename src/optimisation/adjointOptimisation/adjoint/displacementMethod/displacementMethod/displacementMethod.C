@@ -75,12 +75,11 @@ Foam::autoPtr<Foam::displacementMethod> Foam::displacementMethod::New
             false
         )
     );
-    word motionSolverName(dynamicMeshDict.get<word>("solver"));
-    word modelType("displacementMethod" + motionSolverName);
+    word solverType(dynamicMeshDict.get<word>("solver"));
 
-    Info<< "displacementMethod type : " << modelType << endl;
+    Info<< "displacementMethod type : " << solverType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(solverType);
 
     if (!cstrIter.found())
     {
@@ -88,9 +87,9 @@ Foam::autoPtr<Foam::displacementMethod> Foam::displacementMethod::New
         (
             dynamicMeshDict,
             "solver",
-            modelType,
+            solverType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
     return autoPtr<displacementMethod>(cstrIter()(mesh, patchIDs));
 }

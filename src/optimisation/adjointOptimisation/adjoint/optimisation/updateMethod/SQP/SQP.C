@@ -58,11 +58,7 @@ void Foam::SQP::allocateMatrices()
     // Set active design variables, if necessary
     if (activeDesignVars_.empty())
     {
-        activeDesignVars_.setSize(correction_.size());
-        forAll(activeDesignVars_, dvI)
-        {
-            activeDesignVars_[dvI] = dvI;
-        }
+        activeDesignVars_ = identity(objectiveDerivatives_.size());
     }
 
     // Set previous Hessian to be a diagonal matrix
@@ -269,6 +265,11 @@ void Foam::SQP::readFromDict()
         optMethodIODict_.readEntry("eta", eta_);
 
         correction_ = scalarField(correctionOld_.size(), Zero);
+
+        if (activeDesignVars_.empty())
+        {
+            activeDesignVars_ = identity(correction_.size());
+        }
     }
 }
 

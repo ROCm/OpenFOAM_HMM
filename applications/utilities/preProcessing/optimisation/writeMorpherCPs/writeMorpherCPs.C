@@ -45,33 +45,37 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
 
-    IOdictionary dict
+    const dictionary NURBSdict
     (
-        IOobject
+        IOdictionary
         (
-            "dynamicMeshDict",
-            mesh.time().constant(),
-            mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE
-        )
+            IOobject
+            (
+                "dynamicMeshDict",
+                mesh.time().constant(),
+                mesh,
+                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::NO_WRITE,
+                false
+            )
+        ).subDict("volumetricBSplinesMotionSolverCoeffs")
     );
+    // Read box names and allocate size
+    wordList controlBoxes(NURBSdict.toc());
 
-    const dictionary& coeffDict =
-        dict.subDict("volumetricBSplinesMotionSolverCoeffs");
-
-    wordList controlBoxes(coeffDict.get<wordList>("controlBoxes"));
-
-    forAll(controlBoxes, iNURB)
+    for (const word& boxName : controlBoxes)
     {
-        // Creating an object writes the control points in the 
-        // constructor
-        NURBS3DVolume::New
-        (
-            coeffDict.subDict(controlBoxes[iNURB]),
-            mesh,
-            false // do not compute parametric coordinates
-        );
+        if (NURBSdict.isDict(boxName))
+        {
+            // Creating an object writes the control points in the
+            // constructor
+            NURBS3DVolume::New
+            (
+                NURBSdict.subDict(boxName),
+                mesh,
+                false // do not compute parametric coordinates
+            );
+        }
     }
 
     Info<< "End\n" << endl;

@@ -83,7 +83,7 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("displacementMethodlaplacianMotionSolver");
+    TypeName("laplacianMotionSolver");
 
 
     // Constructors

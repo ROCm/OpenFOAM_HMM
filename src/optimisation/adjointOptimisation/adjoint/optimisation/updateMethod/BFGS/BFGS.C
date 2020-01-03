@@ -51,11 +51,7 @@ void Foam::BFGS::allocateMatrices()
     // Set active design variables, if necessary
     if (activeDesignVars_.empty())
     {
-        activeDesignVars_.setSize(correction_.size());
-        forAll(activeDesignVars_, dvI)
-        {
-            activeDesignVars_[dvI] = dvI;
-        }
+        activeDesignVars_ = identity(objectiveDerivatives_.size());
     }
 
     // Set previous HessianInv to be a diagonal matrix
@@ -155,9 +151,14 @@ void Foam::BFGS::readFromDict()
         optMethodIODict_.readEntry("counter", counter_);
         optMethodIODict_.readEntry("eta", eta_);
 
-        label n = HessianInvOld_.n();
+        const label n(HessianInvOld_.n());
         HessianInv_ = SquareMatrix<scalar>(n, Zero);
         correction_ = scalarField(correctionOld_.size(), Zero);
+
+        if (activeDesignVars_.empty())
+        {
+            activeDesignVars_ = identity(n);
+        }
     }
 }
 
