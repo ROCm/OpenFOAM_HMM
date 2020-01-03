@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,54 +34,18 @@ License
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
 template<class Type>
-const Foam::wordList Foam::fv::SemiImplicitSource<Type>::volumeModeTypeNames_
-{
-    "absolute", "specific"
-};
+const Foam::Enum
+<
+    typename Foam::fv::SemiImplicitSource<Type>::volumeModeType
+>
+Foam::fv::SemiImplicitSource<Type>::volumeModeTypeNames_
+({
+    { volumeModeType::vmAbsolute, "absolute" },
+    { volumeModeType::vmSpecific, "specific" },
+});
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-template<class Type>
-typename Foam::fv::SemiImplicitSource<Type>::volumeModeType
-Foam::fv::SemiImplicitSource<Type>::wordToVolumeModeType
-(
-    const word& vmtName
-) const
-{
-    forAll(volumeModeTypeNames_, i)
-    {
-        if (vmtName == volumeModeTypeNames_[i])
-        {
-            return volumeModeType(i);
-        }
-    }
-
-    FatalErrorInFunction
-        << "Unknown volumeMode type " << vmtName
-        << ". Valid volumeMode types are:" << nl << volumeModeTypeNames_
-        << exit(FatalError);
-
-    return volumeModeType(0);
-}
-
-
-template<class Type>
-Foam::word Foam::fv::SemiImplicitSource<Type>::volumeModeTypeToWord
-(
-    const volumeModeType& vmtType
-) const
-{
-    if (vmtType > volumeModeTypeNames_.size())
-    {
-        return "UNKNOWN";
-    }
-    else
-    {
-        return volumeModeTypeNames_[vmtType];
-    }
-}
-
 
 template<class Type>
 void Foam::fv::SemiImplicitSource<Type>::setFieldData(const dictionary& dict)
@@ -207,7 +172,7 @@ bool Foam::fv::SemiImplicitSource<Type>::read(const dictionary& dict)
 {
     if (cellSetOption::read(dict))
     {
-        volumeMode_ = wordToVolumeModeType(coeffs_.get<word>("volumeMode"));
+        volumeMode_ = volumeModeTypeNames_.get("volumeMode", coeffs_);
         setFieldData(coeffs_.subDict("injectionRateSuSp"));
 
         return true;

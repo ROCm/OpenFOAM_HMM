@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,6 +73,7 @@ SourceFiles
 
 #include "Tuple2.H"
 #include "cellSetOption.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -112,7 +114,7 @@ public:
         };
 
         //- Word list of volume mode type names
-        static const wordList volumeModeTypeNames_;
+        static const Enum<volumeModeType> volumeModeTypeNames_;
 
 
 protected:
@@ -130,12 +132,6 @@ protected:
 
 
     // Protected functions
-
-        //- Helper function to convert from a word to a volumeModeType
-        volumeModeType wordToVolumeModeType(const word& vtName) const;
-
-        //- Helper function to convert from a volumeModeType to a word
-        word volumeModeTypeToWord(const volumeModeType& vtType) const;
 
         //- Set the local field data
         void setFieldData(const dictionary& dict);
