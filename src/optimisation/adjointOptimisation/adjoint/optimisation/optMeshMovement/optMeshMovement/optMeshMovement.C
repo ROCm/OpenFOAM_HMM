@@ -110,7 +110,7 @@ Foam::autoPtr<Foam::optMeshMovement> Foam::optMeshMovement::New
             "type",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<optMeshMovement>(cstrIter()(mesh, dict, patchIDs));
@@ -156,9 +156,10 @@ void Foam::optMeshMovement::writeMeshQualityMetrics()
     if (writeMeshQualityMetrics_)
     {
         cellQuality cellQualityEngine(mesh_);
-        tmp<scalarField> cellNonOrtho = cellQualityEngine.nonOrthogonality();
-        tmp<scalarField> cellSkewness = cellQualityEngine.skewness();
-        Info<< "Average, Max cell non - orthogonality " << gAverage(cellNonOrtho())
+        tmp<scalarField> cellNonOrtho(cellQualityEngine.nonOrthogonality());
+        tmp<scalarField> cellSkewness(cellQualityEngine.skewness());
+        Info<< "Average, Max cell non - orthogonality "
+            << gAverage(cellNonOrtho())
             << " " << gMax(cellNonOrtho()) << endl;
         Info<< "Average, Max cell skewness " << gAverage(cellSkewness())
             << " " << gMax(cellSkewness()) << endl;
