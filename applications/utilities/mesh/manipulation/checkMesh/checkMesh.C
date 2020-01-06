@@ -161,6 +161,7 @@ int main(int argc, char *argv[])
             "cellVolume",
             "cellVolumeRatio",
             "minTetVolume",
+            "minPyrVolume",
             "cellRegion",
             "wallDistance"
         });

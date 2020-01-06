@@ -472,6 +472,69 @@ void Foam::writeFields
         minTetVolume.write();
     }
 
+    // minPyrVolume
+    if (selectedFields.found("minPyrVolume"))
+    {
+        volScalarField minPyrVolume
+        (
+            IOobject
+            (
+                "minPyrVolume",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            mesh,
+            dimensionedScalar("minPyrVolume", dimless, GREAT),
+            zeroGradientFvPatchScalarField::typeName
+        );
+
+        // Get owner and neighbour pyr volumes
+        scalarField ownPyrVol(mesh.nFaces());
+        scalarField neiPyrVol(mesh.nInternalFaces());
+        primitiveMeshTools::facePyramidVolume
+        (
+            mesh,
+            mesh.points(),
+            mesh.cellCentres(),
+
+            ownPyrVol,
+            neiPyrVol
+        );
+
+        // Get min pyr vol per cell
+        scalarField& cellFld = minPyrVolume.ref();
+        cellFld = GREAT;
+
+        const labelUList& own = mesh.owner();
+        const labelUList& nei = mesh.neighbour();
+
+        // Internal faces
+        forAll(own, facei)
+        {
+            cellFld[own[facei]] = min(cellFld[own[facei]], ownPyrVol[facei]);
+            cellFld[nei[facei]] = min(cellFld[nei[facei]], neiPyrVol[facei]);
+        }
+
+        // Patch faces
+        for (const auto& fvp : minPyrVolume.boundaryField())
+        {
+            const labelUList& fc = fvp.patch().faceCells();
+
+            forAll(fc, i)
+            {
+                const label meshFacei = fvp.patch().start();
+                cellFld[fc[i]] = min(cellFld[fc[i]], ownPyrVol[meshFacei]);
+            }
+        }
+
+        minPyrVolume.correctBoundaryConditions();
+        Info<< "    Writing minPyrVolume to " << minPyrVolume.name() << endl;
+        minPyrVolume.write();
+    }
+
     if (selectedFields.found("cellRegion"))
     {
         volScalarField cellRegion
