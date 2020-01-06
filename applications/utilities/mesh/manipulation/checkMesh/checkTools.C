@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,26 +54,30 @@ void Foam::printMeshStats(const polyMesh& mesh, const bool allTopology)
         << "    points:           "
         << returnReduce(mesh.points().size(), sumOp<label>()) << nl;
 
-    label nInternalPoints = returnReduce
-    (
-        mesh.nInternalPoints(),
-        sumOp<label>()
-    );
+    // Count number of internal points (-1 if not sorted; 0 if no internal
+    // points)
+    const label minInt = returnReduce(mesh.nInternalPoints(), minOp<label>());
+    const label maxInt = returnReduce(mesh.nInternalPoints(), maxOp<label>());
 
-    if (nInternalPoints != -Pstream::nProcs())
+    if (minInt == -1 && maxInt > 0)
     {
+        WarningInFunction
+            << "Some processors have their points sorted into internal"
+            << " and external and some do not." << endl
+            << "    This can cause problems later on." << endl;
+    }
+    else if (minInt != -1)
+    {
+        // Assume all sorted
+        label nInternalPoints = returnReduce
+        (
+            mesh.nInternalPoints(),
+            sumOp<label>()
+        );
         Info<< "    internal points:  " << nInternalPoints << nl;
-
-        if (returnReduce(mesh.nInternalPoints(), minOp<label>()) == -1)
-        {
-            WarningInFunction
-                << "Some processors have their points sorted into internal"
-                << " and external and some do not." << endl
-                << "This can cause problems later on." << endl;
-        }
     }
 
-    if (allTopology && nInternalPoints != -Pstream::nProcs())
+    if (allTopology && (minInt != -1))
     {
         label nEdges = returnReduce(mesh.nEdges(), sumOp<label>());
         label nInternalEdges = returnReduce
