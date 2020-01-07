@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -175,7 +175,8 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::rhoScale
 
 void Foam::functionObjects::pressure::addHydrostaticContribution
 (
-    volScalarField& p
+    const volScalarField& p,
+    volScalarField& prgh
 ) const
 {
     // Add/subtract hydrostatic contribution
@@ -206,12 +207,12 @@ void Foam::functionObjects::pressure::addHydrostaticContribution
     {
         case ADD:
         {
-            p += rgh;
+            prgh += rgh;
             break;
         }
         case SUBTRACT:
         {
-            p -= rgh;
+            prgh -= rgh;
             break;
         }
         default:
@@ -243,7 +244,7 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::calcPressure
 
     volScalarField& result = tresult.ref();
 
-    addHydrostaticContribution(result);
+    addHydrostaticContribution(p, result);
 
     if (mode_ & STATIC)
     {
