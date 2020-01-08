@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -101,6 +101,8 @@ Usage
         UInf         | Freestream velocity for coefficient calculation | no |
         rhoInf       | Freestream density for coefficient calculation  | no |
         hydrostaticMode | Hydrostatic contributions (see below) | no | none
+        g            | Gravity vector (see below) | no |
+        hRef         | Reference height (see below) | no |
     \endtable
 
     The \c mode entry is used to select the type of pressure that is calculated.
@@ -116,6 +118,15 @@ Usage
     - \c none : not included
     - \c add : add the term, e.g. to convert from p_rgh to p
     - \c subtract : subtract the term, e.g. to convert from p to p_rgh
+
+    If the \c hydrostaticMode is active, values are also required for
+    gravity, \c g, and reference height, \c hRef.  By default these will be
+    retrieved from the database.  When these values are not available
+    the user must provide them, e.g.
+    \verbatim
+        g           (0 -9.81 0);
+        hRef        0;
+    \endverbatim
 
 
 See also
@@ -247,7 +258,11 @@ private:
         ) const;
 
         //- Add the hydrostatic contribution
-        void addHydrostaticContribution(volScalarField& p) const;
+        void addHydrostaticContribution
+        (
+            const volScalarField& p,
+            volScalarField& prgh
+        ) const;
 
         //- Calculate and return the pressure
         tmp<volScalarField> calcPressure
