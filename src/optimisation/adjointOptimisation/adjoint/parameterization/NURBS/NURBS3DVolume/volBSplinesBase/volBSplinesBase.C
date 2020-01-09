@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -203,7 +203,7 @@ Foam::scalar Foam::volBSplinesBase::computeMaxBoundaryDisplacement
     label pastControlPoints(0);
     forAll(volume_, iNURB)
     {
-        const label nb = volume_[iNURB].getControlPoints().size();
+        const label nb(volume_[iNURB].getControlPoints().size());
         vectorField localControlPointsMovement(nb, Zero);
 
         // Set localControlPointsMovement
@@ -230,7 +230,7 @@ Foam::scalar Foam::volBSplinesBase::computeMaxBoundaryDisplacement
 }
 
 
-void Foam::volBSplinesBase::boundControlPointsMovement
+void Foam::volBSplinesBase::boundControlPointMovement
 (
     vectorField& controlPointsMovement
 )
@@ -238,10 +238,10 @@ void Foam::volBSplinesBase::boundControlPointsMovement
     label pastControlPoints(0);
     forAll(volume_, iNURB)
     {
-        label nb = volume_[iNURB].getControlPoints().size();
+        const label nb(volume_[iNURB].getControlPoints().size());
         vectorField localControlPointsMovement(nb, Zero);
 
-        // set localControlPointsMovement
+        // Set localControlPointsMovement
         forAll (localControlPointsMovement, iCPM)
         {
             localControlPointsMovement[iCPM] =
@@ -250,7 +250,7 @@ void Foam::volBSplinesBase::boundControlPointsMovement
 
         volume_[iNURB].boundControlPointMovement(localControlPointsMovement);
 
-        // transfer bounding back to controlPointMovement
+        // Transfer bounding back to controlPointMovement
         forAll(localControlPointsMovement, iCPM)
         {
             controlPointsMovement[pastControlPoints + iCPM] =
@@ -270,10 +270,10 @@ void Foam::volBSplinesBase::moveControlPoints
     label pastControlPoints(0);
     forAll(volume_, iNURB)
     {
-        const label nb = volume_[iNURB].getControlPoints().size();
+        const label nb(volume_[iNURB].getControlPoints().size());
         vectorField localControlPointsMovement(nb, Zero);
 
-        // set localControlPointsMovement
+        // Set localControlPointsMovement
         forAll (localControlPointsMovement, iCPM)
         {
             localControlPointsMovement[iCPM] =
