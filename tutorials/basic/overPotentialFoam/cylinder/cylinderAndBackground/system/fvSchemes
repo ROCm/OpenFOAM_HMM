@@ -49,7 +49,7 @@ snGradSchemes
 
 oversetInterpolation
 {
-    method          leastSquares;//inverseDistanc;
+    method          leastSquares;
 }
 
 
