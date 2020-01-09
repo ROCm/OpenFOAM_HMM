@@ -2039,18 +2039,18 @@ Foam::fileOperations::masterUncollatedFileOperation::readStream
         else
         {
             // Scatter master header info
-            string versionString;
-            string formatString;
-            if (isPtr.valid())
-            {
-                versionString = isPtr().version().str();
-                OStringStream os;
-                os << isPtr().format();
-                formatString = (os.str());
-            }
-
-            Pstream::scatter(versionString); //,  Pstream::msgType(), comm);
-            Pstream::scatter(formatString); //,  Pstream::msgType(), comm);
+            //string versionString;
+            //string formatString;
+            //if (isPtr.valid())
+            //{
+            //    versionString = isPtr().version().str();
+            //    OStringStream os;
+            //    os << isPtr().format();
+            //    formatString = (os.str());
+            //}
+            //
+            //Pstream::scatter(versionString); //,  Pstream::msgType(), comm);
+            //Pstream::scatter(formatString); //,  Pstream::msgType(), comm);
 
             // Get size of file
             off_t sz = Foam::fileSize(fName);

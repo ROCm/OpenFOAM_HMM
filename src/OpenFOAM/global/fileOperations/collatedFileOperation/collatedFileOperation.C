@@ -34,6 +34,7 @@ License
 #include "registerSwitch.H"
 #include "masterOFstream.H"
 #include "OFstream.H"
+#include "foamVersion.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
@@ -217,8 +218,15 @@ bool Foam::fileOperations::collatedFileOperation::appendObject
             << "    version     " << os.version() << ";\n"
             << "    format      " << os.format() << ";\n"
             << "    class       " << decomposedBlockData::typeName
-            << ";\n"
-            << "    location    " << pathName << ";\n"
+            << ";\n";
+
+        // This may be useful to have as well
+        if (os.format() == IOstream::BINARY)
+        {
+            os  << "    arch        " << foamVersion::buildArch << ";\n";
+        }
+
+        os  << "    location    " << pathName << ";\n"
             << "    object      " << pathName.name() << ";\n"
             << "}" << nl;
         IOobject::writeDivider(os) << nl;

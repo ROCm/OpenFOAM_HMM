@@ -37,6 +37,7 @@ License
 #include "labelPair.H"
 #include "masterUncollatedFileOperation.H"
 #include "IListStream.H"
+#include "foamVersion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -210,12 +211,10 @@ void Foam::decomposedBlockData::writeHeader
         << "    class       " << type << ";\n";
 
     // This may be useful to have as well
-    /*
     if (os.format() == IOstream::BINARY)
     {
         os  << "    arch        " << foamVersion::buildArch << ";\n";
     }
-    */
 
     if (Pstream::parRun())
     {
@@ -290,6 +289,8 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlock
 
         IOstream::versionNumber ver(IOstream::currentVersion);
         IOstream::streamFormat fmt;
+        unsigned labelByteSize;
+        unsigned scalarByteSize;
         {
             UIListStream headerStream
             (
@@ -308,6 +309,8 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlock
             }
             ver = headerStream.version();
             fmt = headerStream.format();
+            labelByteSize = headerStream.labelByteSize();
+            scalarByteSize = headerStream.scalarByteSize();
         }
 
         for (label i = 1; i < blocki+1; i++)
@@ -330,6 +333,8 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlock
         // Apply master stream settings to realIsPtr
         realIsPtr().format(fmt);
         realIsPtr().version(ver);
+        realIsPtr().setLabelByteSize(labelByteSize);
+        realIsPtr().setScalarByteSize(scalarByteSize);
     }
     return realIsPtr;
 }
@@ -352,6 +357,22 @@ bool Foam::decomposedBlockData::readBlocks
     }
 
     bool ok = false;
+
+
+
+    //// Scatter master header info
+    //string ver;
+    //unsigned labelByteSize;
+    //unsigned scalarByteSize;
+    //if (UPstream::master(comm))
+    //{
+    //    ver = isPtr().version().str();
+    //    labelByteSize = isPtr().labelByteSize();
+    //    scalarByteSize = isPtr().scalarByteSize();
+    //}
+    //Pstream::scatter(ver); //,  Pstream::msgType(), comm);
+    //Pstream::scatter(labelByteSize); //,  Pstream::msgType(), comm);
+    //Pstream::scatter(scalarByteSize); //,  Pstream::msgType(), comm);
 
     if (commsType == UPstream::commsTypes::scheduled)
     {
@@ -637,19 +658,31 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
 
     Pstream::scatter(ok, Pstream::msgType(), comm);
 
-    // version
-    string versionString(realIsPtr().version().str());
-    Pstream::scatter(versionString,  Pstream::msgType(), comm);
-    realIsPtr().version(IOstream::versionNumber(versionString));
+    //- Set stream properties from isPtr on master
 
-    // stream
+    // Scatter master header info
+    string ver;
+    string format;
+    unsigned labelByteSize;
+    unsigned scalarByteSize;
+    if (UPstream::master(comm))
     {
+        ver = isPtr().version().str();
         OStringStream os;
-        os << realIsPtr().format();
-        string formatString(os.str());
-        Pstream::scatter(formatString,  Pstream::msgType(), comm);
-        realIsPtr().format(formatString);
+        os << isPtr().format();
+        format = os.str();
+        labelByteSize = isPtr().labelByteSize();
+        scalarByteSize = isPtr().scalarByteSize();
     }
+    Pstream::scatter(ver); //,  Pstream::msgType(), comm);
+    Pstream::scatter(format); //,  Pstream::msgType(), comm);
+    Pstream::scatter(labelByteSize); //,  Pstream::msgType(), comm);
+    Pstream::scatter(scalarByteSize); //,  Pstream::msgType(), comm);
+
+    realIsPtr().version(IOstream::versionNumber(ver));
+    realIsPtr().format(format);
+    realIsPtr().setLabelByteSize(labelByteSize);
+    realIsPtr().setScalarByteSize(scalarByteSize);
 
     word name(headerIO.name());
     Pstream::scatter(name, Pstream::msgType(), comm);
