@@ -100,6 +100,9 @@ class shortestPathSet
         //- Destination set of points
         const pointField outsidePoints_;
 
+        //- Local faces that were closed
+        labelList leakFaces_;
+
 
     // Private Member Functions
 
@@ -146,6 +149,53 @@ class shortestPathSet
             const PackedBoolList& isLeakPoint
         ) const;
 
+        //- Removes open-edged faces from set. Ignores edges with both points
+        //  in isBlockedPoint. Returns global number of faces removed from set.
+        label erodeFaceSet
+        (
+            const polyMesh& mesh,
+            const PackedBoolList& isBlockedPoint,
+            PackedBoolList& isLeakFace
+        ) const;
+
+        //- Mark faces inbetween leak cells
+        bitSet pathFaces(const polyMesh& mesh, const bitSet& isLeakCell) const;
+
+        //- Calculate path between insideCelli (-1 if not on current processor)
+        //  and outsidePoint. Appends cellcentres on path to track.
+        //      isLeakCell  : track passes through cell
+        //      isLeakFace  : faces of leak cells that are also on boundary
+        //      isLeakPoint : points  of leak faces       ,,
+        // Returns true if new path found, false otherwise
+        bool genSingleLeakPath
+        (
+            const bool markLeakPath,
+            const label iter,
+            const polyMesh& mesh,
+            const PackedBoolList& isBlockedFace,
+            const point& insidePoint,
+            const label insideCelli,
+            const point& outsidePoint,
+            const label outsideCelli,
+
+            // Generated sampling points
+            const scalar trackLength,
+            DynamicList<point>& samplingPts,
+            DynamicList<label>& samplingCells,
+            DynamicList<label>& samplingFaces,
+            DynamicList<label>& samplingSegments,
+            DynamicList<scalar>& samplingCurveDist,
+
+            // State of current leak paths
+            PackedBoolList& isLeakCell,
+            PackedBoolList& isLeakFace,
+            PackedBoolList& isLeakPoint,
+
+            // Work storage
+            List<topoDistanceData>& allFaceInfo,
+            List<topoDistanceData>& allCellInfo
+        ) const;
+
         //- Calculate path between insideCelli (-1 if not on current processor)
         //  and outsidePoint. Appends cellcentres on path to track.
         //      isLeakCell  : track passes through cell
@@ -156,7 +206,7 @@ class shortestPathSet
             const bool markLeakPath,
             const label maxIter,
             const polyMesh& mesh,
-            const boolList& isBlockedFace,
+            const PackedBoolList& isBlockedFace,
             const point& insidePoint,
             const label insideCelli,
             const point& outsidePoint,
@@ -182,7 +232,7 @@ class shortestPathSet
             const label maxIter,
             const polyMesh& mesh,
             const labelUList& wallPatches,
-            const boolList& blockedFace
+            const PackedBoolList& blockedFace
         );
 
 
@@ -222,6 +272,16 @@ public:
 
     //- Destructor
     virtual ~shortestPathSet() = default;
+
+
+    // Member Functions
+
+        //- Set of mesh faces needed to close the gap. Will close the gap but
+        //  might be bigger than required
+        const labelList& leakFaces() const
+        {
+            return leakFaces_;
+        }
 };
 
 

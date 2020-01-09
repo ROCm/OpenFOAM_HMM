@@ -37,6 +37,7 @@ License
 #include "OBJstream.H"
 #include "PatchTools.H"
 #include "foamVtkSurfaceWriter.H"
+#include "uindirectPrimitivePatch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -105,7 +106,7 @@ Foam::label Foam::shortestPathSet::findMinFace
         }
         else
         {
-            // Avoid leak points
+            // Avoid leak points i.e. preferentially stay away from the wall
             label minLeakPoints = labelMax;
             forAll(cFaces2, i)
             {
@@ -192,8 +193,8 @@ void Foam::shortestPathSet::calculateDistance
     {
         const fvMesh& fm = refCast<const fvMesh>(mesh);
 
-        const_cast<fvMesh&>(fm).setInstance(fm.time().timeName());
-        fm.write();
+        //const_cast<fvMesh&>(fm).setInstance(fm.time().timeName());
+        //fm.write();
         volScalarField fld
         (
             IOobject
@@ -224,6 +225,8 @@ void Foam::shortestPathSet::calculateDistance
         }
         //Note: do not swap cell values so do not do
         //fld.correctBoundaryConditions();
+        Pout<< "Writing distance field for initial cell " << cellI
+            << " to " << fld.objectPath() << endl;
         fld.write();
     }
 }
@@ -291,7 +294,10 @@ bool Foam::shortestPathSet::touchesWall
     const face& f = mesh.faces()[facei];
     forAll(f, fp)
     {
-        if (isLeakPoint[f[fp]])
+        const label nextFp = f.fcIndex(fp);
+
+        if (isLeakPoint[f[fp]] && isLeakPoint[f[nextFp]])   // edge on boundary
+        //if (isLeakPoint[f[fp]])                           // point on boundary
         {
             if (isLeakFace.set(facei))
             {
@@ -304,12 +310,610 @@ bool Foam::shortestPathSet::touchesWall
 }
 
 
-void Foam::shortestPathSet::genSamples
+Foam::bitSet Foam::shortestPathSet::pathFaces
+(
+    const polyMesh& mesh,
+    const bitSet& isLeakCell
+) const
+{
+    // Calculates the list of faces inbetween leak cells.
+    // Does not account for the fact that the cells might be from different
+    // paths...
+
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+    const labelList& own = mesh.faceOwner();
+    const labelList& nbr = mesh.faceNeighbour();
+
+    // Get remote value of bitCell. Note: keep uncoupled boundary faces false.
+    boolList nbrLeakCell(mesh.nBoundaryFaces(), false);
+    {
+        for (const polyPatch& pp : patches)
+        {
+            if (pp.coupled())
+            {
+                label bFacei = pp.start()-mesh.nInternalFaces();
+
+                const labelUList& faceCells = pp.faceCells();
+
+                for (const label celli : faceCells)
+                {
+                    nbrLeakCell[bFacei] = isLeakCell[celli];
+                    ++bFacei;
+                }
+            }
+        }
+
+        syncTools::swapBoundaryFaceList
+        (
+            mesh,
+            nbrLeakCell
+        );
+    }
+
+
+    bitSet isLeakFace(mesh.nFaces());
+
+    // Internal faces
+    for (label facei = 0; facei < mesh.nInternalFaces(); facei++)
+    {
+        if (isLeakCell[own[facei]] && isLeakCell[nbr[facei]])
+        {
+            isLeakFace.set(facei);
+        }
+    }
+    // Boundary faces
+    for (label facei = mesh.nInternalFaces(); facei < mesh.nFaces(); facei++)
+    {
+        if (isLeakCell[own[facei]] && nbrLeakCell[facei-mesh.nInternalFaces()])
+        {
+            isLeakFace.set(facei);
+        }
+    }
+    return isLeakFace;
+}
+
+
+bool Foam::shortestPathSet::genSingleLeakPath
 (
     const bool markLeakPath,
+    const label iter,
+    const polyMesh& mesh,
+    const PackedBoolList& isBlockedFace,
+    const point& insidePoint,
+    const label insideCelli,
+    const point& outsidePoint,
+    const label outsideCelli,
+
+    // Generated sampling points
+    const scalar trackLength,
+    DynamicList<point>& samplingPts,
+    DynamicList<label>& samplingCells,
+    DynamicList<label>& samplingFaces,
+    DynamicList<label>& samplingSegments,
+    DynamicList<scalar>& samplingCurveDist,
+
+    // State of current leak paths
+    PackedBoolList& isLeakCell,
+    PackedBoolList& isLeakFace,
+    PackedBoolList& isLeakPoint,
+
+    // Work storage
+    List<topoDistanceData>& allFaceInfo,
+    List<topoDistanceData>& allCellInfo
+) const
+{
+    const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+    const topoDistanceData maxData(labelMax, labelMax);
+
+
+    allFaceInfo.setSize(mesh.nFaces());
+    allFaceInfo = topoDistanceData();
+    allCellInfo.setSize(mesh.nCells());
+    allCellInfo = topoDistanceData();
+
+    // Mark blocked faces with high distance
+    forAll(isBlockedFace, facei)
+    {
+        if (isBlockedFace[facei])
+        {
+            allFaceInfo[facei] = maxData;
+        }
+    }
+
+    if (markLeakPath)
+    {
+        // Mark any previously found leak path. This marks all
+        // faces of all cells on the path. This will make sure that
+        // ultimately the path will go through another gap.
+        forAll(isLeakCell, celli)
+        {
+            if (celli != insideCelli && celli != outsideCelli)
+            {
+                if (isLeakCell[celli])
+                {
+                    allCellInfo[celli] = maxData;
+                    //- Mark all faces of the cell
+                    //const cell& cFaces = mesh.cells()[celli];
+                    //for (auto facei : cFaces)
+                    //{
+                    //    allFaceInfo[facei] = maxData;
+                    //}
+                }
+            }
+        }
+
+        //- Mark only faces inbetween two leak cells
+        bitSet isLeakCellWithout(isLeakCell);
+        if (insideCelli != -1)
+        {
+            isLeakCellWithout.unset(insideCelli);
+        }
+        if (outsideCelli != -1)
+        {
+            isLeakCellWithout.unset(outsideCelli);
+        }
+        const bitSet isPathFace(pathFaces(mesh, isLeakCellWithout));
+        forAll(isPathFace, facei)
+        {
+            if (isPathFace[facei])
+            {
+                allFaceInfo[facei] = maxData;
+            }
+        }
+    }
+
+    // Mark any previously found leak faces. These are faces that
+    // are (point- or edge-)connected to an existing boundary.
+    forAll(isLeakFace, facei)
+    {
+        if (isLeakFace[facei])
+        {
+            allFaceInfo[facei] = maxData;
+        }
+    }
+
+
+    // Pass1: Get distance to insideCelli
+
+    calculateDistance(iter, mesh, insideCelli, allFaceInfo, allCellInfo);
+
+
+
+    // Pass2: walk from outside points backwards. Note: could be done
+    //        using FaceCellWave as well but is overly complex since
+    //        does not allow logic comparing all faces of a cell.
+
+    bool targetFound = false;
+    if (outsideCelli != -1)
+    {
+        int dummyTrackData;
+        targetFound = allCellInfo[outsideCelli].valid(dummyTrackData);
+        if (iter == 0 && !targetFound)
+        {
+            WarningInFunction
+                << "Point " << outsidePoint
+                << " not reachable by walk from " << insidePoint
+                << ". Probably mesh has island/regions."
+                << " Skipped route detection." << endl;
+        }
+    }
+    reduce(targetFound, orOp<bool>());
+    if (!targetFound)
+    {
+        //Pout<< "now :"
+        //    << " nLeakCell:"
+        //    << returnReduce(isLeakCell.count(), sumOp<label>())
+        //    << " nLeakFace:"
+        //    << returnReduce(isLeakFace.count(), sumOp<label>())
+        //    << " nLeakPoint:"
+        //    << returnReduce(isLeakPoint.count(), sumOp<label>())
+        //    << endl;
+
+        return false;
+    }
+
+
+    // Start with given target cell and walk back
+    // If point happens to be on multiple processors, random pick
+    label frontCellI = outsideCelli;
+    point origin(outsidePoint);
+    bool findMinDistance = true;
+
+    while (true)
+    {
+        // We have a single face front (frontFaceI). Walk from face to cell
+        // to face etc until we reach the destination cell.
+
+        label frontFaceI = -1;
+
+        // Work within same processor
+        if (frontCellI != -1)
+        {
+            // Find face with lowest distance from seed. In below figure the
+            // seed cell is marked with distance 0. It is surrounded by faces
+            // and cells with distance 1. The layer outside is marked with
+            // distance 2 etc etc.
+            //
+            //   x  |  x  2  1  2  2  |  x  |  x
+            //  --- + --- + -1- + -2- + --- + ---
+            //   x  |  1  1  0  1  1  |  x  |  x
+            //  --- + --- + -1- + -2- + --- + ---
+            //   x  |  x  2  1  2  2  3  3  4  4
+            //  --- + --- + --- + -3- + -4- + -5-
+            //   x  |  x  3  2  3  3  4  4  5  5
+            //
+            // e.g. if we start backwards search from cell with value = 4,
+            // we have neighbour faces 4, 4, 5, 5. Choose 4 (least distance
+            // to seed) and continue...
+
+            frontFaceI = findMinFace
+            (
+                mesh,
+                frontCellI,
+                allFaceInfo,
+                isLeakPoint,
+                findMinDistance,    // mode : find min or find max
+                origin
+            );
+
+
+            // Loop until we hit a boundary face
+            PackedBoolList isNewLeakPoint(isLeakPoint);
+            while (mesh.isInternalFace(frontFaceI))
+            {
+                if (isBlockedFace.size() && isBlockedFace[frontFaceI])
+                {
+                    // This should not happen since we never walk through
+                    // a blocked face. However ...
+                    // Pout<< " Found blocked face" << endl;
+                    frontCellI = -1;
+                    break;
+                }
+
+                // Step to neighbouring cell
+                label nbrCellI = mesh.faceOwner()[frontFaceI];
+                if (nbrCellI == frontCellI)
+                {
+                    nbrCellI = mesh.faceNeighbour()[frontFaceI];
+                }
+
+                if (nbrCellI == insideCelli)
+                {
+                    // Reached destination. This is the normal exit.
+                    frontCellI = -1;
+                    break;
+                }
+
+                frontCellI = nbrCellI;
+
+                // Pick best face on cell
+                frontFaceI = findMinFace
+                (
+                    mesh,
+                    frontCellI,
+                    allFaceInfo,
+                    isLeakPoint,
+                    findMinDistance,
+                    origin
+                );
+
+                const topoDistanceData& cInfo = allCellInfo[frontCellI];
+                const topoDistanceData& fInfo = allFaceInfo[frontFaceI];
+
+                if (fInfo.distance() <= cInfo.distance())
+                {
+                    // Found valid next cell,face. Mark on path
+                    samplingPts.append(mesh.cellCentres()[frontCellI]);
+                    samplingCells.append(frontCellI);
+                    samplingFaces.append(-1);
+                    samplingSegments.append(iter);
+                    samplingCurveDist.append
+                    (
+                        trackLength+cInfo.distance()
+                    );
+                    isLeakCell.set(frontCellI);
+
+                    // Check if front face uses a boundary point.
+                    if
+                    (
+                        touchesWall
+                        (
+                            mesh,
+                            frontFaceI,
+                            isLeakFace,
+                            isLeakPoint
+                        )
+                    )
+                    {
+                        //Pout<< "** added leak face:" << frontFaceI << " at:"
+                        //<< mesh.faceCentres()[frontFaceI] << endl;
+                        isNewLeakPoint.set(mesh.faces()[frontFaceI]);
+                        origin = mesh.faceCentres()[frontFaceI];
+                        findMinDistance = false;
+                    }
+                }
+            }
+            isLeakPoint.transfer(isNewLeakPoint);
+        }
+
+        // Situation 1: we found the destination cell (do nothing),
+        // frontCellI is -1 on all processors
+        if (returnReduce(frontCellI == -1, andOp<bool>()))
+        {
+            //Pout<< "now :"
+            //    << " nLeakCell:"
+            //    << returnReduce(isLeakCell.count(), sumOp<label>())
+            //    << " nLeakFace:"
+            //    << returnReduce(isLeakFace.count(), sumOp<label>())
+            //    << " nLeakPoint:"
+            //    << returnReduce(isLeakPoint.count(), sumOp<label>())
+            //    << endl;
+
+            break;
+        }
+
+        // Situation 2: we're on a coupled patch and might need to
+        //              switch processor/cell. We need to transfer:
+        //              -frontface -frontdistance -leak points/faces
+        boolList isFront(mesh.nBoundaryFaces(), false);
+
+        if (frontFaceI != -1)
+        {
+            isFront[frontFaceI-mesh.nInternalFaces()] = true;
+        }
+        syncTools::swapBoundaryFaceList(mesh, isFront);
+
+        label minCellDistance = labelMax;
+        if (frontCellI != -1)
+        {
+            minCellDistance = allCellInfo[frontCellI].distance();
+        }
+        reduce(minCellDistance, minOp<label>());
+
+        // Sync all leak data
+        sync
+        (
+            mesh,
+            isLeakFace,
+            isLeakPoint,
+            frontCellI,
+            origin,
+            findMinDistance
+        );
+
+
+        // Bit tricky:
+        // - processor might get frontFaceI/frontCellI in through multiple faces
+        //   (even through different patches?)
+        // - so loop over all (coupled) patches and pick the best frontCellI
+
+        const label oldFrontFaceI = frontFaceI;
+        frontCellI = -1;
+        frontFaceI = -1;
+        forAll(pbm, patchI)
+        {
+            const polyPatch& pp = pbm[patchI];
+            forAll(pp, i)
+            {
+                label faceI = pp.start()+i;
+                if
+                (
+                    oldFrontFaceI == -1
+                 && isFront[faceI-mesh.nInternalFaces()]
+                 && (isBlockedFace.empty() || !isBlockedFace[faceI])
+                )
+                {
+                    frontFaceI = faceI;
+                    frontCellI = pp.faceCells()[i];
+                    break;
+                }
+            }
+
+            if
+            (
+                frontCellI != -1
+             && allCellInfo[frontCellI].distance() < minCellDistance
+            )
+            {
+                const topoDistanceData& cInfo = allCellInfo[frontCellI];
+
+                samplingPts.append(mesh.cellCentres()[frontCellI]);
+                samplingCells.append(frontCellI);
+                samplingFaces.append(-1);
+                samplingSegments.append(iter);
+                samplingCurveDist.append
+                (
+                    trackLength+cInfo.distance()
+                );
+                isLeakCell.set(frontCellI);
+
+                // Check if frontFacei touches leakPoint
+                if
+                (
+                    touchesWall
+                    (
+                        mesh,
+                        frontFaceI,
+                        isLeakFace,
+                        isLeakPoint
+                    )
+                )
+                {
+                    //Pout<< "** added leak BOUNDARY face:" << frontFaceI
+                    // << " at:" << mesh.faceCentres()[frontFaceI] << endl;
+                    isLeakPoint.set(mesh.faces()[frontFaceI]);
+                    origin = mesh.faceCentres()[frontFaceI];
+                    findMinDistance = false;
+                }
+
+                break;
+            }
+
+            // When seed cell is isolated by processor boundaries
+            if (insideCelli != -1 && frontCellI == insideCelli)
+            {
+                // Pout<< " Found connection seed cell!" << endl;
+                frontCellI = -1;
+                break;
+            }
+        }
+
+        // Sync all leak data
+        sync
+        (
+            mesh,
+            isLeakFace,
+            isLeakPoint,
+            frontCellI,
+            origin,
+            findMinDistance
+        );
+    }
+
+    return true;
+}
+
+
+// Clean up leak faces (erode open edges). These are leak faces which are
+// not connected to another leak face or leak point. Parallel consistent.
+// Returns overall number of faces deselected.
+Foam::label Foam::shortestPathSet::erodeFaceSet
+(
+    const polyMesh& mesh,
+    const PackedBoolList& isBlockedPoint,
+    PackedBoolList& isLeakFace
+) const
+{
+    if
+    (
+        (isBlockedPoint.size() != mesh.nPoints())
+     || (isLeakFace.size() != mesh.nFaces())
+    )
+    {
+        FatalErrorInFunction << "Problem :"
+            << " isBlockedPoint:" << isBlockedPoint.size()
+            << " isLeakFace:" << isLeakFace.size()
+            << exit(FatalError);
+    }
+
+    const globalMeshData& globalData = mesh.globalData();
+    const mapDistribute& map = globalData.globalEdgeSlavesMap();
+    const indirectPrimitivePatch& cpp = mesh.globalData().coupledPatch();
+
+
+    label nTotalEroded = 0;
+
+    while (true)
+    {
+        PackedBoolList newIsLeakFace(isLeakFace);
+
+        // Get number of edges
+
+        const labelList meshFaceIDs(isLeakFace.toc());
+        const uindirectPrimitivePatch pp
+        (
+            UIndirectList<face>(mesh.faces(), meshFaceIDs),
+            mesh.points()
+        );
+
+        // Count number of faces per edge
+        const labelListList& edgeFaces = pp.edgeFaces();
+        labelList nEdgeFaces(edgeFaces.size());
+        forAll(edgeFaces, edgei)
+        {
+            nEdgeFaces[edgei] = edgeFaces[edgei].size();
+        }
+
+        // Match pp edges to coupled edges
+        labelList patchEdges;
+        labelList coupledEdges;
+        PackedBoolList sameEdgeOrientation;
+        PatchTools::matchEdges
+        (
+            pp,
+            cpp,
+            patchEdges,
+            coupledEdges,
+            sameEdgeOrientation
+        );
+
+
+        // Convert patch-edge data into cpp-edge data
+        labelList coupledNEdgeFaces(map.constructSize(), Zero);
+        UIndirectList<label>(coupledNEdgeFaces, coupledEdges) =
+            UIndirectList<label>(nEdgeFaces, patchEdges);
+
+        // Synchronise
+        globalData.syncData
+        (
+            coupledNEdgeFaces,
+            globalData.globalEdgeSlaves(),
+            globalData.globalEdgeTransformedSlaves(),
+            map,
+            plusEqOp<label>()
+        );
+
+        // Convert back from cpp-edge to patch-edge
+        UIndirectList<label>(nEdgeFaces, patchEdges) =
+            UIndirectList<label>(coupledNEdgeFaces, coupledEdges);
+
+        // Remove any open edges
+        label nEroded = 0;
+        forAll(nEdgeFaces, edgei)
+        {
+            if (nEdgeFaces[edgei] == 1)
+            {
+                const edge& e = pp.edges()[edgei];
+                const label mp0 = pp.meshPoints()[e[0]];
+                const label mp1 = pp.meshPoints()[e[1]];
+
+                if (!isBlockedPoint[mp0] || !isBlockedPoint[mp1])
+                {
+                    // Edge is not on wall so is open
+                    const label patchFacei = edgeFaces[edgei][0];
+                    const label meshFacei = pp.addressing()[patchFacei];
+                    //Pout<< "Eroding face:" << meshFacei
+                    //    << " at:" << mesh.faceCentres()[meshFacei]
+                    //    << " since has open edge:" << mesh.points()[mp0]
+                    //    << mesh.points()[mp1] << endl;
+
+                    if (newIsLeakFace.unset(meshFacei))
+                    {
+                        nEroded++;
+                    }
+                }
+            }
+        }
+
+        reduce(nEroded, sumOp<label>());
+        nTotalEroded += nEroded;
+
+        if (nEroded == 0)
+        {
+            break;
+        }
+
+        // Make sure we make the same decision on both sides
+        syncTools::syncFaceList
+        (
+            mesh,
+            newIsLeakFace,
+            orEqOp<unsigned int>()
+        );
+
+        isLeakFace = std::move(newIsLeakFace);
+    }
+
+    return nTotalEroded;
+}
+
+
+void Foam::shortestPathSet::genSamples
+(
+    const bool addLeakPath,
     const label maxIter,
     const polyMesh& mesh,
-    const boolList& isBlockedFace,
+    const PackedBoolList& isBoundaryFace,
     const point& insidePoint,
     const label insideCelli,
     const point& outsidePoint,
@@ -324,324 +928,70 @@ void Foam::shortestPathSet::genSamples
     PackedBoolList& isLeakPoint
 ) const
 {
+    // Mark all paths needed to close a single combination of insidePoint,
+    // outsidePoint. The output is
+    // - isLeakCell : is cell along a leak path
+    // - isLeakFace : is face along a leak path (so inbetween two leakCells)
+    // - isLeakPoint : is point on a leakFace
+
+
     const topoDistanceData maxData(labelMax, labelMax);
 
     // Get the target point
-    label outsideCelli = mesh.findCell(outsidePoint);
+    const label outsideCelli = mesh.findCell(outsidePoint);
 
     // Maintain overall track length. Used to make curveDist continuous.
-    label trackLength = 0;
+    scalar trackLength = 0;
 
-    for (label iter = 0; iter < maxIter; iter++)
+    List<topoDistanceData> allFaceInfo(mesh.nFaces());
+    List<topoDistanceData> allCellInfo(mesh.nCells());
+
+
+    // Boundary face + additional temporary blocks (to force leakpath to
+    // outside)
+    autoPtr<PackedBoolList> isBlockedFace;
+
+    label iter;
+    bool markLeakPath = false;
+
+
+    for (iter = 0; iter < maxIter; iter++)
     {
-        List<topoDistanceData> allFaceInfo(mesh.nFaces());
-        List<topoDistanceData> allCellInfo(mesh.nCells());
+        const label nOldLeakFaces = returnReduce
+        (
+            isLeakFace.count(),
+            sumOp<label>()
+        );
+        const label oldNSamplingPts(samplingPts.size());
 
-        // Mark blocked faces with high distance
-        forAll(isBlockedFace, facei)
-        {
-            if (isBlockedFace[facei])
-            {
-                allFaceInfo[facei] = maxData;
-            }
-        }
+        bool foundPath = genSingleLeakPath
+        (
+            markLeakPath,
+            iter,
+            mesh,
+            (isBlockedFace.valid() ? isBlockedFace() : isBoundaryFace),
+            insidePoint,
+            insideCelli,
+            outsidePoint,
+            outsideCelli,
 
-        if (markLeakPath)
-        {
-            // Mark any previously found leak path. This marks all
-            // faces of all cells on the path. This will make sure that
-            // ultimately the path will go through another gap.
-            forAll(isLeakCell, celli)
-            {
-                if (celli != insideCelli && celli != outsideCelli)
-                {
-                    if (isLeakCell[celli])
-                    {
-                        allCellInfo[celli] = maxData;
-                        const cell& cFaces = mesh.cells()[celli];
-                        for (auto facei : cFaces)
-                        {
-                            allFaceInfo[facei] = maxData;
-                        }
-                    }
-                }
-            }
-        }
+            // Generated sampling points
+            trackLength,
+            samplingPts,
+            samplingCells,
+            samplingFaces,
+            samplingSegments,
+            samplingCurveDist,
 
-        // Mark any previously found leak faces. These are faces that
-        // are (point-)connected to an existing boundary.
-        forAll(isLeakFace, facei)
-        {
-            if (isLeakFace[facei])
-            {
-                allFaceInfo[facei] = maxData;
-            }
-        }
+            // State of current leak paths
+            isLeakCell,
+            isLeakFace,
+            isLeakPoint,
 
-
-        // Pass1: Get distance to insideCelli
-
-        calculateDistance(iter, mesh, insideCelli, allFaceInfo, allCellInfo);
-
-
-
-        // Pass2: walk from outside points backwards. Note: could be done
-        //        using FaceCellWave as well but is overly complex since
-        //        does not allow logic comparing all faces of a cell.
-
-        const polyBoundaryMesh& pbm = mesh.boundaryMesh();
-
-
-        bool targetFound = false;
-        if (outsideCelli != -1)
-        {
-            int dummyTrackData;
-            targetFound = allCellInfo[outsideCelli].valid(dummyTrackData);
-            if (!targetFound)
-            {
-                WarningInFunction
-                    << "Point " << outsidePoint
-                    << " not reachable by walk from " << insidePoint
-                    << ". Probably mesh has island/regions."
-                    << " Skipped route detection." << endl;
-            }
-        }
-        reduce(targetFound, orOp<bool>());
-        if (!targetFound)
-        {
-            break;
-        }
-
-
-        // Start with given target cell and walk back
-        // If point happens to be on multiple processors, random pick
-        label frontCellI = outsideCelli;
-        point origin(outsidePoint);
-        bool findMinDistance = true;
-
-        while (true)
-        {
-            label frontFaceI = -1;
-
-            // Work within same processor
-            if (frontCellI != -1)
-            {
-                // Find face with lowest distance from seed
-                //   x  |  x  2  1  2  2  |  x  |  x
-                //  --- + --- + -1- + -2- + --- + ---
-                //   x  |  1  1  0  1  1  |  x  |  x
-                //  --- + --- + -1- + -2- + --- + ---
-                //   x  |  x  2  1  2  2  3  3  4  4
-                //  --- + --- + --- + -3- + -4- + -5-
-                //   x  |  x  3  2  3  3  4  4  5  5
-                // e.g. if we start from cell with value = 4, we have
-                // neighbour faces 4, 4, 5, 5. Choose 4 (least distance
-                // to seed) and continue...
-
-                frontFaceI = findMinFace
-                (
-                    mesh,
-                    frontCellI,
-                    allFaceInfo,
-                    isLeakPoint,
-                    findMinDistance,    // mode : find min or find max
-                    origin
-                );
-
-
-                // Loop until we hit a boundary face
-                PackedBoolList isNewLeakPoint(isLeakPoint);
-                while (mesh.isInternalFace(frontFaceI))
-                {
-                    if (isBlockedFace.size() && isBlockedFace[frontFaceI])
-                    {
-                        // Pout<< " Found blocked face" << endl;
-                        frontCellI = -1;
-                        break;
-                    }
-
-                    // Step to neighbouring cell
-                    label nbrCellI = mesh.faceOwner()[frontFaceI];
-                    if (nbrCellI == frontCellI)
-                    {
-                        nbrCellI = mesh.faceNeighbour()[frontFaceI];
-                    }
-
-                    if (nbrCellI == insideCelli)
-                    {
-                        // Pout<< " Found connection seed cell!" << endl;
-                        frontCellI = -1;
-                        break;
-                    }
-
-                    frontCellI = nbrCellI;
-
-                    // Pick best face on cell
-                    frontFaceI = findMinFace
-                    (
-                        mesh,
-                        frontCellI,
-                        allFaceInfo,
-                        isLeakPoint,
-                        findMinDistance,
-                        origin
-                    );
-
-                    const topoDistanceData& cInfo = allCellInfo[frontCellI];
-                    const topoDistanceData& fInfo = allFaceInfo[frontFaceI];
-
-                    if (fInfo.distance() <= cInfo.distance())
-                    {
-                        samplingPts.append(mesh.cellCentres()[frontCellI]);
-                        samplingCells.append(frontCellI);
-                        samplingFaces.append(-1);
-                        samplingSegments.append(iter);
-                        samplingCurveDist.append
-                        (
-                            trackLength+cInfo.distance()
-                        );
-                        isLeakCell.set(frontCellI);
-
-                        if
-                        (
-                            touchesWall
-                            (
-                                mesh,
-                                frontFaceI,
-                                isLeakFace,
-                                isLeakPoint
-                            )
-                        )
-                        {
-                            isNewLeakPoint.set(mesh.faces()[frontFaceI]);
-                            origin = mesh.faceCentres()[frontFaceI];
-                            findMinDistance = false;
-                        }
-
-                    }
-                }
-                isLeakPoint.transfer(isNewLeakPoint);
-            }
-
-            // Situation 1: we found the destination cell (do nothing),
-            // frontCellI is -1 on all processors
-            if (returnReduce(frontCellI == -1, andOp<bool>()))
-            {
-                break;
-            }
-
-            // Situation 2: we're on a coupled patch and might need to
-            //              switch processor/cell. We need to transfer:
-            //              -frontface -frontdistance -leak points/faces
-            boolList isFront(mesh.nBoundaryFaces(), false);
-
-            if (frontFaceI != -1)
-            {
-                isFront[frontFaceI-mesh.nInternalFaces()] = true;
-            }
-            syncTools::swapBoundaryFaceList(mesh, isFront);
-
-            label minCellDistance = labelMax;
-            if (frontCellI != -1)
-            {
-                minCellDistance = allCellInfo[frontCellI].distance();
-            }
-            reduce(minCellDistance, minOp<label>());
-
-            // Sync all leak data
-            sync
-            (
-                mesh,
-                isLeakFace,
-                isLeakPoint,
-                frontCellI,
-                origin,
-                findMinDistance
-            );
-
-
-
-            const label oldFrontFaceI = frontFaceI;
-            frontCellI = -1;
-            frontFaceI = -1;
-            forAll(pbm, patchI)
-            {
-                const polyPatch& pp = pbm[patchI];
-                forAll(pp, i)
-                {
-                    label faceI = pp.start()+i;
-                    if
-                    (
-                        oldFrontFaceI == -1
-                     && isFront[faceI-mesh.nInternalFaces()]
-                     && (isBlockedFace.empty() || !isBlockedFace[faceI])
-                    )
-                    {
-                        frontFaceI = faceI;
-                        frontCellI = pp.faceCells()[i];
-                        break;
-                    }
-                }
-
-                if
-                (
-                    frontCellI != -1
-                 && allCellInfo[frontCellI].distance() < minCellDistance
-                )
-                {
-                    const topoDistanceData& cInfo = allCellInfo[frontCellI];
-
-                    samplingPts.append(mesh.cellCentres()[frontCellI]);
-                    samplingCells.append(frontCellI);
-                    samplingFaces.append(-1);
-                    samplingSegments.append(iter);
-                    samplingCurveDist.append
-                    (
-                        trackLength+cInfo.distance()
-                    );
-                    isLeakCell.set(frontCellI);
-
-                    // Check if frontFacei touches leakPoint
-                    if
-                    (
-                        touchesWall
-                        (
-                            mesh,
-                            frontFaceI,
-                            isLeakFace,
-                            isLeakPoint
-                        )
-                    )
-                    {
-                        isLeakPoint.set(mesh.faces()[frontFaceI]);
-                        origin = mesh.faceCentres()[frontFaceI];
-                        findMinDistance = false;
-                    }
-
-                    break;
-                }
-
-                // When seed cell is isolated by processor boundaries
-                if (insideCelli != -1 && frontCellI == insideCelli)
-                {
-                    // Pout<< " Found connection seed cell!" << endl;
-                    frontCellI = -1;
-                    break;
-                }
-            }
-
-            // Sync all leak data
-            sync
-            (
-                mesh,
-                isLeakFace,
-                isLeakPoint,
-                frontCellI,
-                origin,
-                findMinDistance
-            );
-        }
-
+            // Work storage
+            allFaceInfo,
+            allCellInfo
+        );
 
         // Recalculate the overall trackLength
         trackLength = returnReduce
@@ -654,32 +1004,139 @@ void Foam::shortestPathSet::genSamples
             maxOp<scalar>()
         );
 
+        const label nLeakFaces = returnReduce
+        (
+            isLeakFace.count(),
+            sumOp<label>()
+        );
 
-        if (debug)
+        if (!foundPath && !markLeakPath)
         {
-            const fvMesh& fm = refCast<const fvMesh>(mesh);
-
-            const_cast<fvMesh&>(fm).setInstance(fm.time().timeName());
-            volScalarField fld
-            (
-                IOobject
-                (
-                    "isLeakCell",
-                    fm.time().timeName(),
-                    fm,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
-                fm,
-                dimensionedScalar(dimless, Zero)
-            );
-            forAll(isLeakCell, celli)
-            {
-                fld[celli] = isLeakCell[celli];
-            }
-            fld.correctBoundaryConditions();
-            fld.write();
+            // In mark-boundary-face-only mode and already fully blocked the
+            // path to outsideCell so we're good
+            break;
         }
+
+
+        if (nLeakFaces > nOldLeakFaces)
+        {
+            // Normal operation: walking has closed some wall-connected faces
+            // If previous iteration was markLeakPath-mode make sure to revert
+            // to normal operation (i.e. face marked in isLeakFace)
+            if (isBlockedFace.valid())
+            {
+                isBlockedFace.clear();
+            }
+            markLeakPath = false;
+        }
+        else
+        {
+            // Did not mark any additional faces/points. Save current state
+            // and add faces/points on leakpath to force next walk
+            // to pass outside of leakpath. This is done until the leakpath
+            // 'touchesWall' (i.e. edge connected to an original boundary face)
+
+            if (markLeakPath && !foundPath)
+            {
+                // Is marking all faces on all paths and no additional path
+                // found. Also nothing new marked (in isLeakFace) since
+                // nLeakFaces == nOldLeakFaces) so we're
+                // giving up. Convert all path faces into leak faces
+                //Pout<< "** giving up" << endl;
+                break;
+            }
+
+
+            // Revert to boundaryFaces only
+            if (!isBlockedFace.valid())
+            {
+                //Pout<< "** Starting from original boundary faces." << endl;
+                isBlockedFace.set(new PackedBoolList(isBoundaryFace));
+            }
+
+            markLeakPath = true;
+
+
+            if (debug & 2)
+            {
+                const pointField leakCcs(mesh.cellCentres(), isLeakCell.toc());
+                mkDir(mesh.time().timePath());
+                OBJstream str
+                (
+                    mesh.time().timePath()
+                   /"isLeakCell" + Foam::name(iter) + ".obj"
+                );
+                Pout<< "Writing new isLeakCell to " << str.name() << endl;
+                forAll(leakCcs, i)
+                {
+                    str.write(leakCcs[i]);
+                }
+            }
+            if (debug & 2)
+            {
+                OBJstream str
+                (
+                    mesh.time().timePath()
+                   /"leakPath" + Foam::name(iter) + ".obj"
+                );
+                Pout<< "Writing new leak-path to " << str.name() << endl;
+                for
+                (
+                    label samplei = oldNSamplingPts+1;
+                    samplei < samplingPts.size();
+                    samplei++
+                )
+                {
+                    Pout<< "    passing through cell "
+                        << samplingCells[samplei]
+                        << " at:" << mesh.cellCentres()[samplingCells[samplei]]
+                        << " distance:" << samplingCurveDist[samplei]
+                        << endl;
+
+                    str.write
+                    (
+                        linePointRef
+                        (
+                            samplingPts[samplei-1],
+                            samplingPts[samplei]
+                        )
+                    );
+                }
+            }
+        }
+    }
+
+    if (debug)
+    {
+        const fvMesh& fm = refCast<const fvMesh>(mesh);
+
+        const_cast<fvMesh&>(fm).setInstance(fm.time().timeName());
+        volScalarField fld
+        (
+            IOobject
+            (
+                "isLeakCell",
+                fm.time().timeName(),
+                fm,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            fm,
+            dimensionedScalar(dimless, Zero)
+        );
+        forAll(isLeakCell, celli)
+        {
+            fld[celli] = isLeakCell[celli];
+        }
+        fld.correctBoundaryConditions();
+        fld.write();
+    }
+
+    if (maxIter > 1 && iter == maxIter)
+    {
+        WarningInFunction << "Did not manage to close gap using " << iter
+            << " leak paths" << nl << "This can cause problems when using the"
+            << " paths to close leaks" << endl;
     }
 }
 
@@ -690,7 +1147,7 @@ void Foam::shortestPathSet::genSamples
     const label maxIter,
     const polyMesh& mesh,
     const labelUList& wallPatches,
-    const boolList& isBlockedFace
+    const PackedBoolList& isBlockedFace
 )
 {
     // Storage for sample points
@@ -701,8 +1158,7 @@ void Foam::shortestPathSet::genSamples
     DynamicList<scalar> samplingCurveDist;
 
     // Seed faces and points on 'real' boundary
-    PackedBoolList isLeakFace(mesh.nFaces());
-    PackedBoolList isLeakPoint(mesh.nPoints());
+    PackedBoolList isBlockedPoint(mesh.nPoints());
     {
         // Real boundaries
         const polyBoundaryMesh& pbm = mesh.boundaryMesh();
@@ -711,7 +1167,7 @@ void Foam::shortestPathSet::genSamples
             const polyPatch& pp = pbm[patchi];
             forAll(pp, i)
             {
-                isLeakPoint.set(pp[i]);
+                isBlockedPoint.set(pp[i]);
             }
         }
 
@@ -720,20 +1176,35 @@ void Foam::shortestPathSet::genSamples
         {
             if (isBlockedFace[facei])
             {
-                isLeakPoint.set(mesh.faces()[facei]);
+                isBlockedPoint.set(mesh.faces()[facei]);
             }
         }
 
         syncTools::syncPointList
         (
             mesh,
-            isLeakPoint,
+            isBlockedPoint,
             orEqOp<unsigned int>(),
             0u
         );
+
+        if (debug)
+        {
+            mkDir(mesh.time().timePath());
+            OBJstream str(mesh.time().timePath()/"isBlockedPoint.obj");
+            for (const auto& pointi : isBlockedPoint)
+            {
+                str.write(mesh.points()[pointi]);
+            }
+            Pout<< "Writing " << str.nVertices() << " points to " << str.name()
+                << endl;
+        }
     }
 
 
+    PackedBoolList isLeakPoint(isBlockedPoint);
+    // Newly closed faces
+    PackedBoolList isLeakFace(mesh.nFaces());
     // All cells along leak paths
     PackedBoolList isLeakCell(mesh.nCells());
 
@@ -784,11 +1255,19 @@ void Foam::shortestPathSet::genSamples
         }
     }
 
+    // Clean up leak faces (erode open edges). These are leak faces which are
+    // not connected to another leak face or leak point
+    erodeFaceSet(mesh, isBlockedPoint, isLeakFace);
+
+    leakFaces_ = isLeakFace.sortedToc();
+
+
     if (debug)
     {
-        const faceList leakFaces(mesh.faces(), isLeakFace.sortedToc());
+        const faceList leakFaces(mesh.faces(), leakFaces_);
 
-        OBJstream str(mesh.time().path()/"isLeakFace.obj");
+        mkDir(mesh.time().timePath());
+        OBJstream str(mesh.time().timePath()/"isLeakFace.obj");
         str.write(leakFaces, mesh.points(), false);
         Pout<< "Writing " << leakFaces.size() << " faces to " << str.name()
             << endl;
@@ -914,7 +1393,14 @@ Foam::shortestPathSet::shortestPathSet
         }
     }
 
-    genSamples(markLeakPath, maxIter, mesh, wallPatches, isBlockedFace);
+    genSamples
+    (
+        markLeakPath,
+        maxIter,
+        mesh,
+        wallPatches,
+        PackedBoolList(isBlockedFace)
+    );
 }
 
 
@@ -945,7 +1431,7 @@ Foam::shortestPathSet::shortestPathSet
         }
     }
 
-    genSamples(markLeakPath, maxIter, mesh, wallPatches, boolList());
+    genSamples(markLeakPath, maxIter, mesh, wallPatches, PackedBoolList());
 }
 
 
