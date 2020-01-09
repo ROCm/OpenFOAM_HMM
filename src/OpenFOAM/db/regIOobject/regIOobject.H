@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,7 +88,7 @@ protected:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Is this object registered with the registry
         bool registered_;
@@ -117,8 +117,8 @@ private:
 
 public:
 
-        //- Declare friendship with any classes that need access to
-        //  masterOnlyReading
+        //- Declare friendship with classes that need access to
+        //- masterOnlyReading
         friend class functionEntries::codeStream;
         friend class fileOperations::uncollatedFileOperation;
         friend class fileOperations::masterUncollatedFileOperation;
@@ -164,7 +164,8 @@ public:
         // Registration
 
             //- Add object to registry, if not already registered
-            //  \return true if object was newly registered
+            //  \return true if object was already registered,
+            //      or was newly registered
             bool checkIn();
 
             //- Remove all file watches and remove object from registry
@@ -177,30 +178,53 @@ public:
             //- Is this object owned by the registry?
             inline bool ownedByRegistry() const;
 
-            //- Transfer ownership of this object to its registry
-            inline void store();
+            //- Register object with its registry
+            //- and transfer ownership to the registry.
+            //  \return true if now ownedByRegistry
+            inline bool store();
 
-            //- Transfer ownership of the given object pointer to its registry
+            //- Register object pointer with its registry
+            //- and transfer ownership to the registry.
             //  \return reference to the object.
             template<class Type>
             inline static Type& store(Type* p);
 
-            //- Transfer ownership of the given object pointer to its registry
+            //- Register object pointer with its registry
+            //- and transfer ownership to the registry.
+            //  Clears the autoPtr parameter.
             //  \return reference to the object.
             template<class Type>
             inline static Type& store(autoPtr<Type>& aptr);
 
-            //- Transfer ownership of the given object pointer to its registry
+            //- Register object pointer with its registry
+            //- and transfer ownership to the registry.
+            //  Clears the autoPtr parameter.
             //  \return reference to the object.
             template<class Type>
             inline static Type& store(autoPtr<Type>&& aptr);
+
+            //- Register temporary pointer with its registry
+            //- and transfer ownership of pointer to the registry.
+            //  After the call, tmp parameter changes from PTR to CREF.
+            //
+            //  \return reference to the object.
+            template<class Type>
+            inline static Type& store(tmp<Type>& tptr);
+
+            //- Register temporary pointer with its registry
+            //- and transfer ownership of pointer to the registry.
+            //  After the call, the tmp parameter content is \em unspecified.
+            //
+            //  \return reference to the object.
+            template<class Type>
+            inline static Type& store(tmp<Type>&& tptr);
 
             //- Release ownership of this object from its registry
             //  \param unregister optionally set as non-registered
             inline void release(const bool unregister = false);
 
 
-        // Dependency checking
+        // Dependency Checking
 
             //- Event number at last update.
             inline label eventNo() const;
@@ -271,8 +295,8 @@ public:
             //- Read object
             virtual bool read();
 
-            //- Add file watch for fileName on object if not yet watched. Return
-            //  index of watch
+            //- Add file watch for fileName on object if not yet watched.
+            //  \return index of watch
             virtual label addWatch(const fileName&);
 
             //- Return file-monitoring handles
@@ -282,7 +306,7 @@ public:
             inline labelList& watchIndices();
 
             //- Return true if the object's file (or files for objectRegistry)
-            //  have been modified. (modified state is cached by Time)
+            //- have been modified. (modified state is cached by Time)
             virtual bool modified() const;
 
             //- Read object if modified (as set by call to modified)
@@ -317,9 +341,10 @@ public:
             }
 
 
-    // Member operators
+    // Member Operators
 
-        void operator=(const IOobject&);
+        //- Copy assignment
+        void operator=(const IOobject& io);
 };
 
 

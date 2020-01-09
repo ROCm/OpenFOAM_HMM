@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,9 +34,19 @@ inline bool Foam::regIOobject::ownedByRegistry() const
 }
 
 
-inline void Foam::regIOobject::store()
+inline bool Foam::regIOobject::store()
 {
-    ownedByRegistry_ = true;
+    if (checkIn())
+    {
+        ownedByRegistry_ = true;
+    }
+    else
+    {
+        WarningInFunction
+            << "Refuse to store unregistered object: " << this->name() << nl;
+    }
+
+    return ownedByRegistry_;
 }
 
 
@@ -50,7 +60,15 @@ inline Type& Foam::regIOobject::store(Type* p)
             << abort(FatalError);
     }
 
-    p->regIOobject::ownedByRegistry_ = true;
+    const bool ok = p->regIOobject::store();
+
+    if (!ok)
+    {
+        FatalErrorInFunction
+            << "Failed to store pointer: " << p->regIOobject::name()
+            << ". Risk of memory leakage\n"
+            << abort(FatalError);
+    }
 
     return *p;
 }
@@ -59,14 +77,57 @@ inline Type& Foam::regIOobject::store(Type* p)
 template<class Type>
 inline Type& Foam::regIOobject::store(autoPtr<Type>& aptr)
 {
-    return store(aptr.ptr()); // release, pass management to regIOobject
+    // Pass management to objectRegistry
+    return store(aptr.release());
 }
 
 
 template<class Type>
 inline Type& Foam::regIOobject::store(autoPtr<Type>&& aptr)
 {
-    return store(aptr.ptr()); // release, pass management to regIOobject
+    // Pass management to objectRegistry
+    return store(aptr.release());
+}
+
+
+template<class Type>
+inline Type& Foam::regIOobject::store(tmp<Type>& tptr)
+{
+    Type* p = nullptr;
+
+    if (tptr.isTmp())
+    {
+        // Pass management to objectRegistry
+        p = tptr.ptr();
+
+        store(p);
+
+        // Adjust tmp<> access to use the stored reference
+        tptr.cref(*p);
+    }
+    else
+    {
+        // Taking ownership of a const-ref does not make much sense.
+        // - Storing the object won't actually do so, it will be removed
+        //   when the original object goes out of scope.
+        // - Storing a clone may not be what we want.
+
+        p = tptr.get();
+
+        WarningInFunction
+            << "Refuse to store tmp to const-ref: " << p->name()
+            << ". Likely indicates a coding error\n";
+    }
+
+    return *p;
+}
+
+
+template<class Type>
+inline Type& Foam::regIOobject::store(tmp<Type>&& tptr)
+{
+    // Treat like a normal reference
+    return store(tptr);
 }
 
 

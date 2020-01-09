@@ -109,6 +109,7 @@ Foam::regIOobject::regIOobject(const regIOobject& rio, bool registerCopy)
     {
         if (rio.registered_)
         {
+            // Unregister the original object
             const_cast<regIOobject&>(rio).checkOut();
         }
         checkIn();
@@ -132,6 +133,9 @@ Foam::regIOobject::regIOobject
 {
     if (registerCopy)
     {
+        // NOTE: could also unregister the original object
+        // if (rio.registered_ && newName == rio.name()) ...
+
         checkIn();
     }
 }
