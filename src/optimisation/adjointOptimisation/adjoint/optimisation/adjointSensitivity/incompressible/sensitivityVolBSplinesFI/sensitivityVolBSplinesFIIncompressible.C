@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -137,7 +137,7 @@ void sensitivityVolBSplinesFI::assembleSensitivities()
     PtrList<NURBS3DVolume>& boxes = volBSplinesBase_.boxesRef();
     forAll(boxes, iNURB)
     {
-        label nb = boxes[iNURB].getControlPoints().size();
+        const label nb(boxes[iNURB].getControlPoints().size());
         vectorField boxSensitivities(nb, Zero);
 
         vectorField dxdbSens = boxes[iNURB].computeControlPointSensitivities
@@ -278,13 +278,6 @@ void sensitivityVolBSplinesFI::assembleSensitivities()
         }
 
         // Zero sensitivities in non-active design variables
-        boxes[iNURB].boundControlPointMovement(flowSens_);
-        boxes[iNURB].boundControlPointMovement(dSdbSens_);
-        boxes[iNURB].boundControlPointMovement(dndbSens_);
-        boxes[iNURB].boundControlPointMovement(dVdbSens_);
-        boxes[iNURB].boundControlPointMovement(distanceSens_);
-        boxes[iNURB].boundControlPointMovement(dxdbDirectSens_);
-        boxes[iNURB].boundControlPointMovement(optionsSens_);
         boxes[iNURB].boundControlPointMovement(boxSensitivities);
 
         // Transfer sensitivities to global list
@@ -299,6 +292,16 @@ void sensitivityVolBSplinesFI::assembleSensitivities()
         // Increment number of passed sensitivities
         passedCPs += nb;
     }
+
+    // Zero non-active sensitivity components.
+    // For consistent output only, does not affect optimisation
+    volBSplinesBase_.boundControlPointMovement(flowSens_);
+    volBSplinesBase_.boundControlPointMovement(dSdbSens_);
+    volBSplinesBase_.boundControlPointMovement(dndbSens_);
+    volBSplinesBase_.boundControlPointMovement(dVdbSens_);
+    volBSplinesBase_.boundControlPointMovement(distanceSens_);
+    volBSplinesBase_.boundControlPointMovement(dxdbDirectSens_);
+    volBSplinesBase_.boundControlPointMovement(optionsSens_);
 }
 
 
