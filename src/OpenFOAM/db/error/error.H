@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,15 +67,13 @@ class error
     public std::exception,
     public messageStream
 {
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         string functionName_;
         string sourceFileName_;
         label sourceFileLineNumber_;
-
         bool throwExceptions_;
         OStringStream* messageStreamPtr_;
 
@@ -90,15 +88,15 @@ public:
         //- Construct from dictionary
         explicit error(const dictionary& errDict);
 
-        //- Construct as copy
+        //- Copy construct
         error(const error& err);
 
 
     //- Destructor
-    virtual ~error() throw();
+    virtual ~error() noexcept;
 
 
-    // Static Member Functions
+    // Static Functions
 
         //- Emit warning on stderr about something being old.
         //  \param what description for the warning
@@ -220,7 +218,7 @@ class IOerror
 :
     public error
 {
-    // Private data
+    // Private Data
 
         string ioFileName_;
         label ioStartLineNumber_;
@@ -232,17 +230,17 @@ public:
     // Constructors
 
         //- Construct from title string
-        IOerror(const string& title);
+        explicit IOerror(const string& title);
 
         //- Construct from dictionary
-        IOerror(const dictionary& errDict);
+        explicit IOerror(const dictionary& errDict);
 
 
     //- Destructor
-    virtual ~IOerror() throw();
+    virtual ~IOerror() noexcept;
 
 
-    // Member functions
+    // Member Functions
 
         inline const string& ioFileName() const
         {
