@@ -10,13 +10,12 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volVectorField;
-    location    "0.1";
+    location    "0";
     object      cellDisplacement;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 dimensions      [0 1 0 0 0 0 0];
-
 
 internalField   uniform (0 0 0);
 
@@ -29,29 +28,15 @@ boundaryField
         value           uniform (0 0 0);
     }
 
-    walls
+    "(walls|hole|left1|right1)"
     {
         type            cellMotion;
         value           uniform (0 0 0);
     }
-    hole
-    {
-        type            cellMotion;
-        value           uniform (0 0 0);
-    }
+
     frontAndBack
     {
         type            empty;
-    }
-    left1
-    {
-        type            cellMotion;
-        value           uniform (0 0 0);
-    }
-    right1
-    {
-        type            cellMotion;
-        value           uniform (0 0 0);
     }
 }
 

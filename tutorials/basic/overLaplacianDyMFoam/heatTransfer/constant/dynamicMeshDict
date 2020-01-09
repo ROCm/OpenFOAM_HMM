@@ -14,11 +14,11 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dynamicFvMesh   dynamicOversetFvMesh;
+dynamicFvMesh    dynamicOversetFvMesh;
 
 motionSolverLibs (fvMotionSolvers);
 
-solver          displacementLaplacian;
+solver           displacementLaplacian;
 
 displacementLaplacianCoeffs
 {

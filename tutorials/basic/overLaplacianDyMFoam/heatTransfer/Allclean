@@ -4,7 +4,6 @@ cd "${0%/*}" || exit                                # Run from this directory
 #------------------------------------------------------------------------------
 
 cleanCase0
-
 rm -f constant/polyMesh/boundary
 rm -f constant/polyMesh/zoneID
 
