@@ -5,7 +5,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2019 OpenCFD Ltd.
+#     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -97,11 +97,11 @@ wmakeLibPv()
 
     for libName
     do
-        sentinel=$(sameDependency "$depend" $libName) || \
+        sentinel=$(sameDependency "$depend" "$libName") || \
             wclean $libName
 
         wmake $targetType $libName \
-        && echo "$depend" > ${sentinel:-/dev/null}
+        && storeDependency "$depend" "$sentinel"
     done
 }
 
@@ -148,7 +148,7 @@ get_pvplugin_api()
 #
 have_pvplugin_support()
 {
-    local header settings warn pv_api installDir binDir includeDir targetDir
+    local header warn pv_api installDir binDir includeDir targetDir
     warn="==> skip paraview-plugin"
 
     # Trivial check
