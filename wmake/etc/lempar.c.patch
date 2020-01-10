@@ -1,5 +1,5 @@
---- lempar.c.orig	2019-08-30 17:49:01.815549795 +0200
-+++ lempar.c	2019-09-26 16:09:17.880373536 +0200
+--- lempar.c.orig	2020-01-10 14:08:55.225662130 +0100
++++ lempar.c	2020-01-10 14:31:25.891656998 +0100
 @@ -251,12 +251,14 @@
  ** Outputs:
  ** None.
@@ -23,14 +23,14 @@
  void ParseInit(void *yypRawParser ParseCTX_PDECL){
    yyParser *yypParser = (yyParser*)yypRawParser;
    ParseCTX_STORE
-@@ -344,6 +347,7 @@
- #if YYSTACKDEPTH>0
+@@ -345,6 +348,7 @@
    yypParser->yystackEnd = &yypParser->yystack[YYSTACKDEPTH-1];
  #endif
-+%namespace_end
  }
++%namespace_end
  
  #ifndef Parse_ENGINEALWAYSONSTACK
+ /*
 @@ -359,6 +363,7 @@
  ** A pointer to a parser.  This pointer is used in subsequent calls
  ** to Parse and ParseFree.
@@ -107,7 +107,7 @@
  #endif
  
  /*
-@@ -893,6 +907,7 @@
+@@ -891,6 +905,7 @@
  ** Outputs:
  ** None.
  */
@@ -115,7 +115,7 @@
  void Parse(
    void *yyp,                   /* The parser */
    int yymajor,                 /* The major token code number */
-@@ -1062,11 +1077,13 @@
+@@ -1060,11 +1075,13 @@
  #endif
    return;
  }
@@ -128,9 +128,9 @@
 +%namespace_begin
  int ParseFallback(int iToken){
  #ifdef YYFALLBACK
-   if( iToken<(int)(sizeof(yyFallback)/sizeof(yyFallback[0])) ){
-@@ -1077,3 +1094,4 @@
- #endif
+   assert( iToken<(int)(sizeof(yyFallback)/sizeof(yyFallback[0])) );
+@@ -1074,3 +1091,4 @@
    return 0;
+ #endif
  }
 +%namespace_end

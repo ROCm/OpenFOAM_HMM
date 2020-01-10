@@ -1,7 +1,7 @@
 /*
- * Part of check-in [https://www.sqlite.org/src/info/980be1730dc1239c]
+ * Part of check-in [https://www.sqlite.org/src/info/fccfb8a9ed3c1df9]
  * artifact:
- * https://www.sqlite.org/src/raw/tool/lemon.c?name=61d5f0af1eff8f754b75ddca668c9897fd30759e389bfffb42ce9e4d38fd4746
+ * https://www.sqlite.org/src/raw/tool/lemon.c?name=a361b85fa230560b783006ac002a6a8bad214c3b9d7fa48980aecc2b691ddcad
  */
 /*
 ** This file contains all sources (including headers) to the LEMON
@@ -223,7 +223,7 @@ void Plink_delete(struct plink *);
 /********** From the file "report.h" *************************************/
 void Reprint(struct lemon *);
 void ReportOutput(struct lemon *);
-void ReportTable(struct lemon *, int);
+void ReportTable(struct lemon *, int, int);
 void ReportHeader(struct lemon *);
 void CompressTables(struct lemon *);
 void ResortStates(struct lemon *);
@@ -297,13 +297,15 @@ struct rule {
   const char *code;        /* The code executed when this rule is reduced */
   const char *codePrefix;  /* Setup code before code[] above */
   const char *codeSuffix;  /* Breakdown code after code[] above */
-  int noCode;              /* True if this rule has no associated C code */
-  int codeEmitted;         /* True if the code has been emitted already */
   struct symbol *precsym;  /* Precedence symbol for this rule */
   int index;               /* An index number for this rule */
   int iRule;               /* Rule number as used in the generated tables */
+  Boolean noCode;          /* True if this rule has no associated C code */
+  Boolean codeEmitted;     /* True if the code has been emitted already */
   Boolean canReduce;       /* True if this rule is ever reduced */
   Boolean doesReduce;      /* Reduce actions occur after optimization */
+  Boolean neverReduce;     /* Reduce is theoretically possible, but prevented
+                           ** by actions or other outside implementation */
   struct rule *nextlhs;    /* Next rule with the same LHS */
   struct rule *next;       /* Next rule in the global list */
 };
@@ -390,6 +392,7 @@ struct lemon {
   int nstate;              /* Number of states */
   int nxstate;             /* nstate with tail degenerate states removed */
   int nrule;               /* Number of rules */
+  int nruleWithAction;     /* Number of rules with actions */
   int nsymbol;             /* Number of terminal and nonterminal symbols */
   int nterminal;           /* Number of terminal symbols */
   int minShiftReduce;      /* Minimum shift-reduce action value */
@@ -913,9 +916,9 @@ void FindStates(struct lemon *lemp)
     sp = Symbol_find(lemp->start);
     if( sp==0 ){
       ErrorMsg(lemp->filename,0,
-"The specified start symbol \"%s\" is not \
-in a nonterminal of the grammar.  \"%s\" will be used as the start \
-symbol instead.",lemp->start,lemp->startRule->lhs->name);
+        "The specified start symbol \"%s\" is not "
+        "in a nonterminal of the grammar.  \"%s\" will be used as the start "
+        "symbol instead.",lemp->start,lemp->startRule->lhs->name);
       lemp->errorcnt++;
       sp = lemp->startRule->lhs;
     }
@@ -931,9 +934,9 @@ symbol instead.",lemp->start,lemp->startRule->lhs->name);
     for(i=0; i<rp->nrhs; i++){
       if( rp->rhs[i]==sp ){   /* FIX ME:  Deal with multiterminals */
         ErrorMsg(lemp->filename,0,
-"The start symbol \"%s\" occurs on the \
-right-hand side of a rule. This will result in a parser which \
-does not work properly.",sp->name);
+          "The start symbol \"%s\" occurs on the "
+          "right-hand side of a rule. This will result in a parser which "
+          "does not work properly.",sp->name);
         lemp->errorcnt++;
       }
     }
@@ -1655,6 +1658,7 @@ int main(int argc, char **argv)
   static int mhflag = 0;
   static int nolinenosflag = 0;
   static int noResort = 0;
+  static int sqlFlag = 0;
 
   static struct s_options options[] = {
     {OPT_FLAG, "b", (char*)&basisflag, "Print only the basis in report."},
@@ -1674,6 +1678,8 @@ int main(int argc, char **argv)
     {OPT_FLAG, "r", (char*)&noResort, "Do not sort or renumber states"},
     {OPT_FLAG, "s", (char*)&statistics,
                                    "Print parser stats to standard output."},
+    {OPT_FLAG, "S", (char*)&sqlFlag,
+                    "Generate the *.sql file describing the parser tables."},
     {OPT_FLAG, "x", (char*)&version, "Print the version number."},
     {OPT_FSTR, "T", (char*)handle_T_option, "Specify a template file."},
     {OPT_FSTR, "W", 0, "Ignored.  (Placeholder for '-W' compiler options.)"},
@@ -1735,6 +1741,7 @@ int main(int argc, char **argv)
   for(i=0, rp=lem.rule; rp; rp=rp->next){
     rp->iRule = rp->code ? i++ : -1;
   }
+  lem.nruleWithAction = i;
   for(rp=lem.rule; rp; rp=rp->next){
     if( rp->iRule<0 ) rp->iRule = i++;
   }
@@ -1782,7 +1789,7 @@ int main(int argc, char **argv)
     if( !quiet ) ReportOutput(&lem);
 
     /* Generate the source code for the parser */
-    ReportTable(&lem, mhflag);
+    ReportTable(&lem, mhflag, sqlFlag);
 
     /* Produce a header file for use by the scanner.  (This step is
     ** omitted if the "-m" option is used because makeheaders will
@@ -2291,14 +2298,16 @@ static void parseonetoken(struct pstate *psp)
       }else if( x[0]=='{' ){
         if( psp->prevrule==0 ){
           ErrorMsg(psp->filename,psp->tokenlineno,
-"There is no prior rule upon which to attach the code \
-fragment which begins on this line.");
+            "There is no prior rule upon which to attach the code "
+            "fragment which begins on this line.");
           psp->errorcnt++;
         }else if( psp->prevrule->code!=0 ){
           ErrorMsg(psp->filename,psp->tokenlineno,
-"Code fragment beginning on this line is not the first \
-to follow the previous rule.");
+            "Code fragment beginning on this line is not the first "
+            "to follow the previous rule.");
           psp->errorcnt++;
+        }else if( strcmp(x, "{NEVER-REDUCE")==0 ){
+          psp->prevrule->neverReduce = 1;
         }else{
           psp->prevrule->line = psp->tokenlineno;
           psp->prevrule->code = &x[1];
@@ -2324,8 +2333,8 @@ to follow the previous rule.");
         psp->errorcnt++;
       }else if( psp->prevrule->precsym!=0 ){
         ErrorMsg(psp->filename,psp->tokenlineno,
-"Precedence mark on this line is not the first \
-to follow the previous rule.");
+          "Precedence mark on this line is not the first "
+          "to follow the previous rule.");
         psp->errorcnt++;
       }else{
         psp->prevrule->precsym = Symbol_new(x);
@@ -2931,7 +2940,8 @@ void Parse(struct lemon *gp)
       }
       if( c==0 ){
         ErrorMsg(ps.filename,startline,
-"String starting on this line is not terminated before the end of the file.");
+            "String starting on this line is not terminated before "
+            "the end of the file.");
         ps.errorcnt++;
         nextcp = cp;
       }else{
@@ -2970,7 +2980,8 @@ void Parse(struct lemon *gp)
       }
       if( c==0 ){
         ErrorMsg(ps.filename,ps.tokenlineno,
-"C code starting on this line is not terminated before the end of the file.");
+          "C code starting on this line is not terminated before "
+          "the end of the file.");
         ps.errorcnt++;
         nextcp = cp;
       }else{
@@ -4233,9 +4244,10 @@ static void writeRuleText(FILE *out, struct rule *rp){
 /* Generate C source code for the parser */
 void ReportTable(
   struct lemon *lemp,
-  int mhflag     /* Output in makeheaders format if true */
+  int mhflag,     /* Output in makeheaders format if true */
+  int sqlFlag     /* Generate the *.sql file too */
 ){
-  FILE *out, *in;
+  FILE *out, *in, *sql;
   char line[LINESIZE];
   int  lineno;
   struct state *stp;
@@ -4265,6 +4277,78 @@ void ReportTable(
   if( out==0 ){
     fclose(in);
     return;
+  }
+  if( sqlFlag==0 ){
+    sql = 0;
+  }else{
+    sql = file_open(lemp, ".sql", "wb");
+    if( sql==0 ){
+      fclose(in);
+      fclose(out);
+      return;
+    }
+    fprintf(sql,
+       "BEGIN;\n"
+       "CREATE TABLE symbol(\n"
+       "  id INTEGER PRIMARY KEY,\n"
+       "  name TEXT NOT NULL,\n"
+       "  isTerminal BOOLEAN NOT NULL,\n"
+       "  fallback INTEGER REFERENCES symbol"
+               " DEFERRABLE INITIALLY DEFERRED\n"
+       ");\n"
+    );
+    for(i=0; i<lemp->nsymbol; i++){
+      fprintf(sql,
+         "INSERT INTO symbol(id,name,isTerminal,fallback)"
+         "VALUES(%d,'%s',%s",
+         i, lemp->symbols[i]->name,
+         i<lemp->nterminal ? "TRUE" : "FALSE"
+      );
+      if( lemp->symbols[i]->fallback ){
+        fprintf(sql, ",%d);\n", lemp->symbols[i]->fallback->index);
+      }else{
+        fprintf(sql, ",NULL);\n");
+      }
+    }
+    fprintf(sql,
+      "CREATE TABLE rule(\n"
+      "  ruleid INTEGER PRIMARY KEY,\n"
+      "  lhs INTEGER REFERENCES symbol(id),\n"
+      "  txt TEXT\n"
+      ");\n"
+      "CREATE TABLE rulerhs(\n"
+      "  ruleid INTEGER REFERENCES rule(ruleid),\n"
+      "  pos INTEGER,\n"
+      "  sym INTEGER REFERENCES symbol(id)\n"
+      ");\n"
+    );
+    for(i=0, rp=lemp->rule; rp; rp=rp->next, i++){
+      assert( i==rp->iRule );
+      fprintf(sql,
+        "INSERT INTO rule(ruleid,lhs,txt)VALUES(%d,%d,'",
+        rp->iRule, rp->lhs->index
+      );
+      writeRuleText(sql, rp);
+      fprintf(sql,"');\n");
+      for(j=0; j<rp->nrhs; j++){
+        struct symbol *sp = rp->rhs[j];
+        if( sp->type!=MULTITERMINAL ){
+          fprintf(sql,
+            "INSERT INTO rulerhs(ruleid,pos,sym)VALUES(%d,%d,%d);\n",
+            i,j,sp->index
+          );
+        }else{
+          int k;
+          for(k=0; k<sp->nsubsym; k++){
+            fprintf(sql,
+              "INSERT INTO rulerhs(ruleid,pos,sym)VALUES(%d,%d,%d);\n",
+              i,j,sp->subsym[k]->index
+            );
+          }
+        }
+      }
+    }
+    fprintf(sql, "COMMIT;\n");
   }
   lineno = 1;
   tplt_xfer(lemp->name,lemp->namesp,in,out,&lineno);
@@ -4441,6 +4525,8 @@ void ReportTable(
   ** been computed */
   fprintf(out,"#define YYNSTATE             %d\n",lemp->nxstate);  lineno++;
   fprintf(out,"#define YYNRULE              %d\n",lemp->nrule);  lineno++;
+  fprintf(out,"#define YYNRULE_WITH_ACTION  %d\n",lemp->nruleWithAction);
+         lineno++;
   fprintf(out,"#define YYNTOKEN             %d\n",lemp->nterminal); lineno++;
   fprintf(out,"#define YY_MAX_SHIFT         %d\n",lemp->nxstate-1); lineno++;
   i = lemp->minShiftReduce;
@@ -4760,7 +4846,10 @@ void ReportTable(
     assert( rp->noCode );
     fprintf(out,"      /* (%d) ", rp->iRule);
     writeRuleText(out, rp);
-    if( rp->doesReduce ){
+    if( rp->neverReduce ){
+      fprintf(out, " (NEVER REDUCES) */ assert(yyruleno!=%d);\n",
+              rp->iRule); lineno++;
+    }else if( rp->doesReduce ){
       fprintf(out, " */ yytestcase(yyruleno==%d);\n", rp->iRule); lineno++;
     }else{
       fprintf(out, " (OPTIMIZED OUT) */ assert(yyruleno!=%d);\n",
@@ -4788,6 +4877,7 @@ void ReportTable(
   acttab_free(pActtab);
   fclose(in);
   fclose(out);
+  if( sql ) fclose(sql);
   return;
 }
 

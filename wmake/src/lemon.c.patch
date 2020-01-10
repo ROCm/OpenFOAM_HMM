@@ -1,6 +1,6 @@
---- lemon.c.orig	2019-09-26 14:00:01.572868618 +0200
-+++ lemon.c	2019-09-27 09:05:08.182250296 +0200
-@@ -404,6 +404,7 @@
+--- lemon.c.orig	2020-01-10 14:08:19.181711107 +0100
++++ lemon.c	2020-01-10 14:12:00.621402133 +0100
+@@ -406,6 +406,7 @@
    struct symbol *errsym;   /* The error symbol */
    struct symbol *wildcard; /* Token that matches anything */
    char *name;              /* Name of the generated parser */
@@ -8,7 +8,7 @@
    char *arg;               /* Declaration of the 3th argument to parser */
    char *ctx;               /* Declaration of 2nd argument to constructor */
    char *tokentype;         /* Type of terminal symbols in the parser stack */
-@@ -1557,6 +1558,23 @@
+@@ -1559,6 +1560,23 @@
    lemon_strcpy(outputDir, z);
  }
  
@@ -32,7 +32,7 @@
  static char *user_templatename = NULL;
  static void handle_T_option(char *z){
    user_templatename = (char *) malloc( lemonStrlen(z)+1 );
-@@ -1644,6 +1662,7 @@
+@@ -1647,6 +1665,7 @@
      {OPT_FLAG, "c", (char*)&compress, "Don't compress the action table."},
      {OPT_FSTR, "d", (char*)&handle_d_option, "Output directory.  Default '.'"},
      {OPT_FSTR, "D", (char*)handle_D_option, "Define an %ifdef macro."},
@@ -40,7 +40,7 @@
      {OPT_FSTR, "f", 0, "Ignored.  (Placeholder for -f compiler options.)"},
      {OPT_FLAG, "g", (char*)&rpflag, "Print grammar without actions."},
      {OPT_FSTR, "I", 0, "Ignored.  (Placeholder for '-I' compiler options.)"},
-@@ -2482,6 +2501,9 @@
+@@ -2490,6 +2509,9 @@
          if( strcmp(x,"name")==0 ){
            psp->declargslot = &(psp->gp->name);
            psp->insertLineMacro = 0;
@@ -50,7 +50,7 @@
          }else if( strcmp(x,"include")==0 ){
            psp->declargslot = &(psp->gp->include);
          }else if( strcmp(x,"code")==0 ){
-@@ -3467,20 +3489,83 @@
+@@ -3477,20 +3499,83 @@
  #define LINESIZE 1000
  /* The next cluster of routines are for reading the template file
  ** and writing the results to the generated parser */
@@ -135,7 +135,7 @@
      if( name ){
        for(i=0; line[i]; i++){
          if( line[i]=='P' && strncmp(&line[i],"Parse",5)==0
-@@ -4175,13 +4260,14 @@
+@@ -4187,7 +4272,8 @@
  
    in = tplt_open(lemp);
    if( in==0 ) return;
@@ -145,6 +145,8 @@
    if( out==0 ){
      fclose(in);
      return;
+@@ -4265,7 +4351,7 @@
+     fprintf(sql, "COMMIT;\n");
    }
    lineno = 1;
 -  tplt_xfer(lemp->name,in,out,&lineno);
@@ -152,7 +154,7 @@
  
    /* Generate the include code, if any */
    tplt_print(out,lemp,lemp->include,&lineno);
-@@ -4190,7 +4276,7 @@
+@@ -4274,7 +4360,7 @@
      fprintf(out,"#include \"%s\"\n", incName); lineno++;
      free(incName);
    }
@@ -161,7 +163,7 @@
  
    /* Generate #defines for all tokens */
    if( mhflag ){
-@@ -4204,7 +4290,7 @@
+@@ -4288,7 +4374,7 @@
      }
      fprintf(out,"#endif\n"); lineno++;
    }
@@ -170,7 +172,7 @@
  
    /* Generate the defines */
    fprintf(out,"#define YYCODETYPE %s\n",
-@@ -4367,7 +4453,7 @@
+@@ -4453,7 +4539,7 @@
    fprintf(out,"#define YY_MIN_REDUCE        %d\n", lemp->minReduce); lineno++;
    i = lemp->minReduce + lemp->nrule;
    fprintf(out,"#define YY_MAX_REDUCE        %d\n", i-1); lineno++;
@@ -179,7 +181,7 @@
  
    /* Now output the action table and its associates:
    **
-@@ -4489,7 +4575,7 @@
+@@ -4591,7 +4677,7 @@
      }
    }
    fprintf(out, "};\n"); lineno++;
@@ -188,7 +190,7 @@
  
    /* Generate the table of fallback tokens.
    */
-@@ -4508,7 +4594,7 @@
+@@ -4612,7 +4698,7 @@
        lineno++;
      }
    }
@@ -197,7 +199,7 @@
  
    /* Generate a table containing the symbolic name of every symbol
    */
-@@ -4516,7 +4602,7 @@
+@@ -4620,7 +4706,7 @@
      lemon_sprintf(line,"\"%s\",",lemp->symbols[i]->name);
      fprintf(out,"  /* %4d */ \"%s\",\n",i, lemp->symbols[i]->name); lineno++;
    }
@@ -206,7 +208,7 @@
  
    /* Generate a table containing a text string that describes every
    ** rule in the rule set of the grammar.  This information is used
-@@ -4528,7 +4614,7 @@
+@@ -4632,7 +4718,7 @@
      writeRuleText(out, rp);
      fprintf(out,"\",\n"); lineno++;
    }
@@ -215,7 +217,7 @@
  
    /* Generate code which executes every time a symbol is popped from
    ** the stack while processing errors or while destroying the parser.
-@@ -4591,11 +4677,11 @@
+@@ -4695,11 +4781,11 @@
      emit_destructor_code(out,lemp->symbols[i],lemp,&lineno);
      fprintf(out,"      break;\n"); lineno++;
    }
@@ -229,7 +231,7 @@
  
    /* Generate the tables of rule information.  yyRuleInfoLhs[] and
    ** yyRuleInfoNRhs[].
-@@ -4608,13 +4694,13 @@
+@@ -4712,13 +4798,13 @@
       rule_print(out, rp);
      fprintf(out," */\n"); lineno++;
    }
@@ -245,7 +247,7 @@
  
    /* Generate code which execution during each REDUCE action */
    i = 0;
-@@ -4664,19 +4750,19 @@
+@@ -4771,19 +4857,19 @@
      }
    }
    fprintf(out,"        break;\n"); lineno++;
