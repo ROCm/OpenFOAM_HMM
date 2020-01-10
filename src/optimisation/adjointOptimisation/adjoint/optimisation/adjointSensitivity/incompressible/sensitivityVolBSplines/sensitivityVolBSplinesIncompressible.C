@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -86,10 +86,10 @@ void sensitivityVolBSplines::computeObjectiveContributions()
                 dSdbSens_[passedCPs + cpI] = dSdbSensCP;
                 dndbSens_[passedCPs + cpI] = dndbSensCP;
             }
-            boxes[iNURB].boundControlPointMovement(dSdbSens_);
-            boxes[iNURB].boundControlPointMovement(dndbSens_);
             passedCPs += nb;
         }
+        volBSplinesBase_.boundControlPointMovement(dSdbSens_);
+        volBSplinesBase_.boundControlPointMovement(dndbSens_);
 
         passedCPs = 0;
         forAll(boxes, iNURB)
@@ -106,9 +106,9 @@ void sensitivityVolBSplines::computeObjectiveContributions()
             {
                 dxdbDirectSens_[passedCPs + cpI] = sensDxDbDirect[cpI];
             }
-            boxes[iNURB].boundControlPointMovement(dxdbDirectSens_);
             passedCPs += sensDxDbDirect.size();
         }
+        volBSplinesBase_.boundControlPointMovement(dxdbDirectSens_);
     }
 }
 
@@ -188,9 +188,8 @@ void sensitivityVolBSplines::assembleSensitivities()
             flowSens_[passedCPs + cpI] = sens[cpI];
         }
         passedCPs += sens.size();
-
-        boxes[iNURB].boundControlPointMovement(flowSens_);
     }
+    volBSplinesBase_.boundControlPointMovement(flowSens_);
 
     // Contribution from objective function
     // Note:
