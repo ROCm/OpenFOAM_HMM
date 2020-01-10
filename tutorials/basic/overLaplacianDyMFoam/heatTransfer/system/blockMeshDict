@@ -51,7 +51,6 @@ vertices
 blocks
 (
     hex (0 1 2 3 4 5 6 7) (18 18 1) simpleGrading (1 1 1)
-
     hex (8 9 10 11 12 13 14 15) movingZone (20 20 1) simpleGrading (1 1 1)
 );
 
@@ -110,6 +109,7 @@ boundary
             (0 4 7 3)
         );
     }
+
     right1
     {
         type patch;

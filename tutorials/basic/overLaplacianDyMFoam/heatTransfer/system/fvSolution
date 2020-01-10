@@ -44,29 +44,15 @@ solvers
 
 SIMPLE
 {
-    nNonOrthogonalCorrectors 0; //2;
+    nNonOrthogonalCorrectors 0;
 }
 
 PIMPLE
 {
-    correctPhi          yes;
     nOuterCorrectors    2;
     nCorrectors         1;
     nNonOrthogonalCorrectors 0;
 }
 
-relaxationFactors
-{
-    fields
-    {
-        p               0.3;
-    }
-    equations
-    {
-        U               0.7;
-        k               0.7;
-        omega           0.7;
-    }
-}
 
 // ************************************************************************* //

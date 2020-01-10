@@ -5,8 +5,6 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 ./Allrun.pre
 
-# Run it for a bit
-
 # Serial
 #runApplication $(getApplication)
 

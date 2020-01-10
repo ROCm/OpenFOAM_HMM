@@ -29,19 +29,14 @@ boundaryField
         type            overset;
     }
 
-    wall
-    {
-        type            zeroGradient;
-    }
-
-    inlet
+    "(wall|inlet)"
     {
         type            zeroGradient;
     }
 
     outlet
     {
-        type            fixedValue;   //calculated;
+        type            fixedValue;
         value           $internalField;
     }
 

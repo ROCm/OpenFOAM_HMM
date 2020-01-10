@@ -12,7 +12,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#includeEtc "caseDicts/postProcessing/numerical/residuals.cfg"
+#includeEtc "caseDicts/postProcessing/numerical/solverInfo.cfg"
 
 writeControl writeTime;
 

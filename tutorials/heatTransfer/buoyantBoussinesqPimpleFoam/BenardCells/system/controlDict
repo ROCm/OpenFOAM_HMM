@@ -47,7 +47,7 @@ runTimeModifiable true;
 
 functions
 {
-    #includeFunc residuals
+    #includeFunc solverInfo
     #includeFunc streamlines
 }
 

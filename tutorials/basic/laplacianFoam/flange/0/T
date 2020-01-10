@@ -20,7 +20,7 @@ internalField   uniform 273;
 
 boundaryField
 {
-    patch1
+    "(patch1|patch3)"
     {
         type            zeroGradient;
     }
@@ -29,11 +29,6 @@ boundaryField
     {
         type            fixedValue;
         value           uniform 273;
-    }
-
-    patch3
-    {
-        type            zeroGradient;
     }
 
     patch4
