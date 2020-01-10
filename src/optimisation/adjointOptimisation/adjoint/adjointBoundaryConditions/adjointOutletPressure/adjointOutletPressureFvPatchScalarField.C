@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,7 @@ adjointOutletPressureFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF),
-    adjointBoundaryCondition(p, iF, word::null)
+    adjointScalarBoundaryCondition(p, iF, word::null)
 {}
 
 
@@ -59,7 +59,7 @@ adjointOutletPressureFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
-    adjointBoundaryCondition(p, iF, ptf.adjointSolverName_)
+    adjointScalarBoundaryCondition(p, iF, ptf.adjointSolverName_)
 {}
 
 
@@ -72,7 +72,7 @@ adjointOutletPressureFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF),
-    adjointBoundaryCondition(p, iF, dict.get<word>("solverName"))
+    adjointScalarBoundaryCondition(p, iF, dict.get<word>("solverName"))
 {
     fvPatchField<scalar>::operator=
     (
@@ -89,7 +89,7 @@ adjointOutletPressureFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(tppsf, iF),
-    adjointBoundaryCondition(tppsf)
+    adjointScalarBoundaryCondition(tppsf)
 {}
 
 

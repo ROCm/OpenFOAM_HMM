@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -46,9 +46,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class adjointBoundaryCondition Declaration
+                   Class adjointBoundaryCondition Declaration
 \*---------------------------------------------------------------------------*/
 
+template<class Type>
 class adjointBoundaryCondition
 {
 protected:
@@ -82,10 +83,10 @@ protected:
     // Protected Member Functions
 
         //- Get gradient of field on a specific boundary
-        template<class Type>
+        template<class Type2>
         tmp
         <
-            Field<typename Foam::outerProduct<Foam::vector, Type>::type>
+            Field<typename Foam::outerProduct<Foam::vector, Type2>::type>
         > computePatchGrad(word name);
 
         //- Whether to add the extra term from the UaGradU formulation
@@ -103,7 +104,6 @@ public:
     // Constructors
 
         //- Construct from field and base name
-        template<class Type>
         adjointBoundaryCondition
         (
             const fvPatch& p,
@@ -112,11 +112,11 @@ public:
         );
 
         //- Construct as copy
-        adjointBoundaryCondition(const adjointBoundaryCondition&);
+        adjointBoundaryCondition(const adjointBoundaryCondition<Type>&);
 
 
     //- Destructor
-    virtual ~adjointBoundaryCondition() = default;
+    virtual ~adjointBoundaryCondition<Type>() = default;
 
 
     // Member Functions
@@ -140,6 +140,18 @@ public:
 
             //- ATC type might be useful for a number of BCs. Return here
             const ATCModel& getATC() const;
+
+
+        // Contribution to sensitivity derivatives
+
+            //- Return contribution to sensitivity derivatives
+            //  For adjoint boundary conditions corresponding to primal
+            //  boundary conditions that include geometric components
+            //  (e.g. rotatingWallVelocity)
+            virtual tmp
+            <
+                Field<typename Foam::outerProduct<Foam::vector, Type>::type>
+            > dxdbMult() const;
 };
 
 
@@ -150,11 +162,14 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "adjointBoundaryConditionTemplates.C"
+    #include "adjointBoundaryCondition.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
+
+#define makeAdjointBoundaryCondition(adjointTypeBoundaryCondition)             \
+defineNamedTemplateTypeNameAndDebug(adjointTypeBoundaryCondition, 0);
 
 // ************************************************************************* //
