@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,9 +29,9 @@ inline Foam::HashSet<Foam::wordRe>
 Foam::functionObjects::fieldSelection::filters() const
 {
     HashSet<wordRe> f;
-    for (const auto fieldInfo : *this)
+    for (const fieldInfo& fi : *this)
     {
-        f.insert(fieldInfo.name());
+        f.insert(fi.name());
     }
 
     return f;
