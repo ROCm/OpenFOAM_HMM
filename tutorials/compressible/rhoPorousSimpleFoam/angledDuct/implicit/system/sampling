@@ -34,23 +34,16 @@ cellZoneID
             {
                 if (!volZonePtr)
                 {
-                    volZonePtr = new volScalarField
+                    volZonePtr = &regIOobject::store
                     (
-                        IOobject
+                        volScalarField::New
                         (
                             fieldName,
-                            mesh.time().timeName(),
                             mesh,
-                            IOobject::NO_READ,
-                            IOobject::NO_WRITE,
-                            true  // Register
-                        ),
-                        mesh,
-                        dimless,
-                        zeroGradientFvPatchField<scalar>::typeName
+                            dimless,
+                            zeroGradientFvPatchField<scalar>::typeName
+                        )
                     );
-
-                    volZonePtr->store();
 
                     Info<< "Creating " << fieldName
                         << " field for postProcessing" << nl;
