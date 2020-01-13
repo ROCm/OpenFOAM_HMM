@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,12 +62,8 @@ static inline void writeEntryIfPresent
 
     if (eptr)
     {
-        os.writeKeyword(key)
-            << token::HASH << token::BEGIN_BLOCK;
-
-        os.writeQuoted(string(eptr->stream()), false)
-            << token::HASH << token::END_BLOCK
-            << token::END_STATEMENT << nl;
+        const token& tok = eptr->stream()[0];
+        os.writeKeyword(key) << tok << token::END_STATEMENT << nl;
     }
 }
 //! \endcond
