@@ -658,7 +658,7 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
 
     Pstream::scatter(ok, Pstream::msgType(), comm);
 
-    //- Set stream properties from isPtr on master
+    //- Set stream properties from realIsPtr on master
 
     // Scatter master header info
     string ver;
@@ -667,12 +667,12 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
     unsigned scalarByteSize;
     if (UPstream::master(comm))
     {
-        ver = isPtr().version().str();
+        ver = realIsPtr().version().str();
         OStringStream os;
-        os << isPtr().format();
+        os << realIsPtr().format();
         format = os.str();
-        labelByteSize = isPtr().labelByteSize();
-        scalarByteSize = isPtr().scalarByteSize();
+        labelByteSize = realIsPtr().labelByteSize();
+        scalarByteSize = realIsPtr().scalarByteSize();
     }
     Pstream::scatter(ver); //,  Pstream::msgType(), comm);
     Pstream::scatter(format); //,  Pstream::msgType(), comm);
