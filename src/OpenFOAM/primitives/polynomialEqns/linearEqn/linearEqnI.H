@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,29 +91,19 @@ inline Foam::scalar Foam::linearEqn::error(const scalar x) const
 
 inline Foam::Roots<1> Foam::linearEqn::roots() const
 {
-    /*
-
-    This function solves a linear equation of the following form:
-
-        a*x + b = 0
-          x + B = 0
-
-    */
-
     const scalar a = this->a();
     const scalar b = this->b();
 
-    if (a == 0)
+    if (mag(a) < VSMALL)
     {
         return Roots<1>(roots::nan, 0);
     }
-
-    if (mag(b/VGREAT) >= mag(a))
+    else if (mag(b/VGREAT) >= mag(a))
     {
         return Roots<1>(sign(a) == sign(b) ? roots::negInf : roots::posInf, 0);
     }
 
-    return Roots<1>(roots::real, - b/a);
+    return Roots<1>(roots::real, -b/a);
 }
 
 

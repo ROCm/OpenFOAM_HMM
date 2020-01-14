@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +28,67 @@ Class
     Foam::cubicEqn
 
 Description
-    Cubic equation of the form a*x^3 + b*x^2 + c*x + d = 0
+    Container to encapsulate various operations for
+    cubic equation of the forms with real coefficients:
+
+    \f[
+        a*x^3 + b*x^2 + c*x + d = 0
+          x^3 + B*x^2 + C*x + D = 0
+    \f]
+
+    The following two substitutions into the above forms are used:
+
+    \f[
+        x = t - B/3
+        t = w - P/3/w
+    \f]
+
+    This reduces the problem to a quadratic in \c w^3:
+
+    \f[
+        w^6 + Q*w^3 - P = 0
+    \f]
+
+    where \c Q and \c P are given in the code.
+
+    The properties of the cubic can be related to the properties of this
+    quadratic in \c w^3.
+
+    If the quadratic eqn has two identical real roots at zero, three identical
+    real roots exist in the cubic eqn.
+
+    If the quadratic eqn has two identical real roots at non-zero, two identical
+    and one distinct real roots exist in the cubic eqn.
+
+    If the quadratic eqn has two complex roots (a complex conjugate pair),
+    three distinct real roots exist in the cubic eqn.
+
+    If the quadratic eqn has two distinct real roots, one real root and two
+    complex roots (a complex conjugate pair) exist in the cubic eqn.
+
+    The quadratic eqn is solved for the most numerically accurate value
+    of \c w^3. See the \link quadraticEqn.H \endlink for details on how to
+    pick a value. This single value of \c w^3 can yield up to three cube
+    roots for \c w, which relate to the three solutions for \c x.
+
+    Only a single root, or pair of conjugate roots, is directly evaluated; the
+    one, or ones with the lowest relative numerical error. Root identities are
+    then used to recover the remaining roots, possibly utilising a quadratic
+    and/or linear solution. This seems to be a good way of maintaining the
+    accuracy of roots at very different magnitudes.
+
+    Reference:
+    \verbatim
+        Kahan's algo. to compute 'p' using fused multiply-adds (tag:JML):
+            Jeannerod, C. P., Louvet, N., & Muller, J. M. (2013).
+            Further analysis of Kahan's algorithm for the accurate
+            computation of 2× 2 determinants.
+            Mathematics of Computation, 82(284), 2245-2264.
+            DOI:10.1090/S0025-5718-2013-02679-8
+    \endverbatim
+
+See also
+    Test-cubicEqn.C
 
 SourceFiles
     cubicEqnI.H
@@ -79,28 +140,37 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            inline scalar a() const;
-            inline scalar b() const;
-            inline scalar c() const;
-            inline scalar d() const;
+        inline scalar a() const;
+        inline scalar b() const;
+        inline scalar c() const;
+        inline scalar d() const;
 
-            inline scalar& a();
-            inline scalar& b();
-            inline scalar& c();
-            inline scalar& d();
+        inline scalar& a();
+        inline scalar& b();
+        inline scalar& c();
+        inline scalar& d();
 
-        //- Evaluate at x
+    // Evaluate
+
+        //- Evaluate the cubic equation at x
         inline scalar value(const scalar x) const;
 
-        //- Evaluate the derivative at x
+        //- Evaluate the derivative of the cubic equation at x
         inline scalar derivative(const scalar x) const;
 
-        //- Estimate the error of evaluation at x
+        //- Estimate the error of evaluation of the cubic equation at x
         inline scalar error(const scalar x) const;
 
-        //- Get the roots
+        //- Return the roots of the cubic equation with no particular order
+        //  if discriminant > 0: return three distinct real roots
+        //  if discriminant < 0: return one real root and one complex root
+        //                       (one member of the complex conjugate pair)
+        //  if discriminant = 0: return two identical roots,
+        //                       and one distinct real root
+        //  if identical zero Hessian: return three identical real roots
+        //  where the discriminant = - 4p^3 - 27q^2.
         Roots<3> roots() const;
 };
 
