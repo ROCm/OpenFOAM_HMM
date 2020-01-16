@@ -263,34 +263,41 @@ void Foam::snappySnapDriver::calcNearestFace
     {
         label zoneSurfi = zonedSurfaces[i];
 
-        const word& faceZoneName = surfZones[zoneSurfi].faceZoneName();
+        const wordList& faceZoneNames = surfZones[zoneSurfi].faceZoneNames();
 
         // Get indices of faces on pp that are also in zone
-        label zonei = mesh.faceZones().findZoneID(faceZoneName);
-        if (zonei == -1)
+        DynamicList<label> ppFaces;
+        DynamicList<label> meshFaces;
+        forAll(faceZoneNames, fzi)
         {
-            FatalErrorInFunction
-                << "Problem. Cannot find zone " << faceZoneName
-                << exit(FatalError);
-        }
-        const faceZone& fZone = mesh.faceZones()[zonei];
-        const bitSet isZonedFace(mesh.nFaces(), fZone);
-
-        DynamicList<label> ppFaces(fZone.size());
-        DynamicList<label> meshFaces(fZone.size());
-        forAll(pp.addressing(), i)
-        {
-            if (isZonedFace[pp.addressing()[i]])
+            const word& faceZoneName = faceZoneNames[fzi];
+            label zonei = mesh.faceZones().findZoneID(faceZoneName);
+            if (zonei == -1)
             {
-                snapSurf[i] = zoneSurfi;
-                ppFaces.append(i);
-                meshFaces.append(pp.addressing()[i]);
+                FatalErrorInFunction
+                    << "Problem. Cannot find zone " << faceZoneName
+                    << exit(FatalError);
             }
-        }
+            const faceZone& fZone = mesh.faceZones()[zonei];
+            const bitSet isZonedFace(mesh.nFaces(), fZone);
 
-        //Pout<< "For faceZone " << fZone.name()
-        //    << " found " << ppFaces.size() << " out of " << pp.size()
-        //    << endl;
+            ppFaces.reserve(ppFaces.capacity()+fZone.size());
+            meshFaces.reserve(meshFaces.capacity()+fZone.size());
+
+            forAll(pp.addressing(), i)
+            {
+                if (isZonedFace[pp.addressing()[i]])
+                {
+                    snapSurf[i] = zoneSurfi;
+                    ppFaces.append(i);
+                    meshFaces.append(pp.addressing()[i]);
+                }
+            }
+
+            //Pout<< "For faceZone " << fZone.name()
+            //    << " found " << ppFaces.size() << " out of " << pp.size()
+            //    << endl;
+        }
 
         pointField fc
         (

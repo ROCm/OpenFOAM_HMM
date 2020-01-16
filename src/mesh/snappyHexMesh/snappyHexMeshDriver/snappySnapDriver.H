@@ -157,11 +157,13 @@ class snappySnapDriver
             labelList getInternalOrBaffleDuplicateFace() const;
 
             //- Get points both on patch and facezone.
-            static labelList getZoneSurfacePoints
+            static void getZoneSurfacePoints
             (
                 const fvMesh& mesh,
                 const indirectPrimitivePatch&,
-                const word& zoneName
+                const word& zoneName,
+
+                bitSet& pointOnZone
             );
 
             //- Get points both on patch and facezone.

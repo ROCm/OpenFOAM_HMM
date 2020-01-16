@@ -597,14 +597,15 @@ private:
             ) const;
 
             //- Calculate intersections on zoned faces. Return per face -1
-            // or the index of the surface and the orientation w.r.t. surface
+            //  or the global region of the surface and the orientation
+            //  w.r.t. surface
             void getIntersections
             (
                 const labelList& surfacesToTest,
                 const pointField& neiCc,
                 const labelList& testFaces,
 
-                labelList& namedSurfaceIndex,
+                labelList& namedSurfaceRegion,
                 bitSet& posOrientation
             ) const;
 
@@ -737,13 +738,13 @@ private:
 
             //- Finds zone per cell for cells inside closed named surfaces.
             //  (uses geometric test for insideness)
-            //  Adapts namedSurfaceIndex so all faces on boundary of cellZone
+            //  Adapts namedSurfaceRegion so all faces on boundary of cellZone
             //  have corresponding faceZone.
             void findCellZoneGeometric
             (
                 const pointField& neiCc,
                 const labelList& closedNamedSurfaces,
-                labelList& namedSurfaceIndex,
+                labelList& namedSurfaceRegion,
                 const labelList& surfaceToCellZone,
                 labelList& cellToZone
             ) const;
@@ -781,14 +782,14 @@ private:
 
             //- Finds zone per cell. Uses topological walk with all faces
             //  marked in unnamedSurfaceRegion (intersections with unnamed
-            //  surfaces) and namedSurfaceIndex (intersections with named
+            //  surfaces) and namedSurfaceRegion (intersections with named
             //  surfaces) regarded as blocked.
             void findCellZoneTopo
             (
                 const label backgroundZoneID,
                 const pointField& locationsInMesh,
                 const labelList& unnamedSurfaceRegion,
-                const labelList& namedSurfaceIndex,
+                const labelList& namedSurfaceRegion,
                 const labelList& surfaceToCellZone,
                 labelList& cellToZone
             ) const;
@@ -800,17 +801,17 @@ private:
                 const label nErodeCellZones,
                 const label backgroundZoneID,
                 const labelList& unnamedSurfaceRegion,
-                const labelList& namedSurfaceIndex,
+                const labelList& namedSurfaceRegion,
                 labelList& cellToZone
             ) const;
 
-            //- Make namedSurfaceIndex consistent with cellToZone
+            //- Make namedSurfaceRegion consistent with cellToZone
             //  - clear out any blocked faces inbetween same cell zone.
             void makeConsistentFaceIndex
             (
                 const labelList& zoneToNamedSurface,
                 const labelList& cellToZone,
-                labelList& namedSurfaceIndex
+                labelList& namedSurfaceRegion
             ) const;
 
             //- Calculate cellZone allocation
@@ -825,7 +826,7 @@ private:
                 labelList& cellToZone,
                 labelList& unnamedRegion1,
                 labelList& unnamedRegion2,
-                labelList& namedSurfaceIndex,
+                labelList& namedSurfaceRegion,
                 bitSet& posOrientation
             ) const;
 

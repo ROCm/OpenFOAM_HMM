@@ -585,35 +585,52 @@ void Foam::conformalVoronoiMesh::addZones
 
     labelList namedSurfaces(surfaceZonesInfo::getNamedSurfaces(surfZones));
 
+    // Tbd. No support yet for multi-faceZones on outside of cellZone
+
     forAll(namedSurfaces, i)
     {
         label surfI = namedSurfaces[i];
+        const wordList& fzNames = surfZones[surfI].faceZoneNames();
 
         Info<< incrIndent << indent << "Surface : "
             << geometryToConformTo().geometry().names()[surfI] << nl
             << indent << "    faceZone : "
-            << surfZones[surfI].faceZoneName() << nl
+            << (fzNames.size() ? fzNames[0] : "") << nl
             << indent << "    cellZone : "
             << surfZones[surfI].cellZoneName()
             << decrIndent << endl;
     }
 
     // Add zones to mesh
-    labelList surfaceToFaceZone =
-        surfaceZonesInfo::addFaceZonesToMesh
+    labelList surfaceToFaceZone(surfZones.size(), -1);
+    {
+        const labelListList surfaceToFaceZones
         (
-            surfZones,
-            namedSurfaces,
-            mesh
+            surfaceZonesInfo::addFaceZonesToMesh
+            (
+                surfZones,
+                namedSurfaces,
+                mesh
+            )
         );
+        forAll(surfaceToFaceZones, surfi)
+        {
+            if (surfaceToFaceZones[surfi].size())
+            {
+                surfaceToFaceZone[surfi] = surfaceToFaceZones[surfi][0];
+            }
+        }
+    }
 
-    labelList surfaceToCellZone =
+    const labelList surfaceToCellZone
+    (
         surfaceZonesInfo::addCellZonesToMesh
         (
             surfZones,
             namedSurfaces,
             mesh
-        );
+        )
+    );
 
     // Topochange container
     polyTopoChange meshMod(mesh);

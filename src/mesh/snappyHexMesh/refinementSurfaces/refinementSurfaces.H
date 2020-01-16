@@ -77,8 +77,11 @@ class refinementSurfaces
         //- List of surface zone (face and cell zone) information
         PtrList<surfaceZonesInfo> surfZones_;
 
-        //- From local region number to global region number
+        //- From surface to starting global region
         labelList regionOffset_;
+
+        //- From global region number to surface
+        labelList regionToSurface_;
 
         //- From global region number to refinement level
         labelList minLevel_;
@@ -120,6 +123,13 @@ class refinementSurfaces
             const List<pointIndexHit>& intersectionInfo,
             const labelList& surfaceLevel
         ) const;
+
+        //- Calculate global region to surface
+        static labelList calcSurfaceIndex
+        (
+            const searchableSurfaces& allGeometry,
+            const labelList& surfaces
+        );
 
         //- No copy construct
         refinementSurfaces(const refinementSurfaces&) = delete;
@@ -183,7 +193,7 @@ public:
                 return surfZones_;
             }
 
-            //- From local region number to global region number
+            //- From surface to starting global region
             const labelList& regionOffset() const
             {
                 return regionOffset_;
@@ -251,6 +261,9 @@ public:
             {
                 return regionOffset_[surfI]+regionI;
             }
+
+            //- From global region to surface + region
+            labelPair whichSurface(const label globalRegionI) const;
 
             //- Min level for surface and region on surface
             label minLevel(const label surfI, const label regionI) const

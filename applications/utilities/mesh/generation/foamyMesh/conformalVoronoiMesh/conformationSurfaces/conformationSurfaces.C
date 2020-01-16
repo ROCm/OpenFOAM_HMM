@@ -355,7 +355,16 @@ Foam::conformationSurfaces::conformationSurfaces
             // Surface zones
             if (dict.found("faceZone"))
             {
-                surfZones_.set(surfI, new surfaceZonesInfo(surface, dict));
+                surfZones_.set
+                (
+                    surfI,
+                    new surfaceZonesInfo
+                    (
+                        surface,
+                        dict,
+                        allGeometry_.regionNames()[surfaces_[surfI]]
+                    )
+                );
             }
 
             allGeometryToSurfaces_[surfaces_[surfI]] = surfI;
