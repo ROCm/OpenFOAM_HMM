@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -368,7 +368,7 @@ void Foam::UnsortedMeshedSurface<Face>::setZones
     {
         zoneToc_[zonei] = surfZoneIdentifier
         (
-            "zone" + ::Foam::name(zonei),
+            surfZoneIdentifier::defaultName(zonei),
             zonei
         );
 
@@ -496,7 +496,7 @@ Foam::surfZoneList Foam::UnsortedMeshedSurface<Face>::sortedZones
             zoneNames.lookup
             (
                 origId,
-                "zone" + ::Foam::name(zonei)  // default name
+                surfZoneIdentifier::defaultName(zonei)
             );
 
         zoneLst[zonei] = surfZone

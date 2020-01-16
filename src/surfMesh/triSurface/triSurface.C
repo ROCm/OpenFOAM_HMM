@@ -358,7 +358,7 @@ Foam::triSurface::calcPatches(labelList& faceMap) const
         }
         else
         {
-            newPatch.name() = word("patch") + Foam::name(newPatchi);
+            newPatch.name() = surfacePatch::defaultName(newPatchi);
         }
 
         if

@@ -680,11 +680,11 @@ void Foam::boundaryMesh::readTriSurface(const fileName& fName)
                 patchi,
                 new boundaryPatch
                 (
-                    "patch" + name(patchi),
+                    geometricSurfacePatch::defaultName(patchi),
                     patchi,
                     0,
                     0,
-                    "empty"
+                    geometricSurfacePatch::emptyType
                 )
             );
         }

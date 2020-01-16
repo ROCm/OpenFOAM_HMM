@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -307,7 +307,7 @@ bool Foam::discreteSurface::update(const meshSearch& meshSearcher)
                 patchi,
                 (
                     patches[patchi].name().empty()
-                  ? word::printf("patch%d", patchi)
+                  ? geometricSurfacePatch::defaultName(patchi)
                   : patches[patchi].name()
                 )
             );
@@ -328,10 +328,10 @@ bool Foam::discreteSurface::update(const meshSearch& meshSearcher)
                 const triSurface::FaceType& f = s[facei];
                 const label regionid = f.region();
 
-                Map<label>::iterator fnd = zoneSizes.find(regionid);
-                if (fnd != zoneSizes.end())
+                auto fnd = zoneSizes.find(regionid);
+                if (fnd.found())
                 {
-                    fnd()++;
+                    ++(*fnd);
                 }
                 else
                 {
@@ -340,7 +340,7 @@ bool Foam::discreteSurface::update(const meshSearch& meshSearcher)
                     zoneNames.set
                     (
                         regionid,
-                        word::printf("patch%d", regionid)
+                        geometricSurfacePatch::defaultName(regionid)
                     );
                 }
 
@@ -380,15 +380,10 @@ bool Foam::discreteSurface::update(const meshSearch& meshSearcher)
         // No negative regionids, so Map<label> sorts properly
         const label regionid = iter.key();
 
-        word name;
-        Map<word>::const_iterator fnd = zoneNames.find(regionid);
-        if (fnd != zoneNames.end())
-        {
-            name = fnd();
-        }
+        word name(zoneNames.lookup(regionid, word::null));
         if (name.empty())
         {
-            name = word::printf("patch%d", regionid);
+            name = geometricSurfacePatch::defaultName(regionid);
         }
 
         zoneLst[zoneI] = surfZone

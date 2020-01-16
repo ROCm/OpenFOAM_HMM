@@ -71,6 +71,20 @@ public:
         static constexpr const char* const emptyType = "empty";
 
 
+    // Static Member Functions
+
+        //- Default patch name: "patch" or "patchN"
+        static word defaultName(const label n = -1)
+        {
+            return
+            (
+                n < 0
+              ? word("patch", false)
+              : word("patch" + std::to_string(n), false)
+            );
+        }
+
+
     // Public Classes
 
         //- Helper to convert identifier types as an operation

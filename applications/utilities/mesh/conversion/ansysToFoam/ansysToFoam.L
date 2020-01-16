@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -521,7 +521,7 @@ int main(int argc, char *argv[])
         }
 
         boundary[patchi] = patchFaces;
-        patchNames[patchi] = "patch" + Foam::name(patchi + 1);
+        patchNames[patchi] = polyPatch::defaultName(patchi + 1);
     }
 
 

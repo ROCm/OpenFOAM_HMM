@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -313,7 +313,7 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
                 patchi,
                 (
                     patches[patchi].name().empty()
-                  ? word::printf("patch%d", patchi)
+                  ? geometricSurfacePatch::defaultName(patchi)
                   : patches[patchi].name()
                 )
             );
@@ -343,7 +343,11 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
                 {
                     // This shouldn't happen
                     zoneSizes.insert(regionid, 1);
-                    zoneNames.set(regionid, word::printf("patch%d", regionid));
+                    zoneNames.set
+                    (
+                        regionid,
+                        geometricSurfacePatch::defaultName(regionid)
+                    );
                 }
 
                 // Store new faces compact
@@ -388,7 +392,7 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
         }
         if (name.empty())
         {
-            name = word::printf("patch%d", regionid);
+            name = geometricSurfacePatch::defaultName(regionid);
         }
 
         zoneLst[zoneI] = surfZone

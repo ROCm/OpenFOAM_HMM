@@ -58,7 +58,7 @@ Info<< "Creating patch dictionaries" << endl;
 wordList patchNames(boundary.size());
 forAll(patchNames, patchi)
 {
-    patchNames[patchi] = "patch" + Foam::name(patchi);
+    patchNames[patchi] = polyPatch::defaultName(patchi);
 }
 
 PtrList<dictionary> boundaryDicts(boundary.size());
@@ -69,11 +69,11 @@ forAll(boundaryDicts, patchi)
     word nbrPatchName;
     if (patchi % 2 == 0)
     {
-        nbrPatchName = "patch" + Foam::name(patchi + 1);
+        nbrPatchName = polyPatch::defaultName(patchi + 1);
     }
     else
     {
-        nbrPatchName = "patch" + Foam::name(patchi - 1);
+        nbrPatchName = polyPatch::defaultName(patchi - 1);
     }
 
     patchDict.add("type", cyclicPolyPatch::typeName);

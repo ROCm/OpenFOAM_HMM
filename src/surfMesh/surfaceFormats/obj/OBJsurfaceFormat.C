@@ -125,7 +125,7 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
             {
                 if (zoneId != *iterGroup)
                 {
-                    sorted = false; // group appeared out of order
+                    sorted = false; // Group appeared out of order
                 }
                 zoneId = *iterGroup;
             }

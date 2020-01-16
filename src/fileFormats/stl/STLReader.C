@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -128,15 +128,14 @@ bool Foam::fileFormats::STLReader::readBINARY
         // interpret STL attribute as a zone
         const label origId = stlTri.attrib();
 
-        Map<label>::const_iterator fnd = lookup.find(origId);
-        if (fnd != lookup.end())
+        auto fnd = lookup.cfind(origId);
+        if (fnd.found())
         {
-            if (zoneI != fnd())
+            if (zoneI != *fnd)
             {
-                // group appeared out of order
-                sorted_ = false;
+                sorted_ = false; // Group appeared out of order
             }
-            zoneI = fnd();
+            zoneI = *fnd;
         }
         else
         {

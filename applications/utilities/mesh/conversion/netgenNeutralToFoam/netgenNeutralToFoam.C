@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -263,7 +264,7 @@ int main(int argc, char *argv[])
 
     forAll(patchNames, patchi)
     {
-        patchNames[patchi] = word("patch") + name(patchi);
+        patchNames[patchi] = polyPatch::defaultName(patchi);
     }
 
     wordList patchTypes(nPatches, polyPatch::typeName);

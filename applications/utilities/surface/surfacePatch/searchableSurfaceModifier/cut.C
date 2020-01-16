@@ -78,7 +78,7 @@ void Foam::searchableSurfaceModifiers::cut::triangulate
     {
         patches[patchi] = geometricSurfacePatch
         (
-            "patch" + Foam::name(patchi),
+            geometricSurfacePatch::defaultName(patchi),
             patchi
         );
     }

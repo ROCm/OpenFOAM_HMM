@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -102,7 +102,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
 
     for (label zoneI = 0; zoneI < nZones; ++zoneI)
     {
-        names[zoneI] = word("zone") + Foam::name(zoneI);
+        names[zoneI] = surfZone::defaultName(zoneI);
 
         args = cueToOrDie(is, "OBJECT", "while reading " + names[zoneI]);
 

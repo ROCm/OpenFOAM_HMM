@@ -70,6 +70,20 @@ class patchIdentifier
 
 public:
 
+    // Static Member Functions
+
+        //- Default patch name: "patch" or "patchN"
+        static word defaultName(const label n = -1)
+        {
+            return
+            (
+                n < 0
+              ? word("patch", false)
+              : word("patch" + std::to_string(n), false)
+            );
+        }
+
+
     // Generated Methods
 
         //- Copy construct

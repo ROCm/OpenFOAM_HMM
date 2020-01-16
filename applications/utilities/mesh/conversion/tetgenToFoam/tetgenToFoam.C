@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -483,8 +483,8 @@ int main(int argc, char *argv[])
 
         forAllConstIters(regionToPatch, iter)
         {
-            Info<< "    region:" << iter.key() << '\t' << "patch:"
-                << iter() << endl;
+            Info<< "    region:" << iter.key()
+                << '\t' << "patch:" << iter.val() << nl;
         }
         Info<< endl;
 
@@ -495,7 +495,7 @@ int main(int argc, char *argv[])
 
         forAll(patchNames, patchi)
         {
-            patchNames[patchi] = "patch" + Foam::name(patchi);
+            patchNames[patchi] = polyPatch::defaultName(patchi);
         }
 
         wordList patchTypes(nPatches, polyPatch::typeName);

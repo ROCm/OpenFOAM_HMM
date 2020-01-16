@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,11 +73,11 @@ int main(int argc, char *argv[])
     {
         const geometricSurfacePatch& pp = patches[patchi];
 
-        word patchName = pp.name();
+        word patchName(pp.name());
 
         if (patchName.empty())
         {
-            patchName = "patch" + Foam::name(patchi);
+            patchName = geometricSurfacePatch::defaultName(patchi);
         }
 
         fileName outFile(surfBase + '_' + patchName + '.' + extension);

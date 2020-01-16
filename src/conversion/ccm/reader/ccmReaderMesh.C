@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -2419,7 +2419,7 @@ void Foam::ccm::reader::addPatches
     // provide some fallback values
     forAll(newPatches, patchI)
     {
-        const word fallbackName("patch" + Foam::name(patchI));
+        const word fallbackName(polyPatch::defaultName(patchI));
         word patchName;
         word patchType;
 

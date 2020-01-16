@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -542,7 +542,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::voxelMeshSearch::makeMesh
     wordList patchNames(boundary.size());
     forAll(patchNames, patchi)
     {
-        patchNames[patchi] = "patch" + Foam::name(patchi);
+        patchNames[patchi] = polyPatch::defaultName(patchi);
     }
 
     PtrList<dictionary> boundaryDicts(boundary.size());

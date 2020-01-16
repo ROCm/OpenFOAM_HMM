@@ -78,6 +78,20 @@ public:
         static constexpr const char* const emptyType = "empty";
 
 
+    // Static Member Functions
+
+        //- Default zone name: "zone" or "zoneN"
+        static word defaultName(const label n = -1)
+        {
+            return
+            (
+                n < 0
+              ? word("zone", false)
+              : word("zone" + std::to_string(n), false)
+            );
+        }
+
+
     // Generated Methods
 
         //- Copy construct

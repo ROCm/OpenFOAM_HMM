@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -228,12 +228,12 @@ bool Foam::fileFormats::GTSsurfaceFormat<Face>::read
 
 
     List<surfZoneIdentifier> newZones(maxZone+1);
-    forAll(newZones, zoneI)
+    forAll(newZones, zonei)
     {
-        newZones[zoneI] = surfZoneIdentifier
+        newZones[zonei] = surfZoneIdentifier
         (
-            "zone" + ::Foam::name(zoneI),
-            zoneI
+            surfZoneIdentifier::defaultName(zonei),
+            zonei
         );
     }
 

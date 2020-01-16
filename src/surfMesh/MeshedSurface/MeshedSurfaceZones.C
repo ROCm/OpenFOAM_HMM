@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -175,7 +175,7 @@ void Foam::MeshedSurface<Face>::addZones
         {
             zones[nZone] = surfZone
             (
-                word("zone") + ::Foam::name(nZone),
+                surfZone::defaultName(nZone),
                 sizes[zoneI],
                 start,
                 nZone
