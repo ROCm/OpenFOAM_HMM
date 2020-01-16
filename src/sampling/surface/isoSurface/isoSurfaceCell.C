@@ -340,7 +340,7 @@ Foam::pointIndexHit Foam::isoSurfaceCell::collapseSurface
         triSurface surf
         (
             localTris,
-            geometricSurfacePatchList(0),
+            geometricSurfacePatchList(),
             localPoints,
             true
         );
@@ -1053,7 +1053,7 @@ Foam::triSurface Foam::isoSurfaceCell::stitchTriPoints
         }
     }
 
-    return triSurface(tris, geometricSurfacePatchList(0), newPoints, true);
+    return triSurface(tris, geometricSurfacePatchList(), newPoints, true);
 }
 
 

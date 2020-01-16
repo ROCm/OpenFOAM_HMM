@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,9 +29,27 @@ License
 #include "surfZoneIdentifier.H"
 #include "dictionary.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-const Foam::word Foam::surfZoneIdentifier::emptyType = "empty";
+namespace Foam
+{
+
+static inline word readOptionalWord(Istream& is)
+{
+    token tok(is);
+
+    if (tok.isWord())
+    {
+        return tok.wordToken();
+    }
+    else
+    {
+        // Allow empty words
+        return word::validate(tok.stringToken());
+    }
+}
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -47,6 +65,18 @@ Foam::surfZoneIdentifier::surfZoneIdentifier()
 Foam::surfZoneIdentifier::surfZoneIdentifier(const label index)
 :
     name_(),
+    index_(index),
+    geometricType_()
+{}
+
+
+Foam::surfZoneIdentifier::surfZoneIdentifier
+(
+    const word& name,
+    const label index
+)
+:
+    name_(name),
     index_(index),
     geometricType_()
 {}
@@ -105,7 +135,11 @@ void Foam::surfZoneIdentifier::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
-bool Foam::operator==(const surfZoneIdentifier& a, const surfZoneIdentifier& b)
+bool Foam::operator==
+(
+    const surfZoneIdentifier& a,
+    const surfZoneIdentifier& b
+)
 {
     return
     (
@@ -116,7 +150,11 @@ bool Foam::operator==(const surfZoneIdentifier& a, const surfZoneIdentifier& b)
 }
 
 
-bool Foam::operator!=(const surfZoneIdentifier& a, const surfZoneIdentifier& b)
+bool Foam::operator!=
+(
+    const surfZoneIdentifier& a,
+    const surfZoneIdentifier& b
+)
 {
     return !(a == b);
 }
@@ -126,15 +164,24 @@ bool Foam::operator!=(const surfZoneIdentifier& a, const surfZoneIdentifier& b)
 
 Foam::Istream& Foam::operator>>(Istream& is, surfZoneIdentifier& obj)
 {
-    is >> obj.name() >> obj.geometricType();
+    obj.name() = readOptionalWord(is);
+    obj.geometricType() = readOptionalWord(is);
+
     return is;
 }
 
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const surfZoneIdentifier& obj)
 {
-    // Newlines to separate, since that is what triSurface currently expects
-    os  << nl << obj.name() << nl << obj.geometricType();
+    // Force unconditional line-breaks on list output.
+    // We otherwise risk extremely unreadable entries
+    os << nl;
+
+    // Empty words are double-quoted so they are treated as 'string'
+
+    os.writeQuoted(obj.name(), obj.name().empty()) << token::SPACE;
+    os.writeQuoted(obj.geometricType(), obj.geometricType().empty());
+
     os.check(FUNCTION_NAME);
     return os;
 }

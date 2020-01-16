@@ -27,6 +27,7 @@ Typedef
     Foam::geometricSurfacePatchList
 
 Description
+    A List of geometricSurfacePatch.
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,7 +44,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-typedef List<geometricSurfacePatch>  geometricSurfacePatchList;
+typedef List<geometricSurfacePatch> geometricSurfacePatchList;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

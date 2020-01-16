@@ -27,6 +27,7 @@ Typedef
     Foam::surfZoneIdentifierList
 
 Description
+    A List of surfZoneIdentifier.
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,7 +44,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-typedef List<surfZoneIdentifier>  surfZoneIdentifierList;
+typedef List<surfZoneIdentifier> surfZoneIdentifierList;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

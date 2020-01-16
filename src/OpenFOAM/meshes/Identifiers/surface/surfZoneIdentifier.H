@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,13 +43,14 @@ SourceFiles
 
 #include "word.H"
 #include "label.H"
+#include "stdFoam.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class dictionary;
 
 /*---------------------------------------------------------------------------*\
@@ -58,7 +59,7 @@ class dictionary;
 
 class surfZoneIdentifier
 {
-    // Private data
+    // Private Data
 
         //- Name of zone
         word name_;
@@ -69,29 +70,40 @@ class surfZoneIdentifier
         //- Type name of zone
         mutable word geometricType_;
 
-
 public:
 
-    // Public data
+    // Public Data
 
         //- The name for an 'empty' type
-        static const word emptyType;
+        static constexpr const char* const emptyType = "empty";
+
+
+    // Generated Methods
+
+        //- Copy construct
+        surfZoneIdentifier(const surfZoneIdentifier&) = default;
+
+        //- Copy assignment
+        surfZoneIdentifier& operator=(const surfZoneIdentifier&) = default;
 
 
     // Constructors
 
-        //- Construct null, with index zero
+        //- Default construct, with index zero
         surfZoneIdentifier();
 
         //- Construct null with specified index
         explicit surfZoneIdentifier(const label index);
+
+        //- Construct from mandatory components
+        surfZoneIdentifier(const word& name, const label index);
 
         //- Construct from components
         surfZoneIdentifier
         (
             const word& name,
             const label index,
-            const word& geometricType = word::null
+            const word& geometricType
         );
 
         //- Construct from dictionary
@@ -102,7 +114,7 @@ public:
             const label index
         );
 
-        //- Copy construct from another zone identifier, resetting the index
+        //- Copy construct, resetting the index
         surfZoneIdentifier
         (
             const surfZoneIdentifier& p,
@@ -110,69 +122,64 @@ public:
         );
 
 
-    //- Destructor
-    virtual ~surfZoneIdentifier() = default;
-
-
     // Member Functions
 
-        //- Return name
+        //- The patch/zone name
         const word& name() const
         {
             return name_;
         }
 
-        //- Return name for modification
+        //- Modifiable patch/zone name
         word& name()
         {
             return name_;
         }
 
-        //- Return the geometric type of the patch/zone
+        //- The geometric type of the patch/zone
         const word& geometricType() const
         {
             return geometricType_;
         }
 
-        //- Return the geometric type of the patch/zone for modification
+        //- Modifiable geometric type of the patch/zone
         word& geometricType()
         {
             return geometricType_;
         }
 
-        //- Return the index of this patch/zone in the surface mesh
+        //- The index of this patch/zone in the surface mesh
         label index() const
         {
             return index_;
         }
 
-        //- Return the index of this patch/zone for modification
+        //- Modifiable index of this patch/zone in the surface mesh
         label& index()
         {
             return index_;
         }
 
-
-        //- Write identifier as a dictionary
+        //- Write (geometricType) dictionary entry
+        //- (without surrounding braces)
         void write(Ostream& os) const;
 };
 
 
 // Global Operators
 
-// Ostream Operator
-
-//- Read name/type
-Istream& operator>>(Istream& is, surfZoneIdentifier& obj);
-
-//- Write name/type
-Ostream& operator<<(Ostream& os, const surfZoneIdentifier& obj);
-
 //- Compare zone indentifiers for equality
 bool operator==(const surfZoneIdentifier& a, const surfZoneIdentifier& b);
 
 //- Compare zone indentifiers for inequality
 bool operator!=(const surfZoneIdentifier& a, const surfZoneIdentifier& b);
+
+
+//- Read name, geometricType
+Istream& operator>>(Istream& is, surfZoneIdentifier& obj);
+
+//- Write name, geometricType. Entries are quoted to support empty words.
+Ostream& operator<<(Ostream& os, const surfZoneIdentifier& obj);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

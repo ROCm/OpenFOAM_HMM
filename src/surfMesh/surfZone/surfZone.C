@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,15 +28,6 @@ License
 
 #include "surfZone.H"
 #include "dictionary.H"
-#include "word.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    defineTypeNameAndDebug(surfZone, 0);
-}
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -71,19 +62,6 @@ Foam::surfZone::surfZone
 {}
 
 
-Foam::surfZone::surfZone(Istream& is, const label index)
-:
-    surfZoneIdentifier(),
-    size_(0),
-    start_(0)
-{
-    word name(is);
-    dictionary dict(is);
-
-    operator=(surfZone(name, dict, index));
-}
-
-
 Foam::surfZone::surfZone
 (
     const word& name,
@@ -97,31 +75,17 @@ Foam::surfZone::surfZone
 {}
 
 
-Foam::surfZone::surfZone(const surfZone& zone)
-:
-    surfZoneIdentifier(zone, zone.index()),
-    size_(zone.size()),
-    start_(zone.start())
-{}
-
-
 Foam::surfZone::surfZone(const surfZone& zone, const label index)
 :
-    surfZoneIdentifier(zone, index),
-    size_(zone.size()),
-    start_(zone.start())
-{}
+    surfZone(zone)
+{
+    surfZoneIdentifier::index() = index;
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::surfZone::write(Ostream& os) const
-{
-    writeDict(os);
-}
-
-
-void Foam::surfZone::writeDict(Ostream& os) const
 {
     os.beginBlock(name());
 
@@ -133,39 +97,44 @@ void Foam::surfZone::writeDict(Ostream& os) const
 }
 
 
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
-bool Foam::surfZone::operator!=(const surfZone& rhs) const
-{
-    return !(*this == rhs);
-}
-
-
-bool Foam::surfZone::operator==(const surfZone& rhs) const
+bool Foam::operator==(const surfZone& a, const surfZone& b)
 {
     return
     (
-        size()  == rhs.size()
-     && start() == rhs.start()
-     && geometricType() == rhs.geometricType()
+        a.size()  == b.size()
+     && a.start() == b.start()
+     && a.geometricType() == b.geometricType()
     );
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
-
-Foam::Istream& Foam::operator>>(Istream& is, surfZone& zone)
+bool Foam::operator!=(const surfZone& a, const surfZone& b)
 {
-    zone = surfZone(is, 0);
+    return !(a == b);
+}
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+Foam::Istream& Foam::operator>>(Istream& is, surfZone& obj)
+{
+    const word name(is);
+    const dictionary dict(is);
+
+    // Could also leave index untouched?
+    obj = surfZone(name, dict, 0);
 
     is.check(FUNCTION_NAME);
     return is;
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const surfZone& zone)
+Foam::Ostream& Foam::operator<<(Ostream& os, const surfZone& obj)
 {
-    zone.write(os);
+    obj.write(os);
+
     os.check(FUNCTION_NAME);
     return os;
 }

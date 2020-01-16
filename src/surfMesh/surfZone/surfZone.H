@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,9 +40,6 @@ SourceFiles
 #ifndef surfZone_H
 #define surfZone_H
 
-#include "word.H"
-#include "label.H"
-#include "className.H"
 #include "surfZoneIdentifier.H"
 #include "labelRange.H"
 #include "autoPtr.H"
@@ -53,12 +50,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-class surfZone;
-
-Istream& operator>>(Istream&, surfZone&);
-Ostream& operator<<(Ostream&, const surfZone&);
-
 /*---------------------------------------------------------------------------*\
                           Class surfZone Declaration
 \*---------------------------------------------------------------------------*/
@@ -67,7 +58,7 @@ class surfZone
 :
     public surfZoneIdentifier
 {
-    // Private data
+    // Private Data
 
         //- Size of this group in the face list
         label size_;
@@ -78,13 +69,18 @@ class surfZone
 
 public:
 
-    //- Runtime type information
-    ClassName("surfZone");
+    // Generated Methods
+
+        //- Copy construct
+        surfZone(const surfZone&) = default;
+
+        //- Copy assignment
+        surfZone& operator=(const surfZone&) = default;
 
 
     // Constructors
 
-        //- Construct null with zero start, size, index
+        //- Default construct, with zero start, size, index
         surfZone();
 
         //- Construct with name, size. With zero start, index
@@ -100,9 +96,6 @@ public:
             const word& geometricType = word::null
         );
 
-        //- Construct from Istream
-        surfZone(Istream& is, const label index);
-
         //- Construct from dictionary
         surfZone
         (
@@ -111,10 +104,7 @@ public:
             const label index
         );
 
-        //- Construct as copy
-        surfZone(const surfZone&);
-
-        //- Construct from another zone, resetting the index
+        //- Copy construct, resetting the index
         surfZone(const surfZone&, const label index);
 
         //- Return clone
@@ -126,8 +116,8 @@ public:
 
         static autoPtr<surfZone> New(Istream& is)
         {
-            word name(is);
-            dictionary dict(is);
+            const word name(is);
+            const dictionary dict(is);
 
             return autoPtr<surfZone>::New(name, dict, 0);
         }
@@ -135,56 +125,71 @@ public:
 
     // Member Functions
 
-        //- Return start label of this zone in the face list
+        //- The start label of this zone in the face list
         label start() const
         {
             return start_;
         }
 
-        //- Return start label of this zone in the face list
+        //- Modifiable start label of this zone in the face list
         label& start()
         {
             return start_;
         }
 
-        //- Return size of this zone in the face list
+        //- The size of this zone in the face list
         label size() const
         {
             return size_;
         }
 
-        //- Return size of this zone in the face list
+        //- Modifiable size of this zone in the face list
         label& size()
         {
             return size_;
         }
 
-        //- Return start/size range of this zone
+        //- The start/size range of this zone
         labelRange range() const
         {
             return labelRange(start_, size_);
         }
 
-        //- Write
-        void write(Ostream&) const;
-
-        //- Write dictionary
-        void writeDict(Ostream&) const;
+        //- Write dictionary, includes surrounding braces
+        //  \warning Prior to 2020-01 was identical to operator<< output
+        void write(Ostream& os) const;
 
 
-    // Member Operators
+    // Housekeeping
 
-        bool operator!=(const surfZone&) const;
+        //- Removed(2020-01) Construct from Istream
+        //  \deprecated(2020-01) - unused, inconsistent
+        surfZone(Istream& is, const label index) = delete;
 
-        //- compare.
-        bool operator==(const surfZone&) const;
-
-
-    // IOstream Operators
-
-        friend Istream& operator>>(Istream&, surfZone&);
-        friend Ostream& operator<<(Ostream&, const surfZone&);
+        //- Deprecated(2020-01) Write dictionary
+        //  \deprecated(2020-01) - Write dictionary
+        void FOAM_DEPRECATED_FOR(2020-01, "write() or operator<<")
+        writeDict(Ostream& os) const
+        {
+            write(os);
+        }
 };
+
+
+// Global Operators
+
+//- Compare surfZones for equality
+bool operator==(const surfZone& a, const surfZone& b);
+
+//- Compare surfZones for inequality
+bool operator!=(const surfZone& a, const surfZone& b);
+
+
+//- Read as dictionary
+Istream& operator>>(Istream& is, surfZone& obj);
+
+//- Write as dictionary
+Ostream& operator<<(Ostream&, const surfZone& obj);
 
 
 // Global Functions

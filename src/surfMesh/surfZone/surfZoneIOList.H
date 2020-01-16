@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,20 +40,12 @@ SourceFiles
 
 #include "surfZoneList.H"
 #include "regIOobject.H"
-#include "faceList.H"
-#include "className.H"
+#include "typeInfo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// Forward declarations
-
-class surfZoneIOList;
-
-Ostream& operator<<(Ostream&, const surfZoneIOList&);
-
 
 /*---------------------------------------------------------------------------*\
                       Class surfZoneIOList Declaration
@@ -67,7 +59,7 @@ class surfZoneIOList
 public:
 
     //- Runtime type information
-    TypeName("surfZoneList");
+    TypeNameNoDebug("surfZoneList");
 
 
     // Constructors
@@ -88,7 +80,7 @@ public:
 
     // Member Functions
 
-        //- The writeData function for regIOobject
+        //- The writeData function - required by regIOobject
         bool writeData(Ostream& os) const;
 
 
@@ -99,12 +91,13 @@ public:
 
         //- Copy or move assignment of entries
         using surfZoneList::operator=;
-
-
-    // IOstream Operators
-
-        friend Ostream& operator<<(Ostream& os, const surfZoneIOList& list);
 };
+
+
+// Global Operators
+
+//- Write surfZone list using its writeData() method
+Ostream& operator<<(Ostream& os, const surfZoneIOList& zones);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

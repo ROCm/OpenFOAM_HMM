@@ -27,6 +27,7 @@ Typedef
     Foam::surfacePatchList
 
 Description
+    A List of surfacePatch.
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,7 +44,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-typedef List<surfacePatch>  surfacePatchList;
+typedef List<surfacePatch> surfacePatchList;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

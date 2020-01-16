@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,13 +74,12 @@ void Foam::searchableSurfaceModifiers::cut::triangulate
         }
     }
     geometricSurfacePatchList patches(fcs.size());
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        patches[patchI] = geometricSurfacePatch
+        patches[patchi] = geometricSurfacePatch
         (
-            "",
-            "patch" + Foam::name(patchI),
-            patchI
+            "patch" + Foam::name(patchi),
+            patchi
         );
     }
     cutSurf = triSurface(tris, patches, pts, true);
@@ -345,9 +345,9 @@ bool Foam::searchableSurfaceModifiers::cut::modify
                 newPatches.setSize(sz+1);
                 newPatches[sz] = geometricSurfacePatch
                 (
-                    newPatches[sz-1].geometricType(),
                     newPatches[sz-1].name() + "_inside",
-                    newPatches[sz-1].index()
+                    newPatches[sz-1].index(),
+                    newPatches[sz-1].geometricType()
                 );
 
                 Info<< "Moving " << nInside << " out of " << surf3.size()

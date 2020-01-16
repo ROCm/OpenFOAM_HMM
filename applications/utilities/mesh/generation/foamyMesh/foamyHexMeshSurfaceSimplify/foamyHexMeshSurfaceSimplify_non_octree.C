@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -262,9 +263,9 @@ int main(int argc, char *argv[])
             {
                 patches[nRegions] = geometricSurfacePatch
                 (
-                    "patch",
                     geometry[surfaces[i]].name() + "_" + regions[regionI],
-                    nRegions
+                    nRegions,
+                    "patch"
                 );
                 nRegions++;
             }

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,8 +28,9 @@ Class
     Foam::boundaryPatch
 
 Description
-    Like polyPatch but without reference to mesh. patchIdentifier::index
-    is not used. Used in boundaryMesh to hold data on patches.
+    Like polyPatch but without reference to mesh.
+    Used in boundaryMesh to hold data on patches.
+    The patchIdentifier::index is set, but not used.
 
 SourceFiles
     boundaryPatch.C
@@ -46,27 +48,24 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
-class boundaryPatch;
-
-Ostream& operator<<(Ostream&, const boundaryPatch&);
-
-
 /*---------------------------------------------------------------------------*\
-                           Class boundaryPatch Declaration
+                        Class boundaryPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class boundaryPatch
 :
     public patchIdentifier
 {
-    // Private data
+    // Private Data
 
         label size_;
+
         label start_;
 
 public:
+
+    // Generated Methods: copy construct, copy assignment
+
 
     // Constructors
 
@@ -88,18 +87,15 @@ public:
             const label index
         );
 
-        //- Construct as copy
-        boundaryPatch(const boundaryPatch&);
+        //- Copy construct, resetting the index
+        boundaryPatch(const boundaryPatch& p, const label index);
 
-        //- Construct as copy, resetting the index
-        boundaryPatch(const boundaryPatch&, const label index);
 
         //- Clone
-        autoPtr<boundaryPatch> clone() const;
-
-
-    //- Destructor
-    ~boundaryPatch();
+        autoPtr<boundaryPatch> clone() const
+        {
+            return autoPtr<boundaryPatch>::New(*this);
+        }
 
 
     // Member Functions
@@ -125,14 +121,15 @@ public:
         }
 
 
-        //- Write dictionary
-        virtual void write(Ostream&) const;
-
-
-    // Ostream Operator
-
-        friend Ostream& operator<<(Ostream&, const boundaryPatch&);
+        //- Write dictionary entries (without surrounding braces)
+        virtual void write(Ostream& os) const;
 };
+
+
+// Global Operators
+
+//- Write boundaryPatch as dictionary entries (without surrounding braces)
+Ostream& operator<<(Ostream&, const boundaryPatch& p);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

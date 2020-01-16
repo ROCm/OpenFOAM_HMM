@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,9 +28,26 @@ License
 
 #include "patchIdentifier.H"
 #include "dictionary.H"
-#include "ListOps.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::patchIdentifier::patchIdentifier()
+:
+    name_(),
+    index_(0)
+{}
+
+
+Foam::patchIdentifier::patchIdentifier
+(
+    const word& name,
+    const label index
+)
+:
+    name_(name),
+    index_(index)
+{}
+
 
 Foam::patchIdentifier::patchIdentifier
 (
@@ -53,8 +71,7 @@ Foam::patchIdentifier::patchIdentifier
     const label index
 )
 :
-    name_(name),
-    index_(index)
+    patchIdentifier(name, index)
 {
     dict.readIfPresent("physicalType", physicalType_);
     dict.readIfPresent("inGroups", inGroups_);
@@ -76,18 +93,13 @@ Foam::patchIdentifier::patchIdentifier
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::patchIdentifier::inGroup(const word& name) const
-{
-    return inGroups_.found(name);
-}
-
-
 void Foam::patchIdentifier::write(Ostream& os) const
 {
     if (physicalType_.size())
     {
         os.writeEntry("physicalType", physicalType_);
     }
+
     if (inGroups_.size())
     {
         os.writeKeyword("inGroups");
@@ -97,7 +109,7 @@ void Foam::patchIdentifier::write(Ostream& os) const
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const patchIdentifier& p)
 {

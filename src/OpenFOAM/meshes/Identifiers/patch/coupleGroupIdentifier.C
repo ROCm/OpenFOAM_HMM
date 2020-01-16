@@ -49,8 +49,7 @@ Foam::label Foam::coupleGroupIdentifier::findOtherPatchID
             << exit(FatalError);
     }
 
-    HashTable<labelList>::const_iterator fnd =
-        pbm.groupPatchIDs().find(name());
+    const auto fnd = pbm.groupPatchIDs().cfind(name());
 
     if (!fnd.found())
     {
@@ -130,18 +129,6 @@ Foam::label Foam::coupleGroupIdentifier::findOtherPatchID
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::coupleGroupIdentifier::coupleGroupIdentifier()
-:
-    name_()
-{}
-
-
-Foam::coupleGroupIdentifier::coupleGroupIdentifier(const word& patchGroupName)
-:
-    name_(patchGroupName)
-{}
-
 
 Foam::coupleGroupIdentifier::coupleGroupIdentifier(const dictionary& dict)
 :
@@ -232,7 +219,7 @@ void Foam::coupleGroupIdentifier::write(Ostream& os) const
 }
 
 
-// * * * * * * * * * * * * * * Friend Operators * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const coupleGroupIdentifier& p)
 {

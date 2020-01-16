@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ Class
     Foam::surfacePatch
 
 Description
-    'Patch' on surface as subset of triSurface.
+    A 'patch' on surface as subset of triSurface.
 
 SourceFiles
     surfacePatch.C
@@ -39,20 +39,14 @@ SourceFiles
 #define surfacePatch_H
 
 #include "geometricSurfacePatch.H"
-#include "className.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
-class surfacePatch;
+// Forward Declarations
 class surfZone;
-
-Ostream& operator<<(Ostream&, const surfacePatch&);
-
 
 /*---------------------------------------------------------------------------*\
                         Class surfacePatch Declaration
@@ -62,23 +56,29 @@ class surfacePatch
 :
     public geometricSurfacePatch
 {
-    // Private data
+    // Private Data
 
-        //- Size of this patch in the triSurface face list
+        //- Size of this patch in the face list
         label size_;
 
-        //- Start label of this patch in the triSurface face list
+        //- Start label of this patch in the face list
         label start_;
+
 
 public:
 
-    //- Runtime type information
-    ClassName("surfacePatch");
+    // Generated Methods
+
+        //- Copy construct
+        surfacePatch(const surfacePatch&) = default;
+
+        //- Copy assignment
+        surfacePatch& operator=(const surfacePatch&) = default;
 
 
     // Constructors
 
-        //- Construct null
+        //- Default construct, with zero start, size, index=-1
         surfacePatch();
 
         //- Construct null with specified index
@@ -87,15 +87,12 @@ public:
         //- Construct from components
         surfacePatch
         (
-            const word& geometricType,
             const word& name,
             const label size,
             const label start,
-            const label index
+            const label index,
+            const word& geometricType = word::null
         );
-
-        //- Construct from Istream
-        surfacePatch(Istream& is, const label index);
 
         //- Construct from dictionary
         surfacePatch
@@ -104,9 +101,6 @@ public:
             const dictionary& dict,
             const label index
         );
-
-        //- Construct as copy
-        surfacePatch(const surfacePatch&);
 
 
     // Member Functions
@@ -135,11 +129,9 @@ public:
             return size_;
         }
 
-        //- Write
-        void write(Ostream&) const;
-
-        //- Write dictionary
-        void writeDict(Ostream&) const;
+        //- Write dictionary, includes surrounding braces
+        //  \warning Prior to 2020-01 was identical to operator<< output
+        void write(Ostream& os) const;
 
 
     // Member Operators
@@ -148,17 +140,43 @@ public:
         explicit operator surfZone() const;
 
 
-        //- Compare.
-        bool operator!=(const surfacePatch&) const;
+    // Housekeeping
 
-        //- Compare.
-        bool operator==(const surfacePatch&) const;
+        //- Removed(2020-01) Construct from Istream
+        //  \deprecated(2020-01) - unused, inconsistent
+        surfacePatch(Istream& is, const label index) = delete;
 
+        //- Deprecated(2020-01) Construct from components
+        //  \deprecated(2020-01) - order inconsistent with other identifiers
+        surfacePatch
+        (
+            const word& geometricType,
+            const word& name,
+            const label size,
+            const label start,
+            const label index
+        ) FOAM_DEPRECATED(2020-01);
 
-    // IOstream Operators
-
-        friend Ostream& operator<<(Ostream&, const surfacePatch&);
+        //- Deprecated(2020-01) Ostream output
+        //  \deprecated(2020-01) - Ostream output
+        void FOAM_DEPRECATED_FOR(2020-01, "write() or operator<<")
+        writeDict(Ostream& os) const
+        {
+            write(os);
+        }
 };
+
+
+// Global Operators
+
+//- Compare patches for equality
+bool operator==(const surfacePatch& a, const surfacePatch& b);
+
+//- Compare patches for inequality
+bool operator!=(const surfacePatch& a, const surfacePatch& b);
+
+//- Write name, geometricType, size, start
+Ostream& operator<<(Ostream& os, const surfacePatch& obj);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

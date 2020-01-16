@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,28 +29,18 @@ License
 #include "surfacePatch.H"
 #include "surfZone.H"
 #include "dictionary.H"
-#include "word.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    defineTypeNameAndDebug(surfacePatch, 0);
-}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::surfacePatch::surfacePatch()
 :
-    geometricSurfacePatch(word::null, word::null, -1),
-    size_(0),
-    start_(0)
+    surfacePatch(-1)
 {}
 
 
 Foam::surfacePatch::surfacePatch(const label index)
 :
-    geometricSurfacePatch(word::null, word::null, index),
+    geometricSurfacePatch(word::null, index, word::null),
     size_(0),
     start_(0)
 {}
@@ -58,27 +48,17 @@ Foam::surfacePatch::surfacePatch(const label index)
 
 Foam::surfacePatch::surfacePatch
 (
-    const word& geometricType,
     const word& name,
     const label size,
     const label start,
-    const label index
+    const label index,
+    const word& geometricType
 )
 :
-    geometricSurfacePatch(geometricType, name, index),
+    geometricSurfacePatch(name, index, geometricType),
     size_(size),
     start_(start)
 {}
-
-
-Foam::surfacePatch::surfacePatch(Istream& is, const label index)
-:
-    geometricSurfacePatch(is, index),
-    size_(0),
-    start_(0)
-{
-    is >> size_ >> start_;
-}
 
 
 Foam::surfacePatch::surfacePatch
@@ -94,32 +74,18 @@ Foam::surfacePatch::surfacePatch
 {}
 
 
-Foam::surfacePatch::surfacePatch(const surfacePatch& sp)
-:
-    geometricSurfacePatch(sp),
-    size_(sp.size()),
-    start_(sp.start())
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::surfacePatch::write(Ostream& os) const
 {
-    os  << nl
-        << static_cast<const geometricSurfacePatch&>(*this) << endl
-        << size() << tab << start();
-}
+    os.beginBlock(name());
 
-void Foam::surfacePatch::writeDict(Ostream& os) const
-{
-    os  << nl << name() << nl << token::BEGIN_BLOCK << nl;
+    geometricSurfacePatch::write(os);
 
-    geometricSurfacePatch::writeDict(os);
+    os.writeEntry("nFaces", size());
+    os.writeEntry("startFace", start());
 
-    os  << "    nFaces " << size() << ';' << nl
-        << "    startFace " << start() << ';' << nl
-        << token::END_BLOCK << endl;
+    os.endBlock();
 }
 
 
@@ -138,31 +104,59 @@ Foam::surfacePatch::operator Foam::surfZone() const
 }
 
 
-bool Foam::surfacePatch::operator!=(const surfacePatch& p) const
-{
-    return !(*this == p);
-}
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
-
-bool Foam::surfacePatch::operator==(const surfacePatch& p) const
+bool Foam::operator==
+(
+    const surfacePatch& a,
+    const surfacePatch& b
+)
 {
     return
     (
-        (geometricType() == p.geometricType())
-     && (size() == p.size())
-     && (start() == p.start())
+        (a.geometricType() == b.geometricType())
+     && (a.size() == b.size())
+     && (a.start() == b.start())
     );
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
-
-Foam::Ostream& Foam::operator<<(Ostream& os, const surfacePatch& p)
+bool Foam::operator!=
+(
+    const surfacePatch& a,
+    const surfacePatch& b
+)
 {
-    p.write(os);
+    return !(a == b);
+}
+
+
+// * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * * //
+
+Foam::Ostream& Foam::operator<<(Ostream& os, const surfacePatch& obj)
+{
+    os  << static_cast<const geometricSurfacePatch&>(obj) << token::SPACE
+        << obj.size() << token::SPACE
+        << obj.start();
+
     os.check(FUNCTION_NAME);
     return os;
 }
+
+
+// * * * * * * * * * * * * * * * Housekeeping  * * * * * * * * * * * * * * * //
+
+Foam::surfacePatch::surfacePatch
+(
+    const word& geometricType,
+    const word& name,
+    const label size,
+    const label start,
+    const label index
+)
+:
+    surfacePatch(name, size, start, index, geometricType)
+{}
 
 
 // ************************************************************************* //

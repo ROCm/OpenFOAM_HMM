@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,20 +39,12 @@ SourceFiles
 #ifndef geometricSurfacePatch_H
 #define geometricSurfacePatch_H
 
-#include "typeInfo.H"
 #include "surfZoneIdentifier.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// Forward declarations
-class dictionary;
-class geometricSurfacePatch;
-
-Istream& operator>>(Istream& is, geometricSurfacePatch& p);
-Ostream& operator<<(Ostream& os, const geometricSurfacePatch& p);
 
 /*---------------------------------------------------------------------------*\
                     Class geometricSurfacePatch Declaration
@@ -62,64 +54,64 @@ class geometricSurfacePatch
 {
     // Private Data
 
-        //- Type name of patch
-        word geometricType_;
-
         //- Name of patch
         word name_;
 
         //- Index of patch in boundary
         label index_;
 
+        //- Type name of patch
+        word geometricType_;
+
 public:
 
     // Public Data
 
         //- The name for an 'empty' type
-        static const word emptyType;
+        static constexpr const char* const emptyType = "empty";
+
+
+    // Public Classes
 
         //- Helper to convert identifier types as an operation
         struct fromIdentifier
         {
-            geometricSurfacePatch operator()(const surfZoneIdentifier& ident)
-            const
+            geometricSurfacePatch
+            operator()(const surfZoneIdentifier& ident) const
             {
                 return geometricSurfacePatch(ident);
             }
         };
 
 
-    //- Runtime type information
-    ClassName("geometricSurfacePatch");
+    // Generated Methods
+
+        //- Copy construct
+        geometricSurfacePatch(const geometricSurfacePatch&) = default;
+
+        //- Copy assignment
+        geometricSurfacePatch&
+            operator=(const geometricSurfacePatch&) = default;
 
 
     // Constructors
 
-        //- Construct null
+        //- Default construct, use index=0, name="patch"
         geometricSurfacePatch();
 
         //- Construct null with specified index
         explicit geometricSurfacePatch(const label index);
+
+        //- Construct from mandatory components
+        geometricSurfacePatch(const word& name, const label index);
 
         //- Construct from components
         geometricSurfacePatch
         (
             const word& name,
             const label index,
-            const word& geometricType = word::null
+            const word& geometricType
         );
-
-        //- Construct from components
-        geometricSurfacePatch
-        (
-            const word& geometricType,
-            const word& name,
-            const label index
-        );
-
-        //- Implicit conversion from surfZoneIdentifier, which has similar
-        //- information but in a different order
-        geometricSurfacePatch(const surfZoneIdentifier& ident);
 
         //- Construct from dictionary
         geometricSurfacePatch
@@ -129,59 +121,76 @@ public:
             const label index
         );
 
-        //- Construct from Istream
-        geometricSurfacePatch(Istream& is, const label index);
+        //- Implicit conversion from surfZoneIdentifier
+        geometricSurfacePatch(const surfZoneIdentifier& ident);
 
 
     // Member Functions
 
-        //- Return name
+        //- The patch/zone name
         const word& name() const
         {
             return name_;
         }
 
-        //- Return name
+        //- Modifiable patch/zone name
         word& name()
         {
             return name_;
         }
 
-        //- Return the geometric type of the patch
+        //- The geometric type of the patch/zone
         const word& geometricType() const
         {
             return geometricType_;
         }
 
-        //- Return the geometric type of the patch for modification
+        //- Modifiable geometric type of the patch/zone
         word& geometricType()
         {
             return geometricType_;
         }
 
-        //- Return the index of this patch in the surface mesh
+        //- The index of this patch/zone in the surface mesh
         label index() const
         {
             return index_;
         }
 
-        //- Return the index of this patch in the surface mesh for modification
+        //- Modifiable index of this patch/zone in the surface mesh
         label& index()
         {
             return index_;
         }
 
-        //- Write
+        //- Write (geometricType) dictionary entry
+        //- (without surrounding braces)
+        //  \warning Prior to 2020-01 was identical to operator<< output
         void write(Ostream& os) const;
 
-        //- Write dictionary
-        void writeDict(Ostream& os) const;
 
+    // Housekeeping
 
-    // Ostream Operator
+        //- Removed(2020-01) Construct from Istream
+        //  \deprecated(2020-01) - unused, inconsistent
+        geometricSurfacePatch(Istream& is, const label index) = delete;
 
-        friend Istream& operator>>(Istream& is, geometricSurfacePatch& p);
-        friend Ostream& operator<<(Ostream& os, const geometricSurfacePatch& p);
+        //- Deprecated(2020-01) Construct from components
+        //  \deprecated(2020-01) - order inconsistent with other identifiers
+        geometricSurfacePatch
+        (
+            const word& geometricType,
+            const word& name,
+            const label index
+        ) FOAM_DEPRECATED(2020-01);
+
+        //- Deprecated(2020-01) Write dictionary
+        //  \deprecated(2020-01) - Write dictionary
+        void FOAM_DEPRECATED_FOR(2020-01, "write() or operator<<")
+        writeDict(Ostream& os) const
+        {
+            write(os);
+        }
 };
 
 
@@ -192,6 +201,13 @@ bool operator==(const geometricSurfacePatch& a, const geometricSurfacePatch& b);
 
 //- Compare patches for inequality
 bool operator!=(const geometricSurfacePatch& a, const geometricSurfacePatch& b);
+
+
+//- Read name, geometricType
+Istream& operator>>(Istream& is, geometricSurfacePatch& obj);
+
+//- Write name, geometricType. Entries are quoted to support empty words.
+Ostream& operator<<(Ostream& os, const geometricSurfacePatch& obj);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

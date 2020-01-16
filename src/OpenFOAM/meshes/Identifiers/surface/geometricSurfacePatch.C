@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,31 +29,54 @@ License
 #include "geometricSurfacePatch.H"
 #include "dictionary.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(geometricSurfacePatch, 0);
+
+static inline word readOptionalWord(Istream& is)
+{
+    token tok(is);
+
+    if (tok.isWord())
+    {
+        return tok.wordToken();
+    }
+    else
+    {
+        // Allow empty words
+        return word::validate(tok.stringToken());
+    }
 }
 
-const Foam::word Foam::geometricSurfacePatch::emptyType = "empty";
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::geometricSurfacePatch::geometricSurfacePatch()
 :
-    geometricType_(emptyType),
-    name_("patch"),
-    index_(0)
+    geometricSurfacePatch(0)
 {}
 
 
 Foam::geometricSurfacePatch::geometricSurfacePatch(const label index)
 :
-    geometricType_(emptyType),
     name_("patch"),
-    index_(index)
+    index_(index),
+    geometricType_(emptyType)
+{}
+
+
+Foam::geometricSurfacePatch::geometricSurfacePatch
+(
+    const word& name,
+    const label index
+)
+:
+    name_(name),
+    index_(index),
+    geometricType_()
 {}
 
 
@@ -64,66 +87,10 @@ Foam::geometricSurfacePatch::geometricSurfacePatch
     const word& geometricType
 )
 :
-    geometricType_(geometricType),
     name_(name),
-    index_(index)
-{
-    if (geometricType_.empty())
-    {
-        geometricType_ = emptyType;
-    }
-}
-
-
-Foam::geometricSurfacePatch::geometricSurfacePatch
-(
-    const word& geometricType,
-    const word& name,
-    const label index
-)
-:
-    geometricType_(geometricType),
-    name_(name),
-    index_(index)
-{
-    if (geometricType_.empty())
-    {
-        geometricType_ = emptyType;
-    }
-}
-
-
-Foam::geometricSurfacePatch::geometricSurfacePatch
-(
-    const surfZoneIdentifier& ident
-)
-:
-    geometricType_(ident.geometricType()),
-    name_(ident.name()),
-    index_(ident.index())
-{
-    if (geometricType_.empty())
-    {
-        geometricType_ = emptyType;
-    }
-}
-
-
-Foam::geometricSurfacePatch::geometricSurfacePatch
-(
-    Istream& is,
-    const label index
-)
-:
-    geometricType_(is),
-    name_(is),
-    index_(index)
-{
-    if (geometricType_.empty())
-    {
-        geometricType_ = emptyType;
-    }
-}
+    index_(index),
+    geometricType_(geometricType)
+{}
 
 
 Foam::geometricSurfacePatch::geometricSurfacePatch
@@ -133,26 +100,31 @@ Foam::geometricSurfacePatch::geometricSurfacePatch
     const label index
 )
 :
-    geometricType_(emptyType),
     name_(name),
-    index_(index)
+    index_(index),
+    geometricType_()
 {
     dict.readIfPresent("geometricType", geometricType_);
 }
+
+
+Foam::geometricSurfacePatch::geometricSurfacePatch
+(
+    const surfZoneIdentifier& ident
+)
+:
+    geometricSurfacePatch(ident.name(), ident.index(), ident.geometricType())
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::geometricSurfacePatch::write(Ostream& os) const
 {
-    os  << nl << name_
-        << nl << geometricType_;
-}
-
-
-void Foam::geometricSurfacePatch::writeDict(Ostream& os) const
-{
-    os.writeEntry("geometricType", geometricType_);
+    if (geometricType_.size())
+    {
+        os.writeEntry("geometricType", geometricType_);
+    }
 }
 
 
@@ -182,21 +154,54 @@ bool Foam::operator!=
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Istream& Foam::operator>>(Istream& is, geometricSurfacePatch& p)
+Foam::Istream& Foam::operator>>(Istream& is, geometricSurfacePatch& obj)
 {
-    is >> p.name_ >> p.geometricType_;
+    obj.name() = readOptionalWord(is);
+    obj.geometricType() = readOptionalWord(is);
+
     return is;
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const geometricSurfacePatch& p)
+Foam::Ostream& Foam::operator<<(Ostream& os, const geometricSurfacePatch& obj)
 {
-    p.write(os);
+    // Force unconditional line-breaks on list output.
+    // We otherwise risk extremely unreadable entries
+    os << nl;
+
+    // Empty words are double-quoted so they are treated as 'string'
+
+    os.writeQuoted(obj.name(), obj.name().empty()) << token::SPACE;
+    os.writeQuoted(obj.geometricType(), obj.geometricType().empty());
+
+    // Equivalent for OpenFOAM-1912 and earlier:
+    // if (obj.geometricType().empty())
+    // {
+    //     os << emptyType;
+    // }
+    // else
+    // {
+    //     os << obj.geometricType();
+    // }
+
     os.check(FUNCTION_NAME);
     return os;
 }
+
+
+// * * * * * * * * * * * * * * * Housekeeping  * * * * * * * * * * * * * * * //
+
+Foam::geometricSurfacePatch::geometricSurfacePatch
+(
+    const word& geometricType,
+    const word& name,
+    const label index
+)
+:
+    geometricSurfacePatch(name, index, geometricType)
+{}
 
 
 // ************************************************************************* //

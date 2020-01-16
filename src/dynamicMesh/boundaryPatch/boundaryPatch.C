@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,32 +60,12 @@ Foam::boundaryPatch::boundaryPatch
 {}
 
 
-Foam::boundaryPatch::boundaryPatch(const boundaryPatch& p)
-:
-    patchIdentifier(p.name(), p.index(), p.physicalType()),
-    size_(p.size()),
-    start_(p.start())
-{}
-
-
 Foam::boundaryPatch::boundaryPatch(const boundaryPatch& p, const label index)
 :
-    patchIdentifier(p.name(), index, p.physicalType()),
-    size_(p.size()),
-    start_(p.start())
-{}
-
-
-Foam::autoPtr<Foam::boundaryPatch> Foam::boundaryPatch::clone() const
+    boundaryPatch(p)
 {
-    return autoPtr<boundaryPatch>::New(*this);
+    patchIdentifier::index() = index;
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::boundaryPatch::~boundaryPatch()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -97,7 +78,7 @@ void Foam::boundaryPatch::write(Ostream& os) const
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const boundaryPatch& p)
 {

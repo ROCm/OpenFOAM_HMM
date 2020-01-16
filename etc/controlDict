@@ -588,7 +588,6 @@ DebugSwitches
     generic             0;
     genericPatch        0;
     geomCellLooper      0;
-    geometricSurfacePatch   0;
     global              0;
     globalIndexAndTransform 0;
     globalMeshData      0;
@@ -880,7 +879,6 @@ DebugSwitches
     surfaceInterpolationScheme 0;
     surfaceIntersection 0;
     surfaceNormalFixedValue 0;
-    surfacePatch        0;
     surfaceScalarField  0;
     surfaceScalarField::Internal 0;
     surfaceSlipDisplacement 0;

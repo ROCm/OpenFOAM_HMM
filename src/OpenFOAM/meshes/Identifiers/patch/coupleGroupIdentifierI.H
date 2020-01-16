@@ -25,7 +25,16 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "coupleGroupIdentifier.H"
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+inline Foam::coupleGroupIdentifier::coupleGroupIdentifier
+(
+    const word& patchGroupName
+)
+:
+    name_(patchGroupName)
+{}
+
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 

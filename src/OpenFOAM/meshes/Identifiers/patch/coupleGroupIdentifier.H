@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,12 +28,11 @@ Class
     Foam::coupleGroupIdentifier
 
 Description
-    Encapsulates using patchGroups to specify coupled patch
+    Encapsulates using "patchGroups" to specify coupled patch
 
 SourceFiles
     coupleGroupIdentifierI.H
     coupleGroupIdentifier.C
-    coupleGroupIdentifierIO.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -47,16 +47,10 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class dictionary;
 class polyMesh;
 class polyPatch;
-class Ostream;
-
-// Forward declaration of friend functions and operators
-class coupleGroupIdentifier;
-Ostream& operator<<(Ostream& os, const coupleGroupIdentifier& p);
-
 
 /*---------------------------------------------------------------------------*\
                     Class coupleGroupIdentifier Declaration
@@ -64,7 +58,7 @@ Ostream& operator<<(Ostream& os, const coupleGroupIdentifier& p);
 
 class coupleGroupIdentifier
 {
-    // Private data
+    // Private Data
 
         //- Name of patchGroup
         word name_;
@@ -72,7 +66,8 @@ class coupleGroupIdentifier
 
     // Private Member Functions
 
-        //- Find other patch in specified mesh. Returns index of patch or -1.
+        //- Find other patch in specified mesh.
+        //  \return index of patch or -1
         label findOtherPatchID
         (
             const polyMesh& mesh,
@@ -82,16 +77,19 @@ class coupleGroupIdentifier
 
 public:
 
+    // Generated Methods
+
+        //- Default construct
+        coupleGroupIdentifier() = default;
+
+
     // Constructors
 
-        //- Construct null
-        coupleGroupIdentifier();
-
         //- Construct from components
-        coupleGroupIdentifier(const word& patchGroupName);
+        inline explicit coupleGroupIdentifier(const word& patchGroupName);
 
         //- Construct from dictionary
-        coupleGroupIdentifier(const dictionary& dict);
+        explicit coupleGroupIdentifier(const dictionary& dict);
 
 
     // Member Functions
@@ -102,29 +100,28 @@ public:
         //- Is a valid patchGroup
         inline bool valid() const;
 
-        //- Find other patch in same region. Returns index of patch or -1.
+        //- Find other patch in same region.
+        //  \return index of patch or -1.
         label findOtherPatchID(const polyPatch& thisPatch) const;
 
-        //- Find other patch and region. Returns index of patch and sets
-        //  otherRegion to name of region. Fatal error if patch not found
+        //- Find other patch and region.
+        //  Returns index of patch and sets otherRegion to name of region.
+        //  FatalError if patch not found
         label findOtherPatchID
         (
             const polyPatch& thisPatch,
             word& otherRegion
         ) const;
 
-        //- Write the data as a dictionary
+        //- Write the coupleGroup dictionary entry
         void write(Ostream& os) const;
-
-
-    // IOstream Operators
-
-        friend Ostream& operator<<
-        (
-            Ostream& os,
-            const coupleGroupIdentifier& p
-        );
 };
+
+
+// Global Operators
+
+//- Write the coupleGroup dictionary entry
+Ostream& operator<<(Ostream& os, const coupleGroupIdentifier& p);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

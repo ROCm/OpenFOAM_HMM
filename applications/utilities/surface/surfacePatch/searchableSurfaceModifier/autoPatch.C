@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -121,9 +122,9 @@ bool Foam::searchableSurfaceModifiers::autoPatch::modify
             {
                 geometricSurfacePatch patch
                 (
-                    surf.patches()[regionI].geometricType(),
                     surf.patches()[regionI].name() + Foam::name(subI),
-                    surf.patches().size()
+                    surf.patches().size(),
+                    surf.patches()[regionI].geometricType()
                 );
 
 

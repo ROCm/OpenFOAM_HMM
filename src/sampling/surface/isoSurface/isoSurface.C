@@ -1019,7 +1019,7 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
 
         if (debug)
         {
-            triSurface surf(tris, geometricSurfacePatchList(0), newPoints);
+            triSurface surf(tris, geometricSurfacePatchList(), newPoints);
 
             forAll(surf, facei)
             {
@@ -1054,7 +1054,7 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
         }
     }
 
-    return triSurface(tris, geometricSurfacePatchList(0), newPoints, true);
+    return triSurface(tris, geometricSurfacePatchList(), newPoints, true);
 }
 
 

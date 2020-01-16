@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,18 +39,14 @@ SourceFiles
 #define patchIdentifier_H
 
 #include "wordList.H"
-#include "label.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class dictionary;
-class patchIdentifier;
-Ostream& operator<<(Ostream& os, const patchIdentifier& p);
-
 
 /*---------------------------------------------------------------------------*\
                        Class patchIdentifier Declaration
@@ -57,7 +54,7 @@ Ostream& operator<<(Ostream& os, const patchIdentifier& p);
 
 class patchIdentifier
 {
-    // Private data
+    // Private Data
 
         //- Name of patch
         word name_;
@@ -73,14 +70,32 @@ class patchIdentifier
 
 public:
 
+    // Generated Methods
+
+        //- Copy construct
+        patchIdentifier(const patchIdentifier&) = default;
+
+        //- Copy assignment
+        patchIdentifier& operator=(const patchIdentifier&) = default;
+
+        //- Destructor
+        virtual ~patchIdentifier() = default;
+
+
     // Constructors
+
+        //- Default construct, with index zero
+        patchIdentifier();
+
+        //- Construct from mandatory components
+        patchIdentifier(const word& name, const label index);
 
         //- Construct from components
         patchIdentifier
         (
             const word& name,
             const label index,
-            const word& physicalType = word::null,
+            const word& physicalType,
             const wordList& inGroups = wordList()
         );
 
@@ -100,13 +115,9 @@ public:
         );
 
 
-    //- Destructor
-    virtual ~patchIdentifier() = default;
-
-
     // Member Functions
 
-        //- Return the patch name
+        //- The patch name
         const word& name() const
         {
             return name_;
@@ -118,13 +129,13 @@ public:
             return name_;
         }
 
-        //- The optional physical type of the patch
+        //- The (optional) physical type of the patch
         const word& physicalType() const
         {
             return physicalType_;
         }
 
-        //- Modifiable optional physical type of the patch
+        //- Modifiable (optional) physical type of the patch
         word& physicalType()
         {
             return physicalType_;
@@ -136,35 +147,41 @@ public:
             return index_;
         }
 
-        //- Modifiable the index of this patch in the boundaryMesh
+        //- Modifiable index of this patch in the boundaryMesh
         label& index()
         {
             return index_;
         }
 
-        //- The optional groups that the patch belongs to
+        //- The (optional) groups that the patch belongs to
         const wordList& inGroups() const
         {
             return inGroups_;
         }
 
-        //- Modifiable optional groups that the patch belongs to
+        //- Modifiable (optional) groups that the patch belongs to
         wordList& inGroups()
         {
             return inGroups_;
         }
 
-        //- Check if the patch is in named group
-        bool inGroup(const word& name) const;
+        //- True if the patch is in named group
+        bool inGroup(const word& name) const
+        {
+            return inGroups_.found(name);
+        }
 
-        //- Write patchIdentifier as a dictionary
+        //- Write (physicalType, inGroups) dictionary entries
+        //- (without surrounding braces)
         void write(Ostream& os) const;
-
-
-    // Ostream Operator
-
-        friend Ostream& operator<<(Ostream& os, const patchIdentifier& p);
 };
+
+
+// Global Operators
+
+//- Write (physicalType, inGroups) dictionary entries
+//- (without surrounding braces)
+Ostream& operator<<(Ostream& os, const patchIdentifier& p);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
