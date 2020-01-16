@@ -49,6 +49,18 @@ Foam::surfaceZonesInfo::areaSelectionAlgoNames
 
 const Foam::Enum
 <
+    Foam::surfaceZonesInfo::faceZoneNaming
+>
+Foam::surfaceZonesInfo::faceZoneNamingNames
+({
+    { faceZoneNaming::NOZONE, "none" },
+    { faceZoneNaming::SINGLE, "single" },
+    { faceZoneNaming::REGION, "region" }
+});
+
+
+const Foam::Enum
+<
     Foam::surfaceZonesInfo::faceZoneType
 >
 Foam::surfaceZonesInfo::faceZoneTypeNames
@@ -64,18 +76,77 @@ Foam::surfaceZonesInfo::faceZoneTypeNames
 Foam::surfaceZonesInfo::surfaceZonesInfo
 (
     const searchableSurface& surface,
-    const dictionary& surfacesDict
+    const dictionary& surfacesDict,
+    const wordList& regionNames
 )
 :
-    faceZoneName_(),
+    faceZoneNames_(),
     cellZoneName_(),
     zoneInside_(NONE),
     zoneInsidePoint_(point::min),
     faceType_(INTERNAL)
 {
-    // Global zone names per surface
-    if (surfacesDict.readIfPresent("faceZone", faceZoneName_))
+    const label nRegions = surface.regions().size();
+
+    // Old syntax
+    surfaceZonesInfo::faceZoneNaming namingType = faceZoneNaming::NOZONE;
+
+    word namingMethod;
+    word faceZoneName;
+    if (surfacesDict.readIfPresent("faceZone", faceZoneName))
     {
+        // Single zone name per surface
+        if (surfacesDict.found("faceZoneNaming"))
+        {
+            FatalIOErrorInFunction(surfacesDict)
+                << "Cannot provide both \"faceZone\" and \"faceZoneNaming\""
+                << exit(FatalIOError);
+        }
+
+        namingType = faceZoneNaming::SINGLE;
+        faceZoneNames_.setSize(nRegions, faceZoneName);
+    }
+    else if (surfacesDict.readIfPresent("faceZoneNaming", namingMethod))
+    {
+        //namingType = faceZoneNamingNames.get("faceZoneNaming", surfacesDict);
+        namingType = faceZoneNamingNames[namingMethod];
+
+        // Generate faceZone names. Maybe make runtime-selection table?
+        switch (namingType)
+        {
+            case faceZoneNaming::NOZONE:
+            break;
+
+            case faceZoneNaming::SINGLE:
+            {
+                // Should already be handled above
+                faceZoneNames_.setSize
+                (
+                    nRegions,
+                    surfacesDict.get<word>("faceZone")
+                );
+            }
+            break;
+
+            case faceZoneNaming::REGION:
+            {
+                faceZoneNames_ = regionNames;
+            }
+            break;
+        }
+    }
+
+    if (faceZoneNames_.size())
+    {
+        if (faceZoneNames_.size() != nRegions)
+        {
+            FatalIOErrorInFunction(surfacesDict)
+                << "Number of faceZones (through 'faceZones' keyword)"
+                << " does not correspond to the number of regions "
+                << nRegions << " in surface " << surface.name()
+                << exit(FatalIOError);
+        }
+
         // Read optional entry to determine inside of faceZone
 
         word method;
@@ -116,8 +187,8 @@ Foam::surfaceZonesInfo::surfaceZonesInfo
                 IOWarningInFunction(surfacesDict)
                     << "Illegal entry zoneInside "
                     << areaSelectionAlgoNames[zoneInside_]
-                    << " for faceZone "
-                    << faceZoneName_
+                    << " for faceZones "
+                    << faceZoneNames_
                     << " since surface is not closed." << endl;
             }
         }
@@ -125,7 +196,7 @@ Foam::surfaceZonesInfo::surfaceZonesInfo
         {
             IOWarningInFunction(surfacesDict)
                 << "Unused entry zoneInside for faceZone "
-                << faceZoneName_
+                << faceZoneNames_
                 << " since no cellZone specified."
                 << endl;
         }
@@ -142,14 +213,14 @@ Foam::surfaceZonesInfo::surfaceZonesInfo
 
 Foam::surfaceZonesInfo::surfaceZonesInfo
 (
-    const word& faceZoneName,
+    const wordList& faceZoneNames,
     const word& cellZoneName,
     const areaSelectionAlgo& zoneInside,
     const point& zoneInsidePoint,
     const faceZoneType& faceType
 )
 :
-    faceZoneName_(faceZoneName),
+    faceZoneNames_(faceZoneNames),
     cellZoneName_(cellZoneName),
     zoneInside_(zoneInside),
     zoneInsidePoint_(zoneInsidePoint),
@@ -159,7 +230,7 @@ Foam::surfaceZonesInfo::surfaceZonesInfo
 
 Foam::surfaceZonesInfo::surfaceZonesInfo(const surfaceZonesInfo& surfZone)
 :
-    faceZoneName_(surfZone.faceZoneName()),
+    faceZoneNames_(surfZone.faceZoneNames()),
     cellZoneName_(surfZone.cellZoneName()),
     zoneInside_(surfZone.zoneInside()),
     zoneInsidePoint_(surfZone.zoneInsidePoint()),
@@ -177,7 +248,7 @@ Foam::labelList Foam::surfaceZonesInfo::getUnnamedSurfaces
     label i = 0;
     forAll(surfList, surfI)
     {
-        if (surfList[surfI].faceZoneName().empty())
+        if (surfList[surfI].faceZoneNames().empty())
         {
             anonymousSurfaces[i++] = surfI;
         }
@@ -201,7 +272,7 @@ Foam::labelList Foam::surfaceZonesInfo::getNamedSurfaces
         if
         (
             surfList.set(surfI)
-         && surfList[surfI].faceZoneName().size()
+         && surfList[surfI].faceZoneNames().size()
         )
         {
             namedSurfaces[namedI++] = surfI;
@@ -226,7 +297,7 @@ Foam::labelList Foam::surfaceZonesInfo::getStandaloneNamedSurfaces
         if
         (
             surfList.set(surfI)
-        &&  surfList[surfI].faceZoneName().size()
+        &&  surfList[surfI].faceZoneNames().size()
         && !surfList[surfI].cellZoneName().size()
         )
         {
@@ -468,14 +539,14 @@ Foam::label Foam::surfaceZonesInfo::addFaceZone
 }
 
 
-Foam::labelList Foam::surfaceZonesInfo::addFaceZonesToMesh
+Foam::labelListList Foam::surfaceZonesInfo::addFaceZonesToMesh
 (
     const PtrList<surfaceZonesInfo>& surfList,
     const labelList& namedSurfaces,
     polyMesh& mesh
 )
 {
-    labelList surfaceToFaceZone(surfList.size(), -1);
+    labelListList surfaceToFaceZones(surfList.size());
 
     faceZoneMesh& faceZones = mesh.faceZones();
 
@@ -483,17 +554,23 @@ Foam::labelList Foam::surfaceZonesInfo::addFaceZonesToMesh
     {
         label surfI = namedSurfaces[i];
 
-        const word& faceZoneName = surfList[surfI].faceZoneName();
+        const wordList& faceZoneNames = surfList[surfI].faceZoneNames();
 
-        label zoneI = addFaceZone
-        (
-            faceZoneName,   //name
-            labelList(0),   //addressing
-            boolList(0),    //flipmap
-            mesh
-        );
+        surfaceToFaceZones[surfI].setSize(faceZoneNames.size(), -1);
+        forAll(faceZoneNames, j)
+        {
+            const word& faceZoneName = faceZoneNames[j];
 
-        surfaceToFaceZone[surfI] = zoneI;
+            label zoneI = addFaceZone
+            (
+                faceZoneName,   //name
+                labelList(0),   //addressing
+                boolList(0),    //flipmap
+                mesh
+            );
+
+            surfaceToFaceZones[surfI][j] = zoneI;
+        }
     }
 
     // Check they are synced
@@ -515,7 +592,7 @@ Foam::labelList Foam::surfaceZonesInfo::addFaceZonesToMesh
         }
     }
 
-    return surfaceToFaceZone;
+    return surfaceToFaceZones;
 }
 
 

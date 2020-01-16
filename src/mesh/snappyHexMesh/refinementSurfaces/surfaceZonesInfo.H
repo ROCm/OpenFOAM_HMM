@@ -73,6 +73,16 @@ public:
 
     static const Enum<areaSelectionAlgo> areaSelectionAlgoNames;
 
+    //- How to generate faceZone name
+    enum faceZoneNaming
+    {
+        NOZONE,
+        SINGLE,
+        REGION
+    };
+
+    static const Enum<faceZoneNaming> faceZoneNamingNames;
+
     //- What to do with faceZone faces
     enum faceZoneType
     {
@@ -88,8 +98,8 @@ private:
 
     // Private data
 
-        //- Per 'interface' surface : name of faceZone to put faces into
-        word faceZoneName_;
+        //- Per 'interface' surface : names of faceZones to put faces into
+        wordList faceZoneNames_;
 
         //- Per 'interface' surface : name of cellZone to put cells into
         word cellZoneName_;
@@ -117,17 +127,19 @@ public:
 
     // Constructors
 
-        //- Construct from surfaces and dictionary
+        //- Construct from surfaces and dictionary and fully resolved
+        //  region names (for optional automatic faceZone naming)
         surfaceZonesInfo
         (
             const searchableSurface& surface,
-            const dictionary& surfacesDict
+            const dictionary& surfacesDict,
+            const wordList& regionNames
         );
 
         //- Construct from components
         surfaceZonesInfo
         (
-            const word& faceZoneNames,
+            const wordList& faceZoneNames,
             const word& cellZoneNames,
             const areaSelectionAlgo& zoneInside,
             const point& zoneInsidePoints,
@@ -148,11 +160,11 @@ public:
 
         // Access
 
-            //- Per 'interface' surface : empty or name of faceZone to put
-            //  faces into
-            const word& faceZoneName() const
+            //- Per 'interface' surface : empty or names of faceZones to put
+            //  faces into (according to region)
+            const wordList& faceZoneNames() const
             {
-                return faceZoneName_;
+                return faceZoneNames_;
             }
 
             //- Per 'interface' surface : empty or name of cellZone to put
@@ -254,7 +266,7 @@ public:
                 polyMesh& mesh
             );
 
-            static labelList addFaceZonesToMesh
+            static labelListList addFaceZonesToMesh
             (
                 const PtrList<surfaceZonesInfo>& surfList,
                 const labelList& namedSurfaces,

@@ -307,7 +307,7 @@ void Foam::meshRefinement::getBafflePatches
     labelList cellToZone;
     labelList unnamedRegion1;
     labelList unnamedRegion2;
-    labelList namedSurfaceIndex;
+    labelList namedSurfaceRegion;
     {
         bitSet posOrientation;
         zonify
@@ -321,7 +321,7 @@ void Foam::meshRefinement::getBafflePatches
             cellToZone,
             unnamedRegion1,
             unnamedRegion2,
-            namedSurfaceIndex,
+            namedSurfaceRegion,
             posOrientation
         );
     }
@@ -381,8 +381,8 @@ void Foam::meshRefinement::getBafflePatches
                  || (neiZone >= 0 && ownZone != -2)
                 )
              && (
-                    namedSurfaceIndex.size() == 0
-                 || namedSurfaceIndex[faceI] == -1
+                    namedSurfaceRegion.size() == 0
+                 || namedSurfaceRegion[faceI] == -1
                 )
             )
             {
@@ -426,17 +426,17 @@ Foam::Map<Foam::labelPair> Foam::meshRefinement::getZoneBafflePatches
 
     forAll(surfZones, surfI)
     {
-        const word& faceZoneName = surfZones[surfI].faceZoneName();
+        const wordList& faceZoneNames = surfZones[surfI].faceZoneNames();
 
-        if (faceZoneName.size())
+        forAll(faceZoneNames, fzi)
         {
             // Get zone
+            const word& faceZoneName = faceZoneNames[fzi];
             label zoneI = fZones.findZoneID(faceZoneName);
-
             const faceZone& fZone = fZones[zoneI];
 
             // Get patch allocated for zone
-            label globalRegionI = surfaces_.globalRegion(surfI, 0);
+            label globalRegionI = surfaces_.globalRegion(surfI, fzi);
             labelPair zPatches
             (
                 globalToMasterPatch[globalRegionI],
@@ -1370,7 +1370,7 @@ void Foam::meshRefinement::findCellZoneGeometric
 (
     const pointField& neiCc,
     const labelList& closedNamedSurfaces,   // indices of closed surfaces
-    labelList& namedSurfaceIndex,           // per face index of named surface
+    labelList& namedSurfaceRegion,          // per face: named surface region
     const labelList& surfaceToCellZone,     // cell zone index per surface
 
     labelList& cellToZone
@@ -1418,11 +1418,9 @@ void Foam::meshRefinement::findCellZoneGeometric
 
     // Count points to test.
     label nCandidates = 0;
-    forAll(namedSurfaceIndex, faceI)
+    forAll(namedSurfaceRegion, faceI)
     {
-        label surfI = namedSurfaceIndex[faceI];
-
-        if (surfI != -1)
+        if (namedSurfaceRegion[faceI] != -1)
         {
             if (mesh_.isInternalFace(faceI))
             {
@@ -1438,11 +1436,9 @@ void Foam::meshRefinement::findCellZoneGeometric
     // Collect points.
     pointField candidatePoints(nCandidates);
     nCandidates = 0;
-    forAll(namedSurfaceIndex, faceI)
+    forAll(namedSurfaceRegion, faceI)
     {
-        label surfI = namedSurfaceIndex[faceI];
-
-        if (surfI != -1)
+        if (namedSurfaceRegion[faceI] != -1)
         {
             label own = faceOwner[faceI];
             const point& ownCc = cellCentres[own];
@@ -1482,11 +1478,9 @@ void Foam::meshRefinement::findCellZoneGeometric
     // 3. Update zone information
 
     nCandidates = 0;
-    forAll(namedSurfaceIndex, faceI)
+    forAll(namedSurfaceRegion, faceI)
     {
-        label surfI = namedSurfaceIndex[faceI];
-
-        if (surfI != -1)
+        if (namedSurfaceRegion[faceI] != -1)
         {
             label own = faceOwner[faceI];
 
@@ -1518,8 +1512,8 @@ void Foam::meshRefinement::findCellZoneGeometric
     }
 
 
-    // Adapt the namedSurfaceIndex
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Adapt the namedSurfaceRegion
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // for if any cells were not completely covered.
 
     for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
@@ -1527,7 +1521,7 @@ void Foam::meshRefinement::findCellZoneGeometric
         label ownZone = cellToZone[mesh_.faceOwner()[faceI]];
         label neiZone = cellToZone[mesh_.faceNeighbour()[faceI]];
 
-        if (namedSurfaceIndex[faceI] == -1 && (ownZone != neiZone))
+        if (namedSurfaceRegion[faceI] == -1 && (ownZone != neiZone))
         {
             // Give face the zone of min cell zone (but only if the
             // cellZone originated from a closed, named surface)
@@ -1546,12 +1540,14 @@ void Foam::meshRefinement::findCellZoneGeometric
                 minZone = min(ownZone, neiZone);
             }
 
-            // Make sure the cellZone originated from a closed surface
+            // Make sure the cellZone originated from a closed surface. Use
+            // hardcoded region 0 inside named surface.
             label geomSurfI = surfaceToCellZone.find(minZone);
 
             if (geomSurfI != -1)
             {
-                namedSurfaceIndex[faceI] = geomSurfI;
+                namedSurfaceRegion[faceI] =
+                    surfaces_.globalRegion(geomSurfI, 0);
             }
         }
     }
@@ -1573,7 +1569,7 @@ void Foam::meshRefinement::findCellZoneGeometric
                 label ownZone = cellToZone[mesh_.faceOwner()[faceI]];
                 label neiZone = neiCellZone[faceI-mesh_.nInternalFaces()];
 
-                if (namedSurfaceIndex[faceI] == -1 && (ownZone != neiZone))
+                if (namedSurfaceRegion[faceI] == -1 && (ownZone != neiZone))
                 {
                     // Give face the min cell zone
                     label minZone;
@@ -1590,12 +1586,14 @@ void Foam::meshRefinement::findCellZoneGeometric
                         minZone = min(ownZone, neiZone);
                     }
 
-                    // Make sure the cellZone originated from a closed surface
+                    // Make sure the cellZone originated from a closed surface.
+                    // Use hardcoded region 0 inside named surface.
                     label geomSurfI = surfaceToCellZone.find(minZone);
 
                     if (geomSurfI != -1)
                     {
-                        namedSurfaceIndex[faceI] = geomSurfI;
+                        namedSurfaceRegion[faceI] =
+                            surfaces_.globalRegion(geomSurfI, 0);
                     }
                 }
             }
@@ -1603,7 +1601,7 @@ void Foam::meshRefinement::findCellZoneGeometric
     }
 
     // Sync
-    syncTools::syncFaceList(mesh_, namedSurfaceIndex, maxEqOp<label>());
+    syncTools::syncFaceList(mesh_, namedSurfaceRegion, maxEqOp<label>());
 }
 
 
@@ -1839,7 +1837,7 @@ void Foam::meshRefinement::findCellZoneTopo
     const label backgroundZoneID,
     const pointField& locationsInMesh,
     const labelList& unnamedSurfaceRegion,
-    const labelList& namedSurfaceIndex,
+    const labelList& namedSurfaceRegion,
     const labelList& surfaceToCellZone,
     labelList& cellToZone
 ) const
@@ -1848,7 +1846,7 @@ void Foam::meshRefinement::findCellZoneTopo
     // (after all off the unreachable bits of the mesh have been removed).
     // This routine splits the mesh into regions, based on the intersection
     // with a surface. The problem is that we know the surface which
-    // (intersected) face belongs to (in namedSurfaceIndex) but we don't
+    // (intersected) face belongs to (in namedSurfaceRegion) but we don't
     // know which side of the face it relates to. So all we are doing here
     // is get the correspondence between surface/cellZone and regionSplit
     // region. See the logic in calcRegionToZone.
@@ -1862,14 +1860,18 @@ void Foam::meshRefinement::findCellZoneTopo
     // Assumes:
     // - region containing keepPoint does not go into a cellZone
     // - all other regions can be found by crossing faces marked in
-    //   namedSurfaceIndex.
+    //   namedSurfaceRegion.
 
     // Analyse regions. Reuse regionsplit
     boolList blockedFace(mesh_.nFaces());
 
     forAll(unnamedSurfaceRegion, faceI)
     {
-        if (unnamedSurfaceRegion[faceI] == -1 && namedSurfaceIndex[faceI] == -1)
+        if
+        (
+            unnamedSurfaceRegion[faceI] == -1
+         && namedSurfaceRegion[faceI] == -1
+        )
         {
             blockedFace[faceI] = false;
         }
@@ -1878,7 +1880,7 @@ void Foam::meshRefinement::findCellZoneTopo
             blockedFace[faceI] = true;
         }
     }
-    // No need to sync since namedSurfaceIndex already is synced
+    // No need to sync since namedSurfaceRegion already is synced
 
     // Set region per cell based on walking
     regionSplit cellRegion(mesh_, blockedFace);
@@ -1968,13 +1970,16 @@ void Foam::meshRefinement::findCellZoneTopo
 
         for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
         {
-            label surfI = namedSurfaceIndex[faceI];
+            label regionI = namedSurfaceRegion[faceI];
 
             // Connected even if no cellZone defined for surface
-            if (unnamedSurfaceRegion[faceI] == -1 && surfI != -1)
+            if (unnamedSurfaceRegion[faceI] == -1 && regionI != -1)
             {
                 // Calculate region to zone from cellRegions on either side
                 // of internal face.
+
+                label surfI = surfaces_.whichSurface(regionI).first();
+
                 bool changedCell = calcRegionToZone
                 (
                     backgroundZoneID,
@@ -2008,11 +2013,13 @@ void Foam::meshRefinement::findCellZoneTopo
                 {
                     label faceI = pp.start()+i;
 
-                    label surfI = namedSurfaceIndex[faceI];
+                    label regionI = namedSurfaceRegion[faceI];
 
                     // Connected even if no cellZone defined for surface
-                    if (unnamedSurfaceRegion[faceI] == -1 && surfI != -1)
+                    if (unnamedSurfaceRegion[faceI] == -1 && regionI != -1)
                     {
+                        label surfI = surfaces_.whichSurface(regionI).first();
+
                         bool changedCell = calcRegionToZone
                         (
                             backgroundZoneID,
@@ -2070,7 +2077,7 @@ void Foam::meshRefinement::erodeCellZone
     const label nErodeCellZones,
     const label backgroundZoneID,
     const labelList& unnamedSurfaceRegion,
-    const labelList& namedSurfaceIndex,
+    const labelList& namedSurfaceRegion,
     labelList& cellToZone
 ) const
 {
@@ -2097,7 +2104,7 @@ void Foam::meshRefinement::erodeCellZone
             if
             (
                 unnamedSurfaceRegion[facei] == -1
-             && namedSurfaceIndex[facei] == -1
+             && namedSurfaceRegion[facei] == -1
             )
             {
                 label own = mesh_.faceOwner()[facei];
@@ -2137,7 +2144,7 @@ void Foam::meshRefinement::erodeCellZone
                     if
                     (
                         unnamedSurfaceRegion[facei] == -1
-                     && namedSurfaceIndex[facei] == -1
+                     && namedSurfaceRegion[facei] == -1
                     )
                     {
                         label own = mesh_.faceOwner()[facei];
@@ -2174,14 +2181,14 @@ void Foam::meshRefinement::makeConsistentFaceIndex
 (
     const labelList& surfaceMap,
     const labelList& cellToZone,
-    labelList& namedSurfaceIndex
+    labelList& namedSurfaceRegion
 ) const
 {
-    // Make namedSurfaceIndex consistent with cellToZone - clear out any
+    // Make namedSurfaceRegion consistent with cellToZone - clear out any
     // blocked faces inbetween same cell zone (or background (=-1))
     // Do not do this for surfaces relating to 'pure' faceZones i.e.
     // faceZones without a cellZone. Note that we cannot check here
-    // for different cellZones on either side but no namedSurfaceIndex
+    // for different cellZones on either side but no namedSurfaceRegion
     // since cellZones can now originate from locationsInMesh as well
     // (instead of only through named surfaces)
 
@@ -2192,15 +2199,16 @@ void Foam::meshRefinement::makeConsistentFaceIndex
     {
         label ownZone = cellToZone[faceOwner[faceI]];
         label neiZone = cellToZone[faceNeighbour[faceI]];
+        label globalI = namedSurfaceRegion[faceI];
 
         if
         (
             ownZone == neiZone
-         && namedSurfaceIndex[faceI] != -1
-         && surfaceMap[namedSurfaceIndex[faceI]] == -1
+         && globalI != -1
+         && surfaceMap[surfaces_.whichSurface(globalI).first()] == -1
         )
         {
-            namedSurfaceIndex[faceI] = -1;
+            namedSurfaceRegion[faceI] = -1;
         }
     }
 
@@ -2223,15 +2231,16 @@ void Foam::meshRefinement::makeConsistentFaceIndex
 
                 label ownZone = cellToZone[faceOwner[faceI]];
                 label neiZone = neiCellZone[faceI-mesh_.nInternalFaces()];
+                label globalI = namedSurfaceRegion[faceI];
 
                 if
                 (
                     ownZone == neiZone
-                 && namedSurfaceIndex[faceI] != -1
-                 && surfaceMap[namedSurfaceIndex[faceI]] == -1
+                 && globalI != -1
+                 && surfaceMap[surfaces_.whichSurface(globalI).first()] == -1
                 )
                 {
-                    namedSurfaceIndex[faceI] = -1;
+                    namedSurfaceRegion[faceI] = -1;
                 }
             }
         }
@@ -2241,14 +2250,15 @@ void Foam::meshRefinement::makeConsistentFaceIndex
             forAll(pp, i)
             {
                 label faceI = pp.start()+i;
+                label globalI = namedSurfaceRegion[faceI];
 
                 if
                 (
-                    namedSurfaceIndex[faceI] != -1
-                 && surfaceMap[namedSurfaceIndex[faceI]] == -1
+                    globalI != -1
+                 && surfaceMap[surfaces_.whichSurface(globalI).first()] == -1
                 )
                 {
-                    namedSurfaceIndex[faceI] = -1;
+                    namedSurfaceRegion[faceI] = -1;
                 }
             }
         }
@@ -2262,12 +2272,12 @@ void Foam::meshRefinement::getIntersections
     const pointField& neiCc,
     const labelList& testFaces,
 
-    labelList& namedSurfaceIndex,
+    labelList& namedSurfaceRegion,
     bitSet& posOrientation
 ) const
 {
-    namedSurfaceIndex.setSize(mesh_.nFaces());
-    namedSurfaceIndex = -1;
+    namedSurfaceRegion.setSize(mesh_.nFaces());
+    namedSurfaceRegion = -1;
 
     posOrientation.setSize(mesh_.nFaces());
     posOrientation = false;
@@ -2300,31 +2310,30 @@ void Foam::meshRefinement::getIntersections
     // the information already in surfaceIndex_.
 
     labelList surface1;
+    labelList region1;
     List<pointIndexHit> hit1;
     vectorField normal1;
     labelList surface2;
+    labelList region2;
     List<pointIndexHit> hit2;
     vectorField normal2;
-    {
-        labelList region1;
-        labelList region2;
-        surfaces_.findNearestIntersection
-        (
-            surfacesToTest,
-            start,
-            end,
 
-            surface1,
-            hit1,
-            region1,
-            normal1,
+    surfaces_.findNearestIntersection
+    (
+        surfacesToTest,
+        start,
+        end,
 
-            surface2,
-            hit2,
-            region2,
-            normal2
-        );
-    }
+        surface1,
+        hit1,
+        region1,
+        normal1,
+
+        surface2,
+        hit2,
+        region2,
+        normal2
+    );
 
     forAll(testFaces, i)
     {
@@ -2343,20 +2352,32 @@ void Foam::meshRefinement::getIntersections
                 )
             )
             {
-                namedSurfaceIndex[faceI] = surface2[i];
+                namedSurfaceRegion[faceI] = surfaces_.globalRegion
+                (
+                    surface2[i],
+                    region2[i]
+                );
                 posOrientation.set(faceI, ((area&normal2[i]) > 0));
                 nSurfFaces[surface2[i]]++;
             }
             else
             {
-                namedSurfaceIndex[faceI] = surface1[i];
+                namedSurfaceRegion[faceI] = surfaces_.globalRegion
+                (
+                    surface1[i],
+                    region1[i]
+                );
                 posOrientation.set(faceI, ((area&normal1[i]) > 0));
                 nSurfFaces[surface1[i]]++;
             }
         }
         else if (surface2[i] != -1)
         {
-            namedSurfaceIndex[faceI] = surface2[i];
+            namedSurfaceRegion[faceI] = surfaces_.globalRegion
+            (
+                surface2[i],
+                region2[i]
+            );
             posOrientation.set(faceI, ((area&normal2[i]) > 0));
             nSurfFaces[surface2[i]]++;
         }
@@ -2370,7 +2391,7 @@ void Foam::meshRefinement::getIntersections
     syncTools::syncFaceList
     (
         mesh_,
-        namedSurfaceIndex,
+        namedSurfaceRegion,
         maxEqOp<label>()
     );
 
@@ -2399,7 +2420,7 @@ void Foam::meshRefinement::zonify
     labelList& cellToZone,
     labelList& unnamedRegion1,
     labelList& unnamedRegion2,
-    labelList& namedSurfaceIndex,
+    labelList& namedSurfaceRegion,
     bitSet& posOrientation
 ) const
 {
@@ -2408,9 +2429,9 @@ void Foam::meshRefinement::zonify
     // -2  : unset
     // -1  : not in any zone (zone 'none' or background zone)
     // >=0 : zoneID
-    // namedSurfaceIndex, posOrientation:
+    // namedSurfaceRegion, posOrientation:
     // -1  : face not intersected by named surface
-    // >=0 : index of named surface
+    // >=0 : globalRegion (surface+region)
     //       (and posOrientation: surface normal v.s. face normal)
 
     const PtrList<surfaceZonesInfo>& surfZones = surfaces_.surfZones();
@@ -2441,7 +2462,7 @@ void Foam::meshRefinement::zonify
     cellToZone.setSize(mesh_.nCells());
     cellToZone = -2;
 
-    namedSurfaceIndex.clear();
+    namedSurfaceRegion.clear();
     posOrientation.clear();
 
 
@@ -2466,7 +2487,7 @@ void Foam::meshRefinement::zonify
             namedSurfaces,
             neiCc,
             intersectedFaces(),
-            namedSurfaceIndex,
+            namedSurfaceRegion,
             posOrientation
         );
     }
@@ -2551,12 +2572,12 @@ void Foam::meshRefinement::zonify
 
         // Stop at unnamed or named surface
         labelList allRegion1(mesh_.nFaces(), -1);
-        forAll(namedSurfaceIndex, faceI)
+        forAll(namedSurfaceRegion, faceI)
         {
             allRegion1[faceI] = max
             (
                 unnamedRegion1[faceI],
-                namedSurfaceIndex[faceI]
+                namedSurfaceRegion[faceI]
             );
         }
 
@@ -2595,7 +2616,7 @@ void Foam::meshRefinement::zonify
         (
             neiCc,
             closedNamedSurfaces,    // indices of closed surfaces
-            namedSurfaceIndex,      // per face index of named surface
+            namedSurfaceRegion,     // per face index of named surface + region
             surfaceToCellZone,      // cell zone index per surface
 
             cellToZone
@@ -2618,7 +2639,7 @@ void Foam::meshRefinement::zonify
                 backgroundZoneID,
                 pointField(0),
                 unnamedRegion1,      // Intersections with unnamed surfaces
-                namedSurfaceIndex,   // Intersections with named surfaces
+                namedSurfaceRegion,  // Intersections with named surfaces
                 surfaceToCellZone,
                 cellToZone
             );
@@ -2635,13 +2656,13 @@ void Foam::meshRefinement::zonify
                 nErodeCellZones,
                 backgroundZoneID,
                 unnamedRegion1,
-                namedSurfaceIndex,
+                namedSurfaceRegion,
                 cellToZone
             );
         }
 
 
-        // Make sure namedSurfaceIndex is unset inbetween same cell zones.
+        // Make sure namedSurfaceRegion is unset inbetween same cell zones.
         if (!allowFreeStandingZoneFaces)
         {
             Info<< "Only keeping zone faces inbetween different cellZones."
@@ -2668,7 +2689,7 @@ void Foam::meshRefinement::zonify
             (
                 surfaceMap,
                 cellToZone,
-                namedSurfaceIndex
+                namedSurfaceRegion
             );
         }
     }
@@ -4476,7 +4497,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     // Add any faceZones, cellZones originating from surface to the mesh
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     labelList surfaceToCellZone;
-    labelList surfaceToFaceZone;
+    labelListList surfaceToFaceZones;
 
     labelList namedSurfaces(surfaceZonesInfo::getNamedSurfaces(surfZones));
     if (namedSurfaces.size())
@@ -4487,8 +4508,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
             label surfI = namedSurfaces[i];
 
             Info<< "Surface : " << surfaces_.names()[surfI] << nl
-                << "    faceZone : " << surfZones[surfI].faceZoneName() << nl
-                << "    cellZone : " << surfZones[surfI].cellZoneName() << endl;
+                << "    faceZones : " << surfZones[surfI].faceZoneNames() << nl
+                << "    cellZone  : " << surfZones[surfI].cellZoneName()
+                << endl;
         }
         Info<< endl;
 
@@ -4499,7 +4521,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
             namedSurfaces,
             mesh_
         );
-        surfaceToFaceZone = surfaceZonesInfo::addFaceZonesToMesh
+        surfaceToFaceZones = surfaceZonesInfo::addFaceZonesToMesh
         (
             surfZones,
             namedSurfaces,
@@ -4516,11 +4538,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     // -2 : unset : not allowed!
     // -1 : not in any zone (zone 'none')
     // >=0: zoneID
-    // namedSurfaceIndex:
+    // namedSurfaceRegion:
     // -1  : face not intersecting a named surface
     // >=0 : index of named surface
     labelList cellToZone;
-    labelList namedSurfaceIndex;
+    labelList namedSurfaceRegion;
     bitSet posOrientation;
     {
         labelList unnamedRegion1;
@@ -4537,24 +4559,26 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
             cellToZone,
             unnamedRegion1,
             unnamedRegion2,
-            namedSurfaceIndex,
+            namedSurfaceRegion,
             posOrientation
         );
     }
 
 
-    // Convert namedSurfaceIndex (index of named surfaces) to
+    // Convert namedSurfaceRegion (index of named surfaces) to
     // actual faceZone index
 
     //- Per face index of faceZone or -1
     labelList faceToZone(mesh_.nFaces(), -1);
 
-    forAll(namedSurfaceIndex, faceI)
+    forAll(namedSurfaceRegion, faceI)
     {
-        label surfI = namedSurfaceIndex[faceI];
-        if (surfI != -1)
+        //label surfI = namedSurfaceIndex[faceI];
+        label globalI = namedSurfaceRegion[faceI];
+        if (globalI != -1)
         {
-            faceToZone[faceI] = surfaceToFaceZone[surfI];
+            const labelPair spr = surfaces_.whichSurface(globalI);
+            faceToZone[faceI] = surfaceToFaceZones[spr.first()][spr.second()];
         }
     }
 

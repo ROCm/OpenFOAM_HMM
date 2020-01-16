@@ -163,7 +163,16 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
             globalLevelIncr[surfi] = gapLevelIncrement;
 
             // Surface zones
-            surfZones.set(surfi, new surfaceZonesInfo(surface, shapeDict));
+            surfZones.set
+            (
+                surfi,
+                new surfaceZonesInfo
+                (
+                    surface,
+                    shapeDict,
+                    allGeometry.regionNames()[surfaces[surfi]]
+                )
+            );
 
 
             // Global perpendicular angle
@@ -1395,9 +1404,10 @@ int main(int argc, char *argv[])
                 Info<< surfaces.names()[surfi] << ':' << nl << nl;
             }
 
-            const word& fzName = surfaces.surfZones()[surfi].faceZoneName();
+            const wordList& fzNames =
+                surfaces.surfZones()[surfi].faceZoneNames();
 
-            if (fzName.empty())
+            if (fzNames.empty())
             {
                 // 'Normal' surface
                 forAll(regNames, i)
@@ -1520,15 +1530,19 @@ int main(int argc, char *argv[])
                 // region in surface for patch for zoning
                 if (regNames.size())
                 {
-                    label globalRegioni = surfaces.globalRegion(surfi, 0);
+                    forAll(fzNames, fzi)
+                    {
+                        const word& fzName = fzNames[fzi];
+                        label globalRegioni = surfaces.globalRegion(surfi, fzi);
 
-                    meshRefiner.addFaceZone
-                    (
-                        fzName,
-                        pbm[globalToMasterPatch[globalRegioni]].name(),
-                        pbm[globalToSlavePatch[globalRegioni]].name(),
-                        surfaces.surfZones()[surfi].faceType()
-                    );
+                        meshRefiner.addFaceZone
+                        (
+                            fzName,
+                            pbm[globalToMasterPatch[globalRegioni]].name(),
+                            pbm[globalToSlavePatch[globalRegioni]].name(),
+                            surfaces.surfZones()[surfi].faceType()
+                        );
+                    }
                 }
             }
 

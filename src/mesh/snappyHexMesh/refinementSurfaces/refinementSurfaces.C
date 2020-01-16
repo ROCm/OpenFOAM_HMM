@@ -123,6 +123,34 @@ Foam::labelList Foam::refinementSurfaces::findHigherLevel
 }
 
 
+Foam::labelList Foam::refinementSurfaces::calcSurfaceIndex
+(
+    const searchableSurfaces& allGeometry,
+    const labelList& surfaces
+)
+{
+    // Determine overall number of global regions
+    label globalI = 0;
+    forAll(surfaces, surfI)
+    {
+        globalI += allGeometry[surfaces[surfI]].regions().size();
+    }
+
+    labelList regionToSurface(globalI);
+    globalI = 0;
+    forAll(surfaces, surfI)
+    {
+        const label nLocal = allGeometry[surfaces[surfI]].regions().size();
+        for (label i = 0; i < nLocal; i++)
+        {
+            regionToSurface[globalI++] = surfI;
+        }
+    }
+
+    return regionToSurface;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::refinementSurfaces::refinementSurfaces
@@ -276,7 +304,16 @@ Foam::refinementSurfaces::refinementSurfaces
             const searchableSurface& surface = allGeometry_[surfaces_[surfI]];
 
             // Surface zones
-            surfZones_.set(surfI, new surfaceZonesInfo(surface, dict));
+            surfZones_.set
+            (
+                surfI,
+                new surfaceZonesInfo
+                (
+                    surface,
+                    dict,
+                    allGeometry_.regionNames()[surfaces_[surfI]]
+                )
+            );
 
             // Global perpendicular angle
             if (dict.found("patchInfo"))
@@ -433,6 +470,10 @@ Foam::refinementSurfaces::refinementSurfaces
     }
 
     // Rework surface specific information into information per global region
+
+    regionToSurface_ = calcSurfaceIndex(allGeometry_, surfaces_);
+
+
     minLevel_.setSize(nRegions);
     minLevel_ = 0;
     maxLevel_.setSize(nRegions);
@@ -539,6 +580,7 @@ Foam::refinementSurfaces::refinementSurfaces
     names_(names),
     surfZones_(surfZones),
     regionOffset_(regionOffset),
+    regionToSurface_(calcSurfaceIndex(allGeometry, surfaces)),
     minLevel_(minLevel),
     maxLevel_(maxLevel),
     gapLevel_(gapLevel),
@@ -557,6 +599,17 @@ Foam::refinementSurfaces::refinementSurfaces
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::labelPair Foam::refinementSurfaces::whichSurface
+(
+    const label globalRegionI
+) const
+{
+    const label surfI = regionToSurface_[globalRegionI];
+    const label localI = globalRegionI-regionOffset_[surfI];
+    return labelPair(surfI, localI);
+}
+
 
 // // Count number of triangles per surface region
 // Foam::labelList Foam::refinementSurfaces::countRegions(const triSurface& s)
