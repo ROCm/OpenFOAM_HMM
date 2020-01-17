@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -146,6 +146,7 @@ sensitivityBezierFI::sensitivityBezierFI
     dVdbSens_(3*Bezier_.nBezier(), Zero),
     distanceSens_(3*Bezier_.nBezier(), Zero),
     optionsSens_(3*Bezier_.nBezier(), Zero),
+    bcSens_(3*Bezier_.nBezier(), Zero),
 
     derivativesFolder_("optimisation"/type() + "Derivatives"),
 
@@ -249,6 +250,9 @@ void sensitivityBezierFI::assembleSensitivities()
                 const vectorField& dxdbFace = tdxdbFace();
                 dxdbDirectSens_[iDV] +=
                     gSum(dxdbDirectMult_()[patchI] & dxdbFace);
+
+                // Contribution from boundary conditions
+                bcSens_[iDV] += gSum(bcDxDbMult_()[patchI] & dxdbFace);
             }
 
             // Contribution from delta (V) / delta b
@@ -290,7 +294,8 @@ void sensitivityBezierFI::assembleSensitivities()
           + dxdbDirectSens_
           + dVdbSens_
           + distanceSens_
-          + optionsSens_;
+          + optionsSens_
+          + bcSens_;
     }
 }
 
@@ -304,6 +309,7 @@ void sensitivityBezierFI::clearSensitivities()
     dVdbSens_ = Zero;
     distanceSens_ = Zero;
     optionsSens_ = Zero;
+    bcSens_ = Zero;
 
     FIBase::clearSensitivities();
 }
@@ -329,7 +335,9 @@ void sensitivityBezierFI::write(const word& baseName)
             << setw(width)   << "dndb"       << " "
             << setw(width)   << "dxdbDirect" << " "
             << setw(width)   << "dVdb"       << " "
-            << setw(width)   << "distance"   << endl;
+            << setw(width)   << "distance"   << " "
+            << setw(width)   << "options"    << " "
+            << setw(width)   << "dvdb"       << endl;
         const label nDVs = derivatives_.size();
         const label nBezier = Bezier_.nBezier();
         const boolListList& confineMovement = Bezier_.confineMovement();
@@ -337,11 +345,14 @@ void sensitivityBezierFI::write(const word& baseName)
 
         for (label iDV = 0; iDV < nDVs; iDV++)
         {
-            label iCP = iDV%nBezier;
-            label idir = iDV/nBezier;
+            const label iCP(iDV%nBezier);
+            const label idir(iDV/nBezier);
             if (!confineMovement[idir][iCP])
             {
-                if (iDV!=lastActive + 1) derivFile << "\n";
+                if (iDV!=lastActive + 1)
+                {
+                    derivFile << "\n";
+                }
                 lastActive = iDV;
                 derivFile
                    << setw(widthDV) << iDV << " "
@@ -351,7 +362,9 @@ void sensitivityBezierFI::write(const word& baseName)
                    << setw(width) << dndbSens_[iDV] << " "
                    << setw(width) << dxdbDirectSens_[iDV] << " "
                    << setw(width) << dVdbSens_[iDV] << " "
-                   << setw(width) << distanceSens_[iDV] << endl;
+                   << setw(width) << distanceSens_[iDV] << " "
+                   << setw(width) << optionsSens_[iDV] << " "
+                   << setw(width) << bcSens_[iDV] << endl;
             }
         }
     }

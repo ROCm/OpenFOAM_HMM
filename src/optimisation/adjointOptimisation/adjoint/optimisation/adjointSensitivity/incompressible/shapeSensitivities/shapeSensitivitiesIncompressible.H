@@ -5,9 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2020 PCOpt/NTUA
-    Copyright (C) 2013-2020 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2020 PCOpt/NTUA
+    Copyright (C) 2020 FOSS GP
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,89 +25,60 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::incompressible::sensitivityBezierFI
+    Foam::incompressible::shapeSensitivitiesBase
 
 Description
-    Calculation of adjoint based sensitivities for Bezier control points
-    using the FI appoach
+    Base class supporting shape sensitivity derivatives for
+    incompressible flows
 
 SourceFiles
-    sensitivityBezierFI.C
+    shapeSensitivitiesBase.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sensitivityBezierFIIncompressible_H
-#define sensitivityBezierFIIncompressible_H
+#ifndef shapeSensitivitiesIncompressible_H
+#define shapeSensitivitiesIncompressible_H
 
-#include "primitiveFieldsFwd.H"
-#include "volFieldsFwd.H"
-#include "pointFieldsFwd.H"
-#include "surfaceFieldsFwd.H"
-#include "volPointInterpolation.H"
-#include "FIBaseIncompressible.H"
-#include "PrimitivePatchInterpolation.H"
-#include "deltaBoundary.H"
-#include "Bezier.H"
+#include "adjointSensitivityIncompressible.H"
+#include "shapeSensitivitiesBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
 namespace incompressible
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class sensitivityBezierFI Declaration
+                      Class shapeSensitivities Declaration
 \*---------------------------------------------------------------------------*/
 
-class sensitivityBezierFI
+class shapeSensitivities
 :
-    public FIBase
+    public adjointSensitivity,
+    public shapeSensitivitiesBase
 {
 protected:
 
     // Protected data
-        Bezier Bezier_;
 
-        //- Flow related term
-        scalarField flowSens_;
+        //- Fields related to direct sensitivities
+        autoPtr<boundaryVectorField> dSfdbMult_;
+        autoPtr<boundaryVectorField> dnfdbMult_;
+        autoPtr<boundaryVectorField> dxdbDirectMult_;
+        autoPtr<boundaryVectorField> bcDxDbMult_;
 
-        //- Term depending on delta(n dS)/delta b
-        scalarField dSdbSens_;
 
-        //- Term depending on delta(n)/delta b
-        scalarField dndbSens_;
+    // Protected Member Fuctions
 
-        //- Term depending on delta(x)/delta b for objectives that directly
-        //- depend on x
-        scalarField dxdbDirectSens_;
+        //- Accumulate direct sensitivities
+        virtual void accumulateDirectSensitivityIntegrand(const scalar dt);
 
-        //- Term depending on delta(V)/delta b
-        scalarField dVdbSens_;
+        //- Accumulate sensitivities enamating from the boundary conditions
+        virtual void accumulateBCSensitivityIntegrand(const scalar dt);
 
-        //- Term depending on distance differentiation
-        scalarField distanceSens_;
-
-        //- Term depending on fvOptions
-        scalarField optionsSens_;
-
-        //- Term depending on the differenation of boundary conditions
-        scalarField bcSens_;
-
-        fileName derivativesFolder_;
-
-        label meshMovementIters_;
-        scalar meshMovementResidualLimit_;
-        volVectorField dxdb_;
-
-        void read();
-
-        tmp<volVectorField> solveMeshMovementEqn
-        (
-            const label iCP,
-            const label idir
-        );
+        //- Compute multiplier of dv_i/db
+        tmp<boundaryVectorField> dvdbMult() const;
 
 
 private:
@@ -116,22 +86,22 @@ private:
     // Private Member Functions
 
         //- No copy construct
-        sensitivityBezierFI(const sensitivityBezierFI&) = delete;
+        shapeSensitivities(const shapeSensitivities&) = delete;
 
         //- No copy assignment
-        void operator=(const sensitivityBezierFI&) = delete;
+        void operator=(const shapeSensitivities&) = delete;
 
 
 public:
 
     //- Runtime type information
-    TypeName("BezierFI");
+    TypeName("shapeSensitivities");
 
 
     // Constructors
 
         //- Construct from components
-        sensitivityBezierFI
+        shapeSensitivities
         (
             const fvMesh& mesh,
             const dictionary& dict,
@@ -143,18 +113,21 @@ public:
 
 
     //- Destructor
-    virtual ~sensitivityBezierFI() = default;
+    virtual ~shapeSensitivities() = default;
 
 
     // Member Functions
 
+        //- Accumulate sensitivity integrands
+        virtual void accumulateIntegrand(const scalar dt) = 0;
+
         //- Assemble sensitivities
-        virtual void assembleSensitivities();
+        virtual void assembleSensitivities() = 0;
 
         //- Zero sensitivity fields and their constituents
         virtual void clearSensitivities();
 
-        //- Write sensitivities to file
+        //- Write sensitivity fields.
         virtual void write(const word& baseName = word::null);
 };
 

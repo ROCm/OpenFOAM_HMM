@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -40,7 +40,7 @@ SourceFiles
 #define FIBaseIncompressible_H
 
 #include "adjointSensitivityIncompressible.H"
-#include "shapeSensitivitiesBase.H"
+#include "shapeSensitivitiesIncompressible.H"
 #include "adjointEikonalSolverIncompressible.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -52,13 +52,12 @@ namespace incompressible
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class FIBase Declaration
+                            Class FIBase Declaration
 \*---------------------------------------------------------------------------*/
 
 class FIBase
 :
-    public adjointSensitivity,
-    public shapeSensitivitiesBase
+    public shapeSensitivities
 {
 protected:
 
@@ -72,11 +71,6 @@ protected:
 
         //- dx/db multiplier coming from fvOptions
         vectorField optionsDxDbMult_;
-
-        //- Fields related to direct sensitivities
-        autoPtr<boundaryVectorField> dSfdbMult_;
-        autoPtr<boundaryVectorField> dnfdbMult_;
-        autoPtr<boundaryVectorField> dxdbDirectMult_;
 
         //- Include distance variation in sens computation
         bool includeDistance_;
@@ -139,9 +133,6 @@ public:
 
         //- Zero sensitivity fields and their constituents
         virtual void clearSensitivities();
-
-        //- Write sensitivity fields
-        virtual void write(const word& baseName = word::null);
 };
 
 

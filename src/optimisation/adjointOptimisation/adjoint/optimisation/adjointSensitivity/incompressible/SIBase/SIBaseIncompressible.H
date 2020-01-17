@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -40,8 +40,7 @@ SourceFiles
 #ifndef SIBaseIncompressible_H
 #define SIBaseIncompressible_H
 
-#include "adjointSensitivityIncompressible.H"
-#include "shapeSensitivitiesBase.H"
+#include "shapeSensitivitiesIncompressible.H"
 #include "sensitivitySurfaceIncompressible.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -53,13 +52,12 @@ namespace incompressible
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class SIBase Declaration
+                            Class SIBase Declaration
 \*---------------------------------------------------------------------------*/
 
 class SIBase
 :
-    public adjointSensitivity,
-    public shapeSensitivitiesBase
+    public shapeSensitivities
 {
 protected:
 
@@ -68,11 +66,10 @@ protected:
         //- Surface sensitivities
         sensitivitySurface surfaceSensitivity_;
 
-        //- Fields related to direct sensitivities
-        autoPtr<boundaryVectorField> dSfdbMult_;
-        autoPtr<boundaryVectorField> dnfdbMult_;
-        autoPtr<boundaryVectorField> dxdbDirectMult_;
-
+        //- Whether to include direct sensitivities or not.
+        //  Used to avoid double contributions from both here and the
+        //  sensitivitySurface object which might have already accounted for
+        //  them
         bool includeObjective_;
 
 
@@ -130,9 +127,6 @@ public:
 
         //- Zero sensitivity fields and their constituents
         virtual void clearSensitivities();
-
-        //- Write sensitivity fields.
-        virtual void write(const word& baseName = word::null);
 };
 
 
