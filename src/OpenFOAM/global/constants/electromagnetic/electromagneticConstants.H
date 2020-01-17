@@ -48,7 +48,7 @@ namespace electromagnetic
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     //- Group name for electromagnetic constants
-    extern const char* const group;
+    constexpr const char* const group = "electromagnetic";
 
     //- Magnetic constant/permeability of free space: default SI units: [H/m]
     extern const dimensionedScalar mu0;

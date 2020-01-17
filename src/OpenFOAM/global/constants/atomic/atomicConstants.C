@@ -38,9 +38,6 @@ namespace Foam
 namespace constant
 {
 
-const char* const atomic::group = "atomic";
-
-
 // Note: cannot use dimless etc. since not guaranteed to be constructed
 defineDimensionedConstantWithDefault
 (

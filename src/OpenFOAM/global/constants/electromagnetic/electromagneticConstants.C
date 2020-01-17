@@ -38,9 +38,6 @@ namespace Foam
 namespace constant
 {
 
-const char* const electromagnetic::group = "electromagnetic";
-
-
 defineDimensionedConstantWithDefault
 (
     electromagnetic::group,

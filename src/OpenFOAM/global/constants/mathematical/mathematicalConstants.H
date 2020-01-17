@@ -48,6 +48,7 @@ namespace mathematical
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    //- Group name for mathematical constants
     constexpr const char* const group = "mathematical";
 
     constexpr scalar e(M_E);

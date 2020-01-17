@@ -36,9 +36,6 @@ namespace Foam
 namespace constant
 {
 
-const char* const universal::group = "universal";
-
-
 // Note: cannot use dimless etc. since not guaranteed to be constructed
 defineDimensionedConstantWithDefault
 (

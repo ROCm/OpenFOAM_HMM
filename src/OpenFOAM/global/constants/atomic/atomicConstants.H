@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +49,7 @@ namespace atomic
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     //- Group name for atomic constants
-    extern const char* const group;
+    constexpr const char* const group = "atomic";
 
     //- Fine-structure constant: default SI units: []
     extern const dimensionedScalar alpha;

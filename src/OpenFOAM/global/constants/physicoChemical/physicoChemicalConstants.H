@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +49,7 @@ namespace physicoChemical
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     //- Group name for physico-chemical constants
-    extern const char* const group;
+    constexpr const char* const group = "physicoChemical";
 
     //- Universal gas constant: default SI units: [J/mol/K]
     extern const dimensionedScalar R;

@@ -39,8 +39,6 @@ namespace Foam
 namespace constant
 {
 
-const char* const physicoChemical::group = "physicoChemical";
-
 defineDimensionedConstantWithDefault
 (
     physicoChemical::group,
