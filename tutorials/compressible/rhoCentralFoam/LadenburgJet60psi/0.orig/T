@@ -47,8 +47,15 @@ boundaryField
         value           uniform 297.0;
     }
 
-    wedge1 {type wedge;}
-    wedge2 {type wedge;}
+    wedge1
+    {
+        type wedge;
+    }
+
+    wedge2
+    {
+        type wedge;
+    }
 }
 
 // ************************************************************************* //

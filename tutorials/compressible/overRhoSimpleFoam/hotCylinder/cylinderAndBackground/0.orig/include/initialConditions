@@ -11,6 +11,5 @@ pressure             1e5;
 temperature          300;
 turbulentEpsilon     10;
 turbulentKE          1;
-#inputMode           merge
 
 // ************************************************************************* //

@@ -11,47 +11,52 @@ FoamFile
     format      ascii;
     class       volScalarField;
     location    "0";
-    object      k;
+    object      epsilon;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -2 0 0 0 0];
+dimensions      [0 2 -3 0 0 0 0];
 
-internalField   uniform 1;
+internalField   uniform 200;
 
 boundaryField
 {
     front
     {
-        type            kqRWallFunction;
-        value           uniform 1;
+        type            epsilonWallFunction;
+        value           uniform 200;
     }
+
     back
     {
-        type            kqRWallFunction;
-        value           uniform 1;
+        type            epsilonWallFunction;
+        value           uniform 200;
     }
+
     walls
     {
-        type            kqRWallFunction;
-        value           uniform 1;
+        type            epsilonWallFunction;
+        value           uniform 200;
     }
+
     porosityWall
     {
-        type            kqRWallFunction;
-        value           uniform 1;
+        type            epsilonWallFunction;
+        value           uniform 200;
     }
+
     inlet
     {
-        type            turbulentIntensityKineticEnergyInlet;
-        intensity       0.05;
-        value           uniform 1;
+        type            turbulentMixingLengthDissipationRateInlet;
+        mixingLength    0.005;
+        value           uniform 200;
     }
+
     outlet
     {
         type            inletOutlet;
-        inletValue      uniform 1;
-        value           uniform 1;
+        inletValue      uniform 200;
+        value           uniform 200;
     }
 }
 

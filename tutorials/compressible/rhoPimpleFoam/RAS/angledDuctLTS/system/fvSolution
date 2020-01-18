@@ -32,7 +32,7 @@ solvers
         relTol          0.1;
     }
 
-    "(rho|U|h|k|epsilon|omega)"
+    "(rho|U|h|k|epsilon)"
     {
         solver          smoothSolver;
         smoother        symGaussSeidel;
@@ -40,7 +40,7 @@ solvers
         relTol          0.1;
     }
 
-    "(rho|U|h|k|epsilon|omega)Final"
+    "(rho|U|h|k|epsilon)Final"
     {
         $U;
         tolerance       1e-05;

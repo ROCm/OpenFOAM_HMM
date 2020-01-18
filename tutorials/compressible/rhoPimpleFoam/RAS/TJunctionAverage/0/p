@@ -55,7 +55,6 @@ boundaryField
         // debugParser     true;
     }
 
-
     outlet2
     {
         type            fixedValue;

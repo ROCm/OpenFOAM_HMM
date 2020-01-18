@@ -34,16 +34,17 @@ boundaryField
         value           uniform (0 0 0);
     }
 
-   outlet
-   {
-       type            uniformFixedValue;
-       uniformValue    (0 0 0);
-   }
-   inlet
-   {
-       type            uniformFixedValue;
-       uniformValue     (0 0 0);
-   }
+    outlet
+    {
+        type            uniformFixedValue;
+        uniformValue    (0 0 0);
+    }
+
+    inlet
+    {
+        type            uniformFixedValue;
+        uniformValue     (0 0 0);
+    }
 
     overset
     {

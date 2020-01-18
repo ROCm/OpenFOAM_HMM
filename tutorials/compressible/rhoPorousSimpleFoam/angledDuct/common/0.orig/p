@@ -24,14 +24,17 @@ boundaryField
     {
         type            zeroGradient;
     }
+
     back
     {
         type            zeroGradient;
     }
+
     walls
     {
         type            zeroGradient;
     }
+
     porosityWall
     {
         type            zeroGradient;
@@ -41,6 +44,7 @@ boundaryField
     {
         type            zeroGradient;
     }
+
     outlet
     {
         type            fixedValue;

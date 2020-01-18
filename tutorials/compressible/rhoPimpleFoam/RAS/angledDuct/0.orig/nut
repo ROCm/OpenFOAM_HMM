@@ -11,45 +11,50 @@ FoamFile
     format      ascii;
     class       volScalarField;
     location    "0";
-    object      alphat;
+    object      nut;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [1 -1 -1 0 0 0 0];
+dimensions      [0 2 -1 0 0 0 0];
 
-internalField   uniform 1e-3;
+internalField   uniform 0;
 
 boundaryField
 {
     front
     {
-        type            compressible::alphatWallFunction;
-        value           $internalField;
+        type            nutkWallFunction;
+        value           uniform 0;
     }
+
     back
     {
-        type            compressible::alphatWallFunction;
-        value           $internalField;
+        type            nutkWallFunction;
+        value           uniform 0;
     }
+
     walls
     {
-        type            compressible::alphatWallFunction;
-        value           $internalField;
+        type            nutkWallFunction;
+        value           uniform 0;
     }
+
     porosityWall
     {
-        type            compressible::alphatWallFunction;
-        value           $internalField;
+        type            nutkWallFunction;
+        value           uniform 0;
     }
+
     inlet
     {
         type            calculated;
-        value           $internalField;
+        value           uniform 0;
     }
+
     outlet
     {
         type            calculated;
-        value           $internalField;
+        value           uniform 0;
     }
 }
 
