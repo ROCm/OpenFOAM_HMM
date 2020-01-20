@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,11 +34,15 @@ Description
     compressible flows.
 
     The model is a three-transport-equation linear-eddy-viscosity turbulence
-    closure model alongside an elliptic relaxation equation:
-      - Turbulent kinetic energy, \c k,
-      - Turbulent kinetic energy dissipation rate, \c epsilon,
-      - Normalised wall-normal fluctuating velocity scale, \c phit,
-      - Elliptic relaxation factor, \c f.
+    closure model alongside an elliptic relaxation equation.
+
+    \heading Input fields
+    \plaintable
+        k         | Turbulent kinetic energy [m2/s2]
+        epsilon   | Turbulent kinetic energy dissipation rate [m2/s3]
+        phit      | Normalised wall-normal fluctuating velocity scale [-]
+        f         | Elliptic relaxation factor [1/s]
+    \endplaintable
 
     Reference:
     \verbatim
@@ -53,19 +57,20 @@ Description
     \verbatim
         kEpsilonPhitFCoeffs
         {
-            Cmu         0.22,    // Turbulent viscosity constant
-            Ceps1a      1.4,     // Model constant for epsilon
-            Ceps1b      1.0,     // Model constant for epsilon
-            Ceps1c      0.05,    // Model constant for epsilon
-            Ceps2       1.9,     // Model constant for epsilon
-            Cf1         1.4,     // Model constant for f
-            Cf2         0.3,     // Model constant for f
-            CL          0.25,    // Model constant for L
-            Ceta        110.0,   // Model constant for L
-            CT          6.0,     // Model constant for T
-            sigmaK      1.0,     // Turbulent Prandtl number for k
-            sigmaEps    1.3,     // Turbulent Prandtl number for epsilon
-            sigmaPhit   1.0,     // Turbulent Prandtl number for phit = sigmaK
+            includeNu   true;    // include nu in (LUU: Eq. 17), see Notes
+            Cmu         0.22;    // Turbulent viscosity constant
+            Ceps1a      1.4;     // Model constant for epsilon
+            Ceps1b      1.0;     // Model constant for epsilon
+            Ceps1c      0.05;    // Model constant for epsilon
+            Ceps2       1.9;     // Model constant for epsilon
+            Cf1         1.4;     // Model constant for f
+            Cf2         0.3;     // Model constant for f
+            CL          0.25;    // Model constant for L
+            Ceta        110.0;   // Model constant for L
+            CT          6.0;     // Model constant for T
+            sigmaK      1.0;     // Turbulent Prandtl number for k
+            sigmaEps    1.3;     // Turbulent Prandtl number for epsilon
+            sigmaPhit   1.0;     // Turbulent Prandtl number for phit = sigmaK
         }
     \endverbatim
 
@@ -73,6 +78,14 @@ Note
     The name of the original variable replacing 'v2' is 'phi' (LUU:Eq. 14).
     However, the name 'phi' preexisted in OpenFOAM; therefore, this name was
     replaced by 'phit' herein.
+
+    Including \c nu in \c DphitEff even though it is not present in (LUU:Eq. 17)
+    provided higher level of resemblance to benchmarks for the tests considered,
+    particularly for the peak skin friction (yet, pressure-related predictions
+    were unaffected). Users can switch off \c nu in \c DphitEff by using
+    \c includeNu entry in \c kEpsilonPhitFCoeffs as shown above in order to
+    follow the reference paper thereat. \c includeNu is left \c true by default.
+    See GitLab issue #1560.
 
 SourceFiles
     kEpsilonPhitF.C
@@ -118,6 +131,8 @@ class kEpsilonPhitF
 protected:
 
     // Protected Data
+
+            Switch includeNu_;
 
         // Model coefficients
 
@@ -210,7 +225,7 @@ public:
         //- Re-read model coefficients if they have changed
         virtual bool read();
 
-        //- Return the effective diffusivity for k
+        //- Return the effective diffusivity for k (LUU:Eq. 3)
         tmp<volScalarField> DkEff() const
         {
             return tmp<volScalarField>
@@ -223,7 +238,7 @@ public:
             );
         }
 
-        //- Return the effective diffusivity for epsilon
+        //- Return the effective diffusivity for epsilon (LUU:Eq. 4)
         tmp<volScalarField> DepsilonEff() const
         {
             return tmp<volScalarField>
@@ -236,17 +251,18 @@ public:
             );
         }
 
-        //- Return the effective diffusivity for phit
+        //- Return the effective diffusivity for phit (LUU:Eq. 17)
         tmp<volScalarField> DphitEff() const
         {
-            return tmp<volScalarField>
-            (
-                new volScalarField
-                (
-                    "DphitEff",
-                    this->nut_/sigmaPhit_ + this->nu()
-                )
-            );
+            auto tfld =
+                tmp<volScalarField>::New("DphitEff", this->nut_/sigmaPhit_);
+
+            if (includeNu_)
+            {
+                tfld.ref() += this->nu();
+            }
+
+            return tfld;
         }
 
         //- Return the turbulent kinetic energy field
