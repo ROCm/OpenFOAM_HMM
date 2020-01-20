@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -194,12 +194,13 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const token& tok)
         break;
 
         case token::tokenType::STRING:
-        case token::tokenType::VERBATIMSTRING:
             os << *tok.data_.stringPtr;
         break;
 
         case token::tokenType::VARIABLE:
-            // Behaviour differs according to stream type
+        case token::tokenType::VERBATIMSTRING:
+            // Different behaviour for (serial/parallel) stream type
+            // - preserve its type
             os.write(tok);
         break;
 

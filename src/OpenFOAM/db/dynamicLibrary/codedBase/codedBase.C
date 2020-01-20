@@ -62,8 +62,12 @@ static inline void writeEntryIfPresent
 
     if (eptr)
     {
-        const token& tok = eptr->stream()[0];
-        os.writeKeyword(key) << tok << token::END_STATEMENT << nl;
+        const tokenList& toks = eptr->stream();
+
+        if (!toks.empty())
+        {
+            os.writeEntry(key, toks[0]);
+        }
     }
 }
 //! \endcond
