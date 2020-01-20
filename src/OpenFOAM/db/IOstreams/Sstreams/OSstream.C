@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,7 +45,7 @@ bool Foam::OSstream::write(const token& tok)
             return true;
         }
 
-        case token::tokenType::VERBATIMSTRING :
+        case token::tokenType::VERBATIM :
         {
             write(char(token::HASH));
             write(char(token::BEGIN_BLOCK));

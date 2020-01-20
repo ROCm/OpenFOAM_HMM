@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -187,7 +187,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
     // Analyse input starting with this character.
     switch (c)
     {
-        // Check for punctuation first - same as token::isSeparator
+        // Check for punctuation first - same as token::isseparator()
 
         case token::END_STATEMENT :
         case token::BEGIN_LIST :
@@ -247,7 +247,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
                 else
                 {
                     t = std::move(val); // Move contents to token
-                    t.setType(token::tokenType::VERBATIMSTRING);
+                    t.setType(token::tokenType::VERBATIM);
                 }
             }
             else
@@ -381,7 +381,6 @@ Foam::Istream& Foam::ISstream::read(token& t)
 
             return *this;
         }
-
 
         // Should be a word (which can also be a single character)
         default:

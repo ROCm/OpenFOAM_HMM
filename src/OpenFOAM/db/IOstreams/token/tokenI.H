@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,6 +52,8 @@ inline Foam::token Foam::token::flag(int bitmask)
 
 inline bool Foam::token::isseparator(int c)
 {
+    // NOTE: keep synchronized with ISstream::read(token&)
+
     switch (c)
     {
         case token::END_STATEMENT :
@@ -119,7 +121,7 @@ inline Foam::token::token(const token& tok)
 
         case tokenType::STRING:
         case tokenType::VARIABLE:
-        case tokenType::VERBATIMSTRING:
+        case tokenType::VERBATIM:
         {
             data_.stringPtr = new string(*tok.data_.stringPtr);
             break;
@@ -173,7 +175,7 @@ inline Foam::token::token(const label val, label lineNumber)
 inline Foam::token::token(const floatScalar val, label lineNumber)
 :
     data_(),
-    type_(tokenType::FLOAT_SCALAR),
+    type_(tokenType::FLOAT),
     lineNumber_(lineNumber)
 {
     data_.floatVal = val;
@@ -183,7 +185,7 @@ inline Foam::token::token(const floatScalar val, label lineNumber)
 inline Foam::token::token(const doubleScalar val, label lineNumber)
 :
     data_(),
-    type_(tokenType::DOUBLE_SCALAR),
+    type_(tokenType::DOUBLE),
     lineNumber_(lineNumber)
 {
     data_.doubleVal = val;
@@ -252,7 +254,7 @@ inline void Foam::token::reset()
 
         case tokenType::STRING:
         case tokenType::VARIABLE:
-        case tokenType::VERBATIMSTRING:
+        case tokenType::VERBATIM:
         {
             delete data_.stringPtr;
             break;
@@ -327,14 +329,14 @@ inline bool Foam::token::setType(token::tokenType variant)
 
         case tokenType::STRING:
         case tokenType::VARIABLE:
-        case tokenType::VERBATIMSTRING:
+        case tokenType::VERBATIM:
         {
             switch (type_)
             {
                 // could also go from WORD to STRING etc - to be decided
                 case tokenType::STRING:
                 case tokenType::VARIABLE:
-                case tokenType::VERBATIMSTRING:
+                case tokenType::VERBATIM:
                     type_ = variant;
                     return true;
                     break;
@@ -465,15 +467,15 @@ inline Foam::label Foam::token::labelToken() const
 }
 
 
-inline bool Foam::token::isFloatScalar() const
+inline bool Foam::token::isFloat() const
 {
-    return (type_ == tokenType::FLOAT_SCALAR);
+    return (type_ == tokenType::FLOAT);
 }
 
 
-inline Foam::floatScalar Foam::token::floatScalarToken() const
+inline Foam::floatScalar Foam::token::floatToken() const
 {
-    if (type_ == tokenType::FLOAT_SCALAR)
+    if (type_ == tokenType::FLOAT)
     {
         return data_.floatVal;
     }
@@ -483,15 +485,15 @@ inline Foam::floatScalar Foam::token::floatScalarToken() const
 }
 
 
-inline bool Foam::token::isDoubleScalar() const
+inline bool Foam::token::isDouble() const
 {
-    return (type_ == tokenType::DOUBLE_SCALAR);
+    return (type_ == tokenType::DOUBLE);
 }
 
 
-inline Foam::doubleScalar Foam::token::doubleScalarToken() const
+inline Foam::doubleScalar Foam::token::doubleToken() const
 {
-    if (type_ == tokenType::DOUBLE_SCALAR)
+    if (type_ == tokenType::DOUBLE)
     {
         return data_.doubleVal;
     }
@@ -505,19 +507,19 @@ inline bool Foam::token::isScalar() const
 {
     return
     (
-        type_ == tokenType::FLOAT_SCALAR
-     || type_ == tokenType::DOUBLE_SCALAR
+        type_ == tokenType::FLOAT
+     || type_ == tokenType::DOUBLE
     );
 }
 
 
 inline Foam::scalar Foam::token::scalarToken() const
 {
-    if (type_ == tokenType::FLOAT_SCALAR)
+    if (type_ == tokenType::FLOAT)
     {
         return data_.floatVal;
     }
-    else if (type_ == tokenType::DOUBLE_SCALAR)
+    else if (type_ == tokenType::DOUBLE)
     {
         return data_.doubleVal;
     }
@@ -573,7 +575,7 @@ inline bool Foam::token::isString() const
     (
         type_ == tokenType::STRING
      || type_ == tokenType::VARIABLE
-     || type_ == tokenType::VERBATIMSTRING
+     || type_ == tokenType::VERBATIM
     );
 }
 
@@ -586,7 +588,7 @@ inline bool Foam::token::isVariable() const
 
 inline bool Foam::token::isVerbatim() const
 {
-    return (type_ == tokenType::VERBATIMSTRING);
+    return (type_ == tokenType::VERBATIM);
 }
 
 
@@ -602,7 +604,7 @@ inline const Foam::string& Foam::token::stringToken() const
     (
         type_ == tokenType::STRING
      || type_ == tokenType::VARIABLE
-     || type_ == tokenType::VERBATIMSTRING
+     || type_ == tokenType::VERBATIM
     )
     {
         return *data_.stringPtr;
@@ -671,7 +673,7 @@ inline void Foam::token::operator=(const token& tok)
 
         case tokenType::STRING:
         case tokenType::VARIABLE:
-        case tokenType::VERBATIMSTRING:
+        case tokenType::VERBATIM:
         {
             data_.stringPtr = new string(*tok.data_.stringPtr);
         }
@@ -723,7 +725,7 @@ inline void Foam::token::operator=(const label val)
 inline void Foam::token::operator=(const floatScalar val)
 {
     reset();
-    type_ = tokenType::FLOAT_SCALAR;
+    type_ = tokenType::FLOAT;
     data_.floatVal = val;
 }
 
@@ -731,7 +733,7 @@ inline void Foam::token::operator=(const floatScalar val)
 inline void Foam::token::operator=(const doubleScalar val)
 {
     reset();
-    type_ = tokenType::DOUBLE_SCALAR;
+    type_ = tokenType::DOUBLE;
     data_.doubleVal = val;
 }
 
@@ -800,10 +802,10 @@ inline bool Foam::token::operator==(const token& tok) const
         case tokenType::LABEL:
             return data_.labelVal == tok.data_.labelVal;
 
-        case tokenType::FLOAT_SCALAR:
+        case tokenType::FLOAT:
             return equal(data_.floatVal, tok.data_.floatVal);
 
-        case tokenType::DOUBLE_SCALAR:
+        case tokenType::DOUBLE:
             return equal(data_.doubleVal, tok.data_.doubleVal);
 
         case tokenType::WORD:
@@ -811,7 +813,7 @@ inline bool Foam::token::operator==(const token& tok) const
 
         case tokenType::STRING:
         case tokenType::VARIABLE:
-        case tokenType::VERBATIMSTRING:
+        case tokenType::VERBATIM:
             return *data_.stringPtr == *tok.data_.stringPtr;
 
         case tokenType::COMPOUND:
@@ -856,7 +858,7 @@ inline bool Foam::token::operator==(const floatScalar val) const
 {
     return
     (
-        type_ == tokenType::FLOAT_SCALAR
+        type_ == tokenType::FLOAT
      && equal(data_.floatVal, val)
     );
 }
@@ -866,7 +868,7 @@ inline bool Foam::token::operator==(const doubleScalar val) const
 {
     return
     (
-        type_ == tokenType::DOUBLE_SCALAR
+        type_ == tokenType::DOUBLE
      && equal(data_.doubleVal, val)
     );
 }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,17 +83,22 @@ public:
         PUNCTUATION,      //!< single character punctuation
         BOOL,             //!< boolean type
         LABEL,            //!< label (integer) type
-        FLOAT_SCALAR,     //!< float (single-precision) type
-        DOUBLE_SCALAR,    //!< double (double-precision) type
+        FLOAT,            //!< float (single-precision) type
+        DOUBLE,           //!< double (double-precision) type
 
         // Pointer types
         WORD,             //!< A Foam::word
         STRING,           //!< A string
         VARIABLE,         //!< A dictionary \c \$variable (string variant)
-        VERBATIMSTRING,   //!< Verbatim string content
+        VERBATIM,         //!< Verbatim string content
         COMPOUND,         //!< Compound type such as \c List\<label\> etc.
 
-        ERROR             //!< A token error encountered
+        ERROR,            //!< A token error encountered
+
+        // Aliases
+        FLOAT_SCALAR = FLOAT,
+        DOUBLE_SCALAR = DOUBLE,
+        VERBATIMSTRING = VERBATIM
     };
 
 
@@ -155,7 +160,7 @@ public:
 
     public:
 
-        //- Runtime type information
+        //- Declare type-name, virtual type (with debug switch)
         TypeName("compound");
 
         //- Declare run-time constructor selection table
@@ -171,7 +176,7 @@ public:
 
         // Constructors
 
-            //- Construct null
+            //- Default construct
             compound()
             :
                 empty_(false)
@@ -224,7 +229,7 @@ public:
     {
     public:
 
-        //- Runtime type information
+        //- Declare type-name, virtual type (with debug switch)
         TypeName("Compound<T>");
 
         Compound(Istream& is)
@@ -302,7 +307,7 @@ public:
 
     // Constructors
 
-        //- Construct null, initialized to an UNDEFINED token.
+        //- Default construct, initialized to an UNDEFINED token.
         inline constexpr token() noexcept;
 
         //- Copy construct
@@ -343,7 +348,7 @@ public:
     inline ~token();
 
 
-    // Static Member Functions
+    // Static Functions
 
         //- Create a bool token.
         inline static token boolean(bool on);
@@ -375,7 +380,7 @@ public:
         //- Change the token type, for similar types.
         //  This can be used to change between string-like variants
         //  (eg, STRING, VARIABLE, etc)
-        //  To change types entirely (eg, STRING to DOUBLE_SCALAR),
+        //  To change types entirely (eg, STRING to DOUBLE),
         //  use the corresponding assignment operator.
         //
         //  \return true if the change was successful or no change was required
@@ -411,16 +416,16 @@ public:
         //- Token is LABEL
         inline bool isLabel() const;
 
-        //- Token is FLOAT_SCALAR
-        inline bool isFloatScalar() const;
+        //- Token is FLOAT
+        inline bool isFloat() const;
 
-        //- Token is DOUBLE_SCALAR
-        inline bool isDoubleScalar() const;
+        //- Token is DOUBLE
+        inline bool isDouble() const;
 
-        //- Token is FLOAT_SCALAR or DOUBLE_SCALAR
+        //- Token is FLOAT or DOUBLE
         inline bool isScalar() const;
 
-        //- Token is LABEL, FLOAT_SCALAR or DOUBLE_SCALAR
+        //- Token is LABEL, FLOAT or DOUBLE
         inline bool isNumber() const;
 
         //- Token is WORD
@@ -461,21 +466,21 @@ public:
         inline label labelToken() const;
 
         //- Return float value.
-        //  Report FatalIOError and return \b 0 if token is not FLOAT_SCALAR
-        inline floatScalar floatScalarToken() const;
+        //  Report FatalIOError and return \b 0 if token is not FLOAT
+        inline floatScalar floatToken() const;
 
         //- Return double value.
-        //  Report FatalIOError and return \b 0 if token is not DOUBLE_SCALAR
-        inline doubleScalar doubleScalarToken() const;
+        //  Report FatalIOError and return \b 0 if token is not DOUBLE
+        inline doubleScalar doubleToken() const;
 
         //- Return float or double value.
         //  Report FatalIOError and return \b 0 if token is not a
-        //  FLOAT_SCALAR or DOUBLE_SCALAR
+        //  FLOAT or DOUBLE
         inline scalar scalarToken() const;
 
         //- Return label, float or double value.
         //  Report FatalIOError and return \b 0 if token is not a
-        //  LABEL, FLOAT_SCALAR or DOUBLE_SCALAR
+        //  LABEL, FLOAT or DOUBLE
         inline scalar number() const;
 
         //- Return const reference to the word contents.
@@ -586,6 +591,22 @@ public:
 
 
     // Housekeeping
+
+        //- Token is FLOAT
+        //  \deprecated(2020-01) - isFloat()
+        bool isFloatScalar() const { return isFloat(); };
+
+        //- Token is DOUBLE
+        //  \deprecated(2020-01) - isDouble()
+        bool isDoubleScalar() const { return isDouble(); }
+
+        //- Return float value.
+        //  \deprecated(2020-01) - floatToken()
+        floatScalar floatScalarToken() const { return floatToken(); }
+
+        //- Return double value.
+        //  \deprecated(2020-01) - doubleToken()
+        doubleScalar doubleScalarToken() const { return doubleToken(); }
 
         //- Deprecated(2017-11) transfer word pointer to the token
         //  \deprecated(2017-11) - use move assign from word

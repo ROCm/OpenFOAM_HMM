@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -250,11 +250,11 @@ Foam::Istream& Foam::UIPstream::read(token& t)
         }
 
         // String
-        case token::tokenType::VERBATIMSTRING :
+        case token::tokenType::VERBATIM :
         {
             // Recurse to read actual string
             read(t);
-            t.setType(token::tokenType::VERBATIMSTRING);
+            t.setType(token::tokenType::VERBATIM);
             return *this;
         }
         case token::tokenType::VARIABLE :
@@ -293,8 +293,8 @@ Foam::Istream& Foam::UIPstream::read(token& t)
             return *this;
         }
 
-        // floatScalar
-        case token::tokenType::FLOAT_SCALAR :
+        // Float
+        case token::tokenType::FLOAT :
         {
             floatScalar val;
             if (read(val))
@@ -308,8 +308,8 @@ Foam::Istream& Foam::UIPstream::read(token& t)
             return *this;
         }
 
-        // doubleScalar
-        case token::tokenType::DOUBLE_SCALAR :
+        // Double
+        case token::tokenType::DOUBLE :
         {
             doubleScalar val;
             if (read(val))

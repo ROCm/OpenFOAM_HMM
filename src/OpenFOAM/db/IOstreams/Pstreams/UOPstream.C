@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -202,9 +202,9 @@ bool Foam::UOPstream::write(const token& tok)
             return true;
         }
 
-        case token::tokenType::VERBATIMSTRING :
+        case token::tokenType::VERBATIM :
         {
-            writeToBuffer(char(token::tokenType::VERBATIMSTRING));
+            writeToBuffer(char(token::tokenType::VERBATIM));
             write(tok.stringToken());
 
             return true;
@@ -310,7 +310,7 @@ Foam::Ostream& Foam::UOPstream::write(const int64_t val)
 
 Foam::Ostream& Foam::UOPstream::write(const floatScalar val)
 {
-    writeToBuffer(char(token::tokenType::FLOAT_SCALAR));
+    writeToBuffer(char(token::tokenType::FLOAT));
     writeToBuffer(val);
     return *this;
 }
@@ -318,7 +318,7 @@ Foam::Ostream& Foam::UOPstream::write(const floatScalar val)
 
 Foam::Ostream& Foam::UOPstream::write(const doubleScalar val)
 {
-    writeToBuffer(char(token::tokenType::DOUBLE_SCALAR));
+    writeToBuffer(char(token::tokenType::DOUBLE));
     writeToBuffer(val);
     return *this;
 }

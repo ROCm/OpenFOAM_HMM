@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +55,7 @@ Foam::prefixOSstream::prefixOSstream
 :
     OSstream(os, name, format, version, compression),
     printPrefix_(true),
-    prefix_("")
+    prefix_()
 {}
 
 
@@ -79,7 +80,7 @@ bool Foam::prefixOSstream::write(const token& tok)
             return true;
         }
 
-        case token::tokenType::VERBATIMSTRING :
+        case token::tokenType::VERBATIM :
         {
             write(char(token::HASH));
             write(char(token::BEGIN_BLOCK));

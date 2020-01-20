@@ -62,12 +62,12 @@ static OS& printTokenInfo(OS& os, const token& tok)
             os  << "label " << tok.labelToken();
         break;
 
-        case token::tokenType::FLOAT_SCALAR:
-            os  << "float " << tok.floatScalarToken();
+        case token::tokenType::FLOAT:
+            os  << "float " << tok.floatToken();
         break;
 
-        case token::tokenType::DOUBLE_SCALAR:
-            os  << "double " << tok.doubleScalarToken();
+        case token::tokenType::DOUBLE:
+            os  << "double " << tok.doubleToken();
         break;
 
         case token::tokenType::WORD:
@@ -82,8 +82,8 @@ static OS& printTokenInfo(OS& os, const token& tok)
             os  << "variable " << tok.stringToken();
         break;
 
-        case token::tokenType::VERBATIMSTRING:
-            os  << "verbatim string " << tok.stringToken();
+        case token::tokenType::VERBATIM:
+            os  << "verbatim " << tok.stringToken();
         break;
 
         case token::tokenType::COMPOUND:
@@ -132,11 +132,11 @@ Foam::word Foam::token::name() const
         case token::tokenType::FLAG: return "flag";
         case token::tokenType::PUNCTUATION: return "punctuation";
         case token::tokenType::LABEL: return "label";
-        case token::tokenType::FLOAT_SCALAR: return "float";
-        case token::tokenType::DOUBLE_SCALAR: return "double";
+        case token::tokenType::FLOAT: return "float";
+        case token::tokenType::DOUBLE: return "double";
         case token::tokenType::WORD: return "word";
         case token::tokenType::STRING: return "string";
-        case token::tokenType::VERBATIMSTRING: return "verbatim";
+        case token::tokenType::VERBATIM: return "verbatim";
         case token::tokenType::VARIABLE: return "variable";
         case token::tokenType::COMPOUND: return "compound";
         case token::tokenType::ERROR: return "error";
@@ -181,11 +181,11 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const token& tok)
             os << tok.data_.labelVal;
         break;
 
-        case token::tokenType::FLOAT_SCALAR:
+        case token::tokenType::FLOAT:
             os << tok.data_.floatVal;
         break;
 
-        case token::tokenType::DOUBLE_SCALAR:
+        case token::tokenType::DOUBLE:
             os << tok.data_.doubleVal;
         break;
 
