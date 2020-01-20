@@ -74,9 +74,18 @@ class Istream
 
 public:
 
+    // Generated Methods
+
+        //- Copy construct
+        Istream(const Istream&) = default;
+
+        //- Destructor
+        virtual ~Istream() = default;
+
+
     // Constructors
 
-        //- Construct and set stream status
+        //- Default construct, set stream status
         Istream
         (
             streamFormat format=ASCII,
@@ -87,10 +96,6 @@ public:
             IOstream(format, version, compression),
             putBack_(false)
         {}
-
-
-    //- Destructor
-    virtual ~Istream() = default;
 
 
     // Member Functions

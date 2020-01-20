@@ -59,7 +59,7 @@ class UIPstream
     public UPstream,
     public Istream
 {
-    // Private data
+    // Private Data
 
         int fromProcNo_;
 
@@ -134,7 +134,7 @@ public:
             }
 
 
-        // Read functions
+        // Read Functions
 
             //- Read into given buffer from given processor and return the
             //  message size
@@ -197,10 +197,10 @@ public:
             }
 
 
-        // Print
+    // Print
 
-            //- Print description of IOstream to Ostream
-            void print(Ostream&) const;
+        //- Print stream description to Ostream
+        void print(Ostream& os) const;
 };
 
 

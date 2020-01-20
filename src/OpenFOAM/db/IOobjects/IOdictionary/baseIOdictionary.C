@@ -34,12 +34,12 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(baseIOdictionary, 0);
+    defineTypeNameAndDebug(baseIOdictionary, 0);
 
-bool baseIOdictionary::writeDictionaries
-(
-    debug::infoSwitch("writeDictionaries", 0)
-);
+    bool baseIOdictionary::writeDictionaries
+    (
+        debug::infoSwitch("writeDictionaries", 0)
+    );
 }
 
 
@@ -75,12 +75,6 @@ Foam::baseIOdictionary::baseIOdictionary
 {
     dictionary::name() = IOobject::objectPath();
 }
-
-
-// * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
-
-Foam::baseIOdictionary::~baseIOdictionary()
-{}
 
 
 // * * * * * * * * * * * * * * * Members Functions * * * * * * * * * * * * * //

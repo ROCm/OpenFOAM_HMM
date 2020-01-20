@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,19 +56,23 @@ class OSstream
 :
     public Ostream
 {
-    // Private data
+    // Private Data
 
         fileName name_;
+
         std::ostream& os_;
 
 
-    // Private Member Functions
+public:
+
+    // Generated Methods
+
+        //- Copy construct
+        OSstream(const OSstream&) = default;
 
         //- No copy assignment
         void operator=(const OSstream&) = delete;
 
-
-public:
 
     // Constructors
 
@@ -83,7 +87,7 @@ public:
         );
 
 
-    // Member functions
+    // Member Functions
 
         // Enquiry
 
@@ -218,7 +222,7 @@ public:
 
         // Print
 
-            //- Print description of IOstream to Ostream
+            //- Print stream description to Ostream
             virtual void print(Ostream& os) const;
 };
 

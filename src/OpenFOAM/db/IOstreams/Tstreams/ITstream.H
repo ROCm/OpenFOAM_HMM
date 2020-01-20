@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,7 +46,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration
+// Forward Declarations
 class ISstream;
 
 /*---------------------------------------------------------------------------*\
@@ -58,9 +58,9 @@ class ITstream
     public Istream,
     public tokenList
 {
-    // Private data
+    // Private Data
 
-        //- Name of ITstream
+        //- Name associated with the stream
         fileName name_;
 
         //- Index of token currently being read
@@ -87,6 +87,18 @@ public:
 
     // Constructors
 
+        //- Copy construct
+        ITstream(const ITstream& is)
+        :
+            Istream(ASCII, currentVersion),
+            tokenList(is),
+            name_(is.name_),
+            tokenIndex_(0)
+        {
+            setOpened();
+            setGood();
+        }
+
         //- Construct from components
         ITstream
         (
@@ -104,7 +116,6 @@ public:
             setOpened();
             setGood();
         }
-
 
         //- Construct from components, transferring the tokens
         ITstream
@@ -124,7 +135,6 @@ public:
             setGood();
         }
 
-
         //- Construct token list by parsing the input character sequence
         //  Uses UIListStream internally.
         ITstream
@@ -135,7 +145,6 @@ public:
             versionNumber version=currentVersion
         );
 
-
         //- Construct token list by parsing the input string
         //  Uses UIListStream internally.
         ITstream
@@ -145,7 +154,6 @@ public:
             streamFormat format=ASCII,
             versionNumber version=currentVersion
         );
-
 
         //- Construct token list by parsing the input character sequence
         //  Uses UIListStream internally.
@@ -158,21 +166,8 @@ public:
         );
 
 
-        //- Copy construct
-        ITstream(const ITstream& is)
-        :
-            Istream(ASCII, currentVersion),
-            tokenList(is),
-            name_(is.name_),
-            tokenIndex_(0)
-        {
-            setOpened();
-            setGood();
-        }
-
-
-        //- Destructor
-        virtual ~ITstream() = default;
+    //- Destructor
+    virtual ~ITstream() = default;
 
 
     // Static Functions
@@ -230,7 +225,7 @@ public:
                 return tokenIndex_;
             }
 
-            //- Return the number of remaining tokens
+            //- The number of remaining tokens
             label nRemainingTokens() const
             {
                 return size() - tokenIndex_;
@@ -328,14 +323,26 @@ public:
             }
 
 
-        // Output
+    // Output
 
-            //- Print description of stream to Ostream
-            void print(Ostream& os) const;
+        //- Print stream description to Ostream
+        void print(Ostream& os) const;
 
-            //- Concatenate tokens into a space-separated std::string.
-            //- The resulting string may contain quote characters.
-            std::string toString() const;
+        //- Concatenate tokens into a space-separated std::string.
+        //- The resulting string may contain quote characters.
+        std::string toString() const;
+
+
+    // Member Operators
+
+        //- Copy assignment, with rewind()
+        void operator=(const ITstream& is);
+
+        //- Copy assignment of tokens, with rewind()
+        void operator=(const tokenList& toks);
+
+        //- Move assignment of tokens, with rewind()
+        void operator=(tokenList&& toks);
 };
 
 

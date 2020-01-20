@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +60,7 @@ class Ostream
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Indentation of the entry from the start of the keyword
         static constexpr const unsigned short entryIndentation_ = 16;
@@ -74,9 +74,18 @@ protected:
 
 public:
 
+    // Generated Methods
+
+        //- Copy construct
+        Ostream(const Ostream&) = default;
+
+        //- Destructor
+        virtual ~Ostream() = default;
+
+
     // Constructors
 
-        //- Construct and set stream status
+        //- Default construct, set stream status
         Ostream
         (
             streamFormat format=ASCII,
@@ -86,10 +95,6 @@ public:
         :
             IOstream(format, version, compression)
         {}
-
-
-    //- Destructor
-    virtual ~Ostream() = default;
 
 
     // Member Functions
@@ -271,7 +276,7 @@ public:
             virtual int precision(const int p) = 0;
 
 
-    // Member operators
+    // Member Operators
 
         //- Return a non-const reference to const Ostream
         //  Needed for write functions where the stream argument is temporary:

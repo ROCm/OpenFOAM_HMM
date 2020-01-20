@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,6 @@ SourceFiles
 #include "className.H"
 
 #include <fstream>
-using std::ifstream;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -85,7 +84,6 @@ protected:
 
         //- Delete the stream pointer
         void deallocate();
-
 };
 
 } // End namespace Detail
@@ -102,14 +100,14 @@ class IFstream
 {
 public:
 
-    // Declare name of the class and its debug switch
+    //- Declare type-name (with debug switch)
     ClassName("IFstream");
 
 
     // Constructors
 
         //- Construct from pathname
-        IFstream
+        explicit IFstream
         (
             const fileName& pathname,
             streamFormat format=ASCII,
@@ -143,7 +141,7 @@ public:
 
     // Print
 
-        //- Print description of IOstream to Ostream
+        //- Print stream description to Ostream
         virtual void print(Ostream& os) const;
 
 

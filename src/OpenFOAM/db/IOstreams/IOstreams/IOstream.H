@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -147,6 +147,15 @@ protected:
 
 public:
 
+    // Generated Methods
+
+        //- Copy construct
+        IOstream(const IOstream&) = default;
+
+        //- Destructor
+        virtual ~IOstream() = default;
+
+
     // Constructors
 
         //- Construct with specified stream option
@@ -172,10 +181,6 @@ public:
         :
             IOstream(IOstreamOption(format, version, compression))
         {}
-
-
-    //- Destructor
-    virtual ~IOstream() = default;
 
 
     // Member Functions
@@ -383,7 +388,7 @@ public:
 
     // Print
 
-        //- Print description of IOstream to Ostream
+        //- Print stream description to Ostream
         virtual void print(Ostream& os) const;
 
         //- Print information about the stream state bits

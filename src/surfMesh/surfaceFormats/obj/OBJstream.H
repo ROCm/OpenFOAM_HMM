@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2015 OpenFOAM Foundation
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,6 +49,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class treeBoundBox;
 
 /*---------------------------------------------------------------------------*\
@@ -58,7 +60,7 @@ class OBJstream
 :
     public OFstream
 {
-    // Private data
+    // Private Data
 
         bool startOfLine_;
 
@@ -71,14 +73,14 @@ class OBJstream
 
 public:
 
-    // Declare name of the class and its debug switch
+    //- Declare type-name (with debug switch)
     ClassName("OBJstream");
 
 
     // Constructors
 
         //- Construct from pathname
-        OBJstream
+        explicit OBJstream
         (
             const fileName& pathname,
             streamFormat format=ASCII,
@@ -184,7 +186,6 @@ public:
                 const treeBoundBox& bb,
                 const bool lines = true
             );
-
 };
 
 

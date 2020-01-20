@@ -249,27 +249,16 @@ Foam::Istream& Foam::UIPstream::read(token& t)
             return *this;
         }
 
-        // String
-        case token::tokenType::VERBATIM :
-        {
-            // Recurse to read actual string
-            read(t);
-            t.setType(token::tokenType::VERBATIM);
-            return *this;
-        }
-        case token::tokenType::VARIABLE :
-        {
-            // Recurse to read actual string
-            read(t);
-            t.setType(token::tokenType::VARIABLE);
-            return *this;
-        }
+        // String types
         case token::tokenType::STRING :
+        case token::tokenType::VARIABLE :
+        case token::tokenType::VERBATIM :
         {
             string val;
             if (read(val))
             {
                 t = std::move(val);
+                t.setType(token::tokenType(c));
             }
             else
             {

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,7 +81,7 @@ protected:
 
 public:
 
-    //- Construct null, or with precount size
+    //- Default construct, or with precount size
     countstreambuf(std::streamsize precount=0)
     :
         size_(precount)
@@ -116,7 +116,7 @@ class ocountstream
 {
 public:
 
-    //- Construct null
+    //- Default construct
     ocountstream()
     :
         countstreambuf(),
@@ -148,7 +148,7 @@ class OCountStreamAllocator
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         typedef std::ostream stream_type;
 
@@ -161,7 +161,7 @@ protected:
 
     // Constructors
 
-        //- Construct null, or with precount size
+        //- Default construct, or with precount size
         OCountStreamAllocator(std::streamsize precount=0)
         :
             buf_(precount),
@@ -213,22 +213,22 @@ public:
 
     // Constructors
 
-        //- Construct and set stream status
-        OCountStream
+        //- Default construct
+        explicit OCountStream
         (
             streamFormat format=ASCII,
             versionNumber version=currentVersion
         )
         :
             allocator_type(),
-            OSstream(stream_, "output", format, version)
+            OSstream(stream_, "count", format, version)
         {}
 
         //- Copy construct
-        OCountStream(const OCountStream& os)
+        OCountStream(const OCountStream& str)
         :
-            allocator_type(os.size()),
-            OSstream(stream_, os.name(), os.format(), os.version())
+            allocator_type(str.size()),
+            OSstream(stream_, str.name(), str.format(), str.version())
         {}
 
 
@@ -241,10 +241,10 @@ public:
             setGood();  // resynchronize with internal state
         }
 
-        //- Print description to Ostream
+        //- Print stream description to Ostream
         virtual void print(Ostream& os) const;
-
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

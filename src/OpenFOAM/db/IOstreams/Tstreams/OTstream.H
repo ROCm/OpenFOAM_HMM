@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,8 +62,8 @@ public:
 
     // Constructors
 
-        //- Construct and set stream status
-        OTstream
+        //- Default construct, set stream status
+        explicit OTstream
         (
             streamFormat format=ASCII,
             versionNumber version=currentVersion
@@ -227,7 +227,6 @@ public:
         }
 
 
-
     // Inquiry
 
         //- Return flags of output stream
@@ -260,7 +259,7 @@ public:
             DynamicList<token>::clear();
         }
 
-        //- Print description of IOstream to Ostream
+        //- Print stream description to Ostream
         void print(Ostream& os) const;
 };
 

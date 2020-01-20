@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,7 +44,7 @@ Description
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class Ostream;
 
 /*---------------------------------------------------------------------------*\
@@ -146,7 +146,7 @@ protected:
 
 public:
 
-    // Forward declarations
+    // Forward Declarations
     class in;
     class out;
 };
@@ -163,7 +163,7 @@ class memorybuf::in
 {
 protected:
 
-    //- Default construct null
+    //- Default construct
     in() = default;
 
     //- Get sequence of characters
@@ -244,7 +244,7 @@ class memorybuf::out
 {
 protected:
 
-    //- Default construct null
+    //- Default construct
     out() = default;
 
     //- Put sequence of characters

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,7 +56,7 @@ class ensightFile
 :
     public OFstream
 {
-    // Private data
+    // Private Data
 
         //- Allow undef in results
         static bool allowUndef_;
@@ -85,7 +85,7 @@ class ensightFile
 
 public:
 
-    // Static Member Functions
+    // Static Functions
 
         //- Return a null ensightFile
         inline static const ensightFile& null()
@@ -96,9 +96,9 @@ public:
 
     // Constructors
 
-        //- Construct from pathname.
-        //  The entire pathname is checked for valid ensight naming.
-        ensightFile
+        //- Construct from pathName.
+        //  The entire pathName is checked for valid ensight naming.
+        explicit ensightFile
         (
             const fileName& pathname,
             IOstream::streamFormat format=IOstream::BINARY
@@ -202,7 +202,6 @@ public:
         //- Write an indirect list of scalars as "%12.5e" or as binary
         //  With carriage return after each value (ascii stream)
         void writeList(const UList<scalar>& field, const labelUList& addr);
-
 };
 
 
