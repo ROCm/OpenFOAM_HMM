@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,24 +95,15 @@ inline bool Foam::cellInfo::update
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Null constructor
 inline Foam::cellInfo::cellInfo()
 :
     type_(cellClassification::NOTSET)
 {}
 
 
-// Construct from components
-inline Foam::cellInfo::cellInfo(const label type)
+inline Foam::cellInfo::cellInfo(const label ctype)
 :
-    type_(type)
-{}
-
-
-// Construct as copy
-inline Foam::cellInfo::cellInfo(const cellInfo& w2)
-:
-    type_(w2.type())
+    type_(ctype)
 {}
 
 
@@ -132,8 +124,7 @@ inline bool Foam::cellInfo::sameGeometry
     const cellInfo& w2,
     const scalar tol,
     TrackingData& td
-)
- const
+) const
 {
     return true;
 }
@@ -223,6 +214,7 @@ inline bool Foam::cellInfo::updateFace
     );
 }
 
+
 // Update this with neighbour information
 template<class TrackingData>
 inline bool Foam::cellInfo::updateFace
@@ -259,13 +251,19 @@ inline bool Foam::cellInfo::equal
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline bool Foam::cellInfo::operator==(const Foam::cellInfo& rhs) const
+inline bool Foam::cellInfo::operator==
+(
+    const cellInfo& rhs
+) const
 {
-    return type() == rhs.type();
+    return type_ == rhs.type_;
 }
 
 
-inline bool Foam::cellInfo::operator!=(const Foam::cellInfo& rhs) const
+inline bool Foam::cellInfo::operator!=
+(
+    const cellInfo& rhs
+) const
 {
     return !(*this == rhs);
 }

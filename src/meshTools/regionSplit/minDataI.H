@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -177,16 +177,16 @@ inline bool Foam::minData::equal
 
 inline bool Foam::minData::operator==
 (
-    const Foam::minData& rhs
+    const minData& rhs
 ) const
 {
-    return data() == rhs.data();
+    return data_ == rhs.data_;
 }
 
 
 inline bool Foam::minData::operator!=
 (
-    const Foam::minData& rhs
+    const minData& rhs
 ) const
 {
     return !(*this == rhs);
@@ -197,21 +197,21 @@ inline bool Foam::minData::operator!=
 
 inline Foam::Ostream& Foam::operator<<
 (
-    Foam::Ostream& os,
-    const Foam::minData& wDist
+    Ostream& os,
+    const minData& rhs
 )
 {
-    return os << wDist.data_;
+    return os << rhs.data_;
 }
 
 
 inline Foam::Istream& Foam::operator>>
 (
-    Foam::Istream& is,
-    Foam::minData& wDist
+    Istream& is,
+    minData& rhs
 )
 {
-    return is >> wDist.data_;
+    return is >> rhs.data_;
 }
 
 

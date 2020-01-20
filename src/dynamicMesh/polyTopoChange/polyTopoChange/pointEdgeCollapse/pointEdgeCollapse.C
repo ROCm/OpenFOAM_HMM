@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,30 +28,31 @@ License
 
 #include "pointEdgeCollapse.H"
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<
 (
-    Foam::Ostream& os,
-    const Foam::pointEdgeCollapse& wDist
+    Ostream& os,
+    const pointEdgeCollapse& rhs
 )
 {
     return os
-        << wDist.collapsePoint_
-        << wDist.collapseIndex_
-        << wDist.collapsePriority_;
+        << rhs.collapsePoint_
+        << rhs.collapseIndex_
+        << rhs.collapsePriority_;
 }
+
 
 Foam::Istream& Foam::operator>>
 (
-    Foam::Istream& is,
-    Foam::pointEdgeCollapse& wDist
+    Istream& is,
+    pointEdgeCollapse& rhs
 )
 {
     return is
-        >> wDist.collapsePoint_
-        >> wDist.collapseIndex_
-        >> wDist.collapsePriority_;
+        >> rhs.collapsePoint_
+        >> rhs.collapseIndex_
+        >> rhs.collapsePriority_;
 }
 
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,40 +28,31 @@ License
 
 #include "wallPointData.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class Type>
-Ostream& operator<<
+Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const wallPointData<Type>& wDist
+    const wallPointData<Type>& rhs
 )
 {
     return os
-        << static_cast<const wallPoint&>(wDist)
+        << static_cast<const wallPoint&>(rhs)
         << token::SPACE
-        << wDist.data();
+        << rhs.data();
 }
 
 
 template<class Type>
-Istream& operator>>
+Foam::Istream& Foam::operator>>
 (
     Istream& is,
-    wallPointData<Type>& wDist
+    wallPointData<Type>& rhs
 )
 {
-    return is >> static_cast<wallPoint&>(wDist) >> wDist.data_;
+    return is >> static_cast<wallPoint&>(rhs) >> rhs.data_;
 }
 
-
-// ************************************************************************* //
-
-} // End namespace Foam
 
 // ************************************************************************* //

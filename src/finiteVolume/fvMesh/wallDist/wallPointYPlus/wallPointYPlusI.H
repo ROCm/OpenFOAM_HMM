@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,16 +26,11 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Update this with w2 if w2 nearer to pt.
 template<class TrackingData>
-inline bool wallPointYPlus::update
+inline bool Foam::wallPointYPlus::update
 (
     const point& pt,
     const wallPointYPlus& w2,
@@ -42,11 +38,11 @@ inline bool wallPointYPlus::update
     TrackingData& td
 )
 {
-    scalar dist2 = magSqr(pt - w2.origin());
+    const scalar dist2 = magSqr(pt - w2.origin());
 
     if (valid(td))
     {
-        scalar diff = distSqr() - dist2;
+        const scalar diff = distSqr() - dist2;
 
         if (diff < 0)
         {
@@ -65,7 +61,7 @@ inline bool wallPointYPlus::update
     // Either *this is not yet valid or w2 is closer
     {
         // only propagate if interesting (i.e. y+ < 100)
-        scalar yPlus = Foam::sqrt(dist2)/w2.data();
+        const scalar yPlus = Foam::sqrt(dist2)/w2.data();
 
         if (yPlus < yPlusCutOff)
         {
@@ -86,8 +82,7 @@ inline bool wallPointYPlus::update
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Null constructor
-inline wallPointYPlus::wallPointYPlus()
+inline Foam::wallPointYPlus::wallPointYPlus()
 :
     wallPointData<scalar>()
 {
@@ -96,8 +91,7 @@ inline wallPointYPlus::wallPointYPlus()
 }
 
 
-// Construct from components
-inline wallPointYPlus::wallPointYPlus
+inline Foam::wallPointYPlus::wallPointYPlus
 (
     const point& origin,
     const scalar yStar,
@@ -112,7 +106,7 @@ inline wallPointYPlus::wallPointYPlus
 
 // Update this with w2 if w2 nearer to pt.
 template<class TrackingData>
-inline bool wallPointYPlus::updateCell
+inline bool Foam::wallPointYPlus::updateCell
 (
     const polyMesh& mesh,
     const label thisCelli,
@@ -136,7 +130,7 @@ inline bool wallPointYPlus::updateCell
 
 // Update this with w2 if w2 nearer to pt.
 template<class TrackingData>
-inline bool wallPointYPlus::updateFace
+inline bool Foam::wallPointYPlus::updateFace
 (
     const polyMesh& mesh,
     const label thisFacei,
@@ -160,7 +154,7 @@ inline bool wallPointYPlus::updateFace
 
 // Update this with w2 if w2 nearer to pt.
 template<class TrackingData>
-inline bool wallPointYPlus::updateFace
+inline bool Foam::wallPointYPlus::updateFace
 (
     const polyMesh& mesh,
     const label thisFacei,
@@ -180,9 +174,5 @@ inline bool wallPointYPlus::updateFace
     );
 }
 
-
-// ************************************************************************* //
-
-} // End namespace Foam
 
 // ************************************************************************* //

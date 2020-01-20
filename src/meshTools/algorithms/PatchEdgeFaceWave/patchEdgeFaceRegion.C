@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,25 +28,25 @@ License
 
 #include "patchEdgeFaceRegion.H"
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<
 (
-    Foam::Ostream& os,
-    const Foam::patchEdgeFaceRegion& wDist
+    Ostream& os,
+    const patchEdgeFaceRegion& rhs
 )
 {
-    return os << wDist.region_;
+    return os << rhs.region_;
 }
 
 
 Foam::Istream& Foam::operator>>
 (
-    Foam::Istream& is,
-    Foam::patchEdgeFaceRegion& wDist
+    Istream& is,
+    patchEdgeFaceRegion& rhs
 )
 {
-    return is >> wDist.region_;
+    return is >> rhs.region_;
 }
 
 

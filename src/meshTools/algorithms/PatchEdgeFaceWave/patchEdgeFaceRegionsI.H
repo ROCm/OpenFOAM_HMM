@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,12 +56,6 @@ inline Foam::patchEdgeFaceRegions::patchEdgeFaceRegions
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-inline const Foam::labelList& Foam::patchEdgeFaceRegions::regions() const
-{
-    return regions_;
-}
-
 
 template<class TrackingData>
 inline bool Foam::patchEdgeFaceRegions::valid(TrackingData& td) const
@@ -265,16 +260,16 @@ inline bool Foam::patchEdgeFaceRegions::equal
 
 inline bool Foam::patchEdgeFaceRegions::operator==
 (
-    const Foam::patchEdgeFaceRegions& rhs
+    const patchEdgeFaceRegions& rhs
 ) const
 {
-    return regions() == rhs.regions();
+    return regions_ == rhs.regions_;
 }
 
 
 inline bool Foam::patchEdgeFaceRegions::operator!=
 (
-    const Foam::patchEdgeFaceRegions& rhs
+    const patchEdgeFaceRegions& rhs
 ) const
 {
     return !(*this == rhs);

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,7 +30,7 @@ License
 #include "transform.H"
 #include "orientedSurface.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 inline Foam::patchFaceOrientation::patchFaceOrientation()
 :
@@ -47,12 +48,6 @@ inline Foam::patchFaceOrientation::patchFaceOrientation
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-inline Foam::label Foam::patchFaceOrientation::flipStatus() const
-{
-    return flipStatus_;
-}
-
 
 inline void Foam::patchFaceOrientation::flip()
 {
@@ -210,16 +205,16 @@ inline bool Foam::patchFaceOrientation::equal
 
 inline bool Foam::patchFaceOrientation::operator==
 (
-    const Foam::patchFaceOrientation& rhs
+    const patchFaceOrientation& rhs
 ) const
 {
-    return flipStatus() == rhs.flipStatus();
+    return flipStatus_ == rhs.flipStatus_;
 }
 
 
 inline bool Foam::patchFaceOrientation::operator!=
 (
-    const Foam::patchFaceOrientation& rhs
+    const patchFaceOrientation& rhs
 ) const
 {
     return !(*this == rhs);

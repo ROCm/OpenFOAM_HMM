@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,23 +28,23 @@ License
 
 #include "refinementData.H"
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<
 (
-    Foam::Ostream& os,
-    const Foam::refinementData& wDist
+    Ostream& os,
+    const refinementData& rhs
 )
 {
     if (os.format() == IOstream::ASCII)
     {
-        os << wDist.refinementCount_ << token::SPACE << wDist.count_;
+        os << rhs.refinementCount_ << token::SPACE << rhs.count_;
     }
     else
     {
         os.write
         (
-            reinterpret_cast<const char*>(&wDist.refinementCount_),
+            reinterpret_cast<const char*>(&rhs.refinementCount_),
             sizeof(refinementData)
         );
     }
@@ -54,18 +54,22 @@ Foam::Ostream& Foam::operator<<
 }
 
 
-Foam::Istream& Foam::operator>>(Foam::Istream& is, Foam::refinementData& wDist)
+Foam::Istream& Foam::operator>>
+(
+    Istream& is,
+    refinementData& rhs
+)
 {
     if (is.format() == IOstream::ASCII)
     {
-        is >> wDist.refinementCount_ >> wDist.count_;
+        is >> rhs.refinementCount_ >> rhs.count_;
     }
     else
     {
         Detail::readContiguous<refinementData>
         (
             is,
-            reinterpret_cast<char*>(&wDist.refinementCount_),
+            reinterpret_cast<char*>(&rhs.refinementCount_),
             sizeof(refinementData)
         );
     }

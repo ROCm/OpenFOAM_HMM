@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +55,6 @@ class pointEdgeStructuredWalk;
 Istream& operator>>(Istream&, pointEdgeStructuredWalk&);
 Ostream& operator<<(Ostream&, const pointEdgeStructuredWalk&);
 
-
 /*---------------------------------------------------------------------------*\
                    Class pointEdgeStructuredWalk Declaration
 \*---------------------------------------------------------------------------*/
@@ -95,7 +94,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         inline pointEdgeStructuredWalk();
 
         //- Construct from components
@@ -113,27 +112,35 @@ public:
 
     // Access
 
+        //- The distance information
+        scalar dist() const
+        {
+            return dist_;
+        }
+
+        //- Tracking data
+        const vector& data() const
+        {
+            return data_;
+        }
+
+        //- Index (if any) associated with data
+        label index() const
+        {
+            return index_;
+        }
+
         //- True if starting point is valid (ie, not point::max)
         inline bool inZone() const;
 
-        //- The distance information
-        inline scalar dist() const;
 
-        //- Tracking data
-        inline const vector& data() const;
+        // Needed by MeshWave
 
-        //- Index (if any) associated with data
-        inline label index() const;
-
-
-        // Needed by meshWave
-
-            //- Check whether origin has been changed at all or
-            //  still contains original (invalid) value.
+            //- Changed or contains original (invalid) value
             template<class TrackingData>
             inline bool valid(TrackingData& td) const;
 
-            //- Check for identical geometrical data. Used for cyclics checking.
+            //- Check for identical geometrical data (eg, cyclics checking)
             template<class TrackingData>
             inline bool sameGeometry
             (
@@ -217,16 +224,21 @@ public:
                 TrackingData& td
             );
 
-            //- Same (like operator==)
+            //- Test for equality, with TrackingData
             template<class TrackingData>
-            inline bool equal(const pointEdgeStructuredWalk&, TrackingData&)
-            const;
+            inline bool equal
+            (
+                const pointEdgeStructuredWalk&,
+                TrackingData&
+            ) const;
 
 
     // Member Operators
 
-        //Note: Used to determine whether to call update.
+        //- Test for equality
         inline bool operator==(const pointEdgeStructuredWalk&) const;
+
+        //- Test for inequality
         inline bool operator!=(const pointEdgeStructuredWalk&) const;
 
 

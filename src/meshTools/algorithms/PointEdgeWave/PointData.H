@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,7 +66,7 @@ class PointData
 :
     public pointEdgePoint
 {
-    // Private data
+    // Private Data
 
         //- Additional transported data
         DataType data_;
@@ -76,7 +76,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         inline PointData();
 
         //- Construct from origin, distance and data
@@ -87,19 +87,22 @@ public:
             const DataType& data
         );
 
-        //- Construct as copy
-        inline PointData(const PointData&);
-
 
     // Member Functions
 
         // Access
 
-            //- Const access the data
-            inline const DataType& data() const;
+            const DataType& data() const
+            {
+                return data_;
+            }
+            DataType& data()
+            {
+                return data_;
+            }
 
 
-        // Needed by meshWave
+        // Needed by MeshWave
 
             //- Apply rotation matrix to the data
             template<class TrackingData>
@@ -155,9 +158,13 @@ public:
                 TrackingData& td
             );
 
+
     // Member Operators
 
+        //- Test for equality
         inline bool operator==(const PointData<DataType>&) const;
+
+        //- Test for inequality
         inline bool operator!=(const PointData<DataType>&) const;
 
 

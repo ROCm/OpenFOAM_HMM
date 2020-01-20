@@ -44,7 +44,7 @@ inline bool Foam::sweepData::update
         return true;
     }
 
-    scalar myDist2 = magSqr(position - origin());
+    const scalar myDist2 = magSqr(position - origin());
 
     if (myDist2 < SMALL)
     {
@@ -76,11 +76,15 @@ inline bool Foam::sweepData::update
 inline Foam::sweepData::sweepData()
 :
     value_(-GREAT),
-    origin_(vector::max)
+    origin_(point::max)
 {}
 
 
-inline Foam::sweepData::sweepData(const scalar value, const point& origin)
+inline Foam::sweepData::sweepData
+(
+    const scalar value,
+    const point& origin
+)
 :
     value_(value),
     origin_(origin)
@@ -208,21 +212,12 @@ inline bool Foam::sweepData::equal
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline void Foam::sweepData::operator=
-(
-    const scalar value
-)
-{
-    value_ = value;
-}
-
-
 inline bool Foam::sweepData::operator==
 (
     const sweepData& rhs
 ) const
 {
-    return origin() == rhs.origin();
+    return origin_ == rhs.origin_;
 }
 
 

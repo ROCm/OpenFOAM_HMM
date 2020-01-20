@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,9 +31,10 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Returns the wanted level
-inline Foam::label Foam::refinementDistanceData::wantedLevel(const point& pt)
- const
+inline Foam::label Foam::refinementDistanceData::wantedLevel
+(
+    const point& pt
+) const
 {
     const scalar distSqr = magSqr(pt-origin_);
 
@@ -122,14 +123,12 @@ inline bool Foam::refinementDistanceData::update
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Null constructor
 inline Foam::refinementDistanceData::refinementDistanceData()
 :
     level0Size_(-1)
 {}
 
 
-// Construct from components
 inline Foam::refinementDistanceData::refinementDistanceData
 (
     const scalar level0Size,
@@ -283,7 +282,7 @@ inline bool Foam::refinementDistanceData::equal
 
 inline bool Foam::refinementDistanceData::operator==
 (
-    const Foam::refinementDistanceData& rhs
+    const refinementDistanceData& rhs
 ) const
 {
     return
@@ -295,7 +294,7 @@ inline bool Foam::refinementDistanceData::operator==
 
 inline bool Foam::refinementDistanceData::operator!=
 (
-    const Foam::refinementDistanceData& rhs
+    const refinementDistanceData& rhs
 ) const
 {
     return !(*this == rhs);

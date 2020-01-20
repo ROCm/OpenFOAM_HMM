@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +40,7 @@ inline bool Foam::externalPointEdgePoint::update
     TrackingData& td
 )
 {
-    scalar dist2 = magSqr(pt - w2.origin());
+    const scalar dist2 = magSqr(pt - w2.origin());
 
     if (!valid(td))
     {
@@ -50,7 +51,7 @@ inline bool Foam::externalPointEdgePoint::update
         return true;
     }
 
-    scalar diff = distSqr_ - dist2;
+    const scalar diff = distSqr_ - dist2;
 
     if (diff < 0)
     {
@@ -91,7 +92,7 @@ inline bool Foam::externalPointEdgePoint::update
         return true;
     }
 
-    scalar diff = distSqr_ - w2.distSqr();
+    const scalar diff = distSqr_ - w2.distSqr();
 
     if (diff < 0)
     {
@@ -135,29 +136,7 @@ inline Foam::externalPointEdgePoint::externalPointEdgePoint
 {}
 
 
-inline Foam::externalPointEdgePoint::externalPointEdgePoint
-(
-    const externalPointEdgePoint& wpt
-)
-:
-    origin_(wpt.origin()),
-    distSqr_(wpt.distSqr())
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-inline const Foam::point& Foam::externalPointEdgePoint::origin() const
-{
-    return origin_;
-}
-
-
-inline Foam::scalar Foam::externalPointEdgePoint::distSqr() const
-{
-    return distSqr_;
-}
-
 
 template<class TrackingData>
 inline bool Foam::externalPointEdgePoint::valid(TrackingData& td) const
@@ -175,7 +154,7 @@ inline bool Foam::externalPointEdgePoint::sameGeometry
     TrackingData& td
 ) const
 {
-    scalar diff = Foam::mag(distSqr() - w2.distSqr());
+    const scalar diff = Foam::mag(distSqr() - w2.distSqr());
 
     if (diff < SMALL)
     {
@@ -305,19 +284,17 @@ inline bool Foam::externalPointEdgePoint::equal
 
 inline bool Foam::externalPointEdgePoint::operator==
 (
-    const Foam::externalPointEdgePoint& rhs
-)
-const
+    const externalPointEdgePoint& rhs
+) const
 {
-    return (origin() == rhs.origin()) && (distSqr() == rhs.distSqr());
+    return origin_ == rhs.origin_ && distSqr_ == rhs.distSqr_;
 }
 
 
 inline bool Foam::externalPointEdgePoint::operator!=
 (
-    const Foam::externalPointEdgePoint& rhs
-)
-const
+    const externalPointEdgePoint& rhs
+) const
 {
     return !(*this == rhs);
 }

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,61 +57,53 @@ Ostream& operator<<(Ostream&, const meshToMeshData&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class meshToMeshData Declaration
+                       Class meshToMeshData Declaration
 \*---------------------------------------------------------------------------*/
 
 class meshToMeshData
 {
-public:
+    // Private Data
 
-    //- Class used to pass non-cell data to the update function
-    class trackData
-    {
-    public:
-
-        const polyMesh& tgtMesh_;
-
-
-        // Constructors
-
-            trackData(const polyMesh& tgtMesh)
-            :
-                tgtMesh_(tgtMesh)
-            {}
-
-    };
-
-
-    // Private data
-
-        // Corresponding cell in tgtMesh
+        //- Corresponding cell in tgtMesh
         label tgtCelli_;
 
 
 public:
 
+    // Public Classes
+
+        //- Class used to pass non-cell data to the update function
+        class trackData
+        {
+        public:
+
+            const polyMesh& tgtMesh_;
+
+            trackData(const polyMesh& tgtMesh)
+            :
+                tgtMesh_(tgtMesh)
+            {}
+        };
+
+
     // Constructors
 
-        //- Construct null
+        //- Default construct
         inline meshToMeshData();
 
-        //- Construct from count
-        inline meshToMeshData
-        (
-            const label tgtCelli
-        );
+        //- Construct from target cell
+        inline meshToMeshData(const label tgtCelli);
 
 
     // Member Functions
 
         // Access
 
-            inline label tgtCell() const
+            label tgtCell() const
             {
                 return tgtCelli_;
             }
-
-            inline label& tgtCell()
+            label& tgtCell()
             {
                 return tgtCelli_;
             }
@@ -119,12 +111,11 @@ public:
 
         // Needed by FaceCellWave
 
-            //- Check whether origin has been changed at all or
-            //  still contains original (invalid) value.
+            //- Changed or contains original (invalid) value
             template<class TrackingData>
             inline bool valid(TrackingData&) const;
 
-            //- Check for identical geometrical data. Used for cyclics checking.
+            //- Check for identical geometrical data (eg, cyclics checking)
             template<class TrackingData>
             inline bool sameGeometry
             (
@@ -134,8 +125,8 @@ public:
                 TrackingData&
             ) const;
 
-            //- Convert any absolute coordinates into relative to (patch)face
-            //  centre
+            //- Convert absolute coordinates into relative
+            //- to (patch)face centre
             template<class TrackingData>
             inline void leaveDomain
             (
@@ -201,7 +192,7 @@ public:
                 TrackingData&
             );
 
-            //- Same (like operator==)
+            //- Test for equality, with TrackingData
             template<class TrackingData>
             inline bool equal
             (
@@ -212,9 +203,10 @@ public:
 
     // Member Operators
 
-        // Needed for List IO
+        //- Test for equality
         inline bool operator==(const meshToMeshData&) const;
 
+        //- Test for inequality
         inline bool operator!=(const meshToMeshData&) const;
 
 

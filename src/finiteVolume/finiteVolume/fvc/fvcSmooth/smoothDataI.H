@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -192,21 +193,12 @@ inline bool Foam::smoothData::equal
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline void Foam::smoothData::operator=
-(
-    const scalar value
-)
-{
-    value_ = value;
-}
-
-
 inline bool Foam::smoothData::operator==
 (
     const smoothData& rhs
 ) const
 {
-    return value_ == rhs.value();
+    return value_ == rhs.value_;
 }
 
 

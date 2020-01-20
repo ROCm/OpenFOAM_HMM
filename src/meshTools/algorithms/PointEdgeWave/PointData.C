@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,30 +28,38 @@ License
 
 #include "PointData.H"
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-template<class DataType>
-Foam::Ostream& Foam::operator<<(Ostream& os, const PointData<DataType>& pd)
+template<class T>
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const PointData<T>& rhs
+)
 {
     if (os.format() == IOstream::ASCII)
     {
         return os
-            << static_cast<const pointEdgePoint&>(pd)
-            << token::SPACE << pd.data();
+            << static_cast<const pointEdgePoint&>(rhs)
+            << token::SPACE << rhs.data();
     }
     else
     {
         return os
-            << static_cast<const pointEdgePoint&>(pd)
-            << pd.data();
+            << static_cast<const pointEdgePoint&>(rhs)
+            << rhs.data();
     }
 }
 
 
-template<class DataType>
-Foam::Istream& Foam::operator>>(Istream& is, PointData<DataType>& pd)
+template<class T>
+Foam::Istream& Foam::operator>>
+(
+    Istream& is,
+    PointData<T>& rhs
+)
 {
-    return is >> static_cast<pointEdgePoint&>(pd) >> pd.data_;
+    return is >> static_cast<pointEdgePoint&>(rhs) >> rhs.data();
 }
 
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,25 +51,19 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class polyMesh;
-
-
-// Forward declaration of friend functions and operators
-
 class patchEdgeFaceRegions;
-
 Istream& operator>>(Istream&, patchEdgeFaceRegions&);
 Ostream& operator<<(Ostream&, const patchEdgeFaceRegions&);
 
-
 /*---------------------------------------------------------------------------*\
-                           Class patchEdgeFaceRegions Declaration
+                    Class patchEdgeFaceRegions Declaration
 \*---------------------------------------------------------------------------*/
 
 class patchEdgeFaceRegions
 {
-    // Private data
+    // Private Data
 
         //- Region per point
         labelList regions_;
@@ -77,27 +72,33 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         inline patchEdgeFaceRegions();
 
         //- Construct from regions
-        inline patchEdgeFaceRegions(const labelList&);
+        inline patchEdgeFaceRegions(const labelList& regions);
 
         //- Construct from regions (on edge)
-        inline patchEdgeFaceRegions(const labelPair&);
+        inline patchEdgeFaceRegions(const labelPair& regions);
 
 
     // Member Functions
 
         // Access
 
-            inline const labelList& regions() const;
+            const labelList& regions() const
+            {
+                return regions_;
+            }
+            labelList& regions()
+            {
+                return regions_;
+            }
 
 
-        // Needed by meshWave
+        // Needed by MeshWave
 
-            //- Check whether origin has been changed at all or
-            //  still contains original (invalid) value.
+            //- Changed or contains original (invalid) value
             template<class TrackingData>
             inline bool valid(TrackingData& td) const;
 
@@ -150,15 +151,17 @@ public:
                 TrackingData& td
             );
 
-            //- Same (like operator==)
+            //- Test for equality, with TrackingData
             template<class TrackingData>
             inline bool equal(const patchEdgeFaceRegions&, TrackingData&) const;
 
 
     // Member Operators
 
-        // Needed for List IO
+        //- Test for equality
         inline bool operator==(const patchEdgeFaceRegions&) const;
+
+        //- Test for inequality
         inline bool operator!=(const patchEdgeFaceRegions&) const;
 
 

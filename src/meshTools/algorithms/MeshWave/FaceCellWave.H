@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +60,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class polyMesh;
 class polyPatch;
 
@@ -80,20 +80,20 @@ class FaceCellWave
 :
     public FaceCellWaveName
 {
-    // Private Member Functions
-
-        //- No copy construct
-        FaceCellWave(const FaceCellWave&) = delete;
-
-        //- No copy assignment
-        void operator=(const FaceCellWave&) = delete;
-
-
 protected:
 
     //- Information tagged with a source or destination id.
     //  With std::pair as lightweight, moveable container.
     typedef std::pair<label,Type> taggedInfoType;
+
+
+    // Protected Static Data
+
+        static const scalar geomTol_;
+        static scalar propagationTol_;
+
+        //- Default trackdata value to satisfy default template argument.
+        static int dummyTrackData_;
 
 
     // Protected Data
@@ -257,14 +257,11 @@ protected:
             void handleExplicitConnections();
 
 
-      // Protected static data
+        //- No copy construct
+        FaceCellWave(const FaceCellWave&) = delete;
 
-            static const scalar geomTol_;
-            static scalar propagationTol_;
-
-            //- Used as default trackdata value to satisfy default template
-            //  argument.
-            static int dummyTrackData_;
+        //- No copy assignment
+        void operator=(const FaceCellWave&) = delete;
 
 
 public:
@@ -397,7 +394,6 @@ public:
         //- Iterate until no changes or maxIter reached.
         //  \return the number of iterations taken.
         virtual label iterate(const label maxIter);
-
 };
 
 

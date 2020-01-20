@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,7 +63,7 @@ Ostream& operator<<(Ostream&, const refinementDistanceData&);
 
 class refinementDistanceData
 {
-    // Private data
+    // Private Data
 
         //- Unrefined (level0) buffer size (nBufferLayers*level0Size)
         scalar level0Size_;
@@ -75,7 +75,8 @@ class refinementDistanceData
 
     // Private Member Functions
 
-        //- Updates with neighbouring data. Returns true if something changed.
+        //- Updates with neighbouring data.
+        //  \return true if something changed.
         template<class TrackingData>
         inline bool update
         (
@@ -89,7 +90,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         inline refinementDistanceData();
 
         //- Construct from count
@@ -105,32 +106,29 @@ public:
 
         // Access
 
-            inline scalar level0Size() const
+            scalar level0Size() const
+            {
+                return level0Size_;
+            }
+            scalar& level0Size()
             {
                 return level0Size_;
             }
 
-            inline scalar& level0Size()
+            const point& origin() const
             {
-                return level0Size_;
+                return origin_;
             }
-
-            inline const point& origin() const
+            point& origin()
             {
                 return origin_;
             }
 
-            inline point& origin()
-            {
-                return origin_;
-            }
-
-            inline label originLevel() const
+            label originLevel() const
             {
                 return originLevel_;
             }
-
-            inline label& originLevel()
+            label& originLevel()
             {
                 return originLevel_;
             }
@@ -138,19 +136,18 @@ public:
 
         // Other
 
-            //- Calculates the wanted level at a given point. Walks out from
-            //  the origin.
+            //- Calculates the wanted level at a given point.
+            //  Walks out from the origin.
             inline label wantedLevel(const point& pt) const;
 
 
         // Needed by FaceCellWave
 
-            //- Check whether origin has been changed at all or
-            //  still contains original (invalid) value.
+            //- Changed or contains original (invalid) value
             template<class TrackingData>
             inline bool valid(TrackingData&) const;
 
-            //- Check for identical geometrical data. Used for cyclics checking.
+            //- Check for identical geometrical data (eg, cyclics checking)
             template<class TrackingData>
             inline bool sameGeometry
             (
@@ -227,19 +224,18 @@ public:
                 TrackingData&
             );
 
-            //- Same (like operator==)
+            //- Test for equality, with TrackingData
             template<class TrackingData>
-            inline bool equal
-            (
-                const refinementDistanceData&,
-                TrackingData&
-            ) const;
+            inline bool equal(const refinementDistanceData&, TrackingData&)
+            const;
+
 
     // Member Operators
 
-        // Needed for List IO
+        //- Test for equality
         inline bool operator==(const refinementDistanceData&) const;
 
+        //- Test for inequality
         inline bool operator!=(const refinementDistanceData&) const;
 
 

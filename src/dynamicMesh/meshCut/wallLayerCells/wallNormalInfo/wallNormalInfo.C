@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,23 +28,23 @@ License
 
 #include "wallNormalInfo.H"
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<
 (
-    Foam::Ostream& os,
-    const Foam::wallNormalInfo& wDist
+    Ostream& os,
+    const wallNormalInfo& rhs
 )
 {
     if (os.format() == IOstream::ASCII)
     {
-        os << wDist.normal();
+        os << rhs.normal();
     }
     else
     {
         os.write
         (
-            reinterpret_cast<const char*>(&wDist.normal_),
+            reinterpret_cast<const char*>(&rhs.normal_),
             sizeof(vector)
         );
     }
@@ -53,18 +54,22 @@ Foam::Ostream& Foam::operator<<
 }
 
 
-Foam::Istream& Foam::operator>>(Foam::Istream& is, Foam::wallNormalInfo& wDist)
+Foam::Istream& Foam::operator>>
+(
+    Istream& is,
+    wallNormalInfo& rhs
+)
 {
     if (is.format() == IOstream::ASCII)
     {
-        is >> wDist.normal_;
+        is >> rhs.normal_;
     }
     else if (!is.checkLabelSize<>() || !is.checkScalarSize<>())
     {
         // Non-native label or scalar size
         is.beginRawRead();
 
-        readRawScalar(is, wDist.normal_.data(), vector::nComponents);
+        readRawScalar(is, rhs.normal_.data(), vector::nComponents);
 
         is.endRawRead();
     }
@@ -72,7 +77,7 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, Foam::wallNormalInfo& wDist)
     {
         is.read
         (
-            reinterpret_cast<char*>(&wDist.normal_),
+            reinterpret_cast<char*>(&rhs.normal_),
             sizeof(vector)
         );
     }

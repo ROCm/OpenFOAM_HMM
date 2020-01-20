@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,16 +28,26 @@ License
 
 #include "wallPoint.H"
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::wallPoint& wDist)
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const wallPoint& rhs
+)
 {
-    return os << wDist.origin() << token::SPACE << wDist.distSqr();
+    return os << rhs.origin() << token::SPACE << rhs.distSqr();
 }
 
-Foam::Istream& Foam::operator>>(Foam::Istream& is, Foam::wallPoint& wDist)
+
+Foam::Istream& Foam::operator>>
+(
+    Istream& is,
+    wallPoint& rhs
+)
 {
-    return is >> wDist.origin() >> wDist.distSqr();
+    return is >> rhs.origin() >> rhs.distSqr();
 }
+
 
 // ************************************************************************* //

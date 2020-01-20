@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,14 +56,13 @@ class pointTopoDistanceData;
 Istream& operator>>(Istream&, pointTopoDistanceData&);
 Ostream& operator<<(Ostream&, const pointTopoDistanceData&);
 
-
 /*---------------------------------------------------------------------------*\
                        Class pointTopoDistanceData Declaration
 \*---------------------------------------------------------------------------*/
 
 class pointTopoDistanceData
 {
-    // Private data
+    // Private Data
 
         //- Starting data
         label data_;
@@ -76,7 +75,7 @@ public:
 
     // Constructors
 
-        //- Construct null with invalid (-1) for data and distance
+        //- Default construct, with invalid (-1) for data and distance
         inline pointTopoDistanceData();
 
         //- Construct from components
@@ -91,11 +90,12 @@ public:
 
         // Access
 
-            inline label data() const
+            label data() const
             {
                 return data_;
             }
-            inline label distance() const
+
+            label distance() const
             {
                 return distance_;
             }
@@ -103,13 +103,11 @@ public:
 
         // Needed by PointEdgeWave
 
-
-            //- Check whether origin has been changed at all or
-            //  still contains original (invalid) value.
+            //- Changed or contains original (invalid) value
             template<class TrackingData>
             inline bool valid(TrackingData& td) const;
 
-            //- Check for identical geometrical data. Used for cyclics checking.
+            //- Check for identical geometrical data (eg, cyclics checking)
             template<class TrackingData>
             inline bool sameGeometry
             (
@@ -193,7 +191,7 @@ public:
                 TrackingData& td
             );
 
-            //- Same (like operator==)
+            //- Test for equality, with TrackingData
             template<class TrackingData>
             inline bool equal(const pointTopoDistanceData&, TrackingData&)
             const;
@@ -201,8 +199,10 @@ public:
 
     // Member Operators
 
-        // Needed for List IO
+        //- Test for equality
         inline bool operator==(const pointTopoDistanceData&) const;
+
+        //- Test for inequality
         inline bool operator!=(const pointTopoDistanceData&) const;
 
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,9 +77,9 @@ private:
 
     // Private Member Functions
 
-        //- Evaluate distance to point. Update distSqr, origin from whomever
-        //  is nearer pt. Return true if w2 is closer to point,
-        //  false otherwise.
+        //- Evaluate distance to point.
+        //  Update distSqr, origin from whomever is nearer pt.
+        //  \return true if w2 is closer to point, false otherwise.
         template<class TrackingData>
         inline bool update
         (

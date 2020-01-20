@@ -140,7 +140,7 @@ void Foam::waveMethod::calculate
 
         forAll(cellData, celli)
         {
-            srcToTgtAddr[celli] = cellData[celli].tgtCelli_;
+            srcToTgtAddr[celli] = cellData[celli].tgtCell();
         }
     }
 
@@ -171,6 +171,7 @@ Foam::waveMethod::waveMethod
 
 Foam::waveMethod::~waveMethod()
 {}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 

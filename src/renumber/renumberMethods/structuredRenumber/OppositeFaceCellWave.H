@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,7 +73,7 @@ class OppositeFaceCellWave
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- For every entry in changedCells (i.e. the cell front) gives
         //  the face that it needs to transfer to
@@ -95,7 +96,8 @@ public:
     // Constructors
 
         //- Construct from mesh and list of changed faces with the Type
-        //  for these faces. Iterates until nothing changes or maxIter reached.
+        //- for these faces.
+        //  Iterates until nothing changes or maxIter reached.
         //  (maxIter can be 0)
         OppositeFaceCellWave
         (

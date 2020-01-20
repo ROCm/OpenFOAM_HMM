@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,9 +59,7 @@ Istream& operator>>(Istream&, PointIntegrateData<DataType>&);
 template<class DataType>
 class PointIntegrateData
 {
-private:
-
-    // Private data
+    // Private Data
 
         //- Valid flag
         bool valid_;
@@ -88,7 +86,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         inline PointIntegrateData();
 
         //- Construct from data
@@ -99,8 +97,11 @@ public:
 
         // Access
 
-            //- Const access the data
-            inline const DataType& data() const
+            const DataType& data() const
+            {
+                return data_;
+            };
+            DataType& data()
             {
                 return data_;
             };
@@ -108,11 +109,11 @@ public:
 
         // Needed by PointEdgeWave
 
-            //- Check whether original (invalid) value.
+            //- Changed or contains original (invalid) value
             template<class TrackingData>
             inline bool valid(TrackingData& td) const;
 
-            //- Check for identical geometrical data. Used for cyclics checking.
+            //- Check for identical geometrical data (eg, cyclics checking)
             template<class TrackingData>
             inline bool sameGeometry
             (
@@ -122,7 +123,7 @@ public:
             ) const;
 
             //- Convert origin to relative vector to leaving point
-            //  (= point coordinate)
+            //- (= point coordinate)
             template<class TrackingData>
             inline void leaveDomain
             (
@@ -196,7 +197,7 @@ public:
                 TrackingData& td
             );
 
-            //- Same (like operator==)
+            //- Test for equality, with TrackingData
             template<class TrackingData>
             inline bool equal
             (
@@ -207,8 +208,10 @@ public:
 
     // Member Operators
 
-        // Needed for List IO
+        //- Test for equality
         inline bool operator==(const PointIntegrateData<DataType>&) const;
+
+        //- Test for inequality
         inline bool operator!=(const PointIntegrateData<DataType>&) const;
 
 

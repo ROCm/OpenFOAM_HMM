@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -199,23 +200,23 @@ Foam::label Foam::directionInfo::edgeToFaceIndex
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<
 (
-    Foam::Ostream& os,
-    const Foam::directionInfo& wDist
+    Ostream& os,
+    const directionInfo& rhs
 )
 {
     if (os.format() == IOstream::ASCII)
     {
-        os << wDist.index_ << wDist.n_;
+        os << rhs.index_ << rhs.n_;
     }
     else
     {
         os.write
         (
-            reinterpret_cast<const char*>(&wDist.index_),
+            reinterpret_cast<const char*>(&rhs.index_),
             sizeof(directionInfo)
         );
     }
@@ -225,19 +226,23 @@ Foam::Ostream& Foam::operator<<
 }
 
 
-Foam::Istream& Foam::operator>>(Foam::Istream& is, Foam::directionInfo& wDist)
+Foam::Istream& Foam::operator>>
+(
+    Istream& is,
+    directionInfo& rhs
+)
 {
     if (is.format() == IOstream::ASCII)
     {
-        is >> wDist.index_ >> wDist.n_;
+        is >> rhs.index_ >> rhs.n_;
     }
     else if (!is.checkLabelSize<>() || !is.checkScalarSize<>())
     {
         // Non-native label or scalar size
         is.beginRawRead();
 
-        readRawLabel(is, &wDist.index_);
-        readRawScalar(is, wDist.n_.data(), vector::nComponents);
+        readRawLabel(is, &rhs.index_);
+        readRawScalar(is, rhs.n_.data(), vector::nComponents);
 
         is.endRawRead();
     }
@@ -245,7 +250,7 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, Foam::directionInfo& wDist)
     {
         is.read
         (
-            reinterpret_cast<char*>(&wDist.index_),
+            reinterpret_cast<char*>(&rhs.index_),
             sizeof(directionInfo)
         );
     }

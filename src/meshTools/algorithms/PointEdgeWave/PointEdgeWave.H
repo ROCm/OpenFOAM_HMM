@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,7 +70,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class polyMesh;
 class polyPatch;
 
@@ -89,19 +90,18 @@ class PointEdgeWave
 :
     public PointEdgeWaveName
 {
-  // Private static data
+    // Private Static Data
 
         //- Relative tolerance. Stop propagation if relative changes
         //  less than this tolerance (responsibility for checking this is
         //  up to Type implementation)
         static scalar propagationTol_;
 
-        //- Used as default trackdata value to satisfy default template
-        //  argument.
+        //- Default trackdata value to satisfy default template argument.
         static int dummyTrackData_;
 
 
-    // Private data
+    // Private Data
 
         //- Reference to mesh
         const polyMesh& mesh_;
@@ -167,8 +167,8 @@ class PointEdgeWave
             List<Type>& pointInfo
         ) const;
 
-        //- Updates pointInfo with information from neighbour. Updates all
-        //  statistics.
+        //- Updates pointInfo with information from neighbour.
+        //  Updates all statistics.
         bool updatePoint
         (
             const label pointi,
@@ -177,8 +177,8 @@ class PointEdgeWave
             Type& pointInfo
         );
 
-        //- Updates pointInfo with information from same point. Updates all
-        //  statistics.
+        //- Updates pointInfo with information from same point.
+        //  Updates all statistics.
         bool updatePoint
         (
             const label pointi,
@@ -186,8 +186,8 @@ class PointEdgeWave
             Type& pointInfo
         );
 
-        //- Updates edgeInfo with information from neighbour. Updates all
-        //  statistics.
+        //- Updates edgeInfo with information from neighbour.
+        //  Updates all statistics.
         bool updateEdge
         (
             const label edgeI,
@@ -195,6 +195,7 @@ class PointEdgeWave
             const Type& neighbourInfo,
             Type& edgeInfo
         );
+
 
         // Parallel, cyclic
 
@@ -266,7 +267,7 @@ public:
 
 
     //- Destructor
-    ~PointEdgeWave();
+    ~PointEdgeWave() = default;
 
 
     // Member Functions
@@ -336,6 +337,7 @@ class listUpdateOp
     TrackingData& td_;
 
 public:
+
     listUpdateOp(const scalar tol, TrackingData& td)
     :
         tol_(tol),

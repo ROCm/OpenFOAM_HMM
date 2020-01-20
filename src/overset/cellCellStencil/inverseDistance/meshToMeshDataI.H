@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,7 +116,7 @@ inline bool Foam::meshToMeshData::updateCell
         const point& cc = mesh.cellCentres()[thisCelli];
 
         // See if we are in the neighbour
-        label tgti = neighbourInfo.tgtCelli_;
+        const label tgti = neighbourInfo.tgtCelli_;
 
         // Try match of neighbour
         if (td.tgtMesh_.pointInCell(cc, tgti, polyMesh::CELL_TETS))
@@ -127,10 +127,8 @@ inline bool Foam::meshToMeshData::updateCell
 
         // Try match of neighbour's neighbours
         const labelList& tgtNbrs = td.tgtMesh_.cellCells(tgti);
-        forAll(tgtNbrs, i)
+        for (const label tgti : tgtNbrs)
         {
-            label tgti = tgtNbrs[i];
-
             // Try match of neighbour
             if (td.tgtMesh_.pointInCell(cc, tgti, polyMesh::CELL_TETS))
             {
@@ -211,7 +209,7 @@ inline bool Foam::meshToMeshData::equal
 
 inline bool Foam::meshToMeshData::operator==
 (
-    const Foam::meshToMeshData& rhs
+    const meshToMeshData& rhs
 ) const
 {
     return tgtCelli_ == rhs.tgtCelli_;
@@ -220,7 +218,7 @@ inline bool Foam::meshToMeshData::operator==
 
 inline bool Foam::meshToMeshData::operator!=
 (
-    const Foam::meshToMeshData& rhs
+    const meshToMeshData& rhs
 ) const
 {
     return !(*this == rhs);

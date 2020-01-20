@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,25 +28,25 @@ License
 
 #include "pointTopoDistanceData.H"
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<
 (
-    Foam::Ostream& os,
-    const Foam::pointTopoDistanceData& wDist
+    Ostream& os,
+    const pointTopoDistanceData& rhs
 )
 {
-    return os << wDist.data_ << token::SPACE << wDist.distance_;
+    return os << rhs.data_ << token::SPACE << rhs.distance_;
 }
 
 
 Foam::Istream& Foam::operator>>
 (
-    Foam::Istream& is,
-    Foam::pointTopoDistanceData& wDist
+    Istream& is,
+    pointTopoDistanceData& rhs
 )
 {
-    return is >> wDist.data_ >> wDist.distance_;
+    return is >> rhs.data_ >> rhs.distance_;
 }
 
 

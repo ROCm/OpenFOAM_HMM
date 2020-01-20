@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -215,7 +215,6 @@ inline bool Foam::PointIntegrateData<DataType>::updateEdge
 }
 
 
-//- Same (like operator==)
 template<class DataType>
 template<class TrackingData>
 inline bool Foam::PointIntegrateData<DataType>::equal
@@ -246,9 +245,8 @@ inline bool Foam::PointIntegrateData<DataType>::equal
 template<class DataType>
 inline bool Foam::PointIntegrateData<DataType>::operator==
 (
-    const Foam::PointIntegrateData<DataType>& rhs
-)
-const
+    const PointIntegrateData<DataType>& rhs
+) const
 {
     return this->data_ == rhs.data_;
 }
@@ -257,30 +255,29 @@ const
 template<class DataType>
 inline bool Foam::PointIntegrateData<DataType>::operator!=
 (
-    const Foam::PointIntegrateData<DataType>& rhs
-)
-const
+    const PointIntegrateData<DataType>& rhs
+) const
 {
     return !(*this == rhs);
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class DataType>
 inline Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const PointIntegrateData<DataType>& pd
+    const PointIntegrateData<DataType>& rhs
 )
 {
     if (os.format() == IOstream::ASCII)
     {
-        return os << pd.valid_ << token::SPACE << pd.data();
+        return os << rhs.valid_ << token::SPACE << rhs.data();
     }
     else
     {
-        return os << pd.valid_ << pd.data();
+        return os << rhs.valid_ << rhs.data();
     }
 }
 
@@ -289,10 +286,10 @@ template<class DataType>
 inline Foam::Istream& Foam::operator>>
 (
     Istream& is,
-    PointIntegrateData<DataType>& pd
+    PointIntegrateData<DataType>& rhs
 )
 {
-    return is >> pd.valid_ >> pd.data_;
+    return is >> rhs.valid_ >> rhs.data_;
 }
 
 

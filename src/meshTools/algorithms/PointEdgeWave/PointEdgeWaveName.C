@@ -31,7 +31,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(PointEdgeWaveName, 0);
+    defineTypeNameAndDebug(PointEdgeWaveName, 0);
 }
 
 

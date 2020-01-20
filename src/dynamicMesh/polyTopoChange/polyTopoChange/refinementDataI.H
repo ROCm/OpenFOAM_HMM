@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +28,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Null constructor
 inline Foam::refinementData::refinementData()
 :
     refinementCount_(-1),
@@ -35,7 +35,6 @@ inline Foam::refinementData::refinementData()
 {}
 
 
-// Construct from components
 inline Foam::refinementData::refinementData
 (
     const label refinementCount,
@@ -251,15 +250,19 @@ inline bool Foam::refinementData::equal
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline bool Foam::refinementData::operator==(const Foam::refinementData& rhs)
- const
+inline bool Foam::refinementData::operator==
+(
+    const refinementData& rhs
+) const
 {
-    return count() == rhs.count() && refinementCount() == rhs.refinementCount();
+    return count_ == rhs.count_ && refinementCount_ == rhs.refinementCount_;
 }
 
 
-inline bool Foam::refinementData::operator!=(const Foam::refinementData& rhs)
- const
+inline bool Foam::refinementData::operator!=
+(
+    const refinementData& rhs
+) const
 {
     return !(*this == rhs);
 }

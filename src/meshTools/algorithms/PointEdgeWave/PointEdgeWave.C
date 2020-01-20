@@ -53,11 +53,12 @@ namespace Foam
     {
         TrackingData& td_;
 
-        public:
-            combineEqOp(TrackingData& td)
-            :
-                td_(td)
-            {}
+    public:
+
+        combineEqOp(TrackingData& td)
+        :
+            td_(td)
+        {}
 
         void operator()(Type& x, const Type& y) const
         {
@@ -705,15 +706,7 @@ Foam::PointEdgeWave<Type, TrackingData>::PointEdgeWave
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type, class TrackingData>
-Foam::PointEdgeWave<Type, TrackingData>::~PointEdgeWave()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
 
 template<class Type, class TrackingData>
 Foam::label Foam::PointEdgeWave<Type, TrackingData>::nUnvisitedPoints() const

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,14 +56,13 @@ class externalPointEdgePoint;
 Istream& operator>>(Istream&, externalPointEdgePoint&);
 Ostream& operator<<(Ostream&, const externalPointEdgePoint&);
 
-
 /*---------------------------------------------------------------------------*\
-                           Class externalPointEdgePoint Declaration
+               Class externalPointEdgePoint Declaration
 \*---------------------------------------------------------------------------*/
 
 class externalPointEdgePoint
 {
-    // Private data
+    // Private Data
 
         //- Position of nearest wall center
         point origin_;
@@ -74,9 +73,9 @@ class externalPointEdgePoint
 
     // Private Member Functions
 
-        //- Evaluate distance to point. Update distSqr, origin from whomever
-        //  is nearer pt. Return true if w2 is closer to point,
-        //  false otherwise.
+        //- Evaluate distance to point.
+        //  Update distSqr, origin from whomever is nearer pt.
+        //  \return true if w2 is closer to point, false otherwise.
         template<class TrackingData>
         inline bool update
         (
@@ -86,8 +85,8 @@ class externalPointEdgePoint
             TrackingData& td
         );
 
-        //- Combine current with w2. Update distSqr, origin if w2 has smaller
-        //  quantities and returns true.
+        //- Combine current with w2.
+        //  Update distSqr, origin if w2 has smaller quantities and return true
         template<class TrackingData>
         inline bool update
         (
@@ -103,6 +102,7 @@ public:
     class trackingData
     {
     public:
+
         const pointField& points_;
 
         trackingData(const pointField& points)
@@ -112,36 +112,37 @@ public:
     };
 
 
-
     // Constructors
 
-        //- Construct null
+        //- Default construct
         inline externalPointEdgePoint();
 
         //- Construct from origin, distance
         inline externalPointEdgePoint(const point&, const scalar);
-
-        //- Construct as copy
-        inline externalPointEdgePoint(const externalPointEdgePoint&);
 
 
     // Member Functions
 
         // Access
 
-            inline const point& origin() const;
+            const point& origin() const
+            {
+                return origin_;
+            }
 
-            inline scalar distSqr() const;
+            scalar distSqr() const
+            {
+                return distSqr_;
+            }
 
 
         // Needed by PointEdgeWave
 
-            //- Check whether origin has been changed at all or
-            //  still contains original (invalid) value.
+            //- Changed or contains original (invalid) value
             template<class TrackingData>
             inline bool valid(TrackingData& td) const;
 
-            //- Check for identical geometrical data. Used for cyclics checking.
+            //- Check for identical geometrical data (eg, cyclics checking)
             template<class TrackingData>
             inline bool sameGeometry
             (
@@ -151,7 +152,7 @@ public:
             ) const;
 
             //- Convert origin to relative vector to leaving point
-            //  (= point coordinate)
+            //- (= point coordinate)
             template<class TrackingData>
             inline void leaveDomain
             (
@@ -225,7 +226,7 @@ public:
                 TrackingData& td
             );
 
-            //- Equivalent to operator== with TrackingData
+            //- Test for equality, with TrackingData
             template<class TrackingData>
             inline bool equal
             (
@@ -236,8 +237,10 @@ public:
 
     // Member Operators
 
-        // Needed for List IO
+        //- Test for equality
         inline bool operator==(const externalPointEdgePoint&) const;
+
+        //- Test for inequality
         inline bool operator!=(const externalPointEdgePoint&) const;
 
 

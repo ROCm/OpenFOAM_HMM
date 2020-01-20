@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,21 +28,25 @@ License
 
 #include "pointEdgePoint.H"
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<
 (
-    Foam::Ostream& os,
-    const Foam::pointEdgePoint& wDist
+    Ostream& os,
+    const pointEdgePoint& rhs
 )
 {
-    return os << wDist.origin() << wDist.distSqr();
+    return os << rhs.origin() << rhs.distSqr();
 }
 
 
-Foam::Istream& Foam::operator>>(Foam::Istream& is, Foam::pointEdgePoint& wDist)
+Foam::Istream& Foam::operator>>
+(
+    Istream& is,
+    pointEdgePoint& rhs
+)
 {
-    return is >> wDist.origin_ >> wDist.distSqr_;
+    return is >> rhs.origin() >> rhs.distSqr();
 }
 
 

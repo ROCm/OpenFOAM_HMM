@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +50,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class polyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -73,19 +74,18 @@ class PatchEdgeFaceWave
 :
     public PatchEdgeFaceWaveName
 {
-  // Private static data
+    // Private Static Data
 
-        //- Relative tolerance. Stop propagation if relative changes
-        //  less than this tolerance (responsibility for checking this is
-        //  up to Type implementation)
+        //- Relative tolerance.
+        //  Stop propagation if relative changes less than this tolerance
+        //  (responsibility for checking this is up to Type implementation)
         static scalar propagationTol_;
 
-        //- Used as default trackdata value to satisfy default template
-        //  argument.
+        //- Default trackdata value to satisfy default template argument.
         static label dummyTrackData_;
 
 
-    // Private data
+    // Private Data
 
         //- Reference to mesh
         const polyMesh& mesh_;
@@ -130,8 +130,8 @@ class PatchEdgeFaceWave
 
     // Private Member Functions
 
-        //- Updates edgeInfo with information from neighbour. Updates all
-        //  statistics.
+        //- Updates edgeInfo with information from neighbour.
+        //  Updates all statistics.
         bool updateEdge
         (
             const label edgeI,
@@ -140,8 +140,8 @@ class PatchEdgeFaceWave
             Type& edgeInfo
         );
 
-        //- Updates faceInfo with information from neighbour. Updates all
-        //  statistics.
+        //- Updates faceInfo with information from neighbour.
+        //  Updates all statistics.
         bool updateFace
         (
             const label facei,
@@ -180,7 +180,8 @@ public:
     // Constructors
 
         //- Construct from patch, list of changed edges with the Type
-        //  for these edges. Gets work arrays to operate on, one of size
+        //- for these edges.
+        //  Obtains work arrays to operate on, one of size
         //  number of patch edges, the other number of patch faces.
         //  Iterates until nothing changes or maxIter reached.
         //  (maxIter can be 0)
@@ -196,8 +197,8 @@ public:
             TrackingData& td = dummyTrackData_
         );
 
-        //- Construct from patch. Use setEdgeInfo and iterate() to do
-        //  actual calculation
+        //- Construct from patch.
+        //  Use setEdgeInfo() and iterate() to do actual calculation
         PatchEdgeFaceWave
         (
             const polyMesh& mesh,
@@ -229,13 +230,21 @@ public:
         }
 
         //- Number of unvisited faces, i.e. faces that were not (yet)
-        //  reached from walking across patch. This can happen from
+        //- reached from walking across patch.
+        //
+        //  This can happen from
         //  - not enough iterations done
         //  - a disconnected patch
         //  - a patch without walls in it
-        label nUnvisitedFaces() const;
+        label nUnvisitedFaces() const
+        {
+            return nUnvisitedFaces_;
+        }
 
-        label nUnvisitedEdges() const;
+        label nUnvisitedEdges() const
+        {
+            return nUnvisitedEdges_;
+        }
 
         //- Copy initial data into allEdgeInfo_
         void setEdgeInfo
@@ -244,16 +253,16 @@ public:
             const List<Type>& changedEdgesInfo
         );
 
-        //- Propagate from edge to face. Returns total number of faces
-        //  (over all processors) changed.
+        //- Propagate from edge to face.
+        //  \return total number of faces (over all processors) changed.
         label edgeToFace();
 
-        //- Propagate from face to edge. Returns total number of edges
-        //  (over all processors) changed.
+        //- Propagate from face to edge.
+        //  \return total number of edges (over all processors) changed.
         label faceToEdge();
 
-        //- Iterate until no changes or maxIter reached. Returns actual
-        //  number of iterations.
+        //- Iterate until no changes or maxIter reached.
+        //  \return actual number of iterations.
         label iterate(const label maxIter);
 };
 
@@ -276,6 +285,7 @@ class updateOp
     TrackingData& td_;
 
 public:
+
     updateOp
     (
         const polyMesh& mesh,
@@ -316,6 +326,7 @@ class transformOp
     TrackingData& td_;
 
 public:
+
     transformOp
     (
         const polyMesh& mesh,

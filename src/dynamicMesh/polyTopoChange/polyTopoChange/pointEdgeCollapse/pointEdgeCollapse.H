@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,14 +55,13 @@ class pointEdgeCollapse;
 Istream& operator>>(Istream&, pointEdgeCollapse&);
 Ostream& operator<<(Ostream&, const pointEdgeCollapse&);
 
-
 /*---------------------------------------------------------------------------*\
-                           Class pointEdgeCollapse Declaration
+                      Class pointEdgeCollapse Declaration
 \*---------------------------------------------------------------------------*/
 
 class pointEdgeCollapse
 {
-    // Private data
+    // Private Data
 
         //- Collapse location
         point collapsePoint_;
@@ -85,7 +84,6 @@ class pointEdgeCollapse
             TrackingData& td
         );
 
-
         //- Check for same coordinate
         inline bool samePoint(const point& pt) const;
 
@@ -93,7 +91,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         inline pointEdgeCollapse();
 
         //- Construct from components
@@ -109,17 +107,25 @@ public:
 
         // Access
 
-            inline const point& collapsePoint() const;
+            const point& collapsePoint() const
+            {
+                return collapsePoint_;
+            }
 
-            inline label collapseIndex() const;
+            label collapseIndex() const
+            {
+                return collapseIndex_;
+            }
 
-            inline label collapsePriority() const;
+            label collapsePriority() const
+            {
+                return collapsePriority_;
+            }
 
 
-        // Needed by meshWave
+        // Needed by MeshWave
 
-            //- Check whether origin has been changed at all or
-            //  still contains original (invalid) value.
+            //- Changed or contains original (invalid) value
             template<class TrackingData>
             inline bool valid(TrackingData& td) const;
 
@@ -198,16 +204,17 @@ public:
                 TrackingData& td
             );
 
-            //- Same (like operator==)
+            //- Test for equality, with TrackingData
             template<class TrackingData>
-            inline bool equal(const pointEdgeCollapse&, TrackingData&)
-            const;
+            inline bool equal(const pointEdgeCollapse&, TrackingData&) const;
 
 
     // Member Operators
 
-        //Note: Used to determine whether to call update.
+        //- Test for equality
         inline bool operator==(const pointEdgeCollapse&) const;
+
+        //- Test for inequality
         inline bool operator!=(const pointEdgeCollapse&) const;
 
 

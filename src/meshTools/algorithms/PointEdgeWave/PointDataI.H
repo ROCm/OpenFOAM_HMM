@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,22 +51,7 @@ inline Foam::PointData<DataType>::PointData
 {}
 
 
-template<class DataType>
-inline Foam::PointData<DataType>::PointData(const PointData<DataType>& wpt)
-:
-    pointEdgePoint(wpt),
-    data_(wpt.data())
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class DataType>
-inline const DataType& Foam::PointData<DataType>::data() const
-{
-    return data_;
-}
-
 
 template<class DataType>
 template<class TrackingData>
@@ -207,9 +192,8 @@ inline bool Foam::PointData<DataType>::updateEdge
 template<class DataType>
 inline bool Foam::PointData<DataType>::operator==
 (
-    const Foam::PointData<DataType>& rhs
-)
-const
+    const PointData<DataType>& rhs
+) const
 {
     return pointEdgePoint::operator==(rhs) && (data() == rhs.data());
 }
@@ -218,9 +202,8 @@ const
 template<class DataType>
 inline bool Foam::PointData<DataType>::operator!=
 (
-    const Foam::PointData<DataType>& rhs
-)
-const
+    const PointData<DataType>& rhs
+) const
 {
     return !(*this == rhs);
 }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +57,7 @@ template<class Type> Ostream& operator<<(Ostream&, const wallPointData<Type>&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class wallPointData Declaration
+                        Class wallPointData Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -65,7 +65,7 @@ class wallPointData
 :
     public wallPoint
 {
-    // Private data
+    // Private Data
 
         //- Data at nearest wall center
         Type data_;
@@ -73,9 +73,9 @@ class wallPointData
 
     // Private Member Functions
 
-        //- Evaluate distance to point. Update distSqr, origin from whomever
-        //  is nearer pt. Return true if w2 is closer to point,
-        //  false otherwise.
+        //- Evaluate distance to point.
+        //  Update distSqr, origin from whomever is nearer pt.
+        //  \return true if w2 is closer to point, false otherwise.
         template<class TrackingData>
         inline bool update
         (
@@ -88,12 +88,15 @@ class wallPointData
 
 public:
 
-    typedef Type dataType;
+    // Public Typedefs
+
+        //- Type of additional data carried
+        typedef Type dataType;
 
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         inline wallPointData();
 
         //- Construct from origin, normal, distance
@@ -109,10 +112,17 @@ public:
 
         // Access
 
-            inline const Type& data() const;
-            inline Type& data();
+            const Type& data() const
+            {
+                return data_;
+            }
+            Type& data()
+            {
+                return data_;
+            }
 
-        // Needed by meshWave
+
+        // Needed by MeshWave
 
             //- Influence of neighbouring face.
             //  Calls update(...) with cellCentre of celli
@@ -153,7 +163,6 @@ public:
                 TrackingData& td
             );
 
-    // Member Operators
 
     // IOstream Operators
 

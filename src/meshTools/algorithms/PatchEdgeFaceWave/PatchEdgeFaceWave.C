@@ -415,32 +415,6 @@ PatchEdgeFaceWave
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template
-<
-    class PrimitivePatchType,
-    class Type,
-    class TrackingData
->
-Foam::label Foam::PatchEdgeFaceWave<PrimitivePatchType, Type, TrackingData>::
-nUnvisitedEdges() const
-{
-    return nUnvisitedEdges_;
-}
-
-
-template
-<
-    class PrimitivePatchType,
-    class Type,
-    class TrackingData
->
-Foam::label Foam::PatchEdgeFaceWave<PrimitivePatchType, Type, TrackingData>::
-nUnvisitedFaces() const
-{
-    return nUnvisitedFaces_;
-}
-
-
 // Copy edge information into member data
 template
 <

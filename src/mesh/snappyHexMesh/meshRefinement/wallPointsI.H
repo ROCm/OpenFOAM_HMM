@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,7 @@ inline bool Foam::wallPoints::update
     TrackingData& td
 )
 {
-    scalar dist2 = magSqr(pt - w2.origin_[index2]);
+    const scalar dist2 = magSqr(pt - w2.origin_[index2]);
 
     if (!valid(td))
     {
@@ -55,7 +55,7 @@ inline bool Foam::wallPoints::update
         return true;
     }
 
-    scalar diff = distSqr_[index1] - dist2;
+    const scalar diff = distSqr_[index1] - dist2;
 
     if (diff < 0)
     {
@@ -329,7 +329,7 @@ inline bool Foam::wallPoints::equal
 
 inline bool Foam::wallPoints::operator==
 (
-    const Foam::wallPoints& rhs
+    const wallPoints& rhs
 ) const
 {
     return
@@ -342,7 +342,7 @@ inline bool Foam::wallPoints::operator==
 
 inline bool Foam::wallPoints::operator!=
 (
-    const Foam::wallPoints& rhs
+    const wallPoints& rhs
 ) const
 {
     return !(*this == rhs);

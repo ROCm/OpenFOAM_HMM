@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,24 +91,6 @@ inline bool Foam::pointEdgeStructuredWalk::inZone() const
 }
 
 
-inline Foam::scalar Foam::pointEdgeStructuredWalk::dist() const
-{
-    return dist_;
-}
-
-
-inline const Foam::vector& Foam::pointEdgeStructuredWalk::data() const
-{
-    return data_;
-}
-
-
-inline Foam::label Foam::pointEdgeStructuredWalk::index() const
-{
-    return index_;
-}
-
-
 template<class TrackingData>
 inline bool Foam::pointEdgeStructuredWalk::valid(TrackingData& td) const
 {
@@ -125,7 +107,7 @@ inline bool Foam::pointEdgeStructuredWalk::sameGeometry
     TrackingData& td
 ) const
 {
-    scalar diff = Foam::mag(dist() - w2.dist());
+    const scalar diff = Foam::mag(dist() - w2.dist());
 
     if (diff < SMALL)
     {
@@ -275,7 +257,7 @@ inline bool Foam::pointEdgeStructuredWalk::equal
 
 inline bool Foam::pointEdgeStructuredWalk::operator==
 (
-    const Foam::pointEdgeStructuredWalk& rhs
+    const pointEdgeStructuredWalk& rhs
 ) const
 {
     return previousPoint_ == rhs.previousPoint_;
@@ -284,7 +266,7 @@ inline bool Foam::pointEdgeStructuredWalk::operator==
 
 inline bool Foam::pointEdgeStructuredWalk::operator!=
 (
-    const Foam::pointEdgeStructuredWalk& rhs
+    const pointEdgeStructuredWalk& rhs
 ) const
 {
     return !(*this == rhs);

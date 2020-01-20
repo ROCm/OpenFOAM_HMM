@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -204,16 +204,16 @@ inline bool Foam::pointTopoDistanceData::equal
 
 inline bool Foam::pointTopoDistanceData::operator==
 (
-    const Foam::pointTopoDistanceData& rhs
+    const pointTopoDistanceData& rhs
 ) const
 {
-    return data() == rhs.data() && distance() == rhs.distance();
+    return data_ == rhs.data_ && distance_ == rhs.distance_;
 }
 
 
 inline bool Foam::pointTopoDistanceData::operator!=
 (
-    const Foam::pointTopoDistanceData& rhs
+    const pointTopoDistanceData& rhs
 ) const
 {
     return !(*this == rhs);

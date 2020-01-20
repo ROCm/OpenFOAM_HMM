@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,11 +40,11 @@ inline bool Foam::transportData::update
     TrackingData& td
 )
 {
-    scalar dist2 = magSqr(pt - w2.origin());
+    const scalar dist2 = magSqr(pt - w2.origin());
 
     if (valid(td))
     {
-        scalar diff = distSqr() - dist2;
+        const scalar diff = distSqr() - dist2;
 
         if (diff < 0)
         {

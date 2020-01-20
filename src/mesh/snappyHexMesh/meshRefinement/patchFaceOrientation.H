@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,14 +54,13 @@ class patchFaceOrientation;
 Istream& operator>>(Istream&, patchFaceOrientation&);
 Ostream& operator<<(Ostream&, const patchFaceOrientation&);
 
-
 /*---------------------------------------------------------------------------*\
-                           Class patchFaceOrientation Declaration
+                    Class patchFaceOrientation Declaration
 \*---------------------------------------------------------------------------*/
 
 class patchFaceOrientation
 {
-    // Private data
+    // Private Data
 
         //- Flip status
         label flipStatus_;
@@ -70,7 +69,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         inline patchFaceOrientation();
 
         //- Construct from components
@@ -79,17 +78,21 @@ public:
 
     // Member Functions
 
-        //- Orientation
-        inline label flipStatus() const;
+    // Access
 
-        //- Reverse orientation
+        //- Orientation
+        label flipStatus() const
+        {
+            return flipStatus_;
+        }
+
+        //- Reverse the orientation
         inline void flip();
 
 
-        // Needed by meshWave
+        // Needed by MeshWave
 
-            //- Check whether origin has been changed at all or
-            //  still contains original (invalid) value.
+            //- Changed or contains original (invalid) value
             template<class TrackingData>
             inline bool valid(TrackingData& td) const;
 
@@ -142,15 +145,17 @@ public:
                 TrackingData& td
             );
 
-            //- Same (like operator==)
+            //- Test for equality, with TrackingData
             template<class TrackingData>
             inline bool equal(const patchFaceOrientation&, TrackingData&) const;
 
 
     // Member Operators
 
-        // Needed for List IO
+        //- Test for equality
         inline bool operator==(const patchFaceOrientation&) const;
+
+        //- Test for equality
         inline bool operator!=(const patchFaceOrientation&) const;
 
 

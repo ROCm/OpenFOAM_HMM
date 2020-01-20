@@ -31,7 +31,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(FaceCellWaveName, 0);
+    defineTypeNameAndDebug(FaceCellWaveName, 0);
 }
 
 

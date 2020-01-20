@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,25 +27,25 @@ License
 
 #include "meshToMeshData.H"
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<
 (
-    Foam::Ostream& os,
-    const Foam::meshToMeshData& wDist
+    Ostream& os,
+    const meshToMeshData& rhs
 )
 {
-    return os << wDist.tgtCelli_;
+    return os << rhs.tgtCelli_;
 }
 
 
 Foam::Istream& Foam::operator>>
 (
-    Foam::Istream& is,
-    Foam::meshToMeshData& wDist
+    Istream& is,
+    meshToMeshData& rhs
 )
 {
-    return is >> wDist.tgtCelli_;
+    return is >> rhs.tgtCelli_;
 }
 
 

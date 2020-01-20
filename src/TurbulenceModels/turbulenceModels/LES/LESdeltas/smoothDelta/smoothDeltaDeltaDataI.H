@@ -198,7 +198,7 @@ inline bool Foam::LESModels::smoothDelta::deltaData::operator==
     const deltaData& rhs
 ) const
 {
-    return delta_ == rhs.delta();
+    return delta_ == rhs.delta_;
 }
 
 

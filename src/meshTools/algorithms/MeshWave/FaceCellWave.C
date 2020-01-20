@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,6 +50,7 @@ Foam::scalar Foam::FaceCellWave<Type, TrackingData>::propagationTol_ = 0.01;
 template<class Type, class TrackingData>
 int Foam::FaceCellWave<Type, TrackingData>::dummyTrackData_ = 12345;
 
+
 namespace Foam
 {
     template<class Type, class TrackingData>
@@ -61,7 +62,7 @@ namespace Foam
 
         const cyclicAMIPolyPatch& patch_;
 
-        public:
+    public:
 
             combine
             (

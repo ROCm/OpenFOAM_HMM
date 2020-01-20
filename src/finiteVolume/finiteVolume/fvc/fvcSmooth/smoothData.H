@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,12 +44,36 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
+class smoothData;
+
+Ostream& operator<<(Ostream&, const smoothData&);
+Istream& operator>>(Istream&, smoothData&);
+
 /*---------------------------------------------------------------------------*\
                        Class smoothData Declaration
 \*---------------------------------------------------------------------------*/
 
 class smoothData
 {
+    // Private Data
+
+        scalar value_;
+
+
+    // Private Member Functions
+
+        //- Update gets information from neighbouring face/cell and
+        //- uses this to update itself (if necessary) and return true
+        template<class TrackingData>
+        inline bool update
+        (
+            const smoothData& svf,
+            const scalar scale,
+            const scalar tol,
+            TrackingData& td
+        );
+
 
 public:
 
@@ -63,30 +87,18 @@ public:
     };
 
 
-private:
+    // Generated Methods
 
-    scalar value_;
+        //- Copy construct
+        smoothData(const smoothData&) = default;
 
-    // Private Member Functions
-
-        //- Update - gets information from neighbouring face/cell and
-        //  uses this to update itself (if necessary) and return true
-        template<class TrackingData>
-        inline bool update
-        (
-            const smoothData& svf,
-            const scalar scale,
-            const scalar tol,
-            TrackingData& td
-        );
-
-
-public:
+        //- Copy assignment
+        smoothData& operator=(const smoothData&) = default;
 
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         inline smoothData();
 
         //- Construct from inverse field value
@@ -103,16 +115,20 @@ public:
                 return value_;
             }
 
+            //- The value
+            scalar& value()
+            {
+                return value_;
+            }
+
 
         // Needed by FaceCellWave
 
-            //- Check whether origin has been changed at all or
-            //  still contains original (invalid) value
+            //- Changed or contains original (invalid) value
             template<class TrackingData>
             inline bool valid(TrackingData& td) const;
 
-            //- Check for identical geometrical data
-            //  Used for cyclics checking
+            //- Check for identical geometrical data (eg, cyclics checking)
             template<class TrackingData>
             inline bool sameGeometry
             (
@@ -123,7 +139,7 @@ public:
             ) const;
 
             //- Convert any absolute coordinates into relative to
-            //  (patch)face centre
+            //- (patch)face centre
             template<class TrackingData>
             inline void leaveDomain
             (
@@ -189,36 +205,37 @@ public:
                 TrackingData& td
             );
 
-            //- Same (like operator==)
+            //- Test for equality, with TrackingData
             template<class TrackingData>
             inline bool equal(const smoothData&, TrackingData& td) const;
 
 
-        // Member Operators
+    // Member Operators
 
-            inline void operator=(const scalar value);
+        //- Assign new value
+        void operator=(const scalar value)
+        {
+            value_ = value;
+        }
 
-            // Needed for List IO
-            inline bool operator==(const smoothData&) const;
+        //- Test for equality
+        inline bool operator==(const smoothData&) const;
 
-            inline bool operator!=(const smoothData&) const;
+        //- Test for inequality
+        inline bool operator!=(const smoothData&) const;
 
 
-        // IOstream Operators
+    // IOstream Operators
 
-            friend Ostream& operator<<
-            (
-                Ostream& os,
-                const smoothData& svf
-            )
-            {
-                return os  << svf.value_;
-            }
+        friend Ostream& operator<<(Ostream& os, const smoothData& rhs)
+        {
+            return os << rhs.value_;
+        }
 
-            friend Istream& operator>>(Istream& is, smoothData& svf)
-            {
-                return is  >> svf.value_;
-            }
+        friend Istream& operator>>(Istream& is, smoothData& rhs)
+        {
+            return is >> rhs.value_;
+        }
 };
 
 

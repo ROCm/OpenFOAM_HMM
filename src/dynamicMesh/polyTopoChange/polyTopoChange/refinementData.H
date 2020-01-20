@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,14 +56,13 @@ class refinementData;
 Istream& operator>>(Istream&, refinementData&);
 Ostream& operator<<(Ostream&, const refinementData&);
 
-
 /*---------------------------------------------------------------------------*\
                            Class refinementData Declaration
 \*---------------------------------------------------------------------------*/
 
 class refinementData
 {
-    // Private data
+    // Private Data
 
         //- Count which triggers refinement
         label refinementCount_;
@@ -75,7 +74,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         inline refinementData();
 
         //- Construct from count
@@ -86,27 +85,25 @@ public:
 
         // Access
 
-            inline label refinementCount() const
+            label refinementCount() const
+            {
+                return refinementCount_;
+            }
+            label& refinementCount()
             {
                 return refinementCount_;
             }
 
-            inline label& refinementCount()
+            label count() const
             {
-                return refinementCount_;
+                return count_;
             }
-
-            inline label count() const
+            label& count()
             {
                 return count_;
             }
 
-            inline label& count()
-            {
-                return count_;
-            }
-
-            inline bool isRefined() const
+            bool isRefined() const
             {
                 return count_ >= refinementCount_;
             }
@@ -115,12 +112,11 @@ public:
 
         // Needed by FaceCellWave
 
-            //- Check whether origin has been changed at all or
-            //  still contains original (invalid) value.
+            //- Changed or contains original (invalid) value
             template<class TrackingData>
             inline bool valid(TrackingData& td) const;
 
-            //- Check for identical geometrical data. Used for cyclics checking.
+            //- Check for identical geometrical data (eg, cyclics checking)
             template<class TrackingData>
             inline bool sameGeometry
             (
@@ -197,16 +193,17 @@ public:
                 TrackingData& td
             );
 
-            //- Same (like operator==)
+            //- Test for equality, with TrackingData
             template<class TrackingData>
             inline bool equal(const refinementData&, TrackingData& td) const;
 
 
     // Member Operators
 
-        // Needed for List IO
+        //- Test for equality
         inline bool operator==(const refinementData&) const;
 
+        //- Test for inequality
         inline bool operator!=(const refinementData&) const;
 
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,16 +48,12 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class polyPatch;
 class polyMesh;
-
-// Forward declaration of friend functions and operators
-
 class wallPoints;
-
 Istream& operator>>(Istream&, wallPoints&);
 Ostream& operator<<(Ostream&, const wallPoints&);
-
 
 /*---------------------------------------------------------------------------*\
                            Class wallPoints Declaration
@@ -67,7 +63,7 @@ class wallPoints
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Starting points
         DynamicList<point> origin_;
@@ -84,9 +80,9 @@ protected:
 
     // Protected Member Functions
 
-        //- Evaluate distance to point. Update distSqr, origin from whomever
-        //  is nearer pt. Return true if w2 is closer to point,
-        //  false otherwise.
+        //- Evaluate distance to point.
+        //  Update distSqr, origin from whomever is nearer pt.
+        //  \return true if w2 is closer to point, false otherwise.
         template<class TrackingData>
         inline bool update
         (
@@ -104,7 +100,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         inline wallPoints();
 
         //- Construct from count
@@ -121,21 +117,21 @@ public:
 
         // Access
 
-            inline const List<point>& origin() const
+            const List<point>& origin() const
             {
                 return origin_;
             }
-            inline const List<scalar>& distSqr() const
+            const List<scalar>& distSqr() const
             {
                 return distSqr_;
             }
 
-            inline const List<FixedList<label, 3>>& surface() const
+            const List<FixedList<label, 3>>& surface() const
             {
                 return surface_;
             }
 
-            //inline const List<vector>& normal() const
+            //const List<vector>& normal() const
             //{
             //    return normal_;
             //}
@@ -143,12 +139,11 @@ public:
 
         // Needed by FaceCellWave
 
-            //- Check whether origin has been changed at all or
-            //  still contains original (invalid) value.
+            //- Changed or contains original (invalid) value
             template<class TrackingData>
             inline bool valid(TrackingData& td) const;
 
-            //- Check for identical geometrical data. Used for cyclics checking.
+            //- Check for identical geometrical data (eg, cyclics checking)
             template<class TrackingData>
             inline bool sameGeometry
             (
@@ -225,16 +220,17 @@ public:
                 TrackingData& td
             );
 
-            //- Same (like operator==)
+            //- Test for equality, with TrackingData
             template<class TrackingData>
             inline bool equal(const wallPoints&, TrackingData&) const;
 
 
     // Member Operators
 
-        // Needed for List IO
+        //- Test for equality
         inline bool operator==(const wallPoints&) const;
 
+        //- Test for inequality
         inline bool operator!=(const wallPoints&) const;
 
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +61,13 @@ class MeshWave
 :
     public MeshWaveName
 {
-    // Private data
+    // Private Static Data
+
+        //- Default trackdata value to satisfy default template argument.
+        static int dummyTrackData_;
+
+
+    // Private Data
 
         //- Wall information for all faces
         List<Type> allFaceInfo_;
@@ -71,6 +78,7 @@ class MeshWave
         //- Wave calculation engine.
         FaceCellWave<Type, TrackingData> calc_;
 
+
     // Private Member Functions
 
         //- No copy construct
@@ -79,18 +87,14 @@ class MeshWave
         //- No copy assignment
         void operator=(const MeshWave&) = delete;
 
-      // Private static data
-
-            //- Used as default trackdata value to satisfy default template
-            //  argument.
-            static int dummyTrackData_;
 
 public:
 
     // Constructors
 
         //- Construct from mesh and list of changed faces with the Type
-        //  for these faces. Iterates until nothing changes or maxIter reached.
+        //- for these faces.
+        //  Iterates until nothing changes or maxIter reached.
         //  (maxIter can be 0)
         MeshWave
         (
@@ -102,7 +106,7 @@ public:
         );
 
         //- Construct from mesh, list of changed faces with the Type
-        //  for these faces and initial field.
+        //- for these faces and initial field.
         //  Iterates until nothing changes or maxIter reached.
         //  (maxIter can be 0)
         MeshWave
@@ -136,15 +140,17 @@ public:
             return calc_.data();
         }
 
-        //- Iterate until no changes or maxIter reached. Returns actual
-        //  number of iterations.
+        //- Iterate until no changes or maxIter reached.
+        //  \return actual number of iterations.
         label iterate(const label maxIter)
         {
             return calc_.iterate(maxIter);
         }
 
         //- Number of unvisited cells, i.e. cells that were not (yet)
-        //  reached from walking across mesh. This can happen from
+        //- reached from walking across mesh.
+        //
+        //  This can happen from
         //  - not enough iterations done
         //  - a disconnected mesh
         //  - a mesh without walls in it
