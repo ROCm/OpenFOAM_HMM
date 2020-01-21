@@ -82,6 +82,10 @@ protected:
         //- Flag to enable/disable writing to file
         bool writeToFile_;
 
+        //- Flag to update the header, e.g. on mesh changes.
+        //- Default is true.
+        bool updateHeader_;
+
         //- Flag to identify whether the header has been written
         bool writtenHeader_;
 
@@ -174,6 +178,9 @@ public:
 
         //- Flag to allow writing to file
         virtual bool writeToFile() const;
+
+        //- Flag to allow writing the header
+        virtual bool canWriteHeader() const;
 
         //- Return width of character stream output
         virtual label charWidth() const;

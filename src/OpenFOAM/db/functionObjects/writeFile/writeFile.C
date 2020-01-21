@@ -161,6 +161,7 @@ Foam::functionObjects::writeFile::writeFile(const writeFile& wf)
     filePtr_(),
     writePrecision_(wf.writePrecision_),
     writeToFile_(wf.writeToFile_),
+    updateHeader_(wf.updateHeader_),
     writtenHeader_(wf.writtenHeader_),
     useUserTime_(wf.useUserTime_),
     startTime_(wf.startTime_)
@@ -180,6 +181,7 @@ Foam::functionObjects::writeFile::writeFile
     fileName_(name),
     filePtr_(),
     writePrecision_(IOstream::defaultPrecision()),
+    updateHeader_(true),
     writeToFile_(writeToFile),
     writtenHeader_(false),
     useUserTime_(true),
@@ -214,6 +216,9 @@ bool Foam::functionObjects::writeFile::read(const dictionary& dict)
     writePrecision_ =
         dict.getOrDefault("writePrecision", IOstream::defaultPrecision());
 
+    updateHeader_ =
+        dict.lookupOrDefault("updateHeader", updateHeader_);
+
     // Only write on master
     writeToFile_ =
         Pstream::master() && dict.getOrDefault("writeToFile", writeToFile_);
@@ -245,6 +250,12 @@ Foam::OFstream& Foam::functionObjects::writeFile::file()
 bool Foam::functionObjects::writeFile::writeToFile() const
 {
     return writeToFile_;
+}
+
+
+bool Foam::functionObjects::writeFile::canWriteHeader() const
+{
+    return writeToFile_ && (updateHeader_ || !writtenHeader_);
 }
 
 
