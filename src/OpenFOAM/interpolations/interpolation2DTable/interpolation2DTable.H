@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,7 +63,7 @@ class interpolation2DTable
         //- File name
         fileName fileName_;
 
-        //- The actual reader
+        //- Table reader
         autoPtr<tableReader<Type>> reader_;
 
 
@@ -102,7 +102,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         interpolation2DTable();
 
         //- Construct from components
@@ -120,7 +120,7 @@ public:
         explicit interpolation2DTable(const dictionary& dict);
 
         //- Copy construct
-        interpolation2DTable(const interpolation2DTable& interpTable);
+        interpolation2DTable(const interpolation2DTable& tbl);
 
 
     // Member Functions
@@ -134,6 +134,9 @@ public:
 
 
     // Member Operators
+
+        //- Copy assignment
+        void operator=(const interpolation2DTable<Type>& rhs);
 
         //- Return an interpolated value
         Type operator()(const scalar valueX, const scalar valueY) const;

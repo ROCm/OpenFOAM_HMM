@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +60,6 @@ SourceFiles
 #include "TableBase.H"
 #include "Tuple2.H"
 #include "labelList.H"
-#include "ISstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -78,22 +77,22 @@ class CSV
 :
     public TableBase<Type>
 {
-    // Private data
+    // Private Data
 
         //- Number header lines
-        label nHeaderLine_;
+        const label nHeaderLine_;
 
         //- Column of the time
-        label refColumn_;
+        const label refColumn_;
 
         //- Labels of the components
-        labelList componentColumns_;
+        const labelList componentColumns_;
 
         //- Separator character
-        char separator_;
+        const char separator_;
 
         //- Merge separators flag, e.g. ',,,' becomes ','
-        bool mergeSeparators_;
+        const bool mergeSeparators_;
 
         //- File name for csv table
         fileName fName_;
@@ -101,11 +100,18 @@ class CSV
 
     // Private Member Functions
 
+        //- Get component columns entry
+        static labelList getComponentColumns
+        (
+            const word& name,
+            const dictionary& dict
+        );
+
         //- Read csv data table
         void read();
 
-        //- Read the next value from the splitted string
-        Type readValue(const List<string>& splitted) const;
+        //- Read component values from the split string
+        Type readValue(const List<string>& strings) const;
 
         //- No copy assignment
         void operator=(const CSV<Type>&) = delete;
@@ -113,7 +119,7 @@ class CSV
 
 public:
 
-    //- Runtime type information
+    //- Declare type-name, virtual type (with debug switch)
     TypeName("csvFile");
 
 
@@ -127,7 +133,7 @@ public:
             const fileName& fName = fileName::null
         );
 
-        //- Copy constructor
+        //- Copy construct
         explicit CSV(const CSV<Type>& csv);
 
         //- Construct and return a clone
@@ -153,10 +159,10 @@ public:
 
 // Template specialisations
 template<>
-label CSV<label>::readValue(const List<string>& splitted) const;
+label CSV<label>::readValue(const List<string>& strings) const;
 
 template<>
-Foam::scalar CSV<scalar>::readValue(const List<string>& splitted) const;
+scalar CSV<scalar>::readValue(const List<string>& strings) const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

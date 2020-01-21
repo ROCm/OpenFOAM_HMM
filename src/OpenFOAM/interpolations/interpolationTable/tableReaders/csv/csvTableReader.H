@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,27 +55,37 @@ class csvTableReader
 :
     public tableReader<Type>
 {
-    // Private data
+    // Private Data
 
         //- Does the file have a header line?
         const bool headerLine_;
 
-        //- Column of the time
-        const label timeColumn_;
+        //- Column for reference (lookup) value
+        const label refColumn_;
 
         //- Labels of the components
         const labelList componentColumns_;
-
-        //- Read the next value from the splitted string
-        Type readValue(const List<string>&);
 
         //- Separator character
         const char separator_;
 
 
+    // Private Member Functions
+
+        //- Get component columns entry
+        static labelList getComponentColumns
+        (
+            const word& name,
+            const dictionary& dict
+        );
+
+        //- Read component values from the split string
+        Type readValue(const List<string>& strings) const;
+
+
 public:
 
-    //- Runtime type information
+    //- Declare type-name, virtual type (with debug switch)
     TypeName("csv");
 
 
@@ -97,24 +108,36 @@ public:
 
 
     //- Destructor
-    virtual ~csvTableReader();
+    virtual ~csvTableReader() = default;
 
 
     // Member Functions
 
-        //- Read the table
-        virtual void operator()(const fileName&, List<Tuple2<scalar, Type>>&);
-
-        //- Read 2D table
+        //- Read 1D table
         virtual void operator()
         (
-            const fileName&,
-            List<Tuple2<scalar, List<Tuple2<scalar, Type>>>>&
+            const fileName& fName,
+            List<Tuple2<scalar, Type>>& data
+        );
+
+        //- Read 2D table - NotImplemented
+        virtual void operator()
+        (
+            const fileName& fName,
+            List<Tuple2<scalar, List<Tuple2<scalar, Type>>>>& data
         );
 
         //- Write the remaining parameters
         virtual void write(Ostream& os) const;
 };
+
+
+// Template specialisations
+template<>
+label csvTableReader<label>::readValue(const List<string>& strings) const;
+
+template<>
+scalar csvTableReader<scalar>::readValue(const List<string>& strings) const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

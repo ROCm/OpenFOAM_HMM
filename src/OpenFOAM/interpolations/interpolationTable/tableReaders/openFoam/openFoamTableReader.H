@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,17 +54,25 @@ class openFoamTableReader
 :
     public tableReader<Type>
 {
-
 public:
 
-    //- Runtime type information
+    //- Declare type-name, virtual type (with debug switch)
     TypeName("openFoam");
+
+
+    // Generated Methods
+
+        //- Default construct
+        openFoamTableReader() = default;
+
+        //- Destructor
+        virtual ~openFoamTableReader() = default;
 
 
     // Constructors
 
         //- Construct from dictionary
-        openFoamTableReader(const dictionary &dict);
+        explicit openFoamTableReader(const dictionary& dict);
 
         //- Construct and return a copy
         virtual autoPtr<tableReader<Type>> clone() const
@@ -78,20 +87,20 @@ public:
         }
 
 
-    //- Destructor
-    virtual ~openFoamTableReader();
+    // Member Functions
 
-
-    // Member functions
-
-        //- Read the table
-        virtual void operator()(const fileName&, List<Tuple2<scalar, Type>> &);
+        //- Read 1D table
+        virtual void operator()
+        (
+            const fileName& fName,
+            List<Tuple2<scalar, Type>>& data
+        );
 
         //- Read 2D table
         virtual void operator()
         (
-            const fileName&,
-            List<Tuple2<scalar, List<Tuple2<scalar, Type>>>>&
+            const fileName& fName,
+            List<Tuple2<scalar, List<Tuple2<scalar, Type>>>>& data
         );
 };
 
@@ -105,7 +114,6 @@ public:
 #ifdef NoRepository
     #include "openFoamTableReader.C"
 #endif
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

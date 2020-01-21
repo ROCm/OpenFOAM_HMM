@@ -66,13 +66,6 @@ Foam::tableReader<Type>::tableReader(const dictionary&)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::tableReader<Type>::~tableReader()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>

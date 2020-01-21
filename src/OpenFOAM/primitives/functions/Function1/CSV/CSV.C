@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,64 +28,73 @@ License
 
 #include "CSV.H"
 #include "DynamicList.H"
+#include "ListOps.H"
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+template<class Type>
+Foam::labelList Foam::Function1Types::CSV<Type>::getComponentColumns
+(
+    const word& name,
+    const dictionary& dict
+)
+{
+    // Writing of columns was forced to be ASCII,
+    // do the same when reading
+
+    labelList cols;
+
+    ITstream& is = dict.lookup(name);
+    is.format(IOstream::ASCII);
+    is >> cols;
+    dict.checkITstream(is, name);
+
+    if (cols.size() != pTraits<Type>::nComponents)
+    {
+        FatalIOErrorInFunction(dict)
+            << name << " with " << cols
+            << " does not have the expected length "
+            << pTraits<Type>::nComponents << nl
+            << exit(FatalIOError);
+    }
+
+    return cols;
+}
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<>
 Foam::label Foam::Function1Types::CSV<Foam::label>::readValue
 (
-    const List<string>& splitted
+    const List<string>& strings
 ) const
 {
-    if (componentColumns_[0] >= splitted.size())
-    {
-        FatalErrorInFunction
-            << "No column " << componentColumns_[0] << " in "
-            << splitted << endl
-            << exit(FatalError);
-    }
-
-    return readLabel(splitted[componentColumns_[0]]);
+    return readLabel(strings[componentColumns_[0]]);
 }
 
 
 template<>
 Foam::scalar Foam::Function1Types::CSV<Foam::scalar>::readValue
 (
-    const List<string>& splitted
+    const List<string>& strings
 ) const
 {
-    if (componentColumns_[0] >= splitted.size())
-    {
-        FatalErrorInFunction
-            << "No column " << componentColumns_[0] << " in "
-            << splitted << endl
-            << exit(FatalError);
-    }
-
-    return readScalar(splitted[componentColumns_[0]]);
+    return readScalar(strings[componentColumns_[0]]);
 }
 
 
 template<class Type>
 Type Foam::Function1Types::CSV<Type>::readValue
 (
-    const List<string>& splitted
+    const List<string>& strings
 ) const
 {
     Type result;
 
     for (label i = 0; i < pTraits<Type>::nComponents; ++i)
     {
-        if (componentColumns_[i] >= splitted.size())
-        {
-            FatalErrorInFunction
-                << "No column " << componentColumns_[i] << " in "
-                << splitted << endl
-                << exit(FatalError);
-        }
-
-        result[i] = readScalar(splitted[componentColumns_[i]]);
+        result[i] = readScalar(strings[componentColumns_[i]]);
     }
 
     return result;
@@ -106,38 +115,45 @@ void Foam::Function1Types::CSV<Type>::read()
             << exit(FatalIOError);
     }
 
-    DynamicList<Tuple2<scalar, Type>> values;
+    const label maxEntry =
+        max(refColumn_, componentColumns_[findMax(componentColumns_)]);
 
-    // skip header
-    for (label i = 0; i < nHeaderLine_; i++)
+    label lineNo = 0;
+
+    // Skip header
+    for (label i = 0; i < nHeaderLine_; ++i)
     {
         string line;
         is.getLine(line);
+        ++lineNo;
     }
 
-    label nEntries = max(componentColumns_);
+    DynamicList<Tuple2<scalar, Type>> values;
+    DynamicList<string> strings(maxEntry+1);  // reserve
 
-    // read data
     while (is.good())
     {
         string line;
         is.getLine(line);
+        ++lineNo;
 
+        strings.clear();
 
-        label n = 0;
         std::size_t pos = 0;
-        DynamicList<string> splitted;
 
-        if (mergeSeparators_)
+        for
+        (
+            label n = 0;
+            (pos != std::string::npos) && (n <= maxEntry);
+            ++n
+        )
         {
-            std::size_t nPos = 0;
-
-            while ((pos != std::string::npos) && (n <= nEntries))
+            if (mergeSeparators_)
             {
                 bool found = false;
                 while (!found)
                 {
-                    nPos = line.find(separator_, pos);
+                    const auto nPos = line.find(separator_, pos);
 
                     if ((nPos != std::string::npos) && (nPos - pos == 0))
                     {
@@ -148,52 +164,38 @@ void Foam::Function1Types::CSV<Type>::read()
                         found = true;
                     }
                 }
-
-                nPos = line.find(separator_, pos);
-
-                if (nPos == std::string::npos)
-                {
-                    splitted.append(line.substr(pos));
-                    pos = nPos;
-                    n++;
-                }
-                else
-                {
-                    splitted.append(line.substr(pos, nPos - pos));
-                    pos = nPos + 1;
-                    n++;
-                }
             }
-        }
-        else
-        {
-            while ((pos != std::string::npos) && (n <= nEntries))
+
+            const auto nPos = line.find(separator_, pos);
+
+            if (nPos == std::string::npos)
             {
-                std::size_t nPos = line.find(separator_, pos);
-
-                if (nPos == std::string::npos)
-                {
-                    splitted.append(line.substr(pos));
-                    pos = nPos;
-                    n++;
-                }
-                else
-                {
-                    splitted.append(line.substr(pos, nPos - pos));
-                    pos = nPos + 1;
-                    n++;
-                }
+                strings.append(line.substr(pos));
+                pos = nPos;
+            }
+            else
+            {
+                strings.append(line.substr(pos, nPos - pos));
+                pos = nPos + 1;
             }
         }
 
-
-        if (splitted.size() <= 1)
+        if (strings.size() <= 1)
         {
             break;
         }
 
-        scalar x = readScalar(splitted[refColumn_]);
-        Type value = readValue(splitted);
+        if (strings.size() <= maxEntry)
+        {
+            FatalErrorInFunction
+                << "Not enough columns near line " << lineNo
+                << ". Require " << (maxEntry+1) << " but found "
+                << strings << nl
+                << exit(FatalError);
+        }
+
+        scalar x = readScalar(strings[refColumn_]);
+        Type value = readValue(strings);
 
         values.append(Tuple2<scalar,Type>(x, value));
     }
@@ -215,26 +217,11 @@ Foam::Function1Types::CSV<Type>::CSV
     TableBase<Type>(entryName, dict),
     nHeaderLine_(dict.get<label>("nHeaderLine")),
     refColumn_(dict.get<label>("refColumn")),
-    componentColumns_(),
+    componentColumns_(getComponentColumns("componentColumns", dict)),
     separator_(dict.getOrDefault<string>("separator", ",")[0]),
     mergeSeparators_(dict.get<bool>("mergeSeparators")),
     fName_(fName.empty() ? dict.get<fileName>("file") : fName)
 {
-    // Writing of "componentColumns" was forced to be ASCII,
-    // do the same when reading
-    ITstream& is = dict.lookup("componentColumns");
-    is.format(IOstream::ASCII);
-    is >> componentColumns_;
-    dict.checkITstream(is, "componentColumns");
-
-    if (componentColumns_.size() != pTraits<Type>::nComponents)
-    {
-        FatalIOErrorInFunction(dict)
-            << componentColumns_ << " does not have the expected length of "
-            << pTraits<Type>::nComponents << nl
-            << exit(FatalIOError);
-    }
-
     read();
 
     TableBase<Type>::check();

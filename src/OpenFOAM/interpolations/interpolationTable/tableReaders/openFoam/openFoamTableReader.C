@@ -37,13 +37,6 @@ Foam::openFoamTableReader<Type>::openFoamTableReader(const dictionary& dict)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::openFoamTableReader<Type>::~openFoamTableReader()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>

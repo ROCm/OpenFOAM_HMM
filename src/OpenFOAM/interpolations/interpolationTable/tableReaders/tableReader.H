@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,11 +60,11 @@ namespace Foam
 template<class Type>
 class tableReader
 {
-
 public:
 
-    //- Runtime type information
+    //- Declare type-name, virtual type (with debug switch)
     TypeName("tableReader");
+
 
     // Declare run-time constructor selection table
 
@@ -79,6 +80,9 @@ public:
 
     // Constructors
 
+        //- Default construct
+        tableReader() = default;
+
         //- Construct from dictionary
         tableReader(const dictionary& dict);
 
@@ -93,23 +97,23 @@ public:
 
 
     //- Destructor
-    virtual ~tableReader();
+    virtual ~tableReader() = default;
 
 
-    // Member functions
+    // Member Functions
 
-        //- Read the table
+        //- Read 1D table
         virtual void operator()
         (
-            const fileName&,
-            List<Tuple2<scalar, Type>>&
+            const fileName& fName,
+            List<Tuple2<scalar, Type>>& data
         ) = 0;
 
-        //- Read the 2D table
+        //- Read 2D table
         virtual void operator()
         (
-            const fileName&,
-            List<Tuple2<scalar, List<Tuple2<scalar, Type>>>>&
+            const fileName& fName,
+            List<Tuple2<scalar, List<Tuple2<scalar, Type>>>>& tbl
         ) = 0;
 
         //- Write additional information
