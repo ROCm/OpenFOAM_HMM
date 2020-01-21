@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -121,9 +121,18 @@ kEpsilonPhitF<BasicTurbulenceModel>::kEpsilonPhitF
     ),
     kEpsilonPhitFBase(),
 
+    includeNu_
+    (
+        Switch::getOrAddToDict
+        (
+            "includeNu",
+            this->coeffDict_,
+            true
+        )
+    ),
     Cmu_
     (
-        dimensioned<scalar>::getOrAddToDict
+        dimensionedScalar::getOrAddToDict
         (
             "Cmu",
             this->coeffDict_,
@@ -132,7 +141,7 @@ kEpsilonPhitF<BasicTurbulenceModel>::kEpsilonPhitF
     ),
     Ceps1a_
     (
-        dimensioned<scalar>::getOrAddToDict
+        dimensionedScalar::getOrAddToDict
         (
             "Ceps1a",
             this->coeffDict_,
@@ -141,7 +150,7 @@ kEpsilonPhitF<BasicTurbulenceModel>::kEpsilonPhitF
     ),
     Ceps1b_
     (
-        dimensioned<scalar>::getOrAddToDict
+        dimensionedScalar::getOrAddToDict
         (
             "Ceps1b",
             this->coeffDict_,
@@ -150,7 +159,7 @@ kEpsilonPhitF<BasicTurbulenceModel>::kEpsilonPhitF
     ),
     Ceps1c_
     (
-        dimensioned<scalar>::getOrAddToDict
+        dimensionedScalar::getOrAddToDict
         (
             "Ceps1c",
             this->coeffDict_,
@@ -159,7 +168,7 @@ kEpsilonPhitF<BasicTurbulenceModel>::kEpsilonPhitF
     ),
     Ceps2_
     (
-        dimensioned<scalar>::getOrAddToDict
+        dimensionedScalar::getOrAddToDict
         (
             "Ceps2",
             this->coeffDict_,
@@ -168,7 +177,7 @@ kEpsilonPhitF<BasicTurbulenceModel>::kEpsilonPhitF
     ),
     Cf1_
     (
-        dimensioned<scalar>::getOrAddToDict
+        dimensionedScalar::getOrAddToDict
         (
             "Cf1",
             this->coeffDict_,
@@ -177,7 +186,7 @@ kEpsilonPhitF<BasicTurbulenceModel>::kEpsilonPhitF
     ),
     Cf2_
     (
-        dimensioned<scalar>::getOrAddToDict
+        dimensionedScalar::getOrAddToDict
         (
             "Cf2",
             this->coeffDict_,
@@ -186,7 +195,7 @@ kEpsilonPhitF<BasicTurbulenceModel>::kEpsilonPhitF
     ),
     CL_
     (
-        dimensioned<scalar>::getOrAddToDict
+        dimensionedScalar::getOrAddToDict
         (
             "CL",
             this->coeffDict_,
@@ -195,7 +204,7 @@ kEpsilonPhitF<BasicTurbulenceModel>::kEpsilonPhitF
     ),
     Ceta_
     (
-        dimensioned<scalar>::getOrAddToDict
+        dimensionedScalar::getOrAddToDict
         (
             "Ceta",
             this->coeffDict_,
@@ -204,7 +213,7 @@ kEpsilonPhitF<BasicTurbulenceModel>::kEpsilonPhitF
     ),
     CT_
     (
-        dimensioned<scalar>::getOrAddToDict
+        dimensionedScalar::getOrAddToDict
         (
             "CT",
             this->coeffDict_,
@@ -213,7 +222,7 @@ kEpsilonPhitF<BasicTurbulenceModel>::kEpsilonPhitF
     ),
     sigmaK_
     (
-        dimensioned<scalar>::getOrAddToDict
+        dimensionedScalar::getOrAddToDict
         (
             "sigmaK",
             this->coeffDict_,
@@ -222,7 +231,7 @@ kEpsilonPhitF<BasicTurbulenceModel>::kEpsilonPhitF
     ),
     sigmaEps_
     (
-        dimensioned<scalar>::getOrAddToDict
+        dimensionedScalar::getOrAddToDict
         (
             "sigmaEps",
             this->coeffDict_,
@@ -231,7 +240,7 @@ kEpsilonPhitF<BasicTurbulenceModel>::kEpsilonPhitF
     ),
     sigmaPhit_
     (
-        dimensioned<scalar>::getOrAddToDict
+        dimensionedScalar::getOrAddToDict
         (
             "sigmaPhit",
             this->coeffDict_,
@@ -341,6 +350,7 @@ bool kEpsilonPhitF<BasicTurbulenceModel>::read()
 {
     if (eddyViscosity<RASModel<BasicTurbulenceModel>>::read())
     {
+        includeNu_.readIfPresent("includeNu", this->coeffDict());
         Cmu_.readIfPresent(this->coeffDict());
         Ceps1a_.readIfPresent(this->coeffDict());
         Ceps1b_.readIfPresent(this->coeffDict());
