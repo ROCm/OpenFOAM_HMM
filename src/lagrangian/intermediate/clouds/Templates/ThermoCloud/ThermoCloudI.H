@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -365,7 +365,7 @@ Foam::ThermoCloud<CloudType>::sigmap() const
         const scalar f = constProps_.f0();
         const scalarField& sumAreaP = radAreaP_->field();
 
-        sigmap *= sumAreaP*(1.0 - f)*(1.0 - epsilon)/V/dt;
+        sigmap = sumAreaP*(1.0 - f)*(1.0 - epsilon)/V/dt;
     }
 
     return tsigmap;
