@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,7 +50,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 template<class T> class UList;
 
 /*---------------------------------------------------------------------------*\
@@ -85,7 +85,7 @@ class Random
 
 public:
 
-        // Forward declarations - generator classes
+        // Forward Declarations - generator classes
         template<class T> class uniformGeneratorOp;
         template<class T> class gaussianGeneratorOp;
 
@@ -101,12 +101,8 @@ public:
         //- Construct with seed value
         explicit Random(const label seedValue = defaultSeed);
 
-        //- Copy construct with optional reset of seed
-        Random(const Random& r, const bool reset = false);
-
-
-    //- Destructor
-    ~Random() = default;
+        //- Copy construct with possible reset of seed
+        Random(const Random& rnd, const bool reset);
 
 
     // Member Functions
@@ -221,7 +217,7 @@ class Random::uniformGeneratorOp
 :
     public Random
 {
-    // Private data
+    // Private Data
 
         //- The interval
         const T min_;
@@ -242,7 +238,7 @@ public:
 
     // Constructors
 
-        //- Construct null or with seed value. Uses default [0,1] interval
+        //- Default construct or with seed value. Uses default [0,1] interval
         explicit uniformGeneratorOp(const label seed = Random::defaultSeed)
         :
             uniformGeneratorOp(seed, pTraits<T>::zero, pTraits<T>::one)
@@ -293,7 +289,6 @@ class Random::gaussianGeneratorOp
 :
     public Random
 {
-
     // Private Member Functions
 
         //- Generate a random number. Treat as mutable.
@@ -308,7 +303,7 @@ public:
 
     // Constructors
 
-        //- Construct null or with seed value. Uses default [0,1] interval
+        //- Default construct or with seed value. Uses default [0,1] interval
         explicit gaussianGeneratorOp(const label seed = Random::defaultSeed)
         :
             Random(seed)

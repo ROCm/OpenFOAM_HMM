@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,7 +107,7 @@ class indexedVertex
     public Foam::indexedVertexEnum,
     public Vb
 {
-    // Private data
+    // Private Data
 
         //- Type of pair-point
         vertexType type_;
@@ -143,6 +143,13 @@ public:
         typedef typename Vb::template Rebind_TDS<TDS2>::Other   Vb2;
         typedef indexedVertex<Gt,Vb2>                           Other;
     };
+
+
+    // Generated Methods
+
+        //- Copy construct
+        indexedVertex(const indexedVertex&) = default;
+
 
     // Constructors
 
@@ -261,6 +268,10 @@ public:
         //- Fix the vertex so that it can't be moved
         inline bool& fixed();
 
+
+    // Member Operators
+
+        //- Copy assignment
         inline void operator=(const indexedVertex& rhs)
         {
             Vb::operator=(rhs);
@@ -291,10 +302,9 @@ public:
         }
 
 
-    // Info
+    // IOstream Operators
 
-        //- Return info proxy.
-        //  Used to print indexedVertex information to a stream
+        //- Info proxy, to print information to a stream
         Foam::InfoProxy<indexedVertex<Gt, Vb>> info() const
         {
             return *this;

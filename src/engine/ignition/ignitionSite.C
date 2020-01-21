@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -124,6 +125,11 @@ bool Foam::ignitionSite::ignited() const
 
 void Foam::ignitionSite::operator=(const ignitionSite& is)
 {
+    if (this == &is)
+    {
+        return;
+    }
+
     location_ = is.location_;
     diameter_ = is.diameter_;
     time_ = is.time_;

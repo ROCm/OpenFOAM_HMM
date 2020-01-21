@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,6 +51,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class Time;
 class engineTime;
 class fvMesh;
@@ -60,7 +62,7 @@ class fvMesh;
 
 class ignitionSite
 {
-    // Private data
+    // Private Data
 
         const Time& db_;
         const fvMesh& mesh_;
@@ -88,10 +90,9 @@ class ignitionSite
 
 public:
 
-    // Public classes
+    // Public Classes
 
-        //- Class used for the read-construction of
-        //  PtrLists of ignitionSite
+        //- Read-construction of PtrLists of ignitionSite
         class iNew
         {
             const Time& db_;
@@ -110,6 +111,12 @@ public:
                 return autoPtr<ignitionSite>::New(is, db_, mesh_);
             }
         };
+
+
+    // Generated Methods
+
+        //- Copy construct
+        ignitionSite(const ignitionSite&) = default;
 
 
     // Constructors

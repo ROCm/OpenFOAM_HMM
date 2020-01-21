@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -95,7 +95,7 @@ public:
     // Constructors
 
         //- Construct with specified or default seed
-        Rand48(uint32_t val = default_seed)
+        explicit Rand48(uint32_t val = default_seed)
         :
             engine_(convert(val))
         {}

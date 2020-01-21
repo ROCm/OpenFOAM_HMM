@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,13 +40,9 @@ Foam::Random::Random(const label seedValue)
 {}
 
 
-Foam::Random::Random(const Random& r, const bool reset)
+Foam::Random::Random(const Random& rnd, const bool reset)
 :
-    seed_(r.seed_),
-    generator_(r.generator_),
-    uniform01_(),
-    hasGaussSample_(r.hasGaussSample_),
-    gaussSample_(r.gaussSample_)
+    Random(rnd)
 {
     if (reset)
     {
