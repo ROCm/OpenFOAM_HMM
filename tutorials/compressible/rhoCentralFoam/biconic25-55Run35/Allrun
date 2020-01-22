@@ -4,17 +4,12 @@ cd "${0%/*}" || exit                                # Run from this directory
 #------------------------------------------------------------------------------
 
 runApplication blockMesh
-
 runApplication datToFoam grid256.dat
-
-CONST="constant"
-cat $CONST/pointsHeader $CONST/points.tmp > $CONST/polyMesh/points
 runApplication collapseEdges -overwrite
 
-echo "Changing patch type to wedge type in boundary file"
-mv $CONST/polyMesh/boundary $CONST/polyMesh/boundary.bak
-sed -f $CONST/wedgeScr $CONST/polyMesh/boundary.bak > $CONST/polyMesh/boundary
-rm $CONST/polyMesh/boundary.bak
+echo "Overwriting 'patch' type as 'wedge' type in 'boundary' dictionary"
+sed -if '/wedge1/,/nFaces/{s/patch/wedge/};/wedge2/,/nFaces/{s/patch/wedge/}'\
+    constant/polyMesh/boundary
 
 runApplication $(getApplication)
 

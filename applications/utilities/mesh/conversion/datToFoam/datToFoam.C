@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +61,7 @@ int main(int argc, char *argv[])
 
     if (!args.check())
     {
-         FatalError.exit();
+        FatalError.exit();
     }
 
     #include "createTime.H"
@@ -87,23 +88,23 @@ int main(int argc, char *argv[])
     Istring >> block;
     Istring >> jPoints;
 
-    Info<< "Number of vertices in i direction = " << iPoints << endl
+    Info<< "Number of vertices in i direction = " << iPoints << nl
         << "Number of vertices in j direction = " << jPoints << endl;
 
     // We ignore the first layer of points in i and j the biconic meshes
-    label nPointsij = (iPoints - 1)*(jPoints - 1);
+    const label nPointsij = (iPoints - 1)*(jPoints - 1);
 
     pointField points(nPointsij, Zero);
 
-    for (direction comp = 0; comp < 2; comp++)
+    for (direction comp = 0; comp < 2; ++comp)
     {
-        label p(0);
+        label p = 0;
 
-        for (label j = 0; j < jPoints; j++)
+        for (label j = 0; j < jPoints; ++j)
         {
-            for (label i = 0; i < iPoints; i++)
+            for (label i = 0; i < iPoints; ++i)
             {
-                double coord;
+                scalar coord;
                 plot3dFile >> coord;
 
                 // if statement ignores the first layer in i and j
@@ -126,31 +127,37 @@ int main(int argc, char *argv[])
 
     pointField pointsWedge(nPointsij*2, Zero);
 
-    fileName pointsFile(runTime.constantPath()/"points.tmp");
-    OFstream pFile(pointsFile);
-
     const scalar a = degToRad(0.1);
-    tensor rotateZ =
-        tensor
-        (
-            1.0, 0.0, 0.0,
-            0.0, 1.0, 0.0,
-            0.0, -::sin(a), ::cos(a)
-        );
+    const tensor rotateZ
+    (
+        1.0,  0.0,      0.0,
+        0.0,  1.0,      0.0,
+        0.0, -::sin(a), ::cos(a)
+    );
 
     forAll(points, i)
     {
         pointsWedge[i] = (rotateZ & points[i]);
-        pointsWedge[i+nPointsij] = cmptMultiply
-        (
-            vector(1.0, 1.0, -1.0),
-            pointsWedge[i]
-        );
+        pointsWedge[i + nPointsij] =
+            cmptMultiply
+            (
+                vector(1.0, 1.0, -1.0),
+                pointsWedge[i]
+            );
     }
 
+    const fileName polyMeshPath(runTime.constantPath()/"polyMesh");
+    const fileName pointsFile(polyMeshPath/"points");
+    OFstream pFile(pointsFile);
+    if (!exists(polyMeshPath)) mkDir(polyMeshPath);
+
     Info<< "Writing points to: " << nl
-         << "    " << pointsFile << endl;
+        << "    " << pointsFile << endl;
+
+    runTime.writeHeader(pFile, "vectorField");
     pFile << pointsWedge;
+    runTime.writeEndDivider(pFile);
+
 
     Info<< "End" << endl;
 
