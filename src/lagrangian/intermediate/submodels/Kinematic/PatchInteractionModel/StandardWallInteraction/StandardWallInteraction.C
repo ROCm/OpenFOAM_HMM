@@ -252,7 +252,7 @@ void Foam::StandardWallInteraction<CloudType>::info(Ostream& os)
     scalarListList mpe0(nEscape_.size());
     labelListList nps0(nEscape_.size());
     scalarListList mps0(nEscape_.size());
-    
+
     forAll(nEscape_, patchi)
     {
         label lsd = nEscape_[patchi].size();
@@ -261,7 +261,7 @@ void Foam::StandardWallInteraction<CloudType>::info(Ostream& os)
         nps0[patchi].setSize(lsd, Zero);
         mps0[patchi].setSize(lsd, Zero);
     }
-    
+
     this->getModelProperty("nEscape", npe0);
     this->getModelProperty("massEscape", mpe0);
     this->getModelProperty("nStick", nps0);

@@ -61,11 +61,11 @@ class EulerFaD2dt2Scheme
 {
     // Private Member Functions
 
-		//- Return the current time-step
-		scalar deltaT_() const;
+        //- Return the current time-step
+        scalar deltaT_() const;
 
-		//- Return the previous time-step
-		scalar deltaT0_() const;
+        //- Return the previous time-step
+        scalar deltaT0_() const;
 
         //- No copy construct
         EulerFaD2dt2Scheme(const EulerFaD2dt2Scheme&) = delete;

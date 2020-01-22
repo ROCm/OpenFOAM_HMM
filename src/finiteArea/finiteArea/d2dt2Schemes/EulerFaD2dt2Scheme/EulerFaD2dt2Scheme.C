@@ -44,14 +44,14 @@ namespace fa
 template<class Type>
 scalar EulerFaD2dt2Scheme<Type>::deltaT_() const
 {
-	return mesh().time().deltaT().value();
+    return mesh().time().deltaT().value();
 }
 
 
 template<class Type>
 scalar EulerFaD2dt2Scheme<Type>::deltaT0_() const
 {
-	return mesh().time().deltaT0().value();
+    return mesh().time().deltaT0().value();
 }
 
 

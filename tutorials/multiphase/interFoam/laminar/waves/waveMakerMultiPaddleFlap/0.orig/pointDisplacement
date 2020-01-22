@@ -43,8 +43,8 @@ boundaryField
         rampTime        2.0;
         wavePhase       0;
 
-	nPaddle		4;
-	waveAngle	45;
+        nPaddle         4;
+        waveAngle       45;
     }
     back
     {

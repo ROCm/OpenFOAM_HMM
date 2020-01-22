@@ -14,14 +14,14 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-SIMPLE          
+SIMPLE
 {
     nNonOrthogonalCorrectors 0;
-}    
+}
 
 solvers
 {
-    "p|pa" 
+    "p|pa"
     {
         solver           PCG;
         preconditioner   DIC;
@@ -44,7 +44,7 @@ solvers
     };
 }
 
-relaxationFactors 
+relaxationFactors
 {
     fields
     {

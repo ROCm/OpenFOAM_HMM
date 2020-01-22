@@ -275,7 +275,7 @@ int main(int argc, char *argv[])
                 { false, " 31E1 " },
                 { false, " 31.4159E-1 "  },
                 { true,  "100"  },
-                { true,  "	2147483644"  },
+                { true,  "\t2147483644"  },
                 { false, "   2147483700  "  },
             }
         );

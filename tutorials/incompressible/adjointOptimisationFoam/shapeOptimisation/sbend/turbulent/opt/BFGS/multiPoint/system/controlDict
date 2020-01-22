@@ -16,7 +16,7 @@ FoamFile
 
 application       adjointOptimisationFoam;
 
-startFrom         latestTime; 
+startFrom         latestTime;
 
 startTime         0;
 

@@ -42,8 +42,8 @@ Usage
         type            heatTransferCoeff;
         libs            ("libfieldFunctionObjects.so");
         ...
-    	htcModel	    fixedReferenceTemperature;
-	    TRef		    300;
+        htcModel        fixedReferenceTemperature;
+        TRef            300;
         ...
     \endverbatim
 

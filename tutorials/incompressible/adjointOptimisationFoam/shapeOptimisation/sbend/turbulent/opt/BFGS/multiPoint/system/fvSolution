@@ -14,14 +14,14 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-SIMPLE          
+SIMPLE
 {
     nNonOrthogonalCorrectors 0;
-}    
+}
 
 solvers
 {
-    "p.*|pa.*" 
+    "p.*|pa.*"
     {
         solver           PCG;
         preconditioner   DIC;
@@ -35,7 +35,7 @@ solvers
         tolerance        1e-9;
         relTol           0.01;
     };
-    "U.*|Ua.*|nuTilda.*|nuaTilda.*|yWall|da" 
+    "U.*|Ua.*|nuTilda.*|nuaTilda.*|yWall|da"
     {
         solver           PBiCGStab;
         preconditioner   DILU;
@@ -44,7 +44,7 @@ solvers
     };
 }
 
-relaxationFactors 
+relaxationFactors
 {
     fields
     {

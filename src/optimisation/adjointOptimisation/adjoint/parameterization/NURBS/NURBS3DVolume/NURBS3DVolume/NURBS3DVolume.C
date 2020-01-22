@@ -1796,7 +1796,7 @@ Foam::label Foam::NURBS3DVolume::nUSymmetry() const
     else
     {
         nU = (nU - 1)/2 + 1;
-    }    
+    }
     return nU;
 }
 
@@ -1811,7 +1811,7 @@ Foam::label Foam::NURBS3DVolume::nVSymmetry() const
     else
     {
         nV = (nV - 1)/2 + 1;
-    }    
+    }
     return nV;
 }
 
@@ -1826,7 +1826,7 @@ Foam::label Foam::NURBS3DVolume::nWSymmetry() const
     else
     {
         nW = (nW - 1)/2 + 1;
-    }    
+    }
     return nW;
 }
 

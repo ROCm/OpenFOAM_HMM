@@ -117,7 +117,7 @@ optimisation
             {
                 type                         volumetricBSplines;
                 patches                      (lower upper);
-                includeObjectiveContribution true; // one of this or the equivalent flag in 
+                includeObjectiveContribution true; // one of this or the equivalent flag in
                                                    // surfaceSensitivities has to be set to true
                                                    // with this being the prefered one
                 surfaceSensitivities
@@ -128,9 +128,9 @@ optimisation
                     includeDistance              true;
                     includeObjectiveContribution false;
 
-                    // adjointEikonal and adjointMeshMovement solvers should be always nested 
-                    // within the dictionary of the sensitivity type they correspond to. 
-                    // For (E)SI based sensitivities, this means the surfaceSensitivities dict 
+                    // adjointEikonal and adjointMeshMovement solvers should be always nested
+                    // within the dictionary of the sensitivity type they correspond to.
+                    // For (E)SI based sensitivities, this means the surfaceSensitivities dict
                     // Default values are provided, so the dictionaries can be skipped
                     adjointEikonalSolver
                     {

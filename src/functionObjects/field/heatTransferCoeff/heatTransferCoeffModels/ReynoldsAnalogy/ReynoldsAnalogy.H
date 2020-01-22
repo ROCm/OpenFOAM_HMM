@@ -48,7 +48,7 @@ Usage
         type            heatTransferCoeff;
         libs            ("libfieldFunctionObjects.so");
         ...
-    	htcModel	    ReynoldsAnalogy;
+        htcModel        ReynoldsAnalogy;
         UInf            (20 0 0);
         Cp              CpInf;
         CpInf           1005;

@@ -21,7 +21,7 @@ SIMPLE
 
 solvers
 {
-    "p|pa" 
+    "p|pa"
     {
         solver           PCG;
         preconditioner   DIC;

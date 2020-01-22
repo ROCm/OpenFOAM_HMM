@@ -55,7 +55,7 @@ castellatedMeshControls
             cellZone rotatingZone;
             faceZone rotatingZone;
             cellZoneInside inside;
-        } 
+        }
         fan{ level (2 2);} // Note: better: levels 3 3
         door{ level (0 0);}
         outlet{ level (0 0);}
@@ -67,7 +67,7 @@ castellatedMeshControls
 
     refinementRegions
     {
-	    // Note: for better mesh quality utilize this refinement region
+        // Note: for better mesh quality utilize this refinement region
         // AMI{ mode inside; levels ((1E15 3));}
     }
 
@@ -78,7 +78,7 @@ castellatedMeshControls
 snapControls
 {
     nSmoothPatch 3;
-    tolerance 4.0; 
+    tolerance 4.0;
     nSolveIter 300;
     nRelaxIter 5;
     nFeatureSnapIter 10;

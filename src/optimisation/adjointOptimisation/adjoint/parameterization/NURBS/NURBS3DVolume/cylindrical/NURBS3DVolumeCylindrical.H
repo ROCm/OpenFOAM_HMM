@@ -58,7 +58,7 @@ class NURBS3DVolumeCylindrical
 protected:
 
     // Protected Data
-        
+
         //- Translation vector
         vector origin_;
 

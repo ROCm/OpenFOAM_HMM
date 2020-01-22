@@ -42,7 +42,7 @@ Usage
         type            heatTransferCoeff;
         libs            ("libfieldFunctionObjects.so");
         ...
-    	htcModel	    localReferenceTemperature;
+        htcModel        localReferenceTemperature;
         ...
     \endverbatim
 

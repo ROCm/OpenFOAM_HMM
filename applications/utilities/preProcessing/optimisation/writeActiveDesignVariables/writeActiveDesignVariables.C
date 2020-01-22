@@ -29,9 +29,9 @@ Application
     writeActiveDesignVariables
 
 Description
-    Writes the active design variables based on the selected parameterisation 
+    Writes the active design variables based on the selected parameterisation
     scheme, as read from the meshMovement part of optimisationDict.
-    Keeps a back-up of the original optimisationDict in 
+    Keeps a back-up of the original optimisationDict in
     system/optimisationDict.org, as comments in the dict will be lost.
 
 \*---------------------------------------------------------------------------*/
@@ -69,17 +69,17 @@ int main(int argc, char *argv[])
 
     // Construct mesh movement object and grab active design variables
     // Will exit with error if not implemented for this type
-    const dictionary& movementDict = 
+    const dictionary& movementDict =
         optDict.subDict("optimisation").subDict("meshMovement");
-    // Empty patch list will do 
+    // Empty patch list will do
     labelList patchIDs(0);
     autoPtr<optMeshMovement> movementPtr
         (optMeshMovement::New(mesh, movementDict, patchIDs));
-    const labelList activeDesignVariables = 
+    const labelList activeDesignVariables =
         movementPtr().getActiveDesignVariables();
 
     // Construct update method to grab the type
-    dictionary& updateMethodDict = 
+    dictionary& updateMethodDict =
         optDict.subDict("optimisation").subDict("updateMethod");
     autoPtr<updateMethod> updMethod(updateMethod::New(mesh, updateMethodDict));
 
@@ -87,11 +87,11 @@ int main(int argc, char *argv[])
     dictionary& coeffsDict = updateMethodDict.subDictOrAdd(updMethod().type());
     coeffsDict.add<labelList>
     (
-        "activeDesignVariables", 
-        activeDesignVariables, 
+        "activeDesignVariables",
+        activeDesignVariables,
         true
     );
-    
+
     // Write modified dictionary
     optDict.regIOobject::writeObject
     (
