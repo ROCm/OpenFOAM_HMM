@@ -61,10 +61,10 @@ adjustTimeStep  yes;
 
 functions
 {
-     htc
+    htc
     {
         type            heatTransferCoeff;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         region          water;
         field           T.liquid;
         writeControl    outputTime;
@@ -73,7 +73,7 @@ functions
         patches         (water_to_solid);
         TRef            373;
     }
-    
+
     htcSurfaceFieldValue
     {
         type            surfaceFieldValue;

@@ -97,18 +97,18 @@ Foam::heatTransferCoeffModel::q() const
         (
             mesh_.lookupObject<phaseSystem>("phaseProperties")
         );
-        
+
         for (label patchi : patchSet_)
         {
             forAll(fluid.phases(), phasei)
             {
                 const phaseModel& phase = fluid.phases()[phasei];
-                const fvPatchScalarField& alpha = 
+                const fvPatchScalarField& alpha =
                     phase.boundaryField()[patchi];
                 const volScalarField& he = phase.thermo().he();
                 const volScalarField::Boundary& hebf = he.boundaryField();
-                
-                q[patchi] += 
+
+                q[patchi] +=
                     alpha*phase.alphaEff(patchi)()*hebf[patchi].snGrad();
             }
         }
