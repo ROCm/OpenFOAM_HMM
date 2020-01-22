@@ -153,12 +153,12 @@ then
         # - libPVFoamReader_SM = (OPENFOAM <= 1912)
 
         case "$plugin" in
-        blockReader)
+        (blockReader)
             for libName in \
                 ParaFoamBlockReader \
                 libParaFoamBlockReader \
                 libPVblockMeshReader_SM \
-                ;
+            ;
             do
                 if [ -f "$PV_PLUGIN_PATH/$libName.so" ]
                 then
@@ -166,13 +166,13 @@ then
                     break
                 fi
             done
-        ;;
-        foamReader)
+            ;;
+        (foamReader)
             for libName in \
                 ParaFoamReader \
                 libParaFoamReader \
                 libPVFoamReader_SM \
-                ;
+            ;
             do
                 if [ -f "$PV_PLUGIN_PATH/$libName.so" ]
                 then
@@ -180,7 +180,7 @@ then
                     break
                 fi
             done
-        ;;
+            ;;
         esac
 
         if [ -n "$pluginError" ]
@@ -329,22 +329,22 @@ else
     # Check existence of essential files
     warn=false
     case "$plugin" in
-        blockReader)
-            blockMeshDict=system/blockMeshDict
-            if [ -f constant/polyMesh/blockMeshDict ]
-            then
-                blockMeshDict=constant/polyMesh/blockMeshDict
-            fi
+    (blockReader)
+        blockMeshDict=system/blockMeshDict
+        if [ -f constant/polyMesh/blockMeshDict ]
+        then
+            blockMeshDict=constant/polyMesh/blockMeshDict
+        fi
 
-            hasFiles system/controlDict "$blockMeshDict" || warn=true
-            ;;
+        hasFiles system/controlDict "$blockMeshDict" || warn=true
+        ;;
 
-        foamReader)
-            hasFiles \
-                system/controlDict \
-                "$fvControls/fvSchemes" \
-                "$fvControls/fvSolution" || warn=true
-            ;;
+    (foamReader)
+        hasFiles \
+            system/controlDict \
+            "$fvControls/fvSchemes" \
+            "$fvControls/fvSolution" || warn=true
+        ;;
     esac
 
     [ "${warn:-false}" = false ] || {

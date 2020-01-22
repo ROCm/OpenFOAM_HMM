@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -273,20 +274,23 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
 
     if (verbose)
     {
-        Info<< "I/O    : " << typeName
+        DetailInfo
+            << "I/O    : " << typeName
             << " (maxThreadFileBufferSize " << maxThreadFileBufferSize
             << ')' << endl;
 
         if (maxThreadFileBufferSize == 0)
         {
-            Info<< "         Threading not activated "
+            DetailInfo
+                << "         Threading not activated "
                    "since maxThreadFileBufferSize = 0." << nl
                 << "         Writing may run slowly for large file sizes."
                 << endl;
         }
         else
         {
-            Info<< "         Threading activated "
+            DetailInfo
+                << "         Threading activated "
                    "since maxThreadFileBufferSize > 0." << nl
                 << "         Requires large enough buffer to collect all data"
                     " or thread support " << nl
@@ -308,12 +312,15 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
             }
             Pstream::gatherList(ioRanks);
 
-            Info<< "         IO nodes:" << nl;
+            DetailInfo
+                << "         IO nodes:" << nl;
+
             for (const string& ranks : ioRanks)
             {
                 if (!ranks.empty())
                 {
-                    Info<< "             " << ranks << nl;
+                    DetailInfo
+                        << "             " << ranks << nl;
                 }
             }
         }
@@ -360,20 +367,23 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
 
     if (verbose)
     {
-        Info<< "I/O    : " << typeName
+        DetailInfo
+            << "I/O    : " << typeName
             << " (maxThreadFileBufferSize " << maxThreadFileBufferSize
             << ')' << endl;
 
         if (maxThreadFileBufferSize == 0)
         {
-            Info<< "         Threading not activated "
+            DetailInfo
+                << "         Threading not activated "
                    "since maxThreadFileBufferSize = 0." << nl
                 << "         Writing may run slowly for large file sizes."
                 << endl;
         }
         else
         {
-            Info<< "         Threading activated "
+            DetailInfo
+                << "         Threading activated "
                    "since maxThreadFileBufferSize > 0." << nl
                 << "         Requires large enough buffer to collect all data"
                     " or thread support " << nl
