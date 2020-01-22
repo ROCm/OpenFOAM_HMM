@@ -7,11 +7,10 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2016-2018 OpenCFD Ltd.
+#     Copyright (C) 2016-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     paraFoam
@@ -76,9 +75,9 @@ unset FOAM_ABORT
 # already 2010-07)
 export LC_ALL=C
 
-# Reader extension and plugin
+# Default reader extension and plugin name
 extension=OpenFOAM
-plugin=PVFoamReader
+plugin=foamReader
 
 # Parse options
 unset regionName optTouch
@@ -90,7 +89,7 @@ do
         ;;
     -block*)
         extension=blockMesh
-        plugin=PVblockMeshReader
+        plugin=blockReader
         ;;
     -vtk | -built*)
         extension=foam
@@ -139,32 +138,71 @@ done
 
 if [ -n "$plugin" ]
 then
-    pluginError="Cannot use ParaView reader module library ($plugin)"
+    pluginError="Cannot use ParaView/OpenFOAM reader modules"
 
     # Check if requested reader module exists
     if [ -z "$PV_PLUGIN_PATH" ]
     then
+        echo "The PV_PLUGIN_PATH environment variable is unset" 1>&2
         echo "$pluginError" 1>&2
-        echo "The PV_PLUGIN_PATH environment value is not set" 1>&2
-    elif [ -f "$PV_PLUGIN_PATH/lib${plugin}_SM.so" ]
-    then
-        unset pluginError
     else
-        echo "$pluginError - not built?" 1>&2
-        cat<< NO_PLUGIN 1>&2
-Consider building the reader module
-    cd \$WM_PROJECT_DIR/applications/utilities/postProcessing/graphics/PVReaders
-    ./Allwclean
-    ./Allwmake
+
+        # Check for different names. For example,
+        # - ParaFoamReader     = (paraview >= 5.7)
+        # - libParaFoamReader  = (paraview < 5.7) and (OPENFOAM > 1912)
+        # - libPVFoamReader_SM = (OPENFOAM <= 1912)
+
+        case "$plugin" in
+        blockReader)
+            for libName in \
+                ParaFoamBlockReader \
+                libParaFoamBlockReader \
+                libPVblockMeshReader_SM \
+                ;
+            do
+                if [ -f "$PV_PLUGIN_PATH/$libName.so" ]
+                then
+                    unset pluginError
+                    break
+                fi
+            done
+        ;;
+        foamReader)
+            for libName in \
+                ParaFoamReader \
+                libParaFoamReader \
+                libPVFoamReader_SM \
+                ;
+            do
+                if [ -f "$PV_PLUGIN_PATH/$libName.so" ]
+                then
+                    unset pluginError
+                    break
+                fi
+            done
+        ;;
+        esac
+
+        if [ -n "$pluginError" ]
+        then
+            cat<< NO_PLUGIN 1>&2
+=========================
+$pluginError - need to build?
+
+    cd \$WM_PROJECT_DIR/modules/visualization/src/paraview-plugins
+OR  cd \$WM_PROJECT_DIR/applications/utilities/postProcessing/graphics/PVReaders
+
+    ./Allwclean && ./Allwmake
+=========================
 NO_PLUGIN
+        fi
     fi
 
     if [ -n "$pluginError" ]
     then
         # Fallback to native reader, if possible
-        if [ "$plugin" = PVFoamReader ]
+        if [ "$plugin" = foamReader ]
         then
-            echo 1>&2
             echo "Continuing with builtin reader:  paraFoam -vtk" 1>&2
             echo 1>&2
             extension=foam
@@ -291,7 +329,7 @@ else
     # Check existence of essential files
     warn=false
     case "$plugin" in
-        PVblockMeshReader)
+        blockReader)
             blockMeshDict=system/blockMeshDict
             if [ -f constant/polyMesh/blockMeshDict ]
             then
@@ -301,7 +339,7 @@ else
             hasFiles system/controlDict "$blockMeshDict" || warn=true
             ;;
 
-        PVFoamReader)
+        foamReader)
             hasFiles \
                 system/controlDict \
                 "$fvControls/fvSchemes" \
@@ -318,9 +356,9 @@ else
 
     # Only create/remove caseFile if it did not previously exist
     [ -e "$caseFile" ] || {
-        trap "rm -f $caseFile 2>/dev/null; exit 0" EXIT TERM INT
         touch "$caseFile"
         echo "Created temporary '$caseFile'" 1>&2
+        trap "rm -f \"$caseFile\"; exit 0" EXIT TERM INT
     }
 
     # For now filter out any ld.so errors. Caused by non-system compiler?
