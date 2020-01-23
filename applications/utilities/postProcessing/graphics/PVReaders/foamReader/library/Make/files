@@ -1,8 +1,0 @@
-vtkPVFoam.C
-vtkPVFoamFields.C
-vtkPVFoamMesh.C
-vtkPVFoamMeshLagrangian.C
-vtkPVFoamMeshVolume.C
-vtkPVFoamUpdateInfo.C
-
-LIB = $(FOAM_LIBBIN)/libvtkPVFoam-pv${PARAVIEW_API}

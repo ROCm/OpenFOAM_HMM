@@ -1,3 +1,0 @@
-foamPvCore.C
-
-LIB = $(FOAM_LIBBIN)/libvtkPVFoamCommon-pv${PARAVIEW_API}
