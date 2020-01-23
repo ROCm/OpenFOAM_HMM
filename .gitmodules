@@ -4,9 +4,6 @@
 [submodule "avalanche"]
 	path = modules/avalanche
 	url = https://develop.openfoam.com/Community/avalanche.git
-[submodule "catalyst"]
-	path = modules/catalyst
-	url = https://develop.openfoam.com/Community/catalyst.git
 [submodule "adios"]
 	path = modules/adios
 	url = https://develop.openfoam.com/Community/adiosfoam.git
@@ -14,3 +11,6 @@
 	path = modules/OpenQBMM
 	url = https://github.com/OpenQBMM/OpenQBMM
 	branch = openfoam.com
+[submodule "visualization"]
+	path = modules/visualization
+	url = https://develop.openfoam.com/modules/visualization.git
