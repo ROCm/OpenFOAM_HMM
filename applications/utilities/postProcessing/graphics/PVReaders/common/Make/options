@@ -1,9 +1,0 @@
-EXE_INC = \
-    ${c++LESSWARN} \
-    -I$(LIB_SRC)/conversion/lnInclude \
-    -I$(LIB_SRC)/finiteVolume/lnInclude \
-    -I$(PARAVIEW_INC_DIR) \
-    -I$(PARAVIEW_INC_DIR)/vtkkwiml
-
-LIB_LIBS = \
-    $(GLIBS)
