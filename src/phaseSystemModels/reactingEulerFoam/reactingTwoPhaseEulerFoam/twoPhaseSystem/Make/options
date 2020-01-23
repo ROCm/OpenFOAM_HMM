@@ -21,6 +21,5 @@ LIB_LIBS = \
     -lmeshTools \
     -lsampling \
     -lcombustionModels \
-    -lreactingPhaseSystem \
     -lturbulenceModels \
     -lcompressibleTurbulenceModels

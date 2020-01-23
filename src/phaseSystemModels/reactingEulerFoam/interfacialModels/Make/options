@@ -15,6 +15,5 @@ LIB_LIBS = \
     -lfluidThermophysicalModels \
     -lcompressibleTransportModels \
     -lspecie \
-    -lreactingPhaseSystem \
     -lturbulenceModels \
     -lcompressibleTurbulenceModels

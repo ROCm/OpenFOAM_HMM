@@ -36,5 +36,6 @@ EXE_LIBS = \
     -lradiationModels \
     -lregionModels \
     -lsampling \
-    -lreactingPhaseSystem \
-    -lreactingTwoPhaseSystem
+    -lreactingTwoPhaseSystem \
+    -lreactingPhaseSystem
+

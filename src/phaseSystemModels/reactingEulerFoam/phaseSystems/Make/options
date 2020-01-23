@@ -24,4 +24,9 @@ LIB_LIBS = \
     -lcompressibleTransportModels \
     -lturbulenceModels \
     -lcompressibleTurbulenceModels \
-    -lcombustionModels
+    -lcombustionModels \
+    -lreactingEulerianInterfacialCompositionModels \
+    -lreactingEulerianInterfacialModels \
+    -lreactingEulerianFvPatchFields \
+    -lmultiphaseReactingTurbulenceModels \
+    -ltwoPhaseReactingTurbulenceModels
