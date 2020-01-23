@@ -1,3 +1,0 @@
-runTimePostProcessingDummy.C
-
-LIB = $(FOAM_LIBBIN)/librunTimePostProcessing
