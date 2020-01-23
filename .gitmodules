@@ -10,7 +10,7 @@
 [submodule "adios"]
 	path = modules/adios
 	url = https://develop.openfoam.com/Community/adiosfoam.git
-[submodule "modules/OpenQBMM"]
+[submodule "OpenQBMM"]
 	path = modules/OpenQBMM
 	url = https://github.com/OpenQBMM/OpenQBMM
 	branch = openfoam.com
