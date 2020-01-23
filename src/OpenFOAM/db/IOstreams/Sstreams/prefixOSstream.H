@@ -55,9 +55,10 @@ class prefixOSstream
 :
     public OSstream
 {
-    // Private data
+    // Private Data
 
         bool printPrefix_;
+
         string prefix_;
 
 
@@ -81,7 +82,7 @@ public:
         );
 
 
-    // Member functions
+    // Member Functions
 
         // Enquiry
 
@@ -98,7 +99,7 @@ public:
             }
 
 
-        // Write functions
+        // Write Functions
 
             //- Write token to stream or otherwise handle it.
             //  \return false if the token type was not handled by this method
@@ -143,10 +144,10 @@ public:
             virtual void indent();
 
 
-        // Print
+    // Print
 
-            //- Print description of IOstream to Ostream
-            virtual void print(Ostream& os) const;
+        //- Print stream description to Ostream
+        virtual void print(Ostream& os) const;
 };
 
 

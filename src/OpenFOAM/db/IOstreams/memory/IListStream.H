@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,7 +66,7 @@ protected:
 
     // Constructors
 
-        //- Construct empty
+        //- Default construct
         IListStreamAllocator()
         :
             List<char>(),
@@ -142,21 +142,20 @@ public:
 
     // Constructors
 
-        //- Construct with an empty list
-        IListStream
+        //- Default construct with an empty list
+        explicit IListStream
         (
             streamFormat format=ASCII,
-            versionNumber version=currentVersion,
-            const Foam::string& name="input"
+            versionNumber version=currentVersion
         )
         :
             allocator_type(),
-            ISstream(stream_, name, format, version)
+            ISstream(stream_, "input", format, version)
         {}
 
 
         //- Move construct from List
-        IListStream
+        explicit IListStream
         (
             ::Foam::List<char>&& buffer,  // Fully qualify (issue #1521)
             streamFormat format=ASCII,
@@ -171,7 +170,7 @@ public:
 
         //- Move construct from DynamicList
         template<int SizeMin>
-        IListStream
+        explicit IListStream
         (
             DynamicList<char,SizeMin>&& buffer,
             streamFormat format=ASCII,
@@ -204,11 +203,11 @@ public:
         }
 
 
-        //- Print description to Ostream
+        //- Print stream description to Ostream
         virtual void print(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
         //- A non-const reference to const Istream
         //  Needed for read-constructors where the stream argument is temporary

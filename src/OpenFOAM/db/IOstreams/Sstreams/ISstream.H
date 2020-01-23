@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -204,7 +204,7 @@ public:
 
         // Print
 
-            //- Print description of IOstream to Ostream
+            //- Print stream description to Ostream
             virtual void print(Ostream& os) const;
 };
 

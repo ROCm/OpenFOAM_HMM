@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +55,7 @@ namespace Foam
 
 class base64Layer
 {
-    // Private data
+    // Private Data
 
         //- The output stream for the layer
         std::ostream& os_;
@@ -97,10 +97,10 @@ public:
     // Constructors
 
         //- Construct and attach to an output stream
-        base64Layer(std::ostream& os);
+        explicit base64Layer(std::ostream& os);
 
 
-    //- Destructor
+    //- Destructor. Performs close()
     ~base64Layer();
 
 
@@ -117,10 +117,10 @@ public:
         void reset();
 
         //- End the encoding sequence, padding the final characters with '='.
-        //  Return false if no encoding was actually performed.
+        //  \return false if no encoding was actually performed.
         bool close();
-
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

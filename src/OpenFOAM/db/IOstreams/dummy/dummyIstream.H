@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,142 +23,25 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
+Typedef
     Foam::dummyIstream
 
 Description
-    Dummy stream for input. Aborts at any attempt to read from it.
-
-SourceFiles
+    Dummy input stream, currently the same as Foam::dummyISstream.
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef dummyIstream_H
 #define dummyIstream_H
 
-#include "Istream.H"
+#include "dummyISstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-/*---------------------------------------------------------------------------*\
-                        Class dummyIstream Declaration
-\*---------------------------------------------------------------------------*/
-
-class dummyIstream
-:
-    public Istream
-{
-public:
-
-    // Constructors
-
-        //- Construct null
-        dummyIstream() = default;
-
-
-    //- Destructor
-    ~dummyIstream() = default;
-
-
-    // Member Functions
-
-        // Read Functions
-
-            //- Return next token from stream
-            virtual Istream& read(token&)
-            {
-                NotImplemented;
-                return *this;
-            }
-
-            //- Read a character
-            virtual Istream& read(char&)
-            {
-                NotImplemented;
-                return *this;
-            }
-
-            //- Read a word
-            virtual Istream& read(word&)
-            {
-                NotImplemented;
-                return *this;
-            }
-
-            // Read a string (including enclosing double-quotes)
-            virtual Istream& read(string&)
-            {
-                NotImplemented;
-                return *this;
-            }
-
-            //- Read a label
-            virtual Istream& read(label&)
-            {
-                NotImplemented;
-                return *this;
-            }
-
-            //- Read a floatScalar
-            virtual Istream& read(floatScalar&)
-            {
-                NotImplemented;
-                return *this;
-            }
-
-            //- Read a doubleScalar
-            virtual Istream& read(doubleScalar&)
-            {
-                NotImplemented;
-                return *this;
-            }
-
-            //- Read binary block
-            virtual Istream& read(char*, std::streamsize)
-            {
-                NotImplemented;
-                return *this;
-            }
-
-            //- Low-level raw binary read
-            virtual Istream& readRaw(char*, std::streamsize)
-            {
-                NotImplemented;
-                return *this;
-            }
-
-            //- Start of low-level raw binary read
-            virtual bool beginRawRead()
-            {
-                return false;
-            }
-
-            //- End of low-level raw binary read
-            virtual bool endRawRead()
-            {
-                return false;
-            }
-
-            //- Rewind the stream so that it may be read again
-            virtual void rewind()
-            {}
-
-            //- Return flags of stream
-            virtual ios_base::fmtflags flags() const
-            {
-                return ios_base::fmtflags(0);
-            }
-
-            //- Set flags of stream
-            virtual ios_base::fmtflags flags(const ios_base::fmtflags)
-            {
-                return ios_base::fmtflags(0);
-            }
-};
-
+typedef dummyISstream dummyIstream;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

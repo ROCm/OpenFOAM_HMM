@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,7 +94,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class Time;
 class objectRegistry;
 
@@ -106,7 +106,7 @@ class IOobject
 {
 public:
 
-    // Public data types
+    // Public Data Types
 
         //- Enumeration defining the valid states of an IOobject
         enum objectState : char
@@ -198,7 +198,7 @@ protected:
 
 public:
 
-    //- Runtime type information
+    //- Declare type-name, virtual type (with debug switch)
     TypeName("IOobject");
 
 
@@ -208,7 +208,7 @@ public:
         static fileCheckTypes fileModificationChecking;
 
 
-    // Static Member Functions
+    // Static Functions
 
         //- Split path into instance, local, name components
         //
@@ -267,6 +267,15 @@ public:
         );
 
 
+    // Generated Methods
+
+        //- Copy construct
+        IOobject(const IOobject&) = default;
+
+        //- Destructor
+        virtual ~IOobject() = default;
+
+
     // Constructors
 
         //- Construct from name, instance, registry, io options
@@ -309,14 +318,14 @@ public:
             bool globalObject = false
         );
 
-        //- Construct as copy resetting registry
+        //- Copy construct, resetting registry
         IOobject
         (
             const IOobject& io,
             const objectRegistry& registry
         );
 
-        //- Construct as copy resetting name
+        //- Copy construct, resetting name
         IOobject
         (
             const IOobject& io,
@@ -334,10 +343,6 @@ public:
         {
             return autoPtr<IOobject>::New(*this, registry);
         }
-
-
-    //- Destructor
-    virtual ~IOobject() = default;
 
 
     // Member Functions

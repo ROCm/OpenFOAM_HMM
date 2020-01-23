@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,15 +32,23 @@ License
 #include "PstreamBuffers.H"
 #include "masterUncollatedFileOperation.H"
 #include "boolList.H"
+#include <algorithm>
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::masterOFstream::checkWrite
 (
     const fileName& fName,
-    const string& str
+    const char* str,
+    std::streamsize len
 )
 {
+    if (!len)
+    {
+        // Can probably skip all of this if there is nothing to write
+        return;
+    }
+
     mkDir(fName.path());
 
     OFstream os
@@ -53,17 +62,120 @@ void Foam::masterOFstream::checkWrite
     if (!os.good())
     {
         FatalIOErrorInFunction(os)
-            << "Could not open file " << fName
+            << "Could not open file " << fName << nl
             << exit(FatalIOError);
     }
 
-    os.writeQuoted(str, false);
+    // Use writeRaw() instead of writeQuoted(string,false) to output
+    // characters directly.
+
+    os.writeRaw(str, len);
+
     if (!os.good())
     {
         FatalIOErrorInFunction(os)
-            << "Failed writing to " << fName
+            << "Failed writing to " << fName << nl
             << exit(FatalIOError);
     }
+}
+
+
+void Foam::masterOFstream::checkWrite
+(
+    const fileName& fName,
+    const std::string& s
+)
+{
+    checkWrite(fName, &s[0], s.length());
+}
+
+
+void Foam::masterOFstream::commit()
+{
+    if (Pstream::parRun())
+    {
+        List<fileName> filePaths(Pstream::nProcs());
+        filePaths[Pstream::myProcNo()] = pathName_;
+        Pstream::gatherList(filePaths);
+
+        bool uniform =
+            fileOperations::masterUncollatedFileOperation::uniformFile
+            (
+                filePaths
+            );
+
+        Pstream::scatter(uniform);
+
+        if (uniform)
+        {
+            if (Pstream::master() && valid_)
+            {
+                checkWrite(pathName_, this->str());
+            }
+
+            this->reset();
+            return;
+        }
+
+        boolList valid(Pstream::nProcs());
+        valid[Pstream::myProcNo()] = valid_;
+        Pstream::gatherList(valid);
+
+
+        // Different files
+        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+
+        // Send my buffer to master
+        if (!Pstream::master())
+        {
+            UOPstream os(Pstream::masterNo(), pBufs);
+            string s(this->str());
+            this->reset();
+
+            os.write(&s[0], s.length());
+        }
+
+        labelList recvSizes;
+        pBufs.finishedSends(recvSizes);
+
+        if (Pstream::master())
+        {
+            // Write master data
+            if (valid[Pstream::masterNo()])
+            {
+                checkWrite(filePaths[Pstream::masterNo()], this->str());
+            }
+            this->reset();
+
+            // Find the max slave size
+            recvSizes[Pstream::masterNo()] = 0;
+            List<char> buf
+            (
+                *std::max_element(recvSizes.cbegin(), recvSizes.cend())
+            );
+
+            for (label proci = 1; proci < Pstream::nProcs(); ++proci)
+            {
+                UIPstream is(proci, pBufs);
+
+                const std::streamsize count(recvSizes[proci]);
+                is.read(buf.data(), count);
+
+                if (valid[proci])
+                {
+                    checkWrite(filePaths[proci], buf.cdata(), count);
+                }
+            }
+        }
+    }
+    else
+    {
+        checkWrite(pathName_, this->str());
+        this->reset();
+    }
+
+    // This method is only called once (internally)
+    // so no need to clear/flush old buffered data
 }
 
 
@@ -91,79 +203,7 @@ Foam::masterOFstream::masterOFstream
 
 Foam::masterOFstream::~masterOFstream()
 {
-    if (Pstream::parRun())
-    {
-        List<fileName> filePaths(Pstream::nProcs());
-        filePaths[Pstream::myProcNo()] = pathName_;
-        Pstream::gatherList(filePaths);
-
-        bool uniform =
-            fileOperations::masterUncollatedFileOperation::uniformFile
-            (
-                filePaths
-            );
-
-        Pstream::scatter(uniform);
-
-        if (uniform)
-        {
-            if (Pstream::master() && valid_)
-            {
-                checkWrite(pathName_, str());
-            }
-            return;
-        }
-        boolList valid(Pstream::nProcs());
-        valid[Pstream::myProcNo()] = valid_;
-        Pstream::gatherList(valid);
-
-
-        // Different files
-        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
-
-        // Send my buffer to master
-        if (!Pstream::master())
-        {
-            UOPstream os(Pstream::masterNo(), pBufs);
-            string s(this->str());
-            os.write(&s[0], s.size());
-        }
-
-        labelList recvSizes;
-        pBufs.finishedSends(recvSizes);
-
-        if (Pstream::master())
-        {
-            // Write my own data
-            {
-                if (valid[Pstream::myProcNo()])
-                {
-                    checkWrite(filePaths[Pstream::myProcNo()], str());
-                }
-            }
-
-            for (label proci = 1; proci < Pstream::nProcs(); proci++)
-            {
-                UIPstream is(proci, pBufs);
-                List<char> buf(recvSizes[proci]);
-
-                is.read(buf.begin(), buf.size());
-
-                if (valid[proci])
-                {
-                    checkWrite
-                    (
-                        filePaths[proci],
-                        string(buf.begin(), buf.size())
-                    );
-                }
-            }
-        }
-    }
-    else
-    {
-        checkWrite(pathName_, str());
-    }
+    commit();
 }
 
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -178,7 +178,7 @@ class OListStreamAllocator
 
     // Constructors
 
-        //- Construct with an empty list, or specified number of reserved bytes
+        //- Default construct, with initial reserved number of bytes
         dynbuf(size_t nbytes = 512)
         :
             storage_()
@@ -275,7 +275,7 @@ protected:
 
     // Constructors
 
-        //- Construct with an empty list or specified number of reserved bytes
+        //- Default construct, with initial reserved number of bytes
         OListStreamAllocator(size_t nbytes = 512)
         :
             buf_(nbytes),
@@ -406,8 +406,8 @@ public:
 
     // Constructors
 
-        //- Construct with an empty list
-        OListStream
+        //- Default construct (empty output)
+        explicit OListStream
         (
             streamFormat format=ASCII,
             versionNumber version=currentVersion
@@ -417,9 +417,8 @@ public:
             OSstream(stream_, "output", format, version)
         {}
 
-
-        //- Construct with a specified number of reserved bytes
-        OListStream
+        //- Construct with initial reserved number of bytes
+        explicit OListStream
         (
             size_t nbytes,
             streamFormat format=ASCII,
@@ -430,9 +429,8 @@ public:
             OSstream(stream_, "output", format, version)
         {}
 
-
         //- Move construct from an existing List
-        OListStream
+        explicit OListStream
         (
             List<char>&& buffer,
             streamFormat format=ASCII,
@@ -443,10 +441,9 @@ public:
             OSstream(stream_, "output", format, version)
         {}
 
-
         //- Move construct from an existing DynamicList
         template<int SizeMin>
-        OListStream
+        explicit OListStream
         (
             DynamicList<char,SizeMin>&& buffer,
             streamFormat format=ASCII,
@@ -467,9 +464,8 @@ public:
             setGood();  // resynchronize with internal state
         }
 
-        //- Print description to Ostream
+        //- Print stream description to Ostream
         virtual void print(Ostream& os) const;
-
 };
 
 

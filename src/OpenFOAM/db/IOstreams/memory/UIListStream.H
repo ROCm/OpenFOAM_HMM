@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -123,7 +123,7 @@ class UIListStreamAllocator
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         typedef std::istream stream_type;
 
@@ -137,7 +137,7 @@ protected:
     // Constructors
 
         //- Construct for character array and number of bytes
-        UIListStreamAllocator(char *buffer, size_t nbytes)
+        UIListStreamAllocator(char* buffer, size_t nbytes)
         :
             buf_(buffer, nbytes),
             stream_(&buf_)
@@ -147,7 +147,7 @@ protected:
     // Protected Member Functions
 
         //- Reset buffer pointers
-        inline void reset(char *buffer, size_t nbytes)
+        inline void reset(char* buffer, size_t nbytes)
         {
             buf_.resetg(buffer, nbytes);
         }
@@ -159,7 +159,7 @@ protected:
 
 public:
 
-    // Public Member Functions
+    // Member Functions
 
         //- Const UList access to the input characters (shallow copy).
         inline const UList<char> list() const
@@ -228,7 +228,7 @@ public:
 
         //- Construct using data area from a FixedList
         template<unsigned N>
-        UIListStream
+        explicit UIListStream
         (
             const FixedList<char, N>& buffer,
             streamFormat format=ASCII,
@@ -255,7 +255,7 @@ public:
 
         //- Construct using data area from a List and its inherent storage size
         //  Uses addressed size, thus no special treatment for a DynamicList
-        UIListStream
+        explicit UIListStream
         (
             const UList<char>& buffer,
             streamFormat format=ASCII,
@@ -282,7 +282,7 @@ public:
             setGood();  // resynchronize with internal state
         }
 
-        //- Print description to Ostream
+        //- Print stream description to Ostream
         virtual void print(Ostream& os) const;
 
 
@@ -294,7 +294,6 @@ public:
         {
             return const_cast<Istream&>(static_cast<const Istream&>(*this));
         }
-
 };
 
 

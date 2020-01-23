@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,7 +64,7 @@ class ensightGeoFile
 
 public:
 
-    // Static Member Functions
+    // Static Functions
 
         //- Return a null ensightGeoFile
         inline static const ensightGeoFile& null()
@@ -75,9 +75,9 @@ public:
 
     // Constructors
 
-        //- Construct from pathname.
-        //  The entire pathname is checked for valid ensight naming.
-        ensightGeoFile
+        //- Construct from pathName.
+        //  The entire pathName is checked for valid ensight naming.
+        explicit ensightGeoFile
         (
             const fileName& pathname,
             IOstream::streamFormat format=IOstream::BINARY
@@ -113,8 +113,8 @@ public:
 
         //- Begin a "coordinates" block
         void beginCoordinates(const label npoints);
-
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

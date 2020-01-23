@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +53,7 @@ class masterOFstream
 :
     public OStringStream
 {
-    // Private data
+    // Private Data
 
         const fileName pathName_;
 
@@ -66,8 +67,19 @@ class masterOFstream
 
     // Private Member Functions
 
-        //- Open file with checking
-        void checkWrite(const fileName& fName, const string& str);
+        //- Open file with checking and write append contents
+        void checkWrite
+        (
+            const fileName& fName,
+            const char* str,
+            std::streamsize len
+        );
+
+        //- Open file with checking and write append contents
+        void checkWrite(const fileName& fName, const std::string& s);
+
+        //- Commit buffered information, including parallel gather as required
+        void commit();
 
 
 public:
@@ -75,7 +87,7 @@ public:
     // Constructors
 
         //- Construct and set stream status
-        masterOFstream
+        explicit masterOFstream
         (
             const fileName& pathname,
             streamFormat format=ASCII,
@@ -86,7 +98,7 @@ public:
         );
 
 
-    //- Destructor
+    //- Destructor - commits buffered information to file
     ~masterOFstream();
 };
 

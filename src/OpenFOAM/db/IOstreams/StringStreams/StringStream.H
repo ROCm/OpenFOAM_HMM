@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,7 @@ class StringStreamAllocator
 {
 protected:
 
-    // Member Data
+    // Protected Member Data
 
         //- The stream type
         typedef StreamType stream_type;
@@ -70,23 +70,22 @@ protected:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         StringStreamAllocator()
         :
             stream_()
         {}
 
-
         //- Copy construct from string
-        StringStreamAllocator(const std::string& buffer)
+        StringStreamAllocator(const std::string& s)
         :
-            stream_(buffer)
+            stream_(s)
         {}
 
 
 public:
 
-    // Public Member Functions
+    // Member Functions
 
         //- Get the string - as Foam::string rather than std::string
         Foam::string str() const
@@ -120,35 +119,44 @@ public:
 
     // Constructors
 
-        //- Construct from string
-        IStringStream
+        //- Default construct
+        explicit IStringStream
         (
-            const Foam::string& buffer,
+            streamFormat format=ASCII,
+            versionNumber version=currentVersion
+        )
+        :
+            allocator_type(),
+            ISstream(stream_, "input", format, version)
+        {}
+
+        //- Construct from std::string
+        explicit IStringStream
+        (
+            const std::string& s,
             streamFormat format=ASCII,
             versionNumber version=currentVersion,
             const Foam::string& name="input"
         )
         :
-            allocator_type(buffer),
+            allocator_type(s),
             ISstream(stream_, name, format, version)
         {}
-
 
         //- Construct from char*
-        IStringStream
+        explicit IStringStream
         (
-            const char* buffer,
+            const char* s,
             streamFormat format=ASCII,
             versionNumber version=currentVersion,
             const Foam::string& name="input"
         )
         :
-            allocator_type(buffer),
+            allocator_type(s),
             ISstream(stream_, name, format, version)
         {}
 
-
-        //- Construct as copy of content
+        //- Copy construct, copies content and format
         IStringStream(const IStringStream& str)
         :
             allocator_type(str.str()),
@@ -165,11 +173,11 @@ public:
             this->rewind();
         }
 
-        //- Print description to Ostream
+        //- Print stream description to Ostream
         virtual void print(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
         //- Return a non-const reference to const Istream
         //  Needed for read-constructors where the stream argument is temporary.
@@ -177,7 +185,6 @@ public:
         {
             return const_cast<IStringStream&>(*this);
         }
-
 };
 
 
@@ -197,8 +204,8 @@ public:
 
     // Constructors
 
-        //- Construct and set stream status
-        OStringStream
+        //- Default construct
+        explicit OStringStream
         (
             streamFormat format=ASCII,
             versionNumber version=currentVersion
@@ -208,8 +215,7 @@ public:
             OSstream(stream_, "output", format, version)
         {}
 
-
-        //- Construct as copy of content
+        //- Copy construct, copies content and format
         OStringStream(const OStringStream& str)
         :
             allocator_type(str.str()),
@@ -233,9 +239,8 @@ public:
             stream_.rdbuf()->pubseekpos(0, std::ios_base::out);
         }
 
-        //- Print description to Ostream
+        //- Print stream description to Ostream
         virtual void print(Ostream& os) const;
-
 };
 
 

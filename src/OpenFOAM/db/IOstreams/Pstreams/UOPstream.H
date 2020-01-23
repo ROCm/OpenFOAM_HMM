@@ -60,7 +60,7 @@ class UOPstream
     public UPstream,
     public Ostream
 {
-    // Private data
+    // Private Data
 
         int toProcNo_;
 
@@ -267,10 +267,10 @@ public:
             }
 
 
-        // Print
+    // Print
 
-            //- Print description of IOstream to Ostream
-            void print(Ostream& os) const;
+        //- Print stream description to Ostream
+        void print(Ostream& os) const;
 };
 
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,13 +60,26 @@ class baseIOdictionary
     public regIOobject,
     public dictionary
 {
-    // Private data
+    // Private Data
 
         static bool writeDictionaries;
 
 public:
 
+    //- Declare type-name, virtual type (with debug switch)
     TypeName("dictionary");
+
+
+    // Generated Methods
+
+        //- Copy construct
+        baseIOdictionary(const baseIOdictionary&) = default;
+
+        //- Move construct
+        baseIOdictionary(baseIOdictionary&&) = default;
+
+        //- Destructor
+        virtual ~baseIOdictionary() = default;
 
 
     // Constructors
@@ -80,35 +94,33 @@ public:
         baseIOdictionary(const IOobject&, Istream&);
 
 
-    //- Destructor
-    virtual ~baseIOdictionary();
-
-
-    // Member functions
+    // Member Functions
 
         //- Return complete path + object name if the file exists
-        //  either in the case/processor or case otherwise null
+        //- either in the case/processor or case otherwise null
         virtual fileName filePath() const = 0;
 
         //- Name function is needed to disambiguate those inherited
-        //  from regIOobject and dictionary
+        //- from regIOobject and dictionary
         const word& name() const;
 
-        //- ReadData function required for regIOobject read operation
+        //- The readData function required by regIOobject read operation
         virtual bool readData(Istream&);
 
-        //- WriteData function required for regIOobject write operation
+        //- The writeData function required by regIOobject write operation
         virtual bool writeData(Ostream&) const;
 
         //- Is object global
         virtual bool global() const = 0;
 
 
-    // Member operators
+    // Member Operators
 
-        //- Assignment of other baseIOdictionary's entries to this
-        //  baseIOdictionary
+        //- Copy assignment of dictionary entries (leave regIOobject untouched)
         void operator=(const baseIOdictionary&);
+
+        //- Copy assignment of dictionary entries
+        using dictionary::operator=;
 };
 
 

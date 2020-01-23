@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,9 +28,15 @@ Class
     Foam::dummyISstream
 
 Description
-    Dummy stream for input. Aborts at any attempt to read from it.
+    Dummy input stream, which can be used as a placeholder for interfaces
+    taking an Istream or ISstream. Aborts at any attempt to read from it.
+
+Note
+    The inheritance from an empty IStringStream is solely for convenience
+    of implementation and should not be relied upon.
 
 SourceFiles
+    dummyISstream.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -54,17 +60,13 @@ class dummyISstream
 {
 public:
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        dummyISstream()
-        :
-            IStringStream(string::null)
-        {}
+        //- Default construct
+        dummyISstream() = default;
 
-
-    //- Destructor
-    virtual ~dummyISstream() = default;
+        //- Destructor
+        virtual ~dummyISstream() = default;
 
 
     // Member Functions
