@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,6 +24,8 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
+
+#include <numeric>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,19 +52,6 @@ inline Foam::UList<vtkIdType> Foam::vtk::Tools::asUList
     array->SetNumberOfTuples(size);
 
     return UList<vtkIdType>(array->WritePointer(0, size), size);
-}
-
-
-inline Foam::UList<vtkIdType> Foam::vtk::Tools::asUList
-(
-    vtkCellArray* cells,
-    const label nCells,
-    const label size
-)
-{
-    cells->GetData()->SetNumberOfTuples(size);
-
-    return UList<vtkIdType>(cells->WritePointer(nCells, size), size);
 }
 
 
@@ -150,19 +139,71 @@ inline vtkSmartPointer<vtkCellArray> Foam::vtk::Tools::identityVertices
     const label size
 )
 {
-    // VTK_VERTEX: need 2 values (size=1 and index=id) per vertex
     auto cells = vtkSmartPointer<vtkCellArray>::New();
 
-    UList<vtkIdType> list = asUList(cells, size, 2*size);
+    #ifdef VTK_CELL_ARRAY_V2
+
+    // Offsets
+    // [0, n1, n1+n2, n1+n2+n3... ]
+
+    auto offsets = vtkSmartPointer<vtkIdTypeArray>::New();
+
+    {
+        const vtkIdType nOffsets(size+1);
+
+        offsets->SetNumberOfTuples(nOffsets);
+
+        vtkIdType* iter = offsets->WritePointer(0, nOffsets);
+
+        std::iota(iter, (iter + nOffsets), vtkIdType(0));
+    }
+
+
+    auto connect = vtkSmartPointer<vtkIdTypeArray>::New();
+
+    // Connectivity
+    {
+        const vtkIdType nConnect(size);
+
+        connect->SetNumberOfTuples(nConnect);
+
+        vtkIdType* iter = connect->WritePointer(0, nConnect);
+
+        std::iota(iter, (iter + nConnect), vtkIdType(0));
+    }
+
+    // Move into a vtkCellArray
+
+    cells->SetData(offsets, connect);
+
+    #else
+
+    // In VTK-8.2.0 and older,
+    // sizes are interwoven (prefixed) in the connectivity
+
+    // Connectivity size, with prefixed size information
 
     // Cell connectivity for vertex
     // [size, ids.., size, ids...]  -> therefore  [1, id, 1, id, ...]
-    auto iter = list.begin();
-    for (label id=0; id < size; ++id)
+
+    const vtkIdType nElem(size);
+    const vtkIdType nConnect(2*size);
+
     {
-        *(iter++) = 1;
-        *(iter++) = id;
+        cells->GetData()->SetNumberOfTuples(nConnect);
+
+        vtkIdType* iter = cells->WritePointer(nElem, nConnect);
+
+        // Fill in the connectivity array, with prefixed size information
+
+        for (vtkIdType id = 0; id < nElem; ++id)
+        {
+            *(iter++) = 1;
+            *(iter++) = id;
+        }
     }
+
+    #endif
 
     return cells;
 };

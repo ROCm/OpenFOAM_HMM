@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,89 +103,127 @@ Foam::vtk::vtuAdaptor::internal
     const bool decompPoly
 )
 {
+    const vtk::vtuSizing::contentType output
+    (
+        #ifdef VTK_CELL_ARRAY_V2
+        vtk::vtuSizing::contentType::INTERNAL2
+        #else
+        vtk::vtuSizing::contentType::INTERNAL1
+        #endif
+    );
+
     vtk::vtuSizing sizing(mesh, decompPoly);
 
+    auto vtkmesh = vtkSmartPointer<vtkUnstructuredGrid>::New();
+
     auto cellTypes = vtkSmartPointer<vtkUnsignedCharArray>::New();
+
+    UList<uint8_t> cellTypesUL
+    (
+        vtk::Tools::asUList(cellTypes, sizing.nFieldCells())
+    );
 
     auto cells = vtkSmartPointer<vtkCellArray>::New();
     auto faces = vtkSmartPointer<vtkIdTypeArray>::New();
 
-    auto cellLocations = vtkSmartPointer<vtkIdTypeArray>::New();
+    auto cellOffsets   = vtkSmartPointer<vtkIdTypeArray>::New();
     auto faceLocations = vtkSmartPointer<vtkIdTypeArray>::New();
 
-    UList<uint8_t> cellTypesUL =
-        vtk::Tools::asUList(cellTypes, sizing.nFieldCells());
+    const auto nConnect
+    (
+        sizing.sizeOf(output, vtk::vtuSizing::slotType::CELLS)
+    );
 
-    UList<vtkIdType> cellsUL =
+    UList<vtkIdType> cellOffsetsUL
+    (
         vtk::Tools::asUList
         (
-            cells,
-            sizing.nFieldCells(),
-            sizing.sizeInternal(vtk::vtuSizing::slotType::CELLS)
-        );
+            cellOffsets,
+            sizing.sizeOf(output, vtk::vtuSizing::slotType::CELLS_OFFSETS)
+        )
+    );
 
-    UList<vtkIdType> cellLocationsUL =
-        vtk::Tools::asUList
-        (
-            cellLocations,
-            sizing.sizeInternal(vtk::vtuSizing::slotType::CELLS_OFFSETS)
-        );
+    #ifdef VTK_CELL_ARRAY_V2
 
-    UList<vtkIdType> facesUL =
+    auto cellConnect = vtkSmartPointer<vtkIdTypeArray>::New();
+
+    UList<vtkIdType> cellsUL
+    (
+        vtk::Tools::asUList(cellConnect, nConnect)
+    );
+
+    #else
+
+    cells->GetData()->SetNumberOfTuples(sizing.nFieldCells());
+
+    UList<vtkIdType> cellsUL
+    (
+        cells->WritePointer(sizing.nFieldCells(), nConnect),
+        nConnect
+    );
+
+    #endif
+
+    UList<vtkIdType> facesUL
+    (
         vtk::Tools::asUList
         (
             faces,
-            sizing.sizeInternal(vtk::vtuSizing::slotType::FACES)
-        );
+            sizing.sizeOf(output, vtk::vtuSizing::slotType::FACES)
+        )
+    );
 
-    UList<vtkIdType> faceLocationsUL =
+    UList<vtkIdType> faceLocationsUL
+    (
         vtk::Tools::asUList
         (
             faceLocations,
-            sizing.sizeInternal(vtk::vtuSizing::slotType::FACES_OFFSETS)
-        );
+            sizing.sizeOf(output, vtk::vtuSizing::slotType::FACES_OFFSETS)
+        )
+    );
 
 
     sizing.populateInternal
     (
         mesh,
         cellTypesUL,
-        cellsUL,
-        cellLocationsUL,
-        facesUL,
-        faceLocationsUL,
-        static_cast<foamVtkMeshMaps&>(*this)
+        cellsUL, cellOffsetsUL,
+        facesUL, faceLocationsUL,
+        static_cast<foamVtkMeshMaps&>(*this),
+        output
     );
 
-    auto vtkmesh = vtkSmartPointer<vtkUnstructuredGrid>::New();
 
     // Convert OpenFOAM mesh vertices to VTK
     // - can only do this *after* populating the decompInfo with cell-ids
     //   for any additional points (ie, mesh cell-centres)
     vtkmesh->SetPoints(this->points(mesh));
 
+    #ifdef VTK_CELL_ARRAY_V2
+
+    // Move into a vtkCellArray
+    cells->SetData(cellOffsets, cellConnect);
+
     if (facesUL.size())
     {
-        vtkmesh->SetCells
-        (
-            cellTypes,
-            cellLocations,
-            cells,
-            faceLocations,
-            faces
-        );
+        vtkmesh->SetCells(cellTypes, cells, faceLocations, faces);
     }
     else
     {
-        vtkmesh->SetCells
-        (
-            cellTypes,
-            cellLocations,
-            cells,
-            nullptr,
-            nullptr
-        );
+        vtkmesh->SetCells(cellTypes, cells, nullptr, nullptr);
     }
+    #else
+
+    if (facesUL.size())
+    {
+        vtkmesh->SetCells(cellTypes, cellOffsets, cells, faceLocations, faces);
+    }
+    else
+    {
+        vtkmesh->SetCells(cellTypes, cellOffsets, cells, nullptr, nullptr);
+    }
+
+    #endif
 
     return vtkmesh;
 }

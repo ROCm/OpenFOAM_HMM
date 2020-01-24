@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -108,15 +108,16 @@ void Foam::vtk::vtuCells::repopulate(const polyMesh& mesh)
 {
     // vtuSizing::reset() called prior to this method
 
-    cellTypes_.setSize(nFieldCells());
-    vertLabels_.setSize(sizeOf(output_, slotType::CELLS));
-    vertOffset_.setSize(sizeOf(output_, slotType::CELLS_OFFSETS));
-    faceLabels_.setSize(sizeOf(output_, slotType::FACES));
-    faceOffset_.setSize(sizeOf(output_, slotType::FACES_OFFSETS));
+    cellTypes_.resize(nFieldCells());
+    vertLabels_.resize(sizeOf(output_, slotType::CELLS));
+    vertOffset_.resize(sizeOf(output_, slotType::CELLS_OFFSETS));
+    faceLabels_.resize(sizeOf(output_, slotType::FACES));
+    faceOffset_.resize(sizeOf(output_, slotType::FACES_OFFSETS));
 
     switch (output_)
     {
         case contentType::LEGACY:
+        {
             populateLegacy
             (
                 mesh,
@@ -125,7 +126,10 @@ void Foam::vtk::vtuCells::repopulate(const polyMesh& mesh)
                 maps_
             );
             break;
+        }
+
         case contentType::XML:
+        {
             populateXml
             (
                 mesh,
@@ -137,7 +141,11 @@ void Foam::vtk::vtuCells::repopulate(const polyMesh& mesh)
                 maps_
             );
             break;
-        case contentType::INTERNAL:
+        }
+
+        case contentType::INTERNAL1:
+        case contentType::INTERNAL2:
+        {
             populateInternal
             (
                 mesh,
@@ -146,9 +154,11 @@ void Foam::vtk::vtuCells::repopulate(const polyMesh& mesh)
                 vertOffset_,
                 faceLabels_,
                 faceOffset_,
-                maps_
+                maps_,
+                output_
             );
             break;
+        }
     }
 }
 

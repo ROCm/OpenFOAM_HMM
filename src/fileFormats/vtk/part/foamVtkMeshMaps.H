@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +37,7 @@ Description
     for additional points of decomposed cells
 
 SourceFiles
+    foamVtkMeshMaps.C
     foamVtkMeshMapsI.H
 
 \*---------------------------------------------------------------------------*/
@@ -74,12 +75,11 @@ public:
 
     // Constructors
 
-        //- Construct null
-        inline explicit foamVtkMeshMaps(const label size = 0);
+        //- Default construct: zero-sized, no reserved size
+        inline foamVtkMeshMaps();
 
-
-    //- Destructor
-    ~foamVtkMeshMaps() = default;
+        //- Construct with reserved size
+        inline explicit foamVtkMeshMaps(const label size);
 
 
     // Member Functions
@@ -92,17 +92,26 @@ public:
         //  cells this becomes a useful means of mapping from the original mesh.
         inline const labelList& cellMap() const;
 
+        //- Write access to original cell ids
+        inline DynamicList<label>& cellMap();
+
         //- Point labels for subsetted meshes
         inline const labelList& pointMap() const;
+
+        //- Write access to point labels for subsetted meshes
+        inline DynamicList<label>& pointMap();
 
         //- Any additional (user) labels.
         //  Eg, cell-centre labels for additional points of decomposed cells
         inline const labelList& additionalIds() const;
 
+        //- Write access to additional (user) labels.
+        inline DynamicList<label>& additionalIds();
+
 
     // Edit
 
-        //- Clear
+        //- Clear sizing
         inline void clear();
 
         //- Renumber cell ids (cellMap and additionalIds) to account for
@@ -111,22 +120,6 @@ public:
 
         //- Renumber point ids (pointMap) to account for subset meshes
         void renumberPoints(const labelUList& mapping);
-
-
-        //- Original cell ids for all cells (regular and decomposed).
-        //  For a regular mesh comprising only primitive cell types, this
-        //  will simply be an identity list. However, for subsetted meshes
-        //  and decomposed cells this becomes a useful means of mapping from
-        //  the original mesh.
-        inline DynamicList<label>& cellMap();
-
-        //- Point labels for subsetted meshes
-        inline DynamicList<label>& pointMap();
-
-        //- Any additional (user) labels.
-        //  Eg, cell-centre labels for additional points of decomposed cells
-        inline DynamicList<label>& additionalIds();
-
 };
 
 

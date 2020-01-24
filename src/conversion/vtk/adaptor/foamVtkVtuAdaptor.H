@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,19 +52,14 @@ SourceFiles
 #include "foamVtkMeshMaps.H"
 #include "foamVtuSizing.H"
 
-#include "vtkSmartPointer.h"
-#include "vtkPoints.h"
-#include "vtkPolyData.h"
 #include "vtkUnstructuredGrid.h"
 #include "vtkMultiBlockDataSet.h"
 
-// * * * * * * * * * * * * * Forward Declarations  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-class vtkCellArray;
+// Forward Declarations
 class vtkDataSet;
 class vtkFloatArray;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {

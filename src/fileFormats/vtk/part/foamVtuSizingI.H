@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,12 +125,21 @@ inline Foam::label Foam::vtk::vtuSizing::sizeXml
 }
 
 
-inline Foam::label Foam::vtk::vtuSizing::sizeInternal
+inline Foam::label Foam::vtk::vtuSizing::sizeInternal1
 (
     const enum slotType slot
 ) const
 {
-    return sizeOf(contentType::INTERNAL, slot);
+    return sizeOf(contentType::INTERNAL1, slot);
+}
+
+
+inline Foam::label Foam::vtk::vtuSizing::sizeInternal2
+(
+    const enum slotType slot
+) const
+{
+    return sizeOf(contentType::INTERNAL2, slot);
 }
 
 

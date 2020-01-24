@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,14 @@ License
 #include "foamVtkMeshMaps.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+inline Foam::foamVtkMeshMaps::foamVtkMeshMaps()
+:
+    cellMap_(0),
+    pointMap_(0),
+    additionalIds_(0)
+{}
+
 
 inline Foam::foamVtkMeshMaps::foamVtkMeshMaps(const label size)
 :

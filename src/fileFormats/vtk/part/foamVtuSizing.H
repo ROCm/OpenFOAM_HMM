@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,10 +66,20 @@ Description
     \endtable
 
     \table
-        internal storage
+        internal1 storage (VTK-8 and earlier)
         \c types        | vtk cell type (1-255)
         \c connectivity | nLabels and unique vertex labels used by the cell
         \c location     | begin location for each of \c connectivity
+        \c faces        | face stream for polyhedral cells
+                        | [nFaces, nFace0Pts, id1, id2, ..., nFace1Pts, id1, id2, ...]
+        \c facelocation | begin location for each of \c faces, with -1 for primitive cells
+    \endtable
+
+    \table
+        internal2 storage (with VTK_CELL_ARRAY_V2)
+        \c types        | vtk cell type (1-255)
+        \c connectivity | unique vertex labels used by the cell
+        \c offsets      | begin/end offsets for \c connectivity
         \c faces        | face stream for polyhedral cells
                         | [nFaces, nFace0Pts, id1, id2, ..., nFace1Pts, id1, id2, ...]
         \c facelocation | begin location for each of \c faces, with -1 for primitive cells
@@ -84,6 +94,10 @@ Note
     There is no support for point renumbering with merged mesh points,
     since it likely more efficient to use VTK point-blanking to mark duplicate
     points instead of merging points ourselves.
+
+Note
+    The VTK_CELL_ARRAY_V2 define (from vtkCellArray.h) indicates if the new
+    (internal2) new format is being used.
 
 SourceFiles
     foamVtuSizing.C
@@ -103,7 +117,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class polyMesh;
 
 namespace vtk
@@ -117,23 +131,25 @@ class vtuSizing
 {
 public:
 
-    // Public data
+    // Public Data
 
     //- Types of content that the storage may represent
     enum contentType
     {
         LEGACY,     //!< Legacy VTK content
         XML,        //!< XML (VTU) content
-        INTERNAL    //!< Internal vtkUnstructuredGrid content
+        INTERNAL1,  //!< Internal vtkUnstructuredGrid content
+        INTERNAL2   //!< Internal vtkUnstructuredGrid content, VTK_CELL_ARRAY_V2
     };
 
     //- The possible storage 'slots' that can be used
     enum slotType
     {
         CELLS,         //!< Cell connectivity (ALL)
-        CELLS_OFFSETS, //!< End-offsets (XML) or locations (INTERNAL) for cells
+        CELLS_OFFSETS, //!< Cell end-offsets (XML), locations (INTERNAL1)
+                       //!< or begin/end offsets (INTERNAL2)
         FACES,         //!< Face-stream (XML, INTERNAL)
-        FACES_OFFSETS  //!< End-offsets (XML) or locations (INTERNAL) for faces
+        FACES_OFFSETS  //!< Faces end-offsets (XML) or locations (INTERNAL1)
     };
 
 
@@ -153,6 +169,7 @@ private:
         //- Number of vertex labels to represent the mesh
         label nVertLabels_;
 
+
     // Polyhedrals
 
         //- Number of polyhedral face labels for the mesh
@@ -163,6 +180,7 @@ private:
 
         //- Number of vertex labels used by polyhedrals
         label nVertPoly_;
+
 
     // Decomposed polyhedrals
 
@@ -202,8 +220,8 @@ public:
 
     // Constructors
 
-        //- Construct null.
-        vtuSizing();
+        //- Default construct
+        vtuSizing() noexcept;
 
         //- Construct sizing by analyzing the mesh.
         //  No polyhedral decomposition.
@@ -212,10 +230,6 @@ public:
         //- Construct sizing by analyzing the mesh.
         //  Optionally with polyhedral decomposition.
         vtuSizing(const polyMesh& mesh, const bool decompose);
-
-
-    //- Destructor
-    ~vtuSizing() = default;
 
 
     // Member Functions
@@ -227,7 +241,7 @@ public:
         void reset(const polyMesh& mesh, const bool decompose=false);
 
         //- Reset all sizes to zero.
-        void clear();
+        void clear() noexcept;
 
 
     // Access
@@ -290,7 +304,10 @@ public:
         inline label sizeXml(const enum slotType slot) const;
 
         //- The calculated size for vtk-internal storage of the specified slot
-        inline label sizeInternal(const enum slotType slot) const;
+        inline label sizeInternal1(const enum slotType slot) const;
+
+        //- The calculated size for vtk-internal storage of the specified slot
+        inline label sizeInternal2(const enum slotType slot) const;
 
 
     // Routines for populating the output lists
@@ -316,80 +333,45 @@ public:
             foamVtkMeshMaps& maps
         ) const;
 
-        //- Populate lists for Internal VTK format
-        void populateInternal
-        (
-            const polyMesh& mesh,
-            UList<uint8_t>& cellTypes,
-            UList<int>& connectivity,
-            UList<int>& offsets,
-            UList<int>& faces,
-            UList<int>& facesOffsets,
-            foamVtkMeshMaps& maps
-        ) const;
 
-        //- Populate lists for Internal VTK format
-        void populateInternal
-        (
-            const polyMesh& mesh,
-            UList<uint8_t>& cellTypes,
-            UList<long>& connectivity,
-            UList<long>& offsets,
-            UList<long>& faces,
-            UList<long>& facesOffsets,
-            foamVtkMeshMaps& maps
-        ) const;
+    // Internal types. The size of vtkIdType is unknown here
 
-        //- Populate lists for Internal VTK format
-        void populateInternal
-        (
-            const polyMesh& mesh,
-            UList<uint8_t>& cellTypes,
-            UList<long long>& connectivity,
-            UList<long long>& offsets,
-            UList<long long>& faces,
-            UList<long long>& facesOffsets,
-            foamVtkMeshMaps& maps
-        ) const;
+#undef  declarePopulateInternalMethod
+#define declarePopulateInternalMethod(Type)                                   \
+                                                                              \
+        /*! Populate lists for Internal VTK format */                         \
+        void populateInternal                                                 \
+        (                                                                     \
+            const polyMesh& mesh,                                             \
+            UList<uint8_t>& cellTypes,                                        \
+            UList<Type>& connectivity,                                        \
+            UList<Type>& offsets,                                             \
+            UList<Type>& faces,                                               \
+            UList<Type>& facesOffsets,                                        \
+            foamVtkMeshMaps& maps,                                            \
+            const enum contentType output                                     \
+        ) const;                                                              \
+                                                                              \
+        /*! Populate lists for Internal VTK format */                         \
+        void populateInternal                                                 \
+        (                                                                     \
+            const polyMesh& mesh,                                             \
+            UList<uint8_t>& cellTypes,                                        \
+            UList<Type>& connectivity,                                        \
+            UList<Type>& offsets,                                             \
+            UList<Type>& faces,                                               \
+            UList<Type>& facesOffsets,                                        \
+            labelUList& cellMap,                                              \
+            labelUList& addPointsIds,                                         \
+            const enum contentType output                                     \
+        ) const
 
-        //- Populate lists for Internal VTK format
-        void populateInternal
-        (
-            const polyMesh& mesh,
-            UList<uint8_t>& cellTypes,
-            UList<int>& connectivity,
-            UList<int>& offsets,
-            UList<int>& faces,
-            UList<int>& facesOffsets,
-            labelUList& cellMap,
-            labelUList& addPointsIds
-        ) const;
 
-        //- Populate lists for Internal VTK format
-        void populateInternal
-        (
-            const polyMesh& mesh,
-            UList<uint8_t>& cellTypes,
-            UList<long>& connectivity,
-            UList<long>& offsets,
-            UList<long>& faces,
-            UList<long>& facesOffsets,
-            labelUList& cellMap,
-            labelUList& addPointsIds
-        ) const;
+        declarePopulateInternalMethod(int);
+        declarePopulateInternalMethod(long);
+        declarePopulateInternalMethod(long long);
 
-        //- Populate lists for Internal VTK format
-        void populateInternal
-        (
-            const polyMesh& mesh,
-            UList<uint8_t>& cellTypes,
-            UList<long long>& connectivity,
-            UList<long long>& offsets,
-            UList<long long>& faces,
-            UList<long long>& facesOffsets,
-            labelUList& cellMap,
-            labelUList& addPointsIds
-        ) const;
+        #undef declarePopulateInternalMethod
 
 
     // Routines for renumber vertices with a global point offset
@@ -465,7 +447,6 @@ public:
 
         //- Test inequality
         bool operator!=(const vtuSizing& rhs) const;
-
 };
 
 

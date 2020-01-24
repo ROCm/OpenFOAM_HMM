@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,14 +37,14 @@ License
 
 void Foam::vtk::vtuSizing::presizeMaps(foamVtkMeshMaps& maps) const
 {
-    maps.cellMap().setSize(this->nFieldCells());
-    maps.additionalIds().setSize(this->nAddPoints());
+    maps.cellMap().resize(this->nFieldCells());
+    maps.additionalIds().resize(this->nAddPoints());
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::vtk::vtuSizing::vtuSizing()
+Foam::vtk::vtuSizing::vtuSizing() noexcept
 {
     clear();
 }
@@ -63,7 +63,7 @@ Foam::vtk::vtuSizing::vtuSizing
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::vtk::vtuSizing::clear()
+void Foam::vtk::vtuSizing::clear() noexcept
 {
     decompose_   = false;
     nCells_      = 0;
@@ -232,6 +232,7 @@ Foam::label Foam::vtk::vtuSizing::sizeOf
             }
             break;
         }
+
         case contentType::XML:
         {
             switch (slot)
@@ -254,7 +255,8 @@ Foam::label Foam::vtk::vtuSizing::sizeOf
             }
             break;
         }
-        case contentType::INTERNAL:
+
+        case contentType::INTERNAL1:
         {
             switch (slot)
             {
@@ -265,6 +267,29 @@ Foam::label Foam::vtk::vtuSizing::sizeOf
 
                 case slotType::CELLS_OFFSETS:
                     return nFieldCells();
+                    break;
+
+                case slotType::FACES:
+                    return nFaceLabels();
+                    break;
+
+                case slotType::FACES_OFFSETS:
+                    return nFaceLabels() ? nFieldCells() : 0;
+                    break;
+            }
+            break;
+        }
+
+        case contentType::INTERNAL2:
+        {
+            switch (slot)
+            {
+                case slotType::CELLS:
+                    return (nVertLabels() + nAddVerts());
+                    break;
+
+                case slotType::CELLS_OFFSETS:
+                    return (nFieldCells() + 1);
                     break;
 
                 case slotType::FACES:
@@ -343,175 +368,73 @@ void Foam::vtk::vtuSizing::populateXml
 }
 
 
-void Foam::vtk::vtuSizing::populateInternal
-(
-    const polyMesh& mesh,
-    UList<uint8_t>& cellTypes,
-    UList<int>& connectivity,
-    UList<int>& offsets,
-    UList<int>& faces,
-    UList<int>& facesOffsets,
-    foamVtkMeshMaps& maps
-) const
-{
-    presizeMaps(maps);
-
-    populateArrays
-    (
-        mesh,
-        *this,
-        cellTypes,
-        connectivity,
-        offsets,
-        faces,
-        facesOffsets,
-        contentType::INTERNAL,
-        maps.cellMap(),
-        maps.additionalIds()
-    );
-}
-
-
-void Foam::vtk::vtuSizing::populateInternal
-(
-    const polyMesh& mesh,
-    UList<uint8_t>& cellTypes,
-    UList<long>& connectivity,
-    UList<long>& offsets,
-    UList<long>& faces,
-    UList<long>& facesOffsets,
-    foamVtkMeshMaps& maps
-) const
-{
-    presizeMaps(maps);
-
-    populateArrays
-    (
-        mesh,
-        *this,
-        cellTypes,
-        connectivity,
-        offsets,
-        faces,
-        facesOffsets,
-        contentType::INTERNAL,
-        maps.cellMap(),
-        maps.additionalIds()
-    );
-}
-
-
-void Foam::vtk::vtuSizing::populateInternal
-(
-    const polyMesh& mesh,
-    UList<uint8_t>& cellTypes,
-    UList<long long>& connectivity,
-    UList<long long>& offsets,
-    UList<long long>& faces,
-    UList<long long>& facesOffsets,
-    foamVtkMeshMaps& maps
-) const
-{
-    presizeMaps(maps);
-
-    populateArrays
-    (
-        mesh,
-        *this,
-        cellTypes,
-        connectivity,
-        offsets,
-        faces,
-        facesOffsets,
-        contentType::INTERNAL,
-        maps.cellMap(),
-        maps.additionalIds()
-    );
-}
+#undef  definePopulateInternalMethod
+#define definePopulateInternalMethod(Type)                                   \
+                                                                             \
+    void Foam::vtk::vtuSizing::populateInternal                              \
+    (                                                                        \
+        const polyMesh& mesh,                                                \
+        UList<uint8_t>& cellTypes,                                           \
+        UList<Type>& connectivity,                                           \
+        UList<Type>& offsets,                                                \
+        UList<Type>& faces,                                                  \
+        UList<Type>& facesOffsets,                                           \
+        foamVtkMeshMaps& maps,                                               \
+        const enum contentType output                                        \
+    ) const                                                                  \
+    {                                                                        \
+        presizeMaps(maps);                                                   \
+                                                                             \
+        populateArrays                                                       \
+        (                                                                    \
+            mesh,                                                            \
+            *this,                                                           \
+            cellTypes,                                                       \
+            connectivity,                                                    \
+            offsets,                                                         \
+            faces,                                                           \
+            facesOffsets,                                                    \
+            output,                                                          \
+            maps.cellMap(),                                                  \
+            maps.additionalIds()                                             \
+        );                                                                   \
+    }                                                                        \
+                                                                             \
+    void Foam::vtk::vtuSizing::populateInternal                              \
+    (                                                                        \
+        const polyMesh& mesh,                                                \
+        UList<uint8_t>& cellTypes,                                           \
+        UList<Type>& connectivity,                                           \
+        UList<Type>& offsets,                                                \
+        UList<Type>& faces,                                                  \
+        UList<Type>& facesOffsets,                                           \
+        labelUList& cellMap,                                                 \
+        labelUList& addPointsIds,                                            \
+        const enum contentType output                                        \
+    ) const                                                                  \
+    {                                                                        \
+        populateArrays                                                       \
+        (                                                                    \
+            mesh,                                                            \
+            *this,                                                           \
+            cellTypes,                                                       \
+            connectivity,                                                    \
+            offsets,                                                         \
+            faces,                                                           \
+            facesOffsets,                                                    \
+            output,                                                          \
+            cellMap,                                                         \
+            addPointsIds                                                     \
+        );                                                                   \
+    }
 
 
-void Foam::vtk::vtuSizing::populateInternal
-(
-    const polyMesh& mesh,
-    UList<uint8_t>& cellTypes,
-    UList<int>& connectivity,
-    UList<int>& offsets,
-    UList<int>& faces,
-    UList<int>& facesOffsets,
-    labelUList& cellMap,
-    labelUList& addPointsIds
-) const
-{
-    populateArrays
-    (
-        mesh,
-        *this,
-        cellTypes,
-        connectivity,
-        offsets,
-        faces,
-        facesOffsets,
-        contentType::INTERNAL,
-        cellMap,
-        addPointsIds
-    );
-}
+definePopulateInternalMethod(int);
+definePopulateInternalMethod(long);
+definePopulateInternalMethod(long long);
 
 
-void Foam::vtk::vtuSizing::populateInternal
-(
-    const polyMesh& mesh,
-    UList<uint8_t>& cellTypes,
-    UList<long>& connectivity,
-    UList<long>& offsets,
-    UList<long>& faces,
-    UList<long>& facesOffsets,
-    labelUList& cellMap,
-    labelUList& addPointsIds
-) const
-{
-    populateArrays
-    (
-        mesh,
-        *this,
-        cellTypes,
-        connectivity,
-        offsets,
-        faces,
-        facesOffsets,
-        contentType::INTERNAL,
-        cellMap,
-        addPointsIds
-    );
-}
-
-
-void Foam::vtk::vtuSizing::populateInternal
-(
-    const polyMesh& mesh,
-    UList<uint8_t>& cellTypes,
-    UList<long long>& connectivity,
-    UList<long long>& offsets,
-    UList<long long>& faces,
-    UList<long long>& facesOffsets,
-    labelUList& cellMap,
-    labelUList& addPointsIds
-) const
-{
-    populateArrays
-    (
-        mesh,
-        *this,
-        cellTypes,
-        connectivity,
-        offsets,
-        faces,
-        facesOffsets,
-        contentType::INTERNAL,
-        cellMap,
-        addPointsIds
-    );
-}
+#undef definePopulateInternalMethod
 
 
 // * * * * * * * * * * * * * * Renumber vertices * * * * * * * * * * * * * * //
@@ -559,7 +482,7 @@ void Foam::vtk::vtuSizing::renumberVertLabelsLegacy
     // Therefore anything with 18 labels or more must be a poly
 
     auto iter = vertLabels.begin();
-    auto last = vertLabels.end();
+    const auto last = vertLabels.end();
 
     while (iter < last)
     {
@@ -671,7 +594,7 @@ void Foam::vtk::vtuSizing::renumberFaceLabelsXml
     // [nFaces, nFace0Pts, id1,id2,..., nFace1Pts, id1,id2,...]
 
     auto iter = faceLabels.begin();
-    auto last = faceLabels.end();
+    const auto last = faceLabels.end();
 
     while (iter < last)
     {

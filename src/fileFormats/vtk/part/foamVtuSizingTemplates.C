@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,6 +47,17 @@ void Foam::vtk::vtuSizing::populateArrays
     UList<LabelType2>& addPointsIds
 )
 {
+    // Characteristics
+
+    // Are vertLabels prefixed with the size?
+    // Also use as the size of the prefixed information
+    const int prefix =
+    (
+        output == contentType::LEGACY
+     || output == contentType::INTERNAL1
+    ) ? 1 : 0;
+
+
     // STAGE 1: Verify storage sizes
 
     if (cellTypes.size() != sizing.nFieldCells())
@@ -73,10 +84,6 @@ void Foam::vtk::vtuSizing::populateArrays
             << exit(FatalError);
     }
 
-    // Prefix vertLabels with the size too?
-    // Also use as the size of the prefixed information
-    const int prefix = (output != contentType::XML) ? 1 : 0;
-
     switch (output)
     {
         case contentType::LEGACY:
@@ -90,6 +97,7 @@ void Foam::vtk::vtuSizing::populateArrays
             }
             break;
         }
+
         case contentType::XML:
         {
             // XML uses connectivity/offset pair.
@@ -149,32 +157,33 @@ void Foam::vtk::vtuSizing::populateArrays
             }
             break;
         }
-        case contentType::INTERNAL:
+
+        case contentType::INTERNAL1:
         {
-            // VTK-internal connectivity/offset pair.
+            // VTK-internal1 connectivity/offset pair.
             if
             (
                 vertLabels.size()
-             != sizing.sizeInternal(slotType::CELLS)
+             != sizing.sizeInternal1(slotType::CELLS)
             )
             {
                 FatalErrorInFunction
                     << " connectivity size=" << vertLabels.size()
                     << " expected "
-                    << sizing.sizeInternal(slotType::CELLS)
+                    << sizing.sizeInternal1(slotType::CELLS)
                     << exit(FatalError);
             }
 
             if
             (
                 vertOffset.size()
-             != sizing.sizeInternal(slotType::CELLS_OFFSETS)
+             != sizing.sizeInternal1(slotType::CELLS_OFFSETS)
             )
             {
                 FatalErrorInFunction
                     << " offsets size=" << vertOffset.size()
                     << " expected "
-                    << sizing.sizeInternal(slotType::CELLS_OFFSETS)
+                    << sizing.sizeInternal1(slotType::CELLS_OFFSETS)
                     << exit(FatalError);
             }
 
@@ -183,26 +192,86 @@ void Foam::vtk::vtuSizing::populateArrays
                 if
                 (
                     faceLabels.size()
-                 != sizing.sizeInternal(slotType::FACES)
+                 != sizing.sizeInternal1(slotType::FACES)
                 )
                 {
                     FatalErrorInFunction
                         << " faces size=" << faceLabels.size()
                         << " expected "
-                        << sizing.sizeInternal(slotType::FACES)
+                        << sizing.sizeInternal1(slotType::FACES)
                         << exit(FatalError);
                 }
 
                 if
                 (
                     faceOffset.size()
-                 != sizing.sizeInternal(slotType::FACES_OFFSETS)
+                 != sizing.sizeInternal1(slotType::FACES_OFFSETS)
                 )
                 {
                     FatalErrorInFunction
                         << " facesOffsets size=" << faceOffset.size()
                         << " expected "
-                        << sizing.sizeInternal(slotType::FACES_OFFSETS)
+                        << sizing.sizeInternal1(slotType::FACES_OFFSETS)
+                        << exit(FatalError);
+                }
+            }
+            break;
+        }
+
+        case contentType::INTERNAL2:
+        {
+            // VTK-internal2 connectivity/offset pair.
+            if
+            (
+                vertLabels.size()
+             != sizing.sizeInternal2(slotType::CELLS)
+            )
+            {
+                FatalErrorInFunction
+                    << " connectivity size=" << vertLabels.size()
+                    << " expected "
+                    << sizing.sizeInternal2(slotType::CELLS)
+                    << exit(FatalError);
+            }
+
+            if
+            (
+                vertOffset.size()
+             != sizing.sizeInternal2(slotType::CELLS_OFFSETS)
+            )
+            {
+                FatalErrorInFunction
+                    << " offsets size=" << vertOffset.size()
+                    << " expected "
+                    << sizing.sizeInternal2(slotType::CELLS_OFFSETS)
+                    << exit(FatalError);
+            }
+
+            if (sizing.nFaceLabels())
+            {
+                if
+                (
+                    faceLabels.size()
+                 != sizing.sizeInternal2(slotType::FACES)
+                )
+                {
+                    FatalErrorInFunction
+                        << " faces size=" << faceLabels.size()
+                        << " expected "
+                        << sizing.sizeInternal2(slotType::FACES)
+                        << exit(FatalError);
+                }
+
+                if
+                (
+                    faceOffset.size()
+                 != sizing.sizeInternal2(slotType::FACES_OFFSETS)
+                )
+                {
+                    FatalErrorInFunction
+                        << " facesOffsets size=" << faceOffset.size()
+                        << " expected "
+                        << sizing.sizeInternal2(slotType::FACES_OFFSETS)
                         << exit(FatalError);
                 }
             }
@@ -211,7 +280,19 @@ void Foam::vtk::vtuSizing::populateArrays
     }
 
 
+    // Initialization
+
     faceOffset = -1;
+
+    // For INTERNAL2, the vertOffset is (nFieldCells+1), which means that
+    // the last entry is never visited. Set as zero now.
+
+    if (vertOffset.size())
+    {
+        vertOffset.first() = 0;
+        vertOffset.last() = 0;
+    }
+
 
     const cellModel& tet      = cellModel::ref(cellModel::TET);
     const cellModel& pyr      = cellModel::ref(cellModel::PYR);
@@ -222,11 +303,11 @@ void Foam::vtk::vtuSizing::populateArrays
 
     const cellShapeList& shapes = mesh.cellShapes();
 
-    // face owner is needed to determine the face orientation
+    // The face owner is needed to determine the face orientation
     const labelList& owner = mesh.faceOwner();
 
     // Unique vertex labels per polyhedral
-    labelHashSet hashUniqId(2*256);
+    labelHashSet hashUniqId(512);
 
     // Index into vertLabels, faceLabels for normal cells
     label nVertLabels = 0;
@@ -277,13 +358,15 @@ void Foam::vtk::vtuSizing::populateArrays
         if (model == tet)
         {
             cellTypes[celli] = vtk::cellType::VTK_TETRA;
+            constexpr label nShapePoints = 4; // OR shape.size();
+
             if (vertOffset.size())
             {
-                vertOffset[celli] = shape.size();
+                vertOffset[celli] = nShapePoints;
             }
             if (prefix)
             {
-                vertLabels[nVertLabels++] = shape.size();
+                vertLabels[nVertLabels++] = nShapePoints;
             }
 
             for (const label cpi : shape)
@@ -294,13 +377,15 @@ void Foam::vtk::vtuSizing::populateArrays
         else if (model == pyr)
         {
             cellTypes[celli] = vtk::cellType::VTK_PYRAMID;
+            constexpr label nShapePoints = 5; // OR shape.size();
+
             if (vertOffset.size())
             {
-                vertOffset[celli] = shape.size();
+                vertOffset[celli] = nShapePoints;
             }
             if (prefix)
             {
-                vertLabels[nVertLabels++] = shape.size();
+                vertLabels[nVertLabels++] = nShapePoints;
             }
 
             for (const label cpi : shape)
@@ -311,13 +396,15 @@ void Foam::vtk::vtuSizing::populateArrays
         else if (model == hex)
         {
             cellTypes[celli] = vtk::cellType::VTK_HEXAHEDRON;
+            constexpr label nShapePoints = 8; // OR shape.size();
+
             if (vertOffset.size())
             {
-                vertOffset[celli] = shape.size();
+                vertOffset[celli] = nShapePoints;
             }
             if (prefix)
             {
-                vertLabels[nVertLabels++] = shape.size();
+                vertLabels[nVertLabels++] = nShapePoints;
             }
 
             for (const label cpi : shape)
@@ -328,13 +415,15 @@ void Foam::vtk::vtuSizing::populateArrays
         else if (model == prism)
         {
             cellTypes[celli] = vtk::cellType::VTK_WEDGE;
+            constexpr label nShapePoints = 6; // OR shape.size();
+
             if (vertOffset.size())
             {
-                vertOffset[celli] = shape.size();
+                vertOffset[celli] = nShapePoints;
             }
             if (prefix)
             {
-                vertLabels[nVertLabels++] = shape.size();
+                vertLabels[nVertLabels++] = nShapePoints;
             }
 
             // VTK_WEDGE triangles point outwards (swap 1<->2, 4<->5)
@@ -349,13 +438,15 @@ void Foam::vtk::vtuSizing::populateArrays
         {
             // Treat as squeezed prism
             cellTypes[celli] = vtk::cellType::VTK_WEDGE;
+            constexpr label nShapePoints = 6;
+
             if (vertOffset.size())
             {
-                vertOffset[celli] = 6;
+                vertOffset[celli] = nShapePoints;
             }
             if (prefix)
             {
-                vertLabels[nVertLabels++] = 6;
+                vertLabels[nVertLabels++] = nShapePoints;
             }
 
             vertLabels[nVertLabels++] = shape[0];
@@ -369,13 +460,15 @@ void Foam::vtk::vtuSizing::populateArrays
         {
             // Treat as squeezed hex
             cellTypes[celli] = vtk::cellType::VTK_HEXAHEDRON;
+            constexpr label nShapePoints = 8;
+
             if (vertOffset.size())
             {
-                vertOffset[celli] = 8;
+                vertOffset[celli] = nShapePoints;
             }
             if (prefix)
             {
-                vertLabels[nVertLabels++] = 8;
+                vertLabels[nVertLabels++] = nShapePoints;
             }
 
             vertLabels[nVertLabels++] = shape[0];
@@ -427,7 +520,7 @@ void Foam::vtk::vtuSizing::populateArrays
                 {
                     // Quad becomes a pyramid
 
-                    const label nShapePoints = 5;  // pyr (5 vertices)
+                    constexpr label nShapePoints = 5;  // pyr (5 vertices)
 
                     label celLoc, vrtLoc;
                     if (first)
@@ -479,7 +572,7 @@ void Foam::vtk::vtuSizing::populateArrays
                 {
                     // Triangle becomes a tetrahedral
 
-                    const label nShapePoints = 4;  // tet (4 vertices)
+                    constexpr label nShapePoints = 4;  // tet (4 vertices)
 
                     label celLoc, vrtLoc;
                     if (first)
@@ -604,8 +697,12 @@ void Foam::vtk::vtuSizing::populateArrays
     // STAGE 3: Adjust vertOffset for all cells
     // A second pass is needed for several reasons.
     // - Additional (decomposed) cells are placed out of sequence
-    // - Internal format has the size prefixed, XML format does not.
-    // - XML format expects end-offsets, Internal expects begin-offsets
+    // - INTERNAL1 connectivity has size prefixed
+    //
+    // Cell offsets:
+    // - XML format expects end-offsets,
+    // - INTERNAL1 expects begin-offsets
+    // - INTERNAL2 expects begin/end-offsets
 
     switch (output)
     {
@@ -614,17 +711,19 @@ void Foam::vtk::vtuSizing::populateArrays
 
         case contentType::XML:
         {
-            // No prefix, determine end offsets
-            // vertOffset[0] already contains its size
+            // Transform cell sizes (vertOffset) into begin offsets
+
+            // vertOffset[0] already contains its size, leave untouched
             for (label i = 1; i < vertOffset.size(); ++i)
             {
                 vertOffset[i] += vertOffset[i-1];
             }
 
+            // The end face offsets, leaving -1 untouched
             if (sizing.nFaceLabels())
             {
-                // End face offsets, leaving -1 untouched
-                LabelType prev = 0;
+                LabelType prev(0);
+
                 for (LabelType& off : faceOffset)
                 {
                     const auto sz = off;
@@ -637,21 +736,63 @@ void Foam::vtk::vtuSizing::populateArrays
             }
             break;
         }
-        case contentType::INTERNAL:
+
+        case contentType::INTERNAL1:
         {
-            // Has prefix, determine begin offsets
-            label beg = 0;
-            for (LabelType& off : vertOffset)
+            // Transform cell sizes (vertOffset) into begin offsets
             {
-                const auto sz = off;
-                off = beg;
-                beg += 1 + sz;
+                LabelType beg(0);
+
+                for (LabelType& off : vertOffset)
+                {
+                    const auto sz = off;
+                    off = beg;
+                    beg += 1 + sz;  // Additional 1 to skip embedded prefix
+                }
             }
 
-            // Begin face offsets, leaving -1 untouched
+            // The begin face offsets, leaving -1 untouched
             if (sizing.nFaceLabels())
             {
-                beg = 0;
+                LabelType beg(0);
+
+                for (LabelType& off : faceOffset)
+                {
+                    const auto sz = off;
+                    if (sz > 0)
+                    {
+                        off = beg;
+                        beg += sz;
+                    }
+                }
+            }
+            break;
+        }
+
+        case contentType::INTERNAL2:
+        {
+            // Transform cell sizes (vertOffset) into begin/end offsets
+            // input    [n1, n2, n3, ..., 0]
+            // becomes  [0, n1, n1+n2, n1+n2+n3, ..., nTotal]
+
+            // The last entry of vertOffset was initialized as zero and
+            // never revisited, so the following loop is OK
+            {
+                LabelType total(0);
+
+                for (LabelType& off : vertOffset)
+                {
+                    const auto sz = off;
+                    off = total;
+                    total += sz;
+                }
+            }
+
+            // The begin face offsets, leaving -1 untouched
+            if (sizing.nFaceLabels())
+            {
+                LabelType beg(0);
+
                 for (LabelType& off : faceOffset)
                 {
                     const auto sz = off;

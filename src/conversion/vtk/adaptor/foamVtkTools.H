@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,8 +69,6 @@ SourceFiles
 class vtkDataSet;
 class vtkCellData;
 class vtkPointData;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
@@ -184,15 +182,6 @@ namespace Tools
         vtkIdTypeArray* array,
         const label size
     );
-
-    //- Wrap vtkCellArray as a UList
-    inline UList<vtkIdType> asUList
-    (
-        vtkCellArray* cells,
-        const label nCells,
-        const label size
-    );
-
 
     //- Return a list of points as vtkPoints
     inline vtkSmartPointer<vtkPoints> Points

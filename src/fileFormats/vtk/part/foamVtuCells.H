@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2019 OpenCFD Ltd.
+    Copyright (C) 2014-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +52,6 @@ SourceFiles
 #include "foamVtkCore.H"
 #include "foamVtkMeshMaps.H"
 #include "foamVtuSizing.H"
-#include "DynamicList.H"
 #include "labelList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -60,12 +59,12 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class polyMesh;
 
 namespace vtk
 {
-// Forward declarations
+// Forward Declarations
 class outputOptions;
 
 /*---------------------------------------------------------------------------*\
@@ -76,7 +75,7 @@ class vtuCells
 :
     public vtuSizing
 {
-    // Private Member Data
+    // Private Data
 
     // Requested output types
 
@@ -112,7 +111,7 @@ class vtuCells
     // Private Member Functions
 
         //- Create the geometry using the previously requested output and
-        //  decomposition types.
+        //- decomposition types.
         void repopulate(const polyMesh& mesh);
 
         //- No copy construct
@@ -126,17 +125,15 @@ public:
 
     // Constructors
 
-        //- Construct from components.
-        //  Optionally with polyhedral decomposition.
-        vtuCells
+        //- Default construct (XML format, no polyhedral decomposition)
+        explicit vtuCells
         (
             const enum contentType output = contentType::XML,
             const bool decompose = false
         );
 
-        //- Construct from components and create the output information
-        //- immediately
-        vtuCells
+        //- Construct from components, create output information immediately
+        explicit vtuCells
         (
             const polyMesh& mesh,
             const enum contentType output = contentType::XML,
@@ -145,24 +142,19 @@ public:
 
         //- Construct from components.
         //  Optionally with polyhedral decomposition.
-        vtuCells
+        explicit vtuCells
         (
             const vtk::outputOptions opts,
             const bool decompose = false
         );
 
-        //- Construct from components, and create the output information
-        //- immediately
+        //- Construct from components, create output information immediately
         vtuCells
         (
             const polyMesh& mesh,
             const vtk::outputOptions opts,
             const bool decompose = false
         );
-
-
-    //- Destructor
-    ~vtuCells() = default;
 
 
     // Member Functions
@@ -229,7 +221,6 @@ public:
 
         //- Original cell ids for all cells (regular and decomposed).
         inline const labelList& cellMap() const;
-
 };
 
 
