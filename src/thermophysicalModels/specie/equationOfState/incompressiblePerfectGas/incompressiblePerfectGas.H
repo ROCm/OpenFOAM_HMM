@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,7 +51,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 
 template<class Specie> class incompressiblePerfectGas;
 
@@ -92,7 +93,7 @@ class incompressiblePerfectGas
 :
     public Specie
 {
-    // Private data
+    // Private Data
 
         //- Reference pressure
         scalar pRef_;
@@ -100,13 +101,16 @@ class incompressiblePerfectGas
 
 public:
 
+    // Generated Methods: copy construct, copy assignment
+
+
     // Constructors
 
         //- Construct from components
         inline incompressiblePerfectGas(const Specie& sp, const scalar pRef);
 
         //- Construct from dictionary
-        incompressiblePerfectGas(const dictionary& dict);
+        explicit incompressiblePerfectGas(const dictionary& dict);
 
         //- Construct as named copy
         inline incompressiblePerfectGas
@@ -125,7 +129,7 @@ public:
         );
 
 
-    // Member functions
+    // Member Functions
 
         //- Return the instantiated type name
         static word typeName()
@@ -178,14 +182,13 @@ public:
             void write(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
-        inline void operator=(const incompressiblePerfectGas&);
         inline void operator+=(const incompressiblePerfectGas&);
         inline void operator*=(const scalar);
 
 
-    // Friend operators
+    // Friend Operators
 
         friend incompressiblePerfectGas operator+ <Specie>
         (
@@ -206,7 +209,7 @@ public:
         );
 
 
-    // Ostream Operator
+    // IOstream Operators
 
         friend Ostream& operator<< <Specie>
         (

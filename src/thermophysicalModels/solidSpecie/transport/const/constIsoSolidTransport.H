@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,6 +48,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 template<class Thermo> class constIsoSolidTransport;
 
 template<class Thermo>
@@ -73,7 +75,7 @@ class constIsoSolidTransport
 :
     public Thermo
 {
-    // Private data
+    // Private Data
 
         //- Constant isotropic thermal conductivity
         scalar kappa_;
@@ -87,6 +89,9 @@ class constIsoSolidTransport
 
 public:
 
+    // Generated Methods: copy construct, copy assignment
+
+
     // Constructors
 
         //- Construct as named copy
@@ -97,7 +102,7 @@ public:
         );
 
         //- Construct from dictionary
-        constIsoSolidTransport(const dictionary& dict);
+        explicit constIsoSolidTransport(const dictionary& dict);
 
         // Selector from dictionary
         inline static autoPtr<constIsoSolidTransport> New
@@ -106,7 +111,7 @@ public:
         );
 
 
-    // Member functions
+    // Member Functions
 
         //- Return the instantiated type name
         static word typeName()
@@ -123,7 +128,7 @@ public:
         //- Un-isotropic thermal conductivity [W/mK]
         inline vector Kappa(const scalar p, const scalar T) const;
 
-         //- Dynamic viscosity [kg/ms]
+        //- Dynamic viscosity [kg/ms]
         inline scalar mu(const scalar p, const scalar T) const;
 
         //- Thermal diffusivity of enthalpy [kg/ms]
@@ -134,13 +139,12 @@ public:
         void write(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
-        inline void operator=(const constIsoSolidTransport&);
         inline void operator+=(const constIsoSolidTransport&);
 
 
-    // Friend operators
+    // Friend Operators
 
         friend constIsoSolidTransport operator* <Thermo>
         (
@@ -149,7 +153,7 @@ public:
         );
 
 
-    // Ostream Operator
+    // IOstream Operators
 
         friend Ostream& operator<< <Thermo>
         (

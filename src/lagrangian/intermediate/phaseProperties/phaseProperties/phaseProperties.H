@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,13 +49,10 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward Declarations
 class phaseProperties;
-
 Istream& operator>>(Istream&, phaseProperties&);
 Ostream& operator<<(Ostream&, const phaseProperties&);
-
 
 /*---------------------------------------------------------------------------*\
                       Class phaseProperties Declaration
@@ -64,7 +62,7 @@ class phaseProperties
 {
 public:
 
-    // Public data
+    // Public Data
 
         //- Phase type enumeration
         enum phaseType
@@ -81,7 +79,7 @@ public:
 
 private:
 
-   // Private data
+   // Private Data
 
         //- Phase type
         phaseType phase_;
@@ -118,21 +116,14 @@ public:
 
     // Constructors
 
-        //- Null constructor
+        //- Default construct, as 'UNKNOWN' state
         phaseProperties();
 
         //- Construct from Istream
-        phaseProperties(Istream& is);
-
-        //- Construct as copy
-        phaseProperties(const phaseProperties& pp);
+        explicit phaseProperties(Istream& is);
 
 
-    //- Destructor
-    ~phaseProperties() = default;
-
-
-    // Public Member Functions
+    // Member Functions
 
         //- Reorder species to be consistent with the corresponding
         //  phase specie name list

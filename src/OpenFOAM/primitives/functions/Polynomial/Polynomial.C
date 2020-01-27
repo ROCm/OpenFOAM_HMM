@@ -34,25 +34,13 @@ Foam::Polynomial<PolySize>::Polynomial()
 :
     VectorSpace<Polynomial<PolySize>, scalar, PolySize>(),
     logActive_(false),
-    logCoeff_(0.0)
+    logCoeff_(0)
 {
     for (int i = 0; i < PolySize; ++i)
     {
-        this->v_[i] = 0.0;
+        this->v_[i] = 0;
     }
 }
-
-
-template<int PolySize>
-Foam::Polynomial<PolySize>::Polynomial
-(
-    const Polynomial<PolySize>& poly
-)
-:
-    VectorSpace<Polynomial<PolySize>, scalar, PolySize>(poly),
-    logActive_(poly.logActive_),
-    logCoeff_(poly.logCoeff_)
-{}
 
 
 template<int PolySize>
@@ -60,7 +48,7 @@ Foam::Polynomial<PolySize>::Polynomial(const scalar coeffs[PolySize])
 :
     VectorSpace<Polynomial<PolySize>, scalar, PolySize>(),
     logActive_(false),
-    logCoeff_(0.0)
+    logCoeff_(0)
 {
     for (int i=0; i<PolySize; i++)
     {
@@ -74,7 +62,7 @@ Foam::Polynomial<PolySize>::Polynomial(const UList<scalar>& coeffs)
 :
     VectorSpace<Polynomial<PolySize>, scalar, PolySize>(),
     logActive_(false),
-    logCoeff_(0.0)
+    logCoeff_(0)
 {
     if (coeffs.size() != PolySize)
     {
@@ -96,7 +84,7 @@ Foam::Polynomial<PolySize>::Polynomial(Istream& is)
 :
     VectorSpace<Polynomial<PolySize>, scalar, PolySize>(is),
     logActive_(false),
-    logCoeff_(0.0)
+    logCoeff_(0)
 {}
 
 
@@ -105,7 +93,7 @@ Foam::Polynomial<PolySize>::Polynomial(const word& name, Istream& is)
 :
     VectorSpace<Polynomial<PolySize>, scalar, PolySize>(),
     logActive_(false),
-    logCoeff_(0.0)
+    logCoeff_(0)
 {
     word isName(is);
 

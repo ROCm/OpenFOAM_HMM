@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,7 +74,7 @@ See also
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 
 template<class Thermo, int PolySize> class polynomialSolidTransport;
 
@@ -108,7 +109,7 @@ class polynomialSolidTransport
 :
     public Thermo
 {
-    // Private data
+    // Private Data
 
         //- Thermal conductivity polynomial coefficients
         //  Note: input in [W/m/K]
@@ -133,6 +134,9 @@ class polynomialSolidTransport
 
 public:
 
+    // Generated Methods: copy construct, copy assignment
+
+
     // Constructors
 
         //- Construct as named copy
@@ -143,7 +147,7 @@ public:
         );
 
         //- Construct from dictionary
-        polynomialSolidTransport(const dictionary& dict);
+        explicit polynomialSolidTransport(const dictionary& dict);
 
         //- Construct and return a clone
         inline autoPtr<polynomialSolidTransport> clone() const;
@@ -155,7 +159,7 @@ public:
         );
 
 
-    // Member functions
+    // Member Functions
 
         //- Return the instantiated type name
         static word typeName()
@@ -183,14 +187,13 @@ public:
         void write(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
-        inline void operator=(const polynomialSolidTransport&);
         inline void operator+=(const polynomialSolidTransport&);
         inline void operator*=(const scalar);
 
 
-    // Friend operators
+    // Friend Operators
 
         friend polynomialSolidTransport operator+ <Thermo, PolySize>
         (
@@ -205,7 +208,7 @@ public:
         );
 
 
-    // Ostream Operator
+    // IOstream Operators
 
         friend Ostream& operator<< <Thermo, PolySize>
         (

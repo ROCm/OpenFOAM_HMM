@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +48,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 template<class PairType, class WallType>
 class CollisionRecordList;
 
@@ -79,7 +80,7 @@ Ostream& operator<<(Ostream&, const CollisionRecordList<PairType, WallType>&);
 template<class PairType, class WallType>
 class CollisionRecordList
 {
-    // Private data
+    // Private Data
 
         //- List of active pair collisions
         DynamicList<PairCollisionRecord<PairType>> pairRecords_;
@@ -90,13 +91,16 @@ class CollisionRecordList
 
 public:
 
+    // Generated Methods
+
+        //- Default construct
+        CollisionRecordList() = default;
+
+
     // Constructors
 
-        //- Construct null
-        CollisionRecordList();
-
         //- Construct from Istream
-        CollisionRecordList(Istream&);
+        explicit CollisionRecordList(Istream& is);
 
         //- Construct from component fields (for IO)
         CollisionRecordList
@@ -109,9 +113,6 @@ public:
             const vectorField& wallPRel,
             const Field<WallType>& wallData
         );
-
-    //- Destructor
-    ~CollisionRecordList();
 
 
     // Member Functions
@@ -194,11 +195,6 @@ public:
         //  marked as having been accessed, then mark all records as
         //  not accessed ready for the next evaluation
         void update();
-
-
-        // Member Operators
-
-            void operator=(const CollisionRecordList&);
 
 
         // Friend Operators

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +60,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 
 template<class Thermo> class WLFTransport;
 
@@ -94,7 +95,7 @@ class WLFTransport
 :
     public Thermo
 {
-    // Private data
+    // Private Data
 
         //- Dynamic viscosity at the reference temperature [Pa.s]
         scalar mu0_;
@@ -108,7 +109,7 @@ class WLFTransport
         //- WLF coefficient 2 [T]
         scalar C2_;
 
-        //- Reciprocal Prandtl Number []
+        //- Reciprocal Prandtl Number [-]
         scalar rPr_;
 
 
@@ -120,13 +121,16 @@ class WLFTransport
 
 public:
 
+    // Generated Methods: copy construct, copy assignment
+
+
     // Constructors
 
         //- Construct as named copy
         inline WLFTransport(const word&, const WLFTransport&);
 
         //- Construct from dictionary
-        WLFTransport(const dictionary& dict);
+        explicit WLFTransport(const dictionary& dict);
 
         //- Construct and return a clone
         inline autoPtr<WLFTransport> clone() const;
@@ -135,7 +139,7 @@ public:
         inline static autoPtr<WLFTransport> New(const dictionary& dict);
 
 
-    // Member functions
+    // Member Functions
 
         //- Return the instantiated type name
         static word typeName()
@@ -159,16 +163,14 @@ public:
         void write(Ostream& os) const;
 
 
-    // Member operators
-
-        inline void operator=(const WLFTransport&);
+    // Member Operators
 
         inline void operator+=(const WLFTransport&);
 
         inline void operator*=(const scalar);
 
 
-    // Friend operators
+    // Friend Operators
 
         friend WLFTransport operator+ <Thermo>
         (
@@ -183,7 +185,7 @@ public:
         );
 
 
-    // Ostream Operator
+    // IOstream Operators
 
         friend Ostream& operator<< <Thermo>
         (

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,11 +64,10 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 template<int PolySize>
 class Polynomial;
 
-// Forward declaration of friend functions
 template<int PolySize>
 Ostream& operator<<
 (
@@ -87,7 +87,7 @@ class Polynomial
 {
     static_assert(PolySize > 0, "Size must be positive (non-zero)");
 
-    // Private data
+    // Private Data
 
         //- Include the log term? - only activated using integralMinus1()
         bool logActive_;
@@ -98,18 +98,19 @@ class Polynomial
 
 public:
 
-    typedef Polynomial<PolySize> polyType;
+    // Public Typedefs
 
-    typedef Polynomial<PolySize+1> intPolyType;
+        typedef Polynomial<PolySize> polyType;
+        typedef Polynomial<PolySize+1> intPolyType;
+
+
+    // Generated Methods: copy construct, copy assignment
 
 
     // Constructors
 
-        //- Construct null, with all coefficients = 0.0
+        //- Default construct, with all coefficients = 0
         Polynomial();
-
-        //- Copy constructor
-        Polynomial(const Polynomial&);
 
         //- Construct from C-array of coefficients
         explicit Polynomial(const scalar coeffs[PolySize]);
@@ -118,10 +119,10 @@ public:
         explicit Polynomial(const UList<scalar>& coeffs);
 
         //- Construct from Istream
-        Polynomial(Istream&);
+        explicit Polynomial(Istream& is);
 
         //- Construct from name and Istream
-        Polynomial(const word& name, Istream&);
+        Polynomial(const word& name, Istream& is);
 
 
     // Member Functions

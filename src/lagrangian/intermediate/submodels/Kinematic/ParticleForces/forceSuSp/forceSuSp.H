@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,7 +51,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class forceSuSp;
 
 inline forceSuSp operator+(const forceSuSp& susp1, const forceSuSp& susp2);
@@ -65,13 +66,12 @@ class forceSuSp
 :
     public Tuple2<vector, scalar>
 {
-
 public:
 
     // Constructors
 
-        //- Construct null
-        inline forceSuSp();
+        //- Default construct
+        forceSuSp() = default;
 
         //- Construct zero-initialized content
         inline forceSuSp(const zero);
@@ -83,7 +83,7 @@ public:
         inline forceSuSp(const vector& Su, const scalar Sp);
 
         //- Construct from Istream
-        inline forceSuSp(Istream& is);
+        inline explicit forceSuSp(Istream& is);
 
 
     // Member Functions
@@ -108,9 +108,6 @@ public:
 
         // Operators
 
-            //- Assignment
-            inline void operator=(const forceSuSp& susp);
-
             //- Addition
             inline void operator+=(const forceSuSp& susp);
 
@@ -118,7 +115,7 @@ public:
             inline void operator-=(const forceSuSp& susp);
 
 
-        // Friend operators
+        // Friend Operators
 
             //- Addition
             friend inline forceSuSp operator*
