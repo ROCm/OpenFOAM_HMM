@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,7 +72,7 @@ public:
         //- Pointer to next entry in list
         link* next_ = nullptr;
 
-        //- Null construct
+        //- Default construct
         link() = default;
 
         //- Check if the node is registered with the list
@@ -85,7 +85,7 @@ public:
 
 private:
 
-    // Private Member Data
+    // Private Data
 
        //- Pointer to first element
        link *first_ = nullptr;
@@ -95,15 +95,6 @@ private:
 
        //- Number of elements in the list
        label size_ = 0;
-
-
-    // Private Member Functions
-
-        //- No copy construct
-        DLListBase(const DLListBase&) = delete;
-
-        //- No copy assignment
-        void operator=(const DLListBase&) = delete;
 
 
 protected:
@@ -142,14 +133,19 @@ public:
         friend class const_iterator;
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Null construct
+        //- Default construct
         DLListBase() = default;
 
+        //- No copy construct
+        DLListBase(const DLListBase&) = delete;
 
-    //- Destructor
-    ~DLListBase() = default;
+        //- No copy assignment
+        void operator=(const DLListBase&) = delete;
+
+        //- Destructor
+        ~DLListBase() = default;
 
 
     // Member Functions
@@ -233,6 +229,9 @@ public:
 
         public:
 
+            //- Copy construct
+            iterator(const iterator&) = default;
+
             //- Construct for a node on a list
             inline iterator(DLListBase* list, link* item);
 
@@ -280,14 +279,14 @@ public:
 
         public:
 
+            //- Copy construct
+            const_iterator(const const_iterator&) = default;
+
             //- Construct for a node on a list
             inline const_iterator(const DLListBase* list, const link* item);
 
             //- Copy construct from a non-const iterator
             inline const_iterator(const DLListBase::iterator& iter);
-
-            //- Copy construct
-            const_iterator(const const_iterator&) = default;
 
             //- The storage node
             inline const link* get_node() const;
@@ -308,6 +307,7 @@ public:
             //- Move forward through list
             inline void next();
 
+            //- Copy assignment
             const_iterator& operator=(const const_iterator&) = default;
 
             inline bool operator==(const const_iterator&) const;

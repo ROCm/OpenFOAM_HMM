@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -105,7 +105,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 template<unsigned Width> class PackedList;
 class labelRange;
 
@@ -230,7 +230,7 @@ public:
 
     // Constructors
 
-        //- Null constructor
+        //- Default construct, zero-sized and no allocation
         inline constexpr PackedList() noexcept;
 
         //- Construct for given number of elements, initializes values to 0
@@ -451,6 +451,7 @@ public:
         class reference
         {
         protected:
+
             friend class PackedList;    // Access for parent
             void operator&() = delete;  // Refuse to provide its address
 
@@ -472,10 +473,16 @@ public:
 
         public:
 
+            //- Copy construct
+            reference(const reference&) = default;
+
+            //- Move construct
+            reference(reference&&) = default;
+
             //- Value assignment
             inline void operator=(const reference& other);
 
-            //- Value assignment.
+            //- Value assignment
             inline void operator=(const unsigned int val);
 
             //- Conversion operator.

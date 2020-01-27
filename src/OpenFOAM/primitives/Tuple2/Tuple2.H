@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,8 +75,8 @@ public:
 
     // Constructors
 
-        //- Construct null
-        inline Tuple2() = default;
+        //- Default construct
+        Tuple2() = default;
 
         //- Copy construct from components
         inline Tuple2(const T1& f, const T2& s)

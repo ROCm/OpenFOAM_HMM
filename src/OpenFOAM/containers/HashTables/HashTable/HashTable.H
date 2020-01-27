@@ -206,7 +206,7 @@ public:
 
     // Constructors
 
-        //- Construct null with default (128) table capacity
+        //- Default construct with default (128) table capacity
         HashTable();
 
         //- Construct given initial table capacity
@@ -550,6 +550,7 @@ protected:
         class Iterator
         {
         public:
+
         // Typedefs
             using iterator_category = std::forward_iterator_tag;
             using difference_type = this_type::difference_type;
@@ -671,6 +672,7 @@ public:
             public Iterator<false>
         {
         public:
+
         // Typedefs
             using iterator_category = std::forward_iterator_tag;
             using difference_type   = this_type::difference_type;
@@ -684,8 +686,8 @@ public:
 
         // Constructors
 
-            //- Construct null (end iterator)
-            inline iterator() = default;
+            //- Default construct (end iterator)
+            iterator() = default;
 
             //- Copy construct from similar access type
             inline explicit iterator(const Iterator<false>& iter)
@@ -729,6 +731,7 @@ public:
             public Iterator<true>
         {
         public:
+
         // Typedefs
             using iterator_category = std::forward_iterator_tag;
             using difference_type   = this_type::difference_type;
@@ -741,8 +744,11 @@ public:
 
         // Constructors
 
-            //- Construct null (end iterator)
-            inline const_iterator() = default;
+            //- Default construct (end iterator)
+            const_iterator() = default;
+
+            //- Copy construct
+            const_iterator(const const_iterator&) = default;
 
             //- Copy construct from similar access type
             inline explicit const_iterator(const Iterator<true>& iter)
@@ -781,8 +787,10 @@ public:
             inline const_iterator& operator++();
             inline const_iterator operator++(int);
 
+
         // Assignment
 
+            //- Copy assignment
             const_iterator& operator=(const const_iterator&) = default;
 
             // Allow assign from iterator to const_iterator
@@ -805,6 +813,7 @@ public:
             public Iter
         {
         public:
+
             using value_type = this_type::key_type;
             using reference  = const Key&;
 
