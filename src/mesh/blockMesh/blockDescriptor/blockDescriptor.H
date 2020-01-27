@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -126,11 +126,16 @@ class blockDescriptor
 
         void findCurvedFaces();
 
+public:
+
+    // Generated Methods
+
+        //- Copy construct
+        blockDescriptor(const blockDescriptor&) = default;
+
         //- No copy assignment
         void operator=(const blockDescriptor&) = delete;
 
-
-public:
 
     // Constructors
 
@@ -143,7 +148,7 @@ public:
             const blockFaceList& faces,
             const labelVector& density,
             const UList<gradingDescriptors>& expand,
-            const word& zoneName = ""
+            const word& zoneName = word::null
         );
 
         //- Construct from Istream
