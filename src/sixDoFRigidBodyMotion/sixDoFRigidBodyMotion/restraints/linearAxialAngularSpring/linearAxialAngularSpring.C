@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -162,9 +162,9 @@ bool Foam::sixDoFRigidBodyMotionRestraints::linearAxialAngularSpring::read
             << exit(FatalError);
     }
 
-    axis_ = sDoFRBMRCoeffs_.lookup("axis");
+    sDoFRBMRCoeffs_.readEntry("axis", axis_);
 
-    scalar magAxis(mag(axis_));
+    const scalar magAxis(mag(axis_));
 
     if (magAxis > VSMALL)
     {

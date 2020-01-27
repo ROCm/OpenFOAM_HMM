@@ -159,9 +159,9 @@ bool Foam::RBD::restraints::linearAxialAngularSpring::read
             << exit(FatalError);
     }
 
-    axis_ = coeffs_.lookup("axis");
+    coeffs_.readEntry("axis", axis_);
 
-    scalar magAxis(mag(axis_));
+    const scalar magAxis(mag(axis_));
 
     if (magAxis > VSMALL)
     {

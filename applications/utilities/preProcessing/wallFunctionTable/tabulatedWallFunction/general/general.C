@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +29,7 @@ License
 #include "general.H"
 #include "addToRunTimeSelectionTable.H"
 #include "Tuple2.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -135,12 +137,15 @@ Foam::tabulatedWallFunctions::general::general
 :
     tabulatedWallFunction(dict, mesh, typeName),
     interpType_(interpolationTypeNames_.get("interpType", coeffDict_)),
+    log10YPlus_(coeffDict_.get<bool>("log10YPlus")),
+    log10UPlus_(coeffDict_.get<bool>("log10UPlus")),
     yPlus_(),
-    uPlus_(),
-    log10YPlus_(coeffDict_.lookup("log10YPlus")),
-    log10UPlus_(coeffDict_.lookup("log10UPlus"))
+    uPlus_()
 {
-    List<Tuple2<scalar, scalar>> inputTable = coeffDict_.lookup("inputTable");
+    List<Tuple2<scalar, scalar>> inputTable;
+
+    coeffDict_.readEntry("inputTable", inputTable);
+
     if (inputTable.size() < 2)
     {
         FatalErrorInFunction

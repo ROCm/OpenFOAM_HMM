@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +33,7 @@ Description
 
     Example dictionary specification:
 
+    \verbatim
         tabulatedWallFunction general;
 
         // Output table info
@@ -52,9 +54,8 @@ Description
                 ...
                 (yPlusValueN    uPlusValueN)
             );
-
         }
-
+    \endverbatim
 
 SourceFiles
     general.C
@@ -66,7 +67,6 @@ SourceFiles
 
 #include "tabulatedWallFunction.H"
 #include "Enum.H"
-#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -103,17 +103,17 @@ protected:
         //- Type of interpolation to apply when inverting the data set
         interpolationType interpType_;
 
+        //- Are y+ values entered as log10(y+)?
+        bool log10YPlus_;
+
+        //- Are U+ values entered as log10(U+)?
+        bool log10UPlus_;
+
         //- Input y+ values
         List<scalar> yPlus_;
 
         //- Input U+ values
         List<scalar> uPlus_;
-
-        //- Are y+ values entered as log10(y+)?
-        Switch log10YPlus_;
-
-        //- Are U+ values entered as log10(U+)?
-        Switch log10UPlus_;
 
 
     // Protected Member Functions

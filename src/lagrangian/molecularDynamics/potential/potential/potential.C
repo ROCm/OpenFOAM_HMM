@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +48,10 @@ void Foam::potential::setSiteIdList(const dictionary& moleculePropertiesDict)
 
         const dictionary& molDict(moleculePropertiesDict.subDict(id));
 
-        List<word> siteIdNames = molDict.lookup("siteIds");
+        List<word> siteIdNames
+        (
+            molDict.lookup("siteIds")
+        );
 
         forAll(siteIdNames, sI)
         {
@@ -59,7 +63,10 @@ void Foam::potential::setSiteIdList(const dictionary& moleculePropertiesDict)
             }
         }
 
-        List<word> pairPotSiteIds = molDict.lookup("pairPotentialSiteIds");
+        List<word> pairPotSiteIds
+        (
+            molDict.lookup("pairPotentialSiteIds")
+        );
 
         forAll(pairPotSiteIds, sI)
         {
@@ -111,7 +118,7 @@ void Foam::potential::potential::readPotentialDict()
         )
     );
 
-    idList_ = List<word>(idListDict.lookup("idList"));
+    idListDict.readEntry("idList", idList_);
 
     setSiteIdList
     (
@@ -156,10 +163,10 @@ void Foam::potential::potential::readPotentialDict()
 
     potentialDict.readEntry("potentialEnergyLimit", potentialEnergyLimit_);
 
-    if (potentialDict.found("removalOrder"))
-    {
-        List<word> remOrd = potentialDict.lookup("removalOrder");
+    List<word> remOrd;
 
+    if (potentialDict.readIfPresent("removalOrder", remOrd))
+    {
         removalOrder_.setSize(remOrd.size());
 
         forAll(removalOrder_, rO)

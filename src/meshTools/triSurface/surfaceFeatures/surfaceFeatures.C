@@ -731,10 +731,10 @@ Foam::surfaceFeatures::surfaceFeatures
 
     dictionary featInfoDict(str);
 
-    featureEdges_ = labelList(featInfoDict.lookup("featureEdges"));
-    featurePoints_ = labelList(featInfoDict.lookup("featurePoints"));
-    externalStart_ = featInfoDict.get<label>("externalStart");
-    internalStart_ = featInfoDict.get<label>("internalStart");
+    featInfoDict.readEntry("featureEdges", featureEdges_);
+    featInfoDict.readEntry("featurePoints", featurePoints_);
+    featInfoDict.readEntry("externalStart", externalStart_);
+    featInfoDict.readEntry("internalStart", internalStart_);
 }
 
 

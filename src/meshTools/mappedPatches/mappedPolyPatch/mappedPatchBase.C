@@ -1057,7 +1057,6 @@ Foam::mappedPatchBase::mappedPatchBase
 
             case NONUNIFORM:
             {
-                //offsets_ = pointField(dict.lookup("offsets"));
                 offsets_ = readListOrField("offsets", dict, patch_.size());
             }
             break;
@@ -1076,7 +1075,6 @@ Foam::mappedPatchBase::mappedPatchBase
     else if (dict.found("offsets"))
     {
         offsetMode_ = NONUNIFORM;
-        //offsets_ = pointField(dict.lookup("offsets"));
         offsets_ = readListOrField("offsets", dict, patch_.size());
     }
     else if (mode_ != NEARESTPATCHFACE && mode_ != NEARESTPATCHFACEAMI)
