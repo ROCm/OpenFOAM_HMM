@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -151,8 +151,8 @@ private:
             Ostream& os,
             const word& faceType,
             const labelUList& facePts,
-            const label EID,    //!< 1-based Element Id
-            const label PID     //!< 1-based Property Id
+            const label elemId,     //!< 1-based Element Id
+            const label propId      //!< 1-based Property Id
         ) const;
 
         //- Main driver to write the surface mesh geometry
@@ -160,7 +160,7 @@ private:
         (
             Ostream& os,
             const meshedSurf& surf,
-            List<DynamicList<face>>& decomposedFaces
+            List<faceList>& decomposedFaces
         ) const;
 
         //- Write the formatted keyword to the output stream
@@ -184,7 +184,7 @@ private:
             Ostream& os,
             const loadFormat format,
             const Type& value,
-            const label EID     //!< 1-based Element Id
+            const label elemId      //!< 1-based Element Id
         ) const;
 
 
@@ -199,16 +199,16 @@ private:
 
 public:
 
-    //- Runtime type information
+    //- Declare type-name, virtual type (with debug switch)
     TypeNameNoDebug("nastran");
 
 
     // Constructors
 
-        //- Construct null
+        //- Default construct. Default SHORT format
         nastranWriter();
 
-        //- Construct with some output options
+        //- Construct with some output options. Default LONG format
         explicit nastranWriter(const dictionary& options);
 
         //- Construct from components

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -129,8 +129,8 @@ void Foam::surfaceWriters::nastranWriter::writeFace
     Ostream& os,
     const word& faceType,
     const labelUList& facePts,
-    const label nFace,
-    const label PID
+    const label elemId,
+    const label propId
 ) const
 {
     // Only valid surface elements are CTRIA3 and CQUAD4
@@ -147,12 +147,12 @@ void Foam::surfaceWriters::nastranWriter::writeFace
 
     // For CTRIA3 elements, cols 7 onwards are not used
 
-    writeKeyword(os, faceType)   << separator_;
+    writeKeyword(os, faceType)  << separator_;
 
     os.setf(std::ios_base::right);
 
-    writeValue(os, nFace)        << separator_;
-    writeValue(os, PID);
+    writeValue(os, elemId)      << separator_;
+    writeValue(os, propId);
 
     switch (writeFormat_)
     {
@@ -204,7 +204,7 @@ void Foam::surfaceWriters::nastranWriter::writeGeometry
 (
     Ostream& os,
     const meshedSurf& surf,
-    List<DynamicList<face>>& decomposedFaces
+    List<faceList>& decomposedFaces
 ) const
 {
     const pointField& points = surf.points();
@@ -222,42 +222,46 @@ void Foam::surfaceWriters::nastranWriter::writeGeometry
         writeCoord(os, points[pointi], pointi);
     }
 
-    // Write faces
+    // Write faces, with on-the-fly decomposition (triangulation)
     decomposedFaces.clear();
-    decomposedFaces.setSize(faces.size());
+    decomposedFaces.resize(faces.size());
 
     os  << "$" << nl
         << "$ Faces" << nl
         << "$" << nl;
 
-    label nFace = 0; // the element-id
+    label elemId = 0; // The element-id
     forAll(faces, facei)
     {
         const face& f = faces[facei];
+        faceList& decomp = decomposedFaces[facei];
+
         // 1-offset for PID
-        const label PID = 1 + (facei < zones.size() ? zones[facei] : 0);
+        const label propId = 1 + (facei < zones.size() ? zones[facei] : 0);
 
         if (f.size() == 3)
         {
-            writeFace(os, "CTRIA3", f, ++nFace, PID);
-            decomposedFaces[facei].append(f);
+            writeFace(os, "CTRIA3", f, ++elemId, propId);
+            decomp.resize(1);
+            decomp[0] = f;
         }
         else if (f.size() == 4)
         {
-            writeFace(os, "CQUAD4", f, ++nFace, PID);
-            decomposedFaces[facei].append(f);
+            writeFace(os, "CQUAD4", f, ++elemId, propId);
+            decomp.resize(1);
+            decomp[0] = f;
         }
         else
         {
             // Decompose poly face into tris
-            label nTri = 0;
-            faceList triFaces;
-            f.triangles(points, nTri, triFaces);
+            decomp.resize(f.nTriangles());
 
-            forAll(triFaces, trii)
+            label nTri = 0;
+            f.triangles(points, nTri, decomp);
+
+            for (const face& f2 : decomp)
             {
-                writeFace(os, "CTRIA3", triFaces[trii], ++nFace, PID);
-                decomposedFaces[facei].append(triFaces[trii]);
+                writeFace(os, "CTRIA3", f2, ++elemId, propId);
             }
         }
     }
@@ -275,7 +279,7 @@ Foam::Ostream& Foam::surfaceWriters::nastranWriter::writeFooter
     labelList pidsUsed = labelHashSet(surf.zoneIds()).sortedToc();
     if (pidsUsed.empty())
     {
-        pidsUsed.setSize(1, Zero); // fallback
+        pidsUsed.resize(1, Zero); // fallback
     }
 
     for (auto pid : pidsUsed)
@@ -431,7 +435,7 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::write()
             << "$" << nl
             << "BEGIN BULK" << nl;
 
-        List<DynamicList<face>> decomposedFaces;
+        List<faceList> decomposedFaces;
         writeGeometry(os, surf, decomposedFaces);
 
         writeFooter(os, surf)
