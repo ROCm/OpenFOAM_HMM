@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,11 +61,13 @@ class BarycentricTensor
 {
 public:
 
-    //- Equivalent type of labels used for valid component indexing
-    typedef Tensor<label> labelType;
+    // Typedefs
+
+        //- Equivalent type of labels used for valid component indexing
+        typedef Tensor<label> labelType;
 
 
-    // Member constants
+    // Member Constants
 
         //- Rank of BarycentricTensor is 2
         static constexpr direction rank = 2;
@@ -75,16 +77,19 @@ public:
     enum components { XA, XB, XC, XD, YA, YB, YC, YD, ZA, ZB, ZC, ZD };
 
 
+    // Generated Methods
+
+        //- Default construct
+        BarycentricTensor() = default;
+
+
     // Constructors
 
-        //- Construct null
-        BarycentricTensor();
-
         //- Construct initialised to zero
-        BarycentricTensor(const Foam::zero);
+        inline BarycentricTensor(const Foam::zero);
 
         //- Construct given three barycentric components (rows)
-        BarycentricTensor
+        inline BarycentricTensor
         (
             const Barycentric<Cmpt>& x,
             const Barycentric<Cmpt>& y,
@@ -92,7 +97,7 @@ public:
         );
 
         //- Construct given four vector components (columns)
-        BarycentricTensor
+        inline BarycentricTensor
         (
             const Vector<Cmpt>& a,
             const Vector<Cmpt>& b,

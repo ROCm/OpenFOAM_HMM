@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,34 +60,35 @@ class MatrixSpace
 :
     public VectorSpace<Form, Cmpt, Mrows*Ncols>
 {
-
 public:
 
-    //- MatrixSpace type
-    typedef MatrixSpace<Form, Cmpt, Mrows, Ncols> msType;
+    // Typedefs
+
+        //- MatrixSpace type
+        typedef MatrixSpace<Form, Cmpt, Mrows, Ncols> msType;
 
 
-    // Member constants
+    // Member Constants
 
         static constexpr direction mRows = Mrows;
         static constexpr direction nCols = Ncols;
 
 
-    // Static member functions
+    // Static Member Functions
 
-        //- Return the number of rows
+        //- The number of rows
         static direction m() noexcept
         {
             return Mrows;
         }
 
-        //- Return the number of columns
+        //- The number of columns
         static direction n() noexcept
         {
             return Ncols;
         }
 
-        //- Return the identity matrix for square matrix spaces
+        //- An identity matrix for square matrix-spaces
         inline static msType identity();
 
 
@@ -149,13 +150,13 @@ public:
             static const direction mRows = SubTensor::mRows;
             static const direction nCols = SubTensor::nCols;
 
-            //- Return the number of rows in the block
+            //- The number of rows in the block
             static direction m()
             {
                 return mRows;
             }
 
-            //- Return the number of columns in the block
+            //- The number of columns in the block
             static direction n()
             {
                 return nCols;
@@ -199,10 +200,13 @@ public:
         };
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        inline MatrixSpace();
+        //- Default construct
+        MatrixSpace() = default;
+
+
+    // Constructors
 
         //- Construct initialized to zero
         inline MatrixSpace(const Foam::zero);
@@ -227,7 +231,7 @@ public:
         );
 
         //- Construct from Istream
-        MatrixSpace(Istream&);
+        explicit MatrixSpace(Istream& is);
 
 
     // Member Functions

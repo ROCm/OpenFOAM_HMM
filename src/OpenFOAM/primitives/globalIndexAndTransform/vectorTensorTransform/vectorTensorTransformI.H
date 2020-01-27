@@ -173,17 +173,6 @@ inline Foam::pointField Foam::vectorTensorTransform::invTransformPosition
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline void Foam::vectorTensorTransform::operator=
-(
-    const vectorTensorTransform& tr
-)
-{
-    t_ = tr.t_;
-    R_ = tr.R_;
-    hasR_ = tr.hasR_;
-}
-
-
 inline void Foam::vectorTensorTransform::operator&=
 (
     const vectorTensorTransform& tr

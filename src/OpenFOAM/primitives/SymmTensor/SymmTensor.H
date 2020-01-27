@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,20 +59,21 @@ class SymmTensor
 :
     public VectorSpace<SymmTensor<Cmpt>, Cmpt, 6>
 {
-
 public:
 
-    //- Equivalent type of labels used for valid component indexing
-    typedef SymmTensor<label> labelType;
+    // Typedefs
+
+        //- Equivalent type of labels used for valid component indexing
+        typedef SymmTensor<label> labelType;
 
 
-    // Member constants
+    // Member Constants
 
         //- Rank of SymmTensor is 2
         static constexpr direction rank = 2;
 
 
-    // Static data members
+    // Static Data Members
 
         static const SymmTensor I;
 
@@ -81,10 +82,19 @@ public:
     enum components { XX, XY, XZ, YY, YZ, ZZ };
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        inline SymmTensor();
+        //- Default construct
+        SymmTensor() = default;
+
+        //- Copy construct
+        SymmTensor(const SymmTensor&) = default;
+
+        //- Copy assignment
+        SymmTensor& operator=(const SymmTensor&) = default;
+
+
+    // Constructors
 
         //- Construct initialized to zero
         inline SymmTensor(const Foam::zero);
@@ -105,7 +115,7 @@ public:
         );
 
         //- Construct from Istream
-        inline SymmTensor(Istream&);
+        inline explicit SymmTensor(Istream& is);
 
 
     // Member Functions

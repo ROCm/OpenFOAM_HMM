@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +31,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::barycentric barycentric01
+static inline Foam::barycentric barycentric01Impl
 (
     Foam::scalar s,
     Foam::scalar t,
@@ -71,13 +72,11 @@ Foam::barycentric barycentric01
 
 Foam::barycentric Foam::barycentric01(Random& rndGen)
 {
-    return
-        ::barycentric01
-        (
-            rndGen.sample01<scalar>(),
-            rndGen.sample01<scalar>(),
-            rndGen.sample01<scalar>()
-        );
+    const scalar s(rndGen.sample01<scalar>());
+    const scalar t(rndGen.sample01<scalar>());
+    const scalar u(rndGen.sample01<scalar>());
+
+    return barycentric01Impl(s, t, u);
 }
 
 

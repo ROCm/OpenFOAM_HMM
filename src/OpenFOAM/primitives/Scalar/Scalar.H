@@ -70,18 +70,19 @@ class pTraits<Scalar>
 
 public:
 
-    //- Component type
-    typedef Scalar cmptType;
+    // Typedefs
 
-    //- Magnitude type
-    typedef Scalar magType;
+        //- Component type
+        typedef Scalar cmptType;
 
-    //- Equivalent type of labels used for valid component indexing
-    typedef label labelType;
+        //- Magnitude type
+        typedef Scalar magType;
+
+        //- Equivalent type of labels used for valid component indexing
+        typedef label labelType;
 
 
-
-    // Member constants
+    // Member Constants
 
         //- Dimensionality of space
         static constexpr direction dim = 3;
@@ -93,7 +94,7 @@ public:
         static constexpr direction nComponents = 1;
 
 
-    // Static data members
+    // Static Data Members
 
         static const char* const typeName;
         static const char* const componentNames[];
@@ -108,11 +109,11 @@ public:
 
     // Constructors
 
-        //- Construct from primitive
+        //- Copy construct from primitive
         explicit pTraits(const Scalar& val);
 
-        //- Construct from Istream
-        pTraits(Istream& is);
+        //- Read construct from Istream
+        explicit pTraits(Istream& is);
 
 
     // Member Functions

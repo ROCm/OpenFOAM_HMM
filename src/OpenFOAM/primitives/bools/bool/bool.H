@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,10 +43,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class Istream;
 class Ostream;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Istream& operator>>(Istream& is, bool& b);
 Ostream& operator<<(Ostream& os, const bool b);
@@ -72,14 +71,16 @@ class pTraits<bool>
 
 public:
 
-    //- Component type
-    typedef bool cmptType;
+    // Typedefs
 
-    //- Magnitude type
-    typedef bool magType;
+        //- Component type
+        typedef bool cmptType;
+
+        //- Magnitude type
+        typedef bool magType;
 
 
-    // Member constants
+    // Member Constants
 
         //- Dimensionality of space
         static constexpr direction dim = 3;
@@ -91,7 +92,7 @@ public:
         static constexpr direction nComponents = 1;
 
 
-    // Static data members
+    // Static Data Members
 
         static const char* const typeName;
         static const char* const componentNames[];
@@ -101,11 +102,11 @@ public:
 
     // Constructors
 
-        //- Construct from primitive
+        //- Copy construct from primitive
         explicit pTraits(const bool& p);
 
-        //- Construct from Istream
-        pTraits(Istream& is);
+        //- Read construct from Istream
+        explicit pTraits(Istream& is);
 
 
     // Member Functions

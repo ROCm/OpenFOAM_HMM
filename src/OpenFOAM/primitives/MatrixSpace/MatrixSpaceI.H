@@ -30,11 +30,6 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Form, class Cmpt, Foam::direction Mrows, Foam::direction Ncols>
-inline Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::MatrixSpace()
-{}
-
-
-template<class Form, class Cmpt, Foam::direction Mrows, Foam::direction Ncols>
 inline Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::MatrixSpace
 (
     const Foam::zero

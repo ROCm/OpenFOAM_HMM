@@ -29,11 +29,6 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline Foam::Barycentric2D<Cmpt>::Barycentric2D()
-{}
-
-
-template<class Cmpt>
 inline Foam::Barycentric2D<Cmpt>::Barycentric2D(const Foam::zero)
 :
     Barycentric2D::vsType(Zero)

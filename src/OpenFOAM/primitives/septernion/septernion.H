@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,7 +77,7 @@ class septernion
 
 public:
 
-    // Static data members
+    // Static Data
 
         static const char* const typeName;
 
@@ -85,10 +85,28 @@ public:
         static const septernion I;
 
 
+    // Generated Methods
+
+        //- Default construct
+        septernion() = default;
+
+        //- Copy construct
+        septernion(const septernion&) = default;
+
+        //- Copy assignment
+        septernion& operator=(const septernion&) = default;
+
+        //- Move construct
+        septernion(septernion&&) = default;
+
+        //- Move assignment
+        septernion& operator=(septernion&&) = default;
+
+
     // Constructors
 
-        //- Construct null
-        inline septernion();
+        //- Construct zero initialized
+        inline septernion(const Foam::zero);
 
         //- Construct given a translation vector and rotation quaternion
         inline septernion(const vector& t, const quaternion& r);
@@ -103,24 +121,24 @@ public:
         inline explicit septernion(const spatialTransform& st);
 
         //- Construct from Istream
-        septernion(Istream&);
+        explicit septernion(Istream& is);
 
 
-    // Member functions
+    // Member Functions
 
-           // Access
+        // Access
 
                inline const vector& t() const;
                inline const quaternion& r() const;
 
 
-           // Edit
+        // Edit
 
                inline vector& t();
                inline quaternion& r();
 
 
-           // Transform
+        // Transform
 
                //- Transform the given coordinate point
                inline vector transformPoint(const vector& v) const;
@@ -129,9 +147,8 @@ public:
                inline vector invTransformPoint(const vector& v) const;
 
 
-    // Member operators
+    // Member Operators
 
-        inline void operator=(const septernion&);
         inline void operator*=(const septernion&);
 
         inline void operator=(const vector&);
@@ -146,7 +163,7 @@ public:
         inline void operator/=(const scalar);
 
 
-    // IOstream operators
+    // IOstream Operators
 
         friend Istream& operator>>(Istream& is, septernion&);
         friend Ostream& operator<<(Ostream& os, const septernion& C);

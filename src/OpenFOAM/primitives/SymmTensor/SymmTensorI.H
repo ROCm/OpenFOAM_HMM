@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,11 +31,6 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline Foam::SymmTensor<Cmpt>::SymmTensor()
-{}
-
-
-template<class Cmpt>
 inline Foam::SymmTensor<Cmpt>::SymmTensor(const Foam::zero)
 :
     SymmTensor::vsType(Zero)
@@ -56,9 +51,9 @@ inline Foam::SymmTensor<Cmpt>::SymmTensor
 template<class Cmpt>
 inline Foam::SymmTensor<Cmpt>::SymmTensor(const SphericalTensor<Cmpt>& st)
 {
-    this->v_[XX] = st.ii(); this->v_[XY] = 0;       this->v_[XZ] = 0;
-                            this->v_[YY] = st.ii(); this->v_[YZ] = 0;
-                                                    this->v_[ZZ] = st.ii();
+    this->v_[XX] = st.ii(); this->v_[XY] = 0; this->v_[XZ] = 0;
+    this->v_[YY] = st.ii(); this->v_[YZ] = 0;
+    this->v_[ZZ] = st.ii();
 }
 
 
@@ -313,7 +308,10 @@ inline Cmpt tr(const SymmTensor<Cmpt>& st)
 template<class Cmpt>
 inline SphericalTensor<Cmpt> sph(const SymmTensor<Cmpt>& st)
 {
-    return (1.0/3.0)*tr(st);
+    return SphericalTensor<Cmpt>
+    (
+        (1.0/3.0)*tr(st)
+    );
 }
 
 

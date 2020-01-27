@@ -55,11 +55,9 @@ inline Foam::Tensor2D<Cmpt>::Tensor2D(const SymmTensor2D<Cmpt>& st)
 
 template<class Cmpt>
 inline Foam::Tensor2D<Cmpt>::Tensor2D(const SphericalTensor2D<Cmpt>& st)
-:
-    Tensor2D::vsType(Zero)
 {
-    this->v_[XX] = st.ii();
-    this->v_[YY] = st.ii();
+    this->v_[XX] = st.ii(); this->v_[XY] = 0;
+    this->v_[YX] = 0;       this->v_[YY] = st.ii();
 }
 
 
@@ -467,7 +465,10 @@ inline Cmpt tr(const Tensor2D<Cmpt>& t)
 template<class Cmpt>
 inline SphericalTensor2D<Cmpt> sph(const Tensor2D<Cmpt>& t)
 {
-    return 0.5*tr(t);
+    return SphericalTensor2D<Cmpt>
+    (
+        0.5*tr(t)
+    );
 }
 
 

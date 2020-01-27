@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,20 +61,21 @@ class Tensor2D
 :
     public VectorSpace<Tensor2D<Cmpt>, Cmpt, 4>
 {
-
 public:
 
-    //- Equivalent type of labels used for valid component indexing
-    typedef Tensor2D<label> labelType;
+    // Typedefs
+
+        //- Equivalent type of labels used for valid component indexing
+        typedef Tensor2D<label> labelType;
 
 
-    // Member constants
+    // Member Constants
 
         //- Rank of Tensor2D is 2
         static constexpr direction rank = 2;
 
 
-    // Static data members
+    // Static Data Members
 
         static const Tensor2D I;
 
@@ -82,10 +83,17 @@ public:
     //- Component labeling enumeration
     enum components { XX, XY, YX, YY };
 
+
     // Generated Methods
 
-        //- Construct null
+        //- Default construct
         Tensor2D() = default;
+
+        //- Copy construct
+        Tensor2D(const Tensor2D&) = default;
+
+        //- Copy assignment
+        Tensor2D& operator=(const Tensor2D&) = default;
 
 
     // Constructors
@@ -117,7 +125,7 @@ public:
         );
 
         //- Construct from Istream
-        inline Tensor2D(Istream&);
+        inline explicit Tensor2D(Istream& is);
 
 
     // Member Functions

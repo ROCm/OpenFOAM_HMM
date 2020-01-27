@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,14 +58,15 @@ class DiagTensor
 :
     public VectorSpace<DiagTensor<Cmpt>, Cmpt, 3>
 {
-
 public:
 
-    //- Equivalent type of labels used for valid component indexing
-    typedef DiagTensor<label> labelType;
+    // Typedefs
+
+        //- Equivalent type of labels used for valid component indexing
+        typedef DiagTensor<label> labelType;
 
 
-    // Member constants
+    // Member Constants
 
         //- Rank of DiagTensor is 2
         static constexpr direction rank = 2;
@@ -75,10 +76,19 @@ public:
     enum components { XX, YY, ZZ };
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        inline DiagTensor();
+        //- Default construct
+        DiagTensor() = default;
+
+        //- Copy construct
+        DiagTensor(const DiagTensor&) = default;
+
+        //- Copy assignment
+        DiagTensor& operator=(const DiagTensor&) = default;
+
+
+    // Constructors
 
         //- Construct initialized to zero
         inline DiagTensor(const Foam::zero);
@@ -91,7 +101,7 @@ public:
         inline DiagTensor(const Cmpt& txx, const Cmpt& tyy, const Cmpt& tzz);
 
         //- Construct from Istream
-        inline DiagTensor(Istream&);
+        inline explicit DiagTensor(Istream& is);
 
 
     // Member Functions

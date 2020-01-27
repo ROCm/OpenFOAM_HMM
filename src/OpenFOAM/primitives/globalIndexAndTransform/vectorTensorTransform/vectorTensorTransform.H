@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +52,6 @@ namespace Foam
 {
 
 // Forward Declarations
-
 class vectorTensorTransform;
 Istream& operator>>(Istream& is, vectorTensorTransform&);
 Ostream& operator<<(Ostream& os, const vectorTensorTransform& C);
@@ -63,7 +63,7 @@ Ostream& operator<<(Ostream& os, const vectorTensorTransform& C);
 
 class vectorTensorTransform
 {
-    // private data
+    // Private Data
 
         //- Translation vector
         vector t_;
@@ -79,7 +79,7 @@ class vectorTensorTransform
 
 public:
 
-    // Static data members
+    // Static Data
 
         static const char* const typeName;
 
@@ -88,13 +88,30 @@ public:
         static const vectorTensorTransform I;
 
 
+    // Generated Methods
+
+        //- Copy construct
+        vectorTensorTransform(const vectorTensorTransform&) = default;
+
+        //- Copy assignment
+        vectorTensorTransform&
+            operator=(const vectorTensorTransform&) = default;
+
+        //- Move construct
+        vectorTensorTransform(vectorTensorTransform&&) = default;
+
+        //- Move assignment
+        vectorTensorTransform&
+            operator=(vectorTensorTransform&&) = default;
+
+
     // Constructors
 
-        //- Construct null
+        //- Default construct - no translation, identity rotation.
         inline vectorTensorTransform();
 
         //- Construct given a translation vector, rotation tensor and
-        //  hasR bool
+        //- hasR bool
         inline vectorTensorTransform
         (
             const vector& t,
@@ -103,18 +120,18 @@ public:
         );
 
         //- Construct a pure translation vectorTensorTransform given a
-        //  translation vector
+        //- translation vector
         inline explicit vectorTensorTransform(const vector& t);
 
         //- Construct a pure rotation vectorTensorTransform given a
-        //  rotation tensor
+        //- rotation tensor
         inline explicit vectorTensorTransform(const tensor& R);
 
         //- Construct from Istream
-        vectorTensorTransform(Istream&);
+        explicit vectorTensorTransform(Istream&);
 
 
-    // Member functions
+    // Member Functions
 
         // Access
 
@@ -151,11 +168,11 @@ public:
             tmp<Field<Type>> transform(const Field<Type>&) const;
 
 
-    // Member operators
+    // Member Operators
 
-        inline void operator=(const vectorTensorTransform&);
         inline void operator&=(const vectorTensorTransform&);
 
+        //- Assign translation
         inline void operator=(const vector&);
         inline void operator+=(const vector&);
         inline void operator-=(const vector&);
@@ -164,7 +181,7 @@ public:
         inline void operator&=(const tensor&);
 
 
-    // IOstream operators
+    // IOstream Operators
 
         friend Istream& operator>>(Istream& is, vectorTensorTransform&);
 

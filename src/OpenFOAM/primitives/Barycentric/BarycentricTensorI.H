@@ -28,11 +28,6 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline Foam::BarycentricTensor<Cmpt>::BarycentricTensor()
-{}
-
-
-template<class Cmpt>
 inline Foam::BarycentricTensor<Cmpt>::BarycentricTensor(const Foam::zero)
 :
     BarycentricTensor::msType(Zero)

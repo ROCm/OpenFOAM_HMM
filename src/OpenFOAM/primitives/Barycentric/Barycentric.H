@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,11 +58,13 @@ class Barycentric
 {
 public:
 
-    //- Equivalent type of labels used for valid component indexing
-    typedef Barycentric<label> labelType;
+    // Typedefs
+
+        //- Equivalent type of labels used for valid component indexing
+        typedef Barycentric<label> labelType;
 
 
-    // Member constants
+    // Member Constants
 
         //- Rank of Barycentric is 1
         static constexpr direction rank = 1;
@@ -72,15 +74,18 @@ public:
     enum components { A, B, C, D };
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        inline Barycentric();
+        //- Default construct
+        Barycentric() = default;
+
+
+    // Constructors
 
         //- Construct initialized to zero
         inline Barycentric(const Foam::zero);
 
-        //- Construct given four components
+        //- Construct from components
         inline Barycentric
         (
             const Cmpt& va,
