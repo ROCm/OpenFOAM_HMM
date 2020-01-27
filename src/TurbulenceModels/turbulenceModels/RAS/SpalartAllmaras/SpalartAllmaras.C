@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -317,7 +317,7 @@ tmp<volScalarField> SpalartAllmaras<BasicTurbulenceModel>::k() const
             this->mesh_
         ),
         this->mesh_,
-        dimensionedScalar(dimensionSet(0, 2, -2, 0, 0), Zero),
+        dimensionedScalar(sqr(dimLength)/sqr(dimTime), Zero),
         zeroGradientFvPatchField<scalar>::typeName
     );
 }
@@ -340,8 +340,30 @@ tmp<volScalarField> SpalartAllmaras<BasicTurbulenceModel>::epsilon() const
             this->mesh_
         ),
         this->mesh_,
-        dimensionedScalar(dimensionSet(0, 2, -3, 0, 0), Zero),
+        dimensionedScalar(sqr(dimLength)/pow3(dimTime), Zero),
         zeroGradientFvPatchField<scalar>::typeName
+    );
+}
+
+
+template<class BasicTurbulenceModel>
+tmp<volScalarField> SpalartAllmaras<BasicTurbulenceModel>::omega() const
+{
+    WarningInFunction
+        << "Specific dissipation rate not defined for "
+        << "Spalart-Allmaras model. Returning zero field"
+        << endl;
+
+    return tmp<volScalarField>::New
+    (
+        IOobject
+        (
+            IOobject::groupName("omega", this->alphaRhoPhi_.group()),
+            this->runTime_.timeName(),
+            this->mesh_
+        ),
+        this->mesh_,
+        dimensionedScalar(dimless/dimTime, Zero)
     );
 }
 

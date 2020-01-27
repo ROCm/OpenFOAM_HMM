@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -110,6 +110,9 @@ public:
 
         //- Return sub-grid dissipation rate
         virtual tmp<volScalarField> epsilon() const;
+
+        //- Return sub-grid specific dissipation rate
+        virtual tmp<volScalarField> omega() const;
 };
 
 
