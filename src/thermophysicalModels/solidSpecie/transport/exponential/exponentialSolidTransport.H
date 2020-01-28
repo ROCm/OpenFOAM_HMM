@@ -142,13 +142,12 @@ public:
         void write(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
-        inline void operator=(const exponentialSolidTransport&);
         inline void operator+=(const exponentialSolidTransport&);
 
 
-    // Friend operators
+    // Friend Operators
 
         friend exponentialSolidTransport operator* <Thermo>
         (

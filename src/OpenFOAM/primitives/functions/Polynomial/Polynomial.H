@@ -108,9 +108,6 @@ public:
         //- Construct null, with all coefficients = 0.0
         Polynomial();
 
-        //- Copy constructor
-        Polynomial(const Polynomial&);
-
         //- Construct from C-array of coefficients
         explicit Polynomial(const scalar coeffs[PolySize]);
 

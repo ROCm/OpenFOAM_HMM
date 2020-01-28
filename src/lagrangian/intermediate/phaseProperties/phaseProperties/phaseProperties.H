@@ -124,13 +124,6 @@ public:
         //- Construct from Istream
         phaseProperties(Istream& is);
 
-        //- Construct as copy
-        phaseProperties(const phaseProperties& pp);
-
-
-    //- Destructor
-    ~phaseProperties() = default;
-
 
     // Public Member Functions
 

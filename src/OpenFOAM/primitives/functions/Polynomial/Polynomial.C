@@ -44,18 +44,6 @@ Foam::Polynomial<PolySize>::Polynomial()
 
 
 template<int PolySize>
-Foam::Polynomial<PolySize>::Polynomial
-(
-    const Polynomial<PolySize>& poly
-)
-:
-    VectorSpace<Polynomial<PolySize>, scalar, PolySize>(poly),
-    logActive_(poly.logActive_),
-    logCoeff_(poly.logCoeff_)
-{}
-
-
-template<int PolySize>
 Foam::Polynomial<PolySize>::Polynomial(const scalar coeffs[PolySize])
 :
     VectorSpace<Polynomial<PolySize>, scalar, PolySize>(),

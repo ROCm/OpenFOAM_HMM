@@ -85,6 +85,12 @@ public:
     ClassName("specie");
 
 
+    // Generated Methods
+
+        //- Copy construct
+        specie(const specie&) = default;
+
+
     // Constructors
 
         //- Construct from components without name
@@ -128,9 +134,11 @@ public:
             void write(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
+        //- Copy assignment, preserve original name
         inline void operator=(const specie&);
+
         inline void operator+=(const specie&);
         inline void operator*=(const scalar);
 

@@ -82,6 +82,15 @@ public:
     ClassName("surfZone");
 
 
+    // Generated Methods
+
+        //- Copy construct
+        surfZone(const surfZone&) = default;
+
+        //- Copy assignment
+        surfZone& operator=(const surfZone&) = default;
+
+
     // Constructors
 
         //- Construct null with zero start, size, index
@@ -110,9 +119,6 @@ public:
             const dictionary& dict,
             const label index
         );
-
-        //- Construct as copy
-        surfZone(const surfZone&);
 
         //- Construct from another zone, resetting the index
         surfZone(const surfZone&, const label index);

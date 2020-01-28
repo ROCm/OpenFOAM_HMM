@@ -144,6 +144,13 @@ public:
         typedef indexedVertex<Gt,Vb2>                           Other;
     };
 
+
+    // Generated Methods
+
+        //- Copy construct
+        indexedVertex(const indexedVertex&) = default;
+
+
     // Constructors
 
         inline indexedVertex();

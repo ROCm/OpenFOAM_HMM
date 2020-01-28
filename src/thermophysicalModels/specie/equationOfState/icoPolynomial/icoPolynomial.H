@@ -209,14 +209,13 @@ public:
             void write(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
-        inline void operator=(const icoPolynomial&);
         inline void operator+=(const icoPolynomial&);
         inline void operator*=(const scalar);
 
 
-    // Friend operators
+    // Friend Operators
 
         friend icoPolynomial operator+ <Specie, PolySize>
         (

@@ -88,6 +88,16 @@ public:
         static const vectorTensorTransform I;
 
 
+    // Generated Methods
+
+        //- Copy construct
+        vectorTensorTransform(const vectorTensorTransform&) = default;
+
+        //- Copy assignment
+        vectorTensorTransform&
+            operator=(const vectorTensorTransform&) = default;
+
+
     // Constructors
 
         //- Construct null
@@ -151,11 +161,11 @@ public:
             tmp<Field<Type>> transform(const Field<Type>&) const;
 
 
-    // Member operators
+    // Member Operators
 
-        inline void operator=(const vectorTensorTransform&);
         inline void operator&=(const vectorTensorTransform&);
 
+        //- Assign translation
         inline void operator=(const vector&);
         inline void operator+=(const vector&);
         inline void operator-=(const vector&);

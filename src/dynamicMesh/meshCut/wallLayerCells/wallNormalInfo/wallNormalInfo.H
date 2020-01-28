@@ -86,8 +86,7 @@ public:
         //- Construct from normal
         inline wallNormalInfo(const vector& normal);
 
-        //- Construct as copy
-        inline wallNormalInfo(const wallNormalInfo&);
+
 
     // Member Functions
 

@@ -27,7 +27,10 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::septernion::septernion()
+inline Foam::septernion::septernion(const Foam::zero)
+:
+    t_(Zero),
+    r_(Zero)
 {}
 
 inline Foam::septernion::septernion(const vector& t, const quaternion& r)
@@ -94,12 +97,6 @@ inline Foam::vector Foam::septernion::invTransformPoint(const vector& v) const
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-inline void Foam::septernion::operator=(const septernion& tr)
-{
-    t_ = tr.t_;
-    r_ = tr.r_;
-}
 
 inline void Foam::septernion::operator*=(const septernion& tr)
 {

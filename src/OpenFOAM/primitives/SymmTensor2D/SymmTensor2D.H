@@ -81,10 +81,19 @@ public:
     enum components { XX, XY, YY };
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        inline SymmTensor2D();
+        //- Default construct
+        SymmTensor2D() = default;
+
+        //- Copy construct
+        SymmTensor2D(const SymmTensor2D&) = default;
+
+        //- Copy assignment
+        SymmTensor2D& operator=(const SymmTensor2D&) = default;
+
+
+    // Constructors
 
         //- Construct initialized to zero
         inline SymmTensor2D(const Foam::zero);

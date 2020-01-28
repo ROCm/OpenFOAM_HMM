@@ -76,10 +76,13 @@ class referredWallFace
 
 public:
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        referredWallFace();
+        //- Default construct
+        referredWallFace() = default;
+
+
+    // Constructors
 
         //- Construct from components
         referredWallFace
@@ -88,13 +91,6 @@ public:
             const pointField& pts,
             label patchi
         );
-
-        //- Construct as copy
-        referredWallFace(const referredWallFace&);
-
-
-    //- Destructor
-    ~referredWallFace();
 
 
     // Member Functions

@@ -120,7 +120,7 @@ public:
         explicit interpolation2DTable(const dictionary& dict);
 
         //- Copy construct
-        interpolation2DTable(const interpolation2DTable& interpTable);
+        interpolation2DTable(const interpolation2DTable& tbl);
 
 
     // Member Functions
@@ -134,6 +134,9 @@ public:
 
 
     // Member Operators
+
+        //- Copy assignment
+        void operator=(const interpolation2DTable<Type>& rhs);
 
         //- Return an interpolated value
         Type operator()(const scalar valueX, const scalar valueY) const;

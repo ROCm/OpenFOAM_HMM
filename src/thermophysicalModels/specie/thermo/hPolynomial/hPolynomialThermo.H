@@ -228,9 +228,8 @@ public:
             void write(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
-        inline void operator=(const hPolynomialThermo&);
         inline void operator+=(const hPolynomialThermo&);
         inline void operator*=(const scalar);
 

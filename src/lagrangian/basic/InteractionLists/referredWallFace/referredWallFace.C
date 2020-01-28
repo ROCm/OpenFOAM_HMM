@@ -29,14 +29,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::referredWallFace::referredWallFace()
-:
-    face(),
-    pts_(),
-    patchi_()
-{}
-
-
 Foam::referredWallFace::referredWallFace
 (
     const face& f,
@@ -55,27 +47,6 @@ Foam::referredWallFace::referredWallFace
             << abort(FatalError);
     }
 }
-
-
-Foam::referredWallFace::referredWallFace(const referredWallFace& rWF)
-:
-    face(rWF),
-    pts_(rWF.pts_),
-    patchi_(rWF.patchi_)
-{
-    if (this->size() != pts_.size())
-    {
-        FatalErrorInFunction
-            << "Face and pointField are not the same size. " << nl << (*this)
-            << abort(FatalError);
-    }
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::referredWallFace::~referredWallFace()
-{}
 
 
 // * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //

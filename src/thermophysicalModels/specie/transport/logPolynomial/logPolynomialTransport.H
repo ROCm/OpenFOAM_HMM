@@ -204,9 +204,7 @@ public:
         void write(Ostream& os) const;
 
 
-    // Member operators
-
-        inline void operator=(const logPolynomialTransport&);
+    // Member Operators
 
         inline void operator+=(const logPolynomialTransport&);
 

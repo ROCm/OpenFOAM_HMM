@@ -31,11 +31,6 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline Foam::SymmTensor2D<Cmpt>::SymmTensor2D()
-{}
-
-
-template<class Cmpt>
 inline Foam::SymmTensor2D<Cmpt>::SymmTensor2D(const Foam::zero)
 :
     SymmTensor2D::vsType(Zero)

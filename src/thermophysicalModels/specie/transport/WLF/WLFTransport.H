@@ -159,9 +159,7 @@ public:
         void write(Ostream& os) const;
 
 
-    // Member operators
-
-        inline void operator=(const WLFTransport&);
+    // Member Operators
 
         inline void operator+=(const WLFTransport&);
 

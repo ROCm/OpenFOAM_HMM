@@ -101,12 +101,8 @@ public:
         //- Construct with seed value
         explicit Random(const label seedValue = defaultSeed);
 
-        //- Copy construct with optional reset of seed
-        Random(const Random& r, const bool reset = false);
-
-
-    //- Destructor
-    ~Random() = default;
+        //- Copy construct with possible reset of seed
+        Random(const Random& rnd, const bool reset);
 
 
     // Member Functions

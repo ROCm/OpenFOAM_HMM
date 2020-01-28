@@ -129,7 +129,7 @@ Foam::error::error(const error& err)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::error::~error() throw()
+Foam::error::~error() noexcept
 {
     delete messageStreamPtr_;
 }

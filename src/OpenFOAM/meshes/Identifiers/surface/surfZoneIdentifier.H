@@ -78,6 +78,15 @@ public:
         static const word emptyType;
 
 
+    // Generated Methods
+
+        //- Copy construct
+        surfZoneIdentifier(const surfZoneIdentifier&) = default;
+
+        //- Copy assignment
+        surfZoneIdentifier& operator=(const surfZoneIdentifier&) = default;
+
+
     // Constructors
 
         //- Construct null, with index zero

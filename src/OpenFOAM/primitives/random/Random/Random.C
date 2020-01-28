@@ -40,13 +40,9 @@ Foam::Random::Random(const label seedValue)
 {}
 
 
-Foam::Random::Random(const Random& r, const bool reset)
+Foam::Random::Random(const Random& rnd, const bool reset)
 :
-    seed_(r.seed_),
-    generator_(r.generator_),
-    uniform01_(),
-    hasGaussSample_(r.hasGaussSample_),
-    gaussSample_(r.gaussSample_)
+    Random(rnd)
 {
     if (reset)
     {

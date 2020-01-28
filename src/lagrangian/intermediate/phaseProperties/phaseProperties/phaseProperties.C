@@ -188,16 +188,6 @@ Foam::phaseProperties::phaseProperties()
 {}
 
 
-Foam::phaseProperties::phaseProperties(const phaseProperties& pp)
-:
-    phase_(pp.phase_),
-    stateLabel_(pp.stateLabel_),
-    names_(pp.names_),
-    Y_(pp.Y_),
-    carrierIds_(pp.carrierIds_)
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::phaseProperties::reorder

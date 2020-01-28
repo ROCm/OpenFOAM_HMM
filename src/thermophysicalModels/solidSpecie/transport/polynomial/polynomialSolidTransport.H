@@ -183,14 +183,13 @@ public:
         void write(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
-        inline void operator=(const polynomialSolidTransport&);
         inline void operator+=(const polynomialSolidTransport&);
         inline void operator*=(const scalar);
 
 
-    // Friend operators
+    // Friend Operators
 
         friend polynomialSolidTransport operator+ <Thermo, PolySize>
         (

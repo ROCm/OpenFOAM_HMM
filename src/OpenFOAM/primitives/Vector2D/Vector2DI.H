@@ -29,11 +29,6 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline Foam::Vector2D<Cmpt>::Vector2D()
-{}
-
-
-template<class Cmpt>
 inline Foam::Vector2D<Cmpt>::Vector2D(const Foam::zero)
 :
     Vector2D::vsType(Zero)

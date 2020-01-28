@@ -139,14 +139,6 @@ inline Foam::patchEdgeFaceInfo::patchEdgeFaceInfo
 {}
 
 
-// Construct as copy
-inline Foam::patchEdgeFaceInfo::patchEdgeFaceInfo(const patchEdgeFaceInfo& wpt)
-:
-    origin_(wpt.origin()),
-    distSqr_(wpt.distSqr())
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline const Foam::point& Foam::patchEdgeFaceInfo::origin() const

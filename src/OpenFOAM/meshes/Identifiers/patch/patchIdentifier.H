@@ -73,6 +73,18 @@ class patchIdentifier
 
 public:
 
+    // Generated Methods
+
+        //- Copy construct
+        patchIdentifier(const patchIdentifier&) = default;
+
+        //- Copy assignment
+        patchIdentifier& operator=(const patchIdentifier&) = default;
+
+        //- Destructor
+        virtual ~patchIdentifier() = default;
+
+
     // Constructors
 
         //- Construct from components
@@ -98,10 +110,6 @@ public:
             const patchIdentifier& p,
             const label index
         );
-
-
-    //- Destructor
-    virtual ~patchIdentifier() = default;
 
 
     // Member Functions

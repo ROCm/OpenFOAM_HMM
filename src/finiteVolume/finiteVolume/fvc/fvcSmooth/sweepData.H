@@ -69,6 +69,15 @@ class sweepData
 
 public:
 
+    // Generated Methods
+
+        //- Copy construct
+        sweepData(const sweepData&) = default;
+
+        //- Copy assignment
+        sweepData& operator=(const sweepData&) = default;
+
+
     // Constructors
 
         //- Construct null

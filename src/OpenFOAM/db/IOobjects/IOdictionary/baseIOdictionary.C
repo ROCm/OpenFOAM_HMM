@@ -77,12 +77,6 @@ Foam::baseIOdictionary::baseIOdictionary
 }
 
 
-// * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
-
-Foam::baseIOdictionary::~baseIOdictionary()
-{}
-
-
 // * * * * * * * * * * * * * * * Members Functions * * * * * * * * * * * * * //
 
 const Foam::word& Foam::baseIOdictionary::name() const
