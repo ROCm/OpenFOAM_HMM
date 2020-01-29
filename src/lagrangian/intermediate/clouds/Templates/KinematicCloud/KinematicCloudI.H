@@ -425,7 +425,7 @@ Foam::KinematicCloud<CloudType>::SU(volVectorField& U) const
 {
     if (debug)
     {
-        Info<< "UTrans min/max = " << min(UTrans()).value() << ", "
+        Pout<< "UTrans min/max = " << min(UTrans()).value() << ", "
             << max(UTrans()).value() << nl
             << "UCoeff min/max = " << min(UCoeff()).value() << ", "
             << max(UCoeff()).value() << endl;
