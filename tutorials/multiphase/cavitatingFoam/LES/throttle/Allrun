@@ -21,6 +21,8 @@ refineMeshByCellSet()
    done
 }
 
+restore0Dir
+
 runApplication blockMesh
 refineMeshByCellSet 1 2 3
 runApplication $(getApplication)

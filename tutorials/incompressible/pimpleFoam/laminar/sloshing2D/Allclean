@@ -11,6 +11,6 @@ cleanFaMesh
 
 (cd makeWave && wclean)
 
-rm -r history
+rm -rf history
 
 #------------------------------------------------------------------------------

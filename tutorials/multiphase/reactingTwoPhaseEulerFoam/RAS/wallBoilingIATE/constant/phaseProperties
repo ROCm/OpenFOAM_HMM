@@ -122,7 +122,7 @@ saturationModel
         componentColumns    (1);
         separator           ",";
         mergeSeparators     no;
-        file                "Tsat_water_1_2bar.csv";
+        file                "$FOAM_TUTORIALS/resources/dataset/Tsat_water_1_2bar.csv";
         outOfBounds         clamp;
         interpolationScheme linear;
     };

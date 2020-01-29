@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volVectorField;
-    location    "0";
     object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -35,9 +34,7 @@ boundaryField
     floatingObject
     {
         type            fixedNormalInletOutletVelocity;
-
         fixTangentialInflow false;
-
         normalVelocity
         {
             type            uniformFixedValue;
@@ -45,26 +42,21 @@ boundaryField
             uniformValue
             {
                 type        scale;
-
                 value
                 {
-                    type sine;
-
+                    type        sine;
                     frequency   1;
                     amplitude   0.025;
                     scale       (0 1 0);
                     level       (0 0 0);
                 }
-
                 scale
                 {
                     type linearRamp;
-
                     duration 10;
                 }
             }
         }
-
         value           uniform (0 0 0);
     }
 

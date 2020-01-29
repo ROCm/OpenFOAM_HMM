@@ -16,7 +16,7 @@ FoamFile
 
 libs            (overset fvMotionSolvers);
 
-application     overInterDyMFoam ;
+application     overInterDyMFoam;
 
 startFrom       latestTime;
 
@@ -49,8 +49,11 @@ runTimeModifiable yes;
 adjustTimeStep  yes;
 
 maxCo           1.5;
+
 maxAlphaCo      2.0;
+
 maxDeltaT       1;
+
 
 functions
 {
@@ -76,7 +79,6 @@ functions
         (
             (0.00132  0.0009 0.005)
         );
-
     }
 
     alphaVol
@@ -93,8 +95,8 @@ functions
             const volScalarField& alpha =
                 mesh().lookupObject<volScalarField>("alpha.water");
 
-            Info<< "Alpha volume = " << alpha.weightedAverage(mesh().Vsc()) << endl;
-
+            Info<< "Alpha volume = " << alpha.weightedAverage(mesh().Vsc())
+                << endl;
         #};
     }
 }

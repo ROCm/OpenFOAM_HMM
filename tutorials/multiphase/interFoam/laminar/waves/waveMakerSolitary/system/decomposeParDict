@@ -12,14 +12,13 @@ FoamFile
     class       dictionary;
     object      decomposeParDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 numberOfSubdomains 2;
 
 method          hierarchical;
 
-hierarchicalCoeffs
+coeffs
 {
     n           (2 1 1);
     delta       0.001;

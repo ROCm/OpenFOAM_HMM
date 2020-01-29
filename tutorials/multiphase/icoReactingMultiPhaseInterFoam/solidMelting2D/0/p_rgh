@@ -24,20 +24,24 @@ boundaryField
     {
         type            fixedFluxPressure;
     }
+
     right
     {
         type            totalPressure;
         p0              $internalField;
         value           $internalField;
     }
+
     bottom
     {
         type            fixedFluxPressure;
     }
+
     top
     {
         type            fixedFluxPressure;
     }
+
     frontAndBack
     {
         type            empty;

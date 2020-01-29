@@ -27,21 +27,25 @@ boundaryField
         type            calculated;
         value           uniform (0 0 0);
     }
+
     "(atmosphere|sidePatch)"
     {
         type            calculated;
         value           uniform (0 0 0);
     }
+
     floatingObject
     {
         type            calculated;
         value           uniform (0 0 0);
     }
+
     oversetPatch
     {
         patchType       overset;
         type            zeroGradient;
     }
+
     sides
     {
         patchType       overset;

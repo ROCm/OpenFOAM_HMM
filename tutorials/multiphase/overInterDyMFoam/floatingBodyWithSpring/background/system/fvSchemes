@@ -54,7 +54,7 @@ snGradSchemes
 
 oversetInterpolation
 {
-    method          inverseDistance;//cellVolumeWeight
+    method          inverseDistance;    //cellVolumeWeight
 }
 
 oversetInterpolationSuppressed

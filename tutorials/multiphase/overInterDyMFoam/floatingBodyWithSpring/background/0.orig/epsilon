@@ -28,24 +28,25 @@ boundaryField
         inletValue      uniform 0.1;
         value           uniform 0.1;
     }
+
     "(atmosphere|sidePatch)"
     {
         type            inletOutlet;
         inletValue      uniform 0.1;
         value           uniform 0.1;
     }
+
     floatingObject
     {
         type            epsilonWallFunction;
-        Cmu             0.09;
-        kappa           0.41;
-        E               9.8;
         value           uniform 0.1;
     }
+
     overset
     {
         type            overset;
     }
+
     oversetPatch
     {
         type            overset;

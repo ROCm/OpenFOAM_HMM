@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volVectorField;
-    location    "0";
     object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -21,22 +20,11 @@ internalField   uniform (0 0 0);
 
 boundaryField
 {
-    left
+    "(left|right|bottom|top)"
     {
         type            slip;
     }
-    right
-    {
-        type            slip;
-    }
-    bottom
-    {
-        type            slip;
-    }
-    top
-    {
-        type            slip;
-    }
+
     frontBack
     {
         type            empty;

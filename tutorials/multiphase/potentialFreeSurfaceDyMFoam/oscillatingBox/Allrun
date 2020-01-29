@@ -9,13 +9,18 @@ runApplication -s 1 topoSet
 
 runApplication subsetMesh -overwrite c0 -patch floatingObject
 
-runApplication -s selectBottom \
-    topoSet -dict system/topoSetDict-selectBottom
+runApplication -s selectBottom topoSet -dict system/topoSetDict-selectBottom
 
 runApplication createPatch -overwrite
 
 restore0Dir
 
 runApplication $(getApplication)
+
+# Require awk
+command -v awk >/dev/null && {
+    awk '{print $1 " " $3}' \
+        postProcessing/poolHeight/0/surfaceFieldValue.dat > poolHeight_vs_time
+}
 
 #------------------------------------------------------------------------------

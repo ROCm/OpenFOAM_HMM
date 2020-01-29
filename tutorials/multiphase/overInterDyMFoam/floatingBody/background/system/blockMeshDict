@@ -39,14 +39,12 @@ edges
 
 boundary
 (
-    // Dummy patch to trigger overset interpolation before any other
-    // bcs
+    // Dummy patch to trigger overset interpolation before any other bcs
     oversetPatch
     {
         type overset;
         faces ();
     }
-
     stationaryWalls
     {
         type wall;

@@ -56,8 +56,11 @@ runTimeModifiable yes;
 adjustTimeStep  yes;
 
 maxCo           1.5;
+
 maxAlphaCo      2.0;
+
 maxDeltaT       1;
+
 
 functions
 {
@@ -83,7 +86,6 @@ functions
         (
              (0.0009999 0.0015 0.003)
         );
-
     }
 
     alphaVol

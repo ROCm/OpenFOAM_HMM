@@ -5,8 +5,12 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 ./Allrun.pre
 
+restore0Dir
+
 runApplication decomposePar
+
 runParallel $(getApplication)
+
 runApplication reconstructPar
 
 #------------------------------------------------------------------------------

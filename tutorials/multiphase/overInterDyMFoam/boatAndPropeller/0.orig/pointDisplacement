@@ -31,21 +31,25 @@ boundaryField
          type            calculated;
         value           uniform (0 0 0);
     }
+
     oversetPatch
     {
         patchType       overset;
         type            zeroGradient;
     }
+
     "overset.*"
     {
         patchType       overset;
         type            zeroGradient;
     }
+
     atmosphere
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
+
     defaultFaces
     {
         type            fixedValue;

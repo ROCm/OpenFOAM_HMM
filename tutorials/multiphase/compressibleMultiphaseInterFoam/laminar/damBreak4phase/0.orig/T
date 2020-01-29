@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      T;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,22 +25,26 @@ boundaryField
         type            fixedValue;
         value           $internalField;
     }
+
     rightWall
     {
         type            fixedValue;
         value           $internalField;
     }
+
     lowerWall
     {
         type            fixedValue;
         value           uniform 293;
     }
+
     atmosphere
     {
         type            inletOutlet;
         phi             rhoPhi;
         inletValue      $internalField;
     }
+
     defaultFaces
     {
         type            empty;

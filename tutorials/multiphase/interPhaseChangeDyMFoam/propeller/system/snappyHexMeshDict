@@ -28,7 +28,7 @@ addLayers       false;
 // - to 'snap' the mesh boundary to the surface
 geometry
 {
-    innerCylinder.obj
+    innerCylinder.obj.gz
     {
         type        triSurfaceMesh;
         name        innerCylinder;
@@ -40,7 +40,7 @@ geometry
             }
         }
     }
-    innerCylinderSmall.obj
+    innerCylinderSmall.obj.gz
     {
         type        triSurfaceMesh;
         name        innerCylinderSmall;
@@ -52,7 +52,7 @@ geometry
             }
         }
     }
-    outerCylinder.obj
+    outerCylinder.obj.gz
     {
         type        triSurfaceMesh;
         name        outerCylinder;
@@ -76,7 +76,7 @@ geometry
             }
         }
     }
-    propellerStem1.obj
+    propellerStem1.obj.gz
     {
         type        triSurfaceMesh;
         name        propellerStem1;
@@ -88,7 +88,7 @@ geometry
             }
         }
     }
-    propellerStem2.obj
+    propellerStem2.obj.gz
     {
         type        triSurfaceMesh;
         name        propellerStem2;
@@ -100,7 +100,7 @@ geometry
             }
         }
     }
-    propellerStem3.obj
+    propellerStem3.obj.gz
     {
         type        triSurfaceMesh;
         name        propellerStem3;
@@ -113,7 +113,6 @@ geometry
         }
     }
 }
-
 
 
 // Settings for the castellatedMesh generation.
@@ -465,7 +464,6 @@ meshQualityControls
         maxNonOrtho 75;
     }
 }
-
 
 
 // Merge tolerance. Is fraction of overall bounding box of initial mesh.

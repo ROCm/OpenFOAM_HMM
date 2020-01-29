@@ -3,10 +3,19 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
+restore0Dir
+
+mkdir -p constant/triSurface
+
+cp -f $FOAM_TUTORIALS/resources/geometry/sloshingCylinder.obj.gz \
+    constant/triSurface/
+
 runApplication blockMesh
+
 runApplication snappyHexMesh -overwrite
-cp 0/alpha.water.orig 0/alpha.water
+
 runApplication setFields
+
 runApplication $(getApplication)
 
 #------------------------------------------------------------------------------

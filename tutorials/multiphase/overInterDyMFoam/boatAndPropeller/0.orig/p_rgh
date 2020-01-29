@@ -27,8 +27,8 @@ boundaryField
         type            fixedFluxPressure;
     }
 
-   atmosphere
-   {
+    atmosphere
+    {
         type            totalPressure;
         p0              uniform 0;
         U               U;
@@ -37,12 +37,12 @@ boundaryField
         psi             none;
         gamma           1;
         value           uniform 0;
-   }
-  defaultFaces
-  {
-      type            fixedFluxPressure;
-  }
+    }
 
+    defaultFaces
+    {
+        type            fixedFluxPressure;
+    }
 
     "overset.*"
     {

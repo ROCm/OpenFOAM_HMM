@@ -48,13 +48,14 @@ runTimeModifiable yes;
 adjustTimeStep  yes;
 
 maxCo           1.0;
+
 maxAlphaCo      1.0;
 
 maxDeltaT       0.05;
 
+
 functions
 {
-
     minMax
     {
       type          fieldMinMax;

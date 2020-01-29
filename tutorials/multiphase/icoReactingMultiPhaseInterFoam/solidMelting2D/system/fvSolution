@@ -30,7 +30,6 @@ solvers
         nAlphaSubCycles 2;
         cAlphas         ((liquid and solid)  0);
 
-
         solver          smoothSolver;
         smoother        symGaussSeidel;
         tolerance       1e-8;

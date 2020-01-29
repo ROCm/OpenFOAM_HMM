@@ -53,6 +53,7 @@ maxCo           0.4;
 
 maxDeltaT       1;
 
+
 functions
 {
     forces
@@ -71,8 +72,8 @@ functions
     {
         type            surfaceFieldValue;
         libs            (fieldFunctionObjects);
-        writeControl   timeStep;
-        writeInterval  1;
+        writeControl    timeStep;
+        writeInterval   1;
         log             yes;
         writeTotalArea  no;
         writeFields     no;

@@ -36,7 +36,7 @@ then
 
         # Modify case
         setDamBreakFine
-        \cp ../damBreak/0/alpha.water.orig 0/alpha.water
+        restore0Dir
         # And execute
         runApplication blockMesh
         runApplication setFields

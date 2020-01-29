@@ -24,10 +24,12 @@ boundaryField
     {
         type            overset;
     }
+
     "(stationaryWalls|sidePatch)"
     {
         type            fixedFluxPressure;
     }
+
     atmosphere
     {
         type            totalPressure;
@@ -39,10 +41,12 @@ boundaryField
         gamma           1;
         value           uniform 0;
     }
+
     floatingObject
     {
         type            fixedFluxPressure;
     }
+
     overset
     {
         patchType       overset;

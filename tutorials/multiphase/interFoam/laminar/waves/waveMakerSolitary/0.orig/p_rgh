@@ -47,14 +47,17 @@ boundaryField
     {
         type            empty;
     }
+
     back1
     {
         type            empty;
     }
+
     front2
     {
         type            empty;
     }
+
     back2
     {
         type            empty;
@@ -71,6 +74,7 @@ boundaryField
         p0              uniform 0;
         value           uniform 0;
     }
+
     top2
     {
         type            totalPressure;

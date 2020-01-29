@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      air.gas;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -25,20 +24,24 @@ boundaryField
     {
         type            zeroGradient;
     }
+
     top
     {
         type            inletOutlet;
         inletValue      uniform 1;
         value           uniform 1;
     }
+
     left
     {
         type            zeroGradient;
     }
+
     right
     {
         type            zeroGradient;
     }
+
     frontAndBack
     {
         type            empty;

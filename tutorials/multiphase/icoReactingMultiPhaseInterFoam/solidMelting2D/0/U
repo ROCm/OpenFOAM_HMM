@@ -25,21 +25,25 @@ boundaryField
         type            fixedValue;
         value           uniform (0 0 0);
     }
+
     top
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
+
     bottom
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
+
     right
     {
         type            pressureInletOutletVelocity;
         value           uniform (0 0 0);
     }
+
     frontAndBack
     {
         type            empty;

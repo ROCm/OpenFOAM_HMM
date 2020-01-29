@@ -24,11 +24,13 @@ boundaryField
     {
         type            zeroGradient;
     }
+
     bottom2
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
+
     leftwall
     {
         type            waveMaker;
@@ -46,19 +48,23 @@ boundaryField
         nPaddle         4;
         waveAngle       45;
     }
+
     back
     {
         type            zeroGradient;
     }
+
     front
     {
         type            zeroGradient;
     }
+
     rightwall
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
+
     top
     {
         type            zeroGradient;

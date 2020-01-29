@@ -6,6 +6,10 @@ cd "${0%/*}" || exit    # Run from this directory
 ( cd gap_detection && ./Allrun )
 ( cd aerofoilNACA0012_directionalRefinement && ./Allrun )
 ( cd iglooWithFridgesDirectionalRefinement && ./Allrun )
+( cd distributedTriSurfaceMesh && ./Allrun )
+( cd faceZoneRegions && ./Allrun )
+( cd motorBike_leakDetection && ./Allrun )
+( cd opposite_walls && ./Allrun )
 
 exit 0
 

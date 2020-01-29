@@ -6,9 +6,9 @@ cd "${0%/*}" || exit                                # Run from this directory
 restore0Dir
 
 runApplication blockMesh
-\cp 0/alpha.water.orig 0/alpha.water
 
 runApplication setFields
+
 runApplication $(getApplication)
 
 #------------------------------------------------------------------------------

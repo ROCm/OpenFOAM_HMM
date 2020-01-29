@@ -12,8 +12,9 @@ FoamFile
     class           dictionary;
     object          blockMeshDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+scale   1;
 
 vertices
 (

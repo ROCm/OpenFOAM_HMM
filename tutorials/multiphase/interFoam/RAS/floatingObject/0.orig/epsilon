@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      epsilon;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -24,23 +23,19 @@ boundaryField
     stationaryWalls
     {
         type            epsilonWallFunction;
-        Cmu             0.09;
-        kappa           0.41;
-        E               9.8;
         value           uniform 0.1;
     }
+
     atmosphere
     {
         type            inletOutlet;
         inletValue      uniform 0.1;
         value           uniform 0.1;
     }
+
     floatingObject
     {
         type            epsilonWallFunction;
-        Cmu             0.09;
-        kappa           0.41;
-        E               9.8;
         value           uniform 0.1;
     }
 }

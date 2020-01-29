@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      p;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -25,35 +24,42 @@ boundaryField
     {
         type            wedge;
     }
+
     back
     {
         type            wedge;
     }
+
     innerAMI
     {
         type            cyclicAMI;
         value           uniform 101325;
     }
+
     outerAMI
     {
         type            cyclicAMI;
         value           uniform 101325;
     }
+
     top
     {
         type            calculated;
         value           uniform 101325;
     }
+
     bottom
     {
         type            calculated;
         value           uniform 101325;
     }
+
     farFieldWall
     {
         type            calculated;
         value           uniform 101325;
     }
+
     sphere
     {
         type            calculated;

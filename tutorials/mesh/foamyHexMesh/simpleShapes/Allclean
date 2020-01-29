@@ -5,12 +5,12 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 cleanCase0
 
-rm -r constant/extendedFeatureEdgeMesh constant/internalDelaunayVertices
+rm -rf constant/extendedFeatureEdgeMesh constant/internalDelaunayVertices
 rm -f constant/triSurface/*.eMesh
 rm -f constant/triSurface/*_orient*
-rm -r constant/tetDualMesh
+rm -rf constant/tetDualMesh
 
-rm -r snapToSurface?.obj tetsToSnapTo.obj
+rm -f snapToSurface?.obj tetsToSnapTo.obj
 rm -f domain coneAndSphere
 
 #------------------------------------------------------------------------------

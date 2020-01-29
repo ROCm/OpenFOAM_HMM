@@ -13,6 +13,7 @@ FoamFile
     object      phaseProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 type    massTransferMultiphaseSystem;
 
 phases  (liquid gas);
@@ -46,4 +47,6 @@ massTransferModel
         Tactivate       366;
     }
 );
+
+
 // ************************************************************************* //

@@ -45,11 +45,7 @@ solvers
         solver          GAMG;
         tolerance       1e-8;
         relTol          0.1;
-
         smoother        DICGaussSeidel;
-
-
-
         maxIter         50;
     };
 
@@ -59,12 +55,9 @@ solvers
         preconditioner
         {
             preconditioner  GAMG;
-
             tolerance       1e-6;
             relTol          0;
-
             nVcycles        2;
-
             smoother        DICGaussSeidel;
 
         };

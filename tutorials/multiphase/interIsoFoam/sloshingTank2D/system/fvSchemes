@@ -27,8 +27,8 @@ gradSchemes
 
 divSchemes
 {
-    div(rhoPhi,U)  Gauss vanLeerV;
-    div(phi,alpha)  Gauss vanLeer;
+    div(rhoPhi,U)    Gauss vanLeerV;
+    div(phi,alpha)   Gauss vanLeer;
     div(phirb,alpha) Gauss vanLeer;
     div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
 }

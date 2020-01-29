@@ -4,6 +4,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 #------------------------------------------------------------------------------
 
 cleanCase0
-rm -rf poolHeight poolHeight_vs_time
+
+rm -f poolHeight_vs_time
 
 #------------------------------------------------------------------------------

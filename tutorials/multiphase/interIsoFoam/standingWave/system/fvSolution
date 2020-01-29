@@ -17,7 +17,6 @@ FoamFile
 
 solvers
 {
-
     "alpha.*"
     {
         isoFaceTol      1e-10;

@@ -24,7 +24,6 @@ solvers
         cAlpha          1;
     }
 
-
     cellDisplacement
     {
         solver          GAMG;
@@ -80,24 +79,21 @@ solvers
         tolerance       1e-08;
         relTol          0;
     }
-
 }
+
 
 PIMPLE
 {
     momentumPredictor no;
     nOuterCorrectors 2;
     nCorrectors      4;
-
     nNonOrthogonalCorrectors 1;
-
     correctPhi              yes;
-
     checkMeshCourantNo      no;
     moveMeshOuterCorrectors no;
-
     transonic   false;
 }
+
 
 relaxationFactors
 {

@@ -55,11 +55,10 @@ runTimeModifiable yes;
 adjustTimeStep  yes;
 
 maxCo           5.0;
+
 maxAlphaCo      2.0;
+
 maxDeltaT       0.1;
 
-functions
-{
-}
 
 // ************************************************************************* //

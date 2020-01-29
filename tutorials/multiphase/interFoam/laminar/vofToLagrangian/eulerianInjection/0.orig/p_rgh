@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      binary;
     class       volScalarField;
-    location    "0";
     object      p_rgh;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -27,12 +26,14 @@ boundaryField
         gradient        uniform 0;
         value           uniform 0;
     }
+
     bottom
     {
         type            fixedFluxPressure;
         gradient        uniform 0;
         value           uniform 0;
     }
+
     sides
     {
         type            fixedValue;

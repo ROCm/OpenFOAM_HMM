@@ -67,7 +67,6 @@ functions
         setFormat       raw;
         sets
         (
-
             line1
             {
                 type    uniform;

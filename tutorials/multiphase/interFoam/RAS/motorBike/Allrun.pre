@@ -3,8 +3,10 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
+mkdir -p constant/triSurface
+
 # copy motorbike surface from resources directory
-\cp $FOAM_TUTORIALS/resources/geometry/motorBike.obj.gz constant/triSurface/
+cp -f $FOAM_TUTORIALS/resources/geometry/motorBike.obj.gz constant/triSurface/
 
 runApplication surfaceFeatureExtract
 
@@ -22,7 +24,7 @@ runApplication blockMesh
 # --------
 runApplication decomposePar -force
 runParallel snappyHexMesh -overwrite
-\ls -d processor* | xargs -I {} \rm -f ./{}/constant/polyMesh/refinementHistory
+ls -d processor* | xargs -I {} rm -f ./{}/constant/polyMesh/refinementHistory
 
 # - set the initial fields
 restore0Dir -processor

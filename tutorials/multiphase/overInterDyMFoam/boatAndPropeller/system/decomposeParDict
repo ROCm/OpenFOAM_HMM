@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    note        "mesh decomposition control dictionary";
     object      decomposeParDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -22,8 +21,6 @@ method          hierarchical;
 coeffs
 {
     n           (2 2 2);
-   // delta       0.001;
-   // order       xyz;
 }
 
 // ************************************************************************* //

@@ -26,6 +26,7 @@ boundaryField
     {
         type            overset;
     }
+
     "(walls|hole|outlet|inlet)"
     {
         type            fixedFluxPressure;

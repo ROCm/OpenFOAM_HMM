@@ -34,6 +34,7 @@ boundaryField
     {
         type            zeroGradient;
     }
+
     ground2
     {
         type            zeroGradient;
@@ -43,6 +44,7 @@ boundaryField
     {
         type            empty;
     }
+
     back1
     {
         type            empty;
@@ -52,6 +54,7 @@ boundaryField
     {
         type            empty;
     }
+
     back2
     {
         type            empty;
@@ -63,6 +66,7 @@ boundaryField
         inletValue      uniform 0;
         value           uniform 0;
     }
+
     top2
     {
         type            inletOutlet;

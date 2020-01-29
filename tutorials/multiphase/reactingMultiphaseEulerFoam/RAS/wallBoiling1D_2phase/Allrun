@@ -3,13 +3,17 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
+restore0Dir
+
 application=$(getApplication)
 
 runApplication blockMesh
+
 runApplication $application
 
 if notTest "$@"
 then
+    cp -f system/controlDict system/controlDict.orig
     foamDictionary system/controlDict -entry endTime -set 4
     foamDictionary system/controlDict -entry startTime -set 0.5
     foamDictionary 0.5/T.liquid -entry boundaryField.wall2.q -set 'uniform 500000'

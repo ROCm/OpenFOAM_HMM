@@ -3,9 +3,6 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
 #------------------------------------------------------------------------------
 
-cleanCase
-
-rm -f 0/alpha.water.gz 0/alpha.water
-rm -rf *Flux
+cleanCase0
 
 #------------------------------------------------------------------------------

@@ -6,10 +6,9 @@ cd "${0%/*}" || exit                                # Run from this directory
 cleanCase0
 
 # Remove surface and features
-rm -f  constant/triSurface/motorBike.obj.gz
-rm -f  constant/triSurface/motorBike.eMesh
+rm -rf  constant/triSurface
 rm -rf constant/extendedFeatureEdgeMesh
 
-\cp system/controlDict_run system/controlDict
+cp -f system/controlDict_run system/controlDict
 
 #------------------------------------------------------------------------------

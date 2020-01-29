@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      binary;
     class       volVectorField;
-    location    "0";
     object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,11 +25,13 @@ boundaryField
         type            fixedValue;
         value           $internalField;
     }
+
     bottom
     {
         type            fixedValue;
         value           $internalField;
     }
+
     sides
     {
         type            pressureInletOutletVelocity;

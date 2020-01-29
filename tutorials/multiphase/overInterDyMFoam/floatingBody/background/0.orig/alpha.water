@@ -26,12 +26,14 @@ boundaryField
     {
         type            zeroGradient;
     }
+
     atmosphere
     {
         type            inletOutlet;
         inletValue      uniform 0;
         value           uniform 0;
     }
+
     floatingObject
     {
         type            zeroGradient;

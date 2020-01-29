@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       pointVectorField;
-    location    "0";
     object      pointDisplacement;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -29,16 +28,19 @@ boundaryField
         type            fixedValue;
         value           uniform (0 0 0);
     }
+
     bottom
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
+
     top
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
+
     sphere
     {
         type            sixDoFRigidBodyDisplacement;
@@ -77,18 +79,22 @@ boundaryField
 
         value           uniform ( 0 0 0 );
     }
+
     innerAMI
     {
         type            cyclicAMI;
     }
+
     outerAMI
     {
         type            cyclicAMI;
     }
+
     back
     {
         type            wedge;
     }
+
     front
     {
         type            wedge;

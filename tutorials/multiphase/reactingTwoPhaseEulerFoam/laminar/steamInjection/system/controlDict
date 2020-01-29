@@ -51,6 +51,7 @@ maxCo           0.1;
 
 maxDeltaT       1e-2;
 
+
 functions
 {
     timeStepping
@@ -68,7 +69,7 @@ functions
         libs        (fieldFunctionObjects);
         fields
         (
-             p
+            p
         );
         location        no;
         writeControl    timeStep;
