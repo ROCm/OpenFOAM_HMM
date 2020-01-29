@@ -65,13 +65,12 @@ class forceSuSp
 :
     public Tuple2<vector, scalar>
 {
-
 public:
 
     // Constructors
 
-        //- Construct null
-        inline forceSuSp();
+        //- Default construct
+        forceSuSp() = default;
 
         //- Construct zero-initialized content
         inline forceSuSp(const zero);
@@ -107,9 +106,6 @@ public:
 
 
         // Operators
-
-            //- Assignment
-            inline void operator=(const forceSuSp& susp);
 
             //- Addition
             inline void operator+=(const forceSuSp& susp);

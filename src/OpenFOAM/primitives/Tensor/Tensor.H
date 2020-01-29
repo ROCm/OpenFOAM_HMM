@@ -89,10 +89,19 @@ public:
     enum components { XX, XY, XZ, YX, YY, YZ, ZX, ZY, ZZ };
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        inline Tensor();
+        //- Default construct
+        Tensor() = default;
+
+        //- Copy construct
+        Tensor(const Tensor&) = default;
+
+        //- Copy assignment
+        Tensor& operator=(const Tensor&) = default;
+
+
+    // Constructors
 
         //- Construct initialized to zero
         inline Tensor(const Foam::zero);

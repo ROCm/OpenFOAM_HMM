@@ -133,9 +133,8 @@ public:
         void write(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
-        inline void operator=(const constAnIsoSolidTransport&);
         inline void operator+=(const constAnIsoSolidTransport&);
 
 

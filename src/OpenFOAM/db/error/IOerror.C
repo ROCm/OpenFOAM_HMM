@@ -55,7 +55,7 @@ Foam::IOerror::IOerror(const dictionary& errDict)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::IOerror::~IOerror() throw()
+Foam::IOerror::~IOerror() noexcept
 {}
 
 

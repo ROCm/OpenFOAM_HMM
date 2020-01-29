@@ -233,6 +233,9 @@ public:
 
         public:
 
+            //- Copy construct
+            iterator(const iterator&) = default;
+
             //- Construct for a node on a list
             inline iterator(DLListBase* list, link* item);
 

@@ -68,6 +68,18 @@ public:
     TypeName("dictionary");
 
 
+    // Generated Methods
+
+        //- Copy construct
+        baseIOdictionary(const baseIOdictionary&) = default;
+
+        //- Move construct
+        baseIOdictionary(baseIOdictionary&&) = default;
+
+        //- Destructor
+        virtual ~baseIOdictionary() = default;
+
+
     // Constructors
 
         //- Construct given an IOobject
@@ -80,11 +92,7 @@ public:
         baseIOdictionary(const IOobject&, Istream&);
 
 
-    //- Destructor
-    virtual ~baseIOdictionary();
-
-
-    // Member functions
+    // Member Functions
 
         //- Return complete path + object name if the file exists
         //  either in the case/processor or case otherwise null

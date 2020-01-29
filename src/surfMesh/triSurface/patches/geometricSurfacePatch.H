@@ -93,6 +93,16 @@ public:
     ClassName("geometricSurfacePatch");
 
 
+    // Generated Methods
+
+        //- Copy construct
+        geometricSurfacePatch(const geometricSurfacePatch&) = default;
+
+        //- Copy assignment
+        geometricSurfacePatch&
+            operator=(const geometricSurfacePatch&) = default;
+
+
     // Constructors
 
         //- Construct null

@@ -112,6 +112,12 @@ public:
         };
 
 
+    // Generated Methods
+
+        //- Copy construct
+        ignitionSite(const ignitionSite&) = default;
+
+
     // Constructors
 
         //- Construct from Istream and database

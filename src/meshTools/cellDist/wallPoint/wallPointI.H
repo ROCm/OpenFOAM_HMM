@@ -98,13 +98,6 @@ inline Foam::wallPoint::wallPoint(const point& origin, const scalar distSqr)
 {}
 
 
-inline Foam::wallPoint::wallPoint(const wallPoint& wpt)
-:
-    origin_(wpt.origin()),
-    distSqr_(wpt.distSqr())
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline const Foam::point& Foam::wallPoint::origin() const

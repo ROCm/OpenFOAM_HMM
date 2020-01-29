@@ -85,10 +85,22 @@ public:
         static const septernion I;
 
 
+    // Generated Methods
+
+        //- Default construct
+        septernion() = default;
+
+        //- Copy construct
+        septernion(const septernion&) = default;
+
+        //- Copy assignment
+        septernion& operator=(const septernion&) = default;
+
+
     // Constructors
 
-        //- Construct null
-        inline septernion();
+        //- Construct zero initialized
+        inline septernion(const Foam::zero);
 
         //- Construct given a translation vector and rotation quaternion
         inline septernion(const vector& t, const quaternion& r);
@@ -129,9 +141,8 @@ public:
                inline vector invTransformPoint(const vector& v) const;
 
 
-    // Member operators
+    // Member Operators
 
-        inline void operator=(const septernion&);
         inline void operator*=(const septernion&);
 
         inline void operator=(const vector&);

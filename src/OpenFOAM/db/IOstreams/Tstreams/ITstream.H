@@ -328,14 +328,26 @@ public:
             }
 
 
-        // Output
+    // Output
 
-            //- Print description of stream to Ostream
-            void print(Ostream& os) const;
+        //- Print stream description to Ostream
+        void print(Ostream& os) const;
 
-            //- Concatenate tokens into a space-separated std::string.
-            //- The resulting string may contain quote characters.
-            std::string toString() const;
+        //- Concatenate tokens into a space-separated std::string.
+        //- The resulting string may contain quote characters.
+        std::string toString() const;
+
+
+    // Member Operators
+
+        //- Copy assignment, with rewind()
+        void operator=(const ITstream& is);
+
+        //- Copy assignment of tokens, with rewind()
+        void operator=(const tokenList& toks);
+
+        //- Move assignment of tokens, with rewind()
+        void operator=(tokenList&& toks);
 };
 
 

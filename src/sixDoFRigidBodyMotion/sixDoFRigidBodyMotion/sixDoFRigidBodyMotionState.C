@@ -61,24 +61,4 @@ Foam::sixDoFRigidBodyMotionState::sixDoFRigidBodyMotionState
 {}
 
 
-Foam::sixDoFRigidBodyMotionState::sixDoFRigidBodyMotionState
-(
-    const sixDoFRigidBodyMotionState& sDoFRBMS
-)
-:
-    centreOfRotation_(sDoFRBMS.centreOfRotation()),
-    Q_(sDoFRBMS.Q()),
-    v_(sDoFRBMS.v()),
-    a_(sDoFRBMS.a()),
-    pi_(sDoFRBMS.pi()),
-    tau_(sDoFRBMS.tau())
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::sixDoFRigidBodyMotionState::~sixDoFRigidBodyMotionState()
-{}
-
-
 // ************************************************************************* //

@@ -139,14 +139,6 @@ inline Foam::pointEdgePoint::pointEdgePoint
 {}
 
 
-// Construct as copy
-inline Foam::pointEdgePoint::pointEdgePoint(const pointEdgePoint& wpt)
-:
-    origin_(wpt.origin()),
-    distSqr_(wpt.distSqr())
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline const Foam::point& Foam::pointEdgePoint::origin() const

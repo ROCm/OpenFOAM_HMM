@@ -101,17 +101,9 @@ inline Foam::cellInfo::cellInfo()
 {}
 
 
-// Construct from components
-inline Foam::cellInfo::cellInfo(const label type)
+inline Foam::cellInfo::cellInfo(const label ctype)
 :
-    type_(type)
-{}
-
-
-// Construct as copy
-inline Foam::cellInfo::cellInfo(const cellInfo& w2)
-:
-    type_(w2.type())
+    type_(ctype)
 {}
 
 

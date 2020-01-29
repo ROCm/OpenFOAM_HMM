@@ -169,9 +169,7 @@ public:
         void write(Ostream& os) const;
 
 
-    // Member operators
-
-        inline void operator=(const sutherlandTransport&);
+    // Member Operators
 
         inline void operator+=(const sutherlandTransport&);
 

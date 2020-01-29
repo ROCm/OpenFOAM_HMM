@@ -81,10 +81,19 @@ public:
     enum components { X, Y, Z };
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        inline Vector();
+        //- Default construct
+        Vector() = default;
+
+        //- Copy construct
+        Vector(const Vector&) = default;
+
+        //- Copy assignment
+        Vector& operator=(const Vector&) = default;
+
+
+    // Constructors
 
         //- Construct initialized to zero
         inline Vector(const Foam::zero);

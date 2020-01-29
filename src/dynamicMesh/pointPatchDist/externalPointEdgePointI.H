@@ -135,16 +135,6 @@ inline Foam::externalPointEdgePoint::externalPointEdgePoint
 {}
 
 
-inline Foam::externalPointEdgePoint::externalPointEdgePoint
-(
-    const externalPointEdgePoint& wpt
-)
-:
-    origin_(wpt.origin()),
-    distSqr_(wpt.distSqr())
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline const Foam::point& Foam::externalPointEdgePoint::origin() const

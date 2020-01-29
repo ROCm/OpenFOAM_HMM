@@ -447,6 +447,12 @@ public:
 
         public:
 
+            //- Copy construct
+            reference(const reference&) = default;
+
+            //- Move construct
+            reference(reference&&) = default;
+
             //- Flip the bit at the position, no range-checking
             inline void flip();
 

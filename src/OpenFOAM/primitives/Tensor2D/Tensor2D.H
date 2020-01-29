@@ -82,10 +82,17 @@ public:
     //- Component labeling enumeration
     enum components { XX, XY, YX, YY };
 
+
     // Generated Methods
 
-        //- Construct null
+        //- Default construct
         Tensor2D() = default;
+
+        //- Copy construct
+        Tensor2D(const Tensor2D&) = default;
+
+        //- Copy assignment
+        Tensor2D& operator=(const Tensor2D&) = default;
 
 
     // Constructors

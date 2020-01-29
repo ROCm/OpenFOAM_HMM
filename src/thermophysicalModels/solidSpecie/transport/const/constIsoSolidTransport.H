@@ -134,13 +134,12 @@ public:
         void write(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
-        inline void operator=(const constIsoSolidTransport&);
         inline void operator+=(const constIsoSolidTransport&);
 
 
-    // Friend operators
+    // Friend Operators
 
         friend constIsoSolidTransport operator* <Thermo>
         (

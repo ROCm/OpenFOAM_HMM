@@ -126,11 +126,16 @@ class blockDescriptor
 
         void findCurvedFaces();
 
+public:
+
+    // Generated Methods
+
+        //- Copy construct
+        blockDescriptor(const blockDescriptor&) = default;
+
         //- No copy assignment
         void operator=(const blockDescriptor&) = delete;
 
-
-public:
 
     // Constructors
 

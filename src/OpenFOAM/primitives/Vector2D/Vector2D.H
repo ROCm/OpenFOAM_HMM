@@ -74,10 +74,19 @@ public:
     enum components { X, Y };
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        inline Vector2D();
+        //- Default construct
+        Vector2D() = default;
+
+        //- Copy construct
+        Vector2D(const Vector2D&) = default;
+
+        //- Copy assignment
+        Vector2D& operator=(const Vector2D&) = default;
+
+
+    // Constructors
 
         //- Construct initialized to zero
         inline Vector2D(const Foam::zero);

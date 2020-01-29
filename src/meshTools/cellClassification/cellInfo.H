@@ -92,11 +92,8 @@ public:
         //- Construct null
         inline cellInfo();
 
-        //- Construct from cType
-        inline cellInfo(const label);
-
-        //- Construct as copy
-        inline cellInfo(const cellInfo&);
+        //- Construct from cellClassification type
+        inline explicit cellInfo(const label ctype);
 
 
     // Member Functions

@@ -114,13 +114,13 @@ Foam::interpolation2DTable<Type>::interpolation2DTable(const dictionary& dict)
 template<class Type>
 Foam::interpolation2DTable<Type>::interpolation2DTable
 (
-     const interpolation2DTable& interpTable
+     const interpolation2DTable& tbl
 )
 :
-    List<value_type>(interpTable),
-    bounding_(interpTable.bounding_),
-    fileName_(interpTable.fileName_),
-    reader_(interpTable.reader_)    // note: steals reader. Used in write().
+    List<value_type>(tbl),
+    bounding_(tbl.bounding_),
+    fileName_(tbl.fileName_),
+    reader_(tbl.reader_.clone())
 {}
 
 
@@ -217,6 +217,24 @@ Foam::label Foam::interpolation2DTable<Type>::Xi
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+template<class Type>
+void Foam::interpolation2DTable<Type>::operator=
+(
+    const interpolation2DTable<Type>& rhs
+)
+{
+    if (this == &rhs)
+    {
+        return;
+    }
+
+    static_cast<List<value_type>&>(*this) = rhs;
+    bounding_ = rhs.bounding_;
+    fileName_ = rhs.fileName_;
+    reader_.reset(rhs.reader_.clone());
+}
+
 
 template<class Type>
 Type Foam::interpolation2DTable<Type>::operator()

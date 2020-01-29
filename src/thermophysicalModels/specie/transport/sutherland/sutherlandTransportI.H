@@ -147,19 +147,6 @@ inline Foam::scalar Foam::sutherlandTransport<Thermo>::alphah
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Thermo>
-inline void Foam::sutherlandTransport<Thermo>::operator=
-(
-    const sutherlandTransport<Thermo>& st
-)
-{
-    Thermo::operator=(st);
-
-    As_ = st.As_;
-    Ts_ = st.Ts_;
-}
-
-
-template<class Thermo>
 inline void Foam::sutherlandTransport<Thermo>::operator+=
 (
     const sutherlandTransport<Thermo>& st

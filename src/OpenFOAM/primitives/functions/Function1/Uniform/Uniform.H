@@ -63,16 +63,19 @@ class Uniform
 :
     public Constant<Type>
 {
-    // Private Member Functions
+public:
+
+    //- Declare type-name, virtual type (with debug switch)
+    TypeName("uniform");
+
+
+    // Generated Methods
+
+        //- Copy construct
+        Uniform<Type>(const Uniform&) = default;
 
         //- No copy assignment
         void operator=(const Uniform<Type>&) = delete;
-
-
-public:
-
-    // Runtime type information
-    TypeName("uniform");
 
 
     // Constructors

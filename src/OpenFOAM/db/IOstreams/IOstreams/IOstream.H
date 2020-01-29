@@ -147,6 +147,15 @@ protected:
 
 public:
 
+    // Generated Methods
+
+        //- Copy construct
+        IOstream(const IOstream&) = default;
+
+        //- Destructor
+        virtual ~IOstream() = default;
+
+
     // Constructors
 
         //- Construct with specified stream option
@@ -172,10 +181,6 @@ public:
         :
             IOstream(IOstreamOption(format, version, compression))
         {}
-
-
-    //- Destructor
-    virtual ~IOstream() = default;
 
 
     // Member Functions

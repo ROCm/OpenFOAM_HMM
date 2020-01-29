@@ -116,13 +116,6 @@ inline Foam::complex Foam::complex::conjugate() const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline void Foam::complex::operator=(const complex& c)
-{
-    re = c.re;
-    im = c.im;
-}
-
-
 inline void Foam::complex::operator=(const Foam::zero)
 {
     re = 0;

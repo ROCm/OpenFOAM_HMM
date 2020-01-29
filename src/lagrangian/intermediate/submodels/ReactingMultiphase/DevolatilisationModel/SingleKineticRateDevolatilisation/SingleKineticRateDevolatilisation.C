@@ -71,29 +71,6 @@ SingleKineticRateDevolatilisation
 }
 
 
-template<class CloudType>
-Foam::SingleKineticRateDevolatilisation<CloudType>::
-SingleKineticRateDevolatilisation
-(
-    const SingleKineticRateDevolatilisation<CloudType>& dm
-)
-:
-    DevolatilisationModel<CloudType>(dm),
-    volatileData_(dm.volatileData_),
-    YVolatile0_(dm.YVolatile0_),
-    volatileToGasMap_(dm.volatileToGasMap_),
-    residualCoeff_(dm.residualCoeff_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::SingleKineticRateDevolatilisation<CloudType>::
-~SingleKineticRateDevolatilisation()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>

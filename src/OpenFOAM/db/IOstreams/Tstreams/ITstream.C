@@ -453,4 +453,32 @@ void Foam::ITstream::append(tokenList&& newTokens, const bool lazy)
 }
 
 
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+void Foam::ITstream::operator=(const ITstream& is)
+{
+    Istream::operator=(is);
+    tokenList::operator=(is);
+    name_ = is.name_;
+
+    rewind();
+}
+
+
+void Foam::ITstream::operator=(const tokenList& toks)
+{
+    tokenList::operator=(toks);
+
+    rewind();
+}
+
+
+void Foam::ITstream::operator=(tokenList&& toks)
+{
+    tokenList::operator=(std::move(toks));
+
+    rewind();
+}
+
+
 // ************************************************************************* //

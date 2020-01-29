@@ -31,11 +31,6 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline Foam::SymmTensor<Cmpt>::SymmTensor()
-{}
-
-
-template<class Cmpt>
 inline Foam::SymmTensor<Cmpt>::SymmTensor(const Foam::zero)
 :
     SymmTensor::vsType(Zero)

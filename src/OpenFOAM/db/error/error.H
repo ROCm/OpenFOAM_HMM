@@ -95,7 +95,7 @@ public:
 
 
     //- Destructor
-    virtual ~error() throw();
+    virtual ~error() noexcept;
 
 
     // Static Member Functions
@@ -239,7 +239,7 @@ public:
 
 
     //- Destructor
-    virtual ~IOerror() throw();
+    virtual ~IOerror() noexcept;
 
 
     // Member functions

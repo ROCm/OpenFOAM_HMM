@@ -90,13 +90,25 @@ class complex
 
 public:
 
+    // Generated Methods
+
+        //- Copy construct
+        complex(const complex&) = default;
+
+        //- Copy assignment
+        complex& operator=(const complex&) = default;
+
+        //- Move construct
+        complex(complex&&) = default;
+
+        //- Move assignment
+        complex& operator=(complex&&) = default;
+
+
     // Constructors
 
-        //- Construct null as zero-initialized
+        //- Default construct, as zero-initialized
         inline constexpr complex() noexcept;
-
-        //- Default copy constructor
-        complex(const complex&) = default;
 
         //- Construct zero-initialized from zero class
         inline constexpr complex(const Foam::zero) noexcept;
@@ -172,9 +184,6 @@ public:
             return std::complex<scalar>(re, im);
         }
 
-
-        //- Copy assignment
-        inline void operator=(const complex& c);
 
         //- Assign zero
         inline void operator=(const Foam::zero);
