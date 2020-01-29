@@ -181,13 +181,35 @@ void Foam::searchableExtrudedCircle::findNearest
 
     forAll(samples, i)
     {
-        info[i] = tree.findNearest(samples[i], nearestDistSqr[i]);
+        const scalar nearestDist = Foam::sqrt(nearestDistSqr[i]);
+        const scalar searchDistSqr = Foam::sqr(nearestDist+radius_);
+
+        // Find nearest on central edge
+        info[i] = tree.findNearest(samples[i], searchDistSqr);
 
         if (info[i].hit())
         {
-            const vector d = normalised(samples[i] - info[i].hitPoint());
+            // Derive distance to nearest surface from distance to nearest edge
+            const vector d(samples[i] - info[i].hitPoint());
+            const scalar s(mag(d));
 
-            info[i].setPoint(info[i].hitPoint() + d*radius_);
+            if (s < ROOTVSMALL)
+            {
+                // Point is on edge. TBD.
+                info[i].setMiss();
+            }
+            else
+            {
+                const scalar distToSurface = radius_-s;
+                if (mag(distToSurface) > nearestDist)
+                {
+                    info[i].setMiss();
+                }
+                else
+                {
+                    info[i].setPoint(info[i].hitPoint() + d/s*radius_);
+                }
+            }
         }
     }
 }

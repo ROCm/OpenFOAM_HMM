@@ -38,7 +38,9 @@ Description
     \endtable
 
 Note
-    The edge mesh file is to be located in the constant/geometry directory.
+    - The edge mesh file is to be located in the constant/geometry directory.
+    - Can not be used with snappyHexMesh since only implements nearest
+      searching.
 
 SourceFiles
     searchableExtrudedCircle.C
