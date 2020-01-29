@@ -5,6 +5,4 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 cleanCase
 
-rm -f constant/geometry/boundaryLayer.obj
-
 #------------------------------------------------------------------------------

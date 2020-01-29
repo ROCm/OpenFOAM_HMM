@@ -9,15 +9,49 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "system";
-    object      mapFieldsDict;
+    class       volScalarField;
+    object      T;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-patchMap        ( );
+dimensions      [0 0 0 1 0 0 0];
 
-cuttingPatches  ( );
+internalField   uniform 293;
 
+boundaryField
+{
+    front
+    {
+        type            zeroGradient;
+    }
+
+    back
+    {
+        type            zeroGradient;
+    }
+
+    wall
+    {
+        type            zeroGradient;
+    }
+
+    porosityWall
+    {
+        type            zeroGradient;
+    }
+
+    inlet
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
+
+    outlet
+    {
+        type            inletOutlet;
+        value           $internalField;
+        inletValue      $internalField;
+    }
+}
 
 // ************************************************************************* //

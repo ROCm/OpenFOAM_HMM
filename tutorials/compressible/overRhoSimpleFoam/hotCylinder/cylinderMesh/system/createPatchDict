@@ -10,6 +10,7 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
+    location    "system";
     object      createPatchDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -78,7 +79,7 @@ patches
         // If constructFrom = set : name of faceSet
         set f0;
     }
-
 );
+
 
 // ************************************************************************* //

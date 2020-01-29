@@ -30,7 +30,7 @@ writeControl    adjustable;
 
 writeInterval   0.001;
 
-purgeWrite      0;
+purgeWrite      10;
 
 writeFormat     ascii;
 

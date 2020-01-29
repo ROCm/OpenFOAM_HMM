@@ -62,9 +62,7 @@ SIMPLE
         p               1e-2;
         U               1e-4;
         e               1e-3;
-
-        // Possibly check turbulence fields
-        "(k|epsilon|omega)" 1e-3;
+        "(k|epsilon)" 1e-3;
     }
 }
 

@@ -9,32 +9,46 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       pointVectorField;
-    object      pointDisplacement;
+    class       volScalarField;
+    object      p;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 1 0 0 0 0 0];
+dimensions      [1 -1 -2 0 0 0 0];
 
-internalField   uniform (0 0 0);
+internalField   uniform 1.0e5;
 
 boundaryField
 {
-    ".*"
-    {
-        type            uniformFixedValue;
-        uniformValue    (0 0 0);
-    }
-
-    hole
+    front
     {
         type            zeroGradient;
     }
 
-    overset
+    back
     {
-        patchType       overset;
         type            zeroGradient;
+    }
+
+    walls
+    {
+        type            zeroGradient;
+    }
+
+    porosityWall
+    {
+        type            zeroGradient;
+    }
+
+    inlet
+    {
+        type            zeroGradient;
+    }
+
+    outlet
+    {
+        type            fixedValue;
+        value           $internalField;
     }
 }
 

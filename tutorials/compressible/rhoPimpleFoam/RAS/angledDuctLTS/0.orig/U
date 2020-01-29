@@ -9,51 +9,51 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    location    "0";
-    object      epsilon;
+    class       volVectorField;
+    object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -3 0 0 0 0];
+dimensions      [0 1 -1 0 0 0 0];
 
-internalField   uniform 200;
+internalField   uniform (47.8 0 0);
 
 boundaryField
 {
     front
     {
-        type            epsilonWallFunction;
-        value           uniform 200;
+        type            noSlip;
     }
+
     back
     {
-        type            epsilonWallFunction;
-        value           uniform 200;
+        type            noSlip;
     }
+
     walls
     {
-        type            epsilonWallFunction;
-        value           uniform 200;
+        type            noSlip;
     }
+
     porosityWall
     {
-        type            epsilonWallFunction;
-        value           uniform 200;
+        type            slip;
+        value           uniform (0 0 0);
     }
+
     inlet
     {
-        type            turbulentMixingLengthDissipationRateInlet;
-        mixingLength    0.005;
-        value           uniform 200;
+        type            flowRateInletVelocity;
+        massFlowRate    constant 0.1;
+        value           uniform (0 0 0);
     }
+
     outlet
     {
-        type            inletOutlet;
-        inletValue      uniform 200;
-        value           uniform 200;
+        type            fluxCorrectedVelocity; //inletOutlet;
+        value           uniform (0 0 0);
+        inletValue      uniform (0 0 0);
     }
 }
-
 
 // ************************************************************************* //

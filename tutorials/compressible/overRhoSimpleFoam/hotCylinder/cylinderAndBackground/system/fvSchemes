@@ -35,9 +35,7 @@ divSchemes
     div(phi,h)          bounded Gauss upwind;
     div(phi,epsilon)    bounded Gauss upwind;
     div(phi,k)          bounded Gauss upwind;
-
     div(phi,Ekp)        bounded Gauss upwind;
-
     div(phi,K)          bounded Gauss upwind;
 }
 

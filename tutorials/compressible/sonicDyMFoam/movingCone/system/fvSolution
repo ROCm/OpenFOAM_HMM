@@ -46,7 +46,7 @@ solvers
         relTol          0;
     }
 
-    "(U|h|e|R|k|epsilon|omega)"
+    "(U|h|e)"
     {
         solver          smoothSolver;
         smoother        symGaussSeidel;
@@ -54,7 +54,7 @@ solvers
         relTol          0.1;
     }
 
-    "(U|h|e|R|k|epsilon|omega)Final"
+    "(U|h|e)Final"
     {
         $U;
         relTol          0;

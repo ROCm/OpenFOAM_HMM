@@ -9,42 +9,55 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "system";
-    object      fvSolution;
+    class       volScalarField;
+    location    "0";
+    object      k;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-solvers
+dimensions      [0 2 -2 0 0 0 0];
+
+internalField   uniform 1;
+
+boundaryField
 {
-    p
+    front
     {
-        solver          smoothSolver;
-        smoother        symGaussSeidel;
-        tolerance       1e-12;
-        relTol          0;
+        type            kqRWallFunction;
+        value           uniform 1;
     }
 
-    rho
+    back
     {
-        solver          PCG;
-        preconditioner  DIC;
-        tolerance       1e-08;
-        relTol          0;
+        type            kqRWallFunction;
+        value           uniform 1;
     }
 
-    "(U|e|k|epsilon|R)"
+    walls
     {
-        $p;
-        tolerance       1e-08;
-        relTol          0;
+        type            kqRWallFunction;
+        value           uniform 1;
     }
-}
 
-PISO
-{
-    nCorrectors     2;
-    nNonOrthogonalCorrectors 2;
+    porosityWall
+    {
+        type            kqRWallFunction;
+        value           uniform 1;
+    }
+
+    inlet
+    {
+        type            turbulentIntensityKineticEnergyInlet;
+        intensity       0.05;
+        value           uniform 1;
+    }
+
+    outlet
+    {
+        type            inletOutlet;
+        inletValue      uniform 1;
+        value           uniform 1;
+    }
 }
 
 
