@@ -177,6 +177,10 @@ public:
        //  Used with optimisation libraries
        virtual const scalarField& calculateSensitivities();
 
+       //- Returns the sensitivity fields
+       //  Assumes it has already been updated/computed
+       const scalarField& getSensitivities() const;
+
        //- Zero sensitivity fields and their constituents
        virtual void clearSensitivities();
 
