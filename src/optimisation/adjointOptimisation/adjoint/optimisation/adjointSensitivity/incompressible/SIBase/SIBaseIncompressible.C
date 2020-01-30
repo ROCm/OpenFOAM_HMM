@@ -50,6 +50,8 @@ void SIBase::read()
     surfaceSensitivity_.read();
     includeObjective_ =
         dict().getOrDefault<bool>("includeObjectiveContribution", true);
+    writeSensitivityMap_ =
+        dict().getOrDefault<bool>("writeSensitivityMap", false);
 
     // If includeObjective is set to true both here and in the surface
     // sensitivities, set the one in the latter to false to avoid double
@@ -105,7 +107,8 @@ SIBase::SIBase
         objectiveManager,
         fvOptionsAdjoint
     ),
-    includeObjective_(true)
+    includeObjective_(true),
+    writeSensitivityMap_(true)
 {
     read();
 }
@@ -149,6 +152,22 @@ void SIBase::clearSensitivities()
 {
     surfaceSensitivity_.clearSensitivities();
     shapeSensitivities::clearSensitivities();
+}
+
+
+const sensitivitySurface& SIBase::getSurfaceSensitivities() const
+{
+    return surfaceSensitivity_;
+}
+
+
+void SIBase::write(const word& baseName)
+{
+    shapeSensitivities::write(baseName);
+    if (writeSensitivityMap_)
+    {
+        surfaceSensitivity_.write(baseName);
+    }
 }
 
 

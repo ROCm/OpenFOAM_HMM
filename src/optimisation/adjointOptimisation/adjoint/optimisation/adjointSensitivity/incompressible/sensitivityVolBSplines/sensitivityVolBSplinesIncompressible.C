@@ -268,6 +268,9 @@ void sensitivityVolBSplines::clearSensitivities()
 void sensitivityVolBSplines::write(const word& baseName)
 {
     Info<< "Writing control point sensitivities to file" << endl;
+    // Write sensitivity map
+    SIBase::write(baseName);
+    // Write control point sensitivities
     if (Pstream::master())
     {
         OFstream derivFile

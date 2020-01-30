@@ -72,6 +72,9 @@ protected:
         //  them
         bool includeObjective_;
 
+        //- Write sensitivity map upon write
+        bool writeSensitivityMap_;
+
 
     // Protected Member Functions
 
@@ -127,6 +130,12 @@ public:
 
         //- Zero sensitivity fields and their constituents
         virtual void clearSensitivities();
+
+        //- Return reference to underlaying surface sensitivities
+        const sensitivitySurface& getSurfaceSensitivities() const;
+
+        //- Write sensitivity map
+        virtual void write(const word& baseName = word::null);
 };
 
 
