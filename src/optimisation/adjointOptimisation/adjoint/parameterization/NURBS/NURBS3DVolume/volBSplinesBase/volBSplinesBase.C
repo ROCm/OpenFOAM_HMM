@@ -187,6 +187,24 @@ labelList volBSplinesBase::getStartCpID() const
 }
 
 
+label volBSplinesBase::findBoxID(const label cpI) const
+{
+    const labelList startCPID(getStartCpID());
+    for (label iBox = 0; iBox < startCPID.size() - 1 ; ++iBox)
+    {
+        if (cpI >= startCPID[iBox] || cpI < startCPID[iBox + 1])
+        {
+            return iBox;
+        }
+    }
+
+    FatalErrorInFunction
+        << "Invalid control point ID " << cpI << endl
+        << exit(FatalError);
+    return -1;
+}
+
+
 const Foam::labelList& volBSplinesBase::getActiveDesignVariables() const
 {
     return activeDesignVariables_;
