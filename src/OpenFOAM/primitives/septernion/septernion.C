@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,16 +33,14 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const char* const Foam::septernion::typeName = "septernion";
-const Foam::septernion Foam::septernion::zero
-(
-    vector(0, 0, 0),
-    quaternion(0, vector(0, 0, 0))
-);
+const Foam::septernion Foam::septernion::zero(Zero);
+
 const Foam::septernion Foam::septernion::I
 (
-    vector(0, 0, 0),
-    quaternion(1, vector(0, 0, 0))
+    vector(Zero),
+    quaternion(scalar(1))
 );
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

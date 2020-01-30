@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,7 +87,7 @@ See also
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 
 template<class EquationOfState, int PolySize>
 class hPolynomialThermo;
@@ -129,7 +130,7 @@ class hPolynomialThermo
 :
     public EquationOfState
 {
-    // Private data
+    // Private Data
 
         //- Heat of formation
         scalar Hf_;
@@ -169,6 +170,9 @@ class hPolynomialThermo
 
 
 public:
+
+    // Generated Methods: copy construct, copy assignment
+
 
     // Constructors
 
@@ -222,20 +226,19 @@ public:
 
 
 
-        // I-O
+        // IO
 
             //- Write to Ostream
             void write(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
-        inline void operator=(const hPolynomialThermo&);
         inline void operator+=(const hPolynomialThermo&);
         inline void operator*=(const scalar);
 
 
-    // Friend operators
+    // Friend Operators
 
         friend hPolynomialThermo operator+ <EquationOfState, PolySize>
         (
@@ -256,7 +259,7 @@ public:
         );
 
 
-    // Ostream Operator
+    // IOstream Operators
 
         friend Ostream& operator<< <EquationOfState, PolySize>
         (

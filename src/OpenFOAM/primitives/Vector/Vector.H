@@ -64,14 +64,15 @@ class Vector
 :
     public VectorSpace<Vector<Cmpt>, Cmpt, 3>
 {
-
 public:
 
-    //- Equivalent type of labels used for valid component indexing
-    typedef Vector<label> labelType;
+    // Typedefs
+
+        //- Equivalent type of labels used for valid component indexing
+        typedef Vector<label> labelType;
 
 
-    // Member constants
+    // Member Constants
 
         //- Rank of Vector is 1
         static constexpr direction rank = 1;
@@ -81,10 +82,19 @@ public:
     enum components { X, Y, Z };
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        inline Vector();
+        //- Default construct
+        Vector() = default;
+
+        //- Copy construct
+        Vector(const Vector&) = default;
+
+        //- Copy assignment
+        Vector& operator=(const Vector&) = default;
+
+
+    // Constructors
 
         //- Construct initialized to zero
         inline Vector(const Foam::zero);
@@ -97,7 +107,7 @@ public:
         inline Vector(const Cmpt& vx, const Cmpt& vy, const Cmpt& vz);
 
         //- Construct from Istream
-        inline Vector(Istream& is);
+        inline explicit Vector(Istream& is);
 
 
     // Member Functions
@@ -130,7 +140,6 @@ public:
         (
             const Foam::List<Vector<Cmpt>>&
         ) const;
-
 };
 
 

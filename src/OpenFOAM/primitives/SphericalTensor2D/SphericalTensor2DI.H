@@ -30,11 +30,6 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline Foam::SphericalTensor2D<Cmpt>::SphericalTensor2D()
-{}
-
-
-template<class Cmpt>
 inline Foam::SphericalTensor2D<Cmpt>::SphericalTensor2D(const Foam::zero)
 :
     SphericalTensor2D::vsType(Zero)

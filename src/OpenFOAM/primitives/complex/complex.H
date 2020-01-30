@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,13 +90,25 @@ class complex
 
 public:
 
+    // Generated Methods
+
+        //- Copy construct
+        complex(const complex&) = default;
+
+        //- Copy assignment
+        complex& operator=(const complex&) = default;
+
+        //- Move construct
+        complex(complex&&) = default;
+
+        //- Move assignment
+        complex& operator=(complex&&) = default;
+
+
     // Constructors
 
-        //- Construct null as zero-initialized
+        //- Default construct, as zero-initialized
         inline constexpr complex() noexcept;
-
-        //- Default copy constructor
-        complex(const complex&) = default;
 
         //- Construct zero-initialized from zero class
         inline constexpr complex(const Foam::zero) noexcept;
@@ -173,9 +185,6 @@ public:
         }
 
 
-        //- Copy assignment
-        inline void operator=(const complex& c);
-
         //- Assign zero
         inline void operator=(const Foam::zero);
 
@@ -250,14 +259,16 @@ class pTraits<complex>
 
 public:
 
-    //- Component type
-    typedef complex cmptType;
+    // Typedefs
 
-    //- Magnitude type
-    typedef scalar magType;
+        //- Component type
+        typedef complex cmptType;
 
-    //- Equivalent type of labels used for valid component indexing
-    typedef label labelType;
+        //- Magnitude type
+        typedef scalar magType;
+
+        //- Equivalent type of labels used for valid component indexing
+        typedef label labelType;
 
 
     // Member Constants
@@ -287,11 +298,11 @@ public:
 
     // Constructors
 
-        //- Construct from primitive
+        //- Copy construct from primitive
         explicit pTraits(const complex& val);
 
-        //- Construct from Istream
-        pTraits(Istream& is);
+        //- Read construct from Istream
+        explicit pTraits(Istream& is);
 
 
     // Member Functions

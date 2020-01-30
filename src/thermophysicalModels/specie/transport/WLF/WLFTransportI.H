@@ -108,22 +108,6 @@ inline Foam::scalar Foam::WLFTransport<Thermo>::alphah
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Thermo>
-inline void Foam::WLFTransport<Thermo>::operator=
-(
-    const WLFTransport<Thermo>& wlft
-)
-{
-    Thermo::operator=(wlft);
-
-    mu0_ = wlft.mu0_;
-    Tr_ = wlft.Tr_;
-    C1_ = wlft.C1_;
-    C2_ = wlft.C2_;
-    rPr_ = wlft.rPr_;
-}
-
-
-template<class Thermo>
 inline void Foam::WLFTransport<Thermo>::operator+=
 (
     const WLFTransport<Thermo>& wlft

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,7 +46,6 @@ SourceFiles
 #include "word.H"
 #include "pTraits.H"
 #include "direction.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -139,14 +138,16 @@ class pTraits<int32_t>
 
 public:
 
-    //- Component type
-    typedef int32_t cmptType;
+    // Typedefs
 
-    //- Magnitude type
-    typedef int32_t magType;
+        //- Component type
+        typedef int32_t cmptType;
+
+        //- Magnitude type
+        typedef int32_t magType;
 
 
-    // Member constants
+    // Member Constants
 
         //- Dimensionality of space
         static constexpr direction dim = 3;
@@ -158,7 +159,7 @@ public:
         static constexpr direction nComponents = 1;
 
 
-    // Static data members
+    // Static Data Members
 
         static const char* const typeName;
         static const char* const componentNames[];
@@ -176,7 +177,7 @@ public:
         explicit pTraits(const int32_t& val);
 
         //- Read construct from Istream
-        pTraits(Istream& is);
+        explicit pTraits(Istream& is);
 
 
     // Member Functions

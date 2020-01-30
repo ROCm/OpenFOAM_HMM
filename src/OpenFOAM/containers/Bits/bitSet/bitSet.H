@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,7 @@ See also
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class bitSet;
 class labelRange;
 
@@ -131,13 +131,14 @@ public:
         class const_iterator;
         typedef unsigned int const_reference;
 
-    //- Define class name and debug
+
+    //- Declare type-name (with debug switch)
     ClassName("bitSet");
 
 
     // Constructors
 
-        //- Construct an empty, zero-sized set
+        //- Default construct an empty, zero-sized set
         inline bitSet() noexcept;
 
         //- Construct from Istream
@@ -438,6 +439,7 @@ public:
             public PackedList<1>::reference
         {
         protected:
+
             friend class bitSet;        // Access for parent
             void operator&() = delete;  // Refuse to provide its address
 
@@ -446,6 +448,12 @@ public:
             inline reference(bitSet* parent, const label index);
 
         public:
+
+            //- Copy construct
+            reference(const reference&) = default;
+
+            //- Move construct
+            reference(reference&&) = default;
 
             //- Flip the bit at the position, no range-checking
             inline void flip();
@@ -474,7 +482,7 @@ public:
             //- Global position of the current \a on bit
             label pos_;
 
-            //- Construct null - an end iterator
+            //- Default construct - an end iterator
             inline const_iterator() noexcept;
 
             //- Construct begin iterator

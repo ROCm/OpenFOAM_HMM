@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,11 +31,6 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline Foam::SymmTensor2D<Cmpt>::SymmTensor2D()
-{}
-
-
-template<class Cmpt>
 inline Foam::SymmTensor2D<Cmpt>::SymmTensor2D(const Foam::zero)
 :
     SymmTensor2D::vsType(Zero)
@@ -56,7 +51,7 @@ template<class Cmpt>
 inline Foam::SymmTensor2D<Cmpt>::SymmTensor2D(const SphericalTensor2D<Cmpt>& st)
 {
     this->v_[XX] = st.ii(); this->v_[XY] = 0;
-                            this->v_[YY] = st.ii();
+    this->v_[YY] = st.ii();
 }
 
 
@@ -252,7 +247,10 @@ inline Cmpt tr(const SymmTensor2D<Cmpt>& st)
 template<class Cmpt>
 inline SphericalTensor2D<Cmpt> sph(const SymmTensor2D<Cmpt>& st)
 {
-    return (1.0/2.0)*tr(st);
+    return SphericalTensor2D<Cmpt>
+    (
+        0.5*tr(st)
+    );
 }
 
 

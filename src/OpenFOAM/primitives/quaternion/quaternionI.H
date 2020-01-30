@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,13 +28,9 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::quaternion::quaternion()
-{}
-
-
 inline Foam::quaternion::quaternion(const Foam::zero)
 :
-    w_(Zero),
+    w_(0),
     v_(Zero)
 {}
 
@@ -584,12 +580,6 @@ inline Foam::vector Foam::quaternion::eulerAngles
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-inline void Foam::quaternion::operator=(const quaternion& q)
-{
-    w_ = q.w_;
-    v_ = q.v_;
-}
 
 inline void Foam::quaternion::operator+=(const quaternion& q)
 {

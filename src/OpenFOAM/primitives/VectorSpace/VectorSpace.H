@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +52,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 
 template<class Form, class Cmpt, direction Ncmpts> class VectorSpace;
 
@@ -149,16 +149,16 @@ public:
         };
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        inline VectorSpace();
+        //- Default construct
+        VectorSpace() = default;
+
+
+    // Constructors
 
         //- Construct initialized to zero
         inline VectorSpace(const Foam::zero);
-
-        //- Construct from Istream
-        VectorSpace(Istream& is);
 
         //- Copy construct
         inline VectorSpace(const VectorSpace<Form, Cmpt, Ncmpts>& vs);
@@ -167,11 +167,17 @@ public:
         template<class Form2, class Cmpt2>
         inline explicit VectorSpace(const VectorSpace<Form2, Cmpt2, Ncmpts>&);
 
+        //- Construct from Istream
+        explicit VectorSpace(Istream& is);
+
 
     // Member Functions
 
-        //- Return the number of elements in the VectorSpace = Ncmpts.
-        inline static constexpr direction size();
+        //- The number of elements in the VectorSpace = Ncmpts.
+        static constexpr direction size() noexcept
+        {
+            return Ncmpts;
+        }
 
         inline const Cmpt& component(const direction) const;
         inline Cmpt& component(const direction);
@@ -255,7 +261,7 @@ public:
 };
 
 
-// * * * * * * * * * * * * * * Global functions  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
 //- A word representation of a VectorSpace
 template<class Form, class Cmpt, direction Ncmpts>

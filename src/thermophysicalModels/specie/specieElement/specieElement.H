@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +44,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 class specieElement;
 Ostream& operator<<(Ostream&, const specieElement&);
 
@@ -54,7 +55,7 @@ Ostream& operator<<(Ostream&, const specieElement&);
 
 class specieElement
 {
-    // Private data
+    // Private Data
 
         //- Name of the element
         word name_;
@@ -67,14 +68,14 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         inline specieElement();
 
         //- Construct from components
         inline specieElement(const word& name, const label nAtoms);
 
         //- Construct from Istream
-        inline specieElement(Istream&);
+        inline explicit specieElement(Istream& is);
 
 
     // Member Functions

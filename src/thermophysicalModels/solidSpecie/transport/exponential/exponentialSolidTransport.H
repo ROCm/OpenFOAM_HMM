@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,6 +45,8 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
+
 template<class Thermo> class exponentialSolidTransport;
 
 template<class Thermo>
@@ -70,7 +73,7 @@ class exponentialSolidTransport
 :
     public Thermo
 {
-    // Private data
+    // Private Data
 
         //- Constant thermal coefficient.
         scalar kappa0_;
@@ -96,6 +99,9 @@ class exponentialSolidTransport
 
 public:
 
+    // Generated Methods: copy construct, copy assignment
+
+
     // Constructors
 
         //- Construct as named copy
@@ -106,7 +112,7 @@ public:
         );
 
         //- Construct from dictionary
-        exponentialSolidTransport(const dictionary&);
+        explicit exponentialSolidTransport(const dictionary&);
 
         // Selector from dictionary
         inline static autoPtr<exponentialSolidTransport> New
@@ -115,7 +121,7 @@ public:
         );
 
 
-    // Member functions
+    // Member Functions
 
         //- Return the instantiated type name
         static word typeName()
@@ -132,7 +138,7 @@ public:
         //- Thermal conductivity [W/mK]
         inline vector Kappa(const scalar p, const scalar T) const;
 
-         //- Dynamic viscosity [kg/ms]
+        //- Dynamic viscosity [kg/ms]
         inline scalar mu(const scalar p, const scalar T) const;
 
         //- Thermal diffusivity of enthalpy [kg/ms]
@@ -142,13 +148,12 @@ public:
         void write(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
-        inline void operator=(const exponentialSolidTransport&);
         inline void operator+=(const exponentialSolidTransport&);
 
 
-    // Friend operators
+    // Friend Operators
 
         friend exponentialSolidTransport operator* <Thermo>
         (
@@ -156,7 +161,8 @@ public:
             const exponentialSolidTransport&
         );
 
-    // Ostream Operator
+
+    // IOstream Operators
 
         friend Ostream& operator<< <Thermo>
         (

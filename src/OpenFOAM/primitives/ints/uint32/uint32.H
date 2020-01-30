@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -127,11 +127,13 @@ class pTraits<uint32_t>
 
 public:
 
-    //- Component type
-    typedef uint32_t cmptType;
+    // Typedefs
+
+        //- Component type
+        typedef uint32_t cmptType;
 
 
-    // Member constants
+    // Member Constants
 
         //- Dimensionality of space
         static constexpr direction dim = 3;
@@ -143,7 +145,7 @@ public:
         static constexpr direction nComponents = 1;
 
 
-    // Static data members
+    // Static Data Members
 
         static const char* const typeName;
         static const char* const componentNames[];
@@ -161,7 +163,7 @@ public:
         explicit pTraits(const uint32_t& val);
 
         //- Read construct from Istream
-        pTraits(Istream& is);
+        explicit pTraits(Istream& is);
 
 
     // Member Functions

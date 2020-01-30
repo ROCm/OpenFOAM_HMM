@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,14 +57,15 @@ class Vector2D
 :
     public VectorSpace<Vector2D<Cmpt>, Cmpt, 2>
 {
-
 public:
 
-    //- Equivalent type of labels used for valid component indexing
-    typedef Vector2D<label> labelType;
+    // Typedefs
+
+        //- Equivalent type of labels used for valid component indexing
+        typedef Vector2D<label> labelType;
 
 
-    // Member constants
+    // Member Constants
 
         //- Rank of Vector2D is 1
         static constexpr direction rank = 1;
@@ -74,10 +75,19 @@ public:
     enum components { X, Y };
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        inline Vector2D();
+        //- Default construct
+        Vector2D() = default;
+
+        //- Copy construct
+        Vector2D(const Vector2D&) = default;
+
+        //- Copy assignment
+        Vector2D& operator=(const Vector2D&) = default;
+
+
+    // Constructors
 
         //- Construct initialized to zero
         inline Vector2D(const Foam::zero);
@@ -89,7 +99,7 @@ public:
         inline Vector2D(const Cmpt& vx, const Cmpt& vy);
 
         //- Construct from Istream
-        inline Vector2D(Istream& is);
+        inline explicit Vector2D(Istream& is);
 
 
     // Member Functions
@@ -113,7 +123,6 @@ public:
 
         //- Perp dot product (dot product with perpendicular vector)
         inline scalar perp(const Vector2D<Cmpt>& b) const;
-
 };
 
 

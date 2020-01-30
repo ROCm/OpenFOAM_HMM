@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,20 +57,21 @@ class SphericalTensor
 :
     public VectorSpace<SphericalTensor<Cmpt>, Cmpt, 1>
 {
-
 public:
 
-    //- Equivalent type of labels used for valid component indexing
-    typedef SphericalTensor<label> labelType;
+    // Typedefs
+
+        //- Equivalent type of labels used for valid component indexing
+        typedef SphericalTensor<label> labelType;
 
 
-    // Member constants
+    // Member Constants
 
         //- Rank of SphericalTensor is 2
         static constexpr direction rank = 2;
 
 
-    // Static data members
+    // Static Data Members
 
         static const SphericalTensor I;
         static const SphericalTensor oneThirdI;
@@ -81,10 +82,19 @@ public:
     enum components { II };
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        inline SphericalTensor();
+        //- Default construct
+        SphericalTensor() = default;
+
+        //- Copy construct
+        SphericalTensor(const SphericalTensor&) = default;
+
+        //- Copy assignment
+        SphericalTensor& operator=(const SphericalTensor&) = default;
+
+
+    // Constructors
 
         //- Construct initialized to zero
         inline SphericalTensor(const Foam::zero);
@@ -97,10 +107,10 @@ public:
         );
 
         //- Construct given the component
-        inline SphericalTensor(const Cmpt& tii);
+        inline explicit SphericalTensor(const Cmpt& tii);
 
         //- Construct from Istream
-        inline SphericalTensor(Istream&);
+        inline explicit SphericalTensor(Istream& is);
 
 
     // Member Functions
@@ -111,7 +121,7 @@ public:
             inline Cmpt& ii();
 
 
-        //- Transpose
+        //- Transpose (no-op)
         inline const SphericalTensor<Cmpt>& T() const;
 };
 

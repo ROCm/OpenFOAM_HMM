@@ -31,11 +31,6 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline Foam::Tensor<Cmpt>::Tensor()
-{}
-
-
-template<class Cmpt>
 inline Foam::Tensor<Cmpt>::Tensor(const Foam::zero)
 :
     Tensor::msType(Zero)
@@ -66,12 +61,10 @@ inline Foam::Tensor<Cmpt>::Tensor
 
 template<class Cmpt>
 inline Foam::Tensor<Cmpt>::Tensor(const SphericalTensor<Cmpt>& st)
-:
-    Tensor::msType(Zero)
 {
-    this->v_[XX] = st.ii();
-    this->v_[YY] = st.ii();
-    this->v_[ZZ] = st.ii();
+    this->v_[XX] = st.ii(); this->v_[XY] = 0;       this->v_[XZ] = 0;
+    this->v_[YX] = 0;       this->v_[YY] = st.ii(); this->v_[YZ] = 0;
+    this->v_[ZX] = 0;       this->v_[ZY] = 0;       this->v_[ZZ] = st.ii();
 }
 
 
@@ -706,7 +699,10 @@ inline Cmpt tr(const Tensor<Cmpt>& t)
 template<class Cmpt>
 inline SphericalTensor<Cmpt> sph(const Tensor<Cmpt>& t)
 {
-    return (1.0/3.0)*tr(t);
+    return SphericalTensor<Cmpt>
+    (
+        (1.0/3.0)*tr(t)
+    );
 }
 
 

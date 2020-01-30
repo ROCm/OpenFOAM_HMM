@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,16 +57,21 @@ class SphericalTensor2D
 :
     public VectorSpace<SphericalTensor2D<Cmpt>, Cmpt, 1>
 {
-
 public:
 
-    // Member constants
+    // Typedefs
+
+        //- Equivalent type of labels used for valid component indexing
+        typedef SphericalTensor2D<label> labelType;
+
+
+    // Member Constants
 
         //- Rank of SphericalTensor2D is 2
         static constexpr direction rank = 2;
 
 
-    // Static data members
+    // Static Data Members
 
         static const SphericalTensor2D I;
         static const SphericalTensor2D oneThirdI;
@@ -77,10 +82,19 @@ public:
     enum components { II };
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        inline SphericalTensor2D();
+        //- Default construct
+        SphericalTensor2D() = default;
+
+        //- Copy construct
+        SphericalTensor2D(const SphericalTensor2D&) = default;
+
+        //- Copy assignment
+        SphericalTensor2D& operator=(const SphericalTensor2D&) = default;
+
+
+    // Constructors
 
         //- Construct initialized to zero
         inline SphericalTensor2D(const Foam::zero);
@@ -92,10 +106,10 @@ public:
         );
 
         //- Construct given the component
-        inline SphericalTensor2D(const Cmpt& tii);
+        inline explicit SphericalTensor2D(const Cmpt& tii);
 
         //- Construct from Istream
-        inline SphericalTensor2D(Istream&);
+        inline explicit SphericalTensor2D(Istream& is);
 
 
     // Member Functions

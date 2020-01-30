@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -127,10 +127,25 @@ public:
         static const quaternion I;
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        inline quaternion();
+        //- Default construct
+        quaternion() = default;
+
+        //- Copy construct
+        quaternion(const quaternion&) = default;
+
+        //- Copy assignment
+        quaternion& operator=(const quaternion&) = default;
+
+        //- Move construct
+        quaternion(quaternion&&) = default;
+
+        //- Move assignment
+        quaternion& operator=(quaternion&&) = default;
+
+
+    // Constructors
 
         //- Construct zero initialized
         inline quaternion(const Foam::zero);
@@ -193,7 +208,7 @@ public:
        inline quaternion normalized() const;
 
 
-   // Edit
+    // Edit
 
        //- Scalar part of the quaternion ( = cos(theta/2) for rotation)
        inline scalar& w();
@@ -205,7 +220,7 @@ public:
        inline void normalize();
 
 
-   // Transform
+    // Transform
 
        //- Rotate the given vector
        inline vector transform(const vector& v) const;
@@ -222,16 +237,15 @@ public:
 
     // Member Operators
 
-        inline void operator=(const quaternion& q);
         inline void operator+=(const quaternion& q);
         inline void operator-=(const quaternion& q);
         inline void operator*=(const quaternion& q);
         inline void operator/=(const quaternion& q);
 
-        //- Change scalar portion
+        //- Change scalar portion only
         inline void operator=(const scalar s);
 
-        //- Change vector portion
+        //- Change vector portion only
         inline void operator=(const vector& v);
 
         inline void operator*=(const scalar s);

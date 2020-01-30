@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,14 +69,14 @@ public:
         //- Pointer to next entry in list
         link* next_ = nullptr;
 
-        //- Null construct
+        //- Default construct
         link() = default;
     };
 
 
 private:
 
-    // Private Member Data
+    // Private Data
 
        //- A pointer to the last element.
        //  last_->next_ points to first element, i.e. circular storage
@@ -84,15 +84,6 @@ private:
 
        //- Number of elements in the list
        label size_ = 0;
-
-
-    // Private Member Functions
-
-        //- No copy construct
-        SLListBase(const SLListBase&) = delete;
-
-        //- No copy assignment
-        void operator=(const SLListBase&) = delete;
 
 
 protected:
@@ -130,14 +121,19 @@ public:
         friend class const_iterator;
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Null construct
+        //- Default construct
         SLListBase() = default;
 
+        //- No copy construct
+        SLListBase(const SLListBase&) = delete;
 
-    //- Destructor
-    ~SLListBase() = default;
+        //- No copy assignment
+        void operator=(const SLListBase&) = delete;
+
+        //- Destructor
+        ~SLListBase() = default;
 
 
     // Member Functions
@@ -209,6 +205,9 @@ public:
 
         public:
 
+            //- Copy construct
+            iterator(const iterator&) = default;
+
             //- Construct for a node on the list
             inline iterator(SLListBase* list, link* item);
 
@@ -231,6 +230,7 @@ public:
             //- Move forward through list
             inline void next();
 
+            //- Copy assignment
             inline void operator=(const iterator& iter);
 
             inline bool operator==(const iterator& iter) const;
@@ -254,14 +254,14 @@ public:
 
         public:
 
+            //- Copy construct
+            const_iterator(const const_iterator&) = default;
+
             //- Construct for a node on the list
             inline const_iterator(const SLListBase* list, const link* item);
 
             //- Construct from a non-const iterator
             inline const_iterator(const SLListBase::iterator& iter);
-
-            //- Copy construct
-            const_iterator(const const_iterator&) = default;
 
             //- The storage node
             inline const link* get_node() const;
@@ -282,6 +282,7 @@ public:
             //- Move forward through list
             inline void next();
 
+            //- Copy assignment
             const_iterator& operator=(const const_iterator&) = default;
 
             inline bool operator==(const const_iterator& iter) const;
@@ -306,7 +307,6 @@ public:
 
         //- No reverse iteration
         const const_iterator& crend() const = delete;
-
 };
 
 

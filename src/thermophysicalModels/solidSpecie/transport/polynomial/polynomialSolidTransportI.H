@@ -81,7 +81,7 @@ inline Foam::scalar Foam::polynomialSolidTransport<Thermo, PolySize>::mu
 ) const
 {
     NotImplemented;
-    return scalar(0);
+    return 0;
 }
 
 
@@ -119,18 +119,6 @@ inline Foam::scalar Foam::polynomialSolidTransport<Thermo, PolySize>::alphah
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-template<class Thermo, int PolySize>
-inline void Foam::polynomialSolidTransport<Thermo, PolySize>::operator=
-(
-    const polynomialSolidTransport<Thermo, PolySize>& pt
-)
-{
-    Thermo::operator=(pt);
-
-    kappaCoeffs_ = pt.kappaCoeffs_;
-}
-
 
 template<class Thermo, int PolySize>
 inline void Foam::polynomialSolidTransport<Thermo, PolySize>::operator+=

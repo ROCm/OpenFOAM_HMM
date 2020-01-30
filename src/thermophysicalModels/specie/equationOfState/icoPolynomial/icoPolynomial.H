@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,7 +77,7 @@ See also
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 
 template<class Specie, int PolySize>
 class icoPolynomial;
@@ -119,7 +120,7 @@ class icoPolynomial
 :
     public Specie
 {
-    // Private data
+    // Private Data
 
         //- Density polynomial coefficients
         Polynomial<PolySize> rhoCoeffs_;
@@ -136,6 +137,8 @@ class icoPolynomial
 
 public:
 
+    // Generated Methods: copy construct, copy assignment
+
     // Constructors
 
         //- Construct from components
@@ -146,7 +149,7 @@ public:
         );
 
         //- Construct from dictionary
-        icoPolynomial(const dictionary& dict);
+        explicit icoPolynomial(const dictionary& dict);
 
         //- Construct as named copy
         inline icoPolynomial(const word& name, const icoPolynomial&);
@@ -158,7 +161,7 @@ public:
         inline static autoPtr<icoPolynomial> New(const dictionary& dict);
 
 
-    // Member functions
+    // Member Functions
 
         //- Return the instantiated type name
         static word typeName()
@@ -209,14 +212,13 @@ public:
             void write(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
-        inline void operator=(const icoPolynomial&);
         inline void operator+=(const icoPolynomial&);
         inline void operator*=(const scalar);
 
 
-    // Friend operators
+    // Friend Operators
 
         friend icoPolynomial operator+ <Specie, PolySize>
         (
@@ -237,7 +239,7 @@ public:
         );
 
 
-    // Ostream Operator
+    // IOstream Operators
 
         friend Ostream& operator<< <Specie, PolySize>
         (

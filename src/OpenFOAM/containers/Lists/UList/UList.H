@@ -66,7 +66,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class labelRange;
 template<class T> class List;
 template<class T> class SubList;
@@ -87,7 +87,7 @@ typedef UList<label> labelUList;    //!< A UList of labels
 template<class T>
 class UList
 {
-    // Private data
+    // Private Data
 
         //- Number of elements in UList
         label size_;
@@ -167,13 +167,13 @@ public:
         friend class SubList<T>;
 
 
-    // Static Member Functions
+    // Static Functions
 
         //- Return a UList reference to a nullObject
         inline static const UList<T>& null();
 
 
-    // Public classes
+    // Public Classes
 
         //- A list compare binary predicate for normal sort
         struct less
@@ -208,9 +208,15 @@ public:
         };
 
 
+    // Generated Methods
+
+        //- Copy construct
+        UList(const UList<T>&) = default;
+
+
     // Constructors
 
-        //- Null constructor
+        //- Default construct, zero-sized and nullptr
         inline constexpr UList() noexcept;
 
         //- Construct from components
@@ -331,7 +337,7 @@ public:
         void deepCopy(const UList<T>& list);
 
 
-    // Member operators
+    // Member Operators
 
         //- Return element of UList
         inline T& operator[](const label i);

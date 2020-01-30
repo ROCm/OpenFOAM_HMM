@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -135,7 +135,7 @@ public:
         typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
 
-    // Static Member Functions
+    // Static Functions
 
         //- Return a null FixedList
         inline static const FixedList<T, N>& null();
@@ -143,8 +143,8 @@ public:
 
     // Constructors
 
-        //- Null constructor
-        inline FixedList() = default;
+        //- Default construct
+        FixedList() = default;
 
         //- Construct and initialize all entries to given value
         inline explicit FixedList(const T& val);
@@ -155,7 +155,7 @@ public:
         //- Copy construct from C-array
         inline explicit FixedList(const T list[N]);
 
-        //- Copy constructor
+        //- Copy construct
         inline FixedList(const FixedList<T, N>& list);
 
         //- Move construct by using move assignment for the individual

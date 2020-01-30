@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,20 +67,21 @@ class Tensor
 :
     public MatrixSpace<Tensor<Cmpt>, Cmpt, 3, 3>
 {
-
 public:
 
-    //- Equivalent type of labels used for valid component indexing
-    typedef Tensor<label> labelType;
+    // Typedefs
+
+        //- Equivalent type of labels used for valid component indexing
+        typedef Tensor<label> labelType;
 
 
-    // Member constants
+    // Member Constants
 
         //- Rank of Tensor is 2
         static constexpr direction rank = 2;
 
 
-    // Static data members
+    // Static Data Members
 
         static const Tensor I;
 
@@ -89,10 +90,19 @@ public:
     enum components { XX, XY, XZ, YX, YY, YZ, ZX, ZY, ZZ };
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        inline Tensor();
+        //- Default construct
+        Tensor() = default;
+
+        //- Copy construct
+        Tensor(const Tensor&) = default;
+
+        //- Copy assignment
+        Tensor& operator=(const Tensor&) = default;
+
+
+    // Constructors
 
         //- Construct initialized to zero
         inline Tensor(const Foam::zero);
@@ -150,7 +160,7 @@ public:
         );
 
         //- Construct from Istream
-        inline Tensor(Istream& is);
+        inline explicit Tensor(Istream& is);
 
 
     // Member Functions

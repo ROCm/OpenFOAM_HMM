@@ -31,11 +31,6 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline Foam::DiagTensor<Cmpt>::DiagTensor()
-{}
-
-
-template<class Cmpt>
 inline Foam::DiagTensor<Cmpt>::DiagTensor(const Foam::zero)
 :
     VectorSpace<DiagTensor<Cmpt>, Cmpt, 3>(Zero)
@@ -289,7 +284,10 @@ inline Cmpt tr(const DiagTensor<Cmpt>& dt)
 template<class Cmpt>
 inline SphericalTensor<Cmpt> sph(const DiagTensor<Cmpt>& dt)
 {
-    return 0.5*tr(dt);
+    return SphericalTensor<Cmpt>
+    (
+        1.0/3.0*tr(dt)
+    );
 }
 
 

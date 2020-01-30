@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,8 +51,7 @@ using namespace Foam::constant::thermodynamic;
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward Declarations
 class specie;
 
 inline specie operator+(const specie&, const specie&);
@@ -67,7 +67,7 @@ Ostream& operator<<(Ostream&, const specie&);
 
 class specie
 {
-    // Private data
+    // Private Data
 
         //- Name of specie
         word name_;
@@ -81,8 +81,14 @@ class specie
 
 public:
 
-    //- Runtime type information
+    //- Declare type-name (with debug switch)
     ClassName("specie");
+
+
+    // Generated Methods
+
+        //- Copy construct
+        specie(const specie&) = default;
 
 
     // Constructors
@@ -102,7 +108,7 @@ public:
         inline specie(const word& name, const specie&);
 
         //- Construct from dictionary
-        specie(const dictionary& dict);
+        explicit specie(const dictionary& dict);
 
 
     // Member Functions
@@ -122,27 +128,29 @@ public:
             inline scalar R() const;
 
 
-        // I-O
+        // IO
 
             //- Write to Ostream
             void write(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
+        //- Copy assignment, preserve original name
         inline void operator=(const specie&);
+
         inline void operator+=(const specie&);
         inline void operator*=(const scalar);
 
 
-    // Friend operators
+    // Friend Operators
 
         inline friend specie operator+(const specie&, const specie&);
         inline friend specie operator*(const scalar, const specie&);
         inline friend specie operator==(const specie&, const specie&);
 
 
-    // Ostream Operator
+    // IOstream Operators
 
         friend Ostream& operator<<(Ostream&, const specie&);
 };

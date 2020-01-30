@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,20 +59,21 @@ class SymmTensor2D
 :
     public VectorSpace<SymmTensor2D<Cmpt>, Cmpt, 3>
 {
-
 public:
 
-    //- Equivalent type of labels used for valid component indexing
-    typedef SymmTensor2D<label> labelType;
+    // Typedefs
+
+        //- Equivalent type of labels used for valid component indexing
+        typedef SymmTensor2D<label> labelType;
 
 
-    // Member constants
+    // Member Constants
 
         //- Rank of SymmTensor2D is 2
         static constexpr direction rank = 2;
 
 
-    // Static data members
+    // Static Data Members
 
         static const SymmTensor2D I;
 
@@ -81,10 +82,19 @@ public:
     enum components { XX, XY, YY };
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        inline SymmTensor2D();
+        //- Default construct
+        SymmTensor2D() = default;
+
+        //- Copy construct
+        SymmTensor2D(const SymmTensor2D&) = default;
+
+        //- Copy assignment
+        SymmTensor2D& operator=(const SymmTensor2D&) = default;
+
+
+    // Constructors
 
         //- Construct initialized to zero
         inline SymmTensor2D(const Foam::zero);
@@ -103,7 +113,7 @@ public:
         );
 
         //- Construct from Istream
-        inline SymmTensor2D(Istream&);
+        inline explicit SymmTensor2D(Istream& is);
 
 
     // Member Functions

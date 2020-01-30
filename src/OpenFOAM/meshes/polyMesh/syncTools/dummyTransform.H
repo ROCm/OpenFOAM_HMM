@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,7 +74,7 @@ class pTraits<List<T>>
 public:
     typedef label cmptType;
 
-    pTraits(Istream& is)
+    explicit pTraits(Istream& is)
     :
         List<T>(is)
     {}
@@ -87,7 +88,7 @@ class pTraits<UList<T>>
 public:
     typedef label cmptType;
 
-    pTraits(Istream& is)
+    explicit pTraits(Istream& is)
     :
         UList<T>(is)
     {}
@@ -101,7 +102,7 @@ class pTraits<Field<T>>
 public:
     typedef label cmptType;
 
-    pTraits(Istream& is)
+    explicit pTraits(Istream& is)
     :
         Field<T>(is)
     {}
@@ -115,7 +116,7 @@ class pTraits<face>
 public:
     typedef label cmptType;
 
-    pTraits(Istream& is)
+    explicit pTraits(Istream& is)
     :
         face(is)
     {}

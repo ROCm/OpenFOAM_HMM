@@ -30,11 +30,6 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline Foam::SphericalTensor<Cmpt>::SphericalTensor()
-{}
-
-
-template<class Cmpt>
 inline Foam::SphericalTensor<Cmpt>::SphericalTensor(const Foam::zero)
 :
     SphericalTensor::vsType(Zero)

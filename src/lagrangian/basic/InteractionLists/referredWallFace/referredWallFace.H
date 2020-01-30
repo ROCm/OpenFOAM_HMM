@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,15 +48,10 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-class Istream;
-class Ostream;
-
-// Forward declaration of friend functions and operators
+// Forward Declarations
 class referredWallFace;
 Istream& operator>>(Istream&, referredWallFace&);
 Ostream& operator<<(Ostream&, const referredWallFace&);
-
 
 /*---------------------------------------------------------------------------*\
                         Class referredWallFace Declaration
@@ -65,7 +61,7 @@ class referredWallFace
 :
     public face
 {
-    // Private data
+    // Private Data
 
         //- Points of face
         pointField pts_;
@@ -76,10 +72,13 @@ class referredWallFace
 
 public:
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        referredWallFace();
+        //- Default construct
+        referredWallFace() = default;
+
+
+    // Constructors
 
         //- Construct from components
         referredWallFace
@@ -88,13 +87,6 @@ public:
             const pointField& pts,
             label patchi
         );
-
-        //- Construct as copy
-        referredWallFace(const referredWallFace&);
-
-
-    //- Destructor
-    ~referredWallFace();
 
 
     // Member Functions
@@ -118,6 +110,7 @@ public:
 
         bool operator==(const referredWallFace&) const;
         bool operator!=(const referredWallFace&) const;
+
 
     // IOstream Operators
 

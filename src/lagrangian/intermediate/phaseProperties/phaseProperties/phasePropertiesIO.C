@@ -32,11 +32,7 @@ License
 
 Foam::phaseProperties::phaseProperties(Istream& is)
 :
-    phase_(UNKNOWN),
-    stateLabel_("(unknown)"),
-    names_(),
-    Y_(),
-    carrierIds_()
+    phaseProperties()
 {
     is >> *this;
 }
@@ -59,7 +55,7 @@ Foam::Istream& Foam::operator>>(Istream& is, phaseProperties& pp)
 
     const label nComponents = pp.names_.size();
 
-    pp.Y_.resize(nComponents, 0.0);
+    pp.Y_.resize(nComponents, Zero);
     pp.carrierIds_.resize(nComponents, -1);
 
     for (label cmpti = 0; cmpti < nComponents; ++cmpti)

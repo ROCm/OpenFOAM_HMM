@@ -32,13 +32,7 @@ License
 #include "ops.H"
 #include <type_traits>
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class Form, class Cmpt, Foam::direction Ncmpts>
-inline Foam::VectorSpace<Form, Cmpt, Ncmpts>::VectorSpace()
-{}
-
 
 template<class Form, class Cmpt, Foam::direction Ncmpts>
 inline Foam::VectorSpace<Form, Cmpt, Ncmpts>::VectorSpace(const Foam::zero)
@@ -87,13 +81,6 @@ inline Foam::VectorSpace<Form, Cmpt, Ncmpts>::ConstBlock<SubVector, BStart>
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Form, class Cmpt, Foam::direction Ncmpts>
-inline constexpr Foam::direction Foam::VectorSpace<Form, Cmpt, Ncmpts>::size()
-{
-    return Ncmpts;
-}
-
 
 template<class Form, class Cmpt, Foam::direction Ncmpts>
 inline const Cmpt& Foam::VectorSpace<Form, Cmpt, Ncmpts>::component

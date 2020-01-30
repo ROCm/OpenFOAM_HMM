@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,6 +68,7 @@ Description
 
 namespace Foam
 {
+
 /*---------------------------------------------------------------------------*\
               Class SingleKineticRateDevolatilisation Declaration
 \*---------------------------------------------------------------------------*/
@@ -77,10 +78,10 @@ class SingleKineticRateDevolatilisation
 :
     public DevolatilisationModel<CloudType>
 {
-    // Helper class to store specie-local volatile data
+    //- Helper class to store specie-local volatile data
     class volatileData
     {
-        // Private data
+        // Private Data
 
             //- Specie name
             word name_;
@@ -91,41 +92,28 @@ class SingleKineticRateDevolatilisation
             //- Pre-exponential factor
             scalar E_;
 
-
     public:
 
         // Constructors
 
-            //- Null constructor
+            //- Default construct
             volatileData()
             :
-                name_(word::null),
-                A1_(0.0),
-                E_(0.0)
+                name_(),
+                A1_(0),
+                E_(0)
             {}
 
             //- Construct from Istream
-            volatileData(Istream& is)
+            explicit volatileData(Istream& is)
             :
                 name_(is),
                 A1_(readScalar(is)),
                 E_(readScalar(is))
             {}
 
-            //- Construct as copy
-            volatileData(const volatileData& vd)
-            :
-                name_(vd.name_),
-                A1_(vd.A1_),
-                E_(vd.E_)
-            {}
 
-
-        //- Destructor
-        ~volatileData() = default;
-
-
-        // Public Member Functions
+        // Member Functions
 
             // Access
 
@@ -174,9 +162,9 @@ class SingleKineticRateDevolatilisation
     };
 
 
-    // Private data
+    // Private Data
 
-        // Model constants
+        // Model Constants
 
             //- List of volatile data - (name A1 E)
             List<volatileData> volatileData_;
@@ -195,7 +183,7 @@ class SingleKineticRateDevolatilisation
 
 public:
 
-    //- Runtime type information
+    //- Declare type-name, virtual type (with debug switch)
     TypeName("singleKineticRateDevolatilisation");
 
 
@@ -206,12 +194,6 @@ public:
         (
             const dictionary& dict,
             CloudType& owner
-        );
-
-        //- Construct copy
-        SingleKineticRateDevolatilisation
-        (
-            const SingleKineticRateDevolatilisation<CloudType>& dm
         );
 
         //- Construct and return a clone
@@ -225,7 +207,7 @@ public:
 
 
     //- Destructor
-    virtual ~SingleKineticRateDevolatilisation();
+    virtual ~SingleKineticRateDevolatilisation() = default;
 
 
     // Member Functions

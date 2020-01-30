@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,13 +28,9 @@ License
 
 // * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * * //
 
-inline Foam::forceSuSp::forceSuSp()
-{}
-
-
 inline Foam::forceSuSp::forceSuSp(const zero)
 :
-    Tuple2<vector, scalar>(vector::zero, 0.0)
+    Tuple2<vector, scalar>(vector::zero, 0)
 {}
 
 
@@ -86,13 +83,6 @@ inline Foam::scalar& Foam::forceSuSp::Sp()
 
 
 // * * * * * * * * * * * * * * * Operators * * * * * * * * * * * * * * * * * //
-
-inline void Foam::forceSuSp::operator=(const forceSuSp& susp)
-{
-    first() = susp.first();
-    second() = susp.second();
-}
-
 
 inline void Foam::forceSuSp::operator+=(const forceSuSp& susp)
 {

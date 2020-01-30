@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,7 +50,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 template<class T> class SubList;
 
 // Common list types
@@ -70,10 +70,16 @@ class SubList
 {
 public:
 
-    // Static Member Functions
+    // Static Functions
 
         //- Return a null SubList
         inline static const SubList<T>& null();
+
+
+    // Generated Methods
+
+        //- Copy construct
+        SubList(const SubList&) = default;
 
 
     // Constructors
@@ -122,7 +128,7 @@ public:
         //- Copy assign entries from given sub-list
         inline void operator=(const SubList<T>& list);
 
-        //- Copy assign entries to the given list
+        //- Copy assign entries from given list
         inline void operator=(const UList<T>& list);
 
         //- Assign all entries to the given value

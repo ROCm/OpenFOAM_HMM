@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,6 +44,7 @@ Description
 namespace Foam
 {
 
+// Forward Declarations
 class Istream;
 
 /*---------------------------------------------------------------------------*\
@@ -54,19 +56,18 @@ class pTraits
 :
     public PrimitiveType
 {
-
 public:
 
     // Constructors
 
-        //- Construct from primitive
-        pTraits(const PrimitiveType& p)
+        //- Copy construct from primitive
+        explicit pTraits(const PrimitiveType& p)
         :
             PrimitiveType(p)
         {}
 
         //- Construct from Istream
-        pTraits(Istream& is)
+        explicit pTraits(Istream& is)
         :
             PrimitiveType(is)
         {}

@@ -83,7 +83,7 @@ inline Foam::scalar Foam::constAnIsoSolidTransport<Thermo>::
 mu(const scalar p, const scalar T) const
 {
     NotImplemented;
-    return scalar(0);
+    return 0;
 }
 
 
@@ -95,16 +95,6 @@ alphah(const scalar p, const scalar T) const
 }
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-template<class Thermo>
-inline void Foam::constAnIsoSolidTransport<Thermo>::operator=
-(
-    const constAnIsoSolidTransport<Thermo>& ct
-)
-{
-    kappa_ = ct.kappa_;
-}
-
 
 template<class Thermo>
 inline void Foam::constAnIsoSolidTransport<Thermo>::operator+=
