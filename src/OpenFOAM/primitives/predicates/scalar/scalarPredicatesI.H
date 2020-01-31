@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,11 +62,11 @@ inline Foam::predicates::scalars::unary Foam::predicates::scalars::operation
 
 inline bool Foam::predicates::scalars::found
 (
-    const scalar& value,
-    const label start
+    const scalar value,
+    label pos
 ) const
 {
-    return (this->find(value, start) >= 0);
+    return (this->find(value, pos) >= 0);
 }
 
 

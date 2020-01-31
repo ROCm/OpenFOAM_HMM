@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,23 +32,44 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T, unsigned N>
-Foam::label Foam::FixedList<T, N>::find
-(
-    const T& val,
-    const label start
-) const
+Foam::label Foam::FixedList<T, N>::find(const T& val, label pos) const
 {
-    if (start >= 0)
+    if (pos >= 0)
     {
         List_CONST_ACCESS(T, *this, list);
 
-        for (label i = start; i < label(N); ++i)
+        while (pos < label(N))
         {
-            if (list[i] == val)
+            if (list[pos] == val)
             {
-                return i;
+                return pos;
             }
         }
+    }
+
+    return -1;
+}
+
+
+template<class T, unsigned N>
+Foam::label Foam::FixedList<T, N>::rfind(const T& val, label pos) const
+{
+    // pos == -1 has same meaning as std::string::npos - search from end
+    if (pos < 0 || pos >= label(N))
+    {
+        pos = label(N)-1;
+    }
+
+    List_CONST_ACCESS(T, *this, list);
+
+    while (pos >= 0)
+    {
+        if (list[pos] == val)
+        {
+            return pos;
+        }
+
+        --pos;
     }
 
     return -1;

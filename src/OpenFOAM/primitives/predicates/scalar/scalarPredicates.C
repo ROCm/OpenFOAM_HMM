@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -252,22 +252,24 @@ Foam::predicates::scalars::scalars(Istream& is)
 
 Foam::label Foam::predicates::scalars::find
 (
-    const scalar& value,
-    const label start
+    const scalar value,
+    label pos
 ) const
 {
     const label len = this->size();
 
-    if (start >= 0 && len)
+    if (pos >= 0 && len)
     {
         // auto iter = this->cbegin();
 
-        for (label i = start; i < len; ++i)
+        while (pos < len)
         {
-            if ((*this)[i](value))
+            if ((*this)[pos](value))
             {
-                return i;
+                return pos;
             }
+
+            ++pos;
         }
     }
 
@@ -277,19 +279,24 @@ Foam::label Foam::predicates::scalars::find
 
 Foam::label Foam::predicates::scalars::rfind
 (
-    const scalar& value,
-    const label pos
+    const scalar value,
+    label pos
 ) const
 {
-    const label len1 = (this->size()-1);
-
     // pos == -1 has same meaning as std::string::npos - search from end
-    for (label i = ((pos >= 0 && pos < len1) ? pos : len1); i >= 0; --i)
+    if (pos < 0 || pos >= this->size())
     {
-        if ((*this)[i](value))
+        pos = this->size()-1;
+    }
+
+    while (pos >= 0)
+    {
+        if ((*this)[pos](value))
         {
-            return i;
+            return pos;
         }
+
+        --pos;
     }
 
     return -1;

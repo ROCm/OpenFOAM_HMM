@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -304,10 +304,10 @@ template<class T, unsigned N>
 inline bool Foam::FixedList<T, N>::found
 (
     const T& val,
-    const label start
+    label pos
 ) const
 {
-    return (this->find(val, start) >= 0);
+    return (this->find(val, pos) >= 0);
 }
 
 

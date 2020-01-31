@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -259,22 +259,22 @@ public:
     // Search
 
         //- Index of the first match for the value.
-        //  When start is specified, any occurrences before start are ignored.
+        //  Any occurences before the start pos are ignored.
         //  Linear search.
         //  \return position in list or -1 if not found.
-        label find(const scalar& value, const label start=0) const;
+        label find(const scalar value, label pos = 0) const;
 
         //- Index of the last match for the value.
-        //  When pos is specified, any occurrences after pos are ignored.
+        //  Any occurences after the end pos are ignored.
         //  Linear search.
         //  \return position in list or -1 if not found.
-        label rfind(const scalar& value, const label pos=-1) const;
+        label rfind(const scalar value, label pos = -1) const;
 
         //- True if the value matches any in the list.
-        //  When start is specified, any occurences before start are ignored.
+        //  Any occurences before the start pos are ignored.
         //  Linear search.
         //  \return true if found.
-        inline bool found(const scalar& value, const label start=0) const;
+        inline bool found(const scalar value, label pos=0) const;
 
         //- Match any condition in the list.
         //

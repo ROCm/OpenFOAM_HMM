@@ -196,20 +196,22 @@ std::streamsize Foam::UList<T>::byteSize() const
 
 
 template<class T>
-Foam::label Foam::UList<T>::find(const T& val, const label start) const
+Foam::label Foam::UList<T>::find(const T& val, label pos) const
 {
     const label len = this->size();
 
-    if (start >= 0 && len)
+    if (pos >= 0 && len)
     {
-        List_CONST_ACCESS(T, (*this), vp);
+        List_CONST_ACCESS(T, (*this), list);
 
-        for (label i = start; i < len; ++i)
+        while (pos < len)
         {
-            if (vp[i] == val)
+            if (list[pos] == val)
             {
-                return i;
+                return pos;
             }
+
+            ++pos;
         }
     }
 
@@ -218,19 +220,24 @@ Foam::label Foam::UList<T>::find(const T& val, const label start) const
 
 
 template<class T>
-Foam::label Foam::UList<T>::rfind(const T& val, const label pos) const
+Foam::label Foam::UList<T>::rfind(const T& val, label pos) const
 {
-    List_CONST_ACCESS(T, (*this), vp);
-
-    const label len1 = (this->size()-1);
-
     // pos == -1 has same meaning as std::string::npos - search from end
-    for (label i = ((pos >= 0 && pos < len1) ? pos : len1); i >= 0; --i)
+    if (pos < 0 || pos >= this->size())
     {
-        if (vp[i] == val)
+        pos = this->size()-1;
+    }
+
+    List_CONST_ACCESS(T, (*this), list);
+
+    while (pos >= 0)
+    {
+        if (list[pos] == val)
         {
-            return i;
+            return pos;
         }
+
+        --pos;
     }
 
     return -1;

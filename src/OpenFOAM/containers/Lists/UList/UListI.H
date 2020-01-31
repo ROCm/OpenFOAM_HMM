@@ -209,9 +209,9 @@ inline T* Foam::UList<T>::data()
 
 
 template<class T>
-inline bool Foam::UList<T>::found(const T& val, const label start) const
+inline bool Foam::UList<T>::found(const T& val, label pos) const
 {
-    return (this->find(val, start) >= 0);
+    return (this->find(val, pos) >= 0);
 }
 
 

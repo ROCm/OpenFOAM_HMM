@@ -249,12 +249,21 @@ public:
     // Search
 
         //- Find index of the first occurence of the value.
+        //  Any occurences before the start pos are ignored.
         //  Linear search.
         //  \return -1 if not found.
-        label find(const T& val, const label start=0) const;
+        label find(const T& val, label pos = 0) const;
 
-        //- True if the value if found in the list. Linear search.
-        inline bool found(const T& val, const label start=0) const;
+        //- Find index of the last occurrence of the value.
+        //  Any occurrences after the end pos are ignored.
+        //  Linear search.
+        //  \return position in list or -1 if not found.
+        label rfind(const T& val, label pos = -1) const;
+
+        //- True if the value if found in the list.
+        //  Any occurences before the start pos are ignored.
+        //  Linear search.
+        inline bool found(const T& val, label pos = 0) const;
 
 
     // Edit
