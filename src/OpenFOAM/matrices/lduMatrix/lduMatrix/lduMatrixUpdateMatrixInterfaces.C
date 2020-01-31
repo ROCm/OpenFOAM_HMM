@@ -92,7 +92,7 @@ void Foam::lduMatrix::initMatrixInterfaces
     else
     {
         FatalErrorInFunction
-            << "Unsuported communications type "
+            << "Unsupported communications type "
             << Pstream::commsTypeNames[Pstream::defaultCommsType]
             << exit(FatalError);
     }
@@ -272,7 +272,7 @@ void Foam::lduMatrix::updateMatrixInterfaces
     else
     {
         FatalErrorInFunction
-            << "Unsuported communications type "
+            << "Unsupported communications type "
             << Pstream::commsTypeNames[Pstream::defaultCommsType]
             << exit(FatalError);
     }

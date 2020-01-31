@@ -41,8 +41,7 @@ Description
         airframe noise, VKI LS 2013-03.
     \endverbatim
 
-
-    Contact:      info@cfd-berlin.com
+    Contact:      info@upstream-cfd.com
 
 \*---------------------------------------------------------------------------*/
 

@@ -31,7 +31,7 @@ Description
     corresponding to PDR basic drag model (\link basic.H \endlink)
 
     The default model coefficients correspond to the following:
-    @verbatim
+    \verbatim
         PDRkEpsilonCoeffs
         {
             Cmu         0.09;
@@ -43,7 +43,7 @@ Description
             sigmaEps    1.3;
             Prt         1.0;    // only for compressible
         }
-    @endverbatim
+    \endverbatim
 
     The turbulence source term \f$ G_{R} \f$ appears in the
     \f$ \kappa-\epsilon \f$ equation for the generation of turbulence due to

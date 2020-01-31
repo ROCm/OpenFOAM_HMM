@@ -46,8 +46,8 @@ Description
     }
     \endverbatim
 
-    The result program would receive \b -time, @b -latestTime, @b -constant
-    and \b -noZero options. The @b -constant option explicitly includes the
+    The result program would receive \b -time, \b -latestTime, \b -constant
+    and \b -noZero options. The \b -constant option explicitly includes the
     \c constant/ directory in the time list and the \b -noZero option
     explicitly excludes the \c 0/ directory from the time list.
 
@@ -133,7 +133,7 @@ public:
         //   behaviour (and \b -latestTime behaviour) to exclude the \c 0/
         //   directory. The \c 0/ directory will only be included when
         //   \b -withZero is specified.
-        //   The \b -noZero option has precedence over the @b -withZero option.
+        //   The \b -noZero option has precedence over the \b -withZero option.
         static void addOptions
         (
             const bool constant=true,

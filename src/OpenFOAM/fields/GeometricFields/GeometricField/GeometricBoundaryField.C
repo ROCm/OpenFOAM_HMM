@@ -432,7 +432,7 @@ evaluate()
     else
     {
         FatalErrorInFunction
-            << "Unsuported communications type "
+            << "Unsupported communications type "
             << Pstream::commsTypeNames[Pstream::defaultCommsType]
             << exit(FatalError);
     }

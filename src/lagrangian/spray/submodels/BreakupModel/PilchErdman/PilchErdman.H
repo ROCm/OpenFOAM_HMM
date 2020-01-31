@@ -32,13 +32,13 @@ Group
 Description
     Particle secondary breakup model, based on the reference:
 
-    @verbatim
+    \verbatim
     Pilch, M. and Erdman, C.A.
     "Use of breakup time data and velocity history data
      to predict the maximum size of stable fragments for acceleration
      induced breakup of a liquid drop."
     Int. J. Multiphase Flows 13 (1987), 741-757
-    @endverbatim
+    \endverbatim
 
     The droplet fragment velocity is described by the equation:
 
@@ -69,6 +69,7 @@ Description
 
 namespace Foam
 {
+
 /*---------------------------------------------------------------------------*\
                         Class PilchErdman Declaration
 \*---------------------------------------------------------------------------*/
