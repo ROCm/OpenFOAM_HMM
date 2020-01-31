@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +31,15 @@ template<class T, class Addr>
 template<class ListType>
 inline void Foam::IndirectListBase<T, Addr>::copyList(const ListType& rhs)
 {
+    if
+    (
+        this
+     == reinterpret_cast<IndirectListBase<T,Addr>*>(const_cast<ListType*>(&rhs))
+    )
+    {
+        return;  // Self-assignment is a no-op
+    }
+
     const label len = addr_.size();
 
     if (len != rhs.size())
@@ -94,10 +102,10 @@ template<class T, class Addr>
 inline bool Foam::IndirectListBase<T, Addr>::found
 (
     const T& val,
-    const label pos
+    label pos
 ) const
 {
-    return this->find(val, pos) != -1;
+    return (this->find(val, pos) >= 0);
 }
 
 

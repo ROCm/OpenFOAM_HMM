@@ -37,7 +37,6 @@ Description
     variant etc.
 
 SourceFiles
-    UIndirectListI.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -52,7 +51,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 template<class T> class UIndirectList;
 
 // Common list types
@@ -78,8 +77,7 @@ public:
             IndirectListBase<T, labelUList>(values, addr)
         {}
 
-        //- Copy construct from UIndirectList with
-        //- shallow copy of values and addressing arrays
+        //- Copy construct (shallow copy of values and addressing arrays)
         UIndirectList(const UIndirectList<T>& list)
         :
             UIndirectList<T>(list.values(), list.addressing())

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,66 +23,31 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::SliceList
+InClass
+    Foam
 
 Description
-    A List with indirect slice addressing.
-
-SourceFiles
+    Forward declarations for common indirect list types.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SliceList_H
-#define SliceList_H
-
-#include "IndirectListAddressing.H"
-#include "IndirectListBase.H"
-#include "sliceRange.H"
+#ifndef IndirectListsFwd_H
+#define IndirectListsFwd_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-/*---------------------------------------------------------------------------*\
-                          Class SliceList Declaration
-\*---------------------------------------------------------------------------*/
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class T>
-class SliceList
-:
-    private IndirectListAddressing<sliceRange>,
-    public IndirectListBase<T, sliceRange>
-{
-public:
+template<class T, class Addr> class IndirectListBase;
+template<class T> class UIndirectList;
+template<class T> class IndirectList;
+template<class T> class IndirectSubList;
+template<class T> class SliceList;
 
-    // Constructors
-
-        //- Copy construct from values list and slicing
-        SliceList(const UList<T>& values, const sliceRange& addr)
-        :
-            IndirectListAddressing<sliceRange>(addr),
-            IndirectListBase<T, sliceRange>
-            (
-                values,
-                IndirectListAddressing<sliceRange>::addressing()
-            )
-        {}
-
-
-    // Member Functions
-
-        //- The list addressing
-        using IndirectListAddressing::addressing;
-
-
-    // Member Operators
-
-        //- Use standard assignment operations
-        using IndirectListBase<T, sliceRange>::operator=;
-};
-
+//Not common enough: template<class T> class SortList;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

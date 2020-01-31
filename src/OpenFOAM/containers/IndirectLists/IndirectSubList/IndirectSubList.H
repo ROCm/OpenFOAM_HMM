@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,21 +24,30 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::SliceList
+    Foam::IndirectSubList
 
 Description
-    A List with indirect slice addressing.
+    Indirect access to a sub-section of a list.
+
+    In many cases, using a Foam::SubList provides a simpler and more
+    efficient means of accessing a sub-list.
+    There are, however, some advantages of a IndirectSubList:
+    - allows adjustment of its addressing range after construct
+    - can recover the original, underlying list at any time
+
+SeeAlso
+    Foam::SubList
 
 SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SliceList_H
-#define SliceList_H
+#ifndef IndirectSubList_H
+#define IndirectSubList_H
 
 #include "IndirectListAddressing.H"
 #include "IndirectListBase.H"
-#include "sliceRange.H"
+#include "labelRange.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,27 +55,42 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class SliceList Declaration
+                       Class IndirectSubList Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T>
-class SliceList
+class IndirectSubList
 :
-    private IndirectListAddressing<sliceRange>,
-    public IndirectListBase<T, sliceRange>
+    private IndirectListAddressing<labelRange>,
+    public IndirectListBase<T, labelRange>
 {
 public:
 
     // Constructors
 
-        //- Copy construct from values list and slicing
-        SliceList(const UList<T>& values, const sliceRange& addr)
+        //- Construct from UList, the entire size
+        explicit IndirectSubList(const UList<T>& values)
         :
-            IndirectListAddressing<sliceRange>(addr),
-            IndirectListBase<T, sliceRange>
+            IndirectListAddressing<labelRange>(labelRange(0, values.size())),
+            IndirectListBase<T, labelRange>
             (
                 values,
-                IndirectListAddressing<sliceRange>::addressing()
+                IndirectListAddressing<labelRange>::addressing()
+            )
+        {}
+
+        //- Construct from values list and range
+        IndirectSubList
+        (
+            const UList<T>& values,
+            const labelRange& addr
+        )
+        :
+            IndirectListAddressing<labelRange>(addr),
+            IndirectListBase<T, labelRange>
+            (
+                values,
+                IndirectListAddressing<labelRange>::addressing()
             )
         {}
 
@@ -80,7 +104,7 @@ public:
     // Member Operators
 
         //- Use standard assignment operations
-        using IndirectListBase<T, sliceRange>::operator=;
+        using IndirectListBase<T, labelRange>::operator=;
 };
 
 

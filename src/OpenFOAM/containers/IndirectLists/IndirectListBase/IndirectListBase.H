@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,7 +33,6 @@ Description
     is held outside of the class.
 
 SourceFiles
-    IndirectListBase.H
     IndirectListBase.C
     IndirectListBaseI.H
     IndirectListBaseIO.C
@@ -70,7 +69,7 @@ protected:
 
     // Protected Member Functions
 
-        //- Copy values The number of elements in the list
+        //- Deep copy values from the list
         template<class ListType>
         inline void copyList(const ListType& rhs);
 
@@ -112,7 +111,7 @@ public:
 
     // Constructors
 
-        //- No null construct
+        //- No default construct
         IndirectListBase() = delete;
 
         //- Store references to the values list and the addressing array
@@ -184,19 +183,21 @@ public:
     // Search
 
         //- Find index of the first occurrence of the value.
-        //  When start is specified, any occurences before start are ignored.
+        //  Any occurences before the start pos are ignored.
         //  Linear search.
         //  \return -1 if not found.
-        label find(const T& val, const label start=0) const;
+        label find(const T& val, label pos = 0) const;
 
         //- Find index of the last occurrence of the value.
-        //  When pos is specified, any occurrences after pos are ignored.
+        //  Any occurrences after the end pos are ignored.
         //  Linear search.
         //  \return -1 if not found.
-        label rfind(const T& val, const label pos=-1) const;
+        label rfind(const T& val, label pos = -1) const;
 
-        //- True if the value if found in the list. Linear search.
-        inline bool found(const T& val, const label start=0) const;
+        //- True if the value if found in the list.
+        //  Any occurences before the start pos are ignored.
+        //  Linear search.
+        inline bool found(const T& val, label pos=0) const;
 
 
     // Member Operators

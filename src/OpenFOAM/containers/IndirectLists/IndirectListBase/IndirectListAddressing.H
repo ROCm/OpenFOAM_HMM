@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,12 +27,11 @@ Class
     Foam::IndirectListAddressing
 
 Description
-    A class for storing list addressing (labels, slices etc) which are
-    normally to used by IndirectList. A private inheritance is often used
-    by any inheriting classes.
+    A class for storing list addressing (labels, slices etc), which are
+    normally to used by IndirectList.
+    Private inheritance is often used by any inheriting classes.
 
 SourceFiles
-    IndirectListAddressing.H
 
 \*---------------------------------------------------------------------------*/
 

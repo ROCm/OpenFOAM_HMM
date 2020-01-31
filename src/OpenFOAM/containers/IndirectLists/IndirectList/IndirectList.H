@@ -72,6 +72,9 @@ public:
         //- Copy construct addressing, shallow copy values list reference
         inline IndirectList(const IndirectList<T>& list);
 
+        //- Move construct addressing, shallow copy values list reference
+        inline IndirectList(IndirectList<T>&& list);
+
         //- Copy construct addressing, shallow copy values list reference
         inline explicit IndirectList(const UIndirectList<T>& list);
 

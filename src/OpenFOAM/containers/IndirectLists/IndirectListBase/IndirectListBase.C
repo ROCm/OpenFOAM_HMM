@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,21 +31,23 @@ template<class T, class Addr>
 Foam::label Foam::IndirectListBase<T, Addr>::find
 (
     const T& val,
-    const label start
+    label pos
 ) const
 {
     const label len = addr_.size();
 
-    if (start >= 0 && len)
+    if (pos >= 0 && len)
     {
         List_CONST_ACCESS(T, values_, vals);
 
-        for (label i = start; i < len; ++i)
+        while (pos < len)
         {
-            if (vals[addr_[i]] == val)
+            if (vals[addr_[pos]] == val)
             {
-                return i;
+                return pos;
             }
+
+            ++pos;
         }
     }
 
@@ -57,20 +59,26 @@ template<class T, class Addr>
 Foam::label Foam::IndirectListBase<T, Addr>::rfind
 (
     const T& val,
-    const label pos
+    label pos
 ) const
 {
+    // pos == -1 has same meaning as std::string::npos - search from end
+
+    if (pos < 0 || pos >= addr_.size())
+    {
+        pos = addr_.size()-1;
+    }
+
     List_CONST_ACCESS(T, values_, vals);
 
-    const label len1 = (addr_.size()-1);
-
-    // pos == -1 has same meaning as std::string::npos - search from end
-    for (label i = ((pos >= 0 && pos < len1) ? pos : len1); i >= 0; --i)
+    while (pos >= 0)
     {
-        if (vals[addr_[i]] == val)
+        if (vals[addr_[pos]] == val)
         {
-            return i;
+            return pos;
         }
+
+        --pos;
     }
 
     return -1;

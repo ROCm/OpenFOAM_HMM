@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,6 +65,19 @@ inline Foam::IndirectList<T>::IndirectList(const IndirectList<T>& list)
 :
     // Copy addressing
     IndirectListAddressing<labelList>(list.addressing()),
+    UIndirectList<T>
+    (
+        list.values(),
+        IndirectListAddressing<labelList>::addressing()
+    )
+{}
+
+
+template<class T>
+inline Foam::IndirectList<T>::IndirectList(IndirectList<T>&& list)
+:
+    // Move addressing
+    IndirectListAddressing<labelList>(std::move(list.addressing())),
     UIndirectList<T>
     (
         list.values(),
