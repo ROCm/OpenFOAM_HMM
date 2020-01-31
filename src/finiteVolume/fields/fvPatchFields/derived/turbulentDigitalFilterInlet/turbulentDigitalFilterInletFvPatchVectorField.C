@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,11 +96,11 @@ Foam::turbulentDigitalFilterInletFvPatchVectorField::patchIndexPairs()
     const vector nf(computePatchNormal());
 
     // Find the second local coordinate direction
-    direction minCmpt = -1;
-    scalar minMag = VGREAT;
-    for (direction cmpt = 0; cmpt < pTraits<vector>::nComponents; ++cmpt)
+    direction minCmpt = 0;
+    scalar minMag = mag(nf[minCmpt]);
+    for (direction cmpt = 1; cmpt < pTraits<vector>::nComponents; ++cmpt)
     {
-        scalar s = mag(nf[cmpt]);
+        const scalar s = mag(nf[cmpt]);
         if (s < minMag)
         {
             minMag = s;
@@ -110,7 +110,7 @@ Foam::turbulentDigitalFilterInletFvPatchVectorField::patchIndexPairs()
 
     // Create the second local coordinate direction
     vector e2(Zero);
-    e2[minCmpt] = 1.0;
+    e2[minCmpt] = 1;
 
     // Remove normal component
     e2 -= (nf&e2)*nf;
@@ -147,17 +147,14 @@ Foam::turbulentDigitalFilterInletFvPatchVectorField::patchIndexPairs()
     // Compute virtual-actual patch index pairs
     List<Pair<label>> indexPairs(this->size(), Pair<label>(Zero, Zero));
 
-    // Virtual turbulence plane indices
-    label j = 0;
-    label k = 0;
-
     forAll(*this, facei)
     {
         const scalar& centre0 = localPos[facei][0];
         const scalar& centre1 = localPos[facei][1];
 
-        j = label((centre0 - localMinPt[0])*invDelta_[0]);
-        k = label((centre1 - localMinPt[1])*invDelta_[1]);
+        // Virtual turbulence plane indices
+        const label j = label((centre0 - localMinPt[0])*invDelta_[0]);
+        const label k = label((centre1 - localMinPt[1])*invDelta_[1]);
 
         indexPairs[facei] = Pair<label>(facei, k*n[0] + j);
     }

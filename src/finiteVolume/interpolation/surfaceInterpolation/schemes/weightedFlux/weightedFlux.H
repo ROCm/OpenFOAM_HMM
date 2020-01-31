@@ -162,7 +162,7 @@ public:
 
 
     //- Destructor
-    ~weightedFlux();
+    virtual ~weightedFlux();
 
 
     // Member Functions

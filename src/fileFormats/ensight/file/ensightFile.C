@@ -166,19 +166,15 @@ Foam::Ostream& Foam::ensightFile::write
 
 Foam::Ostream& Foam::ensightFile::write(const char* value)
 {
-    // Parentheses around strncpy to silence the GCC -Wstringop-truncation
-    // warning, which is spurious here.
-    // The max-size and buffer-size *are* identical, which means the buffer
-    // may not have a nul terminator. However, this is properly handled in
-    // the subsequent binary write and the ASCII write explicitly adds
-    // a nul terminator.
+    // Output 80 chars, but allocate for trailing nul character
+    // to avoid -Wstringop-truncation warnings/errors.
 
-    char buf[80];
-    (strncpy(buf, value, 80)); // max 80 chars or padded with nul if smaller
+    char buf[80+1];
+    strncpy(buf, value, 80); // max 80 chars or padded with nul if smaller
 
     if (format() == IOstream::BINARY)
     {
-        write(buf, sizeof(buf));
+        write(buf, 80);
     }
     else
     {
