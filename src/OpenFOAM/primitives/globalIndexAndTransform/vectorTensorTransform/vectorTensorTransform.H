@@ -97,13 +97,6 @@ public:
         vectorTensorTransform&
             operator=(const vectorTensorTransform&) = default;
 
-        //- Move construct
-        vectorTensorTransform(vectorTensorTransform&&) = default;
-
-        //- Move assignment
-        vectorTensorTransform&
-            operator=(vectorTensorTransform&&) = default;
-
 
     // Constructors
 

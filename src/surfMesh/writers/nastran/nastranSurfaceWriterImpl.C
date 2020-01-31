@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,7 +70,7 @@ Foam::Ostream& Foam::surfaceWriters::nastranWriter::writeFaceValue
     Ostream& os,
     const loadFormat format,
     const Type& value,
-    const label EID
+    const label elemId
 ) const
 {
     // Fixed short/long formats supporting PLOAD2 and PLOAD4:
@@ -87,7 +87,7 @@ Foam::Ostream& Foam::surfaceWriters::nastranWriter::writeFaceValue
     // 3 EID        : element ID
     // 4 onwards    : load values
 
-    label SID = 1;
+    const label setId = 1;
 
     Type scaledValue = scale_*value;
 
@@ -98,7 +98,7 @@ Foam::Ostream& Foam::surfaceWriters::nastranWriter::writeFaceValue
     // Write load set ID
     os.setf(std::ios_base::right);
 
-    writeValue(os, SID) << separator_;
+    writeValue(os, setId) << separator_;
 
     switch (format)
     {
@@ -119,13 +119,13 @@ Foam::Ostream& Foam::surfaceWriters::nastranWriter::writeFaceValue
                 writeValue(os, scalar(0)) << separator_;
             }
 
-            writeValue(os, EID);
+            writeValue(os, elemId);
             break;
         }
 
         case loadFormat::PLOAD4 :
         {
-            writeValue(os, EID);
+            writeValue(os, elemId);
 
             for (direction d = 0; d < pTraits<Type>::nComponents; ++d)
             {
@@ -197,7 +197,7 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
             mkDir(outputFile.path());
         }
 
-        const scalar timeValue = 0.0;
+        const scalar timeValue(0);
 
         OFstream os(outputFile);
         fileFormats::NASCore::setPrecision(os, writeFormat_);
@@ -214,7 +214,7 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
             << "$" << nl
             << "BEGIN BULK" << nl;
 
-        List<DynamicList<face>> decomposedFaces;
+        List<faceList> decomposedFaces;
         writeGeometry(os, surf, decomposedFaces);
 
         os  << "$" << nl
@@ -225,7 +225,7 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
 
         if (this->isPointData())
         {
-            for (const DynamicList<face>& dFaces : decomposedFaces)
+            for (const faceList& dFaces : decomposedFaces)
             {
                 for (const face& f : dFaces)
                 {
@@ -243,12 +243,15 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
         }
         else
         {
-            for (const DynamicList<face>& dFaces : decomposedFaces)
+            auto valIter = values.cbegin();
+
+            for (const faceList& dFaces : decomposedFaces)
             {
                 forAll(dFaces, facei)
                 {
-                    writeFaceValue(os, format, values[facei], ++elemId);
+                    writeFaceValue(os, format, *valIter, ++elemId);
                 }
+                ++valIter;
             }
         }
 

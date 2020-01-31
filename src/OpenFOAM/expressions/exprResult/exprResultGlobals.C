@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -203,7 +203,7 @@ Foam::expressions::exprResultGlobals::get
         {
             WarningInFunction
                 << "No scope " << scopeName << " for " << name << nl
-                << "Known global scopes: " << variables_.sortToc() << nl;
+                << "Known global scopes: " << variables_.sortedToc() << nl;
         }
         #endif
     }

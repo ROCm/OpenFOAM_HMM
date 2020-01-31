@@ -138,12 +138,6 @@ public:
         //- Copy assignment
         quaternion& operator=(const quaternion&) = default;
 
-        //- Move construct
-        quaternion(quaternion&&) = default;
-
-        //- Move assignment
-        quaternion& operator=(quaternion&&) = default;
-
 
     // Constructors
 

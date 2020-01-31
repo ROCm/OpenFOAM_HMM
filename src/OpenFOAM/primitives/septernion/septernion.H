@@ -96,12 +96,6 @@ public:
         //- Copy assignment
         septernion& operator=(const septernion&) = default;
 
-        //- Move construct
-        septernion(septernion&&) = default;
-
-        //- Move assignment
-        septernion& operator=(septernion&&) = default;
-
 
     // Constructors
 

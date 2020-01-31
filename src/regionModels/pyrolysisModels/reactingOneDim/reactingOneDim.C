@@ -622,7 +622,7 @@ scalar reactingOneDim::solidRegionDiffNo() const
         DiNum = max(KrhoCpbyDelta.primitiveField())*time().deltaTValue();
     }
 
-    return DiNum;
+    return returnReduce(DiNum, maxOp<scalar>());
 }
 
 
