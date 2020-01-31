@@ -9,7 +9,7 @@
 	url = https://develop.openfoam.com/Community/adiosfoam.git
 [submodule "OpenQBMM"]
 	path = modules/OpenQBMM
-	url = https://github.com/OpenQBMM/OpenQBMM
+	url = https://github.com/OpenQBMM/OpenQBMM.git
 	branch = openfoam.com
 [submodule "visualization"]
 	path = modules/visualization
