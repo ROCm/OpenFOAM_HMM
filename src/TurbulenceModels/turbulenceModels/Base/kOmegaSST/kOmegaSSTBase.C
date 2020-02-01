@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2017, OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -501,7 +501,11 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
 
     tmp<volTensorField> tgradU = fvc::grad(U);
     volScalarField S2(2*magSqr(symm(tgradU())));
-    volScalarField::Internal GbyNu0((tgradU() && dev(twoSymm(tgradU()))));
+    volScalarField::Internal GbyNu0
+    (
+        this->type() + ":GbyNu",
+        (tgradU() && dev(twoSymm(tgradU())))
+    );
     volScalarField::Internal G(this->GName(), nut*GbyNu0);
 
     // Update omega and G at the wall
@@ -519,6 +523,8 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
         volScalarField::Internal gamma(this->gamma(F1));
         volScalarField::Internal beta(this->beta(F1));
 
+        GbyNu0 = GbyNu(GbyNu0, F23(), S2());
+
         // Turbulent frequency equation
         tmp<fvScalarMatrix> omegaEqn
         (
@@ -526,7 +532,7 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
           + fvm::div(alphaRhoPhi, omega_)
           - fvm::laplacian(alpha*rho*DomegaEff(F1), omega_)
          ==
-            alpha()*rho()*gamma*GbyNu(GbyNu0, F23(), S2())
+            alpha()*rho()*gamma*GbyNu0
           - fvm::SuSp((2.0/3.0)*alpha()*rho()*gamma*divU, omega_)
           - fvm::Sp(alpha()*rho()*beta*omega_(), omega_)
           - fvm::SuSp
