@@ -200,6 +200,50 @@ void reduce
 );
 
 
+#if defined(WM_SPDP)
+void reduce
+(
+    solveScalar& Value,
+    const sumOp<solveScalar>& bop,
+    const int tag = Pstream::msgType(),
+    const label comm = UPstream::worldComm
+);
+
+void reduce
+(
+    solveScalar& Value,
+    const minOp<solveScalar>& bop,
+    const int tag = Pstream::msgType(),
+    const label comm = UPstream::worldComm
+);
+
+void reduce
+(
+    Vector2D<solveScalar>& Value,
+    const sumOp<Vector2D<solveScalar>>& bop,
+    const int tag = Pstream::msgType(),
+    const label comm = UPstream::worldComm
+);
+
+void sumReduce
+(
+    solveScalar& Value,
+    label& Count,
+    const int tag = Pstream::msgType(),
+    const label comm = UPstream::worldComm
+);
+
+void reduce
+(
+    solveScalar& Value,
+    const sumOp<solveScalar>& bop,
+    const int tag,
+    const label comm,
+    label& request
+);
+#endif
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
