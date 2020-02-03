@@ -5,35 +5,24 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2017 OpenCFD Ltd.
+#     Copyright (C) 2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # File
-#     config.sh/example/compiler
-#     - sourced by OpenFOAM-*/etc/config.sh/settings
+#     config.sh/example/compiler-Gcc92
+#     - sourced by OpenFOAM-*/etc/config.sh/compiler
 #
 # Description
-#     Older example of fine tuning compiler settings for OpenFOAM.
-#
-#     The preferred mechanism is now with a "compiler-$WM_COMPILER" file
-#     in one of the etc/ directories.
+#     Example of fine tuning compiler settings with a hook
 #
 #------------------------------------------------------------------------------
 
-# Load the standard versions
-eval $($WM_PROJECT_DIR/bin/foamEtcFile -sh -config -mode=o compiler)
-
 # Modify/override compiler settings
-case "$WM_COMPILER" in
-Gcc70*)
-    gcc_version=gcc-7.0.0
-    gmp_version=gmp-6.1.2
-    mpfr_version=mpfr-3.1.5
-    mpc_version=mpc-1.0.3
-    ;;
-esac
+gcc_version=gcc-9.2.0
+gmp_version=gmp-6.2.0
+mpfr_version=mpfr-4.0.2
+mpc_version=mpc-1.1.0
 
 #------------------------------------------------------------------------------

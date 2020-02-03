@@ -6,11 +6,10 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2016 OpenFOAM Foundation
-#     Copyright (C) 2016-2019 OpenCFD Ltd.
+#     Copyright (C) 2016-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # File
 #     etc/config.csh/compiler
@@ -24,14 +23,19 @@
 
 switch ("$WM_COMPILER_TYPE")
 case ThirdParty:
-    # Default versions of GMP, MPFR, MPC - override as necessary
+    # Default versions (CLANG, GCC, GMP, MPFR, MPC) - override as necessary
 
-    set gmp_version=gmp-system
-    set mpfr_version=mpfr-system
-    set mpc_version=mpc-system
+    set default_clang_version=llvm-3.7.1
+    set default_gcc_version=gcc-4.8.5
+
+    set default_gmp_version=gmp-system
+    set default_mpfr_version=mpfr-system
+    set default_mpc_version=mpc-system
 
     switch ("$WM_COMPILER")
     case Gcc:
+        set gcc_version="$default_gcc_version"
+        breaksw
     case Gcc48*:
         set gcc_version=gcc-4.8.5
         breaksw
@@ -95,7 +99,10 @@ case ThirdParty:
     case Gcc92*:
         set gcc_version=gcc-9.2.0
         breaksw
+
     case Clang:
+        set clang_version="$default_clang_version"
+        breaksw
     case Clang37*:
         set clang_version=llvm-3.7.1
         breaksw
@@ -126,6 +133,7 @@ case ThirdParty:
     case Clang90*:
         set clang_version=llvm-9.0.0
         breaksw
+
     default:
         /bin/cat << UNKNOWN_COMPILER
 ===============================================================================
@@ -142,5 +150,8 @@ UNKNOWN_COMPILER
     _foamEtc -config "compiler-$WM_COMPILER"
     breaksw
 endsw
+
+unset default_gcc_version default_clang_version
+unset default_gmp_version default_mpfr_version default_mpc_version
 
 #------------------------------------------------------------------------------
