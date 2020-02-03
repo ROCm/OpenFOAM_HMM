@@ -44,6 +44,8 @@ Foam::label Foam::FixedList<T, N>::find(const T& val, label pos) const
             {
                 return pos;
             }
+
+            ++pos;
         }
     }
 
