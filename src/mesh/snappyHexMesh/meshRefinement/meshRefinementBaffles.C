@@ -55,6 +55,9 @@ License
 #include "zeroGradientFvPatchFields.H"
 #include "volFields.H"
 
+#include "FaceCellWave.H"
+#include "wallPoints.H"
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 Foam::label Foam::meshRefinement::createBaffle
@@ -2177,6 +2180,313 @@ void Foam::meshRefinement::erodeCellZone
 }
 
 
+void Foam::meshRefinement::growCellZone
+(
+    const label nGrowCellZones,
+    const label backgroundZoneID,
+    labelList& unnamedSurfaceRegion,
+    labelList& namedSurfaceRegion,  // potentially zero size if no faceZones
+    labelList& cellToZone
+) const
+{
+    if (nGrowCellZones != 1)
+    {
+        WarningInFunction
+            << "Growing currently only supported for single layer."
+            << " Exiting zone growing" << endl;
+        return;
+    }
+
+
+    // See meshRefinement::markProximityRefinementWave:
+    // - walk out nGrowCellZones iterations from outside of cellZone
+    //   and wall into unassigned cells
+    // - detect any cells inbetween
+    //      - multiple zones
+    //      - zone and wall
+    //   and
+    //      - assign cells to the cellZone
+    //      - unblock faces (along the path) inbetween
+
+
+    // Special tag for walls
+    const FixedList<label, 3> wallTag
+    ({
+        labelMax,   // Special value for wall face. Loses out to cellZone tag
+        labelMax,
+        labelMax
+    });
+
+    // Work arrays
+    pointField origins(1);
+    scalarField distSqrs(1);
+    List<FixedList<label, 3>> surfaces(1);
+
+
+    // Set up blockage. Marked with 0 distance (so always wins)
+
+    //List<wallPoints> allFaceInfo(mesh_.nFaces());
+    //for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
+    //{
+    //    if (unnamedSurfaceRegion[facei] != -1)
+    //    {
+    //        origins[0] = mesh_.faceCentres()[facei];
+    //        distSqrs[0] = 0.0;  // Initial distance
+    //        surfaces[0] = wallTag;
+    //        allFaceInfo[facei] = wallPoints(origins, distSqrs, surfaces);
+    //    }
+    //}
+    List<wallPoints> allCellInfo(mesh_.nCells());
+    forAll(cellToZone, celli)
+    {
+        if (cellToZone[celli] >= 0)
+        {
+            const FixedList<label, 3> zoneTag
+            ({
+                cellToZone[celli],      // zone
+                0,                      // 'region'
+                labelMax                // 'sub-region'
+            });
+
+            origins[0] = mesh_.cellCentres()[celli];
+            distSqrs[0] = 0.0;  // Initial distance
+            surfaces[0] = zoneTag;
+            allCellInfo[celli] = wallPoints(origins, distSqrs, surfaces);
+        }
+    }
+
+
+    DynamicList<wallPoints> faceDist(mesh_.nFaces()/128);
+    DynamicList<label> changedFaces(mesh_.nFaces()/128);
+
+    for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
+    {
+        const label own = mesh_.faceOwner()[facei];
+        const label nei = mesh_.faceNeighbour()[facei];
+        if (cellToZone[own] >= 0 && cellToZone[nei] < 0)
+        {
+            // boundary between cellZone (own) and background/unvisited (nei)
+
+            origins[0] = mesh_.faceCentres()[facei];
+            distSqrs[0] = 0.0;  // Initial distance
+            surfaces[0] = FixedList<label, 3>
+            ({
+                cellToZone[own],        // zone
+                0,                      // 'region'
+                labelMax                // 'sub-region'
+            });
+            faceDist.append(wallPoints(origins, distSqrs, surfaces));
+            changedFaces.append(facei);
+        }
+        else if (cellToZone[own] < 0 && cellToZone[nei] >= 0)
+        {
+            // boundary between cellZone (nei) and background/unvisited (own)
+
+            origins[0] = mesh_.faceCentres()[facei];
+            distSqrs[0] = 0.0;  // Initial distance
+            surfaces[0] = FixedList<label, 3>
+            ({
+                cellToZone[nei],        // zone
+                0,                      // 'region'
+                labelMax                // 'sub-region'
+            });
+            faceDist.append(wallPoints(origins, distSqrs, surfaces));
+            changedFaces.append(facei);
+        }
+        else if (unnamedSurfaceRegion[facei] != -1)
+        {
+            // Seed (yet unpatched) wall faces
+
+            origins[0] = mesh_.faceCentres()[facei];
+            distSqrs[0] = 0.0;  // Initial distance
+            surfaces[0] = wallTag;
+            faceDist.append(wallPoints(origins, distSqrs, surfaces));
+            changedFaces.append(facei);
+        }
+    }
+
+    // Get coupled neighbour cellRegion
+    labelList neiCellZone;
+    syncTools::swapBoundaryCellList(mesh_, cellToZone, neiCellZone);
+
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+    // Calculate region to zone from cellRegions on either side of coupled
+    // face.
+    forAll(patches, patchi)
+    {
+        const polyPatch& pp = patches[patchi];
+
+        if (pp.coupled())
+        {
+            // Like internal faces
+            forAll(pp, i)
+            {
+                label facei = pp.start()+i;
+                label own = mesh_.faceOwner()[facei];
+                label bFacei = facei-mesh_.nInternalFaces();
+                if (cellToZone[own] >= 0 && neiCellZone[bFacei] < 0)
+                {
+                    origins[0] = mesh_.faceCentres()[facei];
+                    distSqrs[0] = Foam::sqr(GREAT);
+                    surfaces[0] = FixedList<label, 3>
+                    ({
+                        cellToZone[own],        // zone
+                        0,                      // 'region'
+                        labelMax                // 'sub-region'
+                    });
+                    faceDist.append(wallPoints(origins, distSqrs, surfaces));
+                    changedFaces.append(facei);
+                }
+                else if (cellToZone[own] < 0 && cellToZone[own] >= 0)
+                {
+                    // Handled on nbr processor
+                }
+                else if (unnamedSurfaceRegion[facei] != -1)
+                {
+                    // Seed (yet unpatched) wall faces
+                    origins[0] = mesh_.faceCentres()[facei];
+                    distSqrs[0] = 0.0;  // Initial distance
+                    surfaces[0] = wallTag;
+                    faceDist.append(wallPoints(origins, distSqrs, surfaces));
+                    changedFaces.append(facei);
+                }
+            }
+        }
+        else
+        {
+            // Seed wall faces
+            forAll(pp, i)
+            {
+                label facei = pp.start()+i;
+                label own = mesh_.faceOwner()[facei];
+                if (cellToZone[own] < 0)
+                {
+                    origins[0] = mesh_.faceCentres()[facei];
+                    distSqrs[0] = 0.0;  // Initial distance
+                    surfaces[0] = wallTag;
+                    faceDist.append(wallPoints(origins, distSqrs, surfaces));
+                    changedFaces.append(facei);
+                }
+            }
+        }
+    }
+
+
+    List<wallPoints> allFaceInfo(mesh_.nFaces());
+    FaceCellWave<wallPoints> wallDistCalc
+    (
+        mesh_,
+        changedFaces,
+        faceDist,
+        allFaceInfo,
+        allCellInfo,
+        0             // max iterations
+    );
+    wallDistCalc.iterate(nGrowCellZones);
+
+
+    // Check for cells which are within nGrowCellZones of two cellZones or
+    // one cellZone and a wall
+    // TBD. Currently only one layer of growth handled.
+
+    bitSet isChangedCell(mesh_.nCells());
+
+    forAll(allCellInfo, celli)
+    {
+        if (allCellInfo[celli].valid(wallDistCalc.data()))
+        {
+            const List<FixedList<label, 3>>& surfaces =
+                allCellInfo[celli].surface();
+
+            if (surfaces.size() > 1)
+            {
+                // Check if inbetween two cellZones or cellZone and wall
+                // Find 'nearest' other cellZone
+                scalar minDistSqr = Foam::sqr(GREAT);
+                label minZone = -1;
+                for (label i = 0; i < surfaces.size(); i++)
+                {
+                    const label zonei = surfaces[i][0];
+                    const scalar d2 = allCellInfo[celli].distSqr()[i];
+                    if (zonei != cellToZone[celli] && d2 < minDistSqr)
+                    {
+                        minDistSqr = d2;
+                        minZone = zonei;   // zoneID
+                    }
+                }
+
+                if (minZone != -1)
+                {
+                    if (minZone != cellToZone[celli] && minZone != wallTag[0])
+                    {
+                        cellToZone[celli] = minZone;
+                        isChangedCell.set(celli);
+                    }
+                }
+            }
+        }
+    }
+
+
+    // Make sure to unset faces of changed cell
+    label nUnnamed = 0;
+    label nNamed = 0;
+    for (const label celli : isChangedCell)
+    {
+        const cell& cFaces = mesh_.cells()[celli];
+        for (const label facei : cFaces)
+        {
+            const label own = mesh_.faceOwner()[facei];
+            const label ownZone = cellToZone[own];
+
+            label nbrZone = -1;
+            if (mesh_.isInternalFace(facei))
+            {
+                const label neiZone = cellToZone[mesh_.faceNeighbour()[facei]];
+                nbrZone = (own != celli ? ownZone : neiZone);
+            }
+            else
+            {
+                nbrZone = neiCellZone[facei-mesh_.nInternalFaces()];
+            }
+
+            if (nbrZone == cellToZone[celli])
+            {
+                if (unnamedSurfaceRegion[facei] != -1)
+                {
+                    unnamedSurfaceRegion[facei] = -1;
+                    nUnnamed++;
+                }
+                if
+                (
+                    namedSurfaceRegion.size()
+                 && namedSurfaceRegion[facei] != -1
+                )
+                {
+                    namedSurfaceRegion[facei] = -1;
+                    nNamed++;
+                }
+            }
+        }
+    }
+
+    if (debug)
+    {
+        Pout<< "growCellZone : grown cellZones by "
+            << returnReduce(isChangedCell.count(), sumOp<label>())
+            << " cells (moved from background to nearest cellZone)"
+            << endl;
+        Pout<< "growCellZone : unmarked "
+            << returnReduce(nUnnamed, sumOp<label>())
+            << " unzoned intersections; "
+            << returnReduce(nNamed, sumOp<label>())
+            << " zoned intersections; "
+            << endl;
+    }
+}
+
+
 void Foam::meshRefinement::makeConsistentFaceIndex
 (
     const labelList& surfaceMap,
@@ -2628,7 +2938,7 @@ void Foam::meshRefinement::zonify
 
     if (namedSurfaces.size())
     {
-        if (nErodeCellZones <= 0)
+        if (nErodeCellZones == 0)
         {
             Info<< "Walking from known cellZones; crossing a faceZone "
                 << "face changes cellZone" << nl << endl;
@@ -2641,6 +2951,20 @@ void Foam::meshRefinement::zonify
                 unnamedRegion1,      // Intersections with unnamed surfaces
                 namedSurfaceRegion,  // Intersections with named surfaces
                 surfaceToCellZone,
+                cellToZone
+            );
+        }
+        else if (nErodeCellZones < 0)
+        {
+            Info<< "Growing cellZones by " << -nErodeCellZones
+                << " layers" << nl << endl;
+
+            growCellZone
+            (
+                -nErodeCellZones,
+                backgroundZoneID,
+                unnamedRegion1,
+                namedSurfaceRegion,
                 cellToZone
             );
         }
@@ -2664,6 +2988,54 @@ void Foam::meshRefinement::zonify
 
         // Make sure namedSurfaceRegion is unset inbetween same cell zones.
         if (!allowFreeStandingZoneFaces)
+        {
+            Info<< "Only keeping zone faces inbetween different cellZones."
+                << nl << endl;
+
+            // Surfaces with faceZone but no cellZone
+            labelList standaloneNamedSurfaces
+            (
+                surfaceZonesInfo::getStandaloneNamedSurfaces
+                (
+                    surfZones
+                )
+            );
+
+            // Construct map from surface index to index in
+            // standaloneNamedSurfaces (or -1)
+            labelList surfaceMap(surfZones.size(), -1);
+            forAll(standaloneNamedSurfaces, i)
+            {
+                surfaceMap[standaloneNamedSurfaces[i]] = i;
+            }
+
+            makeConsistentFaceIndex
+            (
+                surfaceMap,
+                cellToZone,
+                namedSurfaceRegion
+            );
+        }
+    }
+    else if (nErodeCellZones < 0 && gMax(cellToZone) >= 0)
+    {
+        // With multiple locationsInMesh and non-trivial cellZones we allow
+        // some growing of the cellZones to avoid any background cells
+
+        Info<< "Growing cellZones by " << -nErodeCellZones
+            << " layers" << nl << endl;
+
+        growCellZone
+        (
+            -nErodeCellZones,
+            backgroundZoneID,
+            unnamedRegion1,
+            namedSurfaceRegion, // note: potentially zero sized
+            cellToZone
+        );
+
+        // Make sure namedSurfaceRegion is unset inbetween same cell zones.
+        if (!allowFreeStandingZoneFaces && namedSurfaceRegion.size())
         {
             Info<< "Only keeping zone faces inbetween different cellZones."
                 << nl << endl;
@@ -2850,6 +3222,7 @@ void Foam::meshRefinement::handleSnapProblems
 
     if (debug&MESH)
     {
+        const_cast<Time&>(mesh_.time())++;
         Pout<< "Writing extra baffled mesh to time "
             << timeName() << endl;
         write
@@ -3635,6 +4008,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
     if (debug&MESH)
     {
+        const_cast<Time&>(mesh_.time())++;
         Pout<< "Writing baffled mesh to time " << timeName()
             << endl;
         write
@@ -4538,7 +4912,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     // -2 : unset : not allowed!
     // -1 : not in any zone (zone 'none')
     // >=0: zoneID
-    // namedSurfaceRegion:
+    // namedSurfaceRegion: zero sized or:
     // -1  : face not intersecting a named surface
     // >=0 : index of named surface
     labelList cellToZone;

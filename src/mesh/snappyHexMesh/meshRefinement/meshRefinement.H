@@ -805,6 +805,17 @@ private:
                 labelList& cellToZone
             ) const;
 
+            //- Variation of findCellZoneTopo: walks from cellZones but ignores
+            //  face intersections (unnamedSurfaceRegion). WIP
+            void growCellZone
+            (
+                const label nGrowCellZones,
+                const label backgroundZoneID,
+                labelList& unnamedSurfaceRegion,
+                labelList& namedSurfaceRegion,
+                labelList& cellToZone
+            ) const;
+
             //- Make namedSurfaceRegion consistent with cellToZone
             //  - clear out any blocked faces inbetween same cell zone.
             void makeConsistentFaceIndex

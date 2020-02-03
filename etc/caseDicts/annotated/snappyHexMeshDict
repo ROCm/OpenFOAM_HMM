@@ -456,6 +456,10 @@ castellatedMeshControls
     //           Erosion is specified as a number of erosion iterations.
     //           Erosion has less chance of bleeding and changing the zone
     //           for a complete region.
+    //           A negative value implements 'growing' the cellZones which
+    //           might help with small non-physical gaps inbetween cellZones.
+    //           (currently only a single layer growth i.e. -1 is supported)
+    //           Default value is 0.
     //nCellZoneErodeIter 2;
 }
 
