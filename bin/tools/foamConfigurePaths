@@ -7,11 +7,10 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2016-2019 OpenCFD Ltd.
+#     Copyright (C) 2016-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     foamConfigurePaths
@@ -39,8 +38,8 @@ Basic
 Compiler
   -system NAME        specify 'system' compiler to use (eg, Gcc, Icc,...)
   -third  NAME        specify 'ThirdParty' compiler to use (eg, Clang40,...)
-  -gcc VER            specify 'gcc_version' for ThirdParty Gcc
-  -clang VER          specify 'clang_version' for ThirdParty Clang
+  -gcc VER            specify 'default_gcc_version' for ThirdParty Gcc
+  -clang VER          specify 'default_clang_version' for ThirdParty Clang
   gmp-VERSION         for ThirdParty gcc (gmp-system for system library)
   mpfr-VERSION        for ThirdParty gcc (mpfr-system for system library)
   mpc-VERSION         for ThirdParty gcc (mpc-system for system library)
@@ -346,19 +345,19 @@ do
 ## Compiler ##
 
     -clang)
-        # Replace clang_version=...
+        # Replace default_clang_version=...
         optionValue=$(getOptionValue "$@")
-        replace etc/config.sh/compiler   clang_version "$optionValue"
-        replace etc/config.csh/compiler  clang_version "$optionValue"
+        replace etc/config.sh/compiler   default_clang_version "$optionValue"
+        replace etc/config.csh/compiler  default_clang_version "$optionValue"
         adjusted=true
         shift
         ;;
 
     -gcc)
-        # Replace gcc_version=...
+        # Replace default_gcc_version=...
         optionValue=$(getOptionValue "$@")
-        replace etc/config.sh/compiler   gcc_version "$optionValue"
-        replace etc/config.csh/compiler  gcc_version "$optionValue"
+        replace etc/config.sh/compiler   default_gcc_version "$optionValue"
+        replace etc/config.csh/compiler  default_gcc_version "$optionValue"
         adjusted=true
         shift
         ;;
@@ -391,22 +390,22 @@ do
 
     gmp-[4-9]* | gmp-system)
         # gcc-related package
-        replace etc/config.sh/compiler   gmp_version "$1"
-        replace etc/config.csh/compiler  gmp_version "$1"
+        replace etc/config.sh/compiler   default_gmp_version "$1"
+        replace etc/config.csh/compiler  default_gmp_version "$1"
         adjusted=true
         ;;
 
     mpfr-[2-9]* | mpfr-system)
         # gcc-related package
-        replace etc/config.sh/compiler   mpfr_version "$1"
-        replace etc/config.csh/compiler  mpfr_version "$1"
+        replace etc/config.sh/compiler   default_mpfr_version "$1"
+        replace etc/config.csh/compiler  default_mpfr_version "$1"
         adjusted=true
         ;;
 
     mpc-[0-9]* | mpc-system)
         # gcc-related package
-        replace etc/config.sh/compiler   mpc_version "$1"
-        replace etc/config.csh/compiler  mpc_version "$1"
+        replace etc/config.sh/compiler   default_mpc_version "$1"
+        replace etc/config.csh/compiler  default_mpc_version "$1"
         adjusted=true
         ;;
 
