@@ -40,10 +40,15 @@ License
 #include <cstdlib>
 #include <csignal>
 
-#if defined(WM_SP) || defined(WM_SPDP)
+#if defined(WM_SP)
     #define MPI_SCALAR MPI_FLOAT
+    #define MPI_SOLVESCALAR MPI_FLOAT
+#elif defined(WM_SPDP)
+    #define MPI_SCALAR MPI_FLOAT
+    #define MPI_SOLVESCALAR MPI_DOUBLE
 #elif defined(WM_DP)
     #define MPI_SCALAR MPI_DOUBLE
+    #define MPI_SOLVESCALAR MPI_DOUBLE
 #endif
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -476,6 +481,132 @@ void Foam::reduce
     requestID = -1;
 #endif
 }
+
+
+#if defined(WM_SPDP)
+void Foam::reduce
+(
+    solveScalar& Value,
+    const sumOp<solveScalar>& bop,
+    const int tag,
+    const label communicator
+)
+{
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "** reducing:" << Value << " with comm:" << communicator
+            << " warnComm:" << UPstream::warnComm
+            << endl;
+        error::printStack(Pout);
+    }
+    allReduce(Value, 1, MPI_SOLVESCALAR, MPI_SUM, bop, tag, communicator);
+}
+
+
+void Foam::reduce
+(
+    solveScalar& Value,
+    const minOp<solveScalar>& bop,
+    const int tag,
+    const label communicator
+)
+{
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "** reducing:" << Value << " with comm:" << communicator
+            << " warnComm:" << UPstream::warnComm
+            << endl;
+        error::printStack(Pout);
+    }
+    allReduce(Value, 1, MPI_SOLVESCALAR, MPI_MIN, bop, tag, communicator);
+}
+
+
+void Foam::reduce
+(
+    Vector2D<solveScalar>& Value,
+    const sumOp<Vector2D<solveScalar>>& bop,
+    const int tag,
+    const label communicator
+)
+{
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "** reducing:" << Value << " with comm:" << communicator
+            << " warnComm:" << UPstream::warnComm
+            << endl;
+        error::printStack(Pout);
+    }
+    allReduce(Value, 2, MPI_SOLVESCALAR, MPI_SUM, bop, tag, communicator);
+}
+
+
+void Foam::sumReduce
+(
+    solveScalar& Value,
+    label& Count,
+    const int tag,
+    const label communicator
+)
+{
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "** reducing:" << Value << " with comm:" << communicator
+            << " warnComm:" << UPstream::warnComm
+            << endl;
+        error::printStack(Pout);
+    }
+    Vector2D<solveScalar> twoScalars(Value, solveScalar(Count));
+    reduce(twoScalars, sumOp<Vector2D<solveScalar>>(), tag, communicator);
+
+    Value = twoScalars.x();
+    Count = twoScalars.y();
+}
+
+
+void Foam::reduce
+(
+    solveScalar& Value,
+    const sumOp<solveScalar>& bop,
+    const int tag,
+    const label communicator,
+    label& requestID
+)
+{
+#ifdef MPIX_COMM_TYPE_SHARED
+    // Assume mpich2 with non-blocking collectives extensions. Once mpi3
+    // is available this will change.
+    MPI_Request request;
+    solveScalar v = Value;
+    MPIX_Ireduce
+    (
+        &v,
+        &Value,
+        1,
+        MPI_SOLVESCALAR,
+        MPI_SUM,
+        0,              //root
+        PstreamGlobals::MPICommunicators_[communicator],
+        &request
+    );
+
+    requestID = PstreamGlobals::outstandingRequests_.size();
+    PstreamGlobals::outstandingRequests_.append(request);
+
+    if (UPstream::debug)
+    {
+        Pout<< "UPstream::allocateRequest for non-blocking reduce"
+            << " : request:" << requestID
+            << endl;
+    }
+#else
+    // Non-blocking not yet implemented in mpi
+    reduce(Value, bop, tag, communicator);
+    requestID = -1;
+#endif
+}
+#endif
+
 
 
 void Foam::UPstream::allToAll

@@ -96,6 +96,51 @@ void Foam::reduce(scalar&, const sumOp<scalar>&, const int, const label, label&)
 {}
 
 
+#if defined(WM_SPDP)
+void Foam::reduce
+(
+    solveScalar& Value,
+    const sumOp<solveScalar>& bop,
+    const int tag,
+    const label comm
+)
+{}
+void Foam::reduce
+(
+    solveScalar& Value,
+    const minOp<solveScalar>& bop,
+    const int tag,
+    const label comm
+)
+{}
+void Foam::reduce
+(
+    Vector2D<solveScalar>& Value,
+    const sumOp<Vector2D<solveScalar>>& bop,
+    const int tag,
+    const label comm
+)
+{}
+void Foam::sumReduce
+(
+    solveScalar& Value,
+    label& Count,
+    const int tag,
+    const label comm
+)
+{}
+void Foam::reduce
+(
+    solveScalar& Value,
+    const sumOp<solveScalar>& bop,
+    const int tag,
+    const label comm,
+    label& request
+)
+{}
+#endif
+
+
 void Foam::UPstream::allToAll
 (
     const labelUList& sendData,
