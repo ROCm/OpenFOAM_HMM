@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,7 @@ public:
 
     // Public typedefs
 
-     typedef
+    typedef
             HashTable
             <
                 autoPtr<interfaceCompositionModel>,
@@ -67,6 +67,9 @@ public:
                 phasePairKey::hash
             >
             massTransferModelTable;
+            
+            
+    typedef HashTable<volScalarField::Internal> SuSpTable;
 
 protected:
 
@@ -123,9 +126,17 @@ public:
 
     // Mass transfer functions
 
-        //- Return the heat transfer matrix and fill dmdt for phases
+        //- Return the heat transfer matrix
         virtual  tmp<fvScalarMatrix> heatTransfer(const volScalarField& T);
-
+        
+        //- Return the volumetric rate transfer matrix
+        virtual  tmp<fvScalarMatrix> volTransfer(const volScalarField& p);
+        
+        //- Correct/calculates mass sources dmdt for phases
+        virtual void correctMassSources(const volScalarField& T);
+        
+        //- Calculate mass transfer for alpha's
+        virtual void alphaTransfer(SuSpTable& Su, SuSpTable& Sp);
 
         //- Calculate mass transfer for species
         virtual void massSpeciesTransfer

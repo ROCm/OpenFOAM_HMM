@@ -185,7 +185,20 @@ public:
         //- Explicit mass transfer coefficient
         virtual tmp<volScalarField> Kexp
         (
-            label variable,
+            const volScalarField& field
+        );
+        
+        //- Implicit mass transfer coefficient
+        virtual tmp<volScalarField> KSp
+        (
+            label modelVariable,
+            const volScalarField& field
+        );
+        
+        //- Explicit mass transfer coefficient
+        virtual tmp<volScalarField> KSu
+        (
+            label modelVariable,
             const volScalarField& field
         );
 

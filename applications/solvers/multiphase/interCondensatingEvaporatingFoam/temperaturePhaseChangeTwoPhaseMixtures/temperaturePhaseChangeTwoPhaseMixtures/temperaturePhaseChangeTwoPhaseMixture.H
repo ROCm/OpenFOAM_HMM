@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,6 +42,7 @@ SourceFiles
 #include "runTimeSelectionTables.H"
 #include "volFields.H"
 #include "dimensionedScalar.H"
+#include "fvMatrices.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -140,15 +141,18 @@ public:
         //  coefficient to multiply (Tsat - T) for the condensation rate
         //  and a coefficient to multiply  (T - Tsat) for the vaporisation rate
         virtual Pair<tmp<volScalarField>> mDotDeltaT() const = 0;
+        
+        //- Source for T equarion
+        virtual tmp<fvScalarMatrix> TSource() const = 0;
 
         //- Return the volumetric condensation and vaporisation rates as a
         //  coefficient to multiply (1 - alphal) for the condensation rate
         //  and a coefficient to multiply  alphal for the vaporisation rate
-        Pair<tmp<volScalarField>> vDotAlphal() const;
+        virtual Pair<tmp<volScalarField>> vDotAlphal() const;
 
         //- Return the volumetric condensation and vaporisation rates as
         //  coefficients
-        Pair<tmp<volScalarField>> vDot() const;
+        virtual Pair<tmp<volScalarField>> vDot() const;
 
         //- Correct the phaseChange model
         virtual void correct() = 0;

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,6 +78,9 @@ public:
 
 
         typedef HashTable<autoPtr<phaseModel>> phaseModelTable;
+        
+
+        typedef HashTable<volScalarField::Internal> SuSpTable;
 
 
 protected:
@@ -113,6 +116,9 @@ protected:
 
         //- Reference to the mesh
         const fvMesh& mesh_;
+        
+        //- Dynamic viscocity
+        volScalarField mu_;
 
         //- Phase names
         wordList phaseNames_;
@@ -147,6 +153,9 @@ protected:
 
     // Protected member functions
 
+
+        //- Calculate and return the laminar viscosity
+        void calcMu();
 
         //- Generate the phases
         HashTable<autoPtr<phaseModel>> generatePhaseModels
@@ -501,9 +510,15 @@ public:
         (
             const volScalarField& T
         ) = 0;
-
-        //- Calculate mass transfer
-        //virtual void massTransfer(const volScalarField& T) = 0;
+        
+        //- Return the volumetric rate transfer matrix
+        virtual tmp<fvScalarMatrix> volTransfer
+        (
+            const volScalarField& p
+        ) = 0;
+        
+        //- Calculate mass transfer for alpha's
+        virtual void alphaTransfer(SuSpTable& Su, SuSpTable& Sp) = 0;
 
         //- Calculate mass transfer for species
         virtual void massSpeciesTransfer
@@ -522,6 +537,9 @@ public:
 
         //- Correct the mixture thermos
         virtual void correct();
+        
+        //- Correct mass sources
+        virtual void correctMassSources(const volScalarField& T) = 0;
 
         //- Return the name of the thermo physics
         virtual word thermoName() const
@@ -531,7 +549,7 @@ public:
         }
 
         //- Correct the turbulence
-        // (NOTE: Each phase could help its own turbulence)
+        // (NOTE: Each phase could have its own turbulence)
         virtual void correctTurbulence();
 
         //- Read base phaseProperties dictionary

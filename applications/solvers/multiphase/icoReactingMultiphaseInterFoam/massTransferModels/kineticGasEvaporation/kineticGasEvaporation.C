@@ -88,9 +88,8 @@ Foam::meltingEvaporationModels::kineticGasEvaporation<Thermo, OtherThermo>
 template<class Thermo, class OtherThermo>
 Foam::tmp<Foam::volScalarField>
 Foam::meltingEvaporationModels::kineticGasEvaporation<Thermo, OtherThermo>
-::Kexp(label variable, const volScalarField& field)
+::Kexp(const volScalarField& field)
 {
-    if (this->modelVariable_ == variable)
     {
         const volScalarField& to = this->pair().to();
 
@@ -246,10 +245,29 @@ Foam::meltingEvaporationModels::kineticGasEvaporation<Thermo, OtherThermo>
 
         return massFluxEvap*areaDensity*Nl*from;
     }
-    else
-    {
-        return tmp<volScalarField> ();
-    }
+}
+
+template<class Thermo, class OtherThermo>
+Foam::tmp<Foam::volScalarField>
+Foam::meltingEvaporationModels::kineticGasEvaporation<Thermo, OtherThermo>::KSu
+(
+    label variable,
+    const volScalarField& refValue
+)
+{
+    return tmp<volScalarField> ();
+}
+
+
+template<class Thermo, class OtherThermo>
+Foam::tmp<Foam::volScalarField>
+Foam::meltingEvaporationModels::kineticGasEvaporation<Thermo, OtherThermo>::KSp
+(
+    label variable,
+    const volScalarField& refValue
+)
+{
+    return tmp<volScalarField> ();
 }
 
 

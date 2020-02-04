@@ -33,47 +33,9 @@
         (
             fvc::div(phiHbyA)
           - fvm::laplacian(rAUf, p_rgh)
+          + fluid.volTransfer(p_rgh)
         );
-
-        forAllConstIters(fluid.totalPhasePairs(), iter)
-        {
-            const phasePair& pair = iter()();
-
-            const phaseModel& phase1 = pair.phase1();
-            const phaseModel& phase2 = pair.phase2();
-
-            const phasePairKey key12
-            (
-                phase1.name(),
-                phase2.name(),
-                true
-            );
-
-            // Mass transfer from phase2 to phase1
-            tmp<volScalarField> tdmdt12(fluid.dmdt(key12));
-            const volScalarField& dmdt12 = tdmdt12();
-
-            const phasePairKey key21
-            (
-                phase2.name(),
-                phase1.name(),
-                true
-            );
-
-            // Mass transfer from phase1 to phase2
-            tmp<volScalarField> tdmdt21(fluid.dmdt(key21));
-            const volScalarField&  dmdt21 = tdmdt21();
-
-            const volScalarField dmdtNet(dmdt21 - dmdt12);
-
-            p_rghEqn +=
-                dmdtNet*
-                (
-                  - fluid.coeffs(phase1.name())
-                  + fluid.coeffs(phase2.name())
-                );
-        }
-
+          
         p_rghEqn.setReference(pRefCell, pRefValue);
 
         p_rghEqn.solve(mesh.solver(p_rgh.select(pimple.finalInnerIter())));

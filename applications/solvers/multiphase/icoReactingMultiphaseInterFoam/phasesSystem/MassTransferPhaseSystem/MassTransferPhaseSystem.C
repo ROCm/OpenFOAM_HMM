@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-202 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,7 @@ License
 #include "fvcDiv.H"
 #include "fvmSup.H"
 #include "fvMatrix.H"
+#include "volFields.H"
 #include "fundamentalConstants.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -152,9 +153,7 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::dmdt
             (
                 "dmdt",
                 this->mesh().time().timeName(),
-                this->mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
+                this->mesh()
             ),
             this->mesh(),
             dimensionedScalar(dimDensity/dimTime, Zero)
@@ -213,15 +212,45 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::heatTransfer
                         (
                             "tdmdtYki",
                             this->mesh().time().timeName(),
-                            this->mesh(),
-                            IOobject::NO_READ,
-                            IOobject::NO_WRITE
+                            this->mesh()
                         ),
                         this->mesh(),
                         dimensionedScalar(dimDensity/dimTime, Zero)
                     )
                 );
                 volScalarField& dmdtNetki = tdmdtNetki.ref();
+                
+                tmp<volScalarField> tSp
+                (
+                    new volScalarField
+                    (
+                        IOobject
+                        (
+                            "Sp",
+                            this->mesh().time().timeName(),
+                            this->mesh()
+                        ),
+                        this->mesh(),
+                        dimensionedScalar(dimDensity/dimTime/dimTemperature, Zero)
+                    )
+                );
+                volScalarField& Sp = tSp.ref();
+                
+                tmp<volScalarField> tSu
+                (
+                    new volScalarField
+                    (
+                        IOobject
+                        (
+                            "Su",
+                            this->mesh().time().timeName(),
+                            this->mesh()
+                        ),
+                        this->mesh(),
+                        dimensionedScalar(dimDensity/dimTime, Zero)
+                    )
+                );
+                volScalarField& Su = tSu.ref();
 
 
                 if (massTransferModels_.found(keyik))
@@ -229,14 +258,28 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::heatTransfer
                     autoPtr<interfaceCompositionModel>& interfacePtr =
                         massTransferModels_[keyik];
 
-                    // Explicit temperature mass transfer rate
-                    tmp<volScalarField> Kexp =
-                        interfacePtr->Kexp(interfaceCompositionModel::T, T);
-
-                    if (Kexp.valid())
+                    dmdtNetki -= *dmdt_[keyik];
+                    
+                    tmp<volScalarField> KSp =
+                        interfacePtr->KSp(interfaceCompositionModel::T, T);
+                    
+                    if (KSp.valid())
                     {
-                        dmdtNetki -= Kexp.ref();
-                        *dmdt_[keyik] = Kexp.ref();
+                        Sp -= KSp.ref();
+                    }
+                    
+                    tmp<volScalarField> KSu =
+                        interfacePtr->KSu(interfaceCompositionModel::T, T);
+                    
+                    if (KSu.valid())
+                    {
+                        Su -= KSu.ref();
+                    }
+                    
+                    // If linearization is not provided used full explicit
+                    if (!KSp.valid() && !KSu.valid())
+                    {
+                        Su -= *dmdt_[keyik];
                     }
                 }
 
@@ -246,30 +289,36 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::heatTransfer
                     autoPtr<interfaceCompositionModel>& interfacePtr =
                         massTransferModels_[keyki];
 
-                    // Explicit temperature mass transfer rate
-                    const tmp<volScalarField> Kexp =
-                        interfacePtr->Kexp(interfaceCompositionModel::T, T);
+                    dmdtNetki += *dmdt_[keyki];
 
-                    if (Kexp.valid())
+                    
+                    tmp<volScalarField> KSp =
+                        interfacePtr->KSp(interfaceCompositionModel::T, T);
+                    
+                    if (KSp.valid())
                     {
-                        dmdtNetki += Kexp.ref();
-                        *dmdt_[keyki] = Kexp.ref();
+                        Sp += KSp.ref();
                     }
-
+                    
+                    tmp<volScalarField> KSu =
+                        interfacePtr->KSu(interfaceCompositionModel::T, T);
+                    
+                    if (KSu.valid())
+                    {
+                        Su += KSu.ref();
+                    }
+                    
+                    // If linearization is not provided used full explicit
+                    if (!KSp.valid() && !KSu.valid())
+                    {
+                        Su += *dmdt_[keyki];
+                    }
                 }
 
-                word keyikName(phasei.name() + phasek.name());
-                word keykiName(phasek.name() + phasei.name());
+                tmp<volScalarField> L = calculateL(dmdtNetki, keyik, keyki, T);
 
-                eqn -=
-                    (
-                        dmdtNetki
-                        *(
-                            calculateL(dmdtNetki, keyik, keyki, T)
-                            - (phasek.Cp() - phasei.Cp())
-                            * constant::standard::Tstd
-                        )
-                    );
+                //eqn -= dmdtNetki*L;
+                eqn -= fvm::Sp(Sp*L.ref(), T) + Su*L.ref();
             }
         }
     }
@@ -277,6 +326,401 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::heatTransfer
 }
 
 
+template<class BasePhaseSystem>
+Foam::tmp<Foam::fvScalarMatrix>
+Foam::MassTransferPhaseSystem<BasePhaseSystem>::volTransfer
+(
+    const volScalarField& p
+)
+{
+    tmp<fvScalarMatrix> tEqnPtr
+    (
+        new fvScalarMatrix(p, dimVolume/dimTime)
+    );
+    
+    fvScalarMatrix& eqn = tEqnPtr.ref();
+    
+    tmp<volScalarField> tSp
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "Sp",
+                this->mesh().time().timeName(),
+                this->mesh()
+            ),
+            this->mesh(),
+            dimensionedScalar(dimless/dimTime/dimPressure, Zero)
+        )
+    );
+    volScalarField& Sp = tSp.ref();
+    
+    tmp<volScalarField> tSu
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "Su",
+                this->mesh().time().timeName(),
+                this->mesh()
+            ),
+            this->mesh(),
+            dimensionedScalar(dimless/dimTime, Zero)
+        )
+    );
+    volScalarField& Su = tSu.ref();
+    
+    forAllConstIters(this->totalPhasePairs(), iter)
+    {
+        const phasePair& pair = iter()();
+
+        const phaseModel& phase1 = pair.phase1();
+        const phaseModel& phase2 = pair.phase2();
+
+        const phasePairKey key12
+        (
+            phase1.name(),
+            phase2.name(),
+            true
+        );
+        
+        if (massTransferModels_.found(key12))
+        {
+            autoPtr<interfaceCompositionModel>& interfacePtr =
+                massTransferModels_[key12];
+           
+            tmp<volScalarField> KSp =
+                interfacePtr->KSp(interfaceCompositionModel::P, p);
+            
+            if (KSp.valid())
+            {
+                Sp += KSp.ref();
+            }
+            
+            tmp<volScalarField> KSu =
+                interfacePtr->KSu(interfaceCompositionModel::P, p);
+            
+            if (KSu.valid())
+            {
+                Su += KSu.ref();
+            }
+            
+            // If linearization is not provided used full explicit
+            if (!KSp.valid() && !KSu.valid())
+            {
+                Su -= 
+                    *dmdt_[key12] 
+                    *(
+                        - this->coeffs(phase1.name())
+                        + this->coeffs(phase2.name())
+                    );
+            }
+        }
+        
+        const phasePairKey key21
+        (
+            phase2.name(),
+            phase1.name(),
+            true
+        );
+        
+        if (massTransferModels_.found(key21))
+        {
+            autoPtr<interfaceCompositionModel>& interfacePtr =
+                massTransferModels_[key21];
+           
+            tmp<volScalarField> KSp =
+                interfacePtr->KSp(interfaceCompositionModel::P, p);
+            
+            if (KSp.valid())
+            {
+                Sp += KSp.ref();
+            }
+            
+            tmp<volScalarField> KSu =
+                interfacePtr->KSu(interfaceCompositionModel::P, p);
+            
+            if (KSu.valid())
+            {
+                Su += KSu.ref();
+            }
+            
+            // If linearization is not provided used full explicit
+            if (!KSp.valid() && !KSu.valid())
+            {
+                Su += 
+                    *dmdt_[key21]
+                    *(
+                        - this->coeffs(phase1.name())
+                        + this->coeffs(phase2.name())
+                    );
+            }
+        }
+
+    }
+    
+    eqn += fvm::Sp(Sp, p) + Su;
+    return tEqnPtr;
+}
+
+
+template<class BasePhaseSystem>
+void Foam::MassTransferPhaseSystem<BasePhaseSystem>::correctMassSources
+(
+    const volScalarField& T
+)
+{
+    forAllConstIters(this->phaseModels_, iteri)
+    {
+        const phaseModel& phasei = iteri()();
+
+        auto iterk = iteri;
+
+        for (++iterk; iterk != this->phaseModels_.end(); ++iterk)
+        {
+            if (iteri()().name() != iterk()().name())
+            {
+                const phaseModel& phasek = iterk()();
+
+                // Phase i to phase k
+                const phasePairKey keyik(phasei.name(), phasek.name(), true);
+
+                // Phase k to phase i
+                const phasePairKey keyki(phasek.name(), phasei.name(), true);
+                
+                if (massTransferModels_.found(keyik))
+                {
+                    autoPtr<interfaceCompositionModel>& interfacePtr =
+                        massTransferModels_[keyik];
+                        
+                    tmp<volScalarField> Kexp = interfacePtr->Kexp(T);
+                    
+                    *dmdt_[keyik] = Kexp.ref();
+                    
+                }
+                
+                if (massTransferModels_.found(keyki))
+                {
+                    autoPtr<interfaceCompositionModel>& interfacePtr =
+                        massTransferModels_[keyki];
+
+                    // Explicit temperature mass transfer rate
+                    const tmp<volScalarField> Kexp = interfacePtr->Kexp(T);
+                    
+                    *dmdt_[keyki] = Kexp.ref();
+                }
+            }
+        }
+    }
+}
+
+
+template<class BasePhaseSystem>
+void Foam::MassTransferPhaseSystem<BasePhaseSystem>::alphaTransfer
+(
+    SuSpTable& Su,
+    SuSpTable& Sp
+)
+{
+    // This term adds and substract alpha*div(U) as a source term
+    // for alpha, substituting div(U) = mDot(1/rho1 - 1/rho2)
+    bool includeDivU(true);
+    
+    forAllConstIters(this->totalPhasePairs(), iter)
+    {
+        const phasePair& pair = iter()();
+
+        const phaseModel& phase1 = pair.phase1();
+        const phaseModel& phase2 = pair.phase2();
+
+        const volScalarField& alpha1 = pair.phase1();
+        const volScalarField& alpha2 = pair.phase2();
+
+        tmp<volScalarField> tCoeffs1 = this->coeffs(phase1.name());
+        const volScalarField&  coeffs1 = tCoeffs1();
+
+        tmp<volScalarField> tCoeffs2 = this->coeffs(phase2.name());
+        const volScalarField&  coeffs2 = tCoeffs2();
+
+        // Phase 1 to phase 2
+        const phasePairKey key12
+        (
+            phase1.name(),
+            phase2.name(),
+            true
+        );
+        
+        tmp<volScalarField> tdmdt12(this->dmdt(key12));
+        volScalarField& dmdt12 = tdmdt12.ref();
+        
+        if (massTransferModels_.found(key12))
+        {
+            autoPtr<interfaceCompositionModel>& interfacePtr =
+                massTransferModels_[key12];
+             
+            tmp<volScalarField> KSu =
+                interfacePtr->KSu(interfaceCompositionModel::alpha, phase1);
+            
+            if (KSu.valid())
+            {
+                dmdt12 = KSu.ref();
+            }
+            
+            includeDivU = interfacePtr->includeDivU();
+        }
+       
+
+        // Phase 2 to phase 1
+        const phasePairKey key21
+        (
+            phase2.name(),
+            phase1.name(),
+            true
+        );
+
+        tmp<volScalarField> tdmdt21(this->dmdt(key21));
+        volScalarField& dmdt21 = tdmdt21.ref();
+        
+        if (massTransferModels_.found(key21))
+        {
+            autoPtr<interfaceCompositionModel>& interfacePtr =
+                massTransferModels_[key21];
+            
+            tmp<volScalarField> KSu =
+                interfacePtr->KSu(interfaceCompositionModel::alpha, phase2);
+            
+            if (KSu.valid())
+            {
+                dmdt21 = KSu.ref();
+            }
+            
+            includeDivU = interfacePtr->includeDivU();
+        }
+
+        volScalarField::Internal& SpPhase1 = Sp[phase1.name()];
+
+        volScalarField::Internal& SuPhase1 = Su[phase1.name()];
+
+        volScalarField::Internal& SpPhase2 = Sp[phase2.name()];
+
+        volScalarField::Internal& SuPhase2 = Su[phase2.name()];
+
+        const volScalarField dmdtNet(dmdt21 - dmdt12);
+
+        const volScalarField coeffs12(coeffs1 - coeffs2);
+
+        const surfaceScalarField& phi = this->phi();
+        
+        if (includeDivU)
+        {
+            SuPhase1 +=
+                fvc::div(phi)*min(max(alpha1, scalar(0)), scalar(1));
+                
+            SuPhase2 +=
+                fvc::div(phi)*min(max(alpha2, scalar(0)), scalar(1));
+        }
+        
+        // NOTE: dmdtNet is distributed in terms =
+        //  Source for phase 1 =
+        //      dmdtNet/rho1
+        //    - alpha1*dmdtNet(1/rho1 - 1/rho2)
+
+        forAll(dmdtNet, celli)
+        {
+            scalar dmdt21 = dmdtNet[celli];
+            scalar coeffs12Cell = coeffs12[celli];
+
+            scalar alpha1Limited = max(min(alpha1[celli], 1.0), 0.0);
+
+            // exp.
+            SuPhase1[celli] += coeffs1[celli]*dmdt21;
+
+            if (includeDivU)
+            {
+                if (dmdt21 > 0)
+                {
+                    if (coeffs12Cell > 0)
+                    {
+                        // imp
+                        SpPhase1[celli] -= dmdt21*coeffs12Cell;
+                    }
+                    else if (coeffs12Cell < 0)
+                    {
+                        // exp
+                        SuPhase1[celli] -=
+                            dmdt21*coeffs12Cell*alpha1Limited;
+                    }
+                }
+                else if (dmdt21 < 0)
+                {
+                    if (coeffs12Cell > 0)
+                    {
+                        // exp
+                        SuPhase1[celli] -=
+                            dmdt21*coeffs12Cell*alpha1Limited;
+                    }
+                    else if (coeffs12Cell < 0)
+                    {
+                        // imp
+                        SpPhase1[celli] -= dmdt21*coeffs12Cell;
+                    }
+                }
+            }
+        }
+
+        forAll(dmdtNet, celli)
+        {
+            scalar dmdt12 = -dmdtNet[celli];
+            scalar coeffs21Cell = -coeffs12[celli];
+
+            scalar alpha2Limited = max(min(alpha2[celli], 1.0), 0.0);
+
+            // exp
+            SuPhase2[celli] += coeffs2[celli]*dmdt12;
+
+            if (includeDivU)
+            {
+                if (dmdt12 > 0)
+                {
+                    if (coeffs21Cell > 0)
+                    {
+                        // imp
+                        SpPhase2[celli] -= dmdt12*coeffs21Cell;
+                    }
+                    else if (coeffs21Cell < 0)
+                    {
+                        // exp
+                        SuPhase2[celli] -=
+                            dmdt12*coeffs21Cell*alpha2Limited;
+                    }
+                }
+                else if (dmdt12 < 0)
+                {
+                    if (coeffs21Cell > 0)
+                    {
+                        // exp
+                        SuPhase2[celli] -=
+                            coeffs21Cell*dmdt12*alpha2Limited;
+                    }
+                    else if (coeffs21Cell < 0)
+                    {
+                        // imp
+                        SpPhase2[celli] -= dmdt12*coeffs21Cell;
+                    }
+                }
+            }
+
+        }
+
+        // Update ddtAlphaMax
+        this->ddtAlphaMax_ =  
+            max(gMax((dmdt21*coeffs1)()), gMax((dmdt12*coeffs2)()));
+    }
+}
+
+        
 template<class BasePhaseSystem>
 void Foam::MassTransferPhaseSystem<BasePhaseSystem>::massSpeciesTransfer
 (

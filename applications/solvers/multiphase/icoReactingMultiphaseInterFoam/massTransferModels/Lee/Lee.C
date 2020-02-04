@@ -51,6 +51,44 @@ template<class Thermo, class OtherThermo>
 Foam::tmp<Foam::volScalarField>
 Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>::Kexp
 (
+    const volScalarField& refValue
+)
+{
+    {
+        const volScalarField from
+        (
+            min(max(this->pair().from(), scalar(0)), scalar(1))
+        );
+        
+        const volScalarField coeff
+        (
+            C_*from*this->pair().from().rho()*pos(from - alphaMin_)
+           *(refValue - Tactivate_)
+           /Tactivate_
+        );
+        
+        if (sign(C_.value()) > 0)
+        {
+            return
+            (
+                coeff*pos(refValue - Tactivate_)
+            );
+        }
+        else
+        {
+            return
+            (
+               coeff*pos(Tactivate_ - refValue)
+            );
+        }
+    }
+}
+
+
+template<class Thermo, class OtherThermo>
+Foam::tmp<Foam::volScalarField>
+Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>::KSp
+(
     label variable,
     const volScalarField& refValue
 )
@@ -61,31 +99,68 @@ Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>::Kexp
         (
             min(max(this->pair().from(), scalar(0)), scalar(1))
         );
+        
+        const volScalarField coeff
+        (
+            C_*from*this->pair().from().rho()*pos(from - alphaMin_)
+            /Tactivate_
+        );
 
         if (sign(C_.value()) > 0)
         {
             return
             (
-                C_
-              * from
-              * this->pair().from().rho()
-              * (refValue.oldTime() - Tactivate_)
-              * pos(from - alphaMin_)
-              * pos(refValue.oldTime() - Tactivate_)/Tactivate_
+                coeff*pos(refValue - Tactivate_)
             );
         }
         else
         {
             return
             (
-               -C_
-              * from
-              * this->pair().from().rho()
-              * pos(from - alphaMin_)
-              * (Tactivate_ - refValue.oldTime())
-              * pos(Tactivate_ - refValue.oldTime())/Tactivate_
+                coeff*pos(Tactivate_ - refValue)
             );
+        }
+    }
+    else
+    {
+        return tmp<volScalarField> ();
+    }
+}
 
+
+template<class Thermo, class OtherThermo>
+Foam::tmp<Foam::volScalarField>
+Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>::KSu
+(
+    label variable,
+    const volScalarField& refValue
+)
+{
+    if (this->modelVariable_ == variable)
+    {
+        volScalarField from
+        (
+            min(max(this->pair().from(), scalar(0)), scalar(1))
+        );
+        
+        const volScalarField coeff
+        (
+            C_*from*this->pair().from().rho()*pos(from - alphaMin_)
+        );
+
+        if (sign(C_.value()) > 0)
+        {
+            return
+            (
+                -coeff*pos(refValue - Tactivate_)
+            );
+        }
+        else
+        {
+            return
+            (
+                coeff*pos(Tactivate_ - refValue)
+            );
         }
     }
     else
@@ -100,6 +175,14 @@ const Foam::dimensionedScalar&
 Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>::Tactivate() const
 {
     return Tactivate_;
+}
+
+
+template<class Thermo, class OtherThermo>
+bool 
+Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>::includeDivU()
+{
+    return true;
 }
 
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -98,13 +98,13 @@ int main(int argc, char *argv[])
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
+        fluid.correctMassSources(T);
         fluid.solve();
         rho = fluid.rho();
 
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())
         {
-            solve(fvm::ddt(rho) + fvc::div(rhoPhi));
             #include "UEqn.H"
             #include "YEqns.H"
             #include "TEqn.H"

@@ -14,7 +14,17 @@
     if (nAlphaSubCycles > 1)
     {
         dimensionedScalar totalDeltaT = runTime.deltaT();
-        surfaceScalarField rhoPhiSum("rhoPhiSum", rhoPhi);
+        surfaceScalarField rhoPhiSum
+        (
+            IOobject
+            (
+                "rhoPhiSum",
+                runTime.timeName(),
+                mesh
+            ),
+            mesh,
+            dimensionedScalar(rhoPhi.dimensions(), Zero)
+        );
 
         for
         (

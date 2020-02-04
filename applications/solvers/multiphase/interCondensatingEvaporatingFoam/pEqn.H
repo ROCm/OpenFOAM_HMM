@@ -33,7 +33,8 @@
         (
             fvc::div(phiHbyA)
           - fvm::laplacian(rAUf, p_rgh)
-          - (vDotc - vDotv)
+          ==
+            vDotv - vDotc
         );
 
         p_rghEqn.setReference(pRefCell, pRefValue);

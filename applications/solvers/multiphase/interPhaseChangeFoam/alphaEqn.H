@@ -114,6 +114,9 @@
     }
 
     rhoPhi = talphaPhi()*(rho1 - rho2) + phi*rho2;
+    
+    // Cache alphaPhi
+    alphaPhi10 = talphaPhi();
 
     Info<< "Liquid phase volume fraction = "
         << alpha1.weightedAverage(mesh.V()).value()
