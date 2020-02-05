@@ -33,38 +33,6 @@ License
 #include "fvcGrad.H"
 #include "distributedWeightedFvPatchFieldMapper.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    //- Helper class for list
-    template<class Type>
-    class ListPlusEqOp
-    {
-        public:
-        void operator()(List<Type>& x, const List<Type> y) const
-        {
-            if (y.size())
-            {
-                if (x.size())
-                {
-                    label sz = x.size();
-                    x.setSize(sz + y.size());
-                    forAll(y, i)
-                    {
-                        x[sz++] = y[i];
-                    }
-                }
-                else
-                {
-                    x = y;
-                }
-            }
-        }
-    };
-}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class Type>

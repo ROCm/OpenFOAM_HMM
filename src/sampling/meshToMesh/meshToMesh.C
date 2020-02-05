@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -543,7 +543,7 @@ void Foam::meshToMesh::calculate(const word& methodName, const bool normalise)
             globalSrcCells.inplaceToGlobal(addressing);
         }
 
-        // set up as a reverse distribute
+        // Set up as a reverse distribute
         mapDistributeBase::distribute
         (
             Pstream::commsTypes::nonBlocking,
@@ -554,12 +554,12 @@ void Foam::meshToMesh::calculate(const word& methodName, const bool normalise)
             map.subMap(),
             false,
             tgtToSrcCellAddr_,
-            ListPlusEqOp<label>(),
+            ListOps::appendEqOp<label>(),
             flipOp(),
             labelList()
         );
 
-        // set up as a reverse distribute
+        // Set up as a reverse distribute
         mapDistributeBase::distribute
         (
             Pstream::commsTypes::nonBlocking,
@@ -570,7 +570,7 @@ void Foam::meshToMesh::calculate(const word& methodName, const bool normalise)
             map.subMap(),
             false,
             tgtToSrcCellWght_,
-            ListPlusEqOp<scalar>(),
+            ListOps::appendEqOp<scalar>(),
             flipOp(),
             scalarList()
         );

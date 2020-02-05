@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -914,7 +914,7 @@ handleFeatureAngleLayerTerminations
         mesh(),
         meshEdges,
         edgeFaceNormals,
-        globalMeshData::ListPlusEqOp<List<point>>(),   // combine operator
+        ListOps::appendEqOp<point>(),
         List<point>()               // null value
     );
 
@@ -923,7 +923,7 @@ handleFeatureAngleLayerTerminations
         mesh(),
         meshEdges,
         edgeFaceExtrude,
-        globalMeshData::ListPlusEqOp<List<bool>>(),    // combine operator
+        ListOps::appendEqOp<bool>(),
         List<bool>()                // null value
     );
 
