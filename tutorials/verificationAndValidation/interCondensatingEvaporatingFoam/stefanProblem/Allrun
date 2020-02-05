@@ -11,4 +11,6 @@ runApplication setAlphaField
 
 runApplication $(getApplication)
 
+./plotGraph
+
 #------------------------------------------------------------------------------

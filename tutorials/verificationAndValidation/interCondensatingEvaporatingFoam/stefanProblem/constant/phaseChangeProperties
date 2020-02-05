@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1906                                 |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|  \\    /   O peration     | Version:  v1912                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-phaseChangeTwoPhaseModel constant;//interfaceHeatResistance;
+phaseChangeTwoPhaseModel interfaceHeatResistance;//constant;
 
 
 R               1e6;
@@ -24,10 +24,5 @@ spread          3;
 
 coeffC          0;
 coeffE          500;
-
-// interfacePhaseChangeCoeffs
-// {
-//     R_               1e6;
-// }
 
 // ************************************************************************* //

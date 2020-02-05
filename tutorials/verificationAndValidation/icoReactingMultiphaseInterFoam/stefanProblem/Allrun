@@ -14,6 +14,8 @@ rm log.setAlphaField
 cp system/setAlphaFieldDict.gas system/setAlphaFieldDict
 runApplication setAlphaField
 
-#runApplication $(getApplication)
+runApplication $(getApplication)
+
+./plotGraph
 
 #------------------------------------------------------------------------------

@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1906                                 |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|  \\    /   O peration     | Version:  v1912                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -23,22 +23,22 @@ liquid
     rho             958.4;
 
 
-    Cp              4216;  // irrelevant
-    Cv              4216;  // irrelevant
-    kappa           0.671; // irrelevant
+    Cp              4216;
+    Cv              4216;
+    kappa           0.671;
     hf              0;
 }
 
 vapour
 {
     transportModel  Newtonian;
-    nu              1e-5; // irrelevant
+    nu              1e-5;
     rho             0.581;
 
 
     Cp              2030;      // FC72 vapour
     Cv              2030;      // Cv = Cp - R/w
-    kappa           0.025;       // FC72 vapour // 0.01;
+    kappa           0.025;
     hf              2260.0e3;
 }
 
