@@ -6,11 +6,10 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2016-2019 OpenCFD Ltd.
+#     Copyright (C) 2016-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # File
 #     etc/cshrc
@@ -176,7 +175,7 @@ endif
 # Finalize setup of OpenFOAM environment
 if ( -d "$WM_PROJECT_DIR" ) then
     if ($?FOAM_VERBOSE && $?prompt) echo "source $WM_PROJECT_DIR/etc/config.csh/setup"
-    source "$WM_PROJECT_DIR/etc/config.csh/setup" "${*}"
+    source "$WM_PROJECT_DIR/etc/config.csh/setup" $argv[*]
 else
     echo "Error: did not locate installation path for $WM_PROJECT-$WM_PROJECT_VERSION"
     echo "No directory: $WM_PROJECT_DIR"
