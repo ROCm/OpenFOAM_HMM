@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,34 +25,51 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ensightPart.H"
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
+template<class Addr>
+bool Foam::ensightFile::isUndef(const IndirectListBase<scalar, Addr>& field)
 {
-    defineTypeNameAndDebug(ensightPart, 0);
+    for (const scalar val : field)
+    {
+        if (std::isnan(val))
+        {
+            return true;
+        }
+    }
+
+    return true;
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::ensightPart::ensightPart(const string& description)
-:
-    name_(description)
-{}
-
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-Foam::ensightGeoFile& Foam::operator<<
-(
-    ensightGeoFile& os,
-    const ensightPart& part
-)
+template<class Addr>
+void Foam::ensightFile::writeLabels(const IndirectListBase<label, Addr>& list)
 {
-    part.write(os);
-    return os;
+    for (const scalar val : list)
+    {
+        write(val);
+        newline();
+    }
+}
+
+
+template<class Addr>
+void Foam::ensightFile::writeList(const IndirectListBase<scalar, Addr>& field)
+{
+    for (const scalar val : field)
+    {
+        if (std::isnan(val))
+        {
+            writeUndef();
+        }
+        else
+        {
+            write(val);
+        }
+        newline();
+    }
 }
 
 

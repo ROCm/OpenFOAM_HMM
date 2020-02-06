@@ -32,14 +32,14 @@ License
 Foam::ensightCase::options::options(IOstream::streamFormat format)
 :
     format_(format),
-    width_(0),
-    mask_(),
-    printf_(),
     overwrite_(false),
     nodeValues_(false),
-    separateCloud_(false)
+    separateCloud_(false),
+    width_(0),
+    mask_(),
+    printf_()
 {
-    width(8); // Ensures that mask and printf-format are properly resized
+    width(8);  // Fill mask and setup printf-format
 }
 
 
