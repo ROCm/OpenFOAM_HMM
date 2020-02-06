@@ -811,7 +811,8 @@ private:
             (
                 const label nGrowCellZones,
                 const label backgroundZoneID,
-                labelList& unnamedSurfaceRegion,
+                labelList& unnamedSurfaceRegion1,
+                labelList& unnamedSurfaceRegion2,
                 labelList& namedSurfaceRegion,
                 labelList& cellToZone
             ) const;

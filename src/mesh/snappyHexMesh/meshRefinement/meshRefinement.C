@@ -235,6 +235,27 @@ void Foam::meshRefinement::calcCellCellRays
     const labelList& cellLevel = meshCutter_.cellLevel();
     const pointField& cellCentres = mesh_.cellCentres();
 
+
+    // Mark all non-coupled or coupled+master faces. Leaves only slave of
+    // coupled unset.
+    bitSet isMaster(mesh_.nBoundaryFaces(), true);
+    {
+        const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+        for (const polyPatch& pp : patches)
+        {
+            if (pp.coupled() && !refCast<const coupledPolyPatch>(pp).owner())
+            {
+                const labelRange bSlice
+                (
+                    pp.start()-mesh_.nInternalFaces(),
+                    pp.size()
+                );
+                isMaster.unset(bSlice);
+            }
+        }
+    }
+
+
     start.setSize(testFaces.size());
     end.setSize(testFaces.size());
     minLevel.setSize(testFaces.size());
@@ -256,8 +277,17 @@ void Foam::meshRefinement::calcCellCellRays
         {
             const label bFacei = facei - mesh_.nInternalFaces();
 
-            start[i] = cellCentres[own];
-            end[i] = neiCc[bFacei];
+            if (isMaster[bFacei])
+            {
+                start[i] = cellCentres[own];
+                end[i] = neiCc[bFacei];
+            }
+            else
+            {
+                // Slave face
+                start[i] = neiCc[bFacei];
+                end[i] = cellCentres[own];
+            }
             minLevel[i] = min(cellLevel[own], neiLevel[bFacei]);
         }
     }
