@@ -586,5 +586,62 @@ void Foam::writeFields
         }
     }
 
+    if (selectedFields.found("cellZone"))
+    {
+        volScalarField cellZone
+        (
+            IOobject
+            (
+                "cellZone",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            mesh,
+            dimensionedScalar(scalar(-1)),
+            calculatedFvPatchScalarField::typeName
+        );
+
+        const cellZoneMesh& czs = mesh.cellZones();
+        for (const auto& zone : czs)
+        {
+            UIndirectList<scalar>(cellZone, zone) = zone.index();
+        }
+
+        cellZone.correctBoundaryConditions();
+        Info<< "    Writing cell zoning to " << cellZone.name() << endl;
+        cellZone.write();
+    }
+    if (selectedFields.found("faceZone"))
+    {
+        surfaceScalarField faceZone
+        (
+            IOobject
+            (
+                "faceZone",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            mesh,
+            dimensionedScalar(scalar(-1)),
+            calculatedFvsPatchScalarField::typeName
+        );
+
+        const faceZoneMesh& czs = mesh.faceZones();
+        for (const auto& zone : czs)
+        {
+            UIndirectList<scalar>(faceZone, zone) = zone.index();
+        }
+
+        //faceZone.correctBoundaryConditions();
+        Info<< "    Writing face zoning to " << faceZone.name() << endl;
+        faceZone.write();
+    }
+
     Info<< endl;
 }
