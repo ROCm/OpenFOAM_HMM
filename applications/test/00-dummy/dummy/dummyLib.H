@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,14 +60,17 @@ struct dummyLib
     //- Compile-time value of WM_COMPILER
     static const std::string compiler;
 
-    //- Compile-time equivalent to WM_PRECISION_OPTION
-    static const std::string scalar_size;
+    //- Compile-time of WM_PRECISION_OPTION
+    static const std::string precision;
 
     //- Compile-time of WM_LABEL_SIZE
-    static const std::string label_size;
+    static const int label_size;
 
-    //- Compile-time value of WM_PRECISION_OPTION
-    static const std::string precision;
+    //- Compile-time equivalent to WM_PRECISION_OPTION
+    static const int scalar_size;
+
+    //- Compile-time equivalent to WM_PRECISION_OPTION
+    static const int solveScalar_size;
 
     //- Compile-time value of WM_ARCH + WM_COMPILER
     static const std::string archComp;

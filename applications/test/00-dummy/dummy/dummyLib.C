@@ -29,12 +29,15 @@ License
 
 // We know that our options file has properly defined types here
 
+#undef SOLVE_SIZE
+
 #if defined WM_SP
 # define PRECISION    "SP"
 # define SCALAR_SIZE  (8*sizeof(float))
 #elif defined(WM_SPDP)
 # define PRECISION    "SPDP"
 # define SCALAR_SIZE  (8*sizeof(float))
+# define SOLVE_SIZE   (8*sizeof(double))
 #elif defined WM_DP
 # define PRECISION    "DP"
 # define SCALAR_SIZE  (8*sizeof(double))
@@ -66,14 +69,17 @@ const std::string Foam::Detail::dummyLib::compiler(WM_COMPILER);
 
 const std::string Foam::Detail::dummyLib::precision(PRECISION);
 
-const std::string Foam::Detail::dummyLib::scalar_size
-(
-    std::to_string(SCALAR_SIZE)
-);
+const int Foam::Detail::dummyLib::label_size(WM_LABEL_SIZE);
 
-const std::string Foam::Detail::dummyLib::label_size
+const int Foam::Detail::dummyLib::scalar_size(SCALAR_SIZE);
+
+const int Foam::Detail::dummyLib::solveScalar_size
 (
-    std::to_string(WM_LABEL_SIZE)
+    #ifdef SOLVE_SIZE
+    SOLVE_SIZE
+    #else
+    SCALAR_SIZE
+    #endif
 );
 
 const std::string Foam::Detail::dummyLib::archComp

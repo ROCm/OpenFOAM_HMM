@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,33 +32,121 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "dummyLib.H"
+#include <cstring>
 #include <iostream>
 
+constexpr char nl = '\n';
+constexpr const char* const bold = "\\fB";  // nroff
+constexpr const char* const norm = "\\fR";  // nroff
+
+constexpr const char* const website = "www.openfoam.com";
+
+using std::cout;
+using wmake = Foam::Detail::dummyLib;
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Main program:
+
+static void printMan(const char* exeName)
+{
+    cout
+        << ".TH \"" << exeName << "\" 1 "
+        << "\"OpenFOAM-v" << OPENFOAM
+        << "\" \"" << website << "\" \"OpenFOAM Commands Manual\""
+        << nl;
+
+    cout
+        << ".SH NAME" << nl
+        << exeName
+        << " \\- part of " << bold << "OpenFOAM" << norm
+        << " (The Open Source CFD Toolbox)." << nl
+        << ".SH SYNOPSIS" << nl
+        << bold << exeName << norm << " [OPTIONS]" << nl;
+
+    cout
+        << ".SH DESCRIPTION" << nl
+        << ".nf" << nl
+        << "Minimal compilation test with wmake, without OpenFOAM libraries."
+        << nl
+        << ".fi" << nl;
+
+    cout
+        << ".SH OPTIONS" << nl
+        << ".TP" << nl
+        << "-help-man" << nl
+        << "Display manpage" << nl;
+
+    cout
+        << ".SH INFORMATION" << nl
+        << ".nf" << nl
+        << "label    = " << wmake::label_size << nl
+        << "scalar   = " << wmake::scalar_size;
+
+    if
+    (
+        wmake::solveScalar_size
+     && wmake::solveScalar_size != wmake::scalar_size
+    )
+    {
+        cout
+            << " [solve=" << wmake::solveScalar_size << "]";
+    }
+    cout
+        << " (" << wmake::precision << ')' << nl
+        << "arch     = " << wmake::arch << nl
+        << "compiler = " << wmake::compiler << nl;
+
+    cout
+        << nl
+        << "archComp     = " << wmake::archComp << nl
+        << "archCompBase = " << wmake::archCompBase << nl
+        << "archCompFull = " << wmake::archCompFull << nl;
+    cout
+        << ".fi" << nl;
+
+    cout
+        << ".SH \"SEE ALSO\"" << nl
+        << "Online documentation https://" << website << "/documentation/"
+        << nl;
+}
+
 
 int main(int argc, char *argv[])
 {
-    using wmake = Foam::Detail::dummyLib;
+    // Process -help-man
+    if (argc > 1 && strcmp(argv[1], "-help-man") == 0)
+    {
+        printMan("Test-dummyLib");
+        return 0;
+    }
 
-    std::cout
-        << '\n'
-        << "OPENFOAM  = " << OPENFOAM << '\n'
-        << "label     = " << wmake::label_size << '\n'
+    cout
+        << nl
+        << "OPENFOAM  = " << OPENFOAM << nl
+        << "label     = " << wmake::label_size << nl
         << "scalar    = " << wmake::scalar_size
-        << " (" << wmake::precision << ")\n"
-        << "arch      = " << wmake::arch << '\n'
-        << "compiler  = " << wmake::compiler << '\n';
+        << " (" << wmake::precision << ')' << nl;
 
+    if
+    (
+        wmake::solveScalar_size
+     && wmake::solveScalar_size != wmake::scalar_size
+    )
+    {
+        cout
+            << "solve     = " << wmake::solveScalar_size << nl;
+    }
 
-    std::cout
-        << '\n'
-        << "archComp     = " << wmake::archComp << '\n'
-        << "archCompBase = " << wmake::archCompBase << '\n'
-        << "archCompFull = " << wmake::archCompFull << '\n';
+    cout
+        << "arch      = " << wmake::arch << nl
+        << "compiler  = " << wmake::compiler << nl;
 
-    std::cout
-        << '\n';
+    cout
+        << nl
+        << "archComp     = " << wmake::archComp << nl
+        << "archCompBase = " << wmake::archCompBase << nl
+        << "archCompFull = " << wmake::archCompFull << nl;
+
+    cout<< nl;
 
     return 0;
 }
