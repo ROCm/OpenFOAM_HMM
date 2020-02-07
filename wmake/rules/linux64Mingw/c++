@@ -1,6 +1,6 @@
 include $(GENERAL_RULES)/Gcc/c++
 
-c++ARCH     = -m64
+c++ARCH     = -m64 -pthread
 
 # With gnu++11 (not c++11) to ensure __STRICT_ANSI__ is not defined
 CC          = x86_64-w64-mingw32-g++ -std=gnu++11

@@ -1,6 +1,6 @@
 include $(GENERAL_RULES)/Clang/c++
 
-c++ARCH     = -m64 -ftrapping-math
+c++ARCH     = -m64 -pthread -ftrapping-math
 
 include $(DEFAULT_RULES)/c++$(WM_COMPILE_OPTION)
 
