@@ -3,7 +3,7 @@ include $(GENERAL_RULES)/Clang/c++
 
 CC          = armclang++ -std=c++11
 
-c++ARCH     = -mcpu=native
+c++ARCH     = -mcpu=native -pthread
 
 include $(DEFAULT_RULES)/c++$(WM_COMPILE_OPTION)
 

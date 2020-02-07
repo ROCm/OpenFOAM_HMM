@@ -1,6 +1,6 @@
 include $(GENERAL_RULES)/Clang/c++
 
-c++ARCH     =
+c++ARCH     = -pthread
 
 include $(DEFAULT_RULES)/c++$(WM_COMPILE_OPTION)
 
