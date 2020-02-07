@@ -8,8 +8,7 @@
 #     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     paraviewFunctions
@@ -232,11 +231,16 @@ have_pvplugin_support()
 # Force reset of old variables
 no_paraview
 
-# Testing
-if [ "$1" = "-test" ]
-then
+# Test/query
+case "$1" in
+-test)
     have_pvplugin_support
     echo_paraview
+    ;;
+-query)
+    ## query_paraview
+    ;;
+esac
 fi
 
 #------------------------------------------------------------------------------

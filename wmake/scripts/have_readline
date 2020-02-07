@@ -5,17 +5,16 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2019 OpenCFD Ltd.
+#     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     have_readline
 #
 # Description
-#     Detection/setup of readline
+#     Detection/setup of READLINE
 #
 # Requires
 #     None
@@ -109,11 +108,12 @@ have_readline()
 # Force reset of old variables
 no_readline
 
-# Testing
-if [ "$1" = "-test" ]
-then
+# Test/query
+case "$1" in
+-test)
     have_readline
     echo_readline
-fi
+    ;;
+esac
 
 #------------------------------------------------------------------------------

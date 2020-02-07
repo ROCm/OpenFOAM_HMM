@@ -5,11 +5,10 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2019 OpenCFD Ltd.
+#     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     have_kahip
@@ -21,7 +20,7 @@
 #     config.sh/kahip
 #
 # Functions provided
-#     have_kahip, no_kahip, echo_kahip
+#     have_kahip, no_kahip, echo_kahip, query_kahip
 #
 # Variables set on success
 #     HAVE_KAHIP
@@ -53,19 +52,36 @@ echo_kahip()
 }
 
 
+# Query settings
+query_kahip()
+{
+    local config="config.sh/kahip"
+    local settings
+
+    if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile -mode=o "$config")"
+    then
+        . "$settings"
+        _process_query kahip "$KAHIP_ARCH_PATH"
+    else
+        echo "(no $config settings)" 1>&2
+        echo "kahip=unknown"
+    fi
+}
+
+
 # On success, return 0 and export variables
 # -> HAVE_KAHIP, KAHIP_ARCH_PATH, KAHIP_INC_DIR, KAHIP_LIB_DIR
 have_kahip()
 {
+    local config="config.sh/kahip"
     local prefix header library incName libName settings warn
     warn="==> skip kahip"
 
-    # Setup
-    if settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/kahip)
+    if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config")"
     then
         . "$settings"
     else
-        [ -n "$warn" ] && echo "$warn (no config.sh/kahip settings)"
+        [ -n "$warn" ] && echo "$warn (no $config settings)"
         return 1
     fi
 
@@ -123,11 +139,15 @@ have_kahip()
 # Force reset of old variables
 no_kahip
 
-# Testing
-if [ "$1" = "-test" ]
-then
+# Test/query
+case "$1" in
+-test)
     have_kahip
     echo_kahip
-fi
+    ;;
+-query)
+    query_kahip
+    ;;
+esac
 
 #------------------------------------------------------------------------------

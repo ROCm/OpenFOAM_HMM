@@ -5,11 +5,10 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2019 OpenCFD Ltd.
+#     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     have_fftw
@@ -21,7 +20,7 @@
 #     FFTW_ARCH_PATH
 #
 # Functions provided
-#     have_fftw, no_fftw, echo_fftw
+#     have_fftw, no_fftw, echo_fftw, query_fftw
 #
 # Variables set on success
 #     HAVE_FFTW
@@ -49,6 +48,23 @@ echo_fftw()
     echo "root=$FFTW_ARCH_PATH"
     echo "include=$FFTW_INC_DIR"
     echo "library=$FFTW_LIB_DIR"
+}
+
+
+# Query settings
+query_fftw()
+{
+    local config="config.sh/FFTW"
+    local settings
+
+    if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile -mode=o "$config")"
+    then
+        . "$settings"
+        _process_query fftw "$FFTW_ARCH_PATH"
+    else
+        echo "(no $config settings)" 1>&2
+        echo "fftw=unknown"
+    fi
 }
 
 
@@ -112,11 +128,15 @@ have_fftw()
 # Force reset of old variables
 no_fftw
 
-# Testing
-if [ "$1" = "-test" ]
-then
+# Test/query
+case "$1" in
+-test)
     have_fftw
     echo_fftw
-fi
+    ;;
+-query)
+    query_fftw
+    ;;
+esac
 
 #------------------------------------------------------------------------------

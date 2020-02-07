@@ -5,23 +5,22 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2019 OpenCFD Ltd.
+#     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     have_scotch
 #
 # Description
-#     Detection/setup of scotch
+#     Detection/setup of SCOTCH
 #
 # Requires
 #     config.sh/scotch
 #
 # Functions provided
-#     have_scotch, no_scotch, echo_scotch
+#     have_scotch, no_scotch, echo_scotch, query_scotch
 #
 # Variables set on success
 #     HAVE_SCOTCH
@@ -59,19 +58,36 @@ echo_scotch()
 }
 
 
+# Query settings
+query_scotch()
+{
+    local config="config.sh/scotch"
+    local settings
+
+    if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile -mode=o "$config")"
+    then
+        . "$settings"
+        _process_query scotch "$SCOTCH_ARCH_PATH"
+    else
+        echo "(no $config settings)" 1>&2
+        echo "scotch=unknown"
+    fi
+}
+
+
 # On success, return 0 and export variables
 # -> HAVE_SCOTCH, SCOTCH_ARCH_PATH, SCOTCH_INC_DIR, SCOTCH_LIB_DIR
 have_scotch()
 {
+    local config="config.sh/scotch"
     local prefix header library incName libName settings warn
     warn="==> skip scotch"
 
-    # Setup
-    if settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/scotch)
+    if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config")"
     then
         . "$settings"
     else
-        [ -n "$warn" ] && echo "$warn (no config.sh/scotch settings)"
+        [ -n "$warn" ] && echo "$warn (no $config settings)"
         return 2
     fi
 
@@ -252,11 +268,15 @@ have_ptscotch()
 # Force reset of old variables
 no_scotch
 
-# Testing
-if [ "$1" = "-test" ]
-then
+# Test/query
+case "$1" in
+-test)
     have_scotch && have_ptscotch
     echo_scotch
-fi
+    ;;
+-query)
+    query_scotch
+    ;;
+esac
 
 #------------------------------------------------------------------------------

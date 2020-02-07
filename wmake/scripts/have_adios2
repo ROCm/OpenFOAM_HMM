@@ -5,11 +5,10 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2019 OpenCFD Ltd.
+#     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     have_adios2
@@ -21,7 +20,7 @@
 #     ADIOS2_ARCH_PATH
 #
 # Functions provided
-#     have_adios2, no_adios2, echo_adios2, hint_adios2
+#     have_adios2, no_adios2, echo_adios2, hint_adios2, query_adios2
 #
 # Variables set on success
 #     HAVE_ADIOS2
@@ -68,19 +67,37 @@ INFORMATION
 }
 
 
+# Query settings
+query_adios2()
+{
+    local config="config.sh/adios2"
+    local settings
+
+    if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile -mode=o "$config")"
+    then
+        . "$settings"
+        _process_query adios2 "$ADIOS2_ARCH_PATH"
+    else
+        echo "(no $config settings)" 1>&2
+        echo "adios2=unknown"
+    fi
+}
+
+
 # On success, return 0 and export variables
 # -> HAVE_ADIOS2, ADIOS2_INC_DIR, ADIOS2_LIB_DIR
 have_adios2()
 {
+    local config="config.sh/adios2"
     local prefix header library incName libName settings warn
     # warn="==> skip adios2"
 
     # Setup
-    if settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/adios2)
+    if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config")"
     then
         . "$settings"
     else
-        [ -n "$warn" ] && echo "$warn (no config.sh/adios2 settings)"
+        [ -n "$warn" ] && echo "$warn (no $config settings)"
         return 2
     fi
 
@@ -135,11 +152,15 @@ have_adios2()
 # Force reset of old variables
 no_adios2
 
-# Testing
-if [ "$1" = "-test" ]
-then
+# Test/query
+case "$1" in
+-test)
     have_adios2
     echo_adios2
-fi
+    ;;
+-query)
+    query_adios2
+    ;;
+esac
 
 #------------------------------------------------------------------------------

@@ -1,0 +1,109 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | www.openfoam.com
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+#     Copyright (C) 2020 OpenCFD Ltd.
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
+#
+# Script
+#     query-versions
+#
+# Description
+#     Query (ThirdParty) versions based on their etc/config.sh values
+#     Executes their respective -query.
+#
+# TODO
+#     cmake, vtk, paraview
+#
+#------------------------------------------------------------------------------
+# Hard-coded value (eg, with autoconfig)
+projectDir="@PROJECT_DIR@"
+
+if [ -z "$projectDir" ] || [ "${projectDir#@}" != "$projectDir" ]
+then
+    # Auto-detect from location
+    toolsDir="${0%/*}"                              # The bin/tools dir
+    projectDir="${toolsDir%/bin/tools}"             # Project dir
+
+    case "$projectDir" in
+        (/bin | /usr/bin | /usr/local/bin)
+        # This shouldn't happen.
+        # If copied to a system dir, should also be using hard-coded values!
+        echo "Warning: suspicious looking project dir: $projectDir" 1>&2
+        ;;
+
+        ("$toolsDir")
+        # Eg, called as ./openfoam etc - need to try harder
+        projectDir="$(\cd $(dirname $0)/../.. && \pwd -L)" || unset projectDir
+        ;;
+    esac
+fi
+
+#------------------------------------------------------------------------------
+usage() {
+    exec 1>&2
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
+
+Usage: ${0##*/} [OPTION]
+
+options:
+  -h, -help         Print the usage
+
+Query (ThirdParty) versions based on their etc/config.sh values.
+Uses OpenFOAM wmake/scripts/have_* scripts.
+
+USAGE
+    exit 1
+}
+
+#------------------------------------------------------------------------------
+
+# Parse options
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    # Print help
+    (-h | -help*)
+        usage
+        ;;
+
+    (*)
+        echo "Ignore unknown option/argument: $@" 1>&2
+        break
+        ;;
+    esac
+    shift
+done
+
+#------------------------------------------------------------------------------
+scriptsDir="$projectDir/wmake/scripts"
+
+[ -d "$scriptsDir" ] || {
+    echo "No such directory: $scriptsDir" 1>&2
+    exit 2
+}
+
+# Allow operation without an active OpenFOAM environment
+export WM_PROJECT_DIR="$projectDir"
+
+#------------------------------------------------------------------------------
+
+# Examine the "wmake/scripts/have_..." scripts for query_...() functions,
+# assume they also have a -query option
+
+for script in grep -l -e '^query_' "$scriptsDir"/have_*
+do
+    if [ -f "$script" ]
+    then
+        bash "$script" -query
+    fi
+done
+
+#------------------------------------------------------------------------------

@@ -5,11 +5,10 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2019 OpenCFD Ltd.
+#     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     have_cgal
@@ -21,7 +20,7 @@
 #     CGAL_ARCH_PATH
 #
 # Functions provided
-#     have_cgal, no_cgal, echo_cgal
+#     have_cgal, no_cgal, echo_cgal, query_cgal
 #
 # Variables set on success
 #     HAVE_CGAL
@@ -49,6 +48,23 @@ echo_cgal()
     echo "root=$CGAL_ARCH_PATH"
     echo "include=$CGAL_INC_DIR"
     echo "library=$CGAL_LIB_DIR"
+}
+
+
+# Query settings (from CGAL setup)
+query_cgal()
+{
+    local config="config.sh/CGAL"
+    local settings
+
+    if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile -mode=o "$config")"
+    then
+        . "$settings"
+        _process_query cgal "$CGAL_ARCH_PATH"
+    else
+        echo "(no $config settings)" 1>&2
+        echo "cgal=unknown"
+    fi
 }
 
 
@@ -114,11 +130,15 @@ have_cgal()
 # Force reset of old variables
 no_cgal
 
-# Testing
-if [ "$1" = "-test" ]
-then
+# Test/query
+case "$1" in
+-test)
     have_cgal
     echo_cgal
-fi
+    ;;
+-query)
+    query_cgal
+    ;;
+esac
 
 #------------------------------------------------------------------------------

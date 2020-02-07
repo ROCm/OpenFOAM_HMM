@@ -5,23 +5,22 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2019 OpenCFD Ltd.
+#     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     have_boost
 #
 # Description
-#     Detection/setup of Boost
+#     Detection/setup of BOOST
 #
 # Requires
 #     BOOST_ARCH_PATH
 #
 # Functions provided
-#     have_boost, no_boost, echo_boost
+#     have_boost, no_boost, echo_boost, query_boost
 #
 # Variables set on success
 #     HAVE_BOOST
@@ -49,6 +48,23 @@ echo_boost()
     echo "root=$BOOST_ARCH_PATH"
     echo "include=$BOOST_INC_DIR"
     echo "library=$BOOST_LIB_DIR"
+}
+
+
+# Query settings (from CGAL setup)
+query_boost()
+{
+    local config="config.sh/CGAL"
+    local settings
+
+    if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile -mode=o "$config")"
+    then
+        . "$settings"
+        _process_query boost "$BOOST_ARCH_PATH"
+    else
+        echo "(no $config settings)" 1>&2
+        echo "boost=unknown"
+    fi
 }
 
 
@@ -114,11 +130,15 @@ have_boost()
 # Force reset of old variables
 no_boost
 
-# Testing
-if [ "$1" = "-test" ]
-then
+# Test/query
+case "$1" in
+-test)
     have_boost
     echo_boost
-fi
+    ;;
+-query)
+    query_boost
+    ;;
+esac
 
 #------------------------------------------------------------------------------

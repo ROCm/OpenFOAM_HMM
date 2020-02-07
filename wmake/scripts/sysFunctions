@@ -8,8 +8,7 @@
 #     Copyright (C) 2018-2019 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     sysFunctions
@@ -88,6 +87,26 @@ then
     isSystem()
     {
         test "${1##*-}" = system
+    }
+
+
+    # Simple output for -query
+    # $1 = software
+    # $2 = setting
+    _process_query()
+    {
+        if isNone "$2"
+        then
+            echo "$1=none"
+        elif isAbsdir "$2"    ## not hasAbsdir
+        then
+            echo "$1=${2##*/}"
+        elif isSystem "$2"
+        then
+            echo "$1=system"
+        else
+            echo "$1=unknown"
+        fi
     }
 
 
