@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,9 +58,9 @@ Foam::label Foam::functionObjects::ensightWrite::writeVolFields
 
         ensightOutput::writeVolField<Type>
         (
+            os.ref(),
             field,
             ensMesh(),
-            os.ref(),
             caseOpts_.nodeValues()
         );
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,10 +35,8 @@ Description
 #define ensightOutputVolField_H
 
 #include "ensightOutput.H"
-#include "ensightPart.H"
-#include "ensightParts.H"
-#include "ensightPartFaces.H"
-#include "ensightPartCells.H"
+#include "ensightFaces.H"
+#include "ensightCells.H"
 #include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -46,39 +44,11 @@ Description
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class ensightMesh;
 
 namespace ensightOutput
 {
-
-/*---------------------------------------------------------------------------*\
-                        Namespace ensightOutput::Detail
-\*---------------------------------------------------------------------------*/
-
-namespace Detail
-{
-
-//- Write volume field component-wise
-template<class Type>
-bool writeVolField
-(
-    const GeometricField<Type, fvPatchField, volMesh>& vf,
-    const ensightMesh& ensMesh,
-    ensightFile& os
-);
-
-//- Write point field component-wise
-template<class Type>
-bool writePointField
-(
-    const GeometricField<Type, pointPatchField, pointMesh>& pf,
-    const ensightMesh& ensMesh,
-    ensightFile& os
-);
-
-} // End namespace Detail
-
 
 /*---------------------------------------------------------------------------*\
                             Namespace ensightOutput
@@ -88,50 +58,30 @@ bool writePointField
 template<class Type>
 bool writeVolField
 (
-    const GeometricField<Type, fvPatchField, volMesh>&,
-    const ensightMesh& ensMesh,
     ensightFile& os,
-    const bool nodeValues = false
+    const GeometricField<Type, fvPatchField, volMesh>& vf,
+    const ensightMesh& ensMesh
 );
 
 
-/*---------------------------------------------------------------------------*\
-                        Namespace ensightOutput::Serial
-\*---------------------------------------------------------------------------*/
-
-namespace Serial
-{
-
-//- Write volume field component-wise for specified faces
+//- Write volume field component-wise, optionally forcing interpolation
 template<class Type>
 bool writeVolField
 (
+    ensightFile& os,
     const GeometricField<Type, fvPatchField, volMesh>& vf,
-    const ensightPartFaces& part,
-    ensightFile& os
+    const ensightMesh& ensMesh,
+    const bool nodeValues
 );
 
-
-//- Write volume field component-wise for specified cells
+//- Write point field component-wise
 template<class Type>
-bool writeVolField
+bool writePointField
 (
-    const GeometricField<Type, fvPatchField, volMesh>& vf,
-    const ensightPartCells& part,
-    ensightFile& os
+    ensightFile& os,
+    const GeometricField<Type, pointPatchField, pointMesh>& pf,
+    const ensightMesh& ensMesh
 );
-
-
-//- Write volume field component-wise
-template<class Type>
-bool writeVolField
-(
-    const GeometricField<Type, fvPatchField, volMesh>& vf,
-    const ensightParts& list,
-    ensightFile& os
-);
-
-} // End namespace Serial
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

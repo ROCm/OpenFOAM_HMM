@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,73 +31,72 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<template<typename> class FieldContainer, class Type>
-bool Foam::ensightOutput::Detail::writeFieldComponents
+void Foam::ensightOutput::Detail::copyComponent
 (
-    const char* key,
-    const FieldContainer<Type>& fld,
-    ensightFile& os,
+    scalarField& res,
+    const FieldContainer<Type>& input,
+    const direction cmpt
+)
+{
+    res.resize(input.size());
+
+    auto iter = res.begin();
+
+    for (const Type& val : input)
+    {
+        *iter = component(val, cmpt);
+        ++iter;
+    }
+}
+
+
+template<template<typename> class FieldContainer>
+bool Foam::ensightOutput::Detail::writeCoordinates
+(
+    ensightGeoFile& os,
+    const label partId,
+    const word& partName,
+    const label nPoints,
+    const FieldContainer<Foam::point>& fld,
     bool parallel
 )
 {
-    // Preliminary checks
-    // ~~~~~~~~~~~~~~~~~~
-
     parallel = parallel && Pstream::parRun();
 
-    bool hasField = !fld.empty();
+    const label nSlaves = (parallel ? Pstream::nProcs() : 0);
 
-    if (parallel)
-    {
-        reduce(hasField, orOp<bool>());
-    }
+    // Using manual copyComponent(...) instead of fld.component() to support
+    // indirect lists etc.
 
-    // Nothing to write
-    if (!hasField) return false;
-
-    // End preliminary checks
-    // ~~~~~~~~~~~~~~~~~~~~~~
-
+    scalarField send(fld.size());
 
     if (Pstream::master())
     {
-        os.writeKeyword(key);
+        // Serial output, or parallel (master)
 
-        if (!parallel)
+        os.beginPart(partId, partName);
+        os.beginCoordinates(nPoints);
+
+        for (direction cmpt=0; cmpt < point::nComponents; ++cmpt)
         {
-            // Serial output
-            for (direction d=0; d < pTraits<Type>::nComponents; ++d)
+            copyComponent(send, fld, cmpt);
+            os.writeList(send);
+
+            for (int slave=1; slave < nSlaves; ++slave)
             {
-                const label cmpt = ensightPTraits<Type>::componentOrder[d];
-
-                os.writeList(fld.component(cmpt));
-            }
-        }
-        else
-        {
-            // Parallel (master)
-
-            for (direction d=0; d < pTraits<Type>::nComponents; ++d)
-            {
-                const label cmpt = ensightPTraits<Type>::componentOrder[d];
-
-                os.writeList(fld.component(cmpt));
-
-                for (int slave=1; slave<Pstream::nProcs(); ++slave)
-                {
-                    IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-                    scalarField received(fromSlave);
-                    os.writeList(received);
-                }
+                IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
+                scalarField recv(fromSlave);
+                os.writeList(recv);
             }
         }
     }
-    else if (parallel)
+    else if (nSlaves)
     {
         // Parallel (slaves)
 
-        for (direction d=0; d < pTraits<Type>::nComponents; ++d)
+        for (direction cmpt=0; cmpt < point::nComponents; ++cmpt)
         {
-            const label cmpt = ensightPTraits<Type>::componentOrder[d];
+            copyComponent(send, fld, cmpt);
 
             OPstream toMaster
             (
@@ -105,8 +104,7 @@ bool Foam::ensightOutput::Detail::writeFieldComponents
                 Pstream::masterNo()
             );
 
-            toMaster
-                << fld.component(cmpt);
+            toMaster << send;
         }
     }
 
@@ -114,52 +112,77 @@ bool Foam::ensightOutput::Detail::writeFieldComponents
 }
 
 
-template<class Type>
-bool Foam::ensightOutput::Detail::writeFaceField
+template<template<typename> class FieldContainer, class Type>
+bool Foam::ensightOutput::Detail::writeFieldComponents
 (
-    const Field<Type>& fld,
-    const ensightFaces& part,
     ensightFile& os,
+    const char* key,
+    const FieldContainer<Type>& fld,
     bool parallel
 )
 {
-    // Preliminary checks
-    // ~~~~~~~~~~~~~~~~~~
-
     parallel = parallel && Pstream::parRun();
 
-    bool hasGeom = (parallel ? part.total() : part.size());
-    bool hasField = !fld.empty();
+    const label nSlaves = (parallel ? Pstream::nProcs() : 0);
 
-    if (parallel)
+    // Preliminary checks
     {
-        // Used 'pre-reduced' information for hasGeom
-        reduce(hasField, orOp<bool>());
+        bool hasField = !fld.empty();
+
+        if (parallel)
+        {
+            reduce(hasField, orOp<bool>());
+        }
+
+        // No field
+        if (!hasField) return false;
     }
 
-    // Nothing to write
-    if (!hasGeom || !hasField) return false;
 
-    // End preliminary checks
-    // ~~~~~~~~~~~~~~~~~~~~~~
+    // Using manual copyComponent(...) instead of fld.component() to support
+    // indirect lists etc.
 
+    scalarField send(fld.size());
 
     if (Pstream::master())
     {
-        os.beginPart(part.index());
+        // Serial output, or parallel (master)
+
+        os.writeKeyword(key);
+
+        for (direction d=0; d < pTraits<Type>::nComponents; ++d)
+        {
+            const direction cmpt = ensightPTraits<Type>::componentOrder[d];
+
+            copyComponent(send, fld, cmpt);
+            os.writeList(send);
+
+            for (label slave=1; slave < nSlaves; ++slave)
+            {
+                IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
+                scalarField recv(fromSlave);
+                os.writeList(recv);
+            }
+        }
     }
-
-    for (int typei=0; typei < ensightFaces::nTypes; ++typei)
+    else if (nSlaves)
     {
-        const ensightFaces::elemType what = ensightFaces::elemType(typei);
+        // Parallel (slaves)
 
-        writeFieldComponents
-        (
-            ensightFaces::key(what),
-            Field<Type>(fld, part.faceIds(what)),
-            os,
-            parallel
-        );
+        for (direction d=0; d < pTraits<Type>::nComponents; ++d)
+        {
+            const direction cmpt = ensightPTraits<Type>::componentOrder[d];
+
+            copyComponent(send, fld, cmpt);
+
+            OPstream toMaster
+            (
+                Pstream::commsTypes::scheduled,
+                Pstream::masterNo()
+            );
+
+            toMaster << send;
+        }
     }
 
     return true;
@@ -169,31 +192,29 @@ bool Foam::ensightOutput::Detail::writeFaceField
 template<class Type>
 bool Foam::ensightOutput::Detail::writeFaceSubField
 (
+    ensightFile& os,
     const Field<Type>& fld,
     const ensightFaces& part,
-    ensightFile& os,
     bool parallel
 )
 {
-    // Preliminary checks
-    // ~~~~~~~~~~~~~~~~~~
-
     parallel = parallel && Pstream::parRun();
 
-    bool hasGeom = (parallel ? part.total() : part.size());
-    bool hasField = !fld.empty();
-
-    if (parallel)
+    // Preliminary checks: total() contains pre-reduced information
     {
-        // Used 'pre-reduced' information for hasGeom
-        reduce(hasField, orOp<bool>());
+        // No geometry
+        if (parallel ? !part.total() : !part.size()) return false;
+
+        bool hasField = !fld.empty();
+
+        if (parallel)
+        {
+            reduce(hasField, orOp<bool>());
+        }
+
+        // No field
+        if (!hasField) return false;
     }
-
-    // Nothing to write
-    if (!hasGeom || !hasField) return false;
-
-    // End preliminary checks
-    // ~~~~~~~~~~~~~~~~~~~~~~
 
 
     if (Pstream::master())
@@ -201,23 +222,19 @@ bool Foam::ensightOutput::Detail::writeFaceSubField
         os.beginPart(part.index());
     }
 
+    labelList localAddr;
 
-    label start = 0; // The start of the sub-list
     for (int typei=0; typei < ensightFaces::nTypes; ++typei)
     {
-        const ensightFaces::elemType what = ensightFaces::elemType(typei);
+        const auto etype = ensightFaces::elemType(typei);
 
-        const label size = part.faceIds(what).size();
-
-        writeFieldComponents
+        ensightOutput::Detail::writeFieldComponents
         (
-            ensightFaces::key(what),
-            SubField<Type>(fld, size, start),
             os,
+            ensightFaces::key(etype),
+            SubField<Type>(fld, part.range(etype)),
             parallel
         );
-
-        start += size;  // Advance the start for next sub-list
     }
 
     return true;
@@ -225,80 +242,31 @@ bool Foam::ensightOutput::Detail::writeFaceSubField
 
 
 template<class Type>
-bool Foam::ensightOutput::Serial::writePointField
+bool Foam::ensightOutput::writeField
 (
-    const Field<Type>& fld,
-    const ensightFaces& part,
-    ensightFile& os
-)
-{
-    // Preliminary checks
-    // ~~~~~~~~~~~~~~~~~~
-
-    bool parallel = false && Pstream::parRun();
-
-    bool hasGeom = (parallel ? part.total() : part.size());
-    bool hasField = !fld.empty();
-
-    if (parallel)
-    {
-        // Used 'pre-reduced' information for hasGeom
-        reduce(hasField, orOp<bool>());
-    }
-
-    // Nothing to write
-    if (!hasGeom || !hasField) return false;
-
-    // End preliminary checks
-    // ~~~~~~~~~~~~~~~~~~~~~~
-
-
-    if (Pstream::master())
-    {
-        os.beginPart(part.index());
-    }
-
-    ensightOutput::Detail::writeFieldComponents
-    (
-        "coordinates",
-        fld,
-        os,
-        parallel
-    );
-
-    return true;
-}
-
-
-template<class Type>
-bool Foam::ensightOutput::Detail::writeCellField
-(
+    ensightFile& os,
     const Field<Type>& fld,
     const ensightCells& part,
-    ensightFile& os,
     bool parallel
 )
 {
-    // Preliminary checks
-    // ~~~~~~~~~~~~~~~~~~
-
     parallel = parallel && Pstream::parRun();
 
-    bool hasGeom = (parallel ? part.total() : part.size());
-    bool hasField = !fld.empty();
-
-    if (parallel)
+    // Preliminary checks: total() contains pre-reduced information
     {
-        // Used 'pre-reduced' information for hasGeom
-        reduce(hasField, orOp<bool>());
+        // No geometry
+        if (parallel ? !part.total() : !part.size()) return false;
+
+        bool hasField = !fld.empty();
+
+        if (parallel)
+        {
+            reduce(hasField, orOp<bool>());
+        }
+
+        // No field
+        if (!hasField) return false;
     }
-
-    // Nothing to write
-    if (!hasGeom || !hasField) return false;
-
-    // End preliminary checks
-    // ~~~~~~~~~~~~~~~~~~~~~~
-
 
     if (Pstream::master())
     {
@@ -307,13 +275,63 @@ bool Foam::ensightOutput::Detail::writeCellField
 
     for (int typei=0; typei < ensightCells::nTypes; ++typei)
     {
-        const ensightCells::elemType what = ensightCells::elemType(typei);
+        const auto etype = ensightCells::elemType(typei);
 
-        Detail::writeFieldComponents
+        ensightOutput::Detail::writeFieldComponents
         (
-            ensightCells::key(what),
-            Field<Type>(fld, part.cellIds(what)),
             os,
+            ensightCells::key(etype),
+            UIndirectList<Type>(fld, part.cellIds(etype)),
+            parallel
+        );
+    }
+
+    return true;
+}
+
+
+template<class Type>
+bool Foam::ensightOutput::writeField
+(
+    ensightFile& os,
+    const Field<Type>& fld,
+    const ensightFaces& part,
+    bool parallel
+)
+{
+    parallel = parallel && Pstream::parRun();
+
+    // Preliminary checks: total() contains pre-reduced information
+    {
+        // No geometry
+        if (parallel ? !part.total() : !part.size()) return false;
+
+        bool hasField = !fld.empty();
+
+        if (parallel)
+        {
+            reduce(hasField, orOp<bool>());
+        }
+
+        // No field
+        if (!hasField) return false;
+    }
+
+
+    if (Pstream::master())
+    {
+        os.beginPart(part.index());
+    }
+
+    for (int typei=0; typei < ensightFaces::nTypes; ++typei)
+    {
+        const auto etype = ensightFaces::elemType(typei);
+
+        ensightOutput::Detail::writeFieldComponents
+        (
+            os,
+            ensightFaces::key(etype),
+            UIndirectList<Type>(fld, part.faceIds(etype)),
             parallel
         );
     }

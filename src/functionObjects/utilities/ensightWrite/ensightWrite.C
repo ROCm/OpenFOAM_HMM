@@ -77,7 +77,8 @@ Foam::functionObjects::ensightWrite::ensightWrite
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    writeOpts_
+    writeOpts_(),
+    caseOpts_
     (
         IOstreamOption::formatNames.lookupOrDefault
         (
@@ -87,7 +88,6 @@ Foam::functionObjects::ensightWrite::ensightWrite
             true  // Failsafe behaviour
         )
     ),
-    caseOpts_(writeOpts_.format()),
     outputDir_(),
     consecutive_(false),
     meshState_(polyMesh::TOPO_CHANGE),

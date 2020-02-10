@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,67 +25,71 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-inline const Foam::fvMesh& Foam::ensightMesh::mesh() const
+inline void Foam::ensightCells::add(const elemType etype, label id)
 {
-    return mesh_;
+    // Linear addressing location
+    const label index = offsets_[etype] + sizes_[etype]++;
+
+    addressing()[index] = id;
 }
 
 
-inline const Foam::ensightMesh::options& Foam::ensightMesh::option() const
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+inline const char* Foam::ensightCells::key(const elemType etype)
 {
-    return *options_;
+    return elemNames[etype];
 }
 
 
-inline Foam::IOstream::streamFormat Foam::ensightMesh::format() const
+inline const Foam::FixedList<Foam::label,5>& Foam::ensightCells::totals() const
 {
-    return options_->format();
+    return sizes_;
 }
 
 
-inline bool Foam::ensightMesh::useInternalMesh() const
+inline Foam::label Foam::ensightCells::total(const elemType etype) const
 {
-    return options_->useInternalMesh();
+    return sizes_[etype];
 }
 
 
-inline bool Foam::ensightMesh::useBoundaryMesh() const
+inline Foam::label Foam::ensightCells::size(const elemType etype) const
 {
-    return options_->useBoundaryMesh();
+    return (offsets_[etype+1] - offsets_[etype]);
 }
 
 
-inline const Foam::ensightCells& Foam::ensightMesh::meshCells() const
+inline Foam::labelRange Foam::ensightCells::range(const elemType etype) const
 {
-    return meshCells_;
+    return labelRange(offsets_[etype], offsets_[etype+1] - offsets_[etype]);
 }
 
 
-inline const Foam::Map<Foam::word>& Foam::ensightMesh::patches() const
+inline const Foam::labelList& Foam::ensightCells::cellIds() const
 {
-    return patchLookup_;
+    return addressing();
 }
 
 
-inline const Foam::HashTable<Foam::ensightFaces>&
-Foam::ensightMesh::boundaryPatchFaces() const
+inline const Foam::labelUList
+Foam::ensightCells::cellIds(const elemType etype) const
 {
-    return boundaryPatchFaces_;
+    return addressing()[range(etype)];
 }
 
 
-inline const Foam::HashTable<Foam::ensightFaces>&
-Foam::ensightMesh::faceZoneFaces() const
+inline void Foam::ensightCells::incrCellIds(const label off)
 {
-    return faceZoneFaces_;
+    incrAddressing(off);
 }
 
 
-inline void Foam::ensightMesh::write(autoPtr<ensightGeoFile>& os) const
+inline void Foam::ensightCells::decrCellIds(const label off)
 {
-    write(os.ref());
+    decrAddressing(off);
 }
 
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,31 +33,41 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+namespace Foam
+{
+    defineTypeNameAndDebug(ensightCells, 0);
+}
+
 const char* Foam::ensightCells::elemNames[5] =
     { "tetra4", "pyramid5", "penta6", "hexa8", "nfaced" };
+
+static_assert
+(
+    Foam::ensightCells::nTypes == 5,
+    "Support exactly 5 cell types (tetra4, pyramid5, penta6, hexa8, nfaced)"
+);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::ensightCells::resizeAll()
 {
-    // overall required size
-    label n = 0;
-    forAll(sizes_, typei)
-    {
-        n += sizes_[typei];
-    }
-    address_.setSize(n, Zero);
+    // Assign sub-list offsets, determine overall size
 
-    // assign corresponding sub-lists
-    n = 0;
-    forAll(sizes_, typei)
-    {
-        slices_[typei].setStart(n);
-        slices_[typei].setSize(sizes_[typei]);
+    label len = 0;
 
-        n += sizes_[typei];
+    auto iter = offsets_.begin();
+
+    *iter = 0;
+    for (const label n : sizes_)
+    {
+        len += n;
+
+        *(++iter) = len;
     }
+
+    // The addressing space
+    addressing().resize(len, Zero);
 }
 
 
@@ -65,38 +75,17 @@ void Foam::ensightCells::resizeAll()
 
 Foam::ensightCells::ensightCells()
 :
-    ensightCells(0)
+    ensightPart(),
+    offsets_(Zero),
+    sizes_(Zero)
 {}
 
 
-Foam::ensightCells::ensightCells(const label partIndex)
+Foam::ensightCells::ensightCells(const string& description)
 :
-    index_(partIndex),
-    address_(),
-    slices_(),
-    sizes_(Zero)
+    ensightCells()
 {
-    resizeAll(); // adjust allocation/sizing
-}
-
-
-Foam::ensightCells::ensightCells(const ensightCells& obj)
-:
-    index_(obj.index_),
-    address_(obj.address_),
-    slices_(),
-    sizes_()
-{
-    // Save the total (reduced) sizes
-    FixedList<label, 5> totSizes = obj.sizes_;
-
-    // Need local sizes for the resize operation
-    this->sizes_ = obj.sizes();
-
-    resizeAll(); // Adjust allocation/sizing
-
-    // Restore total (reduced) sizes
-    this->sizes_ = totSizes;
+    rename(description);
 }
 
 
@@ -105,9 +94,10 @@ Foam::ensightCells::ensightCells(const ensightCells& obj)
 Foam::FixedList<Foam::label, 5> Foam::ensightCells::sizes() const
 {
     FixedList<label, 5> count;
-    forAll(slices_, typei)
+
+    forAll(count, typei)
     {
-        count[typei] = slices_[typei].size();
+        count[typei] = size(elemType(typei));
     }
 
     return count;
@@ -127,9 +117,17 @@ Foam::label Foam::ensightCells::total() const
 
 void Foam::ensightCells::clear()
 {
-    sizes_ = Zero;  // reset sizes
-    resizeAll();
+    clearOut();
+
+    ensightPart::clear();
+
+    sizes_ = Zero;
+    offsets_ = Zero;
 }
+
+
+void Foam::ensightCells::clearOut()
+{}
 
 
 void Foam::ensightCells::reduce()
@@ -137,7 +135,7 @@ void Foam::ensightCells::reduce()
     // No listCombineGather, listCombineScatter for FixedList
     forAll(sizes_, typei)
     {
-        sizes_[typei] = slices_[typei].size();
+        sizes_[typei] = size(elemType(typei));
         Foam::reduce(sizes_[typei], sumOp<label>());
     }
 }
@@ -145,12 +143,15 @@ void Foam::ensightCells::reduce()
 
 void Foam::ensightCells::sort()
 {
-    forAll(slices_, typei)
+    for (int typei=0; typei < nTypes; ++typei)
     {
-        if (slices_[typei].size())
+        const labelRange sub(range(elemType(typei)));
+
+        if (!sub.empty())
         {
-            SubList<label> idLst(address_, slices_[typei]);
-            Foam::sort(idLst);
+            SubList<label> ids(addressing(), sub);
+
+            Foam::sort(ids);
         }
     }
 }
@@ -178,29 +179,30 @@ void Foam::ensightCells::classifyImpl
     {
         const cellModel& model = shapes[id].model();
 
-        enum elemType what = NFACED;
+        elemType etype(NFACED);
         if (model == tet)
         {
-            what = TETRA4;
+            etype = TETRA4;
         }
         else if (model == pyr)
         {
-            what = PYRAMID5;
+            etype = PYRAMID5;
         }
         else if (model == prism)
         {
-            what = PENTA6;
+            etype = PENTA6;
         }
         else if (model == hex)
         {
-            what = HEXA8;
+            etype = HEXA8;
         }
 
-        sizes_[what]++;
+        ++sizes_[etype];
     }
 
     resizeAll();    // adjust allocation
     sizes_ = Zero;  // reset sizes - use for local indexing here
+
 
     // Pass 2: Assign cell-id per shape type
 
@@ -208,29 +210,25 @@ void Foam::ensightCells::classifyImpl
     {
         const cellModel& model = shapes[id].model();
 
-        enum elemType what = NFACED;
+        elemType etype(NFACED);
         if (model == tet)
         {
-            what = TETRA4;
+            etype = TETRA4;
         }
         else if (model == pyr)
         {
-            what = PYRAMID5;
+            etype = PYRAMID5;
         }
         else if (model == prism)
         {
-            what = PENTA6;
+            etype = PENTA6;
         }
         else if (model == hex)
         {
-            what = HEXA8;
+            etype = HEXA8;
         }
 
-        // eg, the processor local cellId
-        labelUList slice = address_[slices_[what]];
-
-        slice[sizes_[what]] = id;
-        sizes_[what]++;
+        add(etype, id);
     }
 }
 
@@ -259,6 +257,30 @@ void Foam::ensightCells::classify
 )
 {
     classifyImpl(mesh, selection);
+}
+
+
+void Foam::ensightCells::writeDict(Ostream& os, const bool full) const
+{
+    os.beginBlock(type());
+
+    os.writeEntry("id",     index()+1); // Ensight starts with 1
+    os.writeEntry("name",   name());
+    os.writeEntry("size",   size());
+
+    if (full)
+    {
+        for (int typei=0; typei < ensightCells::nTypes; ++typei)
+        {
+            const auto etype = ensightCells::elemType(typei);
+
+            os.writeKeyword(ensightCells::key(etype));
+
+            cellIds(etype).writeList(os, 0) << endEntry;  // Flat output
+        }
+    }
+
+    os.endBlock();
 }
 
 

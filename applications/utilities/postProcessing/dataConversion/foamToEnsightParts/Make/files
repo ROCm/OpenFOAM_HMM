@@ -1,4 +1,0 @@
-foamToEnsightParts.C
-readFields.C
-
-EXE = $(FOAM_APPBIN)/foamToEnsightParts

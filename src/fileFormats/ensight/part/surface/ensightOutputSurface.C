@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,35 +23,57 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Code chunk for converting volume and dimensioned fields
-    included by foamToEnsightParts.
-
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "ensightOutputSurface.H"
+#include "ensightOutput.H"
 
-// Cell field data output
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::ensightOutputSurface::ensightOutputSurface
+(
+    const pointField& points,
+    const faceList& faces,
+    const string& description
+)
+:
+    ensightFaces(description),
+    points_(points),
+    faces_(faces)
 {
-    Info<< "Write volume field (";
+    // Classify face types
+    classify(faces);
+}
 
-    writeAllVolFields
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::ensightOutputSurface::write(ensightGeoFile& os) const
+{
+    if (!total())
+    {
+        return;
+    }
+
+    // Coordinates
+    ensightOutput::Detail::writeCoordinates
     (
-        ensCase,
-        ensParts,
-        mesh,
-        objects
+        os,
+        index(),
+        name(),
+        points_.size(),
+        points_,
+        false // serial
     );
 
-    writeAllDimFields
+    // Faces
+    ensightOutput::writeFaceConnectivity
     (
-        ensCase,
-        ensParts,
-        mesh,
-        objects
+        os,
+        *this,
+        faces_,
+        false  // serial
     );
-
-    Info<< " )" << nl;
 }
 
 

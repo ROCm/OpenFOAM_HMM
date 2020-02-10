@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,17 +27,19 @@ InNamespace
     Foam
 
 Description
-    Read dimensioned fields from disk and write with ensightParts
+    Read point fields from disk
+    and write as ensight data
 
 SourceFiles
-    writeDimFields.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightParts_writeDimFields_H
-#define ensightParts_writeDimFields_H
+#ifndef ensight_writePointFields_H
+#define ensight_writePointFields_H
 
-#include "writeVolFields.H"
+#include "readFields.H"
+#include "ensightMesh.H"
+#include "fvMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,37 +47,58 @@ namespace Foam
 {
 
 template<class Type>
-label writeDimFields
+bool writePointField
 (
     ensightCase& ensCase,
-    const ensightParts& ensParts,
-    const fvMesh& mesh,
+    const ensightMesh& ensMesh,
+    const tmp<GeometricField<Type, pointPatchField, pointMesh>>& tfield
+)
+{
+    if (!tfield.valid())
+    {
+        return false;
+    }
+
+    const auto& field = tfield();
+
+    // PointData = true
+    autoPtr<ensightFile> os = ensCase.newData<Type>(field.name(), true);
+
+    bool wrote = ensightOutput::writePointField<Type>
+    (
+        os.ref(),
+        field,
+        ensMesh
+    );
+
+    tfield.clear();
+    return wrote;
+}
+
+
+template<class Type>
+label writePointFields
+(
+    ensightCase& ensCase,
+    const ensightMesh& ensMesh,
     const IOobjectList& objects
 )
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> GeoField;
+    typedef GeometricField<Type, pointPatchField, pointMesh> GeoField;
 
-    typedef typename
-        GeometricField
-        <
-            Type, fvPatchField, volMesh
-        >::Internal DimField;
-
+    const pointMesh& ptMesh = pointMesh::New(ensMesh.mesh());
 
     label count = 0;
 
-    for (const word& fieldName : objects.sortedNames<DimField>())
+    for (const word& fieldName : objects.sortedNames<GeoField>())
     {
-        const IOobject* io = objects.findObject(fieldName);
-
         if
         (
-            writeVolField<Type>
+            writePointField<Type>
             (
                 ensCase,
-                ensParts,
-                mesh,
-                getZeroGradField<GeoField>(io, mesh)
+                ensMesh,
+                getField<GeoField>(ptMesh, objects, fieldName)
             )
         )
         {
@@ -88,31 +111,30 @@ label writeDimFields
 }
 
 
-label writeAllDimFields
+label writeAllPointFields
 (
     ensightCase& ensCase,
-    const ensightParts& ensParts,
-    const fvMesh& mesh,
+    const ensightMesh& ensMesh,
     const IOobjectList& objects
 )
 {
-    #undef  foamToEnsight_WRITE_FIELD
-    #define foamToEnsight_WRITE_FIELD(PrimitiveType)    \
-        writeDimFields<PrimitiveType>                   \
+    #undef  ensight_WRITE_FIELD
+    #define ensight_WRITE_FIELD(PrimitiveType)          \
+        writePointFields<PrimitiveType>                 \
         (                                               \
-            ensCase, ensParts,                          \
-            mesh,                                       \
+            ensCase,                                    \
+            ensMesh,                                    \
             objects                                     \
         )
 
     label count = 0;
-    count += foamToEnsight_WRITE_FIELD(scalar);
-    count += foamToEnsight_WRITE_FIELD(vector);
-    count += foamToEnsight_WRITE_FIELD(sphericalTensor);
-    count += foamToEnsight_WRITE_FIELD(symmTensor);
-    count += foamToEnsight_WRITE_FIELD(tensor);
+    count += ensight_WRITE_FIELD(scalar);
+    count += ensight_WRITE_FIELD(vector);
+    count += ensight_WRITE_FIELD(sphericalTensor);
+    count += ensight_WRITE_FIELD(symmTensor);
+    count += ensight_WRITE_FIELD(tensor);
 
-    #undef foamToEnsight_WRITE_FIELD
+    #undef ensight_WRITE_FIELD
     return count;
 }
 

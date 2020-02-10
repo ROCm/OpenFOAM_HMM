@@ -3,7 +3,7 @@
 
 label timeIndex = 0;
 {
-    if (optIndex)
+    if (doConsecutive)
     {
         timeIndex = indexingNumber++;
     }

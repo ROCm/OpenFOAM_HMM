@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,8 @@ InNamespace
     Foam
 
 Description
-    Read fields from disk for foamToEnsight
+    Helper routines for reading a field or fields,
+    for foamToEnsight
 
 SourceFiles
     readFields.C
@@ -39,38 +40,113 @@ SourceFiles
 
 #include "instantList.H"
 #include "IOobjectList.H"
-#include "fvMeshSubsetProxy.H"
+#include "zeroGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-//- Get the field and subset it, or return nullptr
+//- Get the field or return nullptr
 template<class GeoField>
-tmp<GeoField> getField(const IOobject* io, const fvMeshSubsetProxy& proxy)
+tmp<GeoField> getField
+(
+    const IOobject* io,
+    const typename GeoField::Mesh& mesh
+)
 {
     if (io)
     {
-        auto tfield = tmp<GeoField>::New(*io, proxy.baseMesh());
-        return proxy.interpolate(tfield);
+        return tmp<GeoField>::New(*io, mesh);
     }
 
     return nullptr;
 }
 
 
-//- Get internal field and make it a zero-gradient volume field with subsetting
+//- Get the named field from the objects, or return nullptr.
 template<class GeoField>
-tmp<GeoField>
-getZeroGradField(const IOobject* io, const fvMeshSubsetProxy& proxy)
+tmp<GeoField> getField
+(
+    const typename GeoField::Mesh& mesh,
+    const IOobjectList& objects,
+    const word& fieldName
+)
 {
-    if (io)
+    // Can do something with syncPar on failure ...
+
+    return getField<GeoField>(objects.findObject(fieldName), mesh);
+}
+
+
+//- Convert an internal field to zero-gradient volume field
+template<class Type>
+tmp<GeometricField<Type, fvPatchField, volMesh>>
+makeZeroGradientField
+(
+    const tmp
+    <
+        typename GeometricField<Type, fvPatchField, volMesh>::Internal
+    >& tdf
+)
+{
+    if (tdf.valid())
     {
-        auto tfield =
-            tmp<typename GeoField::Internal>::New(*io, proxy.baseMesh());
-        return proxy.interpolateInternal(tfield);
+        auto& df = tdf.ref();
+
+        auto tfield = GeometricField<Type, fvPatchField, volMesh>::New
+        (
+            df.name(),
+            df.mesh(),
+            df.dimensions(),
+            std::move(df.field()),
+            zeroGradientFvPatchScalarField::typeName
+        );
+
+        tfield.ref().oriented() = df.oriented();
+        tfield.ref().correctBoundaryConditions();
+
+        tdf.clear();
+
+        return tfield;
     }
+
+    tdf.clear();
+
+    return nullptr;
+}
+
+
+//- Convert a volume field to zero-gradient volume field
+template<class Type>
+tmp<GeometricField<Type, fvPatchField, volMesh>>
+makeZeroGradientField
+(
+    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tdf
+)
+{
+    if (tdf.valid())
+    {
+        auto& df = tdf.ref();
+
+        auto tfield = GeometricField<Type, fvPatchField, volMesh>::New
+        (
+            df.name(),
+            df.mesh(),
+            df.dimensions(),
+            std::move(df.primitiveFieldRef(false)),  // No update accessTime
+            zeroGradientFvPatchScalarField::typeName
+        );
+
+        tfield.ref().oriented() = df.oriented();
+        tfield.ref().correctBoundaryConditions();
+
+        tdf.clear();
+
+        return tfield;
+    }
+
+    tdf.clear();
 
     return nullptr;
 }

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,12 +30,11 @@ Description
     Read dimensioned fields from disk and write with ensightMesh
 
 SourceFiles
-    writeDimFields.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef writeDimFields_H
-#define writeDimFields_H
+#ifndef ensight_writeDimFields_H
+#define ensight_writeDimFields_H
 
 #include "writeVolFields.H"
 
@@ -45,39 +44,59 @@ namespace Foam
 {
 
 template<class Type>
+bool writeDimField
+(
+    ensightCase& ensCase,
+    const ensightMesh& ensMesh,
+    const tmp<DimensionedField<Type, volMesh>>& tdf
+)
+{
+    if (!tdf.valid())
+    {
+        return false;
+    }
+
+    auto tfield = makeZeroGradientField<Type>(tdf);
+
+    // Now a volField with zero-gradient boundaries
+
+    return writeVolField<Type>
+    (
+        ensCase,
+        ensMesh,
+        tfield,
+        false  // No nearCellValue, we already have zero-gradient
+    );
+}
+
+
+template<class Type>
 label writeDimFields
 (
     ensightCase& ensCase,
     const ensightMesh& ensMesh,
-    const fvMeshSubsetProxy& proxy,
-    const IOobjectList& objects,
-    const bool nodeValues
+    const IOobjectList& objects
 )
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> GeoField;
-
     typedef typename
         GeometricField
         <
             Type, fvPatchField, volMesh
         >::Internal DimField;
 
+    const fvMesh& mesh = dynamicCast<const fvMesh>(ensMesh.mesh());
 
     label count = 0;
 
     for (const word& fieldName : objects.sortedNames<DimField>())
     {
-        const IOobject* io = objects.findObject(fieldName);
-
         if
         (
-            writeVolField<Type>
+            writeDimField<Type>
             (
                 ensCase,
                 ensMesh,
-                proxy,
-                getZeroGradField<GeoField>(io, proxy),
-                nodeValues
+                getField<DimField>(objects.findObject(fieldName), mesh)
             )
         )
         {
@@ -94,29 +113,26 @@ label writeAllDimFields
 (
     ensightCase& ensCase,
     const ensightMesh& ensMesh,
-    const fvMeshSubsetProxy& proxy,
-    const IOobjectList& objects,
-    const bool nodeValues
+    const IOobjectList& objects
 )
 {
-    #undef  foamToEnsight_WRITE_FIELD
-    #define foamToEnsight_WRITE_FIELD(PrimitiveType)    \
+    #undef  ensight_WRITE_FIELD
+    #define ensight_WRITE_FIELD(PrimitiveType)          \
         writeDimFields<PrimitiveType>                   \
         (                                               \
-            ensCase, ensMesh,                           \
-            proxy,                                      \
-            objects,                                    \
-            nodeValues                                  \
+            ensCase,                                    \
+            ensMesh,                                    \
+            objects                                     \
         )
 
     label count = 0;
-    count += foamToEnsight_WRITE_FIELD(scalar);
-    count += foamToEnsight_WRITE_FIELD(vector);
-    count += foamToEnsight_WRITE_FIELD(sphericalTensor);
-    count += foamToEnsight_WRITE_FIELD(symmTensor);
-    count += foamToEnsight_WRITE_FIELD(tensor);
+    count += ensight_WRITE_FIELD(scalar);
+    count += ensight_WRITE_FIELD(vector);
+    count += ensight_WRITE_FIELD(sphericalTensor);
+    count += ensight_WRITE_FIELD(symmTensor);
+    count += ensight_WRITE_FIELD(tensor);
 
-    #undef foamToEnsight_WRITE_FIELD
+    #undef ensight_WRITE_FIELD
     return count;
 }
 

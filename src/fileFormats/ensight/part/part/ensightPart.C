@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,28 +32,49 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(ensightPart, 0);
+    defineTypeName(ensightPart);
+}
+
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void Foam::ensightPart::incrAddressing(const label off)
+{
+    for (label& val : address_)
+    {
+        val += off;
+    }
+}
+
+
+void Foam::ensightPart::decrAddressing(const label off)
+{
+    for (label& val : address_)
+    {
+        val -= off;
+    }
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::ensightPart::ensightPart(const string& description)
+Foam::ensightPart::ensightPart() noexcept
 :
-    name_(description)
+    index_(0),
+    identifier_(-1),
+    name_(),
+    address_()
 {}
 
 
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-Foam::ensightGeoFile& Foam::operator<<
-(
-    ensightGeoFile& os,
-    const ensightPart& part
-)
+Foam::ensightPart::ensightPart(const string& description)
+:
+    ensightPart()
 {
-    part.write(os);
-    return os;
+    if (!description.empty())
+    {
+        name_ = description;
+    }
 }
 
 

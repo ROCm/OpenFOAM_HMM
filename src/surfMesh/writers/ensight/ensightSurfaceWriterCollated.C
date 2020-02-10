@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -405,29 +405,28 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
 
         const fileName meshFile(baseDir/geometryName);
 
-        // Write geometry
-        ensightPartFaces ensPart
+        // Ensight Geometry
+        ensightOutputSurface part
         (
-            0,
-            meshFile.name(),
             surf.points(),
             surf.faces(),
-            true // contiguous points
+            meshFile.name()
         );
+
         if (!exists(meshFile))
         {
             if (verbose_)
             {
                 Info<< "Writing mesh file to " << meshFile.name() << endl;
             }
-            // Use two-argument form for path-name to avoid validating base-dir
+            // Two-argument form for path-name to avoid validating base-dir
             ensightGeoFile osGeom
             (
                 meshFile.path(),
                 meshFile.name(),
                 writeFormat_
             );
-            osGeom << ensPart;
+            part.write(osGeom); // serial
         }
 
         // Write field
@@ -443,31 +442,11 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
             Info<< "Writing field file to " << osField.name() << endl;
         }
 
-        // Write field
+        // Write field (serial only)
         osField.writeKeyword(ensightPTraits<Type>::typeName);
+        part.writeData(osField, tfield(), this->isPointData());
 
-        if (this->isPointData())
-        {
-            ensightOutput::Serial::writePointField
-            (
-                tfield(),
-                ensPart,
-                osField
-                // serial
-            );
-        }
-        else
-        {
-            ensightOutput::Detail::writeFaceField
-            (
-                tfield(),
-                ensPart,
-                osField,
-                false // serial
-            );
-        }
-
-        // Place a timestamp in the directory for future reference
+        // Timestamp in the directory for future reference
         {
             OFstream timeStamp(dataDir/"time");
             timeStamp
