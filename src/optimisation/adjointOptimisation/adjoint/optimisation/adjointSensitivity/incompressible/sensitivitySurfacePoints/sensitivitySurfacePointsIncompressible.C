@@ -306,14 +306,21 @@ void sensitivitySurfacePoints::constructGlobalPointNormalsAndAreas
 
 void sensitivitySurfacePoints::setSuffixName()
 {
+    word suffix(dict().getOrDefault<word>("suffix", word::null));
     // Determine suffix for fields holding the sens
     if (includeMeshMovement_)
     {
-        shapeSensitivitiesBase::setSuffix(adjointVars_.solverName() + "ESI");
+        shapeSensitivitiesBase::setSuffix
+        (
+            adjointVars_.solverName() + "ESI" + suffix
+        );
     }
     else
     {
-        shapeSensitivitiesBase::setSuffix(adjointVars_.solverName() + "SI");
+        shapeSensitivitiesBase::setSuffix
+        (
+            adjointVars_.solverName() + "SI" + suffix
+        );
     }
 }
 
