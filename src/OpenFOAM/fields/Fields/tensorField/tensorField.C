@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -121,9 +121,6 @@ tmp<tensorField> inv(const tmp<tensorField>& tf)
     tf.clear();
     return tres;
 }
-
-UNARY_FUNCTION(vector, tensor, eigenValues)
-UNARY_FUNCTION(tensor, tensor, eigenVectors)
 
 UNARY_FUNCTION(vector, symmTensor, eigenValues)
 UNARY_FUNCTION(tensor, symmTensor, eigenVectors)

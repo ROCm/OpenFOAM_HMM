@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,10 +58,13 @@ bool Foam::functionObjects::Lambda2::calc()
         const tmp<volTensorField> tgradU(fvc::grad(U));
         const volTensorField& gradU = tgradU();
 
-        const volTensorField SSplusWW
+        const volSymmTensorField SSplusWW
         (
-            (symm(gradU) & symm(gradU))
-          + (skew(gradU) & skew(gradU))
+            symm
+            (
+                (symm(gradU) & symm(gradU))
+              + (skew(gradU) & skew(gradU))
+            )
         );
 
         return store

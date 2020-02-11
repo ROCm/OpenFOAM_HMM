@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,8 +49,6 @@ UNARY_FUNCTION(tensor, tensor, dev2, transform)
 UNARY_FUNCTION(scalar, tensor, det, pow3)
 UNARY_FUNCTION(tensor, tensor, cof, pow2)
 UNARY_FUNCTION(tensor, tensor, inv, inv)
-UNARY_FUNCTION(vector, tensor, eigenValues, transform)
-UNARY_FUNCTION(tensor, tensor, eigenVectors, sign)
 
 UNARY_FUNCTION(vector, symmTensor, eigenValues, transform)
 UNARY_FUNCTION(symmTensor, symmTensor, eigenVectors, sign)

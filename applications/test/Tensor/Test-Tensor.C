@@ -902,6 +902,104 @@ void test_global_opers(Type)
 }
 
 
+// Return false if given eigenvalues fail to satisy eigenvalue relations
+// Relations: (Beauregard & Fraleigh (1973), ISBN 0-395-14017-X, p. 307)
+void test_eigenvalues
+(
+    const tensor& T,
+    const Vector<complex>& EVals,
+    const bool prod = true
+)
+{
+    if (prod)
+    {
+        const scalar determinant = det(T);
+        // In case of complex EVals, the production is effectively scalar
+        // due to the (complex*complex conjugate) results in zero imag part
+        const scalar EValsProd = ((EVals.x()*EVals.y()*EVals.z()).real());
+        cmp("# Product of eigenvalues = det(sT):", EValsProd, determinant);
+    }
+
+    {
+        const scalar trace = tr(T);
+        scalar EValsSum = 0.0;
+        // In case of complex EVals, the summation is effectively scalar
+        // due to the (complex+complex conjugate) results in zero imag part
+        for (const auto& val : EVals)
+        {
+            EValsSum += val.real();
+        }
+        cmp("# Sum of eigenvalues = trace(sT):", EValsSum, trace);
+    }
+}
+
+
+// Return false if a given eigenvalue-eigenvector pair
+// fails to satisfy the characteristic equation
+void test_characteristic_equation
+(
+    const tensor& T,
+    const Vector<complex>& EVals,
+    const Tensor<complex>& EVecs
+)
+{
+    Info<< "# Characteristic equation:" << nl;
+
+    Tensor<complex> Tc(Zero);
+    forAll(T, i)
+    {
+        Tc[i] = complex(T[i], 0);
+    }
+
+    for (direction dir = 0; dir < pTraits<vector>::nComponents; ++dir)
+    {
+        const Vector<complex> leftSide(Tc & EVecs.row(dir));
+        const Vector<complex> rightSide(EVals[dir]*EVecs.row(dir));
+        const Vector<complex> X(leftSide - rightSide);
+
+        for (const auto x : X)
+        {
+            cmp("  (sT & EVec - EVal*EVec) = 0:", mag(x), 0.0, 1e-8, 1e-6);
+        }
+    }
+}
+
+
+// Return false if the eigen functions fail to satisfy relations
+void test_eigen_funcs(const tensor& T, const bool prod = true)
+{
+    Info<< "# Operand:" << nl
+        << "  tensor = " << T << nl;
+
+
+    Info<< "# Return eigenvalues of a given tensor:" << nl;
+    const Vector<complex> EVals(eigenValues(T));
+    Info<< EVals << endl;
+    test_eigenvalues(T, EVals, prod);
+
+    Info<< "# Return an eigenvector of a given tensor in a given direction"
+        << " corresponding to a given eigenvalue:" << nl;
+    const Vector<complex> standardBasis1(Zero, pTraits<complex>::one, Zero);
+    const Vector<complex> standardBasis2(Zero, Zero, pTraits<complex>::one);
+    const Vector<complex> EVec
+    (
+        eigenVector(T, EVals.x(), standardBasis1, standardBasis2)
+    );
+    Info<< EVec << endl;
+
+    Info<< "# Return eigenvectors of a given tensor corresponding to"
+        << " given eigenvalues:" << nl;
+    const Tensor<complex> EVecs0(eigenVectors(T, EVals));
+    Info<< EVecs0 << endl;
+    test_characteristic_equation(T, EVals, EVecs0);
+
+    Info<< "# Return eigenvectors of a given tensor by computing"
+        << " the eigenvalues of the tensor in the background:" << nl;
+    const Tensor<complex> EVecs1(eigenVectors(T));
+    Info<< EVecs1 << endl;
+}
+
+
 // Do compile-time recursion over the given types
 template<std::size_t I = 0, typename... Tp>
 inline typename std::enable_if<I == sizeof...(Tp), void>::type
@@ -945,6 +1043,53 @@ int main()
     });
 
     run_tests(types, typeID);
+
+
+    Info<< nl << "    ## Test tensor eigen functions: ##" << nl;
+    const label numberOfTests = 10000;
+    Random rndGen(1234);
+
+    for (label i = 0; i < numberOfTests; ++i)
+    {
+        const tensor T(makeRandomContainer(rndGen));
+        test_eigen_funcs(T);
+    }
+
+    {
+        Info<< nl << "    ## Test eigen functions by a zero tensor: ##"<< nl;
+        const tensor zeroT(Zero);
+        test_eigen_funcs(zeroT);
+    }
+    {
+        Info<< nl
+            << "    ## Test eigen functions by a skew-symmetric tensor"
+            << " consisting of no-real eigenvalues: ##"
+            << nl;
+        const tensor T
+        (
+            0,  1,  1,
+           -1,  0,  1,
+           -1, -1,  0
+        );
+        test_eigen_funcs(T);
+    }
+    {
+        Info<< nl
+            << "    ## Test eigen functions by a stiff tensor: ##"
+            << nl;
+        const tensor stiff
+        (
+            pow(10.0, 10), pow(10.0, 8), pow(10.0, 7),
+            pow(10.0, -8), pow(10.0, 9), pow(10.0, -8),
+            pow(10.0, 10), pow(10.0, 8), pow(10.0, 7)
+        );
+        // Although eigendecomposition is successful for the stiff tensors,
+        // cross-check between prod(eigenvalues) ?= det(stiff) is inherently
+        // problematic; therefore, eigenvalues of the stiff tensors are
+        // cross-checked by only sum(eigenvalues) ?= trace(stiff)
+        const bool testProd = false;
+        test_eigen_funcs(stiff, testProd);
+    }
 
 
     if (nFail_)

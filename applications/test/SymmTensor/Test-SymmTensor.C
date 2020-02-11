@@ -512,6 +512,78 @@ void test_global_opers(Type)
 }
 
 
+// Return false if given eigenvalues fail to satisy eigenvalue relations
+// Relations: (Beauregard & Fraleigh (1973), ISBN 0-395-14017-X, p. 307)
+void test_eigenvalues(const symmTensor& sT, const vector& EVals)
+{
+    {
+        const scalar determinant = det(sT);
+        const scalar EValsProd = EVals.x()*EVals.y()*EVals.z();
+        cmp("# Product of eigenvalues = det(sT):", EValsProd, determinant);
+    }
+    {
+        const scalar trace = tr(sT);
+        scalar EValsSum = 0.0;
+        for (const auto& val : EVals)
+        {
+            EValsSum += val;
+        }
+        cmp("# Sum of eigenvalues = trace(sT):", EValsSum, trace);
+    }
+}
+
+
+// Return false if a given eigenvalue-eigenvector pair
+// fails to satisfy the characteristic equation
+void test_characteristic_equation
+(
+    const symmTensor& sT,
+    const vector& EVals,
+    const tensor& EVecs
+)
+{
+    Info<< "# Characteristic equation:" << nl;
+    for (direction dir = 0; dir < pTraits<vector>::nComponents; ++dir)
+    {
+        Info<< "EVal = " << EVals[dir] << nl
+            << "EVec = " << EVecs.row(dir) << endl;
+        const vector leftSide(sT & EVecs.row(dir));
+        const vector rightSide(EVals[dir]*EVecs.row(dir));
+        const vector X(leftSide - rightSide);
+
+        for (const auto x : X)
+        {
+            cmp("  (sT & EVec - EVal*EVec) = 0:", x, 0.0, 1e-8, 1e-6);
+        }
+    }
+}
+
+
+// Return false if the eigen functions fail to satisfy relations
+void test_eigen_funcs(const symmTensor& sT)
+{
+    Info<< "# Operand:" << nl
+        << "  symmTensor = " << sT << nl;
+
+
+    Info<< "# Return eigenvalues of a given symmTensor:" << nl;
+    const vector EVals(eigenValues(sT));
+    Info<< EVals << endl;
+    test_eigenvalues(sT, EVals);
+
+    Info<< "# Return eigenvectors of a given symmTensor corresponding to"
+        << " given eigenvalues:" << nl;
+    const tensor EVecs0(eigenVectors(sT, EVals));
+    Info<< EVecs0 << endl;
+    test_characteristic_equation(sT, EVals, EVecs0);
+
+    Info<< "# Return eigenvectors of a given symmTensor by computing"
+        << " the eigenvalues of the symmTensor in the background:" << nl;
+    const tensor EVecs1(eigenVectors(sT));
+    Info<< EVecs1 << endl;
+}
+
+
 // Do compile-time recursion over the given types
 template<std::size_t I = 0, typename... Tp>
 inline typename std::enable_if<I == sizeof...(Tp), void>::type
@@ -557,6 +629,74 @@ int main()
     run_tests(types, typeID);
 
 
+    Info<< nl << "    ## Test SymmTensor<scalar> eigen functions: ##" << nl;
+    const label numberOfTests = 10000;
+    Random rndGen(1234);
+
+    for (label i = 0; i < numberOfTests; ++i)
+    {
+        const symmTensor T(makeRandomContainer(rndGen));
+        test_eigen_funcs(T);
+    }
+
+    {
+        Info<< nl << "    ## Test eigen functions by a zero tensor: ##"<< nl;
+        const symmTensor zeroT(Zero);
+        test_eigen_funcs(zeroT);
+    }
+    {
+        Info<< nl
+            << "    ## Test eigen functions by a tensor consisting of"
+            << " 2 repeated eigenvalues: ##"
+            << nl;
+        const symmTensor T
+        (
+            1.0, 0.0, Foam::sqrt(2.0),
+                 2.0, 0.0,
+                      0.0
+        );
+        test_eigen_funcs(T);
+    }
+    {
+        Info<< nl
+            << "    ## Test eigen functions by a tensor consisting of"
+            << " 3 repeated eigenvalues: ##"
+            << nl;
+        const symmTensor T
+        (
+            0.023215, -5.0739e-09, -7.0012e-09,
+                         0.023215, -8.148e-10,
+                                    0.023215
+        );
+        test_eigen_funcs(T);
+    }
+    {
+        Info<< nl
+            << "    ## Test eigen functions by a tensor consisting of"
+            << " SMALL off-diagonal elements: ##"
+            << nl;
+
+        for (label i = 0; i < numberOfTests; ++i)
+        {
+            symmTensor T(makeRandomContainer(rndGen));
+            T.xy() = SMALL*rndGen.GaussNormal<scalar>();
+            T.xz() = SMALL*rndGen.GaussNormal<scalar>();
+            T.yz() = SMALL*rndGen.GaussNormal<scalar>();
+            test_eigen_funcs(T);
+        }
+    }
+    {
+        Info<< nl << "    ## Test eigen functions by a stiff tensor: ##" << nl;
+        const symmTensor stiff
+        (
+            pow(10.0, 10), pow(10.0, 8),  pow(10.0, -8),
+                           pow(10.0, -8), pow(10.0, 8),
+                                          pow(10.0, 7)
+        );
+        test_eigen_funcs(stiff);
+    }
+
+
     if (nFail_)
     {
         Info<< nl << "        #### "
@@ -567,8 +707,6 @@ int main()
     }
 
     Info<< nl << "        #### Passed all " << nTest_ <<" tests ####\n" << endl;
-    return 0;
-
     return 0;
 }
 

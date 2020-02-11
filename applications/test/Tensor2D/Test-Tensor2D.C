@@ -716,6 +716,94 @@ void test_global_opers(Type)
 }
 
 
+// Return false if given eigenvalues fail to satisy eigenvalue relations
+// Relations: (Beauregard & Fraleigh (1973), ISBN 0-395-14017-X, p. 307)
+void test_eigenvalues(const tensor2D& T, const Vector2D<complex>& EVals)
+{
+    {
+        const scalar determinant = det(T);
+        // In case of complex EVals, the production is effectively scalar
+        // due to the (complex*complex conjugate) results in zero imag part
+        const scalar EValsProd = ((EVals.x()*EVals.y()).real());
+        cmp("# Product of eigenvalues = det(sT):", EValsProd, determinant);
+    }
+
+    {
+        const scalar trace = tr(T);
+        scalar EValsSum = 0.0;
+        // In case of complex EVals, the summation is effectively scalar
+        // due to the (complex+complex conjugate) results in zero imag part
+        for (const auto& val : EVals)
+        {
+            EValsSum += val.real();
+        }
+        cmp("# Sum of eigenvalues = trace(sT):", EValsSum, trace, 1e-8, 1e-8);
+    }
+}
+
+
+// Return false if a given eigenvalue-eigenvector pair
+// fails to satisfy the characteristic equation
+void test_characteristic_equation
+(
+    const tensor2D& T,
+    const Vector2D<complex>& EVals,
+    const Tensor2D<complex>& EVecs
+)
+{
+    Info<< "# Characteristic equation:" << nl;
+
+    Tensor2D<complex> Tc(Zero);
+    forAll(T, i)
+    {
+        Tc[i] = complex(T[i], 0);
+    }
+
+    for (direction dir = 0; dir < pTraits<vector2D>::nComponents; ++dir)
+    {
+        const Vector2D<complex> leftSide(Tc & EVecs.row(dir));
+        const Vector2D<complex> rightSide(EVals[dir]*EVecs.row(dir));
+        const Vector2D<complex> X(leftSide - rightSide);
+
+        for (const auto x : X)
+        {
+            cmp("  (Tc & EVec - EVal*EVec) = 0:", mag(x), 0.0, 1e-8, 1e-6);
+        }
+    }
+}
+
+
+// Return false if the eigen functions fail to satisfy relations
+void test_eigen_funcs(const tensor2D& T)
+{
+    Info<< "# Operand:" << nl
+        << "  tensor2D = " << T << nl;
+
+
+    Info<< "# Return eigenvalues of a given tensor2D:" << nl;
+    const Vector2D<complex> EVals(eigenValues(T));
+    Info<< EVals << endl;
+    test_eigenvalues(T, EVals);
+
+    Info<< "# Return an eigenvector of a given tensor2D in a given direction"
+        << " corresponding to a given eigenvalue:" << nl;
+    const Vector2D<complex> standardBasis(pTraits<complex>::one, Zero);
+    const Vector2D<complex> EVec(eigenVector(T, EVals.x(), standardBasis));
+    Info<< EVec << endl;
+
+    Info<< "# Return eigenvectors of a given tensor2D corresponding to"
+        << " given eigenvalues:" << nl;
+    const Tensor2D<complex> EVecs0(eigenVectors(T, EVals));
+    Info<< EVecs0 << endl;
+    test_characteristic_equation(T, EVals, EVecs0);
+
+    Info<< "# Return eigenvectors of a given tensor2D by computing"
+        << " the eigenvalues of the tensor2D in the background:" << nl;
+    const Tensor2D<complex> EVecs1(eigenVectors(T));
+    Info<< EVecs1 << endl;
+}
+
+
 // Do compile-time recursion over the given types
 template<std::size_t I = 0, typename... Tp>
 inline typename std::enable_if<I == sizeof...(Tp), void>::type
@@ -760,6 +848,58 @@ int main(int argc, char *argv[])
     });
 
     run_tests(types, typeID);
+
+
+    Info<< nl << "    ## Test tensor2D eigen functions: ##" << nl;
+    const label numberOfTests = 10000;
+    Random rndGen(1234);
+
+    for (label i = 0; i < numberOfTests; ++i)
+    {
+        const tensor2D T(makeRandomContainer(rndGen));
+        test_eigen_funcs(T);
+    }
+
+    {
+        Info<< nl << "    ## Test eigen functions by a zero tensor2D: ##"<< nl;
+        const tensor2D zeroT(Zero);
+        test_eigen_funcs(zeroT);
+    }
+    {
+        Info<< nl
+            << "    ## Test eigen functions by a tensor2D consisting of"
+            << " repeated eigenvalues: ##"
+            << nl;
+        const tensor2D T
+        (
+            -1.0, 2.0,
+            0.0, -1.0
+        );
+        test_eigen_funcs(T);
+    }
+    {
+        Info<< nl
+            << "    ## Test eigen functions by a skew-symmetric tensor2D"
+            << " consisting of no-real eigenvalues: ##"
+            << nl;
+        const tensor2D T
+        (
+            0.0, 1.0,
+            -1.0, 0.0
+        );
+        test_eigen_funcs(T);
+    }
+    {
+        Info<< nl
+            << "    ## Test eigen functions by a stiff tensor2D: ##"
+            << nl;
+        const tensor2D stiff
+        (
+            pow(10.0, 10), pow(10.0, 8),
+            pow(10.0, -8), pow(10.0, 9)
+        );
+        test_eigen_funcs(stiff);
+    }
 
 
     {
@@ -822,7 +962,6 @@ int main(int argc, char *argv[])
                 << "   => " << flatOutput(vfld1) << nl;
         }
     }
-
 
     if (nFail_)
     {

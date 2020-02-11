@@ -476,6 +476,80 @@ void test_global_opers(Type)
 }
 
 
+// Return false if given eigenvalues fail to satisy eigenvalue relations
+// Relations: (Beauregard & Fraleigh (1973), ISBN 0-395-14017-X, p. 307)
+void test_eigenvalues(const symmTensor2D& T, const vector2D& EVals)
+{
+    {
+        Info<< "# Product of eigenvalues = det(T):" << nl;
+        const scalar determinant = det(T);
+        const scalar EValsProd = EVals.x()*EVals.y();
+        cmp("# Product of eigenvalues = det(sT):", EValsProd, determinant);
+    }
+
+    {
+        const scalar trace = tr(T);
+        scalar EValsSum = 0.0;
+        for (const auto& val : EVals)
+        {
+            EValsSum += val;
+        }
+        cmp("# Sum of eigenvalues = trace(sT):", EValsSum, trace);
+    }
+}
+
+
+// Return false if a given eigenvalue-eigenvector pair
+// fails to satisfy the characteristic equation
+void test_characteristic_equation
+(
+    const symmTensor2D& T,
+    const vector2D& EVals,
+    const tensor2D& EVecs
+)
+{
+    Info<< "# Characteristic equation:" << nl;
+    for (direction dir = 0; dir < pTraits<vector2D>::nComponents; ++dir)
+    {
+        Info<< "EVal = " << EVals[dir] << nl
+            << "EVec = " << EVecs.row(dir) << nl;
+        const vector2D leftSide(T & EVecs.row(dir));
+        const vector2D rightSide(EVals[dir]*EVecs.row(dir));
+        const vector2D X(leftSide - rightSide);
+
+        for (const auto x : X)
+        {
+            cmp("  (sT & EVec - EVal*EVec) = 0:", x, 0.0, 1e-8, 1e-6);
+        }
+    }
+}
+
+
+// Return false if the eigen functions fail to satisfy relations
+void test_eigen_funcs(const symmTensor2D& T)
+{
+    Info<< "# Operand:" << nl
+        << "  symmTensor2D = " << T << nl;
+
+
+    Info<< "# Return eigenvalues of a given symmTensor2D:" << nl;
+    const vector2D EVals(eigenValues(T));
+    Info<< EVals << endl;
+    test_eigenvalues(T, EVals);
+
+    Info<< "# Return eigenvectors of a given symmTensor2D corresponding to"
+        << " given eigenvalues:" << nl;
+    const tensor2D EVecs0(eigenVectors(T, EVals));
+    Info<< EVecs0 << endl;
+    test_characteristic_equation(T, EVals, EVecs0);
+
+    Info<< "# Return eigenvectors of a given symmTensor2D by computing"
+        << " the eigenvalues of the symmTensor2D in the background:" << nl;
+    const tensor2D EVecs1(eigenVectors(T));
+    Info<< EVecs1 << endl;
+}
+
+
 // Do compile-time recursion over the given types
 template<std::size_t I = 0, typename... Tp>
 inline typename std::enable_if<I == sizeof...(Tp), void>::type
@@ -519,6 +593,52 @@ int main(int argc, char *argv[])
     });
 
     run_tests(types, typeID);
+
+
+    Info<< nl << "    ## Test symmTensor2D eigen functions: ##" << nl;
+    const label numberOfTests = 10000;
+    Random rndGen(1234);
+
+    for (label i = 0; i < numberOfTests; ++i)
+    {
+        const symmTensor2D T(makeRandomContainer(rndGen));
+        test_eigen_funcs(T);
+    }
+
+    Info<< nl << "    ## Test symmTensor2D eigen functions"
+        << " with T.xy = VSMALL: ##" << nl;
+    for (label i = 0; i < numberOfTests; ++i)
+    {
+        symmTensor2D T(makeRandomContainer(rndGen));
+        T.xy() = VSMALL;
+        test_eigen_funcs(T);
+    }
+
+    Info<< nl << "    ## Test symmTensor2D eigen functions"
+        << " with T.xx = T.yy: ##" << nl;
+    for (label i = 0; i < numberOfTests; ++i)
+    {
+        symmTensor2D T(makeRandomContainer(rndGen));
+        T.xx() = T.yy();
+        test_eigen_funcs(T);
+    }
+
+    {
+        Info<< nl
+            << "    ## Test eigen functions by a zero symmTensor2D: ##"<< nl;
+        const symmTensor2D zeroT(Zero);
+        test_eigen_funcs(zeroT);
+    }
+
+    {
+        Info<< nl << "    ## Test eigen functions by a stiff tensor2D: ##"<< nl;
+        const symmTensor2D stiff
+        (
+            pow(10.0, 10), pow(10.0, -8),
+                           pow(10.0, 9)
+        );
+        test_eigen_funcs(stiff);
+    }
 
 
     if (nFail_)

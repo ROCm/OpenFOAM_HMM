@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -386,7 +386,7 @@ void Foam::edgeCollapser::faceCollapseAxisAndAspectRatio
 {
     const pointField& pts = mesh_.points();
 
-    tensor J = f.inertia(pts, fC);
+    symmTensor J(symm(f.inertia(pts, fC)));
 
     // Find the dominant collapse direction by finding the eigenvector
     // that corresponds to the normal direction, discarding it.  The
@@ -423,7 +423,7 @@ void Foam::edgeCollapser::faceCollapseAxisAndAspectRatio
     }
     else
     {
-        vector eVals = eigenValues(J);
+        vector eVals(eigenValues(J));
 
         if (mag(eVals.y() - eVals.x()) < 100*SMALL)
         {
