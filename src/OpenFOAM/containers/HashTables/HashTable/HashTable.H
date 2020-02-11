@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -105,7 +105,6 @@ template<class T> class UList;
 template<class T, unsigned N> class FixedList;
 template<class T, class Key, class Hash> class HashTable;
 
-
 /*---------------------------------------------------------------------------*\
                           Class HashTable Declaration
 \*---------------------------------------------------------------------------*/
@@ -171,9 +170,16 @@ public:
         //- The third template parameter, the hash index method.
         typedef Hash hasher;
 
+        //- Pointer type for storing into value_type objects.
+        //  This type is usually 'value_type*'.
+        typedef T* pointer;
+
         //- Reference to the stored value_type.
         //  This type is usually 'value_type&'.
         typedef T& reference;
+
+        //- Const pointer type for the stored value_type.
+        typedef const T* const_pointer;
 
         //- Const reference to the stored value_type.
         typedef const T& const_reference;
@@ -587,10 +593,10 @@ protected:
 
             //- True if iterator points to an entry
             //  This can be used directly instead of comparing to end()
-            inline bool good() const;
+            inline bool good() const noexcept;
 
             //- True if iterator points to an entry - same as good()
-            inline bool found() const;
+            inline bool found() const noexcept;
 
             //- The key associated with the iterator
             inline const Key& key() const;
@@ -607,11 +613,11 @@ protected:
 
             //- Compare hash-entry element pointers.
             //  Independent of const/non-const access
-            inline bool operator==(const Iterator<true>& iter) const;
-            inline bool operator!=(const Iterator<true>& iter) const;
+            template<bool Any>
+            inline bool operator==(const Iterator<Any>& iter) const noexcept;
 
-            inline bool operator==(const Iterator<false>& iter) const;
-            inline bool operator!=(const Iterator<false>& iter) const;
+            template<bool Any>
+            inline bool operator!=(const Iterator<Any>& iter) const noexcept;
 
 
         protected:
@@ -621,11 +627,11 @@ protected:
 
             //- The selected entry.
             //  MUST be the first member for easy comparison between iterators
-            //  and for reinterpret_cast from nullObject
+            //  and to support reinterpret_cast from nullObject
             node_type* entry_;
 
             //- The hash-table container being iterated on.
-            //  Using a pointer allows default bitwise copy/assignment
+            //  Uses pointer for default copy/assignment
             table_type* container_;
 
             //- Index within the hash-table data.
@@ -636,11 +642,11 @@ protected:
 
         // Protected Constructors
 
-            //- Construct null (end iterator)
-            inline Iterator();
+            //- Default construct (end iterator)
+            inline constexpr Iterator() noexcept;
 
             //- Construct from begin of hash-table
-            inline Iterator(bool, table_type* tbl);
+            inline explicit Iterator(table_type* tbl);
 
             //- Construct by finding key in hash table
             Iterator(table_type* tbl, const Key& key);
@@ -651,10 +657,11 @@ protected:
             //- Increment to the next position
             inline void increment();
 
-            //- Permit an explicit cast to the other (const/non-const) searcher
-            inline explicit operator const Iterator<!Const>&() const
+            //- Permit explicit cast to the other (const/non-const) iterator
+            template<bool Any>
+            explicit operator const Iterator<Any>&() const
             {
-                return *reinterpret_cast<const Iterator<!Const>*>(this);
+                return *reinterpret_cast<const Iterator<Any>*>(this);
             }
         };
 
@@ -680,7 +687,9 @@ public:
             using key_type    = this_type::key_type;
             using mapped_type = this_type::mapped_type;
             using value_type  = this_type::value_type;
+            using pointer     = this_type::pointer;
             using reference   = this_type::reference;
+            using const_pointer = this_type::const_pointer;
             using const_reference = this_type::const_reference;
 
 
@@ -690,7 +699,7 @@ public:
             iterator() = default;
 
             //- Copy construct from similar access type
-            inline explicit iterator(const Iterator<false>& iter)
+            explicit iterator(const Iterator<false>& iter)
             :
                 Iterator<false>(iter)
             {}
@@ -739,10 +748,11 @@ public:
             using key_type    = this_type::key_type;
             using mapped_type = const this_type::mapped_type;
             using value_type  = const this_type::value_type;
+            using pointer     = this_type::const_pointer;
             using reference   = this_type::const_reference;
 
 
-        // Constructors
+        // Generated Methods
 
             //- Default construct (end iterator)
             const_iterator() = default;
@@ -750,23 +760,21 @@ public:
             //- Copy construct
             const_iterator(const const_iterator&) = default;
 
-            //- Copy construct from similar access type
-            inline explicit const_iterator(const Iterator<true>& iter)
-            :
-                Iterator<true>(iter)
-            {}
+            //- Copy assignment
+            const_iterator& operator=(const const_iterator&) = default;
 
-            //- Copy construct from dissimilar access type
-            inline explicit const_iterator(const Iterator<false>& iter)
+
+        // Constructors
+
+            //- Copy construct from any access type
+            template<bool Any>
+            const_iterator(const Iterator<Any>& iter)
             :
-                Iterator<true>
-                (
-                    static_cast<const Iterator<true>&>(iter)
-                )
+                Iterator<true>(static_cast<const Iterator<Any>&>(iter))
             {}
 
             //- Implicit conversion from dissimilar access type
-            inline const_iterator(const iterator& iter)
+            const_iterator(const iterator& iter)
             :
                 const_iterator(reinterpret_cast<const const_iterator&>(iter))
             {}
@@ -790,9 +798,6 @@ public:
 
         // Assignment
 
-            //- Copy assignment
-            const_iterator& operator=(const const_iterator&) = default;
-
             // Allow assign from iterator to const_iterator
             const_iterator& operator=(const iterator& iter)
             {
@@ -815,10 +820,17 @@ public:
         public:
 
             using value_type = this_type::key_type;
+            using pointer    = const Key*;
             using reference  = const Key&;
 
-            //- Implicit conversion
-            inline key_iterator_base(const Iter& iter)
+            //- Default construct (end iterator)
+            constexpr key_iterator_base() noexcept
+            :
+                Iter()
+            {}
+
+            //- Copy construct with implicit conversion
+            explicit key_iterator_base(const Iter& iter)
             :
                 Iter(iter)
             {}
@@ -851,8 +863,7 @@ public:
         //- A const iterator begin/end pair for iterating over keys
         const_iterator_pair<const_key_iterator, this_type> keys() const
         {
-            return
-                const_iterator_pair<const_key_iterator,this_type>(*this);
+            return const_iterator_pair<const_key_iterator, this_type>(*this);
         }
 
 
@@ -867,14 +878,14 @@ public:
         //- const_iterator set to the beginning of the HashTable
         inline const_iterator cbegin() const;
 
-        //- iterator to signal the end for any HashTable
-        inline const iterator& end();
+        //- iterator to signal the end (for any HashTable)
+        inline iterator end() noexcept;
 
-        //- const_iterator to signal the end for any HashTable
-        inline const const_iterator& end() const;
+        //- const_iterator to signal the end (for any HashTable)
+        inline const_iterator end() const noexcept;
 
-        //- const_iterator to signal the end for any HashTable
-        inline const const_iterator& cend() const;
+        //- const_iterator to signal the end (for any HashTable)
+        inline constexpr const_iterator cend() const noexcept;
 
 
     // Writing

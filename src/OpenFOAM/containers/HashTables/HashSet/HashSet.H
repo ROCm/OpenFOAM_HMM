@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,9 +73,8 @@ Description
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 template<class T> class MinMax;
-
 
 /*---------------------------------------------------------------------------*\
                            Class HashSet Declaration
@@ -115,10 +114,22 @@ public:
 
     // Constructors
 
-        //- Construct null with default (128) table capacity
+        //- Default construct with default (128) table capacity
         HashSet()
         :
             parent_type()
+        {}
+
+        //- Copy construct
+        HashSet(const this_type& rhs)
+        :
+            parent_type(rhs)
+        {}
+
+        //- Move construct
+        HashSet(this_type&& rhs)
+        :
+            parent_type(std::move(rhs))
         {}
 
         //- Construct given initial table capacity
@@ -128,7 +139,7 @@ public:
         {}
 
         //- Construct from Istream with default table capacity
-        HashSet(Istream& is)
+        explicit HashSet(Istream& is)
         :
             parent_type(is)
         {}
@@ -147,18 +158,6 @@ public:
         //- Construct from an initializer list of Key
         HashSet(std::initializer_list<Key> list);
 
-        //- Copy construct
-        HashSet(const this_type& hs)
-        :
-            parent_type(hs)
-        {}
-
-        //- Move construct
-        HashSet(this_type&& hs)
-        :
-            parent_type(std::move(hs))
-        {}
-
         //- Construct from the keys of another HashTable,
         //- the type of values held is arbitrary.
         template<class AnyType, class AnyHash>
@@ -169,7 +168,7 @@ public:
 
         //- Same as found() - return true if key exists in the set.
         //  Method name compatibility with bitSet and boolList.
-        bool test(const Key& key) const
+        bool test(const Key& key) const noexcept
         {
             return found(key);
         }
@@ -291,13 +290,13 @@ public:
 
     // STL iterators
 
-        iterator begin();
-        const_iterator begin() const;
-        const_iterator cbegin() const;
+        inline iterator begin();
+        inline const_iterator begin() const;
+        inline const_iterator cbegin() const;
 
-        const iterator& end();
-        const const_iterator& end() const;
-        const const_iterator& cend() const;
+        inline iterator end() noexcept;
+        inline const_iterator end() const noexcept;
+        inline constexpr const_iterator cend() const noexcept;
 
 
     // Writing
@@ -314,10 +313,10 @@ public:
     // Member Operators
 
         //- Return true if the entry exists, same as found()
-        inline bool operator()(const Key& key) const;
+        inline bool operator()(const Key& key) const noexcept;
 
         //- Return true if the entry exists, same as found().
-        inline bool operator[](const Key& key) const;
+        inline bool operator[](const Key& key) const noexcept;
 
         using parent_type::operator=;
 
@@ -368,13 +367,10 @@ public:
         //- Only retain unique entries (xor)
         this_type& operator^=(const this_type& rhs);
 
-        //- Add entries to this HashSet
-        inline this_type& operator+=(const this_type& rhs)
-        {
-            return this->operator|=(rhs);
-        }
+        //- Add entries to this HashSet. Same as the '|=' operator
+        inline this_type& operator+=(const this_type& rhs);
 
-        //- Remove entries from this HashSet
+        //- Remove entries from this HashSet. Uses erase()
         inline this_type& operator-=(const this_type& rhs);
 
 
@@ -403,7 +399,6 @@ public:
         //- Not applicable for HashSet
         template<class BinaryPredicate>
         label filterEntries(const BinaryPredicate&, const bool) = delete;
-
 };
 
 

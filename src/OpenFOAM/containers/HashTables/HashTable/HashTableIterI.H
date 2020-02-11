@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,7 +29,8 @@ License
 
 template<class T, class Key, class Hash>
 template<bool Const>
-inline Foam::HashTable<T, Key, Hash>::Iterator<Const>::Iterator()
+inline constexpr
+Foam::HashTable<T, Key, Hash>::Iterator<Const>::Iterator() noexcept
 :
     entry_(nullptr),
     container_(nullptr),
@@ -41,7 +42,6 @@ template<class T, class Key, class Hash>
 template<bool Const>
 inline Foam::HashTable<T, Key, Hash>::Iterator<Const>::Iterator
 (
-    bool, // Future use and to avoid implicit construct
     table_type* tbl
 )
 :
@@ -112,7 +112,7 @@ Foam::HashTable<T, Key, Hash>::Iterator<Const>::increment()
 template<class T, class Key, class Hash>
 template<bool Const>
 inline bool
-Foam::HashTable<T, Key, Hash>::Iterator<Const>::good() const
+Foam::HashTable<T, Key, Hash>::Iterator<Const>::good() const noexcept
 {
     return entry_;
 }
@@ -121,7 +121,7 @@ Foam::HashTable<T, Key, Hash>::Iterator<Const>::good() const
 template<class T, class Key, class Hash>
 template<bool Const>
 inline bool
-Foam::HashTable<T, Key, Hash>::Iterator<Const>::found() const
+Foam::HashTable<T, Key, Hash>::Iterator<Const>::found() const noexcept
 {
     return entry_;
 }
@@ -161,10 +161,11 @@ bool() const noexcept
 
 template<class T, class Key, class Hash>
 template<bool Const>
+template<bool Any>
 inline bool Foam::HashTable<T, Key, Hash>::Iterator<Const>::operator==
 (
-    const Iterator<true>& iter
-) const
+    const Iterator<Any>& iter
+) const noexcept
 {
     return entry_ == iter.entry_;
 }
@@ -172,32 +173,11 @@ inline bool Foam::HashTable<T, Key, Hash>::Iterator<Const>::operator==
 
 template<class T, class Key, class Hash>
 template<bool Const>
+template<bool Any>
 inline bool Foam::HashTable<T, Key, Hash>::Iterator<Const>::operator!=
 (
-    const Iterator<true>& iter
-) const
-{
-    return entry_ != iter.entry_;
-}
-
-
-template<class T, class Key, class Hash>
-template<bool Const>
-inline bool Foam::HashTable<T, Key, Hash>::Iterator<Const>::operator==
-(
-    const Iterator<false>& iter
-) const
-{
-    return entry_ == iter.entry_;
-}
-
-
-template<class T, class Key, class Hash>
-template<bool Const>
-inline bool Foam::HashTable<T, Key, Hash>::Iterator<Const>::operator!=
-(
-    const Iterator<false>& iter
-) const
+    const Iterator<Any>& iter
+) const noexcept
 {
     return entry_ != iter.entry_;
 }
@@ -251,7 +231,7 @@ template<class T, class Key, class Hash>
 inline typename Foam::HashTable<T, Key, Hash>::iterator
 Foam::HashTable<T, Key, Hash>::begin()
 {
-    return iterator(Iterator<false>(true, this));
+    return iterator(Iterator<false>(this));
 }
 
 
@@ -259,7 +239,7 @@ template<class T, class Key, class Hash>
 inline typename Foam::HashTable<T, Key, Hash>::const_iterator
 Foam::HashTable<T, Key, Hash>::begin() const
 {
-    return const_iterator(Iterator<true>(true, this));
+    return const_iterator(Iterator<true>(this));
 }
 
 
@@ -267,31 +247,31 @@ template<class T, class Key, class Hash>
 inline typename Foam::HashTable<T, Key, Hash>::const_iterator
 Foam::HashTable<T, Key, Hash>::cbegin() const
 {
-    return const_iterator(Iterator<true>(true, this));
+    return const_iterator(Iterator<true>(this));
 }
 
 
 template<class T, class Key, class Hash>
-inline const typename Foam::HashTable<T, Key, Hash>::iterator&
-Foam::HashTable<T, Key, Hash>::end()
+inline typename Foam::HashTable<T, Key, Hash>::iterator
+Foam::HashTable<T, Key, Hash>::end() noexcept
 {
-    return iterator_end<iterator>();
+    return iterator();
 }
 
 
 template<class T, class Key, class Hash>
-inline const typename Foam::HashTable<T, Key, Hash>::const_iterator&
-Foam::HashTable<T, Key, Hash>::end() const
+inline typename Foam::HashTable<T, Key, Hash>::const_iterator
+Foam::HashTable<T, Key, Hash>::end() const noexcept
 {
-    return iterator_cend<const_iterator>();
+    return const_iterator();
 }
 
 
 template<class T, class Key, class Hash>
-inline const typename Foam::HashTable<T, Key, Hash>::const_iterator&
-Foam::HashTable<T, Key, Hash>::cend() const
+inline constexpr typename Foam::HashTable<T, Key, Hash>::const_iterator
+Foam::HashTable<T, Key, Hash>::cend() const noexcept
 {
-    return iterator_cend<const_iterator>();
+    return const_iterator();
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -246,14 +246,14 @@ inline Foam::label Foam::HashSet<Key, Hash>::unset
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Key, class Hash>
-inline bool Foam::HashSet<Key, Hash>::operator()(const Key& key) const
+inline bool Foam::HashSet<Key, Hash>::operator()(const Key& key) const noexcept
 {
     return this->found(key);
 }
 
 
 template<class Key, class Hash>
-inline bool Foam::HashSet<Key, Hash>::operator[](const Key& key) const
+inline bool Foam::HashSet<Key, Hash>::operator[](const Key& key) const noexcept
 {
     return this->found(key);
 }
@@ -355,6 +355,14 @@ Foam::HashSet<Key, Hash>::operator^=(const HashSet<Key, Hash>& rhs)
 
 template<class Key, class Hash>
 inline Foam::HashSet<Key, Hash>&
+Foam::HashSet<Key, Hash>::operator+=(const HashSet<Key, Hash>& rhs)
+{
+    return this->operator|=(rhs);
+}
+
+
+template<class Key, class Hash>
+inline Foam::HashSet<Key, Hash>&
 Foam::HashSet<Key, Hash>::operator-=(const HashSet<Key, Hash>& rhs)
 {
     this->parent_type::erase(rhs);
@@ -419,9 +427,9 @@ template<class Key, class Hash>
 inline typename Foam::HashSet<Key, Hash>::iterator
 Foam::HashSet<Key, Hash>::begin()
 {
-    return HashTableCore::iterator_begin<iterator>
+    return iterator
     (
-        static_cast<parent_type&>(*this)
+        static_cast<parent_type&>(*this).begin()
     );
 }
 
@@ -430,9 +438,9 @@ template<class Key, class Hash>
 inline typename Foam::HashSet<Key, Hash>::const_iterator
 Foam::HashSet<Key, Hash>::begin() const
 {
-    return HashTableCore::iterator_cbegin<const_iterator>
+    return const_iterator
     (
-        static_cast<const parent_type&>(*this)
+        static_cast<const parent_type&>(*this).begin()
     );
 }
 
@@ -441,34 +449,34 @@ template<class Key, class Hash>
 inline typename Foam::HashSet<Key, Hash>::const_iterator
 Foam::HashSet<Key, Hash>::cbegin() const
 {
-    return HashTableCore::iterator_cbegin<const_iterator>
+    return const_iterator
     (
-        static_cast<const parent_type&>(*this)
+        static_cast<const parent_type&>(*this).cbegin()
     );
 }
 
 
 template<class Key, class Hash>
-inline const typename Foam::HashSet<Key, Hash>::iterator&
-Foam::HashSet<Key, Hash>::end()
+inline typename Foam::HashSet<Key, Hash>::iterator
+Foam::HashSet<Key, Hash>::end() noexcept
 {
-    return HashTableCore::iterator_end<iterator>();
+    return iterator();
 }
 
 
 template<class Key, class Hash>
-inline const typename Foam::HashSet<Key, Hash>::const_iterator&
-Foam::HashSet<Key, Hash>::end() const
+inline typename Foam::HashSet<Key, Hash>::const_iterator
+Foam::HashSet<Key, Hash>::end() const noexcept
 {
-    return HashTableCore::iterator_cend<const_iterator>();
+    return const_iterator();
 }
 
 
 template<class Key, class Hash>
-inline const typename Foam::HashSet<Key, Hash>::const_iterator&
-Foam::HashSet<Key, Hash>::cend() const
+inline constexpr typename Foam::HashSet<Key, Hash>::const_iterator
+Foam::HashSet<Key, Hash>::cend() const noexcept
 {
-    return HashTableCore::iterator_cend<const_iterator>();
+    return const_iterator();
 }
 
 

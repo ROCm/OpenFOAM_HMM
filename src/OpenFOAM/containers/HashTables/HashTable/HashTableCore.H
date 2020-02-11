@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,11 +62,11 @@ struct HashTableCore
     //- Return a canonical (power-of-two) of the requested size.
     static label canonicalSize(const label requested_size);
 
-    //- Construct null
-    HashTableCore() = default;
-
-    //- Define template name and debug
+    //- Declare type-name (with debug switch)
     ClassName("HashTable");
+
+    //- Default construct
+    HashTableCore() = default;
 
     static_assert
     (
@@ -75,34 +75,19 @@ struct HashTableCore
     );
 
 
-    //- Factory method to create a non-const iterator begin
-    template<class IteratorType, class TableType>
-    inline static IteratorType iterator_begin(TableType& table);
-
-    //- Factory method to create a const iterator begin
-    template<class IteratorType, class TableType>
-    inline static IteratorType iterator_cbegin(const TableType& table);
-
-    //- Factory method to return an iterator end
-    //  Simply reinterprets a NullObject as a hash-table iterator.
-    template<class IteratorType>
-    inline static const IteratorType& iterator_end();
-
-    //- Factory method to return an iterator cend
-    //  Simply reinterprets a NullObject as a hash-table iterator.
-    template<class IteratorType>
-    inline static const IteratorType& iterator_cend();
-
-
     //- Factory class for creating a begin/end pair for any const iterator.
     template<class IteratorType, class TableType>
     class const_iterator_pair
     {
-        label size_;
+        const label size_;
         IteratorType iter_;
 
     public:
 
+        //- Default construct an empty pair
+        inline const_iterator_pair();
+
+        //- Construct begin/end pair for table
         inline const_iterator_pair(const TableType& tbl);
 
         label size() const noexcept { return size_; }
@@ -111,8 +96,8 @@ struct HashTableCore
         inline IteratorType begin() const;
         inline IteratorType cbegin() const;
 
-        inline const IteratorType& end() const;
-        inline const IteratorType& cend() const;
+        inline IteratorType end() const;
+        inline IteratorType cend() const;
     };
 };
 

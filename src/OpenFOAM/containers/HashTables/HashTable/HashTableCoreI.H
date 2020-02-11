@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,43 +25,16 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * helper methods  * * * * * * * * * * * * * * //
-
-template<class IteratorType, class TableType>
-inline IteratorType Foam::HashTableCore::iterator_begin
-(
-    TableType& table
-)
-{
-    return IteratorType(table.begin());
-}
-
-
-template<class IteratorType, class TableType>
-inline IteratorType Foam::HashTableCore::iterator_cbegin
-(
-    const TableType& table
-)
-{
-    return IteratorType(table.cbegin());
-}
-
-
-template<class IteratorType>
-inline const IteratorType& Foam::HashTableCore::iterator_end()
-{
-    return *reinterpret_cast<const IteratorType*>(nullObjectPtr);
-}
-
-
-template<class IteratorType>
-inline const IteratorType& Foam::HashTableCore::iterator_cend()
-{
-    return *reinterpret_cast<const IteratorType*>(nullObjectPtr);
-}
-
-
 // * * * * * * * * * * * * * const iterator pair * * * * * * * * * * * * * * //
+
+template<class IteratorType, class TableType>
+inline Foam::HashTableCore::const_iterator_pair<IteratorType, TableType>
+::const_iterator_pair()
+:
+    size_(0),
+    iter_()
+{}
+
 
 template<class IteratorType, class TableType>
 inline Foam::HashTableCore::const_iterator_pair<IteratorType, TableType>
@@ -98,24 +71,24 @@ inline IteratorType Foam::HashTableCore::const_iterator_pair
 
 
 template<class IteratorType, class TableType>
-inline const IteratorType& Foam::HashTableCore::const_iterator_pair
+inline IteratorType Foam::HashTableCore::const_iterator_pair
 <
     IteratorType,
     TableType
 >::end() const
 {
-    return HashTableCore::iterator_cend<IteratorType>();
+    return IteratorType();
 }
 
 
 template<class IteratorType, class TableType>
-inline const IteratorType& Foam::HashTableCore::const_iterator_pair
+inline IteratorType Foam::HashTableCore::const_iterator_pair
 <
     IteratorType,
     TableType
 >::cend() const
 {
-    return HashTableCore::iterator_cend<IteratorType>();
+    return IteratorType();
 }
 
 
