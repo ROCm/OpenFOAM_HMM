@@ -416,7 +416,7 @@ do
         # Explicitly set WM_MPLIB=...
         optionValue=$(getOptionValue "$@")
         replace    etc/bashrc  WM_MPLIB "$optionValue"
-        replaceCsh etc/bashrc  WM_MPLIB "$optionValue"
+        replaceCsh etc/cshrc   WM_MPLIB "$optionValue"
         optMpi=system
         adjusted=true
         shift
