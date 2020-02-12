@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -48,6 +48,39 @@ addToRunTimeSelectionTable
 );
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void shapeOptimisation::updateDesignVariables(scalarField& correction)
+{
+    // Communicate the movement to optMeshMovement
+    optMeshMovement_->setCorrection(correction);
+
+    if (updateGeometry_)
+    {
+        // Update the mesh
+        optMeshMovement_->moveMesh();
+
+        if (writeEachMesh_)
+        {
+            Info<< "  Writing new mesh points " << endl;
+            pointIOField points
+            (
+                IOobject
+                (
+                   "points",
+                    mesh_.pointsInstance(),
+                    mesh_.meshSubDir,
+                    mesh_,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                mesh_.points()
+            );
+            points.write();
+        }
+    }
+}
+
 
 void shapeOptimisation::computeEta
 (
@@ -145,144 +178,6 @@ shapeOptimisation::shapeOptimisation
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void shapeOptimisation::update()
-{
-    Info<< nl << "Moving Mesh..." << nl << endl;
-
-    // Sum contributions
-    scalarField objectiveSens(0);
-    PtrList<scalarField> constraintSens(0);
-    scalar objectiveValue(Zero);
-    scalarField constraintValues(0);
-    forAll(adjointSolvManagers_, amI)
-    {
-        adjointSolverManager& adjSolvManager(adjointSolvManagers_[amI]);
-        const scalar opWeight(adjSolvManager.operatingPointWeight());
-
-        // Allocate objective sens size if necessary
-        tmp<scalarField> tadjointSolverManagerSens =
-            adjSolvManager.aggregateSensitivities();
-
-        if (objectiveSens.empty())
-        {
-            objectiveSens.setSize(tadjointSolverManagerSens().size(), Zero);
-        }
-        objectiveSens += opWeight*tadjointSolverManagerSens();
-        objectiveValue += opWeight*adjSolvManager.objectiveValue();
-
-        // Allocate constraint sens size if necessary
-        PtrList<scalarField> adjointSolverManagerConstSens
-            = adjSolvManager.constraintSensitivities();
-        tmp<scalarField> cValues = adjSolvManager.constraintValues();
-        if (constraintSens.empty())
-        {
-            constraintSens.setSize(adjointSolverManagerConstSens.size());
-            forAll(constraintSens, cI)
-            {
-                constraintSens.set
-                (
-                    cI,
-                    new scalarField
-                    (
-                        adjointSolverManagerConstSens[cI].size(),
-                        Zero
-                    )
-                );
-                constraintValues.setSize(cValues().size());
-                constraintValues = Zero;
-            }
-        }
-
-        forAll(constraintSens, cI)
-        {
-            constraintSens[cI] += opWeight*adjointSolverManagerConstSens[cI];
-        }
-        constraintValues += opWeight*cValues();
-    }
-
-    // Based on the sensitivities, return design variables correction
-    updateMethod_->setObjectiveDeriv(objectiveSens);
-    updateMethod_->setConstraintDeriv(constraintSens);
-    updateMethod_->setObjectiveValue(objectiveValue);
-    updateMethod_->setConstraintValues(constraintValues);
-    scalarField& correction = updateMethod_->returnCorrection();
-
-    // Computed  eta if needed
-    computeEta(correction);
-    updateMethod_->writeCorrection();
-
-    // Communicate the movement to optMeshMovement
-    optMeshMovement_->setCorrection(correction);
-    if (updateGeometry_)
-    {
-        optMeshMovement_->moveMesh();
-
-        if (writeEachMesh_)
-        {
-            Info<< "  Writing new mesh points " << endl;
-            pointIOField points
-            (
-                IOobject
-                (
-                    "points",
-                     mesh_.pointsInstance(),
-                     mesh_.meshSubDir,
-                     mesh_,
-                     IOobject::NO_READ,
-                     IOobject::NO_WRITE,
-                     false
-                ),
-                mesh_.points()
-            );
-            points.write();
-        }
-    }
-}
-
-
-void shapeOptimisation::update(scalarField& direction)
-{
-    // Computed eta if needed
-    computeEta(direction);
-
-    // Multiply with line search step, if necessary
-    scalarField correction = direction;
-    if (lineSearch_.valid())
-    {
-        correction *= lineSearch_->step();
-    }
-
-    // Communicate the movement to optMeshMovement
-    optMeshMovement_->setCorrection(correction);
-
-    if (updateGeometry_)
-    {
-        // Update the mesh
-        optMeshMovement_->moveMesh();
-
-        if (writeEachMesh_)
-        {
-            Info<< "  Writing new mesh points " << endl;
-            pointIOField points
-            (
-                IOobject
-                (
-                   "points",
-                    mesh_.pointsInstance(),
-                    mesh_.meshSubDir,
-                    mesh_,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE,
-                    false
-                ),
-                mesh_.points()
-            );
-            points.write();
-        }
-    }
-}
-
 
 void shapeOptimisation::storeDesignVariables()
 {

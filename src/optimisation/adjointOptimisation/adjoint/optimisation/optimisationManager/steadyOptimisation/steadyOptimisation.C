@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -68,8 +68,13 @@ void Foam::steadyOptimisation::updateOptTypeSource()
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::steadyOptimisation::lineSearchUpdate(scalarField& direction)
+void Foam::steadyOptimisation::lineSearchUpdate()
 {
+    // Compute direction of update
+    tmp<scalarField> tdirection = optType_->computeDirection();
+    scalarField& direction = tdirection.ref();
+
+    // Grab reference to line search
     autoPtr<lineSearch>& lineSrch = optType_->getLineSearch();
 
     // Store starting point
@@ -121,7 +126,7 @@ void Foam::steadyOptimisation::lineSearchUpdate(scalarField& direction)
         else
         {
             // If maximum number of iteration has been reached, continue
-            if (iter == lineSrch->maxIters()-1)
+            if (iter == lineSrch->maxIters() - 1)
             {
                 Info<< "Line search reached max. number of iterations.\n"
                     << "Proceeding to the next optimisation cycle" << endl;
@@ -141,15 +146,10 @@ void Foam::steadyOptimisation::lineSearchUpdate(scalarField& direction)
 }
 
 
-void Foam::steadyOptimisation::fixedStepUpdate(scalarField& direction)
+void Foam::steadyOptimisation::fixedStepUpdate()
 {
-    // Update based on fixed step
-    optType_->update(direction);
-
-    // If direction has been scaled (say by setting the initial eta), the
-    // old correction has to be updated
-    optType_->updateOldCorrection(direction);
-    optType_->write();
+    // Update design variables
+    optType_->update();
 
     // Solve primal equations
     solvePrimalEquations();
@@ -223,20 +223,15 @@ bool Foam::steadyOptimisation::update()
 
 void Foam::steadyOptimisation::updateDesignVariables()
 {
-    // Compute direction of update
-    tmp<scalarField> tdirection = optType_->computeDirection();
-    scalarField& direction = tdirection.ref();
-    autoPtr<lineSearch>& lineSrch = optType_->getLineSearch();
-
     // Update design variables using either a line-search scheme or
     // a fixed-step update
-    if (lineSrch.valid())
+    if (optType_->getLineSearch().valid())
     {
-        lineSearchUpdate(direction);
+        lineSearchUpdate();
     }
     else
     {
-        fixedStepUpdate(direction);
+        fixedStepUpdate();
     }
 
     // Reset adjoint sensitivities in all adjoint solver managers

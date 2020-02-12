@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -107,8 +107,7 @@ public:
         virtual bool update();
 
         //- Update design variables.
-        //  Might employ a line search to find a correction satisfying the step
-        //  convergence criteria
+        //  Does nothing
         virtual void updateDesignVariables();
 };
 
