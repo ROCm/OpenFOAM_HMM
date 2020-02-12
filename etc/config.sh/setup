@@ -132,8 +132,8 @@ then
     _foamAddMan "$WM_PROJECT_DIR/doc"
 fi
 
-# Interactive shell
-if /usr/bin/tty -s 2>/dev/null
+# Interactive shell (use PS1, not tty)
+if [ -n "$PS1" ]
 then
     _foamEtc -config  aliases
     [ "${BASH_VERSINFO:-0}" -ge 4 ] && _foamEtc -config  bash_completion
