@@ -29,11 +29,16 @@
 #         -  $WM_PROJECT_SITE/$FOAM_API/etc/prefs.csh
 #         -  $WM_PROJECT_SITE/prefs.csh
 #
+#     Some settings can also be overridden on the command-line when
+#     sourcing this file. For example,
+#
+#       source /path/etc/cshrc WM_COMPILER=Clang WM_LABEL_SIZE=64
+#
 # Environment
-#     FOAM_VERBOSE (set/unset)
-#         - add extra verbosity when sourcing files
 #     FOAM_CONFIG_NOUSER (set/unset)
 #         - suppress use of user/group configuration files
+#     FOAM_VERBOSE (set/unset)
+#         - add extra verbosity when sourcing files
 #     WM_PROJECT_SITE (optional directory)
 #         - local site-specific directory, uses WM_PROJECT_DIR/site if unset
 #

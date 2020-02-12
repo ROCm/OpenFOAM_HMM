@@ -6,11 +6,10 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2016-2019 OpenCFD Ltd.
+#     Copyright (C) 2016-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # File
 #     etc/bashrc
@@ -30,11 +29,16 @@
 #         -  $WM_PROJECT_SITE/$FOAM_API/etc/prefs.sh
 #         -  $WM_PROJECT_SITE/etc/prefs.sh
 #
+#     Some settings can also be overridden on the command-line when
+#     sourcing this file. For example,
+#
+#       . /path/etc/bashrc WM_COMPILER=Clang WM_LABEL_SIZE=64
+#
 # Environment
-#     FOAM_VERBOSE (set/unset)
-#         - add extra verbosity when sourcing files
 #     FOAM_CONFIG_NOUSER (set/unset)
 #         - suppress use of user/group configuration files
+#     FOAM_VERBOSE (set/unset)
+#         - add extra verbosity when sourcing files
 #     WM_PROJECT_SITE (optional directory)
 #         - local site-specific directory, uses WM_PROJECT_DIR/site if unset
 #

@@ -5,34 +5,36 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2019 OpenCFD Ltd.
+#     Copyright (C) 2019-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # File
 #     bin/tools/source-bashrc
 #
 # Description
-#     Source user ~/.bashrc and OpenFOAM etc/bashrc
+#     Source user ~/.bashrc and OpenFOAM etc/bashrc.
+#     Not normally sourced manually, but from bash with the --rcfile option.
 #
-#     This file is normally not sourced manually,
-#     but from bash with the --rcfile option.
 #------------------------------------------------------------------------------
-# Hard-coded value (eg, with autoconfig)
+# Hard-coded directory path (eg, autoconfig)
 projectDir="@PROJECT_DIR@"
 
 if [ -z "$projectDir" ] || [ "${projectDir#@}" != "$projectDir" ]
 then
-    # Auto-detect (as per OpenFOAM etc/bashrc)
+    # Auto-detect location (as per OpenFOAM etc/bashrc)
     # --
     # Assuming this file is $WM_PROJECT_DIR/bin/tools/source-bashrc,
     # the next lines should work when sourced by BASH or ZSH shells.
     # --
 
     projectDir="${BASH_SOURCE:-${ZSH_NAME:+$0}}"
-    [ -n "$projectDir" ] && projectDir="$(\cd $(dirname $projectDir)/../.. && \pwd -L)" || unset projectDir
+    if [ -n "$projectDir" ]
+    then
+        projectDir="$(\cd "$(dirname "$projectDir")"/../.. && \pwd -L)" || \
+        unset projectDir
+    fi
 fi
 
 #------------------------------------------------------------------------------
@@ -66,7 +68,7 @@ then
     # Some feedback
     if [ -n "$PS1" ] && [ -d "$WM_PROJECT_DIR" ]
     then
-        info="$(foamEtcFile -show-patch 2>/dev/null)"
+        info="$("$WM_PROJECT_DIR"/bin/foamEtcFile -show-patch 2>/dev/null)"
 
         # echo "Using: OpenFOAM-$WM_PROJECT_VERSION ($FOAM_API${info:+ patch=$info}) - visit www.openfoam.com" 1>&2
         echo "Using: OpenFOAM-$WM_PROJECT_VERSION${info:+ (patch=$info)} - visit www.openfoam.com" 1>&2
