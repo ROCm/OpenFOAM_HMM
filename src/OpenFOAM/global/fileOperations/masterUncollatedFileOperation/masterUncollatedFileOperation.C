@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -723,17 +723,15 @@ Foam::fileOperations::masterUncollatedFileOperation::read
                 Pout<< "masterUncollatedFileOperation::readStream :"
                     << " Done reading " << buf.size() << " bytes" << endl;
             }
-            const fileName& fName = filePaths[Pstream::myProcNo(comm)];
-            isPtr.reset
-            (
-                new IListStream
-                (
-                    std::move(buf),
-                    IOstream::BINARY,
-                    IOstream::currentVersion,
-                    fName
-                )
-            );
+
+            // A local character buffer copy of the Pstream contents.
+            // Construct with same parameters (ASCII, current version)
+            // as the IFstream so that it has the same characteristics.
+
+            isPtr.reset(new IListStream(std::move(buf)));
+
+            // With the proper file name
+            isPtr->name() = filePaths[Pstream::myProcNo(comm)];
 
             if (!io.readHeader(isPtr()))
             {
@@ -2415,6 +2413,8 @@ Foam::fileOperations::masterUncollatedFileOperation::NewIFstream
     const fileName& filePath
 ) const
 {
+    autoPtr<ISstream> isPtr;
+
     if (Pstream::parRun())
     {
         // Insert logic of filePath. We assume that if a file is absolute
@@ -2497,10 +2497,7 @@ Foam::fileOperations::masterUncollatedFileOperation::NewIFstream
         if (Pstream::master(Pstream::worldComm))
         {
             // Read myself
-            return autoPtr<ISstream>
-            (
-                new IFstream(filePaths[Pstream::masterNo()])
-            );
+            isPtr.reset(new IFstream(filePaths[Pstream::masterNo()]));
         }
         else
         {
@@ -2522,26 +2519,23 @@ Foam::fileOperations::masterUncollatedFileOperation::NewIFstream
                     << " Done reading " << buf.size() << " bytes" << endl;
             }
 
-            // Note: IPstream is not an IStream so use a IStringStream to
-            //       convert the buffer. Note that we construct with a string
-            //       so it holds a copy of the buffer.
-            return autoPtr<ISstream>
-            (
-                new IListStream
-                (
-                    std::move(buf),
-                    IOstream::BINARY,
-                    IOstream::currentVersion,
-                    filePath
-                )
-            );
+            // A local character buffer copy of the Pstream contents.
+            // Construct with same parameters (ASCII, current version)
+            // as the IFstream so that it has the same characteristics.
+
+            isPtr.reset(new IListStream(std::move(buf)));
+
+            // With the proper file name
+            isPtr->name() = filePath;
         }
     }
     else
     {
         // Read myself
-        return autoPtr<ISstream>(new IFstream(filePath));
+        isPtr.reset(new IFstream(filePath));
     }
+
+    return isPtr;
 }
 
 
