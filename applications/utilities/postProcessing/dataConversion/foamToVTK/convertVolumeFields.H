@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,9 +50,9 @@ Description
 
     const label nPointFields =
     (
-        noPointValues
-      ? 0
-      : objects.count(stringListOps::foundOp<word>(fieldTypes::point))
+        doPointValues
+      ? objects.count(stringListOps::foundOp<word>(fieldTypes::point))
+      : 0
     );
 
 
@@ -82,7 +82,7 @@ Description
 
     if (doInternal)
     {
-        if (!noPointValues)
+        if (doPointValues)
         {
             pInterp.reset(new volPointInterpolation(mesh));
         }
@@ -180,7 +180,7 @@ Description
     else if (patchIds.size())
     {
         patchWriters.resize(patchIds.size());
-        if (!noPointValues)
+        if (doPointValues)
         {
             patchInterps.resize(patchIds.size());
         }
@@ -320,7 +320,7 @@ Description
     // PointData
     // - only construct pointMesh on request since it constructs
     //   edge addressing
-    if (!noPointValues)
+    if (doPointValues)
     {
         // Begin PointData
         if (internalWriter.valid())

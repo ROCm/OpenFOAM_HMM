@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -510,8 +510,8 @@ int main(int argc, char *argv[])
             << nl << endl;
     }
 
-    const bool noPointValues = args.found("no-point-data");
-    if (noPointValues)
+    const bool doPointValues = !args.found("no-point-data");
+    if (!doPointValues)
     {
         Info<< "Point fields and interpolated point data"
             << " disabled with the '-no-point-data' option"
@@ -523,7 +523,7 @@ int main(int argc, char *argv[])
     {
         Info<< "Write point ids requested";
 
-        if (noPointValues)
+        if (!doPointValues)
         {
             Info<< ", but ignored due to the '-no-point-data' option";
         }
@@ -801,9 +801,9 @@ int main(int argc, char *argv[])
             // Prune restart fields
             objects.prune_0();
 
-            if (noPointValues)
+            if (!doPointValues)
             {
-                // Prune point fields unless specifically requested
+                // Prune point fields if disabled
                 objects.filterClasses
                 (
                     [](const word& clsName)
