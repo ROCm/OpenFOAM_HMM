@@ -82,14 +82,17 @@ void Foam::primitiveMesh::makeCellCentresAndVols
 {
     typedef Vector<solveScalar> solveVector;
 
+    // Clear the fields for accumulation. Note1: we're doing this before
+    // any precision conversion since this might complain about illegal numbers.
+    // Note2: zero is a special value which is perfectly converted into zero
+    //        in the new precision
+    cellCtrs_s = Zero;
+    cellVols_s = 0.0;
+
     PrecisionAdaptor<solveVector, vector> tcellCtrs(cellCtrs_s);
     Field<solveVector>& cellCtrs = tcellCtrs.ref();
     PrecisionAdaptor<solveScalar, scalar> tcellVols(cellVols_s);
     Field<solveScalar>& cellVols = tcellVols.ref();
-
-    // Clear the fields for accumulation
-    cellCtrs = Zero;
-    cellVols = 0.0;
 
     const labelList& own = faceOwner();
     const labelList& nei = faceNeighbour();

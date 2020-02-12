@@ -5,11 +5,10 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2019 OpenCFD Ltd.
+#     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # File
 #     etc/config.csh/setup
@@ -89,7 +88,7 @@ endif
 
 # Capture and evaluate any command-line parameters
 # These can be used to set/unset values, specify additional files etc.
-setenv FOAM_SETTINGS "${*}"
+setenv FOAM_SETTINGS "$argv[*]"
 
 while ( $#argv > 0 )
     switch ($argv[1])

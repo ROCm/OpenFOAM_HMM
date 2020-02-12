@@ -180,7 +180,7 @@ endif
 # Finalize setup of OpenFOAM environment
 if ( -d "$WM_PROJECT_DIR" ) then
     if ($?FOAM_VERBOSE && $?prompt) echo "source $WM_PROJECT_DIR/etc/config.csh/setup"
-    source "$WM_PROJECT_DIR/etc/config.csh/setup" "${*}"
+    source "$WM_PROJECT_DIR/etc/config.csh/setup" $argv[*]
 else
     echo "Error: did not locate installation path for $WM_PROJECT-$WM_PROJECT_VERSION"
     echo "No directory: $WM_PROJECT_DIR"
