@@ -247,7 +247,14 @@ void Foam::blockFaces::projectFace::project
         }
 
 
-        if (iter > 0 && (iResidual+jResidual)/initialResidual < relTol)
+        if
+        (
+            iter > 0
+         && (
+                initialResidual < ROOTVSMALL
+             || ((iResidual+jResidual)/initialResidual < relTol)
+            )
+        )
         {
             break;
         }
