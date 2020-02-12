@@ -90,7 +90,13 @@ namespace Foam
 
 
 // Hack to do zones which have Lists in them. See above.
-bool writeZones(const word& name, const fileName& meshDir, Time& runTime)
+bool writeZones
+(
+    const word& name,
+    const fileName& meshDir,
+    Time& runTime,
+    const IOstreamOption::compressionType compression
+)
 {
     IOobject io
     (
@@ -156,7 +162,7 @@ bool writeZones(const word& name, const fileName& meshDir, Time& runTime)
         (
             IOstream::ASCII,
             IOstream::currentVersion,
-            runTime.writeCompression(),
+            compression,
             true
         );
     }
@@ -330,7 +336,7 @@ int main(int argc, char *argv[])
         writeMeshObject<pointIOField>("points", meshDir, runTime);
         // Write boundary in ascii. This is only needed for fileHandler to
         // kick in. Should not give problems since always writing ascii.
-        writeZones("boundary", meshDir, runTime);
+        writeZones("boundary", meshDir, runTime, IOstreamOption::UNCOMPRESSED);
         writeMeshObject<labelIOList>("pointProcAddressing", meshDir, runTime);
         writeMeshObject<labelIOList>("faceProcAddressing", meshDir, runTime);
         writeMeshObject<labelIOList>("cellProcAddressing", meshDir, runTime);
@@ -353,9 +359,11 @@ int main(int argc, char *argv[])
         {
             // Only do zones when converting from binary to ascii
             // The other way gives problems since working on dictionary level.
-            writeZones("cellZones", meshDir, runTime);
-            writeZones("faceZones", meshDir, runTime);
-            writeZones("pointZones", meshDir, runTime);
+            const IOstreamOption::compressionType compress =
+                runTime.writeCompression();
+            writeZones("cellZones", meshDir, runTime, compress);
+            writeZones("faceZones", meshDir, runTime, compress);
+            writeZones("pointZones", meshDir, runTime, compress);
         }
 
         // Get list of objects from the database
