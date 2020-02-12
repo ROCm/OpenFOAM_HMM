@@ -196,7 +196,7 @@ Foam::label Foam::metisDecomp::decomposeSerial
 
     // Output: cell -> processor addressing
     decomp.resize(numCells);
-    PrecisionAdaptor<idx_t, label, List> decomp_param(decomp);
+    PrecisionAdaptor<idx_t, label, List> decomp_param(decomp, false);
 
     // Output: number of cut edges
     idx_t edgeCut = 0;

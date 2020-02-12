@@ -229,7 +229,7 @@ Foam::label Foam::kahipDecomp::decomposeSerial
 
     // Output: cell -> processor addressing
     decomp.resize(numCells);
-    PrecisionAdaptor<int, label, List> decomp_param(decomp);
+    PrecisionAdaptor<int, label, List> decomp_param(decomp, false);
 
 
 #if 0 // WIP: #ifdef KAFFPA_CPP_INTERFACE

@@ -169,11 +169,14 @@ class PrecisionAdaptor
     // Private Member Functions
 
         //- Copy in field
-        void copyInput(const Container<InputType>& input)
+        void copyInput(const Container<InputType>& input, const bool copy)
         {
             Container<Type>* p = new Container<Type>(input.size());
             this->reset(p);
-            std::copy(input.cbegin(), input.cend(), p->begin());
+            if (copy)
+            {
+                std::copy(input.cbegin(), input.cend(), p->begin());
+            }
         }
 
 
@@ -185,8 +188,8 @@ public:
 
     // Constructors
 
-        //- Construct from Container<InputType>, copying on input as required
-        PrecisionAdaptor(Container<InputType>& input)
+        //- Construct from Container<InputType>, copying on input if required
+        PrecisionAdaptor(Container<InputType>& input, const bool copy = true)
         :
             tmpNrc<Container<Type>>(),
             ref_(input)
@@ -197,7 +200,7 @@ public:
             }
             else
             {
-                this->copyInput(input);
+                this->copyInput(input, copy);
             }
         }
 
