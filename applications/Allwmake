@@ -6,13 +6,14 @@ wmakeCheckPwd "$WM_PROJECT_DIR/applications" 2>/dev/null || {
     echo "    Check your OpenFOAM environment and installation"
     exit 1
 }
-[ -d "$WM_PROJECT_DIR" -a -f "$WM_PROJECT_DIR/etc/bashrc" ] || {
+if [ -f "$WM_PROJECT_DIR"/wmake/scripts/AllwmakeParseArguments ]
+then  . "$WM_PROJECT_DIR"/wmake/scripts/AllwmakeParseArguments || \
+    echo "Argument parse error";
+else
     echo "Error (${0##*/}) : WM_PROJECT_DIR appears to be incorrect"
     echo "    Check your OpenFOAM environment and installation"
     exit 1
-}
-
-. "$WM_PROJECT_DIR"/wmake/scripts/AllwmakeParseArguments
+fi
 
 #------------------------------------------------------------------------------
 

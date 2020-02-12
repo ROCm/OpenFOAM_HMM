@@ -6,23 +6,10 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2019 OpenCFD Ltd.
+#     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     wmakeBuildInfo
@@ -38,12 +25,13 @@
 # Note
 #     Partial logic is also implemented in the bin/foamEtcFile
 #     -show-api and -show-patch options.
-#     Make sure that any changes here are also reflected there.
+#     Make sure that changes here are also reflected there.
 #
 #------------------------------------------------------------------------------
 # Locations
 rulesFile="${WM_DIR:-$WM_PROJECT_DIR/wmake}/rules/General/general"
-metaInfoDir="$WM_PROJECT_DIR/META-INFO"
+META_INFO="$WM_PROJECT_DIR/META-INFO"
+FOAM_GIT_DIR="$WM_PROJECT_DIR/.git"
 
 usage() {
     exec 1>&2
@@ -58,6 +46,7 @@ options:
                 (exit code 0 for no changes)
   -dry-run      In combination with -update
   -filter FILE  Filter @API@, @BUILD@ tags in file with make information
+  -no-git       Disable use of git for obtaining information
   -remove       Remove meta-info build information and exit
   -update       Update meta-info from make information
   -query        Report make-info and meta-info
@@ -131,6 +120,9 @@ do
         shift # Stop here, a file name follows
         break
         ;;
+    -no-git)
+        unset FOAM_GIT_DIR
+        ;;
     *)
         die "unknown option/argument: '$1'"
         ;;
@@ -142,8 +134,8 @@ done
 [ -d "$WM_PROJECT_DIR" ] || \
     die "Bad or unset environment variable: \$WM_PROJECT_DIR"
 
-[ -d "$WM_PROJECT_DIR/META-INFO" ] || \
-    die "No META-INFO/ directory for project"
+[ -d "$META_INFO" ] || \
+    die "No ${META_INFO##*/}/ directory for project"
 
 
 #------------------------------------------------------------------------------
@@ -151,12 +143,12 @@ done
 if [ "$optUpdate" = remove ]
 then
 
-    if [ -f "$metaInfoDir/build-info" ]
+    if [ -f "$META_INFO/build-info" ]
     then
-        echo "Removing project META-INFO/build-info" 1>&2
-        rm -f "$metaInfoDir/build-info" 2>/dev/null
+        echo "Removing project ${META_INFO##*/}/build-info" 1>&2
+        rm -f "$META_INFO/build-info" 2>/dev/null
     else
-        echo "Already removed project META-INFO/build-info" 1>&2
+        echo "Already removed project ${META_INFO##*/}/build-info" 1>&2
     fi
     exit 0
 
@@ -173,7 +165,7 @@ then
 
 else
 
-    [ "$#" -eq 0 ] || die "Unexpected option/arguments $@"
+    [ "$#" -eq 0 ] || die "Unexpected option/arguments $*"
 
     # Nothing specified? Default to -query-make
     if [ -z "$optCheck$optUpdate$optQuery" ]
@@ -221,22 +213,25 @@ getMakeInfo()
     # (api) from WM_DIR/rules/General/general
     # - extract WM_VERSION = OPENFOAM=<digits>
 
-    api="$(sed -ne '/^ *#/!{ /WM_VERSION.*OPENFOAM=/{ s@^.*OPENFOAM= *\([0-9][0-9]*\).*@\1@p; q }}' $rulesFile 2>/dev/null)"
+    api="$(sed -ne '/^ *#/!{ /WM_VERSION.*OPENFOAM=/{ s@^.*OPENFOAM= *\([0-9][0-9]*\).*@\1@p; q }}' "$rulesFile" 2>/dev/null)"
 
-    if [ -d "$metaInfoDir" ]
+    if [ -d "$META_INFO" ]
     then
         # (patch) from build-info - not from api-info
-        patch="$(sed -ne 's@^patch *= *\([0-9][0-9]*\).*@\1@p' $metaInfoDir/build-info 2>/dev/null)"
+        patch="$(sed -ne 's@^patch *= *\([0-9][0-9]*\).*@\1@p' "$META_INFO/build-info" 2>/dev/null)"
     fi
 
     # Build info from git. Use short date format (YYYY-MM-DD) and sed instead
     # of the newer --date='format:%y%m%d'
-    build="$(git --git-dir=$WM_PROJECT_DIR/.git log -1 --date=short --format='%h=%ad' 2>/dev/null|sed 's/-//g;s/=/-/')"
-
-    # Branch info from git
-    if [ -n "$build" ]
+    if [ -d "$FOAM_GIT_DIR" ]
     then
-        branch="$(git --git-dir=$WM_PROJECT_DIR/.git rev-parse --abbrev-ref HEAD 2>/dev/null)"
+        build="$(git --git-dir="$FOAM_GIT_DIR" log -1 --date=short --format='%h=%ad' 2>/dev/null|sed 's/-//g;s/=/-/')"
+
+        # Branch info from git
+        if [ -n "$build" ]
+        then
+            branch="$(git --git-dir="$FOAM_GIT_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null)"
+        fi
     fi
 
     make_api="$api"
@@ -269,15 +264,15 @@ getMetaInfo()
     local api patch build branch
     unset meta_api meta_patch meta_branch meta_build
 
-    if [ -d "$metaInfoDir" ]
+    if [ -d "$META_INFO" ]
     then
         # (api, patch) from api-info
         # (branch, build) from build-info
 
-        api="$(sed -ne 's@^api *= *\([0-9][0-9]*\).*@\1@p' $metaInfoDir/api-info 2>/dev/null)"
-        patch="$(sed -ne 's@^patch *= *\([0-9][0-9]*\).*@\1@p' $metaInfoDir/api-info 2>/dev/null)"
-        branch="$(sed -ne 's@^branch *= *\([^ ]*\).*@\1@p' $metaInfoDir/build-info 2>/dev/null)"
-        build="$(sed -ne 's@^build *= *\([^ ]*\).*@\1@p' $metaInfoDir/build-info 2>/dev/null)"
+        api="$(sed -ne 's@^api *= *\([0-9][0-9]*\).*@\1@p' "$META_INFO/api-info" 2>/dev/null)"
+        patch="$(sed -ne 's@^patch *= *\([0-9][0-9]*\).*@\1@p' "$META_INFO/api-info" 2>/dev/null)"
+        branch="$(sed -ne 's@^branch *= *\([^ ]*\).*@\1@p' "$META_INFO/build-info" 2>/dev/null)"
+        build="$(sed -ne 's@^build *= *\([^ ]*\).*@\1@p' "$META_INFO/build-info" 2>/dev/null)"
     fi
 
     meta_api="$api"
@@ -478,7 +473,7 @@ performUpdate()
     local outputFile
 
     # build-info
-    outputFile="$metaInfoDir/build-info"
+    outputFile="$META_INFO/build-info"
     if [ "$branch" != "${meta_branch}" ] || \
        [ "$build" != "${meta_build}" ] || \
        [ "$patch" != "${meta_patch}" ]
@@ -499,7 +494,7 @@ performUpdate()
 
 
     # api-info
-    outputFile="$metaInfoDir/api-info"
+    outputFile="$META_INFO/api-info"
     if [ "$api" != "${meta_api}" ]
     then
         patch="${meta_patch:-0}"        # <- From meta-info only

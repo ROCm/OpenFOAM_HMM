@@ -79,7 +79,7 @@ then
 cat<<HELP_FULL
   -debug            Define c++DBUG='-DFULLDEBUG -g -O0' as override
   -no-scheduler     Disable scheduled parallel compilation
-  -show-api         Print api value
+  -show-api         Print api value (from Make rules)
   -show-ext-so      Print shared library extension (with '.' separator)
   -show-c           Print C compiler value
   -show-cflags      Print C compiler flags

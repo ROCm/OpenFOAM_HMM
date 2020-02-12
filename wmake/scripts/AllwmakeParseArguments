@@ -6,11 +6,10 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2014-2017 OpenFOAM Foundation
-#     Copyright (C) 2019 OpenCFD Ltd.
+#     Copyright (C) 2019-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # File
 #     wmake/scripts/AllwmakeParseArguments
@@ -22,14 +21,26 @@
 #     # Parse the arguments by sourcing this script
 #     . ${WM_PROJECT_DIR:?}/wmake/scripts/AllwmakeParseArguments
 #
+# Parsed options (make)
+#     -k | -keep-going | -non-stop
+#     -j | -jN | -j N
+#
+# Parsed options (wmake)
+#     -debug
+#     -q | -queue
+#
+# Parsed options (special)
+#     -l | -log | -log=FILE
+#
 #------------------------------------------------------------------------------
-
-if [ -z "$WM_PROJECT_DIR" ]
-then
-    echo "$Script error: The OpenFOAM environment is not set."
-    echo "    Check the OpenFOAM entries in your dot-files and source them."
+# Check environment
+[ -d "$WM_PROJECT_DIR" ] || {
+    exec 1>&2
+    echo "$Script error: The OpenFOAM environment not set or incorrect."
+    echo "    Check OpenFOAM entries in your dot-files and source them."
     exit 1
-fi
+}
+
 usage() {
     exec 1>&2
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
