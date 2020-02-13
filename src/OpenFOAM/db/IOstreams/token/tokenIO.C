@@ -74,6 +74,10 @@ static OS& printTokenInfo(OS& os, const token& tok)
             os  << "word '" << tok.wordToken() << '\'';
         break;
 
+        case token::tokenType::DIRECTIVE:
+            os  << "directive '" << tok.wordToken() << '\'';
+        break;
+
         case token::tokenType::STRING:
             os  << "string " << tok.stringToken();
         break;
@@ -135,6 +139,7 @@ Foam::word Foam::token::name() const
         case token::tokenType::FLOAT: return "float";
         case token::tokenType::DOUBLE: return "double";
         case token::tokenType::WORD: return "word";
+        case token::tokenType::DIRECTIVE: return "directive";
         case token::tokenType::STRING: return "string";
         case token::tokenType::VERBATIM: return "verbatim";
         case token::tokenType::VARIABLE: return "variable";
@@ -189,19 +194,19 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const token& tok)
             os << tok.data_.doubleVal;
         break;
 
+        // Different behaviour for (serial/parallel) streams: preserve types
+        case token::tokenType::DIRECTIVE:
+        case token::tokenType::VARIABLE:
+        case token::tokenType::VERBATIMSTRING:
+            os.write(tok);
+        break;
+
         case token::tokenType::WORD:
             os << *tok.data_.wordPtr;
         break;
 
         case token::tokenType::STRING:
             os << *tok.data_.stringPtr;
-        break;
-
-        case token::tokenType::VARIABLE:
-        case token::tokenType::VERBATIMSTRING:
-            // Different behaviour for (serial/parallel) stream type
-            // - preserve its type
-            os.write(tok);
         break;
 
         case token::tokenType::COMPOUND:

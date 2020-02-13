@@ -253,10 +253,21 @@ Foam::Istream& Foam::ISstream::read(token& t)
             else
             {
                 // Word beginning with '#'. Eg, "#include"
+                // Put back both so that '#...' is included in the directive
+
                 putback(nextC);
                 putback(c);
 
-                readWordToken(t);
+                word val;
+                if (read(val).bad())
+                {
+                    t.setBad();
+                }
+                else
+                {
+                    t = std::move(val); // Move contents to token
+                    t.setType(token::tokenType::DIRECTIVE);
+                }
             }
 
             return *this;

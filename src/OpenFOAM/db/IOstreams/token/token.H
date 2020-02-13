@@ -89,6 +89,7 @@ public:
         // Pointer types
         WORD,             //!< A Foam::word
         STRING,           //!< A string
+        DIRECTIVE,        //!< A dictionary \c \#directive (word variant)
         VARIABLE,         //!< A dictionary \c \$variable (string variant)
         VERBATIM,         //!< Verbatim string content
         COMPOUND,         //!< Compound type such as \c List\<label\> etc.
@@ -384,7 +385,7 @@ public:
         //  use the corresponding assignment operator.
         //
         //  \return true if the change was successful or no change was required
-        inline bool setType(const tokenType variant);
+        inline bool setType(const tokenType tokType);
 
         //- The line number for the token
         inline label lineNumber() const;
@@ -428,19 +429,22 @@ public:
         //- Token is LABEL, FLOAT or DOUBLE
         inline bool isNumber() const;
 
-        //- Token is WORD
+        //- Token is WORD or DIRECTIVE word
         inline bool isWord() const;
+
+        //- Token is DIRECTIVE (word variant)
+        inline bool isDirective() const;
 
         //- Token is STRING, VARIABLE or VERBATIM string
         inline bool isString() const;
 
-        //- Token is VARIABLE
+        //- Token is VARIABLE (string variant)
         inline bool isVariable() const;
 
-        //- Token is VERBATIM string
+        //- Token is VERBATIM string (string variant)
         inline bool isVerbatim() const;
 
-        //- Token is WORD, STRING, VARIABLE or VERBATIM
+        //- Token is WORD, DIRECTIVE, STRING, VARIABLE or VERBATIM
         inline bool isStringType() const;
 
         //- Token is COMPOUND
@@ -484,12 +488,13 @@ public:
         inline scalar number() const;
 
         //- Return const reference to the word contents.
-        //  Report FatalIOError and return \b "" if token is not a WORD
+        //  Report FatalIOError and return \b "" if token is not a
+        //  WORD or DIRECTIVE
         inline const word& wordToken() const;
 
         //- Return const reference to the string contents.
         //  Report FatalIOError and return \b "" if token is not a
-        //  STRING, VARIABLE, VERBATIM or an upcast WORD
+        //  STRING, VARIABLE, VERBATIM or an upcast WORD or DIRECTIVE
         inline const string& stringToken() const;
 
         //- Read access for compound token

@@ -114,6 +114,7 @@ inline Foam::token::token(const token& tok)
     switch (type_)
     {
         case tokenType::WORD:
+        case tokenType::DIRECTIVE:
         {
             data_.wordPtr = new word(*tok.data_.wordPtr);
             break;
@@ -247,6 +248,7 @@ inline void Foam::token::reset()
     switch (type_)
     {
         case tokenType::WORD:
+        case tokenType::DIRECTIVE:
         {
             delete data_.wordPtr;
             break;
@@ -300,15 +302,15 @@ inline Foam::token::tokenType Foam::token::type() const
 }
 
 
-inline bool Foam::token::setType(token::tokenType variant)
+inline bool Foam::token::setType(token::tokenType tokType)
 {
-    if (type_ == variant)
+    if (type_ == tokType)
     {
         // No change required
         return true;
     }
 
-    switch (variant)
+    switch (tokType)
     {
         case tokenType::BOOL:
         case tokenType::LABEL:
@@ -317,7 +319,24 @@ inline bool Foam::token::setType(token::tokenType variant)
             {
                 case tokenType::BOOL:
                 case tokenType::LABEL:
-                    type_ = variant;
+                    type_ = tokType;
+                    return true;
+                    break;
+
+                default:
+                    break;
+            }
+        }
+        break;
+
+        case tokenType::WORD:
+        case tokenType::DIRECTIVE:
+        {
+            switch (type_)
+            {
+                case tokenType::WORD:
+                case tokenType::DIRECTIVE:
+                    type_ = tokType;
                     return true;
                     break;
 
@@ -337,7 +356,7 @@ inline bool Foam::token::setType(token::tokenType variant)
                 case tokenType::STRING:
                 case tokenType::VARIABLE:
                 case tokenType::VERBATIM:
-                    type_ = variant;
+                    type_ = tokType;
                     return true;
                     break;
 
@@ -553,13 +572,27 @@ inline Foam::scalar Foam::token::number() const
 
 inline bool Foam::token::isWord() const
 {
-    return (type_ == tokenType::WORD);
+    return
+    (
+        type_ == tokenType::WORD
+     || type_ == tokenType::DIRECTIVE
+    );
+}
+
+
+inline bool Foam::token::isDirective() const
+{
+    return (type_ == tokenType::DIRECTIVE);
 }
 
 
 inline const Foam::word& Foam::token::wordToken() const
 {
-    if (type_ == tokenType::WORD)
+    if
+    (
+        type_ == tokenType::WORD
+     || type_ == tokenType::DIRECTIVE
+    )
     {
         return *data_.wordPtr;
     }
@@ -609,10 +642,14 @@ inline const Foam::string& Foam::token::stringToken() const
     {
         return *data_.stringPtr;
     }
-    else if (type_ == tokenType::WORD)
+    else if
+    (
+        type_ == tokenType::WORD
+     || type_ == tokenType::DIRECTIVE
+    )
     {
-        // Upcast to string
-        return static_cast<const string&>(*data_.wordPtr);
+        // Foam::word derives from Foam::string, no need to cast.
+        return *data_.wordPtr;
     }
 
     parseError("string");
@@ -666,6 +703,7 @@ inline void Foam::token::operator=(const token& tok)
     switch (type_)
     {
         case tokenType::WORD:
+        case tokenType::DIRECTIVE:
         {
             data_.wordPtr = new word(*tok.data_.wordPtr);
         }
@@ -809,6 +847,7 @@ inline bool Foam::token::operator==(const token& tok) const
             return equal(data_.doubleVal, tok.data_.doubleVal);
 
         case tokenType::WORD:
+        case tokenType::DIRECTIVE:
             return *data_.wordPtr == *tok.data_.wordPtr;
 
         case tokenType::STRING:
@@ -837,7 +876,7 @@ inline bool Foam::token::operator==(const std::string& s) const
 {
     return
     (
-        type_ == tokenType::WORD
+        isWord()
       ? s == *data_.wordPtr
       : isString() && s == *data_.stringPtr
     );

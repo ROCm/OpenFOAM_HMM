@@ -227,8 +227,9 @@ Foam::Istream& Foam::UIPstream::read(token& t)
             return *this;
         }
 
-        // Word
+        // Word/directive
         case token::tokenType::WORD :
+        case token::tokenType::DIRECTIVE :
         {
             word val;
             if (read(val))
@@ -240,6 +241,7 @@ Foam::Istream& Foam::UIPstream::read(token& t)
                 else
                 {
                     t = std::move(val);
+                    t.setType(token::tokenType(c));
                 }
             }
             else

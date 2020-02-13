@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,29 +61,28 @@ bool Foam::primitiveEntry::acceptToken
 {
     bool accept = tok.good();
 
-    if (tok.isWord())
+    if (tok.isDirective())
     {
+        // Directive: wordToken starts with '#'
         const word& key = tok.wordToken();
 
         accept =
         (
             disableFunctionEntries
          || key.size() == 1
-         || (
-                !(key[0] == '$' && expandVariable(key.substr(1), dict))
-             && !(key[0] == '#' && expandFunction(key.substr(1), dict, is))
-            )
+         || !expandFunction(key.substr(1), dict, is)
         );
     }
     else if (tok.isVariable())
     {
+        // Variable: stringToken starts with '$'
         const string& key = tok.stringToken();
 
         accept =
         (
             disableFunctionEntries
          || key.size() == 1
-         || !(key[0] == '$' && expandVariable(key.substr(1), dict))
+         || !expandVariable(key.substr(1), dict)
         );
     }
 
@@ -304,7 +303,7 @@ void Foam::primitiveEntry::write(Ostream& os) const
 }
 
 
-// * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<>
 Foam::Ostream& Foam::operator<<

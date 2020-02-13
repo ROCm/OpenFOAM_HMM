@@ -45,8 +45,17 @@ bool Foam::OSstream::write(const token& tok)
             return true;
         }
 
+        case token::tokenType::DIRECTIVE :
+        {
+            // The '#' sigil is already part of the wordToken
+            write(tok.wordToken());
+
+            return true;
+        }
+
         case token::tokenType::VERBATIM :
         {
+            // Surrounding '#{ .. #}' to be recognized as verbatim
             write(char(token::HASH));
             write(char(token::BEGIN_BLOCK));
             writeQuoted(tok.stringToken(), false);

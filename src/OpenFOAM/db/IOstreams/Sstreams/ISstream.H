@@ -68,7 +68,7 @@ class ISstream
         //- Get the next valid character
         char nextValid();
 
-        //- Get a word token
+        //- Read a word token
         void readWordToken(token& t);
 
         //- Read a verbatim string (excluding block delimiters).

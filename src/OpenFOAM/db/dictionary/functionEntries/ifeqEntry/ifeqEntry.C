@@ -155,14 +155,15 @@ bool Foam::functionEntries::ifeqEntry::equalToken
             return (eqType && t1.pToken() == t2.pToken());
 
         case token::WORD:
-            if (eqType)
+        case token::DIRECTIVE:
+            if (t2.isWord())
             {
                 return t1.wordToken() == t2.wordToken();
             }
             else if (t2.isString())
             {
-                wordRe w2(t2.stringToken(), wordRe::DETECT);
-                return w2.match(t1.wordToken(), false);
+                const wordRe w2(t2.stringToken(), wordRe::DETECT);
+                return w2.match(t1.wordToken());
             }
             return false;
 
@@ -171,24 +172,20 @@ bool Foam::functionEntries::ifeqEntry::equalToken
             {
                 const wordRe w1(t1.stringToken(), wordRe::DETECT);
                 const wordRe w2(t2.stringToken(), wordRe::DETECT);
-                return w1.match(w2, false) || w2.match(w1, false);
+                return w1.match(w2) || w2.match(w1);
             }
             else if (t2.isWord())
             {
                 const wordRe w1(t1.stringToken(), wordRe::DETECT);
-                return w1.match(t2.wordToken(), false);
+                return w1.match(t2.wordToken());
             }
             return false;
 
         case token::VARIABLE:
         case token::VERBATIM:
-            if (eqType)
+            if (t2.isStringType())
             {
                 return t1.stringToken() == t2.stringToken();
-            }
-            else if (t2.isWord())
-            {
-                return t1.stringToken() == t2.wordToken();
             }
             return false;
 
@@ -248,18 +245,24 @@ void Foam::functionEntries::ifeqEntry::skipUntil
     {
         token t;
         readToken(t, is);
-        if (t.isWord())
+
+        if (!t.isDirective())
         {
-            if (t.wordToken() == "#if" || t.wordToken() == "#ifeq")
-            {
-                stack.append(filePos(is.name(), is.lineNumber()));
-                skipUntil(stack, parentDict, "#endif", is);
-                stack.remove();
-            }
-            else if (t.wordToken() == endWord)
-            {
-                return;
-            }
+            continue;
+        }
+        else if
+        (
+            t.wordToken() == "#if"
+         || t.wordToken() == "#ifeq"
+        )
+        {
+            stack.append(filePos(is.name(), is.lineNumber()));
+            skipUntil(stack, parentDict, "#endif", is);
+            stack.remove();
+        }
+        else if (t.wordToken() == endWord)
+        {
+            return;
         }
     }
 
@@ -342,6 +345,7 @@ bool Foam::functionEntries::ifeqEntry::execute
         while (!is.eof())
         {
             readToken(t, is);
+
             if
             (
                 t.isWord()
