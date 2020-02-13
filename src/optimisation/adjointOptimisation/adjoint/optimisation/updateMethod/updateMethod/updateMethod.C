@@ -355,8 +355,8 @@ void Foam::updateMethod::writeCorrection()
             correctionFolder_/"cumulativeCorrection" + mesh_.time().timeName()
         );
 
-        OFstream corFile(correctionFile.c_str());
-        OFstream cumulCorFile(cumulativeCorrectionFile.c_str());
+        OFstream corFile(correctionFile);
+        OFstream cumulCorFile(cumulativeCorrectionFile);
         forAll(correction_, cI)
         {
             corFile

@@ -1831,7 +1831,7 @@ Foam::label Foam::NURBS3DVolume::nWSymmetry() const
 }
 
 
-void Foam::NURBS3DVolume::writeCps(const string fileName) const
+void Foam::NURBS3DVolume::writeCps(const fileName& baseName) const
 {
     const label nCPsU = basisU_.nCPs();
     const label nCPsV = basisV_.nCPs();
@@ -1846,12 +1846,13 @@ void Foam::NURBS3DVolume::writeCps(const string fileName) const
 
     if (Pstream::master())
     {
-        OFstream cpsFile(("optimisation"/cpsFolder_/name_ + fileName + ".csv").c_str());
+        OFstream cpsFile("optimisation"/cpsFolder_/name_ + baseName + ".csv");
         // Write header
         cpsFile
             << "\"Points : 0\", \"Points : 1\", \"Points : 2\","
             << "\"u\", \"v\", \"w\","
             << "\"active : 0\", \"active : 1\", \"active : 2\"" << endl;
+
         forAll(cpsInCartesian, cpI)
         {
             const label iCPw = cpI/label(nCPsU*nCPsV);

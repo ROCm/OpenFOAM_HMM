@@ -468,7 +468,7 @@ public:
 
             //- Write control points on a cartesian coordinates system for
             //- visualization
-            void writeCps(const string="cpsFile") const;
+            void writeCps(const fileName& baseName="cpsFile") const;
 
             //- Write control points on the local coordinate system.
             //  For continuation
