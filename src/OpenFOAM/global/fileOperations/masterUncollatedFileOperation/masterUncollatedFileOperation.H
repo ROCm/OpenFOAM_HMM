@@ -448,20 +448,11 @@ protected:
             const word& instancePath
         ) const;
 
-        //- Read file contents and send to processors
+        //- Read file contents and send to processors.
+        //  Handles compressed or uncompressed files
         static void readAndSend
         (
             const fileName& filePath,
-            const IOstream::compressionType cmp,
-            const labelUList& procs,
-            PstreamBuffers& pBufs
-        );
-
-        //- Detect file (possibly compressed), read file contents and send
-        //  to processors
-        static void readAndSend
-        (
-            const fileName& fName,
             const labelUList& procs,
             PstreamBuffers& pBufs
         );

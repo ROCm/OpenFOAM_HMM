@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +58,7 @@ class decomposedBlockData
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Type to use for gather
         const UPstream::commsTypes commsType_;
@@ -90,6 +91,7 @@ protected:
 
 public:
 
+    //- Declare type-name, virtual type (with debug switch)
     TypeName("decomposedBlockData");
 
 
@@ -123,7 +125,7 @@ public:
 
 
     //- Destructor
-    virtual ~decomposedBlockData();
+    virtual ~decomposedBlockData() = default;
 
 
     // Member functions
@@ -133,7 +135,7 @@ public:
 
         //- Write separated content. Assumes content is the serialised data
         //  and that the master data contains a header
-        virtual bool writeData(Ostream&) const;
+        virtual bool writeData(Ostream& os) const;
 
         //- Write using stream options
         virtual bool writeObject
@@ -224,7 +226,7 @@ public:
         );
 
         //- Detect number of blocks in a file
-        static label numBlocks(const fileName&);
+        static label numBlocks(const fileName& fName);
 };
 
 
