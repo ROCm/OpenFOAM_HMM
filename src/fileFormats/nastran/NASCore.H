@@ -46,7 +46,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class Ostream;
 
 namespace fileFormats
@@ -93,14 +93,6 @@ public:
         //- Extract numbers from things like "-2.358-8" (same as "-2.358e-8")
         static scalar readNasScalar(const std::string& str);
 
-        //- Deprecated(2017-09)
-        //  Extract numbers from things like "-2.358-8" (same as "-2.358e-8")
-        //  \deprecated(2017-09) - use readNasScalar() method
-        inline static scalar parseNASCoord(const std::string& str)
-        {
-            return readNasScalar(str);
-        }
-
         //- A string::substr() to handle fixed-format and free-format NASTRAN.
         //  Returns the substr to the next comma (if found) or the given length
         //
@@ -128,7 +120,6 @@ public:
             const word& keyword,
             const fieldFormat format
         );
-
 };
 
 

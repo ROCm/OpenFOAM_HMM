@@ -33,11 +33,8 @@ Description
 
 #include "PatchTools.H"
 #include "argList.H"
-#include "fvMesh.H"
-#include "volFields.H"
 #include "Time.H"
 #include "OBJstream.H"
-#include "fvCFD.H"
 
 using namespace Foam;
 

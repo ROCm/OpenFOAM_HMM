@@ -32,7 +32,6 @@ $(surfaceFormats)/gts/GTSsurfaceFormatRunTime.C
 $(surfaceFormats)/gts/triSurfaceGTSformat.C
 $(surfaceFormats)/nas/NASsurfaceFormatRunTime.C
 $(surfaceFormats)/obj/OBJsurfaceFormatRunTime.C
-$(surfaceFormats)/obj/OBJstream.C
 $(surfaceFormats)/off/OFFsurfaceFormatRunTime.C
 $(surfaceFormats)/smesh/SMESHsurfaceFormatRunTime.C
 $(surfaceFormats)/starcd/STARCDsurfaceFormatCore.C

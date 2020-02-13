@@ -13,8 +13,8 @@ $(edgeMeshFormats)/edgeMesh/edgeMeshFormatRunTime.C
 $(edgeMeshFormats)/extendedFeatureEdgeMesh/extendedFeatureEdgeMeshFormat.C
 $(edgeMeshFormats)/extendedFeatureEdgeMesh/extendedFeatureEdgeMeshFormatRunTime.C
 
-$(edgeMeshFormats)/nas/NASedgeFormat.C
-$(edgeMeshFormats)/nas/NASedgeFormatRunTime.C
+$(edgeMeshFormats)/nastran/NASedgeFormat.C
+$(edgeMeshFormats)/nastran/NASedgeFormatRunTime.C
 
 $(edgeMeshFormats)/obj/OBJedgeFormat.C
 $(edgeMeshFormats)/obj/OBJedgeFormatRunTime.C

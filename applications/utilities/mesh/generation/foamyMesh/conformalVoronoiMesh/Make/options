@@ -25,6 +25,8 @@ EXE_INC = \
 
 LIB_LIBS = \
     ${CGAL_LIBS} \
+    -lfileFormats \
+    -lsurfMesh \
     -lmeshTools \
     -ldecompose \
     -ldynamicMesh \
