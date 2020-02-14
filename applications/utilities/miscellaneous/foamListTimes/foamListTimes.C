@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +39,7 @@ Usage
 
     Options:
       - \par -processor
-        List times from processor0/ directory
+        Times from processor0/ directory
 
       - \par -rm
         Remove selected time directories
@@ -58,8 +58,29 @@ Note
 #include "profiling.H"
 #include "timeSelector.H"
 #include "TimePaths.H"
+#include "ListOps.H"
+#include "stringOps.H"
 
 using namespace Foam;
+
+// Many ways to name processor directories
+//
+// Uncollated       | "processor0", "processor1" ...
+// Collated (old)   | "processors"
+// Collated (new)   | "processors<N>"
+// Host collated    | "processors<N>_<low>-<high>"
+
+const regExp matcher("processors?[0-9]+(_[0-9]+-[0-9]+)?");
+
+bool isProcessorDir(const string& dir)
+{
+    return
+    (
+        dir.starts_with("processor")
+     && (dir == "processors" || matcher.match(dir))
+    );
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -95,7 +116,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
 
     const bool removeFiles(args.found("rm"));
-    const bool verbose(args.found("verbose"));
+    bool verbose(args.found("verbose"));
 
 
     // Get times list from the master processor and subset based on
@@ -116,6 +137,7 @@ int main(int argc, char *argv[])
                 << exit(FatalError);
         }
 
+        // Obtain time directory names from "processor0/" only
         timePaths = autoPtr<TimePaths>::New
         (
             args.rootPath(),
@@ -140,10 +162,34 @@ int main(int argc, char *argv[])
     {
         if (nProcs)
         {
+            fileNameList procDirs
+            (
+                Foam::readDir
+                (
+                    args.path(),
+                    fileName::DIRECTORY,
+                    false,  // No gzip anyhow
+                    false   // Do not follow linkts
+                )
+            );
+
+            inplaceSubsetList(procDirs, isProcessorDir);
+
+            // Perhaps not needed
+            /// Foam::sort(procDirs, stringOps::natural_sort());
+
             if (verbose)
             {
-                Info<< "Removing " << nTimes
-                    << " processor time directories" << endl;
+                InfoErr
+                    << "Removing " << nTimes
+                    << " times in " << procDirs.size()
+                    << " processor directories" << endl;
+            }
+
+            // No processor directories? - silence verbosity
+            if (procDirs.empty())
+            {
+                verbose = false;
             }
 
             forAllReverse(timeDirs, timei)
@@ -152,25 +198,15 @@ int main(int argc, char *argv[])
 
                 if (verbose)
                 {
-                    Info<< "    rm " << timeName
+                    InfoErr
+                        << "    rm " << timeName
                         << " [" << (nTimes - timei) << '/' << nTimes << ']'
                         << endl;
                 }
 
-                fileName path(args.path()/"processors"/timeName);
-
-                rmDir(path, true);
-
-                for (label proci=0; proci<nProcs; ++proci)
+                for (const fileName& procDir : procDirs)
                 {
-                    path =
-                    (
-                        args.path()
-                      / ("processor" + Foam::name(proci))
-                      / timeName
-                    );
-
-                    rmDir(path, true);
+                    rmDir(args.path()/procDir/timeName, true);
                 }
             }
         }
@@ -178,7 +214,8 @@ int main(int argc, char *argv[])
         {
             if (verbose)
             {
-                Info<< "Removing " << nTimes
+                InfoErr
+                    << "Removing " << nTimes
                     << " time directories" << endl;
             }
 
@@ -188,7 +225,8 @@ int main(int argc, char *argv[])
 
                 if (verbose)
                 {
-                    Info<< "    rm " << timeName
+                    InfoErr
+                        << "    rm " << timeName
                         << " [" << (nTimes - timei) << '/' << nTimes << ']'
                         << endl;
                 }
@@ -199,6 +237,7 @@ int main(int argc, char *argv[])
     }
     else
     {
+        // List times: one per line
         for (const instant& t : timeDirs)
         {
             Info<< t.name() << nl;

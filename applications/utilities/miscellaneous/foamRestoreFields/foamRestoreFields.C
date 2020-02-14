@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +30,7 @@ Group
     grpMiscUtilities
 
 Description
-    Restore field names by removing the ending.
+    Adjust (restore) field names by removing the ending.
     The fields are selected automatically or can be specified as optional
     command arguments.
 
@@ -63,8 +63,29 @@ Usage
 #include "timeSelector.H"
 #include "Enum.H"
 #include "TimePaths.H"
+#include "ListOps.H"
+#include "stringOps.H"
 
 using namespace Foam;
+
+// Many ways to name processor directories
+//
+// Uncollated       | "processor0", "processor1" ...
+// Collated (old)   | "processors"
+// Collated (new)   | "processors<N>"
+// Host collated    | "processors<N>_<low>-<high>"
+
+const regExp matcher("processors?[0-9]+(_[0-9]+-[0-9]+)?");
+
+bool isProcessorDir(const string& dir)
+{
+    return
+    (
+        dir.starts_with("processor")
+     && (dir == "processors" || matcher.match(dir))
+    );
+}
+
 
 //- The known and support types of operations
 enum restoreMethod
@@ -311,7 +332,6 @@ int main(int argc, char *argv[])
         }
 
         // Obtain time directory names from "processor0/" only
-
         timePaths = autoPtr<TimePaths>::New
         (
             args.rootPath(),
@@ -329,10 +349,77 @@ int main(int argc, char *argv[])
 
     const instantList timeDirs(timeSelector::select(timePaths->times(), args));
 
+    fileNameList procDirs;
+    label leadProcIdx = -1;
+
     if (timeDirs.empty())
     {
-        Info<< "no times selected" << nl;
+        Info<< "No times selected" << nl;
     }
+    else if (nProcs)
+    {
+        procDirs =
+            Foam::readDir
+            (
+                args.path(),
+                fileName::DIRECTORY,
+                false,  // No gzip anyhow
+                false   // Do not follow linkts
+            );
+
+        inplaceSubsetList(procDirs, isProcessorDir);
+
+        // Perhaps not needed
+        Foam::sort(procDirs, stringOps::natural_sort());
+
+        // Decide who will be the "leading" processor for obtaining names
+        // - processor0
+        // - processors<N>
+        // - processors<N>_0-<high>
+
+        // Uncollated
+        leadProcIdx = procDirs.find("processor0");
+
+        if (!procDirs.empty())
+        {
+            if (leadProcIdx < 0)
+            {
+                // Collated (old)
+                leadProcIdx = procDirs.find("processors");
+            }
+
+            if (leadProcIdx < 0)
+            {
+                // Collated (new)
+                leadProcIdx = procDirs.find("processors" + Foam::name(nProcs));
+            }
+
+            if (leadProcIdx < 0)
+            {
+                // Host-collated
+                const std::string prefix
+                (
+                    "processors" + Foam::name(nProcs) + "_0-"
+                );
+
+                forAll(procDirs, idx)
+                {
+                    if (procDirs[idx].starts_with(prefix))
+                    {
+                        leadProcIdx = idx;
+                        break;
+                    }
+                }
+            }
+
+            // Just default to anything (safety)
+            if (leadProcIdx < 0)
+            {
+                leadProcIdx = 0;
+            }
+        }
+    }
+
 
     for (const instant& t : timeDirs)
     {
@@ -341,28 +428,28 @@ int main(int argc, char *argv[])
         Info<< "\nTime = " << timeName << nl;
 
         label count = 0;
+        wordList files;
 
         if (nProcs)
         {
-            const wordHashSet files
-            (
-                getFiles(args.path()/"processor0", timeName)
-            );
+            if (leadProcIdx >= 0)
+            {
+                files = getFiles(args.path()/procDirs[leadProcIdx], timeName);
+            }
 
-            for (label proci=0; proci < nProcs; ++proci)
+            for (const fileName& procDir : procDirs)
             {
                 count += restoreFields
                 (
                     method,
-                    args.path()/("processor" + Foam::name(proci))/timeName,
-                    files,
+                    args.path()/procDir/timeName,
+                    wordHashSet(files),
                     targetNames
                 );
             }
         }
         else
         {
-            wordList files;
             if (Pstream::master())
             {
                 files = getFiles(args.path(), timeName);
