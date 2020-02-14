@@ -165,88 +165,7 @@ inline void Foam::SymmTensor2D<Cmpt>::operator=
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
-
-//- Inner-product of a SymmTensor2D and a SymmTensor2D
-template<class Cmpt>
-inline Tensor2D<Cmpt>
-operator&(const SymmTensor2D<Cmpt>& st1, const SymmTensor2D<Cmpt>& st2)
-{
-    return Tensor2D<Cmpt>
-    (
-        st1.xx()*st2.xx() + st1.xy()*st2.xy(),
-        st1.xx()*st2.xy() + st1.xy()*st2.yy(),
-
-        st1.xy()*st2.xx() + st1.yy()*st2.xy(),
-        st1.xy()*st2.xy() + st1.yy()*st2.yy()
-    );
-}
-
-
-//- Double-inner-product of a SymmTensor2D and a SymmTensor2D
-template<class Cmpt>
-inline Cmpt
-operator&&(const SymmTensor2D<Cmpt>& st1, const SymmTensor2D<Cmpt>& st2)
-{
-    return
-    (
-        st1.xx()*st2.xx() + 2*st1.xy()*st2.xy()
-                          +   st1.yy()*st2.yy()
-    );
-}
-
-
-//- Inner-product of a SymmTensor2D and a Vector2D
-template<class Cmpt>
-inline Vector2D<Cmpt>
-operator&(const SymmTensor2D<Cmpt>& st, const Vector2D<Cmpt>& v)
-{
-    return Vector2D<Cmpt>
-    (
-        st.xx()*v.x() + st.xy()*v.y(),
-        st.xy()*v.x() + st.yy()*v.y()
-    );
-}
-
-
-//- Inner-product of a Vector2D and a SymmTensor2D
-template<class Cmpt>
-inline Vector2D<Cmpt>
-operator&(const Vector2D<Cmpt>& v, const SymmTensor2D<Cmpt>& st)
-{
-    return Vector2D<Cmpt>
-    (
-        v.x()*st.xx() + v.y()*st.xy(),
-        v.x()*st.xy() + v.y()*st.yy()
-    );
-}
-
-
-//- Return the inner-product of a SymmTensor2D with itself
-template<class Cmpt>
-inline SymmTensor2D<Cmpt>
-innerSqr(const SymmTensor2D<Cmpt>& st)
-{
-    return SymmTensor2D<Cmpt>
-    (
-        st.xx()*st.xx() + st.xy()*st.xy(),
-        st.xx()*st.xy() + st.xy()*st.yy(),
-        st.xy()*st.xy() + st.yy()*st.yy()
-    );
-}
-
-
-//- Return the square of Frobenius norm of a SymmTensor2D as a Cmpt
-template<class Cmpt>
-inline Cmpt magSqr(const SymmTensor2D<Cmpt>& st)
-{
-    return Cmpt
-    (
-        mag(st.xx()*st.xx()) + 2*mag(st.xy()*st.xy())
-                             +   mag(st.yy()*st.yy())
-    );
-}
-
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 //- Return the trace of a SymmTensor2D
 template<class Cmpt>
@@ -361,6 +280,46 @@ inline Cmpt invariantII(const SymmTensor2D<Cmpt>& st)
 }
 
 
+//- Return the inner-product of a SymmTensor2D with itself
+template<class Cmpt>
+inline SymmTensor2D<Cmpt>
+innerSqr(const SymmTensor2D<Cmpt>& st)
+{
+    return SymmTensor2D<Cmpt>
+    (
+        st.xx()*st.xx() + st.xy()*st.xy(),
+        st.xx()*st.xy() + st.xy()*st.yy(),
+        st.xy()*st.xy() + st.yy()*st.yy()
+    );
+}
+
+
+//- Return the square of Frobenius norm of a SymmTensor2D as a Cmpt
+template<class Cmpt>
+inline Cmpt magSqr(const SymmTensor2D<Cmpt>& st)
+{
+    return Cmpt
+    (
+        mag(st.xx()*st.xx()) + 2*mag(st.xy()*st.xy())
+                             +   mag(st.yy()*st.yy())
+    );
+}
+
+
+//- Outer-product of a Vector2D with itself
+template<class Cmpt>
+inline SymmTensor2D<Cmpt> sqr(const Vector2D<Cmpt>& v)
+{
+    return SymmTensor2D<Cmpt>
+    (
+        v.x()*v.x(), v.x()*v.y(),
+                     v.y()*v.y()
+    );
+}
+
+
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
+
 //- Sum of a SphericalTensor2D and a SymmTensor2D
 template<class Cmpt>
 inline SymmTensor2D<Cmpt>
@@ -413,6 +372,35 @@ operator-(const SymmTensor2D<Cmpt>& st1, const SphericalTensor2D<Cmpt>& spt2)
 }
 
 
+//- Division of a SymmTensor2D by a Cmpt
+template<class Cmpt>
+inline SymmTensor2D<Cmpt>
+operator/(const SymmTensor2D<Cmpt>& st, const Cmpt s)
+{
+    return SymmTensor2D<Cmpt>
+    (
+        st.xx()/s, st.xy()/s,
+                   st.yy()/s
+    );
+}
+
+
+//- Inner-product of a SymmTensor2D and a SymmTensor2D
+template<class Cmpt>
+inline Tensor2D<Cmpt>
+operator&(const SymmTensor2D<Cmpt>& st1, const SymmTensor2D<Cmpt>& st2)
+{
+    return Tensor2D<Cmpt>
+    (
+        st1.xx()*st2.xx() + st1.xy()*st2.xy(),
+        st1.xx()*st2.xy() + st1.xy()*st2.yy(),
+
+        st1.xy()*st2.xx() + st1.yy()*st2.xy(),
+        st1.xy()*st2.xy() + st1.yy()*st2.yy()
+    );
+}
+
+
 //- Inner-product of a SphericalTensor2D and a SymmTensor2D
 template<class Cmpt>
 inline SymmTensor2D<Cmpt>
@@ -439,6 +427,45 @@ operator&(const SymmTensor2D<Cmpt>& st1, const SphericalTensor2D<Cmpt>& spt2)
 }
 
 
+//- Inner-product of a SymmTensor2D and a Vector2D
+template<class Cmpt>
+inline Vector2D<Cmpt>
+operator&(const SymmTensor2D<Cmpt>& st, const Vector2D<Cmpt>& v)
+{
+    return Vector2D<Cmpt>
+    (
+        st.xx()*v.x() + st.xy()*v.y(),
+        st.xy()*v.x() + st.yy()*v.y()
+    );
+}
+
+
+//- Inner-product of a Vector2D and a SymmTensor2D
+template<class Cmpt>
+inline Vector2D<Cmpt>
+operator&(const Vector2D<Cmpt>& v, const SymmTensor2D<Cmpt>& st)
+{
+    return Vector2D<Cmpt>
+    (
+        v.x()*st.xx() + v.y()*st.xy(),
+        v.x()*st.xy() + v.y()*st.yy()
+    );
+}
+
+
+//- Double-inner-product of a SymmTensor2D and a SymmTensor2D
+template<class Cmpt>
+inline Cmpt
+operator&&(const SymmTensor2D<Cmpt>& st1, const SymmTensor2D<Cmpt>& st2)
+{
+    return
+    (
+        st1.xx()*st2.xx() + 2*st1.xy()*st2.xy()
+                          +   st1.yy()*st2.yy()
+    );
+}
+
+
 //- Double-inner-product of a SphericalTensor2D and a SymmTensor2D
 template<class Cmpt>
 inline Cmpt
@@ -454,31 +481,6 @@ inline Cmpt
 operator&&(const SymmTensor2D<Cmpt>& st1, const SphericalTensor2D<Cmpt>& spt2)
 {
     return (st1.xx()*spt2.ii() + st1.yy()*spt2.ii());
-}
-
-
-//- Outer-product of a Vector2D with itself
-template<class Cmpt>
-inline SymmTensor2D<Cmpt> sqr(const Vector2D<Cmpt>& v)
-{
-    return SymmTensor2D<Cmpt>
-    (
-        v.x()*v.x(), v.x()*v.y(),
-                     v.y()*v.y()
-    );
-}
-
-
-//- Division of a SymmTensor2D by a Cmpt
-template<class Cmpt>
-inline SymmTensor2D<Cmpt>
-operator/(const SymmTensor2D<Cmpt>& st, const Cmpt s)
-{
-    return SymmTensor2D<Cmpt>
-    (
-        st.xx()/s, st.xy()/s,
-                   st.yy()/s
-    );
 }
 
 

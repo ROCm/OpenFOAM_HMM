@@ -227,111 +227,7 @@ inline void Foam::SymmTensor<Cmpt>::operator=(const SphericalTensor<Cmpt>& st)
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
-
-//- Return the Hodge dual of a SymmTensor as a Vector
-template<class Cmpt>
-inline Vector<Cmpt> operator*(const SymmTensor<Cmpt>& st)
-{
-    return Vector<Cmpt>(st.yz(), -st.xz(), st.xy());
-}
-
-
-//- Inner-product of a SymmTensor and a SymmTensor
-template<class Cmpt>
-inline Tensor<Cmpt>
-operator&(const SymmTensor<Cmpt>& st1, const SymmTensor<Cmpt>& st2)
-{
-    return Tensor<Cmpt>
-    (
-        st1.xx()*st2.xx() + st1.xy()*st2.xy() + st1.xz()*st2.xz(),
-        st1.xx()*st2.xy() + st1.xy()*st2.yy() + st1.xz()*st2.yz(),
-        st1.xx()*st2.xz() + st1.xy()*st2.yz() + st1.xz()*st2.zz(),
-
-        st1.xy()*st2.xx() + st1.yy()*st2.xy() + st1.yz()*st2.xz(),
-        st1.xy()*st2.xy() + st1.yy()*st2.yy() + st1.yz()*st2.yz(),
-        st1.xy()*st2.xz() + st1.yy()*st2.yz() + st1.yz()*st2.zz(),
-
-        st1.xz()*st2.xx() + st1.yz()*st2.xy() + st1.zz()*st2.xz(),
-        st1.xz()*st2.xy() + st1.yz()*st2.yy() + st1.zz()*st2.yz(),
-        st1.xz()*st2.xz() + st1.yz()*st2.yz() + st1.zz()*st2.zz()
-    );
-}
-
-
-//- Double-inner-product of a SymmTensor and a SymmTensor
-template<class Cmpt>
-inline Cmpt
-operator&&(const SymmTensor<Cmpt>& st1, const SymmTensor<Cmpt>& st2)
-{
-    return
-    (
-        st1.xx()*st2.xx() + 2*st1.xy()*st2.xy() + 2*st1.xz()*st2.xz()
-                          +   st1.yy()*st2.yy() + 2*st1.yz()*st2.yz()
-                                                +   st1.zz()*st2.zz()
-    );
-}
-
-
-//- Inner-product of a SymmTensor and a Vector
-template<class Cmpt>
-inline Vector<Cmpt>
-operator&(const SymmTensor<Cmpt>& st, const Vector<Cmpt>& v)
-{
-    return Vector<Cmpt>
-    (
-        st.xx()*v.x() + st.xy()*v.y() + st.xz()*v.z(),
-        st.xy()*v.x() + st.yy()*v.y() + st.yz()*v.z(),
-        st.xz()*v.x() + st.yz()*v.y() + st.zz()*v.z()
-    );
-}
-
-
-//- Inner-product of a Vector and a SymmTensor
-template<class Cmpt>
-inline Vector<Cmpt>
-operator&(const Vector<Cmpt>& v, const SymmTensor<Cmpt>& st)
-{
-    return Vector<Cmpt>
-    (
-        v.x()*st.xx() + v.y()*st.xy() + v.z()*st.xz(),
-        v.x()*st.xy() + v.y()*st.yy() + v.z()*st.yz(),
-        v.x()*st.xz() + v.y()*st.yz() + v.z()*st.zz()
-    );
-}
-
-
-//- Return the inner-product of a SymmTensor with itself
-template<class Cmpt>
-inline SymmTensor<Cmpt>
-innerSqr(const SymmTensor<Cmpt>& st)
-{
-    return SymmTensor<Cmpt>
-    (
-        st.xx()*st.xx() + st.xy()*st.xy() + st.xz()*st.xz(),
-        st.xx()*st.xy() + st.xy()*st.yy() + st.xz()*st.yz(),
-        st.xx()*st.xz() + st.xy()*st.yz() + st.xz()*st.zz(),
-
-        st.xy()*st.xy() + st.yy()*st.yy() + st.yz()*st.yz(),
-        st.xy()*st.xz() + st.yy()*st.yz() + st.yz()*st.zz(),
-
-        st.xz()*st.xz() + st.yz()*st.yz() + st.zz()*st.zz()
-    );
-}
-
-
-//- Return the square of Frobenius norm of a SymmTensor as a Cmpt
-template<class Cmpt>
-inline Cmpt magSqr(const SymmTensor<Cmpt>& st)
-{
-    return Cmpt
-    (
-        mag(st.xx()*st.xx()) + 2*mag(st.xy()*st.xy()) + 2*mag(st.xz()*st.xz())
-                             +   mag(st.yy()*st.yy()) + 2*mag(st.yz()*st.yz())
-                                                      +   mag(st.zz()*st.zz())
-    );
-}
-
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 //- Return the trace of a SymmTensor
 template<class Cmpt>
@@ -469,6 +365,53 @@ inline Cmpt invariantIII(const SymmTensor<Cmpt>& st)
 }
 
 
+//- Return the inner-product of a SymmTensor with itself
+template<class Cmpt>
+inline SymmTensor<Cmpt>
+innerSqr(const SymmTensor<Cmpt>& st)
+{
+    return SymmTensor<Cmpt>
+    (
+        st.xx()*st.xx() + st.xy()*st.xy() + st.xz()*st.xz(),
+        st.xx()*st.xy() + st.xy()*st.yy() + st.xz()*st.yz(),
+        st.xx()*st.xz() + st.xy()*st.yz() + st.xz()*st.zz(),
+
+        st.xy()*st.xy() + st.yy()*st.yy() + st.yz()*st.yz(),
+        st.xy()*st.xz() + st.yy()*st.yz() + st.yz()*st.zz(),
+
+        st.xz()*st.xz() + st.yz()*st.yz() + st.zz()*st.zz()
+    );
+}
+
+
+//- Return the square of Frobenius norm of a SymmTensor as a Cmpt
+template<class Cmpt>
+inline Cmpt magSqr(const SymmTensor<Cmpt>& st)
+{
+    return Cmpt
+    (
+        mag(st.xx()*st.xx()) + 2*mag(st.xy()*st.xy()) + 2*mag(st.xz()*st.xz())
+                             +   mag(st.yy()*st.yy()) + 2*mag(st.yz()*st.yz())
+                                                      +   mag(st.zz()*st.zz())
+    );
+}
+
+
+//- Return the square of a Vector as a SymmTensor
+template<class Cmpt>
+inline SymmTensor<Cmpt> sqr(const Vector<Cmpt>& v)
+{
+    return SymmTensor<Cmpt>
+    (
+        v.x()*v.x(), v.x()*v.y(), v.x()*v.z(),
+                     v.y()*v.y(), v.y()*v.z(),
+                                  v.z()*v.z()
+    );
+}
+
+
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
+
 //- Sum of a SphericalTensor and a SymmTensor
 template<class Cmpt>
 inline SymmTensor<Cmpt>
@@ -525,6 +468,50 @@ operator-(const SymmTensor<Cmpt>& st1, const SphericalTensor<Cmpt>& spt2)
 }
 
 
+//- Return the Hodge dual of a SymmTensor as a Vector
+template<class Cmpt>
+inline Vector<Cmpt> operator*(const SymmTensor<Cmpt>& st)
+{
+    return Vector<Cmpt>(st.yz(), -st.xz(), st.xy());
+}
+
+
+//- Division of a SymmTensor by a Cmpt
+template<class Cmpt>
+inline SymmTensor<Cmpt>
+operator/(const SymmTensor<Cmpt>& st, const Cmpt s)
+{
+    return SymmTensor<Cmpt>
+    (
+        st.xx()/s, st.xy()/s, st.xz()/s,
+                   st.yy()/s, st.yz()/s,
+                              st.zz()/s
+    );
+}
+
+
+//- Inner-product of a SymmTensor and a SymmTensor
+template<class Cmpt>
+inline Tensor<Cmpt>
+operator&(const SymmTensor<Cmpt>& st1, const SymmTensor<Cmpt>& st2)
+{
+    return Tensor<Cmpt>
+    (
+        st1.xx()*st2.xx() + st1.xy()*st2.xy() + st1.xz()*st2.xz(),
+        st1.xx()*st2.xy() + st1.xy()*st2.yy() + st1.xz()*st2.yz(),
+        st1.xx()*st2.xz() + st1.xy()*st2.yz() + st1.xz()*st2.zz(),
+
+        st1.xy()*st2.xx() + st1.yy()*st2.xy() + st1.yz()*st2.xz(),
+        st1.xy()*st2.xy() + st1.yy()*st2.yy() + st1.yz()*st2.yz(),
+        st1.xy()*st2.xz() + st1.yy()*st2.yz() + st1.yz()*st2.zz(),
+
+        st1.xz()*st2.xx() + st1.yz()*st2.xy() + st1.zz()*st2.xz(),
+        st1.xz()*st2.xy() + st1.yz()*st2.yy() + st1.zz()*st2.yz(),
+        st1.xz()*st2.xz() + st1.yz()*st2.yz() + st1.zz()*st2.zz()
+    );
+}
+
+
 //- Inner-product of a SphericalTensor and a SymmTensor
 template<class Cmpt>
 inline SymmTensor<Cmpt>
@@ -553,6 +540,48 @@ operator&(const SymmTensor<Cmpt>& st1, const SphericalTensor<Cmpt>& spt2)
 }
 
 
+//- Inner-product of a SymmTensor and a Vector
+template<class Cmpt>
+inline Vector<Cmpt>
+operator&(const SymmTensor<Cmpt>& st, const Vector<Cmpt>& v)
+{
+    return Vector<Cmpt>
+    (
+        st.xx()*v.x() + st.xy()*v.y() + st.xz()*v.z(),
+        st.xy()*v.x() + st.yy()*v.y() + st.yz()*v.z(),
+        st.xz()*v.x() + st.yz()*v.y() + st.zz()*v.z()
+    );
+}
+
+
+//- Inner-product of a Vector and a SymmTensor
+template<class Cmpt>
+inline Vector<Cmpt>
+operator&(const Vector<Cmpt>& v, const SymmTensor<Cmpt>& st)
+{
+    return Vector<Cmpt>
+    (
+        v.x()*st.xx() + v.y()*st.xy() + v.z()*st.xz(),
+        v.x()*st.xy() + v.y()*st.yy() + v.z()*st.yz(),
+        v.x()*st.xz() + v.y()*st.yz() + v.z()*st.zz()
+    );
+}
+
+
+//- Double-inner-product of a SymmTensor and a SymmTensor
+template<class Cmpt>
+inline Cmpt
+operator&&(const SymmTensor<Cmpt>& st1, const SymmTensor<Cmpt>& st2)
+{
+    return
+    (
+        st1.xx()*st2.xx() + 2*st1.xy()*st2.xy() + 2*st1.xz()*st2.xz()
+                          +   st1.yy()*st2.yy() + 2*st1.yz()*st2.yz()
+                                                +   st1.zz()*st2.zz()
+    );
+}
+
+
 //- Double-inner-product of a SphericalTensor and a SymmTensor
 template<class Cmpt>
 inline Cmpt
@@ -568,33 +597,6 @@ inline Cmpt
 operator&&(const SymmTensor<Cmpt>& st1, const SphericalTensor<Cmpt>& spt2)
 {
     return (st1.xx()*spt2.ii() + st1.yy()*spt2.ii() + st1.zz()*spt2.ii());
-}
-
-
-//- Return the square of a Vector as a SymmTensor
-template<class Cmpt>
-inline SymmTensor<Cmpt> sqr(const Vector<Cmpt>& v)
-{
-    return SymmTensor<Cmpt>
-    (
-        v.x()*v.x(), v.x()*v.y(), v.x()*v.z(),
-                     v.y()*v.y(), v.y()*v.z(),
-                                  v.z()*v.z()
-    );
-}
-
-
-//- Division of a SymmTensor by a Cmpt
-template<class Cmpt>
-inline SymmTensor<Cmpt>
-operator/(const SymmTensor<Cmpt>& st, const Cmpt s)
-{
-    return SymmTensor<Cmpt>
-    (
-        st.xx()/s, st.xy()/s, st.xz()/s,
-                   st.yy()/s, st.yz()/s,
-                              st.zz()/s
-    );
 }
 
 
