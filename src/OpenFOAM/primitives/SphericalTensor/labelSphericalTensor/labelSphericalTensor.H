@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,10 @@ Typedef
     Foam::labelSphericalTensor
 
 Description
-    SphericalTensor of labels.
+    SphericalTensor of labels, i.e. SphericalTensor<label>.
+
+See also
+    Test-SphericalTensor.C
 
 SourceFiles
     labelSphericalTensor.C

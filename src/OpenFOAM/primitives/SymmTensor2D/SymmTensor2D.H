@@ -28,10 +28,11 @@ Class
     Foam::SymmTensor2D
 
 Description
-    Templated 2D symmetric tensor derived from VectorSpace adding construction
-    from 4 components, element access using xx(), xy() etc. member functions
-    and the inner-product (dot-product) and outer-product of two Vectors
-    (tensor-product) operators.
+    A templated (2 x 2) symmetric tensor of objects of \<T\>, effectively
+    containing 3 elements, derived from VectorSpace.
+
+See also
+    Test-SymmTensor2D.C
 
 SourceFiles
     SymmTensor2DI.H
@@ -122,14 +123,16 @@ public:
 
             inline const Cmpt& xx() const;
             inline const Cmpt& xy() const;
+            inline const Cmpt& yx() const;
             inline const Cmpt& yy() const;
 
             inline Cmpt& xx();
             inline Cmpt& xy();
+            inline Cmpt& yx();
             inline Cmpt& yy();
 
 
-        // Diagonal access.
+        // Diagonal access and manipulation
 
             //- Extract the diagonal as a vector
             inline Vector2D<Cmpt> diag() const;
@@ -138,7 +141,7 @@ public:
             inline void diag(const Vector2D<Cmpt>& v);
 
 
-        //- Transpose
+        //- Return non-Hermitian transpose
         inline const SymmTensor2D<Cmpt>& T() const;
 
 

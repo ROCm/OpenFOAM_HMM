@@ -28,10 +28,10 @@ Class
     Foam::Tensor2D
 
 Description
-    Templated 2D tensor derived from VectorSpace adding construction from
-    4 components, element access using xx(), xy(), yx() and yy() member
-    functions and the iner-product (dot-product) and outer-product of two
-    Vector2Ds (tensor-product) operators.
+    A templated (2 x 2) tensor of objects of \<T\> derived from VectorSpace.
+
+See also
+    Test-Tensor2D.C
 
 SourceFiles
     Tensor2DI.H
@@ -203,7 +203,7 @@ public:
             inline void rows(const Vector2D<Cmpt>& x, const Vector2D<Cmpt>& y);
 
 
-        // Diagonal access.
+        // Diagonal access and manipulation
 
             //- Extract the diagonal as a vector
             inline Vector2D<Cmpt> diag() const;
@@ -214,7 +214,7 @@ public:
 
     // Tensor Operations
 
-        //- Return transpose
+        //- Return non-Hermitian transpose
         inline Tensor2D<Cmpt> T() const;
 
         //- Inner-product of this with another Tensor2D.

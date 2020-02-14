@@ -28,9 +28,11 @@ Class
     Foam::SphericalTensor
 
 Description
-    Templated 3D SphericalTensor derived from VectorSpace adding construction
-    from 1 component, element access using th ii() member function and the
-    inner-product (dot-product) and outer-product operators.
+    A templated (3 x 3) diagonal tensor of objects of \<T\>, effectively
+    containing 1 element, derived from VectorSpace.
+
+See also
+    Test-SphericalTensor.C
 
 SourceFiles
     SphericalTensorI.H
@@ -121,7 +123,7 @@ public:
             inline Cmpt& ii();
 
 
-        //- Transpose (no-op)
+        //- Return non-Hermitian transpose (no-op)
         inline const SphericalTensor<Cmpt>& T() const;
 };
 

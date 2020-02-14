@@ -28,11 +28,11 @@ Class
     Foam::DiagTensor
 
 Description
-    Templated 3D DiagTensor derived from VectorSpace.
+    A templated (3 x 3) diagonal tensor of objects of \<T\>, effectively
+    containing 3 elements, derived from VectorSpace.
 
-    Adding construction from 3 components, element access using xx(), yy()
-    and zz() member functions and the inner-product (dot-product) and
-    outer-product operators.
+See also
+    Test-DiagTensor.C
 
 SourceFiles
     DiagTensorI.H

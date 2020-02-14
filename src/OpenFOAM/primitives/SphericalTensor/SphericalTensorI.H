@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,7 +93,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
-//- Inner-product between two spherical tensors
+//- Inner-product of a SphericalTensor and a SphericalTensor
 template<class Cmpt>
 inline SphericalTensor<Cmpt>
 operator&(const SphericalTensor<Cmpt>& st1, const SphericalTensor<Cmpt>& st2)
@@ -101,7 +102,7 @@ operator&(const SphericalTensor<Cmpt>& st1, const SphericalTensor<Cmpt>& st2)
 }
 
 
-//- Inner-product between a spherical tensor and a vector
+//- Inner-product of a SphericalTensor and a Vector
 template<class Cmpt>
 inline Vector<Cmpt>
 operator&(const SphericalTensor<Cmpt>& st, const Vector<Cmpt>& v)
@@ -115,7 +116,7 @@ operator&(const SphericalTensor<Cmpt>& st, const Vector<Cmpt>& v)
 }
 
 
-//- Inner-product between a vector and a spherical tensor
+//- Inner-product of a Vector and a SphericalTensor
 template<class Cmpt>
 inline Vector<Cmpt>
 operator&(const Vector<Cmpt>& v, const SphericalTensor<Cmpt>& st)
@@ -129,7 +130,7 @@ operator&(const Vector<Cmpt>& v, const SphericalTensor<Cmpt>& st)
 }
 
 
-//- Double-dot-product between a spherical tensor and a spherical tensor
+//- Double-inner-product of a SphericalTensor and a SphericalTensor
 template<class Cmpt>
 inline Cmpt
 operator&&(const SphericalTensor<Cmpt>& st1, const SphericalTensor<Cmpt>& st2)
@@ -138,22 +139,55 @@ operator&&(const SphericalTensor<Cmpt>& st1, const SphericalTensor<Cmpt>& st2)
 }
 
 
-//- Division of a scalar by a sphericalTensor
+//- Division of a Cmpt by a SphericalTensor
 template<class Cmpt>
 inline SphericalTensor<Cmpt>
-operator/(const scalar s, const SphericalTensor<Cmpt>& st)
+operator/(const Cmpt s, const SphericalTensor<Cmpt>& st)
 {
+    #ifdef FULLDEBUG
+    if (mag(st.ii()) < VSMALL)
+    {
+        FatalErrorInFunction
+            << "Cmpt = " << s
+            << " is not divisible due to a zero element in SphericalTensor:"
+            << "SphericalTensor = " << st
+            << abort(FatalError);
+    }
+    #endif
+
     return SphericalTensor<Cmpt>(s/st.ii());
 }
 
 
+//- Division of a SphericalTensor by a Cmpt
 template<class Cmpt>
-inline Cmpt magSqr(const SphericalTensor<Cmpt>& st)
+inline SphericalTensor<Cmpt>
+operator/(const SphericalTensor<Cmpt>& st, const Cmpt s)
 {
-    return 3*magSqr(st.ii());
+    #ifdef FULLDEBUG
+    if (mag(s) < VSMALL)
+    {
+        FatalErrorInFunction
+            << "SphericalTensor = " << st
+            << " is not divisible due to a zero value in Cmpt:"
+            << "Cmpt = " << s
+            << abort(FatalError);
+    }
+    #endif
+
+    return SphericalTensor<Cmpt>(st.ii()/s);
 }
 
 
+//- Return the square of Frobenius norm of a SphericalTensor as a Cmpt
+template<class Cmpt>
+inline Cmpt magSqr(const SphericalTensor<Cmpt>& st)
+{
+    return Cmpt(3*mag(st.ii()*st.ii()));
+}
+
+
+//- Return the max component of a SphericalTensor
 template<class Cmpt>
 inline Cmpt cmptMax(const SphericalTensor<Cmpt>& st)
 {
@@ -161,6 +195,7 @@ inline Cmpt cmptMax(const SphericalTensor<Cmpt>& st)
 }
 
 
+//- Return the min component of a SphericalTensor
 template<class Cmpt>
 inline Cmpt cmptMin(const SphericalTensor<Cmpt>& st)
 {
@@ -168,6 +203,7 @@ inline Cmpt cmptMin(const SphericalTensor<Cmpt>& st)
 }
 
 
+//- Return the sum of components of a SphericalTensor
 template<class Cmpt>
 inline Cmpt cmptSum(const SphericalTensor<Cmpt>& st)
 {
@@ -175,6 +211,7 @@ inline Cmpt cmptSum(const SphericalTensor<Cmpt>& st)
 }
 
 
+//- Return the arithmetic average of components of a SphericalTensor
 template<class Cmpt>
 inline Cmpt cmptAv(const SphericalTensor<Cmpt>& st)
 {
@@ -182,7 +219,7 @@ inline Cmpt cmptAv(const SphericalTensor<Cmpt>& st)
 }
 
 
-//- Return the trace of a spherical tensor
+//- Return the trace of a SphericalTensor
 template<class Cmpt>
 inline Cmpt tr(const SphericalTensor<Cmpt>& st)
 {
@@ -190,7 +227,7 @@ inline Cmpt tr(const SphericalTensor<Cmpt>& st)
 }
 
 
-//- Return the spherical part of a spherical tensor, i.e. itself
+//- Return the spherical part of a SphericalTensor, i.e. itself
 template<class Cmpt>
 inline SphericalTensor<Cmpt> sph(const SphericalTensor<Cmpt>& st)
 {
@@ -198,7 +235,7 @@ inline SphericalTensor<Cmpt> sph(const SphericalTensor<Cmpt>& st)
 }
 
 
-//- Return the determinant of a spherical tensor
+//- Return the determinant of a SphericalTensor
 template<class Cmpt>
 inline Cmpt det(const SphericalTensor<Cmpt>& st)
 {
@@ -206,13 +243,25 @@ inline Cmpt det(const SphericalTensor<Cmpt>& st)
 }
 
 
-//- Return the inverse of a spherical tensor
+//- Return the inverse of a SphericalTensor
 template<class Cmpt>
 inline SphericalTensor<Cmpt> inv(const SphericalTensor<Cmpt>& st)
 {
-    return SphericalTensor<Cmpt>(1.0/st.ii());
+    #ifdef FULLDEBUG
+    if (mag(st.ii()) < VSMALL)
+    {
+        FatalErrorInFunction
+            << "SphericalTensor is not invertible due to the zero determinant:"
+            << "det(SphericalTensor) = " << det(st)
+            << abort(FatalError);
+    }
+    #endif
+
+    return SphericalTensor<Cmpt>(1/st.ii());
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Cmpt>
 class outerProduct<SphericalTensor<Cmpt>, Cmpt>

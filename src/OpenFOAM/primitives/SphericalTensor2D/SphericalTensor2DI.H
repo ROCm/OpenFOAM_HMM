@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,7 +84,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
-//- Inner-product between two spherical tensors
+//- Inner-product of a SphericalTensor2D and a SphericalTensor2D
 template<class Cmpt>
 inline SphericalTensor2D<Cmpt>
 operator&
@@ -96,7 +97,7 @@ operator&
 }
 
 
-//- Inner-product between a spherical tensor and a vector
+//- Inner-product of a SphericalTensor2D and a Vector2D
 template<class Cmpt>
 inline Vector2D<Cmpt>
 operator&(const SphericalTensor2D<Cmpt>& st, const Vector2D<Cmpt>& v)
@@ -109,7 +110,7 @@ operator&(const SphericalTensor2D<Cmpt>& st, const Vector2D<Cmpt>& v)
 }
 
 
-//- Inner-product between a vector and a spherical tensor
+//- Inner-product of a Vector2D and a SphericalTensor2D
 template<class Cmpt>
 inline Vector2D<Cmpt>
 operator&(const Vector2D<Cmpt>& v, const SphericalTensor2D<Cmpt>& st)
@@ -122,16 +123,47 @@ operator&(const Vector2D<Cmpt>& v, const SphericalTensor2D<Cmpt>& st)
 }
 
 
-//- Division of a scalar by a sphericalTensor2D
+//- Division of a Cmpt by a SphericalTensor2D
 template<class Cmpt>
 inline SphericalTensor2D<Cmpt>
-operator/(const scalar s, const SphericalTensor2D<Cmpt>& st)
+operator/(const Cmpt s, const SphericalTensor2D<Cmpt>& st)
 {
+    #ifdef FULLDEBUG
+    if (mag(st.ii()) < VSMALL)
+    {
+        FatalErrorInFunction
+            << "Cmpt = " << s
+            << " is not divisible due to a zero element in SphericalTensor2D:"
+            << "SphericalTensor2D = " << st
+            << abort(FatalError);
+    }
+    #endif
+
     return SphericalTensor2D<Cmpt>(s/st.ii());
 }
 
 
-//- Return the trace of a spherical tensor
+//- Division of a SphericalTensor2D by a Cmpt
+template<class Cmpt>
+inline SphericalTensor2D<Cmpt>
+operator/(const SphericalTensor2D<Cmpt>& st, const Cmpt s)
+{
+    #ifdef FULLDEBUG
+    if (mag(s) < VSMALL)
+    {
+        FatalErrorInFunction
+            << "SphericalTensor2D = " << st
+            << " is not divisible due to a zero value in Cmpt:"
+            << "Cmpt = " << s
+            << abort(FatalError);
+    }
+    #endif
+
+    return SphericalTensor2D<Cmpt>(st.ii()/s);
+}
+
+
+//- Return the trace of a SphericalTensor2D
 template<class Cmpt>
 inline Cmpt tr(const SphericalTensor2D<Cmpt>& st)
 {
@@ -139,7 +171,7 @@ inline Cmpt tr(const SphericalTensor2D<Cmpt>& st)
 }
 
 
-//- Return the spherical part of a spherical tensor, i.e. itself
+//- Return the spherical part of a SphericalTensor2D, i.e. itself
 template<class Cmpt>
 inline SphericalTensor2D<Cmpt> sph(const SphericalTensor2D<Cmpt>& st)
 {
@@ -147,7 +179,7 @@ inline SphericalTensor2D<Cmpt> sph(const SphericalTensor2D<Cmpt>& st)
 }
 
 
-//- Return the determinant of a spherical tensor
+//- Return the determinant of a SphericalTensor2D
 template<class Cmpt>
 inline Cmpt det(const SphericalTensor2D<Cmpt>& st)
 {
@@ -155,13 +187,25 @@ inline Cmpt det(const SphericalTensor2D<Cmpt>& st)
 }
 
 
-//- Return the inverse of a symmetric tensor
+//- Return the inverse of a SphericalTensor2D
 template<class Cmpt>
 inline SphericalTensor2D<Cmpt> inv(const SphericalTensor2D<Cmpt>& st)
 {
-    return SphericalTensor2D<Cmpt>(1.0/st.ii());
+    #ifdef FULLDEBUG
+    if (mag(st.ii()) < VSMALL)
+    {
+        FatalErrorInFunction
+            << "SphericalTensor2D is not invertible due to zero determinant:"
+            << "det(SphericalTensor2D) = " << det(st)
+            << abort(FatalError);
+    }
+    #endif
+
+    return SphericalTensor2D<Cmpt>(1/st.ii());
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Cmpt>
 class outerProduct<SphericalTensor2D<Cmpt>, Cmpt>

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -173,6 +173,20 @@ inline Vector<Cmpt> operator^(const Vector<Cmpt>& v1, const Vector<Cmpt>& v2)
         (v1.z()*v2.x() - v1.x()*v2.z()),
         (v1.x()*v2.y() - v1.y()*v2.x())
     );
+}
+
+
+template<class Cmpt>
+inline Vector<Cmpt> operator*(const Cmpt& s, const Vector<Cmpt>& v)
+{
+    return Vector<Cmpt>(s*v.x(), s*v.y(), s*v.z());
+}
+
+
+template<class Cmpt>
+inline Vector<Cmpt> operator*(const Vector<Cmpt>& v, const Cmpt& s)
+{
+    return s*v;
 }
 
 
