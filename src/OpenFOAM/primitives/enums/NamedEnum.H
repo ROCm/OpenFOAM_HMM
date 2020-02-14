@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,10 +67,11 @@ Ostream& operator<<(Ostream& os, const NamedEnum<EnumType, nEnum>& wrapped);
 \*---------------------------------------------------------------------------*/
 
 template<class EnumType, int nEnum>
-class NamedEnum
+class FOAM_DEPRECATED_FOR(2017-05, "Foam::Enum") NamedEnum
 {
     //- The nEnum must be positive (non-zero)
     static_assert(nEnum > 0, "nEnum must be positive (non-zero)");
+
 
     // Private Member Data
 
@@ -102,8 +103,7 @@ public:
     // Constructors
 
         //- Construct from names
-        NamedEnum()
-        FOAM_DEPRECATED_FOR(2017-05, "Enum instead of using NamedEnum");
+        NamedEnum();
 
 
     // Member Functions

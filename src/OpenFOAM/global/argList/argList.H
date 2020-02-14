@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -628,8 +628,8 @@ public:
         //  Index 1 is the first (non-option) argument.
         //  \deprecated(2018-08) - use get() method
         template<class T>
-        T FOAM_DEPRECATED_FOR(2018-08, "get() method")
-        read(const label index) const
+        FOAM_DEPRECATED_FOR(2018-08, "get() method")
+        T read(const label index) const
         {
             return this->get<T>(index);
         }
@@ -638,24 +638,24 @@ public:
         //  Index 1 is the first (non-option) argument.
         //  \deprecated(2018-01) - use get() method
         template<class T>
-        T FOAM_DEPRECATED_FOR(2018-01, "get() method")
-        argRead(const label index) const
+        FOAM_DEPRECATED_FOR(2018-01, "get() method")
+        T argRead(const label index) const
         {
             return this->get<T>(index);
         }
 
         //- Deprecated(2018-01) return true if the named option is found
         //  \deprecated(2018-01) - use found() method
-        bool FOAM_DEPRECATED_FOR(2018-01, "found() method")
-        optionFound(const word& optName) const
+        FOAM_DEPRECATED_FOR(2018-01, "found() method")
+        bool optionFound(const word& optName) const
         {
             return found(optName);
         }
 
         //- Deprecated(2018-01) return an input stream from the named option
         //  \deprecated(2018-01) - use lookup() method
-        ITstream FOAM_DEPRECATED_FOR(2018-01, "lookup() method")
-        optionLookup(const word& optName) const
+        FOAM_DEPRECATED_FOR(2018-01, "lookup() method")
+        ITstream optionLookup(const word& optName) const
         {
             return lookup(optName);
         }
@@ -663,8 +663,8 @@ public:
         //- Deprecated(2018-01) read a value from the named option
         //  \deprecated(2018-01) - use get() method
         template<class T>
-        T FOAM_DEPRECATED_FOR(2018-01, "get() method")
-        optionRead(const word& optName) const
+        FOAM_DEPRECATED_FOR(2018-01, "get() method")
+        T optionRead(const word& optName) const
         {
             return get<T>(optName);
         }
@@ -673,8 +673,8 @@ public:
         //  Return true if the named option was found.
         //  \deprecated(2018-01) - use readIfPresent() method
         template<class T>
-        bool FOAM_DEPRECATED_FOR(2018-01, "readIfPresent() method")
-        optionReadIfPresent
+        FOAM_DEPRECATED_FOR(2018-01, "readIfPresent() method")
+        bool optionReadIfPresent
         (
             const word& optName,
             T& val
@@ -688,8 +688,8 @@ public:
         //  use the supplied default and return false.
         //  \deprecated(2018-01) - use readIfPresent() method
         template<class T>
-        bool FOAM_DEPRECATED_FOR(2018-01, "readIfPresent() method")
-        optionReadIfPresent
+        FOAM_DEPRECATED_FOR(2018-01, "readIfPresent() method")
+        bool optionReadIfPresent
         (
             const word& optName,
             T& val,
@@ -703,8 +703,8 @@ public:
         //  Return supplied default otherwise.
         //  \deprecated(2018-01) - use getOrDefault() method
         template<class T>
-        T FOAM_DEPRECATED_FOR(2018-01, "getOrDefault() method")
-        optionLookupOrDefault
+        FOAM_DEPRECATED_FOR(2018-01, "getOrDefault() method")
+        T optionLookupOrDefault
         (
             const word& optName,
             const T& deflt
@@ -716,8 +716,8 @@ public:
         //- Deprecated(2018-01) read a List of values from the named option
         //  \deprecated(2018-01) - use getList() method
         template<class T>
-        List<T> FOAM_DEPRECATED_FOR(2018-01, "getList() method")
-        optionReadList(const word& optName) const
+        FOAM_DEPRECATED_FOR(2018-01, "getList() method")
+        List<T> optionReadList(const word& optName) const
         {
             return this->getList<T>(optName);
         }

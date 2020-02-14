@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -401,7 +401,8 @@ List<OutputIntListType> invertManyToMany
 //  \return The index found or return -1 if not found.
 //  \deprecated(2017-10) - use the UList find/found methods
 template<class ListType>
-label FOAM_DEPRECATED(2017-10) findIndex
+FOAM_DEPRECATED_FOR(2017-10, "UList find/found methods")
+label findIndex
 (
     const ListType& input,
     typename ListType::const_reference val,

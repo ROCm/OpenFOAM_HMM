@@ -168,8 +168,8 @@ public:
 
         //- Deprecated(2020-01) Write dictionary
         //  \deprecated(2020-01) - Write dictionary
-        void FOAM_DEPRECATED_FOR(2020-01, "write() or operator<<")
-        writeDict(Ostream& os) const
+        FOAM_DEPRECATED_FOR(2020-01, "write() or operator<<")
+        void writeDict(Ostream& os) const
         {
             write(os);
         }

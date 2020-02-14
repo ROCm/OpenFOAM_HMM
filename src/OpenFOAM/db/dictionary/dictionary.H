@@ -1288,8 +1288,8 @@ public:
         //- Deprecated(2018-07) find and return an entry data stream
         //
         //  \deprecated(2018-07) - use lookup() method
-        ITstream& FOAM_DEPRECATED_FOR(2018-07, "lookup() method")
-        operator[](const word& keyword) const
+        FOAM_DEPRECATED_FOR(2018-07, "lookup() method")
+        ITstream& operator[](const word& keyword) const
         {
             return lookup(keyword);
         }
@@ -1297,8 +1297,8 @@ public:
         //- Deprecated(2018-10) find and return a T.
         //  \deprecated(2018-10) - use get() method
         template<class T>
-        T FOAM_DEPRECATED_FOR(2018-10, "get() method")
-        lookupType
+        FOAM_DEPRECATED_FOR(2018-10, "get() method")
+        T lookupType
         (
             const word& keyword,
             bool recursive = false,
@@ -1310,8 +1310,8 @@ public:
 
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use keyType::option version
-        bool FOAM_DEPRECATED_FOR(2018-10, "found(keyType::option)")
-        found
+        FOAM_DEPRECATED_FOR(2018-10, "found(keyType::option)")
+        bool found
         (
             const word& keyword,
             bool recursive,
@@ -1323,9 +1323,8 @@ public:
 
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use keyType::option version
-        entry*
         FOAM_DEPRECATED_FOR(2018-10, "findEntry(keyType::option)")
-        lookupEntryPtr
+        entry* lookupEntryPtr
         (
             const word& keyword,
             bool recursive,
@@ -1337,9 +1336,8 @@ public:
 
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use keyType::option version
-        const entry*
         FOAM_DEPRECATED_FOR(2018-10, "findEntry(keyType::option)")
-        lookupEntryPtr
+        const entry* lookupEntryPtr
         (
             const word& keyword,
             bool recursive,
@@ -1351,9 +1349,8 @@ public:
 
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use keyType::option version
-        const entry*
         FOAM_DEPRECATED_FOR(2018-10, "findScoped(keyType::option)")
-        lookupScopedEntryPtr
+        const entry* lookupScopedEntryPtr
         (
             const word& keyword,
             bool recursive,
@@ -1369,9 +1366,8 @@ public:
         //
         //  Search type: non-recursive with patterns.
         //  \deprecated(2018-10) - use findDict() method
-        const dictionary*
         FOAM_DEPRECATED_FOR(2018-10, "findDict() method")
-        subDictPtr(const word& keyword) const
+        const dictionary* subDictPtr(const word& keyword) const
         {
             return findDict(keyword, keyType::REGEX);
         }
@@ -1382,18 +1378,16 @@ public:
         //
         //  Search type: non-recursive with patterns.
         //  \deprecated(2018-10) - use findDict() method
-        dictionary*
         FOAM_DEPRECATED_FOR(2018-10, "findDict() method")
-        subDictPtr(const word& keyword)
+        dictionary* subDictPtr(const word& keyword)
         {
             return findDict(keyword, keyType::REGEX);
         }
 
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use keyType::option version
-        const entry&
         FOAM_DEPRECATED_FOR(2018-10, "lookupEntry(keyType::option)")
-        lookupEntry
+        const entry& lookupEntry
         (
             const word& keyword,
             bool recursive,
@@ -1405,9 +1399,8 @@ public:
 
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use keyType::option version
-        ITstream&
         FOAM_DEPRECATED_FOR(2018-10, "lookup(keyType::option)")
-        lookup
+        ITstream& lookup
         (
             const word& keyword,
             bool recursive,
@@ -1420,8 +1413,8 @@ public:
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use keyType::option version
         template<class T>
-        T FOAM_DEPRECATED_FOR(2018-10, "lookupOrDefault(keyType::option)")
-        lookupOrDefault
+        FOAM_DEPRECATED_FOR(2018-10, "lookupOrDefault(keyType::option)")
+        T lookupOrDefault
         (
             const word& keyword,
             const T& deflt,
@@ -1437,8 +1430,8 @@ public:
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use keyType::option version
         template<class T>
-        T FOAM_DEPRECATED_FOR(2018-10, "lookupOrAddDefault(keyType::option)")
-        lookupOrAddDefault
+        FOAM_DEPRECATED_FOR(2018-10, "lookupOrAddDefault(keyType::option)")
+        T lookupOrAddDefault
         (
             const word& keyword,
             const T& deflt,
@@ -1454,9 +1447,8 @@ public:
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use keyType::option version
         template<class T>
-        bool
         FOAM_DEPRECATED_FOR(2018-10, "readIfPresent(keyType::option)")
-        readIfPresent
+        bool readIfPresent
         (
             const word& keyword,
             T& val,

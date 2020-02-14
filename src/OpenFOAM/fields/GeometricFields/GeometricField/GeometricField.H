@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -698,11 +698,12 @@ public:
 
         //- Deprecated(2019-01) identical to clip()
         //  \deprecated(2019-01) identical to clip()
+        FOAM_DEPRECATED_FOR(2019-01, "clip() method")
         void maxMin
         (
             const dimensioned<Type>& minVal,
             const dimensioned<Type>& maxVal
-        ) FOAM_DEPRECATED_FOR(2019-01, "clip() method");
+        );
 
 
     // Member Operators

@@ -243,7 +243,8 @@ public:
 
             //- Deprecated(2019-01) Pointing at a valid storage node
             //  \deprecated(2019-01) - use good() method
-            bool FOAM_DEPRECATED_FOR(2019-01, "good() method") found() const
+            FOAM_DEPRECATED_FOR(2019-01, "good() method")
+            bool found() const
             {
                 return this->good();
             }
@@ -296,7 +297,8 @@ public:
 
             //- Deprecated(2019-01) Pointing at a valid storage node
             //  \deprecated(2019-01) - use good() method
-            bool FOAM_DEPRECATED_FOR(2019-01, "good() method") found() const
+            FOAM_DEPRECATED_FOR(2019-01, "good() method")
+            bool found() const
             {
                 return this->good();
             }

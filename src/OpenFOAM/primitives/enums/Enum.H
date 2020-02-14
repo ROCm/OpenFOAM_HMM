@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -282,8 +282,8 @@ public:
 
         //- Deprecated(2018-10) same as two-parameter get()
         //  \deprecated(2018-10) - use two-parameter get() method
-        EnumType FOAM_DEPRECATED_FOR(2018-10, "get() method")
-        lookup(const word& key, const dictionary& dict) const
+        FOAM_DEPRECATED_FOR(2018-10, "get() method")
+        EnumType lookup(const word& key, const dictionary& dict) const
         {
             return get(key, dict);
         }

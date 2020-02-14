@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -505,22 +505,24 @@ public:
 
         //- Deprecated(2019-04) raw data pointer, const access
         //  \deprecated(2019-04) - use cdata() method
-        const Type* FOAM_DEPRECATED_FOR(2019-04, "cdata() method") v() const
+        FOAM_DEPRECATED_FOR(2019-04, "cdata() method")
+        const Type* v() const
         {
             return v_;
         }
 
         //- Deprecated(2019-04) raw data pointer, non-const access
         //  \deprecated(2019-04) - use data() method
-        Type* FOAM_DEPRECATED_FOR(2019-04, "data() method") v()
+        FOAM_DEPRECATED_FOR(2019-04, "data() method")
+        Type* v()
         {
             return v_;
         }
 
         //- Deprecated(2019-04) - use subMatrix()
         //  \deprecated(2019-04) - use subMatrix()
-        ConstMatrixBlock<mType>
-        FOAM_DEPRECATED_FOR(2019-04, "subMatrix() method") block
+        FOAM_DEPRECATED_FOR(2019-04, "subMatrix() method")
+        ConstMatrixBlock<mType> block
         (
             const label m,
             const label n,
@@ -533,8 +535,8 @@ public:
 
         //- Deprecated(2019-04) - use subMatrix()
         //  \deprecated(2019-04) - use subMatrix()
-        MatrixBlock<mType>
-        FOAM_DEPRECATED_FOR(2019-04, "subMatrix() method") block
+        FOAM_DEPRECATED_FOR(2019-04, "subMatrix() method")
+        MatrixBlock<mType> block
         (
             const label m,
             const label n,
@@ -548,8 +550,8 @@ public:
 
         //- Deprecated(2019-04) - use subColumn()
         //  \deprecated(2019-04) - use subColumn()
-        ConstMatrixBlock<mType>
-        FOAM_DEPRECATED_FOR(2019-04, "subColumn() method") col
+        FOAM_DEPRECATED_FOR(2019-04, "subColumn() method")
+        ConstMatrixBlock<mType> col
         (
             const label m,
             const label mStart,
@@ -561,8 +563,8 @@ public:
 
         //- Deprecated(2019-04) - use subColumn()
         //  \deprecated(2019-04) - use subColumn()
-        MatrixBlock<mType>
-        FOAM_DEPRECATED_FOR(2019-04, "subColumn() method") col
+        FOAM_DEPRECATED_FOR(2019-04, "subColumn() method")
+        MatrixBlock<mType> col
         (
             const label m,
             const label mStart,

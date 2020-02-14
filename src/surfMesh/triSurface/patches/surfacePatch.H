@@ -148,6 +148,7 @@ public:
 
         //- Deprecated(2020-01) Construct from components
         //  \deprecated(2020-01) - order inconsistent with other identifiers
+        FOAM_DEPRECATED(2020-01)
         surfacePatch
         (
             const word& geometricType,
@@ -155,12 +156,12 @@ public:
             const label size,
             const label start,
             const label index
-        ) FOAM_DEPRECATED(2020-01);
+        );
 
         //- Deprecated(2020-01) Ostream output
         //  \deprecated(2020-01) - Ostream output
-        void FOAM_DEPRECATED_FOR(2020-01, "write() or operator<<")
-        writeDict(Ostream& os) const
+        FOAM_DEPRECATED_FOR(2020-01, "write() or operator<<")
+        void writeDict(Ostream& os) const
         {
             write(os);
         }

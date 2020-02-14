@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,7 @@ SeeAlso
 // Compile-time warning for use of deprecated methods (compiler-dependent).
 // Use within the class declaration.
 
-#if defined(__cplusplus) && (__cplusplus >= 201402L)
+#if (__cplusplus >= 201402L)
 # define FOAM_DEPRECATED(since) [[deprecated("Since " #since)]]
 # define FOAM_DEPRECATED_FOR(since, replacement) [[deprecated("Since " #since "; use " #replacement)]]
 #elif defined(__GNUC__)
