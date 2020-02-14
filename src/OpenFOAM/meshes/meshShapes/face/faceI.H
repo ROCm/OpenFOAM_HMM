@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,14 +28,12 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Edge to the right of face vertex i
 inline Foam::label Foam::face::right(const label i) const
 {
     return i;
 }
 
 
-// Edge to the left of face vertex i
 inline Foam::label Foam::face::left(const label i) const
 {
     return rcIndex(i);
@@ -43,10 +41,6 @@ inline Foam::label Foam::face::left(const label i) const
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-inline Foam::face::face()
-{}
-
 
 inline Foam::face::face(const label sz)
 :
@@ -80,9 +74,9 @@ inline Foam::face::face(labelList&& list)
 
 
 inline Foam::face::face(Istream& is)
-{
-    is >> *this;
-}
+:
+    labelList(is)
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -177,32 +171,5 @@ inline bool Foam::operator!=(const face& a, const face& b)
     return face::compare(a,b) == 0;
 }
 
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-inline Foam::Istream& Foam::operator>>(Istream& is, face& f)
-{
-    if (is.version() == IOstreamOption::originalVersion)
-    {
-        // Read starting (
-        is.readBegin("face");
-
-        // Read the 'name' token for the face
-        token t(is);
-
-        // Read labels
-        is >> static_cast<labelList&>(f);
-
-        // Read end)
-        is.readEnd("face");
-    }
-    else
-    {
-        is >> static_cast<labelList&>(f);
-    }
-
-    is.check(FUNCTION_NAME);
-    return is;
-}
 
 // ************************************************************************* //

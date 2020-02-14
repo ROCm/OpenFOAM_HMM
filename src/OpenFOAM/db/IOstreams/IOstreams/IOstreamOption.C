@@ -33,9 +33,6 @@ License
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
 const Foam::IOstreamOption::versionNumber
-    Foam::IOstreamOption::originalVersion(0,5);
-
-const Foam::IOstreamOption::versionNumber
     Foam::IOstreamOption::currentVersion(2,0);
 
 

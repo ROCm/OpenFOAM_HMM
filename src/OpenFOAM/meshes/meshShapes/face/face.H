@@ -60,13 +60,11 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class face;
 class triFace;
 
 template<class T, int SizeMin> class DynamicList;
-
-inline Istream& operator>>(Istream& is, face& f);
 
 /*---------------------------------------------------------------------------*\
                            Class face Declaration
@@ -138,15 +136,15 @@ public:
         EDGE    // Close to edge
     };
 
-    // Static data members
+    // Static Data Members
 
         static const char* const typeName;
 
 
     // Constructors
 
-        //- Construct null
-        inline face();
+        //- Default construct
+        face() = default;
 
         //- Construct given size, with invalid point labels (-1)
         inline explicit face(const label sz);
@@ -174,7 +172,7 @@ public:
     // Member Functions
 
         //- Collapse face by removing duplicate point labels
-        //  return the collapsed size
+        //  \return the collapsed size
         label collapse();
 
         //- Flip the face in-place.
@@ -363,7 +361,7 @@ public:
             //- Split into triangles using existing points.
             //  Result in triFaces[triI..triI+nTri].
             //  Splits intelligently to maximize triangle quality.
-            //  Returns number of faces created.
+            //  \Return number of faces created.
             label triangles
             (
                 const UList<point>& points,
@@ -373,7 +371,7 @@ public:
 
             //- Split into triangles using existing points.
             //  Append to DynamicList.
-            //  Returns number of faces created.
+            //  \Return number of faces created.
             template<int SizeMin>
             label triangles
             (
@@ -412,11 +410,6 @@ public:
 
         //- Return true if the faces have the same vertices
         static bool sameVertices(const face& a, const face& b);
-
-
-    // Istream Operator
-
-        friend Istream& operator>>(Istream& is, face& f);
 };
 
 

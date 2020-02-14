@@ -187,9 +187,6 @@ public:
         //- Stream format names (ascii, binary)
         static const Enum<streamFormat> formatNames;
 
-        //- The original version number
-        static const versionNumber originalVersion;
-
         //- The current version number
         static const versionNumber currentVersion;
 
