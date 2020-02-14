@@ -199,12 +199,14 @@ public:
     // Check
 
         //- Check IOstream status for given operation.
-        //  Print IOstream state if error has occurred
+        //  Print IOstream state or generate a FatalIOError
+        //  when an error has occurred.
+        //  The base implementation is a fatalCheck
         virtual bool check(const char* operation) const;
 
         //- Check IOstream status for given operation.
-        //  Print IOstream state if error has occurred and exit
-        void fatalCheck(const char* operation) const;
+        //  Generate a FatalIOError when an error has occurred.
+        bool fatalCheck(const char* operation) const;
 
         //- Return true if stream has been opened
         bool opened() const

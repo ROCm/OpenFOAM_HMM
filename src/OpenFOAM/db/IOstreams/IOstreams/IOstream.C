@@ -50,25 +50,22 @@ Foam::fileName& Foam::IOstream::name()
 
 bool Foam::IOstream::check(const char* operation) const
 {
-    if (bad())
-    {
-        FatalIOErrorInFunction(*this)
-            << "error in IOstream " << name() << " for operation " << operation
-            << exit(FatalIOError);
-    }
-
-    return !bad();
+    return fatalCheck(operation);
 }
 
 
-void Foam::IOstream::fatalCheck(const char* operation) const
+bool Foam::IOstream::fatalCheck(const char* operation) const
 {
-    if (bad())
+    const bool ok = !bad();
+
+    if (!ok)
     {
         FatalIOErrorInFunction(*this)
             << "error in IOstream " << name() << " for operation " << operation
             << exit(FatalIOError);
     }
+
+    return ok;
 }
 
 
