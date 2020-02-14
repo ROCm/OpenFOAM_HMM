@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,16 +67,11 @@ bool Foam::sigFpe::nanActive_ = false;
 // or by the specified flag
 static bool isTrue(const char* envName, bool deflt)
 {
-    const auto str(Foam::getEnv(envName));
+    Foam::Switch sw(Foam::Switch::find(Foam::getEnv(envName)));
 
-    if (str.size())
+    if (sw.good())
     {
-        Foam::Switch sw(str, true);  // Silently ignores bad input
-
-        if (sw.valid())
-        {
-            return sw;
-        }
+        return static_cast<bool>(sw);
     }
 
     // Env was not set or did not contain a valid bool value

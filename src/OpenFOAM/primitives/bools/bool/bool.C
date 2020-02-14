@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,7 +61,7 @@ Foam::Istream& Foam::operator>>(Istream& is, bool& b)
 Foam::Ostream& Foam::operator<<(Ostream& os, const bool b)
 {
     // Emit as label (not byte etc) for proper send/receive in parallel
-    os.write(label(b));
+    os.write(static_cast<label>(b));
     os.check(FUNCTION_NAME);
     return os;
 }

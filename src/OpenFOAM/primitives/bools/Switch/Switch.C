@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +30,6 @@ License
 #include "scalar.H"
 #include "error.H"
 #include "dictionary.H"
-#include "IOstreams.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -50,23 +49,45 @@ static const char* names[9] =
     "no",    "yes",
     "off",   "on",
     "none",  "any",
-    "invalid"
+    "invalid"  //< Output representation only
 };
 
 } // End anonymous namespace
 
-// * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
-const char* Foam::Switch::name(const bool b) noexcept
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    return names[(b ? 1 : 0)];
-}
+template<class OS>
+static OS& printTokenError(OS& os, const token& tok)
+{
+    if (!tok.good())
+    {
+        os  << "Bad token - could not get bool/switch" << nl;
+    }
+    else if (tok.isWord())
+    {
+        os  << "Expected true/false, on/off... found "
+            << tok.wordToken() << nl;
+    }
+    else
+    {
+        os  << "Wrong token - expected bool/switch, found "
+            << tok.info() << nl;
+    }
 
+    return os;
+}
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 Foam::Switch::switchType Foam::Switch::parse
 (
     const std::string& str,
-    bool allowBad
+    const bool failOnError
 )
 {
     switch (str.size())
@@ -108,10 +129,10 @@ Foam::Switch::switchType Foam::Switch::parse
         }
     }
 
-    if (!allowBad)
+    if (failOnError)
     {
         FatalErrorInFunction
-            << "Unknown switch word " << str << nl
+            << "Unknown switch " << str << nl
             << abort(FatalError);
     }
 
@@ -119,29 +140,95 @@ Foam::Switch::switchType Foam::Switch::parse
 }
 
 
+// * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
+
+const char* Foam::Switch::name(const bool b) noexcept
+{
+    return names[(b ? 1 : 0)];
+}
+
+
+Foam::Switch Foam::Switch::find(const std::string& str)
+{
+    return Switch(parse(str, false));  // failOnError=false
+}
+
+
+bool Foam::Switch::found(const std::string& str)
+{
+    return (switchType::INVALID != parse(str, false));  // failOnError=false
+}
+
+
 Foam::Switch Foam::Switch::getOrAddToDict
 (
-    const word& name,
+    const word& key,
     dictionary& dict,
     const Switch deflt
 )
 {
-    return dict.getOrAdd<Switch>(name, deflt);
+    return dict.getOrAdd<Switch>(key, deflt, keyType::LITERAL);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::Switch::Switch(const std::string& str)
+:
+    value_(parse(str, true))
+{}
+
+
+Foam::Switch::Switch(const char* str)
+:
+    value_(parse(str, true))
+{}
+
+
+Foam::Switch::Switch(const std::string& str, bool allowBad)
+:
+    value_(parse(str, !allowBad))
+{}
+
+
+Foam::Switch::Switch(const char* str, bool allowBad)
+:
+    value_(parse(str, !allowBad))
+{}
+
+
 Foam::Switch::Switch(const float val, const float tol)
 :
-    switch_((mag(val) > tol) ? switchType::TRUE : switchType::FALSE)
+    value_((mag(val) > tol) ? switchType::TRUE : switchType::FALSE)
 {}
 
 
 Foam::Switch::Switch(const double val, const double tol)
 :
-    switch_((mag(val) > tol) ? switchType::TRUE : switchType::FALSE)
+    value_((mag(val) > tol) ? switchType::TRUE : switchType::FALSE)
 {}
+
+
+Foam::Switch::Switch(const token& tok)
+:
+    value_(switchType::INVALID)
+{
+    if (tok.good())
+    {
+        if (tok.isBool())
+        {
+            (*this) = tok.boolToken();
+        }
+        else if (tok.isLabel())
+        {
+            (*this) = bool(tok.labelToken());
+        }
+        else if (tok.isWord())
+        {
+            value_ = parse(tok.wordToken(), false);  // failOnError=false
+        }
+    }
+}
 
 
 Foam::Switch::Switch
@@ -149,15 +236,20 @@ Foam::Switch::Switch
     const word& key,
     const dictionary& dict
 )
+:
+    value_(switchType::INVALID)
 {
-    const word str(dict.get<word>(key, keyType::LITERAL));
+    const token tok(dict.get<token>(key, keyType::LITERAL));
 
-    (*this) = parse(str, true);
+    Switch sw(tok);
 
-    if (!valid())
+    if (sw.good())
     {
-        FatalIOErrorInFunction(dict)
-            << "Expected 'true/false', 'on/off' ... found " << str << nl
+        (*this) = sw;
+    }
+    else
+    {
+        printTokenError(FatalIOErrorInFunction(dict), tok)
             << exit(FatalIOError);
     }
 }
@@ -167,25 +259,30 @@ Foam::Switch::Switch
 (
     const word& key,
     const dictionary& dict,
-    const Switch deflt
+    const Switch deflt,
+    const bool failsafe
 )
 :
-    Switch(deflt)
+    value_(deflt.value_)
 {
-    const entry* eptr = dict.findEntry(key, keyType::LITERAL);
+    token tok;
 
-    if (eptr)
+    if (dict.readIfPresent<token>(key, tok, keyType::LITERAL))
     {
-        const word str(eptr->get<word>());
+        Switch sw(tok);
 
-        (*this) = parse(str, true);
-
-        if (!valid())
+        if (sw.good())
         {
-            // Found entry, but was bad input
-
-            FatalIOErrorInFunction(dict)
-                << "Expected 'true/false', 'on/off' ... found " << str << nl
+            (*this) = sw;
+        }
+        else if (failsafe)
+        {
+            printTokenError(IOWarningInFunction(dict), tok)
+                << "using failsafe " << deflt.c_str() << endl;
+        }
+        else
+        {
+            printTokenError(FatalIOErrorInFunction(dict), tok)
                 << exit(FatalIOError);
         }
     }
@@ -200,33 +297,37 @@ Foam::Switch::Switch(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * * //
 
-bool Foam::Switch::valid() const noexcept
+bool Foam::Switch::good() const noexcept
 {
-    return switch_ != switchType::INVALID;
+    return (value_ < switchType::INVALID);
 }
 
 
 Foam::Switch::switchType Foam::Switch::type() const noexcept
 {
-    return switchType(switch_);
+    return switchType(value_);
 }
 
 
 const char* Foam::Switch::c_str() const noexcept
 {
-    return names[(switch_ & 0x0F)];
+    return names[(value_ & 0x0F)];
 }
 
 
 std::string Foam::Switch::str() const
 {
-    return names[(switch_ & 0x0F)];
+    return names[(value_ & 0x0F)];
 }
 
 
-bool Foam::Switch::readIfPresent(const word& name, const dictionary& dict)
+bool Foam::Switch::readIfPresent
+(
+    const word& key,
+    const dictionary& dict
+)
 {
-    return dict.readIfPresent<Switch>(name, *this);
+    return dict.readIfPresent<Switch>(key, *this, keyType::LITERAL);
 }
 
 
@@ -234,47 +335,21 @@ bool Foam::Switch::readIfPresent(const word& name, const dictionary& dict)
 
 Foam::Istream& Foam::operator>>(Istream& is, Switch& sw)
 {
-    token t(is);
+    token tok(is);
 
-    if (!t.good())
-    {
-        FatalIOErrorInFunction(is)
-            << "Bad token - could not get bool"
-            << exit(FatalIOError);
-        is.setBad();
-        return is;
-    }
+    sw = Switch(tok);
 
-    if (t.isLabel())
+    if (sw.good())
     {
-        sw = bool(t.labelToken());
-    }
-    else if (t.isWord())
-    {
-        // Permit invalid value, but catch immediately for better messages
-        sw = Switch(t.wordToken(), true);
-
-        if (!sw.valid())
-        {
-            FatalIOErrorInFunction(is)
-                << "Expected 'true/false', 'on/off' ... found "
-                << t.wordToken()
-                << exit(FatalIOError);
-            is.setBad();
-            return is;
-        }
+        is.check(FUNCTION_NAME);
     }
     else
     {
-        FatalIOErrorInFunction(is)
-            << "Wrong token type - expected bool, found "
-            << t.info()
+        printTokenError(FatalIOErrorInFunction(is), tok)
             << exit(FatalIOError);
         is.setBad();
-        return is;
     }
 
-    is.check(FUNCTION_NAME);
     return is;
 }
 

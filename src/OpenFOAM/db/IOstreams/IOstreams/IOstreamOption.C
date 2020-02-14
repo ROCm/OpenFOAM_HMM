@@ -71,8 +71,8 @@ Foam::IOstreamOption::compressionEnum(const word& compName)
 {
     // Handle bad input graciously
 
-    const Switch sw(compName, true);
-    if (sw.valid())
+    const Switch sw = Switch::find(compName);
+    if (sw.good())
     {
         return
         (

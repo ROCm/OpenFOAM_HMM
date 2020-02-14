@@ -47,9 +47,15 @@ namespace Foam
 class Istream;
 class Ostream;
 
+// IOstream Operators
+
+//- Read bool from stream using Foam::Switch(Istream&)
 Istream& operator>>(Istream& is, bool& b);
+
+//- Write bool to a stream as an label (integer) value
 Ostream& operator<<(Ostream& os, const bool b);
 
+//- Read bool from stream using Foam::Switch(Istream&)
 bool readBool(Istream& is);
 
 } // End namespace Foam

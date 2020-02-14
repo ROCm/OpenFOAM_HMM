@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
     Copyright (C) 2011 Symscape
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,16 +69,11 @@ static void clearFpe()
 // or by the specified flag
 static bool isTrue(const char* envName, bool deflt)
 {
-    const auto str(Foam::getEnv(envName));
+    Foam::Switch sw(Foam::Switch::find(Foam::getEnv(envName)));
 
-    if (str.size())
+    if (sw.good())
     {
-        Foam::Switch sw(str, true);  // Silently ignores bad input
-
-        if (sw.valid())
-        {
-            return sw;
-        }
+        return static_cast<bool>(sw);
     }
 
     // Env was not set or did not contain a valid bool value

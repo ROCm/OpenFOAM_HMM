@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,10 +71,10 @@ Foam::isoSurfaceBase::getFilterType
         return deflt;
     }
 
-    // Try as bool
-    Switch sw(filterName, true);
+    // Try as bool/switch
+    Switch sw = Switch::find(filterName);
 
-    if (sw.valid())
+    if (sw.good())
     {
         return
         (

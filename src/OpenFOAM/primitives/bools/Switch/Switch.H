@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,7 @@ SourceFiles
 #define Switch_H
 
 #include "bool.H"
-#include "word.H"
+#include "stdFoam.H"
 
 // Avoid any pre-processor conflicts with enum names
 #undef FALSE
@@ -56,12 +56,18 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-class Switch;
+// Forward Declarations
 class dictionary;
+class token;
+class word;
+class Switch;
 
 // IOstream Operators
+
+//- Read Switch from stream using Foam::Switch(Istream&)
 Istream& operator>>(Istream& is, Switch& sw);
+
+//- Write Switch to stream as its text value (eg, "true", "false")
 Ostream& operator<<(Ostream& is, const Switch& sw);
 
 /*---------------------------------------------------------------------------*\
@@ -72,19 +78,21 @@ class Switch
 {
 public:
 
-    //- Switch enumerations corresponding to common text representations.
-    //  \note the values specified here are critical for its proper behaviour.
-    //  The lower bit is tested for the true/false condition.
-    //  The values correspond to an index into the predefined output names
-    //  for the c_str() method.
-    enum switchType : unsigned char
-    {
-        FALSE   = 0 /*!< "false" */, TRUE = 1 /*!< "true" */,
-        NO      = 2 /*!< "no" */,    YES  = 3 /*!< "yes" */,
-        OFF     = 4 /*!< "off" */,   ON   = 5 /*!< "on" */,
-        NONE    = 6 /*!< "none" */,  ANY  = 7 /*!< "any" */,
-        INVALID = 8 /*!< "invalid" */
-    };
+    // Data Types
+
+        //- Switch enumerations corresponding to common text representations.
+        //  \note The values here are critical for its proper behaviour.
+        //  The values correspond to an index into the predefined output names
+        //  for the c_str() method and the lower bit is tested for
+        //  determining the true/false bool value.
+        enum switchType : unsigned char
+        {
+            FALSE   = 0 /*!< "false" */, TRUE = 1 /*!< "true" */,
+            NO      = 2 /*!< "no" */,    YES  = 3 /*!< "yes" */,
+            OFF     = 4 /*!< "off" */,   ON   = 5 /*!< "on" */,
+            NONE    = 6 /*!< "none" */,  ANY  = 7 /*!< "any" */,
+            INVALID = 8 /*!< "invalid" */,
+        };
 
 
 private:
@@ -92,42 +100,60 @@ private:
     // Private Data
 
         //- The logic and enumerated text representation stored in a byte
-        unsigned char switch_;
+        unsigned char value_;
 
 
-    // Static Member Functions
+    // Private Member Functions
 
-        //- Return enum value for input string
-        static switchType parse(const std::string& str, bool allowBad);
+        //- Find switchType for given string. Return 'INVALID' if not found.
+        //  With failOnError, trigger FatalError if not found
+        static switchType parse(const std::string& str, const bool failOnError);
 
 
 public:
 
+    // Generated Methods
+
+        //- Copy construct
+        Switch(const Switch&) noexcept = default;
+
+        //- Copy assignment
+        Switch& operator=(const Switch&) noexcept = default;
+
+
     // Constructors
 
-        //- Null constructible as false
+        //- Default construct as false
         constexpr Switch() noexcept
         :
-            switch_(switchType::FALSE)
+            value_(switchType::FALSE)
         {}
 
         //- Construct from enumerated value
         constexpr Switch(const switchType sw) noexcept
         :
-            switch_(sw)
+            value_(sw)
         {}
 
         //- Construct from bool
         constexpr Switch(const bool b) noexcept
         :
-            switch_(b ? switchType::TRUE : switchType::FALSE)
+            value_(b ? switchType::TRUE : switchType::FALSE)
         {}
 
         //- Construct from int (treat integer as bool value)
         constexpr Switch(const int i) noexcept
         :
-            switch_(i ? switchType::TRUE : switchType::FALSE)
+            value_(i ? switchType::TRUE : switchType::FALSE)
         {}
+
+        //- Construct from string - catches bad input.
+        //  Use static find() method for a failsafe alternative
+        explicit Switch(const std::string& str);
+
+        //- Construct from character array - catches bad input.
+        //  Use static find() method for a failsafe alternative
+        explicit Switch(const char* str);
 
         //- Construct from float with rounding to zero given by
         //- the tolerance (default: 0.5)
@@ -137,31 +163,8 @@ public:
         //- the tolerance (default: 0.5)
         explicit Switch(const double val, const double tol=0.5);
 
-        //- Construct from string - catches bad input.
-        explicit Switch(const std::string& str)
-        :
-            switch_(parse(str, false))
-        {}
-
-        //- Construct from character array - catches bad input.
-        explicit Switch(const char* str)
-        :
-            switch_(parse(str, false))
-        {}
-
-        //- Construct from string.
-        //  Optionally allow bad words, and catch the error elsewhere
-        Switch(const std::string& str, bool allowBad)
-        :
-            switch_(parse(str, allowBad))
-        {}
-
-        //- Construct from character array.
-        //  Optionally allow bad words, and catch the error elsewhere
-        Switch(const char* str, bool allowBad)
-        :
-            switch_(parse(str, allowBad))
-        {}
+        //- Construct from token. Handles bool/label/word types.
+        explicit Switch(const token& tok);
 
         //- Construct from dictionary lookup.
         //  FatalError if anything is incorrect.
@@ -171,17 +174,20 @@ public:
             const dictionary& dict  //!< dictionary
         );
 
-        //- Find the key in the dictionary and return the corresponding
-        //- switch value, or the default value.
-        //  FatalError if anything is incorrect.
+        //- Find the key in the dictionary and use the corresponding
+        //- switch value or the default if not found in dictionary.
+        //
+        //  FatalIOError if the switch name is incorrect.
+        //  Specifying failsafe downgrades the FatalIOError to an IOWarning.
         Switch
         (
             const word& key,        //!< Lookup key. Uses LITERAL (not REGEX)
             const dictionary& dict, //!< dictionary
-            const Switch deflt      //!< fallback if not found
+            const Switch deflt,     //!< fallback if not found
+            const bool failsafe = false  //!< Warn only on bad input
         );
 
-        //- Construct from Istream
+        //- Construct from Istream by reading a token
         explicit Switch(Istream& is);
 
 
@@ -191,9 +197,9 @@ public:
         //- value is not found, it is added into the dictionary.
         static Switch getOrAddToDict
         (
-            const word& name,           //!< Lookup key. Uses REGEX!
-            dictionary& dict,           //!< dictionary
-            const Switch deflt = switchType::FALSE //!< default to add
+            const word& key,        //!< Lookup key. Uses LITERAL (not REGEX)
+            dictionary& dict,       //!< dictionary
+            const Switch deflt = switchType::FALSE //!< default value to add
         );
 
 
@@ -202,16 +208,26 @@ public:
         //- A string representation of bool as "false" / "true"
         static const char* name(const bool b) noexcept;
 
+        //- Find switchType for the given string, returning as a Switch that
+        //- can be tested for good() or bad().
+        static Switch find(const std::string& str);
+
+        //- Test if there is a switch type corresponding to the given string.
+        static bool found(const std::string& str);
+
 
     // Member Functions
 
         //- True if the Switch represents a valid enumeration
-        bool valid() const noexcept;
+        bool good() const noexcept;
+
+        //- True if the Switch does not represent a valid enumeration
+        bool bad() const noexcept { return !good(); }
 
         //- The underlying enumeration value
         switchType type() const noexcept;
 
-        //- A string representation of the Switch value
+        //- A C-string representation of the Switch value
         const char* c_str() const noexcept;
 
         //- A string representation of the Switch value
@@ -220,8 +236,8 @@ public:
         //- Update the value of the Switch if it is found in the dictionary
         bool readIfPresent
         (
-            const word& name,           //!< Lookup key. Uses REGEX!
-            const dictionary& dict      //!< dictionary
+            const word& key,        //!< Lookup key. Uses LITERAL (not REGEX)
+            const dictionary& dict  //!< dictionary
         );
 
 
@@ -230,41 +246,54 @@ public:
         //- Conversion to bool
         operator bool() const noexcept
         {
-            return (switch_ & 0x1);
+            return (value_ & 0x1);
         }
 
         //- Assignment from enumerated value
         Switch& operator=(const switchType sw) noexcept
         {
-            switch_ = sw;
+            value_ = sw;
             return *this;
         }
 
         //- Assignment from bool
         Switch& operator=(const bool b) noexcept
         {
-            switch_ = (b ? Switch::TRUE : Switch::FALSE);
+            value_ = (b ? Switch::TRUE : Switch::FALSE);
             return *this;
         }
 
 
     // Housekeeping
 
-        //- Construct from dictionary, supplying default value so that if the
-        //- value is not found, it is added into the dictionary.
+        //- Deprecated(2020-01) From string with/without bad input test
+        //  \deprecated(2020-01) - confusing syntax, use static find() method
+        FOAM_DEPRECATED_FOR(2019-02, "static find() method")
+        Switch(const std::string& str, bool allowBad);
+
+        //- Deprecated(2020-01) From string with/without bad input test
+        //  \deprecated(2020-01) - confusing syntax, use static find() method
+        FOAM_DEPRECATED_FOR(2019-02, "static find() method")
+        Switch(const char* str, bool allowBad);
+
+        //- Deprecated(2020-01) Use good() method, or static found() method
+        //  \deprecated(2020-01) Use good() method, or static found() method
+        FOAM_DEPRECATED_FOR(2019-02, "good() or static found() method")
+        bool valid() const noexcept
+        {
+            return good();
+        }
+
+        //- Same as getOrAddToDict()
         static Switch lookupOrAddToDict
         (
-            const word& name,           //!< Lookup key. Uses REGEX!
-            dictionary& dict,           //!< dictionary
-            const Switch deflt = switchType::FALSE //!< default to add
+            const word& name,
+            dictionary& dict,
+            const Switch deflt = switchType::FALSE
         )
         {
             return getOrAddToDict(name, dict, deflt);
         }
-
-        //- Deprecated(2018-03) text representation of the Switch value
-        //  \deprecated(2018-03) - use c_str() method
-        inline const char* asText() const { return c_str(); };
 };
 
 

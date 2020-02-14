@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,9 +61,9 @@ bool Foam::scalarRange::parse(const std::string& str, scalarRange& range)
 
         if (str.size() >= 4)
         {
-            Switch sw(str, true);
+            Switch sw = Switch::find(str);
 
-            if (sw.valid())
+            if (sw.good())
             {
                 if (sw)
                 {

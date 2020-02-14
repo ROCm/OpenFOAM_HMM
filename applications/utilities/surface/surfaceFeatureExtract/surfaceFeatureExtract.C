@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2017 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -279,16 +279,9 @@ int main(int argc, char *argv[])
                 surfaceIntersection::NONE
             );
 
-        const Switch writeObj = surfaceDict.lookupOrDefault<Switch>
-        (
-            "writeObj",
-            Switch::OFF
-        );
-        const Switch writeVTK = surfaceDict.lookupOrDefault<Switch>
-        (
-            "writeVTK",
-            Switch::OFF
-        );
+        const Switch writeObj("writeObj", surfaceDict, Switch::OFF);
+
+        const Switch writeVTK("writeVTK", surfaceDict, Switch::OFF);
 
         // The "surfaces" entry is normally optional, but make it mandatory
         // if the dictionary name doesn't have an extension
