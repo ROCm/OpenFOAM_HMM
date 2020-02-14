@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,7 +71,6 @@ Description
 
     Note: if offsetMode is \c normal it uses outwards pointing normals. So
     supply a negative distance if sampling inside the domain.
-
 
 Note
     Storage is not optimal. It temporary collects all (patch)face centres
@@ -278,14 +278,6 @@ protected:
 
         //- Calculate AMI interpolator
         void calcAMI() const;
-
-        //- Helper to read field or non-uniform list from dictionary
-        static tmp<pointField> readListOrField
-        (
-            const word& keyword,
-            const dictionary& dict,
-            const label size
-        );
 
 
 public:

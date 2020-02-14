@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -234,23 +234,12 @@ Foam::Field<Type>::Field
                     << exit(FatalIOError);
             }
         }
-        else if (is.version() == IOstream::versionNumber(2,0))
-        {
-            IOWarningInFunction(dict)
-                << "Expected keyword 'uniform' or 'nonuniform', "
-                "assuming deprecated Field format from "
-                "Foam version 2.0." << endl;
-
-            this->setSize(len);
-
-            is.putBack(firstToken);
-            operator=(pTraits<Type>(is));
-        }
         else
         {
             FatalIOErrorInFunction(dict)
                 << "Expected keyword 'uniform' or 'nonuniform', found "
-                << firstToken.info() << exit(FatalIOError);
+                << firstToken.info() << nl
+                << exit(FatalIOError);
         }
     }
 }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -846,67 +846,6 @@ void Foam::mappedPatchBase::calcAMI() const
 }
 
 
-// Hack to read old (List-based) format. See Field.C. The difference
-// is only that in case of falling back to old format it expects a non-uniform
-// list instead of a single vector.
-Foam::tmp<Foam::pointField> Foam::mappedPatchBase::readListOrField
-(
-    const word& keyword,
-    const dictionary& dict,
-    const label size
-)
-{
-    tmp<pointField> tfld(new pointField());
-    pointField& fld = tfld.ref();
-
-    if (size)
-    {
-        ITstream& is = dict.lookup(keyword);
-
-        // Read first token
-        token firstToken(is);
-
-        if (firstToken.isWord())
-        {
-            if (firstToken.wordToken() == "uniform")
-            {
-                fld.setSize(size);
-                fld = pTraits<vector>(is);
-            }
-            else if (firstToken.wordToken() == "nonuniform")
-            {
-                is >> static_cast<List<vector>&>(fld);
-                if (fld.size() != size)
-                {
-                    FatalIOErrorInFunction(dict)
-                        << "size " << fld.size()
-                        << " is not equal to the given value of " << size
-                        << exit(FatalIOError);
-                }
-            }
-            else
-            {
-                FatalIOErrorInFunction(dict)
-                    << "Expected keyword 'uniform' or 'nonuniform', found "
-                    << firstToken.wordToken()
-                    << exit(FatalIOError);
-            }
-        }
-        else if (is.version() == IOstream::versionNumber(2,0))
-        {
-            IOWarningInFunction(dict)
-                << "Expected keyword 'uniform' or 'nonuniform', "
-                   "assuming List format for backwards compatibility."
-                   "Foam version 2.0." << endl;
-
-            is.putBack(firstToken);
-            is >> static_cast<List<vector>&>(fld);
-        }
-    }
-    return tfld;
-}
-
-
 // * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * * * * //
 
 Foam::mappedPatchBase::mappedPatchBase
@@ -1026,8 +965,8 @@ Foam::mappedPatchBase::mappedPatchBase
     coupleGroup_(dict),
     offsetMode_(UNIFORM),
     offset_(Zero),
-    offsets_(0),
-    distance_(0.0),
+    offsets_(),
+    distance_(0),
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
     mapPtr_(nullptr),
     AMIPtr_(nullptr),
@@ -1057,7 +996,7 @@ Foam::mappedPatchBase::mappedPatchBase
 
             case NONUNIFORM:
             {
-                offsets_ = readListOrField("offsets", dict, patch_.size());
+                offsets_ = pointField("offsets", dict, patch_.size());
             }
             break;
 
@@ -1075,7 +1014,7 @@ Foam::mappedPatchBase::mappedPatchBase
     else if (dict.found("offsets"))
     {
         offsetMode_ = NONUNIFORM;
-        offsets_ = readListOrField("offsets", dict, patch_.size());
+        offsets_ = pointField("offsets", dict, patch_.size());
     }
     else if (mode_ != NEARESTPATCHFACE && mode_ != NEARESTPATCHFACEAMI)
     {
@@ -1102,7 +1041,7 @@ Foam::mappedPatchBase::mappedPatchBase
     offsetMode_(UNIFORM),
     offset_(Zero),
     offsets_(0),
-    distance_(0.0),
+    distance_(0),
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
     mapPtr_(nullptr),
     AMIPtr_(nullptr),
@@ -1175,7 +1114,7 @@ Foam::mappedPatchBase::mappedPatchBase
     (
         offsetMode_ == NONUNIFORM
       ? vectorField(mpb.offsets_, mapAddressing)
-      : vectorField(0)
+      : vectorField()
     ),
     distance_(mpb.distance_),
     sameRegion_(mpb.sameRegion_),
