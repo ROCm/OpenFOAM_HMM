@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,7 +80,7 @@ namespace Foam
 
 namespace vtk
 {
-// Forward declarations
+// Forward Declarations
 class outputOptions;
 class surfaceWriter;
 }
@@ -122,13 +122,13 @@ class vtkWriter
 
 public:
 
-    //- Runtime type information
+    //- Declare type-name, virtual type (without debug switch)
     TypeNameNoDebug("vtk");
 
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         vtkWriter();
 
         //- Construct with some output options
@@ -159,7 +159,7 @@ public:
         );
 
 
-    //- Destructor
+    //- Destructor. Calls close()
     virtual ~vtkWriter();
 
 

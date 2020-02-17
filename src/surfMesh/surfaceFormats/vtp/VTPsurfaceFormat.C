@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,6 +96,7 @@ void Foam::fileFormats::VTPsurfaceFormat<Face>::write
 (
     const fileName& filename,
     const MeshedSurfaceProxy<Face>& surf,
+    IOstreamOption,
     const dictionary& options
 )
 {
@@ -204,6 +205,7 @@ void Foam::fileFormats::VTPsurfaceFormat<Face>::write
 (
     const fileName& filename,
     const UnsortedMeshedSurface<Face>& surf,
+    IOstreamOption,
     const dictionary& options
 )
 {

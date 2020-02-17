@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,8 +32,8 @@ Description
 
     The formatOptions for raw:
     \table
-        Property     | Description                          | Required | Default
-        compression  | on / off                             | no    | off
+        Property    | Description                           | Required | Default
+        compression | Use file compression                  | no  | false
     \endtable
 
     For example,
@@ -92,10 +92,10 @@ class rawWriter
 :
     public surfaceWriter
 {
-    // Private data
+    // Private Data
 
-        //- Output compression (default: uncompressed)
-        IOstream::compressionType writeCompression_;
+        //- Output stream option
+        IOstreamOption streamOpt_;
 
 
     // Private Member Functions
@@ -111,13 +111,13 @@ class rawWriter
 
 public:
 
-    //- Runtime type information
+    //- Declare type-name, virtual type (without debug switch)
     TypeNameNoDebug("raw");
 
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         rawWriter();
 
         //- Construct with some output options

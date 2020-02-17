@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,12 @@ Class
 
 Description
     Provide a means of writing x3d format.
+
+    Output stream options:
+       - ASCII only
+       - compression on/off
+
+    Output dictionary options: ignored
 
 SourceFiles
     X3DsurfaceFormat.C
@@ -64,7 +70,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         X3DsurfaceFormat() = default;
 
 
@@ -72,14 +78,15 @@ public:
     virtual ~X3DsurfaceFormat() = default;
 
 
-    // Static Member Functions
+    // Static Functions
 
         //- Write surface mesh components by proxy
         static void write
         (
             const fileName& filename,
             const MeshedSurfaceProxy<Face>& surf,
-            const dictionary& options = dictionary::null
+            IOstreamOption streamOpt = IOstreamOption(),
+            const dictionary& /*unused*/ = dictionary::null
         );
 
 
@@ -89,10 +96,11 @@ public:
         virtual void write
         (
             const fileName& name,
+            IOstreamOption streamOpt = IOstreamOption(),
             const dictionary& options = dictionary::null
         ) const
         {
-            write(name, MeshedSurfaceProxy<Face>(*this), options);
+            write(name, MeshedSurfaceProxy<Face>(*this), streamOpt, options);
         }
 };
 

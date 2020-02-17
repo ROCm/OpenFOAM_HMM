@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,8 +62,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-//
+// Forward Declarations
 class Time;
 class Istream;
 class Ostream;
@@ -95,14 +94,14 @@ class UnsortedMeshedSurface
 
 private:
 
-    // Private typedefs for convenience
+    // Private Typedefs (convenience)
 
         typedef MeshedSurface<Face>       ParentType;
         typedef MeshedSurface<Face>       FriendType;
         typedef MeshedSurfaceProxy<Face>  ProxyType;
 
 
-    // Private Member Data
+    // Private Data
 
         //- The zone Id associated with each face
         labelList zoneIds_;
@@ -128,7 +127,7 @@ private:
 
 protected:
 
-    // Protected Member functions
+    // Protected Member Functions
 
         //- Return non-const access to the zone Ids
         labelList& storedZoneIds()
@@ -148,16 +147,17 @@ protected:
 
 public:
 
-    // Public typedefs
+    // Public Typedefs
 
         //- Face type used
         typedef Face FaceType;
 
-        //- Runtime type information
-        TypeName("UnsortedMeshedSurface");
+
+    //- Declare type-name, virtual type (with debug switch)
+    TypeName("UnsortedMeshedSurface");
 
 
-    // Static
+    // Static Functions
 
         //- Can we read this file format type?
         static bool canReadType(const word& ext, bool verbose=false);
@@ -177,10 +177,10 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         UnsortedMeshedSurface();
 
-        //- Construct as copy
+        //- Copy construct
         UnsortedMeshedSurface(const UnsortedMeshedSurface<Face>& surf);
 
         //- Construct from a MeshedSurface
@@ -261,9 +261,10 @@ public:
             (
                 const fileName& name,
                 const UnsortedMeshedSurface<Face>& surf,
+                IOstreamOption streamOpt,
                 const dictionary& options
             ),
-            (name, surf, options)
+            (name, surf, streamOpt, options)
         );
 
         //- Write to file, select based on its extension
@@ -271,6 +272,7 @@ public:
         (
             const fileName& name,
             const UnsortedMeshedSurface<Face>& surf,
+            IOstreamOption streamOpt = IOstreamOption(),
             const dictionary& options = dictionary::null
         );
 
@@ -280,7 +282,8 @@ public:
             const fileName& name,
             const word& ext,
             const UnsortedMeshedSurface<Face>& surf,
-            const dictionary& options
+            IOstreamOption streamOpt = IOstreamOption(),
+            const dictionary& options = dictionary::null
         );
 
 
@@ -382,10 +385,11 @@ public:
         virtual void write
         (
             const fileName& name,
+            IOstreamOption streamOpt = IOstreamOption(),
             const dictionary& options = dictionary::null
         ) const
         {
-            write(name, *this, options);
+            write(name, *this, streamOpt, options);
         }
 
         //- Write to database

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,6 +91,7 @@ static inline void printColour(Ostream& os, const vector& rgb)
 Foam::surfaceWriters::x3dWriter::x3dWriter()
 :
     surfaceWriter(),
+    streamOpt_(),
     range_(),
     colourTablePtr_(nullptr)
 {}
@@ -102,6 +103,11 @@ Foam::surfaceWriters::x3dWriter::x3dWriter
 )
 :
     surfaceWriter(options),
+    streamOpt_
+    (
+        IOstream::ASCII,
+        IOstream::compressionEnum("compression", options)
+    ),
     range_(),
     colourTablePtr_(nullptr)
 {
@@ -202,11 +208,12 @@ Foam::fileName Foam::surfaceWriters::x3dWriter::write()
             mkDir(outputFile.path());
         }
 
-        MeshedSurfaceProxy<face>
+        MeshedSurfaceProxy<face>(surf.points(), surf.faces()).write
         (
-            surf.points(),
-            surf.faces()
-        ).write(outputFile, "x3d");
+            outputFile,
+            "x3d",
+            streamOpt_
+        );
     }
 
     wroteGeom_ = true;
@@ -243,7 +250,7 @@ Foam::fileName Foam::surfaceWriters::x3dWriter::writeTemplate
         outputFile /= timeName();
     }
 
-    // Append <field>_surfaceName.usr
+    // Append <field>_surfaceName.x3d
     outputFile /= fieldName + '_' + outputPath_.name();
     outputFile.ext("x3d");
 
@@ -273,7 +280,7 @@ Foam::fileName Foam::surfaceWriters::x3dWriter::writeTemplate
             mkDir(outputFile.path());
         }
 
-        OFstream os(outputFile);
+        OFstream os(outputFile, streamOpt_);
 
         writeHeader(os);
         beginGroup(os);

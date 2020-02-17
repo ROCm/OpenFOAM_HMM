@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,6 +45,7 @@ namespace surfaceWriters
 {
     defineTypeName(boundaryDataWriter);
     addToRunTimeSelectionTable(surfaceWriter, boundaryDataWriter, word);
+    addToRunTimeSelectionTable(surfaceWriter, boundaryDataWriter, wordDict);
 }
 }
 
@@ -53,7 +54,9 @@ namespace surfaceWriters
 
 Foam::surfaceWriters::boundaryDataWriter::boundaryDataWriter()
 :
-    surfaceWriter()
+    surfaceWriter(),
+    header_(false),
+    streamOpt_()
 {}
 
 
@@ -62,7 +65,13 @@ Foam::surfaceWriters::boundaryDataWriter::boundaryDataWriter
     const dictionary& options
 )
 :
-    surfaceWriter(options)
+    surfaceWriter(options),
+    header_(options.getOrDefault("header", false)),
+    streamOpt_
+    (
+        IOstream::formatEnum("format", options, IOstream::ASCII),
+        IOstream::compressionEnum("compression", options)
+    )
 {}
 
 
@@ -106,16 +115,8 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::write()
 
     fileName surfaceDir = outputPath_;
 
-    // Write points
-    if (verbose_)
-    {
-        Info<< "Writing points to " << surfaceDir/"points" << endl;
-    }
-
-
     // Dummy Time to use as objectRegistry
     autoPtr<Time> dummyTimePtr(Time::New(argList::envGlobalPath()));
-
 
     const meshedSurf& surf = surface();
 
@@ -126,7 +127,7 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::write()
             mkDir(surfaceDir);
         }
 
-        pointIOField pts
+        pointIOField iopts
         (
             IOobject
             (
@@ -135,19 +136,32 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::write()
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
-            ),
-            surf.points()
+            )
         );
 
-        // Do like regIOobject::writeObject but don't do instance() adaptation
+        if (verbose_)
+        {
+            Info<< "Writing points: " << iopts.objectPath() << endl;
+        }
+
+
+        // Like regIOobject::writeObject without instance() adaptation
         // since this would write to e.g. 0/ instead of postProcessing/
 
-        // Try opening an OFstream for object
-        OFstream os(pts.objectPath());
+        OFstream osGeom(iopts.objectPath(), streamOpt_);
 
-        //pts.writeHeader(os);
-        pts.writeData(os);
-        //pts.writeEndDivider(os);
+        if (header_)
+        {
+            iopts.writeHeader(osGeom);
+        }
+
+        // Just like writeData, but without copying beforehand
+        osGeom << surf.points();
+
+        if (header_)
+        {
+            iopts.writeEndDivider(osGeom);
+        }
     }
 
     wroteGeom_ = true;
@@ -193,7 +207,7 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::writeTemplate
             mkDir(outputFile.path());
         }
 
-        pointIOField pts
+        pointIOField iopts
         (
             IOobject
             (
@@ -202,48 +216,79 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::writeTemplate
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
-            ),
-            label(0)
+            )
         );
+
+        if (verbose_)
+        {
+            if (this->isPointData())
+            {
+                Info<< "Writing points: " << iopts.objectPath() << endl;
+            }
+            else
+            {
+                Info<< "Writing face centres: " << iopts.objectPath() << endl;
+            }
+        }
+
+        // Like regIOobject::writeObject without instance() adaptation
+        // since this would write to e.g. 0/ instead of postProcessing/
+
+        OFstream osGeom(iopts.objectPath(), streamOpt_);
+
+        if (header_)
+        {
+            iopts.writeHeader(osGeom);
+        }
 
         if (this->isPointData())
         {
-            if (verbose_)
-            {
-                Info<< "Writing points to "
-                    << surfaceDir/"points" << endl;
-            }
-            pts = points;
+            // Just like writeData, but without copying beforehand
+            osGeom << points;
         }
         else
         {
-            if (verbose_)
-            {
-                Info<< "Writing face centres to "
-                    << surfaceDir/"points" << endl;
-            }
+            primitivePatch pp(SubList<face>(faces), points);
 
-            primitivePatch pp(SubList<face>(faces, faces.size()), points);
-
-            pts = pp.faceCentres();
+            // Just like writeData, but without copying beforehand
+            osGeom << pp.faceCentres();
         }
 
+        if (header_)
         {
-            // Do like regIOobject::writeObject but don't do instance()
-            // adaptation
-            // since this would write to e.g. 0/ instead of postProcessing/
-
-            // Try opening an OFstream for object
-            OFstream os(pts.objectPath());
-
-            //pts.writeHeader(os);
-            pts.writeData(os);
-            //pts.writeEndDivider(os);
+            iopts.writeEndDivider(osGeom);
         }
 
 
         // Write field
-        OFstream(outputFile)() << tfield();
+        {
+            IOField<Type> iofld
+            (
+                IOobject
+                (
+                    outputFile,
+                    *dummyTimePtr,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                )
+            );
+
+            OFstream osField(iofld.objectPath(), streamOpt_);
+
+            if (header_)
+            {
+                iofld.writeHeader(osField);
+            }
+
+            // Just like writeData, but without copying beforehand
+            osField << tfield();
+
+            if (header_)
+            {
+                iofld.writeEndDivider(osField);
+            }
+        }
     }
 
     wroteGeom_ = true;

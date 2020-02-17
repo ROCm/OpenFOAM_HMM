@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,12 @@ Description
 
     The output is never sorted by zone and is only written if it consists
     entirely of triangles.
+
+    Output stream options:
+       - ASCII only
+       - compression on/off
+
+    Output dictionary options: ignored
 
 SourceFiles
     GTSsurfaceFormat.C
@@ -80,14 +86,15 @@ public:
     virtual ~GTSsurfaceFormat() = default;
 
 
-    // Static Member Functions
+    // Static Functions
 
         //- Write MeshedSurface
         static void write
         (
             const fileName& filename,
             const MeshedSurface<Face>& surf,
-            const dictionary& options = dictionary::null
+            IOstreamOption streamOpt = IOstreamOption(),
+            const dictionary& /*ununsed*/ = dictionary::null
         );
 
         //- Write UnsortedMeshedSurface, the output remains unsorted
@@ -95,7 +102,8 @@ public:
         (
             const fileName& filename,
             const UnsortedMeshedSurface<Face>& surf,
-            const dictionary& options = dictionary::null
+            IOstreamOption streamOpt = IOstreamOption(),
+            const dictionary& /*ununsed*/ = dictionary::null
         );
 
 
@@ -108,10 +116,11 @@ public:
         virtual void write
         (
             const fileName& name,
+            IOstreamOption streamOpt = IOstreamOption(),
             const dictionary& options = dictionary::null
         ) const
         {
-            write(name, *this, options);
+            write(name, *this, streamOpt, options);
         }
 };
 

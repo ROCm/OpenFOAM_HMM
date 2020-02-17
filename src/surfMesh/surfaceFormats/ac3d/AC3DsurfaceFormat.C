@@ -309,9 +309,13 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
 (
     const fileName& filename,
     const MeshedSurfaceProxy<Face>& surf,
+    IOstreamOption streamOpt,
     const dictionary&
 )
 {
+    // ASCII only, allow output compression
+    streamOpt.format(IOstream::ASCII);
+
     const pointField& pointLst = surf.points();
     const UList<Face>& faceLst = surf.surfFaces();
 
@@ -324,7 +328,7 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
 
     const bool useFaceMap = (surf.useFaceMap() && zones.size() > 1);
 
-    OFstream os(filename);
+    OFstream os(filename, streamOpt);
     if (!os.good())
     {
         FatalErrorInFunction
@@ -380,10 +384,14 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
 (
     const fileName& filename,
     const UnsortedMeshedSurface<Face>& surf,
+    IOstreamOption streamOpt,
     const dictionary&
 )
 {
-    OFstream os(filename);
+    // ASCII only, allow output compression
+    streamOpt.format(IOstream::ASCII);
+
+    OFstream os(filename, streamOpt);
     if (!os.good())
     {
         FatalErrorInFunction

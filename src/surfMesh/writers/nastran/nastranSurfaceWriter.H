@@ -142,7 +142,7 @@ private:
         (
             Ostream& os,
             const point& pt,
-            const label pointI  //!< 0-based Point Id
+            const label pointI      //!< 0-based Point Id
         ) const;
 
         //- Write a face element (CTRIA3 or CQUAD4)

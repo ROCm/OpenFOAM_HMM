@@ -243,6 +243,7 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
 (
     const fileName& filename,
     const MeshedSurfaceProxy<Face>& surf,
+    IOstreamOption,
     const dictionary& options
 )
 {
@@ -316,6 +317,7 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
 (
     const fileName& filename,
     const UnsortedMeshedSurface<Face>& surf,
+    IOstreamOption,
     const dictionary& options
 )
 {

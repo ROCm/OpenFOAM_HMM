@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,17 @@ Class
 
 Description
     Provide a means of writing AVL/FIRE FLMA format.
+
+    Output stream options:
+       - ASCII only
+       - compression : ignored
+
+    Output dictionary options: ignored
+
+Note
+   The internal logic is still a bit odd (2020-02) since compressed files
+   must have a \b .flmaz ending.
+   To be revisited in the future.
 
 SourceFiles
     FLMAsurfaceFormat.C
@@ -75,11 +86,10 @@ protected:
             const MeshedSurfaceProxy<Face>& surf
         );
 
-
         //- Write surface mesh components by proxy with/without compression
         static void write
         (
-            bool compress,
+            IOstreamOption::compressionType comp,
             const fileName& filename,
             const MeshedSurfaceProxy<Face>& surf
         );
@@ -89,7 +99,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         FLMAsurfaceFormat() = default;
 
 
@@ -97,14 +107,15 @@ public:
     virtual ~FLMAsurfaceFormat() = default;
 
 
-    // Static Member Functions
+    // Static Functions
 
         //- Write surface mesh components by proxy
         static void write
         (
             const fileName& filename,
             const MeshedSurfaceProxy<Face>& surf,
-            const dictionary& options = dictionary::null
+            IOstreamOption /*ignored*/ = IOstreamOption(),
+            const dictionary& /*unused*/ = dictionary::null
         );
 
 
@@ -114,12 +125,12 @@ public:
         virtual void write
         (
             const fileName& name,
+            IOstreamOption streamOpt = IOstreamOption(),
             const dictionary& options = dictionary::null
         ) const
         {
-            write(name, MeshedSurfaceProxy<Face>(*this), options);
+            write(name, MeshedSurfaceProxy<Face>(*this), streamOpt, options);
         }
-
 };
 
 
@@ -136,7 +147,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         FLMAZsurfaceFormat() = default;
 
 
@@ -144,14 +155,15 @@ public:
     virtual ~FLMAZsurfaceFormat() = default;
 
 
-    // Static Member Functions
+    // Static Functions
 
         //- Write surface mesh components by proxy
         static void write
         (
             const fileName& filename,
             const MeshedSurfaceProxy<Face>& surf,
-            const dictionary& options = dictionary::null
+            IOstreamOption /*ignored*/ = IOstreamOption(),
+            const dictionary& /*unused*/ = dictionary::null
         );
 
 
@@ -161,12 +173,12 @@ public:
         virtual void write
         (
             const fileName& name,
+            IOstreamOption streamOpt = IOstreamOption(),
             const dictionary& options = dictionary::null
         ) const
         {
-            write(name, MeshedSurfaceProxy<Face>(*this), options);
+            write(name, MeshedSurfaceProxy<Face>(*this), streamOpt, options);
         }
-
 };
 
 

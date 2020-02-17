@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,7 @@ Description
     The formatOptions for x3d:
     \table
         Property    | Description                           | Required | Default
+        compression | Use file compression                  | no  | false
         range       | The min/max range for colour table    | no  | automatic
         colourMap   | The colour map for rendering          | no  | coolToWarm
     \endtable
@@ -87,6 +88,9 @@ class x3dWriter
 {
     // Private Data
 
+        //- Output stream option
+        IOstreamOption streamOpt_;
+
         //- Range of values
         //  The lower/upper limits for the colour table output
         //  Undefined means calculate from the data
@@ -109,13 +113,13 @@ class x3dWriter
 
 public:
 
-    //- Runtime type information
+    //- Declare type-name, virtual type (without debug switch)
     TypeNameNoDebug("x3d");
 
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         x3dWriter();
 
         //- Construct with some output options

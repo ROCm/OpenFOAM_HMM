@@ -106,10 +106,11 @@ void Foam::UnsortedMeshedSurface<Face>::write
 (
     const fileName& name,
     const UnsortedMeshedSurface<Face>& surf,
+    IOstreamOption streamOpt,
     const dictionary& options
 )
 {
-    write(name, name.ext(), surf, options);
+    write(name, name.ext(), surf, streamOpt, options);
 }
 
 
@@ -119,6 +120,7 @@ void Foam::UnsortedMeshedSurface<Face>::write
     const fileName& name,
     const word& ext,
     const UnsortedMeshedSurface<Face>& surf,
+    IOstreamOption streamOpt,
     const dictionary& options
 )
 {
@@ -136,7 +138,7 @@ void Foam::UnsortedMeshedSurface<Face>::write
 
         if (delegate.found(ext))
         {
-            MeshedSurfaceProxy<Face>(surf).write(name, ext, options);
+            MeshedSurfaceProxy<Face>(surf).write(name, ext, streamOpt, options);
         }
         else
         {
@@ -149,7 +151,7 @@ void Foam::UnsortedMeshedSurface<Face>::write
     }
     else
     {
-        mfIter()(name, surf, options);
+        mfIter()(name, surf, streamOpt, options);
     }
 }
 

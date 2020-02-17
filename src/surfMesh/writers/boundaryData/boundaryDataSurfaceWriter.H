@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,7 +29,27 @@ Class
 Description
     A surfaceWriter for outputting to a form useable for the
     timeVaryingMapped boundary condition. This reads the data from
-    constant/boundaryData/\<patch\> directory
+    constant/boundaryData/\<patch\> directory.
+
+    \verbatim
+    formatOptions
+    {
+        boundaryData
+        {
+            header      false;
+            format      ascii;
+            compression false;
+        }
+    }
+    \endverbatim
+
+    Format options:
+    \table
+        Property    | Description                           | Required | Default
+        header      | Generate files with FoamFile header   | no  | false
+        format      | ascii/binary                          | no  | ascii
+        compression | Use file compression                  | no  | false
+    \endtable
 
     Typical way of working:
     - use a sampledSurface of type 'patch' (to sample a patch):
@@ -37,17 +57,25 @@ Description
     surfaces
     {
         type            surfaces;
-        surfaceFormat   boundaryData;
         fields          ( p );
+        surfaceFormat   boundaryData;
+        formatOptions
+        {
+            boundaryData
+            {
+                header  true;
+                format  binary;
+            }
+        }
         surfaces
-        (
+        {
             outlet
             {
                 type            patch;
                 patches         (outlet);
                 interpolate     false;
             }
-        );
+        }
     }
     \endverbatim
 
@@ -113,6 +141,15 @@ class boundaryDataWriter
 :
     public surfaceWriter
 {
+    // Private Data
+
+        //- Output files with FoamFile header
+        bool header_;
+
+        //- Output stream option
+        IOstreamOption streamOpt_;
+
+
     // Private Member Functions
 
         //- Templated write field operation
@@ -126,13 +163,13 @@ class boundaryDataWriter
 
 public:
 
-    //- Runtime type information
+    //- Declare type-name, virtual type (without debug switch)
     TypeNameNoDebug("boundaryData");
 
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         boundaryDataWriter();
 
         //- Construct with some output options

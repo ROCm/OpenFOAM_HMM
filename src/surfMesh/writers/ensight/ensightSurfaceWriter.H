@@ -81,7 +81,7 @@ class ensightWriter
 {
     // Private Data
 
-        //- Write option (default: IOstream::ASCII)
+        //- Output format option (default: IOstream::ASCII)
         IOstream::streamFormat writeFormat_;
 
         //- Collate times (default: true)
@@ -193,13 +193,13 @@ class ensightWriter
 
 public:
 
-    //- Runtime type information
+    //- Declare type-name, virtual type (without debug switch)
     TypeNameNoDebug("ensight");
 
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         ensightWriter();
 
         //- Construct with some output options

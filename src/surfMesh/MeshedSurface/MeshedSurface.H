@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,7 +67,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 
 class Time;
 class surfMesh;
@@ -104,7 +104,7 @@ class MeshedSurface
 
 private:
 
-    // Private typedefs for convenience
+    // Private Typedefs (convenience)
 
         typedef PrimitivePatch
         <
@@ -119,7 +119,7 @@ private:
         typedef MeshedSurfaceProxy<Face>     ProxyType;
 
 
-    // Private Member Data
+    // Private Data
 
         //- Zone information
         // (face ordering nFaces/startFace only used during reading/writing)
@@ -137,7 +137,7 @@ private:
 
 protected:
 
-    // Protected Member functions
+    // Protected Member Functions
 
         //- Transfer points/zones from 'face' to other other shapes.
         //  Eg, transcribe face to triFace, or face -> labelledTri, including
@@ -180,16 +180,17 @@ protected:
 
 public:
 
-    // Public typedefs
+    // Public Typedefs
 
         //- Face type used
         typedef Face FaceType;
 
-        //- Runtime type information
-        ClassName("MeshedSurface");
+
+    //- Declare type-name (with debug switch)
+    ClassName("MeshedSurface");
 
 
-    // Static
+    // Static Functions
 
         //- Can we read this file format?
         static bool canRead(const fileName& name, bool verbose=false);
@@ -209,7 +210,7 @@ public:
 
     // Constructors
 
-        //- Construct null, an empty surface
+        //- Default construct, an empty surface
         MeshedSurface();
 
         //- Copy construct
@@ -326,9 +327,10 @@ public:
             (
                 const fileName& name,
                 const MeshedSurface<Face>& surf,
+                IOstreamOption streamOpt,
                 const dictionary& options
             ),
-            (name, surf, options)
+            (name, surf, streamOpt, options)
         );
 
         //- Write to file, selecting writer based on its extension
@@ -336,6 +338,7 @@ public:
         (
             const fileName& name,
             const MeshedSurface<Face>& surf,
+            IOstreamOption streamOpt = IOstreamOption(),
             const dictionary& options = dictionary::null
         );
 
@@ -345,6 +348,7 @@ public:
             const fileName& name,
             const word& ext,
             const MeshedSurface<Face>& surf,
+            IOstreamOption streamOpt = IOstreamOption(),
             const dictionary& options = dictionary::null
         );
 
@@ -526,10 +530,11 @@ public:
         virtual void write
         (
             const fileName& name,
+            IOstreamOption streamOpt = IOstreamOption(),
             const dictionary& options = dictionary::null
         ) const
         {
-            write(name, *this, options);
+            write(name, *this, streamOpt, options);
         }
 
         //- Write to database
@@ -540,7 +545,7 @@ public:
         ) const;
 
 
-    // Member operators
+    // Member Operators
 
         //- Copy assignment
         void operator=(const MeshedSurface<Face>& surf);
@@ -570,7 +575,6 @@ public:
             Ostream& os,
             const MeshedSurface<Face>& surf
         );
-
 };
 
 

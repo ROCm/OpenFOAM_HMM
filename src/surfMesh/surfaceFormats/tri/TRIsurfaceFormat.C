@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -156,9 +156,13 @@ void Foam::fileFormats::TRIsurfaceFormat<Face>::write
 (
     const fileName& filename,
     const MeshedSurfaceProxy<Face>& surf,
-    const dictionary& options
+    IOstreamOption streamOpt,
+    const dictionary&
 )
 {
+    // ASCII only, allow output compression
+    streamOpt.format(IOstream::ASCII);
+
     const UList<point>& pointLst = surf.points();
     const UList<Face>&   faceLst = surf.surfFaces();
     const UList<label>&  faceMap = surf.faceMap();
@@ -172,7 +176,7 @@ void Foam::fileFormats::TRIsurfaceFormat<Face>::write
 
     const bool useFaceMap = (surf.useFaceMap() && zones.size() > 1);
 
-    OFstream os(filename);
+    OFstream os(filename, streamOpt);
     if (!os.good())
     {
         FatalErrorInFunction
@@ -213,13 +217,17 @@ void Foam::fileFormats::TRIsurfaceFormat<Face>::write
 (
     const fileName& filename,
     const UnsortedMeshedSurface<Face>& surf,
-    const dictionary& options
+    IOstreamOption streamOpt,
+    const dictionary&
 )
 {
+    // ASCII only, allow output compression
+    streamOpt.format(IOstream::ASCII);
+
     const UList<point>& pointLst = surf.points();
     const UList<Face>&   faceLst = surf.surfFaces();
 
-    OFstream os(filename);
+    OFstream os(filename, streamOpt);
     if (!os.good())
     {
         FatalErrorInFunction

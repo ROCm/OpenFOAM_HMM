@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,6 +40,7 @@ namespace surfaceWriters
 {
     defineTypeName(foamWriter);
     addToRunTimeSelectionTable(surfaceWriter, foamWriter, word);
+    addToRunTimeSelectionTable(surfaceWriter, foamWriter, wordDict);
 }
 }
 
@@ -48,7 +49,8 @@ namespace surfaceWriters
 
 Foam::surfaceWriters::foamWriter::foamWriter()
 :
-    surfaceWriter()
+    surfaceWriter(),
+    streamOpt_()
 {}
 
 
@@ -57,7 +59,12 @@ Foam::surfaceWriters::foamWriter::foamWriter
     const dictionary& options
 )
 :
-    surfaceWriter(options)
+    surfaceWriter(options),
+    streamOpt_
+    (
+        IOstream::formatEnum("format", options, IOstream::ASCII),
+        IOstream::compressionEnum("compression", options)
+    )
 {}
 
 
@@ -125,10 +132,10 @@ Foam::fileName Foam::surfaceWriters::foamWriter::write()
         }
 
         // Points
-        OFstream(surfaceDir/"points")() << points;
+        OFstream(surfaceDir/"points", streamOpt_)() << points;
 
         // Faces
-        OFstream(surfaceDir/"faces")() << faces;
+        OFstream(surfaceDir/"faces", streamOpt_)() << faces;
 
         // Face centers.
         // Not really necessary but very handy when reusing as inputs
@@ -140,7 +147,7 @@ Foam::fileName Foam::surfaceWriters::foamWriter::write()
             faceCentres[facei] = faces[facei].centre(points);
         }
 
-        OFstream(surfaceDir/"faceCentres")() << faceCentres;
+        OFstream(surfaceDir/"faceCentres", streamOpt_)() << faceCentres;
     }
 
     wroteGeom_ = true;
@@ -202,7 +209,7 @@ Foam::fileName Foam::surfaceWriters::foamWriter::writeTemplate
         }
 
         // Write field
-        OFstream(outputFile)() << tfield();
+        OFstream(outputFile, streamOpt_)() << tfield();
     }
 
     wroteGeom_ = true;

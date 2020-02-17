@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,10 +62,11 @@ void Foam::MeshedSurfaceProxy<Face>::write
 (
     const fileName& name,
     const MeshedSurfaceProxy& surf,
+    IOstreamOption streamOpt,
     const dictionary& options
 )
 {
-    write(name, name.ext(), surf, options);
+    write(name, name.ext(), surf, streamOpt, options);
 }
 
 
@@ -75,6 +76,7 @@ void Foam::MeshedSurfaceProxy<Face>::write
     const fileName& name,
     const word& ext,
     const MeshedSurfaceProxy& surf,
+    IOstreamOption streamOpt,
     const dictionary& options
 )
 {
@@ -94,7 +96,7 @@ void Foam::MeshedSurfaceProxy<Face>::write
             << exit(FatalError);
     }
 
-    mfIter()(name, surf, options);
+    mfIter()(name, surf, streamOpt, options);
 }
 
 
@@ -210,7 +212,6 @@ void Foam::MeshedSurfaceProxy<Face>::write
 
         io.writeEndDivider(os);
     }
-
 }
 
 

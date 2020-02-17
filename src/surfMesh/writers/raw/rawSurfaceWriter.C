@@ -72,7 +72,7 @@ defineSurfaceWriterWriteFields(Foam::surfaceWriters::rawWriter);
 Foam::surfaceWriters::rawWriter::rawWriter()
 :
     surfaceWriter(),
-    writeCompression_(IOstream::UNCOMPRESSED)
+    streamOpt_()
 {}
 
 
@@ -82,8 +82,9 @@ Foam::surfaceWriters::rawWriter::rawWriter
 )
 :
     surfaceWriter(options),
-    writeCompression_
+    streamOpt_
     (
+        IOstream::ASCII,
         IOstream::compressionEnum("compression", options)
     )
 {}
@@ -152,13 +153,7 @@ Foam::fileName Foam::surfaceWriters::rawWriter::write()
             mkDir(outputFile.path());
         }
 
-        OFstream os
-        (
-            outputFile,
-            IOstream::ASCII,
-            IOstream::currentVersion,
-            writeCompression_
-        );
+        OFstream os(outputFile, streamOpt_);
 
         // Header
         {

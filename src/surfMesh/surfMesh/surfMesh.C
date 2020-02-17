@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,6 +43,7 @@ namespace Foam
 }
 
 Foam::word Foam::surfMesh::meshSubDir = "surfMesh";
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -566,10 +567,11 @@ void Foam::surfMesh::removeFiles() const
 void Foam::surfMesh::write
 (
     const fileName& name,
+    IOstreamOption streamOpt,
     const dictionary& options
 ) const
 {
-    write(name, name.ext(), options);
+    write(name, name.ext(), streamOpt, options);
 }
 
 
@@ -577,6 +579,7 @@ void Foam::surfMesh::write
 (
     const fileName& name,
     const word& ext,
+    IOstreamOption streamOpt,
     const dictionary& options
 ) const
 {
@@ -585,7 +588,7 @@ void Foam::surfMesh::write
         this->points(),
         this->faces(),
         this->surfZones()
-    ).write(name, ext, options);
+    ).write(name, ext, streamOpt, options);
 }
 
 

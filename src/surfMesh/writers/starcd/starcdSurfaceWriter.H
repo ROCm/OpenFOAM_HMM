@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,12 @@ Class
 
 Description
     A surfaceWriter for STARCD files.
+
+    The formatOptions for starcd:
+    \table
+        Property    | Description                           | Required | Default
+        compression | Use file compression                  | no  | false
+    \endtable
 
     The geometry is written via the MeshedSurfaceProxy, the fields
     are written in a trivial ASCII format with ID and VALUE as
@@ -89,6 +95,12 @@ class starcdWriter
 :
     public surfaceWriter
 {
+    // Private Data
+
+        //- Output stream option
+        IOstreamOption streamOpt_;
+
+
     // Private Member Functions
 
         //- Templated write operation
@@ -102,13 +114,13 @@ class starcdWriter
 
 public:
 
-    //- Runtime type information
+    //- Declare type-name, virtual type (without debug switch)
     TypeNameNoDebug("starcd");
 
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         starcdWriter();
 
         //- Construct with some output options

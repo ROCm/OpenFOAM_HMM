@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "FLMAsurfaceFormat.H"
-
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -318,32 +317,27 @@ void Foam::fileFormats::FLMAsurfaceFormat<Face>::write
 template<class Face>
 void Foam::fileFormats::FLMAsurfaceFormat<Face>::write
 (
-    bool compress,
+    IOstreamOption::compressionType comp,
     const fileName& filename,
     const MeshedSurfaceProxy<Face>& surf
 )
 {
+    // ASCII only, allow output compression
     autoPtr<OFstream> osPtr
     (
-        compress
-      ? new OFstream
-        (
-            filename,
-            IOstream::ASCII,
-            IOstream::currentVersion,
-            IOstream::COMPRESSED
-        )
-      : new OFstream(filename)
+        new OFstream(filename, IOstreamOption(IOstream::ASCII, comp))
     );
 
     if (osPtr->good())
     {
-        FLMAsurfaceFormat<Face>::write(osPtr(), surf);
-        osPtr.clear();    // implicitly close the file
+        FLMAsurfaceFormat<Face>::write(*osPtr, surf);
 
-        if (compress)
+        if (comp == IOstream::COMPRESSED)
         {
-            // rename .flmaz.gz -> .flmaz
+            // Close the file
+            osPtr.clear();
+
+            // Rename .flmaz.gz -> .flmaz
             // The '.gz' is automatically added by OFstream in compression mode
             Foam::mv(filename + ".gz", filename);
         }
@@ -364,10 +358,11 @@ void Foam::fileFormats::FLMAsurfaceFormat<Face>::write
 (
     const fileName& filename,
     const MeshedSurfaceProxy<Face>& surf,
+    IOstreamOption,
     const dictionary&
 )
 {
-    write(false, filename, surf);
+    FLMAsurfaceFormat<Face>::write(IOstream::UNCOMPRESSED, filename, surf);
 }
 
 
@@ -376,10 +371,11 @@ void Foam::fileFormats::FLMAZsurfaceFormat<Face>::write
 (
     const fileName& filename,
     const MeshedSurfaceProxy<Face>& surf,
+    IOstreamOption,
     const dictionary&
 )
 {
-    FLMAsurfaceFormat<Face>::write(true, filename, surf);
+    FLMAsurfaceFormat<Face>::write(IOstream::COMPRESSED, filename, surf);
 }
 
 

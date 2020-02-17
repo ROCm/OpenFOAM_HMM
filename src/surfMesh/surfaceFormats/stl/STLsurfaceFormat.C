@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -202,10 +202,11 @@ template<class Face>
 void Foam::fileFormats::STLsurfaceFormat<Face>::writeAscii
 (
     const fileName& filename,
-    const MeshedSurfaceProxy<Face>& surf
+    const MeshedSurfaceProxy<Face>& surf,
+    IOstream::compressionType comp
 )
 {
-    OFstream os(filename);
+    OFstream os(filename, IOstreamOption(IOstream::ASCII, comp));
     if (!os.good())
     {
         FatalErrorInFunction
@@ -316,23 +317,24 @@ template<class Face>
 void Foam::fileFormats::STLsurfaceFormat<Face>::writeAscii
 (
     const fileName& filename,
-    const UnsortedMeshedSurface<Face>& surf
+    const UnsortedMeshedSurface<Face>& surf,
+    IOstream::compressionType comp
 )
 {
-    OFstream os(filename);
-    if (!os.good())
-    {
-        FatalErrorInFunction
-            << "Cannot open file for writing " << filename
-            << exit(FatalError);
-    }
-
     const pointField& pointLst = surf.points();
     const UList<Face>& faceLst = surf.surfFaces();
 
     // A single zone - we can skip sorting
     if (surf.zoneToc().size() == 1)
     {
+        OFstream os(filename, IOstreamOption(IOstream::ASCII, comp));
+        if (!os.good())
+        {
+            FatalErrorInFunction
+                << "Cannot open file for writing " << filename
+                << exit(FatalError);
+        }
+
         os << "solid " << surf.zoneToc()[0].name() << nl;
         for (const Face& f : faceLst)
         {
@@ -354,7 +356,8 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeAscii
                 faceLst,
                 zoneLst,
                 faceMap
-            )
+            ),
+            comp
         );
     }
 }
@@ -402,19 +405,22 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::write
 (
     const fileName& filename,
     const MeshedSurfaceProxy<Face>& surf,
+    IOstreamOption streamOpt,
     const dictionary& options
 )
 {
-    // Detect "stlb" extension
-    bool useBinary = STLCore::isBinaryName(filename, STLCore::UNKNOWN);
-
-    if (useBinary)
+    if
+    (
+        streamOpt.format() == IOstream::BINARY
+        // Detected "stlb" extension?
+     || STLCore::isBinaryName(filename, STLCore::UNKNOWN)
+    )
     {
         writeBinary(filename, surf);
     }
     else
     {
-        writeAscii(filename, surf);
+        writeAscii(filename, surf, streamOpt.compression());
     }
 }
 
@@ -424,7 +430,8 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::write
 (
     const fileName& filename,
     const MeshedSurfaceProxy<Face>& surf,
-    const STLFormat format
+    const STLFormat format,
+    IOstream::compressionType comp
 )
 {
     if (STLCore::isBinaryName(filename, format))
@@ -433,7 +440,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::write
     }
     else
     {
-        writeAscii(filename, surf);
+        writeAscii(filename, surf, comp);
     }
 }
 
@@ -443,19 +450,22 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::write
 (
     const fileName& filename,
     const UnsortedMeshedSurface<Face>& surf,
+    IOstreamOption streamOpt,
     const dictionary& options
 )
 {
-    // Detect "stlb" extension
-    bool useBinary = STLCore::isBinaryName(filename, STLCore::UNKNOWN);
-
-    if (useBinary)
+    if
+    (
+        streamOpt.format() == IOstream::BINARY
+        // Detected "stlb" extension?
+     || STLCore::isBinaryName(filename, STLCore::UNKNOWN)
+    )
     {
         writeBinary(filename, surf);
     }
     else
     {
-        writeAscii(filename, surf);
+        writeAscii(filename, surf, streamOpt.compression());
     }
 }
 
@@ -465,7 +475,8 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::write
 (
     const fileName& filename,
     const UnsortedMeshedSurface<Face>& surf,
-    const STLFormat format
+    const STLFormat format,
+    IOstream::compressionType comp
 )
 {
     if (STLCore::isBinaryName(filename, format))
@@ -474,7 +485,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::write
     }
     else
     {
-        writeAscii(filename, surf);
+        writeAscii(filename, surf, comp);
     }
 }
 

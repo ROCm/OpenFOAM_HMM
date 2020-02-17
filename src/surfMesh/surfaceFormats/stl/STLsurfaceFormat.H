@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,10 @@ Class
 
 Description
     Provide a means of reading/writing STL files (ASCII and BINARY).
+
+    Output stream options: ASCII/BINARY, compression for ASCII only
+
+    Output dictionary options: ignored
 
 Note
     For efficiency, the zones are sorted before creating the faces.
@@ -97,13 +101,14 @@ public:
     virtual ~STLsurfaceFormat() = default;
 
 
-    // Static Member Functions
+    // Static Functions
 
         //- Write surface mesh components by proxy (as ASCII)
         static void writeAscii
         (
             const fileName& filename,
-            const MeshedSurfaceProxy<Face>& surf
+            const MeshedSurfaceProxy<Face>& surf,
+            IOstream::compressionType comp = IOstream::UNCOMPRESSED
         );
 
         //- Write surface mesh components by proxy (as BINARY)
@@ -117,7 +122,8 @@ public:
         static void writeAscii
         (
             const fileName& filename,
-            const UnsortedMeshedSurface<Face>& surf
+            const UnsortedMeshedSurface<Face>& surf,
+            IOstream::compressionType comp = IOstream::UNCOMPRESSED
         );
 
         //- Write UnsortedMeshedSurface (as BINARY) unsorted by zone
@@ -133,7 +139,8 @@ public:
         (
             const fileName& filename,
             const MeshedSurfaceProxy<Face>& surf,
-            const STLFormat format
+            const STLFormat format,
+            IOstream::compressionType comp = IOstream::UNCOMPRESSED
         );
 
         //- Write UnsortedMeshedSurface
@@ -142,7 +149,8 @@ public:
         (
             const fileName& filename,
             const UnsortedMeshedSurface<Face>& surf,
-            const STLFormat format
+            const STLFormat format,
+            IOstream::compressionType comp = IOstream::UNCOMPRESSED
         );
 
 
@@ -152,6 +160,7 @@ public:
         (
             const fileName& filename,
             const MeshedSurfaceProxy<Face>& surf,
+            IOstreamOption streamOpt = IOstreamOption(),
             const dictionary& options = dictionary::null
         );
 
@@ -161,6 +170,7 @@ public:
         (
             const fileName& filename,
             const UnsortedMeshedSurface<Face>& surf,
+            IOstreamOption streamOpt = IOstreamOption(),
             const dictionary& options = dictionary::null
         );
 
@@ -174,10 +184,11 @@ public:
         virtual void write
         (
             const fileName& name,
+            IOstreamOption streamOpt = IOstreamOption(),
             const dictionary& options = dictionary::null
         ) const
         {
-            write(name, MeshedSurfaceProxy<Face>(*this), options);
+            write(name, MeshedSurfaceProxy<Face>(*this), streamOpt, options);
         }
 };
 

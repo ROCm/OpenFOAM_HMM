@@ -249,9 +249,13 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
 (
     const fileName& filename,
     const MeshedSurface<Face>& surf,
+    IOstreamOption streamOpt,
     const dictionary&
 )
 {
+    // ASCII only, allow output compression
+    streamOpt.format(IOstream::ASCII);
+
     const UList<point>& pointLst = surf.points();
     const UList<Face>& faceLst  = surf.surfFaces();
 
@@ -264,7 +268,7 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
 
     checkIfTriangulated(faceLst);
 
-    OFstream os(filename);
+    OFstream os(filename, streamOpt);
     if (!os.good())
     {
         FatalErrorInFunction
@@ -336,9 +340,13 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
 (
     const fileName& filename,
     const UnsortedMeshedSurface<Face>& surf,
+    IOstreamOption streamOpt,
     const dictionary&
 )
 {
+    // ASCII only, allow output compression
+    streamOpt.format(IOstream::ASCII);
+
     const UList<point>& pointLst = surf.points();
     const UList<Face>& faceLst = surf.surfFaces();
     const UList<label>& zoneIds = surf.zoneIds();
@@ -346,7 +354,7 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
 
     checkIfTriangulated(faceLst);
 
-    OFstream os(filename);
+    OFstream os(filename, streamOpt);
     if (!os.good())
     {
         FatalErrorInFunction

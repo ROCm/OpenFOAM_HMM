@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,24 @@ Class
 
 Description
     A surfaceWriter for OpenFOAM surfaces
+
+    \verbatim
+    formatOptions
+    {
+        foam
+        {
+            format      ascii;
+            compression true;
+        }
+    }
+    \endverbatim
+
+    Format options:
+    \table
+        Property | Description                              | Required | Default
+        format   | ascii/binary                             | no  | ascii
+        compression | output file compression               | no  | false
+    \endtable
 
     \heading Output file locations
 
@@ -83,6 +101,12 @@ class foamWriter
 :
     public surfaceWriter
 {
+    // Private Data
+
+        //- Output stream option
+        IOstreamOption streamOpt_;
+
+
     // Private Member Functions
 
         //- Templated write operation
@@ -96,13 +120,13 @@ class foamWriter
 
 public:
 
-    //- Runtime type information
+    //- Declare type-name, virtual type (without debug switch)
     TypeNameNoDebug("foam");
 
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         foamWriter();
 
         //- Construct with some output options

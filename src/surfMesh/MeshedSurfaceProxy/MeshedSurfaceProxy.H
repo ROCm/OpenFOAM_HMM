@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 
 template<class Face> class MeshedSurface;
 
@@ -67,7 +67,7 @@ class MeshedSurfaceProxy
 :
     public fileFormats::surfaceFormatsCore
 {
-    // Private Member Data
+    // Private Data
 
         const pointField& points_;
 
@@ -79,16 +79,17 @@ class MeshedSurfaceProxy
 
 public:
 
-    // Public typedefs
+    // Public Typedefs
 
         //- Face type used
         typedef Face FaceType;
 
 
-    // Static
+    //- Declare type-name (with debug switch)
+    ClassName("MeshedSurfaceProxy");
 
-        //- Runtime type information
-        ClassName("MeshedSurfaceProxy");
+
+    // Static Functions
 
         //- The file format types that can be written via MeshedSurfaceProxy
         static wordHashSet writeTypes();
@@ -124,9 +125,10 @@ public:
             (
                 const fileName& name,
                 const MeshedSurfaceProxy<Face>& surf,
+                IOstreamOption streamOpt,
                 const dictionary& options
             ),
-            (name, surf, options)
+            (name, surf, streamOpt, options)
         );
 
         //- Write to file, select based on its extension
@@ -134,7 +136,8 @@ public:
         (
             const fileName& name,
             const MeshedSurfaceProxy& surf,
-            const dictionary& options
+            IOstreamOption streamOpt = IOstreamOption(),
+            const dictionary& options = dictionary::null
         );
 
         //- Write to file, selected based on given extension
@@ -143,7 +146,8 @@ public:
             const fileName& name,
             const word& ext,
             const MeshedSurfaceProxy& surf,
-            const dictionary& options
+            IOstreamOption streamOpt = IOstreamOption(),
+            const dictionary& options = dictionary::null
         );
 
 
@@ -199,10 +203,11 @@ public:
             virtual void write
             (
                 const fileName& name,
+                IOstreamOption streamOpt = IOstreamOption(),
                 const dictionary& options = dictionary::null
             ) const
             {
-                write(name, *this, options);
+                write(name, *this, streamOpt, options);
             }
 
             //- Generic write routine. Chooses writer based on extension.
@@ -210,10 +215,11 @@ public:
             (
                 const fileName& name,
                 const word& ext,
+                IOstreamOption streamOpt = IOstreamOption(),
                 const dictionary& options = dictionary::null
             ) const
             {
-                write(name, ext, *this, options);
+                write(name, ext, *this, streamOpt, options);
             }
 
             //- Write to database

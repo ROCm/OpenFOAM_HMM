@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -241,9 +241,13 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
 (
     const fileName& filename,
     const MeshedSurfaceProxy<Face>& surf,
+    IOstreamOption streamOpt,
     const dictionary&
 )
 {
+    // ASCII only, allow output compression
+    streamOpt.format(IOstream::ASCII);
+
     const UList<point>& pointLst = surf.points();
     const UList<Face>&  faceLst  = surf.surfFaces();
     const UList<label>& faceMap  = surf.faceMap();
@@ -259,12 +263,14 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
 
     fileName baseName = filename.lessExt();
 
-    writePoints
-    (
-        OFstream(starFileName(baseName, STARCDCore::VRT_FILE))(),
-        pointLst
-    );
-    OFstream os(starFileName(baseName, STARCDCore::CEL_FILE));
+    // The .vrt file
+    {
+        OFstream os(starFileName(baseName, STARCDCore::VRT_FILE), streamOpt);
+        writePoints(os, pointLst);
+    }
+
+    // The .cel file
+    OFstream os(starFileName(baseName, STARCDCore::CEL_FILE), streamOpt);
     writeHeader(os, STARCDCore::HEADER_CEL);
 
     label faceIndex = 0;
@@ -291,14 +297,18 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
         }
     }
 
-    // Write simple .inp file
-    writeCase
-    (
-        OFstream(starFileName(baseName, STARCDCore::INP_FILE))(),
-        pointLst,
-        faceLst.size(),
-        zones
-    );
+    // Simple .inp file - always UNCOMPRESSED
+    {
+        OFstream os(starFileName(baseName, STARCDCore::INP_FILE));
+
+        writeCase
+        (
+            os,
+            pointLst,
+            faceLst.size(),
+            zones
+        );
+    }
 }
 
 

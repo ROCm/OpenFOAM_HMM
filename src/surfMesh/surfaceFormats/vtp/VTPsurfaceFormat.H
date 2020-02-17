@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,9 @@ Description
 
     The output is never sorted by zone.
 
-    \heading Output Options
+    Output stream options: ignored (dictionary options only)
+
+    \heading Format options
     \table
         Property    | Description                       | Required | Default
         format      | ascii or binary format            | no  | binary
@@ -83,7 +85,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         VTPsurfaceFormat() = default;
 
 
@@ -91,13 +93,14 @@ public:
     virtual ~VTPsurfaceFormat() = default;
 
 
-    // Static Member Functions
+    // Static Functions
 
         //- Write surface mesh components by proxy
         static void write
         (
             const fileName& filename,
             const MeshedSurfaceProxy<Face>& surf,
+            IOstreamOption /*ignored*/ = IOstreamOption(),
             const dictionary& options = dictionary::null
         );
 
@@ -106,6 +109,7 @@ public:
         (
             const fileName& filename,
             const UnsortedMeshedSurface<Face>& surf,
+            IOstreamOption /*ignored*/ = IOstreamOption(),
             const dictionary& options = dictionary::null
         );
 
@@ -116,10 +120,11 @@ public:
         virtual void write
         (
             const fileName& name,
+            IOstreamOption streamOpt = IOstreamOption(),
             const dictionary& options = dictionary::null
         ) const
         {
-            write(name, MeshedSurfaceProxy<Face>(*this), options);
+            write(name, MeshedSurfaceProxy<Face>(*this), streamOpt, options);
         }
 };
 

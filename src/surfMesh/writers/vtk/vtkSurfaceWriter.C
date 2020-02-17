@@ -91,11 +91,7 @@ Foam::surfaceWriters::vtkWriter::vtkWriter
     fmtType_(static_cast<unsigned>(vtk::formatType::INLINE_BASE64)),
     precision_
     (
-        options.lookupOrDefaultCompat
-        (
-            "precision", {{"writePrecision", 1806}},
-            IOstream::defaultPrecision()
-        )
+        options.getOrDefault("precision", IOstream::defaultPrecision())
     ),
     writer_(nullptr)
 {

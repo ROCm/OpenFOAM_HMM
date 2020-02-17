@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +47,8 @@ namespace surfaceWriters
 Foam::surfaceWriters::proxyWriter::proxyWriter(const word& fileExt)
 :
     surfaceWriter(),
-    fileExtension_(fileExt)
+    fileExtension_(fileExt),
+    streamOpt_()
 {}
 
 
@@ -59,6 +60,11 @@ Foam::surfaceWriters::proxyWriter::proxyWriter
 :
     surfaceWriter(options),
     fileExtension_(fileExt),
+    streamOpt_
+    (
+        IOstream::formatEnum("format", options, IOstream::ASCII),
+        IOstream::compressionEnum("compression", options)
+    ),
     options_(options)
 {}
 
@@ -132,6 +138,7 @@ Foam::fileName Foam::surfaceWriters::proxyWriter::write()
         (
             outputFile,
             fileExtension_,
+            streamOpt_,
             options_
         );
     }

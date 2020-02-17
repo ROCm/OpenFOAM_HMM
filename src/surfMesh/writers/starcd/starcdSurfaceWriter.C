@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,6 +41,7 @@ namespace surfaceWriters
 {
     defineTypeName(starcdWriter);
     addToRunTimeSelectionTable(surfaceWriter, starcdWriter, word);
+    addToRunTimeSelectionTable(surfaceWriter, starcdWriter, wordDict);
 }
 }
 
@@ -52,8 +53,7 @@ namespace Foam
     template<class Type>
     static inline void writeData(Ostream& os, const Type& val)
     {
-        const direction ncmpt = pTraits<Type>::nComponents;
-        for (direction cmpt=0; cmpt < ncmpt; ++cmpt)
+        for (direction cmpt=0; cmpt <  pTraits<Type>::nComponents; ++cmpt)
         {
             os  << ' ' << component(val, cmpt);
         }
@@ -67,7 +67,8 @@ namespace Foam
 
 Foam::surfaceWriters::starcdWriter::starcdWriter()
 :
-    surfaceWriter()
+    surfaceWriter(),
+    streamOpt_()
 {}
 
 
@@ -76,7 +77,12 @@ Foam::surfaceWriters::starcdWriter::starcdWriter
     const dictionary& options
 )
 :
-    surfaceWriter(options)
+    surfaceWriter(options),
+    streamOpt_
+    (
+        IOstream::ASCII,
+        IOstream::compressionEnum("compression", options)
+    )
 {}
 
 
@@ -139,11 +145,12 @@ Foam::fileName Foam::surfaceWriters::starcdWriter::write()
             mkDir(outputFile.path());
         }
 
-        MeshedSurfaceProxy<face>
+        MeshedSurfaceProxy<face>(surf.points(), surf.faces()).write
         (
-            surf.points(),
-            surf.faces()
-        ).write(outputFile, "inp");
+            outputFile,
+            "inp",
+            streamOpt_
+        );
     }
 
     wroteGeom_ = true;
@@ -199,7 +206,7 @@ Foam::fileName Foam::surfaceWriters::starcdWriter::writeTemplate
             mkDir(outputFile.path());
         }
 
-        OFstream os(outputFile);
+        OFstream os(outputFile, streamOpt_);
 
         // 1-based ids
         label elemId = 1;

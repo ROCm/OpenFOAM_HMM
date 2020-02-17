@@ -52,7 +52,7 @@ Foam::surfaceWriters::nullWriter::nullWriter()
 
 Foam::surfaceWriters::nullWriter::nullWriter(const dictionary& options)
 :
-    surfaceWriter()
+    nullWriter()
 {}
 
 
@@ -64,7 +64,7 @@ Foam::surfaceWriters::nullWriter::nullWriter
     const dictionary& options
 )
 :
-    surfaceWriter()
+    nullWriter()
 {}
 
 
@@ -77,7 +77,7 @@ Foam::surfaceWriters::nullWriter::nullWriter
     const dictionary& options
 )
 :
-    surfaceWriter()
+    nullWriter()
 {}
 
 

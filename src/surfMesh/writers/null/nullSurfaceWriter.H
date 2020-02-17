@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,16 +56,16 @@ class nullWriter
 {
 public:
 
-    //- Runtime type information
+    //- Declare type-name, virtual type (without debug switch)
     TypeNameNoDebug("none");
 
 
     // Constructors
 
-        //- Construct for a given extension
+        //- Default construct
         nullWriter();
 
-        //- Construct for a given extension
+        //- Construct with some output options
         explicit nullWriter(const dictionary& options);
 
         //- Construct from components

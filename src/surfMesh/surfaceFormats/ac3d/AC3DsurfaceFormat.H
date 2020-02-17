@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,12 @@ Description
     Read/write AC3D format.
 
     http://www.inivis.com/ac3d/man/ac3dfileformat.html
+
+    Output stream options:
+       - ASCII only
+       - compression on/off
+
+    Output dictionary options: ignored
 
 Note
     On input, the faces are already organized as zones.
@@ -79,14 +85,15 @@ public:
     virtual ~AC3DsurfaceFormat() = default;
 
 
-    // Static Member Functions
+    // Static Functions
 
         //- Write surface mesh components by proxy
         static void write
         (
             const fileName& filename,
             const MeshedSurfaceProxy<Face>& surf,
-            const dictionary& options = dictionary::null
+            IOstreamOption streamOpt = IOstreamOption(),
+            const dictionary& /*unused*/ = dictionary::null
         );
 
         //- Write UnsortedMeshedSurface, the output is always sorted by zones.
@@ -94,7 +101,8 @@ public:
         (
             const fileName& filename,
             const UnsortedMeshedSurface<Face>& surf,
-            const dictionary& options = dictionary::null
+            IOstreamOption streamOpt = IOstreamOption(),
+            const dictionary& /*unused*/ = dictionary::null
         );
 
 
@@ -107,10 +115,11 @@ public:
         virtual void write
         (
             const fileName& name,
-            const dictionary& options
+            IOstreamOption streamOpt = IOstreamOption(),
+            const dictionary& options = dictionary::null
         ) const
         {
-            write(name, MeshedSurfaceProxy<Face>(*this), options);
+            write(name, MeshedSurfaceProxy<Face>(*this), streamOpt, options);
         }
 };
 

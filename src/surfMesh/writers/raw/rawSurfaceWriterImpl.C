@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -152,13 +152,7 @@ Foam::fileName Foam::surfaceWriters::rawWriter::writeTemplate
             mkDir(outputFile.path());
         }
 
-        OFstream os
-        (
-            outputFile,
-            IOstream::ASCII,
-            IOstream::currentVersion,
-            writeCompression_
-        );
+        OFstream os(outputFile, streamOpt_);
 
         // Header
         {

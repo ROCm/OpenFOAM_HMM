@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class dimensionSet;
 class meshedSurf;
 template<class Face> class MeshedSurface;
@@ -100,7 +100,7 @@ private:
         MeshReference;
 
 
-    // Demand driven private data
+    // Private Data
 
         //- The surface zones
         surfZoneIOList surfZones_;
@@ -149,7 +149,7 @@ protected:
 
 public:
 
-    // Public typedefs
+    // Public Typedefs
 
     //- Typedef required for GeoMesh
     typedef surfMesh Mesh;
@@ -158,7 +158,7 @@ public:
     typedef bool BoundaryMesh;
 
 
-    //- Runtime type information
+    //- Declare type-name, virtual type (with debug switch)
     TypeName("surfMesh");
 
     //- Return the mesh sub-directory name (normally "surfMesh")
@@ -361,6 +361,7 @@ public:
         void write
         (
             const fileName& name,
+            IOstreamOption streamOpt = IOstreamOption(),
             const dictionary& options = dictionary::null
         ) const;
 
@@ -370,11 +371,12 @@ public:
         (
             const fileName& name,
             const word& ext,
+            IOstreamOption streamOpt = IOstreamOption(),
             const dictionary& options = dictionary::null
         ) const;
 
 
-    // Storage management
+    // Storage Management
 
         //- Release the geometry and return as a MeshedSurface<face>.
         autoPtr<MeshedSurface<face>> releaseGeom();
@@ -399,8 +401,8 @@ public:
 
         //- Remove all files from mesh instance()
         void removeFiles() const;
-
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

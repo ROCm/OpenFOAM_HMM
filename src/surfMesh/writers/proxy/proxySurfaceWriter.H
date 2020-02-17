@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,6 +46,14 @@ Description
 Note
     The formatOptions for proxy are file-type dependent.
 
+    The following stream options are read and passed through,
+    but not necessarily used by the corresponding backend.
+    \table
+        Property | Description                              | Required | Default
+        format   | ascii/binary                             | no  | ascii
+        compression | File compression                      | no  | false
+    \endtable
+
 SourceFiles
     proxySurfaceWriter.C
 
@@ -76,13 +84,16 @@ class proxyWriter
         //- The file extension associated with the proxy
         word fileExtension_;
 
+        //- Output stream option
+        IOstreamOption streamOpt_;
+
         //- Format options
         dictionary options_;
 
 
 public:
 
-    //- Runtime type information
+    //- Declare type-name, virtual type (without debug switch)
     TypeNameNoDebug("proxy");
 
 
