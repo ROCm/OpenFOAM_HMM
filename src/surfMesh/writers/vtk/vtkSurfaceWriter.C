@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -104,19 +104,13 @@ Foam::surfaceWriters::vtkWriter::vtkWriter
 
     vtk::outputOptions opts(vtk::formatType::INLINE_BASE64);
 
-    const word formatName = options.lookupOrDefault<word>("format", "");
-    if (formatName.size())
-    {
-        opts.ascii
-        (
-            IOstream::formatEnum(formatName) == IOstream::ASCII
-        );
-    }
+    opts.ascii
+    (
+        IOstream::ASCII
+     == IOstream::formatEnum("format", options, IOstream::BINARY)
+    );
 
-    if (options.lookupOrDefault("legacy", false))
-    {
-        opts.legacy(true);
-    }
+    opts.legacy(options.getOrDefault("legacy", false));
 
     // Convert back to raw data type
     fmtType_ = static_cast<unsigned>(opts.fmt());

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,14 +27,13 @@ License
 
 #include "IOstreamOption.H"
 #include "error.H"
+#include "dictionary.H"
 #include "Enum.H"
 #include "Switch.H"
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
-const Foam::IOstreamOption::versionNumber
-    Foam::IOstreamOption::currentVersion(2,0);
-
+const Foam::IOstreamOption::versionNumber Foam::IOstreamOption::currentVersion;
 
 const Foam::Enum
 <
@@ -50,55 +49,151 @@ Foam::IOstreamOption::formatNames
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
 Foam::IOstreamOption::streamFormat
-Foam::IOstreamOption::formatEnum(const word& formatName)
+Foam::IOstreamOption::formatEnum
+(
+    const word& formatName,
+    const streamFormat deflt
+)
 {
-    // Handle bad input graciously
-    if (formatNames.found(formatName))
+    // Handle bad input graciously. A no-op for an empty string
+
+    if (!formatName.empty())
     {
-        return formatNames[formatName];
+        if (formatNames.found(formatName))
+        {
+            return formatNames[formatName];
+        }
+
+        // Fall-through to warning
+
+        WarningInFunction
+            << "Unknown format specifier '" << formatName
+            << "', using '" << formatNames[deflt] << "'\n";
     }
 
-    WarningInFunction
-        << "Unknown format specifier '" << formatName
-        << "', using 'ascii'" << endl;
+    return deflt;
+}
 
-    return streamFormat::ASCII;
+
+Foam::IOstreamOption::streamFormat
+Foam::IOstreamOption::formatEnum
+(
+    const word& key,
+    const dictionary& dict,
+    const streamFormat deflt
+)
+{
+    return formatNames.getOrDefault(key, dict, deflt, true); // failsafe=true
 }
 
 
 Foam::IOstreamOption::compressionType
-Foam::IOstreamOption::compressionEnum(const word& compName)
+Foam::IOstreamOption::compressionEnum
+(
+    const word& compName,
+    const compressionType deflt
+)
 {
-    // Handle bad input graciously
+    // Handle bad input graciously. A no-op for an empty string
 
-    const Switch sw = Switch::find(compName);
-    if (sw.good())
+    if (!compName.empty())
     {
-        return
-        (
-            sw
-          ? compressionType::COMPRESSED
-          : compressionType::UNCOMPRESSED
-        );
+        const Switch sw = Switch::find(compName);
+
+        if (sw.good())
+        {
+            return
+            (
+                sw
+              ? compressionType::COMPRESSED
+              : compressionType::UNCOMPRESSED
+            );
+        }
+
+        // Fall-through to warning
+
+        WarningInFunction
+            << "Unknown compression specifier '" << compName
+            << "', using compression "
+            << (deflt ? "on" : "off" ) << nl;
     }
 
-    WarningInFunction
-        << "Unknown compression specifier '" << compName
-        << "', assuming no compression" << endl;
-
-    return compressionType::UNCOMPRESSED;
+    return deflt;
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+Foam::IOstreamOption::compressionType
+Foam::IOstreamOption::compressionEnum
+(
+    const word& key,
+    const dictionary& dict,
+    const compressionType deflt
+)
+{
+    return
+    (
+        Switch(key, dict, Switch(bool(deflt)), true) // failsafe=true
+      ? compressionType::COMPRESSED
+      : compressionType::UNCOMPRESSED
+    );
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::IOstreamOption::versionNumber::versionNumber(const std::string& verNum)
+:
+    versionNumber(readFloat(verNum))
+{}
+
+
+Foam::IOstreamOption::versionNumber::versionNumber(const token& tok)
+:
+    versionNumber()
+{
+    if (tok.isStringType())
+    {
+        (*this) = versionNumber(tok.stringToken());
+    }
+    else if (tok.isScalar())
+    {
+        (*this) = versionNumber(float(tok.scalarToken()));
+    }
+    else
+    {
+        WarningInFunction
+            << "Wrong token for version - expected word/float, found "
+            << tok.info() << nl;
+    }
+}
+
+
+Foam::IOstreamOption::versionNumber::versionNumber
+(
+    const word& key,
+    const dictionary& dict
+)
+:
+    versionNumber()
+{
+    token tok;
+
+    if (dict.readIfPresent<token>(key, tok, keyType::LITERAL))
+    {
+        (*this) = versionNumber(tok);
+    }
+}
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const IOstreamOption::streamFormat& sf
+    const IOstreamOption::streamFormat& fmt
 )
 {
-    os << IOstreamOption::formatNames[sf];
+    os << IOstreamOption::formatNames[fmt];
     return os;
 }
 
@@ -106,12 +201,13 @@ Foam::Ostream& Foam::operator<<
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const IOstreamOption::versionNumber& vn
+    const IOstreamOption::versionNumber& ver
 )
 {
-    // Emit as char sequence instead of as individual characters
-    // in case this is needed for sending in parallel.
-    os  << vn.str().c_str();
+    // Emit unquoted char sequence (eg, word)
+    // for correct behaviour when sending in parallel
+
+    os.writeQuoted(ver.str(), false);
     return os;
 }
 

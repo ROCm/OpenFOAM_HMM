@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -381,8 +381,8 @@ bool Foam::functionObjects::vtkCloud::read(const dictionary& dict)
 
     writeOpts_.ascii
     (
-        dict.found("format")
-     && (IOstream::formatEnum(dict.get<word>("format")) == IOstream::ASCII)
+        IOstream::ASCII
+     == IOstream::formatEnum("format", dict, IOstream::BINARY)
     );
 
     writeOpts_.append(false);  // No append supported
@@ -390,11 +390,7 @@ bool Foam::functionObjects::vtkCloud::read(const dictionary& dict)
 
     writeOpts_.precision
     (
-        dict.lookupOrDefault
-        (
-            "precision",
-            IOstream::defaultPrecision()
-        )
+        dict.getOrDefault("precision", IOstream::defaultPrecision())
     );
 
     // Info<< type() << " " << name() << " output-format: "

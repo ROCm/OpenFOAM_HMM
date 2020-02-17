@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -360,13 +360,7 @@ void Foam::Time::readDict()
 
     if (controlDict_.found("writeVersion"))
     {
-        writeStreamOption_.version
-        (
-            IOstreamOption::versionNumber
-            (
-                controlDict_.get<float>("writeVersion")
-            )
-        );
+        writeStreamOption_.version(controlDict_.get<token>("writeVersion"));
     }
 
     if (controlDict_.found("writeFormat"))

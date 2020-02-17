@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,13 +80,7 @@ Foam::functionObjects::ensightWrite::ensightWrite
     writeOpts_(),
     caseOpts_
     (
-        IOstreamOption::formatNames.lookupOrDefault
-        (
-            "format",
-            dict,
-            runTime.writeFormat(),
-            true  // Failsafe behaviour
-        )
+        IOstreamOption::formatEnum("format", dict, runTime.writeFormat())
     ),
     outputDir_(),
     consecutive_(false),

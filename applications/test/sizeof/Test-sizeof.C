@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,20 +66,23 @@ int main(int argc, char *argv[])
 
     if (true)
     {
+        cout<<"IOstreamOption:" << sizeof(IOstreamOption) << nl;
         cout<<"IOstream:" << sizeof(IOstream) << nl;
         cout<<"Istream:" << sizeof(Istream) << nl;
-        cout<<"IPstream:" << sizeof(IPstream) << nl;
-        cout<<"ISstream:" << sizeof(ISstream) << nl;
-
         cout<<"Ostream:" << sizeof(Ostream) << nl;
-        cout<<"OPstream:" << sizeof(OPstream) << nl;
+
+        cout<<"ISstream:" << sizeof(ISstream) << nl;
         cout<<"OSstream:" << sizeof(OSstream) << nl;
+
+        cout<<"IPstream:" << sizeof(IPstream) << nl;
+        cout<<"OPstream:" << sizeof(OPstream) << nl;
     }
 
     {
         nil x;
         cout<<"nil:" << sizeof(x) << nl;
     }
+    #if 0
     {
         argList x(argc, argv);
         cout<<"argList:" << sizeof(x) << nl;
@@ -87,6 +90,7 @@ int main(int argc, char *argv[])
         TimePaths y(x);
         cout<<"TimePaths:" << sizeof(y) << nl;
     }
+    #endif
     {
         zero x;
         cout<<"zero:" << sizeof(x) << nl;
@@ -117,6 +121,7 @@ int main(int argc, char *argv[])
     }
 
     {
+        cout<<"short:" << sizeof(short) << nl;
         cout<<"int:" << sizeof(int) << nl;
         cout<<"long:" << sizeof(long) << nl;
         cout<<"float:" << sizeof(float) << nl;

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -183,22 +183,15 @@ bool Foam::functionObjects::vtkWrite::read(const dictionary& dict)
 
     writeOpts_.ascii
     (
-        dict.found("format")
-     && (IOstream::formatEnum(dict.get<word>("format")) == IOstream::ASCII)
+        IOstream::ASCII
+     == IOstream::formatEnum("format", dict, IOstream::BINARY)
     );
 
-    if (dict.lookupOrDefault("legacy", false))
-    {
-        writeOpts_.legacy(true);
-    }
+    writeOpts_.legacy(dict.getOrDefault("legacy", false));
 
     writeOpts_.precision
     (
-        dict.lookupOrDefault
-        (
-            "precision",
-            IOstream::defaultPrecision()
-        )
+        dict.getOrDefault("precision", IOstream::defaultPrecision())
     );
 
     // Info<< type() << " " << name() << " output-format: "

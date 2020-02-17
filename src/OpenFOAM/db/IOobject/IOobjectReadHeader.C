@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,14 +71,7 @@ bool Foam::IOobject::readHeader(Istream& is)
     {
         const dictionary headerDict(is);
 
-        is.version
-        (
-            IOstreamOption::versionNumber
-            (
-                headerDict.get<float>("version")
-            )
-        );
-
+        is.version(headerDict.get<token>("version"));
         is.format(headerDict.get<word>("format"));
 
         headerClassName_ = headerDict.get<word>("class");

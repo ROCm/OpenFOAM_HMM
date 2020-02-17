@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -188,13 +188,7 @@ Foam::surfaceWriters::ensightWriter::ensightWriter
     surfaceWriter(options),
     writeFormat_
     (
-        IOstreamOption::formatNames.getOrDefault
-        (
-            "format",
-            options,
-            IOstreamOption::ASCII,
-            true  // Failsafe behaviour
-        )
+        IOstreamOption::formatEnum("format", options, IOstream::ASCII)
     ),
     collateTimes_(options.getOrDefault("collateTimes", true))
 {}

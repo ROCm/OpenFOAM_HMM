@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,7 +29,13 @@ Class
 
 Description
     The IOstreamOption is a simple container for options an IOstream
-    can normally have. For example, ascii/binary, uncompressed/compressed, ...
+    can normally have.
+
+    The format (ASCII | BINARY) is typically controlled by enumerated
+    names (ascii, binary).
+
+    The compression  (UNCOMPRESSED | COMPRESSED) is typically controlled
+    by switch values (true/false, on/off, ...).
 
 SourceFiles
     IOstreamOption.C
@@ -39,7 +45,6 @@ SourceFiles
 #ifndef IOstreamOption_H
 #define IOstreamOption_H
 
-#include "scalar.H"
 #include "word.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -47,8 +52,9 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-class Ostream;
+// Forward Declarations
+class token;
+class dictionary;
 template<class EnumType> class Enum;
 
 /*---------------------------------------------------------------------------*\
@@ -64,7 +70,7 @@ public:
         //- Data format (ascii | binary)
         enum streamFormat : char
         {
-            ASCII,              //!< "ascii"
+            ASCII = 0,          //!< "ascii" (normal default)
             BINARY              //!< "binary"
         };
 
@@ -86,6 +92,13 @@ public:
 
         // Constructors
 
+            //- Default construct \em current version.
+            //- The value (2.0) corresponds to the \em current version.
+            constexpr versionNumber() noexcept
+            :
+                number_(20)
+            {}
+
             //- Construct from major, number
             constexpr versionNumber(int major, int minor) noexcept
             :
@@ -98,36 +111,40 @@ public:
                 number_(10*ver + 0.001) // Allow some rounding
             {}
 
-            //- Construct from Istream by reading in a float.
-            //  Non-explicit for convenience
-            versionNumber(Istream& is)
-            :
-                versionNumber(readFloat(is))
-            {}
-
             //- Construct by parsing string "major.minor"
-            explicit versionNumber(const std::string& verNum)
-            :
-                versionNumber(readFloat(verNum))
-            {}
+            explicit versionNumber(const std::string& verNum);
+
+            //- Construct from token (float, word, string)
+            explicit versionNumber(const token& tok);
+
+            //- Failsafe construct from dictionary lookup.
+            versionNumber(const word& keyword, const dictionary& dict);
 
 
         // Member Functions
 
+            //- Compare differences in the versions
+            //  Negative when 'this' is less than other.
+            //  Positive when 'this' is greater than other.
+            int compare(const versionNumber& other) const noexcept
+            {
+                return number_ - other.number_;
+            }
+
             //- The canonical major/minor pair as an integer value.
-            inline int canonical() noexcept
+            int canonical() noexcept
             {
                 return number_;
             }
 
             //- Return the major version number.
-            inline int getMajor() const noexcept
+            int getMajor() const noexcept
             {
                 return int(number_ / 10);
             }
 
             //- Return the minor version number
-            inline int getMinor() const noexcept
+            int getMinor() const noexcept
             {
                 return int(number_ % 10);
             }
@@ -140,45 +157,6 @@ public:
                   + '.'
                   + std::to_string(getMinor());
             }
-
-
-        // Member Operators
-
-            //- Version number equality
-            bool operator==(const versionNumber& rhs) const noexcept
-            {
-                return number_ == rhs.number_;
-            }
-
-            //- Version number inequality
-            bool operator!=(const versionNumber& rhs) const noexcept
-            {
-                return number_ != rhs.number_;
-            }
-
-            //- Version number older than rhs
-            bool operator<(const versionNumber& rhs) const noexcept
-            {
-                return number_ < rhs.number_;
-            }
-
-            //- Version number is the same or older than rhs
-            bool operator<=(const versionNumber& rhs) const noexcept
-            {
-                return number_ <= rhs.number_;
-            }
-
-            //- Version number newer than rhs
-            bool operator>(const versionNumber& rhs) const noexcept
-            {
-                return number_ > rhs.number_;
-            }
-
-            //- Version number same or newer than rhs
-            bool operator>=(const versionNumber& rhs) const noexcept
-            {
-                return number_ >= rhs.number_;
-            }
         };
 
 
@@ -187,7 +165,7 @@ public:
         //- Stream format names (ascii, binary)
         static const Enum<streamFormat> formatNames;
 
-        //- The current version number
+        //- The current version number (2.0)
         static const versionNumber currentVersion;
 
 
@@ -195,7 +173,8 @@ private:
 
     // Private Data
 
-    // NB: ordered with adjacent enums to minimize gaps
+    // NB: ordered with versionNumber first (short) and
+    // adjacent enums to minimize gaps
 
         //- Stream version number (eg, 2.0 for current dictionary format)
         versionNumber version_;
@@ -211,58 +190,98 @@ public:
 
     // Constructors
 
-        //- Construct null. (default: ASCII, uncompressed, currentVersion)
-        IOstreamOption() noexcept
-        :
-            version_(currentVersion),
-            format_(ASCII),
-            compression_(compressionType::UNCOMPRESSED)
-        {}
-
-        //- Construct with format. (default: uncompressed, currentVersion)
-        explicit IOstreamOption(streamFormat format) noexcept
-        :
-            version_(currentVersion),
-            format_(format),
-            compression_(compressionType::UNCOMPRESSED)
-        {}
-
-        //- Construct with format and compression, optionally with version.
-        IOstreamOption
+        //- Default construct (ASCII, UNCOMPRESSED, currentVersion)
+        //- or construct with format, compression
+        //  \note non-explicit for convenient construction
+        constexpr IOstreamOption
         (
-            streamFormat format,
-            compressionType compression,
-            versionNumber version=currentVersion
+            streamFormat fmt = streamFormat::ASCII,
+            compressionType comp = compressionType::UNCOMPRESSED
         ) noexcept
         :
-            version_(version),
-            format_(format),
-            compression_(compression)
+            version_(),
+            format_(fmt),
+            compression_(comp)
         {}
 
-        //- Construct with format, version, compression
-        IOstreamOption
+        //- Construct from components (format, compression, version)
+        constexpr IOstreamOption
         (
-            streamFormat format,
-            versionNumber version,
-            compressionType compression
+            streamFormat fmt,
+            compressionType comp,
+            versionNumber ver
         ) noexcept
         :
-            version_(version),
-            format_(format),
-            compression_(compression)
+            version_(ver),
+            format_(fmt),
+            compression_(comp)
+        {}
+
+        //- Construct from components (format, version, compression)
+        constexpr IOstreamOption
+        (
+            streamFormat fmt,
+            versionNumber ver,
+            compressionType comp = compressionType::UNCOMPRESSED
+        ) noexcept
+        :
+            version_(ver),
+            format_(fmt),
+            compression_(comp)
+        {}
+
+        //- Copy construct with change of format
+        IOstreamOption(const IOstreamOption& opt, streamFormat fmt) noexcept
+        :
+            version_(opt.version_),
+            format_(fmt),
+            compression_(opt.compression_)
         {}
 
 
     // Static Member Functions
 
         //- The stream format enum corresponding to the string
-        //  Expected "ascii", "binary"
-        static streamFormat formatEnum(const word& formatName);
+        //- (ascii | binary).
+        //
+        //  If the string is not recognized, emit warning and return default.
+        //  Silent if the string itself is empty.
+        //
+        //  \note Can be used as constructor substitute for the enumeration
+        static streamFormat formatEnum
+        (
+            const word& formatName,
+            const streamFormat deflt = streamFormat::ASCII
+        );
 
-        //- The compression enum corresponding to the string
-        //  Expected "true", "false", "on", "off", etc.
-        static compressionType compressionEnum(const word& compName);
+        //- Failsafe construct streamFormat from optional dictionary lookup
+        static streamFormat formatEnum
+        (
+            const word& key,        //!< Lookup key. Uses LITERAL (not REGEX)
+            const dictionary& dict, //!< dictionary
+            const streamFormat deflt = streamFormat::ASCII
+        );
+
+        //- The compression enum corresponding to the string.
+        //  Expects switch values (true/false, on/off, ...)
+        //
+        //  If the string is not recognized, emit warning and return default.
+        //  Silent if the string itself is empty.
+        //
+        //  \note Can be used as constructor substitute for the enumeration
+        static compressionType compressionEnum
+        (
+            const word& compName,
+            const compressionType deflt = compressionType::UNCOMPRESSED
+        );
+
+        //- Failsafe construct compressionType from optional dictionary lookup
+        static compressionType compressionEnum
+        (
+            const word& key,        //!< Lookup key. Uses LITERAL (not REGEX)
+            const dictionary& dict, //!< dictionary
+            const compressionType deflt = compressionType::UNCOMPRESSED
+        );
 
 
     // Member Functions
@@ -275,19 +294,21 @@ public:
 
         //- Set the stream format
         //  \return the previous value
-        streamFormat format(const streamFormat format) noexcept
+        streamFormat format(const streamFormat fmt) noexcept
         {
             streamFormat old(format_);
-            format_ = format;
+            format_ = fmt;
             return old;
         }
 
-        //- Set the stream format, from string value
+        //- Set the stream format from string value.
+        //  If the string is not recognized, emit warning and leave unchanged.
+        //  Silent if the string itself is empty.
         //  \return the previous value
         streamFormat format(const word& formatName)
         {
             streamFormat old(format_);
-            format_ = formatEnum(formatName);
+            format_ = formatEnum(formatName, format_);
             return old;
         }
 
@@ -306,12 +327,14 @@ public:
             return old;
         }
 
-        //- Set the stream compression, from string value.
+        //- Set the stream compression from string value.
+        //  If the string is not recognized, emit warning and leave unchanged.
+        //  Silent if the string itself is empty.
         //  \return the previous value
-        compressionType compression(const word& compressionName)
+        compressionType compression(const word& compName)
         {
             compressionType old(compression_);
-            compression_ = compressionEnum(compressionName);
+            compression_ = compressionEnum(compName, compression_);
             return old;
         }
 
@@ -323,20 +346,92 @@ public:
 
         //- Set the stream version
         //  \return the previous value
-        versionNumber version(const versionNumber verNum) noexcept
+        versionNumber version(const versionNumber ver) noexcept
         {
             versionNumber old(version_);
-            version_ = verNum;
+            version_ = ver;
+            return old;
+        }
+
+        //- Set the stream version from token
+        //  \return the previous value
+        versionNumber version(const token& tok)
+        {
+            versionNumber old(version_);
+            version_ = versionNumber(tok);
             return old;
         }
 };
 
 
-//- Output the format as text string (ascii | binary)
-Ostream& operator<<(Ostream& os, const IOstreamOption::streamFormat& sf);
+//- Output format type as text string (ascii | binary)
+Ostream& operator<<(Ostream& os, const IOstreamOption::streamFormat& fmt);
 
-//- Output the version as major.minor
-Ostream& operator<<(Ostream& os, const IOstreamOption::versionNumber& vn);
+//- Output version as major.minor text string
+Ostream& operator<<(Ostream& os, const IOstreamOption::versionNumber& ver);
+
+
+// Comparison Operators
+
+//- Version number equality
+inline bool operator==
+(
+    const IOstreamOption::versionNumber& a,
+    const IOstreamOption::versionNumber& b
+) noexcept
+{
+    return a.compare(b) == 0;
+}
+
+//- Version number inequality
+inline bool operator!=
+(
+    const IOstreamOption::versionNumber& a,
+    const IOstreamOption::versionNumber& b
+) noexcept
+{
+    return a.compare(b) != 0;
+}
+
+//- Version A older than B
+inline bool operator<
+(
+    const IOstreamOption::versionNumber& a,
+    const IOstreamOption::versionNumber& b
+) noexcept
+{
+    return a.compare(b) < 0;
+}
+
+//- Version A same or older than B
+inline bool operator<=
+(
+    const IOstreamOption::versionNumber& a,
+    const IOstreamOption::versionNumber& b
+) noexcept
+{
+    return a.compare(b) <= 0;
+}
+
+//- Version A newer than B
+inline bool operator>
+(
+    const IOstreamOption::versionNumber& a,
+    const IOstreamOption::versionNumber& b
+) noexcept
+{
+    return a.compare(b) > 0;
+}
+
+//- Version A same or newer than B
+inline bool operator>=
+(
+    const IOstreamOption::versionNumber& a,
+    const IOstreamOption::versionNumber& b
+) noexcept
+{
+    return a.compare(b) >= 0;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

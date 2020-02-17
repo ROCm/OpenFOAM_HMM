@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,19 +40,15 @@ Foam::fileFormats::VTPsurfaceFormatCore::formatOptions
     opts.legacy(false); // Non-legacy. Use VTKsurfaceFormat for legacy
     opts.append(false); // No append format
 
-    const word formatName = dict.lookupOrDefault<word>("format", "");
-    if (formatName.size())
-    {
-        opts.ascii(IOstream::formatEnum(formatName) == IOstream::ASCII);
-    }
+    opts.ascii
+    (
+        IOstream::ASCII
+     == IOstream::formatEnum("format", dict, IOstream::BINARY)
+    );
 
     opts.precision
     (
-        dict.lookupOrDefault
-        (
-            "precision",
-            IOstream::defaultPrecision()
-        )
+        dict.getOrDefault("precision", IOstream::defaultPrecision())
     );
 
     return opts;
