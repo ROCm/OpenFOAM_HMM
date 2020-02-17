@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,16 +85,23 @@ public:
 
     // Constructors
 
-        //- Default construct, set stream status
-        Istream
+        //- Default construct (ASCII, uncompressed),
+        //- construct with specified stream option.
+        explicit Istream(IOstreamOption streamOpt = IOstreamOption())
+        :
+            IOstream(streamOpt),
+            putBack_(false)
+        {}
+
+        //- Construct with format, version (compression)
+        explicit Istream
         (
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion,
-            compressionType compression=UNCOMPRESSED
+            streamFormat fmt,
+            versionNumber ver = currentVersion,
+            compressionType comp = compressionType::UNCOMPRESSED
         )
         :
-            IOstream(format, version, compression),
-            putBack_(false)
+            Istream(IOstreamOption(fmt, comp, ver))
         {}
 
 

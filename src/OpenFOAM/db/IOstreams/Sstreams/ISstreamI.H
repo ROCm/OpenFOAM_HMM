@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,14 +31,12 @@ License
 inline Foam::ISstream::ISstream
 (
     std::istream& is,
-    const string& name,
-    streamFormat format,
-    versionNumber version,
-    compressionType compression
+    const string& streamName,
+    IOstreamOption streamOpt
 )
 :
-    Istream(format, version, compression),
-    name_(name),
+    Istream(streamOpt),
+    name_(streamName),
     is_(is)
 {
     if (is_.good())

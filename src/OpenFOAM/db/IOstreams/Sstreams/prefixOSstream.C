@@ -47,13 +47,11 @@ inline void Foam::prefixOSstream::checkWritePrefix()
 Foam::prefixOSstream::prefixOSstream
 (
     std::ostream& os,
-    const string& name,
-    streamFormat format,
-    versionNumber version,
-    compressionType compression
+    const string& streamName,
+    IOstreamOption streamOpt
 )
 :
-    OSstream(os, name, format, version, compression),
+    OSstream(os, streamName, streamOpt),
     printPrefix_(true),
     prefix_()
 {}

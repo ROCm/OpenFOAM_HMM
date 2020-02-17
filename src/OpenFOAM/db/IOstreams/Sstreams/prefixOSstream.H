@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,11 +76,22 @@ public:
         prefixOSstream
         (
             std::ostream& os,
-            const string& name,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion,
-            compressionType compression=UNCOMPRESSED
+            const string& streamName,
+            IOstreamOption streamOpt = IOstreamOption()
         );
+
+        //- Construct and set stream status
+        prefixOSstream
+        (
+            std::ostream& os,
+            const string& streamName,
+            streamFormat fmt,
+            versionNumber ver = currentVersion,
+            compressionType comp = compressionType::UNCOMPRESSED
+        )
+        :
+            prefixOSstream(os, streamName, IOstreamOption(fmt, comp, ver))
+        {}
 
 
     // Member Functions

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -206,7 +206,7 @@ protected:
 
 private:
 
-        //- Default write stream option (format, version, compression)
+        //- The write stream option (format, compression, version)
         IOstreamOption writeStreamOption_;
 
         //- Default graph format
@@ -323,22 +323,28 @@ public:
                 return path()/timeName();
             }
 
-            //- Default write format
+            //- The write stream option (format, compression, version)
+            IOstreamOption writeStreamOption() const
+            {
+                return writeStreamOption_;
+            }
+
+            //- The write stream format
             IOstream::streamFormat writeFormat() const
             {
                 return writeStreamOption_.format();
             }
 
-            //- Default write version number
-            IOstream::versionNumber writeVersion() const
-            {
-                return writeStreamOption_.version();
-            }
-
-            //- Default write compression
+            //- The write stream compression
             IOstream::compressionType writeCompression() const
             {
                 return writeStreamOption_.compression();
+            }
+
+            //- The write stream version
+            IOstream::versionNumber writeVersion() const
+            {
+                return writeStreamOption_.version();
             }
 
             //- Default graph format

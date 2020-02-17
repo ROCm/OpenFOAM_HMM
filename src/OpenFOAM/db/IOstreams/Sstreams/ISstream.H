@@ -28,7 +28,7 @@ Class
     Foam::ISstream
 
 Description
-    Generic input stream using standard (STL) streams.
+    Generic input stream using a standard (STL) stream.
 
 SourceFiles
     ISstreamI.H
@@ -88,15 +88,27 @@ public:
 
     // Constructors
 
-        //- Construct as wrapper around std::istream
+        //- Construct wrapper around std::istream, set stream status
+        //  Default stream options (ASCII, uncompressed)
         inline ISstream
         (
             std::istream& is,
-            const string& name,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion,
-            compressionType compression=UNCOMPRESSED
+            const string& streamName,
+            IOstreamOption streamOpt = IOstreamOption()
         );
+
+        //- Construct wrapper around std::istream, set stream status
+        ISstream
+        (
+            std::istream& is,
+            const string& streamName,
+            streamFormat fmt,
+            versionNumber ver = currentVersion,
+            compressionType comp = compressionType::UNCOMPRESSED
+        )
+        :
+            ISstream(is, streamName, IOstreamOption(fmt, comp, ver))
+        {}
 
 
     //- Destructor

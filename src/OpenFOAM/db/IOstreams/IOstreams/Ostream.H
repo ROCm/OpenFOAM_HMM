@@ -85,15 +85,23 @@ public:
 
     // Constructors
 
-        //- Default construct, set stream status
-        Ostream
+        //- Default construct (ASCII, uncompressed),
+        //- construct with specified stream option
+        explicit Ostream(IOstreamOption streamOpt = IOstreamOption())
+        :
+            IOstream(streamOpt)
+        {}
+
+
+        //- Construct with format, version (compression)
+        explicit Ostream
         (
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion,
-            compressionType compression=UNCOMPRESSED
+            streamFormat fmt,
+            versionNumber ver = currentVersion,
+            compressionType comp = compressionType::UNCOMPRESSED
         )
         :
-            IOstream(format, version, compression)
+            Ostream(IOstreamOption(fmt, comp, ver))
         {}
 
 

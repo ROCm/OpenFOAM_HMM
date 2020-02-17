@@ -28,7 +28,7 @@ Class
     Foam::OSstream
 
 Description
-    Generic output stream.
+    Generic output stream using a standard (STL) stream.
 
 SourceFiles
     OSstreamI.H
@@ -76,15 +76,27 @@ public:
 
     // Constructors
 
-        //- Construct as wrapper around std::ostream and set stream status
+        //- Construct wrapper around std::ostream, set stream status
+        //  Default stream options (ASCII, uncompressed)
         inline OSstream
         (
             std::ostream& os,
-            const string& name,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion,
-            compressionType compression=UNCOMPRESSED
+            const string& streamName,
+            IOstreamOption streamOpt = IOstreamOption()
         );
+
+        //- Construct wrapper around std::ostream, set stream status
+        OSstream
+        (
+            std::ostream& os,
+            const string& streamName,
+            streamFormat fmt,
+            versionNumber ver = currentVersion,
+            compressionType comp = compressionType::UNCOMPRESSED
+        )
+        :
+            OSstream(os, streamName, IOstreamOption(fmt, comp, ver))
+        {}
 
 
     // Member Functions

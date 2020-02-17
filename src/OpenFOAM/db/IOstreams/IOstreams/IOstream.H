@@ -158,10 +158,11 @@ public:
 
     // Constructors
 
-        //- Construct with specified stream option
-        explicit IOstream(const IOstreamOption option)
+        //- Default construct (ASCII, uncompressed),
+        //- construct with specified stream option
+        explicit IOstream(IOstreamOption streamOpt = IOstreamOption())
         :
-            IOstreamOption(option),
+            IOstreamOption(streamOpt),
             openClosed_(CLOSED),
             ioState_(ios_base::iostate(0)),
             labelByteSize_(sizeof(label)),
@@ -171,15 +172,15 @@ public:
             setBad();
         }
 
-        //- Construct with format, version
+        //- Construct with format, version (compression)
         IOstream
         (
-            streamFormat format,
-            versionNumber version,
-            compressionType compression=UNCOMPRESSED
+            streamFormat fmt,
+            versionNumber ver,
+            compressionType comp = compressionType::UNCOMPRESSED
         )
         :
-            IOstream(IOstreamOption(format, version, compression))
+            IOstream(IOstreamOption(fmt, comp, ver))
         {}
 
 
