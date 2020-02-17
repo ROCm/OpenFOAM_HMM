@@ -199,10 +199,8 @@ bool Foam::fileOperations::collatedFileOperation::appendObject
     OFstream os
     (
         pathName,
-        IOstream::BINARY,
-        ver,
-        IOstream::UNCOMPRESSED, // no compression
-        !isMaster
+        IOstreamOption(IOstream::BINARY, ver),  // UNCOMPRESSED
+        !isMaster  // append slaves
     );
 
     if (!os.good())
@@ -488,10 +486,8 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
         masterOFstream os
         (
             pathName,
-            fmt,
-            ver,
-            cmp,
-            false,
+            IOstreamOption(fmt, ver, cmp),
+            false,  // append=false
             valid
         );
 
@@ -534,10 +530,8 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
             masterOFstream os
             (
                 pathName,
-                fmt,
-                ver,
-                cmp,
-                false,
+                IOstreamOption(fmt, ver, cmp),
+                false,  // append=false
                 valid
             );
 
@@ -596,9 +590,7 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
             (
                 writer_,
                 pathName,
-                fmt,
-                ver,
-                cmp,
+                IOstreamOption(fmt, ver, cmp),
                 useThread
             );
 

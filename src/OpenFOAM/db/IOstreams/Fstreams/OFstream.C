@@ -111,21 +111,12 @@ Foam::Detail::OFstreamAllocator::OFstreamAllocator
 Foam::OFstream::OFstream
 (
     const fileName& pathname,
-    streamFormat format,
-    versionNumber version,
-    compressionType compression,
+    IOstreamOption streamOpt,
     const bool append
 )
 :
-    Detail::OFstreamAllocator(pathname, compression, append),
-    OSstream
-    (
-        *allocatedPtr_,
-        pathname,
-        format,
-        version,
-        compression
-    )
+    Detail::OFstreamAllocator(pathname, streamOpt.compression(), append),
+    OSstream(*allocatedPtr_, pathname, streamOpt)
 {
     setClosed();
     setState(allocatedPtr_->rdstate());

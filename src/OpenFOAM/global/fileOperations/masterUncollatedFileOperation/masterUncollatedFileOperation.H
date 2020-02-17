@@ -487,7 +487,7 @@ public:
         TypeName("masterUncollated");
 
 
-    // Static data
+    // Static Data
 
         //- Max size of parallel communications. Switches from non-blocking
         //  to scheduled when reading/writing files. Read as float to enable
@@ -696,7 +696,7 @@ public:
             //  Returns success state.
             virtual bool writeObject
             (
-                const regIOobject&,
+                const regIOobject& io,
                 IOstream::streamFormat format=IOstream::ASCII,
                 IOstream::versionNumber version=IOstream::currentVersion,
                 IOstream::compressionType compression=IOstream::UNCOMPRESSED,
@@ -710,9 +710,7 @@ public:
             virtual autoPtr<OSstream> NewOFstream
             (
                 const fileName& pathname,
-                IOstream::streamFormat format=IOstream::ASCII,
-                IOstream::versionNumber version=IOstream::currentVersion,
-                IOstream::compressionType compression=IOstream::UNCOMPRESSED,
+                IOstreamOption streamOpt = IOstreamOption(),
                 const bool valid = true
             ) const;
 

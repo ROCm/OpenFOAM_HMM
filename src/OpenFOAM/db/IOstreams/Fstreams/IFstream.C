@@ -80,20 +80,14 @@ Foam::Detail::IFstreamAllocator::IFstreamAllocator(const fileName& pathname)
 Foam::IFstream::IFstream
 (
     const fileName& pathname,
-    streamFormat format,
-    versionNumber version
+    IOstreamOption streamOpt
 )
 :
     Detail::IFstreamAllocator(pathname),
-    ISstream
-    (
-        *allocatedPtr_,
-        pathname,
-        format,
-        version,
-        IFstreamAllocator::detectedCompression_
-    )
+    ISstream(*allocatedPtr_, pathname, streamOpt)
 {
+    IOstream::compression(IFstreamAllocator::detectedCompression_);
+
     setClosed();
 
     setState(allocatedPtr_->rdstate());

@@ -142,13 +142,7 @@ void Foam::MeshedSurfaceProxy<Face>::write
             )
         );
 
-        OFstream os
-        (
-            objectDir/io.name(),
-            t.writeFormat(),
-            IOstream::currentVersion,
-            t.writeCompression()
-        );
+        OFstream os(objectDir/io.name(), t.writeStreamOption());
 
         io.writeHeader(os);
 
@@ -174,13 +168,8 @@ void Foam::MeshedSurfaceProxy<Face>::write
             )
         );
 
-        OFstream os
-        (
-            objectDir/io.name(),
-            t.writeFormat(),
-            IOstream::currentVersion,
-            t.writeCompression()
-        );
+        OFstream os(objectDir/io.name(), t.writeStreamOption());
+
         io.writeHeader(os);
 
         if (this->useFaceMap())
@@ -212,8 +201,9 @@ void Foam::MeshedSurfaceProxy<Face>::write
             )
         );
 
-        // write as ascii
+        // Write as ASCII-only
         OFstream os(objectDir/io.name());
+
         io.writeHeader(os);
 
         os  << this->surfZones();

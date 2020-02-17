@@ -724,13 +724,11 @@ Foam::autoPtr<Foam::OSstream>
 Foam::fileOperations::uncollatedFileOperation::NewOFstream
 (
     const fileName& pathName,
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
+    IOstreamOption streamOpt,
     const bool valid
 ) const
 {
-    return autoPtr<OSstream>(new OFstream(pathName, fmt, ver, cmp));
+    return autoPtr<OSstream>(new OFstream(pathName, streamOpt));
 }
 
 

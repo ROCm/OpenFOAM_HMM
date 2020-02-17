@@ -2246,7 +2246,7 @@ bool Foam::fileOperations::masterUncollatedFileOperation::writeObject
     const regIOobject& io,
     IOstream::streamFormat fmt,
     IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
+    IOstream::compressionType comp,
     const bool valid
 ) const
 {
@@ -2266,13 +2266,11 @@ bool Foam::fileOperations::masterUncollatedFileOperation::writeObject
         NewOFstream
         (
             pathName,
-            fmt,
-            ver,
-            cmp,
+            IOstreamOption(fmt, ver, comp),
             valid
         )
     );
-    Ostream& os = osPtr();
+    OSstream& os = osPtr();
 
     // If any of these fail, return (leave error handling to Ostream class)
     if (!os.good())
@@ -2549,9 +2547,7 @@ Foam::autoPtr<Foam::OSstream>
 Foam::fileOperations::masterUncollatedFileOperation::NewOFstream
 (
     const fileName& pathName,
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
+    IOstreamOption streamOpt,
     const bool valid
 ) const
 {
@@ -2560,10 +2556,8 @@ Foam::fileOperations::masterUncollatedFileOperation::NewOFstream
         new masterOFstream
         (
             pathName,
-            fmt,
-            ver,
-            cmp,
-            false,      // append
+            streamOpt,
+            false,  // append=false
             valid
         )
     );

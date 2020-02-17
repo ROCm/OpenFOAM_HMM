@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,12 +64,10 @@ void Foam::OBJstream::writeAndCheck(const char c)
 Foam::OBJstream::OBJstream
 (
     const fileName& pathname,
-    streamFormat format,
-    versionNumber version,
-    compressionType compression
+    IOstreamOption streamOpt
 )
 :
-    OFstream(pathname, format, version, compression),
+    OFstream(pathname, streamOpt),
     startOfLine_(true),
     nVertices_(0)
 {}

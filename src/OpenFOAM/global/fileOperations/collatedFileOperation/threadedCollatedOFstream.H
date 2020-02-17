@@ -72,13 +72,31 @@ public:
         //- Construct and set stream status
         threadedCollatedOFstream
         (
-            OFstreamCollator&,
+            OFstreamCollator& writer,
             const fileName& pathname,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion,
-            compressionType compression=UNCOMPRESSED,
+            IOstreamOption streamOpt = IOstreamOption(),
             const bool useThread = true
         );
+
+        //- Construct and set stream status
+        threadedCollatedOFstream
+        (
+            OFstreamCollator& writer,
+            const fileName& pathname,
+            streamFormat fmt,
+            versionNumber ver = currentVersion,
+            compressionType comp = compressionType::UNCOMPRESSED,
+            const bool useThread = true
+        )
+        :
+            threadedCollatedOFstream
+            (
+                writer,
+                pathname,
+                IOstreamOption(fmt, ver, comp),
+                useThread
+            )
+        {}
 
 
     //- Destructor

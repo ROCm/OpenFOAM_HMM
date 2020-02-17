@@ -83,10 +83,20 @@ public:
         explicit OBJstream
         (
             const fileName& pathname,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion,
-            compressionType compression=UNCOMPRESSED
+            IOstreamOption streamOpt = IOstreamOption()
         );
+
+        //- Construct from pathname
+        OBJstream
+        (
+            const fileName& pathname,
+            streamFormat fmt,
+            versionNumber ver = currentVersion,
+            compressionType comp = compressionType::UNCOMPRESSED
+        )
+        :
+            OBJstream(pathname, IOstreamOption(fmt, ver, comp))
+        {}
 
 
     //- Destructor

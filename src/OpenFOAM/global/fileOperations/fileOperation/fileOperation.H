@@ -409,10 +409,10 @@ public:
             //  suppress empty local lagrangian data)
             virtual bool writeObject
             (
-                const regIOobject&,
-                IOstream::streamFormat format=IOstream::ASCII,
-                IOstream::versionNumber version=IOstream::currentVersion,
-                IOstream::compressionType compression=IOstream::UNCOMPRESSED,
+                const regIOobject& io,
+                IOstream::streamFormat fmt = IOstream::ASCII,
+                IOstream::versionNumber ver = IOstream::currentVersion,
+                IOstream::compressionType comp = IOstream::UNCOMPRESSED,
                 const bool valid = true
             ) const;
 
@@ -430,9 +430,7 @@ public:
             virtual autoPtr<OSstream> NewOFstream
             (
                 const fileName& pathname,
-                IOstream::streamFormat format=IOstream::ASCII,
-                IOstream::versionNumber version=IOstream::currentVersion,
-                IOstream::compressionType compression=IOstream::UNCOMPRESSED,
+                IOstreamOption streamOpt = IOstreamOption(),
                 const bool valid = true
             ) const = 0;
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,16 +36,14 @@ Foam::threadedCollatedOFstream::threadedCollatedOFstream
 (
     OFstreamCollator& writer,
     const fileName& pathName,
-    streamFormat format,
-    versionNumber version,
-    compressionType compression,
+    IOstreamOption streamOpt,
     const bool useThread
 )
 :
-    OStringStream(format, version),
+    OStringStream(streamOpt.format(), streamOpt.version()),
     writer_(writer),
     pathName_(pathName),
-    compression_(compression),
+    compression_(streamOpt.compression()),
     useThread_(useThread)
 {}
 
@@ -61,7 +60,7 @@ Foam::threadedCollatedOFstream::~threadedCollatedOFstream()
         IOstream::BINARY,
         version(),
         compression_,
-        false,                  // append
+        false,  // append=false
         useThread_
     );
 }

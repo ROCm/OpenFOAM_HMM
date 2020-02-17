@@ -100,9 +100,19 @@ public:
         explicit IFstream
         (
             const fileName& pathname,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion
+            IOstreamOption streamOpt = IOstreamOption()
         );
+
+        //- Construct from pathname, format (version)
+        IFstream
+        (
+            const fileName& pathname,
+            streamFormat fmt,
+            versionNumber ver = currentVersion
+        )
+        :
+            IFstream(pathname, IOstreamOption(fmt, ver))
+        {}
 
 
     //- Destructor

@@ -86,16 +86,34 @@ public:
 
     // Constructors
 
-        //- Construct and set stream status
+        //- Construct from pathname and set stream status
         explicit masterOFstream
         (
             const fileName& pathname,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion,
-            compressionType compression=UNCOMPRESSED,
+            IOstreamOption streamOpt = IOstreamOption(),
             const bool append = false,
             const bool valid = true
         );
+
+        //- Construct from pathname, version and set stream status
+        masterOFstream
+        (
+            const fileName& pathname,
+            streamFormat fmt,
+            versionNumber ver = currentVersion,
+            compressionType comp = compressionType::UNCOMPRESSED,
+            const bool append = false,
+            const bool valid = true
+        )
+        :
+            masterOFstream
+            (
+                pathname,
+                IOstreamOption(fmt, comp, ver),
+                append,
+                valid
+            )
+        {}
 
 
     //- Destructor - commits buffered information to file

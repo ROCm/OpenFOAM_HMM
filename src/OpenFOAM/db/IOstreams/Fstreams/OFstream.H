@@ -102,11 +102,22 @@ public:
         explicit OFstream
         (
             const fileName& pathname,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion,
-            compressionType compression=UNCOMPRESSED,
+            IOstreamOption streamOpt = IOstreamOption(),
             const bool append = false
         );
+
+        //- Construct from pathname, format (version, compression)
+        OFstream
+        (
+            const fileName& pathname,
+            streamFormat fmt,
+            versionNumber ver = currentVersion,
+            compressionType comp = compressionType::UNCOMPRESSED,
+            const bool append = false
+        )
+        :
+            OFstream(pathname, IOstreamOption(fmt, comp, ver), append)
+        {}
 
 
     //- Destructor

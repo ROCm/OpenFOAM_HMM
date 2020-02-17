@@ -184,16 +184,14 @@ void Foam::masterOFstream::commit()
 Foam::masterOFstream::masterOFstream
 (
     const fileName& pathName,
-    streamFormat format,
-    versionNumber version,
-    compressionType compression,
+    IOstreamOption streamOpt,
     const bool append,
     const bool valid
 )
 :
-    OStringStream(format, version),
+    OStringStream(streamOpt.format(), streamOpt.version()),
     pathName_(pathName),
-    compression_(compression),
+    compression_(streamOpt.compression()),
     append_(append),
     valid_(valid)
 {}

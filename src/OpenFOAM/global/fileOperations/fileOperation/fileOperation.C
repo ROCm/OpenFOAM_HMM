@@ -466,7 +466,7 @@ bool Foam::fileOperation::writeObject
     const regIOobject& io,
     IOstream::streamFormat fmt,
     IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
+    IOstream::compressionType comp,
     const bool valid
 ) const
 {
@@ -478,21 +478,15 @@ bool Foam::fileOperation::writeObject
 
         autoPtr<OSstream> osPtr
         (
-            NewOFstream
-            (
-                pathName,
-                fmt,
-                ver,
-                cmp
-            )
+            NewOFstream(pathName, IOstreamOption(fmt, ver, comp))
         );
 
-        if (!osPtr.valid())
+        if (!osPtr)
         {
             return false;
         }
 
-        Ostream& os = osPtr();
+        OSstream& os = osPtr();
 
         // If any of these fail, return (leave error handling to Ostream class)
         if (!os.good())

@@ -28,6 +28,7 @@ Class
 
 Description
     A simple output token stream that can be used to build token lists.
+    Always UNCOMPRESSED.
 
 Note
     Appending single characters to token list is fragile.
@@ -63,13 +64,23 @@ public:
     // Constructors
 
         //- Default construct, set stream status
+        explicit OTstream(IOstreamOption streamOpt = IOstreamOption())
+        :
+            Ostream(streamOpt.format(), streamOpt.version()),
+            DynamicList<token>()
+        {
+            setOpened();
+            setGood();
+        }
+
+        //- Construct with format, version
         explicit OTstream
         (
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion
+            streamFormat fmt,
+            versionNumber ver = currentVersion
         )
         :
-            Ostream(format, version),
+            Ostream(fmt, ver),
             DynamicList<token>()
         {
             setOpened();
