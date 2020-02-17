@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,7 @@ namespace Foam
 Foam::Detail::IFstreamAllocator::IFstreamAllocator(const fileName& pathname)
 :
     allocatedPtr_(nullptr),
-    compression_(IOstream::UNCOMPRESSED)
+    detectedCompression_(IOstream::UNCOMPRESSED)
 {
     if (pathname.empty())
     {
@@ -55,7 +55,7 @@ Foam::Detail::IFstreamAllocator::IFstreamAllocator(const fileName& pathname)
 
     const std::ios_base::openmode mode(std::ios_base::in|std::ios_base::binary);
 
-    allocatedPtr_ = new std::ifstream(pathname, mode);
+    allocatedPtr_.reset(new std::ifstream(pathname, mode));
 
     // If the file is compressed, decompress it before reading.
     if (!allocatedPtr_->good() && isFile(pathname + ".gz", false))
@@ -65,33 +65,12 @@ Foam::Detail::IFstreamAllocator::IFstreamAllocator(const fileName& pathname)
             InfoInFunction << "Decompressing " << pathname + ".gz" << endl;
         }
 
-        delete allocatedPtr_;
-        allocatedPtr_ = new igzstream((pathname + ".gz").c_str(), mode);
+        allocatedPtr_.reset(new igzstream((pathname + ".gz").c_str(), mode));
 
         if (allocatedPtr_->good())
         {
-            compression_ = IOstream::COMPRESSED;
+            detectedCompression_ = IOstream::COMPRESSED;
         }
-    }
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::Detail::IFstreamAllocator::~IFstreamAllocator()
-{
-    deallocate();
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::Detail::IFstreamAllocator::deallocate()
-{
-    if (allocatedPtr_)
-    {
-        delete allocatedPtr_;
-        allocatedPtr_ = nullptr;
     }
 }
 
@@ -112,7 +91,7 @@ Foam::IFstream::IFstream
         pathname,
         format,
         version,
-        IFstreamAllocator::compression_
+        IFstreamAllocator::detectedCompression_
     )
 {
     setClosed();
@@ -173,7 +152,7 @@ void Foam::IFstream::rewind()
 
     try
     {
-        gzPtr = dynamic_cast<igzstream*>(allocatedPtr_);
+        gzPtr = dynamic_cast<igzstream*>(allocatedPtr_.get());
     }
     catch (const std::bad_cast&)
     {

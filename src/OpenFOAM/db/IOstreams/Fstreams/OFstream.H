@@ -41,8 +41,8 @@ SourceFiles
 #include "OSstream.H"
 #include "fileName.H"
 #include "className.H"
-
 #include <fstream>
+#include <memory>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,7 +64,7 @@ protected:
     // Member Data
 
         //- The allocated stream pointer (ofstream or ogzstream).
-        std::ostream* allocatedPtr_;
+        std::unique_ptr<std::ostream> allocatedPtr_;
 
 
     // Constructors
@@ -73,19 +73,9 @@ protected:
         OFstreamAllocator
         (
             const fileName& pathname,
-            IOstream::compressionType compression=IOstream::UNCOMPRESSED,
+            IOstream::compressionType comp = IOstream::UNCOMPRESSED,
             const bool append = false
         );
-
-
-    //- Destructor
-    ~OFstreamAllocator();
-
-
-    // Protected Member Functions
-
-        //- Delete the stream pointer
-        void deallocate();
 };
 
 } // End namespace Detail

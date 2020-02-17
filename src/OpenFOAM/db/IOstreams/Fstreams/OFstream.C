@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,12 +37,13 @@ namespace Foam
     defineTypeNameAndDebug(OFstream, 0);
 }
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Foam::Detail::OFstreamAllocator::OFstreamAllocator
 (
     const fileName& pathname,
-    IOstream::compressionType compression,
+    IOstream::compressionType comp,
     const bool append
 )
 :
@@ -62,15 +63,16 @@ Foam::Detail::OFstreamAllocator::OFstreamAllocator
         mode |= std::ios_base::app;
     }
 
-    if (compression == IOstream::COMPRESSED)
+    if (comp == IOstream::COMPRESSED)
     {
         // Get identically named uncompressed version out of the way
+        fileName gzPathName(pathname + ".gz");
+
         fileName::Type pathType = Foam::type(pathname, false);
         if (pathType == fileName::FILE || pathType == fileName::LINK)
         {
             rm(pathname);
         }
-        fileName gzPathName(pathname + ".gz");
 
         if (!append && Foam::type(gzPathName) == fileName::LINK)
         {
@@ -79,17 +81,19 @@ Foam::Detail::OFstreamAllocator::OFstreamAllocator
             rm(gzPathName);
         }
 
-        allocatedPtr_ = new ogzstream(gzPathName.c_str(), mode);
+        allocatedPtr_.reset(new ogzstream(gzPathName.c_str(), mode));
     }
     else
     {
-        // get identically named compressed version out of the way
+        // Get identically named compressed version out of the way
         fileName gzPathName(pathname + ".gz");
+
         fileName::Type gzType = Foam::type(gzPathName, false);
         if (gzType == fileName::FILE || gzType == fileName::LINK)
         {
             rm(gzPathName);
         }
+
         if (!append && Foam::type(pathname, false) == fileName::LINK)
         {
             // Disallow writing into softlink to avoid any problems with
@@ -97,23 +101,7 @@ Foam::Detail::OFstreamAllocator::OFstreamAllocator
             rm(pathname);
         }
 
-        allocatedPtr_ = new std::ofstream(pathname, mode);
-    }
-}
-
-
-Foam::Detail::OFstreamAllocator::~OFstreamAllocator()
-{
-    deallocate();
-}
-
-
-void Foam::Detail::OFstreamAllocator::deallocate()
-{
-    if (allocatedPtr_)
-    {
-        delete allocatedPtr_;
-        allocatedPtr_ = nullptr;
+        allocatedPtr_.reset(new std::ofstream(pathname, mode));
     }
 }
 

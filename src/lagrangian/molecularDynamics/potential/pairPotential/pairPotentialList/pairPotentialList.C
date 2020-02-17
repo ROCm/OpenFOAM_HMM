@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -120,7 +120,7 @@ void Foam::pairPotentialList::readPairPotentialDict
             if ((*this)[pairPotentialIndex(a, b)].writeTables())
             {
                 fileHandler().mkDir(mesh.time().path());
-                autoPtr<Ostream> ppTabFile
+                autoPtr<OSstream> ppTabFile
                 (
                     fileHandler().NewOFstream
                     (
@@ -166,7 +166,7 @@ void Foam::pairPotentialList::readPairPotentialDict
     if (electrostaticPotential_->writeTables())
     {
         fileHandler().mkDir(mesh.time().path());
-        autoPtr<Ostream> ppTabFile
+        autoPtr<OSstream> ppTabFile
         (
             fileHandler().NewOFstream
             (

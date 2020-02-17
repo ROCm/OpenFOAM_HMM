@@ -41,8 +41,8 @@ SourceFiles
 #include "ISstream.H"
 #include "fileName.H"
 #include "className.H"
-
 #include <fstream>
+#include <memory>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,26 +64,16 @@ protected:
     // Member Data
 
         //- The allocated stream pointer (ifstream or igzstream).
-        std::istream* allocatedPtr_;
+        std::unique_ptr<std::istream> allocatedPtr_;
 
-        //- The requested compression type
-        IOstream::compressionType compression_;
+        //- The detected compression type
+        IOstream::compressionType detectedCompression_;
 
 
     // Constructors
 
         //- Construct from pathname
         IFstreamAllocator(const fileName& pathname);
-
-
-    //- Destructor
-    ~IFstreamAllocator();
-
-
-    // Protected Member Functions
-
-        //- Delete the stream pointer
-        void deallocate();
 };
 
 } // End namespace Detail

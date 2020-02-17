@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -706,8 +706,8 @@ public:
             //- Generate an ISstream that reads a file
             virtual autoPtr<ISstream> NewIFstream(const fileName&) const;
 
-            //- Generate an Ostream that writes a file
-            virtual autoPtr<Ostream> NewOFstream
+            //- Generate an OSstream that writes a file
+            virtual autoPtr<OSstream> NewOFstream
             (
                 const fileName& pathname,
                 IOstream::streamFormat format=IOstream::ASCII,

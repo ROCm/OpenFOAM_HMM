@@ -2261,7 +2261,7 @@ bool Foam::fileOperations::masterUncollatedFileOperation::writeObject
     // Make sure to pick up any new times
     setTime(io.time());
 
-    autoPtr<Ostream> osPtr
+    autoPtr<OSstream> osPtr
     (
         NewOFstream
         (
@@ -2545,7 +2545,7 @@ Foam::fileOperations::masterUncollatedFileOperation::NewIFstream
 }
 
 
-Foam::autoPtr<Foam::Ostream>
+Foam::autoPtr<Foam::OSstream>
 Foam::fileOperations::masterUncollatedFileOperation::NewOFstream
 (
     const fileName& pathName,
@@ -2555,7 +2555,7 @@ Foam::fileOperations::masterUncollatedFileOperation::NewOFstream
     const bool valid
 ) const
 {
-    return autoPtr<Ostream>
+    return autoPtr<OSstream>
     (
         new masterOFstream
         (

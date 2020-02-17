@@ -720,7 +720,7 @@ Foam::fileOperations::uncollatedFileOperation::NewIFstream
 }
 
 
-Foam::autoPtr<Foam::Ostream>
+Foam::autoPtr<Foam::OSstream>
 Foam::fileOperations::uncollatedFileOperation::NewOFstream
 (
     const fileName& pathName,
@@ -730,7 +730,7 @@ Foam::fileOperations::uncollatedFileOperation::NewOFstream
     const bool valid
 ) const
 {
-    return autoPtr<Ostream>(new OFstream(pathName, fmt, ver, cmp));
+    return autoPtr<OSstream>(new OFstream(pathName, fmt, ver, cmp));
 }
 
 
