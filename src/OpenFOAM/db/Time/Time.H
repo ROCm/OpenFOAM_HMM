@@ -392,12 +392,10 @@ public:
             //- Write time dictionary to the \<time\>/uniform directory
             virtual bool writeTimeDict() const;
 
-            //- Write using given format, version and compression
+            //- Write using stream options
             virtual bool writeObject
             (
-                IOstream::streamFormat,
-                IOstream::versionNumber,
-                IOstream::compressionType,
+                IOstreamOption streamOpt,
                 const bool valid
             ) const;
 

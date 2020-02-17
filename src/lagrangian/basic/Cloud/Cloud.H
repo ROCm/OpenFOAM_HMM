@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -247,13 +247,11 @@ public:
             //  this level.
             virtual void writeFields() const;
 
-            //- Write using given format, version and compression.
+            //- Write using stream options.
             //  Only writes the cloud file if the Cloud isn't empty
             virtual bool writeObject
             (
-                IOstream::streamFormat fmt,
-                IOstream::versionNumber ver,
-                IOstream::compressionType cmp,
+                IOstreamOption streamOpt,
                 const bool valid
             ) const;
 

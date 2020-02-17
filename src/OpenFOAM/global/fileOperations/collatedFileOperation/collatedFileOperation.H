@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -95,9 +95,7 @@ protected:
         (
             const regIOobject& io,
             const fileName& pathName,
-            IOstream::streamFormat fmt,
-            IOstream::versionNumber ver,
-            IOstream::compressionType cmp
+            IOstreamOption streamOpt
         ) const;
 
 
@@ -150,9 +148,7 @@ public:
             virtual bool writeObject
             (
                 const regIOobject&,
-                IOstream::streamFormat format=IOstream::ASCII,
-                IOstream::versionNumber version=IOstream::currentVersion,
-                IOstream::compressionType compression=IOstream::UNCOMPRESSED,
+                IOstreamOption streamOpt = IOstreamOption(),
                 const bool valid = true
             ) const;
 

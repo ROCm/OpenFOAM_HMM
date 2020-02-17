@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -443,18 +443,14 @@ bool Foam::coordinateSystems::writeData(Ostream& os) const
 
 bool Foam::coordinateSystems::writeObject
 (
-    IOstream::streamFormat,
-    IOstream::versionNumber ver,
-    IOstream::compressionType,
+    IOstreamOption,
     const bool valid
 ) const
 {
-    // Force ASCII writing
+    // Force ASCII, uncompressed
     return regIOobject::writeObject
     (
-        IOstream::ASCII,
-        ver,
-        IOstream::UNCOMPRESSED,
+        IOstreamOption(IOstream::ASCII),
         valid
     );
 }

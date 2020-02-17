@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1387,9 +1387,7 @@ bool Foam::dynamicRefineFvMesh::update()
 
 bool Foam::dynamicRefineFvMesh::writeObject
 (
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
+    IOstreamOption streamOpt,
     const bool valid
 ) const
 {
@@ -1398,7 +1396,7 @@ bool Foam::dynamicRefineFvMesh::writeObject
 
     bool writeOk =
     (
-        dynamicFvMesh::writeObject(fmt, ver, cmp, valid)
+        dynamicFvMesh::writeObject(streamOpt, valid)
      && meshCutter_.write(valid)
     );
 

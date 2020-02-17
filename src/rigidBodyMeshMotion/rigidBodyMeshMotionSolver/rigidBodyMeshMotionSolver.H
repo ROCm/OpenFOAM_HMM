@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +50,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-        Class rigidBodyMeshMotionSolver Declaration
+                  Class rigidBodyMeshMotionSolver Declaration
 \*---------------------------------------------------------------------------*/
 
 class rigidBodyMeshMotionSolver
@@ -155,12 +156,10 @@ public:
         //- Solve for motion
         virtual void solve();
 
-        //- Write state using given format, version and compression
+        //- Write state using stream options
         virtual bool writeObject
         (
-            IOstream::streamFormat fmt,
-            IOstream::versionNumber ver,
-            IOstream::compressionType cmp,
+            IOstreamOption streamOpt,
             const bool valid
         ) const;
 

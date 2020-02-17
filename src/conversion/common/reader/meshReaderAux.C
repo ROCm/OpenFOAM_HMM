@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -135,14 +135,8 @@ void Foam::meshReader::writeMeshLabelList
     // NOTE:
     // the cellTableId is an integer and almost always < 1000, thus ASCII
     // will be compacter than binary and makes external scripting easier
-    //
-    ioObj.writeObject
-    (
-        fmt,
-        IOstream::currentVersion,
-        IOstream::UNCOMPRESSED,
-        true
-    );
+
+    ioObj.writeObject(IOstreamOption(fmt), true);
 }
 
 

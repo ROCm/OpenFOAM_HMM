@@ -135,12 +135,10 @@ public:
         //  and that the master data contains a header
         virtual bool writeData(Ostream&) const;
 
-        //- Write using given format, version and compression
+        //- Write using stream options
         virtual bool writeObject
         (
-            IOstream::streamFormat,
-            IOstream::versionNumber,
-            IOstream::compressionType,
+            IOstreamOption streamOpt,
             const bool valid
         ) const;
 

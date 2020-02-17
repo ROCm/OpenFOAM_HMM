@@ -2244,9 +2244,7 @@ bool Foam::fileOperations::masterUncollatedFileOperation::read
 bool Foam::fileOperations::masterUncollatedFileOperation::writeObject
 (
     const regIOobject& io,
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType comp,
+    IOstreamOption streamOpt,
     const bool valid
 ) const
 {
@@ -2261,15 +2259,7 @@ bool Foam::fileOperations::masterUncollatedFileOperation::writeObject
     // Make sure to pick up any new times
     setTime(io.time());
 
-    autoPtr<OSstream> osPtr
-    (
-        NewOFstream
-        (
-            pathName,
-            IOstreamOption(fmt, ver, comp),
-            valid
-        )
-    );
+    autoPtr<OSstream> osPtr(NewOFstream(pathName, streamOpt, valid));
     OSstream& os = osPtr();
 
     // If any of these fail, return (leave error handling to Ostream class)

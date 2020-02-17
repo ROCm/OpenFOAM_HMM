@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -912,9 +912,7 @@ void Foam::fvMesh::updateMesh(const mapPolyMesh& mpm)
 
 bool Foam::fvMesh::writeObject
 (
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
+    IOstreamOption streamOpt,
     const bool valid
 ) const
 {
@@ -932,7 +930,7 @@ bool Foam::fvMesh::writeObject
         ok = V0Ptr_->write(valid);
     }
 
-    return ok && polyMesh::writeObject(fmt, ver, cmp, valid);
+    return ok && polyMesh::writeObject(streamOpt, valid);
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -102,16 +102,14 @@ void Foam::Detail::MeshedSurfaceIOAllocator::clear()
 
 bool Foam::Detail::MeshedSurfaceIOAllocator::writeObject
 (
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
+    IOstreamOption streamOpt,
     const bool valid
 ) const
 {
     return
     (
-        points_.writeObject(fmt, ver, cmp, valid)
-     && faces_.writeObject(fmt, ver, cmp, valid)
+        points_.writeObject(streamOpt, valid)
+     && faces_.writeObject(streamOpt, valid)
     );
 }
 

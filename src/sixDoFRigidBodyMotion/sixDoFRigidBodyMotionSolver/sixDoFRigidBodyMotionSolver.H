@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -141,12 +141,10 @@ public:
         //- Solve for motion
         virtual void solve();
 
-        //- Write state using given format, version and compression
+        //- Write state using stream options
         virtual bool writeObject
         (
-            IOstream::streamFormat fmt,
-            IOstream::versionNumber ver,
-            IOstream::compressionType cmp,
+            IOstreamOption streamOpt,
             const bool valid
         ) const;
 

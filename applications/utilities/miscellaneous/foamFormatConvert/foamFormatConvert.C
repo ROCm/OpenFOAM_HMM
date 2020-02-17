@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -157,12 +157,10 @@ bool writeZones
 
         Info<< "        Writing " << name << endl;
 
-        // Force writing as ascii
+        // Force writing as ASCII
         writeOk = meshObject.regIOobject::writeObject
         (
-            IOstream::ASCII,
-            IOstream::currentVersion,
-            compression,
+            IOstreamOption(IOstream::ASCII, compression),
             true
         );
     }
@@ -471,9 +469,11 @@ int main(int argc, char *argv[])
 
                 parcels.writeObject
                 (
-                    runTime.writeFormat(),
-                    IOstream::currentVersion,
-                    runTime.writeCompression(),
+                    IOstreamOption
+                    (
+                        runTime.writeFormat(),
+                        runTime.writeCompression()
+                    ),
                     parcels.size()
                 );
 

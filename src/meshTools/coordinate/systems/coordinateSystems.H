@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -176,12 +176,10 @@ public:
         //- Write data
         bool writeData(Ostream& os) const;
 
-        //- Write data
+        //- Write using stream options
         virtual bool writeObject
         (
-            IOstream::streamFormat,
-            IOstream::versionNumber ver,
-            IOstream::compressionType,
+            IOstreamOption streamOpt,
             const bool valid = true
         ) const;
 

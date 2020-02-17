@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1893,16 +1893,11 @@ void Foam::NURBS3DVolume::writeCpsInDict() const
         );
 
         cpsDict.add("controlPoints", cps_);
-        // Always write in ASCII format.
-        // Even when choosing to write in binary through controlDict,
-        // the content is written in ASCII format but with a binary header.
-        // This creates problems when the content is read back in
-        // (e.g. continuation)
+
+        // Always write in ASCII, but allow compression
         cpsDict.regIOobject::writeObject
         (
-            IOstream::ASCII,
-            IOstream::currentVersion,
-            mesh_.time().writeCompression(),
+            IOstreamOption(IOstream::ASCII, mesh_.time().writeCompression()),
             true
         );
     }

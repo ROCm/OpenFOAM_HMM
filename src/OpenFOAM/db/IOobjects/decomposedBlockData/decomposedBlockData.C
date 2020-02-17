@@ -1140,18 +1140,19 @@ bool Foam::decomposedBlockData::writeData(Ostream& os) const
 
 bool Foam::decomposedBlockData::writeObject
 (
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
+    IOstreamOption streamOpt,
     const bool valid
 ) const
 {
+    // Always write BINARY
+    streamOpt.format(IOstream::BINARY);
+
     autoPtr<OSstream> osPtr;
     if (UPstream::master(comm_))
     {
-        // Note: always write binary. These are strings so readable
-        //       anyway. They have already be tokenised on the sending side.
-        osPtr.reset(new OFstream(objectPath(), IOstream::BINARY, ver, cmp));
+        // Note: always write binary. These are strings so readable anyway.
+        //       They have already be tokenised on the sending side.
+        osPtr.reset(new OFstream(objectPath(), streamOpt));
         IOobject::writeHeader(osPtr());
     }
 

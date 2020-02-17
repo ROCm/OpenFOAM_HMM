@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -473,9 +473,7 @@ bool Foam::objectRegistry::readIfModified()
 
 bool Foam::objectRegistry::writeObject
 (
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
+    IOstreamOption streamOpt,
     const bool valid
 ) const
 {
@@ -496,7 +494,7 @@ bool Foam::objectRegistry::writeObject
 
         if ((*iter)->writeOpt() != NO_WRITE)
         {
-            ok = (*iter)->writeObject(fmt, ver, cmp, valid) && ok;
+            ok = (*iter)->writeObject(streamOpt, valid) && ok;
         }
     }
 

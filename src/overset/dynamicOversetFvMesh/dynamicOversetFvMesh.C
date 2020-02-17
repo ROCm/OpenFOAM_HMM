@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2014-2019 OpenCFD Ltd.
+    Copyright (C) 2014-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -648,14 +648,12 @@ bool Foam::dynamicOversetFvMesh::interpolateFields()
 
 bool Foam::dynamicOversetFvMesh::writeObject
 (
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
+    IOstreamOption streamOpt,
     const bool valid
 ) const
 {
-    //bool ok = dynamicMotionSolverFvMesh::writeObject(fmt, ver, cmp, valid);
-    bool ok = dynamicMotionSolverListFvMesh::writeObject(fmt, ver, cmp, valid);
+    //bool ok = dynamicMotionSolverFvMesh::writeObject(streamOpt, valid);
+    bool ok = dynamicMotionSolverListFvMesh::writeObject(streamOpt, valid);
 
     // For postprocessing : write cellTypes and zoneID
     {
@@ -684,7 +682,7 @@ bool Foam::dynamicOversetFvMesh::writeObject
             volTypes[cellI] = cellTypes[cellI];
         }
         volTypes.correctBoundaryConditions();
-        volTypes.writeObject(fmt, ver, cmp, valid);
+        volTypes.writeObject(streamOpt, valid);
     }
     {
         volScalarField volZoneID
@@ -711,7 +709,7 @@ bool Foam::dynamicOversetFvMesh::writeObject
             volZoneID[cellI] = zoneID[cellI];
         }
         volZoneID.correctBoundaryConditions();
-        volZoneID.writeObject(fmt, ver, cmp, valid);
+        volZoneID.writeObject(streamOpt, valid);
     }
     if (debug)
     {
@@ -764,7 +762,7 @@ bool Foam::dynamicOversetFvMesh::writeObject
         }
         //- Do not correctBoundaryConditions since re-interpolates!
         //volDonorZoneID.correctBoundaryConditions();
-        volDonorZoneID.writeObject(fmt, ver, cmp, valid);
+        volDonorZoneID.writeObject(streamOpt, valid);
     }
 
     return ok;

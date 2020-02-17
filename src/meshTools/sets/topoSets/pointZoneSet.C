@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -229,16 +229,14 @@ Foam::label Foam::pointZoneSet::maxSize(const polyMesh& mesh) const
 
 bool Foam::pointZoneSet::writeObject
 (
-    IOstream::streamFormat s,
-    IOstream::versionNumber v,
-    IOstream::compressionType c,
+    IOstreamOption streamOpt,
     const bool valid
 ) const
 {
     // Write shadow pointSet
     word oldTypeName = typeName;
     const_cast<word&>(type()) = pointSet::typeName;
-    bool ok = pointSet::writeObject(s, v, c, valid);
+    bool ok = pointSet::writeObject(streamOpt, valid);
     const_cast<word&>(type()) = oldTypeName;
 
     // Modify pointZone

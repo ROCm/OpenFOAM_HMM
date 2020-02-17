@@ -524,9 +524,7 @@ bool Foam::Time::writeTimeDict() const
 
     return timeDict.regIOobject::writeObject
     (
-        IOstream::ASCII,
-        IOstream::currentVersion,
-        IOstream::UNCOMPRESSED,
+        IOstreamOption(IOstream::ASCII),
         true
     );
 }
@@ -534,9 +532,7 @@ bool Foam::Time::writeTimeDict() const
 
 bool Foam::Time::writeObject
 (
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
+    IOstreamOption streamOpt,
     const bool valid
 ) const
 {
@@ -546,7 +542,7 @@ bool Foam::Time::writeObject
 
         if (writeOK)
         {
-            writeOK = objectRegistry::writeObject(fmt, ver, cmp, valid);
+            writeOK = objectRegistry::writeObject(streamOpt, valid);
         }
 
         if (writeOK)

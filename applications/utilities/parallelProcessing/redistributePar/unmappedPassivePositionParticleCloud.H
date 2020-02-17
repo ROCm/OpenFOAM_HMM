@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -93,14 +93,8 @@ public:
         virtual void autoMap(const mapPolyMesh&)
         {}
 
-        //- Switch off writing the objects
-        virtual bool writeObject
-        (
-            IOstream::streamFormat fmt,
-            IOstream::versionNumber ver,
-            IOstream::compressionType cmp,
-            const bool valid
-        ) const
+        //- Disable writing objects
+        virtual bool writeObject(IOstreamOption, const bool valid) const
         {
             return true;
         }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -451,16 +451,14 @@ Foam::label Foam::faceZoneSet::maxSize(const polyMesh& mesh) const
 
 bool Foam::faceZoneSet::writeObject
 (
-    IOstream::streamFormat s,
-    IOstream::versionNumber v,
-    IOstream::compressionType c,
+    IOstreamOption streamOpt,
     const bool valid
 ) const
 {
     // Write shadow faceSet
     word oldTypeName = typeName;
     const_cast<word&>(type()) = faceSet::typeName;
-    bool ok = faceSet::writeObject(s, v, c, valid);
+    bool ok = faceSet::writeObject(streamOpt, valid);
     const_cast<word&>(type()) = oldTypeName;
 
     // Modify faceZone

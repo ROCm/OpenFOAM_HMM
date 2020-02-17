@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -270,12 +270,10 @@ public:
         //- writeData member function required by regIOobject
         virtual bool writeData(Ostream& os) const;
 
-        //- Write using given format, version, compression
+        //- Write using stream options
         virtual bool writeObject
         (
-            IOstream::streamFormat fmt,
-            IOstream::versionNumber ver,
-            IOstream::compressionType cmp,
+            IOstreamOption streamOpt,
             const bool valid
         ) const;
 

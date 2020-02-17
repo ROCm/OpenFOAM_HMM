@@ -464,9 +464,7 @@ Foam::fileName Foam::fileOperation::objectPath
 bool Foam::fileOperation::writeObject
 (
     const regIOobject& io,
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType comp,
+    IOstreamOption streamOpt,
     const bool valid
 ) const
 {
@@ -476,10 +474,7 @@ bool Foam::fileOperation::writeObject
 
         mkDir(pathName.path());
 
-        autoPtr<OSstream> osPtr
-        (
-            NewOFstream(pathName, IOstreamOption(fmt, ver, comp))
-        );
+        autoPtr<OSstream> osPtr(NewOFstream(pathName, streamOpt));
 
         if (!osPtr)
         {

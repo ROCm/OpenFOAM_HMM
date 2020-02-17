@@ -697,9 +697,7 @@ public:
             virtual bool writeObject
             (
                 const regIOobject& io,
-                IOstream::streamFormat format=IOstream::ASCII,
-                IOstream::versionNumber version=IOstream::currentVersion,
-                IOstream::compressionType compression=IOstream::UNCOMPRESSED,
+                IOstreamOption streamOpt = IOstreamOption(),
                 const bool valid = true
             ) const;
 
