@@ -28,10 +28,10 @@ Class
     Foam::Tensor
 
 Description
-    Templated 3D tensor derived from MatrixSpace adding construction from
-    9 components, element access using xx(), xy() etc. member functions and
-    the inner-product (dot-product) and outer-product of two Vectors
-    (tensor-product) operators.
+    A templated (3 x 3) tensor of objects of \<T\> derived from MatrixSpace.
+
+See also
+    Test-Tensor.C
 
 SourceFiles
     TensorI.H
@@ -264,7 +264,7 @@ public:
             );
 
 
-        // Diagonal access.
+        // Diagonal access and manipulation
 
             //- Extract the diagonal as a vector
             inline Vector<Cmpt> diag() const;
@@ -275,7 +275,7 @@ public:
 
     // Tensor Operations
 
-        //- Return transpose
+        //- Return non-Hermitian transpose
         inline Tensor<Cmpt> T() const;
 
         //- Return inverse

@@ -28,10 +28,11 @@ Class
     Foam::SymmTensor
 
 Description
-    Templated 3D symmetric tensor derived from VectorSpace adding construction
-    from 6 components, element access using xx(), xy() etc. member functions
-    and the inner-product (dot-product) and outer-product of two Vectors
-    (tensor-product) operators.
+    A templated (3 x 3) symmetric tensor of objects of \<T\>, effectively
+    containing 6 elements, derived from VectorSpace.
+
+See also
+    Test-SymmTensor.C
 
 SourceFiles
     SymmTensorI.H
@@ -125,19 +126,25 @@ public:
             inline const Cmpt& xx() const;
             inline const Cmpt& xy() const;
             inline const Cmpt& xz() const;
+            inline const Cmpt& yx() const;
             inline const Cmpt& yy() const;
             inline const Cmpt& yz() const;
+            inline const Cmpt& zx() const;
+            inline const Cmpt& zy() const;
             inline const Cmpt& zz() const;
 
             inline Cmpt& xx();
             inline Cmpt& xy();
             inline Cmpt& xz();
+            inline Cmpt& yx();
             inline Cmpt& yy();
             inline Cmpt& yz();
+            inline Cmpt& zx();
+            inline Cmpt& zy();
             inline Cmpt& zz();
 
 
-        // Diagonal access.
+        // Diagonal access and manipulation
 
             //- Extract the diagonal as a vector
             inline Vector<Cmpt> diag() const;
@@ -148,7 +155,7 @@ public:
 
     // Tensor Operations
 
-        //- Transpose
+        //- Return non-Hermitian transpose
         inline const SymmTensor<Cmpt>& T() const;
 
 

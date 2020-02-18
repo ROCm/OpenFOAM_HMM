@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -127,6 +127,20 @@ template<class Cmpt>
 inline scalar Vector2D<Cmpt>::perp(const Vector2D<Cmpt>& b) const
 {
     return x()*b.y()-y()*b.x();
+}
+
+
+template<class Cmpt>
+inline Vector2D<Cmpt> operator*(const Cmpt& s, const Vector2D<Cmpt>& v)
+{
+    return Vector2D<Cmpt>(s*v.x(), s*v.y());
+}
+
+
+template<class Cmpt>
+inline Vector2D<Cmpt> operator*(const Vector2D<Cmpt>& v, const Cmpt& s)
+{
+    return s*v;
 }
 
 

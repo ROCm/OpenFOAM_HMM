@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -145,7 +145,7 @@ Foam::eddy::eddy
     dir1_(0)
 {
     // Principal stresses - eigenvalues returned in ascending order
-    vector lambda = eigenValues(R);
+    vector lambda(eigenValues(R));
 
     // Eddy rotation from principal-to-global axes
     // - given by the 3 eigenvectors of the Reynold stress tensor as rows in

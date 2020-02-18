@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -309,7 +309,7 @@ Foam::triSurfaceTools::curvatures
     {
         pointFundamentalTensors[pI] /= (accumulatedWeights[pI] + SMALL);
 
-        vector2D principalCurvatures = eigenValues(pointFundamentalTensors[pI]);
+        vector2D principalCurvatures(eigenValues(pointFundamentalTensors[pI]));
 
         //scalar curvature =
         //    (principalCurvatures[0] + principalCurvatures[1])/2;

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -114,8 +115,72 @@ inline Cmpt& Foam::DiagTensor<Cmpt>::zz()
 namespace Foam
 {
 
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+//- Return the trace of a DiagTensor
+template<class Cmpt>
+inline Cmpt tr(const DiagTensor<Cmpt>& dt)
+{
+    return dt.xx() + dt.yy() + dt.zz();
+}
+
+
+//- Return the spherical part of a DiagTensor as a SphericalTensor
+template<class Cmpt>
+inline SphericalTensor<Cmpt> sph(const DiagTensor<Cmpt>& dt)
+{
+    return SphericalTensor<Cmpt>
+    (
+        (1.0/3.0)*tr(dt)
+    );
+}
+
+
+//- Return the determinant of a DiagTensor
+template<class Cmpt>
+inline Cmpt det(const DiagTensor<Cmpt>& dt)
+{
+    return dt.xx()*dt.yy()*dt.zz();
+}
+
+
+//- Return the inverse of a DiagTensor as a DiagTensor
+template<class Cmpt>
+inline DiagTensor<Cmpt> inv(const DiagTensor<Cmpt>& dt)
+{
+    #ifdef FULLDEBUG
+    if (mag(det(dt)) < VSMALL)
+    {
+        FatalErrorInFunction
+            << "DiagTensor is not invertible due to the zero determinant:"
+            << "det(DiagTensor) = " << det(dt)
+            << abort(FatalError);
+    }
+    #endif
+
+    return DiagTensor<Cmpt>(1/dt.xx(), 1/dt.yy(), 1/dt.zz());
+}
+
+
+//- Return the diagonal of a Tensor as a DiagTensor
+template<class Cmpt>
+inline DiagTensor<Cmpt> diag(const Tensor<Cmpt>& t)
+{
+    return DiagTensor<Cmpt>(t.xx(), t.yy(), t.zz());
+}
+
+
+//- Return the diagonal of a SymmTensor as a DiagTensor
+template<class Cmpt>
+inline DiagTensor<Cmpt> diag(const SymmTensor<Cmpt>& st)
+{
+    return DiagTensor<Cmpt>(st.xx(), st.yy(), st.zz());
+}
+
+
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
+//- Sum of a DiagTensor and a Tensor
 template<class Cmpt>
 inline Tensor<Cmpt>
 operator+(const DiagTensor<Cmpt>& dt1, const Tensor<Cmpt>& t2)
@@ -129,6 +194,7 @@ operator+(const DiagTensor<Cmpt>& dt1, const Tensor<Cmpt>& t2)
 }
 
 
+//- Sum of a Tensor and a DiagTensor
 template<class Cmpt>
 inline Tensor<Cmpt>
 operator+(const Tensor<Cmpt>& t1, const DiagTensor<Cmpt>& dt2)
@@ -142,6 +208,7 @@ operator+(const Tensor<Cmpt>& t1, const DiagTensor<Cmpt>& dt2)
 }
 
 
+//- Subtract a Tensor from a DiagTensor
 template<class Cmpt>
 inline Tensor<Cmpt>
 operator-(const DiagTensor<Cmpt>& dt1, const Tensor<Cmpt>& t2)
@@ -155,6 +222,7 @@ operator-(const DiagTensor<Cmpt>& dt1, const Tensor<Cmpt>& t2)
 }
 
 
+//- Subtract a DiagTensor from a Tensor
 template<class Cmpt>
 inline Tensor<Cmpt>
 operator-(const Tensor<Cmpt>& t1, const DiagTensor<Cmpt>& dt2)
@@ -168,7 +236,67 @@ operator-(const Tensor<Cmpt>& t1, const DiagTensor<Cmpt>& dt2)
 }
 
 
-//- Inner-product between two diagonal tensors
+//- Division of a Cmpt by a DiagTensor
+template<class Cmpt>
+inline DiagTensor<Cmpt>
+operator/(const Cmpt s, const DiagTensor<Cmpt>& dt)
+{
+    #ifdef FULLDEBUG
+    if (mag(det(dt)) < VSMALL)
+    {
+        FatalErrorInFunction
+            << "Cmpt = " << s
+            << " is not divisible by the DiagTensor due to a zero element:"
+            << "DiagTensor = " << dt
+            << abort(FatalError);
+    }
+    #endif
+
+    return DiagTensor<Cmpt>(s/dt.xx(), s/dt.yy(), s/dt.zz());
+}
+
+
+//- Division of a DiagTensor by a Cmpt
+template<class Cmpt>
+inline DiagTensor<Cmpt>
+operator/(const DiagTensor<Cmpt>& dt, const Cmpt s)
+{
+    #ifdef FULLDEBUG
+    if (mag(s) < VSMALL)
+    {
+        FatalErrorInFunction
+            << "DiagTensor = " << dt
+            << " is not divisible due to a zero value in Cmpt:"
+            << "Cmpt = " << s
+            << abort(FatalError);
+    }
+    #endif
+
+    return DiagTensor<Cmpt>(dt.xx()/s, dt.yy()/s, dt.zz()/s);
+}
+
+
+//- Division of a Vector by a DiagTensor
+template<class Cmpt>
+inline Vector<Cmpt>
+operator/(const Vector<Cmpt> v, const DiagTensor<Cmpt>& dt)
+{
+    #ifdef FULLDEBUG
+    if (mag(det(dt)) < VSMALL)
+    {
+        FatalErrorInFunction
+            << "Vector = " << v
+            << " is not divisible by the DiagTensor due to a zero element:"
+            << "DiagTensor = " << dt
+            << abort(FatalError);
+    }
+    #endif
+
+    return Vector<Cmpt>(v.x()/dt.xx(), v.y()/dt.yy(), v.z()/dt.zz());
+}
+
+
+//- Inner-product of a DiagTensor and a DiagTensor
 template<class Cmpt>
 inline DiagTensor<Cmpt>
 operator&(const DiagTensor<Cmpt>& dt1, const DiagTensor<Cmpt>& dt2)
@@ -182,7 +310,7 @@ operator&(const DiagTensor<Cmpt>& dt1, const DiagTensor<Cmpt>& dt2)
 }
 
 
-//- Inner-product between a diagonal tensor and a tensor
+//- Inner-product of a DiagTensor and a Tensor
 template<class Cmpt>
 inline Tensor<Cmpt>
 operator&(const DiagTensor<Cmpt>& dt1, const Tensor<Cmpt>& t2)
@@ -204,7 +332,7 @@ operator&(const DiagTensor<Cmpt>& dt1, const Tensor<Cmpt>& t2)
 }
 
 
-//- Inner-product between a tensor and a diagonal tensor
+//- Inner-product of a Tensor and a DiagTensor
 template<class Cmpt>
 inline Tensor<Cmpt>
 operator&(const Tensor<Cmpt>& t1, const DiagTensor<Cmpt>& dt2)
@@ -226,7 +354,7 @@ operator&(const Tensor<Cmpt>& t1, const DiagTensor<Cmpt>& dt2)
 }
 
 
-//- Inner-product between a diagonal tensor and a vector
+//- Inner-product of a DiagTensor and a Vector
 template<class Cmpt>
 inline Vector<Cmpt>
 operator&(const DiagTensor<Cmpt>& dt, const Vector<Cmpt>& v)
@@ -240,7 +368,7 @@ operator&(const DiagTensor<Cmpt>& dt, const Vector<Cmpt>& v)
 }
 
 
-//- Inner-product between a vector and a diagonal tensor
+//- Inner-product of a Vector and a DiagTensor
 template<class Cmpt>
 inline Vector<Cmpt>
 operator&(const Vector<Cmpt>& v, const DiagTensor<Cmpt>& dt)
@@ -251,75 +379,6 @@ operator&(const Vector<Cmpt>& v, const DiagTensor<Cmpt>& dt)
                        v.y()*dt.yy(),
                                       v.z()*dt.zz()
     );
-}
-
-
-//- Division of a scalar by a diagonalTensor
-template<class Cmpt>
-inline DiagTensor<Cmpt>
-operator/(const scalar s, const DiagTensor<Cmpt>& dt)
-{
-    return DiagTensor<Cmpt>(s/dt.xx(), s/dt.yy(), s/dt.zz());
-}
-
-
-//- Division of a vector by a diagonalTensor
-template<class Cmpt>
-inline Vector<Cmpt>
-operator/(const Vector<Cmpt> v, const DiagTensor<Cmpt>& dt)
-{
-    return Vector<Cmpt>(v.x()/dt.xx(), v.y()/dt.yy(), v.z()/dt.zz());
-}
-
-
-//- Return the trace of a diagonal tensor
-template<class Cmpt>
-inline Cmpt tr(const DiagTensor<Cmpt>& dt)
-{
-    return dt.xx() + dt.yy() + dt.zz();
-}
-
-
-//- Return the spherical part of a diagonal tensor
-template<class Cmpt>
-inline SphericalTensor<Cmpt> sph(const DiagTensor<Cmpt>& dt)
-{
-    return SphericalTensor<Cmpt>
-    (
-        1.0/3.0*tr(dt)
-    );
-}
-
-
-//- Return the determinant of a diagonal tensor
-template<class Cmpt>
-inline Cmpt det(const DiagTensor<Cmpt>& t)
-{
-    return t.xx()*t.yy()*t.zz();
-}
-
-
-//- Return the inverse of a diagonal tensor
-template<class Cmpt>
-inline DiagTensor<Cmpt> inv(const DiagTensor<Cmpt>& dt)
-{
-    return DiagTensor<Cmpt>(1.0/dt.xx(), 1.0/dt.yy(), 1.0/dt.zz());
-}
-
-
-//- Return the diagonal of a symmetric tensor as a diagonal tensor
-template<class Cmpt>
-inline DiagTensor<Cmpt> diag(const SymmTensor<Cmpt>& t)
-{
-    return DiagTensor<Cmpt>(t.xx(), t.yy(), t.zz());
-}
-
-
-//- Return the diagonal of a tensor as a diagonal tensor
-template<class Cmpt>
-inline DiagTensor<Cmpt> diag(const Tensor<Cmpt>& t)
-{
-    return DiagTensor<Cmpt>(t.xx(), t.yy(), t.zz());
 }
 
 

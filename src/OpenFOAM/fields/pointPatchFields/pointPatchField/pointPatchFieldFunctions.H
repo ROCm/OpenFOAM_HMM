@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -340,20 +340,6 @@ inline void twoSymm
 {}
 
 inline void skew
-(
-    pointPatchField<tensor>&,
-    const pointPatchField<tensor>&
-)
-{}
-
-inline void eigenValues
-(
-    pointPatchField<vector>&,
-    const pointPatchField<tensor>&
-)
-{}
-
-inline void eigenVectors
 (
     pointPatchField<tensor>&,
     const pointPatchField<tensor>&

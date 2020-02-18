@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,10 @@ Typedef
     Foam::labelSymmTensor
 
 Description
-    SymmTensor of labels.
+    SymmTensor of labels, i.e. SymmTensor<label>.
+
+See also
+    Test-SymmTensor.C
 
 SourceFiles
     labelSymmTensor.C

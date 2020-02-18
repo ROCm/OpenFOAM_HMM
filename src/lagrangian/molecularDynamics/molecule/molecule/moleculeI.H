@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -139,17 +140,17 @@ inline Foam::molecule::constantProperties::constantProperties
 
         // Calculate the inertia tensor in the current orientation
 
-        tensor momOfInertia(Zero);
+        symmTensor momOfInertia(Zero);
 
         forAll(siteReferencePositions_, i)
         {
             const vector& p(siteReferencePositions_[i]);
 
-            momOfInertia += siteMasses_[i]*tensor
+            momOfInertia += siteMasses_[i]*symmTensor
             (
                 p.y()*p.y() + p.z()*p.z(), -p.x()*p.y(), -p.x()*p.z(),
-                -p.y()*p.x(), p.x()*p.x() + p.z()*p.z(), -p.y()*p.z(),
-                -p.z()*p.x(), -p.z()*p.y(), p.x()*p.x() + p.y()*p.y()
+                              p.x()*p.x() + p.z()*p.z(), -p.y()*p.z(),
+                                            p.x()*p.x() + p.y()*p.y()
             );
         }
 
@@ -166,7 +167,7 @@ inline Foam::molecule::constantProperties::constantProperties
 
         momOfInertia /= eigenValues(momOfInertia).x();
 
-        tensor e = eigenVectors(momOfInertia);
+        tensor e(eigenVectors(momOfInertia));
 
         // Calculate the transformation between the principle axes to the
         // global axes
@@ -203,11 +204,11 @@ inline Foam::molecule::constantProperties::constantProperties
         {
             const vector& p(siteReferencePositions_[i]);
 
-            momOfInertia += siteMasses_[i]*tensor
+            momOfInertia += siteMasses_[i]*symmTensor
             (
                 p.y()*p.y() + p.z()*p.z(), -p.x()*p.y(), -p.x()*p.z(),
-                -p.y()*p.x(), p.x()*p.x() + p.z()*p.z(), -p.y()*p.z(),
-                -p.z()*p.x(), -p.z()*p.y(), p.x()*p.x() + p.y()*p.y()
+                              p.x()*p.x() + p.z()*p.z(), -p.y()*p.z(),
+                                            p.x()*p.x() + p.y()*p.y()
             );
         }
 

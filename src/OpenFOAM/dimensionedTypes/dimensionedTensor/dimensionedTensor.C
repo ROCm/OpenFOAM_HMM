@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -141,28 +142,6 @@ dimensionedTensor skew(const dimensionedTensor& dt)
         "skew("+dt.name()+')',
         dt.dimensions(),
         skew(dt.value())
-    );
-}
-
-
-dimensionedVector eigenValues(const dimensionedTensor& dt)
-{
-    return dimensionedVector
-    (
-        "eigenValues("+dt.name()+')',
-        dt.dimensions(),
-        eigenValues(dt.value())
-    );
-}
-
-
-dimensionedTensor eigenVectors(const dimensionedTensor& dt)
-{
-    return dimensionedTensor
-    (
-        "eigenVectors("+dt.name()+')',
-        dimless,
-        eigenVectors(dt.value())
     );
 }
 

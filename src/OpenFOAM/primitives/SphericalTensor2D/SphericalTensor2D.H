@@ -28,9 +28,11 @@ Class
     Foam::SphericalTensor2D
 
 Description
-    Templated 2D sphericalTensor derived from VectorSpace adding construction
-    from 1 component, element access using ii() member function and the
-    inner-product (dot-product) and outer-product operators.
+    A templated (2 x 2) diagonal tensor of objects of \<T\>, effectively
+    containing 1 element, derived from VectorSpace.
+
+See also
+    Test-SphericalTensor2D.C
 
 SourceFiles
     SphericalTensor2DI.H

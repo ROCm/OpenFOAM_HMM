@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,13 @@ Typedef
     Foam::tensor
 
 Description
-    Tensor of scalars.
+    Tensor of scalars, i.e. Tensor<scalar>.
+
+    Analytical functions for the computation of complex eigenvalues and
+    complex eigenvectors from a given tensor.
+
+See also
+    Test-Tensor.C
 
 SourceFiles
     tensor.C
@@ -42,6 +48,7 @@ SourceFiles
 #include "vector.H"
 #include "sphericalTensor.H"
 #include "symmTensor.H"
+#include "complex.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,27 +59,51 @@ namespace Foam
 
 typedef Tensor<scalar> tensor;
 
-vector eigenValues(const tensor& T);
-vector eigenVector
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Return complex eigenvalues of a given tensor
+//  \param T tensor
+//
+//  \return Vector<complex> eigenvalues
+Vector<complex> eigenValues(const tensor& T);
+
+
+//- Return a complex eigenvector corresponding to
+//- a given complex eigenvalue of a given tensor
+//  \param T tensor
+//  \param eVal complex eigenvalue
+//  \param standardBasis1 tensor orthogonal component 1
+//  \param standardBasis2 tensor orthogonal component 2
+//
+//  \return Vector<complex> eigenvector
+Vector<complex> eigenVector
 (
     const tensor& T,
-    const scalar lambda,
-    const vector& direction1,
-    const vector& direction2
+    const complex& eVal,
+    const Vector<complex>& standardBasis1,
+    const Vector<complex>& standardBasis2
 );
-tensor eigenVectors(const tensor& T, const vector& lambdas);
-tensor eigenVectors(const tensor& T);
 
-vector eigenValues(const symmTensor& T);
-vector eigenVector
+
+//- Return complex eigenvectors corresponding to
+//- given complex eigenvalues of a given tensor
+//  \param T tensor
+//  \param eVals complex eigenvalues
+//
+//  \return Tensor<complex> eigenvectors, each row is an eigenvector
+Tensor<complex> eigenVectors
 (
-    const symmTensor& T,
-    const scalar lambda,
-    const vector& direction1,
-    const vector& direction2
+    const tensor& T,
+    const Vector<complex>& eVals
 );
-tensor eigenVectors(const symmTensor& T, const vector& lambdas);
-tensor eigenVectors(const symmTensor& T);
+
+
+//- Return complex eigenvectors of a given tensor by computing
+//- the complex eigenvalues of the tensor in the background
+//  \param T tensor
+//
+//  \return Tensor<complex> complex eigenvectors, each row is an eigenvector
+Tensor<complex> eigenVectors(const tensor& T);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

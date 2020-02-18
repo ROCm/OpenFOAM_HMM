@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,132 +34,104 @@ License
 
 Foam::Roots<3> Foam::cubicEqn::roots() const
 {
-    /*
-
-    This function solves a cubic equation of the following form:
-
-        a*x^3 + b*x^2 + c*x + d = 0
-          x^3 + B*x^2 + C*x + D = 0
-
-    The following two substitutions are used:
-
-        x = t - B/3
-        t = w - P/3/w
-
-    This reduces the problem to a quadratic in w^3.
-
-        w^6 + Q*w^3 - P = 0
-
-    Where Q and P are given in the code below.
-
-    The properties of the cubic can be related to the properties of this
-    quadratic in w^3. If it has a repeated root a zero, the cubic has a tripl
-    root. If it has a repeated root not at zero, the cubic has two real roots,
-    one repeated and one not. If it has two complex roots, the cubic has three
-    real roots. If it has two real roots, then the cubic has one real root and
-    two complex roots.
-
-    This is solved for the most numerically accurate value of w^3. See the
-    quadratic function for details on how to pick a value. This single value of
-    w^3 can yield up to three cube roots for w, which relate to the three
-    solutions for x.
-
-    Only a single root, or pair of conjugate roots, is directly evaluated; the
-    one, or ones with the lowest relative numerical error. Root identities are
-    then used to recover the remaining roots, possibly utilising a quadratic
-    and/or linear solution. This seems to be a good way of maintaining the
-    accuracy of roots at very different magnitudes.
-
-    */
-
     const scalar a = this->a();
     const scalar b = this->b();
     const scalar c = this->c();
     const scalar d = this->d();
 
-    if (a == 0)
+    // Check the leading term in the cubic eqn exists
+    if (mag(a) < VSMALL)
     {
         return Roots<3>(quadraticEqn(b, c, d).roots(), roots::nan, 0);
     }
 
-    // This is assumed not to over- or under-flow. If it does, all bets are off.
-    const scalar p = c*a - b*b/3;
+    // (JLM:p. 2246) [p = a*c - b*b/3]
+    const scalar w = a*c;
+    const scalar p = -(fma(-a, c, w) + fma(b, b/3.0, -w));
     const scalar q = b*b*b*scalar(2)/27 - b*c*a/3 + d*a*a;
-    const scalar disc = p*p*p/27 + q*q/4;
+    const scalar numDiscr = p*p*p/27 + q*q/4;
+    const scalar discr = (mag(numDiscr) > SMALL) ? numDiscr : 0;
 
-    // How many roots of what types are available?
-    const bool oneReal = disc == 0 && p == 0;
-    const bool twoReal = disc == 0 && p != 0;
-    const bool threeReal = disc < 0;
-    //const bool oneRealTwoComplex = disc > 0;
+    // Determine the number and types of the roots
+    const bool threeReal = discr < 0;
+    const bool oneRealTwoComplex = discr > 0;
+    const bool twoReal = //p != 0; && discr == 0;
+        (mag(p) > VSMALL) && !(threeReal || oneRealTwoComplex);
+    // const bool oneReal = p == 0 && discr == 0;
 
     static const scalar sqrt3 = sqrt(3.0);
 
-    scalar x;
+    scalar x = 0;
 
-    if (oneReal)
+    if (threeReal)
     {
-        const Roots<1> r = linearEqn(a, b/3).roots();
-        return Roots<3>(r.type(0), r[0]);
-    }
-    else if (twoReal)
-    {
-        if (q*b > 0)
-        {
-            x = - 2*cbrt(q/2) - b/3;
-        }
-        else
-        {
-            x = cbrt(q/2) - b/3;
-            const Roots<1> r = linearEqn(- a, x).roots();
-            return Roots<3>(Roots<2>(r, r), linearEqn(x*x, a*d).roots());
-        }
-    }
-    else if (threeReal)
-    {
-        const scalar wCbRe = - q/2, wCbIm = sqrt(- disc);
+        const scalar wCbRe = -q/2;
+        const scalar wCbIm = sqrt(-discr);
         const scalar wAbs = cbrt(hypot(wCbRe, wCbIm));
         const scalar wArg = atan2(wCbIm, wCbRe)/3;
-        const scalar wRe = wAbs*cos(wArg), wIm = wAbs*sin(wArg);
+        const scalar wRe = wAbs*cos(wArg);
+        const scalar wIm = wAbs*sin(wArg);
+
         if (b > 0)
         {
-            x = - wRe - mag(wIm)*sqrt3 - b/3;
+            x = -wRe - mag(wIm)*sqrt3 - b/3;
         }
         else
         {
             x = 2*wRe - b/3;
         }
     }
-    else // if (oneRealTwoComplex)
+    else if (oneRealTwoComplex)
     {
-        const scalar wCb = - q/2 - sign(q)*sqrt(disc);
+        const scalar wCb = -q/2 - sign(q)*sqrt(discr);
         const scalar w = cbrt(wCb);
         const scalar t = w - p/(3*w);
+
         if (p + t*b < 0)
         {
             x = t - b/3;
         }
         else
         {
-            const scalar xRe = - t/2 - b/3, xIm = sqrt3/2*(w + p/3/w);
-            x = - a*a*d/(xRe*xRe + xIm*xIm);
+            const scalar xRe = -t/2 - b/3;
+            const scalar xIm = sqrt3/2*(w + p/3/w);
 
-            // This form of solving for the remaining roots seems more stable
-            // for this case. This has been determined by trial and error.
             return
                 Roots<3>
                 (
-                    linearEqn(- a, x).roots(),
-                    quadraticEqn(a*x, x*x + b*x, - a*d).roots()
+                    Roots<1>(roots::real, -a*d/(xRe*xRe + xIm*xIm)),
+                    Roots<2>
+                    (
+                        Roots<1>(roots::complex, xRe),
+                        Roots<1>(roots::complex, xIm)
+                    )
                 );
         }
+    }
+    else if (twoReal)
+    {
+        if (q*b > 0)
+        {
+            x = -2*cbrt(q/2) - b/3;
+        }
+        else
+        {
+            x = cbrt(q/2) - b/3;
+            const Roots<1> r(linearEqn(-a, x).roots());
+            return Roots<3>(Roots<2>(r, r), linearEqn(x*x, a*d).roots());
+        }
+    }
+    else // (oneReal)
+    {
+        const Roots<1> r(linearEqn(a, b/3).roots());
+        return Roots<3>(r.type(0), r[0]);
     }
 
     return
         Roots<3>
         (
-            linearEqn(- a, x).roots(),
-            quadraticEqn(- x*x, c*x + a*d, d*x).roots()
+            linearEqn(-a, x).roots(),
+            quadraticEqn(-x*x, c*x + a*d, d*x).roots()
         );
 }
 
