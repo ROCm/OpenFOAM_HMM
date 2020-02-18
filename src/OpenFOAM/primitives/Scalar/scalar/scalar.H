@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -152,6 +152,31 @@ namespace Foam
 }
 
 #endif
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Type conversions (narrowing)
+
+namespace Foam
+{
+
+//- Type narrowing from double to float
+//  Overflow: silently fix, or raise error?
+inline float narrowFloat(const double val)
+{
+    // Single statement - future constexpr?
+    return
+    (
+        (val <= -floatScalarVGREAT) ? -floatScalarVGREAT
+      : (val >=  floatScalarVGREAT) ?  floatScalarVGREAT
+      : (val > -floatScalarVSMALL && val < floatScalarVSMALL) // underflow
+      ? 0
+      : static_cast<float>(val)
+    );
+}
+
+} // End namespace Foam
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Additional transcendental functions and specialisations

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -167,6 +167,24 @@ struct labelOp<int64_t>
         #endif
     }
 };
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Type conversions (narrowing)
+
+//- Type narrowing from int64_t to int32_t
+//  Overflow: silently fix, or raise error?
+inline int32_t narrowInt32(const int64_t val)
+{
+    // Single statement - future constexpr?
+    return
+    (
+        (val < INT32_MIN) ? INT32_MIN
+      : (val > INT32_MAX) ? INT32_MAX
+      : static_cast<int32_t>(val)
+    );
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
