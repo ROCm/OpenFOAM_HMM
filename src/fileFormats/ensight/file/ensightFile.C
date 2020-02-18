@@ -225,25 +225,59 @@ Foam::Ostream& Foam::ensightFile::write
 }
 
 
-Foam::Ostream& Foam::ensightFile::write(const label value)
+Foam::Ostream& Foam::ensightFile::write(const int32_t val)
 {
     if (format() == IOstream::BINARY)
     {
-        unsigned int ivalue(value);
-
         write
         (
-            reinterpret_cast<const char *>(&ivalue),
-            sizeof(ivalue)
+            reinterpret_cast<const char *>(&val),
+            sizeof(int32_t)
         );
     }
     else
     {
         stdStream().width(10);
-        stdStream() << value;
+        stdStream() << val;
     }
 
     return *this;
+}
+
+
+Foam::Ostream& Foam::ensightFile::write(const int64_t val)
+{
+    int32_t ivalue(narrowInt32(val));
+
+    return write(ivalue);
+}
+
+
+Foam::Ostream& Foam::ensightFile::write(const floatScalar val)
+{
+    if (format() == IOstream::BINARY)
+    {
+        write
+        (
+            reinterpret_cast<const char *>(&val),
+            sizeof(floatScalar)
+        );
+    }
+    else
+    {
+        stdStream().width(12);
+        stdStream() << val;
+    }
+
+    return *this;
+}
+
+
+Foam::Ostream& Foam::ensightFile::write(const doubleScalar val)
+{
+    float fvalue(narrowFloat(val));
+
+    return write(fvalue);
 }
 
 
@@ -255,48 +289,12 @@ Foam::Ostream& Foam::ensightFile::write
 {
     if (format() == IOstream::BINARY)
     {
-        unsigned int ivalue(value);
-
-        write
-        (
-            reinterpret_cast<const char *>(&ivalue),
-            sizeof(ivalue)
-        );
+        write(value);
     }
     else
     {
         stdStream().width(fieldWidth);
         stdStream() << value;
-    }
-
-    return *this;
-}
-
-
-Foam::Ostream& Foam::ensightFile::write(const scalar value)
-{
-    float fvalue(value);
-
-    // TBD: limit range?
-    // #if defined(WM_DP)
-    // if (mag(value) < scalar(floatScalarVSMALL))
-    // {
-    //     fvalue = 0;
-    // }
-    // #endif
-
-    if (format() == IOstream::BINARY)
-    {
-        write
-        (
-            reinterpret_cast<const char *>(&fvalue),
-            sizeof(fvalue)
-        );
-    }
-    else
-    {
-        stdStream().width(12);
-        stdStream() << fvalue;
     }
 
     return *this;

@@ -172,6 +172,21 @@ public:
         //- Write undef value
         Ostream& writeUndef();
 
+
+        //- Writing token does not make sense
+        virtual bool write(const token&)
+        {
+            NotImplemented;
+            return false;
+        }
+
+        //- Writing single character does not make sense
+        virtual Ostream& write(const char)
+        {
+            NotImplemented;
+            return *this;
+        }
+
         //- Binary write
         virtual Ostream& write(const char* buf, std::streamsize count);
 
@@ -185,13 +200,19 @@ public:
         virtual Ostream& write(const string& str);
 
         //- Write integer as "%10d" or as binary
-        Ostream& write(const label value);
+        virtual Ostream& write(const int32_t val);
+
+        //- Write integer as "%10d" or as binary
+        virtual Ostream& write(const int64_t val);
 
         //- Write integer with specified width or as binary
         Ostream& write(const label value, const label fieldWidth);
 
-        //- Write float as "%12.5e" or as binary
-        Ostream& write(const scalar value);
+        //- Write floating-point as "%12.5e" or as binary
+        virtual Ostream& write(const floatScalar val);
+
+        //- Write floating-point as "%12.5e" or as binary
+        virtual Ostream& write(const doubleScalar val);
 
         //- Add carriage return to ascii stream
         void newline();

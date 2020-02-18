@@ -241,7 +241,7 @@ public:
         //- optionally write all element addresses
         virtual void writeDict(Ostream& os, const bool full=false) const;
 
-        //- Write geometry, using a mesh reference (serial only)
+        //- Write geometry, using a mesh reference
         virtual void write
         (
             ensightGeoFile& os,

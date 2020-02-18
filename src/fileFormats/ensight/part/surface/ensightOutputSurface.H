@@ -117,6 +117,13 @@ public:
         //- Write a field of point values (serial-only)
         template<class Type>
         void writePointData(ensightFile& os, const Field<Type>& fld) const;
+
+
+    // Housekeeping
+
+        //- Cannot write geometry with a mesh reference
+        virtual void write(ensightGeoFile&, const polyMesh&, bool) const
+        {}
 };
 
 
