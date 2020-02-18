@@ -58,7 +58,7 @@ functions
         type           interfaceHeight;
         libs           ("libfieldFunctionObjects.so");
         alpha          alpha.liquid;
-        locations      ((0 0 0));
+        locations      ((0 0.0001 1e-5));
         direction       (1 0 0);
         writeControl    timeStep;
         writeInterval   3;
