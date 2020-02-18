@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,56 +25,72 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "readFields.H"
-#include "volFields.H"
+#include "ensightOutputSurface.H"
+#include "ensightOutput.H"
 
-// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::label Foam::checkData
+template<class Type>
+void Foam::ensightOutputSurface::writeData
 (
-    const fvMesh& mesh,
-    const instantList& timeDirs,
-    wordList& objectNames
-)
+    ensightFile& os,
+    const Field<Type>& fld,
+    const bool isPointData
+) const
 {
-    // Assume prune_0() was used prior to calling this
-
-    wordHashSet goodFields;
-
-    for (const word& fieldName : objectNames)
+    if (isPointData)
     {
-        bool good = false;
+        this->writePointData(os, fld);
+    }
+    else
+    {
+        this->writeFaceData(os, fld);
+    }
+}
 
-        for (const instant& inst : timeDirs)
-        {
-            good =
-                IOobject
-                (
-                    fieldName,
-                    inst.name(),
-                    mesh,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE,
-                    false  // no register
-                ).typeHeaderOk<volScalarField>(false, false);
 
-            if (!good)
-            {
-                break;
-            }
-        }
+template<class Type>
+void Foam::ensightOutputSurface::writeFaceData
+(
+    ensightFile& os,
+    const Field<Type>& fld
+) const
+{
+    ensightOutput::writeField
+    (
+        os,
+        fld,
+        *this,
+        false  /* serial only! */
+    );
+}
 
-        reduce(good, andOp<bool>());
 
-        if (good)
-        {
-            goodFields.insert(fieldName);
-        }
+template<class Type>
+void Foam::ensightOutputSurface::writePointData
+(
+    ensightFile& os,
+    const Field<Type>& fld
+) const
+{
+    const ensightOutputSurface& part = *this;
+
+    // No geometry or field
+    if (part.empty() || fld.empty())
+    {
+        return;
     }
 
-    objectNames = goodFields.sortedToc();
 
-    return objectNames.size();
+    os.beginPart(part.index());
+
+    ensightOutput::Detail::writeFieldComponents
+    (
+        os,
+        ensightFile::coordinates,
+        fld,
+        false  /* serial only! */
+    );
 }
 
 

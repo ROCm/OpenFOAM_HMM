@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,9 @@ Description
 
 SourceFiles
     ensightCase.C
+    ensightCaseI.H
+    ensightCaseOptions.C
+    ensightCaseTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -42,17 +45,18 @@ SourceFiles
 #include "HashSet.H"
 #include "InfoProxy.H"
 #include "Map.H"
+#include "HashSet.H"
 #include "OSspecific.H"
 #include "Pstream.H"
-
 #include "ensightGeoFile.H"
+#include <memory>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class ensightCase;
 class instant;
 class Time;
@@ -65,7 +69,7 @@ class ensightCase
 {
 public:
 
-    // Forward declarations
+    // Forward Declarations
     class options;
 
     // Public Data
@@ -76,21 +80,22 @@ public:
         //- The name for geometry files
         static const char* geometryName;
 
+
 private:
 
-    // Private data
+    // Private Data
 
         //- Case writing options
-        const options* options_;
+        const std::unique_ptr<options> options_;
+
+        //- Output stream (master only)
+        mutable std::unique_ptr<OFstream> os_;
 
         //- Output path (absolute)
         fileName ensightDir_;
 
         //- Case name (with ".case" ending)
         word caseName_;
-
-        //- Output stream (master only)
-        mutable OFstream* os_;
 
         //- Track state changes since last write
         mutable bool changed_;
@@ -118,6 +123,9 @@ private:
 
         //- Fields/Variables with the ensight type
         mutable HashTable<string> variables_;
+
+        //- Remember fields that are to be treated as point data
+        mutable HashSet<string> nodeVariables_;
 
         //- Cloud names and variables
         mutable HashTable<HashTable<string>> cloudVars_;
@@ -214,7 +222,7 @@ public:
 
 
     //- Destructor
-    ~ensightCase();
+    ~ensightCase() = default;
 
 
     // Member Functions
@@ -236,7 +244,7 @@ public:
         //- Consistent zero-padded integer value
         inline word padded(const label i) const;
 
-        //- Use values per nodes instead of per element
+        //- Force use of values per node instead of per element
         inline bool nodeValues() const;
 
         //- Write clouds into their own directory instead in "data" directory
@@ -269,8 +277,7 @@ public:
     // Addition of entries to case file
 
         //- Open stream for new geometry file (on master).
-        autoPtr<ensightGeoFile> newGeometry(const bool moving = false) const;
-
+        autoPtr<ensightGeoFile> newGeometry(bool moving = false) const;
 
         //- Open stream for new cloud positions (on master).
         //  Note the use of ensightFile, not ensightGeoFile.
@@ -279,11 +286,19 @@ public:
             const word& cloudName
         ) const;
 
-
         //- Open stream for new data file (on master), with current index.
+        //  Optionally marking as containing POINT_DATA
         template<class Type>
-        autoPtr<ensightFile> newData(const word& varName) const;
+        autoPtr<ensightFile> newData
+        (
+            const word& varName,
+            const bool isPointData = false
+        ) const;
 
+        //- Open stream for new data file (on master), with current index
+        //- and marking as containing POINT_DATA
+        template<class Type>
+        autoPtr<ensightFile> newPointData(const word& varName) const;
 
         //- Open stream for new cloud data file (on master), with current index.
         template<class Type>
@@ -313,28 +328,29 @@ public:
 //- Configuration options for the ensightCase
 class ensightCase::options
 {
-private:
+    // Private Data
 
-    //- Ascii/Binary file output
-    IOstream::streamFormat format_;
+        //- Ascii/Binary file output
+        IOstream::streamFormat format_;
 
-    //- Width of mask for subdirectories
-    label width_;
+        //- Remove existing directory and sub-directories on creation
+        bool overwrite_;
 
-    //- The '*' mask appropriate for subdirectories
-    word mask_;
+        //- Force use of values per node instead of per element
+        bool nodeValues_;
 
-    //- The printf format for zero-padded subdirectory numbers
-    string printf_;
+        //- Write clouds into their own directory
+        bool separateCloud_;
 
-    //- Remove existing directory and sub-directories on creation
-    bool overwrite_;
+        //- Width of mask for subdirectories
+        label width_;
 
-    //- Write values at nodes
-    bool nodeValues_;
+        //- The '*' mask appropriate for subdirectories
+        word mask_;
 
-    //- Write clouds into their own directory
-    bool separateCloud_;
+        //- The printf format for zero-padded subdirectory numbers
+        string printf_;
+
 
 public:
 
@@ -363,9 +379,6 @@ public:
         //- Remove existing directory and sub-directories on creation
         bool overwrite() const;
 
-        //- Use values per nodes instead of per element
-        bool nodeValues() const;
-
         //- Write clouds into their own directory instead in "data" directory
         bool separateCloud() const;
 
@@ -379,12 +392,20 @@ public:
         //- Remove existing directory and sub-directories on creation
         void overwrite(bool);
 
-        //- Use values per nodes instead of per element
-        void nodeValues(bool);
-
         //- Write clouds into their own directory instead in "data" directory
         void separateCloud(bool);
 
+
+    // Housekeeping
+
+        //- Force use of values per node instead of per element
+        bool nodeValues() const;
+
+        //- Force use of values per node instead of per element
+        //  Deprecated(2020-02) - The newData() method with a second parameter
+        //  is more flexible.
+        //  \deprecated(2020-02) - newData() with second parameter
+        void nodeValues(bool);
 };
 
 

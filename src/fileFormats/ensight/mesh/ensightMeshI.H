@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,82 +25,91 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-inline const char* Foam::ensightFaces::key(const enum elemType what)
+inline const Foam::polyMesh& Foam::ensightMesh::mesh() const
 {
-    return elemNames[what];
+    return mesh_;
 }
 
 
-inline Foam::label Foam::ensightFaces::index() const
+inline const Foam::ensightMesh::options& Foam::ensightMesh::option() const
 {
-    return index_;
+    return *options_;
 }
 
 
-inline Foam::label& Foam::ensightFaces::index()
+inline const Foam::Map<Foam::ensightCells>&
+Foam::ensightMesh::cellZoneParts() const
 {
-    return index_;
+    return cellZoneParts_;
 }
 
 
-inline Foam::label Foam::ensightFaces::size() const
+inline const Foam::Map<Foam::ensightFaces>&
+Foam::ensightMesh::faceZoneParts() const
 {
-    return address_.size();
+    return faceZoneParts_;
 }
 
 
-inline const Foam::FixedList<Foam::label,3>& Foam::ensightFaces::totals() const
+inline const Foam::Map<Foam::ensightFaces>&
+Foam::ensightMesh::boundaryParts() const
 {
-    return sizes_;
+    return boundaryParts_;
 }
 
 
-inline Foam::label Foam::ensightFaces::total(const enum elemType what) const
+inline bool Foam::ensightMesh::expire()
 {
-    return sizes_[what];
+    clear();
+
+    // Already marked as expired
+    if (needsUpdate_)
+    {
+        return false;
+    }
+
+    needsUpdate_ = true;
+    return true;
 }
 
 
-inline Foam::label Foam::ensightFaces::size(const enum elemType what) const
+inline bool Foam::ensightMesh::needsUpdate() const
 {
-    return slices_[what].size();
+    return needsUpdate_;
 }
 
 
-inline Foam::label Foam::ensightFaces::offset(const enum elemType what) const
+inline bool Foam::ensightMesh::empty() const
 {
-    return slices_[what].start();
+    return
+    (
+        cellZoneParts_.empty()
+     && faceZoneParts_.empty()
+     && boundaryParts_.empty()
+    );
 }
 
 
-inline const Foam::labelUList Foam::ensightFaces::faceIds
+inline Foam::label Foam::ensightMesh::size() const
+{
+    return
+    (
+        cellZoneParts_.size()
+      + faceZoneParts_.size()
+      + boundaryParts_.size()
+    );
+}
+
+
+inline void Foam::ensightMesh::write
 (
-    const enum elemType what
+    autoPtr<ensightGeoFile>& os,
+    bool parallel
 ) const
 {
-    return address_[slices_[what]];
-}
-
-
-inline const Foam::labelUList& Foam::ensightFaces::faceIds() const
-{
-    return address_;
-}
-
-
-inline const Foam::boolList& Foam::ensightFaces::flipMap() const
-{
-    return flipMap_;
-}
-
-
-inline Foam::label Foam::ensightFaces::operator[](const label i) const
-{
-    return address_[i];
+    write(os.ref(), parallel);
 }
 
 

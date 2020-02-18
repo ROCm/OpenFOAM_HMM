@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,15 +30,14 @@ Description
     Read volume fields from disk and write with ensightMesh
 
 SourceFiles
-    writeVolFields.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef writeVolFields_H
-#define writeVolFields_H
+#ifndef ensight_writeVolFields_H
+#define ensight_writeVolFields_H
 
 #include "readFields.H"
-#include "fvMeshSubsetProxy.H"
+#include "fvMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,25 +49,41 @@ bool writeVolField
 (
     ensightCase& ensCase,
     const ensightMesh& ensMesh,
-    const fvMeshSubsetProxy& proxy,
     const tmp<GeometricField<Type, fvPatchField, volMesh>>& tfield,
-    const bool nodeValues
+    const bool nearCellValue = false
 )
 {
     if (!tfield.valid())
     {
         return false;
     }
+    else if (nearCellValue)
+    {
+        auto tzgrad = makeZeroGradientField<Type>(tfield);
+
+        // Recursive call
+        return writeVolField
+        (
+            ensCase,
+            ensMesh,
+            tzgrad,
+            false  // No nearCellValue, we already have zero-gradient
+        );
+    }
 
     const auto& field = tfield();
 
-    autoPtr<ensightFile> os = ensCase.newData<Type>(field.name());
+    // Forced use of node values?
+    const bool nodeValues = ensCase.nodeValues();
+
+    autoPtr<ensightFile> os =
+        ensCase.newData<Type>(field.name(), nodeValues);
 
     bool wrote = ensightOutput::writeVolField<Type>
     (
+        os.ref(),
         field,
         ensMesh,
-        os.ref(),
         nodeValues
     );
 
@@ -82,12 +97,13 @@ label writeVolFields
 (
     ensightCase& ensCase,
     const ensightMesh& ensMesh,
-    const fvMeshSubsetProxy& proxy,
     const IOobjectList& objects,
-    const bool nodeValues
+    const bool nearCellValue = false
 )
 {
     typedef GeometricField<Type, fvPatchField, volMesh> GeoField;
+
+    const fvMesh& mesh = dynamicCast<const fvMesh>(ensMesh.mesh());
 
     label count = 0;
 
@@ -99,9 +115,8 @@ label writeVolFields
             (
                 ensCase,
                 ensMesh,
-                proxy,
-                getField<GeoField>(objects.findObject(fieldName), proxy),
-                nodeValues
+                getField<GeoField>(objects.findObject(fieldName), mesh),
+                nearCellValue
             )
         )
         {
@@ -118,29 +133,28 @@ label writeAllVolFields
 (
     ensightCase& ensCase,
     const ensightMesh& ensMesh,
-    const fvMeshSubsetProxy& proxy,
     const IOobjectList& objects,
-    const bool nodeValues
+    const bool nearCellValue = false
 )
 {
-    #undef  foamToEnsight_WRITE_FIELD
-    #define foamToEnsight_WRITE_FIELD(PrimitiveType)    \
+    #undef  ensight_WRITE_FIELD
+    #define ensight_WRITE_FIELD(PrimitiveType)          \
         writeVolFields<PrimitiveType>                   \
         (                                               \
-            ensCase, ensMesh,                           \
-            proxy,                                      \
+            ensCase,                                    \
+            ensMesh,                                    \
             objects,                                    \
-            nodeValues                                  \
+            nearCellValue                               \
         )
 
     label count = 0;
-    count += foamToEnsight_WRITE_FIELD(scalar);
-    count += foamToEnsight_WRITE_FIELD(vector);
-    count += foamToEnsight_WRITE_FIELD(sphericalTensor);
-    count += foamToEnsight_WRITE_FIELD(symmTensor);
-    count += foamToEnsight_WRITE_FIELD(tensor);
+    count += ensight_WRITE_FIELD(scalar);
+    count += ensight_WRITE_FIELD(vector);
+    count += ensight_WRITE_FIELD(sphericalTensor);
+    count += ensight_WRITE_FIELD(symmTensor);
+    count += ensight_WRITE_FIELD(tensor);
 
-    #undef foamToEnsight_WRITE_FIELD
+    #undef ensight_WRITE_FIELD
     return count;
 }
 

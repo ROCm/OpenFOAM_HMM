@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,132 +29,167 @@ License
 #include "ensightMesh.H"
 
 #include "fvMesh.H"
-#include "globalIndex.H"
+#include "linear.H"
 #include "volPointInterpolation.H"
 #include "interpolation.H"
-#include "linear.H"
 #include "processorFvPatch.H"
-#include "uindirectPrimitivePatch.H"
+#include "DynamicField.H"
 
 // * * * * * * * * * * * * * * * *  Detail * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-bool Foam::ensightOutput::Detail::writeVolField
+bool Foam::ensightOutput::writeVolField
 (
+    ensightFile& os,
     const GeometricField<Type, fvPatchField, volMesh>& vf,
-    const ensightMesh& ensMesh,
-    ensightFile& os
+    const ensightMesh& ensMesh
 )
 {
-    constexpr bool parallel = true;
+    bool parallel = Pstream::parRun();
 
-    const fvMesh& mesh = ensMesh.mesh();
-    const ensightCells& meshCells = ensMesh.meshCells();
-    const Map<word>&  patchLookup = ensMesh.patches();
-    const HashTable<ensightFaces>& patchFaces = ensMesh.boundaryPatchFaces();
-    const HashTable<ensightFaces>&  zoneFaces = ensMesh.faceZoneFaces();
+    const fvMesh& mesh = vf.mesh();
+    const polyBoundaryMesh& bmesh = mesh.boundaryMesh();
 
-    //
-    // write internalMesh, unless patch-selection was requested
-    //
-    if (ensMesh.useInternalMesh())
+    const Map<ensightCells>& cellZoneParts = ensMesh.cellZoneParts();
+    const Map<ensightFaces>& faceZoneParts = ensMesh.faceZoneParts();
+    const Map<ensightFaces>& boundaryParts = ensMesh.boundaryParts();
+
+
+    // Write internalMesh and cellZones - sorted by index
+    for (const label zoneId : cellZoneParts.sortedToc())
     {
-        Detail::writeCellField(vf, meshCells, os, parallel);
+        const ensightCells& part = cellZoneParts[zoneId];
+
+        ensightOutput::writeField(os, vf, part, parallel);
     }
 
-    //
-    // write patches
-    // use sortedToc for extra safety
-    //
-    const labelList patchIds = patchLookup.sortedToc();
-    for (const label patchId : patchIds)
-    {
-        const word& patchName = patchLookup[patchId];
-        const ensightFaces& part = patchFaces[patchName];
 
-        writeFaceField
+    // Write patches - sorted by index
+    for (const label patchId : boundaryParts.sortedToc())
+    {
+        const ensightFaces& part = boundaryParts[patchId];
+
+        if (patchId < 0 || patchId >= bmesh.size())
+        {
+            // Future handling of combined patches?
+            continue;
+        }
+
+        const label patchStart = bmesh[patchId].start();
+
+        // Either use a flat boundary field for all patches,
+        // or patch-local face ids
+
+        // Operate on a copy
+        ensightFaces localPart(part);
+
+        // Change from global faceIds to patch-local
+        localPart.decrFaceIds(patchStart);
+
+        ensightOutput::writeField
         (
-            vf.boundaryField()[patchId],
-            part,
             os,
+            vf.boundaryField()[patchId],
+            localPart,
             parallel
         );
     }
 
 
-    //
-    // write faceZones, if requested
-    // use sortedToc for extra safety
-    //
-    const wordList zoneNames = zoneFaces.sortedToc();
-    if (!zoneNames.empty())
+    // No face zones data
+    if (faceZoneParts.empty())
     {
-        // Interpolates cell values to faces - needed only when exporting
-        // faceZones...
-        GeometricField<Type, fvsPatchField, surfaceMesh> sf
-        (
-            Foam::linearInterpolate(vf)
-        );
+        return true;
+    }
 
-        // flat boundary field
-        // similar to volPointInterpolation::flatBoundaryField()
 
-        Field<Type> flat(mesh.nBoundaryFaces(), Zero);
+    // Flat boundary field
+    // similar to volPointInterpolation::flatBoundaryField()
 
-        const fvBoundaryMesh& bm = mesh.boundary();
-        forAll(vf.boundaryField(), patchi)
+    Field<Type> flat(mesh.nBoundaryFaces(), Zero);
+
+    const fvBoundaryMesh& bm = mesh.boundary();
+    forAll(vf.boundaryField(), patchi)
+    {
+        const polyPatch& pp = bm[patchi].patch();
+        const auto& bf = vf.boundaryField()[patchi];
+
+        if (isA<processorFvPatch>(bm[patchi]))
         {
-            const polyPatch& pp = bm[patchi].patch();
-            const auto& bf = vf.boundaryField()[patchi];
+            // Use average value for processor faces
+            // own cell value = patchInternalField
+            // nei cell value = evaluated boundary values
+            SubList<Type>
+            (
+                flat,
+                bf.size(),
+                pp.offset()
+            ) = (0.5 * (bf.patchInternalField() + bf));
+        }
+        else if (!isA<emptyFvPatch>(bm[patchi]))
+        {
+            SubList<Type>
+            (
+                flat,
+                bf.size(),
+                pp.offset()
+            ) = bf;
+        }
+    }
 
-            if (isA<processorFvPatch>(bm[patchi]))
-            {
-                // Use average value for processor faces
-                // own cell value = patchInternalField
-                // nei cell value = evaluated boundary values
-                SubList<Type>
-                (
-                    flat,
-                    bf.size(),
-                    pp.offset()
-                ) = (0.5 * (bf.patchInternalField() + bf));
-            }
-            else if (!isA<emptyFvPatch>(bm[patchi]))
-            {
-                SubList<Type>
-                (
-                    flat,
-                    bf.size(),
-                    pp.offset()
-                ) = bf;
-            }
+
+    // Interpolate cell values to faces
+    // - only needed when exporting faceZones...
+
+    tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> tsfld
+        = Foam::linearInterpolate(vf);
+
+    const auto& sfld = tsfld();
+
+
+    // Local output buffer
+    label maxLen = 0;
+
+    forAllConstIters(faceZoneParts, iter)
+    {
+        maxLen = max(maxLen, iter.val().size());
+    }
+
+    DynamicField<Type> values(maxLen);
+
+
+    //
+    // Write requested faceZones - sorted by index
+    //
+    for (const label zoneId : faceZoneParts.sortedToc())
+    {
+        const ensightFaces& part = faceZoneParts[zoneId];
+
+        // Loop over face ids to store the needed field values
+        // - internal faces use linear interpolation
+        // - boundary faces use the corresponding patch value
+
+        // Local copy of the field
+        values.resize(part.size());
+        values = Zero;
+
+        auto valIter = values.begin();
+
+        for (const label faceId : part.faceIds())
+        {
+            *valIter =
+            (
+                mesh.isInternalFace(faceId)
+              ? sfld[faceId]
+              : flat[faceId - mesh.nInternalFaces()]
+            );
+
+            ++valIter;
         }
 
-        for (const word& zoneName : zoneNames)
-        {
-            const ensightFaces& part = zoneFaces[zoneName];
-
-            // Field (local size)
-            Field<Type> values(part.size());
-
-            // Loop over face ids to store the needed field values
-            // - internal faces use linear interpolation
-            // - boundary faces use the corresponding patch value
-            forAll(part, i)
-            {
-                const label faceId = part[i];
-                values[i] =
-                (
-                    mesh.isInternalFace(faceId)
-                  ? sf[faceId]
-                  : flat[faceId - mesh.nInternalFaces()]
-                );
-            }
-
-            // The field is already copied in the proper order
-            // - just need its corresponding sub-fields
-            Detail::writeFaceSubField(values, part, os, parallel);
-        }
+        // The field is already in the proper element order
+        // - just need its corresponding sub-fields
+        ensightOutput::Detail::writeFaceSubField(os, values, part, parallel);
     }
 
     return true;
@@ -163,118 +197,90 @@ bool Foam::ensightOutput::Detail::writeVolField
 
 
 template<class Type>
-bool Foam::ensightOutput::Detail::writePointField
+bool Foam::ensightOutput::writePointField
 (
+    ensightFile& os,
     const GeometricField<Type, pointPatchField, pointMesh>& pf,
-    const ensightMesh& ensMesh,
-    ensightFile& os
+    const ensightMesh& ensMesh
 )
 {
-    constexpr bool parallel = true;
+    bool parallel = Pstream::parRun();
 
-    const fvMesh& mesh = ensMesh.mesh();
-    const Map<word>& patchLookup  = ensMesh.patches();
+    const polyMesh& mesh = ensMesh.mesh();
 
-    const HashTable<ensightFaces>& patchFaces = ensMesh.boundaryPatchFaces();
-    const HashTable<ensightFaces>&  zoneFaces = ensMesh.faceZoneFaces();
+    const Map<ensightCells>& cellZoneParts = ensMesh.cellZoneParts();
+    const Map<ensightFaces>& faceZoneParts = ensMesh.faceZoneParts();
+    const Map<ensightFaces>& boundaryParts = ensMesh.boundaryParts();
 
     //
-    // write internalMesh, unless patch-selection was requested
+    // Write internalMesh and cellZones - sorted by index
     //
-    if (ensMesh.useInternalMesh())
+    for (const label zoneId : cellZoneParts.sortedToc())
     {
-        if (Pstream::master())
-        {
-            os.beginPart(0); // 0 = internalMesh
-        }
+        const ensightCells& part = cellZoneParts[zoneId];
 
-        Detail::writeFieldComponents
-        (
-            "coordinates",
-            Field<Type>(pf.internalField(), ensMesh.uniquePointMap()),
-            os,
-            parallel
-        );
-    }
-
-    //
-    // write patches
-    // use sortedToc for extra safety
-    //
-    const labelList patchIds = patchLookup.sortedToc();
-    for (const label patchId : patchIds)
-    {
-        const word& patchName = patchLookup[patchId];
-        const ensightFaces& part = patchFaces[patchName];
-
-        const fvPatch& p = mesh.boundary()[patchId];
-
-        // Renumber the patch points/faces into unique points
-        labelList pointToGlobal;
         labelList uniqueMeshPointLabels;
-        autoPtr<globalIndex> globalPointsPtr =
-            mesh.globalData().mergePoints
-            (
-                p.patch().meshPoints(),
-                p.patch().meshPointMap(),
-                pointToGlobal,
-                uniqueMeshPointLabels
-            );
+        part.uniqueMeshPoints(mesh, uniqueMeshPointLabels, parallel);
 
         if (Pstream::master())
         {
             os.beginPart(part.index());
         }
 
-        Detail::writeFieldComponents
+        ensightOutput::Detail::writeFieldComponents
         (
-            "coordinates",
-            Field<Type>(pf.internalField(), uniqueMeshPointLabels),
             os,
+            ensightFile::coordinates,
+            UIndirectList<Type>(pf.internalField(), uniqueMeshPointLabels),
             parallel
         );
     }
 
+
     //
-    // write faceZones, if requested
+    // Write patches - sorted by index
     //
-    const wordList zoneNames = zoneFaces.sortedToc();
-    for (const word& zoneName : zoneNames)
+    for (const label patchId : boundaryParts.sortedToc())
     {
-        const ensightFaces& part = zoneFaces[zoneName];
+        const ensightFaces& part = boundaryParts[patchId];
 
-        uindirectPrimitivePatch p
-        (
-            UIndirectList<face>
-            (
-                mesh.faces(),
-                part.faceIds()
-            ),
-            mesh.points()
-        );
-
-        // Renumber the patch points/faces into unique points
-        labelList pointToGlobal;
         labelList uniqueMeshPointLabels;
-        autoPtr<globalIndex> globalPointsPtr =
-            mesh.globalData().mergePoints
-            (
-                p.meshPoints(),
-                p.meshPointMap(),
-                pointToGlobal,
-                uniqueMeshPointLabels
-            );
+        part.uniqueMeshPoints(mesh, uniqueMeshPointLabels, parallel);
 
         if (Pstream::master())
         {
             os.beginPart(part.index());
         }
 
-        Detail::writeFieldComponents
+        ensightOutput::Detail::writeFieldComponents
         (
-            "coordinates",
-            Field<Type>(pf.internalField(), uniqueMeshPointLabels),
             os,
+            ensightFile::coordinates,
+            UIndirectList<Type>(pf.internalField(), uniqueMeshPointLabels),
+            parallel
+        );
+    }
+
+    //
+    // Write requested faceZones - sorted by index
+    //
+    for (const label zoneId : faceZoneParts.sortedToc())
+    {
+        const ensightFaces& part = faceZoneParts[zoneId];
+
+        labelList uniqueMeshPointLabels;
+        part.uniqueMeshPoints(mesh, uniqueMeshPointLabels, parallel);
+
+        if (Pstream::master())
+        {
+            os.beginPart(part.index());
+        }
+
+        ensightOutput::Detail::writeFieldComponents
+        (
+            os,
+            ensightFile::coordinates,
+            UIndirectList<Type>(pf.internalField(), uniqueMeshPointLabels),
             parallel
         );
     }
@@ -288,9 +294,9 @@ bool Foam::ensightOutput::Detail::writePointField
 template<class Type>
 bool Foam::ensightOutput::writeVolField
 (
+    ensightFile& os,
     const GeometricField<Type, fvPatchField, volMesh>& vf,
     const ensightMesh& ensMesh,
-    ensightFile& os,
     const bool nodeValues
 )
 {
@@ -303,90 +309,10 @@ bool Foam::ensightOutput::writeVolField
         pfld.ref().checkOut();
         pfld.ref().rename(vf.name());
 
-        return Detail::writePointField<Type>(pfld, ensMesh, os);
+        return ensightOutput::writePointField<Type>(os, pfld, ensMesh);
     }
 
-    return Detail::writeVolField<Type>(vf, ensMesh, os);
-}
-
-
-// * * * * * * * * * * * * * * * *  Serial * * * * * * * * * * * * * * * * * //
-
-template<class Type>
-bool Foam::ensightOutput::Serial::writeVolField
-(
-    const GeometricField<Type, fvPatchField, volMesh>& vf,
-    const ensightPartFaces& part,
-    ensightFile& os
-)
-{
-    constexpr bool parallel = false; // serial
-
-    const label patchi = part.patchIndex();
-
-    if (patchi >= 0 && patchi < vf.boundaryField().size())
-    {
-        return ensightOutput::Detail::writeFaceField
-        (
-            vf.boundaryField()[patchi],
-            part,
-            os,
-            parallel
-        );
-    }
-
-    return false;
-}
-
-
-template<class Type>
-bool Foam::ensightOutput::Serial::writeVolField
-(
-    const GeometricField<Type, fvPatchField, volMesh>& vf,
-    const ensightPartCells& part,
-    ensightFile& os
-)
-{
-    constexpr bool parallel = false; // serial
-
-    return ensightOutput::Detail::writeCellField
-    (
-        vf.internalField(),
-        part,
-        os,
-        parallel
-    );
-}
-
-
-template<class Type>
-bool Foam::ensightOutput::Serial::writeVolField
-(
-    const GeometricField<Type, fvPatchField, volMesh>& vf,
-    const ensightParts& list,
-    ensightFile& os
-)
-{
-    for (const ensightPart& part : list)
-    {
-        const ensightPartFaces* fptr = isA<ensightPartFaces>(part);
-
-        if (fptr)
-        {
-            Serial::writeVolField(vf, *fptr, os);
-            continue;
-        }
-
-        const ensightPartCells* cptr = isA<ensightPartCells>(part);
-
-        if (cptr)
-        {
-            Serial::writeVolField(vf, *cptr, os);
-            continue;
-        }
-    }
-
-    return true;
+    return ensightOutput::writeVolField<Type>(os, vf, ensMesh);
 }
 
 

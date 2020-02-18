@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,31 +25,22 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-inline const char* Foam::ensightCells::key(const enum elemType what)
+inline void Foam::ensightCells::add(const elemType etype, label id)
 {
-    return elemNames[what];
+    // Linear addressing location
+    const label index = offsets_[etype] + sizes_[etype]++;
+
+    addressing()[index] = id;
 }
 
 
-inline Foam::label Foam::ensightCells::index() const
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+inline const char* Foam::ensightCells::key(const elemType etype)
 {
-    return index_;
-}
-
-
-inline Foam::label& Foam::ensightCells::index()
-{
-    return index_;
-}
-
-
-inline Foam::label Foam::ensightCells::size() const
-{
-    return address_.size();
+    return elemNames[etype];
 }
 
 
@@ -59,42 +50,46 @@ inline const Foam::FixedList<Foam::label,5>& Foam::ensightCells::totals() const
 }
 
 
-inline Foam::label Foam::ensightCells::total(const enum elemType what) const
+inline Foam::label Foam::ensightCells::total(const elemType etype) const
 {
-    return sizes_[what];
+    return sizes_[etype];
 }
 
 
-inline Foam::label Foam::ensightCells::size(const enum elemType what) const
+inline Foam::label Foam::ensightCells::size(const elemType etype) const
 {
-    return slices_[what].size();
+    return (offsets_[etype+1] - offsets_[etype]);
 }
 
 
-inline Foam::label Foam::ensightCells::offset(const enum elemType what) const
+inline Foam::labelRange Foam::ensightCells::range(const elemType etype) const
 {
-    return slices_[what].start();
+    return labelRange(offsets_[etype], offsets_[etype+1] - offsets_[etype]);
 }
 
 
-inline const Foam::labelUList Foam::ensightCells::cellIds
-(
-    const enum elemType what
-) const
+inline const Foam::labelList& Foam::ensightCells::cellIds() const
 {
-    return address_[slices_[what]];
+    return addressing();
 }
 
 
-inline const Foam::labelUList& Foam::ensightCells::cellIds() const
+inline const Foam::labelUList
+Foam::ensightCells::cellIds(const elemType etype) const
 {
-    return address_;
+    return addressing()[range(etype)];
 }
 
 
-inline Foam::label Foam::ensightCells::operator[](const label i) const
+inline void Foam::ensightCells::incrCellIds(const label off)
 {
-    return address_[i];
+    incrAddressing(off);
+}
+
+
+inline void Foam::ensightCells::decrCellIds(const label off)
+{
+    decrAddressing(off);
 }
 
 

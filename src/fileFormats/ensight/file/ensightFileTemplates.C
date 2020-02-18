@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,67 +25,51 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-inline const Foam::fvMesh& Foam::ensightMesh::mesh() const
+template<class Addr>
+bool Foam::ensightFile::isUndef(const IndirectListBase<scalar, Addr>& field)
 {
-    return mesh_;
+    for (const scalar val : field)
+    {
+        if (std::isnan(val))
+        {
+            return true;
+        }
+    }
+
+    return true;
 }
 
 
-inline const Foam::ensightMesh::options& Foam::ensightMesh::option() const
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Addr>
+void Foam::ensightFile::writeLabels(const IndirectListBase<label, Addr>& list)
 {
-    return *options_;
+    for (const scalar val : list)
+    {
+        write(val);
+        newline();
+    }
 }
 
 
-inline Foam::IOstream::streamFormat Foam::ensightMesh::format() const
+template<class Addr>
+void Foam::ensightFile::writeList(const IndirectListBase<scalar, Addr>& field)
 {
-    return options_->format();
-}
-
-
-inline bool Foam::ensightMesh::useInternalMesh() const
-{
-    return options_->useInternalMesh();
-}
-
-
-inline bool Foam::ensightMesh::useBoundaryMesh() const
-{
-    return options_->useBoundaryMesh();
-}
-
-
-inline const Foam::ensightCells& Foam::ensightMesh::meshCells() const
-{
-    return meshCells_;
-}
-
-
-inline const Foam::Map<Foam::word>& Foam::ensightMesh::patches() const
-{
-    return patchLookup_;
-}
-
-
-inline const Foam::HashTable<Foam::ensightFaces>&
-Foam::ensightMesh::boundaryPatchFaces() const
-{
-    return boundaryPatchFaces_;
-}
-
-
-inline const Foam::HashTable<Foam::ensightFaces>&
-Foam::ensightMesh::faceZoneFaces() const
-{
-    return faceZoneFaces_;
-}
-
-
-inline void Foam::ensightMesh::write(autoPtr<ensightGeoFile>& os) const
-{
-    write(os.ref());
+    for (const scalar val : field)
+    {
+        if (std::isnan(val))
+        {
+            writeUndef();
+        }
+        else
+        {
+            write(val);
+        }
+        newline();
+    }
 }
 
 

@@ -6,7 +6,6 @@ cd "${0%/*}" || exit                                # Run from this directory
 runApplication ansysToFoam flange.ans -scale 0.001
 runApplication $(getApplication)
 runApplication foamToEnsight -noZero
-runApplication foamToEnsightParts -noZero
 runApplication foamToVTK
 
 #------------------------------------------------------------------------------

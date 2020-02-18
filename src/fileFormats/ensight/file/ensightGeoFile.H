@@ -97,6 +97,8 @@ public:
     ~ensightGeoFile() = default;
 
 
+    // Member Functions
+
     // Output
 
         //- Write keyword with trailing newline

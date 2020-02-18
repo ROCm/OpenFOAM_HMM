@@ -37,11 +37,9 @@ Description
 #define ensightFile_H
 
 #include "OFstream.H"
-#include "IOstream.H"
-
 #include "ensightFileName.H"
 #include "ensightVarName.H"
-#include "UList.H"
+#include "IndirectListBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,7 +59,7 @@ class ensightFile
         //- Allow undef in results
         static bool allowUndef_;
 
-        //- Value to represent undef in results
+        //- Value to represent undef in results (default: 1e+37, floatVGREAT)
         static scalar undefValue_;
 
         //- The '*' mask appropriate for subDir
@@ -84,6 +82,12 @@ class ensightFile
 
 
 public:
+
+    // Static Data Members
+
+        //- The keyword "coordinates"
+        static const char* const coordinates;
+
 
     // Static Functions
 
@@ -118,6 +122,8 @@ public:
     ~ensightFile() = default;
 
 
+    // Member Functions
+
     // Access
 
         //- Return setting for whether 'undef' values are allowed in results
@@ -150,35 +156,42 @@ public:
 
     // Output
 
-        //- Inherit write from Ostream
-        using Ostream::write;
-
-        //- Binary write
-        virtual Ostream& write(const char* buf, std::streamsize count);
-
-        //- Write element keyword with trailing newline, optionally with undef
+        //- Write element keyword with trailing newline,
+        //- optionally with undef and the value for undefined
         virtual Ostream& writeKeyword(const keyType& key);
 
-        //- Write "C Binary" for binary files (eg, geometry/measured)
+        //- Write "C Binary" string for binary files (eg, geometry/measured)
         Ostream& writeBinaryHeader();
+
+        //- Write C-string as "%79s" or as binary (max 80 chars)
+        Ostream& writeString(const char* str);
+
+        //- Write string as "%79s" or as binary (max 80 chars)
+        Ostream& writeString(const std::string& str);
 
         //- Write undef value
         Ostream& writeUndef();
 
-        //- Write C-string as "%79s" or as binary (max 80 chars)
-        Ostream& write(const char*);
+        //- Binary write
+        virtual Ostream& write(const char* buf, std::streamsize count);
 
-        //- Write string as "%79s" or as binary (max 80 chars)
-        Ostream& write(const string&);
+        //- Write C-string, uses writeString()
+        virtual Ostream& write(const char* str);
+
+        //- Write word, uses writeString()
+        virtual Ostream& write(const word& str);
+
+        //- Write string, uses writeString()
+        virtual Ostream& write(const string& str);
 
         //- Write integer as "%10d" or as binary
-        Ostream& write(const label);
+        Ostream& write(const label value);
 
         //- Write integer with specified width or as binary
-        Ostream& write(const label, const label fieldWidth);
+        Ostream& write(const label value, const label fieldWidth);
 
         //- Write float as "%12.5e" or as binary
-        Ostream& write(const scalar);
+        Ostream& write(const scalar value);
 
         //- Add carriage return to ascii stream
         void newline();
@@ -192,7 +205,17 @@ public:
         //- Begin a "particle coordinates" block (measured data)
         void beginParticleCoordinates(const label nparticles);
 
+        //- Write a list of integers
+        //  With carriage return after each value (ascii stream)
+        void writeLabels(const UList<label>& list);
+
+        //- Write a list of integers
+        //  With carriage return after each value (ascii stream)
+        template<class Addr>
+        void writeLabels(const IndirectListBase<label, Addr>& list);
+
         //- Write a list of integers as float values
+        //  With carriage return after each value (ascii stream)
         void writeList(const UList<label>& field);
 
         //- Write a list of floats as "%12.5e" or as binary
@@ -201,13 +224,30 @@ public:
 
         //- Write an indirect list of scalars as "%12.5e" or as binary
         //  With carriage return after each value (ascii stream)
-        void writeList(const UList<scalar>& field, const labelUList& addr);
+        template<class Addr>
+        void writeList(const IndirectListBase<scalar, Addr>& field);
+
+
+    // Other Methods
+
+        //- Check for any NaN in the field
+        static bool isUndef(const UList<scalar>& field);
+
+        //- Check for any NaN in the field
+        template<class Addr>
+        static bool isUndef(const IndirectListBase<scalar, Addr>& field);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "ensightFileTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

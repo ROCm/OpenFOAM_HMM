@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,15 +87,13 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeUncollated()
 
         printTimeset(osCase, 1, 0.0);
 
-        ensightPartFaces ensPart
+        ensightOutputSurface part
         (
-            0,
-            osGeom.name().name(),
             surf.points(),
             surf.faces(),
-            true // contiguous points
+            osGeom.name().name()
         );
-        osGeom << ensPart;
+        part.write(osGeom); // serial
     }
 
     wroteGeom_ = true;
@@ -173,6 +171,7 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeUncollated
         osCase.setf(ios_base::scientific, ios_base::floatfield);
         osCase.precision(5);
 
+        // Two-argument form for path-name to avoid validating base-dir
         ensightGeoFile osGeom
         (
             baseDir,
@@ -212,39 +211,18 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeUncollated
         osCase << "# end" << nl;
 
 
-        ensightPartFaces ensPart
+        // Ensight Geometry
+        ensightOutputSurface part
         (
-            0,
-            osGeom.name().name(),
             surf.points(),
             surf.faces(),
-            true // contiguous points
+            osGeom.name().name()
         );
-        osGeom << ensPart;
+        part.write(osGeom); // serial
 
-        // Write field
+        // Write field (serial)
         osField.writeKeyword(ensightPTraits<Type>::typeName);
-
-        if (this->isPointData())
-        {
-            ensightOutput::Serial::writePointField
-            (
-                tfield(),
-                ensPart,
-                osField
-                // serial
-            );
-        }
-        else
-        {
-            ensightOutput::Detail::writeFaceField
-            (
-                tfield(),
-                ensPart,
-                osField,
-                false // serial
-            );
-        }
+        part.writeData(osField, tfield(), this->isPointData());
     }
 
     wroteGeom_ = true;

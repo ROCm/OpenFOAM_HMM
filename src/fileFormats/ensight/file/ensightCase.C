@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,15 +26,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ensightCase.H"
-#include "stringListOps.H"
+#include "ensightGeoFile.H"
 #include "Time.H"
 #include "cloud.H"
 #include "IOmanip.H"
-#include "globalIndex.H"
-
-#include "ensightFile.H"
-#include "ensightGeoFile.H"
-#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -69,7 +64,7 @@ void Foam::ensightCase::initialize()
             else
             {
                 DetailInfo
-                    <<"Warning: re-using existing directory" << nl
+                    << "Warning: re-using existing directory" << nl
                     << "    " << ensightDir_ << endl;
             }
         }
@@ -78,7 +73,7 @@ void Foam::ensightCase::initialize()
         mkDir(dataDir());
 
         // The case file is always ASCII
-        os_ = new OFstream(ensightDir_/caseName_, IOstream::ASCII);
+        os_.reset(new OFstream(ensightDir_/caseName_, IOstream::ASCII));
 
         // Format options
         os_->setf(ios_base::left);
@@ -126,7 +121,7 @@ Foam::label Foam::ensightCase::checkTimeset(const labelHashSet& lookup) const
 
 void Foam::ensightCase::writeHeader() const
 {
-    if (os_)  // master only
+    if (os_)  // True on master only
     {
         this->rewind();
         *os_
@@ -218,7 +213,7 @@ void Foam::ensightCase::writeTimeset
     const scalar timeCorrection
 ) const
 {
-    // make a copy
+    // Make a copy
     labelHashSet hashed(lookup);
     hashed.erase(-1);
 
@@ -282,9 +277,10 @@ void Foam::ensightCase::noteGeometry(const bool moving) const
 
 void Foam::ensightCase::noteCloud(const word& cloudName) const
 {
+    // Force into existence
     if (!cloudVars_.found(cloudName))
     {
-        cloudVars_.insert(cloudName, HashTable<string>());
+        cloudVars_.emplace(cloudName);
     }
     cloudTimes_.insert(timeIndex_);
 
@@ -388,9 +384,9 @@ Foam::ensightCase::ensightCase
 )
 :
     options_(new options(opts)),
+    os_(nullptr),
     ensightDir_(ensightDir),
     caseName_(caseName + ".case"),
-    os_(nullptr),
     changed_(false),
     timeIndex_(0),
     timeValue_(0),
@@ -398,6 +394,7 @@ Foam::ensightCase::ensightCase
     geomTimes_(),
     cloudTimes_(),
     variables_(),
+    nodeVariables_(),
     cloudVars_()
 {
     initialize();
@@ -412,9 +409,9 @@ Foam::ensightCase::ensightCase
 )
 :
     options_(new options(format)),
+    os_(nullptr),
     ensightDir_(ensightDir),
     caseName_(caseName + ".case"),
-    os_(nullptr),
     changed_(false),
     timeIndex_(0),
     timeValue_(0),
@@ -422,18 +419,10 @@ Foam::ensightCase::ensightCase
     geomTimes_(),
     cloudTimes_(),
     variables_(),
+    nodeVariables_(),
     cloudVars_()
 {
     initialize();
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::ensightCase::~ensightCase()
-{
-    deleteDemandDrivenData(options_);
-    deleteDemandDrivenData(os_);
 }
 
 
@@ -580,7 +569,7 @@ void Foam::ensightCase::write() const
     //
     if (variables_.size() || cloudVars_.size())
     {
-        // start of variables
+        // Start of variables
         *os_
             << nl
             << "VARIABLE" << nl;
@@ -598,7 +587,7 @@ void Foam::ensightCase::write() const
             << ensType.c_str()
             <<
             (
-                nodeValues()
+                (nodeVariables_.found(varName) || nodeValues())
               ? " per node:    1  "  // time-set 1
               : " per element: 1  "  // time-set 1
             )
@@ -678,7 +667,7 @@ void Foam::ensightCase::write() const
 Foam::autoPtr<Foam::ensightGeoFile>
 Foam::ensightCase::newGeometry
 (
-    const bool moving
+    bool moving
 ) const
 {
     autoPtr<Foam::ensightGeoFile> output;
@@ -749,8 +738,12 @@ Foam::Ostream& Foam::ensightCase::printInfo(Ostream& os) const
     os  << "Ensight case:" << nl
         << "   path: "   << ensightDir_ << nl
         << "   name: "   << caseName_   << nl
-        << "   format: " << format()    << nl
-        << "   values per " << (nodeValues() ? "node" : "element") << nl;
+        << "   format: " << format()    << nl;
+
+    if (nodeValues())
+    {
+        os << "   values per node" << nl;
+    }
 
     return os;
 }

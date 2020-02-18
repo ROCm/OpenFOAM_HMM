@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,7 +34,8 @@ template<class Type>
 Foam::autoPtr<Foam::ensightFile>
 Foam::ensightCase::newData
 (
-    const word& name
+    const word& name,
+    const bool isPointData
 ) const
 {
     autoPtr<ensightFile> output;
@@ -42,9 +43,10 @@ Foam::ensightCase::newData
     if (Pstream::master())
     {
         const ensight::VarName varName(name);
+
         output = createDataFile(varName);
 
-        // description
+        // Description
         output().write
         (
             string
@@ -55,11 +57,28 @@ Foam::ensightCase::newData
         );
         output().newline();
 
-        // note field variable for later use
+        // Remember the field variable for later use
         noteVariable(varName, ensightPTraits<Type>::typeName);
+
+        // Could warn about existing variables that changed representation
+        if (isPointData)
+        {
+            nodeVariables_.set(varName);
+        }
     }
 
     return output;
+}
+
+
+template<class Type>
+Foam::autoPtr<Foam::ensightFile>
+Foam::ensightCase::newPointData
+(
+    const word& name
+) const
+{
+    return newData<Type>(name, true);  // POINT_DATA
 }
 
 
@@ -78,7 +97,7 @@ Foam::ensightCase::newCloudData
         const ensight::VarName varName(name);
         output = createCloudFile(cloudName, varName);
 
-        // description
+        // Description
         output().write
         (
             string
@@ -89,7 +108,7 @@ Foam::ensightCase::newCloudData
         );
         output().newline();
 
-        // note cloud variable for later use
+        // Remember the cloud variable for later use
         noteCloud(cloudName, varName, ensightPTraits<Type>::typeName);
     }
 

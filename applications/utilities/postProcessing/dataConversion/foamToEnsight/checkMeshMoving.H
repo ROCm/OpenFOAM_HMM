@@ -1,6 +1,6 @@
 // Check for "points" in any of the result directories
 
-bool meshMoving = false;
+bool hasMovingMesh = false;
 
 if (timeDirs.size() > 1 && Pstream::master())
 {
@@ -12,7 +12,7 @@ if (timeDirs.size() > 1 && Pstream::master())
     {
         const word& timeName = inst.name();
 
-        meshMoving =
+        hasMovingMesh =
         (
             timeName != mesh.pointsInstance()
          && IOobject
@@ -27,13 +27,13 @@ if (timeDirs.size() > 1 && Pstream::master())
             ).typeHeaderOk<pointIOField>(true, false)
         );
 
-        if (meshMoving)
+        if (hasMovingMesh)
         {
             break;
         }
     }
 
-    if (meshMoving)
+    if (hasMovingMesh)
     {
         Info<< "found. Writing meshes for every timestep." << endl;
     }
@@ -43,4 +43,4 @@ if (timeDirs.size() > 1 && Pstream::master())
     }
 }
 
-reduce(meshMoving, orOp<bool>());
+reduce(hasMovingMesh, orOp<bool>());

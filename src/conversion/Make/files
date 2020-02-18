@@ -7,10 +7,6 @@ common/writer/meshWriter.C
 common/tables/boundaryRegion.C
 common/tables/cellTable.C
 
-ensight/mesh/ensightMesh.C
-ensight/mesh/ensightMeshIO.C
-ensight/mesh/ensightMeshOptions.C
-
 fire/FIREMeshReader.C
 fire/FIREMeshWriter.C
 fire/checkFireEdges.C
