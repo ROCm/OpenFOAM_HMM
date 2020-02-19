@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,9 +24,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    write function for regIOobjects
-
 \*---------------------------------------------------------------------------*/
 
 #include "regIOobject.H"
@@ -37,9 +35,7 @@ Description
 
 bool Foam::regIOobject::writeObject
 (
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
+    IOstreamOption streamOpt,
     const bool valid
 ) const
 {
@@ -60,7 +56,6 @@ bool Foam::regIOobject::writeObject
 
         return false;
     }
-
 
 
     //- uncomment this if you want to write global objects on master only
@@ -119,7 +114,7 @@ bool Foam::regIOobject::writeObject
         //if (mkDir(path()))
         //{
         //    // Try opening an OFstream for object
-        //    OFstream os(objectPath(), fmt, ver, cmp);
+        //    OFstream os(objectPath(), streamOpt);
         //
         //    // If any of these fail, return (leave error handling to Ostream
         //    // class)
@@ -143,7 +138,7 @@ bool Foam::regIOobject::writeObject
         //
         //    osGood = os.good();
         //}
-        osGood = fileHandler().writeObject(*this, fmt, ver, cmp, valid);
+        osGood = fileHandler().writeObject(*this, streamOpt, valid);
     }
     else
     {
@@ -171,11 +166,21 @@ bool Foam::regIOobject::write(const bool valid) const
 {
     return writeObject
     (
-        time().writeFormat(),
-        IOstream::currentVersion,
-        time().writeCompression(),
+        IOstreamOption(time().writeFormat(), time().writeCompression()),
         valid
     );
+}
+
+
+bool Foam::regIOobject::writeObject
+(
+    IOstream::streamFormat fmt,
+    IOstream::versionNumber ver,
+    IOstream::compressionType cmp,
+    const bool valid
+) const
+{
+    return writeObject(IOstreamOption(fmt, ver, cmp), valid);
 }
 
 

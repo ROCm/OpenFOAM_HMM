@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -4835,9 +4835,7 @@ void Foam::distributedTriSurfaceMesh::distribute
 
 bool Foam::distributedTriSurfaceMesh::writeObject
 (
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
+    IOstreamOption streamOpt,
     const bool valid
 ) const
 {
@@ -4871,7 +4869,8 @@ bool Foam::distributedTriSurfaceMesh::writeObject
     }
 
     // Dictionary needs to be written in ascii - binary output not supported.
-    bool ok = dict_.writeObject(IOstream::ASCII, ver, cmp, true);
+    streamOpt.format(IOstream::ASCII);
+    bool ok = dict_.writeObject(streamOpt, true);
 
     if (debug)
     {

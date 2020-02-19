@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -193,17 +193,15 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
 
 bool Foam::surfMesh::writeObject
 (
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
+    IOstreamOption streamOpt,
     const bool valid
 ) const
 {
-    bool ok = Allocator::writeObject(fmt, ver, cmp, valid);
+    bool ok = Allocator::writeObject(streamOpt, valid);
 
     if (ok)
     {
-        surfZones_.writeObject(fmt, ver, cmp, valid);
+        surfZones_.writeObject(streamOpt, valid);
     }
 
     return ok;

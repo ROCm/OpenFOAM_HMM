@@ -448,20 +448,11 @@ protected:
             const word& instancePath
         ) const;
 
-        //- Read file contents and send to processors
+        //- Read file contents and send to processors.
+        //  Handles compressed or uncompressed files
         static void readAndSend
         (
             const fileName& filePath,
-            const IOstream::compressionType cmp,
-            const labelUList& procs,
-            PstreamBuffers& pBufs
-        );
-
-        //- Detect file (possibly compressed), read file contents and send
-        //  to processors
-        static void readAndSend
-        (
-            const fileName& fName,
             const labelUList& procs,
             PstreamBuffers& pBufs
         );
@@ -697,9 +688,7 @@ public:
             virtual bool writeObject
             (
                 const regIOobject& io,
-                IOstream::streamFormat format=IOstream::ASCII,
-                IOstream::versionNumber version=IOstream::currentVersion,
-                IOstream::compressionType compression=IOstream::UNCOMPRESSED,
+                IOstreamOption streamOpt = IOstreamOption(),
                 const bool valid = true
             ) const;
 

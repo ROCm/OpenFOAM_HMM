@@ -133,9 +133,7 @@ void Foam::meshReader::writeMesh
     Info<< "Writing polyMesh" << endl;
     mesh.writeObject
     (
-        fmt,
-        IOstream::currentVersion,
-        IOstream::UNCOMPRESSED,
+        IOstreamOption(fmt),
         true
     );
     writeAux(mesh);

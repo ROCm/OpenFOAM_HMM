@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -114,11 +114,10 @@ public:
 
     // Member Functions
 
+        //- Write using stream options. Checks for overflow in binary
         virtual bool writeObject
         (
-            IOstream::streamFormat,
-            IOstream::versionNumber,
-            IOstream::compressionType,
+            IOstreamOption streamOpt,
             const bool valid
         ) const;
 

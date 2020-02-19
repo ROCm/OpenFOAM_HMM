@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -121,9 +121,7 @@ void Foam::Cloud<ParticleType>::writeCloudUniformProperties() const
 
     uniformPropsDict.writeObject
     (
-        IOstream::ASCII,
-        IOstream::currentVersion,
-        time().writeCompression(),
+        IOstreamOption(IOstream::ASCII, time().writeCompression()),
         true
     );
 }
@@ -252,16 +250,14 @@ void Foam::Cloud<ParticleType>::writeFields() const
 template<class ParticleType>
 bool Foam::Cloud<ParticleType>::writeObject
 (
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
+    IOstreamOption streamOpt,
     const bool
 ) const
 {
     writeCloudUniformProperties();
 
     writeFields();
-    return cloud::writeObject(fmt, ver, cmp, this->size());
+    return cloud::writeObject(streamOpt, this->size());
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -175,28 +175,26 @@ Foam::CompactIOField<T, BaseType>::CompactIOField
 template<class T, class BaseType>
 bool Foam::CompactIOField<T, BaseType>::writeObject
 (
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
+    IOstreamOption streamOpt,
     const bool valid
 ) const
 {
-    if (fmt == IOstream::ASCII)
+    if (streamOpt.format() == IOstream::ASCII)
     {
         // Change type to be non-compact format type
         const word oldTypeName(typeName);
 
         const_cast<word&>(typeName) = IOField<T>::typeName;
 
-        bool good = regIOobject::writeObject(IOstream::ASCII, ver, cmp, valid);
+        bool good = regIOobject::writeObject(streamOpt, valid);
 
-        // Change type back
+        // Restore type
         const_cast<word&>(typeName) = oldTypeName;
 
         return good;
     }
 
-    return regIOobject::writeObject(fmt, ver, cmp, valid);
+    return regIOobject::writeObject(streamOpt, valid);
 }
 
 

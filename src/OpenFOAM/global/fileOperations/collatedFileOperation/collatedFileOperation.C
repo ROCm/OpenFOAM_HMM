@@ -118,9 +118,7 @@ bool Foam::fileOperations::collatedFileOperation::appendObject
 (
     const regIOobject& io,
     const fileName& pathName,
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp
+    IOstreamOption streamOpt
 ) const
 {
     // Append to processors/ file
@@ -169,7 +167,7 @@ bool Foam::fileOperations::collatedFileOperation::appendObject
     // Create string from all data to write
     string buf;
     {
-        OStringStream os(fmt, ver);
+        OStringStream os(streamOpt.format(), streamOpt.version());
         if (isMaster)
         {
             if (!io.writeHeader(os))
@@ -199,7 +197,7 @@ bool Foam::fileOperations::collatedFileOperation::appendObject
     OFstream os
     (
         pathName,
-        IOstreamOption(IOstream::BINARY, ver),  // UNCOMPRESSED
+        IOstreamOption(IOstream::BINARY, streamOpt.version()),  // UNCOMPRESSED
         !isMaster  // append slaves
     );
 
@@ -461,9 +459,7 @@ Foam::fileName Foam::fileOperations::collatedFileOperation::objectPath
 bool Foam::fileOperations::collatedFileOperation::writeObject
 (
     const regIOobject& io,
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
+    IOstreamOption streamOpt,
     const bool valid
 ) const
 {
@@ -486,7 +482,7 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
         masterOFstream os
         (
             pathName,
-            IOstreamOption(fmt, ver, cmp),
+            streamOpt,
             false,  // append=false
             valid
         );
@@ -530,7 +526,7 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
             masterOFstream os
             (
                 pathName,
-                IOstreamOption(fmt, ver, cmp),
+                streamOpt,
                 false,  // append=false
                 valid
             );
@@ -565,7 +561,7 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
                     << " appending to " << pathName << endl;
             }
 
-            return appendObject(io, pathName, fmt, ver, cmp);
+            return appendObject(io, pathName, streamOpt);
         }
         else
         {
@@ -590,7 +586,7 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
             (
                 writer_,
                 pathName,
-                IOstreamOption(fmt, ver, cmp),
+                streamOpt,
                 useThread
             );
 

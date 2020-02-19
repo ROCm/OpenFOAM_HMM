@@ -351,9 +351,7 @@ public:
         //- Write all components using given format, version and compression
         virtual bool writeObject
         (
-            IOstream::streamFormat fmt,
-            IOstream::versionNumber ver,
-            IOstream::compressionType cmp,
+            IOstreamOption streamOpt,
             const bool valid
         ) const;
 

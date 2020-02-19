@@ -43,6 +43,7 @@ SourceFiles
 
 #include "IOobject.H"
 #include "typeInfo.H"
+#include "stdFoam.H"
 #include "OSspecific.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -319,12 +320,10 @@ public:
             //  Must be defined in derived types
             virtual bool writeData(Ostream&) const = 0;
 
-            //- Write using given format, version and compression
+            //- Write using stream options
             virtual bool writeObject
             (
-                IOstream::streamFormat,
-                IOstream::versionNumber,
-                IOstream::compressionType,
+                IOstreamOption streamOpt,
                 const bool valid
             ) const;
 
@@ -345,6 +344,19 @@ public:
 
         //- Copy assignment
         void operator=(const IOobject& io);
+
+
+    // Housekeeping
+
+        //- Write using given format, version and compression
+        FOAM_DEPRECATED_FOR(2020-02, "writeObject(IOstreamOption, bool)")
+        virtual bool writeObject
+        (
+            IOstream::streamFormat fmt,
+            IOstream::versionNumber ver,
+            IOstream::compressionType comp,
+            const bool valid
+        ) const;
 };
 
 

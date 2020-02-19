@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +31,6 @@ License
 #include "IPstream.H"
 #include "PstreamBuffers.H"
 #include "Fstream.H"
-#include "StringStream.H"
 #include "dictionary.H"
 #include "objectRegistry.H"
 #include "SubList.H"
@@ -160,12 +160,6 @@ Foam::decomposedBlockData::decomposedBlockData
 }
 
 
-// * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
-
-Foam::decomposedBlockData::~decomposedBlockData()
-{}
-
-
 // * * * * * * * * * * * * * * * Members Functions * * * * * * * * * * * * * //
 
 bool Foam::decomposedBlockData::readMasterHeader(IOobject& io, Istream& is)
@@ -181,15 +175,11 @@ bool Foam::decomposedBlockData::readMasterHeader(IOobject& io, Istream& is)
 
     List<char> data(is);
     is.fatalCheck("read(Istream&) : reading entry");
-    IListStream str
-    (
-        std::move(data),
-        IOstream::ASCII,
-        IOstream::currentVersion,
-        is.name()
-    );
 
-    return io.readHeader(str);
+    UIListStream headerStream(data);
+    headerStream.name() = is.name();
+
+    return io.readHeader(headerStream);
 }
 
 
@@ -254,24 +244,15 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlock
 
     is.fatalCheck("read(Istream&)");
 
-    List<char> data;
     autoPtr<ISstream> realIsPtr;
 
     if (blocki == 0)
     {
-        is >> data;
+        List<char> data(is);
         is.fatalCheck("read(Istream&) : reading entry");
 
-        realIsPtr.reset
-        (
-            new IListStream
-            (
-                std::move(data),
-                IOstream::ASCII,
-                IOstream::currentVersion,
-                is.name()
-            )
-        );
+        realIsPtr.reset(new IListStream(std::move(data)));
+        realIsPtr->name() = is.name();
 
         // Read header
         if (!headerIO.readHeader(realIsPtr()))
@@ -284,7 +265,7 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlock
     else
     {
         // Read master for header
-        is >> data;
+        List<char> data(is);
         is.fatalCheck("read(Istream&) : reading entry");
 
         IOstream::versionNumber ver(IOstream::currentVersion);
@@ -292,13 +273,7 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlock
         unsigned labelByteSize;
         unsigned scalarByteSize;
         {
-            UIListStream headerStream
-            (
-                data,
-                IOstream::ASCII,
-                IOstream::currentVersion,
-                is.name()
-            );
+            UIListStream headerStream(data);
 
             // Read header
             if (!headerIO.readHeader(headerStream))
@@ -315,20 +290,12 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlock
 
         for (label i = 1; i < blocki+1; i++)
         {
-            // Read data, override old data
+            // Read and discard data, only retain the last one
             is >> data;
             is.fatalCheck("read(Istream&) : reading entry");
         }
-        realIsPtr.reset
-        (
-            new IListStream
-            (
-                std::move(data),
-                IOstream::ASCII,
-                IOstream::currentVersion,
-                is.name()
-            )
-        );
+        realIsPtr.reset(new IListStream(std::move(data)));
+        realIsPtr->name() = is.name();
 
         // Apply master stream settings to realIsPtr
         realIsPtr().format(fmt);
@@ -336,6 +303,7 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlock
         realIsPtr().setLabelByteSize(labelByteSize);
         realIsPtr().setScalarByteSize(scalarByteSize);
     }
+
     return realIsPtr;
 }
 
@@ -357,22 +325,6 @@ bool Foam::decomposedBlockData::readBlocks
     }
 
     bool ok = false;
-
-
-
-    //// Scatter master header info
-    //string ver;
-    //unsigned labelByteSize;
-    //unsigned scalarByteSize;
-    //if (UPstream::master(comm))
-    //{
-    //    ver = isPtr().version().str();
-    //    labelByteSize = isPtr().labelByteSize();
-    //    scalarByteSize = isPtr().scalarByteSize();
-    //}
-    //Pstream::scatter(ver); //,  Pstream::msgType(), comm);
-    //Pstream::scatter(labelByteSize); //,  Pstream::msgType(), comm);
-    //Pstream::scatter(scalarByteSize); //,  Pstream::msgType(), comm);
 
     if (commsType == UPstream::commsTypes::scheduled)
     {
@@ -509,17 +461,8 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
                 is >> data;
                 is.fatalCheck("read(Istream&) : reading entry");
 
-                realIsPtr.reset
-                (
-                    new IListStream
-                    (
-                        std::move(data),
-                        IOstream::ASCII,
-                        IOstream::currentVersion,
-                        fName
-                    )
-                );
-
+                realIsPtr.reset(new IListStream(std::move(data)));
+                realIsPtr->name() = fName;
 
                 // Read header
                 if (!headerIO.readHeader(realIsPtr()))
@@ -566,16 +509,8 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
             );
             is >> data;
 
-            realIsPtr.reset
-            (
-                new IListStream
-                (
-                    std::move(data),
-                    IOstream::ASCII,
-                    IOstream::currentVersion,
-                    fName
-                )
-            );
+            realIsPtr.reset(new IListStream(std::move(data)));
+            realIsPtr->name() = fName;
         }
     }
     else
@@ -597,16 +532,8 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
                 is >> data;
                 is.fatalCheck("read(Istream&) : reading entry");
 
-                realIsPtr.reset
-                (
-                    new IListStream
-                    (
-                        std::move(data),
-                        IOstream::ASCII,
-                        IOstream::currentVersion,
-                        fName
-                    )
-                );
+                realIsPtr.reset(new IListStream(std::move(data)));
+                realIsPtr->name() = fName;
 
                 // Read header
                 if (!headerIO.readHeader(realIsPtr()))
@@ -643,16 +570,8 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
             UIPstream is(UPstream::masterNo(), pBufs);
             is >> data;
 
-            realIsPtr.reset
-            (
-                new IListStream
-                (
-                    std::move(data),
-                    IOstream::ASCII,
-                    IOstream::currentVersion,
-                    fName
-                )
-            );
+            realIsPtr.reset(new IListStream(std::move(data)));
+            realIsPtr->name() = fName;
         }
     }
 
@@ -661,26 +580,24 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
     //- Set stream properties from realIsPtr on master
 
     // Scatter master header info
-    string ver;
-    string format;
+    string versionString;
+    label formatValue;
     unsigned labelByteSize;
     unsigned scalarByteSize;
     if (UPstream::master(comm))
     {
-        ver = realIsPtr().version().str();
-        OStringStream os;
-        os << realIsPtr().format();
-        format = os.str();
+        versionString = realIsPtr().version().str();
+        formatValue = static_cast<label>(realIsPtr().format());
         labelByteSize = realIsPtr().labelByteSize();
         scalarByteSize = realIsPtr().scalarByteSize();
     }
-    Pstream::scatter(ver); //,  Pstream::msgType(), comm);
-    Pstream::scatter(format); //,  Pstream::msgType(), comm);
+    Pstream::scatter(versionString); //,  Pstream::msgType(), comm);
+    Pstream::scatter(formatValue); //,  Pstream::msgType(), comm);
     Pstream::scatter(labelByteSize); //,  Pstream::msgType(), comm);
     Pstream::scatter(scalarByteSize); //,  Pstream::msgType(), comm);
 
-    realIsPtr().version(IOstream::versionNumber(ver));
-    realIsPtr().format(format);
+    realIsPtr().version(IOstream::versionNumber(versionString));
+    realIsPtr().format(IOstream::streamFormat(formatValue));
     realIsPtr().setLabelByteSize(labelByteSize);
     realIsPtr().setScalarByteSize(scalarByteSize);
 
@@ -1072,30 +989,17 @@ bool Foam::decomposedBlockData::writeData(Ostream& os) const
     // Re-read my own data to find out the header information
     if (Pstream::master(comm_))
     {
-        UIListStream is
-        (
-            data,
-            IOstream::ASCII,
-            IOstream::currentVersion,
-            name()
-        );
-        io.readHeader(is);
+        UIListStream headerStream(data);
+        io.readHeader(headerStream);
     }
 
     // Scatter header information
 
-    // version
     string versionString(os.version().str());
     Pstream::scatter(versionString, Pstream::msgType(), comm_);
 
-    // stream
-    string formatString;
-    {
-        OStringStream os;
-        os << os.format();
-        formatString  = os.str();
-        Pstream::scatter(formatString, Pstream::msgType(), comm_);
-    }
+    label formatValue(os.format());
+    Pstream::scatter(formatValue, Pstream::msgType(), comm_);
 
     //word masterName(name());
     //Pstream::scatter(masterName, Pstream::msgType(), comm_);
@@ -1114,7 +1018,7 @@ bool Foam::decomposedBlockData::writeData(Ostream& os) const
         (
             os,
             IOstream::versionNumber(versionString),
-            IOstream::formatEnum(formatString),
+            IOstream::streamFormat(formatValue),
             io.headerClassName(),
             io.note(),
             masterLocation,
@@ -1122,12 +1026,18 @@ bool Foam::decomposedBlockData::writeData(Ostream& os) const
         );
     }
 
-    string str
-    (
-        reinterpret_cast<const char*>(data.cbegin()),
-        data.byteSize()
-    );
-    os.writeQuoted(str, false);
+    // Write the character data
+    if (isA<OFstream>(os))
+    {
+        // Serial file output - can use writeRaw()
+        os.writeRaw(data.cdata(), data.byteSize());
+    }
+    else
+    {
+        // Other cases are less fortunate, and no std::string_view
+        std::string str(data.cdata(), data.byteSize());
+        os.writeQuoted(str, false);
+    }
 
     if (!Pstream::master(comm_))
     {
@@ -1140,18 +1050,19 @@ bool Foam::decomposedBlockData::writeData(Ostream& os) const
 
 bool Foam::decomposedBlockData::writeObject
 (
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
+    IOstreamOption streamOpt,
     const bool valid
 ) const
 {
+    // Always write BINARY
+    streamOpt.format(IOstream::BINARY);
+
     autoPtr<OSstream> osPtr;
     if (UPstream::master(comm_))
     {
-        // Note: always write binary. These are strings so readable
-        //       anyway. They have already be tokenised on the sending side.
-        osPtr.reset(new OFstream(objectPath(), IOstream::BINARY, ver, cmp));
+        // Note: always write binary. These are strings so readable anyway.
+        //       They have already be tokenised on the sending side.
+        osPtr.reset(new OFstream(objectPath(), streamOpt));
         IOobject::writeHeader(osPtr());
     }
 

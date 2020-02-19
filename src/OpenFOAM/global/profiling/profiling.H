@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2009-2016 Bernhard Gschaider
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -247,12 +247,10 @@ public:
         //- writeData member function required by regIOobject
         virtual bool writeData(Ostream& os) const;
 
-        //- Write as uncompressed ASCII, using given format
+        //- Write as uncompressed ASCII
         virtual bool writeObject
         (
-            IOstream::streamFormat ignoreAlwaysASCII,
-            IOstream::versionNumber ver,
-            IOstream::compressionType ignoreAlwaysUncompressed,
+            IOstreamOption /*ignore*/,
             const bool valid
         ) const;
 };

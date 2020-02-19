@@ -251,9 +251,11 @@ void Foam::KinematicCloud<CloudType>::postEvolve()
     {
         outputProperties_.writeObject
         (
-            IOstream::ASCII,
-            IOstream::currentVersion,
-            this->db().time().writeCompression(),
+            IOstreamOption
+            (
+                IOstream::ASCII,
+                this->db().time().writeCompression()
+            ),
             true
         );
     }

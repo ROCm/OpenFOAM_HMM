@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -350,12 +350,10 @@ public:
         //- Update fields when mesh is updated
         virtual bool interpolateFields();
 
-        //- Write using given format, version and compression
+        //- Write using stream options
         virtual bool writeObject
         (
-            IOstream::streamFormat,
-            IOstream::versionNumber,
-            IOstream::compressionType,
+            IOstreamOption streamOpt,
             const bool valid
         ) const;
 

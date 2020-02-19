@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -168,21 +168,17 @@ Foam::CompactIOList<T, BaseType>::CompactIOList
 template<class T, class BaseType>
 bool Foam::CompactIOList<T, BaseType>::writeObject
 (
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
+    IOstreamOption streamOpt,
     const bool valid
 ) const
 {
-    bool nonCompact = false;
-
-    if (fmt == IOstream::ASCII)
+    if
+    (
+        streamOpt.format() == IOstream::BINARY
+     && overflows()
+    )
     {
-        nonCompact = true;
-    }
-    else if (overflows())
-    {
-        nonCompact = true;
+        streamOpt.format(IOstream::ASCII);
 
         WarningInFunction
             << "Overall number of elements of CompactIOList of size "
@@ -190,14 +186,14 @@ bool Foam::CompactIOList<T, BaseType>::writeObject
             << nl << "    Switching to ascii writing" << endl;
     }
 
-    if (nonCompact)
+    if (streamOpt.format() == IOstream::ASCII)
     {
-        // Change to non-compact type
+        // Change type to be non-compact format type
         const word oldTypeName(typeName);
 
         const_cast<word&>(typeName) = IOList<T>::typeName;
 
-        bool good = regIOobject::writeObject(IOstream::ASCII, ver, cmp, valid);
+        bool good = regIOobject::writeObject(streamOpt, valid);
 
         // Change type back
         const_cast<word&>(typeName) = oldTypeName;
@@ -205,7 +201,7 @@ bool Foam::CompactIOList<T, BaseType>::writeObject
         return good;
     }
 
-    return regIOobject::writeObject(fmt, ver, cmp, valid);
+    return regIOobject::writeObject(streamOpt, valid);
 }
 
 

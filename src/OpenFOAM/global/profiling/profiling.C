@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2009-2016 Bernhard Gschaider
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -393,19 +393,11 @@ bool Foam::profiling::writeData(Ostream& os) const
 
 bool Foam::profiling::writeObject
 (
-    IOstream::streamFormat,
-    IOstream::versionNumber ver,
-    IOstream::compressionType,
+    IOstreamOption,
     const bool valid
 ) const
 {
-    return regIOobject::writeObject
-    (
-        IOstream::ASCII,
-        ver,
-        IOstream::UNCOMPRESSED,
-        true
-    );
+    return regIOobject::writeObject(IOstreamOption(IOstream::ASCII), true);
 }
 
 
