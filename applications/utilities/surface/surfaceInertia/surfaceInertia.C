@@ -115,9 +115,9 @@ int main(int argc, char *argv[])
             << "Negative mass detected, the surface may be inside-out." << endl;
     }
 
-    vector eVal = eigenValues(J);
+    vector eVal = eigenValues(symm(J));
 
-    tensor eVec = eigenVectors(J);
+    tensor eVec = eigenVectors(symm(J));
 
     label pertI = 0;
 
@@ -133,9 +133,9 @@ int main(int argc, char *argv[])
         J.yy() *= 1.0 + SMALL*rand.sample01<scalar>();
         J.zz() *= 1.0 + SMALL*rand.sample01<scalar>();
 
-        eVal = eigenValues(J);
+        eVal = eigenValues(symm(J));
 
-        eVec = eigenVectors(J);
+        eVec = eigenVectors(symm(J));
 
         pertI++;
     }

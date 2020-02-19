@@ -82,9 +82,9 @@ int main(int argc, char *argv[])
 
         J = f.inertia(pts, Cf, density);
 
-        vector eVal = eigenValues(J);
+        vector eVal = eigenValues(symm(J));
 
-        tensor eVec = eigenVectors(J);
+        tensor eVec = eigenVectors(symm(J));
 
         Info<< nl << "Inertia tensor of test face " << J << nl
             << "eigenValues (principal moments) " << eVal << nl
@@ -148,9 +148,9 @@ int main(int argc, char *argv[])
 
         momentOfInertia::massPropertiesSolid(pts, tetFaces, density, m, cM, J);
 
-        vector eVal = eigenValues(J);
+        vector eVal = eigenValues(symm(J));
 
-        tensor eVec = eigenVectors(J);
+        tensor eVec = eigenVectors(symm(J));
 
         Info<< nl
             << "Mass of tetrahedron " << m << nl
@@ -204,7 +204,7 @@ int main(int argc, char *argv[])
 
         tensor& J = mI[celli];
 
-        vector eVal = eigenValues(J);
+        vector eVal = eigenValues(symm(J));
 
         Info<< nl
             << "Inertia tensor of cell " << celli << " " << J << nl
@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
 
         J /= cmptMax(eVal);
 
-        tensor eVec = eigenVectors(J);
+        tensor eVec = eigenVectors(symm(J));
 
         Info<< "eigenVectors (principal axes, from normalised inertia) " << eVec
             << endl;
