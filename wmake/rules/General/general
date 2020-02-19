@@ -1,5 +1,5 @@
 #-------------------------------*- makefile -*---------------------------------
-WM_VERSION = OPENFOAM=2001
+WM_VERSION = OPENFOAM=2002
 
 AR         = ar
 ARFLAGS    = cr
