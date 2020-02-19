@@ -6,6 +6,8 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020 Henning Scheufler
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +32,11 @@ License
 #include "FaceCellWave.H"
 #include "smoothData.H"
 #include "sweepData.H"
+#include "fvMatrices.H"
+#include "fvcVolumeIntegrate.H"
+#include "fvmLaplacian.H"
+#include "fvmSup.H"
+#include "zeroGradientFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -314,4 +321,100 @@ void Foam::fvc::sweep
 }
 
 
+void Foam::fvc::spreadSource
+(
+    volScalarField& mDotOut,
+    const volScalarField& mDotIn,
+    const volScalarField& alpha1,
+    const volScalarField& alpha2,
+    const dimensionedScalar& D,
+    const scalar cutoff
+)
+{
+    const fvMesh& mesh = alpha1.mesh();
+   
+    volScalarField mDotSmear
+    (
+        IOobject
+        (
+            "mDotSmear",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionedScalar(mDotOut.dimensions(), Zero),
+        zeroGradientFvPatchField<scalar>::typeName
+    );
+
+    //- Smearing of source term field
+    fvScalarMatrix mSourceEqn
+    (
+        fvm::Sp(scalar(1), mDotSmear) 
+      - fvm::laplacian(D, mDotSmear) 
+      == 
+        mDotIn
+    );
+
+    mSourceEqn.solve();
+
+    // Cut cells with cutoff < alpha1 < 1-cutoff and rescale remaining 
+    // source term field
+    
+    dimensionedScalar intvDotLiquid("intvDotLiquid", dimMass/dimTime, 0.0);
+    dimensionedScalar intvDotVapor ("intvDotVapor", dimMass/dimTime, 0.0);
+    
+    const scalarField& Vol = mesh.V();
+    
+    forAll(mesh.C(), celli)
+    {
+        if (alpha1[celli] < cutoff)
+        {
+            intvDotVapor.value() += 
+                alpha2[celli]*mDotSmear[celli]*Vol[celli];
+        }
+        else if (alpha1[celli] > 1.0 - cutoff)
+        {
+            intvDotLiquid.value() += 
+                alpha1[celli]*mDotSmear[celli]*Vol[celli];
+        }
+    }
+    
+    reduce(intvDotVapor.value(), sumOp<scalar>());
+    reduce(intvDotLiquid.value(), sumOp<scalar>());
+
+    //- Calculate Nl and Nv
+    dimensionedScalar Nl ("Nl", dimless, Zero);
+    dimensionedScalar Nv ("Nv", dimless, Zero); 
+    
+    const dimensionedScalar intmSource0(fvc::domainIntegrate(mDotIn));
+
+    if (intvDotVapor.value() > VSMALL)
+    {
+        Nv = intmSource0/intvDotVapor;
+    }
+    if (intvDotLiquid.value() > VSMALL)
+    {
+        Nl = intmSource0/intvDotLiquid;
+    }
+
+    //- Set source terms in cells with alpha1 < cutoff or alpha1 > 1-cutoff
+    forAll(mesh.C(), celli)
+    {
+        if (alpha1[celli] < cutoff)
+        {
+            mDotOut[celli] = Nv.value()*(1 - alpha1[celli])*mDotSmear[celli];
+        }
+        else if (alpha1[celli] > 1.0 - cutoff)
+        {
+            //mDotOut[celli] = 0;
+            mDotOut[celli] = -Nl.value()*alpha1[celli]*mDotSmear[celli];
+        }
+        else
+        {
+            mDotOut[celli] = 0;
+        }
+    }
+}
 // ************************************************************************* //

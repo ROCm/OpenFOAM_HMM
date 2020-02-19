@@ -1,13 +1,18 @@
-interPhaseChangePath = $(FOAM_SOLVERS)/multiphase/interPhaseChangeFoam
+interPhaseChangeFoam = $(FOAM_SOLVERS)/multiphase/interPhaseChangeFoam
+interFoam = $(FOAM_SOLVERS)/multiphase/interFoam
+VoF = $(FOAM_SOLVERS)/multiphase/VoF
 
 EXE_INC = \
     -I. \
+    -I$(interPhaseChangeFoam) \
+    -I$(interFoam) \
+    -I$(VoF) \
     -ItemperaturePhaseChangeTwoPhaseMixtures/lnInclude \
-    -I$(interPhaseChangePath) \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/fvOptions/lnInclude\
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/sampling/lnInclude \
+    -I$(LIB_SRC)/dynamicFvMesh/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
     -I$(LIB_SRC)/transportModels \
     -I$(LIB_SRC)/transportModels/twoPhaseMixture/lnInclude \
@@ -21,6 +26,7 @@ EXE_LIBS = \
     -lfvOptions \
     -lmeshTools \
     -lsampling \
+    -ldynamicFvMesh \
     -lphaseTemperatureChangeTwoPhaseMixtures \
     -ltwoPhaseMixture \
     -linterfaceProperties \
@@ -29,3 +35,5 @@ EXE_LIBS = \
     -lturbulenceModels \
     -lincompressibleTurbulenceModels \
     -lfluidThermophysicalModels
+
+    

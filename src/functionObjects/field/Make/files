@@ -115,4 +115,6 @@ zeroGradient/zeroGradient.C
 
 stabilityBlendingFactor/stabilityBlendingFactor.C
 
+interfaceHeight/interfaceHeight.C
+
 LIB = $(FOAM_LIBBIN)/libfieldFunctionObjects

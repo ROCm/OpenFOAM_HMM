@@ -90,4 +90,10 @@ const Foam::word Foam::interfaceCompositionModel::variable() const
 }
 
 
+bool Foam::interfaceCompositionModel::includeDivU()
+{
+    return true;
+}
+
+
 // ************************************************************************* //

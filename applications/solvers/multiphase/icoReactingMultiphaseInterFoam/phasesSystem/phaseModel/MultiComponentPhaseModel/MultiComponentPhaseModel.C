@@ -90,9 +90,7 @@ MultiComponentPhaseModel
                 (
                     IOobject::groupName("X" + species_[i], phaseName),
                     fluid.mesh().time().timeName(),
-                    fluid.mesh(),
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
+                    fluid.mesh()
                 ),
                 Y()[i]
             )

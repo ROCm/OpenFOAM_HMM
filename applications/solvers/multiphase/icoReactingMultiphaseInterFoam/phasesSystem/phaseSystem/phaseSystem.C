@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,6 +54,12 @@ namespace Foam
 const Foam::word Foam::phaseSystem::phasePropertiesName("phaseProperties");
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void Foam::phaseSystem::calcMu()
+{
+    mu_ = mu()();
+}
+
 
 Foam::phaseSystem::phaseModelTable
 Foam::phaseSystem::generatePhaseModels(const wordList& phaseNames) const
@@ -202,6 +208,18 @@ Foam::phaseSystem::phaseSystem
 :
     basicThermo(mesh, word::null, phasePropertiesName),
     mesh_(mesh),
+    mu_
+    (
+        IOobject
+        (
+            "mu",
+            mesh_.time().timeName(),
+            mesh_
+        ),
+        mesh_,
+        dimensionedScalar(dimViscosity*dimDensity, Zero),
+        calculatedFvPatchScalarField::typeName
+    ),
     phaseNames_(lookup("phases")),
     phi_
     (
@@ -222,9 +240,7 @@ Foam::phaseSystem::phaseSystem
         (
             "rhoPhi",
             mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
+            mesh_
         ),
         mesh_,
         dimensionedScalar(dimMass/dimTime, Zero)
@@ -265,6 +281,9 @@ Foam::phaseSystem::phaseSystem
 
     // Total phase pair
     generatePairsTable();
+    
+    // Update mu_
+    calcMu();
 }
 
 
@@ -884,6 +903,8 @@ void Foam::phaseSystem::correct()
     {
         iter()->correct();
     }
+    
+    calcMu();
 }
 
 

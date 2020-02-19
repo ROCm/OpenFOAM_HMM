@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvcGrad.H"
 #include "twoPhaseMixtureEThermo.H"
+#include "fvmSup.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -57,11 +58,15 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::constant
     temperaturePhaseChangeTwoPhaseMixture(mixture, mesh),
     coeffC_
     (
-        "coeffC", dimless/dimTime/dimTemperature, subDict(type() + "Coeffs")
+        "coeffC", 
+        dimless/dimTime/dimTemperature, 
+        optionalSubDict(type() + "Coeffs")
     ),
     coeffE_
     (
-        "coeffE", dimless/dimTime/dimTemperature, subDict(type() + "Coeffs")
+        "coeffE", 
+        dimless/dimTime/dimTemperature, 
+        optionalSubDict(type() + "Coeffs")
     )
 {}
 
@@ -85,8 +90,8 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::mDotAlphal() const
 
     return Pair<tmp<volScalarField>>
     (
-        coeffC_*mixture_.rho2()*max(TSat - T.oldTime(), T0),
-       -coeffE_*mixture_.rho1()*max(T.oldTime() - TSat, T0)
+        coeffC_*mixture_.rho2()*max(TSat - T, T0),
+       -coeffE_*mixture_.rho1()*max(T - TSat, T0)
     );
 }
 
@@ -116,11 +121,20 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::mDot() const
     const dimensionedScalar& TSat = thermo.TSat();
 
     const dimensionedScalar T0(dimTemperature, Zero);
+    
+    if (mesh_.time().outputTime())
+    {
+        volScalarField mDot
+        (
+            "mDot", coeffE_*mixture_.rho1()*limitedAlpha1*max(T - TSat, T0)
+        );
+        mDot.write();
+    }
 
     return Pair<tmp<volScalarField>>
     (
-        coeffC_*mixture_.rho2()*limitedAlpha2*max(TSat - T.oldTime(), T0),
-        coeffE_*mixture_.rho1()*limitedAlpha1*max(T.oldTime() - TSat, T0)
+        coeffC_*mixture_.rho2()*limitedAlpha2*max(TSat - T, T0),
+       -coeffE_*mixture_.rho1()*limitedAlpha1*max(T - TSat, T0)
     );
 }
 
@@ -150,9 +164,63 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::mDotDeltaT() const
 
     return Pair<tmp<volScalarField>>
     (
-        coeffC_*mixture_.rho2()*limitedAlpha2*pos(TSat - T.oldTime()),
-        coeffE_*mixture_.rho1()*limitedAlpha1*pos(T.oldTime() - TSat)
+        coeffC_*mixture_.rho2()*limitedAlpha2*pos(TSat - T),
+        coeffE_*mixture_.rho1()*limitedAlpha1*pos(T - TSat)
     );
+}
+
+
+Foam::tmp<Foam::fvScalarMatrix>
+Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::TSource() const
+{
+
+    const volScalarField& T = mesh_.lookupObject<volScalarField>("T");
+
+    tmp<fvScalarMatrix> tTSource
+    (
+        new fvScalarMatrix
+        (
+            T,
+            dimEnergy/dimTime
+        )
+    );
+
+    fvScalarMatrix& TSource = tTSource.ref();
+
+    const twoPhaseMixtureEThermo& thermo =
+        refCast<const twoPhaseMixtureEThermo>
+        (
+            mesh_.lookupObject<basicThermo>(basicThermo::dictName)
+        );
+
+    const dimensionedScalar& TSat = thermo.TSat();
+    
+    dimensionedScalar L = mixture_.Hf2() - mixture_.Hf1();
+    
+    volScalarField limitedAlpha1
+    (
+        min(max(mixture_.alpha1(), scalar(0)), scalar(1))
+    );
+
+    volScalarField limitedAlpha2
+    (
+        min(max(mixture_.alpha2(), scalar(0)), scalar(1))
+    );
+   
+    const volScalarField Vcoeff
+    (
+        coeffE_*mixture_.rho1()*limitedAlpha1*L
+    );
+    const volScalarField Ccoeff
+    (
+        coeffC_*mixture_.rho2()*limitedAlpha2*L
+    );
+
+    TSource = 
+        fvm::Sp(Vcoeff, T) - Vcoeff*TSat
+      - fvm::Sp(Ccoeff, T) + Ccoeff*TSat;
+
+    return tTSource;
 }
 
 

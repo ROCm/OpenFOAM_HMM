@@ -61,6 +61,20 @@ volScalarField rho
 );
 rho.oldTime();
 
+// Mass flux
+surfaceScalarField rhoPhi
+(
+    IOobject
+    (
+        "rhoPhi",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    fvc::interpolate(rho)*phi
+);
+
 // Construct interface from alpha1 distribution
 interfaceProperties interface
 (
@@ -105,6 +119,24 @@ if (p_rgh.needReference())
 
 mesh.setFluxRequired(p_rgh.name());
 mesh.setFluxRequired(alpha1.name());
+
+// MULES compressed flux is registered in case scalarTransport FO needs it.
+surfaceScalarField alphaPhiUn
+(
+    IOobject
+    (
+        "alphaPhiUn",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh,
+    dimensionedScalar(phi.dimensions(), Zero)
+);
+
+#include "createMRF.H"
+#include "createFvOptions.H"
 
 // Turbulent Prandtl number
 dimensionedScalar Prt("Prt", dimless, thermo->transportPropertiesDict());

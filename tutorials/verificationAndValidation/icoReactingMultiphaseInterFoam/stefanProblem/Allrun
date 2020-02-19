@@ -1,0 +1,21 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+runApplication blockMesh
+restore0Dir
+cp -r 0 1.36
+cp system/setAlphaFieldDict.liquid system/setAlphaFieldDict
+runApplication setAlphaField
+rm log.setAlphaField
+
+cp system/setAlphaFieldDict.gas system/setAlphaFieldDict
+runApplication setAlphaField
+
+runApplication $(getApplication)
+
+./plotGraph
+
+#------------------------------------------------------------------------------

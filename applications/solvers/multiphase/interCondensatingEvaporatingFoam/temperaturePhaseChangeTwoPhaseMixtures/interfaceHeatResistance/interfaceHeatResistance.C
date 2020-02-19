@@ -1,0 +1,409 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | www.openfoam.com
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020 Henning Scheufler
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+\*---------------------------------------------------------------------------*/
+
+#include "interfaceHeatResistance.H"
+#include "addToRunTimeSelectionTable.H"
+#include "twoPhaseMixtureEThermo.H"
+#include "isoCutCell.H"
+#include "volPointInterpolation.H"
+#include "calculatedFvPatchFields.H"
+#include "wallPolyPatch.H"
+#include "fvcSmooth.H"
+#include "fvmSup.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace temperaturePhaseChangeTwoPhaseMixtures
+{
+    defineTypeNameAndDebug(interfaceHeatResistance, 0);
+    addToRunTimeSelectionTable
+    (
+        temperaturePhaseChangeTwoPhaseMixture,
+        interfaceHeatResistance,
+        components
+    );
+}
+}
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::temperaturePhaseChangeTwoPhaseMixtures::interfaceHeatResistance::
+interfaceHeatResistance
+(
+    const thermoIncompressibleTwoPhaseMixture& mixture,
+    const fvMesh& mesh
+)
+:
+    temperaturePhaseChangeTwoPhaseMixture(mixture, mesh),
+    R_
+    (
+        "R", 
+        dimPower/dimArea/dimTemperature, optionalSubDict(type() + "Coeffs")
+    ),
+    
+    interfaceArea_
+    (
+        IOobject
+        (
+            "interfaceArea",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar(dimless/dimLength, Zero)
+    ),
+    
+    mDotc_
+    (
+        IOobject
+        (
+            "mDotc",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar(dimDensity/dimTime, Zero)
+    ),
+    
+    mDote_
+    (
+        IOobject
+        (
+            "mDote",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar(dimDensity/dimTime, Zero)
+    ),
+    
+    spread_
+    (
+        optionalSubDict(type() + "Coeffs").get<scalar>("spread")
+    )
+{
+    correct();
+}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+Foam::Pair<Foam::tmp<Foam::volScalarField>>
+Foam::temperaturePhaseChangeTwoPhaseMixtures::interfaceHeatResistance::
+vDotAlphal() const
+{
+    dimensionedScalar alphalCoeff(1.0/mixture_.rho1());
+
+    return Pair<tmp<volScalarField>>
+    (
+        (alphalCoeff*mDotc_)/(mixture_.alpha2() + SMALL),
+       -(alphalCoeff*mDote_)/(mixture_.alpha1() + SMALL)
+    );
+}
+
+
+Foam::Pair<Foam::tmp<Foam::volScalarField>>
+Foam::temperaturePhaseChangeTwoPhaseMixtures::interfaceHeatResistance::
+mDotAlphal() const
+{
+    volScalarField limitedAlpha1
+    (
+        min(max(mixture_.alpha1(), scalar(0)), scalar(1))
+    );
+
+    volScalarField limitedAlpha2
+    (
+        min(max(mixture_.alpha2(), scalar(0)), scalar(1))
+    );
+    
+    return Pair<tmp<volScalarField>>
+    (
+        (mDotc_/(limitedAlpha2 + SMALL)),
+       -(mDote_/(limitedAlpha1 + SMALL))
+    );
+}
+
+
+Foam::Pair<Foam::tmp<Foam::volScalarField>>
+Foam::temperaturePhaseChangeTwoPhaseMixtures::interfaceHeatResistance::
+mDot() const
+{
+    
+    return Pair<tmp<volScalarField>>
+    (
+        tmp<volScalarField>(mDotc_), 
+        tmp<volScalarField>(mDote_)
+    );
+}
+
+
+Foam::Pair<Foam::tmp<Foam::volScalarField>>
+Foam::temperaturePhaseChangeTwoPhaseMixtures::interfaceHeatResistance::
+mDotDeltaT() const
+{
+   const twoPhaseMixtureEThermo& thermo =
+        refCast<const twoPhaseMixtureEThermo>
+        (
+            mesh_.lookupObject<basicThermo>(basicThermo::dictName)
+        );
+        
+    const volScalarField& T = mesh_.lookupObject<volScalarField>("T");
+
+    const dimensionedScalar& TSat = thermo.TSat();
+
+    Pair<tmp<volScalarField>> mDotce(mDot());
+    
+    return Pair<tmp<volScalarField>>
+    (
+        mDotc_*pos(TSat - T.oldTime())/(TSat - T.oldTime()),
+       -mDote_*pos(T.oldTime() - TSat)/(T.oldTime() - TSat)
+    );
+
+    
+}
+
+
+Foam::tmp<Foam::fvScalarMatrix>
+Foam::temperaturePhaseChangeTwoPhaseMixtures::interfaceHeatResistance::
+TSource() const
+{
+
+    const volScalarField& T = mesh_.lookupObject<volScalarField>("T");
+
+    tmp<fvScalarMatrix> tTSource
+    (
+        new fvScalarMatrix
+        (
+            T,
+            dimEnergy/dimTime
+        )
+    );
+
+    fvScalarMatrix& TSource = tTSource.ref();
+
+    const twoPhaseMixtureEThermo& thermo =
+        refCast<const twoPhaseMixtureEThermo>
+        (
+            mesh_.lookupObject<basicThermo>(basicThermo::dictName)
+        );
+
+    const dimensionedScalar& TSat = thermo.TSat();
+   
+    // interface heat resistance
+    volScalarField IHRcoeff = interfaceArea_*R_;
+
+    TSource = fvm::Sp(IHRcoeff, T) - IHRcoeff*TSat;
+
+    return tTSource;
+}
+
+
+void Foam::temperaturePhaseChangeTwoPhaseMixtures::interfaceHeatResistance::
+correct()
+{
+   
+    // Update Interface
+    updateInterface();
+    
+    // Update mDotc_ and mDote_
+    const volScalarField& T = mesh_.lookupObject<volScalarField>("T");
+
+    const twoPhaseMixtureEThermo& thermo =
+        refCast<const twoPhaseMixtureEThermo>
+        (
+            mesh_.lookupObject<basicThermo>(basicThermo::dictName)
+        );
+
+    const dimensionedScalar& TSat = thermo.TSat();
+    const dimensionedScalar T0(dimTemperature, Zero);
+
+    dimensionedScalar L = mixture_.Hf2() - mixture_.Hf1();
+   
+    // interface heat resistance
+    mDotc_ = interfaceArea_*R_*max(TSat - T, T0)/L;
+    mDote_ = interfaceArea_*R_*(T - TSat)/L;
+       
+    forAll(mDotc_, celli)
+    {
+        scalar rhobyDt = mixture_.rho1().value()/mesh_.time().deltaTValue();
+        scalar maxEvap = mixture_.alpha1()[celli]*rhobyDt; // positive
+        scalar maxCond = -mixture_.alpha2()[celli]*rhobyDt; // negative 
+        mDote_[celli] = min(max(mDote_[celli], maxCond), maxEvap);
+        mDotc_[celli] = min(max(mDotc_[celli], maxCond), maxEvap);
+    }
+}
+
+
+void Foam::temperaturePhaseChangeTwoPhaseMixtures::interfaceHeatResistance::
+updateInterface()
+{
+    const volScalarField& T = mesh_.lookupObject<volScalarField>("T");
+    const twoPhaseMixtureEThermo& thermo =
+    refCast<const twoPhaseMixtureEThermo>
+    (
+        mesh_.lookupObject<basicThermo>(basicThermo::dictName)
+    );
+
+    const dimensionedScalar& TSat = thermo.TSat();
+   
+    // interface heat resistance
+    // Interpolating alpha1 cell centre values to mesh points (vertices)
+    scalarField ap
+    (
+        volPointInterpolation::New(mesh_).interpolate(mixture_.alpha1())
+    );
+
+    isoCutCell cutCell(mesh_, ap);
+
+    forAll(interfaceArea_, celli)
+    {
+        label status = cutCell.calcSubCell(celli, 0.5);
+        interfaceArea_[celli] = 0;
+        if (status == 0) // cell is cut
+        {
+            interfaceArea_[celli] = 
+                mag(cutCell.isoFaceArea())/mesh_.V()[celli];
+        }
+    }
+
+    const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
+
+    forAll(pbm, patchi)
+    {
+        if (isA<wallPolyPatch>(pbm[patchi]))
+        {
+            const polyPatch& pp = pbm[patchi];
+            forAll(pp.faceCells(),i)
+            {
+                const label pCelli = pp.faceCells()[i];
+ 
+                if
+                (
+                    (TSat.value() - T[pCelli]) > 0 
+                  && mixture_.alpha1()[pCelli] < 0.9
+                )
+                {
+                    interfaceArea_[pCelli] = 
+                        mag(pp.faceAreas()[i])/mesh_.V()[pCelli];
+                }
+            }
+        }
+    }
+}
+
+Foam::Pair<Foam::tmp<Foam::volScalarField>>
+Foam::temperaturePhaseChangeTwoPhaseMixtures::interfaceHeatResistance::
+vDot() const
+{
+
+    dimensionedScalar D
+    (
+        "D", 
+        dimArea, 
+        spread_/sqr(gAverage(mesh_.nonOrthDeltaCoeffs()))
+    );
+    
+   
+    const volScalarField& alpha1 = mixture_.alpha1();
+    const volScalarField& alpha2 = mixture_.alpha2();
+    
+    const dimensionedScalar MDotMin("MdotMin", mDotc_.dimensions(), 1e-3);
+    
+    Pair<tmp<volScalarField>> mDotSpread
+    (
+        tmp<volScalarField>(mDotc_*0.0), 
+        tmp<volScalarField>(mDote_*0.0)
+    );
+    
+    if (max(mDotc_) > MDotMin)
+    {
+        fvc::spreadSource
+        (
+            mDotSpread[0].ref(),
+            mDotc_,
+            alpha1,
+            alpha2,
+            D,
+            1e-3
+        );
+    }
+
+    if (max(mDote_) > MDotMin)
+    {
+        fvc::spreadSource
+        (
+            mDotSpread[1].ref(),
+            mDote_,
+            alpha1,
+            alpha2,
+            D,
+            1e-3
+        );
+    }
+    
+    dimensionedScalar pCoeff(1.0/mixture_.rho1() - 1.0/mixture_.rho2());
+    
+    if (mesh_.time().outputTime())
+    {
+        volScalarField mDotS("mDotSpread", mDotSpread[1].ref());
+        mDotS.write();
+    }
+    
+    return Pair<tmp<volScalarField>>
+    (
+        pCoeff*mDotSpread[0], 
+       -pCoeff*mDotSpread[1]
+    );
+}
+
+
+
+bool Foam::temperaturePhaseChangeTwoPhaseMixtures::interfaceHeatResistance::
+read()
+{
+    if (temperaturePhaseChangeTwoPhaseMixture::read())
+    {
+        optionalSubDict(type() + "Coeffs").readEntry("R", R_);
+        optionalSubDict(type() + "Coeffs").readEntry("spread", spread_);
+
+        return true;
+    }
+
+    return false;
+}
+
+
+// ************************************************************************* //

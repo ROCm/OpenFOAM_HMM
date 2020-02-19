@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,11 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "dynamicFvMesh.H"
 #include "CMULES.H"
+#include "EulerDdtScheme.H"
+#include "localEulerDdtScheme.H"
+#include "CrankNicolsonDdtScheme.H"
 #include "subCycle.H"
 #include "interfaceProperties.H"
 #include "twoPhaseMixtureEThermo.H"
@@ -52,7 +56,8 @@ Description
 #include "turbulenceModel.H"
 #include "pimpleControl.H"
 #include "fvOptions.H"
-#include "fixedFluxPressureFvPatchScalarField.H"
+#include "CorrectPhi.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -72,11 +77,14 @@ int main(int argc, char *argv[])
     #include "addCheckCaseOptions.H"
     #include "setRootCaseLists.H"
     #include "createTime.H"
-    #include "createMesh.H"
-    #include "createControl.H"
+    #include "createDynamicFvMesh.H"
+    #include "initContinuityErrs.H"
+    #include "createDyMControls.H"
     #include "createFields.H"
-    #include "createFvOptions.H"
-    #include "createTimeControls.H"
+    #include "createAlphaFluxes.H"
+    #include "initCorrectPhi.H"
+    #include "createUfIfPresent.H"
+    
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
 
@@ -90,9 +98,19 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-        #include "createTimeControls.H"
-        #include "CourantNo.H"
-        #include "setDeltaT.H"
+        #include "readDyMControls.H"
+        
+        // Store divU from the previous mesh so that it can be mapped
+        // and used in correctPhi to ensure the corrected phi has the
+        // same divergence
+
+        volScalarField divU("divU", fvc::div(fvc::absolute(phi, U)));
+        
+        {
+            #include "CourantNo.H"
+            #include "alphaCourantNo.H"
+            #include "setDeltaT.H"
+        }
 
         ++runTime;
 
@@ -101,28 +119,53 @@ int main(int argc, char *argv[])
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())
         {
-            #include "alphaControls.H"
+            if (pimple.firstIter() || moveMeshOuterCorrectors)
+            {
+                mesh.update();
 
-            surfaceScalarField rhoPhi
-            (
-                IOobject
-                (
-                    "rhoPhi",
-                    runTime.timeName(),
-                    mesh
-                ),
-                mesh,
-                dimensionedScalar(dimMass/dimTime, Zero)
-            );
+                if (mesh.changing())
+                {
+                    // Do not apply previous time-step mesh compression flux
+                    // if the mesh topology changed
+                    if (mesh.topoChanging())
+                    {
+                        talphaPhi1Corr0.clear();
+                    }
 
+                    gh = (g & mesh.C()) - ghRef;
+                    ghf = (g & mesh.Cf()) - ghRef;
+
+                    MRF.update();
+
+                    if (correctPhi)
+                    {
+                        // Calculate absolute flux
+                        // from the mapped surface velocity
+                        phi = mesh.Sf() & Uf();
+
+                        #include "correctPhi.H"
+
+                        // Make the flux relative to the mesh motion
+                        fvc::makeRelative(phi, U);
+
+                        interface.correct();
+                    }
+
+                    if (checkMeshCourantNo)
+                    {
+                        #include "meshCourantNo.H"
+                    }
+                }
+            }
+            
             mixture->correct();
 
+            #include "alphaControls.H"
             #include "alphaEqnSubCycle.H"
 
-            solve(fvm::ddt(rho) + fvc::div(rhoPhi));
             #include "UEqn.H"
             #include "TEqn.H"
-
+            
             // --- Pressure corrector loop
             while (pimple.correct())
             {

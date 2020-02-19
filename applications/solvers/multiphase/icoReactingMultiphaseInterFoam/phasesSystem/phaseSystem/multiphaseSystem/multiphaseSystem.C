@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -120,166 +120,60 @@ Foam::multiphaseSystem::multiphaseSystem
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 void Foam::multiphaseSystem::calculateSuSp()
-{
-    forAllConstIters(totalPhasePairs_, iter)
-    {
-        const phasePair& pair = iter()();
-
-        const phaseModel& phase1 = pair.phase1();
-        const phaseModel& phase2 = pair.phase2();
-
-        const volScalarField& alpha1 = pair.phase1();
-        const volScalarField& alpha2 = pair.phase2();
-
-        tmp<volScalarField> tCoeffs1 = this->coeffs(phase1.name());
-        const volScalarField&  coeffs1 = tCoeffs1();
-
-        tmp<volScalarField> tCoeffs2 = this->coeffs(phase2.name());
-        const volScalarField&  coeffs2 = tCoeffs2();
-
-        // Phase 1 to phase 2
-        const phasePairKey key12
-        (
-            phase1.name(),
-            phase2.name(),
-            true
-        );
-
-
-        tmp<volScalarField> tdmdt12(this->dmdt(key12));
-        const volScalarField& dmdt12 = tdmdt12();
-
-        // Phase 2 to phase 1
-        const phasePairKey key21
-        (
-            phase2.name(),
-            phase1.name(),
-            true
-        );
-
-        tmp<volScalarField> tdmdt21(this->dmdt(key21));
-        const volScalarField& dmdt21 = tdmdt21();
-
-        volScalarField::Internal& SpPhase1 = Sp_[phase1.name()];
-
-        volScalarField::Internal& SuPhase1 = Su_[phase1.name()];
-
-        volScalarField::Internal& SpPhase2 = Sp_[phase2.name()];
-
-        volScalarField::Internal& SuPhase2 = Su_[phase2.name()];
-
-        const volScalarField dmdtNet(dmdt21 - dmdt12);
-
-        const volScalarField coeffs12(coeffs1 - coeffs2);
-
-        // NOTE: dmdtNet is distributed in terms =
-        //  Source for phase 1 =
-        //      dmdtNet/rho1
-        //    - alpha1*dmdtNet(1/rho1 - 1/rho2)
-
-        forAll(dmdtNet, celli)
-        {
-            scalar dmdt21 = dmdtNet[celli];
-            scalar coeffs12Cell = coeffs12[celli];
-
-            scalar alpha1Limited = max(min(alpha1[celli], 1.0), 0.0);
-
-            // exp.
-            SuPhase1[celli] += coeffs1[celli]*dmdt21;
-
-            if (dmdt21 > 0)
-            {
-                if (coeffs12Cell > 0)
-                {
-                    // imp
-                    SpPhase1[celli] -= dmdt21*coeffs12Cell;
-                }
-                else if (coeffs12Cell < 0)
-                {
-                    // exp
-                    SuPhase1[celli] -=
-                        dmdt21*coeffs12Cell*alpha1Limited;
-                }
-            }
-            else if (dmdt21 < 0)
-            {
-                if (coeffs12Cell > 0)
-                {
-                    // exp
-                    SuPhase1[celli] -=
-                        dmdt21*coeffs12Cell*alpha1Limited;
-                }
-                else if (coeffs12Cell < 0)
-                {
-                    // imp
-                    SpPhase1[celli] -= dmdt21*coeffs12Cell;
-                }
-            }
-        }
-
-        forAll(dmdtNet, celli)
-        {
-            scalar dmdt12 = -dmdtNet[celli];
-            scalar coeffs21Cell = -coeffs12[celli];
-
-            scalar alpha2Limited = max(min(alpha2[celli], 1.0), 0.0);
-
-            // exp
-            SuPhase2[celli] += coeffs2[celli]*dmdt12;
-
-            if (dmdt12 > 0)
-            {
-                if (coeffs21Cell > 0)
-                {
-                    // imp
-                    SpPhase2[celli] -= dmdt12*coeffs21Cell;
-                }
-                else if (coeffs21Cell < 0)
-                {
-                    // exp
-                    SuPhase2[celli] -=
-                        dmdt12*coeffs21Cell*alpha2Limited;
-                }
-            }
-            else if (dmdt12 < 0)
-            {
-                if (coeffs21Cell > 0)
-                {
-                    // exp
-                    SuPhase2[celli] -=
-                        coeffs21Cell*dmdt12*alpha2Limited;
-                }
-                else if (coeffs21Cell < 0)
-                {
-                    // imp
-                    SpPhase2[celli] -= dmdt12*coeffs21Cell;
-                }
-            }
-        }
-
-        // Update ddtAlphaMax
-        ddtAlphaMax_ =
-            max
-            (
-                ddtAlphaMax_.value(),
-                max(gMax((dmdt21*coeffs1)()), gMax((dmdt12*coeffs2)()))
-            );
-    }
+{   
+    this->alphaTransfer(Su_, Sp_);
 }
 
 
 void Foam::multiphaseSystem::solve()
 {
-    const fvMesh& mesh = this->mesh();
-
-    const dictionary& alphaControls = mesh.solverDict("alpha");
+    const dictionary& alphaControls = mesh_.solverDict("alpha");
     label nAlphaSubCycles(alphaControls.get<label>("nAlphaSubCycles"));
+    
+    volScalarField& alpha = phases_.first();
+    
+    if (nAlphaSubCycles > 1)
+    {
+        surfaceScalarField rhoPhiSum
+        (
+            IOobject
+            (
+                "rhoPhiSum",
+                mesh_.time().timeName(),
+                mesh_
+            ),
+            mesh_,
+            dimensionedScalar(rhoPhi_.dimensions(), Zero)
+        );
+
+        dimensionedScalar totalDeltaT = mesh_.time().deltaT();
+
+        for
+        (
+            subCycle<volScalarField> alphaSubCycle(alpha, nAlphaSubCycles);
+            !(++alphaSubCycle).end();
+        )
+        {
+            solveAlphas();
+            rhoPhiSum += (mesh_.time().deltaT()/totalDeltaT)*rhoPhi_;
+        }
+
+        rhoPhi_ = rhoPhiSum;
+    }
+    else
+    {
+        solveAlphas();
+    }
+    
+}
+
+void Foam::multiphaseSystem::solveAlphas()
+{
+    
+    mesh_.solverDict("alpha").readEntry("cAlphas", cAlphas_);
+    const dictionary& alphaControls = mesh_.solverDict("alpha");
     label nAlphaCorr(alphaControls.get<label>("nAlphaCorr"));
-    mesh.solverDict("alpha").readEntry("cAlphas", cAlphas_);
-
-    // Reset ddtAlphaMax
-    ddtAlphaMax_ = dimensionedScalar(dimless, Zero);
-
+    
     PtrList<surfaceScalarField> phiAlphaCorrs(phases_.size());
 
     const surfaceScalarField& phi = this->phi();
@@ -389,11 +283,10 @@ void Foam::multiphaseSystem::solve()
             Sp_[phase.name()] = dimensionedScalar("Sp", dimless/dimTime, Zero);
 
             // Add alpha*div(U)
-            const volScalarField& alpha = phase;
-            Su_[phase.name()] +=
-                fvc::div(phi)*min(max(alpha, scalar(0)), scalar(1));
+            //const volScalarField& alpha = phase;
+            //Su_[phase.name()] +=
+            //    fvc::div(phi)*min(max(alpha, scalar(0)), scalar(1));
         }
-
 
         // Fill Su and Sp
         calculateSuSp();
@@ -454,12 +347,12 @@ void Foam::multiphaseSystem::solve()
             //phiAlpha += upwind<scalar>(mesh_, phi).flux(alpha1);
             fvScalarMatrix alpha1Eqn
             (
-                fv::EulerDdtScheme<scalar>(mesh).fvmDdt(alpha1)
+                fv::EulerDdtScheme<scalar>(mesh_).fvmDdt(alpha1)
               + fv::gaussConvectionScheme<scalar>
                 (
-                    mesh,
+                    mesh_,
                     phi,
-                    upwind<scalar>(mesh, phi)
+                    upwind<scalar>(mesh_, phi)
                 ).fvmDiv(phi, alpha1)
               ==
                  Su + fvm::Sp(Sp, alpha1)
@@ -468,60 +361,21 @@ void Foam::multiphaseSystem::solve()
             alpha1Eqn.solve();
 
             phiAlpha += alpha1Eqn.flux();
+            
+            MULES::explicitSolve
+            (
+                geometricOneField(),
+                alpha1,
+                phi,
+                phiAlpha,
+                Sp,
+                Su,
+                oneField(),
+                zeroField()
+            );
 
-            if (nAlphaSubCycles > 1)
-            {
-                for
-                (
-                    subCycle<volScalarField> alphaSubCycle
-                    (
-                        alpha1,
-                        nAlphaSubCycles
-                    );
-                    !(++alphaSubCycle).end();
-                )
-                {
-                    MULES::explicitSolve
-                    (
-                        geometricOneField(),
-                        alpha1,
-                        phi,
-                        phiAlpha,
-                        (alphaSubCycle.index()*Sp)(),
-                        (Su - (alphaSubCycle.index() - 1)*Sp*alpha1)(),
-                        oneField(),
-                        zeroField()
-                    );
-
-                    if (alphaSubCycle.index() == 1)
-                    {
-                        phase.alphaPhi() = phiAlpha;
-                    }
-                    else
-                    {
-                        phase.alphaPhi() += phiAlpha;
-                    }
-                }
-
-                phase.alphaPhi() /= nAlphaSubCycles;
-            }
-            else
-            {
-                MULES::explicitSolve
-                (
-                    geometricOneField(),
-                    alpha1,
-                    phi,
-                    phiAlpha,
-                    Sp,
-                    Su,
-                    oneField(),
-                    zeroField()
-                );
-
-                phase.alphaPhi() = phiAlpha;
-            }
-
+            phase.alphaPhi() = phiAlpha;
+            
             ++phasei;
         }
 
@@ -549,7 +403,6 @@ void Foam::multiphaseSystem::solve()
 
                 // Update rhoPhi
                 rhoPhi_ += fvc::interpolate(phase.rho()) * phase.alphaPhi();
-
             }
 
             Info<< "Phase-sum volume fraction, min, max = "
@@ -566,7 +419,7 @@ void Foam::multiphaseSystem::solve()
                 alpha += alpha*sumCorr;
 
                 Info<< alpha.name() << " volume fraction = "
-                    << alpha.weightedAverage(mesh.V()).value()
+                    << alpha.weightedAverage(mesh_.V()).value()
                     << "  Min(alpha) = " << min(alpha).value()
                     << "  Max(alpha) = " << max(alpha).value()
                     << endl;

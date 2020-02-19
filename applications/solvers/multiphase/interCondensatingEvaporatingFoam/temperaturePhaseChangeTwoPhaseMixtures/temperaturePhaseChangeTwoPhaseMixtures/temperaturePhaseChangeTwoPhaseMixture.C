@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,7 +68,7 @@ temperaturePhaseChangeTwoPhaseMixture
 
 Foam::Pair<Foam::tmp<Foam::volScalarField>>
 Foam::temperaturePhaseChangeTwoPhaseMixture::vDotAlphal() const
-{
+{ 
     volScalarField alphalCoeff
     (
         1.0/mixture_.rho1() - mixture_.alpha1()

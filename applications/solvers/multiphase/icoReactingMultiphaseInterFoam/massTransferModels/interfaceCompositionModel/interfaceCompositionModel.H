@@ -67,7 +67,8 @@ public:
         {
             T,  /* temperature based */
             P,  /* pressure based */
-            Y   /* mass fraction based */
+            Y,   /* mass fraction based */
+            alpha /* alpha source */
         };
 
         static const Enum<modelVariable> modelVariableNames;
@@ -170,15 +171,33 @@ public:
             const volScalarField& Tf
         ) const = 0;
 
-        //- Explicit mass transfer coefficient
+        //- Explicit full mass transfer
         virtual tmp<volScalarField> Kexp
+        (
+            const volScalarField& field
+        ) = 0;
+        
+        //- Implicit mass transfer
+        virtual tmp<volScalarField> KSp
         (
             label modelVariable,
             const volScalarField& field
         ) = 0;
+        
+        //- Explicit mass transfer
+        virtual tmp<volScalarField> KSu
+        (
+            label modelVariable,
+            const volScalarField& field
+        ) = 0;
+        
 
         //- Reference value
         virtual const dimensionedScalar& Tactivate() const = 0;
+        
+        //- Adds and substract alpha*div(U) as a source term
+        //  for alpha, substituting div(U) = mDot(1/rho1 - 1/rho2)
+        virtual bool includeDivU();
 
         //- Returns the variable on which the model is based
         const word variable() const;

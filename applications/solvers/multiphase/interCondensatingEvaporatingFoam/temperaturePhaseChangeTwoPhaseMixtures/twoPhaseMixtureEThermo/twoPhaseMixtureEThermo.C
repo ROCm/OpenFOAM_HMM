@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,44 +40,6 @@ namespace Foam
     defineTypeNameAndDebug(twoPhaseMixtureEThermo, 0);
 }
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-void Foam::twoPhaseMixtureEThermo::eBoundaryCorrection(volScalarField& h)
-{
-    volScalarField::Boundary& hbf = h.boundaryFieldRef();
-
-    forAll(hbf, patchi)
-    {
-        if (isA<gradientEnergyFvPatchScalarField>(hbf[patchi]))
-        {
-            refCast<gradientEnergyFvPatchScalarField>(hbf[patchi]).gradient()
-                = hbf[patchi].fvPatchField::snGrad();
-        }
-        else if (isA<mixedEnergyFvPatchScalarField>(hbf[patchi]))
-        {
-            refCast<mixedEnergyFvPatchScalarField>(hbf[patchi]).refGrad()
-                = hbf[patchi].fvPatchField::snGrad();
-        }
-    }
-}
-
-
-void Foam::twoPhaseMixtureEThermo::init()
-{
-    const volScalarField alpha1Rho1(alpha1()*rho1());
-    const volScalarField alpha2Rho2(alpha2()*rho2());
-
-    e_ =
-        (
-            (T_ - TSat_)*(alpha1Rho1*Cv1() + alpha2Rho2*Cv2())
-          + (alpha1Rho1*Hf1() + alpha2Rho2*Hf2())
-        )
-       /(alpha1Rho1 + alpha2Rho2);
-
-    e_.correctBoundaryConditions();
-}
-
-
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
 Foam::twoPhaseMixtureEThermo::twoPhaseMixtureEThermo
@@ -89,32 +51,8 @@ Foam::twoPhaseMixtureEThermo::twoPhaseMixtureEThermo
     basicThermo(U.mesh(), word::null),
     thermoIncompressibleTwoPhaseMixture(U, phi),
 
-    e_
-    (
-        volScalarField
-        (
-            IOobject
-            (
-                "e",
-                U.mesh().time().timeName(),
-                U.mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            U.mesh(),
-            dimensionedScalar(dimEnergy/dimMass, Zero),
-            heBoundaryTypes()
-        )
-    ),
-
-    TSat_("TSat", dimTemperature, static_cast<const basicThermo&>(*this)),
-
-    pDivU_(basicThermo::lookupOrDefault<Switch>("pDivU", true))
-
-{
-    // Initialise e
-    init();
-}
+    TSat_("TSat", dimTemperature, static_cast<const basicThermo&>(*this))
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -122,19 +60,6 @@ Foam::twoPhaseMixtureEThermo::twoPhaseMixtureEThermo
 void Foam::twoPhaseMixtureEThermo::correct()
 {
     incompressibleTwoPhaseMixture::correct();
-
-    const volScalarField alpha1Rho1(alpha1()*rho1());
-    const volScalarField alpha2Rho2(alpha2()*rho2());
-
-    T_ =
-        (
-            (e_*(alpha1Rho1 + alpha2Rho2))
-         -  (alpha1Rho1*Hf1() + alpha2Rho2*Hf2())
-        )
-       /(alpha1Rho1*Cv1() + alpha2Rho2*Cv2())
-       + TSat_;
-
-    T().correctBoundaryConditions();
 }
 
 
@@ -151,15 +76,8 @@ Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::he
     const volScalarField& T
 ) const
 {
-    const volScalarField alpha1Rho1(alpha1()*rho1());
-    const volScalarField alpha2Rho2(alpha2()*rho2());
-
-    return
-    (
-        (T - TSat_)*(alpha1Rho1*Cv1() + alpha2Rho2*Cv2())
-        + (alpha1Rho1*Hf1() + alpha2Rho2*Hf2())
-    )
-    / (alpha1Rho1 + alpha2Rho2);
+    NotImplemented;
+    return nullptr;
 }
 
 
@@ -170,31 +88,8 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::he
     const labelList& cells
 ) const
 {
-    tmp<scalarField> the(new scalarField(T.size()));
-    scalarField& he = the.ref();
-
-    const volScalarField alpha1Rho1(alpha1()*rho1());
-    const volScalarField alpha2Rho2(alpha2()*rho2());
-
-    forAll(T, i)
-    {
-        const label celli = cells[i];
-        he[i] =
-            (
-                (T[i] - TSat_.value())
-               *(
-                   alpha1Rho1[celli]*Cv1().value()
-                 + alpha2Rho2[celli]*Cv2().value()
-                )
-              + (
-                    alpha1Rho1[celli]*Hf1().value()
-                  + alpha2Rho2[celli]*Hf2().value()
-                )
-            )
-            / (alpha1Rho1[celli] + alpha2Rho2[celli]);
-    }
-
-    return the;
+    NotImplemented;
+    return nullptr;
 }
 
 
@@ -205,26 +100,8 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::he
     const label patchi
 ) const
 {
-    const scalarField& alpha1p = alpha1().boundaryField()[patchi];
-    const scalarField& alpha2p = alpha2().boundaryField()[patchi];
-
-    const scalarField& Tp = T_.boundaryField()[patchi];
-
-    return
-    (
-        (
-            (Tp - TSat_.value())
-           *(
-               alpha1p*rho1().value()*Cv1().value()
-             + alpha2p*rho2().value()*Cv2().value()
-            )
-          + (
-               alpha1p*rho1().value()*Hf1().value()
-             + alpha2p*rho2().value()*Hf2().value()
-            )
-        )
-        / (alpha1p*rho1().value() + alpha2p*rho2().value())
-    );
+    NotImplemented;
+    return nullptr;
 }
 
 
@@ -252,7 +129,7 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::THE
 (
     const scalarField& h,
     const scalarField& p,
-    const scalarField& T0,      // starting temperature
+    const scalarField& T0,
     const labelList& cells
 ) const
 {
@@ -265,7 +142,7 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::THE
 (
     const scalarField& h,
     const scalarField& p,
-    const scalarField& T0,      // starting temperature
+    const scalarField& T0,
     const label patchi
 ) const
 {
@@ -588,7 +465,6 @@ bool Foam::twoPhaseMixtureEThermo::read()
 {
     if (basicThermo::read() && thermoIncompressibleTwoPhaseMixture::read())
     {
-        basicThermo::readIfPresent("pDivU", pDivU_);
         basicThermo::readEntry("TSat", TSat_);
         return true;
     }

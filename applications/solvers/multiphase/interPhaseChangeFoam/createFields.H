@@ -109,3 +109,19 @@ mesh.setFluxRequired(p_rgh.name());
 mesh.setFluxRequired(alpha1.name());
 
 #include "createFvOptions.H"
+
+IOobject alphaPhi10Header
+(
+    IOobject::groupName("alphaPhi0", alpha1.group()),
+    runTime.timeName(),
+    mesh,
+    IOobject::NO_READ,
+    IOobject::NO_WRITE
+);
+
+// MULES flux from previous time-step
+surfaceScalarField alphaPhi10
+(
+    alphaPhi10Header,
+    phi*fvc::interpolate(alpha1)
+);

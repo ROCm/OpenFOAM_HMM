@@ -1,18 +1,19 @@
 {
     tmp<volScalarField> tcp(thermo->Cp());
     const volScalarField& cp = tcp();
+    
+    const dimensionedScalar Cp1 = thermo->Cp1();
+    const dimensionedScalar Cp2 = thermo->Cp2();
 
     rhoCp = rho*cp;
 
     kappaEff = thermo->kappa() + rho*cp*turbulence->nut()/Prt;
-
-    const surfaceScalarField rhoCpPhi(fvc::interpolate(cp)*rhoPhi);
-
-    Pair<tmp<volScalarField>> vDotAlphal = mixture->mDot();
-
-    const volScalarField& vDotcAlphal = vDotAlphal[0]();
-    const volScalarField& vDotvAlphal = vDotAlphal[1]();
-    const volScalarField vDotvmcAlphal(vDotvAlphal - vDotcAlphal);
+    
+    const surfaceScalarField rhoCpPhi
+    (
+        "rhoCpPhi",
+        rhoPhi*(Cp1 - Cp2) + phi*rho2*Cp2
+    );
 
     fvScalarMatrix TEqn
     (
@@ -20,7 +21,7 @@
        + fvm::div(rhoCpPhi, T)
        - fvm::Sp(fvc::ddt(rhoCp) + fvc::div(rhoCpPhi), T)
        - fvm::laplacian(kappaEff, T)
-       + thermo->hc()*vDotvmcAlphal
+       + mixture->TSource()
     );
 
 

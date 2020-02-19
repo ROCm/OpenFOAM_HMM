@@ -1,0 +1,25 @@
+createGraphs()
+{
+    OF=$1
+    EXPT=$2
+
+    gnuplot<<EOF
+    set terminal postscript default
+    set output "OF_vs_Exact.eps"
+    set xlabel "t [sec]"
+    set ylabel "x [mm]"
+    set grid
+
+
+    plot \
+        "$EXPT" u 1:2 title "Exact", \
+        "$OF" u 1:2 title "OpenFOAM" with line lt -1 lw 1
+EOF
+}
+
+sed -e 's/[()]//g' "postProcessing/interfaceHeight1/1.36/position.dat" > "positionClean.dat"
+
+OF="positionClean.dat"
+EXPT="data.dat"
+
+createGraphs $OF $EXPT

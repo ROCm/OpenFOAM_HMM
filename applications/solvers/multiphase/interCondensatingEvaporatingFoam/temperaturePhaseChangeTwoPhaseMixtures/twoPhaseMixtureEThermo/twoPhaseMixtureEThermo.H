@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,10 +27,6 @@ Class
     Foam::twoPhaseMixtureEThermo
 
 Description
-    Two phases thermo Internal energy mixture Defined as:
-    e1 = Cv1(T - Tsat) + Hv1
-    e2 = Cv2(T - Tsat) + Hv2
-    e = (alpha1*rho1*e1 + alpha2*rho2*e2) / (alpha1*rho1 + alpha2*rho2)
 
 SourceFiles
     twoPhaseMixtureEThermo.C
@@ -64,24 +60,8 @@ protected:
 
     // Protected Data
 
-        //- Internal energy field [J]
-        volScalarField e_;
-
         //- Saturation Temperature
         dimensionedScalar TSat_;
-
-        //- Should the p*div(U) term be included in the energy equation
-        Switch pDivU_;
-
-
-    // Protected Member Functions
-
-        //- Correct boundary for e
-        void eBoundaryCorrection (volScalarField& h);
-
-        //- Initialize
-        void init();
-
 
 public:
 
@@ -105,13 +85,15 @@ public:
         //- Return access to the internal energy field [J/Kg]
         virtual volScalarField& he()
         {
-            return e_;
+            NotImplemented;
+            return p();
         }
 
         //- Return access to the internal energy field [J/Kg]
         virtual const volScalarField& he() const
         {
-            return e_;
+            NotImplemented;
+            return p();
         }
 
         //- Enthalpy/Internal energy
@@ -305,12 +287,6 @@ public:
             const incompressibleTwoPhaseMixture& transportPropertiesDict()
             {
                 return *this;
-            }
-
-            //- Should the dpdt term be included in the enthalpy equation
-            Switch pDivU() const
-            {
-                return pDivU_;
             }
 };
 

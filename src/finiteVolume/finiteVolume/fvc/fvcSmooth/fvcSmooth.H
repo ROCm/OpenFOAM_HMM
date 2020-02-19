@@ -6,6 +6,8 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020 Henning Scheufler
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,6 +44,12 @@ Description
            gradient of alpha is large (where the difference between the values
            in neighbouring cells is larger than alphaDiff) away from that
            starting point of the sweep.
+           
+           
+    spreadSource: spread a source field (mDotIn) for two phase multiphase using
+                  a laplacian operator and diffussivity D.
+                  The spread source (mDotOut) is distributed from alpha1 < cutoff 
+                  to alpha1 > 1 - cutoff, and it is zero across the interface
 
 SourceFiles
     fvcSmooth.C
@@ -52,6 +60,7 @@ SourceFiles
 #define fvcSmooth_H
 
 #include "volFieldsFwd.H"
+#include "dimensionedScalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -81,6 +90,16 @@ namespace fvc
         const volScalarField& alpha,
         const label nLayers,
         const scalar alphaDiff = 0.2
+    );
+    
+    void spreadSource
+    (
+        volScalarField& mDotOut,
+        const volScalarField& mDotIn,
+        const volScalarField& alpha1,
+        const volScalarField& alpha2,
+        const dimensionedScalar& D,
+        const scalar cutoff
     );
 }
 }
