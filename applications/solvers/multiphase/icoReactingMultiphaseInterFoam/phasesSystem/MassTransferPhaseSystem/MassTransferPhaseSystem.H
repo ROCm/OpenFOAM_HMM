@@ -67,8 +67,8 @@ public:
                 phasePairKey::hash
             >
             massTransferModelTable;
-            
-            
+
+
     typedef HashTable<volScalarField::Internal> SuSpTable;
 
 protected:
@@ -128,13 +128,13 @@ public:
 
         //- Return the heat transfer matrix
         virtual  tmp<fvScalarMatrix> heatTransfer(const volScalarField& T);
-        
+
         //- Return the volumetric rate transfer matrix
         virtual  tmp<fvScalarMatrix> volTransfer(const volScalarField& p);
-        
+
         //- Correct/calculates mass sources dmdt for phases
         virtual void correctMassSources(const volScalarField& T);
-        
+
         //- Calculate mass transfer for alpha's
         virtual void alphaTransfer(SuSpTable& Su, SuSpTable& Sp);
 

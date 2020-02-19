@@ -28,9 +28,9 @@ Class
     Foam::phaseChangeTwoPhaseMixtures::interfaceHeatResistance
 
 Description
-    Interface Heat Resistance type of condensation/saturation model using 
+    Interface Heat Resistance type of condensation/saturation model using
     spread source distribution following:
-    
+
     References:
     \verbatim
         Hardt, S., Wondra, F. (2008).
@@ -73,22 +73,22 @@ class interfaceHeatResistance
 
         //- Interface area
         volScalarField interfaceArea_;
-        
+
         //- Mass condensation source
         volScalarField mDotc_;
-        
+
         //- Mass evaporation source
         volScalarField mDote_;
-              
+
         //- Spread for mass source
         scalar spread_;
 
-        
+
     // Private member functions
 
         //- Update interface area
         void updateInterface();
-        
+
 
 public:
 
@@ -124,17 +124,17 @@ public:
         //  coefficient to multiply (Tsat - T) for the condensation rate
         //  and a coefficient to multiply  (T - Tsat) for the vaporisation rate
         virtual Pair<tmp<volScalarField>> mDotDeltaT() const;
-        
+
         //- Source for T equarion
         virtual tmp<fvScalarMatrix> TSource() const;
-        
+
         //- Volumetric source for alpha (used by alphaEq)
         virtual Pair<tmp<volScalarField>> vDotAlphal() const;
-        
+
         //- Return the volumetric condensation and vaporisation rates as
         //  coefficients (used by p_rghEq)
         virtual Pair<tmp<volScalarField>> vDot() const;
-        
+
         //- Correct the interfaceHeatResistance phaseChange model
         virtual void correct();
 

@@ -148,14 +148,14 @@ public:
         (
             const volScalarField& field
         );
-        
+
         //- Implicit mass transfer coefficient
         virtual tmp<volScalarField> KSp
         (
             label modelVariable,
             const volScalarField& field
         );
-        
+
         //- Explicit mass transfer coefficient
         virtual tmp<volScalarField> KSu
         (
@@ -165,9 +165,9 @@ public:
 
         //- Return T transition between phases
         virtual const dimensionedScalar& Tactivate() const;
-        
+
         //- Adds and substract alpha*div(U) as a source term
-        //  for alpha, substituting div(U) = mDot(1/rho1 - 1/rho2) 
+        //  for alpha, substituting div(U) = mDot(1/rho1 - 1/rho2)
         virtual bool includeDivU();
 };
 

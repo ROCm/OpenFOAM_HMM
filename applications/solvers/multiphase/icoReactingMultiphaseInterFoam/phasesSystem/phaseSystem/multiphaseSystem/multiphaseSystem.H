@@ -89,7 +89,7 @@ protected:
 
         //- Calculate Sp and Su
         void calculateSuSp();
-        
+
         //- Solve alphas
         void solveAlphas();
 

@@ -64,10 +64,10 @@ interfaceHeatResistance
     temperaturePhaseChangeTwoPhaseMixture(mixture, mesh),
     R_
     (
-        "R", 
+        "R",
         dimPower/dimArea/dimTemperature, optionalSubDict(type() + "Coeffs")
     ),
-    
+
     interfaceArea_
     (
         IOobject
@@ -81,7 +81,7 @@ interfaceHeatResistance
         mesh_,
         dimensionedScalar(dimless/dimLength, Zero)
     ),
-    
+
     mDotc_
     (
         IOobject
@@ -95,7 +95,7 @@ interfaceHeatResistance
         mesh_,
         dimensionedScalar(dimDensity/dimTime, Zero)
     ),
-    
+
     mDote_
     (
         IOobject
@@ -109,7 +109,7 @@ interfaceHeatResistance
         mesh_,
         dimensionedScalar(dimDensity/dimTime, Zero)
     ),
-    
+
     spread_
     (
         optionalSubDict(type() + "Coeffs").get<scalar>("spread")
@@ -148,7 +148,7 @@ mDotAlphal() const
     (
         min(max(mixture_.alpha2(), scalar(0)), scalar(1))
     );
-    
+
     return Pair<tmp<volScalarField>>
     (
         (mDotc_/(limitedAlpha2 + SMALL)),
@@ -161,10 +161,10 @@ Foam::Pair<Foam::tmp<Foam::volScalarField>>
 Foam::temperaturePhaseChangeTwoPhaseMixtures::interfaceHeatResistance::
 mDot() const
 {
-    
+
     return Pair<tmp<volScalarField>>
     (
-        tmp<volScalarField>(mDotc_), 
+        tmp<volScalarField>(mDotc_),
         tmp<volScalarField>(mDote_)
     );
 }
@@ -179,20 +179,20 @@ mDotDeltaT() const
         (
             mesh_.lookupObject<basicThermo>(basicThermo::dictName)
         );
-        
+
     const volScalarField& T = mesh_.lookupObject<volScalarField>("T");
 
     const dimensionedScalar& TSat = thermo.TSat();
 
     Pair<tmp<volScalarField>> mDotce(mDot());
-    
+
     return Pair<tmp<volScalarField>>
     (
         mDotc_*pos(TSat - T.oldTime())/(TSat - T.oldTime()),
        -mDote_*pos(T.oldTime() - TSat)/(T.oldTime() - TSat)
     );
 
-    
+
 }
 
 
@@ -221,7 +221,7 @@ TSource() const
         );
 
     const dimensionedScalar& TSat = thermo.TSat();
-   
+
     // interface heat resistance
     volScalarField IHRcoeff = interfaceArea_*R_;
 
@@ -234,10 +234,10 @@ TSource() const
 void Foam::temperaturePhaseChangeTwoPhaseMixtures::interfaceHeatResistance::
 correct()
 {
-   
+
     // Update Interface
     updateInterface();
-    
+
     // Update mDotc_ and mDote_
     const volScalarField& T = mesh_.lookupObject<volScalarField>("T");
 
@@ -251,16 +251,16 @@ correct()
     const dimensionedScalar T0(dimTemperature, Zero);
 
     dimensionedScalar L = mixture_.Hf2() - mixture_.Hf1();
-   
+
     // interface heat resistance
     mDotc_ = interfaceArea_*R_*max(TSat - T, T0)/L;
     mDote_ = interfaceArea_*R_*(T - TSat)/L;
-       
+
     forAll(mDotc_, celli)
     {
         scalar rhobyDt = mixture_.rho1().value()/mesh_.time().deltaTValue();
         scalar maxEvap = mixture_.alpha1()[celli]*rhobyDt; // positive
-        scalar maxCond = -mixture_.alpha2()[celli]*rhobyDt; // negative 
+        scalar maxCond = -mixture_.alpha2()[celli]*rhobyDt; // negative
         mDote_[celli] = min(max(mDote_[celli], maxCond), maxEvap);
         mDotc_[celli] = min(max(mDotc_[celli], maxCond), maxEvap);
     }
@@ -278,7 +278,7 @@ updateInterface()
     );
 
     const dimensionedScalar& TSat = thermo.TSat();
-   
+
     // interface heat resistance
     // Interpolating alpha1 cell centre values to mesh points (vertices)
     scalarField ap
@@ -294,7 +294,7 @@ updateInterface()
         interfaceArea_[celli] = 0;
         if (status == 0) // cell is cut
         {
-            interfaceArea_[celli] = 
+            interfaceArea_[celli] =
                 mag(cutCell.isoFaceArea())/mesh_.V()[celli];
         }
     }
@@ -309,14 +309,14 @@ updateInterface()
             forAll(pp.faceCells(),i)
             {
                 const label pCelli = pp.faceCells()[i];
- 
+
                 if
                 (
-                    (TSat.value() - T[pCelli]) > 0 
+                    (TSat.value() - T[pCelli]) > 0
                   && mixture_.alpha1()[pCelli] < 0.9
                 )
                 {
-                    interfaceArea_[pCelli] = 
+                    interfaceArea_[pCelli] =
                         mag(pp.faceAreas()[i])/mesh_.V()[pCelli];
                 }
             }
@@ -331,23 +331,23 @@ vDot() const
 
     dimensionedScalar D
     (
-        "D", 
-        dimArea, 
+        "D",
+        dimArea,
         spread_/sqr(gAverage(mesh_.nonOrthDeltaCoeffs()))
     );
-    
-   
+
+
     const volScalarField& alpha1 = mixture_.alpha1();
     const volScalarField& alpha2 = mixture_.alpha2();
-    
+
     const dimensionedScalar MDotMin("MdotMin", mDotc_.dimensions(), 1e-3);
-    
+
     Pair<tmp<volScalarField>> mDotSpread
     (
-        tmp<volScalarField>(mDotc_*0.0), 
+        tmp<volScalarField>(mDotc_*0.0),
         tmp<volScalarField>(mDote_*0.0)
     );
-    
+
     if (max(mDotc_) > MDotMin)
     {
         fvc::spreadSource
@@ -373,18 +373,18 @@ vDot() const
             1e-3
         );
     }
-    
+
     dimensionedScalar pCoeff(1.0/mixture_.rho1() - 1.0/mixture_.rho2());
-    
+
     if (mesh_.time().outputTime())
     {
         volScalarField mDotS("mDotSpread", mDotSpread[1].ref());
         mDotS.write();
     }
-    
+
     return Pair<tmp<volScalarField>>
     (
-        pCoeff*mDotSpread[0], 
+        pCoeff*mDotSpread[0],
        -pCoeff*mDotSpread[1]
     );
 }

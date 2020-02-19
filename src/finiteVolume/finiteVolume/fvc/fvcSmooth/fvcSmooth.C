@@ -332,7 +332,7 @@ void Foam::fvc::spreadSource
 )
 {
     const fvMesh& mesh = alpha1.mesh();
-   
+
     volScalarField mDotSmear
     (
         IOobject
@@ -351,43 +351,43 @@ void Foam::fvc::spreadSource
     //- Smearing of source term field
     fvScalarMatrix mSourceEqn
     (
-        fvm::Sp(scalar(1), mDotSmear) 
-      - fvm::laplacian(D, mDotSmear) 
-      == 
+        fvm::Sp(scalar(1), mDotSmear)
+      - fvm::laplacian(D, mDotSmear)
+      ==
         mDotIn
     );
 
     mSourceEqn.solve();
 
-    // Cut cells with cutoff < alpha1 < 1-cutoff and rescale remaining 
+    // Cut cells with cutoff < alpha1 < 1-cutoff and rescale remaining
     // source term field
-    
+
     dimensionedScalar intvDotLiquid("intvDotLiquid", dimMass/dimTime, 0.0);
     dimensionedScalar intvDotVapor ("intvDotVapor", dimMass/dimTime, 0.0);
-    
+
     const scalarField& Vol = mesh.V();
-    
+
     forAll(mesh.C(), celli)
     {
         if (alpha1[celli] < cutoff)
         {
-            intvDotVapor.value() += 
+            intvDotVapor.value() +=
                 alpha2[celli]*mDotSmear[celli]*Vol[celli];
         }
         else if (alpha1[celli] > 1.0 - cutoff)
         {
-            intvDotLiquid.value() += 
+            intvDotLiquid.value() +=
                 alpha1[celli]*mDotSmear[celli]*Vol[celli];
         }
     }
-    
+
     reduce(intvDotVapor.value(), sumOp<scalar>());
     reduce(intvDotLiquid.value(), sumOp<scalar>());
 
     //- Calculate Nl and Nv
     dimensionedScalar Nl ("Nl", dimless, Zero);
-    dimensionedScalar Nv ("Nv", dimless, Zero); 
-    
+    dimensionedScalar Nv ("Nv", dimless, Zero);
+
     const dimensionedScalar intmSource0(fvc::domainIntegrate(mDotIn));
 
     if (intvDotVapor.value() > VSMALL)

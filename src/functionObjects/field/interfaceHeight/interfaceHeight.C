@@ -55,7 +55,7 @@ void Foam::functionObjects::interfaceHeight::writePositions()
     const uniformDimensionedVectorField& g =
         mesh_.time().lookupObject<uniformDimensionedVectorField>("g");
     vector gHat = vector::zero;
-    
+
     if (mag(direction_) > 0.0)
     {
         gHat = direction_/mag(direction_);
@@ -237,7 +237,7 @@ Foam::functionObjects::interfaceHeight::interfaceHeight
 {
     read(dict);
     resetNames({"height", "position"});
-    
+
     writeFileHeader(fileID::heightFile);
     writeFileHeader(fileID::positionFile);
 }
@@ -253,7 +253,7 @@ Foam::functionObjects::interfaceHeight::~interfaceHeight()
 
 bool Foam::functionObjects::interfaceHeight::read(const dictionary& dict)
 {
-    
+
     dict.readIfPresent("alpha", alphaName_);
     dict.readIfPresent("liquid", liquid_);
     dict.lookup("locations") >> locations_;

@@ -120,7 +120,7 @@ Foam::multiphaseSystem::multiphaseSystem
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 void Foam::multiphaseSystem::calculateSuSp()
-{   
+{
     this->alphaTransfer(Su_, Sp_);
 }
 
@@ -129,9 +129,9 @@ void Foam::multiphaseSystem::solve()
 {
     const dictionary& alphaControls = mesh_.solverDict("alpha");
     label nAlphaSubCycles(alphaControls.get<label>("nAlphaSubCycles"));
-    
+
     volScalarField& alpha = phases_.first();
-    
+
     if (nAlphaSubCycles > 1)
     {
         surfaceScalarField rhoPhiSum
@@ -164,16 +164,16 @@ void Foam::multiphaseSystem::solve()
     {
         solveAlphas();
     }
-    
+
 }
 
 void Foam::multiphaseSystem::solveAlphas()
 {
-    
-    mesh_.solverDict("alpha").readEntry("cAlphas", cAlphas_);
+
     const dictionary& alphaControls = mesh_.solverDict("alpha");
+    alphaControls.readEntry("cAlphas", cAlphas_);
     label nAlphaCorr(alphaControls.get<label>("nAlphaCorr"));
-    
+
     PtrList<surfaceScalarField> phiAlphaCorrs(phases_.size());
 
     const surfaceScalarField& phi = this->phi();
@@ -361,7 +361,7 @@ void Foam::multiphaseSystem::solveAlphas()
             alpha1Eqn.solve();
 
             phiAlpha += alpha1Eqn.flux();
-            
+
             MULES::explicitSolve
             (
                 geometricOneField(),
@@ -375,7 +375,7 @@ void Foam::multiphaseSystem::solveAlphas()
             );
 
             phase.alphaPhi() = phiAlpha;
-            
+
             ++phasei;
         }
 

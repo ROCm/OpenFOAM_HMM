@@ -281,7 +281,7 @@ Foam::phaseSystem::phaseSystem
 
     // Total phase pair
     generatePairsTable();
-    
+
     // Update mu_
     calcMu();
 }
@@ -903,7 +903,7 @@ void Foam::phaseSystem::correct()
     {
         iter()->correct();
     }
-    
+
     calcMu();
 }
 

@@ -35,7 +35,7 @@
           - fvm::laplacian(rAUf, p_rgh)
           + fluid.volTransfer(p_rgh)
         );
-          
+
         p_rghEqn.setReference(pRefCell, pRefValue);
 
         p_rghEqn.solve(mesh.solver(p_rgh.select(pimple.finalInnerIter())));

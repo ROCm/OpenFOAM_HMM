@@ -44,11 +44,11 @@ Description
            gradient of alpha is large (where the difference between the values
            in neighbouring cells is larger than alphaDiff) away from that
            starting point of the sweep.
-           
-           
+
+
     spreadSource: spread a source field (mDotIn) for two phase multiphase using
                   a laplacian operator and diffussivity D.
-                  The spread source (mDotOut) is distributed from alpha1 < cutoff 
+                  The spread source (mDotOut) is distributed from alpha1 < cutoff
                   to alpha1 > 1 - cutoff, and it is zero across the interface
 
 SourceFiles
@@ -91,7 +91,7 @@ namespace fvc
         const label nLayers,
         const scalar alphaDiff = 0.2
     );
-    
+
     void spreadSource
     (
         volScalarField& mDotOut,

@@ -98,7 +98,7 @@ public:
         //  coefficient to multiply (Tsat - T) for the condensation rate
         //  and a coefficient to multiply  (T - Tsat) for the vaporisation rate
         virtual Pair<tmp<volScalarField>> mDotDeltaT() const;
-        
+
         //- Source for T equarion
         virtual tmp<fvScalarMatrix> TSource() const;
 

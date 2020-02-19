@@ -78,7 +78,7 @@ public:
 
 
         typedef HashTable<autoPtr<phaseModel>> phaseModelTable;
-        
+
 
         typedef HashTable<volScalarField::Internal> SuSpTable;
 
@@ -116,7 +116,7 @@ protected:
 
         //- Reference to the mesh
         const fvMesh& mesh_;
-        
+
         //- Dynamic viscocity
         volScalarField mu_;
 
@@ -510,13 +510,13 @@ public:
         (
             const volScalarField& T
         ) = 0;
-        
+
         //- Return the volumetric rate transfer matrix
         virtual tmp<fvScalarMatrix> volTransfer
         (
             const volScalarField& p
         ) = 0;
-        
+
         //- Calculate mass transfer for alpha's
         virtual void alphaTransfer(SuSpTable& Su, SuSpTable& Sp) = 0;
 
@@ -537,7 +537,7 @@ public:
 
         //- Correct the mixture thermos
         virtual void correct();
-        
+
         //- Correct mass sources
         virtual void correctMassSources(const volScalarField& T) = 0;
 

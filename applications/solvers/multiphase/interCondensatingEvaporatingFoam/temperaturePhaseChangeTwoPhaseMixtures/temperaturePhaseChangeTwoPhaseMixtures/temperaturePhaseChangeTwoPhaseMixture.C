@@ -68,7 +68,7 @@ temperaturePhaseChangeTwoPhaseMixture
 
 Foam::Pair<Foam::tmp<Foam::volScalarField>>
 Foam::temperaturePhaseChangeTwoPhaseMixture::vDotAlphal() const
-{ 
+{
     volScalarField alphalCoeff
     (
         1.0/mixture_.rho1() - mixture_.alpha1()

@@ -96,9 +96,8 @@ class interfaceHeight
 
         //- Interpolation scheme
         word interpolationScheme_;
-        
-        
-        //- Direction of interface motion 
+
+        //- Direction of interface motion
         vector direction_;
 
 

@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
     #include "createAlphaFluxes.H"
     #include "initCorrectPhi.H"
     #include "createUfIfPresent.H"
-    
+
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
 
@@ -99,13 +99,13 @@ int main(int argc, char *argv[])
     while (runTime.run())
     {
         #include "readDyMControls.H"
-        
+
         // Store divU from the previous mesh so that it can be mapped
         // and used in correctPhi to ensure the corrected phi has the
         // same divergence
 
         volScalarField divU("divU", fvc::div(fvc::absolute(phi, U)));
-        
+
         {
             #include "CourantNo.H"
             #include "alphaCourantNo.H"
@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
                     }
                 }
             }
-            
+
             mixture->correct();
 
             #include "alphaControls.H"
@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
 
             #include "UEqn.H"
             #include "TEqn.H"
-            
+
             // --- Pressure corrector loop
             while (pimple.correct())
             {

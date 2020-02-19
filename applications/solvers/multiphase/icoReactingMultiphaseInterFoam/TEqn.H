@@ -1,7 +1,7 @@
 {
     radiation->correct();
     rhoCp =  rho*fluid.Cp();
-    
+
     const surfaceScalarField rhoCpPhi(fvc::interpolate(fluid.Cp())*rhoPhi);
 
     const volScalarField kappaEff
@@ -31,7 +31,7 @@
     fvOptions.correct(T);
 
     fluid.correct();
-    
+
     Info<< "min/max(T) = "
         << min(T).value() << ", " << max(T).value() << endl;
 }

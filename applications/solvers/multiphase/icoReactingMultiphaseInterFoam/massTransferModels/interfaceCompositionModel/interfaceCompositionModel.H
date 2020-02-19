@@ -176,25 +176,24 @@ public:
         (
             const volScalarField& field
         ) = 0;
-        
+
         //- Implicit mass transfer
         virtual tmp<volScalarField> KSp
         (
             label modelVariable,
             const volScalarField& field
         ) = 0;
-        
+
         //- Explicit mass transfer
         virtual tmp<volScalarField> KSu
         (
             label modelVariable,
             const volScalarField& field
         ) = 0;
-        
 
         //- Reference value
         virtual const dimensionedScalar& Tactivate() const = 0;
-        
+
         //- Adds and substract alpha*div(U) as a source term
         //  for alpha, substituting div(U) = mDot(1/rho1 - 1/rho2)
         virtual bool includeDivU();

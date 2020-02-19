@@ -1,14 +1,14 @@
 {
     tmp<volScalarField> tcp(thermo->Cp());
     const volScalarField& cp = tcp();
-    
+
     const dimensionedScalar Cp1 = thermo->Cp1();
     const dimensionedScalar Cp2 = thermo->Cp2();
 
     rhoCp = rho*cp;
 
     kappaEff = thermo->kappa() + rho*cp*turbulence->nut()/Prt;
-    
+
     const surfaceScalarField rhoCpPhi
     (
         "rhoCpPhi",

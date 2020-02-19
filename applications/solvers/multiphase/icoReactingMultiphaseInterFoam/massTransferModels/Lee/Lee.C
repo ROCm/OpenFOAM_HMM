@@ -59,14 +59,14 @@ Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>::Kexp
         (
             min(max(this->pair().from(), scalar(0)), scalar(1))
         );
-        
+
         const volScalarField coeff
         (
             C_*from*this->pair().from().rho()*pos(from - alphaMin_)
            *(refValue - Tactivate_)
            /Tactivate_
         );
-        
+
         if (sign(C_.value()) > 0)
         {
             return
@@ -99,7 +99,7 @@ Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>::KSp
         (
             min(max(this->pair().from(), scalar(0)), scalar(1))
         );
-        
+
         const volScalarField coeff
         (
             C_*from*this->pair().from().rho()*pos(from - alphaMin_)
@@ -142,7 +142,7 @@ Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>::KSu
         (
             min(max(this->pair().from(), scalar(0)), scalar(1))
         );
-        
+
         const volScalarField coeff
         (
             C_*from*this->pair().from().rho()*pos(from - alphaMin_)
@@ -179,7 +179,7 @@ Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>::Tactivate() const
 
 
 template<class Thermo, class OtherThermo>
-bool 
+bool
 Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>::includeDivU()
 {
     return true;

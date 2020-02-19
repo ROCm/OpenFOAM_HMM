@@ -187,14 +187,14 @@ public:
         (
             const volScalarField& field
         );
-        
+
         //- Implicit mass transfer coefficient
         virtual tmp<volScalarField> KSp
         (
             label modelVariable,
             const volScalarField& field
         );
-        
+
         //- Explicit mass transfer coefficient
         virtual tmp<volScalarField> KSu
         (
