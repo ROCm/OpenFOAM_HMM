@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,10 +29,11 @@ License
 #include "stringOps.H"
 #include "typeInfo.H"
 #include "etcFiles.H"
-#include "Pstream.H"
+#include "UPstream.H"
 #include "StringStream.H"
 #include "OSstream.H"
 #include "OSspecific.H"
+#include <algorithm>
 #include <cctype>
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
@@ -162,7 +163,7 @@ static void expandLeadingTilde(std::string& s)
 
         // Single warning (on master) with guard to avoid Pstream::master()
         // when Pstream has not yet been initialized
-        if (Pstream::parRun() ? Pstream::master() : true)
+        if (UPstream::parRun() ? UPstream::master() : true)
         {
             std::cerr
                 << nl
@@ -696,55 +697,35 @@ static void expandString
 
 std::string::size_type Foam::stringOps::count
 (
-    const std::string& str,
+    const std::string& s,
     const char c
 )
 {
-    std::string::size_type n = 0;
-
-    for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
-    {
-        if (*iter == c)
-        {
-            ++n;
-        }
-    }
-
-    return n;
+    return std::count(s.cbegin(), s.cend(), c);
 }
 
 
-std::string::size_type Foam::stringOps::count(const char* str, const char c)
+std::string::size_type Foam::stringOps::count(const char* s, const char c)
 {
-    if (!str)
-    {
-        return 0;
-    }
-
-    std::string::size_type n = 0;
-
-    for (const char *iter = str; *iter; ++iter)
-    {
-        if (*iter == c)
-        {
-            ++n;
-        }
-    }
-
-    return n;
+    return
+    (
+        s == nullptr
+      ? 0
+      : std::count(s, (s + std::char_traits<char>::length(s)), c)
+    );
 }
 
 
 Foam::string Foam::stringOps::expand
 (
-    const std::string& str,
+    const std::string& s,
     const HashTable<string, word, string::hash>& mapping,
     const char sigil
 )
 {
-    string s(str);
-    inplaceExpand(s, mapping);
-    return s;
+    string out(s);
+    inplaceExpand(out, mapping);
+    return out;
 }
 
 
@@ -862,14 +843,14 @@ void Foam::stringOps::inplaceExpand
 
 Foam::string Foam::stringOps::expand
 (
-    const std::string& str,
+    const std::string& s,
     const dictionary& dict,
     const char sigil
 )
 {
-    string s(str);
-    inplaceExpand(s, dict, sigil);
-    return s;
+    string out(s);
+    inplaceExpand(out, dict, sigil);
+    return out;
 }
 
 
@@ -902,13 +883,13 @@ void Foam::stringOps::inplaceExpand
 
 Foam::string Foam::stringOps::expand
 (
-    const std::string& str,
+    const std::string& s,
     const bool allowEmpty
 )
 {
-    string s(str);
-    inplaceExpand(s, allowEmpty);
-    return s;
+    string out(s);
+    inplaceExpand(out, allowEmpty);
+    return out;
 }
 
 
@@ -1064,24 +1045,24 @@ Foam::stringOps::findTrim
 }
 
 
-Foam::string Foam::stringOps::trim(const std::string& str)
+Foam::string Foam::stringOps::trim(const std::string& s)
 {
     std::string::size_type pos = 0;
-    std::string::size_type end = str.length();
+    std::string::size_type end = s.length();
 
     // Right
-    while (pos < end && std::isspace(str[end-1]))
+    while (pos < end && std::isspace(s[end-1]))
     {
         --end;
     }
 
     // Left
-    while (pos < end && std::isspace(str[pos]))
+    while (pos < end && std::isspace(s[pos]))
     {
         ++pos;
     }
 
-    return str.substr(pos, end-pos);
+    return s.substr(pos, end-pos);
 }
 
 
@@ -1092,11 +1073,17 @@ void Foam::stringOps::inplaceTrim(std::string& s)
 }
 
 
-Foam::string Foam::stringOps::removeComments(const std::string& str)
+void Foam::stringOps::inplaceRemoveSpace(std::string& s)
 {
-    string s(str);
-    inplaceRemoveComments(s);
-    return s;
+    s.erase(std::remove_if(s.begin(), s.end(), ::isspace), s.end());
+}
+
+
+Foam::string Foam::stringOps::removeComments(const std::string& s)
+{
+    string out(s);
+    inplaceRemoveComments(out);
+    return out;
 }
 
 
@@ -1196,43 +1183,35 @@ void Foam::stringOps::inplaceRemoveComments(std::string& s)
 }
 
 
-Foam::string Foam::stringOps::lower(const std::string& str)
+Foam::string Foam::stringOps::lower(const std::string& s)
 {
-    string s(str);
-    inplaceLower(s);
-    return s;
+    string out;
+    out.resize(s.length());
+
+    std::transform(s.begin(), s.end(), out.begin(), ::tolower);
+    return out;
 }
 
 
 void Foam::stringOps::inplaceLower(std::string& s)
 {
-    for (auto iter = s.begin(); iter != s.end(); ++iter)
-    {
-        *iter = static_cast<std::string::value_type>
-        (
-            std::tolower(static_cast<unsigned char>(*iter))
-        );
-    }
+    std::transform(s.begin(), s.end(), s.begin(), ::tolower);
 }
 
 
-Foam::string Foam::stringOps::upper(const std::string& str)
+Foam::string Foam::stringOps::upper(const std::string& s)
 {
-    string s(str);
-    inplaceUpper(s);
-    return s;
+    string out;
+    out.resize(s.length());
+
+    std::transform(s.begin(), s.end(), out.begin(), ::toupper);
+    return out;
 }
 
 
 void Foam::stringOps::inplaceUpper(std::string& s)
 {
-    for (auto iter = s.begin(); iter != s.end(); ++iter)
-    {
-        *iter = static_cast<std::string::value_type>
-        (
-            std::toupper(static_cast<unsigned char>(*iter))
-        );
-    }
+    std::transform(s.begin(), s.end(), s.begin(), ::toupper);
 }
 
 

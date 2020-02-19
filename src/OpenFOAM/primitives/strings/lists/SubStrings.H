@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ Description
 #ifndef SubStrings_H
 #define SubStrings_H
 
-#include <string>
 #include <regex>
+#include <string>
 #include <vector>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -67,13 +67,13 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         SubStrings() = default;
 
 
     // Member Functions
 
-        //- The total length of all sub-elements.
+        //- The total string length of all sub-elements.
         //  Use size() for the number elements.
         std::string::size_type length() const
         {
@@ -89,7 +89,11 @@ public:
 
 
         //- Append sub-string defined by begin/end iterators
-        void append(string_iterator b, string_iterator e)
+        void append
+        (
+            const typename String::const_iterator& b,
+            const typename String::const_iterator& e
+        )
         {
             value_type range;
             range.first = b;
@@ -101,7 +105,7 @@ public:
 
 
         //- Const reference to the first element,
-        //  for consistency with other OpenFOAM containers
+        //- for consistency with other OpenFOAM containers
         auto first() const -> decltype(this->front())
         {
             return this->front();
@@ -109,7 +113,7 @@ public:
 
 
         //- Const reference to the last element,
-        //  for consistency with other OpenFOAM containers
+        //- for consistency with other OpenFOAM containers
         auto last() const -> decltype(this->back())
         {
             return this->back();
@@ -121,8 +125,8 @@ public:
         {
             return (*this)[pos].str();
         }
-
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

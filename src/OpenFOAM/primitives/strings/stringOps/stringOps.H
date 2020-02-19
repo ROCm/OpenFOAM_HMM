@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +55,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class OSstream;
 
 /*---------------------------------------------------------------------------*\
@@ -65,11 +65,11 @@ class OSstream;
 namespace stringOps
 {
     //- Count the number of occurrences of the specified character
-    std::string::size_type count(const std::string& str, const char c);
+    std::string::size_type count(const std::string& s, const char c);
 
     //- Count the number of occurrences of the specified character
     //  Correctly handles nullptr.
-    std::string::size_type count(const char* str, const char c);
+    std::string::size_type count(const char* s, const char c);
 
     //- Return true if text matches one of the regular expressions.
     inline bool match(const UList<wordRe>& patterns, const std::string& text)
@@ -83,7 +83,7 @@ namespace stringOps
     //  \sa stringOps::inplaceExpand() for details
     string expand
     (
-        const std::string& str,
+        const std::string& s,
         const HashTable<string, word, string::hash>& mapping,
         const char sigil = '$'
     );
@@ -213,7 +213,7 @@ namespace stringOps
     //  \sa stringOps::inplaceExpand(std::string&, const dictionary&, char)
     string expand
     (
-        const std::string& str,
+        const std::string& s,
         const dictionary& dict,
         const char sigil = '$'
     );
@@ -246,11 +246,7 @@ namespace stringOps
     //
     //  \sa
     //  stringOps::inplaceExpand(std::string&, bool);
-    string expand
-    (
-        const std::string& str,
-        const bool allowEmpty = false
-    );
+    string expand(const std::string& s, const bool allowEmpty = false);
 
 
     //- Expand initial tags, tildes, and all occurrences of environment
@@ -268,11 +264,7 @@ namespace stringOps
     // - allow empty = Given by parameter (default: False)
     // - subDict = Not applicable
     // .
-    void inplaceExpand
-    (
-        std::string& s,
-        const bool allowEmpty = false
-    );
+    void inplaceExpand(std::string& s, const bool allowEmpty = false);
 
 
     //- Replace environment variable contents with its name.
@@ -305,27 +297,30 @@ namespace stringOps
     void inplaceTrimRight(std::string& s);
 
     //- Return string trimmed of leading and trailing whitespace
-    string trim(const std::string& str);
+    string trim(const std::string& s);
 
     //- Trim leading and trailing whitespace inplace
     void inplaceTrim(std::string& s);
 
+    //- Eliminate whitespace inplace
+    void inplaceRemoveSpace(std::string& s);
+
 
     //- Return string with C/C++ comments removed
-    string removeComments(const std::string& str);
+    string removeComments(const std::string& s);
 
     //- Remove C/C++ comments inplace
     void inplaceRemoveComments(std::string& s);
 
 
-    //- Return string transformed with std::tolower on each character
-    string lower(const std::string& str);
+    //- Return string copy transformed with std::tolower on each character
+    string lower(const std::string& s);
 
     //- Inplace transform string with std::tolower on each character
     void inplaceLower(std::string& s);
 
-    //- Return string transformed with std::toupper on each character
-    string upper(const std::string& str);
+    //- Return string copy transformed with std::toupper on each character
+    string upper(const std::string& s);
 
     //- Inplace transform string with std::toupper on each character
     void inplaceUpper(std::string& s);

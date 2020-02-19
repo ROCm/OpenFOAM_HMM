@@ -118,12 +118,12 @@ void Foam::Function1Types::CSV<Type>::read()
     const label maxEntry =
         max(refColumn_, componentColumns_[findMax(componentColumns_)]);
 
+    string line;
     label lineNo = 0;
 
     // Skip header
     for (label i = 0; i < nHeaderLine_; ++i)
     {
-        string line;
         is.getLine(line);
         ++lineNo;
     }
@@ -133,7 +133,6 @@ void Foam::Function1Types::CSV<Type>::read()
 
     while (is.good())
     {
-        string line;
         is.getLine(line);
         ++lineNo;
 

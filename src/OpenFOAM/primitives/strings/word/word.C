@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,7 +68,7 @@ Foam::word Foam::word::validate(const std::string& s, const bool prefix)
         }
     }
 
-    out.resize(len);
+    out.erase(len);
 
     return out;
 }
@@ -102,7 +102,7 @@ Foam::word Foam::word::validate
         }
     }
 
-    out.resize(len);
+    out.erase(len);
 
     return out;
 }

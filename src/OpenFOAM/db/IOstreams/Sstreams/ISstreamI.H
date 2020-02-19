@@ -87,6 +87,22 @@ inline Foam::ISstream& Foam::ISstream::getLine(std::string& str, char delim)
 }
 
 
+inline std::streamsize Foam::ISstream::getLine(std::nullptr_t, char delim)
+{
+    is_.ignore(std::numeric_limits<std::streamsize>::max(), delim);
+    setState(is_.rdstate());
+
+    std::streamsize count = is_.gcount();
+
+    if (count && delim == '\n')
+    {
+        ++lineNumber_;
+    }
+
+    return count;
+}
+
+
 inline Foam::ISstream& Foam::ISstream::putback(const char c)
 {
     if (c == '\n')

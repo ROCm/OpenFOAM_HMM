@@ -134,12 +134,12 @@ void Foam::csvTableReader<Type>::operator()
     const label maxEntry =
         max(refColumn_, componentColumns_[findMax(componentColumns_)]);
 
+    string line;
     label lineNo = 0;
 
     // Skip header
     if (headerLine_)
     {
-        string line;
         is.getLine(line);
         ++lineNo;
     }
@@ -149,7 +149,6 @@ void Foam::csvTableReader<Type>::operator()
 
     while (is.good())
     {
-        string line;
         is.getLine(line);
         ++lineNo;
 

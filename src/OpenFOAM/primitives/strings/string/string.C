@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -190,7 +190,7 @@ bool Foam::string::removeRepeated(const char character)
             }
         }
 
-        resize(nChar);
+        erase(nChar);
     }
 
     return changed;
@@ -219,7 +219,7 @@ bool Foam::string::removeEnd(const std::string& text)
 
     if (txtLen && strLen >= txtLen && !compare(strLen - txtLen, npos, text))
     {
-        resize(strLen - txtLen);
+        erase(strLen - txtLen);
         return true;
     }
 
@@ -244,7 +244,7 @@ bool Foam::string::removeEnd(const char c)
     const auto n = length();
     if (n > 1 && back() == c)
     {
-        resize(n-1);
+        erase(n-1);
         return true;
     }
 

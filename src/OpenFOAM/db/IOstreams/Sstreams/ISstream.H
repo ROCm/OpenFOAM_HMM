@@ -41,6 +41,7 @@ SourceFiles
 
 #include "Istream.H"
 #include "fileName.H"
+#include <limits>
 #include <iostream>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -148,8 +149,12 @@ public:
             //  end of file is read.
             inline int peek();
 
-            //- Raw, low-level getline into a string function.
+            //- Raw, low-level getline (until delimiter) into a string.
             inline ISstream& getLine(std::string& str, char delim = '\n');
+
+            //- Low-level discard until delimiter
+            //  \return the number of characters extracted
+            inline std::streamsize getLine(std::nullptr_t, char delim = '\n');
 
             //- Raw, low-level putback character function.
             inline ISstream& putback(const char c);
