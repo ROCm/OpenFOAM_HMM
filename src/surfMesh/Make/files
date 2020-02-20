@@ -25,6 +25,8 @@ surfZone/surfZoneIOList.C
 surfaceFormats = surfaceFormats
 $(surfaceFormats)/surfaceFormatsCore.C
 
+$(surfaceFormats)/abaqus/ABAQUSsurfaceFormatCore.C
+$(surfaceFormats)/abaqus/ABAQUSsurfaceFormatRunTime.C
 $(surfaceFormats)/ac3d/AC3DsurfaceFormatCore.C
 $(surfaceFormats)/ac3d/AC3DsurfaceFormatRunTime.C
 $(surfaceFormats)/fire/FLMAsurfaceFormatRunTime.C

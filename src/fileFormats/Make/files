@@ -25,6 +25,7 @@ $(part)/surface/ensightOutputSurface.C
 ensight/read/ensightReadFile.C
 ensight/type/ensightPTraits.C
 
+abaqus/ABAQUSCore.C
 nastran/NASCore.C
 obj/OBJstream.C
 fire/FIRECore.C
