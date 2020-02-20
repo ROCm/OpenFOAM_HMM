@@ -13,9 +13,12 @@ ptFLAGS     = -DNoRepository -ftemplate-depth-100
 c++WARN     = \
     -Wall -Wextra -Wold-style-cast \
     -Wnon-virtual-dtor -Wno-unused-parameter -Wno-invalid-offsetof \
-    -Wno-attributes -Wno-unknown-pragmas
+    -Wno-attributes -Wno-unknown-pragmas \
+    $(FOAM_EXTRA_CXXFLAGS)
 
 c++LESSWARN = \
     -Wno-old-style-cast -Wno-unused-local-typedefs -Wno-array-bounds \
     -Wno-deprecated-declarations \
     -fpermissive
+
+#------------------------------------------------------------------------------
