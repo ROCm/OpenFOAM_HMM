@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 Shell Research Ltd.
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -185,7 +185,8 @@ static inline scalar averageSurrounding
 template<class Type>
 static inline Ostream& putUniform(Ostream& os, const word& key, const Type& val)
 {
-    os.writeKeyword(key) << "uniform " << val << token::END_STATEMENT << nl;
+    os.writeKeyword(key) << word("uniform") << token::SPACE
+        << val << token::END_STATEMENT << nl;
     return os;
 }
 

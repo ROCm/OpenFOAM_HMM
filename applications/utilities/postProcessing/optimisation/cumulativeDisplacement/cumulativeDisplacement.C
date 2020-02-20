@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
             {
                 label pointI = localPoints[ppI];
                 normalDisplacement[pointI]  =
-                    (meshPoints[pointI] - points0[pointI]) 
+                    (meshPoints[pointI] - points0[pointI])
                   & pointNormals[pointI];
             }
         }

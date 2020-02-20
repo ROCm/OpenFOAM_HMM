@@ -4,9 +4,9 @@ cd "${0%/*}" || exit                                # Run from this directory
 #------------------------------------------------------------------------------
 
 mv ./-180 temp180
-cleanCase
 
-rm -rf 0
+cleanCase0
+
 rm -f constant/polyMesh/boundary
 
 mv temp180 ./-180

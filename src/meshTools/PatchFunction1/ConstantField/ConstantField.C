@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -259,7 +259,7 @@ void Foam::PatchFunction1Types::ConstantField<Type>::writeData
     if (isUniform_)
     {
         os.writeKeyword(this->name_)
-            << "constant " << uniformValue_
+            << word("constant") << token::SPACE << uniformValue_
             << token::END_STATEMENT << nl;
     }
     else
