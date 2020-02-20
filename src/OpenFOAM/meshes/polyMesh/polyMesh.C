@@ -1192,13 +1192,6 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
     faceZones_.movePoints(points_);
     cellZones_.movePoints(points_);
 
-    // Cell tree might become invalid
-    cellTreePtr_.clear();
-
-    // Reset valid directions (could change with rotation)
-    geometricD_ = Zero;
-    solutionD_ = Zero;
-
     // Reset cell tree - it gets built from mesh geometry so might have
     // wrong boxes. It is correct as long as none of the cells leaves
     // the boxes it is in which most likely is almost never the case except
@@ -1209,6 +1202,10 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
     // same so no time would be gained (unless the decomposition gets weighted).
     // Small benefit for lots of scope for problems so not done.
     cellTreePtr_.clear();
+
+    // Reset valid directions (could change with rotation)
+    geometricD_ = Zero;
+    solutionD_ = Zero;
 
     // Note: tet-base decomposition does not get cleared. Ideally your face
     // decomposition should not change during mesh motion ...
