@@ -7,7 +7,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2017-2019 OpenCFD Ltd.
+#     Copyright (C) 2017-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -94,19 +94,22 @@ cat<<HELP_FULL
 HELP_FULL
 fi
 
-cat<<HELP_TAIL
+cat<<HELP_TAIL_COMMON
   -pwd              Print root directory containing a Make/ directory
-  -version | --version  Print version, which is the same as -show-api
+  -version | --version  Print version (same as -show-api)
   -h | -help        Display short help and exit
   -help-full        Display full help and exit
 
 A general, easy-to-use make system for multi-platform development
 with support for local and network parallel compilation.
 
-The 'target' is a Makefile target:
-  e.g., platforms/linux64GccDPOpt/.../fvMesh.o
+HELP_TAIL_COMMON
 
-or a special target:
+if [ -n "$1" ]
+then
+cat<<HELP_TAIL_FULL
+Makefile targets:   platforms/linux64GccDPInt32Opt/.../fvMesh.o (for example)
+Special targets:
   all | queue       Same as -all | -queue options
   exe               Compile statically linked executable
   lib               Compile statically linked archive lib (.a)
@@ -116,9 +119,22 @@ or a special target:
   updatedep         Compile dependencies only (in case of broken dependencies)
   objects           Compile but not link
 
-HELP_TAIL
-    exit 1
+Environment
+  FOAM_EXTRA_CXXFLAGS
+
+HELP_TAIL_FULL
+else
+cat<<HELP_TAIL_BRIEF
+Some special targets (see -help-full for details):
+  all | queue       Same as -all | -queue options
+  exe               Executables
+  lib libo libso    Libraries
+
+HELP_TAIL_BRIEF
+fi
+    exit 0 # clean exit
 }
+
 
 # Report error and exit
 die()

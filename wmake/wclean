@@ -7,7 +7,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2017 OpenCFD Ltd.
+#     Copyright (C) 2017-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -37,36 +37,51 @@
 #     lnInclude directories generated for libraries.
 #
 #------------------------------------------------------------------------------
-Script=${0##*/}             # Use 'Script' for error messages in wmakeFunctions
-. ${0%/*}/scripts/wmakeFunctions        # Source wmake functions
+Script="${0##*/}"           # Use 'Script' for error messages in wmakeFunctions
+. "${0%/*}/scripts/wmakeFunctions"              # Source wmake functions
 
-usage() {
-    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
-    cat<<USAGE
+printHelp() {
+    cat<<HELP_INFO
 
 Usage: $Script [OPTION] [dir]
        $Script [OPTION] target [dir [MakeDir]]
 options:
-  -a | -all         Same as the 'all' target
+  -a | -all         All subdirectories, uses Allwclean, Allclean if they exist
   -s | -silent      Ignored - for compatibility with wmake
-  -help             Print the usage
+  -h | -help        Display short help and exit
+  -help-full        Display full help and exit
 
 Clean up the wmake control directory Make/\$WM_OPTIONS and remove the
 lnInclude directories generated for libraries.
 
-The targets correspond to a subset of the 'wmake' special targets:
-  all               All subdirectories, uses any Allwclean or Allclean
-                    files if they exist
+HELP_INFO
+
+cat<<HELP_TAIL_FULL
+Special targets:
+  all               Same as -all option
   exe | lib | libo | libso
-                    Clean Make, any *.dep files and lnInclude directories
   empty             Remove empty sub-directories for the requested dir.
                     If executed in the main project directory, it will also
                     remove deprecated object directories and respective binaries
                     that refer to no-longer-existing source code.
 
-USAGE
+HELP_TAIL_FULL
+    exit 0 # clean exit
+}
+
+# Report error and exit
+die()
+{
+    exec 1>&2
+    echo
+    echo "Error encountered:"
+    while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
+    echo
+    echo "See '${0##*/} -help' for usage"
+    echo
     exit 1
 }
+
 
 #------------------------------------------------------------------------------
 # Parse arguments and options
@@ -78,16 +93,20 @@ MakeDir=Make
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-    -h | -help*)
-        usage
+    -help-f*)   # Full help
+        printHelp -full
+        ;;
+    -h | -help*) # Short help
+        printHelp
         ;;
     -a | -all | all)
         targetType=all
         ;;
     -s | -silent)    # Ignored - for compatibility with wmake
+        export WM_QUIET=true
         ;;
     -*)
-        usage "unknown option: '$1'"
+        die "unknown option: '$1'"
         ;;
     *)
         break
