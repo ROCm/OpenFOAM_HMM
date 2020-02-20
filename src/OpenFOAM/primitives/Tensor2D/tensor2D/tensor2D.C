@@ -94,6 +94,12 @@ Foam::Vector2D<Foam::complex> Foam::eigenValues(const tensor2D& T)
     const scalar c = T.yx();
     const scalar d = T.yy();
 
+    // Return diagonal if T is effectively diagonal tensor
+    if ((sqr(b) + sqr(c)) < ROOTSMALL)
+    {
+        return Vector2D<complex>(complex(a), complex(d));
+    }
+
     const scalar trace = a + d;
 
     // (JLM:p. 2246)
@@ -126,7 +132,7 @@ Foam::Vector2D<Foam::complex> Foam::eigenValues(const tensor2D& T)
         );
 
         // Sort the eigenvalues into ascending order
-        if (mag(eVals.x()) > mag(eVals.y()))
+        if (eVals.x().real() > eVals.y().real())
         {
             Swap(eVals.x(), eVals.y());
         }
@@ -154,9 +160,48 @@ Foam::Vector2D<Foam::complex> Foam::eigenVector
     const Vector2D<complex>& standardBasis
 )
 {
-    // (K:p. 47-48)
+    // Construct the linear system for this eigenvalue
+    const Tensor2D<complex> A
+    (
+        complex(T.xx()) - eVal,  complex(T.xy()),
+        complex(T.yx()),         complex(T.yy()) - eVal
+    );
+
     // Evaluate the eigenvector using the largest divisor
-    if (mag(T.yx()) > mag(T.xy()) && mag(T.yx()) > VSMALL)
+    if (mag(A.yy()) > mag(A.xx()) && mag(A.yy()) > SMALL)
+    {
+        Vector2D<complex> eVec(complex(1), -A.yx()/A.yy());
+
+        #ifdef FULLDEBUG
+        if (mag(eVec) < SMALL)
+        {
+            FatalErrorInFunction
+                << "Eigenvector magnitude should be non-zero:"
+                << "mag(eigenvector) = " << mag(eVec)
+                << abort(FatalError);
+        }
+        #endif
+
+        return eVec/mag(eVec);
+    }
+    else if (mag(A.xx()) > SMALL)
+    {
+        Vector2D<complex> eVec(-A.xy()/A.xx(), complex(1));
+
+        #ifdef FULLDEBUG
+        if (mag(eVec) < SMALL)
+        {
+            FatalErrorInFunction
+                << "Eigenvector magnitude should be non-zero:"
+                << "mag(eigenvector) = " << mag(eVec)
+                << abort(FatalError);
+        }
+        #endif
+
+        return eVec/mag(eVec);
+    }
+    // (K:p. 47-48)
+    else if (mag(T.yx()) > mag(T.xy()) && mag(T.yx()) > SMALL)
     {
         const Vector2D<complex> eVec(eVal - T.yy(), complex(T.yx()));
 
@@ -172,7 +217,7 @@ Foam::Vector2D<Foam::complex> Foam::eigenVector
 
         return eVec/mag(eVec);
     }
-    else if (mag(T.xy()) > VSMALL)
+    else if (mag(T.xy()) > SMALL)
     {
         const Vector2D<complex> eVec(complex(T.xy()), eVal - T.xx());
 
@@ -189,7 +234,8 @@ Foam::Vector2D<Foam::complex> Foam::eigenVector
         return eVec/mag(eVec);
     }
 
-    return standardBasis;
+    // Repeated eigenvalue
+    return Vector2D<complex>(-standardBasis.y(), standardBasis.x());
 }
 
 

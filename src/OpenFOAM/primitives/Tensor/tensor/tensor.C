@@ -74,22 +74,35 @@ const Foam::tensor Foam::tensor::I
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::Vector<Foam::complex> Foam::eigenValues(const tensor& t)
+Foam::Vector<Foam::complex> Foam::eigenValues(const tensor& T)
 {
+    // Return diagonal if T is effectively diagonal tensor
+    if
+    (
+        (
+            sqr(T.xy()) + sqr(T.xz()) + sqr(T.yz())
+          + sqr(T.yx()) + sqr(T.zx()) + sqr(T.zy())
+        ) < ROOTSMALL
+    )
+    {
+        return Vector<complex>
+        (
+            complex(T.xx()), complex(T.yy()), complex(T.zz())
+        );
+    }
+
     // Coefficients of the characteristic cubic polynomial (a = 1)
-    const scalar b =
-      - t.xx() - t.yy() - t.zz();
+    const scalar b = - T.xx() - T.yy() - T.zz();
     const scalar c =
-        t.xx()*t.yy() + t.xx()*t.zz() + t.yy()*t.zz()
-      - t.xy()*t.yx() - t.yz()*t.zy() - t.zx()*t.xz();
+        T.xx()*T.yy() + T.xx()*T.zz() + T.yy()*T.zz()
+      - T.xy()*T.yx() - T.yz()*T.zy() - T.zx()*T.xz();
     const scalar d =
-      - t.xx()*t.yy()*t.zz()
-      - t.xy()*t.yz()*t.zx() - t.xz()*t.zy()*t.yx()
-      + t.xx()*t.yz()*t.zy() + t.yy()*t.zx()*t.xz() + t.zz()*t.xy()*t.yx();
+      - T.xx()*T.yy()*T.zz()
+      - T.xy()*T.yz()*T.zx() - T.xz()*T.zy()*T.yx()
+      + T.xx()*T.yz()*T.zy() + T.yy()*T.zx()*T.xz() + T.zz()*T.xy()*T.yx();
 
     // Determine the roots of the characteristic cubic polynomial
     const Roots<3> roots(cubicEqn(1, b, c, d).roots());
-
     // Check the root types
     bool isComplex = false;
     forAll(roots, i)
@@ -102,10 +115,10 @@ Foam::Vector<Foam::complex> Foam::eigenValues(const tensor& t)
             case roots::posInf:
             case roots::negInf:
             case roots::nan:
-                FatalErrorInFunction
-                    << "Eigenvalue computation fails for tensor: " << t
+                WarningInFunction
+                    << "Eigenvalue computation fails for tensor: " << T
                     << "due to the not-a-number root = " << roots[i]
-                    << exit(FatalError);
+                    << endl;
             case roots::real:
                 break;
         }

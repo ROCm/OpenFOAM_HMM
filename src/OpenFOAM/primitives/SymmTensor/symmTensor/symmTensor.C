@@ -93,18 +93,27 @@ const Foam::symmTensor Foam::symmTensor::I
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::vector Foam::eigenValues(const symmTensor& t)
+Foam::vector Foam::eigenValues(const symmTensor& T)
 {
+    // Return ascending diagonal if T is effectively diagonal tensor
+    if ((sqr(T.xy()) + sqr(T.xz()) + sqr(T.yz())) < ROOTSMALL)
+    {
+        vector eVals(T.diag());
+
+        std::sort(eVals.begin(), eVals.end());
+
+        return eVals;
+    }
+
     // Coefficients of the characteristic cubic polynomial (a = 1)
-    const scalar b =
-      - t.xx() - t.yy() - t.zz();
+    const scalar b = - T.xx() - T.yy() - T.zz();
     const scalar c =
-        t.xx()*t.yy() + t.xx()*t.zz() + t.yy()*t.zz()
-      - t.xy()*t.yx() - t.yz()*t.zy() - t.zx()*t.xz();
+        T.xx()*T.yy() + T.xx()*T.zz() + T.yy()*T.zz()
+      - T.xy()*T.yx() - T.yz()*T.zy() - T.zx()*T.xz();
     const scalar d =
-      - t.xx()*t.yy()*t.zz()
-      - t.xy()*t.yz()*t.zx() - t.xz()*t.zy()*t.yx()
-      + t.xx()*t.yz()*t.zy() + t.yy()*t.zx()*t.xz() + t.zz()*t.xy()*t.yx();
+      - T.xx()*T.yy()*T.zz()
+      - T.xy()*T.yz()*T.zx() - T.xz()*T.zy()*T.yx()
+      + T.xx()*T.yz()*T.zy() + T.yy()*T.zx()*T.xz() + T.zz()*T.xy()*T.yx();
 
     // Determine the roots of the characteristic cubic polynomial
     Roots<3> roots(cubicEqn(1, b, c, d).roots());
@@ -123,26 +132,17 @@ Foam::vector Foam::eigenValues(const symmTensor& t)
             case roots::posInf:
             case roots::negInf:
             case roots::nan:
-                FatalErrorInFunction
-                    << "Eigenvalue computation fails for symmTensor: " << t
+                WarningInFunction
+                    << "Eigenvalue computation fails for symmTensor: " << T
                     << "due to the non-real root = " << roots[i]
-                    << exit(FatalError);
+                    << endl;
+                eVals[i] = roots[i];
+                break;
         }
     }
 
     // Sort the eigenvalues into ascending order
-    if (eVals.x() > eVals.y())
-    {
-        Swap(eVals.x(), eVals.y());
-    }
-    if (eVals.y() > eVals.z())
-    {
-        Swap(eVals.y(), eVals.z());
-    }
-    if (eVals.x() > eVals.y())
-    {
-        Swap(eVals.x(), eVals.y());
-    }
+    std::sort(eVals.begin(), eVals.end());
 
     return eVals;
 }
@@ -159,87 +159,89 @@ Foam::vector Foam::eigenVector
     // Construct the characteristic equation system for this eigenvalue
     const tensor A(T - eVal*I);
 
-    // Determinants of the 2x2 sub-matrices used to find the eigenvectors
-    // Sub-determinants for a unique eigenvenvalue
-    scalar sd0 = A.yy()*A.zz() - A.yz()*A.zy();
-    scalar sd1 = A.zz()*A.xx() - A.zx()*A.xz();
-    scalar sd2 = A.xx()*A.yy() - A.xy()*A.yx();
-    scalar magSd0 = mag(sd0);
-    scalar magSd1 = mag(sd1);
-    scalar magSd2 = mag(sd2);
-
-    // Evaluate the eigenvector using the largest sub-determinant
-    if (magSd0 >= magSd1 && magSd0 >= magSd2 && magSd0 > SMALL)
     {
-        const vector eVec
-        (
-            1,
-            (A.yz()*A.zx() - A.zz()*A.yx())/sd0,
-            (A.zy()*A.yx() - A.yy()*A.zx())/sd0
-        );
+        // Determinants of the 2x2 sub-matrices used to find the eigenvectors
+        // Sub-determinants for a unique eigenvenvalue
+        const scalar sd0 = A.yy()*A.zz() - A.yz()*A.zy();
+        const scalar sd1 = A.zz()*A.xx() - A.zx()*A.xz();
+        const scalar sd2 = A.xx()*A.yy() - A.xy()*A.yx();
+        const scalar magSd0 = mag(sd0);
+        const scalar magSd1 = mag(sd1);
+        const scalar magSd2 = mag(sd2);
 
-        #ifdef FULLDEBUG
-        if (mag(eVec) < SMALL)
+        // Evaluate the eigenvector using the largest sub-determinant
+        if (magSd0 >= magSd1 && magSd0 >= magSd2 && magSd0 > SMALL)
         {
-            FatalErrorInFunction
-                << "Eigenvector magnitude should be non-zero:"
-                << "mag(eigenvector) = " << mag(eVec)
-                << abort(FatalError);
+            const vector eVec
+            (
+                1,
+                (A.yz()*A.zx() - A.zz()*A.yx())/sd0,
+                (A.zy()*A.yx() - A.yy()*A.zx())/sd0
+            );
+
+            #ifdef FULLDEBUG
+            if (mag(eVec) < SMALL)
+            {
+                FatalErrorInFunction
+                    << "Eigenvector magnitude should be non-zero:"
+                    << "mag(eigenvector) = " << mag(eVec)
+                    << abort(FatalError);
+            }
+            #endif
+
+            return eVec/mag(eVec);
         }
-        #endif
-
-        return eVec/mag(eVec);
-    }
-    else if (magSd1 >= magSd2 && magSd1 > SMALL)
-    {
-        const vector eVec
-        (
-            (A.xz()*A.zy() - A.zz()*A.xy())/sd1,
-            1,
-            (A.zx()*A.xy() - A.xx()*A.zy())/sd1
-        );
-
-        #ifdef FULLDEBUG
-        if (mag(eVec) < SMALL)
+        else if (magSd1 >= magSd2 && magSd1 > SMALL)
         {
-            FatalErrorInFunction
-                << "Eigenvector magnitude should be non-zero:"
-                << "mag(eigenvector) = " << mag(eVec)
-                << abort(FatalError);
+            const vector eVec
+            (
+                (A.xz()*A.zy() - A.zz()*A.xy())/sd1,
+                1,
+                (A.zx()*A.xy() - A.xx()*A.zy())/sd1
+            );
+
+            #ifdef FULLDEBUG
+            if (mag(eVec) < SMALL)
+            {
+                FatalErrorInFunction
+                    << "Eigenvector magnitude should be non-zero:"
+                    << "mag(eigenvector) = " << mag(eVec)
+                    << abort(FatalError);
+            }
+            #endif
+
+            return eVec/mag(eVec);
         }
-        #endif
-
-        return eVec/mag(eVec);
-    }
-    else if (magSd2 > SMALL)
-    {
-        const vector eVec
-        (
-            (A.xy()*A.yz() - A.yy()*A.xz())/sd2,
-            (A.yx()*A.xz() - A.xx()*A.yz())/sd2,
-            1
-        );
-
-        #ifdef FULLDEBUG
-        if (mag(eVec) < SMALL)
+        else if (magSd2 > SMALL)
         {
-            FatalErrorInFunction
-                << "Eigenvector magnitude should be non-zero:"
-                << "mag(eigenvector) = " << mag(eVec)
-                << abort(FatalError);
-        }
-        #endif
+            const vector eVec
+            (
+                (A.xy()*A.yz() - A.yy()*A.xz())/sd2,
+                (A.yx()*A.xz() - A.xx()*A.yz())/sd2,
+                1
+            );
 
-        return eVec/mag(eVec);
+            #ifdef FULLDEBUG
+            if (mag(eVec) < SMALL)
+            {
+                FatalErrorInFunction
+                    << "Eigenvector magnitude should be non-zero:"
+                    << "mag(eigenvector) = " << mag(eVec)
+                    << abort(FatalError);
+            }
+            #endif
+
+            return eVec/mag(eVec);
+        }
     }
 
     // Sub-determinants for a repeated eigenvalue
-    sd0 = A.yy()*standardBasis1.z() - A.yz()*standardBasis1.y();
-    sd1 = A.zz()*standardBasis1.x() - A.zx()*standardBasis1.z();
-    sd2 = A.xx()*standardBasis1.y() - A.xy()*standardBasis1.x();
-    magSd0 = mag(sd0);
-    magSd1 = mag(sd1);
-    magSd2 = mag(sd2);
+    const scalar sd0 = A.yy()*standardBasis1.z() - A.yz()*standardBasis1.y();
+    const scalar sd1 = A.zz()*standardBasis1.x() - A.zx()*standardBasis1.z();
+    const scalar sd2 = A.xx()*standardBasis1.y() - A.xy()*standardBasis1.x();
+    const scalar magSd0 = mag(sd0);
+    const scalar magSd1 = mag(sd1);
+    const scalar magSd2 = mag(sd2);
 
     // Evaluate the eigenvector using the largest sub-determinant
     if (magSd0 >= magSd1 && magSd0 >= magSd2 && magSd0 > SMALL)

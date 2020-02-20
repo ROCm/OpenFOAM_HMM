@@ -86,11 +86,11 @@ typename std::enable_if
     const word& msg,
     const Type& x,
     const Type& y,
-    const scalar relTol = 1e-8,  //<! are values the same within 8 decimals
-    const scalar absTol = 0      //<! useful for cmps near zero
+    const scalar absTol = 0,     //<! useful for cmps near zero
+    const scalar relTol = 1e-8   //<! are values the same within 8 decimals
 )
 {
-    Info<< msg << x << endl;
+    Info<< msg << x << "?=" << y << endl;
 
     unsigned nFail = 0;
 
@@ -124,11 +124,11 @@ typename std::enable_if
     const word& msg,
     const Type& x,
     const Type& y,
-    const scalar relTol = 1e-8,
-    const scalar absTol = 0
+    const scalar absTol = 0,
+    const scalar relTol = 1e-8
 )
 {
-    Info<< msg << x << endl;
+    Info<< msg << x << "?=" << y << endl;
 
     unsigned nFail = 0;
 
@@ -725,7 +725,7 @@ void test_eigenvalues(const tensor2D& T, const Vector2D<complex>& EVals)
         // In case of complex EVals, the production is effectively scalar
         // due to the (complex*complex conjugate) results in zero imag part
         const scalar EValsProd = ((EVals.x()*EVals.y()).real());
-        cmp("# Product of eigenvalues = det(sT):", EValsProd, determinant);
+        cmp("# Product of eigenvalues = det(T):", EValsProd, determinant, 1e-7);
     }
 
     {
@@ -737,7 +737,7 @@ void test_eigenvalues(const tensor2D& T, const Vector2D<complex>& EVals)
         {
             EValsSum += val.real();
         }
-        cmp("# Sum of eigenvalues = trace(sT):", EValsSum, trace, 1e-8, 1e-8);
+        cmp("# Sum of eigenvalues = trace(T):", EValsSum, trace, 1e-8);
     }
 }
 
@@ -767,7 +767,7 @@ void test_characteristic_equation
 
         for (const auto x : X)
         {
-            cmp("  (Tc & EVec - EVal*EVec) = 0:", mag(x), 0.0, 1e-8, 1e-6);
+            cmp("  (Tc & EVec - EVal*EVec) = 0:", mag(x), 0.0, 1e-5);
         }
     }
 }
@@ -861,14 +861,13 @@ int main(int argc, char *argv[])
     }
 
     {
-        Info<< nl << "    ## Test eigen functions by a zero tensor2D: ##"<< nl;
+        Info<< nl << "    ## A zero tensor2D: ##"<< nl;
         const tensor2D zeroT(Zero);
         test_eigen_funcs(zeroT);
     }
     {
         Info<< nl
-            << "    ## Test eigen functions by a tensor2D consisting of"
-            << " repeated eigenvalues: ##"
+            << "    ## A tensor2D with repeated eigenvalues: ##"
             << nl;
         const tensor2D T
         (
@@ -879,8 +878,7 @@ int main(int argc, char *argv[])
     }
     {
         Info<< nl
-            << "    ## Test eigen functions by a skew-symmetric tensor2D"
-            << " consisting of no-real eigenvalues: ##"
+            << "    ## A skew-symmetric tensor2D with no-real eigenvalues: ##"
             << nl;
         const tensor2D T
         (
@@ -891,7 +889,7 @@ int main(int argc, char *argv[])
     }
     {
         Info<< nl
-            << "    ## Test eigen functions by a stiff tensor2D: ##"
+            << "    ## A stiff tensor2D: ##"
             << nl;
         const tensor2D stiff
         (
@@ -899,6 +897,68 @@ int main(int argc, char *argv[])
             pow(10.0, -8), pow(10.0, 9)
         );
         test_eigen_funcs(stiff);
+    }
+    {
+        Info<< nl
+            << "    ## Random tensor2D with tiny off-diag elements: ##"
+            << nl;
+
+        const List<scalar> epsilons
+        ({
+            0, SMALL, Foam::sqrt(SMALL), sqr(SMALL), Foam::cbrt(SMALL),
+            -SMALL, -Foam::sqrt(SMALL), -sqr(SMALL), -Foam::cbrt(SMALL)
+        });
+
+        for (label i = 0; i < numberOfTests; ++i)
+        {
+            for (const auto& eps : epsilons)
+            {
+                {
+                    tensor2D T(makeRandomContainer(rndGen));
+                    T.xy() = eps*rndGen.GaussNormal<scalar>();
+                    test_eigen_funcs(T);
+                }
+                {
+                    tensor2D T(makeRandomContainer(rndGen));
+                    T.yx() = eps*rndGen.GaussNormal<scalar>();
+                    test_eigen_funcs(T);
+                }
+                {
+                    tensor2D T(makeRandomContainer(rndGen));
+                    T.xy() = eps*rndGen.GaussNormal<scalar>();
+                    T.yx() = eps*rndGen.GaussNormal<scalar>();
+                    test_eigen_funcs(T);
+                }
+                {
+                    tensor2D T(makeRandomContainer(rndGen));
+                    T.xy() = 0;
+                    T.yx() = eps*rndGen.GaussNormal<scalar>();
+                    test_eigen_funcs(T);
+                }
+                {
+                    tensor2D T(makeRandomContainer(rndGen));
+                    T.xy() = eps*rndGen.GaussNormal<scalar>();
+                    T.yx() = 0;
+                    test_eigen_funcs(T);
+                }
+                {
+                    tensor2D T(makeRandomContainer(rndGen));
+                    T.xy() = eps;
+                    test_eigen_funcs(T);
+                }
+                {
+                    tensor2D T(makeRandomContainer(rndGen));
+                    T.yx() = eps;
+                    test_eigen_funcs(T);
+                }
+                {
+                    tensor2D T(makeRandomContainer(rndGen));
+                    T.xy() = eps;
+                    T.yx() = eps;
+                    test_eigen_funcs(T);
+                }
+            }
+        }
     }
 
 
@@ -962,6 +1022,7 @@ int main(int argc, char *argv[])
                 << "   => " << flatOutput(vfld1) << nl;
         }
     }
+
 
     if (nFail_)
     {

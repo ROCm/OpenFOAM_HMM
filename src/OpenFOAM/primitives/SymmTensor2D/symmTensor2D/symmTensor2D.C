@@ -88,12 +88,18 @@ const Foam::symmTensor2D Foam::symmTensor2D::I
 
 Foam::vector2D Foam::eigenValues(const symmTensor2D& T)
 {
+    // Return diagonal if T is effectively diagonal tensor
+    if (sqr(T.xy()) < ROOTSMALL)
+    {
+        return vector2D(T.diag());
+    }
+
     //(K:Eqs. 3.2-3.3)
     const scalar skewTrace = T.xx() - T.yy();
     const scalar trace = tr(T);
     const scalar gap = sign(skewTrace)*hypot(skewTrace, 2.0*T.xy());
 
-    return vector2D (0.5*(trace + gap), 0.5*(trace - gap));
+    return vector2D(0.5*(trace + gap), 0.5*(trace - gap));
 }
 
 
