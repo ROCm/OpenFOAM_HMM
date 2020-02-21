@@ -42,13 +42,13 @@ inline const Foam::Time& Foam::regionModels::regionModel::time() const
 }
 
 
-inline const Foam::Switch& Foam::regionModels::regionModel::active() const
+inline Foam::Switch Foam::regionModels::regionModel::active() const
 {
     return active_;
 }
 
 
-inline const Foam::Switch& Foam::regionModels::regionModel::infoOutput() const
+inline Foam::Switch Foam::regionModels::regionModel::infoOutput() const
 {
     return infoOutput_;
 }

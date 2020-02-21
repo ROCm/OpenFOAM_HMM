@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,7 +65,7 @@ protected:
 
     // Protected data
 
-        Switch solveOscillationEq_;
+        bool solveOscillationEq_;
 
         scalar y0_;
         scalar yDot0_;
@@ -128,7 +129,7 @@ public:
 
     // Access
 
-        inline const Switch& solveOscillationEq() const
+        inline bool solveOscillationEq() const
         {
             return solveOscillationEq_;
         }

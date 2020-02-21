@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,8 +46,7 @@ inline const Foam::wordList& Foam::functionObjects::fieldValue::fields() const
 }
 
 
-inline const Foam::Switch&
-Foam::functionObjects::fieldValue::writeFields() const
+inline bool Foam::functionObjects::fieldValue::writeFields() const
 {
     return writeFields_;
 }

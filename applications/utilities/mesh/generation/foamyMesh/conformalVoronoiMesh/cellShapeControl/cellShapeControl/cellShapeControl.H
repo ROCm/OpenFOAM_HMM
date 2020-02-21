@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,7 +57,6 @@ SourceFiles
 
 namespace Foam
 {
-
 
 /*---------------------------------------------------------------------------*\
                      Class cellShapeControl Declaration
@@ -121,7 +121,7 @@ public:
 
         // Access
 
-            inline const scalar& defaultCellSize() const;
+            inline scalar defaultCellSize() const;
 
             inline cellShapeControlMesh& shapeControlMesh();
 
@@ -131,7 +131,7 @@ public:
 
             inline const cellSizeAndAlignmentControls& sizeAndAlignment() const;
 
-            inline const scalar& minimumCellSize() const;
+            inline scalar minimumCellSize() const;
 
 
         // Query

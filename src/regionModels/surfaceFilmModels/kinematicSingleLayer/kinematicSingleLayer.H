@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +58,7 @@ namespace regionModels
 namespace surfaceFilmModels
 {
 
-// Forward class declarations
+// Forward Declarations
 class filmThermoModel;
 
 /*---------------------------------------------------------------------------*\
@@ -326,7 +327,7 @@ public:
             virtual scalar CourantNumber() const;
 
             //- Return the momentum predictor
-            inline const Switch& momentumPredictor() const;
+            inline Switch momentumPredictor() const;
 
             //- Return the number of outer correctors
             inline label nOuterCorr() const;

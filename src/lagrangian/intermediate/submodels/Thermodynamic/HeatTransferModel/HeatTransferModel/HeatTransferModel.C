@@ -71,13 +71,6 @@ Foam::HeatTransferModel<CloudType>::~HeatTransferModel()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-const Foam::Switch& Foam::HeatTransferModel<CloudType>::BirdCorrection() const
-{
-    return BirdCorrection_;
-}
-
-
-template<class CloudType>
 Foam::scalar Foam::HeatTransferModel<CloudType>::htc
 (
     const scalar dp,

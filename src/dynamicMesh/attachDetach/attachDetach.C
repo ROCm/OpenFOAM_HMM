@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -212,7 +213,7 @@ void Foam::attachDetach::checkDefinition()
     if
     (
         !triggersOK
-     || (triggerTimes_.empty() && !manualTrigger())
+     || (triggerTimes_.empty() && !manualTrigger_)
     )
     {
         FatalErrorInFunction
@@ -249,9 +250,9 @@ Foam::attachDetach::attachDetach
     masterPatchID_(masterPatchName, mme.mesh().boundaryMesh()),
     slavePatchID_(slavePatchName, mme.mesh().boundaryMesh()),
     triggerTimes_(triggerTimes),
-    manualTrigger_(manualTrigger),
     triggerIndex_(0),
     state_(UNKNOWN),
+    manualTrigger_(manualTrigger),
     trigger_(false),
     pointMatchMapPtr_(nullptr)
 {
@@ -285,9 +286,9 @@ Foam::attachDetach::attachDetach
         mme.mesh().boundaryMesh()
     ),
     triggerTimes_(dict.lookup("triggerTimes")),
-    manualTrigger_(dict.lookup("manualTrigger")),
     triggerIndex_(0),
     state_(UNKNOWN),
+    manualTrigger_(dict.get<bool>("manualTrigger")),
     trigger_(false),
     pointMatchMapPtr_(nullptr)
 {
@@ -337,7 +338,7 @@ bool Foam::attachDetach::setDetach() const
 
 bool Foam::attachDetach::changeTopology() const
 {
-    if (manualTrigger())
+    if (manualTrigger_)
     {
         if (debug)
         {
@@ -473,7 +474,7 @@ void Foam::attachDetach::writeDict(Ostream& os) const
     os.writeEntry("masterPatchName", masterPatchID_.name());
     os.writeEntry("slavePatchName", slavePatchID_.name());
     os.writeEntry("triggerTimes", triggerTimes_);
-    os.writeEntry("manualTrigger", manualTrigger());
+    os.writeEntry("manualTrigger", Switch::name(manualTrigger_));
     os.writeEntry("active", active());
 
     os.endBlock();

@@ -86,21 +86,27 @@ private:
         static const scalar defaultConcaveAngle;
 
 
-    // Private data
+    // Private Data
 
         const dictionary dict_;
+
+        //- In dry-run mode?
+        const bool dryRun_;
+
+        //- Are sizes relative to local cell size
+        bool relativeSizes_;
+
+        //- Any additional reporting
+        bool additionalReporting_;
 
 
         // Per patch (not region!) information
 
-            //- How many layers to add.
-            labelList numLayers_;
-
-            //- Are sizes relative to local cell size
-            Switch relativeSizes_;
-
             //- How thickness is specified.
             layerSpecification layerSpec_;
+
+            //- How many layers to add.
+            labelList numLayers_;
 
                 scalarField firstLayerThickness_;
 
@@ -130,12 +136,7 @@ private:
 
         label nRelaxedIter_;
 
-        Switch additionalReporting_;
-
         word meshShrinker_;
-
-        //- In dry-run mode?
-        const bool dryRun_;
 
 
     // Private Member Functions
@@ -193,6 +194,12 @@ public:
             bool relativeSizes() const
             {
                 return relativeSizes_;
+            }
+
+            //- Any additional reporting requested?
+            bool additionalReporting() const
+            {
+                return additionalReporting_;
             }
 
             // Expansion factor for layer mesh
@@ -287,11 +294,6 @@ public:
             label nBufferCellsNoExtrude() const
             {
                 return nBufferCellsNoExtrude_;
-            }
-
-            const Switch& additionalReporting() const
-            {
-                return additionalReporting_;
             }
 
             //- Type of mesh shrinker

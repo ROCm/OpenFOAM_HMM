@@ -56,7 +56,9 @@ Foam::functionObjects::fieldValue::fieldValue
     writeFile(obr_, name, valueType, dict),
     scaleFactor_(1.0),
     dict_(dict),
-    regionName_(word::null)
+    regionName_(word::null),
+    fields_(),
+    writeFields_(false)
 {
     read(dict);
 }
@@ -74,7 +76,9 @@ Foam::functionObjects::fieldValue::fieldValue
     writeFile(obr_, name, valueType, dict),
     scaleFactor_(1.0),
     dict_(dict),
-    regionName_(word::null)
+    regionName_(word::null),
+    fields_(),
+    writeFields_(false)
 {
     read(dict);
 }

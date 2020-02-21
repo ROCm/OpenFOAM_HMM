@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -126,9 +127,7 @@ public:
 
             inline const dictionary& meshQualityCoeffDict() const;
 
-
-            inline const Switch& controlMeshQuality() const;
-
+            inline Switch controlMeshQuality() const;
 
             inline const scalar& minLen() const;
 

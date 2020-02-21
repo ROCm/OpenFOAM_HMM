@@ -40,7 +40,7 @@ Foam::SRFVelocityFvPatchVectorField::SRFVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(p, iF),
-    relative_(0),
+    relative_(false),
     inletValue_(p.size(), Zero)
 {}
 
@@ -67,7 +67,7 @@ Foam::SRFVelocityFvPatchVectorField::SRFVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(p, iF, dict),
-    relative_(dict.lookup("relative")),
+    relative_(dict.get<Switch>("relative")),
     inletValue_("inletValue", dict, p.size())
 {}
 

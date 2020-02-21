@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -180,7 +181,8 @@ public:
 
         // Activation and deactivation
 
-            const Switch& active() const
+            //- If modifier activate?
+            Switch active() const
             {
                 return active_;
             }

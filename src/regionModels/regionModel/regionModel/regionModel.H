@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -198,10 +199,10 @@ public:
             inline const Time& time() const;
 
             //- Return the active flag
-            inline const Switch& active() const;
+            inline Switch active() const;
 
             //- Return the information flag
-            inline const Switch& infoOutput() const;
+            inline Switch infoOutput() const;
 
             //- Return the model name
             inline const word& modelName() const;

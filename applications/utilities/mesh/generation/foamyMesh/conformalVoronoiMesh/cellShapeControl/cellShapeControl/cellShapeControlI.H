@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +42,7 @@ Foam::cellShapeControl::shapeControlMesh() const
 }
 
 
-inline const Foam::scalar& Foam::cellShapeControl::defaultCellSize() const
+inline Foam::scalar Foam::cellShapeControl::defaultCellSize() const
 {
     return defaultCellSize_;
 }
@@ -61,7 +62,7 @@ Foam::cellShapeControl::sizeAndAlignment() const
 }
 
 
-inline const Foam::scalar& Foam::cellShapeControl::minimumCellSize() const
+inline Foam::scalar Foam::cellShapeControl::minimumCellSize() const
 {
     return minimumCellSize_;
 }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +48,6 @@ SourceFiles
 
 #include "fvMeshFunctionObject.H"
 #include "writeFile.H"
-#include "Switch.H"
 #include "Field.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -86,7 +85,7 @@ protected:
         wordList fields_;
 
         //- Output field values flag
-        Switch writeFields_;
+        bool writeFields_;
 
 
     // Protected Member Functions
@@ -167,7 +166,7 @@ public:
         inline const wordList& fields() const;
 
         //- Return the output field values flag
-        inline const Switch& writeFields() const;
+        inline bool writeFields() const;
 
         //- Read from dictionary
         virtual bool read(const dictionary& dict);

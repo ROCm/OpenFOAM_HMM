@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,7 +78,7 @@ inline Foam::SprayParcel<ParcelType>::constantProperties::constantProperties
     const scalar f0,
     const scalar Pr,
     const scalar pMin,
-    const Switch& constantVolume,
+    const bool constantVolume,
     const scalar sigma0,
     const scalar mu0
 )

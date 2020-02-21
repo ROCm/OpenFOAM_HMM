@@ -108,7 +108,7 @@ public:
                 const scalar f0,
                 const scalar Pr,
                 const scalar pMin,
-                const Switch& constantVolume,
+                const bool constantVolume,
                 const scalar sigma0,
                 const scalar mu0
             );

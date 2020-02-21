@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +61,7 @@ class HeatTransferModel
 :
     public CloudSubModelBase<CloudType>
 {
-    // Private data
+    // Private Data
 
         //- Apply Bird's correction to the htc
         const Switch BirdCorrection_;
@@ -119,10 +120,11 @@ public:
 
     // Member Functions
 
-        // Access
-
-            //- Return the Bird htc correction flag
-            const Switch& BirdCorrection() const;
+        //- The Bird HTC correction flag
+        bool BirdCorrection() const
+        {
+            return BirdCorrection_;
+        }
 
 
         // Evaluation

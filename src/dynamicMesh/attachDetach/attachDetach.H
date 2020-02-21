@@ -88,14 +88,14 @@ class attachDetach
         //- List of trigger times
         scalarField triggerTimes_;
 
-        //- Use manual trigger
-        Switch manualTrigger_;
-
         //- Trigger time index
         mutable label triggerIndex_;
 
         //- State of the modifier
         mutable modifierState state_;
+
+        //- Use manual trigger
+        bool manualTrigger_;
 
         //- Attach/detach trigger
         mutable bool trigger_;
@@ -197,7 +197,8 @@ public:
             return state_ == ATTACHED;
         }
 
-        const Switch& manualTrigger() const
+        //- Is manually triggered?
+        bool manualTrigger() const
         {
             return manualTrigger_;
         }

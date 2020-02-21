@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,7 +59,6 @@ Description
         U_{in}  | user-specified inlet velocity
         U_{p,srf} | SRF velocity
     \endvartable
-
 
 Usage
     \table
@@ -187,8 +187,8 @@ public:
 
         // Access
 
-            //- Return const access to the relative flag
-            const Switch& relative() const
+            //- Is supplied inlet value relative to the SRF?
+            bool relative() const
             {
                 return relative_;
             }
