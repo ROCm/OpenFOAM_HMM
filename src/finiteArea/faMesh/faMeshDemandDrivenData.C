@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1089,7 +1089,7 @@ void Foam::faMesh::calcPointAreaNormals() const
             (
                 Pstream::commsTypes::blocking,
                 procPatch.neighbProcNo(),
-                reinterpret_cast<const char*>(patchPointNormals.begin()),
+                reinterpret_cast<const char*>(patchPointNormals.cdata()),
                 patchPointNormals.byteSize()
             );
             }
@@ -1105,7 +1105,7 @@ void Foam::faMesh::calcPointAreaNormals() const
                 (
                     Pstream::commsTypes::blocking,
                     procPatch.neighbProcNo(),
-                    reinterpret_cast<char*>(ngbPatchPointNormals.begin()),
+                    reinterpret_cast<char*>(ngbPatchPointNormals.data()),
                     ngbPatchPointNormals.byteSize()
                 );
             }

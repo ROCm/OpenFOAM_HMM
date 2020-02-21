@@ -513,7 +513,7 @@ void Foam::mapDistributeBase::distribute
                     (
                         Pstream::commsTypes::nonBlocking,
                         domain,
-                        reinterpret_cast<const char*>(subField.begin()),
+                        reinterpret_cast<const char*>(subField.cdata()),
                         subField.byteSize(),
                         tag
                     );
@@ -535,7 +535,7 @@ void Foam::mapDistributeBase::distribute
                     (
                         Pstream::commsTypes::nonBlocking,
                         domain,
-                        reinterpret_cast<char*>(recvFields[domain].begin()),
+                        reinterpret_cast<char*>(recvFields[domain].data()),
                         recvFields[domain].byteSize(),
                         tag
                     );
@@ -1014,7 +1014,7 @@ void Foam::mapDistributeBase::distribute
                     (
                         Pstream::commsTypes::nonBlocking,
                         domain,
-                        reinterpret_cast<const char*>(subField.begin()),
+                        reinterpret_cast<const char*>(subField.cdata()),
                         subField.size()*sizeof(T),
                         tag
                     );
@@ -1036,7 +1036,7 @@ void Foam::mapDistributeBase::distribute
                     (
                         Pstream::commsTypes::nonBlocking,
                         domain,
-                        reinterpret_cast<char*>(recvFields[domain].begin()),
+                        reinterpret_cast<char*>(recvFields[domain].data()),
                         recvFields[domain].size()*sizeof(T),
                         tag
                     );

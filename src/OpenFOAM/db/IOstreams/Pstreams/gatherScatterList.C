@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,7 +84,7 @@ void Pstream::gatherList
                 (
                     UPstream::commsTypes::scheduled,
                     belowID,
-                    reinterpret_cast<char*>(receivedValues.begin()),
+                    reinterpret_cast<char*>(receivedValues.data()),
                     receivedValues.byteSize(),
                     tag,
                     comm
@@ -160,7 +160,7 @@ void Pstream::gatherList
                 (
                     UPstream::commsTypes::scheduled,
                     myComm.above(),
-                    reinterpret_cast<const char*>(sendingValues.begin()),
+                    reinterpret_cast<const char*>(sendingValues.cdata()),
                     sendingValues.byteSize(),
                     tag,
                     comm
@@ -246,7 +246,7 @@ void Pstream::scatterList
                 (
                     UPstream::commsTypes::scheduled,
                     myComm.above(),
-                    reinterpret_cast<char*>(receivedValues.begin()),
+                    reinterpret_cast<char*>(receivedValues.data()),
                     receivedValues.byteSize(),
                     tag,
                     comm
@@ -302,7 +302,7 @@ void Pstream::scatterList
                 (
                     UPstream::commsTypes::scheduled,
                     belowID,
-                    reinterpret_cast<const char*>(sendingValues.begin()),
+                    reinterpret_cast<const char*>(sendingValues.cdata()),
                     sendingValues.byteSize(),
                     tag,
                     comm

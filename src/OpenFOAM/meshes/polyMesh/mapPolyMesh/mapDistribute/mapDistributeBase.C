@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -909,7 +909,7 @@ void Foam::mapDistributeBase::compact(const boolList& elemIsUsed, const int tag)
                 (
                     Pstream::commsTypes::nonBlocking,
                     domain,
-                    reinterpret_cast<char*>(recvFields[domain].begin()),
+                    reinterpret_cast<char*>(recvFields[domain].data()),
                     recvFields[domain].size()*sizeof(bool),
                     tag
                 );
@@ -942,7 +942,7 @@ void Foam::mapDistributeBase::compact(const boolList& elemIsUsed, const int tag)
                 (
                     Pstream::commsTypes::nonBlocking,
                     domain,
-                    reinterpret_cast<const char*>(subField.begin()),
+                    reinterpret_cast<const char*>(subField.cdata()),
                     subField.size()*sizeof(bool),
                     tag
                 );
@@ -1076,7 +1076,7 @@ void Foam::mapDistributeBase::compact
                 (
                     Pstream::commsTypes::nonBlocking,
                     domain,
-                    reinterpret_cast<char*>(recvFields[domain].begin()),
+                    reinterpret_cast<char*>(recvFields[domain].data()),
                     recvFields[domain].size()*sizeof(bool),
                     tag
                 );
@@ -1108,7 +1108,7 @@ void Foam::mapDistributeBase::compact
                 (
                     Pstream::commsTypes::nonBlocking,
                     domain,
-                    reinterpret_cast<const char*>(subField.begin()),
+                    reinterpret_cast<const char*>(subField.cdata()),
                     subField.size()*sizeof(bool),
                     tag
                 );

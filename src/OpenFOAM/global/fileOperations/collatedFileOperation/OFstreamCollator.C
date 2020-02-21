@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -465,7 +465,7 @@ bool Foam::OFstreamCollator::write
                 (
                     UPstream::commsTypes::nonBlocking,
                     proci,
-                    reinterpret_cast<char*>(slaveData[proci].begin()),
+                    reinterpret_cast<char*>(slaveData[proci].data()),
                     slaveData[proci].byteSize(),
                     Pstream::msgType(),
                     localComm_
@@ -480,7 +480,7 @@ bool Foam::OFstreamCollator::write
                 (
                     UPstream::commsTypes::nonBlocking,
                     0,
-                    reinterpret_cast<const char*>(slice.begin()),
+                    reinterpret_cast<const char*>(slice.cdata()),
                     slice.byteSize(),
                     Pstream::msgType(),
                     localComm_
