@@ -161,7 +161,6 @@ Foam::Pair<Foam::tmp<Foam::volScalarField>>
 Foam::temperaturePhaseChangeTwoPhaseMixtures::interfaceHeatResistance::
 mDot() const
 {
-
     return Pair<tmp<volScalarField>>
     (
         tmp<volScalarField>(mDotc_),
@@ -191,8 +190,6 @@ mDotDeltaT() const
         mDotc_*pos(TSat - T.oldTime())/(TSat - T.oldTime()),
        -mDote_*pos(T.oldTime() - TSat)/(T.oldTime() - TSat)
     );
-
-
 }
 
 
@@ -200,7 +197,6 @@ Foam::tmp<Foam::fvScalarMatrix>
 Foam::temperaturePhaseChangeTwoPhaseMixtures::interfaceHeatResistance::
 TSource() const
 {
-
     const volScalarField& T = mesh_.lookupObject<volScalarField>("T");
 
     tmp<fvScalarMatrix> tTSource
@@ -223,7 +219,7 @@ TSource() const
     const dimensionedScalar& TSat = thermo.TSat();
 
     // interface heat resistance
-    volScalarField IHRcoeff = interfaceArea_*R_;
+    volScalarField IHRcoeff(interfaceArea_*R_);
 
     TSource = fvm::Sp(IHRcoeff, T) - IHRcoeff*TSat;
 
@@ -234,7 +230,6 @@ TSource() const
 void Foam::temperaturePhaseChangeTwoPhaseMixtures::interfaceHeatResistance::
 correct()
 {
-
     // Update Interface
     updateInterface();
 
@@ -324,6 +319,7 @@ updateInterface()
     }
 }
 
+
 Foam::Pair<Foam::tmp<Foam::volScalarField>>
 Foam::temperaturePhaseChangeTwoPhaseMixtures::interfaceHeatResistance::
 vDot() const
@@ -388,7 +384,6 @@ vDot() const
        -pCoeff*mDotSpread[1]
     );
 }
-
 
 
 bool Foam::temperaturePhaseChangeTwoPhaseMixtures::interfaceHeatResistance::

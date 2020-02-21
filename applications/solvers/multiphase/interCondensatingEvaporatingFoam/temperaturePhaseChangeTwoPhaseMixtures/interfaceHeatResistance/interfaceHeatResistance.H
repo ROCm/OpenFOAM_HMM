@@ -39,12 +39,10 @@ Description
         Journal of Computational Physics 227 (2008), 5871-5895
     \endverbatim
 
-
-
 SourceFiles
     interfaceHeatResistance.C
 
-\*--------------------------------------------------------------------*/
+\*---------------------------------------------------------------------------*/
 
 #ifndef interfaceHeatResistance_H
 #define interfaceHeatResistance_H
@@ -58,15 +56,15 @@ namespace Foam
 namespace temperaturePhaseChangeTwoPhaseMixtures
 {
 
-/*--------------------------------------------------------------------*\
-                    Class interfaceHeatResistance
-\*--------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*\
+                         Class interfaceHeatResistance
+\*---------------------------------------------------------------------------*/
 
 class interfaceHeatResistance
 :
     public temperaturePhaseChangeTwoPhaseMixture
 {
-    // Private data
+    // Private Data
 
         //- Heat transfer coefficient [1/s/K]
         dimensionedScalar R_;
@@ -84,7 +82,7 @@ class interfaceHeatResistance
         scalar spread_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Update interface area
         void updateInterface();
@@ -106,8 +104,7 @@ public:
         );
 
     //- Destructor
-    virtual ~interfaceHeatResistance()
-    {}
+    virtual ~interfaceHeatResistance() = default;
 
 
     // Member Functions
