@@ -30,13 +30,13 @@ License
 
 inline Foam::molecule::constantProperties::constantProperties()
 :
-    siteReferencePositions_(Field<vector>(0)),
-    siteMasses_(List<scalar>(0)),
-    siteCharges_(List<scalar>(0)),
-    siteIds_(List<label>(0)),
-    pairPotentialSites_(List<bool>(false)),
-    electrostaticSites_(List<bool>(false)),
-    momentOfInertia_(diagTensor(0, 0, 0)),
+    siteReferencePositions_(),
+    siteMasses_(),
+    siteCharges_(),
+    siteIds_(),
+    pairPotentialSites_(),
+    electrostaticSites_(),
+    momentOfInertia_(Zero),
     mass_(0)
 {}
 
