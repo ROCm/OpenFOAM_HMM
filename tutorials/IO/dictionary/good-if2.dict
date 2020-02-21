@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1912                                 |
+|  \\    /   O peration     | Version:  v2006                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -14,18 +14,45 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Do comparison
+// Do comparison. Handles the first token after then '#if', which should
+// correspond to a logical (true/false, ...) and integer (0,1, ...)
+// but also a floating-point value with 0-1 range.
 
-#if #eval "${FOAM_API:-0}"
-    foamApi nonZero;
+#if ${FOAM_API:-false}
+    foamApi nonZero is ${FOAM_API:-0};
 #else
     foamApi zeroValue;
 #endif
 
-#if #eval "${XX_XXX_FOAM_API:-1000}"
-    other "some entry";
+#if ${XX_XXX_FOAM_API:-1000}
+    other "some entry" ${XX_XXX_FOAM_API:-(0 1 0)};
 #else
     other "unexpected";
+#endif
+
+
+#if 0.1
+    roundToZero failed;
+#else
+    roundToZero good with ${__expand_or_ignore_:-};
+#endif
+
+#if 0.99
+    roundToOne good;
+#else
+    roundToOne failed;
+#endif
+
+#if -0.1
+    roundNegZero failed;
+#else
+    roundNegZero good;
+#endif
+
+#if -0.99
+    roundToNegOne good;
+#else
+    roundToNegOne failed;
 #endif
 
 
@@ -42,6 +69,24 @@ FoamFile
     condition true;
 #else
     condition false;
+#endif
+
+// Some other conditionals
+
+condition1 true;
+condition2 false;
+
+#if ${unknown:-${condition2:-${condition1}}}
+    multiExpansion1 failed;
+#else
+    multiExpansion1 good;
+#endif
+
+
+#if ${unknown:-${unknown:-${condition2:+true}}}
+    multiExpansion2 good = ${unkn:-${unkn:-${condition2:+on}}};
+#else
+    multiExpansion2 failed;
 #endif
 
 

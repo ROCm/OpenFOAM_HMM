@@ -436,7 +436,7 @@ Foam::Istream& Foam::ISstream::read(word& str)
         {
             if (!depth)
             {
-                break;  // Closed ')' without a '(' ? ... stop
+                break;  // Closed ')' without an opening '(' ? ... stop
             }
             --depth;
         }
@@ -627,43 +627,55 @@ Foam::Istream& Foam::ISstream::readVariable(std::string& str)
     }
     buf[nChar++] = c;
 
-    char endChar = token::END_LIST;
-
+    str.clear();
     if (c == token::BEGIN_BLOCK)
     {
-        // Processing ${...} style
-
-        endChar = token::END_BLOCK;
+        // Processing ${...} style.
         ++depth;
 
         // Could check that the next char is good and not one of '{}'
         // since this would indicate "${}", "${{..." or truncated "${"
 
-        while
-        (
-            (nChar < maxLen) && get(c)
-         &&
-            (
-                validVariableChar(c)
-             || (c == token::BEGIN_BLOCK || c == token::END_BLOCK)
-            )
-        )
+        while (get(c))
         {
+            buf[nChar++] = c;
+            if (nChar == maxLen)
+            {
+                str.append(buf, nChar);
+                nChar = 0;
+            }
             if (c == token::BEGIN_BLOCK)
             {
                 ++depth;
             }
             else if (c == token::END_BLOCK)
             {
+                --depth;
                 if (!depth)
                 {
-                    break;  // Closed '}' without a '{' ? ... stop
+                    // Found closing '}' character
+                    str.append(buf, nChar);
+                    return *this;
                 }
-                --depth;
             }
-
-            buf[nChar++] = c;
         }
+
+        // Should never reach here on normal input
+
+        str.append(buf, nChar);  // Finalize pending buffer input
+
+        nChar = str.length();
+        if (str.length() > errLen)
+        {
+            str.erase(errLen);
+        }
+
+        FatalIOErrorInFunction(*this)
+            << "stream terminated while reading variable '"
+            << str.c_str() << "...' [" << nChar << "]\n"
+            << exit(FatalIOError);
+
+        return *this;
     }
     else if (validVariableChar(c))
     {
@@ -683,7 +695,7 @@ Foam::Istream& Foam::ISstream::readVariable(std::string& str)
             {
                 if (!depth)
                 {
-                    break;  // Closed ')' without a '(' ? ... stop
+                    break;  // Closed ')' without an opening '(' ? ... stop
                 }
                 --depth;
             }
@@ -733,7 +745,7 @@ Foam::Istream& Foam::ISstream::readVariable(std::string& str)
     {
         IOWarningInFunction(*this)
             << "Missing " << depth
-            << " closing '" << endChar << "' while parsing" << nl << nl
+            << " closing ')' while parsing" << nl << nl
             << buf << nl << endl;
     }
 
@@ -762,7 +774,7 @@ Foam::Istream& Foam::ISstream::readVerbatim(std::string& str)
             get(nextC);
             if (nextC == token::END_BLOCK)
             {
-                // The closing "#}" found
+                // Found closing "#}" sequence
                 str.append(buf, nChar);
                 return *this;
             }

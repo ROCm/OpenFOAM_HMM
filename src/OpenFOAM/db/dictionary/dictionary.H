@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -936,6 +936,9 @@ public:
 
 
     // Write
+
+        //- Write sub-dictionary with its dictName as its header
+        void writeEntry(Ostream& os) const;
 
         //- Write sub-dictionary with the keyword as its header
         void writeEntry(const keyType& keyword, Ostream& os) const;
