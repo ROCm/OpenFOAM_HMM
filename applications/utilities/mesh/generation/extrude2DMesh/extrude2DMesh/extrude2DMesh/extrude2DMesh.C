@@ -142,14 +142,6 @@ void Foam::extrude2DMesh::addFrontBackPatches()
                 patches
             ).ptr();
 
-//        newPatches[frontPatchi_] = polyPatch::New
-//        (
-//            "front",
-//            patchDict_,
-//            frontPatchi_,
-//            patches
-//        ).ptr();
-
         Info<< "Adding patch " << newPatches[frontPatchi_]->name()
             << " at index " << frontPatchi_
             << " for front faces." << nl << endl;
@@ -169,14 +161,6 @@ void Foam::extrude2DMesh::addFrontBackPatches()
                 backPatchi_,
                 patches
             ).ptr();
-
-//        newPatches[frontPatchi_] = polyPatch::New
-//        (
-//            "back",
-//            patchDict_,
-//            backPatchi_,
-//            patches
-//        ).ptr();
 
         Info<< "Adding patch " << newPatches[backPatchi_]->name()
             << " at index " << backPatchi_
