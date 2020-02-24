@@ -11,7 +11,7 @@ Overview
 Meshing
 =======
 + Meshing is setup as in the inflowOutflow template
-+ See $FOAM_ETC/templates/inflowOutflow/README for details
++ See etc/templates/inflowOutflow/README for details
 + The setup includes an example for one named patch to be generated in the mesh
 + In snappyHexMeshDict, replace <CADregionName> with the name of region in the
   trisurface; replace <patchName> with the name of the resulting mesh patch

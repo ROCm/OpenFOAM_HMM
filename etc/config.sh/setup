@@ -5,11 +5,10 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018 OpenCFD Ltd.
+#     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # File
 #     etc/config.sh/setup
@@ -19,15 +18,16 @@
 #     Finalize setup of OpenFOAM environment for POSIX shell.
 #
 # Environment
+#     FOAM_CONFIG_MODE (search mode for etc config files - see foamEtcFile)
+#         - eg, FOAM_CONFIG_MODE="o" to only use OpenFOAM config files
+#
 #     FOAM_VERBOSE (set/unset)
 #         - add extra verbosity when sourcing files
-#     FOAM_CONFIG_NOUSER (set/unset)
-#         - suppress use of user/group configuration files
 #
 #------------------------------------------------------------------------------
 
 # [FOAM_API] - The API level for the project
-export FOAM_API="$($WM_PROJECT_DIR/bin/foamEtcFile -show-api)"
+export FOAM_API=$("$WM_PROJECT_DIR/bin/foamEtcFile" -show-api)
 
 # The installation parent directory
 prefixDir="${WM_PROJECT_DIR%/*}"
@@ -83,11 +83,22 @@ fi
 
 
 # Overrides via <prefs.sh>
-# 1. other (system) values
+# 1. Always use O(ther) values from the OpenFOAM project etc/ directory
 _foamEtc -mode=o prefs.sh
 
-# 2. user or group values (unless disabled)
-[ -z "$FOAM_CONFIG_NOUSER" ] && _foamEtc -mode=ug prefs.sh
+# 2. (U)ser or (G)roup values (unless disabled).
+unset configMode
+if [ -z "$FOAM_CONFIG_MODE" ]
+then
+    configMode="ug"
+else
+    case "$FOAM_CONFIG_MODE" in (*[u]*) configMode="${configMode}u" ;; esac
+    case "$FOAM_CONFIG_MODE" in (*[g]*) configMode="${configMode}g" ;; esac
+fi
+if [ -n "$configMode" ]
+then
+    _foamEtc -mode="$configMode" prefs.sh
+fi
 
 
 # Capture and evaluate any command-line parameters
@@ -102,6 +113,21 @@ then
 else
     export FOAM_SETTINGS
     _foamEval "$@"
+fi
+
+# The prefs may have injected a FOAM_CONFIG_ETC value.
+# Verify that it makes sense before continuing.
+if [ -n "$FOAM_CONFIG_ETC" ]
+then
+    if [ ! -d "$FOAM_CONFIG_ETC" ]
+    then
+        echo "Ignore invalid FOAM_CONFIG_ETC = $FOAM_CONFIG_ETC" 1>&2
+        unset FOAM_CONFIG_ETC
+    elif [ "$FOAM_CONFIG_ETC" = "$WM_PROJECT_DIR/etc" ]
+    then
+        # Redundant value
+        unset FOAM_CONFIG_ETC
+    fi
 fi
 
 

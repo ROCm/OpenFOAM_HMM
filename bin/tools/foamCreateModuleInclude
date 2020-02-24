@@ -7,23 +7,10 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2016-2017 CINECA
-#     Copyright (C) 2017-2019 OpenCFD Ltd.
+#     Copyright (C) 2017-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     foamCreateModuleInclude
@@ -134,15 +121,24 @@ syspath() {
 # Frontend: do all basic sanity checks in the front-end only
 if [ -z "$optBackend" ]
 then
-    # Check that it appears to be an OpenFOAM installation
-    [ -d "$projectDir" -a -f "$projectDir/etc/bashrc" ] || \
-        die "Incorrect projectDir? $projectDir"
-
     # Check preloads
-    for file in "$preloads"
-    do
-        [ -f "$file" ] || echo "No such file to preload: $file" 1>&2
-    done
+    if [ -n "$preloads" ]
+    then
+        for file in $preloads
+        do
+            [ -f "$file" ] || echo "No such file to preload: $file" 1>&2
+        done
+    fi
+
+    # Check that it appears to be an OpenFOAM installation
+    # could also check [ -d "$projectDir/META-INFO" ]
+    if [ -d "$projectDir" ] && [ -f "etc/bashrc" ]
+    then
+        echo "Appears to be an OpenFOAM installation" 1>&2
+    else
+        die "Incorrect OpenFOAM projectDir?" \
+        "    $projectDir"
+    fi
 
     # Call itself with clean environment.
     # Tag the start/end of the original PATH, MANPATH, LD_LIBRARY_PATH
@@ -234,6 +230,9 @@ unset FOAM_INST_DIR WM_PROJECT_INST_DIR
 unset WM_PROJECT_USER_DIR WM_THIRD_PARTY_DIR
 unset SCOTCH_VERSION
 
+# Probably don't want these either
+unset FOAM_CONFIG_MODE
+
 
 # Also remove user directories as being unreliable
 
@@ -283,7 +282,7 @@ unalias util        2>/dev/null
 #------------------------------------------------
 
 # Generalize environment.
-# This needs rethinking since it largely duplicates logic from the etc/config.sh/settings
+# Needs rethinking, it largely duplicates logic from etc/config.sh/settings
 rewriteEnv()
 {
     sed \

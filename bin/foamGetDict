@@ -33,7 +33,7 @@
 #     or {user,site} locations and copy it into the case directory.
 #
 # Environment
-#     FOAM_API
+#     FOAM_CONFIG_ETC
 #     WM_PROJECT_DIR
 #     WM_PROJECT_SITE
 #
@@ -81,9 +81,7 @@ die()
 
 #-------------------------------------------------------------------------------
 projectDir="$WM_PROJECT_DIR"                        # Project dir
-userDir="$HOME/.OpenFOAM"                           # As per foamVersion.H
-groupDir="${WM_PROJECT_SITE:-$projectDir/site}"     # As per foamVersion.H
-projectApi="$FOAM_API"
+unset projectApi
 
 #-------------------------------------------------------------------------------
 
@@ -163,20 +161,12 @@ then
 fi
 
 
-# No api specified -with-api= or from environment (FOAM_API)
-if [ -z "$projectApi" ]
-then
-    projectApi="$(foamEtcFile -show-api 2>/dev/null)"
-fi
+# The places to be searched.
+# Like foamEtcFile, but "etc/caseDicts/" for the projectDir
 
-
-# Define the various places to be searched.
-# Similar to foamEtcFile, but with etc/caseDicts/ for the projectDir
-# Filter out nonexistent directories later
-
-searchDirs="${projectApi:+$userDir/$projectApi} $userDir \
-${projectApi:+$groupDir/$projectApi/etc} $groupDir/etc \
-$projectDir/etc/caseDicts";
+searchDirs="\
+$("$projectDir"/bin/foamEtcFile -list-test -mode=ug ${projectApi:+-with-api=$projectApi} 2>/dev/null) \
+$("$projectDir"/bin/foamEtcFile -list -mode=o caseDicts 2>/dev/null)";
 
 ## echo "Using <$searchDirs>" 1>&2
 

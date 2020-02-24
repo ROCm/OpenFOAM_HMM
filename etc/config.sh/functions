@@ -6,11 +6,10 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2017-2018 OpenCFD Ltd.
+#     Copyright (C) 2017-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # File
 #     etc/config.sh/functions
@@ -39,32 +38,25 @@ then
     {
          foamVar_name="$1"
          shift
-         eval "$($foamClean -sh-env=$foamVar_name $@)"
+         eval "$($foamClean -sh-env="$foamVar_name" "$@")"
          unset "foamVar_name"
     }
 
     # Echo values to stderr when FOAM_VERBOSE is on, no-op otherwise
-    unset -f _foamEcho 2>/dev/null
-    if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
-    then
-        _foamEcho() { echo "$@" 1>&2; }
-    else
-        _foamEcho() { true; }
-    fi
-
     # Source an etc file, possibly with some verbosity
     # - use eval to avoid intermediate variables (ksh doesn't have 'local')
+    unset -f _foamEcho 2>/dev/null
     unset -f _foamEtc 2>/dev/null
     if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
     then
-        _foamEtc()
-        {
-            eval "$($WM_PROJECT_DIR/bin/foamEtcFile -sh-verbose ${FOAM_CONFIG_NOUSER:+-mode=o} $@)";
+        _foamEcho() { echo "$@" 1>&2; }
+        _foamEtc() {
+            eval "$("$WM_PROJECT_DIR"/bin/foamEtcFile -sh-verbose "$@")";
         }
     else
-        _foamEtc()
-        {
-            eval "$($WM_PROJECT_DIR/bin/foamEtcFile -sh ${FOAM_CONFIG_NOUSER:+-mode=o} $@)";
+        _foamEcho() { true; }
+        _foamEtc() {
+            eval "$("$WM_PROJECT_DIR"/bin/foamEtcFile -sh "$@")";
         }
     fi
 
@@ -162,7 +154,7 @@ then
         # - use lib-dir script instead of rewriting
         _foamAddLibAuto()
         {
-            eval "$($WM_PROJECT_DIR/bin/tools/lib-dir -sh $@)";
+            eval "$("$WM_PROJECT_DIR"/bin/tools/lib-dir -sh "$@")";
         }
     fi
 

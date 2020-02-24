@@ -35,10 +35,16 @@
 #       . /path/etc/bashrc WM_COMPILER=Clang WM_LABEL_SIZE=64
 #
 # Environment
-#     FOAM_CONFIG_NOUSER (set/unset)
-#         - suppress use of user/group configuration files
+#     FOAM_CONFIG_ETC
+#     - alternative/additional location for OpenFOAM etc/ directory
+#
+#     FOAM_CONFIG_MODE (search mode for etc config files - see foamEtcFile)
+#         - eg, FOAM_CONFIG_MODE="o" to only use OpenFOAM config files
+#         - no influence on OpenFOAM applications, just the config files
+#
 #     FOAM_VERBOSE (set/unset)
 #         - add extra verbosity when sourcing files
+#
 #     WM_PROJECT_SITE (optional directory)
 #         - local site-specific directory, uses WM_PROJECT_DIR/site if unset
 #

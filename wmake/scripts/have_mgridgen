@@ -83,10 +83,10 @@ have_mgridgen()
     elif hasAbsdir "$prefix"
     then
         header=$(findFirstFile "$prefix/include/$incName")
-        library="$(findExtLib $libName $libName2)"
+        library=$(findExtLib "$libName" "$libName2")
     elif isSystem "$prefix"
     then
-        header=$(findFirstFile "/usr/local/include/$incName" "/usr/include/$incName")
+        header=$(findSystemInclude -name="$incName")
         prefix=$(sysPrefix "$header")
     else
         unset prefix
@@ -100,12 +100,10 @@ have_mgridgen()
     }
 
     # Library
-    [ -n "$library" ] || library=$(findLibrary \
-        "$prefix/lib/$libName" \
-        "$prefix/lib/$libName2" \
-        "$prefix/lib$WM_COMPILER_LIB_ARCH/$libName" \
-        "$prefix/lib$WM_COMPILER_LIB_ARCH/$libName2" \
-    ) || {
+    [ -n "$library" ] \
+    || library=$(findLibrary -prefix="$prefix" -name="$libName") \
+    || library=$(findLibrary -prefix="$prefix" -name="$libName2") \
+    || {
         #silent# [ -n "$warn" ] && echo "$warn (no library)"
         return 2
     }
@@ -165,7 +163,7 @@ have_mgridgen()
 }
 
 
-# Force reset of old variables
+# Reset variables
 no_mgridgen
 
 # Testing

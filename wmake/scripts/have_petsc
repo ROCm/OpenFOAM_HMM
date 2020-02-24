@@ -42,7 +42,7 @@ no_petsc()
 }
 
 
-# Reset variables
+# Report
 echo_petsc()
 {
     echo "petsc=${HAVE_PETSC:-false}"
@@ -52,7 +52,7 @@ echo_petsc()
 }
 
 
-# Provide hint for enabling
+# Hint for enabling
 hint_petsc()
 {
     /bin/cat<<INFORMATION 1>&2
@@ -101,10 +101,10 @@ have_petsc()
     elif hasAbsdir "$prefix"
     then
         header=$(findFirstFile "$prefix/include/$incName")
-        library="$(findExtLib $libName)"
+        library=$(findExtLib "$libName")
     elif isSystem "$prefix"
     then
-        header=$(findFirstFile "/usr/local/include/$incName" "/usr/include/$incName")
+        header=$(findSystemInclude -name="$incName")
         prefix=$(sysPrefix "$header")
 
         # No system header, attempt discovery with pkg-config
@@ -131,10 +131,9 @@ have_petsc()
     }
 
     # Library
-    [ -n "$library" ] || library=$(findLibrary \
-        "$prefix/lib/$libName" \
-        "$prefix/lib$WM_COMPILER_LIB_ARCH/$libName" \
-    ) || {
+    [ -n "$library" ] \
+    || library=$(findLibrary -prefix="$prefix" -name="$libName") \
+    || {
         [ -n "$warn" ] && echo "$warn (no library)"
         return 2
     }
@@ -151,7 +150,7 @@ have_petsc()
 }
 
 
-# Force reset of old variables
+# Reset variables
 no_petsc
 
 # Testing

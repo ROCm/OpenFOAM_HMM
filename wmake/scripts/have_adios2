@@ -52,7 +52,7 @@ echo_adios2()
 }
 
 
-# Provide hint for enabling
+# Hint for enabling
 hint_adios2()
 {
     /bin/cat<<INFORMATION 1>&2
@@ -97,10 +97,10 @@ have_adios2()
     elif hasAbsdir "$prefix"
     then
         header=$(findFirstFile "$prefix/include/$incName")
-        library="$(findExtLib $libName)"
+        library=$(findExtLib "$libName")
     elif isSystem "$prefix"
     then
-        header=$(findFirstFile "/usr/local/include/$incName" "/usr/include/$incName")
+        header=$(findSystemInclude -name="$incName")
         prefix=$(sysPrefix "$header")
     else
         unset prefix
@@ -114,10 +114,9 @@ have_adios2()
     }
 
     # Library
-    [ -n "$library" ] || library=$(findLibrary \
-        "$prefix/lib/$libName" \
-        "$prefix/lib$WM_COMPILER_LIB_ARCH/$libName" \
-    ) || {
+    [ -n "$library" ] \
+    || library=$(findLibrary -prefix="$prefix" -name="$libName") \
+    || {
         [ -n "$warn" ] && echo "$warn (no library)"
         return 2
     }
@@ -132,7 +131,7 @@ have_adios2()
 }
 
 
-# Force reset of old variables
+# Reset variables
 no_adios2
 
 # Testing
