@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -120,8 +120,8 @@ void Foam::patchSeedSet::calcSamples
                     1e-4
                 )
             );
-            patchBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-            patchBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+            patchBb.min() -= point::uniform(ROOTVSMALL);
+            patchBb.max() += point::uniform(ROOTVSMALL);
 
             indexedOctree<treeDataFace> boundaryTree
             (

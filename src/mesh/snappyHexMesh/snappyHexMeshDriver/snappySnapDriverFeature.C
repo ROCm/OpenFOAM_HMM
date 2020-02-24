@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -3174,8 +3174,8 @@ void Foam::snappySnapDriver::reverseAttractMeshPoints
         // Slightly extended bb. Slightly off-centred just so on symmetric
         // geometry there are less face/edge aligned items.
         bb = bb.extend(rndGen, 1e-4);
-        bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-        bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        bb.min() -= point::uniform(ROOTVSMALL);
+        bb.max() += point::uniform(ROOTVSMALL);
     }
 
     // Collect candidate points for attraction

@@ -759,8 +759,8 @@ Foam::triSurfaceMesh::edgeTree() const
             // geometry there are less face/edge aligned items.
 
             bb = bb.extend(rndGen, 1e-4);
-            bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-            bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+            bb.min() -= point::uniform(ROOTVSMALL);
+            bb.max() += point::uniform(ROOTVSMALL);
         }
 
 

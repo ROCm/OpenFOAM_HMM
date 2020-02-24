@@ -108,61 +108,6 @@ void Foam::sampledTriSurfaceMesh::setZoneMap
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-const Foam::indexedOctree<Foam::treeDataFace>&
-Foam::sampledTriSurfaceMesh::nonCoupledboundaryTree() const
-{
-    // Variant of meshSearch::boundaryTree() that only does non-coupled
-    // boundary faces.
-
-    if (!boundaryTreePtr_.valid())
-    {
-        // all non-coupled boundary faces (not just walls)
-        const polyBoundaryMesh& patches = mesh().boundaryMesh();
-
-        labelList bndFaces(patches.nFaces());
-        label bndI = 0;
-        for (const polyPatch& pp : patches)
-        {
-            if (!pp.coupled())
-            {
-                forAll(pp, i)
-                {
-                    bndFaces[bndI++] = pp.start()+i;
-                }
-            }
-        }
-        bndFaces.setSize(bndI);
-
-
-        treeBoundBox overallBb(mesh().points());
-        Random rndGen(123456);
-        // Extend slightly and make 3D
-        overallBb = overallBb.extend(rndGen, 1e-4);
-        overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-        overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-
-        boundaryTreePtr_.reset
-        (
-            new indexedOctree<treeDataFace>
-            (
-                treeDataFace    // all information needed to search faces
-                (
-                    false,                      // do not cache bb
-                    mesh(),
-                    bndFaces                    // boundary faces only
-                ),
-                overallBb,                      // overall search domain
-                8,                              // maxLevel
-                10,                             // leafsize
-                3.0                             // duplicity
-            )
-        );
-    }
-
-    return *boundaryTreePtr_;
-}
-
-
 bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
 {
     // Find the cells the triangles of the surface are in.
@@ -224,10 +169,9 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
     {
         // Search for nearest boundaryFace
 
-        ////- Search on all (including coupled) boundary faces
-        //const indexedOctree<treeDataFace>& bTree = meshSearcher.boundaryTree()
         //- Search on all non-coupled boundary faces
-        const indexedOctree<treeDataFace>& bTree = nonCoupledboundaryTree();
+        const indexedOctree<treeDataFace>& bTree =
+            meshSearcher.nonCoupledBoundaryTree();
 
         forAll(fc, triI)
         {

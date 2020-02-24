@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1983,8 +1984,8 @@ void Foam::conformalVoronoiMesh::buildEdgeLocationTree
         geometryToConformTo_.globalBounds().extend(rndGen_, 1e-4)
     );
 
-    overallBb.min() -= Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-    overallBb.max() += Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+    overallBb.min() -= Foam::point::uniform(ROOTVSMALL);
+    overallBb.max() += Foam::point::uniform(ROOTVSMALL);
 
     edgeLocationTreePtr_.reset
     (
@@ -2010,8 +2011,8 @@ void Foam::conformalVoronoiMesh::buildSurfacePtLocationTree
         geometryToConformTo_.globalBounds().extend(rndGen_, 1e-4)
     );
 
-    overallBb.min() -= Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-    overallBb.max() += Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+    overallBb.min() -= Foam::point::uniform(ROOTVSMALL);
+    overallBb.max() += Foam::point::uniform(ROOTVSMALL);
 
     surfacePtLocationTreePtr_.reset
     (

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,7 +33,6 @@ License
 #include "treeBoundBox.H"
 #include "treeDataFace.H"
 #include "addToRunTimeSelectionTable.H"
-
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -90,8 +89,8 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
 
         Random rndGen(123456);
         overallBb = overallBb.extend(rndGen, 1e-4);
-        overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-        overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        overallBb.min() -= point::uniform(ROOTVSMALL);
+        overallBb.max() += point::uniform(ROOTVSMALL);
 
         const indexedOctree<treeDataFace> boundaryTree
         (

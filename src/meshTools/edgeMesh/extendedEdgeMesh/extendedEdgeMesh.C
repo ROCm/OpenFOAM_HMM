@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -848,8 +848,8 @@ Foam::extendedEdgeMesh::pointTree() const
             treeBoundBox(points()).extend(rndGen, 1e-4)
         );
 
-        bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-        bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        bb.min() -= point::uniform(ROOTVSMALL);
+        bb.max() += point::uniform(ROOTVSMALL);
 
         const labelList featurePointLabels = identity(nonFeatureStart_);
 
@@ -888,8 +888,8 @@ Foam::extendedEdgeMesh::edgeTree() const
             treeBoundBox(points()).extend(rndGen, 1e-4)
         );
 
-        bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-        bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        bb.min() -= point::uniform(ROOTVSMALL);
+        bb.max() += point::uniform(ROOTVSMALL);
 
         labelList allEdges(identity(edges().size()));
 
@@ -932,8 +932,8 @@ Foam::extendedEdgeMesh::edgeTreesByType() const
             treeBoundBox(points()).extend(rndGen, 1e-4)
         );
 
-        bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-        bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        bb.min() -= point::uniform(ROOTVSMALL);
+        bb.max() += point::uniform(ROOTVSMALL);
 
         labelListList sliceEdges(nEdgeTypes);
 

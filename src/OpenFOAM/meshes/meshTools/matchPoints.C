@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,11 +49,16 @@ bool Foam::matchPoints
 
     point compareOrigin = origin;
 
-    if (origin == point(VGREAT, VGREAT, VGREAT))
+    if (origin == point::max)
     {
         if (pts1.size())
         {
             compareOrigin = sum(pts1)/pts1.size();
+        }
+        else
+        {
+            // Unusable, but avoid comparison with VGREAT!
+            compareOrigin = point::zero;
         }
     }
 
@@ -160,11 +166,16 @@ bool Foam::matchPoints
 
     point compareOrigin = origin;
 
-    if (origin == point(VGREAT, VGREAT, VGREAT))
+    if (origin == point::max)
     {
         if (pts1.size())
         {
             compareOrigin = sum(pts1)/pts1.size();
+        }
+        else
+        {
+            // Unusable, but avoid comparison with VGREAT!
+            compareOrigin = point::zero;
         }
     }
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -168,9 +168,6 @@ private:
 
 
     // Private Member Functions
-
-        //- Get tree of all non-coupled boundary faces
-        const indexedOctree<treeDataFace>& nonCoupledboundaryTree() const;
 
         //- Sample volume field onto surface faces
         template<class Type>

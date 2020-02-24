@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +48,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class treeDataCell;
 class treeDataFace;
 template<class Type> class indexedOctree;
@@ -60,7 +60,7 @@ class treeBoundBox;
 
 class meshSearch
 {
-    // Private data
+    // Private Data
 
         //- Reference to mesh
         const polyMesh& mesh_;
@@ -73,6 +73,7 @@ class meshSearch
 
         //- Demand driven octrees
         mutable autoPtr<indexedOctree<treeDataFace>> boundaryTreePtr_;
+        mutable autoPtr<indexedOctree<treeDataFace>> nonCoupledBoundaryTreePtr_;
         mutable autoPtr<indexedOctree<treeDataCell>> cellTreePtr_;
 
 
@@ -96,6 +97,12 @@ class meshSearch
             label& nearestI,
             scalar& nearestDistSqr
         );
+
+
+        // Points
+
+            //- Demand-driven bounding box for mesh points
+            const treeBoundBox& dataBoundBox() const;
 
 
         // Cells
@@ -127,7 +134,6 @@ class meshSearch
             label findNearestFaceWalk(const point&, const label) const;
 
 
-
         // Boundary faces
 
             //- Walk from seed to find nearest boundary face. Gets stuck in
@@ -148,11 +154,11 @@ class meshSearch
 
 public:
 
-    // Declare name of the class and its debug switch
+    //- Declare type-name (with debug switch)
     ClassName("meshSearch");
 
 
-    // Static data members
+    // Static Data
 
         //- Tolerance on linear dimensions
         static scalar tol_;
@@ -160,23 +166,24 @@ public:
 
     // Constructors
 
-        //- Construct from components. Constructs bb slightly bigger than
-        //  mesh points bb.
-        meshSearch
+        //- Construct from components.
+        //  Constructs bb slightly bigger than mesh points bb.
+        explicit meshSearch
         (
             const polyMesh& mesh,
             const polyMesh::cellDecomposition = polyMesh::CELL_TETS
         );
 
-        //- Construct with a custom bounding box. Any mesh element outside
-        //  bb will not be found. Up to user to make sure bb
-        //  extends slightly beyond wanted elements.
+        //- Construct with a custom bounding box.
+        //  Any mesh element outside bb will not be found.
+        //  Up to user to ensure bb extends slightly beyond wanted elements.
         meshSearch
         (
             const polyMesh& mesh,
             const treeBoundBox& bb,
             const polyMesh::cellDecomposition = polyMesh::CELL_TETS
         );
+
 
     //- Destructor
     ~meshSearch();
@@ -196,11 +203,14 @@ public:
                 return cellDecompMode_;
             }
 
-            //- Get (demand driven) reference to octree holding all
-            //  boundary faces
+            //- Demand-driven reference to octree holding all boundary faces
             const indexedOctree<treeDataFace>& boundaryTree() const;
 
-            //- Get (demand driven) reference to octree holding all cells
+            //- Demand-driven reference to octree holding all
+            //- non-coupled boundary faces
+            const indexedOctree<treeDataFace>& nonCoupledBoundaryTree() const;
+
+            //- Demand-driven reference to octree holding all cells
             const indexedOctree<treeDataCell>& cellTree() const;
 
 

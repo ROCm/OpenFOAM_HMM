@@ -294,8 +294,8 @@ void Foam::mappedPatchBase::findSamples
                         1e-4
                     )
                 );
-                patchBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-                patchBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+                patchBb.min() -= point::uniform(ROOTVSMALL);
+                patchBb.max() += point::uniform(ROOTVSMALL);
 
                 indexedOctree<treeDataFace> boundaryTree
                 (
@@ -366,8 +366,8 @@ void Foam::mappedPatchBase::findSamples
                         1e-4
                     )
                 );
-                patchBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-                patchBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+                patchBb.min() -= point::uniform(ROOTVSMALL);
+                patchBb.max() += point::uniform(ROOTVSMALL);
 
                 indexedOctree<treeDataPoint> boundaryTree
                 (

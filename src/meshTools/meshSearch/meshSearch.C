@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -603,30 +603,33 @@ Foam::meshSearch::~meshSearch()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+const Foam::treeBoundBox& Foam::meshSearch::dataBoundBox() const
+{
+    if (!overallBbPtr_.valid())
+    {
+        Random rndGen(261782);
+        overallBbPtr_.reset
+        (
+            new treeBoundBox(mesh_.points())
+        );
+
+        treeBoundBox& overallBb = overallBbPtr_();
+
+        // Extend slightly and make 3D
+        overallBb = overallBb.extend(rndGen, 1e-4);
+        overallBb.min() -= point::uniform(ROOTVSMALL);
+        overallBb.max() += point::uniform(ROOTVSMALL);
+    }
+
+    return *overallBbPtr_;
+}
+
+
 const Foam::indexedOctree<Foam::treeDataFace>&
 Foam::meshSearch::boundaryTree() const
 {
     if (!boundaryTreePtr_.valid())
     {
-        //
-        // Construct tree
-        //
-
-        if (!overallBbPtr_.valid())
-        {
-            Random rndGen(261782);
-            overallBbPtr_.reset
-            (
-                new treeBoundBox(mesh_.points())
-            );
-
-            treeBoundBox& overallBb = overallBbPtr_();
-            // Extend slightly and make 3D
-            overallBb = overallBb.extend(rndGen, 1e-4);
-            overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-            overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-        }
-
         // All boundary faces (not just walls)
         labelList bndFaces
         (
@@ -643,7 +646,7 @@ Foam::meshSearch::boundaryTree() const
                     mesh_,
                     bndFaces                    // boundary faces only
                 ),
-                overallBbPtr_(),                // overall search domain
+                dataBoundBox(),                 // overall search domain
                 8,                              // maxLevel
                 10,                             // leafsize
                 3.0                             // duplicity
@@ -655,30 +658,57 @@ Foam::meshSearch::boundaryTree() const
 }
 
 
+
+const Foam::indexedOctree<Foam::treeDataFace>&
+Foam::meshSearch::nonCoupledBoundaryTree() const
+{
+    if (!nonCoupledBoundaryTreePtr_.valid())
+    {
+        // All non-coupled boundary faces (not just walls)
+        const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+        labelList bndFaces(mesh_.nBoundaryFaces());
+
+        label bndi = 0;
+        for (const polyPatch& pp : patches)
+        {
+            if (!pp.coupled())
+            {
+                forAll(pp, i)
+                {
+                    bndFaces[bndi++] = pp.start()+i;
+                }
+            }
+        }
+        bndFaces.setSize(bndi);
+
+        nonCoupledBoundaryTreePtr_.reset
+        (
+            new indexedOctree<treeDataFace>
+            (
+                treeDataFace    // all information needed to search faces
+                (
+                    false,                      // do not cache bb
+                    mesh_,
+                    bndFaces                    // boundary faces only
+                ),
+                dataBoundBox(),                 // overall search domain
+                8,                              // maxLevel
+                10,                             // leafsize
+                3.0                             // duplicity
+            )
+        );
+    }
+
+    return *nonCoupledBoundaryTreePtr_;
+}
+
+
 const Foam::indexedOctree<Foam::treeDataCell>&
 Foam::meshSearch::cellTree() const
 {
     if (!cellTreePtr_.valid())
     {
-        //
-        // Construct tree
-        //
-
-        if (!overallBbPtr_.valid())
-        {
-            Random rndGen(261782);
-            overallBbPtr_.reset
-            (
-                new treeBoundBox(mesh_.points())
-            );
-
-            treeBoundBox& overallBb = overallBbPtr_();
-            // Extend slightly and make 3D
-            overallBb = overallBb.extend(rndGen, 1e-4);
-            overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-            overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-        }
-
         cellTreePtr_.reset
         (
             new indexedOctree<treeDataCell>
@@ -689,7 +719,7 @@ Foam::meshSearch::cellTree() const
                     mesh_,
                     cellDecompMode_ // cell decomposition mode for inside tests
                 ),
-                overallBbPtr_(),
+                dataBoundBox(),     // overall search domain
                 8,              // maxLevel
                 10,             // leafsize
                 6.0             // duplicity

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015,2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -157,8 +157,8 @@ Foam::triSurfaceRegionSearch::treeByRegion() const
                 // on symmetric geometry there are fewer face/edge
                 // aligned items.
                 bb = bb.extend(rndGen, 1e-4);
-                bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-                bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+                bb.min() -= point::uniform(ROOTVSMALL);
+                bb.max() += point::uniform(ROOTVSMALL);
             }
 
             treeByRegion_.set

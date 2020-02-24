@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -180,8 +181,8 @@ void createBoundaryEdgeTrees
             treeBoundBox(UList<point>(surf.localPoints())).extend(rndGen, 1e-4)
         );
 
-        bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-        bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        bb.min() -= point::uniform(ROOTVSMALL);
+        bb.max() += point::uniform(ROOTVSMALL);
 
         bEdgeTrees.set
         (

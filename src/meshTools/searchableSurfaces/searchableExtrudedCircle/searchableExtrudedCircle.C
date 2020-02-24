@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -100,8 +100,8 @@ Foam::searchableExtrudedCircle::searchableExtrudedCircle
 
     // Slightly extended bb. Slightly off-centred just so on symmetric
     // geometry there are less face/edge aligned items.
-    bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-    bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+    bb.min() -= point::uniform(ROOTVSMALL);
+    bb.max() += point::uniform(ROOTVSMALL);
 
     edgeTree_.reset
     (

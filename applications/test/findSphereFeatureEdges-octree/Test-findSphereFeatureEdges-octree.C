@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,8 +69,8 @@ int main(int argc, char *argv[])
         efem.points()
     );
 
-    bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-    bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+    bb.min() -= point::uniform(ROOTVSMALL);
+    bb.max() += point::uniform(ROOTVSMALL);
 
     labelList allEdges(identity(efem.edges().size()));
 
