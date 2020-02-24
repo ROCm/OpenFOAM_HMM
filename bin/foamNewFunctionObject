@@ -7,6 +7,7 @@
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 #     Copyright (C) 2016-2017 OpenFOAM Foundation
+#     Copyright (C) 2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -33,7 +34,7 @@
 #
 #------------------------------------------------------------------------------
 Script=${0##*/}
-DIR="$FOAM_ETC/codeTemplates/functionObject"
+DIR="$WM_PROJECT_DIR/etc/codeTemplates/functionObject"
 
 usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done

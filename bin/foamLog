@@ -7,6 +7,7 @@
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
+#     Copyright (C) 2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -38,8 +39,6 @@
 #------------------------------------------------------------------------------
 Script="${0##*/}"
 toolsDir="${0%/*}/tools"
-groupDir="${WM_PROJECT_SITE:-${WM_PROJECT_DIR:-<unknown>}/site}"
-userDir="$HOME/.OpenFOAM"
 
 usage() {
     exec 1>&2
@@ -91,13 +90,9 @@ cat <<HELP
     The value taken will be the first (non-space)word after this column.
 
     The database ($Script.db) will taken from these locations:
-        .
-        $userDir/$FOAM_API/
-        $userDir/
-        $groupDir/$FOAM_API/etc/
-        $groupDir/etc/
-        $WM_PROJECT_DIR/etc/
-        $toolsDir
+      ./
+$(foamEtcFile -list | sed -e 's#^#      #')
+      $toolsDir
 
     option -quiet : suppresses the default information and only prints the
     extracted variables.

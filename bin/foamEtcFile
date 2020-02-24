@@ -32,7 +32,13 @@
 #     \endcode
 #
 # Environment
-#     - WM_PROJECT_SITE         (unset defaults to PROJECT/site)
+#     FOAM_CONFIG_ETC
+#         Alternative etc directory for shipped files
+#
+#     FOAM_CONFIG_MODE
+#         Fallback search mode for etc files. Unset is the same as "ugo".
+#
+#     WM_PROJECT_SITE         (unset defaults to PROJECT/site)
 #
 # Note
 #     This script must exist in the project 'bin' directory
@@ -45,8 +51,8 @@
 printHelp() {
     cat<<USAGE
 
-Usage: foamEtcFile [OPTION] fileName [-- args]
-       foamEtcFile [OPTION] [-list|-list-test] [fileName]
+Usage: ${0##*/} [OPTION] fileName [-- args]
+       ${0##*/} [OPTION] [-list|-list-test] [fileName]
 
 options:
   -all (-a)         Return all files (otherwise stop after the first match)
@@ -105,6 +111,20 @@ projectDir="$(\cd $(dirname $binDir) && \pwd -L)"   # Project dir
 
 userDir="$HOME/.OpenFOAM"                           # As per foamVersion.H
 groupDir="${WM_PROJECT_SITE:-$projectDir/site}"     # As per foamVersion.H
+optMode=ugo                                         # Default search = 'ugo'
+
+# Environment overrides
+case "$FOAM_CONFIG_MODE" in ([ugo]*) optMode="$FOAM_CONFIG_MODE" ;; esac
+
+# Verify validity of FOAM_CONFIG_ETC
+if [ -n "$FOAM_CONFIG_ETC" ]
+then
+    if [ ! -d "$FOAM_CONFIG_ETC" ] || [ "$FOAM_CONFIG_ETC" = "$projectDir/etc" ]
+    then
+        # Bad directory or redundant value
+        unset FOAM_CONFIG_ETC
+    fi
+fi
 
 #-------------------------------------------------------------------------------
 
@@ -125,7 +145,6 @@ getApiInfo()
 
 
 #-------------------------------------------------------------------------------
-optMode=ugo         # Default mode is always 'ugo'
 unset shellOutput verboseOutput
 unset optAll optConfig optList projectApi
 
@@ -168,7 +187,7 @@ do
     -config)
         optConfig=true
         ;;
-    -mode=[ugoa]*)
+    -mode=[ugo]*)
         optMode="${1#*=}"
         ;;
     -m | -mode)
@@ -176,7 +195,7 @@ do
         shift
         # Sanity check. Handles missing argument too.
         case "$optMode" in
-        ([ugoa]*)
+        ([ugo]*)
             ;;
         (*)
             die "invalid mode '$optMode'"
@@ -219,7 +238,6 @@ done
 # Establish the API value
 [ -n "$projectApi" ] || projectApi=$(getApiInfo api)
 
-
 # Split arguments into filename (for searching) and trailing bits for shell eval
 # Silently remove leading ~OpenFOAM/ (as per Foam::findEtcFile)
 nArgs=$#
@@ -253,23 +271,23 @@ fi
 
 # Define the various places to be searched:
 unset dirList
-case "$optMode" in (*[au]*) # (A)ll or (U)ser
+case "$optMode" in (*[u]*) # (U)ser
     dirList="$dirList $userDir/$projectApi $userDir"
     ;;
 esac
 
-case "$optMode" in (*[ag]*) # (A)ll or (G)roup == site
+case "$optMode" in (*[g]*) # (G)roup == site
     dirList="$dirList $groupDir/$projectApi/etc $groupDir/etc"
     ;;
 esac
 
-case "$optMode" in (*[ao]*) # (A)ll or (O)ther == shipped
-    dirList="$dirList $projectDir/etc"
+case "$optMode" in (*[o]*) # (O)ther == shipped
+    dirList="$dirList $FOAM_CONFIG_ETC $projectDir/etc"
     ;;
 esac
 set -- $dirList
 
-[ "$#" -ge 1 ] || die "No directories to scan. Programming error?"
+[ "$#" -ge 1 ] || die "No directories to scan. Programming or user error?"
 exitCode=2  # Fallback is a FileNotFound error
 
 
@@ -278,7 +296,7 @@ exitCode=2  # Fallback is a FileNotFound error
 #
 
 # Special handling of config.sh/ , config.csh/ directories
-if [ -n "$optConfig" -a -n "$shellOutput" -a -n "$fileName" ]
+if [ -n "$optConfig" ] && [ -n "$shellOutput" ] && [ -n "$fileName" ]
 then
     case "$shellOutput" in
     csh*)

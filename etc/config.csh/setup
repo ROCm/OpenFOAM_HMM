@@ -18,10 +18,11 @@
 #     Finalize setup of OpenFOAM environment for C-shell (csh, tcsh)
 #
 # Environment
+#     FOAM_CONFIG_MODE (search mode for etc config files - see foamEtcFile)
+#         - eg, FOAM_CONFIG_MODE="o" to only use OpenFOAM config files
+#
 #     FOAM_VERBOSE (set/unset)
 #         - add extra verbosity when sourcing files
-#     FOAM_CONFIG_NOUSER (set/unset)
-#         - suppress use of user/group configuration files
 #
 #------------------------------------------------------------------------------
 
@@ -77,14 +78,21 @@ endif
 
 
 # Overrides via <prefs.csh>
-# 1. other (system) values
+# 1. Always use (O)ther values from the OpenFOAM project etc/ directory
 _foamEtc -mode=o prefs.csh
 
-# 2. user or group values (unless disabled)
-if (! $?FOAM_CONFIG_NOUSER ) then
-    _foamEtc -mode=ug prefs.csh
+# 2. (U)ser or (G)roup values (unless disabled). Could use some more work
+if ($?FOAM_CONFIG_MODE) then
+    set configMode="${FOAM_CONFIG_MODE:s/o//}"  # Already handled O(ther)
+else
+    set configMode="ug"
 endif
-
+# Is the remainder valid - has U(ser) or G(roup)?
+switch ("$configMode")
+case *[ug]*:
+    _foamEtc -mode="$configMode" prefs.csh
+    breaksw
+endsw
 
 # Capture and evaluate any command-line parameters
 # These can be used to set/unset values, specify additional files etc.
@@ -118,6 +126,16 @@ while ( $#argv > 0 )
     endsw
     shift
 end
+
+# The prefs may have injected a FOAM_CONFIG_ETC value.
+# Verify that it makes sense before continuing.
+if ( $?FOAM_CONFIG_ETC ) then
+    if ( ! -d "$FOAM_CONFIG_ETC" ) then
+        echo "Ignore invalid FOAM_CONFIG_ETC = $FOAM_CONFIG_ETC"
+    else if ( "$FOAM_CONFIG_ETC" == "$WM_PROJECT_DIR/etc" ) then
+        unsetenv FOAM_CONFIG_ETC
+    endif
+endif
 
 
 # Clean standard environment variables (PATH, MANPATH, LD_LIBRARY_PATH)

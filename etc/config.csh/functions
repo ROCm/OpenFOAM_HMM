@@ -5,11 +5,10 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018 OpenCFD Ltd.
+#     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # File
 #     etc/config.csh/functions
@@ -36,25 +35,13 @@ alias _foamAddLib  'setenv LD_LIBRARY_PATH \!*\:${LD_LIBRARY_PATH}'
 alias _foamAddLibAuto 'eval `$WM_PROJECT_DIR/bin/tools/lib-dir -csh \!*`'
 
 # Echo values when FOAM_VERBOSE is on, no-op otherwise
-if ($?FOAM_VERBOSE && $?prompt) then
-    alias _foamEcho 'echo \!*'
-else
-    alias _foamEcho 'true'
-endif
-
 # Source an etc file, possibly with some verbosity
 if ($?FOAM_VERBOSE && $?prompt) then
-    if ($?FOAM_CONFIG_NOUSER) then
-        alias _foamEtc 'eval `$WM_PROJECT_DIR/bin/foamEtcFile -csh-verbose -mode=o \!*`'
-    else
-        alias _foamEtc 'eval `$WM_PROJECT_DIR/bin/foamEtcFile -csh-verbose \!*`'
-    endif
+    alias _foamEcho 'echo \!*'
+    alias _foamEtc 'eval `$WM_PROJECT_DIR/bin/foamEtcFile -csh-verbose \!*`'
 else
-    if ($?FOAM_CONFIG_NOUSER) then
-        alias _foamEtc 'eval `$WM_PROJECT_DIR/bin/foamEtcFile -csh -mode=o \!*`'
-    else
-        alias _foamEtc 'eval `$WM_PROJECT_DIR/bin/foamEtcFile -csh \!*`'
-    endif
+    alias _foamEcho 'true'
+    alias _foamEtc 'eval `$WM_PROJECT_DIR/bin/foamEtcFile -csh \!*`'
 endif
 
 

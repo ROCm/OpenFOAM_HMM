@@ -5,7 +5,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2019 OpenCFD Ltd.
+#     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -20,11 +20,17 @@
 #     isNone, isSystem, isAbsdir, hasAbsdir
 #     isDarwin, isWindows
 #     findFirstFile
+#     findSystemInclude
 #     findLibrary
 #     findExtLib
 #
 # Internal variables used
 #     extLibraries
+#
+# External variables used
+#     WM_OSTYPE  (is set for Windows)
+#     WM_COMPILER_LIB_ARCH
+#     DEB_TARGET_MULTIARCH
 #
 #------------------------------------------------------------------------------
 
@@ -33,14 +39,19 @@ then
     # Load once, but do not rely on this variable elsewhere
     WMAKE_SCRIPTS_SYSFUNCTIONS=loaded
 
+    # Handle Debian multi-arch, ignore missing/bad dpkg-architecture.
+    if [ -z "$DEB_TARGET_MULTIARCH" ]
+    then
+        DEB_TARGET_MULTIARCH=$(dpkg-architecture -qDEB_TARGET_MULTIARCH 2>/dev/null || true)
+    fi
+
     # True if OS is Darwin.
     isDarwin()
     {
-        test Darwin = "$(uname -s 2>/dev/null)"
+        test Darwin = "$(uname -s 2>/dev/null || true)"
     }
 
     # True if target OS is Windows
-    # Uses cached value from libso extension
     isWindows()
     {
         test MSwindows = "$WM_OSTYPE"
@@ -56,7 +67,6 @@ then
     then
         extLibraries=".a .dll .dll.a"  # including cross-compiling
     fi
-
 
     # True if '$1' begins with '/'
     isAbsdir()
@@ -145,26 +155,113 @@ then
         return 2
     }
 
+    # Check system /usr/local/include /usr/include paths
+    #
+    # On success, echoes the resolved file and returns 0, otherwise returns 2
+    #
+    # Specify -name=incName to search for
+    #
+    findSystemInclude()
+    {
+        local searchName
+
+        case "$1" in
+        -name=*)
+            searchName="${1#*=}"
+            ;;
+        esac
+
+        if [ -z "$searchName" ]
+        then
+            return 1
+        fi
+
+        findFirstFile \
+            "/usr/local/include/$searchName" \
+            "/usr/include/$searchName" \
+            ;
+    }
 
     # Check existence of library with ending '.a', '.so' ...
     #
     # On success, echoes the resolved file and returns 0, otherwise returns 2
+    #
+    # This function has two modes of operation.
+    #
+    # 1) Automated search.
+    #    Specify -prefix=dirName -name=libName and search for
+    #    (lib, lib64, lib/x86_64..) etc.
+    #
+    # 2) Directed search.
+    #    specify the fully qualified names to search on the parameter list
+    #
     findLibrary()
     {
+        local prefixDir searchDir searchName
         local file ext
 
-        for file
+        searchDir=true
+
+        while [ "$searchDir" = true ] && [ "$#" -gt 0 ]
         do
-            [ -n "$file" ] || continue
-            for ext in '' $extLibraries
-            do
-                if [ -f "$file$ext" ] && [ -r "$file$ext" ]
-                then
-                    echo "$file$ext"  # Found
-                    return 0
-                fi
-            done
+            case "$1" in
+            -prefix=*)
+                prefixDir="${1#*=}"
+                shift
+                ;;
+
+            -name=*)
+                searchName="${1#*=}"
+                shift
+                ;;
+
+            (*)
+                unset searchDir
+                ;;
+            esac
         done
+
+        if [ -n "$searchName" ]
+        then
+            # Automated search
+            # Eg, lib/ lib64/, lib/x86_64-linux-gnu
+
+            : "${prefixDir:=/usr}"  # A reasonable default
+            [ -d "$prefixDir" ] || return 2
+
+            for searchDir in \
+                lib \
+                "${WM_COMPILER_LIB_ARCH:+lib}$WM_COMPILER_LIB_ARCH" \
+                "${DEB_TARGET_MULTIARCH:+lib/}${DEB_TARGET_MULTIARCH}" \
+                ;
+            do
+                for ext in '' $extLibraries
+                do
+                    file="$prefixDir/$searchDir/$searchName$ext"
+                    if [ -f "$file" ] && [ -r "$file" ]
+                    then
+                        echo "$file"  # Found
+                        return 0
+                    fi
+                done
+            done
+
+        else
+            # Directed search
+
+            for file
+            do
+                [ -n "$file" ] || continue
+                for ext in '' $extLibraries
+                do
+                    if [ -f "$file$ext" ] && [ -r "$file$ext" ]
+                    then
+                        echo "$file$ext"  # Found
+                        return 0
+                    fi
+                done
+            done
+        fi
 
         return 2
     }

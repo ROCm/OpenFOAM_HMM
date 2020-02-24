@@ -51,6 +51,7 @@ options:
   -dp                   Double precision
   -spdp                 Mixed single/double precision
   -int32 | -int64       The label-size
+  -etc=DIR              Additional project etc/ directory
   -prefix=DIR           Alternative OpenFOAM project directory
   -show-api | -version  Print META-INFO api value and exit
   -show-patch           Print META-INFO patch value and exit
@@ -91,7 +92,7 @@ getApiInfo()
 
 # No inheritance of FOAM_SETTINGS
 unset FOAM_SETTINGS
-unset _foamSettings _foamScriptCommand
+unset _foamEtcDir _foamSettings _foamScriptCommand
 
 # Parse options
 while [ "$#" -gt 0 ]
@@ -140,6 +141,11 @@ do
     -int32 | -int64)
         # WM_LABEL_SIZE=...
         _foamSettings="$_foamSettings${_foamSettings:+ }WM_LABEL_SIZE=${1#-int}"
+        ;;
+
+    -etc=*)
+        # Define FOAM_CONFIG_ETC for finding files
+        _foamEtcDir="${1#*=}"
         ;;
 
     -prefix=*)
@@ -204,6 +210,14 @@ fi
     echo "Error: file not found: $_foamSourceBashEnv" 1>&2
     exit 2
 }
+
+if [ -n "$_foamEtcDir" ] && [ -d "$_foamEtcDir" ]
+then
+    # Additional etc directory
+    export FOAM_CONFIG_ETC="$_foamEtcDir"
+else
+    unset FOAM_CONFIG_ETC
+fi
 
 if [ -n "$interactive" ]
 then

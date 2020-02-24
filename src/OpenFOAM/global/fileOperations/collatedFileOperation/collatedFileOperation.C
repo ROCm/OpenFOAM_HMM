@@ -294,7 +294,7 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
                    "enabled, deactivate" << nl
                 << "         threading by setting maxThreadFileBufferSize "
                     "to 0 in" << nl
-                << "         $FOAM_ETC/controlDict"
+                << "         OpenFOAM etc/controlDict"
                 << endl;
         }
 

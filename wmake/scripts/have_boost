@@ -90,10 +90,10 @@ have_boost()
     elif hasAbsdir "$prefix"
     then
         header=$(findFirstFile "$prefix/include/$incName")
-        library="$(findExtLib $libName)"
+        library=$(findExtLib "$libName")
     elif isSystem "$prefix"
     then
-        header=$(findFirstFile "/usr/local/include/$incName" "/usr/include/$incName")
+        header=$(findSystemInclude -name="$incName")
         prefix=$(sysPrefix "$header")
     else
         unset prefix
@@ -107,10 +107,9 @@ have_boost()
     }
 
     # Library
-    [ -n "$library" ] || library=$(findLibrary \
-        "$prefix/lib/$libName" \
-        "$prefix/lib$WM_COMPILER_LIB_ARCH/$libName" \
-    ) || {
+    [ -n "$library" ] \
+    || library=$(findLibrary -prefix="$prefix" -name="$libName") \
+    || {
         [ -n "$warn" ] && echo "$warn (no library)"
         return 2
     }
@@ -127,7 +126,7 @@ have_boost()
 }
 
 
-# Force reset of old variables
+# Reset variables
 no_boost
 
 # Test/query

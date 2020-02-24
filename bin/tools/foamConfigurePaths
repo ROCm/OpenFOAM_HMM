@@ -19,15 +19,22 @@
 #     Adjust hardcoded installation versions and paths
 #     in etc/{bashrc,cshrc} and etc/config.{sh,csh}/
 #
+# Requires
+#     - sed
+#     - bin/foamEtcFile
+#
+# Environment
+#     FOAM_CONFIG_ETC
+#         Alternative etc directory for shipped files
+#
 #------------------------------------------------------------------------------
-usage() {
-    exec 1>&2
-    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+printHelp() {
     cat<<USAGE
 
-usage: ${0##*/} options
+usage: $0 options
 
 Basic
+  -etc=DIR            set FOAM_CONFIG_ETC for alternative project files
   -project-path DIR   specify 'WM_PROJECT_DIR' (eg, /opt/openfoam1806-patch1)
   -version VER        specify project version (eg, v1806)
   -sp | -SP | -float32 single precision (WM_PRECISION_OPTION)
@@ -36,13 +43,13 @@ Basic
   -int32 | -int64     the 'WM_LABEL_SIZE'
 
 Compiler
-  -system NAME        specify 'system' compiler to use (eg, Gcc, Icc,...)
-  -third  NAME        specify 'ThirdParty' compiler to use (eg, Clang40,...)
-  -gcc VER            specify 'default_gcc_version' for ThirdParty Gcc
-  -clang VER          specify 'default_clang_version' for ThirdParty Clang
-  gmp-VERSION         for ThirdParty gcc (gmp-system for system library)
-  mpfr-VERSION        for ThirdParty gcc (mpfr-system for system library)
-  mpc-VERSION         for ThirdParty gcc (mpc-system for system library)
+  -system-compiler NAME The 'system' compiler to use (eg, Gcc, Clang, Icc,...)
+  -third-compiler NAME  The 'ThirdParty' compiler to use (eg, Clang40,...)
+  -gcc VER            The 'default_gcc_version' for ThirdParty Gcc
+  -clang VER          The 'default_clang_version' for ThirdParty Clang
+  gmp-VERSION         For ThirdParty gcc (gmp-system for system library)
+  mpfr-VERSION        For ThirdParty gcc (mpfr-system for system library)
+  mpc-VERSION         For ThirdParty gcc (mpc-system for system library)
 
 MPI
   -mpi NAME           specify 'WM_MPLIB' type (eg, INTELMPI, etc)
@@ -50,22 +57,24 @@ MPI
   -openmpi-system     use system openmpi
   -openmpi-third      use ThirdParty openmpi (using default version)
 
-Components
+ThirdParty versions
   -adios VER          specify 'adios2_version'
-  -adios-path DIR     specify 'ADIOS2_ARCH_PATH'
   -boost VER          specify 'boost_version'
-  -boost-path DIR     specify 'BOOST_ARCH_PATH'
   -cgal ver           specify 'cgal_version'
-  -cgal-path DIR      specify 'CGAL_ARCH_PATH'
   -cmake VER          specify 'cmake_version'
   -fftw VER           specify 'fffw_version'
-  -fftw-path DIR      specify 'FFTW_ARCH_PATH'
   -kahip VER          specify 'KAHIP_VERSION'
-  -kahip-path DIR     specify 'KAHIP_ARCH_PATH'
   -metis ver          specify 'METIS_VERSION'
-  -metis-path DIR     specify 'METIS_ARCH_PATH'
   -scotch VER         specify 'SCOTCH_VERSION' (eg, scotch_6.0.4)
-  -scotch-path DIR    specify 'SCOTCH_ARCH_PATH' (eg, /opt/scotch_6.0.4)
+
+Components specified by absolute path
+  -adios-path DIR     Path for 'ADIOS2_ARCH_PATH' (overrides -adios)
+  -boost-path DIR     Path for 'BOOST_ARCH_PATH'  (overrides -boost)
+  -cgal-path DIR      Path for 'CGAL_ARCH_PATH'   (overrides -cgal)
+  -fftw-path DIR      Path for 'FFTW_ARCH_PATH'   (overrides -fftw)
+  -kahip-path DIR     Path for 'KAHIP_ARCH_PATH'  (overrides -kahip)
+  -metis-path DIR     Path for 'METIS_ARCH_PATH'  (overrides -metis)
+  -scotch-path DIR    Path for 'SCOTCH_ARCH_PATH' (overrides -scotch)
 
 Graphics
   -paraview VER       specify 'ParaView_VERSION' (eg, 5.4.1 or system)
@@ -92,10 +101,13 @@ Equivalent options:
   -paraview-path        --paraviewInstall | -paraviewInstall
   -scotch               --scotchVersion | -scotchVersion
   -scotch-path          --scotchArchPath | -scotchArchPath
+  -system-compiler      -system
+  -third-compiler       -third
 
 USAGE
-    exit 1
+    exit 0 # clean exit
 }
+
 
 # Report error and exit
 die()
@@ -105,7 +117,7 @@ die()
     echo "Error encountered:"
     while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
     echo
-    echo "See '${0##*/} -help' for usage"
+    echo "See '$0 -help' for usage"
     echo
     exit 1
 }
@@ -113,8 +125,23 @@ die()
 # -----------------------------------------------------------------------------
 
 # Check that it appears to be an OpenFOAM installation
-[ -f etc/bashrc -a -d etc/config.sh ] || \
-    usage "Please run from top-level directory of installation"
+if [ -f etc/bashrc ] && [ -d "META-INFO" ]
+then
+    echo "Configuring OpenFOAM" 1>&2
+else
+    die "Please run from the OpenFOAM top-level installation directory" \
+        "No etc/bashrc or META-INFO/ found"
+fi
+
+# Use foamEtcFile to locate files, but only edit shipped files
+if [ -x bin/foamEtcFile ]
+then
+    _foamEtc() {
+        ./bin/foamEtcFile -mode=o "$@"
+    }
+else
+    die "No bin/foamEtcFile found in installation"
+fi
 
 
 # Check if argument matches the expected input. Respects case.
@@ -211,6 +238,28 @@ replaceCsh()
     done
 }
 
+# Locate file with foamEtcFile -mode=o and forward to replace()
+replaceEtc()
+{
+    local file="$1"
+    shift
+
+    file=$(_foamEtc "$file")
+    replace $file "$@"
+}
+
+
+# Locate file with foamEtcFile -mode=o and forward to replaceCsh()
+replaceEtcCsh()
+{
+    local file="$1"
+    shift
+
+    file=$(_foamEtc "$file")
+    replaceCsh $file "$@"
+}
+
+
 # Get the option's value (argument), or die on missing or empty argument
 # $1 option
 # $2 value
@@ -275,22 +324,55 @@ while [ "$#" -gt 0 ]
 do
     case "$1" in
     -h | -help* | --help*)
-        usage
+        printHelp
         ;;
     '')
         # Discard empty arguments
         ;;
 
+    -debug-list)
+        # Undocumented (experimental)
+        # TDB: List files that can be edited by this script
+        cat << CONFIG_SH
+etc/bashrc
+etc/config.sh/adios2
+etc/config.sh/compiler
+etc/config.sh/paraview
+etc/config.sh/vtk
+etc/config.sh/CGAL
+etc/config.sh/FFTW
+etc/config.sh/metis
+etc/config.sh/kahip
+etc/config.sh/scotch
+CONFIG_SH
+
+        cat << CONFIG_CSH
+etc/cshrc
+etc/config.csh/adios2
+etc/config.csh/compiler
+etc/config.csh/paraview
+etc/config.csh/vtk
+etc/config.csh/CGAL
+etc/config.csh/FFTW
+CONFIG_CSH
+        exit 0
+        ;;
+
 ## Basic ##
+
+   -etc=*)
+        # Define FOAM_CONFIG_ETC for finding files
+        export FOAM_CONFIG_ETC="${1#*=}"
+        ;;
 
    -project-path)
         # Replace WM_PROJECT_DIR=...
         optionValue=$(getOptionValue "$@")
-        replace    etc/bashrc  WM_PROJECT_DIR "\"$optionValue\""
-        replaceCsh etc/cshrc   WM_PROJECT_DIR "\"$optionValue\""
+        replaceEtc     bashrc  WM_PROJECT_DIR "\"$optionValue\""
+        replaceEtcCsh  cshrc   WM_PROJECT_DIR "\"$optionValue\""
 
-        removeBashMagic etc/bashrc
-        removeCshMagic  etc/cshrc
+        removeBashMagic $(_foamEtc bashrc)
+        removeCshMagic  $(_foamEtc cshrc)
 
         adjusted=true
         shift
@@ -299,8 +381,8 @@ do
    -version | -foamVersion | --projectVersion)
         # Replace WM_PROJECT_VERSION=...
         optionValue=$(getOptionValue "$@")
-        replace    etc/bashrc  WM_PROJECT_VERSION "$optionValue"
-        replaceCsh etc/cshrc   WM_PROJECT_VERSION "$optionValue"
+        replaceEtc     bashrc  WM_PROJECT_VERSION "$optionValue"
+        replaceEtcCsh  cshrc   WM_PROJECT_VERSION "$optionValue"
         adjusted=true
         shift
         ;;
@@ -314,30 +396,30 @@ do
 
     -sp | -SP | -float32)
         # Replace WM_PRECISION_OPTION=...
-        replace    etc/bashrc  WM_PRECISION_OPTION "SP"
-        replaceCsh etc/cshrc   WM_PRECISION_OPTION "SP"
+        replaceEtc     bashrc  WM_PRECISION_OPTION "SP"
+        replaceEtcCsh  cshrc   WM_PRECISION_OPTION "SP"
         adjusted=true
         ;;
 
     -dp | -DP | -float64)
         # Replace WM_PRECISION_OPTION=...
-        replace    etc/bashrc  WM_PRECISION_OPTION "DP"
-        replaceCsh etc/cshrc   WM_PRECISION_OPTION "DP"
+        replaceEtc     bashrc  WM_PRECISION_OPTION "DP"
+        replaceEtcCsh  cshrc   WM_PRECISION_OPTION "DP"
         adjusted=true
         ;;
 
     -spdp | -SPDP)
         # Replace WM_PRECISION_OPTION=...
-        replace    etc/bashrc  WM_PRECISION_OPTION "SPDP"
-        replaceCsh etc/cshrc   WM_PRECISION_OPTION "SPDP"
+        replaceEtc     bashrc  WM_PRECISION_OPTION "SPDP"
+        replaceEtcCsh  cshrc   WM_PRECISION_OPTION "SPDP"
         adjusted=true
         ;;
 
     -int32 | -int64)
         # Replace WM_LABEL_SIZE=...
         optionValue="${1#-int}"
-        replace    etc/bashrc  WM_LABEL_SIZE "$optionValue"
-        replaceCsh etc/cshrc   WM_LABEL_SIZE "$optionValue"
+        replaceEtc     bashrc  WM_LABEL_SIZE "$optionValue"
+        replaceEtcCsh  cshrc   WM_LABEL_SIZE "$optionValue"
         adjusted=true
         ;;
 
@@ -347,8 +429,8 @@ do
     -clang)
         # Replace default_clang_version=...
         optionValue=$(getOptionValue "$@")
-        replace etc/config.sh/compiler   default_clang_version "$optionValue"
-        replace etc/config.csh/compiler  default_clang_version "$optionValue"
+        replaceEtc  config.sh/compiler   default_clang_version "$optionValue"
+        replaceEtc  config.csh/compiler  default_clang_version "$optionValue"
         adjusted=true
         shift
         ;;
@@ -356,32 +438,32 @@ do
     -gcc)
         # Replace default_gcc_version=...
         optionValue=$(getOptionValue "$@")
-        replace etc/config.sh/compiler   default_gcc_version "$optionValue"
-        replace etc/config.csh/compiler  default_gcc_version "$optionValue"
+        replaceEtc  config.sh/compiler   default_gcc_version "$optionValue"
+        replaceEtc  config.csh/compiler  default_gcc_version "$optionValue"
         adjusted=true
         shift
         ;;
 
-    -system)
+    -system-compiler | -system)
         # Replace WM_COMPILER_TYPE=... and WM_COMPILER=...
         optionValue=$(getOptionValue "$@")
-        replace etc/bashrc  \
+        replaceEtc  bashrc  \
             WM_COMPILER_TYPE system \
             WM_COMPILER "$optionValue"
-        replaceCsh etc/cshrc \
+        replaceEtcCsh  cshrc \
             WM_COMPILER_TYPE system \
             WM_COMPILER "$optionValue"
         adjusted=true
         shift
         ;;
 
-    -third | -ThirdParty)
+    -third-compiler | -third | -ThirdParty)
         # Replace WM_COMPILER_TYPE=... and WM_COMPILER=...
         optionValue=$(getOptionValue "$@")
-        replace etc/bashrc  \
+        replaceEtc  bashrc  \
             WM_COMPILER_TYPE ThirdParty \
             WM_COMPILER "$optionValue"
-        replaceCsh etc/cshrc  \
+        replaceEtcCsh  cshrc  \
             WM_COMPILER_TYPE ThirdParty \
             WM_COMPILER "$optionValue"
         adjusted=true
@@ -390,22 +472,22 @@ do
 
     gmp-[4-9]* | gmp-system)
         # gcc-related package
-        replace etc/config.sh/compiler   default_gmp_version "$1"
-        replace etc/config.csh/compiler  default_gmp_version "$1"
+        replaceEtc  config.sh/compiler   default_gmp_version "$1"
+        replaceEtc  config.csh/compiler  default_gmp_version "$1"
         adjusted=true
         ;;
 
     mpfr-[2-9]* | mpfr-system)
         # gcc-related package
-        replace etc/config.sh/compiler   default_mpfr_version "$1"
-        replace etc/config.csh/compiler  default_mpfr_version "$1"
+        replaceEtc  config.sh/compiler   default_mpfr_version "$1"
+        replaceEtc  config.csh/compiler  default_mpfr_version "$1"
         adjusted=true
         ;;
 
     mpc-[0-9]* | mpc-system)
         # gcc-related package
-        replace etc/config.sh/compiler   default_mpc_version "$1"
-        replace etc/config.csh/compiler  default_mpc_version "$1"
+        replaceEtc  config.sh/compiler   default_mpc_version "$1"
+        replaceEtc  config.csh/compiler  default_mpc_version "$1"
         adjusted=true
         ;;
 
@@ -415,8 +497,8 @@ do
     -mpi)
         # Explicitly set WM_MPLIB=...
         optionValue=$(getOptionValue "$@")
-        replace    etc/bashrc  WM_MPLIB "$optionValue"
-        replaceCsh etc/bashrc  WM_MPLIB "$optionValue"
+        replaceEtc     bashrc  WM_MPLIB "$optionValue"
+        replaceEtcCsh  cshrc   WM_MPLIB "$optionValue"
         optMpi=system
         adjusted=true
         shift
@@ -431,34 +513,34 @@ do
         _matches "$optMpi" "$expected" || \
             die "'$1' has bad value: '$optMpi'"
 
-        _inlineSed etc/config.sh/mpi \
+        _inlineSed  $(_foamEtc config.sh/mpi) \
             "FOAM_MPI=$expected" \
             "FOAM_MPI=$optMpi" \
             "Replaced 'FOAM_MPI=$expected' setting by 'FOAM_MPI=$optMpi'"
 
-        _inlineSed etc/config.csh/mpi \
+        _inlineSed  $(_foamEtc config.csh/mpi) \
             "FOAM_MPI $expected" \
             "FOAM_MPI $optMpi" \
             "Replaced 'FOAM_MPI $expected' setting by 'FOAM_MPI $optMpi'"
 
-        replace    etc/bashrc  WM_MPLIB OPENMPI
-        replaceCsh etc/cshrc   WM_MPLIB OPENMPI
+        replaceEtc     bashrc  WM_MPLIB OPENMPI
+        replaceEtcCsh  cshrc   WM_MPLIB OPENMPI
         adjusted=true
         shift
         ;;
 
     -openmpi-system)
         # Explicitly set WM_MPLIB=SYSTEMOPENMPI
-        replace    etc/bashrc  WM_MPLIB SYSTEMOPENMPI
-        replaceCsh etc/cshrc   WM_MPLIB SYSTEMOPENMPI
+        replaceEtc     bashrc  WM_MPLIB SYSTEMOPENMPI
+        replaceEtcCsh  cshrc   WM_MPLIB SYSTEMOPENMPI
         optMpi=system
         adjusted=true
         ;;
 
     -openmpi-third)
         # Explicitly set WM_MPLIB=OPENMPI, using default setting for openmpi
-        replace    etc/bashrc  WM_MPLIB OPENMPI
-        replaceCsh etc/cshrc   WM_MPLIB OPENMPI
+        replaceEtc     bashrc  WM_MPLIB OPENMPI
+        replaceEtcCsh  cshrc   WM_MPLIB OPENMPI
         optMpi=third
         adjusted=true
         ;;
@@ -469,8 +551,8 @@ do
     -adios | -adios2)
         # Replace adios2_version=...
         optionValue=$(getOptionValue "$@")
-        replace etc/config.sh/adios2   adios2_version "$optionValue"
-        replace etc/config.csh/adios2  adios2_version "$optionValue"
+        replaceEtc  config.sh/adios2   adios2_version "$optionValue"
+        replaceEtc  config.csh/adios2  adios2_version "$optionValue"
         adjusted=true
         shift
         ;;
@@ -478,8 +560,8 @@ do
     -adios-path | -adios2-path)
         # Replace ADIOS2_ARCH_PATH=...
         optionValue=$(getOptionValue "$@")
-        replace    etc/config.sh/adios2   ADIOS2_ARCH_PATH "\"$optionValue\""
-        replaceCsh etc/config.csh/adios2  ADIOS2_ARCH_PATH "\"$optionValue\""
+        replaceEtc     config.sh/adios2   ADIOS2_ARCH_PATH "\"$optionValue\""
+        replaceEtcCsh  config.csh/adios2  ADIOS2_ARCH_PATH "\"$optionValue\""
         adjusted=true
         shift
         ;;
@@ -487,8 +569,8 @@ do
     -boost)
         # Replace boost_version=...
         optionValue=$(getOptionValue "$@")
-        replace etc/config.sh/CGAL   boost_version "$optionValue"
-        replace etc/config.csh/CGAL  boost_version "$optionValue"
+        replaceEtc  config.sh/CGAL   boost_version "$optionValue"
+        replaceEtc  config.csh/CGAL  boost_version "$optionValue"
         adjusted=true
         shift
         ;;
@@ -496,8 +578,8 @@ do
     -boost-path)
         # Replace BOOST_ARCH_PATH=...
         optionValue=$(getOptionValue "$@")
-        replace    etc/config.sh/CGAL   BOOST_ARCH_PATH "\"$optionValue\""
-        replaceCsh etc/config.csh/CGAL  BOOST_ARCH_PATH "\"$optionValue\""
+        replaceEtc     config.sh/CGAL   BOOST_ARCH_PATH "\"$optionValue\""
+        replaceEtcCsh  config.csh/CGAL  BOOST_ARCH_PATH "\"$optionValue\""
         adjusted=true
         shift
         ;;
@@ -505,8 +587,8 @@ do
     -cgal)
         # Replace cgal_version=...
         optionValue=$(getOptionValue "$@")
-        replace etc/config.sh/CGAL   cgal_version "$optionValue"
-        replace etc/config.csh/CGAL  cgal_version "$optionValue"
+        replaceEtc  config.sh/CGAL   cgal_version "$optionValue"
+        replaceEtc  config.csh/CGAL  cgal_version "$optionValue"
         adjusted=true
         shift
         ;;
@@ -514,8 +596,8 @@ do
     -cgal-path)
         # Replace CGAL_ARCH_PATH=...
         optionValue=$(getOptionValue "$@")
-        replace    etc/config.sh/CGAL   CGAL_ARCH_PATH "$optionValue"
-        replaceCsh etc/config.csh/CGAL  CGAL_ARCH_PATH "$optionValue"
+        replaceEtc     config.sh/CGAL   CGAL_ARCH_PATH "$optionValue"
+        replaceEtcCsh  config.csh/CGAL  CGAL_ARCH_PATH "$optionValue"
         adjusted=true
         shift
         ;;
@@ -523,8 +605,8 @@ do
     -fftw)
         # Replace fftw_version=...
         optionValue=$(getOptionValue "$@")
-        replace etc/config.sh/FFTW   fftw_version "$optionValue"
-        replace etc/config.csh/FFTW  fftw_version "$optionValue"
+        replaceEtc  config.sh/FFTW   fftw_version "$optionValue"
+        replaceEtc  config.csh/FFTW  fftw_version "$optionValue"
         adjusted=true
         shift
         ;;
@@ -532,8 +614,8 @@ do
     -fftw-path)
         # Replace FFTW_ARCH_PATH=...
         optionValue=$(getOptionValue "$@")
-        replace    etc/config.sh/FFTW   FFTW_ARCH_PATH "\"$optionValue\""
-        replaceCsh etc/config.csh/FFTW  FFTW_ARCH_PATH "\"$optionValue\""
+        replaceEtc     config.sh/FFTW   FFTW_ARCH_PATH "\"$optionValue\""
+        replaceEtcCsh  config.csh/FFTW  FFTW_ARCH_PATH "\"$optionValue\""
         adjusted=true
         shift
         ;;
@@ -541,8 +623,8 @@ do
     -cmake)
         # Replace cmake_version=...
         optionValue=$(getOptionValue "$@")
-        replace etc/config.sh/paraview   cmake_version "$optionValue"
-        replace etc/config.csh/paraview  cmake_version "$optionValue"
+        replaceEtc  config.sh/paraview   cmake_version "$optionValue"
+        replaceEtc  config.csh/paraview  cmake_version "$optionValue"
         adjusted=true
         shift
         ;;
@@ -550,7 +632,7 @@ do
     -kahip)
         # Replace KAHIP_VERSION=...
         optionValue=$(getOptionValue "$@")
-        replace etc/config.sh/kahip  KAHIP_VERSION "$optionValue"
+        replaceEtc  config.sh/kahip  KAHIP_VERSION "$optionValue"
         adjusted=true
         shift
         ;;
@@ -558,7 +640,7 @@ do
     -kahip-path)
         # Replace KAHIP_ARCH_PATH=...
         optionValue=$(getOptionValue "$@")
-        replace etc/config.sh/kahip  KAHIP_ARCH_PATH "\"$optionValue\""
+        replaceEtc  config.sh/kahip  KAHIP_ARCH_PATH "\"$optionValue\""
         adjusted=true
         shift
         ;;
@@ -566,7 +648,7 @@ do
     -metis)
         # Replace METIS_VERSION=...
         optionValue=$(getOptionValue "$@")
-        replace etc/config.sh/metis  METIS_VERSION "$optionValue"
+        replaceEtc  config.sh/metis  METIS_VERSION "$optionValue"
         adjusted=true
         shift
         ;;
@@ -574,7 +656,7 @@ do
     -metis-path)
         # Replace METIS_ARCH_PATH=...
         optionValue=$(getOptionValue "$@")
-        replace etc/config.sh/metis  METIS_ARCH_PATH "\"$optionValue\""
+        replaceEtc  config.sh/metis  METIS_ARCH_PATH "\"$optionValue\""
         adjusted=true
         shift
         ;;
@@ -582,7 +664,7 @@ do
     -scotch | -scotchVersion | --scotchVersion)
         # Replace SCOTCH_VERSION=...
         optionValue=$(getOptionValue "$@")
-        replace etc/config.sh/scotch  SCOTCH_VERSION "$optionValue"
+        replaceEtc  config.sh/scotch  SCOTCH_VERSION "$optionValue"
         adjusted=true
         shift
         ;;
@@ -590,7 +672,7 @@ do
     -scotch-path | -scotchArchPath | --scotchArchPath)
         # Replace SCOTCH_ARCH_PATH=...
         optionValue=$(getOptionValue "$@")
-        replace etc/config.sh/scotch  SCOTCH_ARCH_PATH "\"$optionValue\""
+        replaceEtc  config.sh/scotch  SCOTCH_ARCH_PATH "\"$optionValue\""
         adjusted=true
         shift
         ;;
@@ -605,8 +687,8 @@ do
         _matches "$optionValue" "$expected" || \
             [ "$optionValue" != "${optionValue%system}" ] || \
             die "'$1' has bad value: '$optionValue'"
-        replace etc/config.sh/paraview   ParaView_VERSION "$optionValue"
-        replace etc/config.csh/paraview  ParaView_VERSION "$optionValue"
+        replaceEtc  config.sh/paraview   ParaView_VERSION "$optionValue"
+        replaceEtc  config.csh/paraview  ParaView_VERSION "$optionValue"
         adjusted=true
         shift
         ;;
@@ -614,8 +696,8 @@ do
     -paraview-qt)
         # Replace ParaView_QT=...
         optionValue=$(getOptionValue "$@")
-        replace etc/config.sh/paraview   ParaView_QT "$optionValue"
-        replace etc/config.csh/paraview  ParaView_QT "$optionValue"
+        replaceEtc  config.sh/paraview   ParaView_QT "$optionValue"
+        replaceEtc  config.csh/paraview  ParaView_QT "$optionValue"
         adjusted=true
         shift
         ;;
@@ -623,8 +705,8 @@ do
     -paraview-path | -paraviewInstall | --paraviewInstall)
         # Replace ParaView_DIR=...
         optionValue=$(getOptionValue "$@")
-        replace    etc/config.sh/paraview   ParaView_DIR \""$optionValue\""
-        replaceCsh etc/config.csh/paraview  ParaView_DIR \""$optionValue\""
+        replaceEtc     config.sh/paraview   ParaView_DIR \""$optionValue\""
+        replaceEtcCsh  config.csh/paraview  ParaView_DIR \""$optionValue\""
         adjusted=true
         shift
         ;;
@@ -632,8 +714,8 @@ do
     -vtk)
         # Replace vtk_version=...
         optionValue=$(getOptionValue "$@")
-        replace etc/config.sh/vtk   vtk_version "$optionValue"
-        replace etc/config.csh/vtk  vtk_version "$optionValue"
+        replaceEtc  config.sh/vtk   vtk_version "$optionValue"
+        replaceEtc  config.csh/vtk  vtk_version "$optionValue"
         adjusted=true
         shift
         ;;
@@ -641,8 +723,8 @@ do
     -mesa)
         # Replace mesa_version=...
         optionValue=$(getOptionValue "$@")
-        replace etc/config.sh/vtk   mesa_version "$optionValue"
-        replace etc/config.csh/vtk  mesa_version "$optionValue"
+        replaceEtc  config.sh/vtk   mesa_version "$optionValue"
+        replaceEtc  config.csh/vtk  mesa_version "$optionValue"
         adjusted=true
         shift
         ;;
