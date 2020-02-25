@@ -127,7 +127,9 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
 
     readHeader(is, STARCDCore::HEADER_CEL);
 
+    DynamicList<label> dynElemId;  // STARCD element id (1-based)
     DynamicList<Face>  dynFaces;
+
     DynamicList<label> dynZones;
     DynamicList<word>  dynNames;
     DynamicList<label> dynSizes;
@@ -137,6 +139,9 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     bool sorted = true;
     label zoneId = 0;
 
+    // Element id gets trashed with decompose into a triangle!
+    bool ignoreElemId = false;
+
     label ignoredLabel, shapeId, nLabels, cellTableId, typeId;
     DynamicList<label> vertexLabels(64);
 
@@ -144,7 +149,9 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
 
     while (is.read(tok).good() && tok.isLabel())
     {
-        // const label starCellId = tok.labelToken();
+        // First token is the element id (1-based)
+        label elemId = tok.labelToken();
+
         is  >> shapeId
             >> nLabels
             >> cellTableId
@@ -203,6 +210,8 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
             if (faceTraits<Face>::isTri() && nLabels > 3)
             {
                 // The face needs triangulation
+                ignoreElemId = true;
+                dynElemId.clear();
 
                 face f(vertices);
 
@@ -220,6 +229,9 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
             }
             else if (nLabels >= 3)
             {
+                --elemId;   // Convert 1-based -> 0-based
+                dynElemId.append(elemId);
+
                 dynFaces.append(Face(vertices));
                 dynZones.append(zoneId);
                 dynSizes[zoneId]++;
@@ -228,7 +240,14 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     }
     mapPointId.clear();
 
-    this->sortFacesAndStore(dynFaces, dynZones, sorted);
+
+    if (ignoreElemId)
+    {
+        dynElemId.clear();
+    }
+
+
+    this->sortFacesAndStore(dynFaces, dynZones, dynElemId, sorted);
 
     // Add zones (retaining empty ones)
     this->addZones(dynSizes, dynNames);
@@ -253,6 +272,7 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
     const UList<point>& pointLst = surf.points();
     const UList<Face>&  faceLst  = surf.surfFaces();
     const UList<label>& faceMap  = surf.faceMap();
+    const UList<label>& elemIds  = surf.faceIds();
 
     const surfZoneList zones =
     (
@@ -262,6 +282,15 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
     );
 
     const bool useFaceMap = (surf.useFaceMap() && zones.size() > 1);
+
+    // Possible to use faceIds?
+    const bool useOrigFaceIds =
+    (
+        !useFaceMap
+     && surf.useFaceIds()
+     && elemIds.size() == faceLst.size()
+    );
+
 
     fileName baseName = filename.lessExt();
 
@@ -286,6 +315,11 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
                 (useFaceMap ? faceMap[faceIndex] : faceIndex);
 
             const Face& f = faceLst[facei];
+
+            if (useOrigFaceIds)
+            {
+                elemId = elemIds[facei];
+            }
 
             writeShell(os, f, elemId, zoneIndex);
             ++elemId;

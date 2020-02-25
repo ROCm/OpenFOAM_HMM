@@ -340,13 +340,6 @@ public:
             return false;
         }
 
-        //- List of element ids/order of the original surface,
-        //- when hasFaceIds is true.
-        virtual const labelList& originalIds() const
-        {
-            return labelList::null();
-        }
-
 
     // General registry storage (optional)
 

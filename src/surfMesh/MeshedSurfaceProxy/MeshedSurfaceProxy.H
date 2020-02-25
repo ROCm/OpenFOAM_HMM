@@ -31,6 +31,9 @@ Description
     A proxy for writing MeshedSurface, UnsortedMeshedSurface and surfMesh
     to various file formats.
 
+    The constructor interface is fat and ugly, but is largely encapsulated
+    by conversion operators in other classes.
+
 SourceFiles
     MeshedSurfaceProxy.C
     MeshedSurfaceProxys.C
@@ -73,6 +76,9 @@ class MeshedSurfaceProxy
 
         const UList<label>& faceMap_;
 
+        const UList<label>& faceIds_;
+
+
 public:
 
     // Public Typedefs
@@ -104,8 +110,9 @@ public:
         (
             const pointField& pointLst,
             const UList<Face>& faceLst,
-            const UList<surfZone>& zoneLst = List<surfZone>(),
-            const labelUList& faceMap = labelUList::null()
+            const UList<surfZone>& zoneLst = UList<surfZone>::null(),
+            const labelUList& faceMap = labelUList::null(),
+            const labelUList& faceIdLst = labelUList::null()
         );
 
 
@@ -187,10 +194,22 @@ public:
                 return faceMap_;
             }
 
+            //- Const access to the faceIds, zero-sized when unused
+            const labelUList& faceIds() const
+            {
+                return faceIds_;
+            }
+
             //- Can/should use faceMap?
             bool useFaceMap() const
             {
                 return faceMap_.size() == faces_.size();
+            }
+
+            //- Possible to use faceIds?
+            bool useFaceIds() const
+            {
+                return faceIds_.size() == faces_.size();
             }
 
             //- Count number of triangles.

@@ -53,6 +53,7 @@ class meshedSurfRef
     std::reference_wrapper<const pointField> points_;
     std::reference_wrapper<const faceList> faces_;
     std::reference_wrapper<const labelList> zoneIds_;
+    std::reference_wrapper<const labelList> faceIds_;
 
 
 public:
@@ -64,7 +65,8 @@ public:
         :
             points_(std::cref<pointField>(pointField::null())),
             faces_(std::cref<faceList>(faceList::null())),
-            zoneIds_(std::cref<labelList>(labelList::null()))
+            zoneIds_(std::cref<labelList>(labelList::null())),
+            faceIds_(std::cref<labelList>(labelList::null()))
         {}
 
 
@@ -73,12 +75,14 @@ public:
         (
             const pointField& pointLst,
             const faceList& faceLst,
-            const labelList& zoneIdLst = labelList::null()
+            const labelList& zoneIdLst = labelList::null(),
+            const labelList& faceIdLst = labelList::null()
         )
         :
             points_(std::cref<pointField>(pointLst)),
             faces_(std::cref<faceList>(faceLst)),
-            zoneIds_(std::cref<labelList>(zoneIdLst))
+            zoneIds_(std::cref<labelList>(zoneIdLst)),
+            faceIds_(std::cref<labelList>(faceIdLst))
         {}
 
 
@@ -106,12 +110,19 @@ public:
             return zoneIds_.get();
         }
 
+        //- Per-face identifier (eg, element Id)
+        virtual const labelList& faceIds() const
+        {
+            return faceIds_.get();
+        }
+
         //- Remove all references by redirecting to null objects
         void clear()
         {
             points_ = std::cref<pointField>(pointField::null());
             faces_ = std::cref<faceList>(faceList::null());
             zoneIds_ = std::cref<labelList>(labelList::null());
+            faceIds_ = std::cref<labelList>(labelList::null());
         }
 
         //- Reset components
@@ -119,12 +130,14 @@ public:
         (
             const pointField& pointLst,
             const faceList& faceLst,
-            const labelList& zoneIdLst = labelList::null()
+            const labelList& zoneIdLst = labelList::null(),
+            const labelList& faceIdLst = labelList::null()
         )
         {
             points_ = std::cref<pointField>(pointLst);
             faces_ = std::cref<faceList>(faceLst);
             zoneIds_ = std::cref<labelList>(zoneIdLst);
+            faceIds_ = std::cref<labelList>(faceIdLst);
         }
 };
 

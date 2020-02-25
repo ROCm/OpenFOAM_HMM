@@ -79,6 +79,12 @@ public:
         {
             return labelList::null();
         }
+
+        //- Per-face identifier (eg, element Id)
+        virtual const labelList& faceIds() const
+        {
+            return labelList::null();
+        }
 };
 
 

@@ -115,6 +115,11 @@ private:
 
     // Private Data
 
+        //- Face ids.
+        //  If these exist, they are typically arise from reading a mesh
+        //  format from another CAE software (eg, NASTRAN, STARCD, ...)
+        labelList faceIds_;
+
         //- Zone information
         // (face ordering nFaces/startFace only used during reading/writing)
         surfZoneList zones_;
@@ -164,6 +169,12 @@ protected:
             return static_cast<List<Face>&>(*this);
         }
 
+        //- Non-const access to face ids
+        labelList& storedFaceIds()
+        {
+            return faceIds_;
+        }
+
         //- Non-const access to the zones
         surfZoneList& storedZones()
         {
@@ -175,6 +186,7 @@ protected:
         (
             DynamicList<Face>& unsortedFaces,
             DynamicList<label>& zoneIds,
+            DynamicList<label>& elemIds,
             bool sorted
         );
 
@@ -392,6 +404,14 @@ public:
         const List<Face>& surfFaces() const
         {
             return static_cast<const List<Face>&>(*this);
+        }
+
+        //- Return const access to faces ids
+        //  If these exist, they are typically arise from reading a mesh
+        //  format from another CAE software (eg, NASTRAN, STARCD, ...)
+        const labelList& faceIds() const
+        {
+            return faceIds_;
         }
 
         //- Const access to the surface zones.

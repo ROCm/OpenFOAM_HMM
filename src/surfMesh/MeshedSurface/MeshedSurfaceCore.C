@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,9 +52,11 @@ namespace Foam
         MeshedSurface<face>& surf
     )
     {
-        // First triangulate
-        // - slightly wasteful for space, but adjusts the zones too!
+        // First triangulate.
+        // Potentially wasteful of space, but adjusts zones and
+        // invalidates the faceIds
         surf.triangulate();
+
         this->storedPoints().transfer(surf.storedPoints());
         this->storedZones().transfer(surf.storedZones());
 
@@ -83,9 +85,11 @@ namespace Foam
         MeshedSurface<face>& surf
     )
     {
-        // First triangulate
-        // - slightly wasteful for space, but adjusts the zones too!
+        // First triangulate.
+        // Potentially wasteful of space, but adjusts zones and
+        // invalidates the faceIds
         surf.triangulate();
+
         this->storedPoints().transfer(surf.storedPoints());
         this->storedZones().transfer(surf.storedZones());
 

@@ -558,10 +558,15 @@ bool Foam::sampledSurfaces::performAction(unsigned request)
             // Write original ids
             if (s.hasFaceIds() && !s.interpolate())
             {
+                // This is still quite horrible.
+
+                Field<label> ids(s.faceIds());
+                ids += label(1);  // From 0-based to 1-based
+
                 writeSurface
                 (
                     outWriter,
-                    Field<label>(s.originalIds()),
+                    ids,
                     "Ids"
                 );
             }

@@ -61,6 +61,7 @@ Foam::mergedSurf::mergedSurf
     const pointField& unmergedPoints,
     const faceList& unmergedFaces,
     const labelList& origZoneIds,
+    const labelList& origFaceIds,
     const scalar mergeDim
 )
 :
@@ -71,6 +72,7 @@ Foam::mergedSurf::mergedSurf
         unmergedPoints,
         unmergedFaces,
         origZoneIds,
+        origFaceIds,
         mergeDim
     );
 }
@@ -91,6 +93,7 @@ void Foam::mergedSurf::clear()
     pointsMap_.clear();
 
     zoneIds_.clear();
+    faceIds_.clear();
 }
 
 
@@ -106,6 +109,7 @@ bool Foam::mergedSurf::merge
             unmergedSurface.points(),
             unmergedSurface.faces(),
             unmergedSurface.zoneIds(),
+            unmergedSurface.faceIds(),
             mergeDim
         );
 }
@@ -124,6 +128,7 @@ bool Foam::mergedSurf::merge
             unmergedPoints,
             unmergedFaces,
             labelList(),
+            labelList(),
             mergeDim
         );
 }
@@ -134,6 +139,7 @@ bool Foam::mergedSurf::merge
     const pointField& unmergedPoints,
     const faceList& unmergedFaces,
     const labelList& origZoneIds,
+    const labelList& origFaceIds,
     const scalar mergeDim
 )
 {
@@ -160,6 +166,7 @@ bool Foam::mergedSurf::merge
     // Now handle per-face information
 
     globalIndex::gatherOp(origZoneIds, zoneIds_);
+    globalIndex::gatherOp(origFaceIds, faceIds_);
 
     return true;
 }

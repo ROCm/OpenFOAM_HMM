@@ -71,6 +71,7 @@ void Foam::MeshedSurface<Face>::sortFacesAndStore
 (
     DynamicList<Face>& unsortedFaces,
     DynamicList<label>& zoneIds,
+    DynamicList<label>& elemIds,
     bool sorted
 )
 {
@@ -84,10 +85,16 @@ void Foam::MeshedSurface<Face>::sortFacesAndStore
         sorted = true;
     }
 
+    if (elemIds.size() != nInputFaces)
+    {
+        elemIds.clear();
+    }
+
     if (sorted)
     {
         // No additional sorting required
         this->storedFaces().transfer(unsortedFaces);
+        this->storedFaceIds().transfer(elemIds);
         return;
     }
 
@@ -105,6 +112,15 @@ void Foam::MeshedSurface<Face>::sortFacesAndStore
     {
         // Can use transfer, faceMap is unique
         newFaces[facei].transfer(unsortedFaces[faceMap[facei]]);
+    }
+
+    auto& newFaceIds = this->storedFaceIds();
+    newFaceIds.resize(elemIds.size());
+
+    // Element ids in sorted order
+    forAll(newFaceIds, facei)
+    {
+        newFaceIds[facei] = elemIds[faceMap[facei]];
     }
 }
 

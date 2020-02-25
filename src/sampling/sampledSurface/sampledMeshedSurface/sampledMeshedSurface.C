@@ -118,7 +118,7 @@ inline static IOobject selectReadIO(const word& name, const Time& runTime)
 
 void Foam::sampledMeshedSurface::setZoneMap()
 {
-    // Ensure zoneIds_ are correctly populated
+    // Populate zoneIds_ based on surfZone information
 
     const meshedSurface& s = static_cast<const meshedSurface&>(*this);
 
@@ -279,18 +279,9 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
 
     s = surface_.subsetMesh(facesToSubset, pointMap, faceMap);
 
+
     // Ensure zoneIds_ are indeed correct
     setZoneMap();
-
-    // This is currently only partially useful
-    if (keepIds_)
-    {
-        originalIds_ = faceMap;
-    }
-    else
-    {
-        originalIds_.clear();
-    }
 
 
     // Subset cellOrFaceLabels (for compact faces)
@@ -492,8 +483,7 @@ Foam::sampledMeshedSurface::sampledMeshedSurface
     ),
     sampleSource_(sampleSource),
     needsUpdate_(true),
-    keepIds_(false),
-    originalIds_(),
+    keepIds_(true),
     zoneIds_(),
     sampleElements_(),
     samplePoints_()
@@ -524,8 +514,7 @@ Foam::sampledMeshedSurface::sampledMeshedSurface
     ),
     sampleSource_(samplingSourceNames_.get("source", dict)),
     needsUpdate_(true),
-    keepIds_(dict.lookupOrDefault("keepIds", false)),
-    originalIds_(),
+    keepIds_(dict.getOrDefault("keepIds", true)),
     zoneIds_(),
     sampleElements_(),
     samplePoints_()
@@ -610,7 +599,6 @@ bool Foam::sampledMeshedSurface::expire()
     MeshStorage::clear();
     zoneIds_.clear();
 
-    originalIds_.clear();
     sampleElements_.clear();
     samplePoints_.clear();
 

@@ -145,7 +145,14 @@ Foam::fileName Foam::surfaceWriters::starcdWriter::write()
             mkDir(outputFile.path());
         }
 
-        MeshedSurfaceProxy<face>(surf.points(), surf.faces()).write
+        MeshedSurfaceProxy<face>
+        (
+            surf.points(),
+            surf.faces(),
+            UList<surfZone>::null(), // one zone
+            labelUList::null(),      // no faceMap
+            surf.faceIds()           // with face ids (if possible)
+        ).write
         (
             outputFile,
             "starcd",  // Canonical selection name

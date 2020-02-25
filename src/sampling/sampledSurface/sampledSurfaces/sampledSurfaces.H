@@ -69,7 +69,7 @@ Description
         }
 
         surfaces
-        (
+        {
             f0surf
             {
                 type        meshedSurface;
@@ -88,7 +88,7 @@ Description
                 // Optional: registry storage
                 store       true
             }
-        );
+        }
     }
     \endverbatim
 

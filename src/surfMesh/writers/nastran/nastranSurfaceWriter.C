@@ -211,6 +211,24 @@ void Foam::surfaceWriters::nastranWriter::writeGeometry
     const pointField& points = surf.points();
     const faceList&    faces = surf.faces();
     const labelList&   zones = surf.zoneIds();
+    const labelList& elemIds = surf.faceIds();
+
+    // Possible to use faceIds?
+    bool useOrigFaceIds = (elemIds.size() == faces.size());
+
+    if (useOrigFaceIds)
+    {
+        // Not possible with on-the-fly face decomposition
+        for (const auto& f : faces)
+        {
+            if (f.size() > 4)
+            {
+                useOrigFaceIds = false;
+                break;
+            }
+        }
+    }
+
 
     // Write points
 
@@ -237,6 +255,12 @@ void Foam::surfaceWriters::nastranWriter::writeGeometry
     forAll(faces, facei)
     {
         const face& f = faces[facei];
+
+        if (useOrigFaceIds)
+        {
+            // When available and not decomposed
+            elemId = elemIds[facei];
+        }
 
         // 1-offset for PID
         const label propId = 1 + (facei < zones.size() ? zones[facei] : 0);

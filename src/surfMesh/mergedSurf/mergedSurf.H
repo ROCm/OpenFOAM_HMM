@@ -96,6 +96,7 @@ public:
             const pointField& unmergedPoints,
             const faceList& unmergedFaces,
             const labelList& origZoneIds,
+            const labelList& origFaceIds,
             const scalar mergeDim
         );
 
@@ -133,6 +134,12 @@ public:
             return zoneIds_;
         }
 
+        //- Per-face identifier (eg, element Id)
+        virtual const labelList& faceIds() const
+        {
+            return faceIds_;
+        }
+
         //- Map for reordered points (old-to-new)
         const labelList& pointsMap() const
         {
@@ -166,6 +173,7 @@ public:
             const pointField& unmergedPoints,
             const faceList& unmergedFaces,
             const labelList& origZoneIds,
+            const labelList& origFaceIds,
             const scalar mergeDim
         );
 

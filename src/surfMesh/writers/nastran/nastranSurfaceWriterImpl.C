@@ -247,6 +247,16 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
 
         // Regular (undecomposed) faces
         const faceList& faces = surf.faces();
+        const labelList& elemIds = surf.faceIds();
+
+        // Possible to use faceIds?
+        // Not possible with on-the-fly face decomposition
+        const bool useOrigFaceIds =
+        (
+            elemIds.size() == faces.size()
+         && decompFaces.empty()
+        );
+
 
         label elemId = 0;
 
@@ -254,6 +264,12 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
         {
             forAll(faces, facei)
             {
+                if (useOrigFaceIds)
+                {
+                    // When available and not decomposed
+                    elemId = elemIds[facei];
+                }
+
                 const label beginElemId = elemId;
 
                 // Any face decomposition
@@ -299,6 +315,12 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
 
             forAll(faces, facei)
             {
+                if (useOrigFaceIds)
+                {
+                    // When available and not decomposed
+                    elemId = elemIds[facei];
+                }
+
                 const Type v(varScale * *valIter);
                 ++valIter;
 

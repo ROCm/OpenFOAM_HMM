@@ -175,6 +175,8 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
         }
     }
 
+    DynamicList<label> dynElemId; // unused
+
     if (nTri > faces.size())
     {
         // We are here if the target surface needs triangles and
@@ -203,7 +205,7 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
             zoneSizes[zonei]++;
         }
 
-        this->sortFacesAndStore(dynFaces, dynZones, sorted);
+        this->sortFacesAndStore(dynFaces, dynZones, dynElemId, sorted);
 
         // Add zones (retaining empty ones)
         this->addZones(zoneSizes, zoneNames);
@@ -225,7 +227,7 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
             zoneSizes[zonei]++;
         }
 
-        this->sortFacesAndStore(dynFaces, dynZones, sorted);
+        this->sortFacesAndStore(dynFaces, dynZones, dynElemId, sorted);
 
         // Add zones (retaining empty ones)
         this->addZones(zoneSizes, zoneNames);

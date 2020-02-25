@@ -238,13 +238,15 @@ Foam::MeshedSurfaceProxy<Face>::MeshedSurfaceProxy
     const pointField& pointLst,
     const UList<Face>& faceLst,
     const UList<surfZone>& zoneLst,
-    const labelUList& faceMap
+    const labelUList& faceMap,
+    const labelUList& faceIdsLst
 )
 :
     points_(pointLst),
     faces_(faceLst),
     zones_(zoneLst),
-    faceMap_(faceMap)
+    faceMap_(faceMap),
+    faceIds_(faceIdsLst)
 {}
 
 

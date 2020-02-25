@@ -117,6 +117,8 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
 
     DynamicList<label>  pointId;    // Nastran point id (1-based)
     DynamicList<point>  dynPoints;
+
+    DynamicList<label>  dynElemId;  // Nastran element id (1-based)
     DynamicList<Face>   dynFaces;
     DynamicList<label>  dynZones;
     DynamicList<label>  dynSizes;
@@ -126,6 +128,9 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
     // Assume that the groups are not intermixed
     label zoneId = 0;
     bool sorted = true;
+
+    // Element id gets trashed with decompose into a triangle!
+    bool ignoreElemId = false;
 
     // Name for face group
     Map<word> nameLookup;
@@ -222,7 +227,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
 
         if (cmd == "CTRIA3")
         {
-            (void) nextNasField(line, linei, 8); // 8-16
+            label elemId = readLabel(nextNasField(line, linei, 8)); // 8-16
             label groupId = readLabel(nextNasField(line, linei, 8)); // 16-24
             const auto a = readLabel(nextNasField(line, linei, 8)); // 24-32
             const auto b = readLabel(nextNasField(line, linei, 8)); // 32-40
@@ -247,13 +252,15 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
                 // Info<< "zone" << zoneId << " => group " << groupId <<nl;
             }
 
+            --elemId;   // Convert 1-based -> 0-based
+            dynElemId.append(elemId);
             dynFaces.append(Face{a, b, c});
             dynZones.append(zoneId);
             dynSizes[zoneId]++;
         }
         else if (cmd == "CQUAD4")
         {
-            (void) nextNasField(line, linei, 8); // 8-16
+            label elemId = readLabel(nextNasField(line, linei, 8)); // 8-16
             label groupId = readLabel(nextNasField(line, linei, 8)); // 16-24
             const auto a = readLabel(nextNasField(line, linei, 8)); // 24-32
             const auto b = readLabel(nextNasField(line, linei, 8)); // 32-40
@@ -281,6 +288,9 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
 
             if (faceTraits<Face>::isTri())
             {
+                ignoreElemId = true;
+                dynElemId.clear();
+
                 dynFaces.append(Face{a, b, c});
                 dynFaces.append(Face{c, d, a});
                 dynZones.append(zoneId);
@@ -289,6 +299,9 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
             }
             else
             {
+                --elemId;   // Convert 1-based -> 0-based
+
+                dynElemId.append(elemId);
                 dynFaces.append(Face{a,b,c,d});
                 dynZones.append(zoneId);
                 dynSizes[zoneId]++;
@@ -358,6 +371,10 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
     //        << " points:" << dynPoints.size()
     //        << endl;
 
+    if (ignoreElemId)
+    {
+        dynElemId.clear();
+    }
 
     // Transfer to normal lists
     this->storedPoints().transfer(dynPoints);
@@ -403,7 +420,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
         }
     }
 
-    this->sortFacesAndStore(dynFaces, dynZones, sorted);
+    this->sortFacesAndStore(dynFaces, dynZones, dynElemId, sorted);
 
     // Add zones (retaining empty ones)
     this->addZones(dynSizes, names);
@@ -428,6 +445,7 @@ void Foam::fileFormats::NASsurfaceFormat<Face>::write
     const UList<point>& pointLst = surf.points();
     const UList<Face>&  faceLst  = surf.surfFaces();
     const UList<label>& faceMap  = surf.faceMap();
+    const UList<label>& elemIds  = surf.faceIds();
 
     // for no zones, suppress the group name
     const surfZoneList zones =
@@ -438,6 +456,25 @@ void Foam::fileFormats::NASsurfaceFormat<Face>::write
     );
 
     const bool useFaceMap = (surf.useFaceMap() && zones.size() > 1);
+
+    // Possible to use faceIds?
+    bool useOrigFaceIds =
+        (!useFaceMap && elemIds.size() == faceLst.size());
+
+    if (useOrigFaceIds)
+    {
+        // Not possible with on-the-fly face decomposition
+
+        for (const auto& f : faceLst)
+        {
+            if (f.size() > 4)
+            {
+                useOrigFaceIds = false;
+                break;
+            }
+        }
+    }
+
 
     OFstream os(filename, streamOpt);
     if (!os.good())
@@ -488,6 +525,11 @@ void Foam::fileFormats::NASsurfaceFormat<Face>::write
                 (useFaceMap ? faceMap[faceIndex] : faceIndex);
 
             const Face& f = faceLst[facei];
+
+            if (useOrigFaceIds)
+            {
+                elemId = elemIds[facei];
+            }
 
             elemId = writeShell(os, f, elemId, zoneIndex);
         }

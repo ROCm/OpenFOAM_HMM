@@ -71,6 +71,8 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
 
     DynamicList<point> dynPoints;
     DynamicList<label> dynVerts;
+
+    DynamicList<label> dynElemId; // unused
     DynamicList<Face>  dynFaces;
 
     DynamicList<word>  dynNames;
@@ -207,7 +209,7 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
     // Transfer to normal lists
     this->storedPoints().transfer(dynPoints);
 
-    this->sortFacesAndStore(dynFaces, dynZones, sorted);
+    this->sortFacesAndStore(dynFaces, dynZones, dynElemId, sorted);
 
     // Add zones (retaining empty ones)
     this->addZones(dynSizes, dynNames);
