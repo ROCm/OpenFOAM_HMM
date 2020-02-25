@@ -393,7 +393,11 @@ Foam::MeshedSurface<Face>::MeshedSurface
 
 
 template<class Face>
-Foam::MeshedSurface<Face>::MeshedSurface(const fileName& name, const word& ext)
+Foam::MeshedSurface<Face>::MeshedSurface
+(
+    const fileName& name,
+    const word& ext
+)
 :
     MeshedSurface<Face>()
 {
@@ -417,6 +421,16 @@ Foam::MeshedSurface<Face>::MeshedSurface(Istream& is)
 {
     read(is);
 }
+
+
+template<class Face>
+Foam::MeshedSurface<Face>::MeshedSurface
+(
+    const Time& runTime
+)
+:
+    MeshedSurface<Face>(runTime, word::null)
+{}
 
 
 template<class Face>
@@ -449,6 +463,31 @@ Foam::MeshedSurface<Face>::MeshedSurface
     );
 
     this->transcribe(surf);
+}
+
+
+template<class Face>
+Foam::MeshedSurface<Face>::MeshedSurface
+(
+    const IOobject& io,
+    const dictionary& dict,
+    const bool isGlobal
+)
+:
+    MeshedSurface<Face>()
+{
+    fileName fName
+    (
+        fileFormats::surfaceFormatsCore::checkFile(io, dict, isGlobal)
+    );
+
+    // TBD:
+    // word fExt(dict.getOrDefault<word>("surfaceType", fName.ext()));
+    // read(fName, fExt);
+
+    this->read(fName, fName.ext());
+
+    this->scalePoints(dict.getOrDefault<scalar>("scale", 0));
 }
 
 

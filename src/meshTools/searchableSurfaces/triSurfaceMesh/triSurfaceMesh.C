@@ -47,97 +47,6 @@ Foam::word Foam::triSurfaceMesh::meshSubDir = "triSurface";
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::fileName Foam::triSurfaceMesh::checkFile
-(
-    const IOobject& io,
-    const bool isGlobal
-)
-{
-    const fileName fName
-    (
-        isGlobal
-      ? io.globalFilePath(typeName)
-      : io.localFilePath(typeName)
-    );
-    if (fName.empty())
-    {
-        FatalErrorInFunction
-            << "Cannot find triSurfaceMesh starting from "
-            << io.objectPath() << exit(FatalError);
-    }
-
-    return fName;
-}
-
-
-Foam::fileName Foam::triSurfaceMesh::relativeFilePath
-(
-    const IOobject& io,
-    const fileName& f,
-    const bool isGlobal
-)
-{
-    fileName fName(f);
-    fName.expand();
-    if (!fName.isAbsolute())
-    {
-        // Is the specified file:
-        // - local to the cwd?
-        // - local to the case dir?
-        // - or just another name?
-        fName = fileHandler().filePath
-        (
-            isGlobal,
-            IOobject(io, fName),
-            word::null
-        );
-    }
-    return fName;
-}
-
-Foam::fileName Foam::triSurfaceMesh::checkFile
-(
-    const IOobject& io,
-    const dictionary& dict,
-    const bool isGlobal
-)
-{
-    fileName fName;
-    if (dict.readIfPresent("file", fName, keyType::LITERAL))
-    {
-        const fileName rawFName(fName);
-
-        fName = relativeFilePath(io, rawFName, isGlobal);
-
-        if (!exists(fName))
-        {
-            FatalErrorInFunction
-                << "Cannot find triSurfaceMesh " << rawFName
-                << " starting from " << io.objectPath()
-                << exit(FatalError);
-        }
-    }
-    else
-    {
-        fName =
-        (
-            isGlobal
-          ? io.globalFilePath(typeName)
-          : io.localFilePath(typeName)
-        );
-
-        if (!exists(fName))
-        {
-            FatalErrorInFunction
-                << "Cannot find triSurfaceMesh starting from "
-                << io.objectPath() << exit(FatalError);
-        }
-    }
-
-    return fName;
-}
-
-
 bool Foam::triSurfaceMesh::addFaceToEdge
 (
     const edge& e,
@@ -308,7 +217,7 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io)
             false       // searchableSurface already registered under name
         )
     ),
-    triSurface(checkFile(static_cast<const searchableSurface&>(*this), true)),
+    triSurface(static_cast<const searchableSurface&>(*this), dictionary::null),
     triSurfaceRegionSearch(static_cast<const triSurface&>(*this)),
     minQuality_(-1),
     surfaceClosed_(-1),
@@ -341,19 +250,16 @@ Foam::triSurfaceMesh::triSurfaceMesh
             false       // searchableSurface already registered under name
         )
     ),
-    triSurface
-    (
-        checkFile(static_cast<const searchableSurface&>(*this), dict, true)
-    ),
+    triSurface(static_cast<const searchableSurface&>(*this), dict),
     triSurfaceRegionSearch(static_cast<const triSurface&>(*this), dict),
     minQuality_(-1),
     surfaceClosed_(-1),
     outsideVolType_(volumeType::UNKNOWN)
 {
-    // Reading from supplied file name instead of objectPath/filePath
+    // Adjust to use supplied file name instead of objectPath/filePath
     if (dict.readIfPresent("file", fName_, keyType::LITERAL))
     {
-        fName_ = relativeFilePath
+        fName_ = triSurface::relativeFilePath
         (
             static_cast<const searchableSurface&>(*this),
             fName_,
@@ -404,7 +310,7 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io, const readAction r)
             false       // searchableSurface already registered under name
         )
     ),
-    triSurface(),       // construct null
+    triSurface(),
     triSurfaceRegionSearch(static_cast<const triSurface&>(*this)),
     minQuality_(-1),
     surfaceClosed_(-1),
@@ -502,7 +408,7 @@ Foam::triSurfaceMesh::triSurfaceMesh
             false       // searchableSurface already registered under name
         )
     ),
-    triSurface(),       // construct null
+    triSurface(),
     triSurfaceRegionSearch(static_cast<const triSurface&>(*this), dict),
     minQuality_(-1),
     surfaceClosed_(-1),

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,9 +51,9 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-
+// Forward Declarations
 class Time;
+class IOobject;
 class IFstream;
 class surfZone;
 class triSurface;
@@ -240,6 +240,54 @@ public:
         static const wordHashSet& writeTypes();
 
 
+    // IO helpers
+
+        //- Return fileName.
+        //  If fileName is relative gets treated as local to IOobject.
+        static fileName relativeFilePath
+        (
+            const IOobject& io,
+            const fileName& f,
+            const bool isGlobal = true  //!< resolve as a global file
+        );
+
+        //- Return fileName to load IOobject from.
+        //  Fatal if the file does not exist
+        static fileName checkFile
+        (
+            const IOobject& io,
+            const bool isGlobal = true  //!< resolve as a global file
+        );
+
+        //- Return fileName to load IOobject from.
+        //  Supports optional override of fileName with "file" entry
+        //  Fatal if the file does not exist
+        static fileName checkFile
+        (
+            const IOobject& io,
+            const dictionary& dict,
+            const bool isGlobal = true  //!< resolve as a global file
+        );
+
+        //- Use IOobject information to resolve file to load from,
+        //- or empty if the file does not exist.
+        static fileName findFile
+        (
+            const IOobject& io,
+            const bool isGlobal = true  //!< resolve as a global file
+        );
+
+        //- Use IOobject information to resolve file to load from,
+        //- or empty if the file does not exist.
+        //  Supports optional override of fileName with "file" entry
+        static fileName findFile
+        (
+            const IOobject& io,
+            const dictionary& dict,
+            const bool isGlobal = true  //!< resolve as a global file
+        );
+
+
     // Constructors
 
         //- Construct null
@@ -286,7 +334,11 @@ public:
 
         //- Construct from file name (uses extension to determine type).
         //  Optional (positive, non-zero) point scaling is possible.
-        triSurface(const fileName& name, const scalar scaleFactor = -1);
+        explicit triSurface
+        (
+            const fileName& name,
+            const scalar scaleFactor = -1
+        );
 
         //- Construct from file name (uses extension to determine type)
         triSurface
@@ -297,10 +349,20 @@ public:
         );
 
         //- Construct from Istream
-        triSurface(Istream& is);
+        explicit triSurface(Istream& is);
 
-        //- Construct from objectRegistry
-        triSurface(const Time& d);
+        //- Construct from objectRegistry by reading an ".ftr" file
+        explicit triSurface(const Time& d);
+
+        //- Read construct using IO to find the file location.
+        //  Dictionary may contain optional 'file' entry, and an
+        //  optional 'scale' entry (eg, 0.001: mm -> m)
+        triSurface
+        (
+            const IOobject& io,
+            const dictionary& dict,
+            const bool isGlobal = true  //!< resolve as a global file
+        );
 
 
     //- Destructor

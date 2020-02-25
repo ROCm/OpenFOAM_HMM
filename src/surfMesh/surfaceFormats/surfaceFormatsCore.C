@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "surfaceFormatsCore.H"
-
 #include "Time.H"
 #include "ListOps.H"
 #include "Fstream.H"
@@ -155,6 +154,154 @@ Foam::fileName Foam::fileFormats::surfaceFormatsCore::findMeshFile
     return t.path()/t.constant()/localName;
 }
 #endif
+
+
+Foam::fileName Foam::fileFormats::surfaceFormatsCore::relativeFilePath
+(
+    const IOobject& io,
+    const fileName& f,
+    const bool isGlobal
+)
+{
+    fileName fName(f);
+    fName.expand();
+    if (!fName.isAbsolute())
+    {
+        // Is the specified file:
+        // - local to the cwd?
+        // - local to the case dir?
+        // - or just another name?
+        fName = fileHandler().filePath
+        (
+            isGlobal,
+            IOobject(io, fName),
+            word::null
+        );
+    }
+    return fName;
+}
+
+
+Foam::fileName Foam::fileFormats::surfaceFormatsCore::findFile
+(
+    const IOobject& io,
+    const bool isGlobal
+)
+{
+    fileName fName
+    (
+        isGlobal
+      ? io.globalFilePath(word::null)
+      : io.localFilePath(word::null)
+    );
+
+    if (!exists(fName))
+    {
+        fName.clear();
+    }
+
+    return fName;
+}
+
+
+Foam::fileName Foam::fileFormats::surfaceFormatsCore::findFile
+(
+    const IOobject& io,
+    const dictionary& dict,
+    const bool isGlobal
+)
+{
+    fileName fName;
+    if (dict.readIfPresent("file", fName, keyType::LITERAL))
+    {
+        fName = relativeFilePath(io, fName, isGlobal);
+    }
+    else
+    {
+        fName =
+        (
+            isGlobal
+          ? io.globalFilePath(word::null)
+          : io.localFilePath(word::null)
+        );
+    }
+
+    if (!exists(fName))
+    {
+        fName.clear();
+    }
+
+    return fName;
+}
+
+
+Foam::fileName Foam::fileFormats::surfaceFormatsCore::checkFile
+(
+    const IOobject& io,
+    const bool isGlobal
+)
+{
+    fileName fName
+    (
+        isGlobal
+      ? io.globalFilePath(word::null)
+      : io.localFilePath(word::null)
+    );
+
+    if (fName.empty())
+    {
+        FatalErrorInFunction
+            << "Cannot find surface starting from "
+            << io.objectPath() << nl
+            << exit(FatalError);
+    }
+
+    return fName;
+}
+
+
+Foam::fileName Foam::fileFormats::surfaceFormatsCore::checkFile
+(
+    const IOobject& io,
+    const dictionary& dict,
+    const bool isGlobal
+)
+{
+    fileName fName;
+    if (dict.readIfPresent("file", fName, keyType::LITERAL))
+    {
+        const fileName rawFName(fName);
+
+        fName = relativeFilePath(io, rawFName, isGlobal);
+
+        if (!exists(fName))
+        {
+            FatalErrorInFunction
+                << "Cannot find surface " << rawFName
+                << " starting from " << io.objectPath() << nl
+                << exit(FatalError);
+        }
+    }
+    else
+    {
+        fName =
+        (
+            isGlobal
+          ? io.globalFilePath(word::null)
+          : io.localFilePath(word::null)
+        );
+
+        if (!exists(fName))
+        {
+            FatalErrorInFunction
+                << "Cannot find surface starting from "
+                << io.objectPath() << nl
+                << exit(FatalError);
+        }
+    }
+
+    return fName;
+}
 
 
 bool Foam::fileFormats::surfaceFormatsCore::checkSupport

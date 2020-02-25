@@ -203,19 +203,28 @@ public:
         );
 
         //- Construct from file name (uses extension to determine type)
-        UnsortedMeshedSurface(const fileName& name);
+        explicit UnsortedMeshedSurface(const fileName& name);
 
         //- Construct from file name (uses extension to determine type)
         UnsortedMeshedSurface(const fileName& name, const word& ext);
 
         //- Construct from Istream
-        UnsortedMeshedSurface(Istream& is);
+        explicit UnsortedMeshedSurface(Istream& is);
 
-        //- Construct from objectRegistry and a named surface
+        //- Construct from database (as surfMesh) with default name
+        explicit UnsortedMeshedSurface(const Time& runTime);
+
+        //- Construct from database (as surfMesh) with given surface name
+        UnsortedMeshedSurface(const Time& runTime, const word& surfName);
+
+        //- Read construct using IO to find the file location.
+        //  Dictionary may contain optional 'file' entry, and an
+        //  optional 'scale' entry (eg, 0.001: mm -> m)
         UnsortedMeshedSurface
         (
-            const Time& t,
-            const word& surfName = word::null
+            const IOobject& io,
+            const dictionary& dict,
+            const bool isGlobal = true  //!< resolve as a global file
         );
 
 

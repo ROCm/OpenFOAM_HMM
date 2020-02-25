@@ -504,10 +504,7 @@ Foam::triSurface::triSurface
     const scalar scaleFactor
 )
 :
-    ParentType(List<Face>(), pointField()),
-    patches_(),
-    sortedEdgeFacesPtr_(nullptr),
-    edgeOwnerPtr_(nullptr)
+    triSurface()
 {
     read(name, ext);
     scalePoints(scaleFactor);

@@ -28,8 +28,8 @@ Class
     Foam::sampledTriSurfaceMesh
 
 Description
-    A sampledSurface from a triSurfaceMesh. It samples on the points/triangles
-    of the triSurface.
+    A sampledSurface from a meshed surface.
+    It samples on the points/faces of the triSurface.
 
     - it either samples cells or (non-coupled) boundary faces
 
@@ -98,7 +98,7 @@ SourceFiles
 #define sampledTriSurfaceMesh_H
 
 #include "sampledSurface.H"
-#include "triSurfaceMesh.H"
+#include "triSurface.H"
 #include "MeshedSurface.H"
 #include "MeshedSurfacesFwd.H"
 
@@ -120,7 +120,7 @@ class sampledTriSurfaceMesh
     public meshedSurface
 {
 public:
-        //- Types of communications
+        //- Types of sampling regions
         enum samplingSource
         {
             cells,
@@ -130,7 +130,7 @@ public:
 
 private:
 
-    //- Private typedefs for convenience
+        //- Private typedefs for convenience
         typedef meshedSurface MeshStorage;
 
 
@@ -138,8 +138,11 @@ private:
 
         static const Enum<samplingSource> samplingSourceNames_;
 
+        //- The name of the input surface
+        word surfaceName_;
+
         //- Surface to sample on
-        const triSurfaceMesh surface_;
+        const triSurface surface_;
 
         //- Whether to sample internal cell values or boundary values
         const samplingSource sampleSource_;
@@ -151,11 +154,8 @@ private:
         bool keepIds_;
 
         //- List of element ids/order of the original surface,
-        //  when keepIds is active.
+        //- when keepIds is active.
         labelList originalIds_;
-
-        //- Search tree for all non-coupled boundary faces
-        mutable autoPtr<indexedOctree<treeDataFace>> boundaryTreePtr_;
 
         //- For compatibility with the meshSurf interface
         labelList zoneIds_;
@@ -210,18 +210,9 @@ public:
             const dictionary& dict
         );
 
-        //- Construct from triSurface
-        sampledTriSurfaceMesh
-        (
-            const word& name,
-            const polyMesh& mesh,
-            const triSurface& surface,
-            const word& sampleSourceName
-        );
-
 
     //- Destructor
-    virtual ~sampledTriSurfaceMesh();
+    virtual ~sampledTriSurfaceMesh() = default;
 
 
     // Member Functions

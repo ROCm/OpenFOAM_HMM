@@ -33,7 +33,6 @@ License
 #include "treeDataCell.H"
 #include "treeDataFace.H"
 #include "meshTools.H"
-
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -78,7 +77,31 @@ namespace Foam
             }
         }
     };
+
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// The IOobject for reading
+inline static IOobject selectReadIO(const word& name, const Time& runTime)
+{
+    return IOobject
+    (
+        name,
+        runTime.constant(),     // instance
+        "triSurface",           // local
+        runTime,                // registry
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE,
+        false   // no register
+    );
 }
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -94,14 +117,14 @@ void Foam::sampledTriSurfaceMesh::setZoneMap
     {
         sz += zn.size();
     }
+    zoneIds.resize(sz);
 
-    zoneIds.setSize(sz);
     forAll(zoneLst, zonei)
     {
         const surfZone& zn = zoneLst[zonei];
 
         // Assign sub-zone Ids
-        SubList<label>(zoneIds, zn.size(), zn.start()) = zonei;
+        SubList<label>(zoneIds, zn.range()) = zonei;
     }
 }
 
@@ -224,8 +247,8 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
             << " keeping:" << nFound << endl;
     }
 
-    // Now subset the surface. Do not use triSurface::subsetMesh since requires
-    // original surface to be in compact numbering.
+    // Now subset the surface.
+    // Done manually in case the original had non-compact point numbering
 
     const triSurface& s = surface_;
 
@@ -393,15 +416,10 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
 
     forAll(faceMap, facei)
     {
-        const labelledTri& origF = s[faceMap[facei]];
         face& f = surfFaces[facei];
 
-        f = triFace
-        (
-            reversePointMap[origF[0]],
-            reversePointMap[origF[1]],
-            reversePointMap[origF[2]]
-        );
+        f = s[faceMap[facei]];                  // Copy original face
+        inplaceRenumber(reversePointMap, f);    // renumber point ids
 
         for (const label labi : f)
         {
@@ -583,18 +601,11 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
 :
     sampledSurface(name, mesh),
     MeshStorage(),
+    surfaceName_(surfaceName),
     surface_
     (
-        IOobject
-        (
-            surfaceName,
-            mesh.time().constant(), // instance
-            "triSurface",           // local
-            mesh.time(),            // registry
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        )
+        selectReadIO(surfaceName, mesh.time()),
+        dictionary::null
     ),
     sampleSource_(sampleSource),
     needsUpdate_(true),
@@ -615,18 +626,17 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
 :
     sampledSurface(name, mesh, dict),
     MeshStorage(),
+    surfaceName_
+    (
+        triSurface::findFile
+        (
+            selectReadIO(dict.get<word>("surface"), mesh.time()),
+            dict
+        ).name()
+    ),
     surface_
     (
-        IOobject
-        (
-            dict.get<word>("surface"),
-            mesh.time().constant(), // instance
-            "triSurface",           // local
-            mesh.time(),            // registry
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
+        selectReadIO(dict.get<word>("surface"), mesh.time()),
         dict
     ),
     sampleSource_(samplingSourceNames_.get("source", dict)),
@@ -636,46 +646,6 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
     zoneIds_(),
     sampleElements_(),
     samplePoints_()
-{}
-
-
-Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
-(
-    const word& name,
-    const polyMesh& mesh,
-    const triSurface& surface,
-    const word& sampleSourceName
-)
-:
-    sampledSurface(name, mesh),
-    MeshStorage(),
-    surface_
-    (
-        IOobject
-        (
-            name,
-            mesh.time().constant(), // instance
-            "triSurface",           // local
-            mesh.time(),            // registry
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        surface
-    ),
-    sampleSource_(samplingSourceNames_[sampleSourceName]),
-    needsUpdate_(true),
-    keepIds_(false),
-    originalIds_(),
-    zoneIds_(),
-    sampleElements_(),
-    samplePoints_()
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::sampledTriSurfaceMesh::~sampledTriSurfaceMesh()
 {}
 
 
@@ -700,7 +670,6 @@ bool Foam::sampledTriSurfaceMesh::expire()
     zoneIds_.clear();
 
     originalIds_.clear();
-    boundaryTreePtr_.clear();
     sampleElements_.clear();
     samplePoints_.clear();
 
@@ -717,11 +686,7 @@ bool Foam::sampledTriSurfaceMesh::update()
     }
 
     // Calculate surface and mesh overlap bounding box
-    treeBoundBox bb
-    (
-        surface_.triSurface::points(),
-        surface_.triSurface::meshPoints()
-    );
+    treeBoundBox bb(surface_.points(), surface_.meshPoints());
 
     // Check for overlap with (global!) mesh bb
     const bool intersect = bb.intersect(mesh().bounds());
@@ -732,7 +697,7 @@ bool Foam::sampledTriSurfaceMesh::update()
         // bounding box so we don't get any 'invalid bounding box' errors.
 
         WarningInFunction
-            << "Surface " << surface_.searchableSurface::name()
+            << "Surface " << surfaceName_
             << " does not overlap bounding box of mesh " << mesh().bounds()
             << endl;
 
@@ -865,7 +830,7 @@ Foam::tmp<Foam::tensorField> Foam::sampledTriSurfaceMesh::interpolate
 void Foam::sampledTriSurfaceMesh::print(Ostream& os) const
 {
     os  << "sampledTriSurfaceMesh: " << name() << " :"
-        << " surface:" << surface_.objectRegistry::name()
+        << " surface:" << surfaceName_
         << " faces:"   << faces().size()
         << " points:"  << points().size()
         << " zoneids:" << zoneIds().size();

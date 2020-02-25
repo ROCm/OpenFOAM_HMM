@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,9 +49,12 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class ISstream;
 class Time;
+class triSurface;
+class IOobject;
+class dictionary;
 
 namespace fileFormats
 {
@@ -63,9 +67,14 @@ class surfaceFormatsCore
 {
 protected:
 
+    // Friendship with triSurface (for IO helpers)
+    friend class ::Foam::triSurface;
+
+
+    // General
+
         //- Read non-empty and non-comment line
         static string getLineNoComment(ISstream& is, const char comment='#');
-
 
         //- Return a surfZone list with a single entry, the size of which
         //- corresponds to that of the container
@@ -76,8 +85,40 @@ protected:
             const word& name = "zone0"
         )
         {
-            return List<surfZone>(1, surfZone(name, container.size(), 0, 0));
+            return List<surfZone>(1, surfZone(name, container.size()));
         }
+
+
+    // IO helpers
+
+        //- Return fileName.
+        //  If fileName is relative gets treated as local to IOobject.
+        //  Duplicate of triSurfaceMesh::relativeFilePath
+        static fileName relativeFilePath
+        (
+            const IOobject& io,
+            const fileName& f,
+            const bool isGlobal = true  //!< resolve as a global file
+        );
+
+        //- Return fileName to load IOobject from.
+        //  Fatal if the file does not exist
+        static fileName checkFile
+        (
+            const IOobject& io,
+            const bool isGlobal = true  //!< resolve as a global file
+        );
+
+        //- Return fileName to load IOobject from.
+        //  Supports optional override of fileName with "file" entry
+        //  Fatal if the file does not exist
+        static fileName checkFile
+        (
+            const IOobject& io,
+            const dictionary& dict,
+            const bool isGlobal = true  //!< resolve as a global file
+        );
+
 
 public:
 
@@ -99,39 +140,57 @@ public:
             const word& functionName
         );
 
-        //- Return the local file name (within time directory)
-        //  NEEDS FIXING
-        static fileName localMeshFileName
+        //- Use IOobject information to resolve file to load from,
+        //- or empty if the file does not exist.
+        static fileName findFile
         (
-            const word& surfName = word::null
+            const IOobject& io,
+            const bool isGlobal = true  //!< resolve as a global file
         );
 
-        //- Find instance with surfName
-        //  NEEDS FIXING
-        static fileName findMeshInstance
+        //- Use IOobject information to resolve file to load from,
+        //- or empty if the file does not exist.
+        //  Supports optional override of fileName with "file" entry
+        static fileName findFile
         (
-            const Time&,
-            const word& surfName = word::null
+            const IOobject& io,
+            const dictionary& dict,
+            const bool isGlobal = true  //!< resolve as a global file
         );
 
-        //- Find mesh file with surfName
-        //  NEEDS FIXING
-        static fileName findMeshFile
-        (
-            const Time&,
-            const word& surfName = word::null
-        );
+
+//        //- Return the local file name (within time directory)
+//        //  NEEDS FIXING
+//        static fileName localMeshFileName
+//        (
+//            const word& surfName = word::null
+//        );
+//
+//        //- Find instance with surfName
+//        //  NEEDS FIXING
+//        static fileName findMeshInstance
+//        (
+//            const Time&,
+//            const word& surfName = word::null
+//        );
+//
+//        //- Find mesh file with surfName
+//        //  NEEDS FIXING
+//        static fileName findMeshFile
+//        (
+//            const Time&,
+//            const word& surfName = word::null
+//        );
 
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         surfaceFormatsCore() = default;
 
 
     //- Destructor
     virtual ~surfaceFormatsCore() = default;
-
 };
 
 

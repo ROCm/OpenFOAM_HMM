@@ -60,10 +60,10 @@ class triSurfaceMeshPointSet
 :
     public sampledSet
 {
-    // Private data
+    // Private Data
 
-        //- Name of triSurfaceMesh
-        const word surface_;
+        //- The surface name
+        const word surfaceName_;
 
         //- Sampling points
         List<point> sampleCoords_;

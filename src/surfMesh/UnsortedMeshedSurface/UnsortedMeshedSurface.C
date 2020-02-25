@@ -270,14 +270,52 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 template<class Face>
 Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 (
-    const Time& t,
+    const Time& runTime
+)
+:
+    UnsortedMeshedSurface<Face>()
+{
+    MeshedSurface<Face> surf(runTime);
+    transfer(surf);
+}
+
+
+template<class Face>
+Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
+(
+    const Time& runTime,
     const word& surfName
 )
 :
     UnsortedMeshedSurface<Face>()
 {
-    MeshedSurface<Face> surf(t, surfName);
+    MeshedSurface<Face> surf(runTime, surfName);
     transfer(surf);
+}
+
+
+template<class Face>
+Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
+(
+    const IOobject& io,
+    const dictionary& dict,
+    const bool isGlobal
+)
+:
+    UnsortedMeshedSurface<Face>()
+{
+    fileName fName
+    (
+        fileFormats::surfaceFormatsCore::checkFile(io, dict, isGlobal)
+    );
+
+    // TBD:
+    // word fExt(dict.getOrDefault<word>("surfaceType", fName.ext()));
+    // read(fName, fExt);
+
+    this->read(fName, fName.ext());
+
+    this->scalePoints(dict.getOrDefault<scalar>("scale", 0));
 }
 
 
@@ -291,19 +329,15 @@ void Foam::UnsortedMeshedSurface<Face>::setOneZone()
     zoneIds_.resize(size());
     zoneIds_ = 0;
 
-    word zoneName;
-    if (zoneToc_.size())
-    {
-        zoneName = zoneToc_[0].name();
-    }
-    if (zoneName.empty())
-    {
-        zoneName = "zone0";
-    }
-
     // Assign single default zone
     zoneToc_.resize(1);
-    zoneToc_[0] = surfZoneIdentifier(zoneName, 0);
+
+    zoneToc_[0].index() = 0;
+
+    if (zoneToc_[0].name().empty())
+    {
+        zoneToc_[0].name() = "zone0";
+    }
 }
 
 
@@ -324,7 +358,7 @@ void Foam::UnsortedMeshedSurface<Face>::setZones
         zoneToc_[zonei] = zone;
 
         // Assign sub-zone Ids
-        SubList<label>(zoneIds_, zone.size(), zone.start()) = zonei;
+        SubList<label>(zoneIds_, zone.range()) = zonei;
     }
 }
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -104,6 +104,62 @@ bool Foam::triSurface::canRead(const fileName& name, const bool verbose)
     return canReadType(ext, verbose);
 }
 
+
+
+
+Foam::fileName Foam::triSurface::relativeFilePath
+(
+    const IOobject& io,
+    const fileName& f,
+    const bool isGlobal
+)
+{
+    return fileFormats::surfaceFormatsCore::relativeFilePath(io, f, isGlobal);
+}
+
+
+Foam::fileName Foam::triSurface::checkFile
+(
+    const IOobject& io,
+    const bool isGlobal
+)
+{
+    return fileFormats::surfaceFormatsCore::checkFile(io, isGlobal);
+}
+
+
+Foam::fileName Foam::triSurface::checkFile
+(
+    const IOobject& io,
+    const dictionary& dict,
+    const bool isGlobal
+)
+{
+    return fileFormats::surfaceFormatsCore::checkFile(io, dict, isGlobal);
+}
+
+
+Foam::fileName Foam::triSurface::findFile
+(
+    const IOobject& io,
+    const bool isGlobal
+)
+{
+    return fileFormats::surfaceFormatsCore::findFile(io, isGlobal);
+}
+
+
+Foam::fileName Foam::triSurface::findFile
+(
+    const IOobject& io,
+    const dictionary& dict,
+    const bool isGlobal
+)
+{
+    return fileFormats::surfaceFormatsCore::findFile(io, dict, isGlobal);
+}
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::triSurface::printTriangle
@@ -143,7 +199,8 @@ bool Foam::triSurface::read
     if (check && !exists(name))
     {
         FatalErrorInFunction
-            << "Cannnot read " << name << exit(FatalError);
+            << "Cannnot read " << name << nl
+            << exit(FatalError);
     }
 
     if (ext == "gz")
@@ -257,10 +314,7 @@ void Foam::triSurface::write
 
 Foam::triSurface::triSurface(Istream& is)
 :
-    ParentType(List<Face>(), pointField()),
-    patches_(),
-    sortedEdgeFacesPtr_(nullptr),
-    edgeOwnerPtr_(nullptr)
+    triSurface()
 {
     read(is);
 
@@ -270,10 +324,7 @@ Foam::triSurface::triSurface(Istream& is)
 
 Foam::triSurface::triSurface(const Time& d)
 :
-    ParentType(List<Face>(), pointField()),
-    patches_(),
-    sortedEdgeFacesPtr_(nullptr),
-    edgeOwnerPtr_(nullptr)
+    triSurface()
 {
     fileName foamFile(d.caseName() + ".ftr");
 
@@ -282,6 +333,29 @@ Foam::triSurface::triSurface(const Time& d)
     IFstream foamStream(foamPath);
 
     read(foamStream);
+
+    setDefaultPatches();
+}
+
+
+Foam::triSurface::triSurface
+(
+    const IOobject& io,
+    const dictionary& dict,
+    const bool isGlobal
+)
+:
+    triSurface()
+{
+    fileName fName(checkFile(io, dict, isGlobal));
+
+    // TBD:
+    // word fileExt = dict.getOrDefault<word>("surfaceType", fName.ext());
+    // read(fName, ext);
+
+    read(fName, fName.ext());
+
+    scalePoints(dict.getOrDefault<scalar>("scale", 0));
 
     setDefaultPatches();
 }

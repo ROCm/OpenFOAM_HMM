@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -108,15 +108,6 @@ public:
             const word& name,
             const polyMesh& mesh,
             const dictionary& dict
-        );
-
-        //- Construct from triSurface
-        sampledTriSurfaceMeshNormal
-        (
-            const word& name,
-            const polyMesh& mesh,
-            const triSurface& surface,
-            const word& sampleSourceName
         );
 
 

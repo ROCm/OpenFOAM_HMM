@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -121,32 +122,34 @@ Foam::triSurfaceMeshPointSet::triSurfaceMeshPointSet
 )
 :
     sampledSet(name, mesh, searchEngine, dict),
-    surface_(dict.get<word>("surface"))
+    surfaceName_(dict.get<word>("surface"))
 {
-    // Load surface.
-    if (mesh.time().foundObject<triSurfaceMesh>(surface_))
+    // Get or load surface
+
+    const auto* surfPtr =
+        mesh.time().cfindObject<triSurfaceMesh>(surfaceName_);
+
+    if (surfPtr)
     {
         // Note: should use localPoints() instead of points() but assume
         // trisurface is compact.
-        sampleCoords_ = mesh.time().lookupObject<triSurfaceMesh>
-        (
-            surface_
-        ).points();
+        sampleCoords_ = surfPtr->points();
     }
     else
     {
-        sampleCoords_ = triSurfaceMesh
+        sampleCoords_ = triSurface
         (
             IOobject
             (
-                surface_,
+                surfaceName_,
                 mesh.time().constant(),     // instance
                 "triSurface",               // local
                 mesh.time(),
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
                 false
-            )
+            ),
+            dictionary::null
         ).points();
     }
 

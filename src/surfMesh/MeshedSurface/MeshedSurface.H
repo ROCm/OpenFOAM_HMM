@@ -270,19 +270,32 @@ public:
         );
 
         //- Construct from a surfMesh
-        MeshedSurface(const surfMesh& mesh);
+        explicit MeshedSurface(const surfMesh& mesh);
 
         //- Construct from file name (uses extension to determine type)
-        MeshedSurface(const fileName& name);
+        explicit MeshedSurface(const fileName& name);
 
         //- Construct from file name (uses extension to determine type)
-        MeshedSurface(const fileName& name, const word& ext);
+        explicit MeshedSurface(const fileName& name, const word& ext);
 
         //- Construct from Istream
-        MeshedSurface(Istream& is);
+        explicit MeshedSurface(Istream& is);
 
-        //- Construct from database
-        MeshedSurface(const Time& runTime, const word& surfName = word::null);
+        //- Construct from database (as surfMesh) with default name
+        explicit MeshedSurface(const Time& runTime);
+
+        //- Construct from database (as surfMesh) with given surface name
+        MeshedSurface(const Time& runTime, const word& surfName);
+
+        //- Read construct using IO to find the file location.
+        //  Dictionary may contain optional 'file' entry, and an
+        //  optional 'scale' entry (eg, 0.001: mm -> m)
+        MeshedSurface
+        (
+            const IOobject& io,
+            const dictionary& dict,
+            const bool isGlobal = true  //!< resolve as a global file
+        );
 
 
     // Declare run-time constructor selection table
