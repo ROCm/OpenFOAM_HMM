@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,6 +47,7 @@ SourceFiles
 #include "labelList.H"
 #include "stringList.H"
 #include "wordRes.H"
+#include "flipOp.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -345,6 +346,32 @@ struct foundOp
         return values.found(text);
     }
 };
+
+
+//- Return ids for items with matching names.
+//  Uses a combination of whitelist and blacklist.
+//
+//  An empty whitelist accepts everything that is not blacklisted.
+//  A regex match is trumped by a literal match.
+//
+//  Eg,
+//  \verbatim
+//     input:  ( abc apple wall wall1 wall2 )
+//     whitelist:  ( abc  def  "wall.*" )
+//     blacklist:  ( "[ab].*"  wall )
+//
+//     result:  (abc wall1 wall2)
+//  \endverbatim
+//
+//  \return List indices for matches
+template<class StringListType, class AccessOp = noOp>
+labelList findMatching
+(
+    const StringListType& input,
+    const wordRes& whitelist,
+    const wordRes& blacklist = wordRes(),
+    AccessOp aop = noOp()
+);
 
 } // End namespace stringListOps
 

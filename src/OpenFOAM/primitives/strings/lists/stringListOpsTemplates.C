@@ -109,4 +109,57 @@ void Foam::inplaceSubsetMatchingStrings
 }
 
 
+template<class StringListType, class AccessOp>
+Foam::labelList Foam::stringListOps::findMatching
+(
+    const StringListType& input,
+    const wordRes& whitelist,
+    const wordRes& blacklist,
+    AccessOp aop
+)
+{
+    const label len = input.size();
+
+    if (whitelist.empty() && blacklist.empty())
+    {
+        return identity(len);
+    }
+
+    labelList indices(len);
+
+    label count = 0;
+    for (label i=0; i < len; ++i)
+    {
+        const std::string& text = aop(input[i]);
+
+        bool accept = false;
+
+        if (whitelist.size())
+        {
+            const auto result = whitelist.matched(text);
+
+            accept =
+            (
+                result == wordRe::LITERAL
+              ? true
+              : (result == wordRe::REGEX && !blacklist.match(text))
+            );
+        }
+        else
+        {
+            accept = !blacklist.match(text);
+        }
+
+        if (accept)
+        {
+            indices[count] = i;
+            ++count;
+        }
+    }
+    indices.resize(count);
+
+    return indices;
+}
+
+
 // ************************************************************************* //

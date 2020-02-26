@@ -172,10 +172,26 @@ labelList getSelectedPatches
     const wordRes& blacklist
 )
 {
-    DynamicList<label> patchIDs(patches.size());
+    // Name-based selection
+    labelList indices
+    (
+        stringListOps::findMatching
+        (
+            patches,
+            whitelist,
+            blacklist,
+            nameOp<polyPatch>()
+        )
+    );
 
-    for (const polyPatch& pp : patches)
+
+    // Remove undesirable patches
+
+    label count = 0;
+    for (const label patchi : indices)
     {
+        const polyPatch& pp = patches[patchi];
+
         if (isType<emptyPolyPatch>(pp))
         {
             continue;
@@ -185,33 +201,13 @@ labelList getSelectedPatches
             break; // No processor patches for parallel output
         }
 
-        const word& patchName = pp.name();
-
-        bool accept = false;
-
-        if (whitelist.size())
-        {
-            const auto matched = whitelist.matched(patchName);
-
-            accept =
-            (
-                matched == wordRe::LITERAL
-              ? true
-              : (matched == wordRe::REGEX && !blacklist.match(patchName))
-            );
-        }
-        else
-        {
-            accept = !blacklist.match(patchName);
-        }
-
-        if (accept)
-        {
-            patchIDs.append(pp.index());
-        }
+        indices[count] = patchi;
+        ++count;
     }
 
-    return patchIDs.shrink();
+    indices.resize(count);
+
+    return indices;
 }
 
 

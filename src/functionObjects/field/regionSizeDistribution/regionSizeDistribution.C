@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -865,11 +865,13 @@ bool Foam::functionObjects::regionSizeDistribution::write()
         // Collect some more field
         {
             wordList scalarNames(obr_.names(volScalarField::typeName));
-            labelList selected = findStrings(fields_, scalarNames);
 
-            forAll(selected, i)
+            const labelList selected(fields_.matching(scalarNames));
+
+            for (const label fieldi : selected)
             {
-                const word& fldName = scalarNames[selected[i]];
+                const word& fldName = scalarNames[fieldi];
+
                 Log << "    Scalar field " << fldName << endl;
 
                 const scalarField& fld = obr_.lookupObject
@@ -894,11 +896,13 @@ bool Foam::functionObjects::regionSizeDistribution::write()
         }
         {
             wordList vectorNames(obr_.names(volVectorField::typeName));
-            labelList selected = findStrings(fields_, vectorNames);
 
-            forAll(selected, i)
+            const labelList selected(fields_.matching(vectorNames));
+
+            for (const label fieldi : selected)
             {
-                const word& fldName = vectorNames[selected[i]];
+                const word& fldName = vectorNames[fieldi];
+
                 Log << "    Vector field " << fldName << endl;
 
                 vectorField fld = obr_.lookupObject

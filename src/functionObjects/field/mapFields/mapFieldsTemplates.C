@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -124,10 +124,13 @@ bool Foam::functionObjects::mapFields::mapFieldType() const
     const fvMesh& mapRegion = mapRegionPtr_();
 
     wordList fieldNames(this->mesh_.names(VolFieldType::typeName));
-    const labelList selected = findStrings(fieldNames_, fieldNames);
+
+    const labelList selected(fieldNames_.matching(fieldNames));
+
     for (const label fieldi : selected)
     {
         const word& fieldName = fieldNames[fieldi];
+
         const VolFieldType& field = lookupObject<VolFieldType>(fieldName);
 
         if (!mapRegion.foundObject<VolFieldType>(fieldName))
@@ -160,7 +163,7 @@ bool Foam::functionObjects::mapFields::mapFieldType() const
         evaluateConstraintTypes(mappedField);
     }
 
-    return selected.size() > 0;
+    return !selected.empty();
 }
 
 
@@ -172,7 +175,9 @@ bool Foam::functionObjects::mapFields::writeFieldType() const
     const fvMesh& mapRegion = mapRegionPtr_();
 
     wordList fieldNames(this->mesh_.names(VolFieldType::typeName));
-    const labelList selected = findStrings(fieldNames_, fieldNames);
+
+    const labelList selected(fieldNames_.matching(fieldNames));
+
     for (const label fieldi : selected)
     {
         const word& fieldName = fieldNames[fieldi];
@@ -185,7 +190,7 @@ bool Foam::functionObjects::mapFields::writeFieldType() const
         Log << "    " << fieldName << ": written";
     }
 
-    return selected.size() > 0;
+    return !selected.empty();
 }
 
 

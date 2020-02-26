@@ -42,69 +42,6 @@ const Foam::label Foam::ensightMesh::internalZone = -1;
 namespace Foam
 {
 
-// Find matching ids based on whitelist, blacklist
-//
-// An empty whitelist accepts everything that is not blacklisted.
-// A regex match is trumped by a literal match.
-//
-// Eg,
-//     input:  ( abc apple wall wall1 wall2 )
-//     whitelist:  ( abc  def  "wall.*" )
-//     blacklist:  ( "[ab].*"  wall )
-//
-//     result:  (abc wall1 wall2)
-//
-static labelList getSelected
-(
-    const UList<word>& input,
-    const wordRes& whitelist,
-    const wordRes& blacklist
-)
-{
-    const label len = input.size();
-
-    if (whitelist.empty() && blacklist.empty())
-    {
-        return identity(len);
-    }
-
-    labelList indices(len);
-
-    label count = 0;
-    for (label i=0; i < len; ++i)
-    {
-        const auto& text = input[i];
-
-        bool accept = false;
-
-        if (whitelist.size())
-        {
-            const auto result = whitelist.matched(text);
-
-            accept =
-            (
-                result == wordRe::LITERAL
-              ? true
-              : (result == wordRe::REGEX && !blacklist.match(text))
-            );
-        }
-        else
-        {
-            accept = !blacklist.match(text);
-        }
-
-        if (accept)
-        {
-            indices[count] = i;
-            ++count;
-        }
-    }
-    indices.resize(count);
-
-    return indices;
-}
-
-
 // Patch names without processor patches
 static wordList nonProcessorPatchNames(const polyBoundaryMesh& bmesh)
 {
@@ -237,7 +174,7 @@ void Foam::ensightMesh::correct()
     const labelList patchIds =
     (
         option().useBoundaryMesh()
-      ? getSelected
+      ? stringListOps::findMatching
         (
             patchNames,
             option().patchSelection(),
