@@ -61,7 +61,7 @@ void Foam::fileFormats::X3DsurfaceFormat<Face>::write
     if (!os.good())
     {
         FatalErrorInFunction
-            << "Cannot open file for writing " << filename
+            << "Cannot write file " << filename << nl
             << exit(FatalError);
     }
 

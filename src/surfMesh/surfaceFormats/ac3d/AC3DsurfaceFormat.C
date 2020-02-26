@@ -51,13 +51,14 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
     const fileName& filename
 )
 {
+    // Clear everything
     this->clear();
 
     IFstream is(filename);
     if (!is.good())
     {
         FatalErrorInFunction
-            << "Cannot read file " << filename
+            << "Cannot read file " << filename << nl
             << exit(FatalError);
     }
 
@@ -84,7 +85,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
     if (!cueTo(is, "OBJECT", args) || args != "world")
     {
         FatalErrorInFunction
-            << "Cannot find \"OBJECT world\" in file " << filename
+            << "Cannot find 'OBJECT world' in file " << filename << nl
             << exit(FatalError);
     }
 
@@ -119,8 +120,8 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
             if (!readCmd(is, cmd, args))
             {
                 FatalErrorInFunction
-                    << "Did not read up to \"kids 0\" while reading zone "
-                    << zoneI << " from file " << filename
+                    << "Did not read up to 'kids 0' while reading zone "
+                    << zoneI << " from file " << filename << nl
                     << exit(FatalError);
             }
 
@@ -332,7 +333,7 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
     if (!os.good())
     {
         FatalErrorInFunction
-            << "Cannot open file for writing " << filename
+            << "Cannot write file " << filename << nl
             << exit(FatalError);
     }
 
@@ -354,7 +355,7 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
     {
         if (useFaceMap)
         {
-            SubList<label> zoneMap(surf.faceMap(), zone.size(), zone.start());
+            SubList<label> zoneMap(surf.faceMap(), zone.range());
             PrimitivePatch<Face, UIndirectList, const pointField&> patch
             (
                 UIndirectList<Face>(faceLst, zoneMap),
@@ -367,7 +368,7 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
         {
             PrimitivePatch<Face, UList, const pointField&> patch
             (
-                SubList<Face>(faceLst, zone.size(), zone.start()),
+                SubList<Face>(faceLst, zone.range()),
                 pointLst
             );
 
@@ -395,7 +396,7 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
     if (!os.good())
     {
         FatalErrorInFunction
-            << "Cannot open file for writing " << filename
+            << "Cannot write file " << filename << nl
             << exit(FatalError);
     }
 
@@ -421,7 +422,7 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
     label zoneIndex = 0;
     for (const surfZone& zone : zoneLst)
     {
-        SubList<label> zoneMap(faceMap, zone.size(), zone.start());
+        SubList<label> zoneMap(faceMap, zone.range());
         PrimitivePatch<Face, UIndirectList, const pointField&> patch
         (
             UIndirectList<Face>(surf.surfFaces(), zoneMap),

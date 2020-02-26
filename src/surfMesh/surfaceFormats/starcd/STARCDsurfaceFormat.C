@@ -41,11 +41,11 @@ inline void Foam::fileFormats::STARCDsurfaceFormat<Face>::writeShell
     const label cellTableId
 )
 {
-    os  << cellId                    // includes 1 offset
-        << ' ' << starcdShell        // 3(shell) shape
+    os  << (cellId + 1)
+        << ' ' << starcdShell       // 3(shell) shape
         << ' ' << f.size()
-        << ' ' << cellTableId
-        << ' ' << starcdShellType;   // 4(shell)
+        << ' ' << (cellTableId + 1)
+        << ' ' << starcdShellType;  // 4(shell)
 
     // Primitives have <= 8 vertices, but prevent overrun anyhow
     // indent following lines for ease of reading
@@ -54,9 +54,9 @@ inline void Foam::fileFormats::STARCDsurfaceFormat<Face>::writeShell
     {
         if ((count % 8) == 0)
         {
-            os  << nl << "  " << cellId;
+            os  << nl << "  " << (cellId + 1);
         }
-        os  << ' ' << pointi + 1;
+        os  << ' ' << (pointi + 1);
         ++count;
     }
     os  << nl;
@@ -83,6 +83,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     const fileName& filename
 )
 {
+    // Clear everything
     this->clear();
 
     fileName baseName = filename.lessExt();
@@ -120,7 +121,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     if (!is.good())
     {
         FatalErrorInFunction
-            << "Cannot read file " << is.name()
+            << "Cannot read file " << is.name() << nl
             << exit(FatalError);
     }
 
@@ -132,7 +133,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     DynamicList<label> dynSizes;
     Map<label> lookup;
 
-    // assume the cellTableIds are not intermixed
+    // Assume the cellTableIds are not intermixed
     bool sorted = true;
     label zoneId = 0;
 
@@ -201,7 +202,8 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
             SubList<label> vertices(vertexLabels, vertexLabels.size());
             if (faceTraits<Face>::isTri() && nLabels > 3)
             {
-                // face needs triangulation
+                // The face needs triangulation
+
                 face f(vertices);
 
                 faceList trias(f.nTriangles());
@@ -274,27 +276,22 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
     writeHeader(os, STARCDCore::HEADER_CEL);
 
     label faceIndex = 0;
-    forAll(zones, zonei)
+    label zoneIndex = 0;
+    label elemId = 0;
+    for (const surfZone& zone : zones)
     {
-        const surfZone& zone = zones[zonei];
-        const label nLocalFaces = zone.size();
+        for (label nLocal = zone.size(); nLocal--; ++faceIndex)
+        {
+            const label facei =
+                (useFaceMap ? faceMap[faceIndex] : faceIndex);
 
-        if (useFaceMap)
-        {
-            for (label i=0; i<nLocalFaces; ++i)
-            {
-                const Face& f = faceLst[faceMap[faceIndex++]];
-                writeShell(os, f, faceIndex, zonei + 1);
-            }
+            const Face& f = faceLst[facei];
+
+            writeShell(os, f, elemId, zoneIndex);
+            ++elemId;
         }
-        else
-        {
-            for (label i=0; i<nLocalFaces; ++i)
-            {
-                const Face& f = faceLst[faceIndex++];
-                writeShell(os, f, faceIndex, zonei + 1);
-            }
-        }
+
+        ++zoneIndex;
     }
 
     // Simple .inp file - always UNCOMPRESSED

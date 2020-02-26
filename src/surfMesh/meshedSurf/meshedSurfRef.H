@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,33 +52,33 @@ class meshedSurfRef
 {
     std::reference_wrapper<const pointField> points_;
     std::reference_wrapper<const faceList> faces_;
-    std::reference_wrapper<const labelList> ids_;
+    std::reference_wrapper<const labelList> zoneIds_;
 
 
 public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         meshedSurfRef()
         :
             points_(std::cref<pointField>(pointField::null())),
             faces_(std::cref<faceList>(faceList::null())),
-            ids_(std::cref<labelList>(labelList::null()))
+            zoneIds_(std::cref<labelList>(labelList::null()))
         {}
 
 
         //- Construct from components
         meshedSurfRef
         (
-            const pointField& pts,
-            const faceList& fcs,
-            const labelList& ids = labelList::null()
+            const pointField& pointLst,
+            const faceList& faceLst,
+            const labelList& zoneIdLst = labelList::null()
         )
         :
-            points_(std::cref<pointField>(pts)),
-            faces_(std::cref<faceList>(fcs)),
-            ids_(std::cref<labelList>(ids))
+            points_(std::cref<pointField>(pointLst)),
+            faces_(std::cref<faceList>(faceLst)),
+            zoneIds_(std::cref<labelList>(zoneIdLst))
         {}
 
 
@@ -103,7 +103,7 @@ public:
         //- Per-face zone/region information.
         virtual const labelList& zoneIds() const
         {
-            return ids_.get();
+            return zoneIds_.get();
         }
 
         //- Remove all references by redirecting to null objects
@@ -111,20 +111,20 @@ public:
         {
             points_ = std::cref<pointField>(pointField::null());
             faces_ = std::cref<faceList>(faceList::null());
-            ids_ = std::cref<labelList>(labelList::null());
+            zoneIds_ = std::cref<labelList>(labelList::null());
         }
 
         //- Reset components
         void reset
         (
-            const pointField& pts,
-            const faceList& fcs,
-            const labelList& ids = labelList::null()
+            const pointField& pointLst,
+            const faceList& faceLst,
+            const labelList& zoneIdLst = labelList::null()
         )
         {
-            points_ = std::cref<pointField>(pts);
-            faces_ = std::cref<faceList>(fcs);
-            ids_ = std::cref<labelList>(ids);
+            points_ = std::cref<pointField>(pointLst);
+            faces_ = std::cref<faceList>(faceLst);
+            zoneIds_ = std::cref<labelList>(zoneIdLst);
         }
 };
 

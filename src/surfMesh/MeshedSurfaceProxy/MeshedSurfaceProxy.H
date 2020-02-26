@@ -41,9 +41,6 @@ SourceFiles
 #define MeshedSurfaceProxy_H
 
 #include "pointField.H"
-#include "labelledTri.H"
-#include "HashSet.H"
-#include "ListOps.H"
 #include "surfZoneList.H"
 #include "surfaceFormatsCore.H"
 #include "runTimeSelectionTables.H"
@@ -55,7 +52,6 @@ namespace Foam
 {
 
 // Forward Declarations
-
 template<class Face> class MeshedSurface;
 
 /*---------------------------------------------------------------------------*\
@@ -156,19 +152,19 @@ public:
         // Access
 
             //- The surface size is the number of faces
-            inline label size() const
+            label size() const
             {
                 return faces_.size();
             }
 
             //- Return const access to the points
-            inline const pointField& points() const
+            const pointField& points() const
             {
                 return points_;
             }
 
             //- Return const access to the faces
-            inline const UList<Face>& surfFaces() const
+            const UList<Face>& surfFaces() const
             {
                 return faces_;
             }
@@ -176,19 +172,19 @@ public:
             //- Const access to the surface zones.
             //  If zones are defined, they must be contiguous and cover the
             //  entire surface
-            inline const UList<surfZone>& surfZones() const
+            const UList<surfZone>& surfZones() const
             {
                 return zones_;
             }
 
             //- Const access to the faceMap, zero-sized when unused
-            inline const labelUList& faceMap() const
+            const labelUList& faceMap() const
             {
                 return faceMap_;
             }
 
-            //- Use faceMap?
-            inline bool useFaceMap() const
+            //- Can/should use faceMap?
+            bool useFaceMap() const
             {
                 return faceMap_.size() == faces_.size();
             }

@@ -53,6 +53,7 @@ static inline STLpoint getSTLpoint(Istream& is)
 
 bool Foam::fileFormats::TRIReader::readFile(const fileName& filename)
 {
+    // Clear everything
     this->clear();
     sorted_ = true;
 
@@ -60,7 +61,7 @@ bool Foam::fileFormats::TRIReader::readFile(const fileName& filename)
     if (!is.good())
     {
         FatalErrorInFunction
-            << "Cannot read file " << filename
+            << "Cannot read file " << filename << nl
             << exit(FatalError);
     }
 

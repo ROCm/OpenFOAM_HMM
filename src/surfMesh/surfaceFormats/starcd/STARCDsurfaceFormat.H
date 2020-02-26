@@ -78,8 +78,8 @@ class STARCDsurfaceFormat
         (
             Ostream& os,
             const Face& f,
-            const label cellId,
-            const label cellTableId
+            const label cellId,         //!< 0-based element Id
+            const label cellTableId     //!< 0-based table id
         );
 
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,13 +60,19 @@ Foam::mergedSurf::mergedSurf
 (
     const pointField& unmergedPoints,
     const faceList& unmergedFaces,
-    const labelList& originalIds,
+    const labelList& origZoneIds,
     const scalar mergeDim
 )
 :
     mergedSurf()
 {
-    merge(unmergedPoints, unmergedFaces, originalIds, mergeDim);
+    merge
+    (
+        unmergedPoints,
+        unmergedFaces,
+        origZoneIds,
+        mergeDim
+    );
 }
 
 
@@ -82,8 +88,9 @@ void Foam::mergedSurf::clear()
 {
     points_.clear();
     faces_.clear();
-    zones_.clear();
     pointsMap_.clear();
+
+    zoneIds_.clear();
 }
 
 
@@ -111,7 +118,14 @@ bool Foam::mergedSurf::merge
     const scalar mergeDim
 )
 {
-    return merge(unmergedPoints, unmergedFaces, labelList(), mergeDim);
+    return
+        merge
+        (
+            unmergedPoints,
+            unmergedFaces,
+            labelList(),
+            mergeDim
+        );
 }
 
 
@@ -119,7 +133,7 @@ bool Foam::mergedSurf::merge
 (
     const pointField& unmergedPoints,
     const faceList& unmergedFaces,
-    const labelList& originalIds,
+    const labelList& origZoneIds,
     const scalar mergeDim
 )
 {
@@ -143,9 +157,9 @@ bool Foam::mergedSurf::merge
     );
 
 
-    // Now handle zone/region information
+    // Now handle per-face information
 
-    globalIndex::gatherOp(originalIds, zones_);
+    globalIndex::gatherOp(origZoneIds, zoneIds_);
 
     return true;
 }

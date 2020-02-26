@@ -52,13 +52,14 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
     const fileName& filename
 )
 {
+    // Clear everything
     this->clear();
 
     IFstream is(filename);
     if (!is.good())
     {
         FatalErrorInFunction
-            << "Cannot read file " << filename
+            << "Cannot read file " << filename << nl
             << exit(FatalError);
     }
 
@@ -246,7 +247,7 @@ void Foam::fileFormats::OBJsurfaceFormat<Face>::write
     if (!os.good())
     {
         FatalErrorInFunction
-            << "Cannot open file for writing " << filename
+            << "Cannot write file " << filename << nl
             << exit(FatalError);
     }
 
@@ -280,6 +281,7 @@ void Foam::fileFormats::OBJsurfaceFormat<Face>::write
 
 
     label faceIndex = 0;
+
     for (const surfZone& zone : zones)
     {
         if (zone.name().size())
@@ -287,35 +289,19 @@ void Foam::fileFormats::OBJsurfaceFormat<Face>::write
             os << "g " << zone.name() << nl;
         }
 
-        const label nLocalFaces = zone.size();
-
-        if (useFaceMap)
+        for (label nLocal = zone.size(); nLocal--; ++faceIndex)
         {
-            for (label i=0; i<nLocalFaces; ++i)
-            {
-                const Face& f = faceLst[faceMap[faceIndex++]];
+            const label facei =
+                (useFaceMap ? faceMap[faceIndex] : faceIndex);
 
-                os << 'f';
-                for (const label verti : f)
-                {
-                    os << ' ' << verti + 1;
-                }
-                os << nl;
-            }
-        }
-        else
-        {
-            for (label i=0; i<nLocalFaces; ++i)
-            {
-                const Face& f = faceLst[faceIndex++];
+            const Face& f = faceLst[facei];
 
-                os << 'f';
-                for (const label verti : f)
-                {
-                    os << ' ' << verti + 1;
-                }
-                os << nl;
+            os << 'f';
+            for (const label verti : f)
+            {
+                os << ' ' << (verti + 1);
             }
+            os << nl;
         }
     }
     os << "# </faces>" << nl;
