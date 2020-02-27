@@ -55,7 +55,7 @@ inline Foam::label Foam::fileFormats::NASsurfaceFormat<Face>::writeShell
     }
     else if (n == 4)
     {
-        os  << "CTRIA3" << ','
+        os  << "CQUAD4" << ','
             << ++elementId << ','
             << (groupId + 1) << ','
             << (f[0] + 1) << ','

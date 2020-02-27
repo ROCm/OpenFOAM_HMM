@@ -204,7 +204,8 @@ void Foam::surfaceWriters::nastranWriter::writeGeometry
 (
     Ostream& os,
     const meshedSurf& surf,
-    List<faceList>& decomposedFaces
+    labelList& decompOffsets,
+    DynamicList<face>& decompFaces
 ) const
 {
     const pointField& points = surf.points();
@@ -213,9 +214,9 @@ void Foam::surfaceWriters::nastranWriter::writeGeometry
 
     // Write points
 
-    os  << "$" << nl
+    os  << '$' << nl
         << "$ Points" << nl
-        << "$" << nl;
+        << '$' << nl;
 
     forAll(points, pointi)
     {
@@ -223,18 +224,19 @@ void Foam::surfaceWriters::nastranWriter::writeGeometry
     }
 
     // Write faces, with on-the-fly decomposition (triangulation)
-    decomposedFaces.clear();
-    decomposedFaces.resize(faces.size());
+    decompOffsets.resize(faces.size()+1);
+    decompFaces.clear();
 
-    os  << "$" << nl
+    decompOffsets[0] = 0; // The first offset is always zero
+
+    os  << '$' << nl
         << "$ Faces" << nl
-        << "$" << nl;
+        << '$' << nl;
 
-    label elemId = 0; // The element-id
+    label elemId = 0;  // The element-id
     forAll(faces, facei)
     {
         const face& f = faces[facei];
-        faceList& decomp = decomposedFaces[facei];
 
         // 1-offset for PID
         const label propId = 1 + (facei < zones.size() ? zones[facei] : 0);
@@ -242,28 +244,36 @@ void Foam::surfaceWriters::nastranWriter::writeGeometry
         if (f.size() == 3)
         {
             writeFace(os, "CTRIA3", f, ++elemId, propId);
-            decomp.resize(1);
-            decomp[0] = f;
         }
         else if (f.size() == 4)
         {
             writeFace(os, "CQUAD4", f, ++elemId, propId);
-            decomp.resize(1);
-            decomp[0] = f;
         }
         else
         {
-            // Decompose poly face into tris
-            decomp.resize(f.nTriangles());
+            // Decompose into tris
+            f.triangles(points, decompFaces);
 
-            label nTri = 0;
-            f.triangles(points, nTri, decomp);
-
-            for (const face& f2 : decomp)
+            for
+            (
+                label decompi = decompOffsets[facei];
+                decompi < decompFaces.size();
+                ++decompi
+            )
             {
-                writeFace(os, "CTRIA3", f2, ++elemId, propId);
+                writeFace
+                (
+                    os,
+                    "CTRIA3",
+                    decompFaces[decompi],
+                    ++elemId,
+                    propId
+                );
             }
         }
+
+        // The end offset, which is the next begin offset
+        decompOffsets[facei+1] = decompFaces.size();
     }
 }
 
@@ -323,7 +333,7 @@ Foam::surfaceWriters::nastranWriter::nastranWriter()
     surfaceWriter(),
     writeFormat_(fieldFormat::SHORT),
     fieldMap_(),
-    scale_(1.0),
+    scale_(1),
     separator_()
 {}
 
@@ -432,11 +442,13 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::write()
 
         os  << "TITLE=OpenFOAM " << outputPath_.name()
             << " mesh" << nl
-            << "$" << nl
+            << '$' << nl
             << "BEGIN BULK" << nl;
 
-        List<faceList> decomposedFaces;
-        writeGeometry(os, surf, decomposedFaces);
+        labelList decompOffsets;
+        DynamicList<face> decompFaces;
+
+        writeGeometry(os, surf, decompOffsets, decompFaces);
 
         writeFooter(os, surf)
             << "ENDDATA" << nl;

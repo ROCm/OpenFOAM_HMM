@@ -89,8 +89,6 @@ Foam::Ostream& Foam::surfaceWriters::nastranWriter::writeFaceValue
 
     const label setId = 1;
 
-    Type scaledValue = scale_*value;
-
     // Write keyword
     writeKeyword(os, fileFormats::NASCore::loadFormatNames[format])
         << separator_;
@@ -106,19 +104,14 @@ Foam::Ostream& Foam::surfaceWriters::nastranWriter::writeFaceValue
         {
             if (pTraits<Type>::nComponents == 1)
             {
-                writeValue(os, scaledValue) << separator_;
+                writeValue(os, value);
             }
             else
             {
-                WarningInFunction
-                    << fileFormats::NASCore::loadFormatNames[format]
-                    << " requires scalar values"
-                    << " - it cannot be used for higher rank values"
-                    << endl;
-
-                writeValue(os, scalar(0)) << separator_;
+                writeValue(os, mag(value));
             }
 
+            os << separator_;
             writeValue(os, elemId);
             break;
         }
@@ -130,7 +123,7 @@ Foam::Ostream& Foam::surfaceWriters::nastranWriter::writeFaceValue
             for (direction d = 0; d < pTraits<Type>::nComponents; ++d)
             {
                 os  << separator_;
-                writeValue(os, component(scaledValue, d));
+                writeValue(os, component(value, d));
             }
             break;
         }
@@ -164,7 +157,7 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
         return fileName::null;
     }
 
-    const loadFormat& format(fieldMap_[fieldName]);
+    const loadFormat format(fieldMap_[fieldName]);
 
     // Field:  rootdir/<TIME>/field/surfaceName.nas
 
@@ -177,9 +170,27 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
     outputFile /= fieldName / outputPath_.name();
     outputFile.ext("nas");
 
+
+    // Currently the same scaling for all variables
+    const scalar varScale = scale_;
+
     if (verbose_)
     {
-        Info<< "Writing field " << fieldName << " to " << outputFile << endl;
+        Info<< "Writing field " << fieldName;
+        if (!equal(varScale, 1))
+        {
+            Info<< " (scaling " << varScale << ')';
+        }
+        Info<< " to " << outputFile << endl;
+    }
+
+    // Emit any common warnings
+    if (format == loadFormat::PLOAD2 && pTraits<Type>::nComponents != 1)
+    {
+        WarningInFunction
+            << fileFormats::NASCore::loadFormatNames[format]
+            << " cannot be used for higher rank values"
+            << " - reverting to mag()" << endl;
     }
 
 
@@ -199,43 +210,84 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
 
         const scalar timeValue(0);
 
+        // Additional bookkeeping for decomposing non tri/quad
+        labelList decompOffsets;
+        DynamicList<face> decompFaces;
+
+
+        // Could handle separate geometry here
+
         OFstream os(outputFile);
         fileFormats::NASCore::setPrecision(os, writeFormat_);
 
-        if (verbose_)
+        os  << "TITLE=OpenFOAM " << outputFile.name()
+            << token::SPACE << fieldName << " data" << nl;
+
+        if (useTimeDir() && !timeName().empty())
         {
-            Info<< "Writing nastran file to " << os.name() << endl;
+            os  << '$' << nl
+                << "$ TIME " << timeName() << nl;
         }
 
-        os  << "TITLE=OpenFOAM " << outputFile.name()
-            << " " << fieldName << " data" << nl
-            << "$" << nl
+        os  << '$' << nl
             << "TIME " << timeValue << nl
-            << "$" << nl
+            << '$' << nl
             << "BEGIN BULK" << nl;
 
-        List<faceList> decomposedFaces;
-        writeGeometry(os, surf, decomposedFaces);
 
-        os  << "$" << nl
+        writeGeometry(os, surf, decompOffsets, decompFaces);
+
+
+        // Write field
+
+        os  << '$' << nl
             << "$ Field data" << nl
-            << "$" << nl;
+            << '$' << nl;
+
+
+        // Regular (undecomposed) faces
+        const faceList& faces = surf.faces();
 
         label elemId = 0;
 
         if (this->isPointData())
         {
-            for (const faceList& dFaces : decomposedFaces)
+            forAll(faces, facei)
             {
-                for (const face& f : dFaces)
-                {
-                    Type v = Zero;
+                const label beginElemId = elemId;
 
+                // Any face decomposition
+                for
+                (
+                    label decompi = decompOffsets[facei];
+                    decompi < decompOffsets[facei+1];
+                    ++decompi
+                )
+                {
+                    const face& f = decompFaces[decompi];
+
+                    Type v = Zero;
                     for (const label verti : f)
                     {
                         v += values[verti];
                     }
-                    v /= f.size();
+                    v *= (varScale / f.size());
+
+                    writeFaceValue(os, format, v, ++elemId);
+                }
+
+
+                // Face not decomposed
+                if (beginElemId == elemId)
+                {
+                    const face& f = faces[facei];
+
+                    Type v = Zero;
+                    for (const label verti : f)
+                    {
+                        v += values[verti];
+                    }
+                    v *= (varScale / f.size());
 
                     writeFaceValue(os, format, v, ++elemId);
                 }
@@ -245,13 +297,22 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
         {
             auto valIter = values.cbegin();
 
-            for (const faceList& dFaces : decomposedFaces)
+            forAll(faces, facei)
             {
-                forAll(dFaces, facei)
-                {
-                    writeFaceValue(os, format, *valIter, ++elemId);
-                }
+                const Type v(varScale * *valIter);
                 ++valIter;
+
+                label nValues =
+                    max
+                    (
+                        label(1),
+                        (decompOffsets[facei+1] - decompOffsets[facei])
+                    );
+
+                while (nValues--)
+                {
+                    writeFaceValue(os, format, v, ++elemId);
+                }
             }
         }
 

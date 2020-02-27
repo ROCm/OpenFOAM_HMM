@@ -155,12 +155,16 @@ private:
             const label propId      //!< 1-based Property Id
         ) const;
 
-        //- Main driver to write the surface mesh geometry
+        //- Write the surface mesh geometry, tracking face decomposition
+        //
+        //  \param decompOffsets  begin/end offsets (size+1) into decompFaces
+        //  \param decompFaces    Non tri/quad decomposed into triangles
         void writeGeometry
         (
             Ostream& os,
             const meshedSurf& surf,
-            List<faceList>& decomposedFaces
+            labelList& decompOffsets,
+            DynamicList<face>& decompFaces
         ) const;
 
         //- Write the formatted keyword to the output stream

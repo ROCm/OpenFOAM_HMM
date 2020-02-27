@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -194,6 +194,40 @@ Foam::Ostream& Foam::fileFormats::NASCore::writeKeyword
     os.unsetf(ios_base::left);
 
     return os;
+}
+
+
+Foam::label Foam::fileFormats::NASCore::faceDecomposition
+(
+    const UList<point>& points,
+    const UList<face>& faces,
+    labelList& decompOffsets,
+    DynamicList<face>& decompFaces
+)
+{
+    // On-demand face decomposition (triangulation)
+
+    decompOffsets.resize(faces.size()+1);
+    decompFaces.clear();
+
+    auto offsetIter = decompOffsets.begin();
+    *offsetIter = 0; // The first offset is always zero
+
+    for (const face& f : faces)
+    {
+        const label n = f.size();
+
+        if (n != 3 && n != 4)
+        {
+            // Decompose non-tri/quad into tris
+            f.triangles(points, decompFaces);
+        }
+
+        // The end offset, which is the next begin offset
+        *(++offsetIter) = decompFaces.size();
+    }
+
+    return decompFaces.size();
 }
 
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,14 +40,14 @@ SourceFiles
 #include "scalar.H"
 #include "string.H"
 #include "Enum.H"
+#include "face.H"
+#include "point.H"
+#include "DynamicList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// Forward Declarations
-class Ostream;
 
 namespace fileFormats
 {
@@ -84,7 +84,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         NASCore() = default;
 
 
@@ -119,6 +119,22 @@ public:
             Ostream& os,
             const word& keyword,
             const fieldFormat format
+        );
+
+        //- Calculate face decomposition for non tri/quad faces
+        //
+        //  \param points the surface points
+        //  \param faces  the surface faces
+        //  \param decompOffsets begin/end offsets (size+1) into decompFaces
+        //  \param decompFaces  List of non-tri/quad decomposed into triangles
+        //
+        //  \return number of decomposed faces
+        static label faceDecomposition
+        (
+            const UList<point>& points,
+            const UList<face>& faces,
+            labelList& decompOffsets,
+            DynamicList<face>& decompFaces
         );
 };
 
