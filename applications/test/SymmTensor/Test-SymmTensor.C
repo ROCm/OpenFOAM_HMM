@@ -62,9 +62,24 @@ unsigned nFail_ = 0;
 // Create a random symmTensor
 symmTensor makeRandomContainer(Random& rnd)
 {
-    symmTensor A(Zero);
-    std::generate(A.begin(), A.end(), [&]{ return rnd.GaussNormal<scalar>(); });
-    return A;
+    symmTensor T(Zero);
+    std::generate(T.begin(), T.end(), [&]{ return rnd.GaussNormal<scalar>(); });
+    return T;
+}
+
+
+// Create a symmTensor based on a given value
+template<class Type>
+typename std::enable_if
+<
+    std::is_same<floatScalar, Type>::value ||
+    std::is_same<doubleScalar, Type>::value,
+    symmTensor
+>::type makeContainer(const Type val)
+{
+    symmTensor T(Zero);
+    std::fill(T.begin(), T.end(), val);
+    return T;
 }
 
 
@@ -83,11 +98,11 @@ typename std::enable_if
     const word& msg,
     const Type& x,
     const Type& y,
-    const scalar relTol = 1e-8,  //<! are values the same within 8 decimals
-    const scalar absTol = 0      //<! useful for cmps near zero
+    const scalar absTol = 0,    //<! useful for cmps near zero
+    const scalar relTol = 1e-8  //<! are values the same within 8 decimals
 )
 {
-    Info<< msg << x << endl;
+    Info<< msg << x << "?=" << y << endl;
 
     unsigned nFail = 0;
 
@@ -121,11 +136,11 @@ typename std::enable_if
     const word& msg,
     const Type& x,
     const Type& y,
-    const scalar relTol = 1e-8,
-    const scalar absTol = 0
+    const scalar absTol = 0,
+    const scalar relTol = 1e-8
 )
 {
-    Info<< msg << x << endl;
+    Info<< msg << x << "?=" << y << endl;
 
     unsigned nFail = 0;
 
@@ -338,7 +353,6 @@ void test_global_funcs(Type)
                        Type(1),  Type(0),
                                  Type(-0.05555556)
         ),
-        1e-8,
         1e-8
     );
     cmp
@@ -351,7 +365,6 @@ void test_global_funcs(Type)
                        Type(1),  Type(0),
                                  Type(-0.05555556)
         ),
-        1e-8,
         1e-8
     );
     cmp("  First invariant = ", invariantI(sT), Type(-3));
@@ -514,21 +527,21 @@ void test_global_opers(Type)
 
 // Return false if given eigenvalues fail to satisy eigenvalue relations
 // Relations: (Beauregard & Fraleigh (1973), ISBN 0-395-14017-X, p. 307)
-void test_eigenvalues(const symmTensor& sT, const vector& EVals)
+void test_eigenvalues(const symmTensor& T, const vector& EVals)
 {
     {
-        const scalar determinant = det(sT);
+        const scalar determinant = det(T);
         const scalar EValsProd = EVals.x()*EVals.y()*EVals.z();
-        cmp("# Product of eigenvalues = det(sT):", EValsProd, determinant);
+        cmp("# Product of eigenvalues = det(T):", EValsProd, determinant, 1e-6);
     }
     {
-        const scalar trace = tr(sT);
+        const scalar trace = tr(T);
         scalar EValsSum = 0.0;
         for (const auto& val : EVals)
         {
             EValsSum += val;
         }
-        cmp("# Sum of eigenvalues = trace(sT):", EValsSum, trace);
+        cmp("# Sum of eigenvalues = trace(T):", EValsSum, trace);
     }
 }
 
@@ -537,7 +550,7 @@ void test_eigenvalues(const symmTensor& sT, const vector& EVals)
 // fails to satisfy the characteristic equation
 void test_characteristic_equation
 (
-    const symmTensor& sT,
+    const symmTensor& T,
     const vector& EVals,
     const tensor& EVecs
 )
@@ -547,39 +560,39 @@ void test_characteristic_equation
     {
         Info<< "EVal = " << EVals[dir] << nl
             << "EVec = " << EVecs.row(dir) << endl;
-        const vector leftSide(sT & EVecs.row(dir));
+        const vector leftSide(T & EVecs.row(dir));
         const vector rightSide(EVals[dir]*EVecs.row(dir));
         const vector X(leftSide - rightSide);
 
         for (const auto x : X)
         {
-            cmp("  (sT & EVec - EVal*EVec) = 0:", x, 0.0, 1e-8, 1e-6);
+            cmp("  (T & EVec - EVal*EVec) = 0:", x, 0.0, 1e-5);
         }
     }
 }
 
 
 // Return false if the eigen functions fail to satisfy relations
-void test_eigen_funcs(const symmTensor& sT)
+void test_eigen_funcs(const symmTensor& T)
 {
     Info<< "# Operand:" << nl
-        << "  symmTensor = " << sT << nl;
+        << "  symmTensor = " << T << nl;
 
 
     Info<< "# Return eigenvalues of a given symmTensor:" << nl;
-    const vector EVals(eigenValues(sT));
+    const vector EVals(eigenValues(T));
     Info<< EVals << endl;
-    test_eigenvalues(sT, EVals);
+    test_eigenvalues(T, EVals);
 
     Info<< "# Return eigenvectors of a given symmTensor corresponding to"
         << " given eigenvalues:" << nl;
-    const tensor EVecs0(eigenVectors(sT, EVals));
+    const tensor EVecs0(eigenVectors(T, EVals));
     Info<< EVecs0 << endl;
-    test_characteristic_equation(sT, EVals, EVecs0);
+    test_characteristic_equation(T, EVals, EVecs0);
 
     Info<< "# Return eigenvectors of a given symmTensor by computing"
         << " the eigenvalues of the symmTensor in the background:" << nl;
-    const tensor EVecs1(eigenVectors(sT));
+    const tensor EVecs1(eigenVectors(T));
     Info<< EVecs1 << endl;
 }
 
@@ -629,7 +642,7 @@ int main()
     run_tests(types, typeID);
 
 
-    Info<< nl << "    ## Test SymmTensor<scalar> eigen functions: ##" << nl;
+    Info<< nl << "    ## Test symmTensor eigen functions: ##" << nl;
     const label numberOfTests = 10000;
     Random rndGen(1234);
 
@@ -640,14 +653,13 @@ int main()
     }
 
     {
-        Info<< nl << "    ## Test eigen functions by a zero tensor: ##"<< nl;
+        Info<< nl << "    ## A zero symmTensor: ##"<< nl;
         const symmTensor zeroT(Zero);
         test_eigen_funcs(zeroT);
     }
     {
         Info<< nl
-            << "    ## Test eigen functions by a tensor consisting of"
-            << " 2 repeated eigenvalues: ##"
+            << "    ## A symmTensor with 2 repeated eigenvalues: ##"
             << nl;
         const symmTensor T
         (
@@ -659,8 +671,7 @@ int main()
     }
     {
         Info<< nl
-            << "    ## Test eigen functions by a tensor consisting of"
-            << " 3 repeated eigenvalues: ##"
+            << "    ## A symmTensor with 3 repeated eigenvalues: ##"
             << nl;
         const symmTensor T
         (
@@ -671,22 +682,7 @@ int main()
         test_eigen_funcs(T);
     }
     {
-        Info<< nl
-            << "    ## Test eigen functions by a tensor consisting of"
-            << " SMALL off-diagonal elements: ##"
-            << nl;
-
-        for (label i = 0; i < numberOfTests; ++i)
-        {
-            symmTensor T(makeRandomContainer(rndGen));
-            T.xy() = SMALL*rndGen.GaussNormal<scalar>();
-            T.xz() = SMALL*rndGen.GaussNormal<scalar>();
-            T.yz() = SMALL*rndGen.GaussNormal<scalar>();
-            test_eigen_funcs(T);
-        }
-    }
-    {
-        Info<< nl << "    ## Test eigen functions by a stiff tensor: ##" << nl;
+        Info<< nl << "    ## A stiff symmTensor: ##" << nl;
         const symmTensor stiff
         (
             pow(10.0, 10), pow(10.0, 8),  pow(10.0, -8),
@@ -695,6 +691,165 @@ int main()
         );
         test_eigen_funcs(stiff);
     }
+    {
+        Info<< nl
+            << "    ## Random symmTensors with tiny off-diag elements: ##"
+            << nl;
+
+        const List<scalar> epsilons
+        ({
+            0, SMALL, Foam::sqrt(SMALL), sqr(SMALL), Foam::cbrt(SMALL),
+            -SMALL, -Foam::sqrt(SMALL), -sqr(SMALL), -Foam::cbrt(SMALL)
+        });
+
+        for (label i = 0; i < numberOfTests; ++i)
+        {
+            for (const auto& eps : epsilons)
+            {
+                {
+                    symmTensor T(makeRandomContainer(rndGen));
+                    T.xy() = eps*rndGen.GaussNormal<scalar>();
+                    test_eigen_funcs(T);
+                }
+                {
+                    symmTensor T(makeRandomContainer(rndGen));
+                    T.xz() = eps*rndGen.GaussNormal<scalar>();
+                    test_eigen_funcs(T);
+                }
+                {
+                    symmTensor T(makeRandomContainer(rndGen));
+                    T.yz() = eps*rndGen.GaussNormal<scalar>();
+                    test_eigen_funcs(T);
+                }
+                {
+                    symmTensor T(makeRandomContainer(rndGen));
+                    T.xy() = eps*rndGen.GaussNormal<scalar>();
+                    T.xz() = eps*rndGen.GaussNormal<scalar>();
+                    test_eigen_funcs(T);
+                }
+                {
+                    symmTensor T(makeRandomContainer(rndGen));
+                    T.xy() = eps*rndGen.GaussNormal<scalar>();
+                    T.yz() = eps*rndGen.GaussNormal<scalar>();
+                    test_eigen_funcs(T);
+                }
+                {
+                    symmTensor T(makeRandomContainer(rndGen));
+                    T.xz() = eps*rndGen.GaussNormal<scalar>();
+                    T.yz() = eps*rndGen.GaussNormal<scalar>();
+                    test_eigen_funcs(T);
+                }
+                {
+                    symmTensor T(makeRandomContainer(rndGen));
+                    T.xy() = eps*rndGen.GaussNormal<scalar>();
+                    T.xz() = eps*rndGen.GaussNormal<scalar>();
+                    T.yz() = eps*rndGen.GaussNormal<scalar>();
+                    test_eigen_funcs(T);
+                }
+                {
+                    symmTensor T(makeRandomContainer(rndGen));
+                    T.xy() = eps;
+                    T.xz() = eps;
+                    T.yz() = eps;
+                    test_eigen_funcs(T);
+                }
+                {
+                    symmTensor T(makeRandomContainer(rndGen));
+                    T.xy() = eps;
+                    T.xz() = eps;
+                    T.yz() = eps;
+                    T.zz() = eps;
+                    test_eigen_funcs(T);
+                }
+                {
+                    symmTensor T(makeRandomContainer(rndGen));
+                    T.xy() = 0;
+                    T.xz() = eps*rndGen.GaussNormal<scalar>();
+                    T.yz() = 0;
+                    test_eigen_funcs(T);
+                }
+            }
+        }
+    }
+    #if 0
+    // Numerical diagonalisation of 2x2 or 3x3 matrices with analytic methods
+    // are, like the methods currently being used in OpenFOAM, inherently error
+    // prone. Despite its speed, the analytic methods may becomes inaccurate or
+    // may even fail completely if the matrix entries differ greatly in
+    // magnitude, particularly with large off-diagonal elements.
+    // The remedy is to use iterative or hybrid analytic/iterative methods
+    // such as published here (for 3x3/2x2 matrices):
+    // (Kopp, 2008) arXiv.org: physics/0610206
+    // mpi-hd.mpg.de/personalhomes/globes/3x3/index.html
+    {
+        Info<< nl << "    ## symmTensors consisting machine epsilons: ##" << nl;
+        Info<< "    # floatScalar" << nl;
+        const List<floatScalar> floatEpsilons
+        ({
+            floatScalarGREAT, floatScalarVGREAT, floatScalarROOTVGREAT,
+            floatScalarSMALL, floatScalarVSMALL, floatScalarROOTVSMALL,
+            Foam::sqrt(floatScalarSMALL), 0
+        });
+
+        for (const auto& eps : floatEpsilons)
+        {
+            const symmTensor T(makeContainer(eps));
+            test_eigen_funcs(T);
+        }
+
+        Info<< "    # doubleScalar" << nl;
+        const List<doubleScalar> doubleEpsilons
+        ({
+            doubleScalarGREAT, doubleScalarROOTVGREAT, // doubleVGREAT fails
+            doubleScalarSMALL, doubleScalarVSMALL, doubleScalarROOTVSMALL,
+            Foam::sqrt(doubleScalarSMALL), 0
+        });
+
+        for (const auto& eps : doubleEpsilons)
+        {
+            const symmTensor T(makeContainer(eps));
+            test_eigen_funcs(T);
+        }
+    }
+    {
+        Info<< nl
+            << "    ## Random symmTensors with machine eps off-diag elmes: ##"
+            << nl;
+
+        const List<floatScalar> floatEpsilons
+        ({
+            floatScalarGREAT, floatScalarVGREAT, floatScalarROOTVGREAT,
+            floatScalarSMALL, floatScalarVSMALL, floatScalarROOTVSMALL
+        });
+
+        const List<doubleScalar> doubleEpsilons
+        ({
+            doubleScalarGREAT, doubleScalarVGREAT, doubleScalarROOTVGREAT,
+            doubleScalarSMALL, doubleScalarVSMALL, doubleScalarROOTVSMALL
+        });
+
+        for (label i = 0; i < numberOfTests; ++i)
+        {
+            symmTensor T(makeRandomContainer(rndGen));
+
+            for (const auto& eps : floatEpsilons)
+            {
+                T.xy() = eps;
+                T.xz() = eps;
+                T.yz() = eps;
+                test_eigen_funcs(T);
+            }
+
+            for (const auto& eps : doubleEpsilons)
+            {
+                T.xy() = eps;
+                T.xz() = eps;
+                T.yz() = eps;
+                test_eigen_funcs(T);
+            }
+        }
+    }
+    #endif
 
 
     if (nFail_)

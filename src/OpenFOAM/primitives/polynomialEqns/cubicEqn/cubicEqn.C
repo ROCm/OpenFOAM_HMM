@@ -39,6 +39,16 @@ Foam::Roots<3> Foam::cubicEqn::roots() const
     const scalar c = this->c();
     const scalar d = this->d();
 
+    #ifdef FULLDEBUG
+    Info<< "#DEBUG#" << nl
+        << "Coefficients of the characteristic cubic polynomial:" << nl
+        << "a = " << a << nl
+        << "b = " << b << nl
+        << "c = " << c << nl
+        << "d = " << d << nl
+        << "#######" << endl;
+    #endif
+
     // Check the leading term in the cubic eqn exists
     if (mag(a) < VSMALL)
     {
@@ -50,14 +60,26 @@ Foam::Roots<3> Foam::cubicEqn::roots() const
     const scalar p = -(fma(-a, c, w) + fma(b, b/3.0, -w));
     const scalar q = b*b*b*scalar(2)/27 - b*c*a/3 + d*a*a;
     const scalar numDiscr = p*p*p/27 + q*q/4;
-    const scalar discr = (mag(numDiscr) > SMALL) ? numDiscr : 0;
+    const scalar discr = (mag(numDiscr) > sqr(SMALL)) ? numDiscr : 0;
 
     // Determine the number and types of the roots
     const bool threeReal = discr < 0;
     const bool oneRealTwoComplex = discr > 0;
     const bool twoReal = //p != 0; && discr == 0;
-        (mag(p) > VSMALL) && !(threeReal || oneRealTwoComplex);
+        (mag(p) > sqrt(SMALL)) && !(threeReal || oneRealTwoComplex);
     // const bool oneReal = p == 0 && discr == 0;
+
+    #ifdef FULLDEBUG
+    Info<< "#DEBUG#" << nl
+        << "Numerical discriminant:" << tab << numDiscr << nl
+        << "Adjusted discriminant:" << tab << discr << nl
+        << "Number and types of the roots:" << nl
+        << "threeReal = " << threeReal << nl
+        << "oneRealTwoComplex = " << oneRealTwoComplex << nl
+        << "twoReal = " << twoReal << nl
+        << "oneReal = " << !(threeReal || oneRealTwoComplex || twoReal) << nl
+        << "#######" << endl;
+    #endif
 
     static const scalar sqrt3 = sqrt(3.0);
 
@@ -126,6 +148,12 @@ Foam::Roots<3> Foam::cubicEqn::roots() const
         const Roots<1> r(linearEqn(a, b/3).roots());
         return Roots<3>(r.type(0), r[0]);
     }
+
+    #if FULLDEBUG
+    Info<< "#DEBUG#" << nl
+        << "x = " << x << nl
+        << "#######" << endl;
+    #endif
 
     return
         Roots<3>

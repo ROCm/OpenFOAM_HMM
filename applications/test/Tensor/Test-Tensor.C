@@ -84,11 +84,11 @@ typename std::enable_if
     const word& msg,
     const Type& x,
     const Type& y,
-    const scalar relTol = 1e-8,  //<! are values the same within 8 decimals
-    const scalar absTol = 0      //<! useful for cmps near zero
+    const scalar absTol = 0,     //<! useful for cmps near zero
+    const scalar relTol = 1e-8   //<! are values the same within 8 decimals
 )
 {
-    Info<< msg << x << endl;
+    Info<< msg << x << "?=" << y << endl;
 
     unsigned nFail = 0;
 
@@ -122,11 +122,11 @@ typename std::enable_if
     const word& msg,
     const Type& x,
     const Type& y,
-    const scalar relTol = 1e-8,
-    const scalar absTol = 0
+    const scalar absTol = 0,
+    const scalar relTol = 1e-8
 )
 {
-    Info<< msg << x << endl;
+    Info<< msg << x << "?=" << y << endl;
 
     unsigned nFail = 0;
 
@@ -601,8 +601,7 @@ void test_global_funcs(Type)
             Type(4),          Type(6.66666667), Type(-6),
             Type(7),          Type(8),          Type(-7.33333333)
         ),
-        1e-6,
-        1e-6
+        1e-7
     );
     cmp("  Two-third deviatoric part = ", dev2(T), T - 2*sph(T));
     cmp("  Determinant = ", det(T), Type(-6.000000000000005));
@@ -627,7 +626,6 @@ void test_global_funcs(Type)
             Type(1),     Type(-5),           Type(3),
             Type(0.5),   Type(-3.66666667),  Type(2.16666667)
         ),
-        1e-8,
         1e-8
     );
     cmp
@@ -640,7 +638,6 @@ void test_global_funcs(Type)
             Type(1),     Type(-5),           Type(3),
             Type(0.5),   Type(-3.66666667),  Type(2.16666667)
         ),
-        1e-8,
         1e-8
     );
     cmp
@@ -653,7 +650,6 @@ void test_global_funcs(Type)
             Type(1),     Type(-5),           Type(3),
             Type(0.5),   Type(-3.66666667),  Type(2.16666667)
         ),
-        1e-8,
         1e-8
     );
     cmp("  First invariant = ", invariantI(T), Type(-5));
@@ -917,7 +913,7 @@ void test_eigenvalues
         // In case of complex EVals, the production is effectively scalar
         // due to the (complex*complex conjugate) results in zero imag part
         const scalar EValsProd = ((EVals.x()*EVals.y()*EVals.z()).real());
-        cmp("# Product of eigenvalues = det(sT):", EValsProd, determinant);
+        cmp("# Product of eigenvalues = det(T):", EValsProd, determinant, 1e-8);
     }
 
     {
@@ -929,7 +925,7 @@ void test_eigenvalues
         {
             EValsSum += val.real();
         }
-        cmp("# Sum of eigenvalues = trace(sT):", EValsSum, trace);
+        cmp("# Sum of eigenvalues = trace(T):", EValsSum, trace);
     }
 }
 
@@ -959,7 +955,7 @@ void test_characteristic_equation
 
         for (const auto x : X)
         {
-            cmp("  (sT & EVec - EVal*EVec) = 0:", mag(x), 0.0, 1e-8, 1e-6);
+            cmp("  (sT & EVec - EVal*EVec) = 0:", mag(x), 0.0, 1e-5);
         }
     }
 }
@@ -1056,14 +1052,13 @@ int main()
     }
 
     {
-        Info<< nl << "    ## Test eigen functions by a zero tensor: ##"<< nl;
+        Info<< nl << "    ## A zero tensor: ##"<< nl;
         const tensor zeroT(Zero);
         test_eigen_funcs(zeroT);
     }
     {
         Info<< nl
-            << "    ## Test eigen functions by a skew-symmetric tensor"
-            << " consisting of no-real eigenvalues: ##"
+            << "    ## A skew-symmetric tensor with no-real eigenvalues: ##"
             << nl;
         const tensor T
         (
@@ -1075,7 +1070,7 @@ int main()
     }
     {
         Info<< nl
-            << "    ## Test eigen functions by a stiff tensor: ##"
+            << "    ## A stiff tensor: ##"
             << nl;
         const tensor stiff
         (
@@ -1089,6 +1084,89 @@ int main()
         // cross-checked by only sum(eigenvalues) ?= trace(stiff)
         const bool testProd = false;
         test_eigen_funcs(stiff, testProd);
+    }
+    {
+        Info<< nl
+            << "    ## Random tensor with tiny off-diag elements: ##"
+            << nl;
+
+        const List<scalar> epsilons
+        ({
+            0, SMALL, Foam::sqrt(SMALL), sqr(SMALL), Foam::cbrt(SMALL),
+            -SMALL, -Foam::sqrt(SMALL), -sqr(SMALL), -Foam::cbrt(SMALL)
+        });
+
+        for (label i = 0; i < numberOfTests; ++i)
+        {
+            for (const auto& eps : epsilons)
+            {
+                {
+                    tensor T(makeRandomContainer(rndGen));
+                    T.xy() = eps*rndGen.GaussNormal<scalar>();
+                    test_eigen_funcs(T);
+                }
+                {
+                    tensor T(makeRandomContainer(rndGen));
+                    T.xy() = eps*rndGen.GaussNormal<scalar>();
+                    T.xz() = eps*rndGen.GaussNormal<scalar>();
+                    test_eigen_funcs(T);
+                }
+                {
+                    tensor T(makeRandomContainer(rndGen));
+                    T.xy() = eps*rndGen.GaussNormal<scalar>();
+                    T.xz() = eps*rndGen.GaussNormal<scalar>();
+                    T.yz() = eps*rndGen.GaussNormal<scalar>();
+                    test_eigen_funcs(T);
+                }
+                {
+                    tensor T(makeRandomContainer(rndGen));
+                    T.xy() = eps*rndGen.GaussNormal<scalar>();
+                    T.xz() = eps*rndGen.GaussNormal<scalar>();
+                    T.yz() = eps*rndGen.GaussNormal<scalar>();
+                    T.yx() = eps*rndGen.GaussNormal<scalar>();
+                    test_eigen_funcs(T);
+                }
+                {
+                    tensor T(makeRandomContainer(rndGen));
+                    T.xy() = eps*rndGen.GaussNormal<scalar>();
+                    T.xz() = eps*rndGen.GaussNormal<scalar>();
+                    T.yz() = eps*rndGen.GaussNormal<scalar>();
+                    T.yx() = eps*rndGen.GaussNormal<scalar>();
+                    T.zx() = eps*rndGen.GaussNormal<scalar>();
+                    test_eigen_funcs(T);
+                }
+                {
+                    tensor T(makeRandomContainer(rndGen));
+                    T.xy() = eps*rndGen.GaussNormal<scalar>();
+                    T.xz() = eps*rndGen.GaussNormal<scalar>();
+                    T.yz() = eps*rndGen.GaussNormal<scalar>();
+                    T.yx() = eps*rndGen.GaussNormal<scalar>();
+                    T.zx() = eps*rndGen.GaussNormal<scalar>();
+                    T.zy() = eps*rndGen.GaussNormal<scalar>();
+                    test_eigen_funcs(T);
+                }
+                {
+                    tensor T(makeRandomContainer(rndGen));
+                    T.xy() = 0;
+                    T.xz() = eps*rndGen.GaussNormal<scalar>();
+                    T.yz() = 0;
+                    T.yx() = eps*rndGen.GaussNormal<scalar>();
+                    T.zx() = eps*rndGen.GaussNormal<scalar>();
+                    T.zy() = 0;
+                    test_eigen_funcs(T);
+                }
+                {
+                    tensor T(makeRandomContainer(rndGen));
+                    T.xy() = eps;
+                    T.xz() = eps;
+                    T.yz() = eps;
+                    T.yx() = eps;
+                    T.zx() = eps;
+                    T.zy() = eps;
+                    test_eigen_funcs(T);
+                }
+            }
+        }
     }
 
 

@@ -83,11 +83,11 @@ typename std::enable_if
     const word& msg,
     const Type& x,
     const Type& y,
-    const scalar relTol = 1e-8,  //<! are values the same within 8 decimals
-    const scalar absTol = 0      //<! useful for cmps near zero
+    const scalar absTol = 0,     //<! useful for cmps near zero
+    const scalar relTol = 1e-8   //<! are values the same within 8 decimals
 )
 {
-    Info<< msg << x << endl;
+    Info<< msg << x << "?=" << y << endl;
 
     unsigned nFail = 0;
 
@@ -121,11 +121,11 @@ typename std::enable_if
     const word& msg,
     const Type& x,
     const Type& y,
-    const scalar relTol = 1e-8,
-    const scalar absTol = 0
+    const scalar absTol = 0,
+    const scalar relTol = 1e-8
 )
 {
-    Info<< msg << x << endl;
+    Info<< msg << x << "?=" << y << endl;
 
     unsigned nFail = 0;
 
@@ -311,8 +311,7 @@ void test_global_funcs(Type)
             Type(0.42857143), Type(0.28571429),
                               Type(-0.14285714)
         ),
-        1e-8,
-        1e-6
+        1e-7
     );
     cmp
     (
@@ -323,8 +322,7 @@ void test_global_funcs(Type)
             Type(0.42857143), Type(0.28571429),
                               Type(-0.14285714)
         ),
-        1e-8,
-        1e-6
+        1e-7
     );
     cmp("  First invariant = ", invariantI(sT), Type(-2));
     cmp("  Second invariant = ", invariantII(sT), Type(-7));
@@ -481,10 +479,9 @@ void test_global_opers(Type)
 void test_eigenvalues(const symmTensor2D& T, const vector2D& EVals)
 {
     {
-        Info<< "# Product of eigenvalues = det(T):" << nl;
         const scalar determinant = det(T);
         const scalar EValsProd = EVals.x()*EVals.y();
-        cmp("# Product of eigenvalues = det(sT):", EValsProd, determinant);
+        cmp("# Product of eigenvalues = det(T):", EValsProd, determinant, 1e-8);
     }
 
     {
@@ -494,7 +491,7 @@ void test_eigenvalues(const symmTensor2D& T, const vector2D& EVals)
         {
             EValsSum += val;
         }
-        cmp("# Sum of eigenvalues = trace(sT):", EValsSum, trace);
+        cmp("# Sum of eigenvalues = trace(T):", EValsSum, trace);
     }
 }
 
@@ -519,7 +516,7 @@ void test_characteristic_equation
 
         for (const auto x : X)
         {
-            cmp("  (sT & EVec - EVal*EVec) = 0:", x, 0.0, 1e-8, 1e-6);
+            cmp("  (sT & EVec - EVal*EVec) = 0:", x, 0.0, 1e-5);
         }
     }
 }
@@ -605,39 +602,65 @@ int main(int argc, char *argv[])
         test_eigen_funcs(T);
     }
 
-    Info<< nl << "    ## Test symmTensor2D eigen functions"
-        << " with T.xy = VSMALL: ##" << nl;
-    for (label i = 0; i < numberOfTests; ++i)
     {
-        symmTensor2D T(makeRandomContainer(rndGen));
-        T.xy() = VSMALL;
-        test_eigen_funcs(T);
+        Info<< nl << "    ## A symmTensor2D with T.xy = VSMALL" << nl;
+        for (label i = 0; i < numberOfTests; ++i)
+        {
+            symmTensor2D T(makeRandomContainer(rndGen));
+            T.xy() = VSMALL;
+            test_eigen_funcs(T);
+        }
     }
-
-    Info<< nl << "    ## Test symmTensor2D eigen functions"
-        << " with T.xx = T.yy: ##" << nl;
-    for (label i = 0; i < numberOfTests; ++i)
     {
-        symmTensor2D T(makeRandomContainer(rndGen));
-        T.xx() = T.yy();
-        test_eigen_funcs(T);
+        Info<< nl << "    ## A symmTensor2D with T.xx = T.yy: ##" << nl;
+        for (label i = 0; i < numberOfTests; ++i)
+        {
+            symmTensor2D T(makeRandomContainer(rndGen));
+            T.xx() = T.yy();
+            test_eigen_funcs(T);
+        }
     }
-
     {
-        Info<< nl
-            << "    ## Test eigen functions by a zero symmTensor2D: ##"<< nl;
+        Info<< nl << "    ## A zero symmTensor2D: ##"<< nl;
         const symmTensor2D zeroT(Zero);
         test_eigen_funcs(zeroT);
     }
-
     {
-        Info<< nl << "    ## Test eigen functions by a stiff tensor2D: ##"<< nl;
+        Info<< nl << "    ## A stiff symmTensor2D: ##"<< nl;
         const symmTensor2D stiff
         (
             pow(10.0, 10), pow(10.0, -8),
                            pow(10.0, 9)
         );
         test_eigen_funcs(stiff);
+    }
+    {
+        Info<< nl
+            << "    ## Random symmTensor2D with tiny off-diag elements: ##"
+            << nl;
+
+        const List<scalar> epsilons
+        ({
+            0, SMALL, Foam::sqrt(SMALL), sqr(SMALL), Foam::cbrt(SMALL),
+            -SMALL, -Foam::sqrt(SMALL), -sqr(SMALL), -Foam::cbrt(SMALL)
+        });
+
+        for (label i = 0; i < numberOfTests; ++i)
+        {
+            for (const auto& eps : epsilons)
+            {
+                {
+                    symmTensor2D T(makeRandomContainer(rndGen));
+                    T.xy() = eps*rndGen.GaussNormal<scalar>();
+                    test_eigen_funcs(T);
+                }
+                {
+                    symmTensor2D T(makeRandomContainer(rndGen));
+                    T.xy() = eps;
+                    test_eigen_funcs(T);
+                }
+            }
+        }
     }
 
 
