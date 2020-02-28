@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2018 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd
+    Copyright (C) 2018-2020 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1005,11 +1005,6 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
 
                 if (debug & 2)
                 {
-                    scalar nSubCool(0);
-                    scalar nTransient(0);
-                    scalar nFilm(0);
-                    scalar nNonBoiling(0);
-
                     scalarField nSubCools(this->size(), 0);
                     scalarField nTransients(this->size(), 0);
                     scalarField nFilms(this->size(), 0);
@@ -1021,26 +1016,27 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
                         switch (regimeTypes[i])
                         {
                             case regimeType::subcool:
-                                nSubCool++;
                                 nSubCools[i] = 1;
                             break;
 
                             case regimeType::transient:
-                                nTransient++;
                                 nTransients[i] = 1;
                             break;
 
                             case regimeType::film:
-                                nFilm++;
                                 nFilms[i] = 1;
                             break;
 
                             case regimeType::nonBoiling:
-                                nNonBoiling++;
                                 nNonBoilings[i] = 1;
                             break;
                         }
                     }
+                    
+                    scalar nSubCool(gSum(nSubCools));
+                    scalar nTransient(gSum(nTransients));
+                    scalar nFilm(gSum(nFilms));
+                    scalar nNonBoiling(gSum(nNonBoilings));
 
                     Info<< "Faces regime :  " <<  nl << endl;
 
@@ -1048,7 +1044,9 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
                     Info<< "    transient faces : " << nTransient << endl;
                     Info<< "    film faces : " << nFilm << endl;
                     Info<< "    non-Boiling faces : " << nNonBoiling << endl;
-                    Info<< "    total faces : " << this->size() << endl << nl;
+                    Info<< "    total faces : " 
+                        << nSubCool + nTransient + nFilm  + nNonBoiling 
+                        << endl << nl;
 
                     const scalarField qc
                     (
