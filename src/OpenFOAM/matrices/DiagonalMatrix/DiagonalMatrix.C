@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,14 +28,7 @@ License
 
 #include "DiagonalMatrix.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class Type>
-inline Foam::DiagonalMatrix<Type>::DiagonalMatrix()
-:
-    List<Type>()
-{}
-
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
 Foam::DiagonalMatrix<Type>::DiagonalMatrix(const label n)
@@ -74,8 +67,10 @@ Foam::DiagonalMatrix<Type>::DiagonalMatrix(const Matrix<Form, Type>& mat)
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 template<class Type>
-Foam::DiagonalMatrix<Type>& Foam::DiagonalMatrix<Type>::invert()
+void Foam::DiagonalMatrix<Type>::invert()
 {
     for (Type& val : *this)
     {
@@ -88,13 +83,75 @@ Foam::DiagonalMatrix<Type>& Foam::DiagonalMatrix<Type>::invert()
             val = Type(1)/val;
         }
     }
-
-    return this;
 }
 
 
 template<class Type>
-Foam::DiagonalMatrix<Type> Foam::inv(const DiagonalMatrix<Type>& mat)
+template<class CompOp>
+Foam::List<Foam::label> Foam::DiagonalMatrix<Type>::sortPermutation
+(
+    CompOp& compare
+) const
+{
+    List<label> p(this->size());
+    std::iota(p.begin(), p.end(), 0);
+    std::sort
+    (
+        p.begin(),
+        p.end(),
+        [&](label i, label j){ return compare((*this)[i], (*this)[j]); }
+    );
+
+    return p;
+}
+
+
+template<class Type>
+void Foam::DiagonalMatrix<Type>::applyPermutation(const List<label>& p)
+{
+    #ifdef FULLDEBUG
+    if (this->size() != p.size())
+    {
+        FatalErrorInFunction
+            << "Attempt to column-reorder according to an uneven list: " << nl
+            << "DiagonalMatrix diagonal size = " << this->size() << nl
+            << "Permutation list size = " << p.size() << nl
+            << abort(FatalError);
+    }
+    #endif
+
+    List<bool> pass(p.size(), false);
+
+    for (label i = 0; i < p.size(); ++i)
+    {
+        if (pass[i])
+        {
+            continue;
+        }
+        pass[i] = true;
+        label prev = i;
+        label j = p[i];
+        while (i != j)
+        {
+            Swap((*this)[prev], (*this)[j]);
+            pass[j] = true;
+            prev = j;
+            j = p[j];
+        }
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+//- Return the matrix inverse as a DiagonalMatrix if no elem is equal to zero
+template<class Type>
+DiagonalMatrix<Type> inv(const DiagonalMatrix<Type>& mat)
 {
     DiagonalMatrix<Type> Ainv(mat.size());
 
@@ -117,5 +174,42 @@ Foam::DiagonalMatrix<Type> Foam::inv(const DiagonalMatrix<Type>& mat)
     return Ainv;
 }
 
+
+//- Return Matrix column-reordered according to
+//- a given permutation labelList
+template<class Type>
+DiagonalMatrix<Type> applyPermutation
+(
+    const DiagonalMatrix<Type>& mat,
+    const List<label>& p
+)
+{
+    #ifdef FULLDEBUG
+    if (mat.size() != p.size())
+    {
+        FatalErrorInFunction
+            << "Attempt to column-reorder according to an uneven list: " << nl
+            << "DiagonalMatrix diagonal size = " << mat.size() << nl
+            << "Permutation list size = " << p.size() << nl
+            << abort(FatalError);
+    }
+    #endif
+
+    DiagonalMatrix<Type> reordered(mat.size());
+
+    label j = 0;
+    for (const label i : p)
+    {
+        reordered[j] = mat[i];
+        ++j;
+    }
+
+    return reordered;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // ************************************************************************* //

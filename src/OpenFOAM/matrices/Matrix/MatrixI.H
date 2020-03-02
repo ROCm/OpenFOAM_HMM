@@ -242,7 +242,7 @@ inline const Type& Foam::Matrix<Form, Type>::at(const label idx) const
             << abort(FatalError);
     }
     #endif
-    return (v_ + idx);
+    return *(v_ + idx);
 }
 
 
@@ -257,7 +257,7 @@ inline Type& Foam::Matrix<Form, Type>::at(const label idx)
             << abort(FatalError);
     }
     #endif
-    return (v_ + idx);
+    return *(v_ + idx);
 }
 
 
@@ -608,8 +608,16 @@ inline Type* Foam::Matrix<Form, Type>::operator[](const label irow)
 }
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
+
+//- Matrix-vector multiplication (A * x), where x is a column vector
 template<class Form, class Type>
-inline Foam::tmp<Foam::Field<Type>> Foam::operator*
+inline tmp<Field<Type>> operator*
 (
     const Matrix<Form, Type>& mat,
     const UList<Type>& x
@@ -619,8 +627,9 @@ inline Foam::tmp<Foam::Field<Type>> Foam::operator*
 }
 
 
+//- Matrix-vector multiplication (A * x), where x is a column vector
 template<class Form, class Type, class Addr>
-inline Foam::tmp<Foam::Field<Type>> Foam::operator*
+inline tmp<Field<Type>> operator*
 (
     const Matrix<Form, Type>& mat,
     const IndirectListBase<Type, Addr>& x
@@ -630,8 +639,9 @@ inline Foam::tmp<Foam::Field<Type>> Foam::operator*
 }
 
 
+//- Vector-Matrix multiplication (x * A), where x is a row vector
 template<class Form, class Type>
-inline Foam::tmp<Foam::Field<Type>> Foam::operator*
+inline tmp<Field<Type>> operator*
 (
     const UList<Type>& x,
     const Matrix<Form, Type>& mat
@@ -641,8 +651,9 @@ inline Foam::tmp<Foam::Field<Type>> Foam::operator*
 }
 
 
+//- Vector-Matrix multiplication (x * A), where x is a row vector
 template<class Form, class Type, class Addr>
-inline Foam::tmp<Foam::Field<Type>> Foam::operator*
+inline tmp<Field<Type>> operator*
 (
     const IndirectListBase<Type, Addr>& x,
     const Matrix<Form, Type>& mat
@@ -651,5 +662,8 @@ inline Foam::tmp<Foam::Field<Type>> Foam::operator*
     return mat.Tmul(x);
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // ************************************************************************* //

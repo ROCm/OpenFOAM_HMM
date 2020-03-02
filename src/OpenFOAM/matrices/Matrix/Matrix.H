@@ -220,7 +220,6 @@ public:
         //  Subscript checking only with FULLDEBUG
         inline Type& at(const label idx);
 
-
     // Block Access (const)
 
         //- Return const column or column's subset of Matrix
@@ -265,7 +264,6 @@ public:
             const label colIndex
         ) const;
 
-
     // Block Access (non-const)
 
         //- Return column or column's subset of Matrix
@@ -301,7 +299,6 @@ public:
             const label colIndex
         );
 
-
     // Check
 
         //- Check index i is within valid range [0, m)
@@ -315,7 +312,6 @@ public:
 
         //- True if all entries have identical values, and Matrix is non-empty
         inline bool uniform() const;
-
 
     // Edit
 
@@ -342,9 +338,8 @@ public:
         //- Resize Matrix without reallocating storage (unsafe)
         inline void shallowResize(const label m, const label n);
 
-        //- Round to zero elements with magnitude smaller than tol (SMALL)
+        //- Round elements with magnitude smaller than tol (SMALL) to zero
         void round(const scalar tol = SMALL);
-
 
     // Operations
 
@@ -386,7 +381,6 @@ public:
 
         //- Return Frobenius norm of Matrix
         //  Optional without sqrt for parallel usage.
-        //  https://en.wikipedia.org/wiki/Matrix_norm#Frobenius_norm
         scalar norm(const bool noSqrt=false) const;
 
 
@@ -594,159 +588,6 @@ Istream& operator>>(Istream& is, Matrix<Form, Type>& mat);
 //- default length, which is given by Detail::ListPolicy::short_length
 template<class Form, class Type>
 Ostream& operator<<(Ostream& os, const Matrix<Form, Type>& mat);
-
-
-// * * * * * * * * * * * * * * * Global Functions * * * * * * * * * * * * * * //
-
-//- Find max value in Matrix
-template<class Form, class Type>
-const Type& max(const Matrix<Form, Type>& mat);
-
-//- Find min value in Matrix
-template<class Form, class Type>
-const Type& min(const Matrix<Form, Type>& mat);
-
-//- Find the min/max values of Matrix
-template<class Form, class Type>
-MinMax<Type> minMax(const Matrix<Form, Type>& mat);
-
-
-// * * * * * * * * * * * * * * * Global Operators * * * * * * * * * * * * * * //
-
-//- Matrix negation
-template<class Form, class Type>
-Form operator-(const Matrix<Form, Type>& mat);
-
-//- Matrix addition. Returns Matrix of the same form as the first parameter.
-template<class Form1, class Form2, class Type>
-Form1 operator+
-(
-    const Matrix<Form1, Type>& A,
-    const Matrix<Form2, Type>& B
-);
-
-//- Matrix subtraction. Returns Matrix of the same form as the first parameter.
-template<class Form1, class Form2, class Type>
-Form1 operator-
-(
-    const Matrix<Form1, Type>& A,
-    const Matrix<Form2, Type>& B
-);
-
-//- Scalar multiplication of Matrix
-template<class Form, class Type>
-Form operator*
-(
-    const Type& s,
-    const Matrix<Form, Type>& mat
-);
-
-//- Scalar addition of Matrix
-template<class Form, class Type>
-Form operator+
-(
-    const Type& s,
-    const Matrix<Form, Type>& mat
-);
-
-//- Scalar subtraction of Matrix
-template<class Form, class Type>
-Form operator-
-(
-    const Type& s,
-    const Matrix<Form, Type>& mat
-);
-
-//- Scalar multiplication of Matrix
-template<class Form, class Type>
-Form operator*
-(
-    const Matrix<Form, Type>& mat,
-    const Type& s
-);
-
-//- Scalar addition of Matrix
-template<class Form, class Type>
-Form operator+
-(
-    const Matrix<Form, Type>& mat,
-    const Type& s
-);
-
-//- Scalar subtraction of Matrix
-template<class Form, class Type>
-Form operator-
-(
-    const Matrix<Form, Type>& mat,
-    const Type& s
-);
-
-//- Scalar division of Matrix
-template<class Form, class Type>
-Form operator/
-(
-    const Matrix<Form, Type>& mat,
-    const Type& s
-);
-
-//- Matrix-Matrix multiplication using ikj-algorithm
-template<class Form1, class Form2, class Type>
-typename typeOfInnerProduct<Type, Form1, Form2>::type
-operator*
-(
-    const Matrix<Form1, Type>& A,
-    const Matrix<Form2, Type>& B
-);
-
-//- Matrix-vector multiplication (A * x), where x is a column vector
-template<class Form, class Type>
-inline tmp<Field<Type>> operator*
-(
-    const Matrix<Form, Type>& mat,
-    const UList<Type>& x
-);
-
-//- Matrix-vector multiplication (A * x), where x is a column vector
-template<class Form, class Type, class Addr>
-inline tmp<Field<Type>> operator*
-(
-    const Matrix<Form, Type>& mat,
-    const IndirectListBase<Type, Addr>& x
-);
-
-//- Vector-Matrix multiplication (x * A), where x is a row vector
-template<class Form, class Type>
-inline tmp<Field<Type>> operator*
-(
-    const UList<Type>& x,
-    const Matrix<Form, Type>& mat
-);
-
-//- Vector-Matrix multiplication (x * A), where x is a row vector
-template<class Form, class Type, class Addr>
-inline tmp<Field<Type>> operator*
-(
-    const IndirectListBase<Type, Addr>& x,
-    const Matrix<Form, Type>& mat
-);
-
-//- Implicit inner product of Matrix-Matrix, equivalent to A.T()*B
-template<class Form1, class Form2, class Type>
-typename typeOfInnerProduct<Type, Form1, Form2>::type
-operator&
-(
-    const Matrix<Form1, Type>& ATranspose,
-    const Matrix<Form2, Type>& B
-);
-
-//- Implicit outer product of Matrix-Matrix, equivalent to A*B.T()
-template<class Form1, class Form2, class Type>
-typename typeOfInnerProduct<Type, Form1, Form2>::type
-operator^
-(
-    const Matrix<Form1, Type>& A,
-    const Matrix<Form2, Type>& BTranspose
-);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

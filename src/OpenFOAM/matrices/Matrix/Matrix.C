@@ -644,10 +644,16 @@ void Foam::Matrix<Form, Type>::operator/=(const Type& s)
 }
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
 // * * * * * * * * * * * * * * * Global Functions * * * * * * * * * * * * * * //
 
+//- Find max value in Matrix
 template<class Form, class Type>
-const Type& Foam::max(const Matrix<Form, Type>& mat)
+const Type& max(const Matrix<Form, Type>& mat)
 {
     if (mat.empty())
     {
@@ -659,8 +665,9 @@ const Type& Foam::max(const Matrix<Form, Type>& mat)
 }
 
 
+//- Find min value in Matrix
 template<class Form, class Type>
-const Type& Foam::min(const Matrix<Form, Type>& mat)
+const Type& min(const Matrix<Form, Type>& mat)
 {
     if (mat.empty())
     {
@@ -672,8 +679,9 @@ const Type& Foam::min(const Matrix<Form, Type>& mat)
 }
 
 
+//- Find the min/max values of Matrix
 template<class Form, class Type>
-Foam::MinMax<Type> Foam::minMax(const Matrix<Form, Type>& mat)
+MinMax<Type> minMax(const Matrix<Form, Type>& mat)
 {
     MinMax<Type> result;
 
@@ -686,10 +694,12 @@ Foam::MinMax<Type> Foam::minMax(const Matrix<Form, Type>& mat)
 }
 
 
+
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
+//- Matrix negation
 template<class Form, class Type>
-Form Foam::operator-(const Matrix<Form, Type>& mat)
+Form operator-(const Matrix<Form, Type>& mat)
 {
     Form result(mat.sizes());
 
@@ -705,8 +715,9 @@ Form Foam::operator-(const Matrix<Form, Type>& mat)
 }
 
 
+//- Matrix addition. Returns Matrix of the same form as the first parameter.
 template<class Form1, class Form2, class Type>
-Form1 Foam::operator+
+Form1 operator+
 (
     const Matrix<Form1, Type>& A,
     const Matrix<Form2, Type>& B
@@ -738,8 +749,9 @@ Form1 Foam::operator+
 }
 
 
+//- Matrix subtraction. Returns Matrix of the same form as the first parameter.
 template<class Form1, class Form2, class Type>
-Form1 Foam::operator-
+Form1 operator-
 (
     const Matrix<Form1, Type>& A,
     const Matrix<Form2, Type>& B
@@ -771,8 +783,9 @@ Form1 Foam::operator-
 }
 
 
+//- Scalar multiplication of Matrix
 template<class Form, class Type>
-Form Foam::operator*(const Type& s, const Matrix<Form, Type>& mat)
+Form operator*(const Type& s, const Matrix<Form, Type>& mat)
 {
     Form result(mat.sizes());
 
@@ -788,8 +801,17 @@ Form Foam::operator*(const Type& s, const Matrix<Form, Type>& mat)
 }
 
 
+//- Scalar multiplication of Matrix
 template<class Form, class Type>
-Form Foam::operator+(const Type& s, const Matrix<Form, Type>& mat)
+Form operator*(const Matrix<Form, Type>& mat, const Type& s)
+{
+    return s*mat;
+}
+
+
+//- Scalar addition of Matrix
+template<class Form, class Type>
+Form operator+(const Type& s, const Matrix<Form, Type>& mat)
 {
     Form result(mat.sizes());
 
@@ -805,8 +827,17 @@ Form Foam::operator+(const Type& s, const Matrix<Form, Type>& mat)
 }
 
 
+//- Scalar addition of Matrix
 template<class Form, class Type>
-Form Foam::operator-(const Type& s, const Matrix<Form, Type>& mat)
+Form operator+(const Matrix<Form, Type>& mat, const Type& s)
+{
+    return s + mat;
+}
+
+
+//- Scalar subtraction of Matrix
+template<class Form, class Type>
+Form operator-(const Type& s, const Matrix<Form, Type>& mat)
 {
     Form result(mat.sizes());
 
@@ -822,22 +853,9 @@ Form Foam::operator-(const Type& s, const Matrix<Form, Type>& mat)
 }
 
 
+//- Scalar subtraction of Matrix
 template<class Form, class Type>
-Form Foam::operator*(const Matrix<Form, Type>& mat, const Type& s)
-{
-    return s*mat;
-}
-
-
-template<class Form, class Type>
-Form Foam::operator+(const Matrix<Form, Type>& mat, const Type& s)
-{
-    return s + mat;
-}
-
-
-template<class Form, class Type>
-Form Foam::operator-(const Matrix<Form, Type>& mat, const Type& s)
+Form operator-(const Matrix<Form, Type>& mat, const Type& s)
 {
     Form result(mat.sizes());
 
@@ -853,8 +871,9 @@ Form Foam::operator-(const Matrix<Form, Type>& mat, const Type& s)
 }
 
 
+//- Scalar division of Matrix
 template<class Form, class Type>
-Form Foam::operator/(const Matrix<Form, Type>& mat, const Type& s)
+Form operator/(const Matrix<Form, Type>& mat, const Type& s)
 {
     Form result(mat.sizes());
 
@@ -870,9 +889,10 @@ Form Foam::operator/(const Matrix<Form, Type>& mat, const Type& s)
 }
 
 
+//- Matrix-Matrix multiplication using ikj-algorithm
 template<class Form1, class Form2, class Type>
-typename Foam::typeOfInnerProduct<Type, Form1, Form2>::type
-Foam::operator*
+typename typeOfInnerProduct<Type, Form1, Form2>::type
+operator*
 (
     const Matrix<Form1, Type>& A,
     const Matrix<Form2, Type>& B
@@ -912,9 +932,10 @@ Foam::operator*
 }
 
 
+//- Implicit inner product of Matrix-Matrix, equivalent to A.T()*B
 template<class Form1, class Form2, class Type>
-typename Foam::typeOfInnerProduct<Type, Form1, Form2>::type
-Foam::operator&
+typename typeOfInnerProduct<Type, Form1, Form2>::type
+operator&
 (
     const Matrix<Form1, Type>& AT,
     const Matrix<Form2, Type>& B
@@ -954,9 +975,10 @@ Foam::operator&
 }
 
 
+//- Implicit outer product of Matrix-Matrix, equivalent to A*B.T()
 template<class Form1, class Form2, class Type>
-typename Foam::typeOfInnerProduct<Type, Form1, Form2>::type
-Foam::operator^
+typename typeOfInnerProduct<Type, Form1, Form2>::type
+operator^
 (
     const Matrix<Form1, Type>& A,
     const Matrix<Form2, Type>& BT
@@ -996,7 +1018,11 @@ Foam::operator^
 }
 
 
-// * * * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * IOStream operators  * * * * * * * * * * * * * //
 
 #include "MatrixIO.C"
 

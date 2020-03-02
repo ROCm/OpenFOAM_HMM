@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,13 +36,6 @@ License
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class Type>
-inline Foam::SquareMatrix<Type>::SquareMatrix()
-:
-    Matrix<SquareMatrix<Type>, Type>()
-{}
-
 
 template<class Type>
 inline Foam::SquareMatrix<Type>::SquareMatrix(const label n)
@@ -83,7 +76,7 @@ inline Foam::SquareMatrix<Type>::SquareMatrix
 :
     Matrix<SquareMatrix<Type>, Type>(n, n, Zero)
 {
-    for (label i=0; i < n; ++i)
+    for (label i = 0; i < n; ++i)
     {
         this->operator()(i, i) = pTraits<Type>::one;
     }
@@ -318,6 +311,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
 
+// Return the outer product of Field-Field as SquareMatrix
 template<class Type>
 inline Foam::SquareMatrix<Type> symmOuter
 (

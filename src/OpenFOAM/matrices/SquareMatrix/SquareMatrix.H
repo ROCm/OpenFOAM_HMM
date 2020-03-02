@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,8 +28,11 @@ Class
     Foam::SquareMatrix
 
 Description
-    A templated 2D square matrix of objects of \<T\>, where the n x n matrix
-    dimension is known and used for subscript bounds checking, etc.
+    A templated (N x N) square matrix of objects of \<Type\>,
+    containing N*N elements, derived from Matrix.
+
+See also
+    Test-SquareMatrix.C
 
 SourceFiles
     SquareMatrixI.H
@@ -42,6 +45,7 @@ SourceFiles
 
 #include "Matrix.H"
 #include "Identity.H"
+#include <numeric>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,10 +68,19 @@ class SquareMatrix
 
 public:
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        inline SquareMatrix();
+        //- Default construct
+        SquareMatrix() = default;
+
+        //- Copy construct
+        SquareMatrix(const SquareMatrix&) = default;
+
+        //- Copy assignment
+        SquareMatrix& operator=(const SquareMatrix&) = default;
+
+
+    // Constructors
 
         //- Construct for given size (rows == cols)
         inline explicit SquareMatrix(const label n);
@@ -85,20 +98,25 @@ public:
         template<class AnyType>
         inline SquareMatrix(const label n, const Identity<AnyType>);
 
+        //- Construct for given size (rows == cols) by using a labelPair
+        //- initializing to the identity matrix
         template<class AnyType>
         inline SquareMatrix(const labelPair& dims, const Identity<AnyType>);
 
-        //- Construct given number of rows/columns (checked to be equal)
+        //- Construct given number of rows/columns
+        //- by using a labelPair (checked to be equal)
         //  For constructor consistency in rectangular matrices
         inline explicit SquareMatrix(const labelPair& dims);
 
-        //- Construct given number of rows/columns (checked to be equal)
-        //- initializing all elements to zero
+        //- Construct given number of rows/columns
+        //- by using a labelPair (checked to be equal)
+        //- and initializing all elements to zero
         //  For constructor consistency with rectangular matrices
         inline SquareMatrix(const labelPair& dims, const zero);
 
-        //- Construct given number of rows/columns (checked to be equal)
-        //- initializing all elements to the given value
+        //- Construct given number of rows/columns
+        //- by using a labelPair (checked to be equal)
+        //- and initializing all elements to the given value
         //  For constructor consistency with rectangular matrices
         inline SquareMatrix(const labelPair& dims, const Type& val);
 
@@ -106,7 +124,7 @@ public:
         //- initializing all elements to zero
         inline SquareMatrix(const label m, const label n, const zero);
 
-        //- Construct from sub-matrix block
+        //- Construct from const sub-matrix block
         template<class MatrixType>
         inline SquareMatrix(const ConstMatrixBlock<MatrixType>& mat);
 
@@ -149,6 +167,17 @@ public:
         //- Return true if the square matrix is reduced tridiagonal
         inline bool tridiagonal() const;
 
+    // Sort
+
+        //- Return a sort permutation labelList according to
+        //- a given comparison on the diagonal entries
+        template<class CompOp>
+        List<label> sortPermutation(CompOp& compare) const;
+
+        //- Column-reorder this Matrix according to
+        //- a given permutation labelList
+        void applyPermutation(const List<label>& p);
+
 
     // Member Operators
 
@@ -163,28 +192,6 @@ public:
         void operator=(const Identity<AnyType>);
 };
 
-
-// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
-
-//- Return the LU decomposed SquareMatrix det
-template<class Type>
-scalar detDecomposed(const SquareMatrix<Type>&, const label sign);
-
-//- Return the SquareMatrix det
-template<class Type>
-scalar det(const SquareMatrix<Type>&);
-
-//- Return the SquareMatrix det and the LU decomposition in the original matrix
-template<class Type>
-scalar det(SquareMatrix<Type>&);
-
-template<class Type>
-class typeOfInnerProduct<Type, SquareMatrix<Type>, SquareMatrix<Type>>
-{
-public:
-
-    typedef SquareMatrix<Type> type;
-};
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

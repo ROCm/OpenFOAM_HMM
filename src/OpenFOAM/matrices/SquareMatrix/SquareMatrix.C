@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,10 +30,80 @@ License
 #include "RectangularMatrix.H"
 #include "labelList.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::scalar Foam::detDecomposed
+template<class CompOp>
+Foam::List<Foam::label> Foam::SquareMatrix<Type>::sortPermutation
+(
+    CompOp& compare
+) const
+{
+    List<label> p(this->m());
+    std::iota(p.begin(), p.end(), 0);
+    std::sort
+    (
+        p.begin(),
+        p.end(),
+        [&](label i, label j){ return compare((*this)(i,i), (*this)(j,j)); }
+    );
+
+    return p;
+}
+
+
+template<class Type>
+void Foam::SquareMatrix<Type>::applyPermutation(const List<label>& p)
+{
+    #ifdef FULLDEBUG
+    if (this->m() != p.size())
+    {
+        FatalErrorInFunction
+            << "Attempt to column-reorder according to an uneven list: " << nl
+            << "SquareMatrix diagonal size = " << this->m() << nl
+            << "Permutation list size = " << p.size() << nl
+            << abort(FatalError);
+    }
+    #endif
+
+    SquareMatrix<Type> reordered(this->sizes());
+
+    label j = 0;
+    for (const label i : p)
+    {
+        reordered.subColumn(j) = this->subColumn(i);
+        ++j;
+    }
+
+    this->transfer(reordered);
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+template<class Type>
+template<class AnyType>
+void Foam::SquareMatrix<Type>::operator=(const Identity<AnyType>)
+{
+    Matrix<SquareMatrix<Type>, Type>::operator=(Zero);
+
+    for (label i = 0; i < this->n(); ++i)
+    {
+        this->operator()(i, i) = pTraits<Type>::one;
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+//- Return the determinant of the LU decomposed SquareMatrix
+template<class Type>
+scalar detDecomposed
 (
     const SquareMatrix<Type>& matrix,
     const label sign
@@ -50,8 +120,9 @@ Foam::scalar Foam::detDecomposed
 }
 
 
+//- Return the determinant of SquareMatrix
 template<class Type>
-Foam::scalar Foam::det(const SquareMatrix<Type>& matrix)
+scalar det(const SquareMatrix<Type>& matrix)
 {
     SquareMatrix<Type> matrixTmp = matrix;
 
@@ -63,8 +134,9 @@ Foam::scalar Foam::det(const SquareMatrix<Type>& matrix)
 }
 
 
+//- Return the SquareMatrix det and the LU decomposition in the original matrix
 template<class Type>
-Foam::scalar Foam::det(SquareMatrix<Type>& matrix)
+scalar det(SquareMatrix<Type>& matrix)
 {
     labelList pivotIndices(matrix.m());
     label sign;
@@ -74,19 +146,52 @@ Foam::scalar Foam::det(SquareMatrix<Type>& matrix)
 }
 
 
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
+//- Return Matrix column-reordered according to
+//- a given permutation labelList
 template<class Type>
-template<class AnyType>
-void Foam::SquareMatrix<Type>::operator=(const Identity<AnyType>)
+SquareMatrix<Type> applyPermutation
+(
+    const SquareMatrix<Type>& mat,
+    const List<label>& p
+)
 {
-    Matrix<SquareMatrix<Type>, Type>::operator=(Zero);
-
-    for (label i=0; i < this->n(); ++i)
+    #ifdef FULLDEBUG
+    if (mat.m() != p.size())
     {
-        this->operator()(i, i) = pTraits<Type>::one;
+        FatalErrorInFunction
+            << "Attempt to column-reorder according to an uneven list: " << nl
+            << "SquareMatrix diagonal size = " << mat.m() << nl
+            << "Permutation list size = " << p.size() << nl
+            << abort(FatalError);
     }
+    #endif
+
+    SquareMatrix<Type> reordered(mat.sizes());
+
+    label j = 0;
+    for (const label i : p)
+    {
+        reordered.subColumn(j) = mat.subColumn(i);
+        ++j;
+    }
+
+    return reordered;
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class Type>
+class typeOfInnerProduct<Type, SquareMatrix<Type>, SquareMatrix<Type>>
+{
+public:
+
+    typedef SquareMatrix<Type> type;
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// ************************************************************************* //

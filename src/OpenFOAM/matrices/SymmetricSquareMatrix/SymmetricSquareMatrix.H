@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,8 +28,11 @@ Class
     Foam::SymmetricSquareMatrix
 
 Description
-    A templated 2D square symmetric matrix of objects of \<T\>, where the
-    n x n matrix dimension is known and used for subscript bounds checking, etc.
+    A templated (N x N) square matrix of objects of \<Type\>,
+    containing N*N elements, derived from Matrix.
+
+See also
+    Test-SymmetricSquareMatrix.C
 
 SourceFiles
     SymmetricSquareMatrixI.H
@@ -59,10 +62,19 @@ class SymmetricSquareMatrix
 
 public:
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        inline SymmetricSquareMatrix();
+        //- Default construct
+        SymmetricSquareMatrix() = default;
+
+        //- Copy construct
+        SymmetricSquareMatrix(const SymmetricSquareMatrix&) = default;
+
+        //- Copy assignment
+        SymmetricSquareMatrix& operator=(const SymmetricSquareMatrix&) = default;
+
+
+    // Constructors
 
         //- Construct for given size (rows == cols)
         inline explicit SymmetricSquareMatrix(const label n);
@@ -76,7 +88,7 @@ public:
         inline SymmetricSquareMatrix(const label n, const Type& val);
 
         //- Construct for given size (rows == cols)
-        //- setting the diagonal to one and off-diagonals to zero
+        //- initializing to the identity matrix
         template<class AnyType>
         inline SymmetricSquareMatrix(const label n, const Identity<AnyType>);
 

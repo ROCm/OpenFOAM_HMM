@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,13 +28,14 @@ Class
     Foam::RectangularMatrix
 
 Description
-    A templated 2D rectangular m x n matrix of objects of \<Type\>.
+    A templated (M x N) rectangular matrix of objects of \<Type\>,
+    containing M*N elements, derived from Matrix.
 
-    The matrix dimensions are used for subscript bounds checking etc.
+See also
+    Test-RectangularMatrix.C
 
 SourceFiles
     RectangularMatrixI.H
-    RectangularMatrix.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -61,10 +62,19 @@ class RectangularMatrix
 
 public:
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        inline RectangularMatrix();
+        //- Default construct
+        RectangularMatrix() = default;
+
+        //- Copy construct
+        RectangularMatrix(const RectangularMatrix&) = default;
+
+        //- Copy assignment
+        RectangularMatrix& operator=(const RectangularMatrix&) = default;
+
+
+    // Constructors
 
         //- Construct a square matrix (rows == columns)
         inline explicit RectangularMatrix(const label n);
@@ -85,15 +95,15 @@ public:
         template<class AnyType>
         inline RectangularMatrix(const labelPair& dims, const Identity<AnyType>);
 
-        //- Construct given number of rows/columns
+        //- Construct given number of rows/columns by using a label pair
         inline explicit RectangularMatrix(const labelPair& dims);
 
-        //- Construct given number of rows/columns
-        //- initializing all elements to zero
+        //- Construct given number of rows/columns by using a label pair
+        //- and initializing all elements to zero
         inline RectangularMatrix(const labelPair& dims, const zero);
 
-        //- Construct given number of rows/columns
-        //- initializing all elements to the given value
+        //- Construct given number of rows/columns by using a label pair
+        //- and initializing all elements to the given value
         inline RectangularMatrix(const labelPair& dims, const Type& val);
 
         //- Construct from a block of another matrix
@@ -107,7 +117,7 @@ public:
         //- Construct as copy of a square matrix
         inline RectangularMatrix(const SquareMatrix<Type>& mat);
 
-        //- Construct from Istream.
+        //- Construct from Istream
         inline explicit RectangularMatrix(Istream& is);
 
         //- Clone
@@ -122,41 +132,6 @@ public:
         //- Assign all elements to value
         inline void operator=(const Type& val);
 };
-
-
-// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-class typeOfInnerProduct<Type, RectangularMatrix<Type>, RectangularMatrix<Type>>
-{
-public:
-
-    typedef RectangularMatrix<Type> type;
-};
-
-
-template<class Type>
-class typeOfInnerProduct<Type, RectangularMatrix<Type>, SquareMatrix<Type>>
-{
-public:
-
-    typedef RectangularMatrix<Type> type;
-};
-
-
-template<class Type>
-class typeOfInnerProduct<Type, SquareMatrix<Type>, RectangularMatrix<Type>>
-{
-public:
-
-    typedef RectangularMatrix<Type> type;
-};
-
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-RectangularMatrix<Type> outer(const Field<Type>& f1, const Field<Type>& f2);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
