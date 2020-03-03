@@ -118,7 +118,7 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
         {
             label nbrCelli =
             (
-                cell() == mesh().faceOwner()[face()]
+                this->cell() == mesh().faceOwner()[face()]
               ? mesh().faceNeighbour()[face()]
               : mesh().faceOwner()[face()]
             );
@@ -135,7 +135,7 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
                 // Change into nbrCell. No need to change tetFace, tetPt.
                 //Pout<< "    crossed from cell:" << celli_
                 //    << " into " << nbrCelli << endl;
-                cell() = nbrCelli;
+                this->cell() = nbrCelli;
                 patchInteraction(cloud, td, trackFraction);
             }
             else
