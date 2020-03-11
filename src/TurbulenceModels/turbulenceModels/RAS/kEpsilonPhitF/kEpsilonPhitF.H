@@ -275,6 +275,21 @@ public:
             return epsilon_;
         }
 
+        //- Return the (estimated) specific dissipation rate
+        virtual tmp<volScalarField> omega() const
+        {
+            return tmp<volScalarField>::New
+            (
+                IOobject
+                (
+                    IOobject::groupName("omega", this->alphaRhoPhi_.group()),
+                    this->runTime_.timeName(),
+                    this->mesh_
+                ),
+                epsilon_/(Cmu_*k_)
+            );
+        }
+
         //- Return the normalised wall-normal fluctuating velocity scale field
         virtual tmp<volScalarField> phit() const
         {

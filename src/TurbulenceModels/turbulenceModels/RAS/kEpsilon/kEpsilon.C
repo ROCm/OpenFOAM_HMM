@@ -245,6 +245,7 @@ void kEpsilon<BasicTurbulenceModel>::correct()
     tmp<volTensorField> tgradU = fvc::grad(U);
     const volScalarField::Internal GbyNu
     (
+        this->type() + ":GbyNu",
         tgradU().v() && dev(twoSymm(tgradU().v()))
     );
     const volScalarField::Internal G(this->GName(), nut()*GbyNu);

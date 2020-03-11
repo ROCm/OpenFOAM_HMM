@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -110,6 +111,14 @@ Foam::RASModels::phasePressureModel::epsilon() const
 {
     NotImplemented;
     return nut_;
+}
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::RASModels::phasePressureModel::omega() const
+{
+    NotImplemented;
+    return nullptr;
 }
 
 

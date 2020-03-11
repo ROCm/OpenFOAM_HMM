@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -236,6 +236,24 @@ tmp<volScalarField> dynamicKEqn<BasicTurbulenceModel>::epsilon() const
             ),
             Ce()*k()*sqrt(k())/this->delta()
         )
+    );
+}
+
+
+template<class BasicTurbulenceModel>
+tmp<volScalarField> dynamicKEqn<BasicTurbulenceModel>::omega() const
+{
+    volScalarField epsilon(Ce()*k()*sqrt(k())/this->delta());
+
+    return tmp<volScalarField>::New
+    (
+        IOobject
+        (
+            IOobject::groupName("omega", this->alphaRhoPhi_.group()),
+            this->runTime_.timeName(),
+            this->mesh_
+        ),
+        epsilon/(0.09*k())
     );
 }
 

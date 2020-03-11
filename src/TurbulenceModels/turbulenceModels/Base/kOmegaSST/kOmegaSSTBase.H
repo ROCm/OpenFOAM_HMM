@@ -230,7 +230,11 @@ protected:
             const volScalarField::Internal& F1
         ) const
         {
-            return blend(F1, beta1_, beta2_);
+            return tmp<volScalarField::Internal>::New
+            (
+                this->type() + ":beta",
+                blend(F1, beta1_, beta2_)
+            );
         }
 
         tmp<volScalarField::Internal> gamma
@@ -238,7 +242,11 @@ protected:
             const volScalarField::Internal& F1
         ) const
         {
-            return blend(F1, gamma1_, gamma2_);
+            return tmp<volScalarField::Internal>::New
+            (
+                this->type() + ":gamma",
+                blend(F1, gamma1_, gamma2_)
+            );
         }
 
         virtual void correctNut(const volScalarField& S2);

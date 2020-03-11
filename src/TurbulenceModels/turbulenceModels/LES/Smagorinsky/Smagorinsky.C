@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -156,6 +156,25 @@ tmp<volScalarField> Smagorinsky<BasicTurbulenceModel>::epsilon() const
             ),
             this->Ce_*k*sqrt(k)/this->delta()
         )
+    );
+}
+
+
+template<class BasicTurbulenceModel>
+tmp<volScalarField> Smagorinsky<BasicTurbulenceModel>::omega() const
+{
+    volScalarField k(this->k(fvc::grad(this->U_)));
+    volScalarField epsilon(this->Ce_*k*sqrt(k)/this->delta());
+
+    return tmp<volScalarField>::New
+    (
+        IOobject
+        (
+            IOobject::groupName("omega", this->alphaRhoPhi_.group()),
+            this->runTime_.timeName(),
+            this->mesh_
+        ),
+        epsilon/(0.09*k)
     );
 }
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -279,6 +279,27 @@ Foam::laminarModel<BasicTurbulenceModel>::epsilon() const
         ),
         this->mesh_,
         dimensionedScalar(sqr(this->U_.dimensions())/dimTime, Zero)
+    );
+}
+
+
+template<class BasicTurbulenceModel>
+Foam::tmp<Foam::volScalarField>
+Foam::laminarModel<BasicTurbulenceModel>::omega() const
+{
+    return tmp<volScalarField>::New
+    (
+        IOobject
+        (
+            IOobject::groupName("omega", this->alphaRhoPhi_.group()),
+            this->runTime_.timeName(),
+            this->mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        this->mesh_,
+        dimensionedScalar(dimless/dimTime, Zero)
     );
 }
 

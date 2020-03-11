@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -159,6 +160,9 @@ public:
 
         //- Return the turbulence kinetic energy dissipation rate
         virtual tmp<volScalarField> epsilon() const;
+
+        //- Return the specific dissipation rate
+        virtual tmp<volScalarField> omega() const;
 
         //- Return the Reynolds stress tensor
         virtual tmp<volSymmTensorField> R() const;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -196,6 +196,21 @@ public:
         virtual tmp<volScalarField> epsilon() const
         {
             return epsilon_;
+        }
+
+        //- Return the (estimated) specific dissipation rate
+        virtual tmp<volScalarField> omega() const
+        {
+            return tmp<volScalarField>::New
+            (
+                IOobject
+                (
+                    IOobject::groupName("omega", this->alphaRhoPhi_.group()),
+                    this->runTime_.timeName(),
+                    this->mesh_
+                ),
+                epsilon_/(0.09*k_)
+            );
         }
 
         //- Solve the turbulence equations and correct the turbulence viscosity
