@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -255,23 +255,9 @@ bool Foam::functionObjects::wallHeatFlux::execute()
             << "database" << exit(FatalError);
     }
 
-    return true;
-}
-
-
-bool Foam::functionObjects::wallHeatFlux::write()
-{
-    const volScalarField& wallHeatFlux = lookupObject<volScalarField>(type());
-
-    Log << type() << " " << name() << " write:" << nl
-        << "    writing field " << wallHeatFlux.name() << endl;
-
-    wallHeatFlux.write();
-
     const fvPatchList& patches = mesh_.boundary();
 
-    const surfaceScalarField::Boundary& magSf =
-        mesh_.magSf().boundaryField();
+    const surfaceScalarField::Boundary& magSf = mesh_.magSf().boundaryField();
 
     for (const label patchi : patchSet_)
     {
@@ -297,7 +283,25 @@ bool Foam::functionObjects::wallHeatFlux::write()
 
         Log << "    min/max/integ(" << pp.name() << ") = "
             << minHfp << ", " << maxHfp << ", " << integralHfp << endl;
+
+        this->setResult("min(" + pp.name() + ")", minHfp);
+        this->setResult("max(" + pp.name() + ")", maxHfp);
+        this->setResult("int(" + pp.name() + ")", integralHfp);
     }
+
+
+    return true;
+}
+
+
+bool Foam::functionObjects::wallHeatFlux::write()
+{
+    const volScalarField& wallHeatFlux = lookupObject<volScalarField>(type());
+
+    Log << type() << " " << name() << " write:" << nl
+        << "    writing field " << wallHeatFlux.name() << endl;
+
+    wallHeatFlux.write();
 
     return true;
 }
