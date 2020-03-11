@@ -194,7 +194,8 @@ void Foam::iallReduce
 
     if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
     {
-        Pout<< "** non-blocking reducing:" << UList<Type>(recvBuf, MPICount)
+        Pout<< "** non-blocking reducing:"
+            << UList<Type>(static_cast<Type*>(recvBuf), MPICount)
             << " with comm:" << communicator
             << " warnComm:" << UPstream::warnComm << endl;
         error::printStack(Pout);
@@ -219,7 +220,8 @@ void Foam::iallReduce
     )
     {
         FatalErrorInFunction
-            << "MPI_Iallreduce failed for "<< UList<Type>(recvBuf, MPICount)
+            << "MPI_Iallreduce failed for "
+            << UList<Type>(static_cast<Type*>(recvBuf), MPICount)
             << Foam::abort(FatalError);
     }
 
@@ -255,7 +257,8 @@ void Foam::iallReduce
     )
     {
         FatalErrorInFunction
-            << "MPI_Allreduce failed for " << UList<Type>(recvBuf, MPICount)
+            << "MPI_Allreduce failed for "
+            << UList<Type>(static_cast<Type*>(recvBuf), MPICount)
             << Foam::abort(FatalError);
     }
     requestID = -1;
