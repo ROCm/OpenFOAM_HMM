@@ -105,6 +105,8 @@ Foam::SolverPerformance<Type> Foam::faMatrix<Type>::solve
             PrecisionAdaptor<solveScalar, scalar> sourceCmpt_ss(sourceCmpt);
             ConstPrecisionAdaptor<solveScalar, scalar> psiCmpt_ss(psiCmpt);
 
+            const label startRequest = Pstream::nRequests();
+
             initMatrixInterfaces
             (
                 true,
@@ -122,7 +124,8 @@ Foam::SolverPerformance<Type> Foam::faMatrix<Type>::solve
                 interfaces,
                 psiCmpt_ss(),
                 sourceCmpt_ss.ref(),
-                cmpt
+                cmpt,
+                startRequest
             );
         }
 

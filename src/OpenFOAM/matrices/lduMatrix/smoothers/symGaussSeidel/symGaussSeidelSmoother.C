@@ -115,6 +115,8 @@ void Foam::symGaussSeidelSmoother::smooth
     {
         bPrime = source;
 
+        const label startRequest = Pstream::nRequests();
+
         matrix_.initMatrixInterfaces
         (
             false,
@@ -132,7 +134,8 @@ void Foam::symGaussSeidelSmoother::smooth
             interfaces_,
             psi,
             bPrime,
-            cmpt
+            cmpt,
+            startRequest
         );
 
         solveScalar psii;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -171,6 +171,95 @@ void Foam::allReduce
         );
         Value = sum;
     }
+
+    profilingPstream::addReduceTime();
+}
+
+
+template<class Type>
+void Foam::iallReduce
+(
+    void* recvBuf,
+    int MPICount,
+    MPI_Datatype MPIType,
+    MPI_Op MPIOp,
+    const label communicator,
+    label& requestID
+)
+{
+    if (!UPstream::parRun())
+    {
+        return;
+    }
+
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "** non-blocking reducing:" << UList<Type>(recvBuf, MPICount)
+            << " with comm:" << communicator
+            << " warnComm:" << UPstream::warnComm << endl;
+        error::printStack(Pout);
+    }
+
+    profilingPstream::beginTiming();
+
+#if defined(MPI_VERSION) && (MPI_VERSION >= 3)
+    MPI_Request request;
+    if
+    (
+        MPI_Iallreduce
+        (
+            MPI_IN_PLACE,
+            recvBuf,
+            MPICount,
+            MPIType,
+            MPIOp,
+            PstreamGlobals::MPICommunicators_[communicator],
+            &request
+        )
+    )
+    {
+        FatalErrorInFunction
+            << "MPI_Iallreduce failed for "<< UList<Type>(recvBuf, MPICount)
+            << Foam::abort(FatalError);
+    }
+
+    if (PstreamGlobals::freedRequests_.size())
+    {
+        requestID = PstreamGlobals::freedRequests_.remove();
+        PstreamGlobals::outstandingRequests_[requestID] = request;
+    }
+    else
+    {
+        requestID = PstreamGlobals::outstandingRequests_.size();
+        PstreamGlobals::outstandingRequests_.append(request);
+    }
+
+    if (UPstream::debug)
+    {
+        Pout<< "UPstream::allocateRequest for non-blocking reduce"
+            << " : request:" << requestID << endl;
+    }
+#else
+    // Non-blocking not yet implemented in mpi
+    if
+    (
+        MPI_Allreduce
+        (
+            MPI_IN_PLACE,
+            recvBuf,
+            MPICount,
+            MPIType,
+            MPIOp,
+            PstreamGlobals::MPICommunicators_[communicator]
+        )
+    )
+    {
+        FatalErrorInFunction
+            << "MPI_Allreduce failed for " << UList<Type>(recvBuf, MPICount)
+            << Foam::abort(FatalError);
+    }
+    requestID = -1;
+#endif
 
     profilingPstream::addReduceTime();
 }

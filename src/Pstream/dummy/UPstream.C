@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,6 +96,18 @@ void Foam::reduce(scalar&, const sumOp<scalar>&, const int, const label, label&)
 {}
 
 
+void Foam::reduce
+(
+    scalar[],
+    const int,
+    const sumOp<scalar>&,
+    const int,
+    const label,
+    label&
+)
+{}
+
+
 #if defined(WM_SPDP)
 void Foam::reduce
 (
@@ -138,7 +150,18 @@ void Foam::reduce
     label& request
 )
 {}
+void Foam::reduce
+(
+    solveScalar[],
+    const int,
+    const sumOp<solveScalar>&,
+    const int,
+    const label,
+    label&
+)
+{}
 #endif
+
 
 
 void Foam::UPstream::allToAll

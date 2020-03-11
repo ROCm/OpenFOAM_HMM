@@ -708,7 +708,8 @@ public:
                 const lduInterfaceFieldPtrsList& interfaces,
                 const solveScalarField& psiif,
                 solveScalarField& result,
-                const direction cmpt
+                const direction cmpt,
+                const label startRequest // starting request (for non-blocking)
             ) const;
 
             //- Set the residual field using an IOField on the object registry
