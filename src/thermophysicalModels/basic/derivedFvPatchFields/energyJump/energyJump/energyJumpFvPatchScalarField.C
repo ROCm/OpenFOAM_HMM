@@ -121,7 +121,7 @@ void Foam::energyJumpFvPatchScalarField::updateCoeffs()
             const_cast<fixedJumpFvPatchScalarField&>(TbPatch);
 
         // force update of jump
-        Tbp.updateCoeffs();
+        Tbp.evaluate(Pstream::commsTypes::blocking);
 
         const labelUList& faceCells = this->patch().faceCells();
 
