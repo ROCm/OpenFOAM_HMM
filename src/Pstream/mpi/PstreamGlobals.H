@@ -50,6 +50,7 @@ namespace PstreamGlobals
 
 //- Outstanding non-blocking operations.
 extern DynamicList<MPI_Request> outstandingRequests_;
+extern DynamicList<label> freedRequests_;
 
 //- Max outstanding message tag operations.
 extern int nTags_;

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2019-2020 M. Janssens
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,64 +23,64 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InNamespace
-    Foam
-
-Description
-    Various functions to wrap MPI_Allreduce
-
-SourceFiles
-    allReduceTemplates.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef allReduce_H
-#define allReduce_H
+#include "PPCR.H"
+#include "PrecisionAdaptor.H"
 
-#include "UPstream.H"
-
-#include <mpi.h>
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(PPCR, 0);
 
-template<class Type, class BinaryOp>
-void allReduce
+    lduMatrix::solver::addsymMatrixConstructorToTable<PPCR>
+        addPPCRSymMatrixConstructorToTable_;
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::PPCR::PPCR
 (
-    Type& Value,
-    int count,
-    MPI_Datatype MPIType,
-    MPI_Op op,
-    const BinaryOp& bop,
-    const int tag,
-    const label communicator
-);
+    const word& fieldName,
+    const lduMatrix& matrix,
+    const FieldField<Field, scalar>& interfaceBouCoeffs,
+    const FieldField<Field, scalar>& interfaceIntCoeffs,
+    const lduInterfaceFieldPtrsList& interfaces,
+    const dictionary& solverControls
+)
+:
+    PPCG
+    (
+        fieldName,
+        matrix,
+        interfaceBouCoeffs,
+        interfaceIntCoeffs,
+        interfaces,
+        solverControls
+    )
+{}
 
-template<class Type>
-void iallReduce
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::solverPerformance Foam::PPCR::solve
 (
-    void* Value,
-    int count,
-    MPI_Datatype MPIType,
-    MPI_Op op,
-    const label communicator,
-    label& requestID
-);
+    scalarField& psi_s,
+    const scalarField& source,
+    const direction cmpt
+) const
+{
+    PrecisionAdaptor<solveScalar, scalar> tpsi(psi_s);
+    return PPCG::scalarSolve
+    (
+        tpsi.ref(),
+        ConstPrecisionAdaptor<solveScalar, scalar>(source)(),
+        cmpt,
+        false   // operate in residual mode
+    );
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "allReduceTemplates.C"
-#endif
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -307,18 +307,29 @@ void Foam::UPstream::exit(int errnum)
     }
 
 
-    const label nOutstanding = PstreamGlobals::outstandingRequests_.size();
-    if (nOutstanding)
+    if (PstreamGlobals::outstandingRequests_.size())
     {
+        label nOutstanding = 0;
+        forAll(PstreamGlobals::outstandingRequests_, i)
+        {
+            if (findIndex(PstreamGlobals::freedRequests_, i) == -1)
+            {
+                nOutstanding++;
+            }
+        }
+
         PstreamGlobals::outstandingRequests_.clear();
 
-        WarningInFunction
-            << "There were still " << nOutstanding
-            << " outstanding MPI_Requests." << nl
-            << "Which means your code exited before doing a "
-            << " UPstream::waitRequests()." << nl
-            << "This should not happen for a normal code exit."
-            << nl;
+        if (nOutstanding)
+        {
+            WarningInFunction
+                << "There were still " << nOutstanding
+                << " outstanding MPI_Requests." << nl
+                << "Which means your code exited before doing a "
+                << " UPstream::waitRequests()." << nl
+                << "This should not happen for a normal code exit."
+                << nl;
+        }
     }
 
     // Clean mpi communicators
@@ -449,37 +460,29 @@ void Foam::reduce
     label& requestID
 )
 {
-#ifdef MPIX_COMM_TYPE_SHARED
-    // Assume mpich2 with non-blocking collectives extensions. Once mpi3
-    // is available this will change.
-    MPI_Request request;
-    scalar v = Value;
-    MPIX_Ireduce
+    iallReduce<scalar>(&Value, 1, MPI_SCALAR, MPI_SUM, communicator, requestID);
+}
+
+
+void Foam::reduce
+(
+    scalar values[],
+    const int size,
+    const sumOp<scalar>& bop,
+    const int tag,
+    const label communicator,
+    label& requestID
+)
+{
+    iallReduce<scalar>
     (
-        &v,
-        &Value,
-        1,
+        values,
+        size,
         MPI_SCALAR,
         MPI_SUM,
-        0,              //root
-        PstreamGlobals::MPICommunicators_[communicator],
-        &request
+        communicator,
+        requestID
     );
-
-    requestID = PstreamGlobals::outstandingRequests_.size();
-    PstreamGlobals::outstandingRequests_.append(request);
-
-    if (UPstream::debug)
-    {
-        Pout<< "UPstream::allocateRequest for non-blocking reduce"
-            << " : request:" << requestID
-            << endl;
-    }
-#else
-    // Non-blocking not yet implemented in mpi
-    reduce(Value, bop, tag, communicator);
-    requestID = -1;
-#endif
 }
 
 
@@ -573,40 +576,39 @@ void Foam::reduce
     label& requestID
 )
 {
-#ifdef MPIX_COMM_TYPE_SHARED
-    // Assume mpich2 with non-blocking collectives extensions. Once mpi3
-    // is available this will change.
-    MPI_Request request;
-    solveScalar v = Value;
-    MPIX_Ireduce
+    iallReduce<solveScalar>
     (
-        &v,
         &Value,
         1,
         MPI_SOLVESCALAR,
         MPI_SUM,
-        0,              //root
-        PstreamGlobals::MPICommunicators_[communicator],
-        &request
+        communicator,
+        requestID
     );
+}
 
-    requestID = PstreamGlobals::outstandingRequests_.size();
-    PstreamGlobals::outstandingRequests_.append(request);
 
-    if (UPstream::debug)
-    {
-        Pout<< "UPstream::allocateRequest for non-blocking reduce"
-            << " : request:" << requestID
-            << endl;
-    }
-#else
-    // Non-blocking not yet implemented in mpi
-    reduce(Value, bop, tag, communicator);
-    requestID = -1;
-#endif
+void Foam::reduce
+(
+    solveScalar values[],
+    const int size,
+    const sumOp<solveScalar>& bop,
+    const int tag,
+    const label communicator,
+    label& requestID
+)
+{
+    iallReduce<solveScalar>
+    (
+        values,
+        size,
+        MPI_SOLVESCALAR,
+        MPI_SUM,
+        communicator,
+        requestID
+    );
 }
 #endif
-
 
 
 void Foam::UPstream::allToAll
@@ -1054,7 +1056,7 @@ void Foam::UPstream::waitRequest(const label i)
             << endl;
     }
 
-    if (i >= PstreamGlobals::outstandingRequests_.size())
+    if (i < 0 || i >= PstreamGlobals::outstandingRequests_.size())
     {
         FatalErrorInFunction
             << "There are " << PstreamGlobals::outstandingRequests_.size()
@@ -1080,6 +1082,8 @@ void Foam::UPstream::waitRequest(const label i)
     }
 
     profilingPstream::addWaitTime();
+    // Push index onto free cache
+    PstreamGlobals::freedRequests_.append(i);
 
     if (debug)
     {

@@ -142,6 +142,8 @@ void Foam::nonBlockingGaussSeidelSmoother::smooth
     {
         bPrime = source;
 
+        const label startRequest = Pstream::nRequests();
+
         matrix_.initMatrixInterfaces
         (
             false,
@@ -190,7 +192,8 @@ void Foam::nonBlockingGaussSeidelSmoother::smooth
             interfaces_,
             psi,
             bPrime,
-            cmpt
+            cmpt,
+            startRequest
         );
 
         // Update rest of the cells

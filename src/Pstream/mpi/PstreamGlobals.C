@@ -30,6 +30,7 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 Foam::DynamicList<MPI_Request> Foam::PstreamGlobals::outstandingRequests_;
+Foam::DynamicList<Foam::label> Foam::PstreamGlobals::freedRequests_;
 
 int Foam::PstreamGlobals::nTags_ = 0;
 

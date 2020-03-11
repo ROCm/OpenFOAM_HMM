@@ -156,6 +156,21 @@ void reduce
     NotImplemented;
 }
 
+// Non-blocking version of reduce. Sets request.
+template<class T, class BinaryOp>
+void reduce
+(
+    T Value[],
+    const int size,
+    const BinaryOp& bop,
+    const int tag,
+    const label comm,
+    label& request
+)
+{
+    NotImplemented;
+}
+
 
 // Insist there are specialisations for the common reductions of scalar(s)
 void reduce
@@ -199,6 +214,16 @@ void reduce
     label& request
 );
 
+void reduce
+(
+    scalar Value[],
+    const int size,
+    const sumOp<scalar>& bop,
+    const int tag,
+    const label comm,
+    label& request
+);
+
 
 #if defined(WM_SPDP)
 void reduce
@@ -236,6 +261,16 @@ void sumReduce
 void reduce
 (
     solveScalar& Value,
+    const sumOp<solveScalar>& bop,
+    const int tag,
+    const label comm,
+    label& request
+);
+
+void reduce
+(
+    solveScalar Value[],
+    const int size,
     const sumOp<solveScalar>& bop,
     const int tag,
     const label comm,
