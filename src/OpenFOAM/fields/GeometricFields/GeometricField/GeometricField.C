@@ -664,6 +664,37 @@ template<class Type, template<class> class PatchField, class GeoMesh>
 Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 (
     const IOobject& io,
+    const GeometricField<Type, PatchField, GeoMesh>& gf,
+    const labelList& patchIDs,
+    const word& patchFieldType
+)
+:
+    Internal(io, gf),
+    timeIndex_(gf.timeIndex()),
+    field0Ptr_(nullptr),
+    fieldPrevIterPtr_(nullptr),
+    boundaryField_(*this, gf.boundaryField_, patchIDs, patchFieldType)
+{
+    DebugInFunction
+        << "Copy construct, resetting IO params and setting patchFieldType "
+        << "for patchIDs" << nl
+        << this->info() << endl;
+
+    if (!readIfPresent() && gf.field0Ptr_)
+    {
+        field0Ptr_ = new GeometricField<Type, PatchField, GeoMesh>
+        (
+            io.name() + "_0",
+            *gf.field0Ptr_
+        );
+    }
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
+(
+    const IOobject& io,
     const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf,
     const wordList& patchFieldTypes,
     const wordList& actualPatchTypes

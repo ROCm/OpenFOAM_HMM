@@ -100,15 +100,15 @@ public:
         //- Type of mesh on which this GeometricField is instantiated
         typedef typename GeoMesh::Mesh Mesh;
 
-        //- Type of boundary mesh on which this
-        //  GeometricField::Boundary is instantiated
+        //- Type of boundary mesh on which this GeometricField::Boundary is
+        //- instantiated
         typedef typename GeoMesh::BoundaryMesh BoundaryMesh;
 
         //- Type of the internal field from which this GeometricField is derived
         typedef DimensionedField<Type, GeoMesh> Internal;
 
-        //- Type of the patch field of which the
-        //  GeometricField::Boundary is composed
+        //- Type of the patch field of which the GeometricField::Boundary is
+        //- composed
         typedef PatchField<Type> Patch;
 
 
@@ -129,9 +129,8 @@ public:
             //- Construct from a BoundaryMesh
             Boundary(const BoundaryMesh& bmesh);
 
-            //- Construct from a BoundaryMesh,
-            //  reference to the internal field
-            //  and a patch type
+            //- Construct from a BoundaryMesh, reference to the internal field
+            //- and a patch type
             Boundary
             (
                 const BoundaryMesh& bmesh,
@@ -139,10 +138,9 @@ public:
                 const word& patchFieldType
             );
 
-            //- Construct from a BoundaryMesh,
-            //  reference to the internal field
-            //  and a wordList of patch types and optional the actual patch
-            //  types (to override constraint patches)
+            //- Construct from a BoundaryMesh, reference to the internal field
+            //- and a wordList of patch types and optional the actual patch
+            //- types (to override constraint patches)
             Boundary
             (
                 const BoundaryMesh& bmesh,
@@ -151,9 +149,8 @@ public:
                 const wordList& actualPatchTypes = wordList()
             );
 
-            //- Construct from a BoundaryMesh,
-            //  reference to the internal field
-            //  and a PtrList<PatchField<Type>>
+            //- Construct from a BoundaryMesh, reference to the internal field
+            //- and a PtrList<PatchField<Type>>
             Boundary
             (
                 const BoundaryMesh& bmesh,
@@ -166,6 +163,16 @@ public:
             (
                 const Internal& field,
                 const Boundary& btf
+            );
+
+            //- Construct as copy setting the reference to the internal field
+            //- and resetting type of field for given patch IDs
+            Boundary
+            (
+                const Internal& field,
+                const Boundary& btf,
+                const labelList& patchIDs,
+                const word& patchFieldName
             );
 
             //- Construct as copy
@@ -206,15 +213,15 @@ public:
             wordList types() const;
 
             //- Return BoundaryField of the cell values neighbouring
-            //  the boundary
+            //- the boundary
             Boundary boundaryInternalField() const;
 
             //- Return a list of pointers for each patch field with only those
-            //  pointing to interfaces being set
+            //- pointing to interfaces being set
             LduInterfaceFieldPtrsList<Type> interfaces() const;
 
             //- Return a list of pointers for each patch field with only those
-            //  pointing to interfaces being set
+            //- pointing to interfaces being set
             lduInterfaceFieldPtrsList scalarInterfaces() const;
 
             //- Write boundary field as dictionary entry
@@ -259,7 +266,7 @@ private:
         //- Pointer to old time field
         mutable GeometricField<Type, PatchField, GeoMesh>* field0Ptr_;
 
-        //-  Pointer to previous iteration (used for under-relaxation)
+        //- Pointer to previous iteration (used for under-relaxation)
         mutable GeometricField<Type, PatchField, GeoMesh>* fieldPrevIterPtr_;
 
         //- Boundary Type field containing boundary field values
@@ -438,6 +445,16 @@ public:
         (
             const IOobject& io,
             const GeometricField<Type, PatchField, GeoMesh>& gf,
+            const word& patchFieldType
+        );
+
+        //- Construct as copy resetting IO parameters and boundary type
+        //- for selected patchIDs
+        GeometricField
+        (
+            const IOobject& io,
+            const GeometricField<Type, PatchField, GeoMesh>& gf,
+            const labelList& patchIDs,
             const word& patchFieldType
         );
 
