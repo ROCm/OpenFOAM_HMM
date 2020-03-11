@@ -40,6 +40,7 @@ SourceFiles
 
 #include "Map.H"
 #include "HashSet.H"
+#include "wordRes.H"
 #include "labelList.H"
 #include "surfZoneList.H"
 #include "surfZoneIdentifierList.H"
@@ -87,6 +88,17 @@ protected:
         {
             return List<surfZone>(1, surfZone(name, container.size()));
         }
+
+        //- Return ids for zone/patch that match by name.
+        //  Uses a combination of whitelist and blacklist.
+        //
+        //  See Foam::stringListOps::findMatching
+        static labelList getSelectedPatches
+        (
+            const surfZoneList& patches,
+            const wordRes& whitelist,
+            const wordRes& blacklist = wordRes()
+        );
 
 
     // IO helpers

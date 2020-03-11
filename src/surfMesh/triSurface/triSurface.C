@@ -771,96 +771,116 @@ Foam::label Foam::triSurface::markZones
 }
 
 
-void Foam::triSurface::subsetMeshMap
+Foam::triSurface Foam::triSurface::subsetMeshImpl
 (
-    const boolList& include,
-    labelList& pointMap,
-    labelList& faceMap
-) const
-{
-    const List<labelledTri>& locFaces = localFaces();
-
-    label facei = 0;
-    label pointi = 0;
-
-    faceMap.setSize(locFaces.size());
-
-    pointMap.setSize(nPoints());
-
-    bitSet pointHad(nPoints());
-
-    forAll(include, oldFacei)
-    {
-        if (include[oldFacei])
-        {
-            // Store new faces compact
-            faceMap[facei++] = oldFacei;
-
-            // Renumber labels for face
-            const triSurface::FaceType& f = locFaces[oldFacei];
-
-            for (const label verti : f)
-            {
-                if (pointHad.set(verti))
-                {
-                    pointMap[pointi++] = verti;
-                }
-            }
-        }
-    }
-
-    // Trim
-    faceMap.setSize(facei);
-    pointMap.setSize(pointi);
-}
-
-
-Foam::triSurface Foam::triSurface::subsetMesh
-(
-    const boolList& include,
-    labelList& pointMap,
-    labelList& faceMap
+    const labelList& pointMap,
+    const labelList& faceMap
 ) const
 {
     const pointField& locPoints = localPoints();
     const List<labelledTri>& locFaces = localFaces();
 
-    // Fill pointMap, faceMap
-    subsetMeshMap(include, pointMap, faceMap);
+    // Subset of points (compact)
+    pointField newPoints(UIndirectList<point>(locPoints, pointMap));
 
-
-    // Create compact coordinate list and forward mapping array
-    pointField newPoints(pointMap.size());
-    labelList oldToNew(locPoints.size());
+    // Inverse point mapping - same as ListOps invert() without checks
+    labelList oldToNew(locPoints.size(), -1);
     forAll(pointMap, pointi)
     {
-        newPoints[pointi] = locPoints[pointMap[pointi]];
         oldToNew[pointMap[pointi]] = pointi;
     }
 
-    // Renumber triangle node labels and compact
-    List<labelledTri> newTriangles(faceMap.size());
+    // Subset of faces
+    List<labelledTri> newFaces(UIndirectList<labelledTri>(locFaces, faceMap));
 
-    forAll(faceMap, facei)
+    // Renumber face node labels
+    for (auto& f : newFaces)
     {
-        // Get old vertex labels
-        const labelledTri& tri = locFaces[faceMap[facei]];
-
-        newTriangles[facei][0] = oldToNew[tri[0]];
-        newTriangles[facei][1] = oldToNew[tri[1]];
-        newTriangles[facei][2] = oldToNew[tri[2]];
-        newTriangles[facei].region() = tri.region();
+        for (label& vert : f)
+        {
+            vert = oldToNew[vert];
+        }
     }
+    oldToNew.clear();
 
     // Construct sub-surface
-    return triSurface(newTriangles, patches(), newPoints, true);
+    return triSurface(newFaces, patches(), newPoints, true);
 }
 
 
-Foam::triSurface Foam::triSurface::subsetMesh(const boolList& include) const
+Foam::triSurface
+Foam::triSurface::subsetMesh
+(
+    const UList<bool>& include,
+    labelList& pointMap,
+    labelList& faceMap
+) const
+{
+    this->subsetMeshMap(include, pointMap, faceMap);
+    return this->subsetMeshImpl(pointMap, faceMap);
+}
+
+
+Foam::triSurface
+Foam::triSurface::subsetMesh
+(
+    const bitSet& include,
+    labelList& pointMap,
+    labelList& faceMap
+) const
+{
+    this->subsetMeshMap(include, pointMap, faceMap);
+    return this->subsetMeshImpl(pointMap, faceMap);
+}
+
+
+Foam::triSurface
+Foam::triSurface::subsetMesh(const UList<bool>& include) const
 {
     labelList pointMap, faceMap;
-    return subsetMesh(include, pointMap, faceMap);
+    return this->subsetMesh(include, pointMap, faceMap);
+}
+
+
+Foam::triSurface
+Foam::triSurface::subsetMesh(const bitSet& include) const
+{
+    labelList pointMap, faceMap;
+    return this->subsetMesh(include, pointMap, faceMap);
+}
+
+
+Foam::triSurface
+Foam::triSurface::subsetMesh
+(
+    const wordRes& includeNames,
+    const wordRes& excludeNames
+) const
+{
+    const bitSet selectPatches
+    (
+        stringListOps::findMatching
+        (
+            patches_,
+            includeNames,
+            excludeNames,
+            nameOp<geometricSurfacePatch>()
+        )
+    );
+
+    bitSet include(this->size());
+
+    forAll(*this, facei)
+    {
+        const label patchi = (*this)[facei].region();
+
+        if (selectPatches.test(patchi))
+        {
+            include.set(facei);
+        }
+    }
+
+    return this->subsetMesh(include);
 }
 
 

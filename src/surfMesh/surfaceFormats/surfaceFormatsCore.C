@@ -31,6 +31,7 @@ License
 #include "ListOps.H"
 #include "Fstream.H"
 #include "surfMesh.H"
+#include "stringListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -53,6 +54,24 @@ Foam::string Foam::fileFormats::surfaceFormatsCore::getLineNoComment
     while ((line.empty() || line[0] == comment) && is.good());
 
     return line;
+}
+
+
+Foam::labelList Foam::fileFormats::surfaceFormatsCore::getSelectedPatches
+(
+    const surfZoneList& patches,
+    const wordRes& whitelist,
+    const wordRes& blacklist
+)
+{
+    return
+        stringListOps::findMatching
+        (
+            patches,
+            whitelist,
+            blacklist,
+            nameOp<surfZone>()
+        );
 }
 
 

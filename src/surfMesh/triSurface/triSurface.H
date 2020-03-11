@@ -32,6 +32,9 @@ Description
 
 SourceFiles
     triSurface.C
+    triSurfaceAddressing.C
+    triSurfaceIO.C
+    triSurfaceStitch.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,9 +42,12 @@ SourceFiles
 #define triSurface_H
 
 #include "PrimitivePatch.H"
+#include "PatchTools.H"
 #include "pointField.H"
 #include "labelledTri.H"
 #include "boolList.H"
+#include "bitSet.H"
+#include "HashSet.H"
 #include "geometricSurfacePatchList.H"
 #include "surfacePatchList.H"
 #include "triFaceList.H"
@@ -190,6 +196,16 @@ class triSurface
             const pointField& points
         );
 
+        //- Return a new surface using specified pointMap and faceMap
+        //
+        //  \param[in] pointMap from subsetMeshMap
+        //  \param[in] faceMap from subsetMeshMap
+        triSurface subsetMeshImpl
+        (
+            const labelList& pointMap,
+            const labelList& faceMap
+        ) const;
+
 
 protected:
 
@@ -290,7 +306,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         triSurface();
 
         //- Copy construct
@@ -481,35 +497,65 @@ public:
             labelList& faceZone
         ) const;
 
-        //- 'Create' sub mesh
+        //- Create mappings for a sub-surface
         //
         //  \param[in] include the faces to select
         //  \param[out] pointMap from new to old localPoints
-        //  \param[out] faceMap from new to old faces
+        //  \param[out] faceMap from new to old localFaces
+        template<class BoolListType>
         void subsetMeshMap
         (
-            const boolList& include,
+            const BoolListType& include,
+            labelList& pointMap,
+            labelList& faceMap
+        ) const
+        {
+            PatchTools::subsetMap(*this, include, pointMap, faceMap);
+        }
+
+        //- Return a new surface subsetted on the selected faces.
+        //
+        //  \param[in] include the faces to select
+        //  \param[out] pointMap from new to old localPoints
+        //  \param[out] faceMap from new to old localFaces
+        triSurface subsetMesh
+        (
+            const UList<bool>& include,
             labelList& pointMap,
             labelList& faceMap
         ) const;
 
-        //- Return new surface
+        //- Return a new surface subsetted on the selected faces.
         //
         //  \param[in] include the faces to select
         //  \param[out] pointMap from subsetMeshMap
         //  \param[out] faceMap from subsetMeshMap
         triSurface subsetMesh
         (
-            const boolList& include,
+            const bitSet& include,
             labelList& pointMap,
             labelList& faceMap
         ) const;
 
-        //- Return new surface
+        //- Return a new surface subsetted on the selected faces.
         //
         //  \param[in] include the faces to select
-        triSurface subsetMesh(const boolList& include) const;
+        triSurface subsetMesh(const UList<bool>& include) const;
 
+        //- Return a new surface subsetted on the selected faces.
+        //
+        //  \param[in] include the faces to select
+        triSurface subsetMesh(const bitSet& include) const;
+
+        //- Return a new surface subsetted on the selected patch names
+        //
+        //  \param[in] includeNames the patch names to white-list
+        //  \param[in] excludeNames the patch names to black-list
+        triSurface subsetMesh
+        (
+            const wordRes& includeNames,
+            const wordRes& excludeNames = wordRes()
+        ) const;
 
         //- Swap the list of faces being addressed
         void swapFaces(List<labelledTri>& faceLst);

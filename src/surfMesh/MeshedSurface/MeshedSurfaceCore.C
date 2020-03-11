@@ -58,7 +58,7 @@ namespace Foam
         this->storedPoints().transfer(surf.storedPoints());
         this->storedZones().transfer(surf.storedZones());
 
-        // transcribe from face -> triFace
+        // Transcribe from face -> triFace
         const List<face>& origFaces = surf.surfFaces();
         List<triFace> newFaces(origFaces.size());
         forAll(origFaces, facei)
@@ -89,7 +89,7 @@ namespace Foam
         this->storedPoints().transfer(surf.storedPoints());
         this->storedZones().transfer(surf.storedZones());
 
-        // transcribe from face -> labelledTri (via triFace)
+        // Transcribe from face -> labelledTri (via triFace)
         const List<face>& origFaces = surf.surfFaces();
         List<labelledTri> newFaces(origFaces.size());
         forAll(origFaces, facei)
