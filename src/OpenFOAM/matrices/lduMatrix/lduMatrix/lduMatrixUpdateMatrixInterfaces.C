@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -174,12 +174,8 @@ void Foam::lduMatrix::updateMatrixInterfaces
         {
             if (allUpdated)
             {
-                // All received. Just remove all storage of requests
-                // Note that we don't know what starting number of requests
-                // was before start of sends and receives (since set from
-                // initMatrixInterfaces) so set to 0 and loose any in-flight
-                // requests.
-                UPstream::resetRequests(0);
+                // All received. Just remove all outstanding requests
+                UPstream::resetRequests(startRequest);
             }
             else
             {
