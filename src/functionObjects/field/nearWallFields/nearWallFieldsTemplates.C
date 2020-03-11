@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,16 +64,20 @@ void Foam::functionObjects::nearWallFields::createFields
                 io.readOpt() = IOobject::NO_READ;
                 io.writeOpt() = IOobject::NO_WRITE;
 
-                // Override bc to be calculated
-                wordList fldTypes(fld.boundaryField().types());
-                for (const label patchi : patchSet_)
-                {
-                    fldTypes[patchi] = calculatedFvPatchField<Type>::typeName;
-                }
-
                 io.rename(sampleFldName);
 
-                sflds.set(sz, new VolFieldType(io, fld, fldTypes));
+                // Override bc to be calculated
+                sflds.set
+                (
+                    sz,
+                    new VolFieldType
+                    (
+                        io,
+                        fld,
+                        patchSet_.toc(),
+                        calculatedFvPatchField<Type>::typeName
+                    )
+                );
 
                 Log << "    created " << sflds[sz].name()
                     << " to sample " << fld.name() << endl;
