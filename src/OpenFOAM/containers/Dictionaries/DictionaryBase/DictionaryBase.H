@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,7 +59,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 
 template<class IDLListType, class T>
 class DictionaryBase;
@@ -78,13 +79,13 @@ class DictionaryBase
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- HashTable of the entries held on the IDLListType for quick lookup
         HashTable<T*> hashedTs_;
 
 
-    // Protected Member functions
+    // Protected Member Functions
 
         // Add the IDLListType entries into the HashTable
         void addEntries();
@@ -115,16 +116,16 @@ public:
             //- Search for given keyword
             bool found(const word& keyword) const;
 
-            //- Find and return an entry if present, otherwise return nullptr
-            const T* lookupPtr(const word& keyword) const;
+            //- Find and return an entry, nullptr on failure.
+            const T* cfind(const word& keyword) const;
 
-            //- Find and return an entry if present, otherwise return nullptr
-            T* lookupPtr(const word& keyword);
+            //- Find and return an entry, nullptr on failure.
+            T* find(const word& keyword);
 
-            //- Find and return entry
+            //- Find and return entry, FatalError on failure.
             const T* lookup(const word& keyword) const;
 
-            //- Find and return entry
+            //- Find and return entry, FatalError on failure.
             T* lookup(const word& keyword);
 
             //- Return the table of contents (as a sorted list)
@@ -183,6 +184,27 @@ public:
             Ostream&,
             const DictionaryBase<IDLListType, T>&
         );
+
+
+    // Housekeeping
+
+        //- Deprecated(2020-03) use cfind()
+        //
+        //  \deprecated(2020-03) - use cfind() method
+        FOAM_DEPRECATED_FOR(2020-03, "cfind() method")
+        const T* lookupPtr(const word& keyword) const
+        {
+            return this->cfind(keyword);
+        }
+
+        //- Deprecated(2020-03) use find()
+        //
+        //  \deprecated(2020-03) - use find() method
+        FOAM_DEPRECATED_FOR(2020-03, "find() method")
+        T* lookupPtr(const word& keyword)
+        {
+            return this->find(keyword);
+        }
 };
 
 

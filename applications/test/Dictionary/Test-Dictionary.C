@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -191,7 +192,7 @@ int main(int argc, char *argv[])
     scalarDict.transfer(scalarDict2);
 
 
-    Scalar* p = scalarDict.lookupPtr("ent8");
+    const Scalar* p = scalarDict.cfind("ent8");
 
     // This does not (yet) work
     // Scalar* q = scalarDict.remove("ent10");
@@ -208,7 +209,6 @@ int main(int argc, char *argv[])
     scalarDict.clear();
 
     // Info<< " = " << *iter << endl;
-
 
 
     Info<< nl << "Done." << endl;

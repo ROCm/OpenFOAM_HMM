@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +57,7 @@ Foam::coordSystem::indirect::indirect(indirect&& csys)
 {}
 
 
-// Use lookup() instead of lookupPtr() to trigger FatalError on any problems
+// Use lookup() instead of cfind() to trigger FatalError on any problems
 Foam::coordSystem::indirect::indirect
 (
     const objectRegistry& obr,

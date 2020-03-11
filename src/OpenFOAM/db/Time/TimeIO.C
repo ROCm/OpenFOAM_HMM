@@ -230,7 +230,7 @@ void Foam::Time::readDict()
         dictionary dict(Foam::dimensionSystems());
         dict.merge(*localDict);
 
-        simpleObjectRegistryEntry* objPtr = objs.lookupPtr("DimensionSets");
+        simpleObjectRegistryEntry* objPtr = objs.find("DimensionSets");
 
         if (objPtr)
         {

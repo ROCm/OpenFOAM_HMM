@@ -99,7 +99,7 @@ class coordinateSystems
 
 public:
 
-    //- Runtime type information
+    //- Declare type-name, virtual type (without debug switch)
     TypeNameNoDebug("coordinateSystems");
 
 
@@ -146,11 +146,11 @@ public:
         //- Search if given key exists
         bool found(const keyType& key) const;
 
+        //- Return pointer to named coordinateSystem or nullptr on error
+        const coordinateSystem* cfind(const word& name) const;
+
         //- Return reference to named coordinateSystem or FatalErrror
         const coordinateSystem& lookup(const word& name) const;
-
-        //- Return pointer to named coordinateSystem or nullptr on error
-        const coordinateSystem* lookupPtr(const word& name) const;
 
         //- A list of the coordinate-system names
         wordList names() const;
@@ -190,6 +190,15 @@ public:
         labelList findIndices(const keyType& key) const
         {
             return this->indices(key);
+        }
+
+        //- Deprecated(2020-03) find named coordinateSystem or nullptr
+        //
+        //  \deprecated(2020-03) - use cfind() method
+        FOAM_DEPRECATED_FOR(2020-03, "cfind() method")
+        const coordinateSystem* lookupPtr(const word& name) const
+        {
+            return this->cfind(name);
         }
 };
 

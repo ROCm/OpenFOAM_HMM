@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,7 +94,7 @@ bool Foam::DictionaryBase<IDLListType, T>::found(const word& keyword) const
 
 
 template<class IDLListType, class T>
-const T* Foam::DictionaryBase<IDLListType, T>::lookupPtr
+const T* Foam::DictionaryBase<IDLListType, T>::cfind
 (
     const word& keyword
 ) const
@@ -111,7 +111,7 @@ const T* Foam::DictionaryBase<IDLListType, T>::lookupPtr
 
 
 template<class IDLListType, class T>
-T* Foam::DictionaryBase<IDLListType, T>::lookupPtr(const word& keyword)
+T* Foam::DictionaryBase<IDLListType, T>::find(const word& keyword)
 {
     auto iter = hashedTs_.find(keyword);
 

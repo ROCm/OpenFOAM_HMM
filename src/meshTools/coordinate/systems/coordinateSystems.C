@@ -330,7 +330,7 @@ bool Foam::coordinateSystems::found(const keyType& key) const
 
 
 const Foam::coordinateSystem*
-Foam::coordinateSystems::lookupPtr(const word& name) const
+Foam::coordinateSystems::cfind(const word& name) const
 {
     const label index = this->findIndex(name);
 

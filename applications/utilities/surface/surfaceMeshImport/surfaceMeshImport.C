@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
         if (args.found("from"))
         {
             const word csName(args["from"]);
-            const auto* csPtr = globalCoords.lookupPtr(csName);
+            const auto* csPtr = globalCoords.cfind(csName);
 
             if (!csPtr)
             {
@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
         if (args.found("to"))
         {
             const word csName(args["to"]);
-            const auto* csPtr = globalCoords.lookupPtr(csName);
+            const auto* csPtr = globalCoords.cfind(csName);
 
             if (!csPtr)
             {

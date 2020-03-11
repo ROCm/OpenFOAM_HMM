@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +47,7 @@ void Foam::simpleObjectRegistry::setValues
     {
         const word& name = dEntry.keyword();
 
-        simpleObjectRegistryEntry* objPtr = this->lookupPtr(name);
+        simpleObjectRegistryEntry* objPtr = this->find(name);
 
         if (objPtr)
         {
@@ -116,7 +116,7 @@ void Foam::simpleObjectRegistry::setNamedInt
     }
 
 
-    simpleObjectRegistryEntry* objPtr = this->lookupPtr(name.c_str());
+    simpleObjectRegistryEntry* objPtr = this->find(name.c_str());
 
     if (objPtr)
     {
