@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,6 +70,17 @@ Foam::functionObjects::fieldValues::volFieldValue::operationTypeNames_
     { operationType::opWeightedVolIntegrate, "weightedVolIntegrate" },
 });
 
+const Foam::Enum
+<
+    Foam::functionObjects::fieldValues::volFieldValue::postOperationType
+>
+Foam::functionObjects::fieldValues::volFieldValue::postOperationTypeNames_
+({
+    { postOperationType::postOpNone, "none" },
+    { postOperationType::postOpMag, "mag" },
+    { postOperationType::postOpSqrt, "sqrt" },
+});
+
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -88,6 +99,13 @@ bool Foam::functionObjects::fieldValues::volFieldValue::usesVol() const
         default:
             return false;
     }
+}
+
+
+bool Foam::functionObjects::fieldValues::volFieldValue::usesMag() const
+{
+    // Operation specifically tagged to use mag
+    return (operation_ & typeAbsolute);
 }
 
 
@@ -111,35 +129,6 @@ bool Foam::functionObjects::fieldValues::volFieldValue::canWeight
 }
 
 
-void Foam::functionObjects::fieldValues::volFieldValue::initialise
-(
-    const dictionary& dict
-)
-{
-    weightFieldName_ = "none";
-    if (usesWeight())
-    {
-        if (dict.readIfPresent("weightField", weightFieldName_))
-        {
-            Info<< "    weight field = " << weightFieldName_;
-        }
-        else
-        {
-            // Suggest possible alternative unweighted operation?
-            FatalIOErrorInFunction(dict)
-                << "The '" << operationTypeNames_[operation_]
-                << "' operation is missing a weightField." << nl
-                << "Either provide the weightField, "
-                << "use weightField 'none' to suppress weighting," << nl
-                << "or use a different operation."
-                << exit(FatalIOError);
-        }
-    }
-
-    Info<< nl << endl;
-}
-
-
 void Foam::functionObjects::fieldValues::volFieldValue::writeFileHeader
 (
     Ostream& os
@@ -152,6 +141,8 @@ void Foam::functionObjects::fieldValues::volFieldValue::writeFileHeader
     }
 
     writeCommented(os, "Time");
+
+    // TBD: add in postOperation information?
 
     for (const word& fieldName : fields_)
     {
@@ -209,6 +200,16 @@ Foam::functionObjects::fieldValues::volFieldValue::volFieldValue
     fieldValue(name, runTime, dict, typeName),
     volRegion(fieldValue::mesh_, dict),
     operation_(operationTypeNames_.get("operation", dict)),
+    postOperation_
+    (
+        postOperationTypeNames_.getOrDefault
+        (
+            "postOperation",
+            dict,
+            postOperationType::postOpNone,
+            true  // Failsafe behaviour
+        )
+    ),
     weightFieldName_("none")
 {
     read(dict);
@@ -226,6 +227,16 @@ Foam::functionObjects::fieldValues::volFieldValue::volFieldValue
     fieldValue(name, obr, dict, typeName),
     volRegion(fieldValue::mesh_, dict),
     operation_(operationTypeNames_.get("operation", dict)),
+    postOperation_
+    (
+        postOperationTypeNames_.getOrDefault
+        (
+            "postOperation",
+            dict,
+            postOperationType::postOpNone,
+            true  // Failsafe behaviour
+        )
+    ),
     weightFieldName_("none")
 {
     read(dict);
@@ -240,7 +251,29 @@ bool Foam::functionObjects::fieldValues::volFieldValue::read
 )
 {
     fieldValue::read(dict);
-    initialise(dict);
+
+    weightFieldName_ = "none";
+
+    if (usesWeight())
+    {
+        if (dict.readIfPresent("weightField", weightFieldName_))
+        {
+            Info<< "    weight field = " << weightFieldName_;
+        }
+        else
+        {
+            // Suggest possible alternative unweighted operation?
+            FatalIOErrorInFunction(dict)
+                << "The '" << operationTypeNames_[operation_]
+                << "' operation is missing a weightField." << nl
+                << "Either provide the weightField, "
+                << "use weightField 'none' to suppress weighting," << nl
+                << "or use a different operation."
+                << exit(FatalIOError);
+        }
+    }
+
+    Info<< nl << endl;
 
     return true;
 }

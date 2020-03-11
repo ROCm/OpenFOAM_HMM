@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -237,22 +237,83 @@ bool Foam::functionObjects::fieldValues::volFieldValue::writeValues
 
             Type result = processValues(values, V, weightField);
 
+            switch (postOperation_)
+            {
+                case postOpNone:
+                {
+                    break;
+                }
+                case postOpMag:
+                {
+                    // mag: component-wise - does not change the type
+                    for (direction d=0; d < pTraits<Type>::nComponents; ++d)
+                    {
+                        setComponent(result, d)
+                            = mag(component(result, d));
+                    }
+                    break;
+                }
+                case postOpSqrt:
+                {
+                    // sqrt: component-wise - does not change the type
+                    for (direction d=0; d < pTraits<Type>::nComponents; ++d)
+                    {
+                        setComponent(result, d)
+                            = sqrt(mag(component(result, d)));
+                    }
+                    break;
+                }
+            }
+
             // Write state/results information
-            const word& opName = operationTypeNames_[operation_];
-            word outName = fieldName;
+            word prefix, suffix;
+            {
+                if (postOperation_ != postOpNone)
+                {
+                    // Adjust result name to include post-operation
+                    prefix += postOperationTypeNames_[postOperation_];
+                    prefix += '(';
+                    suffix += ')';
+                }
+
+                prefix += operationTypeNames_[operation_];
+                prefix += '(';
+                suffix += ')';
+            }
+
+            word regionPrefix;
             if (this->volRegion::regionName_ != polyMesh::defaultRegion)
             {
-                outName = this->volRegion::regionName_ + ',' + outName;
+                regionPrefix = this->volRegion::regionName_ + ',';
             }
-            word resultName = opName + '(' + outName + ')';
 
-            file()<< tab << result;
+            word resultName = prefix + regionPrefix + fieldName + suffix;
 
-            Log << "    " << opName
-                << '(' << this->volRegion::regionName_ << ") of " << fieldName
-                <<  " = " << result << endl;
+            Log << "    " << prefix << this->volRegion::regionName_ << suffix
+                << " of " << fieldName << " = ";
 
-            this->setResult(resultName, result);
+
+            // Operation tagged that it always returns scalar?
+            const bool alwaysScalar(operation_ & typeScalar);
+
+            if (alwaysScalar)
+            {
+                const scalar sresult = component(result, 0);
+
+                file()<< tab << sresult;
+
+                Log << sresult << endl;
+
+                this->setResult(resultName, sresult);
+            }
+            else
+            {
+                file()<< tab << result;
+
+                Log << result << endl;
+
+                this->setResult(resultName, result);
+            }
         }
     }
 

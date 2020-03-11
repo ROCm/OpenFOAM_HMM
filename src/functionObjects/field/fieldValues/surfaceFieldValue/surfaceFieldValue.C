@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -109,6 +109,7 @@ const Foam::Enum
 Foam::functionObjects::fieldValues::surfaceFieldValue::postOperationTypeNames_
 ({
     { postOperationType::postOpNone, "none" },
+    { postOperationType::postOpMag, "mag" },
     { postOperationType::postOpSqrt, "sqrt" },
 });
 
@@ -564,6 +565,8 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::writeFileHeader
             os  << tab << "Area";
         }
 
+        // TBD: add in postOperation information?
+
         for (const word& fieldName : fields_)
         {
             os  << tab << operationTypeNames_[operation_]
@@ -755,6 +758,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::weightingFactor
 ) const
 {
     // scalar * Area
+
     if (returnReduce(weightField.empty(), andOp<bool>()))
     {
         // No weight field - revert to unweighted form
@@ -778,6 +782,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::weightingFactor
 ) const
 {
     // vector (dot) Area
+
     if (returnReduce(weightField.empty(), andOp<bool>()))
     {
         // No weight field - revert to unweighted form
@@ -806,7 +811,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::surfaceFieldValue
     operation_(operationTypeNames_.get("operation", dict)),
     postOperation_
     (
-        postOperationTypeNames_.lookupOrDefault
+        postOperationTypeNames_.getOrDefault
         (
             "postOperation",
             dict,
@@ -839,7 +844,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::surfaceFieldValue
     operation_(operationTypeNames_.get("operation", dict)),
     postOperation_
     (
-        postOperationTypeNames_.lookupOrDefault
+        postOperationTypeNames_.getOrDefault
         (
             "postOperation",
             dict,

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,6 +71,7 @@ Usage
         regionType   | volRegion type: see below           | yes   |
         name         | Name of volRegion if required       | no    |
         operation    | Operation to perform                | yes   |
+        postOperation | Post-operation to perform          | no    | none
         weightField  | Name of field to apply weighting    | no    |
         fields       | List of fields to operate on        | yes   |
     \endtable
@@ -96,6 +97,13 @@ Usage
        weightedAverage      | Weighted average
        weightedVolAverage   | Weighted volume average
        weightedVolIntegrate | Weighted volume integral
+    \endplaintable
+
+    The \c postOperation is one of:
+    \plaintable
+       none          | No additional operation after calculation
+       mag           | Component-wise \c mag() after normal operation
+       sqrt          | Component-wise \c sqrt() after normal operation
     \endplaintable
 
 See also
@@ -132,16 +140,17 @@ class volFieldValue
     public fieldValue,
     public volRegion
 {
-
 public:
 
-    // Public data types
+    // Public Data Types
 
         //- Bitmask values for operation variants
         enum operationVariant
         {
             typeBase = 0,         //!< Base operation
+            typeScalar = 0x100,   //!< Operation returns a scalar
             typeWeighted = 0x200, //!< Operation using weighting
+            typeAbsolute = 0x400, //!< Operation using mag (eg, for weighting)
         };
 
         //- Operation type enumeration
@@ -150,11 +159,11 @@ public:
             // Normal operations
 
             opNone = 0,             //!< No operation
-            opMin,                  //!< Minimum
-            opMax,                  //!< Maximum
-            opSum,                  //!< Sum
-            opSumMag,               //!< Magnitude of sum
-            opAverage,              //!< Average
+            opMin,                  //!< Minimum value
+            opMax,                  //!< Maximum value
+            opSum,                  //!< Sum of values
+            opSumMag,               //!< Sum of component magnitudes
+            opAverage,              //!< Ensemble average
             opVolAverage,           //!< Volume average
             opVolIntegrate,         //!< Volume integral
             opCoV,                  //!< Coefficient of variation
@@ -172,18 +181,35 @@ public:
 
             //! Weighted volume integral
             opWeightedVolIntegrate = (opVolIntegrate | typeWeighted),
+
+            // Variants using absolute weighting
         };
 
         //- Operation type names
         static const Enum<operationType> operationTypeNames_;
 
 
+        //- Post-operation type enumeration
+        enum postOperationType
+        {
+            postOpNone,   //!< No additional operation after calculation
+            postOpMag,    //!< Component-wise mag after normal operation
+            postOpSqrt    //!< Component-wise sqrt after normal operation
+        };
+
+        //- Operation type names
+        static const Enum<postOperationType> postOperationTypeNames_;
+
+
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Operation to apply to values
         operationType operation_;
+
+        //- Optional post-evaluation operation
+        postOperationType postOperation_;
 
         //- Weight field name - only used for weighted modes
         word weightFieldName_;
@@ -194,15 +220,15 @@ protected:
         //- True if the operation needs the cell-volume
         bool usesVol() const;
 
+        //- True if the operation variant uses mag
+        bool usesMag() const;
+
         //- True if the operation variant uses a weight-field
         bool usesWeight() const;
 
         //- True if operation variant uses a weight-field that is available.
         //  Checks for availability on any processor.
         inline bool canWeight(const scalarField& weightField) const;
-
-        //- Initialise, e.g. cell addressing
-        void initialise(const dictionary& dict);
 
         //- Return true if the field name is valid
         template<class Type>
@@ -251,7 +277,7 @@ protected:
 
 public:
 
-    //- Run-time type information
+    //- Declare type-name, virtual type (with debug switch)
     TypeName("volFieldValue");
 
 
@@ -278,7 +304,7 @@ public:
     virtual ~volFieldValue() = default;
 
 
-    // Public Member Functions
+    // Member Functions
 
         //- Read from dictionary
         virtual bool read(const dictionary& dict);

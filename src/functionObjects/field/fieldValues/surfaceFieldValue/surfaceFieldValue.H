@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -131,6 +131,13 @@ Usage
        absWeightedUniformity    | uniformity index using absolute weighting
     \endplaintable
 
+    The \c postOperation is one of:
+    \plaintable
+       none          | No additional operation after calculation
+       mag           | Component-wise \c mag() after normal operation
+       sqrt          | Component-wise \c sqrt() after normal operation
+    \endplaintable
+
 Note
     - The values reported by the areaNormalAverage and areaNormalIntegrate
       operations are written as the first component of a field with the same
@@ -193,7 +200,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class sampledSurface;
 class surfaceWriter;
 
@@ -311,7 +318,8 @@ public:
         enum postOperationType
         {
             postOpNone,   //!< No additional operation after calculation
-            postOpSqrt    //!< Perform sqrt after normal operation
+            postOpMag,    //!< Component-wise mag after normal operation
+            postOpSqrt    //!< Component-wise sqrt after normal operation
         };
 
         //- Operation type names
@@ -526,7 +534,7 @@ protected:
 
 public:
 
-    //- Run-time type information
+    //- Declare type-name, virtual type (with debug switch)
     TypeName("surfaceFieldValue");
 
 
@@ -553,7 +561,7 @@ public:
     virtual ~surfaceFieldValue() = default;
 
 
-    // Public Member Functions
+    // Member Functions
 
         //- Return the region type
         inline regionTypes regionType() const;

@@ -96,6 +96,7 @@ functions
         log             true;
 
         operation       volIntegrate;
+        // postOperation   mag;
 
         fields
         (

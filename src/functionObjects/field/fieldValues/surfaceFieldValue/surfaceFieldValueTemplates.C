@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -407,9 +407,19 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
                 {
                     break;
                 }
+                case postOpMag:
+                {
+                    // mag: component-wise - does not change the type
+                    for (direction d=0; d < pTraits<Type>::nComponents; ++d)
+                    {
+                        setComponent(result, d)
+                            = mag(component(result, d));
+                    }
+                    break;
+                }
                 case postOpSqrt:
                 {
-                    // sqrt: component-wise - doesn't change the type
+                    // sqrt: component-wise - does not change the type
                     for (direction d=0; d < pTraits<Type>::nComponents; ++d)
                     {
                         setComponent(result, d)
@@ -441,6 +451,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
 
             Log << "    " << prefix << regionName_ << suffix
                 << " of " << fieldName << " = ";
+
 
             // Operation tagged that it always returns scalar?
             const bool alwaysScalar(operation_ & typeScalar);
