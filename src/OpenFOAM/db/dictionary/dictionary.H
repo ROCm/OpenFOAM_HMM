@@ -357,7 +357,7 @@ private:
 
 
         //- Emit IOError about bad input for the entry
-        void raiseBadInput(const word& keyword) const;
+        void raiseBadInput(const ITstream& is, const word& keyword) const;
 
         //- The case-relative dictionary name. Uses FOAM_CASE
         fileName relativeName(const bool caseTag=false) const;

@@ -338,7 +338,11 @@ void Foam::dictionary::checkITstream
 }
 
 
-void Foam::dictionary::raiseBadInput(const word& keyword) const
+void Foam::dictionary::raiseBadInput
+(
+    const ITstream& is,
+    const word& keyword
+) const
 {
     // Can use FatalIOError instead of SafeFatalIOError
     // since predicate checks are not used at the earliest stages
@@ -347,10 +351,11 @@ void Foam::dictionary::raiseBadInput(const word& keyword) const
         "",                 // functionName
         "",                 // sourceFileName
         0,                  // sourceFileLineNumber
-        *this               // ios
+        this->name(),       // ioFileName
+        is.lineNumber(),    // ioStartLineNumber
+        -1                  // ioEndLineNumber
     )
-        << "Entry '" << keyword << "' with invalid input in dictionary "
-        << name() << nl << nl
+        << "Entry '" << keyword << "' with invalid input" << nl
         << exit(FatalIOError);
 }
 

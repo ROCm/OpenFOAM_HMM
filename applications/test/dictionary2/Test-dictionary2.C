@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -352,6 +352,7 @@ int main(int argc, char *argv[])
             (
                 "good 3.14159;\n"
                 "negative -3.14159;\n"
+                "neg2 -3.14159;\n"
                 "empty;\n"
                 // "bad  text;\n"            // always fails
                 // "bad  3.14159 1234;\n"    // fails for readScalar
@@ -386,6 +387,7 @@ int main(int argc, char *argv[])
 
             try_getCheckScalar(dict2, "good", scalarRange::gt0());
             try_getCheckScalar(dict2, "negative", scalarRange::gt0());
+            try_getCheckScalar(dict2, "neg2", scalarRange::gt0());
 
             try_getCheckScalar(dict2, "good", greaterOp1<scalar>(0));
             try_getCheckScalar(dict2, "negative", greaterOp1<scalar>(0));
