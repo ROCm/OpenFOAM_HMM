@@ -24,10 +24,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::sampledTriSurfaceMeshNormal
+    Foam::sampledMeshedSurfaceNormal
 
 Description
-    Variant of sampledTriSurfaceMesh that samples the surface-normal component
+    Variant of sampledMeshedSurface that samples the surface-normal component
     of a vector field.
 
     Returns a vector field with the value in the first component and sets
@@ -39,38 +39,38 @@ Usage
     Example of function object partial specification:
     \verbatim
     surfaces
-    (
+    {
         surface1
         {
-            type    sampledTriSurfaceMeshNormal;
+            type    sampledMeshedSurfaceNormal;
             surface something.obj;
             source  cells;
         }
-    );
+    }
     \endverbatim
 
     Where the sub-entries comprise:
     \table
         Property | Description                             | Required | Default
-        type     | sampledTriSurfaceMeshNormal             | yes      |
+        type     | meshedSurfaceNormal                     | yes      |
         surface  | surface name in triSurface/             | yes      |
         source   | cells/insideCells/boundaryFaces         | yes      |
         keepIds  | pass through id numbering               | no       | false
     \endtable
 
 SeeAlso
-    Foam::sampledTriSurfaceMesh
+    Foam::sampledMeshedSurface
 
 SourceFiles
-    sampledTriSurfaceMeshNormal.C
-    sampledTriSurfaceMeshNormalTemplates.C
+    sampledMeshedSurfaceNormal.C
+    sampledMeshedSurfaceNormalTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sampledTriSurfaceMeshNormal_H
-#define sampledTriSurfaceMeshNormal_H
+#ifndef sampledMeshedSurfaceNormal_H
+#define sampledMeshedSurfaceNormal_H
 
-#include "sampledTriSurfaceMesh.H"
+#include "sampledMeshedSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -78,23 +78,23 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class sampledTriSurfaceMeshNormal Declaration
+                 Class sampledMeshedSurfaceNormal Declaration
 \*---------------------------------------------------------------------------*/
 
-class sampledTriSurfaceMeshNormal
+class sampledMeshedSurfaceNormal
 :
-    public sampledTriSurfaceMesh
+    public sampledMeshedSurface
 {
 public:
 
     //- Runtime type information
-    TypeName("sampledTriSurfaceMeshNormal");
+    TypeName("sampledMeshedSurfaceNormal");
 
 
     // Constructors
 
         //- Construct from components
-        sampledTriSurfaceMeshNormal
+        sampledMeshedSurfaceNormal
         (
             const word& name,
             const polyMesh& mesh,
@@ -103,7 +103,7 @@ public:
         );
 
         //- Construct from dictionary
-        sampledTriSurfaceMeshNormal
+        sampledMeshedSurfaceNormal
         (
             const word& name,
             const polyMesh& mesh,
@@ -112,7 +112,7 @@ public:
 
 
     //- Destructor
-    virtual ~sampledTriSurfaceMeshNormal() = default;
+    virtual ~sampledMeshedSurfaceNormal() = default;
 
 
     // Member Functions

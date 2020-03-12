@@ -23,7 +23,7 @@ sampled
 
     _sampleMesh
     {
-        type    sampledTriSurfaceMesh;
+        type    meshedSurface;
         source  cells;
         store   true;
     }

@@ -25,11 +25,11 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::sampledTriSurfaceMesh
+    Foam::sampledMeshedSurface
 
 Description
     A sampledSurface from a meshed surface.
-    It samples on the points/faces of the triSurface.
+    It samples on the points/faces of the meshed surface.
 
     - it either samples cells or (non-coupled) boundary faces
 
@@ -69,36 +69,35 @@ Usage
     Example of function object partial specification:
     \verbatim
     surfaces
-    (
+    {
         surface1
         {
-            type    sampledTriSurfaceMesh;
+            type    meshedSurface;
             surface something.obj;
             source  cells;
         }
-    );
+    }
     \endverbatim
 
     Where the sub-entries comprise:
     \table
         Property | Description                             | Required | Default
-        type     | sampledTriSurfaceMesh                   | yes      |
+        type     | meshedSurface                           | yes      |
         surface  | surface name in triSurface/             | yes      |
         source   | cells/insideCells/boundaryFaces         | yes      |
         keepIds  | pass through id numbering               | no       | false
     \endtable
 
 SourceFiles
-    sampledTriSurfaceMesh.C
-    sampledTriSurfaceMeshTemplates.C
+    sampledMeshedSurface.C
+    sampledMeshedSurfaceTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sampledTriSurfaceMesh_H
-#define sampledTriSurfaceMesh_H
+#ifndef sampledMeshedSurface_H
+#define sampledMeshedSurface_H
 
 #include "sampledSurface.H"
-#include "triSurface.H"
 #include "MeshedSurface.H"
 #include "MeshedSurfacesFwd.H"
 
@@ -107,14 +106,14 @@ SourceFiles
 namespace Foam
 {
 
-class treeDataFace;
+// Forward Declarations
 class meshSearch;
 
 /*---------------------------------------------------------------------------*\
-                       Class sampledTriSurfaceMesh Declaration
+                       Class sampledMeshedSurface Declaration
 \*---------------------------------------------------------------------------*/
 
-class sampledTriSurfaceMesh
+class sampledMeshedSurface
 :
     public sampledSurface,
     public meshedSurface
@@ -134,7 +133,7 @@ private:
         typedef meshedSurface MeshStorage;
 
 
-    // Private data
+    // Private Data
 
         static const Enum<samplingSource> samplingSourceNames_;
 
@@ -142,7 +141,7 @@ private:
         word surfaceName_;
 
         //- Surface to sample on
-        const triSurface surface_;
+        const meshedSurface surface_;
 
         //- Whether to sample internal cell values or boundary values
         const samplingSource sampleSource_;
@@ -169,6 +168,9 @@ private:
 
     // Private Member Functions
 
+        //- Set zoneIds list based on the surfZone information
+        void setZoneMap();
+
         //- Sample volume field onto surface faces
         template<class Type>
         tmp<Field<Type>> sampleOnFaces
@@ -187,14 +189,14 @@ private:
 
 public:
 
-    //- Runtime type information
-    TypeName("sampledTriSurfaceMesh");
+    //- Declare type-name, virtual type (with debug switch)
+    TypeName("sampledMeshedSurface");
 
 
     // Constructors
 
         //- Construct from components
-        sampledTriSurfaceMesh
+        sampledMeshedSurface
         (
             const word& name,
             const polyMesh& mesh,
@@ -203,7 +205,7 @@ public:
         );
 
         //- Construct from dictionary
-        sampledTriSurfaceMesh
+        sampledMeshedSurface
         (
             const word& name,
             const polyMesh& mesh,
@@ -212,18 +214,10 @@ public:
 
 
     //- Destructor
-    virtual ~sampledTriSurfaceMesh() = default;
+    virtual ~sampledMeshedSurface() = default;
 
 
     // Member Functions
-
-        //- Set new zoneIds list based on the surfZoneList information
-        static void setZoneMap
-        (
-            const surfZoneList& zoneLst,
-            labelList& zoneIds
-        );
-
 
         //- Does the surface need an update?
         virtual bool needsUpdate() const;
@@ -378,7 +372,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "sampledTriSurfaceMeshTemplates.C"
+    #include "sampledMeshedSurfaceTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
