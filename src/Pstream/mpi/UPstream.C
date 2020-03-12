@@ -307,14 +307,15 @@ void Foam::UPstream::exit(int errnum)
     }
 
 
-    if (PstreamGlobals::outstandingRequests_.size())
+    // Warn about any outstanding requests
     {
         label nOutstanding = 0;
-        forAll(PstreamGlobals::outstandingRequests_, i)
+
+        forAll(PstreamGlobals::outstandingRequests_, requestID)
         {
-            if (findIndex(PstreamGlobals::freedRequests_, i) == -1)
+            if (!PstreamGlobals::freedRequests_.found(requestID))
             {
-                nOutstanding++;
+                ++nOutstanding;
             }
         }
 
