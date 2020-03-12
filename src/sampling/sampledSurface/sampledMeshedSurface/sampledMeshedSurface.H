@@ -84,6 +84,7 @@ Usage
         Property | Description                             | Required | Default
         type     | meshedSurface                           | yes      |
         surface  | surface name in triSurface/             | yes      |
+        patches  | Limit to named surface regions (wordRes) | no  |
         source   | cells/insideCells/boundaryFaces         | yes      |
         keepIds  | pass through id numbering               | no       | false
     \endtable
@@ -141,7 +142,7 @@ private:
         word surfaceName_;
 
         //- Surface to sample on
-        const meshedSurface surface_;
+        meshedSurface surface_;
 
         //- Whether to sample internal cell values or boundary values
         const samplingSource sampleSource_;

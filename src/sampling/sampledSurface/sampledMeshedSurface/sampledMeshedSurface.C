@@ -529,7 +529,65 @@ Foam::sampledMeshedSurface::sampledMeshedSurface
     zoneIds_(),
     sampleElements_(),
     samplePoints_()
-{}
+{
+    wordRes includePatches;
+    dict.readIfPresent("patches", includePatches);
+    includePatches.uniq();
+
+    // Could also shift this to the reader itself,
+    // but not yet necessary.
+
+    if (!includePatches.empty())
+    {
+        Info<< "Subsetting surface " << surfaceName_
+            << " to patches: " << flatOutput(includePatches) << nl;
+
+        const surfZoneList& zones = surface_.surfZones();
+
+        const labelList zoneIndices
+        (
+            stringListOps::findMatching
+            (
+                zones,
+                includePatches,
+                wordRes(),
+                nameOp<surfZone>()
+            )
+        );
+
+        // Faces to subset
+        bitSet includeMap(surface_.size());
+
+        for (const label zonei : zoneIndices)
+        {
+            const surfZone& zn = zones[zonei];
+            includeMap.set(zn.range());
+        }
+
+        if (includeMap.none())
+        {
+            WarningInFunction
+                << "Patch selection results in an empty surface"
+                << " - ignoring" << nl;
+        }
+        else if (!includeMap.all())
+        {
+            meshedSurface subSurf(surface_.subsetMesh(includeMap));
+
+            if (subSurf.empty())
+            {
+                WarningInFunction
+                    << "Bad surface subset (empty)"
+                    << " - skip and hope for the best" << nl;
+            }
+            else
+            {
+                // Replace
+                surface_.transfer(subSurf);
+            }
+        }
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

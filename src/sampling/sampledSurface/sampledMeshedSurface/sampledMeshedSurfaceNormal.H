@@ -54,6 +54,7 @@ Usage
         Property | Description                             | Required | Default
         type     | meshedSurfaceNormal                     | yes      |
         surface  | surface name in triSurface/             | yes      |
+        patches  | Limit to named surface regions (wordRes) | no  |
         source   | cells/insideCells/boundaryFaces         | yes      |
         keepIds  | pass through id numbering               | no       | false
     \endtable
