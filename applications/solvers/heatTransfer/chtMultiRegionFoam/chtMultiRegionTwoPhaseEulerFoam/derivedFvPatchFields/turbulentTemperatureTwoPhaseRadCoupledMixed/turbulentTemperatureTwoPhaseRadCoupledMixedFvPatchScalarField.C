@@ -225,10 +225,10 @@ turbulentTemperatureTwoPhaseRadCoupledMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    regionType_(regionTypeNames_.read(dict.lookup("region"))),
+    regionType_(regionTypeNames_.get("region", dict)),
     method_(KMethodTypeNames_.get("kappaMethod", dict)),
     kappaName_(dict.lookupOrDefault<word>("kappa", "none")),
-    otherPhaseName_(dict.lookup("otherPhase")),
+    otherPhaseName_(dict.get<word>("otherPhase")),
     TnbrName_(dict.lookupOrDefault<word>("Tnbr", "T")),
     qrNbrName_(dict.lookupOrDefault<word>("qrNbr", "none")),
     qrName_(dict.lookupOrDefault<word>("qr", "none"))

@@ -111,8 +111,8 @@ alphatWallBoilingWallFunctionFvPatchScalarField
 )
 :
     alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField(p, iF, dict),
-    otherPhaseName_(dict.lookup("otherPhase")),
-    phaseType_(phaseTypeNames_.read(dict.lookup("phaseType"))),
+    otherPhaseName_(dict.get<word>("otherPhase")),
+    phaseType_(phaseTypeNames_.get("phaseType", dict)),
     relax_(Function1<scalar>::New("relax", dict)),
     AbyV_(p.size(), 0),
     alphatConv_(p.size(), 0),
@@ -1032,7 +1032,7 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
                             break;
                         }
                     }
-                    
+
                     scalar nSubCool(gSum(nSubCools));
                     scalar nTransient(gSum(nTransients));
                     scalar nFilm(gSum(nFilms));
@@ -1044,8 +1044,8 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
                     Info<< "    transient faces : " << nTransient << endl;
                     Info<< "    film faces : " << nFilm << endl;
                     Info<< "    non-Boiling faces : " << nNonBoiling << endl;
-                    Info<< "    total faces : " 
-                        << nSubCool + nTransient + nFilm  + nNonBoiling 
+                    Info<< "    total faces : "
+                        << nSubCool + nTransient + nFilm  + nNonBoiling
                         << endl << nl;
 
                     const scalarField qc

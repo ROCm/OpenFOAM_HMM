@@ -290,7 +290,7 @@ private:
         phaseType phaseType_;
 
         //- dmdt relaxationFactor
-         autoPtr<Function1<scalar>> relax_;
+        autoPtr<Function1<scalar>> relax_;
 
         //- Patch face area by cell volume
         scalarField AbyV_;
