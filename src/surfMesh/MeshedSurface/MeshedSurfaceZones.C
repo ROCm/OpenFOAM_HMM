@@ -36,22 +36,23 @@ void Foam::MeshedSurface<Face>::checkZones()
 {
     // extra safety, ensure we have at some zones
     // and they cover all the faces - fix start silently
-    surfZoneList& zones = this->storedZones();
-    if (zones.size())
-    {
-        label count = 0;
-        forAll(zones, zoneI)
-        {
-            zones[zoneI].start() = count;
-            count += zones[zoneI].size();
-        }
 
+    auto& zones = this->storedZones();
+
+    label count = 0;
+    for (surfZone& zn : zones)
+    {
+        zn.start() = count;
+        count += zn.size();
+    }
+
+    if (!zones.empty())
+    {
         if (count < this->size())
         {
             WarningInFunction
                 << "more faces " << this->size() << " than zones " << count
-                << " ... extending final zone"
-                << endl;
+                << " ... extending final zone" << nl;
 
             zones.last().size() += count - this->size();
         }
@@ -70,33 +71,41 @@ void Foam::MeshedSurface<Face>::sortFacesAndStore
 (
     DynamicList<Face>& unsortedFaces,
     DynamicList<label>& zoneIds,
-    const bool sorted
+    bool sorted
 )
 {
-    List<Face>  oldFaces(std::move(unsortedFaces));
-    List<label> zones(std::move(zoneIds));
+    // Basic sanity check
+    const label nInputFaces = unsortedFaces.size();
+
+    if (sorted || zoneIds.size() != nInputFaces)
+    {
+        // Sorting not required or not possible
+        zoneIds.clear();
+        sorted = true;
+    }
 
     if (sorted)
     {
-        // Already sorted - simply transfer faces
-        this->storedFaces().transfer(oldFaces);
-        zones.clear();
+        // No additional sorting required
+        this->storedFaces().transfer(unsortedFaces);
         return;
     }
 
-    // Determine the sorted order:
-    // use sortedOrder directly since we discard the intermediate list anyhow
-    labelList faceMap(sortedOrder(zones));
-    zones.clear();
+    // The sorted order, based on zone-ids
 
-    // Sorted faces
-    List<Face> newFaces(faceMap.size());
-    forAll(faceMap, facei)
+    labelList faceMap;
+    Foam::sortedOrder(zoneIds, faceMap);
+    zoneIds.clear();
+
+    auto& newFaces = this->storedFaces();
+    newFaces.resize(nInputFaces);
+
+    // Faces in sorted order
+    forAll(newFaces, facei)
     {
-        // use transfer to recover memory where possible
-        newFaces[facei].transfer(oldFaces[faceMap[facei]]);
+        // Can use transfer, faceMap is unique
+        newFaces[facei].transfer(unsortedFaces[faceMap[facei]]);
     }
-    this->storedFaces().transfer(newFaces);
 }
 
 
@@ -109,19 +118,21 @@ void Foam::MeshedSurface<Face>::addZones
     const bool cullEmpty
 )
 {
+    auto& zones = this->storedZones();
+    zones.resize(zones.size());
+
     label nZone = 0;
 
-    surfZoneList& zones = this->storedZones();
-    zones.setSize(zones.size());
-    forAll(zones, zoneI)
+    forAll(zones, zonei)
     {
-        if (srfZones[zoneI].size() || !cullEmpty)
+        if (srfZones[zonei].size() || !cullEmpty)
         {
-            zones[nZone] = surfZone(srfZones[zoneI], nZone);
+            zones[nZone] = surfZone(srfZones[zonei], nZone);
             ++nZone;
         }
     }
-    zones.setSize(nZone);
+
+    zones.resize(nZone);
 }
 
 
@@ -133,27 +144,29 @@ void Foam::MeshedSurface<Face>::addZones
     const bool cullEmpty
 )
 {
+    auto& zones = this->storedZones();
+    zones.resize(sizes.size());
+
     label start = 0;
     label nZone = 0;
 
-    surfZoneList& zones = this->storedZones();
-    zones.setSize(sizes.size());
-    forAll(zones, zoneI)
+    forAll(zones, zonei)
     {
-        if (sizes[zoneI] || !cullEmpty)
+        if (sizes[zonei] || !cullEmpty)
         {
             zones[nZone] = surfZone
             (
-                names[zoneI],
-                sizes[zoneI],
+                names[zonei],
+                sizes[zonei],
                 start,
                 nZone
             );
-            start += sizes[zoneI];
+            start += sizes[zonei];
             ++nZone;
         }
     }
-    zones.setSize(nZone);
+
+    zones.resize(nZone);
 }
 
 
@@ -164,27 +177,29 @@ void Foam::MeshedSurface<Face>::addZones
     const bool cullEmpty
 )
 {
+    auto& zones = this->storedZones();
+    zones.resize(sizes.size());
+
     label start = 0;
     label nZone = 0;
 
-    surfZoneList& zones = this->storedZones();
-    zones.setSize(sizes.size());
-    forAll(zones, zoneI)
+    forAll(zones, zonei)
     {
-        if (sizes[zoneI] || !cullEmpty)
+        if (sizes[zonei] || !cullEmpty)
         {
             zones[nZone] = surfZone
             (
                 surfZone::defaultName(nZone),
-                sizes[zoneI],
+                sizes[zonei],
                 start,
                 nZone
             );
-            start += sizes[zoneI];
+            start += sizes[zonei];
             ++nZone;
         }
     }
-    zones.setSize(nZone);
+
+    zones.resize(nZone);
 }
 
 

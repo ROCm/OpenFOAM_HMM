@@ -125,6 +125,18 @@ private:
         //- Write to Ostream
         Ostream& write(Ostream&) const;
 
+
+        //- Return a new surface using specified pointMap and faceMap
+        //
+        //  \param[in] pointMap from subsetMeshMap
+        //  \param[in] faceMap from subsetMeshMap
+        UnsortedMeshedSurface subsetMeshImpl
+        (
+            const labelList& pointMap,
+            const labelList& faceMap
+        ) const;
+
+
 protected:
 
     // Protected Member Functions
@@ -142,7 +154,7 @@ protected:
         }
 
         //- Set new zones from faceMap
-        virtual void remapFaces(const labelUList& faceMap);
+        virtual void remapFaces(const labelUList& faceMapNewToOld);
 
 
 public:
@@ -203,19 +215,28 @@ public:
         );
 
         //- Construct from file name (uses extension to determine type)
-        UnsortedMeshedSurface(const fileName& name);
+        explicit UnsortedMeshedSurface(const fileName& name);
 
         //- Construct from file name (uses extension to determine type)
         UnsortedMeshedSurface(const fileName& name, const word& ext);
 
         //- Construct from Istream
-        UnsortedMeshedSurface(Istream& is);
+        explicit UnsortedMeshedSurface(Istream& is);
 
-        //- Construct from objectRegistry and a named surface
+        //- Construct from database (as surfMesh) with default name
+        explicit UnsortedMeshedSurface(const Time& runTime);
+
+        //- Construct from database (as surfMesh) with given surface name
+        UnsortedMeshedSurface(const Time& runTime, const word& surfName);
+
+        //- Read construct using IO to find the file location.
+        //  Dictionary may contain optional 'file' entry, and an
+        //  optional 'scale' entry (eg, 0.001: mm -> m)
         UnsortedMeshedSurface
         (
-            const Time& t,
-            const word& surfName = word::null
+            const IOobject& io,
+            const dictionary& dict,
+            const bool isGlobal = true  //!< resolve as a global file
         );
 
 
@@ -335,23 +356,55 @@ public:
         //- Clear all storage
         virtual void clear();
 
-        //- Return new surface.
+        //- Create mappings for a sub-surface
+        //
         //  \param[in] include the faces to select
-        //  \param[out] pointMap from subsetMeshMap
-        //  \param[out] faceMap from subsetMeshMap
+        //  \param[out] pointMap from new to old localPoints
+        //  \param[out] faceMap from new to old localFaces
         template<class BoolListType>
-        UnsortedMeshedSurface subsetMesh
+        void subsetMeshMap
         (
             const BoolListType& include,
             labelList& pointMap,
             labelList& faceMap
+        ) const
+        {
+            PatchTools::subsetMap(*this, include, pointMap, faceMap);
+        }
+
+        //- Return a new surface subsetted on the selected faces.
+        //
+        //  \param[in] include the faces to select
+        //  \param[out] pointMap from new to old localPoints
+        //  \param[out] faceMap from new to old localFaces
+        UnsortedMeshedSurface subsetMesh
+        (
+            const UList<bool>& include,
+            labelList& pointMap,
+            labelList& faceMap
         ) const;
 
-        //- Return new surface
-        UnsortedMeshedSurface subsetMesh(const bitSet& include) const;
+        //- Return a new surface subsetted on the selected faces.
+        //
+        //  \param[in] include the faces to select
+        //  \param[out] pointMap from new to old localPoints
+        //  \param[out] faceMap from new to old localFaces
+        UnsortedMeshedSurface subsetMesh
+        (
+            const bitSet& include,
+            labelList& pointMap,
+            labelList& faceMap
+        ) const;
 
-        //- Return new surface
-        UnsortedMeshedSurface subsetMesh(const labelHashSet& include) const;
+        //- Return a new surface subsetted on the selected faces.
+        //
+        //  \param[in] include the faces to select
+        UnsortedMeshedSurface subsetMesh(const UList<bool>& include) const;
+
+        //- Return a new surface subsetted on the selected faces.
+        //
+        //  \param[in] include the faces to select
+        UnsortedMeshedSurface subsetMesh(const bitSet& include) const;
 
 
         //- Swap contents - disabled

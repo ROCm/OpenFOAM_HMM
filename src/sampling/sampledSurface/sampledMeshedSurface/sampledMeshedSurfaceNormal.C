@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,26 +25,36 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "sampledTriSurfaceMeshNormal.H"
+#include "sampledMeshedSurfaceNormal.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(sampledTriSurfaceMeshNormal, 0);
-    addToRunTimeSelectionTable
+    defineTypeNameAndDebug(sampledMeshedSurfaceNormal, 0);
+    // Use shorter name only
+    addNamedToRunTimeSelectionTable
     (
         sampledSurface,
-        sampledTriSurfaceMeshNormal,
-        word
+        sampledMeshedSurfaceNormal,
+        word,
+        meshedSurfaceNormal
+    );
+    // Compatibility name (1912)
+    addNamedToRunTimeSelectionTable
+    (
+        sampledSurface,
+        sampledMeshedSurfaceNormal,
+        word,
+        sampledTriSurfaceMeshNormal
     );
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sampledTriSurfaceMeshNormal::sampledTriSurfaceMeshNormal
+Foam::sampledMeshedSurfaceNormal::sampledMeshedSurfaceNormal
 (
     const word& name,
     const polyMesh& mesh,
@@ -52,37 +62,25 @@ Foam::sampledTriSurfaceMeshNormal::sampledTriSurfaceMeshNormal
     const samplingSource sampleSource
 )
 :
-    sampledTriSurfaceMesh(name, mesh, surfaceName, sampleSource)
+    sampledMeshedSurface(name, mesh, surfaceName, sampleSource)
 {}
 
 
-Foam::sampledTriSurfaceMeshNormal::sampledTriSurfaceMeshNormal
+Foam::sampledMeshedSurfaceNormal::sampledMeshedSurfaceNormal
 (
     const word& name,
     const polyMesh& mesh,
     const dictionary& dict
 )
 :
-    sampledTriSurfaceMesh(name, mesh, dict)
-{}
-
-
-Foam::sampledTriSurfaceMeshNormal::sampledTriSurfaceMeshNormal
-(
-    const word& name,
-    const polyMesh& mesh,
-    const triSurface& surface,
-    const word& sampleSourceName
-)
-:
-    sampledTriSurfaceMesh(name, mesh, surface, sampleSourceName)
+    sampledMeshedSurface(name, mesh, dict)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::Field<Foam::vector>>
-Foam::sampledTriSurfaceMeshNormal::sample
+Foam::sampledMeshedSurfaceNormal::sample
 (
     const interpolation<vector>& sampler
 ) const
@@ -93,7 +91,7 @@ Foam::sampledTriSurfaceMeshNormal::sample
     (
         0,
         meshedSurface::faceNormals()
-       &sampledTriSurfaceMesh::sample(sampler)
+       &sampledMeshedSurface::sample(sampler)
     );
 
     return tvalues;
@@ -101,7 +99,7 @@ Foam::sampledTriSurfaceMeshNormal::sample
 
 
 Foam::tmp<Foam::Field<Foam::vector>>
-Foam::sampledTriSurfaceMeshNormal::interpolate
+Foam::sampledMeshedSurfaceNormal::interpolate
 (
     const interpolation<vector>& interpolator
 ) const
@@ -115,7 +113,7 @@ Foam::sampledTriSurfaceMeshNormal::interpolate
     (
         0,
         allNormals
-       &sampledTriSurfaceMesh::interpolate(interpolator)
+       &sampledMeshedSurface::interpolate(interpolator)
     );
 
     return tvalues;

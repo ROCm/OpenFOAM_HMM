@@ -183,31 +183,26 @@ void Foam::fileFormats::FLMAsurfaceFormat<Face>::write
     // determine the number of faces by counting the
     // tri/quads/triangulated) faces in each zone
     label nFaces = 0;
-    List<label> zoneCount(zones.size());
+    labelList zoneCount(zones.size());
 
     {
         label faceIndex = 0;
-        forAll(zones, zoneI)
+        forAll(zones, zonei)
         {
-            const surfZone& zone = zones[zoneI];
+            const surfZone& zone = zones[zonei];
 
             label selCount = 0;
-            if (useFaceMap)
+            for (label nLocal = zone.size(); nLocal--; ++faceIndex)
             {
-                forAll(zone, localFaceI)
-                {
-                    selCount += countFaces(faceLst[faceMap[faceIndex++]]);
-                }
-            }
-            else
-            {
-                forAll(zone, localFaceI)
-                {
-                    selCount += countFaces(faceLst[faceIndex++]);
-                }
+                const label facei =
+                    (useFaceMap ? faceMap[faceIndex] : faceIndex);
+
+                const Face& f = faceLst[facei];
+
+                selCount += countFaces(f);
             }
 
-            zoneCount[zoneI] = selCount;
+            zoneCount[zonei] = selCount;
             nFaces += selCount;
         }
     }
@@ -239,21 +234,14 @@ void Foam::fileFormats::FLMAsurfaceFormat<Face>::write
         label faceIndex = 0;
         for (const surfZone& zone : zones)
         {
-            const label nLocalFaces = zone.size();
+            for (label nLocal = zone.size(); nLocal--; ++faceIndex)
+            {
+                const label facei =
+                    (useFaceMap ? faceMap[faceIndex] : faceIndex);
 
-            if (useFaceMap)
-            {
-                for (label i=0; i<nLocalFaces; ++i)
-                {
-                    writeShell(os, faceLst[faceMap[faceIndex++]]);
-                }
-            }
-            else
-            {
-                for (label i=0; i<nLocalFaces; ++i)
-                {
-                    writeShell(os, faceLst[faceIndex++]);
-                }
+                const Face& f = faceLst[facei];
+
+                writeShell(os, f);
             }
         }
         newline(os);
@@ -269,21 +257,14 @@ void Foam::fileFormats::FLMAsurfaceFormat<Face>::write
         label faceIndex = 0;
         for (const surfZone& zone : zones)
         {
-            const label nLocalFaces = zone.size();
+            for (label nLocal = zone.size(); nLocal--; ++faceIndex)
+            {
+                const label facei =
+                    (useFaceMap ? faceMap[faceIndex] : faceIndex);
 
-            if (useFaceMap)
-            {
-                for (label i=0; i<nLocalFaces; ++i)
-                {
-                    writeType(os, faceLst[faceMap[faceIndex++]]);
-                }
-            }
-            else
-            {
-                for (label i=0; i<nLocalFaces; ++i)
-                {
-                    writeType(os, faceLst[faceIndex++]);
-                }
+                const Face& f = faceLst[facei];
+
+                writeType(os, f);
             }
         }
         newline(os);
@@ -296,10 +277,10 @@ void Foam::fileFormats::FLMAsurfaceFormat<Face>::write
         newline(os);
 
         label faceIndex = 0;
-        forAll(zones, zoneI)
+        forAll(zones, zonei)
         {
-            const surfZone& zone = zones[zoneI];
-            const label selCount = zoneCount[zoneI];
+            const surfZone& zone = zones[zonei];
+            const label selCount = zoneCount[zonei];
 
             putFireString(os, zone.name());
             putFireLabel(os, static_cast<int>(FIRECore::cellSelection));
@@ -345,7 +326,7 @@ void Foam::fileFormats::FLMAsurfaceFormat<Face>::write
     else
     {
         FatalErrorInFunction
-            << "Cannot open file for writing " << filename
+            << "Cannot write file " << filename << nl
             << exit(FatalError);
     }
 }

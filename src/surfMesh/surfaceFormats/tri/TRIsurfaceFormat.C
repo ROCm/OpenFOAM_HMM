@@ -81,6 +81,7 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
     const fileName& filename
 )
 {
+    // Clear everything
     this->clear();
 
     // Read in the values
@@ -141,7 +142,7 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
     }
     zoneIds.clear();
 
-    // Transfer:
+    // Transfer
     this->storedFaces().transfer(faceLst);
 
     this->addZones(sizes);
@@ -180,7 +181,7 @@ void Foam::fileFormats::TRIsurfaceFormat<Face>::write
     if (!os.good())
     {
         FatalErrorInFunction
-            << "Cannot open file for writing " << filename
+            << "Cannot write file " << filename << nl
             << exit(FatalError);
     }
 
@@ -188,23 +189,14 @@ void Foam::fileFormats::TRIsurfaceFormat<Face>::write
     label zoneIndex = 0;
     for (const surfZone& zone : zones)
     {
-        const label nLocalFaces = zone.size();
+        for (label nLocal = zone.size(); nLocal--; ++faceIndex)
+        {
+            const label facei =
+                (useFaceMap ? faceMap[faceIndex] : faceIndex);
 
-        if (useFaceMap)
-        {
-            for (label i=0; i<nLocalFaces; ++i)
-            {
-                const Face& f = faceLst[faceMap[faceIndex++]];
-                writeShell(os, pointLst, f, zoneIndex);
-            }
-        }
-        else
-        {
-            for (label i=0; i<nLocalFaces; ++i)
-            {
-                const Face& f = faceLst[faceIndex++];
-                writeShell(os, pointLst, f, zoneIndex);
-            }
+            const Face& f = faceLst[facei];
+
+            writeShell(os, pointLst, f, zoneIndex);
         }
 
         ++zoneIndex;
@@ -231,7 +223,7 @@ void Foam::fileFormats::TRIsurfaceFormat<Face>::write
     if (!os.good())
     {
         FatalErrorInFunction
-            << "Cannot open file for writing " << filename
+            << "Cannot write file " << filename << nl
             << exit(FatalError);
     }
 
@@ -252,13 +244,15 @@ void Foam::fileFormats::TRIsurfaceFormat<Face>::write
 
         label faceIndex = 0;
         label zoneIndex = 0;
+
         for (const surfZone& zone : zoneLst)
         {
-            const label nLocalFaces = zone.size();
-
-            for (label i=0; i<nLocalFaces; ++i)
+            for (label nLocal = zone.size(); nLocal--; ++faceIndex)
             {
-                const Face& f = faceLst[faceMap[faceIndex++]];
+                const label facei = faceMap[faceIndex];
+
+                const Face& f = faceLst[facei];
+
                 writeShell(os, pointLst, f, zoneIndex);
             }
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +36,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "triSurface.H"
 #include "triSurfaceSearch.H"
+#include "MeshedSurfaces.H"
 #include "argList.H"
 #include "Fstream.H"
 #include "IOdictionary.H"
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "A surface analysis tool that subsets the triSurface to choose a"
+        "A surface analysis tool that subsets the surface to choose a"
         " region of interest."
     );
 
@@ -71,7 +71,8 @@ int main(int argc, char *argv[])
     dictionary meshSubsetDict(dictFile);
 
     Info<< "Reading surface " << args[2] << " ..." << endl;
-    triSurface surf1(args[2]);
+
+    meshedSurface surf1(args[2]);
 
     const fileName outFileName(args[3]);
 
@@ -101,134 +102,115 @@ int main(int argc, char *argv[])
         meshSubsetDict.lookup("zone")
     );
 
-    if (markedZone.size() && markedZone.size() != 2)
+
+    boundBox zoneBb;
+
+    if (markedZone.size())
     {
-        FatalErrorInFunction
-            << "zone specification should be two points, min and max of "
-            << "the boundingbox" << endl
-            << "zone:" << markedZone
-            << exit(FatalError);
+        if (markedZone.size() != 2)
+        {
+            FatalErrorInFunction
+                << "zone specification should be two points, min and max of "
+                << "the boundingbox" << endl
+                << "zone:" << markedZone
+                << exit(FatalError);
+        }
+
+        zoneBb.min() = markedZone[0];
+        zoneBb.max() = markedZone[1];
+
+        if (!zoneBb.valid())
+        {
+            WarningInFunction
+                << "Defined zone is invalid: " << zoneBb << nl;
+        }
     }
+
 
     const bool addFaceNeighbours =
         meshSubsetDict.get<bool>("addFaceNeighbours");
 
     const bool invertSelection =
-        meshSubsetDict.lookupOrDefault("invertSelection", false);
+        meshSubsetDict.getOrDefault("invertSelection", false);
 
     // Mark the cells for the subset
 
     // Faces to subset
-    boolList facesToSubset(surf1.size(), false);
+    bitSet facesToSubset(surf1.size(), false);
 
 
     //
-    // pick up faces connected to "localPoints"
+    // Faces connected to "localPoints"
     //
 
     if (markedPoints.size())
     {
         Info<< "Found " << markedPoints.size() << " marked point(s)." << endl;
 
-        // pick up cells sharing the point
-
-        forAll(markedPoints, pointi)
+        for (const label pointi : markedPoints)
         {
-            if
-            (
-                markedPoints[pointi] < 0
-             || markedPoints[pointi] >= surf1.nPoints()
-            )
+            if (pointi < 0 || pointi >= surf1.nPoints())
             {
                 FatalErrorInFunction
-                    << "localPoint label " << markedPoints[pointi]
-                    << "out of range."
-                    << " The mesh has got "
-                    << surf1.nPoints() << " localPoints."
+                    << "localPoint label " << pointi << "out of range."
+                    << " Surface has " << surf1.nPoints() << " localPoints."
                     << exit(FatalError);
             }
 
-            const labelList& curFaces =
-                surf1.pointFaces()[markedPoints[pointi]];
+            const labelList& curFaces = surf1.pointFaces()[pointi];
 
-            forAll(curFaces, i)
-            {
-                facesToSubset[curFaces[i]] =  true;
-            }
+            facesToSubset.set(curFaces);
         }
     }
 
 
-
     //
-    // pick up faces connected to "edges"
+    // Faces connected to "edges"
     //
 
     if (markedEdges.size())
     {
         Info<< "Found " << markedEdges.size() << " marked edge(s)." << endl;
 
-        // pick up cells sharing the edge
-
-        forAll(markedEdges, edgeI)
+        for (const label edgei : markedEdges)
         {
-            if
-            (
-                markedEdges[edgeI] < 0
-             || markedEdges[edgeI] >= surf1.nEdges()
-            )
+            if (edgei < 0 || edgei >= surf1.nEdges())
             {
                 FatalErrorInFunction
-                    << "edge label " << markedEdges[edgeI]
-                    << "out of range."
-                    << " The mesh has got "
-                    << surf1.nEdges() << " edges."
+                    << "edge label " << edgei << "out of range."
+                    << " Surface has " << surf1.nEdges() << " edges."
                     << exit(FatalError);
             }
 
-            const labelList& curFaces = surf1.edgeFaces()[markedEdges[edgeI]];
+            const labelList& curFaces = surf1.edgeFaces()[edgei];
 
-            forAll(curFaces, i)
-            {
-                facesToSubset[curFaces[i]] =  true;
-            }
+            facesToSubset.set(curFaces);
         }
     }
 
 
     //
-    // pick up faces with centre inside "zone"
+    // Faces with centre inside "zone"
     //
 
-    if (markedZone.size() == 2)
+    if (zoneBb.valid())
     {
-        const point& min = markedZone[0];
-        const point& max = markedZone[1];
-
-        Info<< "Using zone min:" << min << " max:" << max << endl;
+        Info<< "Using zone " << zoneBb << endl;
 
         forAll(surf1, facei)
         {
             const point centre = surf1[facei].centre(surf1.points());
 
-            if
-            (
-                (centre.x() >= min.x())
-             && (centre.y() >= min.y())
-             && (centre.z() >= min.z())
-             && (centre.x() <= max.x())
-             && (centre.y() <= max.y())
-             && (centre.z() <= max.z())
-            )
+            if (zoneBb.contains(centre))
             {
-                facesToSubset[facei] = true;
+                facesToSubset.set(facei);
             }
         }
     }
 
 
     //
-    // pick up faces on certain side of surface
+    // Faces on certain side of surface
     //
 
     if (meshSubsetDict.found("surface"))
@@ -237,18 +219,16 @@ int main(int argc, char *argv[])
 
         const fileName surfName(surfDict.get<fileName>("name"));
 
-        const bool outside(surfDict.get<bool>("outside"));
+        const volumeType::type volType =
+        (
+            surfDict.getOrDefault("outside", false)
+          ? volumeType::OUTSIDE
+          : volumeType::INSIDE
+        );
 
-        if (outside)
-        {
-            Info<< "Selecting all triangles with centre outside surface "
-                << surfName << endl;
-        }
-        else
-        {
-            Info<< "Selecting all triangles with centre inside surface "
-                << surfName << endl;
-        }
+        Info<< "Selecting faces with centre located "
+            << volumeType::names[volType] << " of surface "
+            << surfName << endl;
 
         // Read surface to select on
         triSurface selectSurf(surfName);
@@ -264,22 +244,15 @@ int main(int argc, char *argv[])
             searchSelectSurf.tree();
 
         // Check if face (centre) is in outside or inside.
-        forAll(facesToSubset, facei)
+        forAll(surf1, facei)
         {
             if (!facesToSubset[facei])
             {
                 const point fc(surf1[facei].centre(surf1.points()));
 
-                volumeType t = selectTree.getVolumeType(fc);
-
-                if
-                (
-                    outside
-                  ? (t == volumeType::OUTSIDE)
-                  : (t == volumeType::INSIDE)
-                )
+                if (volType == selectTree.getVolumeType(fc))
                 {
-                    facesToSubset[facei] = true;
+                    facesToSubset.set(facei);
                 }
             }
         }
@@ -304,7 +277,7 @@ int main(int argc, char *argv[])
 
             if (pl.distance(fc) < distance && mag(pl.normal() & nf) > cosAngle)
             {
-                facesToSubset[facei] = true;
+                facesToSubset.set(facei);
             }
         }
     }
@@ -323,38 +296,29 @@ int main(int argc, char *argv[])
         Info<< "Found " << markedFaces.size() << " marked face(s)." << endl;
 
         // Check and mark faces to pick up
-        forAll(markedFaces, facei)
+        for (const label facei : markedFaces)
         {
-            if
-            (
-                markedFaces[facei] < 0
-             || markedFaces[facei] >= surf1.size()
-            )
+            if (facei < 0 || facei >= surf1.size())
             {
                 FatalErrorInFunction
-                    << "Face label " << markedFaces[facei] << "out of range."
-                    << " The mesh has got "
-                    << surf1.size() << " faces."
+                    << "Face label " << facei << "out of range."
+                    << " Surface has " << surf1.size() << " faces."
                     << exit(FatalError);
             }
 
             // Mark the face
-            facesToSubset[markedFaces[facei]] = true;
+            facesToSubset.set(facei);
 
-            // mark its neighbours if requested
+            // Mark its neighbours if requested
             if (addFaceNeighbours)
             {
-                const labelList& curFaces =
-                    surf1.faceFaces()[markedFaces[facei]];
+                const labelList& curFaces = surf1.faceFaces()[facei];
 
-                forAll(curFaces, i)
+                for (const label neiFacei : curFaces)
                 {
-                    label facei = curFaces[i];
-
-                    if (!facesToSubset[facei])
+                    if (facesToSubset.set(neiFacei))
                     {
-                        facesToSubset[facei] =  true;
-                        nFaceNeighbours++;
+                        ++nFaceNeighbours;
                     }
                 }
             }
@@ -372,15 +336,12 @@ int main(int argc, char *argv[])
     {
         Info<< "Inverting selection." << endl;
 
-        forAll(facesToSubset, i)
-        {
-            facesToSubset[i] = facesToSubset[i] ? false : true;
-        }
+        facesToSubset.flip();
     }
 
 
     // Create subsetted surface
-    triSurface surf2(surf1.subsetMesh(facesToSubset));
+    meshedSurface surf2(surf1.subsetMesh(facesToSubset));
 
     Info<< "Subset:" << endl;
     surf2.writeStats(Info);

@@ -89,13 +89,14 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
     const fileName& filename
 )
 {
+    // Clear everything
     this->clear();
 
     IFstream is(filename);
     if (!is.good())
     {
         FatalErrorInFunction
-            << "Cannot read file " << filename
+            << "Cannot read file " << filename << nl
             << exit(FatalError);
     }
 

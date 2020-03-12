@@ -270,14 +270,52 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 template<class Face>
 Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 (
-    const Time& t,
+    const Time& runTime
+)
+:
+    UnsortedMeshedSurface<Face>()
+{
+    MeshedSurface<Face> surf(runTime);
+    transfer(surf);
+}
+
+
+template<class Face>
+Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
+(
+    const Time& runTime,
     const word& surfName
 )
 :
     UnsortedMeshedSurface<Face>()
 {
-    MeshedSurface<Face> surf(t, surfName);
+    MeshedSurface<Face> surf(runTime, surfName);
     transfer(surf);
+}
+
+
+template<class Face>
+Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
+(
+    const IOobject& io,
+    const dictionary& dict,
+    const bool isGlobal
+)
+:
+    UnsortedMeshedSurface<Face>()
+{
+    fileName fName
+    (
+        fileFormats::surfaceFormatsCore::checkFile(io, dict, isGlobal)
+    );
+
+    // TBD:
+    // word fExt(dict.getOrDefault<word>("surfaceType", fName.ext()));
+    // read(fName, fExt);
+
+    this->read(fName, fName.ext());
+
+    this->scalePoints(dict.getOrDefault<scalar>("scale", 0));
 }
 
 
@@ -291,19 +329,15 @@ void Foam::UnsortedMeshedSurface<Face>::setOneZone()
     zoneIds_.resize(size());
     zoneIds_ = 0;
 
-    word zoneName;
-    if (zoneToc_.size())
-    {
-        zoneName = zoneToc_[0].name();
-    }
-    if (zoneName.empty())
-    {
-        zoneName = "zone0";
-    }
-
     // Assign single default zone
     zoneToc_.resize(1);
-    zoneToc_[0] = surfZoneIdentifier(zoneName, 0);
+
+    zoneToc_[0].index() = 0;
+
+    if (zoneToc_[0].name().empty())
+    {
+        zoneToc_[0].name() = "zone0";
+    }
 }
 
 
@@ -324,7 +358,7 @@ void Foam::UnsortedMeshedSurface<Face>::setZones
         zoneToc_[zonei] = zone;
 
         // Assign sub-zone Ids
-        SubList<label>(zoneIds_, zone.size(), zone.start()) = zonei;
+        SubList<label>(zoneIds_, zone.range()) = zonei;
     }
 }
 
@@ -385,11 +419,11 @@ void Foam::UnsortedMeshedSurface<Face>::setZones
 template<class Face>
 void Foam::UnsortedMeshedSurface<Face>::remapFaces
 (
-    const labelUList& faceMap
+    const labelUList& faceMapNewToOld
 )
 {
     // Re-assign the zone Ids
-    if (faceMap.empty())
+    if (faceMapNewToOld.empty())
     {
         return;
     }
@@ -404,13 +438,13 @@ void Foam::UnsortedMeshedSurface<Face>::remapFaces
     }
     else
     {
-        List<label> newZones(faceMap.size());
+        List<label> newZonesIds(faceMapNewToOld.size());
 
-        forAll(faceMap, facei)
+        forAll(faceMapNewToOld, facei)
         {
-            newZones[facei] = zoneIds_[faceMap[facei]];
+            newZonesIds[facei] = zoneIds_[faceMapNewToOld[facei]];
         }
-        zoneIds_.transfer(newZones);
+        zoneIds_.transfer(newZonesIds);
     }
 }
 
@@ -531,53 +565,46 @@ Foam::surfZoneList Foam::UnsortedMeshedSurface<Face>::sortedZones
 
 
 template<class Face>
-template<class BoolListType>
 Foam::UnsortedMeshedSurface<Face>
-Foam::UnsortedMeshedSurface<Face>::subsetMesh
+Foam::UnsortedMeshedSurface<Face>::subsetMeshImpl
 (
-    const BoolListType& include,
-    labelList& pointMap,
-    labelList& faceMap
+    const labelList& pointMap,
+    const labelList& faceMap
 ) const
 {
-    const pointField&  locPoints = this->localPoints();
-    const List<Face>&  locFaces  = this->localFaces();
+    const pointField& locPoints = this->localPoints();
+    const List<Face>& locFaces  = this->localFaces();
 
-    // Fill pointMap, faceMap
-    PatchTools::subsetMap(*this, include, pointMap, faceMap);
+    // Subset of points (compact)
+    pointField newPoints(UIndirectList<point>(locPoints, pointMap));
 
-    // Create compact coordinate list and forward mapping array
-    pointField newPoints(pointMap.size());
-    labelList  oldToNew(locPoints.size());
+    // Inverse point mapping - same as ListOps invert() without checks
+    labelList oldToNew(locPoints.size(), -1);
     forAll(pointMap, pointi)
     {
-        newPoints[pointi] = locPoints[pointMap[pointi]];
         oldToNew[pointMap[pointi]] = pointi;
     }
 
-    // Renumber face node labels and compact
-    List<Face>  newFaces(faceMap.size());
-    List<label> newZones(faceMap.size());
+    // Subset of faces
+    List<Face> newFaces(UIndirectList<Face>(locFaces, faceMap));
 
-    forAll(faceMap, facei)
+    // Renumber face node labels
+    for (auto& f : newFaces)
     {
-        const label origFacei = faceMap[facei];
-        newFaces[facei] = Face(locFaces[origFacei]);
-
-        // Renumber labels for face
-        for (label& pointi : newFaces[facei])
+        for (label& vert : f)
         {
-            pointi = oldToNew[pointi];
+            vert = oldToNew[vert];
         }
-
-        newZones[facei] = zoneIds_[origFacei];
     }
     oldToNew.clear();
+
+    // Subset of zones
+    List<label> newZones(UIndirectList<label>(zoneIds_, faceMap));
 
     // Retain the same zone toc information
     List<surfZoneIdentifier> subToc(zoneToc_);
 
-    // Return sub-surface
+    // Construct the sub-surface
     return UnsortedMeshedSurface<Face>
     (
         std::move(newPoints),
@@ -589,13 +616,54 @@ Foam::UnsortedMeshedSurface<Face>::subsetMesh
 
 
 template<class Face>
-Foam::UnsortedMeshedSurface<Face> Foam::UnsortedMeshedSurface<Face>::subsetMesh
+Foam::UnsortedMeshedSurface<Face>
+Foam::UnsortedMeshedSurface<Face>::subsetMesh
 (
-    const labelHashSet& include
+    const UList<bool>& include,
+    labelList& pointMap,
+    labelList& faceMap
+) const
+{
+    this->subsetMeshMap(include, pointMap, faceMap);
+    return this->subsetMeshImpl(pointMap, faceMap);
+}
+
+
+template<class Face>
+Foam::UnsortedMeshedSurface<Face>
+Foam::UnsortedMeshedSurface<Face>::subsetMesh
+(
+    const bitSet& include,
+    labelList& pointMap,
+    labelList& faceMap
+) const
+{
+    this->subsetMeshMap(include, pointMap, faceMap);
+    return this->subsetMeshImpl(pointMap, faceMap);
+}
+
+
+template<class Face>
+Foam::UnsortedMeshedSurface<Face>
+Foam::UnsortedMeshedSurface<Face>::subsetMesh
+(
+    const UList<bool>& include
 ) const
 {
     labelList pointMap, faceMap;
-    return subsetMesh(include, pointMap, faceMap);
+    return this->subsetMesh(include, pointMap, faceMap);
+}
+
+
+template<class Face>
+Foam::UnsortedMeshedSurface<Face>
+Foam::UnsortedMeshedSurface<Face>::subsetMesh
+(
+    const bitSet& include
+) const
+{
+    labelList pointMap, faceMap;
+    return this->subsetMesh(include, pointMap, faceMap);
 }
 
 

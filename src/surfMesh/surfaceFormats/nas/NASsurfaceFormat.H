@@ -83,8 +83,8 @@ class NASsurfaceFormat
         (
             Ostream& os,
             const Face& f,
-            const label groupId,
-            label elementId
+            label elemId,           //!< 0-based element id
+            const label groupId     //!< 0-based property/group id
         );
 
 

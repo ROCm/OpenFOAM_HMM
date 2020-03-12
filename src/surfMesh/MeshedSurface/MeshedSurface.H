@@ -68,7 +68,6 @@ namespace Foam
 {
 
 // Forward Declarations
-
 class Time;
 class surfMesh;
 class polyBoundaryMesh;
@@ -134,6 +133,16 @@ private:
         //- Write to Ostream
         Ostream& write(Ostream& os) const;
 
+        //- Return a new surface using specified pointMap and faceMap
+        //
+        //  \param[in] pointMap from subsetMeshMap
+        //  \param[in] faceMap from subsetMeshMap
+        MeshedSurface subsetMeshImpl
+        (
+            const labelList& pointMap,
+            const labelList& faceMap
+        ) const;
+
 
 protected:
 
@@ -171,11 +180,11 @@ protected:
         (
             DynamicList<Face>& unsortedFaces,
             DynamicList<label>& zoneIds,
-            const bool sorted
+            bool sorted
         );
 
         //- Set new zones from faceMap
-        virtual void remapFaces(const labelUList& faceMap);
+        virtual void remapFaces(const labelUList& faceMapNewToOld);
 
 
 public:
@@ -270,19 +279,32 @@ public:
         );
 
         //- Construct from a surfMesh
-        MeshedSurface(const surfMesh& mesh);
+        explicit MeshedSurface(const surfMesh& mesh);
 
         //- Construct from file name (uses extension to determine type)
-        MeshedSurface(const fileName& name);
+        explicit MeshedSurface(const fileName& name);
 
         //- Construct from file name (uses extension to determine type)
-        MeshedSurface(const fileName& name, const word& ext);
+        explicit MeshedSurface(const fileName& name, const word& ext);
 
         //- Construct from Istream
-        MeshedSurface(Istream& is);
+        explicit MeshedSurface(Istream& is);
 
-        //- Construct from database
-        MeshedSurface(const Time& runTime, const word& surfName = word::null);
+        //- Construct from database (as surfMesh) with default name
+        explicit MeshedSurface(const Time& runTime);
+
+        //- Construct from database (as surfMesh) with given surface name
+        MeshedSurface(const Time& runTime, const word& surfName);
+
+        //- Read construct using IO to find the file location.
+        //  Dictionary may contain optional 'file' entry, and an
+        //  optional 'scale' entry (eg, 0.001: mm -> m)
+        MeshedSurface
+        (
+            const IOobject& io,
+            const dictionary& dict,
+            const bool isGlobal = true  //!< resolve as a global file
+        );
 
 
     // Declare run-time constructor selection table
@@ -364,7 +386,7 @@ public:
         }
 
         //- Return const access to the faces
-        inline const List<Face>& surfFaces() const
+        const List<Face>& surfFaces() const
         {
             return static_cast<const List<Face>&>(*this);
         }
@@ -378,19 +400,19 @@ public:
         }
 
         //- Face area vectors (normals)
-        inline const vectorField& Sf() const
+        const vectorField& Sf() const
         {
             return ParentType::faceAreas();
         }
 
         //- Face area magnitudes
-        inline const scalarField& magSf() const
+        const scalarField& magSf() const
         {
             return ParentType::magFaceAreas();
         }
 
         //- Face centres
-        inline const vectorField& Cf() const
+        const vectorField& Cf() const
         {
             return ParentType::faceCentres();
         }
@@ -469,24 +491,65 @@ public:
         //  The faceMap is zero-sized when no triangulation was done.
         virtual label triangulate(List<label>& faceMap);
 
-        //- Return new surface.
+        //- Create mappings for a sub-surface
         //
         //  \param[in] include the faces to select
-        //  \param[out] pointMap from subsetMeshMap
-        //  \param[out] faceMap from subsetMeshMap
+        //  \param[out] pointMap from new to old localPoints
+        //  \param[out] faceMap from new to old localFaces
         template<class BoolListType>
-        MeshedSurface subsetMesh
+        void subsetMeshMap
         (
             const BoolListType& include,
             labelList& pointMap,
             labelList& faceMap
+        ) const
+        {
+            PatchTools::subsetMap(*this, include, pointMap, faceMap);
+        }
+
+        //- Return a new surface subsetted on the selected faces.
+        //
+        //  \param[in] include the faces to select
+        //  \param[out] pointMap from new to old localPoints
+        //  \param[out] faceMap from new to old localFaces
+        MeshedSurface subsetMesh
+        (
+            const UList<bool>& include,
+            labelList& pointMap,
+            labelList& faceMap
         ) const;
 
-        //- Return new surface
+        //- Return a new surface subsetted on the selected faces.
+        //
+        //  \param[in] include the faces to select
+        //  \param[out] pointMap from new to old localPoints
+        //  \param[out] faceMap from new to old localFaces
+        MeshedSurface subsetMesh
+        (
+            const bitSet& include,
+            labelList& pointMap,
+            labelList& faceMap
+        ) const;
+
+        //- Return a new surface subsetted on the selected faces.
+        //
+        //  \param[in] include the faces to select
+        MeshedSurface subsetMesh(const UList<bool>& include) const;
+
+        //- Return a new surface subsetted on the selected faces.
+        //
+        //  \param[in] include the faces to select
         MeshedSurface subsetMesh(const bitSet& include) const;
 
-        //- Return new surface
-        MeshedSurface subsetMesh(const labelHashSet& include) const;
+        //- Return a new surface subsetted on the selected zone names
+        //
+        //  \param[in] includeNames the zone names to white-list
+        //  \param[in] excludeNames the zone names to black-list
+        MeshedSurface subsetMesh
+        (
+            const wordRes& includeNames,
+            const wordRes& excludeNames = wordRes()
+        ) const;
 
         //- Swap contents
         void swap(MeshedSurface<Face>& surf);
@@ -503,14 +566,11 @@ public:
         //- Release (clear) geometry and return for reuse
         autoPtr<MeshedSurface<Face>> releaseGeom();
 
-        //- Swap the stored faces
+        //- Swap the stored faces. Use with caution
         void swapFaces(List<Face>& faces);
 
         //- Swap the stored points
         void swapPoints(pointField& points);
-
-        //- Swap the stored zones
-        void swapZones(surfZoneList& zones);
 
 
     // Read

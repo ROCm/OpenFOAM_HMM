@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,8 +57,8 @@ public:
 
     // Constructors
 
-        //- Construct null
-        meshedSurf() = default;
+        //- Default construct
+        constexpr meshedSurf() noexcept = default;
 
 
     //- Destructor
@@ -86,7 +86,7 @@ public:
                   Class meshedSurf::emptySurface Declaration
 \*---------------------------------------------------------------------------*/
 
-//- A meshedSurf class with no faces, points or zoneId
+//- A concrete meshedSurf class without faces, points, etc.
 class meshedSurf::emptySurface
 :
     public meshedSurf
@@ -95,8 +95,8 @@ public:
 
     // Constructors
 
-        //- Construct null
-        emptySurface() = default;
+        //- Default construct
+        constexpr emptySurface() noexcept = default;
 
 
     //- Destructor

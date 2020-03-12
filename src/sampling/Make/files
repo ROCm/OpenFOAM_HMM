@@ -44,11 +44,11 @@ sampledSurface/isoSurface/sampledIsoSurfaceTopo.C
 sampledSurface/distanceSurface/sampledDistanceSurface.C
 sampledSurface/sampledCuttingPlane/sampledCuttingPlane.C
 sampledSurface/sampledCuttingSurface/sampledCuttingSurface.C
+sampledSurface/sampledMeshedSurface/sampledMeshedSurface.C
+sampledSurface/sampledMeshedSurface/sampledMeshedSurfaceNormal.C
 sampledSurface/sampledSurface/sampledSurface.C
 sampledSurface/sampledSurface/sampledSurfaceRegister.C
 sampledSurface/sampledSurfaces/sampledSurfaces.C
-sampledSurface/sampledTriSurfaceMesh/sampledTriSurfaceMesh.C
-sampledSurface/sampledTriSurfaceMesh/sampledTriSurfaceMeshNormal.C
 sampledSurface/thresholdCellFaces/sampledThresholdCellFaces.C
 
 readers = sampledSurface/readers

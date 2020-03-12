@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -113,31 +113,31 @@ public:
 
 
         //- File read was already sorted
-        inline bool sorted() const
+        bool sorted() const
         {
             return sorted_;
         }
 
         //- Return full access to the points
-        inline List<STLpoint>& points()
+        List<STLpoint>& points()
         {
             return points_;
         }
 
         //- Return full access to the zones
-        inline List<label>& zoneIds()
+        List<label>& zoneIds()
         {
             return zoneIds_;
         }
 
         //- The list of solid names in the order of their first appearance
-        inline List<word>& names()
+        List<word>& names()
         {
             return names_;
         }
 
         //- The list of zone sizes in the order of their first appearance
-        inline List<label>& sizes()
+        List<label>& sizes()
         {
             return sizes_;
         }

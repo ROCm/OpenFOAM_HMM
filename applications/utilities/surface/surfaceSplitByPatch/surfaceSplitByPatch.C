@@ -31,12 +31,33 @@ Group
     grpSurfaceUtilities
 
 Description
-    Writes regions of triSurface to separate files.
+    Writes surface regions to separate files.
+
+Usage
+    \b surfaceSplitByPatch [OPTION]
+
+    Options:
+      - \par -patches NAME | LIST
+        Specify single patch or multiple patches (name or regex) to extract
+        For example,
+        \verbatim
+          -patches top
+          -patches '( front \".*back\" )'
+        \endverbatim
+
+      - \par -excludePatches NAME | LIST
+        Specify single or multiple patches (name or regex) not to extract.
+        For example,
+        \verbatim
+          -excludePatches '( inlet_1 inlet_2 "proc.*")'
+        \endverbatim
 
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
-#include "triSurface.H"
+#include "MeshedSurfaces.H"
+#include "stringListOps.H"
+#include "geometricSurfacePatch.H"
 
 using namespace Foam;
 
@@ -48,65 +69,103 @@ int main(int argc, char *argv[])
     (
         "Write surface mesh regions to separate files"
     );
-
     argList::noParallel();
+    argList::addOption
+    (
+        "patches",
+        "wordRes",
+        "Specify single patch or multiple patches to write\n"
+        "Eg, 'top' or '( front \".*back\" )'"
+    );
+    argList::addOption
+    (
+        "excludePatches",
+        "wordRes",
+        "Specify single patch or multiple patches to exclude from writing."
+        " Eg, 'outlet' or '( inlet \".*Wall\" )'"
+    );
+
     argList::addArgument("input", "The input surface file");
+
     argList args(argc, argv);
 
     const fileName surfName = args[1];
 
-    Info<< "Reading surf from " << surfName << " ..." << nl << endl;
+    const fileName surfBase(surfName.lessExt());
 
-    fileName surfBase = surfName.lessExt();
-
-    word extension = surfName.ext();
-
-    triSurface surf(surfName);
-
-    Info<< "Writing regions to separate files ..."
-        << nl << endl;
+    const word extension(surfName.ext());
 
 
-    const geometricSurfacePatchList& patches = surf.patches();
+    Info<< nl
+        << "Read surface from " << surfName << " ..." << nl << endl;
 
-    forAll(patches, patchi)
+    meshedSurface surf(surfName);
+
+    const surfZoneList& zones = surf.surfZones();
+
+    Info<< "    " << surf.size() << " faces with "
+        << zones.size() << " zones" << nl << nl;
+
+
+    wordRes includePatches, excludePatches;
+
+    if (args.readListIfPresent<wordRe>("patches", includePatches))
     {
-        const geometricSurfacePatch& pp = patches[patchi];
+        Info<< "Including patches " << flatOutput(includePatches)
+            << nl << endl;
+    }
+    if (args.readListIfPresent<wordRe>("excludePatches", excludePatches))
+    {
+        Info<< "Excluding patches " << flatOutput(excludePatches)
+            << nl << endl;
+    }
 
-        word patchName(pp.name());
+    // Identity if both whitelist and blacklist are empty
+    const labelList zoneIndices
+    (
+        stringListOps::findMatching
+        (
+            zones,
+            includePatches,
+            excludePatches,
+            nameOp<surfZone>()
+        )
+    );
+
+
+    Info<< "Writing regions to "
+        << zoneIndices.size() << " separate files ..." << nl << endl;
+
+
+    // Faces to subset
+    bitSet includeMap(surf.size());
+
+    for (const label zonei : zoneIndices)
+    {
+        const surfZone& zn = zones[zonei];
+
+        includeMap.reset();
+        includeMap.set(zn.range());
+
+        word patchName(zn.name());
 
         if (patchName.empty())
         {
-            patchName = geometricSurfacePatch::defaultName(patchi);
+            // In case people expect the same names as with triSurface
+            patchName = geometricSurfacePatch::defaultName(zonei);
         }
 
         fileName outFile(surfBase + '_' + patchName + '.' + extension);
 
-        Info<< "   Writing patch " << patchName << " to file " << outFile
-            << endl;
+        Info<< "   Zone " << zonei << " (" << zn.size() << " faces) "
+            << patchName
+            << " to file " << outFile << nl;
 
-
-        // Collect faces of region
-        boolList includeMap(surf.size(), false);
-
-        forAll(surf, facei)
-        {
-            const labelledTri& f = surf[facei];
-
-            if (f.region() == patchi)
-            {
-                includeMap[facei] = true;
-            }
-        }
-
-        // Subset triSurface
-
-        triSurface subSurf(surf.subsetMesh(includeMap));
-
-        subSurf.write(outFile);
+        // Subset and write
+        surf.subsetMesh(includeMap).write(outFile);
     }
 
-    Info<< "End\n" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

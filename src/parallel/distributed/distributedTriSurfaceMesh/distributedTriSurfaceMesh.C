@@ -2557,7 +2557,7 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh(const IOobject& io)
 
     bounds().reduce();
 
-    const fileName actualFile(checkFile(io, true));
+    const fileName actualFile(triSurfaceMesh::checkFile(io, true));
 
     if
     (
@@ -2697,7 +2697,7 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
 
     bounds().reduce();
 
-    const fileName actualFile(checkFile(io, dict, true));
+    const fileName actualFile(triSurfaceMesh::checkFile(io, dict, true));
 
     if
     (

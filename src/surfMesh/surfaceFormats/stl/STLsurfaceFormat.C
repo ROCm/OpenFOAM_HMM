@@ -119,6 +119,7 @@ bool Foam::fileFormats::STLsurfaceFormat<Face>::read
     const fileName& filename
 )
 {
+    // Clear everything
     this->clear();
 
     // Read in the values
@@ -181,7 +182,7 @@ bool Foam::fileFormats::STLsurfaceFormat<Face>::read
     }
     zoneIds.clear();
 
-    // Transfer:
+    // Transfer
     this->storedFaces().transfer(faceLst);
 
     if (names.size())
@@ -210,7 +211,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeAscii
     if (!os.good())
     {
         FatalErrorInFunction
-            << "Cannot open file for writing " << filename
+            << "Cannot write file " << filename << nl
             << exit(FatalError);
     }
 
@@ -230,23 +231,16 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeAscii
     label faceIndex = 0;
     for (const surfZone& zone : zones)
     {
-        const label nLocalFaces = zone.size();
-
         os << "solid " << zone.name() << nl;
 
-        if (useFaceMap)
+        for (label nLocal = zone.size(); nLocal--; ++faceIndex)
         {
-            for (label i=0; i<nLocalFaces; ++i)
-            {
-                writeShell(os, pointLst, faceLst[faceMap[faceIndex++]]);
-            }
-        }
-        else
-        {
-            for (label i=0; i<nLocalFaces; ++i)
-            {
-                writeShell(os, pointLst, faceLst[faceIndex++]);
-            }
+            const label facei =
+                (useFaceMap ? faceMap[faceIndex] : faceIndex);
+
+            const Face& f = faceLst[facei];
+
+            writeShell(os, pointLst, f);
         }
         os << "endsolid " << zone.name() << endl;
     }
@@ -264,7 +258,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBinary
     if (!os.good())
     {
         FatalErrorInFunction
-            << "Cannot open file for writing " << filename
+            << "Cannot write file " << filename << nl
             << exit(FatalError);
     }
 
@@ -289,23 +283,14 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBinary
     label zoneIndex = 0;
     for (const surfZone& zone : zones)
     {
-        const label nLocalFaces = zone.size();
+        for (label nLocal = zone.size(); nLocal--; ++faceIndex)
+        {
+            const label facei =
+                (useFaceMap ? faceMap[faceIndex] : faceIndex);
 
-        if (useFaceMap)
-        {
-            for (label i=0; i<nLocalFaces; ++i)
-            {
-                const Face& f = faceLst[faceMap[faceIndex++]];
-                writeShell(os, pointLst, f, zoneIndex);
-            }
-        }
-        else
-        {
-            for (label i=0; i<nLocalFaces; ++i)
-            {
-                const Face& f = faceLst[faceIndex++];
-                writeShell(os, pointLst, f, zoneIndex);
-            }
+            const Face& f = faceLst[facei];
+
+            writeShell(os, pointLst, f, zoneIndex);
         }
 
         ++zoneIndex;
@@ -331,7 +316,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeAscii
         if (!os.good())
         {
             FatalErrorInFunction
-                << "Cannot open file for writing " << filename
+                << "Cannot write file " << filename << nl
                 << exit(FatalError);
         }
 
@@ -374,7 +359,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBinary
     if (!os.good())
     {
         FatalErrorInFunction
-            << "Cannot open file for writing " << filename
+            << "Cannot write file " << filename << nl
             << exit(FatalError);
     }
 

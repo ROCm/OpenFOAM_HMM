@@ -25,11 +25,11 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::sampledTriSurfaceMesh
+    Foam::sampledMeshedSurface
 
 Description
-    A sampledSurface from a triSurfaceMesh. It samples on the points/triangles
-    of the triSurface.
+    A sampledSurface from a meshed surface.
+    It samples on the points/faces of the meshed surface.
 
     - it either samples cells or (non-coupled) boundary faces
 
@@ -69,36 +69,36 @@ Usage
     Example of function object partial specification:
     \verbatim
     surfaces
-    (
+    {
         surface1
         {
-            type    sampledTriSurfaceMesh;
+            type    meshedSurface;
             surface something.obj;
             source  cells;
         }
-    );
+    }
     \endverbatim
 
     Where the sub-entries comprise:
     \table
         Property | Description                             | Required | Default
-        type     | sampledTriSurfaceMesh                   | yes      |
+        type     | meshedSurface                           | yes      |
         surface  | surface name in triSurface/             | yes      |
+        patches  | Limit to named surface regions (wordRes) | no  |
         source   | cells/insideCells/boundaryFaces         | yes      |
         keepIds  | pass through id numbering               | no       | false
     \endtable
 
 SourceFiles
-    sampledTriSurfaceMesh.C
-    sampledTriSurfaceMeshTemplates.C
+    sampledMeshedSurface.C
+    sampledMeshedSurfaceTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sampledTriSurfaceMesh_H
-#define sampledTriSurfaceMesh_H
+#ifndef sampledMeshedSurface_H
+#define sampledMeshedSurface_H
 
 #include "sampledSurface.H"
-#include "triSurfaceMesh.H"
 #include "MeshedSurface.H"
 #include "MeshedSurfacesFwd.H"
 
@@ -107,20 +107,20 @@ SourceFiles
 namespace Foam
 {
 
-class treeDataFace;
+// Forward Declarations
 class meshSearch;
 
 /*---------------------------------------------------------------------------*\
-                       Class sampledTriSurfaceMesh Declaration
+                       Class sampledMeshedSurface Declaration
 \*---------------------------------------------------------------------------*/
 
-class sampledTriSurfaceMesh
+class sampledMeshedSurface
 :
     public sampledSurface,
     public meshedSurface
 {
 public:
-        //- Types of communications
+        //- Types of sampling regions
         enum samplingSource
         {
             cells,
@@ -130,16 +130,19 @@ public:
 
 private:
 
-    //- Private typedefs for convenience
+        //- Private typedefs for convenience
         typedef meshedSurface MeshStorage;
 
 
-    // Private data
+    // Private Data
 
         static const Enum<samplingSource> samplingSourceNames_;
 
+        //- The name of the input surface
+        word surfaceName_;
+
         //- Surface to sample on
-        const triSurfaceMesh surface_;
+        meshedSurface surface_;
 
         //- Whether to sample internal cell values or boundary values
         const samplingSource sampleSource_;
@@ -151,11 +154,8 @@ private:
         bool keepIds_;
 
         //- List of element ids/order of the original surface,
-        //  when keepIds is active.
+        //- when keepIds is active.
         labelList originalIds_;
-
-        //- Search tree for all non-coupled boundary faces
-        mutable autoPtr<indexedOctree<treeDataFace>> boundaryTreePtr_;
 
         //- For compatibility with the meshSurf interface
         labelList zoneIds_;
@@ -168,6 +168,9 @@ private:
 
 
     // Private Member Functions
+
+        //- Set zoneIds list based on the surfZone information
+        void setZoneMap();
 
         //- Sample volume field onto surface faces
         template<class Type>
@@ -187,14 +190,14 @@ private:
 
 public:
 
-    //- Runtime type information
-    TypeName("sampledTriSurfaceMesh");
+    //- Declare type-name, virtual type (with debug switch)
+    TypeName("sampledMeshedSurface");
 
 
     // Constructors
 
         //- Construct from components
-        sampledTriSurfaceMesh
+        sampledMeshedSurface
         (
             const word& name,
             const polyMesh& mesh,
@@ -203,36 +206,19 @@ public:
         );
 
         //- Construct from dictionary
-        sampledTriSurfaceMesh
+        sampledMeshedSurface
         (
             const word& name,
             const polyMesh& mesh,
             const dictionary& dict
         );
 
-        //- Construct from triSurface
-        sampledTriSurfaceMesh
-        (
-            const word& name,
-            const polyMesh& mesh,
-            const triSurface& surface,
-            const word& sampleSourceName
-        );
-
 
     //- Destructor
-    virtual ~sampledTriSurfaceMesh();
+    virtual ~sampledMeshedSurface() = default;
 
 
     // Member Functions
-
-        //- Set new zoneIds list based on the surfZoneList information
-        static void setZoneMap
-        (
-            const surfZoneList& zoneLst,
-            labelList& zoneIds
-        );
-
 
         //- Does the surface need an update?
         virtual bool needsUpdate() const;
@@ -387,7 +373,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "sampledTriSurfaceMeshTemplates.C"
+    #include "sampledMeshedSurfaceTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

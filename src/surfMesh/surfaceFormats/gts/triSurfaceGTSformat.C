@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +41,7 @@ void Foam::triSurface::writeGTS
     if (!os.good())
     {
         FatalErrorInFunction
-            << "Cannot open file for writing " << filename
+            << "Cannot write file " << filename << nl
             << exit(FatalError);
     }
 
@@ -89,11 +90,9 @@ void Foam::triSurface::writeGTS
         label faceIndex = 0;
         for (const surfacePatch& p : patches)
         {
-            const label nLocalFaces = p.size();
-
-            for (label i = 0; i<nLocalFaces; ++i)
+            for (label nLocal = p.size(); nLocal--; ++faceIndex)
             {
-                const label facei = faceMap[faceIndex++];
+                const label facei = faceMap[faceIndex];
 
                 const labelList& fEdges = faceEdges()[facei];
 

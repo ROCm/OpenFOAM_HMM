@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,13 +26,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "sampledTriSurfaceMesh.H"
+#include "sampledMeshedSurface.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::sampledTriSurfaceMesh::sampleOnFaces
+Foam::sampledMeshedSurface::sampleOnFaces
 (
     const interpolation<Type>& sampler
 ) const
@@ -95,7 +95,7 @@ Foam::sampledTriSurfaceMesh::sampleOnFaces
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::sampledTriSurfaceMesh::sampleOnPoints
+Foam::sampledMeshedSurface::sampleOnPoints
 (
     const interpolation<Type>& interpolator
 ) const

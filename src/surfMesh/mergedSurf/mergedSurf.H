@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,31 +56,33 @@ class mergedSurf
 {
     pointField points_;
     faceList   faces_;
-    labelList  zones_;
     labelList  pointsMap_;
+
+    labelList  zoneIds_;
+    labelList  faceIds_;
 
 
 public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         mergedSurf() = default;
 
-        //- Copy construct null
+        //- Copy construct
         mergedSurf(const mergedSurf&) = default;
 
         //- Move construct
         mergedSurf(mergedSurf&&) = default;
 
-        //- Construct and merge.
+        //- Construct and merge
         mergedSurf
         (
             const meshedSurf& unmergedSurface,
             const scalar mergeDim
         );
 
-        //- Construct and merge.
+        //- Construct and merge
         mergedSurf
         (
             const pointField& unmergedPoints,
@@ -93,7 +95,7 @@ public:
         (
             const pointField& unmergedPoints,
             const faceList& unmergedFaces,
-            const labelList& originalIds,
+            const labelList& origZoneIds,
             const scalar mergeDim
         );
 
@@ -128,7 +130,7 @@ public:
         //- Per-face zone/region information
         virtual const labelList& zoneIds() const
         {
-            return zones_;
+            return zoneIds_;
         }
 
         //- Map for reordered points (old-to-new)
@@ -163,7 +165,7 @@ public:
         (
             const pointField& unmergedPoints,
             const faceList& unmergedFaces,
-            const labelList& originalIds,
+            const labelList& origZoneIds,
             const scalar mergeDim
         );
 
@@ -175,7 +177,6 @@ public:
 
         //- Move assignment
         mergedSurf& operator=(mergedSurf&&) = default;
-
 };
 
 

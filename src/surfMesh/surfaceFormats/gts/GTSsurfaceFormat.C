@@ -57,7 +57,7 @@ bool Foam::fileFormats::GTSsurfaceFormat<Face>::checkIfTriangulated
     if (nNonTris)
     {
         FatalErrorInFunction
-            << "Surface has " << nNonTris << "/" << faceLst.size()
+            << "Surface has " << nNonTris << '/' << faceLst.size()
             << " non-triangulated faces - not writing!" << endl;
     }
 
@@ -86,13 +86,14 @@ bool Foam::fileFormats::GTSsurfaceFormat<Face>::read
     const fileName& filename
 )
 {
+    // Clear everything
     this->clear();
 
     IFstream is(filename);
     if (!is.good())
     {
         FatalErrorInFunction
-            << "Cannot read file " << filename
+            << "Cannot read file " << filename << nl
             << exit(FatalError);
     }
 
@@ -109,14 +110,14 @@ bool Foam::fileFormats::GTSsurfaceFormat<Face>::read
     }
 
 
-    // write directly into the lists:
-    pointField&  pointLst = this->storedPoints();
-    List<Face>&  faceLst  = this->storedFaces();
-    List<label>& zoneIds  = this->storedZoneIds();
+    // Write directly into the lists
+    auto& pointLst = this->storedPoints();
+    auto& faceLst  = this->storedFaces();
+    auto& zoneIds  = this->storedZoneIds();
 
-    pointLst.setSize(nPoints);
-    faceLst.setSize(nElems);
-    zoneIds.setSize(nElems);
+    pointLst.resize(nPoints);
+    faceLst.resize(nElems);
+    zoneIds.resize(nElems);
 
     // Read points
     forAll(pointLst, pointi)
@@ -160,7 +161,7 @@ bool Foam::fileFormats::GTSsurfaceFormat<Face>::read
             lineStream
                 >> e0Label >> e1Label >> e2Label;
 
-            // Optional zone number: read first, then check state on stream
+            // Optional zone number: read first, then check stream state
             if (lineStream)
             {
                 label num;
@@ -257,7 +258,7 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
     streamOpt.format(IOstream::ASCII);
 
     const UList<point>& pointLst = surf.points();
-    const UList<Face>& faceLst  = surf.surfFaces();
+    const UList<Face>& faceLst = surf.surfFaces();
 
     const surfZoneList zones =
     (
@@ -272,7 +273,7 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
     if (!os.good())
     {
         FatalErrorInFunction
-            << "Cannot open file for writing " << filename
+            << "Cannot write file " << filename << nl
             << exit(FatalError);
     }
 
@@ -281,10 +282,10 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
     os  << "# GTS file" << nl
         << "# Zones:" << nl;
 
-    forAll(zones, zoneI)
+    forAll(zones, zonei)
     {
-        os  << "#     " << zoneI << "    "
-            << zones[zoneI].name() << nl;
+        os  << "#     " << zonei << "    "
+            << zones[zonei].name() << nl;
     }
     os  << "#" << nl;
 
@@ -311,18 +312,19 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
             << meshPts[e.end()] + 1 << nl;
     }
 
-    // Write faces in terms of edges.
+    // Write faces in terms of edges
     const labelListList& faceEs = surf.faceEdges();
 
     label faceIndex = 0;
     label zoneIndex = 0;
+
     for (const surfZone& zone : zones)
     {
-        const label nLocalFaces = zone.size();
-
-        for (label i=0; i<nLocalFaces; ++i)
+        for (label nLocal = zone.size(); nLocal--; ++faceIndex)
         {
-            const labelList& fEdges = faceEs[faceIndex++];
+            const label facei = faceIndex;
+
+            const labelList& fEdges = faceEs[facei];
 
             os  << fEdges[0] + 1 << ' '
                 << fEdges[1] + 1 << ' '
@@ -358,7 +360,7 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
     if (!os.good())
     {
         FatalErrorInFunction
-            << "Cannot open file for writing " << filename
+            << "Cannot write file " << filename << nl
             << exit(FatalError);
     }
 
@@ -367,13 +369,12 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
     os  << "# GTS file" << nl
         << "# Zones:" << nl;
 
-    forAll(zoneToc, zoneI)
+    forAll(zoneToc, zonei)
     {
-        os  << "#     " << zoneI << "    "
-            << zoneToc[zoneI].name() << nl;
+        os  << "#     " << zonei << "    "
+            << zoneToc[zonei].name() << nl;
     }
     os  << "#" << nl;
-
 
     os  << "# nPoints  nEdges  nTriangles" << nl
         << pointLst.size() << ' ' << surf.nEdges() << ' '

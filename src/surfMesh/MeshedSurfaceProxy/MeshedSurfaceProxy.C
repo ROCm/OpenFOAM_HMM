@@ -128,7 +128,7 @@ void Foam::MeshedSurfaceProxy<Face>::write
     }
 
 
-    // write surfMesh/points
+    // Write surfMesh/points
     {
         pointIOField io
         (
@@ -154,7 +154,7 @@ void Foam::MeshedSurfaceProxy<Face>::write
     }
 
 
-    // write surfMesh/faces
+    // Write surfMesh/faces
     {
         faceCompactIOList io
         (
@@ -187,7 +187,7 @@ void Foam::MeshedSurfaceProxy<Face>::write
     }
 
 
-    // write surfMesh/surfZones
+    // Write surfMesh/surfZones
     {
         surfZoneIOList io
         (
@@ -244,7 +244,7 @@ inline Foam::label Foam::MeshedSurfaceProxy<Face>::nTriangles() const
     }
 
     label nTri = 0;
-    for (const Face& f : this->surfFaces())
+    for (const auto& f : faces_)
     {
         nTri += f.nTriangles();
     }

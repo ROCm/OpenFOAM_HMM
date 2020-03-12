@@ -38,8 +38,8 @@ inline Foam::label Foam::fileFormats::NASsurfaceFormat<Face>::writeShell
 (
     Ostream& os,
     const Face& f,
-    const label groupId,
-    label elementId
+    label elemId,
+    const label groupId
 )
 {
     const label n = f.size();
@@ -47,7 +47,7 @@ inline Foam::label Foam::fileFormats::NASsurfaceFormat<Face>::writeShell
     if (n == 3)
     {
         os  << "CTRIA3" << ','
-            << ++elementId << ','
+            << (++elemId) << ','
             << (groupId + 1) << ','
             << (f[0] + 1) << ','
             << (f[1] + 1) << ','
@@ -56,7 +56,7 @@ inline Foam::label Foam::fileFormats::NASsurfaceFormat<Face>::writeShell
     else if (n == 4)
     {
         os  << "CQUAD4" << ','
-            << ++elementId << ','
+            << (++elemId) << ','
             << (groupId + 1) << ','
             << (f[0] + 1) << ','
             << (f[1] + 1) << ','
@@ -72,7 +72,7 @@ inline Foam::label Foam::fileFormats::NASsurfaceFormat<Face>::writeShell
             const label fp2 = f.fcIndex(fp1);
 
             os  << "CTRIA3" << ','
-                << ++elementId << ','
+                << (++elemId) << ','
                 << (groupId + 1) << ','
                 << (f[0] + 1) << ','
                 << (f[fp1] + 1) << ','
@@ -80,7 +80,7 @@ inline Foam::label Foam::fileFormats::NASsurfaceFormat<Face>::writeShell
         }
     }
 
-    return elementId;
+    return elemId;
 }
 
 
@@ -104,18 +104,18 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
     const fileName& filename
 )
 {
+    // Clear everything
     this->clear();
 
     IFstream is(filename);
     if (!is.good())
     {
         FatalErrorInFunction
-            << "Cannot read file " << filename
+            << "Cannot read file " << filename << nl
             << exit(FatalError);
     }
 
-    // Nastran index of points
-    DynamicList<label>  pointId;
+    DynamicList<label>  pointId;    // Nastran point id (1-based)
     DynamicList<point>  dynPoints;
     DynamicList<Face>   dynFaces;
     DynamicList<label>  dynZones;
@@ -140,10 +140,10 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
     // A single warning per unrecognized command
     wordHashSet unhandledCmd;
 
+    string line;
     while (is.good())
     {
         string::size_type linei = 0;  // Parsing position within current line
-        string line;
         is.getLine(line);
 
         // ANSA extension
@@ -358,7 +358,8 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
     //        << " points:" << dynPoints.size()
     //        << endl;
 
-    // transfer to normal lists
+
+    // Transfer to normal lists
     this->storedPoints().transfer(dynPoints);
 
     pointId.shrink();
@@ -375,16 +376,16 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
     // ~~~~~~~~~~~~~
     for (Face& f : dynFaces)
     {
-        forAll(f, fp)
+        for (label& vert : f)
         {
-            f[fp] = mapPointId[f[fp]];
+            vert = mapPointId[vert];
         }
     }
     pointId.clearStorage();
     mapPointId.clear();
 
 
-    // create default zone names, or from ANSA/Hypermesh information
+    // Create default zone names, or from ANSA/Hypermesh information
     List<word> names(dynSizes.size());
     forAllConstIters(zoneLookup, iter)
     {
@@ -442,7 +443,7 @@ void Foam::fileFormats::NASsurfaceFormat<Face>::write
     if (!os.good())
     {
         FatalErrorInFunction
-            << "Cannot open file for writing " << filename
+            << "Cannot write file " << filename << nl
             << exit(FatalError);
     }
 
@@ -477,26 +478,18 @@ void Foam::fileFormats::NASsurfaceFormat<Face>::write
 
     label faceIndex = 0;
     label zoneIndex = 0;
-    label elementId = 0;
+    label elemId = 0;
+
     for (const surfZone& zone : zones)
     {
-        const label nLocalFaces = zone.size();
+        for (label nLocal = zone.size(); nLocal--; ++faceIndex)
+        {
+            const label facei =
+                (useFaceMap ? faceMap[faceIndex] : faceIndex);
 
-        if (useFaceMap)
-        {
-            for (label i=0; i<nLocalFaces; ++i)
-            {
-                const Face& f = faceLst[faceMap[faceIndex++]];
-                elementId = writeShell(os, f, zoneIndex, elementId);
-            }
-        }
-        else
-        {
-            for (label i=0; i<nLocalFaces; ++i)
-            {
-                const Face& f = faceLst[faceIndex++];
-                elementId = writeShell(os, f, zoneIndex, elementId);
-            }
+            const Face& f = faceLst[facei];
+
+            elemId = writeShell(os, f, elemId, zoneIndex);
         }
 
         ++zoneIndex;

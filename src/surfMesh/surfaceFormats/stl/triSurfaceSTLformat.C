@@ -116,7 +116,7 @@ void Foam::triSurface::writeSTLASCII
     if (!os.good())
     {
         FatalErrorInFunction
-            << "Cannot open file for writing " << filename
+            << "Cannot write file " << filename << nl
             << exit(FatalError);
     }
 

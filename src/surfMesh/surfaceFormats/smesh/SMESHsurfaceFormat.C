@@ -61,7 +61,7 @@ void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
     if (!os.good())
     {
         FatalErrorInFunction
-            << "Cannot open file for writing " << filename
+            << "Cannot write file " << filename << nl
             << exit(FatalError);
     }
 
@@ -87,37 +87,22 @@ void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
 
     label faceIndex = 0;
     label zoneIndex = 0;
+
     for (const surfZone& zone : zones)
     {
-        const label nLocalFaces = zone.size();
-
-        if (useFaceMap)
+        for (label nLocal = zone.size(); nLocal--; ++faceIndex)
         {
-            for (label i=0; i<nLocalFaces; ++i)
-            {
-                const Face& f = faceLst[faceMap[faceIndex++]];
+            const label facei =
+                (useFaceMap ? faceMap[faceIndex] : faceIndex);
 
-                os << f.size();
-                for (const label verti : f)
-                {
-                    os << ' ' << verti;
-                }
-                os << ' ' << zoneIndex << nl;
-            }
-        }
-        else
-        {
-            for (label i=0; i<nLocalFaces; ++i)
-            {
-                const Face& f = faceLst[faceIndex++];
+            const Face& f = faceLst[facei];
 
-                os << f.size();
-                for (const label verti : f)
-                {
-                    os << ' ' << verti;
-                }
-                os << ' ' << zoneIndex << nl;
+            os << f.size();
+            for (const label verti : f)
+            {
+                os << ' ' << verti;
             }
+            os << ' ' << zoneIndex << nl;
         }
 
         ++zoneIndex;

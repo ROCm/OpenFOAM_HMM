@@ -26,23 +26,22 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "sampledTriSurfaceMesh.H"
+#include "sampledMeshedSurface.H"
 #include "meshSearch.H"
 #include "Tuple2.H"
 #include "globalIndex.H"
 #include "treeDataCell.H"
 #include "treeDataFace.H"
 #include "meshTools.H"
-
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const Foam::Enum
 <
-    Foam::sampledTriSurfaceMesh::samplingSource
+    Foam::sampledMeshedSurface::samplingSource
 >
-Foam::sampledTriSurfaceMesh::samplingSourceNames_
+Foam::sampledMeshedSurface::samplingSourceNames_
 ({
     { samplingSource::cells, "cells" },
     { samplingSource::insideCells, "insideCells" },
@@ -52,12 +51,22 @@ Foam::sampledTriSurfaceMesh::samplingSourceNames_
 
 namespace Foam
 {
-    defineTypeNameAndDebug(sampledTriSurfaceMesh, 0);
-    addToRunTimeSelectionTable
+    defineTypeNameAndDebug(sampledMeshedSurface, 0);
+    // Use shorter name only
+    addNamedToRunTimeSelectionTable
     (
         sampledSurface,
-        sampledTriSurfaceMesh,
-        word
+        sampledMeshedSurface,
+        word,
+        meshedSurface
+    );
+    // Compatibility name (1912)
+    addNamedToRunTimeSelectionTable
+    (
+        sampledSurface,
+        sampledMeshedSurface,
+        word,
+        sampledTriSurfaceMesh
     );
 
     //- Private class for finding nearest
@@ -78,53 +87,90 @@ namespace Foam
             }
         }
     };
+
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// The IOobject for reading
+inline static IOobject selectReadIO(const word& name, const Time& runTime)
+{
+    return IOobject
+    (
+        name,
+        runTime.constant(),     // instance
+        "triSurface",           // local
+        runTime,                // registry
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE,
+        false   // no register
+    );
 }
 
+} // End namespace Foam
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-void Foam::sampledTriSurfaceMesh::setZoneMap
-(
-    const surfZoneList& zoneLst,
-    labelList& zoneIds
-)
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::sampledMeshedSurface::setZoneMap()
 {
-    label sz = 0;
-    for (const surfZone& zn : zoneLst)
+    // Ensure zoneIds_ are correctly populated
+
+    const meshedSurface& s = static_cast<const meshedSurface&>(*this);
+
+    const auto& zones = s.surfZones();
+
+    zoneIds_.resize(s.size());
+
+    // Trivial case
+    if (zoneIds_.empty() || zones.size() <= 1)
     {
-        sz += zn.size();
+        zoneIds_ = 0;
+        return;
     }
 
-    zoneIds.setSize(sz);
-    forAll(zoneLst, zonei)
+
+    label beg = 0;
+
+    forAll(zones, zonei)
     {
-        const surfZone& zn = zoneLst[zonei];
+        const label len = min(zones[zonei].size(), zoneIds_.size() - beg);
 
         // Assign sub-zone Ids
-        SubList<label>(zoneIds, zn.size(), zn.start()) = zonei;
+        SubList<label>(zoneIds_, len, beg) = zonei;
+
+        beg += len;
+    }
+
+    // Anything remaining? Should not happen
+    {
+        const label len = (zoneIds_.size() - beg);
+
+        if (len > 0)
+        {
+            SubList<label>(zoneIds_, len, beg) = max(0, zones.size()-1);
+        }
     }
 }
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
+bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
 {
+    // Global numbering for cells/faces
+    // - only used to uniquely identify local elements
+    globalIndex globalCells(onBoundary() ? mesh().nFaces() : mesh().nCells());
+
     // Find the cells the triangles of the surface are in.
     // Does approximation by looking at the face centres only
     const pointField& fc = surface_.faceCentres();
 
-    List<nearInfo> nearest(fc.size());
-
-    // Global numbering for cells/faces - only used to uniquely identify local
-    // elements
-    globalIndex globalCells(onBoundary() ? mesh().nFaces() : mesh().nCells());
-
-    for (nearInfo& near : nearest)
-    {
-        near.first()  = GREAT;
-        near.second() = labelMax;
-    }
+    List<nearInfo> nearest(fc.size(), nearInfo(GREAT, labelMax));
 
     if (sampleSource_ == cells)
     {
@@ -132,17 +178,16 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
 
         const indexedOctree<treeDataCell>& cellTree = meshSearcher.cellTree();
 
-        forAll(fc, triI)
+        forAll(fc, facei)
         {
-            pointIndexHit nearInfo = cellTree.findNearest
-            (
-                fc[triI],
-                sqr(GREAT)
-            );
-            if (nearInfo.hit())
+            const point& pt = fc[facei];
+
+            pointIndexHit info = cellTree.findNearest(pt, sqr(GREAT));
+
+            if (info.hit())
             {
-                nearest[triI].first()  = magSqr(nearInfo.hitPoint()-fc[triI]);
-                nearest[triI].second() = globalCells.toGlobal(nearInfo.index());
+                nearest[facei].first()  = magSqr(info.hitPoint()-pt);
+                nearest[facei].second() = globalCells.toGlobal(info.index());
             }
         }
     }
@@ -150,17 +195,19 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
     {
         // Search for cell containing point
 
-        const indexedOctree<treeDataCell>& cellTree = meshSearcher.cellTree();
+        const auto& cellTree = meshSearcher.cellTree();
 
-        forAll(fc, triI)
+        forAll(fc, facei)
         {
-            if (cellTree.bb().contains(fc[triI]))
+            const point& pt = fc[facei];
+
+            if (cellTree.bb().contains(pt))
             {
-                const label index = cellTree.findInside(fc[triI]);
+                const label index = cellTree.findInside(pt);
                 if (index != -1)
                 {
-                    nearest[triI].first()  = 0.0;
-                    nearest[triI].second() = globalCells.toGlobal(index);
+                    nearest[facei].first()  = 0;
+                    nearest[facei].second() = globalCells.toGlobal(index);
                 }
             }
         }
@@ -170,23 +217,22 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
         // Search for nearest boundaryFace
 
         //- Search on all non-coupled boundary faces
-        const indexedOctree<treeDataFace>& bTree =
-            meshSearcher.nonCoupledBoundaryTree();
+        const auto& bndTree = meshSearcher.nonCoupledBoundaryTree();
 
-        forAll(fc, triI)
+        forAll(fc, facei)
         {
-            pointIndexHit nearInfo = bTree.findNearest
-            (
-                fc[triI],
-                sqr(GREAT)
-            );
-            if (nearInfo.hit())
+            const point& pt = fc[facei];
+
+            pointIndexHit info = bndTree.findNearest(pt, sqr(GREAT));
+
+            if (info.hit())
             {
-                nearest[triI].first()  = magSqr(nearInfo.hitPoint()-fc[triI]);
-                nearest[triI].second() = globalCells.toGlobal
-                (
-                    bTree.shapes().faceLabels()[nearInfo.index()]
-                );
+                nearest[facei].first()  = magSqr(info.hitPoint()-pt);
+                nearest[facei].second() =
+                    globalCells.toGlobal
+                    (
+                        bndTree.shapes().faceLabels()[info.index()]
+                    );
             }
         }
     }
@@ -200,20 +246,20 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
 
     labelList cellOrFaceLabels(fc.size(), -1);
 
-    label nFound = 0;
-    forAll(nearest, triI)
+    bitSet facesToSubset(fc.size());
+
+    forAll(nearest, facei)
     {
-        if (nearest[triI].second() == labelMax)
+        const label index = nearest[facei].second();
+
+        if (index == labelMax)
         {
             // Not found on any processor. How to map?
         }
-        else if (globalCells.isLocal(nearest[triI].second()))
+        else if (globalCells.isLocal(index))
         {
-            cellOrFaceLabels[triI] = globalCells.toLocal
-            (
-                nearest[triI].second()
-            );
-            nFound++;
+            cellOrFaceLabels[facei] = globalCells.toLocal(index);
+            facesToSubset.set(facei);
         }
     }
 
@@ -221,202 +267,34 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
     if (debug)
     {
         Pout<< "Local out of faces:" << cellOrFaceLabels.size()
-            << " keeping:" << nFound << endl;
-    }
-
-    // Now subset the surface. Do not use triSurface::subsetMesh since requires
-    // original surface to be in compact numbering.
-
-    const triSurface& s = surface_;
-
-    // Compact to original triangle
-    labelList faceMap(s.size());
-    // Compact to original points
-    labelList pointMap(s.points().size());
-    // From original point to compact points
-    labelList reversePointMap(s.points().size(), -1);
-
-    // Handle region-wise sorting (makes things slightly more complicated)
-    zoneIds_.setSize(s.size(), -1);
-
-    // Better not to use triSurface::sortedZones here,
-    // since we'll sort ourselves
-
-    // Get zone/region sizes used, store under the original region Id
-    Map<label> zoneSizes;
-
-    // Recover region names from the input surface
-    Map<word> zoneNames;
-    {
-        const geometricSurfacePatchList& patches = s.patches();
-
-        forAll(patches, patchi)
-        {
-            zoneNames.set
-            (
-                patchi,
-                (
-                    patches[patchi].name().empty()
-                  ? geometricSurfacePatch::defaultName(patchi)
-                  : patches[patchi].name()
-                )
-            );
-
-            zoneSizes.set(patchi, 0);
-        }
+            << " keeping:" << facesToSubset.count() << endl;
     }
 
 
-    {
-        label newPointi = 0;
-        label newFacei = 0;
+    // Subset the surface
+    meshedSurface& s = static_cast<meshedSurface&>(*this);
 
-        forAll(s, facei)
-        {
-            if (cellOrFaceLabels[facei] != -1)
-            {
-                const triSurface::FaceType& f = s[facei];
-                const label regionid = f.region();
+    labelList pointMap;
+    labelList faceMap;
 
-                auto fnd = zoneSizes.find(regionid);
-                if (fnd.found())
-                {
-                    ++(*fnd);
-                }
-                else
-                {
-                    // This shouldn't happen
-                    zoneSizes.insert(regionid, 1);
-                    zoneNames.set
-                    (
-                        regionid,
-                        geometricSurfacePatch::defaultName(regionid)
-                    );
-                }
+    s = surface_.subsetMesh(facesToSubset, pointMap, faceMap);
 
-                // Store new faces compact
-                faceMap[newFacei] = facei;
-                zoneIds_[newFacei] = regionid;
-                ++newFacei;
+    // Ensure zoneIds_ are indeed correct
+    setZoneMap();
 
-                // Renumber face points
-                for (const label labi : f)
-                {
-                    if (reversePointMap[labi] == -1)
-                    {
-                        pointMap[newPointi] = labi;
-                        reversePointMap[labi] = newPointi++;
-                    }
-                }
-            }
-        }
-
-        // Trim
-        faceMap.setSize(newFacei);
-        zoneIds_.setSize(newFacei);
-        pointMap.setSize(newPointi);
-    }
-
-
-    // Assign start/size (and name) to the newZones
-    // re-use the lookup to map (zoneId => zoneI)
-    surfZoneList zoneLst(zoneSizes.size());
-    label start = 0;
-    label zoneI = 0;
-    forAllIters(zoneSizes, iter)
-    {
-        // No negative regionids, so Map<label> usually sorts properly
-        const label regionid = iter.key();
-
-        word name;
-        auto fnd = zoneNames.cfind(regionid);
-        if (fnd.found())
-        {
-            name = *fnd;
-        }
-        if (name.empty())
-        {
-            name = geometricSurfacePatch::defaultName(regionid);
-        }
-
-        zoneLst[zoneI] = surfZone
-        (
-            name,
-            0,           // initialize with zero size
-            start,
-            zoneI
-        );
-
-        // Adjust start for the next zone and save (zoneId => zoneI) mapping
-        start += iter();
-        iter() = zoneI++;
-    }
-
-
-    // At this stage:
-    // - faceMap to map the (unsorted) compact to original triangle
-    // - zoneIds for the next sorting
-    // - zoneSizes contains region -> count information
-
-    // Rebuild the faceMap for the sorted order
-    labelList sortedFaceMap(faceMap.size());
-
-    forAll(zoneIds_, facei)
-    {
-        const label zonei = zoneIds_[facei];
-        label sortedFacei = zoneLst[zonei].start() + zoneLst[zonei].size()++;
-        sortedFaceMap[sortedFacei] = faceMap[facei];
-    }
-
-    // zoneIds are now simply flat values
-    setZoneMap(zoneLst, zoneIds_);
-
-    // Replace the faceMap with the properly sorted face map
-    faceMap.transfer(sortedFaceMap);
-
+    // This is currently only partially useful
     if (keepIds_)
     {
         originalIds_ = faceMap;
     }
+    else
+    {
+        originalIds_.clear();
+    }
+
 
     // Subset cellOrFaceLabels (for compact faces)
     cellOrFaceLabels = labelUIndList(cellOrFaceLabels, faceMap)();
-
-    // Store any face per point (without using pointFaces())
-    labelList pointToFace(pointMap.size());
-
-    // Create faces and points for subsetted surface
-    faceList& surfFaces = this->storedFaces();
-    surfFaces.setSize(faceMap.size());
-
-    this->storedZones().transfer(zoneLst);
-
-    forAll(faceMap, facei)
-    {
-        const labelledTri& origF = s[faceMap[facei]];
-        face& f = surfFaces[facei];
-
-        f = triFace
-        (
-            reversePointMap[origF[0]],
-            reversePointMap[origF[1]],
-            reversePointMap[origF[2]]
-        );
-
-        for (const label labi : f)
-        {
-            pointToFace[labi] = facei;
-        }
-    }
-
-    this->storedPoints() = pointField(s.points(), pointMap);
-
-    if (debug)
-    {
-        print(Pout);
-        Pout<< endl;
-    }
-
 
 
     // Collect the samplePoints and sampleElements
@@ -424,8 +302,24 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
 
     if (sampledSurface::interpolate())
     {
-        samplePoints_.setSize(pointMap.size());
-        sampleElements_.setSize(pointMap.size(), -1);
+        // With point interpolation
+
+        samplePoints_.resize(pointMap.size());
+        sampleElements_.resize(pointMap.size(), -1);
+
+        // Store any face per point (without using pointFaces())
+        labelList pointToFace(std::move(pointMap));
+
+        forAll(s, facei)
+        {
+            const face& f = s[facei];
+
+            for (const label labi : f)
+            {
+                pointToFace[labi] = facei;
+            }
+        }
+
 
         if (sampleSource_ == cells)
         {
@@ -435,7 +329,9 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
             forAll(points(), pointi)
             {
                 const point& pt = points()[pointi];
-                label celli = cellOrFaceLabels[pointToFace[pointi]];
+
+                const label celli = cellOrFaceLabels[pointToFace[pointi]];
+
                 sampleElements_[pointi] = celli;
 
                 // Check if point inside cell
@@ -454,14 +350,15 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
                 else
                 {
                     // Find nearest point on faces of cell
-                    const cell& cFaces = mesh().cells()[celli];
 
                     scalar minDistSqr = VGREAT;
 
-                    forAll(cFaces, i)
+                    for (const label facei : mesh().cells()[celli])
                     {
-                        const face& f = mesh().faces()[cFaces[i]];
+                        const face& f = mesh().faces()[facei];
+
                         pointHit info = f.nearestPoint(pt, mesh().points());
+
                         if (info.distance() < minDistSqr)
                         {
                             minDistSqr = info.distance();
@@ -479,7 +376,9 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
             forAll(points(), pointi)
             {
                 const point& pt = points()[pointi];
-                label celli = cellOrFaceLabels[pointToFace[pointi]];
+
+                const label celli = cellOrFaceLabels[pointToFace[pointi]];
+
                 sampleElements_[pointi] = celli;
                 samplePoints_[pointi] = pt;
             }
@@ -493,7 +392,9 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
             forAll(points(), pointi)
             {
                 const point& pt = points()[pointi];
-                label facei = cellOrFaceLabels[pointToFace[pointi]];
+
+                const label facei = cellOrFaceLabels[pointToFace[pointi]];
+
                 sampleElements_[pointi] = facei;
                 samplePoints_[pointi] = mesh().faces()[facei].nearestPoint
                 (
@@ -573,7 +474,7 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
+Foam::sampledMeshedSurface::sampledMeshedSurface
 (
     const word& name,
     const polyMesh& mesh,
@@ -583,18 +484,11 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
 :
     sampledSurface(name, mesh),
     MeshStorage(),
+    surfaceName_(surfaceName),
     surface_
     (
-        IOobject
-        (
-            surfaceName,
-            mesh.time().constant(), // instance
-            "triSurface",           // local
-            mesh.time(),            // registry
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        )
+        selectReadIO(surfaceName, mesh.time()),
+        dictionary::null
     ),
     sampleSource_(sampleSource),
     needsUpdate_(true),
@@ -606,7 +500,7 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
 {}
 
 
-Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
+Foam::sampledMeshedSurface::sampledMeshedSurface
 (
     const word& name,
     const polyMesh& mesh,
@@ -615,18 +509,17 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
 :
     sampledSurface(name, mesh, dict),
     MeshStorage(),
+    surfaceName_
+    (
+        meshedSurface::findFile
+        (
+            selectReadIO(dict.get<word>("surface"), mesh.time()),
+            dict
+        ).name()
+    ),
     surface_
     (
-        IOobject
-        (
-            dict.get<word>("surface"),
-            mesh.time().constant(), // instance
-            "triSurface",           // local
-            mesh.time(),            // registry
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
+        selectReadIO(dict.get<word>("surface"), mesh.time()),
         dict
     ),
     sampleSource_(samplingSourceNames_.get("source", dict)),
@@ -636,58 +529,76 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
     zoneIds_(),
     sampleElements_(),
     samplePoints_()
-{}
+{
+    wordRes includePatches;
+    dict.readIfPresent("patches", includePatches);
+    includePatches.uniq();
 
+    // Could also shift this to the reader itself,
+    // but not yet necessary.
 
-Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
-(
-    const word& name,
-    const polyMesh& mesh,
-    const triSurface& surface,
-    const word& sampleSourceName
-)
-:
-    sampledSurface(name, mesh),
-    MeshStorage(),
-    surface_
-    (
-        IOobject
+    if (!includePatches.empty())
+    {
+        Info<< "Subsetting surface " << surfaceName_
+            << " to patches: " << flatOutput(includePatches) << nl;
+
+        const surfZoneList& zones = surface_.surfZones();
+
+        const labelList zoneIndices
         (
-            name,
-            mesh.time().constant(), // instance
-            "triSurface",           // local
-            mesh.time(),            // registry
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        surface
-    ),
-    sampleSource_(samplingSourceNames_[sampleSourceName]),
-    needsUpdate_(true),
-    keepIds_(false),
-    originalIds_(),
-    zoneIds_(),
-    sampleElements_(),
-    samplePoints_()
-{}
+            stringListOps::findMatching
+            (
+                zones,
+                includePatches,
+                wordRes(),
+                nameOp<surfZone>()
+            )
+        );
 
+        // Faces to subset
+        bitSet includeMap(surface_.size());
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+        for (const label zonei : zoneIndices)
+        {
+            const surfZone& zn = zones[zonei];
+            includeMap.set(zn.range());
+        }
 
-Foam::sampledTriSurfaceMesh::~sampledTriSurfaceMesh()
-{}
+        if (includeMap.none())
+        {
+            WarningInFunction
+                << "Patch selection results in an empty surface"
+                << " - ignoring" << nl;
+        }
+        else if (!includeMap.all())
+        {
+            meshedSurface subSurf(surface_.subsetMesh(includeMap));
+
+            if (subSurf.empty())
+            {
+                WarningInFunction
+                    << "Bad surface subset (empty)"
+                    << " - skip and hope for the best" << nl;
+            }
+            else
+            {
+                // Replace
+                surface_.transfer(subSurf);
+            }
+        }
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::sampledTriSurfaceMesh::needsUpdate() const
+bool Foam::sampledMeshedSurface::needsUpdate() const
 {
     return needsUpdate_;
 }
 
 
-bool Foam::sampledTriSurfaceMesh::expire()
+bool Foam::sampledMeshedSurface::expire()
 {
     // already marked as expired
     if (needsUpdate_)
@@ -700,7 +611,6 @@ bool Foam::sampledTriSurfaceMesh::expire()
     zoneIds_.clear();
 
     originalIds_.clear();
-    boundaryTreePtr_.clear();
     sampleElements_.clear();
     samplePoints_.clear();
 
@@ -709,7 +619,7 @@ bool Foam::sampledTriSurfaceMesh::expire()
 }
 
 
-bool Foam::sampledTriSurfaceMesh::update()
+bool Foam::sampledMeshedSurface::update()
 {
     if (!needsUpdate_)
     {
@@ -717,11 +627,7 @@ bool Foam::sampledTriSurfaceMesh::update()
     }
 
     // Calculate surface and mesh overlap bounding box
-    treeBoundBox bb
-    (
-        surface_.triSurface::points(),
-        surface_.triSurface::meshPoints()
-    );
+    treeBoundBox bb(surface_.points(), surface_.meshPoints());
 
     // Check for overlap with (global!) mesh bb
     const bool intersect = bb.intersect(mesh().bounds());
@@ -732,7 +638,7 @@ bool Foam::sampledTriSurfaceMesh::update()
         // bounding box so we don't get any 'invalid bounding box' errors.
 
         WarningInFunction
-            << "Surface " << surface_.searchableSurface::name()
+            << "Surface " << surfaceName_
             << " does not overlap bounding box of mesh " << mesh().bounds()
             << endl;
 
@@ -759,7 +665,7 @@ bool Foam::sampledTriSurfaceMesh::update()
 }
 
 
-bool Foam::sampledTriSurfaceMesh::update(const treeBoundBox& bb)
+bool Foam::sampledMeshedSurface::update(const treeBoundBox& bb)
 {
     if (!needsUpdate_)
     {
@@ -773,7 +679,7 @@ bool Foam::sampledTriSurfaceMesh::update(const treeBoundBox& bb)
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::sampledTriSurfaceMesh::sample
+Foam::tmp<Foam::scalarField> Foam::sampledMeshedSurface::sample
 (
     const interpolation<scalar>& sampler
 ) const
@@ -782,7 +688,7 @@ Foam::tmp<Foam::scalarField> Foam::sampledTriSurfaceMesh::sample
 }
 
 
-Foam::tmp<Foam::vectorField> Foam::sampledTriSurfaceMesh::sample
+Foam::tmp<Foam::vectorField> Foam::sampledMeshedSurface::sample
 (
     const interpolation<vector>& sampler
 ) const
@@ -791,7 +697,7 @@ Foam::tmp<Foam::vectorField> Foam::sampledTriSurfaceMesh::sample
 }
 
 
-Foam::tmp<Foam::sphericalTensorField> Foam::sampledTriSurfaceMesh::sample
+Foam::tmp<Foam::sphericalTensorField> Foam::sampledMeshedSurface::sample
 (
     const interpolation<sphericalTensor>& sampler
 ) const
@@ -800,7 +706,7 @@ Foam::tmp<Foam::sphericalTensorField> Foam::sampledTriSurfaceMesh::sample
 }
 
 
-Foam::tmp<Foam::symmTensorField> Foam::sampledTriSurfaceMesh::sample
+Foam::tmp<Foam::symmTensorField> Foam::sampledMeshedSurface::sample
 (
     const interpolation<symmTensor>& sampler
 ) const
@@ -809,7 +715,7 @@ Foam::tmp<Foam::symmTensorField> Foam::sampledTriSurfaceMesh::sample
 }
 
 
-Foam::tmp<Foam::tensorField> Foam::sampledTriSurfaceMesh::sample
+Foam::tmp<Foam::tensorField> Foam::sampledMeshedSurface::sample
 (
     const interpolation<tensor>& sampler
 ) const
@@ -818,7 +724,7 @@ Foam::tmp<Foam::tensorField> Foam::sampledTriSurfaceMesh::sample
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::sampledTriSurfaceMesh::interpolate
+Foam::tmp<Foam::scalarField> Foam::sampledMeshedSurface::interpolate
 (
     const interpolation<scalar>& interpolator
 ) const
@@ -827,7 +733,7 @@ Foam::tmp<Foam::scalarField> Foam::sampledTriSurfaceMesh::interpolate
 }
 
 
-Foam::tmp<Foam::vectorField> Foam::sampledTriSurfaceMesh::interpolate
+Foam::tmp<Foam::vectorField> Foam::sampledMeshedSurface::interpolate
 (
     const interpolation<vector>& interpolator
 ) const
@@ -835,7 +741,7 @@ Foam::tmp<Foam::vectorField> Foam::sampledTriSurfaceMesh::interpolate
     return sampleOnPoints(interpolator);
 }
 
-Foam::tmp<Foam::sphericalTensorField> Foam::sampledTriSurfaceMesh::interpolate
+Foam::tmp<Foam::sphericalTensorField> Foam::sampledMeshedSurface::interpolate
 (
     const interpolation<sphericalTensor>& interpolator
 ) const
@@ -844,7 +750,7 @@ Foam::tmp<Foam::sphericalTensorField> Foam::sampledTriSurfaceMesh::interpolate
 }
 
 
-Foam::tmp<Foam::symmTensorField> Foam::sampledTriSurfaceMesh::interpolate
+Foam::tmp<Foam::symmTensorField> Foam::sampledMeshedSurface::interpolate
 (
     const interpolation<symmTensor>& interpolator
 ) const
@@ -853,7 +759,7 @@ Foam::tmp<Foam::symmTensorField> Foam::sampledTriSurfaceMesh::interpolate
 }
 
 
-Foam::tmp<Foam::tensorField> Foam::sampledTriSurfaceMesh::interpolate
+Foam::tmp<Foam::tensorField> Foam::sampledMeshedSurface::interpolate
 (
     const interpolation<tensor>& interpolator
 ) const
@@ -862,10 +768,10 @@ Foam::tmp<Foam::tensorField> Foam::sampledTriSurfaceMesh::interpolate
 }
 
 
-void Foam::sampledTriSurfaceMesh::print(Ostream& os) const
+void Foam::sampledMeshedSurface::print(Ostream& os) const
 {
-    os  << "sampledTriSurfaceMesh: " << name() << " :"
-        << " surface:" << surface_.objectRegistry::name()
+    os  << "meshedSurface: " << name() << " :"
+        << " surface:" << surfaceName_
         << " faces:"   << faces().size()
         << " points:"  << points().size()
         << " zoneids:" << zoneIds().size();
