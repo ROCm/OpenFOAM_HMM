@@ -11,7 +11,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 type            subtract;
-libs            ("libfieldFunctionObjects.so");
+libs            (fieldFunctionObjects);
 
 fields          (<field names>);
 

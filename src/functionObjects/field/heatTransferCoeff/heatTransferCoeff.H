@@ -30,21 +30,26 @@ Group
     grpFieldFunctionObjects
 
 Description
-    This function object calculates and writes the heat transfer coefficient
-    as a volScalarField for a set of patches.
+    Computes the heat transfer coefficient as a \c volScalarField
+    for a set of patches.
 
     The field is stored on the mesh database so that it can be retrieved and
-    used for other applications.  Heat transfer coefficient, htc [W/m2/K]
-    can be evaluated using one of the following modes:
-    - ReynoldsAnalogy: Reynold's analogy
-    - localReferenceTemperature: local reference temperature
-    - fixedReferenceTemperature: specified reference temperature
+    used for other applications.
+
+    Operands:
+    \table
+      Operand           | Type           | Location
+      input             | -              | -
+      output file       | -              | -
+      output field      | volScalarField | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
 
 Usage
-    Example usage for mode 'ReynoldsAnalogy' for incompressible case
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
-    htc
+    heatTransferCoeff1
     {
+        // Mandatory entries (unmodifiable)
         type        heatTransferCoeff;
         libs        (fieldFunctionObjects);
 
@@ -60,7 +65,27 @@ Usage
     }
     \endverbatim
 
-    Example usage for mode 'ReynoldsAnalogy' for compressible case
+    Example usage for mode \c ReynoldsAnalogy for incompressible case:
+    \verbatim
+    heatTransferCoeff1
+    {
+        // Mandatory entries (unmodifiable)
+        type        heatTransferCoeff;
+        libs        (fieldFunctionObjects);
+
+        field       T;
+        patches     ("walls.*");
+
+        htcModel    ReynoldsAnalogy;
+        UInf        (20 0 0);
+        Cp          CpInf;
+        CpInf       1000;
+        rho         rhoInf;
+        rhoInf      1.2;
+    }
+    \endverbatim
+
+    Example usage for mode \c ReynoldsAnalogy for compressible case:
     \verbatim
     htc
     {
@@ -75,7 +100,7 @@ Usage
     }
     \endverbatim
 
-    Example usage for mode 'localReferenceTemperature' for compressible case
+    Example usage for mode \c localReferenceTemperature for compressible case:
     \verbatim
     htc
     {
@@ -84,11 +109,11 @@ Usage
 
         field       T;
         patches     ("walls.*");
-        htcModel    local;
+        htcModel    localReferenceTemperature;
     }
     \endverbatim
 
-    Example usage for mode 'fixedReferenceTemperature' for compressible case
+    Example usage for mode \c fixedReferenceTemperature for compressible case:
     \verbatim
     htc
     {
@@ -97,15 +122,30 @@ Usage
 
         field       T;
         patches     ("walls.*");
-        htcModel    local;
+        htcModel    fixedReferenceTemperature;
         TRef        300;
     }
     \endverbatim
 
+    Options for the \c htcModel entry:
+    \verbatim
+        ReynoldsAnalogy           | Reynold's analogy
+        localReferenceTemperature | Local reference temperature
+        fixedReferenceTemperature | Specified reference temperature
+    \endverbatim
+
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link fieldExpression.H \endlink
+
+    Usage by the \c postProcess utility is not available.
+
 See also
-    Foam::functionObjects::fieldExpression
-    Foam::heatTransferCoeffModels::fixedReferenceTemperature
-    Foam::heatTransferCoeffModels::localReferenceTemperature
+    - Foam::functionObject
+    - Foam::functionObjects::fieldExpression
+    - Foam::heatTransferCoeffModels::fixedReferenceTemperature
+    - Foam::heatTransferCoeffModels::localReferenceTemperature
+    - ExtendedCodeGuide::functionObjects::field::heatTransferCoeff
 
 SourceFiles
     heatTransferCoeff.C
@@ -144,17 +184,9 @@ class heatTransferCoeff
 
 protected:
 
-    // Protected Member Functions
-
-        //- Calculate the heat transfer coefficient field
-        //  \return true on success
+        //- Calculate the heat transfer coefficient field and return true
+        //- if successful
         virtual bool calc();
-
-        //- No copy construct
-        heatTransferCoeff(const heatTransferCoeff&) = delete;
-
-        //- No copy assignment
-        void operator=(const heatTransferCoeff&) = delete;
 
 
 public:
@@ -174,9 +206,15 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        heatTransferCoeff(const heatTransferCoeff&) = delete;
+
+        //- No copy assignment
+        void operator=(const heatTransferCoeff&) = delete;
+
 
     //- Destructor
-    virtual ~heatTransferCoeff();
+    virtual ~heatTransferCoeff() = default;
 
 
     // Member Functions

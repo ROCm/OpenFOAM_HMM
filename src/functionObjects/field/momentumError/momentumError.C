@@ -25,18 +25,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-
 #include "momentumError.H"
-
 #include "fvcDiv.H"
 #include "fvcGrad.H"
 #include "fvcLaplacian.H"
-
 #include "turbulenceModel.H"
 #include "turbulentTransportModel.H"
 #include "turbulentFluidThermoModel.H"
 #include "addToRunTimeSelectionTable.H"
-
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -212,5 +208,6 @@ bool Foam::functionObjects::momentumError::write()
 
     return true;
 }
+
 
 // ************************************************************************* //

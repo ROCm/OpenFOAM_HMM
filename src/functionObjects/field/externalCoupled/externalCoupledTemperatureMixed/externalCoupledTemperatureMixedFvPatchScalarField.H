@@ -95,7 +95,7 @@ Usage
         Property | Description                              | Required | Default
         outputTemperature | Output temperature: fluid/wall  | yes |
         htcRefTemperature | Fluid temperature for htc: cell/user  | no | cell
-        Tref     | Reference temperature [K] for htc        | partly |
+        Tref     | Reference temperature [K] for htc        | conditional |
     \endtable
 
 SeeAlso

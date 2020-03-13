@@ -30,54 +30,71 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Calculates the acoustic pressure based on Curle's analogy.
+    Computes the acoustic pressure based on Curle's analogy.
 
     Curle's analogy is implemented as:
 
     \f[
-        p' = \frac{1}{4 \pi c_0}\frac{\vec d}{|\vec d|^2}\frac{d(F)}{d(t)}
+        p' = \frac{1}{4 \pi c_0}\frac{\vec d}{|\vec d|^2}\cdot\frac{d\vec F}{dt}
     \f]
-
 
     where
     \vartable
-        p'          | Curle's acoustic pressure [Pa] or [Pa (m3/rho)]
-        c_0         | Reference speed of sound [m/s]
-        \vec d      | Distance vector to observer locations [m]
-        F           | Force [N] or [N (m3/rho)]
+      p'        | Curle's acoustic pressure     [Pa] or [Pa \f$(m^3/\rho)\f$]
+      c_0       | Reference speed of sound              [m/s]
+      \vec d    | Distance vector to observer locations [m]
+      \vec F    | Force                         [N] or [N (\f$m^3/\rho\f$)]
     \endvartable
 
-Note
-    Only the normal-pressure force is included in the force calculation
+    Operands:
+    \table
+      Operand           | Type           | Location
+      input             | volScalarField | $FOAM_CASE/\<time\>/\<inpField\>
+      output file       | -              | -
+      output field      | volScalarField | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
 
+Note
+    Only the normal-pressure force is included in the force calculation.
 
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     Curle1
     {
-        type        Curle;
-        libs        (fieldFunctionObjects);
+        // Mandatory entries (unmodifiable)
+        type            Curle;
+        libs            (fieldFunctionObjects);
+
+        // Mandatory entries (runtime modifiable)
+        patches         (<patch1> <patch2> ... <patchN>)
+        c0              343;
+
+        // Optional (inherited) entries
         ...
-        patches     (surface1 surface2);
-        c0          330;
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description                  | Required | Default value
-        type         | Type name: Curle             | yes      |
-        field        | Pressure field name          | no       | p
-        result       | Acoustic pressure field name | no       | Curle
-        patches      | Sound generation patch names | yes      |
-        c0           | Reference speed of sound     | yes      |
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: Curle                   | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+      patches      | Names of the operand patches       | wordList | yes | -
+      c0           | Reference speed of sound [m/s]     | scalar | yes | -
     \endtable
 
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link fieldExpression.H \endlink
+
+    Usage by the \c postProcess utility is not available.
 
 See also
-  - Foam::functionObjects::fieldExpression
-  - Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObjects::fieldExpression
+    - ExtendedCodeGuide::functionObjects::field::Curle
 
 SourceFiles
     Curle.C
@@ -122,6 +139,7 @@ class Curle
 
 protected:
 
+<<<<<<< HEAD
     // Protected Member Functions
 
         //- Calculate acoustic pressure field and return true if successful
@@ -133,6 +151,11 @@ protected:
         //- No copy assignment
         void operator=(const Curle&) = delete;
 
+=======
+        //- Calculate the acoustic pressure field and return true if successful
+        virtual bool calc();
+
+>>>>>>> DOC: elaborate the usage of function objects
 
 public:
 
@@ -149,6 +172,12 @@ public:
             const Time& runTime,
             const dictionary& dict
         );
+
+        //- No copy construct
+        Curle(const Curle&) = delete;
+
+        //- No copy assignment
+        void operator=(const Curle&) = delete;
 
 
     //- Destructor

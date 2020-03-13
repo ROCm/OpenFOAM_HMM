@@ -54,11 +54,11 @@ Foam::functionObjects::fieldValue::fieldValue
 :
     fvMeshFunctionObject(name, runTime, dict),
     writeFile(obr_, name, valueType, dict),
+    writeFields_(false),
+    regionName_(word::null),
     scaleFactor_(1.0),
     dict_(dict),
-    regionName_(word::null),
-    fields_(),
-    writeFields_(false)
+    fields_()
 {
     read(dict);
 }
@@ -74,20 +74,14 @@ Foam::functionObjects::fieldValue::fieldValue
 :
     fvMeshFunctionObject(name, obr, dict),
     writeFile(obr_, name, valueType, dict),
+    writeFields_(false),
+    regionName_(word::null),
     scaleFactor_(1.0),
     dict_(dict),
-    regionName_(word::null),
-    fields_(),
-    writeFields_(false)
+    fields_()
 {
     read(dict);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::fieldValue::~fieldValue()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -102,9 +96,9 @@ bool Foam::functionObjects::fieldValue::read(const dictionary& dict)
     fvMeshFunctionObject::read(dict);
     writeFile::read(dict);
 
-    dict.readEntry("fields", fields_);
     dict.readEntry("writeFields", writeFields_);
-    scaleFactor_ = dict.getOrDefault<scalar>("scaleFactor", 1);
+    scaleFactor_ = dict.getOrDefault<scalar>("scaleFactor", 1.0);
+    dict.readEntry("fields", fields_);
 
     return true;
 }

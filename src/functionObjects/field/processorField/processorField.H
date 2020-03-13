@@ -32,28 +32,49 @@ Group
 
 Description
     Writes a scalar field whose value is the local processor ID.  The output
-    field name is 'processorID'.
+    field name is \c processorID.
+
+    Operands:
+    \table
+      Operand        | Type           | Location
+      input          | volScalarField | $FOAM_CASE/\<time\>/\<inpField\>
+      output file    | -              | -
+      output field   | volScalarField | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
 
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     processorField1
     {
+        // Mandatory entries (unmodifiable)
         type        processorField;
         libs        (fieldFunctionObjects);
+
+        // Optional (inherited) entries
         ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description             | Required    | Default value
-        type         | type name: processorField | yes       |
-        log          | Log to standard output  | no          | yes
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: processorField          | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
     \endtable
 
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+
+    Minimal example by using the \c postProcess utility:
+    \verbatim
+        postProcess -func processorField
+    \endverbatim
+
 See also
-    Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - ExtendedCodeGuide::functionObjects::field::processorField
 
 SourceFiles
     processorField.C
@@ -80,21 +101,6 @@ class processorField
 :
     public fvMeshFunctionObject
 {
-
-        //- Result name
-        word resultName_;
-
-        //- Switch to send output to Info as well as to file
-        Switch log_;
-    // Private member functions
-
-        //- No copy construct
-        processorField(const processorField&) = delete;
-
-        //- No copy assignment
-        void operator=(const processorField&) = delete;
-
-
 public:
 
     //- Runtime type information
@@ -111,9 +117,15 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        processorField(const processorField&) = delete;
+
+        //- No copy assignment
+        void operator=(const processorField&) = delete;
+
 
     //- Destructor
-    virtual ~processorField();
+    virtual ~processorField() = default;
 
 
     // Member Functions

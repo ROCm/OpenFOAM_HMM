@@ -51,7 +51,6 @@ namespace functionObjects
 
 void Foam::functionObjects::wallHeatFlux::writeFileHeader(Ostream& os) const
 {
-    // Add headers to output data
     writeHeader(os, "Wall heat-flux");
     writeCommented(os, "Time");
     writeTabbed(os, "patch");

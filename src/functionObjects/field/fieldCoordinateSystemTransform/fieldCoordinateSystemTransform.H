@@ -32,19 +32,31 @@ Group
 
 Description
     Transforms a user-specified selection of fields from global Cartesian
-    coordinates to a local coordinate system.
-    The fields are run-time modifiable.
+    coordinates to a local user-specified coordinate system.
+
+    Operands:
+    \table
+      Operand      | Type                          | Location
+      input        | {vol,surface}\<Type\>Field(s) <!--
+               --> | $FOAM_CASE/\<time\>/\<inpField\>s
+      output file  | -                             | -
+      output field | {vol,surface}\<Type\>Field(s) <!--
+               --> | $FOAM_CASE/\<time\>/\<outField\>s
+    \endtable
+
+    where \c \<Type\>=Scalar/Vector/SphericalTensor/SymmTensor/Tensor.
 
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     fieldCoordinateSystemTransform1
     {
+        // Mandatory entries (unmodifiable)
         type    fieldCoordinateSystemTransform;
         libs    (fieldFunctionObjects);
-        ...
-        fields  ( U UMean UPrime2Mean );
 
+        // Mandatory entries (runtime modifiable)
+        fields  ( U UMean UPrime2Mean );
         coordinateSystem
         {
             origin      (0.001 0 0);
@@ -55,20 +67,31 @@ Usage
                 e3      (0 0 -1);
             }
         }
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description                          | Required | Default value
-        type         | type name: fieldCoordinateSystemTransform | yes |
-        fields       | list of fields to be transformed     | yes |
-        coordinateSystem | local coordinate system          | yes    |
-    \endtable
+      Property  | Description                              | Type | Req'd | Dflt
+      type      | Type name: fieldCoordinateSystemTransform | word |  yes  | -
+      libs      | Library name: fieldFunctionObjects | word |  yes  | -
+      fields    | Names of the operand fields               | wordList | yes | -
+      coordinateSystem | Local coordinate system            | dict  | yes | -
+
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link coordinateSystem.H \endlink
+
+    Usage by the \c postProcess utility is not available.
 
 See also
-    Foam::functionObjects::fvMeshFunctionObject
-    Foam::coordinateSystem
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - Foam::coordinateSystem
+    - ExtendedCodeGuide::functionObjects::field::fieldCoordinateSystemTransform
 
 SourceFiles
     fieldCoordinateSystemTransform.C
@@ -161,6 +184,13 @@ public:
             const Time& runTime,
             const dictionary& dict
         );
+
+        //- No copy construct
+        fieldCoordinateSystemTransform(const fieldCoordinateSystemTransform&)
+            = delete;
+
+        //- No copy assignment
+        void operator=(const fieldCoordinateSystemTransform&) = delete;
 
 
     //- Destructor

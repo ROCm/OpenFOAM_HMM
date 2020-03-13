@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,13 +40,7 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(yPlus, 0);
-
-    addToRunTimeSelectionTable
-    (
-        functionObject,
-        yPlus,
-        dictionary
-    );
+    addToRunTimeSelectionTable(functionObject, yPlus, dictionary);
 }
 }
 
@@ -62,7 +56,7 @@ void Foam::functionObjects::yPlus::writeFileHeader(Ostream& os) const
     writeTabbed(os, "min");
     writeTabbed(os, "max");
     writeTabbed(os, "average");
-    os << endl;
+    os  << endl;
 }
 
 
@@ -101,12 +95,6 @@ Foam::functionObjects::yPlus::yPlus
 
     mesh_.objectRegistry::store(yPlusPtr);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::yPlus::~yPlus()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

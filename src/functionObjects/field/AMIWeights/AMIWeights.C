@@ -370,7 +370,6 @@ bool Foam::functionObjects::AMIWeights::write()
         }
     }
 
-
     return true;
 }
 

@@ -6,14 +6,16 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 Description
-    Calculates and writes the second largest eigenvalue of the sum of the
-    square of the symmetrical and anti-symmetrical parts of the velocity
-    gradient tensor.
+    Computes the min/max/average arbitrary mesh interface (AMI) weights, and
+    optionally reports to a text file or writes VTK surfaces of the sum of
+    the weights and mask fields for arbitrarily coupled mesh interface (ACMI)
+    patches.
 
 \*---------------------------------------------------------------------------*/
 
 type            AMIWeights;
-libs            ("libfieldFunctionObjects.so");
+libs            (fieldFunctionObjects);
+
 writeFields     yes;
 writeControl    writeTime;
 

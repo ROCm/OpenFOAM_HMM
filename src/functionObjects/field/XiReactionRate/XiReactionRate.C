@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,12 +58,6 @@ Foam::functionObjects::XiReactionRate::XiReactionRate
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::XiReactionRate::~XiReactionRate()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::XiReactionRate::read(const dictionary& dict)
@@ -89,7 +83,7 @@ bool Foam::functionObjects::XiReactionRate::write()
     const volScalarField& Xi =
         mesh_.lookupObject<volScalarField>("Xi");
 
-    volScalarField St
+    const volScalarField St
     (
         IOobject
         (
@@ -105,7 +99,7 @@ bool Foam::functionObjects::XiReactionRate::write()
 
     St.write();
 
-    volScalarField wdot
+    const volScalarField wdot
     (
         IOobject
         (

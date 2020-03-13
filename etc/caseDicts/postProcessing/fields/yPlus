@@ -11,7 +11,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 type            yPlus;
-libs            ("libfieldFunctionObjects.so");
+libs            (fieldFunctionObjects);
 
 executeControl  writeTime;
 writeControl    writeTime;

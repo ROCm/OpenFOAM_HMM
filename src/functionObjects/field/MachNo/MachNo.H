@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,11 +31,51 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Calculates and writes the Mach number as a volScalarField.
+    Computes the Mach number as a \c volScalarField.
+
+    Operands:
+    \table
+      Operand          | Type           | Location
+      input            | volVectorField | $FOAM_CASE/<time>/<inpField>
+      output file      | -              | -
+      output field     | volScalarField | $FOAM_CASE/<time>/<outField>
+    \endtable
+
+Usage
+    Minimal example by using \c system/controlDict.functions:
+    \verbatim
+    MachNo1
+    {
+        // Mandatory entries (unmodifiable)
+        type            MachNo;
+        libs            (fieldFunctionObjects);
+
+        // Optional (inherited) entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: MachNo                  | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link fieldExpression.H \endlink
+
+    Minimal example by using the \c postProcess utility:
+    \verbatim
+        postProcess -func MachNo
+    \endverbatim
 
 See also
-    Foam::functionObjects::fieldExpression
-    Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObjects::fieldExpression
+    - ExtendedCodeGuide::functionObjects::field::MachNo
 
 SourceFiles
     MachNo.C
@@ -84,9 +125,15 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        MachNo(const MachNo&) = delete;
+
+        //- No copy assignment
+        void operator=(const MachNo&) = delete;
+
 
     //- Destructor
-    virtual ~MachNo();
+    virtual ~MachNo() = default;
 };
 
 

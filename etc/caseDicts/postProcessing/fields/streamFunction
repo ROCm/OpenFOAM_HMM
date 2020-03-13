@@ -12,7 +12,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 type            streamFunction;
-libs            ("libfieldFunctionObjects.so");
+libs            (fieldFunctionObjects);
 
 field           phi;
 

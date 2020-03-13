@@ -31,28 +31,55 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Calculates and outputs the Peclet number as a surfaceScalarField.
+    Computes the Peclet number as a \c surfaceScalarField.
+
+    Operands:
+    \table
+      Operand        | Type               | Location
+      input          | surfaceScalarField | $FOAM_CASE/\<time\>/\<inpField\>
+      output file    | -                  | -
+      output field   | surfaceScalarField | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
 
 Usage
-    Example of function object specification to calculate the Peclet number:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     PecletNo1
     {
-        type        PecletNo;
-        libs        (fieldFunctionObjects);
+        // Mandatory entries (unmodifiable)
+        type            PecletNo;
+        libs            (fieldFunctionObjects);
+
+        // Optional entries (runtime modifiable)
+        rho             rho;
+
+        // Optional (inherited) entries
         ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description             | Required    | Default value
-        type         | type name: Peclet       | yes         |
-        phi          | Name of flux field      | no          | phi
-        rho          | Name of density field   | no          | rho
-        result       | Name of Peclet field    | no          | \<function name\>
-        log          | Log to standard output  | no          | yes
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: PecletNo                | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+      rho          | Name of density field              | word |  no   | rho
     \endtable
+
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link fieldExpression.H \endlink
+
+    Minimal example by using the \c postProcess utility:
+    \verbatim
+        postProcess -func PecletNo
+    \endverbatim
+
+See also
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObjects::fieldExpression
+    - ExtendedCodeGuide::functionObjects::field::PecletNo
 
 SourceFiles
     PecletNo.C
@@ -80,9 +107,9 @@ class PecletNo
 :
     public fieldExpression
 {
-    // Private data
+    // Private Data
 
-        //- Name of density field, default is "rho"
+        //- Name of density field
         word rhoName_;
 
 
@@ -111,9 +138,15 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        PecletNo(const PecletNo&) = delete;
+
+        //- No copy assignment
+        void operator=(const PecletNo&) = delete;
+
 
     //- Destructor
-    virtual ~PecletNo();
+    virtual ~PecletNo() = default;
 
 
     // Member Functions

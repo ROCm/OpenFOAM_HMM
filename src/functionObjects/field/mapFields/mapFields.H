@@ -30,40 +30,91 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Map fields from local mesh to secondary mesh at run-time.
+    Maps input fields from local mesh to secondary mesh at runtime.
+
+    Operands:
+    \table
+      Operand      | Type                       | Location
+      input        | {vol,surface}\<Type\>Field <!--
+                                    --> | $FOAM_CASE/\<time\>/\<inpField\>
+      output file  | -                          | -
+      output field | {vol,surface}\<Type\>Field <!--
+                                    --> | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
+
+    where \c \<Type\>=Scalar/Vector/SphericalTensor/SymmTensor/Tensor.
 
 Usage
-    Example of function object specification to map fields:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     mapFields1
     {
+        // Mandatory entries (unmodifiable)
         type            mapFields;
         libs            (fieldFunctionObjects);
-        ...
 
+        // Mandatory (inherited) entries (runtime modifiable)
+        fields          (<field1> <field2> ... <fieldN>);
         mapRegion       coarseMesh;
         mapMethod       cellVolumeWeight;
-        consistent      yes;
+        consistent      true;
 
-        fields          ("U.*" p);
+        // Optional entries (runtime modifiable)
+        // patchMapMethod  direct;  // AMI-related entry
+        // enabled if consistent=false
+        // patchMap        (<patchSrc> <patchTgt>);
+        // cuttingPatches  (<patchTgt1> <patchTgt2> ... <patchTgtN>);
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description                | Required  | Default value
-        type         | Type name: mapFields       | yes       |
-        mapRegion    | Name of region to map to   | yes       |
-        mapMethod    | Mapping method             | yes       |
-        patchMapMethod | Patch mapping method     | no        | \<auto\>
-        consistent   | Mapping meshes have consistent boundaries | yes |
-        fields       | List of field names to map | yes       |
-        log          | Log to standard output     | no        | yes
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: mapFields               | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+      fields       | Names of operand fields            | wordList |  yes  | -
+      mapRegion    | Name of region to map to           | word |  yes  | -
+      mapMethod    | Mapping method                     | word |  yes  | -
+      consistent   | Mapping meshes have consistent boundaries | bool  | yes | -
+      patchMapMethod | Patch mapping method for AMI cases | word |  no  | -
+      patchMap   | Coincident source/target patches in two cases <!--
+             --> | wordHashTable | no | -
+      cuttingPatches | Target patches cutting the source domain <!--
+                 --> | wordList | no | -
     \endtable
 
+    Options for the \c mapMethod entry:
+    \verbatim
+      direct
+      mapNearest
+      cellVolumeWeight
+      correctedCellVolumeWeight
+    \endverbatim
+
+    Options for the \c patchMapMethod entry:
+    \verbatim
+      directAMI
+      mapNearestAMI
+      faceAreaWeightAMI
+      partialFaceAreaWeightAMI
+    \endverbatim
+
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+
+    Usage by the \c postProcess utility is not available.
+
+See also
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - ExtendedCodeGuide::functionObjects::field::mapFields
 
 SourceFiles
     mapFields.C
+    mapFieldsTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -91,7 +142,7 @@ class mapFields
 :
     public fvMeshFunctionObject
 {
-    // Private data
+    // Private Data
 
         //- Locally cached map region mesh (map to this mesh)
         autoPtr<fvMesh> mapRegionPtr_;
@@ -104,12 +155,6 @@ class mapFields
 
 
     // Private Member Functions
-
-        //- No copy construct
-        mapFields(const mapFields&) = delete;
-
-        //- No copy assignment
-        void operator=(const mapFields&) = delete;
 
         //- Helper function to create the mesh-to-mesh interpolation
         void createInterpolation(const dictionary& dict);
@@ -145,6 +190,12 @@ public:
             const Time& runTime,
             const dictionary& dict
         );
+
+        //- No copy construct
+        mapFields(const mapFields&) = delete;
+
+        //- No copy assignment
+        void operator=(const mapFields&) = delete;
 
 
     //- Destructor

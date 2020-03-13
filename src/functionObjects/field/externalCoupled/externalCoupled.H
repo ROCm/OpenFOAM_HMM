@@ -30,8 +30,10 @@ Group
     grpFieldFunctionObjects
 
 Description
-    This functionObject provides a simple interface for explicit coupling with
-    an external application.
+    Provides a simple file-based communication interface for explicit coupling
+    with an external application, so that data is transferred to- and from
+    OpenFOAM. The data exchange employs specialised boundary conditions to
+    provide either one-way or two-way coupling models.
 
     The coupling is through plain text files where OpenFOAM boundary data
     is read/written as one line per face (data from all processors collated):
@@ -43,27 +45,28 @@ Description
         <fld1> <fld2> .. <fldn>             //faceN
     \endverbatim
 
-    where the actual entries depend on the bc type:
+    where the actual entries depend on the boundary condition type:
     - mixed: value, snGrad, refValue, refGrad, valueFraction
     - externalCoupledMixed: output of writeDataMaster
     - other: value, snGrad
 
     These text files are located in a user specified communications directory
-    which gets read/written on the master processor only. In the
-    communications directory the structure will be
+    which gets read/written on the master processor only.
+
+    In the communications directory the structure will be:
     \verbatim
         <regionsName>/<patchGroup>/<fieldName>.[in|out]
     \endverbatim
 
-    (where regionsName is either the name of a single region or a composite
+    (where \c regionsName is either the name of a single region or a composite
     of multiple region names)
 
-    At start-up, the boundary creates a lock file, i.e..
+    At start-up, the boundary creates a lock file, i.e.:
     \verbatim
         OpenFOAM.lock
     \endverbatim
 
-    ... to signal the external source to wait. During the functionObject
+    ... to signal the external source to wait. During the function object
     execution the boundary values are written to files (one per region,
     per patch(group), per field), e.g.
     \verbatim
@@ -77,21 +80,19 @@ Description
         <regionsName>/<patchGroup>/<fieldName>.in
     \endverbatim
 
-    ... and then reinstate the lock file. The functionObject will then
+    ... and then reinstate the lock file. The function object will then
     read these values, apply them to the boundary conditions and pass
     program execution back to OpenFOAM.
 
 Usage
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
-    externalCoupled
+    externalCoupled1
     {
+        // Mandatory entries (unmodifiable)
         type            externalCoupled;
-        ...
-        log             yes;
+        libs            (fieldFunctionObjects);
         commsDir        "<case>/comms";
-        initByExternal  yes;
-        statusDone      done;  // Any arbitrary status=... value
-
         regions
         {
             "(region1|region0)"         // Name of region(s)
@@ -103,6 +104,16 @@ Usage
                 }
             }
         }
+        initByExternal  true;
+
+        // Optional entries (runtime modifiable)
+        waitInterval    1;
+        timeOut         100;
+        statusDone      done;  // Any arbitrary status=... value
+        calcFrequency   1;
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
@@ -126,16 +137,29 @@ Usage
 
     The entries comprise:
     \table
-        Property     | Description                          | Required | Default
-        type         | Type name: externalCoupled           | yes |
-        commsDir     | Communication directory              | yes |
-        waitInterval | wait interval in (s)                 | no  | 1
-        timeOut      | timeout in (s)                    | no | 100*waitInterval
-        statusDone   | Lockfile status=... on termination   | no  | done
-        initByExternal | Initialization values supplied by external app | yes
-        calcFrequency | Calculation frequency               | no  | 1
-        regions      | The regions to couple                | yes |
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: externalCoupled         | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+      commsDir     | Communication directory            | word |  yes  | -
+      regions      | The regions to couple              | word |  yes  | -
+      initByExternal | Initialization values supplied by external app  <!--
+                                                    --> | bool | yes | -
+      waitInterval | Wait interval in [s]               | label | no   | 1
+      timeOut      | Timeout in [s]             | label | no | 100*waitInterval
+      statusDone   | Lockfile status=... on termination | word  | no   | done
+      calcFrequency | Calculation frequency             | label | no   | 1
     \endtable
+
+    The inherited entries are elaborated in:
+     - \link timeFunctionObject.H \endlink
+
+    Usage by the \c postProcess utility is not available.
+
+See also
+    - Foam::functionObject
+    - Foam::functionObjects::timeFunctionObject
+    - Foam::externalFileCouple
+    - ExtendedCodeGuide::functionObjects::field::externalCoupled
 
 SourceFiles
     externalCoupled.C
@@ -267,12 +291,6 @@ class externalCoupled
         //- Perform the coupling with necessary initialization etc.
         void performCoupling();
 
-        //- No copy construct
-        externalCoupled(const externalCoupled&) = delete;
-
-        //- No copy assignment
-        void operator=(const externalCoupled&) = delete;
-
 
 public:
 
@@ -295,6 +313,12 @@ public:
             const Time& runTime,
             const dictionary& dict
         );
+
+        //- No copy construct
+        externalCoupled(const externalCoupled&) = delete;
+
+        //- No copy assignment
+        void operator=(const externalCoupled&) = delete;
 
 
     //- Destructor
@@ -339,7 +363,7 @@ public:
       // Other
 
         //- Create single name by appending words (in sorted order),
-        //  separated by '_'
+        //- separated by '_'
         static word compositeName(const wordList&);
 
         //- Write geometry for the group as region/patch

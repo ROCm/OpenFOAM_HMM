@@ -40,13 +40,7 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(ddt2, 0);
-
-    addToRunTimeSelectionTable
-    (
-        functionObject,
-        ddt2,
-        dictionary
-    );
+    addToRunTimeSelectionTable(functionObject, ddt2, dictionary);
 }
 }
 

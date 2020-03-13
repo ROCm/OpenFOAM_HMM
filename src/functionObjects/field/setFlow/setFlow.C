@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,13 +39,7 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(setFlow, 0);
-
-    addToRunTimeSelectionTable
-    (
-        functionObject,
-        setFlow,
-        dictionary
-    );
+    addToRunTimeSelectionTable(functionObject, setFlow, dictionary);
 }
 }
 
@@ -111,10 +105,10 @@ Foam::functionObjects::setFlow::setFlow
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
+    mode_(modeType::FUNCTION),
     UName_("U"),
     rhoName_("none"),
     phiName_("phi"),
-    mode_(modeType::FUNCTION),
     reverseTime_(VGREAT),
     scalePtr_(nullptr),
     origin_(Zero),
@@ -124,12 +118,6 @@ Foam::functionObjects::setFlow::setFlow
 {
     read(dict);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::setFlow::~setFlow()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

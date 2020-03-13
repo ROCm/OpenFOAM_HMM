@@ -38,13 +38,7 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(PecletNo, 0);
-
-    addToRunTimeSelectionTable
-    (
-        functionObject,
-        PecletNo,
-        dictionary
-    );
+    addToRunTimeSelectionTable(functionObject, PecletNo, dictionary);
 }
 }
 
@@ -142,11 +136,6 @@ Foam::functionObjects::PecletNo::PecletNo
     read(dict);
 }
 
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::PecletNo::~PecletNo()
-{}
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 

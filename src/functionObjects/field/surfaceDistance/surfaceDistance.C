@@ -35,13 +35,7 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(surfaceDistance, 0);
-
-    addToRunTimeSelectionTable
-    (
-        functionObject,
-        surfaceDistance,
-        dictionary
-    );
+    addToRunTimeSelectionTable(functionObject, surfaceDistance, dictionary);
 }
 }
 
@@ -80,12 +74,6 @@ Foam::functionObjects::surfaceDistance::surfaceDistance
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::surfaceDistance::~surfaceDistance()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::surfaceDistance::read
@@ -104,9 +92,9 @@ bool Foam::functionObjects::surfaceDistance::read
         (
             IOobject
             (
-                "abc",                              // dummy name
+                "abc",                             // dummy name
                 mesh_.time().constant(),           // directory
-                "triSurface",                       // instance
+                "triSurface",                      // instance
                 mesh_.time(),                      // registry
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE

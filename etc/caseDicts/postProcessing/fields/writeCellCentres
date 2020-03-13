@@ -13,7 +13,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 type            writeCellCentres;
-libs            ("libfieldFunctionObjects.so");
+libs            (fieldFunctionObjects);
 
 executeControl  writeTime;
 writeControl    writeTime;

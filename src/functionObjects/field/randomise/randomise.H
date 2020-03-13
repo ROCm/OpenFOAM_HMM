@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,15 +31,66 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Adds a random component to a field, with a specified perturbation magnitude.
+    Adds a random component to an input field,
+    with a specified perturbation magnitude.
 
-    The operation can be applied to any volume field.
+    Operands:
+    \table
+      Operand        | Type             | Location
+      input          | vol\<Type\>Field | $FOAM_CASE/\<time\>/\<inpField\>
+      output file    | -                | -
+      output field   | vol\<Type\>Field | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
+
+    where \c \<Type\>=Scalar/Vector/SphericalTensor/SymmTensor/Tensor.
+
+Usage
+    Minimal example by using \c system/controlDict.functions:
+    \verbatim
+    randomise1
+    {
+        // Mandatory entries (unmodifiable)
+        type            randomise;
+        libs            (fieldFunctionObjects);
+
+        // Mandatory entries (runtime modifiable)
+        magPerturbation 0.1;
+
+        // Mandatory (inherited) entries (runtime modifiable)
+        field           <field>;
+
+        // Optional (inherited) entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property     | Description                          | Type | Req'd | Dflt
+      type         | Type name: randomise                 | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects   | word |  yes  | -
+      magPerturbation | The magnitude of the perturbation | scalar |  yes  | -
+      field        | Name of the operand field            | word   |  yes  | -
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link fieldExpression.H \endlink
+
+    Minimal example by using the \c postProcess utility:
+    \verbatim
+        postProcess -func "randomise(<field>)"
+    \endverbatim
 
 See also
-    Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObject
+    - Foam::functionObjects::fieldExpression
+    - Foam::functionObjects::fvMeshFunctionObject
+    - ExtendedCodeGuide::functionObjects::field::randomise
 
 SourceFiles
     randomise.C
+    randomiseTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -62,7 +114,7 @@ class randomise
 :
     public fieldExpression
 {
-    // Private member data
+    // Private Data
 
         //- The magnitude of the perturbation
         scalar magPerturbation_;
@@ -94,9 +146,15 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        randomise(const randomise&) = delete;
+
+        //- No copy assignment
+        void operator=(const randomise&) = delete;
+
 
     //- Destructor
-    virtual ~randomise();
+    virtual ~randomise() = default;
 
 
     // Member Functions

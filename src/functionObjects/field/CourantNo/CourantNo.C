@@ -39,13 +39,7 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(CourantNo, 0);
-
-    addToRunTimeSelectionTable
-    (
-        functionObject,
-        CourantNo,
-        dictionary
-    );
+    addToRunTimeSelectionTable(functionObject, CourantNo, dictionary);
 }
 }
 
@@ -135,12 +129,6 @@ Foam::functionObjects::CourantNo::CourantNo
     setResultName("Co", "phi");
     read(dict);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::CourantNo::~CourantNo()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

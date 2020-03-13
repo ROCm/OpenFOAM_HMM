@@ -31,61 +31,85 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Calculates and outputs the blendingFactor as used by the bended convection
-    schemes.  The output is a volume field (cells) whose value is calculated via
-    the maximum blending factor for any cell face.
+    Computes the blending coefficient employed by blended divergence schemes,
+    giving an indicator as to which of the schemes is active across the domain.
 
-    The weight of a blended scheme is given by a function of the blending
-    factor, f:
+    Blended schemes combine contributions from two schemes, i.e. \f$\phi_1\f$
+    and \f$\phi_2\f$, using a weight field, i.e. \f$w\f$, such that the
+    effective scheme value, i.e. \f$\phi_{eff}\f$, is computed as follows:
 
     \f[
-        weight = f scheme1 + (1 - f) scheme2
+        \phi_{eff} = w \phi_1 + (1 - w) \phi_2
     \f]
 
-    The factor is a face-based quantity, which is converted to a cell-based
-    quantity by assigning the minimum blending factor for any cell face.
+    The weight field, i.e. \f$w\f$, is surface field and converted to a volume
+    field for easier post-processing by setting the cell value to one minus
+    the minimum of the face values.
 
-    An indicator (volume) field, named \<functionObjectName\>:\<fieldName\>, is
-    generated that is set to (1 - f), i.e. values of:
-    - 0 represent scheme1 as active, and
-    - 1 represent scheme2 as active.
-    - intermediate values show the contribution to scheme2
+    This conversion leads to blending indicator field whose values mean:
+    \verbatim
+      0   =  scheme 0
+      1   =  scheme 1
+      0-1 =  a blend between scheme 0 and scheme 1
+    \endverbatim
 
-    Additional reporting is written to the standard output, providing
-    statistics as to the number of cells used by each scheme.
+    Operands:
+    \table
+      Operand       | Type           | Location
+      input         | -              | -
+      output file   | dat   | $FOAM_CASE/postProcessing/\<FO\>/\<time\>/\<file\>
+      output field  | volScalarField | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
 
 Usage
-    Example of function object specification to calculate the blending factor:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     blendingFactor1
     {
-        type        blendingFactor;
-        libs        (fieldFunctionObjects);
+        // Mandatory entries (unmodifiable)
+        type            blendingFactor;
+        libs            (fieldFunctionObjects);
 
+        // Mandatory (inherited) entry (runtime modifiable)
+        field           <field>;
+
+        // Optional entries (runtime modifiable)
+        phi             phi;
+        tolerance       0.001;
+
+        // Optional (inherited) entries
         ...
-
-        // Name of field
-        field       U;
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description             | Required    | Default value
-        type         | Type name: blendingFactor | yes       |
-        phi          | Name of flux field      | no          | phi
-        field        | Name of field to evaluate | yes       |
-        tolerance    | Tolerance for number of blended cells | no | 0.001
-        log          | Log to standard output  | no          | yes
+      Property  | Description                           | Type   | Req'd | Deflt
+      type      | Type name: blendingFactor             | word   | yes   | -
+      libs      | Library name: fieldFunctionObjects    | word   | yes   | -
+      field     | Name of the operand field             | word   | yes   | -
+      phi       | Name of flux field                    | word   | no    | phi
+      tolerance | Tolerance for number of blended cells | scalar | no    | 0.001
     \endtable
 
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link fieldExpression.H \endlink
+     - \link writeFile.H \endlink
+
+    Usage by the \c postProcess utility is not available.
+
 See also
-    Foam::functionObjects::fieldExpression
-    Foam::functionObjects::fvMeshFunctionObject
-    Foam::functionObjects::writeFile
+    - Foam::functionObject
+    - Foam::functionObjects::fieldExpression
+    - Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObjects::writeFile
+    - Foam::CoBlended
+    - ExtendedCodeGuide::functionObjects::field::blendingFactor
 
 SourceFiles
     blendingFactor.C
+    blendingFactorTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -112,9 +136,9 @@ class blendingFactor
     public fieldExpression,
     public writeFile
 {
-    // Private member data
+    // Private Data
 
-        //- Name of flux field, default is "phi"
+        //- Name of flux field
         word phiName_;
 
         //- Tolerance used when calculating the number of blended cells
@@ -163,9 +187,15 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        blendingFactor(const blendingFactor&) = delete;
+
+        //- No copy assignment
+        void operator=(const blendingFactor&) = delete;
+
 
     //- Destructor
-    virtual ~blendingFactor();
+    virtual ~blendingFactor() = default;
 
 
     // Member Functions

@@ -11,7 +11,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 type            energySpectrum;
-libs            ("librandomProcessesFunctionObjects.so");
+libs            (randomProcessesFunctionObjects);
 
 executeControl  writeTime;
 writeControl    writeTime;

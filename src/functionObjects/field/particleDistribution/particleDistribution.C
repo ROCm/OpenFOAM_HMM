@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +38,6 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(particleDistribution, 0);
-
     addToRunTimeSelectionTable
     (
         functionObject,
@@ -61,19 +60,13 @@ Foam::functionObjects::particleDistribution::particleDistribution
     fvMeshFunctionObject(name, runTime, dict),
     writeFile(runTime, name),
     cloudName_("unknown-cloudName"),
-    nameVsBinWidth_(),
     tagFieldName_("none"),
     rndGen_(),
+    nameVsBinWidth_(),
     writerPtr_(nullptr)
 {
     read(dict);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::particleDistribution::~particleDistribution()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -83,8 +76,8 @@ bool Foam::functionObjects::particleDistribution::read(const dictionary& dict)
     if (fvMeshFunctionObject::read(dict) && writeFile::read(dict))
     {
         dict.readEntry("cloud", cloudName_);
-        dict.readEntry("nameVsBinWidth", nameVsBinWidth_);
         dict.readIfPresent("tagField", tagFieldName_);
+        dict.readEntry("nameVsBinWidth", nameVsBinWidth_);
         const word format(dict.get<word>("setFormat"));
         writerPtr_ = writer<scalar>::New(format);
 

@@ -37,9 +37,9 @@ Description
 
     Dictionary controls
     \table
-        Property    | Description                           | Required | Default
-        region      | Name of the mesh region               | no | region0
-        subRegion   | Name for alternative objectRegistry   | no | ""
+      Property    | Description                       | Type | Req'd | Dflt
+      region      | Name of the mesh region           | word | no    | region0
+      subRegion   | Name for alternative objectRegistry | word | no  | ""
     \endtable
 
 See also

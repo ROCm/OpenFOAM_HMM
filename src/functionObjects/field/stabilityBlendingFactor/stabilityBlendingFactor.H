@@ -30,126 +30,132 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Calculates and outputs the stabilityBlendingFactor to be used by the
+    Computes the \c stabilityBlendingFactor to be used by the
     local blended convection scheme. The output is a surface field weight
-    between 0-1
+    between 0-1.
 
-    The weight of a blended scheme is given by a function of the blending
-    factor, f:
+    The weight of a blended scheme, i.e. \c w, is given by a function of
+    the blending factor, \c f:
 
     \f[
-        weight = f scheme1 + (1 - f) scheme2
+        w = f_{scheme_1} + (1 - f_{scheme_2})
     \f]
 
     The factor is calculated based on six criteria:
-
-    1) mesh non-orthogonality field
-    2) magnitude of cell centres gradient
-    3) convergence rate of residuals
-    4) faceWeight
-    5) skewness
-    6) Co number
+    \verbatim
+      1. mesh non-orthogonality field
+      2. magnitude of cell centres gradient
+      3. convergence rate of residuals
+      4. faceWeight
+      5. skewness
+      6. Courant number
+    \endverbatim
 
     The user can enable them individually.
 
-    For option 1, the following relation is used:
-        \f[
-            fNon =
-                min
+    For option 1, the following relation is used, where \f$\phi_1\f$ is
+    the non-orthogonality:
+    \f[
+        fNon =
+            min
+            (
+                max
                 (
-                    max
-                    (
-                        0.0,
-                        (nonOrthogonality - maxNonOrthogonality)
-                       /(minNonOrthogonality - maxNonOrthogonality)
-                    ),
-                    1.0
-                )
-        \f]
+                    0.0,
+                    (\phi_1 - max(\phi_1))
+                    /(min(\phi_1) - max(\phi_1))
+                ),
+                1.0
+            )
+    \f]
 
-    For option 2, the following relation is used:
-        \f[
-            fMagGradCc =
-                min
+    For option 2, the following relation is used, where \f$\phi_2\f$ is
+    the magnitude of cell centres gradient (Note that \f$\phi_2 = 3\f$
+    for orthogonal meshes):
+
+    \f[
+        fMagGradCc =
+            min
+            (
+                max
                 (
-                    max
-                    (
-                        0.0,
-                        (magGradCC - maxGradCc)
-                      / (minGradCc - maxGradCc)
-                    ),
-                    1.0
-                )
-        \f]
-    Note that  magGradCC is equal to 3 for ortoghonal meshes
+                    0.0,
+                    (\phi_2 - max(\phi_2))
+                    / (min(\phi_2) - max(\phi_2))
+                ),
+                1.0
+            )
+    \f]
 
-    For option 3 a PID control is used in order to control residual
-    unbouded fluctuations for individual cells.
+    For option 3, a PID control is used in order to control residual
+    unbounded fluctuations for individual cells.
 
-        \f[
-            factor =
-                P*residual
-              + I*residualIntegral
-              + D*residualDifferential
-        \f]
+    \f[
+        factor =
+            P*residual
+            + I*residualIntegral
+            + D*residualDifferential
+    \f]
 
-        where P, I and D are user inputs
+    where \c P, \c I and \c D are user inputs.
 
     The following relation is used:
     \f[
         fRes = (factor - meanRes)/(maxRes*meanRes);
     \f]
 
-        where:
-            meanRes = average(residual)
-            maxRes is an user input
+    where
+    \vartable
+        meanRes | Average(residual)
+        maxRes  | User input
+    \endvartable
+
+    Note that \f$f_{Res}\f$ will blend more towards one as
+    the cell residual is larger then the domain mean residuals.
 
 
-    fRes will blend more towards one as the cell residual is larger then
-    the domain mean residuals.
+    For option 4, the following relation is used, where \f$\phi_4\f$ is
+    the face weight (Note that \f$\phi_4 = 0.5\f$ for orthogonal meshes):
 
-
-    For option 4 , the following relation is used:
-
-        \f[
-            ffaceWeight = min
+    \f[
+        ffaceWeight = min
+        (
+            max
             (
-                max
-                (
-                    0.0,
-                    (minFaceWeight - faceWeights)
-                  / (minFaceWeight - maxFaceWeight)
-                ),
-                1.0
-            )
-        \f]
-    Note that faceWeights for a orthogonal mesh is 0.5.
+                0.0,
+                (min(\phi_4) - \phi_4)
+                / (min(\phi_4) - max(\phi_4))
+            ),
+            1.0
+        )
+    \f]
 
 
-    For option 5 , the following relation is used:
+    For option 5, the following relation is used, where \f$\phi_5\f$ is
+    the cell skewness:
 
-        \f[
-            fskewness =
-            min
+    \f[
+        fskewness =
+        min
+        (
+            max
             (
-                max
-                (
-                    0.0,
-                    (skewness    - maxSkewness)
-                  / (minSkewness - maxSkewness)
-                ),
-                1.0
-            )
-        \f]
+                0.0,
+                (\phi_5    - max(\phi_5))
+                / (min(\phi_5) - max(\phi_5))
+            ),
+            1.0
+        )
+    \f]
 
 
-    For option 6 , the following relation is used:
+    For option 6, the following relation is used:
 
     \f[
         fCoWeight = min(max((Co - Co1)/(Co2 - Co1), 0), 1)
     \f]
-    where
 
+    where
     \vartable
         Co1 | Courant number below which scheme2 is used
         Co2 | Courant number above which scheme1 is used
@@ -161,136 +167,148 @@ Description
         f = max(fNon, fMagGradCc, fRes, ffaceWeight, fskewness, fCoWeight)
     \f]
 
-    An indicator (volume) field, named blendedIndicator is generated if the log
-    flag is on:
+    An indicator (volume) field, named \c blendedIndicator
+    is generated if the log flag is on:
     - 1 represent scheme1 as active,
     - 0 represent scheme2 as active.
 
     Additional reporting is written to the standard output, providing
     statistics as to the number of cells used by each scheme.
 
+    Operands:
+    \table
+      Operand        | Type           | Location
+      input          | -              | -
+      output file    | dat | $FOAM_CASE/postProcessing/\<FO\>/\<time\>/\<file\>
+      output field   | volScalarField | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
+
 Usage
-    Example of function object specification to calculate the blending factor:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     stabilityBlendingFactor1
     {
+        // Mandatory entries (unmodifiable)
         type                stabilityBlendingFactor;
         libs                (fieldFunctionObjects);
 
-        log                 true;
-        writeToFile         false;
+        // Mandatory entries (unmodifiable)
+        field               <field>;    // U;
+        result              <outField>; // UBlendingFactor;
 
-        switchNonOrtho      yes;
-        switchGradCc        no;
-        switchResiduals     yes;
-        switchFaceWeight    no;
-        switchSkewness      no;
-        switchCo            no;
+        // Optional entries (runtime modifiable)
+        tolerance           0.001;
 
+        // Any of the options can be chosen in combinations
+
+        // Option-1
+        switchNonOrtho      true;
+        nonOrthogonality    nonOrthoAngle;
         maxNonOrthogonality 20;
         minNonOrthogonality 60;
 
+        // Option-2
+        switchGradCc        true;
         maxGradCc           3;
         minGradCc           4;
 
-        maxFaceWeight       0.3;
-        minFaceWeight       0.2;
-
-        maxSkewness         2;
-        minSkewness         3;
-
+        // Option-3
+        switchResiduals     true;
         maxResidual         10;
-
-        result              UBlendingFactor;
         residual            initialResidual:p;
         P                   1.5;
         I                   0;
         D                   0.5;
 
+        // Option-4
+        switchFaceWeight    true;
+        maxFaceWeight       0.3;
+        minFaceWeight       0.2;
+
+        // Option-5
+        switchSkewness      true;
+        maxSkewness         2;
+        minSkewness         3;
+
+        // Option-6
+        switchCo            true;
+        U                   U;
         Co1                 1;
         Co2                 10;
+
+        // Optional (inherited) entries
         ...
-        ...
-        field               U;
     }
-
-    Example of function object specification to calculate the residuals used
-    by stabilityBlendingFactor. The following writes 'initialResidual:p'
-    field
-
-        residuals
-        {
-            type            residuals;
-            libs            (utilityFunctionObjects);
-            writeFields     true;
-            writeControl    outputTime;
-            fields          (p);
-        }
-
     \endverbatim
 
-    Where the entries comprise:
+    Example of function object specification to calculate the \c residuals used
+    by \c stabilityBlendingFactor. The following writes 'initialResidual:p'
+    field
+    \verbatim
+    residuals
+    {
+        type            residuals;
+        libs            (utilityFunctionObjects);
+        writeFields     true;
+        writeControl    writeTime;
+        fields          (p);
+    }
+    \endverbatim
+
+    where the entries mean:
     \table
-        Property     | Description             | Required    | Default value
-        type         | Type name: stabilityBlendingFactor | yes       |
-
-        log          | Log to standard output  | no          | yes
-        writeToFile  | Log to file             | no          | yes
-
-        switchNonOrtho | non-orthogonal method | no | false
-        switchGradCc | cell centre gradient method   | no | false
-        switchResiduals | residual evolution method   | no | false
-        switchFaceWeight | face weight method | no    | false
-        switchSkewness | skewness method | no    | false
-        switchCo       | Co blended |  no        | false
-
-        maxNonOrthogonality| maximum non-orthogonal for scheme2 | no | 20
-        minNonOrthogonality| minimum non-orthogonal for scheme1 | no | 60
-
-        maxGradCc| maximum gradient for scheme2 | no | 2
-        minGradCc| minimum gradient for scheme1 | no | 4
-
-        maxResidual| maximum residual-mean ratio for scheme1 | no | 10
-        P       |   proportional factor for PID     | no | 3
-        I       |   integral factor for PID         | no | 0
-        D       |   differential factor for PID     | no | 0.25
-
-        maxFaceWeight | maximum face weight for scheme1 | no | 0.2
-        minFaceWeight | minimum face weight for scheme2 | no | 0.3
-
-        maxSkewness | maximum skewness for scheme2 | no | 2
-        minSkewness | minimum skewness for scheme1 | no | 3
-
-
-        faceWeight | Name of the faceWeight field | no | faceWeight
-        skewness | Name of the skewness field | no | skewness
-        nonOrthogonality | Name of the non-orthogonal field | no |
-            nonOrthoAngle
-        residual    | Name of the residual field | no | initialResidual:p
-        U           | Name of the flux field for Co blended | no | U
-
-
-        Co1 | Courant number below which scheme2 is used | no | 1
-        Co2 | Courant number above which scheme1 is used | no | 10
-
-
-        tolerance    | Tolerance for number of blended cells | no | 0.001
-        field        | Name of field to evaluate | yes       |
-        result    | Name of surface field to be used in the localBlended scheme
-        | yes |
+      Property     | Description                           | Type | Req'd | Dflt
+      type         | Type name: stabilityBlendingFactor    | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects    | word |  yes  | -
+      field        | Name of operand field                 | word |  yes  | -
+      result  | Name of surface field to be used in the localBlended scheme <!--
+          --> | word | yes
+      switchNonOrtho | Select non-orthogonal method        | bool | no | false
+      nonOrthogonality | Name of the non-orthogonal field  <!--
+                   --> | word | no | nonOrthoAngle
+      maxNonOrthogonality| Maximum non-orthogonal for scheme2 | scalar | no | 20
+      minNonOrthogonality| Minimum non-orthogonal for scheme1 | scalar | no | 60
+      switchGradCc | Select cell centre gradient method    | bool | no | false
+      maxGradCc| Maximum gradient for scheme2              | scalar | no | 2
+      minGradCc| Minimum gradient for scheme1              | scalar | no | 4
+      switchResiduals | Select residual evolution method   | bool | no | false
+      residual    | Name of the residual field | word | no | initialResidual:p
+      maxResidual| Maximum residual-mean ratio for scheme1 | scalar | no | 10
+      P       | Proportional factor for PID                | scalar | no | 3
+      I       | Integral factor for PID                    | scalar | no | 0
+      D       | Differential factor for PID                | scalar | no | 0.25
+      switchFaceWeight | Select face weight method         | bool | no | false
+      faceWeight | Name of the faceWeight field       | word | no | faceWeight
+      maxFaceWeight | Maximum face weight for scheme1      | scalar | no | 0.2
+      minFaceWeight | Minimum face weight for scheme2      | scalar | no | 0.3
+      switchSkewness   | Select skewness method            | bool | no | false
+      skewness | Name of the skewness field           | word | no | skewness
+      maxSkewness | Maximum skewness for scheme2           | scalar | no | 2
+      minSkewness | Minimum skewness for scheme1           | scalar | no | 3
+      switchCo         | Select Co blended method          | bool | no | false
+      U   | Name of the flux field for Co blended          | word | no | U
+      Co1 | Courant number below which scheme2 is used     | scalar | no | 1
+      Co2 | Courant number above which scheme1 is used     | scalar | no | 10
+      tolerance    | Tolerance for number of blended cells | scalar | no | 0.001
     \endtable
 
-    The 'log' flag true write the number of cells on each scheme, plus it
-    writes the field name "blendedIndicator".
+    The \c result entry is the field which is read by the \c localBlended scheme
+    specified in \c fvSchemes. This name is determined by the \c localBlended
+    class.
 
-    The 'result' entry is the field which is read by the localBlended scheme
-    specified in fvSchemes. This name is determined by the localBlended class.
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link fieldExpression.H \endlink
+     - \link writeFile.H \endlink
 
+    Usage by the \c postProcess utility is not available.
 
 See also
-    Foam::functionObjects::fieldExpression
-    Foam::functionObjects::fvMeshFunctionObject
-    Foam::functionObjects::writeFile
+    - Foam::functionObject
+    - Foam::functionObjects::fieldExpression
+    - Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObjects::writeFile
+    - ExtendedCodeGuide::functionObjects::field::stabilityBlendingFactor
 
 SourceFiles
     stabilityBlendingFactor.C
@@ -320,7 +338,7 @@ class stabilityBlendingFactor
     public fieldExpression,
     public writeFile
 {
-    // Private member data
+    // Private Member Data
 
         //- Cell based blended indicator
         volScalarField indicator_;
@@ -384,7 +402,7 @@ class stabilityBlendingFactor
 
         // File names
 
-            //- Name of the non-orthogonalit field
+            //- Name of the non-orthogonality field
             word nonOrthogonalityName_;
 
             //- Name of the face weight field
@@ -456,9 +474,15 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        stabilityBlendingFactor(const stabilityBlendingFactor&) = delete;
+
+        //- No copy assignment
+        void operator=(const stabilityBlendingFactor&) = delete;
+
 
     //- Destructor
-    virtual ~stabilityBlendingFactor();
+    virtual ~stabilityBlendingFactor() = default;
 
 
     // Member Functions

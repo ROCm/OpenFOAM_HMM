@@ -31,60 +31,78 @@ Group
     grpFieldFunctionObjects
 
 Description
-    This function object calculates the flux across selections of faces.
+    Computes the volumetric- or mass-flux
+    information across selections of face zones.
 
-    Output comprises, per set of faces, the fluxes:
-    - positive
-    - negative
-    - net
-    - absolute
+    Operands:
+    \table
+      Operand       | Type | Location
+      input         | -    | -
+      output file   | dat  | $FOAM_CASE/postProcessing/\<FO\>/\<time\>/\<faceN\>
+      output field  | -    | -
+    \endtable
 
 Usage
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     fluxSummary1
     {
-        type        fluxSummary;
-        libs        (fieldFunctionObjects);
-        ...
-        write       yes;
-        log         yes;
-        mode        cellZoneAndDirection;
+        // Mandatory entries (unmodifiable)
+        type            fluxSummary;
+        libs            (fieldFunctionObjects);
+
+        // Mandatory entries (runtime modifiable)
+        mode            cellZoneAndDirection;
         cellZoneAndDirection
         (
             (porosity (1 0 0))
         );
-        scaleFactor 1.2;
+
+        // Optional entries  (runtime modifiable)
+        phi             phi;
+        scaleFactor     1.0;
+        tolerance       0.8;
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property    | Description                           | Required | Default
-        type        | Type name: fluxSummary                | yes |
-        write       | Write flux data to file               | no  | yes
-        log         | Write flux data to standard output    | no  | yes
-        mode        | Mode to generate faces to test        | yes |
-        scaleFactor | Optional factor to scale result       | no  | 1
-        tolerance   | Tolerance for the reference direction | no  | 0.8
-        phi         | Surface flux field                    | no  | phi
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: fluxSummary             | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+      mode         | Mode to generate faces to test     | word |  yes  | -
+      phi          | Name of surface flux field         | word |  no   | phi
+      scaleFactor | Factor to scale results             | scalar | no  | 1.0
+      tolerance   | Tolerance for reference direction   | scalar | no  | 0.8
     \endtable
 
-    The mode is one of:
-    - faceZone
-    - faceZoneAndDirection
-    - cellZoneAndDirection
-    - surface
-    - surfaceAndDirection
+    Options for the \c mode entry:
+    \verbatim
+      faceZone
+      faceZoneAndDirection
+      cellZoneAndDirection
+      surface
+      surfaceAndDirection
+    \endverbatim
 
-    Output data is written to files of the form \<timeDir\>/\<faceZoneName\>.dat
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link writeFile.H \endlink
+
+    Usage by the \c postProcess utility is not available.
 
 Note
-    For surface and direction, can use phi = 'U' for determining the fluxes.
+    For surface and direction, phi='U' can be used for determining the fluxes.
 
 See also
-    Foam::functionObjects::fvMeshFunctionObject
-    Foam::functionObjects::writeFile
-    Foam::functionObjects::timeControl
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObjects::writeFile
+    - Foam::functionObjects::timeControl
+    - ExtendedCodeGuide::functionObjects::field::fluxSummary
 
 SourceFiles
     fluxSummary.C
@@ -121,7 +139,7 @@ class fluxSummary
 {
 public:
 
-    // Public enumerations
+    // Public Enumerations
 
         //- Face mode type
         enum modeType
@@ -144,13 +162,13 @@ protected:
         //- Track if the surface needs an update
         bool needsUpdate_;
 
-        //- Mode for face determination
+        //- Mode for face determination/to generate faces to test
         modeType mode_;
 
-        //- Scale factor
+        //- Factor to scale results
         scalar scaleFactor_;
 
-        //- Name of flux field, default = phi
+        //- Name of flux field
         word phiName_;
 
 
@@ -179,12 +197,12 @@ protected:
         scalar tolerance_;
 
 
-    // Private Member Functions
+    // Protected Member Functions
 
         //- Check if surface mode instead of zone mode
         bool isSurfaceMode() const;
 
-        //- Check flowType (mass or volume).
+        //- Check flowType (mass or volume)
         //  Return name on success, fatal error on failure.
         word checkFlowType
         (
@@ -252,7 +270,6 @@ protected:
         //- Initialise - after read(), before write()
         bool update();
 
-
         //- Output file header information
         virtual void writeFileHeader
         (
@@ -264,12 +281,6 @@ protected:
 
         //- Specialized write for surfaces
         bool surfaceModeWrite();
-
-        //- No copy construct
-        fluxSummary(const fluxSummary&) = delete;
-
-        //- No copy assignment
-        void operator=(const fluxSummary&) = delete;
 
 
 public:
@@ -287,6 +298,12 @@ public:
             const Time& runTime,
             const dictionary& dict
         );
+
+        //- No copy construct
+        fluxSummary(const fluxSummary&) = delete;
+
+        //- No copy assignment
+        void operator=(const fluxSummary&) = delete;
 
 
     //- Destructor

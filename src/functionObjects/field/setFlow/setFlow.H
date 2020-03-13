@@ -30,50 +30,104 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Provides options to set the velocity and flux fields as a function of time
+    Provides options to set the velocity and flux fields as a function of time.
 
     Useful for testing advection behaviour of numerical schemes by e.g.
     imposing solid body rotation, vortex flows.  All types include a scaling
-    Foam::Function1 type enabling the strength of the transformation to vary as
-    a function of time.
+    \c Function1 type enabling the strength of the transformation to vary
+    as a function of time.
+
+    Operands:
+    \table
+      Operand       | Type                       | Location
+      input         | {vol,surface}\<Type\>Field <!--
+                --> | $FOAM_CASE/\<time\>/\<inpField\>
+      output file   | -                          | -
+      output field  | {vol,surface}\<Type\>Field <!--
+                --> | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
+
+    where \c \<Type\>=Scalar/Vector/SphericalTensor/SymmTensor/Tensor.
 
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     setFlow1
     {
-        type            setFlow;
-        libs            (fieldFunctionObjects);
+        // Mandatory entries (unmodifiable)
+        type        setFlow;
+        libs        (fieldFunctionObjects);
+
+        // Mandatory entries (runtime modifiable)
+        mode        rotation;
+        scale       1;
+
+        // Optional entries (runtime modifiable)
+        U           U;
+        rho         none;
+        phi         phi;
+        reverseTime 1;
+
+        // When mode=function
+        velocity    (1 0 0);
+
+        // When mode=rotation
+        omega       6.28318530718;
+        origin      (0.5 0 0.5);
+        refDir      (1 0 0);
+        axis        (0 1 0);
+
+        // When mode=(vortex2D|vortex3D)
+        origin      (0.5 0 0.5);
+        refDir      (1 0 0);
+        axis        (0 1 0);
+
+        // Optional (inherited) entries
         ...
-        mode            rotation;
-        scale           1;
-        reverseTime     1;
-        omega           6.28318530718;
-        origin          (0.5 0 0.5);
-        refDir          (1 0 0);
-        axis            (0 1 0);
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description                | Required | Default value
-        type         | Type name: setFlow         | yes      |
-        U            | Name of velocity field     | no       | U
-        rho          | Name of density field      | no       | none
-        phi          | Name of flux field         | no       | phi
-        mode         | operating mode - see below | yes      |
+      Property     | Description                         | Type | Req'd | Dflt
+      type         | Type name: readFields               | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects  | word |  yes  | -
+      mode         | Operating mode - see below          | word |  yes  | -
+      scale        | Scaling function        | Function1<scalar> | yes  | -
+      U            | Name of velocity field              | word |  no   | U
+      rho          | Name of density field               | word |  no   | none
+      phi          | Name of flux field                  | word |  no   | phi
+      reverseTime  <!--
+      --> | Specified time to reverse flow direction     | scalar  | no | VGREAT
+      velocity     <!--
+      --> | Velocity function           | Function1<vector> | conditional | -
+      omega        <!--
+      --> | Rotational speed function   | Function1<scalar> | conditional | -
+      origin       <!--
+      --> | Rotation vector origin      | vector            | conditional | -
+      refDir       <!--
+      --> | Rotation vector reference direction   | vector  | conditional | -
+      axis         <!--
+      --> | Rotation vector axis                  | vector  | conditional | -
     \endtable
 
-    Available \c mode types include:
-    - function
-    - rortation
-    - vortex2D
-    - vortex3D
+    Options for the \c mode entry:
+    \verbatim
+      function
+      rotation
+      vortex2D
+      vortex3D
+    \endverbatim
 
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+
+    Usage by the \c postProcess utility is not available.
 
 See also
-    Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - ExtendedCodeGuide::functionObjects::field::setFlow
 
 SourceFiles
     setFlow.C
@@ -104,30 +158,34 @@ class setFlow
 :
     public fvMeshFunctionObject
 {
-    enum class modeType
-    {
-        FUNCTION,
-        ROTATION,
-        VORTEX2D,
-        VORTEX3D
-    };
+    // Private Enumerations
 
-   static const Enum<modeType> modeTypeNames;
+        //- Options for the operating mode
+        enum class modeType
+        {
+            FUNCTION,
+            ROTATION,
+            VORTEX2D,
+            VORTEX3D
+        };
+
+        //- Names for modeType
+        static const Enum<modeType> modeTypeNames;
 
 
    // Private Data
 
-        //- Name of velocity field, default = "U"
-        word UName_;
-
-        //- Name of density field, default = "none"
-        word rhoName_;
-
-        //- Name of flux field, default = "phi"
-        word phiName_;
-
         //- Operating mode
         modeType mode_;
+
+        //- Name of velocity field
+        word UName_;
+
+        //- Name of density field
+        word rhoName_;
+
+        //- Name of flux field
+        word phiName_;
 
         //- Reverse time
         scalar reverseTime_;
@@ -176,16 +234,27 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        setFlow(const setFlow&) = delete;
+
+        //- No copy assignment
+        void operator=(const setFlow&) = delete;
+
 
     //- Destructor
-    virtual ~setFlow();
+    virtual ~setFlow() = default;
 
 
-    virtual bool read(const dictionary& dict);
+    // Member Functions
 
-    virtual bool execute();
+        //- Read the setFlow data
+        virtual bool read(const dictionary& dict);
 
-    virtual bool write();
+        //- Do nothing
+        virtual bool execute();
+
+        //- Calculate the setFlow and write
+        virtual bool write();
 };
 
 

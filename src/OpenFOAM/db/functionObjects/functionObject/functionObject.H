@@ -28,52 +28,88 @@ Namespace
     Foam::functionObjects
 
 Description
-    Namespace for functionObjects.
+    Function objects are OpenFOAM utilities to ease workflow configurations and
+    enhance workflows by producing additional user-requested data both during
+    runtime and postprocessing calculations, typically in the form of
+    additional logging to the screen, or generating text, image and field files.
 
-    OpenFOAM includes a collection of functionObjects selected by the user at
-    run-time to manipulate the simulation and provide mechanisms to extract
-    field and derived quantities.  Alternatively, the same actions can be
-    executed after the simulation using the \c -postProcess command-line option.
+    Function objects eliminate the need to store all runtime generated data,
+    hence saving considerable resources. Furthermore, function objects are
+    readily applied to batch-driven processes, improving reliability by
+    standardising the sequence of operations and reducing the amount of manual
+    interaction.
+
+    In addition, the output of most function objects, e.g. output fields, are
+    stored on the mesh database so that it can be retrieved and used for other
+    applications (e.g. directly using \c wallShearStress function object output
+    in \c fieldAverage function object to produce \c wallShearStressMean field).
 
     \section secFunctionObjects Using function objects
 
-    FunctionObjects are selected by additional entries in the global case
-    system/controlDict dictionary.  Each object is listed in the \c
-    functions sub-dictionary, e.g. to select the \c functionObjectType
-    functionObject the following entry would be specified:
+    Function objects can be executed by using two methods:
+
+      - \c functions sub-dictionary in the \c system/controlDict file
+      - \c postProcess command-line utility
+
+    For the first method, each selected function object should be listed inside
+    \c functions sub-dictionary of the \c system/controlDict file as a nested
+    sub-dictionary, typically as in the following example:
 
     \verbatim
-    functions
+    functions    // sub-dictionary name under the system/controlDict file
     {
-        <functionObjectName>
+        <userDefinedSubDictName1>
         {
-            type                functionObjectType;
-            libs                (myFunctionObjectLib);
-            region              defaultRegion;
-            enabled             yes;
+            // Mandatory entries
+            type                <functionObjectTypeName>;
+            libs                (<libType>FunctionObjects);
+
+            // Mandatory entries defined in <functionObjectType>
+            ...
+
+            // Optional entries defined in <functionObjectType>
+            ...
+
+            // Optional (inherited) entries
+            region              region0;
+            enabled             true;
+            log                 true;
             timeStart           0;
-            timeEnd             10;
-            writeControl        writeTime;
+            timeEnd             1000;
+            executeControl      timeStep;
+            executeInterval     1;
+            writeControl        timeStep;
             writeInterval       1;
+        }
+
+        <userDefinedSubDictName2>
+        {
+            ...
+        }
+
+        ...
+
+        <userDefinedSubDictNameN>
+        {
             ...
         }
     }
     \endverbatim
 
-    Where:
+    where the entries mean:
     \table
-        Property | Description                              | Required | Default
-        type     | Type of function object                  | yes |
-        libs     | Libraries containing implementation      | yes |
-        region   | Name of region for multi-region cases    | no  |
-        enabled  | On/off switch                            | no  | yes
-        log      | Log information to standard output       | no  | yes
-        timeStart| Start time                               | no  |
-        timeEnd  | End time                                 | no  |
-        executeControl  | See time controls below           | no  | timeStep
-        executeInterval | Steps/time between execute phases | no  | 1
-        writeControl    | See time controls below           | no  | timeStep
-        writeInterval   | Steps/time between write phases   | no  | 1
+        Property | Description                            | Type | Req'd | Dflt
+        type     | Type name of function object           | word |  yes  | -
+        libs     | Library name containing implementation | word |  yes  | -
+        region   | Name of region for multi-region cases  | word | no | region0
+        enabled  | Switch to turn function object on/off  | bool | no | true
+        log     | Switch to write log info to standard output | bool | no | true
+        timeStart | Start time for function object execution | scalar | no | 0
+        timeEnd   | End time for function object execution   | scalar | no | inf
+        executeControl  | See time controls below     | word | no    | timeStep
+        executeInterval | Steps/time between execute phases  | label | no  | 1
+        writeControl    | See time controls below     | word | no    | timeStep
+        writeInterval   | Steps/time between write phases    | label | no  | 1
     \endtable
 
     Time controls:
@@ -86,15 +122,17 @@ Description
         adjustableRunTime | Currently identical to "runTime"
         clockTime         | Trigger every 'Interval' clock time period
         cpuTime           | Trigger every 'Interval' CPU time period
-        onEnd             | Trigger on end of run
+        onEnd             | Trigger on end of simulation run
     \endtable
 
-    The sub-dictionary name \c \<functionObjectName\> is chosen by the user, and
-    is typically used as the name of the output directory for any data written
-    by the functionObject.  The \c type entry defines the type of function
-    object properties that follow.  FunctionObjects are packaged into separate
-    libraries and the \c libs entry is used to specify which library should be
-    loaded.
+    The sub-dictionary name \c <userDefinedSubDictName> is chosen by the user,
+    and is typically used as the name of the output directory for any data
+    written by the function object.
+
+    As the base mandatory entries, the \c type entry defines the type of
+    function object properties that follow.  Function objects are packaged into
+    separate libraries for flexibility and the \c libs entry is used to specify
+    which library should be loaded.
 
     Each function object has two separate run phases:
 
@@ -104,6 +142,36 @@ Description
 
     For each phase the respective time controls are provided, as listed above.
 
+
+    The second method of executing function objects is to use \c postProcess
+    utility.
+
+    When specified without additional arguments, the \c postProcess utility
+    executes all function objects defined in the \c system/controlDict file
+    for all time directories:
+
+    \verbatim
+        postProcess
+    \endverbatim
+
+    Most function objects can be invoked directly without the need to specify
+    the input dictionary using the \c -func option, e.g. to execute the Courant
+    number function object:
+
+    \verbatim
+        postProcess -func CourantNo
+    \endverbatim
+
+    In addition, the \c -postProcess option is available to all solvers,
+    and operates similarly to the stand-alone \c postProcess utility.
+    For example, having completed a \c simpleFoam calculation, the following
+    will execute all function objects defined in the \c system/controlDict file
+    for all time directories:
+
+    \verbatim
+        simpleFoam -postProcess
+    \endverbatim
+
 Class
     Foam::functionObject
 
@@ -111,8 +179,8 @@ Description
     Abstract base-class for Time/database function objects.
 
 See also
-    Foam::functionObjectList
-    Foam::functionObjects::timeControl
+    - Foam::functionObjectList
+    - Foam::functionObjects::timeControl
 
 SourceFiles
     functionObject.C
@@ -142,7 +210,7 @@ class mapPolyMesh;
 
 class functionObject
 {
-    // Private data
+    // Private Data
 
         //- Name
         const word name_;
@@ -164,6 +232,7 @@ public:
     //- Runtime type information
     virtual const word& type() const = 0;
 
+    //- Flag to execute debug content
     static int debug;
 
     //- Global post-processing mode switch
@@ -172,7 +241,7 @@ public:
     //- Directory prefix
     static word outputPrefix;
 
-    //- Switch write log to Info
+    //- Flag to write log into Info
     bool log;
 
 

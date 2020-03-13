@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +39,7 @@ void Foam::functionObjects::turbulenceFields::processField
 {
     typedef GeometricField<Type, fvPatchField, volMesh> FieldType;
 
-    const word scopedName = modelName + ':' + fieldName;
+    const word scopedName = modelName_ + ':' + fieldName;
 
     FieldType* fldPtr = obr_.getObjectPtr<FieldType>(scopedName);
 
@@ -156,5 +156,6 @@ Foam::functionObjects::turbulenceFields::I
         uPrime/max(max(uPrime, mag(model.U())), U0)
     );
 }
+
 
 // ************************************************************************* //

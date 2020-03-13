@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,11 +28,34 @@ Class
     Foam::functionObjects::writeFile
 
 Description
-    functionObject base class for writing single files
+    Base class for writing single files from the function objects.
+
+Usage
+
+    \verbatim
+    <userDefinedSubDictName1>
+    {
+        // Mandatory and other optional entries
+        ...
+
+        // Optional (inherited) entries (runtime modifiable)
+        writePrecision    8;
+        writeToFile       true;
+        useUserTime       true;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property        | Description                      | Type | Req'd | Dflt
+      writePrecision  | Number of decimal points | label | no  | \<system dflt\>
+      writeToFile     | Flag to produce text file output | bool | no    | true
+      useUserTime | Flag to use user time, e.g. degrees  | bool | no    | true
+    \endtable
 
 See also
-    Foam::functionObject
-    Foam::functionObjects::logFiles
+    - Foam::functionObject
+    - Foam::functionObjects::logFiles
 
 SourceFiles
     writeFile.C

@@ -115,9 +115,9 @@ Foam::functionObjects::proudmanAcousticPower::proudmanAcousticPower
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
+    alphaEps_(0.1),
     rhoInf_("0", dimDensity, -1),
-    aRef_(dimVelocity, Zero),
-    alphaEps_(0.1)
+    aRef_(dimVelocity, Zero)
 {
     read(dict);
 
@@ -167,9 +167,9 @@ bool Foam::functionObjects::proudmanAcousticPower::read(const dictionary& dict)
 {
     if (fvMeshFunctionObject::read(dict))
     {
+        dict.readIfPresent("alphaEps", alphaEps_);
         rhoInf_.readIfPresent("rhoInf", dict);
         aRef_.readIfPresent("aRef", dict);
-        dict.readIfPresent("alphaEps", alphaEps_);
 
         return true;
     }

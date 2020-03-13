@@ -45,6 +45,7 @@ timePrecision   6;
 
 runTimeModifiable true;
 
+
 functions
 {
     minMax1
@@ -56,13 +57,24 @@ functions
 
     curle
     {
-        libs            (fieldFunctionObjects);
+        // Mandatory entries
         type            Curle;
-        writeControl    writeTime;
-        timeStart       0.1;
-
+        libs            (fieldFunctionObjects);
         patches         (cylinder);
         c0              343;
+
+        // Optional (inherited) entries
+        field           p;
+        result          Curle;
+        region          region0;
+        enabled         true;
+        log             true;
+        timeStart       0.1;
+        timeEnd         1000;
+        executeControl  timeStep;
+        executeInterval 1;
+        writeControl    writeTime;
+        writeInterval   -1;
     }
 
     cuttingPlane

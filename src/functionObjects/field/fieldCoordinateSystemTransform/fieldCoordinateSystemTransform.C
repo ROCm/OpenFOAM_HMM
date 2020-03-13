@@ -36,7 +36,6 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(fieldCoordinateSystemTransform, 0);
-
     addToRunTimeSelectionTable
     (
         functionObject,

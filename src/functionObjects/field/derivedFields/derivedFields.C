@@ -39,13 +39,7 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(derivedFields, 0);
-
-    addToRunTimeSelectionTable
-    (
-        functionObject,
-        derivedFields,
-        dictionary
-    );
+    addToRunTimeSelectionTable(functionObject, derivedFields, dictionary);
 }
 }
 
@@ -60,7 +54,6 @@ Foam::functionObjects::derivedFields::knownNames
     { derivedType::MASS_FLUX , "rhoU" },
     { derivedType::TOTAL_PRESSURE , "pTotal" },
 });
-
 
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //

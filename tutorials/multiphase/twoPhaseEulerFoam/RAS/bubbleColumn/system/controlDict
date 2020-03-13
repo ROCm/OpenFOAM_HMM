@@ -90,6 +90,39 @@ functions
             }
         );
     }
+
+    regionSizeDistribution1
+    {
+        // Mandatory entries
+        type            regionSizeDistribution;
+        libs            (fieldFunctionObjects);
+        field           alpha.air;
+        patches         (inlet);
+        fields          (p U);
+        threshold       0.5;
+        maxDiameter     0.5;
+        nBins           100;
+        setFormat       gnuplot;
+
+        // Optional entries
+        minDiameter     0.0;
+        isoPlanes       false;
+
+        // Optional (inherited) entries
+        writePrecision  12;
+        writeToFile     true;
+        useUserTime     true;
+
+        region          region0;
+        enabled         true;
+        log             true;
+        timeStart       0;
+        timeEnd         1000;
+        executeControl  timeStep;
+        executeInterval 1;
+        writeControl    writeTime;
+        writeInterval   -1;
+    }
 }
 
 

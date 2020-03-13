@@ -11,7 +11,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 type            magSqr;
-libs            ("libfieldFunctionObjects.so");
+libs            (fieldFunctionObjects);
 
 field           <fieldName>;
 

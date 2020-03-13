@@ -30,40 +30,78 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Calculates the continuity error for a flux field
+    Computes local, global and cumulative continuity errors for a flux field.
+
+    Local continuity error, \f$ \epsilon_{local} \f$:
+    \f[
+        \epsilon_{local} = \Delta_t \langle |x| \rangle
+    \f]
+
+    Global continuity error, \f$ \epsilon_{global} \f$:
+    \f[
+        \epsilon_{global} = \Delta_t \langle |x| \rangle
+    \f]
+
+    Cumulative continuity, \f$ \epsilon_{cum} \f$:
+    \f[
+        \epsilon_{cum} += \epsilon_{global}
+    \f]
+
+    where
+    \vartable
+      \Delta_t          | Time-step size
+      \langle . \rangle | Cell-volume weighted average operator
+      x                 | \f$ \div \phi \f$
+      phi               | Flux field
+    \endvartable
+
+    Operands:
+    \table
+      Operand        | Type | Location
+      input          | -    | -
+      output file    | dat  | $FOAM_CASE/postProcessing/\<FO\>/\<time\>/\<file\>
+      output field   | -    | -
+    \endtable
 
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     continuityError1
     {
+        // Mandatory entries (unmodifiable)
         type        continuityError;
         libs        (fieldFunctionObjects);
-        ...
-        writeToFile yes;
-        log         yes;
+
+        // Optional entries (runtime modifiable)
         phi         phi;
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description             | Required    | Default value
-        type         | type name: continuityError  | yes         |
-        writeToFile  | write min/max data to file | no       | yes
-        log          | write min/max data to standard output | no | yes
-        phi          | name of flux field      | no | phi
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: continuityError         | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+      phi          | Name of flux field                 | word |  no   | phi
     \endtable
 
-    Output data is written to the file \<timeDir\>/continuityError.dat
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link writeFile.H \endlink
+
+    Usage by the \c postProcess utility is not available.
 
 See also
-    Foam::functionObjects::fvMeshFunctionObject
-    Foam::functionObjects::writeFile
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObjects::writeFile
+    - ExtendedCodeGuide::functionObjects::field::continuityError
 
 SourceFiles
     continuityError.C
-    continuityErrorTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -90,22 +128,11 @@ class continuityError
     public fvMeshFunctionObject,
     public writeFile
 {
-private:
-
-    // Private Member Functions
-
-        //- No copy construct
-        continuityError(const continuityError&) = delete;
-
-        //- No copy assignment
-        void operator=(const continuityError&) = delete;
-
-
 protected:
 
-    // Protected data
+    // Protected Data
 
-        //- Name of the flux field; default = "phi
+        //- Name of flux field
         word phiName_;
 
         //- Cumulative error
@@ -133,6 +160,12 @@ public:
             const Time& runTime,
             const dictionary& dict
         );
+
+        //- No copy construct
+        continuityError(const continuityError&) = delete;
+
+        //- No copy assignment
+        void operator=(const continuityError&) = delete;
 
 
     //- Destructor

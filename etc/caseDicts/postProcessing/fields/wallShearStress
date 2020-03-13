@@ -12,7 +12,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 type            wallShearStress;
-libs            ("libfieldFunctionObjects.so");
+libs            (fieldFunctionObjects);
 
 executeControl  writeTime;
 writeControl    writeTime;

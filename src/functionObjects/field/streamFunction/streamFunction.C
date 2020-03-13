@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,13 +42,7 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(streamFunction, 0);
-
-    addToRunTimeSelectionTable
-    (
-        functionObject,
-        streamFunction,
-        dictionary
-    );
+    addToRunTimeSelectionTable(functionObject, streamFunction, dictionary);
 }
 }
 
@@ -435,7 +429,7 @@ Foam::functionObjects::streamFunction::streamFunction
 {
     setResultName(typeName, "phi");
 
-    label nD = mesh_.nGeometricD();
+    const label nD = mesh_.nGeometricD();
 
     if (nD != 2)
     {
@@ -444,12 +438,6 @@ Foam::functionObjects::streamFunction::streamFunction
             << exit(FatalError);
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::streamFunction::~streamFunction()
-{}
 
 
 // ************************************************************************* //

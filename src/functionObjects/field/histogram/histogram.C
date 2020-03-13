@@ -95,12 +95,6 @@ Foam::functionObjects::histogram::histogram
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::histogram::~histogram()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::histogram::read(const dictionary& dict)
@@ -113,6 +107,14 @@ bool Foam::functionObjects::histogram::read(const dictionary& dict)
     max_ = dict.getOrDefault<scalar>("max", -GREAT);
     min_ = dict.getOrDefault<scalar>("min", GREAT);
     dict.readEntry("nBins", nBins_);
+
+    if (nBins_ < 1)
+    {
+        FatalErrorInFunction
+            << "Number of histogram bins = " << nBins_
+            << " cannot be negative or zero."
+            << abort(FatalError);
+    }
 
     const word format(dict.get<word>("setFormat"));
     formatterPtr_ = writer<scalar>::New(format);

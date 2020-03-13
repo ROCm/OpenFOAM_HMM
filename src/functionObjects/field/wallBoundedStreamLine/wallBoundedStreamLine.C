@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +39,6 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(wallBoundedStreamLine, 0);
-
     addToRunTimeSelectionTable
     (
         functionObject,
@@ -126,7 +125,7 @@ Foam::point Foam::functionObjects::wallBoundedStreamLine::pushIn
     //        << " seed:" << pt << exit(FatalError);
     //}
 
-    return (1.0-ROOTSMALL)*pt+ROOTSMALL*tri.centre();
+    return (1.0 - ROOTSMALL)*pt + ROOTSMALL*tri.centre();
 }
 
 
@@ -303,12 +302,6 @@ Foam::functionObjects::wallBoundedStreamLine::wallBoundedStreamLine
 {
     read(dict_);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::wallBoundedStreamLine::~wallBoundedStreamLine()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

@@ -30,52 +30,69 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Calculates linear/angular momentum, reporting integral values
+    Computes linear/angular momentum, reporting integral values
     and optionally writing the fields.
 
-    Data is written into momentum.dat in the
-    postProcessing/\<functionObjectName\> directory.
+    Operands:
+    \table
+      Operand       | Type | Location
+      input         | -    | -
+      output file   | dat  | $FOAM_CASE/postProcessing/\<FO\>/\<time\>/\<file\>
+      output field  | -    | -
+    \endtable
 
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     momentum1
     {
-        type        momentum;
-        libs        (fieldFunctionObjects);
-        ...
-        log         yes;
+        // Mandatory entries (unmodifiable)
+        type            momentum;
+        libs            (fieldFunctionObjects);
 
+        // Optional entries (runtime modifiable)
         regionType      all;
         writeMomentum   yes;
         writePosition   yes;
         writeVelocity   yes;
+        p               p;
+        U               U;
+        rho             rho;
+        rhoRef          1.0;
 
         cylindrical     true;
+        origin          (0 0 0);
+        e1              (1 0 0);
+        e3              (0 0 1);
 
-        origin  (0 0 0);
-        e1      (1 0 0);
-        e3      (0 0 1);
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description                          | Required | Default
-        type         | Type name: momentum                  | yes |
-        log          | Log information to standard output   | no  | no
-        writeMomentum | Write (linear, angular) momentum  fields  | no | no
-        writePosition | Write angular position component fields   | no | no
-        writeVelocity | Write angular velocity fields       | no  | no
-        p            | Pressure field name                  | no  | p
-        U            | Velocity field name                  | no  | U
-        rho          | Density field name                   | no  | rho
-        rhoRef       | Reference density (incompressible)   | no  | 1.0
-        cylindrical  | Use cylindrical coordinates          | no  | false
-        origin       | Origin for cylindrical coordinates   | no  |
-        regionType   | Selection type: all/cellSet/cellZone | no  | all
-        name         | Name of cellSet/cellZone if required | no  |
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: momentum                | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+      regionType   | Selection type: all/cellSet/cellZone | word   | no  | all
+      writeMomentum | Write (linear, angular) momentum  fields | bool | no | no
+      writePosition | Write angular position component fields | bool | no  | no
+      writeVelocity | Write angular velocity fields           | bool | no  | no
+      p            | Pressure field name                | word | no  | p
+      U            | Velocity field name                | word | no  | U
+      rho          | Density field name                 | word | no  | rho
+      rhoRef       | Reference density (incompressible) | scalar | no  | 1.0
+      cylindrical  | Use cylindrical coordinates        | bool | no  | no
+      origin  | Origin for cylindrical coordinates   | vector | conditional  | -
+      name    | Name of cellSet/cellZone if required | word   | conditional  | -
     \endtable
+
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link writeFile.H \endlink
+
+    Usage by the \c postProcess utility is not available.
 
 Note
   - For incompressible cases, the value of \c rhoRef is used.
@@ -93,11 +110,11 @@ Note
     \endverbatim
 
 See also
-    Foam::functionObject
-    Foam::functionObjects::fvMeshFunctionObject
-    Foam::functionObjects::volRegion
-    Foam::functionObjects::writeFile
-    Foam::functionObjects::timeControl
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObjects::volRegion
+    - Foam::functionObjects::writeFile
+    - ExtendedCodeGuide::functionObjects::field::momentum
 
 SourceFiles
     momentum.C
@@ -154,7 +171,7 @@ class momentum
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Integral (linear) momentum
         vector sumMomentum_;
@@ -208,12 +225,6 @@ protected:
         //- Write momentum data
         void writeValues(Ostream& os);
 
-        //- No copy construct
-        momentum(const momentum&) = delete;
-
-        //- No copy assignment
-        void operator=(const momentum&) = delete;
-
 
 public:
 
@@ -240,6 +251,12 @@ public:
             const dictionary& dict,
             const bool readFields = true
         );
+
+        //- No copy construct
+        momentum(const momentum&) = delete;
+
+        //- No copy assignment
+        void operator=(const momentum&) = delete;
 
 
     //- Destructor

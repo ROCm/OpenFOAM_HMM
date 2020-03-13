@@ -1,19 +1,30 @@
-// -*- C++ -*-
-
-// ************************************************************************* //
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1912                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
 
 // Create additional volume fields (for sampling)
 derivedFields
 {
-    type    derivedFields;
-    libs    (fieldFunctionObjects);
-    log     true;
+    // Mandatory entries
+    type            derivedFields;
+    libs            (fieldFunctionObjects);
+    derived         (rhoU pTotal);
 
-    writeControl    none;
+    // Optional (inherited) entries
+    region          region0;
+    enabled         true;
+    log             true;
+    timeStart       0;
+    timeEnd         10000;
     executeControl  timeStep;
     executeInterval 1;
-
-    derived (rhoU pTotal);
+    writeControl    none;
+    writeInterval  -1;
 }
+
 
 // ************************************************************************* //

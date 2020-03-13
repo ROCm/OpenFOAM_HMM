@@ -31,39 +31,58 @@ Group
     grpForcesFunctionObjects
 
 Description
-    Calculates and write the heat-flux at wall patches as the
-    volScalarField field 'wallHeatFlux'.
+    Computes the wall-heat flux at selected wall patches.
 
-    All wall patches are included by default; to restrict the calculation to
-    certain patches, use the optional 'patches' entry.
+    \table
+      Operand        | Type              | Location
+      input          | -                 | -
+      output file    | dat               <!--
+                 --> | $FOAM_CASE/postProcessing/\<FO\>/\<time\>/\<field\>
+      output field   | volScalarField (only boundaryField) <!--
+                 --> | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
 
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     wallHeatFlux1
     {
+        // Mandatory entries (unmodifiable)
         type        wallHeatFlux;
         libs        (fieldFunctionObjects);
+
+        // Optional entries (runtime modifiable)
+        patches     (<patch1> ... <patchN>); // (wall1 "(wall2|wall3)");
+        qr          qr;
+
+        // Optional (inherited) entries
         ...
-        region      fluid;
-        patches     (".*Wall");
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property | Description                | Required   | Default
-        type     | type name: wallHeatFlux    | yes        |
-        patches  | list of patches to process | no         | all wall patches
-        qr       | name of radiative heat flux field | no  | qr
-        region   | region to be evaluated     | no         | default region
+      Property     | Description                           | Type | Req'd | Dflt
+      type         | Type name: wallHeatFlux               | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects    | word |  yes  | -
+      patches    | Names of operand patches   | wordList | no | all wall patches
+      qr         | Name of radiative heat flux field       | word | no | qr
     \endtable
 
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link writeFile.H \endlink
+
+    Minimal example by using the \c postProcess utility:
+    \verbatim
+        <solver> -postProcess -func wallHeatFlux
+    \endverbatim
+
 See also
-    Foam::functionObject
-    Foam::functionObjects::fvMeshFunctionObject
-    Foam::functionObjects::writeFile
-    Foam::functionObjects::timeControl
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObjects::writeFile
+    - ExtendedCodeGuide::functionObjects::field::wallHeatFlux
 
 SourceFiles
     wallHeatFlux.C
@@ -101,7 +120,7 @@ protected:
         //- Optional list of wall patches to process
         labelHashSet patchSet_;
 
-        //- Name of radiative heat flux name, default = qr
+        //- Name of radiative heat flux name
         word qrName_;
 
 
@@ -119,15 +138,6 @@ protected:
         );
 
 
-    // Protected Member Functions
-
-        //- No copy construct
-        wallHeatFlux(const wallHeatFlux&) = delete;
-
-        //- No copy assignment
-        void operator=(const wallHeatFlux&) = delete;
-
-
 public:
 
     //- Runtime type information
@@ -143,6 +153,12 @@ public:
             const Time& runTime,
             const dictionary&
         );
+
+        //- No copy construct
+        wallHeatFlux(const wallHeatFlux&) = delete;
+
+        //- No copy assignment
+        void operator=(const wallHeatFlux&) = delete;
 
 
     //- Destructor

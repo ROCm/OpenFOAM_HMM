@@ -31,34 +31,55 @@ Group
     grpFieldFunctionObjects
 
 Description
-    This function object calculates and outputs the Courant number as a
-    volScalarField.  The field is stored on the mesh database so that it can
-    be retrieved and used for other applications.
+    Computes the Courant number field for time-variant simulations.
+
+    Operands:
+    \table
+      Operand           | Type           | Location
+      input             | -              | -
+      output file       | -              | -
+      output field      | volScalarField | $FOAM_CASE/<time>/<outField>
+    \endtable
 
 Usage
-    Example of function object specification to calculate the Courant number:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     CourantNo1
     {
+        // Mandatory entries (unmodifiable)
         type        CourantNo;
         libs        (fieldFunctionObjects);
+
+        // Optional entries (runtime modifiable)
+        rho         rho;
+
+        // Optional (inherited) entries
         ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description             | Required    | Default value
-        type         | Type name: CourantNo    | yes         |
-        rho          | Name of density field   | no          | rho
-        field        | Name of flux field      | no          | phi
-        result       | Name of Courant number field | no     | \<function name\>
-        log          | Log to standard output  | no          | yes
+      Property   | Description                        | Type | Req'd | Dflt
+      type       | Type name: CourantNo               | word |  yes  | -
+      libs       | Library name: fieldFunctionObjects | word |  yes  | -
+      rho        | Name of density field              | word |  no   | rho
     \endtable
 
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link fieldExpression.H \endlink
+
+    Minimal example by using the \c postProcess utility:
+    \verbatim
+        postProcess -func CourantNo
+    \endverbatim
+
 See also
-    Foam::functionObjects::fieldExpression
-    Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObject
+    - Foam::functionObjects::fieldExpression
+    - Foam::functionObjects::fvMeshFunctionObject
+    - ExtendedCodeGuide::functionObjects::field::CourantNo
 
 SourceFiles
     CourantNo.C
@@ -86,9 +107,9 @@ class CourantNo
 :
     public fieldExpression
 {
-    // Private data
+    // Private Data
 
-        //- Name of density field (optional)
+        //- Name of density field
         word rhoName_;
 
 
@@ -120,9 +141,15 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        CourantNo(const CourantNo&) = delete;
+
+        //- No copy assignment
+        void operator=(const CourantNo&) = delete;
+
 
     //- Destructor
-    virtual ~CourantNo();
+    virtual ~CourantNo() = default;
 
 
     // Member Functions

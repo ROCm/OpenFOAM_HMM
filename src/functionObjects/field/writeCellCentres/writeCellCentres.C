@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,12 +57,6 @@ Foam::functionObjects::writeCellCentres::writeCellCentres
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::writeCellCentres::~writeCellCentres()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::writeCellCentres::read(const dictionary& dict)
@@ -79,7 +73,7 @@ bool Foam::functionObjects::writeCellCentres::execute()
 
 bool Foam::functionObjects::writeCellCentres::write()
 {
-    volVectorField C
+    const volVectorField C
     (
         IOobject
         (
@@ -94,14 +88,15 @@ bool Foam::functionObjects::writeCellCentres::write()
         calculatedFvPatchScalarField::typeName
     );
 
-    Log << "    Writing cell-centre field " << C.name()
+    Log << type() << " " << name() << " write:" << nl
+        << "    writing cell-volumes field " << C.name()
         << " to " << time_.timeName() << endl;
 
     C.write();
 
-    for (direction i=0; i<vector::nComponents; i++)
+    for (direction i = 0; i < vector::nComponents; ++i)
     {
-        volScalarField Ci
+        const volScalarField Ci
         (
             IOobject
             (

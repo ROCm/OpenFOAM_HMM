@@ -12,7 +12,7 @@ License
     This file is part of OpenFOAM.
 
     OpenFOAM is free software: you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by
+    under the terms of the GNU General Public L2020icense as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
@@ -34,32 +34,58 @@ Description
     Reads fields from the time directories and adds them to the mesh database
     for further post-processing.
 
+    Operands:
+    \table
+      Operand        | Type             | Location
+      input          | vol\<Type\>Field | $FOAM_CASE/\<time\>/\<inpField\>
+      output file    | -                | -
+      output field   | vol\<Type\>Field | Mesh database
+    \endtable
+
+    where \c \<Type\>=Scalar/Vector/SphericalTensor/SymmTensor/Tensor.
+
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     readFields1
     {
+        // Mandatory entries (unmodifiable)
         type        readFields;
         libs        (fieldFunctionObjects);
+
+        // Mandatory entries (runtime modifiable)
+        fields      (<field1> <field2> ... <fieldN>);
+
+        // Optional entries (runtime modifiable)
+        readOnStart true;
+
+        // Optional (inherited) entries
         ...
-        fields      (U p);
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description             | Required    | Default value
-        type         | type name: readFields   | yes         |
-        fields       | list of fields to read  |  no         |
-        readOnStart  | flag to start reading on start-up | no  | yes
-        log          | Log to standard output  | no          | yes
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: readFields              | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+      fields       | Names of the operand fields        | wordList |  yes  | -
+      readOnStart  | Flag to start reading on start-up  | bool | no    | true
     \endtable
 
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+
+    Usage by the \c postProcess utility is not available.
+
 See also
-    Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - ExtendedCodeGuide::functionObjects::field::readFields
 
 SourceFiles
     readFields.C
+    readFieldsTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -87,30 +113,20 @@ class readFields
 {
 protected:
 
-    // Protected data
-
-        //- Fields to load
-        wordList fieldSet_;
+    // Protected Data
 
         //- Flag to read on construction
         bool readOnStart_;
 
+        //- Fields to load
+        wordList fieldSet_;
+
 
     // Protected Member Functions
 
+        //- Load field
         template<class Type>
         bool loadField(const word&);
-
-
-private:
-
-    // Private member functions
-
-        //- No copy construct
-        readFields(const readFields&) = delete;
-
-        //- No copy assignment
-        void operator=(const readFields&) = delete;
 
 
 public:
@@ -130,9 +146,15 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        readFields(const readFields&) = delete;
+
+        //- No copy assignment
+        void operator=(const readFields&) = delete;
+
 
     //- Destructor
-    virtual ~readFields();
+    virtual ~readFields() = default;
 
 
     // Member Functions

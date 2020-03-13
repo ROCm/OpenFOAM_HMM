@@ -39,13 +39,7 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(zeroGradient, 0);
-
-    addToRunTimeSelectionTable
-    (
-        functionObject,
-        zeroGradient,
-        dictionary
-    );
+    addToRunTimeSelectionTable(functionObject, zeroGradient, dictionary);
 }
 }
 

@@ -14,7 +14,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 type            flowType;
-libs            ("libfieldFunctionObjects.so");
+libs            (fieldFunctionObjects);
 
 field           U;
 

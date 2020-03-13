@@ -69,9 +69,9 @@ functions
         libs            (fieldFunctionObjects);
         writeControl    writeTime;
     }
-    lambVector1
+    LambVector1
     {
-        type            lambVector;
+        type            LambVector;
         libs            (fieldFunctionObjects);
         writeControl    writeTime;
         field           U;
@@ -81,7 +81,7 @@ functions
         type            div;
         libs            (fieldFunctionObjects);
         writeControl    writeTime;
-        field           lambVector;
+        field           LambVector;
     }
     fieldAverage1
     {
@@ -106,14 +106,14 @@ functions
                 base        time;
             }
 
-            lambVector
+            LambVector
             {
                 mean        on;
                 prime2Mean  off;
                 base        time;
             }
 
-            div(lambVector)
+            div(LambVector)
             {
                 mean        on;
                 prime2Mean  off;

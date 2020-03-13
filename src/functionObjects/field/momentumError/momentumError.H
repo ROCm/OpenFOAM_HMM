@@ -30,28 +30,54 @@ Group
     grpForcesFunctionObjects
 
 Description
-    Produces a balance terms result for the steady momentum equation
+    Computes balance terms for the steady momentum equation.
+
+    Operands:
+    \table
+      Operand       | Type           | Location
+      input         | -              | -
+      output file   | -              | -
+      output field  | volVectorField | $FOAM_CASE/\<time\>/\<file\>
+    \endtable
 
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
-    momErr
+    momentumError1
     {
+        // Mandatory entries (unmodifiable)
         type        momentumError;
+        libs        (fieldFunctionObjects);
+
+        // Optional entries (runtime modifiable)
+        p           <pName>;
+        U           <UName>;
+        phi         <phiName>;
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description             | Required    | Default value
-        type         | Type name: momentumError| yes         |
-        p            | Pressure field name     | no          | p
-        U            | Velocity field name     | no          | U
-        phi          | Flux field name         | no          | phi
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: momentumError           | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+      p            | Name of pressure field             | word |  no   | p
+      U            | Name of velocity field             | word |  no   | U
+      phi          | Name of flux field                 | word |  no   | phi
     \endtable
+
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+
+    Usage by the \c postProcess utility is not available.
+
 See also
-    Foam::functionObject
-    Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - ExtendedCodeGuide::functionObjects::field::momentumError
 
 SourceFiles
     momentumError.C
@@ -79,10 +105,9 @@ class momentumError
 :
     public fvMeshFunctionObject
 {
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         // Read from dictionary
 
@@ -92,7 +117,7 @@ protected:
             //- Name of velocity field
             word UName_;
 
-            //- Flux
+            //- Name of flux field
             word phiName_;
 
 
@@ -100,12 +125,6 @@ protected:
 
          //- Return the effective viscous stress (laminar + turbulent).
         tmp<volVectorField> divDevRhoReff();
-
-        //- No copy construct
-        momentumError(const momentumError&) = delete;
-
-        //- No copy assignment
-        void operator=(const momentumError&) = delete;
 
 
 public:
@@ -124,8 +143,16 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        momentumError(const momentumError&) = delete;
+
+        //- No copy assignment
+        void operator=(const momentumError&) = delete;
+
+
     //- Destructor
     virtual ~momentumError() = default;
+
 
     // Member Functions
 

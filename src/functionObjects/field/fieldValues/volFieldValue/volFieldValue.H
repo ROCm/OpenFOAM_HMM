@@ -31,88 +31,91 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Provides a 'volRegion' specialization of the fieldValue function object.
+    Provides a 'volRegion' specialization of the \c fieldValue function object.
 
     Given a list of user-specified fields and a 'volRegion', a number of
     operations can be performed, such as sums, averages and integrations.
 
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     volFieldValue1
     {
+        // Mandatory entries (unmodifiable)
         type            volFieldValue;
         libs            (fieldFunctionObjects);
 
-        log             true;
-        writeControl    writeTime;
-        writeFields     true;
+        // Mandatory entries (runtime modifiable)
+        fields          (<field1> <field2> ... <fieldN>);
+        operation       <operationType>;
+        regionType      <volRegion>;
 
-        regionType      cellZone;
-        name            c0;
-        operation       volAverage;
-
+        // Optional entries (runtime modifiable)
+        postOperation   none;
         weightField     alpha1;
 
-        fields
-        (
-            p
-            U
-        );
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description              | Required    | Default value
-        type         | Type name: volFieldValue            | yes   |
-        log          | Write data to standard output       | no    | no
-        writeFields  | Write the region field values       | yes   |
-        regionType   | volRegion type: see below           | yes   |
-        name         | Name of volRegion if required       | no    |
-        operation    | Operation to perform                | yes   |
-        postOperation | Post-operation to perform          | no    | none
-        weightField  | Name of field to apply weighting    | no    |
-        fields       | List of fields to operate on        | yes   |
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: volFieldValue           | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+      fields       | Names of operand fields            | wordList | yes | -
+      regionType   | Face regionType: see below         | word |  yes  | -
+      name         | Name for regionType                | word |  yes  | -
+      operation    | Operation type: see below          | word |  yes  | -
+      postOperation | Post-operation type: see below    | word |  no   | none
+      weightField  | Name of field to apply weighting   | word |  no   | none
     \endtable
 
-    Where \c regionType is defined by
+    The inherited entries are elaborated in:
+     - \link fieldValue.H \endlink
+     - \link volRegion.H \endlink
+
+    Options for the \c regionType entry:
     \plaintable
-        cellZone     | requires a 'name' entry to specify the cellZone
-        all          | all cells
+      cellZone     | requires a 'name' entry to specify the cellZone
+      all          | all cells
     \endplaintable
 
-    The \c operation is one of:
+    Options for the \c operation entry:
     \plaintable
-       none                 | No operation
-       min                  | Minimum
-       max                  | Maximum
-       sum                  | Sum
-       sumMag               | Sum of component magnitudes
-       average              | Ensemble average
-       volAverage           | Volume weighted average
-       volIntegrate         | Volume integral
-       CoV                  | Coefficient of variation: standard deviation/mean
-       weightedSum          | Weighted sum
-       weightedAverage      | Weighted average
-       weightedVolAverage   | Weighted volume average
-       weightedVolIntegrate | Weighted volume integral
+      none                 | No operation
+      min                  | Minimum
+      max                  | Maximum
+      sum                  | Sum
+      sumMag               | Sum of component magnitudes
+      average              | Ensemble average
+      volAverage           | Volume weighted average
+      volIntegrate         | Volume integral
+      CoV                  | Coefficient of variation: standard deviation/mean
+      weightedSum          | Weighted sum
+      weightedAverage      | Weighted average
+      weightedVolAverage   | Weighted volume average
+      weightedVolIntegrate | Weighted volume integral
     \endplaintable
 
-    The \c postOperation is one of:
+    Options for the \c postOperation entry:
     \plaintable
-       none          | No additional operation after calculation
-       mag           | Component-wise \c mag() after normal operation
-       sqrt          | Component-wise \c sqrt() after normal operation
+      none          | No additional operation after calculation
+      mag           | Component-wise \c mag() after normal operation
+      sqrt          | Component-wise \c sqrt() after normal operation
     \endplaintable
+
+    Usage by the \c postProcess utility is not available.
 
 See also
-    Foam::functionObjects::fieldValues::fieldValue
-    Foam::functionObjects::volRegion
-    Foam::functionObject
+    - Foam::functionObject
+    - Foam::functionObjects::fieldValues::fieldValue
+    - Foam::functionObjects::volRegion
 
 SourceFiles
     volFieldValue.C
+    volFieldValueTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -271,9 +274,9 @@ protected:
         template<class Type>
         tmp<Field<Type>> filterField(const Field<Type>& field) const;
 
-
         //- Output file header information
         virtual void writeFileHeader(Ostream& os) const;
+
 
 public:
 
@@ -298,6 +301,12 @@ public:
             const objectRegistry& obr,
             const dictionary& dict
         );
+
+        //- No copy construct
+        volFieldValue(const volFieldValue&) = delete;
+
+        //- No copy assignment
+        void operator=(const volFieldValue&) = delete;
 
 
     //- Destructor

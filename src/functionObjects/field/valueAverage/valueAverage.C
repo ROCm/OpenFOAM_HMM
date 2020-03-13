@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2017 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,13 +37,7 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(valueAverage, 0);
-
-    addToRunTimeSelectionTable
-    (
-        functionObject,
-        valueAverage,
-        dictionary
-    );
+    addToRunTimeSelectionTable(functionObject, valueAverage, dictionary);
 }
 }
 
@@ -97,12 +91,6 @@ Foam::functionObjects::valueAverage::valueAverage
 
     writeFileHeader(file());
 }
-
-
-// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
-
-Foam::functionObjects::valueAverage::~valueAverage()
-{}
 
 
 // * * * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * //

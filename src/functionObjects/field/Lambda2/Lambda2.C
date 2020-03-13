@@ -37,13 +37,7 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(Lambda2, 0);
-
-    addToRunTimeSelectionTable
-    (
-        functionObject,
-        Lambda2,
-        dictionary
-    );
+    addToRunTimeSelectionTable(functionObject, Lambda2, dictionary);
 }
 }
 
@@ -91,12 +85,6 @@ Foam::functionObjects::Lambda2::Lambda2
 {
     setResultName(typeName, "U");
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::Lambda2::~Lambda2()
-{}
 
 
 // ************************************************************************* //

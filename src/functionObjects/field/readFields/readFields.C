@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,8 +53,8 @@ Foam::functionObjects::readFields::readFields
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    fieldSet_(),
-    readOnStart_(true)
+    readOnStart_(true),
+    fieldSet_()
 {
     read(dict);
 
@@ -65,20 +65,14 @@ Foam::functionObjects::readFields::readFields
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::readFields::~readFields()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::readFields::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
 
-    dict.readEntry("fields", fieldSet_);
     dict.readIfPresent("readOnStart", readOnStart_);
+    dict.readEntry("fields", fieldSet_);
 
     return true;
 }
