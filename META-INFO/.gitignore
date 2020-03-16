@@ -5,5 +5,6 @@ build-info
 time-stamp
 
 # Do not track any manifest files
-Manifest.txt
-manifest.txt
+*[Mm]anifest.txt
+
+####

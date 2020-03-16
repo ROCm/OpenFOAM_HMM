@@ -6,66 +6,65 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2019 OpenCFD Ltd.
+#     Copyright (C) 2019-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     foamPackRelease [OPTION]
 #
 # Description
-#     Simple script generator for packing OpenFOAM sources and submodules
+#     Script generator for packing OpenFOAM sources and submodules.
 #
-#       $ foamPackRelease -output=some/path origin/master > create-tar
-#       $ bash ./create-tar
+#     The generated script can be further edited as required,
+#     or used directly.
 #
-#     Or directly:
+# Examples
 #
-#       $ foamPackRelease -tgz origin/master | bash
+# Direct call
 #
-#     Done as two-step process to allow further manual adjustments as required
+#     foamPackRelease -tgz origin/master | bash
+#
+# Modules-only packaging with different api
+#
+#     foamPackRelease -with-api=1912 -pkg-modules origin/develop
+#
+# Debian-style without OpenFOAM sub-directory
+#
+#     foamPackRelease -name=openfoam_2002.200129+dfsg1 -no-prefix origin/develop
+#
 #------------------------------------------------------------------------------
 Script="${0##*/}"
 
-usage() {
-    exec 1>&2
-    while [ "$#" -gt 0 ]; do echo "$1"; shift; done
-cat <<USAGE
+printHelp() {
+    cat<<USAGE
 
 Usage: ${0##*/} [OPTION] commit-ish
 options:
-   -output=dir      Write to alternative output directory
-   -no-modules      Exclude submodules
-   -no-patch        Ignore _patch number for the output tar-file
-   -compress=TYPE   Compress with specified type
-   -sep=SEP         Change the patch, version separator from '_' to SEP
-   -tgz             Alias for -compress=tgz
-   -help            Print help
+  -name=NAME        Stem for tar-file (default: auto)
+  -output=DIR       Output directory (default: ".")
+  -prefix=NAME      Prefix directory within tar-file  (default: auto)
+  -pkg-modules      Only package submodules - exclude OpenFOAM
+  -no-modules       Exclude submodules
+  -no-patch         Ignore '_patch' number for output tar-file
+  -no-prefix        Do not prefix subdirectory
+  -compress=TYPE    Compress with specified type
+  -sep=SEP          Change version/patch separator from '_' to SEP
+  -with-api=NUM     Specify alternative api value for packaging
+  -tgz              Alias for -compress=tgz
+  -help             Print help
 
-Simple script generator for packing OpenFOAM and submodules.
+Script generator for packing OpenFOAM sources and submodules.
 Eg,
 
-    $Script -output some-directory origin/master > create-tar
-    sh ./create-tar
+    $Script -output=some-dir origin/master > create-tar-file
+    sh ./create-tar-file
 
     $Script -tgz origin/master | bash
 
 USAGE
-    exit 1
+    exit 0  # A clean exit
 }
 
 # Report error and exit
@@ -85,27 +84,39 @@ die()
 #-------------------------------------------------------------------------------
 outputDir="."
 versionSeparator='_'
-unset compress skipModules skipPatchNum
+withPatchNum=true
+unset compress packageApi withSource withModules prefixDir tarName
 
 while [ "$#" -gt 0 ]
 do
     case "$1" in
     -h | -help*)
-        usage
+        printHelp
         ;;
-    -output)
-        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
-        outputDir="$2"
-        shift
+    -name=*)
+        tarName="${1#*=}"
+        tarName="${tarName%.tar}"
         ;;
     -output=*)
         outputDir="${1#*=}"
         ;;
+    -prefix=*)
+        prefixDir="${1#*=}"
+        prefixDir="${prefixDir%/}"
+        ;;
+    -pkg-modules)
+        withModules=true
+        withSource=false
+        ;;
     -no-modules)
-        skipModules=true
+        withModules=false
+        withSource=true
         ;;
     -no-patch)
-        skipPatchNum=true
+        withPatchNum=false
+        ;;
+    -no-prefix)
+        prefixDir=false
         ;;
     -compress=*)
         compress="${1#*=}"
@@ -113,11 +124,18 @@ do
     -sep=*)
         versionSeparator="${1#*=}"
         ;;
+    -with-api=*)
+        packageApi="${1#*=}"
+        ;;
     -tgz)
         compress="${1#*-}"
         ;;
+    --)
+        shift
+        break
+        ;;
     -*)
-        usage "unknown option: '$*'"
+        die "unknown option: '$1'"
         ;;
     *)
         break
@@ -127,7 +145,7 @@ do
 done
 
 commit="$1"
-[ "$#" -eq 1 ] && [ -n "$commit" ] || usage "Requires one argument"
+[ "$#" -eq 1 ] && [ -n "$commit" ] || die "Requires one argument (commit-ish)"
 
 # Failsafe patch, version separator
 : "${versionSeparator:=_}"
@@ -201,22 +219,48 @@ patch="$(git --git-dir="$gitbase/.git" show "$sha1" | sed -ne s/patch=//p)"
 build="$(git --git-dir="$gitbase/.git" log -1 --date=short --format='%h=%ad' 2>/dev/null|sed 's/-//g;s/=/-/')"
 
 echo "Detected api, patch, build as '$api', '$patch', '$build'" 1>&2
+if [ -n "$packageApi" ]
+then
+    echo "Specified package api=$packageApi" 1>&2
+else
+    packageApi="$api"
+fi
+
 
 # Define the output names
-dirPrefix="OpenFOAM-v${api}"
-tarName="OpenFOAM-v${api}"
 
-if [ "$skipPatchNum" = true ]
+if [ -z "$prefixDir" ]
 then
-    echo "Ignoring patch number for output name" 1>&2
-elif [ "${patch:-0}" -gt 0 ]
+    prefixDir="OpenFOAM-v${packageApi}"
+    if [ "$withSource" = false ]
+    then
+        prefixDir="OpenFOAM-modules-v${packageApi}"
+    fi
+elif [ "$prefixDir" = false ]
 then
-    tarName="${tarName}${versionSeparator}${patch}"
+    unset prefixDir
+fi
+
+if [ -z "$tarName" ]
+then
+    tarName="OpenFOAM-v${packageApi}"
+    if [ "$withSource" = false ]
+    then
+        tarName="OpenFOAM-modules-v${packageApi}"
+    fi
+
+    if [ "$withPatchNum" = false ]
+    then
+        echo "Ignoring patch number for output name" 1>&2
+    elif [ "${patch:-0}" -gt 0 ]
+    then
+        tarName="${tarName}${versionSeparator}${patch}"
+    fi
 fi
 
 echo 1>&2
 echo "Tar-file name:   $tarName.tar" 1>&2
-echo "Directory name:  $dirPrefix/" 1>&2
+echo "Directory name:  $prefixDir${prefixDir:+/}" 1>&2
 echo 1>&2
 
 #-------------------------------------------------------------------------------
@@ -229,34 +273,71 @@ echo "patch='${patch:-0}'"
 echo "build='$build'"
 echo "head='$head'"
 echo "outputDir='$outputDir'"
-echo "dirPrefix='$dirPrefix'"
+echo "prefixDir='$prefixDir'"
 echo "tarName='$tarName'"
-# Note - directory separator '/' encoded as '@' for manifest name
-echo 'manifest="${dirPrefix}@META-INFO@manifest.txt"'
-echo 'buildInfo="${dirPrefix}@META-INFO@build-info"'
-echo '#--------'
-echo 'set -x'
+
+# Always start with an empty tar-file
+echo
 echo 'umask 0022'
-echo 'git -c tar.umask=user archive --format=tar --prefix="$dirPrefix/" -o "$outputDir/$tarName.tar" "$head"'
+echo 'tar -cf "$outputDir/$tarName.tar" -T /dev/null'
 
-
-# Tag build information with underscore to distinguish from "real" build
-# information when git is available.
-echo 'echo build="${build:+_}$build" > "$outputDir/$buildInfo"'
-
-echo '{'
-echo '  echo api="$api"'
-echo '  echo patch="$patch"'
-echo '  echo head="$head"'
-echo '  echo'
-echo '  git ls-tree -r "$head"'
-echo '} > "$outputDir/$manifest"'
-
+# Directory separator '/' encoded as '@'
+echo
+echo 'buildInfo="${prefixDir}${prefixDir:+@}META-INFO@build-info"'
+echo 'manifest0="${prefixDir}${prefixDir:+@}META-INFO@manifest.txt"'
+echo 'manifest1="${prefixDir}${prefixDir:+@}META-INFO@modules-manifest.txt"'
+echo '#--------'
 
 #------------------------------------------------------------------------------
-# Add in mpdules
-if [ "$skipModules" != true ]
+# Sort out particulars related to modules
+if [ "$withModules" = false ]
 then
+    echo '# No modules'
+    echo 'unset manifest1'
+fi
+
+if [ "$withSource" = false ]
+then
+    echo '# No OpenFOAM source (package modules exclusively)'
+    echo 'unset buildInfo'
+    echo 'unset manifest0'
+fi
+
+echo 'set -x'
+echo
+
+#------------------------------------------------------------------------------
+# OpenFOAM sources
+if [ "$withSource" != false ]
+then
+    echo 'git -c tar.umask=user archive --format=tar ${prefixDir:+--prefix="$prefixDir/"} -o "$outputDir/$tarName.tar" "$head"'
+
+    # Tag build information with underscore to distinguish from "real" build
+    # information when git is available.
+    echo 'echo build="${build:+_}$build" > "$outputDir/$buildInfo"'
+
+    echo '{'
+    echo '  echo api="$api"'
+    echo '  echo patch="$patch"'
+    echo '  echo head="$head"'
+    echo '  echo'
+    echo '  git ls-tree -r "$head"'
+    echo '} > "$outputDir/$manifest0"'
+fi
+
+#------------------------------------------------------------------------------
+# Add in modules
+if [ "$withModules" != false ]
+then
+    echo
+    echo '# Modules'
+    echo '{'
+    echo '  echo "# OpenFOAM modules"'
+    echo '  echo api="$api"'
+    echo '  echo patch="$patch"'
+    echo '  echo head="$head"'
+    echo '} > "$outputDir/$manifest1"'
+
     git --git-dir="$gitbase/.git" ls-tree "$head" modules/ | \
         while read mode gittype sha1 module
     do
@@ -268,7 +349,10 @@ then
         echo "tarModule=\""$tarName-${module##*/}"\""
         echo
         echo 'if pushd "$module"; then'
-        echo 'git -c tar.umask=user archive --format=tar --prefix="$dirPrefix/$module/" -o "$outputDir/$tarModule.tar" "$commit"'
+        echo 'moduleDir="$prefixDir${prefixDir:+/}$module"'
+        echo 'git -c tar.umask=user archive --format=tar --prefix="$moduleDir/" -o "$outputDir/$tarModule.tar" "$commit"'
+        echo '# Without test, validation dirs (potentially large)'
+        echo 'tar --delete -f "$outputDir/$tarModule.tar" "$moduleDir/test" "$moduleDir/validation" 2>/dev/null'
         echo 'tar -Af "$outputDir/$tarName.tar" "$outputDir/$tarModule.tar"'
         echo 'rm -f "$outputDir/$tarModule.tar"'
         echo '{'
@@ -276,10 +360,14 @@ then
         echo '  echo "$module"'
         echo '  echo commit="$commit"'
         echo '  echo'
-        echo '  git ls-tree -r "$commit"'
-        echo '} >> "$outputDir/$manifest"'
+        echo '  # Without test, validation dirs'
+        echo '  git ls-tree -r "$commit" | sed -e '"'"'/\ttest\//d;/\tvalidation\//d'"'"
+        echo '} >> "$outputDir/$manifest1"'
         echo 'popd; fi'
     done
+
+    echo
+    echo '{ echo; echo "# End"; } >> "$outputDir/$manifest1"'
 fi
 
 #------------------------------------------------------------------------------
@@ -287,13 +375,10 @@ fi
 # Decode '@' in the names as '/' directory separator
 
 echo
-echo '{ echo; echo "# End"; } >> "$outputDir/$manifest"'
-
-echo
 echo "echo 'Adding build-info and manifest files'"
 echo 'if pushd "$outputDir"; then'
-echo "tar --owner=root --group=root --append --transform='s|@|/|g' -v -f \"\$tarName.tar\" \"\$buildInfo\" \"\$manifest\""
-echo 'rm -f "$buildInfo" "$manifest"'
+echo "tar --owner=root --group=root --append --transform='s|@|/|g' -v -f \"\$tarName.tar\" \"\$buildInfo\" \"\$manifest0\" \"\$manifest1\""
+echo 'rm -f "$buildInfo" "$manifest0" "$manifest1"'
 echo 'popd; fi'
 
 echo
