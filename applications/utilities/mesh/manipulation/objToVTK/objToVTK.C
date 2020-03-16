@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -128,6 +128,8 @@ int main(int argc, char *argv[])
 
     std::ifstream OBJfile(objName);
 
+    Info<< "Processing file " << objName << endl;
+
     if (!OBJfile.good())
     {
         FatalErrorInFunction
@@ -145,13 +147,14 @@ int main(int argc, char *argv[])
     label lineNo = 0;
     while (OBJfile.good())
     {
-        string line = getLine(OBJfile);
+        const string line = getLine(OBJfile);
         lineNo++;
+
+        if (line.empty()) continue;
 
         // Read first word
         IStringStream lineStream(line);
-        word cmd;
-        lineStream >> cmd;
+        word cmd(lineStream);
 
         if (cmd == "v")
         {
