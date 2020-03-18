@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -246,8 +246,8 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
         // Reread values and interpolate
         fileName samplePointsFile
         (
-            mesh.time().path()
-           /mesh.time().caseConstant()
+            mesh.time().globalPath()
+           /mesh.time().constant()
            /"boundaryData"
            /this->patch_.name()
            /pointsName_
@@ -372,8 +372,8 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
             // Reread values and interpolate
             fileName valsFile
             (
-                mesh.time().path()
-               /mesh.time().caseConstant()
+                mesh.time().globalPath()
+               /mesh.time().constant()
                /"boundaryData"
                /this->patch_.name()
                /sampleTimes_[startSampleTime_].name()
@@ -433,8 +433,8 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
             // Reread values and interpolate
             fileName valsFile
             (
-                mesh.time().path()
-               /mesh.time().caseConstant()
+                mesh.time().globalPath()
+               /mesh.time().constant()
                /"boundaryData"
                /this->patch_.name()
                /sampleTimes_[endSampleTime_].name()
