@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -497,15 +497,17 @@ MatrixType Foam::pinv
 {
     typedef typename MatrixType::cmptType cmptType;
 
-    #if FULLDEBUG
     if (A.empty())
     {
         FatalErrorInFunction
-            << "Empty matrix." << abort(FatalError);
+            << "Empty matrix found."
+            << abort(FatalError);
     }
 
-    // Check if A is full-rank
-    #endif
+    if (A.size() == 1)
+    {
+        return MatrixType({1, 1}, cmptType(1.0)/(A(0,0) + cmptType(VSMALL)));
+    }
 
     QRMatrix<MatrixType> QRM
     (
@@ -534,9 +536,12 @@ MatrixType Foam::pinv
 
     if (firstZeroElemi == 0)
     {
-        FatalErrorInFunction
+        WarningInFunction
             << "The largest (magnitude) diagonal element is (almost) zero."
-            << abort(FatalError);
+            << nl << "Returning a zero matrix."
+            << endl;
+
+        return MatrixType(A.sizes(), Zero);
     }
 
     // Exclude the first (almost) zero diagonal row and the rows below
