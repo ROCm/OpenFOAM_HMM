@@ -92,13 +92,6 @@ protected:
         //- Return patch of all coupled faces.
         autoPtr<indirectPrimitivePatch> allCoupledFacesPatch() const;
 
-        //- Combine operator for labelLists
-        class unionEqOp
-        {
-            public:
-            void operator()( labelList& x, const labelList& y ) const;
-        };
-
         //- Collect cell neighbours of faces in global numbering
         void insertFaceCells
         (

@@ -62,7 +62,7 @@ void Foam::CPCCellToCellStencil::calcPointBoundaryData
     (
         mesh(),
         neiGlobal,
-        unionEqOp(),
+        ListOps::unionEqOp(),
         Foam::dummyTransform()      // dummy transformation
     );
 }

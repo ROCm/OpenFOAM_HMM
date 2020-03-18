@@ -231,28 +231,6 @@ Foam::cellToFaceStencil::allCoupledFacesPatch() const
 }
 
 
-void Foam::cellToFaceStencil::unionEqOp::operator()
-(
-    labelList& x,
-    const labelList& y
-) const
-{
-    if (y.size())
-    {
-        if (x.empty())
-        {
-            x = y;
-        }
-        else
-        {
-            labelHashSet set(x);
-            set.insert(y);
-            x = set.toc();
-        }
-    }
-}
-
-
 void Foam::cellToFaceStencil::insertFaceCells
 (
     const label exclude0,

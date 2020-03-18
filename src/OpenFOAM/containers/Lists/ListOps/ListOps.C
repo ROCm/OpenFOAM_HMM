@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ListOps.H"
+#include "HashSet.H"
 #include <numeric>
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
@@ -202,6 +203,28 @@ void Foam::inplaceReorder
 void Foam::ListOps::identity(labelUList& map, label start)
 {
     std::iota(map.begin(), map.end(), start);
+}
+
+
+void Foam::ListOps::unionEqOp::operator()
+(
+    labelList& x,
+    const labelList& y
+) const
+{
+    if (y.size())
+    {
+        if (x.size())
+        {
+            labelHashSet set(x);
+            set.insert(y);
+            x = set.toc();
+        }
+        else
+        {
+            x = y;
+        }
+    }
 }
 
 

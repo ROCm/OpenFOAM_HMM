@@ -579,6 +579,12 @@ struct uniqueEqOp
     void operator()(List<T>& x, const List<T>& y) const;
 };
 
+//- List helper to add y unique elements to x
+struct unionEqOp
+{
+    void operator()(labelList& x, const labelList& y) const;
+};
+
 
 // Public classes
 
