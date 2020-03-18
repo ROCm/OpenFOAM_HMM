@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -189,7 +189,7 @@ Foam::tetDecomposer::tetDecomposer(const polyMesh& mesh)
 void Foam::tetDecomposer::setRefinement
 (
     const decompositionType decomposeType,
-    const PackedBoolList& decomposeCell,
+    const bitSet& decomposeCell,
     polyTopoChange& meshMod
 )
 {
@@ -213,7 +213,7 @@ void Foam::tetDecomposer::setRefinement
 
 
     // Determine for every face whether it borders a cell that is decomposed
-    PackedBoolList decomposeFace(mesh_.nFaces());
+    bitSet decomposeFace(mesh_.nFaces());
     {
         for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
         {

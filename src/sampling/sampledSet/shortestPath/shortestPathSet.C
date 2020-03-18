@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +55,7 @@ Foam::label Foam::shortestPathSet::findMinFace
     const polyMesh& mesh,
     const label cellI,
     const List<topoDistanceData>& allFaceInfo,
-    const PackedBoolList& isLeakPoint,
+    const bitSet& isLeakPoint,
     const bool distanceMode,
     const point& origin
 )
@@ -235,8 +235,8 @@ void Foam::shortestPathSet::calculateDistance
 void Foam::shortestPathSet::sync
 (
     const polyMesh& mesh,
-    PackedBoolList& isLeakFace,
-    PackedBoolList& isLeakPoint,
+    bitSet& isLeakFace,
+    bitSet& isLeakPoint,
     const label celli,
     point& origin,
     bool& findMinDistance
@@ -286,8 +286,8 @@ bool Foam::shortestPathSet::touchesWall
     const polyMesh& mesh,
     const label facei,
 
-    PackedBoolList& isLeakFace,
-    const PackedBoolList& isLeakPoint
+    bitSet& isLeakFace,
+    const bitSet& isLeakPoint
 ) const
 {
     // Check if facei touches leakPoint
@@ -378,7 +378,7 @@ bool Foam::shortestPathSet::genSingleLeakPath
     const bool markLeakPath,
     const label iter,
     const polyMesh& mesh,
-    const PackedBoolList& isBlockedFace,
+    const bitSet& isBlockedFace,
     const point& insidePoint,
     const label insideCelli,
     const point& outsidePoint,
@@ -393,9 +393,9 @@ bool Foam::shortestPathSet::genSingleLeakPath
     DynamicList<scalar>& samplingCurveDist,
 
     // State of current leak paths
-    PackedBoolList& isLeakCell,
-    PackedBoolList& isLeakFace,
-    PackedBoolList& isLeakPoint,
+    bitSet& isLeakCell,
+    bitSet& isLeakFace,
+    bitSet& isLeakPoint,
 
     // Work storage
     List<topoDistanceData>& allFaceInfo,
@@ -558,7 +558,7 @@ bool Foam::shortestPathSet::genSingleLeakPath
 
 
             // Loop until we hit a boundary face
-            PackedBoolList isNewLeakPoint(isLeakPoint);
+            bitSet isNewLeakPoint(isLeakPoint);
             while (mesh.isInternalFace(frontFaceI))
             {
                 if (isBlockedFace.size() && isBlockedFace[frontFaceI])
@@ -780,8 +780,8 @@ bool Foam::shortestPathSet::genSingleLeakPath
 Foam::label Foam::shortestPathSet::erodeFaceSet
 (
     const polyMesh& mesh,
-    const PackedBoolList& isBlockedPoint,
-    PackedBoolList& isLeakFace
+    const bitSet& isBlockedPoint,
+    bitSet& isLeakFace
 ) const
 {
     if
@@ -805,7 +805,7 @@ Foam::label Foam::shortestPathSet::erodeFaceSet
 
     while (true)
     {
-        PackedBoolList newIsLeakFace(isLeakFace);
+        bitSet newIsLeakFace(isLeakFace);
 
         // Get number of edges
 
@@ -827,7 +827,7 @@ Foam::label Foam::shortestPathSet::erodeFaceSet
         // Match pp edges to coupled edges
         labelList patchEdges;
         labelList coupledEdges;
-        PackedBoolList sameEdgeOrientation;
+        bitSet sameEdgeOrientation;
         PatchTools::matchEdges
         (
             pp,
@@ -913,7 +913,7 @@ void Foam::shortestPathSet::genSamples
     const bool addLeakPath,
     const label maxIter,
     const polyMesh& mesh,
-    const PackedBoolList& isBoundaryFace,
+    const bitSet& isBoundaryFace,
     const point& insidePoint,
     const label insideCelli,
     const point& outsidePoint,
@@ -923,9 +923,9 @@ void Foam::shortestPathSet::genSamples
     DynamicList<label>& samplingFaces,
     DynamicList<label>& samplingSegments,
     DynamicList<scalar>& samplingCurveDist,
-    PackedBoolList& isLeakCell,
-    PackedBoolList& isLeakFace,
-    PackedBoolList& isLeakPoint
+    bitSet& isLeakCell,
+    bitSet& isLeakFace,
+    bitSet& isLeakPoint
 ) const
 {
     // Mark all paths needed to close a single combination of insidePoint,
@@ -949,7 +949,7 @@ void Foam::shortestPathSet::genSamples
 
     // Boundary face + additional temporary blocks (to force leakpath to
     // outside)
-    autoPtr<PackedBoolList> isBlockedFace;
+    autoPtr<bitSet> isBlockedFace;
 
     label iter;
     bool markLeakPath = false;
@@ -1051,7 +1051,7 @@ void Foam::shortestPathSet::genSamples
             if (!isBlockedFace.valid())
             {
                 //Pout<< "** Starting from original boundary faces." << endl;
-                isBlockedFace.set(new PackedBoolList(isBoundaryFace));
+                isBlockedFace.reset(new bitSet(isBoundaryFace));
             }
 
             markLeakPath = true;
@@ -1147,7 +1147,7 @@ void Foam::shortestPathSet::genSamples
     const label maxIter,
     const polyMesh& mesh,
     const labelUList& wallPatches,
-    const PackedBoolList& isBlockedFace
+    const bitSet& isBlockedFace
 )
 {
     // Storage for sample points
@@ -1158,7 +1158,7 @@ void Foam::shortestPathSet::genSamples
     DynamicList<scalar> samplingCurveDist;
 
     // Seed faces and points on 'real' boundary
-    PackedBoolList isBlockedPoint(mesh.nPoints());
+    bitSet isBlockedPoint(mesh.nPoints());
     {
         // Real boundaries
         const polyBoundaryMesh& pbm = mesh.boundaryMesh();
@@ -1202,11 +1202,11 @@ void Foam::shortestPathSet::genSamples
     }
 
 
-    PackedBoolList isLeakPoint(isBlockedPoint);
+    bitSet isLeakPoint(isBlockedPoint);
     // Newly closed faces
-    PackedBoolList isLeakFace(mesh.nFaces());
+    bitSet isLeakFace(mesh.nFaces());
     // All cells along leak paths
-    PackedBoolList isLeakCell(mesh.nCells());
+    bitSet isLeakCell(mesh.nCells());
 
     label prevSegmenti = 0;
     scalar prevDistance = 0.0;
@@ -1399,7 +1399,7 @@ Foam::shortestPathSet::shortestPathSet
         maxIter,
         mesh,
         wallPatches,
-        PackedBoolList(isBlockedFace)
+        bitSet(isBlockedFace)
     );
 }
 
@@ -1431,7 +1431,7 @@ Foam::shortestPathSet::shortestPathSet
         }
     }
 
-    genSamples(markLeakPath, maxIter, mesh, wallPatches, PackedBoolList());
+    genSamples(markLeakPath, maxIter, mesh, wallPatches, bitSet());
 }
 
 

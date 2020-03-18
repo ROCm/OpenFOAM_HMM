@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,7 @@ SourceFiles
 #define tetDecomposer_H
 
 #include "DynamicList.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "boolList.H"
 #include "typeInfo.H"
 #include "Enum.H"
@@ -192,7 +192,7 @@ public:
             void setRefinement
             (
                 const decompositionType decomposeType,
-                const PackedBoolList& decomposeCell,
+                const bitSet& decomposeCell,
                 polyTopoChange& meshMod
             );
 

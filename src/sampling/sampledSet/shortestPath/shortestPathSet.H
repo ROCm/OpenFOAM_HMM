@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,7 +75,7 @@ SourceFiles
 #define shortestPathSet_H
 
 #include "sampledSet.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -112,7 +112,7 @@ class shortestPathSet
             const polyMesh& mesh,
             const label cellI,
             const List<topoDistanceData>& allFaceInfo,
-            const PackedBoolList& isLeakPoint,
+            const bitSet& isLeakPoint,
             const bool minDistance,
             const point& origin
         );
@@ -121,8 +121,8 @@ class shortestPathSet
         void sync
         (
             const polyMesh& mesh,
-            PackedBoolList& isLeakFace,
-            PackedBoolList& isLeakPoint,
+            bitSet& isLeakFace,
+            bitSet& isLeakPoint,
             const label celli,
             point& origin,
             bool& findMinDistance
@@ -145,8 +145,8 @@ class shortestPathSet
             const polyMesh& mesh,
             const label facei,
 
-            PackedBoolList& isLeakFace,
-            const PackedBoolList& isLeakPoint
+            bitSet& isLeakFace,
+            const bitSet& isLeakPoint
         ) const;
 
         //- Removes open-edged faces from set. Ignores edges with both points
@@ -154,8 +154,8 @@ class shortestPathSet
         label erodeFaceSet
         (
             const polyMesh& mesh,
-            const PackedBoolList& isBlockedPoint,
-            PackedBoolList& isLeakFace
+            const bitSet& isBlockedPoint,
+            bitSet& isLeakFace
         ) const;
 
         //- Mark faces inbetween leak cells
@@ -172,7 +172,7 @@ class shortestPathSet
             const bool markLeakPath,
             const label iter,
             const polyMesh& mesh,
-            const PackedBoolList& isBlockedFace,
+            const bitSet& isBlockedFace,
             const point& insidePoint,
             const label insideCelli,
             const point& outsidePoint,
@@ -187,9 +187,9 @@ class shortestPathSet
             DynamicList<scalar>& samplingCurveDist,
 
             // State of current leak paths
-            PackedBoolList& isLeakCell,
-            PackedBoolList& isLeakFace,
-            PackedBoolList& isLeakPoint,
+            bitSet& isLeakCell,
+            bitSet& isLeakFace,
+            bitSet& isLeakPoint,
 
             // Work storage
             List<topoDistanceData>& allFaceInfo,
@@ -206,7 +206,7 @@ class shortestPathSet
             const bool markLeakPath,
             const label maxIter,
             const polyMesh& mesh,
-            const PackedBoolList& isBlockedFace,
+            const bitSet& isBlockedFace,
             const point& insidePoint,
             const label insideCelli,
             const point& outsidePoint,
@@ -216,9 +216,9 @@ class shortestPathSet
             DynamicList<label>& samplingFaces,
             DynamicList<label>& samplingSegments,
             DynamicList<scalar>& samplingCurveDist,
-            PackedBoolList& isLeakCell,
-            PackedBoolList& isLeakFace,
-            PackedBoolList& isLeakPoint
+            bitSet& isLeakCell,
+            bitSet& isLeakFace,
+            bitSet& isLeakPoint
         ) const;
 
         //- Generate whole path. With markLeakPath it will block all faces
@@ -232,7 +232,7 @@ class shortestPathSet
             const label maxIter,
             const polyMesh& mesh,
             const labelUList& wallPatches,
-            const PackedBoolList& blockedFace
+            const bitSet& blockedFace
         );
 
 
