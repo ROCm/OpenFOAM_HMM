@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -389,9 +389,9 @@ inline complex operator/(const scalar s, const complex& c)
 namespace Foam
 {
     #define transFunc(func)                                                   \
-    inline complex func(const Foam::complex& z)                               \
+    inline complex func(const complex& c)                                     \
     {                                                                         \
-        return std:: func (std::complex<scalar>(z));                          \
+        return std:: func (static_cast<std::complex<scalar>>(c));             \
     }
 
 transFunc(sqrt)
@@ -414,27 +414,34 @@ transFunc(atanh)
 // Special treatment for pow()
 inline complex pow(const complex& x, const complex& y)
 {
-    return std::pow(std::complex<scalar>(x), std::complex<scalar>(y));
+    return std::pow
+    (
+        static_cast<std::complex<scalar>>(x),
+        static_cast<std::complex<scalar>>(y)
+    );
 }
 
 
-// Combinations of complex and real
+// Combinations of complex and integral/float
 #define powFuncs(type2)                                                       \
-    inline complex pow(const complex& x, const type2& y)                      \
+    inline complex pow(const complex& x, const type2 y)                       \
     {                                                                         \
-        return std::pow(std::complex<scalar>(x), scalar(y));                  \
+        return std::pow(static_cast<std::complex<scalar>>(x), y);             \
     }                                                                         \
                                                                               \
-    inline Foam::complex pow(const type2& x, const complex& y)                \
+    inline complex pow(const type2 x, const complex& y)                       \
     {                                                                         \
-        return std::pow(scalar(x), std::complex<scalar>(y));                  \
+        return std::pow                                                       \
+        (                                                                     \
+            static_cast<std::complex<scalar>>(x),                             \
+            static_cast<std::complex<scalar>>(y)                              \
+        );                                                                    \
     }
 
-
-powFuncs(float)
-powFuncs(double)
 powFuncs(int)
 powFuncs(long)
+powFuncs(float)
+powFuncs(double)
 
 
 inline complex pow3(const complex& c)

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,11 +39,6 @@ Description
 
 using namespace Foam;
 
-void print1(const complex& z)
-{
-    Info<< "r: " << z.real() << " i: " << z.imag() << nl;
-}
-
 
 // * * * * * * * * * * * * * * * Main Program  * * * * * * * * * * * * * * * //
 
@@ -66,14 +61,15 @@ int main(int argc, char *argv[])
 
     for (complex c : { complex{1, 0}, complex{1, 2}} )
     {
-        Info<< nl;
-        print1(c);
+        Info<< nl << "complex : " << c << nl;
 
-        Info<< "sin: " << sin(c) << nl;
-        Info<< "pow(3): " << pow(c, 3) << nl;
-        Info<< "pow3: " << pow3(c) << nl;
-        Info<< "log: " << log(c) << nl;
-        Info<< "pow025: " << pow025(c) << nl;
+        Info<< "sin: " << sin(c) << nl
+            << "pow(3.0f): " << pow(c, 3.0f) << nl
+            << "pow(3): " << pow(c, 3) << nl
+            << "pow3: " << pow3(c) << nl
+            << "log: " << log(c) << nl
+            << "pow025: " << pow025(c) << nl
+            ;
 
         // TDB: allow implicit construct from scalar?
         //
@@ -83,6 +79,40 @@ int main(int argc, char *argv[])
         // }
     }
 
+    // Test powers of zero
+    #if 1
+    {
+        const complex complex0{0, 0};
+        const std::complex<scalar> std0{0, 0};
+
+        const label label0{0};
+        const scalar scalar0{0};
+
+        Info<< nl
+            << "# std::pow(0, 0)" << nl
+            << "    (label, label) = " << std::pow(label0, label0) << nl
+            << "    (scalar, scalar) = " << std::pow(scalar0, scalar0) << nl
+            << "    (label, scalar) = " << std::pow(label0, scalar0) << nl
+            << "    (scalar, label) = " << std::pow(scalar0, label0) << nl
+            << "    (std::complex, label) = " << std::pow(std0, label0) << nl
+            << "    (std::complex, scalar) = " << std::pow(std0, scalar0) << nl
+            << "    (label, std::complex) = " << std::pow(label0, std0) << nl
+            << "    (scalar, std::complex) = " << std::pow(scalar0, std0) << nl
+            ;
+
+        Info<< nl
+            << "# Foam::pow(0, 0)" << nl
+            << "    (label, label) = " << Foam::pow(label0, label0) << nl
+            << "    (scalar, scalar) = " << Foam::pow(scalar0, scalar0) << nl
+            << "    (label, scalar) = " << Foam::pow(label0, scalar0) << nl
+            << "    (scalar, label) = " << Foam::pow(scalar0, label0) << nl
+            << "    (complex, label) = " << Foam::pow(complex0, label0) << nl
+            << "    (complex, scalar) = " << Foam::pow(complex0, scalar0) << nl
+            << "    (label, complex) = " << Foam::pow(label0, complex0) << nl
+            << "    (scalar, complex) = " << Foam::pow(scalar0, complex0) << nl
+            ;
+    }
+    #endif
 
     // Test zip/unzip
     {
@@ -163,7 +193,7 @@ int main(int argc, char *argv[])
         const complex a(6, 1);
         complex b = a;
 
-        Info << "# Compound assignment operations:" << nl;
+        Info<< "# Compound assignment operations:" << nl;
 
         Info<< "a = " << a << ", b = " << b << nl;
 
@@ -192,7 +222,7 @@ int main(int argc, char *argv[])
         const scalar a = 5;
         complex b(6, 1);
 
-        Info << "# Non-assignment operations:" << nl;
+        Info<< "# Non-assignment operations:" << nl;
 
         Info<< "(scalar) a = " << a << ", b = " << b << nl;
 
@@ -225,7 +255,7 @@ int main(int argc, char *argv[])
         Info<< "b = b/a: " << tab << b << nl;
 
 
-        Info << "# Compound assignment operations:" << nl;
+        Info<< "# Compound assignment operations:" << nl;
 
         Info<< "(scalar) a = " << a << ", b = " << b << nl;
 
@@ -244,7 +274,6 @@ int main(int argc, char *argv[])
         // Division: complex/scalar
         b /= a;
         Info<< "b /= a (real and imag parts):" << tab << b << nl;
-
     }
     #endif
 
@@ -282,7 +311,6 @@ int main(int argc, char *argv[])
         Info<< "log(a) = " << log(a) << ", "
             << "log(b) = " << log(b) << ", "
             << "log(c) = " << log(c) << nl;
-
     }
     #endif
 

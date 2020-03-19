@@ -119,10 +119,10 @@ public:
         //- Construct from real and imaginary parts
         inline constexpr complex(const scalar r, const scalar i) noexcept;
 
-        //- Construct from std::complex
+        //- Implicit construct from std::complex
         inline complex(const std::complex<float>& c);
 
-        //- Construct from std::complex
+        //- Implicit construct from std::complex
         inline complex(const std::complex<double>& c);
 
         //- Construct from Istream
@@ -178,8 +178,8 @@ public:
 
     // Member Operators
 
-        //- Conversion to std::complex
-        inline operator std::complex<scalar>() const
+        //- Implicit conversion to std::complex
+        operator std::complex<scalar>() const
         {
             return std::complex<scalar>(re, im);
         }
