@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +35,7 @@ bool Foam::functionObjects::ddt::calcDdt()
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
 
-    if (foundObject<VolFieldType>(fieldName_))
+    if (foundObject<VolFieldType>(fieldName_, false))
     {
         return store
         (

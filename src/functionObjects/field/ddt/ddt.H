@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,6 +41,7 @@ See also
 
 SourceFiles
     ddt.C
+    ddtTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -65,12 +67,13 @@ class ddt
 {
     // Private Member Functions
 
-        //- Calculate the magnitude of the field and register the result
+        //- Calculate and store the result
+        //  \return true if fieldName_ was known and had the correct type
         template<class Type>
         bool calcDdt();
 
-        //- Calculate the time derivative of the field and return
-        //  true if successful
+        //- Calculate time derivative of the field
+        //  \return true on success
         virtual bool calc();
 
 
@@ -92,7 +95,7 @@ public:
 
 
     //- Destructor
-    virtual ~ddt();
+    virtual ~ddt() = default;
 };
 
 

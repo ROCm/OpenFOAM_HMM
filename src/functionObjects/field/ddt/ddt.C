@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,15 +54,14 @@ bool Foam::functionObjects::ddt::calc()
         return false;
     }
 
-    bool processed = false;
-
-    processed = processed || calcDdt<scalar>();
-    processed = processed || calcDdt<vector>();
-    processed = processed || calcDdt<sphericalTensor>();
-    processed = processed || calcDdt<symmTensor>();
-    processed = processed || calcDdt<tensor>();
-
-    return processed;
+    return
+    (
+        calcDdt<scalar>()
+     || calcDdt<vector>()
+     || calcDdt<sphericalTensor>()
+     || calcDdt<symmTensor>()
+     || calcDdt<tensor>()
+    );
 }
 
 
@@ -78,12 +78,6 @@ Foam::functionObjects::ddt::ddt
 {
     read(dict);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::ddt::~ddt()
-{}
 
 
 // ************************************************************************* //
