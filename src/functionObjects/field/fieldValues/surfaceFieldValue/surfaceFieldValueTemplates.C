@@ -403,20 +403,6 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
 
             switch (postOperation_)
             {
-                case postOpNone:
-                {
-                    break;
-                }
-                case postOpMag:
-                {
-                    // mag: component-wise - does not change the type
-                    for (direction d=0; d < pTraits<Type>::nComponents; ++d)
-                    {
-                        setComponent(result, d)
-                            = mag(component(result, d));
-                    }
-                    break;
-                }
                 case postOpSqrt:
                 {
                     // sqrt: component-wise - does not change the type
@@ -425,6 +411,10 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
                         setComponent(result, d)
                             = sqrt(mag(component(result, d)));
                     }
+                    break;
+                }
+                default:
+                {
                     break;
                 }
             }
@@ -453,13 +443,30 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
                 << " of " << fieldName << " = ";
 
 
-            // Operation tagged that it always returns scalar?
-            const bool alwaysScalar(operation_ & typeScalar);
+            // Operation or post-operation returns scalar?
+
+            scalar sresult{0};
+
+            bool alwaysScalar(operation_ & typeScalar);
 
             if (alwaysScalar)
             {
-                const scalar sresult = component(result, 0);
+                sresult = component(result, 0);
 
+                if (postOperation_ == postOpMag)
+                {
+                    sresult = mag(sresult);
+                }
+            }
+            else if (postOperation_ == postOpMag)
+            {
+                sresult = mag(result);
+                alwaysScalar = true;
+            }
+
+
+            if (alwaysScalar)
+            {
                 file()<< tab << sresult;
 
                 Log << sresult << endl;
