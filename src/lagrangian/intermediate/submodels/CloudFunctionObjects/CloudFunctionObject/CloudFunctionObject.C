@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2019 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,22 +85,21 @@ Foam::CloudFunctionObject<CloudType>::CloudFunctionObject
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::CloudFunctionObject<CloudType>::~CloudFunctionObject()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-void Foam::CloudFunctionObject<CloudType>::preEvolve()
+void Foam::CloudFunctionObject<CloudType>::preEvolve
+(
+    const typename parcelType::trackingData& td
+)
 {}
 
 
 template<class CloudType>
-void Foam::CloudFunctionObject<CloudType>::postEvolve()
+void Foam::CloudFunctionObject<CloudType>::postEvolve
+(
+    const typename parcelType::trackingData& td
+)
 {
     if (this->owner().time().writeTime())
     {
@@ -111,7 +111,7 @@ void Foam::CloudFunctionObject<CloudType>::postEvolve()
 template<class CloudType>
 void Foam::CloudFunctionObject<CloudType>::postMove
 (
-    typename CloudType::parcelType&,
+    parcelType&,
     const scalar,
     const point&,
     bool&
@@ -122,7 +122,7 @@ void Foam::CloudFunctionObject<CloudType>::postMove
 template<class CloudType>
 void Foam::CloudFunctionObject<CloudType>::postPatch
 (
-    const typename CloudType::parcelType&,
+    const parcelType&,
     const polyPatch&,
     bool&
 )
@@ -132,7 +132,7 @@ void Foam::CloudFunctionObject<CloudType>::postPatch
 template<class CloudType>
 void Foam::CloudFunctionObject<CloudType>::postFace
 (
-    const typename CloudType::parcelType&,
+    const parcelType&,
     bool&
 )
 {}

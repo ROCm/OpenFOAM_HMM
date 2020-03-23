@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,6 +56,12 @@ class CloudFunctionObjectList
 :
     public PtrList<CloudFunctionObject<CloudType>>
 {
+private:
+
+        //- Convenience typedef for parcel type
+        typedef typename CloudType::parcelType parcelType;
+
+
 protected:
 
     // Protected Data
@@ -86,7 +93,7 @@ public:
 
 
     //- Destructor
-    virtual ~CloudFunctionObjectList();
+    virtual ~CloudFunctionObjectList() = default;
 
 
     // Member Functions
@@ -106,15 +113,21 @@ public:
         // Evaluation
 
             //- Pre-evolve hook
-            virtual void preEvolve();
+            virtual void preEvolve
+            (
+                const typename parcelType::trackingData& td
+            );
 
             //- Post-evolve hook
-            virtual void postEvolve();
+            virtual void postEvolve
+            (
+                const typename parcelType::trackingData& td
+            );
 
             //- Post-move hook
             virtual void postMove
             (
-                typename CloudType::parcelType& p,
+                parcelType& p,
                 const scalar dt,
                 const point& position0,
                 bool& keepParticle
@@ -123,7 +136,7 @@ public:
             //- Post-patch hook
             virtual void postPatch
             (
-                const typename CloudType::parcelType& p,
+                const parcelType& p,
                 const polyPatch& pp,
                 bool& keepParticle
             );
@@ -131,7 +144,7 @@ public:
             //- Post-face hook
             virtual void postFace
             (
-                const typename CloudType::parcelType& p,
+                const parcelType& p,
                 bool& keepParticle
             );
 };

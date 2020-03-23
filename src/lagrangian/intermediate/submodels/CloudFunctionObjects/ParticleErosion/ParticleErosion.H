@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,6 +86,9 @@ protected:
 
     // Protected Member Functions
 
+        //- Create|read|reset the Q field
+        void resetQ();
+
         //- Returns local patchi if patch is in patchIds_ list
         label applyToPatch(const label globalPatchi) const;
 
@@ -130,7 +134,10 @@ public:
         // Evaluation
 
             //- Pre-evolve hook
-            virtual void preEvolve();
+            virtual void preEvolve
+            (
+                const typename parcelType::trackingData& td
+            );
 
             //- Post-patch hook
             virtual void postPatch

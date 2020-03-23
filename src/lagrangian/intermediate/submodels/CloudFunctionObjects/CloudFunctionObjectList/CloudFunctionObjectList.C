@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,31 +104,30 @@ Foam::CloudFunctionObjectList<CloudType>::CloudFunctionObjectList
 {}
 
 
-// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::CloudFunctionObjectList<CloudType>::~CloudFunctionObjectList()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-void Foam::CloudFunctionObjectList<CloudType>::preEvolve()
+void Foam::CloudFunctionObjectList<CloudType>::preEvolve
+(
+    const typename parcelType::trackingData& td
+)
 {
     forAll(*this, i)
     {
-        this->operator[](i).preEvolve();
+        this->operator[](i).preEvolve(td);
     }
 }
 
 
 template<class CloudType>
-void Foam::CloudFunctionObjectList<CloudType>::postEvolve()
+void Foam::CloudFunctionObjectList<CloudType>::postEvolve
+(
+    const typename parcelType::trackingData& td
+)
 {
     forAll(*this, i)
     {
-        this->operator[](i).postEvolve();
+        this->operator[](i).postEvolve(td);
     }
 }
 
@@ -135,7 +135,7 @@ void Foam::CloudFunctionObjectList<CloudType>::postEvolve()
 template<class CloudType>
 void Foam::CloudFunctionObjectList<CloudType>::postMove
 (
-    typename CloudType::parcelType& p,
+    parcelType& p,
     const scalar dt,
     const point& position0,
     bool& keepParticle
@@ -156,7 +156,7 @@ void Foam::CloudFunctionObjectList<CloudType>::postMove
 template<class CloudType>
 void Foam::CloudFunctionObjectList<CloudType>::postPatch
 (
-    const typename CloudType::parcelType& p,
+    const parcelType& p,
     const polyPatch& pp,
     bool& keepParticle
 )
@@ -176,7 +176,7 @@ void Foam::CloudFunctionObjectList<CloudType>::postPatch
 template<class CloudType>
 void Foam::CloudFunctionObjectList<CloudType>::postFace
 (
-    const typename CloudType::parcelType& p,
+    const parcelType& p,
     bool& keepParticle
 )
 {

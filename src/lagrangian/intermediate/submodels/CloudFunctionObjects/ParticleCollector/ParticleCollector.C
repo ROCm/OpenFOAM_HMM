@@ -636,13 +636,6 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::ParticleCollector<CloudType>::~ParticleCollector()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>

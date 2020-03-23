@@ -347,13 +347,6 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::FacePostProcessing<CloudType>::~FacePostProcessing()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>

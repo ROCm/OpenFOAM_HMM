@@ -149,18 +149,13 @@ public:
 
 
     //- Destructor
-    virtual ~FacePostProcessing();
+    virtual ~FacePostProcessing() = default;
 
 
     // Member Functions
 
-    // Access
-
         //- Should data be reset on write?
         inline bool resetOnWrite() const;
-
-
-    // Evaluation
 
         //- Post-face hook
         virtual void postFace(const parcelType& p, bool& keepParticle);

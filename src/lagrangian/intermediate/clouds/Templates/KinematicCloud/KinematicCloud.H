@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -273,7 +273,7 @@ protected:
             );
 
             //- Post-evolve
-            void postEvolve();
+            void postEvolve(const typename parcelType::trackingData& td);
 
             //- Reset state of cloud
             void cloudReset(KinematicCloud<CloudType>& c);
@@ -590,7 +590,7 @@ public:
             void scaleSources();
 
             //- Pre-evolve
-            void preEvolve();
+            void preEvolve(const typename parcelType::trackingData& td);
 
             //- Evolve the cloud
             void evolve();
