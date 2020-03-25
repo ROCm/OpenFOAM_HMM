@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +51,7 @@ SourceFiles
 #define Foam_autoPtr_copyAssign
 #define Foam_autoPtr_castOperator
 
-#include <utility>
+#include "stdFoam.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -143,26 +143,26 @@ public:
     // Check
 
         //- True if the managed pointer is null
-        inline bool empty() const noexcept;
+        bool empty() const noexcept { return !ptr_; }
 
         //- True if the managed pointer is non-null
-        inline bool valid() const noexcept;
+        bool valid() const noexcept { return ptr_; }
 
 
     // Access
 
         //- Return pointer to managed object without nullptr checking.
         //  Pointer remains under autoPtr management.
-        inline T* get() noexcept;
+        T* get() noexcept { return ptr_; }
 
         //- Return const pointer to managed object without nullptr checking.
         //  Pointer remains under autoPtr management.
-        inline const T* get() const noexcept;
+        const T* get() const noexcept { return ptr_; }
 
         //- Return reference to the managed object without nullptr checking.
         //  When get() == nullptr, additional guards may be required to avoid
         //  inadvertent access to a nullptr.
-        inline T& ref();
+        T& ref() { return *ptr_; }
 
 
     // Edit
@@ -170,13 +170,13 @@ public:
         //- Return pointer to the managed object and release ownership.
         inline T* release() noexcept;
 
-        //- Return pointer to the managed object and release ownership.
-        //- Identical behaviour to release().
-        //  \note Provided for method naming consistent with Foam::tmp
-        inline T* ptr() noexcept;
+        //- Same as \c release().
+        //  \remark Method naming consistent with Foam::tmp
+        T* ptr() noexcept { return release(); }
 
-        //- Delete managed object and set pointer to nullptr
-        inline void clear() noexcept;
+        //- Same as \c reset(nullptr)
+        //  \remark Method naming consistent with Foam::tmp
+        void clear() noexcept { reset(nullptr); }
 
         //- Delete managed object and set to new given pointer
         inline void reset(T* p = nullptr) noexcept;
@@ -191,7 +191,7 @@ public:
 
     // Other
 
-        //- Construct copy by invoking clone on underlying managed object
+        //- Copy construct by invoking clone on underlying managed object
         //  A no-op if no pointer is managed
         //  \param args list of arguments for clone
         template<class... Args>
@@ -241,8 +241,8 @@ public:
         //- Cast to pointer type
         operator T*() noexcept { return get(); }
 
-        //- True if the managed pointer is non-null - same as valid()
-        explicit inline operator bool() const noexcept;
+        //- True if the managed pointer is non-null
+        explicit operator bool() const noexcept { return ptr_; }
 
         //- Transfer object ownership from parameter
         inline void operator=(autoPtr<T>&& ap) noexcept;
@@ -262,7 +262,7 @@ public:
         void operator=(const autoPtr<T>& ap) = delete;
         #endif
 
-        //- Clear via assignment from literal nullptr
+        //- Reset via assignment from literal nullptr
         inline void operator=(std::nullptr_t) noexcept;
 
 

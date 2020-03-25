@@ -47,6 +47,7 @@ SeeAlso
 #define stdFoam_H
 
 #include <initializer_list>
+#include <memory>
 #include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -75,6 +76,11 @@ namespace Foam
 
     //- Additional OpenFOAM modules
     namespace Module {}
+
+    // Standard items
+
+    //- Allow use of std::unique_ptr directly as Foam::unique_ptr
+    using std::unique_ptr;
 }
 
 

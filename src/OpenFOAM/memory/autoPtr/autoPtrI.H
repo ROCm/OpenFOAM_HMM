@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -97,60 +97,11 @@ inline Foam::autoPtr<T>::~autoPtr() noexcept
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-inline bool Foam::autoPtr<T>::empty() const noexcept
-{
-    return !ptr_;
-}
-
-
-template<class T>
-inline bool Foam::autoPtr<T>::valid() const noexcept
-{
-    return ptr_;
-}
-
-
-template<class T>
-inline T* Foam::autoPtr<T>::get() noexcept
-{
-    return ptr_;
-}
-
-
-template<class T>
-inline const T* Foam::autoPtr<T>::get() const noexcept
-{
-    return ptr_;
-}
-
-
-template<class T>
-inline T& Foam::autoPtr<T>::ref()
-{
-    return *ptr_;
-}
-
-
-template<class T>
 inline T* Foam::autoPtr<T>::release() noexcept
 {
     T* p = ptr_;
     ptr_ = nullptr;
     return p;
-}
-
-
-template<class T>
-inline T* Foam::autoPtr<T>::ptr() noexcept
-{
-    return release();
-}
-
-
-template<class T>
-inline void Foam::autoPtr<T>::clear() noexcept
-{
-    reset(nullptr);
 }
 
 
@@ -200,7 +151,7 @@ inline T& Foam::autoPtr<T>::operator*()
     if (!ptr_)
     {
         FatalErrorInFunction
-            << "object of type " << typeid(T).name() << " is unallocated"
+            << "unallocated autoPtr of type " << typeid(T).name()
             << abort(FatalError);
     }
     return *ptr_;
@@ -220,7 +171,7 @@ inline T* Foam::autoPtr<T>::operator->()
     if (!ptr_)
     {
         FatalErrorInFunction
-            << "object of type " << typeid(T).name() << " is unallocated"
+            << "unallocated autoPtr of type " << typeid(T).name()
             << abort(FatalError);
     }
     return ptr_;
@@ -245,13 +196,6 @@ template<class T>
 inline const T& Foam::autoPtr<T>::operator()() const
 {
     return operator*();
-}
-
-
-template<class T>
-inline Foam::autoPtr<T>::operator bool() const noexcept
-{
-    return ptr_;
 }
 
 
@@ -281,7 +225,7 @@ inline void Foam::autoPtr<T>::operator=(autoPtr<U>&& ap) noexcept
 template<class T>
 inline void Foam::autoPtr<T>::operator=(std::nullptr_t) noexcept
 {
-    reset();
+    reset(nullptr);
 }
 
 
