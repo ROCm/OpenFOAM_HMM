@@ -7,18 +7,17 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2018-2019 OpenCFD Ltd.
+#     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     foamRunTutorials
 #
 # Description
-#     Run either Allrun or blockMesh/application in current directory
-#     and all its subdirectories.
+#     Recursively run Allrun/Alltest or blockMesh+application,
+#     starting with the current directory or the specified -case directory.
 #
 #     For tutorials that are known to run poorly, an Allrun-optional
 #     placeholder can be used instead of the usual Allrun script.
@@ -36,20 +35,67 @@ then
     thisScript="$PWD/$thisScript"
 fi
 
-unset passArgs runTests skipFirst
+printHelp() {
+    cat <<USAGE
+
+Usage: ${0##*/} [OPTION]
+options:
+  -case <dir>       specify starting directory, default is cwd
+  -self | -skipFirst avoid Allrun, Alltest script (prevent infinite recursion)
+  -test             prefer Alltest script, pass -test argument to scripts
+  -help             print the usage
+
+Recursively run Allrun/Alltest or blockMesh+application,
+starting with the current directory or the specified -case directory.
+
+USAGE
+   exit 0  # clean exit
+}
+
+# Report error and exit
+die()
+{
+    exec 1>&2
+    echo
+    echo "Error encountered:"
+    while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
+    echo
+    echo "See '${0##*/} -help' for usage"
+    echo
+    exit 1
+}
+
+#------------------------------------------------------------------------------
 
 # Parse options
+unset passArgs runTests skipSelf
+
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-    -t | -test)
+    -h | -help*)
+        printHelp
+        ;;
+    -case)
+        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
+        shift
+        cd "$1" 2>/dev/null || {
+            echo "${0##*}: No such directory $1" 1>&2
+            exit 2
+        }
+        ;;
+    -test)
         passArgs="-test"
         runTests=true
         ;;
 
-    # Avoid infinite recursion when invoked from an Allrun or Alltest script
-    -s | -skipFirst)
-        skipFirst=true
+    # Avoid infinite recursion when invoked from an Allrun/Alltest script
+    -self* | -skipFirst)
+        skipSelf=true
+        ;;
+    --)
+        shift
+        break
         ;;
     *)
         break
@@ -58,18 +104,30 @@ do
     shift
 done
 
-if [ -z "$skipFirst" ] && [ -n "$runTests" ] && test -f Alltest
+
+unset exitCode
+if [ -z "$skipSelf" ]
 then
-    # Run specialized Alltest script
-    ./Alltest $passArgs $*
-elif [ -z "$skipFirst" ] && test -f Allrun
+    # Use specialized script(s)
+    if [ "$runTests" = true ] && [ -f Alltest ]
+    then
+        ./Alltest $passArgs $*
+        exitCode="$?"
+    elif [ -f Allrun ]
+    then
+        ./Allrun $passArgs $*
+        exitCode="$?"
+    elif [ -f Allrun-optional ]
+    then
+        echo "Skipped optional case $PWD"
+        exitCode=0
+    fi
+fi
+
+
+if [ -n "$exitCode" ]
 then
-    # Run specialized Allrun script
-    ./Allrun $passArgs $*
-elif [ -z "$skipFirst" ] && test -f Allrun-optional
-then
-    # Has Allrun-optional script - skip this tutorial.
-    echo "Skipped optional case $PWD"
+    exit "$exitCode"
 elif [ -d system ]
 then
     # Run normal case with blockMesh and the application
@@ -79,7 +137,7 @@ else
     # Loop over sub-directories and compile any applications
     for caseName in *
     do
-        if [ -d "$caseName" ] && [ -d "$caseName/Make" ]
+        if [ -d "$caseName/Make" ]
         then
             ( compileApplication "$caseName" )
         fi

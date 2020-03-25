@@ -7,23 +7,10 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011 OpenFOAM Foundation
-#     Copyright (C) 2019 OpenCFD Ltd.
+#     Copyright (C) 2019-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     foamCleanTutorials
@@ -31,10 +18,6 @@
 # Description
 #     Run either Allwclean, Allclean or default cleanCase in current directory
 #     and all its subdirectories.
-#
-#     When an argument is provided, it is treated as a directory name.
-#     If an option (eg, -self) is provided, it suppresses calling
-#     Allwclean or Allclean (ie, to avoid recursion)
 #
 #------------------------------------------------------------------------------
 . $WM_PROJECT_DIR/bin/tools/CleanFunctions  # Tutorial clean functions
@@ -45,29 +28,68 @@ then
     thisScript="$PWD/$thisScript"
 fi
 
-# Simple option/argument parsing.
-# By default use Allclean, Allwclean when present
-#
-# If an argument is supplied, treat as a change directory
-#
-# If an option (eg, -self) is provided,
-# do not execute ./Allwclean or ./Allclean (to avoid recursion)
+printHelp() {
+    cat <<USAGE
 
-withAllclean=true
+Usage: ${0##*/} [OPTION]
+       ${0##*/} [OPTION] directory
+options:
+  -0                use cleanCase0 instead of cleanCase
+  -case <dir>       specify starting directory, default is cwd
+  -self             avoid Allclean script (prevent infinite recursion)
+  -help             print the usage
 
+Recursively clean an OpenFOAM case directory.
+By default uses Allclean, Allwclean when present.
+
+USAGE
+   exit 0  # clean exit
+}
+
+# Report error and exit
+die()
+{
+    exec 1>&2
+    echo
+    echo "Error encountered:"
+    while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
+    echo
+    echo "See '${0##*/} -help' for usage"
+    echo
+    exit 1
+}
+
+#------------------------------------------------------------------------------
+
+# Parse options
+unset skipSelf clean0
 if [ "$#" -gt 0 ]
 then
     case "$1" in
     -h | -help*)
-        echo "${0##*/}: recursively clean an OpenFOAM case directory" 1>&2
-        exit 0
+        printHelp
         ;;
-    -self | -*)
-        unset withAllclean
+    -0)
+        clean0=true
+        ;;
+    -case)
+        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
+        shift
+        cd "$1" 2>/dev/null || {
+            echo "${0##*}: No such directory $1" 1>&2
+            exit 2
+        }
+        ;;
+    -self*)
+        skipSelf=true
+        ;;
+    --)
+        shift
+        break
         ;;
     *)
         cd "$1" 2>/dev/null || {
-            echo "${0##*}: No such directory" 1>&2
+            echo "${0##*}: No such directory $1" 1>&2
             exit 2
         }
         ;;
@@ -75,18 +97,34 @@ then
 fi
 
 
-if [ -n "$withAllclean" ] && [ -f Allwclean ]
+unset exitCode
+if [ -z "$skipSelf" ]
 then
-    # Specialized script
-    ./Allwclean
-elif [ -n "$withAllclean" ] && [ -f Allclean ]
+    # Use specialized script(s)
+    if [ -f Allwclean ]
+    then
+        ./Allwclean
+        exitCode="$?"
+    elif [ -f Allclean ]
+    then
+        ./Allclean
+        exitCode="$?"
+    fi
+fi
+
+
+if [ -n "$exitCode" ]
 then
-    # Specialized script
-    ./Allclean
+    exit "$exitCode"
 elif [ -d system ]
 then
     # Normal case
-    cleanCase
+    if [ "$clean0" = true ]
+    then
+        cleanCase0
+    else
+        cleanCase
+    fi
 elif [ -d Make ]
 then
     # Normal application
@@ -95,7 +133,7 @@ else
     # Recurse into subdirectories
     for caseName in *
     do
-        ( cd $caseName 2>/dev/null && $thisScript )
+        ( cd $caseName 2>/dev/null && "$thisScript" )
     done
 fi
 
