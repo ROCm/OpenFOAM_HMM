@@ -131,7 +131,10 @@ case ThirdParty:
         set clang_version=llvm-8.0.1
         breaksw
     case Clang90*:
-        set clang_version=llvm-9.0.0
+        set clang_version=llvm-9.0.1
+        breaksw
+    case Clang100*:
+        set clang_version=llvm-10.0.0
         breaksw
 
     default:
