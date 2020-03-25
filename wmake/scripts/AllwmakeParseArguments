@@ -36,8 +36,11 @@
 # Check environment
 [ -d "$WM_PROJECT_DIR" ] || {
     exec 1>&2
-    echo "$Script error: The OpenFOAM environment not set or incorrect."
-    echo "    Check OpenFOAM entries in your dot-files and source them."
+    echo "$0"
+    echo "Error encountered:"
+    echo "    The OpenFOAM environment not set or incorrect."
+    echo "    Check your setup."
+    echo
     exit 1
 }
 
@@ -54,10 +57,11 @@ Executing ${0##*/} is equivalent to
 With these additional options:
    -l | -log | -log=name
 
-USAGE
+See
+   wmake -help (or wmake -help-full)
 
-    wmake -help
-    exit 0
+USAGE
+    exit 0  # clean exit
 }
 
 
@@ -86,17 +90,17 @@ do
         continue    # Permanently remove arg
         ;;
     -l | -log)
-        optLog="log.${WM_OPTIONS:-Allwmake}"
+        optLog="log.${WM_OPTIONS:-build}"
         continue    # Permanently remove arg
         ;;
     -log=*)
         optLog="${arg##*=}"
         if [ -d "$optLog" ]
         then
-            optLog="${optLog%/}/log.${WM_OPTIONS:-Allwmake}"
+            optLog="${optLog%/}/log.${WM_OPTIONS:-build}"
         elif [ -z "$optLog" ]
         then
-            optLog="log.${WM_OPTIONS:-Allwmake}"
+            optLog="log.${WM_OPTIONS:-build}"
         fi
         continue    # Permanently remove arg
         ;;
@@ -127,7 +131,7 @@ if [ -z "$fromWmake" ]
 then
     if [ -z "$optLog" ]
     then
-        exec wmake -all $optQueue $*
+        exec wmake -all $optDebug $optQueue $*
         exit $? # Unneeded, but just in case something went wrong
     else
         echo "Logging wmake -all output to '$optLog'" 1>&2

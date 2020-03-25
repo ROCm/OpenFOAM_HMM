@@ -6,11 +6,10 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2015-2016 OpenFOAM Foundation
-#     Copyright (C) 2018 OpenCFD Ltd.
+#     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     wmakeFunctions
@@ -39,9 +38,11 @@ checkEnv()
 {
     local check failed
 
-    for check in WM_PROJECT_DIR WM_OPTIONS WM_DIR
+    # Default for WM_DIR already provided above
+
+    for check in WM_PROJECT_DIR WM_OPTIONS
     do
-        eval test "\$$check" || failed="$failed $check"
+        eval test -n "\$$check" || failed="$failed $check"
     done
 
     [ -z "$failed" ] || {

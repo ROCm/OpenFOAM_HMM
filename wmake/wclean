@@ -38,7 +38,7 @@
 #
 #------------------------------------------------------------------------------
 Script="${0##*/}"           # Use 'Script' for error messages in wmakeFunctions
-. "${0%/*}/scripts/wmakeFunctions"              # Source wmake functions
+. "${0%/*}"/scripts/wmakeFunctions              # Source wmake functions
 
 printHelp() {
     cat<<HELP_INFO
@@ -128,9 +128,9 @@ then
     elif [ -f "$1" ]
     then
         dir="${1%/*}"
-        : ${dir:=.}
+        : "${dir:=.}"
     else
-        targetType=$1
+        targetType="$1"
     fi
 
     # Specified directory name:
@@ -141,7 +141,7 @@ then
 
     if [ -n "$dir" ]
     then
-        cd $dir 2>/dev/null || {
+        cd "$dir" 2>/dev/null || {
             echo "$Script error: could not change to directory '$dir'" 1>&2
             exit 1
         }
@@ -188,7 +188,7 @@ then
         then
             echo "    Removing redundant object directories in $objectsDir"
 
-            find $objectsDir -name 'variables' -print | \
+            find "$objectsDir" -name 'variables' -print | \
             while read variablesFile
             do
                 # Hack'ish way of getting the original source code path
@@ -217,13 +217,13 @@ then
                     binaryFile=$(eval echo $binaryFile)
 
                     # Verbosely remove binary file
-                    if [ -n "$binaryFile" -a -e "$binaryFile" ]
+                    if [ -n "$binaryFile" ] && [ -e "$binaryFile" ]
                     then
-                        rm -vf $binaryFile 2>/dev/null
+                        rm -vf "$binaryFile" 2>/dev/null
                     fi
 
                     # Remove the deprecated object directory
-                    rm -rvf $depFile 2>/dev/null
+                    rm -rvf "$depFile" 2>/dev/null
                 fi
             done
         fi
@@ -237,31 +237,39 @@ fi
 # Recurse the directories tree
 #------------------------------------------------------------------------------
 
+unset exitCode
+
 if [ "$targetType" = all ]
 then
-    if [ -e Allwclean ]       # Consistent with Allwmake
+    if [ -e Allwclean ]       # Symmetric with Allwmake
     then
         ./Allwclean
-        exit $?
-    elif [ -e Allclean ]      # Often used for tutorial cases
+        exitCode="$?"
+    elif [ -e Allclean ]      # Tutorial cases
     then
         ./Allclean
-        exit $?
+        exitCode="$?"
     fi
+
+    if [ -n "$exitCode" ]
+    then
+        exit "$exitCode"
+    fi
+
 
     # For all directories containing a 'Make' directory, or an 'Allwclean' file
     for dir in $(find . -name Allwclean -o -name Make)
     do
-        echo ${dir%/*}
+        echo "${dir%/*}"
     done | sort | uniq | while read dir
     do
         # Use Allwclean if it exists, otherwise wclean
-        if [ -e "$dir/Allwclean" ]
+        if [ -e "$dir"/Allwclean ]
         then
-            $dir/Allwclean
-        elif [ -d "$dir/Make" ]
+            "$dir"/Allwclean
+        elif [ -d "$dir"/Make ]
         then
-            $0 $dir
+            $0 "$dir"
         fi
     done
 fi
@@ -273,14 +281,14 @@ fi
 
 if [ -d "$MakeDir" ]
 then
-    objectsDir=$MakeDir/$WM_OPTIONS
+    objectsDir="$MakeDir/$WM_OPTIONS"
     case "$PWD" in
     ("$WM_PROJECT_DIR"/*)
-        buildPath=$WM_PROJECT_DIR/build/${WM_OPTIONS}
+        buildPath="$WM_PROJECT_DIR/build/${WM_OPTIONS}"
         objectsDir=$buildPath$(echo $PWD | sed s%$WM_PROJECT_DIR%% )
         ;;
     esac
-    rm -rf $objectsDir 2>/dev/null
+    rm -rf "$objectsDir" 2>/dev/null
 fi
 
 #------------------------------------------------------------------------------

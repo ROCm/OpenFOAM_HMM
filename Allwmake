@@ -46,11 +46,20 @@ echo
 "${WM_DIR:-wmake}"/src/Allmake
 
 # Compile ThirdParty libraries and applications
-if [ -d "$WM_THIRD_PARTY_DIR" ] && [ -x "$WM_THIRD_PARTY_DIR/Allwmake" ]
+if [ -d "$WM_THIRD_PARTY_DIR" ]
 then
-    "$WM_THIRD_PARTY_DIR"/Allwmake
+    if [ -e "$WM_THIRD_PARTY_DIR"/Allwmake.override ]
+    then
+        if [ -x "$WM_THIRD_PARTY_DIR"/Allwmake.override ]
+        then    "$WM_THIRD_PARTY_DIR"/Allwmake.override
+        fi
+    elif [ -x "$WM_THIRD_PARTY_DIR"/Allwmake ]
+    then      "$WM_THIRD_PARTY_DIR"/Allwmake
+    else
+        echo "Skip ThirdParty (no Allwmake* files)"
+    fi
 else
-    echo "No ThirdParty directory, or missing Allwmake - skipping"
+    echo "Skip ThirdParty (no directory)"
 fi
 
 echo "========================================"

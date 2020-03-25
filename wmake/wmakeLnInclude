@@ -50,7 +50,7 @@ Usage: $Script [OPTION] [-pwd | dir]
 
 options:
   -u | -update      Update
-  -s | -silent      Use 'silent' mode (do not echo command)
+  -s | -silent      Silent mode (do not echo command)
   -pwd              Locate root directory containing a Make/ directory.
   -h | -help        Print the usage
 

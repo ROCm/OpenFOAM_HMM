@@ -29,27 +29,26 @@
 #     wmake
 #
 # Description
-#     General, easy to use make system for multi-platform development
-#     with support for local and network parallel compilation.
+#     General, wrapped make system for multi-platform development with
+#     support for local and network parallel compilation.
 #
-#     This updated wmake supports out-of-tree object and dependency files to
-#     avoid the clutter which accumulates in the source-tree with the original
-#     wmake system.  Now when building the OpenFOAM package both the object and
-#     dependency files are now located in a tree with the same structure as the
-#     source tree but in the platforms/$WM_OPTIONS sub-directory of
-#     $WM_PROJECT_DIR.
+#     Intermediate object and dependency files retain the tree structure
+#     of the original source files, with its location depending on the
+#     build context.
 #
-#     When building user libraries and applications which are not located in the
-#     OpenFOAM source-tree the object and dependency files are located in a tree
-#     with the same structure as the source tree but in the Make/$WM_OPTIONS
-#     sub-directory.
+#       1. Building within the OpenFOAM project:
+#          The tree is located under $WM_PROJECT_DIR/build/$WM_OPTIONS/
 #
-#     The disadvantage of the out-of-tree compilation is that the dependency
-#     files are harder to find but are sometimes useful to study which header
-#     files are included.  For those who need access to the dependency files the
-#     new wdep script is provided to locate them.  See the wdep script header or
-#     run:
-#         wdep -h
+#       2. Building applications or libraries outside the OpenFOAM project:
+#          The tree is located under its local Make/$WM_OPTIONS/
+#
+#     The `wdep` script can be used to locate the dependency file
+#     corresponding to a given source file.
+#
+#     When `wmake -all` is used, the following rules are applied:
+#     1. If `Allwmake.override` exists, use it.
+#     2. (OR) If `Allwmake` exists, use it.
+#     3. (OR) descend into each sub-directory and repeat.
 #
 # See also
 #     wmakeLnInclude, wmakeLnIncludeAll, wmakeCollect, wdep, wrmdep, wrmo,
@@ -57,16 +56,15 @@
 #
 #------------------------------------------------------------------------------
 Script="${0##*/}"           # Use 'Script' for error messages in wmakeFunctions
-. "${0%/*}/scripts/wmakeFunctions"              # Source wmake functions
+. "${0%/*}"/scripts/wmakeFunctions              # Source wmake functions
 
-# Print help to stdout so that it can be captured
 printHelp() {
     cat<<HELP_HEAD
 
 Usage: $Script [OPTION] [dir]
        $Script [OPTION] target [dir [MakeDir]]
 options:
-  -s | -silent      Quiet mode (does not echo commands)
+  -s | -silent      Silent mode (does not echo commands)
   -a | -all         wmake all sub-directories, running Allwmake if present
   -q | -queue       wmakeCollect sub-directories, running Allwmake if present
   -k | -keep-going  Keep going even when errors occur (-non-stop)
@@ -156,11 +154,10 @@ make="make"
 #------------------------------------------------------------------------------
 
 # Set nCores to the number of cores on the machine
-nCores=0
 allCores()
 {
     nCores=$(getconf _NPROCESSORS_ONLN 2>/dev/null) || nCores=1
-    : ${nCores:=1}
+    echo "${nCores:-1}"
 }
 
 
@@ -204,17 +201,21 @@ do
             ;;
         # Parallel compilation on all cores (or specified number of cores)
         -j)
-            nCores=0
-            test $# -ge 2 && expr $2 + 1 > /dev/null 2>&1 \
-                && shift && nCores=$1
-
-            [ "$nCores" = 0 ] && allCores
-            export WM_NCOMPPROCS=$nCores
+            export WM_NCOMPPROCS=0
+            case "$2" in
+            [0-9]*)
+                if WM_NCOMPPROCS="$(expr 0 + "$2" 2>/dev/null)"
+                then
+                    shift
+                fi
+                ;;
+            esac
+            [ "${WM_NCOMPPROCS:=0}" -gt 0 ] || WM_NCOMPPROCS=$(allCores)
             echo "Compiling enabled on $WM_NCOMPPROCS cores" 1>&2
             ;;
         # Parallel compilation on specified number of cores
         -j[1-9]*)
-            export WM_NCOMPPROCS=${1#-j}
+            export WM_NCOMPPROCS="${1#-j}"
             echo "Compiling enabled on $WM_NCOMPPROCS cores" 1>&2
             ;;
         # Keep going, ignoring errors
@@ -237,7 +238,7 @@ do
         #   and respective binaries.
         -update)
             update=true
-            : ${all:=all}  # implies 'all', unless previous set to 'queue' etc.
+            : "${all:=all}" # implies 'all', unless previous set to 'queue' etc.
             ;;
         -version | --version)
             $make -f $WM_DIR/makefiles/info api
@@ -270,15 +271,16 @@ fi
 
 checkEnv
 
-# When compiling anything but a standalone exe WM_PROJECT and WM_PROJECT_DIR
-# must be set
-[ "$1" = exe -o \( "$WM_PROJECT" -a "$WM_PROJECT_DIR" \) ] || {
+# Require WM_PROJECT for anything except a standalone exe.
+# The WM_PROJECT_DIR was already tested in checkEnv.
+if [ -z "$WM_PROJECT" ] && [ "$1" != exe ]
+then
     exec 1>&2
     echo "$Script error:"
-    echo "    environment variable \$WM_PROJECT or \$WM_PROJECT_DIR not set"
+    echo "    environment variable \$WM_PROJECT not set"
     echo "    while building project library"
     exit 1
-}
+fi
 
 
 #------------------------------------------------------------------------------
@@ -289,7 +291,7 @@ if [ -n "$WM_NCOMPPROCS" ]
 then
     parOpt="-j $WM_NCOMPPROCS"
 
-    if [ "$WM_NCOMPPROCS" -gt 1 -a -z "$MAKEFLAGS" ]
+    if [ "$WM_NCOMPPROCS" -gt 1 ] && [ -z "$MAKEFLAGS" ]
     then
         make="$make --no-print-directory $parOpt"
     fi
@@ -368,7 +370,7 @@ else
 
         if [ -n "$dir" ]
         then
-            cd $dir 2>/dev/null || {
+            cd "$dir" 2>/dev/null || {
                 echo "$Script error: could not change to directory '$dir'" 1>&2
                 exit 1
             }
@@ -404,19 +406,43 @@ fi
 # Recurse the source tree to compile "all" targets
 #------------------------------------------------------------------------------
 
+unset exitCode
+
 if [ "$all" = all ]
 then
-    if [ -e Allwmake ]
+    if [ -e Allwmake.override ]
+    then
+        if [ -x Allwmake.override ]
+        then
+            ./Allwmake.override -fromWmake ${optDebug:+-debug} $targetType
+            exitCode="$?"
+        else
+            # Allow empty or non-executable file (eg, touch Allwmake.override)
+            exitCode=0
+        fi
+    elif [ -e Allwmake ]
     then
         ./Allwmake -fromWmake ${optDebug:+-debug} $targetType
-        exit $?
+        exitCode="$?"
     fi
+
+    if [ -n "$exitCode" ]
+    then
+        exit "$exitCode"
+    fi
+
+    exitCode=0  # For fall-through
+
 
     # Find all the sub-directories containing a 'Make' directory
     # (xargs is just used to flatten the list)
     FOAM_APPS=$(
         for d in *
-        do [ -d "$d" -a "$d" != Optional -a "$d" != Make ] && echo "$d"
+        do
+            case "$d" in
+                (Make) ;;  # Do not make within Make/ dir
+                (*) [ -d "$d" ] && echo "$d" ;;
+            esac
         done | xargs)
 
     if [ -n "$FOAM_APPS" ]
@@ -426,16 +452,13 @@ then
               -f $WM_DIR/makefiles/apps \
               ${optDebug:+c++DBUG="$optDebug"} \
               TARGET="$targetType" FOAM_APPS="$FOAM_APPS"
-        makeExitCode=$?
-    else
-        makeExitCode=0 # For fall-through
+        exitCode=$?
     fi
 
-    # Exit if current directory does not contains a 'Make' directory or
-    # an error was previously encountered
-    if [ ! -d "$MakeDir" -o $makeExitCode -ne 0 ]
+    # Exit on error, or if current directory does not have a 'Make' directory
+    if [ ! -d "$MakeDir" ] || [ "$exitCode" -ne 0 ]
     then
-        exit $makeExitCode
+        exit "$exitCode"
     fi
 fi
 
@@ -496,10 +519,10 @@ fi
 # files and options being built in parallel
 #------------------------------------------------------------------------------
 
-objectsDir=$MakeDir/$WM_OPTIONS
+objectsDir="$MakeDir/$WM_OPTIONS"
 case "$PWD" in
 ("$WM_PROJECT_DIR"/*)
-    buildPath=$WM_PROJECT_DIR/build/${WM_OPTIONS}
+    buildPath="$WM_PROJECT_DIR/build/${WM_OPTIONS}"
     objectsDir=$buildPath$(echo $PWD | sed s%$WM_PROJECT_DIR%% )
     ;;
 esac
@@ -554,9 +577,9 @@ then
 
     $make -f $WM_DIR/makefiles/general \
         MAKE_DIR=$MakeDir OBJECTS_DIR=$objectsDir updatedep
-    makeExitCode=$?
+    exitCode="$?"
 
-    [ $makeExitCode -eq 0 ] || exit $makeExitCode
+    [ "$exitCode" -eq 0 ] || exit "$exitCode"
 fi
 
 
