@@ -35,41 +35,45 @@ Description
     execution of OpenFOAM.
 
 Usage
-    \b decomposePar [OPTION]
+    \b decomposePar [OPTIONS]
 
     Options:
-      - \par -dry-run
-        Test without actually decomposing
+      - \par -allRegions
+        Decompose all regions in regionProperties. Does not check for
+        existence of processor*.
+
+      - \par - case <dir>
+        Specify case directory to use (instead of the cwd).
 
       - \par -cellDist
         Write the cell distribution as a labelList, for use with 'manual'
         decomposition method and as a volScalarField for visualization.
 
-      - \par -region \<regionName\>
-        Decompose named region. Does not check for existence of processor*.
-
-      - \par -allRegions
-        Decompose all regions in regionProperties. Does not check for
-        existence of processor*.
-
-      - \par -copyZero
-        Copy \a 0 directory to processor* rather than decompose the fields.
+      - \par -constant
+        Include the 'constant/' dir in the times list.
 
       - \par -copyUniform
         Copy any \a uniform directories too.
 
-      - \par -constant
+      - \par -copyZero
+        Copy \a 0 directory to processor* rather than decompose the fields.
 
-      - \par -time xxx:yyy
-        Override controlDict settings and decompose selected times. Does not
-        re-decompose the mesh i.e. does not handle moving mesh or changing
-        mesh cases.
+      - \par -debug-switch <name=val>
+        Specify the value of a registered debug switch. Default is 1
+        if the value is omitted. (Can be used multiple times)
+
+      - \par -decomposeParDict <file>
+        Use specified file for decomposePar dictionary.
+
+      - \par -dry-run
+        Test without writing the decomposition. Changes -cellDist to
+        only write volScalarField.
 
       - \par -fields
         Use existing geometry decomposition and convert fields only.
 
-      - \par -noSets
-        Skip decomposing cellSets, faceSets, pointSets.
+      - \par fileHandler <handler>
+        Override the file handler type.
 
       - \par -force
         Remove any existing \a processor subdirectories before decomposing the
@@ -82,6 +86,58 @@ Usage
         to avoid redundant geometry decomposition (eg, in scripts), but should
         be used with caution when the underlying (serial) geometry or the
         decomposition method etc. have been changed between decompositions.
+
+      - \par -info-switch <name=val>
+        Specify the value of a registered info switch. Default is 1
+        if the value is omitted. (Can be used multiple times)
+
+      - \par -latestTime
+        Select the latest time.
+
+      - \par -lib <name>
+        Additional library or library list to load (can be used multiple times).
+
+      - \par -noFunctionObjects
+        Do not execute function objects.
+
+      - \par -noSets
+        Skip decomposing cellSets, faceSets, pointSets.
+
+      - \par -noZero
+        Exclude the \a 0 dir from the times list.
+
+      - \par -opt-switch <name=val>
+        Specify the value of a registered optimisation switch (int/bool).
+        Default is 1 if the value is omitted. (Can be used multiple times)
+
+      - \par -region \<regionName\>
+        Decompose named region. Does not check for existence of processor*.
+
+      - \par -time <ranges>
+        Override controlDict settings and decompose selected times. Does not
+        re-decompose the mesh i.e. does not handle moving mesh or changing
+        mesh cases. Eg, ':10,20 40:70 1000:', 'none', etc.
+
+      - \par -verbose
+        Additional verbosity.
+
+      - \par -doc
+        Display documentation in browser.
+
+      - \par -doc-source
+        Display source code in browser.
+
+      - \par -help
+        Display short help and exit.
+
+      - \par -help-man
+        Display full help (manpage format) and exit.
+
+      - \par -help-notes
+        Display help notes (description) and exit.
+
+      - \par -help-full
+        Display full help and exit.
 
 \*---------------------------------------------------------------------------*/
 
@@ -328,10 +384,12 @@ int main(int argc, char *argv[])
         times = timeSelector::selectIfPresent(runTime, args);
     }
 
-
     // Allow override of decomposeParDict location
-    const fileName decompDictFile =
-        args.getOrDefault<fileName>("decomposeParDict", "");
+    fileName decompDictFile(args.get<fileName>("decomposeParDict", ""));
+    if (!decompDictFile.empty() && !decompDictFile.isAbsolute())
+    {
+        decompDictFile = runTime.globalPath()/decompDictFile;
+    }
 
     // Get all region names
     wordList regionNames;
