@@ -46,11 +46,9 @@ namespace regionModels
 
 void Foam::regionModels::regionModel::constructMeshObjects()
 {
-    // construct region mesh
     if (!time_.foundObject<fvMesh>(regionName_))
     {
-        regionMeshPtr_.reset
-        (
+        fvMesh* regionMeshPtr =
             new fvMesh
             (
                 IOobject
@@ -60,8 +58,9 @@ void Foam::regionModels::regionModel::constructMeshObjects()
                     time_,
                     IOobject::MUST_READ
                 )
-            )
-        );
+            );
+
+        regionMeshPtr->objectRegistry::store();
     }
 }
 
@@ -364,7 +363,6 @@ Foam::regionModels::regionModel::regionModel
     active_(false),
     infoOutput_(false),
     modelName_("none"),
-    regionMeshPtr_(nullptr),
     coeffs_(dictionary::null),
     outputPropertiesPtr_(nullptr),
     primaryPatchIDs_(),
@@ -400,7 +398,6 @@ Foam::regionModels::regionModel::regionModel
     active_(get<Switch>("active")),
     infoOutput_(true),
     modelName_(modelName),
-    regionMeshPtr_(nullptr),
     coeffs_(subOrEmptyDict(modelName + "Coeffs")),
     outputPropertiesPtr_(nullptr),
     primaryPatchIDs_(),
@@ -448,7 +445,6 @@ Foam::regionModels::regionModel::regionModel
     active_(dict.get<Switch>("active")),
     infoOutput_(false),
     modelName_(modelName),
-    regionMeshPtr_(nullptr),
     coeffs_(dict.subOrEmptyDict(modelName + "Coeffs")),
     outputPropertiesPtr_(nullptr),
     primaryPatchIDs_(),
@@ -467,12 +463,6 @@ Foam::regionModels::regionModel::regionModel
         }
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::regionModels::regionModel::~regionModel()
-{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
