@@ -70,6 +70,7 @@ int main(int argc, char *argv[])
         " and surface film modelling."
     );
 
+    #define CREATE_MESH createMeshesPostProcess.H
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"

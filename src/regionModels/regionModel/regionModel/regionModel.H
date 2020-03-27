@@ -99,9 +99,6 @@ protected:
         //- Model name
         const word modelName_;
 
-        //- Pointer to the region mesh database
-        autoPtr<fvMesh> regionMeshPtr_;
-
         //- Model coefficients dictionary
         dictionary coeffs_;
 
@@ -185,7 +182,7 @@ public:
 
 
     //- Destructor
-    virtual ~regionModel();
+    virtual ~regionModel() = default;
 
 
     // Member Functions
