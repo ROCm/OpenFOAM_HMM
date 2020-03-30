@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,7 +29,6 @@ License
 #include "cellModel.H"
 #include "demandDrivenData.H"
 #include "ccmInternal.H" // include last to avoid any strange interactions
-
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -377,8 +376,6 @@ Foam::ccm::writer::writer
 Foam::ccm::writer::~writer()
 {
     close();
-
-    deleteDemandDrivenData(maps_);
 }
 
 

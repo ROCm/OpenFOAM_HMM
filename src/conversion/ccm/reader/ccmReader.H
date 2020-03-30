@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -204,10 +204,10 @@ private:
         static const char* cellTableOptstr[];
 
 
-    // Private data
+    // Private Data
 
         //- Reader options
-        const options* options_;
+        const unique_ptr<options> options_;
 
 
         //- Enumeration defining the status of a ccmio node

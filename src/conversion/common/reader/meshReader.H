@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -117,12 +117,12 @@ protected:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Point-cell addressing. Used for topological analysis
         // Warning. This point cell addressing list potentially contains
         // duplicate cell entries. Use additional checking
-        mutable labelListList* pointCellsPtr_;
+        mutable unique_ptr<labelListList> pointCellsPtr_;
 
         //- Association between two faces
         List<labelPair> interfaces_;
@@ -205,7 +205,7 @@ private:
 
 protected:
 
-    // Protected member data
+    // Protected Data
 
         //- Referenced filename
         fileName geometryFile_;
@@ -255,7 +255,7 @@ protected:
         cellTable cellTable_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Subclasses are required to supply this information
         virtual bool readGeometry(const scalar scaleFactor = 1.0) = 0;
@@ -276,7 +276,7 @@ public:
 
 
     //- Destructor
-    virtual ~meshReader();
+    virtual ~meshReader() = default;
 
 
     // Member Functions

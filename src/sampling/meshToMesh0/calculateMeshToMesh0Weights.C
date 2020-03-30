@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,11 +33,8 @@ License
 
 void Foam::meshToMesh0::calculateInverseDistanceWeights() const
 {
-    if (debug)
-    {
-        InfoInFunction
-            << "Calculating inverse distance weighting factors" << endl;
-    }
+    DebugInFunction
+        << "Calculating inverse distance weighting factors" << nl;
 
     if (inverseDistanceWeightsPtr_)
     {
@@ -46,10 +44,10 @@ void Foam::meshToMesh0::calculateInverseDistanceWeights() const
     }
 
     //- Initialise overlap volume to zero
-    V_ = 0.0;
+    V_ = 0;
 
-    inverseDistanceWeightsPtr_ = new scalarListList(toMesh_.nCells());
-    scalarListList& invDistCoeffs = *inverseDistanceWeightsPtr_;
+    inverseDistanceWeightsPtr_.reset(new scalarListList(toMesh_.nCells()));
+    auto& invDistCoeffs = *inverseDistanceWeightsPtr_;
 
     // get reference to source mesh data
     const labelListList& cc = fromMesh_.cellCells();
@@ -134,11 +132,8 @@ void Foam::meshToMesh0::calculateInverseDistanceWeights() const
 
 void Foam::meshToMesh0::calculateInverseVolumeWeights() const
 {
-    if (debug)
-    {
-        InfoInFunction
-            << "Calculating inverse volume weighting factors" << endl;
-    }
+    DebugInFunction
+        << "Calculating inverse volume weighting factors" << endl;
 
     if (inverseVolumeWeightsPtr_)
     {
@@ -148,10 +143,10 @@ void Foam::meshToMesh0::calculateInverseVolumeWeights() const
     }
 
     //- Initialise overlap volume to zero
-    V_ = 0.0;
+    V_ = 0;
 
-    inverseVolumeWeightsPtr_ = new scalarListList(toMesh_.nCells());
-    scalarListList& invVolCoeffs = *inverseVolumeWeightsPtr_;
+    inverseVolumeWeightsPtr_.reset(new scalarListList(toMesh_.nCells()));
+    auto& invVolCoeffs = *inverseVolumeWeightsPtr_;
 
     const labelListList& cellToCell = cellToCellAddressing();
 
@@ -197,11 +192,8 @@ void Foam::meshToMesh0::calculateInverseVolumeWeights() const
 
 void Foam::meshToMesh0::calculateCellToCellAddressing() const
 {
-    if (debug)
-    {
-        InfoInFunction
-            << "Calculating cell to cell addressing" << endl;
-    }
+    DebugInFunction
+        << "Calculating cell to cell addressing" << endl;
 
     if (cellToCellAddressingPtr_)
     {
@@ -211,12 +203,12 @@ void Foam::meshToMesh0::calculateCellToCellAddressing() const
     }
 
     //- Initialise overlap volume to zero
-    V_ = 0.0;
+    V_ = 0;
 
     tetOverlapVolume overlapEngine;
 
-    cellToCellAddressingPtr_ = new labelListList(toMesh_.nCells());
-    labelListList& cellToCell = *cellToCellAddressingPtr_;
+    cellToCellAddressingPtr_.reset(new labelListList(toMesh_.nCells()));
+    auto& cellToCell = *cellToCellAddressingPtr_;
 
 
     forAll(cellToCell, iTo)

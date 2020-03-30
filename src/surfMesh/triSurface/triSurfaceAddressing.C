@@ -47,8 +47,8 @@ void Foam::triSurface::calcSortedEdgeFaces() const
 
     const labelListList& eFaces = edgeFaces();
 
-    sortedEdgeFacesPtr_ = new labelListList(eFaces.size());
-    labelListList& sortedEdgeFaces = *sortedEdgeFacesPtr_;
+    sortedEdgeFacesPtr_.reset(new labelListList(eFaces.size()));
+    auto& sortedEdgeFaces = *sortedEdgeFacesPtr_;
 
     sortedEdgeFaces = PatchTools::sortedEdgeFaces(*this);
 }
@@ -63,9 +63,8 @@ void Foam::triSurface::calcEdgeOwner() const
             << abort(FatalError);
     }
 
-    // create the owner list
-    edgeOwnerPtr_ = new labelList(nEdges());
-    labelList& edgeOwner = *edgeOwnerPtr_;
+    edgeOwnerPtr_.reset(new labelList(nEdges()));
+    auto& edgeOwner = *edgeOwnerPtr_;
 
     forAll(edges(), edgeI)
     {

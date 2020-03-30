@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "triSurface.H"
-#include "demandDrivenData.H"
 #include "Time.H"
 #include "surfZoneList.H"
 #include "MeshedSurface.H"
@@ -525,8 +524,8 @@ Foam::triSurface::~triSurface()
 void Foam::triSurface::clearTopology()
 {
     ParentType::clearTopology();
-    deleteDemandDrivenData(sortedEdgeFacesPtr_);
-    deleteDemandDrivenData(edgeOwnerPtr_);
+    sortedEdgeFacesPtr_.reset(nullptr);
+    edgeOwnerPtr_.reset(nullptr);
 }
 
 
@@ -585,7 +584,7 @@ const Foam::labelList& Foam::triSurface::edgeOwner() const
 void Foam::triSurface::movePoints(const pointField& pts)
 {
     // Remove all geometry dependent data
-    deleteDemandDrivenData(sortedEdgeFacesPtr_);
+    sortedEdgeFacesPtr_.reset(nullptr);
 
     // Adapt for new point positions
     ParentType::movePoints(pts);
@@ -598,7 +597,7 @@ void Foam::triSurface::movePoints(const pointField& pts)
 void Foam::triSurface::swapPoints(pointField& pts)
 {
     // Remove all geometry dependent data
-    deleteDemandDrivenData(sortedEdgeFacesPtr_);
+    sortedEdgeFacesPtr_.reset(nullptr);
 
     // Adapt for new point positions
     ParentType::movePoints(pts);

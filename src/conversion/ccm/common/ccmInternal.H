@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,14 +33,14 @@ Description
 #include "className.H"
 #include "List.H"
 
-// headers and definitions for using libccmio
+// Headers and definitions for using libccmio
 #include "libccmio/ccmio.h"
 
-// low-level routines are also needed
+// Low-level routines are also needed
 #include "libccmio/ccmiocore.h"
 #include "libccmio/ccmioutility.h"
 
-// don't want these defines to leak through
+// Do not allow these defines to leak through
 #undef TRUE
 #undef FALSE
 
@@ -62,10 +62,7 @@ NamespaceName("ccm");
 
 
 //- A C++ wrapper for the C struct
-class ccmID
-:
-    public CCMIOID
-{};
+class ccmID : public CCMIOID {};
 
 //- A C++ wrapper for the C struct
 class ccmNODE
@@ -146,6 +143,7 @@ public:
 class ccmMaps
 {
 public:
+
     //- The cell map
     ccmID cells;
 

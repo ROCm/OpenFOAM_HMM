@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,8 +47,8 @@ void Foam::meshReader::calcPointCells() const
 
     label nPoints = points_.size();
 
-    pointCellsPtr_ = new labelListList(nPoints);
-    labelListList& ptCells = *pointCellsPtr_;
+    pointCellsPtr_.reset(new labelListList(nPoints));
+    auto& ptCells = *pointCellsPtr_;
 
     forAll(ptCells, i)
     {

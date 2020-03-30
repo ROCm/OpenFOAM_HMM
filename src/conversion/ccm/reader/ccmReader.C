@@ -714,7 +714,6 @@ Foam::ccm::reader::reader(const fileName& file, const reader::options& opts)
 Foam::ccm::reader::~reader()
 {
     close();
-    deleteDemandDrivenData(options_);
 }
 
 

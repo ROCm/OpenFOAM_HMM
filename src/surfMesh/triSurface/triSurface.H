@@ -106,11 +106,11 @@ class triSurface
     // Demand driven private data.
 
         //- Edge-face addressing (sorted)
-        mutable labelListList* sortedEdgeFacesPtr_;
+        mutable unique_ptr<labelListList> sortedEdgeFacesPtr_;
 
-        //- Label of face that 'owns' edge (i.e. e.vec() is righthanded walk
-        //- along face)
-        mutable labelList* edgeOwnerPtr_;
+        //- Label of face that 'owns' edge
+        //- i.e. e.vec() is righthanded walk along face
+        mutable unique_ptr<labelList> edgeOwnerPtr_;
 
 
     // Private Member Functions

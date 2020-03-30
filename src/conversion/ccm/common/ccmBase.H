@@ -41,6 +41,7 @@ SourceFiles
 #ifndef ccmBase_H
 #define ccmBase_H
 
+#include <memory>
 #include <string>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -50,8 +51,7 @@ namespace Foam
 namespace ccm
 {
 
-// * * * * * * * * * * * * * Forward Declarations  * * * * * * * * * * * * * //
-
+// Forward Declarations
 class ccmGlobalState;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -62,21 +62,12 @@ class ccmGlobalState;
 
 class base
 {
-    // Private Member Functions
-
-        //- No copy construct
-        base(const base&) = delete;
-
-        //- No copy assignment
-        void operator=(const base&) = delete;
-
-
 protected:
 
     // Protected Data
 
         //- Maintain overall global states (error, root-node)
-        ccmGlobalState* globalState_;
+        std::unique_ptr<ccmGlobalState> globalState_;
 
 
     // Protected Member Functions
@@ -99,11 +90,18 @@ protected:
         bool assertNoError(const std::string& msg) const;
 
 
+        //- No copy construct
+        base(const base&) = delete;
+
+        //- No copy assignment
+        void operator=(const base&) = delete;
+
+
 public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct. Initializes the global-state.
         base();
 
 
@@ -112,8 +110,6 @@ public:
 
 
     // Member Functions
-
-      // Access
 
         //- Explicitly close the file and terminate ccmio access.
         //  Return false if it was already closed.

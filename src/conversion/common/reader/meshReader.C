@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,6 @@ License
 #include "polyMesh.H"
 #include "faceSet.H"
 #include "emptyPolyPatch.H"
-#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -147,7 +146,7 @@ void Foam::meshReader::clearExtraStorage()
     boundaryIds_.clear();
     baffleIds_.clear();
 
-    deleteDemandDrivenData(pointCellsPtr_);
+    pointCellsPtr_.reset(nullptr);
 }
 
 
@@ -187,14 +186,6 @@ Foam::meshReader::meshReader
     {
         scaleFactor_ = 1;
     }
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::meshReader::~meshReader()
-{
-    deleteDemandDrivenData(pointCellsPtr_);
 }
 
 
