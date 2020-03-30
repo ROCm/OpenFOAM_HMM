@@ -27,7 +27,7 @@ setDecompressionTankFine()
 # Do decompressionTank
 ( cd decompressionTank && foamRunTutorials )
 
-if notTest $@
+if notTest "$@"
 then
     # Clone case
     cloneCase decompressionTank decompressionTankFine

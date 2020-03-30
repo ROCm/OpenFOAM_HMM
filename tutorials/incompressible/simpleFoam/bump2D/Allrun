@@ -47,7 +47,7 @@ extractVal()
 }
 
 
-# Possibly disable for test: if notTest $@
+# Possibly disable for test: if notTest "$@"
 
 if :
 then

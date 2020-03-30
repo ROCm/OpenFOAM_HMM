@@ -10,7 +10,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 ( cd blob && ./Allrun $* )
 ( cd simpleShapes && ./Allrun $* )
 
-if notTest $@
+if notTest "$@"
 then
     ( cd flange && ./Allrun $* )
     ( cd mixerVessel && ./Allrun $* )

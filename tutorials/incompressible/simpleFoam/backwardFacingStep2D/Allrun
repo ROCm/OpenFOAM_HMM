@@ -6,7 +6,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 runApplication blockMesh
 runApplication simpleFoam
 
-if notTest $@
+if notTest "$@"
 then
     # Create validation plots
 

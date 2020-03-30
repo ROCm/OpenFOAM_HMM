@@ -5,7 +5,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 runApplication $(getApplication)
 
-if notTest $@
+if notTest "$@"
 then
     (cd validation && ./Allrun $*)
 fi

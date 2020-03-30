@@ -26,7 +26,7 @@ setDamBreakFine ()
 (cd damBreak && foamRunTutorials)
 
 
-if notTest $@
+if notTest "$@"
 then
     # Clone case
     cloneCase damBreak damBreakFine

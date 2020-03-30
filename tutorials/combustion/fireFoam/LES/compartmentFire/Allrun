@@ -21,7 +21,7 @@ runParallel $(getApplication)
 paraFoam -touch
 paraFoam -touch -region panelRegion
 
-if notTest $@
+if notTest "$@"
 then
     (cd validation && ./createGraphs)
 fi

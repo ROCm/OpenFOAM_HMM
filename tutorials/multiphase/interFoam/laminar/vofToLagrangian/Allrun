@@ -5,7 +5,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 (cd eulerianInjection && ./Allrun $*)
 
-if notTest $@
+if notTest "$@"
 then
     # Note: particle data only available if running complete case
     (cd lagrangianParticleInjection && ./Allrun $*)

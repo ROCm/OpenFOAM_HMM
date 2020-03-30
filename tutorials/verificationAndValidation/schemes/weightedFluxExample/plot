@@ -71,7 +71,7 @@ GNUPLOT
 }
 
 
-if notTest $@
+if notTest "$@"
 then
     # Create validation plots
 

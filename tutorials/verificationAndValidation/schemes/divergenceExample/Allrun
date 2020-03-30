@@ -1,27 +1,34 @@
-#!/bin/sh
+#!/bin/bash
 cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-params=$@
+# Save the line plot
+unset savePlots
+
+if notTest "$@"
+then
+    savePlots=true
+fi
+
 
 runApplication blockMesh
 
-cat system/schemesToTest | while read scheme
+while read -r scheme
 do
     echo "Updating fvSchemes to use $scheme"
     sed "s/DIVSCHEME/$scheme/g" system/fvSchemes.template > system/fvSchemes
 
     # Create a sanitised name for the scheme - remove 'special' characters
-    schemeTag=$(sed -e 's# #_#g#' -e 's#(##g' -e 's#)##g' -e 's#\.##g' <<< "$scheme")
+    schemeTag=$(sed -e 's# #_#g#' -e 's#[.()]##g' <<< "$scheme")
 
-    runApplication -s ${schemeTag} scalarTransportFoam
+    runApplication -s "${schemeTag}" scalarTransportFoam
 
-    if notTest $params
+    if [ "$savePlots" = true ]
     then
         # Save the line plot
-        mv postProcessing/sample1/100/line1_T.xy line1_T_${schemeTag}.xy
+        mv postProcessing/sample1/100/line1_T.xy line1_T_"${schemeTag}".xy
     fi
-done
+done < system/schemesToTest
 
 #------------------------------------------------------------------------------

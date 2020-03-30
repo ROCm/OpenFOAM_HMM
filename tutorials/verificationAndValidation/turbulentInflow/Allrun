@@ -6,7 +6,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 endTime=10
 \cp system/controlDict.template system/controlDict
-if notTest $@
+if notTest "$@"
 then
     endTime=85
 fi

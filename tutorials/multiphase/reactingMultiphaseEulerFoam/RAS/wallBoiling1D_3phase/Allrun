@@ -8,7 +8,7 @@ application=$(getApplication)
 runApplication blockMesh
 runApplication $application
 
-if notTest $@
+if notTest "$@"
 then
     foamDictionary system/controlDict -entry endTime -set 4
     foamDictionary system/controlDict -entry startTime -set 0.5

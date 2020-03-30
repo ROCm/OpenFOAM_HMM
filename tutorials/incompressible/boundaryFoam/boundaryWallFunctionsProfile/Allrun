@@ -33,7 +33,7 @@ do
     rm -rf logs
 done
 
-if notTest $@
+if notTest "$@"
 then
     # create validation plot
 

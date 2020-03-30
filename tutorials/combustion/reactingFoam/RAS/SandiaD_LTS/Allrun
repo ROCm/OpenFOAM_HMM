@@ -15,7 +15,7 @@ runApplication chemkinToFoam \
 runApplication blockMesh
 runApplication setFields
 
-if isTest $@
+if isTest "$@"
 then
     # Test without chemistry
     foamDictionary constant/chemistryProperties -entry chemistry -set off

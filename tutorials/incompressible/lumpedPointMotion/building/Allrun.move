@@ -52,7 +52,7 @@ linkParallelCase()
 # Do steady-state case
 (cd steady && ./Allrun.pre)
 
-if notTest $@
+if notTest "$@"
 then
     # Copy/link the steady-state case to movement
     linkParallelCase steady movement

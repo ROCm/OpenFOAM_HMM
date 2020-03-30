@@ -10,7 +10,7 @@ Stokes
 "
 
 endTime=2
-if notTest $@
+if notTest "$@"
 then
     endTime=25
 fi

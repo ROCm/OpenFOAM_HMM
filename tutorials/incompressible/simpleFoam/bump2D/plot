@@ -92,7 +92,7 @@ PLT_CP
 }
 
 
-if notTest $@
+if notTest "$@"
 then
     # Create validation plots
 

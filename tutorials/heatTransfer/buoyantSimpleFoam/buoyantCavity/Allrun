@@ -7,7 +7,7 @@ runApplication blockMesh
 runApplication $(getApplication)
 runApplication -s sample  postProcess -latestTime -func sample
 
-if notTest $@
+if notTest "$@"
 then
     runApplication validation/createGraphs
 fi

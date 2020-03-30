@@ -6,7 +6,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 runApplication blockMesh
 runApplication $(getApplication)
 
-if notTest $@
+if notTest "$@"
 then
     foamDictionary system/controlDict -entry endTime -set 5
     foamDictionary 2/T.liquid -entry boundaryField/wall2/q -set 'uniform 1e5'
