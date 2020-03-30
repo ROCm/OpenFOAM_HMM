@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016,2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -119,25 +119,6 @@ MarshakRadiationFvPatchScalarField
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::radiation::MarshakRadiationFvPatchScalarField::autoMap
-(
-    const fvPatchFieldMapper& m
-)
-{
-    scalarField::autoMap(m);
-}
-
-
-void Foam::radiation::MarshakRadiationFvPatchScalarField::rmap
-(
-    const fvPatchScalarField& ptf,
-    const labelList& addr
-)
-{
-    mixedFvPatchScalarField::rmap(ptf, addr);
-}
-
 
 void Foam::radiation::MarshakRadiationFvPatchScalarField::updateCoeffs()
 {
