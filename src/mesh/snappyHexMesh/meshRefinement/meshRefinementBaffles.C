@@ -2448,6 +2448,19 @@ void Foam::meshRefinement::growCellZone
         }
     }
 
+    // Fix any left-over unvisited cells
+    if (backgroundZoneID != -2)
+    {
+        forAll(cellToZone, celli)
+        {
+            if (cellToZone[celli] == -2)
+            {
+                cellToZone[celli] = backgroundZoneID;
+                nBackgrounded++;
+            }
+        }
+    }
+
 
     // Make sure to unset faces of changed cell
 
