@@ -147,8 +147,6 @@ int main(int argc, char *argv[])
 
                         // Make the flux relative to the mesh motion
                         fvc::makeRelative(phi, U);
-
-                        interface.correct();
                     }
 
                     if (checkMeshCourantNo)
@@ -162,6 +160,8 @@ int main(int argc, char *argv[])
 
             #include "alphaControls.H"
             #include "alphaEqnSubCycle.H"
+
+            interface.correct();
 
             #include "UEqn.H"
             #include "TEqn.H"
