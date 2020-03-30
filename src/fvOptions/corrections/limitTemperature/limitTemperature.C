@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -109,11 +109,46 @@ void Foam::fv::limitTemperature::correct(volScalarField& he)
 
     scalarField& hec = he.primitiveFieldRef();
 
+    const scalarField& T = thermo.T();
+
+    scalar Tmin0 = min(T);
+    scalar Tmax0 = max(T);
+
+    label nOverTmax = 0;
+    label nLowerTmin = 0;
+
     forAll(cells_, i)
     {
         const label celli = cells_[i];
+        if (hec[celli] < heMin[i])
+        {
+            nLowerTmin++;
+        }
+        else if (hec[celli] > heMax[i])
+        {
+            nOverTmax++;
+        }
         hec[celli]= max(min(hec[celli], heMax[i]), heMin[i]);
     }
+
+    reduce(nOverTmax, sumOp<label>());
+    reduce(nLowerTmin, sumOp<label>());
+
+    reduce(Tmin0, minOp<scalar>());
+    reduce(Tmax0, maxOp<scalar>());
+
+    Info<< type() << " " << name_ << " Lower limited "
+        << nLowerTmin << " ("
+        << 100*scalar(nLowerTmin)/mesh_.globalData().nTotalCells()
+        << "%) of cells" << endl;
+
+    Info<< type() << " " << name_ << " Upper limited "
+        << nOverTmax << " ("
+        << 100*scalar(nOverTmax)/mesh_.globalData().nTotalCells()
+        << "%) of cells" << endl;
+
+    Info<< type() << " " << name_ << " Unlimited Tmax " << Tmax0 << nl
+        <<  "Unlimited Tmin " << Tmin0 << endl;
 
     // handle boundaries in the case of 'all'
     if (selectionMode_ == smAll)
