@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2019-2020 M. Janssens
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +56,7 @@ void Foam::PPCG::gSumMagProd
     const label nCells = a.size();
 
     globalSum = 0.0;
-    for (label cell=0; cell<nCells; cell++)
+    for (label cell=0; cell<nCells; ++cell)
     {
         globalSum[0] += a[cell]*b[cell];    // sumProd(a, b)
         globalSum[1] += a[cell]*c[cell];    // sumProd(a, c)
@@ -77,7 +78,7 @@ void Foam::PPCG::gSumMagProd
 }
 
 
-Foam::solverPerformance Foam::PPCG::scalarSolve
+Foam::solverPerformance Foam::PPCG::scalarSolveCG
 (
     solveScalarField& psi,
     const solveScalarField& source,
@@ -113,11 +114,11 @@ Foam::solverPerformance Foam::PPCG::scalarSolve
 
     // --- Select and construct the preconditioner
     autoPtr<lduMatrix::preconditioner> preconPtr =
-    lduMatrix::preconditioner::New
-    (
-        *this,
-        controlDict_
-    );
+        lduMatrix::preconditioner::New
+        (
+            *this,
+            controlDict_
+        );
 
     // --- Precondition residual (= u0)
     solveScalarField u(nCells);
@@ -209,7 +210,7 @@ Foam::solverPerformance Foam::PPCG::scalarSolve
             const solveScalar beta = gamma/gammaOld;
             alpha = gamma/(delta-beta*gamma/alpha);
 
-            for (label cell=0; cell<nCells; cell++)
+            for (label cell=0; cell<nCells; ++cell)
             {
                 z[cell] = n[cell] + beta*z[cell];
                 q[cell] = m[cell] + beta*q[cell];
@@ -218,7 +219,7 @@ Foam::solverPerformance Foam::PPCG::scalarSolve
             }
         }
 
-        for (label cell=0; cell<nCells; cell++)
+        for (label cell=0; cell<nCells; ++cell)
         {
             psi[cell] += alpha*p[cell];
             r[cell] -= alpha*s[cell];
@@ -286,7 +287,7 @@ Foam::solverPerformance Foam::PPCG::solve
 ) const
 {
     PrecisionAdaptor<solveScalar, scalar> tpsi(psi_s);
-    return scalarSolve
+    return scalarSolveCG
     (
         tpsi.ref(),
         ConstPrecisionAdaptor<solveScalar, scalar>(source)(),

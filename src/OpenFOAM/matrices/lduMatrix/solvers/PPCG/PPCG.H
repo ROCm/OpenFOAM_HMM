@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2019-2020 M. Janssens
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,8 +90,8 @@ class PPCG
 protected:
 
         //- CG solver. Operates either in conjugate-gradient mode or
-        //  conjugate residual
-        solverPerformance scalarSolve
+        //- conjugate residual
+        solverPerformance scalarSolveCG
         (
             solveScalarField& psi,
             const solveScalarField& source,
@@ -120,8 +121,7 @@ public:
 
 
     //- Destructor
-    virtual ~PPCG()
-    {}
+    virtual ~PPCG() = default;
 
 
     // Member Functions

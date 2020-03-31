@@ -73,7 +73,7 @@ Foam::solverPerformance Foam::PPCR::solve
 ) const
 {
     PrecisionAdaptor<solveScalar, scalar> tpsi(psi_s);
-    return PPCG::scalarSolve
+    return PPCG::scalarSolveCG
     (
         tpsi.ref(),
         ConstPrecisionAdaptor<solveScalar, scalar>(source)(),

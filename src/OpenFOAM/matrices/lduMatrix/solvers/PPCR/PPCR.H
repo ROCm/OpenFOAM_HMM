@@ -98,8 +98,7 @@ public:
 
 
     //- Destructor
-    virtual ~PPCR()
-    {}
+    virtual ~PPCR() = default;
 
 
     // Member Functions
