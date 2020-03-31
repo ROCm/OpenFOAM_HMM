@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,6 +40,7 @@ Description
         y           | Y-direction grid specification       | yes |
         z           | Z-direction grid specification       | yes |
         scale       | Point scaling                        | no  | 1.0
+        expansion   | Type of expansion (ratio/relative)   | no  | ratio
         boundary    | Boundary patches                     | yes |
         defaultPatch | Default patch specification         | no  |
     \endtable
@@ -49,12 +50,13 @@ Description
         Property| Description                               | Required | Default
         points  | Locations defining the mesh segment       | yes |
         nCells  | Divisions per mesh segment                | yes |
-        ratios  | Expansion ratio (end/start) per segment   | no  | uniform
+        ratios  | Expansion values per segment              | no  |
     \endtable
 
-    The expansion ratios are defined as per blockMesh and represent the ratio
-    of end-size / start-size for the section. A negative value is trapped
-    and treated as its reciprocal.
+    A negative expansion value is trapped and treated as its reciprocal.
+    by default, the expansion is as per blockMesh and represents the ratio
+    of end-size / start-size for the section.
+    Alternatively, the relative size can be given.
 
 SourceFiles
     PDRblockI.H
@@ -70,6 +72,7 @@ SourceFiles
 #include "boundBox.H"
 #include "pointField.H"
 #include "faceList.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -88,8 +91,18 @@ class PDRblock
 :
     public ijkMesh
 {
-
 public:
+
+    // Data Types
+
+        //- The expansion type
+        enum expansionType
+        {
+            EXPAND_UNIFORM,     //!< Uniform expansion (ie, no expansion)
+            EXPAND_RATIO,       //!< End/start ratio
+            EXPAND_RELATIVE     //!< Relative expansion ratio
+        };
+
 
     // Public Classes
 
@@ -151,6 +164,12 @@ public:
 
 private:
 
+    // Data Types
+
+        //- Named enumerations for the expansion type
+        const static Enum<expansionType> expansionNames_;
+
+
     // Private Classes
 
         //- Extracted patch settings
@@ -205,7 +224,8 @@ private:
         (
             const direction cmpt,
             const dictionary& dict,
-            const scalar scaleFactor = -1
+            const scalar scaleFactor = -1,
+            expansionType expandType = expansionType::EXPAND_RATIO
         );
 
         //- Read "boundary" information

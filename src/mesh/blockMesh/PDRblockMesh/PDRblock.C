@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,25 @@ License
 #include "ListOps.H"
 #include "emptyPolyPatch.H"
 
+// Output when verbosity is enabled
+#undef  Log
+#define Log if (verbose_) Info
+
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+const Foam::Enum
+<
+    Foam::PDRblock::expansionType
+>
+Foam::PDRblock::expansionNames_
+({
+    { expansionType::EXPAND_UNIFORM, "uniform" },
+    { expansionType::EXPAND_RATIO, "ratio" },
+    { expansionType::EXPAND_RELATIVE, "relative"}
+});
+
+
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -38,7 +57,18 @@ namespace Foam
     {
         return nDiv > 1 ? pow(expRatio, 1.0/(nDiv - 1)) : 0.0;
     }
-}
+
+    //- Calculate geometric ratio from relative ratio
+    inline scalar relativeToGeometricRatio
+    (
+        const scalar expRatio,
+        const label nDiv
+    )
+    {
+        return nDiv > 1 ? pow(expRatio, (nDiv - 1)) : 1.0;
+    }
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -132,7 +162,8 @@ void Foam::PDRblock::readGridControl
 (
     const direction cmpt,
     const dictionary& dict,
-    const scalar scaleFactor
+    const scalar scaleFactor,
+    expansionType expandType
 )
 {
     //- The begin/end nodes for each segment
@@ -144,11 +175,8 @@ void Foam::PDRblock::readGridControl
     // The expansion ratio per segment
     scalarList expansion;
 
-    if (verbose_)
-    {
-        Info<< "Reading grid control for "
-            << vector::componentNames[cmpt] << " direction" << nl;
-    }
+    Log << "Reading grid control for "
+        << vector::componentNames[cmpt] << " direction" << nl;
 
     // Points
     // ~~~~~~
@@ -178,10 +206,7 @@ void Foam::PDRblock::readGridControl
     // Do points increase monotonically?
     checkMonotonic(cmpt, knots);
 
-    if (verbose_)
-    {
-        Info<< "    points : " << flatOutput(knots) << nl;
-    }
+    Log << "    points : " << flatOutput(knots) << nl;
 
 
     // Divisions
@@ -221,11 +246,7 @@ void Foam::PDRblock::readGridControl
             << exit(FatalIOError);
     }
 
-
-    if (verbose_)
-    {
-        Info<< "    nCells : " << flatOutput(divisions) << nl;
-    }
+    Log << "    nCells : " << flatOutput(divisions) << nl;
 
 
     // Expansion ratios
@@ -242,7 +263,7 @@ void Foam::PDRblock::readGridControl
         }
     }
 
-    if (expansion.size() && expansion.size() != nSegments)
+    if (expansion.size() && divisions.size() != expansion.size())
     {
         FatalIOErrorInFunction(dict)
             << "Mismatch in number of expansion ratios and divisions:"
@@ -255,20 +276,46 @@ void Foam::PDRblock::readGridControl
     {
         expansion.resize(nSegments, scalar(1));
 
-        if (verbose_)
+        if (expandType != expansionType::EXPAND_UNIFORM)
         {
-            Info<< "Warning: 'ratios' not specified, using constant spacing"
-                << nl;
+            expandType = expansionType::EXPAND_UNIFORM;
+
+            Log << "Warning: no 'ratios', use uniform spacing" << nl;
         }
     }
     else
     {
-        if (verbose_)
+        switch (expandType)
         {
-            Info<< "    ratios : " << flatOutput(expansion) << nl;
+            case expansionType::EXPAND_UNIFORM:
+            {
+                expansion = scalar(1);
+                break;
+            }
+
+            case expansionType::EXPAND_RATIO:
+            {
+                Log << "    ratios : " << flatOutput(expansion) << nl;
+                break;
+            }
+
+            case expansionType::EXPAND_RELATIVE:
+            {
+                Log << "  relative : " << flatOutput(expansion) << nl;
+
+                auto divIter = divisions.cbegin();
+
+                for (scalar& expRatio : expansion)
+                {
+                    expRatio = relativeToGeometricRatio(expRatio, *divIter);
+                    ++divIter;
+                }
+
+                Log << "    ratios : " << flatOutput(expansion) << nl;
+                break;
+            }
         }
     }
-
 
 
     // Define the grid points
@@ -291,7 +338,11 @@ void Foam::PDRblock::readGridControl
 
         const scalar dist = (subPoint.last() - subPoint.first());
 
-        if (equal(expRatio, 1))
+        if
+        (
+            expandType == expansionType::EXPAND_UNIFORM
+         || equal(expRatio, 1)
+        )
         {
             for (label i=1; i < nDiv; ++i)
             {
@@ -318,10 +369,7 @@ void Foam::PDRblock::readGridControl
 
 void Foam::PDRblock::readBoundary(const dictionary& dict)
 {
-    if (verbose_)
-    {
-        Info<< "Reading boundary entries" << nl;
-    }
+    Log << "Reading boundary entries" << nl;
 
     PtrList<entry> patchEntries;
 
@@ -507,12 +555,21 @@ Foam::PDRblock::PDRblock(const dictionary& dict, bool verbose)
 
 bool Foam::PDRblock::read(const dictionary& dict)
 {
-    // Mark no scaling with invalid value
-    const scalar scaleFactor = dict.lookupOrDefault<scalar>("scale", -1);
+    const scalar scaleFactor(dict.getOrDefault<scalar>("scale", -1));
 
-    readGridControl(0, dict.subDict("x"), scaleFactor);
-    readGridControl(1, dict.subDict("y"), scaleFactor);
-    readGridControl(2, dict.subDict("z"), scaleFactor);
+    expansionType expandType
+    (
+        expansionNames_.getOrDefault
+        (
+            "expansion",
+            dict,
+            expansionType::EXPAND_RATIO
+        )
+    );
+
+    readGridControl(0, dict.subDict("x"), scaleFactor, expandType);
+    readGridControl(1, dict.subDict("y"), scaleFactor, expandType);
+    readGridControl(2, dict.subDict("z"), scaleFactor, expandType);
 
     adjustSizes();
 
