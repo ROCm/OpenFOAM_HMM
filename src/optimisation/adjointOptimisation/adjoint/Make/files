@@ -55,6 +55,7 @@ objectives/incompressible/objectiveMoment/objectiveMoment.C
 objectives/incompressible/objectivePtLosses/objectivePtLosses.C
 objectives/incompressible/objectiveForceTarget/objectiveForceTarget.C
 objectives/incompressible/objectivePartialVolume/objectivePartialVolume.C
+objectives/incompressible/objectiveNutSqr/objectiveNutSqr.C
 
 /* OBJECTIVE MANAGER*/
 objectiveManager/objectiveManager/objectiveManager.C
