@@ -67,6 +67,12 @@ class error
     public std::exception,
     public messageStream
 {
+    // Private Member Functions
+
+        //- Common code for exit or abort
+        void exitOrAbort(const int errNo, const bool isAbort);
+
+
 protected:
 
     // Protected Data
@@ -113,23 +119,23 @@ public:
         //- Clear any messages
         void clear() const;
 
-        inline const string& functionName() const
+        const string& functionName() const
         {
             return functionName_;
         }
 
-        inline const string& sourceFileName() const
+        const string& sourceFileName() const
         {
             return sourceFileName_;
         }
 
-        inline label sourceFileLineNumber() const
+        label sourceFileLineNumber() const
         {
             return sourceFileLineNumber_;
         }
 
         //- Return the current exception throwing (on or off)
-        inline bool throwing() const
+        bool throwing() const
         {
             return throwExceptions_;
         }
@@ -157,8 +163,15 @@ public:
             return throwExceptions(false);
         }
 
-        //- Convert to OSstream
-        //  Prints basic message and returns OSstream for further info.
+        //- Define basic print message
+        //  \return OSstream for further info.
+        OSstream& operator()
+        (
+            const string& functionName
+        );
+
+        //- Define basic print message
+        //  \return OSstream for further info.
         OSstream& operator()
         (
             const char* functionName,
@@ -166,8 +179,8 @@ public:
             const int sourceFileLineNumber = 0
         );
 
-        //- Convert to OSstream
-        //  Prints basic message and returns OSstream for further info.
+        //- Define basic print message
+        //  \return OSstream for further info.
         OSstream& operator()
         (
             const string& functionName,
@@ -175,15 +188,14 @@ public:
             const int sourceFileLineNumber = 0
         );
 
-        //- Convert to OSstream
-        //  Prints basic message and returns OSstream for further info.
-        operator OSstream&();
-
-        //- Explicitly convert to OSstream for << operations
+        //- Explicit convert to OSstream for << operations
         OSstream& operator()()
         {
             return operator OSstream&();
         }
+
+        //- Convert to OSstream
+        operator OSstream&();
 
         //- Create and return a dictionary representation of the error
         operator dictionary() const;
@@ -197,7 +209,7 @@ public:
         static void printStack(Ostream& os);
 
         //- Exit : can be called for any error to exit program.
-        //  Prints stack before exiting, when FOAM_ABORT is on.
+        //  Redirects to abort() when FOAM_ABORT is on.
         void exit(const int errNo = 1);
 
         //- Abort : used to stop code for fatal errors.
@@ -225,6 +237,12 @@ class IOerror
         label ioEndLineNumber_;
 
 
+    // Private Member Functions
+
+        //- Common code for exit or abort
+        void exitOrAbort(const int errNo, const bool isAbort);
+
+
 public:
 
     // Constructors
@@ -242,17 +260,17 @@ public:
 
     // Member Functions
 
-        inline const string& ioFileName() const
+        const string& ioFileName() const
         {
             return ioFileName_;
         }
 
-        inline label ioStartLineNumber() const
+        label ioStartLineNumber() const
         {
             return ioStartLineNumber_;
         }
 
-        inline label ioEndLineNumber() const
+        label ioEndLineNumber() const
         {
             return ioEndLineNumber_;
         }

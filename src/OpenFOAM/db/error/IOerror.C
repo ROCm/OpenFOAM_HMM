@@ -147,7 +147,7 @@ void Foam::IOerror::SafeFatalIOError
             << msg << nl
             << "file: " << ioStream.name()
             << " at line " << ioStream.lineNumber() << '.' << nl << nl
-            << "    From function " << functionName << nl
+            << "    From " << functionName << nl
             << "    in file " << sourceFileName
             << " at line " << sourceFileLineNumber << '.' << std::endl;
         std::exit(1);
@@ -172,49 +172,19 @@ Foam::IOerror::operator Foam::dictionary() const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::IOerror::exit(const int)
+void Foam::IOerror::exitOrAbort(const int, const bool isAbort)
 {
     if (!throwExceptions_ && JobInfo::constructed)
     {
         jobInfo.add("FatalIOError", operator dictionary());
-        jobInfo.exit();
-    }
-
-    if (env("FOAM_ABORT"))
-    {
-        abort();
-    }
-    else if (throwExceptions_)
-    {
-        // Make a copy of the error to throw
-        IOerror errorException(*this);
-
-        // Reset the message buffer for the next error message
-        messageStreamPtr_->reset();
-
-        throw errorException;
-    }
-    else if (Pstream::parRun())
-    {
-        Perr<< nl << *this << nl
-            << "\nFOAM parallel run exiting\n" << endl;
-        Pstream::exit(1);
-    }
-    else
-    {
-        Perr<< nl << *this << nl
-            << "\nFOAM exiting\n" << endl;
-        std::exit(1);
-    }
-}
-
-
-void Foam::IOerror::abort()
-{
-    if (!throwExceptions_ && JobInfo::constructed)
-    {
-        jobInfo.add("FatalIOError", operator dictionary());
-        jobInfo.abort();
+        if (isAbort)
+        {
+            jobInfo.abort();
+        }
+        else
+        {
+            jobInfo.exit();
+        }
     }
 
     if (env("FOAM_ABORT"))
@@ -236,68 +206,104 @@ void Foam::IOerror::abort()
     }
     else if (Pstream::parRun())
     {
-        Perr<< nl << *this << nl
-            << "\nFOAM parallel run aborting\n" << endl;
-        printStack(Perr);
-        Pstream::abort();
+        if (isAbort)
+        {
+            Perr<< nl << *this << nl
+                << "\nFOAM parallel run aborting\n" << endl;
+            printStack(Perr);
+            Pstream::abort();
+        }
+        else
+        {
+            Perr<< nl << *this << nl
+                << "\nFOAM parallel run exiting\n" << endl;
+            Pstream::exit(1);
+        }
     }
     else
     {
-        Perr<< nl << *this << nl
-            << "\nFOAM aborting\n" << endl;
-        printStack(Perr);
+        if (isAbort)
+        {
+            Perr<< nl << *this << nl
+                << "\nFOAM aborting\n" << endl;
+            printStack(Perr);
 
-        #ifdef _WIN32
-        std::exit(1);  // Prefer exit() to avoid unnecessary warnings
-        #else
-        std::abort();
-        #endif
+            #ifdef _WIN32
+            std::exit(1);  // Prefer exit() to avoid unnecessary warnings
+            #else
+            std::abort();
+            #endif
+        }
+        else
+        {
+            Perr<< nl << *this << nl
+                << "\nFOAM exiting\n" << endl;
+            std::exit(1);
+        }
     }
+}
+
+
+void Foam::IOerror::exit(const int)
+{
+    exitOrAbort(1, env("FOAM_ABORT"));
+}
+
+
+void Foam::IOerror::abort()
+{
+    exitOrAbort(1, true);
 }
 
 
 void Foam::IOerror::write(Ostream& os, const bool includeTitle) const
 {
-    if (!os.bad())
+    if (os.bad())
     {
-        os  << nl;
-        if (includeTitle && !title().empty())
+        return;
+    }
+
+    os  << nl;
+    if (includeTitle && !title().empty())
+    {
+        os  << title().c_str() << nl;
+    }
+
+    os  << message().c_str();
+
+
+    if (!ioFileName().empty())
+    {
+        os  << nl << nl
+            << "file: " << ioFileName().c_str();
+
+        if (ioStartLineNumber() >= 0)
         {
-            os  << title().c_str() << nl;
-        }
-
-        os  << message().c_str() << nl << nl;
-
-        const bool hasFile = !ioFileName().empty();
-
-        if (hasFile)
-        {
-            os  << "file: " << ioFileName().c_str();
-
-            if (ioStartLineNumber() >= 0)
+            os  << " at line " << ioStartLineNumber();
+            if (ioStartLineNumber() < ioEndLineNumber())
             {
-                if (ioStartLineNumber() < ioEndLineNumber())
-                {
-                    os  << " from line " << ioStartLineNumber()
-                        << " to line " << ioEndLineNumber() << '.';
-                }
-                else
-                {
-                    os  << " at line " << ioStartLineNumber() << '.';
-                }
+                os  << " to " << ioEndLineNumber();
             }
+            os  << '.';
         }
+    }
 
-        if (IOerror::level >= 2 && sourceFileLineNumber())
+
+    const label lineNo = sourceFileLineNumber();
+
+    if (IOerror::level >= 2 && lineNo && !functionName().empty())
+    {
+        os  << nl << nl
+            << "    From " << functionName().c_str() << nl;
+
+        if (!sourceFileName().empty())
         {
-            if (hasFile)
-            {
-                os  << nl << nl;
-            }
+            os << "    in file " << sourceFileName().c_str();
 
-            os  << "    From function " << functionName().c_str() << nl
-                << "    in file " << sourceFileName().c_str()
-                << " at line " << sourceFileLineNumber() << '.';
+            if (lineNo > 0)
+            {
+                os  << " at line " << lineNo << '.';
+            }
         }
     }
 }

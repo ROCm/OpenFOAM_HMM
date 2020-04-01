@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,7 +58,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class IOstream;
 class Ostream;
 class OSstream;
@@ -71,7 +71,6 @@ class dictionary;
 
 class messageStream
 {
-
 public:
 
     //- Message type, or error severity flags
@@ -87,7 +86,7 @@ public:
 
 protected:
 
-    // Private data
+    // Private Data
 
         string title_;
         errorSeverity severity_;
@@ -97,9 +96,9 @@ protected:
 
 public:
 
-    // Static data
+    // Static Data
 
-        //- Controls the output verbosity of messageStream
+        //- Control the output verbosity of messageStream
         //
         //  - level == 0 : suppress all output
         //  - level == 1 : normal output
@@ -119,27 +118,26 @@ public:
             const int maxErrors = 0
         );
 
-
         //- Construct as Fatal from dictionary, extracting the 'title'.
-        messageStream(const dictionary& dict);
+        explicit messageStream(const dictionary& dict);
 
 
     // Member functions
 
-        //- Return the title of this error type
+        //- The title of this error type
         const string& title() const
         {
             return title_;
         }
 
-        //- Return the maximum number of errors before program termination
+        //- The maximum number of errors before program termination
         int maxErrors() const
         {
             return maxErrors_;
         }
 
-        //- Return non-const access to the maximum number of errors before
-        //  program termination to enable user to reset it
+        //- Non-const access to the maximum number of errors before
+        //- program termination to enable user to reset it
         int& maxErrors()
         {
             return maxErrors_;
@@ -149,9 +147,15 @@ public:
         //  Prints to Pout for the master stream
         OSstream& masterStream(const label communicator);
 
+        //- Print basic message
+        //  \return OSstream for further info.
+        OSstream& operator()
+        (
+            const string& functionName
+        );
 
-        //- Convert to OSstream
-        //  Prints basic message and returns OSstream for further info.
+        //- Print basic message
+        //  \return OSstream for further info.
         OSstream& operator()
         (
             const char* functionName,
@@ -159,8 +163,8 @@ public:
             const int sourceFileLineNumber = 0
         );
 
-        //- Convert to OSstream
-        //  Prints basic message and returns OSstream for further info.
+        //- Print basic message
+        //  \return OSstream for further info.
         OSstream& operator()
         (
             const string& functionName,
@@ -168,8 +172,8 @@ public:
             const int sourceFileLineNumber = 0
         );
 
-        //- Convert to OSstream
-        //  Prints basic message and returns OSstream for further info.
+        //- Print basic message
+        //  \return OSstream for further info.
         OSstream& operator()
         (
             const char* functionName,
@@ -180,8 +184,8 @@ public:
             const label ioEndLineNumber = -1
         );
 
-        //- Convert to OSstream
-        //  Prints basic message and returns OSstream for further info.
+        //- Print basic message
+        //  \return OSstream for further info.
         OSstream& operator()
         (
             const char* functionName,
@@ -190,8 +194,8 @@ public:
             const IOstream&
         );
 
-        //- Convert to OSstream
-        //  Prints basic message and returns OSstream for further info.
+        //- Print basic message
+        //  \return OSstream for further info.
         OSstream& operator()
         (
             const char* functionName,

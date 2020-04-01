@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,6 +87,20 @@ Foam::OSstream& Foam::messageStream::masterStream(const label communicator)
 
 Foam::OSstream& Foam::messageStream::operator()
 (
+    const string& functionName
+)
+{
+    OSstream& os = operator OSstream&();
+
+    os  << nl
+        << "    From " << functionName.c_str() << nl;
+
+    return os;
+}
+
+
+Foam::OSstream& Foam::messageStream::operator()
+(
     const char* functionName,
     const char* sourceFileName,
     const int sourceFileLineNumber
@@ -95,7 +109,7 @@ Foam::OSstream& Foam::messageStream::operator()
     OSstream& os = operator OSstream&();
 
     os  << nl
-        << "    From function " << functionName << nl
+        << "    From " << functionName << nl
         << "    in file " << sourceFileName
         << " at line " << sourceFileLineNumber << endl
         << "    ";
@@ -133,21 +147,18 @@ Foam::OSstream& Foam::messageStream::operator()
     OSstream& os = operator OSstream&();
 
     os  << nl
-        << "    From function " << functionName << nl
+        << "    From " << functionName << nl
         << "    in file " << sourceFileName
         << " at line " << sourceFileLineNumber << nl
         << "    Reading " << ioFileName;
 
     if (ioStartLineNumber >= 0)
     {
+        os  << " at line " << ioStartLineNumber;
+
         if (ioStartLineNumber < ioEndLineNumber)
         {
-            os  << " from line " << ioStartLineNumber
-                << " to line " << ioEndLineNumber;
-        }
-        else
-        {
-            os  << " at line " << ioStartLineNumber;
+            os  << " to " << ioEndLineNumber;
         }
     }
 
