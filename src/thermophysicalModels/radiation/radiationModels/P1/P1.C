@@ -72,7 +72,7 @@ Foam::radiation::P1::P1(const volScalarField& T)
             "qr",
             mesh_.time().timeName(),
             mesh_,
-            IOobject::NO_READ,
+            IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
         mesh_,
