@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,6 +40,12 @@ Usage
       - \par -clean
         Perform some surface checking/cleanup on the input surface
 
+      - \par -read-format \<type\>
+        Specify input file format
+
+      - \par -write-format \<type\>
+        Specify output file format
+
       - \par -scale \<scale\>
         Specify a scaling factor for writing the files
 
@@ -58,6 +65,36 @@ Note
 #include "Time.H"
 
 using namespace Foam;
+
+static word getExtension(const fileName& name)
+{
+    word ext(name.ext());
+    if (ext == "gz")
+    {
+        ext = name.lessExt().ext();
+    }
+
+    return ext;
+}
+
+
+// Non-short-circuiting check to get all warnings
+static bool hasReadWriteTypes(const word& readType, const word& writeType)
+{
+    volatile bool good = true;
+
+    if (!triSurface::canReadType(readType, true))
+    {
+        good = false;
+    }
+
+    if (!triSurface::canWriteType(writeType, true))
+    {
+        good = false;
+    }
+
+    return good;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -85,6 +122,18 @@ int main(int argc, char *argv[])
     );
     argList::addOption
     (
+        "read-format",
+        "type",
+        "The input format (default: use file extension)"
+    );
+    argList::addOption
+    (
+        "write-format",
+        "type",
+        "The output format (default: use file extension)"
+    );
+    argList::addOption
+    (
         "scale",
         "factor",
         "Input geometry scaling factor"
@@ -93,7 +142,7 @@ int main(int argc, char *argv[])
     (
         "precision",
         "int",
-        "Write to output with the specified precision"
+        "The output precision"
     );
     argList::addOptionCompat("precision", {"writePrecision", 1812});
 
@@ -110,30 +159,47 @@ int main(int argc, char *argv[])
         }
     }
 
-    const fileName importName = args[1];
-    const fileName exportName = args[2];
+    const fileName importName(args[1]);
+    const fileName exportName(args[2]);
 
     if (importName == exportName)
     {
-        FatalErrorInFunction
-            << "Output file " << exportName << " would overwrite input file."
+        FatalError
+            << "Output file would overwrite input file." << nl
             << exit(FatalError);
     }
 
-    // Check that reading/writing is supported
-    if
+    const word readFileType
     (
-        !triSurface::canRead(importName, true)
-     || !triSurface::canWriteType(exportName.ext(), true)
-    )
+        args.getOrDefault<word>("read-format", getExtension(importName))
+    );
+
+    const word writeFileType
+    (
+        args.getOrDefault<word>("write-format", getExtension(exportName))
+    );
+
+
+    // Check that reading/writing is supported
+    if (!hasReadWriteTypes(readFileType, writeFileType))
     {
-        return 1;
+        FatalError
+            << "Unsupported file format(s)" << nl
+            << exit(FatalError);
     }
 
-    const scalar scaleFactor = args.get<scalar>("scale", -1);
+
+    scalar scaleFactor(0);
 
     Info<< "Reading : " << importName << endl;
-    triSurface surf(importName, scaleFactor);
+    triSurface surf(importName, readFileType, scaleFactor);
+
+    if (args.readIfPresent("scale", scaleFactor) && scaleFactor > 0)
+    {
+        Info<< "scale input " << scaleFactor << nl;
+        surf.scalePoints(scaleFactor);
+    }
+
 
     Info<< "Read surface:" << endl;
     surf.writeStats(Info);
@@ -159,10 +225,9 @@ int main(int argc, char *argv[])
         Info<< "Maintaining face ordering" << endl;
     }
 
-    Info<< "writing " << exportName;
-    Info<< endl;
+    Info<< "writing " << exportName << endl;
 
-    surf.write(exportName, sortByRegion);
+    surf.write(exportName, writeFileType, sortByRegion);
 
     Info<< "\nEnd\n" << endl;
 

@@ -378,8 +378,10 @@ bool Foam::fileFormats::FIREMeshReader::readGeometry(const scalar scaleFactor)
 {
     IOstream::streamFormat fmt = IOstream::ASCII;
 
-    const word ext = geometryFile_.ext();
+    const word ext(geometryFile_.ext());
+
     bool supported = FIRECore::file3dExtensions.found(ext);
+
     if (supported)
     {
         FIRECore::fileExt3d fireFileType = FIRECore::file3dExtensions[ext];

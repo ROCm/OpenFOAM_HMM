@@ -35,76 +35,76 @@ License
 #include "MeshedSurfaceProxy.H"
 #include "MeshedSurface.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-Foam::wordHashSet Foam::triSurface::readTypes_;
-Foam::wordHashSet Foam::triSurface::writeTypes_;
-
-
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-const Foam::wordHashSet& Foam::triSurface::readTypes()
+Foam::wordHashSet Foam::triSurface::readTypes()
 {
-    // Stop-gap measure until reading is handled more generally
-    if (readTypes_.empty())
-    {
-        readTypes_ = { "ftr", "stl", "stlb" };
-        readTypes_ += UnsortedMeshedSurface<labelledTri>::readTypes();
-        readTypes_ += MeshedSurface<labelledTri>::readTypes();
-    }
+    wordHashSet known
+    (
+        UnsortedMeshedSurface<labelledTri>::readTypes()
+      | MeshedSurface<labelledTri>::readTypes()
+    );
 
-    return readTypes_;
+    // Additional hard-coded entry points, but do not need
+    // {"stl", "stlb"}
+    // since they are shadowed by *MeshedSurface
+
+    known.insert("ftr");
+
+    return known;
 }
 
 
-const Foam::wordHashSet& Foam::triSurface::writeTypes()
+Foam::wordHashSet Foam::triSurface::writeTypes()
 {
-    // Stop-gap measure until writing is handled more generally
-    if (writeTypes_.empty())
-    {
-        writeTypes_ = { "ftr", "stl", "stlb", "gts" };
-        writeTypes_ += MeshedSurfaceProxy<labelledTri>::writeTypes();
-    }
+    wordHashSet known
+    (
+        MeshedSurfaceProxy<labelledTri>::writeTypes()
+    );
 
-    return writeTypes_;
+    // Additional hard-coded entry points, but do not need
+    // {"gts", "stl", "stlb"}
+    // since they are shadowed by MeshedSurfaceProxy
+
+    known.insert("ftr");
+
+    return known;
 }
 
 
-bool Foam::triSurface::canReadType(const word& ext, const bool verbose)
+bool Foam::triSurface::canReadType(const word& fileType, bool verbose)
 {
     return fileFormats::surfaceFormatsCore::checkSupport
     (
         readTypes(),
-        ext,
+        fileType,
         verbose,
         "reading"
     );
 }
 
 
-bool Foam::triSurface::canWriteType(const word& ext, const bool verbose)
+bool Foam::triSurface::canWriteType(const word& fileType, bool verbose)
 {
     return fileFormats::surfaceFormatsCore::checkSupport
     (
         writeTypes(),
-        ext,
+        fileType,
         verbose,
         "writing"
     );
 }
 
 
-bool Foam::triSurface::canRead(const fileName& name, const bool verbose)
+bool Foam::triSurface::canRead(const fileName& name, bool verbose)
 {
-    word ext = name.ext();
+    word ext(name.ext());
     if (ext == "gz")
     {
         ext = name.lessExt().ext();
     }
     return canReadType(ext, verbose);
 }
-
-
 
 
 Foam::fileName Foam::triSurface::relativeFilePath
@@ -192,7 +192,7 @@ bool Foam::triSurface::read(Istream& is)
 bool Foam::triSurface::read
 (
     const fileName& name,
-    const word& ext,
+    const word& fileType,
     const bool check
 )
 {
@@ -203,7 +203,25 @@ bool Foam::triSurface::read
             << exit(FatalError);
     }
 
-    if (ext == "gz")
+    if (fileType.empty())
+    {
+        // Handle empty/missing type
+
+        const word ext(name.ext());
+
+        if (ext.empty())
+        {
+            FatalErrorInFunction
+                << "Cannot determine format from filename" << nl
+                << "    " << name << nl
+                << exit(FatalError);
+        }
+
+        return read(name, ext, false);
+    }
+
+
+    if (fileType == "gz")
     {
         fileName unzipName = name.lessExt();
 
@@ -212,15 +230,15 @@ bool Foam::triSurface::read
     }
 
     // Hard-coded readers
-    if (ext == "ftr")
+    if (fileType == "ftr")
     {
         return read(IFstream(name)());
     }
-    else if (ext == "stl")
+    else if (fileType == "stl")
     {
         return readSTL(name);  // ASCII
     }
-    else if (ext == "stlb")
+    else if (fileType == "stlb")
     {
         return readSTL(name, true); // Force BINARY
     }
@@ -228,9 +246,9 @@ bool Foam::triSurface::read
     // UnsortedMeshedSurface
     {
         using proxyType = UnsortedMeshedSurface<labelledTri>;
-        if (proxyType::readTypes().found(ext))
+        if (proxyType::readTypes().found(fileType))
         {
-            transfer(*(proxyType::New(name, ext)));
+            transfer(*(proxyType::New(name, fileType)));
             return true;
         }
     }
@@ -238,19 +256,19 @@ bool Foam::triSurface::read
     // MeshedSurface
     {
         using proxyType = MeshedSurface<labelledTri>;
-        if (proxyType::readTypes().found(ext))
+        if (proxyType::readTypes().found(fileType))
         {
-            transfer(*(proxyType::New(name, ext)));
+            transfer(*(proxyType::New(name, fileType)));
             return true;
         }
     }
 
 
     FatalErrorInFunction
-        << "unknown file extension " << ext
-        << " for reading file " << name
-        << ". Supported extensions:" << nl
-        << "    " << flatOutput(readTypes_.sortedToc()) << nl
+        << "Unknown surface format " << fileType
+        << " for reading file " << name << nl
+        << "Valid types:" << nl
+        << "    " << flatOutput(readTypes().sortedToc()) << nl
         << exit(FatalError);
 
     return false;
@@ -260,30 +278,49 @@ bool Foam::triSurface::read
 void Foam::triSurface::write
 (
     const fileName& name,
-    const word& ext,
-    const bool sort
+    const word& fileType,
+    const bool sortByRegion
 ) const
 {
+    if (fileType.empty())
+    {
+        // Handle empty/missing type
+
+        const word ext(name.ext());
+
+        if (ext.empty())
+        {
+            FatalErrorInFunction
+                << "Cannot determine format from filename" << nl
+                << "    " << name << nl
+                << exit(FatalError);
+        }
+
+        write(name, ext, sortByRegion);
+        return;
+    }
+
+
     // Hard-coded readers
 
-    if (ext == "ftr")
+    if (fileType == "ftr")
     {
         OFstream os(name);
         write(os);
     }
-    else if (ext == "stl")
+    else if (fileType == "stl")
     {
-        writeSTLASCII(name, sort);
+        writeSTLASCII(name, sortByRegion);
     }
-    else if (ext == "stlb")
+    else if (fileType == "stlb")
     {
         writeSTLBINARY(name);
     }
-    else if (ext == "gts")
+    else if (fileType == "gts")
     {
-        writeGTS(name, sort);
+        writeGTS(name, sortByRegion);
     }
-    else if (MeshedSurfaceProxy<labelledTri>::canWriteType(ext))
+    else if (MeshedSurfaceProxy<labelledTri>::canWriteType(fileType))
     {
         labelList faceMap;
         List<surfZone> zoneLst = this->sortedZones(faceMap);
@@ -296,15 +333,15 @@ void Foam::triSurface::write
             faceMap
         );
 
-        proxy.write(name, ext);
+        proxy.write(name, fileType);
     }
     else
     {
         FatalErrorInFunction
-            << "unknown file extension " << ext
-            << " for writing file " << name
-            << ". Supported extensions:" << nl
-            << "    " << flatOutput(writeTypes_.sortedToc()) << nl
+            << "Unknown surface format " << fileType
+            << " for writing file " << name << nl
+            << "Valid types:" << nl
+            << "    " << flatOutput(writeTypes().sortedToc()) << nl
             << exit(FatalError);
     }
 }
@@ -326,13 +363,12 @@ Foam::triSurface::triSurface(const Time& d)
 :
     triSurface()
 {
-    fileName foamFile(d.caseName() + ".ftr");
+    IFstream is
+    (
+        d.path()/triSurfInstance(d)/typeName/(d.caseName() + ".ftr")
+    );
 
-    fileName foamPath(d.path()/triSurfInstance(d)/typeName/foamFile);
-
-    IFstream foamStream(foamPath);
-
-    read(foamStream);
+    read(is);
 
     setDefaultPatches();
 }
@@ -349,11 +385,7 @@ Foam::triSurface::triSurface
 {
     fileName fName(checkFile(io, dict, isGlobal));
 
-    // TBD:
-    // word fileExt = dict.getOrDefault<word>("surfaceType", fName.ext());
-    // read(fName, ext);
-
-    read(fName, fName.ext());
+    read(fName, dict.getOrDefault<word>("fileType", word::null));
 
     scalePoints(dict.getOrDefault<scalar>("scale", 0));
 
@@ -381,20 +413,18 @@ void Foam::triSurface::write(Ostream& os) const
     os  << points() << nl
         << static_cast<const List<labelledTri>&>(*this) << nl;
 
-    // Check state of Ostream
     os.check(FUNCTION_NAME);
 }
 
 
 void Foam::triSurface::write(const Time& d) const
 {
-    fileName foamFile(d.caseName() + ".ftr");
+    OFstream os
+    (
+        d.path()/triSurfInstance(d)/typeName/(d.caseName() + ".ftr")
+    );
 
-    fileName foamPath(d.path()/triSurfInstance(d)/typeName/foamFile);
-
-    OFstream foamStream(foamPath);
-
-    write(foamStream);
+    write(os);
 }
 
 
@@ -402,9 +432,9 @@ void Foam::triSurface::writeStats(Ostream& os) const
 {
     // Unfortunately nPoints constructs meshPoints() so do compact version
     // ourselves.
+
     bitSet pointIsUsed(points().size());
 
-    label nPoints = 0;
     boundBox bb(boundBox::invertedBox);
     labelHashSet regionsUsed;
 
@@ -412,20 +442,18 @@ void Foam::triSurface::writeStats(Ostream& os) const
     {
         regionsUsed.insert(f.region());
 
-        forAll(f, fp)
+        for (const label pointi : f)
         {
-            const label pointi = f[fp];
             if (pointIsUsed.set(pointi))
             {
                 bb.add(points()[pointi]);
-                ++nPoints;
             }
         }
     }
 
     os  << "Triangles    : " << size()
         << " in " << regionsUsed.size() <<  " region(s)" << nl
-        << "Vertices     : " << nPoints << nl
+        << "Vertices     : " << pointIsUsed.count() << nl
         << "Bounding Box : " << bb << endl;
 }
 

@@ -95,10 +95,8 @@ Foam::label Foam::extendedEdgeMesh::convexStart_ = 0;
 
 Foam::label Foam::extendedEdgeMesh::externalStart_ = 0;
 
-Foam::label Foam::extendedEdgeMesh::nPointTypes = 4;
 
-Foam::label Foam::extendedEdgeMesh::nEdgeTypes = 5;
-
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 Foam::wordHashSet Foam::extendedEdgeMesh::readTypes()
 {
@@ -112,26 +110,24 @@ Foam::wordHashSet Foam::extendedEdgeMesh::writeTypes()
 }
 
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-bool Foam::extendedEdgeMesh::canReadType(const word& ext, bool verbose)
+bool Foam::extendedEdgeMesh::canReadType(const word& fileType, bool verbose)
 {
     return edgeMeshFormatsCore::checkSupport
     (
         readTypes(),
-        ext,
+        fileType,
         verbose,
         "reading"
    );
 }
 
 
-bool Foam::extendedEdgeMesh::canWriteType(const word& ext, bool verbose)
+bool Foam::extendedEdgeMesh::canWriteType(const word& fileType, bool verbose)
 {
     return edgeMeshFormatsCore::checkSupport
     (
         writeTypes(),
-        ext,
+        fileType,
         verbose,
         "writing"
     );
@@ -140,7 +136,7 @@ bool Foam::extendedEdgeMesh::canWriteType(const word& ext, bool verbose)
 
 bool Foam::extendedEdgeMesh::canRead(const fileName& name, bool verbose)
 {
-    word ext = name.ext();
+    word ext(name.ext());
     if (ext == "gz")
     {
         ext = name.lessExt().ext();
@@ -380,7 +376,7 @@ void Foam::extendedEdgeMesh::select
 
 Foam::extendedEdgeMesh::extendedEdgeMesh()
 :
-    edgeMesh(pointField(), edgeList()),
+    edgeMesh(),
     concaveStart_(0),
     mixedStart_(0),
     nonFeatureStart_(0),
@@ -396,15 +392,15 @@ Foam::extendedEdgeMesh::extendedEdgeMesh()
     featurePointNormals_(0),
     featurePointEdges_(0),
     regionEdges_(0),
-    pointTree_(),
-    edgeTree_(),
+    pointTree_(nullptr),
+    edgeTree_(nullptr),
     edgeTreesByType_()
 {}
 
 
 Foam::extendedEdgeMesh::extendedEdgeMesh(class one::minus)
 :
-    edgeMesh(pointField(), edgeList()),
+    edgeMesh(),
     concaveStart_(-1),
     mixedStart_(-1),
     nonFeatureStart_(-1),
@@ -420,8 +416,8 @@ Foam::extendedEdgeMesh::extendedEdgeMesh(class one::minus)
     featurePointNormals_(0),
     featurePointEdges_(0),
     regionEdges_(0),
-    pointTree_(),
-    edgeTree_(),
+    pointTree_(nullptr),
+    edgeTree_(nullptr),
     edgeTreesByType_()
 {}
 
@@ -444,8 +440,8 @@ Foam::extendedEdgeMesh::extendedEdgeMesh(const extendedEdgeMesh& fem)
     featurePointNormals_(fem.featurePointNormals()),
     featurePointEdges_(fem.featurePointEdges()),
     regionEdges_(fem.regionEdges()),
-    pointTree_(),
-    edgeTree_(),
+    pointTree_(nullptr),
+    edgeTree_(nullptr),
     edgeTreesByType_()
 {}
 
@@ -600,8 +596,8 @@ Foam::extendedEdgeMesh::extendedEdgeMesh
     featurePointNormals_(featurePointNormals),
     featurePointEdges_(featurePointEdges),
     regionEdges_(regionEdges),
-    pointTree_(),
-    edgeTree_(),
+    pointTree_(nullptr),
+    edgeTree_(nullptr),
     edgeTreesByType_()
 {}
 
@@ -609,12 +605,12 @@ Foam::extendedEdgeMesh::extendedEdgeMesh
 Foam::extendedEdgeMesh::extendedEdgeMesh
 (
     const fileName& name,
-    const word& ext
+    const word& fileType
 )
 :
     extendedEdgeMesh()
 {
-    read(name, ext);
+    read(name, fileType);
 }
 
 
@@ -626,17 +622,11 @@ Foam::extendedEdgeMesh::extendedEdgeMesh(const fileName& name)
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::extendedEdgeMesh::~extendedEdgeMesh()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 bool Foam::extendedEdgeMesh::read(const fileName& name)
 {
-    word ext = name.ext();
+    word ext(name.ext());
     if (ext == "gz")
     {
         fileName unzipName = name.lessExt();
@@ -647,15 +637,14 @@ bool Foam::extendedEdgeMesh::read(const fileName& name)
 }
 
 
-// Read from file in given format
 bool Foam::extendedEdgeMesh::read
 (
     const fileName& name,
-    const word& ext
+    const word& fileType
 )
 {
-    // read via selector mechanism
-    transfer(New(name, ext)());
+    // Read via selector mechanism
+    transfer(*New(name, fileType));
     return true;
 }
 
@@ -837,7 +826,7 @@ void Foam::extendedEdgeMesh::allNearestFeatureEdges
 const Foam::indexedOctree<Foam::treeDataPoint>&
 Foam::extendedEdgeMesh::pointTree() const
 {
-    if (pointTree_.empty())
+    if (!pointTree_)
     {
         Random rndGen(17301893);
 
@@ -877,7 +866,7 @@ Foam::extendedEdgeMesh::pointTree() const
 const Foam::indexedOctree<Foam::treeDataEdge>&
 Foam::extendedEdgeMesh::edgeTree() const
 {
-    if (edgeTree_.empty())
+    if (!edgeTree_)
     {
         Random rndGen(17301893);
 
@@ -919,10 +908,8 @@ Foam::extendedEdgeMesh::edgeTree() const
 const Foam::PtrList<Foam::indexedOctree<Foam::treeDataEdge>>&
 Foam::extendedEdgeMesh::edgeTreesByType() const
 {
-    if (edgeTreesByType_.size() == 0)
+    if (edgeTreesByType_.empty())
     {
-        edgeTreesByType_.setSize(nEdgeTypes);
-
         Random rndGen(872141);
 
         // Slightly extended bb. Slightly off-centred just so on symmetric
@@ -954,6 +941,9 @@ Foam::extendedEdgeMesh::edgeTreesByType() const
         sliceEdges[4] =
             identity((edges().size() - multipleStart_), multipleStart_);
 
+
+        edgeTreesByType_.resize(nEdgeTypes);
+
         forAll(edgeTreesByType_, i)
         {
             edgeTreesByType_.set
@@ -983,6 +973,11 @@ Foam::extendedEdgeMesh::edgeTreesByType() const
 
 void Foam::extendedEdgeMesh::transfer(extendedEdgeMesh& mesh)
 {
+    if (&mesh == this)
+    {
+        return;  // Self-transfer is a no-op
+    }
+
     edgeMesh::transfer(mesh);
 
     concaveStart_ = mesh.concaveStart_;
@@ -1026,8 +1021,8 @@ void Foam::extendedEdgeMesh::clear()
     featurePointNormals_.clear();
     featurePointEdges_.clear();
     regionEdges_.clear();
-    pointTree_.clear();
-    edgeTree_.clear();
+    pointTree_.reset(nullptr);
+    edgeTree_.reset(nullptr);
     edgeTreesByType_.clear();
 }
 
@@ -1296,8 +1291,8 @@ void Foam::extendedEdgeMesh::add(const extendedEdgeMesh& fem)
 
     regionEdges_.transfer(newRegionEdges);
 
-    pointTree_.clear();
-    edgeTree_.clear();
+    pointTree_.reset(nullptr);
+    edgeTree_.reset(nullptr);
     edgeTreesByType_.clear();
 }
 
@@ -1407,8 +1402,8 @@ void Foam::extendedEdgeMesh::flipNormals()
     featurePointNormals_.transfer(newFeaturePointNormals);
     regionEdges_.transfer(newRegionEdges);
 
-    pointTree_.clear();
-    edgeTree_.clear();
+    pointTree_.reset(nullptr);
+    edgeTree_.reset(nullptr);
     edgeTreesByType_.clear();
 }
 

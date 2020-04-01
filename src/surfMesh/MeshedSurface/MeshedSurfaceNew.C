@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,39 +34,46 @@ License
 
 template<class Face>
 Foam::autoPtr<Foam::MeshedSurface<Face>>
-Foam::MeshedSurface<Face>::New(const fileName& name, const word& ext)
+Foam::MeshedSurface<Face>::New
+(
+    const fileName& name,
+    const word& fileType,
+    bool mandatory
+)
 {
-    if (debug)
+    DebugInFunction
+        << "Construct MeshedSurface (" << fileType << ")\n";
+
+    auto cstrIter = fileExtensionConstructorTablePtr_->cfind(fileType);
+
+    if (cstrIter.found())
     {
-        InfoInFunction << "Constructing MeshedSurface" << endl;
+        return autoPtr<MeshedSurface<Face>>(cstrIter()(name));
     }
 
-    auto cstrIter = fileExtensionConstructorTablePtr_->cfind(ext);
 
-    if (!cstrIter.found())
+    // Delegate to friend if possible
+    const wordHashSet delegate(FriendType::readTypes());
+
+    if (delegate.found(fileType))
     {
-        // No direct reader, delegate to friend if possible
-        const wordHashSet& delegate = FriendType::readTypes();
+        // OK, can create indirectly
+        auto surf = autoPtr<MeshedSurface<Face>>::New();
+        surf->transfer(*FriendType::New(name, fileType));
 
-        if (delegate.found(ext))
-        {
-            // Create indirectly
-            auto surf = autoPtr<MeshedSurface<Face>>::New();
-            surf().transfer(*(FriendType::New(name, ext)));
-
-            return surf;
-        }
-        else
-        {
-            FatalErrorInFunction
-                << "Unknown file extension " << ext << nl << nl
-                << "Valid types:" << nl
-                << flatOutput((delegate | readTypes()).sortedToc()) << nl
-                << exit(FatalError);
-        }
+        return surf;
+    }
+    else if (mandatory)
+    {
+        FatalErrorInFunction
+            << "Unknown surface format " << fileType << nl << nl
+            << "Valid types:" << nl
+            << flatOutput((delegate | readTypes()).sortedToc()) << nl
+            << exit(FatalError);
     }
 
-    return autoPtr<MeshedSurface<Face>>(cstrIter()(name));
+    // Failed, but was optional
+    return nullptr;
 }
 
 
@@ -74,7 +81,7 @@ template<class Face>
 Foam::autoPtr<Foam::MeshedSurface<Face>>
 Foam::MeshedSurface<Face>::New(const fileName& name)
 {
-    word ext = name.ext();
+    word ext(name.ext());
     if (ext == "gz")
     {
         ext = name.lessExt().ext();

@@ -28,7 +28,7 @@ Class
     Foam::fileFormats::NASsurfaceFormat
 
 Description
-    Nastran surface reader.
+    Nastran surface reader/writer.
 
     - Uses the Ansa "$ANSA_NAME" or the Hypermesh "$HMNAME COMP" extensions
       to obtain zone names.

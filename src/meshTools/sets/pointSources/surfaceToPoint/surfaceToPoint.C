@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,7 +64,7 @@ void Foam::surfaceToPoint::combine(topoSet& set, const bool add) const
 {
     cpuTime timer;
 
-    triSurface surf(surfName_, scale_);
+    triSurface surf(surfName_, surfType_, scale_);
 
     if (verbose_)
     {
@@ -137,7 +137,8 @@ Foam::surfaceToPoint::surfaceToPoint
 :
     topoSetPointSource(mesh),
     surfName_(surfName),
-    scale_(1.0),
+    surfType_(),
+    scale_(-1),
     nearDist_(nearDist),
     includeInside_(includeInside),
     includeOutside_(includeOutside)
@@ -154,6 +155,7 @@ Foam::surfaceToPoint::surfaceToPoint
 :
     topoSetPointSource(mesh),
     surfName_(dict.get<fileName>("file").expand()),
+    surfType_(dict.getOrDefault<word>("fileType", word::null)),
     scale_(dict.lookupOrDefault<scalar>("scale", -1)),
     nearDist_(dict.get<scalar>("nearDistance")),
     includeInside_(dict.get<bool>("includeInside")),
@@ -171,7 +173,8 @@ Foam::surfaceToPoint::surfaceToPoint
 :
     topoSetPointSource(mesh),
     surfName_(checkIs(is)),
-    scale_(1.0),
+    surfType_(),
+    scale_(-1),
     nearDist_(readScalar(checkIs(is))),
     includeInside_(readBool(checkIs(is))),
     includeOutside_(readBool(checkIs(is)))

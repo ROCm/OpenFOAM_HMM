@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "MeshedSurfaceProxy.H"
-
 #include "Time.H"
 #include "ListOps.H"
 #include "surfMesh.H"
@@ -46,13 +45,16 @@ Foam::wordHashSet Foam::MeshedSurfaceProxy<Face>::writeTypes()
 template<class Face>
 bool Foam::MeshedSurfaceProxy<Face>::canWriteType
 (
-    const word& ext,
-    const bool verbose
+    const word& fileType,
+    bool verbose
 )
 {
     return fileFormats::surfaceFormatsCore::checkSupport
     (
-        writeTypes(), ext, verbose, "writing"
+        writeTypes(),
+        fileType,
+        verbose,
+        "writing"
     );
 }
 
@@ -74,23 +76,39 @@ template<class Face>
 void Foam::MeshedSurfaceProxy<Face>::write
 (
     const fileName& name,
-    const word& ext,
+    const word& fileType,
     const MeshedSurfaceProxy& surf,
     IOstreamOption streamOpt,
     const dictionary& options
 )
 {
-    if (debug)
+    if (fileType.empty())
     {
-        InfoInFunction << "Writing to " << name << endl;
+        // Handle empty/missing type
+
+        const word ext(name.ext());
+
+        if (ext.empty())
+        {
+            FatalErrorInFunction
+                << "Cannot determine format from filename" << nl
+                << "    " << name << nl
+                << exit(FatalError);
+        }
+
+        write(name, ext, surf, streamOpt, options);
+        return;
     }
 
-    auto mfIter = writefileExtensionMemberFunctionTablePtr_->cfind(ext);
+
+    DebugInFunction << "Writing to " << name << nl;
+
+    auto mfIter = writefileExtensionMemberFunctionTablePtr_->cfind(fileType);
 
     if (!mfIter.found())
     {
         FatalErrorInFunction
-            << "Unknown file extension " << ext << nl << nl
+            << "Unknown file type " << fileType << nl << nl
             << "Valid types:" << nl
             << flatOutput(writeTypes().sortedToc()) << nl
             << exit(FatalError);
@@ -110,10 +128,7 @@ void Foam::MeshedSurfaceProxy<Face>::write
     // the surface name to be used
     const word name(surfName.size() ? surfName : surfaceRegistry::defaultName);
 
-    if (debug)
-    {
-        InfoInFunction << "Writing to " << name << endl;
-    }
+    DebugInFunction << "Writing to " << name << endl;
 
 
     // The local location

@@ -143,13 +143,13 @@ public:
 
     // Static Member Functions
 
-        //- Helper function when checking if a file extension is supported.
+        //- Verbose checking of fileType in the list of available types
         static bool checkSupport
         (
             const wordHashSet& available,
-            const word& ext,
-            const bool verbose,
-            const word& functionName
+            const word& fileType,
+            const bool verbose = false,
+            const char* functionName = nullptr
         );
 
         //- Use IOobject information to resolve file to load from,

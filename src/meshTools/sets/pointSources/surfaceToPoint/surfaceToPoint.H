@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,8 @@ Description
     \table
         Property    | Description                       | Required  | Default
         file        | The surface "filename"            | yes   |
-        scale       | surface scaling factor            | no    | -1
+        fileType    | The surface format                | no    |
+        scale       | Surface scaling factor            | no    | -1
         nearDistance   | Near distance to the surface   | yes   |
         includeInside  | Include inside cells (bool)    | yes   |
         includeOutside | Include outside cells (bool)   | yes   |
@@ -61,9 +62,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-class triSurfaceSearch;
-
 /*---------------------------------------------------------------------------*\
                            Class surfaceToPoint Declaration
 \*---------------------------------------------------------------------------*/
@@ -72,8 +70,7 @@ class surfaceToPoint
 :
     public topoSetPointSource
 {
-
-    // Private data
+    // Private Data
 
         //- Add usage string
         static addToUsageTable usage_;
@@ -81,7 +78,10 @@ class surfaceToPoint
         //- Name of surface file
         const fileName surfName_;
 
-        //- Optional scaling for surface
+        //- Surface file type (optional)
+        const word surfType_;
+
+        //- Surface scaling factor (optional)
         const scalar scale_;
 
         //- If > 0 : include points with distance to surface less than nearDist.

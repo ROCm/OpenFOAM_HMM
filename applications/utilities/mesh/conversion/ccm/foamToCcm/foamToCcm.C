@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
     fileName exportName = ccm::writer::defaultMeshName;
     if (args.readIfPresent("name", exportName))
     {
-        const word ext = exportName.ext();
+        const word ext(exportName.ext());
         // strip erroneous extension (.ccm, .ccmg, .ccmp)
         if (ext == "ccm" || ext == "ccmg" || ext == "ccmp")
         {

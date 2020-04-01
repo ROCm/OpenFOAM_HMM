@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,18 +33,18 @@ License
 Foam::autoPtr<Foam::edgeMesh> Foam::edgeMesh::New
 (
     const fileName& name,
-    const word& ext
+    const word& fileType
 )
 {
-    auto cstrIter = fileExtensionConstructorTablePtr_->cfind(ext);
+    auto cstrIter = fileExtensionConstructorTablePtr_->cfind(fileType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown file extension " << ext
+            << "Unknown edge format " << fileType
             << " for file " << name << nl << nl
-            << "Valid extensions :" << nl
-            << fileExtensionConstructorTablePtr_->sortedToc()
+            << "Valid types:" << nl
+            << flatOutput(fileExtensionConstructorTablePtr_->sortedToc())
             << exit(FatalError);
     }
 
@@ -53,7 +54,7 @@ Foam::autoPtr<Foam::edgeMesh> Foam::edgeMesh::New
 
 Foam::autoPtr<Foam::edgeMesh> Foam::edgeMesh::New(const fileName& name)
 {
-    word ext = name.ext();
+    word ext(name.ext());
     if (ext == "gz")
     {
         ext = name.lessExt().ext();

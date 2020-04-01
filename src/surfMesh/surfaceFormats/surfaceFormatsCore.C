@@ -29,7 +29,6 @@ License
 #include "surfaceFormatsCore.H"
 #include "Time.H"
 #include "ListOps.H"
-#include "Fstream.H"
 #include "surfMesh.H"
 #include "stringListOps.H"
 
@@ -326,21 +325,27 @@ Foam::fileName Foam::fileFormats::surfaceFormatsCore::checkFile
 bool Foam::fileFormats::surfaceFormatsCore::checkSupport
 (
     const wordHashSet& available,
-    const word& ext,
+    const word& fileType,
     const bool verbose,
-    const word& functionName
+    const char* functionName
 )
 {
-    if (available.found(ext))
+    if (available.found(fileType))
     {
         return true;
     }
     else if (verbose)
     {
-        Info<<"Unknown file extension for " << functionName
-            << " : " << ext << nl
+        Info<< "Unknown file type";
+
+        if (functionName)
+        {
+            Info<< " for " << functionName;
+        }
+
+        Info<< " : " << fileType << nl
             << "Valid types: " << flatOutput(available.sortedToc()) << nl
-            << endl;
+            << nl;
     }
 
     return false;

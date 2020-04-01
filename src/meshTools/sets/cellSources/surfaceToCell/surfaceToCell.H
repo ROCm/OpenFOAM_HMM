@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,8 @@ Description
     \table
         Property    | Description                       | Required  | Default
         file        | The surface "filename"            | yes   |
-        scale       | surface scaling factor            | no    | -1
+        fileType    | The surface format                | no    |
+        scale       | Surface scaling factor            | no    | -1
         nearDistance | Near distance to the surface     | yes   |
         curvature    | surface curvature selection      | yes   |
         outsidePoints| Points outside of surface        | yes   |
@@ -68,8 +69,10 @@ SourceFiles
 
 namespace Foam
 {
-class triSurfaceSearch;
+
+// Forward Declarations
 class triSurface;
+class triSurfaceSearch;
 
 /*---------------------------------------------------------------------------*\
                            Class surfaceToCell Declaration
@@ -79,8 +82,7 @@ class surfaceToCell
 :
     public topoSetCellSource
 {
-
-    // Private data
+    // Private Data
 
         //- Add usage string
         static addToUsageTable usage_;
@@ -217,7 +219,6 @@ public:
             const topoSetSource::setAction action,
             topoSet&
         ) const;
-
 };
 
 

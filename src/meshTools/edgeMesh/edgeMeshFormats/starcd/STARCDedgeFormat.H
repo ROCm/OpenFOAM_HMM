@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,8 +84,8 @@ protected:
 
     static void writeCase
     (
-        Ostream&,
-        const pointField&,
+        Ostream& os,
+        const pointField& pointLst,
         const label nEdges
     );
 
@@ -95,7 +95,7 @@ public:
     // Constructors
 
         //- Construct from file name
-        STARCDedgeFormat(const fileName&);
+        explicit STARCDedgeFormat(const fileName& filename);
 
 
     // Selectors
@@ -114,10 +114,10 @@ public:
     // Member Functions
 
         //- Write edge mesh
-        static void write(const fileName&, const edgeMesh&);
+        static void write(const fileName& name, const edgeMesh& mesh);
 
         //- Read from file
-        virtual bool read(const fileName&);
+        virtual bool read(const fileName& name);
 
         //- Write object
         virtual void write(const fileName& name) const

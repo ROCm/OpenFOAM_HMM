@@ -94,7 +94,7 @@ public:
         static wordHashSet writeTypes();
 
         //- Can this file format type be written via MeshedSurfaceProxy?
-        static bool canWriteType(const word& ext, const bool verbose=false);
+        static bool canWriteType(const word& fileType, bool verbose=false);
 
 
     // Constructors
@@ -139,11 +139,12 @@ public:
             const dictionary& options = dictionary::null
         );
 
-        //- Write to file, selected based on given extension
+        //- Write to file with given format type.
+        //  If the format type is "", uses the file extension.
         static void write
         (
             const fileName& name,
-            const word& ext,
+            const word& fileType,
             const MeshedSurfaceProxy& surf,
             IOstreamOption streamOpt = IOstreamOption(),
             const dictionary& options = dictionary::null
@@ -196,37 +197,38 @@ public:
             inline label nTriangles() const;
 
 
-        // Write
+    // Write
 
-            //- Generic write routine. Chooses writer based on its extension.
-            virtual void write
-            (
-                const fileName& name,
-                IOstreamOption streamOpt = IOstreamOption(),
-                const dictionary& options = dictionary::null
-            ) const
-            {
-                write(name, *this, streamOpt, options);
-            }
+        //- Write to file, choosing writer based on the file extension.
+        virtual void write
+        (
+            const fileName& name,
+            IOstreamOption streamOpt = IOstreamOption(),
+            const dictionary& options = dictionary::null
+        ) const
+        {
+            write(name, *this, streamOpt, options);
+        }
 
-            //- Generic write routine. Chooses writer based on extension.
-            virtual void write
-            (
-                const fileName& name,
-                const word& ext,
-                IOstreamOption streamOpt = IOstreamOption(),
-                const dictionary& options = dictionary::null
-            ) const
-            {
-                write(name, ext, *this, streamOpt, options);
-            }
+        //- Write to file with given format type.
+        //  If the format type is "", uses the file extension.
+        virtual void write
+        (
+            const fileName& name,
+            const word& fileType,
+            IOstreamOption streamOpt = IOstreamOption(),
+            const dictionary& options = dictionary::null
+        ) const
+        {
+            write(name, fileType, *this, streamOpt, options);
+        }
 
-            //- Write to database
-            virtual void write
-            (
-                const Time& t,
-                const word& surfName = word::null
-            ) const;
+        //- Write to database
+        virtual void write
+        (
+            const Time& t,
+            const word& surfName = word::null
+        ) const;
 };
 
 

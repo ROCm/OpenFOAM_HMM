@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "STARCDsurfaceFormat.H"
-
 #include "addToRunTimeSelectionTable.H"
 #include "addToMemberFunctionSelectionTable.H"
 
@@ -38,14 +37,14 @@ namespace Foam
 namespace fileFormats
 {
 
-// read MeshedSurface
+// Read MeshedSurface
 addNamedTemplatedToRunTimeSelectionTable
 (
     MeshedSurface,
     STARCDsurfaceFormat,
     face,
     fileExtension,
-    inp
+    starcd
 );
 addNamedTemplatedToRunTimeSelectionTable
 (
@@ -53,7 +52,7 @@ addNamedTemplatedToRunTimeSelectionTable
     STARCDsurfaceFormat,
     triFace,
     fileExtension,
-    inp
+    starcd
 );
 addNamedTemplatedToRunTimeSelectionTable
 (
@@ -61,10 +60,10 @@ addNamedTemplatedToRunTimeSelectionTable
     STARCDsurfaceFormat,
     labelledTri,
     fileExtension,
-    inp
+    starcd
 );
 
-// write MeshedSurfaceProxy
+// Write MeshedSurfaceProxy
 addNamedTemplatedToMemberFunctionSelectionTable
 (
     MeshedSurfaceProxy,
@@ -72,7 +71,7 @@ addNamedTemplatedToMemberFunctionSelectionTable
     face,
     write,
     fileExtension,
-    inp
+    starcd
 );
 addNamedTemplatedToMemberFunctionSelectionTable
 (
@@ -81,7 +80,7 @@ addNamedTemplatedToMemberFunctionSelectionTable
     triFace,
     write,
     fileExtension,
-    inp
+    starcd
 );
 addNamedTemplatedToMemberFunctionSelectionTable
 (
@@ -90,7 +89,7 @@ addNamedTemplatedToMemberFunctionSelectionTable
     labelledTri,
     write,
     fileExtension,
-    inp
+    starcd
 );
 
 }

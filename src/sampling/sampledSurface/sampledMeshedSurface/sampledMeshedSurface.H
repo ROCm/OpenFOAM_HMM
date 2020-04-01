@@ -81,12 +81,15 @@ Usage
 
     Where the sub-entries comprise:
     \table
-        Property | Description                             | Required | Default
-        type     | meshedSurface                           | yes      |
-        surface  | surface name in triSurface/             | yes      |
+        Property | Description                              | Required | Default
+        type     | meshedSurface                            | yes |
+        surface  | surface name in triSurface/              | yes |
         patches  | Limit to named surface regions (wordRes) | no  |
-        source   | cells/insideCells/boundaryFaces         | yes      |
-        keepIds  | pass through id numbering               | no       | false
+        source   | cells/insideCells/boundaryFaces          | yes |
+        keepIds  | pass through id numbering                | no  | false
+        file     | Alternative file name                    | no  |
+        fileType | The surface format                       | no  | (extension)
+        scale    | Surface scaling factor                   | no  | 0
     \endtable
 
 SourceFiles

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2017 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,6 +44,8 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
 Foam::wordHashSet Foam::edgeMesh::readTypes()
 {
     return wordHashSet(*fileExtensionConstructorTablePtr_);
@@ -56,26 +58,24 @@ Foam::wordHashSet Foam::edgeMesh::writeTypes()
 }
 
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-bool Foam::edgeMesh::canReadType(const word& ext, bool verbose)
+bool Foam::edgeMesh::canReadType(const word& fileType, bool verbose)
 {
     return checkSupport
     (
         readTypes(),
-        ext,
+        fileType,
         verbose,
         "reading"
    );
 }
 
 
-bool Foam::edgeMesh::canWriteType(const word& ext, bool verbose)
+bool Foam::edgeMesh::canWriteType(const word& fileType, bool verbose)
 {
     return checkSupport
     (
         writeTypes(),
-        ext,
+        fileType,
         verbose,
         "writing"
     );
@@ -84,7 +84,7 @@ bool Foam::edgeMesh::canWriteType(const word& ext, bool verbose)
 
 bool Foam::edgeMesh::canRead(const fileName& name, bool verbose)
 {
-    word ext = name.ext();
+    word ext(name.ext());
     if (ext == "gz")
     {
         ext = name.lessExt().ext();
@@ -97,14 +97,15 @@ bool Foam::edgeMesh::canRead(const fileName& name, bool verbose)
 
 void Foam::edgeMesh::calcPointEdges() const
 {
-    if (pointEdgesPtr_.valid())
+    if (pointEdgesPtr_)
     {
         FatalErrorInFunction
-            << "pointEdges already calculated." << abort(FatalError);
+            << "pointEdges already calculated."
+            << abort(FatalError);
     }
 
     pointEdgesPtr_.reset(new labelListList(points_.size()));
-    labelListList& pointEdges = pointEdgesPtr_();
+    auto& pointEdges = *pointEdgesPtr_;
 
     invertManyToMany(pointEdges.size(), edges_, pointEdges);
 }
@@ -116,12 +117,17 @@ void Foam::edgeMesh::clear()
 {
     points_.clear();
     edges_.clear();
-    pointEdgesPtr_.clear();
+    pointEdgesPtr_.reset(nullptr);
 }
 
 
 void Foam::edgeMesh::transfer(edgeMesh& mesh)
 {
+    if (&mesh == this)
+    {
+        return;  // Self-transfer is a no-op
+    }
+
     points_.transfer(mesh.points_);
     edges_.transfer(mesh.edges_);
     pointEdgesPtr_ = std::move(mesh.pointEdgesPtr_);
@@ -189,6 +195,7 @@ Foam::label Foam::edgeMesh::regions(labelList& edgeRegion) const
 
         currentRegion++;
     }
+
     return currentRegion;
 }
 
@@ -220,7 +227,7 @@ void Foam::edgeMesh::mergePoints(const scalar mergeDist)
 
     if (hasMerged)
     {
-        pointEdgesPtr_.clear();   // connectivity change
+        pointEdgesPtr_.reset(nullptr);   // connectivity change
 
         points_.transfer(newPoints);
 
@@ -281,13 +288,13 @@ void Foam::edgeMesh::mergeEdges()
 
     if (nUniqEdges < edges_.size())
     {
-        pointEdgesPtr_.clear(); // connectivity change
+        pointEdgesPtr_.reset(nullptr); // connectivity change
         edges_.setSize(nUniqEdges);  // truncate
     }
 
     if (nUniqPoints < points_.size())
     {
-        pointEdgesPtr_.clear(); // connectivity change
+        pointEdgesPtr_.reset(nullptr); // connectivity change
 
         // build a oldToNew point-map and rewrite the points.
         // We can do this simultaneously since the point order is unchanged
@@ -320,7 +327,6 @@ void Foam::edgeMesh::mergeEdges()
             e[1] = pointMap[e[1]];
         }
     }
-
 }
 
 

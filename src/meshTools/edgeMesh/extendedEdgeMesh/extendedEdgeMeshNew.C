@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +28,6 @@ License
 
 #include "extendedEdgeMesh.H"
 
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -41,18 +41,18 @@ namespace Foam
 Foam::autoPtr<Foam::extendedEdgeMesh> Foam::extendedEdgeMesh::New
 (
     const fileName& name,
-    const word& ext
+    const word& fileType
 )
 {
-    auto cstrIter = fileExtensionConstructorTablePtr_->cfind(ext);
+    auto cstrIter = fileExtensionConstructorTablePtr_->cfind(fileType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown file extension " << ext
-            << " for file " << name << nl << nl
-            << "Valid extensions :" << nl
-            << fileExtensionConstructorTablePtr_->sortedToc()
+            << "Unknown edge format " << fileType
+            << " for file " << name << nl
+            << "Valid types:" << nl
+            << flatOutput(fileExtensionConstructorTablePtr_->sortedToc())
             << exit(FatalError);
     }
 
@@ -65,7 +65,7 @@ Foam::autoPtr<Foam::extendedEdgeMesh> Foam::extendedEdgeMesh::New
     const fileName& name
 )
 {
-    word ext = name.ext();
+    word ext(name.ext());
     if (ext == "gz")
     {
         ext = name.lessExt().ext();

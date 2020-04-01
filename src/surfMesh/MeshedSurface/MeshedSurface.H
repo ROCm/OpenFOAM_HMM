@@ -199,20 +199,20 @@ public:
 
     // Static Functions
 
-        //- Can we read this file format?
-        static bool canRead(const fileName& name, bool verbose=false);
-
-        //- Can we read this file format?
-        static bool canReadType(const word& ext, bool verbose=false);
-
-        //- Can we write this file format?
-        static bool canWriteType(const word& ext, bool verbose=false);
-
-        //- Known readable file-types
+        //- Known readable file-types, without friends or proxies
         static wordHashSet readTypes();
 
-        //- Known writable file-types
+        //- Known writable file-types, without friends or proxies
         static wordHashSet writeTypes();
+
+        //- Can we read this file format? Also checks friend types.
+        static bool canReadType(const word& fileType, bool verbose=false);
+
+        //- Can we write this file format? Also checks proxy types.
+        static bool canWriteType(const word& fileType, bool verbose=false);
+
+        //- Can we read this file format?
+        static bool canRead(const fileName& name, bool verbose=false);
 
 
     // Constructors
@@ -282,8 +282,9 @@ public:
         //- Construct from file name (uses extension to determine type)
         explicit MeshedSurface(const fileName& name);
 
-        //- Construct from file name (uses extension to determine type)
-        explicit MeshedSurface(const fileName& name, const word& ext);
+        //- Construct from file name and given file type
+        //  If the format type is "", uses the file extension.
+        explicit MeshedSurface(const fileName& name, const word& fileType);
 
         //- Construct from Istream
         explicit MeshedSurface(Istream& is);
@@ -295,8 +296,11 @@ public:
         MeshedSurface(const Time& runTime, const word& surfName);
 
         //- Read construct using IO to find the file location.
-        //  Dictionary may contain optional 'file' entry, and an
-        //  optional 'scale' entry (eg, 0.001: mm -> m)
+        //  Dictionary may contain the following entries:
+        //  - \c file = alternative file name (default is dictionary name)
+        //  - \c fileType = file format (default is from file extension)
+        //  - \c scale (eg, 0.001: mm to m)
+        //  .
         MeshedSurface
         (
             const IOobject& io,
@@ -321,14 +325,15 @@ public:
 
     // Selectors
 
-        //- Select constructed from filename (explicit extension)
+        //- Read construct from filename with given file type
         static autoPtr<MeshedSurface> New
         (
             const fileName& name,
-            const word& ext
+            const word& fileType,
+            bool mandatory = true
         );
 
-        //- Select constructed from filename (implicit extension)
+        //- Read construct from filename (file type implicit from extension)
         static autoPtr<MeshedSurface> New(const fileName& name);
 
 
@@ -366,7 +371,7 @@ public:
         static void write
         (
             const fileName& name,
-            const word& ext,
+            const word& fileType,
             const MeshedSurface<Face>& surf,
             IOstreamOption streamOpt = IOstreamOption(),
             const dictionary& options = dictionary::null
@@ -574,7 +579,7 @@ public:
     // Read
 
         //- Read from file. Chooses reader based on explicit extension
-        bool read(const fileName& name, const word& ext);
+        bool read(const fileName& name, const word& fileType);
 
         //- Read from file. Chooses reader based on detected extension
         virtual bool read(const fileName& name);
@@ -595,10 +600,24 @@ public:
             write(name, *this, streamOpt, options);
         }
 
+        //- Generic write routine for given format type.
+        //  If the format type is "", uses the file extension.
+        virtual void write
+        (
+            const fileName& name,
+            const word& fileType,
+            IOstreamOption streamOpt = IOstreamOption(),
+            const dictionary& options = dictionary::null
+        ) const
+        {
+            write(name, fileType, *this, streamOpt, options);
+        }
+
+
         //- Write to database
         void write
         (
-            const Time& t,
+            const Time& runTime,
             const word& surfName = word::null
         ) const;
 

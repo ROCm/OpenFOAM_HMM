@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,8 +42,38 @@ Description
 
 using namespace Foam;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+static word getExtension(const fileName& name)
+{
+    word ext(name.ext());
+    if (ext == "gz")
+    {
+        ext = name.lessExt().ext();
+    }
 
+    return ext;
+}
+
+
+// Non-short-circuiting check to get all warnings
+static bool hasReadWriteTypes(const word& readType, const word& writeType)
+{
+    volatile bool good = true;
+
+    if (!edgeMesh::canReadType(readType, true))
+    {
+        good = false;
+    }
+
+    if (!edgeMesh::canWriteType(writeType, true))
+    {
+        good = false;
+    }
+
+    return good;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
@@ -56,43 +86,63 @@ int main(int argc, char *argv[])
     argList::addArgument("output", "The output edge file");
     argList::addOption
     (
+        "read-format",
+        "type",
+        "The input format (default: use file extension)"
+    );
+    argList::addOption
+    (
+        "write-format",
+        "type",
+        "The output format (default: use file extension)"
+    );
+    argList::addOption
+    (
         "scale",
         "factor",
-        "Geometry scaling factor - default is 1"
+        "Input geometry scaling factor"
     );
 
     argList args(argc, argv);
     Time runTime(args.rootPath(), args.caseName());
 
-    const fileName importName = args[1];
-    const fileName exportName = args[2];
+    const fileName importName(args[1]);
+    const fileName exportName(args[2]);
 
     // Disable inplace editing
     if (importName == exportName)
     {
-        FatalErrorInFunction
-            << "Output file " << exportName << " would overwrite input file."
+        FatalError
+            << "Output file would overwrite input file."
             << exit(FatalError);
     }
 
-    // Check that reading/writing is supported
-    if
+    const word readFileType
     (
-        !edgeMesh::canReadType(importName.ext(), true)
-     || !edgeMesh::canWriteType(exportName.ext(), true)
-    )
+        args.getOrDefault<word>("read-format", getExtension(importName))
+    );
+
+    const word writeFileType
+    (
+        args.getOrDefault<word>("write-format", getExtension(exportName))
+    );
+
+    // Check that reading/writing is supported
+    if (!hasReadWriteTypes(readFileType, writeFileType))
     {
-        return 1;
+        FatalError
+            << "Unsupported file format(s)" << nl
+            << exit(FatalError);
     }
 
-    edgeMesh mesh(importName);
+    edgeMesh mesh(importName, readFileType);
 
     Info<< "\nRead edgeMesh " << importName << nl;
     mesh.writeStats(Info);
     Info<< nl
         << "\nwriting " << exportName;
 
-    scalar scaleFactor = 0;
+    scalar scaleFactor(0);
     if (args.readIfPresent("scale", scaleFactor) && scaleFactor > 0)
     {
         Info<< " with scaling " << scaleFactor << endl;
@@ -103,7 +153,7 @@ int main(int argc, char *argv[])
         Info<< " without scaling" << endl;
     }
 
-    mesh.write(exportName);
+    mesh.write(exportName, writeFileType);
     mesh.writeStats(Info);
 
     Info<< "\nEnd\n" << endl;

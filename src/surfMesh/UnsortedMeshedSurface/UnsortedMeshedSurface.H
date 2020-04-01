@@ -120,10 +120,10 @@ private:
         void setSize(const label, const Face&) = delete;
 
         //- Read/construct from Istream
-        Istream& read(Istream&);
+        bool readIstream(Istream& is);
 
         //- Write to Ostream
-        Ostream& write(Ostream&) const;
+        void writeOstream(Ostream& os) const;
 
 
         //- Return a new surface using specified pointMap and faceMap
@@ -174,20 +174,20 @@ public:
 
     // Static Functions
 
-        //- Can we read this file format type?
-        static bool canReadType(const word& ext, bool verbose=false);
+        //- Known readable file-types, without friends or proxies
+        static wordHashSet readTypes();
+
+        //- Known writable file-types, without friends or proxies
+        static wordHashSet writeTypes();
+
+        //- Can we read this file format? Also checks friend types.
+        static bool canReadType(const word& fileType, bool verbose=false);
+
+        //- Can we write this file format? Also checks friend types.
+        static bool canWriteType(const word& fileType, bool verbose=false);
 
         //- Can we read this file format?
         static bool canRead(const fileName& name, bool verbose=false);
-
-        //- Can we write this file format type?
-        static bool canWriteType(const word& ext, bool verbose=false);
-
-        //- Known readable file-types
-        static wordHashSet readTypes();
-
-        //- Known writable file-types
-        static wordHashSet writeTypes();
 
 
     // Constructors
@@ -220,8 +220,9 @@ public:
         //- Construct from file name (uses extension to determine type)
         explicit UnsortedMeshedSurface(const fileName& name);
 
-        //- Construct from file name (uses extension to determine type)
-        UnsortedMeshedSurface(const fileName& name, const word& ext);
+        //- Construct from file name with given format type.
+        //  If the format type is "", uses the file extension.
+        UnsortedMeshedSurface(const fileName& name, const word& fileType);
 
         //- Construct from Istream
         explicit UnsortedMeshedSurface(Istream& is);
@@ -233,8 +234,11 @@ public:
         UnsortedMeshedSurface(const Time& runTime, const word& surfName);
 
         //- Read construct using IO to find the file location.
-        //  Dictionary may contain optional 'file' entry, and an
-        //  optional 'scale' entry (eg, 0.001: mm -> m)
+        //  Dictionary may contain the following entries:
+        //  - \c file = alternative file name (default is dictionary name)
+        //  - \c fileType = file format (default is from file extension)
+        //  - \c scale (eg, 0.001: mm to m)
+        //  .
         UnsortedMeshedSurface
         (
             const IOobject& io,
@@ -259,14 +263,15 @@ public:
 
     // Selectors
 
-        //- Select constructed from filename (explicit extension)
+        //- Read construct from filename with given file type
         static autoPtr<UnsortedMeshedSurface> New
         (
             const fileName& name,
-            const word& ext
+            const word& fileType,
+            bool mandatory = true
         );
 
-        //- Select constructed from filename (implicit extension)
+        //- Read construct from filename (implicit extension)
         static autoPtr<UnsortedMeshedSurface> New(const fileName& name);
 
 
@@ -300,11 +305,12 @@ public:
             const dictionary& options = dictionary::null
         );
 
-        //- Write to file, selected based on given extension
+        //- Write to file with given format type.
+        //  If the format type is "", uses the file extension.
         static void write
         (
             const fileName& name,
-            const word& ext,
+            const word& fileType,
             const UnsortedMeshedSurface<Face>& surf,
             IOstreamOption streamOpt = IOstreamOption(),
             const dictionary& options = dictionary::null
@@ -428,8 +434,9 @@ public:
 
     // Read
 
-        //- Read from file. Chooses reader based on explicit extension
-        bool read(const fileName& name, const word& ext);
+        //- Read from file with given format type.
+        //  If the format type is "", uses the file extension.
+        bool read(const fileName& name, const word& fileType);
 
         //- Read from file. Chooses reader based on detected extension
         virtual bool read(const fileName& name);
@@ -437,7 +444,7 @@ public:
 
     // Write
 
-        //- Generic write routine. Chooses writer based on its extension.
+        //- Write to file, choosing writer based on the file extension.
         virtual void write
         (
             const fileName& name,
@@ -446,6 +453,19 @@ public:
         ) const
         {
             write(name, *this, streamOpt, options);
+        }
+
+        //- Write to file with given format type.
+        //  If the format type is "", uses the file extension.
+        virtual void write
+        (
+            const fileName& name,
+            const word& fileType,
+            IOstreamOption streamOpt = IOstreamOption(),
+            const dictionary& options = dictionary::null
+        ) const
+        {
+            write(name, fileType, *this, streamOpt, options);
         }
 
         //- Write to database

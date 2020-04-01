@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,6 +61,36 @@ Description
 
 using namespace Foam;
 using namespace Foam::coordinateRotations;
+
+static word getExtension(const fileName& name)
+{
+    word ext(name.ext());
+    if (ext == "gz")
+    {
+        ext = name.lessExt().ext();
+    }
+
+    return ext;
+}
+
+
+// Non-short-circuiting check to get all warnings
+static bool hasReadWriteTypes(const word& readType, const word& writeType)
+{
+    volatile bool good = true;
+
+    if (!meshedSurface::canReadType(readType, true))
+    {
+        good = false;
+    }
+
+    if (!meshedSurface::canWriteType(writeType, true))
+    {
+        good = false;
+    }
+
+    return good;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -119,6 +149,19 @@ int main(int argc, char *argv[])
         "Scale by the specified amount - Eg, for uniform [mm] to [m] scaling "
         "use either '(0.001 0.001 0.001)' or simply '0.001'"
     );
+    argList::addOption
+    (
+        "read-format",
+        "type",
+        "Input format (default: use file extension)"
+    );
+    argList::addOption
+    (
+        "write-format",
+        "type",
+        "Output format (default: use file extension)"
+    );
+
     argList args(argc, argv);
 
     // Verify that an operation has been specified
@@ -151,13 +194,34 @@ int main(int argc, char *argv[])
         }
     }
 
-    const fileName surfFileName = args[1];
-    const fileName outFileName  = args[2];
+    const fileName importName(args[1]);
+    const fileName exportName(args[2]);
 
-    Info<< "Reading surf from " << surfFileName << " ..." << nl
-        << "Writing surf to " << outFileName << " ..." << endl;
+    const word readFileType
+    (
+        args.getOrDefault<word>("read-format", getExtension(importName))
+    );
 
-    meshedSurface surf1(surfFileName);
+    const word writeFileType
+    (
+        args.getOrDefault<word>("write-format", getExtension(exportName))
+    );
+
+
+    // Check that reading/writing is supported
+    if (!hasReadWriteTypes(readFileType, writeFileType))
+    {
+        FatalError
+            << "Unsupported file format(s)" << nl
+            << exit(FatalError);
+    }
+
+
+    Info<< "Reading surf from " << importName << " ..." << nl
+        << "Writing surf to " << exportName << " ..." << endl;
+
+
+    meshedSurface surf1(importName, readFileType);
 
     pointField points(surf1.points());
 
@@ -169,7 +233,7 @@ int main(int argc, char *argv[])
         points += v;
     }
 
-    vector origin;
+    vector origin(Zero);
     const bool useOrigin = args.readIfPresent("origin", origin);
     if (useOrigin)
     {
@@ -240,7 +304,16 @@ int main(int argc, char *argv[])
     {
         // readListIfPresent handles single or multiple values
 
-        if (scaling.size() == 1)
+        if
+        (
+            scaling.size() == 1
+         ||
+            (
+                scaling.size() == 3
+             && equal(scaling[0], scaling[1])
+             && equal(scaling[0], scaling[2])
+            )
+        )
         {
             Info<< "Scaling points uniformly by " << scaling[0] << nl;
             points *= scaling[0];
@@ -248,9 +321,9 @@ int main(int argc, char *argv[])
         else if (scaling.size() == 3)
         {
             Info<< "Scaling points by ("
-                << scaling[0] << " "
-                << scaling[1] << " "
-                << scaling[2] << ")" << nl;
+                << scaling[0] << ' '
+                << scaling[1] << ' '
+                << scaling[2] << ')' << nl;
 
             points.replace(vector::X, scaling[0]*points.component(vector::X));
             points.replace(vector::Y, scaling[1]*points.component(vector::Y));
@@ -272,7 +345,7 @@ int main(int argc, char *argv[])
     }
 
     surf1.movePoints(points);
-    surf1.write(outFileName);
+    surf1.write(exportName, writeFileType);
 
     Info<< "End\n" << endl;
 

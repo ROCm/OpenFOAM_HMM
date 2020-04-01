@@ -499,13 +499,13 @@ Foam::triSurface::triSurface
 Foam::triSurface::triSurface
 (
     const fileName& name,
-    const word& ext,
+    const word& fileType,
     const scalar scaleFactor
 )
 :
     triSurface()
 {
-    read(name, ext);
+    read(name, fileType);
     scalePoints(scaleFactor);
     setDefaultPatches();
 }

@@ -54,14 +54,14 @@ Foam::wordHashSet Foam::UnsortedMeshedSurface<Face>::writeTypes()
 template<class Face>
 bool Foam::UnsortedMeshedSurface<Face>::canReadType
 (
-    const word& ext,
+    const word& fileType,
     bool verbose
 )
 {
    return fileFormats::surfaceFormatsCore::checkSupport
    (
        readTypes() | MeshReference::readTypes(),
-       ext,
+       fileType,
        verbose,
        "reading"
    );
@@ -71,14 +71,14 @@ bool Foam::UnsortedMeshedSurface<Face>::canReadType
 template<class Face>
 bool Foam::UnsortedMeshedSurface<Face>::canWriteType
 (
-    const word& ext,
+    const word& fileType,
     bool verbose
 )
 {
     return fileFormats::surfaceFormatsCore::checkSupport
     (
         writeTypes(),
-        ext,
+        fileType,
         verbose,
         "writing"
     );
@@ -92,7 +92,7 @@ bool Foam::UnsortedMeshedSurface<Face>::canRead
     bool verbose
 )
 {
-    word ext = name.ext();
+    word ext(name.ext());
     if (ext == "gz")
     {
         ext = name.lessExt().ext();
@@ -118,36 +118,53 @@ template<class Face>
 void Foam::UnsortedMeshedSurface<Face>::write
 (
     const fileName& name,
-    const word& ext,
+    const word& fileType,
     const UnsortedMeshedSurface<Face>& surf,
     IOstreamOption streamOpt,
     const dictionary& options
 )
 {
-    if (debug)
+    if (fileType.empty())
     {
-        InfoInFunction << "Writing to " << name << endl;
+        // Handle empty/missing type
+
+        const word ext(name.ext());
+
+        if (ext.empty())
+        {
+            FatalErrorInFunction
+                << "Cannot determine format from filename" << nl
+                << "    " << name << nl
+                << exit(FatalError);
+        }
+
+        write(name, ext, surf, streamOpt, options);
+        return;
     }
 
-    auto mfIter = writefileExtensionMemberFunctionTablePtr_->cfind(ext);
+
+    DebugInFunction << "Writing to " << name << nl;
+
+    auto mfIter = writefileExtensionMemberFunctionTablePtr_->cfind(fileType);
 
     if (!mfIter.found())
     {
-        // No direct writer, delegate to proxy if possible
-        const wordHashSet& delegate = ProxyType::writeTypes();
+        // Delegate to proxy if possible
+        const wordHashSet delegate(ProxyType::writeTypes());
 
-        if (delegate.found(ext))
-        {
-            MeshedSurfaceProxy<Face>(surf).write(name, ext, streamOpt, options);
-        }
-        else
+        if (!delegate.found(fileType))
         {
             FatalErrorInFunction
-                << "Unknown file extension " << ext << nl << nl
+                << "Unknown write format " << fileType << nl << nl
                 << "Valid types:" << nl
                 << flatOutput((delegate | writeTypes()).sortedToc()) << nl
                 << exit(FatalError);
         }
+
+        MeshedSurfaceProxy<Face>(surf).write
+        (
+            name, fileType, streamOpt, options
+        );
     }
     else
     {
@@ -309,11 +326,7 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
         fileFormats::surfaceFormatsCore::checkFile(io, dict, isGlobal)
     );
 
-    // TBD:
-    // word fExt(dict.getOrDefault<word>("surfaceType", fName.ext()));
-    // read(fName, fExt);
-
-    this->read(fName, fName.ext());
+    this->read(fName, dict.getOrDefault<word>("fileType", word::null));
 
     this->scalePoints(dict.getOrDefault<scalar>("scale", 0));
 }
@@ -452,26 +465,25 @@ void Foam::UnsortedMeshedSurface<Face>::remapFaces
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Face>
-Foam::Istream& Foam::UnsortedMeshedSurface<Face>::read(Istream& is)
+bool Foam::UnsortedMeshedSurface<Face>::readIstream(Istream& is)
 {
     is  >> this->storedZoneIds()
         >> this->storedPoints()
         >> this->storedFaces();
 
     is.check(FUNCTION_NAME);
-    return is;
+    return true;
 }
 
 
 template<class Face>
-Foam::Ostream& Foam::UnsortedMeshedSurface<Face>::write(Ostream& os) const
+void Foam::UnsortedMeshedSurface<Face>::writeOstream(Ostream& os) const
 {
     os  << this->zoneIds()
         << this->points()
         << this->surfFaces();
 
     os.check(FUNCTION_NAME);
-    return os;
 }
 
 
@@ -734,7 +746,6 @@ Foam::UnsortedMeshedSurface<Face>::releaseZoneIds()
 }
 
 
-// Read from file, determine format from extension
 template<class Face>
 bool Foam::UnsortedMeshedSurface<Face>::read(const fileName& name)
 {
@@ -749,18 +760,34 @@ bool Foam::UnsortedMeshedSurface<Face>::read(const fileName& name)
 }
 
 
-// Read from file in given format
 template<class Face>
 bool Foam::UnsortedMeshedSurface<Face>::read
 (
     const fileName& name,
-    const word& ext
+    const word& fileType
 )
 {
+    if (fileType.empty())
+    {
+        // Handle empty/missing type
+
+        const word ext(name.ext());
+
+        if (ext.empty())
+        {
+            FatalErrorInFunction
+                << "Cannot determine format from filename" << nl
+                << "    " << name << nl
+                << exit(FatalError);
+        }
+
+        return read(name, ext);
+    }
+
     clear();
 
-    // read via use selector mechanism
-    transfer(New(name, ext)());
+    // Read via selector mechanism
+    transfer(*New(name, fileType));
     return true;
 }
 
@@ -784,6 +811,11 @@ void Foam::UnsortedMeshedSurface<Face>::operator=
     const UnsortedMeshedSurface<Face>& surf
 )
 {
+    if (&surf == this)
+    {
+        return;  // Self-assignment is a no-op
+    }
+
     clear();
 
     this->storedPoints() = surf.points();
@@ -829,7 +861,8 @@ Foam::Istream& Foam::operator>>
     UnsortedMeshedSurface<Face>& surf
 )
 {
-    return surf.read(is);
+    surf.readIstream(is);
+    return is;
 }
 
 
@@ -840,7 +873,8 @@ Foam::Ostream& Foam::operator<<
     const UnsortedMeshedSurface<Face>& surf
 )
 {
-    return surf.write(os);
+    surf.writeOstream(os);
+    return os;
 }
 
 

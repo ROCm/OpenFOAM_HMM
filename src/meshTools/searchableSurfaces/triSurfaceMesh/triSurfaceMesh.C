@@ -256,7 +256,7 @@ Foam::triSurfaceMesh::triSurfaceMesh
     surfaceClosed_(-1),
     outsideVolType_(volumeType::UNKNOWN)
 {
-    // Adjust to use supplied file name instead of objectPath/filePath
+    // Read with supplied file name instead of objectPath/filePath
     if (dict.readIfPresent("file", fName_, keyType::LITERAL))
     {
         fName_ = triSurface::relativeFilePath
@@ -414,6 +414,9 @@ Foam::triSurfaceMesh::triSurfaceMesh
 {
     if (io.readOpt() != IOobject::NO_READ)
     {
+        // Surface type (optional)
+        const word surfType(dict.getOrDefault<word>("fileType", word::null));
+
         // Scale factor (optional)
         const scalar scaleFactor(dict.getOrDefault<scalar>("scale", 0));
 
@@ -446,6 +449,7 @@ Foam::triSurfaceMesh::triSurfaceMesh
                 << " from:" << actualFile << endl;
         }
 
+
         if (searchGlobal && Pstream::parRun())
         {
             // Check where surface was found
@@ -457,7 +461,7 @@ Foam::triSurfaceMesh::triSurfaceMesh
                 // surface. Load on master only
                 if (Pstream::master())
                 {
-                    triSurface s2(actualFile, scaleFactor);
+                    triSurface s2(actualFile, surfType, scaleFactor);
                     triSurface::transfer(s2);
                 }
                 Pstream::scatter(triSurface::patches());
@@ -470,7 +474,7 @@ Foam::triSurfaceMesh::triSurfaceMesh
             else
             {
                 // Read on all processors
-                triSurface s2(actualFile, scaleFactor);
+                triSurface s2(actualFile, surfType, scaleFactor);
                 triSurface::transfer(s2);
                 if (debug)
                 {
@@ -482,7 +486,7 @@ Foam::triSurfaceMesh::triSurfaceMesh
         else
         {
             // Read on all processors
-            triSurface s2(actualFile, scaleFactor);
+            triSurface s2(actualFile, surfType, scaleFactor);
             triSurface::transfer(s2);
             if (debug)
             {

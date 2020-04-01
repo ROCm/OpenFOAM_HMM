@@ -179,12 +179,6 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::extendedFeatureEdgeMesh::~extendedFeatureEdgeMesh()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 bool Foam::extendedFeatureEdgeMesh::readData(Istream& is)

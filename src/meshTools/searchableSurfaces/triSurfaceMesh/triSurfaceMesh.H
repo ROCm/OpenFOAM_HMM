@@ -41,6 +41,7 @@ Description
         Property    | Description                       | Required | Default
         type        | triSurfaceMesh                    | selector |
         file        | File name to locate the surface   | no    |
+        fileType    | The surface format (Eg, nastran)  | no    |
         scale       | Scaling factor                    | no    | 0
         minQuality  | Quality criterion                 | no    | -1
     \endtable

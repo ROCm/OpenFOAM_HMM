@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -110,7 +110,7 @@ inline const Foam::edgeList& Foam::edgeMesh::edges() const
 
 inline const Foam::labelListList& Foam::edgeMesh::pointEdges() const
 {
-    if (pointEdgesPtr_.empty())
+    if (!pointEdgesPtr_)
     {
         calcPointEdges();
     }
@@ -124,7 +124,7 @@ inline void Foam::edgeMesh::operator=(const edgeMesh& rhs)
 {
     points_ = rhs.points_;
     edges_ = rhs.edges_;
-    pointEdgesPtr_.clear();
+    pointEdgesPtr_.reset(nullptr);
 }
 
 

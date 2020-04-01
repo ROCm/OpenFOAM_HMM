@@ -91,12 +91,8 @@ class triSurface
         //  (face ordering nFaces/startFace only used during reading, writing)
         geometricSurfacePatchList patches_;
 
-        static wordHashSet readTypes_;
 
-        static wordHashSet writeTypes_;
-
-
-    // Demand driven
+    // Demand Driven
 
         //- Edge-face addressing (sorted)
         mutable unique_ptr<labelListList> sortedEdgeFacesPtr_;
@@ -136,11 +132,12 @@ class triSurface
         //- Read in STL format
         bool readSTL(const fileName& filename, bool forceBinary=false);
 
-        //- Generic read routine. Chooses reader based on extension.
+        //- Generic read routine for given format type.
+        //  If the format type is "", uses the file extension.
         bool read
         (
             const fileName& filename,
-            const word& ext,
+            const word& fileType,
             const bool check = true
         );
 
@@ -154,17 +151,8 @@ class triSurface
         //- Write GTS (Gnu Tri Surface library) format.
         void writeGTS(const fileName& filename, const bool sort) const;
 
-        //- Generic write routine. Chooses writer based on extension.
-        //  The sort option may not have an effect.
-        void write
-        (
-            const fileName& filename,
-            const word& ext,
-            const bool sort
-        ) const;
 
-
-    // Static private functions
+    // Static Private Functions
 
         //- Convert faces to labelledTri. All get same region.
         static List<labelledTri> convertToTri
@@ -240,20 +228,20 @@ public:
         //- Name of triSurface directory to use.
         static fileName triSurfInstance(const Time&);
 
-        //- Can we read this file format?
-        static bool canRead(const fileName& name, const bool verbose=false);
+        //- Known readable file-types, including via friends or proxies
+        static wordHashSet readTypes();
+
+        //- Known writable file-types, including via friends or proxies
+        static wordHashSet writeTypes();
 
         //- Can we read this file format?
-        static bool canReadType(const word& ext, const bool verbose=false);
+        static bool canReadType(const word& fileType, bool verbose=false);
 
         //- Can we write this file format?
-        static bool canWriteType(const word& ext, const bool verbose=false);
+        static bool canWriteType(const word& fileType, bool verbose=false);
 
-        //- Known readable file-types
-        static const wordHashSet& readTypes();
-
-        //- Known writable file-types
-        static const wordHashSet& writeTypes();
+        //- Can we read this file format?
+        static bool canRead(const fileName& name, bool verbose=false);
 
 
     // IO helpers
@@ -356,11 +344,12 @@ public:
             const scalar scaleFactor = -1
         );
 
-        //- Construct from file name (uses extension to determine type)
+        //- Construct from file name with given format type.
+        //  If the format type is "", uses the file extension.
         triSurface
         (
             const fileName& name,
-            const word& ext,
+            const word& fileType,
             const scalar scaleFactor = -1
         );
 
@@ -371,8 +360,11 @@ public:
         explicit triSurface(const Time& d);
 
         //- Read construct using IO to find the file location.
-        //  Dictionary may contain optional 'file' entry, and an
-        //  optional 'scale' entry (eg, 0.001: mm -> m)
+        //  Dictionary may contain the following entries:
+        //  - \c file = alternative file name (default is dictionary name)
+        //  - \c fileType = file format (default is from file extension)
+        //  - \c scale (eg, 0.001: mm to m)
+        //  .
         triSurface
         (
             const IOobject& io,
@@ -574,8 +566,19 @@ public:
         //- Write to Ostream in simple FOAM format
         void write(Ostream& os) const;
 
-        //- Generic write routine. Chooses writer based on extension.
+        //- Generic write routine (uses extension to determine type).
+        //  The sort option may not have an effect.
         void write(const fileName&, const bool sortByRegion = false) const;
+
+        //- Generic write routine for given format type.
+        //  If the format type is "", uses the file extension.
+        //  The sort option may not have an effect.
+        void write
+        (
+            const fileName& filename,
+            const word& fileType,
+            const bool sortByRegion = false
+        ) const;
 
         //- Write to database
         void write(const Time& d) const;
@@ -584,7 +587,7 @@ public:
         void writeStats(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
         //- Copy assignment
         void operator=(const triSurface& surf);

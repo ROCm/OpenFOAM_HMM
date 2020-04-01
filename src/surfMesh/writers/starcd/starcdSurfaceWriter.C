@@ -148,7 +148,7 @@ Foam::fileName Foam::surfaceWriters::starcdWriter::write()
         MeshedSurfaceProxy<face>(surf.points(), surf.faces()).write
         (
             outputFile,
-            "inp",
+            "starcd",  // Canonical selection name
             streamOpt_
         );
     }

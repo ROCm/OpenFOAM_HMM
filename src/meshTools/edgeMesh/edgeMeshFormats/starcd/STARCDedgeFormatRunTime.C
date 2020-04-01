@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "STARCDedgeFormat.H"
-
 #include "addToRunTimeSelectionTable.H"
 #include "addToMemberFunctionSelectionTable.H"
 
@@ -37,23 +37,23 @@ namespace Foam
 namespace fileFormats
 {
 
-// read edgeMesh
+// Read
 addNamedToRunTimeSelectionTable
 (
     edgeMesh,
     STARCDedgeFormat,
     fileExtension,
-    inp
+    starcd
 );
 
-// write edgeMesh
+// Write
 addNamedToMemberFunctionSelectionTable
 (
     edgeMesh,
     STARCDedgeFormat,
     write,
     fileExtension,
-    inp
+    starcd
 );
 
 }

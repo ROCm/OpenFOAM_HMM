@@ -148,8 +148,8 @@ int main(int argc, char *argv[])
 
     if (importName == exportName)
     {
-        FatalErrorInFunction
-            << "Output file " << exportName << " would overwrite input file."
+        FatalError
+            << "Output file would overwrite input file."
             << exit(FatalError);
     }
 

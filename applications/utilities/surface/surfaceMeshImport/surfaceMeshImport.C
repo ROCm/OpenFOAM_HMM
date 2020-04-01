@@ -45,11 +45,14 @@ Usage
       - \par -name \<name\>
         Specify an alternative surface name when writing.
 
-      - \par -scaleIn \<scale\>
-        Specify a scaling factor when reading files.
+      - \par -read-format \<type\>
+        Specify input file format
 
-      - \par -scaleOut \<scale\>
-        Specify a scaling factor when writing files.
+      - \par -read-scale \<scale\>
+        Scale factor when reading files.
+
+      - \par -write-scale \<scale\>
+        Scale factor when writing files.
 
       - \par -dict \<dictionary\>
         Use alternative dictionary for constant/coordinateSystems.
@@ -74,6 +77,18 @@ Note
 
 using namespace Foam;
 
+static word getExtension(const fileName& name)
+{
+    word ext(name.ext());
+    if (ext == "gz")
+    {
+        ext = name.lessExt().ext();
+    }
+
+    return ext;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
@@ -95,35 +110,44 @@ int main(int argc, char *argv[])
     (
         "name",
         "name",
-        "Specify an alternative surface name when writing - "
-        "default is 'default'"
+        "The surface name when writing (default is 'default')"
     );
     argList::addOption
     (
-        "scaleIn",
-        "factor",
-        "Geometry scaling factor on input - default is 1"
+        "read-format",
+        "type",
+        "Input format (default: use file extension)"
     );
     argList::addOption
     (
-        "scaleOut",
+        "read-scale",
         "factor",
-        "Geometry scaling factor on output - default is 1"
+        "Input geometry scaling factor"
     );
-    argList::addOption("dict", "file", "Use alternative coordinateSystems");
+    argList::addOption
+    (
+        "write-scale",
+        "factor",
+        "Output geometry scaling factor"
+    );
+
+    argList::addOptionCompat("read-scale", {"scaleIn", 1912});
+    argList::addOptionCompat("write-scale", {"scaleOut", 1912});
+
+    argList::addOption("dict", "file", "Alternative coordinateSystems");
 
     argList::addOption
     (
         "from",
-        "coordinateSystem",
-        "Specify a local coordinate system when reading files.",
+        "system",
+        "The source coordinate system, applied after '-read-scale'",
         true // advanced
     );
     argList::addOption
     (
         "to",
-        "coordinateSystem",
-        "Specify a local coordinate system when writing files.",
+        "system",
+        "The target coordinate system, applied before '-write-scale'",
         true // advanced
     );
 
@@ -143,15 +167,24 @@ int main(int argc, char *argv[])
     }
 
 
-    const fileName importName = args[1];
-    const word exportName = args.get<word>("name", "default");
+    const fileName importName(args[1]);
+    const word exportName(args.get<word>("name", "default"));
 
-    // check that reading is supported
-    if (!MeshedSurface<face>::canRead(importName, true))
+    const word readFileType
+    (
+        args.getOrDefault<word>("read-format", getExtension(importName))
+    );
+
+    // Check that reading is supported
+    if (!meshedSurface::canRead(readFileType, true))
     {
-        return 1;
+        FatalError
+            << "Unsupported file format(s)" << nl
+            << exit(FatalError);
     }
 
+
+    scalar scaleFactor(0);
 
     // The coordinate transformations (must be cartesian)
     autoPtr<coordSystem::cartesian> fromCsys;
@@ -175,7 +208,7 @@ int main(int argc, char *argv[])
 
         if (!ioCsys.typeHeaderOk<coordinateSystems>(false))
         {
-            FatalErrorInFunction
+            FatalError
                 << ioCsys.objectPath() << nl
                 << exit(FatalError);
         }
@@ -189,7 +222,7 @@ int main(int argc, char *argv[])
 
             if (!csPtr)
             {
-                FatalErrorInFunction
+                FatalError
                     << "Cannot find -from " << csName << nl
                     << "available coordinateSystems: "
                     << flatOutput(globalCoords.names()) << nl
@@ -206,7 +239,7 @@ int main(int argc, char *argv[])
 
             if (!csPtr)
             {
-                FatalErrorInFunction
+                FatalError
                     << "Cannot find -to " << csName << nl
                     << "available coordinateSystems: "
                     << flatOutput(globalCoords.names()) << nl
@@ -219,26 +252,24 @@ int main(int argc, char *argv[])
         // Maybe fix this later
         if (fromCsys && toCsys)
         {
-            FatalErrorInFunction
+            FatalError
                 << "Only allowed '-from' or '-to' option at the moment."
                 << exit(FatalError);
         }
     }
 
 
-    MeshedSurface<face> surf(importName);
+    meshedSurface surf(importName, readFileType);
+
+    if (args.readIfPresent("read-scale", scaleFactor) && scaleFactor > 0)
+    {
+        Info<< "scale input " << scaleFactor << nl;
+        surf.scalePoints(scaleFactor);
+    }
 
     if (args.found("clean"))
     {
         surf.cleanup(true);
-    }
-
-
-    scalar scaleIn = 0;
-    if (args.readIfPresent("scaleIn", scaleIn) && scaleIn > 0)
-    {
-        Info<< "scale input " << scaleIn << endl;
-        surf.scalePoints(scaleIn);
     }
 
     if (fromCsys)
@@ -257,11 +288,10 @@ int main(int argc, char *argv[])
         surf.movePoints(tpf());
     }
 
-    scalar scaleOut = 0;
-    if (args.readIfPresent("scaleOut", scaleOut) && scaleOut > 0)
+    if (args.readIfPresent("write-scale", scaleFactor) && scaleFactor > 0)
     {
-        Info<< "scale output " << scaleOut << endl;
-        surf.scalePoints(scaleOut);
+        Info<< "scale output " << scaleFactor << nl;
+        surf.scalePoints(scaleFactor);
     }
 
     surfMesh smesh

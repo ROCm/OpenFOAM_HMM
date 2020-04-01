@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,9 +27,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "edgeMeshFormatsCore.H"
-
 #include "Time.H"
-#include "Fstream.H"
+#include "ListOps.H"
 #include "edgeMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -44,7 +44,7 @@ Foam::string Foam::fileFormats::edgeMeshFormatsCore::getLineNoComment
     const char comment
 )
 {
-    Foam::string line;
+    string line;
     do
     {
         is.getLine(line);
@@ -158,28 +158,27 @@ Foam::fileName Foam::fileFormats::edgeMeshFormatsCore::findMeshFile
 bool Foam::fileFormats::edgeMeshFormatsCore::checkSupport
 (
     const wordHashSet& available,
-    const word& ext,
+    const word& fileType,
     const bool verbose,
-    const word& functionName
+    const char* functionName
 )
 {
-    if (available.found(ext))
+    if (available.found(fileType))
     {
         return true;
     }
     else if (verbose)
     {
-        wordList known = available.sortedToc();
+        Info<< "Unknown file type";
 
-        Info<<"Unknown file extension for " << functionName
-            << " : " << ext << nl
-            <<"Valid types: (";
-        // compact output:
-        forAll(known, i)
+        if (functionName)
         {
-            Info<<" " << known[i];
+            Info<< " for " << functionName;
         }
-        Info<<" )" << endl;
+
+        Info<< " : " << fileType << nl
+            << "Valid types: " << flatOutput(available.sortedToc()) << nl
+            << nl;
     }
 
     return false;

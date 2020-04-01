@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,21 +35,21 @@ License
 Foam::edgeMesh::edgeMesh
 (
     const fileName& name,
-    const word& ext
+    const word& fileType
 )
 :
-    points_(0),
-    edges_(0),
+    points_(),
+    edges_(),
     pointEdgesPtr_(nullptr)
 {
-    read(name, ext);
+    read(name, fileType);
 }
 
 
 Foam::edgeMesh::edgeMesh(const fileName& name)
 :
-    points_(0),
-    edges_(0),
+    points_(),
+    edges_(),
     pointEdgesPtr_(nullptr)
 {
     read(name);
@@ -60,7 +60,7 @@ Foam::edgeMesh::edgeMesh(const fileName& name)
 
 bool Foam::edgeMesh::read(const fileName& name)
 {
-    word ext = name.ext();
+    word ext(name.ext());
     if (ext == "gz")
     {
         fileName unzipName = name.lessExt();
@@ -71,16 +71,40 @@ bool Foam::edgeMesh::read(const fileName& name)
 }
 
 
-// Read from file in given format
 bool Foam::edgeMesh::read
 (
     const fileName& name,
-    const word& ext
+    const word& fileType
 )
 {
-    // read via selector mechanism
-    transfer(New(name, ext)());
+    // Read via selector mechanism
+    transfer(*New(name, fileType));
     return true;
+}
+
+
+void Foam::edgeMesh::write
+(
+    const fileName& name,
+    const word& fileType,
+    const edgeMesh& mesh
+)
+{
+    DebugInFunction << "Writing to " << name << endl;
+
+    auto mfIter = writefileExtensionMemberFunctionTablePtr_->cfind(fileType);
+
+    if (!mfIter.found())
+    {
+        FatalErrorInLookup
+        (
+            "extension",
+            fileType,
+            *writefileExtensionMemberFunctionTablePtr_
+        ) << exit(FatalError);
+    }
+
+    mfIter()(name, mesh);
 }
 
 
@@ -90,23 +114,7 @@ void Foam::edgeMesh::write
     const edgeMesh& mesh
 )
 {
-    DebugInFunction << "Writing to " << name << endl;
-
-    const word ext = name.ext();
-
-    auto mfIter = writefileExtensionMemberFunctionTablePtr_->cfind(ext);
-
-    if (!mfIter.found())
-    {
-        FatalErrorInLookup
-        (
-            "extension",
-            ext,
-            *writefileExtensionMemberFunctionTablePtr_
-        ) << exit(FatalError);
-    }
-
-    mfIter()(name, mesh);
+    write(name, name.ext(), mesh);
 }
 
 
@@ -133,7 +141,7 @@ Foam::Istream& Foam::operator>>(Istream& is, edgeMesh& em)
 {
     fileFormats::edgeMeshFormat::read(is, em.points_, em.edges_);
 
-    em.pointEdgesPtr_.clear();
+    em.pointEdgesPtr_.reset(nullptr);
 
     is.check(FUNCTION_NAME);
     return is;

@@ -39,13 +39,14 @@ License
 #include "faceTraits.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Face>
 Foam::wordHashSet Foam::MeshedSurface<Face>::readTypes()
 {
     return wordHashSet(*fileExtensionConstructorTablePtr_);
 }
+
 
 template<class Face>
 Foam::wordHashSet Foam::MeshedSurface<Face>::writeTypes()
@@ -54,36 +55,34 @@ Foam::wordHashSet Foam::MeshedSurface<Face>::writeTypes()
 }
 
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
 template<class Face>
 bool Foam::MeshedSurface<Face>::canReadType
 (
-    const word& ext,
+    const word& fileType,
     bool verbose
 )
 {
     return fileFormats::surfaceFormatsCore::checkSupport
     (
         readTypes() | FriendType::readTypes(),
-        ext,
+        fileType,
         verbose,
         "reading"
-   );
+    );
 }
 
 
 template<class Face>
 bool Foam::MeshedSurface<Face>::canWriteType
 (
-    const word& ext,
+    const word& fileType,
     bool verbose
 )
 {
     return fileFormats::surfaceFormatsCore::checkSupport
     (
         writeTypes() | ProxyType::writeTypes(),
-        ext,
+        fileType,
         verbose,
         "writing"
     );
@@ -97,7 +96,7 @@ bool Foam::MeshedSurface<Face>::canRead
     bool verbose
 )
 {
-    word ext = name.ext();
+    word ext(name.ext());
     if (ext == "gz")
     {
         ext = name.lessExt().ext();
@@ -123,36 +122,53 @@ template<class Face>
 void Foam::MeshedSurface<Face>::write
 (
     const fileName& name,
-    const word& ext,
+    const word& fileType,
     const MeshedSurface<Face>& surf,
     IOstreamOption streamOpt,
     const dictionary& options
 )
 {
-    if (debug)
+    if (fileType.empty())
     {
-        InfoInFunction << "Writing to " << name << endl;
+        // Handle empty/missing type
+
+        const word ext(name.ext());
+
+        if (ext.empty())
+        {
+            FatalErrorInFunction
+                << "Cannot determine format from filename" << nl
+                << "    " << name << nl
+                << exit(FatalError);
+        }
+
+        write(name, ext, surf, streamOpt, options);
+        return;
     }
 
-    auto mfIter = writefileExtensionMemberFunctionTablePtr_->cfind(ext);
+
+    DebugInFunction << "Writing to " << name << nl;
+
+    auto mfIter = writefileExtensionMemberFunctionTablePtr_->cfind(fileType);
 
     if (!mfIter.found())
     {
-        // No direct writer, delegate to proxy if possible
-        const wordHashSet& delegate = ProxyType::writeTypes();
+        // Delegate to proxy if possible
+        const wordHashSet delegate(ProxyType::writeTypes());
 
-        if (delegate.found(ext))
-        {
-            MeshedSurfaceProxy<Face>(surf).write(name, ext, streamOpt, options);
-        }
-        else
+        if (!delegate.found(fileType))
         {
             FatalErrorInFunction
-                << "Unknown file extension " << ext << nl << nl
+                << "Unknown write format " << fileType << nl << nl
                 << "Valid types:" << nl
                 << flatOutput((delegate | writeTypes()).sortedToc()) << nl
                 << exit(FatalError);
         }
+
+        MeshedSurfaceProxy<Face>(surf).write
+        (
+            name, fileType, streamOpt, options
+        );
     }
     else
     {
@@ -396,12 +412,12 @@ template<class Face>
 Foam::MeshedSurface<Face>::MeshedSurface
 (
     const fileName& name,
-    const word& ext
+    const word& fileType
 )
 :
     MeshedSurface<Face>()
 {
-    read(name, ext);
+    read(name, fileType);
 }
 
 
@@ -481,11 +497,7 @@ Foam::MeshedSurface<Face>::MeshedSurface
         fileFormats::surfaceFormatsCore::checkFile(io, dict, isGlobal)
     );
 
-    // TBD:
-    // word fExt(dict.getOrDefault<word>("surfaceType", fName.ext()));
-    // read(fName, fExt);
-
-    this->read(fName, fName.ext());
+    this->read(fName, dict.getOrDefault<word>("fileType", word::null));
 
     this->scalePoints(dict.getOrDefault<scalar>("scale", 0));
 }
@@ -1331,18 +1343,34 @@ bool Foam::MeshedSurface<Face>::read(const fileName& name)
 }
 
 
-// Read from file in given format
 template<class Face>
 bool Foam::MeshedSurface<Face>::read
 (
     const fileName& name,
-    const word& ext
+    const word& fileType
 )
 {
+    if (fileType.empty())
+    {
+        // Handle empty/missing type
+
+        const word ext(name.ext());
+
+        if (ext.empty())
+        {
+            FatalErrorInFunction
+                << "Cannot determine format from filename" << nl
+                << "    " << name << nl
+                << exit(FatalError);
+        }
+
+        return read(name, ext);
+    }
+
     clear();
 
-    // read via selector mechanism
-    transfer(New(name, ext)());
+    // Read via selector mechanism
+    transfer(*(New(name, fileType)));
     return true;
 }
 

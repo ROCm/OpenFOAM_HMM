@@ -41,26 +41,32 @@ Usage
       - \par -clean
         Perform some surface checking/cleanup on the input surface.
 
-      - \par -scaleIn \<scale\>
-        Specify a scaling factor when reading files.
+      - \par -read-format \<type\>
+        The input file format (default: use file extension)
 
-      - \par -scaleOut \<scale\>
-        Specify a scaling factor when writing files.
+      - \par -write-format \<type\>
+        The output file format (default: use file extension)
+
+      - \par -read-scale \<scale\>
+        Input geometry scaling factor.
+
+      - \par -write-scale \<scale\>
+        Output geometry scaling factor.
 
       - \par -dict \<dictionary\>
-        Specify an alternative dictionary for constant/coordinateSystems.
+        Alternative dictionary for constant/coordinateSystems.
 
       - \par -from \<coordinateSystem\>
-        Specify a coordinate System when reading files.
+        Apply specified coordinate system after reading file.
 
       - \par -to \<coordinateSystem\>
-        Specify a coordinate System when writing files.
+        Apply specified coordinate system before writing file.
 
       - \par -tri
         Triangulate surface.
 
 Note
-    The filename extensions are used to determine the file format type.
+    The filename extensions are used to determine the default file formats.
 
 \*---------------------------------------------------------------------------*/
 
@@ -72,6 +78,36 @@ Note
 #include "cartesianCS.H"
 
 using namespace Foam;
+
+static word getExtension(const fileName& name)
+{
+    word ext(name.ext());
+    if (ext == "gz")
+    {
+        ext = name.lessExt().ext();
+    }
+
+    return ext;
+}
+
+// Non-short-circuiting check to get all warnings
+static bool hasReadWriteTypes(const word& readType, const word& writeType)
+{
+    volatile bool good = true;
+
+    if (!meshedSurface::canReadType(readType, true))
+    {
+        good = false;
+    }
+
+    if (!meshedSurface::canWriteType(writeType, true))
+    {
+        good = false;
+    }
+
+    return good;
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -93,30 +129,46 @@ int main(int argc, char *argv[])
     );
     argList::addOption
     (
-        "scaleIn",
-        "factor",
-        "Geometry scaling factor on input"
+        "read-format",
+        "type",
+        "Input format (default: use file extension)"
     );
     argList::addOption
     (
-        "scaleOut",
-        "factor",
-        "Geometry scaling factor on output"
+        "write-format",
+        "type",
+        "Output format (default: use file extension)"
     );
-    argList::addOption("dict", "file", "Use alternative coordinateSystems");
+    argList::addOption
+    (
+        "read-scale",
+        "factor",
+        "Input geometry scaling factor"
+    );
+    argList::addOption
+    (
+        "write-scale",
+        "factor",
+        "Output geometry scaling factor"
+    );
+
+    argList::addOptionCompat("read-scale", {"scaleIn", 1912});
+    argList::addOptionCompat("write-scale", {"scaleOut", 1912});
+
+    argList::addOption("dict", "file", "Alternative coordinateSystems");
 
     argList::addOption
     (
         "from",
         "system",
-        "Specify the source coordinate system, applied after '-scaleIn'",
+        "The source coordinate system, applied after '-read-scale'",
         true // advanced
     );
     argList::addOption
     (
         "to",
         "system",
-        "Specify the target coordinate system, applied before '-scaleOut'",
+        "The target coordinate system, applied before '-write-scale'",
         true // advanced
     );
     argList::addBoolOption
@@ -129,27 +181,37 @@ int main(int argc, char *argv[])
     argList args(argc, argv);
     Time runTime(args.rootPath(), args.caseName());
 
-    const fileName importName = args[1];
-    const fileName exportName = args[2];
+    const fileName importName(args[1]);
+    const fileName exportName(args[2]);
 
-    // disable inplace editing
     if (importName == exportName)
     {
-        FatalErrorInFunction
-            << "Output file " << exportName << " would overwrite input file."
+        FatalError
+            << "Output file would overwrite input file."
             << exit(FatalError);
     }
 
-    // Check that reading/writing is supported
-    if
+    const word readFileType
     (
-        !MeshedSurface<face>::canRead(importName, true)
-     || !MeshedSurface<face>::canWriteType(exportName.ext(), true)
-    )
+        args.getOrDefault<word>("read-format", getExtension(importName))
+    );
+
+    const word writeFileType
+    (
+        args.getOrDefault<word>("write-format", getExtension(exportName))
+    );
+
+
+    // Check that reading/writing is supported
+    if (!hasReadWriteTypes(readFileType, writeFileType))
     {
-        return 1;
+        FatalError
+            << "Unsupported file format(s)" << nl
+            << exit(FatalError);
     }
 
+
+    scalar scaleFactor(0);
 
     // The coordinate transformations (must be cartesian)
     autoPtr<coordSystem::cartesian> fromCsys;
@@ -173,7 +235,7 @@ int main(int argc, char *argv[])
 
         if (!ioCsys.typeHeaderOk<coordinateSystems>(false))
         {
-            FatalErrorInFunction
+            FatalError
                 << "Cannot open coordinateSystems file\n    "
                 << ioCsys.objectPath() << nl
                 << exit(FatalError);
@@ -188,7 +250,7 @@ int main(int argc, char *argv[])
 
             if (!csPtr)
             {
-                FatalErrorInFunction
+                FatalError
                     << "Cannot find -from " << csName << nl
                     << "available coordinateSystems: "
                     << flatOutput(globalCoords.names()) << nl
@@ -205,7 +267,7 @@ int main(int argc, char *argv[])
 
             if (!csPtr)
             {
-                FatalErrorInFunction
+                FatalError
                     << "Cannot find -to " << csName << nl
                     << "available coordinateSystems: "
                     << flatOutput(globalCoords.names()) << nl
@@ -218,7 +280,7 @@ int main(int argc, char *argv[])
         // Maybe fix this later
         if (fromCsys && toCsys)
         {
-            FatalErrorInFunction
+            FatalError
                 << "Only allowed '-from' or '-to' option at the moment."
                 << exit(FatalError);
         }
@@ -226,24 +288,23 @@ int main(int argc, char *argv[])
 
 
     {
-        MeshedSurface<face> surf(importName);
+        meshedSurface surf(importName, readFileType);
+
+        if (args.readIfPresent("read-scale", scaleFactor) && scaleFactor > 0)
+        {
+            Info<< "scale input " << scaleFactor << nl;
+            surf.scalePoints(scaleFactor);
+        }
 
         if (args.found("clean"))
         {
             surf.cleanup(true);
         }
 
-        scalar scaleIn = 0;
-        if (args.readIfPresent("scaleIn", scaleIn) && scaleIn > 0)
-        {
-            Info<< "scale input " << scaleIn << endl;
-            surf.scalePoints(scaleIn);
-        }
-
         if (fromCsys)
         {
             Info<< "move points from coordinate system: "
-                << fromCsys->name() << endl;
+                << fromCsys->name() << nl;
             tmp<pointField> tpf = fromCsys->localPosition(surf.points());
             surf.movePoints(tpf());
         }
@@ -251,26 +312,25 @@ int main(int argc, char *argv[])
         if (toCsys)
         {
             Info<< "move points to coordinate system: "
-                << toCsys->name() << endl;
+                << toCsys->name() << nl;
             tmp<pointField> tpf = toCsys->globalPosition(surf.points());
             surf.movePoints(tpf());
         }
 
-        scalar scaleOut = 0;
-        if (args.readIfPresent("scaleOut", scaleOut) && scaleOut > 0)
+        if (args.readIfPresent("write-scale", scaleFactor) && scaleFactor > 0)
         {
-            Info<< "scale output " << scaleOut << endl;
-            surf.scalePoints(scaleOut);
+            Info<< "scale output " << scaleFactor << nl;
+            surf.scalePoints(scaleFactor);
         }
 
         if (args.found("tri"))
         {
-            Info<< "triangulate" << endl;
+            Info<< "triangulate" << nl;
             surf.triangulate();
         }
 
         Info<< "writing " << exportName;
-        surf.write(exportName);
+        surf.write(exportName, writeFileType);
     }
 
     Info<< "\nEnd\n" << endl;

@@ -272,7 +272,7 @@ bool Foam::fileFormats::FIREMeshWriter::write(const fileName& meshName) const
     }
     else
     {
-        const word ext = baseName.ext();
+        const word ext(baseName.ext());
 
         if (FIRECore::file3dExtensions.found(ext))
         {

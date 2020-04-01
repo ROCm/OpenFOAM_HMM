@@ -36,40 +36,43 @@ Foam::autoPtr<Foam::UnsortedMeshedSurface<Face>>
 Foam::UnsortedMeshedSurface<Face>::New
 (
     const fileName& name,
-    const word& ext
+    const word& fileType,
+    bool mandatory
 )
 {
-    if (debug)
+    DebugInFunction
+        << "Construct UnsortedMeshedSurface (" << fileType << ")\n";
+
+    auto cstrIter = fileExtensionConstructorTablePtr_->cfind(fileType);
+
+    if (cstrIter.found())
     {
-        InfoInFunction << "Constructing UnsortedMeshedSurface" << endl;
+        return autoPtr<UnsortedMeshedSurface<Face>>(cstrIter()(name));
     }
 
-    auto cstrIter = fileExtensionConstructorTablePtr_->cfind(ext);
 
-    if (!cstrIter.found())
+    // Delegate to friend if possible
+    const wordHashSet delegate(MeshReference::readTypes());
+
+    if (delegate.found(fileType))
     {
-        // No direct reader, delegate to parent if possible
-        const wordHashSet& delegate = MeshReference::readTypes();
+        // OK, can create indirectly
+        auto surf = autoPtr<UnsortedMeshedSurface<Face>>::New();
+        surf->transfer(*(MeshReference::New(name, fileType)));
 
-        if (delegate.found(ext))
-        {
-            // Create indirectly
-            auto surf = autoPtr<UnsortedMeshedSurface<Face>>::New();
-            surf().transfer(*(MeshReference::New(name, ext)));
-
-            return surf;
-        }
-        else
-        {
-            FatalErrorInFunction
-                << "Unknown file extension " << ext << nl << nl
-                << "Valid types:" << nl
-                << flatOutput((delegate | readTypes()).sortedToc()) << nl
-                << exit(FatalError);
-        }
+        return surf;
+    }
+    else if (mandatory)
+    {
+        FatalErrorInFunction
+            << "Unknown surface format " << fileType << nl << nl
+            << "Valid types:" << nl
+            << flatOutput((delegate | readTypes()).sortedToc()) << nl
+            << exit(FatalError);
     }
 
-    return autoPtr<UnsortedMeshedSurface<Face>>(cstrIter()(name));
+    // Failed, but was optional
+    return nullptr;
 }
 
 
@@ -77,7 +80,7 @@ template<class Face>
 Foam::autoPtr<Foam::UnsortedMeshedSurface<Face>>
 Foam::UnsortedMeshedSurface<Face>::New(const fileName& name)
 {
-    word ext = name.ext();
+    word ext(name.ext());
     if (ext == "gz")
     {
         ext = name.lessExt().ext();

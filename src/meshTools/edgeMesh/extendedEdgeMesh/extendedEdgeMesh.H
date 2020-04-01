@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,8 +70,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-
+// Forward Declarations
 class surfaceFeatures;
 class searchableSurface;
 class extendedEdgeMesh;
@@ -132,7 +131,7 @@ public:
 
 protected:
 
-    // Static data
+    // Static Data
 
         //- Index of the start of the convex feature points - static as 0
         static label convexStart_;
@@ -141,7 +140,7 @@ protected:
         static label externalStart_;
 
 
-    // Protected data
+    // Protected Data
 
         //- Index of the start of the concave feature points
         label concaveStart_;
@@ -194,10 +193,10 @@ protected:
         labelList regionEdges_;
 
         //- Search tree for all feature points
-        mutable autoPtr<indexedOctree<treeDataPoint>> pointTree_;
+        mutable unique_ptr<indexedOctree<treeDataPoint>> pointTree_;
 
         //- Search tree for all edges
-        mutable autoPtr<indexedOctree<treeDataEdge>> edgeTree_;
+        mutable unique_ptr<indexedOctree<treeDataEdge>> edgeTree_;
 
         //- Individual search trees for each type of edge
         mutable PtrList<indexedOctree<treeDataEdge>> edgeTreesByType_;
@@ -247,43 +246,49 @@ protected:
 
 public:
 
-    // Static data
+    // Static Data
 
         //- Number of possible point types (i.e. number of slices)
-        static label nPointTypes;
+        static constexpr label nPointTypes = 4;
 
         //- Number of possible feature edge types (i.e. number of slices)
-        static label nEdgeTypes;
+        static constexpr label nEdgeTypes = 5;
+
+
+    // Static Member Functions
+
+        //- Summary of supported read file types.
+        static wordHashSet readTypes();
+
+        //- Summary of supported write file types.
+        static wordHashSet writeTypes();
+
+        //- Can we read this file format?
+        static bool canReadType(const word& fileType, bool verbose=false);
+
+        //- Can we write this file format type?
+        static bool canWriteType(const word& fileType, bool verbose=false);
 
         //- Can we read this file format?
         static bool canRead(const fileName& name, bool verbose=false);
 
-        //- Can we read this file format?
-        static bool canReadType(const word& ext, bool verbose=false);
-
-        //- Can we write this file format type?
-        static bool canWriteType(const word& ext, bool verbose=false);
-
-        static wordHashSet readTypes();
-        static wordHashSet writeTypes();
-
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         extendedEdgeMesh();
 
-        //- Construct as copy
+        //- Copy construct
         explicit extendedEdgeMesh(const extendedEdgeMesh& fem);
 
         //- Construct from file name (uses extension to determine type)
-        extendedEdgeMesh(const fileName&);
+        explicit extendedEdgeMesh(const fileName& name);
 
-        //- Construct from file name (uses extension to determine type)
-        extendedEdgeMesh(const fileName&, const word& ext);
+        //- Construct from file name with given format type
+        extendedEdgeMesh(const fileName& name, const word& fileType);
 
         //- Construct from Istream
-        extendedEdgeMesh(Istream& is);
+        explicit extendedEdgeMesh(Istream& is);
 
         //- Copy construct from components
         extendedEdgeMesh(const pointField& points, const edgeList& edges);
@@ -348,11 +353,11 @@ public:
 
     // Selectors
 
-        //- Select constructed from filename (explicit extension)
+        //- Select constructed from filename with given file format
         static autoPtr<extendedEdgeMesh> New
         (
             const fileName& name,
-            const word& ext
+            const word& fileType
         );
 
         //- Select constructed from filename (implicit extension)
@@ -360,7 +365,7 @@ public:
 
 
     //- Destructor
-    ~extendedEdgeMesh();
+    ~extendedEdgeMesh() = default;
 
 
     // Member Functions

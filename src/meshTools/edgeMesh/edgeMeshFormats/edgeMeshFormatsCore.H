@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,8 +47,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-
+// Forward Declarations
 class ISstream;
 class Time;
 
@@ -75,14 +75,16 @@ public:
         //  Normally "eMesh" (edge-mesh)
         static word nativeExt;
 
+
     // Static Member Functions
 
+        //- Verbose checking of fileType in the list of available types
         static bool checkSupport
         (
             const wordHashSet& available,
-            const word& ext,
-            const bool verbose,
-            const word& functionName
+            const word& fileType,
+            const bool verbose = false,
+            const char* functionName = nullptr
         );
 
        // //- Return the local file name (within time directory)
@@ -102,15 +104,13 @@ public:
        // static fileName findMeshFile(const Time&, const word& edgeName="");
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
+        //- Default construct
         edgeMeshFormatsCore() = default;
 
-
-    //- Destructor
-    virtual ~edgeMeshFormatsCore() = default;
-
+        //- Destructor
+        virtual ~edgeMeshFormatsCore() = default;
 };
 
 

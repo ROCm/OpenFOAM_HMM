@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "NASsurfaceFormat.H"
-
 #include "addToRunTimeSelectionTable.H"
 #include "addToMemberFunctionSelectionTable.H"
 
@@ -38,7 +37,15 @@ namespace Foam
 namespace fileFormats
 {
 
-// read MeshedSurface - .bdf (Bulk Data Format) and nas (Nastran)
+// Read MeshedSurface - .bdf (Bulk Data Format) and nas (Nastran)
+addNamedTemplatedToRunTimeSelectionTable
+(
+    MeshedSurface,
+    NASsurfaceFormat,
+    face,
+    fileExtension,
+    nastran
+);
 addNamedTemplatedToRunTimeSelectionTable
 (
     MeshedSurface,
@@ -56,6 +63,14 @@ addNamedTemplatedToRunTimeSelectionTable
     nas
 );
 
+addNamedTemplatedToRunTimeSelectionTable
+(
+    MeshedSurface,
+    NASsurfaceFormat,
+    triFace,
+    fileExtension,
+    nastran
+);
 addNamedTemplatedToRunTimeSelectionTable
 (
     MeshedSurface,
@@ -79,6 +94,14 @@ addNamedTemplatedToRunTimeSelectionTable
     NASsurfaceFormat,
     labelledTri,
     fileExtension,
+    nastran
+);
+addNamedTemplatedToRunTimeSelectionTable
+(
+    MeshedSurface,
+    NASsurfaceFormat,
+    labelledTri,
+    fileExtension,
     bdf
 );
 addNamedTemplatedToRunTimeSelectionTable
@@ -91,7 +114,16 @@ addNamedTemplatedToRunTimeSelectionTable
 );
 
 
-// write MeshedSurfaceProxy
+// Write MeshedSurfaceProxy
+addNamedTemplatedToMemberFunctionSelectionTable
+(
+    MeshedSurfaceProxy,
+    NASsurfaceFormat,
+    face,
+    write,
+    fileExtension,
+    nastran
+);
 addNamedTemplatedToMemberFunctionSelectionTable
 (
     MeshedSurfaceProxy,
@@ -108,7 +140,25 @@ addNamedTemplatedToMemberFunctionSelectionTable
     triFace,
     write,
     fileExtension,
+    nastran
+);
+addNamedTemplatedToMemberFunctionSelectionTable
+(
+    MeshedSurfaceProxy,
+    NASsurfaceFormat,
+    triFace,
+    write,
+    fileExtension,
     nas
+);
+addNamedTemplatedToMemberFunctionSelectionTable
+(
+    MeshedSurfaceProxy,
+    NASsurfaceFormat,
+    labelledTri,
+    write,
+    fileExtension,
+    nastran
 );
 addNamedTemplatedToMemberFunctionSelectionTable
 (
