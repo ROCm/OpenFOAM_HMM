@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,17 +28,27 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-#include "IOstreams.H"
+#include "argList.H"
 #include "dictionary.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Main program:
 
 int main(int argc, char *argv[])
 {
+    #if 0
+    argList::noBanner();
+    argList args(argc, argv);
+
+    if (true)
+    {
+        InfoErr<< "Called with " << (args.size()-1) << " args\n";
+        InfoErr<< "... some error\n";
+        return 2;
+    }
+    #endif
+
     FatalError.throwExceptions();
 
     try
@@ -57,9 +68,9 @@ int main(int argc, char *argv[])
             << "Error 2"
             << exit(FatalError);
     }
-    catch (const Foam::error& fErr)
+    catch (const Foam::error& err)
     {
-        Serr<< "Caught Foam error " << fErr << nl << endl;
+        Serr<< "Caught Foam error " << err << nl << endl;
     }
 
     try
@@ -68,9 +79,9 @@ int main(int argc, char *argv[])
             << "Error# 3"
             << exit(FatalError);
     }
-    catch (const Foam::error& fErr)
+    catch (const Foam::error& err)
     {
-        Serr<< "Caught Foam error " << fErr << nl << endl;
+        Serr<< "Caught Foam error " << err << nl << endl;
     }
 
     return 0;

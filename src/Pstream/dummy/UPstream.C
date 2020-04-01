@@ -56,10 +56,14 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
 }
 
 
-void Foam::UPstream::exit(int errnum)
+void Foam::UPstream::shutdown(int errNo)
+{}
+
+
+void Foam::UPstream::exit(int errNo)
 {
     // No MPI - just exit
-    std::exit(errnum);
+    std::exit(errNo);
 }
 
 

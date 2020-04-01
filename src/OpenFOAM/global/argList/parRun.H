@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,9 +29,7 @@ Class
 
 Description
     Helper class for initializing parallel jobs from the command arguments.
-
-    This class also handles cleanup of parallel or serial jobs in a
-    uniform manner.
+    Also handles cleanup of parallel (or serial) jobs.
 
 \*---------------------------------------------------------------------------*/
 
@@ -57,14 +55,14 @@ class ParRunControl
 
 public:
 
-    //- Construct null
+    //- Default construct
     ParRunControl()
     :
         parallel_(false),
         distributed_(false)
     {}
 
-    //- Destructor, triggers Pstream::exit
+    //- Destructor. Shutdown (finalize) MPI as required
     ~ParRunControl()
     {
         if (parallel_)
@@ -72,21 +70,19 @@ public:
             Info<< "Finalising parallel run" << endl;
         }
 
-        // Handles serial and parallel modes.
-        Pstream::exit(0);
+        Pstream::shutdown();
     }
 
 
     //- Initialize Pstream for a parallel run
     void runPar(int& argc, char**& argv, bool needsThread)
     {
-        parallel_ = true;
-
         if (!Pstream::init(argc, argv, needsThread))
         {
             Info<< "Failed to start parallel run" << endl;
             Pstream::exit(1);
         }
+        parallel_ = true;
     }
 
     //- True if this is parallel run.

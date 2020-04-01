@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -385,6 +385,7 @@ public:
         //      Fatal if MPI has already been finalized.
         static bool initNull();
 
+
         // Non-blocking comms
 
             //- Get number of outstanding requests
@@ -510,11 +511,15 @@ public:
         }
 
 
-        //- Exit program
-        static void exit(int errnum = 1);
+        //- Shutdown (finalize) MPI as required.
+        //  Uses MPI_Abort instead of MPI_Finalize if errNo is non-zero
+        static void shutdown(int errNo = 0);
 
-        //- Abort program
+        //- Call MPI_Abort with no other checks or cleanup
         static void abort();
+
+        //- Shutdown (finalize) MPI as required and exit program with errNo.
+        static void exit(int errNo = 1);
 
         //- Exchange label with all processors (in the communicator).
         //  sendData[proci] is the label to send to proci.

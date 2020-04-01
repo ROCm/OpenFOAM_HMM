@@ -270,11 +270,11 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
 }
 
 
-void Foam::UPstream::exit(int errnum)
+void Foam::UPstream::shutdown(int errNo)
 {
     if (debug)
     {
-        Pout<< "UPstream::exit\n";
+        Pout<< "UPstream::shutdown\n";
     }
 
     int flag = 0;
@@ -282,8 +282,7 @@ void Foam::UPstream::exit(int errnum)
     MPI_Initialized(&flag);
     if (!flag)
     {
-        // Not initialized - just exit
-        std::exit(errnum);
+        // No MPI initialized - we are done
         return;
     }
 
@@ -298,7 +297,7 @@ void Foam::UPstream::exit(int errnum)
         }
         else if (debug)
         {
-            Pout<< "UPstream::exit : was already finalized\n";
+            Pout<< "UPstream::shutdown : was already finalized\n";
         }
     }
     else
@@ -352,17 +351,22 @@ void Foam::UPstream::exit(int errnum)
                 << "Finalizing MPI, but was initialized elsewhere\n";
         }
 
-        if (errnum == 0)
+        if (errNo == 0)
         {
             MPI_Finalize();
         }
         else
         {
-            MPI_Abort(MPI_COMM_WORLD, errnum);
+            MPI_Abort(MPI_COMM_WORLD, errNo);
         }
     }
+}
 
-    std::exit(errnum);
+
+void Foam::UPstream::exit(int errNo)
+{
+    UPstream::shutdown(errNo);
+    std::exit(errNo);
 }
 
 
