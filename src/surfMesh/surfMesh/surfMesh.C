@@ -59,16 +59,22 @@ Foam::word Foam::surfMesh::meshSubDir = "surfMesh";
 //         zoneName = "zone0";
 //     }
 //
-//     // Set single default zone
+//     // Set single default zone with nFaces
 //     surfZones_.resize(1);
-//     surfZones_[0] = surfZone
-//     (
-//         zoneName,
-//         nFaces(),       // zone size
-//         0,              // zone start
-//         0               // zone index
-//     );
+//     surfZones_[0] = surfZone(zoneName, nFaces());
 // }
+
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void Foam::surfMesh::updateRefs()
+{
+    // Synchronize UList reference to the faces
+    static_cast<MeshReference&>(*this).shallowCopy
+    (
+        this->storedFaces()
+    );
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -288,37 +294,6 @@ Foam::surfMesh::~surfMesh()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::surfMesh::updatePointsRef()
-{
-    // Assign the reference to the points (quite ugly)
-    // points() are returned as Field but are actually stored as SubField
-    reinterpret_cast<typename MeshReference::PointFieldType&>
-    (
-        const_cast<Field<point>&>(MeshReference::points())
-    ).shallowCopy
-    (
-        this->storedPoints()
-    );
-}
-
-
-void Foam::surfMesh::updateFacesRef()
-{
-    // Assign the reference to the faces (UList)
-    static_cast<MeshReference&>(*this).shallowCopy
-    (
-        this->storedFaces()
-    );
-}
-
-
-void Foam::surfMesh::updateRefs()
-{
-    this->updatePointsRef();
-    this->updateFacesRef();
-}
-
-
 void Foam::surfMesh::copySurface
 (
     const pointField& points,
@@ -431,6 +406,9 @@ void Foam::surfMesh::transfer
 Foam::autoPtr<Foam::MeshedSurface<Foam::face>>
 Foam::surfMesh::releaseGeom()
 {
+    clearOut(); // Clear addressing
+    clearFields();
+
     // Start with an empty geometry
     auto aptr = autoPtr<MeshedSurface<face>>::New();
 
@@ -440,8 +418,6 @@ Foam::surfMesh::releaseGeom()
     aptr->storedZones().transfer(this->storedZones());
 
     this->updateRefs(); // This may not be needed...
-    clearOut(); // Clear addressing.
-    clearFields();
 
     return aptr;
 }
@@ -577,7 +553,7 @@ void Foam::surfMesh::write
 void Foam::surfMesh::write
 (
     const fileName& name,
-    const word& ext,
+    const word& fileType,
     IOstreamOption streamOpt,
     const dictionary& options
 ) const
@@ -587,7 +563,7 @@ void Foam::surfMesh::write
         this->points(),
         this->faces(),
         this->surfZones()
-    ).write(name, ext, streamOpt, options);
+    ).write(name, fileType, streamOpt, options);
 }
 
 

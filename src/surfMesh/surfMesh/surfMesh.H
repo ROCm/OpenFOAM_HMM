@@ -28,7 +28,8 @@ Class
     Foam::surfMesh
 
 Description
-    A surface mesh consisting of general polygon faces.
+    A surface mesh consisting of general polygon faces that has
+    IO capabilities and a registry for storing fields.
 
 SourceFiles
     surfMesh.C
@@ -43,9 +44,7 @@ SourceFiles
 #include "surfaceRegistry.H"
 #include "MeshedSurfaceIOAllocator.H"
 #include "PrimitivePatch.H"
-#include "SubField.H"
 #include "surfZoneIOList.H"
-
 #include "surfFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -66,7 +65,7 @@ class surfMesh
 :
     public  surfaceRegistry,
     private Detail::MeshedSurfaceIOAllocator,
-    public  PrimitivePatch<face, ::Foam::UList, ::Foam::SubField<point>, point>
+    public  PrimitivePatch<face, UList, const pointField&, point>
 {
 public:
 
@@ -88,16 +87,12 @@ private:
 
     // Private Typedefs
 
+        //- Memory and IO management
         typedef Detail::MeshedSurfaceIOAllocator Allocator;
 
-        typedef PrimitivePatch
-        <
-            face,
-            ::Foam::UList,
-            ::Foam::SubField<point>,
-            point
-        >
-        MeshReference;
+        //- Internal mesh storage type
+        typedef PrimitivePatch<face, UList, const pointField&, point>
+            MeshReference;
 
 
     // Private Data
@@ -137,14 +132,8 @@ protected:
             return surfZones_;
         }
 
-        //- Update references to storedFaces
-        virtual void updateFacesRef();
-
-        //- Update references to storedPoints
-        virtual void updatePointsRef();
-
-        //- Update references to storedPoints/storedFaces
-        virtual void updateRefs();
+        //- Update point/face references
+        void updateRefs();
 
 
 public:
@@ -365,12 +354,12 @@ public:
             const dictionary& options = dictionary::null
         ) const;
 
-        //- Write to file, choosing writer given extension.
+        //- Write to file, choosing writer for given fileType.
         //  Uses MeshedSurfaceProxy for writing.
         void write
         (
             const fileName& name,
-            const word& ext,
+            const word& fileType,
             IOstreamOption streamOpt = IOstreamOption(),
             const dictionary& options = dictionary::null
         ) const;

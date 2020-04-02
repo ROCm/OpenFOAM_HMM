@@ -146,14 +146,14 @@ public:
         void clear();
 
 
-   // Writing
+    // Writing
 
-       //- Write using stream options
-       virtual bool writeObject
-       (
-           IOstreamOption streamOpt,
-           const bool valid
-       ) const;
+        //- Write using stream options
+        virtual bool writeObject
+        (
+            IOstreamOption streamOpt,
+            const bool valid
+        ) const;
 };
 
 
