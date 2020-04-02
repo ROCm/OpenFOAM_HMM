@@ -267,15 +267,13 @@ Foam::triSurfaceMesh::triSurfaceMesh
         );
     }
 
-    scalar scaleFactor = 0;
-
-    // Allow rescaling of the surface points
-    // eg, CAD geometries are often done in millimeters
-    if (dict.readIfPresent("scale", scaleFactor) && scaleFactor > 0)
+    // Report optional scale factor (eg, mm to m),
+    // which was already applied during triSurface construction
+    scalar scaleFactor{0};
+    if (dict.getOrDefault("scale", scaleFactor) && scaleFactor > 0)
     {
-        Info<< searchableSurface::name() << " : using scale " << scaleFactor
-            << endl;
-        triSurface::scalePoints(scaleFactor);
+        Info<< searchableSurface::name()
+            << " : using scale " << scaleFactor << endl;
     }
 
     const pointField& pts = triSurface::points();
@@ -414,9 +412,11 @@ Foam::triSurfaceMesh::triSurfaceMesh
     surfaceClosed_(-1),
     outsideVolType_(volumeType::UNKNOWN)
 {
-    // Check IO flags
     if (io.readOpt() != IOobject::NO_READ)
     {
+        // Scale factor (optional)
+        const scalar scaleFactor(dict.getOrDefault<scalar>("scale", 0));
+
         const bool searchGlobal(r == localOrGlobal || r == masterOnly);
 
         fileName actualFile
@@ -457,7 +457,7 @@ Foam::triSurfaceMesh::triSurfaceMesh
                 // surface. Load on master only
                 if (Pstream::master())
                 {
-                    triSurface s2(actualFile);
+                    triSurface s2(actualFile, scaleFactor);
                     triSurface::transfer(s2);
                 }
                 Pstream::scatter(triSurface::patches());
@@ -470,7 +470,7 @@ Foam::triSurfaceMesh::triSurfaceMesh
             else
             {
                 // Read on all processors
-                triSurface s2(actualFile);
+                triSurface s2(actualFile, scaleFactor);
                 triSurface::transfer(s2);
                 if (debug)
                 {
@@ -482,7 +482,7 @@ Foam::triSurfaceMesh::triSurfaceMesh
         else
         {
             // Read on all processors
-            triSurface s2(actualFile);
+            triSurface s2(actualFile, scaleFactor);
             triSurface::transfer(s2);
             if (debug)
             {
@@ -490,19 +490,17 @@ Foam::triSurfaceMesh::triSurfaceMesh
                     << " loaded triangles:" << triSurface::size() << endl;
             }
         }
+
+
+        // Report optional scale factor (eg, mm to m),
+        // which was already applied during triSurface reading
+        if (scaleFactor > 0)
+        {
+            Info<< searchableSurface::name()
+                << " : using scale " << scaleFactor << endl;
+        }
     }
 
-
-    scalar scaleFactor = 0;
-
-    // Allow rescaling of the surface points
-    // eg, CAD geometries are often done in millimeters
-    if (dict.readIfPresent("scale", scaleFactor) && scaleFactor > 0)
-    {
-        Info<< searchableSurface::name() << " : using scale " << scaleFactor
-            << endl;
-        triSurface::scalePoints(scaleFactor);
-    }
 
     const pointField& pts = triSurface::points();
     bounds() = boundBox(pts, false);
