@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,6 +40,7 @@ SourceFiles
 
 #include "Fstream.H"
 #include "surfZone.H"
+#include "StringStream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,9 +59,17 @@ protected:
 
     // Protected Static Member Functions
 
-        //- Read a type via IStringStream
+        //- Read a type from string
         template<class Type>
-        static Type parse(const string& str);
+        static Type parse(const string& str)
+        {
+            IStringStream is(str);
+
+            Type t;
+            is >> t;
+
+            return t;
+        }
 
         //- Read cmd, args from IFstream
         //  The cmd is the content up to the first space, args is the balance
@@ -90,12 +100,6 @@ protected:
 
 } // End namespace fileFormats
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "AC3DsurfaceFormatCoreTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -261,17 +261,11 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
 namespace Foam
 {
 // file-scope writing of a patch of faces
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class Patch>
 static void writeZone
 (
     Ostream& os,
-    const PrimitivePatch<Face, FaceList, PointField, PointType>& patch,
+    const Patch& patch,
     const word& name,
     const label zoneI
 )
@@ -289,7 +283,7 @@ static void writeZone
 
     os << "numsurf " << patch.size() << nl;
 
-    for (const Face& f : patch.localFaces())
+    for (const auto& f : patch.localFaces())
     {
         os  << "SURF 0x20" << nl          // polygon
             << "mat " << zoneI << nl

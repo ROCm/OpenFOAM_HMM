@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +29,6 @@ License
 #include "AC3DsurfaceFormatCore.H"
 #include "clock.H"
 #include "IFstream.H"
-#include "StringStream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -82,9 +82,9 @@ bool Foam::fileFormats::AC3DsurfaceFormatCore::cueTo
     string& args
 )
 {
+    string line;
     while (is.good())
     {
-        string line;
         is.getLine(line);
 
         const auto space = line.find(' ');

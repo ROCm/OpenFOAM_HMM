@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2019 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,6 +49,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class polyMesh;
 class tetMatcher;
 
@@ -170,7 +171,7 @@ class isoSurfaceTopo
             void triangulateOutside
             (
                 const bool filterDiag,
-                const PrimitivePatch<face, SubList, const pointField&>& pp,
+                const primitivePatch& pp,
                 const boolList& pointFromDiag,
                 const labelList& pointToFace,
                 const label cellID,
