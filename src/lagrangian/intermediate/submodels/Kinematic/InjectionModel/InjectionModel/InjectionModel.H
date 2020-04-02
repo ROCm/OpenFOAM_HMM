@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -151,6 +151,10 @@ protected:
             //- Optional injector ID
             label injectorID_;
 
+            //- Optional flag to indicate that injections attempted outside
+            //- the mesh should be ignored
+            bool ignoreOutOfBounds_;
+
 
     // Protected Member Functions
 
@@ -237,7 +241,7 @@ public:
 
 
     //- Destructor
-    virtual ~InjectionModel();
+    virtual ~InjectionModel() = default;
 
 
     // Selectors

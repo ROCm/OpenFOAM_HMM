@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,12 +77,12 @@ Foam::FieldActivatedInjection<CloudType>::FieldActivatedInjection
     (
         this->coeffDict().getLabel("parcelsPerInjector")
     ),
-    nParcelsInjected_(positions_.size(), Zero),
+    nParcelsInjected_(),
     U0_
     (
         this->coeffDict().template get<vector>("U0")
     ),
-    diameters_(positions_.size()),
+    diameters_(),
     sizeDistribution_
     (
         distributionModel::New
@@ -92,7 +92,12 @@ Foam::FieldActivatedInjection<CloudType>::FieldActivatedInjection
         )
     )
 {
+    updateMesh();
+
+    nParcelsInjected_.setSize(positions_.size(), Zero);
+
     // Construct parcel diameters - one per injector cell
+    diameters_.setSize(positions_.size());
     forAll(diameters_, i)
     {
         diameters_[i] = sizeDistribution_->sample();
@@ -101,8 +106,6 @@ Foam::FieldActivatedInjection<CloudType>::FieldActivatedInjection
     // Determine total volume of particles to inject
     this->volumeTotal_ =
         nParcelsPerInjector_*sum(pow3(diameters_))*pi/6.0;
-
-    updateMesh();
 }
 
 
@@ -129,28 +132,45 @@ Foam::FieldActivatedInjection<CloudType>::FieldActivatedInjection
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::FieldActivatedInjection<CloudType>::~FieldActivatedInjection()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
 void Foam::FieldActivatedInjection<CloudType>::updateMesh()
 {
+    bitSet reject(positions_.size());
+
     // Set/cache the injector cells
     forAll(positions_, i)
     {
-        this->findCellAtPosition
+        if
         (
-            injectorCells_[i],
-            injectorTetFaces_[i],
-            injectorTetPts_[i],
-            positions_[i]
-        );
+            !this->findCellAtPosition
+            (
+                injectorCells_[i],
+                injectorTetFaces_[i],
+                injectorTetPts_[i],
+                positions_[i],
+                !this->ignoreOutOfBounds_
+
+            )
+        )
+        {
+            reject.set(i);
+        }
+    }
+
+    const label nRejected = reject.count();
+
+    if (nRejected)
+    {
+        reject.flip();
+        inplaceSubset(reject, injectorCells_);
+        inplaceSubset(reject, injectorTetFaces_);
+        inplaceSubset(reject, injectorTetPts_);
+        inplaceSubset(reject, positions_);
+
+        Info<< "    " << nRejected
+            << " positions rejected, out of bounds" << endl;
     }
 }
 

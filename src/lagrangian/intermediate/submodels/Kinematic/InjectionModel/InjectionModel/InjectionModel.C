@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -254,7 +254,7 @@ void Foam::InjectionModel<CloudType>::postInjectCheck
     time0_ = this->owner().db().time().value();
 
     // Increment number of injections
-    nInjections_++;
+    ++nInjections_;
 }
 
 
@@ -280,7 +280,8 @@ Foam::InjectionModel<CloudType>::InjectionModel(CloudType& owner)
     timeStep0_(this->template getModelProperty<scalar>("timeStep0")),
     minParticlesPerParcel_(1),
     delayedVolume_(0.0),
-    injectorID_(-1)
+    injectorID_(-1),
+    ignoreOutOfBounds_(false)
 {}
 
 
@@ -313,7 +314,11 @@ Foam::InjectionModel<CloudType>::InjectionModel
         this->coeffDict().lookupOrDefault("minParticlesPerParcel", scalar(1))
     ),
     delayedVolume_(0.0),
-    injectorID_(this->coeffDict().lookupOrDefault("injectorID", -1))
+    injectorID_(this->coeffDict().lookupOrDefault("injectorID", -1)),
+    ignoreOutOfBounds_
+    (
+        this->coeffDict().lookupOrDefault("ignoreOutOfBounds", false)
+    )
 {
     // Provide some info
     // - also serves to initialise mesh dimensions - needed for parallel runs
@@ -391,14 +396,8 @@ Foam::InjectionModel<CloudType>::InjectionModel
     timeStep0_(im.timeStep0_),
     minParticlesPerParcel_(im.minParticlesPerParcel_),
     delayedVolume_(im.delayedVolume_),
-    injectorID_(im.injectorID_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::InjectionModel<CloudType>::~InjectionModel()
+    injectorID_(im.injectorID_),
+    ignoreOutOfBounds_(im.ignoreOutOfBounds_)
 {}
 
 

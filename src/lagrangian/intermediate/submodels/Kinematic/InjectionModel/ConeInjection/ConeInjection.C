@@ -97,9 +97,14 @@ Foam::ConeInjection<CloudType>::ConeInjection
         )
     ),
     nInjected_(this->parcelsAddedTotal()),
-    tanVec1_(positionAxis_.size()),
-    tanVec2_(positionAxis_.size())
+    tanVec1_(),
+    tanVec2_()
 {
+    updateMesh();
+
+    tanVec1_.setSize(positionAxis_.size());
+    tanVec2_.setSize(positionAxis_.size());
+
     duration_ = owner.db().time().userTimeToTime(duration_);
 
     // Normalise direction vector and determine direction vectors
@@ -127,8 +132,6 @@ Foam::ConeInjection<CloudType>::ConeInjection
 
     // Set total volume to inject
     this->volumeTotal_ = flowRateProfile_.integrate(0.0, duration_);
-
-    updateMesh();
 }
 
 
@@ -156,28 +159,45 @@ Foam::ConeInjection<CloudType>::ConeInjection
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::ConeInjection<CloudType>::~ConeInjection()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
 void Foam::ConeInjection<CloudType>::updateMesh()
 {
+    bitSet reject(positionAxis_.size());
+
     // Set/cache the injector cells
     forAll(positionAxis_, i)
     {
-        this->findCellAtPosition
+        if
         (
-            injectorCells_[i],
-            injectorTetFaces_[i],
-            injectorTetPts_[i],
-            positionAxis_[i].first()
-        );
+            !this->findCellAtPosition
+            (
+                injectorCells_[i],
+                injectorTetFaces_[i],
+                injectorTetPts_[i],
+                positionAxis_[i].first(),
+                !this->ignoreOutOfBounds_
+
+            )
+        )
+        {
+            reject.set(i);
+        }
+    }
+
+    const label nRejected = reject.count();
+
+    if (nRejected)
+    {
+        reject.flip();
+        inplaceSubset(reject, injectorCells_);
+        inplaceSubset(reject, injectorTetFaces_);
+        inplaceSubset(reject, injectorTetPts_);
+        inplaceSubset(reject, positionAxis_);
+
+        Info<< "    " << nRejected
+            << " positions rejected, out of bounds" << endl;
     }
 }
 

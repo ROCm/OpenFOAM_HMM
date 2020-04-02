@@ -135,7 +135,7 @@ public:
 
 
     //- Destructor
-    virtual ~ReactingLookupTableInjection();
+    virtual ~ReactingLookupTableInjection() = default;
 
 
     // Member Functions
@@ -151,7 +151,6 @@ public:
 
         //- Volume of parcels to introduce relative to SOI
         virtual scalar volumeToInject(const scalar time0, const scalar time1);
-
 
 
         // Injection geometry
@@ -181,7 +180,7 @@ public:
             virtual bool fullyDescribed() const;
 
             //- Return flag to identify whether or not injection of parcelI is
-            //  permitted
+            //- permitted
             virtual bool validInjection(const label parcelI);
 };
 

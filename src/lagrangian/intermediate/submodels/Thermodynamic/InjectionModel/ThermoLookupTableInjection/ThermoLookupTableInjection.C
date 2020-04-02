@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,18 +55,13 @@ Foam::ThermoLookupTableInjection<CloudType>::ThermoLookupTableInjection
             IOobject::NO_WRITE
         )
     ),
-    injectorCells_(0),
-    injectorTetFaces_(0),
-    injectorTetPts_(0)
+    injectorCells_(injectors_.size()),
+    injectorTetFaces_(injectors_.size()),
+    injectorTetPts_(injectors_.size())
 {
-    duration_ = owner.db().time().userTimeToTime(duration_);
-
-    // Set/cache the injector cells
-    injectorCells_.setSize(injectors_.size());
-    injectorTetFaces_.setSize(injectors_.size());
-    injectorTetPts_.setSize(injectors_.size());
-
     updateMesh();
+
+    duration_ = owner.db().time().userTimeToTime(duration_);
 
     // Determine volume of particles to inject
     this->volumeTotal_ = 0.0;
@@ -96,28 +91,46 @@ Foam::ThermoLookupTableInjection<CloudType>::ThermoLookupTableInjection
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::ThermoLookupTableInjection<CloudType>::~ThermoLookupTableInjection()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
 void Foam::ThermoLookupTableInjection<CloudType>::updateMesh()
 {
     // Set/cache the injector cells
+    bitSet reject(injectors_.size());
+
+    // Set/cache the injector cells
     forAll(injectors_, i)
     {
-        this->findCellAtPosition
+        if
         (
-            injectorCells_[i],
-            injectorTetFaces_[i],
-            injectorTetPts_[i],
-            injectors_[i].x()
-        );
+            !this->findCellAtPosition
+            (
+                injectorCells_[i],
+                injectorTetFaces_[i],
+                injectorTetPts_[i],
+                injectors_[i].x(),
+                !this->ignoreOutOfBounds_
+
+            )
+        )
+        {
+            reject.set(i);
+        }
+    }
+
+    const label nRejected = reject.count();
+
+    if (nRejected)
+    {
+        reject.flip();
+        inplaceSubset(reject, injectorCells_);
+        inplaceSubset(reject, injectorTetFaces_);
+        inplaceSubset(reject, injectorTetPts_);
+        inplaceSubset(reject, injectors_);
+
+        Info<< "    " << nRejected
+            << " positions rejected, out of bounds" << endl;
     }
 }
 

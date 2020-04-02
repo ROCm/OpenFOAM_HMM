@@ -135,7 +135,7 @@ public:
 
 
     //- Destructor
-    virtual ~ThermoLookupTableInjection();
+    virtual ~ThermoLookupTableInjection() = default;
 
 
     // Member Functions
@@ -184,7 +184,7 @@ public:
             }
 
             //- Return flag to identify whether or not injection of parcelI is
-            //  permitted
+            //- permitted
             virtual bool validInjection(const label parcelI);
 };
 
