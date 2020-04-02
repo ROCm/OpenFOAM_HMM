@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,10 +29,10 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "PrimitivePatch.H"
 #include "argList.H"
 #include "Time.H"
 #include "polyMesh.H"
+#include "primitiveFacePatch.H"
 #include "primitivePatch.H"
 #include "Fstream.H"
 
@@ -39,15 +40,10 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-typedef PrimitivePatch<face, List, const pointField&> myPrimitivePatch;
-
-
-void writeObj(Ostream& os,const pointField& points)
+void writeObj(Ostream& os, const pointField& points)
 {
-    forAll(points, pointi)
+    for (const point& pt : points)
     {
-        const point& pt = points[pointi];
-
         os  << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
     }
 }
@@ -227,7 +223,7 @@ int main(int argc, char *argv[])
 
     // Test addressing
     {
-        myPrimitivePatch pp(patch, patch.points());
+        primitiveFacePatch pp(patch, patch.points());
 
         const pointField& localPoints = pp.localPoints();
         const faceList& localFaces = pp.localFaces();
@@ -250,8 +246,8 @@ int main(int argc, char *argv[])
 
     // Move construct
     {
-        faceList patchFaces = patch;
-        pointField allPoints = patch.points();
+        faceList patchFaces(patch);
+        pointField allPoints(patch.points());
 
         PrimitivePatch<face, List, pointField, point> storedPatch
         (

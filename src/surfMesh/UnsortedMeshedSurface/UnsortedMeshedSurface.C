@@ -60,7 +60,7 @@ bool Foam::UnsortedMeshedSurface<Face>::canReadType
 {
    return fileFormats::surfaceFormatsCore::checkSupport
    (
-       readTypes() | ParentType::readTypes(),
+       readTypes() | MeshReference::readTypes(),
        ext,
        verbose,
        "reading"
@@ -161,7 +161,7 @@ void Foam::UnsortedMeshedSurface<Face>::write
 template<class Face>
 Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface()
 :
-    ParentType()
+    MeshReference()
 {}
 
 
@@ -171,7 +171,7 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
     const UnsortedMeshedSurface<Face>& surf
 )
 :
-    ParentType(surf.points(), surf.surfFaces()), // Copy construct (no zones)
+    MeshReference(surf.points(), surf.surfFaces()), // Copy construct (no zones)
     zoneIds_(surf.zoneIds()),
     zoneToc_(surf.zoneToc())
 {}
@@ -183,7 +183,7 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
     const MeshedSurface<Face>& surf
 )
 :
-    ParentType(surf.points(), surf.surfFaces()), // Copy construct (no zones)
+    MeshReference(surf.points(), surf.surfFaces()), // Copy construct (no zones)
     zoneIds_(),
     zoneToc_()
 {
@@ -224,7 +224,7 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
     UList<surfZoneIdentifier>& tocInfo
 )
 :
-    ParentType(std::move(pointLst), std::move(faceLst)),
+    MeshReference(std::move(pointLst), std::move(faceLst)),
     zoneIds_(std::move(zoneIds)),
     zoneToc_(tocInfo)
 {}
@@ -487,7 +487,7 @@ void Foam::UnsortedMeshedSurface<Face>::setSize(const label s)
 template<class Face>
 void Foam::UnsortedMeshedSurface<Face>::clear()
 {
-    ParentType::clear();
+    MeshReference::clear();
     zoneIds_.clear();
     zoneToc_.clear();
 }
@@ -720,7 +720,7 @@ void Foam::UnsortedMeshedSurface<Face>::transfer
 )
 {
     surfZoneList zoneInfo(surf.surfZones());
-    ParentType::transfer(surf);
+    MeshReference::transfer(surf);
 
     setZones(zoneInfo);
 }

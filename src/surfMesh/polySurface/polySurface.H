@@ -52,7 +52,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class dimensionSet;
 class surfZone;
 class polySurfaceGeoMesh;
@@ -87,14 +87,9 @@ private:
 
     // Private Typedefs
 
-        typedef PrimitivePatch
-        <
-            face,
-            ::Foam::List,
-            pointField,
-            point
-        >
-        MeshReference;
+        //- Internal mesh storage type
+        typedef PrimitivePatch<face, ::Foam::List, pointField, point>
+            MeshReference;
 
 
     // Private Data

@@ -156,7 +156,7 @@ void Foam::triSurface::checkTriangles(const bool verbose)
     // Simple check on indices ok.
     const label maxPointi = points().size() - 1;
 
-    for (const triSurface::FaceType& f : *this)
+    for (const auto& f : *this)
     {
         for (const label verti : f)
         {
@@ -403,7 +403,7 @@ void Foam::triSurface::setDefaultPatches()
 
 Foam::triSurface::triSurface()
 :
-    ParentType(List<Face>(), pointField()),
+    MeshReference(List<labelledTri>(), pointField()),
     patches_(),
     sortedEdgeFacesPtr_(nullptr),
     edgeOwnerPtr_(nullptr)
@@ -412,7 +412,7 @@ Foam::triSurface::triSurface()
 
 Foam::triSurface::triSurface(const triSurface& surf)
 :
-    ParentType(surf, surf.points()),
+    MeshReference(surf, surf.points()),
     patches_(surf.patches()),
     sortedEdgeFacesPtr_(nullptr),
     edgeOwnerPtr_(nullptr)
@@ -434,7 +434,7 @@ Foam::triSurface::triSurface
     const pointField& pts
 )
 :
-    ParentType(triangles, pts),
+    MeshReference(triangles, pts),
     patches_(patches),
     sortedEdgeFacesPtr_(nullptr),
     edgeOwnerPtr_(nullptr)
@@ -449,7 +449,7 @@ Foam::triSurface::triSurface
     const bool reuse
 )
 :
-    ParentType(triangles, pts, reuse),
+    MeshReference(triangles, pts, reuse),
     patches_(patches),
     sortedEdgeFacesPtr_(nullptr),
     edgeOwnerPtr_(nullptr)
@@ -462,7 +462,7 @@ Foam::triSurface::triSurface
     const pointField& pts
 )
 :
-    ParentType(triangles, pts),
+    MeshReference(triangles, pts),
     patches_(),
     sortedEdgeFacesPtr_(nullptr),
     edgeOwnerPtr_(nullptr)
@@ -477,7 +477,7 @@ Foam::triSurface::triSurface
     const pointField& pts
 )
 :
-    ParentType(convertToTri(triangles, 0), pts),
+    MeshReference(convertToTri(triangles, 0), pts),
     patches_(),
     sortedEdgeFacesPtr_(nullptr),
     edgeOwnerPtr_(nullptr)
@@ -523,7 +523,7 @@ Foam::triSurface::~triSurface()
 
 void Foam::triSurface::clearTopology()
 {
-    ParentType::clearTopology();
+    MeshReference::clearTopology();
     sortedEdgeFacesPtr_.reset(nullptr);
     edgeOwnerPtr_.reset(nullptr);
 }
@@ -531,13 +531,13 @@ void Foam::triSurface::clearTopology()
 
 void Foam::triSurface::clearPatchMeshAddr()
 {
-    ParentType::clearPatchMeshAddr();
+    MeshReference::clearPatchMeshAddr();
 }
 
 
 void Foam::triSurface::clearOut()
 {
-    ParentType::clearOut();
+    MeshReference::clearOut();
     clearTopology();
     clearPatchMeshAddr();
 }
@@ -553,7 +553,7 @@ void Foam::triSurface::swap(triSurface& surf)
     clearOut();
     surf.clearOut();
 
-    FaceListType::swap(static_cast<FaceListType&>(surf));
+    storedFaces().swap(surf.storedFaces());
     storedPoints().swap(surf.storedPoints());
     patches_.swap(surf.patches());
 }
@@ -587,7 +587,7 @@ void Foam::triSurface::movePoints(const pointField& pts)
     sortedEdgeFacesPtr_.reset(nullptr);
 
     // Adapt for new point positions
-    ParentType::movePoints(pts);
+    MeshReference::movePoints(pts);
 
     // Copy new points
     storedPoints() = pts;
@@ -600,7 +600,7 @@ void Foam::triSurface::swapPoints(pointField& pts)
     sortedEdgeFacesPtr_.reset(nullptr);
 
     // Adapt for new point positions
-    ParentType::movePoints(pts);
+    MeshReference::movePoints(pts);
 
     // Move/swap new points
     storedPoints().swap(pts);
@@ -616,7 +616,7 @@ void Foam::triSurface::scalePoints(const scalar scaleFactor)
         clearTopology();
 
         // Adapt for new point positions
-        ParentType::movePoints(pointField());
+        MeshReference::movePoints(pointField());
 
         storedPoints() *= scaleFactor;
     }
@@ -895,7 +895,7 @@ void Foam::triSurface::transfer(triSurface& surf)
 {
     clearOut();
 
-    FaceListType::transfer(surf.storedFaces());
+    storedFaces().transfer(surf.storedFaces());
     storedPoints().transfer(surf.storedPoints());
     patches_.transfer(surf.patches());
 
@@ -933,7 +933,7 @@ void Foam::triSurface::operator=(const triSurface& surf)
 {
     clearOut();
 
-    FaceListType::operator=(static_cast<const FaceListType&>(surf));
+    storedFaces() = surf;
     storedPoints() = surf.points();
     patches_ = surf.patches();
 }

@@ -105,14 +105,9 @@ private:
 
     // Private Typedefs (convenience)
 
-        typedef PrimitivePatch
-        <
-            Face,
-            ::Foam::List,
-            pointField,
-            point
-        >
-        ParentType;
+        //- Internal mesh storage type
+        typedef PrimitivePatch<Face, ::Foam::List, pointField, point>
+            MeshReference;
 
         typedef UnsortedMeshedSurface<Face>  FriendType;
         typedef MeshedSurfaceProxy<Face>     ProxyType;
@@ -160,7 +155,7 @@ protected:
         //- Non-const access to global points
         pointField& storedPoints()
         {
-            return const_cast<pointField&>(ParentType::points());
+            return const_cast<pointField&>(MeshReference::points());
         }
 
         //- Non-const access to the faces
@@ -191,8 +186,11 @@ public:
 
     // Public Typedefs
 
-        //- Face type used
-        typedef Face FaceType;
+        //- The face type (same as the underlying PrimitivePatch)
+        typedef Face face_type;
+
+        //- The point type (same as the underlying PrimitivePatch)
+        typedef point point_type;
 
 
     //- Declare type-name (with debug switch)
@@ -382,7 +380,7 @@ public:
         //- The surface size is the number of faces
         label size() const
         {
-            return ParentType::size();
+            return MeshReference::size();
         }
 
         //- Return const access to the faces
@@ -402,19 +400,19 @@ public:
         //- Face area vectors (normals)
         const vectorField& Sf() const
         {
-            return ParentType::faceAreas();
+            return MeshReference::faceAreas();
         }
 
         //- Face area magnitudes
         const scalarField& magSf() const
         {
-            return ParentType::magFaceAreas();
+            return MeshReference::magFaceAreas();
         }
 
         //- Face centres
         const vectorField& Cf() const
         {
-            return ParentType::faceCentres();
+            return MeshReference::faceCentres();
         }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,13 +49,13 @@ Foam::UnsortedMeshedSurface<Face>::New
     if (!cstrIter.found())
     {
         // No direct reader, delegate to parent if possible
-        const wordHashSet& delegate = ParentType::readTypes();
+        const wordHashSet& delegate = MeshReference::readTypes();
 
         if (delegate.found(ext))
         {
             // Create indirectly
             auto surf = autoPtr<UnsortedMeshedSurface<Face>>::New();
-            surf().transfer(*(ParentType::New(name, ext)));
+            surf().transfer(*(MeshReference::New(name, ext)));
 
             return surf;
         }

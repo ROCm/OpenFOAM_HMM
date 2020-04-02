@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,7 +66,7 @@ bool Foam::triSurface::readSTL(const fileName& filename, bool forceBinary)
     const labelList& zoneIds = reader.zoneIds();
 
     pointField& pointLst = storedPoints();
-    List<Face>& faceLst  = storedFaces();
+    List<face_type>& faceLst = storedFaces();
 
     // Sizing
     pointLst.setSize(nUniquePoints);
@@ -80,14 +80,14 @@ bool Foam::triSurface::readSTL(const fileName& filename, bool forceBinary)
 
     // Assign triangles
     label pointi = 0;
-    forAll(faceLst, i)
+    forAll(faceLst, facei)
     {
-        Face& f = faceLst[i];
+        auto& f = faceLst[facei];
 
         f[0] = pointMap[pointi++];
         f[1] = pointMap[pointi++];
         f[2] = pointMap[pointi++];
-        f.region() = zoneIds[i];
+        f.region() = zoneIds[facei];
     }
 
     // Set patch name/index.

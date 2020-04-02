@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,14 +96,26 @@ class PrimitivePatch
 
 public:
 
-    // Public typedefs
+    // Public Typedefs
 
-        typedef Face FaceType;
+        //- The face type
+        typedef Face face_type;
+
+        //- The point type
+        typedef PointType point_type;
+
+        //- The face list type
         typedef FaceList<Face> FaceListType;
+
+        //- The point field type
         typedef PointField PointFieldType;
 
+        //- Deprecated(2020-03) prefer face_type typedef
+        // \deprecated(2020-03) prefer face_type typedef
+        typedef Face FaceType;
 
-    // Public data types
+
+    // Public Data Types
 
         //- Enumeration defining the surface type. Used in check routines.
         enum surfaceTopo
@@ -115,7 +127,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Reference to global list of points
         PointField points_;

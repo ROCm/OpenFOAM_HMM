@@ -78,21 +78,14 @@ class triSurface
 :
     public PrimitivePatch<labelledTri, ::Foam::List, pointField, point>
 {
-    // Private typedefs
+    // Private Typedefs
 
-    //- Typedefs for convenience
-        typedef labelledTri Face;
-        typedef PrimitivePatch
-        <
-            labelledTri,
-            ::Foam::List,
-            pointField,
-            point
-        >
-        ParentType;
+        //- Internal mesh storage type
+        typedef PrimitivePatch<labelledTri, ::Foam::List, pointField, point>
+            MeshReference;
 
 
-    // Private data
+    // Private Data
 
         //- Patch information
         //  (face ordering nFaces/startFace only used during reading, writing)
@@ -103,7 +96,7 @@ class triSurface
         static wordHashSet writeTypes_;
 
 
-    // Demand driven private data.
+    // Demand driven
 
         //- Edge-face addressing (sorted)
         mutable unique_ptr<labelListList> sortedEdgeFacesPtr_;
@@ -214,13 +207,13 @@ protected:
         //- Non-const access to global points
         pointField& storedPoints()
         {
-            return const_cast<pointField&>(ParentType::points());
+            return const_cast<pointField&>(MeshReference::points());
         }
 
         //- Non-const access to the faces
-        List<Face>& storedFaces()
+        List<labelledTri>& storedFaces()
         {
-            return static_cast<List<Face>&>(*this);
+            return static_cast<List<labelledTri>&>(*this);
         }
 
 
@@ -231,8 +224,15 @@ public:
         //- Placeholder only, but do not remove - it is needed for GeoMesh
         typedef bool BoundaryMesh;
 
-        //- Runtime type information
-        ClassName("triSurface");
+        //- The face type (same as the underlying PrimitivePatch)
+        typedef labelledTri face_type;
+
+        //- The point type (same as the underlying PrimitivePatch)
+        typedef point point_type;
+
+
+    //- Runtime type information
+    ClassName("triSurface");
 
 
     // Static
@@ -430,19 +430,19 @@ public:
         //- Face area vectors (normals)
         inline const vectorField& Sf() const
         {
-            return ParentType::faceAreas();
+            return MeshReference::faceAreas();
         }
 
         //- Face area magnitudes
         inline const scalarField& magSf() const
         {
-            return ParentType::magFaceAreas();
+            return MeshReference::magFaceAreas();
         }
 
         //- Face centres
         inline const vectorField& Cf() const
         {
-            return ParentType::faceCentres();
+            return MeshReference::faceCentres();
         }
 
 

@@ -166,7 +166,7 @@ void Foam::MeshedSurface<Face>::write
 template<class Face>
 Foam::MeshedSurface<Face>::MeshedSurface()
 :
-    ParentType(List<Face>(), pointField()),
+    MeshReference(List<Face>(), pointField()),
     zones_()
 {}
 
@@ -177,7 +177,7 @@ Foam::MeshedSurface<Face>::MeshedSurface
     const MeshedSurface<Face>& surf
 )
 :
-    ParentType(surf.surfFaces(), surf.points()),
+    MeshReference(surf.surfFaces(), surf.points()),
     zones_(surf.zones_)
 {}
 
@@ -188,7 +188,7 @@ Foam::MeshedSurface<Face>::MeshedSurface
     const UnsortedMeshedSurface<Face>& surf
 )
 :
-    ParentType(List<Face>(), surf.points())  // Copy points only
+    MeshReference(List<Face>(), surf.points())  // Copy points only
 {
     labelList faceMap;
     this->storedZones() = surf.sortedZones(faceMap);
@@ -237,7 +237,7 @@ Foam::MeshedSurface<Face>::MeshedSurface
     const UList<surfZone>& zoneLst
 )
 :
-    ParentType(faceLst, pointLst), // Copy construct
+    MeshReference(faceLst, pointLst), // Copy construct
     zones_(zoneLst)
 {}
 
@@ -250,7 +250,7 @@ Foam::MeshedSurface<Face>::MeshedSurface
     const UList<surfZone>& zoneLst
 )
 :
-    ParentType(faceLst, pointLst, true), // Move construct
+    MeshReference(faceLst, pointLst, true), // Move construct
     zones_(zoneLst)
 {}
 
@@ -264,7 +264,7 @@ Foam::MeshedSurface<Face>::MeshedSurface
     const UList<word>& zoneNames
 )
 :
-    ParentType(faceLst, pointLst), // Copy construct
+    MeshReference(faceLst, pointLst), // Copy construct
     zones_()
 {
     if (zoneSizes.size())
@@ -290,7 +290,7 @@ Foam::MeshedSurface<Face>::MeshedSurface
     const UList<word>& zoneNames
 )
 :
-    ParentType(faceLst, pointLst, true), // Move construct
+    MeshReference(faceLst, pointLst, true), // Move construct
     zones_()
 {
     if (zoneSizes.size())
@@ -555,7 +555,7 @@ void Foam::MeshedSurface<Face>::remapFaces
 template<class Face>
 void Foam::MeshedSurface<Face>::clear()
 {
-    ParentType::clearOut();  // Topology changes
+    MeshReference::clearOut();  // Topology changes
 
     storedPoints().clear();
     storedFaces().clear();
@@ -566,10 +566,10 @@ void Foam::MeshedSurface<Face>::clear()
 template<class Face>
 void Foam::MeshedSurface<Face>::movePoints(const pointField& newPoints)
 {
-    ParentType::clearGeom();  // Changes areas, normals etc.
+    MeshReference::clearGeom();  // Changes areas, normals etc.
 
     // Adapt for new point position
-    ParentType::movePoints(newPoints);
+    MeshReference::movePoints(newPoints);
 
     // Copy new points
     storedPoints() = newPoints;
@@ -582,12 +582,12 @@ void Foam::MeshedSurface<Face>::scalePoints(const scalar scaleFactor)
     // Avoid bad scaling
     if (scaleFactor > 0 && scaleFactor != 1.0)
     {
-        ParentType::clearGeom();  // Changes areas, normals etc.
+        MeshReference::clearGeom();  // Changes areas, normals etc.
 
         pointField newPoints(scaleFactor*this->points());
 
         // Adapt for new point position
-        ParentType::movePoints(newPoints);
+        MeshReference::movePoints(newPoints);
 
         storedPoints() = std::move(newPoints);
     }
@@ -683,7 +683,7 @@ bool Foam::MeshedSurface<Face>::stitchFaces
     faceMap.clear();
 
     // Topology can change when points are merged, etc
-    ParentType::clearOut();
+    MeshReference::clearOut();
 
     return true;
 }
@@ -842,7 +842,7 @@ bool Foam::MeshedSurface<Face>::checkFaces
     faceMap.clear();
 
     // Topology can change because of renumbering
-    ParentType::clearOut();
+    MeshReference::clearOut();
     return changed;
 }
 
@@ -852,7 +852,7 @@ Foam::label Foam::MeshedSurface<Face>::nTriangles() const
 {
     if (faceTraits<Face>::isTri())
     {
-        return ParentType::size();
+        return MeshReference::size();
     }
 
     return nTriangles
@@ -1035,7 +1035,7 @@ Foam::label Foam::MeshedSurface<Face>::triangulate
     faceMap.clear();
 
     // Topology can change because of renumbering
-    ParentType::clearOut();
+    MeshReference::clearOut();
 
     return nTri;
 }
@@ -1206,7 +1206,7 @@ void Foam::MeshedSurface<Face>::swap
         return;  // Self-swap is a no-op
     }
 
-    ParentType::clearOut(); // Topology changes
+    MeshReference::clearOut(); // Topology changes
     surf.clearOut();        // Topology changes
 
     this->storedPoints().swap(surf.storedPoints());
@@ -1222,7 +1222,7 @@ void Foam::MeshedSurface<Face>::transfer
     List<Face>& faceLst
 )
 {
-    ParentType::clearOut();  // Topology changes
+    MeshReference::clearOut();  // Topology changes
 
     this->storedPoints().transfer(pointLst);
     this->storedFaces().transfer(faceLst);
@@ -1241,7 +1241,7 @@ void Foam::MeshedSurface<Face>::transfer
         return;  // Self-assigment is a no-op
     }
 
-    ParentType::clearOut();  // Topology changes
+    MeshReference::clearOut();  // Topology changes
 
     this->storedPoints().transfer(surf.storedPoints());
     this->storedFaces().transfer(surf.storedFaces());
@@ -1302,7 +1302,7 @@ Foam::MeshedSurface<Face>::releaseGeom()
 template<class Face>
 void Foam::MeshedSurface<Face>::swapFaces(List<Face>& faces)
 {
-    ParentType::clearOut();  // Topology changes
+    MeshReference::clearOut();  // Topology changes
 
     this->storedFaces().swap(faces);
 }
@@ -1311,7 +1311,7 @@ void Foam::MeshedSurface<Face>::swapFaces(List<Face>& faces)
 template<class Face>
 void Foam::MeshedSurface<Face>::swapPoints(pointField& points)
 {
-    ParentType::clearOut();  // Topology changes
+    MeshReference::clearOut();  // Topology changes
 
     this->storedPoints().swap(points);
 }

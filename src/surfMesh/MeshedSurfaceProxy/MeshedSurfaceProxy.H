@@ -77,8 +77,11 @@ public:
 
     // Public Typedefs
 
-        //- Face type used
-        typedef Face FaceType;
+        //- The face type
+        typedef Face face_type;
+
+        //- The point type
+        typedef point point_type;
 
 
     //- Declare type-name (with debug switch)

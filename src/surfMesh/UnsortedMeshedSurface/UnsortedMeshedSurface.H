@@ -96,7 +96,7 @@ private:
 
     // Private Typedefs (convenience)
 
-        typedef MeshedSurface<Face>       ParentType;
+        typedef MeshedSurface<Face>       MeshReference;
         typedef MeshedSurface<Face>       FriendType;
         typedef MeshedSurfaceProxy<Face>  ProxyType;
 
@@ -161,8 +161,11 @@ public:
 
     // Public Typedefs
 
-        //- Face type used
-        typedef Face FaceType;
+        //- The face type (same as the underlying PrimitivePatch)
+        typedef Face face_type;
+
+        //- The point type (same as the underlying PrimitivePatch)
+        typedef point point_type;
 
 
     //- Declare type-name, virtual type (with debug switch)
@@ -315,7 +318,7 @@ public:
         //- The surface size is the number of faces
         label size() const
         {
-            return ParentType::size();
+            return MeshReference::size();
         }
 
         //- Reset size of face and zone list

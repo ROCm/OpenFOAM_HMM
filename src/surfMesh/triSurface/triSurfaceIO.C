@@ -408,7 +408,7 @@ void Foam::triSurface::writeStats(Ostream& os) const
     boundBox bb(boundBox::invertedBox);
     labelHashSet regionsUsed;
 
-    for (const triSurface::FaceType& f : *this)
+    for (const auto& f : *this)
     {
         regionsUsed.insert(f.region());
 
