@@ -6,11 +6,10 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
-#   Copyright (C) 2019 OpenCFD Ltd.
+#   Copyright (C) 2019-2020 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     wrap-lemon
@@ -31,7 +30,7 @@
 #
 #------------------------------------------------------------------------------
 
-binDir="${WMAKE_BIN:-$WM_PROJECT_DIR/wmake/platforms/$WM_ARCH$WM_COMPILER}"
+binDir="${WMAKE_BIN:-$WM_PROJECT_DIR/platforms/tools/$WM_ARCH$WM_COMPILER}"
 etcDir="${WM_DIR:-$WM_PROJECT_DIR/wmake}/etc"
 
 # Executable and skeleton locations
