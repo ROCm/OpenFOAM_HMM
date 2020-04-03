@@ -58,7 +58,6 @@ Usage
     \table
         Property     | Description                  | Required | Default value
         motionType   | See motion types below       | yes      |
-        x0           | Reference point on patch     | yes      |
         n            | Direction of motion          | yes      |
         initialDepth | Initial depth                | yes      |
         wavePeriod   | wave period                  | yes      |

@@ -37,7 +37,6 @@ boundaryField
         value           uniform (0 0 0);
 
         motionType      flap;
-        x0              (0 0 0);
         n               (1 0 0);
         waveHeight      0.06;
         initialDepth    0.25;
