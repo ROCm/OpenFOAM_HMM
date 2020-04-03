@@ -47,7 +47,7 @@ namespace surfaceWriters
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-namespace Foam
+namespace
 {
     // Emit x,y,z
     static inline void writePoint(Foam::Ostream& os, const Foam::point& p)
@@ -55,7 +55,7 @@ namespace Foam
         os << p.x() << ' ' << p.y() << ' ' << p.z();
     }
 
-} // End namespace Foam
+} // End anonymous namespace
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -72,7 +72,9 @@ defineSurfaceWriterWriteFields(Foam::surfaceWriters::rawWriter);
 Foam::surfaceWriters::rawWriter::rawWriter()
 :
     surfaceWriter(),
-    streamOpt_()
+    streamOpt_(),
+    geometryScale_(1),
+    fieldScale_()
 {}
 
 
@@ -86,7 +88,9 @@ Foam::surfaceWriters::rawWriter::rawWriter
     (
         IOstream::ASCII,
         IOstream::compressionEnum("compression", options)
-    )
+    ),
+    geometryScale_(options.getOrDefault<scalar>("scale", 1)),
+    fieldScale_(options.subOrEmptyDict("fieldScale"))
 {}
 
 
@@ -164,7 +168,7 @@ Foam::fileName Foam::surfaceWriters::rawWriter::write()
         // Write faces centres
         for (const face& f : faces)
         {
-            writePoint(os, f.centre(points));
+            writePoint(os, f.centre(points)*geometryScale_);
             os << nl;
         }
 

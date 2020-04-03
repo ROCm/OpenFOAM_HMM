@@ -238,7 +238,7 @@ void Foam::surfaceWriters::nastranWriter::writeGeometry
 
     forAll(points, pointi)
     {
-        writeCoord(os, points[pointi], pointi);
+        writeCoord(os, points[pointi]*geometryScale_, pointi);
     }
 
     // Write faces, with on-the-fly decomposition (triangulation)
@@ -357,7 +357,8 @@ Foam::surfaceWriters::nastranWriter::nastranWriter()
     surfaceWriter(),
     writeFormat_(fieldFormat::SHORT),
     fieldMap_(),
-    scale_(1),
+    geometryScale_(1),
+    fieldScale_(),
     separator_()
 {}
 
@@ -378,7 +379,8 @@ Foam::surfaceWriters::nastranWriter::nastranWriter
         )
     ),
     fieldMap_(),
-    scale_(options.lookupOrDefault<scalar>("scale", 1)),
+    geometryScale_(options.getOrDefault<scalar>("scale", 1)),
+    fieldScale_(options.subOrEmptyDict("fieldScale")),
     separator_()
 {
     if (writeFormat_ == fieldFormat::FREE)

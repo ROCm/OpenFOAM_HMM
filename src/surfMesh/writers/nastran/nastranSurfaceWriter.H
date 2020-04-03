@@ -35,7 +35,8 @@ Description
         Property | Description                              | Required | Default
         fields   | field pairs for PLOAD2, PLOAD4           | yes   |
         format   | short / long / free                      | no    | long
-        scale    | output scaling                           | no    | 1
+        scale    | output geometry scaling                  | no    | 1
+        fieldScale | output field scaling (dictionary)      | no    | empty
     \endtable
 
     For example,
@@ -50,8 +51,14 @@ Description
                 (pMean  PLOAD2)
                 (p      PLOAD4)
             );
+
             format  free;     // format type
-            scale   2.0;      // output scaling
+
+            scale   1000;     // [m] -> [mm]
+            fieldScale
+            {
+               "p.*"   0.01;  // [Pa] -> [mbar]
+            }
         }
     }
     \endverbatim
@@ -80,6 +87,9 @@ Description
             |-- surfaceName0.{nas}
             `-- surfaceName1.{nas}
     \endverbatim
+
+Note
+    Output variable scaling does not apply to integer types such as Ids.
 
 SourceFiles
     nastranSurfaceWriter.C
@@ -128,8 +138,11 @@ private:
         //- Mapping from field name to data format enumeration
         HashTable<loadFormat> fieldMap_;
 
-        //- Scale to apply to values (default = 1.0)
-        scalar scale_;
+        //- Output geometry scaling
+        const scalar geometryScale_;
+
+        //- Output field scaling
+        const dictionary fieldScale_;
 
         //- Separator used for free format
         word separator_;

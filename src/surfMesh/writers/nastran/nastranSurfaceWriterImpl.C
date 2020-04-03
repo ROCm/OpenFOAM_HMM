@@ -171,8 +171,15 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
     outputFile.ext("nas");
 
 
-    // Currently the same scaling for all variables
-    const scalar varScale = scale_;
+    // Output scaling for the variable, but not for integer types.
+    // could also solve with clever templating
+
+    const scalar varScale =
+    (
+        std::is_integral<Type>::value
+      ? scalar(1)
+      : fieldScale_.getOrDefault<scalar>(fieldName, 1)
+    );
 
     if (verbose_)
     {

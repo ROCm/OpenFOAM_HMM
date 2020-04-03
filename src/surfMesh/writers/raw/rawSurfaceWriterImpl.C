@@ -130,9 +130,25 @@ Foam::fileName Foam::surfaceWriters::rawWriter::writeTemplate
     outputFile /= fieldName + '_' + outputPath_.name();
     outputFile.ext("raw");
 
+
+    // Output scaling for the variable, but not for integer types.
+    // could also solve with clever templating
+
+    const scalar varScale =
+    (
+        std::is_integral<Type>::value
+      ? scalar(1)
+      : fieldScale_.getOrDefault<scalar>(fieldName, 1)
+    );
+
     if (verbose_)
     {
-        Info<< "Writing field " << fieldName << " to " << outputFile << endl;
+        Info<< "Writing field " << fieldName;
+        if (!equal(varScale, 1))
+        {
+            Info<< " (scaling " << varScale << ')';
+        }
+        Info<< " to " << outputFile << endl;
     }
 
 
@@ -177,8 +193,8 @@ Foam::fileName Foam::surfaceWriters::rawWriter::writeTemplate
             // Node values
             forAll(values, elemi)
             {
-                writePoint(os, points[elemi]);
-                writeData(os, values[elemi]);
+                writePoint(os, points[elemi]*geometryScale_);
+                writeData(os, values[elemi]*varScale);
             }
         }
         else
@@ -186,8 +202,8 @@ Foam::fileName Foam::surfaceWriters::rawWriter::writeTemplate
             // Face values
             forAll(values, elemi)
             {
-                writePoint(os, faces[elemi].centre(points));
-                writeData(os,  values[elemi]);
+                writePoint(os, faces[elemi].centre(points)*geometryScale_);
+                writeData(os,  values[elemi]*varScale);
             }
         }
     }

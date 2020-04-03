@@ -34,6 +34,8 @@ Description
     \table
         Property    | Description                           | Required | Default
         compression | Use file compression                  | no  | false
+        scale       | output geometry scaling               | no  | 1
+        fieldScale  | output field scaling (dictionary)     | no  | empty
     \endtable
 
     For example,
@@ -43,6 +45,12 @@ Description
         raw
         {
             compression on;
+
+            scale   1000;     // [m] -> [mm]
+            fieldScale
+            {
+               "p.*"   0.01;  // [Pa] -> [mbar]
+            }
         }
     }
     \endverbatim
@@ -96,6 +104,12 @@ class rawWriter
 
         //- Output stream option
         IOstreamOption streamOpt_;
+
+        //- Output geometry scaling
+        const scalar geometryScale_;
+
+        //- Output field scaling
+        const dictionary fieldScale_;
 
 
     // Private Member Functions
