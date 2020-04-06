@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,10 +41,52 @@ Description
     The primary region creates the baffle region and evolves its energy
     equation either:
       - 1-D, normal to each patch face
-      - 2-D, normal and tangential components
+      - 3-D, normal and tangential components
 
     The thermodynamic properties of the baffle material are specified via
     dictionary entries on the master patch.
+
+    The underlying polyPatch on the primary region needs to be defined
+    as a complete mappedWall. i.e:
+
+    \verbatim
+        type            mappedWall;
+        sampleMode      nearestPatchFace;
+        samplePatch     <patchName>;
+        sampleRegion    <regionName>;
+
+        coupleGroup     <coupleGroupName>;
+
+    \endverbatim
+
+    The /keyword{internal} is true when the thermal baffle is used on internal
+    faces and the baffle is coupled on both sides (bottom and top).
+
+    If this baffle is used on a patch set internal = false. By default is
+    true.
+
+    \table
+   Property         | Description             | Required    | Default value
+    Tnbr            | name of the field       | no | T
+    qrNbr           | name of the radiative flux in the nbr region | no | none
+    qr              | name of the radiative flux in this region | no | none
+    thicknessLayers | inherited from temperatureCoupledBase | inherited
+    kappaLayers     | inherited from temperatureCoupledBase | inherited
+    kappaMethod     | inherited from temperatureCoupledBase | inherited
+    kappa           | inherited from temperatureCoupledBase | inherited
+    thermalInertia  | Add thermal inertia to wall node      | no | false
+    region          | Name of the solid region              | yes
+    active          | Active                                | yes
+    internal        | Is the baffle an internal regiion     | no  | true
+    thermoType      | Solid thermo type                     | yes
+    mixture         | Mixture solid                         | yes
+    radiation       | Radiation model in the solid          | yes
+    extrudeModel    | Extrude model                         | yes
+    nLayers         | Number of cell across the ragion      | yes
+    expansionRatio  | Expansion ratio for the solid region  | yes
+    columnCells     | true for 1D or false for 3D region    | yes
+
+    \endtable
 
 Usage
     Example of the boundary condition specification:
@@ -61,8 +104,9 @@ Usage
         value              uniform 300;
 
         // Baffle region name
-        regionName          baffleRegion;
+        region              baffleRegion;
         active              yes;
+        internal            yes;
 
         // Solid thermo in solid region
         thermoType
@@ -117,6 +161,9 @@ Usage
 
     }
     \endverbatim
+
+    If the thermal baffle is used on internal faces of the primary region,
+    then the slave in this region is defined as :
 
     Slave patch on primary region:
     \verbatim
@@ -194,6 +241,9 @@ class thermalBaffleFvPatchScalarField
 
         //- Is the baffle owner
         bool owner_;
+
+        //- Is the baffle internal
+        bool internal_;
 
         //- Thermal baffle
         autoPtr<regionModels::thermalBaffleModels::thermalBaffleModel> baffle_;

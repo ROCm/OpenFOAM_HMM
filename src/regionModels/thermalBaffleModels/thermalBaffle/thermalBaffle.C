@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -190,7 +191,7 @@ thermalBaffle::thermalBaffle
             regionMesh().time().timeName(),
             regionMesh(),
             IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         ),
         regionMesh(),
         dimensionedScalar(dimEnergy/dimVolume/dimTime, Zero)

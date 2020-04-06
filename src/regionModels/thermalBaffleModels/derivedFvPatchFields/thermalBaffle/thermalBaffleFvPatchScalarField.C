@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,6 +48,7 @@ thermalBaffleFvPatchScalarField::thermalBaffleFvPatchScalarField
 :
     turbulentTemperatureRadCoupledMixedFvPatchScalarField(p, iF),
     owner_(false),
+    internal_(true),
     baffle_(),
     dict_(dictionary::null),
     extrudeMeshPtr_()
@@ -69,6 +71,7 @@ thermalBaffleFvPatchScalarField::thermalBaffleFvPatchScalarField
         mapper
     ),
     owner_(ptf.owner_),
+    internal_(ptf.internal_),
     baffle_(),
     dict_(ptf.dict_),
     extrudeMeshPtr_()
@@ -84,6 +87,7 @@ thermalBaffleFvPatchScalarField::thermalBaffleFvPatchScalarField
 :
     turbulentTemperatureRadCoupledMixedFvPatchScalarField(p, iF, dict),
     owner_(false),
+    internal_(true),
     baffle_(),
     dict_(dict),
     extrudeMeshPtr_()
@@ -93,27 +97,27 @@ thermalBaffleFvPatchScalarField::thermalBaffleFvPatchScalarField
 
     typedef regionModels::thermalBaffleModels::thermalBaffleModel baffle;
 
-    if (thisMesh.name() == polyMesh::defaultRegion)
+    word regionName("none");
+    dict_.readIfPresent("region", regionName);
+
+    dict_.readIfPresent("internal", internal_);
+
+    const word baffleName("3DBaffle" + regionName);
+
+    if
+    (
+        !thisMesh.time().foundObject<fvMesh>(regionName)
+        && regionName != "none"
+    )
     {
-        const word regionName = dict_.lookupOrDefault<word>("region", "none");
-
-        const word baffleName("3DBaffle" + regionName);
-
-        if
-        (
-            !thisMesh.time().foundObject<fvMesh>(regionName)
-         && regionName != "none"
-        )
+        if (extrudeMeshPtr_.empty())
         {
-            if (extrudeMeshPtr_.empty())
-            {
-                createPatchMesh();
-            }
-
-            baffle_.reset(baffle::New(thisMesh, dict).ptr());
-            owner_ = true;
-            baffle_->rename(baffleName);
+            createPatchMesh();
         }
+
+        baffle_.reset(baffle::New(thisMesh, dict).ptr());
+        owner_ = true;
+        baffle_->rename(baffleName);
     }
 }
 
@@ -126,6 +130,7 @@ thermalBaffleFvPatchScalarField::thermalBaffleFvPatchScalarField
 :
     turbulentTemperatureRadCoupledMixedFvPatchScalarField(ptf, iF),
     owner_(ptf.owner_),
+    internal_(ptf.internal_),
     baffle_(),
     dict_(ptf.dict_),
     extrudeMeshPtr_()
@@ -170,7 +175,15 @@ void thermalBaffleFvPatchScalarField::createPatchMesh()
     patchNames[topPatchID] = word("top");
 
     patchTypes[bottomPatchID] = mappedWallPolyPatch::typeName;
-    patchTypes[topPatchID] = mappedWallPolyPatch::typeName;
+
+    if (internal_)
+    {
+        patchTypes[topPatchID] = mappedWallPolyPatch::typeName;
+    }
+    else
+    {
+        patchTypes[topPatchID] = polyPatch::typeName;
+    }
 
     if (dict_.get<bool>("columnCells"))
     {
@@ -189,17 +202,24 @@ void thermalBaffleFvPatchScalarField::createPatchMesh()
     wordList inGroups(1);
     inGroups[0] = coupleGroup;
 
+    // The bottomPatchID is coupled with this patch
     dicts[bottomPatchID].add("coupleGroup", coupleGroup);
     dicts[bottomPatchID].add("inGroups", inGroups);
     dicts[bottomPatchID].add("sampleMode", mpp.sampleModeNames_[mpp.mode()]);
+    dicts[bottomPatchID].add("samplePatch", patch().name());
+    dicts[bottomPatchID].add("sampleRegion", thisMesh.name());
 
-    const word coupleGroupSlave =
-        coupleGroup.substr(0, coupleGroup.find('_')) + "_slave";
+    // Internal baffle needs a coupled on the topPatchID
+    if (internal_)
+    {
+        const word coupleGroupSlave =
+            coupleGroup.substr(0, coupleGroup.find('_')) + "_slave";
 
-    inGroups[0] = coupleGroupSlave;
-    dicts[topPatchID].add("coupleGroup", coupleGroupSlave);
-    dicts[topPatchID].add("inGroups", inGroups);
-    dicts[topPatchID].add("sampleMode", mpp.sampleModeNames_[mpp.mode()]);
+        inGroups[0] = coupleGroupSlave;
+        dicts[topPatchID].add("coupleGroup", coupleGroupSlave);
+        dicts[topPatchID].add("inGroups", inGroups);
+        dicts[topPatchID].add("sampleMode", mpp.sampleModeNames_[mpp.mode()]);
+    }
 
 
     forAll(regionPatches, patchi)
@@ -247,9 +267,7 @@ void thermalBaffleFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const fvMesh& thisMesh = patch().boundaryMesh().mesh();
-
-    if (owner_ && thisMesh.name() == polyMesh::defaultRegion)
+    if (owner_)
     {
         baffle_->evolve();
     }
@@ -262,9 +280,7 @@ void thermalBaffleFvPatchScalarField::write(Ostream& os) const
 {
     turbulentTemperatureRadCoupledMixedFvPatchScalarField::write(os);
 
-    const fvMesh& thisMesh = patch().boundaryMesh().mesh();
-
-    if (owner_ && (thisMesh.name() == polyMesh::defaultRegion))
+    if (owner_)
     {
         os.writeEntry("extrudeModel", dict_.get<word>("extrudeModel"));
 
@@ -280,6 +296,8 @@ void thermalBaffleFvPatchScalarField::write(Ostream& os) const
         os << dict_.subDict(extrudeModel) << nl;
 
         os.writeEntry("region", dict_.get<word>("region"));
+
+        os.writeEntryIfDifferent<bool>("internal", true, internal_);
 
         os.writeEntry("active", dict_.get<Switch>("active"));
 

@@ -1,0 +1,36 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1906                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      changeDictionaryDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+
+    boundary
+    {
+        ceiling
+        {
+            type            mappedWall;
+            sampleMode      nearestPatchFace;
+            samplePatch     bottom;
+            sampleRegion    baffle3DRegion;
+            coupleGroup     ceiling_baffle;
+            
+            offsetMode      uniform;
+            offset          (0 0 0);
+        }
+    }
+
+
+
+// ************************************************************************* //
