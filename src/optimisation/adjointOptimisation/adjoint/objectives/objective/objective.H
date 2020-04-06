@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -354,6 +354,9 @@ public:
 
         //- Write objective function history at each primal solver iteration
         virtual void writeInstantaneousValue() const;
+
+        //- Write objective function history at each primal solver iteration
+        virtual void writeInstantaneousSeparator() const;
 
         //- Write mean objective function history
         virtual void writeMeanValue() const;

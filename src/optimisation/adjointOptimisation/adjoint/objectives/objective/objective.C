@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -620,6 +620,18 @@ void objective::writeInstantaneousValue() const
         }
 
         instantValueFilePtr_() << mesh_.time().value() << tab << J_ << endl;
+    }
+}
+
+
+void objective::writeInstantaneousSeparator() const
+{
+    if (Pstream::master())
+    {
+        if (instantValueFilePtr_.valid())
+        {
+            instantValueFilePtr_() << endl;
+        }
     }
 }
 
