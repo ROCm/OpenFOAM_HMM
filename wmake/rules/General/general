@@ -17,7 +17,7 @@ GLIB_LIBS  =
 COMPILER_FAMILY = $(shell echo "$(WM_COMPILER)" | sed -e 's/[0-9].*//')
 DEFAULT_RULES   = $(WM_DIR)/rules/$(WM_ARCH)$(COMPILER_FAMILY)
 RULES           = $(WM_DIR)/rules/$(WM_ARCH)$(WM_COMPILER)
-WMAKE_BIN       = $(WM_DIR)/platforms/$(WM_ARCH)$(WM_COMPILER)
+WMAKE_BIN       = $(WM_PROJECT_DIR)/platforms/tools/$(WM_ARCH)$(WM_COMPILER)
 
 # Default compilation is 'Opt' - never permit an empty value
 ifeq ($(WM_COMPILE_OPTION),)

@@ -51,12 +51,29 @@ namespace Foam
 {
 
 //- A (0-1) range for colouring
+inline scalar srange01(const scalarMinMax& range, scalar x)
+{
+    if (x >= range.max())
+    {
+        return 1;
+    }
+
+    x -= range.min();
+
+    if (x < VSMALL)
+    {
+        return 0;
+    }
+
+    return x / (range.max() - range.min());
+}
+
+
+//- A (0-1) range for colouring
 template<class Type>
 static inline scalar rangex(const scalarMinMax& range, const Type& val)
 {
-    scalar x = Foam::mag(val);
-
-    return (x - range.min()) / (range.max() - range.min());
+    return srange01(range, Foam::mag(val));
 }
 
 
@@ -64,8 +81,7 @@ static inline scalar rangex(const scalarMinMax& range, const Type& val)
 template<>
 inline scalar rangex(const scalarMinMax& range, const scalar& val)
 {
-    scalar x = val;
-    return (x - range.min()) / (range.max() - range.min());
+    return srange01(range, val);
 }
 
 
@@ -73,8 +89,7 @@ inline scalar rangex(const scalarMinMax& range, const scalar& val)
 template<>
 inline scalar rangex(const scalarMinMax& range, const label& val)
 {
-    scalar x = val;
-    return (x - range.min()) / (range.max() - range.min());
+    return srange01(range, val);
 }
 
 
@@ -273,7 +288,16 @@ Foam::fileName Foam::surfaceWriters::x3dWriter::writeTemplate
         if (!range.valid())
         {
             range = minMaxMag(values);
+
+            if (equal(range.mag(), 0))
+            {
+                range.add(range.centre());
+            }
         }
+
+        // Slight rounding
+        range.min() -= VSMALL;
+        range.max() += VSMALL;
 
         if (!isDir(outputFile.path()))
         {

@@ -1,10 +1,24 @@
 #!/bin/sh
-cd "${0%/*}" || exit                    # Run from this directory
+cd "${0%/*}" || exit            # This directory (/path/project/wmake/src)
 
-if [ -z "$WM_DIR" ]                     # Require WM_DIR
+if [ -z "$WM_DIR" ]             # Require WM_DIR (/path/project/wmake)
 then
-    WM_DIR="$(\cd $(dirname $0)/.. && \pwd -L)"
+    WM_DIR="$(dirname "$(pwd -L)")"
     export WM_DIR
+fi
+
+if [ -z "$WM_PROJECT_DIR" ]     # Expect WM_PROJECT_DIR (/path/project)
+then
+    echo "Warning (${0##*/}) : No WM_PROJECT_DIR set" 1>&2
+    WM_PROJECT_DIR="${WM_DIR%/*}"
+    export WM_PROJECT_DIR
+fi
+
+if [ -z "$WM_ARCH" ] || [ -z "$WM_COMPILER" ]
+then
+    echo "Error (${0##*/}) : No WM_ARCH or WM_COMPILER set"
+    echo "    Check your OpenFOAM environment and installation"
+    exit 1
 fi
 
 case "$WM_COMPILER" in
@@ -12,12 +26,13 @@ Mingw*)
     # Host wmake toolchain with system gcc (when cross-compiling)
     make \
         WM_COMPILER=Gcc WM_COMPILER_TYPE=system \
-        WMAKE_BIN="${WM_DIR}/platforms/${WM_ARCH}${WM_COMPILER}"
+        WMAKE_BIN="${WM_PROJECT_DIR}/platforms/tools/${WM_ARCH}${WM_COMPILER}" \
+        "$@"
     ;;
 
 *)
-    # Compile wmake toolchain
-    make
+    # Regular wmake toolchain
+    make "$@"
     ;;
 esac
 
