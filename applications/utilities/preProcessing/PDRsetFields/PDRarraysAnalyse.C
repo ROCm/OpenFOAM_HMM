@@ -673,15 +673,15 @@ void Foam::PDRarrays::addBlockage
             p.patchType = obs.blowoff_type;
             p.blowoffPress = obs.blowoff_press;
             p.blowoffTime = obs.blowoff_time;
-            if (obs.span.x() < 1e-5)
+            if (obs.span.x() < 0.01)
             {
                 indir = 1;
             }
-            else if (obs.span.y() < 1e-5)
+            else if (obs.span.y() < 0.01)
             {
                 indir = 2;
             }
-            else if (obs.span.z() < 1e-5)
+            else if (obs.span.z() < 0.01)
             {
                 indir = 3;
             }

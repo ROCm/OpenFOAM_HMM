@@ -934,9 +934,9 @@ void Foam::PDRarrays::calculateAndWrite
         );
         write_uniformField
         (
-            "mut", 0, MUT_WALL_FN,
+            "nut", 0, NUT_WALL_FN,
             meshIndexing, patches,
-            dimDynamicViscosity, casepath
+            dimViscosity, casepath
         );
         // combustFlag is 1 in rectangular region, 0 or 1 elsewhere
         // (although user could set it to another value)
@@ -1312,9 +1312,9 @@ void write_uniformField
     // outer
     {
         os.beginBlock("outer");
-        if (fieldName == "alphat" || fieldName == "mut")
+        if (fieldName == "alphat" || fieldName == "nut")
         {
-            // Different b.c. for alphat & mut
+            // Different b.c. for alphat & nut
             os.writeEntry("type", "calculated");
         }
         else
@@ -1346,10 +1346,10 @@ void write_pU_fields
 {
     // Velocity field
     {
-        OFstream os(casepath / pars.timeName / "Ubet");
+        OFstream os(casepath / pars.timeName / "U");
         os.precision(outputPrecision);
 
-        make_header(os, "", volVectorField::typeName, "Ubet");
+        make_header(os, "", volVectorField::typeName, "U");
 
         os.writeEntry("dimensions", dimVelocity);
 
@@ -1406,6 +1406,7 @@ void write_pU_fields
                 os.writeEntry("cyclicPatch", word(patchName + "Cyclic_half0"));
                 os.writeEntry("openFraction", 0); // closed
                 os.writeEntry("openingTime", p.blowoffTime);
+                os.writeEntry("minThresholdValue", p.blowoffPress);
                 os.writeEntry("maxOpenFractionDelta", 0.1);
                 os.writeEntry("forceBased", "false");
                 os.writeEntry("opening", "true");
@@ -1865,8 +1866,8 @@ void write_blocked_face_list
             if (p.patchType > 0)  // Panel
             {
                 os.beginBlock(setName);
-                os.writeEntry("wallPatchName", word(patchName + "Wall"));
-                os.writeEntry("cyclicMasterPatchName", patchName);
+                os.writeEntry("wallPatch", word(patchName + "Wall"));
+                os.writeEntry("cyclicMasterPatch", word(patchName + "Cyclic_half0"));
                 os.endBlock();
             }
         }
