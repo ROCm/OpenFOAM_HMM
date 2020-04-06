@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,7 +83,6 @@ namespace Foam
 class face;
 class primitiveMesh;
 class polyMesh;
-class fvMesh;
 class Time;
 class fileName;
 class polyBoundaryMesh;
@@ -201,25 +200,25 @@ class polyTopoChange
     // Private Member Functions
 
         //- Reorder contents of container according to oldToNew map
-        template<class T>
+        template<class Type>
         static void reorder
         (
             const labelUList& oldToNew,
-            DynamicList<T>& lst
+            DynamicList<Type>& lst
         );
 
-        template<class T>
+        template<class Type>
         static void reorder
         (
             const labelUList& oldToNew,
-            List<DynamicList<T>>& lst
+            List<DynamicList<Type>>& lst
         );
 
-        template<class T>
+        template<class Type>
         static void renumberKey
         (
             const labelUList& oldToNew,
-            Map<T>& map
+            Map<Type>& map
         );
 
         //- Renumber elements of container according to oldToNew map
@@ -619,9 +618,10 @@ public:
             );
 
             //- Create new mesh with old mesh patches
+            template<class Type>
             autoPtr<mapPolyMesh> makeMesh
             (
-                autoPtr<fvMesh>& newMesh,
+                autoPtr<Type>& newMesh,
                 const IOobject& io,
                 const polyMesh& mesh,
                 const bool syncParallel = true,

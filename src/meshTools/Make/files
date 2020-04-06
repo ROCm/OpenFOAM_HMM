@@ -292,6 +292,9 @@ mappedPatches/mappedPolyPatch/mappedVariableThicknessWallPolyPatch.C
 mappedPatches/mappedPointPatch/mappedPointPatch.C
 mappedPatches/mappedPointPatch/mappedWallPointPatch.C
 
+polyTopoChange/topoAction/topoActions.C
+polyTopoChange/polyTopoChange.C
+
 PatchFunction1/makePatchFunction1s.C
 PatchFunction1/coordinateLabelScaling.C
 
