@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2018 OpenFOAM Foundation
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,84 +31,156 @@ Group
     grpRASBoundaryConditions grpInletBoundaryConditions
 
 Description
-    This class provides functions to evaluate the velocity and turbulence
-    distributions appropriate for atmospheric boundary layers (ABL).
+    Base class to set log-law type ground-normal inflow boundary conditions for
+    wind velocity and turbulence quantities for homogeneous, two-dimensional,
+    dry-air, equilibrium and neutral atmospheric boundary layer (ABL) modelling.
 
-    The profile is derived from the friction velocity, flow direction and
-    "vertical" direction:
+    The ground-normal profile expressions are due to \c YGCJ
+    (refer to references below) whereat \c RH expressions were generalised:
 
-        \f[
-            U = \frac{U^*}{\kappa} ln\left(\frac{z - z_g + z_0}{z_0}\right)
-        \f]
+    \f[
+        u = \frac{u^*}{\kappa} \ln \left( \frac{z - d + z_0}{z_0} \right)
+    \f]
 
-        \f[
-            k = \frac{(U^*)^2}{\sqrt{C_{\mu}}}
-        \f]
+    \f[
+        v = w = 0
+    \f]
 
-        \f[
-            \epsilon = \frac{(U^*)^3}{\kappa(z - z_g + z_0)}
-        \f]
+    \f[
+        k = \frac{(u^*)^2}{\sqrt{C_\mu}}
+        \sqrt{C_1 \ln \left( \frac{z - d + z_0}{z_0} \right) + C_2}
+    \f]
+
+    \f[
+        \epsilon = \frac{(u^*)^3}{\kappa (z - d + z_0)}
+        \sqrt{C_1 \ln \left( \frac{z - d + z_0}{z_0} \right) + C_2}
+    \f]
+
+    \f[
+        \omega = \frac{u^*}{\kappa \sqrt{C_\mu}} \frac{1}{z - d + z_0}
+    \f]
+
+    \f[
+        u^* =
+            \frac{u_{ref} \kappa}{\ln\left(\frac{z_{ref} + z_0}{z_0}\right)}
+    \f]
 
     where
     \vartable
-        U^*     | Friction velocity
-        \kappa  | von Karman's constant
-        C_{\mu} | Turbulence viscosity coefficient
-        z       | Vertical coordinate
-        z_0     | Surface roughness height [m]
-        z_g     | Minimum z-coordinate [m]
-    \endvartable
-    and
-        \f[
-            U^* = \kappa\frac{U_{ref}}{ln\left(\frac{Z_{ref} + z_0}{z_0}\right)}
-        \f]
-    where
-    \vartable
-        U_{ref} | Reference velocity at \f$Z_{ref}\f$ [m/s]
-        Z_{ref} | Reference height [m]
+      u        | Ground-normal streamwise flow speed profile          [m/s]
+      v        | Spanwise flow speed                                  [m/s]
+      w        | Ground-normal flow speed                             [m/s]
+      k        | Ground-normal turbulent kinetic energy (TKE) profile [m^2/s^2]
+      \epsilon | Ground-normal TKE dissipation rate profile           [m^2/s^3]
+      \omega   | Ground-normal specific dissipation rate profile      [m^2/s^3]
+      u^*      | Friction velocity                                    [m/s]
+      \kappa   | von Kármán constant                                  [-]
+      C_\mu    | Empirical model constant                             [-]
+      z        | Ground-normal coordinate component                   [m]
+      d        | Ground-normal displacement height                    [m]
+      z_0      | Aerodynamic roughness length                         [m]
+      u_{ref}  | Reference mean streamwise wind speed at \f$z_{ref}\f$ [m/s]
+      z_{ref}  | Reference height being used in \f$u^*\f$ estimations [m]
+      C_1      | Curve-fitting coefficient for \c YGCJ profiles       [-]
+      C_2      | Curve-fitting coefficient for \c YGCJ profiles       [-]
     \endvartable
 
-    Use in the atmBoundaryLayerInletVelocity, atmBoundaryLayerInletK and
-    atmBoundaryLayerInletEpsilon boundary conditions.
+Note
+    - The \c RH expressions are special cases of those in \c YGCJ when \c C1=0
+    and \c C2=1. Both \c C1 and \c C2 can be determined by nonlinear fitting
+    of (\c YGCJ:Eq. 19) with an experimental dataset for \c k. By default,
+    \c atmBoundaryLayerInlet boundary conditions compute \c RH expressions.
+    - \c z is the ground-normal height relative to the global minimum height
+    of the inlet patch; therefore, the minimum of \c z is always zero
+    irrespective of the absolute z-coordinate of the computational patch.
 
     Reference:
-        D.M. Hargreaves and N.G. Wright,  "On the use of the k-epsilon model
-        in commercial CFD software to model the neutral atmospheric boundary
-        layer", Journal of Wind Engineering and Industrial Aerodynamics
-        95(2007), pp 355-369.
+    \verbatim
+        The ground-normal profile expressions (tag:RH):
+            Richards, P. J., & Hoxey, R. P. (1993).
+            Appropriate boundary conditions for computational wind
+            engineering models using the k-ε turbulence model.
+            In Computational Wind Engineering 1 (pp. 145-153).
+            DOI:10.1016/B978-0-444-81688-7.50018-8
+
+        Modifications to preserve the profiles downstream (tag:HW):
+            Hargreaves, D. M., & Wright, N. G. (2007).
+            On the use of the k–ε model in commercial CFD software
+            to model the neutral atmospheric boundary layer.
+            Journal of wind engineering and
+            industrial aerodynamics, 95(5), 355-369.
+            DOI:10.1016/j.jweia.2006.08.002
+
+        Expression generalisations to allow height
+        variation for turbulence quantities (tag:YGCJ):
+            Yang, Y., Gu, M., Chen, S., & Jin, X. (2009).
+            New inflow boundary conditions for modelling the neutral equilibrium
+            atmospheric boundary layer in computational wind engineering.
+            J. of Wind Engineering and Industrial Aerodynamics, 97(2), 88-95.
+            DOI:10.1016/j.jweia.2008.12.001
+
+        The generalised ground-normal profile expression for omega (tag:YGJ):
+            Yang, Y., Gu, M., & Jin, X., (2009).
+            New inflow boundary conditions for modelling the
+            neutral equilibrium atmospheric boundary layer in SST k-ω model.
+            In: The Seventh Asia-Pacific Conference on Wind Engineering,
+            November 8-12, Taipei, Taiwan.
+
+        Theoretical remarks (tag:E):
+            Emeis, S. (2013).
+            Wind Energy Meteorology: Atmospheric
+            Physics for Wind Power Generation.
+            Springer-Verlag Berlin Heidelberg.
+            DOI:10.1007/978-3-642-30523-8
+    \endverbatim
 
 Usage
     \table
-        Property     | Description                      | Required  | Default
-        flowDir      | Flow direction                   | yes       |
-        zDir         | Vertical direction               | yes       |
-        kappa        | von Karman's constant            | no        | 0.41
-        Cmu          | Turbulence viscosity coefficient | no        | 0.09
-        Uref         | Reference velocity [m/s]         | yes       |
-        Zref         | Reference height [m]             | yes       |
-        z0           | Surface roughness height [m]     | yes       |
-        zGround      | Minimum z-coordinate [m]         | yes       |
+      Property  | Description              | Type          | Req'd | Deflt
+      flowDir   | Flow direction           | TimeFunction1<vector> | yes | -
+      zDir      | Ground-normal direction  | TimeFunction1<vector> | yes | -
+      Uref      | Reference mean streamwise flow speed being used in <!--
+             --> \f$u^*\f$ estimations [m/s] | TimeFunction1<scalar> | yes | -
+      Zref      | Reference height being used in \f$u^*\f$ estimations [m]  <!--
+                                       --> | TimeFunction1<scalar> | yes | -
+      z0        | Surface roughness length [m] <!--
+                                       --> | PatchFunction1<scalar> | yes | -
+      d         | Displacement height [m] - see Notes <!--
+                                       --> | PatchFunction1<scalar> | yes | -
+      kappa     | von Kármán constant      | scalar | no  | 0.41
+      Cmu       | Empirical model constant | scalar | no  | 0.09
+      initABL   | Flag to initialise profiles with the theoretical <!--
+            --> ABL expressions, otherwise use "value" list        <!--
+                                       --> | bool   | no  | true
+      value     | ABL profile content when initABL=false <!--
+                                       --> | scalarList | conditional | -
+      phi       | Name of the flux field   | word         | no        | phi
+      C1        | Curve-fitting coefficient \c YGCJ profiles | scalar | no | 0.0
+      C2        | Curve-fitting coefficient \c YGCJ profiles | scalar | no | 1.0
     \endtable
 
-    Example of the boundary condition specification:
-    \verbatim
-    ground
-    {
-        type            atmBoundaryLayerInletVelocity;
-        flowDir         (1 0 0);
-        zDir            (0 0 1);
-        Uref            10.0;
-        Zref            20.0;
-        z0              uniform 0.1;
-        zGround         uniform 0.0;
-    }
-    \endverbatim
-
 Note
-    D.M. Hargreaves and N.G. Wright recommend Gamma epsilon in the
-    k-epsilon model should be changed from 1.3 to 1.11 for consistency.
-    The roughness height (Er) is given by Er = 20 z0 following the same
-    reference.
+    - The derived ABL expressions automatically satisfy the simplified transport
+    equation for \c k. Yet the same expressions only satisfy the simplified
+    transport equation for \c epsilon when the model constants \c sigmaEpsilon
+    is 1.11 with \c kappa=0.4 (\c HW:p. 358).
+    - \c atmBoundaryLayerInlet boundary conditions inherit \c inletOutlet
+    traits, so that a given inlet condition can be supplied from all sides of
+    the domain, e.g. a ground-normal cylinder domain having a single
+    inlet/outlet boundary where the changes between inlet and outlet depend
+    on the wind direction and patch normals, so that any change in inflow
+    orientation can be handled with the same mesh.
+    - \c d is the displacement height, and "is relevant for flows over forests
+    and cities" (E:p. 28). "The displacement height gives the vertical
+    displacement of the entire flow regime over areas which are densely covered
+    with obstacles such as trees or buildings" (E:p. 28).
+
+See also
+    - Foam::atmBoundaryLayer::atmBoundaryLayerInletVelocityFvPatchVectorField
+    - Foam::atmBoundaryLayer::atmBoundaryLayerInletKFvPatchScalarField
+    - Foam::atmBoundaryLayer::atmBoundaryLayerInletEpsilonFvPatchScalarField
+    - Foam::atmBoundaryLayer::atmBoundaryLayerInletOmegaFvPatchScalarField
+    - ExtendedCodeGuide::atmBoundaryLayer
 
 SourceFiles
     atmBoundaryLayer.C
@@ -133,7 +205,33 @@ namespace Foam
 
 class atmBoundaryLayer
 {
-    // Private data
+protected:
+
+    // Protected Data
+
+        //- Flag to initialise profiles with the theoretical ABL expressions,
+        //- otherwise initialises by using "value" entry content
+        Switch initABL_;
+
+
+private:
+
+    // Private Data
+
+        //- von Kármán constant
+        const scalar kappa_;
+
+        //- Empirical model constant
+        const scalar Cmu_;
+
+        //- Curve-fitting coefficient
+        const scalar C1_;
+
+        //- Curve-fitting coefficient
+        const scalar C2_;
+
+        //- Minimum coordinate vector of this patch
+        const vector ppMin_;
 
         //- Reference to the time database
         const Time& time_;
@@ -141,29 +239,23 @@ class atmBoundaryLayer
         //- Reference to the patch
         const polyPatch& patch_;
 
-        //- Flow direction
+        //- Streamwise flow direction
         TimeFunction1<vector> flowDir_;
 
-        //- Direction of the z-coordinate
+        //- Direction of the ground-normal coordinate
         TimeFunction1<vector> zDir_;
 
-        //- Von Karman constant
-        const scalar kappa_;
-
-        //- Turbulent viscosity coefficient
-        const scalar Cmu_;
-
-        //- Reference velocity
+        //- Reference mean streamwise flow speed being used in Ustar estimations
         TimeFunction1<scalar> Uref_;
 
-        //- Reference height
+        //- Reference height being used in Ustar estimations
         TimeFunction1<scalar> Zref_;
 
-        //- Surface roughness height
+        //- Surface roughness length
         autoPtr<PatchFunction1<scalar>> z0_;
 
-        //- Minimum coordinate value in z direction
-        autoPtr<PatchFunction1<scalar>> zGround_;
+        //- Displacement height
+        autoPtr<PatchFunction1<scalar>> d_;
 
 
 public:
@@ -193,14 +285,14 @@ public:
         atmBoundaryLayer(const atmBoundaryLayer&);
 
 
-    // Member functions
+    // Member Functions
 
         // Access
 
             //- Return flow direction
             vector flowDir() const;
 
-            //- Return z-direction
+            //- Return the ground-normal direction
             vector zDir() const;
 
             //- Return friction velocity
@@ -219,14 +311,16 @@ public:
         // Evaluate functions
 
             //- Return the velocity distribution for the ATM
-            tmp<vectorField> U(const vectorField& p) const;
+            tmp<vectorField> U(const vectorField& pCf) const;
 
             //- Return the turbulent kinetic energy distribution for the ATM
-            tmp<scalarField> k(const vectorField& p) const;
+            tmp<scalarField> k(const vectorField& pCf) const;
 
             //- Return the turbulent dissipation rate distribution for the ATM
-            tmp<scalarField> epsilon(const vectorField& p) const;
+            tmp<scalarField> epsilon(const vectorField& pCf) const;
 
+            //- Return the specific dissipation rate distribution for the ATM
+            tmp<scalarField> omega(const vectorField& pCf) const;
 
         //- Write
         void write(Ostream&) const;

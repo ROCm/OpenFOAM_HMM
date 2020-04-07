@@ -1,0 +1,339 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+# Postprocess according to the existence of "epsilon" or "omega"
+baseEpsilonOrOmega="epsilon"    # options: "epsilon", "omega".
+
+# Note: Benchmark data is available for the standard k-epsilon model from:
+#    Hargreaves, D. M., & Wright, N. G. (2007).
+#    On the use of the k–ε model in commercial CFD software
+#    to model the neutral atmospheric boundary layer.
+#    Journal of wind engineering and
+#    industrial aerodynamics, 95(5), 355-369.
+#    DOI:10.1016/j.jweia.2006.08.002
+#    Figure 6.
+#------------------------------------------------------------------------------
+
+plotUxUpstream() {
+    timeDir=$1
+    zMin=$2
+    echo "    Plotting the ground-normal flow speed profile (upstream)."
+
+    outName="plots/Ux_upstream.png"
+    gnuplot<<PLT_UX_UPSTREAM
+    set terminal pngcairo font "helvetica,20" size 1000, 800
+    set xrange [4:18]
+    set yrange [0:50]
+    set grid
+    set key top left
+    set xlabel "Ux [m s^{-1}]"
+    set ylabel "Non-dimensionalised height, z/z_{ref}"
+    set offset .05, .05
+    set output "$outName"
+
+    zRef = 6
+    inp0="$timeDir/x_0mCell_U.xy"
+    inp1="$timeDir/x_0mPatch_U.xy"
+
+    plot \
+        "system/benchmark-data-HargreavesWright2007/Ux-HW-RH-Fig6a" \
+            u 1:2 t "RH" w p ps 2 pt 6 lc rgb "#000000", \
+        "system/benchmark-data-HargreavesWright2007/Ux-HW-RH-Fig6a" \
+            u 1:2 t "HW, x=2500m" w p ps 1 pt 5 lc rgb "#E69F00", \
+        "system/benchmark-data-HargreavesWright2007/Ux-HW-RH-Fig6a" \
+            u 1:2 t "HW, x=4000m" w p ps 0.5 pt 4 lc rgb "#56B4E9", \
+        inp0 u 2:((\$1-$zMin)/zRef) t "OF, x=0m (Patch)" w l lw 2 lc rgb "#009E73", \
+        inp1 u 2:((\$1-$zMin)/zRef) t "OF, x=0m (Cell)" w l lw 2 lc rgb "#F0E440"
+PLT_UX_UPSTREAM
+}
+
+
+plotUxMid() {
+    timeDir=$1
+    zMin=$2
+    echo "    Plotting the ground-normal flow speed profile (mid-range)."
+
+    outName="plots/Ux_mid.png"
+    gnuplot<<PLT_UX_MID
+    set terminal pngcairo font "helvetica,20" size 1000, 800
+    set xrange [4:18]
+    set yrange [0:50]
+    set grid
+    set key top left
+    set xlabel "Ux [m s^{-1}]"
+    set ylabel "Non-dimensionalised height, z/z_{ref}"
+    set offset .05, .05
+    set output "$outName"
+
+    zRef = 6
+    inp2="$timeDir/x_2500m_U.xy"
+    inp3="$timeDir/x_4000m_U.xy"
+
+    plot \
+        "system/benchmark-data-HargreavesWright2007/Ux-HW-RH-Fig6a" \
+            u 1:2 t "RH" w p ps 2 pt 6 lc rgb "#000000", \
+        "system/benchmark-data-HargreavesWright2007/Ux-HW-RH-Fig6a" \
+            u 1:2 t "HW, x=2500m" w p ps 1 pt 5 lc rgb "#E69F00", \
+        "system/benchmark-data-HargreavesWright2007/Ux-HW-RH-Fig6a" \
+            u 1:2 t "HW, x=4000m" w p ps 0.5 pt 4 lc rgb "#56B4E9", \
+        inp2 u 2:((\$1-$zMin)/zRef) t "OF, x=2500m" w l lw 2 lc rgb "#0072B2", \
+        inp3 u 2:((\$1-$zMin)/zRef) t "OF, x=4000m" w l lw 2 lc rgb "#D55E00"
+PLT_UX_MID
+}
+
+
+plotUxDownstream() {
+    timeDir=$1
+    zMin=$2
+    echo "    Plotting the ground-normal flow speed profile (downstream)."
+
+    outName="plots/Ux_downstream.png"
+    gnuplot<<PLT_UX_DOWNSTREAM
+    set terminal pngcairo font "helvetica,20" size 1000, 800
+    set xrange [4:18]
+    set yrange [0:50]
+    set grid
+    set key top left
+    set xlabel "Ux [m s^{-1}]"
+    set ylabel "Non-dimensionalised height, z/z_{ref}"
+    set offset .05, .05
+    set output "$outName"
+
+    zRef = 6
+    inp4="$timeDir/x_5000mCell_U.xy"
+    inp5="$timeDir/x_5000mPatch_U.xy"
+
+    plot \
+        "system/benchmark-data-HargreavesWright2007/Ux-HW-RH-Fig6a" \
+            u 1:2 t "RH" w p ps 2 pt 6 lc rgb "#000000", \
+        "system/benchmark-data-HargreavesWright2007/Ux-HW-RH-Fig6a" \
+            u 1:2 t "HW, x=2500m" w p ps 1 pt 5 lc rgb "#E69F00", \
+        "system/benchmark-data-HargreavesWright2007/Ux-HW-RH-Fig6a" \
+            u 1:2 t "HW, x=4000m" w p ps 0.5 pt 4 lc rgb "#56B4E9", \
+        inp4 u 2:((\$1-$zMin)/zRef) t "OF, x=5000m (Cell)" w l lw 2 lc rgb "#CC79A7", \
+        inp5 u 2:((\$1-$zMin)/zRef) t "OF, x=5000m (Patch)" w l lw 2 lc rgb "#440154"
+PLT_UX_DOWNSTREAM
+}
+
+
+plotK() {
+    timeDir=$1
+    items=$2
+    seq=$3
+    zMin=$4
+    echo "    Plotting the ground-normal turbulent kinetic energy profile."
+
+    outName="plots/k.png"
+    gnuplot<<PLT_K
+    set terminal pngcairo font "helvetica,20" size 1000, 800
+    set xrange [1:2]
+    set yrange [0:50]
+    set grid
+    set key top right
+    set xlabel "k [m^2 s^{-2}]"
+    set ylabel "Non-dimensionalised height, z/z_{ref}"
+    set offset .05, .05
+    set output "$outName"
+
+    zRef = 6
+    inp0="$timeDir/x_0mCell_$items.xy"
+    inp1="$timeDir/x_0mPatch_$items.xy"
+    inp2="$timeDir/x_2500m_$items.xy"
+    inp3="$timeDir/x_4000m_$items.xy"
+    inp4="$timeDir/x_5000mCell_$items.xy"
+    inp5="$timeDir/x_5000mPatch_$items.xy"
+
+    plot \
+        "system/benchmark-data-HargreavesWright2007/k-RH-Fig6b" \
+            u 1:2 t "RH" w p ps 2 pt 6 lc rgb "#000000", \
+        "system/benchmark-data-HargreavesWright2007/k-HW-Fig6b-2500" \
+            u 1:2 t "HW, x=2500m" w p ps 1 pt 5 lc rgb "#E69F00", \
+        "system/benchmark-data-HargreavesWright2007/k-HW-Fig6b-4000" \
+            u 1:2 t "HW, x=4000m" w p ps 0.5 pt 4 lc rgb "#56B4E9", \
+        inp0 u $seq:((\$1-$zMin)/zRef) t "OF, x=0m (Patch)" w l lw 2 lc rgb "#009E73", \
+        inp1 u $seq:((\$1-$zMin)/zRef) t "OF, x=0m (Cell)" w l lw 2 lc rgb "#F0E440", \
+        inp2 u $seq:((\$1-$zMin)/zRef) t "OF, x=2500m" w l lw 2 lc rgb "#0072B2", \
+        inp3 u $seq:((\$1-$zMin)/zRef) t "OF, x=4000m" w l lw 2 lc rgb "#D55E00", \
+        inp4 u $seq:((\$1-$zMin)/zRef) t "OF, x=5000m (Cell)" w l lw 2 lc rgb "#CC79A7", \
+        inp5 u $seq:((\$1-$zMin)/zRef) t "OF, x=5000m (Patch)" w l lw 2 lc rgb "#440154"
+PLT_K
+}
+
+
+plotEpsilon() {
+    timeDir=$1
+    items=$2
+    zMin=$3
+    echo "    Plotting the ground-normal turbulent kinetic"\
+              "energy dissipation rate profile."
+
+    outName="plots/epsilon.png"
+    gnuplot<<PLT_EPSILON
+    set terminal pngcairo font "helvetica,20" size 1000, 800
+    set xrange [0.001:10]
+    set yrange [0:50]
+    set grid
+    set key top right
+    set xlabel "epsilon [m^2 s^{-3}]"
+    set ylabel "Non-dimensionalised height, z/z_{ref}"
+    set offset .05, .05
+    set logscale x
+    set output "$outName"
+
+    zRef = 6
+    inp0="$timeDir/x_0mCell_$items.xy"
+    inp1="$timeDir/x_0mPatch_$items.xy"
+    inp2="$timeDir/x_2500m_$items.xy"
+    inp3="$timeDir/x_4000m_$items.xy"
+    inp4="$timeDir/x_5000mCell_$items.xy"
+    inp5="$timeDir/x_5000mPatch_$items.xy"
+
+    plot \
+        "system/benchmark-data-HargreavesWright2007/epsilon-HW-RH-Fig6c" \
+            u 1:2 t "RH" w p ps 2 pt 6 lc rgb "#000000", \
+        "system/benchmark-data-HargreavesWright2007/epsilon-HW-RH-Fig6c" \
+            u 1:2 t "HW, x=2500m" w p ps 1 pt 5 lc rgb "#E69F00", \
+        "system/benchmark-data-HargreavesWright2007/epsilon-HW-RH-Fig6c" \
+            u 1:2 t "HW, x=4000m" w p ps 0.5 pt 4 lc rgb "#56B4E9", \
+        inp0 u 2:((\$1-$zMin)/zRef) t "OF, x=0m (Patch)" w l lw 2 lc rgb "#009E73", \
+        inp1 u 2:((\$1-$zMin)/zRef) t "OF, x=0m (Cell)" w l lw 2 lc rgb "#F0E440", \
+        inp2 u 2:((\$1-$zMin)/zRef) t "OF, x=2500m" w l lw 2 lc rgb "#0072B2", \
+        inp3 u 2:((\$1-$zMin)/zRef) t "OF, x=4000m" w l lw 2 lc rgb "#D55E00", \
+        inp4 u 2:((\$1-$zMin)/zRef) t "OF, x=5000m (Cell)" w l lw 2 lc rgb "#CC79A7", \
+        inp5 u 2:((\$1-$zMin)/zRef) t "OF, x=5000m (Patch)" w l lw 2 lc rgb "#440154"
+PLT_EPSILON
+}
+
+
+plotOmega() {
+    timeDir=$1
+    items=$2
+    zMin=$3
+    echo "    Plotting the ground-normal specific dissipation rate profile."
+
+    outName="plots/omega.png"
+    gnuplot<<PLT_OMEGA
+    set terminal pngcairo font "helvetica,20" size 1000, 800
+    set xrange [0.001:10]
+    set yrange [0:50]
+    set grid
+    set key top right
+    set xlabel "omega [s^{-1}]"
+    set ylabel "Non-dimensionalised height, z/z_{ref}"
+    set offset .05, .05
+    set logscale x
+    set output "$outName"
+
+    zRef = 6
+    inp0="$timeDir/x_0mCell_$items.xy"
+    inp1="$timeDir/x_0mPatch_$items.xy"
+    inp2="$timeDir/x_2500m_$items.xy"
+    inp3="$timeDir/x_4000m_$items.xy"
+    inp4="$timeDir/x_5000mCell_$items.xy"
+    inp5="$timeDir/x_5000mPatch_$items.xy"
+
+    plot \
+        inp0 u 4:((\$1-$zMin)/zRef) t "OF, x=0m (Patch)" w l lw 2 lc rgb "#009E73", \
+        inp1 u 4:((\$1-$zMin)/zRef) t "OF, x=0m (Cell)" w l lw 2 lc rgb "#F0E440", \
+        inp2 u 4:((\$1-$zMin)/zRef) t "OF, x=2500m" w l lw 2 lc rgb "#0072B2", \
+        inp3 u 4:((\$1-$zMin)/zRef) t "OF, x=4000m" w l lw 2 lc rgb "#D55E00", \
+        inp4 u 4:((\$1-$zMin)/zRef) t "OF, x=5000m (Cell)" w l lw 2 lc rgb "#CC79A7", \
+        inp5 u 4:((\$1-$zMin)/zRef) t "OF, x=5000m (Patch)" w l lw 2 lc rgb "#440154"
+PLT_OMEGA
+}
+
+
+plotMut() {
+    timeDir=$1
+    items=$2
+    seq=$3
+    zMin=$4
+    echo "    Plotting the ground-normal turbulent viscosity profile."
+
+    outName="plots/mut.png"
+    gnuplot<<PLT_MUT
+    set terminal pngcairo font "helvetica,20" size 1000, 800
+    set xrange [0:120]
+    set yrange [0:50]
+    set grid
+    set key bottom right
+    set xlabel "mu_t [Pa.s]"
+    set ylabel "Non-dimensionalised height, z/z_{ref}"
+    set offset .05, .05
+    set output "$outName"
+
+    zRef = 6
+    inp0="$timeDir/x_0mCell_$items.xy"
+    inp1="$timeDir/x_0mPatch_$items.xy"
+    inp2="$timeDir/x_2500m_$items.xy"
+    inp3="$timeDir/x_4000m_$items.xy"
+    inp4="$timeDir/x_5000mCell_$items.xy"
+    inp5="$timeDir/x_5000mPatch_$items.xy"
+
+    plot \
+        "system/benchmark-data-HargreavesWright2007/mut-RH-Fig6d" \
+            u 1:2 t "RH" w p ps 2 pt 6 lc rgb "#000000", \
+        "system/benchmark-data-HargreavesWright2007/mut-HW-Fig6d-2500" \
+            u 1:2 t "HW, x=2500m" w p ps 1 pt 5 lc rgb "#E69F00", \
+        "system/benchmark-data-HargreavesWright2007/mut-HW-Fig6d-4000" \
+            u 1:2 t "HW, x=4000m" w p ps 0.5 pt 4 lc rgb "#56B4E9", \
+        inp0 u $seq:((\$1-$zMin)/zRef) t "OF, x=0m (Patch)" w l lw 2 lc rgb "#009E73", \
+        inp1 u $seq:((\$1-$zMin)/zRef) t "OF, x=0m (Cell)" w l lw 2 lc rgb "#F0E440", \
+        inp2 u $seq:((\$1-$zMin)/zRef) t "OF, x=2500m" w l lw 2 lc rgb "#0072B2", \
+        inp3 u $seq:((\$1-$zMin)/zRef) t "OF, x=4000m" w l lw 2 lc rgb "#D55E00", \
+        inp4 u $seq:((\$1-$zMin)/zRef) t "OF, x=5000m (Cell)" w l lw 2 lc rgb "#CC79A7", \
+        inp5 u $seq:((\$1-$zMin)/zRef) t "OF, x=5000m (Patch)" w l lw 2 lc rgb "#440154"
+PLT_MUT
+}
+
+
+#------------------------------------------------------------------------------
+
+# Require gnuplot
+command -v gnuplot >/dev/null || {
+    echo "gnuplot not found - skipping graph creation" 1>&2
+    exit 1
+}
+
+# The latestTime in postProcessing/samples
+timeDir=$(foamListTimes -case postProcessing/samples -latestTime 2>/dev/null)
+[ -n "$timeDir" ] || {
+    echo "No postProcessing/samples found - skipping graph creation" 1>&2
+    exit 2
+}
+timeDir="postProcessing/samples/$timeDir"
+zMin=0
+mkdir -p plots
+
+
+# Postprocess flow speed
+plotUxUpstream $timeDir $zMin
+plotUxMid $timeDir $zMin
+plotUxDownstream $timeDir $zMin
+
+# Postprocess turbulence quantities
+if [ $baseEpsilonOrOmega == "epsilon" ]
+then
+    items="epsilon_k_nut"
+
+    plotEpsilon $timeDir $items $zMin
+    plotK $timeDir $items 3 $zMin
+    plotMut $timeDir $items 4 $zMin
+
+elif [ $baseEpsilonOrOmega == "omega" ]
+then
+    items="k_nut_omega"
+
+    plotK $timeDir $items 2 $zMin
+    plotMut $timeDir $items 3 $zMin
+    plotOmega $timeDir $items $zMin
+
+else
+    echo "Chosen turbulence model is neither epsilon nor omega based." 1>&2
+    exit 2
+fi
+
+
+#------------------------------------------------------------------------------

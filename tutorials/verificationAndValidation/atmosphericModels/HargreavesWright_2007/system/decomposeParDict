@@ -9,48 +9,18 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      epsilon;
+    class       dictionary;
+    object      decomposeParDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -3 0 0 0 0];
+numberOfSubdomains 8;
 
-#include        "include/initialConditions"
+method          hierarchical;
 
-internalField   uniform $turbulentEpsilon;
-
-boundaryField
+coeffs
 {
-    terrain
-    {
-        type            epsilonWallFunction;
-        Cmu             0.09;
-        kappa           0.4;
-        E               9.8;
-        value           $internalField;
-    }
-
-    outlet
-    {
-        type            inletOutlet;
-        inletValue      uniform $turbulentEpsilon;
-        value           $internalField;
-    }
-
-    inlet
-    {
-        type            atmBoundaryLayerInletEpsilon;
-        #include        "include/ABLConditions"
-    }
-
-    ground
-    {
-        type            zeroGradient;
-    }
-
-    #include "include/sideAndTopPatches"
+    n           (8 1 1);
 }
-
 
 // ************************************************************************* //

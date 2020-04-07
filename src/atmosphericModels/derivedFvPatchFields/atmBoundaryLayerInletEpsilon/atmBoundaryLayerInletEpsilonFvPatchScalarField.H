@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,28 +31,74 @@ Group
     grpRASBoundaryConditions grpInletBoundaryConditions
 
 Description
-    This boundary condition specifies an inlet value for the turbulence
-    dissipation, \f$\epsilon\f$, appropriate for atmospheric boundary layers.
+    This boundary condition provides a log-law type ground-normal inflow
+    boundary condition for turbulent kinetic energy dissipation rate, i.e.
+    \c epsilon, for homogeneous, two-dimensional, dry-air, equilibrium and
+    neutral atmospheric boundary layer modelling.
 
-    See Foam::atmBoundaryLayer for details.
+    The ground-normal \c epsilon profile expression:
+
+        \f[
+            \epsilon = \frac{(u^*)^3}{\kappa (z - d + z_0)}
+            \sqrt{C_1 \ln \left( \frac{z - d + z_0}{z_0} \right) + C_2}
+        \f]
+
+    where
+    \vartable
+      \epsilon | Ground-normal TKE dissipation rate profile     [m^2/s^3]
+      u^*      | Friction velocity                              [m/s]
+      \kappa   | von Kármán constant                            [-]
+      z        | Ground-normal coordinate component             [m]
+      z_0      | Aerodynamic roughness length                   [m]
+      d        | Ground-normal displacement height              [m]
+      C_1      | Curve-fitting coefficient for \c YGCJ profiles [-]
+      C_2      | Curve-fitting coefficient for \c YGCJ profiles [-]
+ \endvartable
+
+Usage
+    \heading Required fields
+    \plaintable
+        epsilon   | Turbulent kinetic energy dissipation rate   [m^2/s^3]
+    \endplaintable
 
     Example of the boundary condition specification:
     \verbatim
-    ground
+    inlet
     {
+        // Mandatory entries (unmodifiable)
         type            atmBoundaryLayerInletEpsilon;
+
+        // Mandatory (inherited) entries (unmodifiable)
+        flowDir         (1 0 0);
         z               (0 0 1);
         Uref            10.0;
-        Zref            20.0;
+        Zref            0.0;
         z0              uniform 0.1;
-        zGround         uniform 0.0;
+        d               uniform 0.0;
+
+        // Optional (inherited) entries (unmodifiable)
+        kappa           0.41;
+        Cmu             0.09;
+        initABL         true;
+        phi             phi;
+        C1              0.0;
+        C2              1.0;
+
+        // Conditional mandatory (inherited) entries (runtime modifiable)
+        value           uniform 0;    // when initABL=false
     }
     \endverbatim
 
+    The inherited entries are elaborated in:
+     - \link atmBoundaryLayer.H \endlink
+     - \link inletOutletFvPatchField.H \endlink
+
 See also
-    Foam::atmBoundaryLayer,
-    Foam::atmBoundaryLayerInletVelocityFvPatchVectorField,
-    Foam::atmBoundaryLayerInletKFvPatchScalarField
+    - Foam::atmBoundaryLayer
+    - Foam::atmBoundaryLayer::atmBoundaryLayerInletKFvPatchScalarField
+    - Foam::atmBoundaryLayer::atmBoundaryLayerInletOmegaFvPatchScalarField
+    - Foam::atmBoundaryLayer::atmBoundaryLayerInletVelocityFvPatchVectorField
+    - ExtendedCodeGuide::atmBoundaryLayer::atmBoundaryLayerInletEpsilon
 
 SourceFiles
     atmBoundaryLayerInletEpsilonFvPatchScalarField.C
@@ -104,7 +151,7 @@ public:
         );
 
         //- Construct by mapping given
-        //  atmBoundaryLayerInletEpsilonFvPatchScalarField onto a new patch
+        //- atmBoundaryLayerInletEpsilonFvPatchScalarField onto a new patch
         atmBoundaryLayerInletEpsilonFvPatchScalarField
         (
             const atmBoundaryLayerInletEpsilonFvPatchScalarField&,
@@ -142,11 +189,10 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();
-
 
         // Mapping functions
 

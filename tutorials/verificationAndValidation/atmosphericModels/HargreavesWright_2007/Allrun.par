@@ -1,0 +1,21 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+restore0Dir
+
+rasModel="kEpsilon"    # Tested options="kOmegaSST","kEpsilon"
+
+sed "s|RAS_MODEL|$rasModel|g" constant/turbulenceProperties.template > \
+    constant/turbulenceProperties
+
+runApplication blockMesh
+
+runApplication decomposePar
+
+runParallel renumberMesh -overwrite
+
+runParallel $(getApplication)
+
+#------------------------------------------------------------------------------

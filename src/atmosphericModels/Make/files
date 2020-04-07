@@ -1,10 +1,22 @@
+/* Models */
+
+atmosphericTurbulentTransportModels.C
+porosityModels/powerLawLopesdaCosta/powerLawLopesdaCosta.C
+
+
+/* Boundary conditions */
+
 derivedFvPatchFields/atmBoundaryLayer/atmBoundaryLayer.C
 derivedFvPatchFields/atmBoundaryLayerInletVelocity/atmBoundaryLayerInletVelocityFvPatchVectorField.C
 derivedFvPatchFields/atmBoundaryLayerInletK/atmBoundaryLayerInletKFvPatchScalarField.C
 derivedFvPatchFields/atmBoundaryLayerInletEpsilon/atmBoundaryLayerInletEpsilonFvPatchScalarField.C
+derivedFvPatchFields/atmBoundaryLayerInletOmega/atmBoundaryLayerInletOmegaFvPatchScalarField.C
 derivedFvPatchFields/nutkAtmRoughWallFunction/nutkAtmRoughWallFunctionFvPatchScalarField.C
 
-atmosphericTurbulentTransportModels.C
-porosityModels/powerLawLopesdaCosta/powerLawLopesdaCosta.C
+
+/* Wall function BCs */
+
+
+/* fvOptions */
 
 LIB = $(FOAM_LIBBIN)/libatmosphericModels
