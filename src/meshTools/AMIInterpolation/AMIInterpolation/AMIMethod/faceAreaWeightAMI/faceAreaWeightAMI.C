@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,76 @@ License
 #include "OBJstream.H"
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
+template<class SourcePatch, class TargetPatch>
+void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::initGeom
+(
+    const globalIndex& globalTgtFaces,
+    labelList& extendedTgtFaceIDs
+)
+{
+    // Create a representation of the target patch that covers the source patch
+    if (this->distributed())
+    {
+        this->extendedTgtPatchPtr_ =
+            this->createExtendedTgtPatch
+            (
+                this->srcPatch0_,
+                this->tgtPatch0_,
+                globalTgtFaces,
+                extendedTgtMapPtr_,
+                extendedTgtFaceIDs
+            );
+    }
+
+    const auto& src = this->srcPatch();
+    const auto& tgt = this->tgtPatch();
+
+    // Initialise area magnitudes
+    srcMagSf_.setSize(src.size(), 1.0);
+    tgtMagSf_.setSize(tgt.size(), 1.0);
+
+    // Source and target patch triangulations
+    this->triangulatePatch(src, srcTris_, srcMagSf_);
+    this->triangulatePatch(tgt, tgtTris_, tgtMagSf_);
+
+    if (debug)
+    {
+        static label nAMI = 0;
+
+        // Write out triangulated surfaces as OBJ files
+        OBJstream srcTriObj("srcTris_" + Foam::name(nAMI) + ".obj");
+        const pointField& srcPts = src.points();
+        forAll(srcTris_, facei)
+        {
+            const DynamicList<face>& faces = srcTris_[facei];
+            for (const face& f : faces)
+            {
+                srcTriObj.write
+                (
+                    triPointRef(srcPts[f[0]], srcPts[f[1]], srcPts[f[2]])
+                );
+            }
+        }
+
+        OBJstream tgtTriObj("tgtTris_" + Foam::name(nAMI) + ".obj");
+        const pointField& tgtPts = tgt.points();
+        forAll(tgtTris_, facei)
+        {
+            const DynamicList<face>& faces = tgtTris_[facei];
+            for (const face& f : faces)
+            {
+                tgtTriObj.write
+                (
+                    triPointRef(tgtPts[f[0]], tgtPts[f[1]], tgtPts[f[2]])
+                );
+            }
+        }
+
+        ++nAMI;
+    }
+}
+
 
 template<class SourcePatch, class TargetPatch>
 void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calcAddressing
@@ -148,7 +218,7 @@ bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::processSourceFace
     this->appendNbrFaces
     (
         tgtStartFacei,
-        this->tgtPatch_,
+        this->tgtPatch(),
         visitedFaces,
         nbrFaces
     );
@@ -184,7 +254,7 @@ bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::processSourceFace
             this->appendNbrFaces
             (
                 tgtFacei,
-                this->tgtPatch_,
+                this->tgtPatch(),
                 visitedFaces,
                 nbrFaces
             );
@@ -219,7 +289,7 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
 {
     addProfiling(ami, "faceAreaWeightAMI::setNextFaces");
 
-    const labelList& srcNbrFaces = this->srcPatch_.faceFaces()[srcFacei];
+    const labelList& srcNbrFaces = this->srcPatch().faceFaces()[srcFacei];
 
     // initialise tgtFacei
     tgtFacei = -1;
@@ -327,12 +397,12 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calcInterArea
 {
     addProfiling(ami, "faceAreaWeightAMI::interArea");
 
-    const pointField& srcPoints = this->srcPatch_.points();
-    const pointField& tgtPoints = this->tgtPatch_.points();
+    const pointField& srcPoints = this->srcPatch().points();
+    const pointField& tgtPoints = this->tgtPatch().points();
 
     // references to candidate faces
-    const face& src = this->srcPatch_[srcFacei];
-    const face& tgt = this->tgtPatch_[tgtFacei];
+    const face& src = this->srcPatch()[srcFacei];
+    const face& tgt = this->tgtPatch()[tgtFacei];
 
     // quick reject if either face has zero area
     if
@@ -356,14 +426,14 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calcInterArea
     );
 
     // crude resultant norm
-    vector n(-this->srcPatch_.faceNormals()[srcFacei]);
+    vector n(-this->srcPatch().faceNormals()[srcFacei]);
     if (this->reverseTarget_)
     {
-        n -= this->tgtPatch_.faceNormals()[tgtFacei];
+        n -= this->tgtPatch().faceNormals()[tgtFacei];
     }
     else
     {
-        n += this->tgtPatch_.faceNormals()[tgtFacei];
+        n += this->tgtPatch().faceNormals()[tgtFacei];
     }
     scalar magN = mag(n);
 
@@ -410,12 +480,12 @@ bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::overlaps
     const scalar threshold
 ) const
 {
-    const pointField& srcPoints = this->srcPatch_.points();
-    const pointField& tgtPoints = this->tgtPatch_.points();
+    const pointField& srcPoints = this->srcPatch().points();
+    const pointField& tgtPoints = this->tgtPatch().points();
 
     // references to candidate faces
-    const face& src = this->srcPatch_[srcFacei];
-    const face& tgt = this->tgtPatch_[tgtFacei];
+    const face& src = this->srcPatch()[srcFacei];
+    const face& tgt = this->tgtPatch()[tgtFacei];
 
     // quick reject if either face has zero area
     if
@@ -438,14 +508,14 @@ bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::overlaps
     );
 
     // crude resultant norm
-    vector n(-this->srcPatch_.faceNormals()[srcFacei]);
+    vector n(-this->srcPatch().faceNormals()[srcFacei]);
     if (this->reverseTarget_)
     {
-        n -= this->tgtPatch_.faceNormals()[tgtFacei];
+        n -= this->tgtPatch().faceNormals()[tgtFacei];
     }
     else
     {
-        n += this->tgtPatch_.faceNormals()[tgtFacei];
+        n += this->tgtPatch().faceNormals()[tgtFacei];
     }
     scalar magN = mag(n);
 
@@ -500,7 +570,7 @@ restartUncoveredSourceFace
         {
             ++nBelowMinWeight;
 
-            const face& f = this->srcPatch_[srcFacei];
+            const face& f = this->srcPatch()[srcFacei];
 
             forAll(f, fpi)
             {
@@ -563,65 +633,41 @@ Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::faceAreaWeightAMI
         requireMatch
     ),
     restartUncoveredSourceFace_(restartUncoveredSourceFace),
+    srcMagSf_(),
+    tgtMagSf_(),
     srcTris_(),
-    tgtTris_()
-{
-    this->triangulatePatch(srcPatch, srcTris_, this->srcMagSf_);
-    this->triangulatePatch(tgtPatch, tgtTris_, this->tgtMagSf_);
-
-    if (debug)
-    {
-        static label nAMI = 0;
-
-        // Write out triangulated surfaces as OBJ files
-        OBJstream srcTriObj("srcTris_" + Foam::name(nAMI) + ".obj");
-        const pointField& srcPts = srcPatch.points();
-        forAll(srcTris_, facei)
-        {
-            const DynamicList<face>& faces = srcTris_[facei];
-            for (const face& f : faces)
-            {
-                srcTriObj.write
-                (
-                    triPointRef(srcPts[f[0]], srcPts[f[1]], srcPts[f[2]])
-                );
-            }
-        }
-
-        OBJstream tgtTriObj("tgtTris_" + Foam::name(nAMI) + ".obj");
-        const pointField& tgtPts = tgtPatch.points();
-        forAll(tgtTris_, facei)
-        {
-            const DynamicList<face>& faces = tgtTris_[facei];
-            for (const face& f : faces)
-            {
-                tgtTriObj.write
-                (
-                    triPointRef(tgtPts[f[0]], tgtPts[f[1]], tgtPts[f[2]])
-                );
-            }
-        }
-
-        ++nAMI;
-    }
-}
+    tgtTris_(),
+    extendedTgtMapPtr_(nullptr)
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class SourcePatch, class TargetPatch>
-void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
+bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
 (
     labelListList& srcAddress,
     scalarListList& srcWeights,
     pointListList& srcCentroids,
     labelListList& tgtAddress,
     scalarListList& tgtWeights,
+    scalarList& srcMagSf,
+    scalarList& tgtMagSf,
+    autoPtr<mapDistribute>& srcMapPtr,
+    autoPtr<mapDistribute>& tgtMapPtr,
     label srcFacei,
     label tgtFacei
 )
 {
     addProfiling(ami, "faceAreaWeightAMI::calculate");
+
+    // Create global indexing for each patch
+    globalIndex globalSrcFaces(this->srcPatch0_.size());
+    globalIndex globalTgtFaces(this->tgtPatch0_.size());
+
+    // Initialise the geometry
+    labelList extendedTgtFaceIDs;
+    initGeom(globalTgtFaces, extendedTgtFaceIDs);
 
     bool ok =
         this->initialise
@@ -636,50 +682,54 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
 
     srcCentroids.setSize(srcAddress.size());
 
+    const auto& src = this->srcPatch();
+    const auto& tgt = this->tgtPatch();
 
-    if (!ok)
-    {
-        return;
-    }
-
-    // temporary storage for addressing and weights
-    List<DynamicList<label>> srcAddr(this->srcPatch_.size());
+    // Temporary storage for addressing and weights
+    List<DynamicList<label>> srcAddr(src.size());
     List<DynamicList<scalar>> srcWght(srcAddr.size());
     List<DynamicList<point>> srcCtr(srcAddr.size());
-    List<DynamicList<label>> tgtAddr(this->tgtPatch_.size());
+    List<DynamicList<label>> tgtAddr(tgt.size());
     List<DynamicList<scalar>> tgtWght(tgtAddr.size());
 
-    calcAddressing
-    (
-        srcAddr,
-        srcWght,
-        srcCtr,
-        tgtAddr,
-        tgtWght,
-        srcFacei,
-        tgtFacei
-    );
-
-    if (debug && !this->srcNonOverlap_.empty())
+    if (ok)
     {
-        Pout<< "    AMI: " << this->srcNonOverlap_.size()
-            << " non-overlap faces identified"
-            << endl;
-    }
-
-
-    // Check for badly covered faces
-    if (restartUncoveredSourceFace_)
-    {
-        restartUncoveredSourceFace
+        calcAddressing
         (
             srcAddr,
             srcWght,
             srcCtr,
             tgtAddr,
-            tgtWght
+            tgtWght,
+            srcFacei,
+            tgtFacei
         );
+
+        if (debug && !this->srcNonOverlap_.empty())
+        {
+            Pout<< "    AMI: " << this->srcNonOverlap_.size()
+                << " non-overlap faces identified"
+                << endl;
+        }
+
+        // Check for badly covered faces
+        if (restartUncoveredSourceFace_)
+        {
+            restartUncoveredSourceFace
+            (
+                srcAddr,
+                srcWght,
+                srcCtr,
+                tgtAddr,
+                tgtWght
+            );
+        }
     }
+
+
+    // Set the patch face areas
+    srcMagSf = std::move(srcMagSf_);
+    tgtMagSf = std::move(tgtMagSf_);
 
     // Transfer data to persistent storage
     forAll(srcAddr, i)
@@ -688,26 +738,76 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
         srcWeights[i].transfer(srcWght[i]);
         srcCentroids[i].transfer(srcCtr[i]);
     }
+
     forAll(tgtAddr, i)
     {
         tgtAddress[i].transfer(tgtAddr[i]);
         tgtWeights[i].transfer(tgtWght[i]);
     }
-}
 
+    if (this->distributed())
+    {
+        for (labelList& addressing : srcAddress)
+        {
+            for (label& addr : addressing)
+            {
+                addr = extendedTgtFaceIDs[addr];
+            }
+        }
 
-template<class SourcePatch, class TargetPatch>
-void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::setMagSf
-(
-    const TargetPatch& tgtPatch,
-    const mapDistribute& map,
-    scalarList& srcMagSf,
-    scalarList& tgtMagSf
-) const
-{
-    srcMagSf = std::move(this->srcMagSf_);
-    tgtMagSf = std::move(this->tgtMagSf_);
-    map.reverseDistribute(tgtPatch.size(), tgtMagSf);
+        for (labelList& addressing : tgtAddress)
+        {
+            globalSrcFaces.inplaceToGlobal(addressing);
+        }
+
+        // Send data back to originating procs. Note that contributions
+        // from different processors get added (ListOps::appendEqOp)
+
+        mapDistributeBase::distribute
+        (
+            Pstream::commsTypes::nonBlocking,
+            List<labelPair>(),
+            this->tgtPatch0_.size(),
+            extendedTgtMapPtr_->constructMap(),
+            false,                      // has flip
+            extendedTgtMapPtr_->subMap(),
+            false,                      // has flip
+            tgtAddress,
+            ListOps::appendEqOp<label>(),
+            flipOp(),                   // flip operation
+            labelList()
+        );
+
+        mapDistributeBase::distribute
+        (
+            Pstream::commsTypes::nonBlocking,
+            List<labelPair>(),
+            this->tgtPatch0_.size(),
+            extendedTgtMapPtr_->constructMap(),
+            false,
+            extendedTgtMapPtr_->subMap(),
+            false,
+            tgtWeights,
+            ListOps::appendEqOp<scalar>(),
+            flipOp(),
+            scalarList()
+        );
+
+        // Note: using patch face areas calculated by the AMI method
+        extendedTgtMapPtr_->reverseDistribute
+        (
+            this->tgtPatch0_.size(),
+            tgtMagSf
+        );
+
+        // Cache maps and reset addresses
+        List<Map<label>> cMapSrc;
+        srcMapPtr.reset(new mapDistribute(globalSrcFaces, tgtAddress, cMapSrc));
+        List<Map<label>> cMapTgt;
+        tgtMapPtr.reset(new mapDistribute(globalTgtFaces, srcAddress, cMapTgt));
+    }
+
+    return true;
 }
 
 

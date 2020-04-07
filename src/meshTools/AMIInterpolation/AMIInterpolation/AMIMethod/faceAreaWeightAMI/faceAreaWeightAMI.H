@@ -61,6 +61,12 @@ private:
         //- Flag to restart uncovered source faces
         const bool restartUncoveredSourceFace_;
 
+        //- Source face areas
+        List<scalar> srcMagSf_;
+
+        //- Target face areas
+        List<scalar> tgtMagSf_;
+
         //- Storage for src-side triangle decomposition
         List<DynamicList<face>> srcTris_;
 
@@ -70,6 +76,9 @@ private:
 
 protected:
 
+    autoPtr<mapDistribute> extendedTgtMapPtr_;
+
+
     // Protected Member Functions
 
         //- No copy construct
@@ -77,6 +86,14 @@ protected:
 
         //- No copy assignment
         void operator=(const faceAreaWeightAMI&) = delete;
+
+        //- Initialise the geometry
+        void initGeom
+        (
+            const globalIndex& globalTgtFaces,
+            labelList& extendedTgtFaceIDs
+        );
+
 
         // Marching front
 
@@ -179,25 +196,20 @@ public:
         // Manipulation
 
             //- Update addressing, weights and centroids
-            virtual void calculate
+            virtual bool calculate
             (
                 labelListList& srcAddress,
                 scalarListList& srcWeights,
                 pointListList& srcCentroids,
                 labelListList& tgtAddress,
                 scalarListList& tgtWeights,
+                scalarList& srcMagSf,
+                scalarList& tgtMagSf,
+                autoPtr<mapDistribute>& srcMapPtr,
+                autoPtr<mapDistribute>& tgtMapPtr,
                 label srcFacei = -1,
                 label tgtFacei = -1
             );
-
-            //- Set the face areas for parallel runs
-            virtual void setMagSf
-            (
-                const TargetPatch& tgtPatch,
-                const mapDistribute& map,
-                scalarList& srcMagSf,
-                scalarList& tgtMagSf
-            ) const;
 
             //- Normalise the weight. Can optionally subset addressing
             //- (e.g. for mapNearest)

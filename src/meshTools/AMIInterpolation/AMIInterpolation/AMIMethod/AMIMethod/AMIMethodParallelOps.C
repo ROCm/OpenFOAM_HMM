@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,8 +25,6 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
-
-#include "AMIInterpolation.H"
 #include "mergePoints.H"
 #include "mapDistribute.H"
 #include "AABBTree.H"
@@ -34,7 +32,7 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class SourcePatch, class TargetPatch>
-Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcDistribution
+Foam::label Foam::AMIMethod<SourcePatch, TargetPatch>::calcDistribution
 (
     const SourcePatch& srcPatch,
     const TargetPatch& tgtPatch
@@ -80,8 +78,7 @@ Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcDistribution
 
 
 template<class SourcePatch, class TargetPatch>
-Foam::label
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcOverlappingProcs
+Foam::label Foam::AMIMethod<SourcePatch, TargetPatch>::calcOverlappingProcs
 (
     const List<treeBoundBoxList>& procBb,
     const treeBoundBox& bb,
@@ -102,7 +99,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcOverlappingProcs
             if (tbb.overlaps(bb))
             {
                 overlaps[proci] = true;
-                nOverlaps++;
+                ++nOverlaps;
                 break;
             }
         }
@@ -113,7 +110,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcOverlappingProcs
 
 
 template<class SourcePatch, class TargetPatch>
-void Foam::AMIInterpolation<SourcePatch, TargetPatch>::distributePatches
+void Foam::AMIMethod<SourcePatch, TargetPatch>::distributePatches
 (
     const mapDistribute& map,
     const TargetPatch& pp,
@@ -198,7 +195,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::distributePatches
 
 
 template<class SourcePatch, class TargetPatch>
-void Foam::AMIInterpolation<SourcePatch, TargetPatch>::
+void Foam::AMIMethod<SourcePatch, TargetPatch>::
 distributeAndMergePatches
 (
     const mapDistribute& map,
@@ -313,7 +310,7 @@ distributeAndMergePatches
 
 template<class SourcePatch, class TargetPatch>
 Foam::autoPtr<Foam::mapDistribute>
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcProcMap
+Foam::AMIMethod<SourcePatch, TargetPatch>::calcProcMap
 (
     const SourcePatch& srcPatch,
     const TargetPatch& tgtPatch

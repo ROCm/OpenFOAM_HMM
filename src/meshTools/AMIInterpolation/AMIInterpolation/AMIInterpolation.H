@@ -188,49 +188,6 @@ private:
         void operator=(const AMIInterpolation&) = delete;
 
 
-        // Parallel functionality
-
-            //- Calculate if patches are on multiple processors
-            label calcDistribution
-            (
-                const SourcePatch& srcPatch,
-                const TargetPatch& tgtPatch
-            ) const;
-
-            label calcOverlappingProcs
-            (
-                const List<treeBoundBoxList>& procBb,
-                const treeBoundBox& bb,
-                boolList& overlaps
-            ) const;
-
-            void distributePatches
-            (
-                const mapDistribute& map,
-                const TargetPatch& pp,
-                const globalIndex& gi,
-                List<faceList>& faces,
-                List<pointField>& points,
-                List<labelList>& tgtFaceIDs
-            ) const;
-
-            void distributeAndMergePatches
-            (
-                const mapDistribute& map,
-                const TargetPatch& tgtPatch,
-                const globalIndex& gi,
-                faceList& tgtFaces,
-                pointField& tgtPoints,
-                labelList& tgtFaceIDs
-            ) const;
-
-            autoPtr<mapDistribute> calcProcMap
-            (
-                const SourcePatch& srcPatch,
-                const TargetPatch& tgtPatch
-            ) const;
-
-
         // Initialisation
 
             //- Project points to surface
@@ -637,7 +594,6 @@ public:
 
 #ifdef NoRepository
     #include "AMIInterpolation.C"
-    #include "AMIInterpolationParallelOps.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

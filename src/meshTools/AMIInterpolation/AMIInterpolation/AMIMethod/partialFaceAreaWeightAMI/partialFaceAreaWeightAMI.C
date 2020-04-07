@@ -73,7 +73,8 @@ partialFaceAreaWeightAMI
         tgtPatch,
         triMode,
         reverseTarget,
-        requireMatch
+        requireMatch,
+        true // false // Not performing restart on low weights - valid for partial match
     )
 {}
 
@@ -88,93 +89,60 @@ bool Foam::partialFaceAreaWeightAMI<SourcePatch, TargetPatch>::conformal() const
 
 
 template<class SourcePatch, class TargetPatch>
-void Foam::partialFaceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
+bool Foam::partialFaceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
 (
     labelListList& srcAddress,
     scalarListList& srcWeights,
     pointListList& srcCentroids,
     labelListList& tgtAddress,
     scalarListList& tgtWeights,
+    scalarList& srcMagSf,
+    scalarList& tgtMagSf,
+    autoPtr<mapDistribute>& srcMapPtr,
+    autoPtr<mapDistribute>& tgtMapPtr,
     label srcFacei,
     label tgtFacei
 )
 {
-    bool ok =
-        this->initialise
+     bool ok =
+        faceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
         (
             srcAddress,
             srcWeights,
+            srcCentroids,
             tgtAddress,
             tgtWeights,
+            srcMagSf,
+            tgtMagSf,
+            srcMapPtr,
+            tgtMapPtr,
             srcFacei,
             tgtFacei
         );
 
-    if (!ok)
+    if (ok)
     {
-        return;
+        if (this->distributed())
+        {
+            scalarList newTgtMagSf(std::move(tgtMagSf));
+
+            // Assign default sizes. Override selected values with
+            // calculated values. This is to support ACMI
+            // where some of the target faces are never used (so never get sent
+            // over and hence never assigned to)
+            tgtMagSf = this->tgtPatch0_.magFaceAreas();
+
+            for (const labelList& smap : this->extendedTgtMapPtr_->subMap())
+            {
+                UIndirectList<scalar>(tgtMagSf, smap) =
+                    UIndirectList<scalar>(newTgtMagSf, smap);
+            }
+        }
+
+        return true;
     }
 
-    srcCentroids.setSize(srcAddress.size());
-
-    // temporary storage for addressing and weights
-    List<DynamicList<label>> srcAddr(this->srcPatch_.size());
-    List<DynamicList<scalar>> srcWght(srcAddr.size());
-    List<DynamicList<point>> srcCtr(srcAddr.size());
-    List<DynamicList<label>> tgtAddr(this->tgtPatch_.size());
-    List<DynamicList<scalar>> tgtWght(tgtAddr.size());
-
-    faceAreaWeightAMI<SourcePatch, TargetPatch>::calcAddressing
-    (
-        srcAddr,
-        srcWght,
-        srcCtr,
-        tgtAddr,
-        tgtWght,
-        srcFacei,
-        tgtFacei
-    );
-
-    // transfer data to persistent storage
-    forAll(srcAddr, i)
-    {
-        srcAddress[i].transfer(srcAddr[i]);
-        srcWeights[i].transfer(srcWght[i]);
-        srcCentroids[i].transfer(srcCtr[i]);
-    }
-    forAll(tgtAddr, i)
-    {
-        tgtAddress[i].transfer(tgtAddr[i]);
-        tgtWeights[i].transfer(tgtWght[i]);
-    }
-}
-
-
-template<class SourcePatch, class TargetPatch>
-void Foam::partialFaceAreaWeightAMI<SourcePatch, TargetPatch>::setMagSf
-(
-    const TargetPatch& tgtPatch,
-    const mapDistribute& map,
-    scalarList& srcMagSf,
-    scalarList& tgtMagSf
-) const
-{
-    srcMagSf = std::move(this->srcMagSf_);
-
-    scalarList newTgtMagSf(std::move(this->tgtMagSf_));
-    map.reverseDistribute(tgtPatch.size(), newTgtMagSf);
-
-    // Assign default sizes. Override selected values with
-    // calculated values. This is to support ACMI
-    // where some of the target faces are never used (so never get sent
-    // over and hence never assigned to)
-    tgtMagSf = tgtPatch.magFaceAreas();
-
-    for (const labelList& smap : map.subMap())
-    {
-        UIndirectList<scalar>(tgtMagSf, smap) =
-            UIndirectList<scalar>(newTgtMagSf, smap);
-    }
+    return false;
 }
 
 

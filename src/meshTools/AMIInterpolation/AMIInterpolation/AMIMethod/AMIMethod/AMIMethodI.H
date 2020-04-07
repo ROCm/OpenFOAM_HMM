@@ -26,34 +26,30 @@ License
 \*---------------------------------------------------------------------------*/
 
 template<class SourcePatch, class TargetPatch>
-inline const Foam::List<Foam::scalar>&
-Foam::AMIMethod<SourcePatch, TargetPatch>::srcMagSf() const
+inline const SourcePatch&
+Foam::AMIMethod<SourcePatch, TargetPatch>::srcPatch() const
 {
-    return srcMagSf_;
+    return srcPatch0_;
 }
 
 
 template<class SourcePatch, class TargetPatch>
-inline Foam::List<Foam::scalar>&
-Foam::AMIMethod<SourcePatch, TargetPatch>::srcMagSf()
+inline const TargetPatch&
+Foam::AMIMethod<SourcePatch, TargetPatch>::tgtPatch() const
 {
-    return srcMagSf_;
+    if (extendedTgtPatchPtr_)
+    {
+        return extendedTgtPatchPtr_();
+    }
+
+    return tgtPatch0_;
 }
 
 
 template<class SourcePatch, class TargetPatch>
-inline const Foam::List<Foam::scalar>&
-Foam::AMIMethod<SourcePatch, TargetPatch>::tgtMagSf() const
+bool Foam::AMIMethod<SourcePatch, TargetPatch>::distributed() const
 {
-    return tgtMagSf_;
-}
-
-
-template<class SourcePatch, class TargetPatch>
-inline Foam::List<Foam::scalar>&
-Foam::AMIMethod<SourcePatch, TargetPatch>::tgtMagSf()
-{
-    return tgtMagSf_;
+    return singleMeshProc_ == -1;
 }
 
 

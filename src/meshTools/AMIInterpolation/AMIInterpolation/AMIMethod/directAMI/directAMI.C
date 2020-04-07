@@ -40,20 +40,20 @@ void Foam::directAMI<SourcePatch, TargetPatch>::appendToDirectSeeds
     label& tgtFacei
 ) const
 {
-    const labelList& srcNbr = this->srcPatch_.faceFaces()[srcFacei];
-    const labelList& tgtNbr = this->tgtPatch_.faceFaces()[tgtFacei];
+    const labelList& srcNbr = this->srcPatch().faceFaces()[srcFacei];
+    const labelList& tgtNbr = this->tgtPatch().faceFaces()[tgtFacei];
 
-    const pointField& srcPoints = this->srcPatch_.points();
-    const pointField& tgtPoints = this->tgtPatch_.points();
+    const pointField& srcPoints = this->srcPatch().points();
+    const pointField& tgtPoints = this->tgtPatch().points();
 
-    const vectorField& srcCf = this->srcPatch_.faceCentres();
+    const vectorField& srcCf = this->srcPatch().faceCentres();
 
     for (const label srcI : srcNbr)
     {
         if ((mapFlag[srcI] == 0) && (srcTgtSeed[srcI] == -1))
         {
             // first attempt: match by comparing face centres
-            const face& srcF = this->srcPatch_[srcI];
+            const face& srcF = this->srcPatch()[srcI];
             const point& srcC = srcCf[srcI];
 
             scalar tol = GREAT;
@@ -71,7 +71,7 @@ void Foam::directAMI<SourcePatch, TargetPatch>::appendToDirectSeeds
             bool found = false;
             for (const label tgtI : tgtNbr)
             {
-                const face& tgtF = this->tgtPatch_[tgtI];
+                const face& tgtF = this->tgtPatch()[tgtI];
                 const point tgtC = tgtF.centre(tgtPoints);
 
                 if (mag(srcC - tgtC) < tol)
@@ -93,7 +93,7 @@ void Foam::directAMI<SourcePatch, TargetPatch>::appendToDirectSeeds
 
                 for (const label tgtI : tgtNbr)
                 {
-                    const face& tgtF = this->tgtPatch_[tgtI];
+                    const face& tgtF = this->tgtPatch()[tgtI];
                     pointHit ray = tgtF.ray(srcCf[srcI], srcN, tgtPoints);
 
                     if (ray.hit())
@@ -126,7 +126,7 @@ void Foam::directAMI<SourcePatch, TargetPatch>::appendToDirectSeeds
                     Pout<< "target neighbours:" << nl;
                     for (const label tgtI : tgtNbr)
                     {
-                        const face& tgtF = this->tgtPatch_[tgtI];
+                        const face& tgtF = this->tgtPatch()[tgtI];
 
                         Pout<< "face id: " << tgtI
                             << " centre=" << tgtF.centre(tgtPoints)
@@ -208,13 +208,17 @@ Foam::directAMI<SourcePatch, TargetPatch>::directAMI
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class SourcePatch, class TargetPatch>
-void Foam::directAMI<SourcePatch, TargetPatch>::calculate
+bool Foam::directAMI<SourcePatch, TargetPatch>::calculate
 (
     labelListList& srcAddress,
     scalarListList& srcWeights,
     pointListList& srcCentroids,
     labelListList& tgtAddress,
     scalarListList& tgtWeights,
+    scalarList& srcMagSf,
+    scalarList& tgtMagSf,
+    autoPtr<mapDistribute>& srcMapPtr,
+    autoPtr<mapDistribute>& tgtMapPtr,
     label srcFacei,
     label tgtFacei
 )
@@ -232,13 +236,13 @@ void Foam::directAMI<SourcePatch, TargetPatch>::calculate
 
     if (!ok)
     {
-        return;
+        return false;
     }
 
-
+    NotImplemented;
     // temporary storage for addressing and weights
-    List<DynamicList<label>> srcAddr(this->srcPatch_.size());
-    List<DynamicList<label>> tgtAddr(this->tgtPatch_.size());
+    List<DynamicList<label>> srcAddr(this->srcPatch0_.size());
+    List<DynamicList<label>> tgtAddr(this->tgtPatch0_.size());
 
 
     // construct weights and addressing
@@ -277,7 +281,7 @@ void Foam::directAMI<SourcePatch, TargetPatch>::calculate
             tgtFacei
         );
 
-        if (srcFacei < 0 && nTested < this->srcPatch_.size())
+        if (srcFacei < 0 && nTested < this->srcPatch().size())
         {
             restartAdvancingFront(mapFlag, nonOverlapFaces, srcFacei, tgtFacei);
         }
@@ -306,20 +310,8 @@ void Foam::directAMI<SourcePatch, TargetPatch>::calculate
         tgtAddress[i].transfer(tgtAddr[i]);
         tgtWeights[i] = scalarList(1, magSf);
     }
-}
 
-
-template<class SourcePatch, class TargetPatch>
-void Foam::directAMI<SourcePatch, TargetPatch>::setMagSf
-(
-    const TargetPatch& tgtPatch,
-    const mapDistribute& map,
-    scalarList& srcMagSf,
-    scalarList& tgtMagSf
-) const
-{
-    srcMagSf = std::move(this->srcMagSf_);
-    tgtMagSf = scalarList(tgtPatch.size(), 1.0);
+    return true;
 }
 
 

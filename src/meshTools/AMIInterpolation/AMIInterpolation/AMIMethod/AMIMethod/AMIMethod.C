@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,10 +38,13 @@ License
 template<class SourcePatch, class TargetPatch>
 void Foam::AMIMethod<SourcePatch, TargetPatch>::checkPatches() const
 {
-    if (debug && (!srcPatch_.size() || !tgtPatch_.size()))
+    const auto& src = srcPatch();
+    const auto& tgt = tgtPatch();
+
+    if (debug && (!src.size() || !tgt.size()))
     {
         Pout<< "AMI: Patches not on processor: Source faces = "
-            << srcPatch_.size() << ", target faces = " << tgtPatch_.size()
+            << src.size() << ", target faces = " << tgt.size()
             << endl;
     }
 
@@ -50,9 +53,9 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::checkPatches() const
     {
         const scalar maxBoundsError = 0.05;
 
-        // check bounds of source and target
-        boundBox bbSrc(srcPatch_.points(), srcPatch_.meshPoints(), true);
-        boundBox bbTgt(tgtPatch_.points(), tgtPatch_.meshPoints(), true);
+        // Check bounds of source and target
+        boundBox bbSrc(src.points(), src.meshPoints(), true);
+        boundBox bbTgt(tgt.points(), tgt.meshPoints(), true);
 
         boundBox bbTgtInf(bbTgt);
         bbTgtInf.inflate(maxBoundsError);
@@ -73,6 +76,56 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::checkPatches() const
 
 
 template<class SourcePatch, class TargetPatch>
+Foam::autoPtr<TargetPatch>
+Foam::AMIMethod<SourcePatch, TargetPatch>::createExtendedTgtPatch
+(
+    const SourcePatch& srcPatch,
+    const TargetPatch& tgtPatch,
+    const globalIndex& globalTgtFaces,
+    autoPtr<mapDistribute>& mapPtr,
+    labelList& extendedTgtFaceIDs
+) const
+{
+    // Create a representation of the src mesh that is extended to overlap the
+    // tgt mesh
+
+    // Create processor map of extended cells. This map gets (possibly
+    // remote) cells from the src mesh such that they (together) cover
+    // all of tgt
+    mapPtr = calcProcMap(srcPatch, tgtPatch);
+    const mapDistribute& map = mapPtr();
+
+    // Create new target patch that fully encompasses source patch
+
+    // Faces and points
+    // faceList newTgtFaces_;
+    // pointField newTgtPoints_;
+
+    // Original faces from tgtPatch (in globalIndexing since might be
+    // remote)
+    distributeAndMergePatches
+    (
+        map,
+        tgtPatch,
+        globalTgtFaces,
+        newTgtFaces_,
+        newTgtPoints_,
+        extendedTgtFaceIDs
+    );
+
+    return autoPtr<TargetPatch>::New
+    (
+        SubList<face>
+        (
+            newTgtFaces_,
+            newTgtFaces_.size()
+        ),
+        newTgtPoints_
+    );
+}
+
+
+template<class SourcePatch, class TargetPatch>
 bool Foam::AMIMethod<SourcePatch, TargetPatch>::initialise
 (
     labelListList& srcAddress,
@@ -83,38 +136,41 @@ bool Foam::AMIMethod<SourcePatch, TargetPatch>::initialise
     label& tgtFacei
 )
 {
+    const auto& src = srcPatch();
+    const auto& tgt = tgtPatch();
+
     checkPatches();
 
-    // set initial sizes for weights and addressing - must be done even if
+    // Set initial sizes for weights and addressing - must be done even if
     // returns false below
-    srcAddress.setSize(srcPatch_.size());
-    srcWeights.setSize(srcPatch_.size());
-    tgtAddress.setSize(tgtPatch_.size());
-    tgtWeights.setSize(tgtPatch_.size());
+    srcAddress.setSize(src.size());
+    srcWeights.setSize(srcAddress.size());
+    tgtAddress.setSize(tgt.size());
+    tgtWeights.setSize(tgtAddress.size());
 
-    // check that patch sizes are valid
-    if (!srcPatch_.size())
+    // Check that patch sizes are valid
+    if (!src.size())
     {
         return false;
     }
-    else if (!tgtPatch_.size())
+    else if (!tgt.size())
     {
         WarningInFunction
-            << srcPatch_.size() << " source faces but no target faces" << endl;
+            << src.size() << " source faces but no target faces" << endl;
 
         return false;
     }
 
-    // reset the octree
+    // Reset the octree
     resetTree();
 
-    // find initial face match using brute force/octree search
+    // Find initial face match using brute force/octree search
     if ((srcFacei == -1) || (tgtFacei == -1))
     {
         srcFacei = 0;
         tgtFacei = 0;
         bool foundFace = false;
-        forAll(srcPatch_, facei)
+        forAll(src, facei)
         {
             tgtFacei = findTargetFace(facei);
             if (tgtFacei >= 0)
@@ -202,10 +258,12 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::writeIntersectionOBJ
 template<class SourcePatch, class TargetPatch>
 void Foam::AMIMethod<SourcePatch, TargetPatch>::resetTree()
 {
+    const auto& tgt = tgtPatch();
+
     // Clear the old octree
     treePtr_.clear();
 
-    treeBoundBox bb(tgtPatch_.points(), tgtPatch_.meshPoints());
+    treeBoundBox bb(tgt.points(), tgt.meshPoints());
     bb.inflate(0.01);
 
     if (!treePtr_.valid())
@@ -217,7 +275,7 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::resetTree()
                 treeType
                 (
                     false,
-                    tgtPatch_,
+                    tgt,
                     indexedOctree<treeType>::perturbTol()
                 ),
                 bb,                         // overall search domain
@@ -238,10 +296,12 @@ Foam::label Foam::AMIMethod<SourcePatch, TargetPatch>::findTargetFace
     const label srcFacePti
 ) const
 {
+    const auto& src = srcPatch();
+
     label targetFacei = -1;
 
-    const pointField& srcPts = srcPatch_.points();
-    const face& srcFace = srcPatch_[srcFacei];
+    const pointField& srcPts = src.points();
+    const face& srcFace = src[srcFacei];
 
     findNearestMaskedOp<TargetPatch> fnOp(*treePtr_, excludeFaces);
 
@@ -282,7 +342,7 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::appendNbrFaces
 
     const labelList& nbrFaces = patch.faceFaces()[facei];
 
-    // filter out faces already visited from face neighbours
+    // Filter out faces already visited from face neighbours
     for (const label nbrFacei : nbrFaces)
     {
         bool valid = true;
@@ -307,7 +367,7 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::appendNbrFaces
             }
         }
 
-        // prevent addition of face if it is not on the same plane-ish
+        // Prevent addition of face if it is not on the same plane-ish
         if (valid)
         {
             const vector& n1 = patch.faceNormals()[facei];
@@ -382,14 +442,14 @@ Foam::AMIMethod<SourcePatch, TargetPatch>::AMIMethod
     const bool requireMatch
 )
 :
-    srcPatch_(srcPatch),
-    tgtPatch_(tgtPatch),
+    srcPatch0_(srcPatch),
+    tgtPatch0_(tgtPatch),
+    extendedTgtPatchPtr_(nullptr),
     reverseTarget_(reverseTarget),
     requireMatch_(requireMatch),
-    srcMagSf_(srcPatch.size(), 1.0),
-    tgtMagSf_(tgtPatch.size(), 1.0),
     srcNonOverlap_(),
-    triMode_(triMode)
+    triMode_(triMode),
+    singleMeshProc_(calcDistribution(srcPatch, tgtPatch))
 {
     // Note: setting srcMagSf and tgtMagSf to 1 by default for 1-to-1 methods
     // - others will need to overwrite as necessary

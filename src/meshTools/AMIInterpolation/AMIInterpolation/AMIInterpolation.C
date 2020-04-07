@@ -66,7 +66,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::patchMagSf
     const faceAreaIntersect::triangulationMode triMode
 )
 {
-    tmp<scalarField> tResult(new scalarField(patch.size(), Zero));
+    auto tResult = tmp<scalarField>::New(patch.size(), Zero);
     scalarField& result = tResult.ref();
 
     const pointField& patchPoints = patch.localPoints();
@@ -538,7 +538,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::constructFromSurface
     if (surfPtr.valid())
     {
         // Create new patches for source and target
-        pointField srcPoints = srcPatch.points();
+        pointField srcPoints(srcPatch.points());
         SourcePatch srcPatch0
         (
             SubList<face>
@@ -559,7 +559,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::constructFromSurface
             }
         }
 
-        pointField tgtPoints = tgtPatch.points();
+        pointField tgtPoints(tgtPatch.points());
         TargetPatch tgtPatch0
         (
             SubList<face>
@@ -610,27 +610,18 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     const bool reverseTarget
 )
 :
-    methodName_(interpolationMethodNames_[method]),
-    reverseTarget_(reverseTarget),
-    requireMatch_(requireMatch),
-    singlePatchProc_(-999),
-    lowWeightCorrection_(lowWeightCorrection),
-    srcMagSf_(),
-    srcAddress_(),
-    srcWeights_(),
-    srcWeightsSum_(),
-    srcCentroids_(),
-    tgtMagSf_(),
-    tgtAddress_(),
-    tgtWeights_(),
-    tgtWeightsSum_(),
-    tgtCentroids_(),
-    triMode_(triMode),
-    srcMapPtr_(nullptr),
-    tgtMapPtr_(nullptr)
-{
-    update(srcPatch, tgtPatch);
-}
+    AMIInterpolation
+    (
+        srcPatch,
+        tgtPatch,
+        nullptr,
+        triMode,
+        requireMatch,
+        method,
+        lowWeightCorrection,
+        reverseTarget
+    )
+{}
 
 
 template<class SourcePatch, class TargetPatch>
@@ -645,27 +636,18 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     const bool reverseTarget
 )
 :
-    methodName_(methodName),
-    reverseTarget_(reverseTarget),
-    requireMatch_(requireMatch),
-    singlePatchProc_(-999),
-    lowWeightCorrection_(lowWeightCorrection),
-    srcMagSf_(),
-    srcAddress_(),
-    srcWeights_(),
-    srcWeightsSum_(),
-    srcCentroids_(),
-    tgtMagSf_(),
-    tgtAddress_(),
-    tgtWeights_(),
-    tgtWeightsSum_(),
-    tgtCentroids_(),
-    triMode_(triMode),
-    srcMapPtr_(nullptr),
-    tgtMapPtr_(nullptr)
-{
-    update(srcPatch, tgtPatch);
-}
+    AMIInterpolation
+    (
+        srcPatch,
+        tgtPatch,
+        nullptr,
+        triMode,
+        requireMatch,
+        interpolationMethodNames_.get(methodName),
+        lowWeightCorrection,
+        reverseTarget
+    )
+{}
 
 
 template<class SourcePatch, class TargetPatch>
@@ -717,27 +699,18 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     const bool reverseTarget
 )
 :
-    methodName_(methodName),
-    reverseTarget_(reverseTarget),
-    requireMatch_(requireMatch),
-    singlePatchProc_(-999),
-    lowWeightCorrection_(lowWeightCorrection),
-    srcMagSf_(),
-    srcAddress_(),
-    srcWeights_(),
-    srcWeightsSum_(),
-    srcCentroids_(),
-    tgtMagSf_(),
-    tgtAddress_(),
-    tgtWeights_(),
-    tgtWeightsSum_(),
-    tgtCentroids_(),
-    triMode_(triMode),
-    srcMapPtr_(nullptr),
-    tgtMapPtr_(nullptr)
-{
-    constructFromSurface(srcPatch, tgtPatch, surfPtr);
-}
+    AMIInterpolation
+    (
+        srcPatch,
+        tgtPatch,
+        surfPtr,
+        triMode,
+        requireMatch,
+        interpolationMethodNames_.get(methodName),
+        lowWeightCorrection,
+        reverseTarget
+    )
+{}
 
 
 template<class SourcePatch, class TargetPatch>
@@ -873,188 +846,37 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
         << tgtTotalSize << " target faces"
         << endl;
 
-    // Calculate if patches present on multiple processors
-    singlePatchProc_ = calcDistribution(srcPatch, tgtPatch);
 
-    if (singlePatchProc_ == -1)
-    {
-        // Convert local addressing to global addressing
-        globalIndex globalSrcFaces(srcPatch.size());
-        globalIndex globalTgtFaces(tgtPatch.size());
-
-        // Create processor map of overlapping faces. This map gets
-        // (possibly remote) faces from the tgtPatch such that they (together)
-        // cover all of the srcPatch
-        autoPtr<mapDistribute> mapPtr = calcProcMap(srcPatch, tgtPatch);
-        const mapDistribute& map = mapPtr();
-
-        // Create new target patch that fully encompasses source patch
-
-        // Faces and points
-        faceList newTgtFaces;
-        pointField newTgtPoints;
-
-        // Original faces from tgtPatch (in globalIndexing since might be
-        // remote)
-        labelList tgtFaceIDs;
-        distributeAndMergePatches
+    // Calculate AMI interpolation
+    autoPtr<AMIMethod<SourcePatch, TargetPatch>> AMIPtr
+    (
+        AMIMethod<SourcePatch, TargetPatch>::New
         (
-            map,
+            methodName_,
+            srcPatch,
             tgtPatch,
-            globalTgtFaces,
-            newTgtFaces,
-            newTgtPoints,
-            tgtFaceIDs
-        );
+            triMode_,
+            reverseTarget_,
+            requireMatch_ && (lowWeightCorrection_ < 0)
+        )
+    );
 
-        const TargetPatch
-            newTgtPatch
-            (
-                SubList<face>
-                (
-                    newTgtFaces,
-                    newTgtFaces.size()
-                ),
-                newTgtPoints
-            );
+    AMIPtr->calculate
+    (
+        srcAddress_,
+        srcWeights_,
+        srcCentroids_,
+        tgtAddress_,
+        tgtWeights_,
+        srcMagSf_,
+        tgtMagSf_,
+        srcMapPtr_,
+        tgtMapPtr_
+    );
 
-        // Calculate AMI interpolation
-        autoPtr<AMIMethod<SourcePatch, TargetPatch>> AMIPtr
-        (
-            AMIMethod<SourcePatch, TargetPatch>::New
-            (
-                methodName_,
-                srcPatch,
-                newTgtPatch,
-                triMode_,
-                reverseTarget_,
-                requireMatch_ && (lowWeightCorrection_ < 0)
-            )
-        );
+    AMIPtr->normaliseWeights(true, *this);
 
-        AMIPtr->calculate
-        (
-            srcAddress_,
-            srcWeights_,
-            srcCentroids_,
-            tgtAddress_,
-            tgtWeights_
-        );
-
-
-        // Note: using patch face areas calculated by the AMI method
-        // - TODO: move into the calculate or normalise method?
-        AMIPtr->setMagSf(tgtPatch, map, srcMagSf_, tgtMagSf_);
-
-
-        // Now
-        // ~~~
-        //  srcAddress_ :   per srcPatch face a list of the newTgtPatch (not
-        //                  tgtPatch) faces it overlaps
-        //  tgtAddress_ :   per newTgtPatch (not tgtPatch) face a list of the
-        //                  srcPatch faces it overlaps
-
-        if (debug)
-        {
-            writeFaceConnectivity(srcPatch, newTgtPatch, srcAddress_);
-        }
-
-
-        // Rework newTgtPatch indices into globalIndices of tgtPatch
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-        for (labelList& addressing : srcAddress_)
-        {
-            for (label& addr : addressing)
-            {
-                addr = tgtFaceIDs[addr];
-            }
-        }
-
-        for (labelList& addressing : tgtAddress_)
-        {
-            globalSrcFaces.inplaceToGlobal(addressing);
-        }
-
-        // Send data back to originating procs. Note that contributions
-        // from different processors get added (ListOps::appendEqOp)
-
-        mapDistributeBase::distribute
-        (
-            Pstream::commsTypes::nonBlocking,
-            List<labelPair>(),
-            tgtPatch.size(),
-            map.constructMap(),
-            false,                      // has flip
-            map.subMap(),
-            false,                      // has flip
-            tgtAddress_,
-            ListOps::appendEqOp<label>(),
-            flipOp(),                   // flip operation
-            labelList()
-        );
-
-        mapDistributeBase::distribute
-        (
-            Pstream::commsTypes::nonBlocking,
-            List<labelPair>(),
-            tgtPatch.size(),
-            map.constructMap(),
-            false,
-            map.subMap(),
-            false,
-            tgtWeights_,
-            ListOps::appendEqOp<scalar>(),
-            flipOp(),
-            scalarList()
-        );
-
-        // weights normalisation
-        AMIPtr->normaliseWeights(true, *this);
-
-        // Cache maps and reset addresses
-        List<Map<label>> cMapSrc;
-        srcMapPtr_.reset
-        (
-            new mapDistribute(globalSrcFaces, tgtAddress_, cMapSrc)
-        );
-        List<Map<label>> cMapTgt;
-        tgtMapPtr_.reset
-        (
-            new mapDistribute(globalTgtFaces, srcAddress_, cMapTgt)
-        );
-    }
-    else
-    {
-        // Calculate AMI interpolation
-        autoPtr<AMIMethod<SourcePatch, TargetPatch>> AMIPtr
-        (
-            AMIMethod<SourcePatch, TargetPatch>::New
-            (
-                methodName_,
-                srcPatch,
-                tgtPatch,
-                triMode_,
-                reverseTarget_,
-                requireMatch_ && (lowWeightCorrection_ < 0)
-            )
-        );
-
-        AMIPtr->calculate
-        (
-            srcAddress_,
-            srcWeights_,
-            srcCentroids_,
-            tgtAddress_,
-            tgtWeights_
-        );
-
-        srcMagSf_.transfer(AMIPtr->srcMagSf());
-        tgtMagSf_.transfer(AMIPtr->tgtMagSf());
-
-        AMIPtr->normaliseWeights(true, *this);
-    }
+    singlePatchProc_ = AMIPtr->distributed() ? -1 : 0;
 
     if (debug)
     {
@@ -1115,18 +937,15 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::append
     addProfiling(ami, "AMIInterpolation::append");
 
     // Create a new interpolation
-    autoPtr<AMIInterpolation<SourcePatch, TargetPatch>> newPtr
+    auto newPtr = autoPtr<AMIInterpolation<SourcePatch, TargetPatch>>::New
     (
-        new AMIInterpolation<SourcePatch, TargetPatch>
-        (
-            srcPatch,
-            tgtPatch,
-            triMode_,
-            requireMatch_,
-            methodName_,
-            lowWeightCorrection_,
-            reverseTarget_
-        )
+        srcPatch,
+        tgtPatch,
+        triMode_,
+        requireMatch_,
+        methodName_,
+        lowWeightCorrection_,
+        reverseTarget_
     );
 
     // If parallel then combine the mapDistribution and re-index
@@ -1514,14 +1333,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
     const UList<Type>& defaultValues
 ) const
 {
-    tmp<Field<Type>> tresult
-    (
-        new Field<Type>
-        (
-            srcAddress_.size(),
-            Zero
-        )
-    );
+    auto tresult = tmp<Field<Type>>::New(srcAddress_.size(), Zero);
 
     interpolateToSource
     (
@@ -1559,14 +1371,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
     const UList<Type>& defaultValues
 ) const
 {
-    tmp<Field<Type>> tresult
-    (
-        new Field<Type>
-        (
-            tgtAddress_.size(),
-            Zero
-        )
-    );
+    auto tresult = tmp<Field<Type>>::New(tgtAddress_.size(), Zero);
 
     interpolateToTarget
     (

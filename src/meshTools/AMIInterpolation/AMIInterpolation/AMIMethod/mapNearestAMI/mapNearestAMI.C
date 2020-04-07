@@ -84,7 +84,7 @@ void Foam::mapNearestAMI<SourcePatch, TargetPatch>::setNextNearestFaces
     label& tgtFacei
 ) const
 {
-    const labelList& srcNbr = this->srcPatch_.faceFaces()[srcFacei];
+    const labelList& srcNbr = this->srcPatch().faceFaces()[srcFacei];
 
     srcFacei = -1;
 
@@ -108,7 +108,7 @@ void Foam::mapNearestAMI<SourcePatch, TargetPatch>::setNextNearestFaces
 
             if (tgtFacei == -1)
             {
-                const vectorField& srcCf = this->srcPatch_.faceCentres();
+                const vectorField& srcCf = this->srcPatch().faceCentres();
 
                 FatalErrorInFunction
                     << "Unable to find target face for source face "
@@ -149,7 +149,7 @@ Foam::label Foam::mapNearestAMI<SourcePatch, TargetPatch>::findMappedSrcFace
             }
             else
             {
-                const labelList& nbrFaces = this->tgtPatch_.faceFaces()[tgtI];
+                const labelList& nbrFaces = this->tgtPatch().faceFaces()[tgtI];
 
                 for (const label nbrFacei : nbrFaces)
                 {
@@ -193,13 +193,17 @@ Foam::mapNearestAMI<SourcePatch, TargetPatch>::mapNearestAMI
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class SourcePatch, class TargetPatch>
-void Foam::mapNearestAMI<SourcePatch, TargetPatch>::calculate
+bool Foam::mapNearestAMI<SourcePatch, TargetPatch>::calculate
 (
     labelListList& srcAddress,
     scalarListList& srcWeights,
     pointListList& srcCentroids,
     labelListList& tgtAddress,
     scalarListList& tgtWeights,
+    scalarList& srcMagSf,
+    scalarList& tgtMagSf,
+    autoPtr<mapDistribute>& srcMapPtr,
+    autoPtr<mapDistribute>& tgtMapPtr,
     label srcFacei,
     label tgtFacei
 )
@@ -217,13 +221,13 @@ void Foam::mapNearestAMI<SourcePatch, TargetPatch>::calculate
 
     if (!ok)
     {
-        return;
+        return false;
     }
 
 
     // temporary storage for addressing and weights
-    List<DynamicList<label>> srcAddr(this->srcPatch_.size());
-    List<DynamicList<label>> tgtAddr(this->tgtPatch_.size());
+    List<DynamicList<label>> srcAddr(this->srcPatch().size());
+    List<DynamicList<label>> tgtAddr(this->tgtPatch().size());
 
 
     // construct weights and addressing
@@ -238,7 +242,7 @@ void Foam::mapNearestAMI<SourcePatch, TargetPatch>::calculate
     DynamicList<label> nonOverlapFaces;
     do
     {
-        findNearestFace(this->srcPatch_, this->tgtPatch_, srcFacei, tgtFacei);
+        findNearestFace(this->srcPatch(), this->tgtPatch(), srcFacei, tgtFacei);
 
         srcAddr[srcFacei].append(tgtFacei);
         tgtAddr[tgtFacei].append(srcFacei);
@@ -258,8 +262,8 @@ void Foam::mapNearestAMI<SourcePatch, TargetPatch>::calculate
 
     // for the case of multiple source faces per target face, select the
     // nearest source face only and discard the others
-    const vectorField& srcCf = this->srcPatch_.faceCentres();
-    const vectorField& tgtCf = this->tgtPatch_.faceCentres();
+    const vectorField& srcCf = this->srcPatch().faceCentres();
+    const vectorField& tgtCf = this->tgtPatch().faceCentres();
 
     forAll(tgtAddr, targetFacei)
     {
@@ -301,8 +305,8 @@ void Foam::mapNearestAMI<SourcePatch, TargetPatch>::calculate
                 // note - reversed search from src->tgt to tgt->src
                 findNearestFace
                 (
-                    this->tgtPatch_,
-                    this->srcPatch_,
+                    this->tgtPatch(),
+                    this->srcPatch(),
                     tgtFacei,
                     srcFacei
                 );
@@ -314,8 +318,8 @@ void Foam::mapNearestAMI<SourcePatch, TargetPatch>::calculate
 
 
     // transfer data to persistent storage
-    const pointField& srcFc = this->srcPatch_.faceCentres();
-    const pointField& tgtFc = this->tgtPatch_.faceCentres();
+    const pointField& srcFc = this->srcPatch().faceCentres();
+    const pointField& tgtFc = this->tgtPatch().faceCentres();
 
     forAll(srcAddr, srcI)
     {
@@ -341,6 +345,8 @@ void Foam::mapNearestAMI<SourcePatch, TargetPatch>::calculate
             tgtWeights[tgtI][i] = magSqr(tgtPt-srcFc[addr[i]]);
         }
     }
+
+    return true;
 }
 
 

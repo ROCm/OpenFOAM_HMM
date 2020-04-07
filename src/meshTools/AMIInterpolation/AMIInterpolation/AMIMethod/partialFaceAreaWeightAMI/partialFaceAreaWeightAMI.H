@@ -117,25 +117,20 @@ public:
         // Manipulation
 
             //- Update addressing and weights
-            virtual void calculate
+            virtual bool calculate
             (
                 labelListList& srcAddress,
                 scalarListList& srcWeights,
                 pointListList& srcCentroids,
                 labelListList& tgtAddress,
                 scalarListList& tgtWeights,
+                scalarList& srcMagSf,
+                scalarList& tgtMagSf,
+                autoPtr<mapDistribute>& srcMapPtr,
+                autoPtr<mapDistribute>& tgtMapPtr,
                 label srcFacei = -1,
                 label tgtFacei = -1
             );
-
-            //- Set the face areas for parallel runs
-            virtual void setMagSf
-            (
-                const TargetPatch& tgtPatch,
-                const mapDistribute& map,
-                scalarList& srcMagSf,
-                scalarList& tgtMagSf
-            ) const;
 };
 
 
