@@ -45,8 +45,7 @@ const Foam::Enum
 >
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolationMethodNames_
 ({
-    { interpolationMethod::imDirect, "directAMI" },
-    { interpolationMethod::imMapNearest, "mapNearestAMI" },
+    { interpolationMethod::imNearestFace, "nearestFaceAMI" },
     { interpolationMethod::imFaceAreaWeight, "faceAreaWeightAMI" },
     { interpolationMethod::imPartialFaceAreaWeight, "partialFaceAreaWeightAMI" }
 });

@@ -91,8 +91,7 @@ public:
         //- Enumeration specifying interpolation method
         enum interpolationMethod
         {
-            imDirect,
-            imMapNearest,
+            imNearestFace,
             imFaceAreaWeight,
             imPartialFaceAreaWeight
         };

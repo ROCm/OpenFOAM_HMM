@@ -640,12 +640,12 @@ Foam::meshToMesh::interpolationMethodAMI(const interpolationMethod method)
     {
         case interpolationMethod::imDirect:
         {
-            return AMIPatchToPatchInterpolation::imDirect;
+            return AMIPatchToPatchInterpolation::imNearestFace;
             break;
         }
         case interpolationMethod::imMapNearest:
         {
-            return AMIPatchToPatchInterpolation::imMapNearest;
+            return AMIPatchToPatchInterpolation::imNearestFace;
             break;
         }
         case interpolationMethod::imCellVolumeWeight:
@@ -662,7 +662,7 @@ Foam::meshToMesh::interpolationMethodAMI(const interpolationMethod method)
         }
     }
 
-    return AMIPatchToPatchInterpolation::imDirect;
+    return AMIPatchToPatchInterpolation::imNearestFace;
 }
 
 
