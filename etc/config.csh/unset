@@ -23,7 +23,7 @@
 
 unset foamClean
 if ( $?WM_PROJECT_DIR ) then
-    set foamClean=$WM_PROJECT_DIR/bin/foamCleanPath
+    set foamClean="$WM_PROJECT_DIR/bin/foamCleanPath"
     if ( ! -f "$foamClean" || ! -x "$foamClean" ) unset foamClean
 endif
 
@@ -141,6 +141,7 @@ unsetenv FFTW_ARCH_PATH
 unsetenv GPERFTOOLS_ARCH_PATH
 unsetenv GMP_ARCH_PATH
 unsetenv MPFR_ARCH_PATH
+unsetenv LLVM_ARCH_PATH
 unsetenv MESA_ARCH_PATH
 unsetenv METIS_ARCH_PATH
 unsetenv SCOTCH_ARCH_PATH
@@ -155,12 +156,12 @@ if ( $?foamClean ) then
 
     if ($?LD_LIBRARY_PATH) then
         eval `$foamClean -csh-env=LD_LIBRARY_PATH "$foamOldDirs"`
-        if ( ${%LD_LIBRARY_PATH} == 0 ) unsetenv LD_LIBRARY_PATH
+        if ("${LD_LIBRARY_PATH}" == "") unsetenv LD_LIBRARY_PATH
     endif
 
     if ($?MANPATH) then
         eval `$foamClean -csh-env=MANPATH "$foamOldDirs"`
-        if ( ${%MANPATH} == 0 ) unsetenv MANPATH
+        if ("${MANPATH}" == "") unsetenv MANPATH
     endif
 
 endif

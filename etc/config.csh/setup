@@ -67,7 +67,7 @@ foreach foamDir (\
     endif
 end
 
-if ( "${%foundDir}" ) then
+if ("${foundDir}" == true) then
     _foamEcho "Using $WM_THIRD_PARTY_DIR"
 else
     # Dummy fallback value
@@ -141,9 +141,9 @@ endif
 # Clean standard environment variables (PATH, MANPATH, LD_LIBRARY_PATH)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Prevent local variables from shadowing setenv variables
-unset PATH MANPATH LD_LIBRARY_PATH
-if (! $?LD_LIBRARY_PATH ) setenv LD_LIBRARY_PATH
+unset PATH MANPATH LD_LIBRARY_PATH DYLD_LIBRARY_PATH
 if (! $?MANPATH ) setenv MANPATH
+if (! $?LD_LIBRARY_PATH ) setenv LD_LIBRARY_PATH
 
 _foamClean PATH "$foamOldDirs"
 _foamClean MANPATH "$foamOldDirs"
@@ -183,6 +183,15 @@ _foamClean LD_LIBRARY_PATH
 # Add trailing ':' for system manpages
 if ( $?MANPATH ) then
     setenv MANPATH "${MANPATH}:"
+endif
+
+if ($?LD_LIBRARY_PATH) then
+    if ("${LD_LIBRARY_PATH}" == "") unsetenv LD_LIBRARY_PATH
+endif
+
+# Darwin
+if ($?DYLD_LIBRARY_PATH) then
+    if ("${DYLD_LIBRARY_PATH}" == "") unsetenv DYLD_LIBRARY_PATH
 endif
 
 

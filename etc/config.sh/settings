@@ -82,8 +82,9 @@ Linux)
     esac
     ;;
 
-Darwin)     # Presumably x86_64
+Darwin)     # Presume x86_64, with clang (not gcc) as system compiler
     WM_ARCH=darwin64
+    [ "$WM_COMPILER" = Gcc ] && WM_COMPILER=Clang
     echo "Darwin support is clang/llvm only" 1>&2
     ;;
 
@@ -165,7 +166,7 @@ fi
 # OpenFOAM executables (user, group, standard)
 _foamAddPath "$FOAM_USER_APPBIN:$FOAM_SITE_APPBIN:$FOAM_APPBIN"
 
-# Dummy versions of external libraries. To be found last in LD_LIBRARY_PATH
+# Dummy versions of external libraries. To be found last in library path
 _foamAddLib  "$FOAM_LIBBIN/dummy"
 
 # External (ThirdParty) libraries. Also allowed to be unset

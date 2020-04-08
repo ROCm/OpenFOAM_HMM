@@ -27,7 +27,14 @@ alias _foamClean 'eval `$WM_PROJECT_DIR/bin/foamCleanPath -csh-env=\!*`'
 # Prepend PATH, MANPATH, LD_LIBRARY_PATH
 alias _foamAddPath 'setenv PATH \!*\:${PATH}'
 alias _foamAddMan  'setenv MANPATH \!*\:${MANPATH}'
-alias _foamAddLib  'setenv LD_LIBRARY_PATH \!*\:${LD_LIBRARY_PATH}'
+
+# Special treatment for Darwin
+# - DYLD_LIBRARY_PATH instead of LD_LIBRARY_PATH
+if (`uname -s` == "Darwin") then
+    alias _foamAddLib  'setenv DYLD_LIBRARY_PATH \!*\:${DYLD_LIBRARY_PATH}'
+else
+    alias _foamAddLib  'setenv LD_LIBRARY_PATH \!*\:${LD_LIBRARY_PATH}'
+endif
 
 # Prefix to LD_LIBRARY_PATH with additional checking
 # $1 = base directory for 'lib' or 'lib64'
@@ -59,6 +66,7 @@ unsetenv FFTW_ARCH_PATH
 unsetenv GPERFTOOLS_ARCH_PATH
 unsetenv GMP_ARCH_PATH
 unsetenv MPFR_ARCH_PATH
+unsetenv LLVM_ARCH_PATH
 unsetenv MESA_ARCH_PATH
 unsetenv METIS_ARCH_PATH
 unsetenv SCOTCH_ARCH_PATH

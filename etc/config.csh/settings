@@ -90,8 +90,9 @@ case Linux:
     endsw
     breaksw
 
-case Darwin:    # Presumably x86_64
+case Darwin:    # Presume x86_64, with clang (not gcc) as system compiler
     setenv WM_ARCH darwin64
+    if ("$WM_COMPILER" == Gcc) setenv WM_COMPILER Clang
     echo "Darwin support is clang/llvm only"
     breaksw
 
@@ -168,7 +169,7 @@ endif
 # OpenFOAM executables (user, group, standard)
 _foamAddPath "${FOAM_USER_APPBIN}:${FOAM_SITE_APPBIN}:${FOAM_APPBIN}"
 
-# Dummy versions of external libraries. To be found last in LD_LIBRARY_PATH
+# Dummy versions of external libraries. To be found last in library path
 _foamAddLib  "$FOAM_LIBBIN/dummy"
 
 # External (ThirdParty) libraries. Also allowed to be unset
