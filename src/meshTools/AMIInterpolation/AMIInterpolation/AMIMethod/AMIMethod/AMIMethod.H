@@ -199,7 +199,12 @@ protected:
         // Common AMI method functions
 
             //- Reset the octree for the target patch face search
-            void resetTree();
+            template<class PatchType>
+            autoPtr<indexedOctree<treeDataPrimitivePatch<PatchType>>>
+            createTree
+            (
+                const PatchType& patch
+            ) const;
 
             label findTargetFace
             (

@@ -162,7 +162,7 @@ bool Foam::AMIMethod<SourcePatch, TargetPatch>::initialise
     }
 
     // Reset the octree
-    resetTree();
+    treePtr_.reset(createTree<TargetPatch>(tgtPatch()));
 
     // Find initial face match using brute force/octree search
     if ((srcFacei == -1) || (tgtFacei == -1))
@@ -256,35 +256,31 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::writeIntersectionOBJ
 
 
 template<class SourcePatch, class TargetPatch>
-void Foam::AMIMethod<SourcePatch, TargetPatch>::resetTree()
+template<class PatchType>
+Foam::autoPtr<Foam::indexedOctree<Foam::treeDataPrimitivePatch<PatchType>>>
+Foam::AMIMethod<SourcePatch, TargetPatch>::createTree
+(
+    const PatchType& patch
+) const
 {
-    const auto& tgt = tgtPatch();
+    typedef treeDataPrimitivePatch<PatchType> PatchTreeType;
 
-    // Clear the old octree
-    treePtr_.clear();
-
-    treeBoundBox bb(tgt.points(), tgt.meshPoints());
+    treeBoundBox bb(patch.points(), patch.meshPoints());
     bb.inflate(0.01);
 
-    if (!treePtr_.valid())
-    {
-        treePtr_.reset
+    return autoPtr<indexedOctree<PatchTreeType>>::New
+    (
+        PatchTreeType
         (
-            new indexedOctree<treeType>
-            (
-                treeType
-                (
-                    false,
-                    tgt,
-                    indexedOctree<treeType>::perturbTol()
-                ),
-                bb,                         // overall search domain
-                8,                          // maxLevel
-                10,                         // leaf size
-                3.0                         // duplicity
-            )
-        );
-    }
+            false,
+            patch,
+            indexedOctree<PatchTreeType>::perturbTol()
+        ),
+        bb,                         // overall search domain
+        8,                          // maxLevel
+        10,                         // leaf size
+        3.0                         // duplicity
+    );
 }
 
 

@@ -28,7 +28,7 @@ License
 #include "AMIPatchToPatchInterpolation.H"
 #include "AMIMethod.H"
 #include "directAMI.H"
-#include "mapNearestAMI.H"
+#include "nearestFaceAMI.H"
 #include "faceAreaWeightAMI.H"
 #include "partialFaceAreaWeightAMI.H"
 
@@ -39,7 +39,7 @@ namespace Foam
     makeAMIMethod(AMIPatchToPatchInterpolation);
 
     makeAMIMethodType(AMIPatchToPatchInterpolation, directAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, mapNearestAMI);
+    makeAMIMethodType(AMIPatchToPatchInterpolation, nearestFaceAMI);
     makeAMIMethodType(AMIPatchToPatchInterpolation, faceAreaWeightAMI);
     makeAMIMethodType(AMIPatchToPatchInterpolation, partialFaceAreaWeightAMI);
 }

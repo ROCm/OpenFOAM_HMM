@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,20 +24,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::mapNearestAMI
+    Foam::nearestFaceAMI
 
 Description
-    Nearest-mapping Arbitrary Mesh Interface (AMI) method
+    Nearest-face Arbitrary Mesh Interface (AMI) method
 
 SourceFiles
-    mapNearestAMI.C
+    nearestFaceAMI.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef mapNearestAMI_H
-#define mapNearestAMI_H
+#ifndef nearestFaceAMI_H
+#define nearestFaceAMI_H
 
 #include "AMIMethod.H"
+#include "pointIndexHit.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,73 +46,83 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class mapNearestAMI Declaration
+                        Class nearestFaceAMI Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class SourcePatch, class TargetPatch>
-class mapNearestAMI
+class nearestFaceAMI
 :
     public AMIMethod<SourcePatch, TargetPatch>
 {
+public:
+
+    typedef Tuple2<pointIndexHit, scalar> nearestAndDist;
+
+    //- Helper class for finding nearest
+    class nearestEqOp
+    {
+
+    public:
+
+        void operator()(nearestAndDist& x, const nearestAndDist& y) const
+        {
+            if (y.first().hit())
+            {
+                if (!x.first().hit())
+                {
+                    x = y;
+                }
+                else if (y.second() < x.second())
+                {
+                    x = y;
+                }
+            }
+        }
+    };
+
 
 private:
+
+    // Private Data
+
+        //- Maximum squared distance
+        scalar maxDistance2_;
+
 
     // Private Member Functions
 
         //- No copy construct
-        mapNearestAMI(const mapNearestAMI&) = delete;
+        nearestFaceAMI(const nearestFaceAMI&) = delete;
 
         //- No copy assignment
-        void operator=(const mapNearestAMI&) = delete;
+        void operator=(const nearestFaceAMI&) = delete;
 
-        // Marching front
+        autoPtr<mapDistribute> calcFaceMap
+        (
+            const List<nearestAndDist>& localInfo,
+            const SourcePatch& srcPatch,
+            const TargetPatch& tgtPatch
+        ) const;
 
-            //- Find nearest target face for source face srcFacei
-            void findNearestFace
-            (
-                const SourcePatch& srcPatch,
-                const TargetPatch& tgtPatch,
-                const label& srcFacei,
-                label& tgtFacei
-            ) const;
-
-            //- Determine next source-target face pair
-            void setNextNearestFaces
-            (
-                boolList& mapFlag,
-                label& startSeedI,
-                label& srcFacei,
-                label& tgtFacei
-            ) const;
-
-            //- Find mapped source face
-            label findMappedSrcFace
-            (
-                const label tgtFacei,
-                const List<DynamicList<label>>& tgtToSrc
-            ) const;
-
-
-        // Evaluation
-
-            //- Area of intersection between source and target faces
-            scalar interArea
-            (
-                const label srcFacei,
-                const label tgtFacei
-            ) const;
+        autoPtr<mapDistribute> calcDistributed
+        (
+            const SourcePatch& src,
+            const TargetPatch& tgt,
+            labelListList& srcToTgtAddr,
+            scalarListList& srcToTgtWght
+        ) const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("mapNearestAMI");
+    TypeName("nearestFaceAMI");
 
 
     // Constructors
 
         //- Construct from components
-        mapNearestAMI
+        nearestFaceAMI
         (
             const SourcePatch& srcPatch,
             const TargetPatch& tgtPatch,
@@ -123,7 +133,7 @@ public:
 
 
     //- Destructor
-    virtual ~mapNearestAMI() = default;
+    virtual ~nearestFaceAMI() = default;
 
 
     // Member Functions
@@ -146,15 +156,6 @@ public:
                 label tgtFacei = -1
             );
 
-            //- Set the face areas for parallel runs
-            virtual void setMagSf
-            (
-                const TargetPatch& tgtPatch,
-                const mapDistribute& map,
-                scalarList& srcMagSf,
-                scalarList& tgtMagSf
-            ) const;
-
             //- Normalise the weight. Can optionally subset addressing
             //- (e.g. for mapNearest)
             virtual void normaliseWeights
@@ -172,7 +173,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "mapNearestAMI.C"
+    #include "nearestFaceAMI.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
