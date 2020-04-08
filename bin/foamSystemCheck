@@ -7,6 +7,7 @@
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 #     Copyright (C) 2011 OpenFOAM Foundation
+#     Copyright (C) 2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -114,13 +115,13 @@ fi
 # check os
 OSTYPE=$(uname -s)
 case "$OSTYPE" in
-Linux | LinuxAMD64 | SunOS )
+Linux* | Darwin* | SunOS )
     echo "$(fixlen OS: $WIDTH) $OSTYPE version $(uname -r)"
     ;;
 *)
     echo "ERROR: Incompatible operating system \"$OSTYPE\"."
     echo "       OpenFOAM $WM_PROJECT_VERSION is currently available for "
-    echo "       Linux, LinuxAMD64 and SunOS only."
+    echo "       Linux, Darwin and SunOS only."
     echo
     fatalError=true
     ;;

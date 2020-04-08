@@ -7,11 +7,10 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2017-2018 OpenCFD Ltd.
+#     Copyright (C) 2017-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     foamCleanPath
@@ -41,7 +40,7 @@
 #       cleaned=$(foamCleanPath -env=PATH dir1:dir2) && PATH=$cleaned
 #
 #     - Using shell evaluation for the output
-#       eval $(foamCleanPath -sh=PATH $PATH" dir1:dir2)
+#       eval "$(foamCleanPath -sh=PATH "$PATH" dir1:dir2)"
 #       eval "$(foamCleanPath -sh=PATH -env=PATH dir1:dir2)"
 #       eval "$(foamCleanPath -sh-env=PATH dir1:dir2)"
 #
@@ -49,16 +48,17 @@
 #       eval `foamCleanPath -csh-env=PATH dir1:dir2`
 #
 #------------------------------------------------------------------------------
-usage() {
-    cat <<USAGE 1>&2
+printHelp() {
+    cat<<USAGE
+
 Usage: foamCleanPath [OPTION] path [filter] .. [filter]
        foamCleanPath [OPTION] -env=name [filter] .. [filter]
 options:
-  -csh=NAME         Produce 'setenv NAME ...' output for csh eval
-  -sh=NAME          Produce 'NAME=...' output for sh eval
-  -csh-env=NAME     As per -csh, with -env for initial content
-  -sh-env=NAME      As per -sh,  with -env for initial content
   -env=NAME         Evaluate NAME to obtain initial content
+  -csh=NAME         Produce 'setenv NAME ...' output for csh eval
+  -csh-env=NAME     Like -csh=NAME, with -env for initial content
+  -sh=NAME          Produce 'NAME=...' output for sh eval
+  -sh-env=NAME      Like -sh=NAME, with -env for initial content
   -debug            Print debug information to stderr
   -strip            Remove inaccessible directories
   -verbose          Report some progress (input, output, ...)
@@ -75,7 +75,7 @@ Exit status
     2  initial value of 'path' is empty
 
 USAGE
-    exit 1
+    exit 0  # A clean exit
 }
 
 # Report error and exit
@@ -86,7 +86,7 @@ die()
     echo "Error encountered:"
     while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
     echo
-    echo "See 'foamCleanPath -help' for usage"
+    echo "See '${0##*/} -help' for usage"
     echo
     exit 1
 }
@@ -95,41 +95,44 @@ die()
 
 # Input and outputs
 unset dirList shellOutput
+unset optDebug optEnvName optStrip optVerbose
 
 # Parse options
-unset optDebug optEnvName optStrip optVerbose
 while [ "$#" -gt 0 ]
 do
     case "$1" in
     -h | -help*)
-        usage
+        printHelp
         ;;
+
+    -env=*)
+        optEnvName="${1#*=}"
+        [ -n "$optEnvName" ] || die "Option '$1' missing an ENVNAME"
+        ;;
+
     -csh=* | -sh=* | -csh-env=* | -sh-env=*)
         name="${1#*=}"
         [ -n "$name" ] || die "Option '$1' missing an ENVNAME"
-
-        # Output prefix
-        case "$1" in
-        -csh*)
-            shellOutput="setenv $name "     # eg, "setenv PATH xyz"
-            ;;
-        *)
-            shellOutput="$name="            # eg, "PATH=xyz"
-            ;;
-        esac
 
         # For (-csh-env | -sh-env) also use name for input evaluation
         case "$1" in
         *-env=*)
             optEnvName="$name"
+            name="$optEnvName"
+            ;;
+        esac
+
+        # Shell-specific output prefix ("setenv ENVNAME xyz" or "ENVNAME=xyz")
+        case "$1" in
+        -csh*)
+            shellOutput="setenv $name "
+            ;;
+        *)
+            shellOutput="$name="
             ;;
         esac
         ;;
-    -env=*)
-        name="${1#*=}"
-        [ -n "$name" ] || die "Option '$1' missing an ENVNAME"
-        optEnvName="$name"
-        ;;
+
     -debug)
         optDebug=true
         ;;

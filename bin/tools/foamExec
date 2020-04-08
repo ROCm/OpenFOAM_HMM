@@ -6,23 +6,10 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2019 OpenCFD Ltd.
+#     Copyright (C) 2019-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     foamExec <application> ...
@@ -31,17 +18,20 @@
 #     Runs an application (with arguments) after first sourcing the OpenFOAM
 #     etc/bashrc file from the project directory
 #
-#     This script must exist in $WM_PROJECT_DIR/bin/tools
-#
 #     Can useful for parallel runs. For example,
 #
 #     mpirun -n <nProcs> \
 #         projectDir/bin/tools/foamExec <simpleFoam> ... -parallel
 #
+# Note
+#     This script normally exists in the project 'bin/tools' directory.
+#     Do not copy/move/link to other locations unless you also edit it!
+#
 #------------------------------------------------------------------------------
-usage() {
-    exec 1>&2
-    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+toolsDir="${0%/*}"                                  # The bin/tools dir
+projectDir="${toolsDir%/bin/tools}"                 # Project dir
+
+printHelp() {
     cat<<USAGE
 
 Usage: ${0##*/} [OPTION] <application> ...
@@ -49,11 +39,12 @@ Usage: ${0##*/} [OPTION] <application> ...
 options:
   -help             Print the usage
 
-Runs an application (with arguments) after first sourcing the OpenFOAM
-etc/bashrc file from the project directory
+Run an application (with arguments) after first sourcing
+the OpenFOAM etc/bashrc file from the project directory:
+($projectDir)
 
 USAGE
-    exit 1
+    exit 0 # A clean exit
 }
 
 # Report error and exit
@@ -70,15 +61,13 @@ die()
 }
 
 #-------------------------------------------------------------------------------
-toolsDir="${0%/*}"                                  # The bin/tools dir
-projectDir="${toolsDir%/bin/tools}"                 # Project dir
 
 # Parse options
 while [ "$#" -gt 0 ]
 do
     case "$1" in
     -h | -help*)
-        usage
+        printHelp
         ;;
     --)
         shift
@@ -115,6 +104,7 @@ sourceBashrc()
 {
     . "$projectDir/etc/bashrc" $FOAM_SETTINGS
 }
+
 
 sourceBashrc
 exec "$@"
