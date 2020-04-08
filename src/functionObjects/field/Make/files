@@ -74,6 +74,7 @@ CourantNo/CourantNo.C
 PecletNo/PecletNo.C
 blendingFactor/blendingFactor.C
 momentum/momentum.C
+momentumError/momentumError.C
 pressure/pressure.C
 MachNo/MachNo.C
 Curle/Curle.C

@@ -45,5 +45,26 @@ timePrecision   6;
 
 runTimeModifiable true;
 
+functions
+{
+    momErr
+    {
+        type        momentumError;
+        executeControl  writeTime;
+        writeControl    writeTime;
+        libs        (libfieldFunctionObjects);
+    }
+    
+    contErr
+    {
+        libs        (libfieldFunctionObjects);
+        type        div;
+        field       phi;
+        executeControl  writeTime;
+        writeControl    writeTime;
+    }
+    
+}
+
 
 // ************************************************************************* //
