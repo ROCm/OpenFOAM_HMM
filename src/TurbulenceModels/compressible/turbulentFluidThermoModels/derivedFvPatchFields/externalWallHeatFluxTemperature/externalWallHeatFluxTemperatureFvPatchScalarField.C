@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -360,6 +360,9 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
 
     const scalarField& Tp(*this);
 
+    const scalarField valueFraction0(valueFraction());
+    const scalarField refValue0(refValue());
+
     scalarField qr(Tp.size(), Zero);
     if (qrName_ != "none")
     {
@@ -375,7 +378,7 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
     {
         case fixedPower:
         {
-            refGrad() = (Q_/gSum(patch().magSf()) + qr)/kappa(Tp);
+            refGrad() = (Q_/gSum(patch().magSf()) - qr)/kappa(Tp);
             refValue() = 0;
             valueFraction() = 0;
 
@@ -383,7 +386,7 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
         }
         case fixedHeatFlux:
         {
-            refGrad() = (q_ + qr)/kappa(Tp);
+            refGrad() = (q_ - qr)/kappa(Tp);
             refValue() = 0;
             valueFraction() = 0;
 
@@ -459,8 +462,9 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
         }
     }
 
-    valueFraction() = relaxation_*valueFraction() + (1 - relaxation_);
-    refValue() = relaxation_*refValue() + (1 - relaxation_)*Tp;
+    valueFraction() =
+        relaxation_*valueFraction() + (1 - relaxation_)*valueFraction0;
+    refValue() = relaxation_*refValue() + (1 - relaxation_)*refValue0;
 
     mixedFvPatchScalarField::updateCoeffs();
 
