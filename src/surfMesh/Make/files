@@ -51,6 +51,7 @@ $(surfaceFormats)/x3d/X3DsurfaceFormatRunTime.C
 
 triSurface/triSurface.C
 triSurface/triSurfaceIO.C
+triSurface/triSurfaceNew.C
 triSurface/triSurfaceAddressing.C
 triSurface/triSurfaceStitch.C
 

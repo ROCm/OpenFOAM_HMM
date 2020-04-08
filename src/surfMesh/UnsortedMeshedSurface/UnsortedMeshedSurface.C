@@ -732,6 +732,9 @@ void Foam::UnsortedMeshedSurface<Face>::transfer
 )
 {
     surfZoneList zoneInfo(surf.surfZones());
+
+    this->clear();
+
     MeshReference::transfer(surf);
 
     setZones(zoneInfo);
@@ -749,14 +752,9 @@ Foam::UnsortedMeshedSurface<Face>::releaseZoneIds()
 template<class Face>
 bool Foam::UnsortedMeshedSurface<Face>::read(const fileName& name)
 {
-    const word ext(name.ext());
-    if (ext == "gz")
-    {
-        fileName unzipName = name.lessExt();
-        return read(unzipName, unzipName.ext());
-    }
-
-    return read(name, ext);
+    this->clear();
+    transfer(*New(name));
+    return true;
 }
 
 
@@ -767,26 +765,7 @@ bool Foam::UnsortedMeshedSurface<Face>::read
     const word& fileType
 )
 {
-    if (fileType.empty())
-    {
-        // Handle empty/missing type
-
-        const word ext(name.ext());
-
-        if (ext.empty())
-        {
-            FatalErrorInFunction
-                << "Cannot determine format from filename" << nl
-                << "    " << name << nl
-                << exit(FatalError);
-        }
-
-        return read(name, ext);
-    }
-
-    clear();
-
-    // Read via selector mechanism
+    this->clear();
     transfer(*New(name, fileType));
     return true;
 }

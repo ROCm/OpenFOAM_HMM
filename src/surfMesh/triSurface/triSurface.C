@@ -40,6 +40,34 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Helper function to print triangle info
+static void printTriangle
+(
+    Ostream& os,
+    const string& pre,
+    const labelledTri& f,
+    const pointField& points
+)
+{
+    os
+        << pre.c_str() << "vertex numbers:"
+        << f[0] << ' ' << f[1] << ' ' << f[2] << nl
+
+        << pre.c_str() << "vertex coords :"
+        << points[f[0]] << ' ' << points[f[1]] << ' ' << points[f[2]]
+
+        << pre.c_str() << "region        :" << f.region() << nl
+        << endl;
+}
+
+} // End namespace Foam
+
+
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 Foam::fileName Foam::triSurface::triSurfInstance(const Time& d)

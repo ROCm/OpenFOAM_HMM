@@ -162,30 +162,24 @@ Foam::fileName Foam::triSurface::findFile
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::triSurface::printTriangle
-(
-    Ostream& os,
-    const string& pre,
-    const labelledTri& f,
-    const pointField& points
-)
-{
-    os
-        << pre.c_str() << "vertex numbers:"
-        << f[0] << ' ' << f[1] << ' ' << f[2] << endl
-        << pre.c_str() << "vertex coords :"
-        << points[f[0]] << ' ' << points[f[1]] << ' ' << points[f[2]]
-        << pre.c_str() << "region        :" << f.region() << endl
-        << endl;
-}
-
-
-bool Foam::triSurface::read(Istream& is)
+bool Foam::triSurface::readNative(Istream& is)
 {
     // Read triangles, points from Istream
     is  >> patches_ >> storedPoints() >> storedFaces();
 
     return true;
+}
+
+
+void Foam::triSurface::writeNative(Ostream& os) const
+{
+    os  << patches() << nl;
+
+    //Note: Write with global point numbering
+    os  << points() << nl
+        << static_cast<const List<labelledTri>&>(*this) << nl;
+
+    os.check(FUNCTION_NAME);
 }
 
 
@@ -199,79 +193,13 @@ bool Foam::triSurface::read
     if (check && !exists(name))
     {
         FatalErrorInFunction
-            << "Cannnot read " << name << nl
+            << "No such file " << name << nl
             << exit(FatalError);
     }
 
-    if (fileType.empty())
-    {
-        // Handle empty/missing type
-
-        const word ext(name.ext());
-
-        if (ext.empty())
-        {
-            FatalErrorInFunction
-                << "Cannot determine format from filename" << nl
-                << "    " << name << nl
-                << exit(FatalError);
-        }
-
-        return read(name, ext, false);
-    }
-
-
-    if (fileType == "gz")
-    {
-        fileName unzipName = name.lessExt();
-
-        // Do not check for existence. Let IFstream do the unzipping.
-        return read(unzipName, unzipName.ext(), false);
-    }
-
-    // Hard-coded readers
-    if (fileType == "ftr")
-    {
-        return read(IFstream(name)());
-    }
-    else if (fileType == "stl")
-    {
-        return readSTL(name);  // ASCII
-    }
-    else if (fileType == "stlb")
-    {
-        return readSTL(name, true); // Force BINARY
-    }
-
-    // UnsortedMeshedSurface
-    {
-        using proxyType = UnsortedMeshedSurface<labelledTri>;
-        if (proxyType::readTypes().found(fileType))
-        {
-            transfer(*(proxyType::New(name, fileType)));
-            return true;
-        }
-    }
-
-    // MeshedSurface
-    {
-        using proxyType = MeshedSurface<labelledTri>;
-        if (proxyType::readTypes().found(fileType))
-        {
-            transfer(*(proxyType::New(name, fileType)));
-            return true;
-        }
-    }
-
-
-    FatalErrorInFunction
-        << "Unknown surface format " << fileType
-        << " for reading file " << name << nl
-        << "Valid types:" << nl
-        << "    " << flatOutput(readTypes().sortedToc()) << nl
-        << exit(FatalError);
-
-    return false;
+    this->clear();
+    transfer(*New(name, fileType));
+    return true;
 }
 
 
@@ -301,12 +229,12 @@ void Foam::triSurface::write
     }
 
 
-    // Hard-coded readers
+    // Hard-coded writers
 
     if (fileType == "ftr")
     {
         OFstream os(name);
-        write(os);
+        writeNative(os);
     }
     else if (fileType == "stl")
     {
@@ -353,7 +281,7 @@ Foam::triSurface::triSurface(Istream& is)
 :
     triSurface()
 {
-    read(is);
+    readNative(is);
 
     setDefaultPatches();
 }
@@ -368,7 +296,7 @@ Foam::triSurface::triSurface(const Time& d)
         d.path()/triSurfInstance(d)/typeName/(d.caseName() + ".ftr")
     );
 
-    read(is);
+    readNative(is);
 
     setDefaultPatches();
 }
@@ -407,13 +335,7 @@ void Foam::triSurface::write
 
 void Foam::triSurface::write(Ostream& os) const
 {
-    os  << patches() << nl;
-
-    //Note: Write with global point numbering
-    os  << points() << nl
-        << static_cast<const List<labelledTri>&>(*this) << nl;
-
-    os.check(FUNCTION_NAME);
+    writeNative(os);
 }
 
 
@@ -424,7 +346,7 @@ void Foam::triSurface::write(const Time& d) const
         d.path()/triSurfInstance(d)/typeName/(d.caseName() + ".ftr")
     );
 
-    write(os);
+    writeNative(os);
 }
 
 
@@ -460,18 +382,18 @@ void Foam::triSurface::writeStats(Ostream& os) const
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Istream& Foam::operator>>(Istream& is, triSurface& sm)
+Foam::Istream& Foam::operator>>(Istream& is, triSurface& s)
 {
-    sm.clearOut();
-    sm.read(is);
-    sm.setDefaultPatches();
+    s.clearOut();
+    s.readNative(is);
+    s.setDefaultPatches();
     return is;
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const triSurface& sm)
+Foam::Ostream& Foam::operator<<(Ostream& os, const triSurface& s)
 {
-    sm.write(os);
+    s.writeNative(os);
     return os;
 }
 

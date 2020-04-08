@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,18 +25,18 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "triSurface.H"
+#include "Fstream.H"
+#include "MeshedSurface.H"
 #include "UnsortedMeshedSurface.H"
-#include "ListOps.H"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-template<class Face>
-Foam::autoPtr<Foam::UnsortedMeshedSurface<Face>>
-Foam::UnsortedMeshedSurface<Face>::New
+Foam::autoPtr<Foam::triSurface>
+Foam::triSurface::New
 (
     const fileName& name,
-    const word& fileType,
-    bool mandatory
+    const word& fileType
 )
 {
     const word ext(name.ext());
@@ -54,18 +53,18 @@ Foam::UnsortedMeshedSurface<Face>::New
                 << exit(FatalError);
         }
 
-        return New(name, ext, mandatory);
+        return New(name, ext);
     }
     else if (fileType == "gz")
     {
         // Degenerate call
         fileName unzipName(name.lessExt());
-        return New(unzipName, unzipName.ext(), mandatory);
+        return New(unzipName, unzipName.ext());
     }
     else if (ext == "gz")
     {
         // Handle trailing "gz" on file name
-        return New(name.lessExt(), fileType, mandatory);
+        return New(name.lessExt(), fileType);
     }
 
     // if (check && !exists(name))
@@ -75,45 +74,71 @@ Foam::UnsortedMeshedSurface<Face>::New
     //         << exit(FatalError);
     // }
 
-    DebugInFunction
-        << "Construct UnsortedMeshedSurface (" << fileType << ")\n";
 
-    auto cstrIter = fileExtensionConstructorTablePtr_->cfind(fileType);
-
-    if (cstrIter.found())
+    // Hard-coded readers
+    if (fileType == "ftr")
     {
-        return autoPtr<UnsortedMeshedSurface<Face>>(cstrIter()(name));
-    }
+        auto surf = autoPtr<triSurface>::New();
 
-
-    // Delegate to friend if possible
-    const wordHashSet delegate(MeshReference::readTypes());
-
-    if (delegate.found(fileType))
-    {
-        // OK, can create indirectly
-        auto surf = autoPtr<UnsortedMeshedSurface<Face>>::New();
-        surf->transfer(*(MeshReference::New(name, fileType)));
-
+        IFstream is(name);
+        surf->readNative(is);
         return surf;
     }
-    else if (mandatory)
+    else if (fileType == "stl")
+    {
+        auto surf = autoPtr<triSurface>::New();
+
+        surf->readSTL(name);  // ASCII
+        return surf;
+    }
+    else if (fileType == "stlb")
+    {
+        auto surf = autoPtr<triSurface>::New();
+
+        surf->readSTL(name, true); // Force BINARY
+        return surf;
+    }
+
+    {
+        // UnsortedMeshedSurface
+        using proxyType = UnsortedMeshedSurface<labelledTri>;
+        if (proxyType::readTypes().found(fileType))
+        {
+            auto surf = autoPtr<triSurface>::New();
+
+            surf->transfer(*proxyType::New(name, fileType));
+            return surf;
+        }
+    }
+
+    // MeshedSurface
+    {
+        using proxyType = MeshedSurface<labelledTri>;
+        if (proxyType::readTypes().found(fileType))
+        {
+            auto surf = autoPtr<triSurface>::New();
+
+            surf->transfer(*proxyType::New(name, fileType));
+            return surf;
+        }
+    }
+
     {
         FatalErrorInFunction
-            << "Unknown surface format " << fileType << nl << nl
+            << "Unknown surface format " << fileType
+            << " for reading file " << name << nl
             << "Valid types:" << nl
-            << flatOutput((delegate | readTypes()).sortedToc()) << nl
+            << "    " << flatOutput(readTypes().sortedToc()) << nl
             << exit(FatalError);
     }
 
-    // Failed, but was optional
+    // Failed
     return nullptr;
 }
 
 
-template<class Face>
-Foam::autoPtr<Foam::UnsortedMeshedSurface<Face>>
-Foam::UnsortedMeshedSurface<Face>::New(const fileName& name)
+Foam::autoPtr<Foam::triSurface>
+Foam::triSurface::New(const fileName& name)
 {
     const word ext(name.ext());
     if (ext == "gz")

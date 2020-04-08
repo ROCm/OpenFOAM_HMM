@@ -264,6 +264,9 @@ public:
     // Selectors
 
         //- Read construct from filename with given file type
+        //
+        //  \note Use mandatory=false if support for the file type
+        //  is optional (the file still needs to exist!).
         static autoPtr<UnsortedMeshedSurface> New
         (
             const fileName& name,

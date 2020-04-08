@@ -1397,14 +1397,9 @@ void Foam::MeshedSurface<Face>::swapPoints(pointField& points)
 template<class Face>
 bool Foam::MeshedSurface<Face>::read(const fileName& name)
 {
-    const word ext(name.ext());
-    if (ext == "gz")
-    {
-        fileName unzipName = name.lessExt();
-        return read(unzipName, unzipName.ext());
-    }
-
-    return read(name, ext);
+    this->clear();
+    transfer(*New(name));
+    return true;
 }
 
 
@@ -1415,27 +1410,8 @@ bool Foam::MeshedSurface<Face>::read
     const word& fileType
 )
 {
-    if (fileType.empty())
-    {
-        // Handle empty/missing type
-
-        const word ext(name.ext());
-
-        if (ext.empty())
-        {
-            FatalErrorInFunction
-                << "Cannot determine format from filename" << nl
-                << "    " << name << nl
-                << exit(FatalError);
-        }
-
-        return read(name, ext);
-    }
-
-    clear();
-
-    // Read via selector mechanism
-    transfer(*(New(name, fileType)));
+    this->clear();
+    transfer(*New(name, fileType));
     return true;
 }
 

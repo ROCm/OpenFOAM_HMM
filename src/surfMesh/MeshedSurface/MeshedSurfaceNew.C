@@ -30,7 +30,7 @@ License
 #include "UnsortedMeshedSurface.H"
 #include "ListOps.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Face>
 Foam::autoPtr<Foam::MeshedSurface<Face>>
@@ -41,6 +41,42 @@ Foam::MeshedSurface<Face>::New
     bool mandatory
 )
 {
+    const word ext(name.ext());
+
+    if (fileType.empty())
+    {
+        // Handle empty/missing type
+
+        if (ext.empty())
+        {
+            FatalErrorInFunction
+                << "Cannot determine format from filename" << nl
+                << "    " << name << nl
+                << exit(FatalError);
+        }
+
+        return New(name, ext, mandatory);
+    }
+    else if (fileType == "gz")
+    {
+        // Degenerate call
+        fileName unzipName(name.lessExt());
+        return New(unzipName, unzipName.ext(), mandatory);
+    }
+    else if (ext == "gz")
+    {
+        // Handle trailing "gz" on file name
+        return New(name.lessExt(), fileType, mandatory);
+    }
+
+    // if (check && !exists(name))
+    // {
+    //     FatalErrorInFunction
+    //         << "No such file " << name << nl
+    //         << exit(FatalError);
+    // }
+
+
     DebugInFunction
         << "Construct MeshedSurface (" << fileType << ")\n";
 
@@ -81,11 +117,15 @@ template<class Face>
 Foam::autoPtr<Foam::MeshedSurface<Face>>
 Foam::MeshedSurface<Face>::New(const fileName& name)
 {
-    word ext(name.ext());
+    const word ext(name.ext());
     if (ext == "gz")
     {
-        ext = name.lessExt().ext();
+        // Handle trailing "gz" on file name
+
+        fileName unzipName(name.lessExt());
+        return New(unzipName, unzipName.ext());
     }
+
     return New(name, ext);
 }
 

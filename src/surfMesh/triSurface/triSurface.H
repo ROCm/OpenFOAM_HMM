@@ -127,7 +127,10 @@ class triSurface
         );
 
         //- Read in OpenFOAM format
-        bool read(Istream& is);
+        bool readNative(Istream& is);
+
+        //- Write in OpenFOAM format
+        void writeNative(Ostream& os) const;
 
         //- Read in STL format
         bool readSTL(const fileName& filename, bool forceBinary=false);
@@ -166,15 +169,6 @@ class triSurface
         (
             const triFaceList& faces,
             const label defaultRegion = 0
-        );
-
-        //- Helper function to print triangle info
-        static void printTriangle
-        (
-            Ostream& os,
-            const string& pre,
-            const labelledTri& f,
-            const pointField& points
         );
 
         //- Return a new surface using specified pointMap and faceMap
@@ -373,6 +367,19 @@ public:
         );
 
 
+    // Selectors
+
+        //- Read construct from filename with given file type
+        static autoPtr<triSurface> New
+        (
+            const fileName& name,
+            const word& fileType
+        );
+
+        //- Read construct from filename (file type implicit from extension)
+        static autoPtr<triSurface> New(const fileName& name);
+
+
     //- Destructor
     virtual ~triSurface();
 
@@ -563,7 +570,7 @@ public:
 
     // Write
 
-        //- Write to Ostream in simple FOAM format
+        //- Write to Ostream in simple OpenFOAM format
         void write(Ostream& os) const;
 
         //- Generic write routine (uses extension to determine type).
@@ -601,8 +608,8 @@ public:
 
     // IOstream Operators
 
-        friend Istream& operator>>(Istream&, triSurface&);
-        friend Ostream& operator<<(Ostream&, const triSurface&);
+        friend Istream& operator>>(Istream& is, triSurface& s);
+        friend Ostream& operator<<(Ostream& os, const triSurface& s);
 };
 
 
