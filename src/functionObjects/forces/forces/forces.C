@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -530,17 +530,13 @@ void Foam::functionObjects::forces::addToFields
         return;
     }
 
-    volVectorField& force =
-        lookupObjectRef<volVectorField>(fieldName("force"));
-
+    auto& force = lookupObjectRef<volVectorField>(fieldName("force"));
     vectorField& pf = force.boundaryFieldRef()[patchi];
     pf += fN + fT + fP;
 
-    volVectorField& moment =
-        lookupObjectRef<volVectorField>(fieldName("moment"));
-
+    auto& moment = lookupObjectRef<volVectorField>(fieldName("moment"));
     vectorField& pm = moment.boundaryFieldRef()[patchi];
-    pm += Md;
+    pm = Md^pf;
 }
 
 
@@ -558,17 +554,14 @@ void Foam::functionObjects::forces::addToFields
         return;
     }
 
-    volVectorField& force =
-        lookupObjectRef<volVectorField>(fieldName("force"));
-
-    volVectorField& moment =
-        lookupObjectRef<volVectorField>(fieldName("moment"));
+    auto& force = lookupObjectRef<volVectorField>(fieldName("force"));
+    auto& moment = lookupObjectRef<volVectorField>(fieldName("moment"));
 
     forAll(cellIDs, i)
     {
         label celli = cellIDs[i];
         force[celli] += fN[i] + fT[i] + fP[i];
-        moment[celli] += Md[i];
+        moment[celli] = Md[i]^force[celli];
     }
 }
 
