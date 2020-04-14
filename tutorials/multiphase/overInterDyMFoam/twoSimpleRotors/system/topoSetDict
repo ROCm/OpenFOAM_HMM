@@ -56,7 +56,6 @@ actions
     }
 
     // Select box to remove from region 1 and 2
-
     {
         name    box;
         type    cellSet;

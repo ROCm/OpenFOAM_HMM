@@ -24,7 +24,6 @@ boundaryField
 
     defaultFaces
     {
-        //type            slip;
         type            uniformFixedValue;
         uniformValue    (0 0 0);
     }
@@ -35,12 +34,11 @@ boundaryField
         value           uniform (0 0 0);
     }
 
-   atmosphere
-   {
-       type            pressureInletOutletVelocity;
-       value           uniform (0 0 0);
-   }
-
+    atmosphere
+    {
+        type            pressureInletOutletVelocity;
+        value           uniform (0 0 0);
+    }
 
     "overset.*"
     {

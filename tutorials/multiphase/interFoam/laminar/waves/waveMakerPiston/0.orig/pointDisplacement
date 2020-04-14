@@ -24,11 +24,13 @@ boundaryField
     {
         type            zeroGradient;
     }
+
     bottom2
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
+
     leftwall
     {
         type            waveMaker;
@@ -43,19 +45,23 @@ boundaryField
         rampTime        2.0;
         wavePhase       0;
     }
+
     back
     {
         type            empty;
     }
+
     front
     {
         type            empty;
     }
+
     rightwall
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
+
     top
     {
         type            zeroGradient;

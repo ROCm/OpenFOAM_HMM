@@ -18,7 +18,6 @@ solvers
 {
     alpha.water
     {
-
         isoFaceTol      1e-6;
         surfCellTol     1e-6;
         nAlphaBounds    3;

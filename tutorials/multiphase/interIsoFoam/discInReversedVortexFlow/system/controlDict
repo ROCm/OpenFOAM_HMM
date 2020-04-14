@@ -50,6 +50,7 @@ runTimeModifiable no;
 adjustTimeStep  no;
 
 maxCo           1e10;
+
 maxAlphaCo      0.5;
 
 maxDeltaT       0.05;

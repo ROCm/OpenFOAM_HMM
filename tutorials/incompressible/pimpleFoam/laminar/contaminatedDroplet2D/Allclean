@@ -5,7 +5,9 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 cleanCase
 cleanFaMesh
+
 (cd makePerturbation && wclean)
-rm -r history
+
+rm -rf history
 
 #------------------------------------------------------------------------------

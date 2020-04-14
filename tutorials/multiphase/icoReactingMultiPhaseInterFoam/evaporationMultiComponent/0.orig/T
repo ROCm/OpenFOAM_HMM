@@ -24,22 +24,26 @@ boundaryField
     {
         type            zeroGradient;
     }
+
     top
     {
         type            inletOutlet;
         inletValue      $internalField;
         value           $internalField;
     }
+
     left
     {
         type            fixedValue;
         value           uniform 375;
     }
+
     right
     {
         type            zeroGradient;
         value           $internalField;
     }
+
     frontAndBack
     {
         type            empty;

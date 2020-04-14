@@ -25,11 +25,13 @@ boundaryField
         type            fixedValue;
         value           uniform (0 0 0);
     }
+
     atmosphere
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
+
     floatingObject
     {
         type            calculated;

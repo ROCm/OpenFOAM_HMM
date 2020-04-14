@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-phases (water oir);
+phases (water oil);
 
 water
 {
@@ -24,7 +24,7 @@ water
     rho             1000;
 }
 
-oir
+oil
 {
     transportModel  Newtonian;
     nu              1e-4;

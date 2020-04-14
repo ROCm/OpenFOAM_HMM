@@ -13,7 +13,6 @@ FoamFile
     location    "system";
     object      dynamicMeshDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 dynamicFvMesh   dynamicMotionSolverFvMesh;
@@ -27,5 +26,6 @@ motionSolver    displacementLaplacian;
 // diffusivity  motionDirectional (1 1000 0);
 // diffusivity  file motionDiffusivity;
 diffusivity  inverseDistance 1(floatingObjectBottom);
+
 
 // ************************************************************************* //

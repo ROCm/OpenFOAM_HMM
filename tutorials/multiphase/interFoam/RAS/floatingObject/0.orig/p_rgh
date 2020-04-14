@@ -24,11 +24,13 @@ boundaryField
     {
         type            fixedFluxPressure;
     }
+
     atmosphere
     {
         type            totalPressure;
         p0              uniform 0;
     }
+
     floatingObject
     {
         type            fixedFluxPressure;

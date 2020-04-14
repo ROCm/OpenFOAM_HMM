@@ -76,7 +76,6 @@ nSmoothScale 4;
 errorReduction 0.75;
 
 
-
 // Optional : some meshing phases allow usage of relaxed rules.
 // See e.g. addLayersControls::nRelaxedIter.
 relaxed
@@ -84,3 +83,6 @@ relaxed
     //- Maximum non-orthogonality allowed. Set to 180 to disable.
     maxNonOrtho 75;
 }
+
+
+// ************************************************************************* //

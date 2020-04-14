@@ -24,26 +24,32 @@ boundaryField
     {
         type            zeroGradient;
     }
+
     bottom2
     {
         type            zeroGradient;
     }
+
     front
     {
         type            empty;
     }
+
     back
     {
         type            empty;
     }
+
     leftwall
     {
         type            zeroGradient;
     }
+
     rightwall
     {
         type            zeroGradient;
     }
+
     top
     {
         type            inletOutlet;

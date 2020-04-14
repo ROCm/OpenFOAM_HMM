@@ -14,7 +14,6 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
 libs
 (
     overset
@@ -54,13 +53,15 @@ runTimeModifiable true;
 
 adjustTimeStep  yes;
 
-
 maxCo           4.0;
+
 maxAlphaCo      5.0;
+
 maxDeltaT       1;
+
+
 functions
 {
-
     minMax
     {
         type    fieldMinMax;

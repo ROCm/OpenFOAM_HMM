@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      k;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -25,10 +24,12 @@ boundaryField
     {
         type            zeroGradient;
     }
+
     right
     {
         type            zeroGradient;
     }
+
     sides
     {
         type            slip;
@@ -40,6 +41,7 @@ boundaryField
         inletValue      uniform 0.001;
         value           uniform 0.001;
     }
+
     ground
     {
         type            kqRWallFunction;

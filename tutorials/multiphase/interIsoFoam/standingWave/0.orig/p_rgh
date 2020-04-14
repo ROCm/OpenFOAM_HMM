@@ -20,31 +20,13 @@ internalField   uniform 0;
 
 boundaryField
 {
-    left
+    "(left|right|top|bottom)"
     {
         type    fixedFluxPressure;
         value   uniform 0;
     }
-    right
-    {
-        type    fixedFluxPressure;
-        value   uniform 0;
-    }
-    top
-    {
-        type    fixedFluxPressure;
-        value   uniform 0;
-    }
-    bottom
-    {
-        type    fixedFluxPressure;
-        value   uniform 0;
-    }
-    front
-    {
-        type            empty;
-    }
-    back
+
+    "(front|back)"
     {
         type            empty;
     }

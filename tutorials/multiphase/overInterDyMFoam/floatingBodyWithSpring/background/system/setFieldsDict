@@ -25,14 +25,21 @@ regions
     boxToCell
     {
         box ( -100 -100 -100 ) ( 100 100 0.5368 );
-        fieldValues ( volScalarFieldValue alpha.water 1 );
+        fieldValues
+        (
+            volScalarFieldValue alpha.water 1
+        );
     }
 
     boxToFace
     {
         box ( -100 -100 -100 ) ( 100 100 0.5368 );
-        fieldValues ( volScalarFieldValue alpha.water 1 );
+        fieldValues
+        (
+            volScalarFieldValue alpha.water 1
+        );
     }
+
     /*
     boxToCell
     {
@@ -50,6 +57,7 @@ regions
             volScalarFieldValue zoneID 0
         );
     }
+
     cellToCell
     {
         set c1;
@@ -59,7 +67,6 @@ regions
             volScalarFieldValue zoneID 1
         );
     }
-
 );
 
 // ************************************************************************* //

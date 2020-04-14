@@ -31,7 +31,7 @@ writeControl    adjustable;
 
 writeInterval   0.001;
 
-cycleWrite      0;
+purgeWrite      0;
 
 writeFormat     ascii;
 

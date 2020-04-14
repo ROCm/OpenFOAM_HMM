@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      alpha.sludge;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -21,22 +20,11 @@ internalField   uniform 0;
 
 boundaryField
 {
-    left
+    "(left|right|bottom|top)"
     {
         type            zeroGradient;
     }
-    right
-    {
-        type            zeroGradient;
-    }
-    bottom
-    {
-        type            zeroGradient;
-    }
-    top
-    {
-        type            zeroGradient;
-    }
+
     frontBack
     {
         type            empty;

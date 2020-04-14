@@ -48,6 +48,7 @@ runTimeModifiable yes;
 adjustTimeStep  yes;
 
 maxCo           0.5;
+
 maxAlphaCo      1;
 
 maxDeltaT       1;
@@ -64,7 +65,6 @@ functions
         nLocations      20;
     }
 }
-
 
 
 // ************************************************************************* //

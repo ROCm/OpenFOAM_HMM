@@ -27,12 +27,14 @@ boundaryField
         type            kqRWallFunction;
         value           uniform 0.1;
     }
+
     atmosphere
     {
         type            inletOutlet;
         inletValue      uniform 0.1;
         value           uniform 0.1;
     }
+
     floatingObject
     {
         type            kqRWallFunction;

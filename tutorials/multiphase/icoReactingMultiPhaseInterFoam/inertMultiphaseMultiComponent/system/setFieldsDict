@@ -16,7 +16,7 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // NOTE: The inert specie is defined everywhere.
-// As it is not solved it fullfills the thermo requirement of Sum Y = 1
+// As it is not solved it fulfills the thermo requirement of Sum Y = 1
 // in phases where there are not species
 defaultFieldValues
 (

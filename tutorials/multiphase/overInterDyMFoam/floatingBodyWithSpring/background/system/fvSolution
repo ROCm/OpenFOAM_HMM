@@ -16,7 +16,6 @@ FoamFile
 
 solvers
 {
-
     "cellDisplacement.*"
     {
         solver          PCG;

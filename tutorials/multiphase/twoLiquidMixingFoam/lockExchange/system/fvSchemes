@@ -13,7 +13,6 @@ FoamFile
     location    "system";
     object      fvSchemes;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 ddtSchemes

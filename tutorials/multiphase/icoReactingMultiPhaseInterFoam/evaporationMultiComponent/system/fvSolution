@@ -37,8 +37,6 @@ solvers
         // Compressiion factor for species in each alpha phase
         // NOTE: It should be similar to cAlpha
         cYi             1;
-
-
     }
 
     "(U.*|epsilon.*|k.*)"
@@ -57,8 +55,6 @@ solvers
         relTol          0.01;
         residualAlpha   1e-5;
     }
-
-
 
     p_rgh
     {

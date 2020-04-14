@@ -4,7 +4,9 @@ cd "${0%/*}" || exit                                # Run from this directory
 #------------------------------------------------------------------------------
 
 runApplication blockMesh
+
 runApplication topoSet
+
 runApplication subsetMesh -overwrite c0 -patch floatingObject
 
 #------------------------------------------------------------------------------

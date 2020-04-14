@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      T.water;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -25,34 +24,41 @@ boundaryField
     {
         type            wedge;
     }
+
     back
     {
         type            wedge;
     }
+
     innerAMI
     {
         type            cyclicAMI;
         value           uniform 300;
     }
+
     outerAMI
     {
         type            cyclicAMI;
         value           uniform 300;
     }
+
     top
     {
         type            inletOutlet;
         inletValue      uniform 300;
         value           uniform 300;
     }
+
     bottom
     {
         type            zeroGradient;
     }
+
     farFieldWall
     {
         type            zeroGradient;
     }
+
     sphere
     {
         type            zeroGradient;

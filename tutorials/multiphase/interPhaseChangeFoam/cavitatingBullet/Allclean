@@ -5,7 +5,6 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 cleanCase0
 
-# Remove surface
-rm -f constant/triSurface/bullet.stl.gz
+rm -rf constant/triSurface
 
 #------------------------------------------------------------------------------

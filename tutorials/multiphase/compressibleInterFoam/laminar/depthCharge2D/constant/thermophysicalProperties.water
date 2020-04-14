@@ -14,21 +14,6 @@ FoamFile
     object      thermophysicalProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-/*
-thermoType
-{
-    type            heRhoThermo;
-    mixture         pureMixture;
-    properties      liquid;
-    energy          sensibleInternalEnergy;
-}
-
-mixture
-{
-    H2O;
-}
-*/
-
 
 thermoType
 {

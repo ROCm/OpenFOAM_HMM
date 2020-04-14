@@ -37,6 +37,7 @@ regions
             volScalarFieldValue alpha.air 0
         );
     }
+
     boxToCell
     {
         box (0.1461 0 -1) (0.2922 0.292 1);
@@ -48,6 +49,7 @@ regions
             volScalarFieldValue alpha.air 0
         );
     }
+
     boxToCell
     {
         box (0 0 -1) (0.1461 0.1 1);

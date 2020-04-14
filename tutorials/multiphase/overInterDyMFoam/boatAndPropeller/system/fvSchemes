@@ -26,7 +26,7 @@ gradSchemes
 
 divSchemes
 {
-    div(rhoPhi,U)   Gauss upwind ;//limitedLinearV 1;
+    div(rhoPhi,U)   Gauss upwind;
     div(U)          Gauss linear;
     div(phi,alpha)  Gauss vanLeer;
     div(phirb,alpha) Gauss linear;
@@ -39,7 +39,7 @@ divSchemes
 
 laplacianSchemes
 {
-    default         Gauss linear uncorrected;//uncorrected;
+    default         Gauss linear uncorrected;
 }
 
 interpolationSchemes
@@ -49,7 +49,7 @@ interpolationSchemes
 
 snGradSchemes
 {
-    default         uncorrected;//uncorrected;
+    default         uncorrected;
 }
 
 oversetInterpolation

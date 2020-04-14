@@ -27,24 +27,25 @@ boundaryField
         type            calculated;
         value           uniform 0;
     }
+
     "(atmosphere|sidePatch)"
     {
         type            calculated;
         value           uniform 0;
     }
+
     floatingObject
     {
         type            nutkWallFunction;
-        Cmu             0.09;
-        kappa           0.41;
-        E               9.8;
         value           uniform 0;
     }
+
     overset
     {
         patchType       overset;
         type            zeroGradient;
     }
+
     oversetPatch
     {
         type            overset;

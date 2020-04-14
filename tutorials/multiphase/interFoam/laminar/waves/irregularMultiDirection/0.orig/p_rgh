@@ -43,6 +43,7 @@ boundaryField
         type            fixedFluxPressure;
         value           uniform 0;
     }
+
     sides2
     {
         type            fixedFluxPressure;

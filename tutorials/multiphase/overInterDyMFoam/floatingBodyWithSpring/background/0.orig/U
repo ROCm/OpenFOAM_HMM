@@ -38,16 +38,19 @@ boundaryField
         type            pressureInletOutletVelocity;
         value           uniform (0 0 0);
     }
+
     sidePatch
     {
         type            pressureInletOutletVelocity;
         value           uniform (0 0 0);
     }
+
     atmosphere
     {
         type            pressureInletOutletVelocity;
         value           uniform (0 0 0);
     }
+
     floatingObject
     {
         type            movingWallVelocity;

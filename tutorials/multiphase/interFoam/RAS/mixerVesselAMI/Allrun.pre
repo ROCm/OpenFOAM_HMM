@@ -3,19 +3,22 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
+mkdir -p constant/triSurface
+
+# copy STL files from resources folder
+cp -f $FOAM_TUTORIALS/resources/geometry/mixerVesselAMI/* constant/triSurface/.
+
 rm -rf 0
 
 # Meshing
 runApplication blockMesh
+
 runApplication surfaceFeatureExtract
+
 runApplication snappyHexMesh -overwrite
+
 runApplication createBaffles -overwrite
+
 runApplication mergeOrSplitBaffles -split -overwrite
-
-# Copy fields after meshing to avoid the generation of unnecessary patch fields
-restore0Dir
-
-# Initialize alpha
-runApplication setFields
 
 #------------------------------------------------------------------------------

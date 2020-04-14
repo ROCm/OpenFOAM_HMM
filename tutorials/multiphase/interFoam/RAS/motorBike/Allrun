@@ -11,8 +11,10 @@ runParallel $(getApplication)
 FOAM_SIGFPE=false runParallel -s reconstruct redistributePar -reconstruct
 
 # A bit more testing of decomposing
-\cp system/controlDict_nextWrite system/controlDict
+cp -f system/controlDict_nextWrite system/controlDict
+
 runParallel -s decompose redistributePar -decompose -latestTime
+
 runParallel -s restart $(getApplication)
 
 #------------------------------------------------------------------------------

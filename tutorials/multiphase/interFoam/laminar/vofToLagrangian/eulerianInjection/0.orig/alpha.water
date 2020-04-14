@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      binary;
     class       volScalarField;
-    location    "0";
     object      alpha.water;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,10 +25,12 @@ boundaryField
         type            fixedValue;
         value           uniform 0;
     }
+
     bottom
     {
         type            zeroGradient;
     }
+
     sides
     {
         type            inletOutlet;

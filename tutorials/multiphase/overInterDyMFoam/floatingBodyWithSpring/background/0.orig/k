@@ -24,25 +24,29 @@ boundaryField
 
     stationaryWalls
     {
-         type            inletOutlet;
+        type            inletOutlet;
         inletValue      uniform 0.01;
         value           uniform 0.01;
     }
+
     "(atmosphere|sidePatch)"
     {
         type            inletOutlet;
         inletValue      uniform 0.01;
         value           uniform 0.01;
     }
+
     floatingObject
     {
         type            kqRWallFunction;
         value           uniform 0.01;
     }
+
     overset
     {
         type            overset;
     }
+
     oversetPatch
     {
         type            overset;

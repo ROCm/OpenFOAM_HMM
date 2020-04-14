@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      epsilon;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -18,7 +17,6 @@ FoamFile
 dimensions      [0 2 -3 0 0 0 0];
 
 internalField   uniform 0.1;
-
 
 boundaryField
 {
@@ -29,39 +27,44 @@ boundaryField
         type            overset;
         value           uniform 1;
     }
+
     hullWall
     {
-         type            epsilonWallFunction;
+        type            epsilonWallFunction;
         Cmu             0.09;
         kappa           0.41;
         E               9.8;
         value           uniform 0.1;
     }
+
     propellerWall
     {
-         type            epsilonWallFunction;
+        type            epsilonWallFunction;
         Cmu             0.09;
         kappa           0.41;
         E               9.8;
         value           uniform 0.1;
     }
+
     rudderWall
     {
-         type            epsilonWallFunction;
+        type            epsilonWallFunction;
         Cmu             0.09;
         kappa           0.41;
         E               9.8;
         value           uniform 0.1;
     }
+
     atmosphere
     {
         type            inletOutlet;
         inletValue      uniform 0.1;
         value           uniform 0.1;
     }
+
     defaultFaces
     {
-         type            epsilonWallFunction;
+        type            epsilonWallFunction;
         Cmu             0.09;
         kappa           0.41;
         E               9.8;

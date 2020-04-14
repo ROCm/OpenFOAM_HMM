@@ -14,7 +14,6 @@ FoamFile
     location        "system";
     object          controlDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 application     interIsoFoam;
@@ -52,9 +51,11 @@ runTimeModifiable no;
 adjustTimeStep  no;
 
 maxCo           1e6;
+
 maxAlphaCo      0.5;
 
 maxDeltaT       0.05;
+
 
 functions
 {

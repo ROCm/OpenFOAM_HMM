@@ -39,12 +39,14 @@ boundaryField
         upperBound      1;
         value           uniform 0;
     }
+
     atmosphere
     {
         type            inletOutlet;
         inletValue      uniform 0;
         value           uniform 0;
     }
+
     floatingObject
     {
 //         type            variableHeightFlowRate;
@@ -53,6 +55,7 @@ boundaryField
 //         value           uniform 0;
         type            zeroGradient;
     }
+
     sidePatch
     {
         type            variableHeightFlowRate;

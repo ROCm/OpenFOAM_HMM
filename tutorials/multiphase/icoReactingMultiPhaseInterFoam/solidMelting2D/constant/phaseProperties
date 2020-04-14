@@ -13,6 +13,7 @@ FoamFile
     object      phaseProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 type    massTransferMultiphaseSystem;
 
 phases  (solid liquid);

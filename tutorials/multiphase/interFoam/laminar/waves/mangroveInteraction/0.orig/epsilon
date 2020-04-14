@@ -24,10 +24,12 @@ boundaryField
     {
         type            zeroGradient;
     }
+
     right
     {
         type            zeroGradient;
     }
+
     sides
     {
         type            slip;
@@ -39,6 +41,7 @@ boundaryField
         inletValue      uniform 0.0001;
         value           uniform 0.0001;
     }
+
     ground
     {
         type            epsilonWallFunction;
