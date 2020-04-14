@@ -14,25 +14,29 @@ GLIBS      = -lm
 GLIB_LIBS  =
 
 
-COMPILER_FAMILY = $(shell echo "$(WM_COMPILER)" | sed -e 's/[0-9].*//')
-DEFAULT_RULES   = $(WM_DIR)/rules/$(WM_ARCH)$(COMPILER_FAMILY)
-RULES           = $(WM_DIR)/rules/$(WM_ARCH)$(WM_COMPILER)
+ARCHITECTURE_RULES = $(WM_DIR)/rules/$(WM_ARCH)
+COMPILER_FAMILY = $(shell echo "$(WM_COMPILER)" | sed -e 's/[-+.0-9~].*//')
+DEFAULT_RULES   = $(ARCHITECTURE_RULES)$(COMPILER_FAMILY)
+RULES           = $(ARCHITECTURE_RULES)$(WM_COMPILER)
 WMAKE_BIN       = $(WM_PROJECT_DIR)/platforms/tools/$(WM_ARCH)$(WM_COMPILER)
 
 # Default compilation is 'Opt' - never permit an empty value
-ifeq ($(WM_COMPILE_OPTION),)
+ifeq (,$(WM_COMPILE_OPTION))
     WM_COMPILE_OPTION = Opt
 endif
 
-ifeq ($(WM_SCHEDULER),)
+ifeq (,$(WM_SCHEDULER))
     AND = &&
 else
     AND = '&&'
 endif
 
 include $(DEFAULT_RULES)/general
+sinclude $(DEFAULT_RULES)/override
+ifneq ("$(COMPILER_FAMILY)","$(WM_COMPILER)")
 sinclude $(RULES)/general
 sinclude $(RULES)/c++
+endif
 include $(GENERAL_RULES)/transform
 
 #------------------------------------------------------------------------------
