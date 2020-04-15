@@ -38,7 +38,6 @@ no_metis()
 {
     unset HAVE_METIS METIS_ARCH_PATH METIS_INC_DIR METIS_LIB_DIR
     unset METIS_VERSION
-    return 0
 }
 
 
@@ -73,9 +72,9 @@ query_metis()
 # -> HAVE_METIS, METIS_ARCH_PATH, METIS_INC_DIR, METIS_LIB_DIR
 have_metis()
 {
+    local warn="==> skip metis"
     local config="config.sh/metis"
-    local prefix header library incName libName settings warn
-    warn="==> skip metis"
+    local settings
 
     if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config")"
     then
@@ -86,9 +85,10 @@ have_metis()
     fi
 
     # Expected location, include/library names
-    prefix="$METIS_ARCH_PATH"
-    incName="metis.h"
-    libName="libmetis"
+    local prefix="$METIS_ARCH_PATH"
+    local incName="metis.h"
+    local libName="libmetis"
+    local header library
 
     # ----------------------------------
     if isNone "$prefix"

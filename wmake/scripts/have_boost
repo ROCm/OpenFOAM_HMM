@@ -18,6 +18,7 @@
 #
 # Requires
 #     BOOST_ARCH_PATH
+# or  config.sh/CGAL (when BOOST_ARCH_PATH is empty)
 #
 # Functions provided
 #     have_boost, no_boost, echo_boost, query_boost
@@ -37,7 +38,6 @@
 no_boost()
 {
     unset HAVE_BOOST BOOST_INC_DIR BOOST_LIB_DIR
-    return 0
 }
 
 
@@ -72,15 +72,27 @@ query_boost()
 # -> HAVE_BOOST, BOOST_INC_DIR, BOOST_LIB_DIR
 have_boost()
 {
-    local prefix header library incName libName settings warn
-    # warn="==> skip boost"
+    local warn # warn="==> skip boost"
+    local config="config.sh/CGAL"
+    local settings
 
-    # Setup - from the current environment
+    # Setup - current environment if set
+    if [ -z "$BOOST_ARCH_PATH" ]
+    then
+        if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config")"
+        then
+            . "$settings"
+        else
+            [ -n "$warn" ] && echo "$warn (no $config settings)"
+            return 2
+        fi
+    fi
 
     # Expected location, include/library names
-    prefix="$BOOST_ARCH_PATH"
-    incName="boost/version.hpp"
-    libName="libboost_system"
+    local prefix="$BOOST_ARCH_PATH"
+    local incName="boost/version.hpp"
+    local libName="libboost_system"
+    local header library
 
     # ----------------------------------
     if isNone "$prefix"

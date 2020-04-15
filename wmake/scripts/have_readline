@@ -36,7 +36,6 @@
 no_readline()
 {
     unset HAVE_LIBREADLINE READLINE_INC_DIR READLINE_LIB_DIR
-    return 0
 }
 
 
@@ -53,13 +52,14 @@ echo_readline()
 # -> HAVE_LIBREADLINE, READLINE_INC_DIR, READLINE_LIB_DIR
 have_readline()
 {
-    local prefix header library incName libName settings warn
-    # warn="==> skip readline"
+    local warn # warn="==> skip readline"
+    local settings
 
     # Expected location, include/library names
-    prefix=system
-    incName="readline/readline.h"
-    libName="libreadline"
+    local prefix=system
+    local incName="readline/readline.h"
+    local libName="libreadline"
+    local header library
 
     # ----------------------------------
     if isNone "$prefix"

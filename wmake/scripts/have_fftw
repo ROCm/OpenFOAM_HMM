@@ -18,6 +18,7 @@
 #
 # Requires
 #     FFTW_ARCH_PATH
+# or  config.sh/FFTW (when FFTW_ARCH_PATH is empty)
 #
 # Functions provided
 #     have_fftw, no_fftw, echo_fftw, query_fftw
@@ -37,7 +38,6 @@
 no_fftw()
 {
     unset HAVE_FFTW FFTW_INC_DIR FFTW_LIB_DIR
-    return 0
 }
 
 
@@ -72,15 +72,27 @@ query_fftw()
 # -> HAVE_FFTW, FFTW_INC_DIR, FFTW_LIB_DIR
 have_fftw()
 {
-    local prefix header library incName libName settings warn
-    # warn="==> skip fftw"
+    local warn # warn="==> skip fftw"
+    local config="config.sh/FFTW"
+    local settings
 
-    # Setup - from the current environment
+    # Setup - current environment if set
+    if [ -z "$FFTW_ARCH_PATH" ]
+    then
+        if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config")"
+        then
+            . "$settings"
+        else
+            [ -n "$warn" ] && echo "$warn (no $config settings)"
+            return 2
+        fi
+    fi
 
     # Expected location, include/library names
-    prefix="$FFTW_ARCH_PATH"
-    incName="fftw3.h"
-    libName="libfftw3"
+    local prefix="$FFTW_ARCH_PATH"
+    local incName="fftw3.h"
+    local libName="libfftw3"
+    local header library
 
     # ----------------------------------
     if isNone "$prefix"

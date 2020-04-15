@@ -38,7 +38,6 @@ no_kahip()
 {
     unset HAVE_KAHIP KAHIP_ARCH_PATH KAHIP_INC_DIR KAHIP_LIB_DIR
     unset KAHIP_VERSION
-    return 0
 }
 
 
@@ -73,9 +72,9 @@ query_kahip()
 # -> HAVE_KAHIP, KAHIP_ARCH_PATH, KAHIP_INC_DIR, KAHIP_LIB_DIR
 have_kahip()
 {
+    local warn="==> skip kahip"
     local config="config.sh/kahip"
-    local prefix header library incName libName settings warn
-    warn="==> skip kahip"
+    local settings
 
     if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config")"
     then
@@ -86,9 +85,10 @@ have_kahip()
     fi
 
     # Expected location, include/library names
-    prefix="$KAHIP_ARCH_PATH"
-    incName="kaHIP_interface.h"
-    libName="libkahip"
+    local prefix="$KAHIP_ARCH_PATH"
+    local incName="kaHIP_interface.h"
+    local libName="libkahip"
+    local header library
 
     # ----------------------------------
     if isNone "$prefix"

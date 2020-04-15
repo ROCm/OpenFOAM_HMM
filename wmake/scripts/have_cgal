@@ -18,6 +18,7 @@
 #
 # Requires
 #     CGAL_ARCH_PATH
+# or  config.sh/CGAL (when CGAL_ARCH_PATH is empty)
 #
 # Functions provided
 #     have_cgal, no_cgal, echo_cgal, query_cgal
@@ -37,7 +38,6 @@
 no_cgal()
 {
     unset HAVE_CGAL CGAL_INC_DIR CGAL_LIB_DIR
-    return 0
 }
 
 
@@ -72,15 +72,27 @@ query_cgal()
 # -> HAVE_CGAL, CGAL_INC_DIR, CGAL_LIB_DIR
 have_cgal()
 {
-    local prefix header library incName libName settings warn
-    # warn="==> skip cgal"
+    local warn # warn="==> skip cgal"
+    local config="config.sh/CGAL"
+    local settings
 
-    # Setup - from the current environment
+    # Setup - current environment if set
+    if [ -z "$CGAL_ARCH_PATH" ]
+    then
+        if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config")"
+        then
+            . "$settings"
+        else
+            [ -n "$warn" ] && echo "$warn (no $config settings)"
+            return 2
+        fi
+    fi
 
     # Expected location, include/library names
-    prefix="$CGAL_ARCH_PATH"
-    incName="CGAL/version.h"
-    libName="libCGAL"
+    local prefix="$CGAL_ARCH_PATH"
+    local incName="CGAL/version.h"
+    local libName="libCGAL"
+    local header library
 
     # ----------------------------------
     if isNone "$prefix"

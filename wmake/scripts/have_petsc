@@ -18,6 +18,7 @@
 #
 # Requires
 #     PETSC_ARCH_PATH
+# or  config.sh/petsc
 #
 # Functions provided
 #     have_petsc, no_petsc, echo_petsc, hint_petsc, query_petsc
@@ -37,7 +38,6 @@
 no_petsc()
 {
     unset HAVE_PETSC PETSC_INC_DIR PETSC_LIB_DIR
-    return 0
 }
 
 
@@ -88,9 +88,9 @@ query_petsc()
 # -> HAVE_PETSC, PETSC_INC_DIR, PETSC_LIB_DIR
 have_petsc()
 {
+    local warn="==> skip petsc"
     local config="config.sh/petsc"
-    local prefix header library incName libName pkgName settings warn
-    warn="==> skip petsc"
+    local settings
 
     # Setup - prefer current environment value? (TDB)
     if [ ! -d "$PETSC_ARCH_PATH" ]
@@ -105,10 +105,11 @@ have_petsc()
     fi
 
     # Expected location, include/library names
-    prefix="$PETSC_ARCH_PATH"
-    incName="petsc.h"
-    libName="libpetsc"
-    pkgName="PETSc"
+    local prefix="$PETSC_ARCH_PATH"
+    local incName="petsc.h"
+    local libName="libpetsc"
+    local pkgName="PETSc"
+    local header library
 
     # ----------------------------------
     if isNone "$prefix"

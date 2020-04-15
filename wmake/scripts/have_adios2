@@ -37,7 +37,6 @@
 no_adios2()
 {
     unset HAVE_ADIOS2 ADIOS2_INC_DIR ADIOS2_LIB_DIR
-    return 0
 }
 
 
@@ -88,11 +87,10 @@ query_adios2()
 # -> HAVE_ADIOS2, ADIOS2_INC_DIR, ADIOS2_LIB_DIR
 have_adios2()
 {
+    local warn # warn="==> skip adios2"
     local config="config.sh/adios2"
-    local prefix header library incName libName settings warn
-    # warn="==> skip adios2"
+    local settings
 
-    # Setup
     if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config")"
     then
         . "$settings"
@@ -102,9 +100,10 @@ have_adios2()
     fi
 
     # Expected location, include/library names
-    prefix="$ADIOS2_ARCH_PATH"
-    incName="adios2.h"
-    libName="libadios2"
+    local prefix="$ADIOS2_ARCH_PATH"
+    local incName="adios2.h"
+    local libName="libadios2"
+    local header library
 
     # ----------------------------------
     if isNone "$prefix"

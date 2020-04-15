@@ -37,8 +37,8 @@
 no_ccmio()
 {
     unset HAVE_CCMIO CCMIO_INC_DIR CCMIO_LIB_DIR
-    return 0
 }
+
 
 # Report
 echo_ccmio()
@@ -71,9 +71,9 @@ query_ccmio()
 # -> HAVE_CCMIO, CCMIO_INC_DIR, CCMIO_LIB_DIR
 have_ccmio()
 {
+    local warn="==> skip ccmio"
     local config="config.sh/ccmio"
-    local prefix header library incName libName settings warn
-    warn="==> skip ccmio"
+    local settings
 
     if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config")"
     then
@@ -85,9 +85,10 @@ have_ccmio()
 
     # Expected location, include/library names
     # Link with static libccmio only (fewer issues)
-    prefix="$CCMIO_ARCH_PATH"
-    incName="libccmio/ccmio.h"
-    libName="libccmio.a"
+    local prefix="$CCMIO_ARCH_PATH"
+    local incName="libccmio/ccmio.h"
+    local libName="libccmio.a"
+    local header library
 
     # ----------------------------------
     if isNone "$prefix"

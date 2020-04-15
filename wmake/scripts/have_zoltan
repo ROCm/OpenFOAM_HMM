@@ -37,7 +37,6 @@
 no_zoltan()
 {
     unset HAVE_ZOLTAN ZOLTAN_INC_DIR ZOLTAN_LIB_DIR
-    return 0
 }
 
 
@@ -72,9 +71,9 @@ query_zoltan()
 # -> HAVE_ZOLTAN, ZOLTAN_INC_DIR, ZOLTAN_LIB_DIR
 have_zoltan()
 {
+    local warn # warn="==> skip zoltan"
     local config="config.sh/zoltan"
-    local prefix header library incName libName settings warn
-    # warn="==> skip zoltan"
+    local settings
 
     if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config")"
     then
@@ -85,9 +84,10 @@ have_zoltan()
     fi
 
     # Expected location, include/library names
-    prefix="$ZOLTAN_ARCH_PATH"
-    incName="zoltan.h"
-    libName="libzoltan"
+    local prefix="$ZOLTAN_ARCH_PATH"
+    local incName="zoltan.h"
+    local libName="libzoltan"
+    local header library
 
     # ----------------------------------
     if isNone "$prefix"

@@ -18,6 +18,7 @@
 #
 # Requires
 #     HYPRE_ARCH_PATH
+# or  config.sh/hypre
 #
 # Functions provided
 #     have_hypre, no_hypre, echo_hypre, query_hypre
@@ -37,7 +38,6 @@
 no_hypre()
 {
     unset HAVE_HYPRE HYPRE_INC_DIR HYPRE_LIB_DIR
-    return 0
 }
 
 
@@ -72,9 +72,9 @@ query_hypre()
 # -> HAVE_HYPRE, HYPRE_INC_DIR, HYPRE_LIB_DIR
 have_hypre()
 {
+    local warn="==> skip hypre"
     local config="config.sh/hypre"
-    local prefix header library incName libName settings warn
-    warn="==> skip hypre"
+    local settings
 
     # Setup - prefer current environment value? (TDB)
     if [ ! -d "$HYPRE_ARCH_PATH" ]
@@ -89,9 +89,10 @@ have_hypre()
     fi
 
     # Expected location, include/library names
-    prefix="$HYPRE_ARCH_PATH"
-    incName="HYPRE.h"
-    libName="libHYPRE"
+    local prefix="$HYPRE_ARCH_PATH"
+    local incName="HYPRE.h"
+    local libName="libHYPRE"
+    local header library
 
     # ----------------------------------
     if isNone "$prefix"

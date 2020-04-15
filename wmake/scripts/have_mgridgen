@@ -38,7 +38,6 @@ no_mgridgen()
 {
     unset HAVE_MGRIDGEN MGRIDGEN_ARCH_PATH MGRIDGEN_INC_DIR MGRIDGEN_LIB_DIR
     unset MGRIDGEN_VERSION
-    return 0
 }
 
 
@@ -73,9 +72,9 @@ query_mgridgen()
 # -> HAVE_MGRIDGEN, MGRIDGEN_ARCH_PATH, MGRIDGEN_INC_DIR, MGRIDGEN_LIB_DIR
 have_mgridgen()
 {
+    local warn="==> skip mgridgen"
     local config="config.sh/mgridgen"
-    local prefix header library incName libName libName2 settings warn
-    warn="==> skip mgridgen"
+    local settings
 
     if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config")"
     then
@@ -86,10 +85,11 @@ have_mgridgen()
     fi
 
     # Expected location, include/library names
-    prefix="$MGRIDGEN_ARCH_PATH"
-    incName="mgridgen.h"
-    libName="libMGridGen"
-    libName2="libmgrid"
+    local prefix="$MGRIDGEN_ARCH_PATH"
+    local incName="mgridgen.h"
+    local libName="libMGridGen"
+    local libName2="libmgrid"
+    local header library
 
     # ----------------------------------
     if isNone "$prefix"
@@ -126,7 +126,7 @@ have_mgridgen()
 
     # ----------------------------------
 
-    local good label scalar
+    local label scalar
 
     # Ensure consistent sizes with OpenFOAM and mgridgen header
     # Extract typedef for idxtype, realtype
@@ -142,7 +142,6 @@ have_mgridgen()
 
     case "$WM_LABEL_SIZE:$label" in
     (32:int32_t | 32:int | 64:int64_t | 64:long)
-        good=true
         ;;
 
     (*)
@@ -156,7 +155,6 @@ have_mgridgen()
     esac
     case "$WM_PRECISION_OPTION:$scalar" in
     (SP:float | SPDP:float | DP:double)
-        good=true
         ;;
 
     (*)
