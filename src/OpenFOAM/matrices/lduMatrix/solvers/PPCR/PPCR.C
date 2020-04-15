@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 M. Janssens
+    Copyright (C) 2019-2020 Mattijs Janssens
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.

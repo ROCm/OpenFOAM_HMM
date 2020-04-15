@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 M. Janssens
+    Copyright (C) 2019-2020 Mattijs Janssens
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,11 +70,11 @@ class PPCR
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        PPCR(const PPCR&);
+        //- No copy construct
+        PPCR(const PPCR&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const PPCR&);
+        //- No copy assignment
+        void operator=(const PPCR&) = delete;
 
 
 public:

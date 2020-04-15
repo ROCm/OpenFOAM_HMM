@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 M. Janssens
+    Copyright (C) 2019-2020 Mattijs Janssens
     Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -80,11 +80,11 @@ class PPCG
             const label comm
         ) const;
 
-        //- Disallow default bitwise copy construct
-        PPCG(const PPCG&);
+        //- No copy construct
+        PPCG(const PPCG&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const PPCG&);
+        //- No copy assignment
+        void operator=(const PPCG&) = delete;
 
 
 protected:
