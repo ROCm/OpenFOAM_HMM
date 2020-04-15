@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -197,7 +197,9 @@ void Foam::Time::setControls()
 
     // Check if time directory exists
     // If not increase time precision to see if it is formatted differently.
-    if (!fileHandler().exists(timePath(), false))
+    // Note: do not use raw fileHandler().exists(...) since does not check
+    //       alternative processorsDDD directories naming
+    if (fileHandler().filePath(timePath()).empty())
     {
         int oldPrecision = precision_;
         int requiredPrecision = -1;
@@ -221,7 +223,9 @@ void Foam::Time::setControls()
             oldTime = newTime;
 
             // Check the existence of the time directory with the new format
-            found = fileHandler().exists(timePath(), false);
+            //found = fileHandler().exists(timePath(), false);
+            const fileName dirName(fileHandler().filePath(timePath()));
+            found = !dirName.empty();
 
             if (found)
             {
