@@ -8,8 +8,7 @@
 #     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     sysFunctions
@@ -40,7 +39,7 @@ then
     # Load once, but do not rely on this variable elsewhere
     WMAKE_SCRIPTS_SYSFUNCTIONS=loaded
 
-    # Handle Debian multi-arch, ignore missing/bad dpkg-architecture.
+    # Debian multi-arch, ignore missing/bad dpkg-architecture.
     if [ -z "$DEB_TARGET_MULTIARCH" ]
     then
         DEB_TARGET_MULTIARCH=$(dpkg-architecture -qDEB_TARGET_MULTIARCH 2>/dev/null || true)
@@ -98,6 +97,35 @@ then
     isSystem()
     {
         test "${1##*-}" = system
+    }
+
+
+    # True if '$1' and '$2' have the same directory basename
+    # Eg,
+    #    equalBaseName "/usr/include/scotch-int32" "scotch-int32"
+    equalBaseName()
+    {
+        test "${1##*/}" = "${2##*/}"
+    }
+
+
+    # Simple output for -query
+    # $1 = software
+    # $2 = setting
+    _process_query()
+    {
+        if isNone "$2"
+        then
+            echo "$1=none"
+        elif isAbsdir "$2"    ## not hasAbsdir
+        then
+            echo "$1=${2##*/}"
+        elif isSystem "$2"
+        then
+            echo "$1=system"
+        else
+            echo "$1=unknown"
+        fi
     }
 
 
@@ -170,15 +198,15 @@ then
     # This function has two modes of operation.
     #
     # 1) Automated search.
-    #    Specify -prefix=dirName -name=libName and search for
-    #    (lib, lib64, lib/x86_64..) etc.
+    #    Specify -prefix=dirName -name=libName, optionally -local=subdirName
+    #    and search for (lib, lib64, lib/x86_64..) etc.
     #
     # 2) Directed search.
     #    specify the fully qualified names to search on the parameter list
     #
     findLibrary()
     {
-        local prefixDir searchDir searchName
+        local prefixDir localDir searchDir searchName
         local file ext
 
         searchDir=true
@@ -188,6 +216,12 @@ then
             case "$1" in
             -prefix=*)
                 prefixDir="${1#*=}"
+                shift
+                ;;
+
+            -local=*)
+                # Prefix with directory separator
+                localDir="/${1#*=}"
                 shift
                 ;;
 
@@ -204,18 +238,30 @@ then
 
         if [ -n "$searchName" ]
         then
-            # Automated search
-            # Eg, lib/ lib64/, lib/x86_64-linux-gnu
+            # Automated search (eg, lib/ lib64/, lib/x86_64-linux-gnu)
+            # but also handle possible local versions (eg, lib/scotch-int32)
 
             : "${prefixDir:=/usr}"  # A reasonable default
             [ -d "$prefixDir" ] || return 2
 
-            for searchDir in \
-                lib \
-                "${WM_COMPILER_LIB_ARCH:+lib}$WM_COMPILER_LIB_ARCH" \
-                "${DEB_TARGET_MULTIARCH:+lib/}${DEB_TARGET_MULTIARCH}" \
+            # Local and regular search paths
+            set -- \
+                "lib${localDir}" \
+                "${WM_COMPILER_LIB_ARCH:+lib${WM_COMPILER_LIB_ARCH}${localDir}}" \
+                "${DEB_TARGET_MULTIARCH:+lib/${DEB_TARGET_MULTIARCH}${localDir}}" \
+                "lib" \
+                "${WM_COMPILER_LIB_ARCH:+lib${WM_COMPILER_LIB_ARCH}}" \
+                "${DEB_TARGET_MULTIARCH:+lib/${DEB_TARGET_MULTIARCH}}" \
                 ;
+
+            # Ignore empty local search path ("/")
+            [ "${#localDir}" -gt 1 ] || shift 3
+
+            ## echo "search: $# $@" 1>&2
+
+            for searchDir in "$@"
             do
+                [ -n "$searchDir" ] || continue
                 for ext in '' $extLibraries
                 do
                     file="$prefixDir/$searchDir/$searchName$ext"

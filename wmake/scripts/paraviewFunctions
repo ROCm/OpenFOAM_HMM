@@ -5,11 +5,10 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2019 OpenCFD Ltd.
+#     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     paraviewFunctions
@@ -47,7 +46,6 @@ no_paraview()
 {
     unset HAVE_PVPLUGIN_SUPPORT FOAM_PV_PLUGIN_LIBBIN
     unset PARAVIEW_API PARAVIEW_INC_DIR
-    return 0
 }
 
 
@@ -93,15 +91,15 @@ cmakePvInstall()
 wmakeLibPv()
 {
     local depend="ParaView_DIR=$ParaView_DIR"
-    local sentinel
+    local sentinel libName
 
     for libName
     do
-        sentinel=$(sameDependency "$depend" $libName) || \
+        sentinel=$(sameDependency "$depend" "$libName") || \
             wclean $libName
 
         wmake $targetType $libName \
-        && echo "$depend" > ${sentinel:-/dev/null}
+        && storeDependency "$depend" "$sentinel"
     done
 }
 
@@ -148,8 +146,8 @@ get_pvplugin_api()
 #
 have_pvplugin_support()
 {
-    local header settings warn pv_api installDir binDir includeDir targetDir
-    warn="==> skip paraview-plugin"
+    local warn="==> skip paraview-plugin"
+    local settings pv_api installDir binDir includeDir targetDir
 
     # Trivial check
     command -v cmake >/dev/null || {
@@ -172,7 +170,7 @@ have_pvplugin_support()
     fi
 
     # Include/library names
-    header="pqServerManagerModel.h"
+    local header="pqServerManagerModel.h"
 
     if [ -n "$ParaView_DIR" ]
     then
@@ -232,11 +230,15 @@ have_pvplugin_support()
 # Force reset of old variables
 no_paraview
 
-# Testing
-if [ "$1" = "-test" ]
-then
+# Test/query
+case "$1" in
+-test)
     have_pvplugin_support
     echo_paraview
-fi
+    ;;
+-query)
+    ## query_paraview
+    ;;
+esac
 
 #------------------------------------------------------------------------------

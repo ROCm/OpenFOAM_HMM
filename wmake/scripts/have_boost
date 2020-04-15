@@ -5,23 +5,23 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2019 OpenCFD Ltd.
+#     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     have_boost
 #
 # Description
-#     Detection/setup of Boost
+#     Detection/setup of BOOST
 #
 # Requires
 #     BOOST_ARCH_PATH
+# or  config.sh/CGAL (when BOOST_ARCH_PATH is empty)
 #
 # Functions provided
-#     have_boost, no_boost, echo_boost
+#     have_boost, no_boost, echo_boost, query_boost
 #
 # Variables set on success
 #     HAVE_BOOST
@@ -38,7 +38,6 @@
 no_boost()
 {
     unset HAVE_BOOST BOOST_INC_DIR BOOST_LIB_DIR
-    return 0
 }
 
 
@@ -52,19 +51,48 @@ echo_boost()
 }
 
 
+# Query settings (from CGAL setup)
+query_boost()
+{
+    local config="config.sh/CGAL"
+    local settings
+
+    if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile -mode=o "$config")"
+    then
+        . "$settings"
+        _process_query boost "$BOOST_ARCH_PATH"
+    else
+        echo "(no $config settings)" 1>&2
+        echo "boost=unknown"
+    fi
+}
+
+
 # On success, return 0 and export variables
 # -> HAVE_BOOST, BOOST_INC_DIR, BOOST_LIB_DIR
 have_boost()
 {
-    local prefix header library incName libName settings warn
-    # warn="==> skip boost"
+    local warn # warn="==> skip boost"
+    local config="config.sh/CGAL"
+    local settings
 
-    # Setup - from the current environment
+    # Setup - current environment if set
+    if [ -z "$BOOST_ARCH_PATH" ]
+    then
+        if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config")"
+        then
+            . "$settings"
+        else
+            [ -n "$warn" ] && echo "$warn (no $config settings)"
+            return 2
+        fi
+    fi
 
     # Expected location, include/library names
-    prefix="$BOOST_ARCH_PATH"
-    incName="boost/version.hpp"
-    libName="libboost_system"
+    local prefix="$BOOST_ARCH_PATH"
+    local incName="boost/version.hpp"
+    local libName="libboost_system"
+    local header library
 
     # ----------------------------------
     if isNone "$prefix"
@@ -113,11 +141,15 @@ have_boost()
 # Reset variables
 no_boost
 
-# Testing
-if [ "$1" = "-test" ]
-then
+# Test/query
+case "$1" in
+-test)
     have_boost
     echo_boost
-fi
+    ;;
+-query)
+    query_boost
+    ;;
+esac
 
 #------------------------------------------------------------------------------

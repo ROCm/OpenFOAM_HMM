@@ -5,17 +5,17 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2017-2019 OpenCFD Ltd.
+#     Copyright (C) 2017-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     cmakeFunctions
 #
 # Description
 #     Helper functions for CMake
+#
 #------------------------------------------------------------------------------
 . ${WM_PROJECT_DIR:?}/wmake/scripts/wmakeFunctions  # Require wmake functions
 
@@ -61,6 +61,22 @@ sameDependency()
     fi
 }
 
+#
+# Save dependency information into sentinel file
+#
+storeDependency()
+{
+    local depend="$1"
+    local sentinel="$2"
+
+    if [ -n "$sentinel" ]
+    then
+        mkdir -p "$(dirname "$sentinel")"
+        echo "$depend" >| "$sentinel"
+    fi
+    return 0
+}
+
 
 # CMake with output suppressed according to WM_QUIET
 _cmake()
@@ -98,7 +114,7 @@ cmakeVersioned()
 
     mkdir -p "$objectsDir" \
     && (cd "$objectsDir" && _cmake "$@" "$sourceDir" && make) \
-    && echo "$depend" >| "${sentinel:-/dev/null}"
+    && storeDependency "$depend" "$sentinel"
 }
 
 
@@ -124,7 +140,7 @@ cmakeVersionedInstall()
 
     mkdir -p "$objectsDir" \
     && (cd "$objectsDir" && _cmake "$@" "$sourceDir" && make install) \
-    && echo "$depend" >| "${sentinel:-/dev/null}"
+    && storeDependency "$depend" "$sentinel"
 }
 
 
@@ -151,7 +167,7 @@ wmakeVersioned()
 
     mkdir -p "$objectsDir" \
     && wmake "$@" \
-    && echo "$depend" >| "${sentinel:-/dev/null}"
+    && storeDependency "$depend" "$sentinel"
 }
 
 

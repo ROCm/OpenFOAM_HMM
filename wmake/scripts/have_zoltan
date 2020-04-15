@@ -5,23 +5,22 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2019 OpenCFD Ltd.
+#     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     have_zoltan
 #
 # Description
-#     Detection/setup of zoltan
+#     Detection/setup of ZOLTAN
 #
 # Requires
 #     config.sh/zoltan
 #
 # Functions provided
-#     have_zoltan, no_zoltan, echo_zoltan
+#     have_zoltan, no_zoltan, echo_zoltan, query_zoltan
 #
 # Variables set on success
 #     HAVE_ZOLTAN
@@ -38,7 +37,6 @@
 no_zoltan()
 {
     unset HAVE_ZOLTAN ZOLTAN_INC_DIR ZOLTAN_LIB_DIR
-    return 0
 }
 
 
@@ -52,26 +50,44 @@ echo_zoltan()
 }
 
 
+# Query settings
+query_zoltan()
+{
+    local config="config.sh/zoltan"
+    local settings
+
+    if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile -mode=o "$config")"
+    then
+        . "$settings"
+        _process_query zoltan "$ZOLTAN_ARCH_PATH"
+    else
+        echo "(no $config settings)" 1>&2
+        echo "zoltan=unknown"
+    fi
+}
+
+
 # On success, return 0 and export variables
 # -> HAVE_ZOLTAN, ZOLTAN_INC_DIR, ZOLTAN_LIB_DIR
 have_zoltan()
 {
-    local prefix header library incName libName settings warn
-    # warn="==> skip zoltan"
+    local warn # warn="==> skip zoltan"
+    local config="config.sh/zoltan"
+    local settings
 
-    # Setup
-    if settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/zoltan)
+    if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config")"
     then
         . "$settings"
     else
-        [ -n "$warn" ] && echo "$warn (no config.sh/zoltan settings)"
+        [ -n "$warn" ] && echo "$warn (no $config settings)"
         return 2
     fi
 
     # Expected location, include/library names
-    prefix="$ZOLTAN_ARCH_PATH"
-    incName="zoltan.h"
-    libName="libzoltan"
+    local prefix="$ZOLTAN_ARCH_PATH"
+    local incName="zoltan.h"
+    local libName="libzoltan"
+    local header library
 
     # ----------------------------------
     if isNone "$prefix"
@@ -118,11 +134,15 @@ have_zoltan()
 # Reset variables
 no_zoltan
 
-# Testing
-if [ "$1" = "-test" ]
-then
+# Test/query
+case "$1" in
+-test)
     have_zoltan
     echo_zoltan
-fi
+    ;;
+-query)
+    query_zoltan
+    ;;
+esac
 
 #------------------------------------------------------------------------------

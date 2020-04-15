@@ -5,23 +5,22 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2019 OpenCFD Ltd.
+#     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     have_scotch
 #
 # Description
-#     Detection/setup of scotch
+#     Detection/setup of SCOTCH
 #
 # Requires
 #     config.sh/scotch
 #
 # Functions provided
-#     have_scotch, no_scotch, echo_scotch
+#     have_scotch, no_scotch, echo_scotch, query_scotch
 #
 # Variables set on success
 #     HAVE_SCOTCH
@@ -40,7 +39,6 @@ no_scotch()
     unset HAVE_SCOTCH SCOTCH_ARCH_PATH SCOTCH_INC_DIR SCOTCH_LIB_DIR
     unset SCOTCH_VERSION
     unset HAVE_PTSCOTCH PTSCOTCH_ARCH_PATH PTSCOTCH_INC_DIR PTSCOTCH_LIB_DIR
-    return 0
 }
 
 
@@ -59,26 +57,45 @@ echo_scotch()
 }
 
 
+# Query settings
+query_scotch()
+{
+    local config="config.sh/scotch"
+    local settings
+
+    if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile -mode=o "$config")"
+    then
+        . "$settings"
+        _process_query scotch "$SCOTCH_ARCH_PATH"
+    else
+        echo "(no $config settings)" 1>&2
+        echo "scotch=unknown"
+    fi
+}
+
+
 # On success, return 0 and export variables
 # -> HAVE_SCOTCH, SCOTCH_ARCH_PATH, SCOTCH_INC_DIR, SCOTCH_LIB_DIR
 have_scotch()
 {
-    local prefix header library incName libName settings warn
-    warn="==> skip scotch"
+    local warn="==> skip scotch"
+    local config="config.sh/scotch"
+    local settings
 
-    # Setup
-    if settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/scotch)
+    if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config")"
     then
         . "$settings"
     else
-        [ -n "$warn" ] && echo "$warn (no config.sh/scotch settings)"
+        [ -n "$warn" ] && echo "$warn (no $config settings)"
         return 2
     fi
 
     # Expected location, include/library names
-    prefix="$SCOTCH_ARCH_PATH"
-    incName="scotch.h"
-    libName="libscotch"
+    local prefix="$SCOTCH_ARCH_PATH"
+    local incName="scotch.h"
+    local libName="libscotch"
+    local localDir="scotch-int$WM_LABEL_SIZE"
+    local header library
 
     # ----------------------------------
     if isNone "$prefix"
@@ -87,13 +104,18 @@ have_scotch()
         return 1
     elif hasAbsdir "$prefix"
     then
-        header=$(findFirstFile "$prefix/include/$incName")
+        header=$(findFirstFile \
+            "$prefix/include/$localDir/$incName" \
+            "$prefix/include/$incName" \
+        )
         library=$(findExtLib "$libName")
     elif isSystem "$prefix"
     then
         header=$(findFirstFile \
+            "/usr/local/include/$localDir/$incName" \
             "/usr/local/include/scotch/$incName" \
             "/usr/local/include/$incName" \
+            "/usr/include/$localDir/$incName" \
             "/usr/include/scotch/$incName" \
             "/usr/include/$incName" \
         )
@@ -102,6 +124,7 @@ have_scotch()
         unset prefix
     fi
     # ----------------------------------
+    equalBaseName "${header%/*}" "$localDir" || unset localDir
 
     # Header
     [ -n "$header" ] || {
@@ -111,7 +134,7 @@ have_scotch()
 
     # Library
     [ -n "$library" ] \
-    || library=$(findLibrary -prefix="$prefix" -name="$libName") \
+    || library=$(findLibrary -prefix="$prefix" -name="$libName" -local="$localDir") \
     || {
         [ -n "$warn" ] && echo "$warn (no library)"
         return 2
@@ -119,7 +142,7 @@ have_scotch()
 
     # ----------------------------------
 
-    local good label
+    local label
 
     # Ensure consistent sizes between OpenFOAM and scotch header
     # extract 'typedef int64_t SCOTCH_Num' or equivalent
@@ -147,7 +170,6 @@ have_scotch()
 
     case "$WM_LABEL_SIZE:$label" in
     (32:int32_t | 32:int | 64:int64_t | 64:long)
-        good=true
         ;;
 
     (*)
@@ -176,8 +198,7 @@ have_scotch()
 # -> HAVE_PTSCOTCH, PTSCOTCH_ARCH_PATH, PTSCOTCH_INC_DIR, PTSCOTCH_LIB_DIR
 have_ptscotch()
 {
-    local prefix header library incName libName settings warn
-    warn="==> skip ptscotch"
+    local warn="==> skip ptscotch"
 
     if [ "$HAVE_SCOTCH" != true ]
     then
@@ -189,9 +210,11 @@ have_ptscotch()
     [ -n "$PTSCOTCH_ARCH_PATH" ] || PTSCOTCH_ARCH_PATH="$SCOTCH_ARCH_PATH"
 
     # Expected location, include/library names
-    prefix="$PTSCOTCH_ARCH_PATH"
-    incName="ptscotch.h"
-    libName="libptscotch"
+    local prefix="$PTSCOTCH_ARCH_PATH"
+    local incName="ptscotch.h"
+    local libName="libptscotch"
+    local localDir="scotch-int$WM_LABEL_SIZE"
+    local header library
 
     # ----------------------------------
     if isNone "$prefix"
@@ -202,25 +225,27 @@ have_ptscotch()
     then
         header=$(findFirstFile  \
             "$prefix/include/$FOAM_MPI/$incName" \
+            "$prefix/include/$localDir/$incName" \
             "$prefix/include/$incName"
         )
         library="$(findExtLib $FOAM_MPI/$libName $libName)"
     elif isSystem "$prefix"
     then
-        prefix=/usr
         header=$(findFirstFile \
             "/usr/local/include/ptscotch/$incName" \
             "/usr/local/include/scotch/$incName" \
             "/usr/local/include/$incName" \
+            "/usr/include/$localDir/$incName" \
             "/usr/include/ptscotch/$incName" \
             "/usr/include/scotch/$incName" \
             "/usr/include/$incName" \
         )
-        case "$header" in (/usr/local/*) prefix=/usr/local ;; esac
+        prefix=$(sysPrefix "$header")
     else
         unset prefix
     fi
     # ----------------------------------
+    equalBaseName "${header%/*}" "$localDir" || unset localDir
 
     # Header
     [ -n "$header" ] || {
@@ -230,7 +255,7 @@ have_ptscotch()
 
     # Library
     [ -n "$library" ] \
-    || library=$(findLibrary -prefix="$prefix" -name="$libName") \
+    || library=$(findLibrary -prefix="$prefix" -name="$libName" -local="$localDir") \
     || {
         [ -n "$warn" ] && echo "$warn (no library)"
         return 2
@@ -250,11 +275,15 @@ have_ptscotch()
 # Reset variables
 no_scotch
 
-# Testing
-if [ "$1" = "-test" ]
-then
+# Test/query
+case "$1" in
+-test)
     have_scotch && have_ptscotch
     echo_scotch
-fi
+    ;;
+-query)
+    query_scotch
+    ;;
+esac
 
 #------------------------------------------------------------------------------

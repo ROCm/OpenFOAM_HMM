@@ -5,11 +5,10 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2019 OpenCFD Ltd.
+#     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     have_petsc
@@ -19,9 +18,10 @@
 #
 # Requires
 #     PETSC_ARCH_PATH
+# or  config.sh/petsc
 #
 # Functions provided
-#     have_petsc, no_petsc, echo_petsc, hint_petsc
+#     have_petsc, no_petsc, echo_petsc, hint_petsc, query_petsc
 #
 # Variables set on success
 #     HAVE_PETSC
@@ -38,7 +38,6 @@
 no_petsc()
 {
     unset HAVE_PETSC PETSC_INC_DIR PETSC_LIB_DIR
-    return 0
 }
 
 
@@ -68,30 +67,49 @@ INFORMATION
 }
 
 
+# Query settings
+query_petsc()
+{
+    local config="config.sh/petsc"
+    local settings
+
+    if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile -mode=o "$config")"
+    then
+        . "$settings"
+        _process_query petsc "$PETSC_ARCH_PATH"
+    else
+        echo "(no $config settings)" 1>&2
+        echo "petsc=unknown"
+    fi
+}
+
+
 # On success, return 0 and export variables
 # -> HAVE_PETSC, PETSC_INC_DIR, PETSC_LIB_DIR
 have_petsc()
 {
-    local prefix header library incName libName pkgName settings warn
-    warn="==> skip petsc"
+    local warn="==> skip petsc"
+    local config="config.sh/petsc"
+    local settings
 
     # Setup - prefer current environment value? (TDB)
     if [ ! -d "$PETSC_ARCH_PATH" ]
     then
-        if settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/petsc)
+        if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config")"
         then
             . "$settings"
         else
-            [ -n "$warn" ] && echo "$warn (no config.sh/petsc settings)"
+            [ -n "$warn" ] && echo "$warn (no $config settings)"
             return 2
         fi
     fi
 
     # Expected location, include/library names
-    prefix="$PETSC_ARCH_PATH"
-    incName="petsc.h"
-    libName="libpetsc"
-    pkgName="PETSc"
+    local prefix="$PETSC_ARCH_PATH"
+    local incName="petsc.h"
+    local libName="libpetsc"
+    local pkgName="PETSc"
+    local header library
 
     # ----------------------------------
     if isNone "$prefix"
@@ -153,11 +171,15 @@ have_petsc()
 # Reset variables
 no_petsc
 
-# Testing
-if [ "$1" = "-test" ]
-then
+# Test/query
+case "$1" in
+-test)
     have_petsc
     echo_petsc
-fi
+    ;;
+-query)
+    query_petsc
+    ;;
+esac
 
 #------------------------------------------------------------------------------

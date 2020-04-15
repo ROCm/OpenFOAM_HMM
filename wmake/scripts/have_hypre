@@ -5,11 +5,10 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2019 OpenCFD Ltd.
+#     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     have_hypre
@@ -19,9 +18,10 @@
 #
 # Requires
 #     HYPRE_ARCH_PATH
+# or  config.sh/hypre
 #
 # Functions provided
-#     have_hypre, no_hypre, echo_hypre
+#     have_hypre, no_hypre, echo_hypre, query_hypre
 #
 # Variables set on success
 #     HAVE_HYPRE
@@ -38,7 +38,6 @@
 no_hypre()
 {
     unset HAVE_HYPRE HYPRE_INC_DIR HYPRE_LIB_DIR
-    return 0
 }
 
 
@@ -52,29 +51,48 @@ echo_hypre()
 }
 
 
+# Query settings
+query_hypre()
+{
+    local config="config.sh/hypre"
+    local settings
+
+    if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile -mode=o "$config")"
+    then
+        . "$settings"
+        _process_query hypre "$HYPRE_ARCH_PATH"
+    else
+        echo "(no $config settings)" 1>&2
+        echo "hypre=unknown"
+    fi
+}
+
+
 # On success, return 0 and export variables
 # -> HAVE_HYPRE, HYPRE_INC_DIR, HYPRE_LIB_DIR
 have_hypre()
 {
-    local prefix header library incName libName settings warn
-    warn="==> skip hypre"
+    local warn="==> skip hypre"
+    local config="config.sh/hypre"
+    local settings
 
     # Setup - prefer current environment value? (TDB)
     if [ ! -d "$HYPRE_ARCH_PATH" ]
     then
-        if settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/hypre)
+        if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config")"
         then
             . "$settings"
         else
-            [ -n "$warn" ] && echo "$warn (no config.sh/hypre settings)"
+            [ -n "$warn" ] && echo "$warn (no $config settings)"
             return 2
         fi
     fi
 
     # Expected location, include/library names
-    prefix="$HYPRE_ARCH_PATH"
-    incName="HYPRE.h"
-    libName="libHYPRE"
+    local prefix="$HYPRE_ARCH_PATH"
+    local incName="HYPRE.h"
+    local libName="libHYPRE"
+    local header library
 
     # ----------------------------------
     if isNone "$prefix"
@@ -121,11 +139,15 @@ have_hypre()
 # Reset variables
 no_hypre
 
-# Testing
-if [ "$1" = "-test" ]
-then
+# Test/query
+case "$1" in
+-test)
     have_hypre
     echo_hypre
-fi
+    ;;
+-query)
+    query_hypre
+    ;;
+esac
 
 #------------------------------------------------------------------------------
