@@ -54,6 +54,9 @@ usage() {
 Usage: ${0##*/} [OPTION]
 
 options:
+  -compiler         Print clang,gcc compiler versions only
+  -clang            Print clang compiler versions only
+  -gcc              Print gcc compiler versions only
   -h, -help         Print the usage
 
 Query (ThirdParty) versions based on their etc/config.sh values.
@@ -66,12 +69,21 @@ USAGE
 #------------------------------------------------------------------------------
 
 # Parse options
+unset optCompiler
 while [ "$#" -gt 0 ]
 do
     case "$1" in
     # Print help
     (-h | -help*)
         usage
+        ;;
+
+    (-clang | -gcc)
+        optCompiler="${1#-}"
+        ;;
+
+    (-comp*)
+        optCompiler=true
         ;;
 
     (*)
@@ -83,8 +95,13 @@ do
 done
 
 #------------------------------------------------------------------------------
+configDir="$projectDir/etc/config.sh"
 scriptsDir="$projectDir/wmake/scripts"
 
+[ -d "$configDir" ] || {
+    echo "No such directory: $configDir" 1>&2
+    exit 2
+}
 [ -d "$scriptsDir" ] || {
     echo "No such directory: $scriptsDir" 1>&2
     exit 2
@@ -95,15 +112,74 @@ export WM_PROJECT_DIR="$projectDir"
 
 #------------------------------------------------------------------------------
 
+# Gcc/Clang versions in etc/config.sh/compiler
+#
+# parse this type of content
+# ----
+#     default_clang_version=llvm-3.7.1
+#     default_gcc_version=gcc-4.8.5
+#
+#     Gcc48*) gcc_version=gcc-4.8.5 ;;
+#     Gcc49*) gcc_version=gcc-4.9.4 ;;
+# ----
+
+queryCompiler()
+{
+    compiler="$1"
+
+    if [ -z "$compiler" ]
+    then
+        compiler='clang\|gcc'
+    fi
+
+    settings="$configDir/compiler"
+    if ! [ -f "$settings" ]
+    then
+        echo "No such file: $settings" 1>&2
+        return 1
+    fi
+
+    sed -n \
+        -e 's/^[ ]*\('"$compiler"'\)\([0-9][0-9]*\)[^=]*=\([^ ;]*\).*$/\1\2 \3/ip' \
+        "$settings"
+
+    sed -n \
+        -e 's/^[ ]*\(default_\)\('"$compiler"'\)_version=\([^ ;]*\).*$/\1\2 \3/ip' \
+        "$settings"
+}
+
+
+#------------------------------------------------------------------------------
+
 # Examine the "wmake/scripts/have_..." scripts for query_...() functions,
 # assume they also have a -query option
 
-for script in grep -l -e '^query_' "$scriptsDir"/have_*
-do
-    if [ -f "$script" ]
-    then
-        bash "$script" -query
-    fi
-done
+queryVersions()
+{
+    for script in grep -l -e '^query_' "$scriptsDir"/have_*
+    do
+        if [ -f "$script" ]
+        then
+            bash "$script" -query
+        fi
+    done
+}
+
+
+#------------------------------------------------------------------------------
+
+# main
+
+case "$optCompiler" in
+(true)
+    queryCompiler
+    ;;
+(clang | gcc)
+    queryCompiler "$optCompiler"
+    ;;
+(*)
+    queryVersions
+    ;;
+esac
 
 #------------------------------------------------------------------------------
