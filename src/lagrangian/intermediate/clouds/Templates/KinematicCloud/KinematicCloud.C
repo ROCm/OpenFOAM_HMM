@@ -562,7 +562,11 @@ void Foam::KinematicCloud<CloudType>::setParcelThermoProperties
     const scalar lagrangianDt
 )
 {
-    parcel.rho() = constProps_.rho0();
+    // If rho0 is given in the const properties
+    if (constProps_.rho0() != -1)
+    {
+        parcel.rho() = constProps_.rho0();
+    }
 }
 
 
@@ -580,6 +584,14 @@ void Foam::KinematicCloud<CloudType>::checkParcelProperties
     if (parcel.typeId() == -1)
     {
         parcel.typeId() = constProps_.parcelTypeId();
+    }
+
+    if (parcel.rho() == -1)
+    {
+        FatalErrorInFunction
+            << "The kinematic cloud needs rho0 in the constantProperties "
+            << " dictionary. " << nl
+            << abort(FatalError);
     }
 }
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,6 +34,7 @@ License
 #include "NoPhaseChange.H"
 #include "LiquidEvaporation.H"
 #include "LiquidEvaporationBoil.H"
+#include "LiquidEvapFuchsKnudsen.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -41,7 +43,8 @@ License
     makePhaseChangeModel(CloudType);                                           \
     makePhaseChangeModelType(NoPhaseChange, CloudType);                        \
     makePhaseChangeModelType(LiquidEvaporation, CloudType);                    \
-    makePhaseChangeModelType(LiquidEvaporationBoil, CloudType);
+    makePhaseChangeModelType(LiquidEvaporationBoil, CloudType);                \
+    makePhaseChangeModelType(LiquidEvapFuchsKnudsen, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

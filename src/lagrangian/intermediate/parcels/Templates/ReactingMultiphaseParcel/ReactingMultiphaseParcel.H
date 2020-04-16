@@ -209,6 +209,22 @@ protected:
 
     // Protected Member Functions
 
+
+        //- Return change of volume due to mass exchange
+        template<class TrackCloudType>
+        scalar updatedDeltaVolume
+        (
+            TrackCloudType& cloud,
+            const scalarField& dMassGas,
+            const scalarField& dMassLiquid,
+            const scalarField& dMassSolid,
+            const label idG,
+            const label idL,
+            const label idS,
+            const scalar p,
+            const scalar T
+        );
+
         //- Calculate Devolatilisation
         template<class TrackCloudType>
         void calcDevolatilisation

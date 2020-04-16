@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +38,29 @@ using namespace Foam::constant::mathematical;
 
 template<class ParcelType>
 template<class TrackCloudType>
+Foam::scalar Foam::ReactingParcel<ParcelType>::updatedDeltaVolume
+(
+    TrackCloudType& cloud,
+    const scalarField& dMass,
+    const scalar p,
+    const scalar T
+)
+{
+    const auto& composition = cloud.composition();
+
+    scalarField dVolLiquid(dMass.size(), Zero);
+    forAll(dVolLiquid, i)
+    {
+        dVolLiquid[i] =
+            dMass[i]/composition.liquids().properties()[i].rho(p, T);
+    }
+
+    return sum(dVolLiquid);
+}
+
+
+template<class ParcelType>
+template<class TrackCloudType>
 void Foam::ReactingParcel<ParcelType>::calcPhaseChange
 (
     TrackCloudType& cloud,
@@ -49,9 +73,11 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     const scalar d,
     const scalar T,
     const scalar mass,
+    const scalar rho,
     const label idPhase,
     const scalar YPhase,
     const scalarField& Y,
+    const scalarField& Ysol,
     scalarField& dMassPC,
     scalar& Sh,
     scalar& N,
@@ -62,7 +88,8 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     const auto& composition = cloud.composition();
     auto& phaseChange = cloud.phaseChange();
 
-    if (!phaseChange.active() || (YPhase < SMALL))
+    // Some models allow evaporation and condensation
+    if (!phaseChange.active())
     {
         return;
     }
@@ -70,7 +97,6 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     scalarField X(composition.liquids().X(Y));
 
     scalar Tvap = phaseChange.Tvap(X);
-
     if (T < Tvap)
     {
         return;
@@ -89,16 +115,27 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
         Pr,
         d,
         nus,
+        rho,
         Tdash,
         Tsdash,
         td.pc(),
         td.Tc(),
-        X,
+        X,                // components molar fractions purely in the liquid
+        Ysol*mass,        // total solid mass
+        YPhase*Y*mass,    // total liquid mass
         dMassPC
     );
 
     // Limit phase change mass by availability of each specie
-    dMassPC = min(mass*YPhase*Y, dMassPC);
+    forAll (Y, i)
+    {
+        // evaporation
+        if (dMassPC[i] > 0)
+        {
+            dMassPC[i] = min(mass*YPhase*Y[i], dMassPC[i]);
+        }
+        // condensation Do something?
+    }
 
     const scalar dMassTot = sum(dMassPC);
 
@@ -394,6 +431,7 @@ void Foam::ReactingParcel<ParcelType>::calc
     const vector& U0 = this->U_;
     const scalar T0 = this->T_;
     const scalar mass0 = this->mass();
+    const scalar rho0 = this->rho_;
 
 
     // Calc surface values
@@ -455,9 +493,11 @@ void Foam::ReactingParcel<ParcelType>::calc
         d0,
         T0,
         mass0,
+        rho0,
         0,
         1.0,
         Y_,
+        scalarField(0),
         dMassPC,
         Sh,
         Ne,
@@ -474,14 +514,52 @@ void Foam::ReactingParcel<ParcelType>::calc
 
     this->Cp_ = composition.Cp(0, Y_, td.pc(), T0);
 
-    // Update particle density or diameter
-    if (cloud.constProps().constantVolume())
+    if
+    (
+        cloud.constProps().volUpdateType()
+     == constantProperties::volumeUpadteType::mUndefined
+    )
     {
-        this->rho_ = mass1/this->volume();
+        // Update particle density or diameter
+        if (cloud.constProps().constantVolume())
+        {
+            this->rho_ = mass1/this->volume();
+        }
+        else
+        {
+            this->d_ = cbrt(mass1/this->rho_*6/pi);
+        }
     }
     else
     {
-        this->d_ = cbrt(mass1/this->rho_*6.0/pi);
+        switch (cloud.constProps().volUpdateType())
+        {
+            case constantProperties::volumeUpadteType::mConstRho :
+            {
+                this->d_ = cbrt(mass1/this->rho_*6/pi);
+                break;
+            }
+            case constantProperties::volumeUpadteType::mConstVol :
+            {
+                this->rho_ = mass1/this->volume();
+                break;
+            }
+            case constantProperties::volumeUpadteType::mUpdateRhoAndVol :
+            {
+                scalar deltaVol =
+                    updatedDeltaVolume
+                    (
+                        cloud,
+                        dMass,
+                        td.pc(),
+                        T0
+                    );
+                this->rho_ = mass1/(this->volume() - deltaVol);
+                this->d_ = cbrt(mass1/this->rho_*6/pi);
+                break;
+            }
+
+        }
     }
 
     // Remove the particle when mass falls below minimum threshold

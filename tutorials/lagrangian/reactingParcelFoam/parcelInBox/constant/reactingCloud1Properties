@@ -60,7 +60,7 @@ constantProperties
     T0              350;
     Cp0             4100;
 
-    constantVolume  false;
+    volumeUpdateMethod  constantRho;
 }
 
 

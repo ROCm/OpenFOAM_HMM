@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -139,6 +139,48 @@ Foam::scalar Foam::ReactingMultiphaseParcel<ParcelType>::updateMassFractions
 }
 
 
+template<class ParcelType>
+template<class TrackCloudType>
+Foam::scalar Foam::ReactingMultiphaseParcel<ParcelType>::updatedDeltaVolume
+(
+    TrackCloudType& cloud,
+    const scalarField& dMassGas,
+    const scalarField& dMassLiquid,
+    const scalarField& dMassSolid,
+    const label idG,
+    const label idL,
+    const label idS,
+    const scalar p,
+    const scalar T
+)
+{
+    const auto& props = cloud.composition().phaseProps()[idG];
+    const auto& thermo = cloud.composition().thermo();
+
+    scalarField dVolGas(dMassGas.size(), Zero);
+    forAll(dMassGas, i)
+    {
+        label cid = props.carrierIds()[i];
+        dVolGas[i] = -dMassGas[i]/thermo.carrier().rho(cid, p, T);
+    }
+
+    scalarField dVolLiquid(dMassLiquid.size(), Zero);
+    forAll(dMassLiquid, i)
+    {
+        dVolLiquid[i] =
+            -dMassLiquid[i]/thermo.liquids().properties()[i].rho(p, T);
+    }
+
+    scalarField dVolSolid(dMassSolid.size(), Zero);
+    forAll(dMassSolid, i)
+    {
+        dVolSolid[i] = -dMassSolid[i]/thermo.solids().properties()[i].rho();
+    }
+
+    return (sum(dVolGas) + sum(dVolLiquid) + sum(dMassSolid));
+}
+
+
 // * * * * * * * * * * *  Protected Member Functions * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -188,6 +230,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     const vector& U0 = this->U_;
     const scalar T0 = this->T_;
     const scalar mass0 = this->mass();
+    const scalar rho0 = this->rho_;
+
 
     const scalar pc = td.pc();
 
@@ -256,9 +300,11 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         d0,
         T0,
         mass0,
+        rho0,
         idL,
         YMix[LIQ],
         YLiquid_,
+        YMix[SLD]*YSolid_,
         dMassPC,
         Sh,
         Ne,
@@ -382,16 +428,57 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
 
     (void)updateMassFractions(mass0, dMassGas, dMassLiquid, dMassSolid);
 
-     // Update particle density or diameter
-    if (cloud.constProps().constantVolume())
+    if
+    (
+        cloud.constProps().volUpdateType()
+     == constantProperties::volumeUpadteType::mUndefined
+    )
     {
-        this->rho_ = mass1/this->volume();
+        if (cloud.constProps().constantVolume())
+        {
+            this->rho_ = mass1/this->volume();
+        }
+        else
+        {
+            this->d_ = cbrt(mass1/this->rho_*6/pi);
+        }
     }
     else
     {
-        this->d_ = cbrt(mass1/this->rho_*6.0/pi);
-    }
+        switch (cloud.constProps().volUpdateType())
+        {
+            case constantProperties::volumeUpadteType::mConstRho :
+            {
+                this->d_ = cbrt(mass1/this->rho_*6/pi);
+                break;
+            }
+            case constantProperties::volumeUpadteType::mConstVol :
+            {
+                this->rho_ = mass1/this->volume();
+                break;
+            }
+            case constantProperties::volumeUpadteType::mUpdateRhoAndVol :
+            {
+                scalar deltaVol =
+                    updatedDeltaVolume
+                    (
+                        cloud,
+                        dMassGas,
+                        dMassLiquid,
+                        dMassSolid,
+                        idG,
+                        idL,
+                        idS,
+                        pc,
+                        T0
+                    );
 
+                this->rho_ = mass1/(this->volume() + deltaVol);
+                this->d_ = cbrt(mass1/this->rho_*6/pi);
+                break;
+            }
+        }
+    }
     // Correct surface values due to emitted species
     this->correctSurfaceValues(cloud, td, Ts, Cs, rhos, mus, Prs, kappas);
     Res = this->Re(rhos, U0, td.Uc(), this->d_, mus);

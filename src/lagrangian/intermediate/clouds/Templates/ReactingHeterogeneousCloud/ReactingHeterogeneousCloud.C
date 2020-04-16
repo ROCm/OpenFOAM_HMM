@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -136,6 +136,25 @@ void Foam::ReactingHeterogeneousCloud<CloudType>::setParcelThermoProperties
 
     // Set the parcel to combust
     parcel.canCombust() = 1;
+
+    // If rho0 was given in constProp use it. If not use the composition
+    // to set tho
+    if (this->constProps_.rho0() == -1)
+    {
+        const label idGas = this->composition().idGas();
+        const label idLiquid = this->composition().idLiquid();
+        const label idSolid = this->composition().idSolid();
+
+        const scalarField& Ygas = this->composition().Y0(idGas);
+        const scalarField& Yliq = this->composition().Y0(idLiquid);
+        const scalarField& Ysol = this->composition().Y0(idSolid);
+
+        const scalar p0 =
+            this->composition().thermo().thermo().p()[parcel.cell()];
+        const scalar T0 = this->constProps_.T0();
+
+        parcel.rho() = this->composition().rho(Ygas, Yliq, Ysol, T0, p0);
+    }
 }
 
 

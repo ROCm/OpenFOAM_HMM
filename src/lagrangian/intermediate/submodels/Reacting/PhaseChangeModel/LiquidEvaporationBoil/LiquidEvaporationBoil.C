@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -139,11 +140,14 @@ void Foam::LiquidEvaporationBoil<CloudType>::calculate
     const scalar Pr,
     const scalar d,
     const scalar nu,
+    const scalar rho,
     const scalar T,
     const scalar Ts,
     const scalar pc,
     const scalar Tc,
     const scalarField& X,
+    const scalarField& solMass,
+    const scalarField& liqMass,
     scalarField& dMassPC
 ) const
 {

@@ -168,6 +168,16 @@ protected:
 
     // Protected Member Functions
 
+        //- Return change of volume due to mass exchange
+        template<class TrackCloudType>
+        scalar updatedDeltaVolume
+        (
+            TrackCloudType& cloud,
+            const scalarField& dMass,
+            const scalar p,
+            const scalar T
+        );
+
 
         //- Calculate surface reactions
         template<class TrackCloudType>
