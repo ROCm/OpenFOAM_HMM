@@ -48,8 +48,9 @@ turbulentMixingLengthDissipationRateInletFvPatchScalarField
 )
 :
     inletOutletFvPatchScalarField(p, iF),
+    kName_("k"),
     mixingLength_(0.0),
-    kName_("k")
+    Cmu_(0.0)
 {
     this->refValue() = 0.0;
     this->refGrad() = 0.0;
@@ -67,8 +68,9 @@ turbulentMixingLengthDissipationRateInletFvPatchScalarField
 )
 :
     inletOutletFvPatchScalarField(ptf, p, iF, mapper),
+    kName_(ptf.kName_),
     mixingLength_(ptf.mixingLength_),
-    kName_(ptf.kName_)
+    Cmu_(ptf.Cmu_)
 {}
 
 
@@ -81,8 +83,12 @@ turbulentMixingLengthDissipationRateInletFvPatchScalarField
 )
 :
     inletOutletFvPatchScalarField(p, iF),
-    mixingLength_(dict.get<scalar>("mixingLength")),
-    kName_(dict.getOrDefault<word>("k", "k"))
+    kName_(dict.getOrDefault<word>("k", "k")),
+    mixingLength_
+    (
+        dict.getCheck<scalar>("mixingLength", scalarMinMax::ge(SMALL))
+    ),
+    Cmu_(dict.getCheckOrDefault<scalar>("Cmu", 0.09, scalarMinMax::ge(SMALL)))
 {
     this->phiName_ = dict.getOrDefault<word>("phi", "phi");
 
@@ -101,8 +107,9 @@ turbulentMixingLengthDissipationRateInletFvPatchScalarField
 )
 :
     inletOutletFvPatchScalarField(ptf),
+    kName_(ptf.kName_),
     mixingLength_(ptf.mixingLength_),
-    kName_(ptf.kName_)
+    Cmu_(ptf.Cmu_)
 {}
 
 
@@ -114,8 +121,9 @@ turbulentMixingLengthDissipationRateInletFvPatchScalarField
 )
 :
     inletOutletFvPatchScalarField(ptf, iF),
+    kName_(ptf.kName_),
     mixingLength_(ptf.mixingLength_),
-    kName_(ptf.kName_)
+    Cmu_(ptf.Cmu_)
 {}
 
 
@@ -138,10 +146,9 @@ void turbulentMixingLengthDissipationRateInletFvPatchScalarField::updateCoeffs()
         )
     );
 
-    const scalar Cmu =
-        turbModel.coeffDict().getOrDefault<scalar>("Cmu", 0.09);
+    Cmu_ = turbModel.coeffDict().getOrDefault<scalar>("Cmu", Cmu_);
 
-    const scalar Cmu75 = pow(Cmu, 0.75);
+    const scalar Cmu75 = pow(Cmu_, 0.75);
 
     const fvPatchScalarField& kp =
         patch().lookupPatchField<volScalarField, scalar>(kName_);
@@ -149,7 +156,7 @@ void turbulentMixingLengthDissipationRateInletFvPatchScalarField::updateCoeffs()
     const fvsPatchScalarField& phip =
         patch().lookupPatchField<surfaceScalarField, scalar>(this->phiName_);
 
-    this->refValue() = Cmu75*kp*sqrt(kp)/mixingLength_;
+    this->refValue() = (Cmu75/mixingLength_)*pow(kp, 1.5);
     this->valueFraction() = 1.0 - pos0(phip);
 
     inletOutletFvPatchScalarField::updateCoeffs();
