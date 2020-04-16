@@ -32,7 +32,8 @@
 #
 # Debian-style without OpenFOAM sub-directory
 #
-#     foamPackRelease -name=openfoam_2002.200129+dfsg1 -no-prefix origin/develop
+#     foamPackRelease -name=openfoam2002_200129.orig -no-prefix origin/develop
+#     foamPackRelease -debian=openfoam2002_200129 origin/develop
 #
 #------------------------------------------------------------------------------
 Script="${0##*/}"
@@ -44,16 +45,18 @@ Usage: ${0##*/} [OPTION] commit-ish
 options:
   -name=NAME        Stem for tar-file (default: auto)
   -output=DIR       Output directory (default: ".")
-  -prefix=NAME      Prefix directory within tar-file  (default: auto)
+  -prefix=NAME      Prefix directory within tar-file (default: auto)
   -pkg-modules      Only package submodules - exclude OpenFOAM
   -no-modules       Exclude submodules
   -no-patch         Ignore '_patch' number for output tar-file
   -no-prefix        Do not prefix subdirectory
-  -compress=TYPE    Compress with specified type
+  -no-compress      Disable compression
+  -compress=TYPE    Use specified compression type
   -sep=SEP          Change version/patch separator from '_' to SEP
-  -gitbase=DIR      Alternative repo location
+  -gitbase=DIR      Alternative repository location
   -with-api=NUM     Specify alternative api value for packaging
-  -tgz              Alias for -compress=tgz
+  -tgz, -xz         Alias for -compress=tgz, -compress=xz
+  -debian=NAME      Short-cut for -name=NAME.orig, -no-prefix, -xz
   -help             Print help
 
 Script generator for packing OpenFOAM sources and submodules.
@@ -89,15 +92,43 @@ withPatchNum=true
 unset compress packageApi withSource withModules prefixDir tarName
 unset gitbase
 
+# Cleanup tarName to remove trailing '.tar', detect compression etc
+cleanTarName() {
+    case "$tarName" in
+    (*.tar)
+        tarName="${tarName%.tar}"
+        ;;
+    (*.tar.*)
+        compress="${tarName#*.tar.}"
+        tarName="${tarName%.tar*}"
+        ;;
+    (*.tgz)
+        compress="tgz"
+        tarName="${tarName%.tgz}"
+        ;;
+    esac
+}
+
+
 while [ "$#" -gt 0 ]
 do
     case "$1" in
     -h | -help*)
         printHelp
         ;;
+    -debian=*)
+        tarName="${1#*=}"
+        cleanTarName
+        if [ "${tarName%.orig}" = "${tarName}" ]
+        then
+            tarName="${tarName}.orig"  # Append .orig
+        fi
+        prefixDir=false      # No prefix directory
+        : "${compress:=xz}"  # Default 'xz' compression
+        ;;
     -name=*)
         tarName="${1#*=}"
-        tarName="${tarName%.tar}"
+        cleanTarName
         ;;
     -output=*)
         outputDir="${1#*=}"
@@ -120,6 +151,9 @@ do
     -no-prefix)
         prefixDir=false
         ;;
+    -no-compress)
+        unset compress
+        ;;
     -compress=*)
         compress="${1#*=}"
         ;;
@@ -132,7 +166,7 @@ do
     -with-api=*)
         packageApi="${1#*=}"
         ;;
-    -tgz)
+    -tgz | -xz)
         compress="${1#*-}"
         ;;
     --)
@@ -410,7 +444,7 @@ case "$compress" in
 
     (gz | gzip)
     echo "Using gzip compression" 1>&2
-    echo 'gzip -9 "$outputDir/$tarName.tar"'
+    echo 'gzip -f9 "$outputDir/$tarName.tar"'
     echo
     echo '# End of compression'
     ;;
@@ -425,14 +459,14 @@ case "$compress" in
 
     (bz | bzip | bzip2)
     echo "Using bzip2 compression" 1>&2
-    echo 'bzip2 -9 "$outputDir/$tarName.tar"'
+    echo 'bzip2 -f9 "$outputDir/$tarName.tar"'
     echo
     echo '# End of compression'
     ;;
 
     (xz)
     echo "Using xz compression" 1>&2
-    echo 'xz -9 "$outputDir/$tarName.tar"'
+    echo 'xz -f9 "$outputDir/$tarName.tar"'
     echo
     echo '# End of compression'
     ;;
