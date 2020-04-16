@@ -1,4 +1,6 @@
 /*
+ * -*- C++ -*-
+ *
  *  Progressive Mesh type Polygon Reduction Algorithm
  *  by Stan Melax (c) 1998
  *
@@ -18,8 +20,8 @@
 #ifndef PROGRESSIVE_MESH_H
 #define PROGRESSIVE_MESH_H
 
-#include "vector.h"
-#include "list.h"
+#include "vector.hxx"
+#include "list.hxx"
 
 class tridata {
   public:

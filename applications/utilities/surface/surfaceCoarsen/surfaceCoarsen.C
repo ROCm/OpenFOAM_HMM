@@ -50,7 +50,7 @@ Description
 #include "triFaceList.H"
 
 // From bunnylod
-#include "progmesh.h"
+#include "progmesh.hxx"
 
 using namespace Foam;
 

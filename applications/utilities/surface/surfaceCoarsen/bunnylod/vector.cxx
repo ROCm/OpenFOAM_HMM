@@ -1,8 +1,8 @@
-#include <stdio.h>
-#include <math.h>
-#include <assert.h>
+#include <cstdio>
+#include <cmath>
+#include <cassert>
 
-#include "vector.h"
+#include "vector.hxx"
 
 float  sqr(float a) {return a*a;}
 

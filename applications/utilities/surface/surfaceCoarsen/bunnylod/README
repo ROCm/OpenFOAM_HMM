@@ -7,3 +7,14 @@ The PC executable bunnylod.exe should run
 on a standard PC.
 Just run it and enjoy.
 Mouse dragging spins the rabbit.
+
+-------------------------------------------------------------------
+Changes
+
+2020-04-16 OpenCFD Ltd
+  - remove MSWindows components (code and makefiles)
+  - use cxx, hxx extensions to reduce possible confusion with other
+    "list" and "vector" classes
+  - use C++ versions for C headers
+
+-------------------------------------------------------------------

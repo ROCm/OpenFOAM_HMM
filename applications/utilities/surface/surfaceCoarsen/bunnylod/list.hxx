@@ -1,13 +1,16 @@
 /*
+ * -*- C++ -*-
+ *
  *  A generic template list class.
  *  Fairly typical of the list example you would
  *  find in any c++ book.
  */
+
 #ifndef GENERIC_LIST_H
 #define GENERIC_LIST_H
 
-#include <assert.h>
-#include <stdio.h>
+#include <cassert>
+#include <cstdio>
 
 template<class Type> class List {
         public:
@@ -122,9 +125,5 @@ void List<Type>::Remove(Type t){
                 assert(element[i] != t);
         }
 }
-
-
-
-
 
 #endif

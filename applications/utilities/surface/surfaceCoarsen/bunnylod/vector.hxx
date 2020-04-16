@@ -1,3 +1,4 @@
+// -*- C++ -*-
 //
 // This module contains a bunch of well understood functions
 // I apologise if the conventions used here are slightly
@@ -7,8 +8,8 @@
 #ifndef GENERIC_VECTOR_H
 #define GENERIC_VECTOR_H
 
-#include <stdio.h>
-#include <math.h>
+#include <cstdio>
+#include <cmath>
 
 
 class Vector {
