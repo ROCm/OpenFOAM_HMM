@@ -122,19 +122,25 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::mDot() const
 
     const dimensionedScalar T0(dimTemperature, Zero);
 
+    volScalarField mDotE
+    (
+        "mDotE", coeffE_*mixture_.rho1()*limitedAlpha1*max(T - TSat, T0)
+    );
+    volScalarField mDotC
+    (
+        "mDotC", coeffC_*mixture_.rho2()*limitedAlpha2*max(TSat - T, T0)
+    );
+
     if (mesh_.time().outputTime())
     {
-        volScalarField mDot
-        (
-            "mDot", coeffE_*mixture_.rho1()*limitedAlpha1*max(T - TSat, T0)
-        );
-        mDot.write();
+        mDotC.write();
+        mDotE.write();
     }
 
     return Pair<tmp<volScalarField>>
     (
-        coeffC_*mixture_.rho2()*limitedAlpha2*max(TSat - T, T0),
-       -coeffE_*mixture_.rho1()*limitedAlpha1*max(T - TSat, T0)
+        tmp<volScalarField>(new volScalarField(mDotC)),
+        tmp<volScalarField>(new volScalarField(-mDotE))
     );
 }
 
@@ -209,16 +215,16 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::TSource() const
 
     const volScalarField Vcoeff
     (
-        coeffE_*mixture_.rho1()*limitedAlpha1*L
+        coeffE_*mixture_.rho1()*limitedAlpha1*L*pos(T - TSat)
     );
     const volScalarField Ccoeff
     (
-        coeffC_*mixture_.rho2()*limitedAlpha2*L
+        coeffC_*mixture_.rho2()*limitedAlpha2*L*pos(TSat - T)
     );
 
     TSource =
         fvm::Sp(Vcoeff, T) - Vcoeff*TSat
-      - fvm::Sp(Ccoeff, T) + Ccoeff*TSat;
+      + fvm::Sp(Ccoeff, T) - Ccoeff*TSat;
 
     return tTSource;
 }
