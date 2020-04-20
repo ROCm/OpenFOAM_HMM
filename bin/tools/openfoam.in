@@ -1,4 +1,5 @@
 #!/bin/sh
+exec "@PROJECT_DIR@"/etc/openfoam "$@"
 #------------------------------------------------------------------------------
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
@@ -11,16 +12,8 @@
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
-# Script
-#     openfoam [options] [args]
-#
 # Description
-#     Forwarding to the OpenFOAM etc/openfoam bash session script.
+#     Forwarding to OpenFOAM etc/openfoam bash session script.
+#     Uses a hard-code directory path (eg, generated with autoconfig).
 #
-#------------------------------------------------------------------------------
-# Hard-coded directory path (eg, autoconfig)
-projectDir="@PROJECT_DIR@"
-
-exec "$projectDir"/etc/openfoam "$@"
-
 #------------------------------------------------------------------------------

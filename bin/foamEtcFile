@@ -7,14 +7,13 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2017-2018 OpenCFD Ltd.
+#     Copyright (C) 2017-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
-#     foamEtcFile
+#     bin/foamEtcFile
 #
 # Description
 #     Locate user/group/other file as per '#includeEtc'.
@@ -67,8 +66,8 @@ options:
   -config           Add config directory prefix for shell type:
                         with -csh* for a config.csh/ prefix
                         with -sh*  for a config.sh/ prefix
-  -show-api         Print api value from wmake/rules, or meta-info and exit
-  -show-patch       Print patch value from meta-info and exit
+  -show-api         Print META-INFO api value and exit
+  -show-patch       Print META-INFO patch value and exit
   -with-api=NUM     Specify alternative api value to search with
   -quiet (-q)       Suppress all normal output
   -silent (-s)      Suppress stderr, except -csh-verbose, -sh-verbose output
@@ -129,54 +128,17 @@ fi
 
 #-------------------------------------------------------------------------------
 
-# The API locations. See wmake/wmakeBuildInfo
-rulesFile="$projectDir/wmake/rules/General/general"
-metaInfoDir="$projectDir/META-INFO"
-
-# Get api from rules/General/general
-#
-# Failure modes:
-# - No api information (can't find file etc).
-#   -> Fatal for building, but could be OK for a stripped down version
-#
-# Fallback. Get from api-info
-#
-getApi()
+# Get a value from META-INFO/api-info
+# $1 : keyword
+getApiInfo()
 {
-    local value
-
-    value="$(sed -ne '/^ *#/!{ /WM_VERSION.*OPENFOAM=/{ s@^.*OPENFOAM= *\([0-9][0-9]*\).*@\1@p; q }}' $rulesFile 2>/dev/null)"
-    if [ -z "$value" ] && [ -f "$metaInfoDir/api-info" ]
-    then
-        # Fallback. Get from api-info
-        value="$(sed -ne 's@^ *api *= *\([0-9][0-9]*\).*@\1@p' $metaInfoDir/api-info 2>/dev/null)"
-    fi
+    value="$(sed -ne 's@^'"$1"' *= *\([0-9][0-9]*\).*@\1@p' "$projectDir"/META-INFO/api-info 2>/dev/null)"
 
     if [ -n "$value" ]
     then
         echo "$value"
     else
-        return 1
-    fi
-}
-
-
-# Get patch from meta-info / api-info
-#
-# Failure modes:
-# - No patch information (can't find file etc).
-#
-getPatchLevel()
-{
-    local value
-
-    # Fallback. Get from api-info
-    value="$(sed -ne 's@^ *patch *= *\([0-9][0-9]*\).*@\1@p' $metaInfoDir/api-info 2>/dev/null)"
-
-    if [ -n "$value" ]
-    then
-        echo "$value"
-    else
+        echo "Could not determine OPENFOAM '$1' value" 1>&2
         return 1
     fi
 }
@@ -193,14 +155,12 @@ do
     -h | -help*)
         printHelp
         ;;
-    -show-api)
-        # Show API and exit
-        getApi
+    -show-api)  # Show API and exit
+        getApiInfo api
         exit $?
         ;;
-    -show-patch)
-        # Show patch level and exit
-        getPatchLevel
+    -show-patch)  # Show patch level and exit
+        getApiInfo patch
         exit $?
         ;;
     -with-api=*)
@@ -276,7 +236,7 @@ done
 #-------------------------------------------------------------------------------
 
 # Establish the API value
-[ -n "$projectApi" ] || projectApi=$(getApi)
+[ -n "$projectApi" ] || projectApi=$(getApiInfo api)
 
 # Split arguments into filename (for searching) and trailing bits for shell eval
 # Silently remove leading ~OpenFOAM/ (as per Foam::findEtcFile)

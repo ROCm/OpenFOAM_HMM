@@ -9,12 +9,11 @@
 #     Copyright (C) 2016-2018 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # File
 #     etc/config.sh/gperftools
-#     - sourced by OpenFOAM-*/etc/bashrc
+#     Not normally sourced by OpenFOAM-*/etc/bashrc
 #
 # Description
 #     Setup file for GPERFTOOLS binaries/libraries.
