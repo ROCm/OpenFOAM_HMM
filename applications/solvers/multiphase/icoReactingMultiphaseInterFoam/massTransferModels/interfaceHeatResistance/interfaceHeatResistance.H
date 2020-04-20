@@ -5,7 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020 Henning Scheufler
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,115 +25,119 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::meltingEvaporationModels::Lee
+    Foam::meltingEvaporationModels::interfaceHeatResistance
 
 Description
-    Mass tranfer Lee model. Simple model driven by field value difference as:
+    Interface Heat Resistance type of condensation/saturation model using
+    spread source distribution following:
 
-    \f[
-        \dot{m} = C \rho \alpha (T - T_{activate})/T_{activate}
-    \f]
-
-    where C is a model constant.
-
-    if C > 0:
-    \f[
-        \dot{m} = C \rho \alpha (T - T_{activate})/T_{activate}
-    \f]
-        for \f[ T > T_{activate} \f]
-
-    and
-
-        \f[ mDot = 0.0 \f]  for \f[  T < T_{activate} \f]
-
-
-    if C < 0:
-    \f[
-        \dot{m} = -C \rho \alpha (T_{activate} - T)/T_{activate}
-    \f]
-        for \f[ T < T_{activate} \f]
-
-    and
-        \f[ \dot{m} = 0.0 \f] for \f[ T > T_{activate} \f]
-
-    Based on the reference:
-    -# W. H. Lee. "A Pressure Iteration Scheme for Two-Phase Modeling".
-    Technical Report LA-UR 79-975. Los Alamos Scientific Laboratory,
-    Los Alamos, New Mexico. 1979.
-
-Usage
-    Example usage:
+    References:
     \verbatim
-        massTransferModel
-        (
-            (solid to liquid)
-            {
-                type            Lee;
-                C               40;
-                Tactivate       302.78;
-            }
-        );
+        Hardt, S., Wondra, F. (2008).
+        Evaporation model for interfacial flows based on a continuum-
+        field representation of the source term
+        Journal of Computational Physics 227 (2008), 5871-5895
     \endverbatim
 
-    Where:
 
+Usage
+
+    Example usage:
+    \verbatim
+    massTransferModel
+    (
+        (liquid to gas)
+        {
+            type                interfaceHeatResistance;
+            R                   2e6;
+            Tactivate           373;
+        }
+    );
+    \endverbatim
+
+    where:
     \table
-        Property    | Description            | Required    | Default value
-        Tactivate   | Activation temperature | yes
-        C           | Model constant         | yes
+        Property    | Description             | Required    | Default value
+        R           | Heat transfer coefficient | yes
         includeVolChange    | Volumen change  | no          | yes
+        isoAlpha    | iso-alpha for interface | no          | 0.5
+        Tactivate   | Saturation temperature  | yes
         species     | Specie name on the other phase | no   | none
+        spread      | Cells to spread the source for pEq | no   | 3
     \endtable
 
 SourceFiles
-    Lee.C
+    interfaceHeatResistance.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef meltingEvaporationModels_Lee_H
-#define meltingEvaporationModels_Lee_H
+#ifndef meltingEvaporationModels_interfaceHeatResistance_H
+#define meltingEvaporationModels_interfaceHeatResistance_H
+
 
 #include "InterfaceCompositionModel.H"
-
 
 // * * * * * * * * * * * * * * * * *  * * * * * * * * * * * * * * * * * * * *//
 
 namespace Foam
 {
+
+class phasePair;
+
 namespace meltingEvaporationModels
 {
 
 /*---------------------------------------------------------------------------*\
-                                  Class Lee
+                         Class interfaceHeatResistance
 \*---------------------------------------------------------------------------*/
 
 template<class Thermo, class OtherThermo>
-class Lee
+class interfaceHeatResistance
 :
     public InterfaceCompositionModel<Thermo, OtherThermo>
 {
     // Private data
 
-        //- Condensation coefficient [1/s]
-        dimensionedScalar C_;
+        //- Heat transfer coefficient [1/s/K]
+        dimensionedScalar R_;
 
-        //- Phase transition temperature
+        //- Activation temperature
         const dimensionedScalar Tactivate_;
 
-        //- Phase minimum value for activation
-        scalar alphaMin_;
+        //- Interface area
+        volScalarField interfaceArea_;
 
+        //- Mass source
+        volScalarField mDotc_;
+
+        //- Spread mass source
+        volScalarField mDotcSpread_;
+
+        //- Heat transfer coefficient
+        volScalarField htc_;
+
+        //- Interface Iso-value
+        scalar isoAlpha_;
+
+        //- Spread for mass source
+        scalar spread_;
+
+
+    // Private member
+
+        //- Update interface
+        void updateInterface(const volScalarField& T);
 
 public:
 
     //- Runtime type information
-    TypeName("Lee");
+    TypeName("interfaceHeatResistance");
 
 
     // Constructors
 
         //- Construct from components
-        Lee
+        interfaceHeatResistance
         (
             const dictionary& dict,
             const phasePair& pair
@@ -140,7 +145,7 @@ public:
 
 
     //- Destructor
-    virtual ~Lee() = default;
+    virtual ~interfaceHeatResistance() = default;
 
 
     // Member Functions
@@ -165,13 +170,12 @@ public:
             const volScalarField& field
         );
 
-        //- Return T transition between phases
+        //- Return Tactivate
         virtual const dimensionedScalar& Tactivate() const;
 
         //- Adds and substract alpha*div(U) as a source term
         //  for alpha, substituting div(U) = mDot(1/rho1 - 1/rho2)
         virtual bool includeDivU();
-
 };
 
 
@@ -183,11 +187,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "Lee.C"
+#   include "interfaceHeatResistance.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 #endif
 
 // ************************************************************************* //
