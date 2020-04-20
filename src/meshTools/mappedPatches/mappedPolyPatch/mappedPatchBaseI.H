@@ -145,6 +145,14 @@ inline bool Foam::mappedPatchBase::sameRegion() const
 
 inline const Foam::mapDistribute& Foam::mappedPatchBase::map() const
 {
+    const polyMesh& thisMesh = patch_.boundaryMesh().mesh();
+    bool topoChange = sampleMesh().topoChanging() || thisMesh.topoChanging();
+
+    if (topoChange)
+    {
+        mapPtr_.clear();
+    }
+
     if (mapPtr_.empty())
     {
         calcMapping();
@@ -159,7 +167,15 @@ inline const Foam::AMIPatchToPatchInterpolation& Foam::mappedPatchBase::AMI
     bool forceUpdate
 ) const
 {
-    if (forceUpdate || AMIPtr_.empty())
+    const polyMesh& thisMesh = patch_.boundaryMesh().mesh();
+    bool topoChange = sampleMesh().topoChanging() || thisMesh.topoChanging();
+
+    if (topoChange || forceUpdate)
+    {
+        AMIPtr_.clear();
+    }
+
+    if (AMIPtr_.empty())
     {
         calcAMI();
     }
