@@ -172,6 +172,20 @@ inline label invTransform(const tensor&, const label i)
 }
 
 
+//- No-op rotational transform of an unsigned integer
+inline unsigned int transform(const tensor&, const unsigned int i)
+{
+    return i;
+}
+
+
+//- No-op inverse rotational transform of an unsigned integer
+inline unsigned int invTransform(const tensor&, const unsigned int i)
+{
+    return i;
+}
+
+
 //- No-op rotational transform of a scalar
 inline scalar transform(const tensor&, const scalar s)
 {
