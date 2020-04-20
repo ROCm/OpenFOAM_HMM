@@ -50,6 +50,7 @@ License
 
 #include "kineticGasEvaporation.H"
 #include "Lee.H"
+#include "interfaceHeatResistance.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -327,6 +328,152 @@ namespace Foam
             hPowerSolidThermoPhysics
         );
 
+
+
+        // interfaceHeatResistance model definitions
+
+        // From pure phase (rho const) to phase (rho const)
+        makeInterfacePureType
+        (
+            interfaceHeatResistance,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            constRhoHThermoPhysics,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            constRhoHThermoPhysics
+        );
+
+        // From pure phase (rho const) to phase (Boussinesq)
+        makeInterfacePureType
+        (
+            interfaceHeatResistance,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            constRhoHThermoPhysics,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            BoussinesqFluidEThermoPhysics
+        );
+
+
+        // From pure phase (solidThermo) to phase (Boussinesq)
+        makeInterfacePureType
+        (
+            interfaceHeatResistance,
+            heSolidThermo,
+            solidThermo,
+            pureMixture,
+            hConstSolidThermoPhysics,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            BoussinesqFluidEThermoPhysics
+        );
+
+        // From pure phase (solidThermo) to phase (rho const)
+        makeInterfacePureType
+        (
+            interfaceHeatResistance,
+            heSolidThermo,
+            solidThermo,
+            pureMixture,
+            hConstSolidThermoPhysics,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            constRhoHThermoPhysics
+        );
+
+        // From pure phase (all-poly solidThermo) to phase (ico-rho)
+        makeInterfacePureType
+        (
+            interfaceHeatResistance,
+            heSolidThermo,
+            solidThermo,
+            pureMixture,
+            hPolyTranspPolyIcoSolidThermoPhysics,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            icoPoly8HThermoPhysics
+        );
+
+        // From pure phase (exp-Transp, hPower solidThermo) to phase (ico-rho)
+        makeInterfacePureType
+        (
+            interfaceHeatResistance,
+            heSolidThermo,
+            solidThermo,
+            pureMixture,
+            hPowerSolidThermoPhysics,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            icoPoly8HThermoPhysics
+        );
+
+
+        // From pure phase (const rho) to multi phase (incomp ideal gas)
+        makeInterfaceContSpecieMixtureType
+        (
+            interfaceHeatResistance,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            constRhoHThermoPhysics,
+            heRhoThermo,
+            rhoReactionThermo,
+            multiComponentMixture,
+            constIncompressibleGasHThermoPhysics
+        );
+
+
+        // From pure phase (Boussinesq) to phase (solidThermo)
+        makeInterfacePureType
+        (
+            interfaceHeatResistance,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            BoussinesqFluidEThermoPhysics,
+            heSolidThermo,
+            solidThermo,
+            pureMixture,
+            hConstSolidThermoPhysics
+        );
+
+        // From pure phase (rho const) to phase (solidThermo)
+        makeInterfacePureType
+        (
+            interfaceHeatResistance,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            constRhoHThermoPhysics,
+            heSolidThermo,
+            solidThermo,
+            pureMixture,
+            hConstSolidThermoPhysics
+        );
+
+        //From pure liquid phase (ico-rho) to pure phase (exp-Transp, hPower solidThermo)
+        makeInterfacePureType
+        (
+            interfaceHeatResistance,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            icoPoly8HThermoPhysics,
+            heSolidThermo,
+            solidThermo,
+            pureMixture,
+            hPowerSolidThermoPhysics
+        );
 
 }
 

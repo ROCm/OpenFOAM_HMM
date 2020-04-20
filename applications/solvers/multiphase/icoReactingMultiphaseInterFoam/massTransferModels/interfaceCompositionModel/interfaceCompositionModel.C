@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,6 +44,7 @@ Foam::interfaceCompositionModel::modelVariableNames
     { modelVariable::T, "temperature" },
     { modelVariable::P, "pressure" },
     { modelVariable::Y, "massFraction" },
+    { modelVariable::alpha, "alphaVolumeFraction" },
 };
 
 
@@ -64,6 +65,7 @@ Foam::interfaceCompositionModel::interfaceCompositionModel
             modelVariable::T
         )
     ),
+    includeVolChange_(dict.lookupOrDefault<bool>("includeVolChange", true)),
     pair_(pair),
     speciesName_(dict.lookupOrDefault<word>("species", "none")),
     mesh_(pair_.from().mesh())
@@ -95,5 +97,10 @@ bool Foam::interfaceCompositionModel::includeDivU()
     return true;
 }
 
+
+bool Foam::interfaceCompositionModel::includeVolChange()
+{
+    return includeVolChange_;
+}
 
 // ************************************************************************* //

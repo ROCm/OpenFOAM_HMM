@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,6 +75,9 @@ public:
 
         //- Enumeration for model variables
         modelVariable modelVariable_;
+
+        //- Add volume change in pEq
+        bool includeVolChange_;
 
 
 protected:
@@ -197,6 +200,9 @@ public:
         //- Adds and substract alpha*div(U) as a source term
         //  for alpha, substituting div(U) = mDot(1/rho1 - 1/rho2)
         virtual bool includeDivU();
+
+        //- Add volume change in pEq
+        bool includeVolChange();
 
         //- Returns the variable on which the model is based
         const word variable() const;

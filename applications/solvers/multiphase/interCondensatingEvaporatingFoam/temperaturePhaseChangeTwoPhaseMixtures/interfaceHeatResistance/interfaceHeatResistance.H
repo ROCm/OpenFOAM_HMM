@@ -78,6 +78,12 @@ class interfaceHeatResistance
         //- Mass evaporation source
         volScalarField mDote_;
 
+        //- Spread condensation mass source
+        volScalarField mDotcSpread_;
+
+        //- Spread evaporation mass source
+        volScalarField mDoteSpread_;
+
         //- Spread for mass source
         scalar spread_;
 

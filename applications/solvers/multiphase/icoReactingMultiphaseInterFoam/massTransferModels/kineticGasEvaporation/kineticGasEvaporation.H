@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,9 +66,8 @@ Description
     \f[
         Flux =
            2 \frac{C}{2 - C}
-           \sqrt{\frac{M}{2 \pi R T_{activate}}}
-           L (\rho_{v}*\rho_{l}/(\rho_{l} - \rho_{v}))
-           (T - T_{activate})/T_{activate}
+           \sqrt{\frac{M}{2 \pi R {T_activate}^3}} L (\rho_{v})
+           (T - T_{activate})
     \f]
 
     This assumes liquid and vapour are in equilibrium, then the accomodation
@@ -91,8 +90,7 @@ Usage
             type                kineticGasEvaporation;
             species             vapour.gas;
             C                   0.1;
-            alphaMin            0.0;
-            alphaMax            0.2;
+            isoAlpha            0.1;
             Tactivate           373;
         }
     );
@@ -101,12 +99,12 @@ Usage
     where:
     \table
         Property    | Description             | Required    | Default value
-        C           | Accomodation coefficient (C > 0 for evaporation, C < 0 for
+        C           | Coefficient (C > 0 for evaporation, C < 0 for
             condensation) | yes
-        alphaMin    | Minimum value of alpha  | no          | 0.0
-        alphaMax    | Maximum values of alpha | no          | 0.5
+        includeVolChange    | Volumen change  | no          | yes
+        isoAlpha    | iso-alpha for interface | no          | 0.5
         Tactivate   | Saturation temperature  | yes
-        species     | Specie name on the other phase | yes
+        species     | Specie name on the other phase | no   | none
     \endtable
 
 SourceFiles
@@ -150,14 +148,23 @@ class kineticGasEvaporation
         //- Molar weight of the vapour in the continous phase
         dimensionedScalar Mv_;
 
-        //- 'To' phase maximum value for the mass transfer
-        scalar alphaMax_;
+        //- Interface area
+        volScalarField interfaceArea_;
 
-        //- 'To' phase minumum value for the mass transfer
-        scalar alphaMin_;
+        //- Heat transfer coefficient
+        volScalarField htc_;
 
-        //- Alpha maximum for the rest of phases
-        scalar alphaRestMax_;
+        //- Mass source
+        volScalarField mDotc_;
+
+        //- Interface Iso-value
+        scalar isoAlpha_;
+
+
+    // Private member
+
+        //- Update interface
+        void updateInterface(const volScalarField& T);
 
 
 public:
@@ -182,7 +189,7 @@ public:
 
     // Member Functions
 
-        //- Explicit mass transfer coefficient
+        //- Explicit total mass transfer coefficient
         virtual tmp<volScalarField> Kexp
         (
             const volScalarField& field
@@ -204,6 +211,10 @@ public:
 
         //- Return Tactivate
         virtual const dimensionedScalar& Tactivate() const;
+
+        //- Adds and substract alpha*div(U) as a source term
+        //  for alpha, substituting div(U) = mDot(1/rho1 - 1/rho2)
+        virtual bool includeDivU();
 };
 
 

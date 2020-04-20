@@ -529,6 +529,9 @@ public:
             const word speciesName
         ) = 0;
 
+        //- Add volume change in pEq
+        virtual bool includeVolChange() = 0;
+
 
     // Solve phases and correct models
 

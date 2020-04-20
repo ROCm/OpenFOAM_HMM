@@ -110,6 +110,34 @@ interfaceHeatResistance
         dimensionedScalar(dimDensity/dimTime, Zero)
     ),
 
+    mDotcSpread_
+    (
+        IOobject
+        (
+            "mDotcSpread",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar(dimDensity/dimTime, Zero)
+    ),
+
+    mDoteSpread_
+    (
+        IOobject
+        (
+            "mDoteSpread",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar(dimDensity/dimTime, Zero)
+    ),
+
     spread_
     (
         optionalSubDict(type() + "Coeffs").get<scalar>("spread")
@@ -259,6 +287,47 @@ correct()
         mDote_[celli] = min(max(mDote_[celli], maxCond), maxEvap);
         mDotc_[celli] = min(max(mDotc_[celli], maxCond), maxEvap);
     }
+
+    // Calculate the spread sources
+
+    dimensionedScalar D
+    (
+        "D",
+        dimArea,
+        spread_/sqr(gAverage(mesh_.nonOrthDeltaCoeffs()))
+    );
+
+
+    const volScalarField& alpha1 = mixture_.alpha1();
+    const volScalarField& alpha2 = mixture_.alpha2();
+
+    const dimensionedScalar MDotMin("MdotMin", mDotc_.dimensions(), 1e-3);
+
+    if (max(mDotc_) > MDotMin)
+    {
+        fvc::spreadSource
+        (
+            mDotcSpread_,
+            mDotc_,
+            alpha1,
+            alpha2,
+            D,
+            1e-3
+        );
+    }
+
+    if (max(mDote_) > MDotMin)
+    {
+        fvc::spreadSource
+        (
+            mDoteSpread_,
+            mDote_,
+            alpha1,
+            alpha2,
+            D,
+            1e-3
+        );
+    }
 }
 
 
@@ -325,63 +394,12 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::interfaceHeatResistance::
 vDot() const
 {
 
-    dimensionedScalar D
-    (
-        "D",
-        dimArea,
-        spread_/sqr(gAverage(mesh_.nonOrthDeltaCoeffs()))
-    );
-
-
-    const volScalarField& alpha1 = mixture_.alpha1();
-    const volScalarField& alpha2 = mixture_.alpha2();
-
-    const dimensionedScalar MDotMin("MdotMin", mDotc_.dimensions(), 1e-3);
-
-    Pair<tmp<volScalarField>> mDotSpread
-    (
-        tmp<volScalarField>(mDotc_*0.0),
-        tmp<volScalarField>(mDote_*0.0)
-    );
-
-    if (max(mDotc_) > MDotMin)
-    {
-        fvc::spreadSource
-        (
-            mDotSpread[0].ref(),
-            mDotc_,
-            alpha1,
-            alpha2,
-            D,
-            1e-3
-        );
-    }
-
-    if (max(mDote_) > MDotMin)
-    {
-        fvc::spreadSource
-        (
-            mDotSpread[1].ref(),
-            mDote_,
-            alpha1,
-            alpha2,
-            D,
-            1e-3
-        );
-    }
-
     dimensionedScalar pCoeff(1.0/mixture_.rho1() - 1.0/mixture_.rho2());
-
-    if (mesh_.time().outputTime())
-    {
-        volScalarField mDotS("mDotSpread", mDotSpread[1].ref());
-        mDotS.write();
-    }
 
     return Pair<tmp<volScalarField>>
     (
-        pCoeff*mDotSpread[0],
-       -pCoeff*mDotSpread[1]
+        pCoeff*mDotcSpread_,
+       -pCoeff*mDoteSpread_
     );
 }
 

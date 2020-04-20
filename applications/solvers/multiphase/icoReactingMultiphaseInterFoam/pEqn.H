@@ -33,8 +33,12 @@
         (
             fvc::div(phiHbyA)
           - fvm::laplacian(rAUf, p_rgh)
-          + fluid.volTransfer(p_rgh)
         );
+
+        if (fluid.includeVolChange())
+        {
+            p_rghEqn += fluid.volTransfer(p_rgh);
+        }
 
         p_rghEqn.setReference(pRefCell, pRefValue);
 

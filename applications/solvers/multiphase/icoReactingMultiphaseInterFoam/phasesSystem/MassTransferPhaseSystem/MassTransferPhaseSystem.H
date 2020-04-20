@@ -127,12 +127,15 @@ public:
     // Mass transfer functions
 
         //- Return the heat transfer matrix
+        // NOTE: Call KSu and KSp with T as variable,if not provided uses dmdt.
         virtual  tmp<fvScalarMatrix> heatTransfer(const volScalarField& T);
 
         //- Return the volumetric rate transfer matrix
+        // NOTE: Call KSu and KSp with p as variable,if not provided uses dmdt.
         virtual  tmp<fvScalarMatrix> volTransfer(const volScalarField& p);
 
         //- Correct/calculates mass sources dmdt for phases
+        // NOTE: Call the kexp() for all the mass transfer models.
         virtual void correctMassSources(const volScalarField& T);
 
         //- Calculate mass transfer for alpha's
@@ -147,6 +150,8 @@ public:
             const word speciesName
         );
 
+        //- Add volume change in pEq
+        virtual bool includeVolChange();
 };
 
 

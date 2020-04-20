@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-202 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -396,7 +396,12 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::volTransfer
 
             if (KSp.valid())
             {
-                Sp += KSp.ref();
+                Sp -=
+                    KSp.ref()
+                   *(
+                        - this->coeffs(phase1.name())
+                        + this->coeffs(phase2.name())
+                    );
             }
 
             tmp<volScalarField> KSu =
@@ -404,7 +409,12 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::volTransfer
 
             if (KSu.valid())
             {
-                Su += KSu.ref();
+                Su -=
+                    KSu.ref()
+                   *(
+                        - this->coeffs(phase1.name())
+                        + this->coeffs(phase2.name())
+                    );
             }
 
             // If linearization is not provided used full explicit
@@ -436,7 +446,12 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::volTransfer
 
             if (KSp.valid())
             {
-                Sp += KSp.ref();
+                Sp +=
+                    KSp.ref()
+                   *(
+                        - this->coeffs(phase1.name())
+                        + this->coeffs(phase2.name())
+                    );
             }
 
             tmp<volScalarField> KSu =
@@ -444,7 +459,12 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::volTransfer
 
             if (KSu.valid())
             {
-                Su += KSu.ref();
+                Su +=
+                    KSu.ref()
+                   *(
+                        - this->coeffs(phase1.name())
+                        + this->coeffs(phase2.name())
+                    );
             }
 
             // If linearization is not provided used full explicit
@@ -743,5 +763,19 @@ void Foam::MassTransferPhaseSystem<BasePhaseSystem>::massSpeciesTransfer
     }
 }
 
+
+template<class BasePhaseSystem>
+bool Foam::MassTransferPhaseSystem<BasePhaseSystem>::includeVolChange()
+{
+    bool includeVolChange(true);
+    forAllIters(massTransferModels_, iter)
+    {
+        if (!iter()->includeVolChange())
+        {
+            includeVolChange = false;
+        }
+    }
+    return includeVolChange;
+}
 
 // ************************************************************************* //
