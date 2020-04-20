@@ -1,0 +1,6 @@
+# Empty flags for not compiling/linking with CGAL
+
+CGAL_INC   =
+CGAL_LIBS  =
+
+#------------------------------------------------------------------------------
