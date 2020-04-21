@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +37,7 @@ Description
 
 #include "tensor.H"
 #include "mathematicalConstants.H"
+#include <type_traits>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -144,59 +146,20 @@ inline tensor Ra(const vector& a, const scalar omega)
 }
 
 
-//- No-op rotational transform of a bool
-inline bool transform(const tensor&, const bool b)
+//- No-op rotational transform for base types
+template<class T>
+constexpr typename std::enable_if<std::is_arithmetic<T>::value, T>::type
+transform(const tensor&, const T val)
 {
-    return b;
+    return val;
 }
 
-
-//- No-op inverse rotational transform of a bool
-inline bool invTransform(const tensor&, const bool b)
+//- No-op inverse rotational transform for base types
+template<class T>
+constexpr typename std::enable_if<std::is_arithmetic<T>::value, T>::type
+invTransform(const tensor&, const T val)
 {
-    return b;
-}
-
-
-//- No-op rotational transform of a label
-inline label transform(const tensor&, const label i)
-{
-    return i;
-}
-
-
-//- No-op inverse rotational transform of a label
-inline label invTransform(const tensor&, const label i)
-{
-    return i;
-}
-
-
-//- No-op rotational transform of an unsigned integer
-inline unsigned int transform(const tensor&, const unsigned int i)
-{
-    return i;
-}
-
-
-//- No-op inverse rotational transform of an unsigned integer
-inline unsigned int invTransform(const tensor&, const unsigned int i)
-{
-    return i;
-}
-
-
-//- No-op rotational transform of a scalar
-inline scalar transform(const tensor&, const scalar s)
-{
-    return s;
-}
-
-
-//- No-op inverse rotational transform of a scalar
-inline scalar invTransform(const tensor&, const scalar s)
-{
-    return s;
+    return val;
 }
 
 
