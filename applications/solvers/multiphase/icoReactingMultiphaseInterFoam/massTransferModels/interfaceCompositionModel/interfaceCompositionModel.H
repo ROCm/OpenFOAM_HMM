@@ -39,16 +39,17 @@ SourceFiles
 #ifndef interfaceCompositionModel_H
 #define interfaceCompositionModel_H
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 #include "volFields.H"
 #include "dictionary.H"
 #include "runTimeSelectionTables.H"
 #include "Enum.H"
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 namespace Foam
 {
 
+// Forward Declarations
 class phaseModel;
 class phasePair;
 
@@ -82,7 +83,7 @@ public:
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Phase pair
         const phasePair& pair_;
@@ -197,8 +198,8 @@ public:
         //- Reference value
         virtual const dimensionedScalar& Tactivate() const = 0;
 
-        //- Adds and substract alpha*div(U) as a source term
-        //  for alpha, substituting div(U) = mDot(1/rho1 - 1/rho2)
+        //- Add/subtract alpha*div(U) as a source term
+        //- for alpha, substituting div(U) = mDot(1/rho1 - 1/rho2)
         virtual bool includeDivU();
 
         //- Add volume change in pEq

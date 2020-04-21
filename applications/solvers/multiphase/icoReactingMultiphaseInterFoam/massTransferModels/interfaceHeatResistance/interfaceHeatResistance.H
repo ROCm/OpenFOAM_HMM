@@ -74,7 +74,6 @@ SourceFiles
 #ifndef meltingEvaporationModels_interfaceHeatResistance_H
 #define meltingEvaporationModels_interfaceHeatResistance_H
 
-
 #include "InterfaceCompositionModel.H"
 
 // * * * * * * * * * * * * * * * * *  * * * * * * * * * * * * * * * * * * * *//
@@ -82,13 +81,14 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class phasePair;
 
 namespace meltingEvaporationModels
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class interfaceHeatResistance
+                   Class interfaceHeatResistance Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Thermo, class OtherThermo>
@@ -96,7 +96,7 @@ class interfaceHeatResistance
 :
     public InterfaceCompositionModel<Thermo, OtherThermo>
 {
-    // Private data
+    // Private Data
 
         //- Heat transfer coefficient [1/s/K]
         dimensionedScalar R_;
@@ -123,7 +123,7 @@ class interfaceHeatResistance
         scalar spread_;
 
 
-    // Private member
+    // Private Member Functions
 
         //- Update interface
         void updateInterface(const volScalarField& T);
@@ -173,8 +173,8 @@ public:
         //- Return Tactivate
         virtual const dimensionedScalar& Tactivate() const;
 
-        //- Adds and substract alpha*div(U) as a source term
-        //  for alpha, substituting div(U) = mDot(1/rho1 - 1/rho2)
+        //- Add/subtract alpha*div(U) as a source term
+        //- for alpha, substituting div(U) = mDot(1/rho1 - 1/rho2)
         virtual bool includeDivU();
 };
 

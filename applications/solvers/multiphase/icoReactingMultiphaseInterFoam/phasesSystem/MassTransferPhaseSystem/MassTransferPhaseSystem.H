@@ -85,7 +85,7 @@ protected:
             dmdtTable;
 
 
-    // Protected data
+    // Protected Data
 
         //- Overall inter-phase mass transfer rates [Kg/s]
         dmdtTable dmdt_;
@@ -94,7 +94,7 @@ protected:
         massTransferModelTable massTransferModels_;
 
 
-    // Protected memebers
+    // Protected Member Functions
 
         //- Calculate L between phases
         tmp<volScalarField> calculateL
@@ -111,7 +111,7 @@ public:
     // Constructors
 
         //- Construct from fvMesh
-        MassTransferPhaseSystem(const fvMesh&);
+        explicit MassTransferPhaseSystem(const fvMesh&);
 
 
     //- Destructor

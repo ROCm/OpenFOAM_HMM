@@ -195,23 +195,20 @@ Foam::meltingEvaporationModels::interfaceHeatResistance<Thermo, OtherThermo>
 
     updateInterface(T);
 
-    tmp<volScalarField> tdeltaT
+    auto tdeltaT = tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "tdeltaT",
-                mesh.time().timeName(),
-                mesh
-            ),
-            mesh,
-            dimensionedScalar(dimTemperature, Zero)
-        )
+            "tdeltaT",
+            mesh.time().timeName(),
+            mesh
+        ),
+        mesh,
+        dimensionedScalar(dimTemperature, Zero)
     );
-    volScalarField& deltaT = tdeltaT.ref();
+    auto& deltaT = tdeltaT.ref();
 
-    dimensionedScalar T0("T0", dimTemperature, Zero);
+    const dimensionedScalar T0(dimTemperature, Zero);
 
     if (sign(R_.value()) > 0)
     {
@@ -257,7 +254,7 @@ Foam::meltingEvaporationModels::interfaceHeatResistance<Thermo, OtherThermo>
 
     mDotc_ = interfaceArea_*htc_*deltaT;
 
-    return tmp<volScalarField>(new volScalarField(mDotc_));
+    return tmp<volScalarField>::New(mDotc_);
 }
 
 
@@ -283,10 +280,8 @@ Foam::meltingEvaporationModels::interfaceHeatResistance<Thermo, OtherThermo>
             return(coeff*pos(Tactivate_ - refValue));
         }
     }
-    else
-    {
-        return tmp<volScalarField> ();
-    }
+
+    return nullptr;
 }
 
 
@@ -314,12 +309,10 @@ Foam::meltingEvaporationModels::interfaceHeatResistance<Thermo, OtherThermo>
     }
     else if (interfaceCompositionModel::P == variable)
     {
-        return tmp<volScalarField>(new volScalarField(mDotcSpread_));
+        return tmp<volScalarField>::New(mDotcSpread_);
     }
-    else
-    {
-        return tmp<volScalarField> ();
-    }
+
+    return nullptr;
 }
 
 
@@ -339,5 +332,6 @@ interfaceHeatResistance<Thermo, OtherThermo>::includeDivU()
 {
     return true;
 }
+
 
 // ************************************************************************* //

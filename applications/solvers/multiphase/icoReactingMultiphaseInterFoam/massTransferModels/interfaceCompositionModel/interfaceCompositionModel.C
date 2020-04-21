@@ -65,7 +65,7 @@ Foam::interfaceCompositionModel::interfaceCompositionModel
             modelVariable::T
         )
     ),
-    includeVolChange_(dict.lookupOrDefault<bool>("includeVolChange", true)),
+    includeVolChange_(dict.lookupOrDefault("includeVolChange", true)),
     pair_(pair),
     speciesName_(dict.lookupOrDefault<word>("species", "none")),
     mesh_(pair_.from().mesh())

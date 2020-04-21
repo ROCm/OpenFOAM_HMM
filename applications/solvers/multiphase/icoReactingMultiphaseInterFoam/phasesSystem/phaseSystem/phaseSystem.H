@@ -53,6 +53,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class surfaceTensionModel;
 class porousModel;
 
@@ -267,7 +268,7 @@ public:
     // Energy related thermo functionaliy functions
 
         //- Return access to the inernal energy field [J/Kg]
-        // NOTE: this mixture thermo is prepared to to work with T
+        //  \note this mixture thermo is prepared to work with T
         virtual volScalarField& he()
         {
             NotImplemented;
@@ -275,7 +276,7 @@ public:
         }
 
         //- Return access to the inernal energy field [J/Kg]
-        // NOTE: this mixture thermo is prepared to to work with T
+        //  \note this mixture thermo is prepared to work with T
         virtual const volScalarField& he() const
         {
            NotImplemented;
@@ -552,7 +553,7 @@ public:
         }
 
         //- Correct the turbulence
-        // (NOTE: Each phase could have its own turbulence)
+        //  \note Each phase could have its own turbulence
         virtual void correctTurbulence();
 
         //- Read base phaseProperties dictionary

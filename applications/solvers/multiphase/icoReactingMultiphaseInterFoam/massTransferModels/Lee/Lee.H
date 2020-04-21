@@ -94,7 +94,6 @@ SourceFiles
 
 #include "InterfaceCompositionModel.H"
 
-
 // * * * * * * * * * * * * * * * * *  * * * * * * * * * * * * * * * * * * * *//
 
 namespace Foam
@@ -103,7 +102,7 @@ namespace meltingEvaporationModels
 {
 
 /*---------------------------------------------------------------------------*\
-                                  Class Lee
+                             Class Lee Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Thermo, class OtherThermo>
@@ -111,7 +110,7 @@ class Lee
 :
     public InterfaceCompositionModel<Thermo, OtherThermo>
 {
-    // Private data
+    // Private Data
 
         //- Condensation coefficient [1/s]
         dimensionedScalar C_;
@@ -168,10 +167,9 @@ public:
         //- Return T transition between phases
         virtual const dimensionedScalar& Tactivate() const;
 
-        //- Adds and substract alpha*div(U) as a source term
-        //  for alpha, substituting div(U) = mDot(1/rho1 - 1/rho2)
+        //- Add/subtract alpha*div(U) as a source term
+        //- for alpha, substituting div(U) = mDot(1/rho1 - 1/rho2)
         virtual bool includeDivU();
-
 };
 
 

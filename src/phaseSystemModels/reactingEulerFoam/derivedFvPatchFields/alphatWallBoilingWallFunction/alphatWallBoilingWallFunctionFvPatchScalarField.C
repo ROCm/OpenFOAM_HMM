@@ -949,7 +949,7 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
                         );
 
                         // alphat is added alphal and multiplied by phase
-                        // alphaFilm in the coupled BC. We substract
+                        // alphaFilm in the coupled BC. We subtract
                         // alpha and divide by phase to get a net alphaFilm
                         this->operator[](i) =
                             (

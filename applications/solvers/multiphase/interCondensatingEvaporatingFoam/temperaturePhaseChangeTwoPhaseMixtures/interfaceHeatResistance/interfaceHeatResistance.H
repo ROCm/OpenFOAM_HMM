@@ -109,6 +109,7 @@ public:
             const fvMesh& mesh
         );
 
+
     //- Destructor
     virtual ~interfaceHeatResistance() = default;
 

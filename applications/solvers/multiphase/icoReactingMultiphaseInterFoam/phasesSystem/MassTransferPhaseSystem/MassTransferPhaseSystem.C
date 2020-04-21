@@ -26,9 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "MassTransferPhaseSystem.H"
-
 #include "HashPtrTable.H"
-
 #include "fvcDiv.H"
 #include "fvmSup.H"
 #include "fvMatrix.H"
@@ -85,23 +83,20 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::calculateL
     const volScalarField& T
 ) const
 {
-    tmp<volScalarField> tL
+    auto tL = tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "tL",
-                this->mesh().time().timeName(),
-                this->mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            "tL",
+            this->mesh().time().timeName(),
             this->mesh(),
-            dimensionedScalar(dimEnergy/dimMass, Zero)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        this->mesh(),
+        dimensionedScalar(dimEnergy/dimMass, Zero)
     );
-    volScalarField& L = tL.ref();
+    auto& L = tL.ref();
 
     if (massTransferModels_.found(keyik))
     {
@@ -110,10 +105,7 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::calculateL
 
         word speciesName = interfacePtr->transferSpecie();
 
-        auto tempOpen = speciesName.find('.');
-
-        //const word species(speciesName(0, tempOpen));
-        const word species(speciesName.substr(0, tempOpen));
+        const word species(speciesName.substr(0, speciesName.find('.')));
 
         L -= neg(dmdtNetki)*interfacePtr->L(species, T);
     }
@@ -125,9 +117,7 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::calculateL
 
         word speciesName = interfacePtr->transferSpecie();
 
-        auto tempOpen = speciesName.find('.');
-
-        const word species(speciesName.substr(0, tempOpen));
+        const word species(speciesName.substr(0, speciesName.find('.')));
 
         L += pos(dmdtNetki)*interfacePtr->L(species, T);
     }
@@ -145,22 +135,18 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::dmdt
     const phasePairKey& key
 ) const
 {
-    tmp<volScalarField> tdmdt
+    auto tdmdt = tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "dmdt",
-                this->mesh().time().timeName(),
-                this->mesh()
-            ),
-            this->mesh(),
-            dimensionedScalar(dimDensity/dimTime, Zero)
-        )
+            "dmdt",
+            this->mesh().time().timeName(),
+            this->mesh()
+        ),
+        this->mesh(),
+        dimensionedScalar(dimDensity/dimTime, Zero)
     );
-
-    volScalarField& dmdt = tdmdt.ref();
+    auto& dmdt = tdmdt.ref();
 
     if (dmdt_.found(key))
     {
@@ -178,12 +164,8 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::heatTransfer
     const volScalarField& T
 )
 {
-    tmp<fvScalarMatrix> tEqnPtr
-    (
-        new fvScalarMatrix(T, dimEnergy/dimTime)
-    );
-
-    fvScalarMatrix& eqn = tEqnPtr.ref();
+    auto teqn = tmp<fvScalarMatrix>::New(T, dimEnergy/dimTime);
+    auto& eqn = teqn.ref();
 
     forAllConstIters(this->phaseModels_, iteri)
     {
@@ -204,53 +186,44 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::heatTransfer
                 const phasePairKey keyki(phasek.name(), phasei.name(), true);
 
                 // Net mass transfer from k to i phase
-                tmp<volScalarField> tdmdtNetki
+                auto tdmdtNetki = tmp<volScalarField>::New
                 (
-                    new volScalarField
+                    IOobject
                     (
-                        IOobject
-                        (
-                            "tdmdtYki",
-                            this->mesh().time().timeName(),
-                            this->mesh()
-                        ),
-                        this->mesh(),
-                        dimensionedScalar(dimDensity/dimTime, Zero)
-                    )
+                        "tdmdtYki",
+                        this->mesh().time().timeName(),
+                        this->mesh()
+                    ),
+                    this->mesh(),
+                    dimensionedScalar(dimDensity/dimTime, Zero)
                 );
-                volScalarField& dmdtNetki = tdmdtNetki.ref();
+                auto& dmdtNetki = tdmdtNetki.ref();
 
-                tmp<volScalarField> tSp
+                auto tSp = tmp<volScalarField>::New
                 (
-                    new volScalarField
+                    IOobject
                     (
-                        IOobject
-                        (
-                            "Sp",
-                            this->mesh().time().timeName(),
-                            this->mesh()
-                        ),
-                        this->mesh(),
-                        dimensionedScalar(dimDensity/dimTime/dimTemperature, Zero)
-                    )
+                        "Sp",
+                        this->mesh().time().timeName(),
+                        this->mesh()
+                    ),
+                    this->mesh(),
+                    dimensionedScalar(dimDensity/dimTime/dimTemperature, Zero)
                 );
-                volScalarField& Sp = tSp.ref();
+                auto& Sp = tSp.ref();
 
-                tmp<volScalarField> tSu
+                auto tSu = tmp<volScalarField>::New
                 (
-                    new volScalarField
+                    IOobject
                     (
-                        IOobject
-                        (
-                            "Su",
-                            this->mesh().time().timeName(),
-                            this->mesh()
-                        ),
-                        this->mesh(),
-                        dimensionedScalar(dimDensity/dimTime, Zero)
-                    )
+                        "Su",
+                        this->mesh().time().timeName(),
+                        this->mesh()
+                    ),
+                    this->mesh(),
+                    dimensionedScalar(dimDensity/dimTime, Zero)
                 );
-                volScalarField& Su = tSu.ref();
+                auto& Su = tSu.ref();
 
 
                 if (massTransferModels_.found(keyik))
@@ -322,7 +295,7 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::heatTransfer
             }
         }
     }
-    return tEqnPtr;
+    return teqn;
 }
 
 
@@ -333,44 +306,34 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::volTransfer
     const volScalarField& p
 )
 {
-    tmp<fvScalarMatrix> tEqnPtr
-    (
-        new fvScalarMatrix(p, dimVolume/dimTime)
-    );
+    auto teqn = tmp<fvScalarMatrix>::New(p, dimVolume/dimTime);
+    auto& eqn = teqn.ref();
 
-    fvScalarMatrix& eqn = tEqnPtr.ref();
-
-    tmp<volScalarField> tSp
+    auto tSp = tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "Sp",
-                this->mesh().time().timeName(),
-                this->mesh()
-            ),
-            this->mesh(),
-            dimensionedScalar(dimless/dimTime/dimPressure, Zero)
-        )
+            "Sp",
+            this->mesh().time().timeName(),
+            this->mesh()
+        ),
+        this->mesh(),
+        dimensionedScalar(dimless/dimTime/dimPressure, Zero)
     );
-    volScalarField& Sp = tSp.ref();
+    auto& Sp = tSp.ref();
 
-    tmp<volScalarField> tSu
+    auto tSu = tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "Su",
-                this->mesh().time().timeName(),
-                this->mesh()
-            ),
-            this->mesh(),
-            dimensionedScalar(dimless/dimTime, Zero)
-        )
+            "Su",
+            this->mesh().time().timeName(),
+            this->mesh()
+        ),
+        this->mesh(),
+        dimensionedScalar(dimless/dimTime, Zero)
     );
-    volScalarField& Su = tSu.ref();
+    auto& Su = tSu.ref();
 
     forAllConstIters(this->totalPhasePairs(), iter)
     {
@@ -482,7 +445,7 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::volTransfer
     }
 
     eqn += fvm::Sp(Sp, p) + Su;
-    return tEqnPtr;
+    return teqn;
 }
 
 
@@ -544,7 +507,7 @@ void Foam::MassTransferPhaseSystem<BasePhaseSystem>::alphaTransfer
     SuSpTable& Sp
 )
 {
-    // This term adds and substract alpha*div(U) as a source term
+    // This term adds/subtracts alpha*div(U) as a source term
     // for alpha, substituting div(U) = mDot(1/rho1 - 1/rho2)
     bool includeDivU(true);
 

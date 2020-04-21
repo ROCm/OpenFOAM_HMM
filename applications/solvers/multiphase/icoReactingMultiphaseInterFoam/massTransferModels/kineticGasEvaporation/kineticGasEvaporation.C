@@ -63,13 +63,10 @@ void Foam::meltingEvaporationModels::kineticGasEvaporation<Thermo, OtherThermo>
         }
     }
 
-    const polyBoundaryMesh& pbm = mesh.boundaryMesh();
-
-    forAll(pbm, patchi)
+    for (const polyPatch& pp : mesh.boundaryMesh())
     {
-        if (isA<wallPolyPatch>(pbm[patchi]))
+        if (isA<wallPolyPatch>(pp))
         {
-            const polyPatch& pp = pbm[patchi];
             forAll(pp.faceCells(), faceI)
             {
                 const label pCelli = pp.faceCells()[faceI];

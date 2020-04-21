@@ -115,7 +115,6 @@ SourceFiles
 #ifndef meltingEvaporationModels_kineticGasEvaporation_H
 #define meltingEvaporationModels_kineticGasEvaporation_H
 
-
 #include "InterfaceCompositionModel.H"
 
 // * * * * * * * * * * * * * * * * *  * * * * * * * * * * * * * * * * * * * *//
@@ -123,13 +122,14 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class phasePair;
 
 namespace meltingEvaporationModels
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class kineticGasEvaporation
+                    Class kineticGasEvaporation Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Thermo, class OtherThermo>
@@ -137,7 +137,7 @@ class kineticGasEvaporation
 :
     public InterfaceCompositionModel<Thermo, OtherThermo>
 {
-    // Private data
+    // Private Data
 
         //- Evaporation coefficient
         dimensionedScalar C_;
@@ -161,7 +161,7 @@ class kineticGasEvaporation
         scalar isoAlpha_;
 
 
-    // Private member
+    // Private Member Functions
 
         //- Update interface
         void updateInterface(const volScalarField& T);
@@ -212,8 +212,8 @@ public:
         //- Return Tactivate
         virtual const dimensionedScalar& Tactivate() const;
 
-        //- Adds and substract alpha*div(U) as a source term
-        //  for alpha, substituting div(U) = mDot(1/rho1 - 1/rho2)
+        //- Add/subtract alpha*div(U) as a source term
+        //- for alpha, substituting div(U) = mDot(1/rho1 - 1/rho2)
         virtual bool includeDivU();
 };
 

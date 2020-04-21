@@ -227,16 +227,8 @@ TSource() const
 {
     const volScalarField& T = mesh_.lookupObject<volScalarField>("T");
 
-    tmp<fvScalarMatrix> tTSource
-    (
-        new fvScalarMatrix
-        (
-            T,
-            dimEnergy/dimTime
-        )
-    );
-
-    fvScalarMatrix& TSource = tTSource.ref();
+    auto tTSource = tmp<fvScalarMatrix>::New(T, dimEnergy/dimTime);
+    auto& TSource = tTSource.ref();
 
     const twoPhaseMixtureEThermo& thermo =
         refCast<const twoPhaseMixtureEThermo>
