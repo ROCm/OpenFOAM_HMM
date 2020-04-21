@@ -23,6 +23,7 @@
 #     findSystemInclude
 #     findLibrary
 #     findExtLib
+#     versionCompare
 #
 # Internal variables used
 #     extLibraries
@@ -317,6 +318,74 @@ then
         fi
 
         return 2
+    }
+
+
+    # Compare version tuples with syntax similar to POSIX shell,
+    # but respecting dot separators.
+    #
+    # arg1 OP arg2
+    #   OP is one of -eq, -ne, -lt, -le, -gt, or -ge.
+    #   Returns true for a successful comparison.
+    #   Arg1 and arg2 normally comprise positive integers, but leading content
+    #   before a '-' is stripped.
+    #   Missing digits are treated as '0'.
+    #
+    # Eg,
+    #    versionCompare "software-1.2.3" -gt 1.1 && echo True
+    #
+    # Ad hoc handling of "git" version as always newest.
+    #    "git" -gt "1.2.3" : True
+    #    "1.2.3" -lt "git" : True
+    versionCompare()
+    {
+        [ "$#" -eq 3 ] || {
+            echo "Compare needs 3 arguments (was given $#)" 1>&2
+            return 2
+        }
+
+        local arg1="${1#*-}"    # Strip leading prefix-
+        local op="${2}"
+        local arg2="${3#*-}"    # Strip leading prefix-
+        local result=''         # Empty represents 'equal'
+
+        arg1="${arg1:-0}."
+        arg2="${arg2:-0}."
+
+        if   [ "$arg1" = "$arg2" ];        then unset arg1 arg2 # Identical
+        elif [ "${arg1#git}" != "$arg1" ]; then result='more'   # (git > arg2)
+        elif [ "${arg2#git}" != "$arg2" ]; then result='less'   # (arg1 < git)
+        fi
+
+        while [ -z "$result" ] && [ -n "${arg1}${arg2}" ]
+        do
+            local digits1="${arg1%%.*}"
+            local digits2="${arg2%%.*}"
+
+            arg1="${arg1#*.}"
+            arg2="${arg2#*.}"
+
+            : "${digits1:=0}"
+            : "${digits2:=0}"
+
+            # Other handling of non-integer values?
+            if   [ "$digits1" -lt "$digits2" ]; then result='less'
+            elif [ "$digits1" -gt "$digits2" ]; then result='more'
+            fi
+        done
+
+        case "$op" in
+        (-eq | eq)  [ -z "$result" ] ;;
+        (-ne | ne)  [ -n "$result" ] ;;
+        (-lt | lt)  [ 'less' = "$result" ] ;;
+        (-gt | gt)  [ 'more' = "$result" ] ;;
+        (-le | le)  [ 'less' = "${result:-less}" ] ;;
+        (-ge | ge)  [ 'more' = "${result:-more}" ] ;;
+        (*)
+            echo "Unknown operator: '$op'" 1>&2
+            return 2
+            ;;
+        esac
     }
 fi
 

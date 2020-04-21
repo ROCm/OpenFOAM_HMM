@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,14 +28,50 @@ License
 
 #include "PolyhedronReader.H"
 
+// * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
+
+template<class HDS>
+void Foam::PolyhedronReader::Build_triangle<HDS>::operator()(HDS& hds)
+{
+    // Postcondition: hds is a valid polyhedral surface.
+    CGAL::Polyhedron_incremental_builder_3<HDS> B(hds, true);
+
+    B.begin_surface(s_.nPoints(), s_.size());
+
+    typedef typename HDS::Vertex Vertex;
+    typedef typename Vertex::Point Point;
+
+    for (const auto& pt : s_.points())
+    {
+        B.add_vertex(Point(pt.x(), pt.y(), pt.z()));
+    }
+
+    for (const auto& f : s_)
+    {
+        B.begin_facet();
+
+        for (const label verti : f)
+        {
+            B.add_vertex_to_facet(verti);
+        }
+
+        B.end_facet();
+    }
+
+    B.end_surface();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::PolyhedronReader::PolyhedronReader(const triSurface& s, Polyhedron& p)
 {
     Build_triangle<HalfedgeDS> triangle(s);
     p.delegate(triangle);
+
     // Populate index and region
     Foam::label nTris = 0;
+
     for
     (
         Facet_iterator fi = p.facets_begin();
@@ -42,8 +79,10 @@ Foam::PolyhedronReader::PolyhedronReader(const triSurface& s, Polyhedron& p)
         ++fi
     )
     {
-        fi->index = nTris++;
-        fi->region = s[fi->index].region();
+        fi->index = nTris;
+        fi->region = s[nTris].region();
+
+        ++nTris;
     }
 }
 

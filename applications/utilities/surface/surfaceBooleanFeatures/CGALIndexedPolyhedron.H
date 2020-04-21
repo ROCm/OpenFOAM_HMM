@@ -65,6 +65,7 @@ struct IndexedFace
     Foam::label index;
     Foam::label region;
 };
+
 struct My_items
 :
     public CGAL::Polyhedron_items_3

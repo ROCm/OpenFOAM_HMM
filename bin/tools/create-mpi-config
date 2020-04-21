@@ -1,0 +1,272 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | www.openfoam.com
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+#     Copyright (C) 2020 OpenCFD Ltd.
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
+#
+# Script
+#     bin/tools/create-mpi-config
+#
+# Description
+#     Define hard-coded packaging settings for MPI flavours,
+#     primarily for system openmpi.
+#     This eliminates a runtime dependency on mpicc, for example.
+#
+#     Instead of querying/parsing 'mpicc --showme:link' each time,
+#     it is done once during packaging.
+#
+# Environment
+#     FOAM_MPI, MPI_ARCH_PATH, DEB_TARGET_MULTIARCH
+#
+# Possible Dependencies
+#     - dpkg-architecture
+#     - mpicc
+#
+# Notes
+#     Run from top-level directory when creating config files
+#
+#------------------------------------------------------------------------------
+printHelp() {
+    exec 1>&2
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
+
+usage: ${0##*/} options
+
+options:
+  -dry-run          Report but do not write config files
+  -no-mpicc         Bypass any use of mpicc
+  -query-openmpi    Report installation directory for system openmpi
+  -write-openmpi    Query system openmpi and write config files
+  -write            Write config files using FOAM_MPI, MPI_ARCH_PATH
+
+Define hard-coded packaging settings for MPI flavours.
+
+Equivalent options:
+  -write-system-openmpi | -write-openmpi
+  -query-system-openmpi | -query-openmpi
+
+USAGE
+    exit 0  # A clean exit
+}
+
+
+# Report error and exit
+die()
+{
+    exec 1>&2
+    echo
+    echo "Error encountered:"
+    while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
+    echo
+    echo "See '${0##*/} -help' for usage"
+    echo
+    exit 1
+}
+
+
+#------------------------------------------------------------------------------
+# Options
+unset optDryRun
+useMpicc=true
+
+# Get installation directory for system openmpi
+# - from "mpicc --showme:link"
+# - manual fallback
+#
+# The mpicc content looks like this:
+# ----
+# -pthread -L/usr/lib64/mpi/gcc/openmpi/lib64 -lmpi
+# ----
+
+query_system_openmpi()
+{
+    unset arch_path
+
+    if [ "$useMpicc" = true ]
+    then
+        arch_path=$(mpicc --showme:link 2>/dev/null | sed -e 's#^.*-L\([^ ]*\).*#\1#')
+        arch_path="${arch_path%/*}"
+
+        if [ -n "$arch_path" ]
+        then
+            echo "$arch_path"
+            return 0  # Clean exit
+        fi
+
+        echo "No mpicc found. Attempt manually" 1>&2
+    fi
+
+
+    # Manual discovery
+    if [ -z "$DEB_TARGET_MULTIARCH" ]
+    then
+        DEB_TARGET_MULTIARCH=$(dpkg-architecture -qDEB_TARGET_MULTIARCH 2>/dev/null || true)
+    fi
+
+    # Include is under /usr/lib...  (eg, debian, openSUSE)
+    for testdir in \
+        /usr/lib/"${DEB_TARGET_MULTIARCH:+${DEB_TARGET_MULTIARCH}/}"openmpi/include \
+        /usr/lib64/mpi/gcc/openmpi/include \
+    ;
+    do
+        if [ -e "$testdir/mpi.h" ]
+        then
+            echo "${testdir%/*}"
+            return 0  # Clean exit
+        fi
+    done
+
+    # Include is under /usr/include (eg, RedHat)
+    for testdir in \
+        /usr/include/openmpi-"$(uname -m)" \
+        /usr/include/openmpi \
+    ;
+    do
+        if [ -e "$testdir/mpi.h" ]
+        then
+            echo "/usr"
+            return 0  # Clean exit
+        fi
+    done
+
+    # Failed (should not happen)
+    # - report '/usr', but with error code 2
+    echo "/usr"
+    return 2
+}
+
+
+# Generate etc/config.{csh,sh}/MPI-TYPE files
+# based on the values for FOAM_MPI and MPI_ARCH_PATH
+
+create_files()
+{
+    [ -n "$FOAM_MPI" ] || die "FOAM_MPI not set"
+
+    if [ -d "$MPI_ARCH_PATH" ]
+    then
+        echo "Define $FOAM_MPI with $MPI_ARCH_PATH" 1>&2
+
+        case "$FOAM_MPI" in
+        (openmpi-system)
+            configDir="etc/config.sh"
+            if [ "$optDryRun" = true ]
+            then
+                cat << CONTENT 1>&2
+dry-run: $configDir/$FOAM_MPI
+#
+# Packaging configured value for $FOAM_MPI
+export MPI_ARCH_PATH="$MPI_ARCH_PATH"
+
+CONTENT
+            elif [ -d "$configDir" ]
+            then
+                echo "Write $configDir/$FOAM_MPI" 1>&2
+                cat << CONTENT > "$configDir/$FOAM_MPI"
+# $configDir/$FOAM_MPI
+#
+# Packaging configured value for $FOAM_MPI
+
+export MPI_ARCH_PATH="$MPI_ARCH_PATH"
+#----
+CONTENT
+            else
+                echo "Cannot write $configDir/$FOAM_MPI - no directory" 1>&2
+            fi
+
+            configDir="etc/config.csh"
+            if [ "$optDryRun" = true ]
+            then
+                cat << CONTENT 1>&2
+dry-run: $configDir/$FOAM_MPI
+#
+# Packaging configured value for $FOAM_MPI
+setenv MPI_ARCH_PATH "$MPI_ARCH_PATH"
+
+CONTENT
+            elif [ -d "$configDir" ]
+            then
+                echo "Write $configDir/$FOAM_MPI" 1>&2
+                cat << CONTENT > "$configDir/$FOAM_MPI"
+# $configDir/$FOAM_MPI
+#
+# Packaging configured value for $FOAM_MPI
+
+setenv MPI_ARCH_PATH "$MPI_ARCH_PATH"
+#----
+CONTENT
+            else
+                echo "Cannot write $configDir/$FOAM_MPI - no directory" 1>&2
+            fi
+            ;;
+        esac
+    else
+        echo "Warning: $FOAM_MPI with bad MPI_ARCH_PATH: $MPI_ARCH_PATH" 1>&2
+        # TBD - remove old/bad entries?
+        #
+        # for file in "etc/config.sh/$FOAM_MPI" "etc/config.csh/$FOAM_MPI"
+        # do
+        #     [ -f "$file" ] && rm -f "$file"
+        # done
+    fi
+}
+
+
+#------------------------------------------------------------------------------
+
+# Parse options
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help* | --help*)
+        printHelp
+        ;;
+    '')
+        # Discard empty arguments
+        ;;
+
+    -dry-run)
+        optDryRun=true
+        ;;
+
+    -no-mpicc)
+        unset useMpicc
+        ;;
+
+    -query-openmpi | -query-system-openmpi)
+        query_system_openmpi
+        exit $?
+        ;;
+
+    -write-openmpi | -write-system-openmpi)
+        if MPI_ARCH_PATH=$(query_system_openmpi)
+        then
+            FOAM_MPI="openmpi-system"
+            create_files
+        else
+            die "Failed query for system openmpi"
+        fi
+        ;;
+
+    -write)
+        create_files
+        ;;
+
+    *)
+        echo "Ignore unknown option/argument: '$1'" 1>&2
+        ;;
+    esac
+    shift
+done
+
+exit 0 # A clean exit, if we get this far
+
+# -----------------------------------------------------------------------------

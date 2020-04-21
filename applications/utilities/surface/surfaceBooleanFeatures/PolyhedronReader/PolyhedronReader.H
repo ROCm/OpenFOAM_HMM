@@ -61,19 +61,13 @@ class PolyhedronReader
 
         public:
 
-            Build_triangle(const triSurface& s);
+            Build_triangle(const triSurface& s)
+            :
+                s_(s)
+            {}
 
             void operator()(HDS& hds);
         };
-
-
-    // Private Member Functions
-
-        //- No copy construct
-        PolyhedronReader(const PolyhedronReader&) = delete;
-
-        //- No copy assignment
-        void operator=(const PolyhedronReader&) = delete;
 
 
 public:
@@ -82,19 +76,12 @@ public:
 
         //- Populate polyhedron from surface
         PolyhedronReader(const triSurface& s, Polyhedron& p);
-
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "PolyhedronReaderTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

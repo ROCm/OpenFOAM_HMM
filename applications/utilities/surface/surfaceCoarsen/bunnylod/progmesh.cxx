@@ -1,4 +1,6 @@
 /*
+ * -*- C++ -*-
+ *
  *  Progressive Mesh type Polygon Reduction Algorithm
  *  by Stan Melax (c) 1998
  *  Permission to use any of this code wherever you want is granted..
@@ -7,15 +9,14 @@
  *  See the header file progmesh.h for a description of this module
  */
 
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
-#include <assert.h>
-//#include <windows.h>
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cassert>
 
-#include "vector.h"
-#include "list.h"
-#include "progmesh.h"
+#include "vector.hxx"
+#include "list.hxx"
+#include "progmesh.hxx"
 
 #define min(x,y) (((x) <= (y)) ? (x) : (y))
 #define max(x,y) (((x) >= (y)) ? (x) : (y))

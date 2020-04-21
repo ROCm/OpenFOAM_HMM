@@ -35,7 +35,7 @@
 #         etc/openfoam -DWM_COMPILER=Clang
 #
 #------------------------------------------------------------------------------
-# Auto-detect from location
+# Auto-detect from location. Do not call from within the etc/directory itself!
 projectDir="$(\cd "$(dirname "${0%/*}")" && \pwd -L)"
 
 #------------------------------------------------------------------------------
@@ -56,6 +56,7 @@ options:
   -show-api | -version  Print META-INFO api value and exit
   -show-patch           Print META-INFO patch value and exit
   -show-prefix          Print project directory and exit
+  -test-tutorial        Forward arguments to tutorials/AutoTest
   -verbose              Set FOAM_VERBOSE=true (interactive only)
   -help                 Print the usage
 
@@ -93,6 +94,7 @@ getApiInfo()
 # No inheritance of FOAM_SETTINGS
 unset FOAM_SETTINGS
 unset _foamEtcDir _foamSettings _foamScriptCommand
+unset optTestTut
 
 # Parse options
 while [ "$#" -gt 0 ]
@@ -112,6 +114,10 @@ do
     -show-prefix)  # Show project directory and exit
         echo "$projectDir"
         exit $?
+        ;;
+
+    -test-tutorial)  # Run tutorials/AutoTest
+        optTestTut=true
         ;;
 
     -c)  # Shell command
@@ -196,7 +202,7 @@ fi
 
 unset interactive
 
-if [ "$#" -eq 0 ] && [ -z "$_foamScriptCommand" ]
+if [ "$#" -eq 0 ] && [ -z "$_foamScriptCommand" ] && [ -z "$optTestTut" ]
 then
     # Interactive shell, chain off via a file
     interactive=true
@@ -259,6 +265,15 @@ then
 
     sourceBashrc
     exec bash -c "$_foamScriptCommand" "$@"
+    exit $? # Safety
+fi
+
+
+if [ -n "$optTestTut" ]
+then
+
+    sourceBashrc
+    exec "$WM_PROJECT_DIR/tutorials/AutoTest" "$@"
     exit $? # Safety
 fi
 
