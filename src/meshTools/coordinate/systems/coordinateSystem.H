@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -429,7 +429,7 @@ public:
         //- Considered valid if it has a specification
         virtual bool valid() const
         {
-            return spec_.valid();
+            return spec_;
         }
 
         //- True if the rotation tensor is uniform for all locations

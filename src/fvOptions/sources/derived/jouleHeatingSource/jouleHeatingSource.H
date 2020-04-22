@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -155,7 +155,7 @@ class jouleHeatingSource
 :
     public option
 {
-    // Private data
+    // Private Data
 
         //- Name of electrical conductivity field
         static const word sigmaName;
@@ -189,9 +189,6 @@ class jouleHeatingSource
 
         //- No copy assignment
         void operator=(const jouleHeatingSource&) = delete;
-
-        //- The coordinate system for anisotropic electrical conductivity
-        const coordinateSystem& csys() const;
 
         //- Transform the anisotropic electrical conductivity into global system
         tmp<volSymmTensorField> transformSigma
@@ -232,7 +229,7 @@ public:
 
 
     //- Destructor
-    virtual ~jouleHeatingSource();
+    virtual ~jouleHeatingSource() = default;
 
 
     // Member Functions

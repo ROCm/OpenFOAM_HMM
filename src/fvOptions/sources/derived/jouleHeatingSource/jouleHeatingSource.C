@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,19 +55,6 @@ const Foam::word Foam::fv::jouleHeatingSource::sigmaName(typeName + ":sigma");
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-const Foam::coordinateSystem& Foam::fv::jouleHeatingSource::csys() const
-{
-    if (!csysPtr_ || !csysPtr_.valid())
-    {
-        FatalErrorInFunction
-            << "Coordinate system invalid"
-            << abort(FatalError);
-    }
-
-    return *csysPtr_;
-}
-
-
 Foam::tmp<Foam::volSymmTensorField>
 Foam::fv::jouleHeatingSource::transformSigma
 (
@@ -91,15 +78,25 @@ Foam::fv::jouleHeatingSource::transformSigma
     );
     auto& sigma = tsigma.ref();
 
-    if (csys().uniform())
+    // This check should be unnecessary
+    if (!csysPtr_)
+    {
+        FatalErrorInFunction
+            << "Coordinate system undefined"
+            << abort(FatalError);
+    }
+
+    const auto& csys = *csysPtr_;
+
+    if (csys.uniform())
     {
         sigma.primitiveFieldRef() =
-            csys().transformPrincipal(sigmaLocal);
+            csys.transformPrincipal(sigmaLocal);
     }
     else
     {
         sigma.primitiveFieldRef() =
-            csys().transformPrincipal(mesh_.cellCentres(), sigmaLocal);
+            csys.transformPrincipal(mesh_.cellCentres(), sigmaLocal);
     }
 
     sigma.correctBoundaryConditions();
@@ -150,12 +147,6 @@ Foam::fv::jouleHeatingSource::jouleHeatingSource
 
     read(dict);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fv::jouleHeatingSource::~jouleHeatingSource()
-{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -247,6 +238,8 @@ bool Foam::fv::jouleHeatingSource::read(const dictionary& dict)
             Info<< "    Using scalar electrical conductivity" << endl;
 
             initialiseSigma(coeffs_, scalarSigmaVsTPtr_);
+
+            csysPtr_.clear();  // Do not need coordinate system
         }
 
         return true;
