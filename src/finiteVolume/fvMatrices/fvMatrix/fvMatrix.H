@@ -231,10 +231,10 @@ public:
 
         // Constructors
 
-            fvSolver(fvMatrix<Type>& fvMat, autoPtr<lduMatrix::solver> sol)
+            fvSolver(fvMatrix<Type>& fvMat, autoPtr<lduMatrix::solver>&& sol)
             :
                 fvMat_(fvMat),
-                solver_(sol)
+                solver_(std::move(sol))
             {}
 
 

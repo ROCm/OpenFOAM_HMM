@@ -41,8 +41,6 @@ License
 
 namespace Foam
 {
-    autoPtr<fileOperation> fileOperation::fileHandlerPtr_;
-
     defineTypeNameAndDebug(fileOperation, 0);
     defineRunTimeSelectionTable(fileOperation, word);
 
@@ -58,6 +56,8 @@ namespace Foam
     );
 }
 
+
+Foam::autoPtr<Foam::fileOperation> Foam::fileOperation::fileHandlerPtr_;
 
 Foam::word Foam::fileOperation::processorsBaseDir = "processors";
 
@@ -83,7 +83,7 @@ Foam::fileOperation::pathTypeNames_
 
 Foam::fileMonitor& Foam::fileOperation::monitor() const
 {
-    if (!monitorPtr_.valid())
+    if (!monitorPtr_)
     {
         monitorPtr_.reset
         (
@@ -1169,7 +1169,7 @@ Foam::label Foam::fileOperation::detectProcessorPath(const fileName& fName)
 
 const Foam::fileOperation& Foam::fileHandler()
 {
-    if (!fileOperation::fileHandlerPtr_.valid())
+    if (!fileOperation::fileHandlerPtr_)
     {
         word handler(getEnv("FOAM_FILEHANDLER"));
 
@@ -1185,23 +1185,19 @@ const Foam::fileOperation& Foam::fileHandler()
 }
 
 
-void Foam::fileHandler(autoPtr<fileOperation>& newHandler)
+void Foam::fileHandler(autoPtr<fileOperation>&& newHandler)
 {
     if
     (
-        newHandler.valid() && fileOperation::fileHandlerPtr_.valid()
+        newHandler
+     && fileOperation::fileHandlerPtr_
      && newHandler->type() == fileOperation::fileHandlerPtr_->type()
     )
     {
         return;
     }
 
-    fileOperation::fileHandlerPtr_.clear();
-
-    if (newHandler.valid())
-    {
-        fileOperation::fileHandlerPtr_ = std::move(newHandler);
-    }
+    fileOperation::fileHandlerPtr_ = std::move(newHandler);
 }
 
 

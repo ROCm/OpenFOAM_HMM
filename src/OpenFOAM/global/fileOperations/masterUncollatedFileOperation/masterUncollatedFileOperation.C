@@ -638,9 +638,9 @@ Foam::fileOperations::masterUncollatedFileOperation::read
                 isPtr.reset(new IFstream(filePaths[0]));
 
                 // Read header
-                if (!io.readHeader(isPtr()))
+                if (!io.readHeader(*isPtr))
                 {
-                    FatalIOErrorInFunction(isPtr())
+                    FatalIOErrorInFunction(*isPtr)
                         << "problem while reading header for object "
                         << io.name() << exit(FatalIOError);
                 }
@@ -684,7 +684,7 @@ Foam::fileOperations::masterUncollatedFileOperation::read
     {
         // This processor needs to return something
 
-        if (!isPtr.valid())
+        if (!isPtr)
         {
             UIPstream is(Pstream::masterNo(), pBufs);
 
@@ -709,9 +709,9 @@ Foam::fileOperations::masterUncollatedFileOperation::read
             // With the proper file name
             isPtr->name() = filePaths[Pstream::myProcNo(comm)];
 
-            if (!io.readHeader(isPtr()))
+            if (!io.readHeader(*isPtr))
             {
-                FatalIOErrorInFunction(isPtr())
+                FatalIOErrorInFunction(*isPtr)
                     << "problem while reading header for object "
                     << io.name() << exit(FatalIOError);
             }
@@ -1918,10 +1918,10 @@ Foam::fileOperations::masterUncollatedFileOperation::readStream
 
             isPtr.reset(new IFstream(fName));
 
-            if (isPtr().good())
+            if (isPtr->good())
             {
                 // Read header data (on copy)
-                headerIO.readHeader(isPtr());
+                headerIO.readHeader(*isPtr);
 
                 if (headerIO.headerClassName() == decomposedBlockData::typeName)
                 {
@@ -1986,7 +1986,7 @@ Foam::fileOperations::masterUncollatedFileOperation::readStream
 
             if (proci == -1)
             {
-                FatalIOErrorInFunction(isPtr())
+                FatalIOErrorInFunction(*isPtr)
                     << "Could not detect processor number"
                     << " from objectPath:" << io.objectPath()
                     << exit(FatalIOError);
@@ -2005,10 +2005,10 @@ Foam::fileOperations::masterUncollatedFileOperation::readStream
                 Pout<< "masterUncollatedFileOperation::readStream :"
                     << " For object : " << io.name()
                     << " starting input from block " << proci
-                    << " of " << isPtr().name() << endl;
+                    << " of " << isPtr->name() << endl;
             }
 
-            return decomposedBlockData::readBlock(proci, isPtr(), io);
+            return decomposedBlockData::readBlock(proci, *isPtr, io);
         }
         else
         {
@@ -2023,17 +2023,17 @@ Foam::fileOperations::masterUncollatedFileOperation::readStream
             if (groupStart != -1 && groupSize > 0)
             {
                 readComm = comm_;
-                if (UPstream::master(comm_) && !isPtr.valid() && !fName.empty())
+                if (UPstream::master(comm_) && !isPtr && !fName.empty())
                 {
                     // In multi-master mode also open the file on the other
                     // masters
                     isPtr.reset(new IFstream(fName));
 
-                    if (isPtr().good())
+                    if (isPtr->good())
                     {
                         // Read header data (on copy)
                         IOobject headerIO(io);
-                        headerIO.readHeader(isPtr());
+                        headerIO.readHeader(*isPtr);
                     }
                 }
             }

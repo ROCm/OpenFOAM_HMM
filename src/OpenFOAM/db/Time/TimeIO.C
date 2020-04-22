@@ -166,8 +166,7 @@ void Foam::Time::readDict()
         controlDict_.watchIndices().clear();
 
         // Installing the new handler
-        auto handler = fileOperation::New(fileHandlerName, true);
-        Foam::fileHandler(handler);
+        Foam::fileHandler(fileOperation::New(fileHandlerName, true));
 
         // Reinstall old watches
         fileHandler().addWatches(controlDict_, oldWatched);

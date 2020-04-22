@@ -1070,16 +1070,17 @@ void Foam::argList::parse
     // 5. '-fileHandler' commmand-line option
 
     {
-        word handlerType =
-            options_.lookup("fileHandler", Foam::getEnv("FOAM_FILEHANDLER"));
+        word handlerType
+        (
+            options_.lookup("fileHandler", Foam::getEnv("FOAM_FILEHANDLER"))
+        );
 
         if (handlerType.empty())
         {
             handlerType = fileOperation::defaultFileHandler;
         }
 
-        auto handler = fileOperation::New(handlerType, bannerEnabled());
-        Foam::fileHandler(handler);
+        Foam::fileHandler(fileOperation::New(handlerType, bannerEnabled()));
     }
 
 
@@ -1549,8 +1550,7 @@ Foam::argList::~argList()
     jobInfo.end();
 
     // Delete file handler to flush any remaining IO
-    autoPtr<fileOperation> dummy(nullptr);
-    fileHandler(dummy);
+    Foam::fileHandler(nullptr);
 }
 
 

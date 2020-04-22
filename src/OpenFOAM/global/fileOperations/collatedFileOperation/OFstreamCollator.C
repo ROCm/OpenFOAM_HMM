@@ -138,9 +138,9 @@ bool Foam::OFstreamCollator::writeFile
         false       // do not reduce return state
     );
 
-    if (osPtr.valid() && !osPtr().good())
+    if (osPtr && !osPtr->good())
     {
-        FatalIOErrorInFunction(osPtr())
+        FatalIOErrorInFunction(*osPtr)
             << "Failed writing to " << fName << exit(FatalIOError);
     }
 
@@ -334,13 +334,13 @@ Foam::OFstreamCollator::OFstreamCollator
 
 Foam::OFstreamCollator::~OFstreamCollator()
 {
-    if (thread_.valid())
+    if (thread_)
     {
         if (debug)
         {
             Pout<< "~OFstreamCollator : Waiting for write thread" << endl;
         }
-        thread_().join();
+        thread_->join();
         thread_.clear();
     }
 
@@ -505,14 +505,14 @@ bool Foam::OFstreamCollator::write
             // Start thread if not running
             if (!threadRunning_)
             {
-                if (thread_.valid())
+                if (thread_)
                 {
                     if (debug)
                     {
                         Pout<< "OFstreamCollator : Waiting for write thread"
                             << endl;
                     }
-                    thread_().join();
+                    thread_->join();
                 }
 
                 if (debug)
@@ -573,14 +573,14 @@ bool Foam::OFstreamCollator::write
 
             if (!threadRunning_)
             {
-                if (thread_.valid())
+                if (thread_)
                 {
                     if (debug)
                     {
                         Pout<< "OFstreamCollator : Waiting for write thread"
                             << endl;
                     }
-                    thread_().join();
+                    thread_->join();
                 }
 
                 if (debug)

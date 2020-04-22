@@ -58,6 +58,7 @@ Description
 namespace Foam
 {
 
+// Forward Declarations
 class IOobject;
 class regIOobject;
 class objectRegistry;
@@ -564,8 +565,8 @@ public:
 //- Get current file handler
 const fileOperation& fileHandler();
 
-//- Reset file handler
-void fileHandler(autoPtr<fileOperation>& newHandler);
+//- Replace, reset file handler
+void fileHandler(autoPtr<fileOperation>&& newHandler);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

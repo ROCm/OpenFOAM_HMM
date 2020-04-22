@@ -502,17 +502,17 @@ bool Foam::fileOperations::uncollatedFileOperation::readHeader
 
     autoPtr<ISstream> isPtr(NewIFstream(fName));
 
-    if (!isPtr.valid() || !isPtr->good())
+    if (!isPtr || !isPtr->good())
     {
         return false;
     }
 
-    bool ok = io.readHeader(isPtr());
+    bool ok = io.readHeader(*isPtr);
 
     if (io.headerClassName() == decomposedBlockData::typeName)
     {
         // Read the header inside the container (master data)
-        ok = decomposedBlockData::readMasterHeader(io, isPtr());
+        ok = decomposedBlockData::readMasterHeader(io, *isPtr);
     }
 
     if (debug)
@@ -536,12 +536,9 @@ Foam::fileOperations::uncollatedFileOperation::readStream
     const bool valid
 ) const
 {
-    autoPtr<ISstream> isPtr;
-
     if (!valid)
     {
-        isPtr = autoPtr<ISstream>(new dummyISstream());
-        return isPtr;
+        return autoPtr<ISstream>(new dummyISstream());
     }
 
     if (fName.empty())
@@ -551,9 +548,9 @@ Foam::fileOperations::uncollatedFileOperation::readStream
             << exit(FatalError);
     }
 
-    isPtr = NewIFstream(fName);
+    autoPtr<ISstream> isPtr = NewIFstream(fName);
 
-    if (!isPtr.valid() || !isPtr->good())
+    if (!isPtr || !isPtr->good())
     {
         FatalIOError
         (
@@ -565,9 +562,9 @@ Foam::fileOperations::uncollatedFileOperation::readStream
         )   << "cannot open file"
             << exit(FatalIOError);
     }
-    else if (!io.readHeader(isPtr()))
+    else if (!io.readHeader(*isPtr))
     {
-        FatalIOErrorInFunction(isPtr())
+        FatalIOErrorInFunction(*isPtr)
             << "problem while reading header for object " << io.name()
             << exit(FatalIOError);
     }
@@ -584,7 +581,7 @@ Foam::fileOperations::uncollatedFileOperation::readStream
 
         if (proci == -1)
         {
-            FatalIOErrorInFunction(isPtr())
+            FatalIOErrorInFunction(*isPtr)
                 << "could not detect processor number"
                 << " from objectPath:" << io.objectPath()
                 << " fName:" << fName
@@ -612,7 +609,7 @@ Foam::fileOperations::uncollatedFileOperation::readStream
         }
 
         // Read data and return as stream
-        return decomposedBlockData::readBlock(proci, isPtr(), io);
+        return decomposedBlockData::readBlock(proci, *isPtr, io);
     }
 }
 

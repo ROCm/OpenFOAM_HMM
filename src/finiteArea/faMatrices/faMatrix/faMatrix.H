@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -166,10 +167,10 @@ public:
 
         // Constructors
 
-            faSolver(faMatrix<Type>& faMat, autoPtr<lduMatrix::solver> sol)
+            faSolver(faMatrix<Type>& faMat, autoPtr<lduMatrix::solver>&& sol)
             :
                 faMat_(faMat),
-                solver_(sol)
+                solver_(std::move(sol))
             {}
 
 
