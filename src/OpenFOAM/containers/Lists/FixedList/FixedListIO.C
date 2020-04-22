@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +36,7 @@ License
 template<class T, unsigned N>
 void Foam::FixedList<T, N>::writeEntry(Ostream& os) const
 {
-    const word tag = "List<" + word(pTraits<T>::typeName) + '>';
+    const word tag("List<" + word(pTraits<T>::typeName) + '>');
     if (token::compound::isCompound(tag))
     {
         os  << tag << token::SPACE;

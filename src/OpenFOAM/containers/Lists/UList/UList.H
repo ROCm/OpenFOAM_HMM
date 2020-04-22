@@ -49,6 +49,7 @@ SourceFiles
 #include "label.H"
 #include "uLabel.H"
 #include "zero.H"
+#include "one.H"
 #include "contiguous.H"
 #include "nullObject.H"
 #include "stdFoam.H"
