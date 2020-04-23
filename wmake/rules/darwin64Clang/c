@@ -12,4 +12,5 @@ ctoo        = $(WM_SCHEDULER) $(cc) $(cFLAGS) -c $< -o $@
 LINK_LIBS   = $(cDBUG)
 
 LINKLIBSO   = $(cc) $(cARCH) -Wl,-dylib,-undefined,dynamic_lookup
+
 LINKEXE     = $(cc) $(cARCH) -Wl,-execute,-undefined,dynamic_lookup

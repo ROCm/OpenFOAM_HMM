@@ -14,6 +14,7 @@ CGAL_LIBS = \
     -L$(CGAL_ARCH_PATH)/lib \
     -L$(CGAL_ARCH_PATH)/lib$(WM_COMPILER_LIB_ARCH) \
     -lCGAL \
+    -lgmp \
     -lmpfr
 
 sinclude $(DEFAULT_RULES)/CGAL

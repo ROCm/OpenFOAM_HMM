@@ -9,7 +9,6 @@ cFLAGS      = $(cARCH) $(GFLAGS) $(cWARN) $(cOPT) $(cDBUG) $(LIB_HEADER_DIRS) -f
 
 ctoo        = $(WM_SCHEDULER) $(cc) $(cFLAGS) -c $< -o $@
 
-LINK_LIBS   = $(cDBUG) -L$(IA32ROOT)/lib
+include $(GENERAL_RULES)/Icc/link-c
 
-LINKLIBSO   = $(cc) $(cARCH) -shared
-LINKEXE     = $(cc) $(cARCH) -Xlinker --add-needed -Xlinker -z -Xlinker nodefs
+LINK_LIBS   += -L$(IA32ROOT)/lib

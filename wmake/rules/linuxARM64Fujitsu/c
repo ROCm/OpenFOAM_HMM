@@ -12,7 +12,4 @@ cFLAGS      = $(cARCH) $(GFLAGS) $(cWARN) $(cOPT) $(cDBUG) $(LIB_HEADER_DIRS) -f
 
 ctoo        = $(WM_SCHEDULER) $(cc) $(cFLAGS) -c $< -o $@
 
-LINK_LIBS   = $(cDBUG)
-
-LINKLIBSO   = $(cc) $(cARCH) -shared
-LINKEXE     = $(cc) $(cARCH) -Xlinker --add-needed -Xlinker -z -Xlinker nodefs
+include $(GENERAL_RULES)/Clang/link-c

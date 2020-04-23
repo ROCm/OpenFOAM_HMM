@@ -1,10 +1,9 @@
-SUFFIXES += .c
+# Cray compiler - a gcc variant/wrapper
+include $(GENERAL_RULES)/Gcc/c
 
 cc          = cc
 
 cARCH       = -m64
-
-cWARN       = -Wall
 
 # Compile option is non-mandatory, but must be non-empty
 sinclude $(DEFAULT_RULES)/c$(WM_COMPILE_OPTION)
@@ -13,7 +12,4 @@ cFLAGS      = $(cARCH) $(GFLAGS) $(cWARN) $(cOPT) $(cDBUG) $(LIB_HEADER_DIRS) -f
 
 ctoo        = $(WM_SCHEDULER) $(cc) $(cFLAGS) -c $< -o $@
 
-LINK_LIBS   = $(cDBUG)
-
-LINKLIBSO   = $(cc) $(cARCH) -shared
-LINKEXE     = $(cc) $(cARCH) -Xlinker --add-needed -Xlinker -z -Xlinker nodefs
+include $(GENERAL_RULES)/Gcc/link-c

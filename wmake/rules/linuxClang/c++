@@ -11,7 +11,4 @@ cxxtoo      = $(Ctoo)
 cctoo       = $(Ctoo)
 cpptoo      = $(Ctoo)
 
-LINK_LIBS   = $(c++DBUG)
-
-LINKLIBSO   = $(CC) $(c++FLAGS) -shared
-LINKEXE     = $(CC) $(c++FLAGS) -Xlinker --add-needed
+include $(GENERAL_RULES)/Clang/link-c++

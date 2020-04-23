@@ -1,0 +1,5 @@
+LINK_LIBS   = $(cDBUG)
+
+LINKLIBSO   = $(cc) $(cFLAGS) -shared
+
+LINKEXE     = $(cc) $(cFLAGS) -Xlinker --add-needed -Xlinker -z -Xlinker nodefs

@@ -1,0 +1,9 @@
+# Headers-only CGAL
+
+CGAL_INC = \
+    -I$(BOOST_ARCH_PATH)/include \
+    -I$(CGAL_ARCH_PATH)/include
+
+CGAL_LIBS =
+
+#------------------------------------------------------------------------------

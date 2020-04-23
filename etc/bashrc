@@ -142,10 +142,10 @@ projectDir="$HOME/OpenFOAM/OpenFOAM-$WM_PROJECT_VERSION"
 #   * on a 32-bit OS this option is ignored (always 32-bit)
 #export WM_ARCH_OPTION=64
 
-# [FOAM_EXTRA_CXXFLAGS]
+# [FOAM_EXTRA_CFLAGS, FOAM_EXTRA_CXXFLAGS, FOAM_EXTRA_LDFLAGS]
 # Additional compilation flags - do not inherit from the environment.
 # Set after sourcing or via <prefs.sh> to avoid surprises.
-unset FOAM_EXTRA_CXXFLAGS
+unset FOAM_EXTRA_CFLAGS FOAM_EXTRA_CXXFLAGS FOAM_EXTRA_LDFLAGS
 
 ################################################################################
 # NO (NORMAL) USER EDITING BELOW HERE

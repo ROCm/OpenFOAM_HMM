@@ -50,6 +50,9 @@
 #     2. (OR) If `Allwmake` exists, use it.
 #     3. (OR) descend into each sub-directory and repeat.
 #
+# Environment
+#     FOAM_EXTRA_CFLAGS FOAM_EXTRA_CXXFLAGS FOAM_EXTRA_LDFLAGS
+#
 # See also
 #     wmakeLnInclude, wmakeLnIncludeAll, wmakeCollect, wdep, wrmdep, wrmo,
 #     wclean, wcleanPlatform, wcleanLnIncludeAll
@@ -118,7 +121,7 @@ Special targets:
   objects           Compile but not link
 
 Environment
-  FOAM_EXTRA_CXXFLAGS
+  FOAM_EXTRA_CFLAGS FOAM_EXTRA_CXXFLAGS FOAM_EXTRA_LDFLAGS
 
 HELP_TAIL_FULL
 else

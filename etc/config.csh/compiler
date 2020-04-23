@@ -19,6 +19,10 @@
 #     Setup for custom compiler versions for OpenFOAM
 #     Per-compiler overrides in "compiler-$WM_COMPILER" files
 #
+# Note
+#     The default values for gcc/clang are not a recommendation,
+#     but typically correspond to the minimum usable version.
+#
 #------------------------------------------------------------------------------
 
 switch ("$WM_COMPILER_TYPE")
@@ -84,6 +88,9 @@ case ThirdParty:
     case Gcc74*:
         set gcc_version=gcc-7.4.0
         breaksw
+    case Gcc75*:
+        set gcc_version=gcc-7.5.0
+        breaksw
     case Gcc81*:
         set gcc_version=gcc-8.1.0
         breaksw
@@ -93,11 +100,17 @@ case ThirdParty:
     case Gcc83*:
         set gcc_version=gcc-8.3.0
         breaksw
+    case Gcc84*:
+        set gcc_version=gcc-8.4.0
+        breaksw
     case Gcc91*:
         set gcc_version=gcc-9.1.0
         breaksw
     case Gcc92*:
         set gcc_version=gcc-9.2.0
+        breaksw
+    case Gcc93*:
+        set gcc_version=gcc-9.3.0
         breaksw
 
     case Clang:

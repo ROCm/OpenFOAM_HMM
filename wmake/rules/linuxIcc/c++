@@ -11,7 +11,6 @@ cxxtoo      = $(Ctoo)
 cctoo       = $(Ctoo)
 cpptoo      = $(Ctoo)
 
-LINK_LIBS   = $(c++DBUG) -L$(IA32ROOT)/lib
+include $(GENERAL_RULES)/Icc/link-c++
 
-LINKLIBSO   = $(CC) $(c++FLAGS) -shared -Xlinker --add-needed -Xlinker --no-as-needed
-LINKEXE     = $(CC) $(c++FLAGS) -Xlinker --add-needed -Xlinker --no-as-needed
+LINK_LIBS   += -L$(IA32ROOT)/lib
