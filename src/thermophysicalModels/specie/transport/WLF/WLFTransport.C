@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,19 +29,6 @@ License
 #include "WLFTransport.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-template<class Thermo>
-Foam::scalar Foam::WLFTransport<Thermo>::readCoeff
-(
-    const word& coeffName,
-    const dictionary& dict
-)
-{
-    return readScalar(dict.subDict("transport").lookup(coeffName));
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Thermo>
@@ -51,7 +39,7 @@ Foam::WLFTransport<Thermo>::WLFTransport(const dictionary& dict)
     Tr_(readCoeff("Tr", dict)),
     C1_(readCoeff("C1", dict)),
     C2_(readCoeff("C2", dict)),
-    rPr_(1.0/readScalar(dict.subDict("transport").lookup("Pr")))
+    rPr_(1.0/readCoeff("Pr", dict))
 {}
 
 
@@ -60,20 +48,21 @@ Foam::WLFTransport<Thermo>::WLFTransport(const dictionary& dict)
 template<class Thermo>
 void Foam::WLFTransport<Thermo>::write(Ostream& os) const
 {
-    os  << this->specie::name() << endl
-        << token::BEGIN_BLOCK  << incrIndent << nl;
+    os.beginBlock(this->specie::name());
 
     Thermo::write(os);
 
-    dictionary dict("transport");
-    dict.add("mu0", mu0_);
-    dict.add("Tr", Tr_);
-    dict.add("C1", C1_);
-    dict.add("C2", C2_);
-    dict.add("Pr", 1.0/rPr_);
+    {
+        os.beginBlock("transport");
+        os.writeEntry("mu0", mu0_);
+        os.writeEntry("Tr", Tr_);
+        os.writeEntry("C1", C1_);
+        os.writeEntry("C2", C2_);
+        os.writeEntry("Pr", 1.0/rPr_);
+        os.endBlock();
+    }
 
-    os  << indent << dict.dictName() << dict
-        << decrIndent << token::END_BLOCK << nl;
+    os.endBlock();
 }
 
 

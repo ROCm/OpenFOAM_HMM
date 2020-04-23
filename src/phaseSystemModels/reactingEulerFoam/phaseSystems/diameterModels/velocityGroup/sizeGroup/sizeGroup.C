@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,14 +60,14 @@ Foam::diameterModels::sizeGroup::sizeGroup
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedScalar(name, dimless, readScalar(dict.lookup("value"))),
+        dimensionedScalar(name, dimless, dict.get<scalar>("value")),
         velocityGroup.f().boundaryField().types()
     ),
     phase_(phase),
     velocityGroup_(velocityGroup),
     d_("d", dimLength, dict),
     x_("x", velocityGroup.formFactor()*pow3(d_)),
-    value_(readScalar(dict.lookup("value")))
+    value_(dict.get<scalar>("value"))
 {
     // Adjust refValue at mixedFvPatchField boundaries
     forAll(this->boundaryField(), patchi)

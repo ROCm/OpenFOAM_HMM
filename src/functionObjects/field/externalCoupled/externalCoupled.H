@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -149,7 +149,7 @@ SourceFiles
 #include "timeFunctionObject.H"
 #include "externalFileCoupler.H"
 #include "DynamicList.H"
-#include "wordReList.H"
+#include "wordRes.H"
 #include "scalarField.H"
 #include "UPtrList.H"
 

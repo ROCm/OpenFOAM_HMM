@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -308,8 +308,7 @@ int main(int argc, char *argv[])
                 << exit(FatalError);
         }
 
-        fileName sourceCasePath(dict.lookup("sourceCase"));
-        sourceCasePath.expand();
+        fileName sourceCasePath(dict.get<fileName>("sourceCase").expand());
         fileName sourceRootDir = sourceCasePath.path();
         fileName sourceCaseDir = sourceCasePath.name();
         if (Pstream::parRun())
@@ -758,8 +757,7 @@ int main(int argc, char *argv[])
     else
     {
         // Read from surface
-        fileName surfName(dict.lookup("surface"));
-        surfName.expand();
+        fileName surfName(dict.get<fileName>("surface").expand());
 
         Info<< "Extruding surfaceMesh read from file " << surfName << nl
             << endl;

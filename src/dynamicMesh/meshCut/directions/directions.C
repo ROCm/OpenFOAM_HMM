@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -275,10 +276,12 @@ Foam::directions::directions
     const twoDPointCorrector* correct2DPtr
 )
 :
-    List<vectorField>(wordList(dict.lookup("directions")).size())
+    List<vectorField>()
 {
-    const wordList wantedDirs(dict.lookup("directions"));
+    const wordList wantedDirs(dict.get<wordList>("directions"));
     const word coordSystem(dict.get<word>("coordinateSystem"));
+
+    List<vectorField>::resize(wantedDirs.size());
 
     bool wantNormal = false;
     bool wantTan1 = false;
@@ -311,10 +314,10 @@ Foam::directions::directions
     {
         const dictionary& globalDict = dict.subDict("globalCoeffs");
 
-        vector tan1(globalDict.lookup("tan1"));
+        vector tan1(globalDict.get<vector>("tan1"));
         check2D(correct2DPtr, tan1);
 
-        vector tan2(globalDict.lookup("tan2"));
+        vector tan2(globalDict.get<vector>("tan2"));
         check2D(correct2DPtr, tan2);
 
         const vector normal = normalised(tan1 ^ tan2);
@@ -357,7 +360,7 @@ Foam::directions::directions
         // Take zeroth face on patch
         const polyPatch& pp = mesh.boundaryMesh()[patchi];
 
-        vector tan1(patchDict.lookup("tan1"));
+        vector tan1(patchDict.get<vector>("tan1"));
 
         const vector& n0 = pp.faceNormals()[0];
 

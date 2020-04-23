@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,7 +46,7 @@ inline Foam::symmTensor Foam::RBD::rigidBodyInertia::Ioc
 
 inline Foam::RBD::rigidBodyInertia::rigidBodyInertia()
 :
-    m_(0),
+    m_(Zero),
     c_(Zero),
     Ic_(Zero)
 {}
@@ -67,8 +68,8 @@ inline Foam::RBD::rigidBodyInertia::rigidBodyInertia
 inline Foam::RBD::rigidBodyInertia::rigidBodyInertia(const dictionary& dict)
 :
     m_(dict.get<scalar>("mass")),
-    c_(dict.lookup("centreOfMass")),
-    Ic_(dict.lookup("inertia"))
+    c_(dict.get<vector>("centreOfMass")),
+    Ic_(dict.get<symmTensor>("inertia"))
 {}
 
 

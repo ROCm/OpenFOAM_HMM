@@ -115,8 +115,11 @@ class WLFTransport
 
     // Private Member Functions
 
-        //- Read coefficient from dictionary
-        scalar readCoeff(const word& coeffName, const dictionary& dict);
+        //- Read coefficient from "transport" sub-dictionary
+        inline scalar readCoeff(const word& key, const dictionary& dict)
+        {
+            return dict.subDict("transport").get<scalar>(key);
+        }
 
 
 public:

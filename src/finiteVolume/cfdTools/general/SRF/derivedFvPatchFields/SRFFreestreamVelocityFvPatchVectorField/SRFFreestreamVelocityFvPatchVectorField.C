@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,9 +74,9 @@ SRFFreestreamVelocityFvPatchVectorField
 :
     inletOutletFvPatchVectorField(p, iF),
     relative_(dict.lookupOrDefault("relative", false)),
-    UInf_(dict.lookup("UInf"))
+    UInf_(dict.get<vector>("UInf"))
 {
-    this->phiName_ = dict.lookupOrDefault<word>("phi","phi");
+    this->phiName_ = dict.lookupOrDefault<word>("phi", "phi");
 
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
 }

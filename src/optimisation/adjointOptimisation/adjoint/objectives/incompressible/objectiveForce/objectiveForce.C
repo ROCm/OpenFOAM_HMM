@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,8 +64,8 @@ objectiveForce::objectiveForce
     (
         mesh_.boundaryMesh().patchSet
         (
-            wordReList(dict.get<wordRes>("patches"))
-        )
+            dict.get<wordRes>("patches")
+        ).sortedToc()
     ),
     forceDirection_(dict.get<vector>("direction")),
     Aref_(dict.get<scalar>("Aref")),

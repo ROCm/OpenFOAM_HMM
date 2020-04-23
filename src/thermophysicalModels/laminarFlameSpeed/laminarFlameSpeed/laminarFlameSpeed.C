@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,7 +47,7 @@ Foam::laminarFlameSpeed::laminarFlameSpeed
 )
 :
     psiuReactionThermo_(ct),
-    fuel_(dict.lookup("fuel")),
+    fuel_(dict.get<word>("fuel")),
     equivalenceRatio_(0)
 {
     if (!psiuReactionThermo_.composition().contains("ft"))

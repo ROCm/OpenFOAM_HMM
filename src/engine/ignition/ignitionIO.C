@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +39,7 @@ Foam::ignition::ignition
 )
 :
     mesh_(mesh),
-    ignite_(combustionProperties.lookup("ignite")),
+    ignite_(combustionProperties.get<bool>("ignite")),
     ignSites_
     (
         combustionProperties.lookup("ignitionSites"),
@@ -64,7 +65,7 @@ Foam::ignition::ignition
 )
 :
     mesh_(mesh),
-    ignite_(combustionProperties.lookup("ignite")),
+    ignite_(combustionProperties.get<bool>("ignite")),
     ignSites_
     (
         combustionProperties.lookup("ignitionSites"),

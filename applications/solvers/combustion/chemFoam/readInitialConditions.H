@@ -37,11 +37,7 @@
     {
         forAll(Y, i)
         {
-            const word& name = Y[i].name();
-            if (fractions.found(name))
-            {
-                X0[i] = fractions.get<scalar>(name);
-            }
+            fractions.readIfPresent(Y[i].name(), X0[i]);
         }
 
         scalar mw = 0.0;
@@ -61,11 +57,7 @@
     {
         forAll(Y, i)
         {
-            const word& name = Y[i].name();
-            if (fractions.found(name))
-            {
-                Y0[i] = fractions.get<scalar>(name);
-            }
+            fractions.readIfPresent(Y[i].name(), Y0[i]);
         }
 
         scalar invW = 0.0;

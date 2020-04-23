@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -126,7 +126,7 @@ bool Foam::solidBodyMotionFunctions::tabulated6DoFMotion::read
 
     fileName newTimeDataFileName
     (
-        fileName(SBMFCoeffs_.lookup("timeDataFileName")).expand()
+        SBMFCoeffs_.get<fileName>("timeDataFileName").expand()
     );
 
     if (newTimeDataFileName != timeDataFileName_)

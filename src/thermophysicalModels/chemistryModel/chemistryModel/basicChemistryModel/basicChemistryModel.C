@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,9 +59,9 @@ Foam::basicChemistryModel::basicChemistryModel(basicThermo& thermo)
         )
     ),
     mesh_(thermo.p().mesh()),
-    chemistry_(lookup("chemistry")),
+    chemistry_(get<Switch>("chemistry")),
     deltaTChemIni_(get<scalar>("initialChemicalTimeStep")),
-    deltaTChemMax_(lookupOrDefault("maxChemicalTimeStep", GREAT)),
+    deltaTChemMax_(getOrDefault<scalar>("maxChemicalTimeStep", GREAT)),
     deltaTChem_
     (
         IOobject

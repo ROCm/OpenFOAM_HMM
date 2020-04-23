@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,30 +126,42 @@ Foam::engineValve::engineValve
     (
         coordinateSystem::New(mesh_, dict, coordinateSystem::typeName_())
     ),
-    bottomPatch_(dict.lookup("bottomPatch"), mesh.boundaryMesh()),
-    poppetPatch_(dict.lookup("poppetPatch"), mesh.boundaryMesh()),
-    stemPatch_(dict.lookup("stemPatch"), mesh.boundaryMesh()),
+    bottomPatch_
+    (
+        dict.get<keyType>("bottomPatch"),
+        mesh.boundaryMesh()
+    ),
+    poppetPatch_
+    (
+        dict.get<keyType>("poppetPatch"),
+        mesh.boundaryMesh()
+    ),
+    stemPatch_
+    (
+        dict.get<keyType>("stemPatch"),
+        mesh.boundaryMesh()
+    ),
     curtainInPortPatch_
     (
-        dict.lookup("curtainInPortPatch"),
+        dict.get<keyType>("curtainInPortPatch"),
         mesh.boundaryMesh()
     ),
     curtainInCylinderPatch_
     (
-        dict.lookup("curtainInCylinderPatch"),
+        dict.get<keyType>("curtainInCylinderPatch"),
         mesh.boundaryMesh()
     ),
     detachInCylinderPatch_
     (
-        dict.lookup("detachInCylinderPatch"),
+        dict.get<keyType>("detachInCylinderPatch"),
         mesh.boundaryMesh()
     ),
     detachInPortPatch_
     (
-        dict.lookup("detachInPortPatch"),
+        dict.get<keyType>("detachInPortPatch"),
         mesh.boundaryMesh()
     ),
-    detachFaces_(dict.lookup("detachFaces")),
+    detachFaces_(dict.get<labelList>("detachFaces")),
     liftProfile_("theta", "lift", name_, dict.lookup("liftProfile")),
     liftProfileStart_(min(liftProfile_.x())),
     liftProfileEnd_(max(liftProfile_.x())),

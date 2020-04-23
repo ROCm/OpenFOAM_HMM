@@ -197,7 +197,7 @@ bool Foam::functionObjectList::readFunctionObject
     word funcName(funcNameArgs);
 
     int argLevel = 0;
-    wordReList args;
+    wordRes args;
 
     List<Tuple2<word, string>> namedArgs;
     bool hasNamedArg = false;

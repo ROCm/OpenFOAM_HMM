@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,8 +53,8 @@ Foam::diameterModels::breakupModels::exponential::exponential
 )
 :
     breakupModel(popBal, dict),
-    exponent_(readScalar(dict.lookup("exponent"))),
-    C_(readScalar(dict.lookup("C")))
+    exponent_(dict.get<scalar>("exponent")),
+    C_(dict.get<scalar>("C"))
 {}
 
 

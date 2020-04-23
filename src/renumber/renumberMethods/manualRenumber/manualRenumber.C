@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +53,8 @@ Foam::manualRenumber::manualRenumber(const dictionary& renumberDict)
     renumberMethod(renumberDict),
     dataFile_
     (
-        renumberDict.optionalSubDict(typeName+"Coeffs").lookup("dataFile")
+        renumberDict.optionalSubDict(typeName+"Coeffs")
+        .get<fileName>("dataFile")
     )
 {}
 

@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,25 +49,28 @@ zeroATCcells::zeroATCcells
 )
 :
     mesh_(mesh),
-    zeroATCPatches_
-    (
-        dict.lookupOrDefault<wordList>("zeroATCPatchTypes", wordList())
-    ),
-    zeroATCZones_(0),
-    zeroATCcells_(0)
+    zeroATCPatches_(),
+    zeroATCZones_(),
+    zeroATCcells_()
 {
-    if (dict.found("zeroATCZones"))
+    dict.readIfPresent("zeroATCPatchTypes", zeroATCPatches_);
+
+    wordList zeroATCZoneNames;
+
+    if (dict.readIfPresent("zeroATCZones", zeroATCZoneNames))
     {
-        const wordList zeroATCZoneNames(dict.get<wordList>("zeroATCZones"));
-        zeroATCZones_ = labelList(zeroATCZoneNames.size(), -1);
+        zeroATCZones_.resize(zeroATCZoneNames.size(), -1);
+
         forAll(zeroATCZoneNames, zI)
         {
-            label zoneID = mesh.cellZones().findZoneID(zeroATCZoneNames[zI]);
+            const word& zoneName = zeroATCZoneNames[zI];
+
+            label zoneID = mesh.cellZones().findZoneID(zoneName);
             if (zoneID == -1)
             {
                 WarningInFunction
                     << "cannot find cellZone "
-                    << zeroATCZoneNames[zI]
+                    << zoneName
                     << " for smoothing ATC"
                     << endl;
             }

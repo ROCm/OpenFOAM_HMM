@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd
+    Copyright (C) 2018-2020 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,7 +103,7 @@ void Foam::wallBoilingModels::TDNBModels::Schroeder::write
 ) const
 {
     TDNBModel::write(os);
-    os.writeKeyword("kg") << kg_ << token::END_STATEMENT << nl;
+    os.writeEntry("kg", kg_);
 }
 
 // ************************************************************************* //

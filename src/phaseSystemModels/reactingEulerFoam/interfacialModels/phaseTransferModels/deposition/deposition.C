@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,9 +52,9 @@ Foam::phaseTransferModels::deposition::deposition
 )
 :
     phaseTransferModel(dict, pair),
-    dropletName_(dict.lookup("droplet")),
-    surfaceName_(dict.lookup("surface")),
-    efficiency_(readScalar(dict.lookup("efficiency")))
+    dropletName_(dict.get<word>("droplet")),
+    surfaceName_(dict.get<word>("surface")),
+    efficiency_(dict.get<scalar>("efficiency"))
 {}
 
 

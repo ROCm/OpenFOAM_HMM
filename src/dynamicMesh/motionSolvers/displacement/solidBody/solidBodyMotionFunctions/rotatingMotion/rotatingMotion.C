@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,8 +58,8 @@ Foam::solidBodyMotionFunctions::rotatingMotion::rotatingMotion
 )
 :
     solidBodyMotionFunction(SBMFCoeffs, runTime),
-    origin_(SBMFCoeffs_.lookup("origin")),
-    axis_(SBMFCoeffs_.lookup("axis")),
+    origin_(SBMFCoeffs_.get<vector>("origin")),
+    axis_(SBMFCoeffs_.get<vector>("axis")),
     omega_(Function1<scalar>::New("omega", SBMFCoeffs_))
 {}
 

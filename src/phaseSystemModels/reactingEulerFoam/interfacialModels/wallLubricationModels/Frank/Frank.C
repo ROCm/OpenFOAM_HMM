@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +58,7 @@ Foam::wallLubricationModels::Frank::Frank
     wallLubricationModel(dict, pair),
     Cwd_("Cwd", dimless, dict),
     Cwc_("Cwc", dimless, dict),
-    p_(readScalar(dict.lookup("p")))
+    p_(dict.get<scalar>("p"))
 {}
 
 

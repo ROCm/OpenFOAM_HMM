@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2019 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,10 +46,9 @@ void Foam::rPolynomial<Specie>::write(Ostream& os) const
 {
     Specie::write(os);
 
-    dictionary dict("equationOfState");
-    dict.add("C", C_);
-
-    os  << indent << dict.dictName() << dict;
+    os.beginBlock("equationOfState");
+    os.writeEntry("C", C_);
+    os.endBlock();
 }
 
 

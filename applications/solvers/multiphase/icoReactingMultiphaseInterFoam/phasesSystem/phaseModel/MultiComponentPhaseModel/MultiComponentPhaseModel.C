@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -191,7 +191,7 @@ void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>::solveYi
 
     const dictionary& MULEScontrols = mesh.solverDict(alpha1.name());
 
-    scalar cAlpha(readScalar(MULEScontrols.lookup("cYi")));
+    scalar cAlpha(MULEScontrols.get<scalar>("cYi"));
 
     PtrList<surfaceScalarField> phiYiCorrs(species_.size());
     const surfaceScalarField& phi = this->fluid().phi();

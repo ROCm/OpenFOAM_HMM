@@ -63,7 +63,7 @@ Foam::rigidBodyMeshMotion::bodyMesh::bodyMesh
 :
     name_(name),
     bodyID_(bodyID),
-    patches_(dict.lookup("patches")),
+    patches_(dict.get<wordRes>("patches")),
     patchSet_(mesh.boundaryMesh().patchSet(patches_)),
     di_(dict.get<scalar>("innerDistance")),
     do_(dict.get<scalar>("outerDistance")),

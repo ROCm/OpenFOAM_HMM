@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,7 +91,7 @@ bool Foam::diameterModels::constant::read(const dictionary& phaseProperties)
 {
     diameterModel::read(phaseProperties);
 
-    diameterProperties_.lookup("d") >> d_;
+    diameterProperties_.readEntry("d", d_);
 
     return true;
 }

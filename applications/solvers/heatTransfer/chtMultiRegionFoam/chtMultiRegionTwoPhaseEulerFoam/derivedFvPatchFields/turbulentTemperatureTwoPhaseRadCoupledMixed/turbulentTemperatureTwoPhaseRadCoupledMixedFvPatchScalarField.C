@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd
+    Copyright (C) 2018-2020 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -495,11 +495,8 @@ void turbulentTemperatureTwoPhaseRadCoupledMixedFvPatchScalarField::write
     os.writeEntryIfDifferent<word>("qrNbr", "none", qrNbrName_);
     os.writeEntryIfDifferent<word>("qr", "none", qrName_);
 
-    os.writeKeyword("region") << regionTypeNames_[regionType_]
-        << token::END_STATEMENT << nl;
-
-    os.writeKeyword("otherPhase") << otherPhaseName_ << token::END_STATEMENT
-    << nl;
+    os.writeEntry("region", regionTypeNames_[regionType_]);
+    os.writeEntry("otherPhase", otherPhaseName_);
 }
 
 

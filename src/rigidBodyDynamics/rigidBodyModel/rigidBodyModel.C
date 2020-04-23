@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -197,7 +198,7 @@ Foam::RBD::rigidBodyModel::rigidBodyModel
             merge
             (
                 bodyID(bodyDict.get<word>("mergeWith")),
-                bodyDict.lookup("transform"),
+                bodyDict.get<spatialTransform>("transform"),
                 rigidBody::New(key, bodyDict)
             );
         }
@@ -206,7 +207,7 @@ Foam::RBD::rigidBodyModel::rigidBodyModel
             join
             (
                 bodyID(bodyDict.get<word>("parent")),
-                bodyDict.lookup("transform"),
+                bodyDict.get<spatialTransform>("transform"),
                 joint::New(bodyDict.subDict("joint")),
                 rigidBody::New(key, bodyDict)
             );

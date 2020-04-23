@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2019 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,7 +63,8 @@ Foam::RBD::restraints::externalForce::externalForce
 )
 :
     restraint(name, dict, model),
-    externalForce_(nullptr)
+    externalForce_(nullptr),
+    location_(Zero)
 {
     read(dict);
 }
@@ -106,7 +108,7 @@ bool Foam::RBD::restraints::externalForce::read
 {
     restraint::read(dict);
 
-    coeffs_.lookup("location") >> location_;
+    coeffs_.readEntry("location", location_);
 
     externalForce_ = Function1<vector>::New("force", coeffs_);
 

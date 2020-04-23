@@ -237,15 +237,9 @@ alphatWallBoilingWallFunctionFvPatchScalarField
                 dDep_ = scalarField("dDep", dict, p.size());
             }
 
-            if (dict.found("K"))
-            {
-                dict.lookup("K") >> K_;
-            }
+            dict.readIfPresent("K", K_);
 
-            if (dict.found("wp"))
-            {
-                dict.lookup("wp") >> wp_;
-            }
+            dict.readIfPresent("wp", wp_);
 
             if (dict.found("qQuenching"))
             {
@@ -422,7 +416,7 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
     }
 
     // Check that partitioningModel has been constructed
-    if (!partitioningModel_.valid())
+    if (!partitioningModel_)
     {
         FatalErrorInFunction
             << "partitioningModel has not been constructed!"
@@ -501,7 +495,7 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
         case liquidPhase:
         {
             // Check that nucleationSiteModel has been constructed
-            if (!nucleationSiteModel_.valid())
+            if (!nucleationSiteModel_)
             {
                 FatalErrorInFunction
                     << "nucleationSiteModel has not been constructed!"
@@ -509,7 +503,7 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
             }
 
             // Check that departureDiameterModel has been constructed
-            if (!departureDiamModel_.valid())
+            if (!departureDiamModel_)
             {
                 FatalErrorInFunction
                     << "departureDiameterModel has not been constructed!"
@@ -517,7 +511,7 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
             }
 
             // Check that nucleationSiteModel has been constructed
-            if (!departureFreqModel_.valid())
+            if (!departureFreqModel_)
             {
                 FatalErrorInFunction
                     << "departureFrequencyModel has not been constructed!"
@@ -1124,8 +1118,7 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
 
-    os.writeKeyword("phaseType") << phaseTypeNames_[phaseType_]
-        << token::END_STATEMENT << nl;
+    os.writeEntry("phaseType", phaseTypeNames_[phaseType_]);
 
     relax_->writeData(os);
 
@@ -1133,107 +1126,93 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::write(Ostream& os) const
     {
         case vaporPhase:
         {
-            os.writeKeyword("partitioningModel") << nl;
-            os  << indent << token::BEGIN_BLOCK << incrIndent << nl;
+            os.beginBlock("partitioningModel");
             partitioningModel_->write(os);
-            os << decrIndent << indent << token::END_BLOCK << nl;
+            os.endBlock();
 
-            if (filmBoilingModel_.valid())
+            if (filmBoilingModel_)
             {
-                os.writeKeyword("filmBoilingModel") << nl;
-                os << indent << token::BEGIN_BLOCK << incrIndent << nl;
+                os.beginBlock("filmBoilingModel");
                 filmBoilingModel_->write(os);
-                os << decrIndent << indent << token::END_BLOCK << nl;
+                os.endBlock();
             }
 
-            if (LeidenfrostModel_.valid())
+            if (LeidenfrostModel_)
             {
-                os.writeKeyword("LeidenfrostModel") << nl;
-                os << indent << token::BEGIN_BLOCK << incrIndent << nl;
+                os.beginBlock("LeidenfrostModel");
                 LeidenfrostModel_->write(os);
-                os << decrIndent << indent << token::END_BLOCK << nl;
+                os.endBlock();
             }
 
             break;
         }
         case liquidPhase:
         {
-            os.writeKeyword("partitioningModel") << nl;
-            os << indent << token::BEGIN_BLOCK << incrIndent << nl;
+            os.beginBlock("partitioningModel");
             partitioningModel_->write(os);
-            os << decrIndent << indent << token::END_BLOCK << nl;
+            os.endBlock();
 
-            os.writeKeyword("nucleationSiteModel") << nl;
-            os << indent << token::BEGIN_BLOCK << incrIndent << nl;
+            os.beginBlock("nucleationSiteModel");
             nucleationSiteModel_->write(os);
-            os << decrIndent << indent << token::END_BLOCK << nl;
+            os.endBlock();
 
-            os.writeKeyword("departureDiamModel") << nl;
-            os << indent << token::BEGIN_BLOCK << incrIndent << nl;
+            os.beginBlock("departureDiamModel");
             departureDiamModel_->write(os);
-            os << decrIndent << indent << token::END_BLOCK << nl;
+            os.endBlock();
 
-            os.writeKeyword("departureFreqModel") << nl;
-            os << indent << token::BEGIN_BLOCK << incrIndent << nl;
+            os.beginBlock("departureFreqModel");
             departureFreqModel_->write(os);
-            os << decrIndent << indent << token::END_BLOCK << nl;
+            os.endBlock();
 
-            if (filmBoilingModel_.valid())
+            if (filmBoilingModel_)
             {
-                os.writeKeyword("filmBoilingModel") << nl;
-                os << indent << token::BEGIN_BLOCK << incrIndent << nl;
+                os.beginBlock("filmBoilingModel");
                 filmBoilingModel_->write(os);
-                os << decrIndent << indent << token::END_BLOCK << nl;
+                os.endBlock();
             }
 
-            if (LeidenfrostModel_.valid())
+            if (LeidenfrostModel_)
             {
-                os.writeKeyword("LeidenfrostModel") << nl;
-                os << indent << token::BEGIN_BLOCK << incrIndent << nl;
+                os.beginBlock("LeidenfrostModel");
                 LeidenfrostModel_->write(os);
-                os << decrIndent << indent << token::END_BLOCK << nl;
+                os.endBlock();
             }
 
-            if (CHFModel_.valid())
+            if (CHFModel_)
             {
-                os.writeKeyword("CHFModel") << nl;
-                os << indent << token::BEGIN_BLOCK << incrIndent << nl;
+                os.beginBlock("CHFModel");
                 CHFModel_->write(os);
-                os << decrIndent << indent << token::END_BLOCK << nl;
+                os.endBlock();
             }
 
-            if (CHFSoobModel_.valid())
+            if (CHFSoobModel_)
             {
-                os.writeKeyword("CHFSubCoolModel") << nl;
-                os << indent << token::BEGIN_BLOCK << incrIndent << nl;
+                os.beginBlock("CHFSubCoolModel");
                 CHFSoobModel_->write(os);
-                os << decrIndent << indent << token::END_BLOCK << nl;
+                os.endBlock();
             }
 
-            if (MHFModel_.valid())
+            if (MHFModel_)
             {
-                os.writeKeyword("MHFModel") << nl;
-                os << indent << token::BEGIN_BLOCK << incrIndent << nl;
+                os.beginBlock("MHFModel");
                 MHFModel_->write(os);
-                os << decrIndent << indent << token::END_BLOCK << nl;
+                os.endBlock();
             }
 
-            if (TDNBModel_.valid())
+            if (TDNBModel_)
             {
-                os.writeKeyword("TDNBModel") << nl;
-                os << indent << token::BEGIN_BLOCK << incrIndent << nl;
+                os.beginBlock("TDNBModel");
                 TDNBModel_->write(os);
-                os << decrIndent << indent << token::END_BLOCK << nl;
+                os.endBlock();
             }
 
-            os.writeKeyword("K") << K_ << token::END_STATEMENT << nl;
-            os.writeKeyword("wp") << wp_ << token::END_STATEMENT << nl;
+            os.writeEntry("K", K_);
+            os.writeEntry("wp", wp_);
             break;
         }
     }
 
-    os.writeKeyword("otherPhase") << otherPhaseName_
-        << token::END_STATEMENT << nl;
+    os.writeEntry("otherPhase", otherPhaseName_);
 
     dmdt_.writeEntry("dmdt", os);
     dDep_.writeEntry("dDep", os);

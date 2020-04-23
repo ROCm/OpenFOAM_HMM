@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,7 +77,7 @@ Foam::componentDisplacementMotionSolver::componentDisplacementMotionSolver
 )
 :
     motionSolver(mesh, dict, type),
-    cmptName_(coeffDict().lookup("component")),
+    cmptName_(coeffDict().get<word>("component")),
     cmpt_(cmpt(cmptName_)),
     points0_
     (

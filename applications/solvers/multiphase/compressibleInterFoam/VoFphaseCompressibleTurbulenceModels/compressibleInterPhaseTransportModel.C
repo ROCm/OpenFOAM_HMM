@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,9 +58,9 @@ Foam::compressibleInterPhaseTransportModel::compressibleInterPhaseTransportModel
             )
         );
 
-        word simulationType
+        const word simulationType
         (
-            turbulenceProperties.lookup("simulationType")
+            turbulenceProperties.get<word>("simulationType")
         );
 
         if (simulationType == "twoPhaseTransport")

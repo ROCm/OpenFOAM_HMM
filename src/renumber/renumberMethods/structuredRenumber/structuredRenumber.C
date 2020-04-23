@@ -56,8 +56,8 @@ Foam::structuredRenumber::structuredRenumber
 :
     renumberMethod(renumberDict),
     methodDict_(renumberDict.optionalSubDict(typeName + "Coeffs")),
-    patches_(methodDict_.lookup("patches")),
-    nLayers_(methodDict_.lookupOrDefault<label>("nLayers", labelMax)),
+    patches_(methodDict_.get<wordRes>("patches")),
+    nLayers_(methodDict_.getOrDefault<label>("nLayers", labelMax)),
     depthFirst_(methodDict_.get<bool>("depthFirst")),
     reverse_(methodDict_.get<bool>("reverse")),
     method_(renumberMethod::New(methodDict_))

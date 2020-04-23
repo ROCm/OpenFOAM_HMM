@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,7 +45,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 
 template<class EquationOfState> class eRefConstThermo;
 
@@ -86,7 +87,7 @@ class eRefConstThermo
 :
     public EquationOfState
 {
-    // Private data
+    // Private Data
 
         scalar Cv_;
         scalar Hf_;
@@ -95,6 +96,13 @@ class eRefConstThermo
 
 
     // Private Member Functions
+
+        //- Read coefficient from "thermodynamics" sub-dictionary
+        inline scalar readCoeff(const word& key, const dictionary& dict)
+        {
+            return dict.subDict("thermodynamics").get<scalar>(key);
+        }
+
 
         //- Construct from components
         inline eRefConstThermo

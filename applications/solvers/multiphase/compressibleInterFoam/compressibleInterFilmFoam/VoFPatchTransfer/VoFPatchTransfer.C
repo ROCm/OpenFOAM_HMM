@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,43 +72,39 @@ VoFPatchTransfer::VoFPatchTransfer
     transferRateCoeff_
     (
         coeffDict_.lookupOrDefault<scalar>("transferRateCoeff", 0.1)
-    )
+    ),
+    patchIDs_(),
+    patchTransferredMasses_()
 {
     const polyBoundaryMesh& pbm = film.regionMesh().boundaryMesh();
-    patchIDs_.setSize
+
+    const label nPatches
     (
         pbm.size() - film.regionMesh().globalData().processorPatches().size()
     );
 
-    if (coeffDict_.found("patches"))
+    wordReList patchNames;
+    if (coeffDict_.readIfPresent("patches", patchNames))
     {
-        const wordReList patchNames(coeffDict_.lookup("patches"));
-        const labelHashSet patchSet = pbm.patchSet(patchNames);
+        patchIDs_ = pbm.patchSet(patchNames).sortedToc();
 
-        Info<< "        applying to patches:" << nl;
+        Info<< "        applying to " << patchIDs_.size() << " patches:" << nl;
 
-        label pidi = 0;
-        for (const label patchi : patchSet)
+        for (const label patchi : patchIDs_)
         {
-            patchIDs_[pidi++] = patchi;
             Info<< "            " << pbm[patchi].name() << endl;
         }
-        patchIDs_.setSize(pidi);
-        patchTransferredMasses_.setSize(pidi, 0);
     }
     else
     {
         Info<< "            applying to all patches" << endl;
 
-        forAll(patchIDs_, patchi)
-        {
-            patchIDs_[patchi] = patchi;
-        }
-
-        patchTransferredMasses_.setSize(patchIDs_.size(), 0);
+        patchIDs_ = identity(nPatches);
     }
 
-    if (!patchIDs_.size())
+    patchTransferredMasses_.resize(patchIDs_.size(), Zero);
+
+    if (patchIDs_.empty())
     {
         FatalErrorInFunction
             << "No patches selected"

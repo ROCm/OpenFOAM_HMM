@@ -98,7 +98,7 @@ Foam::RASModels::kineticTheoryModel::kineticTheoryModel
         )
     ),
 
-    equilibrium_(coeffDict_.lookup("equilibrium")),
+    equilibrium_(coeffDict_.get<bool>("equilibrium")),
     e_("e", dimless, coeffDict_),
     alphaMax_("alphaMax", dimless, coeffDict_),
     alphaMinFriction_("alphaMinFriction", dimless, coeffDict_),

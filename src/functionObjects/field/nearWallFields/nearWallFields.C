@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "nearWallFields.H"
-#include "wordReList.H"
+#include "wordRes.H"
 #include "findCellParticle.H"
 #include "mappedPatchBase.H"
 #include "OBJstream.H"

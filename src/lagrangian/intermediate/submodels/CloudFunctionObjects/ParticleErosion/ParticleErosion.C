@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,7 +81,10 @@ Foam::ParticleErosion<CloudType>::ParticleErosion
     K_(this->coeffDict().template lookupOrDefault<scalar>("K", 2.0))
 {
     const wordList allPatchNames(owner.mesh().boundaryMesh().names());
-    const wordReList patchNames(this->coeffDict().lookup("patches"));
+    const wordRes patchNames
+    (
+        this->coeffDict().template get<wordRes>("patches")
+    );
 
     labelHashSet uniqIds;
     for (const wordRe& re : patchNames)

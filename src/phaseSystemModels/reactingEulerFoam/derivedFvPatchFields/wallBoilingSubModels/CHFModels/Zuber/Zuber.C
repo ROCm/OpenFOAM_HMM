@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd
+    Copyright (C) 2018-2020 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,7 +106,7 @@ Foam::wallBoilingModels::CHFModels::Zuber::CHF
 void Foam::wallBoilingModels::CHFModels::Zuber::write(Ostream& os) const
 {
     CHFModel::write(os);
-    os.writeKeyword("Cn") << Cn_ << token::END_STATEMENT << nl;
+    os.writeEntry("Cn", Cn_);
 }
 
 

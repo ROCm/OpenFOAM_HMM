@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,7 +65,7 @@ transferModelList::transferModelList
 {
     const wordList activeModels
     (
-        dict.lookupOrDefault("transferModels", wordList())
+        dict.lookupOrDefault<wordList>("transferModels", wordList())
     );
 
     wordHashSet models(activeModels);

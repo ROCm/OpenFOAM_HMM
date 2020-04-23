@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,16 +67,12 @@ objectivePartialVolume::objectivePartialVolume
     (
         mesh_.boundaryMesh().patchSet
         (
-            wordReList(dict.get<wordRes>("patches"))
-        )
+            dict.get<wordRes>("patches")
+        ).sortedToc()
     )
 {
     // Read target volume if present. Else use the current one as a target
-    if (dict.found("initialVolume"))
-    {
-        initVol_ = dict.get<scalar>("initialVolume");
-    }
-    else
+    if (!dict.readIfPresent("initialVolume", initVol_))
     {
         const scalar oneThird(1.0/3.0);
         forAllConstIters(objectivePatches_, iter)

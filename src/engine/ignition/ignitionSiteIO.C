@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +41,7 @@ Foam::ignitionSite::ignitionSite
     db_(db),
     mesh_(mesh),
     ignitionSiteDict_(is),
-    location_(ignitionSiteDict_.lookup("location")),
+    location_(ignitionSiteDict_.get<vector>("location")),
     diameter_(ignitionSiteDict_.get<scalar>("diameter")),
     time_
     (
@@ -76,7 +77,7 @@ Foam::ignitionSite::ignitionSite
     db_(edb),
     mesh_(mesh),
     ignitionSiteDict_(is),
-    location_(ignitionSiteDict_.lookup("location")),
+    location_(ignitionSiteDict_.get<vector>("location")),
     diameter_(ignitionSiteDict_.get<scalar>("diameter")),
     time_
     (

@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,16 +82,11 @@ objectivePtLosses::objectivePtLosses
 void objectivePtLosses::initialize()
 {
     // If patches are prescribed, use them
-    if (dict().found("patches"))
+
+    wordRes patchSelection;
+    if (dict().readIfPresent("patches", patchSelection))
     {
-        labelHashSet patches
-        (
-            mesh_.boundaryMesh().patchSet
-            (
-                wordReList(dict().get<wordRes>("patches"))
-            )
-        );
-        patches_ = patches.toc();
+        patches_ = mesh_.boundaryMesh().patchSet(patchSelection).sortedToc();
     }
     // Otherwise, pick them up based on the mass flow.
     // Note: a non-zero U initialisation should be used in order to pick up the
@@ -99,9 +94,9 @@ void objectivePtLosses::initialize()
     else
     {
         WarningInFunction
-            << "No patches provided to PtLosses. Chossing them according to "
-            << "the patch mass flows"
-            << endl;
+            << "No patches provided to PtLosses. "
+            << "Choosing them according to the patch mass flows" << nl;
+
         DynamicList<label> objectiveReportPatches(mesh_.boundary().size());
         const surfaceScalarField& phi = vars_.phiInst();
         forAll(mesh_.boundary(), patchI)

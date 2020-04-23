@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd
+    Copyright (C) 2018-2020 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -130,9 +130,9 @@ void Foam::wallBoilingModels::filmBoilingModels::Bromley::write
 ) const
 {
     filmBoilingModel::write(os);
-    os.writeKeyword("Cn") << Cn_ << token::END_STATEMENT << nl;
-    os.writeKeyword("L") << L_ << token::END_STATEMENT << nl;
-    os.writeKeyword("emissivity") << emissivity_ << token::END_STATEMENT << nl;
+    os.writeEntry("Cn", Cn_);
+    os.writeEntry("L", L_);
+    os.writeEntry("emissivity", emissivity_);
 }
 
 

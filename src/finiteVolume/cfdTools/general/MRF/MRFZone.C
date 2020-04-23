@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -254,8 +254,8 @@ Foam::MRFZone::MRFZone
     (
         coeffs_.lookupOrDefault<wordRes>("nonRotatingPatches", wordRes())
     ),
-    origin_(coeffs_.lookup("origin")),
-    axis_(coeffs_.lookup("axis")),
+    origin_(coeffs_.get<vector>("origin")),
+    axis_(coeffs_.get<vector>("axis").normalise()),
     omega_(Function1<scalar>::New("omega", coeffs_))
 {
     if (cellZoneName_ == word::null)
@@ -270,8 +270,6 @@ Foam::MRFZone::MRFZone
     else
     {
         cellZoneID_ = mesh_.cellZones().findZoneID(cellZoneName_);
-
-        axis_ = axis_/mag(axis_);
 
         const labelHashSet excludedPatchSet
         (

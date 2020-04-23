@@ -945,7 +945,7 @@ Foam::vector Foam::interfaceTrackingFvMesh::totalViscousForce() const
     //         "transportProperties"
     //     );
 
-    // dimensionedScalar nu(properties.lookup("nu"));
+    // dimensionedScalar nu("nu", properties);
 
     const scalarField& S = aMesh().S();
     const vectorField& n = aMesh().faceAreaNormals().internalField();
@@ -1557,16 +1557,16 @@ Foam::interfaceTrackingFvMesh::interfaceTrackingFvMesh(const IOobject& io)
     fsPatchIndex_(-1),
     fixedFreeSurfacePatches_
     (
-        motion().lookup("fixedFreeSurfacePatches")
+        motion().get<wordList>("fixedFreeSurfacePatches")
     ),
     nonReflectingFreeSurfacePatches_(),
     pointNormalsCorrectionPatches_
     (
-        motion().lookup("pointNormalsCorrectionPatches")
+        motion().get<wordList>("pointNormalsCorrectionPatches")
     ),
     normalMotionDir_
     (
-        motion().lookup("normalMotionDir")
+        motion().get<bool>("normalMotionDir")
     ),
     motionDir_(Zero),
     smoothing_(motion().lookupOrDefault("smoothing", false)),
@@ -1619,16 +1619,16 @@ Foam::interfaceTrackingFvMesh::interfaceTrackingFvMesh
     fsPatchIndex_(-1),
     fixedFreeSurfacePatches_
     (
-        motion().lookup("fixedFreeSurfacePatches")
+        motion().get<wordList>("fixedFreeSurfacePatches")
     ),
     nonReflectingFreeSurfacePatches_(),
     pointNormalsCorrectionPatches_
     (
-        motion().lookup("pointNormalsCorrectionPatches")
+        motion().get<wordList>("pointNormalsCorrectionPatches")
     ),
     normalMotionDir_
     (
-        motion().lookup("normalMotionDir")
+        motion().get<bool>("normalMotionDir")
     ),
     motionDir_(Zero),
     smoothing_(motion().lookupOrDefault("smoothing", false)),

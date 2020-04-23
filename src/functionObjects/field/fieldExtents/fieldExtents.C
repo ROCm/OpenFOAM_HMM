@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -135,7 +135,7 @@ bool Foam::functionObjects::fieldExtents::read(const dictionary& dict)
         patchIDs_.clear();
         const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
 
-        wordReList patchNames;
+        wordRes patchNames;
         if (dict.readIfPresent("patches", patchNames))
         {
             for (const wordRe& name : patchNames)

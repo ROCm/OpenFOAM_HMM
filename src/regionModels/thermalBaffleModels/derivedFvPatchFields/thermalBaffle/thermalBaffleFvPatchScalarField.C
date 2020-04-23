@@ -292,8 +292,7 @@ void thermalBaffleFvPatchScalarField::write(Ostream& os) const
 
         const word extrudeModel(dict_.get<word>("extrudeModel") + "Coeffs");
 
-        os.writeKeyword(extrudeModel);
-        os << dict_.subDict(extrudeModel) << nl;
+        dict_.subDict(extrudeModel).writeEntry(extrudeModel, os);
 
         os.writeEntry("region", dict_.get<word>("region"));
 
@@ -301,14 +300,9 @@ void thermalBaffleFvPatchScalarField::write(Ostream& os) const
 
         os.writeEntry("active", dict_.get<Switch>("active"));
 
-        os.writeKeyword("thermoType");
-        os << dict_.subDict("thermoType") << nl;
-
-        os.writeKeyword("mixture");
-        os << dict_.subDict("mixture") << nl;
-
-        os.writeKeyword("radiation");
-        os << dict_.subDict("radiation") << nl;
+        dict_.subDict("thermoType").writeEntry("thermoType", os);
+        dict_.subDict("mixture").writeEntry("mixture", os);
+        dict_.subDict("radiation").writeEntry("radiation", os);
    }
 }
 

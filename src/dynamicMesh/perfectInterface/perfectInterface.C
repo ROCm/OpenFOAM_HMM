@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -110,17 +110,17 @@ Foam::perfectInterface::perfectInterface
     polyMeshModifier(name, index, mme, dict.get<bool>("active")),
     faceZoneID_
     (
-        dict.lookup("faceZoneName"),
+        dict.get<keyType>("faceZoneName"),
         mme.mesh().faceZones()
     ),
     masterPatchID_
     (
-        dict.lookup("masterPatchName"),
+        dict.get<keyType>("masterPatchName"),
         mme.mesh().boundaryMesh()
     ),
     slavePatchID_
     (
-        dict.lookup("slavePatchName"),
+        dict.get<keyType>("slavePatchName"),
         mme.mesh().boundaryMesh()
     )
 {}

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,23 +48,22 @@ Foam::speciesTable& Foam::foamChemistryReader<ThermoType>::setSpecies
 template<class ThermoType>
 void Foam::foamChemistryReader<ThermoType>::readSpeciesComposition()
 {
-    if (!chemDict_.found("elements"))
+    wordList elems;
+
+    if (!chemDict_.readIfPresent("elements", elems))
     {
         Info<< "    elements not defined in " << chemDict_.name() << endl;
         return;
     }
 
-    wordList e(chemDict_.get<wordList>("elements"));
-    label currentElementIndex(0);
-
     DynamicList<word> elementNames_;
     HashTable<label> elementIndices_;
 
-    for (const word& elemName : e)
+    for (const word& elemName : elems)
     {
         if (!elementIndices_.found(elemName))
         {
-            elementIndices_.insert(elemName, currentElementIndex++);
+            elementIndices_.insert(elemName, elementNames_.size());
             elementNames_.append(elemName);
         }
         else
@@ -156,14 +155,14 @@ Foam::foamChemistryReader<ThermoType>::foamChemistryReader
     (
         IFstream
         (
-            fileName(thermoDict.lookup("foamChemistryFile")).expand()
+            thermoDict.get<fileName>("foamChemistryFile").expand()
         )()
     ),
     thermoDict_
     (
         IFstream
         (
-            fileName(thermoDict.lookup("foamChemistryThermoFile")).expand()
+            thermoDict.get<fileName>("foamChemistryThermoFile").expand()
         )()
     ),
     speciesTable_(setSpecies(chemDict_, species)),

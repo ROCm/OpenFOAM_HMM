@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +60,7 @@ Foam::porosityModels::powerLawLopesdaCostaZone::powerLawLopesdaCostaZone
     dictionary coeffs(dict.optionalSubDict(modelType + "Coeffs"));
 
     // Vertical direction within porous region
-    vector zDir(coeffs.lookup("zDir"));
+    vector zDir(coeffs.get<vector>("zDir"));
 
     // Span of the search for the cells in the porous region
     scalar searchSpan(coeffs.get<scalar>("searchSpan"));
@@ -69,7 +70,7 @@ Foam::porosityModels::powerLawLopesdaCostaZone::powerLawLopesdaCostaZone
 
     // List of the ground patches defining the lower surface
     // of the porous region
-    List<wordRe> groundPatches(coeffs.lookup("groundPatches"));
+    wordRes groundPatches(coeffs.get<wordRes>("groundPatches"));
 
     // Functional form of the porosity surface area per unit volume as a
     // function of the normalized vertical position

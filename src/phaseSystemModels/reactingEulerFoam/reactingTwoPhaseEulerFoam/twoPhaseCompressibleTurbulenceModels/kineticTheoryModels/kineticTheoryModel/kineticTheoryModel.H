@@ -109,7 +109,7 @@ class kineticTheoryModel
         // Kinetic Theory Model coefficients
 
             //- Use equilibrium approximation: generation == dissipation
-            Switch equilibrium_;
+            bool equilibrium_;
 
             //- Coefficient of restitution
             dimensionedScalar e_;

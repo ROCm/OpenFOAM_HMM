@@ -6,7 +6,7 @@
     \\/      M anipulation   |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -378,16 +378,17 @@ int main(int argc, char *argv[])
                "from the body reference frame to the global "
                "reference frame, i.e.:" << nl
             << "globalVector = orientation & bodyLocalVector"
-            << endl;
+            << nl;
 
         Info<< nl
             << "Entries for sixDoFRigidBodyDisplacement boundary condition:"
-            << nl
-            << "        mass            " << m << token::END_STATEMENT << nl
-            << "        centreOfMass    " << cM << token::END_STATEMENT << nl
-            << "        momentOfInertia " << eVal << token::END_STATEMENT << nl
-            << "        orientation     " << eVec.T() << token::END_STATEMENT
-            << endl;
+            << nl;
+
+        Info()
+            .writeEntry("mass", m)
+            .writeEntry("centreOfMass", cM)
+            .writeEntry("momentOfInertia", eVal)
+            .writeEntry("orientation", eVec.T());
     }
 
     if (calcAroundRefPt)

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -171,8 +172,8 @@ bool Foam::diameterModels::IATE::read(const dictionary& phaseProperties)
 {
     diameterModel::read(phaseProperties);
 
-    diameterProperties_.lookup("dMax") >> dMax_;
-    diameterProperties_.lookup("dMin") >> dMin_;
+    diameterProperties_.readEntry("dMax", dMax_);
+    diameterProperties_.readEntry("dMin", dMin_);
 
     // Re-create all the sources updating number, type and coefficients
     PtrList<IATEsource>

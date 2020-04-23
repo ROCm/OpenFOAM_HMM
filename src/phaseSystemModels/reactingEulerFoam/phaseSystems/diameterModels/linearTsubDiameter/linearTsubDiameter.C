@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018-2019 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -144,11 +145,11 @@ void Foam::diameterModels::linearTsub::correct()
 bool Foam::diameterModels::linearTsub::read(const dictionary& phaseProperties)
 {
     diameterModel::read(phaseProperties);
-    diameterProperties_.lookup("liquidPhase") >> liquidPhaseName_;
-    diameterProperties_.lookup("d2") >> d2_;
-    diameterProperties_.lookup("Tsub2") >> Tsub2_;
-    diameterProperties_.lookup("d1") >> d1_;
-    diameterProperties_.lookup("Tsub1") >> Tsub1_;
+    diameterProperties_.readEntry("liquidPhase", liquidPhaseName_);
+    diameterProperties_.readEntry("d2", d2_);
+    diameterProperties_.readEntry("Tsub2", Tsub2_);
+    diameterProperties_.readEntry("d1", d1_);
+    diameterProperties_.readEntry("Tsub1", Tsub1_);
 
     return true;
 }

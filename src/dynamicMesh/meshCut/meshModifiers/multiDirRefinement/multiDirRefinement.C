@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -494,7 +494,7 @@ Foam::multiDirRefinement::multiDirRefinement
 
     const bool writeMesh(dict.get<bool>("writeMesh"));
 
-    wordList dirNames(dict.lookup("directions"));
+    const wordList dirNames(dict.get<wordList>("directions"));
 
     if (useHex && dirNames.size() == 3)
     {
@@ -537,7 +537,7 @@ Foam::multiDirRefinement::multiDirRefinement
 
     const bool writeMesh(dict.get<bool>("writeMesh"));
 
-    wordList dirNames(dict.lookup("directions"));
+    const wordList dirNames(dict.get<wordList>("directions"));
 
     if (useHex && dirNames.size() == 3)
     {

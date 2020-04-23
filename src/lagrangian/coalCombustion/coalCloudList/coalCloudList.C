@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +52,7 @@ Foam::coalCloudList::coalCloudList
         )
     );
 
-    const wordHashSet cloudNames(wordList(props.lookup("clouds")));
+    const wordHashSet cloudNames(props.get<wordList>("clouds"));
 
     setSize(cloudNames.size());
 

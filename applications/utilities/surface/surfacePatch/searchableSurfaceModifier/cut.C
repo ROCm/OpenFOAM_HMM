@@ -275,7 +275,7 @@ Foam::searchableSurfaceModifiers::cut::cut
 )
 :
     searchableSurfaceModifier(geometry, dict),
-    cutterNames_(dict_.lookup("cutters"))
+    cutterNames_(dict_.get<wordRes>("cutters"))
 {}
 
 

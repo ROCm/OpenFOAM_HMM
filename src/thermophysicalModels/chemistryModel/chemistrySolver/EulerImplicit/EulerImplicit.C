@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +42,7 @@ Foam::EulerImplicit<ChemistryModel>::EulerImplicit
     chemistrySolver<ChemistryModel>(thermo),
     coeffsDict_(this->subDict("EulerImplicitCoeffs")),
     cTauChem_(coeffsDict_.get<scalar>("cTauChem")),
-    eqRateLimiter_(coeffsDict_.lookup("equilibriumRateLimiter")),
+    eqRateLimiter_(coeffsDict_.get<Switch>("equilibriumRateLimiter")),
     cTp_(this->nEqns())
 {}
 

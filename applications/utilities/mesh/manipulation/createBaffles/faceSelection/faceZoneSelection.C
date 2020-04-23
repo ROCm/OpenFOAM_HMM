@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,7 +51,7 @@ Foam::faceSelections::faceZoneSelection::faceZoneSelection
 )
 :
     faceSelection(name, mesh, dict),
-    zoneName_(dict_.lookup("zoneName"))
+    zoneName_(dict_.get<word>("zoneName"))
 {}
 
 

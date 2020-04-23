@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,14 +76,14 @@ Foam::twoPhaseSystem::twoPhaseSystem
     (
         *this,
         *this,
-        wordList(lookup("phases"))[0]
+        this->get<wordList>("phases")[0]
     ),
 
     phase2_
     (
         *this,
         *this,
-        wordList(lookup("phases"))[1]
+        this->get<wordList>("phases")[1]
     ),
 
     phi_
@@ -109,7 +110,7 @@ Foam::twoPhaseSystem::twoPhaseSystem
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedScalar("dgdt", dimless/dimTime, 0)
+        dimensionedScalar("dgdt", dimless/dimTime, Zero)
     )
 {
     phase2_.volScalarField::operator=(scalar(1) - phase1_);
@@ -124,7 +125,7 @@ Foam::twoPhaseSystem::twoPhaseSystem
             blendingMethod::New
             (
                 iter().dict(),
-                wordList(lookup("phases"))
+                this->get<wordList>("phases")
             )
         );
     }

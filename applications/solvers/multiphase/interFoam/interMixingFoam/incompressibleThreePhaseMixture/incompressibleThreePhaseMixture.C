@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,9 +64,9 @@ Foam::incompressibleThreePhaseMixture::incompressibleThreePhaseMixture
         )
     ),
 
-    phase1Name_(wordList(lookup("phases"))[0]),
-    phase2Name_(wordList(lookup("phases"))[1]),
-    phase3Name_(wordList(lookup("phases"))[2]),
+    phase1Name_(get<wordList>("phases")[0]),
+    phase2Name_(get<wordList>("phases")[1]),
+    phase3Name_(get<wordList>("phases")[2]),
 
     alpha1_
     (

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -136,7 +136,7 @@ bool Foam::functionObjects::wallShearStress::read(const dictionary& dict)
     patchSet_ =
         mesh_.boundaryMesh().patchSet
         (
-            wordReList(dict.lookupOrDefault("patches", wordReList()))
+            dict.getOrDefault<wordRes>("patches", wordRes())
         );
 
     Info<< type() << " " << name() << ":" << nl;

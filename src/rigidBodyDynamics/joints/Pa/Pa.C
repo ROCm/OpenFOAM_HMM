@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,11 +63,8 @@ Foam::RBD::joints::Pa::Pa(const vector& axis)
 
 Foam::RBD::joints::Pa::Pa(const dictionary& dict)
 :
-    joint(1)
-{
-    vector axis(dict.lookup("axis"));
-    S_[0] = spatialVector(Zero, axis/mag(axis));
-}
+    Pa(dict.get<vector>("axis"))
+{}
 
 
 Foam::autoPtr<Foam::RBD::joint> Foam::RBD::joints::Pa::clone() const

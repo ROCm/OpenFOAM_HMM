@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -113,7 +113,7 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
         dict.lookupOrDefault
         (
             "initialCentreOfMass",
-            vector(dict.lookup("centreOfMass"))
+            dict.get<vector>("centreOfMass")
         )
     ),
     initialCentreOfRotation_(initialCentreOfMass_),
@@ -126,7 +126,7 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
         )
     ),
     mass_(dict.get<scalar>("mass")),
-    momentOfInertia_(dict.lookup("momentOfInertia")),
+    momentOfInertia_(dict.get<diagTensor>("momentOfInertia")),
     aRelax_(dict.lookupOrDefault<scalar>("accelerationRelaxation", 1.0)),
     aDamp_(dict.lookupOrDefault<scalar>("accelerationDamping", 1.0)),
     report_(dict.lookupOrDefault("report", false)),

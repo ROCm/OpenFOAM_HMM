@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +53,7 @@ Foam::solidBodyMotionFunctions::SDA::SDA
 )
 :
     solidBodyMotionFunction(SBMFCoeffs, runTime),
-    CofG_(SBMFCoeffs_.lookup("CofG"))
+    CofG_(SBMFCoeffs_.get<vector>("CofG"))
 {
     read(SBMFCoeffs);
 }

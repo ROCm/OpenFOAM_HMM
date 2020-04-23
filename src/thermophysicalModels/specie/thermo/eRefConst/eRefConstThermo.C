@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,10 +35,10 @@ template<class EquationOfState>
 Foam::eRefConstThermo<EquationOfState>::eRefConstThermo(const dictionary& dict)
 :
     EquationOfState(dict),
-    Cv_(readScalar(dict.subDict("thermodynamics").lookup("Cv"))),
-    Hf_(readScalar(dict.subDict("thermodynamics").lookup("Hf"))),
-    Tref_(readScalar(dict.subDict("thermodynamics").lookup("Tref"))),
-    Eref_(readScalar(dict.subDict("thermodynamics").lookup("Eref")))
+    Cv_(readCoeff("Cv", dict)),
+    Hf_(readCoeff("Hf", dict)),
+    Tref_(readCoeff("Tref", dict)),
+    Eref_(readCoeff("Eref", dict))
 {}
 
 
@@ -48,12 +49,14 @@ void Foam::eRefConstThermo<EquationOfState>::write(Ostream& os) const
 {
     EquationOfState::write(os);
 
-    dictionary dict("thermodynamics");
-    dict.add("Cv", Cv_);
-    dict.add("Hf", Hf_);
-    dict.add("Tref", Tref_);
-    dict.add("Eref", Eref_);
-    os  << indent << dict.dictName() << dict;
+    {
+        os.beginBlock("thermodynamics");
+        os.writeEntry("Cv", Cv_);
+        os.writeEntry("Hf", Hf_);
+        os.writeEntry("Tref", Tref_);
+        os.writeEntry("Eref", Eref_);
+        os.endBlock();
+    }
 }
 
 

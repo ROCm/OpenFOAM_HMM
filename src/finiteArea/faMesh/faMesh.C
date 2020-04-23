@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -392,7 +393,10 @@ Foam::faMesh::faMesh
         )
     );
 
-    const wordList polyMeshPatches(faMeshDefinition.lookup("polyMeshPatches"));
+    const wordList polyMeshPatches
+    (
+        faMeshDefinition.get<wordList>("polyMeshPatches")
+    );
 
     const dictionary& bndDict = faMeshDefinition.subDict("boundary");
 

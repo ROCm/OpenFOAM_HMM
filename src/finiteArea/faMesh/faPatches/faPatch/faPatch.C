@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,7 +83,7 @@ Foam::faPatch::faPatch
     const faBoundaryMesh& bm
 )
 :
-    labelList(dict.lookup("edgeLabels")),
+    labelList(dict.get<labelList>("edgeLabels")),
     patchIdentifier(name, dict, index),
     ngbPolyPatchIndex_(dict.get<label>("ngbPolyPatchIndex")),
     boundaryMesh_(bm),

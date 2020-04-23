@@ -157,7 +157,7 @@ bool Foam::functionObjects::wallHeatFlux::read(const dictionary& dict)
     patchSet_ =
         mesh_.boundaryMesh().patchSet
         (
-            wordReList(dict.lookupOrDefault("patches", wordReList()))
+            dict.getOrDefault<wordRes>("patches", wordRes())
         );
 
     dict.readIfPresent("qr", qrName_);

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -215,37 +216,37 @@ Foam::slidingInterface::slidingInterface
     polyMeshModifier(name, index, mme, dict.get<bool>("active")),
     masterFaceZoneID_
     (
-        dict.lookup("masterFaceZoneName"),
+        dict.get<keyType>("masterFaceZoneName"),
         mme.mesh().faceZones()
     ),
     slaveFaceZoneID_
     (
-        dict.lookup("slaveFaceZoneName"),
+        dict.get<keyType>("slaveFaceZoneName"),
         mme.mesh().faceZones()
     ),
     cutPointZoneID_
     (
-        dict.lookup("cutPointZoneName"),
+        dict.get<keyType>("cutPointZoneName"),
         mme.mesh().pointZones()
     ),
     cutFaceZoneID_
     (
-        dict.lookup("cutFaceZoneName"),
+        dict.get<keyType>("cutFaceZoneName"),
         mme.mesh().faceZones()
     ),
     masterPatchID_
     (
-        dict.lookup("masterPatchName"),
+        dict.get<keyType>("masterPatchName"),
         mme.mesh().boundaryMesh()
     ),
     slavePatchID_
     (
-        dict.lookup("slavePatchName"),
+        dict.get<keyType>("slavePatchName"),
         mme.mesh().boundaryMesh()
     ),
     matchType_(typeOfMatchNames.get("typeOfMatch", dict)),
-    coupleDecouple_(dict.lookup("coupleDecouple")),
-    attached_(dict.lookup("attached")),
+    coupleDecouple_(dict.get<bool>("coupleDecouple")),
+    attached_(dict.get<bool>("attached")),
     projectionAlgo_
     (
         intersection::algorithmNames_.get("projection", dict)

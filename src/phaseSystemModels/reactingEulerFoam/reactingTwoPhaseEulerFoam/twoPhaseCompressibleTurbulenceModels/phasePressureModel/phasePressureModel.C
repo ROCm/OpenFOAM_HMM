@@ -86,9 +86,9 @@ bool Foam::RASModels::phasePressureModel::read()
         >::read()
     )
     {
-        coeffDict().lookup("alphaMax") >> alphaMax_;
-        coeffDict().lookup("preAlphaExp") >> preAlphaExp_;
-        coeffDict().lookup("expMax") >> expMax_;
+        coeffDict().readEntry("alphaMax", alphaMax_);
+        coeffDict().readEntry("preAlphaExp", preAlphaExp_);
+        coeffDict().readEntry("expMax", expMax_);
         g0_.readIfPresent(coeffDict());
 
         return true;

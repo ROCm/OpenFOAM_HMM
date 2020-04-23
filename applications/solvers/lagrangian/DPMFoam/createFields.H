@@ -11,7 +11,7 @@ word continuousPhaseName
             mesh,
             IOobject::MUST_READ
         )
-    ).lookup("continuousPhase")
+    ).get<word>("continuousPhase")
 );
 
 Info<< "Reading field U\n" << endl;

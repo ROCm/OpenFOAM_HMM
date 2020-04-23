@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd
+    Copyright (C) 2018-2020 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -109,7 +109,7 @@ void Foam::wallBoilingModels::CHFModels::Jeschar::write
 ) const
 {
     MHFModel::write(os);
-    os.writeKeyword("Kmhf") << Kmhf_ << token::END_STATEMENT << nl;
+    os.writeEntry("Kmhf", Kmhf_);
 }
 
 

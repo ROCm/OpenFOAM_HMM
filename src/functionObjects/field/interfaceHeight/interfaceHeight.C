@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2019 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -256,7 +257,7 @@ bool Foam::functionObjects::interfaceHeight::read(const dictionary& dict)
 
     dict.readIfPresent("alpha", alphaName_);
     dict.readIfPresent("liquid", liquid_);
-    dict.lookup("locations") >> locations_;
+    dict.readEntry("locations", locations_);
     dict.readIfPresent("interpolationScheme", interpolationScheme_);
     dict.readIfPresent("direction", direction_);
 

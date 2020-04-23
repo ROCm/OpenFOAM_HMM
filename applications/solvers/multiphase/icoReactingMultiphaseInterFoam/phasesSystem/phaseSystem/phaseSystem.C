@@ -220,7 +220,7 @@ Foam::phaseSystem::phaseSystem
         dimensionedScalar(dimViscosity*dimDensity, Zero),
         calculatedFvPatchScalarField::typeName
     ),
-    phaseNames_(lookup("phases")),
+    phaseNames_(get<wordList>("phases")),
     phi_
     (
         IOobject

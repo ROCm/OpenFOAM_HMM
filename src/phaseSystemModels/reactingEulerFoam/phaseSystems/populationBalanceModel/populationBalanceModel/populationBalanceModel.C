@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2019 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1232,14 +1233,13 @@ Foam::diameterModels::populationBalanceModel::continuousTurbulence() const
 void Foam::diameterModels::populationBalanceModel::solve()
 {
     const dictionary& solutionControls = mesh_.solverDict(name_);
-    bool solveOnFinalIterOnly =
-        solutionControls.lookupOrDefault<bool>("solveOnFinalIterOnly", false);
+    const bool solveOnFinalIterOnly =
+        solutionControls.getOrDefault("solveOnFinalIterOnly", false);
 
     if (!solveOnFinalIterOnly || pimple_.finalIter())
     {
         const label nCorr = this->nCorr();
-        const scalar tolerance =
-            readScalar(solutionControls.lookup("tolerance"));
+        const scalar tolerance = solutionControls.get<scalar>("tolerance");
 
         if (nCorr > 0)
         {
