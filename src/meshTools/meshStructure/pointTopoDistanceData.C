@@ -26,27 +26,27 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "pointTopoDistanceData.H"
+// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
+template<class Type>
 Foam::Ostream& Foam::operator<<
 (
-    Ostream& os,
-    const pointTopoDistanceData& rhs
+    Foam::Ostream& os,
+    const Foam::pointTopoDistanceData<Type>& wDist
 )
 {
-    return os << rhs.data_ << token::SPACE << rhs.distance_;
+    return os << wDist.distance_ << token::SPACE << wDist.data_;
 }
 
 
+template<class Type>
 Foam::Istream& Foam::operator>>
 (
-    Istream& is,
-    pointTopoDistanceData& rhs
+    Foam::Istream& is,
+    Foam::pointTopoDistanceData<Type>& wDist
 )
 {
-    return is >> rhs.data_ >> rhs.distance_;
+    return is >> wDist.distance_ >> wDist.data_;
 }
 
 

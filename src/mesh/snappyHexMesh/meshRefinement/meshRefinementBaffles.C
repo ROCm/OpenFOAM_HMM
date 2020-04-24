@@ -47,7 +47,7 @@ License
 #include "OBJstream.H"
 #include "patchFaceOrientation.H"
 #include "PatchEdgeFaceWave.H"
-#include "patchEdgeFaceRegion.H"
+#include "edgeTopoDistanceData.H"
 #include "polyMeshAdder.H"
 #include "IOmanip.H"
 #include "refinementParameters.H"
@@ -3507,8 +3507,8 @@ Foam::label Foam::meshRefinement::markPatchZones
     labelList& faceToZone
 ) const
 {
-    List<patchEdgeFaceRegion> allEdgeInfo(patch.nEdges());
-    List<patchEdgeFaceRegion> allFaceInfo(patch.size());
+    List<edgeTopoDistanceData<label>> allEdgeInfo(patch.nEdges());
+    List<edgeTopoDistanceData<label>> allFaceInfo(patch.size());
 
 
     // Protect all non-manifold edges
@@ -3519,7 +3519,7 @@ Foam::label Foam::meshRefinement::markPatchZones
         {
             if (nMasterFacesPerEdge[edgeI] > 2)
             {
-                allEdgeInfo[edgeI] = -2;
+                allEdgeInfo[edgeI] = edgeTopoDistanceData<label>(0, -2);
                 nProtected++;
             }
         }
@@ -3532,12 +3532,12 @@ Foam::label Foam::meshRefinement::markPatchZones
     // Hand out zones
 
     DynamicList<label> changedEdges;
-    DynamicList<patchEdgeFaceRegion> changedInfo;
+    DynamicList<edgeTopoDistanceData<label>> changedInfo;
 
     const scalar tol = PatchEdgeFaceWave
     <
         indirectPrimitivePatch,
-        patchEdgeFaceRegion
+        edgeTopoDistanceData<label>
     >::propagationTol();
 
     int dummyTrackData;
@@ -3577,11 +3577,11 @@ Foam::label Foam::meshRefinement::markPatchZones
 
         if (procI == Pstream::myProcNo())
         {
-            patchEdgeFaceRegion& faceInfo = allFaceInfo[seedFaceI];
+            edgeTopoDistanceData<label>& faceInfo = allFaceInfo[seedFaceI];
 
 
             // Set face
-            faceInfo = currentZoneI;
+            faceInfo = edgeTopoDistanceData<label>(0, currentZoneI);
 
             // .. and seed its edges
             const labelList& fEdges = patch.faceEdges()[seedFaceI];
@@ -3589,7 +3589,7 @@ Foam::label Foam::meshRefinement::markPatchZones
             {
                 label edgeI = fEdges[fEdgeI];
 
-                patchEdgeFaceRegion& edgeInfo = allEdgeInfo[edgeI];
+                edgeTopoDistanceData<label>& edgeInfo = allEdgeInfo[edgeI];
 
                 if
                 (
@@ -3622,7 +3622,7 @@ Foam::label Foam::meshRefinement::markPatchZones
         PatchEdgeFaceWave
         <
             indirectPrimitivePatch,
-            patchEdgeFaceRegion
+            edgeTopoDistanceData<label>
         > calc
         (
             mesh_,
@@ -3648,7 +3648,7 @@ Foam::label Foam::meshRefinement::markPatchZones
                 << " at " << patch.faceCentres()[faceI]
                 << exit(FatalError);
         }
-        faceToZone[faceI] = allFaceInfo[faceI].region();
+        faceToZone[faceI] = allFaceInfo[faceI].data();
     }
 
     return currentZoneI;

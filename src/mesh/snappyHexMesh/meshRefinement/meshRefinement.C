@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -417,12 +417,12 @@ Foam::labelList Foam::meshRefinement::nearestPatch
         }
 
         // Field on cells and faces.
-        List<topoDistanceData> cellData(mesh_.nCells());
-        List<topoDistanceData> faceData(mesh_.nFaces());
+        List<topoDistanceData<label>> cellData(mesh_.nCells());
+        List<topoDistanceData<label>> faceData(mesh_.nFaces());
 
         // Start of changes
         labelList patchFaces(nFaces);
-        List<topoDistanceData> patchData(nFaces);
+        List<topoDistanceData<label>> patchData(nFaces);
         nFaces = 0;
         forAll(adaptPatchIDs, i)
         {
@@ -432,13 +432,13 @@ Foam::labelList Foam::meshRefinement::nearestPatch
             forAll(pp, i)
             {
                 patchFaces[nFaces] = pp.start()+i;
-                patchData[nFaces] = topoDistanceData(patchi, 0);
+                patchData[nFaces] = topoDistanceData<label>(0, patchi);
                 nFaces++;
             }
         }
 
         // Propagate information inwards
-        FaceCellWave<topoDistanceData> deltaCalc
+        FaceCellWave<topoDistanceData<label>> deltaCalc
         (
             mesh_,
             patchFaces,
@@ -542,12 +542,12 @@ Foam::labelList Foam::meshRefinement::nearestIntersection
     labelList nearestRegion(mesh_.nFaces(), defaultRegion);
 
     // Field on cells and faces.
-    List<topoDistanceData> cellData(mesh_.nCells());
-    List<topoDistanceData> faceData(mesh_.nFaces());
+    List<topoDistanceData<label>> cellData(mesh_.nCells());
+    List<topoDistanceData<label>> faceData(mesh_.nFaces());
 
     // Start walking from all intersected faces
     DynamicList<label> patchFaces(start.size());
-    DynamicList<topoDistanceData> patchData(start.size());
+    DynamicList<topoDistanceData<label>> patchData(start.size());
     forAll(start, i)
     {
         label facei = testFaces[i];
@@ -555,18 +555,18 @@ Foam::labelList Foam::meshRefinement::nearestIntersection
         {
             patchFaces.append(facei);
             label regioni = surfaces_.globalRegion(surface1[i], region1[i]);
-            patchData.append(topoDistanceData(regioni, 0));
+            patchData.append(topoDistanceData<label>(0, regioni));
         }
         else if (surface2[i] != -1)
         {
             patchFaces.append(facei);
             label regioni = surfaces_.globalRegion(surface2[i], region2[i]);
-            patchData.append(topoDistanceData(regioni, 0));
+            patchData.append(topoDistanceData<label>(0, regioni));
         }
     }
 
     // Propagate information inwards
-    FaceCellWave<topoDistanceData> deltaCalc
+    FaceCellWave<topoDistanceData<label>> deltaCalc
     (
         mesh_,
         patchFaces,

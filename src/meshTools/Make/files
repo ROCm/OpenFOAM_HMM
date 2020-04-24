@@ -94,7 +94,6 @@ patchWave = $(algorithms)/PatchEdgeFaceWave
 $(patchWave)/PatchEdgeFaceWaveName.C
 $(patchWave)/patchEdgeFaceInfo.C
 $(patchWave)/patchPatchDist.C
-$(patchWave)/patchEdgeFaceRegion.C
 $(patchWave)/patchEdgeFaceRegions.C
 
 
@@ -297,8 +296,6 @@ PatchFunction1/makePatchFunction1s.C
 PatchFunction1/coordinateLabelScaling.C
 
 meshStructure/meshStructure.C
-meshStructure/topoDistanceData.C
-meshStructure/pointTopoDistanceData.C
 
 output/foamVtkIndPatchWriter.C
 output/foamVtkWriteTopoSet.C

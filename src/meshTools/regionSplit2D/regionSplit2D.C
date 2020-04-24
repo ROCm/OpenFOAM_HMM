@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ License
 #include "regionSplit2D.H"
 #include "polyMesh.H"
 #include "PatchEdgeFaceWave.H"
-#include "Time.H"
+#include "edgeTopoDistanceData.H"
 
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
@@ -45,10 +45,10 @@ Foam::regionSplit2D::regionSplit2D
 {
     globalIndex globalFaces(blockedFaces.size());
     label regionI = globalFaces.toGlobal(0);
-    List<patchEdgeFaceRegion> allEdgeInfo(patch.nEdges());
-    List<patchEdgeFaceRegion> allFaceInfo(patch.size());
+    List<edgeTopoDistanceData<label>> allEdgeInfo(patch.nEdges());
+    List<edgeTopoDistanceData<label>> allFaceInfo(patch.size());
     DynamicList<label> changedEdges;
-    DynamicList<patchEdgeFaceRegion> changedRegions;
+    DynamicList<edgeTopoDistanceData<label>> changedRegions;
     label nBlockedFaces = 0;
     forAll(blockedFaces, faceI)
     {
@@ -60,7 +60,14 @@ Foam::regionSplit2D::regionSplit2D
                 changedEdges.append(fEdges[feI]);
 
                 // Append globally unique value
-                changedRegions.append(regionI);
+                changedRegions.append
+                (
+                    edgeTopoDistanceData<label>
+                    (
+                        0,              // distance
+                        regionI         // passive data
+                    )
+                );
             }
             nBlockedFaces++;
             regionI++;
@@ -68,7 +75,11 @@ Foam::regionSplit2D::regionSplit2D
         else
         {
             // Block all non-seeded faces from the walk
-            allFaceInfo[faceI] = -2;
+            allFaceInfo[faceI] = edgeTopoDistanceData<label>
+            (
+                0,              // distance
+                -2         // passive data
+            );
         }
     }
 
@@ -81,7 +92,7 @@ Foam::regionSplit2D::regionSplit2D
     PatchEdgeFaceWave
     <
         indirectPrimitivePatch,
-        patchEdgeFaceRegion
+        edgeTopoDistanceData<label>
     >
     (
         mesh,
@@ -100,7 +111,7 @@ Foam::regionSplit2D::regionSplit2D
     label compactRegionI = 0;
     forAll(allFaceInfo, faceI)
     {
-        label regionI = allFaceInfo[faceI].region();
+        label regionI = allFaceInfo[faceI].data();
         if
         (
             globalFaces.isLocal(regionI)
@@ -129,7 +140,7 @@ Foam::regionSplit2D::regionSplit2D
     // Set the region index per face
     forAll(allFaceInfo, faceI)
     {
-        label regionI = allFaceInfo[faceI].region();
+        label regionI = allFaceInfo[faceI].data();
         if (regionI >= 0)
         {
             this->operator[](faceI) = regionToCompactAddr[regionI] + offset;

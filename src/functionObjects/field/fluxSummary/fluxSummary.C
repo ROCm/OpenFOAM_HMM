@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,7 +34,7 @@ License
 #include "syncTools.H"
 #include "meshTools.H"
 #include "PatchEdgeFaceWave.H"
-#include "patchEdgeFaceRegion.H"
+#include "edgeTopoDistanceData.H"
 #include "globalIndex.H"
 #include "OBJstream.H"
 #include "addToRunTimeSelectionTable.H"
@@ -511,8 +511,8 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
 
 
     // Data on all edges and faces
-    List<patchEdgeFaceRegion> allEdgeInfo(patch.nEdges());
-    List<patchEdgeFaceRegion> allFaceInfo(patch.size());
+    List<edgeTopoDistanceData<label>> allEdgeInfo(patch.nEdges());
+    List<edgeTopoDistanceData<label>> allFaceInfo(patch.size());
 
     bool search = true;
 
@@ -528,12 +528,12 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
     while (search)
     {
         DynamicList<label> changedEdges;
-        DynamicList<patchEdgeFaceRegion> changedInfo;
+        DynamicList<edgeTopoDistanceData<label>> changedInfo;
 
         label seedFacei = labelMax;
         for (; oldFaceID < patch.size(); oldFaceID++)
         {
-            if (allFaceInfo[oldFaceID].region() == -1)
+            if (allFaceInfo[oldFaceID].data() == -1)
             {
                 seedFacei = globalFaces.toGlobal(oldFaceID);
                 break;
@@ -553,7 +553,7 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
 
             forAll(fEdges, i)
             {
-                if (allEdgeInfo[fEdges[i]].region() != -1)
+                if (allEdgeInfo[fEdges[i]].data() != -1)
                 {
                     WarningInFunction
                         << "Problem in edge face wave: attempted to assign a "
@@ -563,7 +563,14 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
                 }
 
                 changedEdges.append(fEdges[i]);
-                changedInfo.append(regioni);
+                changedInfo.append
+                (
+                    edgeTopoDistanceData<label>
+                    (
+                        0,          // distance
+                        regioni
+                    )
+                );
             }
         }
 
@@ -571,7 +578,7 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
         PatchEdgeFaceWave
         <
             indirectPrimitivePatch,
-            patchEdgeFaceRegion
+            edgeTopoDistanceData<label>
         > calc
         (
             mesh_,
@@ -588,7 +595,7 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
             label nCells = 0;
             forAll(allFaceInfo, facei)
             {
-                if (allFaceInfo[facei].region() == regioni)
+                if (allFaceInfo[facei].data() == regioni)
                 {
                     nCells++;
                 }
@@ -611,7 +618,7 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
 
     forAll(allFaceInfo, facei)
     {
-        regioni = allFaceInfo[facei].region();
+        regioni = allFaceInfo[facei].data();
 
         regionFaceIDs[regioni].append(faceLocalPatchIDs[facei]);
         regionFacePatchIDs[regioni].append(facePatchIDs[facei]);

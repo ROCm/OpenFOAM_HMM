@@ -28,7 +28,8 @@ Class
     Foam::topoDistanceData
 
 Description
-    For use with FaceCellWave. Determines topological distance to starting faces
+    For use with FaceCellWave. Determines topological distance to starting
+    faces. Templated on passive transported data.
 
 SourceFiles
     topoDistanceDataI.H
@@ -50,38 +51,42 @@ namespace Foam
 // Forward Declarations
 class polyPatch;
 class polyMesh;
-class topoDistanceData;
+template<class Type> class topoDistanceData;
 
-Istream& operator>>(Istream&, topoDistanceData&);
-Ostream& operator<<(Ostream&, const topoDistanceData&);
+template<class Type>
+Istream& operator>>(Istream&, topoDistanceData<Type>&);
+template<class Type>
+Ostream& operator<<(Ostream&, const topoDistanceData<Type>&);
 
 /*---------------------------------------------------------------------------*\
                       Class topoDistanceData Declaration
 \*---------------------------------------------------------------------------*/
 
+template<class Type>
 class topoDistanceData
 {
     // Private Data
 
-        //- Starting data
-        label data_;
-
         //- Distance
         label distance_;
+
+        //- Starting data
+        Type data_;
 
 
 public:
 
     // Constructors
 
-        //- Default construct, with invalid (-1) for data and distance
+        //- Construct null with invalid (-1) for distance, null constructor
+        //  for data
         inline topoDistanceData();
 
         //- Construct from components
         inline topoDistanceData
         (
-            const label data,
-            const label distance
+            const label distance,
+            const Type& data
         );
 
 
@@ -89,14 +94,14 @@ public:
 
         // Access
 
-            label data() const
-            {
-                return data_;
-            }
-
-            label distance() const
+            inline label distance() const
             {
                 return distance_;
+            }
+
+            inline const Type& data() const
+            {
+                return data_;
             }
 
 
@@ -111,7 +116,7 @@ public:
             inline bool sameGeometry
             (
                 const polyMesh&,
-                const topoDistanceData&,
+                const topoDistanceData<Type>&,
                 const scalar,
                 TrackingData& td
             ) const;
@@ -155,7 +160,7 @@ public:
                 const polyMesh&,
                 const label thisCelli,
                 const label neighbourFacei,
-                const topoDistanceData& neighbourInfo,
+                const topoDistanceData<Type>& neighbourInfo,
                 const scalar tol,
                 TrackingData& td
             );
@@ -167,7 +172,7 @@ public:
                 const polyMesh&,
                 const label thisFacei,
                 const label neighbourCelli,
-                const topoDistanceData& neighbourInfo,
+                const topoDistanceData<Type>& neighbourInfo,
                 const scalar tol,
                 TrackingData& td
             );
@@ -178,44 +183,68 @@ public:
             (
                 const polyMesh&,
                 const label thisFacei,
-                const topoDistanceData& neighbourInfo,
+                const topoDistanceData<Type>& neighbourInfo,
                 const scalar tol,
                 TrackingData& td
             );
 
             //- Test for equality, with TrackingData
             template<class TrackingData>
-            inline bool equal(const topoDistanceData&, TrackingData& td) const;
+            inline bool equal
+            (
+                const topoDistanceData<Type>&,
+                TrackingData& td
+            ) const;
 
 
     // Member Operators
 
-        //- Test for equality
-        inline bool operator==(const topoDistanceData&) const;
+        // Needed for List IO
+        inline bool operator==(const topoDistanceData<Type>&) const;
 
-        //- Test for inequality
-        inline bool operator!=(const topoDistanceData&) const;
+        inline bool operator!=(const topoDistanceData<Type>&) const;
 
 
     // IOstream Operators
 
-        friend Ostream& operator<<(Ostream&, const topoDistanceData&);
-        friend Istream& operator>>(Istream&, topoDistanceData&);
+        friend Ostream& operator<< <Type>
+        (
+            Ostream&,
+            const topoDistanceData<Type>&
+        );
+        friend Istream& operator>> <Type>
+        (
+            Istream&,
+            topoDistanceData<Type>&
+        );
 };
 
 
 // * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
 
-//- Contiguous data for topoDistanceData
-template<> struct is_contiguous<topoDistanceData> : std::true_type {};
+//- Data are contiguous if data type is contiguous
+template<class Type>
+struct is_contiguous<topoDistanceData<Type>> : is_contiguous<Type> {};
 
-//- Contiguous label data for topoDistanceData
-template<> struct is_contiguous_label<topoDistanceData> : std::true_type {};
+//- Data are contiguous label if data type is label
+template<class Type>
+struct is_contiguous_label<topoDistanceData<Type>> :
+    is_contiguous_label<Type> {};
 
+//- Data are contiguous scalar if data type is scalar
+template<class Type>
+struct is_contiguous_scalar<topoDistanceData<Type>> :
+    is_contiguous_scalar<Type>{};
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "topoDistanceData.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

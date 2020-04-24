@@ -30,38 +30,42 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::pointTopoDistanceData::pointTopoDistanceData()
+template<class Type>
+inline Foam::pointTopoDistanceData<Type>::pointTopoDistanceData()
 :
-    data_(-1),
-    distance_(-1)
+    distance_(-1),
+    data_()
 {}
 
 
-inline Foam::pointTopoDistanceData::pointTopoDistanceData
+template<class Type>
+inline Foam::pointTopoDistanceData<Type>::pointTopoDistanceData
 (
-    const label data,
-    const label distance
+    const label distance,
+    const Type& data
 )
 :
-    data_(data),
-    distance_(distance)
+    distance_(distance),
+    data_(data)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+template<class Type>
 template<class TrackingData>
-inline bool Foam::pointTopoDistanceData::valid(TrackingData& td) const
+inline bool Foam::pointTopoDistanceData<Type>::valid(TrackingData& td) const
 {
     return distance_ != -1;
 }
 
 
 // No geometric data so never any problem on cyclics
+template<class Type>
 template<class TrackingData>
-inline bool Foam::pointTopoDistanceData::sameGeometry
+inline bool Foam::pointTopoDistanceData<Type>::sameGeometry
 (
-    const pointTopoDistanceData&,
+    const pointTopoDistanceData<Type>&,
     const scalar tol,
     TrackingData& td
 ) const
@@ -71,8 +75,9 @@ inline bool Foam::pointTopoDistanceData::sameGeometry
 
 
 // No geometric data.
+template<class Type>
 template<class TrackingData>
-inline void Foam::pointTopoDistanceData::leaveDomain
+inline void Foam::pointTopoDistanceData<Type>::leaveDomain
 (
     const polyPatch& patch,
     const label patchPointi,
@@ -83,8 +88,9 @@ inline void Foam::pointTopoDistanceData::leaveDomain
 
 
 // No geometric data.
+template<class Type>
 template<class TrackingData>
-inline void Foam::pointTopoDistanceData::transform
+inline void Foam::pointTopoDistanceData<Type>::transform
 (
     const tensor& rotTensor,
     TrackingData& td
@@ -93,8 +99,9 @@ inline void Foam::pointTopoDistanceData::transform
 
 
 // No geometric data.
+template<class Type>
 template<class TrackingData>
-inline void Foam::pointTopoDistanceData::enterDomain
+inline void Foam::pointTopoDistanceData<Type>::enterDomain
 (
     const polyPatch& patch,
     const label patchPointi,
@@ -105,21 +112,22 @@ inline void Foam::pointTopoDistanceData::enterDomain
 
 
 // Update this with information from connected edge
+template<class Type>
 template<class TrackingData>
-inline bool Foam::pointTopoDistanceData::updatePoint
+inline bool Foam::pointTopoDistanceData<Type>::updatePoint
 (
     const polyMesh& mesh,
     const label pointi,
     const label edgeI,
-    const pointTopoDistanceData& edgeInfo,
+    const pointTopoDistanceData<Type>& edgeInfo,
     const scalar tol,
     TrackingData& td
 )
 {
     if (distance_ == -1)
     {
-        data_ = edgeInfo.data_;
         distance_ = edgeInfo.distance_ + 1;
+        data_ = edgeInfo.data_;
         return true;
     }
 
@@ -128,19 +136,21 @@ inline bool Foam::pointTopoDistanceData::updatePoint
 
 
 // Update this with new information on same point
+template<class Type>
 template<class TrackingData>
-inline bool Foam::pointTopoDistanceData::updatePoint
+inline bool Foam::pointTopoDistanceData<Type>::updatePoint
 (
     const polyMesh& mesh,
     const label pointi,
-    const pointTopoDistanceData& newPointInfo,
+    const pointTopoDistanceData<Type>& newPointInfo,
     const scalar tol,
     TrackingData& td
 )
 {
     if (distance_ == -1)
     {
-        operator=(newPointInfo);
+        distance_ = newPointInfo.distance_;
+        data_ = newPointInfo.data_;
         return true;
     }
 
@@ -149,17 +159,19 @@ inline bool Foam::pointTopoDistanceData::updatePoint
 
 
 // Update this with new information on same point. No extra information.
+template<class Type>
 template<class TrackingData>
-inline bool Foam::pointTopoDistanceData::updatePoint
+inline bool Foam::pointTopoDistanceData<Type>::updatePoint
 (
-    const pointTopoDistanceData& newPointInfo,
+    const pointTopoDistanceData<Type>& newPointInfo,
     const scalar tol,
     TrackingData& td
 )
 {
     if (distance_ == -1)
     {
-        operator=(newPointInfo);
+        distance_ = newPointInfo.distance_;
+        data_ = newPointInfo.data_;
         return true;
     }
 
@@ -168,20 +180,22 @@ inline bool Foam::pointTopoDistanceData::updatePoint
 
 
 // Update this with information from connected point
+template<class Type>
 template<class TrackingData>
-inline bool Foam::pointTopoDistanceData::updateEdge
+inline bool Foam::pointTopoDistanceData<Type>::updateEdge
 (
     const polyMesh& mesh,
     const label edgeI,
     const label pointi,
-    const pointTopoDistanceData& pointInfo,
+    const pointTopoDistanceData<Type>& pointInfo,
     const scalar tol,
     TrackingData& td
 )
 {
     if (distance_ == -1)
     {
-        operator=(pointInfo);
+        distance_ = pointInfo.distance_;
+        data_ = pointInfo.data_;
         return true;
     }
 
@@ -189,10 +203,11 @@ inline bool Foam::pointTopoDistanceData::updateEdge
 }
 
 
+template<class Type>
 template<class TrackingData>
-inline bool Foam::pointTopoDistanceData::equal
+inline bool Foam::pointTopoDistanceData<Type>::equal
 (
-    const pointTopoDistanceData& rhs,
+    const pointTopoDistanceData<Type>& rhs,
     TrackingData& td
 ) const
 {
@@ -202,18 +217,20 @@ inline bool Foam::pointTopoDistanceData::equal
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline bool Foam::pointTopoDistanceData::operator==
+template<class Type>
+inline bool Foam::pointTopoDistanceData<Type>::operator==
 (
-    const pointTopoDistanceData& rhs
+    const Foam::pointTopoDistanceData<Type>& rhs
 ) const
 {
-    return data_ == rhs.data_ && distance_ == rhs.distance_;
+    return distance() == rhs.distance() && data() == rhs.data();
 }
 
 
-inline bool Foam::pointTopoDistanceData::operator!=
+template<class Type>
+inline bool Foam::pointTopoDistanceData<Type>::operator!=
 (
-    const pointTopoDistanceData& rhs
+    const Foam::pointTopoDistanceData<Type>& rhs
 ) const
 {
     return !(*this == rhs);

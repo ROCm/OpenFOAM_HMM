@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,10 +44,11 @@ SourceFiles
 #define structuredRenumber_H
 
 #include "renumberMethod.H"
-#include "topoDistanceData.H"
 
 namespace Foam
 {
+
+template<class Type> class topoDistanceData;
 
 /*---------------------------------------------------------------------------*\
                    Class structuredRenumber Declaration
@@ -66,7 +68,7 @@ public:
         {
             const bool depthFirst_;
             const labelList& order_;
-            const List<topoDistanceData>& distance_;
+            const List<topoDistanceData<label>>& distance_;
 
         public:
 
@@ -74,7 +76,7 @@ public:
             (
                 const bool depthFirst,
                 const labelList& order,
-                const List<topoDistanceData>& distance
+                const List<topoDistanceData<label>>& distance
             )
             :
                 depthFirst_(depthFirst),

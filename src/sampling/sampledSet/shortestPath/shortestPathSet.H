@@ -82,7 +82,7 @@ SourceFiles
 namespace Foam
 {
 
-class topoDistanceData;
+template<class Type> class topoDistanceData;
 
 /*---------------------------------------------------------------------------*\
                        Class shortestPathSet Declaration
@@ -111,7 +111,7 @@ class shortestPathSet
         (
             const polyMesh& mesh,
             const label cellI,
-            const List<topoDistanceData>& allFaceInfo,
+            const List<topoDistanceData<label>>& allFaceInfo,
             const bitSet& isLeakPoint,
             const bool minDistance,
             const point& origin
@@ -135,8 +135,8 @@ class shortestPathSet
             const polyMesh& mesh,
             const label cellI,
 
-            List<topoDistanceData>& allFaceInfo,
-            List<topoDistanceData>& allCellInfo
+            List<topoDistanceData<label>>& allFaceInfo,
+            List<topoDistanceData<label>>& allCellInfo
         ) const;
 
         //- Checks if face uses a leak point
@@ -192,8 +192,8 @@ class shortestPathSet
             bitSet& isLeakPoint,
 
             // Work storage
-            List<topoDistanceData>& allFaceInfo,
-            List<topoDistanceData>& allCellInfo
+            List<topoDistanceData<label>>& allFaceInfo,
+            List<topoDistanceData<label>>& allCellInfo
         ) const;
 
         //- Calculate path between insideCelli (-1 if not on current processor)

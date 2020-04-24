@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2019,2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,23 +25,24 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::pointTopoDistanceData
+    Foam::edgeTopoDistanceData
 
 Description
-    For use with PointEdgeWave. Determines topological distance to
-    starting points. Templated on passive transported data.
+    For use with PatchEdgeFaceWave. Determines topological distance to
+    starting edges. Templated on passive transported data.
 
 SourceFiles
-    pointTopoDistanceDataI.H
-    pointTopoDistanceData.C
+    edgeTopoDistanceDataI.H
+    edgeTopoDistanceData.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointTopoDistanceData_H
-#define pointTopoDistanceData_H
+#ifndef edgeTopoDistanceData_H
+#define edgeTopoDistanceData_H
 
 #include "point.H"
 #include "tensor.H"
+#include "indirectPrimitivePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,19 +52,31 @@ namespace Foam
 // Forward Declarations
 class polyPatch;
 class polyMesh;
-template<class Type> class pointTopoDistanceData;
-template<class Type>
-Istream& operator>>(Istream&, pointTopoDistanceData<Type>&);
-template<class Type>
-Ostream& operator<<(Ostream&, const pointTopoDistanceData<Type>&);
+template<class Type, class PrimitivePatchType>
+class edgeTopoDistanceData;
+
+template<class Type, class PrimitivePatchType>
+Istream& operator>>
+(
+    Istream&,
+    edgeTopoDistanceData<Type, PrimitivePatchType>&
+);
+template<class Type, class PrimitivePatchType>
+Ostream& operator<<
+(
+    Ostream&,
+    const edgeTopoDistanceData<Type, PrimitivePatchType>&
+);
+
 
 /*---------------------------------------------------------------------------*\
-                    Class pointTopoDistanceData Declaration
+                    Class edgeTopoDistanceData Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Type>
-class pointTopoDistanceData
+template<class Type, class PrimitivePatchType = indirectPrimitivePatch>
+class edgeTopoDistanceData
 {
+protected:
 
     // Protected data
 
@@ -78,15 +91,14 @@ public:
 
     typedef Type dataType;
 
-
     // Constructors
 
         //- Construct null with invalid (-1) for distance, null constructor
         //  for data
-        inline pointTopoDistanceData();
+        inline edgeTopoDistanceData();
 
-        //- Construct from components
-        inline pointTopoDistanceData
+        //- Construct from distance, data
+        inline edgeTopoDistanceData
         (
             const label distance,
             const Type& data
@@ -108,139 +120,117 @@ public:
             }
 
 
-        // Needed by PointEdgeWave
+        // Needed by PatchEdgeFaceWave
 
-            //- Changed or contains original (invalid) value
+            //- Check whether origin has been changed at all or
+            //  still contains original (invalid) value.
             template<class TrackingData>
             inline bool valid(TrackingData& td) const;
 
-            //- Check for identical geometrical data (eg, cyclics checking)
-            template<class TrackingData>
-            inline bool sameGeometry
-            (
-                const pointTopoDistanceData<Type>&,
-                const scalar tol,
-                TrackingData& td
-            ) const;
-
-            //- Convert origin to relative vector to leaving point
-            //  (= point coordinate)
-            template<class TrackingData>
-            inline void leaveDomain
-            (
-                const polyPatch& patch,
-                const label patchPointi,
-                const point& pos,
-                TrackingData& td
-            );
-
-            //- Convert relative origin to absolute by adding entering point
-            template<class TrackingData>
-            inline void enterDomain
-            (
-                const polyPatch& patch,
-                const label patchPointi,
-                const point& pos,
-                TrackingData& td
-            );
-
-            //- Apply rotation matrix to origin
+            //- Apply rotation matrix
             template<class TrackingData>
             inline void transform
             (
+                const polyMesh& mesh,
+                const PrimitivePatchType& patch,
                 const tensor& rotTensor,
-                TrackingData& td
-            );
-
-            //- Influence of edge on point
-            template<class TrackingData>
-            inline bool updatePoint
-            (
-                const polyMesh& mesh,
-                const label pointi,
-                const label edgeI,
-                const pointTopoDistanceData<Type>& edgeInfo,
                 const scalar tol,
                 TrackingData& td
             );
 
-            //- Influence of different value on same point.
-            //  Merge new and old info.
-            template<class TrackingData>
-            inline bool updatePoint
-            (
-                const polyMesh& mesh,
-                const label pointi,
-                const pointTopoDistanceData<Type>& newPointInfo,
-                const scalar tol,
-                TrackingData& td
-            );
-
-            //- Influence of different value on same point.
-            //  No information about current position whatsoever.
-            template<class TrackingData>
-            inline bool updatePoint
-            (
-                const pointTopoDistanceData<Type>& newPointInfo,
-                const scalar tol,
-                TrackingData& td
-            );
-
-            //- Influence of point on edge.
+            //- Influence of face on edge
             template<class TrackingData>
             inline bool updateEdge
             (
                 const polyMesh& mesh,
+                const PrimitivePatchType& patch,
                 const label edgeI,
-                const label pointi,
-                const pointTopoDistanceData<Type>& pointInfo,
+                const label facei,
+                const edgeTopoDistanceData<Type, PrimitivePatchType>& faceInfo,
                 const scalar tol,
                 TrackingData& td
             );
 
-            //- Test for equality, with TrackingData
+            //- New information for edge (from e.g. coupled edge)
             template<class TrackingData>
-            inline bool equal(const pointTopoDistanceData<Type>&, TrackingData&)
-            const;
+            inline bool updateEdge
+            (
+                const polyMesh& mesh,
+                const PrimitivePatchType& patch,
+                const edgeTopoDistanceData<Type, PrimitivePatchType>& edgeInfo,
+                const bool sameOrientation,
+                const scalar tol,
+                TrackingData& td
+            );
+
+            //- Influence of edge on face.
+            template<class TrackingData>
+            inline bool updateFace
+            (
+                const polyMesh& mesh,
+                const PrimitivePatchType& patch,
+                const label facei,
+                const label edgeI,
+                const edgeTopoDistanceData<Type, PrimitivePatchType>& edgeInfo,
+                const scalar tol,
+                TrackingData& td
+            );
+
+            //- Same (like operator==)
+            template<class TrackingData>
+            inline bool equal
+            (
+                const edgeTopoDistanceData<Type, PrimitivePatchType>&,
+                TrackingData&
+            ) const;
 
 
     // Member Operators
 
         // Needed for List IO
-        inline bool operator==(const pointTopoDistanceData<Type>&) const;
-        inline bool operator!=(const pointTopoDistanceData<Type>&) const;
+        inline bool operator==
+        (
+            const edgeTopoDistanceData<Type, PrimitivePatchType>&
+        ) const;
+        inline bool operator!=
+        (
+            const edgeTopoDistanceData<Type, PrimitivePatchType>&
+        ) const;
 
 
     // IOstream Operators
 
-        friend Ostream& operator<< <Type>
+        friend Ostream& operator<< <Type, PrimitivePatchType>
         (
             Ostream&,
-            const pointTopoDistanceData<Type>&
+            const edgeTopoDistanceData<Type, PrimitivePatchType>&
         );
-        friend Istream& operator>> <Type>
+        friend Istream& operator>> <Type, PrimitivePatchType>
         (
             Istream&,
-            pointTopoDistanceData<Type>&
+            edgeTopoDistanceData<Type, PrimitivePatchType>&
         );
 };
 
 
 // * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
 
+
 //- Data are contiguous if data type is contiguous
-template<class Type>
-struct is_contiguous<pointTopoDistanceData<Type>> : is_contiguous<Type> {};
+template<class Type, class PrimitivePatchType>
+struct is_contiguous<edgeTopoDistanceData<Type, PrimitivePatchType>> :
+    is_contiguous<Type> {};
 
 //- Data are contiguous label if data type is label
-template<class Type>
-struct is_contiguous_label<pointTopoDistanceData<Type>> :
+template<class Type, class PrimitivePatchType>
+struct is_contiguous_label<edgeTopoDistanceData<Type, PrimitivePatchType>> :
     is_contiguous_label<Type> {};
 
 //- Data are contiguous scalar if data type is scalar
-template<class Type>
-struct is_contiguous_scalar<pointTopoDistanceData<Type>> :
+template<class Type, class PrimitivePatchType>
+struct is_contiguous_scalar<edgeTopoDistanceData<Type, PrimitivePatchType>> :
     is_contiguous_scalar<Type>{};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -249,12 +239,12 @@ struct is_contiguous_scalar<pointTopoDistanceData<Type>> :
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "pointTopoDistanceData.C"
+    #include "edgeTopoDistanceData.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "pointTopoDistanceDataI.H"
+#include "edgeTopoDistanceDataI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

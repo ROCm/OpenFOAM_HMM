@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,8 +72,8 @@ bool Foam::structuredRenumber::layerLess::operator()
     const label b
 )
 {
-    const topoDistanceData& ta = distance_[a];
-    const topoDistanceData& tb = distance_[b];
+    const topoDistanceData<label>& ta = distance_[a];
+    const topoDistanceData<label>& tb = distance_[b];
 
     int dummy;
 
@@ -209,7 +209,7 @@ Foam::labelList Foam::structuredRenumber::renumber
 
     // Walk sub-ordering (=column index) out.
     labelList patchFaces(nFaces);
-    List<topoDistanceData> patchData(nFaces);
+    List<topoDistanceData<label>> patchData(nFaces);
     nFaces = 0;
     for (const label patchi : patchIDs)
     {
@@ -218,21 +218,21 @@ Foam::labelList Foam::structuredRenumber::renumber
         forAll(fc, i)
         {
             patchFaces[nFaces] = pp.start()+i;
-            patchData[nFaces] = topoDistanceData
+            patchData[nFaces] = topoDistanceData<label>
             (
-                orderedToOld[fc[i]],// passive data: global column
-                0                   // distance: layer
+                0,                  // distance: layer
+                orderedToOld[fc[i]] // passive data: global column
             );
             nFaces++;
         }
     }
 
     // Field on cells and faces.
-    List<topoDistanceData> cellData(mesh.nCells());
-    List<topoDistanceData> faceData(mesh.nFaces());
+    List<topoDistanceData<label>> cellData(mesh.nCells());
+    List<topoDistanceData<label>> faceData(mesh.nFaces());
 
     // Propagate information inwards
-    OppositeFaceCellWave<topoDistanceData> deltaCalc
+    OppositeFaceCellWave<topoDistanceData<label>> deltaCalc
     (
         mesh,
         patchFaces,

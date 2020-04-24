@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -110,8 +110,8 @@ void Foam::meshStructure::correct
 )
 {
     // Field on cells and faces.
-    List<topoDistanceData> cellData(mesh.nCells());
-    List<topoDistanceData> faceData(mesh.nFaces());
+    List<topoDistanceData<label>> cellData(mesh.nCells());
+    List<topoDistanceData<label>> faceData(mesh.nFaces());
 
     {
         if (debug)
@@ -124,20 +124,20 @@ void Foam::meshStructure::correct
 
         // Start of changes
         labelList patchFaces(pp.size());
-        List<topoDistanceData> patchData(pp.size());
+        List<topoDistanceData<label>> patchData(pp.size());
         forAll(pp, patchFacei)
         {
             patchFaces[patchFacei] = pp.addressing()[patchFacei];
-            patchData[patchFacei] = topoDistanceData
+            patchData[patchFacei] = topoDistanceData<label>
             (
-                globalFaces.toGlobal(patchFacei),
-                0
+                0,                                  // distance
+                globalFaces.toGlobal(patchFacei)    // passive data
             );
         }
 
 
         // Propagate information inwards
-        FaceCellWave<topoDistanceData> distanceCalc
+        FaceCellWave<topoDistanceData<label>> distanceCalc
         (
             mesh,
             patchFaces,
@@ -232,25 +232,25 @@ void Foam::meshStructure::correct
         }
 
         // Field on edges and points.
-        List<pointTopoDistanceData> edgeData(mesh.nEdges());
-        List<pointTopoDistanceData> pointData(mesh.nPoints());
+        List<pointTopoDistanceData<label>> edgeData(mesh.nEdges());
+        List<pointTopoDistanceData<label>> pointData(mesh.nPoints());
 
         // Start of changes
         labelList patchPoints(pp.nPoints());
-        List<pointTopoDistanceData> patchData(pp.nPoints());
+        List<pointTopoDistanceData<label>> patchData(pp.nPoints());
         forAll(pp.meshPoints(), patchPointi)
         {
             patchPoints[patchPointi] = pp.meshPoints()[patchPointi];
-            patchData[patchPointi] = pointTopoDistanceData
+            patchData[patchPointi] = pointTopoDistanceData<label>
             (
-                globalPoints.toGlobal(patchPointi),
-                0
+                0,                                  // distance
+                globalPoints.toGlobal(patchPointi)  // passive data
             );
         }
 
 
         // Walk
-        PointEdgeWave<pointTopoDistanceData> distanceCalc
+        PointEdgeWave<pointTopoDistanceData<label>> distanceCalc
         (
             mesh,
             patchPoints,
@@ -308,7 +308,8 @@ void Foam::meshStructure::correct
                     //    << " at:" << mesh.faceCentres()[facei]
                     //    << " data:" << faceData[facei]
                     //    << " pointDatas:"
-                    //    << UIndirectList<pointTopoDistanceData>(pointData, f)
+                    //    << UIndirectList<pointTopoDistanceData<label>>
+                    //       (pointData, f)
                     //    << endl;
 
                     label patchFacei = faceData[facei].data();

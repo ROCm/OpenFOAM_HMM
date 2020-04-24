@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2013 OpenFOAM Foundation
     Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -26,26 +25,24 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "topoDistanceData.H"
+// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-template<class Type>
+template<class Type, class PrimitivePatchType>
 Foam::Ostream& Foam::operator<<
 (
     Foam::Ostream& os,
-    const Foam::topoDistanceData<Type>& wDist
+    const Foam::edgeTopoDistanceData<Type, PrimitivePatchType>& wDist
 )
 {
     return os << wDist.distance_ << token::SPACE << wDist.data_;
 }
 
 
-template<class Type>
+template<class Type, class PrimitivePatchType>
 Foam::Istream& Foam::operator>>
 (
     Foam::Istream& is,
-    Foam::topoDistanceData<Type>& wDist
+    Foam::edgeTopoDistanceData<Type, PrimitivePatchType>& wDist
 )
 {
     return is >> wDist.distance_ >> wDist.data_;

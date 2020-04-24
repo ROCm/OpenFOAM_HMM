@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,12 +88,12 @@ labelList nearestPatch(const polyMesh& mesh, const labelList& patchIDs)
     }
 
     // Field on cells and faces.
-    List<topoDistanceData> cellData(mesh.nCells());
-    List<topoDistanceData> faceData(mesh.nFaces());
+    List<topoDistanceData<label>> cellData(mesh.nCells());
+    List<topoDistanceData<label>> faceData(mesh.nFaces());
 
     // Start of changes
     labelList patchFaces(nFaces);
-    List<topoDistanceData> patchData(nFaces);
+    List<topoDistanceData<label>> patchData(nFaces);
     nFaces = 0;
     for (const label patchi : patchIDs)
     {
@@ -102,13 +102,13 @@ labelList nearestPatch(const polyMesh& mesh, const labelList& patchIDs)
         forAll(pp, i)
         {
             patchFaces[nFaces] = pp.start()+i;
-            patchData[nFaces] = topoDistanceData(patchi, 0);
+            patchData[nFaces] = topoDistanceData<label>(0, patchi);
             ++nFaces;
         }
     }
 
     // Propagate information inwards
-    FaceCellWave<topoDistanceData> deltaCalc
+    FaceCellWave<topoDistanceData<label>> deltaCalc
     (
         mesh,
         patchFaces,

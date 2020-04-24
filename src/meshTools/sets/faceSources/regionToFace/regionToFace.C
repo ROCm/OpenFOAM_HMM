@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,7 +34,7 @@ License
 #include "PatchTools.H"
 #include "addToRunTimeSelectionTable.H"
 #include "PatchEdgeFaceWave.H"
-#include "patchEdgeFaceRegion.H"
+#include "edgeTopoDistanceData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -83,11 +83,11 @@ void Foam::regionToFace::markZone
 ) const
 {
     // Data on all edges and faces
-    List<patchEdgeFaceRegion> allEdgeInfo(patch.nEdges());
-    List<patchEdgeFaceRegion> allFaceInfo(patch.size());
+    List<edgeTopoDistanceData<label>> allEdgeInfo(patch.nEdges());
+    List<edgeTopoDistanceData<label>> allFaceInfo(patch.size());
 
     DynamicList<label> changedEdges;
-    DynamicList<patchEdgeFaceRegion> changedInfo;
+    DynamicList<edgeTopoDistanceData<label>> changedInfo;
 
     if (Pstream::myProcNo() == proci)
     {
@@ -95,7 +95,14 @@ void Foam::regionToFace::markZone
         for (const label edgei : fEdges)
         {
             changedEdges.append(edgei);
-            changedInfo.append(zoneI);
+            changedInfo.append
+            (
+                edgeTopoDistanceData<label>
+                (
+                    0,          // distance
+                    zoneI
+                )
+            );
         }
     }
 
@@ -103,7 +110,7 @@ void Foam::regionToFace::markZone
     PatchEdgeFaceWave
     <
         indirectPrimitivePatch,
-        patchEdgeFaceRegion
+        edgeTopoDistanceData<label>
     > calc
     (
         mesh_,
@@ -117,7 +124,7 @@ void Foam::regionToFace::markZone
 
     forAll(allFaceInfo, facei)
     {
-        if (allFaceInfo[facei].region() == zoneI)
+        if (allFaceInfo[facei].data() == zoneI)
         {
             faceZone[facei] = zoneI;
         }

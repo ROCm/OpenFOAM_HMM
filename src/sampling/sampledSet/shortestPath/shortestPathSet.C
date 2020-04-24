@@ -54,7 +54,7 @@ Foam::label Foam::shortestPathSet::findMinFace
 (
     const polyMesh& mesh,
     const label cellI,
-    const List<topoDistanceData>& allFaceInfo,
+    const List<topoDistanceData<label>>& allFaceInfo,
     const bitSet& isLeakPoint,
     const bool distanceMode,
     const point& origin
@@ -70,7 +70,7 @@ Foam::label Foam::shortestPathSet::findMinFace
     forAll(cFaces2, i)
     {
         label faceI = cFaces2[i];
-        const topoDistanceData& info = allFaceInfo[faceI];
+        const topoDistanceData<label>& info = allFaceInfo[faceI];
         if (info.distance() < minDist)
         {
             minDist = info.distance();
@@ -146,14 +146,14 @@ void Foam::shortestPathSet::calculateDistance
     const polyMesh& mesh,
     const label cellI,
 
-    List<topoDistanceData>& allFaceInfo,
-    List<topoDistanceData>& allCellInfo
+    List<topoDistanceData<label>>& allFaceInfo,
+    List<topoDistanceData<label>>& allCellInfo
 ) const
 {
     int dummyTrackData = 0;
 
     // Seed faces on cell1
-    DynamicList<topoDistanceData> faceDist;
+    DynamicList<topoDistanceData<label>> faceDist;
     DynamicList<label> cFaces1;
 
     if (cellI != -1)
@@ -167,7 +167,7 @@ void Foam::shortestPathSet::calculateDistance
             if (!allFaceInfo[facei].valid(dummyTrackData))
             {
                 cFaces1.append(facei);
-                faceDist.append(topoDistanceData(123, 0));
+                faceDist.append(topoDistanceData<label>(0, 123));
             }
         }
     }
@@ -177,7 +177,7 @@ void Foam::shortestPathSet::calculateDistance
     // Walk through face-cell wave till all cells are reached
     FaceCellWave
     <
-        topoDistanceData
+        topoDistanceData<label>
     > wallDistCalc
     (
         mesh,
@@ -215,7 +215,7 @@ void Foam::shortestPathSet::calculateDistance
         forAll(fld.boundaryField(), patchi)
         {
             const polyPatch& pp = mesh.boundaryMesh()[patchi];
-            SubList<topoDistanceData> p(pp.patchSlice(allFaceInfo));
+            SubList<topoDistanceData<label>> p(pp.patchSlice(allFaceInfo));
             scalarField pfld(fld.boundaryField()[patchi].size());
             forAll(pfld, i)
             {
@@ -398,18 +398,18 @@ bool Foam::shortestPathSet::genSingleLeakPath
     bitSet& isLeakPoint,
 
     // Work storage
-    List<topoDistanceData>& allFaceInfo,
-    List<topoDistanceData>& allCellInfo
+    List<topoDistanceData<label>>& allFaceInfo,
+    List<topoDistanceData<label>>& allCellInfo
 ) const
 {
     const polyBoundaryMesh& pbm = mesh.boundaryMesh();
-    const topoDistanceData maxData(labelMax, labelMax);
+    const topoDistanceData<label> maxData(labelMax, labelMax);
 
 
     allFaceInfo.setSize(mesh.nFaces());
-    allFaceInfo = topoDistanceData();
+    allFaceInfo = topoDistanceData<label>();
     allCellInfo.setSize(mesh.nCells());
-    allCellInfo = topoDistanceData();
+    allCellInfo = topoDistanceData<label>();
 
     // Mark blocked faces with high distance
     forAll(isBlockedFace, facei)
@@ -597,8 +597,8 @@ bool Foam::shortestPathSet::genSingleLeakPath
                     origin
                 );
 
-                const topoDistanceData& cInfo = allCellInfo[frontCellI];
-                const topoDistanceData& fInfo = allFaceInfo[frontFaceI];
+                const topoDistanceData<label>& cInfo = allCellInfo[frontCellI];
+                const topoDistanceData<label>& fInfo = allFaceInfo[frontFaceI];
 
                 if (fInfo.distance() <= cInfo.distance())
                 {
@@ -715,7 +715,7 @@ bool Foam::shortestPathSet::genSingleLeakPath
              && allCellInfo[frontCellI].distance() < minCellDistance
             )
             {
-                const topoDistanceData& cInfo = allCellInfo[frontCellI];
+                const topoDistanceData<label>& cInfo = allCellInfo[frontCellI];
 
                 samplingPts.append(mesh.cellCentres()[frontCellI]);
                 samplingCells.append(frontCellI);
@@ -935,7 +935,7 @@ void Foam::shortestPathSet::genSamples
     // - isLeakPoint : is point on a leakFace
 
 
-    const topoDistanceData maxData(labelMax, labelMax);
+    const topoDistanceData<label> maxData(labelMax, labelMax);
 
     // Get the target point
     const label outsideCelli = mesh.findCell(outsidePoint);
@@ -943,8 +943,8 @@ void Foam::shortestPathSet::genSamples
     // Maintain overall track length. Used to make curveDist continuous.
     scalar trackLength = 0;
 
-    List<topoDistanceData> allFaceInfo(mesh.nFaces());
-    List<topoDistanceData> allCellInfo(mesh.nCells());
+    List<topoDistanceData<label>> allFaceInfo(mesh.nFaces());
+    List<topoDistanceData<label>> allCellInfo(mesh.nCells());
 
 
     // Boundary face + additional temporary blocks (to force leakpath to
