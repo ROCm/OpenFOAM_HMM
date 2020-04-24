@@ -34,6 +34,7 @@ License
 #include "polyTopoChange.H"
 #include "MeshObject.H"
 #include "lduMesh.H"
+#include "surfaceInterpolate.H"
 
 #include "processorFvPatch.H"
 
@@ -195,6 +196,12 @@ bool Foam::dynamicMotionSolverFvMeshAMI::update()
     if (Uptr)
     {
         Uptr->correctBoundaryConditions();
+
+        surfaceVectorField* UfPtr = getObjectPtr<surfaceVectorField>("Uf");
+        if (UfPtr)
+        {
+            *UfPtr = fvc::interpolate(*Uptr);
+        }
     }
 
     if (debug)
