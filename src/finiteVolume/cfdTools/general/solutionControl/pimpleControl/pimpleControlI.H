@@ -143,4 +143,10 @@ inline bool Foam::pimpleControl::turbCorr()
 }
 
 
+inline bool Foam::pimpleControl::ddtCorr() const
+{
+    return ddtCorr_;
+}
+
+
 // ************************************************************************* //
