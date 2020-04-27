@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,8 +28,9 @@ Class
     Foam::zero
 
 Description
-    A class representing the concept of 0 (zero), which can be used to avoid
-    manipulating objects that are known to be \em zero at compile-time.
+    A class representing the concept of 0 (zero) that can be used to avoid
+    manipulating objects known to be \em zero at compile-time.
+    It is also used for tagged dispatch.
 
 SourceFiles
     zero.C
@@ -50,7 +51,7 @@ SeeAlso
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class zero;
 class Istream;
 class Ostream;
@@ -62,12 +63,13 @@ class Ostream;
 class zero
 {
 public:
+
     typedef zero value_type;
 
-    // Forward declarations
+    // Forward Declarations
     class null;
 
-    //- Null constructible
+    //- Default construct
     constexpr zero() noexcept {}
 
     //- Construct from Istream consumes no content.
@@ -75,25 +77,25 @@ public:
 
 
     //- Return false (0) for bool
-    inline constexpr operator bool() const noexcept
+    constexpr operator bool() const noexcept
     {
         return false;
     }
 
     //- Return 0 for label
-    inline constexpr operator label() const noexcept
+    constexpr operator label() const noexcept
     {
         return 0;
     }
 
     //- Return 0 for float
-    inline constexpr operator float() const noexcept
+    constexpr operator float() const noexcept
     {
         return 0;
     }
 
     //- Return 0 for double
-    inline constexpr operator double() const noexcept
+    constexpr operator double() const noexcept
     {
         return 0;
     }
@@ -110,6 +112,7 @@ class zero::null
     public zero
 {
 public:
+
     typedef null value_type;
 
     //- A static zero::null for dereferencing as a dummy element
@@ -125,7 +128,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Global zero
+//- Global zero (0)
 static constexpr const zero Zero;
 
 // IOstream Operators
@@ -149,6 +152,7 @@ inline constexpr Ostream& operator<<(Ostream& os, const zero::null&) noexcept
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Global Operators, Functions
 #include "zeroI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

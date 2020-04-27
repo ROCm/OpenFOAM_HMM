@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,8 +28,9 @@ Class
     Foam::one
 
 Description
-    A class representing the concept of 1 (one), which can be used to avoid
-    manipulating objects that are known to be \em one at compile-time.
+    A class representing the concept of 1 (one) that can be used to avoid
+    manipulating objects known to be \em one at compile-time.
+    It is also used for tagged dispatch.
 
 SourceFiles
     oneI.H
@@ -49,7 +50,7 @@ SeeAlso
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class one;
 class Istream;
 class Ostream;
@@ -61,13 +62,14 @@ class Ostream;
 class one
 {
 public:
+
     typedef one value_type;
 
-    // Forward declarations
+    // Forward Declarations
     class minus;
     class null;
 
-    //- Null constructible
+    //- Default construct
     constexpr one() noexcept {}
 
     //- Construct from Istream consumes no content.
@@ -75,19 +77,19 @@ public:
 
 
     //- Return 1 for label
-    inline constexpr operator label() const noexcept
+    constexpr operator label() const noexcept
     {
         return 1;
     }
 
     //- Return 1 for float
-    inline constexpr operator float() const noexcept
+    constexpr operator float() const noexcept
     {
         return 1;
     }
 
     //- Return 1 for double
-    inline constexpr operator double() const noexcept
+    constexpr operator double() const noexcept
     {
         return 1;
     }
@@ -99,14 +101,15 @@ public:
 \*---------------------------------------------------------------------------*/
 
 //- A class representing the concept of -1.
-//  Note that this class must never be derived from 'one', since this could
+//  \note this class must never be derived from Foam::one, since this could
 //  potentially mask its behaviour.
 class one::minus
 {
 public:
+
     typedef minus value_type;
 
-    //- Null constructible
+    //- Default construct
     constexpr minus() noexcept {}
 
     //- Construct from Istream consumes no content.
@@ -114,19 +117,19 @@ public:
 
 
     //- Return -1 for label
-    inline constexpr operator label() const noexcept
+    constexpr operator label() const noexcept
     {
         return -1;
     }
 
     //- Return -1 for float
-    inline constexpr operator float() const noexcept
+    constexpr operator float() const noexcept
     {
         return -1;
     }
 
     //- Return -1 for double
-    inline constexpr operator double() const noexcept
+    constexpr operator double() const noexcept
     {
         return -1;
     }
@@ -137,15 +140,16 @@ public:
                           Class one::null Declaration
 \*---------------------------------------------------------------------------*/
 
-//- A one class with a null output adapter.
+//- A Foam::one class with a null output adapter.
 class one::null
 :
     public one
 {
 public:
+
     typedef null value_type;
 
-    //- Null constructible
+    //- Default construct
     constexpr null() noexcept {}
 
     //- Construct from Istream consumes no content.
@@ -154,6 +158,9 @@ public:
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Global one (1)
+static constexpr const one One;
 
 // IOstream Operators
 
@@ -182,6 +189,7 @@ inline constexpr Ostream& operator<<(Ostream& os, const one::null&) noexcept
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Global Operators, Functions
 #include "oneI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

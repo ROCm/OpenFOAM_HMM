@@ -48,7 +48,8 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
+class one;
 class zero;
 class dictionary;
 class primitiveEntry;
@@ -57,7 +58,6 @@ template<class Type> class dimensioned;
 
 template<class Type>
 Istream& operator>>(Istream& is, dimensioned<Type>& dt);
-
 
 /*---------------------------------------------------------------------------*\
                            Class dimensioned Declaration
@@ -130,7 +130,10 @@ public:
         explicit dimensioned(const dimensionSet& dims);
 
         //- A dimensioned Zero, named "0"
-        explicit dimensioned(const dimensionSet& dims, const zero);
+        explicit dimensioned(const dimensionSet& dims, const Foam::zero);
+
+        //- A dimensioned pTraits::one, named "1"
+        explicit dimensioned(const dimensionSet& dims, const Foam::one);
 
         //- Implicit construct dimensionless from given value.
         dimensioned(const Type& val)
@@ -140,8 +143,8 @@ public:
             value_(val)
         {}
 
-        //- Copy construct dimensioned Type with a new name
-        dimensioned(const word& name, const dimensioned<Type>& dt);
+        //- Construct dimensioned from given value
+        dimensioned(const dimensionSet& dims, const Type& val);
 
         //- Construct from components (name, dimensions, value).
         dimensioned
@@ -150,6 +153,9 @@ public:
             const dimensionSet& dims,
             const Type& val
         );
+
+        //- Copy construct dimensioned Type with a new name
+        dimensioned(const word& name, const dimensioned<Type>& dt);
 
         //- Construct from primitive entry with given name.
         //  The entry may contain optional name and dimensions.
@@ -234,7 +240,7 @@ public:
     // Static Member Functions
 
         //- Construct dimensioned from dictionary, with default value.
-        //- FatalIOError if there are excess tokens.
+        //  FatalIOError if there are excess tokens.
         static dimensioned<Type> getOrDefault
         (
             const word& name,

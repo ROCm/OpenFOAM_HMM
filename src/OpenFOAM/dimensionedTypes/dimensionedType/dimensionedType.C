@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,7 +46,7 @@ void Foam::dimensioned<Type>::initialize(Istream& is, const bool checkDims)
         is.putBack(nextToken);
     }
 
-    scalar mult(1.0);
+    scalar mult{1};
 
     if (nextToken == token::BEGIN_SQR)
     {
@@ -128,7 +128,11 @@ Foam::dimensioned<Type>::dimensioned(const dimensionSet& dims)
 
 
 template<class Type>
-Foam::dimensioned<Type>::dimensioned(const dimensionSet& dims, const zero)
+Foam::dimensioned<Type>::dimensioned
+(
+    const dimensionSet& dims,
+    const Foam::zero
+)
 :
     name_("0"),
     dimensions_(dims),
@@ -139,13 +143,26 @@ Foam::dimensioned<Type>::dimensioned(const dimensionSet& dims, const zero)
 template<class Type>
 Foam::dimensioned<Type>::dimensioned
 (
-    const word& name,
-    const dimensioned<Type>& dt
+    const dimensionSet& dims,
+    const Foam::one
 )
 :
-    name_(name),
-    dimensions_(dt.dimensions_),
-    value_(dt.value_)
+    name_("1"),
+    dimensions_(dims),
+    value_(pTraits<Type>::one)
+{}
+
+
+template<class Type>
+Foam::dimensioned<Type>::dimensioned
+(
+    const dimensionSet& dims,
+    const Type& val
+)
+:
+    name_(::Foam::name(val)),
+    dimensions_(dims),
+    value_(val)
 {}
 
 
@@ -160,6 +177,19 @@ Foam::dimensioned<Type>::dimensioned
     name_(name),
     dimensions_(dims),
     value_(val)
+{}
+
+
+template<class Type>
+Foam::dimensioned<Type>::dimensioned
+(
+    const word& name,
+    const dimensioned<Type>& dt
+)
+:
+    name_(name),
+    dimensions_(dt.dimensions_),
+    value_(dt.value_)
 {}
 
 
@@ -490,7 +520,7 @@ Foam::Istream& Foam::dimensioned<Type>::read(Istream& is, const bool readName)
     }
 
     // Read dimensionSet + multiplier
-    scalar mult(1.0);
+    scalar mult{1};
     dimensions_.read(is, mult);
 
     // Read value
@@ -510,7 +540,7 @@ Foam::dimensioned<Type>::read(Istream& is, const dictionary& readSet)
     is >> name_;
 
     // Read dimensionSet + multiplier
-    scalar mult(1.0);
+    scalar mult{1};
     dimensions_.read(is, mult, readSet);
 
     // Read value
@@ -533,7 +563,7 @@ Foam::Istream& Foam::dimensioned<Type>::read
     is >> name_;
 
     // Read dimensionSet + multiplier
-    scalar mult(1.0);
+    scalar mult{1};
     dimensions_.read(is, mult, readSet);
 
     // Read value
@@ -561,7 +591,7 @@ void Foam::dimensioned<Type>::writeEntry
     }
 
     // The dimensions
-    scalar mult(1.0);
+    scalar mult{1};
     dimensions_.write(os, mult);
 
     // The value
@@ -777,7 +807,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const dimensioned<Type>& dt)
     os << dt.name() << token::SPACE;
 
     // The dimensions
-    scalar mult(1.0);
+    scalar mult{1};
     dt.dimensions().write(os, mult);
 
     // The value
