@@ -1,0 +1,20 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+endTime=85
+if notTest "$@"
+then
+    endTime=10
+fi
+
+sed "s|END_TIME|$endTime|g" system/controlDict.template > system/controlDict
+
+restore0Dir
+
+runApplication blockMesh
+
+rm -rf results
+
+#------------------------------------------------------------------------------

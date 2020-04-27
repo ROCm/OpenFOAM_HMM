@@ -30,21 +30,6 @@ License
 #include "mathematicalConstants.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const Foam::Enum
-<
-    Foam::turbulentDigitalFilterInletFvPatchVectorField::variantType
->
-Foam::turbulentDigitalFilterInletFvPatchVectorField::variantNames
-({
-    { variantType::DIGITAL_FILTER, "digitalFilter" },
-    { variantType::DIGITAL_FILTER, "DFM" },
-    { variantType::FORWARD_STEPWISE, "forwardStepwise" },
-    { variantType::FORWARD_STEPWISE, "reducedDigitalFilter" },
-    { variantType::FORWARD_STEPWISE, "FSM" }
-});
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 const Foam::pointToPointPlanarInterpolation&
@@ -114,10 +99,10 @@ Foam::turbulentDigitalFilterInletFvPatchVectorField::patchMapper() const
 
 
 Foam::List<Foam::Pair<Foam::label>>
-Foam::turbulentDigitalFilterInletFvPatchVectorField::patchIndexPairs()
+Foam::turbulentDigitalFilterInletFvPatchVectorField::indexPairs()
 {
     // Get patch normal direction into the domain
-    const vector nf(computePatchNormal());
+    const vector nf((-gAverage(patch().nf())).normalise());
 
     // Find the second local coordinate direction
     direction minCmpt = 0;
@@ -163,7 +148,7 @@ Foam::turbulentDigitalFilterInletFvPatchVectorField::patchIndexPairs()
     const boundBox bb(localPos);
 
     // Normalise to (i, j) coordinates
-    const Vector2D<label> n(planeDivisions_.first(), planeDivisions_.second());
+    const Vector2D<label> n(n_.first(), n_.second());
     invDelta_[0] = n[0]/bb.span()[0];
     invDelta_[1] = n[1]/bb.span()[1];
     const point localMinPt(bb.min());
@@ -187,8 +172,7 @@ Foam::turbulentDigitalFilterInletFvPatchVectorField::patchIndexPairs()
 }
 
 
-void Foam::turbulentDigitalFilterInletFvPatchVectorField::
-checkRTensorRealisable() const
+void Foam::turbulentDigitalFilterInletFvPatchVectorField::checkR() const
 {
     const vectorField& faceCentres = this->patch().patch().faceCentres();
 
@@ -198,65 +182,65 @@ checkRTensorRealisable() const
         {
             FatalErrorInFunction
                 << "Reynolds stress tensor component Rxx cannot be negative"
-                   "or zero, where Rxx = " << R_[facei].xx() << " at the face "
-                   "centre = " << faceCentres[facei] << exit(FatalError);
+                << " or zero, where Rxx = " << R_[facei].xx()
+                << " at the face centre = " << faceCentres[facei]
+                << exit(FatalError);
         }
 
         if (R_[facei].yy() < 0 || R_[facei].zz() < 0)
         {
             FatalErrorInFunction
                 << "Reynolds stress tensor components Ryy or Rzz cannot be"
-                << "negative where Ryy = " << R_[facei].yy() << ", and Rzz = "
-                << R_[facei].zz() << " at the face centre = "
-                << faceCentres[facei] << exit(FatalError);
+                << " negative where Ryy = " << R_[facei].yy()
+                << ", and Rzz = " << R_[facei].zz()
+                << " at the face centre = " << faceCentres[facei]
+                << exit(FatalError);
         }
 
-        scalar term0 = R_[facei].xx()*R_[facei].yy() - sqr(R_[facei].xy());
+        const scalar x0 = R_[facei].xx()*R_[facei].yy() - sqr(R_[facei].xy());
 
-        if (term0 <= 0)
+        if (x0 <= 0)
         {
             FatalErrorInFunction
                 << "Reynolds stress tensor component group, Rxx*Ryy - Rxy^2"
-                << "cannot be negative or zero at the face centre = "
-                << faceCentres[facei] << exit(FatalError);
+                << " cannot be negative or zero"
+                << " at the face centre = " << faceCentres[facei]
+                << exit(FatalError);
         }
 
-        scalar term1 = R_[facei].zz() - sqr(R_[facei].xz())/R_[facei].xx();
-        scalar term2 =
-            sqr(R_[facei].yz() - R_[facei].xy()*R_[facei].xz()
-           /(R_[facei].xx()*term0));
-        scalar term3 = term1 - term2;
+        const scalar x1 = R_[facei].zz() - sqr(R_[facei].xz())/R_[facei].xx();
+        const scalar x2 = sqr(R_[facei].yz() - R_[facei].xy()*R_[facei].xz()
+                         /(R_[facei].xx()*x0));
+        const scalar x3 = x1 - x2;
 
-        if (term3 < 0)
+        if (x3 < 0)
         {
             FatalErrorInFunction
-                << "Reynolds stress tensor component group,"
+                << "Reynolds stress tensor component group, "
                 << "Rzz - Rxz^2/Rxx - (Ryz - Rxy*Rxz/(Rxx*(Rxx*Ryy - Rxy^2)))^2"
-                << "cannot be negative at the face centre = "
-                << faceCentres[facei] << exit(FatalError);
+                << " cannot be negative at the face centre = "
+                << faceCentres[facei]
+                << exit(FatalError);
         }
     }
 
-    #ifdef FULLDEBUG
-    Info<< "Ends: checkRTensorRealisable()."
-        << " Reynolds tensor (on patch) is consistent." << nl;
-    #endif
+    Info<< "  # Reynolds stress tensor on patch is consistent #" << endl;
 }
 
 
 Foam::symmTensorField Foam::turbulentDigitalFilterInletFvPatchVectorField::
-computeLundWuSquires() const
+calcLund() const
 {
-    checkRTensorRealisable();
+    checkR();
 
-    symmTensorField LundWuSquires(symmTensorField(R_.size()));
+    symmTensorField Lund(symmTensorField(R_.size()));
 
     forAll(R_, facei)
     {
         const symmTensor& R = R_[facei];
-        symmTensor& lws = LundWuSquires[facei];
+        symmTensor& lws = Lund[facei];
 
-        // (Klein et al., 2003, Eq. 5)
+        // (KSJ:Eq. 5)
         lws.xx() = Foam::sqrt(R.xx());
         lws.xy() = R.xy()/lws.xx();
         lws.xz() = R.xz()/lws.xx();
@@ -265,128 +249,96 @@ computeLundWuSquires() const
         lws.zz() = Foam::sqrt(R.zz() - sqr(lws.xz()) - sqr(lws.yz()));
     }
 
-    #ifdef FULLDEBUG
-    Info<< "Ends: computeLundWuSquires()." << nl;
-    #endif
-
-    return LundWuSquires;
-}
-
-
-Foam::vector Foam::turbulentDigitalFilterInletFvPatchVectorField::
-computePatchNormal() const
-{
-    vector patchNormal(-gAverage(patch().nf()));
-    return patchNormal.normalise();
+    return Lund;
 }
 
 
 Foam::scalar Foam::turbulentDigitalFilterInletFvPatchVectorField::
-computeInitialFlowRate() const
+calcFlowRate() const
 {
-    const vector patchNormal(computePatchNormal());
+    const vector patchNormal((-gAverage(patch().nf())).normalise());
     return gSum((UMean_ & patchNormal)*patch().magSf());
 }
 
 
-void Foam::turbulentDigitalFilterInletFvPatchVectorField::convertToTimeScale
-(
-    tensor& L
-) const
-{
-    if (isTaylorHypot_)
-    {
-        forAll(L.x(), i)
-        {
-            L[i] /= patchNormalSpeed_;
-        }
-
-    #ifdef FULLDEBUG
-    Info<< "Ends: convertToTimeScale()."
-        << "Streamwise integral length scales are converted to time scales via"
-        << "Taylor's frozen turbulence hypothesis" << nl;
-    #endif
-    }
-}
-
-
 Foam::tensor Foam::turbulentDigitalFilterInletFvPatchVectorField::
-convertScalesToGridUnits
+meterToCell
 (
     const tensor& L
 ) const
 {
     tensor Ls(L);
-    convertToTimeScale(Ls);
+
+    // Convert streamwise integral length scales to integral
+    // time scales by using Taylor's frozen turbulence hypothesis
+    forAll(Ls.x(), i)
+    {
+        Ls[i] /= Ubulk_;
+    }
+
     const scalar invDeltaT = 1.0/db().time().deltaTValue();
 
+    //  (KSJ:Eq. 13)
     Ls.row(0, Ls.x()*invDeltaT);
     Ls.row(1, Ls.y()*invDelta_[0]);
     Ls.row(2, Ls.z()*invDelta_[1]);
-
-    #ifdef FULLDEBUG
-    Info<< "Ends: convertScalesToGridUnits()."
-        << "Units of input length scales are converted from metres to"
-        << "virtual-patch cell size/time-step" << nl;
-    #endif
 
     return Ls;
 }
 
 
 Foam::List<Foam::label> Foam::turbulentDigitalFilterInletFvPatchVectorField::
-initLenRandomBox() const
+initBox() const
 {
     label initValue = 0;
     label rangeModifier = 0;
 
-    if (variant_ == variantType::FORWARD_STEPWISE)
+    if (fsm_)
     {
-        // Initialise with 1 since x-dir possess 1 node with this variant
-        initValue = pTraits<label>::nComponents;
+        // Initialise with 1 since streamwise-dir possesses 1 cell in FSM
+        initValue = 1;
         rangeModifier = pTraits<vector>::nComponents;
     }
 
-    List<label> lenRandomBox(pTraits<tensor>::nComponents, initValue);
-    Vector<label> lenGrid
+    List<label> szBox(pTraits<tensor>::nComponents, initValue);
+    Vector<label> szPlane
     (
-        pTraits<label>::nComponents,
-        planeDivisions_.first(),
-        planeDivisions_.second()
+        1,
+        n_.first(),
+        n_.second()
     );
 
-    // Initialise: Main convenience factor, lenRandomBox_
     for
     (
-        const label& i
+        const label i
       : labelRange(rangeModifier, pTraits<tensor>::nComponents - rangeModifier)
     )
     {
         // Slicing index
-        const label sliceI = label(i/pTraits<vector>::nComponents);
+        const label slicei = label(i/pTraits<vector>::nComponents);
 
-        // Refer to 'computeFilterCoeffs()'
+        // Refer to "calcFilterCoeffs()"
         const label n = ceil(L_[i]);
         const label twiceN = 4*n;
 
-        // Initialise: Random-number set sizes
-        lenRandomBox[i] = lenGrid[sliceI] + twiceN;
+        // Size of random-number sets
+        szBox[i] = szPlane[slicei] + twiceN;
     }
 
-    return lenRandomBox;
+    return szBox;
 }
 
 
 Foam::List<Foam::label> Foam::turbulentDigitalFilterInletFvPatchVectorField::
-initBoxFactors2D() const
+initFactors2D() const
 {
     List<label> boxFactors2D(pTraits<vector>::nComponents);
 
     for (direction dir = 0; dir < pTraits<vector>::nComponents; ++dir)
     {
         boxFactors2D[dir] =
-            lenRandomBox_[pTraits<vector>::nComponents + dir]
-           *lenRandomBox_[pTraits<symmTensor>::nComponents + dir];
+            szBox_[pTraits<vector>::nComponents + dir]
+           *szBox_[pTraits<symmTensor>::nComponents + dir];
     }
 
     return boxFactors2D;
@@ -394,13 +346,13 @@ initBoxFactors2D() const
 
 
 Foam::List<Foam::label> Foam::turbulentDigitalFilterInletFvPatchVectorField::
-initBoxFactors3D() const
+initFactors3D() const
 {
     List<label> boxFactors3D(pTraits<vector>::nComponents);
 
     for (direction dir = 0; dir < pTraits<vector>::nComponents; ++dir)
     {
-        boxFactors3D[dir] = randomBoxFactors2D_[dir]*lenRandomBox_[dir];
+        boxFactors3D[dir] = boxFactors2D_[dir]*szBox_[dir];
     }
 
     return boxFactors3D;
@@ -408,14 +360,13 @@ initBoxFactors3D() const
 
 
 Foam::List<Foam::label> Foam::turbulentDigitalFilterInletFvPatchVectorField::
-initBoxPlaneFactors() const
+initPlaneFactors() const
 {
     List<label> planeFactors(pTraits<vector>::nComponents);
 
     for (direction dir = 0; dir < pTraits<vector>::nComponents; ++dir)
     {
-        planeFactors[dir] =
-            randomBoxFactors2D_[dir]*(lenRandomBox_[dir] - pTraits<label>::one);
+        planeFactors[dir] = boxFactors2D_[dir]*(szBox_[dir] - 1);
     }
 
     return planeFactors;
@@ -423,29 +374,23 @@ initBoxPlaneFactors() const
 
 
 Foam::List<Foam::List<Foam::scalar>>
-Foam::turbulentDigitalFilterInletFvPatchVectorField::fillRandomBox()
+Foam::turbulentDigitalFilterInletFvPatchVectorField::fillBox()
 {
-    List<List<scalar>> randomBox(pTraits<vector>::nComponents, List<scalar>());
+    List<List<scalar>> box(pTraits<vector>::nComponents, List<scalar>());
 
     // Initialise: Remaining convenience factors for (e1 e2 e3)
     for (direction dir = 0; dir < pTraits<vector>::nComponents; ++dir)
     {
         // Initialise: Random-box content with random-number sets
-        randomBox[dir] =
-            generateRandomSet<List<scalar>, scalar>(randomBoxFactors3D_[dir]);
+        box[dir] = randomSet<List<scalar>, scalar>(boxFactors3D_[dir]);
     }
 
-    #ifdef FULLDEBUG
-    Info<< "Ends: fillRandomBox()."
-        << "Random-number box is created." << nl;
-    #endif
-
-    return randomBox;
+    return box;
 }
 
 
 Foam::List<Foam::List<Foam::scalar>>
-Foam::turbulentDigitalFilterInletFvPatchVectorField::computeFilterCoeffs() const
+Foam::turbulentDigitalFilterInletFvPatchVectorField::calcFilterCoeffs() const
 {
     List<List<scalar>> filterCoeffs
     (
@@ -455,7 +400,7 @@ Foam::turbulentDigitalFilterInletFvPatchVectorField::computeFilterCoeffs() const
 
     label initValue = 0;
 
-    if(variant_ == variantType::FORWARD_STEPWISE)
+    if (fsm_)
     {
         initValue = pTraits<vector>::nComponents;
     }
@@ -463,11 +408,11 @@ Foam::turbulentDigitalFilterInletFvPatchVectorField::computeFilterCoeffs() const
     for (direction dir = initValue; dir < pTraits<tensor>::nComponents; ++dir)
     {
         // The smallest filter width larger than length scale
-        // (Klein et al., 2003, 'n' in Eq. 15)
+        // (KSJ:'n' in Eq. 15)
         const label n  = ceil(L_[dir]);
 
         // Full filter-width (except mid-zero) according to the condition
-        // (Klein et al., 2003, Eq. 15 whereat N is minimum =2n)
+        // (KSJ:Eq. 15 whereat N is minimum =2n)
         const label twiceN = 4*n;
 
         // Initialise filter-coeffs containers with full filter-width size
@@ -477,8 +422,7 @@ Foam::turbulentDigitalFilterInletFvPatchVectorField::computeFilterCoeffs() const
         // First element: -N within [-N, N]
         const scalar initElem = -2*scalar(n);
 
-        // Container initialised with [-N, N]
-        // (Klein et al., 2003, p. 658, Item-b)
+        // Container initialised with [-N, N] (KSJ:p. 658, item-b)
         std::iota
         (
             filterCoeffs[dir].begin(),
@@ -486,50 +430,43 @@ Foam::turbulentDigitalFilterInletFvPatchVectorField::computeFilterCoeffs() const
             initElem
         );
 
-        // Compute filter-coeffs
-        // (Klein et al., 2003, Eq. 14 (Gaussian))
-        // (Bercin et al., 2018, Fig. 9 (Exponential))
+        // Compute filter-coeffs (KSJ:Eq. 14 (Gaussian))
         List<scalar> fTemp(filterCoeffs[dir]);
         scalar fSum = 0;
         const scalar nSqr = n*n;
 
-        if (isGaussian_)
+        if (Gaussian_)
         {
-            fTemp = sqr(exp(modelConst_*sqr(fTemp)/nSqr));
+            fTemp = sqr(exp(C1_*sqr(fTemp)/nSqr));
             fSum = Foam::sqrt(sum(fTemp));
 
             filterCoeffs[dir] =
-                exp(modelConst_*sqr(filterCoeffs[dir])/nSqr)/fSum;
+                exp(C1_*sqr(filterCoeffs[dir])/nSqr)/fSum;
         }
         else
         {
-            fTemp = sqr(exp(modelConst_*mag(fTemp)/n));
+            fTemp = sqr(exp(C1_*mag(fTemp)/n));
             fSum = Foam::sqrt(sum(fTemp));
 
-            filterCoeffs[dir] = exp(modelConst_*mag(filterCoeffs[dir])/n)/fSum;
+            filterCoeffs[dir] = exp(C1_*mag(filterCoeffs[dir])/n)/fSum;
         }
     }
-
-    #ifdef FULLDEBUG
-    Info<< "Ends: computeFilterCoeffs()."
-        << " Filter coefficients are computed." << nl;
-    #endif
 
     return filterCoeffs;
 }
 
 
-void Foam::turbulentDigitalFilterInletFvPatchVectorField::rndShiftRefill()
+void Foam::turbulentDigitalFilterInletFvPatchVectorField::shiftRefill()
 {
-    forAll(randomBox_, dir)
+    forAll(box_, dir)
     {
-        List<scalar>& r = randomBox_[dir];
+        List<scalar>& r = box_[dir];
 
         // Shift forward from the back to the front / First Out
-        inplaceRotateList(r, randomBoxFactors2D_[dir]);
+        inplaceRotateList(r, boxFactors2D_[dir]);
 
         // Refill the back with a new random-number set / First In
-        for (label i = 0; i < randomBoxFactors2D_[dir]; ++i)
+        for (label i = 0; i < boxFactors2D_[dir]; ++i)
         {
             r[i] = rndGen_.GaussNormal<scalar>();
         }
@@ -537,7 +474,7 @@ void Foam::turbulentDigitalFilterInletFvPatchVectorField::rndShiftRefill()
 }
 
 
-void Foam::turbulentDigitalFilterInletFvPatchVectorField::mapFilteredRandomBox
+void Foam::turbulentDigitalFilterInletFvPatchVectorField::mapFilteredBox
 (
     vectorField& U
 )
@@ -546,24 +483,24 @@ void Foam::turbulentDigitalFilterInletFvPatchVectorField::mapFilteredRandomBox
     {
         const label xf = x.first();
         const label xs = x.second();
-        U[xf][0] = filteredRandomBox_[0][xs];
-        U[xf][1] = filteredRandomBox_[1][xs];
-        U[xf][2] = filteredRandomBox_[2][xs];
+        U[xf][0] = filteredBox_[0][xs];
+        U[xf][1] = filteredBox_[1][xs];
+        U[xf][2] = filteredBox_[2][xs];
     }
 }
 
 
-void Foam::turbulentDigitalFilterInletFvPatchVectorField::embedOnePointCorrs
+void Foam::turbulentDigitalFilterInletFvPatchVectorField::onePointCorrs
 (
     vectorField& U
 ) const
 {
-    forAll(LundWuSquires_, facei)
+    forAll(Lund_, facei)
     {
         vector& Us = U[facei];
-        const symmTensor& lws = LundWuSquires_[facei];
+        const symmTensor& lws = Lund_[facei];
 
-        // (Klein et al. p. 658, Item-e)
+        // (KSJ:p. 658, item-e)
         Us.z() = Us.x()*lws.xz() + Us.y()*lws.yz() + Us.z()*lws.zz();
         Us.y() = Us.x()*lws.xy() + Us.y()*lws.yy();
         Us.x() = Us.x()*lws.xx();
@@ -571,42 +508,24 @@ void Foam::turbulentDigitalFilterInletFvPatchVectorField::embedOnePointCorrs
 }
 
 
-void Foam::turbulentDigitalFilterInletFvPatchVectorField::embedMeanVelocity
-(
-    vectorField& U
-) const
-{
-    U += UMean_;
-}
-
-
-void Foam::turbulentDigitalFilterInletFvPatchVectorField::correctFlowRate
-(
-    vectorField& U
-) const
-{
-    U *= (initialFlowRate_/gSum(U & -patch().Sf()));
-}
-
-
-void Foam::turbulentDigitalFilterInletFvPatchVectorField::embedTwoPointCorrs()
+void Foam::turbulentDigitalFilterInletFvPatchVectorField::twoPointCorrs()
 {
     for (direction dir = 0; dir < pTraits<vector>::nComponents; ++dir)
     {
-        List<scalar>& in = randomBox_[dir];
-        List<scalar>& out = filteredRandomBox_[dir];
+        List<scalar>& in = box_[dir];
+        List<scalar>& out = filteredBox_[dir];
         const List<scalar>& filter1 = filterCoeffs_[dir];
         const List<scalar>& filter2 = filterCoeffs_[3 + dir];
         const List<scalar>& filter3 = filterCoeffs_[6 + dir];
 
-        const label sz1 = lenRandomBox_[dir];
-        const label sz2 = lenRandomBox_[3 + dir];
-        const label sz3 = lenRandomBox_[6 + dir];
+        const label sz1 = szBox_[dir];
+        const label sz2 = szBox_[3 + dir];
+        const label sz3 = szBox_[6 + dir];
         const label szfilter1 = filterCoeffs_[dir].size();
         const label szfilter2 = filterCoeffs_[3 + dir].size();
         const label szfilter3 = filterCoeffs_[6 + dir].size();
-        const label sz23 = randomBoxFactors2D_[dir];
-        const label sz123 = randomBoxFactors3D_[dir];
+        const label sz23 = boxFactors2D_[dir];
+        const label sz123 = boxFactors3D_[dir];
         const label validSlice2 = sz2 - (szfilter2 - label(1));
         const label validSlice3 = sz3 - (szfilter3 - label(1));
 
@@ -705,116 +624,31 @@ void Foam::turbulentDigitalFilterInletFvPatchVectorField::embedTwoPointCorrs()
 }
 
 
-void Foam::turbulentDigitalFilterInletFvPatchVectorField::computeDFM
-(
-    vectorField& U
-)
+Foam::List<Foam::scalar> Foam::turbulentDigitalFilterInletFvPatchVectorField::
+calcCoeffs1FSM() const
 {
-    #ifdef FULLDEBUG
-    Info<< "Starts: computeDFM()" << nl;
-    #endif
+    List<scalar> coeffs1FSM(pTraits<vector>::nComponents);
 
-    if (Pstream::master())
+    forAll(L_.x(), i)
     {
-        embedTwoPointCorrs();
-        rndShiftRefill();
+        coeffs1FSM[i] = exp(C1FSM_/L_[i]);
     }
 
-    Pstream::scatter(filteredRandomBox_);
-
-    mapFilteredRandomBox(U);
-
-    embedOnePointCorrs(U);
-
-    embedMeanVelocity(U);
-
-    if (isCorrectedFlowRate_)
-    {
-        correctFlowRate(U);
-    }
-
-    #ifdef FULLDEBUG
-    Info<< "Ends: computeDFM()" << nl;
-    #endif
-}
-
-
-void Foam::turbulentDigitalFilterInletFvPatchVectorField::computeReducedDFM
-(
-    vectorField& U
-)
-{
-    #ifdef FULLDEBUG
-    Info<< "Starts: computeReducedDFM()" << nl;
-    #endif
-
-    if (Pstream::master())
-    {
-        embedTwoPointCorrs();
-        rndShiftRefill();
-    }
-
-    Pstream::scatter(filteredRandomBox_);
-
-    mapFilteredRandomBox(U);
-
-    computeFSM(U);
-
-    embedOnePointCorrs(U);
-
-    embedMeanVelocity(U);
-
-    if (isCorrectedFlowRate_)
-    {
-        correctFlowRate(U);
-    }
-
-    #ifdef FULLDEBUG
-    Info<< "Ends: computeReducedDFM()" << nl;
-    #endif
+    return coeffs1FSM;
 }
 
 
 Foam::List<Foam::scalar> Foam::turbulentDigitalFilterInletFvPatchVectorField::
-computeConstList1FSM() const
+calcCoeffs2FSM() const
 {
-    List<scalar> constList1FSM(pTraits<vector>::nComponents);
+    List<scalar> coeffs2FSM(pTraits<vector>::nComponents);
 
     forAll(L_.x(), i)
     {
-        constList1FSM[i] = exp(const1FSM_/L_[i]);
+        coeffs2FSM[i] = Foam::sqrt(1.0 - exp(C2FSM_/L_[i]));
     }
 
-    return constList1FSM;
-}
-
-
-Foam::List<Foam::scalar> Foam::turbulentDigitalFilterInletFvPatchVectorField::
-computeConstList2FSM() const
-{
-    List<scalar> constList2FSM(pTraits<vector>::nComponents);
-
-    forAll(L_.x(), i)
-    {
-        constList2FSM[i] = Foam::sqrt(1.0 - exp(const2FSM_/L_[i]));
-    }
-
-    return constList2FSM;
-}
-
-
-void Foam::turbulentDigitalFilterInletFvPatchVectorField::computeFSM
-(
-    vectorField& U
-)
-{
-    for (direction dir = 0; dir < pTraits<vector>::nComponents; ++dir)
-    {
-        U.component(dir) = U0_.component(dir)*constList1FSM_[dir]
-                          +U.component(dir)*constList2FSM_[dir];
-    }
-
-    U0_ = U;
+    return coeffs2FSM;
 }
 
 
@@ -829,44 +663,40 @@ turbulentDigitalFilterInletFvPatchVectorField
 :
     fixedValueFvPatchField<vector>(p, iF),
     mapperPtr_(nullptr),
-    variant_(variantType::DIGITAL_FILTER),
-    isGaussian_(true),
-    isFixedSeed_(true),
-    isContinuous_(false),
-    isCorrectedFlowRate_(true),
-    interpolateR_(false),
-    interpolateUMean_(false),
-    isInsideMesh_(false),
-    isTaylorHypot_(true),
+    fsm_(false),
+    Gaussian_(true),
+    fixSeed_(true),
+    continuous_(false),
+    correctFlowRate_(true),
+    interpR_(false),
+    interpUMean_(false),
     mapMethod_("nearestCell"),
     curTimeIndex_(-1),
-    tiny_(1e-8),
-    patchNormalSpeed_(Zero),
-    modelConst_(-0.5*constant::mathematical::pi),
+    Ubulk_(0.0),
+    C1_(-0.5*constant::mathematical::pi),
     perturb_(1e-5),
-    initialFlowRate_(pTraits<scalar>::one),
+    flowRate_(1.0),
     rndGen_(1234),
-    planeDivisions_(Zero, Zero),
+    n_(0, 0),
     invDelta_(Zero),
     indexPairs_(Zero),
     R_(Zero),
-    LundWuSquires_(Zero),
+    Lund_(Zero),
     UMean_(Zero),
     Lbak_(Zero),
     L_(Zero),
-    const1FSM_(Zero),
-    const2FSM_(Zero),
-    constList1FSM_(Zero),
-    constList2FSM_(Zero),
-    lenRandomBox_(Zero),
-    randomBoxFactors2D_(Zero),
-    randomBoxFactors3D_(Zero),
+    C1FSM_(Zero),
+    C2FSM_(Zero),
+    coeffs1FSM_(Zero),
+    coeffs2FSM_(Zero),
+    szBox_(Zero),
+    boxFactors2D_(Zero),
+    boxFactors3D_(Zero),
     iNextToLastPlane_(Zero),
-    randomBox_(Zero),
+    box_(Zero),
     filterCoeffs_(Zero),
-    filteredRandomBox_(Zero),
-    U0_(Zero),
-    computeVariant(nullptr)
+    filteredBox_(Zero),
+    U0_(Zero)
 {}
 
 
@@ -881,44 +711,40 @@ turbulentDigitalFilterInletFvPatchVectorField
 :
     fixedValueFvPatchField<vector>(ptf, p, iF, mapper),
     mapperPtr_(nullptr),
-    variant_(ptf.variant_),
-    isGaussian_(ptf.isGaussian_),
-    isFixedSeed_(ptf.isFixedSeed_),
-    isContinuous_(ptf.isContinuous_),
-    isCorrectedFlowRate_(ptf.isCorrectedFlowRate_),
-    interpolateR_(ptf.interpolateR_),
-    interpolateUMean_(ptf.interpolateUMean_),
-    isInsideMesh_(ptf.isInsideMesh_),
-    isTaylorHypot_(ptf.isTaylorHypot_),
+    fsm_(ptf.fsm_),
+    Gaussian_(ptf.Gaussian_),
+    fixSeed_(ptf.fixSeed_),
+    continuous_(ptf.continuous_),
+    correctFlowRate_(ptf.correctFlowRate_),
+    interpR_(ptf.interpR_),
+    interpUMean_(ptf.interpUMean_),
     mapMethod_(ptf.mapMethod_),
     curTimeIndex_(-1),
-    tiny_(ptf.tiny_),
-    patchNormalSpeed_(ptf.patchNormalSpeed_),
-    modelConst_(ptf.modelConst_),
+    Ubulk_(ptf.Ubulk_),
+    C1_(ptf.C1_),
     perturb_(ptf.perturb_),
-    initialFlowRate_(ptf.initialFlowRate_),
+    flowRate_(ptf.flowRate_),
     rndGen_(ptf.rndGen_),
-    planeDivisions_(ptf.planeDivisions_),
+    n_(ptf.n_),
     invDelta_(ptf.invDelta_),
     indexPairs_(ptf.indexPairs_),
     R_(ptf.R_),
-    LundWuSquires_(ptf.LundWuSquires_),
+    Lund_(ptf.Lund_),
     UMean_(ptf.UMean_),
     Lbak_(ptf.Lbak_),
     L_(ptf.L_),
-    const1FSM_(ptf.const1FSM_),
-    const2FSM_(ptf.const2FSM_),
-    constList1FSM_(ptf.constList1FSM_),
-    constList2FSM_(ptf.constList2FSM_),
-    lenRandomBox_(ptf.lenRandomBox_),
-    randomBoxFactors2D_(ptf.randomBoxFactors2D_),
-    randomBoxFactors3D_(ptf.randomBoxFactors3D_),
+    C1FSM_(ptf.C1FSM_),
+    C2FSM_(ptf.C2FSM_),
+    coeffs1FSM_(ptf.coeffs1FSM_),
+    coeffs2FSM_(ptf.coeffs2FSM_),
+    szBox_(ptf.szBox_),
+    boxFactors2D_(ptf.boxFactors2D_),
+    boxFactors3D_(ptf.boxFactors3D_),
     iNextToLastPlane_(ptf.iNextToLastPlane_),
-    randomBox_(ptf.randomBox_),
+    box_(ptf.box_),
     filterCoeffs_(ptf.filterCoeffs_),
-    filteredRandomBox_(ptf.filteredRandomBox_),
-    U0_(ptf.U0_),
-    computeVariant(ptf.computeVariant)
+    filteredBox_(ptf.filteredBox_),
+    U0_(ptf.U0_)
 {}
 
 
@@ -932,163 +758,115 @@ turbulentDigitalFilterInletFvPatchVectorField
 :
     fixedValueFvPatchField<vector>(p, iF, dict),
     mapperPtr_(nullptr),
-    variant_
-    (
-        variantNames.getOrDefault
-        (
-            "variant",
-            dict,
-            variantType::DIGITAL_FILTER
-        )
-    ),
-    isGaussian_
-    (
-        (variant_ == variantType::FORWARD_STEPWISE)
-      ? false
-      : dict.getOrDefault("isGaussian", true)
-    ),
-    isFixedSeed_(dict.getOrDefault("isFixedSeed", true)),
-    isContinuous_(dict.getOrDefault("isContinuous", false)),
-    isCorrectedFlowRate_(dict.getOrDefault("isCorrectedFlowRate", true)),
-    interpolateR_(dict.getOrDefault("interpolateR", false)),
-    interpolateUMean_(dict.getOrDefault("interpolateUMean", false)),
-    isInsideMesh_(dict.getOrDefault("isInsideMesh", false)),
-    isTaylorHypot_(dict.getOrDefault("isTaylorHypot", true)),
+    fsm_(dict.getOrDefault("fsm", false)),
+    Gaussian_(fsm_ ? false : dict.getOrDefault("Gaussian", true)),
+    fixSeed_(dict.getOrDefault("fixSeed", true)),
+    continuous_(dict.getOrDefault("continuous", false)),
+    correctFlowRate_(dict.getOrDefault("correctFlowRate", true)),
+    interpR_(false),
+    interpUMean_(false),
     mapMethod_(dict.getOrDefault<word>("mapMethod", "nearestCell")),
     curTimeIndex_(-1),
-    tiny_(dict.getOrDefault<scalar>("threshold", 1e-8)),
-    patchNormalSpeed_
+    Ubulk_(dict.getCheck<scalar>("Ubulk", scalarMinMax::ge(ROOTSMALL))),
+    C1_
     (
-        dict.getCheck<scalar>
-        (
-            "patchNormalSpeed",
-            scalarMinMax::ge(tiny_)
-        )
+        dict.getOrDefault<scalar>("C1", -0.5*constant::mathematical::pi)
     ),
-    modelConst_
+    perturb_
     (
-        dict.getOrDefault<scalar>
-        (
-            "modelConst",
-           -0.5*constant::mathematical::pi
-        )
+        dict.getCheckOrDefault<scalar>("perturb", 1e-5, scalarMinMax::ge(SMALL))
     ),
-    perturb_(dict.getOrDefault<scalar>("perturb", 1e-5)),
-    initialFlowRate_(pTraits<scalar>::one),
-    rndGen_
-    (
-        isFixedSeed_
-      ? 1234
-      : time(0)
-    ),
-    planeDivisions_
+    flowRate_(1.0),
+    rndGen_(fixSeed_ ? 1234 : time(0)),
+    n_
     (
         dict.getCheck<Tuple2<label, label>>
         (
-            "planeDivisions",
-            [&](const Tuple2<label, label>& len)
+            "n",
+            [&](const Tuple2<label, label>& x)
             {
-                return tiny_ < min(len.first(), len.second()) ? true : false;
+                return min(x.first(), x.second()) > 0 ? true : false;
             }
         )
     ),
-    invDelta_(),
-    indexPairs_(patchIndexPairs()),
-    R_(interpolateOrRead<symmTensor>("R", dict, interpolateR_)),
-    LundWuSquires_(computeLundWuSquires()),
-    UMean_(interpolateOrRead<vector>("UMean", dict, interpolateUMean_)),
+    invDelta_(Zero),
+    indexPairs_(indexPairs()),
+    R_(interpolateOrRead<symmTensor>("R", dict, interpR_)),
+    Lund_(calcLund()),
+    UMean_(interpolateOrRead<vector>("UMean", dict, interpUMean_)),
     Lbak_
     (
         dict.getCheck<tensor>
         (
             "L",
-            [&](const tensor& l){return tiny_ < cmptMin(l) ? true : false;}
+            [&](const tensor& x){return cmptMin(x) > ROOTSMALL ? true : false;}
         )
     ),
-    L_(convertScalesToGridUnits(Lbak_)),
-    const1FSM_
+    L_(meterToCell(Lbak_)),
+    C1FSM_
     (
-        (variant_ == variantType::FORWARD_STEPWISE)
+        fsm_
       ? dict.getOrDefault<scalar>
         (
-            "const1FSM",
+            "C1FSM",
            -0.25*constant::mathematical::pi
         )
-      : Zero
+      : 0.0
     ),
-    const2FSM_
+    C2FSM_
     (
-        (variant_ == variantType::FORWARD_STEPWISE)
+        fsm_
       ? dict.getOrDefault<scalar>
         (
-            "const2FSM",
-           -0.5*constant::mathematical::pi
+            "C2FSM",
+            -0.5*constant::mathematical::pi
         )
-      : Zero
+      : 0.0
     ),
-    constList1FSM_
+    coeffs1FSM_(fsm_ ? calcCoeffs1FSM() : List<scalar>()),
+    coeffs2FSM_(fsm_ ? calcCoeffs2FSM() : List<scalar>()),
+    szBox_(initBox()),
+    boxFactors2D_(initFactors2D()),
+    boxFactors3D_(initFactors3D()),
+    iNextToLastPlane_(initPlaneFactors()),
+    box_
     (
-        (variant_ == variantType::FORWARD_STEPWISE)
-      ? computeConstList1FSM()
-      : List<scalar>()
-    ),
-    constList2FSM_
-    (
-        (variant_ == variantType::FORWARD_STEPWISE)
-      ? computeConstList2FSM()
-      : List<scalar>()
-    ),
-    lenRandomBox_(initLenRandomBox()),
-    randomBoxFactors2D_(initBoxFactors2D()),
-    randomBoxFactors3D_(initBoxFactors3D()),
-    iNextToLastPlane_(initBoxPlaneFactors()),
-    randomBox_
-    (
-        (isContinuous_ && Pstream::master())
+        (continuous_ && Pstream::master())
       ? dict.getOrDefault<List<List<scalar>>>
         (
-            "randomBox",
-            fillRandomBox() // First time-step
+            "box",
+            fillBox() // First time-step
         )
       :
-        fillRandomBox()
+        fillBox()
     ),
-    filterCoeffs_(computeFilterCoeffs()),
-    filteredRandomBox_
+    filterCoeffs_(calcFilterCoeffs()),
+    filteredBox_
     (
         pTraits<vector>::nComponents,
-        List<scalar>(planeDivisions_.first()*planeDivisions_.second(), Zero)
+        List<scalar>(n_.first()*n_.second(), Zero)
     ),
     U0_
     (
-        (variant_ == variantType::FORWARD_STEPWISE)
-      ? generateRandomSet<vectorField, vector>(patch().size())
+        fsm_
+      ? randomSet<vectorField, vector>(patch().size())
       : vectorField()
-    ),
-    computeVariant
-    (
-        (variant_ == variantType::FORWARD_STEPWISE)
-      ? &turbulentDigitalFilterInletFvPatchVectorField::computeReducedDFM
-      : &turbulentDigitalFilterInletFvPatchVectorField::computeDFM
     )
 {
-    if (isCorrectedFlowRate_)
+    if (correctFlowRate_)
     {
-        initialFlowRate_ = computeInitialFlowRate();
+        flowRate_ = calcFlowRate();
     }
 
     // Check if varying or fixed time-step computation
     if (db().time().isAdjustTimeStep())
     {
         WarningInFunction
-            << "Varying time-step computations are not fully supported"
-            << " for the moment."<< nl << nl;
+            << "  # Varying time-step computations are not fully supported #"
+            << endl;
     }
 
-    #ifdef FULLDEBUG
-    Info<< "Ends: Resource acquisition/initialisation for the"
-        << " synthetic turbulence boundary condition." << nl;
-    #endif
+    Info<< "  # turbulentDigitalFilterInlet initialisation completed #" << endl;
 }
 
 
@@ -1100,44 +878,40 @@ turbulentDigitalFilterInletFvPatchVectorField
 :
     fixedValueFvPatchField<vector>(ptf),
     mapperPtr_(nullptr),
-    variant_(ptf.variant_),
-    isGaussian_(ptf.isGaussian_),
-    isFixedSeed_(ptf.isFixedSeed_),
-    isContinuous_(ptf.isContinuous_),
-    isCorrectedFlowRate_(ptf.isCorrectedFlowRate_),
-    interpolateR_(ptf.interpolateR_),
-    interpolateUMean_(ptf.interpolateUMean_),
-    isInsideMesh_(ptf.isInsideMesh_),
-    isTaylorHypot_(ptf.isTaylorHypot_),
+    fsm_(ptf.fsm_),
+    Gaussian_(ptf.Gaussian_),
+    fixSeed_(ptf.fixSeed_),
+    continuous_(ptf.continuous_),
+    correctFlowRate_(ptf.correctFlowRate_),
+    interpR_(ptf.interpR_),
+    interpUMean_(ptf.interpUMean_),
     mapMethod_(ptf.mapMethod_),
     curTimeIndex_(ptf.curTimeIndex_),
-    tiny_(ptf.tiny_),
-    patchNormalSpeed_(ptf.patchNormalSpeed_),
-    modelConst_(ptf.modelConst_),
+    Ubulk_(ptf.Ubulk_),
+    C1_(ptf.C1_),
     perturb_(ptf.perturb_),
-    initialFlowRate_(ptf.initialFlowRate_),
+    flowRate_(ptf.flowRate_),
     rndGen_(ptf.rndGen_),
-    planeDivisions_(ptf.planeDivisions_),
+    n_(ptf.n_),
     invDelta_(ptf.invDelta_),
     indexPairs_(ptf.indexPairs_),
     R_(ptf.R_),
-    LundWuSquires_(ptf.LundWuSquires_),
+    Lund_(ptf.Lund_),
     UMean_(ptf.UMean_),
     Lbak_(ptf.Lbak_),
     L_(ptf.L_),
-    const1FSM_(ptf.const1FSM_),
-    const2FSM_(ptf.const2FSM_),
-    constList1FSM_(ptf.constList1FSM_),
-    constList2FSM_(ptf.constList2FSM_),
-    lenRandomBox_(ptf.lenRandomBox_),
-    randomBoxFactors2D_(ptf.randomBoxFactors2D_),
-    randomBoxFactors3D_(ptf.randomBoxFactors3D_),
+    C1FSM_(ptf.C1FSM_),
+    C2FSM_(ptf.C2FSM_),
+    coeffs1FSM_(ptf.coeffs1FSM_),
+    coeffs2FSM_(ptf.coeffs2FSM_),
+    szBox_(ptf.szBox_),
+    boxFactors2D_(ptf.boxFactors2D_),
+    boxFactors3D_(ptf.boxFactors3D_),
     iNextToLastPlane_(ptf.iNextToLastPlane_),
-    randomBox_(ptf.randomBox_),
+    box_(ptf.box_),
     filterCoeffs_(ptf.filterCoeffs_),
-    filteredRandomBox_(ptf.filteredRandomBox_),
-    U0_(ptf.U0_),
-    computeVariant(ptf.computeVariant)
+    filteredBox_(ptf.filteredBox_),
+    U0_(ptf.U0_)
 {}
 
 
@@ -1150,44 +924,40 @@ turbulentDigitalFilterInletFvPatchVectorField
 :
     fixedValueFvPatchField<vector>(ptf, iF),
     mapperPtr_(nullptr),
-    variant_(ptf.variant_),
-    isGaussian_(ptf.isGaussian_),
-    isFixedSeed_(ptf.isFixedSeed_),
-    isContinuous_(ptf.isContinuous_),
-    isCorrectedFlowRate_(ptf.isCorrectedFlowRate_),
-    interpolateR_(ptf.interpolateR_),
-    interpolateUMean_(ptf.interpolateUMean_),
-    isInsideMesh_(ptf.isInsideMesh_),
-    isTaylorHypot_(ptf.isTaylorHypot_),
+    fsm_(ptf.fsm_),
+    Gaussian_(ptf.Gaussian_),
+    fixSeed_(ptf.fixSeed_),
+    continuous_(ptf.continuous_),
+    correctFlowRate_(ptf.correctFlowRate_),
+    interpR_(ptf.interpR_),
+    interpUMean_(ptf.interpUMean_),
     mapMethod_(ptf.mapMethod_),
     curTimeIndex_(-1),
-    tiny_(ptf.tiny_),
-    patchNormalSpeed_(ptf.patchNormalSpeed_),
-    modelConst_(ptf.modelConst_),
+    Ubulk_(ptf.Ubulk_),
+    C1_(ptf.C1_),
     perturb_(ptf.perturb_),
-    initialFlowRate_(ptf.initialFlowRate_),
+    flowRate_(ptf.flowRate_),
     rndGen_(ptf.rndGen_),
-    planeDivisions_(ptf.planeDivisions_),
+    n_(ptf.n_),
     invDelta_(ptf.invDelta_),
     indexPairs_(ptf.indexPairs_),
     R_(ptf.R_),
-    LundWuSquires_(ptf.LundWuSquires_),
+    Lund_(ptf.Lund_),
     UMean_(ptf.UMean_),
     Lbak_(ptf.Lbak_),
     L_(ptf.L_),
-    const1FSM_(ptf.const1FSM_),
-    const2FSM_(ptf.const2FSM_),
-    constList1FSM_(ptf.constList1FSM_),
-    constList2FSM_(ptf.constList2FSM_),
-    lenRandomBox_(ptf.lenRandomBox_),
-    randomBoxFactors2D_(ptf.randomBoxFactors2D_),
-    randomBoxFactors3D_(ptf.randomBoxFactors3D_),
+    C1FSM_(ptf.C1FSM_),
+    C2FSM_(ptf.C2FSM_),
+    coeffs1FSM_(ptf.coeffs1FSM_),
+    coeffs2FSM_(ptf.coeffs2FSM_),
+    szBox_(ptf.szBox_),
+    boxFactors2D_(ptf.boxFactors2D_),
+    boxFactors3D_(ptf.boxFactors3D_),
     iNextToLastPlane_(ptf.iNextToLastPlane_),
-    randomBox_(ptf.randomBox_),
+    box_(ptf.box_),
     filterCoeffs_(ptf.filterCoeffs_),
-    filteredRandomBox_(ptf.filteredRandomBox_),
-    U0_(ptf.U0_),
-    computeVariant(ptf.computeVariant)
+    filteredBox_(ptf.filteredBox_),
+    U0_(ptf.U0_)
 {}
 
 
@@ -1204,7 +974,38 @@ void Foam::turbulentDigitalFilterInletFvPatchVectorField::updateCoeffs()
     {
         vectorField& U = *this;
 
-        computeVariant(this, U);
+        if (Pstream::master())
+        {
+            twoPointCorrs();
+            shiftRefill();
+        }
+
+        Pstream::scatter(filteredBox_);
+
+        mapFilteredBox(U);
+
+        if (fsm_)
+        {
+            //(XC:Eq. 14)
+            for (direction dir = 0; dir < pTraits<vector>::nComponents; ++dir)
+            {
+                U.component(dir) =
+                    U0_.component(dir)*coeffs1FSM_[dir]
+                  + U.component(dir)*coeffs2FSM_[dir];
+            }
+
+            U0_ = U;
+        }
+
+        onePointCorrs(U);
+
+        U += UMean_;
+
+        if (correctFlowRate_)
+        {
+            // (KCX:Eq. 8)
+            U *= (flowRate_/gSum(U & -patch().Sf()));
+        }
 
         curTimeIndex_ = db().time().timeIndex();
     }
@@ -1219,27 +1020,24 @@ void Foam::turbulentDigitalFilterInletFvPatchVectorField::write
 ) const
 {
     fixedValueFvPatchField<vector>::write(os),
-    os.writeEntry("variant", variantNames[variant_]);
-    os.writeEntry("planeDivisions", planeDivisions_);
+    os.writeEntry("n", n_);
     os.writeEntry("L", Lbak_);
 
-    if (!interpolateR_)
+    if (!interpR_)
     {
         R_.writeEntry("R", os);
     }
 
-    if (!interpolateUMean_)
+    if (!interpUMean_)
     {
         UMean_.writeEntry("UMean", os);
     }
 
-    os.writeEntryIfDifferent<bool>("isGaussian", true, isGaussian_);
-    os.writeEntryIfDifferent<bool>("isFixedSeed", true, isFixedSeed_);
-    os.writeEntryIfDifferent<bool>("isContinuous", false, isContinuous_);
-    os.writeEntryIfDifferent<bool>
-        ("isCorrectedFlowRate", true, isCorrectedFlowRate_);
-    os.writeEntryIfDifferent<bool>("isInsideMesh", false, isInsideMesh_);
-    os.writeEntryIfDifferent<bool>("isTaylorHypot", true, isTaylorHypot_);
+    os.writeEntryIfDifferent<bool>("fsm", false, fsm_);
+    os.writeEntryIfDifferent<bool>("Gaussian", true, Gaussian_);
+    os.writeEntryIfDifferent<bool>("fixSeed", true, fixSeed_);
+    os.writeEntryIfDifferent<bool>("continuous", false, continuous_);
+    os.writeEntryIfDifferent<bool>("correctFlowRate", true, correctFlowRate_);
 
     if (!mapMethod_.empty())
     {
@@ -1251,21 +1049,39 @@ void Foam::turbulentDigitalFilterInletFvPatchVectorField::write
         );
     }
 
-    os.writeEntry("threshold", tiny_);
-    os.writeEntry("patchNormalSpeed", patchNormalSpeed_);
-    os.writeEntry("modelConst", modelConst_);
+    os.writeEntry("Ubulk", Ubulk_);
+    os.writeEntry("C1", C1_);
     os.writeEntry("perturb", perturb_);
 
-    if (variant_ == variantType::FORWARD_STEPWISE)
+    if (fsm_)
     {
-        os.writeEntry("const1FSM", const1FSM_);
-        os.writeEntry("const2FSM", const2FSM_);
+        os.writeEntry("C1FSM", C1FSM_);
+        os.writeEntry("C2FSM", C2FSM_);
     }
 
-    if (isContinuous_ && Pstream::master())
+    if (continuous_ && Pstream::master())
     {
-        os.writeEntry("randomBox", randomBox_);
+        os.writeEntry("box", box_);
     }
+}
+
+
+void Foam::turbulentDigitalFilterInletFvPatchVectorField::autoMap
+(
+    const fvPatchFieldMapper& m
+)
+{
+    fixedValueFvPatchField<vector>::autoMap(m);
+}
+
+
+void Foam::turbulentDigitalFilterInletFvPatchVectorField::rmap
+(
+    const fvPatchVectorField& ptf,
+    const labelList& addr
+)
+{
+    fixedValueFvPatchField<vector>::rmap(ptf, addr);
 }
 
 

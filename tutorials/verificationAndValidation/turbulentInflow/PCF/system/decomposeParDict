@@ -10,27 +10,19 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
-    object      fieldAverage;
+    object      decomposeParDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-fieldAverage1
-{
-    type                fieldAverage;
-    libs                (fieldFunctionObjects);
-    writeControl        writeTime;
-    timeStart           $/timeStart;
+numberOfSubdomains  4;
 
-    fields
-    (
-        U
-        {
-            mean        on;
-            prime2Mean  on;
-            base        time;
-        }
-    );
+method              hierarchical;
+
+coeffs
+{
+    n    (1 2 2);
 }
 
+
 // ************************************************************************* //
+

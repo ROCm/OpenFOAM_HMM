@@ -9,19 +9,33 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volVectorField;
-    object      U;
+    class       volScalarField;
+    object      p;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inlet
+dimensions      [0 2 -2 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField
 {
-    type                turbulentDigitalFilterInlet;
-    variant             digitalFilter;
-    planeDivisions      ( 64 70 );
-    L                   ( 0.78035508 0.31085352 0.342261 0.1728125 0.171875
-                          0.22459375 0.172787596 0.171889998 0.224578995 );
-    patchNormalSpeed    20.133;
+    "bottomWall|topWall|inlet"
+    {
+        type            zeroGradient;
+    }
+
+    "left|right"
+    {
+        type            cyclic;
+    }
+
+    outlet
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
 }
+
 
 // ************************************************************************* //

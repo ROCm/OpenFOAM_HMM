@@ -9,43 +9,17 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    location    "0";
-    object      p;
+    class       volVectorField;
+    object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -2 0 0 0 0];
-
-internalField   uniform 0;
-
-boundaryField
+inlet
 {
-    bottomWall
-    {
-        type            zeroGradient;
-    }
-    topWall
-    {
-        type            zeroGradient;
-    }
-    left
-    {
-        type            cyclic;
-    }
-    right
-    {
-        type            cyclic;
-    }
-    inlet
-    {
-        type            zeroGradient;
-    }
-    outlet
-    {
-        type            fixedValue;
-        value           uniform 0;
-    }
+    type            turbulentDFSEMInlet;
+    delta           1;
+    nCellPerEddy    1;
+    mapMethod       nearestCell;
 }
 
 
