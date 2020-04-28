@@ -540,15 +540,26 @@ void Foam::triSurfaceMesh::clearOut()
 
 Foam::tmp<Foam::pointField> Foam::triSurfaceMesh::coordinates() const
 {
-    auto tpts = tmp<pointField>::New(8);
+    auto tpts = tmp<pointField>::New();
     auto& pts = tpts.ref();
 
-    // Use copy to calculate face centres so they don't get stored
-    pts = PrimitivePatch<triSurface::FaceType, SubList, const pointField&>
-    (
-        SubList<triSurface::FaceType>(*this, triSurface::size()),
-        triSurface::points()
-    ).faceCentres();
+    if (triSurface::hasFaceCentres())
+    {
+        // Can reuse existing values
+        pts = triSurface::faceCentres();
+    }
+    else
+    {
+        typedef SubList<labelledTri> FaceListType;
+
+        // Calculate face centres from a copy to avoid incurring
+        // additional storage
+        pts = PrimitivePatch<labelledTri, SubList, const pointField&>
+        (
+            FaceListType(*this, triSurface::size()),
+            triSurface::points()
+        ).faceCentres();
+    }
 
     return tpts;
 }
