@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1062,7 +1062,7 @@ void Foam::triSurfaceTools::snapToEnd
         if (current.elementType() == triPointRef::NONE)
         {
             // endpoint on point; current on triangle
-            const triSurface::FaceType& f = s.localFaces()[current.index()];
+            const triSurface::face_type& f = s.localFaces()[current.index()];
 
             if (f.found(end.index()))
             {
@@ -1443,7 +1443,7 @@ Foam::label Foam::triSurfaceTools::oppositeVertex
     const label edgeI
 )
 {
-    const triSurface::FaceType& f = surf.localFaces()[facei];
+    const triSurface::face_type& f = surf.localFaces()[facei];
     const edge& e = surf.edges()[edgeI];
 
     for (const label pointi : f)
@@ -1958,7 +1958,7 @@ Foam::vector Foam::triSurfaceTools::surfaceNormal
     const point& nearestPt
 )
 {
-    const triSurface::FaceType& f = surf[nearestFacei];
+    const triSurface::face_type& f = surf[nearestFacei];
     const pointField& points = surf.points();
 
     label nearType, nearLabel;
@@ -1989,7 +1989,7 @@ Foam::vector Foam::triSurfaceTools::surfaceNormal
     else
     {
         // Nearest to point
-        const triSurface::FaceType& localF = surf.localFaces()[nearestFacei];
+        const triSurface::face_type& localF = surf.localFaces()[nearestFacei];
         return surf.pointNormals()[localF[nearLabel]];
     }
 }
@@ -2039,7 +2039,7 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
     const label nearestFacei
 )
 {
-    const triSurface::FaceType& f = surf[nearestFacei];
+    const triSurface::face_type& f = surf[nearestFacei];
     const pointField& points = surf.points();
 
     // Find where point is on face
@@ -2135,7 +2135,7 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
         // above (nearType == triPointRef::EDGE).
 
 
-        const triSurface::FaceType& localF = surf.localFaces()[nearestFacei];
+        const triSurface::face_type& localF = surf.localFaces()[nearestFacei];
         label nearPointi = localF[nearLabel];
 
         const edgeList& edges = surf.edges();

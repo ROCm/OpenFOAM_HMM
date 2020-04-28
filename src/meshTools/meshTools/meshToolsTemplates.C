@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,9 +39,9 @@ void Foam::meshTools::writeOBJ
 
     label vertI = 0;
 
-    forAll(faceLabels, i)
+    for (const label facei : faceLabels)
     {
-        const FaceType& f = faces[faceLabels[i]];
+        const FaceType& f = faces[facei];
 
         forAll(f, fp)
         {

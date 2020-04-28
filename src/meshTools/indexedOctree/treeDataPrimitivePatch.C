@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +51,6 @@ void Foam::treeDataPrimitivePatch<PatchType>::update()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 template<class PatchType>
 Foam::treeDataPrimitivePatch<PatchType>::treeDataPrimitivePatch
 (
@@ -166,8 +165,8 @@ Foam::volumeType Foam::treeDataPrimitivePatch<PatchType>::getVolumeType
             << " nearest face:" << facei;
     }
 
-    const typename PatchType::FaceType& localF = patch_.localFaces()[facei];
-    const typename PatchType::FaceType& f = patch_[facei];
+    const typename PatchType::face_type& localF = patch_.localFaces()[facei];
+    const typename PatchType::face_type& f = patch_[facei];
     const pointField& points = patch_.points();
     const labelList& mp = patch_.meshPoints();
 
@@ -380,7 +379,7 @@ bool Foam::treeDataPrimitivePatch<PatchType>::overlaps
     // 2. Check if one or more face points inside
 
     const pointField& points = patch_.points();
-    const typename PatchType::FaceType& f = patch_[index];
+    const typename PatchType::face_type& f = patch_[index];
 
     if (cubeBb.containsAny(points, f))
     {
@@ -478,7 +477,7 @@ void Foam::treeDataPrimitivePatch<PatchType>::findNearestOp::operator()
 
     for (const label index : indices)
     {
-        const typename PatchType::FaceType& f = patch[index];
+        const typename PatchType::face_type& f = patch[index];
 
         const pointHit nearHit = f.nearestPoint(sample, points);
         const scalar distSqr = sqr(nearHit.distance());
@@ -560,7 +559,7 @@ bool Foam::treeDataPrimitivePatch<PatchType>::findSelfIntersectOp::operator()
     const treeDataPrimitivePatch<PatchType>& shape = tree_.shapes();
     const PatchType& patch = shape.patch();
 
-    const typename PatchType::FaceType& f = patch.localFaces()[index];
+    const typename PatchType::face_type& f = patch.localFaces()[index];
     const edge& e = patch.edges()[edgeID_];
 
     if (!f.found(e[0]) && !f.found(e[1]))
@@ -586,7 +585,7 @@ bool Foam::treeDataPrimitivePatch<PatchType>::findIntersection
     const PatchType& patch = shape.patch();
 
     const pointField& points = patch.points();
-    const typename PatchType::FaceType& f = patch[index];
+    const typename PatchType::face_type& f = patch[index];
 
     // Do quick rejection test
     if (shape.cacheBb_)

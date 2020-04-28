@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +41,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(surfaceIntersection, 0);
+    defineTypeNameAndDebug(surfaceIntersection, 0);
 }
 
 const Foam::Enum
@@ -283,7 +283,7 @@ void Foam::surfaceIntersection::classifyHit
 
     // Classify point on surface2
 
-    const triSurface::FaceType& f2 = surf2.localFaces()[surf2Facei];
+    const triSurface::face_type& f2 = surf2.localFaces()[surf2Facei];
     const pointField& surf1Pts = surf1.localPoints();
     const pointField& surf2Pts = surf2.localPoints();
 

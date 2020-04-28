@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(edgeIntersections, 0);
+    defineTypeNameAndDebug(edgeIntersections, 0);
 }
 
 Foam::scalar Foam::edgeIntersections::alignedCos_ = Foam::cos(degToRad(89.0));
@@ -383,14 +383,12 @@ bool Foam::edgeIntersections::offsetPerturb
     bool hasPerturbed = false;
 
     // For all hits on edge
-    forAll(hits, i)
+    for (const pointIndexHit& pHit : hits)
     {
-        const pointIndexHit& pHit = hits[i];
-
         // Classify point on face of surface2
-        label surf2Facei = pHit.index();
+        const label surf2Facei = pHit.index();
 
-        const triSurface::FaceType& f2 = surf2.localFaces()[surf2Facei];
+        const triSurface::face_type& f2 = surf2.localFaces()[surf2Facei];
         const pointField& surf2Pts = surf2.localPoints();
 
         const point ctr = f2.centre(surf2Pts);
@@ -440,7 +438,6 @@ bool Foam::edgeIntersections::offsetPerturb
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct null
 Foam::edgeIntersections::edgeIntersections()
 :
     List<List<pointIndexHit>>(),
@@ -475,7 +472,6 @@ Foam::edgeIntersections::edgeIntersections
 }
 
 
-// Construct from components
 Foam::edgeIntersections::edgeIntersections
 (
     const List<List<pointIndexHit>>& intersections,

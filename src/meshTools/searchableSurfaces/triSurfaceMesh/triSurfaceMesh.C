@@ -92,7 +92,7 @@ bool Foam::triSurfaceMesh::isSurfaceClosed() const
         facesPerEdge.clear();
         for (const label facei : pFaces)
         {
-            const triSurface::FaceType& f = triSurface::operator[](facei);
+            const triSurface::face_type& f = triSurface::operator[](facei);
             const label fp = f.find(pointi);
 
             // Something weird: if I expand the code of addFaceToEdge in both

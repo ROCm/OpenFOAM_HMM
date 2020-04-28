@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,23 +35,30 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(orientedSurface, 0);
+    defineTypeNameAndDebug(orientedSurface, 0);
 }
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    // True if edge is used in opposite order in faces
+    template<class Face>
+    static inline bool consistentEdge
+    (
+        const edge& e,
+        const Face& f0,
+        const Face& f1
+    )
+    {
+        return (f0.edgeDirection(e) > 0) ^ (f1.edgeDirection(e) > 0);
+    }
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-// Return true if edge is used in opposite order in faces
-bool Foam::orientedSurface::consistentEdge
-(
-    const edge& e,
-    const triSurface::FaceType& f0,
-    const triSurface::FaceType& f1
-)
-{
-    return (f0.edgeDirection(e) > 0) ^ (f1.edgeDirection(e) > 0);
-}
-
 
 Foam::labelList Foam::orientedSurface::faceToEdge
 (
@@ -61,13 +69,11 @@ Foam::labelList Foam::orientedSurface::faceToEdge
     labelList changedEdges(3*changedFaces.size());
     label changedI = 0;
 
-    forAll(changedFaces, i)
+    for (const label facei : changedFaces)
     {
-        const labelList& fEdges = s.faceEdges()[changedFaces[i]];
-
-        forAll(fEdges, j)
+        for (const label edgei : s.faceEdges()[facei])
         {
-            changedEdges[changedI++] = fEdges[j];
+            changedEdges[changedI++] = edgei;
         }
     }
     changedEdges.setSize(changedI);
@@ -86,10 +92,8 @@ Foam::labelList Foam::orientedSurface::edgeToFace
     labelList changedFaces(2*changedEdges.size());
     label changedI = 0;
 
-    forAll(changedEdges, i)
+    for (const label edgeI : changedEdges)
     {
-        label edgeI = changedEdges[i];
-
         const labelList& eFaces = s.edgeFaces()[edgeI];
 
         if (eFaces.size() < 2)
@@ -98,11 +102,11 @@ Foam::labelList Foam::orientedSurface::edgeToFace
         }
         else if (eFaces.size() == 2)
         {
-            label face0 = eFaces[0];
-            label face1 = eFaces[1];
+            const label face0 = eFaces[0];
+            const label face1 = eFaces[1];
 
-            const triSurface::FaceType& f0 = s.localFaces()[face0];
-            const triSurface::FaceType& f1 = s.localFaces()[face1];
+            const triSurface::face_type& f0 = s.localFaces()[face0];
+            const triSurface::face_type& f1 = s.localFaces()[face1];
 
             if (flip[face0] == UNVISITED)
             {

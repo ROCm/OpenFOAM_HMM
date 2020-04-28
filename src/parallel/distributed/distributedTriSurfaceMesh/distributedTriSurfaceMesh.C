@@ -1106,19 +1106,16 @@ Foam::label Foam::distributedTriSurfaceMesh::findOtherFace
 ) const
 {
     const triSurface& surf = static_cast<const triSurface&>(*this);
-    const triSurface::FaceType& nearF = surf[nearFacei];
+    const triSurface::face_type& nearF = surf[nearFacei];
 
     const edge e(nearF[nearLabel], nearF[nearF.fcIndex(nearLabel)]);
 
     const labelList& pFaces = pointFaces[e[0]];
-    forAll(pFaces, pFacei)
+    for (const label facei : pFaces)
     {
-        const label facei = pFaces[pFacei];
         if (facei != nearFacei)
         {
-            const triSurface::FaceType& f = surf[facei];
-
-            int dir = f.edgeDirection(e);
+            int dir = surf[facei].edgeDirection(e);
             if (dir != 0)
             {
                 return facei;
@@ -1151,9 +1148,8 @@ void Foam::distributedTriSurfaceMesh::calcFaceFaces
         {
             const edge e(f[fp], f[f.fcIndex(fp)]);
             const labelList& pFaces = pointFaces[f[fp]];
-            forAll(pFaces, pFacei)
+            for (const label otherFacei : pFaces)
             {
-                const label otherFacei = pFaces[pFacei];
                 if (otherFacei != facei)
                 {
                     if (s[otherFacei].edgeDirection(e) != 0)
@@ -1223,8 +1219,8 @@ void Foam::distributedTriSurfaceMesh::surfaceSide
 
         forAll(triangleIndex, i)
         {
-            label facei = triangleIndex[i];
-            const triSurface::FaceType& f = surf[facei];
+            const label facei = triangleIndex[i];
+            const triSurface::face_type& f = surf[facei];
             const point& sample = localSamples[i];
 
             // Find where point is on face
@@ -1287,10 +1283,9 @@ void Foam::distributedTriSurfaceMesh::surfaceSide
                 scalar maxCosAngle = -GREAT;
                 labelPair maxEdgeFaces(-1, -1);
 
-                forAll(pFaces, pFacei)
+                for (const label facei : pFaces)
                 {
-                    label facei = pFaces[pFacei];
-                    const triSurface::FaceType& f = surf[facei];
+                    const triSurface::face_type& f = surf[facei];
 
                     label fp = f.find(pointi);
                     label p1 = f[f.fcIndex(fp)];
@@ -1716,10 +1711,8 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
         // Find bounding box for all triangles on new distribution.
         forAll(s, trii)
         {
-            const triSurface::FaceType& f = s[trii];
-
             treeBoundBox& bb = bbs[distribution[trii]][0];
-            bb.add(s.points(), f);
+            bb.add(s.points(), s[trii]);
         }
 
         // Now combine for all processors and convert to correct format.
@@ -1767,10 +1760,8 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
         // Find bounding box for all triangles on new distribution.
         forAll(s, trii)
         {
-            const triSurface::FaceType& f = s[trii];
-
             treeBoundBox& bb = bbs[distribution[trii]][0];
-            bb.add(s.points(), f);
+            bb.add(s.points(), s[trii]);
         }
 
         // Now combine for all processors and convert to correct format.
@@ -1967,10 +1958,8 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
 //        // Find bounding box for all triangles on new distribution.
 //        forAll(s, trii)
 //        {
-//            const triSurface::FaceType& f = s[trii];
-//
 //            treeBoundBox& bb = bbs[distribution[trii]][0];
-//            bb.add(s.points(), f);
+//            bb.add(s.points(), s[trii]);
 //        }
 //
 //        // Now combine for all processors and convert to correct format.
@@ -2073,9 +2062,8 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
 
         forAll(s, trii)
         {
-            const triSurface::FaceType& f = s[trii];
             treeBoundBox& bb = bbs[distribution[trii]][0];
-            bb.add(s.points(), f);
+            bb.add(s.points(), s[trii]);
         }
 
         // Now combine for all processors and convert to correct format.
@@ -2160,12 +2148,8 @@ void Foam::distributedTriSurfaceMesh::subsetMeshMap
                 newToOldFaces[facei++] = oldFacei;
 
                 // Renumber labels for face
-                const triSurface::FaceType& f = s[oldFacei];
-
-                forAll(f, fp)
+                for (const label oldPointi : s[oldFacei])
                 {
-                    label oldPointi = f[fp];
-
                     if (oldToNewPoints[oldPointi] == -1)
                     {
                         oldToNewPoints[oldPointi] = pointi;
@@ -2273,12 +2257,8 @@ Foam::triSurface Foam::distributedTriSurfaceMesh::subsetMesh
             if (include[oldFacei])
             {
                 // Renumber labels for face
-                const triSurface::FaceType& f = s[oldFacei];
-
-                forAll(f, fp)
+                for (const label oldPointi : s[oldFacei])
                 {
-                    label oldPointi = f[fp];
-
                     if (oldToNewPoints[oldPointi] == -1)
                     {
                         oldToNewPoints[oldPointi] = pointi;

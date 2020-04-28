@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +36,7 @@ static void markPointNbrs
     boolList& okToCollapse
 )
 {
-    const triSurface::FaceType& f = surf.localFaces()[facei];
+    const triSurface::face_type& f = surf.localFaces()[facei];
 
     forAll(f, fp)
     {
@@ -109,7 +110,7 @@ label collapseEdge(triSurface& surf, const scalar minLen)
             if (okToCollapse[facei])
             {
                 // Check edge lengths.
-                const triSurface::FaceType& f = localFaces[facei];
+                const triSurface::face_type& f = localFaces[facei];
 
                 forAll(f, fp)
                 {

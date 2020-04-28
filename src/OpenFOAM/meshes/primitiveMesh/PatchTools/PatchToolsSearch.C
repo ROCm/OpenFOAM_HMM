@@ -219,7 +219,7 @@ void Foam::PatchTools::calcBounds
     nPoints = 0;
     bb = boundBox::invertedBox;
 
-    for (const Face& f : p)
+    for (const auto& f : p)
     {
         for (const label pointi : f)
         {

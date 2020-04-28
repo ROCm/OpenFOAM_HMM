@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -459,7 +459,7 @@ label sharedFace
 
     const edge& e = surf.edges()[sharedEdgeI];
 
-    const triSurface::FaceType& f = surf.localFaces()[firstFacei];
+    const triSurface::face_type& f = surf.localFaces()[firstFacei];
 
     label startIndex = f.find(e.start());
 
@@ -611,13 +611,13 @@ void renumberFaces
     const triSurface& surf,
     const labelList& pointMap,
     const Map<label>& faceToEdge,
-    List<triSurface::FaceType>& newTris
+    List<triSurface::face_type>& newTris
 )
 {
     forAllConstIters(faceToEdge, iter)
     {
         const label facei = iter.key();
-        const triSurface::FaceType& f = surf.localFaces()[facei];
+        const triSurface::face_type& f = surf.localFaces()[facei];
 
         forAll(f, fp)
         {
@@ -932,7 +932,7 @@ int main(int argc, char *argv[])
         // Check if faces use unmoved points.
         forAll(newTris, facei)
         {
-            const triSurface::FaceType& f = newTris[facei];
+            const triSurface::face_type& f = newTris[facei];
 
             forAll(f, fp)
             {
