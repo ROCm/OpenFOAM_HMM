@@ -28,14 +28,7 @@ License
 #include "error.H"
 #include <cctype>
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-inline Foam::ensight::VarName::VarName(const VarName& vn)
-:
-    word(vn, false)
-{}
-
 
 inline Foam::ensight::VarName::VarName(const char* s)
 :

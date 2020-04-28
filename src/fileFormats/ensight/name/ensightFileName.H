@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,6 +35,10 @@ Description
     Overall line length within case file is limited to 1024, but this is not
     yet addresssed.
 
+Note
+    To assist windows usage, a colon (':') in the name is replaced with
+    by an underscore.
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef ensightFileName_H
@@ -60,19 +64,25 @@ class FileName
 {
 public:
 
-    // Constructors
+    // Generated Methods
 
         //- Copy construct
-        inline FileName(const FileName& fn);
+        FileName(const FileName&) = default;
+
+        //- Move construct
+        FileName(FileName&&) = default;
+
+
+    // Constructors
 
         //- Construct as copy of character array
         inline explicit FileName(const char* s);
 
-        //- Construct as copy of std::string
+        //- Copy construct from std::string
         inline explicit FileName(const std::string& s);
 
 
-    // Member functions
+    // Member Functions
 
         //- Is this character valid for an ensight file-name
         inline static bool valid(char c);
@@ -90,8 +100,8 @@ public:
         void operator=(const string&) = delete;
         void operator=(const std::string&) = delete;
         void operator=(const char*) = delete;
-
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ Class
 Description
     Specification of a valid Ensight variable-name.
 
+    Illegal characters
     \code
         space !#%()*+,-./;@[]^
     \endcode
@@ -62,15 +63,21 @@ class VarName
 {
 public:
 
-    // Constructors
+    // Generated Methods
 
         //- Copy construct
-        inline VarName(const VarName& vn);
+        VarName(const VarName&) = default;
+
+        //- Move construct
+        VarName(VarName&&) = default;
+
+
+    // Constructors
 
         //- Construct as copy of character array
         inline explicit VarName(const char* s);
 
-        //- Construct as copy of std::string
+        //- Copy construct from std::string
         inline explicit VarName(const std::string& s);
 
 
@@ -91,7 +98,6 @@ public:
         void operator=(const string&) = delete;
         void operator=(const std::string&) = delete;
         void operator=(const char*) = delete;
-
 };
 
 
