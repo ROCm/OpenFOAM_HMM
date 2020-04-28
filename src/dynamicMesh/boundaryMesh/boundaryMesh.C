@@ -36,6 +36,7 @@ License
 #include "triSurface.H"
 #include "SortableList.H"
 #include "OFstream.H"
+#include "primitiveFacePatch.H"
 #include "uindirectPrimitivePatch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -538,11 +539,7 @@ void Foam::boundaryMesh::read(const polyMesh& mesh)
     //
 
     // Temporary primitivePatch to calculate compact points & faces.
-    PrimitivePatch<face, List, const pointField&> globalPatch
-    (
-        bFaces,
-        mesh.points()
-    );
+    primitiveFacePatch globalPatch(bFaces, mesh.points());
 
     // Store in local(compact) addressing
     clearOut();

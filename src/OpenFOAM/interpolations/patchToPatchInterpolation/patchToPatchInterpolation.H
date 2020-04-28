@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,26 +24,26 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::patchToPatchInterpolation
+
+Description
+    Foam::patchToPatchInterpolation
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef patchToPatchInterpolation_H
 #define patchToPatchInterpolation_H
 
 #include "PatchToPatchInterpolation.H"
-#include "PrimitivePatch.H"
-#include "face.H"
-#include "SubList.H"
-#include "pointField.H"
+#include "primitivePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef PatchToPatchInterpolation
-    <
-        PrimitivePatch<face, SubList, const pointField&>,
-        PrimitivePatch<face, SubList, const pointField&>
-    >   patchToPatchInterpolation;
+    typedef PatchToPatchInterpolation<primitivePatch, primitivePatch>
+        patchToPatchInterpolation;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

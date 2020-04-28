@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,19 +36,14 @@ Description
 #define primitivePatchInterpolation_H
 
 #include "PrimitivePatchInterpolation.H"
-#include "PrimitivePatch.H"
-#include "face.H"
-#include "SubList.H"
-#include "pointField.H"
+#include "primitivePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef PrimitivePatchInterpolation
-    <
-        PrimitivePatch<face, SubList, const pointField&>
-    >   primitivePatchInterpolation;
+    typedef PrimitivePatchInterpolation<primitivePatch>
+        primitivePatchInterpolation;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

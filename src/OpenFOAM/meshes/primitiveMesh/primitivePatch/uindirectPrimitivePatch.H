@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +28,8 @@ Typedef
     Foam::uindirectPrimitivePatch
 
 Description
-    A PrimitivePatch using a UIndirectList for the faces.
+    A PrimitivePatch with UIndirectList for the faces, const reference
+    for the point field.
 
 \*---------------------------------------------------------------------------*/
 

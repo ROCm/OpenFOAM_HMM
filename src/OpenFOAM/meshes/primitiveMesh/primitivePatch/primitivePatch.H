@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +28,10 @@ Typedef
     Foam::primitivePatch
 
 Description
-    Addressing for a faceList slice.
+    A PrimitivePatch with a SubList addressing for the faces,
+    const reference for the point field.
+
+    Can be used as addressing for a faceList slice.
 
 \*---------------------------------------------------------------------------*/
 

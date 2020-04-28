@@ -64,7 +64,7 @@ void PrimitivePatchInterpolation<Patch>::makeFaceToPointWeights() const
     const List<typename Patch::face_type>& faces = patch_.localFaces();
 
     faceToPointWeightsPtr_ = new scalarListList(points.size());
-    scalarListList& weights = *faceToPointWeightsPtr_;
+    auto& weights = *faceToPointWeightsPtr_;
 
     // get reference to addressing
     const labelListList& pointFaces = patch_.pointFaces();
@@ -122,7 +122,7 @@ void PrimitivePatchInterpolation<Patch>::makeFaceToEdgeWeights() const
     const labelListList& edgeFaces = patch_.edgeFaces();
 
     faceToEdgeWeightsPtr_ = new scalarList(patch_.nInternalEdges());
-    scalarList& weights = *faceToEdgeWeightsPtr_;
+    auto& weights = *faceToEdgeWeightsPtr_;
 
     forAll(weights, edgei)
     {
@@ -301,12 +301,8 @@ tmp<Field<Type>> PrimitivePatchInterpolation<Patch>::faceToEdgeInterpolate
             << abort(FatalError);
     }
 
-    tmp<Field<Type>> tresult
-    (
-        new Field<Type>(patch_.nEdges(), Zero)
-    );
-
-    Field<Type>& result = tresult.ref();
+    auto tresult = tmp<Field<Type>>::New(patch_.nEdges(), Zero);
+    auto& result = tresult.ref();
 
     const edgeList& edges = patch_.edges();
     const labelListList& edgeFaces = patch_.edgeFaces();

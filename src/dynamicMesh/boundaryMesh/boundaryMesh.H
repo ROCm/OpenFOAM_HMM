@@ -50,7 +50,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class Time;
 class polyMesh;
 class primitiveMesh;
@@ -61,7 +61,7 @@ class primitiveMesh;
 
 class boundaryMesh
 {
-    // Static data
+    // Static Data
 
         //- Normal along which to divide faces into categories
         //  (used in getNearest)
@@ -73,7 +73,7 @@ class boundaryMesh
         static const scalar distanceTol_;
 
 
-    // Private data
+    // Private Data
 
         //- All boundary mesh data. Reconstructed every time faces are repatched
         bMesh* meshPtr_;
