@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,14 +28,38 @@ License
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class StringType>
-inline Foam::word Foam::IOobject::groupName(StringType name, const word& group)
+inline Foam::word Foam::IOobject::groupName
+(
+    StringType base,
+    const word& group
+)
 {
     if (group.empty())
+    {
+        return base;
+    }
+
+    return base + ('.' + group);
+}
+
+
+template<class StringType>
+inline Foam::word Foam::IOobject::scopedName
+(
+    StringType scope,
+    const word& name
+)
+{
+    if (name.empty())
+    {
+        return scope;
+    }
+    else if (scope.empty())
     {
         return name;
     }
 
-    return name + ('.' + group);
+    return scope + (IOobject::scopeSeparator + name);
 }
 
 

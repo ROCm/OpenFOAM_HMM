@@ -204,6 +204,10 @@ public:
 
     // Static Data Members
 
+        //- Character for scoping object names (':' or '_')
+        //  Change with caution.
+        static char scopeSeparator;
+
         //- Type of file modification checking
         static fileCheckTypes fileModificationChecking;
 
@@ -233,17 +237,21 @@ public:
             word& name
         );
 
-        //- Create dot-delimited name.group
-        //  If the group is an empty string, it is ignored.
+        //- Create dot-delimited name.group string
+        //  An empty group is ignored.
         template<class StringType>
-        static inline word groupName(StringType name, const word& group);
-
+        static inline word groupName(StringType base, const word& group);
 
         //- Return group (extension part of name)
         static word group(const word& name);
 
         //- Return member (name without the extension)
         static word member(const word& name);
+
+        //- Create scope:name or scope_name string
+        //  An empty scope or name is ignored.
+        template<class StringType>
+        static inline word scopedName(StringType scope, const word& name);
 
         //- Return the IOobject, but also consider an alternative file name.
         //
