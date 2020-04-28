@@ -156,6 +156,33 @@ Foam::string& Foam::string::replaceAll
 }
 
 
+Foam::string& Foam::string::replaceAny
+(
+    const std::string& s1,
+    const char c2,
+    size_type pos
+)
+{
+    if (s1.length())
+    {
+        while ((pos = find_first_of(s1, pos)) != npos)
+        {
+            if (c2)
+            {
+                operator[](pos) = c2;
+                ++pos;
+            }
+            else
+            {
+                erase(pos, 1);
+            }
+        }
+    }
+
+    return *this;
+}
+
+
 Foam::string& Foam::string::expand(const bool allowEmpty)
 {
     stringOps::inplaceExpand(*this, allowEmpty);

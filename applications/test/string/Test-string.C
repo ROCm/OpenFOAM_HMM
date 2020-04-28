@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -172,6 +172,19 @@ int main(int argc, char *argv[])
     Info<<"trimLeft: " << stringOps::trimLeft(test) << endl;
     Info<<"trimRight: " << stringOps::trimRight(test) << endl;
     Info<<"trim: " << stringOps::trim(test) << endl;
+
+    // With replace, replaceAll
+    {
+        string test2(test);
+        Info<<"replaceAny: (\"abcj\", '?')" << nl
+            << test2.replaceAny("abcj", '?') << endl;
+        Info<<"replaceAll: (\"k\", \"?\")" << nl
+            << test2.replaceAll("k", "?") << endl;
+        Info<<"replaceAll: (\"h\", null) - ie, remove them" << nl
+            << test2.replaceAll("h", "") << endl;
+        Info<<"replaceAny: (\"it${}?\", null) - ie, remove them" << nl
+            << test2.replaceAny("it${}?", '\0') << endl;
+    }
 
     if (false)
     {

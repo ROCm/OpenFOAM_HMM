@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -234,11 +234,21 @@ public:
 
         //- Replace all occurrences of sub-string s1 with s2,
         //- beginning at pos in the string.
-        //  This is a no-op if s1 is empty.
+        //  A no-op if s1 is empty.
         string& replaceAll
         (
             const std::string& s1,
             const std::string& s2,
+            size_type pos = 0
+        );
+
+        //- Replace any occurrence of s1 characters with c2,
+        //- beginning at pos in the string.
+        //  A no-op if s1 is empty.
+        string& replaceAny
+        (
+            const std::string& s1,
+            const char c2,
             size_type pos = 0
         );
 
