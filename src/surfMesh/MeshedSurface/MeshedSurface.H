@@ -44,6 +44,11 @@ Description
 
 SourceFiles
     MeshedSurface.C
+    MeshedSurfaceCore.C
+    MeshedSurfaceIO.C
+    MeshedSurfaceNew.C
+    MeshedSurfaceZones.C
+    MeshedSurfaces.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -507,7 +512,7 @@ public:
 
         //- Count number of triangles, returning a face map of original ids.
         //  The faceMap is zero-sized when no triangulation would be needed.
-        virtual label nTriangles(List<label>& faceMap) const;
+        virtual label nTriangles(labelList& faceMap) const;
 
         //- Triangulate in-place, returning the number of triangles added.
         virtual label triangulate();
@@ -515,7 +520,7 @@ public:
         //- Triangulate in-place, returning the number of triangles added
         //  and setting a map of original face Ids.
         //  The faceMap is zero-sized when no triangulation was done.
-        virtual label triangulate(List<label>& faceMap);
+        virtual label triangulate(labelList& faceMap);
 
         //- Create mappings for a sub-surface
         //

@@ -918,7 +918,7 @@ Foam::label Foam::MeshedSurface<Face>::nTriangles() const
 
     return nTriangles
     (
-        const_cast<List<label>&>(List<label>::null())
+        const_cast<labelList&>(labelList::null())
     );
 }
 
@@ -926,7 +926,7 @@ Foam::label Foam::MeshedSurface<Face>::nTriangles() const
 template<class Face>
 Foam::label Foam::MeshedSurface<Face>::nTriangles
 (
-    List<label>& faceMap
+    labelList& faceMap
 ) const
 {
     label nTri = 0;
@@ -980,7 +980,7 @@ Foam::label Foam::MeshedSurface<Face>::triangulate()
     {
         return triangulate
         (
-            const_cast<List<label>&>(List<label>::null())
+            const_cast<labelList&>(labelList::null())
         );
     }
 }
@@ -989,17 +989,22 @@ Foam::label Foam::MeshedSurface<Face>::triangulate()
 template<class Face>
 Foam::label Foam::MeshedSurface<Face>::triangulate
 (
-    List<label>& faceMapOut
+    labelList& faceMapOut
 )
 {
+    labelList dummyFaceMap;
+
+    labelList& faceMap =
+    (
+        notNull(faceMapOut)
+      ? faceMapOut
+      : dummyFaceMap
+    );
+
     if (faceTraits<Face>::isTri())
     {
         // Inplace triangulation of triFace/labelledTri surface = no-op
-        if (notNull(faceMapOut))
-        {
-            faceMapOut.clear();
-        }
-
+        faceMap.clear();
         return 0;
     }
 
@@ -1021,23 +1026,13 @@ Foam::label Foam::MeshedSurface<Face>::triangulate
     // Nothing to do
     if (nTri <= faceLst.size())
     {
-        if (notNull(faceMapOut))
-        {
-            faceMapOut.clear();
-        }
+        faceMap.clear();
         return 0;
     }
 
     this->storedFaceIds().clear();  // Invalid or misleading
 
-    List<Face>  newFaces(nTri);
-    List<label> faceMap;
-
-    // reuse storage from optional faceMap
-    if (notNull(faceMapOut))
-    {
-        faceMap.transfer(faceMapOut);
-    }
+    List<Face> newFaces(nTri);
     faceMap.resize(nTri);
 
     if (this->points().empty())
@@ -1089,13 +1084,6 @@ Foam::label Foam::MeshedSurface<Face>::triangulate
 
     faceLst.transfer(newFaces);
     remapFaces(faceMap);
-
-    // optionally return the faceMap
-    if (notNull(faceMapOut))
-    {
-        faceMapOut.transfer(faceMap);
-    }
-    faceMap.clear();
 
     // Topology can change because of renumbering
     MeshReference::clearOut();
