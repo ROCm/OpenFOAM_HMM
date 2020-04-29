@@ -1,0 +1,120 @@
+#----------------------------------*-sh-*--------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | www.openfoam.com
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+#     Copyright (C) 2020 OpenCFD Ltd.
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
+#
+# File
+#     wmake/scripts/wmake.cmake-args
+#
+# Description
+#     Special-purpose argument parser (eg, for Allwmake scripts)
+#     that handles -prefix=... and some other simpler tasks
+#
+# Usage
+#     # Parse the arguments by sourcing this script
+#     . ${WM_PROJECT_DIR:?}/wmake/scripts/wmake.cmake-args
+#
+# Options
+#     -prefix=...
+#     Exports CMAKE_INSTALL_PREFIX value.
+#     Handles u(ser), g(roup), o(ther) short-cuts (see foamEtcFile),
+#     absolute or relative paths
+#
+#     -j | -jN | -j N
+#     Compile using all or specified N cores/hyperthreads
+#
+#------------------------------------------------------------------------------
+
+# NB: nArgs to track the current processing position to avoid wraparound
+# when checking for optional parameters (eg, the -j processing)
+
+nArgs="$#"
+for arg in "$@"
+do
+    shift; nArgs="$((nArgs - 1))"               # Drop argument
+
+    case "$arg" in
+
+    # Install prefix: user
+    -prefix=u | -prefix=user)
+        export CMAKE_INSTALL_PREFIX="${FOAM_USER_LIBBIN%/*}"
+        echo "Install prefix = user ($CMAKE_INSTALL_PREFIX)" 1>&2
+        continue    # Handled argument
+        ;;
+
+    # Install prefix: group
+    -prefix=g | -prefix=group)
+        export CMAKE_INSTALL_PREFIX="${FOAM_SITE_LIBBIN%/*}"
+        echo "Install prefix = group ($CMAKE_INSTALL_PREFIX)" 1>&2
+        continue    # Handled argument
+        ;;
+
+    # Install prefix: other/openfoam
+    -prefix=o | -prefix=other | -prefix=openfoam)
+        export CMAKE_INSTALL_PREFIX="${FOAM_LIBBIN%/*}"
+        echo "Install prefix = openfoam ($CMAKE_INSTALL_PREFIX)" 1>&2
+        continue    # Handled argument
+        ;;
+
+    # Install prefix: custom
+    -prefix=*)
+        export CMAKE_INSTALL_PREFIX="${arg#*=}"
+        : "${CMAKE_INSTALL_PREFIX:=/usr/local}"  # Default as per autoconf
+
+        # Require as absolute path
+        [ "${CMAKE_INSTALL_PREFIX#/}" != "${CMAKE_INSTALL_PREFIX}" ] || \
+            CMAKE_INSTALL_PREFIX="${PWD}/${CMAKE_INSTALL_PREFIX}"
+
+        echo "Install prefix = $CMAKE_INSTALL_PREFIX" 1>&2
+        continue    # Handled argument
+        ;;
+
+    # Parallel compilation (all or specified number of cores)
+    -j)
+        export WM_NCOMPPROCS=0
+        if [ "$nArgs" -gt 0 ]
+        then
+            case "$1" in
+            [0-9]*)
+                if WM_NCOMPPROCS="$(expr 0 + "$1" 2>/dev/null)"
+                then
+                    shift; nArgs="$((nArgs - 1))"   # Drop argument
+                fi
+                ;;
+            esac
+        fi
+        if [ "${WM_NCOMPPROCS:=0}" -le 0 ]
+        then
+            WM_NCOMPPROCS=$(getconf _NPROCESSORS_ONLN 2>/dev/null) || \
+                WM_NCOMPPROCS=1
+        fi
+
+        echo "Compiling enabled on $WM_NCOMPPROCS cores" 1>&2
+        continue    # Handled argument
+        ;;
+
+    # Parallel compilation (specified number of cores)
+    -j[0-9]*)
+        export WM_NCOMPPROCS="${arg#-j}"
+        if [ "${WM_NCOMPPROCS:=0}" -le 0 ]
+        then
+            WM_NCOMPPROCS=$(getconf _NPROCESSORS_ONLN 2>/dev/null) || \
+                WM_NCOMPPROCS=1
+        fi
+
+        echo "Compiling enabled on $WM_NCOMPPROCS cores" 1>&2
+        continue    # Handled argument
+        ;;
+    esac
+
+    set -- "$@" "$arg"     # Reinsert unhandled argument
+done
+
+#------------------------------------------------------------------------------

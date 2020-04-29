@@ -107,6 +107,7 @@ Components specified by absolute path
   -adios-path DIR     Path for 'ADIOS2_ARCH_PATH' (overrides -adios)
   -boost-path DIR     Path for 'BOOST_ARCH_PATH'  (overrides -boost)
   -cgal-path DIR      Path for 'CGAL_ARCH_PATH'   (overrides -cgal)
+  -cmake-path DIR     Path for 'CMAKE_ARCH_PATH'  (overrides -cmake)
   -fftw-path DIR      Path for 'FFTW_ARCH_PATH'   (overrides -fftw)
   -kahip-path DIR     Path for 'KAHIP_ARCH_PATH'  (overrides -kahip)
   -metis-path DIR     Path for 'METIS_ARCH_PATH'  (overrides -metis)
@@ -662,8 +663,15 @@ CONFIG_CSH
     -cmake)
         # Replace cmake_version=...
         optionValue=$(getOptionValue "$@")
-        replaceEtc  config.sh/paraview   cmake_version "$optionValue"
-        replaceEtc  config.csh/paraview  cmake_version "$optionValue"
+        replaceEtc  config.sh/cmake   cmake_version "$optionValue"
+        adjusted=true
+        shift
+        ;;
+
+    -cmake-path)
+        # Replace CMAKE_ARCH_PATH=...
+        optionValue=$(getOptionValue "$@")
+        replaceEtc  config.sh/cmake   CMAKE_ARCH_PATH "$optionValue"
         adjusted=true
         shift
         ;;

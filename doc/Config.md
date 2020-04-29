@@ -78,7 +78,6 @@ example,
 
 ParaView_VERSION=5.6.0
 ParaView_QT=qt-system
-cmake_version=cmake-system
 
 # END OF (NORMAL) USER EDITABLE PART
 #------------------------------------------------------------------------------
