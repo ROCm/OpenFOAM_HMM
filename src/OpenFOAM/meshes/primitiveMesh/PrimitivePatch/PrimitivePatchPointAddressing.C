@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,19 +35,11 @@ Description
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 void
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-calcPointEdges() const
+Foam::PrimitivePatch<FaceList, PointField>::calcPointEdges() const
 {
-    DebugInFunction
-        << "Calculating pointEdges" << endl;
+    DebugInFunction << "Calculating pointEdges" << endl;
 
     if (pointEdgesPtr_)
     {
@@ -57,9 +49,8 @@ calcPointEdges() const
             << abort(FatalError);
     }
 
-    pointEdgesPtr_ = new labelListList(meshPoints().size());
-
-    labelListList& pe = *pointEdgesPtr_;
+    pointEdgesPtr_.reset(new labelListList(meshPoints().size()));
+    auto& pe = *pointEdgesPtr_;
 
     invertManyToMany(pe.size(), edges(), pe);
 
@@ -68,16 +59,9 @@ calcPointEdges() const
 }
 
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 void
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-calcPointFaces() const
+Foam::PrimitivePatch<FaceList, PointField>::calcPointFaces() const
 {
     DebugInFunction
         << "Calculating pointFaces" << endl;
@@ -90,14 +74,14 @@ calcPointFaces() const
             << abort(FatalError);
     }
 
-    const List<Face>& f = localFaces();
+    const List<face_type>& locFcs = localFaces();
 
     // set up storage for pointFaces
     List<SLList<label>> pointFcs(meshPoints().size());
 
-    forAll(f, facei)
+    forAll(locFcs, facei)
     {
-        const Face& curPoints = f[facei];
+        const face_type& curPoints = locFcs[facei];
 
         for (const label pointi : curPoints)
         {
@@ -105,20 +89,13 @@ calcPointFaces() const
         }
     }
 
-    // sort out the list
-    pointFacesPtr_ = new labelListList(pointFcs.size());
-
-    labelListList& pf = *pointFacesPtr_;
+    // Copy the list
+    pointFacesPtr_.reset(new labelListList(pointFcs.size()));
+    auto& pf = *pointFacesPtr_;
 
     forAll(pointFcs, pointi)
     {
-        pf[pointi].setSize(pointFcs[pointi].size());
-
-        label i = 0;
-        for (const label facei : pointFcs[pointi])
-        {
-            pf[pointi][i++] = facei;
-        }
+        pf[pointi] = pointFcs[pointi];
     }
 
     DebugInfo

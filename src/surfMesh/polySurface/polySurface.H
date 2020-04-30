@@ -68,7 +68,7 @@ template<class Face> class MeshedSurface;
 class polySurface
 :
     public objectRegistry,
-    public PrimitivePatch<face, ::Foam::List, pointField, point>,
+    public PrimitivePatch<::Foam::List<face>, pointField>,
     public meshedSurf
 {
 public:
@@ -88,7 +88,7 @@ private:
     // Private Typedefs
 
         //- Internal mesh storage type
-        typedef PrimitivePatch<face, ::Foam::List, pointField, point>
+        typedef PrimitivePatch<::Foam::List<face>, pointField>
             MeshReference;
 
 

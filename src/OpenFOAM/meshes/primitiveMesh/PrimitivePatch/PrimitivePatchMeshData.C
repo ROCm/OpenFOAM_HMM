@@ -31,20 +31,13 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 void
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-calcMeshData() const
+Foam::PrimitivePatch<FaceList, PointField>::calcMeshData() const
 {
     if (debug)
     {
-        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+        Pout<< "PrimitivePatch<FaceList, PointField>::"
                "calcMeshData() : "
                "calculating mesh data in PrimitivePatch"
             << endl;
@@ -73,7 +66,7 @@ calcMeshData() const
     //// if the point is used, set the mark to 1
     //forAll(*this, facei)
     //{
-    //    const Face& curPoints = this->operator[](facei);
+    //    const face_type& curPoints = this->operator[](facei);
     //
     //    forAll(curPoints, pointi)
     //    {
@@ -83,8 +76,8 @@ calcMeshData() const
     //
     //// Create the storage and store the meshPoints.  Mesh points are
     //// the ones marked by the usage loop above
-    //meshPointsPtr_ = new labelList(markedPoints.toc());
-    //labelList& pointPatch = *meshPointsPtr_;
+    //meshPointsPtr_.reset(new labelList(markedPoints.toc()));
+    //auto& pointPatch = *meshPointsPtr_;
     //
     //// Sort the list to preserve compatibility with the old ordering
     //sort(pointPatch);
@@ -97,42 +90,36 @@ calcMeshData() const
 
     //- Unsorted version:
     DynamicList<label> meshPoints(2*this->size());
-    forAll(*this, facei)
+    for (const face_type& f : *this)
     {
-        const Face& curPoints = this->operator[](facei);
-
-        forAll(curPoints, pointi)
+        for (const label pointi : f)
         {
-            if (markedPoints.insert(curPoints[pointi], meshPoints.size()))
+            if (markedPoints.insert(pointi, meshPoints.size()))
             {
-                meshPoints.append(curPoints[pointi]);
+                meshPoints.append(pointi);
             }
         }
     }
     // Transfer to straight list (reuses storage)
-    meshPointsPtr_ = new labelList(meshPoints, true);
+    meshPointsPtr_.reset(new labelList(meshPoints, true));
 
+    // Create local faces. Deep-copy original faces to retain additional
+    // data (e.g. region number of labelledTri)
+    // The vertices will be overwritten later
+    localFacesPtr_.reset(new List<face_type>(*this));
+    auto& locFaces = *localFacesPtr_;
 
-    // Create local faces. Note that we start off from copy of original face
-    // list (even though vertices are overwritten below). This is done so
-    // additional data gets copied (e.g. region number of labelledTri)
-    localFacesPtr_ = new List<Face>(*this);
-    List<Face>& lf = *localFacesPtr_;
-
-    forAll(*this, facei)
+    for (face_type& f : locFaces)
     {
-        const Face& curFace = this->operator[](facei);
-        lf[facei].setSize(curFace.size());
-
-        forAll(curFace, labelI)
+        for (label& pointi : f)
         {
-            lf[facei][labelI] = markedPoints.find(curFace[labelI])();
+            pointi = *(markedPoints.cfind(pointi));
         }
     }
 
     if (debug)
     {
-        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+        Pout<< "PrimitivePatch<FaceList, PointField>::"
                "calcMeshData() : "
                "finished calculating mesh data in PrimitivePatch"
             << endl;
@@ -140,20 +127,13 @@ calcMeshData() const
 }
 
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 void
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-calcMeshPointMap() const
+Foam::PrimitivePatch<FaceList, PointField>::calcMeshPointMap() const
 {
     if (debug)
     {
-        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+        Pout<< "PrimitivePatch<FaceList, PointField>::"
                "calcMeshPointMap() : "
                "calculating mesh point map in PrimitivePatch"
             << endl;
@@ -169,8 +149,8 @@ calcMeshPointMap() const
 
     const labelList& mp = meshPoints();
 
-    meshPointMapPtr_ = new Map<label>(2*mp.size());
-    Map<label>& mpMap = *meshPointMapPtr_;
+    meshPointMapPtr_.reset(new Map<label>(2*mp.size()));
+    auto& mpMap = *meshPointMapPtr_;
 
     forAll(mp, i)
     {
@@ -179,7 +159,7 @@ calcMeshPointMap() const
 
     if (debug)
     {
-        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+        Pout<< "PrimitivePatch<FaceList, PointField>::"
                "calcMeshPointMap() : "
                "finished calculating mesh point map in PrimitivePatch"
             << endl;
@@ -187,20 +167,13 @@ calcMeshPointMap() const
 }
 
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 void
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-calcLocalPoints() const
+Foam::PrimitivePatch<FaceList, PointField>::calcLocalPoints() const
 {
     if (debug)
     {
-        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+        Pout<< "PrimitivePatch<FaceList, PointField>::"
                "calcLocalPoints() : "
                "calculating localPoints in PrimitivePatch"
             << endl;
@@ -216,9 +189,8 @@ calcLocalPoints() const
 
     const labelList& meshPts = meshPoints();
 
-    localPointsPtr_ = new Field<PointType>(meshPts.size());
-
-    Field<PointType>& locPts = *localPointsPtr_;
+    localPointsPtr_.reset(new Field<point_type>(meshPts.size()));
+    auto& locPts = *localPointsPtr_;
 
     forAll(meshPts, pointi)
     {
@@ -227,7 +199,7 @@ calcLocalPoints() const
 
     if (debug)
     {
-        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+        Pout<< "PrimitivePatch<FaceList, PointField>::"
             << "calcLocalPoints() : "
             << "finished calculating localPoints in PrimitivePatch"
             << endl;
@@ -235,20 +207,13 @@ calcLocalPoints() const
 }
 
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 void
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-calcPointNormals() const
+Foam::PrimitivePatch<FaceList, PointField>::calcPointNormals() const
 {
     if (debug)
     {
-        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+        Pout<< "PrimitivePatch<FaceList, PointField>::"
                "calcPointNormals() : "
                "calculating pointNormals in PrimitivePatch"
             << endl;
@@ -262,21 +227,16 @@ calcPointNormals() const
             << abort(FatalError);
     }
 
-    const Field<PointType>& faceUnitNormals = faceNormals();
+    const auto& faceUnitNormals = faceNormals();
 
     const labelListList& pf = pointFaces();
 
-    pointNormalsPtr_ = new Field<PointType>
-    (
-        meshPoints().size(),
-        PointType::zero
-    );
-
-    Field<PointType>& n = *pointNormalsPtr_;
+    pointNormalsPtr_.reset(new Field<point_type>(meshPoints().size(), Zero));
+    auto& n = *pointNormalsPtr_;
 
     forAll(pf, pointi)
     {
-        PointType& curNormal = n[pointi];
+        point_type& curNormal = n[pointi];
 
         const labelList& curFaces = pf[pointi];
 
@@ -290,7 +250,7 @@ calcPointNormals() const
 
     if (debug)
     {
-        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+        Pout<< "PrimitivePatch<FaceList, PointField>::"
                "calcPointNormals() : "
                "finished calculating pointNormals in PrimitivePatch"
             << endl;
@@ -298,20 +258,13 @@ calcPointNormals() const
 }
 
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 void
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-calcFaceCentres() const
+Foam::PrimitivePatch<FaceList, PointField>::calcFaceCentres() const
 {
     if (debug)
     {
-        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+        Pout<< "PrimitivePatch<FaceList, PointField>::"
                "calcFaceCentres() : "
                "calculating faceCentres in PrimitivePatch"
             << endl;
@@ -325,9 +278,8 @@ calcFaceCentres() const
             << abort(FatalError);
     }
 
-    faceCentresPtr_ = new Field<PointType>(this->size());
-
-    Field<PointType>& c = *faceCentresPtr_;
+    faceCentresPtr_.reset(new Field<point_type>(this->size()));
+    auto& c = *faceCentresPtr_;
 
     forAll(c, facei)
     {
@@ -336,7 +288,7 @@ calcFaceCentres() const
 
     if (debug)
     {
-        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+        Pout<< "PrimitivePatch<FaceList, PointField>::"
                "calcFaceCentres() : "
                "finished calculating faceCentres in PrimitivePatch"
             << endl;
@@ -344,20 +296,13 @@ calcFaceCentres() const
 }
 
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 void
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-calcMagFaceAreas() const
+Foam::PrimitivePatch<FaceList, PointField>::calcMagFaceAreas() const
 {
     if (debug)
     {
-        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+        Pout<< "PrimitivePatch<FaceList, PointField>::"
                "calcMagFaceAreas() : "
                "calculating magFaceAreas in PrimitivePatch"
             << endl;
@@ -371,8 +316,8 @@ calcMagFaceAreas() const
             << abort(FatalError);
     }
 
-    magFaceAreasPtr_ = new Field<scalar>(this->size());
-    Field<scalar>& a = *magFaceAreasPtr_;
+    magFaceAreasPtr_.reset(new Field<scalar>(this->size()));
+    auto& a = *magFaceAreasPtr_;
 
     forAll(a, facei)
     {
@@ -381,7 +326,7 @@ calcMagFaceAreas() const
 
     if (debug)
     {
-        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+        Pout<< "PrimitivePatch<FaceList, PointField>::"
                "calcMagFaceAreas() : "
                "finished calculating magFaceAreas in PrimitivePatch"
             << endl;
@@ -389,20 +334,13 @@ calcMagFaceAreas() const
 }
 
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 void
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-calcFaceAreas() const
+Foam::PrimitivePatch<FaceList, PointField>::calcFaceAreas() const
 {
     if (debug)
     {
-        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+        Pout<< "PrimitivePatch<FaceList, PointField>::"
                "calcFaceAreas() : "
                "calculating faceAreas in PrimitivePatch"
             << endl;
@@ -416,9 +354,8 @@ calcFaceAreas() const
             << abort(FatalError);
     }
 
-    faceAreasPtr_ = new Field<PointType>(this->size());
-
-    Field<PointType>& n = *faceAreasPtr_;
+    faceAreasPtr_.reset(new Field<point_type>(this->size()));
+    auto& n = *faceAreasPtr_;
 
     forAll(n, facei)
     {
@@ -427,7 +364,7 @@ calcFaceAreas() const
 
     if (debug)
     {
-        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+        Pout<< "PrimitivePatch<FaceList, PointField>::"
                "calcFaceAreas() : "
                "finished calculating faceAreas in PrimitivePatch"
             << endl;
@@ -435,20 +372,13 @@ calcFaceAreas() const
 }
 
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 void
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-calcFaceNormals() const
+Foam::PrimitivePatch<FaceList, PointField>::calcFaceNormals() const
 {
     if (debug)
     {
-        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+        Pout<< "PrimitivePatch<FaceList, PointField>::"
                "calcFaceNormals() : "
                "calculating faceNormals in PrimitivePatch"
             << endl;
@@ -462,9 +392,8 @@ calcFaceNormals() const
             << abort(FatalError);
     }
 
-    faceNormalsPtr_ = new Field<PointType>(this->size());
-
-    Field<PointType>& n = *faceNormalsPtr_;
+    faceNormalsPtr_.reset(new Field<point_type>(this->size()));
+    auto& n = *faceNormalsPtr_;
 
     forAll(n, facei)
     {
@@ -473,7 +402,7 @@ calcFaceNormals() const
 
     if (debug)
     {
-        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+        Pout<< "PrimitivePatch<FaceList, PointField>::"
                "calcFaceNormals() : "
                "finished calculating faceNormals in PrimitivePatch"
             << endl;

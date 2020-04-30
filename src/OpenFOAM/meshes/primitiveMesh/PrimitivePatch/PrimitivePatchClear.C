@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,108 +27,62 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "PrimitivePatch.H"
-#include "demandDrivenData.H"
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 void
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-clearGeom()
+Foam::PrimitivePatch<FaceList, PointField>::clearGeom()
 {
-    if (debug)
-    {
-        InfoInFunction << "Clearing geometric data" << endl;
-    }
+    DebugInFunction << "Clearing geometric data" << nl;
 
-    deleteDemandDrivenData(localPointsPtr_);
-    deleteDemandDrivenData(faceCentresPtr_);
-    deleteDemandDrivenData(faceAreasPtr_);
-    deleteDemandDrivenData(magFaceAreasPtr_);
-    deleteDemandDrivenData(faceNormalsPtr_);
-    deleteDemandDrivenData(pointNormalsPtr_);
+    localPointsPtr_.reset(nullptr);
+    faceCentresPtr_.reset(nullptr);
+    faceAreasPtr_.reset(nullptr);
+    magFaceAreasPtr_.reset(nullptr);
+    faceNormalsPtr_.reset(nullptr);
+    pointNormalsPtr_.reset(nullptr);
 }
 
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 void
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-clearTopology()
+Foam::PrimitivePatch<FaceList, PointField>::clearTopology()
 {
-    if (debug)
-    {
-        InfoInFunction << "Clearing patch addressing" << endl;
-    }
+    DebugInFunction << "Clearing patch addressing" << nl;
 
     // group created and destroyed together
     if (edgesPtr_ && faceFacesPtr_ && edgeFacesPtr_ && faceEdgesPtr_)
     {
-        delete edgesPtr_;
-        edgesPtr_ = nullptr;
-
-        delete faceFacesPtr_;
-        faceFacesPtr_ = nullptr;
-
-        delete edgeFacesPtr_;
-        edgeFacesPtr_ = nullptr;
-
-        delete faceEdgesPtr_;
-        faceEdgesPtr_ = nullptr;
+        edgesPtr_.reset(nullptr);
+        faceFacesPtr_.reset(nullptr);
+        edgeFacesPtr_.reset(nullptr);
+        faceEdgesPtr_.reset(nullptr);
     }
 
-    deleteDemandDrivenData(boundaryPointsPtr_);
-    deleteDemandDrivenData(pointEdgesPtr_);
-    deleteDemandDrivenData(pointFacesPtr_);
-    deleteDemandDrivenData(edgeLoopsPtr_);
-    deleteDemandDrivenData(localPointOrderPtr_);
+    boundaryPointsPtr_.reset(nullptr);
+    pointEdgesPtr_.reset(nullptr);
+    pointFacesPtr_.reset(nullptr);
+    edgeLoopsPtr_.reset(nullptr);
+    localPointOrderPtr_.reset(nullptr);
 }
 
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 void
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-clearPatchMeshAddr()
+Foam::PrimitivePatch<FaceList, PointField>::clearPatchMeshAddr()
 {
-    if (debug)
-    {
-        InfoInFunction << "Clearing patch-mesh addressing" << endl;
-    }
+    DebugInFunction << "Clearing patch-mesh addressing" << nl;
 
-    deleteDemandDrivenData(meshPointsPtr_);
-    deleteDemandDrivenData(meshPointMapPtr_);
-    deleteDemandDrivenData(localFacesPtr_);
+    meshPointsPtr_.reset(nullptr);
+    meshPointMapPtr_.reset(nullptr);
+    localFacesPtr_.reset(nullptr);
 }
 
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 void
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-clearOut()
+Foam::PrimitivePatch<FaceList, PointField>::clearOut()
 {
     clearGeom();
     clearTopology();

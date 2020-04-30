@@ -35,17 +35,10 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template
-<
-    class BoolListType,
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class BoolListType, class FaceList, class PointField>
 void Foam::PatchTools::markZone
 (
-    const PrimitivePatch<Face, FaceList, PointField, PointType>& p,
+    const PrimitivePatch<FaceList, PointField>& p,
     const BoolListType& borderEdge,
     const label facei,
     const label currentZone,
@@ -111,19 +104,11 @@ void Foam::PatchTools::markZone
 }
 
 
-template
-<
-    class BoolListType,
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
-
+template<class BoolListType, class FaceList, class PointField>
 Foam::label
 Foam::PatchTools::markZones
 (
-    const PrimitivePatch<Face, FaceList, PointField, PointType>& p,
+    const PrimitivePatch<FaceList, PointField>& p,
     const BoolListType& borderEdge,
     labelList& faceZone
 )
@@ -151,25 +136,17 @@ Foam::PatchTools::markZones
 }
 
 
-template
-<
-    class BoolListType,
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
-
+template<class BoolListType, class FaceList, class PointField>
 void
 Foam::PatchTools::subsetMap
 (
-    const PrimitivePatch<Face, FaceList, PointField, PointType>& p,
+    const PrimitivePatch<FaceList, PointField>& p,
     const BoolListType& includeFaces,
     labelList& pointMap,
     labelList& faceMap
 )
 {
-    const List<Face>& localFaces = p.localFaces();
+    const auto& localFaces = p.localFaces();
 
     faceMap.resize(localFaces.size());
     pointMap.clear();
@@ -196,16 +173,10 @@ Foam::PatchTools::subsetMap
 }
 
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 void Foam::PatchTools::calcBounds
 (
-    const PrimitivePatch<Face, FaceList, PointField, PointType>& p,
+    const PrimitivePatch<FaceList, PointField>& p,
     boundBox& bb,
     label& nPoints
 )

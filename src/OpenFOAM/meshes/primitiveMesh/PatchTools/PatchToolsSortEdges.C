@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,24 +32,17 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
-
+template<class FaceList, class PointField>
 Foam::labelListList
 Foam::PatchTools::sortedEdgeFaces
 (
-    const PrimitivePatch<Face, FaceList, PointField, PointType>& p
+    const PrimitivePatch<FaceList, PointField>& p
 )
 {
     const edgeList& edges = p.edges();
     const labelListList& edgeFaces = p.edgeFaces();
-    const List<Face>& localFaces = p.localFaces();
-    const Field<PointType>& localPoints = p.localPoints();
+    const auto& localFaces = p.localFaces();
+    const auto& localPoints = p.localPoints();
 
     // create the lists for the various results. (resized on completion)
     labelListList sortedEdgeFaces(edgeFaces.size());
@@ -69,7 +63,7 @@ Foam::PatchTools::sortedEdgeFaces
 
             // Get the vertex on 0th face that forms a vector with the first
             // edge point that has the largest angle with the edge
-            const Face& f0 = localFaces[faceNbs[0]];
+            const auto& f0 = localFaces[faceNbs[0]];
 
             scalar maxAngle = GREAT;
             vector maxAngleEdgeDir(vector::max);
@@ -110,7 +104,7 @@ Foam::PatchTools::sortedEdgeFaces
             {
                 // Get the vertex on face that forms a vector with the first
                 // edge point that has the largest angle with the edge
-                const Face& f = localFaces[faceNbs[nbI]];
+                const auto& f = localFaces[faceNbs[nbI]];
 
                 maxAngle = GREAT;
                 maxAngleEdgeDir = vector::max;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,19 +32,13 @@ License
 
 template
 <
-    class Face1,
-    template<class> class FaceList1,
-    class PointField1,
-    class PointType1,
-    class Face2,
-    template<class> class FaceList2,
-    class PointField2,
-    class PointType2
+    class FaceList1, class PointField1,
+    class FaceList2, class PointField2
 >
 void Foam::PatchTools::matchPoints
 (
-    const PrimitivePatch<Face1, FaceList1, PointField1, PointType1>& p1,
-    const PrimitivePatch<Face2, FaceList2, PointField2, PointType2>& p2,
+    const PrimitivePatch<FaceList1, PointField1>& p1,
+    const PrimitivePatch<FaceList2, PointField2>& p2,
 
     labelList& p1PointLabels,
     labelList& p2PointLabels
@@ -75,19 +69,13 @@ void Foam::PatchTools::matchPoints
 
 template
 <
-    class Face1,
-    template<class> class FaceList1,
-    class PointField1,
-    class PointType1,
-    class Face2,
-    template<class> class FaceList2,
-    class PointField2,
-    class PointType2
+    class FaceList1, class PointField1,
+    class FaceList2, class PointField2
 >
 void Foam::PatchTools::matchEdges
 (
-    const PrimitivePatch<Face1, FaceList1, PointField1, PointType1>& p1,
-    const PrimitivePatch<Face2, FaceList2, PointField2, PointType2>& p2,
+    const PrimitivePatch<FaceList1, PointField1>& p1,
+    const PrimitivePatch<FaceList2, PointField2>& p2,
 
     labelList& p1EdgeLabels,
     labelList& p2EdgeLabels,

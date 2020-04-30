@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,21 +31,11 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 void
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-calcBdryPoints() const
+Foam::PrimitivePatch<FaceList, PointField>::calcBdryPoints() const
 {
-    if (debug)
-    {
-        InfoInFunction << "Calculating boundary points" << endl;
-    }
+    DebugInFunction << "Calculating boundary points" << nl;
 
     if (boundaryPointsPtr_)
     {
@@ -66,12 +57,9 @@ calcBdryPoints() const
         bp.insert(curEdge.end());
     }
 
-    boundaryPointsPtr_ = new labelList(bp.sortedToc());
+    boundaryPointsPtr_.reset(new labelList(bp.sortedToc()));
 
-    if (debug)
-    {
-        Info<< "    Finished." << endl;
-    }
+    DebugInfo << "    Finished." << nl;
 }
 
 

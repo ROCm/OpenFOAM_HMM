@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,26 +40,13 @@ Description
 #include "PrimitivePatch.H"
 #include "DynamicList.H"
 
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 void
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-calcAddressing() const
+Foam::PrimitivePatch<FaceList, PointField>::calcAddressing() const
 {
-    if (debug)
-    {
-        Info<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
-            << "calcAddressing() : calculating patch addressing"
-            << endl;
-    }
+    DebugInFunction << "Calculating patch addressing" << nl;
 
     if (edgesPtr_ || faceFacesPtr_ || edgeFacesPtr_ || faceEdgesPtr_)
     {
@@ -69,31 +57,31 @@ calcAddressing() const
     }
 
     // get reference to localFaces
-    const List<Face>& locFcs = localFaces();
+    const List<face_type>& locFcs = localFaces();
 
     // get reference to pointFaces
     const labelListList& pf = pointFaces();
 
     // Guess the max number of edges and neighbours for a face
     label maxEdges = 0;
-    forAll(locFcs, facei)
+    for (const auto& f : locFcs)
     {
-        maxEdges += locFcs[facei].size();
+        maxEdges += f.size();
     }
 
     // create the lists for the various results. (resized on completion)
-    edgesPtr_ = new edgeList(maxEdges);
-    edgeList& edges = *edgesPtr_;
+    edgesPtr_.reset(new edgeList(maxEdges));
+    auto& edges = *edgesPtr_;
 
-    edgeFacesPtr_ = new labelListList(maxEdges);
-    labelListList& edgeFaces = *edgeFacesPtr_;
+    edgeFacesPtr_.reset(new labelListList(maxEdges));
+    auto& edgeFaces = *edgeFacesPtr_;
 
     // faceFaces created using a dynamic list.  Cannot guess size because
     // of multiple connections
     List<DynamicList<label>> ff(locFcs.size());
 
-    faceEdgesPtr_ = new labelListList(locFcs.size());
-    labelListList& faceEdges = *faceEdgesPtr_;
+    faceEdgesPtr_.reset(new labelListList(locFcs.size()));
+    auto& faceEdges = *faceEdgesPtr_;
 
     // count the number of face neighbours
     labelList noFaceFaces(locFcs.size());
@@ -129,7 +117,7 @@ calcAddressing() const
     forAll(locFcs, facei)
     {
         // Get reference to vertices of current face and corresponding edges.
-        const Face& curF = locFcs[facei];
+        const face_type& curF = locFcs[facei];
         const edgeList& curEdges = faceIntoEdges[facei];
 
         // Record the neighbour face.  Multiple connectivity allowed
@@ -283,8 +271,8 @@ calcAddressing() const
     edgeFaces.setSize(nEdges);
 
     // faceFaces list
-    faceFacesPtr_ = new labelListList(locFcs.size());
-    labelListList& faceFaces = *faceFacesPtr_;
+    faceFacesPtr_.reset(new labelListList(locFcs.size()));
+    auto& faceFaces = *faceFacesPtr_;
 
     forAll(faceFaces, facei)
     {
@@ -292,12 +280,7 @@ calcAddressing() const
     }
 
 
-    if (debug)
-    {
-        Info<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
-            << "calcAddressing() : finished calculating patch addressing"
-            << endl;
-    }
+    DebugInFunction << "Calculated patch addressing" << nl;
 }
 
 

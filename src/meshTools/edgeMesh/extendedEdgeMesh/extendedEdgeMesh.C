@@ -541,7 +541,7 @@ Foam::extendedEdgeMesh::extendedEdgeMesh
 
 Foam::extendedEdgeMesh::extendedEdgeMesh
 (
-    const PrimitivePatch<face, List, pointField, point>& surf,
+    const PrimitivePatch<faceList, pointField>& surf,
     const labelUList& featureEdges,
     const labelUList& regionFeatureEdges,
     const labelUList& featurePoints

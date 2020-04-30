@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,20 +37,16 @@ Description
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 template<class ToPatch>
 Foam::List<Foam::objectHit>
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-projectPoints
+Foam::PrimitivePatch<FaceList, PointField>::projectPoints
 (
     const ToPatch& targetPatch,
-    const Field<PointType>& projectionDirection,
+    const Field
+    <
+        typename Foam::PrimitivePatch<FaceList, PointField>::point_type
+    >& projectionDirection,
     const intersection::algorithm alg,
     const intersection::direction dir
 ) const
@@ -77,10 +74,10 @@ projectPoints
 
     const ToPatch& masterFaces = targetPatch;
 
-    const Field<PointType>& masterPoints = targetPatch.points();
+    const Field<point_type>& masterPoints = targetPatch.points();
 
     // Estimate face centre of target side
-    Field<PointType> masterFaceCentres(targetPatch.size());
+    Field<point_type> masterFaceCentres(targetPatch.size());
 
     forAll(masterFaceCentres, facei)
     {
@@ -104,10 +101,10 @@ projectPoints
         // Pick up slave point and direction
         const label curLocalPointLabel = slavePointOrder[pointi];
 
-        const PointType& curPoint =
+        const point_type& curPoint =
             points_[slaveMeshPoints[curLocalPointLabel]];
 
-        const PointType& curProjectionDir =
+        const point_type& curProjectionDir =
             projectionDirection[curLocalPointLabel];
 
         bool closer;
@@ -133,7 +130,7 @@ projectPoints
                 doNSquaredSearch = false;
 
                 // Calculate intersection with curFace
-                PointHit<PointType> curHit =
+                PointHit<point_type> curHit =
                     masterFaces[curFace].ray
                     (
                         curPoint,
@@ -169,7 +166,7 @@ projectPoints
                     // face.  This is cooked (illogical!) for fastest
                     // surface walk.
                     //
-                    PointType missPlanePoint =
+                    point_type missPlanePoint =
                         curPoint + curProjectionDir*curHit.distance();
 
                     const labelList& masterNbrs = masterFaceFaces[curFace];
@@ -224,7 +221,7 @@ projectPoints
 
             forAll(masterFaces, facei)
             {
-                PointHit<PointType> curHit =
+                PointHit<point_type> curHit =
                     masterFaces[facei].ray
                     (
                         curPoint,
@@ -279,20 +276,16 @@ projectPoints
 }
 
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 template<class ToPatch>
 Foam::List<Foam::objectHit>
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-projectFaceCentres
+Foam::PrimitivePatch<FaceList, PointField>::projectFaceCentres
 (
     const ToPatch& targetPatch,
-    const Field<PointType>& projectionDirection,
+    const Field
+    <
+        typename Foam::PrimitivePatch<FaceList, PointField>::point_type
+    >& projectionDirection,
     const intersection::algorithm alg,
     const intersection::direction dir
 ) const
@@ -311,7 +304,7 @@ projectFaceCentres
     labelList slaveFaceOrder = bandCompression(faceFaces());
 
     // calculate master face centres
-    Field<PointType> masterFaceCentres(targetPatch.size());
+    Field<point_type> masterFaceCentres(targetPatch.size());
 
     const labelListList& masterFaceFaces = targetPatch.faceFaces();
 
@@ -328,8 +321,7 @@ projectFaceCentres
     // Result
     List<objectHit> result(this->size());
 
-    const PrimitivePatch<Face, FaceList, PointField, PointType>& slaveFaces =
-        *this;
+    const PrimitivePatch<FaceList, PointField>& slaveFaces = *this;
 
     const PointField& slaveGlobalPoints = points();
 
@@ -378,7 +370,7 @@ projectFaceCentres
                 doNSquaredSearch = false;
 
                 // Calculate intersection with curFace
-                PointHit<PointType> curHit =
+                PointHit<point_type> curHit =
                     masterFaces[curFace].ray
                     (
                         curFaceCentre,
@@ -413,7 +405,7 @@ projectFaceCentres
                     // Calculate the miss point.  This is
                     // cooked (illogical!) for fastest surface walk.
                     //
-                    PointType missPlanePoint =
+                    point_type missPlanePoint =
                         curFaceCentre + curProjectionDir*curHit.distance();
 
                     sqrDistance =
@@ -465,7 +457,7 @@ projectFaceCentres
 
             forAll(masterFaces, facei)
             {
-                PointHit<PointType> curHit =
+                PointHit<point_type> curHit =
                     masterFaces[facei].ray
                     (
                         curFaceCentre,

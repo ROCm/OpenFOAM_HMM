@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,16 +35,9 @@ Description
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 void
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-visitPointRegion
+Foam::PrimitivePatch<FaceList, PointField>::visitPointRegion
 (
     const label pointi,
     const labelList& pFaces,
@@ -109,22 +103,11 @@ visitPointRegion
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
-typename
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::surfaceTopo
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-surfaceType() const
+template<class FaceList, class PointField>
+typename Foam::PrimitivePatch<FaceList, PointField>::surfaceTopo
+Foam::PrimitivePatch<FaceList, PointField>::surfaceType() const
 {
-    if (debug)
-    {
-        InfoInFunction << "Calculating patch topology" << endl;
-    }
+    DebugInFunction << "Calculating patch topology" << nl;
 
     const labelListList& edgeFcs = edgeFaces();
 
@@ -148,34 +131,21 @@ surfaceType() const
         }
     }
 
-    if (debug)
-    {
-        Info<< "    Finished." << endl;
-    }
+    DebugInFunction << "Calculated patch topology" << nl;
 
     return pType;
 }
 
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 bool
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-checkTopology
+Foam::PrimitivePatch<FaceList, PointField>::checkTopology
 (
     const bool report,
     labelHashSet* setPtr
 ) const
 {
-    if (debug)
-    {
-        InfoInFunction << "Checking patch topology" << endl;
-    }
+    DebugInFunction << "Checking patch topology" << nl;
 
     // Check edgeFaces
 
@@ -208,25 +178,15 @@ checkTopology
         }
     }
 
-    if (debug)
-    {
-        Info<< "    Finished." << endl;
-    }
+    DebugInFunction << "Checked patch topology" << nl;
 
     return illegalTopo;
 }
 
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 bool
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-checkPointManifold
+Foam::PrimitivePatch<FaceList, PointField>::checkPointManifold
 (
     const bool report,
     labelHashSet* setPtr

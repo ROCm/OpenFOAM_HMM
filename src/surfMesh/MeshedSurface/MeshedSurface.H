@@ -95,7 +95,7 @@ Ostream& operator<<(Ostream&, const MeshedSurface<Face>&);
 template<class Face>
 class MeshedSurface
 :
-    public PrimitivePatch<Face, ::Foam::List, pointField, point>,
+    public PrimitivePatch<::Foam::List<Face>, pointField>,
     public fileFormats::surfaceFormatsCore
 {
     // Friends, regardless of face representations
@@ -111,7 +111,7 @@ private:
     // Private Typedefs (convenience)
 
         //- Internal mesh storage type
-        typedef PrimitivePatch<Face, ::Foam::List, pointField, point>
+        typedef PrimitivePatch<::Foam::List<Face>, pointField>
             MeshReference;
 
         typedef UnsortedMeshedSurface<Face>  FriendType;

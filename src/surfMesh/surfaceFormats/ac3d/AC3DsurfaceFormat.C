@@ -335,7 +335,7 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
 
     if (zones.size() == 1)
     {
-        PrimitivePatch<Face, UList, const pointField&> patch
+        PrimitivePatch<UList<Face>, const pointField&> patch
         (
             faceLst, pointLst
         );
@@ -349,10 +349,13 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
     {
         if (useFaceMap)
         {
+            typedef UIndirectList<Face> FaceListType;
+
             SubList<label> zoneMap(surf.faceMap(), zone.range());
-            PrimitivePatch<Face, UIndirectList, const pointField&> patch
+
+            PrimitivePatch<FaceListType, const pointField&> patch
             (
-                UIndirectList<Face>(faceLst, zoneMap),
+                FaceListType(faceLst, zoneMap),
                 pointLst
             );
 
@@ -360,9 +363,11 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
         }
         else
         {
-            PrimitivePatch<Face, UList, const pointField&> patch
+            typedef SubList<Face> FaceListType;
+
+            PrimitivePatch<FaceListType, const pointField&> patch
             (
-                SubList<Face>(faceLst, zone.range()),
+                FaceListType(faceLst, zone.range()),
                 pointLst
             );
 
@@ -416,10 +421,13 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
     label zoneIndex = 0;
     for (const surfZone& zone : zoneLst)
     {
+        typedef UIndirectList<Face> FaceListType;
+
         SubList<label> zoneMap(faceMap, zone.range());
-        PrimitivePatch<Face, UIndirectList, const pointField&> patch
+
+        PrimitivePatch<FaceListType, const pointField&> patch
         (
-            UIndirectList<Face>(surf.surfFaces(), zoneMap),
+            FaceListType(surf.surfFaces(), zoneMap),
             surf.points()
         );
 
