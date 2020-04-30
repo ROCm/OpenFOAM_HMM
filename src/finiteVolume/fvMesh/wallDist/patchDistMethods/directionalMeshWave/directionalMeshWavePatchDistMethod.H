@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -25,43 +24,53 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::patchDistMethods::meshWave
+    Foam::patchDistMethods::directionalMeshWave
 
 Description
-    Fast topological mesh-wave method for calculating the distance to nearest
-    patch for all cells and boundary.
+    Variant of \c meshWave distance-to-patch method.
 
-    For regular/un-distorted meshes this method is accurate but for skewed,
-    non-orthogonal meshes it is approximate with the error increasing with the
-    degree of mesh distortion.  The distance from the near-wall cells to the
-    boundary may optionally be corrected for mesh distortion by setting
-    correctWalls = true.
+    Ignores the component in the specified direction. Can be used e.g. to
+    calculate the distance in the z-direction only.
 
-    Example of the wallDist specification in fvSchemes:
+Usage
+    Example of specification in \c fvSchemes.wallDist:
     \verbatim
         wallDist
         {
-            method meshWave;
+            // Mandatory entries (unmodifiable)
+            method      directionalMeshWave;
+            n           (0 0 1);
 
-            // Optional entry enabling the calculation
-            // of the normal-to-wall field
-            nRequired false;
+            // Optional (inherited) entries (unmodifiable)
+            ...
         }
     \endverbatim
 
+    where the entries mean:
+    \table
+      Property     | Description                        | Type | Req'd | Dflt
+      method       | Method name: directionalMeshWave   | word |  yes  | -
+      n            | The direction component to ignore  | vector |  yes  | -
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link meshWavePatchDistMethod.H \endlink
+
 See also
-    Foam::patchDistMethod::Poisson
     Foam::wallDist
+    Foam::patchDistMethod::meshWave
+    Foam::patchDistMethod::Poisson
+    Foam::directionalWallPoint
 
 SourceFiles
-    meshWavePatchDistMethod.C
+    directionalMeshWavePatchDistMethod.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef meshWavePatchDistMethod_H
-#define meshWavePatchDistMethod_H
+#ifndef directionalMeshWavePatchDistMethod_H
+#define directionalMeshWavePatchDistMethod_H
 
-#include "patchDistMethod.H"
+#include "meshWavePatchDistMethod.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -71,61 +80,40 @@ namespace patchDistMethods
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class meshWave Declaration
+                          Class directionalMeshWave Declaration
 \*---------------------------------------------------------------------------*/
 
-class meshWave
+class directionalMeshWave
 :
-    public patchDistMethod
+    public meshWave
 {
-protected:
+    // Private Member Data
 
-    // Protected Member Data
-
-        //- Do accurate distance calculation for near-wall cells.
-        const bool correctWalls_;
-
-        //- Number of unset cells and faces.
-        mutable label nUnset_;
-
-
-private:
-
-    // Private Member Functions
+        //- The direction component to ignore
+        const vector n_;
 
         //- No copy construct
-        meshWave(const meshWave&) = delete;
+        directionalMeshWave(const directionalMeshWave&) = delete;
 
         //- No copy assignment
-        void operator=(const meshWave&) = delete;
+        void operator=(const directionalMeshWave&) = delete;
 
 
 public:
 
     //- Runtime type information
-    TypeName("meshWave");
+    TypeName("directionalMeshWave");
 
 
     // Constructors
 
         //- Construct from coefficients dictionary, mesh
-        //  and fixed-value patch set
-        meshWave
+        //- and fixed-value patch set
+        directionalMeshWave
         (
             const dictionary& dict,
             const fvMesh& mesh,
             const labelHashSet& patchIDs
-        );
-
-        //- Construct from mesh, fixed-value patch set and flag specifying
-        //  whether or not to correct wall.
-        //  Calculate for all cells. correctWalls : correct wall (face&point)
-        //  cells for correct distance, searching neighbours.
-        meshWave
-        (
-            const fvMesh& mesh,
-            const labelHashSet& patchIDs,
-            const bool correctWalls = true
         );
 
 

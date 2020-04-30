@@ -46,5 +46,11 @@ snGradSchemes
     default         corrected;
 }
 
+wallDist
+{
+    method          directionalMeshWave;
+    n               (0 0 1);
+}
+
 
 // ************************************************************************* //
