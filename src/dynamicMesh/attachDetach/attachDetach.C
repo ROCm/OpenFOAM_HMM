@@ -24,11 +24,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Attach/detach boundary mesh modifier.  This modifier takes a set of
-    internal faces and converts them into boundary faces and vice versa
-    based on the given activation switch.
-
 \*---------------------------------------------------------------------------*/
 
 #include "attachDetach.H"
@@ -38,6 +33,7 @@ Description
 #include "primitiveMesh.H"
 #include "polyTopoChange.H"
 #include "addToRunTimeSelectionTable.H"
+#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "weightedFlux.H"
+#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 

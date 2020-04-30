@@ -33,6 +33,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "mapPolyMesh.H"
 #include "unitConversion.H"
+#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

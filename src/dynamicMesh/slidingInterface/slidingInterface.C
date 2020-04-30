@@ -32,6 +32,7 @@ License
 #include "polyTopoChange.H"
 #include "addToRunTimeSelectionTable.H"
 #include "plane.H"
+#include "demandDrivenData.H"
 
 // Index of debug signs:
 // p - adjusting a projection point
