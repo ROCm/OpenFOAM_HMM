@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,11 +74,8 @@ void Foam::radiation::viewFactor::initialise()
     totalNCoarseFaces_ = nLocalCoarseFaces_;
     reduce(totalNCoarseFaces_, sumOp<label>());
 
-    if (debug && Pstream::master())
-    {
-        InfoInFunction
-            << "Total number of clusters : " << totalNCoarseFaces_ << endl;
-    }
+    DebugInFunction
+        << "Total number of clusters : " << totalNCoarseFaces_ << endl;
 
     map_.reset
     (
@@ -139,11 +136,8 @@ void Foam::radiation::viewFactor::initialise()
             new scalarSquareMatrix(totalNCoarseFaces_, Zero)
         );
 
-        if (debug)
-        {
-            InfoInFunction
-                << "Insert elements in the matrix..." << endl;
-        }
+        DebugInFunction
+            << "Insert elements in the matrix..." << endl;
 
         for (label procI = 0; procI < Pstream::nProcs(); procI++)
         {
@@ -160,11 +154,7 @@ void Foam::radiation::viewFactor::initialise()
 
         if (coeffs_.get<bool>("smoothing"))
         {
-            if (debug)
-            {
-                InfoInFunction
-                    << "Smoothing the matrix..." << endl;
-            }
+            DebugInFunction << "Smoothing the matrix..." << endl;
 
             for (label i=0; i<totalNCoarseFaces_; i++)
             {
@@ -576,11 +566,7 @@ void Foam::radiation::viewFactor::calculate()
                         }
                     }
 
-                    if (debug)
-                    {
-                        InfoInFunction
-                            << "\nDecomposing C matrix..." << endl;
-                    }
+                    DebugInFunction << "\nDecomposing C matrix..." << endl;
 
                     LUDecompose(CLU_(), pivotIndices_);
                 }

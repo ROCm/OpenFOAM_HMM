@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,10 +40,7 @@ License
 
 void Foam::fvMesh::makeSf() const
 {
-    if (debug)
-    {
-        InfoInFunction << "Assembling face areas" << endl;
-    }
+    DebugInFunction << "Assembling face areas" << endl;
 
     // It is an error to attempt to recalculate
     // if the pointer is already set
@@ -76,10 +74,7 @@ void Foam::fvMesh::makeSf() const
 
 void Foam::fvMesh::makeMagSf() const
 {
-    if (debug)
-    {
-        InfoInFunction << "Assembling mag face areas" << endl;
-    }
+    DebugInFunction << "Assembling mag face areas" << endl;
 
     // It is an error to attempt to recalculate
     // if the pointer is already set
@@ -112,10 +107,7 @@ void Foam::fvMesh::makeMagSf() const
 
 void Foam::fvMesh::makeC() const
 {
-    if (debug)
-    {
-        InfoInFunction << "Assembling cell centres" << endl;
-    }
+    DebugInFunction << "Assembling cell centres" << endl;
 
     // It is an error to attempt to recalculate
     // if the pointer is already set
@@ -152,10 +144,7 @@ void Foam::fvMesh::makeC() const
 
 void Foam::fvMesh::makeCf() const
 {
-    if (debug)
-    {
-        InfoInFunction << "Assembling face centres" << endl;
-    }
+    DebugInFunction << "Assembling face centres" << endl;
 
     // It is an error to attempt to recalculate
     // if the pointer is already set
@@ -191,11 +180,8 @@ const Foam::volScalarField::Internal& Foam::fvMesh::V() const
 {
     if (!VPtr_)
     {
-        if (debug)
-        {
-            InfoInFunction
-                << "Constructing from primitiveMesh::cellVolumes()" << endl;
-        }
+        DebugInFunction
+            << "Constructing from primitiveMesh::cellVolumes()" << endl;
 
         VPtr_ = new slicedVolScalarField::Internal
         (
@@ -248,10 +234,7 @@ const Foam::volScalarField::Internal& Foam::fvMesh::V00() const
 {
     if (!V00Ptr_)
     {
-        if (debug)
-        {
-            InfoInFunction << "Constructing from V0" << endl;
-        }
+        DebugInFunction << "Constructing from V0" << endl;
 
         V00Ptr_ = new DimensionedField<scalar, volMesh>
         (
@@ -379,10 +362,7 @@ const Foam::surfaceVectorField& Foam::fvMesh::Cf() const
 
 Foam::tmp<Foam::surfaceVectorField> Foam::fvMesh::delta() const
 {
-    if (debug)
-    {
-        InfoInFunction << "Calculating face deltas" << endl;
-    }
+    DebugInFunction << "Calculating face deltas" << endl;
 
     tmp<surfaceVectorField> tdelta
     (

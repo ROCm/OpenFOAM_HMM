@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -526,10 +526,8 @@ Foam::polyMesh::polyMesh
     curMotionTimeIndex_(time().timeIndex()),
     oldPointsPtr_(nullptr)
 {
-    if (debug)
-    {
-        Info<<"Constructing polyMesh from cell and boundary shapes." << endl;
-    }
+    DebugInfo
+        << "Constructing polyMesh from cell and boundary shapes." << endl;
 
     // Calculate faces and cells
     labelList patchSizes;
@@ -808,10 +806,8 @@ Foam::polyMesh::polyMesh
     curMotionTimeIndex_(time().timeIndex()),
     oldPointsPtr_(nullptr)
 {
-    if (debug)
-    {
-        Info<<"Constructing polyMesh from cell and boundary shapes." << endl;
-    }
+    DebugInfo
+        << "Constructing polyMesh from cell and boundary shapes." << endl;
 
     // Calculate faces and cells
     labelList patchSizes;
@@ -940,7 +936,7 @@ Foam::polyMesh::polyMesh
     {
         if (checkMesh())
         {
-            Info << "Mesh OK" << endl;
+            Info<< "Mesh OK" << endl;
         }
     }
 }

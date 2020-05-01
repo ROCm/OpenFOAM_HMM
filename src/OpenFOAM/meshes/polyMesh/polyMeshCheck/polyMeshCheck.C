@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,10 +42,7 @@ bool Foam::polyMesh::checkFaceOrthogonality
     labelHashSet* setPtr
 ) const
 {
-    if (debug)
-    {
-        InfoInFunction << "Checking mesh non-orthogonality" << endl;
-    }
+    DebugInFunction << "Checking mesh non-orthogonality" << endl;
 
     const labelList& own = faceOwner();
     const labelList& nei = faceNeighbour();
@@ -179,10 +176,7 @@ bool Foam::polyMesh::checkFaceSkewness
     labelHashSet* setPtr
 ) const
 {
-    if (debug)
-    {
-        InfoInFunction << "Checking face skewness" << endl;
-    }
+    DebugInFunction << "Checking face skewness" << endl;
 
     const labelList& own = faceOwner();
     const labelList& nei = faceNeighbour();
@@ -283,10 +277,7 @@ bool Foam::polyMesh::checkEdgeAlignment
     // Empty direction info is passed in as a vector of labels (synchronised)
     // which are 1 if the direction is non-empty, 0 if it is.
 
-    if (debug)
-    {
-        InfoInFunction << "Checking edge alignment" << endl;
-    }
+    DebugInFunction << "Checking edge alignment" << endl;
 
     label nDirs = 0;
     for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
@@ -413,10 +404,7 @@ bool Foam::polyMesh::checkCellDeterminant
 {
     const scalar warnDet = 1e-3;
 
-    if (debug)
-    {
-        InfoInFunction << "Checking for under-determined cells" << endl;
-    }
+    DebugInFunction << "Checking for under-determined cells" << endl;
 
     tmp<scalarField> tcellDeterminant = primitiveMeshTools::cellDeterminant
     (
@@ -491,10 +479,7 @@ bool Foam::polyMesh::checkFaceWeight
     labelHashSet* setPtr
 ) const
 {
-    if (debug)
-    {
-        InfoInFunction << "Checking for low face interpolation weights" << endl;
-    }
+    DebugInFunction << "Checking for low face interpolation weights" << endl;
 
     tmp<scalarField> tfaceWght = polyMeshTools::faceWeights
     (
@@ -580,10 +565,7 @@ bool Foam::polyMesh::checkVolRatio
     labelHashSet* setPtr
 ) const
 {
-    if (debug)
-    {
-        InfoInFunction << "Checking for volume ratio < " << minRatio << endl;
-    }
+    DebugInFunction << "Checking for volume ratio < " << minRatio << endl;
 
     tmp<scalarField> tvolRatio = polyMeshTools::volRatio(*this, cellVols);
     scalarField& volRatio = tvolRatio.ref();

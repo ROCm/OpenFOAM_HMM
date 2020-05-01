@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,20 +66,16 @@ Foam::label Foam::meshToMesh::calcDistribution
         if (nHaveCells > 1)
         {
             proci = -1;
-            if (debug)
-            {
-                InfoInFunction
-                    << "Meshes split across multiple processors" << endl;
-            }
+
+            DebugInFunction
+                << "Meshes split across multiple processors" << endl;
         }
         else if (nHaveCells == 1)
         {
             proci = cellsPresentOnProc.find(1);
-            if (debug)
-            {
-                InfoInFunction
-                    << "Meshes local to processor" << proci << endl;
-            }
+
+            DebugInFunction
+                << "Meshes local to processor" << proci << endl;
         }
     }
 
@@ -889,11 +885,8 @@ void Foam::meshToMesh::distributeAndMergeCells
 
         if (hasMerged)
         {
-            if (debug)
-            {
-                Pout<< "Merged from " << tgtPoints.size()
-                    << " down to " << newTgtPoints.size() << " points" << endl;
-            }
+            Pout<< "Merged from " << tgtPoints.size()
+                << " down to " << newTgtPoints.size() << " points" << endl;
 
             tgtPoints.transfer(newTgtPoints);
             forAll(tgtFaces, i)

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,10 +38,7 @@ License
 
 void Foam::polyMesh::removeBoundary()
 {
-    if (debug)
-    {
-        InfoInFunction << "Removing boundary patches." << endl;
-    }
+    DebugInFunction << "Removing boundary patches." << endl;
 
     // Remove the point zones
     boundary_.clear();
@@ -54,10 +52,7 @@ void Foam::polyMesh::removeBoundary()
 
 void Foam::polyMesh::clearGeom()
 {
-    if (debug)
-    {
-        InfoInFunction << "Clearing geometric data" << endl;
-    }
+    DebugInFunction << "Clearing geometric data" << endl;
 
     // Clear all geometric mesh objects
     meshObject::clear<pointMesh, GeometricMeshObject>(*this);
@@ -82,12 +77,10 @@ void Foam::polyMesh::updateGeom
     autoPtr<labelIOList>& newTetBasePtIsPtr
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Updating geometric data with newPoints:"
-            << newPoints.size() << " newTetBasePtIs:"
-            << newTetBasePtIsPtr.valid() << endl;
-    }
+    DebugInFunction
+        << "Updating geometric data with newPoints:"
+        << newPoints.size() << " newTetBasePtIs:"
+        << newTetBasePtIsPtr.valid() << endl;
 
     if (points_.size() != 0 && points_.size() != newPoints.size())
     {
@@ -158,11 +151,8 @@ void Foam::polyMesh::updateGeom
 
 void Foam::polyMesh::clearAddressing(const bool isMeshUpdate)
 {
-    if (debug)
-    {
-        InfoInFunction
-            << "Clearing topology  isMeshUpdate:" << isMeshUpdate << endl;
-    }
+    DebugInFunction
+        << "Clearing topology  isMeshUpdate:" << isMeshUpdate << endl;
 
     if (isMeshUpdate)
     {
@@ -238,10 +228,7 @@ void Foam::polyMesh::clearOut()
 
 void Foam::polyMesh::clearTetBasePtIs()
 {
-    if (debug)
-    {
-        InfoInFunction << "Clearing tet base points" << endl;
-    }
+    DebugInFunction << "Clearing tet base points" << endl;
 
     tetBasePtIsPtr_.clear();
 }
@@ -249,10 +236,7 @@ void Foam::polyMesh::clearTetBasePtIs()
 
 void Foam::polyMesh::clearCellTree()
 {
-    if (debug)
-    {
-        InfoInFunction << "Clearing cell tree" << endl;
-    }
+    DebugInFunction << "Clearing cell tree" << endl;
 
     cellTreePtr_.clear();
 }

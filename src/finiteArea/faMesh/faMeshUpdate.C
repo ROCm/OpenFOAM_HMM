@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,11 +37,7 @@ License
 
 void Foam::faMesh::updateMesh(const mapPolyMesh& mpm)
 {
-    if (debug)
-    {
-        Info<< "bool faMesh::updateMesh(const mapPolyMesh& mpm) : "
-            << "Updating mesh" << endl;
-    }
+    DebugInFunction << "Updating mesh" << endl;
 
     // if (!mpm.morphing())
     // {
@@ -182,11 +179,7 @@ void Foam::faMesh::mapOldAreas(const faMeshMapper& mapper) const
 {
     if (S0Ptr_)
     {
-        if (debug)
-        {
-            InfoIn("void faMesh::mapOldAreas(const faMeshMapper& mapper)")
-                << "Mapping old face areas." << endl;
-        }
+        DebugInFunction << "Mapping old face areas." << endl;
 
         scalarField& S0 = *S0Ptr_;
 
@@ -211,11 +204,7 @@ void Foam::faMesh::mapOldAreas(const faMeshMapper& mapper) const
 
     if (S00Ptr_)
     {
-        if (debug)
-        {
-            InfoIn("void faMesh::mapOldAreas(const faMeshMapper& mapper)")
-                << "Mapping old-old face areas." << endl;
-        }
+        DebugInFunction << "Mapping old-old face areas." << endl;
 
         scalarField& S00 = *S00Ptr_;
 

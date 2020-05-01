@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -176,12 +176,7 @@ void Foam::mixerFvMesh::addZonesAndModifiers()
 
 void Foam::mixerFvMesh::calcMovingMasks() const
 {
-    if (debug)
-    {
-        InfoInFunction
-            << "Calculating point and cell masks"
-            << endl;
-    }
+    DebugInFunction << "Calculating point and cell masks" << endl;
 
     if (movingPointsMaskPtr_)
     {
@@ -340,10 +335,7 @@ bool Foam::mixerFvMesh::update()
 
     if (topoChangeMap.valid())
     {
-        if (debug)
-        {
-            InfoInFunction << "Mesh topology is changing" << endl;
-        }
+        DebugInFunction << "Mesh topology is changing" << nl;
 
         deleteDemandDrivenData(movingPointsMaskPtr_);
     }

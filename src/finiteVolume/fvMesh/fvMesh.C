@@ -127,10 +127,7 @@ void Foam::fvMesh::clearGeom()
 
 void Foam::fvMesh::clearAddressing(const bool isMeshUpdate)
 {
-    if (debug)
-    {
-        InfoInFunction << "isMeshUpdate: " << isMeshUpdate << endl;
-    }
+    DebugInFunction << "isMeshUpdate: " << isMeshUpdate << endl;
 
     if (isMeshUpdate)
     {
@@ -168,15 +165,10 @@ void Foam::fvMesh::storeOldVol(const scalarField& V)
 {
     if (curTimeIndex_ < time().timeIndex())
     {
-        if (debug)
-        {
-            InfoInFunction
-                << " Storing old time volumes since from time " << curTimeIndex_
-                << " and time now " << time().timeIndex()
-                << " V:" << V.size()
-                << endl;
-        }
-
+        DebugInFunction
+            << " Storing old time volumes since from time " << curTimeIndex_
+            << " and time now " << time().timeIndex()
+            << " V:" << V.size() << endl;
 
         if (V00Ptr_ && V0Ptr_)
         {
@@ -220,6 +212,7 @@ void Foam::fvMesh::storeOldVol(const scalarField& V)
             InfoInFunction
                 << " Stored old time volumes V0:" << V0Ptr_->size()
                 << endl;
+
             if (V00Ptr_)
             {
                 InfoInFunction
@@ -266,10 +259,7 @@ Foam::fvMesh::fvMesh(const IOobject& io)
     CfPtr_(nullptr),
     phiPtr_(nullptr)
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing fvMesh from IOobject" << endl;
-    }
+    DebugInFunction << "Constructing fvMesh from IOobject" << endl;
 
     // Check the existence of the cell volumes and read if present
     // and set the storage of V00
@@ -370,10 +360,7 @@ Foam::fvMesh::fvMesh
     CfPtr_(nullptr),
     phiPtr_(nullptr)
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing fvMesh from components" << endl;
-    }
+    DebugInFunction << "Constructing fvMesh from components" << endl;
 }
 
 
@@ -410,10 +397,7 @@ Foam::fvMesh::fvMesh
     CfPtr_(nullptr),
     phiPtr_(nullptr)
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing fvMesh from components" << endl;
-    }
+    DebugInFunction << "Constructing fvMesh from components" << endl;
 }
 
 
@@ -521,10 +505,7 @@ void Foam::fvMesh::addFvPatches
 
 void Foam::fvMesh::removeFvBoundary()
 {
-    if (debug)
-    {
-        InfoInFunction << "Removing boundary patches." << endl;
-    }
+    DebugInFunction << "Removing boundary patches." << endl;
 
     // Remove fvBoundaryMesh data first.
     boundary_.clear();
@@ -537,19 +518,13 @@ void Foam::fvMesh::removeFvBoundary()
 
 Foam::polyMesh::readUpdateState Foam::fvMesh::readUpdate()
 {
-    if (debug)
-    {
-        InfoInFunction << "Updating fvMesh.  ";
-    }
+    DebugInFunction << "Updating fvMesh.  ";
 
     polyMesh::readUpdateState state = polyMesh::readUpdate();
 
     if (state == polyMesh::TOPO_PATCH_CHANGE)
     {
-        if (debug)
-        {
-            Info<< "Boundary and topological update" << endl;
-        }
+        DebugInfo << "Boundary and topological update" << endl;
 
         boundary_.readUpdate(boundaryMesh());
 
@@ -558,28 +533,19 @@ Foam::polyMesh::readUpdateState Foam::fvMesh::readUpdate()
     }
     else if (state == polyMesh::TOPO_CHANGE)
     {
-        if (debug)
-        {
-            Info<< "Topological update" << endl;
-        }
+        DebugInfo << "Topological update" << endl;
 
         clearOut();
     }
     else if (state == polyMesh::POINTS_MOVED)
     {
-        if (debug)
-        {
-            Info<< "Point motion update" << endl;
-        }
+        DebugInfo << "Point motion update" << endl;
 
         clearGeom();
     }
     else
     {
-        if (debug)
-        {
-            Info<< "No update" << endl;
-        }
+        DebugInfo << "No update" << endl;
     }
 
     return state;
@@ -596,12 +562,9 @@ const Foam::lduAddressing& Foam::fvMesh::lduAddr() const
 {
     if (!lduPtr_)
     {
-        if (debug)
-        {
-            InfoInFunction
-                << " calculating fvMeshLduAddressing from nFaces:"
-                << nFaces() << endl;
-        }
+        DebugInFunction
+            << "Calculating fvMeshLduAddressing from nFaces:"
+            << nFaces() << endl;
 
         lduPtr_ = new fvMeshLduAddressing(*this);
     }
@@ -612,16 +575,12 @@ const Foam::lduAddressing& Foam::fvMesh::lduAddr() const
 
 void Foam::fvMesh::mapFields(const mapPolyMesh& meshMap)
 {
-    if (debug)
-    {
-        InfoInFunction
-            << " nOldCells:" << meshMap.nOldCells()
-            << " nCells:" << nCells()
-            << " nOldFaces:" << meshMap.nOldFaces()
-            << " nFaces:" << nFaces()
-            << endl;
-    }
-
+    DebugInFunction
+        << " nOldCells:" << meshMap.nOldCells()
+        << " nCells:" << nCells()
+        << " nOldFaces:" << meshMap.nOldFaces()
+        << " nFaces:" << nFaces()
+        << endl;
 
     // We require geometric properties valid for the old mesh
     if
@@ -717,11 +676,9 @@ void Foam::fvMesh::mapFields(const mapPolyMesh& meshMap)
             }
         }
 
-        if (debug)
-        {
-            Info<< "Mapping old time volume V0. Merged "
-                << nMerged << " out of " << nCells() << " cells" << endl;
-        }
+        DebugInfo
+            << "Mapping old time volume V0. Merged "
+            << nMerged << " out of " << nCells() << " cells" << endl;
     }
 
 
@@ -760,11 +717,9 @@ void Foam::fvMesh::mapFields(const mapPolyMesh& meshMap)
             }
         }
 
-        if (debug)
-        {
-            Info<< "Mapping old time volume V00. Merged "
-                << nMerged << " out of " << nCells() << " cells" << endl;
-        }
+        DebugInfo
+            << "Mapping old time volume V00. Merged "
+            << nMerged << " out of " << nCells() << " cells" << endl;
     }
 }
 

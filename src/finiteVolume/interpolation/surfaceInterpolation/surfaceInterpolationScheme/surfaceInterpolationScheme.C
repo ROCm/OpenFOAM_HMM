@@ -98,8 +98,7 @@ Foam::surfaceInterpolationScheme<Type>::New
 
     if (surfaceInterpolation::debug || surfaceInterpolationScheme<Type>::debug)
     {
-        InfoInFunction
-            << "Discretisation scheme = " << schemeName << endl;
+        InfoInFunction << "Discretisation scheme = " << schemeName << endl;
     }
 
     auto cstrIter = MeshFluxConstructorTablePtr_->cfind(schemeName);

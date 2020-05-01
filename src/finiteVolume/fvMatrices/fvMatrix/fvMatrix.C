@@ -282,11 +282,8 @@ Foam::fvMatrix<Type>::fvMatrix
     boundaryCoeffs_(psi.mesh().boundary().size()),
     faceFluxCorrectionPtr_(nullptr)
 {
-    if (debug)
-    {
-        InfoInFunction
-            << "Constructing fvMatrix<Type> for field " << psi_.name() << endl;
-    }
+    DebugInFunction
+        << "Constructing fvMatrix<Type> for field " << psi_.name() << endl;
 
     // Initialise coupling coefficients
     forAll(psi.mesh().boundary(), patchi)
@@ -334,11 +331,8 @@ Foam::fvMatrix<Type>::fvMatrix(const fvMatrix<Type>& fvm)
     boundaryCoeffs_(fvm.boundaryCoeffs_),
     faceFluxCorrectionPtr_(nullptr)
 {
-    if (debug)
-    {
-        InfoInFunction
-            << "Copying fvMatrix<Type> for field " << psi_.name() << endl;
-    }
+    DebugInFunction
+        << "Copying fvMatrix<Type> for field " << psi_.name() << endl;
 
     if (fvm.faceFluxCorrectionPtr_)
     {
@@ -378,11 +372,8 @@ Foam::fvMatrix<Type>::fvMatrix(const tmp<fvMatrix<Type>>& tfvm)
     ),
     faceFluxCorrectionPtr_(nullptr)
 {
-    if (debug)
-    {
-        InfoInFunction
-            << "Copying fvMatrix<Type> for field " << psi_.name() << endl;
-    }
+    DebugInFunction
+        << "Copying fvMatrix<Type> for field " << psi_.name() << endl;
 
     if (tfvm().faceFluxCorrectionPtr_)
     {
@@ -420,11 +411,8 @@ Foam::fvMatrix<Type>::fvMatrix
     boundaryCoeffs_(psi.mesh().boundary().size()),
     faceFluxCorrectionPtr_(nullptr)
 {
-    if (debug)
-    {
-        InfoInFunction
-            << "Constructing fvMatrix<Type> for field " << psi_.name() << endl;
-    }
+    DebugInFunction
+        << "Constructing fvMatrix<Type> for field " << psi_.name() << endl;
 
     // Initialise coupling coefficients
     forAll(psi.mesh().boundary(), patchi)
@@ -468,11 +456,8 @@ Foam::tmp<Foam::fvMatrix<Type>> Foam::fvMatrix<Type>::clone() const
 template<class Type>
 Foam::fvMatrix<Type>::~fvMatrix()
 {
-    if (debug)
-    {
-        InfoInFunction
-            << "Destroying fvMatrix<Type> for field " << psi_.name() << endl;
-    }
+    DebugInFunction
+        << "Destroying fvMatrix<Type> for field " << psi_.name() << endl;
 
     if (faceFluxCorrectionPtr_)
     {
@@ -579,11 +564,8 @@ void Foam::fvMatrix<Type>::relax(const scalar alpha)
         return;
     }
 
-    if (debug)
-    {
-        InfoInFunction
-            << "Relaxing " << psi_.name() << " by " << alpha << endl;
-    }
+    DebugInFunction
+        << "Relaxing " << psi_.name() << " by " << alpha << endl;
 
     Field<Type>& S = source();
     scalarField& D = diag();

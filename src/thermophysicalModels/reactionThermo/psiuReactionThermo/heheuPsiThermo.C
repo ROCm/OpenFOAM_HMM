@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -398,21 +398,16 @@ Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::~heheuPsiThermo()
 template<class BasicPsiThermo, class MixtureType>
 void Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::correct()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << endl;
 
     // force the saving of the old-time values
     this->psi_.oldTime();
 
     calculate();
 
-    if (debug)
-    {
-        Info<< "    Finished" << endl;
-    }
+    DebugInfo << "    Finished" << endl;
 }
+
 
 /*
 template<class BasicPsiThermo, class MixtureType>

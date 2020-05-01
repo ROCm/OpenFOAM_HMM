@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -112,12 +112,9 @@ Foam::fv::options& Foam::fv::options::New(const fvMesh& mesh)
     }
     else
     {
-        if (debug)
-        {
-            InfoInFunction
-                << "Constructing " << typeName
-                << " for region " << mesh.name() << endl;
-        }
+        DebugInFunction
+            << "Constructing " << typeName
+            << " for region " << mesh.name() << nl;
 
         options* objectPtr = new options(mesh);
         regIOobject::store(objectPtr);

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,10 +85,7 @@ Foam::leastSquaresVectors::~leastSquaresVectors()
 
 void Foam::leastSquaresVectors::calcLeastSquaresVectors()
 {
-    if (debug)
-    {
-        InfoInFunction << "Calculating least square gradient vectors" << endl;
-    }
+    DebugInFunction << "Calculating least square gradient vectors" << nl;
 
     const fvMesh& mesh = mesh_;
 
@@ -168,11 +166,7 @@ void Foam::leastSquaresVectors::calcLeastSquaresVectors()
         }
     }
 
-    if (debug)
-    {
-        InfoInFunction
-            <<"Finished calculating least square gradient vectors" << endl;
-    }
+    DebugInfo << "Finished calculating least square gradient vectors" << endl;
 }
 
 

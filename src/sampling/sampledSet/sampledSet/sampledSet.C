@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -363,19 +363,16 @@ bool Foam::sampledSet::getTrackingPoint
         }
     }
 
-    if (debug)
-    {
-        InfoInFunction
-            << " samplePt:" << samplePt
-            << " bPoint:" << bPoint
-            << " bFacei:" << bFacei
-            << endl << "   Calculated first tracking point :"
-            << " trackPt:" << trackPt
-            << " trackCelli:" << trackCelli
-            << " trackFacei:" << trackFacei
-            << " isGoodSample:" << isGoodSample
-            << endl;
-    }
+    DebugInFunction
+        << " samplePt:" << samplePt
+        << " bPoint:" << bPoint
+        << " bFacei:" << bFacei << nl
+        << "   Calculated first tracking point :"
+        << " trackPt:" << trackPt
+        << " trackCelli:" << trackCelli
+        << " trackFacei:" << trackFacei
+        << " isGoodSample:" << isGoodSample
+        << endl;
 
     return isGoodSample;
 }

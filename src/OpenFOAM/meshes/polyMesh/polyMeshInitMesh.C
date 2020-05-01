@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,10 +32,7 @@ License
 
 void Foam::polyMesh::initMesh()
 {
-    if (debug)
-    {
-        InfoInFunction << "initialising primitiveMesh" << endl;
-    }
+    DebugInFunction << "initialising primitiveMesh" << endl;
 
     // For backward compatibility check if the neighbour array is the same
     // length as the owner and shrink to remove the -1s padding
@@ -111,10 +108,7 @@ void Foam::polyMesh::initMesh()
 
 void Foam::polyMesh::initMesh(cellList& c)
 {
-    if (debug)
-    {
-        InfoInFunction << "Calculating owner-neighbour arrays" << endl;
-    }
+    DebugInFunction << "Calculating owner-neighbour arrays" << endl;
 
     owner_.setSize(faces_.size(), -1);
     neighbour_.setSize(faces_.size(), -1);

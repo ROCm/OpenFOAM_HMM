@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,10 +37,7 @@ Foam::autoPtr<Foam::meshToMeshMethod> Foam::meshToMeshMethod::New
     const polyMesh& tgt
 )
 {
-    if (debug)
-    {
-        Info<< "Selecting AMIMethod " << methodName << endl;
-    }
+    DebugInfo << "Selecting AMIMethod " << methodName << endl;
 
     auto cstrIter = componentsConstructorTablePtr_->cfind(methodName);
 

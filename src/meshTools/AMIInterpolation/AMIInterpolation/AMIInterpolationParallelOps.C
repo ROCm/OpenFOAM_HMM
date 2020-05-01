@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,20 +62,14 @@ Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcDistribution
         if (nHaveFaces > 1)
         {
             proci = -1;
-            if (debug)
-            {
-                InfoInFunction
-                    << "AMI split across multiple processors" << endl;
-            }
+            DebugInFunction
+                << "AMI split across multiple processors" << endl;
         }
         else if (nHaveFaces == 1)
         {
             proci = facesPresentOnProc.find(1);
-            if (debug)
-            {
-                InfoInFunction
-                    << "AMI local to processor" << proci << endl;
-            }
+            DebugInFunction
+                << "AMI local to processor" << proci << endl;
         }
     }
 

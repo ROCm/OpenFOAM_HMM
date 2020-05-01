@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -204,12 +204,9 @@ Foam::turbulentDFSEMInletFvPatchVectorField::patchMapper() const
 
         pointField samplePoints((IFstream(samplePointsFile)()));
 
-        if (debug)
-        {
-            InfoInFunction
-                << " Read " << samplePoints.size() << " sample points from "
-                << samplePointsFile << endl;
-        }
+        DebugInFunction
+            << " Read " << samplePoints.size() << " sample points from "
+            << samplePointsFile << endl;
 
 
         // tbd: run-time selection

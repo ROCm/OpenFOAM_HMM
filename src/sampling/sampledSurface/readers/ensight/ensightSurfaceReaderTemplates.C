@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,10 +65,7 @@ Foam::tmp<Foam::Field<Type>> Foam::ensightSurfaceReader::readField
     const label fieldIndex
 ) const
 {
-    if (debug)
-    {
-        InfoInFunction<< endl;
-    }
+    DebugInFunction << endl;
 
     const word& fieldName(fieldNames_[fieldIndex]);
     const label fileIndex = timeStartIndex_ + timeIndex*timeIncrement_;
@@ -106,10 +103,7 @@ Foam::tmp<Foam::Field<Type>> Foam::ensightSurfaceReader::readField
     is.read(primitiveType);
 
 
-    if (debug)
-    {
-        Info<< "primitiveType: " << primitiveType << endl;
-    }
+    DebugInfo << "primitiveType: " << primitiveType << endl;
 
     if (primitiveType != pTraits<Type>::typeName)
     {
@@ -139,11 +133,9 @@ Foam::tmp<Foam::Field<Type>> Foam::ensightSurfaceReader::readField
     // Read data file using schema generated while reading the surface
     forAll(schema_, i)
     {
-        if (debug)
-        {
-            const string& faceType = schema_[i].first();
-            Info<< "Reading face type " << faceType << " data" << endl;
-        }
+        DebugInfo
+            << "Reading face type "
+            << schema_[i].first() << " data" << endl;
 
         const label nFace = schema_[i].second();
 

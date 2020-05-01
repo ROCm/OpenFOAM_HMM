@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,12 +41,8 @@ Description
 
 void Foam::polyMesh::updateMesh(const mapPolyMesh& mpm)
 {
-    if (debug)
-    {
-        InfoInFunction
-            << "Updating addressing and (optional) pointMesh/pointFields"
-            << endl;
-    }
+    DebugInFunction
+        << "Updating addressing and (optional) pointMesh/pointFields" << endl;
 
     // Update boundaryMesh (note that patches themselves already ok)
     boundary_.updateMesh();

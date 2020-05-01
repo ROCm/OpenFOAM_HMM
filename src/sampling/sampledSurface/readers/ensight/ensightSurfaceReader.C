@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -203,7 +203,7 @@ Foam::ensightSurfaceReader::readGeometryHeader(ensightReadFile& is) const
 
 void Foam::ensightSurfaceReader::readCase(IFstream& is)
 {
-    DebugInFunction<< nl;
+    DebugInFunction << endl;
 
     if (!is.good())
     {
@@ -259,12 +259,12 @@ void Foam::ensightSurfaceReader::readCase(IFstream& is)
         }
         else if (debug)
         {
-            Info<<"variable line: " << parsed.size();
+            Info<< "variable line: " << parsed.size();
             for (const auto& s : parsed)
             {
-                Info<<" " << s.str();
+                Info<< " " << s.str();
             }
-            Info<<nl;
+            Info<< nl;
         }
 
         fieldNames.append(parsed[parsed.size()-2].str());
@@ -332,7 +332,7 @@ Foam::ensightSurfaceReader::ensightSurfaceReader(const fileName& fName)
 
 const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry()
 {
-    DebugInFunction<< nl;
+    DebugInFunction << endl;
 
     if (!surfPtr_.valid())
     {

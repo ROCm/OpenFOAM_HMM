@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,10 +83,7 @@ void kinematicSingleLayer::correctThermoFields()
 
 void kinematicSingleLayer::resetPrimaryRegionSourceTerms()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << endl;
 
     rhoSpPrimary_ == dimensionedScalar(rhoSp_.dimensions(), Zero);
     USpPrimary_ == dimensionedVector(USp_.dimensions(), Zero);
@@ -109,10 +106,7 @@ void kinematicSingleLayer::transferPrimaryRegionThermoFields()
 
 void kinematicSingleLayer::transferPrimaryRegionSourceFields()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << endl;
 
     volScalarField::Boundary& rhoSpPrimaryBf =
         rhoSpPrimary_.boundaryFieldRef();
@@ -215,10 +209,7 @@ void kinematicSingleLayer::correctAlpha()
 
 void kinematicSingleLayer::updateSubmodels()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << endl;
 
     // Update injection model - mass returned is mass available for injection
     injection_.correct(availableMass_, cloudMassTrans_, cloudDiameterTrans_);
@@ -269,10 +260,7 @@ void kinematicSingleLayer::continuityCheck()
 
 void kinematicSingleLayer::solveContinuity()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << endl;
 
     solve
     (
@@ -307,10 +295,7 @@ tmp<Foam::fvVectorMatrix> kinematicSingleLayer::solveMomentum
     const volScalarField& pp
 )
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << endl;
 
     // Momentum
     tmp<fvVectorMatrix> tUEqn
@@ -366,10 +351,7 @@ void kinematicSingleLayer::solveThickness
     const fvVectorMatrix& UEqn
 )
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << endl;
 
     volScalarField rUA(1.0/UEqn.A());
     U_ = rUA*UEqn.H();
@@ -854,14 +836,11 @@ void kinematicSingleLayer::addSources
     const scalar energySource
 )
 {
-    if (debug)
-    {
-        InfoInFunction
-            << "\nSurface film: " << type() << ": adding to film source:" << nl
-            << "    mass     = " << massSource << nl
-            << "    momentum = " << momentumSource << nl
-            << "    pressure = " << pressureSource << endl;
-    }
+    DebugInFunction
+        << "\nSurface film: " << type() << ": adding to film source:" << nl
+        << "    mass     = " << massSource << nl
+        << "    momentum = " << momentumSource << nl
+        << "    pressure = " << pressureSource << endl;
 
     rhoSpPrimary_.boundaryFieldRef()[patchi][facei] -= massSource;
     USpPrimary_.boundaryFieldRef()[patchi][facei] -= momentumSource;
@@ -873,10 +852,7 @@ void kinematicSingleLayer::addSources
 
 void kinematicSingleLayer::preEvolveRegion()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << endl;
 
     surfaceFilmRegionModel::preEvolveRegion();
 
@@ -900,10 +876,7 @@ void kinematicSingleLayer::preEvolveRegion()
 
 void kinematicSingleLayer::evolveRegion()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << endl;
 
     // Update sub-models to provide updated source contributions
     updateSubmodels();
@@ -937,10 +910,7 @@ void kinematicSingleLayer::evolveRegion()
 
 void kinematicSingleLayer::postEvolveRegion()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << endl;
 
     // Reset source terms for next time integration
     resetPrimaryRegionSourceTerms();

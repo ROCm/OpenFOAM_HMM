@@ -2545,11 +2545,9 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh(const IOobject& io)
      && (distType_ == INDEPENDENT || distType_ == DISTRIBUTED)
     )
     {
-        if (debug)
-        {
-            InfoInFunction << "Read distributedTriSurface " << io.name()
-                << " from parent path " << actualFile << endl;
-        }
+        DebugInFunction
+            << "Read distributedTriSurface " << io.name()
+            << " from parent path " << actualFile << endl;
 
         if (Pstream::parRun())
         {
@@ -2571,7 +2569,8 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh(const IOobject& io)
     {
         if (debug)
         {
-            InfoInFunction << "Read distributedTriSurface " << io.name()
+            InfoInFunction
+                << "Read distributedTriSurface " << io.name()
                 << " from actual path " << actualFile << ':' << endl;
 
             labelList nTris(Pstream::nProcs());
@@ -2590,8 +2589,8 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh(const IOobject& io)
     }
     if (debug)
     {
-        InfoInFunction << "Read distributedTriSurface " << io.name() << ':'
-            << endl;
+        InfoInFunction
+            << "Read distributedTriSurface " << io.name() << ':' << endl;
         writeStats(Info);
     }
 }
@@ -2685,12 +2684,10 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
      && (distType_ == INDEPENDENT || distType_ == DISTRIBUTED)
     )
     {
-        if (debug)
-        {
-            InfoInFunction << "Read distributedTriSurface " << io.name()
-                << " from parent path " << actualFile
-                << " and dictionary" << endl;
-        }
+        DebugInFunction
+            << "Read distributedTriSurface " << io.name()
+            << " from parent path " << actualFile
+            << " and dictionary" << endl;
 
         if (Pstream::parRun())
         {
@@ -2712,7 +2709,8 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
     {
         if (debug)
         {
-            InfoInFunction << "Read distributedTriSurface " << io.name()
+            InfoInFunction
+                << "Read distributedTriSurface " << io.name()
                 << " from actual path " << actualFile
                 << " and dictionary:" << endl;
 
@@ -2732,8 +2730,8 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
     }
     if (debug)
     {
-        InfoInFunction << "Read distributedTriSurface " << io.name() << ':'
-            << endl;
+        InfoInFunction
+            << "Read distributedTriSurface " << io.name() << ':' << endl;
         writeStats(Info);
     }
 }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,10 +56,7 @@ void Foam::patchCloudSet::calcSamples
     DynamicList<scalar>& samplingCurveDist
 ) const
 {
-    if (debug)
-    {
-        Info<< "patchCloudSet : sampling on patches :" << endl;
-    }
+    DebugInfo << "patchCloudSet : sampling on patches :" << endl;
 
     // Construct search tree for all patch faces.
     label sz = 0;
@@ -69,10 +66,7 @@ void Foam::patchCloudSet::calcSamples
 
         sz += pp.size();
 
-        if (debug)
-        {
-            Info<< "    " << pp.name() << " size " << pp.size() << endl;
-        }
+        DebugInfo << "    " << pp.name() << " size " << pp.size() << endl;
     }
 
     labelList patchFaces(sz);

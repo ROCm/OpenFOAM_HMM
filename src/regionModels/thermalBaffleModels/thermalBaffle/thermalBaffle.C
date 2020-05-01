@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "thermalBaffle.H"
-
 #include "fvm.H"
 #include "fvcDiv.H"
 #include "addToRunTimeSelectionTable.H"
@@ -69,10 +68,7 @@ bool thermalBaffle::read(const dictionary& dict)
 
 void thermalBaffle::solveEnergy()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << endl;
 
     const polyBoundaryMesh& rbm = regionMesh().boundaryMesh();
 

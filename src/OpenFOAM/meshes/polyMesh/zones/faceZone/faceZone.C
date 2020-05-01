@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,10 +69,7 @@ void Foam::faceZone::setFlipMap(const bool val)
 
 void Foam::faceZone::calcFaceZonePatch() const
 {
-    if (debug)
-    {
-        InfoInFunction << "Calculating primitive patch" << endl;
-    }
+    DebugInFunction << "Calculating primitive patch" << endl;
 
     if (patchPtr_)
     {
@@ -107,19 +104,13 @@ void Foam::faceZone::calcFaceZonePatch() const
         }
     }
 
-    if (debug)
-    {
-        InfoInFunction << "Finished calculating primitive patch" << endl;
-    }
+    DebugInfo << "Finished calculating primitive patch" << endl;
 }
 
 
 void Foam::faceZone::calcCellLayers() const
 {
-    if (debug)
-    {
-        InfoInFunction << "Calculating master cells" << endl;
-    }
+    DebugInFunction << "Calculating master cells" << endl;
 
     // It is an error to attempt to recalculate edgeCells
     // if the pointer is already set

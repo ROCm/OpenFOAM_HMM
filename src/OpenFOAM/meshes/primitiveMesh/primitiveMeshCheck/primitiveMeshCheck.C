@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,11 +52,7 @@ bool Foam::primitiveMesh::checkClosedBoundary
     const bitSet& internalOrCoupledFaces
 ) const
 {
-    if (debug)
-    {
-        InfoInFunction
-            << "Checking whether the boundary is closed" << endl;
-    }
+    DebugInFunction << "Checking if boundary is closed" << endl;
 
     // Loop through all boundary faces and sum up the face area vectors.
     // For a closed boundary, this should be zero in all vector components
@@ -110,11 +106,7 @@ bool Foam::primitiveMesh::checkClosedCells
     const Vector<label>& meshD
 ) const
 {
-    if (debug)
-    {
-        InfoInFunction
-            << "Checking whether cells are closed" << endl;
-    }
+    DebugInFunction << "Checking if cells are closed" << endl;
 
     // Check that all cells labels are valid
     const cellList& c = cells();
@@ -240,10 +232,7 @@ bool Foam::primitiveMesh::checkFaceAreas
     labelHashSet* setPtr
 ) const
 {
-    if (debug)
-    {
-        InfoInFunction << "Checking face area magnitudes" << endl;
-    }
+    DebugInFunction << "Checking face area magnitudes" << endl;
 
     const scalarField magFaceAreas(mag(faceAreas));
 
@@ -316,10 +305,7 @@ bool Foam::primitiveMesh::checkCellVolumes
     labelHashSet* setPtr
 ) const
 {
-    if (debug)
-    {
-        InfoInFunction << "Checking cell volumes" << endl;
-    }
+    DebugInFunction << "Checking cell volumes" << endl;
 
     scalar minVolume = GREAT;
     scalar maxVolume = -GREAT;
@@ -384,11 +370,7 @@ bool Foam::primitiveMesh::checkFaceOrthogonality
     labelHashSet* setPtr
 ) const
 {
-    if (debug)
-    {
-        InfoInFunction << "Checking mesh non-orthogonality" << endl;
-    }
-
+    DebugInFunction << "Checking mesh non-orthogonality" << endl;
 
     tmp<scalarField> tortho = primitiveMeshTools::faceOrthogonality
     (
@@ -494,10 +476,7 @@ bool Foam::primitiveMesh::checkFacePyramids
     labelHashSet* setPtr
 ) const
 {
-    if (debug)
-    {
-        InfoInFunction << "Checking face orientation" << endl;
-    }
+    DebugInFunction << "Checking face orientation" << endl;
 
     const labelList& own = faceOwner();
     const labelList& nei = faceNeighbour();
@@ -594,10 +573,7 @@ bool Foam::primitiveMesh::checkFaceSkewness
     labelHashSet* setPtr
 ) const
 {
-    if (debug)
-    {
-        InfoInFunction << "Checking face skewness" << endl;
-    }
+    DebugInFunction << "Checking face skewness" << endl;
 
     // Warn if the skew correction vector is more than skewWarning times
     // larger than the face area vector
@@ -664,10 +640,7 @@ bool Foam::primitiveMesh::checkFaceAngles
     labelHashSet* setPtr
 ) const
 {
-    if (debug)
-    {
-        InfoInFunction << "Checking face angles" << endl;
-    }
+    DebugInFunction << "Checking face angles" << endl;
 
     if (maxDeg < -SMALL || maxDeg > 180+SMALL)
     {
@@ -743,15 +716,12 @@ bool Foam::primitiveMesh::checkFaceFlatness
     labelHashSet* setPtr
 ) const
 {
-    if (debug)
-    {
-        InfoInFunction << "Checking face flatness" << endl;
-    }
+    DebugInFunction << "Checking face flatness" << endl;
 
     if (warnFlatness < 0 || warnFlatness > 1)
     {
         FatalErrorInFunction
-            << "warnFlatness should be [0..1] but is now " << warnFlatness
+            << "warnFlatness should be [0..1] but is " << warnFlatness
             << exit(FatalError);
     }
 
@@ -844,10 +814,7 @@ bool Foam::primitiveMesh::checkConcaveCells
     labelHashSet* setPtr
 ) const
 {
-    if (debug)
-    {
-        InfoInFunction << "Checking for concave cells" << endl;
-    }
+    DebugInFunction << "Checking for concave cells" << endl;
 
     const cellList& c = cells();
     const labelList& fOwner = faceOwner();
@@ -951,10 +918,7 @@ bool Foam::primitiveMesh::checkUpperTriangular
     labelHashSet* setPtr
 ) const
 {
-    if (debug)
-    {
-        InfoInFunction << "Checking face ordering" << endl;
-    }
+    DebugInFunction << "Checking face ordering" << endl;
 
     // Check whether internal faces are ordered in the upper triangular order
     const labelList& own = faceOwner();
@@ -1112,10 +1076,7 @@ bool Foam::primitiveMesh::checkCellsZipUp
     labelHashSet* setPtr
 ) const
 {
-    if (debug)
-    {
-        InfoInFunction << "Checking topological cell openness" << endl;
-    }
+    DebugInFunction << "Checking topological cell openness" << endl;
 
     label nOpenCells = 0;
 
@@ -1208,10 +1169,7 @@ bool Foam::primitiveMesh::checkFaceVertices
     labelHashSet* setPtr
 ) const
 {
-    if (debug)
-    {
-        InfoInFunction << "Checking face vertices" << endl;
-    }
+    DebugInFunction << "Checking face vertices" << endl;
 
     // Check that all vertex labels are valid
     const faceList& f = faces();
@@ -1279,10 +1237,7 @@ bool Foam::primitiveMesh::checkPoints
     labelHashSet* setPtr
 ) const
 {
-    if (debug)
-    {
-        InfoInFunction << "Checking points" << endl;
-    }
+    DebugInFunction << "Checking points" << endl;
 
     label nFaceErrors = 0;
     label nCellErrors = 0;
@@ -1551,10 +1506,7 @@ bool Foam::primitiveMesh::checkFaceFaces
     labelHashSet* setPtr
 ) const
 {
-    if (debug)
-    {
-        InfoInFunction << "Checking face-face connectivity" << endl;
-    }
+    DebugInFunction << "Checking face-face connectivity" << endl;
 
     const labelListList& pf = pointFaces();
 
@@ -1872,10 +1824,7 @@ bool Foam::primitiveMesh::checkGeometry(const bool report) const
 
 bool Foam::primitiveMesh::checkMesh(const bool report) const
 {
-    if (debug)
-    {
-        InfoInFunction << "Checking primitiveMesh" << endl;
-    }
+    DebugInFunction << "Checking primitiveMesh" << endl;
 
     label nFailedChecks = checkTopology(report) + checkGeometry(report);
 

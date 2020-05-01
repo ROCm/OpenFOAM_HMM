@@ -179,7 +179,7 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
 
     if (debug)
     {
-        InfoInFunction << endl;
+        InfoInFunction << nl;
         forAll(nearest, samplei)
         {
             label proci = nearest[samplei].second().second();

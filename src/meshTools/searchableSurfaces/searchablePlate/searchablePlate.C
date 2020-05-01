@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -230,14 +231,10 @@ Foam::searchablePlate::searchablePlate
     span_(span),
     normalDir_(calcNormal(span_))
 {
-    if (debug)
-    {
-        InfoInFunction
-            << " origin:" << origin_
-            << " origin+span:" << origin_+span_
-            << " normal:" << vector::componentNames[normalDir_]
-            << endl;
-    }
+    DebugInFunction
+        << " origin:" << origin_
+        << " origin+span:" << origin_+span_
+        << " normal:" << vector::componentNames[normalDir_] << nl;
 
     bounds() = boundBox(origin_, origin_ + span_);
 }
@@ -254,14 +251,10 @@ Foam::searchablePlate::searchablePlate
     span_(dict.get<vector>("span")),
     normalDir_(calcNormal(span_))
 {
-    if (debug)
-    {
-        InfoInFunction
-            << " origin:" << origin_
-            << " origin+span:" << origin_+span_
-            << " normal:" << vector::componentNames[normalDir_]
-            << endl;
-    }
+    DebugInFunction
+        << " origin:" << origin_
+        << " origin+span:" << origin_+span_
+        << " normal:" << vector::componentNames[normalDir_] << nl;
 
     bounds() = boundBox(origin_, origin_ + span_);
 }

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,10 +68,7 @@ Foam::skewCorrectionVectors::~skewCorrectionVectors()
 
 void Foam::skewCorrectionVectors::calcSkewCorrectionVectors()
 {
-    if (debug)
-    {
-        InfoInFunction << "Calculating skew correction vectors" << endl;
-    }
+    DebugInFunction << "Calculating skew correction vectors" << nl;
 
     // Set local references to mesh data
     const volVectorField& C = mesh_.C();
@@ -134,10 +132,7 @@ void Foam::skewCorrectionVectors::calcSkewCorrectionVectors()
             max(mag(skewCorrectionVectors_)*mesh_.deltaCoeffs()).value();
     }
 
-    if (debug)
-    {
-        InfoInFunction << "skew coefficient = " << skewCoeff << endl;
-    }
+    DebugInFunction << "skew coefficient = " << skewCoeff << nl;
 
     if (skewCoeff < 1e-5)
     {

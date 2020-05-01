@@ -72,7 +72,7 @@ functions
 
             dimensionedScalar uInfX("uInfx", dimVelocity, ULeft);
 
-            Info << "U at inlet = " << uInfX.value() << " m/s" << endl;
+            Info<< "U at inlet = " << uInfX.value() << " m/s" << endl;
 
 
             scalar magCylinder = 0.0;
@@ -86,7 +86,7 @@ functions
 
             dimensionedScalar radius("radius", dimLength, magCylinder);
 
-            Info << "Cylinder radius = " << radius.value() << " m" << endl;
+            Info<< "Cylinder radius = " << radius.value() << " m" << endl;
 
             volVectorField UA
             (

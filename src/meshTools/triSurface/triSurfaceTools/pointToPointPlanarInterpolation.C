@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -122,13 +122,10 @@ Foam::pointToPointPlanarInterpolation::calcCoordinateSystem
 
     const vector n = normalised(e1 ^ (points[index2]-p0));
 
-    if (debug)
-    {
-        InfoInFunction
-            << " Used points " << p0 << ' ' << points[index1]
-            << ' ' << points[index2]
-            << " to define coordinate system with normal " << n << endl;
-    }
+    DebugInFunction
+        << " Used points " << p0 << ' ' << points[index1]
+        << ' ' << points[index2]
+        << " to define coordinate system with normal " << n << endl;
 
     return coordSystem::cartesian
     (
@@ -210,14 +207,11 @@ void Foam::pointToPointPlanarInterpolation::calcWeights
         const boundBox bb(localVertices, true);
         const point bbMid(bb.centre());
 
-        if (debug)
-        {
-            InfoInFunction
-                << " Perturbing points with " << perturb_
-                << " fraction of a random position inside " << bb
-                << " to break any ties on regular meshes."
-                << nl << endl;
-        }
+        DebugInFunction
+            << " Perturbing points with " << perturb_
+            << " fraction of a random position inside " << bb
+            << " to break any ties on regular meshes." << nl
+            << endl;
 
         Random rndGen(123456);
         forAll(localVertices, i)

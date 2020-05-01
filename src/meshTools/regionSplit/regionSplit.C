@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -365,10 +365,7 @@ Foam::label Foam::regionSplit::calcLocalRegionSplit
         }
     }
 
-    if (debug)
-    {
-        Info<<"regionSplit = " << double(timing.elapsed()) << "s\n";
-    }
+    DebugInfo << "regionSplit = " << double(timing.elapsed()) << "s\n";
 
     return nLocalRegions;
 }
@@ -817,11 +814,8 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::reduceRegions
         cellRegion[celli] = localToGlobal[cellRegion[celli]];
     }
 
-    if (debug)
-    {
-        Info<<"regionSplit::reduceRegions = "
-            << double(timing.elapsed()) << "s\n";
-    }
+    DebugInfo
+        <<"regionSplit::reduceRegions = " << double(timing.elapsed()) << "s\n";
 
     return globalCompactPtr;
 }

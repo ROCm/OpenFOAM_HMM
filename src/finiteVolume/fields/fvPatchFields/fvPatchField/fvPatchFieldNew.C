@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,13 +37,9 @@ Foam::tmp<Foam::fvPatchField<Type>> Foam::fvPatchField<Type>::New
     const DimensionedField<Type, volMesh>& iF
 )
 {
-    if (debug)
-    {
-        InfoInFunction
-            << "patchFieldType = " << patchFieldType
-            << " : " << p.type()
-            << endl;
-    }
+    DebugInFunction
+        << "patchFieldType = " << patchFieldType
+        << " : " << p.type() << nl;
 
     auto cstrIter = patchConstructorTablePtr_->cfind(patchFieldType);
 
@@ -109,12 +105,8 @@ Foam::tmp<Foam::fvPatchField<Type>> Foam::fvPatchField<Type>::New
 {
     const word patchFieldType(dict.get<word>("type"));
 
-    if (debug)
-    {
-        InfoInFunction
-            << "patchFieldType = " << patchFieldType
-            << endl;
-    }
+    DebugInFunction
+        << "patchFieldType = " << patchFieldType << nl;
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(patchFieldType);
 
@@ -168,10 +160,8 @@ Foam::tmp<Foam::fvPatchField<Type>> Foam::fvPatchField<Type>::New
     const fvPatchFieldMapper& pfMapper
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing fvPatchField<Type>" << endl;
-    }
+    DebugInFunction
+        << "Constructing fvPatchField<Type>" << nl;
 
     auto cstrIter = patchMapperConstructorTablePtr_->cfind(ptf.type());
 

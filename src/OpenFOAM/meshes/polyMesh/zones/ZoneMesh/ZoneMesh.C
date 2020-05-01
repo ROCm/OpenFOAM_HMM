@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -493,12 +493,9 @@ Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findZoneID
     }
 
     // Zone not found
-    if (debug)
-    {
-        InfoInFunction
-            << "Zone named " << zoneName << " not found.  "
-            << "List of available zone names: " << names() << endl;
-    }
+    DebugInFunction
+        << "Zone named " << zoneName << " not found.  "
+        << "List of available zone names: " << names() << endl;
 
     if (disallowGenericZones != 0)
     {

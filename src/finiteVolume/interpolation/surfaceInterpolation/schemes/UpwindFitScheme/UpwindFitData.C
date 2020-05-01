@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,17 +56,11 @@ Foam::UpwindFitData<Polynomial>::UpwindFitData
     owncoeffs_(mesh.nFaces()),
     neicoeffs_(mesh.nFaces())
 {
-    if (debug)
-    {
-        InfoInFunction << "Contructing UpwindFitData<Polynomial>" << endl;
-    }
+    DebugInFunction << "Contructing UpwindFitData<Polynomial>" << nl;
 
     calcFit();
 
-    if (debug)
-    {
-        Info<< "    Finished constructing polynomialFit data" << endl;
-    }
+    DebugInfo << "    Finished constructing polynomialFit data" << nl;
 }
 
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,10 +55,7 @@ Foam::fv::LeastSquaresVectors<Stencil>::~LeastSquaresVectors()
 template<class Stencil>
 void Foam::fv::LeastSquaresVectors<Stencil>::calcLeastSquaresVectors()
 {
-    if (debug)
-    {
-        InfoInFunction << "Calculating least square gradient vectors" << endl;
-    }
+    DebugInFunction << "Calculating least square gradient vectors" << nl;
 
     const fvMesh& mesh = this->mesh_;
     const extendedCentredCellToCellStencil& stencil = this->stencil();
@@ -98,11 +96,8 @@ void Foam::fv::LeastSquaresVectors<Stencil>::calcLeastSquaresVectors()
         }
     }
 
-    if (debug)
-    {
-        InfoInFunction
-            << "Finished calculating least square gradient vectors" << endl;
-    }
+    DebugInfo
+        << "Finished calculating least square gradient vectors" << endl;
 }
 
 

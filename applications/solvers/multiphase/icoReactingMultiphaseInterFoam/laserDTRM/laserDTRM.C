@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -175,11 +175,9 @@ void Foam::radiation::laserDTRM::initialise()
     const vector lPosition = focalLaserPosition_->value(t);
     const vector lDir = normalised(laserDirection_->value(t));
 
-    if (debug)
-    {
-        Info << "Laser position : " << lPosition << endl;
-        Info << "Laser direction : " << lDir << endl;
-    }
+    DebugInfo
+        << "Laser position : " << lPosition << nl
+        << "Laser direction : " << lDir << endl;
 
     // Find a vector on the area plane. Normal to laser direction
     vector rArea = Zero;

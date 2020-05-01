@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -371,15 +371,12 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
         // 'reverseTransformPosition' functionality.
         scalar srcSumDiff = 0;
 
-        if (debug)
-        {
-            InfoInFunction
-                << "patch:" << name()
-                << " srcSum:" << srcSum
-                << " tgtSum:" << tgtSum
-                << " direction:" << direction
-                << endl;
-        }
+        DebugInFunction
+            << "patch:" << name()
+            << " srcSum:" << srcSum
+            << " tgtSum:" << tgtSum
+            << " direction:" << direction
+            << endl;
 
         // Loop, replicating the geometry
         while
@@ -395,24 +392,18 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
             {
                 periodicPatch.transformPosition(thisPoints);
 
-                if (debug)
-                {
-                    InfoInFunction
-                        << "patch:" << name()
-                        << " moving this side from:"
-                        << gAverage(thisPatch.points())
-                        << " to:" << gAverage(thisPoints) << endl;
-                }
+                DebugInFunction
+                    << "patch:" << name()
+                    << " moving this side from:"
+                    << gAverage(thisPatch.points())
+                    << " to:" << gAverage(thisPoints) << endl;
 
                 thisPatch.movePoints(thisPoints);
 
-                if (debug)
-                {
-                    InfoInFunction
-                        << "patch:" << name()
-                        << " appending weights with untransformed slave side"
-                        << endl;
-                }
+                DebugInFunction
+                    << "patch:" << name()
+                    << " appending weights with untransformed slave side"
+                    << endl;
 
                 AMIPtr_->append(thisPatch, nbrPatch0);
 
@@ -425,14 +416,11 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
             {
                 periodicPatch.transformPosition(nbrPoints);
 
-                if (debug)
-                {
-                    InfoInFunction
-                        << "patch:" << name()
-                        << " moving neighbour side from:"
-                        << gAverage(nbrPatch.points())
-                        << " to:" << gAverage(nbrPoints) << endl;
-                }
+                DebugInFunction
+                    << "patch:" << name()
+                    << " moving neighbour side from:"
+                    << gAverage(nbrPatch.points())
+                    << " to:" << gAverage(nbrPoints) << endl;
 
                 nbrPatch.movePoints(nbrPoints);
 
@@ -461,16 +449,13 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
 
             ++iter;
 
-            if (debug)
-            {
-                InfoInFunction
-                    << "patch:" << name()
-                    << " iteration:" << iter
-                    << " srcSum:" << srcSum
-                    << " tgtSum:" << tgtSum
-                    << " direction:" << direction
-                    << endl;
-            }
+            DebugInFunction
+                << "patch:" << name()
+                << " iteration:" << iter
+                << " srcSum:" << srcSum
+                << " tgtSum:" << tgtSum
+                << " direction:" << direction
+                << endl;
         }
 
 

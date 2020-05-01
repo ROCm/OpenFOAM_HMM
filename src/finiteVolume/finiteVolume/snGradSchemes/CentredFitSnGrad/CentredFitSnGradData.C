@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,18 +53,12 @@ Foam::CentredFitSnGradData<Polynomial>::CentredFitSnGradData
     ),
     coeffs_(mesh.nFaces())
 {
-    if (debug)
-    {
-        InfoInFunction
-            << "Contructing CentredFitSnGradData<Polynomial>" << endl;
-    }
+    DebugInFunction
+        << "Contructing CentredFitSnGradData<Polynomial>" << nl;
 
     calcFit();
 
-    if (debug)
-    {
-        Info<< "    Finished constructing polynomialFit data" << endl;
-    }
+    DebugInfo << "    Finished constructing polynomialFit data" << endl;
 }
 
 

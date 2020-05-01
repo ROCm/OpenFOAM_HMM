@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 #include "polyMesh.H"
 #include "Time.H"
 #include "cellIOList.H"
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::polyMesh::setInstance
@@ -37,10 +38,7 @@ void Foam::polyMesh::setInstance
     const IOobject::writeOption wOpt
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Resetting file instance to " << inst << endl;
-    }
+    DebugInFunction << "Resetting file instance to " << inst << endl;
 
     points_.writeOpt() = wOpt;
     points_.instance() = inst;
@@ -76,10 +74,7 @@ void Foam::polyMesh::setInstance
 
 Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
 {
-    if (debug)
-    {
-        InfoInFunction << "Updating mesh based on saved data." << endl;
-    }
+    DebugInFunction << "Updating mesh based on saved data." << endl;
 
     // Find the point and cell instance
     fileName pointsInst(time().findInstance(meshDir(), "points"));

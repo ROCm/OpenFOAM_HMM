@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,10 +54,7 @@ const Foam::Map<Foam::label>& Foam::zone::lookupMap() const
 
 void Foam::zone::calcLookupMap() const
 {
-    if (debug)
-    {
-        InfoInFunction << "Calculating lookup map" << endl;
-    }
+    DebugInFunction << "Calculating lookup map" << endl;
 
     if (lookupMapPtr_)
     {
@@ -76,10 +73,7 @@ void Foam::zone::calcLookupMap() const
         lm.insert(addr[i], i);
     }
 
-    if (debug)
-    {
-        InfoInFunction << "Finished calculating lookup map" << endl;
-    }
+    DebugInfo << "Finished calculating lookup map" << endl;
 }
 
 

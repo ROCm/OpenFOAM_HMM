@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -131,13 +131,11 @@ Foam::sampledPlane::sampledPlane
         const point  orig = cs.globalPosition(pln.origin());
         const vector norm = cs.globalVector(pln.normal());
 
-        if (debug)
-        {
-            Info<< "plane " << name << " :"
-                << " origin:" << origin()
-                << " normal:" << normal()
-                << " defined within a local coordinateSystem" << endl;
-        }
+        DebugInfo
+            << "plane " << name << " :"
+            << " origin:" << origin()
+            << " normal:" << normal()
+            << " defined within a local coordinateSystem" << endl;
 
         // Reassign the plane
         pln = plane(orig, norm);

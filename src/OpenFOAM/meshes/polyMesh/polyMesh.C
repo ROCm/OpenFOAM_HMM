@@ -1091,8 +1091,7 @@ const Foam::pointField& Foam::polyMesh::oldPoints() const
     {
         if (debug)
         {
-            WarningInFunction
-                << endl;
+            WarningInFunction << endl;
         }
 
         oldPointsPtr_.reset(new pointField(points_));
@@ -1108,12 +1107,9 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
     const pointField& newPoints
 )
 {
-    if (debug)
-    {
-        InfoInFunction
-            << "Moving points for time " << time().value()
-            << " index " << time().timeIndex() << endl;
-    }
+    DebugInFunction
+        << "Moving points for time " << time().value()
+        << " index " << time().timeIndex() << endl;
 
     if (newPoints.size() != points_.size())
     {

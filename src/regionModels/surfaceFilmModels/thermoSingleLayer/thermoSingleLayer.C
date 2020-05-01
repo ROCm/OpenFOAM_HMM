@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,10 +94,7 @@ bool thermoSingleLayer::read()
 
 void thermoSingleLayer::resetPrimaryRegionSourceTerms()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << endl;
 
     kinematicSingleLayer::resetPrimaryRegionSourceTerms();
 
@@ -153,10 +150,7 @@ void thermoSingleLayer::updateSurfaceTemperatures()
 
 void thermoSingleLayer::transferPrimaryRegionThermoFields()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << endl;
 
     kinematicSingleLayer::transferPrimaryRegionThermoFields();
 
@@ -172,10 +166,7 @@ void thermoSingleLayer::transferPrimaryRegionThermoFields()
 
 void thermoSingleLayer::transferPrimaryRegionSourceFields()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << endl;
 
     kinematicSingleLayer::transferPrimaryRegionSourceFields();
 
@@ -233,10 +224,7 @@ void thermoSingleLayer::correctAlpha()
 
 void thermoSingleLayer::updateSubmodels()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << endl;
 
     // Update heat transfer coefficient sub-models
     htcs_->correct();
@@ -289,11 +277,7 @@ tmp<fvScalarMatrix> thermoSingleLayer::q(volScalarField& hs) const
 
 void thermoSingleLayer::solveEnergy()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
-
+    DebugInFunction << endl;
 
     dimensionedScalar residualDeltaRho
     (
@@ -603,10 +587,8 @@ void thermoSingleLayer::addSources
         energySource
     );
 
-    if (debug)
-    {
-        Info<< "    energy   = " << energySource << nl << endl;
-    }
+    DebugInfo
+        << "    energy   = " << energySource << nl << nl;
 
     hsSpPrimary_.boundaryFieldRef()[patchi][facei] -= energySource;
 }
@@ -614,10 +596,7 @@ void thermoSingleLayer::addSources
 
 void thermoSingleLayer::preEvolveRegion()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << endl;
 
     kinematicSingleLayer::preEvolveRegion();
     primaryEnergyTrans_ == dimensionedScalar(dimEnergy, Zero);
@@ -626,10 +605,7 @@ void thermoSingleLayer::preEvolveRegion()
 
 void thermoSingleLayer::evolveRegion()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << endl;
 
     // Solve continuity for deltaRho_
     solveContinuity();

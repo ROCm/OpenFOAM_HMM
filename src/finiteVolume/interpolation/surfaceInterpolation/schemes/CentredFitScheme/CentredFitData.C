@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,17 +55,11 @@ Foam::CentredFitData<Polynomial>::CentredFitData
     ),
     coeffs_(mesh.nFaces())
 {
-    if (debug)
-    {
-        InfoInFunction << "Contructing CentredFitData<Polynomial>" << endl;
-    }
+    DebugInFunction << "Contructing CentredFitData<Polynomial>" << nl;
 
     calcFit();
 
-    if (debug)
-    {
-        Info<<     "Finished constructing polynomialFit data" << endl;
-    }
+    DebugInfo << "Finished constructing polynomialFit data" << endl;
 }
 
 

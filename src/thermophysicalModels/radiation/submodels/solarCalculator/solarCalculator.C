@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2017 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,11 +116,9 @@ void Foam::solarCalculator::calculateBetaTheta()
         theta_ += 2*(constant::mathematical::pi - theta_);
     }
 
-    if (debug)
-    {
-        Info << tab << "altitude : " << radToDeg(beta_) << endl;
-        Info << tab << "azimuth  : " << radToDeg(theta_) << endl;
-    }
+    DebugInfo
+        << tab << "altitude : " << radToDeg(beta_) << nl
+        << tab << "azimuth  : " << radToDeg(theta_) << endl;
 }
 
 
@@ -141,18 +139,14 @@ void Foam::solarCalculator::calculateSunDirection()
 
     direction_.normalise();
 
-    if (debug)
-    {
-        Info<< "Sun direction in absolute coordinates : " << direction_ <<endl;
-    }
+    DebugInfo
+        << "Sun direction in absolute coordinates : " << direction_ <<endl;
 
     // Transform to actual coordinate system
     direction_ = coord_->transform(direction_);
 
-    if (debug)
-    {
-        Info<< "Sun direction in the Grid coordinates : " << direction_ <<endl;
-    }
+    DebugInfo
+        << "Sun direction in the Grid coordinates : " << direction_ <<endl;
 }
 
 

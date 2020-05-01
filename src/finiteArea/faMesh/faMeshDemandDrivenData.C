@@ -1229,10 +1229,8 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
 
         if (curPoints.size() < 5)
         {
-            if (debug)
-            {
-                Info << "WARNING: Extending point set for fitting." << endl;
-            }
+            DebugInfo
+                << "WARNING: Extending point set for fitting." << endl;
 
             labelHashSet faceSet(pointFaces[curPoint]);
             labelList curFaces(faceSet.toc());

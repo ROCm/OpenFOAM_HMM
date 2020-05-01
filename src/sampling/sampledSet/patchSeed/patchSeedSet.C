@@ -56,10 +56,7 @@ void Foam::patchSeedSet::calcSamples
     DynamicList<scalar>& samplingCurveDist
 )
 {
-    if (debug)
-    {
-        Info<< "patchSeedSet : sampling on patches :" << endl;
-    }
+    DebugInfo << "patchSeedSet : sampling on patches :" << endl;
 
     // Construct search tree for all patch faces.
     label sz = 0;
@@ -69,10 +66,7 @@ void Foam::patchSeedSet::calcSamples
 
         sz += pp.size();
 
-        if (debug)
-        {
-            Info<< "    " << pp.name() << " size " << pp.size() << endl;
-        }
+        DebugInfo << "    " << pp.name() << " size " << pp.size() << endl;
     }
 
     labelList patchFaces(sz);

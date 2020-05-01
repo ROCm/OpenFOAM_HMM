@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -227,10 +227,7 @@ void reactingOneDim::updateMesh(const scalarField& deltaV)
 
 void reactingOneDim::solveContinuity()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << endl;
 
     if (!moveMesh_)
     {
@@ -255,10 +252,7 @@ void reactingOneDim::solveContinuity()
 
 void reactingOneDim::solveSpeciesMass()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << endl;
 
     volScalarField Yt(0.0*Ys_[0]);
 
@@ -294,10 +288,7 @@ void reactingOneDim::solveSpeciesMass()
 
 void reactingOneDim::solveEnergy()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << endl;
 
     tmp<volScalarField> alpha(solidThermo_->alpha());
 
