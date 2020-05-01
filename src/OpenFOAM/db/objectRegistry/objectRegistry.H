@@ -537,6 +537,7 @@ public:
         //- Deprecated(2018-10) find object
         //  \deprecated(2018-10) - use findObject() method
         template<class Type>
+        FOAM_DEPRECATED_FOR(2018-10, "findObject / cfindObject() methods")
         const Type* lookupObjectPtr
         (
             const word& name,
@@ -549,6 +550,7 @@ public:
         //- Deprecated(2018-10) get object pointer, ignoring constness
         //  \deprecated(2018-10) - use getObjectPtr() method
         template<class Type>
+        FOAM_DEPRECATED_FOR(2018-10, "getObjectPtr() method")
         Type* lookupObjectRefPtr
         (
             const word& name,

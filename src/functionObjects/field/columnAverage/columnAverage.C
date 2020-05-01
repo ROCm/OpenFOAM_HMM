@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -172,7 +172,7 @@ bool Foam::functionObjects::columnAverage::write()
     {
         const word resultName("columnAverage(" + fieldName + ")");
         const regIOobject* obj =
-            obr_.lookupObjectPtr<regIOobject>(averageName(fieldName));
+            obr_.cfindObject<regIOobject>(averageName(fieldName));
 
         if (obj)
         {

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -101,7 +101,7 @@ bool Foam::functionObjects::continuityError::execute()
 
 bool Foam::functionObjects::continuityError::write()
 {
-    const auto phiPtr = mesh_.lookupObjectPtr<surfaceScalarField>(phiName_);
+    const auto* phiPtr = mesh_.cfindObject<surfaceScalarField>(phiName_);
 
     if (!phiPtr)
     {

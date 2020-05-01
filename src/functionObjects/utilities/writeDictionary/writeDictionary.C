@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -174,7 +174,7 @@ bool Foam::functionObjects::writeDictionary::write()
     forAll(dictNames_, dicti)
     {
         const IOdictionary* dictptr =
-            obr_.lookupObjectPtr<IOdictionary>(dictNames_[dicti]);
+            obr_.cfindObject<IOdictionary>(dictNames_[dicti]);
 
         if (dictptr)
         {

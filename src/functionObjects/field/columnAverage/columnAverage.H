@@ -94,7 +94,7 @@ class columnAverage
 :
     public fvMeshFunctionObject
 {
-    // Private data
+    // Private Data
 
         //- Patches on which to collapse the fields
         labelHashSet patchSet_;
@@ -145,7 +145,7 @@ public:
     // Member Functions
 
         //- Read the settings
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
         //- Execute, currently does nothing
         virtual bool execute();

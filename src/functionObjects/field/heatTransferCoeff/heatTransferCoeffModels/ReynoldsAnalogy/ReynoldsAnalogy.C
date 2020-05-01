@@ -149,14 +149,12 @@ Foam::heatTransferCoeffModels::ReynoldsAnalogy::devReff() const
 
         return -nu*dev(twoSymm(fvc::grad(U)));
     }
-    else
-    {
-        FatalErrorInFunction
-            << "No valid model for viscous stress calculation"
-            << exit(FatalError);
 
-        return volSymmTensorField::null();
-    }
+    FatalErrorInFunction
+        << "No valid model for viscous stress calculation"
+        << exit(FatalError);
+
+    return nullptr;
 }
 
 

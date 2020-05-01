@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +39,7 @@ bool Foam::functionObjects::columnAverage::columnAverageField
 {
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
-    const fieldType* fldPtr = lookupObjectPtr<fieldType>(fieldName);
+    const fieldType* fldPtr = cfindObject<fieldType>(fieldName);
 
     if (fldPtr)
     {
@@ -47,9 +47,11 @@ bool Foam::functionObjects::columnAverage::columnAverageField
 
         const word resultName(averageName(fieldName));
 
-        if (!obr_.foundObject<fieldType>(resultName))
+        fieldType* resPtr = obr_.getObjectPtr<fieldType>(resultName);
+
+        if (!resPtr)
         {
-            fieldType* ptr = new fieldType
+            resPtr = new fieldType
             (
                 IOobject
                 (
@@ -61,10 +63,9 @@ bool Foam::functionObjects::columnAverage::columnAverageField
                 ),
                 fld
             );
-            obr_.objectRegistry::store(ptr);
+            obr_.objectRegistry::store(resPtr);
         }
-
-        fieldType& res = obr_.lookupObjectRef<fieldType>(resultName);
+        fieldType& res = *resPtr;
 
         const meshStructure& ms = meshAddressing(fld.mesh());
         if (globalFaces_().empty())

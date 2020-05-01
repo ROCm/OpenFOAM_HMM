@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +60,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class objectRegistry;
 
 namespace functionObjects
@@ -206,6 +206,7 @@ public:
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use findObject() method
         template<class ObjectType>
+        FOAM_DEPRECATED_FOR(2018-10, "findObject / cfindObject() methods")
         const ObjectType* lookupObjectPtr(const word& fieldName) const
         {
             return this->cfindObject<ObjectType>(fieldName);
@@ -214,6 +215,7 @@ public:
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use getObjectPtr() method
         template<class ObjectType>
+        FOAM_DEPRECATED_FOR(2018-10, "getObjectPtr() method")
         ObjectType* lookupObjectRefPtr(const word& fieldName) const
         {
             return this->getObjectPtr<ObjectType>(fieldName);

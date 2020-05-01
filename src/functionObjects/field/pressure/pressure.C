@@ -263,7 +263,7 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::calcPressure
     if (mode_ & ISENTROPIC)
     {
         const basicThermo* thermoPtr =
-            p.mesh().lookupObjectPtr<basicThermo>(basicThermo::dictName);
+            p.mesh().cfindObject<basicThermo>(basicThermo::dictName);
 
         if (!thermoPtr)
         {
