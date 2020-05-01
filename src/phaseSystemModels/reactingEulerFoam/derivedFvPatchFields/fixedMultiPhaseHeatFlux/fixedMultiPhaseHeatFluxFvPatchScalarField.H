@@ -61,7 +61,7 @@ class fixedMultiPhaseHeatFluxFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
-    // Private data
+    // Private Data
 
         //- Heat power [W] or flux [W/m2]
         scalarField q_;
@@ -113,6 +113,15 @@ public:
             const fixedMultiPhaseHeatFluxFvPatchScalarField&
         );
 
+        //- Construct and return a clone
+        virtual tmp<fvPatchScalarField> clone() const
+        {
+            return tmp<fvPatchScalarField>
+            (
+                new fixedMultiPhaseHeatFluxFvPatchScalarField(*this)
+            );
+        }
+
         //- Construct as copy setting internal field reference
         fixedMultiPhaseHeatFluxFvPatchScalarField
         (
@@ -120,10 +129,22 @@ public:
             const DimensionedField<scalar, volMesh>&
         );
 
+        //- Construct and return a clone setting internal field reference
+        virtual tmp<fvPatchScalarField> clone
+        (
+            const DimensionedField<scalar, volMesh>& iF
+        ) const
+        {
+            return tmp<fvPatchScalarField>
+            (
+                new fixedMultiPhaseHeatFluxFvPatchScalarField(*this, iF)
+            );
+        }
 
-    // Member functions
 
-        // Evaluation functions
+    // Member Functions
+
+        // Evaluation Functions
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();

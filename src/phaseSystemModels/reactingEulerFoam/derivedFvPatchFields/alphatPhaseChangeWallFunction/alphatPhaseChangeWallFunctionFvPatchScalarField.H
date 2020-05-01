@@ -61,7 +61,7 @@ class alphatPhaseChangeWallFunctionFvPatchScalarField
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Rate of phase-change
         scalarField dmdt_;
@@ -117,8 +117,10 @@ public:
             const DimensionedField<scalar, volMesh>&
         );
 
+        // No clone methods - abstract class
 
-    // Member functions
+
+    // Member Functions
 
         //- Return the rate of phase-change
         virtual const scalarField& dmdt() const
@@ -162,9 +164,10 @@ public:
             return mDotL_;
         }
 
-        // Evaluation functions
 
-            //- Update the coefficients associated with the patch field
+        // Evaluation Functions
+
+        //- Update the coefficients associated with the patch field
             virtual void updateCoeffs() = 0;
 
 

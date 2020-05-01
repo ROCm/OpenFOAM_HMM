@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +58,7 @@ class copiedFixedValueFvPatchScalarField
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         word sourceFieldName_;
 
@@ -101,6 +102,15 @@ public:
             const copiedFixedValueFvPatchScalarField&
         );
 
+        //- Construct and return a clone
+        virtual tmp<fvPatchScalarField> clone() const
+        {
+            return tmp<fvPatchScalarField>
+            (
+                new copiedFixedValueFvPatchScalarField(*this)
+            );
+        }
+
         //- Construct as copy setting internal field reference
         copiedFixedValueFvPatchScalarField
         (
@@ -108,10 +118,22 @@ public:
             const DimensionedField<scalar, volMesh>&
         );
 
+        //- Construct and return a clone setting internal field reference
+        virtual tmp<fvPatchScalarField> clone
+        (
+            const DimensionedField<scalar, volMesh>& iF
+        ) const
+        {
+            return tmp<fvPatchScalarField>
+            (
+                new copiedFixedValueFvPatchScalarField(*this, iF)
+            );
+        }
 
-    // Member functions
 
-        // Evaluation functions
+    // Member Functions
+
+        // Evaluation Functions
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016, 2019 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -176,6 +176,8 @@ public:
             const nutWallFunctionFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
+
+        // No clone methods - abstract class
 
 
     // Member Functions
