@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,7 +106,7 @@ class Curle
 :
     public fieldExpression
 {
-    // Private data
+    // Private Data
 
         // Read from dictionary
 
@@ -120,19 +120,18 @@ class Curle
             dimensionedScalar c0_;
 
 
-    // Private Member Functions
+protected:
+
+    // Protected Member Functions
+
+        //- Calculate acoustic pressure field and return true if successful
+        virtual bool calc();
 
         //- No copy construct
         Curle(const Curle&) = delete;
 
         //- No copy assignment
         void operator=(const Curle&) = delete;
-
-
-protected:
-
-        //- Calculate the acoustic pressure field and return true if successful
-        virtual bool calc();
 
 
 public:
@@ -153,7 +152,7 @@ public:
 
 
     //- Destructor
-    virtual ~Curle();
+    virtual ~Curle() = default;
 
 
     // Member Functions

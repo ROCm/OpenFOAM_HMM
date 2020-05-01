@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -97,18 +97,9 @@ class ReynoldsAnalogy
 :
     public heatTransferCoeffModel
 {
-    // Private Member Functions
-
-        //- No copy construct
-        ReynoldsAnalogy(const ReynoldsAnalogy&) = delete;
-
-        //- No copy assignment
-        void operator=(const ReynoldsAnalogy&) = delete;
-
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Name of velocity field
         word UName_;
@@ -141,6 +132,13 @@ protected:
 
         //- Set the heat transfer coefficient
         virtual void htc(volScalarField& htc);
+
+
+        //- No copy construct
+        ReynoldsAnalogy(const ReynoldsAnalogy&) = delete;
+
+        //- No copy assignment
+        void operator=(const ReynoldsAnalogy&) = delete;
 
 
 public:

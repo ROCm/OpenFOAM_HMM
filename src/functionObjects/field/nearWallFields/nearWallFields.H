@@ -106,7 +106,7 @@ class nearWallFields
 {
 protected:
 
-    // Protected member data
+    // Protected Member Data
 
         // Read from dictionary
 
@@ -176,8 +176,6 @@ protected:
         ) const;
 
 
-private:
-
         //- No copy construct
         nearWallFields(const nearWallFields&) = delete;
 
@@ -203,13 +201,13 @@ public:
 
 
     //- Destructor
-    virtual ~nearWallFields();
+    virtual ~nearWallFields() = default;
 
 
     // Member Functions
 
         //- Read the controls
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
         //- Calculate the near-wall fields
         virtual bool execute();

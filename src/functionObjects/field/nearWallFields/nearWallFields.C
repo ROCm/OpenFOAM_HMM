@@ -256,14 +256,6 @@ Foam::functionObjects::nearWallFields::nearWallFields
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::nearWallFields::~nearWallFields()
-{
-    DebugInFunction << endl;
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::nearWallFields::read(const dictionary& dict)
@@ -272,7 +264,12 @@ bool Foam::functionObjects::nearWallFields::read(const dictionary& dict)
 
     dict.readEntry("fields", fieldSet_);
     dict.readEntry("distance", distance_);
-    patchSet_ = mesh_.boundaryMesh().patchSet(dict.get<wordRes>("patches"));
+
+    patchSet_ =
+        mesh_.boundaryMesh().patchSet
+        (
+            dict.get<wordRes>("patches")
+        );
 
 
     // Clear out any previously loaded fields

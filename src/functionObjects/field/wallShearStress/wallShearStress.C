@@ -118,12 +118,6 @@ Foam::functionObjects::wallShearStress::wallShearStress
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::wallShearStress::~wallShearStress()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::wallShearStress::read(const dictionary& dict)

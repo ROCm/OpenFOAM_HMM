@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,6 +55,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class fvMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -63,32 +64,35 @@ class fvMesh;
 
 class heatTransferCoeffModel
 {
+protected:
 
-    // Private Member Functions
+    // Protected Data
+
+        //- Mesh reference
+        const fvMesh& mesh_;
+
+        //- Optional list of (wall) patches to process
+        labelHashSet patchSet_;
+
+        //- Temperature name
+        const word TName_;
+
+        //- Name of radiative heat flux name, default = qr
+        word qrName_;
+
+
+    // Protected Member Functions
+
+        tmp<FieldField<Field, scalar>> q() const;
+
+        //- Set the heat transfer coefficient
+        virtual void htc(volScalarField& htc) = 0;
 
         //- No copy construct
         heatTransferCoeffModel(const heatTransferCoeffModel&) = delete;
 
         //- No copy assignment
         void operator=(const heatTransferCoeffModel&) = delete;
-
-
-protected:
-
-    // Protected data
-
-        const fvMesh& mesh_;
-
-        const word TName_;
-
-        labelHashSet patchSet_;
-
-        word qrName_;
-
-        tmp<FieldField<Field, scalar>> q() const;
-
-        //- Set the heat transfer coefficient
-        virtual void htc(volScalarField& htc) = 0;
 
 
 public:

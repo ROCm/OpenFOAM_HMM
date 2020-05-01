@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "fixedReferenceTemperature.H"
-
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -47,7 +46,8 @@ namespace heatTransferCoeffModels
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::heatTransferCoeffModels::fixedReferenceTemperature::fixedReferenceTemperature
+Foam::heatTransferCoeffModels::fixedReferenceTemperature::
+fixedReferenceTemperature
 (
     const dictionary& dict,
     const fvMesh& mesh,
@@ -90,9 +90,8 @@ void Foam::heatTransferCoeffModels::fixedReferenceTemperature::htc
     const scalar eps = ROOTVSMALL;
 
     volScalarField::Boundary& htcBf = htc.boundaryFieldRef();
-    forAllConstIters(patchSet_, iter)
+    for (const label patchi : patchSet_)
     {
-        label patchi = iter.key();
         htcBf[patchi] = qBf[patchi]/(TRef_ - Tbf[patchi] + eps);
     }
 }

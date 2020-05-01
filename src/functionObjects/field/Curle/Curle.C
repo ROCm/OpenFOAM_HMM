@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,7 +65,7 @@ bool Foam::functionObjects::Curle::calc()
 
         dimensionedVector dfdt("dfdt", p.dimensions()*dimArea/dimTime, Zero);
 
-        for (auto patchi : patchSet_)
+        for (const label patchi : patchSet_)
         {
             dfdt.value() += sum(dpdtBf[patchi]*SfBf[patchi]);
         }
@@ -101,6 +101,7 @@ bool Foam::functionObjects::Curle::calc()
     return false;
 }
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::functionObjects::Curle::Curle
@@ -121,19 +122,17 @@ Foam::functionObjects::Curle::Curle
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::Curle::~Curle()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::Curle::read(const dictionary& dict)
 {
     if (fieldExpression::read(dict))
     {
-        patchSet_ = mesh_.boundaryMesh().patchSet(dict.get<wordRes>("patches"));
+        patchSet_ =
+            mesh_.boundaryMesh().patchSet
+            (
+                dict.get<wordRes>("patches")
+            );
 
         if (patchSet_.empty())
         {

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +52,7 @@ Usage
 
     Where the entries comprise:
     \table
-        Property | Description                | Required   | Default value
+        Property | Description                | Required   | Default
         type     | type name: wallHeatFlux    | yes        |
         patches  | list of patches to process | no         | all wall patches
         qr       | name of radiative heat flux field | no  | qr
@@ -94,12 +94,11 @@ class wallHeatFlux
     public fvMeshFunctionObject,
     public writeFile
 {
-
 protected:
 
-    // Protected data
+    // Protected Data
 
-        //- Optional list of patches to process
+        //- Optional list of wall patches to process
         labelHashSet patchSet_;
 
         //- Name of radiative heat flux name, default = qr
@@ -120,9 +119,7 @@ protected:
         );
 
 
-private:
-
-    // Private member functions
+    // Protected Member Functions
 
         //- No copy construct
         wallHeatFlux(const wallHeatFlux&) = delete;
@@ -149,13 +146,13 @@ public:
 
 
     //- Destructor
-    virtual ~wallHeatFlux();
+    virtual ~wallHeatFlux() = default;
 
 
     // Member Functions
 
         //- Read the wallHeatFlux data
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
         //- Calculate the wall heat-flux
         virtual bool execute();

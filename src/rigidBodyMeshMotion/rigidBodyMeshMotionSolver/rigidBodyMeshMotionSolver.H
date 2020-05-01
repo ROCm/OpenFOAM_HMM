@@ -119,10 +119,7 @@ class rigidBodyMeshMotionSolver
     // Private Member Functions
 
         //- No copy construct
-        rigidBodyMeshMotionSolver
-        (
-            const rigidBodyMeshMotionSolver&
-        ) = delete;
+        rigidBodyMeshMotionSolver(const rigidBodyMeshMotionSolver&) = delete;
 
         //- No copy assignment
         void operator=(const rigidBodyMeshMotionSolver&) = delete;

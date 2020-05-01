@@ -54,10 +54,10 @@ Usage
 
     Where the entries comprise:
     \table
-        Property     | Description               | Required    | Default value
-        type         | type name: fieldMinMax    | yes         |
-        patches      | list of patches to collapse onto | yes  |
-        fields       | list of fields to process | yes         |
+        Property     | Description                          | Required | Default
+        type         | type name: columnAverage             | yes |
+        patches      | list of patches to collapse onto     | yes |
+        fields       | list of fields to process            | yes |
     \endtable
 
 See also
@@ -96,8 +96,8 @@ class columnAverage
 {
     // Private Data
 
-        //- Patches on which to collapse the fields
-        labelHashSet patchSet_;
+        //- Patches on which to collapse the fields (in sorted order)
+        labelList patchIDs_;
 
         //- Fields to collapse
         volFieldSelection fieldSet_;
@@ -134,7 +134,7 @@ public:
         (
             const word& name,
             const Time& runTime,
-            const dictionary&
+            const dictionary& dict
         );
 
 

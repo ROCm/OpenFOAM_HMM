@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,7 +85,7 @@ Foam::heatTransferCoeffModel::q() const
         const volScalarField& alpha(thermo.alpha());
         const volScalarField::Boundary& alphabf = alpha.boundaryField();
 
-        for (label patchi : patchSet_)
+        for (const label patchi : patchSet_)
         {
             q[patchi] = alphabf[patchi]*hebf[patchi].snGrad();
         }
@@ -98,10 +98,12 @@ Foam::heatTransferCoeffModel::q() const
     }
 
     // Add radiative heat flux contribution if present
-    if (mesh_.foundObject<volScalarField>(qrName_))
+
+    const volScalarField* qrPtr = mesh_.cfindObject<volScalarField>(qrName_);
+
+    if (qrPtr)
     {
-        const volScalarField& qr = mesh_.lookupObject<volScalarField>(qrName_);
-        const volScalarField::Boundary& qrbf = qr.boundaryField();
+        const volScalarField::Boundary& qrbf = qrPtr->boundaryField();
 
         for (const label patchi : patchSet_)
         {
@@ -123,8 +125,8 @@ Foam::heatTransferCoeffModel::heatTransferCoeffModel
 )
 :
     mesh_(mesh),
-    TName_(TName),
     patchSet_(),
+    TName_(TName),
     qrName_("qr")
 {}
 
@@ -133,7 +135,11 @@ Foam::heatTransferCoeffModel::heatTransferCoeffModel
 
 bool Foam::heatTransferCoeffModel::read(const dictionary& dict)
 {
-    patchSet_ = mesh_.boundaryMesh().patchSet(dict.get<wordRes>("patches"));
+    patchSet_ =
+        mesh_.boundaryMesh().patchSet
+        (
+            dict.get<wordRes>("patches")
+        );
 
     dict.readIfPresent("qr", qrName_);
 

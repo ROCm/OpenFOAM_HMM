@@ -49,10 +49,10 @@ Usage
 
     Where the entries comprise:
     \table
-        Property     | Description             | Required    | Default value
-        type         | type name: heatTransferCoeff | yes    |
-        htcModel     | selected htc model      | yes         |
-        TRef         | reference temperature   | yes |
+        Property     | Description                          | Required | Default
+        type         | type name: heatTransferCoeff         | yes |
+        htcModel     | selected htc model                   | yes |
+        TRef         | reference temperature                | yes |
     \endtable
 
 SourceFiles
@@ -83,20 +83,11 @@ class fixedReferenceTemperature
 :
     public heatTransferCoeffModel
 {
-    // Private Member Functions
-
-        //- No copy construct
-        fixedReferenceTemperature(const fixedReferenceTemperature&) = delete;
-
-        //- No copy assignment
-        void operator=(const fixedReferenceTemperature&) = delete;
-
-
 protected:
 
-    // Protected data
+    // Protected Data
 
-        //- Reference tempetaure
+        //- Reference temperature
         scalar TRef_;
 
 
@@ -104,6 +95,12 @@ protected:
 
         //- Set the heat transfer coefficient
         virtual void htc(volScalarField& htc);
+
+        //- No copy construct
+        fixedReferenceTemperature(const fixedReferenceTemperature&) = delete;
+
+        //- No copy assignment
+        void operator=(const fixedReferenceTemperature&) = delete;
 
 
 public:

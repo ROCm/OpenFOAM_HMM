@@ -75,26 +75,21 @@ void Foam::functionObjects::wallHeatFlux::calcHeatFlux
 
     const volScalarField::Boundary& alphaBf = alpha.boundaryField();
 
-    forAll(wallHeatFluxBf, patchi)
+    for (const label patchi : patchSet_)
     {
-        if (!wallHeatFluxBf[patchi].coupled())
-        {
-            wallHeatFluxBf[patchi] = alphaBf[patchi]*heBf[patchi].snGrad();
-        }
+        wallHeatFluxBf[patchi] = alphaBf[patchi]*heBf[patchi].snGrad();
     }
 
-    if (foundObject<volScalarField>(qrName_))
+
+    const auto* qrPtr = cfindObject<volScalarField>(qrName_);
+
+    if (qrPtr)
     {
-        const volScalarField& qr = lookupObject<volScalarField>(qrName_);
+        const volScalarField::Boundary& radHeatFluxBf = qrPtr->boundaryField();
 
-        const volScalarField::Boundary& radHeatFluxBf = qr.boundaryField();
-
-        forAll(wallHeatFluxBf, patchi)
+        for (const label patchi : patchSet_)
         {
-            if (!wallHeatFluxBf[patchi].coupled())
-            {
-                wallHeatFluxBf[patchi] -= radHeatFluxBf[patchi];
-            }
+            wallHeatFluxBf[patchi] -= radHeatFluxBf[patchi];
         }
     }
 }
@@ -137,12 +132,6 @@ Foam::functionObjects::wallHeatFlux::wallHeatFlux
 
     writeFileHeader(file());
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::wallHeatFlux::~wallHeatFlux()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

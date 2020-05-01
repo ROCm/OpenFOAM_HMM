@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "localReferenceTemperature.H"
-
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -44,6 +43,7 @@ namespace heatTransferCoeffModels
     );
 }
 }
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -83,9 +83,9 @@ void Foam::heatTransferCoeffModels::localReferenceTemperature::htc
     const scalar eps = ROOTVSMALL;
 
     volScalarField::Boundary& htcBf = htc.boundaryFieldRef();
-    forAllConstIters(patchSet_, iter)
+
+    for (const label patchi : patchSet_)
     {
-        label patchi = iter.key();
         const scalarField Tc(Tbf[patchi].patchInternalField());
         htcBf[patchi] = qBf[patchi]/(Tc - Tbf[patchi] + eps);
     }

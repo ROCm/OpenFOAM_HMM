@@ -48,14 +48,13 @@ namespace functionObjects
 const Foam::meshStructure&
 Foam::functionObjects::columnAverage::meshAddressing(const polyMesh& mesh) const
 {
-    if (!meshStructurePtr_.valid())
+    if (!meshStructurePtr_)
     {
         const polyBoundaryMesh& pbm = mesh.boundaryMesh();
-        const labelList patchIDs(patchSet_.sortedToc());
 
         // Count
         label sz = 0;
-        for (const label patchi : patchIDs)
+        for (const label patchi : patchIDs_)
         {
             sz += pbm[patchi].size();
         }
@@ -63,7 +62,7 @@ Foam::functionObjects::columnAverage::meshAddressing(const polyMesh& mesh) const
         // Fill
         labelList meshFaces(sz);
         sz = 0;
-        for (const label patchi : patchIDs)
+        for (const label patchi : patchIDs_)
         {
             label start = pbm[patchi].start();
             label size = pbm[patchi].size();
@@ -92,7 +91,7 @@ Foam::functionObjects::columnAverage::meshAddressing(const polyMesh& mesh) const
         globalFaces_.set(new globalIndex(uip.size()));
         globalEdges_.set(new globalIndex(uip.nEdges()));
         globalPoints_.set(new globalIndex(uip.nPoints()));
-        meshStructurePtr_.set
+        meshStructurePtr_.reset
         (
             new meshStructure
             (
@@ -104,7 +103,8 @@ Foam::functionObjects::columnAverage::meshAddressing(const polyMesh& mesh) const
             )
         );
     }
-    return meshStructurePtr_();
+
+    return *meshStructurePtr_;
 }
 
 
@@ -127,7 +127,7 @@ Foam::functionObjects::columnAverage::columnAverage
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    patchSet_(),
+    patchIDs_(),
     fieldSet_(mesh_)
 {
     read(dict);
@@ -140,7 +140,11 @@ bool Foam::functionObjects::columnAverage::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
 
-    patchSet_ = mesh_.boundaryMesh().patchSet(dict.get<wordRes>("patches"));
+    patchIDs_ =
+        mesh_.boundaryMesh().patchSet
+        (
+            dict.get<wordRes>("patches")
+        ).sortedToc();
 
     fieldSet_.read(dict);
 

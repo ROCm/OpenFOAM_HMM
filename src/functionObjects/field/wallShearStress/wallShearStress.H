@@ -107,7 +107,7 @@ class wallShearStress
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Optional list of patches to process
         labelHashSet patchSet_;
@@ -124,11 +124,6 @@ protected:
             const volSymmTensorField& Reff,
             volVectorField& shearStress
         );
-
-
-private:
-
-    // Private member functions
 
         //- No copy construct
         wallShearStress(const wallShearStress&) = delete;
@@ -155,7 +150,7 @@ public:
 
 
     //- Destructor
-    virtual ~wallShearStress();
+    virtual ~wallShearStress() = default;
 
 
     // Member Functions
