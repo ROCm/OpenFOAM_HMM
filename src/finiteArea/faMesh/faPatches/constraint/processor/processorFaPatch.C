@@ -33,6 +33,7 @@ License
 #include "faBoundaryMesh.H"
 #include "faMesh.H"
 #include "globalMeshData.H"
+#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

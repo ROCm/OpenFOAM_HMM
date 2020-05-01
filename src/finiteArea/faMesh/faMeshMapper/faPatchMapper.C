@@ -31,6 +31,7 @@ License
 #include "faMesh.H"
 #include "mapPolyMesh.H"
 #include "faceMapper.H"
+#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

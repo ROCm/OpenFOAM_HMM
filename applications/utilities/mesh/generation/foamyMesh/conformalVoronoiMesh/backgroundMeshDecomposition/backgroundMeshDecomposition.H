@@ -81,7 +81,7 @@ SourceFiles
 namespace Foam
 {
 
-typedef PrimitivePatch<face, List, const pointField, point> bPatch;
+typedef PrimitivePatch<::Foam::List<face>, const pointField> bPatch;
 typedef treeDataPrimitivePatch<bPatch> treeDataBPatch;
 
 class Time;

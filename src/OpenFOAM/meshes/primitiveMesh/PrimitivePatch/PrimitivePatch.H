@@ -67,6 +67,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class face;
 template<class T> class Map;
 
@@ -81,38 +82,33 @@ TemplateName(PrimitivePatch);
                            Class PrimitivePatch Declaration
 \*---------------------------------------------------------------------------*/
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType=point
->
+template<class FaceList, class PointField>
 class PrimitivePatch
 :
     public PrimitivePatchName,
-    public FaceList<Face>
+    public FaceList
 {
-
 public:
 
     // Public Typedefs
 
         //- The face type
-        typedef Face face_type;
+        typedef typename
+            std::remove_reference<FaceList>::type::value_type face_type;
 
         //- The point type
-        typedef PointType point_type;
+        typedef typename
+            std::remove_reference<PointField>::type::value_type point_type;
 
         //- The face list type
-        typedef FaceList<Face> FaceListType;
+        typedef FaceList FaceListType;
 
         //- The point field type
         typedef PointField PointFieldType;
 
         //- Deprecated(2020-03) prefer face_type typedef
         // \deprecated(2020-03) prefer face_type typedef
-        typedef Face FaceType;
+        typedef face_type FaceType;
 
 
     // Public Data Types
@@ -138,62 +134,62 @@ private:
         //- Edges of the patch; address into local point list;
         //  sorted with internal edges first in upper-triangular order
         //  and external edges last.
-        mutable edgeList* edgesPtr_;
+        mutable unique_ptr<edgeList> edgesPtr_;
 
         //- Which part of edgesPtr_ is internal edges.
         mutable label nInternalEdges_;
 
         //- Boundary point labels, addressing into local point list
-        mutable labelList* boundaryPointsPtr_;
+        mutable unique_ptr<labelList> boundaryPointsPtr_;
 
         //- Face-face addressing
-        mutable labelListList* faceFacesPtr_;
+        mutable unique_ptr<labelListList> faceFacesPtr_;
 
         //- Edge-face addressing
-        mutable labelListList* edgeFacesPtr_;
+        mutable unique_ptr<labelListList> edgeFacesPtr_;
 
         //- Face-edge addressing
-        mutable labelListList* faceEdgesPtr_;
+        mutable unique_ptr<labelListList> faceEdgesPtr_;
 
         //- Point-edge addressing
-        mutable labelListList* pointEdgesPtr_;
+        mutable unique_ptr<labelListList> pointEdgesPtr_;
 
         //- Point-face addressing
-        mutable labelListList* pointFacesPtr_;
+        mutable unique_ptr<labelListList> pointFacesPtr_;
 
         //- Faces addressing into local point list
-        mutable List<Face>* localFacesPtr_;
+        mutable unique_ptr<List<face_type>> localFacesPtr_;
 
         //- Labels of mesh points
-        mutable labelList* meshPointsPtr_;
+        mutable unique_ptr<labelList> meshPointsPtr_;
 
         //- Mesh point map. Given the global point index find its
         //- location in the patch
-        mutable Map<label>* meshPointMapPtr_;
+        mutable unique_ptr<Map<label>> meshPointMapPtr_;
 
         //- Outside edge loops
-        mutable labelListList* edgeLoopsPtr_;
+        mutable unique_ptr<labelListList> edgeLoopsPtr_;
 
         //- Points local to patch
-        mutable Field<PointType>* localPointsPtr_;
+        mutable unique_ptr<Field<point_type>> localPointsPtr_;
 
         //- Local point order for most efficient search
-        mutable labelList* localPointOrderPtr_;
+        mutable unique_ptr<labelList> localPointOrderPtr_;
 
         //- Face centres
-        mutable Field<PointType>* faceCentresPtr_;
+        mutable unique_ptr<Field<point_type>> faceCentresPtr_;
 
         //- Face area vectors
-        mutable Field<PointType>* faceAreasPtr_;
+        mutable unique_ptr<Field<point_type>> faceAreasPtr_;
 
         //- Mag face area
-        mutable Field<scalar>* magFaceAreasPtr_;
+        mutable unique_ptr<Field<scalar>> magFaceAreasPtr_;
 
         //- Face unit normals
-        mutable Field<PointType>* faceNormalsPtr_;
+        mutable unique_ptr<Field<point_type>> faceNormalsPtr_;
 
         //- Point unit normals
-        mutable Field<PointType>* pointNormalsPtr_;
+        mutable unique_ptr<Field<point_type>> pointNormalsPtr_;
 
 
     // Private Member Functions
@@ -263,30 +259,27 @@ public:
         //- Construct from components
         PrimitivePatch
         (
-            const FaceList<Face>& faces,
-            const Field<PointType>& points
+            const FaceList& faces,
+            const PointField& points
         );
 
         //- Construct from components, transferring faces
         PrimitivePatch
         (
-            FaceList<Face>&& faces,
-            const Field<PointType>& points
+            FaceList&& faces,
+            const PointField& points
         );
 
         //- Construct from components, reuse storage
         PrimitivePatch
         (
-            FaceList<Face>& faces,
-            Field<PointType>& points,
+            FaceList& faces,
+            PointField& points,
             const bool reuse
         );
 
-        //- Construct as copy
-        PrimitivePatch
-        (
-            const PrimitivePatch<Face, FaceList, PointField, PointType>&
-        );
+        //- Copy construct
+        PrimitivePatch(const PrimitivePatch<FaceList, PointField>& pp);
 
 
     //- Destructor
@@ -310,7 +303,7 @@ public:
     // Access
 
         //- Return reference to global points
-        const Field<PointType>& points() const
+        const Field<point_type>& points() const
         {
             return points_;
         }
@@ -363,7 +356,7 @@ public:
             const labelListList& pointFaces() const;
 
             //- Return patch faces addressing into local point list
-            const List<Face>& localFaces() const;
+            const List<face_type>& localFaces() const;
 
 
         // Addressing into mesh
@@ -378,7 +371,7 @@ public:
             const Map<label>& meshPointMap() const;
 
             //- Return pointField of points in patch
-            const Field<PointType>& localPoints() const;
+            const Field<point_type>& localPoints() const;
 
             //- Return orders the local points for most efficient search
             const labelList& localPointOrder() const;
@@ -409,27 +402,27 @@ public:
             ) const;
 
             //- Return face centres for patch
-            const Field<PointType>& faceCentres() const;
+            const Field<point_type>& faceCentres() const;
 
             //- Return face area vectors for patch
-            const Field<PointType>& faceAreas() const;
+            const Field<point_type>& faceAreas() const;
 
             //- Return face area magnitudes for patch
             const Field<scalar>& magFaceAreas() const;
 
             //- Return face unit normals for patch
-            const Field<PointType>& faceNormals() const;
+            const Field<point_type>& faceNormals() const;
 
             //- Return point normals for patch
-            const Field<PointType>& pointNormals() const;
+            const Field<point_type>& pointNormals() const;
 
 
         // Storage Management
 
-            inline bool hasFaceAreas() const { return faceAreasPtr_; }
-            inline bool hasFaceCentres() const { return faceCentresPtr_; }
-            inline bool hasFaceNormals() const { return faceNormalsPtr_; }
-            inline bool hasPointNormals() const { return pointNormalsPtr_; }
+            bool hasFaceAreas() const { return bool(faceAreasPtr_); }
+            bool hasFaceCentres() const { return bool(faceCentresPtr_); }
+            bool hasFaceNormals() const { return bool(faceNormalsPtr_); }
+            bool hasPointNormals() const { return bool(pointNormalsPtr_); }
 
 
         // Other patch operations
@@ -439,7 +432,7 @@ public:
             List<objectHit> projectPoints
             (
                 const ToPatch& targetPatch,
-                const Field<PointType>& projectionDirection,
+                const Field<point_type>& projectionDirection,
                 const intersection::algorithm = intersection::FULL_RAY,
                 const intersection::direction = intersection::VECTOR
             ) const;
@@ -449,7 +442,7 @@ public:
             List<objectHit> projectFaceCentres
             (
                 const ToPatch& targetPatch,
-                const Field<PointType>& projectionDirection,
+                const Field<point_type>& projectionDirection,
                 const intersection::algorithm = intersection::FULL_RAY,
                 const intersection::direction = intersection::VECTOR
             ) const;
@@ -494,16 +487,16 @@ public:
     // Edit
 
         //- Correct patch after moving points
-        virtual void movePoints(const Field<PointType>&);
+        virtual void movePoints(const Field<point_type>&);
 
 
     // Member Operators
 
-        //- Assignment
-        void operator=
-        (
-            const PrimitivePatch<Face, FaceList, PointField, PointType>&
-        );
+        //- Copy assign faces. Leave points alone (could be a reference).
+        void operator=(const PrimitivePatch<FaceList, PointField>& rhs);
+
+        //- Move assign faces. Leave points alone (could be a reference).
+        void operator=(PrimitivePatch<FaceList, PointField>&& rhs);
 };
 
 

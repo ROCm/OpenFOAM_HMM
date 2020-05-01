@@ -65,7 +65,7 @@ class surfMesh
 :
     public  surfaceRegistry,
     private Detail::MeshedSurfaceIOAllocator,
-    public  PrimitivePatch<face, UList, const pointField&, point>
+    public  PrimitivePatch<::Foam::UList<face>, const pointField&>
 {
 public:
 
@@ -91,7 +91,7 @@ private:
         typedef Detail::MeshedSurfaceIOAllocator Allocator;
 
         //- Internal mesh storage type
-        typedef PrimitivePatch<face, UList, const pointField&, point>
+        typedef PrimitivePatch<::Foam::UList<face>, const pointField&>
             MeshReference;
 
 

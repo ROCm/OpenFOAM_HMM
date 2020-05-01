@@ -33,6 +33,7 @@ License
 #include "areaFields.H"
 #include "edgeFields.H"
 #include "polyMesh.H"
+#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

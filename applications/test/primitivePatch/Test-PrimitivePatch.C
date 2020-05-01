@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
         faceList patchFaces(patch);
         pointField allPoints(patch.points());
 
-        PrimitivePatch<face, List, pointField, point> storedPatch
+        PrimitivePatch<List<face>, pointField> storedPatch
         (
             patchFaces,
             allPoints,

@@ -45,7 +45,7 @@ Description
 
 namespace Foam
 {
-    typedef PrimitivePatch<face, UIndirectList, const pointField&>
+    typedef PrimitivePatch<UIndirectList<face>, const pointField&>
         uindirectPrimitivePatch;
 }
 

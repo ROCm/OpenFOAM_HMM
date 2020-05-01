@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +30,7 @@ License
 #include "edgeFields.H"
 #include "areaFields.H"
 #include "mapPolyMesh.H"
+#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -61,12 +63,8 @@ Foam::leastSquaresFaVectors::~leastSquaresFaVectors()
 
 void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
 {
-    if (debug)
-    {
-        Info<< "leastSquaresFaVectors::makeLeastSquaresVectors() :"
-            << "Constructing finite area least square gradient vectors"
-            << endl;
-    }
+    DebugInFunction
+        << "Constructing finite area least square gradient vectors" << nl;
 
     pVectorsPtr_ = new edgeVectorField
     (
@@ -213,12 +211,8 @@ void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
         }
     }
 
-    if (debug)
-    {
-        Info<< "leastSquaresFaVectors::makeLeastSquaresVectors() :"
-            << "Finished constructing finite area least square gradient vectors"
-            << endl;
-    }
+    DebugInFunction
+        << "Done constructing finite area least square gradient vectors" << nl;
 }
 
 
@@ -246,11 +240,8 @@ const Foam::edgeVectorField& Foam::leastSquaresFaVectors::nVectors() const
 
 bool Foam::leastSquaresFaVectors::movePoints()
 {
-    if (debug)
-    {
-        InfoIn("bool leastSquaresFaVectors::movePoints()")
-            << "Clearing least square data" << endl;
-    }
+    DebugInFunction
+        << "Clearing least square data" << nl;
 
     deleteDemandDrivenData(pVectorsPtr_);
     deleteDemandDrivenData(nVectorsPtr_);

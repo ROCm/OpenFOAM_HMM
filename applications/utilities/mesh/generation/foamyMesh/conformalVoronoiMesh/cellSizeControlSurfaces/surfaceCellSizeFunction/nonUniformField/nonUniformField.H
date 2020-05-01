@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,11 +61,11 @@ class nonUniformField
 
 protected:
 
-    // Private typedef
+    // Typedefs
 
         typedef PrimitivePatchInterpolation
         <
-            PrimitivePatch<labelledTri, List, pointField, point>
+            PrimitivePatch<::Foam::List<labelledTri>, pointField>
         >   primitivePatchInterpolation;
 
 

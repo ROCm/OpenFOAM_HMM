@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,22 +33,25 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 void Foam::PatchTools::gatherAndMerge
 (
     const scalar mergeDist,
-    const PrimitivePatch<Face, FaceList, PointField, PointType>& p,
-    Field<PointType>& mergedPoints,
-    List<Face>& mergedFaces,
+    const PrimitivePatch<FaceList, PointField>& p,
+    Field
+    <
+        typename PrimitivePatch<FaceList, PointField>::point_type
+    >& mergedPoints,
+    List
+    <
+        typename PrimitivePatch<FaceList, PointField>::face_type
+    >& mergedFaces,
     labelList& pointMergeMap
 )
 {
+    typedef typename PrimitivePatch<FaceList,PointField>::face_type FaceType;
+    typedef typename PrimitivePatch<FaceList,PointField>::point_type PointType;
+
     // Collect points from all processors
     labelList pointSizes;
     {
@@ -62,20 +65,20 @@ void Foam::PatchTools::gatherAndMerge
     // Collect faces from all processors and renumber using sizes of
     // gathered points
     {
-        List<List<Face>> gatheredFaces(Pstream::nProcs());
+        List<List<FaceType>> gatheredFaces(Pstream::nProcs());
         gatheredFaces[Pstream::myProcNo()] = p;
         Pstream::gatherList(gatheredFaces);
 
         if (Pstream::master())
         {
-            mergedFaces = static_cast<const List<Face>&>
+            mergedFaces = static_cast<const List<FaceType>&>
             (
-                ListListOps::combineOffset<List<Face>>
+                ListListOps::combineOffset<List<FaceType>>
                 (
                     gatheredFaces,
                     pointSizes,
-                    accessOp<List<Face>>(),
-                    offsetOp<Face>()
+                    accessOp<List<FaceType>>(),
+                    offsetOp<FaceType>()
                 )
             );
         }
@@ -104,11 +107,9 @@ void Foam::PatchTools::gatherAndMerge
             mergedPoints.transfer(newPoints);
 
             // Relabel faces
-            List<Face>& faces = mergedFaces;
-
-            forAll(faces, facei)
+            for (auto& f : mergedFaces)
             {
-                inplaceRenumber(pointMergeMap, faces[facei]);
+                inplaceRenumber(pointMergeMap, f);
             }
         }
     }
@@ -151,9 +152,9 @@ void Foam::PatchTools::gatherAndMerge
             // Get renumbered local data
             pointField myPoints(mesh.points(), uniqueMeshPointLabels);
             List<FaceType> myFaces(localFaces);
-            forAll(myFaces, i)
+            for (auto& f : myFaces)
             {
-                inplaceRenumber(pointToGlobal, myFaces[i]);
+                inplaceRenumber(pointToGlobal, f);
             }
 
 
@@ -190,9 +191,9 @@ void Foam::PatchTools::gatherAndMerge
             // Get renumbered local data
             pointField myPoints(mesh.points(), uniqueMeshPointLabels);
             List<FaceType> myFaces(localFaces);
-            forAll(myFaces, i)
+            for (auto& f : myFaces)
             {
-                inplaceRenumber(pointToGlobal, myFaces[i]);
+                inplaceRenumber(pointToGlobal, f);
             }
 
             // Construct processor stream with estimate of size. Could

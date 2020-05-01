@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +58,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class polyMesh;
 class bitSet;
 class boundBox;
@@ -73,16 +74,10 @@ public:
     //- Check for orientation issues.
     //  Returns true if problems were found.
     //  If a normal flips across an edge, places it in the HashSet
-    template
-    <
-        class Face,
-        template<class> class FaceList,
-        class PointField,
-        class PointType
-    >
+    template<class FaceList, class PointField>
     static bool checkOrientation
     (
-        const PrimitivePatch<Face, FaceList, PointField, PointType>&,
+        const PrimitivePatch<FaceList, PointField>&,
         const bool report = false,
         labelHashSet* marked = 0
     );
@@ -91,17 +86,10 @@ public:
     //- Fill faceZone with currentZone for every face reachable
     //  from facei without crossing edge marked in borderEdge.
     //  Note: faceZone has to be sized nFaces before calling.
-    template
-    <
-        class BoolListType,
-        class Face,
-        template<class> class FaceList,
-        class PointField,
-        class PointType
-    >
+    template<class BoolListType, class FaceList, class PointField>
     static void markZone
     (
-        const PrimitivePatch<Face, FaceList, PointField, PointType>&,
+        const PrimitivePatch<FaceList, PointField>&,
         const BoolListType& borderEdge,
         const label facei,
         const label currentZone,
@@ -111,17 +99,10 @@ public:
     //- Size and fills faceZone with zone of face.
     //  Zone is area reachable by edge crossing without crossing borderEdge.
     //  Returns number of zones.
-    template
-    <
-        class BoolListType,
-        class Face,
-        template<class> class FaceList,
-        class PointField,
-        class PointType
-    >
+    template<class BoolListType, class FaceList, class PointField>
     static label markZones
     (
-        const PrimitivePatch<Face, FaceList, PointField, PointType>&,
+        const PrimitivePatch<FaceList, PointField>&,
         const BoolListType& borderEdge,
         labelList& faceZone
     );
@@ -132,78 +113,47 @@ public:
     //  \param[in]  includeFaces faces to include
     //  \param[out] pointMap mapping new to old localPoints
     //  \param[out] faceMap  mapping new to old faces
-    template
-    <
-        class BoolListType,
-        class Face,
-        template<class> class FaceList,
-        class PointField,
-        class PointType
-    >
+    template<class BoolListType, class FaceList, class PointField>
     static void subsetMap
     (
-        const PrimitivePatch<Face, FaceList, PointField, PointType>& p,
+        const PrimitivePatch<FaceList, PointField>& p,
         const BoolListType& includeFaces,
         labelList& pointMap,
         labelList& faceMap
     );
 
     //-
-    template
-    <
-        class Face,
-        template<class> class FaceList,
-        class PointField,
-        class PointType
-    >
+    template<class FaceList, class PointField>
     static void calcBounds
     (
-        const PrimitivePatch<Face, FaceList, PointField, PointType>& p,
+        const PrimitivePatch<FaceList, PointField>& p,
         boundBox& bb,
         label& nPoints
     );
 
     //- Return edge-face addressing sorted by angle around the edge.
     //  Orientation is anticlockwise looking from edge.vec(localPoints())
-    template
-    <
-        class Face,
-        template<class> class FaceList,
-        class PointField,
-        class PointType
-    >
+    template<class FaceList, class PointField>
     static labelListList sortedEdgeFaces
     (
-        const PrimitivePatch<Face, FaceList, PointField, PointType>&
+        const PrimitivePatch<FaceList, PointField>&
     );
 
     //- Return point-edge addressing sorted by order around the point.
-    template
-    <
-        class Face,
-        template<class> class FaceList,
-        class PointField,
-        class PointType
-    >
+    template<class FaceList, class PointField>
     static labelListList sortedPointEdges
     (
-        const PrimitivePatch<Face, FaceList, PointField, PointType>&
+        const PrimitivePatch<FaceList, PointField>&
     );
 
     //- If 2 face neighbours: label of face where ordering of edge
     //  is consistent with righthand walk.
     //  If 1 neighbour: label of only face.
     //  If >2 neighbours: undetermined.
-    template
-    <
-        class Face,
-        template<class> class FaceList,
-        class PointField,
-        class PointType
-    >
+    template<class FaceList, class PointField>
     static labelList edgeOwner
     (
-        const PrimitivePatch<Face, FaceList, PointField, PointType>&
+        const PrimitivePatch<FaceList, PointField>&
     );
 
 
@@ -212,19 +162,13 @@ public:
     //  p2PointLabels : corresponding points on p2
     template
     <
-        class Face1,
-        template<class> class FaceList1,
-        class PointField1,
-        class PointType1,
-        class Face2,
-        template<class> class FaceList2,
-        class PointField2,
-        class PointType2
+        class FaceList1, class PointField1,
+        class FaceList2, class PointField2
     >
     static void matchPoints
     (
-        const PrimitivePatch<Face1, FaceList1, PointField1, PointType1>& p1,
-        const PrimitivePatch<Face2, FaceList2, PointField2, PointType2>& p2,
+        const PrimitivePatch<FaceList1, PointField1>& p1,
+        const PrimitivePatch<FaceList2, PointField2>& p2,
 
         labelList& p1PointLabels,
         labelList& p2PointLabels
@@ -236,19 +180,13 @@ public:
     //  sameOrientation : same orientation?
     template
     <
-        class Face1,
-        template<class> class FaceList1,
-        class PointField1,
-        class PointType1,
-        class Face2,
-        template<class> class FaceList2,
-        class PointField2,
-        class PointType2
+        class FaceList1, class PointField1,
+        class FaceList2, class PointField2
     >
     static void matchEdges
     (
-        const PrimitivePatch<Face1, FaceList1, PointField1, PointType1>& p1,
-        const PrimitivePatch<Face2, FaceList2, PointField2, PointType2>& p2,
+        const PrimitivePatch<FaceList1, PointField1>& p1,
+        const PrimitivePatch<FaceList2, PointField2>& p2,
 
         labelList& p1EdgeLabels,
         labelList& p2EdgeLabels,
@@ -257,33 +195,21 @@ public:
 
 
     //- Return parallel consistent point normals for patches using mesh points.
-    template
-    <
-        class Face,
-        template<class> class FaceList,
-        class PointField,
-        class PointType
-    >
+    template<class FaceList, class PointField>
     static tmp<pointField> pointNormals
     (
         const polyMesh&,
-        const PrimitivePatch<Face, FaceList, PointField, PointType>&
+        const PrimitivePatch<FaceList, PointField>&
     );
 
 
     //- Return parallel consistent edge normals for patches using mesh points.
     //  Supply with patch matching info from matchEdges.
-    template
-    <
-        class Face,
-        template<class> class FaceList,
-        class PointField,
-        class PointType
-    >
+    template<class FaceList, class PointField>
     static tmp<pointField> edgeNormals
     (
         const polyMesh&,
-        const PrimitivePatch<Face, FaceList, PointField, PointType>&,
+        const PrimitivePatch<FaceList, PointField>&,
         const labelList& patchEdges,
         const labelList& coupledEdges
     );
@@ -291,19 +217,19 @@ public:
 
     //- Gather points and faces onto master and merge into single patch.
     //  Note: uses faces/points, not localFaces/localPoints.
-    template
-    <
-        class Face,
-        template<class> class FaceList,
-        class PointField,
-        class PointType
-    >
+    template<class FaceList, class PointField>
     static void gatherAndMerge
     (
         const scalar mergeDist,
-        const PrimitivePatch<Face, FaceList, PointField, PointType>& p,
-        Field<PointType>& mergedPoints,
-        List<Face>& mergedFaces,
+        const PrimitivePatch<FaceList, PointField>& p,
+        Field
+        <
+            typename PrimitivePatch<FaceList, PointField>::point_type
+        >& mergedPoints,
+        List
+        <
+            typename PrimitivePatch<FaceList, PointField>::face_type
+        >& mergedFaces,
         labelList& pointMergeMap
     );
 

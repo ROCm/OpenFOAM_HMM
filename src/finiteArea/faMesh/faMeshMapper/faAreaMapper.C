@@ -23,13 +23,11 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    FV surface mapper.
-
 \*---------------------------------------------------------------------------*/
 
 #include "faAreaMapper.H"
 #include "mapPolyMesh.H"
+#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

@@ -554,7 +554,7 @@ Foam::tmp<Foam::pointField> Foam::triSurfaceMesh::coordinates() const
 
         // Calculate face centres from a copy to avoid incurring
         // additional storage
-        pts = PrimitivePatch<labelledTri, SubList, const pointField&>
+        pts = PrimitivePatch<FaceListType, const pointField&>
         (
             FaceListType(*this, triSurface::size()),
             triSurface::points()

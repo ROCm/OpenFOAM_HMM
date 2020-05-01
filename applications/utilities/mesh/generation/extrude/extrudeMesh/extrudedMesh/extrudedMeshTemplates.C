@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,15 +31,10 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField
->
+template<class FaceList, class PointField>
 Foam::pointField Foam::extrudedMesh::extrudedPoints
 (
-    const PrimitivePatch<Face, FaceList, PointField>& extrudePatch,
+    const PrimitivePatch<FaceList, PointField>& extrudePatch,
     const extrudeModel& model
 )
 {
@@ -68,10 +64,10 @@ Foam::pointField Foam::extrudedMesh::extrudedPoints
 }
 
 
-template<class Face, template<class> class FaceList, class PointField>
+template<class FaceList, class PointField>
 Foam::faceList Foam::extrudedMesh::extrudedFaces
 (
-    const PrimitivePatch<Face, FaceList, PointField>& extrudePatch,
+    const PrimitivePatch<FaceList, PointField>& extrudePatch,
     const extrudeModel& model
 )
 {
@@ -194,10 +190,10 @@ Foam::faceList Foam::extrudedMesh::extrudedFaces
 }
 
 
-template<class Face, template<class> class FaceList, class PointField>
+template<class FaceList, class PointField>
 Foam::cellList Foam::extrudedMesh::extrudedCells
 (
-    const PrimitivePatch<Face, FaceList, PointField>& extrudePatch,
+    const PrimitivePatch<FaceList, PointField>& extrudePatch,
     const extrudeModel& model
 )
 {
@@ -302,16 +298,11 @@ Foam::cellList Foam::extrudedMesh::extrudedCells
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField
->
+template<class FaceList, class PointField>
 Foam::extrudedMesh::extrudedMesh
 (
     const IOobject& io,
-    const PrimitivePatch<Face, FaceList, PointField>& extrudePatch,
+    const PrimitivePatch<FaceList, PointField>& extrudePatch,
     const extrudeModel& model
 )
 :

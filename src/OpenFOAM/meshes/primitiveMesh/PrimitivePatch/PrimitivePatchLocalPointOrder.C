@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,24 +34,16 @@ Description
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 void
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-calcLocalPointOrder() const
+Foam::PrimitivePatch<FaceList, PointField>::calcLocalPointOrder() const
 {
     // Note: Cannot use bandCompressing as point-point addressing does
     // not exist and is not considered generally useful.
-    //
 
     if (debug)
     {
-        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+        Pout<< "PrimitivePatch<FaceList, PointField>::"
             << "calcLocalPointOrder() : "
             << "calculating local point order"
             << endl;
@@ -64,15 +57,14 @@ calcLocalPointOrder() const
             << abort(FatalError);
     }
 
-    const List<Face>& lf = localFaces();
+    const List<face_type>& lf = localFaces();
 
     const labelListList& ff = faceFaces();
 
     boolList visitedFace(lf.size(), false);
 
-    localPointOrderPtr_ = new labelList(meshPoints().size(), -1);
-
-    labelList& pointOrder = *localPointOrderPtr_;
+    localPointOrderPtr_.reset(new labelList(meshPoints().size(), -1));
+    auto& pointOrder = *localPointOrderPtr_;
 
     boolList visitedPoint(pointOrder.size(), false);
 
@@ -126,7 +118,7 @@ calcLocalPointOrder() const
 
     if (debug)
     {
-        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+        Pout<< "PrimitivePatch<FaceList, PointField>::"
             << "calcLocalPointOrder() "
             << "finished calculating local point order"
             << endl;

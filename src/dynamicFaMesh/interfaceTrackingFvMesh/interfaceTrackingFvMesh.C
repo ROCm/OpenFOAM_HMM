@@ -45,6 +45,7 @@ License
 #include "twoDPointCorrector.H"
 #include "gravityMeshObject.H"
 #include "turbulentTransportModel.H"
+#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

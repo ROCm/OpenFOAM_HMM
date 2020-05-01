@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,24 +32,13 @@ Description
 
 #include "PrimitivePatch.H"
 
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 void
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-calcEdgeLoops() const
+Foam::PrimitivePatch<FaceList, PointField>::calcEdgeLoops() const
 {
-    if (debug)
-    {
-        InfoInFunction << "Calculating boundary edge loops" << endl;
-    }
+    DebugInFunction << "Calculating boundary edge loops" << endl;
 
     if (edgeLoopsPtr_)
     {
@@ -64,7 +54,7 @@ calcEdgeLoops() const
 
     if (nBdryEdges == 0)
     {
-        edgeLoopsPtr_ = new labelListList(0);
+        edgeLoopsPtr_.reset(new labelListList(0));
         return;
     }
 
@@ -79,8 +69,8 @@ calcEdgeLoops() const
     labelList loopNumber(nBdryEdges, -1);
 
     // Size return list plenty big
-    edgeLoopsPtr_ = new labelListList(nBdryEdges);
-    labelListList& edgeLoops = *edgeLoopsPtr_;
+    edgeLoopsPtr_.reset(new labelListList(nBdryEdges));
+    auto& edgeLoops = *edgeLoopsPtr_;
 
 
     // Current loop number.
@@ -149,23 +139,13 @@ calcEdgeLoops() const
 
     edgeLoops.setSize(loopI);
 
-    if (debug)
-    {
-        Info<< "    Finished." << endl;
-    }
+    DebugInFunction << "Calculated boundary edge loops" << nl;
 }
 
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
+template<class FaceList, class PointField>
 const Foam::labelListList&
-Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
-edgeLoops() const
+Foam::PrimitivePatch<FaceList, PointField>::edgeLoops() const
 {
     if (!edgeLoopsPtr_)
     {

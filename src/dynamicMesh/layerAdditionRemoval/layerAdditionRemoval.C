@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,9 +24,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Cell layer addition/removal mesh modifier
-
 \*---------------------------------------------------------------------------*/
 
 #include "layerAdditionRemoval.H"
@@ -35,6 +33,7 @@ Description
 #include "primitiveMesh.H"
 #include "polyTopoChange.H"
 #include "addToRunTimeSelectionTable.H"
+#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

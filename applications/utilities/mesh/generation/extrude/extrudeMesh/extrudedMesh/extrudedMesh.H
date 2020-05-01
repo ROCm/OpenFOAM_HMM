@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +54,7 @@ class extrudedMesh
 :
     public polyMesh
 {
-    // Private data
+    // Private Data
 
         const extrudeModel& model_;
 
@@ -64,26 +65,26 @@ class extrudedMesh
         static bool sameOrder(const face&, const edge&);
 
         //- Construct and return the extruded mesh points
-        template<class Face, template<class> class FaceList, class PointField>
+        template<class FaceList, class PointField>
         pointField extrudedPoints
         (
-            const PrimitivePatch<Face, FaceList, PointField>& extrudePatch,
+            const PrimitivePatch<FaceList, PointField>& extrudePatch,
             const extrudeModel&
         );
 
         //- Construct and return the extruded mesh faces
-        template<class Face, template<class> class FaceList, class PointField>
+        template<class FaceList, class PointField>
         faceList extrudedFaces
         (
-            const PrimitivePatch<Face, FaceList, PointField>& extrudePatch,
+            const PrimitivePatch<FaceList, PointField>& extrudePatch,
             const extrudeModel&
         );
 
         //- Construct and return the extruded mesh cells
-        template<class Face, template<class> class FaceList, class PointField>
+        template<class FaceList, class PointField>
         cellList extrudedCells
         (
-            const PrimitivePatch<Face, FaceList, PointField>& extrudePatch,
+            const PrimitivePatch<FaceList, PointField>& extrudePatch,
             const extrudeModel&
         );
 
@@ -100,11 +101,11 @@ public:
     // Constructors
 
         //- Construct from the primitivePatch to extrude
-        template<class Face, template<class> class FaceList, class PointField>
+        template<class FaceList, class PointField>
         extrudedMesh
         (
             const IOobject&,
-            const PrimitivePatch<Face, FaceList, PointField>& extrudePatch,
+            const PrimitivePatch<FaceList, PointField>& extrudePatch,
             const extrudeModel&
         );
 };

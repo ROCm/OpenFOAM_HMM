@@ -76,12 +76,12 @@ Ostream& operator<<(Ostream&, const triSurface&);
 
 class triSurface
 :
-    public PrimitivePatch<labelledTri, ::Foam::List, pointField, point>
+    public PrimitivePatch<::Foam::List<labelledTri>, pointField>
 {
     // Private Typedefs
 
         //- Internal mesh storage type
-        typedef PrimitivePatch<labelledTri, ::Foam::List, pointField, point>
+        typedef PrimitivePatch<::Foam::List<labelledTri>, pointField>
             MeshReference;
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,19 +33,12 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
-
+template<class FaceList, class PointField>
 Foam::tmp<Foam::pointField>
 Foam::PatchTools::pointNormals
 (
     const polyMesh& mesh,
-    const PrimitivePatch<Face, FaceList, PointField, PointType>& p
+    const PrimitivePatch<FaceList, PointField>& p
 )
 {
     const globalMeshData& globalData = mesh.globalData();
@@ -196,27 +189,21 @@ Foam::PatchTools::pointNormals
 }
 
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
-
+template<class FaceList, class PointField>
 Foam::tmp<Foam::pointField>
 Foam::PatchTools::edgeNormals
 (
     const polyMesh& mesh,
-    const PrimitivePatch<Face, FaceList, PointField, PointType>& p,
+    const PrimitivePatch<FaceList, PointField>& p,
     const labelList& patchEdges,
     const labelList& coupledEdges
 )
 {
     // 1. Start off with local normals
 
-    tmp<pointField> tedgeNormals(new pointField(p.nEdges(), Zero));
-    pointField& edgeNormals = tedgeNormals.ref();
+    auto tedgeNormals = tmp<pointField>::New(p.nEdges(), Zero);
+    auto& edgeNormals = tedgeNormals.ref();
+
     {
         const labelListList& edgeFaces = p.edgeFaces();
         const vectorField& faceNormals = p.faceNormals();
