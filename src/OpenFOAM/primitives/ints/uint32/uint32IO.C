@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,7 @@ License
 #include "parsing.H"
 #include "IOstreams.H"
 #include <cinttypes>
+#include <cmath>
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
@@ -92,6 +93,34 @@ Foam::Istream& Foam::operator>>(Istream& is, uint32_t& val)
     if (t.isLabel())
     {
         val = uint32_t(t.labelToken());
+    }
+    else if (t.isScalar())
+    {
+        const scalar sval(t.scalarToken());
+        const uintmax_t parsed = uintmax_t(std::round(sval));
+        val = 0 + uint32_t(parsed);
+
+        // Accept integral floating-point values.
+        // Eg, from string expression evaluation (#1696)
+
+        if ((sval < -1e-4) || parsed > UINT32_MAX)
+        {
+            FatalIOErrorInFunction(is)
+                << "Expected label (uint32), value out-of-range "
+                << t.info()
+                << exit(FatalIOError);
+            is.setBad();
+            return is;
+        }
+        else if (1e-4 < std::abs(sval - scalar(parsed)))
+        {
+            FatalIOErrorInFunction(is)
+                << "Expected label (uint32), found non-integral value "
+                << t.info()
+                << exit(FatalIOError);
+            is.setBad();
+            return is;
+        }
     }
     else
     {
