@@ -34,8 +34,8 @@ blockMesh/blockMesh.C
 blockMesh/blockMeshCreate.C
 blockMesh/blockMeshTopology.C
 blockMesh/blockMeshCheck.C
-blockMesh/blockMeshMerge.C
-blockMesh/blockMeshMergeFast.C
+blockMesh/blockMeshMergeGeometrical.C
+blockMesh/blockMeshMergeTopological.C
 
 blockMeshTools/blockMeshTools.C
 

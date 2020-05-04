@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,6 +45,9 @@ Usage
     Options:
       - \par -blockTopology
         Write the topology as a set of edges in OBJ format and exit.
+
+      - \par -merge-geometric
+        Use geometric instead of topological merging
 
       - \par -region \<name\>
         Specify alternative mesh region.
@@ -119,6 +122,13 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
+        "merge-geometric",
+        "Use geometric (point) merging instead of topological merging "
+        "(slower, fails with high-aspect cells. default for 1912 and earlier)",
+        true  // mark as an advanced option
+    );
+    argList::addBoolOption
+    (
         "noClean",
         "Do not remove any existing polyMesh/ directory or files"
     );
@@ -144,7 +154,18 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    word regionName = polyMesh::defaultRegion;
+    // Remove old files, unless disabled
+    const bool removeOldFiles = !args.found("noClean");
+
+    // Topological merge, unless otherwise specified
+    blockMesh::mergeStrategy strategy(blockMesh::TOPOLOGICAL);
+
+    if (args.found("merge-geometric"))
+    {
+        strategy = blockMesh::GEOMETRIC;
+    }
+
+    word regionName(polyMesh::defaultRegion);
     word regionPath;
 
     // Check if the region is specified otherwise mesh the default region
@@ -183,7 +204,7 @@ int main(int argc, char *argv[])
     // Locate appropriate blockMeshDict
     #include "findBlockMeshDict.H"
 
-    blockMesh blocks(meshDict, regionName);
+    blockMesh blocks(meshDict, regionName, strategy);
 
     if (!blocks.valid())
     {
@@ -243,7 +264,7 @@ int main(int argc, char *argv[])
         runTime.setTime(instant(meshInstance), 0);
     }
 
-    if (!args.found("noClean"))
+    if (removeOldFiles)
     {
         const fileName polyMeshPath
         (

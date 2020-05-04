@@ -111,6 +111,9 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
+    // Remove old files, unless disabled
+    const bool removeOldFiles = !args.found("noClean");
+
     // Instance for resulting mesh
     bool useTime = false;
     word meshInstance(runTime.constant());
@@ -159,7 +162,7 @@ int main(int argc, char *argv[])
         runTime.setTime(instant(meshInstance), 0);
     }
 
-    if (!args.found("noClean"))
+    if (removeOldFiles)
     {
         const fileName polyMeshPath
         (

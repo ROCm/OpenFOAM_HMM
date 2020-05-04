@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,13 +39,18 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::blockMesh::blockMesh(const IOdictionary& dict, const word& regionName)
+Foam::blockMesh::blockMesh
+(
+    const IOdictionary& dict,
+    const word& regionName,
+    const mergeStrategy strategy
+)
 :
     meshDict_(dict),
-    verboseOutput(meshDict_.lookupOrDefault("verbose", true)),
+    verboseOutput(meshDict_.getOrDefault("verbose", true)),
     checkFaceCorrespondence_
     (
-        meshDict_.lookupOrDefault("checkFaceCorrespondence", true)
+        meshDict_.getOrDefault("checkFaceCorrespondence", true)
     ),
     geometry_
     (
@@ -63,7 +68,7 @@ Foam::blockMesh::blockMesh(const IOdictionary& dict, const word& regionName)
       : dictionary(),
         true
     ),
-    scaleFactor_(1.0),
+    scaleFactor_(1),
     blockVertices_
     (
         meshDict_.lookup("vertices"),
@@ -72,13 +77,17 @@ Foam::blockMesh::blockMesh(const IOdictionary& dict, const word& regionName)
     vertices_(Foam::vertices(blockVertices_)),
     topologyPtr_(createTopology(meshDict_, regionName))
 {
-    if (meshDict_.lookupOrDefault("fastMerge", false))
+    // TODO - extend with Enum
+
+    bool useTopoMerge = (strategy == mergeStrategy::TOPOLOGICAL);
+
+    if (meshDict_.getOrDefault("fastMerge", useTopoMerge))
     {
-        calcMergeInfoFast();
+        calcTopologicalMerge();
     }
     else
     {
-        calcMergeInfo();
+        calcGeometricalMerge();
     }
 }
 

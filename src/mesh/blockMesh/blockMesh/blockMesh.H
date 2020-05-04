@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,7 +66,7 @@ class blockMesh
 :
     public blockList
 {
-    // Private data
+    // Private Data
 
         //- Reference to mesh dictionary
         const IOdictionary& meshDict_;
@@ -155,11 +155,13 @@ class blockMesh
 
         void check(const polyMesh& bm, const dictionary& dict) const;
 
-        //- Determine the merge info and the final number of cells/points
-        void calcMergeInfo();
+        //- Determine merge info and final number of cells/points
+        //- based on point distances
+        void calcGeometricalMerge();
 
-        //- Determine the merge info and the final number of cells/points
-        void calcMergeInfoFast();
+        //- Determine merge info and final number of cells/points
+        //- based on block topology
+        void calcTopologicalMerge();
 
         faceList createPatchFaces(const polyPatch& patchTopologyFaces) const;
 
@@ -177,15 +179,31 @@ class blockMesh
 
 public:
 
-    // Static data members
+    // Data Types
+
+        //- The block merging strategy
+        enum mergeStrategy
+        {
+            TOPOLOGICAL,    //!< Merge using block topology
+            GEOMETRIC       //!< Merge using point geometry
+        };
+
+
+    // Static Data Members
 
         ClassName("blockMesh");
 
 
     // Constructors
 
-        //- Construct from IOdictionary
-        blockMesh(const IOdictionary& dict, const word& regionName);
+        //- Construct from IOdictionary for given region
+        //  Default is topological merging.
+        blockMesh
+        (
+            const IOdictionary& dict,
+            const word& regionName,
+            const mergeStrategy strategy = TOPOLOGICAL
+        );
 
 
     //- Destructor
