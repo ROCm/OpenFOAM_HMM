@@ -30,7 +30,7 @@ Group
     grpCmpWallFunctions
 
 Description
-    This boundary condition provides a turbulent thermal diffusivity conditon
+    This boundary condition provides a turbulent thermal diffusivity condition
     when using wall functions
     - replicates OpenFOAM v1.5 (and earlier) behaviour
 

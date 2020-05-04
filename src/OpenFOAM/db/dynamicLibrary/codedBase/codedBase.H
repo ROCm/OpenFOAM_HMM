@@ -34,7 +34,7 @@ Description
     object to maintain information about the state.
 
     For simple coded objects, the default state management is sufficient.
-    When there are more complicated code segements
+    When there are more complicated code segments
     (eg, functionObjects::codedFunctionObject), the state management
     must also register these elements as well, starting with an initial
     setCodeContext() call and followed by append() to register each element.

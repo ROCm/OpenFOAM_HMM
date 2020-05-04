@@ -126,7 +126,7 @@ class waveMakerPointPatchVectorField
         //- Vertical direction
         vector gHat_;
 
-        //- Inital water depth
+        //- Initial water depth
         scalar initialDepth_;
 
         //- Wave period

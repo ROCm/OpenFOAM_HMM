@@ -105,7 +105,7 @@ void eddyDissipationModelBase<ReactionThermo, ThermoType>::correct()
         else
         {
             FatalErrorInFunction
-                << "You selected a combustion model which requieres O2 mass"
+                << "You selected a combustion model that requires O2 mass"
                 << " to be present in the mixture"
                 << exit(FatalError);
         }

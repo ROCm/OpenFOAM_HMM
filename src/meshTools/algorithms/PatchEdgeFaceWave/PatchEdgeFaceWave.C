@@ -477,7 +477,7 @@ faceToEdge()
             FatalErrorInFunction
                 << "face " << facei
                 << " not marked as having been changed" << nl
-                << "This might be caused by multiple occurences of the same"
+                << "This might be caused by multiple occurrences of the same"
                 << " seed edge." << abort(FatalError);
         }
 
@@ -542,7 +542,7 @@ edgeToFace()
             FatalErrorInFunction
                 << "edge " << edgeI
                 << " not marked as having been changed" << nl
-                << "This might be caused by multiple occurences of the same"
+                << "This might be caused by multiple occurrences of the same"
                 << " seed edge." << abort(FatalError);
         }
 

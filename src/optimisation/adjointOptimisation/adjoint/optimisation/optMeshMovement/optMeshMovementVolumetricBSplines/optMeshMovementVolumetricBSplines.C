@@ -128,7 +128,7 @@ void Foam::optMeshMovementVolumetricBSplines::resetDesignVariables()
     optMeshMovement::resetDesignVariables();
 
     DebugInfo
-        << "optMeshMovementVolumetricBSplines:: reseting control points"
+        << "optMeshMovementVolumetricBSplines:: resetting control points"
         << endl;
 
     PtrList<NURBS3DVolume>& boxes = volBSplinesBase_.boxesRef();

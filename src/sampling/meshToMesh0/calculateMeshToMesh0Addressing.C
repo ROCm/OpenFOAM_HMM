@@ -323,7 +323,7 @@ void Foam::meshToMesh0::cellAddresses
 
                 if (!found)
                 {
-                    // Still not found so us the octree
+                    // Still not found so use the octree
                     cellAddressing_[toI] = oc.findInside(p);
                 }
             }

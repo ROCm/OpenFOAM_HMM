@@ -89,7 +89,7 @@ protected:
         //- Bounding boxes making up the tree
         List<treeBoundBox> boundBoxes_;
 
-        //- Leaf adressing
+        //- Leaf addressing
         List<labelList> addressing_;
 
 

@@ -84,7 +84,7 @@ class interfaceTrackingFvMesh
         //  if not normal motion direction
         vector motionDir_;
 
-        //- Interface smoothing at the begining of time step
+        //- Interface smoothing at the beginning of time step
         Switch smoothing_;
 
         //- Pure free-surface

@@ -33,7 +33,7 @@ divert(-1)dnl
 #     _logic_, _scalar_, _vector_,
 #     _sphTensor_, _symTensor_, _tensor_
 #
-# Values for the currently targetted rule
+# Values for the currently targeted rule
 #     _target_, _value_type_
 #
 # Note

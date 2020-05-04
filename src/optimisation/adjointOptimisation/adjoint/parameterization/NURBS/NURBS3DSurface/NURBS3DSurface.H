@@ -56,7 +56,7 @@ class NURBS3DSurface
 :
     public vectorField
 {
-    // Private data
+    // Private Data
 
         enum paramType
         {
@@ -67,7 +67,7 @@ class NURBS3DSurface
 
         enum nrmOrientation
         {
-            ALLIGNED=1,
+            ALIGNED=1,
             OPPOSED=-1
         };
 

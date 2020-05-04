@@ -116,7 +116,7 @@ Foam::label Foam::scotchDecomp::decomposeSerial
 
         const label version = 0;
         str << version << nl;
-        // Numer of vertices
+        // Number of vertices
         str << xadj.size()-1 << ' ' << adjncy.size() << nl;
 
         // Numbering starts from 0

@@ -27,7 +27,7 @@ Class
     Foam::interfaceCompositionModel
 
 Description
-    Generic base class for interface models. Mass transer models are
+    Generic base class for interface models. Mass transfer models are
     interface models between two thermos.
     Abstract class for mass transfer functions
 

@@ -33,7 +33,7 @@ Description
     used.  The first level of derivation is to basic patchFields which cover
     zero-gradient, fixed-gradient, fixed-value and mixed conditions.  The next
     level of derivation covers all the specialised typed with specific
-    evaluation proceedures, particularly with respect to specific fields.
+    evaluation procedures, particularly with respect to specific fields.
 
 Author
     Zeljko Tukovic, FMENA
@@ -56,15 +56,12 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward Declarations
 
 class objectRegistry;
 class dictionary;
 class faPatchFieldMapper;
 class edgeMesh;
-
-
-// Forward declaration of friend functions and operators
 
 template<class Type>
 class faePatchField;

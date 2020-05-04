@@ -176,7 +176,7 @@ double inters_cy
 //   xc, yc                       Coordinates of axis of d.b.
 //   theta, wa, wb        Angle and widths
 //
-//   The returned parameters will be multipled by the length of the obstacle's intersection with
+//   The returned parameters will be multiplied by the length of the obstacle's intersection with
 //   the third dimension of the 3-D cell to give this obstacle's contribution to the count, drag
 //   and area blockages.
 //   The return value is the area of intersection, which will multiply to volume blockage.

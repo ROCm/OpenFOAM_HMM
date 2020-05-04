@@ -1528,7 +1528,7 @@ void Foam::cellCellStencils::inverseDistance::createStencil
                     //Pout<< "    acceptor:" << cellI
                     //    << " at:" << mesh_.cellCentres()[cellI]
                     //    << " global:" << globalCells.toGlobal(cellI)
-                    //    << " foudn in donor:" << elemI << endl;
+                    //    << " found in donor:" << elemI << endl;
                     minMagSqrEqOp<point>()(samples[elemI], cc);
                 }
                 nSamples++;

@@ -133,7 +133,7 @@ public:
             //- Const access to adjoint solvers
             scalar operatingPointWeight() const;
 
-            //- Number of adjoint solvers corresponding to contraints
+            //- Number of adjoint solvers corresponding to constraints
             label nConstraints() const;
 
             //- Number of adjoint solvers corresponding to objectives

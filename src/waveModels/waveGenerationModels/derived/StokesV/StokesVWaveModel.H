@@ -114,7 +114,7 @@ private:
             scalar C4(const scalar h, const scalar k) const;
 
 
-        //- Model intialisation
+        //- Model initialisation
         void initialise
         (
             const scalar H,

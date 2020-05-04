@@ -57,11 +57,11 @@ class NURBS3DCurve
 :
     public vectorField
 {
-    // Private data
+    // Private Data
 
         enum nrmOrientation
         {
-            ALLIGNED = 1,
+            ALIGNED = 1,
             OPPOSED = -1
         };
 

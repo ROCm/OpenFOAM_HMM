@@ -95,7 +95,7 @@ void Foam::PDRutils::one_d_overlap
     // First and last steps overlapped given by *cmin, *cmax
     // Ditto for shifted grid given by *cfmin, *cfmax.
 
-    // Initially zero everwhere
+    // Initially zero everywhere
     olap = Zero;
 
     if (olap.size() < grid.nPoints())
@@ -591,7 +591,7 @@ scalar block_cylinder_overlap
                     // The intersection between a circle and a rectangle  can be an odd shape.
                     // We have its area. a_lblk and b_lblk are dimensions of enclosing rectangle
                     // and a_centre and b_centre its centre. We scale this rectangle down to
-                    // the corect areacorrect area, as a rectangular approximation to the intersection.
+                    // the correct areacorrect area, as a rectangular approximation to the intersection.
                     const scalar ratio = std::sqrt( area / a_lblk / b_lblk );
 
                     a_lblk *= blk1.span.x() * ratio;

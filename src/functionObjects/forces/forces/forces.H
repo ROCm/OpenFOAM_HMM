@@ -216,7 +216,7 @@ protected:
             //- Reference pressure
             scalar pRef_;
 
-            //- Coordinate system used when evaluting forces/moments
+            //- Coordinate system used when evaluating forces/moments
             coordSystem::cartesian coordSys_;
 
             //- Flag to include porosity effects

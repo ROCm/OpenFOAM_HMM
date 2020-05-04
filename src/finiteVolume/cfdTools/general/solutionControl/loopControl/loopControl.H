@@ -52,7 +52,7 @@ Usage
     Where the loop entries comprise:
     \table
         Property    | Description           | Required      | Default
-        enabled     | active/deactive loop  | no            | true
+        enabled     | activate/deactivate loop | no            | true
         iteration   | times to loop         | no            | 0
         timeStart   | begin time for loop activation  | no  | -VGREAT
         timeEnd     | end time of loop activation     | no  | VGREAT

@@ -30,7 +30,6 @@ Group
     grpCombustionModels
 
 Description
-
     Diffusion based turbulent combustion model for multicomponent species.
 
     The model calculates the laminar finite rate source terms based on
@@ -46,7 +45,7 @@ Description
 
     muEff : is the effective turbulent viscosity
     prob :  is a normalized Gaussian shaped distribution around the stoichiometric
-            value of each reaction. The distribtion is controled by 'sigma'
+            value of each reaction. The distribution is controlled by 'sigma'
             for standard deviation and ftCorr for correction of the stoichiometric
             value.
 

@@ -187,7 +187,7 @@ void Foam::optMeshMovement::storeDesignVariables()
 
 void Foam::optMeshMovement::resetDesignVariables()
 {
-    Info<< "optMeshMovement:: reseting mesh points" << endl;
+    Info<< "optMeshMovement:: resetting mesh points" << endl;
     mesh_.movePoints(pointsInit_);
 }
 

@@ -49,7 +49,7 @@ Description
     Info<< minMax(values) << nl;
     \endverbatim
 
-    General comparsion operations
+    General comparison operations
     \verbatim
     scalar val;
     if (val < range) ... value is below range min

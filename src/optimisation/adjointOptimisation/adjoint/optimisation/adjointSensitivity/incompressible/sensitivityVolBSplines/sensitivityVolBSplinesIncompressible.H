@@ -75,7 +75,7 @@ protected:
         //- Term depending on delta (n)/delta b
         vectorField dndbSens_;
 
-        //- Term dependng on dxdb for objective funtions directly depending
+        //- Term depending on dxdb for objective functions directly depending
         //- on x
         vectorField dxdbDirectSens_;
 

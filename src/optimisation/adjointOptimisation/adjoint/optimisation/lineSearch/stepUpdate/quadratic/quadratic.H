@@ -30,7 +30,7 @@ Class
     Foam::quadratic
 
 Description
-    Fits a quadratic polynomial of the merit function as a fuction of step
+    Fits a quadratic polynomial of the merit function as a function of step
     and finds the "optimal" value
 
 SourceFiles

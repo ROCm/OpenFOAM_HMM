@@ -76,7 +76,7 @@ protected:
         bool includeObjective_;
 
 
-    // Protected Member Fuctions
+    // Protected Member Functions
 
         //- Read options from dict
         void read();

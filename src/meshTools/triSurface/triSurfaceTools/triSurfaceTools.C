@@ -1563,7 +1563,7 @@ Foam::triSurface Foam::triSurfaceTools::collapseEdges
     //    {
     //        if (surf[neighbours[0]].region() != surf[neighbours[1]].region())
     //        {
-    //            // Neighbours on different regions. For now dont allow
+    //            // Neighbours on different regions. For now, do not allow
     //            // any collapse.
     //            //Pout<< "protecting face " << neighbours[0]
     //            //    << ' ' << neighbours[1] << endl;

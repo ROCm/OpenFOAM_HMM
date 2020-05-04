@@ -200,7 +200,7 @@ bool mvBak(const fileName& src, const std::string& ext = "bak");
 //  An empty name is a no-op that always returns false.
 bool rm(const fileName& file);
 
-//- Remove a dirctory and its contents (optionally silencing warnings)
+//- Remove a directory and its contents (optionally silencing warnings)
 //  An empty directory name is a no-op that always returns false,
 //  but also produces a warning.
 bool rmDir(const fileName& directory, const bool silent=false);

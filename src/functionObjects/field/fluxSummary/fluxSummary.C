@@ -85,7 +85,7 @@ Foam::word Foam::functionObjects::fluxSummary::checkFlowType
     const word& fieldName
 ) const
 {
-    // Surfaces are multipled by their area, so account for that
+    // Surfaces are multiplied by their area, so account for that
     // in the dimension checking
     const dimensionSet dims =
         (fieldDims * (isSurfaceMode() ? dimTime*dimArea : dimTime));

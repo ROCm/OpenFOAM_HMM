@@ -72,10 +72,10 @@ class indirectPatchWriter
         //- Reference to the faces as an indirect patch
         const indirectPrimitivePatch& pp_;
 
-        //- The numer of field points for the current Piece
+        //- The number of field points for the current Piece
         label numberOfPoints_;
 
-        //- The numer of field cells (faces) for the current Piece
+        //- The number of field cells (faces) for the current Piece
         label numberOfCells_;
 
         //- Local number of points
@@ -90,7 +90,7 @@ class indirectPatchWriter
 
     // Private Member Functions
 
-        //- Determing sizes (nLocalPoints_, nLocalFaces_, nLocalVerts_),
+        //- Determine sizes (nLocalPoints_, nLocalFaces_, nLocalVerts_),
         //- and begin piece
         void beginPiece();
 

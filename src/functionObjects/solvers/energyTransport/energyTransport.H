@@ -38,7 +38,7 @@ Description
       directory.
     - The turbulence model should be incompressible
     - In order to use in a incompressible multi phase a list of thermal
-      properties are needed. See bellow
+      properties are needed. See below
 
 
 Usage

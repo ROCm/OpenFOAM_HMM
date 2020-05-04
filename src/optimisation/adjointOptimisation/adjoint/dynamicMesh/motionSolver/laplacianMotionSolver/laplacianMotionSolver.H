@@ -89,7 +89,7 @@ protected:
 
     // Protected Member Functions
 
-        //- Set boundary condtions of cellMotionU based on pointMotionU.
+        //- Set boundary conditions of cellMotionU based on pointMotionU.
         //  Avoiding the use of the cellMotionFvPatchField bc
         //  due to the use of the registry in order to grab pointMotionU, which
         //  may give problems if multiple objects of this class are constructed

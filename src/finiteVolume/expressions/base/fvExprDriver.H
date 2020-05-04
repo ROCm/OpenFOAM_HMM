@@ -95,7 +95,7 @@ class fvExprDriver
         //- Pointer to the "default" mesh
         static const fvMesh *defaultMeshPtr_;
 
-        //- Cache cellSets, faceSets insted of reading from disc each time
+        //- Cache cellSets, faceSets instead of reading from disc each time
         static bool cacheSets_;
 
 
@@ -610,7 +610,7 @@ public:
         //- Create a writer for this object
         void createWriterAndRead(const word& name);
 
-        //- Write data if apropriate
+        //- Write data if appropriate
         //- Should enable exact restarts
         void tryWrite() const;
 

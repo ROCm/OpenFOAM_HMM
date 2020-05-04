@@ -81,10 +81,10 @@ class internalWriter
         //- The volume cells (internalMesh)
         const vtuCells& vtuCells_;
 
-        //- The numer of field points for the current Piece
+        //- The number of field points for the current Piece
         label numberOfPoints_;
 
-        //- The numer of field cells for the current Piece
+        //- The number of field cells for the current Piece
         label numberOfCells_;
 
 

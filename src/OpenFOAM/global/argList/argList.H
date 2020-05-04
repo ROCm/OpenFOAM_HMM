@@ -530,7 +530,7 @@ public:
         //  Queries the Foam::infoDetailLevel flag.
         static bool bannerEnabled();
 
-        //- Remove '-noFunctionObjects' option and ignore any occurances.
+        //- Remove '-noFunctionObjects' option and ignore any occurrences.
         //  Optionally add a '-withFunctionObjects' option instead
         static void noFunctionObjects(bool addWithOption = false);
 

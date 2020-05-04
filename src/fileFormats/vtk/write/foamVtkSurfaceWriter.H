@@ -78,10 +78,10 @@ class surfaceWriter
         //- Reference to the faces
         std::reference_wrapper<const faceList> faces_;
 
-        //- The numer of field points for the current Piece
+        //- The number of field points for the current Piece
         label numberOfPoints_;
 
-        //- The numer of field cells (faces) for the current Piece
+        //- The number of field cells (faces) for the current Piece
         label numberOfCells_;
 
         //- Local number of points
@@ -99,7 +99,7 @@ class surfaceWriter
 
     // Private Member Functions
 
-        //- Determing sizes (nLocalPoints_, nLocalFaces_, nLocalVerts_),
+        //- Determine sizes (nLocalPoints_, nLocalFaces_, nLocalVerts_),
         //- and begin piece
         void beginPiece();
 

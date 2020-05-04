@@ -115,7 +115,7 @@ void displacementMethodelasticityMotionSolver::setMotionField
 
     // Update the boundary conditions of the pointField in order to make
     // sure that the boundary will move according to the initial BCs
-    // without the interferance of the volPointInterpolation in the elasticityMotionSolver
+    // without the interference of the volPointInterpolation in the elasticityMotionSolver
     for (label patchI : patchIDs_)
     {
         // Set boundary field. Needed for the motionSolver class

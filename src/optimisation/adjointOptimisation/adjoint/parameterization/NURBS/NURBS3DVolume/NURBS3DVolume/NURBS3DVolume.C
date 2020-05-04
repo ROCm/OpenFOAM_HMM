@@ -169,7 +169,7 @@ void Foam::NURBS3DVolume::computeParametricCoordinates
                 pointMesh::New(mesh_)
             );
 
-        // Initialize intermidiate fields with sizes from findPointInBox
+        // Initialize intermediate fields with sizes from findPointInBox
         labelList actualMap(map.size());
 
         // Read and store
@@ -189,7 +189,7 @@ void Foam::NURBS3DVolume::computeParametricCoordinates
             }
         }
 
-        // Resize intermidiate
+        // Resize intermediate
         actualMap.setSize(curIndex);
 
         reduce(curIndex, sumOp<label>());
@@ -600,7 +600,7 @@ void Foam::NURBS3DVolume::confineControlPoint(const label cpI)
     if (cpI < 0 || cpI > cps_.size() -1)
     {
         FatalErrorInFunction
-           << "Attempted to confine contol point movement for a control point "
+           << "Attempted to confine control point movement for a control point "
            << " ID which is out of bounds"
            << exit(FatalError);
     }
@@ -622,7 +622,7 @@ void Foam::NURBS3DVolume::confineControlPoint
     if (cpI < 0 || cpI > cps_.size() -1)
     {
         FatalErrorInFunction
-           << "Attempted to confine contol point movement for a control point "
+           << "Attempted to confine control point movement for a control point "
            << " ID which is out of bounds"
            << exit(FatalError);
     }
@@ -1076,7 +1076,7 @@ Foam::vectorField Foam::NURBS3DVolume::computeControlPointSensitivities
     // Get parametric coordinates
     const vectorField& parametricCoordinates = getParametricCoordinates();
 
-    // Auxilary quantities
+    // Auxiliary quantities
     deltaBoundary deltaBoundary(mesh_);
     const labelList& reverseMap = reverseMapPtr_();
 
@@ -1147,7 +1147,7 @@ Foam::vector Foam::NURBS3DVolume::computeControlPointSensitivities
     // Get parametric coordinates
     const vectorField& parametricCoordinates = getParametricCoordinates();
 
-    // Auxilary quantities
+    // Auxiliary quantities
     deltaBoundary deltaBoundary(mesh_);
     const labelList& reverseMap = reverseMapPtr_();
 
@@ -1207,7 +1207,7 @@ Foam::tmp<Foam::tensorField> Foam::NURBS3DVolume::dndbBasedSensitivities
     // Return field
     tmp<tensorField> tdndbSens(new tensorField(patch.size(), Zero));
     tensorField& dndbSens = tdndbSens.ref();
-    // Auxilary quantities
+    // Auxiliary quantities
     deltaBoundary deltaBoundary(mesh_);
     const label patchStart = ppatch.start();
     const labelList& reverseMap = reverseMapPtr_();

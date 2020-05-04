@@ -37,7 +37,7 @@ Description
 
 Note
     If fields should be CellData instead of PointData (default), this
-    must be decided at contruction time.
+    must be decided at construction time.
 
 SourceFiles
     lagrangianWriter.C
@@ -80,7 +80,7 @@ class lagrangianWriter
         //- The cloud name
         const word cloudName_;
 
-        //- The numer of field points for the current Piece
+        //- The number of field points for the current Piece
         label numberOfPoints_;
 
         //- Write as CellData (verts) instead of as PointData.

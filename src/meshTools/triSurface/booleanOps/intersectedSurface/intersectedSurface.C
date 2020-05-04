@@ -308,7 +308,7 @@ Foam::intersectedSurface::calcPointEdgeAddressing
                 << points[e.end()] << nl;
         }
 
-        Pout<< "    Constructed point-edge adressing:" << nl;
+        Pout<< "    Constructed point-edge addressing:" << nl;
         forAllConstIters(facePointEdges, iter)
         {
             Pout<< "    vertex " << iter.key() << " is connected to edges "

@@ -54,7 +54,7 @@ namespace ListPolicy
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Number of items before requiring line-breaks in the list ouput.
+//- Number of items before requiring line-breaks in the list output.
 //
 //  Default definition: 10
 template<class T>

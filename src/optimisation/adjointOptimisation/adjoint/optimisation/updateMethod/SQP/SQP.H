@@ -173,7 +173,7 @@ public:
        //- line search
        virtual void updateOldCorrection(const scalarField& oldCorrection);
 
-       //- Write usefull quantities to files
+       //- Write useful quantities to files
        virtual void write();
 };
 

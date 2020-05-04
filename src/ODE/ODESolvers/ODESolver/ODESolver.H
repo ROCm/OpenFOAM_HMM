@@ -191,7 +191,7 @@ public:
 
         inline void resizeMatrix(scalarSquareMatrix& m) const;
 
-        //- Solve the ODE system as far as possible upto dxTry
+        //- Solve the ODE system as far as possible up to dxTry
         //  adjusting the step as necessary to provide a solution within
         //  the specified tolerance.
         //  Update the state and return an estimate for the next step in dxTry
@@ -202,7 +202,7 @@ public:
             scalar& dxTry
         ) const;
 
-        //- Solve the ODE system as far as possible upto dxTry
+        //- Solve the ODE system as far as possible up to dxTry
         //  adjusting the step as necessary to provide a solution within
         //  the specified tolerance.
         //  Update the state and return an estimate for the next step in dxTry

@@ -471,7 +471,7 @@ void incompressibleVars::resetMeanFields()
 {
     if (solverControl_.average())
     {
-        Info<< "Reseting mean fields to zero" << endl;
+        Info<< "Resetting mean fields to zero" << endl;
 
         // Reset fields to zero
         pMeanPtr_() == dimensionedScalar(pInst().dimensions(), Zero);

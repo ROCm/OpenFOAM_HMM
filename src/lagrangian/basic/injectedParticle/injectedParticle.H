@@ -27,7 +27,7 @@ Class
     Foam::injectedParticle
 
 Description
-    Primarly stores particle properties so that it can be injected at a later
+    Primarily stores particle properties so that it can be injected at a later
     time.  Note that this stores its own local position as opposed to the
     base particle class barycentric coordinates since the particle is not
     (usually) attached to a mesh, and instead used for post-processing.

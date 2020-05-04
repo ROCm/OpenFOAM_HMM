@@ -27,7 +27,7 @@ Class
     Foam::meltingEvaporationModels::Lee
 
 Description
-    Mass tranfer Lee model. Simple model driven by field value difference as:
+    Mass transfer Lee model. Simple model driven by field value difference as:
 
     \f[
         \dot{m} = C \rho \alpha (T - T_{activate})/T_{activate}

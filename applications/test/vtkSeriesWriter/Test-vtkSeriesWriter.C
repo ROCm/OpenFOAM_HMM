@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
         {
             writer.load(input, true);
 
-            Info<< "reload, checking the existance of files" << nl;
+            Info<< "reload, checking the existence of files" << nl;
             writer.print(Info);
             Info<< nl << nl;
         }

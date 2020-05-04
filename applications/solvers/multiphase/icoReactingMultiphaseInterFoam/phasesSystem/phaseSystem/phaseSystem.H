@@ -267,7 +267,7 @@ public:
 
     // Energy related thermo functionaliy functions
 
-        //- Return access to the inernal energy field [J/Kg]
+        //- Return access to the internal energy field [J/Kg]
         //  \note this mixture thermo is prepared to work with T
         virtual volScalarField& he()
         {
@@ -275,7 +275,7 @@ public:
             return const_cast<volScalarField&>(volScalarField::null());
         }
 
-        //- Return access to the inernal energy field [J/Kg]
+        //- Return access to the internal energy field [J/Kg]
         //  \note this mixture thermo is prepared to work with T
         virtual const volScalarField& he() const
         {

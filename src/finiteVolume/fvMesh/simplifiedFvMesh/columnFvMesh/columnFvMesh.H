@@ -53,7 +53,7 @@ namespace simplifiedMeshes
 
 class columnFvMeshInfo
 {
-    // Private Member Funtions
+    // Private Member Functions
 
         //- Set the patch dictionary entries using the mesh or field files
         bool setPatchEntries(const Time& runTime);

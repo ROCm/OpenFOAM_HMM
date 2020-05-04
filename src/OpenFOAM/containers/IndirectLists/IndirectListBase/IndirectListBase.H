@@ -183,7 +183,7 @@ public:
     // Search
 
         //- Find index of the first occurrence of the value.
-        //  Any occurences before the start pos are ignored.
+        //  Any occurrences before the start pos are ignored.
         //  Linear search.
         //  \return -1 if not found.
         label find(const T& val, label pos = 0) const;
@@ -195,7 +195,7 @@ public:
         label rfind(const T& val, label pos = -1) const;
 
         //- True if the value if found in the list.
-        //  Any occurences before the start pos are ignored.
+        //  Any occurrences before the start pos are ignored.
         //  Linear search.
         inline bool found(const T& val, label pos=0) const;
 

@@ -88,10 +88,10 @@ protected:
 
         const incompressibleVars& primalVars_;
 
-        //- Note: getting a reference to the adjoint vars in the contructor of
+        //- Note: getting a reference to the adjoint vars in the constructor of
         //- boundaryAdjointContributionIncompressible is dangerous since the
         //- autoPtr that holds them has not been completed yet. Instead, get
-        //- a reference to the solver and grad the adjoint vars from there,
+        //- a reference to the solver and grab the adjoint vars from there,
         //- when necessary
         const incompressibleAdjointSolver& adjointSolver_;
 

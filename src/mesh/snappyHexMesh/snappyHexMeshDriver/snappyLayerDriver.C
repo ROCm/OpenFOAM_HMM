@@ -670,8 +670,8 @@ void Foam::snappyLayerDriver::handleNonManifolds
     // 4. Check for extrusion of baffles i.e. all edges of a face having the
     //    same two neighbouring faces (one of which is the current face).
     //    Note: this is detected locally already before - this test is for the
-    //          extremely rare occurence where the baffle faces are on different
-    //          processors.
+    //          extremely rare occurrence where the baffle faces are on
+    //          different processors.
     {
         label nBaffleFaces = 0;
 
@@ -927,7 +927,7 @@ void Foam::snappyLayerDriver::handleWarpedFaces
 }
 
 
-//// No extrusion on cells with multiple patch faces. There ususally is a reason
+//// No extrusion on cells with multiple patch faces. There usually is a reason
 //// why combinePatchFaces hasn't succeeded.
 //void Foam::snappyLayerDriver::handleMultiplePatchFaces
 //(
@@ -2223,7 +2223,7 @@ Foam::label Foam::snappyLayerDriver::truncateDisplacement
         // ~~~~~~~~~
 
         // Make sure that a string of edges becomes a single face so
-        // not a butterfly. Occassionally an 'edge' will have a single dangling
+        // not a butterfly. Occasionally an 'edge' will have a single dangling
         // vertex due to face combining. These get extruded as a single face
         // (with a dangling vertex) so make sure this extrusion forms a single
         // shape.

@@ -1147,7 +1147,7 @@ void Foam::stringOps::inplaceRemoveComments(std::string& s)
 
                 if (i == std::string::npos)
                 {
-                    // Trucated - done
+                    // Truncated - done
                     break;
                 }
 
@@ -1161,7 +1161,7 @@ void Foam::stringOps::inplaceRemoveComments(std::string& s)
 
                 if (i == std::string::npos)
                 {
-                    // Trucated - done
+                    // Truncated - done
                     break;
                 }
 

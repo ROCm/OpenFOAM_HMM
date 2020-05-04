@@ -153,7 +153,7 @@ void Foam::fv::multiphaseStabilizedTurbulence::addSup
         return;
     }
 
-    Log << this->name() << ": applying bouyancy production term to "
+    Log << this->name() << ": applying buoyancy production term to "
         << eqn.psi().name() << endl;
 
     // Buoyancy production in k eqn

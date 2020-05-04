@@ -160,7 +160,7 @@ public:
             //- Pressure corrector loop control
             inline bool correct();
 
-            //- Return true to store the intial residuals
+            //- Return true to store the initial residuals
             inline bool storeInitialResiduals() const;
 
             //- Return true for first PIMPLE (outer) iteration

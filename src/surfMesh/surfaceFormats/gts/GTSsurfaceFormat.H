@@ -94,7 +94,7 @@ public:
             const fileName& filename,
             const MeshedSurface<Face>& surf,
             IOstreamOption streamOpt = IOstreamOption(),
-            const dictionary& /*ununsed*/ = dictionary::null
+            const dictionary& /*unused*/ = dictionary::null
         );
 
         //- Write UnsortedMeshedSurface, the output remains unsorted
@@ -103,7 +103,7 @@ public:
             const fileName& filename,
             const UnsortedMeshedSurface<Face>& surf,
             IOstreamOption streamOpt = IOstreamOption(),
-            const dictionary& /*ununsed*/ = dictionary::null
+            const dictionary& /*unused*/ = dictionary::null
         );
 
 

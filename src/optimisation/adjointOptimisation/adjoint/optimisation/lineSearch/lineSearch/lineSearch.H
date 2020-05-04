@@ -98,7 +98,7 @@ protected:
 
         //- Whether to extrapolate the correction multiplier for
         //- this optimisation cycle based on the previous ones.
-        //  Usefull for non-quasi Newton methods
+        //  Useful for non-quasi Newton methods
         bool extrapolateInitialStep_;
 
         //- Mechanism to update method if line search conditions are not set

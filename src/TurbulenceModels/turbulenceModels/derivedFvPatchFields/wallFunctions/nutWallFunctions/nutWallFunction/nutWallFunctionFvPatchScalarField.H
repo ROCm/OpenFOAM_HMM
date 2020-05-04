@@ -97,7 +97,7 @@ protected:
     // Protected Data
 
         //- Name of velocity field
-        //  Defult is null (not specified) in which case the velocity is
+        //  Default is null (not specified) in which case the velocity is
         //  retrieved from the turbulence model
         word UName_;
 

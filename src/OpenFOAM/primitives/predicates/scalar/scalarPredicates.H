@@ -259,19 +259,19 @@ public:
     // Search
 
         //- Index of the first match for the value.
-        //  Any occurences before the start pos are ignored.
+        //  Any occurrences before the start pos are ignored.
         //  Linear search.
         //  \return position in list or -1 if not found.
         label find(const scalar value, label pos = 0) const;
 
         //- Index of the last match for the value.
-        //  Any occurences after the end pos are ignored.
+        //  Any occurrences after the end pos are ignored.
         //  Linear search.
         //  \return position in list or -1 if not found.
         label rfind(const scalar value, label pos = -1) const;
 
         //- True if the value matches any in the list.
-        //  Any occurences before the start pos are ignored.
+        //  Any occurrences before the start pos are ignored.
         //  Linear search.
         //  \return true if found.
         inline bool found(const scalar value, label pos=0) const;

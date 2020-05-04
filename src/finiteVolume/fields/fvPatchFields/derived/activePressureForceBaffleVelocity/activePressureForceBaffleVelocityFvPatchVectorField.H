@@ -42,7 +42,7 @@ Description
     used in an extra wall beyond an existing cyclic patch pair.
 
     The baffle is activated when the area weighted pressure difference between
-    master and slave paches is larger then minThresholdValue.
+    master and slave patches is larger then minThresholdValue.
 
     Once the threshold is crossed, the baffle is activated and continues to
     open or close at a fixed rate using

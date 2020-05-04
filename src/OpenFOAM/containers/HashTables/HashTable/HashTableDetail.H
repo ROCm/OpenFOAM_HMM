@@ -230,7 +230,7 @@ struct HashTableSingle
         void operator=(const HashTableSingle&) = delete;
 
 
-        //- Construct from next pointer, key, (ununsed) contents
+        //- Construct from next pointer, key, (unused) contents
         template<class... Args>
         HashTableSingle
         (

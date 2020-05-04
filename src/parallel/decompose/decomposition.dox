@@ -164,7 +164,7 @@ a region specification is only needed if the value differs.
 \subsection subsecMultiLevel Multi-level decomposition
 
 The #Foam::multiLevelDecomp decomposition provides a general means of
-successively decomposing with different methods. Each appplication of the
+successively decomposing with different methods. Each application of the
 decomposition is termed a level. For example,
 
 \verbatim

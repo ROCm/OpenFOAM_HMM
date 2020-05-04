@@ -31,7 +31,7 @@ Group
     grpLduMatrixSolvers
 
 Description
-    Iterative solver for symmetric and asymetric matrices which uses a
+    Iterative solver for symmetric and asymmetric matrices which uses a
     run-time selected smoother e.g. GaussSeidel to converge the solution to
     the required tolerance.
 

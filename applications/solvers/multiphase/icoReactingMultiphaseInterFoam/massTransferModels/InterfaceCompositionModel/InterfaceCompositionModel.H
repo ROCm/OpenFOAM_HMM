@@ -143,7 +143,7 @@ public:
             const volScalarField& Tf
         ) const;
 
-        //- Reference mass fraction for specied based models
+        //- Reference mass fraction for species based models
         virtual tmp<volScalarField> Yf
         (
             const word& speciesName,

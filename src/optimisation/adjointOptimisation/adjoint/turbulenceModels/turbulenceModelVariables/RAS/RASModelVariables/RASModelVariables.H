@@ -30,7 +30,7 @@ Class
 
 Description
     Abstract base class for objective functions. No point in making this
-    runTime selectable since its childs will have different constructors.
+    runTime selectable since its children will have different constructors.
 
 SourceFiles
     RASModelVariables.C

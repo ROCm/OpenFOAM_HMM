@@ -30,7 +30,7 @@ Group
     grpRadiationSootSubModels
 
 Description
-    This soot model is purely an state model. The ammount of soot produced is
+    This soot model is purely an state model. The amount of soot produced is
     determined by a single step chemistry as :
 
         nuf Fuel + nuOx Ox = nuP P + nuSoot soot

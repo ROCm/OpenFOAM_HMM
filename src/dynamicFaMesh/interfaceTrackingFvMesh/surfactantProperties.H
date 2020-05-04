@@ -172,7 +172,7 @@ public:
             return soluble_;
         }
 
-        //- Surface tension change due to presense of surfactants
+        //- Surface tension change due to presence of surfactants
         tmp<areaScalarField> dSigma
         (
             const areaScalarField& surfactConc

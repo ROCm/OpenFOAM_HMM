@@ -129,7 +129,7 @@ void Foam::GAMGSolver::agglomerateMatrix
         const boolList& faceFlipMap =
             agglomeration_.faceFlipMap(fineLevelIndex);
 
-        // Check if matrix is asymetric and if so agglomerate both upper
+        // Check if matrix is asymmetric and if so agglomerate both upper
         // and lower coefficients ...
         if (fineMatrix.hasLower())
         {

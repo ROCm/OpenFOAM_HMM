@@ -2044,7 +2044,7 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
             continue;
         }
 
-        // Improve comparision speed by sorting by distance
+        // Improve comparison speed by sorting by distance
         SortableList<scalar> pts0MagSqr
         (
             magSqr

@@ -56,7 +56,7 @@ Foam::UpwindFitData<Polynomial>::UpwindFitData
     owncoeffs_(mesh.nFaces()),
     neicoeffs_(mesh.nFaces())
 {
-    DebugInFunction << "Contructing UpwindFitData<Polynomial>" << nl;
+    DebugInFunction << "Constructing UpwindFitData<Polynomial>" << nl;
 
     calcFit();
 

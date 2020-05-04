@@ -84,7 +84,7 @@ bool Foam::solver::readDict(const dictionary& dict)
     dict_ = dict;
 
     // Note: Slightly dangerous to change active_ while the solver is
-    // running. At the very least, this should trigger writing before stoping.
+    // running. At the very least, this should trigger writing before stopping.
     // Additional problems if we have an adjontSolver corresponding to a
     // constraint. To be revisited
     //active_ = dict.lookupOrDefault<bool>("active", true);

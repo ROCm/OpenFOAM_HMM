@@ -35,7 +35,7 @@ Description
 
     Combusting RANS code using the b-Xi two-equation model.
     Xi may be obtained by either the solution of the Xi transport
-    equation or from an algebraic exression.  Both approaches are
+    equation or from an algebraic expression.  Both approaches are
     based on Gulder's flame speed correlation which has been shown
     to be appropriate by comparison with the results from the
     spectral model.
@@ -66,7 +66,7 @@ Description
     CR     | Drag tensor (1/m)
     CT     | Turbulence generation parameter (1/m)
     Nv     | Number of obstacles in cell per unit volume (m^-2)
-    nsv    | Tensor whose diagonal indicates the number to substract from
+    nsv    | Tensor whose diagonal indicates the number to subtract from
            | Nv to get the number of obstacles crossing the flow in each
            | direction.
     \endplaintable

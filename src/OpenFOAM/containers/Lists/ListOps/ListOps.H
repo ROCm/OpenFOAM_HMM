@@ -397,7 +397,7 @@ List<OutputIntListType> invertManyToMany
 }
 
 
-//- Deprecated(2017-10) search for first occurence of the given element.
+//- Deprecated(2017-10) search for first occurrence of the given element.
 //  \return The index found or return -1 if not found.
 //  \deprecated(2017-10) - use the UList find/found methods
 template<class ListType>
@@ -413,7 +413,7 @@ label findIndex
 }
 
 
-//- Linear search to find all occurences of given element.
+//- Linear search to find all occurrences of given element.
 template<class ListType>
 labelList findIndices
 (
@@ -643,7 +643,7 @@ label find
 
 
 //- True if there is a value in the list that satisfies the predicate.
-//  When start is specified, any occurences before start are ignored.
+//  When start is specified, any occurrences before start are ignored.
 //  Linear search.
 //  \return true if found.
 template<class ListType, class UnaryPredicate>

@@ -585,7 +585,7 @@ Foam::shellSurfaces::shellSurfaces
     allGeometry_(allGeometry),
     dryRun_(dryRun)
 {
-    // Wilcard specification : loop over all surfaces and try to find a match.
+    // Wildcard specification : loop over all surfaces and try to find a match.
 
     // Count number of shells.
     label shellI = 0;

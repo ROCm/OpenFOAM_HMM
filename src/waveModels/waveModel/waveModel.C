@@ -316,7 +316,7 @@ bool Foam::waveModel::readDict(const dictionary& overrideDict)
 
     readIfPresent("initialDepth", initialDepth_);
 
-    // Need to intialise the geometry before calling waterLevel()
+    // Need to initialise the geometry before calling waterLevel()
     initialiseGeometry();
 
     // Set the reference water depth

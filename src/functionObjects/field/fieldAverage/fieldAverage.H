@@ -120,7 +120,7 @@ Usage
 
 
 Note
-    To employ the \c prime2Mean option, the \c mean option must be selecetd.
+    To employ the \c prime2Mean option, the \c mean option must be selected.
 
 See also
     Foam::functionObjects::fvMeshFunctionObject

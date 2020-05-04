@@ -26,7 +26,7 @@ License
 Description
     Minimal compilation test with wmake, without OpenFOAM libraries.
 
-    The application and libray can also serve as a minimal test case for
+    The application and library can also serve as a minimal test case for
     wmake, or to provide a minimal library/executable target for testing.
 
 \*---------------------------------------------------------------------------*/

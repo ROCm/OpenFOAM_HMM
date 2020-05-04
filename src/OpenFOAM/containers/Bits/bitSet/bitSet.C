@@ -378,7 +378,7 @@ void Foam::bitSet::set(const labelRange& range)
 
     // Range finishes at or beyond the right side.
     // - zero fill any gaps that we might create.
-    // - flood-fill the reset, which now correponds to the full range.
+    // - flood-fill the reset, which now corresponds to the full range.
     //
     // NB: use labelRange after() for the exclusive end-value, which
     // corresponds to our new set size.

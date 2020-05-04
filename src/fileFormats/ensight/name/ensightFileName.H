@@ -33,7 +33,7 @@ Description
     no '*' wildcards, no '%' (structured block continuation).
 
     Overall line length within case file is limited to 1024, but this is not
-    yet addresssed.
+    yet addressed.
 
 Note
     To assist windows usage, a colon (':') in the name is replaced with

@@ -124,7 +124,7 @@ public:
         // Access
 
             //- Return reference to weights arrays.
-            //  This also constructs the weighting factors if neccessary.
+            //  This also constructs the weighting factors if necessary.
             const FieldField<Field, scalar>& volWeights() const;
 
 

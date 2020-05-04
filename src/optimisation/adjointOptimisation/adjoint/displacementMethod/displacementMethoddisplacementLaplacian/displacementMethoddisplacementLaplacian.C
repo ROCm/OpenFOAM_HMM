@@ -115,7 +115,7 @@ void displacementMethoddisplacementLaplacian::setMotionField
     const pointVectorField& pointMovement
 )
 {
-    Info<< "Reseting mesh motion fields to zero " << endl;
+    Info<< "Resetting mesh motion fields to zero " << endl;
 
     if (resetFields_)
     {

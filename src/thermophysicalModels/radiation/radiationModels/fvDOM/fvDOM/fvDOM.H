@@ -130,7 +130,7 @@ class fvDOM
         //- Total radiative heat flux [W/m2]
         volScalarField qr_;
 
-         //- Emmitted radiative heat flux [W/m2]
+        //- Emitted radiative heat flux [W/m2]
         volScalarField qem_;
 
         //- Incident radiative heat flux [W/m2]

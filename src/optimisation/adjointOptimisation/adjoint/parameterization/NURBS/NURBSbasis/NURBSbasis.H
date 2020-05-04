@@ -29,7 +29,7 @@ Class
     Foam::NURBSbasis
 
 Description
-    NURBSbasis fuction. Used to construct NURBS curves, surfaces and volumes
+    NURBSbasis function. Used to construct NURBS curves, surfaces and volumes
 
 SourceFiles
     NURBSbasis.C

@@ -67,7 +67,7 @@ protected:
         List<vectorField> cpsInit_;
 
 
-    // Protected Fuctions
+    // Protected Member Functions
 
         vectorField controlPointMovement(const scalarField& correction);
 

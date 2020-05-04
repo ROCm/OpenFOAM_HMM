@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
         );
     }
 
-    Info<<"## initally populated ##" << nl;
+    Info<<"## initially populated ##" << nl;
     printRegistry(Info, db);
     Info<< nl;
 

@@ -361,7 +361,7 @@ Foam::label Foam::isoCutCell::calcSubCell
         cellStatus_ = 0;
         calcIsoFaceCentreAndArea();
 
-        // In the rare but occuring cases where a cell is only touched at a
+        // In the rare but occurring cases where a cell is only touched at a
         // point or a line the isoFaceArea_ will have zero length and here the
         // cell should be treated as either completely empty or full.
         if (mag(isoFaceArea_) < 10*SMALL)

@@ -102,7 +102,7 @@ public:
             //- Return const access to the cloud region
             inline const regionModel& region() const;
 
-            //- Return refernce to the cloud region
+            //- Return reference to the cloud region
             inline regionModel& region();
 
             //- Return the forces dictionary

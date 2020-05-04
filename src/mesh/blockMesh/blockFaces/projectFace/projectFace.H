@@ -73,7 +73,7 @@ class projectFace
         //- Convert i,j to single index
         static label index(const labelPair& n, const labelPair& coord);
 
-        //- Calulate lambdas (but unnormalised)
+        //- Calculate lambdas (but unnormalised)
         void calcLambdas
         (
             const labelPair& n,

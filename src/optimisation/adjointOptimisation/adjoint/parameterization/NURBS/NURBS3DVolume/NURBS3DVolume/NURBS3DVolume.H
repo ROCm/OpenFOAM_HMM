@@ -101,7 +101,7 @@ protected:
         autoPtr<labelList> mapPtr_;
 
         //- Map of mesh points to points-in-box
-        //  Return -1 if point not whithin the box
+        //  Return -1 if point not within the box
         autoPtr<labelList> reverseMapPtr_;
 
         //- Parametric coordinates of pointsInBox
@@ -403,8 +403,7 @@ public:
 
             // Functions triggering calculations
 
-                //- Get points of mesh which recide within the control points
-                //- box
+                //- Get mesh points that reside within the control points box
                 tmp<vectorField> getPointsInBox();
 
                 //- Get map of points in box to mesh points

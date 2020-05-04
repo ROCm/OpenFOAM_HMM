@@ -90,7 +90,7 @@ protected:
         //- Exponent to stiffen highly morphed cells
         scalar exponent_;
 
-        //- Intermidiate steps to solve the PDEs
+        //- Intermediate steps to solve the PDEs
         label nSteps_;
 
         //- Number of laplacian iterations per solution step
@@ -102,7 +102,7 @@ protected:
 
     // Protected Member Functions
 
-        //- Set boundary condtions of cellMotionU based on pointMotionU.
+        //- Set boundary conditions of cellMotionU based on pointMotionU.
         //  Avoiding the use of the cellMotionFvPatchField bc
         //  due to the use of the registry in order to grab pointMotionU, which
         //  may give problems if multiple objects of this class are constructed

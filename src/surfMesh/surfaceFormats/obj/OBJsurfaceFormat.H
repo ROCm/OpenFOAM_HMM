@@ -86,7 +86,7 @@ public:
             const fileName& filename,
             const MeshedSurfaceProxy<Face>& surf,
             IOstreamOption streamOpt = IOstreamOption(),
-            const dictionary& /*ununsed*/ = dictionary::null
+            const dictionary& /*unused*/ = dictionary::null
         );
 
 

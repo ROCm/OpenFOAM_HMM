@@ -154,7 +154,7 @@ inline UIntType repeat_value(unsigned val)
     // Max value for a single element
     const unsigned mask = ((1u << BitWidth) - 1);
 
-    // The first occurance
+    // The first occurrence
     UIntType fillval = ((val >= mask) ? mask : val);
 
     // Repeated
@@ -226,7 +226,7 @@ namespace BitSetOps
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Create a bitSet with length n with the specifed \a on locations.
+//- Create a bitSet with length n with the specified \a on locations.
 //  The resulting bitSet is guaranteed to have exactly the specified length,
 //  any values or positions larger than n-1 are silently ignored.
 //
@@ -243,7 +243,7 @@ bitSet create
 );
 
 
-//- Create a bitSet with length n with the specifed \a on locations.
+//- Create a bitSet with length n with the specified \a on locations.
 //  The resulting bitSet is guaranteed to have exactly the specified length,
 //  any values or positions larger than n-1 are silently ignored.
 //
@@ -260,7 +260,7 @@ bitSet create
 );
 
 
-//- Create a bitSet with length n with the specifed \a on locations
+//- Create a bitSet with length n with the specified \a on locations
 //- when the list values are equal to the select value.
 //
 //  The resulting bitSet is guaranteed to have exactly the specified length,

@@ -334,7 +334,7 @@ private:
 
         // Transition boiling model
 
-            //- Run-time selected for Leidenfrost tempearure
+            //- Run-time selected for Leidenfrost temperature
             autoPtr<wallBoilingModels::LeidenfrostModel>
                 LeidenfrostModel_;
 

@@ -104,7 +104,8 @@ private:
         //- Use temporarily stored sizes to redimension the element lists
         void resizeAll();
 
-        //- Classify cell types, set element lists for selection (implemention)
+        //- Classify cell types, set element lists for selection
+        //  (implementation)
         template<class Addressing>
         void classifyImpl(const polyMesh& mesh, const Addressing& cellIds);
 

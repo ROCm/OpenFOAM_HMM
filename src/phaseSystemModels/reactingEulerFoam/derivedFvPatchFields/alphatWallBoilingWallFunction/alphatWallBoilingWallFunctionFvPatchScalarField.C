@@ -886,7 +886,7 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
                         // transient boiling
                         regimeTypes[i] = regimeType::transient;
 
-                        // No convective heat tranfer
+                        // No convective heat transfer
                         alphatConv_[i] = 0.0;
 
                         // transient boiling
@@ -918,7 +918,7 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
                     {
                         regimeTypes[i] = regimeType::film; // film boiling
 
-                        // No convective heat tranfer
+                        // No convective heat transfer
                         alphatConv_[i] = 0.0;
 
                         // Film boiling

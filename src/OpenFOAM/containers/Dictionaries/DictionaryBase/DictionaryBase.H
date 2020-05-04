@@ -161,7 +161,7 @@ public:
 
     // Member Operators
 
-        //- Copy assigment
+        //- Copy assignment
         void operator=(const DictionaryBase&);
 
         //- Find and return entry

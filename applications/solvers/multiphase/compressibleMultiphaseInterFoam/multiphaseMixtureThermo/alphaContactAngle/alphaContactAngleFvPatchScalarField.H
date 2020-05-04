@@ -28,7 +28,7 @@ Class
 
 Description
     Contact-angle boundary condition for multi-phase interface-capturing
-    simulations.  Used in conjuction with multiphaseMixture.
+    simulations.  Used in conjunction with multiphaseMixture.
 
 SourceFiles
     alphaContactAngleFvPatchScalarField.C

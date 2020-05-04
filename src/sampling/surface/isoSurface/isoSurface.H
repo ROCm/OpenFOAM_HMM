@@ -157,7 +157,7 @@ class isoSurface
             //- Per face whether is collocated
             bitSet collocatedFaces(const coupledPolyPatch&) const;
 
-            //- Synchonise points on all non-separated coupled patches
+            //- Synchronise points on all non-separated coupled patches
             void syncUnseparatedPoints
             (
                 pointField& collapsedPoint,

@@ -28,9 +28,9 @@ Class
     Foam::sigSegv
 
 Description
-    Signal handler for SEGV interupt.
+    Signal handler for SEGV interrupt.
 
-    The standard interupt handler is overridden to ensure that the
+    The standard interrupt handler is overridden to ensure that the
     runningJob file is removed.
     Can be used either directly through the static member functions or
     through the scope of the object (constructor sets trapping; destructor

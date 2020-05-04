@@ -108,7 +108,7 @@ Pair<int> faceMap
     }
 
     FatalErrorInFunction
-        << "Cannot find point correspondance for faces "
+        << "Cannot find point correspondence for faces "
         << faceP << " and " << faceN
         << exit(FatalError);
 

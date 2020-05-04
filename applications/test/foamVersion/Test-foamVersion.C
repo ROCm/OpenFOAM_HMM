@@ -79,7 +79,7 @@ int main()
         << "FOAMbuild   " << typeid(Foam::FOAMbuild).name() << nl;
 
     Info
-        << "\nVerify memory addesses are identical:" << nl
+        << "\nVerify memory addresses are identical:" << nl
         << "macro     " << name(Foam::FOAMversion) << nl
         << "namespace " << name(&(foamVersion::version[0])) << nl;
 

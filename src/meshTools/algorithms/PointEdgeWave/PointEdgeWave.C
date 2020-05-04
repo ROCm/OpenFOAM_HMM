@@ -777,7 +777,7 @@ Foam::label Foam::PointEdgeWave<Type, TrackingData>::edgeToPoint()
             FatalErrorInFunction
                 << "edge " << edgeI
                 << " not marked as having been changed" << nl
-                << "This might be caused by multiple occurences of the same"
+                << "This might be caused by multiple occurrences of the same"
                 << " seed point." << abort(FatalError);
         }
 
@@ -855,7 +855,7 @@ Foam::label Foam::PointEdgeWave<Type, TrackingData>::pointToEdge()
             FatalErrorInFunction
                 << "Point " << pointi
                 << " not marked as having been changed" << nl
-                << "This might be caused by multiple occurences of the same"
+                << "This might be caused by multiple occurrences of the same"
                 << " seed point." << abort(FatalError);
         }
 

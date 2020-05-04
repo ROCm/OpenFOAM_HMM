@@ -30,7 +30,7 @@ Description
     Incompressible multi-phase mixture with built in solution for the
     phase fractions with interface compression for interface-capturing.
 
-    Derived from transportModel so that it can be unsed in conjunction with
+    Derived from transportModel so that it can be unused in conjunction with
     the incompressible turbulence models.
 
     Surface tension and contact-angle is handled for the interface

@@ -40,7 +40,7 @@ undefine([rule_tensor_unzipRow])
 # rule_scalar_components(source)
 #
 # Description
-#     Exract scalar field from scalar field - no-op
+#     Extract scalar field from scalar field - no-op
 #------------------------------------------------------------------------------
 
 define([rule_scalar_components], [])
@@ -50,7 +50,7 @@ define([rule_scalar_components], [])
 # rule_vector_components(out, in)
 #
 # Description
-#     Exract scalar field from vector field
+#     Extract scalar field from vector field
 #------------------------------------------------------------------------------
 
 define([rule_vector_components],
@@ -64,7 +64,7 @@ rule_method_component($1, $2, CMPT_Z, Foam::vector::Z)]
 # rule_sphTensor_components(out, in)
 #
 # Description
-#     Exract scalar field from sphericalTensor field
+#     Extract scalar field from sphericalTensor field
 #------------------------------------------------------------------------------
 
 define([rule_sphTensor_components],
@@ -76,7 +76,7 @@ define([rule_sphTensor_components],
 # rule_symTensor_components(out, in)
 #
 # Description
-#     Exract scalar field from symmTensor field
+#     Extract scalar field from symmTensor field
 #------------------------------------------------------------------------------
 
 define([rule_symTensor_components],
@@ -92,7 +92,7 @@ rule_method_component($1, $2, CMPT_ZZ, Foam::symmTensor::ZZ)]
 # rule_tensor_components(out, in)
 #
 # Description
-#     Exract scalar field from tensor field
+#     Extract scalar field from tensor field
 #------------------------------------------------------------------------------
 
 define([rule_tensor_components],

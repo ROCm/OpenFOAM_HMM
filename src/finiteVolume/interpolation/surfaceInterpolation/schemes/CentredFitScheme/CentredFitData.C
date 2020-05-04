@@ -55,7 +55,7 @@ Foam::CentredFitData<Polynomial>::CentredFitData
     ),
     coeffs_(mesh.nFaces())
 {
-    DebugInFunction << "Contructing CentredFitData<Polynomial>" << nl;
+    DebugInFunction << "Constructing CentredFitData<Polynomial>" << nl;
 
     calcFit();
 

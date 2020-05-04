@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
           + name(z)
           + "." + outExtension;
 
-        Info<< "    Writing mulitple part "
+        Info<< "    Writing multiple part "
             << z << " to " << remainingPartFileName << endl;
 
         zoneSurf.write(remainingPartFileName);

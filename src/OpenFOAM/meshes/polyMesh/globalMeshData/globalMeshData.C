@@ -261,7 +261,7 @@ void Foam::globalMeshData::countSharedEdges
         {
             if (globalFnd() == -1)
             {
-                // Second time occurence of this edge.
+                // Second time occurrence of this edge.
                 // Assign proper edge label.
                 globalFnd() = sharedEdgeI++;
             }

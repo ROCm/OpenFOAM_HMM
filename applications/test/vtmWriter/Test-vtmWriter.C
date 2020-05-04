@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
 
         writer2.endBlock("boundary");
 
-        // These should be automatically skiped
+        // These should be automatically skipped
         writer2.endBlock();
         writer2.endBlock();
         writer2.endBlock();

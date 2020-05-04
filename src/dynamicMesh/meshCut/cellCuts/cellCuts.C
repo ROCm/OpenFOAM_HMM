@@ -1092,7 +1092,7 @@ bool Foam::cellCuts::walkCell
             {
                 // Cut along existing edge. So is in fact on two faces.
                 // Get faces on both sides of the edge to make
-                // sure we dont fold back on to those.
+                // sure we do not fold back on to those.
 
                 label f0, f1;
                 meshTools::getEdgeFaces(mesh(), celli, edgeI, f0, f1);

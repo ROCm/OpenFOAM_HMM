@@ -128,7 +128,7 @@ Foam::oppositeFace Foam::cell::opposingFace
     // This is a prismatic cell.  Go through all the vertices of the master
     // face and find an edge going from the master face vertex to a slave
     // face vertex.  If all is OK, there should be only one such
-    // edge for every master vertex and will provide te
+    // edge for every master vertex and will provide the
     // master-to-slave vertex mapping.  Assemble the opposite face
     // in the same manner as the master.
 

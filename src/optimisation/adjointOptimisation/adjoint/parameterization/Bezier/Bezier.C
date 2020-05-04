@@ -174,7 +174,7 @@ tmp<tensorField> Bezier::dndbBasedSensitivities
     auto tdndbSens = tmp<tensorField>::New(patch.size(), Zero);
     auto& dndbSens = tdndbSens.ref();
 
-    // Auxilary quantities
+    // Auxiliary quantities
     deltaBoundary deltaBoundary(mesh_);
     const label patchStart = ppatch.start();
     const tensorField& dxdbInt = dxidXj_[cpI].primitiveField();
@@ -231,7 +231,7 @@ tmp<vectorField> Bezier::dndbBasedSensitivities
     auto tdndbSens = tmp<vectorField>::New(patch.size(), Zero);
     auto& dndbSens = tdndbSens.ref();
 
-    // Auxilary quantities
+    // Auxiliary quantities
     deltaBoundary deltaBoundary(mesh_);
     const label patchStart = ppatch.start();
     const tensorField& dxdbInt = dxidXj_[cpI].primitiveField();
@@ -291,7 +291,7 @@ tmp<tensorField> Bezier::dxdbFace
     auto& dxdbFace = tdxdbFace.ref();
     if (useChainRule)
     {
-        // Auxilary quantities
+        // Auxiliary quantities
         deltaBoundary deltaBoundary(mesh_);
         const label patchStart = patch.start();
         const tensorField& dxdbInt = dxidXj_[cpI].primitiveField();
@@ -345,7 +345,7 @@ tmp<vectorField> Bezier::dxdbFace
 
     if (useChainRule)
     {
-        // Auxilary quantities
+        // Auxiliary quantities
         deltaBoundary deltaBoundary(mesh_);
         const label patchStart = patch.start();
         const tensorField& dxdbInt = dxidXj_[cpI].primitiveField();

@@ -79,10 +79,10 @@ class patchWriter
         //- Use internal field value instead of patch value
         bool useNearCellValue_;
 
-        //- The numer of field points for the current Piece
+        //- The number of field points for the current Piece
         label numberOfPoints_;
 
-        //- The numer of field cells (faces) for the current Piece
+        //- The number of field cells (faces) for the current Piece
         label numberOfCells_;
 
         //- Local number of points
@@ -97,7 +97,7 @@ class patchWriter
 
     // Private Member Functions
 
-        //- Determing sizes (nLocalPoints_, nLocalFaces_, nLocalVerts_),
+        //- Determine sizes (nLocalPoints_, nLocalFaces_, nLocalVerts_),
         //- and begin piece.
         void beginPiece();
 

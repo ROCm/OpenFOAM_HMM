@@ -127,14 +127,14 @@ void Foam::pointVolInterpolation::makeWeights() const
 }
 
 
-// Do what is neccessary if the mesh has changed topology
+// Do what is necessary if the mesh has changed topology
 void Foam::pointVolInterpolation::clearAddressing() const
 {
     deleteDemandDrivenData(patchInterpolatorsPtr_);
 }
 
 
-// Do what is neccessary if the mesh has moved
+// Do what is necessary if the mesh has moved
 void Foam::pointVolInterpolation::clearGeom() const
 {
     deleteDemandDrivenData(volWeightsPtr_);
@@ -205,7 +205,7 @@ Foam::pointVolInterpolation::volWeights() const
 }
 
 
-// Do what is neccessary if the mesh has moved
+// Do what is necessary if the mesh has moved
 void Foam::pointVolInterpolation::updateTopology()
 {
     clearAddressing();
@@ -213,7 +213,7 @@ void Foam::pointVolInterpolation::updateTopology()
 }
 
 
-// Do what is neccessary if the mesh has moved
+// Do what is necessary if the mesh has moved
 bool Foam::pointVolInterpolation::movePoints()
 {
     clearGeom();

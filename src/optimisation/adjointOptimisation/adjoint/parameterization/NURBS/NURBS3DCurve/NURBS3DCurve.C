@@ -225,7 +225,7 @@ NURBS3DCurve::NURBS3DCurve
 
     givenInitNrm_(Zero),
 
-    nrmOrientation_(ALLIGNED)
+    nrmOrientation_(ALIGNED)
 
 {
     buildCurve();
@@ -250,7 +250,7 @@ NURBS3DCurve::NURBS3DCurve
 
     givenInitNrm_(Zero),
 
-    nrmOrientation_(ALLIGNED)
+    nrmOrientation_(ALIGNED)
 
 {
     setUniformU();
@@ -300,7 +300,7 @@ void NURBS3DCurve::setNrm3DOrientation
 
     if ((givenNrm & curveNrm) >= scalar(0))
     {
-        nrmOrientation_ = ALLIGNED;
+        nrmOrientation_ = ALIGNED;
     }
     else
     {
@@ -330,7 +330,7 @@ void NURBS3DCurve::setNrm2DOrientation
 
     if ((givenNrm & curveNrm) >= scalar(0))
     {
-        nrmOrientation_ = ALLIGNED;
+        nrmOrientation_ = ALIGNED;
     }
     else
     {
@@ -345,13 +345,13 @@ void NURBS3DCurve::setNrm2DOrientation
 
 void NURBS3DCurve::flipNrmOrientation()
 {
-    if (nrmOrientation_ == ALLIGNED)
+    if (nrmOrientation_ == ALIGNED)
     {
         nrmOrientation_ = OPPOSED;
     }
     else
     {
-        nrmOrientation_ = ALLIGNED;
+        nrmOrientation_ = ALIGNED;
     }
 }
 
@@ -613,7 +613,7 @@ const vector NURBS3DCurve::nrm3D(const vector& refTan, const scalar u) const
 {
     vector curveNrm(Zero);
 
-    if (nrmOrientation_ == ALLIGNED)
+    if (nrmOrientation_ == ALIGNED)
     {
         curveNrm = curveDerivativeU(u) ^ refTan;
     }

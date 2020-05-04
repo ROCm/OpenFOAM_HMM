@@ -331,7 +331,7 @@ NURBS3DSurface::NURBS3DSurface
     CPsUCPIs_(0),
     CPsVCPIs_(0),
 
-    nrmOrientation_(ALLIGNED),
+    nrmOrientation_(ALIGNED),
 
     boundaryCPIDs_(nullptr)
 {
@@ -369,7 +369,7 @@ NURBS3DSurface::NURBS3DSurface
     CPsUCPIs_(0),
     CPsVCPIs_(0),
 
-    nrmOrientation_(ALLIGNED),
+    nrmOrientation_(ALIGNED),
 
     boundaryCPIDs_(nullptr)
 {
@@ -408,7 +408,7 @@ NURBS3DSurface::NURBS3DSurface
     CPsUCPIs_(0),
     CPsVCPIs_(0),
 
-    nrmOrientation_(ALLIGNED),
+    nrmOrientation_(ALIGNED),
 
     boundaryCPIDs_(nullptr)
 {
@@ -458,7 +458,7 @@ NURBS3DSurface::NURBS3DSurface
     CPsUCPIs_(0),
     CPsVCPIs_(0),
 
-    nrmOrientation_(ALLIGNED),
+    nrmOrientation_(ALIGNED),
 
     boundaryCPIDs_(nullptr)
 {
@@ -507,7 +507,7 @@ NURBS3DSurface::NURBS3DSurface
     CPsUCPIs_(0),
     CPsVCPIs_(0),
 
-    nrmOrientation_(ALLIGNED),
+    nrmOrientation_(ALIGNED),
 
     boundaryCPIDs_(nullptr)
 {
@@ -559,7 +559,7 @@ NURBS3DSurface::NURBS3DSurface
     CPsUCPIs_(0),
     CPsVCPIs_(0),
 
-    nrmOrientation_(ALLIGNED),
+    nrmOrientation_(ALIGNED),
 
     boundaryCPIDs_(nullptr)
 {
@@ -597,7 +597,7 @@ void NURBS3DSurface::setNrmOrientation
 
     if (relation >= 0)
     {
-        nrmOrientation_ = ALLIGNED;
+        nrmOrientation_ = ALIGNED;
     }
     else
     {
@@ -612,13 +612,13 @@ void NURBS3DSurface::setNrmOrientation
 
 void NURBS3DSurface::flipNrmOrientation()
 {
-    if (nrmOrientation_ == ALLIGNED)
+    if (nrmOrientation_ == ALIGNED)
     {
         nrmOrientation_ = OPPOSED;
     }
     else
     {
-        nrmOrientation_ = ALLIGNED;
+        nrmOrientation_ = ALIGNED;
     }
 }
 
@@ -1266,7 +1266,7 @@ const vector NURBS3DSurface::nrm(scalar u, scalar v)
 {
     vector surfaceNrm(Zero);
 
-    if (nrmOrientation_ == ALLIGNED)
+    if (nrmOrientation_ == ALIGNED)
     {
         surfaceNrm = surfaceDerivativeU(u, v) ^ surfaceDerivativeV(u, v);
     }

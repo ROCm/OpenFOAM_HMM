@@ -33,7 +33,7 @@ Description
     An important concept is that the thermo can share an existing T
     (similar to p) in which case it will not try to update it. This gets
     triggered purely on construction order - the first one to register
-    T is repsonsible for updating it. Note that the mechanism also means
+    T is responsible for updating it. Note that the mechanism also means
     that if multiple thermos are running on the same mesh, only the first one
     will update the temperature. The behaviour can be overridden using the
     'updateT' dictionary entry.

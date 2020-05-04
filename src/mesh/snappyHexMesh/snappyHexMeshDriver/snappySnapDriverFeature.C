@@ -4246,7 +4246,7 @@ Foam::vectorField Foam::snappySnapDriver::calcNearestSurfaceFeature
         pp.meshPoints(),
         patchDisp,
         minMagSqrEqOp<point>(),         // combine op
-        vector(GREAT, GREAT, GREAT)     // null value (note: cant use VGREAT)
+        vector(GREAT, GREAT, GREAT)     // null value (note: cannot use VGREAT)
     );
 
     return patchDisp;

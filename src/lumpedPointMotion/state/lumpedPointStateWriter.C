@@ -306,7 +306,7 @@ void Foam::lumpedPointState::writeVTP
 
     // Finally
     // could add a 'ghost' level above to visualize extrapolated values
-    // draw as two triangles to distingush from real levels ...
+    // draw as two triangles to distinguish from real levels ...
 
     format().endTag(vtk::fileTag::POLY_DATA)
         .endVTKFile();

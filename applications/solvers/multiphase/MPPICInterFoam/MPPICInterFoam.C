@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
         alphac = max(1.0 - kinematicCloud.theta(), alphacMin);
         alphac.correctBoundaryConditions();
 
-         Info<< "Continous phase-1 volume fraction = "
+         Info<< "Continuous phase-1 volume fraction = "
             << alphac.weightedAverage(mesh.Vsc()).value()
             << "  Min(alphac) = " << min(alphac).value()
             << "  Max(alphac) = " << max(alphac).value()

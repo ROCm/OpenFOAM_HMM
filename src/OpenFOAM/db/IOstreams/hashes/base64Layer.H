@@ -29,7 +29,7 @@ Class
 Description
     An output filter layer to write base-64 encoded content.
 
-    Base64 encoding accoding to RFC 4648 specification
+    Base64 encoding according to RFC 4648 specification
     (https://tools.ietf.org/html/rfc4648#page-5).
     It is the obligation of the caller to avoid using normal output
     while the base-64 encoding layer is actively used.

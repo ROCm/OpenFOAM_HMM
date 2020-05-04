@@ -40,7 +40,7 @@ Description
             Flux    | mass flux rate [kg/s/m2]
             M       | molecular weight
             T_{activate} | saturation temperature
-            C       | accomodation coefficient
+            C       | accommodation coefficient
             R       | universal gas constant
             p_{sat} | saturation pressure
             p       | vapor partial pressure
@@ -70,7 +70,7 @@ Description
            (T - T_{activate})
     \f]
 
-    This assumes liquid and vapour are in equilibrium, then the accomodation
+    This assumes liquid and vapour are in equilibrium, then the accommodation
     coefficient are equivalent for the interface. This relation is known as the
     Hertz-Knudsen-Schrage.
 
@@ -145,7 +145,7 @@ class kineticGasEvaporation
         //- Activation temperature
         const dimensionedScalar Tactivate_;
 
-        //- Molar weight of the vapour in the continous phase
+        //- Molar weight of the vapour in the continuous phase
         dimensionedScalar Mv_;
 
         //- Interface area

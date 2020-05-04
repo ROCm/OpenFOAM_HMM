@@ -27,7 +27,7 @@ InNamespace
     Foam::fam
 
 Description
-    Calulate the matrix for the first temporal derivative.
+    Calculate the matrix for the first temporal derivative.
 
 SourceFiles
     famDdt.C

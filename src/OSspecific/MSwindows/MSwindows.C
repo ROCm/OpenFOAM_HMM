@@ -914,7 +914,7 @@ bool Foam::cp(const fileName& src, const fileName& dest, const bool followLink)
 
 bool Foam::ln(const fileName& src, const fileName& dst)
 {
-    // links are poorly supported, or need adminstrator privileges.
+    // links are poorly supported, or need administrator privileges.
     // Skip for now.
 
     if (MSwindows::debug)
@@ -1119,7 +1119,7 @@ bool Foam::ping
     const label timeOut
 )
 {
-    // Appears that socket calls require adminstrator privileges.
+    // Appears that socket calls require administrator privileges.
     // Skip for now.
 
     if (MSwindows::debug)

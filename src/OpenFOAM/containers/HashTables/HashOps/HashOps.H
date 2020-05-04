@@ -105,7 +105,7 @@ labelHashSet used(const UList<bool>& select);
 //
 //  \return a bitset
 //
-//  \see BitSetOps::create for other possiblities
+//  \see BitSetOps::create for other possibilities
 bitSet bitset(const labelHashSet& locations);
 
 

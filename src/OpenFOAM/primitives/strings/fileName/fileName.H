@@ -272,7 +272,7 @@ public:
         }
 
         //- Return directory path name (part before last /)
-        //  The result normally coresponds to a Foam::fileName
+        //  The result normally corresponds to a Foam::fileName
         //
         // Behaviour compared to /usr/bin/dirname:
         // \verbatim

@@ -127,7 +127,7 @@ void Foam::ReactingHeterogeneousCloud<CloudType>::setParcelThermoProperties
     CloudType::setParcelThermoProperties(parcel, lagrangianDt);
     label idS = this->composition().idSolid();
 
-    // Set inital particle composition. Overwrite thermoProperties from
+    // Set initial particle composition. Overwrite thermoProperties from
     // ReactingCloud
     parcel.Y() = this->composition().Y0(idS);
 

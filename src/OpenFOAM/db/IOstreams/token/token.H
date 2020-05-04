@@ -501,7 +501,7 @@ public:
         inline const compound& compoundToken() const;
 
         //- Return reference to compound token and decrease its internal
-        //- refCound accordingly.
+        //- refCount accordingly.
         //  The Istream is used for reference error messages only.
         compound& transferCompoundToken(const Istream& is);
 

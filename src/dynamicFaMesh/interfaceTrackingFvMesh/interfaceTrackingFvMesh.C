@@ -679,7 +679,7 @@ void Foam::interfaceTrackingFvMesh::updateDisplacementDirections()
         facesDisplacementDir() =
             aMesh().faceAreaNormals().internalField();
 
-        // Correction of control points postion
+        // Correction of control points position
         const vectorField& Cf = aMesh().areaCentres().internalField();
 
         controlPoints() =

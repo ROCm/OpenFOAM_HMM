@@ -193,7 +193,7 @@ void variablesSet::swapAndRename
     autoPtr<GeometricField<Type, PatchField, GeoMesh>>& p2
 )
 {
-    // Swaping pointers is OK for the mean flow fields known by the
+    // Swapping pointers is OK for the mean flow fields known by the
     // variablesSet (and, in essence, by the solver).
     // The problem is that turbulence models know references to U and phi
     // which cannot be swapped.

@@ -367,7 +367,7 @@ void Foam::Detail::STLAsciiParseManual::execute(std::istream& is)
         }
         while (errMsg_.empty());
 
-        // How much still in the bufffer?
+        // How much still in the buffer?
         pending = data + gcount - pe;
 
         if (pending)

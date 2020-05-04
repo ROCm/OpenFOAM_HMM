@@ -35,7 +35,7 @@ Description
         \f]
 
     The methods are defined in terms of the effective time-step \f$\Delta
-    t_e\f$ by which the explicit rate is multipled. The effective time-step is
+    t_e\f$ by which the explicit rate is multiplied. The effective time-step is
     a function of the actual time step and the implicit coefficient, which must
     be implemented in each derived scheme.
 
@@ -49,7 +49,7 @@ Description
     This class also facilitates integration in stages. If the explicit and
     implicit coefficients, \f$A\f$ and \f$B\f$, are a summation of differing
     contributions, \f$\sum \alpha_i\f$ and \f$\sum \beta_i\f$, then the
-    integration can be split up to detemine the effect of each contribution.
+    integration can be split up to determine the effect of each contribution.
 
         \f[
             \frac{d \phi_i}{d t} = \alpha_i - \beta_i \phi

@@ -85,7 +85,7 @@ class sixDoFRigidBodyMotion
         //- Motion restraints
         PtrList<sixDoFRigidBodyMotionRestraint> restraints_;
 
-        //- Motion constaints
+        //- Motion constraints
         PtrList<sixDoFRigidBodyMotionConstraint> constraints_;
 
         //- Translational constraint tensor

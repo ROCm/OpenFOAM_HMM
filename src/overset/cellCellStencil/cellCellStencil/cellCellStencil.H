@@ -94,7 +94,7 @@ protected:
 
     // Protected Member Functions
 
-        //- Count ocurrences (in parallel)
+        //- Count occurrences (in parallel)
         static labelList count(const label size, const labelUList& lst);
 
         //- Helper: create volScalarField for postprocessing.

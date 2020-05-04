@@ -78,7 +78,7 @@ class surfaceFieldWriter
         //- Reference to the OpenFOAM mesh (or subset)
         const fvMesh& mesh_;
 
-        //- The numer of field points for the current Piece
+        //- The number of field points for the current Piece
         label numberOfPoints_;
 
 

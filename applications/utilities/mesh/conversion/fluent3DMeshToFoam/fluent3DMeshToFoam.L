@@ -940,8 +940,8 @@ int main(int argc, char *argv[])
     fluentGroupToFoamPatch.insert("fan");
 
 
-    // Create intial empty polyMesh
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Create initial empty polyMesh
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     polyMesh mesh
     (

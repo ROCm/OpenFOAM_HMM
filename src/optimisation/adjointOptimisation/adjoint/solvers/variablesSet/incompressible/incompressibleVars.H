@@ -131,7 +131,7 @@ public:
         );
 
         //- Copy constructor
-        //  turbulence_ and laminarTransport_ are unitialized since there is
+        //  turbulence_ and laminarTransport_ are uninitialized since there is
         //  no clear way (and possibly no usage) of cloning them.
         //  The resulting incompressibleVars is hence incomplete.
         //  Additionally, copied fields have the original name, appended with

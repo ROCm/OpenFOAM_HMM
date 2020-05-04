@@ -108,8 +108,8 @@ class backgroundMeshDecomposition
         //- Random number generator
         Random& rndGen_;
 
-        //- Mesh stored on for this processor, specifiying the domain that it
-        //  is responsible for.
+        //- Mesh stored on for this processor, specifying the domain that it
+        //- is responsible for.
         fvMesh mesh_;
 
         //- Refinement object

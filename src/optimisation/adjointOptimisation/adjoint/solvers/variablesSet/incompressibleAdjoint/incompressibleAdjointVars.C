@@ -84,7 +84,7 @@ void incompressibleAdjointVars::resetMeanFields()
 {
     if (solverControl_.average())
     {
-        Info<< "Reseting adjoint mean fields to zero" << endl;
+        Info<< "Resetting adjoint mean fields to zero" << endl;
 
         // Reset fields to zero
         paMeanPtr_() == dimensionedScalar(paPtr_().dimensions(), Zero);

@@ -399,9 +399,9 @@ bool Foam::KinematicParcel<ParcelType>::hitPatch
     }
     else
     {
-        // This does not take into account the wall interation model
+        // This does not take into account the wall interaction model
         // Just the polyPatch type. Then, a patch type which has 'rebound'
-        // interation model will count as escaped parcel while it is not
+        // interaction model will count as escaped parcel while it is not
         if (!isA<wallPolyPatch>(pp) && !polyPatch::constraintType(pp.type()))
         {
             cloud.patchInteraction().addToEscapedParcels(nParticle_*mass());

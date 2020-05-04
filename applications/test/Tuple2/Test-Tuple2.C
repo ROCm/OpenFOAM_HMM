@@ -28,7 +28,7 @@ Application
     Test-Tuple2
 
 Description
-    Test construction, comparision etc for Tuple2 and Pair.
+    Test construction, comparison etc for Tuple2 and Pair.
 
 \*---------------------------------------------------------------------------*/
 

@@ -27,7 +27,7 @@ Class
     Foam::surfaceWriters::boundaryDataWriter
 
 Description
-    A surfaceWriter for outputting to a form useable for the
+    A surfaceWriter for outputting to a form usable for the
     timeVaryingMapped boundary condition. This reads the data from
     constant/boundaryData/\<patch\> directory.
 

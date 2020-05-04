@@ -91,7 +91,7 @@ void sensitivitySurface::addGeometricSens()
                     functions[funcI].weight()
                    *functions[funcI].dndbMultiplier(patchI);
             }
-            // Correspondance of local point addressing to global point
+            // Correspondence of local point addressing to global point
             // addressing
             const labelList& meshPoints = patch.patch().meshPoints();
             //  List with mesh faces. Global addressing
@@ -414,7 +414,7 @@ void sensitivitySurface::accumulateIntegrand(const scalar dt)
     autoPtr<incompressibleAdjoint::adjointRASModel>& adjointTurbulence =
         adjointVars_.adjointTurbulence();
 
-    Info<< "    Calculating auxilary quantities " << endl;
+    Info<< "    Calculating auxiliary quantities " << endl;
     // Fields needed to calculate adjoint sensitivities
     const autoPtr<incompressible::RASModelVariables>&
        turbVars = primalVars_.RASModelVariables();
@@ -549,7 +549,7 @@ void sensitivitySurface::accumulateIntegrand(const scalar dt)
         {
             // Terms corresponding to contributions from converting delta to
             // thetas are added through the corresponding adjoint boundary
-            // conditions instead of grabing contributions from the objective
+            // conditions instead of grabbing contributions from the objective
             // function.  Useful to have a unified formulation for low- and
             // high-re meshes
             const fvPatchVectorField& Uab = Ua.boundaryField()[patchI];

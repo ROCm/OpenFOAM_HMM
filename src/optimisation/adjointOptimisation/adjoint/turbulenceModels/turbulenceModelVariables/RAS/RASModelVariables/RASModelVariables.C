@@ -544,7 +544,7 @@ void RASModelVariables::resetMeanFields()
 {
     if (solverControl_.average())
     {
-        Info<< "Reseting mean turbulent fields to zero" << endl;
+        Info<< "Resetting mean turbulent fields to zero" << endl;
 
         // Reset fields to zero
         if (hasTMVar1_)

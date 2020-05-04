@@ -36,8 +36,8 @@ Description
     If spaces exist, they must be quoted
 
     Variable names cannot start with a digit.
-    The maximum part name length (in GUI: 49 chars) - not addresssed.
-    The maximum variable length (in GUI: 49 chars) - not addresssed.
+    The maximum part name length (in GUI: 49 chars) - not addressed.
+    The maximum variable length (in GUI: 49 chars) - not addressed.
 
 \*---------------------------------------------------------------------------*/
 

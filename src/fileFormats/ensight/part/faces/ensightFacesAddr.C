@@ -86,7 +86,7 @@ Foam::label Foam::ensightFaces::uniqueMeshPoints
         nPoints = pp.meshPoints().size();
         uniqueMeshPointLabels = pp.meshPoints();
 
-        // Not neaded: pointToGlobal
+        // Not needed: pointToGlobal
     }
 
     return nPoints;

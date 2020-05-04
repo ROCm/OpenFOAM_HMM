@@ -59,7 +59,7 @@ Changes for OpenFOAM
 #undef DIGITS_ALWAYS_FIRST
 
 // [MANUAL_NUMCOMPARE] : handwritten code instead of strncmp
-// The orignal code has a mix of strncmp for equality but handwritten code
+// The original code has a mix of strncmp for equality but handwritten code
 // for greater-than/less-than.
 //
 // -> this does to be unneeded, rely on strncmp() return values

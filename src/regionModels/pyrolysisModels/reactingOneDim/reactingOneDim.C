@@ -321,7 +321,7 @@ void reactingOneDim::solveEnergy()
 
 /*
     NOTE: The moving mesh option is only correct for reaction such as
-    Solid -> Gas, thus the ddt term is compesated exaclty by chemistrySh and
+    Solid -> Gas, thus the ddt term is compensated exactly by chemistrySh and
     the mesh flux is not necessary.
 
     if (regionMesh().moving())

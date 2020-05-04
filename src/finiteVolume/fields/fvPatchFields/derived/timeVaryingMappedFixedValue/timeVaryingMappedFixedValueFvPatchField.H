@@ -38,7 +38,7 @@ Description
       - \<time\>/\<field\> : field of values at time \<time\>
 
     The default mode of operation (mapMethod planarInterpolation) is to project
-    the points onto a plane (constructed from the first threee points) and
+    the points onto a plane (constructed from the first three points) and
     construct a 2D triangulation and finds for the face centres the triangle it
     is in and the weights to the 3 vertices.
 

@@ -186,13 +186,13 @@ public:
             //- Return non-const access to the boundary incident heat flux
             inline volScalarField& qin();
 
-            //- Return non-const access to the boundary emmitted heat flux
+            //- Return non-const access to the boundary emitted heat flux
             inline volScalarField& qem();
 
             //- Return const access to the boundary incident heat flux
             inline const volScalarField& qin() const;
 
-            //- Return const access to the boundary emmitted heat flux
+            //- Return const access to the boundary emitted heat flux
             inline const volScalarField& qem() const;
 
             //- Return direction
