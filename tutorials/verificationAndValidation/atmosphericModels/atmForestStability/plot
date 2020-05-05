@@ -1,0 +1,396 @@
+#!/bin/bash
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+# Benchmark dataset:
+#  Arnqvist, J., Segalini, A., Dellwik, E., & Bergström, H. (2015).
+#  Wind statistics from a forested landscape.
+#  Boundary-Layer Meteorology, 156(1), 53-71.
+#  DOI:10.1007/s10546-015-0016-x
+#------------------------------------------------------------------------------
+
+# Simple linear interpolation on an ascending table
+linearInterp() {
+    inpFile=$1
+    zRef=$2
+    yi=($(awk -v zRef="$zRef" '
+                    BEGIN{
+                        x1=0;  y1=0;
+                        x2=$1; y2=$2;
+                    }
+                    {
+                        if((x1 < zRef) && (x2 < zRef) && (getline != 0))
+                        {
+                            x1=x2; y1=y2; x2=$1; y2=$2
+                        }
+                    }
+                    END {
+                        yi = (y2-y1)/(x2-x1)*(zRef-x1) + y1;
+                        print yi
+                    }
+                ' $inpFile))
+    echo "$yi"
+}
+
+
+plotU() {
+    timeDir=$1
+    treeH=$2
+    zRef=$3
+    smple=$4
+    shift 4
+    declare -a inps=("${!1}")
+
+    echo "  Plotting the ground-normal normalised "
+    echo "  streamwise flow speed profile."
+
+    for i in "${!inps[@]}"
+    do
+        inp="results/${inps[$i]}/$timeDir/$smple"
+        echo $inp
+
+        # Store the ground-normal height
+        z=($(awk '{ printf "%.16f\n", $1 }' $inp))
+
+        # Compute velocity magnitude by excluding the ground-normal component
+        magU=($(awk '
+        {
+            mag = sqrt($2*$2 + $3*$3);
+            printf "%.16f\n", mag
+        }' $inp))
+
+        file="z-magU-$i.dat"
+        [ ! -f $file ] && for ((j = 0; j < "${#magU[@]}"; j++)) \
+            do printf "%.16f %.16f\n" "${z[$j]}" "${magU[$j]}" \
+            >> $file; done
+
+        # Find velocity magnitude at zRef height by linear interpolation
+        uRef=$(linearInterp "$file" "$zRef")
+
+        # Find z normalised by the reference tree height
+        zNorm=($(awk -v treeH="$treeH" '
+        {
+            zNorm = $1/treeH; printf "%.16f\n", zNorm
+        }' $file))
+
+        # Find U normalised by uRef
+        uNorm=($(awk -v uRef="$uRef" '
+        {
+            uNorm = $2/uRef; printf "%.16f\n", uNorm
+        }' $file))
+
+        fil="zNorm-uNorm-$i.dat"
+        [ ! -f $fil ] && for ((j = 0; j < "${#zNorm[@]}"; j++)) \
+            do printf "%.16f %.16f\n" "${zNorm[$j]}" "${uNorm[$j]}" \
+            >> $fil; done
+    done
+
+    outName="plots/uNorm-zNorm.png"
+    gnuplot<<PLT_U
+    set terminal pngcairo font "helvetica,20" size 1000, 800
+    set xrange [0:3.5]
+    set yrange [0:7]
+    set grid
+    set key bottom right
+    set key samplen 2
+    set key spacing 0.75
+    set xlabel "U/U_{ref} [-]"
+    set ylabel "z/z_{ref} [-]"
+    set offset .05, .05
+    set output "$outName"
+
+    veryStable="zNorm-uNorm-0.dat"
+    stable="zNorm-uNorm-1.dat"
+    slightlyStable="zNorm-uNorm-2.dat"
+    neutral="zNorm-uNorm-3.dat"
+    slightlyUnstable="zNorm-uNorm-4.dat"
+    unstable="zNorm-uNorm-5.dat"
+    bench="system/atm-Arnqvist-2015/uNorm-zNorm.dat"
+
+    plot \
+        bench every ::0::5 u ((\$1)/13.8953):2 t "Vs" w p ps 2 pt 6 lc rgb "#000000", \
+        bench every ::6::11 u ((\$1)/8.13953):2 t "S" w p ps 2 pt 5 lc rgb "#000000", \
+        bench every ::12::17 u ((\$1)/6.36047):2 t "Ss" w p ps 2 pt 4 lc rgb "#000000", \
+        bench every ::18::23 u ((\$1)/5.62791):2 t "N" w p ps 2 pt 3 lc rgb "#000000", \
+        bench every ::24::29 u ((\$1)/5.31395):2 t "Su" w p ps 2 pt 2 lc rgb "#000000", \
+        bench every ::30::35 u ((\$1)/5.06977):2 t "U" w p ps 2 pt 1 lc rgb "#000000", \
+        veryStable u 2:1 t "Very stable" w l lw 2 lc rgb "#009E73", \
+        stable u 2:1 t "Stable" w l lw 2 lc rgb "#F0E440", \
+        slightlyStable u 2:1 t "Slightly stable" w l lw 2 lc rgb "#0072B2", \
+        neutral u 2:1 t "Neutral" w l lw 2 lc rgb "#D55E00", \
+        slightlyUnstable u 2:1 t "Slightly unstable" w l lw 2 lc rgb "#CC79A7", \
+        unstable u 2:1 t "Unstable" w l lw 2 lc rgb "#440154"
+PLT_U
+
+rm -f {zNorm-uNorm-,z-magU-}*.dat
+}
+
+
+plotK() {
+    timeDir=$1
+    treeH=$2
+    zRef=$3
+    smple=$4
+    shift 4
+    declare -a inps=("${!1}")
+
+    echo "  Plotting the ground-normal normalised "
+    echo "  turbulent kinetic energy profile."
+
+    for i in "${!inps[@]}"
+    do
+        inp="results/${inps[$i]}/$timeDir/$smple"
+        echo $inp
+
+        # Store the ground-normal height profile
+        z=($(awk '{ printf "%.16f\n", $1 }' $inp))
+
+        # Store the turbulent kinetic energy profile
+        k=($(awk '{ printf "%.16f\n", $5 }' $inp))
+
+        file="z-k-$i.dat"
+        [ ! -f $file ] && for ((j = 0; j < "${#k[@]}"; j++)) \
+            do printf "%.16f %.16f\n" "${z[$j]}" "${k[$j]}" \
+            >> $file; done
+
+        # Find k at zRef height by linear interpolation
+        kRef=$(linearInterp "$file" "$zRef")
+
+        # Find z normalised by the reference tree height
+        zNorm=($(awk -v treeH="$treeH" '
+        {
+            zNorm = $1/treeH; printf "%.16f\n", zNorm
+        }' $file))
+
+        # Find k normalised by kRef
+        kNorm=($(awk -v kRef="$kRef" '
+        {
+            kNorm = $2/kRef; printf "%.16f\n", kNorm
+        }' $file))
+
+        fil="zNorm-kNorm-$i.dat"
+        [ ! -f $fil ] && for ((j = 0; j < "${#zNorm[@]}"; j++)) \
+            do printf "%.16f %.16f\n" "${zNorm[$j]}" "${kNorm[$j]}" \
+            >> $fil; done
+    done
+
+    outName="plots/kNorm-zNorm.png"
+    gnuplot<<PLT_K
+    set terminal pngcairo font "helvetica,20" size 1000, 800
+    set xrange [0:2]
+    set yrange [0:7]
+    set grid
+    set key bottom right
+    set key samplen 2
+    set key spacing 0.75
+    set xlabel "k/k_{ref} [-]"
+    set ylabel "z/z_{ref} [-]"
+    set offset .05, .05
+    set output "$outName"
+
+    veryStable="zNorm-kNorm-0.dat"
+    stable="zNorm-kNorm-1.dat"
+    slightlyStable="zNorm-kNorm-2.dat"
+    neutral="zNorm-kNorm-3.dat"
+    slightlyUnstable="zNorm-kNorm-4.dat"
+    unstable="zNorm-kNorm-5.dat"
+    bench="system/atm-Arnqvist-2015/kNorm-zNorm.dat"
+
+    plot \
+        bench every ::0::5 u ((\$1)/5.050476682):2 t "Vs" w p ps 2 pt 6 lc rgb "#000000", \
+        bench every ::6::11 u ((\$1)/4.24970097):2 t "S" w p ps 2 pt 5 lc rgb "#000000", \
+        bench every ::12::17 u ((\$1)/3.897762917):2 t "Ss" w p ps 2 pt 4 lc rgb "#000000", \
+        bench every ::18::23 u ((\$1)/3.788680963):2 t "N" w p ps 2 pt 3 lc rgb "#000000", \
+        bench every ::24::29 u ((\$1)/4.038160328):2 t "Su" w p ps 2 pt 2 lc rgb "#000000", \
+        bench every ::30::35 u ((\$1)/4.198358216):2 t "U" w p ps 2 pt 1 lc rgb "#000000", \
+        veryStable u 2:1 t "Very stable" w l lw 2 lc rgb "#009E73", \
+        stable u 2:1 t "Stable" w l lw 2 lc rgb "#F0E440", \
+        slightlyStable u 2:1 t "Slightly stable" w l lw 2 lc rgb "#0072B2", \
+        neutral u 2:1 t "Neutral" w l lw 2 lc rgb "#D55E00", \
+        slightlyUnstable u 2:1 t "Slightly unstable" w l lw 2 lc rgb "#CC79A7", \
+        unstable u 2:1 t "Unstable" w l lw 2 lc rgb "#440154"
+PLT_K
+
+rm -f {zNorm-kNorm-,z-k-}*.dat
+}
+
+
+printObukhovLength() {
+    timeDir=$1
+    treeH=$2
+    zRef=$3
+    smple=$4
+    shift 4
+    declare -a inps=("${!1}")
+
+    echo "  Printing the Obukhov length at a given reference height."
+
+    for i in "${!inps[@]}"
+    do
+        inp="results/${inps[$i]}/$timeDir/$smple"
+        echo $inp
+
+        # Store the ground-normal height profile
+        z=($(awk '{ printf "%.16f\n", $1 }' $inp))
+
+        # Store the Obukhov length profile
+        OL=($(awk '{ printf "%.16f\n", $2 }' $inp))
+
+        file="z-OL-$i.dat"
+        [ ! -f $file ] && for ((j = 0; j < "${#OL[@]}"; j++)) \
+            do printf "%.16f %.16f\n" "${z[$j]}" "${OL[$j]}" \
+            >> $file; done
+
+        # Find the Obukhov length at zRef height by linear interpolation
+        OLRef=$(linearInterp "$file" "$zRef")
+
+        echo "${inps[$i]} = $OLRef" >> "plots/ObukhovLength.dat"
+    done
+
+rm -f z-OL-*.dat
+}
+
+
+plotVeer() {
+    timeDir=$1
+    treeH=$2
+    zRef=$3
+    smple=$4
+    shift 4
+    declare -a inps=("${!1}")
+
+    echo "  Plotting the ground-normal normalised veer profile."
+
+    for i in "${!inps[@]}"
+    do
+        inp="results/${inps[$i]}/$timeDir/$smple"
+        echo $inp
+
+        # Store the ground-normal height
+        z=($(awk '{ printf "%.16f\n", $1 }' $inp))
+        # Store streamwise and spanwise velocity components
+        u=($(awk '{ printf "%.16f\n", $2 }' $inp))
+        v=($(awk '{ printf "%.16f\n", $3 }' $inp))
+
+        fileu="z-u-$i.dat"
+        [ ! -f $fileu ] && for ((j = 0; j < "${#z[@]}"; j++)) \
+            do printf "%.16f %.16f\n" "${z[$j]}" "${u[$j]}"  \
+            >> $fileu; done
+
+        filev="z-v-$i.dat"
+        [ ! -f $filev ] && for ((j = 0; j < "${#z[@]}"; j++)) \
+            do printf "%.16f %.16f\n" "${z[$j]}" "${v[$j]}"  \
+            >> $filev; done
+
+        # Find u and v at zRef height by linear interpolation
+        uRef=$(linearInterp "$fileu" "$zRef")
+        vRef=$(linearInterp "$filev" "$zRef")
+
+        # Find z normalised by the reference tree height
+        zNorm=($(awk -v treeH="$treeH" '
+        {
+            zNorm = $1/treeH; printf "%.16f\n", zNorm
+        }' $fileu))
+
+        # Find veer
+        veer=($(awk -v uRef="$uRef" -v vRef="$vRef" '
+        {
+            x = $2/sqrt($2*$2 + $3*$3);
+            xR = uRef/sqrt(uRef*uRef + vRef*vRef);
+            veer = -1*(atan2(sqrt(1 - x*x), x) - atan2(sqrt(1 - xR*xR), xR))*180/atan2(0, -1);
+            printf "%.16f\n", veer
+        }' $inp))
+
+        fil="zNorm-veer-$i.dat"
+        [ ! -f $fil ] && for ((j = 0; j < "${#zNorm[@]}"; j++)) \
+            do printf "%.16f %.16f\n" "${zNorm[$j]}" "${veer[$j]}" \
+            >> $fil; done
+    done
+
+    outName="plots/veer-zNorm.png"
+    gnuplot<<PLT_VEER
+    set terminal pngcairo font "helvetica,20" size 1000, 800
+    set xrange [-5:20]
+    set yrange [0:7]
+    set grid
+    set key bottom right
+    set key samplen 2
+    set key spacing 0.75
+    set xlabel "alpha/alpha_{ref} [-]"
+    set ylabel "z/z_{ref} [-]"
+    set offset .05, .05
+    set output "$outName"
+
+    veryStable="zNorm-veer-0.dat"
+    stable="zNorm-veer-1.dat"
+    slightlyStable="zNorm-veer-2.dat"
+    neutral="zNorm-veer-3.dat"
+    slightlyUnstable="zNorm-veer-4.dat"
+    unstable="zNorm-veer-5.dat"
+    bench="system/atm-Arnqvist-2015/veer-zNorm.dat"
+
+    plot \
+        bench every ::0::5 u 1:2 t "Vs" w p ps 2 pt 6 lc rgb "#000000", \
+        bench every ::6::11 u 1:2 t "S" w p ps 2 pt 5 lc rgb "#000000", \
+        bench every ::12::17 u 1:2 t "Ss" w p ps 2 pt 4 lc rgb "#000000", \
+        bench every ::18::23 u 1:2 t "N" w p ps 2 pt 3 lc rgb "#000000", \
+        bench every ::24::29 u 1:2 t "Su" w p ps 2 pt 2 lc rgb "#000000", \
+        bench every ::30::35 u 1:2 t "U" w p ps 2 pt 1 lc rgb "#000000", \
+        veryStable u 2:1 t "Very stable" w l lw 2 lc rgb "#009E73", \
+        stable u 2:1 t "Stable" w l lw 2 lc rgb "#F0E440", \
+        slightlyStable u 2:1 t "Slightly stable" w l lw 2 lc rgb "#0072B2", \
+        neutral u 2:1 t "Neutral" w l lw 2 lc rgb "#D55E00", \
+        slightlyUnstable u 2:1 t "Slightly unstable" w l lw 2 lc rgb "#CC79A7", \
+        unstable u 2:1 t "Unstable" w l lw 2 lc rgb "#440154"
+PLT_VEER
+
+rm -f {zNorm-veer-,z-u-,z-v-}*.dat
+}
+
+
+#------------------------------------------------------------------------------
+
+# Requires gnuplot
+command -v gnuplot >/dev/null || {
+    echo "gnuplot not found - skipping graph creation" 1>&2
+    exit 1
+}
+
+# Requires awk
+command -v awk >/dev/null || {
+    echo "awk not found - skipping graph creation" 1>&2
+    exit 1
+}
+
+# The latestTime in postProcessing/samples
+timeDir=$(foamListTimes -case results/veryStable/postProcessing/samples \
+    -latestTime 2>/dev/null)
+[ -n "$timeDir" ] || {
+    echo "No results found in postProcessing - skipping graph creation" 1>&2
+    exit 1
+}
+timeDir="postProcessing/samples/$timeDir"
+
+# Settings
+declare -a stability
+stability[0]="veryStable"
+stability[1]="stable"
+stability[2]="slightlyStable"
+stability[3]="neutral"
+stability[4]="slightlyUnstable"
+stability[5]="unstable"
+sample1="lineZ1_U.xy"
+sample2="lineZ1_ObukhovLength_T_Ustar_k_p_rgh.xy"
+treeHeight=20
+zRef=40
+
+# Postprocessing
+mkdir -p plots
+plotU $timeDir $treeHeight $zRef $sample1 stability[@]
+plotK $timeDir $treeHeight $zRef $sample2 stability[@]
+printObukhovLength $timeDir $treeHeight $zRef $sample2 stability[@]
+plotVeer $timeDir $treeHeight $zRef $sample1 stability[@]
+
+
+#------------------------------------------------------------------------------

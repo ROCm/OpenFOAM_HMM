@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,16 +43,14 @@ addRadialActuationDiskAxialInertialResistance
     const scalarField& Vcells,
     const RhoFieldType& rho,
     const vectorField& U
-) const
+)
 {
-    scalar a = 1.0 - Cp_/Ct_;
     scalarField Tr(cells.size());
-    const vector uniDiskDir = diskDir_/mag(diskDir_);
 
     tensor E(Zero);
-    E.xx() = uniDiskDir.x();
-    E.yy() = uniDiskDir.y();
-    E.zz() = uniDiskDir.z();
+    E.xx() = diskDir_.x();
+    E.yy() = diskDir_.y();
+    E.zz() = diskDir_.z();
 
     const Field<vector> zoneCellCentres(mesh().cellCentres(), cells);
     const Field<scalar> zoneCellVolumes(mesh().cellVolumes(), cells);
@@ -59,32 +58,80 @@ addRadialActuationDiskAxialInertialResistance
     const vector avgCentre = gSum(zoneCellVolumes*zoneCellCentres)/V();
     const scalar maxR = gMax(mag(zoneCellCentres - avgCentre));
 
-    scalar intCoeffs =
+    const scalar intCoeffs =
         radialCoeffs_[0]
       + radialCoeffs_[1]*sqr(maxR)/2.0
       + radialCoeffs_[2]*pow4(maxR)/3.0;
 
-    vector upU = vector(VGREAT, VGREAT, VGREAT);
-    scalar upRho = VGREAT;
-    if (upstreamCellId_ != -1)
+    if (mag(intCoeffs) < VSMALL)
     {
-        upU =  U[upstreamCellId_];
-        upRho = rho[upstreamCellId_];
+        FatalErrorInFunction
+            << "Radial distribution coefficients lead to zero polynomial." << nl
+            << "radialCoeffs = " << radialCoeffs_
+            << exit(FatalIOError);
     }
-    reduce(upU, minOp<vector>());
-    reduce(upRho, minOp<scalar>());
 
-    scalar T = 2.0*upRho*diskArea_*mag(upU)*a*(1.0 - a);
+    // Compute upstream U and rho, spatial-averaged over monitor-region
+    vector Uref(Zero);
+    scalar rhoRef = 0.0;
+    label szMonitorCells = monitorCells_.size();
+
+    for (const auto& celli : monitorCells_)
+    {
+        Uref += U[celli];
+        rhoRef = rhoRef + rho[celli];
+    }
+    reduce(Uref, sumOp<vector>());
+    reduce(rhoRef, sumOp<scalar>());
+    reduce(szMonitorCells, sumOp<label>());
+
+    if (szMonitorCells == 0)
+    {
+        FatalErrorInFunction
+            << "No cell is available for incoming velocity monitoring."
+            << exit(FatalError);
+    }
+
+    Uref /= szMonitorCells;
+    rhoRef /= szMonitorCells;
+
+    const scalar Ct = sink_*UvsCtPtr_->value(mag(Uref));
+    const scalar Cp = sink_*UvsCpPtr_->value(mag(Uref));
+
+    if (Cp <= VSMALL || Ct <= VSMALL)
+    {
+        FatalErrorInFunction
+           << "Cp and Ct must be greater than zero." << nl
+           << "Cp = " << Cp << ", Ct = " << Ct
+           << exit(FatalIOError);
+    }
+
+    const scalar a = 1.0 - Cp/Ct;
+    const scalar T = 2.0*rhoRef*diskArea_*mag(Uref)*a*(1.0 - a);
+
     forAll(cells, i)
     {
-        scalar r2 = magSqr(mesh().cellCentres()[cells[i]] - avgCentre);
+        const scalar r2 = magSqr(mesh().cellCentres()[cells[i]] - avgCentre);
 
         Tr[i] =
             T
            *(radialCoeffs_[0] + radialCoeffs_[1]*r2 + radialCoeffs_[2]*sqr(r2))
            /intCoeffs;
 
-        Usource[cells[i]] += ((Vcells[cells[i]]/V_)*Tr[i]*E) & upU;
+        Usource[cells[i]] += ((Vcells[cells[i]]/V_)*Tr[i]*E) & Uref;
+    }
+
+    if
+    (
+        mesh_.time().timeOutputValue() >= writeFileStart_
+     && mesh_.time().timeOutputValue() <= writeFileEnd_
+    )
+    {
+        Ostream& os = file();
+        writeCurrentTime(os);
+
+        os  << Uref << tab << Cp << tab << Ct << tab << a << tab << T << tab
+            << endl;
     }
 
     if (debug)

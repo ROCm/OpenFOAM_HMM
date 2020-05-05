@@ -1,0 +1,110 @@
+#!/bin/bash
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+# Benchmark dataset:
+#  Lettau, H. (1950).
+#  A re-examination of the "Leipzig wind profile" considering some
+#  relations between wind and turbulence in the frictional layer.
+#  Tellus, 2(2), 125-129.
+#  DOI:10.3402/tellusa.v2i2.8534
+#
+#  Koblitz, T. (2013).
+#  CFD Modeling of Non-Neutral Atmospheric Boundary Layer Conditions.
+#  DTU Wind Energy. DTU Wind Energy PhD, No. 0019(EN).
+#  Figure 4.1
+#------------------------------------------------------------------------------
+
+plotU() {
+    sample=$1
+
+    echo "  Plotting the ground-normal streamwise flow speed profile."
+
+    outName="plots/u-z.png"
+    gnuplot<<PLT_U
+    set terminal pngcairo font "helvetica,20" size 600, 1000
+    set xrange [0:25]
+    set yrange [0:3000]
+    set grid
+    set key left top
+    set key samplen 2
+    set key spacing 0.75
+    set xlabel "u [m/s]"
+    set ylabel "z [m]"
+    set offset .05, .05
+    set output "$outName"
+
+    bench="system/atm-Koblitz-2013/u-z-Leipzig.dat"
+    sample="$sample"
+
+    plot \
+        bench every ::0::16 u 1:2 t "Leipzig" w p ps 2 pt 6 lc rgb "#000000", \
+        sample u 2:1 t "Neutral" w l lw 2 lc rgb "#D55E00"
+PLT_U
+}
+
+
+plotV() {
+    sample=$1
+
+    echo "  Plotting the ground-normal spanwise flow speed profile."
+
+    outName="plots/v-z.png"
+    gnuplot<<PLT_V
+    set terminal pngcairo font "helvetica,20" size 600, 1000
+    set xrange [-1:6]
+    set yrange [0:3000]
+    set grid
+    set key right top
+    set key samplen 2
+    set key spacing 0.75
+    set xlabel "v [m/s]"
+    set ylabel "z [m]"
+    set offset .2, .05
+    set output "$outName"
+
+    bench="system/atm-Koblitz-2013/u-z-Leipzig.dat"
+    sample="$sample"
+
+    plot \
+        bench every ::17::35 u 1:2 t "Leipzig" w p ps 2 pt 6 lc rgb "#000000", \
+        sample u 3:1 t "Neutral" w l lw 2 lc rgb "#D55E00"
+PLT_V
+}
+
+
+#------------------------------------------------------------------------------
+
+# Requires gnuplot
+command -v gnuplot >/dev/null || {
+    echo "gnuplot not found - skipping graph creation" 1>&2
+    exit 1
+}
+
+# Requires awk
+command -v awk >/dev/null || {
+    echo "awk not found - skipping graph creation" 1>&2
+    exit 1
+}
+
+# The latestTime in postProcessing/samples
+timeDir=$(foamListTimes -case postProcessing/samples -latestTime 2>/dev/null)
+[ -n "$timeDir" ] || {
+    echo "No results found in postProcessing - skipping graph creation" 1>&2
+    exit 1
+}
+timeDir="postProcessing/samples/$timeDir"
+
+# Settings
+sample="$timeDir/lineZ1_U.xy"
+stability="neutral"
+
+# Postprocessing
+mkdir -p plots
+cp -rf $FOAM_TUTORIALS/resources/dataset/atm-Koblitz-2013 system/.
+plotU $sample
+plotV $sample
+
+
+#------------------------------------------------------------------------------

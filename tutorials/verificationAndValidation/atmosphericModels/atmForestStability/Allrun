@@ -1,0 +1,75 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+. ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
+#------------------------------------------------------------------------------
+
+./Allrun.pre
+
+cp -rf $FOAM_TUTORIALS/resources/dataset/atm-Arnqvist-2015 system/.
+
+RASmodel="kEpsilon"    # kOmegaSST
+
+declare -A stabilityStates
+declare -A Lmaxs
+declare -A qPlants
+
+stabilityStates[0]="veryStable"
+stabilityStates[1]="stable"
+stabilityStates[2]="slightlyStable"
+stabilityStates[3]="neutral"
+stabilityStates[4]="slightlyUnstable"
+stabilityStates[5]="unstable"
+
+Lmaxs[0]="5.0"
+Lmaxs[1]="13.0"
+Lmaxs[2]="25.5"
+Lmaxs[3]="41.0"
+Lmaxs[4]="80.75"
+Lmaxs[5]="200.0"
+
+qPlants[0]="-20.0"
+qPlants[1]="-9.0"
+qPlants[2]="-5.0"
+qPlants[3]="0.0"
+qPlants[4]="15.0"
+qPlants[5]="60.0"
+
+
+for i in "${!stabilityStates[@]}"
+do
+    state=${stabilityStates[$i]}
+    Lmax=${Lmaxs[$i]}
+    qPlant=${qPlants[$i]}
+
+    echo "    # Computations for the atmopsheric stability = $state:"
+    echo "        ## Lmax = $Lmax [m], qPlant = $qPlant [-]"
+    echo ""
+
+    sed -e "s|RAS_MODEL|$RASmodel|g" constant/turbulenceProperties.temp > \
+        constant/turbulenceProperties
+    sed -e "s|L_MAX|$Lmax|g" constant/fvOptions.temp > constant/fvOptions
+    sed -e "s|Q_PLANT|$qPlant|g" 0.orig/qPlant.temp > 0/qPlant
+    sed -e "s|Q_PLANT|$qPlant|g" system/setFieldsDict.temp > \
+        system/setFieldsDict
+
+    runApplication decomposePar
+    runParallel -s parallel renumberMesh -overwrite
+    runParallel -s $i setFields
+    runParallel $(getApplication)
+    runParallel postProcess -funcs \
+        "(minMaxComponents(U) minMaxMagnitude(U))" -latestTime
+    runParallel redistributePar -reconstruct -latestTime
+
+    # Collect results into $resultDir
+    resultDir="results/$state"
+    mkdir -p $resultDir
+    timeDir=$(foamListTimes -latestTime)
+    mv -f $timeDir postProcessing log.* $resultDir
+    cp -rf system/fv* constant/fv* constant/*Properties 0 $resultDir
+
+    cleanTimeDirectories
+    rm -rf processor*
+done
+
+#------------------------------------------------------------------------------

@@ -5,7 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 ENERCON GmbH
+    Copyright (C) 2018-2020 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,8 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "actuationDiskSource.H"
-#include "fvMesh.H"
-#include "fvMatrix.H"
 #include "geometricOneField.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -38,43 +37,113 @@ namespace Foam
 namespace fv
 {
     defineTypeNameAndDebug(actuationDiskSource, 0);
-    addToRunTimeSelectionTable
-    (
-        option,
-        actuationDiskSource,
-        dictionary
-    );
+    addToRunTimeSelectionTable(option, actuationDiskSource, dictionary);
 }
 }
 
 
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+const Foam::Enum
+<
+    Foam::fv::actuationDiskSource::forceMethodType
+>
+Foam::fv::actuationDiskSource::forceMethodTypeNames
+({
+    { forceMethodType::FROUDE, "Froude" },
+    { forceMethodType::VARIABLE_SCALING, "variableScaling" },
+});
 
-void Foam::fv::actuationDiskSource::checkData() const
+
+const Foam::Enum
+<
+    Foam::fv::actuationDiskSource::monitorMethodType
+>
+Foam::fv::actuationDiskSource::monitorMethodTypeNames
+({
+    { monitorMethodType::POINTS, "points" },
+    { monitorMethodType::CELLSET, "cellSet" },
+});
+
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void Foam::fv::actuationDiskSource::writeFileHeader(Ostream& os)
 {
-    if (magSqr(diskArea_) <= VSMALL)
+    writeFile::writeHeader(os, "Actuation disk source");
+    writeFile::writeCommented(os, "Time");
+    writeFile::writeCommented(os, "Uref");
+    writeFile::writeCommented(os, "Cp");
+    writeFile::writeCommented(os, "Ct");
+
+    if (forceMethod_ == forceMethodType::FROUDE)
     {
-        FatalErrorInFunction
-           << "diskArea is approximately zero"
-           << exit(FatalIOError);
+        writeFile::writeCommented(os, "a");
+        writeFile::writeCommented(os, "T");
     }
-    if (Cp_ <= VSMALL || Ct_ <= VSMALL)
+    else if (forceMethod_ == forceMethodType::VARIABLE_SCALING)
     {
-        FatalErrorInFunction
-           << "Cp and Ct must be greater than zero"
-           << exit(FatalIOError);
+        writeFile::writeCommented(os, "Udisk");
+        writeFile::writeCommented(os, "CpStar");
+        writeFile::writeCommented(os, "CtStar");
+        writeFile::writeCommented(os, "T");
+        writeFile::writeCommented(os, "P");
     }
-    if (mag(diskDir_) < VSMALL)
+
+    os  << endl;
+}
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::fv::actuationDiskSource::setMonitorCells(const dictionary& subDict)
+{
+    switch (monitorMethod_)
     {
-        FatalErrorInFunction
-           << "disk direction vector is approximately zero"
-           << exit(FatalIOError);
-    }
-    if (returnReduce(upstreamCellId_, maxOp<label>()) == -1)
-    {
-        FatalErrorInFunction
-           << "upstream location " << upstreamPoint_  << " not found in mesh"
-           << exit(FatalIOError);
+        case monitorMethodType::POINTS:
+        {
+            Info<< "    - selecting cells using points" << endl;
+
+            labelHashSet selectedCells;
+
+            List<point> monitorPoints;
+            subDict.readEntry("points", monitorPoints);
+
+            for (const auto& monitorPoint : monitorPoints)
+            {
+                const label celli = mesh_.findCell(monitorPoint);
+                if (celli >= 0)
+                {
+                    selectedCells.insert(celli);
+                }
+
+                const label globalCelli = returnReduce(celli, maxOp<label>());
+                if (globalCelli < 0)
+                {
+                    WarningInFunction
+                        << "Unable to find owner cell for point "
+                        << monitorPoint << endl;
+                }
+            }
+
+            monitorCells_ = selectedCells.sortedToc();
+            break;
+        }
+        case monitorMethodType::CELLSET:
+        {
+            Info<< "    - selecting cells using cellSet "
+                << cellSetName_ << endl;
+
+            monitorCells_ = cellSet(mesh_, cellSetName_).sortedToc();
+            break;
+        }
+        default:
+        {
+            FatalErrorInFunction
+                << "Unknown type for monitoring of incoming velocity"
+                << monitorMethodTypeNames[monitorMethod_]
+                << ". Valid monitor method types : "
+                << monitorMethodTypeNames
+                << exit(FatalError);
+        }
     }
 }
 
@@ -90,22 +159,64 @@ Foam::fv::actuationDiskSource::actuationDiskSource
 )
 :
     cellSetOption(name, modelType, dict, mesh),
-    diskDir_(coeffs_.get<vector>("diskDir")),
-    Cp_(coeffs_.get<scalar>("Cp")),
-    Ct_(coeffs_.get<scalar>("Ct")),
-    diskArea_(coeffs_.get<scalar>("diskArea")),
-    upstreamPoint_(coeffs_.get<point>("upstreamPoint")),
-    upstreamCellId_(-1)
+    writeFile(mesh, name, modelType, dict),
+    forceMethod_
+    (
+        forceMethodTypeNames.getOrDefault
+        (
+            "variant",
+            dict,
+            forceMethodType::FROUDE
+        )
+    ),
+    monitorMethod_
+    (
+        monitorMethodTypeNames.get
+        (
+            "monitorMethod",
+            dict
+        )
+    ),
+    sink_
+    (
+        dict.getOrDefault<bool>("sink", true)
+      ? 1
+      : -1
+    ),
+    writeFileStart_(dict.getOrDefault<scalar>("writeFileStart", 0)),
+    writeFileEnd_(dict.getOrDefault<scalar>("writeFileEnd", VGREAT)),
+    diskArea_
+    (
+        dict.getCheck<scalar>
+        (
+            "diskArea",
+            scalarMinMax::ge(VSMALL)
+        )
+    ),
+    diskDir_
+    (
+        dict.getCheck<vector>
+        (
+            "diskDir",
+            [&](const vector& vec){ return mag(vec) > VSMALL; }
+        ).normalise()
+    ),
+    UvsCpPtr_(Function1<scalar>::New("Cp", dict)),
+    UvsCtPtr_(Function1<scalar>::New("Ct", dict)),
+    monitorCells_()
 {
-    coeffs_.readEntry("fields", fieldNames_);
+    setMonitorCells((dict.subDict("monitorCoeffs")));
+
+    fieldNames_.setSize(1, "U");
+
     applied_.setSize(fieldNames_.size(), false);
 
-    Info<< "    - creating actuation disk zone: "
-        << this->name() << endl;
+    Info<< "    - creating actuation disk zone: " << this->name() << endl;
 
-    upstreamCellId_ = mesh.findCell(upstreamPoint_);
+    Info<< "    - force computation method: "
+        << forceMethodTypeNames[forceMethod_] << endl;
 
-    checkData();
+    writeFileHeader(file());
 }
 
 
@@ -117,20 +228,9 @@ void Foam::fv::actuationDiskSource::addSup
     const label fieldi
 )
 {
-    const scalarField& cellsV = mesh_.V();
-    vectorField& Usource = eqn.source();
-    const vectorField& U = eqn.psi();
-
     if (V() > VSMALL)
     {
-        addActuationDiskAxialInertialResistance
-        (
-            Usource,
-            cells_,
-            cellsV,
-            geometricOneField(),
-            U
-        );
+        calc(geometricOneField(), geometricOneField(), eqn);
     }
 }
 
@@ -142,34 +242,53 @@ void Foam::fv::actuationDiskSource::addSup
     const label fieldi
 )
 {
-    const scalarField& cellsV = mesh_.V();
-    vectorField& Usource = eqn.source();
-    const vectorField& U = eqn.psi();
-
     if (V() > VSMALL)
     {
-        addActuationDiskAxialInertialResistance
-        (
-            Usource,
-            cells_,
-            cellsV,
-            rho,
-            U
-        );
+        calc(geometricOneField(), rho, eqn);
+    }
+}
+
+
+void Foam::fv::actuationDiskSource::addSup
+(
+    const volScalarField& alpha,
+    const volScalarField& rho,
+    fvMatrix<vector>& eqn,
+    const label fieldi
+)
+{
+    if (V() > VSMALL)
+    {
+        calc(alpha, rho, eqn);
     }
 }
 
 
 bool Foam::fv::actuationDiskSource::read(const dictionary& dict)
 {
-    if (cellSetOption::read(dict))
+    if (cellSetOption::read(dict) && writeFile::read(dict))
     {
-        coeffs_.readIfPresent("diskDir", diskDir_);
-        coeffs_.readIfPresent("Cp", Cp_);
-        coeffs_.readIfPresent("Ct", Ct_);
-        coeffs_.readIfPresent("diskArea", diskArea_);
+        dict.readIfPresent("sink", sink_);
+        dict.readIfPresent("writeFileStart", writeFileStart_);
+        dict.readIfPresent("writeFileEnd", writeFileEnd_);
+        dict.readIfPresent("diskArea", diskArea_);
+        if (diskArea_ < VSMALL)
+        {
+            FatalErrorInFunction
+                << "Actuator disk has zero area: "
+                << "diskArea = " << diskArea_
+                << exit(FatalIOError);
+        }
 
-        checkData();
+        dict.readIfPresent("diskDir", diskDir_);
+        diskDir_.normalise();
+        if (mag(diskDir_) < VSMALL)
+        {
+            FatalErrorInFunction
+                << "Actuator disk surface-normal vector is zero: "
+                << "diskDir = " << diskDir_
+                << exit(FatalIOError);
+        }
 
         return true;
     }
