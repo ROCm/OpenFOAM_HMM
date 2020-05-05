@@ -16,7 +16,16 @@
 # Description
 #     Helper functions for CMake
 #
+# Environment
+#     Consider CMAKE_INSTALL_PREFIX as a reserved name, although it is not
+#     set/unset here.
+#
+# Files
+#     Uses etc/config.sh/cmake (if it exists) for the
+#     CMAKE_ARCH_PATH that may specify a possible cmake/bin directory.
+#
 #------------------------------------------------------------------------------
+. ${WM_PROJECT_DIR:?}/wmake/scripts/have_cmake
 . ${WM_PROJECT_DIR:?}/wmake/scripts/wmakeFunctions  # Require wmake functions
 
 # Export compiler information for cmake
@@ -29,64 +38,92 @@ export CXXFLAGS="$(wmake -show-cxxflags)"
 #------------------------------------------------------------------------------
 
 #
-# Check sentinel file(s) to handle paraview / vtk version changes
+# Save build/configure parameter information (dependency) into sentinel file
 #
-sameDependency()
-{
-    local depend="$1"
-    local sourceDir="$2"
-    local objectsDir sentinel prev
-
-    # Where generated files are stored
-    objectsDir=$(findObjectDir "$sourceDir") || exit 1 # Fatal
-    sentinel="$objectsDir/ThirdParty"
-
-    echo "$sentinel"
-
-    if read -r prev 2>/dev/null < $sentinel
-    then
-        if [ "$prev" = "$depend" ]
-        then
-            return 0
-        else
-            echo "${depend%=*} changed between builds" 1>&2
-            return 1
-        fi
-    elif [ -f "$objectsDir/CMakeCache.txt" ]
-    then
-        echo "previous build was incomplete" 1>&2
-        return 1
-    else
-        return 0
-    fi
-}
-
-#
-# Save dependency information into sentinel file
+# 1 - sentinelFile
+# 2... build/configure parameters
 #
 storeDependency()
 {
-    local depend="$1"
-    local sentinel="$2"
+    local sentinel="$1"
+    local depend
+    shift
 
     if [ -n "$sentinel" ]
     then
         mkdir -p "$(dirname "$sentinel")"
-        echo "$depend" >| "$sentinel"
+
+        echo '# Build/configure parameters' >| "$sentinel"
+
+        for depend
+        do
+            echo "-- $depend"
+        done >> "$sentinel"
     fi
     return 0
 }
 
 
-# CMake with output suppressed according to WM_QUIET
-_cmake()
+#
+# Check sentinel file(s) to handle changed build/configure parameters
+# such as paraview / vtk version changes
+#
+# 1 - sourceDir
+# 2... build/configure parameters
+#
+sameDependency()
 {
-    echo "cmake..."
-    if [ -n "$WM_QUIET" ]
+    local sourceDir="$1"
+    shift
+    local depend objectsDir
+    local compare=0
+
+    # Where generated files are stored
+    objectsDir=$(findObjectDir "$sourceDir") || exit 1 # Fatal
+    local sentinel="$objectsDir/ThirdParty"
+
+    if [ -f "$sentinel" ]
     then
-        cmake -DCMAKE_RULE_MESSAGES=OFF $@ >/dev/null
+        # Create an .update version
+        storeDependency   "${sentinel}.update" $@
+        cmp "${sentinel}" "${sentinel}.update" >/dev/null 2>&1
+        compare=$?
+
+        if [ "$compare" -ne 0 ]
+        then
+            echo "build/configure parameters changed between builds" 1>&2
+        fi
+
     else
-        cmake $@
+        # No sentinel file: First time, or failed compilation?
+        if [ -f "$objectsDir/CMakeCache.txt" ]
+        then
+            echo "previous build was incomplete" 1>&2
+            compare=1
+        fi
+    fi
+
+    echo "$sentinel"
+    return "$compare"
+}
+
+
+# Resolve the location of cmake (if needed) and call with output
+# suppressed according to WM_QUIET
+call_cmake()
+{
+    if have_cmake
+    then
+        if [ -n "$WM_QUIET" ]
+        then
+            echo "cmake..."
+            "$CMAKE_EXE" -DCMAKE_RULE_MESSAGES=OFF $@ >/dev/null
+        else
+            echo "cmake $@"
+            "$CMAKE_EXE" $@
+        fi
+    else
+        return 1
     fi
 }
 
@@ -109,12 +146,13 @@ cmakeVersioned()
     objectsDir=$(findObjectDir "$sourceDir") || exit 1 # Fatal
 
     # Version changed
-    sentinel=$(sameDependency "$depend" "$sourceDir") || \
+    sentinel=$(sameDependency "$sourceDir" "$depend" $@) || \
         rm -rf "$objectsDir" 2>/dev/null
 
     mkdir -p "$objectsDir" \
-    && (cd "$objectsDir" && _cmake "$@" "$sourceDir" && make) \
-    && storeDependency "$depend" "$sentinel"
+    && ( cd "$objectsDir" && call_cmake "$@" "$sourceDir" && \
+         make "-j${WM_NCOMPPROCS:-1}" ) \
+    && storeDependency "$sentinel" "$depend" $@
 }
 
 
@@ -135,12 +173,13 @@ cmakeVersionedInstall()
     objectsDir=$(findObjectDir "$sourceDir") || exit 1 # Fatal
 
     # Version changed
-    sentinel=$(sameDependency "$depend" "$sourceDir") || \
+    sentinel=$(sameDependency "$sourceDir" "$depend" $@) || \
         rm -rf "$objectsDir" 2>/dev/null
 
     mkdir -p "$objectsDir" \
-    && (cd "$objectsDir" && _cmake "$@" "$sourceDir" && make install) \
-    && storeDependency "$depend" "$sentinel"
+    && ( cd "$objectsDir" && call_cmake "$@" "$sourceDir" && \
+         make "-j${WM_NCOMPPROCS:-1}" install ) \
+    && storeDependency "$sentinel" "$depend" $@
 }
 
 
@@ -162,12 +201,12 @@ wmakeVersioned()
     objectsDir=$(findObjectDir "$sourceDir") || exit 1 # Fatal
 
     # Version changed
-    sentinel=$(sameDependency "$depend" "$sourceDir") || \
+    sentinel=$(sameDependency "$sourceDir" "$depend" $@) || \
         rm -rf "$objectsDir" 2>/dev/null
 
     mkdir -p "$objectsDir" \
     && wmake "$@" \
-    && storeDependency "$depend" "$sentinel"
+    && storeDependency "$sentinel" "$depend" $@
 }
 
 
