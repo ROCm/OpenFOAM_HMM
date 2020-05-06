@@ -1,0 +1,122 @@
+#----------------------------------*-sh-*--------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | www.openfoam.com
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+#     Copyright (C) 2020 OpenCFD Ltd.
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
+#
+# Script
+#     have_cmake
+#
+# Description
+#     Locate CMAKE executable
+#
+# Files
+#     Uses etc/config.sh/cmake (if it exists) for the
+#     CMAKE_ARCH_PATH that may specify a possible cmake/bin directory.
+#
+# Functions provided
+#     have_cmake, no_cmake, echo_cmake
+#
+# Variables set on success
+#     HAVE_CMAKE
+#     CMAKE_EXE
+#
+# When properly resolved, CMAKE_EXE will be an absolute path to the
+# cmake executable. On failure it will point to 'false'
+#
+#------------------------------------------------------------------------------
+
+# Reset variables
+no_cmake()
+{
+    unset HAVE_CMAKE CMAKE_EXE
+}
+
+
+# Report
+echo_cmake()
+{
+    echo cmake="${CMAKE_EXE:-false}"
+    echo version="$("${CMAKE_EXE:-false}" --version | sed -ne '1s/^.*version *//p')"
+}
+
+
+#
+# Try to locate cmake according to values specified in <etc/config.sh/cmake>
+# or just use what is found on the path.
+#
+# On success: return the resolved value as output.
+# On failure: set executable as "false" and return with 1
+#
+have_cmake()
+{
+    # Treat previous queries as "sticky"
+    if [ -n "$CMAKE_EXE" ]
+    then
+        test "$CMAKE_EXE" != "false"
+        return $?
+    fi
+
+    local config="config.sh/cmake"
+    unset CMAKE_ARCH_PATH
+    local settings candidate foundExe
+
+    if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config" 2>/dev/null)"
+    then
+        . "$settings"
+
+        if [ -d "$CMAKE_ARCH_PATH" ]
+        then
+            candidate="$CMAKE_ARCH_PATH"/bin/cmake
+            if [ -f "$candidate" ] && [ -x "$candidate" ]
+            then
+                foundExe="$candidate"
+            fi
+        fi
+    fi
+
+    if [ -z "$foundExe" ]
+    then
+        # Default: resolve from PATH
+        if candidate="$(command -v cmake 2>/dev/null)"
+        then
+            foundExe="$candidate"
+        fi
+    fi
+
+    if [ -n "$foundExe" ]
+    then
+        # OK
+        export HAVE_CMAKE=true
+        export CMAKE_EXE="$foundExe"
+    else
+        # Failure
+        export CMAKE_EXE="false"  # Avoid repeated calls?
+        return 2
+    fi
+}
+
+
+# Reset variables
+no_cmake
+
+
+# Test/query
+case "$1" in
+-test)
+    have_cmake
+    echo_cmake
+    ;;
+-query)
+    ## query_cmake
+    ;;
+esac
+
+
+#------------------------------------------------------------------------------

@@ -6,11 +6,10 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2019 OpenCFD Ltd.
+#     Copyright (C) 2019-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # File
 #     wmake/makefiles/general
@@ -66,6 +65,14 @@ EXE_INC         =
 EXE_LIBS        =
 LIB_LIBS        =
 
+
+# These variables are used for some builds - provide fallback values
+ifeq (,$(FOAM_SOLVERS))
+    FOAM_SOLVERS    = $(WM_PROJECT_DIR)/applications/solvers
+endif
+ifeq (,$(FOAM_UTILITIES))
+    FOAM_UTILITIES  = $(WM_PROJECT_DIR)/applications/utilities
+endif
 
 #------------------------------------------------------------------------------
 # Declare default name of libraries and executables

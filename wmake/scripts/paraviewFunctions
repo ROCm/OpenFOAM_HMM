@@ -18,8 +18,8 @@
 #     Setup of variables for creating ParaView plugins
 #
 # Requires
-#     ParaView_DIR  (unless system)
-#     PV_PLUGIN_PATH
+#     ParaView_DIR   (unless system)
+#     PV_PLUGIN_PATH (or rely on automatic mechanism)
 #
 # Provides Functions
 #     get_pvplugin_api, have_pvplugin_support, no_paraview, echo_paraview
@@ -85,22 +85,59 @@ cmakePvInstall()
     cmakeVersionedInstall "ParaView_DIR=$ParaView_DIR" "$@"
 }
 
-#
+
 # Build library - use sentinel file(s) to handle paraview version changes
+# Some difficulty handling different installation options as well
+# as wmake options, so only handle build/configure information for now
 #
+# 1 - libName
+# 2... build/configure information
+#
+# Similar to wmakeVersioned
 wmakeLibPv()
 {
     local depend="ParaView_DIR=$ParaView_DIR"
-    local sentinel libName
+    local libName="$1"
+    shift 1
+    local sentinel
 
-    for libName
-    do
-        sentinel=$(sameDependency "$depend" "$libName") || \
-            wclean $libName
+    sentinel=$(sameDependency "$libName" "$depend" $@) || \
+        wclean "$libName"
 
-        wmake $targetType $libName \
-        && storeDependency "$depend" "$sentinel"
-    done
+    wmake $targetType "$libName" \
+    && storeDependency "$sentinel" "$depend" $@
+}
+
+# Get ParaView API from given path.
+# Eg, "/path/paraview-dir/paraview-5.6" -> "5.6"
+#
+# Or the output from `paraview --version`
+# Eg, "paraview version 5.6.3" -> "5.6"
+#
+# 1 - the input path ending with paraview-x.y, or paraview --version information
+#
+# On success, return 0 and echo value
+#
+get_pvapi()
+{
+    local pv_api
+
+    # Extract paraview major+minor version from the directory name
+    # From /path/paraview-5.6 -> 5.6
+    pv_api=$(echo "${1:-none}" | \
+        sed -ne 's@^.*/@@;s@^[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\).*$@\1@p')
+
+    if [ -z "$pv_api" ]
+    then
+        # Extract paraview major+minor version from "paraview --version" information
+        pv_api=$(echo "${1:-none}" | \
+            sed -ne 's@^.*version *\([0-9][0-9]*\.[0-9][0-9]*\).*$@\1@p')
+    fi
+
+    [ -n "$pv_api" ] || return 1
+
+    # OK
+    echo "$pv_api"
 }
 
 
@@ -122,10 +159,9 @@ get_pvplugin_api()
     targetDir="${PV_PLUGIN_PATH##;}"
     targetDir="${targetDir%%;*}"
 
-    # Extract paraview major+minor version from the directory name
+    # Extract paraview major+minor version from directory name
     # From /path/paraview-5.6 -> 5.6
-    pv_api=$(echo "$targetDir" | \
-        sed -ne 's@^.*/@@;s/^[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\).*/\1/p')
+    pv_api=$(get_pvapi "$targetDir")
 
     [ -n "$pv_api" ] || return 1
 
@@ -147,7 +183,7 @@ get_pvplugin_api()
 have_pvplugin_support()
 {
     local warn="==> skip paraview-plugin"
-    local settings pv_api installDir binDir includeDir targetDir
+    local settings pv_api pv_executable installDir binDir includeDir targetDir
 
     # Trivial check
     command -v cmake >/dev/null || {
@@ -162,12 +198,13 @@ have_pvplugin_support()
     fi
     unset FOAM_PV_PLUGIN_LIBBIN PARAVIEW_API
 
-    if [ -z "$targetDir" ] || [ -z "$pv_api" ]
-    then
-        echo "$warn (could not determine target or major.minor version)"
-        echo "    PV_PLUGIN_PATH=${PV_PLUGIN_PATH:-???}"
-        return 1
-    fi
+    # Probably not needed...
+    # if [ -z "$targetDir" ] || [ -z "$pv_api" ]
+    # then
+    #     echo "$warn (could not determine target or major.minor version)"
+    #     echo "    PV_PLUGIN_PATH=${PV_PLUGIN_PATH:-???}"
+    #     return 1
+    # fi
 
     # Include/library names
     local header="pqServerManagerModel.h"
@@ -175,6 +212,21 @@ have_pvplugin_support()
     if [ -n "$ParaView_DIR" ]
     then
         # ParaView_DIR defined. Look for include/
+
+        # Unless already known, get API value from include directory name
+        if [ -z "$pv_api" ]
+        then
+            for settings in $(find "$ParaView_DIR"/include -maxdepth 1 -name 'paraview-*' -type d)
+            do
+                pv_api=$(get_pvapi "$settings") && break
+            done
+
+            if [ -z "$pv_api" ]
+            then
+                echo "$warn (could not determine paraview major.minor version)"
+                return 1
+            fi
+        fi
 
         header=$(findFirstFile \
             "$ParaView_DIR/include/paraview-$pv_api/$header" \
@@ -184,17 +236,31 @@ have_pvplugin_support()
     else
         # No ParaView_DIR defined
         # - use location of 'paraview' to guess an equivalent ParaView_DIR
-        # - assume we can use paraview-config
+        # - assume paraview-config works, but might be removed too!
 
-        binDir="$(command -v paraview 2>/dev/null)"
-        binDir="${binDir%/*}"       # Eg, /usr/bin/paraview -> /usr/bin
-        installDir="${binDir%/*}"   # Eg, /usr/bin -> /usr
+        pv_executable="$(command -v paraview 2>/dev/null)" || {
+            echo "$warn (no paraview found?)"
+            return 2
+        }
+        binDir="${pv_executable%/*}"  # Eg, /usr/bin/paraview -> /usr/bin
+        installDir="${binDir%/*}"     # Eg, /usr/bin -> /usr
 
         case "$installDir" in
         (/*)    # An absolute path
             includeDir="$installDir/include"  # Eg, /usr -> /usr/include
         ;;
         esac
+
+        # Unless already known, get API value from `paraview --version` information
+        if [ -z "$pv_api" ]
+        then
+            pv_api=$(get_pvapi "$("$pv_executable" --version)")
+            if [ -z "$pv_api" ]
+            then
+                echo "$warn (could not determine paraview major.minor version)"
+                return 1
+            fi
+        fi
 
         header=$(findFirstFile \
             "$(paraview-config --include 2>/dev/null |sed -ne 's/^ *-I//p')/$header"\
@@ -218,8 +284,9 @@ have_pvplugin_support()
     # ----------------------------------
 
     # OK
+    # Use FOAM_LIBBIN/paraview-maj.min as default
     export HAVE_PVPLUGIN_SUPPORT=true
-    export FOAM_PV_PLUGIN_LIBBIN="$targetDir"
+    export FOAM_PV_PLUGIN_LIBBIN="${targetDir:-$FOAM_LIBBIN/paraview-$pv_api}"
     export PARAVIEW_API="$pv_api"
     export PARAVIEW_INC_DIR="${header%/*}"      # Basename
 

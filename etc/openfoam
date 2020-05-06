@@ -63,7 +63,12 @@ options:
 Open an interactive bash session with an OpenFOAM environment,
 or run an OpenFOAM application (with arguments) after first sourcing
 the OpenFOAM etc/bashrc file from the project directory:
-($projectDir)
+(${projectDir:-???})
+
+For a persistent OpenFOAM environment, the following can be added to your
+~/.bashrc file:
+
+    source ${projectDir:-???}/etc/bashrc
 
 For more information: www.openfoam.com
 
@@ -91,8 +96,9 @@ getApiInfo()
 
 #-------------------------------------------------------------------------------
 
-# No inheritance of FOAM_SETTINGS
-unset FOAM_SETTINGS
+# - No inheritance of FOAM_SETTINGS
+# - No default verbosity (only as command-line option)
+unset FOAM_CONFIG_ETC FOAM_SETTINGS FOAM_VERBOSE
 unset _foamEtcDir _foamSettings _foamScriptCommand
 unset optTestTut
 
@@ -221,8 +227,6 @@ if [ -n "$_foamEtcDir" ] && [ -d "$_foamEtcDir" ]
 then
     # Additional etc directory
     export FOAM_CONFIG_ETC="$_foamEtcDir"
-else
-    unset FOAM_CONFIG_ETC
 fi
 
 if [ -n "$interactive" ]
