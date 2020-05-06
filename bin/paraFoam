@@ -21,21 +21,43 @@
 # Note
 #     Combining -block, -vtk, -builtin options with -region option yields
 #     undefined behaviour
+#
 #------------------------------------------------------------------------------
+printBuildHelp() {
+cat<<HELP_BUILD
+Possible way to build supplementary ParaView/OpenFOAM reader modules
+
+    cd \$WM_PROJECT_DIR/modules/visualization/src/paraview-plugins
+    ./Allwclean
+    ./Allwmake
+
+HELP_BUILD
+}
+
 printHelp() {
-    # Print usage to stdout so that it can be captured for bash completion
-    cat<<USAGE
+    cat<<HELP_HEAD
 
 Usage: ${0##*/} [OPTION] [--] [PARAVIEW_OPTION]
 options:
   -block            Use blockMesh reader (.blockMesh extension)
+  -vtk              Use VTK builtin OpenFOAM reader (.foam extension)
   -case <dir>       Specify alternative case directory, default is the cwd
   -region <name>    Specify alternative mesh region
   -touch            Create the file (eg, .blockMesh, .OpenFOAM, .foam, ...)
   -touch-all        Create .blockMesh, .foam, .OpenFOAM files (for all regions)
+HELP_HEAD
+
+if [ -n "$1" ]
+then
+cat<<HELP_FULL
   -touch-proc       Same as '-touch' but for each processor
-  -vtk              Use VTK builtin OpenFOAM reader (.foam extension)
+  -plugin-path=DIR  Define plugin directory (default: \$PV_PLUGIN_PATH)
   --help            Display ParaView help
+  -help-build       Display help for building reader module and exit
+HELP_FULL
+fi
+
+cat<<HELP_TAIL_COMMON
   -help             Display short help and exit
   -help-full        Display full help and exit
 
@@ -44,11 +66,18 @@ Note that paraview options begin with double dashes.
 
 Uses paraview=$(command -v paraview)
 
+HELP_TAIL_COMMON
+
+if [ -n "$1" ]
+then
+cat<<HELP_TAIL_FULL
 Equivalent options:
   -touch-all     -touchAll
   -vtk           -builtin
 
-USAGE
+HELP_TAIL_FULL
+fi
+
     exit 0  # A clean exit
 }
 
@@ -84,10 +113,38 @@ unset regionName optTouch
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-    -h | -help*)
+    -help-b*)   # Build help
+        printBuildHelp
+        exit 0
+        ;;
+    -help-f*)   # Full help
+        printHelp -full
+        ;;
+    -h | -help*) # Short help
         printHelp
         ;;
-    -block*)
+
+    -plugin-path=*)
+        # Define alternative plugin directory
+        pluginPath="${1#*=}"
+        if [ -d "$pluginPath" ]
+        then
+            export PV_PLUGIN_PATH="$pluginPath"
+            pluginPath="${pluginPath%/*}"
+
+            # If located in lib/ subdir, include parent in lib-path
+            case "$(basename "$pluginPath")" in
+            (lib*)
+                LD_LIBRARY_PATH="${pluginPath}:$LD_LIBRARY_PATH"
+                ;;
+            esac
+        else
+            echo "Ignore bad/invalid plugin-path: $pluginPath" 1>&2
+            unset pluginPath
+        fi
+        ;;
+
+    -block*)  # Silently accepts -blockMesh
         extension=blockMesh
         plugin=blockReader
         ;;
@@ -136,16 +193,14 @@ do
     shift
 done
 
+
+pluginError="No supplementary ParaView/OpenFOAM reader modules"
+
 if [ -n "$plugin" ]
 then
-    pluginError="Cannot use ParaView/OpenFOAM reader modules"
-
-    # Check if requested reader module exists
-    if [ -z "$PV_PLUGIN_PATH" ]
+    if [ -d "$PV_PLUGIN_PATH" ]
     then
-        echo "The PV_PLUGIN_PATH environment variable is unset" 1>&2
-        echo "$pluginError" 1>&2
-    else
+        # Check if requested reader module exists
 
         # Check for different names. For example,
         # - ParaFoamReader     = (paraview >= 5.7)
@@ -186,30 +241,30 @@ then
         if [ -n "$pluginError" ]
         then
             cat<< NO_PLUGIN 1>&2
-=========================
-$pluginError - need to build?
+$pluginError
+    See '${0##*/} -help-build' for more information
 
-    cd \$WM_PROJECT_DIR/modules/visualization/src/paraview-plugins
-OR  cd \$WM_PROJECT_DIR/applications/utilities/postProcessing/graphics/PVReaders
-
-    ./Allwclean && ./Allwmake
-=========================
 NO_PLUGIN
         fi
+    else
+        echo "Invalid \$PV_PLUGIN_PATH and -plugin-path= not defined" 1>&2
+        echo "$pluginError" 1>&2
     fi
 
     if [ -n "$pluginError" ]
     then
         # Fallback to native reader, if possible
-        if [ "$plugin" = foamReader ]
-        then
-            echo "Continuing with builtin reader:  paraFoam -vtk" 1>&2
+        case "$plugin" in
+        (foamReader)
+            echo "Using builtin reader: ${0##*/} -vtk" 1>&2
             echo 1>&2
             extension=foam
-        else
+            ;;
+        (*)
             echo 1>&2
             exit 1
-        fi
+            ;;
+        esac
         unset plugin
     fi
 fi
