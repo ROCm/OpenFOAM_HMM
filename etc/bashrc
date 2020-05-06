@@ -66,7 +66,7 @@ export WM_PROJECT_VERSION=com
 export WM_COMPILER_TYPE=system
 
 # [WM_COMPILER] - Compiler:
-# = Gcc | Clang | Icc | Cray | Arm | Pgi | Fujitsu |
+# = Gcc | Clang | Icc | Cray | Amd | Arm | Pgi | Fujitsu |
 #   Gcc<digits> | Clang<digits>
 export WM_COMPILER=Gcc
 

@@ -1,0 +1,13 @@
+# AMD compiler - a clang variant
+include $(GENERAL_RULES)/Clang/c
+
+cARCH       = -m64
+
+# Compile option is non-mandatory, but must be non-empty
+sinclude $(DEFAULT_RULES)/c$(WM_COMPILE_OPTION)
+
+cFLAGS      = $(cARCH) $(GFLAGS) $(cWARN) $(cOPT) $(cDBUG) $(LIB_HEADER_DIRS) -fPIC
+
+ctoo        = $(WM_SCHEDULER) $(cc) $(cFLAGS) -c $< -o $@
+
+include $(GENERAL_RULES)/Amd/link-c
