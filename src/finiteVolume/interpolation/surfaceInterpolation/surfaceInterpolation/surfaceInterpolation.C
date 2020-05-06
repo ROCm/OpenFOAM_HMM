@@ -246,7 +246,11 @@ void Foam::surfaceInterpolation::makeDeltaCoeffs() const
 
     forAll(deltaCoeffsBf, patchi)
     {
-        deltaCoeffsBf[patchi] = 1.0/mag(mesh_.boundary()[patchi].delta());
+        const fvPatch& p = mesh_.boundary()[patchi];
+        deltaCoeffsBf[patchi] = 1.0/mag(p.delta());
+
+        // Optionally correct
+        p.makeDeltaCoeffs(deltaCoeffsBf[patchi]);
     }
 }
 
@@ -329,6 +333,9 @@ void Foam::surfaceInterpolation::makeNonOrthDeltaCoeffs() const
             patchDeltaCoeffs[patchFacei] =
                 1.0/max(unitArea & delta, 0.05*mag(delta));
         }
+
+        // Optionally correct
+        p.makeNonOrthoDeltaCoeffs(patchDeltaCoeffs);
     }
 }
 
@@ -385,6 +392,8 @@ void Foam::surfaceInterpolation::makeNonOrthCorrectionVectors() const
     {
         fvsPatchVectorField& patchCorrVecs = corrVecsBf[patchi];
 
+        const fvPatch& p = patchCorrVecs.patch();
+
         if (!patchCorrVecs.coupled())
         {
             patchCorrVecs = Zero;
@@ -393,8 +402,6 @@ void Foam::surfaceInterpolation::makeNonOrthCorrectionVectors() const
         {
             const fvsPatchScalarField& patchNonOrthDeltaCoeffs =
                 NonOrthDeltaCoeffs.boundaryField()[patchi];
-
-            const fvPatch& p = patchCorrVecs.patch();
 
             const vectorField patchDeltas(mesh_.boundary()[patchi].delta());
 
@@ -410,6 +417,9 @@ void Foam::surfaceInterpolation::makeNonOrthCorrectionVectors() const
                     unitArea - delta*patchNonOrthDeltaCoeffs[patchFacei];
             }
         }
+
+        // Optionally correct
+        p.makeNonOrthoCorrVectors(patchCorrVecs);
     }
 
     if (debug)
