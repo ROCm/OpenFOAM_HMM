@@ -1,5 +1,4 @@
 EXE_INC = \
-    -I.  \
     -I.. \
     -I$(FOAM_SOLVERS)/multiphase/reactingEulerFoam/reactingTwoPhaseEulerFoam \
     -I$(LIB_SRC)/phaseSystemModels/reactingEulerFoam/reactingTwoPhaseEulerFoam/twoPhaseSystem/lnInclude \
@@ -37,5 +36,5 @@ EXE_LIBS = \
     -lradiationModels \
     -lregionModels \
     -lsampling \
-    -lreactingTwoPhaseSystem \
-
+    -lreactingPhaseSystem \
+    -lreactingTwoPhaseSystem

@@ -1,5 +1,4 @@
 EXE_INC = \
-    -I. \
     -I../buoyantBoussinesqSimpleFoam \
     -I$(LIB_SRC)/sampling/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \

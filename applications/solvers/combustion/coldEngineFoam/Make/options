@@ -1,5 +1,4 @@
 EXE_INC = \
-    -I. \
     -I../XiFoam/XiEngineFoam \
     -I../XiFoam \
     -I../../compressible/rhoPimpleFoam \

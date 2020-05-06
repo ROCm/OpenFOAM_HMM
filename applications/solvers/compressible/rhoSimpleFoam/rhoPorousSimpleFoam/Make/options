@@ -1,5 +1,4 @@
 EXE_INC = \
-    -I. \
     -I.. \
     -I$(LIB_SRC)/finiteVolume/cfdTools \
     -I$(LIB_SRC)/finiteVolume/lnInclude \

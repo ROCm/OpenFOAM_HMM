@@ -3,7 +3,6 @@ interFoam = $(FOAM_SOLVERS)/multiphase/interFoam
 VoF = $(FOAM_SOLVERS)/multiphase/VoF
 
 EXE_INC = \
-    -I. \
     -I$(interPhaseChangeFoam) \
     -I$(interFoam) \
     -I$(VoF) \

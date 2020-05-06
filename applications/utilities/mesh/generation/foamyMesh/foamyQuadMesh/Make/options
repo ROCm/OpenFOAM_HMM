@@ -26,6 +26,8 @@ EXE_LIBS = \
     -lextrudeModel \
     -lcv2DMesh \
     -lconformalVoronoiMesh \
+    -lfileFormats \
+    -lsurfMesh \
     -lmeshTools \
     -ldynamicMesh \
     -ldecompositionMethods \

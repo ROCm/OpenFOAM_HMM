@@ -1,7 +1,6 @@
 interFoamPath = $(FOAM_SOLVERS)/multiphase/interFoam
 
-EXE_INC =  \
-    -I. \
+EXE_INC = \
     -I../VoF \
     -I./IncompressibleTwoPhaseMixtureTurbulenceModels/lnInclude \
     -I$(interFoamPath) \

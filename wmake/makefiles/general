@@ -120,13 +120,13 @@ OBJECTS=$(BASENAMES:%=$(OBJECTS_DIR)/%.o)
 
 
 #------------------------------------------------------------------------------
-# Set header file include paths
+# Include paths, use -iquote to ensure that (.) is searched first
 #------------------------------------------------------------------------------
 
 LIB_HEADER_DIRS = \
     $(EXE_INC) \
+    -iquote. \
     -IlnInclude \
-    -I. \
     $(PROJECT_INC) \
     $(GINC) \
     $(SYS_INC)
