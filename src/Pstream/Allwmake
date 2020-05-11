@@ -1,37 +1,13 @@
 #!/bin/sh
 cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/wmake/scripts/AllwmakeParseArguments
+. ${WM_PROJECT_DIR:?}/wmake/scripts/wmakeFunctions  # Require wmake functions
 
 #------------------------------------------------------------------------------
-
-# Define how to create an mpi-versioned library of $targetType
-# compile into qualified directory
-# use sentinel file to handle version changes
-wmakeMpiLib()
-{
-    local objectsDir
-    for libName
-    do
-    (
-        WM_OPTIONS="$WM_OPTIONS$WM_MPLIB"
-        objectsDir="$WM_PROJECT_DIR/build/$WM_OPTIONS/src/Pstream/$libName"
-        whichmpi="$objectsDir/using:$FOAM_MPI"
-        [ -e "$whichmpi" ] || wclean $libName
-        echo "wmake $targetType $libName (mpi=$WM_MPLIB)"
-        wmake $targetType $libName
-        mkdir -p "$objectsDir"
-        touch "$whichmpi"
-    )
-    done
-}
 
 echo "wmake $targetType dummy (mpi=$WM_MPLIB)"
 wmake $targetType dummy
 
-case "$WM_MPLIB" in
-(*MPI*)
-    wmakeMpiLib mpi
-    ;;
-esac
+wmakeLibMpi mpi
 
 #------------------------------------------------------------------------------

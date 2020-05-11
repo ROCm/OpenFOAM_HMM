@@ -1,6 +1,7 @@
 #!/bin/sh
 cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/wmake/scripts/AllwmakeParseArguments
+. ${WM_PROJECT_DIR:?}/wmake/scripts/wmakeFunctions  # Require wmake functions
 . ${WM_PROJECT_DIR:?}/wmake/scripts/have_kahip
 . ${WM_PROJECT_DIR:?}/wmake/scripts/have_metis
 . ${WM_PROJECT_DIR:?}/wmake/scripts/have_scotch
@@ -10,33 +11,8 @@ cd "${0%/*}" || exit                                # Run from this directory
 : ${FOAM_EXT_LIBBIN:=/usr/lib$WM_COMPILER_LIB_ARCH}  # Extra safety?
 export FOAM_EXT_LIBBIN
 
-# Define how to create an mpi-versioned library of $targetType
-# compile into qualified directory
-# use sentinel file(s) to handle version changes
-wmakeMpiLib()
-{
-    local decompName="$1"
-    local objectsDir
-    shift
-    for libName
-    do
-    (
-        WM_OPTIONS="$WM_OPTIONS$WM_MPLIB"
-        objectsDir="$WM_PROJECT_DIR/build/$WM_OPTIONS/src/parallel/decompose/$libName"
-        whichmpi="$objectsDir/using:$FOAM_MPI"
-        whichdecomp="$objectsDir/using:$decompName"
-        [ -e "$whichmpi" ] && [ -e "$whichdecomp" ] || wclean $libName
-        echo "wmake $targetType $libName (mpi=$WM_MPLIB)"
-        wmake $targetType $libName
-        mkdir -p "$objectsDir"
-        touch "$whichdecomp" "$whichmpi"
-    )
-    done
-}
-
 wmake $targetType decompositionMethods
 wmake $targetType decompose
-
 
 if have_kahip
 then
@@ -54,7 +30,7 @@ then
 
     if have_ptscotch
     then
-        wmakeMpiLib "$SCOTCH_VERSION" ptscotchDecomp
+        wmakeLibMpi ptscotchDecomp "scotch=$SCOTCH_VERSION"
     fi
 fi
 

@@ -15,7 +15,10 @@
 #     wmakeFunctions
 #
 # Description
-#     Functions to check wmake environment and find .dep and .o files
+#     Support functions for wmake infrastructure.
+#     For example, check environment, find .dep and .o files, various
+#     wrappers when making libraries.
+#
 #------------------------------------------------------------------------------
 
 # Ensure these variables are always defined
@@ -31,9 +34,8 @@ fi
 
 
 #------------------------------------------------------------------------------
-# Check environment variables
-#------------------------------------------------------------------------------
 
+# Check environment variables
 checkEnv()
 {
     local check failed
@@ -53,11 +55,8 @@ checkEnv()
 }
 
 
-#------------------------------------------------------------------------------
-# Search up directories tree for the Make sub-directory
-#------------------------------------------------------------------------------
-
-# Return the absolute path for a directory or a file's parent directory
+# Return the absolute (physical) path for a directory or
+# for a file's parent directory
 # expandPath dirName
 # expandPath fileName
 #
@@ -75,6 +74,7 @@ expandPath()
         pwd -P
     fi
 }
+
 
 # Find the target directory, which contains a Make/ directory
 # search upwards in its parent directories, but stopping
@@ -198,6 +198,139 @@ removeObjectDir()
     fi
 }
 
+
+# Save build/configure parameter information (dependency) into sentinel file
+#
+# 1 - sentinelFile
+# 2... build/configure parameters
+#
+storeDependency()
+{
+    local sentinel="$1"
+    local depend
+    shift
+
+    if [ -n "$sentinel" ]
+    then
+        mkdir -p "$(dirname "$sentinel")"
+
+        echo '# Build/configure parameters' >| "$sentinel"
+
+        for depend
+        do
+            echo "-- $depend"
+        done >> "$sentinel"
+    fi
+    return 0
+}
+
+
+# Check sentinel file(s) to handle changed build/configure parameters
+# such as paraview / vtk version changes
+#
+# 1 - sourceDir
+# 2... build/configure parameters
+#
+# The additional test for "CMakeCache.txt" helps for cmake projects and
+# has no adverse affect for others
+#
+sameDependency()
+{
+    local sourceDir="$1"
+    shift
+    local objectsDir
+    local compare=0
+
+    # Where generated files are stored
+    objectsDir=$(findObjectDir "$sourceDir") || exit 1 # Fatal
+    local sentinel="$objectsDir/ConfigParameters"
+
+    if [ -f "$sentinel" ]
+    then
+        # Create an .update version for comparison
+        storeDependency   "${sentinel}.update" $@
+        cmp "${sentinel}" "${sentinel}.update" >/dev/null 2>&1
+        compare=$?
+
+        if [ "$compare" -ne 0 ]
+        then
+            echo "build/configure parameters changed between builds" 1>&2
+            ## cat "${sentinel}.update" 1>&2
+        fi
+
+    else
+        # No sentinel file: First time, or failed compilation?
+        if [ -f "$objectsDir/CMakeCache.txt" ]
+        then
+            echo "previous build was incomplete" 1>&2
+            compare=1
+        fi
+    fi
+
+    echo "$sentinel"
+    return "$compare"
+}
+
+
+# Build a mpi-versioned library (targetType)
+# - use sentinel file(s) to handle paraview version changes
+# compile into qualified directory
+# use sentinel file(s) to handle version changes
+# 1 - libName
+# 2... build/configure information
+#
+# Global variables used:
+# - WM_OPTIONS, WM_MPLIB, FOAM_MPI
+#
+# Requires that WM_MPLIB contain an "MPI" string
+wmakeLibMpi()
+{
+    local libName="$1"
+    shift
+
+    case "$WM_MPLIB" in (*MPI* | *mpi*)
+    (
+        WM_OPTIONS="$WM_OPTIONS$WM_MPLIB"
+
+        # Where generated files are stored
+        objectsDir="$(findObjectDir "$libName")" || exit 1 # Fatal
+
+        # Something changed
+        sentinel=$(sameDependency "$libName" "MPLIB=$WM_MPLIB" "MPI=$FOAM_MPI" $@) || \
+            wclean "$libName"
+
+        echo "wmake $targetType $libName (mpi=$WM_MPLIB)"
+        wmake $targetType "$libName" && \
+        storeDependency "$sentinel" "MPLIB=$WM_MPLIB" "MPI=$FOAM_MPI" $@
+    )
+    ;;
+    esac
+}
+
+
+# Clean an mpi-versioned library
+#
+# Global variables used:
+# - WM_OPTIONS, WM_MPLIB
+#
+# Requires that WM_MPLIB contain an "MPI" string
+wcleanLibMpi()
+{
+    case "$WM_MPLIB" in (*MPI* | *mpi*)
+    (
+        WM_OPTIONS="$WM_OPTIONS$WM_MPLIB"
+
+        for libName
+        do
+            wclean "$libName"
+        done
+    )
+    ;;
+    esac
+}
+
+
+#------------------------------------------------------------------------------
 
 # depToSource depFile
 #

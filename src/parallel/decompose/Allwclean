@@ -1,27 +1,15 @@
 #!/bin/sh
-cd "${0%/*}" || exit    # Run from this directory
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/wmake/scripts/wmakeFunctions  # Require wmake functions
 
-# Clean an mpi-versioned library
-wcleanMpiLib()
-{
-    case "$WM_MPLIB" in (*MPI*)
-    (
-        WM_OPTIONS="$WM_OPTIONS$WM_MPLIB"
-        for libName
-        do
-            wclean $libName
-        done
-    )
-    ;;
-    esac
-}
-
+#------------------------------------------------------------------------------
 
 wclean metisDecomp
 wclean kahipDecomp
 wclean scotchDecomp
 wclean decompositionMethods
 wclean decompose
-wcleanMpiLib ptscotchDecomp
+
+wcleanLibMpi ptscotchDecomp
 
 #------------------------------------------------------------------------------
