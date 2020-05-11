@@ -29,8 +29,7 @@
 #     wmake
 #
 # Description
-#     General, wrapped make system for multi-platform development with
-#     support for local and network parallel compilation.
+#     General, wrapped make system for multi-platform development.
 #
 #     Intermediate object and dependency files retain the tree structure
 #     of the original source files, with its location depending on the
@@ -55,24 +54,27 @@
 #
 # See also
 #     wmakeLnInclude, wmakeLnIncludeAll, wmakeCollect, wdep, wrmdep, wrmo,
-#     wclean, wcleanPlatform, wcleanLnIncludeAll
+#     wclean, wcleanLnIncludeAll
 #
 #------------------------------------------------------------------------------
-Script="${0##*/}"           # Use 'Script' for error messages in wmakeFunctions
-. "${0%/*}"/scripts/wmakeFunctions              # Source wmake functions
+Script="${0##*/}"                   # Need 'Script' for wmakeFunctions messages
+scriptsDir="${0%/*}"/scripts        # wmake/scripts directory
+. "$scriptsDir"/wmakeFunctions      # Source wmake functions
 
 printHelp() {
     cat<<HELP_HEAD
 
 Usage: $Script [OPTION] [dir]
        $Script [OPTION] target [dir [MakeDir]]
+       $Script -subcommand ...
+
 options:
-  -s | -silent      Silent mode (does not echo commands)
+  -s | -silent      Silent mode (do not echo commands)
   -a | -all         wmake all sub-directories, running Allwmake if present
   -q | -queue       wmakeCollect sub-directories, running Allwmake if present
   -k | -keep-going  Keep going even when errors occur (-non-stop)
   -j | -jN | -j N   Compile using all or specified N cores/hyperthreads
-  -update           Update lnInclude dirs, dep files, remove deprecated files/dirs
+  -update           Update lnInclude, dep files, remove deprecated files/dirs
 HELP_HEAD
 
 if [ -n "$1" ]
@@ -95,20 +97,36 @@ cat<<HELP_FULL
 HELP_FULL
 fi
 
-cat<<HELP_TAIL_COMMON
+cat<<TAIL_OPTIONS
   -pwd              Print root directory containing a Make/ directory
   -version | --version  Print version (same as -show-api)
   -h | -help        Display short help and exit
   -help-full        Display full help and exit
 
-A general, easy-to-use make system for multi-platform development
-with support for local and network parallel compilation.
+subcommands (wmake subcommand -help for more information):
+TAIL_OPTIONS
 
+if [ -n "$1" ]
+then
+cat<<HELP_SUBCOMMANDS
+  -build-info       Query/manage status of {api,branch,build} information
+  -check-dir        Check directory equality
+HELP_SUBCOMMANDS
+else
+cat<<HELP_SUBCOMMANDS
+  -build-info -check-dir
+HELP_SUBCOMMANDS
+fi
+
+cat<<HELP_TAIL_COMMON
+
+General, wrapped make system for multi-platform development.
 HELP_TAIL_COMMON
 
 if [ -n "$1" ]
 then
 cat<<HELP_TAIL_FULL
+
 Makefile targets:   platforms/linux64GccDPInt32Opt/.../fvMesh.o (for example)
 Special targets:
   all | queue       Same as -all | -queue options
@@ -116,8 +134,8 @@ Special targets:
   lib               Compile statically linked archive lib (.a)
   libo              Compile statically linked lib (.o)
   libso             Compile dynamically linked lib (.so)
-  dep               Compile lnInclude and dependencies only
-  updatedep         Compile dependencies only (in case of broken dependencies)
+  dep               Create lnInclude and dependencies only
+  updatedep         Create dependencies only (in case of broken dependencies)
   objects           Compile but not link
 
 Environment
@@ -126,6 +144,7 @@ Environment
 HELP_TAIL_FULL
 else
 cat<<HELP_TAIL_BRIEF
+
 Some special targets (see -help-full for details):
   all | queue       Same as -all | -queue options
   exe               Executables
@@ -169,7 +188,12 @@ allCores()
 #------------------------------------------------------------------------------
 
 # Default to compiling the local target only
-unset all update optDebug optShow optPrintRootDir
+unset optAll optUpdate optDebug optQuiet optShow optPwd
+
+# Consistency with inherited values
+if [ "$WM_QUIET" = true ]
+then optQuiet=true
+fi
 
 while [ "$#" -gt 0 ]
 do
@@ -180,7 +204,23 @@ do
         -h | -help*) # Short help
             printHelp
             ;;
+
+        # Forward to scripts/wmake-build-info
+        -build-info) shift
+            exec "$scriptsDir/wmake-build-info" "$@"
+            exit $?
+            ;;
+
+        # Forward to scripts/wmake-check-dir
+        # Out of order options: (-quiet)
+        -check-dir) shift
+            exec "$scriptsDir/wmake-check-dir" \
+                ${optQuiet:+-silent} "$@"
+            exit $?
+            ;;
+
         -s | -silent)
+            optQuiet=true
             export WM_QUIET=true
             ;;
         -debug)
@@ -197,10 +237,10 @@ do
             optShow=true
             ;;
         -a | -all | all)
-            all=all
+            optAll=all
             ;;
         -q | -queue | queue)
-            all=queue
+            optAll=queue
             ;;
         # Parallel compilation on all cores (or specified number of cores)
         -j)
@@ -231,7 +271,7 @@ do
             ;;
         # Print root directory containing a Make/ directory and exit
         -pwd)
-            optPrintRootDir=true
+            optPwd=true
             ;;
         # Meant to be used following a pull, this will:
         # - remove dep files that depend on deleted files;
@@ -240,8 +280,8 @@ do
         # - remove empty directories, along with deprecated object directories
         #   and respective binaries.
         -update)
-            update=true
-            : "${all:=all}" # implies 'all', unless previous set to 'queue' etc.
+            optUpdate=true
+            : "${optAll:=all}" # implies 'all', unless previously set
             ;;
         -version | --version)
             $make -f $WM_DIR/makefiles/info api
@@ -311,7 +351,7 @@ MakeDir=Make
 
 unset dir
 
-if [ -n "$optPrintRootDir" ]
+if [ -n "$optPwd" ]
 then
     if [ $# -ge 1 ]
     then
@@ -322,10 +362,7 @@ then
         then
             dir="${1%/*}"
             : "${dir:=.}"
-            if [ "$dir" = "$1" ]
-            then
-                dir="."
-            fi
+            [ "$dir" != "$1" ] || dir="."
         else
             echo "$Script error: not a file or directory" 1>&2
             exit 1
@@ -395,7 +432,7 @@ unset dir
 # Recurse the source tree to update all
 #------------------------------------------------------------------------------
 
-if [ "$update" = true ]
+if [ "$optUpdate" = true ]
 then
     wrmdep -update
     wrmdep -old
@@ -405,13 +442,13 @@ then
 fi
 
 
+unset exitCode
+
 #------------------------------------------------------------------------------
 # Recurse the source tree to compile "all" targets
 #------------------------------------------------------------------------------
 
-unset exitCode
-
-if [ "$all" = all ]
+if [ "$optAll" = all ]
 then
     if [ -e Allwmake.override ]
     then
@@ -467,12 +504,11 @@ fi
 
 
 #------------------------------------------------------------------------------
-# Recurse the source tree to compile "all" targets using wmakeCollect
+# Recurse source tree to compile "all" targets using wmakeCollect
 #------------------------------------------------------------------------------
-
-if [ "$all" = queue ]
+if [ "$optAll" = queue ]
 then
-    [ "$update" = true ] || wmakeLnIncludeAll $parOpt
+    [ "$optUpdate" = true ] || wmakeLnIncludeAll $parOpt
 
     (
         export WM_COLLECT_DIR="$WM_PROJECT_DIR/build/${WM_OPTIONS}/${PWD////_}"

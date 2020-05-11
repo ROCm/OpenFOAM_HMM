@@ -12,7 +12,8 @@
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
-#     wmakeBuildInfo
+#     wmake/scripts/wmake-build-info
+#     Backend for "wmake -build-info"
 #
 # Description
 #     Print the api/version and other build information for the project.
@@ -22,10 +23,19 @@
 #     - WM_PROJECT_VERSION
 #     - WM_DIR              (unset defaults to WM_PROJECT_DIR/wmake)
 #
+# Files
+#     - META-INFO/{api-info,build-info}
+#     - wmake/rules/General/general
+#     - debian : implicitly disables git queries
+#
 # Note
-#     Partial logic is also implemented in the bin/foamEtcFile
-#     -show-api and -show-patch options.
-#     Make sure that changes here are also reflected there.
+#     When a 'debian/' directory exists, the '.git/' directory is most
+#     likely from debian and not from OpenFOAM (ie, useless here).
+#     This corresponds to an implicit '-no-git', which has no effect
+#     when building from pristine sources.
+#
+# SeeAlso
+#     META-INFO/README.md for other routines that also use META-INFO.
 #
 #------------------------------------------------------------------------------
 # Locations
@@ -33,11 +43,9 @@ rulesFile="${WM_DIR:-$WM_PROJECT_DIR/wmake}/rules/General/general"
 META_INFO="$WM_PROJECT_DIR/META-INFO"
 FOAM_GIT_DIR="$WM_PROJECT_DIR/.git"
 
-usage() {
-    exec 1>&2
-
-    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+printHelp() {
     cat<<USAGE
+
 Usage: ${0##*/} [OPTION]
        ${0##*/} [-update] -filter FILE
 options:
@@ -56,7 +64,7 @@ options:
   -show-patch   Print patch value from meta-info and exit
   -help         Print the usage
 
-Query/manage status of api,branch,build information.
+Query/manage status of {api,branch,build} information.
 Default without any arguments is the same as '-query-make'.
 
 USAGE
@@ -85,7 +93,7 @@ while [ "$#" -gt 0 ]
 do
     case "$1" in
     -h | -help*)
-        usage
+        printHelp
         ;;
     -cmp | -check)
         optCheck=true
@@ -124,7 +132,7 @@ do
         unset FOAM_GIT_DIR
         ;;
     *)
-        die "unknown option/argument: '$1'"
+        die "Unknown option/argument: '$1'"
         ;;
     esac
     shift
@@ -137,6 +145,11 @@ done
 [ -d "$META_INFO" ] || \
     die "No ${META_INFO##*/}/ directory for project"
 
+# Disable git queries for debian packaging (see notes above)
+if [ -d "$WM_PROJECT_DIR/debian" ]
+then
+    unset FOAM_GIT_DIR
+fi
 
 #------------------------------------------------------------------------------
 
@@ -146,7 +159,7 @@ then
     if [ -f "$META_INFO/build-info" ]
     then
         echo "Removing project ${META_INFO##*/}/build-info" 1>&2
-        rm -f "$META_INFO/build-info" 2>/dev/null
+        rm -f "$META_INFO/build-info"
     else
         echo "Already removed project ${META_INFO##*/}/build-info" 1>&2
     fi

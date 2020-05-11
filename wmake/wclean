@@ -175,15 +175,15 @@ then
                       -name .git -prune -o -type d -print)
     do
         echo "    searching: ${d#./}"
-        find $d -depth -empty -type d -delete -print
+        find "$d" -depth -empty -type d -delete -print
     done
 
     # Second pass: clean up object directories with WM_PROJECT_DIR that don't
     # have respective source code folders, along with the respective binaries
-    if [ "$(expandPath $PWD)" = "$(expandPath $WM_PROJECT_DIR)" ]
-    then
-        objectsDir=$(findObjectDir $PWD 2>/dev/null) || exit 1 # Fatal
 
+    if "$scriptsDir"/wmake-check-dir "$WM_PROJECT_DIR" && \
+        objectsDir=$(findObjectDir . 2>/dev/null)
+    then
         if [ -d "$objectsDir" ]
         then
             echo "    Removing redundant object directories in $objectsDir"

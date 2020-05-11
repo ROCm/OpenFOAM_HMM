@@ -6,11 +6,11 @@ touch=true
 
 case "$1" in
 -check)
-    if wmakeBuildInfo -check
+    if wmake -build-info -check
     then
         unset touch
     fi
-;;
+    ;;
 esac
 
 if [ -n "$touch" ]

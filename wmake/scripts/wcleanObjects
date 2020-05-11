@@ -6,11 +6,10 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2017-2018 OpenCFD Ltd.
+#     Copyright (C) 2017-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     wcleanBuild, wcleanPlatform
@@ -88,8 +87,8 @@ done
 
 #------------------------------------------------------------------------------
 # Run from OPENFOAM or THIRDPARTY top-level directory only
-wmakeCheckPwd -q "$WM_PROJECT_DIR"     2>/dev/null || \
-wmakeCheckPwd -q "$WM_THIRD_PARTY_DIR" 2>/dev/null || \
+wmake -check-dir -quiet "$WM_PROJECT_DIR"     2>/dev/null || \
+wmake -check-dir -quiet "$WM_THIRD_PARTY_DIR" 2>/dev/null || \
 {
 cat<<ERROR
 ${0##*/}: Error incorrect top-level directory

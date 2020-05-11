@@ -7,7 +7,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2018 OpenCFD Ltd.
+#     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -102,7 +102,7 @@ done
 # project directory: {applications,src} directories
 if [ "$#" -eq 0 ]
 then
-    if wmakeCheckPwd "$WM_PROJECT_DIR" 2>/dev/null
+    if wmake -check-dir "$WM_PROJECT_DIR" 2>/dev/null
     then
         set -- applications src
     else

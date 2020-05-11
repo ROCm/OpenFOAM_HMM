@@ -1,7 +1,7 @@
 #!/bin/sh
 # Run from OPENFOAM src/ directory only
 cd "${0%/*}" || exit
-wmakeCheckPwd "$WM_PROJECT_DIR/src" 2>/dev/null || {
+wmake -check-dir "$WM_PROJECT_DIR/src" 2>/dev/null || {
     echo "Error (${0##*/}) : not located in \$WM_PROJECT_DIR/src"
     echo "    Check your OpenFOAM environment and installation"
     exit 1

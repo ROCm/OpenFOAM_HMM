@@ -34,6 +34,9 @@
 #     However, the '-D' options grant more flexibility. For example,
 #         etc/openfoam -DWM_COMPILER=Clang
 #
+# SeeAlso
+#     META-INFO/README.md for other routines that also use META-INFO.
+#
 #------------------------------------------------------------------------------
 # Auto-detect from location. Do not call from within the etc/directory itself!
 projectDir="$(\cd "$(dirname "${0%/*}")" && \pwd -L)"

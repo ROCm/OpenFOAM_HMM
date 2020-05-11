@@ -85,10 +85,10 @@ As can be seen in this example, the git build information is
 supplemented by the date when the last change was authored, which can
 be helpful when the repository contains local changes. If you simply
 wish to know the current API and patch levels directly, the
-`wmakeBuildInfo` script provides the relevant information even
+`wmake -build-info` provides the relevant information even
 when OpenFOAM has not yet been compiled:
 ```
-$ wmakeBuildInfo
+$ wmake -build-info
 make
     api = 1812
     patch = 190531
@@ -207,4 +207,4 @@ ThirdParty directory will contain either an `Allwmake` file or a
 - [Community](http://www.openfoam.com/community/), [Governance](http://www.openfoam.com/governance/)
 - [Contacting OpenCFD](http://www.openfoam.com/contact/)
 
-Copyright 2016-2019 OpenCFD Ltd
+Copyright 2016-2020 OpenCFD Ltd

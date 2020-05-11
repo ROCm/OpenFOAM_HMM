@@ -43,9 +43,11 @@
 # Note
 #     This script must exist in the project 'bin' directory
 #
-#     The '-show-api' and '-show-patch' options implement partial logic
-#     from wmake/wmakeBuildInfo.
-#     Make sure that any changes there are also reflected here.
+#     The '-show-api' and '-show-patch' options extract values from
+#     the "META-INFO/api-info" file
+#
+# SeeAlso
+#     META-INFO/README.md for other routines that also use META-INFO.
 #
 #-------------------------------------------------------------------------------
 printHelp() {

@@ -264,7 +264,7 @@ patch="$(git --git-dir="$gitbase/.git" show "$sha1" | sed -ne s/patch=//p)"
 
 [ -n "$api" ] || die "Could resolve api value"
 
-# Determine the BUILD information from git, as per wmakeBuildInfo.
+# Determine the BUILD information from git, as per `wmake -build-info`
 build="$(git --git-dir="$gitbase/.git" log -1 --date=short --format='%h=%ad' 2>/dev/null|sed 's/-//g;s/=/-/')"
 
 echo "Detected api, patch, build as '$api', '$patch', '$build'" 1>&2
