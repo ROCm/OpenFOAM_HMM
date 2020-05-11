@@ -167,7 +167,7 @@ fi
 if [ -x bin/foamEtcFile ]
 then
     _foamEtc() {
-        ./bin/foamEtcFile -mode=o "$@"
+        bin/foamEtcFile -mode=o "$@"
     }
 else
     die "No bin/foamEtcFile found in installation"
@@ -313,13 +313,17 @@ getOptionValue()
 removeBashMagic()
 {
     local file="$1"
+    local localFile
+
+    # Local filename (for reporting)
+    localFile="$(echo "$file" | sed -e "s#^$projectDir/##")"
 
     [ -f "$file" ] || {
         echo "Missing file: $file"
         exit 2 # Fatal
     }
 
-    echo "    Remove automatic projectDir setting ($file)"
+    echo "    Remove automatic projectDir setting ($localFile)"
 
     sed -i \
         -e '/^ *#/!{/\(BASH_SOURCE\|projectDir=\)/s/^/##IGNORE## /}' \
@@ -336,13 +340,17 @@ removeBashMagic()
 removeCshMagic()
 {
     local file="$1"
+    local localFile
+
+    # Local filename (for reporting)
+    localFile="$(echo "$file" | sed -e "s#^$projectDir/##")"
 
     [ -f "$file" ] || {
         echo "Missing file: $file"
         exit 2 # Fatal
     }
 
-    echo "    Remove automatic projectDir setting ($file)"
+    echo "    Remove automatic projectDir setting ($localFile)"
 
     sed -i \
         -e '/^ *#/!{\@\(projectName=\|projectDir=\|/etc/cshrc\)@s/^/##IGNORE## /}' \
@@ -379,8 +387,9 @@ etc/config.sh/adios2
 etc/config.sh/compiler
 etc/config.sh/paraview
 etc/config.sh/vtk
-etc/config.sh/CGAL
-etc/config.sh/FFTW
+etc/config.sh/cgal
+etc/config.sh/cmake
+etc/config.sh/fftw
 etc/config.sh/metis
 etc/config.sh/kahip
 etc/config.sh/scotch
@@ -392,8 +401,8 @@ etc/config.csh/adios2
 etc/config.csh/compiler
 etc/config.csh/paraview
 etc/config.csh/vtk
-etc/config.csh/CGAL
-etc/config.csh/FFTW
+etc/config.csh/cgal
+etc/config.csh/fftw
 CONFIG_CSH
         exit 0
         ;;
@@ -607,37 +616,41 @@ CONFIG_CSH
         ;;
 
     -boost)
-        # Replace boost_version=...
+        # Replace boost_version=...  (config is cgal or CGAL)
         optionValue=$(getOptionValue "$@")
-        replaceEtc  config.sh/CGAL   boost_version "$optionValue"
-        replaceEtc  config.csh/CGAL  boost_version "$optionValue"
+        cfgName=cgal; _foamEtc -q config.sh/"$cfgName" || cfgName=CGAL
+        replaceEtc  config.sh/"$cfgName"   boost_version "$optionValue"
+        replaceEtc  config.csh/"$cfgName"  boost_version "$optionValue"
         adjusted=true
         shift
         ;;
 
     -boost-path)
-        # Replace BOOST_ARCH_PATH=...
+        # Replace BOOST_ARCH_PATH=...  (config is cgal or CGAL)
         optionValue=$(getOptionValue "$@")
-        replaceEtc     config.sh/CGAL   BOOST_ARCH_PATH "\"$optionValue\""
-        replaceEtcCsh  config.csh/CGAL  BOOST_ARCH_PATH "\"$optionValue\""
+        cfgName=cgal; _foamEtc -q config.sh/"$cfgName" || cfgName=CGAL
+        replaceEtc  config.sh/"$cfgName"   BOOST_ARCH_PATH "\"$optionValue\""
+        replaceEtc  config.csh/"$cfgName"  BOOST_ARCH_PATH "\"$optionValue\""
         adjusted=true
         shift
         ;;
 
     -cgal)
-        # Replace cgal_version=...
+        # Replace cgal_version=...  (config is cgal or CGAL)
         optionValue=$(getOptionValue "$@")
-        replaceEtc  config.sh/CGAL   cgal_version "$optionValue"
-        replaceEtc  config.csh/CGAL  cgal_version "$optionValue"
+        cfgName=cgal; _foamEtc -q config.sh/"$cfgName" || cfgName=CGAL
+        replaceEtc  config.sh/"$cfgName"   cgal_version "$optionValue"
+        replaceEtc  config.csh/"$cfgName"  cgal_version "$optionValue"
         adjusted=true
         shift
         ;;
 
     -cgal-path)
-        # Replace CGAL_ARCH_PATH=...
+        # Replace CGAL_ARCH_PATH=...  (config is cgal or CGAL)
         optionValue=$(getOptionValue "$@")
-        replaceEtc     config.sh/CGAL   CGAL_ARCH_PATH "$optionValue"
-        replaceEtcCsh  config.csh/CGAL  CGAL_ARCH_PATH "$optionValue"
+        cfgName=cgal; _foamEtc -q config.sh/"$cfgName" || cfgName=CGAL
+        replaceEtc     config.sh/"$cfgName"   CGAL_ARCH_PATH "$optionValue"
+        replaceEtcCsh  config.csh/"$cfgName"  CGAL_ARCH_PATH "$optionValue"
         adjusted=true
         shift
         ;;
@@ -645,8 +658,10 @@ CONFIG_CSH
     -fftw)
         # Replace fftw_version=...
         optionValue=$(getOptionValue "$@")
-        replaceEtc  config.sh/FFTW   fftw_version "$optionValue"
-        replaceEtc  config.csh/FFTW  fftw_version "$optionValue"
+        # config.sh/fftw or config.sh/FFTW
+        cfgName=fftw; _foamEtc -q config.sh/"$cfgName" || cfgName=FFTW
+        replaceEtc  config.sh/"$cfgName"   fftw_version "$optionValue"
+        replaceEtc  config.csh/"$cfgName"  fftw_version "$optionValue"
         adjusted=true
         shift
         ;;
@@ -654,8 +669,10 @@ CONFIG_CSH
     -fftw-path)
         # Replace FFTW_ARCH_PATH=...
         optionValue=$(getOptionValue "$@")
-        replaceEtc     config.sh/FFTW   FFTW_ARCH_PATH "\"$optionValue\""
-        replaceEtcCsh  config.csh/FFTW  FFTW_ARCH_PATH "\"$optionValue\""
+        # config.sh/fftw or config.sh/FFTW
+        cfgName=fftw; _foamEtc -q config.sh/"$cfgName" || cfgName=FFTW
+        replaceEtc     config.sh/"$cfgName"  FFTW_ARCH_PATH "\"$optionValue\""
+        replaceEtcCsh  config.csh/"$cfgName" FFTW_ARCH_PATH "\"$optionValue\""
         adjusted=true
         shift
         ;;
