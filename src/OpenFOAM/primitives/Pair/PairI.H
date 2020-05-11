@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,7 +89,7 @@ inline Foam::Pair<T>::Pair(const FixedList<T, 2>& list)
 template<class T>
 inline Foam::Pair<T>::Pair(const T& f, const T& s, const bool doSort)
 {
-    if (doSort && f < s)
+    if (doSort && s < f)
     {
         first()  = s;
         second() = f;
