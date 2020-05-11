@@ -66,15 +66,20 @@ pid_t pgid();
 
 //- True if environment variable of given name is defined.
 //  Using an empty name is a no-op and always returns false.
-bool env(const std::string& envName);
+bool hasEnv(const std::string& envName);
 
 //- Get environment value for given envName.
-//  Return string() if the environment is undefined or envName is empty.
+//  \return empty string if environment is undefined or envName is empty.
 string getEnv(const std::string& envName);
 
 //- Set an environment variable, return true on success.
 //  Using an empty name is a no-op and always returns false.
 bool setEnv(const word& name, const std::string& value, const bool overwrite);
+
+//- Deprecated(2020-05) check for existence of environment variable
+//  \deprecated(2020-05) - use hasEnv() function
+FOAM_DEPRECATED_FOR(2020-05, "hasEnv() function")
+inline bool env(const std::string& envName) { return Foam::hasEnv(envName); }
 
 //- Return the system's host name, as per hostname(1)
 //  Optionally with the full name (as per the '-f' option)

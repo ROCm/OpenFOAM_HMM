@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
     Copyright (C) 2011 Symscape
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -360,7 +360,7 @@ pid_t Foam::pgid()
 }
 
 
-bool Foam::env(const std::string& envName)
+bool Foam::hasEnv(const std::string& envName)
 {
     // An empty envName => always false
     return !envName.empty() &&

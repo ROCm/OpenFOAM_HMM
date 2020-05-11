@@ -238,7 +238,7 @@ void Foam::error::exitOrAbort(const int errNo, const bool isAbort)
         }
     }
 
-    if (env("FOAM_ABORT"))
+    if (hasEnv("FOAM_ABORT"))
     {
         Perr<< nl << *this << nl
             << "\nFOAM aborting (FOAM_ABORT set)\n" << endl;
@@ -297,7 +297,7 @@ void Foam::error::exitOrAbort(const int errNo, const bool isAbort)
 
 void Foam::error::exit(const int errNo)
 {
-    exitOrAbort(errNo, env("FOAM_ABORT"));
+    exitOrAbort(errNo, hasEnv("FOAM_ABORT"));
 }
 
 
