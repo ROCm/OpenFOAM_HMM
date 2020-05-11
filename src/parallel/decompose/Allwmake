@@ -1,7 +1,6 @@
 #!/bin/sh
 cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/wmake/scripts/AllwmakeParseArguments
-. ${WM_PROJECT_DIR:?}/wmake/scripts/wmakeFunctions  # Require wmake functions
 . ${WM_PROJECT_DIR:?}/wmake/scripts/have_kahip
 . ${WM_PROJECT_DIR:?}/wmake/scripts/have_metis
 . ${WM_PROJECT_DIR:?}/wmake/scripts/have_scotch
@@ -27,12 +26,8 @@ fi
 if have_scotch
 then
     wmake $targetType scotchDecomp
-
-    if have_ptscotch
-    then
-        wmakeLibMpi ptscotchDecomp "scotch=$SCOTCH_VERSION"
-    fi
 fi
 
+./Allwmake-mpi $targetType $*
 
 #------------------------------------------------------------------------------
