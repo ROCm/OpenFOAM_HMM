@@ -6,11 +6,10 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2018 OpenCFD Ltd.
+#     Copyright (C) 2018-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # File
 #     wmake/makefiles/files
@@ -52,7 +51,7 @@ all : $(OPTIONS) $(SFILES) $(VARS)
 
 $(OPTIONS) : $(MAKE_DIR)/options
 	@$(CPP) $(GFLAGS) $(MAKE_DIR)/options | sed -e 's@   *@ @g' > $(OPTIONS)
-ifeq ("$(WM_OSTYPE)","MSwindows")
+ifneq (,$(findstring windows,$(WM_OSTYPE)))
 	@$(WM_SCRIPTS)/wmakeWindowsDlOpenLibs $(OPTIONS) >> $(OPTIONS)
 endif
 

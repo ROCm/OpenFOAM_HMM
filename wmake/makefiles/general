@@ -25,8 +25,8 @@
 
 SHELL           = /bin/sh
 
-ifeq ("$(WM_OSTYPE)","")
-    WM_OSTYPE   = POSIX
+ifeq (,$(WM_OSTYPE))
+    WM_OSTYPE  := POSIX
 endif
 
 
@@ -171,7 +171,7 @@ objects: $(OBJECTS) | silent
 .PHONY: libso
 libso: $(LIB)$(EXT_SO) | silent
 
-ifeq ("$(WM_OSTYPE)","MSwindows")
+ifneq (,$(findstring windows,$(WM_OSTYPE)))
 $(LIB)$(EXT_SO): $(OBJECTS)
 	@$(WM_SCRIPTS)/makeTargetDir $(LIB)
 	$(call QUIET_MESSAGE,ld,$(LIB)$(EXT_SO))
@@ -211,7 +211,7 @@ $(LIB).o: $(OBJECTS)
 #------------------------------------------------------------------------------
 
 lnInclude: $(MAKE_DIR)/files $(MAKE_DIR)/options
-	@rm -rf lnInclude ; wmakeLnInclude .
+	@wmakeLnInclude -force .
 
 
 #------------------------------------------------------------------------------
@@ -231,7 +231,7 @@ dep: $(DEPENDENCIES)
 
 updatedep: dep
 
-ifeq ($(findstring lnInclude,$(MAKECMDGOALS))$(findstring updatedep,$(MAKECMDGOALS)),)
+ifeq (,$(findstring lnInclude,$(MAKECMDGOALS))$(findstring updatedep,$(MAKECMDGOALS)))
 sinclude $(DEPENDENCIES)
 endif
 

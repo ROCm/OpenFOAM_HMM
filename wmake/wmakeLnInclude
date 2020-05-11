@@ -7,60 +7,59 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2019 OpenCFD Ltd.
+#     Copyright (C) 2019-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
-#     wmakeLnInclude
+#     wmake/wmakeLnInclude
 #
 # Usage
-#     wmakeLnInclude [OPTION] [-pwd | <dir>]
+#     wmakeLnInclude [OPTION] [-pwd | dir [.. dirN]]
 #
 # Description
-#     Link all the source files in the <dir> directory into <dir>/lnInclude
+#     Link source files in the specified dir(s) into their respective
+#     lnInclude directories
 #
 #     C files:      .c .h
 #     C++ files:    .C .cc .cpp .cxx .H .hh .hpp .hxx
 #
 #------------------------------------------------------------------------------
-Script="${0##*/}"           # Use 'Script' for error messages in wmakeFunctions
-. "${0%/*}/scripts/wmakeFunctions"              # Source wmake functions
+Script="${0##*/}"                   # Need 'Script' for wmakeFunctions messages
+scriptsDir="${0%/*}"/scripts        # wmake/scripts directory
+. "$scriptsDir"/wmakeFunctions      # Source wmake functions
 
-usage() {
-    exec 1>&2
-    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+printHelp() {
     cat<<USAGE
 
-Usage: $Script [OPTION] [-pwd | dir]
+Usage: ${0##*/} [OPTION] [-pwd | dir [.. dirN]]
 
 options:
-  -u | -update      Update
+  -f | -force       Force remove of existing lnInclude before recreating
+  -u | -update      Update existing lnInclude directories
   -s | -silent      Silent mode (do not echo command)
-  -pwd              Locate root directory containing a Make/ directory.
+  -pwd              Locate root directory containing Make/ directory
   -h | -help        Print the usage
 
-Link all the source files in the <dir> into <dir>/lnInclude
-
-Note
-    The '-u' option forces an update when the lnInclude directory already exists
-    and changes the default linking from 'ln -s' to 'ln -sf'.
+Link source files in specified dir(s) into their respective
+lnInclude directories. With '-update', items are relinked with 'ln -sf'
 
 USAGE
+    exit 0 # clean exit
+}
+
+
+# Report error and exit
+die()
+{
+    exec 1>&2
+    echo
+    echo "Error encountered:"
+    while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
+    echo
+    echo "See '${0##*/} -help' for usage"
+    echo
     exit 1
 }
 
@@ -72,26 +71,30 @@ USAGE
 # Option for 'ln'
 optLink="-s"
 
-unset update optQuiet optFindRootDir
+unset optForce optQuiet optUpdate optPwd
 
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-        -h | -help*)   # Provide immediate help
-            usage
+        -h | -help*)
+            printHelp
+            ;;
+        -f | -force)
+            optForce=true
+            optLink="-sf"
             ;;
         -u | -update)
-            update=true
+            optUpdate=true
             optLink="-sf"
             ;;
         -s | -silent)
             optQuiet=true
             ;;
         -pwd)
-            optFindRootDir=true
+            optPwd=true
             ;;
         -*)
-            usage "unknown option: '$1'"
+            die "unknown option: '$1'"
             ;;
         *)
             break
@@ -100,16 +103,15 @@ do
     shift
 done
 
-[ "$optFindRootDir" = true ] || [ "$#" -eq 1 ] || \
-    usage "Error: incorrect number of arguments"
+[ "$optPwd" = true ] || [ "$#" -ge 1 ] || \
+    die "incorrect number of arguments"
 
 #------------------------------------------------------------------------------
 
-unset dir
 baseDir="$1"
 
-# With -root, go on discovery
-if [ "$optFindRootDir" = true ]
+# With -pwd, go on discovery
+if [ "$optPwd" = true ]
 then
     if [ -n "$baseDir" ]
     then
@@ -121,6 +123,7 @@ then
         then
             dir="${dir%/*}"
             : "${dir:=.}"
+            [ "$dir" != "$baseDir" ] || dir="."
         else
             echo "$Script error: not a file or directory" 1>&2
             exit 1
@@ -141,75 +144,94 @@ then
     fi
 
     echo "Using $baseDir" 1>&2
+
+    set -- "$baseDir"
 fi
 
 
-# Convert incorrect path/dir/lnInclude to something sensible
-while [ "${baseDir##*/}" = lnInclude ]
+unset errorCode
+
+for baseDir
 do
-    baseDir="${baseDir%/*}"
-    if [ "$baseDir" = lnInclude ]
+
+    # Correct path/dir/lnInclude to something more sensible
+    while [ "${baseDir##*/}" = lnInclude ]
+    do
+        baseDir="${baseDir%/*}"
+        if [ "$baseDir" = lnInclude ]
+        then
+            baseDir="."
+        fi
+    done
+
+    [ -d "$baseDir" ] || {
+        echo "$Script error: base directory $baseDir does not exist" 1>&2
+        errorCode=2
+        continue
+    }
+
+    incDir="$baseDir/lnInclude"
+
+    if [ "$optForce" = true ]
     then
-        baseDir="."
+        rm -rf -- "$incDir"
+        mkdir "$incDir"
+    elif [ -d "$incDir" ]
+    then
+        if [ "$optUpdate" != true ]
+        then
+            continue
+        fi
+    else
+        mkdir "$incDir"
+    fi
+
+    if [ -d "$incDir" ]
+    then
+    (
+        cd "$incDir" || {
+            errorCode=1
+            exit 1
+        }
+
+        # Display compact info
+        echo "    ln: $incDir" 1>&2
+
+        # Remove any broken links first
+        # - helps if file locations have moved
+
+        case "$WM_ARCH" in
+        (darwin*)
+            # -exec rm (not -delete) to remove names with '/' in their name
+            # with \+ instead of \; to pack into a single command
+            find -L . -type l -exec rm -- {} \+
+            ;;
+        (*)
+            find -L . -type l -delete
+            ;;
+        esac
+
+        # Create links, avoid recreating links unless necessary
+        # things in the 'noLink' directory are skipped
+
+        find .. \
+            \( -name lnInclude -o -name Make -o -name config -o -name noLink \) \
+            -prune \
+            -o \( \
+                -name '*.[CHch]' \
+                -o -name '*.cc' \
+                -o -name '*.hh' \
+                -o -name '*.[ch]xx' \
+                -o -name '*.[ch]pp' \
+                -o -name '*.type' \
+            \)  \
+            -exec ln "$optLink" {} . \;
+    )
+    else
+        echo "$Script error: failed to create include directory $incDir" 1>&2
     fi
 done
-incDir="$baseDir/lnInclude"
 
-
-[ -d "$baseDir" ] || {
-    echo "$Script error: base directory $baseDir does not exist" 1>&2
-    exit 2
-}
-
-if [ -d "$incDir" ]
-then
-    [ "$update" = true ] || exit 0
-else
-    mkdir "$incDir"
-fi
-
-[ -d "$incDir" ] || {
-    echo "$Script error: failed to create include directory $incDir" 1>&2
-    exit 0
-}
-
-cd "$incDir" || exit 1
-
-# Always just display compact info
-echo "    ln: $incDir" 1>&2
-
-
-#------------------------------------------------------------------------------
-# Remove any broken links first (this helps when file locations have moved)
-#------------------------------------------------------------------------------
-
-case "$WM_ARCH" in
-(darwin*)
-    find -L . -type l -exec rm -- {} \+
-    ;;
-(*)
-    find -L . -type l -delete
-    ;;
-esac
-
-
-#------------------------------------------------------------------------------
-# Create links, avoid recreating links unless necessary
-# things placed in the 'noLink' directory are skipped
-#------------------------------------------------------------------------------
-find .. \
-    \( -name lnInclude -o -name Make -o -name config -o -name noLink \) \
-    -prune \
-    -o \( \
-        -name '*.[CHch]' \
-        -o -name '*.cc' \
-        -o -name '*.hh' \
-        -o -name '*.[ch]xx' \
-        -o -name '*.[ch]pp' \
-        -o -name '*.type' \
-    \)  \
-    -exec ln "$optLink" {} . \;
-
-exit 0 # clean exit
+exit "${errorCode:-0}"  # clean exit
 
 #------------------------------------------------------------------------------
