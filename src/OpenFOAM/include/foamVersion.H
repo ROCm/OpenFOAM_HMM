@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,6 +35,15 @@ Note
     The foamVersion.H file is located directly in the src/OpenFOAM/include
     directory for easier use by external packages and to allow easier
     modification during packaging.
+
+    Provisions for compile-time configuration of some paths
+      - FOAM_CONFIGURED_PROJECT_DIR
+      - FOAM_CONFIGURED_PROJECT_ETC
+
+    For example,
+    \verbatim
+    FOAM_EXTRA_CXXFLAGS='-DFOAM_CONFIGURED_PROJECT_ETC=\"/etc/openfoam\"'
+    \endverbatim
 
 SourceFiles
     foamVersion.C
@@ -115,6 +124,14 @@ namespace Foam
         //
         //  \param full includes Arch information
         void printBuildInfo(const bool full=true);
+
+        //- Compile-time definition of the OpenFOAM project directory
+        //  Usually not defined - functional equivalent to WM_PROJECT_DIR
+        extern const std::string configuredProjectDir;
+
+        //- Compile-time definition of the OpenFOAM etc/ directory
+        //  Usually not defined - functional equivalent to WM_PROJECT_DIR/etc
+        extern const std::string configuredEtcDir;
     }
 }
 

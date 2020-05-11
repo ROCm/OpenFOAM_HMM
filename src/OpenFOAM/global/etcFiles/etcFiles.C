@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,14 +29,6 @@ License
 #include "etcFiles.H"
 #include "foamVersion.H"
 #include "OSspecific.H"
-
-// Note contains handling for compile-time configuration of some paths
-// via defines:
-// - FOAM_CONFIGURED_PROJECT_DIR
-// - FOAM_CONFIGURED_PROJECT_ETC
-
-// Eg,
-// #define FOAM_CONFIGURED_PROJECT_ETC "/usr/share/openfoam/etc"
 
 // * * * * * * * * * * * * * * Static Functions  * * * * * * * * * * * * * * //
 
@@ -151,14 +143,11 @@ static inline bool groupResourceDir(Foam::fileName& queried)
     #endif
 
     // Compile-time paths
-
-    #ifdef FOAM_CONFIGURED_PROJECT_DIR
-    queried = FOAM_CONFIGURED_PROJECT_DIR/Foam::string("site/etc");
+    queried = Foam::foamVersion::configuredProjectDir/Foam::string("site/etc");
     if (queried.size() > 8 && Foam::isDir(queried))
     {
         return true;
     }
-    #endif
 
     queried.clear();
     return false;
@@ -186,21 +175,17 @@ static inline bool projectResourceDir(Foam::fileName& queried)
 
     // Compile-time paths
 
-    #ifdef FOAM_CONFIGURED_PROJECT_ETC
-    queried = FOAM_CONFIGURED_PROJECT_ETC;
+    queried = Foam::foamVersion::configuredEtcDir;
     if (Foam::isDir(queried))
     {
         return true;
     }
-    #endif
 
-    #ifdef FOAM_CONFIGURED_PROJECT_DIR
-    queried = FOAM_CONFIGURED_PROJECT_DIR/Foam::word("etc");
+    queried = Foam::foamVersion::configuredProjectDir/Foam::word("etc");
     if (queried.size() > 3 && Foam::isDir(queried))
     {
         return true;
     }
-    #endif
 
     queried.clear();
     return false;

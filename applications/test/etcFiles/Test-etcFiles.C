@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,14 +35,15 @@ Description
 
 #include "argList.H"
 #include "etcFiles.H"
+#include "foamVersion.H"
 
 using namespace Foam;
 
 void printList(const fileNameList& list)
 {
-    forAll(list, i)
+    for (const fileName& f : list)
     {
-        Info<< list[i].c_str() << nl;
+        Info<< f.c_str() << nl;
     }
 }
 
@@ -58,6 +59,11 @@ int main(int argc, char *argv[])
 
     argList::addBoolOption
     (
+        "config",
+        "Print compile-time configuration values"
+    );
+    argList::addBoolOption
+    (
         "all",
         "Return all files (otherwise stop after the first match)"
     );
@@ -69,7 +75,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "list-all",
-        "List all directories (including non-existence ones)"
+        "List all directories (including non-existent ones)"
     );
     argList::addArgument("file...");
 
@@ -84,7 +90,13 @@ int main(int argc, char *argv[])
     // First handle no parameters
     if (args.size() == 1)
     {
-        if (args.found("list-all"))
+        if (args.found("config"))
+        {
+            Info<<"config:project=" << foamVersion::configuredProjectDir << nl;
+            Info<<"config:etc=" << foamVersion::configuredEtcDir << nl;
+            return 0;
+        }
+        else if (args.found("list-all"))
         {
             fileNameList results = etcDirs(false);
             printList(results);
