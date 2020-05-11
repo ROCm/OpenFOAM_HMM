@@ -12,10 +12,11 @@
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
-#     wcleanBuild, wcleanPlatform
+#     wmake/scripts/wcleanObjects
+#     Backend for "wclean -build", "wclean -platform"
 #
 # Usage
-#     wcleanBuild <option | platform> [.. <option | platform>]
+#     wclean-build <option | platform> [.. <option | platform>]
 #
 # Description
 #     Deletes the specified 'build/' object files directories from the
@@ -34,10 +35,9 @@
 #     tutorials
 #
 #------------------------------------------------------------------------------
-Script="${0##*/}"
 targetDir=build   # Safe default - override based on script name
 
-case "$Script" in
+case "${0##*/}" in
 (*[Pp]latform*)
     targetDir=platforms
     ;;
@@ -57,15 +57,15 @@ usage() {
 Usage: ${0##*/} <option | platform> [.. <option | platform>]
 
 options:
-  -a, -all              Same as 'all'
-  -curr, -current       Use \$WM_OPTIONS ($WM_OPTIONS)
-  -comp, -compiler      Use \$WM_ARCH\$WM_COMPILER*  ($WM_ARCH$WM_COMPILER)
+  -a | -all             Same as 'all'
+  -curr | -current      Use \$WM_OPTIONS ($WM_OPTIONS)
+  -comp | -compiler     Use \$WM_ARCH\$WM_COMPILER*  ($WM_ARCH$WM_COMPILER)
   -compiler=NAME        Use \$WM_ARCH<NAME>*  ($WM_ARCH<NAME>*)
-  -h, -help             Print the usage
+  -h | -help            Print the usage
 
-
-Deletes the specified $targetDir/ object file directories from the project
-top-level $targetDir/ directory $WM_PROJECT_DIR.
+Deletes specified $targetDir object file directories from project top-level:
+Project:   $WM_PROJECT_DIR
+Directory: $targetDir/
 
 special platforms:
   all           Remove all platforms$extraText
@@ -90,7 +90,7 @@ done
 wmake -check-dir -quiet "$WM_PROJECT_DIR"     2>/dev/null || \
 wmake -check-dir -quiet "$WM_THIRD_PARTY_DIR" 2>/dev/null || \
 {
-cat<<ERROR
+    cat<<ERROR
 ${0##*/}: Error incorrect top-level directory
 
   Not in Project:     $WM_PROJECT_DIR

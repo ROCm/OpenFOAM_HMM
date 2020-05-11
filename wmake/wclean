@@ -31,30 +31,51 @@
 # Usage
 #     wclean [OPTION] [dir]
 #     wclean [OPTION] target [dir [MakeDir]]
+#     wclean -subcommand ...
 #
 # Description
 #     Clean up the wmake control directory Make/\$WM_OPTIONS and remove the
 #     lnInclude directories generated for libraries.
 #
 #------------------------------------------------------------------------------
-Script="${0##*/}"           # Use 'Script' for error messages in wmakeFunctions
-. "${0%/*}"/scripts/wmakeFunctions              # Source wmake functions
+Script="${0##*/}"                   # Need 'Script' for wmakeFunctions messages
+scriptsDir="${0%/*}"/scripts        # wmake/scripts directory
+. "$scriptsDir"/wmakeFunctions      # Source wmake functions
 
 printHelp() {
-    cat<<HELP_INFO
+    cat<<HELP_HEAD
 
 Usage: $Script [OPTION] [dir]
        $Script [OPTION] target [dir [MakeDir]]
+       $Script -subcommand ...
+
 options:
   -a | -all         All subdirectories, uses Allwclean, Allclean if they exist
-  -s | -silent      Ignored - for compatibility with wmake
+  -s | -silent      Silent mode (ignored - for compatibility with wmake)
   -h | -help        Display short help and exit
   -help-full        Display full help and exit
+
+subcommands (wclean subcommand -help for more information):
+HELP_HEAD
+
+if [ -n "$1" ]
+then
+cat<<HELP_SUBCOMMANDS
+  -build           Remove specified build/ object directories
+  -platform        Remove specified platforms/ object directories
+HELP_SUBCOMMANDS
+else
+cat<<HELP_SUBCOMMANDS
+  -build -platform
+HELP_SUBCOMMANDS
+fi
+
+cat<<HELP_TAIL_COMMON
 
 Clean up the wmake control directory Make/\$WM_OPTIONS and remove the
 lnInclude directories generated for libraries.
 
-HELP_INFO
+HELP_TAIL_COMMON
 
 cat<<HELP_TAIL_FULL
 Special targets:
@@ -99,6 +120,19 @@ do
     -h | -help*) # Short help
         printHelp
         ;;
+
+    # Forward to scripts/wclean-build
+    -build) shift
+        exec "$scriptsDir/wclean-build" "$@"
+        exit $?
+        ;;
+
+    # Forward to scripts/wclean-platform
+    -platform*) shift
+        exec "$scriptsDir/wclean-platform" "$@"
+        exit $?
+        ;;
+
     -a | -all | all)
         targetType=all
         ;;
