@@ -55,7 +55,7 @@ Usage
             (100.0 1.0)
         );
 
-        patch
+        refValue
         {
             type            fixedValue;
             value           uniform (15 0 0);
