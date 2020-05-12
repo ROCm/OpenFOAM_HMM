@@ -558,22 +558,32 @@ fi
 # files and options being built in parallel
 #------------------------------------------------------------------------------
 
-objectsDir="$MakeDir/$WM_OPTIONS"
-case "$PWD" in
-("$WM_PROJECT_DIR"/*)
-    buildPath="$WM_PROJECT_DIR/build/${WM_OPTIONS}"
-    objectsDir=$buildPath$(echo $PWD | sed s%$WM_PROJECT_DIR%% )
-    ;;
-esac
+# Mini-version of findObjectDir
+unset objectsDir
+
+# Handle project/{applications,src} as out-of-source build
+relativeDir="${PWD#${WM_PROJECT_DIR}/}"
+if [ "$relativeDir" != "$PWD" ]
+then
+    [ -w "$WM_PROJECT_DIR" ] && \
+        objectsDir="${WM_PROJECT_DIR}/build/${WM_OPTIONS}/${relativeDir}"
+fi
+
+# Default (local) build directory
+if [ -z "$objectsDir" ]
+then
+    objectsDir="$MakeDir/$WM_OPTIONS"
+fi
+
 
 (
     unset MAKEFLAGS
-    mkdir -p $objectsDir
+    mkdir -p "$objectsDir"
 
     # Pre-build the $WM_OPTIONS/options file
     # which is included when building the $WM_OPTIONS/files file
     $make -s -f $WM_DIR/makefiles/files \
-        MAKE_DIR=$MakeDir OBJECTS_DIR=$objectsDir $objectsDir/options
+        MAKE_DIR="$MakeDir" OBJECTS_DIR="$objectsDir" "$objectsDir"/options
 
     $make -s -f $WM_DIR/makefiles/files \
         MAKE_DIR=$MakeDir OBJECTS_DIR=$objectsDir

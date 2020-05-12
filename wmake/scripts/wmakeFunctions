@@ -69,7 +69,7 @@ expandPath()
         (cd "$1" && pwd -P)
     elif [ -n "$1" ]
     then
-        (cd $(dirname "$1") && pwd -P)
+        (cd "$(dirname "$1")" && pwd -P)
     else
         pwd -P
     fi
@@ -89,15 +89,15 @@ expandPath()
 # - WM_PROJECT_DIR, HOME
 findTarget()
 {
-    local project=$(expandPath $WM_PROJECT_DIR)
-    local home=$(expandPath $HOME)
+    local project=$(expandPath "$WM_PROJECT_DIR")
+    local home=$(expandPath "$HOME")
     local reldir="${1:-.}"
-    local absdir=$(expandPath $reldir)
+    local absdir=$(expandPath "$reldir")
 
     while [ -n "$absdir" ]
     do
         case "$absdir" in
-        ($project | $home | /)
+        ("$project" | "$home" | /)
             break
             ;;
         esac
@@ -113,7 +113,7 @@ findTarget()
         fi
     done
 
-    echo "Error: no Make directory for $(expandPath $1)" 1>&2
+    echo "Error: no Make directory for $(expandPath "$1")" 1>&2
     echo 1>&2
     return 1
 }
@@ -133,14 +133,14 @@ cdSource()
         echo "    Searching up directories tree for Make directory" 1>&2
 
         dir=$(findTarget .) || exit 1 # Fatal
-        cd $dir 2>/dev/null || {
+        cd "$dir" 2>/dev/null || {
             echo "$Script error: could not change to directory '$dir'" 1>&2
             exit 1
         }
         unset targetType
     fi
 
-    [ -r $MakeDir/files ] || {
+    [ -r "$MakeDir"/files ] || {
         echo "$Script error: file '$MakeDir/files' does not exist in $PWD" 1>&2
         exit 1
     }
@@ -158,23 +158,29 @@ cdSource()
 # - WM_PROJECT_DIR, WM_OPTIONS
 findObjectDir()
 {
-    local project=$(expandPath $WM_PROJECT_DIR)
-    local absdir=$(expandPath ${1:-.})
-    local objectsDir
+    local project="$(expandPath "$WM_PROJECT_DIR")"
+    local absdir="$(expandPath "${1:-.}")"
+    local appDir relativeDir objectsDir
 
-    case "$absdir" in
-    ("$project"/*)
-        local buildPath=$WM_PROJECT_DIR/build/${WM_OPTIONS}
-        objectsDir=$buildPath$(echo $absdir | sed s%$project%% )
-        ;;
-    (*)
-        local path=$absdir
-        local appDir=.
+    # Treat project/ builds as out-of-source
+    relativeDir="${absdir#${project}/}"
+    if [ "$relativeDir" != "$absdir" ]
+    then
+        [ -w "$WM_PROJECT_DIR" ] && \
+            objectsDir="${WM_PROJECT_DIR}/build/${WM_OPTIONS}/${relativeDir}"
+    fi
+
+    # Default (local) build directory
+    if [ -z "$objectsDir" ]
+    then
+        relativeDir="$absdir"
+        appDir=.
         [ -d Make ] || appDir=$(findTarget .) || exit 1 # Fatal
-        absdir=$(expandPath $appDir/.)
-        objectsDir=$appDir/Make/${WM_OPTIONS}$(echo $path | sed s%$absdir%% )
-    ;;
-    esac
+        absdir=$(expandPath "$appDir"/.)
+
+        relativeDir="${relativeDir#${absdir}}"
+        objectsDir="${appDir}/Make/${WM_OPTIONS}${relativeDir}"
+    fi
 
     echo "$objectsDir"
 }
@@ -191,7 +197,7 @@ findObjectDir()
 # - WM_PROJECT_DIR, WM_OPTIONS
 removeObjectDir()
 {
-    local objectsDir=$(findObjectDir ${1:-.})
+    local objectsDir="$(findObjectDir "${1:-.}")"
     if [ -d "$objectsDir" ]
     then
         rm -rf "$objectsDir" 2>/dev/null
@@ -344,7 +350,7 @@ if [ -n "$BASH_VERSION" ]
 then
     depToSource()
     {
-        local sourceFile=${1%.dep}
+        local sourceFile="${1%.dep}"
         sourceFile="${sourceFile/build\/${WM_OPTIONS}\//}"
         sourceFile="${sourceFile/build\/${WM_OPTIONS}${WM_MPLIB}\//}"
         sourceFile="${sourceFile/Make\/${WM_OPTIONS}\//}"
@@ -355,13 +361,11 @@ then
 else
     depToSource()
     {
-        local sourceFile=$(echo ${1%.dep} |             \
-            sed -e s%build/${WM_OPTIONS}/%%             \
-                -e s%build/${WM_OPTIONS}${WM_MPLIB}/%%  \
-                -e s%Make/${WM_OPTIONS}/%%              \
-                -e s%Make/${WM_OPTIONS}${WM_MPLIB}/%% )
-
-        echo "$sourceFile"
+        echo "${1%.dep}" | sed \
+            -e "s%build/${WM_OPTIONS}/%%"             \
+            -e "s%build/${WM_OPTIONS}${WM_MPLIB}/%%"  \
+            -e "s%Make/${WM_OPTIONS}/%%"              \
+            -e "s%Make/${WM_OPTIONS}${WM_MPLIB}/%%"
     }
 fi
 
