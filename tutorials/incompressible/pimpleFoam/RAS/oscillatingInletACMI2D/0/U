@@ -9,60 +9,43 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
+    class       volVectorField;
     location    "0";
-    object      p;
+    object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -2 0 0 0 0];
+dimensions      [0 1 -1 0 0 0 0];
 
-internalField   uniform 0;
+internalField   uniform (0 0 0);
 
 boundaryField
 {
+    #includeEtc "caseDicts/setConstraintTypes"
+
     inlet
     {
-        type            zeroGradient;
+        type            fixedValue;
+        value           uniform (1 0 0);
     }
     outlet
     {
-        type            fixedValue;
-        value           uniform 0;
+        type            pressureInletOutletVelocity;
+        value           uniform (0 0 0);
     }
     walls
     {
-        type            zeroGradient;
-    }
-    couple1
-    {
-        type            zeroGradient;
-    }
-    couple2
-    {
-        type            zeroGradient;
-    }
-    defaultFaces
-    {
-        type            empty;
+//        type            fixedValue;
+        type            movingWallVelocity;
+        value           uniform (0 0 0);
     }
     ACMI1_blockage
     {
-        type            zeroGradient;
-    }
-    ACMI1_couple
-    {
-        type            cyclicACMI;
-        value           uniform 0;
+        type            noSlip;
     }
     ACMI2_blockage
     {
-        type            zeroGradient;
-    }
-    ACMI2_couple
-    {
-        type            cyclicACMI;
-        value           uniform 0;
+        type            noSlip;
     }
 }
 

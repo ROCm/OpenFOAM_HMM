@@ -11,16 +11,18 @@ FoamFile
     format      ascii;
     class       volScalarField;
     location    "0";
-    object      nut;
+    object      k;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -1 0 0 0 0];
+dimensions      [0 2 -2 0 0 0 0];
 
-internalField   uniform 0;
+internalField   uniform 3.75e-3;
 
 boundaryField
 {
+    #includeEtc "caseDicts/setConstraintTypes"
+
     inlet
     {
         type            fixedValue;
@@ -34,31 +36,17 @@ boundaryField
     }
     walls
     {
-        type            nutkWallFunction;
+        type            kqRWallFunction;
         value           $internalField;
-    }
-    defaultFaces
-    {
-        type            empty;
     }
     ACMI1_blockage
     {
-        type            nutkWallFunction;
-        value           $internalField;
-    }
-    ACMI1_couple
-    {
-        type            cyclicACMI;
+        type            kqRWallFunction;
         value           $internalField;
     }
     ACMI2_blockage
     {
-        type            nutkWallFunction;
-        value           $internalField;
-    }
-    ACMI2_couple
-    {
-        type            cyclicACMI;
+        type            kqRWallFunction;
         value           $internalField;
     }
 }

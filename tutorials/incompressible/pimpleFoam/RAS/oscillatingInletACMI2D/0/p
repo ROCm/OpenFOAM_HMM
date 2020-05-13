@@ -11,55 +11,46 @@ FoamFile
     format      ascii;
     class       volScalarField;
     location    "0";
-    object      epsilon;
+    object      p;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -3 0 0 0 0];
+dimensions      [0 2 -2 0 0 0 0];
 
-internalField   uniform 1.8e-3;
+internalField   uniform 0;
 
 boundaryField
 {
+    #includeEtc "caseDicts/setConstraintTypes"
+
     inlet
     {
-        type            fixedValue;
-        value           $internalField;
+        type            zeroGradient;
     }
     outlet
     {
-        type            inletOutlet;
-        inletValue      $internalField;
-        value           $internalField;
+        type            fixedValue;
+        value           uniform 0;
     }
     walls
     {
-        type            epsilonWallFunction;
-        value           $internalField;
+        type            zeroGradient;
     }
-    defaultFaces
+    couple1
     {
-        type            empty;
+        type            zeroGradient;
+    }
+    couple2
+    {
+        type            zeroGradient;
     }
     ACMI1_blockage
     {
-        type            epsilonWallFunction;
-        value           $internalField;
-    }
-    ACMI1_couple
-    {
-        type            cyclicACMI;
-        value           $internalField;
+        type            zeroGradient;
     }
     ACMI2_blockage
     {
-        type            epsilonWallFunction;
-        value           $internalField;
-    }
-    ACMI2_couple
-    {
-        type            cyclicACMI;
-        value           $internalField;
+        type            zeroGradient;
     }
 }
 

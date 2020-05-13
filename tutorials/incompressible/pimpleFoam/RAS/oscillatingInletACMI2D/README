@@ -52,7 +52,17 @@ In the above, the ACMI1_blockage and ACMI1_couple patches occupy the same space,
 with duplicate points, edges and faces.  The ACMI2_blockage and ACMI2_couple
 patches are created similarly.
 
-The duplicate patches are initially created using the createBaffles utility.
+The duplicate patches are either created within blockMesh or using the
+createBaffles utility. Using the blockMesh path will result in a warning
+message of the form
+
+    'Trying to specify a boundary face '
+    'already belongs to some other patch'
+
+since there are now in total 7 faces defined for the hex shape and blockMesh
+does not yet know whether the definition is incorrect.
+
+Using the createBaffles utility is slightly more work.
 Firstly, the original (non-duplicated) patch faces are collected into zones
 using the topoSet utility.
 
@@ -109,14 +119,33 @@ the same as when operating in serial mode.
 
 checkMesh
 ---------
-checkMesh will see the 'duplicate' boundary faces but does not know about
-the area factors so will complain:
+Older versions of checkMesh would see the 'duplicate' boundary faces before
+the area factors were know so would complain:
 
      ***Boundary openness (-0.0103092 2.3845e-17 3.80774e-17) possible hole in boundary description.
      ***Open cells found, max cell openness: 0.333333, number of open cells 136
       <<Writing 136 non closed cells to set nonClosedCells
 
 As long as these non-closed cells are on the ACMI they can be ignored.
+
+In current checkMesh the area factors are updated before the check:
+
+    AMI: Creating addressing and weights between 40 source faces and 96 target faces
+    AMI: Patch source sum(weights) min:1 max:1 average:1
+    AMI: Patch target sum(weights) min:0 max:1 average:0.4
+    ACMI: Patch source uncovered/blended/covered = 0, 0, 40
+    ACMI: Patch target uncovered/blended/covered = 56, 2, 38
+
+
+pimpleFoam
+----------
+In the 'createBaffles' method the ACMI patches would be created after
+the 'empty' patch. In the 'blockMesh' method however the 'empty' patch
+will be last. This results in a slight difference in face ordering which
+is enough to give a slightly different truncation error in the geometry
+calculation and hence in the results. For all practical purposes however the
+results are the same. For cases which do not have 'empty' patches (i.e. 2D)
+this limitation does not apply.
 
 
 paraFoam

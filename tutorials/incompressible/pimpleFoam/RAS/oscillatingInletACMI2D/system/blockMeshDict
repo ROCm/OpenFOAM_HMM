@@ -41,7 +41,7 @@ blocks
 (
 //    hex (0 1 2 3 4 5 6 7) (20 20 1) simpleGrading (1 1 1)
 //    hex (8 9 10 11 12 13 14 15) (40 48 1) simpleGrading (1 1 1)
-    hex (0 1 2 3 4 5 6 7) (80 40 1) simpleGrading (1 1 1)
+    hex (0 1 2 3 4 5 6 7) inletChannel (80 40 1) simpleGrading (1 1 1)
     hex (8 9 10 11 12 13 14 15) (80 96 1) simpleGrading (1 1 1)
 );
 
@@ -78,17 +78,37 @@ boundary
             (9 13 12 8)
         );
     }
-    couple1
+    ACMI1_couple
     {
-        type patch;
+        type            cyclicACMI;
+        neighbourPatch  ACMI2_couple;
+        nonOverlapPatch ACMI1_blockage;
         faces
         (
             (2 6 5 1)
         );
     }
-    couple2
+    ACMI1_blockage
     {
-        type patch;
+        type wall;
+        faces
+        (
+            (2 6 5 1)
+        );
+    }
+    ACMI2_couple
+    {
+        type            cyclicACMI;
+        neighbourPatch  ACMI1_couple;
+        nonOverlapPatch ACMI2_blockage;
+        faces
+        (
+            (8 12 15 11)
+        );
+    }
+    ACMI2_blockage
+    {
+        type wall;
         faces
         (
             (8 12 15 11)
@@ -96,8 +116,5 @@ boundary
     }
 );
 
-mergePatchPairs
-(
-);
 
 // ************************************************************************* //

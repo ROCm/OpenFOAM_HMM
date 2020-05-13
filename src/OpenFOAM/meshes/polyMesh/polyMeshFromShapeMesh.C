@@ -285,6 +285,7 @@ void Foam::polyMesh::setTopology
     }
 
     // Do boundary faces
+    const label nInternalFaces = nFaces;
 
     patchSizes.setSize(boundaryFaces.size(), -1);
     patchStarts.setSize(boundaryFaces.size(), -1);
@@ -305,6 +306,9 @@ void Foam::polyMesh::setTopology
         // Grab the start label
         label curPatchStart = nFaces;
 
+        // Suppress multiple warnings per patch
+        bool patchWarned = false;
+
         forAll(patchFaces, facei)
         {
             const face& curFace = patchFaces[facei];
@@ -320,25 +324,75 @@ void Foam::polyMesh::setTopology
             {
                 if (face::sameVertices(facesOfCellInside[cellFacei], curFace))
                 {
-                    if (cells[cellInside][cellFacei] >= 0)
-                    {
-                        FatalErrorInFunction
-                            << "Trying to specify a boundary face " << curFace
-                            << " on the face on cell " << cellInside
-                            << " which is either an internal face or already "
-                            << "belongs to some other patch.  This is face "
-                            << facei << " of patch "
-                            << patchi << " named "
-                            << boundaryPatchNames[patchi] << "."
-                            << abort(FatalError);
-                    }
-
                     found = true;
 
-                    // Set the patch face to corresponding cell-face
-                    faces_[nFaces] = facesOfCellInside[cellFacei];
+                    const label meshFacei = cells[cellInside][cellFacei];
 
-                    cells[cellInside][cellFacei] = nFaces;
+                    if (meshFacei >= 0)
+                    {
+                        // Already have mesh face for this side of the
+                        // cellshape. This can happen for duplicate faces.
+                        // It might be
+                        // an error or explicitly desired (e.g. duplicate
+                        // baffles or acmi). We could have a special 7-faced
+                        // hex shape instead so we can have additional patches
+                        // but that would be unworkable. 
+                        // So now either
+                        // - exit with error
+                        // - or warn and append face to addressing
+                        // Note that duplicate baffles
+                        // - cannot be on an internal faces
+                        // - cannot be on the same patch (for now?)
+
+                        if
+                        (
+                            meshFacei < nInternalFaces
+                         || meshFacei >= curPatchStart
+                        )
+                        {
+                            FatalErrorInFunction
+                                << "Trying to specify a boundary face "
+                                << curFace
+                                << " on the face on cell " << cellInside
+                                << " which is either an internal face"
+                                << " or already belongs to the same patch."
+                                << " This is face " << facei << " of patch "
+                                << patchi << " named "
+                                << boundaryPatchNames[patchi] << "."
+                                << exit(FatalError);
+                        }
+
+
+                        if (!patchWarned)
+                        {
+                            WarningInFunction
+                                << "Trying to specify a boundary face "
+                                << curFace
+                                << " on the face on cell " << cellInside
+                                << " which is either an internal face"
+                                << " or already belongs to some other patch."
+                                << " This is face " << facei << " of patch "
+                                << patchi << " named "
+                                << boundaryPatchNames[patchi] << "."
+                                //<< abort(FatalError);
+                                << endl;
+                            patchWarned = true;
+                        }
+
+                        faces_.setSize(faces_.size()+1);
+
+                        // Set the patch face to corresponding cell-face
+                        faces_[nFaces] = facesOfCellInside[cellFacei];
+
+                        cells[cellInside].append(nFaces);
+                    }
+                    else
+                    {
+                        // Set the patch face to corresponding cell-face
+                        faces_[nFaces] = facesOfCellInside[cellFacei];
+
+                        cells[cellInside][cellFacei] = nFaces;
+                    }
 
                     break;
                 }
@@ -384,8 +438,6 @@ void Foam::polyMesh::setTopology
 
     // Reset the size of the face list
     faces_.setSize(nFaces);
-
-    return ;
 }
 
 
