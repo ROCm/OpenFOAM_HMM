@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,25 +47,26 @@ void Foam::slidingInterface::clearCouple
             << "Clearing old couple points and faces." << endl;
     }
 
-    // Remove all points from the point zone
-
     const polyMesh& mesh = topoChanger().mesh();
 
-    const labelList& cutPointZoneLabels =
-        mesh.pointZones()[cutPointZoneID_.index()];
-
-    forAll(cutPointZoneLabels, pointi)
+    // Remove all points from the point zone
+    for
+    (
+        const label pointi
+      : mesh.pointZones()[cutPointZoneID_.index()]
+    )
     {
-        ref.setAction(polyRemovePoint(cutPointZoneLabels[pointi]));
+        ref.setAction(polyRemovePoint(pointi));
     }
 
     // Remove all faces from the face zone
-    const labelList& cutFaceZoneLabels =
-        mesh.faceZones()[cutFaceZoneID_.index()];
-
-    forAll(cutFaceZoneLabels, facei)
+    for
+    (
+        const label facei
+      : mesh.faceZones()[cutFaceZoneID_.index()]
+    )
     {
-        ref.setAction(polyRemoveFace(cutFaceZoneLabels[facei]));
+        ref.setAction(polyRemoveFace(facei));
     }
 
     if (debug)

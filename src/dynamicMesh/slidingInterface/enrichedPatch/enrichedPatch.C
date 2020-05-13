@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,10 +50,7 @@ void Foam::enrichedPatch::calcMeshPoints() const
             << abort(FatalError);
     }
 
-    meshPointsPtr_ = new labelList(pointMap().toc());
-    labelList& mp = *meshPointsPtr_;
-
-    sort(mp);
+    meshPointsPtr_ = new labelList(pointMap().sortedToc());
 }
 
 
@@ -71,27 +68,24 @@ void Foam::enrichedPatch::calcLocalFaces() const
 
     Map<label> mpLookup(2*mp.size());
 
-    forAll(mp, mpI)
+    forAll(mp, mpi)
     {
-        mpLookup.insert(mp[mpI], mpI);
+        mpLookup.insert(mp[mpi], mpi);
     }
+
+    // Create local faces.
+    // Copy original faces and overwrite vertices after
 
     const faceList& faces = enrichedFaces();
 
-    localFacesPtr_ = new faceList(faces.size());
-    faceList& lf = *localFacesPtr_;
+    localFacesPtr_ = new faceList(faces);
+    auto& locFaces = *localFacesPtr_;
 
-    forAll(faces, facei)
+    for (face& f : locFaces)
     {
-        const face& f = faces[facei];
-
-        face& curlf = lf[facei];
-
-        curlf.setSize(f.size());
-
-        forAll(f, pointi)
+        for (label& pointi : f)
         {
-            curlf[pointi] = mpLookup.cfind(f[pointi])();
+            pointi = *(mpLookup.cfind(pointi));
         }
     }
 }
@@ -109,11 +103,11 @@ void Foam::enrichedPatch::calcLocalPoints() const
     const labelList& mp = meshPoints();
 
     localPointsPtr_ = new pointField(mp.size());
-    pointField& lp = *localPointsPtr_;
+    auto& locPoints = *localPointsPtr_;
 
-    forAll(lp, i)
+    forAll(locPoints, i)
     {
-        lp[i] = pointMap().cfind(mp[i])();
+        locPoints[i] = *(pointMap().cfind(mp[i]));
     }
 }
 
@@ -229,15 +223,13 @@ bool Foam::enrichedPatch::checkSupport() const
 
     forAll(faces, facei)
     {
-        const face& curFace = faces[facei];
-
-        forAll(curFace, pointi)
+        for (const label pointi : faces[facei])
         {
-            if (!pointMap().found(curFace[pointi]))
+            if (!pointMap().found(pointi))
             {
                 WarningInFunction
                     << "Point " << pointi << " of face " << facei
-                    << " global point index: " << curFace[pointi]
+                    << " global point index: " << pointi
                     << " not supported in point map.  This is not allowed."
                     << endl;
 
