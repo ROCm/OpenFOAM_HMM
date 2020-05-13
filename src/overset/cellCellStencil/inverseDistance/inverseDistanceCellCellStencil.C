@@ -2257,18 +2257,25 @@ bool Foam::cellCellStencils::inverseDistance::update()
         }
 
 
-        // Dump stencil
+        // Dump stencil, one per zone
         mkDir(mesh_.time().timePath());
-        OBJstream str(mesh_.time().timePath()/"stencil.obj");
-        Pout<< type() << " : dumping to " << str.name() << endl;
         pointField cc(mesh_.cellCentres());
         cellInterpolationMap().distribute(cc);
-
-        forAll(cellStencil_, celli)
+        forAll(meshParts, zonei)
         {
-            const labelList& slots = cellStencil_[celli];
-            if (slots.size())
+            OBJstream str
+            (
+               mesh_.time().timePath()
+               + "/stencil_" + name(zonei) + ".obj"
+            );
+            Pout<< type() << " : dumping to " << str.name() << endl;
+
+            const labelList& subMeshCellMap = meshParts[zonei].cellMap();
+
+            forAll(subMeshCellMap, subcelli)
             {
+                const label celli = subMeshCellMap[subcelli];
+                const labelList& slots = cellStencil_[celli];
                 const point& accCc = mesh_.cellCentres()[celli];
                 forAll(slots, i)
                 {
