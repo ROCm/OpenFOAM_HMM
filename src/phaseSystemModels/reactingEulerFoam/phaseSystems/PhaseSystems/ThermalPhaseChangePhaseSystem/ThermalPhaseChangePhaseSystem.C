@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2019 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -430,9 +431,9 @@ Foam::ThermalPhaseChangePhaseSystem<BasePhaseSystem>::correctInterfaceThermo()
         Tf = (H1*T1 + H2*T2 + iDmdtNew*L)/(H1 + H2);
 
         Info<< "Tf." << pair.name()
-            << ": min = " << min(Tf.primitiveField())
-            << ", mean = " << average(Tf.primitiveField())
-            << ", max = " << max(Tf.primitiveField())
+            << ": min = " << gMin(Tf.primitiveField())
+            << ", mean = " << gAverage(Tf.primitiveField())
+            << ", max = " << gMax(Tf.primitiveField())
             << endl;
 
         scalar iDmdtRelax(this->mesh().fieldRelaxationFactor("iDmdt"));
@@ -441,9 +442,9 @@ Foam::ThermalPhaseChangePhaseSystem<BasePhaseSystem>::correctInterfaceThermo()
         if (phaseChange_)
         {
             Info<< "iDmdt." << pair.name()
-                << ": min = " << min(iDmdt.primitiveField())
-                << ", mean = " << average(iDmdt.primitiveField())
-                << ", max = " << max(iDmdt.primitiveField())
+                << ": min = " << gMin(iDmdt.primitiveField())
+                << ", mean = " << gAverage(iDmdt.primitiveField())
+                << ", max = " << gMax(iDmdt.primitiveField())
                 << ", integral = " << fvc::domainIntegrate(iDmdt).value()
                 << endl;
         }
@@ -525,9 +526,9 @@ Foam::ThermalPhaseChangePhaseSystem<BasePhaseSystem>::correctInterfaceThermo()
         if (wallBoilingActive)
         {
             Info<< "wDmdt." << pair.name()
-                << ": min = " << min(wDmdt.primitiveField())
-                << ", mean = " << average(wDmdt.primitiveField())
-                << ", max = " << max(wDmdt.primitiveField())
+                << ": min = " << gMin(wDmdt.primitiveField())
+                << ", mean = " << gAverage(wDmdt.primitiveField())
+                << ", max = " << gMax(wDmdt.primitiveField())
                 << ", integral = " << fvc::domainIntegrate(wDmdt).value()
                 << endl;
         }
