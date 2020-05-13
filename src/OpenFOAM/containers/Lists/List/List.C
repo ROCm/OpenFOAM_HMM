@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -369,7 +369,7 @@ Foam::List<T>::List(std::initializer_list<T> list)
 template<class T>
 Foam::List<T>::List(List<T>&& list)
 :
-    UList<T>(nullptr, 0)
+    UList<T>()
 {
     // Can use transfer or swap to manage content
     transfer(list);
@@ -380,7 +380,7 @@ template<class T>
 template<int SizeMin>
 Foam::List<T>::List(DynamicList<T, SizeMin>&& list)
 :
-    UList<T>(nullptr, 0)
+    UList<T>()
 {
     transfer(list);
 }
@@ -389,7 +389,7 @@ Foam::List<T>::List(DynamicList<T, SizeMin>&& list)
 template<class T>
 Foam::List<T>::List(SortableList<T>&& list)
 :
-    UList<T>(nullptr, 0)
+    UList<T>()
 {
     transfer(list);
 }
@@ -398,7 +398,7 @@ Foam::List<T>::List(SortableList<T>&& list)
 template<class T>
 Foam::List<T>::List(SLList<T>&& list)
 :
-    UList<T>(nullptr, 0)
+    UList<T>()
 {
     operator=(std::move(list));
 }
@@ -531,14 +531,29 @@ void Foam::List<T>::operator=(const SLList<T>& list)
 
     if (len)
     {
-        List_ACCESS(T, (*this), vp);
+        T* iter = this->begin();
 
-        label i = 0;
-        for (auto iter = list.cbegin(); iter != list.cend(); ++iter)
+        for (const T& val : list)
         {
-            vp[i] = *iter;
-            ++i;
+            *iter = val;
+            ++iter;
         }
+    }
+}
+
+
+template<class T>
+template<unsigned N>
+void Foam::List<T>::operator=(const FixedList<T, N>& list)
+{
+    reAlloc(label(N));
+
+    T* iter = this->begin();
+
+    for (const T& val : list)
+    {
+        *iter = val;
+        ++iter;
     }
 }
 
@@ -572,13 +587,12 @@ void Foam::List<T>::operator=(std::initializer_list<T> list)
 
     if (len)
     {
-        List_ACCESS(T, (*this), vp);
+        T* iter = this->begin();
 
-        label i = 0;
         for (const T& val : list)
         {
-            vp[i] = val;
-            ++i;
+            *iter = val;
+            ++iter;
         }
     }
 }
@@ -614,18 +628,16 @@ void Foam::List<T>::operator=(SortableList<T>&& list)
 template<class T>
 void Foam::List<T>::operator=(SLList<T>&& list)
 {
-    const label len = list.size();
+    label len = list.size();
 
     reAlloc(len);
 
-    if (len)
-    {
-        List_ACCESS(T, (*this), vp);
+    T* iter = this->begin();
 
-        for (label i = 0; i < len; ++i)
-        {
-            vp[i] = std::move(list.removeHead());
-        }
+    while (len--)
+    {
+        *iter = std::move(list.removeHead());
+        ++iter;
     }
 
     list.clear();

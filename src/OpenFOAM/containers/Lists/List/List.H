@@ -52,7 +52,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class Istream;
 class Ostream;
 
@@ -267,6 +267,10 @@ public:
         //- Assignment from IndirectList. Takes linear time
         template<class Addr>
         void operator=(const IndirectListBase<T, Addr>& list);
+
+        //- Copy assignment from FixedList
+        template<unsigned N>
+        void operator=(const FixedList<T, N>& list);
 
         //- Assignment to an initializer list
         void operator=(std::initializer_list<T> list);

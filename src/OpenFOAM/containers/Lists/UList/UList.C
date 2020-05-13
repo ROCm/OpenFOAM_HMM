@@ -160,8 +160,11 @@ const Foam::UList<T> Foam::UList<T>::operator[](const labelRange& range) const
 template<class T>
 void Foam::UList<T>::operator=(const T& val)
 {
+    const label len = this->size();
+
     List_ACCESS(T, (*this), vp);
-    List_FOR_ALL((*this), i)
+
+    for (label i=0; i < len; ++i)
     {
         vp[i] = val;
     }
@@ -171,8 +174,11 @@ void Foam::UList<T>::operator=(const T& val)
 template<class T>
 void Foam::UList<T>::operator=(const zero)
 {
+    const label len = this->size();
+
     List_ACCESS(T, (*this), vp);
-    List_FOR_ALL((*this), i)
+
+    for (label i=0; i < len; ++i)
     {
         vp[i] = Zero;
     }
