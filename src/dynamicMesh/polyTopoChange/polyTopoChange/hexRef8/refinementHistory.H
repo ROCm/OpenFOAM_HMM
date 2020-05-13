@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,7 +65,6 @@ Description
 
     The parent 0 refers back to the splitcell entries.
 
-
 SourceFiles
     refinementHistory.C
 
@@ -87,13 +86,10 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class mapPolyMesh;
 class mapDistributePolyMesh;
 class polyMesh;
-
-// Forward declaration of friend functions and operators
-
 class refinementHistory;
 
 Istream& operator>>(Istream&, refinementHistory&);
@@ -122,7 +118,7 @@ public:
         //- Cells this cell was refined into
         autoPtr<FixedList<label, 8>> addedCellsPtr_;
 
-        //- Construct null (parent = -1)
+        //- Default construct (parent = -1)
         splitCell8();
 
         //- Construct from parent
@@ -132,14 +128,14 @@ public:
         splitCell8(Istream& is);
 
         //- Construct as deep copy
-        splitCell8(const splitCell8&);
+        splitCell8(const splitCell8& rhs);
 
-        //- Copy operator since autoPtr otherwise 'steals' storage.
-        void operator=(const splitCell8& s);
+        //- Copy assignment (no autoPtr stealing)
+        void operator=(const splitCell8& rhs);
 
-        bool operator==(const splitCell8& s) const;
+        bool operator==(const splitCell8& rhs) const;
 
-        bool operator!=(const splitCell8& s) const;
+        bool operator!=(const splitCell8& rhs) const;
 
         friend Istream& operator>>(Istream&, splitCell8&);
         friend Ostream& operator<<(Ostream&, const splitCell8&);
@@ -148,7 +144,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Is active?
         bool active_;
@@ -221,9 +217,9 @@ public:
 
     // Constructors
 
-        //- Construct (read) given an IOobject. If global number of visible
-        //  cells > 0 becomes active
-        refinementHistory(const IOobject&);
+        //- Construct (read) given an IOobject.
+        //  If global number of visible cells > 0 becomes active
+        explicit refinementHistory(const IOobject&);
 
         //- Construct (read) or construct from components
         refinementHistory
@@ -235,12 +231,12 @@ public:
         );
 
         //- Construct (read) or construct from initial number of cells
-        //  (all visible). If global number of visible
-        //  cells > 0 becomes active
+        //- (all visible).
+        //  If global number of visible cells > 0 becomes active
         refinementHistory(const IOobject&, const label nCells);
 
         //- Construct (read) or construct from initial number of cells
-        //  (all visible) and active flag
+        //- (all visible) and active flag
         refinementHistory
         (
             const IOobject&,
@@ -251,8 +247,8 @@ public:
         //- Construct as copy
         refinementHistory(const IOobject&, const refinementHistory&);
 
-        //- Construct from multiple refinement histories. If global number of
-        //  visible cells > 0 becomes active
+        //- Construct from multiple refinement histories.
+        //  If global number of visible cells > 0 becomes active
         refinementHistory
         (
             const IOobject&,
@@ -260,22 +256,22 @@ public:
             const UPtrList<const refinementHistory>&
         );
 
-        //- Construct from Istream. If global number of
-        //  visible cells > 0 becomes active
-        refinementHistory(const IOobject&, Istream&);
+        //- Construct from Istream.
+        //  If global number of visible cells > 0 becomes active
+        explicit refinementHistory(const IOobject&, Istream&);
 
 
     // Member Functions
 
 
         //- Per cell in the current mesh (i.e. visible) either -1 (unrefined)
-        //  or an index into splitCells.
+        //- or an index into splitCells.
         const labelList& visibleCells() const
         {
             return visibleCells_;
         }
 
-        //- Storage for splitCell8s.
+        //- Storage for splitCell8s
         const DynamicList<splitCell8>& splitCells() const
         {
             return splitCells_;

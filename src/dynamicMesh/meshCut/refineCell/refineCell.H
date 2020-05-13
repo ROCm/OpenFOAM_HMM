@@ -45,10 +45,8 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward Declarations
 class refineCell;
-
 Ostream& operator<<(Ostream&, const refineCell&);
 
 
@@ -58,26 +56,27 @@ Ostream& operator<<(Ostream&, const refineCell&);
 
 class refineCell
 {
-    // Private data
+    // Private Data
 
-    //- Cell label
-    label cellNo_;
+        //- Cell label
+        label cellNo_;
 
-    //- Preferred refinement direction (always normalized).
-    vector direction_;
+        //- Preferred refinement direction (always normalized).
+        vector direction_;
+
 
 public:
 
     // Constructors
 
-        //- Null
+        //- Default construct
         refineCell();
 
         //- From components. Vector will be normalized upon construction.
-        refineCell(const label, const vector&);
+        refineCell(const label celli, const vector& direction);
 
         //- From Istream. Vector will be normalized upon construction.
-        refineCell(Istream& is);
+        explicit refineCell(Istream& is);
 
 
     // Member Functions

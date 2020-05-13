@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,7 +57,7 @@ class layerAdditionRemoval
 :
     public polyMeshModifier
 {
-    // Private data
+    // Private Data
 
         //- Master face zone ID
         faceZoneID faceZoneID_;
@@ -76,10 +77,10 @@ class layerAdditionRemoval
         mutable scalar oldLayerThickness_;
 
         //- Point pairing
-        mutable labelList* pointsPairingPtr_;
+        mutable unique_ptr<labelList> pointsPairingPtr_;
 
         //- Face pairing
-        mutable labelList* facesPairingPtr_;
+        mutable unique_ptr<labelList> facesPairingPtr_;
 
         //- Layer removal trigger time index
         mutable label triggerRemoval_;
@@ -100,7 +101,7 @@ class layerAdditionRemoval
         void checkDefinition();
 
 
-        // Topological changes
+        // Topological Changes
 
             //- Check for valid layer
             bool validCollapse() const;
@@ -127,13 +128,7 @@ class layerAdditionRemoval
             void clearAddressing() const;
 
 
-        // Helpers
-
-            //- Optionally read old thickness
-            static scalar readOldThickness(const dictionary&);
-
-
-    // Static data members
+    // Static Data Members
 
         //- Thickness insertion fraction for the pre-motion
         static const scalar addDelta_;
@@ -174,7 +169,7 @@ public:
 
 
     //- Destructor
-    virtual ~layerAdditionRemoval();
+    virtual ~layerAdditionRemoval() = default;
 
 
     // Member Functions

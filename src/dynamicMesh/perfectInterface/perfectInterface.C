@@ -126,12 +126,6 @@ Foam::perfectInterface::perfectInterface
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::perfectInterface::~perfectInterface()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::perfectInterface::changeTopology() const

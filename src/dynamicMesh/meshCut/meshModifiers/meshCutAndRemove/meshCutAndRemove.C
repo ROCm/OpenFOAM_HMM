@@ -563,7 +563,6 @@ Foam::face Foam::meshCutAndRemove::loopToFace
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::meshCutAndRemove::meshCutAndRemove(const polyMesh& mesh)
 :
     edgeVertex(mesh),

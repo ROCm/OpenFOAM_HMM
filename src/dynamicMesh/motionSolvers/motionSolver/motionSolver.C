@@ -195,12 +195,6 @@ Foam::autoPtr<Foam::motionSolver> Foam::motionSolver::iNew::operator()
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::motionSolver::~motionSolver()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::pointField> Foam::motionSolver::newPoints()

@@ -28,9 +28,6 @@ License
 
 #include "rotatingMotion.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathematicalConstants.H"
-
-using namespace Foam::constant::mathematical;
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -64,12 +61,6 @@ Foam::solidBodyMotionFunctions::rotatingMotion::rotatingMotion
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::solidBodyMotionFunctions::rotatingMotion::~rotatingMotion()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::septernion
@@ -98,7 +89,7 @@ bool Foam::solidBodyMotionFunctions::rotatingMotion::read
 
     omega_.reset
     (
-        Function1<scalar>::New("omega", SBMFCoeffs_).ptr()
+        Function1<scalar>::New("omega", SBMFCoeffs_)
     );
 
     return true;

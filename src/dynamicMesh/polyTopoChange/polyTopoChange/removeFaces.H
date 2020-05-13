@@ -51,7 +51,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class polyMesh;
 class polyTopoChange;
 class face;
@@ -177,6 +177,7 @@ public:
         //  to be considered aligned. Set to >= 1 to disable checking
         //  and always merge (if on same patch)
         removeFaces(const polyMesh&, const scalar minCos);
+
 
     // Member Functions
 

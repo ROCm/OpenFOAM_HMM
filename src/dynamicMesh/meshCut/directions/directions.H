@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +54,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class polyMesh;
 class twoDPointCorrector;
 class primitiveMesh;
@@ -68,10 +69,9 @@ class directions
 :
     public List<vectorField>
 {
-
 public:
 
-    // Data types
+    // Data Types
 
         //- Enumeration listing the possible coordinate directions.
         enum directionType

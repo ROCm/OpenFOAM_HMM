@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,7 +62,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class polyMesh;
 class plane;
 
@@ -73,7 +74,6 @@ class cellLooper
 :
     public edgeVertex
 {
-
 protected:
 
     // Protected Member Functions
@@ -106,10 +106,6 @@ protected:
         label getMisAlignedEdge(const vector& refDir, const label celli) const;
 
 
-private:
-
-    // Private Member Functions
-
         //- No copy construct
         cellLooper(const cellLooper&) = delete;
 
@@ -140,8 +136,8 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        cellLooper(const polyMesh& mesh);
+        //- Construct from mesh
+        explicit cellLooper(const polyMesh& mesh);
 
         //- Clone
         autoPtr<cellLooper> clone() const
@@ -162,7 +158,7 @@ public:
 
 
     //- Destructor
-    virtual ~cellLooper();
+    virtual ~cellLooper() = default;
 
 
     // Member Functions
@@ -198,7 +194,6 @@ public:
             labelList& loop,
             scalarField& loopWeights
         ) const = 0;
-
 };
 
 

@@ -38,13 +38,11 @@ Description
 namespace Foam
 {
     defineTypeNameAndDebug(polyMeshModifier, 0);
-
     defineRunTimeSelectionTable(polyMeshModifier, dictionary);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::polyMeshModifier::polyMeshModifier
 (
     const word& name,
@@ -57,12 +55,6 @@ Foam::polyMeshModifier::polyMeshModifier
     index_(index),
     topoChanger_(mme),
     active_(act)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::polyMeshModifier::~polyMeshModifier()
 {}
 
 

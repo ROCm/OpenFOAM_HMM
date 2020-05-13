@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +48,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class mapPolyMesh;
 class mapDistributePolyMesh;
 class refinementHistory;
@@ -60,10 +60,7 @@ class fvMesh;
 
 class hexRef8Data
 {
-
-private:
-
-    // Private data
+    // Private Data
 
         autoPtr<labelIOList> cellLevelPtr_;
 
@@ -88,8 +85,8 @@ public:
     // Constructors
 
         //- Construct read. Has special provision for only some processors
-        //  having the files so can be used in redistribution.
-        hexRef8Data(const IOobject& io);
+        //- having the files so can be used in redistribution.
+        explicit hexRef8Data(const IOobject& io);
 
         //- Construct as subset
         hexRef8Data
@@ -111,7 +108,7 @@ public:
 
 
     //- Destructor
-    ~hexRef8Data();
+    ~hexRef8Data() = default;
 
 
     // Member Functions

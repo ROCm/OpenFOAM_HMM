@@ -174,7 +174,6 @@ void Foam::undoableMeshCutter::updateLabels
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::undoableMeshCutter::undoableMeshCutter
 (
     const polyMesh& mesh,

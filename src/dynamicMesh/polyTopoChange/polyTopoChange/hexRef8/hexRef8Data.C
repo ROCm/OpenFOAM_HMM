@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,6 @@ License
 
 #include "IOobject.H"
 #include "UList.H"
-
 #include "hexRef8Data.H"
 #include "mapPolyMesh.H"
 #include "mapDistributePolyMesh.H"
@@ -42,59 +41,47 @@ License
 Foam::hexRef8Data::hexRef8Data(const IOobject& io)
 {
     {
-        IOobject rio(io);
-        rio.rename("cellLevel");
-        bool haveFile = returnReduce
-        (
-            rio.typeHeaderOk<labelIOList>(true),
-            orOp<bool>()
-        );
-        if (haveFile)
+        typedef labelIOList Type;
+        IOobject rio(io, "cellLevel");
+
+        // haveFile
+        if (returnReduce(rio.typeHeaderOk<Type>(true), orOp<bool>()))
         {
             Info<< "Reading hexRef8 data : " << rio.name() << endl;
-            cellLevelPtr_.reset(new labelIOList(rio));
+            cellLevelPtr_.reset(new Type(rio));
         }
     }
     {
-        IOobject rio(io);
-        rio.rename("pointLevel");
-        bool haveFile = returnReduce
-        (
-            rio.typeHeaderOk<labelIOList>(true),
-            orOp<bool>()
-        );
-        if (haveFile)
+        typedef labelIOList Type;
+        IOobject rio(io, "pointLevel");
+
+        // haveFile
+        if (returnReduce(rio.typeHeaderOk<Type>(true), orOp<bool>()))
         {
             Info<< "Reading hexRef8 data : " << rio.name() << endl;
-            pointLevelPtr_.reset(new labelIOList(rio));
+            pointLevelPtr_.reset(new Type(rio));
         }
     }
     {
-        IOobject rio(io);
-        rio.rename("level0Edge");
-        bool haveFile = returnReduce
-        (
-            rio.typeHeaderOk<uniformDimensionedScalarField>(true),
-            orOp<bool>()
-        );
-        if (haveFile)
+        typedef uniformDimensionedScalarField Type;
+        IOobject rio(io, "level0Edge");
+
+        // haveFile
+        if (returnReduce(rio.typeHeaderOk<Type>(true), orOp<bool>()))
         {
             Info<< "Reading hexRef8 data : " << rio.name() << endl;
-            level0EdgePtr_.reset(new uniformDimensionedScalarField(rio));
+            level0EdgePtr_.reset(new Type(rio));
         }
     }
     {
-        IOobject rio(io);
-        rio.rename("refinementHistory");
-        bool haveFile = returnReduce
-        (
-            rio.typeHeaderOk<refinementHistory>(true),
-            orOp<bool>()
-        );
-        if (haveFile)
+        typedef refinementHistory Type;
+        IOobject rio(io, "refinementHistory");
+
+        // haveFile
+        if (returnReduce(rio.typeHeaderOk<Type>(true), orOp<bool>()))
         {
             Info<< "Reading hexRef8 data : " << rio.name() << endl;
-            refHistoryPtr_.reset(new refinementHistory(rio));
+            refHistoryPtr_.reset(new Type(rio));
         }
     }
 }
@@ -108,10 +95,9 @@ Foam::hexRef8Data::hexRef8Data
     const labelList& pointMap
 )
 {
-    if (data.cellLevelPtr_.valid())
+    if (data.cellLevelPtr_)
     {
-        IOobject rio(io);
-        rio.rename(data.cellLevelPtr_().name());
+        IOobject rio(io, data.cellLevelPtr_().name());
 
         cellLevelPtr_.reset
         (
@@ -122,10 +108,9 @@ Foam::hexRef8Data::hexRef8Data
             )
         );
     }
-    if (data.pointLevelPtr_.valid())
+    if (data.pointLevelPtr_)
     {
-        IOobject rio(io);
-        rio.rename(data.pointLevelPtr_().name());
+        IOobject rio(io, data.pointLevelPtr_().name());
 
         pointLevelPtr_.reset
         (
@@ -136,20 +121,18 @@ Foam::hexRef8Data::hexRef8Data
             )
         );
     }
-    if (data.level0EdgePtr_.valid())
+    if (data.level0EdgePtr_)
     {
-        IOobject rio(io);
-        rio.rename(data.level0EdgePtr_().name());
+        IOobject rio(io, data.level0EdgePtr_().name());
 
         level0EdgePtr_.reset
         (
             new uniformDimensionedScalarField(rio, data.level0EdgePtr_())
         );
     }
-    if (data.refHistoryPtr_.valid())
+    if (data.refHistoryPtr_)
     {
-        IOobject rio(io);
-        rio.rename(data.refHistoryPtr_().name());
+        IOobject rio(io, data.refHistoryPtr_().name());
 
         refHistoryPtr_ = data.refHistoryPtr_().clone(rio, cellMap);
     }
@@ -168,13 +151,12 @@ Foam::hexRef8Data::hexRef8Data
 
     // cellLevel
 
-    if (procDatas[0].cellLevelPtr_.valid())
+    if (procDatas[0].cellLevelPtr_)
     {
-        IOobject rio(io);
-        rio.rename(procDatas[0].cellLevelPtr_().name());
+        IOobject rio(io, procDatas[0].cellLevelPtr_().name());
 
         cellLevelPtr_.reset(new labelIOList(rio, mesh.nCells()));
-        labelList& cellLevel = cellLevelPtr_();
+        auto& cellLevel = *cellLevelPtr_;
 
         forAll(procDatas, procI)
         {
@@ -186,13 +168,12 @@ Foam::hexRef8Data::hexRef8Data
 
     // pointLevel
 
-    if (procDatas[0].pointLevelPtr_.valid())
+    if (procDatas[0].pointLevelPtr_)
     {
-        IOobject rio(io);
-        rio.rename(procDatas[0].pointLevelPtr_().name());
+        IOobject rio(io, procDatas[0].pointLevelPtr_().name());
 
         pointLevelPtr_.reset(new labelIOList(rio, mesh.nPoints()));
-        labelList& pointLevel = pointLevelPtr_();
+        auto& pointLevel = *pointLevelPtr_;
 
         forAll(procDatas, procI)
         {
@@ -204,10 +185,9 @@ Foam::hexRef8Data::hexRef8Data
 
     // level0Edge
 
-    if (procDatas[0].level0EdgePtr_.valid())
+    if (procDatas[0].level0EdgePtr_)
     {
-        IOobject rio(io);
-        rio.rename(procDatas[0].level0EdgePtr_().name());
+        IOobject rio(io, procDatas[0].level0EdgePtr_().name());
 
         level0EdgePtr_.reset
         (
@@ -222,10 +202,9 @@ Foam::hexRef8Data::hexRef8Data
 
     // refinementHistory
 
-    if (procDatas[0].refHistoryPtr_.valid())
+    if (procDatas[0].refHistoryPtr_)
     {
-        IOobject rio(io);
-        rio.rename(procDatas[0].refHistoryPtr_().name());
+        IOobject rio(io, procDatas[0].refHistoryPtr_().name());
 
         UPtrList<const refinementHistory> procRefs(procDatas.size());
         forAll(procDatas, i)
@@ -246,23 +225,16 @@ Foam::hexRef8Data::hexRef8Data
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::hexRef8Data::~hexRef8Data()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::hexRef8Data::sync(const IOobject& io)
 {
     const polyMesh& mesh = dynamic_cast<const polyMesh&>(io.db());
 
-    bool hasCellLevel = returnReduce(cellLevelPtr_.valid(), orOp<bool>());
-    if (hasCellLevel && !cellLevelPtr_.valid())
+    bool hasCellLevel = returnReduce(bool(cellLevelPtr_), orOp<bool>());
+    if (hasCellLevel && !cellLevelPtr_)
     {
-        IOobject rio(io);
-        rio.rename("cellLevel");
+        IOobject rio(io, "cellLevel");
         rio.readOpt() = IOobject::NO_READ;
         cellLevelPtr_.reset
         (
@@ -270,11 +242,10 @@ void Foam::hexRef8Data::sync(const IOobject& io)
         );
     }
 
-    bool hasPointLevel = returnReduce(pointLevelPtr_.valid(), orOp<bool>());
-    if (hasPointLevel && !pointLevelPtr_.valid())
+    bool hasPointLevel = returnReduce(bool(pointLevelPtr_), orOp<bool>());
+    if (hasPointLevel && !pointLevelPtr_)
     {
-        IOobject rio(io);
-        rio.rename("pointLevel");
+        IOobject rio(io, "pointLevel");
         rio.readOpt() = IOobject::NO_READ;
         pointLevelPtr_.reset
         (
@@ -282,16 +253,15 @@ void Foam::hexRef8Data::sync(const IOobject& io)
         );
     }
 
-    bool hasLevel0Edge = returnReduce(level0EdgePtr_.valid(), orOp<bool>());
+    bool hasLevel0Edge = returnReduce(bool(level0EdgePtr_), orOp<bool>());
     if (hasLevel0Edge)
     {
         // Get master length
         scalar masterLen = (Pstream::master() ? level0EdgePtr_().value() : 0);
         Pstream::scatter(masterLen);
-        if (!level0EdgePtr_.valid())
+        if (!level0EdgePtr_)
         {
-            IOobject rio(io);
-            rio.rename("level0Edge");
+            IOobject rio(io, "level0Edge");
             rio.readOpt() = IOobject::NO_READ;
             level0EdgePtr_.reset
             (
@@ -304,11 +274,10 @@ void Foam::hexRef8Data::sync(const IOobject& io)
         }
     }
 
-    bool hasHistory = returnReduce(refHistoryPtr_.valid(), orOp<bool>());
-    if (hasHistory && !refHistoryPtr_.valid())
+    bool hasHistory = returnReduce(bool(refHistoryPtr_), orOp<bool>());
+    if (hasHistory && !refHistoryPtr_)
     {
-        IOobject rio(io);
-        rio.rename("refinementHistory");
+        IOobject rio(io, "refinementHistory");
         rio.readOpt() = IOobject::NO_READ;
         refHistoryPtr_.reset(new refinementHistory(rio, mesh.nCells(), true));
     }
@@ -320,8 +289,8 @@ void Foam::hexRef8Data::updateMesh(const mapPolyMesh& map)
     // Sanity check
     if
     (
-         (cellLevelPtr_.valid() && cellLevelPtr_().size() != map.nOldCells())
-      || (pointLevelPtr_.valid() && pointLevelPtr_().size() != map.nOldPoints())
+         (cellLevelPtr_ && cellLevelPtr_().size() != map.nOldCells())
+      || (pointLevelPtr_ && pointLevelPtr_().size() != map.nOldPoints())
     )
     {
         cellLevelPtr_.clear();
@@ -332,7 +301,7 @@ void Foam::hexRef8Data::updateMesh(const mapPolyMesh& map)
     }
 
 
-    if (cellLevelPtr_.valid())
+    if (cellLevelPtr_)
     {
         const labelList& cellMap = map.cellMap();
         labelList& cellLevel = cellLevelPtr_();
@@ -354,7 +323,7 @@ void Foam::hexRef8Data::updateMesh(const mapPolyMesh& map)
         cellLevel.transfer(newCellLevel);
         cellLevelPtr_().instance() = map.mesh().facesInstance();
     }
-    if (pointLevelPtr_.valid())
+    if (pointLevelPtr_)
     {
         const labelList& pointMap = map.pointMap();
         labelList& pointLevel = pointLevelPtr_();
@@ -378,7 +347,7 @@ void Foam::hexRef8Data::updateMesh(const mapPolyMesh& map)
     }
 
 
-    if (refHistoryPtr_.valid() && refHistoryPtr_().active())
+    if (refHistoryPtr_ && refHistoryPtr_().active())
     {
         refHistoryPtr_().updateMesh(map);
         refHistoryPtr_().instance() = map.mesh().facesInstance();
@@ -388,18 +357,18 @@ void Foam::hexRef8Data::updateMesh(const mapPolyMesh& map)
 
 void Foam::hexRef8Data::distribute(const mapDistributePolyMesh& map)
 {
-    if (cellLevelPtr_.valid())
+    if (cellLevelPtr_)
     {
-        map.cellMap().distribute(cellLevelPtr_());
+        map.cellMap().distribute(*cellLevelPtr_);
     }
-    if (pointLevelPtr_.valid())
+    if (pointLevelPtr_)
     {
-        map.pointMap().distribute(pointLevelPtr_());
+        map.pointMap().distribute(*pointLevelPtr_);
     }
 
     // No need to distribute the level0Edge
 
-    if (refHistoryPtr_.valid() && refHistoryPtr_().active())
+    if (refHistoryPtr_ && refHistoryPtr_().active())
     {
         refHistoryPtr_().distribute(map);
     }
@@ -409,19 +378,19 @@ void Foam::hexRef8Data::distribute(const mapDistributePolyMesh& map)
 bool Foam::hexRef8Data::write() const
 {
     bool ok = true;
-    if (cellLevelPtr_.valid())
+    if (cellLevelPtr_)
     {
         ok = ok && cellLevelPtr_().write();
     }
-    if (pointLevelPtr_.valid())
+    if (pointLevelPtr_)
     {
         ok = ok && pointLevelPtr_().write();
     }
-    if (level0EdgePtr_.valid())
+    if (level0EdgePtr_)
     {
         ok = ok && level0EdgePtr_().write();
     }
-    if (refHistoryPtr_.valid())
+    if (refHistoryPtr_)
     {
         ok = ok && refHistoryPtr_().write();
     }

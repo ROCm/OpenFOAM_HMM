@@ -43,14 +43,14 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(boundaryMesh, 0);
+    defineTypeNameAndDebug(boundaryMesh, 0);
+}
 
 // Normal along which to divide faces into categories (used in getNearest)
-const vector boundaryMesh::splitNormal_(3, 2, 1);
+const Foam::vector Foam::boundaryMesh::splitNormal_(3, 2, 1);
 
 // Distance to face tolerance for getNearest
-const scalar boundaryMesh::distanceTol_ = 1e-2;
-}
+const Foam::scalar Foam::boundaryMesh::distanceTol_ = 1e-2;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -437,7 +437,6 @@ void Foam::boundaryMesh::markZone
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Null constructor
 Foam::boundaryMesh::boundaryMesh()
 :
     meshPtr_(nullptr),
@@ -452,26 +451,13 @@ Foam::boundaryMesh::boundaryMesh()
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::boundaryMesh::~boundaryMesh()
-{
-    clearOut();
-}
-
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::boundaryMesh::clearOut()
 {
-    if (meshPtr_)
-    {
-        delete meshPtr_;
-
-        meshPtr_ = nullptr;
-    }
+    meshPtr_.reset(nullptr);
 }
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::boundaryMesh::read(const polyMesh& mesh)
 {
@@ -544,8 +530,10 @@ void Foam::boundaryMesh::read(const polyMesh& mesh)
     // Store in local(compact) addressing
     clearOut();
 
-    meshPtr_ = new bMesh(globalPatch.localFaces(), globalPatch.localPoints());
-
+    meshPtr_.reset
+    (
+        new bMesh(globalPatch.localFaces(), globalPatch.localPoints())
+    );
 
     if (debug & 2)
     {
@@ -586,16 +574,15 @@ void Foam::boundaryMesh::read(const polyMesh& mesh)
     }
 
     // Clear edge storage
-    featurePoints_.setSize(0);
-    featureEdges_.setSize(0);
+    featurePoints_.clear();
+    featureEdges_.clear();
 
-    featureToEdge_.setSize(0);
-    edgeToFeature_.setSize(meshPtr_->nEdges());
+    featureToEdge_.clear();
+    edgeToFeature_.resize(meshPtr_->nEdges());
     edgeToFeature_ = -1;
 
-    featureSegments_.setSize(0);
-
-    extraEdges_.setSize(0);
+    featureSegments_.clear();
+    extraEdges_.clear();
 }
 
 
@@ -752,19 +739,18 @@ void Foam::boundaryMesh::readTriSurface(const fileName& fName)
     clearOut();
 
     // Store compact.
-    meshPtr_ = new bMesh(bFaces, surf.localPoints());
+    meshPtr_.reset(new bMesh(bFaces, surf.localPoints()));
 
     // Clear edge storage
-    featurePoints_.setSize(0);
-    featureEdges_.setSize(0);
+    featurePoints_.clear();
+    featureEdges_.clear();
 
-    featureToEdge_.setSize(0);
-    edgeToFeature_.setSize(meshPtr_->nEdges());
+    featureToEdge_.clear();
+    edgeToFeature_.resize(meshPtr_->nEdges());
     edgeToFeature_ = -1;
 
-    featureSegments_.setSize(0);
-
-    extraEdges_.setSize(0);
+    featureSegments_.clear();
+    extraEdges_.clear();
 }
 
 
@@ -1813,7 +1799,8 @@ void Foam::boundaryMesh::changeFaces
     }
 
     // Reconstruct 'mesh' from new faces and (copy of) existing points.
-    bMesh* newMeshPtr_ = new bMesh(newFaces, mesh().points());
+
+    unique_ptr<bMesh> newMeshPtr(new bMesh(newFaces, mesh().points()));
 
     // Reset meshFace_ to new ordering.
     meshFace_.transfer(newMeshFace);
@@ -1823,7 +1810,7 @@ void Foam::boundaryMesh::changeFaces
     clearOut();
 
     // And insert new 'mesh'.
-    meshPtr_ = newMeshPtr_;
+    meshPtr_ = std::move(newMeshPtr);
 }
 
 

@@ -36,7 +36,6 @@ Description
 #include "labelPair.H"
 #include "primitiveMesh.H"
 #include "edgeHashes.H"
-#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -635,22 +634,17 @@ void Foam::enrichedPatch::calcCutFaces() const
     } // end of local faces
 
     // Re-pack lists into compact storage
-    cutFacesPtr_ = new faceList();
-    cutFacesPtr_->transfer(cf);
-
-    cutFaceMasterPtr_ = new labelList();
-    cutFaceMasterPtr_->transfer(cfMaster);
-
-    cutFaceSlavePtr_ = new labelList();
-    cutFaceSlavePtr_->transfer(cfSlave);
+    cutFacesPtr_.reset(new faceList(std::move(cf)));
+    cutFaceMasterPtr_.reset(new labelList(std::move(cfMaster)));
+    cutFaceSlavePtr_.reset(new labelList(std::move(cfSlave)));
 }
 
 
 void Foam::enrichedPatch::clearCutFaces()
 {
-    deleteDemandDrivenData(cutFacesPtr_);
-    deleteDemandDrivenData(cutFaceMasterPtr_);
-    deleteDemandDrivenData(cutFaceSlavePtr_);
+    cutFacesPtr_.reset(nullptr);
+    cutFaceMasterPtr_.reset(nullptr);
+    cutFaceSlavePtr_.reset(nullptr);
 }
 
 

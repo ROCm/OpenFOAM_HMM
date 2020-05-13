@@ -50,7 +50,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class mapPolyMesh;
 class polyTopoChange;
 class globalMeshData;
@@ -61,7 +61,7 @@ class globalMeshData;
 
 class createShellMesh
 {
-    // Private data
+    // Private Data
 
         //- Reference to patch to extrude
         const primitiveFacePatch& patch_;
@@ -113,7 +113,7 @@ public:
 
     // Constructors
 
-        //- Construct from mesh.
+        //- Construct from face patch
         createShellMesh
         (
             const primitiveFacePatch& patch,
@@ -123,7 +123,6 @@ public:
 
 
     // Member Functions
-
 
         // Access
 

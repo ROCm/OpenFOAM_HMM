@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +55,7 @@ class solidBodyMotionDisplacementPointPatchVectorField
 :
     public fixedValuePointPatchVectorField
 {
-    // Private data
+    // Private Data
 
         //- The motion control function
         autoPtr<solidBodyMotionFunction> SBMFPtr_;
@@ -149,7 +150,8 @@ public:
 
             const pointField& localPoints0() const;
 
-        // Evaluation functions
+
+        // Evaluation Functions
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();

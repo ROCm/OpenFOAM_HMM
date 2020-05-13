@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,7 +77,7 @@ class boundaryMesh
     // Private Data
 
         //- All boundary mesh data. Reconstructed every time faces are repatched
-        bMesh* meshPtr_;
+        unique_ptr<bMesh> meshPtr_;
 
         //- Patches. Reconstructed every time faces are repatched.
         PtrList<boundaryPatch> patches_;
@@ -189,12 +190,12 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         boundaryMesh();
 
 
     //- Destructor
-    ~boundaryMesh();
+    ~boundaryMesh() = default;
 
         void clearOut();
 
@@ -208,8 +209,8 @@ public:
                 if (!meshPtr_)
                 {
                     FatalErrorInFunction
-                        << "No mesh available. Probably mesh not yet"
-                        << " read." << abort(FatalError);
+                        << "No mesh available. Probably mesh not yet read\n"
+                        << abort(FatalError);
                 }
                 return *meshPtr_;
             }

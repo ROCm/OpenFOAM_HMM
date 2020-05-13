@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +61,7 @@ class SDA
 :
     public solidBodyMotionFunction
 {
-    // Private data
+    // Private Data
 
         //- Center of gravity
         vector CofG_;
@@ -135,7 +136,7 @@ public:
 
 
     //- Destructor
-    virtual ~SDA();
+    virtual ~SDA() = default;
 
 
     // Member Functions

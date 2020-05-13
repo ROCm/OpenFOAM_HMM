@@ -30,7 +30,6 @@ License
 #include "polyMesh.H"
 #include "line.H"
 #include "polyTopoChanger.H"
-#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -239,10 +238,11 @@ bool Foam::slidingInterface::projectPoints() const
     }
 
     // Projected slave points are stored for mesh motion correction
-    deleteDemandDrivenData(projectedSlavePointsPtr_);
-    projectedSlavePointsPtr_ =
-        new pointField(slavePointFaceHits.size(), Zero);
-    pointField& projectedSlavePoints = *projectedSlavePointsPtr_;
+    projectedSlavePointsPtr_.reset
+    (
+        new pointField(slavePointFaceHits.size(), Zero)
+    );
+    auto& projectedSlavePoints = *projectedSlavePointsPtr_;
 
     // Adjust projection to type of match
 
@@ -1082,21 +1082,22 @@ bool Foam::slidingInterface::projectPoints() const
         trigger_ = true;
 
         // Store the addressing arrays and projected points
-        deleteDemandDrivenData(slavePointPointHitsPtr_);
-        slavePointPointHitsPtr_ = new labelList();
-        slavePointPointHitsPtr_->transfer(slavePointPointHits);
-
-        deleteDemandDrivenData(slavePointEdgeHitsPtr_);
-        slavePointEdgeHitsPtr_ = new labelList();
-        slavePointEdgeHitsPtr_->transfer(slavePointEdgeHits);
-
-        deleteDemandDrivenData(slavePointFaceHitsPtr_);
-        slavePointFaceHitsPtr_ = new List<objectHit>();
-        slavePointFaceHitsPtr_->transfer(slavePointFaceHits);
-
-        deleteDemandDrivenData(masterPointEdgeHitsPtr_);
-        masterPointEdgeHitsPtr_ = new labelList();
-        masterPointEdgeHitsPtr_->transfer(masterPointEdgeHits);
+        slavePointPointHitsPtr_.reset
+        (
+            new labelList(std::move(slavePointPointHits))
+        );
+        slavePointEdgeHitsPtr_.reset
+        (
+            new labelList(std::move(slavePointEdgeHits))
+        );
+        slavePointFaceHitsPtr_.reset
+        (
+            new List<objectHit>(std::move(slavePointFaceHits))
+        );
+        masterPointEdgeHitsPtr_.reset
+        (
+            new labelList(std::move(masterPointEdgeHits))
+        );
 
         if (debug)
         {
@@ -1118,21 +1119,22 @@ bool Foam::slidingInterface::projectPoints() const
         )
         {
             // Must be restart.  Force topological change.
-            deleteDemandDrivenData(slavePointPointHitsPtr_);
-            slavePointPointHitsPtr_ = new labelList();
-            slavePointPointHitsPtr_->transfer(slavePointPointHits);
-
-            deleteDemandDrivenData(slavePointEdgeHitsPtr_);
-            slavePointEdgeHitsPtr_ = new labelList();
-            slavePointEdgeHitsPtr_->transfer(slavePointEdgeHits);
-
-            deleteDemandDrivenData(slavePointFaceHitsPtr_);
-            slavePointFaceHitsPtr_ = new List<objectHit>();
-            slavePointFaceHitsPtr_->transfer(slavePointFaceHits);
-
-            deleteDemandDrivenData(masterPointEdgeHitsPtr_);
-            masterPointEdgeHitsPtr_ = new labelList();
-            masterPointEdgeHitsPtr_->transfer(masterPointEdgeHits);
+            slavePointPointHitsPtr_.reset
+            (
+                new labelList(slavePointPointHits)
+            );
+            slavePointEdgeHitsPtr_.reset
+            (
+                new labelList(std::move(slavePointEdgeHits))
+            );
+            slavePointFaceHitsPtr_.reset
+            (
+                new List<objectHit>(std::move(slavePointFaceHits))
+            );
+            masterPointEdgeHitsPtr_.reset
+            (
+                new labelList(std::move(masterPointEdgeHits))
+            );
 
             if (debug)
             {
@@ -1143,7 +1145,7 @@ bool Foam::slidingInterface::projectPoints() const
             return trigger_;
         }
 
-        if (slavePointPointHits != (*slavePointPointHitsPtr_))
+        if (slavePointPointHits != *slavePointPointHitsPtr_)
         {
             if (debug)
             {
@@ -1153,7 +1155,7 @@ bool Foam::slidingInterface::projectPoints() const
             trigger_ = true;
         }
 
-        if (slavePointEdgeHits != (*slavePointEdgeHitsPtr_))
+        if (slavePointEdgeHits != *slavePointEdgeHitsPtr_)
         {
             if (debug)
             {
@@ -1198,7 +1200,7 @@ bool Foam::slidingInterface::projectPoints() const
 
         }
 
-        if (masterPointEdgeHits != (*masterPointEdgeHitsPtr_))
+        if (masterPointEdgeHits != *masterPointEdgeHitsPtr_)
         {
             if (debug)
             {
@@ -1212,21 +1214,22 @@ bool Foam::slidingInterface::projectPoints() const
         if (trigger_)
         {
             // Grab new data
-            deleteDemandDrivenData(slavePointPointHitsPtr_);
-            slavePointPointHitsPtr_ = new labelList();
-            slavePointPointHitsPtr_->transfer(slavePointPointHits);
-
-            deleteDemandDrivenData(slavePointEdgeHitsPtr_);
-            slavePointEdgeHitsPtr_ = new labelList();
-            slavePointEdgeHitsPtr_->transfer(slavePointEdgeHits);
-
-            deleteDemandDrivenData(slavePointFaceHitsPtr_);
-            slavePointFaceHitsPtr_ = new List<objectHit>();
-            slavePointFaceHitsPtr_->transfer(slavePointFaceHits);
-
-            deleteDemandDrivenData(masterPointEdgeHitsPtr_);
-            masterPointEdgeHitsPtr_ = new labelList();
-            masterPointEdgeHitsPtr_->transfer(masterPointEdgeHits);
+            slavePointPointHitsPtr_.reset
+            (
+                new labelList(std::move(slavePointPointHits))
+            );
+            slavePointEdgeHitsPtr_.reset
+            (
+                new labelList(std::move(slavePointEdgeHits))
+            );
+            slavePointFaceHitsPtr_.reset
+            (
+                new List<objectHit>(std::move(slavePointFaceHits))
+            );
+            masterPointEdgeHitsPtr_.reset
+            (
+                new labelList(std::move(masterPointEdgeHits))
+            );
 
             if (debug)
             {
@@ -1248,12 +1251,12 @@ bool Foam::slidingInterface::projectPoints() const
 
 void Foam::slidingInterface::clearPointProjection() const
 {
-    deleteDemandDrivenData(slavePointPointHitsPtr_);
-    deleteDemandDrivenData(slavePointEdgeHitsPtr_);
-    deleteDemandDrivenData(slavePointFaceHitsPtr_);
-    deleteDemandDrivenData(masterPointEdgeHitsPtr_);
+    slavePointPointHitsPtr_.reset(nullptr);
+    slavePointEdgeHitsPtr_.reset(nullptr);
+    slavePointFaceHitsPtr_.reset(nullptr);
+    masterPointEdgeHitsPtr_.reset(nullptr);
 
-    deleteDemandDrivenData(projectedSlavePointsPtr_);
+    projectedSlavePointsPtr_.reset(nullptr);
 }
 
 

@@ -202,10 +202,4 @@ Foam::cellLooper::cellLooper(const polyMesh& mesh)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cellLooper::~cellLooper()
-{}
-
-
 // ************************************************************************* //

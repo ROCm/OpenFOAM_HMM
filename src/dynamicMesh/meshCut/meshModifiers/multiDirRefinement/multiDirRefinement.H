@@ -65,7 +65,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class undoableMeshCutter;
 class cellLooper;
 class topoSet;

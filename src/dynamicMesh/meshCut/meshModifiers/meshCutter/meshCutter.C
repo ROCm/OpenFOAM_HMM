@@ -516,12 +516,6 @@ Foam::meshCutter::meshCutter(const polyMesh& mesh)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::meshCutter::~meshCutter()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::meshCutter::setRefinement

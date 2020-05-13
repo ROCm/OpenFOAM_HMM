@@ -62,12 +62,6 @@ Foam::setUpdater::setUpdater
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::setUpdater::~setUpdater()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::setUpdater::changeTopology() const

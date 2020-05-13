@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,15 +47,10 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
+// Forward Declarations
 class polyMesh;
 class mapPolyMesh;
 class polyBoundaryMesh;
-
-
-// Forward declaration of friend functions and operators
-
 class polyTopoChanger;
 
 Ostream& operator<<(Ostream&, const polyTopoChanger&);
@@ -162,7 +157,7 @@ public:
         bool operator==(const polyTopoChanger&) const;
 
 
-    // Ostream operator
+    // Ostream Operator
 
         friend Ostream& operator<<(Ostream&, const polyTopoChanger&);
 };

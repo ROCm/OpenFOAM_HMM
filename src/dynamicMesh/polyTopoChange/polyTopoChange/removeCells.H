@@ -51,7 +51,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class bitSet;
 class polyMesh;
 class polyTopoChange;

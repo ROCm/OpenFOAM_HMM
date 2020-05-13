@@ -48,7 +48,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class polyMesh;
 class polyTopoChange;
 class mapPolyMesh;
@@ -60,8 +60,7 @@ class face;
 
 class removePoints
 {
-
-    // Private data
+    // Private Data
 
         //- Reference to mesh
         const polyMesh& mesh_;
@@ -107,17 +106,17 @@ public:
     // Constructors
 
         //- Construct from mesh
-        removePoints(const polyMesh& mesh, const bool undoable = false);
+        explicit removePoints(const polyMesh& mesh, const bool undoable=false);
 
 
     // Member Functions
 
-            //- If undoable: affected face labels. Already restored faces
-            //  will be -1.
-            const labelList& savedFaceLabels() const
-            {
-                return savedFaceLabels_;
-            }
+        //- If undoable: affected face labels.
+        //- Already restored faces will be -1.
+        const labelList& savedFaceLabels() const
+        {
+            return savedFaceLabels_;
+        }
 
 
         // Helper functions

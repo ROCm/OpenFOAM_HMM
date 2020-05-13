@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,6 @@ License
 
 #include "enrichedPatch.H"
 #include "primitiveMesh.H"
-#include "demandDrivenData.H"
 #include "DynamicList.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -88,8 +87,8 @@ void Foam::enrichedPatch::calcMasterPointFaces() const
 
     // Re-pack dynamic lists into normal lists
 
-    masterPointFacesPtr_ = new Map<labelList>(2*mpf.size());
-    Map<labelList>& masterPointFaceMap = *masterPointFacesPtr_;
+    masterPointFacesPtr_.reset(new Map<labelList>(2*mpf.size()));
+    auto& masterPointFaceMap = *masterPointFacesPtr_;
 
     forAllIters(mpf, mpfIter)
     {

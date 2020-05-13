@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +28,7 @@ Class
     Foam::meshCutAndRemove
 
 Description
-    like meshCutter but also removes non-anchor side of cell.
+    Like meshCutter but also removes non-anchor side of cell.
 
 SourceFiles
     meshCutAndRemove.C
@@ -49,7 +50,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class Time;
 class polyTopoChange;
 class cellCuts;
@@ -65,14 +66,14 @@ class meshCutAndRemove
 :
     public edgeVertex
 {
-    // Private data
+    // Private Data
 
-        //- Faces added in last setRefinement. Per split cell label of added
-        //  face
+        //- Faces added in last setRefinement.
+        //  Per split cell label of added face
         Map<label> addedFaces_;
 
-        //- Points added in last setRefinement. Per split edge label of added
-        //  point
+        //- Points added in last setRefinement.
+        //  Per split edge label of added point
         EdgeMap<label> addedPoints_;
 
 
@@ -193,7 +194,7 @@ public:
     // Constructors
 
         //- Construct from mesh
-        meshCutAndRemove(const polyMesh& mesh);
+        explicit meshCutAndRemove(const polyMesh& mesh);
 
 
     // Member Functions

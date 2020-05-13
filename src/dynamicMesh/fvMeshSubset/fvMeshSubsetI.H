@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,13 +35,13 @@ inline const Foam::fvMesh& Foam::fvMeshSubset::baseMesh() const
 
 inline const Foam::fvMesh& Foam::fvMeshSubset::mesh() const
 {
-    return fvMeshSubsetPtr_.valid() ? *fvMeshSubsetPtr_ : baseMesh_;
+    return fvMeshSubsetPtr_ ? *fvMeshSubsetPtr_ : baseMesh_;
 }
 
 
 inline bool Foam::fvMeshSubset::hasSubMesh() const
 {
-    return fvMeshSubsetPtr_.valid();
+    return bool(fvMeshSubsetPtr_);
 }
 
 
@@ -79,7 +79,7 @@ inline const Foam::labelList& Foam::fvMeshSubset::faceMap() const
 
 inline const Foam::labelList& Foam::fvMeshSubset::faceFlipMap() const
 {
-    if (!faceFlipMapPtr_.valid())
+    if (!faceFlipMapPtr_)
     {
         calcFaceFlipMap();
     }

@@ -42,7 +42,6 @@ License
 #include "polyModifyPoint.H"
 #include "polyModifyFace.H"
 #include "polyRemoveFace.H"
-#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -1886,11 +1885,8 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
     }
 
     // Grab cut face master and slave addressing
-    deleteDemandDrivenData(cutFaceMasterPtr_);
-    cutFaceMasterPtr_ = new labelList(cutPatch.cutFaceMaster());
-
-    deleteDemandDrivenData(cutFaceSlavePtr_);
-    cutFaceSlavePtr_ = new labelList(cutPatch.cutFaceSlave());
+    cutFaceMasterPtr_.reset(new labelList(cutPatch.cutFaceMaster()));
+    cutFaceSlavePtr_.reset(new labelList(cutPatch.cutFaceSlave()));
 
     // Finished coupling
     attached_ = true;

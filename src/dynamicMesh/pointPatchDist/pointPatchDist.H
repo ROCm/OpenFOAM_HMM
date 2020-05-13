@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,6 +45,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class pointMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -54,7 +56,6 @@ class pointPatchDist
 :
     public pointScalarField
 {
-
 private:
 
     // Private Member Data
@@ -92,7 +93,7 @@ public:
 
 
     //- Destructor
-    virtual ~pointPatchDist();
+    virtual ~pointPatchDist() = default;
 
 
     // Member Functions

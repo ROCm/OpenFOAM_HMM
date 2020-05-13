@@ -56,7 +56,7 @@ class multiMotion
 :
     public solidBodyMotionFunction
 {
-    // Private data
+    // Private Data
 
         //- Motions to combine
         PtrList<solidBodyMotionFunction> SBMFs_;
@@ -101,7 +101,7 @@ public:
 
 
     //- Destructor
-    virtual ~multiMotion();
+    virtual ~multiMotion() = default;
 
 
     // Member Functions

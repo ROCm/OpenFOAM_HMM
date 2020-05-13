@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -131,7 +132,7 @@ public:
     // Constructors
 
         //- Construct from mesh
-        polyMeshGeometry(const polyMesh&);
+        explicit polyMeshGeometry(const polyMesh&);
 
 
     // Member Functions

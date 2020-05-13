@@ -56,7 +56,7 @@ class linearMotion
 :
     public solidBodyMotionFunction
 {
-    // Private data
+    // Private Data
 
         //- Linear velocity
         vector velocity_;
@@ -101,7 +101,7 @@ public:
 
 
     //- Destructor
-    virtual ~linearMotion();
+    virtual ~linearMotion() = default;
 
 
     // Member Functions

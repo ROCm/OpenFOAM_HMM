@@ -98,7 +98,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class polyMesh;
 class cellLooper;
 class refineCell;
@@ -112,7 +112,7 @@ class cellCuts
 :
     public edgeVertex
 {
-    // Private data
+    // Private Data
 
         //- Warn for illegal cuts
         const bool verbose_;
@@ -134,7 +134,7 @@ class cellCuts
 
             //- Cuts per existing face (includes those along edge of face)
             //  Cuts in no particular order.
-            mutable autoPtr<labelListList> faceCutsPtr_;
+            mutable unique_ptr<labelListList> faceCutsPtr_;
 
             //- Per face : cut across edge (so not along existing edge)
             //  (can only be one per face)
@@ -183,6 +183,7 @@ class cellCuts
             const labelList& lst,
             const Map<label>&
         );
+
 
     // Private Member Functions
 
@@ -541,9 +542,9 @@ public:
 
 
     //- Destructor
-    ~cellCuts();
+    ~cellCuts() = default;
 
-        //- Clear out demand driven storage
+        //- Clear out demand-driven storage
         void clearOut();
 
 
@@ -573,7 +574,7 @@ public:
             //  Cuts in no particular order
             const labelListList& faceCuts() const
             {
-                if (!faceCutsPtr_.valid())
+                if (!faceCutsPtr_)
                 {
                     calcFaceCuts();
                 }

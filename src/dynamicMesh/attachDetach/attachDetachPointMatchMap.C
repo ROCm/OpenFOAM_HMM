@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,8 +90,8 @@ void Foam::attachDetach::calcPointMatchMap() const
     const faceList& masterLocalFaces = masterPatch.localFaces();
     const faceList& slaveLocalFaces = reverseSlavePatch.localFaces();
 
-    pointMatchMapPtr_ = new Map<label>(2*slaveMeshPoints.size());
-    Map<label>& removedPointMap = *pointMatchMapPtr_;
+    pointMatchMapPtr_.reset(new Map<label>(2*slaveMeshPoints.size()));
+    auto& removedPointMap = *pointMatchMapPtr_;
 
     forAll(masterLocalFaces, facei)
     {

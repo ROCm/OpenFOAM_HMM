@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -117,7 +118,7 @@ public:
 
 
     //- Destructor
-    virtual ~tabulated6DoFMotion();
+    virtual ~tabulated6DoFMotion() = default;
 
 
     // Member Functions

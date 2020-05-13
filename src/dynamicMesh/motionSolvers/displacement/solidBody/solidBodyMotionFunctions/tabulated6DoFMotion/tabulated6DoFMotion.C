@@ -65,12 +65,6 @@ Foam::solidBodyMotionFunctions::tabulated6DoFMotion::tabulated6DoFMotion
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::solidBodyMotionFunctions::tabulated6DoFMotion::~tabulated6DoFMotion()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::septernion

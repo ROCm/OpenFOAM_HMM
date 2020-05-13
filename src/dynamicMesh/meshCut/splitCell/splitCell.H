@@ -45,24 +45,22 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-
 /*---------------------------------------------------------------------------*\
                            Class splitCell Declaration
 \*---------------------------------------------------------------------------*/
 
 class splitCell
 {
-    // Private data
+    // Private Data
 
-        //- Unsplit cell label. Only uptodate if this cell is 'live'
-        //  (i.e. no master or slave)
+        //- Unsplit cell label.
+        //  Only uptodate if this cell is 'live' (i.e. no master or slave)
         label celli_;
 
-        //- Parent splitCell or null
+        //- Parent splitCell or nullptr
         splitCell* parent_;
 
-        //- Cells replacing this or null
+        //- Cells replacing this or nullptr
         splitCell* master_;
 
         splitCell* slave_;

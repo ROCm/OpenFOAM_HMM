@@ -45,7 +45,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class polyMesh;
 class polyTopoChange;
 class edge;
@@ -87,7 +87,7 @@ public:
     // Constructors
 
         //- Construct from mesh
-        duplicatePoints(const polyMesh& mesh);
+        explicit duplicatePoints(const polyMesh& mesh);
 
 
     // Member Functions

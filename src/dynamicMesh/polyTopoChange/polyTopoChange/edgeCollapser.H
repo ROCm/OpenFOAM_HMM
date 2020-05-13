@@ -54,7 +54,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class polyMesh;
 class bitSet;
 class polyTopoChange;
@@ -254,7 +254,7 @@ public:
     // Constructors
 
         //- Construct from mesh
-        edgeCollapser(const polyMesh& mesh);
+        explicit edgeCollapser(const polyMesh& mesh);
 
         //- Construct from mesh and dict
         edgeCollapser(const polyMesh& mesh, const dictionary& dict);

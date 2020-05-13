@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,18 +54,18 @@ namespace Foam
 
 class repatchPolyTopoChanger
 {
-    // Private data
+    // Private Data
 
         //- The polyMesh to be repatched
         polyMesh& mesh_;
 
         //- Topological change to accumulated all mesh changes
-        autoPtr<polyTopoChange> meshModPtr_;
+        unique_ptr<polyTopoChange> meshModPtr_;
 
 
     // Private Member Functions
 
-        //- Demand driven access to polyTopoChange
+        //- Demand-driven access to polyTopoChange
         polyTopoChange& meshMod();
 
         //- No copy construct

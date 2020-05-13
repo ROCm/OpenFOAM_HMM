@@ -324,7 +324,6 @@ bool Foam::polyMeshGeometry::checkFaceTet
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::polyMeshGeometry::polyMeshGeometry(const polyMesh& mesh)
 :
     mesh_(mesh)

@@ -49,7 +49,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -60,7 +60,7 @@ class motionSolver
 :
     public IOdictionary
 {
-    // Private data
+    // Private Data
 
         //- Reference to mesh
         const polyMesh& mesh_;
@@ -136,7 +136,7 @@ public:
 
 
     //- Destructor
-    virtual ~motionSolver();
+    virtual ~motionSolver() = default;
 
 
     // Member Functions

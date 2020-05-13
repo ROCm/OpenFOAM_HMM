@@ -53,7 +53,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class cellModel;
 
 /*---------------------------------------------------------------------------*\
@@ -64,10 +64,9 @@ class hexCellLooper
 :
     public geomCellLooper
 {
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Reference to hex cell shape.
         const cellModel& hex_;
@@ -114,12 +113,12 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        hexCellLooper(const polyMesh& mesh);
+        //- Construct from mesh
+        explicit hexCellLooper(const polyMesh& mesh);
 
 
     //- Destructor
-    virtual ~hexCellLooper();
+    virtual ~hexCellLooper() = default;
 
 
     // Member Functions

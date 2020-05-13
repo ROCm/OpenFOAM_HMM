@@ -47,7 +47,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::refinementIterator::refinementIterator
 (
     polyMesh& mesh,
@@ -67,7 +66,7 @@ Foam::refinementIterator::refinementIterator
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::refinementIterator::~refinementIterator()
-{}
+{}  // Define here since polyMesh was forward declared
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

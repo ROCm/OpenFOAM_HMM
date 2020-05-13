@@ -967,12 +967,6 @@ Foam::polyMeshFilter::polyMeshFilter
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::polyMeshFilter::~polyMeshFilter()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::label Foam::polyMeshFilter::filter(const label nOriginalBadFaces)

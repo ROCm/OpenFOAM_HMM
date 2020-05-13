@@ -46,7 +46,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from mesh
 Foam::duplicatePoints::duplicatePoints(const polyMesh& mesh)
 :
     mesh_(mesh),

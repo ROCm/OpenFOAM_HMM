@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +56,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class polyTopoChange;
 class mapPolyMesh;
 class polyMesh;
@@ -127,11 +128,11 @@ public:
     // Constructors
 
         //- Construct from mesh
-        boundaryCutter(const polyMesh& mesh);
+        explicit boundaryCutter(const polyMesh& mesh);
 
 
     //- Destructor
-    ~boundaryCutter();
+    ~boundaryCutter() = default;
 
 
     // Member Functions

@@ -33,7 +33,6 @@ License
 #include "primitiveMesh.H"
 #include "polyTopoChange.H"
 #include "addToRunTimeSelectionTable.H"
-#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -222,13 +221,12 @@ void Foam::attachDetach::checkDefinition()
 
 void Foam::attachDetach::clearAddressing() const
 {
-    deleteDemandDrivenData(pointMatchMapPtr_);
+    pointMatchMapPtr_.reset(nullptr);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::attachDetach::attachDetach
 (
     const word& name,
@@ -256,7 +254,6 @@ Foam::attachDetach::attachDetach
 }
 
 
-// Construct from components
 Foam::attachDetach::attachDetach
 (
     const word& name,
@@ -292,26 +289,11 @@ Foam::attachDetach::attachDetach
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::attachDetach::~attachDetach()
-{
-    clearAddressing();
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::attachDetach::setAttach() const
 {
-    if (!attached())
-    {
-        trigger_ = true;
-    }
-    else
-    {
-        trigger_ = false;
-    }
+    trigger_ = (!attached());
 
     return trigger_;
 }
@@ -319,14 +301,7 @@ bool Foam::attachDetach::setAttach() const
 
 bool Foam::attachDetach::setDetach() const
 {
-    if (attached())
-    {
-        trigger_ = true;
-    }
-    else
-    {
-        trigger_ = false;
-    }
+    trigger_ = (attached());
 
     return trigger_;
 }

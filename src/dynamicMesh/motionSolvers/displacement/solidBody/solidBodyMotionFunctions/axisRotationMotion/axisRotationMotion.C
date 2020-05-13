@@ -62,12 +62,6 @@ Foam::solidBodyMotionFunctions::axisRotationMotion::axisRotationMotion
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::solidBodyMotionFunctions::axisRotationMotion::~axisRotationMotion()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::septernion

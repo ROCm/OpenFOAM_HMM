@@ -61,12 +61,6 @@ Foam::velocityMotionSolver::velocityMotionSolver
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::velocityMotionSolver::~velocityMotionSolver()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::velocityMotionSolver::movePoints(const pointField& p)

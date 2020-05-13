@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class polyMesh;
 class polyPatch;
 class polyTopoChange;
@@ -67,7 +67,7 @@ class mapDistributePolyMesh;
 
 class hexRef8
 {
-    // Private data
+    // Private Data
 
         //- Reference to underlying mesh.
         const polyMesh& mesh_;
@@ -362,7 +362,7 @@ public:
         //- Construct from mesh, read_if_present refinement data
         //  (from write below). If readHistory is true does read_if_present
         //  of refinement history. If false clears all history
-        hexRef8(const polyMesh& mesh, const bool readHistory = true);
+        explicit hexRef8(const polyMesh& mesh, const bool readHistory=true);
 
         //- Construct from mesh and un/refinement data and optional size of
         //  starting cells
@@ -593,7 +593,6 @@ public:
 
             //- Helper: remove all relevant files from mesh instance
             static void removeFiles(const polyMesh&);
-
 };
 
 

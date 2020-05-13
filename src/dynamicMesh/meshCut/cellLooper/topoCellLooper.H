@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +60,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class cellFeatures;
 
 /*---------------------------------------------------------------------------*\
@@ -70,7 +71,6 @@ class topoCellLooper
 :
     public hexCellLooper
 {
-
     // Private Member Functions
 
         //- In-memory truncate a list
@@ -166,12 +166,12 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        topoCellLooper(const polyMesh& mesh);
+        //- Construct from mesh
+        explicit topoCellLooper(const polyMesh& mesh);
 
 
     //- Destructor
-    virtual ~topoCellLooper();
+    virtual ~topoCellLooper() = default;
 
 
     // Member Functions

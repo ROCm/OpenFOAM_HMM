@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -2040,7 +2040,6 @@ Foam::hexRef8::hexRef8(const polyMesh& mesh, const bool readHistory)
 }
 
 
-// Construct from components
 Foam::hexRef8::hexRef8
 (
     const polyMesh& mesh,
@@ -2150,7 +2149,6 @@ Foam::hexRef8::hexRef8
 }
 
 
-// Construct from components
 Foam::hexRef8::hexRef8
 (
     const polyMesh& mesh,
@@ -5011,7 +5009,7 @@ void Foam::hexRef8::checkRefinementLevels
 
 const Foam::cellShapeList& Foam::hexRef8::cellShapes() const
 {
-    if (cellShapesPtr_.empty())
+    if (!cellShapesPtr_)
     {
         if (debug)
         {

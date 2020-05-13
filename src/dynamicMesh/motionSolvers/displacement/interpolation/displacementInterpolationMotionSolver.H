@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,7 +65,7 @@ class displacementInterpolationMotionSolver
 :
     public displacementMotionSolver
 {
-    // Private data
+    // Private Data
 
         // Face zone information (note: could pack these to only contain
         // used zones)
@@ -131,7 +131,7 @@ public:
 
 
     //- Destructor
-    ~displacementInterpolationMotionSolver();
+    ~displacementInterpolationMotionSolver() = default;
 
 
     // Member Functions

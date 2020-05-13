@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -130,18 +130,12 @@ Foam::codedPoints0MotionSolver::codedPoints0MotionSolver
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::codedPoints0MotionSolver::~codedPoints0MotionSolver()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::motionSolver&
 Foam::codedPoints0MotionSolver::redirectMotionSolver() const
 {
-    if (!redirectMotionSolverPtr_.valid())
+    if (!redirectMotionSolverPtr_)
     {
         // Get the dictionary for the solver and override the
         // solver name (in case it is not a subdictionary and contains
@@ -159,7 +153,8 @@ Foam::codedPoints0MotionSolver::redirectMotionSolver() const
             IOdictionary(io, constructDict)
         );
     }
-    return redirectMotionSolverPtr_();
+
+    return *redirectMotionSolverPtr_;
 }
 
 

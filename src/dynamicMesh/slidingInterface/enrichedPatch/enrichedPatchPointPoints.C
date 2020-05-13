@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,8 +75,8 @@ void Foam::enrichedPatch::calcPointPoints() const
     }
 
     // Re-pack the list
-    pointPointsPtr_ = new labelListList(pp.size());
-    labelListList& ppAddr = *pointPointsPtr_;
+    pointPointsPtr_.reset(new labelListList(pp.size()));
+    auto& ppAddr = *pointPointsPtr_;
 
     forAll(pp, pointi)
     {

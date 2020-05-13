@@ -30,7 +30,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from cell number and parent
 Foam::splitCell::splitCell(const label celli, splitCell* parent)
 :
     celli_(celli),

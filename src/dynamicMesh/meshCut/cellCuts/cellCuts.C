@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -488,7 +488,7 @@ Foam::label Foam::cellCuts::vertexVertexToFace
 
 void Foam::cellCuts::calcFaceCuts() const
 {
-    if (faceCutsPtr_.valid())
+    if (faceCutsPtr_)
     {
         FatalErrorInFunction
             << "faceCuts already calculated" << abort(FatalError);
@@ -497,7 +497,7 @@ void Foam::cellCuts::calcFaceCuts() const
     const faceList& faces = mesh().faces();
 
     faceCutsPtr_.reset(new labelListList(mesh().nFaces()));
-    labelListList& faceCuts = faceCutsPtr_();
+    auto& faceCuts = *faceCutsPtr_;
 
     for (label facei = 0; facei < mesh().nFaces(); facei++)
     {
@@ -1275,7 +1275,7 @@ void Foam::cellCuts::calcCellLoops(const labelList& cutCells)
                     // Dump cell and cuts on cell.
                     writeUncutOBJ(".", celli);
                 }
-                cellLoops_[celli].setSize(0);
+                cellLoops_[celli].clear();
             }
         }
         else
@@ -1283,7 +1283,7 @@ void Foam::cellCuts::calcCellLoops(const labelList& cutCells)
             //Pout<< "calcCellLoops(const labelList&) : did not find valid"
             //    << " loop for cell " << celli << " since not enough cut faces"
             //    << endl;
-            cellLoops_[celli].setSize(0);
+            cellLoops_[celli].clear();
         }
     }
 }
@@ -2196,8 +2196,8 @@ void Foam::cellCuts::setFromCellLoops()
                         << endl;
                 }
 
-                cellLoops_[celli].setSize(0);
-                cellAnchorPoints_[celli].setSize(0);
+                cellLoops_[celli].clear();
+                cellAnchorPoints_[celli].clear();
             }
             else
             {
@@ -2368,7 +2368,7 @@ void Foam::cellCuts::setFromCellLoops
             else
             {
                 // Clear cellLoops
-                cellLoops_[celli].setSize(0);
+                cellLoops_[celli].clear();
             }
         }
     }
@@ -2430,7 +2430,7 @@ void Foam::cellCuts::setFromCellCutter
             }
             else
             {
-                cellLoops_[celli].setSize(0);
+                cellLoops_[celli].clear();
 
                 WarningInFunction
                     << "Found loop on cell " << celli
@@ -2455,7 +2455,7 @@ void Foam::cellCuts::setFromCellCutter
         else
         {
             // Clear cellLoops
-            cellLoops_[celli].setSize(0);
+            cellLoops_[celli].clear();
         }
     }
 
@@ -2552,7 +2552,7 @@ void Foam::cellCuts::setFromCellCutter
             }
             else
             {
-                cellLoops_[celli].setSize(0);
+                cellLoops_[celli].clear();
 
                 // Discarded by validLoop
                 if (debug)
@@ -2566,7 +2566,7 @@ void Foam::cellCuts::setFromCellCutter
         else
         {
             // Clear cellLoops
-            cellLoops_[celli].setSize(0);
+            cellLoops_[celli].clear();
         }
     }
 
@@ -3138,21 +3138,13 @@ Foam::cellCuts::cellCuts
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cellCuts::~cellCuts()
-{
-    clearOut();
-}
-
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::cellCuts::clearOut()
 {
-    faceCutsPtr_.clear();
+    faceCutsPtr_.reset(nullptr);
 }
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::pointField Foam::cellCuts::loopPoints(const label celli) const
 {

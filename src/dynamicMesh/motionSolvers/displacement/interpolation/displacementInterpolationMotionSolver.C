@@ -325,13 +325,6 @@ displacementInterpolationMotionSolver
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::displacementInterpolationMotionSolver::
-~displacementInterpolationMotionSolver()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::pointField>

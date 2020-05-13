@@ -46,7 +46,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class polyMesh;
 class polyTopoChange;
 class mapPolyMesh;
@@ -58,7 +58,7 @@ class face;
 
 class combineFaces
 {
-    // Private data
+    // Private Data
 
         //- Reference to mesh
         const polyMesh& mesh_;
@@ -77,7 +77,6 @@ class combineFaces
 
         //- If undoable: saved coordinates of above points.
         pointField savedPoints_;
-
 
 
     // Private Member Functions
@@ -118,7 +117,6 @@ class combineFaces
         ) const;
 
 
-
         //- No copy construct
         combineFaces(const combineFaces&) = delete;
 
@@ -134,7 +132,7 @@ public:
     // Constructors
 
         //- Construct from mesh
-        combineFaces(const polyMesh& mesh, const bool undoable = false);
+        explicit combineFaces(const polyMesh& mesh, const bool undoable=false);
 
 
     // Member Functions

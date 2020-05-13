@@ -33,7 +33,6 @@ License
 #include "primitiveMesh.H"
 #include "polyTopoChange.H"
 #include "addToRunTimeSelectionTable.H"
-#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -96,38 +95,10 @@ void Foam::layerAdditionRemoval::checkDefinition()
 }
 
 
-Foam::scalar Foam::layerAdditionRemoval::readOldThickness
-(
-    const dictionary& dict
-)
-{
-    return dict.lookupOrDefault("oldLayerThickness", -1.0);
-}
-
-
 void Foam::layerAdditionRemoval::clearAddressing() const
 {
-    if (pointsPairingPtr_)
-    {
-        if (debug)
-        {
-            Pout<< "layerAdditionRemoval::clearAddressing()" << nl
-                << "    clearing pointsPairingPtr_" << endl;
-        }
-
-        deleteDemandDrivenData(pointsPairingPtr_);
-    }
-
-    if (facesPairingPtr_)
-    {
-        if (debug)
-        {
-            Pout<< "layerAdditionRemoval::clearAddressing()" << nl
-                << "    clearing facesPairingPtr_" << endl;
-        }
-
-        deleteDemandDrivenData(facesPairingPtr_);
-    }
+    pointsPairingPtr_.reset(nullptr);
+    facesPairingPtr_.reset(nullptr);
 }
 
 
@@ -171,22 +142,14 @@ Foam::layerAdditionRemoval::layerAdditionRemoval
     faceZoneID_(dict.lookup("faceZoneName"), ptc.mesh().faceZones()),
     minLayerThickness_(dict.get<scalar>("minLayerThickness")),
     maxLayerThickness_(dict.get<scalar>("maxLayerThickness")),
-    thicknessFromVolume_(dict.lookupOrDefault("thicknessFromVolume", true)),
-    oldLayerThickness_(readOldThickness(dict)),
+    thicknessFromVolume_(dict.getOrDefault("thicknessFromVolume", true)),
+    oldLayerThickness_(dict.getOrDefault<scalar>("oldLayerThickness", -1.0)),
     pointsPairingPtr_(nullptr),
     facesPairingPtr_(nullptr),
     triggerRemoval_(-1),
     triggerAddition_(-1)
 {
     checkDefinition();
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::layerAdditionRemoval::~layerAdditionRemoval()
-{
-    clearAddressing();
 }
 
 

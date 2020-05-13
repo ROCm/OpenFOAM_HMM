@@ -33,7 +33,6 @@ License
 #include "ListOps.H"
 #include "meshTools.H"
 #include "hexMatcher.H"
-
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -662,16 +661,9 @@ void Foam::topoCellLooper::walkSplitHex
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::topoCellLooper::topoCellLooper(const polyMesh& mesh)
 :
     hexCellLooper(mesh)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::topoCellLooper::~topoCellLooper()
 {}
 
 

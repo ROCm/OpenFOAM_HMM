@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,22 +58,21 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
- s                  Class solidBodyMotionFunction Declaration
+                    Class solidBodyMotionFunction Declaration
 \*---------------------------------------------------------------------------*/
 
 class solidBodyMotionFunction
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         dictionary SBMFCoeffs_;
+
         const Time& time_;
 
 
-private:
-
-    // Private Member Functions
+    // Protected Member Functions
 
         //- No copy construct
         solidBodyMotionFunction(const solidBodyMotionFunction&) = delete;
@@ -123,7 +123,7 @@ public:
 
 
     //- Destructor
-    virtual ~solidBodyMotionFunction();
+    virtual ~solidBodyMotionFunction() = default;
 
 
     // Member Functions

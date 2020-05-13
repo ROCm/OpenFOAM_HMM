@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,7 +67,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class polyMesh;
 class polyTopoChange;
 class mapPolyMesh;
@@ -77,7 +78,7 @@ class mapPolyMesh;
 
 class faceCollapser
 {
-    // Private data
+    // Private Data
 
         //- Reference to mesh
         const polyMesh& mesh_;
@@ -130,7 +131,7 @@ public:
     // Constructors
 
         //- Construct from mesh.
-        faceCollapser(const polyMesh& mesh);
+        explicit faceCollapser(const polyMesh& mesh);
 
 
     // Member Functions

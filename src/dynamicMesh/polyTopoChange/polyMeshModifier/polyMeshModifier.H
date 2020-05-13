@@ -53,14 +53,10 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class polyTopoChanger;
 class polyTopoChange;
 class mapPolyMesh;
-
-
-// Forward declaration of friend functions and operators
-
 class polyMeshModifier;
 
 Ostream& operator<<(Ostream&, const polyMeshModifier&);
@@ -146,7 +142,7 @@ public:
 
 
     //- Destructor
-    virtual ~polyMeshModifier();
+    virtual ~polyMeshModifier() = default;
 
 
     // Member Functions

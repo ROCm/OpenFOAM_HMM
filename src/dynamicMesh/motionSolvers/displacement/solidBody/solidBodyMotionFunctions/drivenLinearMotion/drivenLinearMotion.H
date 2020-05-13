@@ -115,7 +115,7 @@ public:
 
 
     //- Destructor
-    virtual ~drivenLinearMotion();
+    virtual ~drivenLinearMotion() = default;
 
 
     // Member Functions

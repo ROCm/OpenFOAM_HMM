@@ -59,12 +59,6 @@ Foam::pointPatchDist::pointPatchDist
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::pointPatchDist::~pointPatchDist()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::pointPatchDist::correct()

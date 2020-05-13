@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +58,7 @@ class axisRotationMotion
 :
     public solidBodyMotionFunction
 {
-    // Private data
+    // Private Data
 
         //- Origin
         point origin_;
@@ -105,7 +106,7 @@ public:
 
 
     //- Destructor
-    virtual ~axisRotationMotion();
+    virtual ~axisRotationMotion() = default;
 
 
     // Member Functions

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,6 +49,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -60,14 +62,13 @@ class velocityMotionSolver
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Point motion field
         mutable pointVectorField pointMotionU_;
 
-private:
 
-    // Private Member Functions
+    // Protected Member Functions
 
         //- No copy construct
         velocityMotionSolver(const velocityMotionSolver&) = delete;
@@ -93,7 +94,7 @@ public:
 
 
     //- Destructor
-    virtual ~velocityMotionSolver();
+    virtual ~velocityMotionSolver() = default;
 
 
     // Member Functions

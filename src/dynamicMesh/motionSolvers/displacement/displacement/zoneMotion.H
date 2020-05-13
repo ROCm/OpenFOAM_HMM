@@ -46,6 +46,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class polyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -54,8 +55,7 @@ class polyMesh;
 
 class zoneMotion
 {
-     // Private data
-
+     // Private Data
 
         //- Points to move when cell zone is supplied
         labelList pointIDs_;
@@ -93,8 +93,7 @@ public:
 
 
     //- Destructor
-    virtual ~zoneMotion();
-
+    virtual ~zoneMotion() = default;
 };
 
 

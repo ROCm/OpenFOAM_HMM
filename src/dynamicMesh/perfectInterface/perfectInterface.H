@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +49,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class Time;
 
 /*---------------------------------------------------------------------------*\
@@ -59,7 +60,7 @@ class perfectInterface
 :
     public polyMeshModifier
 {
-    // Private data
+    // Private Data
 
         //- Master face zone ID
         faceZoneID faceZoneID_;
@@ -70,9 +71,10 @@ class perfectInterface
         //- Slave patch ID
         polyPatchID slavePatchID_;
 
-        //- Tolerance used for distance comparison (fraction of minimum edge
-        //  length)
+        //- Tolerance used for distance comparison
+        //  (fraction of minimum edge length)
         static const scalar tol_;
+
 
     // Private Member Functions
 
@@ -117,7 +119,7 @@ public:
 
 
     //- Destructor
-    virtual ~perfectInterface();
+    virtual ~perfectInterface() = default;
 
 
     // Member Functions

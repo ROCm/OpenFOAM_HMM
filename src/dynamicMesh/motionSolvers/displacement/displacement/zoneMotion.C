@@ -128,12 +128,6 @@ Foam::zoneMotion::zoneMotion
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::zoneMotion::~zoneMotion()
-{}
-
-
 // * * * * * * * * * * * * * * * * Members  * * * * * * * * * * * * * * //
 
 const Foam::labelList& Foam::zoneMotion::pointIDs() const
@@ -146,5 +140,6 @@ bool Foam::zoneMotion::moveAllCells() const
 {
     return moveAllCells_;
 }
+
 
 // ************************************************************************* //

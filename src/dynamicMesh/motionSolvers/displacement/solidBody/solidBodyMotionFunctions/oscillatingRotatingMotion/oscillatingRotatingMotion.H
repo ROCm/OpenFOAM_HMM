@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,7 +57,7 @@ class oscillatingRotatingMotion
 :
     public solidBodyMotionFunction
 {
-    // Private data
+    // Private Data
 
         //- Centre of gravity
         point origin_;
@@ -107,7 +108,7 @@ public:
 
 
     //- Destructor
-    virtual ~oscillatingRotatingMotion();
+    virtual ~oscillatingRotatingMotion() = default;
 
 
     // Member Functions

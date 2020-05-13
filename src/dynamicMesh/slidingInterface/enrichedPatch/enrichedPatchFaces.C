@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,8 +59,11 @@ void Foam::enrichedPatch::calcEnrichedFaces
     //    the edge; order them in the necessary direction and insert onto the
     //    face.
     // 4) Grab the next point and return on step 2.
-    enrichedFacesPtr_ = new faceList(masterPatch_.size() + slavePatch_.size());
-    faceList& enrichedFaces = *enrichedFacesPtr_;
+    enrichedFacesPtr_.reset
+    (
+        new faceList(masterPatch_.size() + slavePatch_.size())
+    );
+    auto& enrichedFaces = *enrichedFacesPtr_;
 
     label nEnrichedFaces = 0;
 

@@ -59,12 +59,6 @@ Foam::solidBodyMotionFunctions::SDA::SDA
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::solidBodyMotionFunctions::SDA::~SDA()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::septernion Foam::solidBodyMotionFunctions::SDA::transformation() const

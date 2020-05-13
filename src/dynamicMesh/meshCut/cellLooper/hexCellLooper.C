@@ -34,15 +34,14 @@ License
 #include "ListOps.H"
 #include "meshTools.H"
 #include "OFstream.H"
-
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-defineTypeNameAndDebug(hexCellLooper, 0);
-addToRunTimeSelectionTable(cellLooper, hexCellLooper, word);
+    defineTypeNameAndDebug(hexCellLooper, 0);
+    addToRunTimeSelectionTable(cellLooper, hexCellLooper, word);
 }
 
 
@@ -150,17 +149,10 @@ void Foam::hexCellLooper::makeFace
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::hexCellLooper::hexCellLooper(const polyMesh& mesh)
 :
     geomCellLooper(mesh),
     hex_(cellModel::ref(cellModel::HEX))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::hexCellLooper::~hexCellLooper()
 {}
 
 

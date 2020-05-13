@@ -65,8 +65,8 @@ void Foam::slidingInterface::calcAttachedAddressing() const
         const boolList& masterFlip =
             faceZones[masterFaceZoneID_.index()].flipMap();
 
-        masterFaceCellsPtr_ = new labelList(masterPatchFaces.size());
-        labelList& mfc = *masterFaceCellsPtr_;
+        masterFaceCellsPtr_.reset(new labelList(masterPatchFaces.size()));
+        auto& mfc = *masterFaceCellsPtr_;
 
         forAll(masterPatchFaces, facei)
         {
@@ -91,8 +91,8 @@ void Foam::slidingInterface::calcAttachedAddressing() const
         const boolList& slaveFlip =
             faceZones[slaveFaceZoneID_.index()].flipMap();
 
-        slaveFaceCellsPtr_ = new labelList(slavePatchFaces.size());
-        labelList& sfc = *slaveFaceCellsPtr_;
+        slaveFaceCellsPtr_.reset(new labelList(slavePatchFaces.size()));
+        auto& sfc = *slaveFaceCellsPtr_;
 
         forAll(slavePatchFaces, facei)
         {
@@ -174,15 +174,12 @@ void Foam::slidingInterface::calcAttachedAddressing() const
             }
         }
 
+        masterStickOutFacesPtr_.reset(new labelList(stickOutFaceMap.toc()));
+
         // Sort in debug mode for easier diagnostics
         if (debug)
         {
-            masterStickOutFacesPtr_ =
-                new labelList(stickOutFaceMap.sortedToc());
-        }
-        else
-        {
-            masterStickOutFacesPtr_ = new labelList(stickOutFaceMap.toc());
+            Foam::sort(*masterStickOutFacesPtr_);
         }
 
         // Slave side
@@ -209,33 +206,34 @@ void Foam::slidingInterface::calcAttachedAddressing() const
             }
         }
 
+        slaveStickOutFacesPtr_.reset(new labelList(stickOutFaceMap.toc()));
+
         // Sort in debug mode for easier diagnostics
         if (debug)
         {
-            slaveStickOutFacesPtr_ =
-                new labelList(stickOutFaceMap.sortedToc());
-        }
-        else
-        {
-            slaveStickOutFacesPtr_ = new labelList(stickOutFaceMap.toc());
+            Foam::sort(*slaveStickOutFacesPtr_);
         }
 
         stickOutFaceMap.clear();
 
         // Retired point addressing does not exist at this stage.
         // It will be filled when the interface is coupled.
-        retiredPointMapPtr_ =
+        retiredPointMapPtr_.reset
+        (
             new Map<label>
             (
                 2*faceZones[slaveFaceZoneID_.index()]().nPoints()
-            );
+            )
+        );
 
         // Ditto for cut point edge map.  This is a rough guess of its size
-        cutPointEdgePairMapPtr_ =
+        cutPointEdgePairMapPtr_.reset
+        (
             new Map<Pair<edge>>
             (
                 faceZones[slaveFaceZoneID_.index()]().nEdges()
-            );
+            )
+        );
     }
     else
     {
@@ -256,14 +254,14 @@ void Foam::slidingInterface::calcAttachedAddressing() const
 
 void Foam::slidingInterface::clearAttachedAddressing() const
 {
-    deleteDemandDrivenData(masterFaceCellsPtr_);
-    deleteDemandDrivenData(slaveFaceCellsPtr_);
+    masterFaceCellsPtr_.reset(nullptr);
+    slaveFaceCellsPtr_.reset(nullptr);
 
-    deleteDemandDrivenData(masterStickOutFacesPtr_);
-    deleteDemandDrivenData(slaveStickOutFacesPtr_);
+    masterStickOutFacesPtr_.reset(nullptr);
+    slaveStickOutFacesPtr_.reset(nullptr);
 
-    deleteDemandDrivenData(retiredPointMapPtr_);
-    deleteDemandDrivenData(cutPointEdgePairMapPtr_);
+    retiredPointMapPtr_.reset(nullptr);
+    cutPointEdgePairMapPtr_.reset(nullptr);
 }
 
 
@@ -281,8 +279,8 @@ void Foam::slidingInterface::renumberAttachedAddressing
     const labelList& sfc = slaveFaceCells();
 
     // Master side
-    labelList* newMfcPtr = new labelList(mfc.size(), -1);
-    labelList& newMfc = *newMfcPtr;
+    unique_ptr<labelList> newMfcPtr(new labelList(mfc.size(), -1));
+    auto& newMfc = *newMfcPtr;
 
     const labelList& mfzRenumber =
         m.faceZoneFaceMap()[masterFaceZoneID_.index()];
@@ -298,8 +296,8 @@ void Foam::slidingInterface::renumberAttachedAddressing
     }
 
     // Slave side
-    labelList* newSfcPtr = new labelList(sfc.size(), -1);
-    labelList& newSfc = *newSfcPtr;
+    unique_ptr<labelList> newSfcPtr(new labelList(sfc.size(), -1));
+    auto& newSfc = *newSfcPtr;
 
     const labelList& sfzRenumber =
         m.faceZoneFaceMap()[slaveFaceZoneID_.index()];
@@ -334,8 +332,8 @@ void Foam::slidingInterface::renumberAttachedAddressing
     // Master side
     const labelList& msof = masterStickOutFaces();
 
-    labelList* newMsofPtr = new labelList(msof.size(), -1);
-    labelList& newMsof = *newMsofPtr;
+    unique_ptr<labelList> newMsofPtr(new labelList(msof.size(), -1));
+    auto& newMsof = *newMsofPtr;
 
     forAll(msof, facei)
     {
@@ -350,8 +348,8 @@ void Foam::slidingInterface::renumberAttachedAddressing
     // Slave side
     const labelList& ssof = slaveStickOutFaces();
 
-    labelList* newSsofPtr = new labelList(ssof.size(), -1);
-    labelList& newSsof = *newSsofPtr;
+    unique_ptr<labelList> newSsofPtr(new labelList(ssof.size(), -1));
+    auto& newSsof = *newSsofPtr;
 
     forAll(ssof, facei)
     {
@@ -379,8 +377,8 @@ void Foam::slidingInterface::renumberAttachedAddressing
     // Renumber the retired point map. Need to take a copy!
     const Map<label> rpm = retiredPointMap();
 
-    Map<label>* newRpmPtr = new Map<label>(rpm.size());
-    Map<label>& newRpm = *newRpmPtr;
+    unique_ptr<Map<label>> newRpmPtr(new Map<label>(rpm.size()));
+    auto& newRpm = *newRpmPtr;
 
     // Get reference to point renumbering
     const labelList& reversePointMap = m.reversePointMap();
@@ -409,8 +407,8 @@ void Foam::slidingInterface::renumberAttachedAddressing
     // Renumber the cut point edge pair map. Need to take a copy!
     const Map<Pair<edge>> cpepm = cutPointEdgePairMap();
 
-    Map<Pair<edge>>* newCpepmPtr = new Map<Pair<edge>>(cpepm.size());
-    Map<Pair<edge>>& newCpepm = *newCpepmPtr;
+    unique_ptr<Map<Pair<edge>>> newCpepmPtr(new Map<Pair<edge>>(cpepm.size()));
+    auto& newCpepm = *newCpepmPtr;
 
     forAllConstIters(cpepm, iter)
     {
@@ -450,11 +448,11 @@ void Foam::slidingInterface::renumberAttachedAddressing
     // Renumber the projected slave zone points
     const pointField& projectedSlavePoints = *projectedSlavePointsPtr_;
 
-    pointField* newProjectedSlavePointsPtr
+    unique_ptr<pointField> newProjectedSlavePointsPtr
     (
         new pointField(projectedSlavePoints.size())
     );
-    pointField& newProjectedSlavePoints = *newProjectedSlavePointsPtr;
+    auto& newProjectedSlavePoints = *newProjectedSlavePointsPtr;
 
     const labelList& sfzPointRenumber =
         m.faceZonePointMap()[slaveFaceZoneID_.index()];
@@ -471,17 +469,17 @@ void Foam::slidingInterface::renumberAttachedAddressing
     // Re-set the lists
     clearAttachedAddressing();
 
-    deleteDemandDrivenData(projectedSlavePointsPtr_);
+    projectedSlavePointsPtr_.reset(nullptr);
 
-    masterFaceCellsPtr_ = newMfcPtr;
-    slaveFaceCellsPtr_ = newSfcPtr;
+    masterFaceCellsPtr_ = std::move(newMfcPtr);
+    slaveFaceCellsPtr_ = std::move(newSfcPtr);
 
-    masterStickOutFacesPtr_ = newMsofPtr;
-    slaveStickOutFacesPtr_ = newSsofPtr;
+    masterStickOutFacesPtr_ = std::move(newMsofPtr);
+    slaveStickOutFacesPtr_ = std::move(newSsofPtr);
 
-    retiredPointMapPtr_ = newRpmPtr;
-    cutPointEdgePairMapPtr_ = newCpepmPtr;
-    projectedSlavePointsPtr_ = newProjectedSlavePointsPtr;
+    retiredPointMapPtr_ = std::move(newRpmPtr);
+    cutPointEdgePairMapPtr_ = std::move(newCpepmPtr);
+    projectedSlavePointsPtr_ = std::move(newProjectedSlavePointsPtr);
 }
 
 

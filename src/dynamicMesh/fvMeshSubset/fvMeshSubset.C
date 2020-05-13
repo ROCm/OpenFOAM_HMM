@@ -68,7 +68,7 @@ Foam::word Foam::fvMeshSubset::exposedPatchName("oldInternalFaces");
 
 bool Foam::fvMeshSubset::checkCellSubset() const
 {
-    if (fvMeshSubsetPtr_.empty())
+    if (!fvMeshSubsetPtr_)
     {
         FatalErrorInFunction
             << "setCellSubset()" << nl
@@ -87,9 +87,8 @@ void Foam::fvMeshSubset::calcFaceFlipMap() const
     const labelList& subToBaseFace = faceMap();
     const labelList& subToBaseCell = cellMap();
 
-    faceFlipMapPtr_.clear();
     faceFlipMapPtr_.reset(new labelList(subToBaseFace.size()));
-    labelList& faceFlipMap = *faceFlipMapPtr_;
+    auto& faceFlipMap = *faceFlipMapPtr_;
 
     // Only exposed internal faces might be flipped (since we don't do
     // any cell renumbering, just compacting)
@@ -546,8 +545,8 @@ Foam::fvMeshSubset::fvMeshSubset
 
 void Foam::fvMeshSubset::clear()
 {
-    fvMeshSubsetPtr_.clear();
-    faceFlipMapPtr_.clear();
+    fvMeshSubsetPtr_.reset(nullptr);
+    faceFlipMapPtr_.reset(nullptr);
 
     pointMap_.clear();
     faceMap_.clear();

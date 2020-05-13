@@ -32,7 +32,6 @@ License
 #include "polyTopoChange.H"
 #include "addToRunTimeSelectionTable.H"
 #include "plane.H"
-#include "demandDrivenData.H"
 
 // Index of debug signs:
 // p - adjusting a projection point
@@ -285,17 +284,19 @@ Foam::slidingInterface::slidingInterface
         }
 
         // The face zone addressing is written out in the definition dictionary
-        masterFaceCellsPtr_ = new labelList(dict.lookup("masterFaceCells"));
-        slaveFaceCellsPtr_ = new labelList(dict.lookup("slaveFaceCells"));
+        masterFaceCellsPtr_.reset(new labelList{});
+        slaveFaceCellsPtr_.reset(new labelList{});
+        masterStickOutFacesPtr_.reset(new labelList{});
+        slaveStickOutFacesPtr_.reset(new labelList{});
+        retiredPointMapPtr_.reset(new Map<label>{});
+        cutPointEdgePairMapPtr_.reset(new Map<Pair<edge>>{});
 
-        masterStickOutFacesPtr_ =
-            new labelList(dict.lookup("masterStickOutFaces"));
-        slaveStickOutFacesPtr_ =
-            new labelList(dict.lookup("slaveStickOutFaces"));
-
-        retiredPointMapPtr_ = new Map<label>(dict.lookup("retiredPointMap"));
-        cutPointEdgePairMapPtr_ =
-            new Map<Pair<edge>>(dict.lookup("cutPointEdgePairMap"));
+        dict.readEntry("masterFaceCells", *masterFaceCellsPtr_);
+        dict.readEntry("slaveFaceCells", *slaveFaceCellsPtr_);
+        dict.readEntry("masterStickOutFaces", *masterStickOutFacesPtr_);
+        dict.readEntry("slaveStickOutFaces", *slaveStickOutFacesPtr_);
+        dict.readEntry("retiredPointMap", *retiredPointMapPtr_);
+        dict.readEntry("cutPointEdgePairMap", *cutPointEdgePairMapPtr_);
     }
     else
     {
@@ -304,22 +305,14 @@ Foam::slidingInterface::slidingInterface
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::slidingInterface::~slidingInterface()
-{
-    clearOut();
-}
-
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::slidingInterface::clearAddressing() const
 {
-    deleteDemandDrivenData(cutFaceMasterPtr_);
-    deleteDemandDrivenData(cutFaceSlavePtr_);
+    cutFaceMasterPtr_.reset(nullptr);
+    cutFaceSlavePtr_.reset(nullptr);
 }
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const Foam::faceZoneID& Foam::slidingInterface::masterFaceZoneID() const
 {
@@ -679,6 +672,7 @@ const Foam::pointField& Foam::slidingInterface::pointProjection() const
 
     return *projectedSlavePointsPtr_;
 }
+
 
 void Foam::slidingInterface::setTolerances(const dictionary&dict, bool report)
 {

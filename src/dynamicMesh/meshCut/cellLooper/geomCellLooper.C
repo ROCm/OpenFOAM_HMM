@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +36,15 @@ License
 #include "HashSet.H"
 #include "ListOps.H"
 #include "transform.H"
-
 #include "addToRunTimeSelectionTable.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTypeNameAndDebug(geomCellLooper, 0);
+    addToRunTimeSelectionTable(cellLooper, geomCellLooper, word);
+}
 
 
 // Extension factor of edges to make sure we catch intersections through
@@ -47,17 +54,6 @@ const Foam::scalar Foam::geomCellLooper::pointEqualTol_ = 1e-3;
 
 // Snap cuts through edges onto edge endpoints. Fraction of edge length.
 Foam::scalar Foam::geomCellLooper::snapTol_ = 0.1;
-
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-defineTypeNameAndDebug(geomCellLooper, 0);
-addToRunTimeSelectionTable(cellLooper, geomCellLooper, word);
-
-}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -209,16 +205,9 @@ bool Foam::geomCellLooper::edgeEndsCut
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::geomCellLooper::geomCellLooper(const polyMesh& mesh)
 :
     cellLooper(mesh)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::geomCellLooper::~geomCellLooper()
 {}
 
 

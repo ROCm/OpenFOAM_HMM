@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,7 +64,7 @@ class attachDetach
 :
     public polyMeshModifier
 {
-    // Data types
+    // Data Types
 
         //- State of the modifier
         enum modifierState
@@ -74,7 +75,7 @@ class attachDetach
         };
 
 
-    // Private data
+    // Private Data
 
         //- Master face zone ID
         faceZoneID faceZoneID_;
@@ -103,8 +104,8 @@ class attachDetach
 
         // Private addressing data.  Created on topology change
 
-            //- Map of matching points
-            mutable Map<label>* pointMatchMapPtr_;
+        //- Map of matching points
+        mutable unique_ptr<Map<label>> pointMatchMapPtr_;
 
 
     // Private Member Functions
@@ -174,7 +175,7 @@ public:
 
 
     //- Destructor
-    virtual ~attachDetach();
+    virtual ~attachDetach() = default;
 
 
     // Member Functions

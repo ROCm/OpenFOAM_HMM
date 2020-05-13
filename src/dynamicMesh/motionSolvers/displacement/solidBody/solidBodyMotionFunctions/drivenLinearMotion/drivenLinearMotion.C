@@ -79,12 +79,6 @@ Foam::solidBodyMotionFunctions::drivenLinearMotion::drivenLinearMotion
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::solidBodyMotionFunctions::drivenLinearMotion::~drivenLinearMotion()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::septernion

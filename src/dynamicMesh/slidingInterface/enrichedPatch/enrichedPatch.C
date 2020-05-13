@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "enrichedPatch.H"
-#include "demandDrivenData.H"
 #include "OFstream.H"
 #include "meshTools.H"
 
@@ -50,7 +49,7 @@ void Foam::enrichedPatch::calcMeshPoints() const
             << abort(FatalError);
     }
 
-    meshPointsPtr_ = new labelList(pointMap().sortedToc());
+    meshPointsPtr_.reset(new labelList(pointMap().sortedToc()));
 }
 
 
@@ -78,7 +77,7 @@ void Foam::enrichedPatch::calcLocalFaces() const
 
     const faceList& faces = enrichedFaces();
 
-    localFacesPtr_ = new faceList(faces);
+    localFacesPtr_.reset(new faceList(faces));
     auto& locFaces = *localFacesPtr_;
 
     for (face& f : locFaces)
@@ -102,7 +101,7 @@ void Foam::enrichedPatch::calcLocalPoints() const
 
     const labelList& mp = meshPoints();
 
-    localPointsPtr_ = new pointField(mp.size());
+    localPointsPtr_.reset(new pointField(mp.size()));
     auto& locPoints = *localPointsPtr_;
 
     forAll(locPoints, i)
@@ -114,13 +113,13 @@ void Foam::enrichedPatch::calcLocalPoints() const
 
 void Foam::enrichedPatch::clearOut()
 {
-    deleteDemandDrivenData(enrichedFacesPtr_);
+    enrichedFacesPtr_.reset(nullptr);
 
-    deleteDemandDrivenData(meshPointsPtr_);
-    deleteDemandDrivenData(localFacesPtr_);
-    deleteDemandDrivenData(localPointsPtr_);
-    deleteDemandDrivenData(pointPointsPtr_);
-    deleteDemandDrivenData(masterPointFacesPtr_);
+    meshPointsPtr_.reset(nullptr);
+    localFacesPtr_.reset(nullptr);
+    localPointsPtr_.reset(nullptr);
+    pointPointsPtr_.reset(nullptr);
+    masterPointFacesPtr_.reset(nullptr);
 
     clearCutFaces();
 }
@@ -159,14 +158,6 @@ Foam::enrichedPatch::enrichedPatch
     cutFaceMasterPtr_(nullptr),
     cutFaceSlavePtr_(nullptr)
 {}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::enrichedPatch::~enrichedPatch()
-{
-    clearOut();
-}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

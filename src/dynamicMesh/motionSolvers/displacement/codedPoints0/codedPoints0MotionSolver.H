@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -154,7 +154,7 @@ public:
 
 
     //- Destructor
-    virtual ~codedPoints0MotionSolver();
+    virtual ~codedPoints0MotionSolver() = default;
 
 
     // Member Functions

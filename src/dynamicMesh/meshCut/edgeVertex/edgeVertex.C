@@ -30,7 +30,6 @@ License
 #include "meshTools.H"
 #include "refineCell.H"
 
-
 // * * * * * * * * * * * * * * * Static Functions  * * * * * * * * * * * * * //
 
 // Update stored refine list using map

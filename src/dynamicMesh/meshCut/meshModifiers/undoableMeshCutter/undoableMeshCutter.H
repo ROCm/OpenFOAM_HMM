@@ -59,8 +59,6 @@ Description
 
     - liveSplitCells contains pointers to splitCells with null children.
 
-
-
 SourceFiles
     undoableMeshCutter.C
 
@@ -83,7 +81,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class polyMesh;
 class polyTopoChange;
 class refineCell;
@@ -97,7 +95,7 @@ class undoableMeshCutter
 :
     public meshCutter
 {
-    // Private data
+    // Private Data
 
         //- Whether or not to store actions for unplaying.
         const bool undoable_;
@@ -143,12 +141,15 @@ public:
     ClassName("undoableMeshCutter");
 
 
-
     // Constructors
 
         //- Construct from mesh and flag whether refinement pattern needs
-        //  to be stored.
-        undoableMeshCutter(const polyMesh& mesh, const bool undoable = true);
+        //- to be stored.
+        explicit undoableMeshCutter
+        (
+            const polyMesh& mesh,
+            const bool undoable = true
+        );
 
 
     //- Destructor

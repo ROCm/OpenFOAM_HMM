@@ -385,18 +385,11 @@ bool Foam::boundaryCutter::splitFace
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::boundaryCutter::boundaryCutter(const polyMesh& mesh)
 :
     mesh_(mesh),
     edgeAddedPoints_(),
     faceAddedPoint_()
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::boundaryCutter::~boundaryCutter()
 {}
 
 
