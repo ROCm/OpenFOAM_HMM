@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,10 +91,10 @@ int Foam::fileFormats::STLCore::detectBinaryHeader
 )
 {
     bool compressed = false;
-    autoPtr<std::istream> streamPtr
-    (
+    std::unique_ptr<std::istream> streamPtr
+    {
         new std::ifstream(filename, std::ios::binary)
-    );
+    };
 
     // If the file is compressed, decompress it before further checking.
     if (!streamPtr->good() && isFile(filename + ".gz", false))
@@ -102,7 +102,7 @@ int Foam::fileFormats::STLCore::detectBinaryHeader
         compressed = true;
         streamPtr.reset(new igzstream((filename + ".gz").c_str()));
     }
-    std::istream& is = streamPtr();
+    auto& is = *streamPtr;
 
     if (!is.good())
     {
@@ -156,7 +156,7 @@ int Foam::fileFormats::STLCore::detectBinaryHeader
 }
 
 
-Foam::autoPtr<std::istream>
+std::unique_ptr<std::istream>
 Foam::fileFormats::STLCore::readBinaryHeader
 (
     const fileName& filename,
@@ -167,10 +167,10 @@ Foam::fileFormats::STLCore::readBinaryHeader
     bool compressed = false;
     nTrisEstimated = 0;
 
-    autoPtr<std::istream> streamPtr
-    (
+    std::unique_ptr<std::istream> streamPtr
+    {
         new std::ifstream(filename, std::ios::binary)
-    );
+    };
 
     // If the file is compressed, decompress it before reading.
     if (!streamPtr->good() && isFile(filename + ".gz", false))
@@ -178,12 +178,10 @@ Foam::fileFormats::STLCore::readBinaryHeader
         compressed = true;
         streamPtr.reset(new igzstream((filename + ".gz").c_str()));
     }
-    std::istream& is = streamPtr();
+    auto& is = *streamPtr;
 
     if (!is.good())
     {
-        streamPtr.clear();
-
         FatalErrorInFunction
             << "Cannot read file " << filename
             << " or file " << filename + ".gz"
@@ -198,8 +196,6 @@ Foam::fileFormats::STLCore::readBinaryHeader
     // Check that stream is OK, if not this may be an ASCII file
     if (!is.good()) // could check again: startsWithSolid(header)
     {
-        streamPtr.clear();
-
         FatalErrorInFunction
             << "problem reading header, perhaps file is not binary "
             << exit(FatalError);
@@ -235,8 +231,6 @@ Foam::fileFormats::STLCore::readBinaryHeader
 
     if (bad)
     {
-        streamPtr.clear();
-
         FatalErrorInFunction
             << "problem reading number of triangles, perhaps file is not binary"
             << exit(FatalError);

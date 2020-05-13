@@ -211,7 +211,7 @@ Foam::fileName Foam::surfaceWriters::vtkWriter::write()
 
     const meshedSurf& surf = surface();
 
-    if (writer_.empty() && (Pstream::master() || !parallel_))
+    if (!writer_ && (Pstream::master() || !parallel_))
     {
         writer_.reset
         (

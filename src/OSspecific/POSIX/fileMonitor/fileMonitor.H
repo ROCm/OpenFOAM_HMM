@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,10 +45,11 @@ SourceFiles
 #ifndef fileMonitor_H
 #define fileMonitor_H
 
-#include <sys/types.h>
 #include "Enum.H"
 #include "className.H"
 #include "DynamicList.H"
+#include <memory>
+#include <sys/types.h>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -67,7 +68,7 @@ class fileMonitor
 {
 public:
 
-    // Public data types
+    // Public Data Types
 
         //- Enumeration defining the file state.
         enum fileState
@@ -81,7 +82,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Whether to use inotify (requires -DFOAM_USE_INOTIFY, see above)
         const bool useInotify_;
@@ -99,7 +100,7 @@ private:
         DynamicList<label> freeWatchFds_;
 
         //- Watch mechanism (stat or inotify)
-        mutable autoPtr<fileMonitorWatcher> watcher_;
+        mutable std::unique_ptr<fileMonitorWatcher> watcher_;
 
 
     // Private Member Functions

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +39,7 @@ SourceFiles
 
 #include "STLpoint.H"
 #include "STLtriangle.H"
-#include "autoPtr.H"
+#include <memory>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,7 +56,7 @@ class STLCore
 {
 public:
 
-    // Public data types
+    // Public Data Types
 
         //- Enumeration for the format of data in the stream
         enum STLFormat
@@ -88,7 +88,8 @@ protected:
         //- Read STL binary file header.
         //  Return the opened file stream and estimated number of triangles.
         //  The stream is invalid and number of triangles is 0 on error.
-        static autoPtr<std::istream> readBinaryHeader
+        static std::unique_ptr<std::istream>
+        readBinaryHeader
         (
             const fileName& filename,
             label& nTrisEstimated
@@ -100,9 +101,8 @@ protected:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         STLCore() = default;
-
 };
 
 

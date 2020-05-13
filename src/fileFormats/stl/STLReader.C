@@ -90,17 +90,19 @@ bool Foam::fileFormats::STLReader::readBINARY
     format_ = STLFormat::UNKNOWN;
 
     label nTris = 0;
-    autoPtr<istream> streamPtr = readBinaryHeader(filename, nTris);
+    std::unique_ptr<std::istream> streamPtr
+    {
+        readBinaryHeader(filename, nTris)
+    };
 
-    if (!streamPtr.valid())
+    if (!streamPtr)
     {
         FatalErrorInFunction
             << "Error reading file " << filename
             << " or file " << filename + ".gz"
             << exit(FatalError);
     }
-
-    istream& is = streamPtr();
+    auto& is = *streamPtr;
 
 #ifdef DEBUG_STLBINARY
     Info<< "# " << nTris << " facets" << endl;
