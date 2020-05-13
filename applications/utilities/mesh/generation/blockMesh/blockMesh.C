@@ -43,11 +43,11 @@ Usage
     \b blockMesh [OPTION]
 
     Options:
-      - \par -blockTopology
-        Write the topology as a set of edges in OBJ format and exit.
+      - \par -write-obj
+        Write topology as a set of edges in OBJ format and exit.
 
-      - \par -merge-geometric
-        Use geometric instead of topological merging
+      - \par -merge-points
+        Merge points instead of default topological merge
 
       - \par -region \<name\>
         Specify alternative mesh region.
@@ -117,13 +117,15 @@ int main(int argc, char *argv[])
 
     argList::addBoolOption
     (
-        "blockTopology",
+        "write-obj",
         "Write block edges and centres as obj files and exit"
     );
+    argList::addOptionCompat("write-obj", {"blockTopology", 1912});
+
     argList::addBoolOption
     (
-        "merge-geometric",
-        "Use geometric (point) merging instead of topological merging "
+        "merge-points",
+        "Geometric (point) merging instead of topological merging "
         "(slower, fails with high-aspect cells. default for 1912 and earlier)",
         true  // mark as an advanced option
     );
@@ -157,12 +159,12 @@ int main(int argc, char *argv[])
     // Remove old files, unless disabled
     const bool removeOldFiles = !args.found("noClean");
 
-    // Topological merge, unless otherwise specified
-    blockMesh::mergeStrategy strategy(blockMesh::TOPOLOGICAL);
+    // Default merge (topology), unless otherwise specified
+    blockMesh::mergeStrategy strategy(blockMesh::DEFAULT_MERGE);
 
-    if (args.found("merge-geometric"))
+    if (args.found("merge-points"))
     {
-        strategy = blockMesh::GEOMETRIC;
+        strategy = blockMesh::MERGE_POINTS;
     }
 
     word regionName(polyMesh::defaultRegion);
@@ -217,11 +219,15 @@ int main(int argc, char *argv[])
     }
 
 
-    if (args.found("blockTopology"))
+    bool quickExit = false;
+
+    if (args.found("write-obj"))
     {
+        quickExit = true;
+
         Info<< nl;
 
-        // Write mesh as edges.
+        // Write mesh as edges
         {
             OFstream os(runTime.path()/"blockTopology.obj");
 
@@ -238,19 +244,19 @@ int main(int argc, char *argv[])
             Info<< "Writing block centres as obj format: "
                 << os.name().name() << endl;
 
-            const polyMesh& topo = blocks.topology();
-
-            for (const point& cc :  topo.cellCentres())
+            for (const point& cc : blocks.topology().cellCentres())
             {
                 os << "v " << cc.x() << ' ' << cc.y() << ' ' << cc.z() << nl;
             }
         }
+    }
 
+    if (quickExit)
+    {
         Info<< "\nEnd\n" << endl;
 
         return 0;
     }
-
 
 
     // Instance for resulting mesh

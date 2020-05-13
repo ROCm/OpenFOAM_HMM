@@ -55,7 +55,7 @@ void Foam::blockMesh::calcGeometricalMerge()
 
     if (verboseOutput)
     {
-        Info<< "Creating merge list.." << flush;
+        Info<< "Creating merge list (geometric search).." << flush;
     }
 
     // set unused to -1

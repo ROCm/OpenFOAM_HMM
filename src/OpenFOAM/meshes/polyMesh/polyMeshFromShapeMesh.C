@@ -336,7 +336,7 @@ void Foam::polyMesh::setTopology
                         // an error or explicitly desired (e.g. duplicate
                         // baffles or acmi). We could have a special 7-faced
                         // hex shape instead so we can have additional patches
-                        // but that would be unworkable. 
+                        // but that would be unworkable.
                         // So now either
                         // - exit with error
                         // - or warn and append face to addressing

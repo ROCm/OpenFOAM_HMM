@@ -328,7 +328,7 @@ void Foam::blockMesh::calcTopologicalMerge()
 
     if (verboseOutput)
     {
-        Info<< "Creating merge list with fast topological search.." << flush;
+        Info<< "Creating merge list (topological search).." << flush;
     }
 
     // Size merge list and initialize to -1

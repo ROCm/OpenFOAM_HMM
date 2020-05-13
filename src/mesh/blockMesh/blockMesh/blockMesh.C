@@ -37,13 +37,21 @@ namespace Foam
 }
 
 
+const Foam::Enum<Foam::blockMesh::mergeStrategy>
+Foam::blockMesh::strategyNames_
+({
+    { mergeStrategy::MERGE_TOPOLOGY, "topology" },
+    { mergeStrategy::MERGE_POINTS, "points" },
+});
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::blockMesh::blockMesh
 (
     const IOdictionary& dict,
     const word& regionName,
-    const mergeStrategy strategy
+    mergeStrategy strategy
 )
 :
     meshDict_(dict),
@@ -77,17 +85,24 @@ Foam::blockMesh::blockMesh
     vertices_(Foam::vertices(blockVertices_)),
     topologyPtr_(createTopology(meshDict_, regionName))
 {
-    // TODO - extend with Enum
+    // Command-line option has precedence over dictionary setting
 
-    bool useTopoMerge = (strategy == mergeStrategy::TOPOLOGICAL);
-
-    if (meshDict_.getOrDefault("fastMerge", useTopoMerge))
+    if (strategy == mergeStrategy::DEFAULT_MERGE)
     {
-        calcTopologicalMerge();
+        strategyNames_.readIfPresent("mergeType", meshDict_, strategy);
+
+        // Warn about fairly obscure old "fastMerge" option?
+    }
+
+    if (strategy == mergeStrategy::MERGE_POINTS)
+    {
+        // MERGE_POINTS
+        calcGeometricalMerge();
     }
     else
     {
-        calcGeometricalMerge();
+        // MERGE_TOPOLOGY
+        calcTopologicalMerge();
     }
 }
 
@@ -96,7 +111,7 @@ Foam::blockMesh::blockMesh
 
 bool Foam::blockMesh::valid() const
 {
-    return topologyPtr_.valid();
+    return bool(topologyPtr_);
 }
 
 
@@ -219,18 +234,14 @@ Foam::label Foam::blockMesh::numZonedBlocks() const
 
 void Foam::blockMesh::writeTopology(Ostream& os) const
 {
-    const pointField& pts = topology().points();
-
-    for (const point& pt : pts)
+    for (const point& p : topology().points())
     {
-        os << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
+        os << "v " << p.x() << ' ' << p.y() << ' ' << p.z() << nl;
     }
 
-    const edgeList& edges = topology().edges();
-
-    for (const edge& e : edges)
+    for (const edge& e : topology().edges())
     {
-        os << "l " << e.start() + 1 << ' ' << e.end() + 1 << endl;
+        os << "l " << e.start() + 1 << ' ' << e.end() + 1 << nl;
     }
 }
 

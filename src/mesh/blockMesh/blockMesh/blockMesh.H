@@ -30,6 +30,23 @@ Class
 Description
     A multi-block mesh generator
 
+    Dictionary controls
+    \table
+        Property    | Description                           | Required | Default
+        scale       | Point scaling                         | no  | 1.0
+        vertices    |                                       | yes |
+        blocks      |                                       | yes |
+        edges       |                                       | no  |
+        faces       |                                       | no  |
+        boundary    | Boundary definition                   | no  |
+        patches     | Alternate version for "boundary"      | no  |
+        namedBlocks |                                       | no  |
+        namedVertices |                                     | no  |
+        mergeType   | Merging "points" or "topology"        | no  | topology
+        checkFaceCorrespondence |                           | no  | true
+        verbose     |                                       | no  | true
+    \endtable
+
 Note
     The vertices, cells and patches for filling the blocks are demand-driven.
 
@@ -45,6 +62,7 @@ SourceFiles
 #ifndef blockMesh_H
 #define blockMesh_H
 
+#include "Enum.H"
 #include "blockList.H"
 #include "searchableSurfaces.H"
 #include "polyMesh.H"
@@ -66,6 +84,27 @@ class blockMesh
 :
     public blockList
 {
+public:
+
+    // Data Types
+
+        //- The block merging strategy
+        enum mergeStrategy
+        {
+            DEFAULT_MERGE,  //!< Default (TOPOLOGY), not selectable
+            MERGE_TOPOLOGY, //!< "topology" merge by block topology (default)
+            MERGE_POINTS    //!< "points" merge by point geometry
+        };
+
+
+private:
+
+    // Static Data
+
+        //- Names corresponding to the mergeStrategy
+        static const Enum<mergeStrategy> strategyNames_;
+
+
     // Private Data
 
         //- Reference to mesh dictionary
@@ -179,19 +218,8 @@ class blockMesh
 
 public:
 
-    // Data Types
-
-        //- The block merging strategy
-        enum mergeStrategy
-        {
-            TOPOLOGICAL,    //!< Merge using block topology
-            GEOMETRIC       //!< Merge using point geometry
-        };
-
-
-    // Static Data Members
-
-        ClassName("blockMesh");
+    //- Runtime type information
+    ClassName("blockMesh");
 
 
     // Constructors
@@ -202,7 +230,7 @@ public:
         (
             const IOdictionary& dict,
             const word& regionName,
-            const mergeStrategy strategy = TOPOLOGICAL
+            mergeStrategy strategy = mergeStrategy::DEFAULT_MERGE
         );
 
 
