@@ -106,6 +106,22 @@ objective::objective
     const word& primalSolverName
 )
 :
+    localIOdictionary
+    (
+        IOobject
+        (
+            dict.dictName(),
+            mesh.time().timeName(),
+            fileName("uniform")/fileName("objectives")/adjointSolverName,
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        // avoid type checking since dictionary is read using the
+        // derived type name and type() will result in "objective"
+        // here
+        word::null
+    ),
     mesh_(mesh),
     dict_(dict),
     adjointSolverName_(adjointSolverName),
@@ -115,7 +131,7 @@ objective::objective
     nullified_(false),
 
     J_(Zero),
-    JMean_(Zero),
+    JMean_(this->getOrDefault<scalar>("JMean", Zero)),
     weight_(Zero),
 
     integrationStartTimePtr_(nullptr),
@@ -157,21 +173,6 @@ objective::objective
         (
             new scalar(dict.get<scalar>("integrationEndTime"))
         );
-    }
-
-    // Read JMean from dictionary, if present
-    IOobject headObjectiveIODict
-    (
-        "objectiveDict" + objectiveName_,
-        mesh_.time().timeName(),
-        "uniform",
-        mesh_,
-        IOobject::READ_IF_PRESENT,
-        IOobject::NO_WRITE
-    );
-    if (headObjectiveIODict.typeHeaderOk<IOdictionary>(false))
-    {
-        JMean_ = IOdictionary(headObjectiveIODict).get<scalar>("JMean");
     }
 }
 
@@ -660,22 +661,13 @@ void objective::writeMeanValue() const
                 << mesh_.time().value() << tab << JMean_ << endl;
         }
     }
-    // Write mean value under time/uniform, to allow for lineSearch to work
-    // appropriately in continuation runs, when field averaging is used
-    IOdictionary objectiveDict
-    (
-        IOobject
-        (
-            "objectiveDict" + objectiveName_,
-            mesh_.time().timeName(),
-            "uniform",
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        )
-    );
-    objectiveDict.add<scalar>("JMean", JMean_);
-    objectiveDict.regIOobject::write();
+}
+
+
+bool objective::writeData(Ostream& os) const
+{
+    os.writeEntry("JMean", JMean_);
+    return os.good();
 }
 
 

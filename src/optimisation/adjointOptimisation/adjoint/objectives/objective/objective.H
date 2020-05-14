@@ -40,6 +40,7 @@ SourceFiles
 #ifndef objective_H
 #define objective_H
 
+#include "localIOdictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
 #include "OFstream.H"
@@ -57,6 +58,8 @@ namespace Foam
 \*---------------------------------------------------------------------------*/
 
 class objective
+:
+    public localIOdictionary
 {
 protected:
 
@@ -70,9 +73,13 @@ protected:
         bool computeMeanFields_;
         bool nullified_;
 
-        // Objective function value and weight
+        //- Objective function value and weight
         scalar J_;
-        scalar JMean_;  //average value
+
+        //- Average objective value
+        scalar JMean_;
+
+        //- Objective weight
         scalar weight_;
 
         // Objective integration start and end times (for unsteady flows)
@@ -360,6 +367,9 @@ public:
 
         //- Write mean objective function history
         virtual void writeMeanValue() const;
+
+        //- Write averaged objective for continuation
+        virtual bool writeData(Ostream& os) const;
 
         // Inline functions for checking whether pointers are set or not
         inline const word& objectiveName() const;

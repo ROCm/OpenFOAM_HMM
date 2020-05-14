@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -312,9 +312,6 @@ void Foam::adjointSimple::solve()
 {
     if (active_)
     {
-        // Update objective function related quantities
-        objectiveManagerPtr_->updateAndWrite();
-
         // Reset mean fields before solving
         adjointVars_.resetMeanFields();
 
@@ -386,6 +383,15 @@ Foam::sensitivity& Foam::adjointSimple::getSensitivityBase()
     }
 
     return adjointSensitivity_();
+}
+
+
+void Foam::adjointSimple::updatePrimalBasedQuantities()
+{
+    incompressibleAdjointSolver::updatePrimalBasedQuantities();
+
+    // Update objective function related quantities
+    objectiveManagerPtr_->updateAndWrite();
 }
 
 
