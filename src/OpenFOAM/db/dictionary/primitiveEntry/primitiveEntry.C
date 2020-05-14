@@ -151,7 +151,7 @@ Foam::label Foam::primitiveEntry::startLineNumber() const
 
     if (tokens.size())
     {
-        tokens.first().lineNumber();
+        return tokens.first().lineNumber();
     }
 
     return -1;
