@@ -5,11 +5,10 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2017-2018 OpenCFD Ltd.
+#     Copyright (C) 2017-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # File
 #     etc/config.sh/bash_completion
@@ -58,20 +57,20 @@ foamAddCompletion()
         if [ "$appName" = "-clear" ]
         then
            # Clear cached values
-           echo "clear cached values"
+           echo "clear cached values" 1>&2
            _of_complete_cache_=()
 
         elif [ "$appName" = "-list" ]
         then
            # List cached keys
            choices="${#_of_complete_cache_[@]}"
-           echo "$choices cached values:"
+           echo "$choices cached values:" 1>&2
            [ "$choices" = 0 ] || echo ${!_of_complete_cache_[@]}  # keys
 
         elif [ -d "$appName" ]
         then
             # Process directory for applications
-            choices="$(find $appName -maxdepth 1 -executable -type f 2>/dev/null)"
+            choices="$(find "$appName" -maxdepth 1 -executable -type f 2>/dev/null)"
             for appName in $choices
             do
                 complete -o filenames -F _of_complete_ "${appName##*/}"
@@ -82,9 +81,10 @@ foamAddCompletion()
         then
             complete -o filenames -F _of_complete_ "${appName##*/}"
             # echo "complete ${appName##*/}" 1>&2
-        else
-            echo "No completion added for $appName" 1>&2
-            echo "... incorrect platform, or not yet compiled?" 1>&2
+        elif [ -n "$appName" ]
+        then
+            echo "No completions for $appName" 1>&2
+            echo "[ignore if OpenFOAM is not yet compiled]" 1>&2
         fi
     done
 }
@@ -124,7 +124,8 @@ _of_complete_()
         COMPREPLY=($(compgen -d -X '![-0-9]*' -- ${cur}))
         ;;
     -region)
-        choices=$(\ls -d system/*/ 2>/dev/null | sed -e 's#/$##' -e 's#^.*/##')
+        # Or: $(find system -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed -e 's%.*/%%')
+        choices=$(\ls -d system/*/ 2>/dev/null | sed -e 's%/$%%; s%^.*/%%')
         COMPREPLY=($(compgen -W "$choices" -- ${cur}))
         ;;
     -fileHandler)
@@ -151,7 +152,8 @@ _of_complete_()
         # any of the option description text
         if [ -z "$choices" ]
         then
-            local helpText=$($appName -help-full 2>/dev/null | \
+            local helpText
+            helpText=$("$appName" -help-full 2>/dev/null | \
                 sed -ne '1,/^[Oo]ptions:/d' \
                     -e '/^ \{8\}/d;' \
                     -e 's/^ *//; /^$/d; /^[^-]/d; /^--/d; /^-help-man/d;' \
@@ -215,8 +217,8 @@ _of_complete_()
     return 0
 }
 
-#------------------------------------------------------------------------------
 
+#------------------------------------------------------------------------------
 
 # Uses 'declare -gA' for the implementation
 # The '-A' requires bash >= 4.0 and the '-g' requires bash >= 4.2
@@ -231,9 +233,10 @@ then
     then
         _of_complete_cache_=()
 
-        # Generate completions for predefined directories
-        foamAddCompletion $FOAM_APPBIN
-        # And a few scripts from bin/
+        # Completions for predefined directories
+        foamAddCompletion "$FOAM_APPBIN"
+
+        # A few scripts from bin/
         foamAddCompletion paraFoam
     fi
 else
