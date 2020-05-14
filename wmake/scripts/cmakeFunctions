@@ -81,7 +81,7 @@ cmakeVersioned()
 
     mkdir -p "$objectsDir" \
     && ( cd "$objectsDir" && call_cmake "$@" "$sourceDir" && \
-         make "-j${WM_NCOMPPROCS:-1}" ) \
+         make ) \
     && storeDependency "$sentinel" "$depend" $@
 }
 
@@ -108,7 +108,7 @@ cmakeVersionedInstall()
 
     mkdir -p "$objectsDir" \
     && ( cd "$objectsDir" && call_cmake "$@" "$sourceDir" && \
-         make "-j${WM_NCOMPPROCS:-1}" install ) \
+         make install ) \
     && storeDependency "$sentinel" "$depend" $@
 }
 

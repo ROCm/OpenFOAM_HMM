@@ -61,7 +61,7 @@ options:
   -curr | -current      Use \$WM_OPTIONS ($WM_OPTIONS)
   -comp | -compiler     Use \$WM_ARCH\$WM_COMPILER*  ($WM_ARCH$WM_COMPILER)
   -compiler=NAME        Use \$WM_ARCH<NAME>*  ($WM_ARCH<NAME>*)
-  -h | -help            Print the usage
+  -help                 Print the usage
 
 Deletes specified $targetDir object file directories from project top-level:
 Project:   $WM_PROJECT_DIR

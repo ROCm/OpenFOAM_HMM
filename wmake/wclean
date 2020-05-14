@@ -52,7 +52,7 @@ Usage: $Script [OPTION] [dir]
 options:
   -a | -all         All subdirectories, uses Allwclean, Allclean if they exist
   -s | -silent      Silent mode (ignored - for compatibility with wmake)
-  -h | -help        Display short help and exit
+  -help             Display short help and exit
   -help-full        Display full help and exit
 
 subcommands (wclean subcommand -help for more information):
@@ -136,7 +136,7 @@ do
     -a | -all | all)
         targetType=all
         ;;
-    -s | -silent)    # Ignored - for compatibility with wmake
+    -s | -silent | -quiet)
         export WM_QUIET=true
         ;;
     -*)

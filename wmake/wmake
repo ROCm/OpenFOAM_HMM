@@ -100,7 +100,7 @@ fi
 cat<<TAIL_OPTIONS
   -pwd              Print root directory containing a Make/ directory
   -version | --version  Print version (same as -show-api)
-  -h | -help        Display short help and exit
+  -help             Display short help and exit
   -help-full        Display full help and exit
 
 subcommands (wmake subcommand -help for more information):
@@ -219,7 +219,7 @@ do
             exit $?
             ;;
 
-        -s | -silent)
+        -s | -silent | -quiet)
             optQuiet=true
             export WM_QUIET=true
             ;;

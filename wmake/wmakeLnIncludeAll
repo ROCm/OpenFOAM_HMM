@@ -36,23 +36,38 @@
 #     and execute 'wmakeLnInclude' for each one
 #
 #------------------------------------------------------------------------------
-Script=${0##*/}
+Script="${0##*/}"                   # Need 'Script' for wmakeFunctions messages
 
-usage() {
-    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+printHelp() {
     cat<<USAGE
 
-Usage: $Script [OPTION] [dir1 .. dirN]
+Usage: ${0##*/} [OPTION] [dir1 .. dirN]
 
 options:
-  -j                Compile using all local cores/hyperthreads
-  -jN or -j N       Compile using N cores/hyperthreads
-  -h | -help        Print the usage
+  -f | -force       Force remove of existing lnInclude before recreating
+  -u | -update      Update existing lnInclude directories
+  -j                Use all local cores/hyperthreads
+  -jN | -j N        Use N cores/hyperthreads
+  -help             Display short help and exit
 
 Find directories with a 'Make/files' containing a 'LIB =' directive
-and execute 'wmakeLnInclude -update' for each one
+and execute 'wmakeLnInclude' for each.
 
 USAGE
+    exit 0 # clean exit
+}
+
+
+# Report error and exit
+die()
+{
+    exec 1>&2
+    echo
+    echo "Error encountered:"
+    while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
+    echo
+    echo "See '${0##*/} -help' for usage"
+    echo
     exit 1
 }
 
@@ -61,35 +76,53 @@ USAGE
 # Parse arguments and options
 #------------------------------------------------------------------------------
 
-findName=lnInclude
+# Parallel operation requested
 nCores=0
 
-# Default 'wmakeLnInclude' option
-unset wmLnOpt
+unset optForce optUpdate
 
 while [ "$#" -gt 0 ]
 do
     case "$1" in
         -h | -help*)
-            usage
+            printHelp
+            ;;
+        -f | -force)
+            optForce=true
             ;;
         -u | -update)
-            wmLnOpt="-update"
+            optUpdate=true
+            ;;
+        -s | -silent | -quiet)
+            export WM_QUIET=true
             ;;
         # Parallel execution on WM_NCOMPPROCS cores
         -j)
-            nCores=${WM_NCOMPPROCS:-0}
-            test $# -ge 2 && expr $2 + 1 > /dev/null 2>&1 \
-                && shift && nCores=$1
+            nJobs=0
+            case "$2" in
+            [0-9]*)
+                if nJobs="$(expr 0 + "$2" 2>/dev/null)"
+                then
+                    shift
+                fi
+                ;;
+            esac
 
-            [ "$nCores" = 0 ] && nCores=1
+            if [ "${nJobs:=0}" -gt 0 ]
+            then
+                nCores="$nJobs"
+            else
+                nCores="${WM_NCOMPPROCS:-1}"
+                [ "$nCores" -gt 0 ] || nCores=1
+            fi
             ;;
+
         # Parallel compilation on specified number of cores
         -j[1-9]*)
-            nCores=${1#-j}
+            nCores="${1#-j}"
             ;;
         -*)
-            usage "unknown option: '$1'"
+            die "unknown option: '$1'"
             ;;
         *)
             break
@@ -97,6 +130,7 @@ do
     esac
     shift
 done
+
 
 # Default search is from CWD, with special handling of the top-level
 # project directory: {applications,src} directories
@@ -112,14 +146,14 @@ fi
 
 if [ "$nCores" -gt 0 ]
 then
-    echo "$Script: starting wmakeLnInclude processes on $nCores cores"
+    echo "${0##*/}: starting wmakeLnInclude processes on $nCores cores"
 else
-    echo "$Script: running wmakeLnInclude"
+    echo "${0##*/}: running wmakeLnInclude"
 fi
 
 for checkDir
 do
-    if [ -d $checkDir ]
+    if [ -d "$checkDir" ]
     then
         echo "    searching $checkDir for 'Make' directories"
     else
@@ -127,7 +161,7 @@ do
         continue
     fi
 
-    find $checkDir -depth -name Make -type d -print | while read MakeDir
+    find "$checkDir" -depth -name Make -type d -print | while read MakeDir
     do
         topDir=${MakeDir%/Make}    # trim /Make from the end
         if [ -d "$topDir" ]
@@ -145,9 +179,9 @@ do
                         wait -n
                         joblist=($(jobs -p))
                     done
-                    wmakeLnInclude $wmLnOpt $topDir &
+                    wmakeLnInclude ${optForce:+-force} ${optUpdate:+-update} $topDir &
                 else
-                    wmakeLnInclude $wmLnOpt $topDir
+                    wmakeLnInclude ${optForce:+-force} ${optUpdate:+-update} $topDir
                 fi
             elif [ -d "$topDir/lnInclude" ]
             then
@@ -160,7 +194,7 @@ done
 
 if [ "$nCores" -gt 0 ]
 then
-    # Wait for all of the wmakeLnInclude jobs to finish
+    # Wait for wmakeLnInclude jobs to finish
     wait
 
     # Synchronize the file system to ensure that all of the links exist

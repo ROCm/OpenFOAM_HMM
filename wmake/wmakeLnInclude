@@ -40,7 +40,7 @@ options:
   -u | -update      Update existing lnInclude directories
   -s | -silent      Silent mode (do not echo command)
   -pwd              Locate root directory containing Make/ directory
-  -h | -help        Print the usage
+  -help             Print the usage
 
 Link source files in specified dir(s) into their respective
 lnInclude directories. With '-update', items are relinked with 'ln -sf'
@@ -71,7 +71,7 @@ die()
 # Option for 'ln'
 optLink="-s"
 
-unset optForce optQuiet optUpdate optPwd
+unset optForce optUpdate optPwd
 
 while [ "$#" -gt 0 ]
 do
@@ -87,8 +87,8 @@ do
             optUpdate=true
             optLink="-sf"
             ;;
-        -s | -silent)
-            optQuiet=true
+        -s | -silent | -quiet)
+            export WM_QUIET=true
             ;;
         -pwd)
             optPwd=true
