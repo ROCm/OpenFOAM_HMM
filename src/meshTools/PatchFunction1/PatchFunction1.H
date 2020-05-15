@@ -183,6 +183,12 @@ public:
             //- Return the name of the entry
             const word& name() const;
 
+            //- Reference to the patch
+            const polyPatch& patch() const;
+
+            //- Whether to generate face or point values on patch
+            bool faceValues() const;
+
 
         // Manipulation
 

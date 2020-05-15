@@ -100,6 +100,20 @@ const Foam::word& Foam::PatchFunction1<Type>::name() const
 
 
 template<class Type>
+const Foam::polyPatch& Foam::PatchFunction1<Type>::patch() const
+{
+    return patch_;
+}
+
+
+template<class Type>
+bool Foam::PatchFunction1<Type>::faceValues() const
+{
+    return faceValues_;
+}
+
+
+template<class Type>
 void Foam::PatchFunction1<Type>::convertTimeBase(const Time&)
 {}
 
