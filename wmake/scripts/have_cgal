@@ -25,19 +25,23 @@
 #
 # Variables set on success
 #     HAVE_CGAL
+#     CGAL_FLAVOUR (header, library, ...)
 #     CGAL_ARCH_PATH
 #     CGAL_INC_DIR
 #     CGAL_LIB_DIR
 #
+# Uses
+#     BOOST_ARCH_PATH and have_boost::search_boost()
+#
 #------------------------------------------------------------------------------
-. ${WM_PROJECT_DIR:?}/wmake/scripts/sysFunctions    # General system functions
+. ${WM_PROJECT_DIR:?}/wmake/scripts/have_boost      # boost + system functions
 
 #------------------------------------------------------------------------------
 
 # Reset
 no_cgal()
 {
-    unset HAVE_CGAL CGAL_INC_DIR CGAL_LIB_DIR
+    unset HAVE_CGAL CGAL_FLAVOUR CGAL_INC_DIR CGAL_LIB_DIR
 }
 
 
@@ -45,6 +49,7 @@ no_cgal()
 echo_cgal()
 {
     echo "cgal=${HAVE_CGAL:-false}"
+    echo "flavour=$CGAL_FLAVOUR"
     echo "root=$CGAL_ARCH_PATH"
     echo "include=$CGAL_INC_DIR"
     echo "library=$CGAL_LIB_DIR"
@@ -55,7 +60,7 @@ echo_cgal()
 # $1 : prefix (*_ARCH_PATH, system, ...)
 #
 # On success, return 0 and export variables
-# -> HAVE_CGAL, CGAL_INC_DIR, CGAL_LIB_DIR
+# -> HAVE_CGAL, CGAL_INC_DIR, CGAL_LIB_DIR, CGAL_FLAVOUR
 search_cgal()
 {
     local warn # warn="==> skip cgal"
@@ -63,7 +68,7 @@ search_cgal()
     local libName="libCGAL"
 
     local prefix="${1:-system}"
-    local header library
+    local header library flavour
 
     # ----------------------------------
     if isNone "$prefix"
@@ -89,12 +94,13 @@ search_cgal()
         return 2
     }
 
-    # Library
+    # Library may be optional - eg, header-only
     [ -n "$library" ] \
     || library=$(findLibrary -prefix="$prefix" -name="$libName") \
     || {
-        [ -n "$warn" ] && echo "$warn (no library)"
-        return 2
+        [ -n "$warn" ] && echo "==> cgal (no library)"
+        unset library
+        flavour="header"    # Header only
     }
 
     # ----------------------------------
@@ -128,6 +134,9 @@ have_cgal()
             return 2
         fi
     fi
+
+    # Need boost for cgal
+    search_boost "$BOOST_ARCH_PATH"
 
     search_cgal "$CGAL_ARCH_PATH"
 }
