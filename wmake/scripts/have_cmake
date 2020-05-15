@@ -21,7 +21,7 @@
 #     CMAKE_ARCH_PATH that may specify a possible cmake/bin directory.
 #
 # Functions provided
-#     have_cmake, no_cmake, echo_cmake
+#     have_cmake, no_cmake, echo_cmake, search_cmake
 #
 # Variables set on success
 #     HAVE_CMAKE
@@ -32,10 +32,10 @@
 #
 #------------------------------------------------------------------------------
 
-# Reset variables
+# Reset
 no_cmake()
 {
-    unset HAVE_CMAKE CMAKE_EXE
+    unset HAVE_CMAKE CMAKE_EXE CMAKE_ARCH_PATH
 }
 
 
@@ -47,14 +47,15 @@ echo_cmake()
 }
 
 
+# Search
+# $1 : prefix (*_ARCH_PATH, system, ...)
 #
-# Try to locate cmake according to values specified in <etc/config.sh/cmake>
+# Locate cmake according to values specified in <etc/config.sh/cmake>
 # or just use what is found on the path.
 #
 # On success: return the resolved value as output.
 # On failure: set executable as "false" and return with 1
-#
-have_cmake()
+search_cmake()
 {
     # Treat previous queries as "sticky"
     if [ -n "$CMAKE_EXE" ]
@@ -63,31 +64,18 @@ have_cmake()
         return $?
     fi
 
-    local config="config.sh/cmake"
-    unset CMAKE_ARCH_PATH
-    local settings candidate foundExe
+    local prefix="$1"
+    local candidate foundExe
 
-    if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config" 2>/dev/null)"
+    candidate="$prefix"/bin/cmake
+
+    if [ -d "$prefix" ] && [ -f "$candidate" ] && [ -x "$candidate" ]
     then
-        . "$settings"
-
-        if [ -d "$CMAKE_ARCH_PATH" ]
-        then
-            candidate="$CMAKE_ARCH_PATH"/bin/cmake
-            if [ -f "$candidate" ] && [ -x "$candidate" ]
-            then
-                foundExe="$candidate"
-            fi
-        fi
-    fi
-
-    if [ -z "$foundExe" ]
+        foundExe="$candidate"
+    elif candidate="$(command -v cmake 2>/dev/null)"
     then
-        # Default: resolve from PATH
-        if candidate="$(command -v cmake 2>/dev/null)"
-        then
-            foundExe="$candidate"
-        fi
+        # Resolved from PATH
+        foundExe="$candidate"
     fi
 
     if [ -n "$foundExe" ]
@@ -103,9 +91,33 @@ have_cmake()
 }
 
 
-# Reset variables
-no_cmake
+# Output as per search_* function
+have_cmake()
+{
+    # Treat previous queries as "sticky"
+    if [ -n "$CMAKE_EXE" ]
+    then
+        test "$CMAKE_EXE" != "false"
+        return $?
+    fi
 
+    local config="config.sh/cmake"
+    local file
+    unset CMAKE_ARCH_PATH
+
+    if file="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config" 2>/dev/null)"
+    then
+        . "$file"
+    fi
+
+    search_cmake "$CMAKE_ARCH_PATH"
+}
+
+
+#------------------------------------------------------------------------------
+
+# Reset
+no_cmake
 
 # Test/query
 case "$1" in
@@ -117,6 +129,5 @@ case "$1" in
     ## query_cmake
     ;;
 esac
-
 
 #------------------------------------------------------------------------------

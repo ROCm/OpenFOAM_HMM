@@ -34,7 +34,7 @@
 
 #------------------------------------------------------------------------------
 
-# Reset variables
+# Reset
 no_cgal()
 {
     unset HAVE_CGAL CGAL_INC_DIR CGAL_LIB_DIR
@@ -51,47 +51,18 @@ echo_cgal()
 }
 
 
-# Query settings (from CGAL setup)
-query_cgal()
-{
-    local config="config.sh/CGAL"
-    local settings
-
-    if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile -mode=o "$config")"
-    then
-        . "$settings"
-        _process_query cgal "$CGAL_ARCH_PATH"
-    else
-        echo "(no $config settings)" 1>&2
-        echo "cgal=unknown"
-    fi
-}
-
-
+# Search
+# $1 : prefix (*_ARCH_PATH, system, ...)
+#
 # On success, return 0 and export variables
 # -> HAVE_CGAL, CGAL_INC_DIR, CGAL_LIB_DIR
-have_cgal()
+search_cgal()
 {
     local warn # warn="==> skip cgal"
-    local config="config.sh/CGAL"
-    local settings
-
-    # Setup - current environment if set
-    if [ -z "$CGAL_ARCH_PATH" ]
-    then
-        if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config")"
-        then
-            . "$settings"
-        else
-            [ -n "$warn" ] && echo "$warn (no $config settings)"
-            return 2
-        fi
-    fi
-
-    # Expected location, include/library names
-    local prefix="$CGAL_ARCH_PATH"
     local incName="CGAL/version.h"
     local libName="libCGAL"
+
+    local prefix="${1:-system}"
     local header library
 
     # ----------------------------------
@@ -132,13 +103,56 @@ have_cgal()
 
     # OK
     export HAVE_CGAL=true
+    export CGAL_FLAVOUR="${flavour:-library}"
     export CGAL_ARCH_PATH="$prefix"
     export CGAL_INC_DIR="${header%/*}"     # Basename
     export CGAL_LIB_DIR="${library%/*}"    # Basename
 }
 
 
-# Reset variables
+# Output as per search_* function
+have_cgal()
+{
+    local warn # warn="==> skip cgal"
+    local config="config.sh/CGAL"
+    local file
+
+    # Setup - current environment if set
+    if [ -z "$CGAL_ARCH_PATH" ]
+    then
+        if file="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config")"
+        then
+            . "$file"
+        else
+            [ -n "$warn" ] && echo "$warn (no $config)"
+            return 2
+        fi
+    fi
+
+    search_cgal "$CGAL_ARCH_PATH"
+}
+
+
+# Query settings (from CGAL setup)
+query_cgal()
+{
+    local config="config.sh/CGAL"
+    local file
+
+    if file="$("$WM_PROJECT_DIR"/bin/foamEtcFile -mode=o "$config")"
+    then
+        . "$file"
+        _process_query cgal "$CGAL_ARCH_PATH"
+    else
+        echo "(no $config)" 1>&2
+        echo "cgal=unknown"
+    fi
+}
+
+
+#------------------------------------------------------------------------------
+
+# Reset
 no_cgal
 
 # Test/query
