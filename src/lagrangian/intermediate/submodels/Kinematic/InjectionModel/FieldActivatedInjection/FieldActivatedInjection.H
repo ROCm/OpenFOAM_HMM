@@ -151,7 +151,7 @@ public:
 
 
     //- Destructor
-    virtual ~FieldActivatedInjection();
+    virtual ~FieldActivatedInjection() = default;
 
 
     // Member Functions

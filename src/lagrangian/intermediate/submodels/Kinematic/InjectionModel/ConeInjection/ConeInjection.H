@@ -147,7 +147,7 @@ public:
 
 
     //- Destructor
-    virtual ~ConeInjection();
+    virtual ~ConeInjection() = default;
 
 
     // Member Functions

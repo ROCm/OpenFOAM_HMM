@@ -138,7 +138,7 @@ public:
 
 
     //- Destructor
-    virtual ~ReactingMultiphaseLookupTableInjection();
+    virtual ~ReactingMultiphaseLookupTableInjection() = default;
 
 
     // Member Functions
@@ -183,7 +183,7 @@ public:
             virtual bool fullyDescribed() const;
 
             //- Return flag to identify whether or not injection of parcelI is
-            //  permitted
+            //- permitted
             virtual bool validInjection(const label parcelI);
 };
 
