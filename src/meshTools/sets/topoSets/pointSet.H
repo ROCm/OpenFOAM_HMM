@@ -144,7 +144,6 @@ public:
             const primitiveMesh&,
             const label maxLen
         ) const;
-
 };
 
 

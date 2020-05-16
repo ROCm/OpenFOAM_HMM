@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,16 +27,56 @@ Class
     Foam::sphereToFace
 
 Description
-    A topoSetFaceSource to select faces based on faces centres inside sphere.
+    A \c topoSetFaceSource to select faces based
+    on face centres inside a given bounding sphere.
 
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                           | Required | Default
-        origin      | The origin (centre) of the sphere     | yes   |
-        radius      | The (outer) radius of sphere          | yes   |
-        innerRadius | The inner radius of sphere            | no    | 0
-        centre      | Alternative for 'origin'              | no    |
+      Operand   | Type    | Location
+      output    | faceSet | $FOAM_CASE/constant/polyMesh/sets/\<set\>
     \endtable
+
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        faceSet;
+        action      <action>;
+
+        // Mandatory entries
+        source      sphereToFace;
+        origin      (0 0 0);
+        radius      0.5;
+
+        // Optional entries
+        innerRadius 0;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                         | Type | Req'd | Dflt
+      name       | Name of faceSet                     | word |  yes  | -
+      type       | Type name: faceSet                  | word |  yes  | -
+      action     | Action applied on faces - see below | word |  yes  | -
+      source     | Source name: sphereToFace           | word |  yes  | -
+      origin     | The origin (centre) of the sphere   | vector | yes | -
+      radius     | The (outer) radius of sphere        | scalar | yes | -
+      innerRadius | The inner radius of sphere         | scalar | no  | 0
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new faceSet from selected faces
+      add      | Add selected faces into this faceSet
+      subtract | Remove selected faces from this faceSet
+    \endverbatim
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetFaceSource
 
 SourceFiles
     sphereToFace.C
@@ -61,8 +101,7 @@ class sphereToFace
 :
     public topoSetFaceSource
 {
-
-    // Private data
+    // Private Data
 
         //- Add usage string
         static addToUsageTable usage_;
@@ -117,7 +156,6 @@ public:
             const topoSetSource::setAction action,
             topoSet& set
         ) const;
-
 };
 
 

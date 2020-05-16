@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,17 +28,68 @@ Class
     Foam::shapeToCell
 
 Description
-    A topoSetCellSource to select cells based on cell shape.
+    A \c topoSetCellSource to select cells
+    based on the type of their cell shapes.
 
-    Handles all known ones from static collection in cellModel
-    and splitHex with 10 degrees feature angle.
+    Handles all types of cell shapes known from static collection
+    in the \c cellModel (as shown below) and \c splitHex with
+    10 degrees feature angle.
 
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                           | Required | Default
-        shape       | The cell model (hex, ..)              | yes |
-        type        | Older specification for 'shape'       | no  |
+      Operand   | Type    | Location
+      output    | cellSet | $FOAM_CASE/constant/polyMesh/sets/\<set\>
     \endtable
+
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        cellSet;
+        action      <action>;
+
+        // Mandatory entries
+        source      shapeToCell;
+        shape       <shapeTypeName>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                         | Type | Req'd | Dflt
+      name       | Name of cellSet                     | word |  yes  | -
+      type       | Type name: cellSet                  | word |  yes  | -
+      action     | Action applied on cells - see below | word |  yes  | -
+      source     | Source name: shapeToCell            | word |  yes  | -
+      shape      | Type of cell shape - see below      | word |  yes  | -
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new cellSet from selected cells
+      add      | Add selected cells into this cellSet
+      subtract | Remove selected cells from this cellSet
+    \endverbatim
+
+    Options for the \c shape entry:
+    \verbatim
+      splitHex   | Split-hexahedra cells
+      hex        | Hexahedra cells
+      wedge      | Wedge cells
+      tetWedge   | Tetrahedra-wedge cells
+      prism      | Prism cells
+      pyr        | Pyramid cells
+      tet        | Tetrahedra cells
+    \endverbatim
+
+Note
+    \c splitHex hardcoded with internal angle < 10 degrees.
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetCellSource
 
 SourceFiles
     shapeToCell.C
@@ -63,8 +114,7 @@ class shapeToCell
 :
     public topoSetCellSource
 {
-
-    // Private data
+    // Private Data
 
         //- Add usage string
         static addToUsageTable usage_;
@@ -75,7 +125,6 @@ class shapeToCell
 
     // Private Member Functions
 
-        //- Depending on cell type add to or delete from cellSet.
         void combine(topoSet& set, const bool add) const;
 
 
@@ -85,7 +134,7 @@ public:
     TypeName("shapeToCell");
 
 
-    // Static data
+    // Static Data
 
         //- Cos of feature angle for polyHedral to be splitHex
         static scalar featureCos;
@@ -114,7 +163,6 @@ public:
             const topoSetSource::setAction action,
             topoSet& set
         ) const;
-
 };
 
 

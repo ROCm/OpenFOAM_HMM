@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,10 +28,10 @@ Class
     Foam::topoSetSource
 
 Description
-    Base class of a source for a topoSet.
+    Base class of a source for a \c topoSet.
 
-    Implementer must modify the given set (see applyToSet) according to
-    its function and the setAction (one of add/delete/new)
+    Implementer must modify the given set (see \c applyToSet) according to
+    its function and the \c setAction (one of add/delete/new).
 
 SourceFiles
     topoSetSource.C

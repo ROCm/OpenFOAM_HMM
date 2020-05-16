@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,15 +27,55 @@ Class
     Foam::searchableSurfaceToPoint
 
 Description
-    A topoSetPointSource to select mesh points within a searchableSurface.
+    A \c topoSetPointSource to select points which are
+    centre enclosed by a given \c searchableSurface.
 
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                           | Required | Default
-        surfaceType | The searchable surface type           | yes   |
-        surfaceName | Name for the IOobject                 | no    | mesh-name
-        surface     | Same as 'surfaceType'                 | no    |
+      Operand   | Type       | Location
+      input     | triSurface | $FOAM_CASE/constant/triSurface/\<file\>
+      output    | pointSet   | $FOAM_CASE/constant/polyMesh/sets/\<set\>
     \endtable
+
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        pointSet;
+        action      <action>;
+
+        // Mandatory entries
+        source      searchableSurfaceToPoint;
+        surfaceType <surfaceTypeName>;
+
+        // Optional entries
+        surfaceName <surfaceName>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                           | Type | Req'd | Dflt
+      name       | Name of pointSet                      | word |  yes  | -
+      type       | Type name: pointSet                   | word |  yes  | -
+      action     | Action applied on points - see below  | word |  yes  | -
+      source     | Source name: searchableSurfaceToPoint | word |  yes | -
+      surfaceType | The searchable surface type          | word |  yes  | -
+      surfaceName | Name for the IOobject                | word | no | mesh-name
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new pointSet from selected points
+      add      | Add selected points into this pointSet
+      subtract | Remove selected points from this pointSet
+    \endverbatim
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetPointSource
 
 SourceFiles
     searchableSurfaceToPoint.C

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,16 +28,59 @@ Class
     Foam::cylinderToCell
 
 Description
-    A topoSetCellSource to select cells with their centres inside a cylinder.
+    A \c topoSetCellSource to select all cells whose cell centre
+    inside a given bounding cylinder or cylinder annulus.
 
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                       | Required | Default
-        p1          | Coordinate of endpoint            | yes   |
-        p2          | Coordinate of endpoint            | yes   |
-        radius      | Cylinder (outer) radius           | yes   |
-        innerRadius | Cylinder inner radius             | no    | 0
+      Operand   | Type    | Location
+      output    | cellSet | $FOAM_CASE/constant/polyMesh/sets/\<set\>
     \endtable
+
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name           <name>;
+        type           cellSet;
+        action         <action>;
+
+        // Mandatory entries
+        source         cylinderToCell;
+        p1             (<p1X> <p1Y> <p1Z>);
+        p2             (<p2X> <p2Y> <p2Z>);
+        radius         <radius1>;
+
+        // Optional entries
+        innerRadius    <radius2>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                         | Type   | Req'd | Dflt
+      name       | Name of cellSet                     | word   |  yes  | -
+      type       | Type name: cellSet                  | word   |  yes  | -
+      action     | Action applied on cells - see below | word   |  yes  | -
+      source     | Source name: cylinderToCell         | word   |  yes  | -
+      p1          | Coordinate of one of the endpoints | vector |  yes  | -
+      p2          | Coordinate of the other endpoint   | vector |  yes  | -
+      radius      | Cylinder outer radius              | scalar |  yes  | -
+      innerRadius | Cylinder inner radius              | scalar |  no   | 0
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new cellSet from selected cells
+      add      | Add selected cells into this cellSet
+      subtract | Remove selected cells from this cellSet
+    \endverbatim
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetCellSource
+    - Foam::cylinderAnnulusToCell
 
 SourceFiles
     cylinderToCell.C
@@ -62,8 +105,7 @@ class cylinderToCell
 :
     public topoSetCellSource
 {
-
-    // Private data
+    // Private Data
 
         //- Add usage string
         static addToUsageTable usage_;
@@ -122,7 +164,6 @@ public:
             const topoSetSource::setAction action,
             topoSet& set
         ) const;
-
 };
 
 

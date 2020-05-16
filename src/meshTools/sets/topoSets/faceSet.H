@@ -53,7 +53,6 @@ class faceSet
 :
     public topoSet
 {
-
 public:
 
     //- Runtime type information
@@ -145,7 +144,6 @@ public:
             const primitiveMesh&,
             const label maxLen
         ) const;
-
 };
 
 

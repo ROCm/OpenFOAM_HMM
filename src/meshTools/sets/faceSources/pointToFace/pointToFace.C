@@ -67,6 +67,7 @@ Foam::topoSetSource::addToUsageTable Foam::pointToFace::usage_
     "    -two consecutive points (an edge) in the pointSet\n\n"
 );
 
+
 const Foam::Enum
 <
     Foam::pointToFace::pointAction

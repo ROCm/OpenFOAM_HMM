@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,16 +27,57 @@ Class
     Foam::haloToCell
 
 Description
-    A topoSetCellSource to add/remove halo cells (cells attached to
-    the outside of the current cellSet).
-    When removing halo cells, this strips off any cells on the boundary
-    of the set.
+    A \c topoSetCellSource to select cells attached to the outside
+    of this \c cellSet, and add into/remove from this \c cellSet.
 
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                           | Required | Default
-        steps       | Number of grow/shrink steps to use    | no  | 1
+      Operand  | Type    | Location
+      input    | cellSet | $FOAM_CASE/constant/polyMesh/sets/\<set\>
+      output   | cellSet | $FOAM_CASE/constant/polyMesh/sets/\<set\>
     \endtable
+
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        cellSet;
+        action      <action>;
+
+        // Mandatory entries
+        source      haloToCell;
+
+        // Optional entries
+        steps       1;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                         | Type | Req'd | Dflt
+      name       | Name of cellSet                     | word |  yes  | -
+      type       | Type name: cellSet                  | word |  yes  | -
+      action     | Action applied on cells - see below | word |  yes  | -
+      source     | Source name: haloToCell             | word |  yes  | -
+      steps      | Number of grow/shrink steps to use  | label | no   | 1
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      add      | Add selected cells into this cellSet
+      subtract | Remove selected cells from this cellSet
+    \endverbatim
+
+Note
+    - \c action=new is not available for \c haloToCell.
+    - When removing halo cells, this strips off
+    any cells on the boundary of the cellSet.
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetCellSource
 
 SourceFiles
     haloToCell.C
@@ -61,8 +102,7 @@ class haloToCell
 :
     public topoSetCellSource
 {
-
-    // Private data
+    // Private Data
 
         //- Add usage string
         static addToUsageTable usage_;
@@ -105,7 +145,6 @@ public:
             const topoSetSource::setAction action,
             topoSet& set
         ) const;
-
 };
 
 

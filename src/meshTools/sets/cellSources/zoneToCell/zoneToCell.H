@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,18 +28,73 @@ Class
     Foam::zoneToCell
 
 Description
-    A topoSetCellSource to select cells based on one or more cellZones.
+    A \c topoSetCellSource to convert \c cellZone(s) to a \c cellSet.
 
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                           | Required | Default
-        zones       | The cell zone names or regexs         | possibly |
-        zone        | The cell zone name or regex           | possibly |
-        name        | Older specification for 'zone'        | no    |
+      Operand   | Type        | Location
+      input     | cellZone(s) | $FOAM_CASE/constant/polyMesh/cellZones
+      output    | cellSet     | $FOAM_CASE/constant/polyMesh/sets/\<set\>
     \endtable
 
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        cellSet;
+        action      <action>;
+
+        // Mandatory entries
+        source      zoneToCell;
+
+        // Conditional mandatory entries
+        // Select either of the below
+
+        // Option-1
+        zones
+        (
+            <cellZoneName0>
+            <cellZoneName1>
+            ...
+        );
+
+        // Option-2
+        zone     <cellZoneName>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                         | Type | Req'd | Dflt
+      name       | Name of cellSet                     | word |  yes  | -
+      type       | Type name: cellSet                  | word |  yes  | -
+      action     | Action applied on cells - see below | word |  yes  | -
+      source     | Source name: zoneToCell             | word |  yes  | -
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new cellSet from selected cells
+      add      | Add selected cells into this cellsSet
+      subtract | Remove selected cells from this cellSet
+    \endverbatim
+
+    Options for the conditional mandatory entries:
+    \verbatim
+      Entry    | Description                | Type     | Req'd  | Dflt
+      zones    | Names of input cellZones   | wordList | cond'l | -
+      zone     | Name of input cellZone     | word     | cond'l | -
+    \verbatim
+
 Note
-    Must specify "zones", "zone" or "name" (highest to lowest precedence).
+    The order of precedence among the conditional mandatory entries from the
+    highest to the lowest is \c zones, and \c zone.
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetCellSource
 
 SourceFiles
     zoneToCell.C
@@ -65,8 +120,7 @@ class zoneToCell
 :
     public topoSetCellSource
 {
-
-    // Private data
+    // Private Data
 
         //- Add usage string
         static addToUsageTable usage_;
@@ -84,6 +138,7 @@ public:
 
     //- Runtime type information
     TypeName("zoneToCell");
+
 
     // Constructors
 
@@ -108,7 +163,6 @@ public:
             const topoSetSource::setAction action,
             topoSet& set
         ) const;
-
 };
 
 

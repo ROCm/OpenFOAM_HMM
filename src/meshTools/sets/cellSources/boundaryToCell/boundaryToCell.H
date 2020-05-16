@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,10 +27,49 @@ Class
     Foam::boundaryToCell
 
 Description
-    A topoSetCellSource to select all external (boundary) faces.
+    A \c topoSetCellSource to select all cells possessing
+    at least a single face on all external boundaries.
 
-    \heading Dictionary parameters
-    None
+    Operands:
+    \table
+      Operand   | Type    | Location
+      output    | cellSet | $FOAM_CASE/constant/polyMesh/sets/\<set\>
+    \endtable
+
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        cellSet;
+        action      <action>;
+
+        // Mandatory entries
+        source      boundaryToCell;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                          | Type | Req'd | Dflt
+      name       | Name of cellSet                      | word |  yes  | -
+      type       | Type name: cellSet                   | word |  yes  | -
+      action     | Action applied on cells - see below  | word |  yes  | -
+      source     | Source name: boundaryToCell          | word |  yes  | -
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new cellSet from selected cells
+      add      | Add selected cells into this cellSet
+      subtract | Remove selected cells from this cellSet
+    \endverbatim
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetCellSource
+    - Foam::patchToCell
 
 SourceFiles
     boundaryToCell.C
@@ -55,7 +94,7 @@ class boundaryToCell
 :
     public topoSetCellSource
 {
-    // Private data
+    // Private Data
 
         //- Add usage string
         static addToUsageTable usage_;
@@ -70,6 +109,7 @@ public:
 
     //- Runtime type information
     TypeName("boundaryToCell");
+
 
     // Constructors
 
@@ -94,7 +134,6 @@ public:
             const topoSetSource::setAction action,
             topoSet& set
         ) const;
-
 };
 
 

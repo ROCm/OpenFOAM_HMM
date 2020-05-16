@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,19 +28,83 @@ Class
     Foam::faceZoneToCell
 
 Description
-    A topoSetCellSource to select cells based on side of faceZone.
+    A \c topoSetCellSource to select cells based on \c master
+    or \c slave side of given \c faceZone(s).
 
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                           | Required | Default
-        option      | Selection type (master / slave)       | yes   |
-        zones       | The face zone names or regexs         | possibly |
-        zone        | The face zone name or regex           | possibly |
-        name        | Older specification for 'zone'        | no    |
+      Operand   | Type        | Location
+      input     | faceZone(s) | $FOAM_CASE/constant/polyMesh/faceZones
+      output    | cellSet     | $FOAM_CASE/constant/polyMesh/sets/\<set\>
     \endtable
 
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        cellSet;
+        action      <action>;
+
+        // Mandatory entries
+        source      faceZoneToCell;
+        option      <option>;
+
+        // Conditional mandatory entries
+        // Select either of the below
+
+        // Option-1
+        zones
+        (
+            <faceZoneName1>
+            <faceZoneName2>
+            ...
+        );
+
+        // Option-2
+        set <faceZoneName>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                         | Type | Req'd | Dflt
+      name       | Name of cellSet                     | word |  yes  | -
+      type       | Type name: cellSet                  | word |  yes  | -
+      action     | Action applied on cells - see below | word |  yes  | -
+      source     | Source name: faceZoneToCell         | word |  yes  | -
+      option     | Selection type - see below          | word |  yes  | -
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new cellSet from selected cells
+      add      | Add selected cells into this cellSet
+      subtract | Remove selected cells from this cellSet
+    \endverbatim
+
+    Options for the \c option entry:
+    \verbatim
+      master   | Master side of the faceZone
+      slave    | Slave side of the faceZone
+    \endverbatim
+
+    Options for the conditional mandatory entries:
+    \verbatim
+      Entry    | Description                    | Type     | Req'd  | Dflt
+      zones    | Names of input faceZones       | wordList | cond'l | -
+      zone     | Name of input faceZone         | word     | cond'l | -
+    \verbatim
+
 Note
-    Must specify "zones", "zone" or "name" (highest to lowest precedence).
+    The order of precedence among the conditional mandatory entries from the
+    highest to the lowest is \c zones, and \c zone.
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetCellSource
+    - Foam::faceToCell
 
 SourceFiles
     faceZoneToCell.C
@@ -74,9 +138,10 @@ public:
             SLAVE
         };
 
+
 private:
 
-    // Private data
+    // Private Data
 
         static const Enum<faceAction> faceActionNames_;
 
@@ -86,7 +151,7 @@ private:
         //- Matcher for face zones
         wordRes selectedZones_;
 
-        //- Option
+        //- Selection type
         faceAction option_;
 
 
@@ -99,6 +164,7 @@ public:
 
     //- Runtime type information
     TypeName("faceZoneToCell");
+
 
     // Constructors
 
@@ -128,7 +194,6 @@ public:
             const topoSetSource::setAction action,
             topoSet& set
         ) const;
-
 };
 
 

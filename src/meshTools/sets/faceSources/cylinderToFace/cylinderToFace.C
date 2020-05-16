@@ -110,7 +110,15 @@ Foam::cylinderToFace::cylinderToFace
     point2_(point2),
     radius_(radius),
     innerRadius_(innerRadius)
-{}
+{
+    if (innerRadius_ > radius_)
+    {
+        FatalErrorInFunction
+            << "inner radius = " << innerRadius_ << "cannot be larger than "
+            << "outer radius = " << radius_
+            << exit(FatalIOError);
+    }
+}
 
 
 Foam::cylinderToFace::cylinderToFace
@@ -124,8 +132,8 @@ Foam::cylinderToFace::cylinderToFace
         mesh,
         dict.get<point>("p1"),
         dict.get<point>("p2"),
-        dict.get<scalar>("radius"),
-        dict.getOrDefault<scalar>("innerRadius", 0)
+        dict.getCheck<scalar>("radius", scalarMinMax::ge(SMALL)),
+        dict.getCheckOrDefault<scalar>("innerRadius", 0, scalarMinMax::ge(0))
     )
 {}
 

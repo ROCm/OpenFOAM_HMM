@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,18 +28,73 @@ Class
     Foam::patchToFace
 
 Description
-    A topoSetFaceSource to select faces based on usage in patches.
+    A \c topoSetFaceSource to select cells associated with given patch(es).
 
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                           | Required | Default
-        patches     | The patch names or regexs             | possibly |
-        patch       | The patch name or regex               | possibly |
-        name        | Older specification for 'patch'       | no    |
+      Operand   | Type    | Location
+      output    | faceSet | $FOAM_CASE/constant/polyMesh/sets/\<set\>
     \endtable
 
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        faceSet;
+        action      <action>;
+
+        // Mandatory entries
+        source      patchToFace;
+
+        // Conditional mandatory entries
+        // Select either of the below
+
+        // Option-1
+        patches
+        (
+            <patchName1>
+            <patchName2>
+            ...
+        );
+
+        // Option-2
+        patch    <patchName>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                         | Type | Req'd | Dflt
+      name       | Name of faceSet                     | word |  yes  | -
+      type       | Type name: faceSet                  | word |  yes  | -
+      action     | Action applied on faces - see below | word |  yes  | -
+      source     | Source name: patchToFace            | word |  yes  | -
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new faceSet from selected faces
+      add      | Add selected faces into this faceSet
+      subtract | Remove selected faces from this faceSet
+    \endverbatim
+
+    Options for the conditional mandatory entries:
+    \verbatim
+      Entry    | Description           | Type     | Req'd  | Dflt
+      patches  | Names of patches      | wordList | cond'l | -
+      patch    | Name of patch         | word     | cond'l | -
+    \verbatim
+
 Note
-    Must specify "patches", "patch" or "name" (highest to lowest precedence).
+    The order of precedence among the conditional mandatory entries from the
+    highest to the lowest is \c patches, and \c patch.
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetFaceSource
+    - Foam::boundaryToFace
 
 SourceFiles
     patchToFace.C
@@ -65,8 +120,7 @@ class patchToFace
 :
     public topoSetFaceSource
 {
-
-    // Private data
+    // Private Data
 
         //- Add usage string
         static addToUsageTable usage_;
@@ -84,6 +138,7 @@ public:
 
     //- Runtime type information
     TypeName("patchToFace");
+
 
     // Constructors
 
@@ -108,7 +163,6 @@ public:
             const topoSetSource::setAction action,
             topoSet& set
         ) const;
-
 };
 
 

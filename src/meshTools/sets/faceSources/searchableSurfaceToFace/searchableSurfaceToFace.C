@@ -102,7 +102,7 @@ void Foam::searchableSurfaceToFace::combine(topoSet& set, const bool add) const
     s.getVolumeType(ctrs, volTypes);
 
     const label len = volTypes.size();
-    for (label elemi=0; elemi < len; ++elemi)
+    for (label elemi = 0; elemi < len; ++elemi)
     {
         if (volTypes[elemi] == volumeType::INSIDE)
         {

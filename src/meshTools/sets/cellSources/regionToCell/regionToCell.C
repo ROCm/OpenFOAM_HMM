@@ -410,7 +410,7 @@ Foam::regionToCell::regionToCell
     (
         dict.getCompat<pointField>("insidePoints", {{ "insidePoint", 0 }})
     ),
-    nErode_(dict.getOrDefault<label>("nErode", 0))
+    nErode_(dict.getCheckOrDefault<label>("nErode", 0, labelMinMax::ge(0)))
 {}
 
 

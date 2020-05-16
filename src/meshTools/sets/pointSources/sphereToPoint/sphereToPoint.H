@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,16 +27,56 @@ Class
     Foam::sphereToPoint
 
 Description
-    A topoSetPointSource to select based on mesh points inside sphere.
+    A \c topoSetPointSource to select points
+    which are inside a given bounding sphere.
 
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                           | Required | Default
-        origin      | The origin (centre) of the sphere     | yes   |
-        radius      | The (outer) radius of sphere          | yes   |
-        innerRadius | The inner radius of sphere            | no    | 0
-        centre      | Alternative for 'origin'              | no    |
+      Operand   | Type     | Location
+      output    | pointSet | $FOAM_CASE/constant/polyMesh/sets/\<set\>
     \endtable
+
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        pointSet;
+        action      <action>;
+
+        // Mandatory entries
+        source      sphereToPoint;
+        origin      (0 0 0);
+        radius      0.5;
+
+        // Optional entries
+        innerRadius 0;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                           | Type | Req'd | Dflt
+      name       | Name of pointSet                      | word |  yes  | -
+      type       | Type name: pointSet                   | word |  yes  | -
+      action     | Action applied on points - see below  | word |  yes  | -
+      source     | Source name: sphereToPoint            | word |  yes  | -
+      origin     | The origin (centre) of the sphere     | vector | yes | -
+      radius     | The (outer) radius of sphere          | scalar | yes | -
+      innerRadius | The inner radius of sphere           | scalar | no  | 0
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new pointSet from selected points
+      add      | Add selected points into this pointSet
+      subtract | Remove selected points from this pointSet
+    \endverbatim
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetPointSource
 
 SourceFiles
     sphereToPoint.C
@@ -61,8 +101,7 @@ class sphereToPoint
 :
     public topoSetPointSource
 {
-
-    // Private data
+    // Private Data
 
         //- Add usage string
         static addToUsageTable usage_;
@@ -117,7 +156,6 @@ public:
             const topoSetSource::setAction action,
             topoSet& set
         ) const;
-
 };
 
 

@@ -53,7 +53,7 @@ class cellZoneSet
 :
     public cellSet
 {
-    // Private data
+    // Private Data
 
         const polyMesh& mesh_;
 

@@ -304,7 +304,7 @@ Foam::targetVolumeToCell::targetVolumeToCell
     targetVolumeToCell
     (
         mesh,
-        dict.get<scalar>("volume"),
+        dict.getCheck<scalar>("volume", scalarMinMax::ge(0)),
         dict.get<vector>("normal"),
         dict.getOrDefault<word>("set", "")
     )

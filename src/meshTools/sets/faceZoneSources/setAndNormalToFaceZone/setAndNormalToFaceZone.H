@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,15 +28,49 @@ Class
     Foam::setAndNormalToFaceZone
 
 Description
-    A topoSetSource to select faces based on usage in a faceSet, where the
-    normal vector is used to orient the faces.
+    A \c topoSetSource to select faces based on usage in a \c faceSet,
+    where the normal vector is used to orient the faces.
 
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                       | Required  | Default
-        faceSet     | Name of input faceSet             | yes   |
-        normal      | The normal vector for orientation | yes   |
+      Operand   | Type     | Location
+      input     | faceSet  | $FOAM_CASE/constant/polyMesh/sets/\<set\>
+      output    | faceZone | $FOAM_CASE/constant/polyMesh/faceZones
     \endtable
+
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        faceZoneSet;
+        action      <action>;
+
+        // Mandatory entries
+        source      setAndNormalToFaceZone;
+        faceSet     <faceSetName>;
+        normal      (1 0 0);
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                         | Type | Req'd | Dflt
+      name       | Name of faceZoneSet                 | word |  yes  | -
+      type       | Type name: faceZoneSet              | word |  yes  | -
+      action     | Action applied on faces - see below | word |  yes  | -
+      source     | Source name: setAndNormalToFaceZone | word |  yes  | -
+      faceSet    | Name of input faceSet               | word |  yes  | -
+      normal     | The normal vector for orientation   | vector | yes | -
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new faceZoneSet from selected faces
+      add      | Add selected faces into this faceZoneSet
+      subtract | Remove selected faces from this faceZoneSet
+    \endverbatim
 
 SourceFiles
     setAndNormalToFaceZone.C
@@ -61,7 +95,7 @@ class setAndNormalToFaceZone
 :
     public topoSetSource
 {
-    // Private data
+    // Private Data
 
         //- Add usage string
         static addToUsageTable usage_;

@@ -124,8 +124,8 @@ Foam::cylinderToPoint::cylinderToPoint
         mesh,
         dict.get<point>("p1"),
         dict.get<point>("p2"),
-        dict.get<scalar>("radius"),
-        dict.getOrDefault<scalar>("innerRadius", 0)
+        dict.getCheck<scalar>("radius", scalarMinMax::ge(0)),
+        dict.getCheckOrDefault<scalar>("innerRadius", 0, scalarMinMax::ge(0))
     )
 {}
 

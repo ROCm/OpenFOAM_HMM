@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,16 +52,13 @@ class fieldDictionary
     public regIOobject,
     public dictionary
 {
-    const word type_;
+
+    // Private Data
+
+        const word type_;
+
 
 public:
-
-    // Redefine type name to be of the instantiated type
-    virtual const word& type() const
-    {
-        return type_;
-    }
-
 
     // Constructors
 
@@ -75,8 +73,13 @@ public:
         }
 
 
+    // Member Functions
 
-    // Member functions
+        //- Redefine type name to be of the instantiated type
+        virtual const word& type() const
+        {
+            return type_;
+        }
 
         bool writeData(Ostream& os) const
         {

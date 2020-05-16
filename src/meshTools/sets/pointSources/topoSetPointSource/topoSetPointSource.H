@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,11 @@ Class
     Foam::topoSetPointSource
 
 Description
-    Base class of a topoSet source for selecting points.
+    The \c topoSetPointSource is a intermediate class
+    for handling \c topoSet sources for selecting points.
+
+    The class is not an executable \c topoSet itself,
+    yet a provider for common entries to its derived \c topoSet.
 
 SourceFiles
     topoSetPointSource.C

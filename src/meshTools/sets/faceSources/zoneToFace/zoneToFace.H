@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,18 +28,73 @@ Class
     Foam::zoneToFace
 
 Description
-    A topoSetFaceSource to select faces based on one of more faceZones.
+    A \c topoSetFaceSource to convert \c faceZone(s) to a \c faceSet.
 
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                           | Required | Default
-        zones       | The face zone names or regexs         | possibly |
-        zone        | The face zone name or regex           | possibly |
-        name        | Older specification for 'zone'        | no    |
+      Operand   | Type        | Location
+      input     | faceZone(s) | $FOAM_CASE/constant/polyMesh/faceZones
+      output    | faceSet     | $FOAM_CASE/constant/polyMesh/sets/\<set\>
     \endtable
 
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        faceSet;
+        action      <action>;
+
+        // Mandatory entries
+        source      zoneToFace;
+
+        // Conditional mandatory entries
+        // Select either of the below
+
+        // Option-1
+        zones
+        (
+            <faceZoneName0>
+            <faceZoneName1>
+            ...
+        );
+
+        // Option-2
+        zone     <faceZoneName>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                         | Type | Req'd | Dflt
+      name       | Name of faceSet                     | word |  yes  | -
+      type       | Type name: faceSet                  | word |  yes  | -
+      action     | Action applied on faces - see below | word |  yes  | -
+      source     | Source name: zoneToFace             | word |  yes  | -
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new faceSet from selected faces
+      add      | Add selected faces into this faceSet
+      subtract | Remove selected faces from this faceSet
+    \endverbatim
+
+    Options for the conditional mandatory entries:
+    \verbatim
+      Entry    | Description                | Type     | Req'd  | Dflt
+      zones    | Names of input faceZones   | wordList | cond'l | -
+      zone     | Name of input faceZone     | word     | cond'l | -
+    \verbatim
+
 Note
-    Must specify "zones", "zone" or "name" (highest to lowest precedence).
+    The order of precedence among the conditional mandatory entries from the
+    highest to the lowest is \c zones, and \c zone.
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetFaceSource
 
 SourceFiles
     zoneToFace.C
@@ -65,8 +120,7 @@ class zoneToFace
 :
     public topoSetFaceSource
 {
-
-    // Private data
+    // Private Data
 
         //- Add usage string
         static addToUsageTable usage_;
@@ -84,6 +138,7 @@ public:
 
     //- Runtime type information
     TypeName("zoneToFace");
+
 
     // Constructors
 
@@ -108,7 +163,6 @@ public:
             const topoSetSource::setAction action,
             topoSet& set
         ) const;
-
 };
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,19 +28,56 @@ Class
     Foam::setToFaceZone
 
 Description
-    A topoSetSource to select faces based on usage in a faceSet.
-    Sets flipMap to true.
+    A \c topoSetSource to convert a \c faceSet
+    to a \c faceZone (and associated \c faceSet).
 
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                           | Required | Default
-        faceSet     | Name of input faceSet                 | yes   |
+      Operand   | Type     | Location
+      input     | faceSet  | $FOAM_CASE/constant/polyMesh/sets/\<set\>
+      output 1  | faceSet  | $FOAM_CASE/constant/polyMesh/sets/\<set\>
+      output 2  | faceZone | $FOAM_CASE/constant/polyMesh/faceZones
     \endtable
 
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        faceZoneSet;
+        action      <action>;
+
+        // Mandatory entries
+        source      setToFaceZone;
+        faceSet     <faceSetName>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                         | Type | Req'd | Dflt
+      name       | Name of faceZone                    | word |  yes  | -
+      type       | Type name: faceZoneSet              | word |  yes  | -
+      action     | Action applied on faces - see below | word |  yes  | -
+      source     | Source name: setToFaceZone          | word |  yes  | -
+      faceSet    | Name of input faceSet               | word |  yes  | -
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new faceZone from selected faces of a faceSet
+      add      | Add selected faces of a faceSet into this faceZone
+      subtract | Remove selected faces of a faceSet from this faceZone
+    \endverbatim
+
 Note
-    The use of keyword \c faceSet is consistent with the setsToFaceZone,
-    but inconsistent with setToCellZone and setToPointZone.
+    The use of keyword \c faceSet is consistent with the \c setsToFaceZone,
+    but inconsistent with \c setToCellZone and \c setToPointZone.
     Both of which use \c set instead.
+
+See also
+    - Foam::topoSetSource
 
 SourceFiles
     setToFaceZone.C
@@ -65,7 +102,7 @@ class setToFaceZone
 :
     public topoSetSource
 {
-    // Private data
+    // Private Data
 
         //- Add usage string
         static addToUsageTable usage_;
@@ -73,10 +110,12 @@ class setToFaceZone
         //- Name of set to use
         word setName_;
 
+
 public:
 
     //- Runtime type information
     TypeName("setToFaceZone");
+
 
     // Constructors
 

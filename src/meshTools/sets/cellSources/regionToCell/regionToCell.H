@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,30 +28,65 @@ Class
     Foam::regionToCell
 
 Description
-    A topoSetCellSource to select cells belonging to a topological connected
-    region (that contains given points)
+    A \c topoSetCellSource to select cells belonging to a topologically
+    connected region (that contains given points). If started inside
+    a given \c subCellSet keeps to it; if started outside stays outside.
+
+    Operands:
+    \table
+      Operand   | Type    | Location
+      input     | region  | $FOAM_CASE/constant/\{\<region\>, polyMesh\}
+      output    | cellSet | $FOAM_CASE/constant/polyMesh/sets/\<set\>
+    \endtable
 
 Usage
-    In dictionary input:
+    Minimal example by using \c system/topoSetDict.actions:
     \verbatim
-        // optional name of cellSet delimiting search
-        set         c0;
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        cellSet;
+        action      <action>;
 
-        //- Number of cell layers to erode mesh to detect holes in the mesh
-        //  Set to 0 if not used.
-        nErode 3;
+        // Mandatory entries
+        source      regionToCell;
+        insidePoints
+        (
+            (<p1x> <p1y> <p1z>)
+            (<p2x> <p2y> <p2z>)
+            ...
+        );
 
-        // points inside region to select
-        insidePoints ((1 2 3));
+        // Optional entries
+        set       <cellSetName>;
+        nErode    <label>;
+    }
     \endverbatim
 
-    Dictionary parameters:
+    where the entries mean:
     \table
-        Property    | Description                           | Required | Default
-        insidePoints | Points inside regions                | yes   |
-        nErode      | Cell layers to erode to detect holes  | no | 0
-        set         | Restrict to named cellSet             | no    | ""
+      Property   | Description                         | Type | Req'd | Dflt
+      name       | Name of cellSet                     | word |  yes  | -
+      type       | Type name: cellSet                  | word |  yes  | -
+      action     | Action applied on cells - see below | word |  yes  | -
+      source     | Source name: regionToCell           | word |  yes  | -
+      insidePoints  | Coordinate(s) that is inside connected region <!--
+                                             --> | vectorList |  yes  | -
+      set        | Name of cellSet giving mesh subset  | word |  no   | none
+      nErode     | Number of cell layers to erode mesh to detect holes <!--
+           --> in the mesh - set to 0 if not used      | label | no   | 0
     \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new cellSet from selected cells
+      add      | Add selected cells into this cellSet
+      subtract | Remove selected cells from this cellSet
+    \endverbatim
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetCellSource
 
 SourceFiles
     regionToCell.C
@@ -79,8 +114,7 @@ class regionToCell
 :
     public topoSetCellSource
 {
-
-    // Private data
+    // Private Data
 
         //- Add usage string
         static addToUsageTable usage_;
@@ -105,7 +139,7 @@ class regionToCell
         ) const;
 
         //- Determine for every disconnected region in the mesh whether
-        //  it contains a locationInMesh
+        //- it contains a locationInMesh
         boolList findRegions(const bool verbose, const regionSplit&) const;
 
         //- Unselect regions not containing a locationInMesh
@@ -115,7 +149,7 @@ class regionToCell
         void shrinkRegions(boolList& selectedCell) const;
 
         //- Erode a given number of layers from selectedCell. Remove any
-        //  region that gets disconnected that way.
+        //- region that gets disconnected that way.
         void erode(boolList& selectedCell) const;
 
         void combine(topoSet& set, const bool add) const;
@@ -125,6 +159,7 @@ public:
 
     //- Runtime type information
     TypeName("regionToCell");
+
 
     // Constructors
 
