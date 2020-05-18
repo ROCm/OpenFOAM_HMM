@@ -173,6 +173,13 @@ public:
         //- Construct from UList
         inline explicit FixedList(const UList<T>& list);
 
+        //- Copy construct from a subset of the input
+        inline FixedList
+        (
+            const UList<T>& list,
+            const FixedList<label, N>& indices
+        );
+
         //- Construct from SLList
         inline explicit FixedList(const SLList<T>& list);
 

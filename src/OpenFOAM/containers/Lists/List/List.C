@@ -292,11 +292,11 @@ Foam::List<T>::List(List<T>& a, bool reuse)
 
 
 template<class T>
-Foam::List<T>::List(const UList<T>& list, const labelUList& mapAddressing)
+Foam::List<T>::List(const UList<T>& list, const labelUList& indices)
 :
-    UList<T>(nullptr, mapAddressing.size())
+    UList<T>(nullptr, indices.size())
 {
-    const label len = mapAddressing.size();
+    const label len = indices.size();
 
     if (len)
     {
@@ -306,8 +306,31 @@ Foam::List<T>::List(const UList<T>& list, const labelUList& mapAddressing)
 
         for (label i=0; i < len; ++i)
         {
-            vp[i] = list[mapAddressing[i]];
+            vp[i] = list[indices[i]];
         }
+    }
+}
+
+
+template<class T>
+template<unsigned N>
+Foam::List<T>::List
+(
+    const UList<T>& list,
+    const FixedList<label,N>& indices
+)
+:
+    UList<T>(nullptr, label(N))
+{
+    const label len = label(N);
+
+    doAlloc();
+
+    List_ACCESS(T, (*this), vp);
+
+    for (label i=0; i < len; ++i)
+    {
+        vp[i] = list[indices[i]];
     }
 }
 

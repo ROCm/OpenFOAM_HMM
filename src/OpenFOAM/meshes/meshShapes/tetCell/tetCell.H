@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,7 +69,7 @@ public:
 
     // Constructors
 
-        //- Construct null, with invalid point labels (-1)
+        //- Default construct, with invalid point labels (-1)
         inline tetCell();
 
         //- Construct from four point labels
@@ -81,11 +81,18 @@ public:
             const label d
         );
 
-        //- Construct from FixedList of four point labels
-        inline tetCell(const FixedList<label, 4>& lst);
-
         //- Construct from an initializer list of four point labels
-        inline explicit tetCell(std::initializer_list<label> lst);
+        inline explicit tetCell(std::initializer_list<label> list);
+
+        //- Construct from FixedList of four point labels
+        inline tetCell(const FixedList<label, 4>& list);
+
+        //- Copy construct from a subset of the input list
+        inline tetCell
+        (
+            const labelUList& list,
+            const FixedList<label, 4>& indices
+        );
 
         //- Construct from Istream
         inline tetCell(Istream& is);

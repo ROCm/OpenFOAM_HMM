@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,15 +53,25 @@ inline Foam::tetCell::tetCell
 }
 
 
-inline Foam::tetCell::tetCell(const FixedList<label, 4>& lst)
+inline Foam::tetCell::tetCell(std::initializer_list<label> list)
 :
-    FixedList<label, 4>(lst)
+    FixedList<label, 4>(list)
 {}
 
 
-inline Foam::tetCell::tetCell(std::initializer_list<label> lst)
+inline Foam::tetCell::tetCell(const FixedList<label, 4>& list)
 :
-    FixedList<label, 4>(lst)
+    FixedList<label, 4>(list)
+{}
+
+
+inline Foam::tetCell::tetCell
+(
+    const labelUList& list,
+    const FixedList<label, 4>& indices
+)
+:
+    FixedList<label, 4>(list, indices)
 {}
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,6 +71,16 @@ inline Foam::edge::edge(const label from, const label to, const bool doSort)
 inline Foam::edge::edge(const FixedList<label, 2>& list, const bool doSort)
 :
     labelPair(list, doSort)
+{}
+
+
+inline Foam::edge::edge
+(
+    const labelUList& list,
+    const FixedList<label, 2>& indices
+)
+:
+    labelPair(list[indices.first()], list[indices.last()])
 {}
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         inline tetPoints()
         {}
 
@@ -77,6 +77,17 @@ public:
             operator[](2) = c;
             operator[](3) = d;
         }
+
+        //- Copy construct from subset of points
+        inline tetPoints
+        (
+            const UList<point>& points,
+            const FixedList<label, 4>& indices
+        )
+        :
+            FixedList<point, 4>(points, indices)
+        {}
+
 
     // Member Functions
 

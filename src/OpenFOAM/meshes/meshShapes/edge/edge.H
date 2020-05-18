@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,7 +67,7 @@ class edge
 {
 public:
 
-    // Static data members
+    // Static Data Members
 
         static const char* const typeName;
 
@@ -91,6 +91,13 @@ public:
 
         //- Construct from list, sorted with first less-than second
         inline edge(const FixedList<label, 2>& list, const bool doSort);
+
+        //- Copy construct from a subset of the input
+        inline edge
+        (
+            const UList<label>& list,
+            const FixedList<label, 2>& indices
+        );
 
         //- Construct from Istream
         inline edge(Istream& is);

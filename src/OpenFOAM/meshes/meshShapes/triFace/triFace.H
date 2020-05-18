@@ -56,7 +56,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class face;
 class triFace;
 
@@ -72,7 +72,6 @@ class triFace
 :
     public FixedList<label, 3>
 {
-
 public:
 
     // Constructors
@@ -88,11 +87,18 @@ public:
             const label c
         );
 
-        //- Copy construct from a list of three point labels.
-        inline explicit triFace(const labelUList& lst);
-
         //- Construct from an initializer list of three point labels
-        inline explicit triFace(std::initializer_list<label> lst);
+        inline explicit triFace(std::initializer_list<label> list);
+
+        //- Copy construct from a list of three point labels.
+        inline explicit triFace(const labelUList& list);
+
+        //- Copy construct from a subset of the input
+        inline triFace
+        (
+            const labelUList& list,
+            const FixedList<label, 3>& indices
+        );
 
         //- Construct from Istream
         inline triFace(Istream& is);

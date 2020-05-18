@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,15 +81,25 @@ inline Foam::triFace::triFace
 }
 
 
-inline Foam::triFace::triFace(const labelUList& lst)
+inline Foam::triFace::triFace(std::initializer_list<label> list)
 :
-    FixedList<label, 3>(lst)
+    FixedList<label, 3>(list)
 {}
 
 
-inline Foam::triFace::triFace(std::initializer_list<label> lst)
+inline Foam::triFace::triFace(const labelUList& list)
 :
-    FixedList<label, 3>(lst)
+    FixedList<label, 3>(list)
+{}
+
+
+inline Foam::triFace::triFace
+(
+    const labelUList& list,
+    const FixedList<label, 3>& indices
+)
+:
+    FixedList<label, 3>(list, indices)
 {}
 
 

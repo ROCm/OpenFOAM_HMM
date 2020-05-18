@@ -137,6 +137,20 @@ inline Foam::FixedList<T, N>::FixedList(const UList<T>& list)
 
 
 template<class T, unsigned N>
+inline Foam::FixedList<T, N>::FixedList
+(
+    const UList<T>& list,
+    const FixedList<label, N>& indices
+)
+{
+    for (unsigned i=0; i<N; ++i)
+    {
+        v_[i] = list[indices[i]];
+    }
+}
+
+
+template<class T, unsigned N>
 inline Foam::FixedList<T, N>::FixedList(const SLList<T>& list)
 {
     checkSize(list.size());

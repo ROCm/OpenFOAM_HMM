@@ -153,8 +153,12 @@ public:
         //- Construct as copy or re-use as specified
         List(List<T>& a, bool reuse);
 
-        //- Construct as subset
-        List(const UList<T>& list, const labelUList& mapAddressing);
+        //- Copy construct subset of list
+        List(const UList<T>& list, const labelUList& indices);
+
+        //- Copy construct subset of list
+        template<unsigned N>
+        List(const UList<T>& list, const FixedList<label, N>& indices);
 
         //- Construct given begin/end iterators.
         //  Uses std::distance for the size.
