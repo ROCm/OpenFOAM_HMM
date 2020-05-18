@@ -158,6 +158,7 @@ svalue (lhs) ::= ZERO .             { lhs = Foam::Zero; }
 svalue (lhs) ::= PI LPAREN RPAREN . { lhs = Foam::constant::mathematical::pi; }
 svalue (lhs) ::= DEG_TO_RAD LPAREN RPAREN . { lhs = Foam::degToRad(); }
 svalue (lhs) ::= RAD_TO_DEG LPAREN RPAREN . { lhs = Foam::radToDeg(); }
+svalue (lhs) ::= ARG LPAREN RPAREN .  { lhs = driver->argValue(); }
 svalue (lhs) ::= TIME LPAREN RPAREN . { lhs = driver->timeValue(); }
 
 

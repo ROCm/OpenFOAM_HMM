@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2010-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,6 +92,7 @@ Foam::expressions::exprDriver::exprDriver
     result_(),
     variableStrings_(),
     variables_(),
+    arg1Value_(0),
     stashedTokenId_(0),
 
     // Controls
@@ -120,6 +121,7 @@ Foam::expressions::exprDriver::exprDriver
     result_(rhs.result_),
     variableStrings_(rhs.variableStrings_),
     variables_(rhs.variables_),
+    arg1Value_(rhs.arg1Value_),
     stashedTokenId_(0),
 
     debugScanner_(rhs.debugScanner_),
@@ -191,6 +193,18 @@ void Foam::expressions::exprDriver::clearVariables()
 {
     variables_.clear();
     addVariables(variableStrings_, false);
+}
+
+
+void Foam::expressions::exprDriver::setArgument(scalar val)
+{
+    arg1Value_ = val;
+}
+
+
+Foam::scalar Foam::expressions::exprDriver::argValue() const
+{
+    return arg1Value_;
 }
 
 

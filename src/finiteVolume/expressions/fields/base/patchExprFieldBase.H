@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Original code Copyright (C) 2011-2018 Bernhard Gschaider
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2011-2018 Bernhard Gschaider
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,6 +58,7 @@ namespace Foam
 // Forward Declarations
 class facePointPatch;
 class fvPatch;
+class polyPatch;
 
 namespace expressions
 {
@@ -91,10 +92,13 @@ public:
        //- Find (guess) fvPatch from a pointPatch
        static const fvPatch& getFvPatch(const facePointPatch& fp);
 
+       //- Find (guess) fvPatch from a polyPatch
+       static const fvPatch& getFvPatch(const polyPatch& pp);
+
 
     // Constructors
 
-        //- Null constructor
+        //- Default construct
         patchExprFieldBase();
 
         //- Construct with specified gradient handling

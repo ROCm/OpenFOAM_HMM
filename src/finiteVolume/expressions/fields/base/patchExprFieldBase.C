@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Original code Copyright (C) 2011-2018 Bernhard Gschaider
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2011-2018 Bernhard Gschaider
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,6 +53,25 @@ Foam::expressions::patchExprFieldBase::getFvPatch(const facePointPatch& pp)
 }
 
 
+const Foam::fvPatch&
+Foam::expressions::patchExprFieldBase::getFvPatch(const polyPatch& pp)
+{
+    const polyMesh& pmesh = pp.boundaryMesh().mesh();
+
+    const fvMesh* meshptr = isA<fvMesh>(pmesh);
+
+    if (!meshptr)
+    {
+        FatalErrorInFunction
+            << "Poly patch not attached to a base fvMesh, "
+            << "cannot use patch expressions" << nl << endl
+            << exit(FatalError);
+    }
+
+    return meshptr->boundary()[pp.index()];
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::expressions::patchExprFieldBase::patchExprFieldBase()
@@ -82,9 +101,9 @@ Foam::expressions::patchExprFieldBase::patchExprFieldBase
     bool isPointVal
 )
 :
-    debug_(dict.lookupOrDefault("debug", false)),
+    debug_(dict.getOrDefault("debug", false)),
     allowGradient_(allowGradient),
-    evalOnConstruct_(dict.lookupOrDefault<bool>("evalOnConstruct", false)),
+    evalOnConstruct_(dict.getOrDefault<bool>("evalOnConstruct", false)),
     valueExpr_(),
     gradExpr_(),
     fracExpr_()

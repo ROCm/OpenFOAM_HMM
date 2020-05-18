@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Original code Copyright (C) 2010-2018 Bernhard Gschaider
+    Copyright (C) 2010-2018 Bernhard Gschaider
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -79,7 +79,7 @@ class exprDriver
 {
 protected:
 
-    // Private Data
+    // Protected Data
 
     // Stored Data
 
@@ -94,6 +94,9 @@ protected:
 
         //- The variables table
         HashTable<exprResult> variables_;
+
+        //- Special-purpose scalar reference argument
+        scalar arg1Value_;
 
 
     // Controls, tracing etc.
@@ -122,8 +125,6 @@ protected:
         //- Search on disk (eg, for a standalone application)
         bool searchFiles_;
 
-
-protected:
 
     // Protected Member Functions
 
@@ -292,6 +293,14 @@ public:
         }
 
 
+    // Globals, Mesh Related
+
+        //- Set special-purpose scalar reference argument.
+        //  Typically available as \c arg() in an expression and
+        //  may corrspond to table index, time value etc.
+        scalar argValue() const;
+
+
     // General Controls
 
         //- Get "look-behind" parsing context (internal bookkeeping)
@@ -335,6 +344,11 @@ public:
 
         //- Clear temporary variables and resets from expression strings
         virtual void clearVariables();
+
+        //- Set special-purpose scalar reference argument.
+        //  Typically available as \c arg() in an expression and
+        //  may corrspond to table index, time value etc.
+        virtual void setArgument(const scalar val);
 
         //- True if named variable exists
         inline virtual bool hasVariable(const word& name) const;

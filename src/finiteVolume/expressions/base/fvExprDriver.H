@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Original code Copyright (C) 2010-2018 Bernhard Gschaider
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2010-2018 Bernhard Gschaider
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -99,7 +99,7 @@ class fvExprDriver
         static bool cacheSets_;
 
 
-    // Protected Data
+    // Private Data
 
     // Stored Data
 
@@ -431,7 +431,7 @@ public:
         virtual label pointSize() const = 0;
 
 
-    // Mesh Related
+    // Globals, Mesh Related
 
         //- The Time associated with the mesh
         const Time& runTime() const;
