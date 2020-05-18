@@ -30,14 +30,12 @@ License
 #define AMIPatchToPatchInterpolation_H
 
 #include "AMIInterpolation.H"
-#include "primitivePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef AMIInterpolation<primitivePatch, primitivePatch>
-        AMIPatchToPatchInterpolation;
+    typedef AMIInterpolation AMIPatchToPatchInterpolation;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

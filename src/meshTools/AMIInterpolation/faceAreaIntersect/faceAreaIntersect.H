@@ -46,6 +46,7 @@ SourceFiles
 #include "face.H"
 #include "triPoints.H"
 #include "Enum.H"
+#include "searchableSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

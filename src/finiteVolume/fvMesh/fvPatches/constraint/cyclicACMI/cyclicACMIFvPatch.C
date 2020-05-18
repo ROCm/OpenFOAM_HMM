@@ -46,6 +46,7 @@ namespace Foam
 void Foam::cyclicACMIFvPatch::resetPatchAreas(const fvPatch& fvp) const
 {
     const_cast<vectorField&>(fvp.Sf()) = fvp.patch().faceAreas();
+    const_cast<vectorField&>(fvp.Cf()) = fvp.patch().faceCentres();
     const_cast<scalarField&>(fvp.magSf()) = mag(fvp.patch().faceAreas());
 
     DebugPout
@@ -117,7 +118,7 @@ Foam::tmp<Foam::vectorField> Foam::cyclicACMIFvPatch::delta() const
 
         vectorField nbrPatchD(interpolate(nbrPatch.coupledFvPatch::delta()));
 
-        tmp<vectorField> tpdv(new vectorField(patchD.size()));
+        auto tpdv = tmp<vectorField>::New(patchD.size());
         vectorField& pdv = tpdv.ref();
 
         // do the transformation if necessary
@@ -204,6 +205,9 @@ void Foam::cyclicACMIFvPatch::movePoints()
     scalarField& phiNonOverlapp =
         meshPhiBf[nonOverlapPatch.patch().index()];
 
+    const auto& localFaces = cyclicACMIPolyPatch_.localFaces();
+    const auto& localPoints = cyclicACMIPolyPatch_.localPoints();
+
     forAll(phip, facei)
     {
         if (newSrcAddr[facei].empty())
@@ -214,12 +218,12 @@ void Foam::cyclicACMIFvPatch::movePoints()
         else
         {
             // Scale the mesh flux according to the area fraction
-            const face& fAMI = cyclicACMIPolyPatch_.localFaces()[facei];
+            const face& fAMI = localFaces[facei];
 
             // Note: using raw point locations to calculate the geometric
             // area - faces areas are currently scaled (decoupled from
             // mesh points)
-            const scalar geomArea = fAMI.mag(cyclicACMIPolyPatch_.localPoints());
+            const scalar geomArea = fAMI.mag(localPoints);
             phip[facei] *= magSf()[facei]/geomArea;
         }
     }
@@ -234,6 +238,9 @@ void Foam::cyclicACMIFvPatch::movePoints()
     scalarField& nbrPhiNonOverlapp =
         meshPhiBf[nbrNonOverlapPatch.patch().index()];
 
+    const auto& nbrLocalFaces = nbrACMI.patch().localFaces();
+    const auto& nbrLocalPoints = nbrACMI.patch().localPoints();
+
     forAll(nbrPhip, facei)
     {
         if (newTgtAddr[facei].empty())
@@ -242,12 +249,12 @@ void Foam::cyclicACMIFvPatch::movePoints()
         }
         else
         {
-            const face& fAMI = nbrACMI.patch().localFaces()[facei];
+            const face& fAMI = nbrLocalFaces[facei];
 
             // Note: using raw point locations to calculate the geometric
             // area - faces areas are currently scaled (decoupled from
             // mesh points)
-            const scalar geomArea = fAMI.mag(nbrACMI.patch().localPoints());
+            const scalar geomArea = fAMI.mag(nbrLocalPoints);
             nbrPhip[facei] *= nbrACMI.magSf()[facei]/geomArea;
         }
     }

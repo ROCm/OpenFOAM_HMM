@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,11 +27,30 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "partialFaceAreaWeightAMI.H"
+#include "addToRunTimeSelectionTable.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTypeNameAndDebug(partialFaceAreaWeightAMI, 0);
+    addToRunTimeSelectionTable
+    (
+        AMIInterpolation,
+        partialFaceAreaWeightAMI,
+        dict
+    );
+    addToRunTimeSelectionTable
+    (
+        AMIInterpolation,
+        partialFaceAreaWeightAMI,
+        component
+    );
+}
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class SourcePatch, class TargetPatch>
-void Foam::partialFaceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
+bool Foam::partialFaceAreaWeightAMI::setNextFaces
 (
     label& startSeedi,
     label& srcFacei,
@@ -41,7 +61,7 @@ void Foam::partialFaceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
     const bool errorOnNotFound
 ) const
 {
-    faceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
+    return faceAreaWeightAMI::setNextFaces
     (
         startSeedi,
         srcFacei,
@@ -56,85 +76,75 @@ void Foam::partialFaceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class SourcePatch, class TargetPatch>
-Foam::partialFaceAreaWeightAMI<SourcePatch, TargetPatch>::
-partialFaceAreaWeightAMI
+Foam::partialFaceAreaWeightAMI::partialFaceAreaWeightAMI
 (
-    const SourcePatch& srcPatch,
-    const TargetPatch& tgtPatch,
-    const faceAreaIntersect::triangulationMode& triMode,
-    const bool reverseTarget,
-    const bool requireMatch
+    const dictionary& dict,
+    const bool reverseTarget
 )
 :
-    faceAreaWeightAMI<SourcePatch, TargetPatch>
+    faceAreaWeightAMI(dict, reverseTarget)
+{}
+
+
+Foam::partialFaceAreaWeightAMI::partialFaceAreaWeightAMI
+(
+    const bool requireMatch,
+    const bool reverseTarget,
+    const scalar lowWeightCorrection,
+    const faceAreaIntersect::triangulationMode triMode,
+    const bool restartUncoveredSourceFace
+)
+:
+    faceAreaWeightAMI
     (
-        srcPatch,
-        tgtPatch,
-        triMode,
-        reverseTarget,
         requireMatch,
-        true // false // Not performing restart on low weights - valid for partial match
+        reverseTarget,
+        lowWeightCorrection,
+        triMode,
+        restartUncoveredSourceFace
     )
+{}
+
+
+Foam::partialFaceAreaWeightAMI::partialFaceAreaWeightAMI
+(
+    const partialFaceAreaWeightAMI& ami
+)
+:
+    faceAreaWeightAMI(ami)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class SourcePatch, class TargetPatch>
-bool Foam::partialFaceAreaWeightAMI<SourcePatch, TargetPatch>::conformal() const
+bool Foam::partialFaceAreaWeightAMI::conformal() const
 {
     return false;
 }
 
 
-template<class SourcePatch, class TargetPatch>
-bool Foam::partialFaceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
+bool Foam::partialFaceAreaWeightAMI::calculate
 (
-    labelListList& srcAddress,
-    scalarListList& srcWeights,
-    pointListList& srcCentroids,
-    labelListList& tgtAddress,
-    scalarListList& tgtWeights,
-    scalarList& srcMagSf,
-    scalarList& tgtMagSf,
-    autoPtr<mapDistribute>& srcMapPtr,
-    autoPtr<mapDistribute>& tgtMapPtr,
-    label srcFacei,
-    label tgtFacei
+    const primitivePatch& srcPatch,
+    const primitivePatch& tgtPatch,
+    const autoPtr<searchableSurface>& surfPtr
 )
 {
-     bool ok =
-        faceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
-        (
-            srcAddress,
-            srcWeights,
-            srcCentroids,
-            tgtAddress,
-            tgtWeights,
-            srcMagSf,
-            tgtMagSf,
-            srcMapPtr,
-            tgtMapPtr,
-            srcFacei,
-            tgtFacei
-        );
-
-    if (ok)
+    if (faceAreaWeightAMI::calculate(srcPatch, tgtPatch, surfPtr))
     {
-        if (this->distributed())
+        if (distributed())
         {
-            scalarList newTgtMagSf(std::move(tgtMagSf));
+            scalarList newTgtMagSf(std::move(tgtMagSf_));
 
-            // Assign default sizes. Override selected values with
-            // calculated values. This is to support ACMI
-            // where some of the target faces are never used (so never get sent
-            // over and hence never assigned to)
-            tgtMagSf = this->tgtPatch0_.magFaceAreas();
+            // Assign default sizes. Override selected values with calculated
+            // values. This is to support ACMI where some of the target faces
+            // are never used (so never get sent over and hence never assigned
+            // to)
+            tgtMagSf_ = tgtPatch0().magFaceAreas();
 
             for (const labelList& smap : this->extendedTgtMapPtr_->subMap())
             {
-                UIndirectList<scalar>(tgtMagSf, smap) =
+                UIndirectList<scalar>(tgtMagSf_, smap) =
                     UIndirectList<scalar>(newTgtMagSf, smap);
             }
         }

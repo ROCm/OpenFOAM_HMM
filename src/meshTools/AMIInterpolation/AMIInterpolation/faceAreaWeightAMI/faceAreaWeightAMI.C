@@ -29,41 +29,20 @@ License
 #include "faceAreaWeightAMI.H"
 #include "profiling.H"
 #include "OBJstream.H"
+#include "addToRunTimeSelectionTable.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTypeNameAndDebug(faceAreaWeightAMI, 0);
+    addToRunTimeSelectionTable(AMIInterpolation, faceAreaWeightAMI, dict);
+    addToRunTimeSelectionTable(AMIInterpolation, faceAreaWeightAMI, component);
+}
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-template<class SourcePatch, class TargetPatch>
-void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::initGeom
-(
-    const globalIndex& globalTgtFaces,
-    labelList& extendedTgtFaceIDs
-)
-{
-    // Create a representation of the target patch that covers the source patch
-    if (this->distributed())
-    {
-        this->extendedTgtPatchPtr_ =
-            this->createExtendedTgtPatch
-            (
-                this->srcPatch0_,
-                this->tgtPatch0_,
-                globalTgtFaces,
-                extendedTgtMapPtr_,
-                extendedTgtFaceIDs
-            );
-    }
-
-    const auto& src = this->srcPatch();
-    const auto& tgt = this->tgtPatch();
-
-    // Initialise area magnitudes
-    srcMagSf_.setSize(src.size(), 1.0);
-    tgtMagSf_.setSize(tgt.size(), 1.0);
-
-    // Source and target patch triangulations
-    this->triangulatePatch(src, srcTris_, srcMagSf_);
-    this->triangulatePatch(tgt, tgtTris_, tgtMagSf_);
-
+/*
     if (debug)
     {
         static label nAMI = 0;
@@ -99,11 +78,10 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::initGeom
 
         ++nAMI;
     }
-}
+*/
 
 
-template<class SourcePatch, class TargetPatch>
-void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calcAddressing
+void Foam::faceAreaWeightAMI::calcAddressing
 (
     List<DynamicList<label>>& srcAddr,
     List<DynamicList<scalar>>& srcWght,
@@ -116,27 +94,28 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calcAddressing
 {
     addProfiling(ami, "faceAreaWeightAMI::calcAddressing");
 
-    // construct weights and addressing
+    // Construct weights and addressing
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     label nFacesRemaining = srcAddr.size();
 
-    // list of tgt face neighbour faces
+    // List of tgt face neighbour faces
     DynamicList<label> nbrFaces(10);
 
-    // list of faces currently visited for srcFacei to avoid multiple hits
+    // List of faces currently visited for srcFacei to avoid multiple hits
     DynamicList<label> visitedFaces(10);
 
-    // list to keep track of tgt faces used to seed src faces
+    // List to keep track of tgt faces used to seed src faces
     labelList seedFaces(nFacesRemaining, -1);
     seedFaces[srcFacei] = tgtFacei;
 
-    // list to keep track of whether src face can be mapped
+    // List to keep track of whether src face can be mapped
     bitSet mapFlag(nFacesRemaining, true);
 
-    // reset starting seed
+    // Reset starting seed
     label startSeedi = 0;
 
+    bool continueWalk = true;
     DynamicList<label> nonOverlapFaces;
     do
     {
@@ -161,34 +140,30 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calcAddressing
 
         mapFlag.unset(srcFacei);
 
-        nFacesRemaining--;
-
         if (!faceProcessed)
         {
             nonOverlapFaces.append(srcFacei);
         }
 
-        // choose new src face from current src face neighbour
-        if (nFacesRemaining > 0)
-        {
-            setNextFaces
-            (
-                startSeedi,
-                srcFacei,
-                tgtFacei,
-                mapFlag,
-                seedFaces,
-                visitedFaces
-            );
-        }
-    } while (nFacesRemaining > 0);
+        // Choose new src face from current src face neighbour
+        continueWalk = setNextFaces
+        (
+            startSeedi,
+            srcFacei,
+            tgtFacei,
+            mapFlag,
+            seedFaces,
+            visitedFaces,
+            requireMatch_ && (lowWeightCorrection_ < 0)
+            // pass in nonOverlapFaces for failed tree search?
+        );
+    } while (continueWalk);
 
-    this->srcNonOverlap_.transfer(nonOverlapFaces);
+    srcNonOverlap_.transfer(nonOverlapFaces);
 }
 
 
-template<class SourcePatch, class TargetPatch>
-bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::processSourceFace
+bool Foam::faceAreaWeightAMI::processSourceFace
 (
     const label srcFacei,
     const label tgtStartFacei,
@@ -213,15 +188,11 @@ bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::processSourceFace
         return false;
     }
 
+    const auto& tgtPatch = this->tgtPatch();
+
     // append initial target face and neighbours
     nbrFaces.append(tgtStartFacei);
-    this->appendNbrFaces
-    (
-        tgtStartFacei,
-        this->tgtPatch(),
-        visitedFaces,
-        nbrFaces
-    );
+    appendNbrFaces(tgtStartFacei, tgtPatch, visitedFaces, nbrFaces);
 
     bool faceProcessed = false;
 
@@ -238,11 +209,7 @@ bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::processSourceFace
         calcInterArea(srcFacei, tgtFacei, interArea, interCentroid);
 
         // store when intersection fractional area > tolerance
-        if
-        (
-            interArea/this->srcMagSf_[srcFacei]
-          > faceAreaIntersect::tolerance()
-        )
+        if (interArea/srcMagSf_[srcFacei] > faceAreaIntersect::tolerance())
         {
             srcAddr[srcFacei].append(tgtFacei);
             srcWght[srcFacei].append(interArea);
@@ -251,13 +218,7 @@ bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::processSourceFace
             tgtAddr[tgtFacei].append(srcFacei);
             tgtWght[tgtFacei].append(interArea);
 
-            this->appendNbrFaces
-            (
-                tgtFacei,
-                this->tgtPatch(),
-                visitedFaces,
-                nbrFaces
-            );
+            appendNbrFaces(tgtFacei, tgtPatch, visitedFaces, nbrFaces);
 
             faceProcessed = true;
 
@@ -275,8 +236,7 @@ bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::processSourceFace
 }
 
 
-template<class SourcePatch, class TargetPatch>
-void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
+bool Foam::faceAreaWeightAMI::setNextFaces
 (
     label& startSeedi,
     label& srcFacei,
@@ -289,12 +249,18 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
 {
     addProfiling(ami, "faceAreaWeightAMI::setNextFaces");
 
+    if (mapFlag.count() == 0)
+    {
+        // No more faces to map
+        return false;
+    }
+
     const labelList& srcNbrFaces = this->srcPatch().faceFaces()[srcFacei];
 
-    // initialise tgtFacei
+    // Initialise tgtFacei
     tgtFacei = -1;
 
-    // set possible seeds for later use
+    // Set possible seeds for later use
     bool valuesSet = false;
     for (label faceS: srcNbrFaces)
     {
@@ -303,7 +269,7 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
             for (label faceT : visitedFaces)
             {
                 const scalar threshold =
-                    this->srcMagSf_[faceS]*faceAreaIntersect::tolerance();
+                    srcMagSf_[faceS]*faceAreaIntersect::tolerance();
 
                 // Store when intersection fractional area > threshold
                 if (overlaps(faceS, faceT, threshold))
@@ -321,73 +287,73 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
         }
     }
 
-    // set next src and tgt faces if not set above
     if (valuesSet)
     {
-        return;
+        return true;
     }
-    else
+
+    // Set next src and tgt faces if not set above
+    // - try to use existing seed
+    label facei = startSeedi;
+    if (!mapFlag.test(startSeedi))
     {
-        // try to use existing seed
-        label facei = startSeedi;
-        if (!mapFlag.test(startSeedi))
+        facei = mapFlag.find_next(facei);
+    }
+    const label startSeedi0 = facei;
+
+    bool foundNextSeed = false;
+    while (facei != -1)
+    {
+        if (!foundNextSeed)
         {
-            facei = mapFlag.find_next(facei);
-        }
-        const label startSeedi0 = facei;
-
-        bool foundNextSeed = false;
-        while (facei != -1)
-        {
-            if (!foundNextSeed)
-            {
-                startSeedi = facei;
-                foundNextSeed = true;
-            }
-
-            if (seedFaces[facei] != -1)
-            {
-                srcFacei = facei;
-                tgtFacei = seedFaces[facei];
-
-                return;
-            }
-
-            facei = mapFlag.find_next(facei);
+            startSeedi = facei;
+            foundNextSeed = true;
         }
 
-        // perform new search to find match
-        if (debug)
-        {
-            Pout<< "Advancing front stalled: searching for new "
-                << "target face" << endl;
-        }
-
-        facei = startSeedi0;
-        while (facei != -1)
+        if (seedFaces[facei] != -1)
         {
             srcFacei = facei;
-            tgtFacei = this->findTargetFace(srcFacei, visitedFaces);
+            tgtFacei = seedFaces[facei];
 
-            if (tgtFacei >= 0)
-            {
-                return;
-            }
-
-            facei = mapFlag.find_next(facei);
+            return true;
         }
 
-        if (errorOnNotFound)
-        {
-            FatalErrorInFunction
-               << "Unable to set source and target faces" << abort(FatalError);
-        }
+        facei = mapFlag.find_next(facei);
     }
+
+    // Perform new search to find match
+    if (debug)
+    {
+        Pout<< "Advancing front stalled: searching for new "
+            << "target face" << endl;
+    }
+
+    facei = startSeedi0;
+    while (facei != -1)
+    {
+        srcFacei = facei;
+        tgtFacei = findTargetFace(srcFacei, visitedFaces);
+
+        if (tgtFacei >= 0)
+        {
+            return true;
+        }
+
+        facei = mapFlag.find_next(facei);
+    }
+
+    if (errorOnNotFound)
+    {
+        FatalErrorInFunction
+            << "Unable to set target face for source face " << srcFacei
+            << abort(FatalError);
+    }
+
+    return false;
 }
 
 
-template<class SourcePatch, class TargetPatch>
-void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calcInterArea
+void Foam::faceAreaWeightAMI::calcInterArea
 (
     const label srcFacei,
     const label tgtFacei,
@@ -397,45 +363,47 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calcInterArea
 {
     addProfiling(ami, "faceAreaWeightAMI::interArea");
 
-    const pointField& srcPoints = this->srcPatch().points();
-    const pointField& tgtPoints = this->tgtPatch().points();
-
-    // references to candidate faces
-    const face& src = this->srcPatch()[srcFacei];
-    const face& tgt = this->tgtPatch()[tgtFacei];
-
-    // quick reject if either face has zero area
+    // Quick reject if either face has zero area
     if
     (
-        (this->srcMagSf_[srcFacei] < ROOTVSMALL)
-     || (this->tgtMagSf_[tgtFacei] < ROOTVSMALL)
+        (srcMagSf_[srcFacei] < ROOTVSMALL)
+     || (tgtMagSf_[tgtFacei] < ROOTVSMALL)
     )
     {
         return;
     }
 
-    // create intersection object
+    const auto& srcPatch = this->srcPatch();
+    const auto& tgtPatch = this->tgtPatch();
+
+    const pointField& srcPoints = srcPatch.points();
+    const pointField& tgtPoints = tgtPatch.points();
+
+    // Create intersection object
     faceAreaIntersect inter
     (
         srcPoints,
         tgtPoints,
-        this->srcTris_[srcFacei],
-        this->tgtTris_[tgtFacei],
-        this->reverseTarget_,
-        AMIInterpolation<SourcePatch, TargetPatch>::cacheIntersections_
+        srcTris_[srcFacei],
+        tgtTris_[tgtFacei],
+        reverseTarget_,
+        AMIInterpolation::cacheIntersections_
     );
 
-    // crude resultant norm
-    vector n(-this->srcPatch().faceNormals()[srcFacei]);
-    if (this->reverseTarget_)
+    // Crude resultant norm
+    vector n(-srcPatch.faceNormals()[srcFacei]);
+    if (reverseTarget_)
     {
-        n -= this->tgtPatch().faceNormals()[tgtFacei];
+        n -= tgtPatch.faceNormals()[tgtFacei];
     }
     else
     {
-        n += this->tgtPatch().faceNormals()[tgtFacei];
+        n += tgtPatch.faceNormals()[tgtFacei];
     }
     scalar magN = mag(n);
+
+    const face& src = srcPatch[srcFacei];
+    const face& tgt = tgtPatch[tgtFacei];
 
     if (magN > ROOTVSMALL)
     {
@@ -451,11 +419,7 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calcInterArea
             << endl;
     }
 
-    if
-    (
-        AMIInterpolation<SourcePatch, TargetPatch>::cacheIntersections_
-     && debug
-    )
+    if (AMIInterpolation::cacheIntersections_ && debug)
     {
         static OBJstream tris("intersectionTris.obj");
         const auto& triPts = inter.triangles();
@@ -467,57 +431,58 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calcInterArea
 
     if ((debug > 1) && (area > 0))
     {
-        this->writeIntersectionOBJ(area, src, tgt, srcPoints, tgtPoints);
+        writeIntersectionOBJ(area, src, tgt, srcPoints, tgtPoints);
     }
 }
 
 
-template<class SourcePatch, class TargetPatch>
-bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::overlaps
+bool Foam::faceAreaWeightAMI::overlaps
 (
     const label srcFacei,
     const label tgtFacei,
     const scalar threshold
 ) const
 {
-    const pointField& srcPoints = this->srcPatch().points();
-    const pointField& tgtPoints = this->tgtPatch().points();
-
-    // references to candidate faces
-    const face& src = this->srcPatch()[srcFacei];
-    const face& tgt = this->tgtPatch()[tgtFacei];
-
-    // quick reject if either face has zero area
+    // Quick reject if either face has zero area
     if
     (
-        (this->srcMagSf_[srcFacei] < ROOTVSMALL)
-     || (this->tgtMagSf_[tgtFacei] < ROOTVSMALL)
+        (srcMagSf_[srcFacei] < ROOTVSMALL)
+     || (tgtMagSf_[tgtFacei] < ROOTVSMALL)
     )
     {
         return false;
     }
 
+    const auto& srcPatch = this->srcPatch();
+    const auto& tgtPatch = this->tgtPatch();
+
+    const pointField& srcPoints = srcPatch.points();
+    const pointField& tgtPoints = tgtPatch.points();
+
     faceAreaIntersect inter
     (
         srcPoints,
         tgtPoints,
-        this->srcTris_[srcFacei],
-        this->tgtTris_[tgtFacei],
-        this->reverseTarget_,
-        AMIInterpolation<SourcePatch, TargetPatch>::cacheIntersections_
+        srcTris_[srcFacei],
+        tgtTris_[tgtFacei],
+        reverseTarget_,
+        AMIInterpolation::cacheIntersections_
     );
 
-    // crude resultant norm
-    vector n(-this->srcPatch().faceNormals()[srcFacei]);
-    if (this->reverseTarget_)
+    // Crude resultant norm
+    vector n(-srcPatch.faceNormals()[srcFacei]);
+    if (reverseTarget_)
     {
-        n -= this->tgtPatch().faceNormals()[tgtFacei];
+        n -= tgtPatch.faceNormals()[tgtFacei];
     }
     else
     {
-        n += this->tgtPatch().faceNormals()[tgtFacei];
+        n += tgtPatch.faceNormals()[tgtFacei];
     }
     scalar magN = mag(n);
+
+    const face& src = srcPatch[srcFacei];
+    const face& tgt = tgtPatch[tgtFacei];
 
     if (magN > ROOTVSMALL)
     {
@@ -537,9 +502,7 @@ bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::overlaps
 }
 
 
-template<class SourcePatch, class TargetPatch>
-void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::
-restartUncoveredSourceFace
+void Foam::faceAreaWeightAMI::restartUncoveredSourceFace
 (
     List<DynamicList<label>>& srcAddr,
     List<DynamicList<scalar>>& srcWght,
@@ -555,27 +518,29 @@ restartUncoveredSourceFace
     label nBelowMinWeight = 0;
     const scalar minWeight = 0.95;
 
-    // list of tgt face neighbour faces
+    // List of tgt face neighbour faces
     DynamicList<label> nbrFaces(10);
 
-    // list of faces currently visited for srcFacei to avoid multiple hits
+    // List of faces currently visited for srcFacei to avoid multiple hits
     DynamicList<label> visitedFaces(10);
+
+    const auto& srcPatch = this->srcPatch();
 
     forAll(srcWght, srcFacei)
     {
         const scalar s = sum(srcWght[srcFacei]);
-        const scalar t = s/this->srcMagSf_[srcFacei];
+        const scalar t = s/srcMagSf_[srcFacei];
 
         if (t < minWeight)
         {
             ++nBelowMinWeight;
 
-            const face& f = this->srcPatch()[srcFacei];
+            const face& f = srcPatch[srcFacei];
 
             forAll(f, fpi)
             {
                 const label tgtFacei =
-                    this->findTargetFace(srcFacei, srcAddr[srcFacei], fpi);
+                    findTargetFace(srcFacei, srcAddr[srcFacei], fpi);
 
                 if (tgtFacei != -1)
                 {
@@ -613,77 +578,74 @@ restartUncoveredSourceFace
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class SourcePatch, class TargetPatch>
-Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::faceAreaWeightAMI
+Foam::faceAreaWeightAMI::faceAreaWeightAMI
 (
-    const SourcePatch& srcPatch,
-    const TargetPatch& tgtPatch,
-    const faceAreaIntersect::triangulationMode& triMode,
-    const bool reverseTarget,
+    const dictionary& dict,
+    const bool reverseTarget
+)
+:
+    advancingFrontAMI(dict, reverseTarget),
+    restartUncoveredSourceFace_
+    (
+        dict.getOrDefault("restartUncoveredSourceFace", true)
+    )
+{}
+
+
+Foam::faceAreaWeightAMI::faceAreaWeightAMI
+(
     const bool requireMatch,
+    const bool reverseTarget,
+    const scalar lowWeightCorrection,
+    const faceAreaIntersect::triangulationMode triMode,
     const bool restartUncoveredSourceFace
 )
 :
-    AMIMethod<SourcePatch, TargetPatch>
+    advancingFrontAMI
     (
-        srcPatch,
-        tgtPatch,
-        triMode,
+        requireMatch,
         reverseTarget,
-        requireMatch
+        lowWeightCorrection,
+        triMode
     ),
-    restartUncoveredSourceFace_(restartUncoveredSourceFace),
-    srcMagSf_(),
-    tgtMagSf_(),
-    srcTris_(),
-    tgtTris_(),
-    extendedTgtMapPtr_(nullptr)
+    restartUncoveredSourceFace_(restartUncoveredSourceFace)
+{}
+
+
+Foam::faceAreaWeightAMI::faceAreaWeightAMI(const faceAreaWeightAMI& ami)
+:
+    advancingFrontAMI(ami),
+    restartUncoveredSourceFace_(ami.restartUncoveredSourceFace_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class SourcePatch, class TargetPatch>
-bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
+bool Foam::faceAreaWeightAMI::calculate
 (
-    labelListList& srcAddress,
-    scalarListList& srcWeights,
-    pointListList& srcCentroids,
-    labelListList& tgtAddress,
-    scalarListList& tgtWeights,
-    scalarList& srcMagSf,
-    scalarList& tgtMagSf,
-    autoPtr<mapDistribute>& srcMapPtr,
-    autoPtr<mapDistribute>& tgtMapPtr,
-    label srcFacei,
-    label tgtFacei
+    const primitivePatch& srcPatch,
+    const primitivePatch& tgtPatch,
+    const autoPtr<searchableSurface>& surfPtr
 )
 {
+    if (upToDate_)
+    {
+        return false;
+    }
+
     addProfiling(ami, "faceAreaWeightAMI::calculate");
 
-    // Create global indexing for each patch
-    globalIndex globalSrcFaces(this->srcPatch0_.size());
-    globalIndex globalTgtFaces(this->tgtPatch0_.size());
+    advancingFrontAMI::calculate(srcPatch, tgtPatch, surfPtr);
 
-    // Initialise the geometry
-    labelList extendedTgtFaceIDs;
-    initGeom(globalTgtFaces, extendedTgtFaceIDs);
+    label srcFacei = 0;
+    label tgtFacei = 0;
 
-    bool ok =
-        this->initialise
-        (
-            srcAddress,
-            srcWeights,
-            tgtAddress,
-            tgtWeights,
-            srcFacei,
-            tgtFacei
-        );
+    bool ok = initialiseWalk(srcFacei, tgtFacei);
 
-    srcCentroids.setSize(srcAddress.size());
+    srcCentroids_.setSize(srcAddress_.size());
 
     const auto& src = this->srcPatch();
-    const auto& tgt = this->tgtPatch();
+    const auto& tgt = this->tgtPatch(); // might be the extended patch!
 
     // Temporary storage for addressing and weights
     List<DynamicList<label>> srcAddr(src.size());
@@ -705,15 +667,15 @@ bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
             tgtFacei
         );
 
-        if (debug && !this->srcNonOverlap_.empty())
+        if (debug && !srcNonOverlap_.empty())
         {
-            Pout<< "    AMI: " << this->srcNonOverlap_.size()
+            Pout<< "    AMI: " << srcNonOverlap_.size()
                 << " non-overlap faces identified"
                 << endl;
         }
 
         // Check for badly covered faces
-        if (restartUncoveredSourceFace_)
+        if (restartUncoveredSourceFace_) // && requireMatch_???
         {
             restartUncoveredSourceFace
             (
@@ -726,36 +688,38 @@ bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
         }
     }
 
-
-    // Set the patch face areas
-    srcMagSf = std::move(srcMagSf_);
-    tgtMagSf = std::move(tgtMagSf_);
-
     // Transfer data to persistent storage
     forAll(srcAddr, i)
     {
-        srcAddress[i].transfer(srcAddr[i]);
-        srcWeights[i].transfer(srcWght[i]);
-        srcCentroids[i].transfer(srcCtr[i]);
+        srcAddress_[i].transfer(srcAddr[i]);
+        srcWeights_[i].transfer(srcWght[i]);
+        srcCentroids_[i].transfer(srcCtr[i]);
     }
 
     forAll(tgtAddr, i)
     {
-        tgtAddress[i].transfer(tgtAddr[i]);
-        tgtWeights[i].transfer(tgtWght[i]);
+        tgtAddress_[i].transfer(tgtAddr[i]);
+        tgtWeights_[i].transfer(tgtWght[i]);
     }
 
-    if (this->distributed())
+    if (distributed())
     {
-        for (labelList& addressing : srcAddress)
+        const primitivePatch& srcPatch0 = this->srcPatch0();
+        const primitivePatch& tgtPatch0 = this->tgtPatch0();
+
+        // Create global indexing for each original patch
+        globalIndex globalSrcFaces(srcPatch0.size());
+        globalIndex globalTgtFaces(tgtPatch0.size());
+
+        for (labelList& addressing : srcAddress_)
         {
             for (label& addr : addressing)
             {
-                addr = extendedTgtFaceIDs[addr];
+                addr = extendedTgtFaceIDs_[addr];
             }
         }
 
-        for (labelList& addressing : tgtAddress)
+        for (labelList& addressing : tgtAddress_)
         {
             globalSrcFaces.inplaceToGlobal(addressing);
         }
@@ -767,12 +731,12 @@ bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
         (
             Pstream::commsTypes::nonBlocking,
             List<labelPair>(),
-            this->tgtPatch0_.size(),
+            tgtPatch0.size(),
             extendedTgtMapPtr_->constructMap(),
             false,                      // has flip
             extendedTgtMapPtr_->subMap(),
             false,                      // has flip
-            tgtAddress,
+            tgtAddress_,
             ListOps::appendEqOp<label>(),
             flipOp(),                   // flip operation
             labelList()
@@ -782,43 +746,55 @@ bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
         (
             Pstream::commsTypes::nonBlocking,
             List<labelPair>(),
-            this->tgtPatch0_.size(),
+            tgtPatch0.size(),
             extendedTgtMapPtr_->constructMap(),
             false,
             extendedTgtMapPtr_->subMap(),
             false,
-            tgtWeights,
+            tgtWeights_,
             ListOps::appendEqOp<scalar>(),
             flipOp(),
             scalarList()
         );
 
         // Note: using patch face areas calculated by the AMI method
-        extendedTgtMapPtr_->reverseDistribute
-        (
-            this->tgtPatch0_.size(),
-            tgtMagSf
-        );
+        extendedTgtMapPtr_->reverseDistribute(tgtPatch0.size(), tgtMagSf_);
 
         // Cache maps and reset addresses
         List<Map<label>> cMapSrc;
-        srcMapPtr.reset(new mapDistribute(globalSrcFaces, tgtAddress, cMapSrc));
+        srcMapPtr_.reset
+        (
+            new mapDistribute(globalSrcFaces, tgtAddress_, cMapSrc)
+        );
+
         List<Map<label>> cMapTgt;
-        tgtMapPtr.reset(new mapDistribute(globalTgtFaces, srcAddress, cMapTgt));
+        tgtMapPtr_.reset
+        (
+            new mapDistribute(globalTgtFaces, srcAddress_, cMapTgt)
+        );
     }
 
-    return true;
+    // Convert the weights from areas to normalised values
+    normaliseWeights(conformal(), true);
+
+    upToDate_ = true;
+
+    return upToDate_;
 }
 
 
-template<class SourcePatch, class TargetPatch>
-void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::normaliseWeights
-(
-    const bool verbose,
-    AMIInterpolation<SourcePatch, TargetPatch>& inter
-)
+void Foam::faceAreaWeightAMI::write(Ostream& os) const
 {
-    inter.normaliseWeights(this->conformal(), verbose);
+    advancingFrontAMI::write(os);
+
+    if (restartUncoveredSourceFace_)
+    {
+        os.writeEntry
+        (
+            "restartUncoveredSourceFace",
+            restartUncoveredSourceFace_
+        );
+    }
 }
 
 

@@ -38,7 +38,7 @@ SourceFiles
 #ifndef faceAreaWeightAMI_H
 #define faceAreaWeightAMI_H
 
-#include "AMIMethod.H"
+#include "advancingFrontAMI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,10 +49,9 @@ namespace Foam
                       Class faceAreaWeightAMI Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class SourcePatch, class TargetPatch>
 class faceAreaWeightAMI
 :
-    public AMIMethod<SourcePatch, TargetPatch>
+    public advancingFrontAMI
 {
 private:
 
@@ -61,28 +60,11 @@ private:
         //- Flag to restart uncovered source faces
         const bool restartUncoveredSourceFace_;
 
-        //- Source face areas
-        List<scalar> srcMagSf_;
-
-        //- Target face areas
-        List<scalar> tgtMagSf_;
-
-        //- Storage for src-side triangle decomposition
-        List<DynamicList<face>> srcTris_;
-
-        //- Storage for tgt-side triangle decomposition
-        List<DynamicList<face>> tgtTris_;
 
 
 protected:
 
-    autoPtr<mapDistribute> extendedTgtMapPtr_;
-
-
     // Protected Member Functions
-
-        //- No copy construct
-        faceAreaWeightAMI(const faceAreaWeightAMI&) = delete;
 
         //- No copy assignment
         void operator=(const faceAreaWeightAMI&) = delete;
@@ -90,6 +72,8 @@ protected:
         //- Initialise the geometry
         void initGeom
         (
+            const primitivePatch& srcPatch,
+            const primitivePatch& tgtPatch,
             const globalIndex& globalTgtFaces,
             labelList& extendedTgtFaceIDs
         );
@@ -135,7 +119,7 @@ protected:
             );
 
             //- Set the source and target seed faces
-            virtual void setNextFaces
+            virtual bool setNextFaces
             (
                 label& startSeedi,
                 label& srcFacei,
@@ -175,16 +159,32 @@ public:
 
     // Constructors
 
+        //- Construct from dictionary
+        faceAreaWeightAMI
+        (
+            const dictionary& dict,
+            const bool reverseTarget = false
+        );
+
         //- Construct from components
         faceAreaWeightAMI
         (
-            const SourcePatch& srcPatch,
-            const TargetPatch& tgtPatch,
-            const faceAreaIntersect::triangulationMode& triMode,
+            const bool requireMatch,
             const bool reverseTarget = false,
-            const bool requireMatch = true,
+            const scalar lowWeightCorrection = -1,
+            const faceAreaIntersect::triangulationMode triMode =
+                faceAreaIntersect::tmMesh,
             const bool restartUncoveredSourceFace = true
         );
+
+        //- Construct as copy
+        faceAreaWeightAMI(const faceAreaWeightAMI& ami);
+
+        //- Construct and return a clone
+        virtual autoPtr<AMIInterpolation> clone() const
+        {
+            return autoPtr<AMIInterpolation>(new faceAreaWeightAMI(*this));
+        }
 
 
     //- Destructor
@@ -193,43 +193,22 @@ public:
 
     // Member Functions
 
-        // Manipulation
+        //- Update addressing, weights and (optional) centroids
+        virtual bool calculate
+        (
+            const primitivePatch& srcPatch,
+            const primitivePatch& tgtPatch,
+            const autoPtr<searchableSurface>& surfPtr = nullptr
+        );
 
-            //- Update addressing, weights and centroids
-            virtual bool calculate
-            (
-                labelListList& srcAddress,
-                scalarListList& srcWeights,
-                pointListList& srcCentroids,
-                labelListList& tgtAddress,
-                scalarListList& tgtWeights,
-                scalarList& srcMagSf,
-                scalarList& tgtMagSf,
-                autoPtr<mapDistribute>& srcMapPtr,
-                autoPtr<mapDistribute>& tgtMapPtr,
-                label srcFacei = -1,
-                label tgtFacei = -1
-            );
-
-            //- Normalise the weight. Can optionally subset addressing
-            //- (e.g. for mapNearest)
-            virtual void normaliseWeights
-            (
-                const bool verbose,
-                AMIInterpolation<SourcePatch, TargetPatch>& inter
-            );
+        //- Write
+        virtual void write(Ostream& os) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "faceAreaWeightAMI.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

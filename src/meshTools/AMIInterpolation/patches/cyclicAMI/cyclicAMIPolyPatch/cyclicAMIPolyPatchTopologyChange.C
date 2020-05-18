@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,29 +55,27 @@ void Foam::cyclicAMIPolyPatch::restoreScaledGeometry()
     vectorField::subField faceAreas = this->faceAreas();
     vectorField::subField faceCentres = this->faceCentres();
 
-    if (debug)
-    {
-        Info<< "Patch:" << name() << " before: sum(mag(faceAreas)):"
-            << gSum(mag(faceAreas)) << endl;
-        Info<< "Patch:" << name() << " before: sum(mag(faceAreas0)):"
-            << gSum(mag(faceAreas0_)) << endl;
-    }
+    DebugInfo
+        << "Patch:" << name() << " before: sum(mag(faceAreas)):"
+        << gSum(mag(faceAreas)) << nl
+        << "Patch:" << name() << " before: sum(mag(faceAreas0)):"
+        << gSum(mag(faceAreas0_)) << endl;
 
     faceAreas = faceAreas0_;
-    Info<< "WARNING: ==============================" << endl;
-    Info<< "WARNING: Not updating face cell centres" << endl;
-    Info<< "WARNING: ==============================" << endl;
-    //faceCentres = faceCentres0_;
+    if (moveFaceCentres_)
+    {
+        DebugInfo << "Moving face centres" << endl;
+        faceCentres = faceCentres0_;
+    }
+
     faceAreas0_.clear();
     faceCentres0_.clear();
 
-    if (debug)
-    {
-        Info<< "Patch:" << name() << " after: sum(mag(faceAreas)):"
-            << gSum(mag(faceAreas)) << endl;
-        Info<< "Patch:" << name() << " after: sum(mag(faceAreas0)):"
-            << gSum(mag(faceAreas0_)) << endl;
-    }
+    DebugInfo
+        << "Patch:" << name() << " after: sum(mag(faceAreas)):"
+        << gSum(mag(faceAreas)) << nl
+        << "Patch:" << name() << " after: sum(mag(faceAreas0)):"
+        << gSum(mag(faceAreas0_)) << endl;
 }
 
 
@@ -614,9 +614,9 @@ void Foam::cyclicAMIPolyPatch::setAMIFaces()
         }
     }
 
-    // Update the AMI addressing and weights to reflect the new 1-to-1
+    // Reset the AMI addressing and weights to reflect the new 1-to-1
     // correspondence
-    AMIPtr_->update
+    AMIPtr_->reset
     (
         std::move(srcToTgtMap1),
         std::move(tgtToSrcMap1),
@@ -626,7 +626,9 @@ void Foam::cyclicAMIPolyPatch::setAMIFaces()
         std::move(newTgtToSrcWeights)
     );
 
-    AMIPtr_->setAreas(mag(faceAreas0_), mag(nbrFaceAreas0));
+    // Need to set areas, e.g. for agglomeration to (re-)normalisation weights
+    AMIPtr_->srcMagSf() = mag(faceAreas0_);
+    AMIPtr_->tgtMagSf() = mag(nbrFaceAreas0);
 
     if (debug)
     {
@@ -660,7 +662,7 @@ bool Foam::cyclicAMIPolyPatch::setTopology(polyTopoChange& topoChange)
     {
         // Calculate the AMI using the new points
         // Note: mesh still has old points
-        resetAMI(topoChange.points(), AMIMethod_);
+        resetAMI(topoChange.points());
 
         removeAMIFaces(topoChange);
 

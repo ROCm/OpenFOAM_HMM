@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,6 +41,7 @@ SourceFiles
 #include "cyclicAMIPolyPatch.H"
 #include "AMIPatchToPatchInterpolation.H"
 #include "polyBoundaryMesh.H"
+#include "partialFaceAreaWeightAMI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -86,19 +87,10 @@ protected:
         ) const;
 
         //- Reset the AMI interpolator, supply patch points
-        virtual void resetAMI
-        (
-            const UList<point>& points,
-            const AMIPatchToPatchInterpolation::interpolationMethod& AMIMethod =
-                AMIPatchToPatchInterpolation::imFaceAreaWeight
-        ) const;
+        virtual void resetAMI(const UList<point>& points) const;
 
         //-  Reset the AMI interpolator, use current patch points
-        virtual void resetAMI
-        (
-            const AMIPatchToPatchInterpolation::interpolationMethod& AMIMethod =
-                AMIPatchToPatchInterpolation::imFaceAreaWeight
-        ) const;
+        virtual void resetAMI() const;
 
         //- Scale patch face areas to maintain physical area
         virtual void scalePatchFaceAreas();
@@ -145,7 +137,8 @@ public:
             const label index,
             const polyBoundaryMesh& bm,
             const word& patchType,
-            const transformType transform = UNKNOWN
+            const transformType transform = UNKNOWN,
+            const word& defaultAMIMethod = partialFaceAreaWeightAMI::typeName
         );
 
         //- Construct from dictionary
@@ -155,7 +148,8 @@ public:
             const dictionary& dict,
             const label index,
             const polyBoundaryMesh& bm,
-            const word& patchType
+            const word& patchType,
+            const word& defaultAMIMethod = partialFaceAreaWeightAMI::typeName
         );
 
         //- Construct as copy, resetting the boundary mesh

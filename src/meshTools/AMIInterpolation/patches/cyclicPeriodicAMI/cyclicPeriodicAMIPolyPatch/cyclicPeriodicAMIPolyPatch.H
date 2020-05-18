@@ -83,11 +83,7 @@ private:
         void writeOBJ(const primitivePatch& p, OBJstream& str) const;
 
         //- Reset the AMI interpolator
-        virtual void resetAMI
-        (
-            const AMIPatchToPatchInterpolation::interpolationMethod& AMIMethod =
-                AMIPatchToPatchInterpolation::imFaceAreaWeight
-        ) const;
+        virtual void resetAMI() const;
 
 
 public:

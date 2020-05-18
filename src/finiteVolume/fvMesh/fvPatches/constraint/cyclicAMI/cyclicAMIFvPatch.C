@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -123,7 +124,7 @@ Foam::tmp<Foam::vectorField> Foam::cyclicAMIFvPatch::delta() const
 
         const vectorField& nbrPatchD = tnbrPatchD();
 
-        tmp<vectorField> tpdv(new vectorField(patchD.size()));
+        auto tpdv = tmp<vectorField>::New(patchD.size());
         vectorField& pdv = tpdv.ref();
 
         // do the transformation if necessary

@@ -37,7 +37,7 @@ SourceFiles
 #ifndef nearestFaceAMI_H
 #define nearestFaceAMI_H
 
-#include "AMIMethod.H"
+#include "AMIInterpolation.H"
 #include "pointIndexHit.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -49,10 +49,9 @@ namespace Foam
                         Class nearestFaceAMI Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class SourcePatch, class TargetPatch>
 class nearestFaceAMI
 :
-    public AMIMethod<SourcePatch, TargetPatch>
+    public AMIInterpolation
 {
 public:
 
@@ -91,23 +90,20 @@ private:
 
     // Private Member Functions
 
-        //- No copy construct
-        nearestFaceAMI(const nearestFaceAMI&) = delete;
-
         //- No copy assignment
         void operator=(const nearestFaceAMI&) = delete;
 
         autoPtr<mapDistribute> calcFaceMap
         (
             const List<nearestAndDist>& localInfo,
-            const SourcePatch& srcPatch,
-            const TargetPatch& tgtPatch
+            const primitivePatch& srcPatch,
+            const primitivePatch& tgtPatch
         ) const;
 
         autoPtr<mapDistribute> calcDistributed
         (
-            const SourcePatch& src,
-            const TargetPatch& tgt,
+            const primitivePatch& src,
+            const primitivePatch& tgt,
             labelListList& srcToTgtAddr,
             scalarListList& srcToTgtWght
         ) const;
@@ -121,15 +117,29 @@ public:
 
     // Constructors
 
+        //- Construct from dictionary
+        nearestFaceAMI
+        (
+            const dictionary& dict,
+            const bool reverseTarget = false
+        );
+
         //- Construct from components
         nearestFaceAMI
         (
-            const SourcePatch& srcPatch,
-            const TargetPatch& tgtPatch,
-            const faceAreaIntersect::triangulationMode& triMode,
+            const bool requireMatch = true,
             const bool reverseTarget = false,
-            const bool requireMatch = true
+            const scalar lowWeightCorrection = -1
         );
+
+        //- Construct as copy
+        nearestFaceAMI(const nearestFaceAMI& ami);
+
+        //- Construct and return a clone
+        virtual autoPtr<AMIInterpolation> clone() const
+        {
+            return autoPtr<AMIInterpolation>(new nearestFaceAMI(*this));
+        }
 
 
     //- Destructor
@@ -138,43 +148,19 @@ public:
 
     // Member Functions
 
-        // Manipulation
-
-            //- Update addressing and weights
-            virtual bool calculate
-            (
-                labelListList& srcAddress,
-                scalarListList& srcWeights,
-                pointListList& srcCentroids,
-                labelListList& tgtAddress,
-                scalarListList& tgtWeights,
-                scalarList& srcMagSf,
-                scalarList& tgtMagSf,
-                autoPtr<mapDistribute>& srcMapPtr,
-                autoPtr<mapDistribute>& tgtMapPtr,
-                label srcFacei = -1,
-                label tgtFacei = -1
-            );
-
-            //- Normalise the weight. Can optionally subset addressing
-            //- (e.g. for mapNearest)
-            virtual void normaliseWeights
-            (
-                const bool verbose,
-                AMIInterpolation<SourcePatch, TargetPatch>& inter
-            );
+        //- Update addressing and weights
+        virtual bool calculate
+        (
+            const primitivePatch& srcPatch,
+            const primitivePatch& tgtPatch,
+            const autoPtr<searchableSurface>& surfPtr = nullptr
+        );
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "nearestFaceAMI.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

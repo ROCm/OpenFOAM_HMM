@@ -226,10 +226,9 @@ void Foam::cyclicACMIFvPatchField<Type>::updateInterfaceMatrix
 {
     const cyclicACMIPolyPatch& cpp = cyclicACMIPatch_.cyclicACMIPatch();
 
-    // note: only applying coupled contribution
+    // Note: only applying coupled contribution
 
-    const labelUList& nbrFaceCellsCoupled =
-        cpp.neighbPatch().faceCells();
+    const labelUList& nbrFaceCellsCoupled = cpp.neighbPatch().faceCells();
 
     solveScalarField pnf(psiInternal, nbrFaceCellsCoupled);
 
@@ -254,7 +253,7 @@ void Foam::cyclicACMIFvPatchField<Type>::updateInterfaceMatrix
 {
     const cyclicACMIPolyPatch& cpp = cyclicACMIPatch_.cyclicACMIPatch();
 
-    // note: only applying coupled contribution
+    // Note: only applying coupled contribution
 
     const labelUList& nbrFaceCellsCoupled = cpp.neighbPatch().faceCells();
 
@@ -277,7 +276,7 @@ void Foam::cyclicACMIFvPatchField<Type>::manipulateMatrix
 {
     const scalarField& mask = cyclicACMIPatch_.cyclicACMIPatch().mask();
 
-    // nothing to be done by the AMI, but re-direct to non-overlap patch
+    // Nothing to be done by the AMI, but re-direct to non-overlap patch
     // with non-overlap patch weights
     const fvPatchField<Type>& npf = nonOverlapPatchField();
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,6 +42,7 @@ SourceFiles
 #include "AMIPatchToPatchInterpolation.H"
 #include "polyBoundaryMesh.H"
 #include "coupleGroupIdentifier.H"
+#include "faceAreaWeightAMI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -73,9 +75,6 @@ class cyclicAMIPolyPatch
 protected:
 
     // Protected data
-
-        //- Flag to indicate that AMI has been updated
-        mutable bool updated_;
 
         //- Name of other half
         mutable word nbrPatchName_;
@@ -113,23 +112,11 @@ protected:
         //- AMI interpolation class
         mutable autoPtr<AMIPatchToPatchInterpolation> AMIPtr_;
 
-        //- AMI method
-        const AMIPatchToPatchInterpolation::interpolationMethod AMIMethod_;
-
-        //- Flag to indicate that slave patch should be reversed for AMI
-        const bool AMIReverse_;
-
-        //- Flag to indicate that patches should match/overlap
-        bool AMIRequireMatch_;
-
-        //- Low weight correction threshold for AMI
-        const scalar AMILowWeightCorrection_;
+        //- Dictionary used during projection surface construction
+        const dictionary surfDict_;
 
         //- Projection surface
         mutable autoPtr<searchableSurface> surfPtr_;
-
-        //- Dictionary used during projection surface construction
-        const dictionary surfDict_;
 
 
         // Change of topology as AMI is updated
@@ -137,6 +124,9 @@ protected:
             //- Flag to indicate that new AMI faces will created
             //  Set by the call to changeTopology
             mutable bool createAMIFaces_;
+
+            //- Move face centres (default = no)
+            bool moveFaceCentres_;
 
             mutable bool updatingAMI_;
 
@@ -163,21 +153,14 @@ protected:
 
             virtual void restoreScaledGeometry();
 
+        //- Create and return pointer to the projection surface
+        const autoPtr<searchableSurface>& surfPtr() const;
 
         //- Reset the AMI interpolator, supply patch points
-        virtual void resetAMI
-        (
-            const UList<point>& points,
-            const AMIPatchToPatchInterpolation::interpolationMethod& AMIMethod =
-                AMIPatchToPatchInterpolation::imFaceAreaWeight
-        ) const;
+        virtual void resetAMI(const UList<point>& points) const;
 
         //-  Reset the AMI interpolator, use current patch points
-        virtual void resetAMI
-        (
-            const AMIPatchToPatchInterpolation::interpolationMethod& AMIMethod =
-                AMIPatchToPatchInterpolation::imFaceAreaWeight
-        ) const;
+        virtual void resetAMI() const;
 
         //- Recalculate the transformation tensors
         virtual void calcTransforms();
@@ -221,7 +204,8 @@ public:
             const label index,
             const polyBoundaryMesh& bm,
             const word& patchType,
-            const transformType transform = UNKNOWN
+            const transformType transform = UNKNOWN,
+            const word& defaultAMIMethod = faceAreaWeightAMI::typeName
         );
 
         //- Construct from dictionary
@@ -231,7 +215,8 @@ public:
             const dictionary& dict,
             const label index,
             const polyBoundaryMesh& bm,
-            const word& patchType
+            const word& patchType,
+            const word& defaultAMIMethod = faceAreaWeightAMI::typeName
         );
 
         //- Construct as copy, resetting the boundary mesh
@@ -328,22 +313,11 @@ public:
             //- Flag to indicate whether the AMI can be reset
             inline bool canResetAMI() const;
 
-             //- Reset the updated flag
-            inline void setUpdated(bool flag) const;
-
-            //- Return access to the updated flag
-            inline bool updated() const;
-
             //- Return access to the createAMIFaces flag
             inline bool createAMIFaces() const;
 
             //- Return access to the updated flag
             inline bool updatingAMI() const;
-
-void clearAMI() const
-{
-    AMIPtr_.clear();
-}
 
             //- Return true if this patch changes the mesh topology
             //  True when createAMIFaces is true
@@ -370,9 +344,6 @@ void clearAMI() const
 
             //- Return a reference to the neighbour patch
             virtual const cyclicAMIPolyPatch& neighbPatch() const;
-
-            //- Return a reference to the projection surface
-            const autoPtr<searchableSurface>& surfPtr() const;
 
             //- Return a reference to the AMI interpolator
             const AMIPatchToPatchInterpolation& AMI() const;

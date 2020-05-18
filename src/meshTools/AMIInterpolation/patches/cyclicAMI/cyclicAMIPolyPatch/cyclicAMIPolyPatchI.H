@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,18 +31,6 @@ License
 inline bool Foam::cyclicAMIPolyPatch::canResetAMI() const
 {
     return Pstream::parRun() || !boundaryMesh().mesh().time().processorCase();
-}
-
-
-inline void Foam::cyclicAMIPolyPatch::setUpdated(const bool flag) const
-{
-    updated_ = flag;
-}
-
-
-inline bool Foam::cyclicAMIPolyPatch::updated() const
-{
-    return updated_;
 }
 
 

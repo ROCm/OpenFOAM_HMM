@@ -26,17 +26,23 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "AMIMethod.H"
+#include "advancingFrontAMI.H"
 #include "meshTools.H"
 #include "mapDistribute.H"
 #include "unitConversion.H"
 
 #include "findNearestMaskedOp.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTypeNameAndDebug(advancingFrontAMI, 0);
+}
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-template<class SourcePatch, class TargetPatch>
-void Foam::AMIMethod<SourcePatch, TargetPatch>::checkPatches() const
+void Foam::advancingFrontAMI::checkPatches() const
 {
     const auto& src = srcPatch();
     const auto& tgt = tgtPatch();
@@ -75,101 +81,68 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::checkPatches() const
 }
 
 
-template<class SourcePatch, class TargetPatch>
-Foam::autoPtr<TargetPatch>
-Foam::AMIMethod<SourcePatch, TargetPatch>::createExtendedTgtPatch
-(
-    const SourcePatch& srcPatch,
-    const TargetPatch& tgtPatch,
-    const globalIndex& globalTgtFaces,
-    autoPtr<mapDistribute>& mapPtr,
-    labelList& extendedTgtFaceIDs
-) const
+void Foam::advancingFrontAMI::createExtendedTgtPatch()
 {
-    // Create a representation of the src mesh that is extended to overlap the
-    // tgt mesh
-
     // Create processor map of extended cells. This map gets (possibly
     // remote) cells from the src mesh such that they (together) cover
     // all of tgt
-    mapPtr = calcProcMap(srcPatch, tgtPatch);
-    const mapDistribute& map = mapPtr();
+    extendedTgtMapPtr_.reset(calcProcMap(srcPatch0(), tgtPatch0()));
+    const mapDistribute& map = extendedTgtMapPtr_();
 
-    // Create new target patch that fully encompasses source patch
-
-    // Faces and points
-    // faceList newTgtFaces_;
-    // pointField newTgtPoints_;
-
-    // Original faces from tgtPatch (in globalIndexing since might be
-    // remote)
+    // Original faces from tgtPatch
+    // Note: in globalIndexing since might be remote
+    globalIndex globalTgtFaces(tgtPatch0().size());
     distributeAndMergePatches
     (
         map,
-        tgtPatch,
+        tgtPatch0(),
         globalTgtFaces,
-        newTgtFaces_,
-        newTgtPoints_,
-        extendedTgtFaceIDs
+        extendedTgtFaces_,
+        extendedTgtPoints_,
+        extendedTgtFaceIDs_
     );
 
-    return autoPtr<TargetPatch>::New
+    // Create a representation of the tgt patch that is extended to overlap
+    // the src patch
+    extendedTgtPatchPtr_.reset
     (
-        SubList<face>
+        autoPtr<primitivePatch>::New
         (
-            newTgtFaces_,
-            newTgtFaces_.size()
-        ),
-        newTgtPoints_
+            SubList<face>(extendedTgtFaces_),
+            extendedTgtPoints_
+        )
     );
 }
 
 
-template<class SourcePatch, class TargetPatch>
-bool Foam::AMIMethod<SourcePatch, TargetPatch>::initialise
-(
-    labelListList& srcAddress,
-    scalarListList& srcWeights,
-    labelListList& tgtAddress,
-    scalarListList& tgtWeights,
-    label& srcFacei,
-    label& tgtFacei
-)
+bool Foam::advancingFrontAMI::initialiseWalk(label& srcFacei, label& tgtFacei)
 {
-    const auto& src = srcPatch();
-    const auto& tgt = tgtPatch();
+    const auto& src = this->srcPatch();
+    const auto& tgt = this->tgtPatch();
 
-    checkPatches();
-
-    // Set initial sizes for weights and addressing - must be done even if
-    // returns false below
-    srcAddress.setSize(src.size());
-    srcWeights.setSize(srcAddress.size());
-    tgtAddress.setSize(tgt.size());
-    tgtWeights.setSize(tgtAddress.size());
+    bool foundFace = false;
 
     // Check that patch sizes are valid
     if (!src.size())
     {
-        return false;
+        return foundFace;
     }
     else if (!tgt.size())
     {
         WarningInFunction
             << src.size() << " source faces but no target faces" << endl;
 
-        return false;
+        return foundFace;
     }
 
     // Reset the octree
-    treePtr_.reset(createTree<TargetPatch>(tgtPatch()));
+    treePtr_.reset(createTree(tgt));
 
     // Find initial face match using brute force/octree search
     if ((srcFacei == -1) || (tgtFacei == -1))
     {
         srcFacei = 0;
         tgtFacei = 0;
-        bool foundFace = false;
         forAll(src, facei)
         {
             tgtFacei = findTargetFace(facei);
@@ -190,7 +163,7 @@ bool Foam::AMIMethod<SourcePatch, TargetPatch>::initialise
                     << abort(FatalError);
             }
 
-            return false;
+            return foundFace;
         }
     }
 
@@ -203,8 +176,7 @@ bool Foam::AMIMethod<SourcePatch, TargetPatch>::initialise
 }
 
 
-template<class SourcePatch, class TargetPatch>
-void Foam::AMIMethod<SourcePatch, TargetPatch>::writeIntersectionOBJ
+void Foam::advancingFrontAMI::writeIntersectionOBJ
 (
     const scalar area,
     const face& f1,
@@ -255,37 +227,7 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::writeIntersectionOBJ
 }
 
 
-template<class SourcePatch, class TargetPatch>
-template<class PatchType>
-Foam::autoPtr<Foam::indexedOctree<Foam::treeDataPrimitivePatch<PatchType>>>
-Foam::AMIMethod<SourcePatch, TargetPatch>::createTree
-(
-    const PatchType& patch
-) const
-{
-    typedef treeDataPrimitivePatch<PatchType> PatchTreeType;
-
-    treeBoundBox bb(patch.points(), patch.meshPoints());
-    bb.inflate(0.01);
-
-    return autoPtr<indexedOctree<PatchTreeType>>::New
-    (
-        PatchTreeType
-        (
-            false,
-            patch,
-            indexedOctree<PatchTreeType>::perturbTol()
-        ),
-        bb,                         // overall search domain
-        8,                          // maxLevel
-        10,                         // leaf size
-        3.0                         // duplicity
-    );
-}
-
-
-template<class SourcePatch, class TargetPatch>
-Foam::label Foam::AMIMethod<SourcePatch, TargetPatch>::findTargetFace
+Foam::label Foam::advancingFrontAMI::findTargetFace
 (
     const label srcFacei,
     const UList<label>& excludeFaces,
@@ -299,9 +241,9 @@ Foam::label Foam::AMIMethod<SourcePatch, TargetPatch>::findTargetFace
     const pointField& srcPts = src.points();
     const face& srcFace = src[srcFacei];
 
-    findNearestMaskedOp<TargetPatch> fnOp(*treePtr_, excludeFaces);
+    findNearestMaskedOp<primitivePatch> fnOp(*treePtr_, excludeFaces);
 
-    boundBox bb(srcPts, srcFace, false);
+    const boundBox bb(srcPts, srcFace, false);
 
     const point srcPt =
         srcFacePti == -1 ? bb.centre() : srcPts[srcFace[srcFacePti]];
@@ -325,11 +267,10 @@ Foam::label Foam::AMIMethod<SourcePatch, TargetPatch>::findTargetFace
 }
 
 
-template<class SourcePatch, class TargetPatch>
-void Foam::AMIMethod<SourcePatch, TargetPatch>::appendNbrFaces
+void Foam::advancingFrontAMI::appendNbrFaces
 (
     const label facei,
-    const TargetPatch& patch,
+    const primitivePatch& patch,
     const DynamicList<label>& visitedFaces,
     DynamicList<label>& faceIDs
 ) const
@@ -341,30 +282,8 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::appendNbrFaces
     // Filter out faces already visited from face neighbours
     for (const label nbrFacei : nbrFaces)
     {
-        bool valid = true;
-        for (const label visitedFacei : visitedFaces)
-        {
-            if (nbrFacei == visitedFacei)
-            {
-                valid = false;
-                break;
-            }
-        }
-
-        if (valid)
-        {
-            for (const label testFacei : faceIDs)
-            {
-                if (nbrFacei == testFacei)
-                {
-                    valid = false;
-                    break;
-                }
-            }
-        }
-
         // Prevent addition of face if it is not on the same plane-ish
-        if (valid)
+        if (!visitedFaces.found(nbrFacei) && !faceIDs.found(nbrFacei))
         {
             const vector& n1 = patch.faceNormals()[facei];
             const vector& n2 = patch.faceNormals()[nbrFacei];
@@ -380,11 +299,9 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::appendNbrFaces
 }
 
 
-template<class SourcePatch, class TargetPatch>
-template<class PatchType>
-void Foam::AMIMethod<SourcePatch, TargetPatch>::triangulatePatch
+void Foam::advancingFrontAMI::triangulatePatch
 (
-    const PatchType& patch,
+    const primitivePatch& patch,
     List<DynamicList<face>>& tris,
     List<scalar>& magSf
 ) const
@@ -396,6 +313,8 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::triangulatePatch
     // Using methods that index into existing points
     forAll(patch, facei)
     {
+        tris[facei].clear();
+
         switch (triMode_)
         {
             case faceAreaIntersect::tmFan:
@@ -428,34 +347,114 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::triangulatePatch
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class SourcePatch, class TargetPatch>
-Foam::AMIMethod<SourcePatch, TargetPatch>::AMIMethod
+Foam::advancingFrontAMI::advancingFrontAMI
 (
-    const SourcePatch& srcPatch,
-    const TargetPatch& tgtPatch,
-    const faceAreaIntersect::triangulationMode& triMode,
-    const bool reverseTarget,
-    const bool requireMatch
+    const dictionary& dict,
+    const bool reverseTarget
 )
 :
-    srcPatch0_(srcPatch),
-    tgtPatch0_(tgtPatch),
+    AMIInterpolation(dict, reverseTarget),
+    srcTris_(),
+    tgtTris_(),
     extendedTgtPatchPtr_(nullptr),
-    reverseTarget_(reverseTarget),
-    requireMatch_(requireMatch),
+    extendedTgtFaces_(),
+    extendedTgtPoints_(),
+    extendedTgtFaceIDs_(),
+    extendedTgtMapPtr_(nullptr),
     srcNonOverlap_(),
-    triMode_(triMode),
-    singleMeshProc_(calcDistribution(srcPatch, tgtPatch))
-{
-    // Note: setting srcMagSf and tgtMagSf to 1 by default for 1-to-1 methods
-    // - others will need to overwrite as necessary
-}
+    triMode_
+    (
+        faceAreaIntersect::triangulationModeNames_.getOrDefault
+        (
+            "triMode",
+            dict,
+            faceAreaIntersect::tmMesh
+        )
+    )
+{}
+
+
+Foam::advancingFrontAMI::advancingFrontAMI
+(
+    const bool requireMatch,
+    const bool reverseTarget,
+    const scalar lowWeightCorrection,
+    const faceAreaIntersect::triangulationMode triMode
+)
+:
+    AMIInterpolation(requireMatch, reverseTarget, lowWeightCorrection),
+    srcTris_(),
+    tgtTris_(),
+    extendedTgtPatchPtr_(nullptr),
+    extendedTgtFaces_(),
+    extendedTgtPoints_(),
+    extendedTgtFaceIDs_(),
+    extendedTgtMapPtr_(nullptr),
+    srcNonOverlap_(),
+    triMode_(triMode)
+{}
+
+
+Foam::advancingFrontAMI::advancingFrontAMI(const advancingFrontAMI& ami)
+:
+    AMIInterpolation(ami),
+    srcTris_(),
+    tgtTris_(),
+    extendedTgtPatchPtr_(nullptr),
+    extendedTgtFaces_(),
+    extendedTgtPoints_(),
+    extendedTgtFaceIDs_(),
+    extendedTgtMapPtr_(nullptr),
+    srcNonOverlap_(),
+    triMode_(ami.triMode_)
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class SourcePatch, class TargetPatch>
-bool Foam::AMIMethod<SourcePatch, TargetPatch>::conformal() const
+bool Foam::advancingFrontAMI::calculate
+(
+    const primitivePatch& srcPatch,
+    const primitivePatch& tgtPatch,
+    const autoPtr<searchableSurface>& surfPtr
+)
+{
+    if (AMIInterpolation::calculate(srcPatch, tgtPatch, surfPtr))
+    {
+        // Create a representation of the target patch that covers the source patch
+        if (distributed())
+        {
+            createExtendedTgtPatch();
+        }
+
+        const auto& src = this->srcPatch();
+        const auto& tgt = this->tgtPatch();
+
+        // Initialise area magnitudes
+        srcMagSf_.setSize(src.size(), 1.0);
+        tgtMagSf_.setSize(tgt.size(), 1.0);
+
+        // Source and target patch triangulations
+        triangulatePatch(src, srcTris_, srcMagSf_);
+        triangulatePatch(tgt, tgtTris_, tgtMagSf_);
+
+        checkPatches();
+
+        // Set initial sizes for weights and addressing - must be done even if
+        // returns false below
+        srcAddress_.setSize(src.size());
+        srcWeights_.setSize(src.size());
+        tgtAddress_.setSize(tgt.size());
+        tgtWeights_.setSize(tgt.size());
+
+        return true;
+    }
+
+    return false;
+}
+
+
+bool Foam::advancingFrontAMI::conformal() const
 {
     return true;
 }
