@@ -2514,6 +2514,7 @@ Foam::label Foam::meshRefinement::findRegions
     const vector& perturbVec,
     const pointField& locationsInMesh,
     const pointField& locationsOutsideMesh,
+    const bool exitIfLeakPath,
     const writer<scalar>& leakPathFormatter,
     const label nRegions,
     labelList& cellRegion,
@@ -2725,13 +2726,25 @@ Foam::label Foam::meshRefinement::findRegions
 
                 Pstream::scatter(fName);
 
-                FatalErrorInFunction
-                    << "Location in mesh " << locationsInMesh[index]
-                    << " is inside same mesh region " << regioni
-                    << " as one of the locations outside mesh "
-                    << locationsOutsideMesh
-                    << nl << "    Dumped leak path to " << fName
-                    << exit(FatalError);
+                if (exitIfLeakPath)
+                {
+                    FatalErrorInFunction
+                        << "Location in mesh " << locationsInMesh[index]
+                        << " is inside same mesh region " << regioni
+                        << " as one of the locations outside mesh "
+                        << locationsOutsideMesh
+                        << nl << "    Dumped leak path to " << fName
+                        << exit(FatalError);
+                }
+                else
+                {
+                    WarningInFunction
+                        << "Location in mesh " << locationsInMesh[index]
+                        << " is inside same mesh region " << regioni
+                        << " as one of the locations outside mesh "
+                        << locationsOutsideMesh
+                        << nl << "Dumped leak path to " << fName << endl;
+                }
             }
         }
     }
@@ -2763,6 +2776,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
     const labelList& globalToSlavePatch,
     const pointField& locationsInMesh,
     const pointField& locationsOutsideMesh,
+    const bool exitIfLeakPath,
     const writer<scalar>& leakPathFormatter
 )
 {
@@ -2783,6 +2797,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
         mergeDistance_ * vector::one,   // perturbVec
         locationsInMesh,
         locationsOutsideMesh,
+        exitIfLeakPath,
         leakPathFormatter,
         cellRegion.nRegions(),
         cellRegion,

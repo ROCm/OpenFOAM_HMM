@@ -4258,6 +4258,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
         globalToSlavePatch,
         locationsInMesh,
         locationsOutsideMesh,
+        true,       // Exit if any connection between inside and outside
         leakPathFormatter
     );
 
@@ -4368,6 +4369,7 @@ void Foam::meshRefinement::mergeFreeStandingBaffles
             globalToSlavePatch,
             locationsInMesh,
             locationsOutsideMesh,
+            true,   // Exit if any connection between inside and outside
             leakPathFormatter
         );
 
@@ -4443,6 +4445,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
         mergeDistance_ * vector::one,   // perturbVec
         locationsInMesh,
         locationsOutsideMesh,
+        false,      // do not exit if outside location found
         leakPathFormatter,
         cellRegion.nRegions(),
         cellRegion,

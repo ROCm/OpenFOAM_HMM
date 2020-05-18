@@ -2700,6 +2700,7 @@ void Foam::snappyRefineDriver::splitAndMergeBaffles
             globalToSlavePatch_,
             refineParams.locationsInMesh(),
             refineParams.locationsOutsideMesh(),
+            true,   // exit if any path to outside points
             setFormatter_
         );
 

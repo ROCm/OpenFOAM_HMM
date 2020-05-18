@@ -1439,6 +1439,7 @@ public:
                 const vector& perturbVec,
                 const pointField& locationsInMesh,
                 const pointField& locationsOutsideMesh,
+                const bool exitIfLeakPath,
                 const writer<scalar>& leakPathFormatter,
                 const label nRegions,
                 labelList& cellRegion,
@@ -1453,6 +1454,7 @@ public:
                 const labelList& globalToSlavePatch,
                 const pointField& locationsInMesh,
                 const pointField& locationsOutsideMesh,
+                const bool exitIfLeakPath,
                 const writer<scalar>& leakPathFormatter
             );
 
