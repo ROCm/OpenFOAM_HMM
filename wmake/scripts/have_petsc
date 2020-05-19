@@ -21,7 +21,8 @@
 # or  config.sh/petsc
 #
 # Functions provided
-#     have_petsc, no_petsc, echo_petsc, hint_petsc, query_petsc
+#     have_petsc, no_petsc, echo_petsc, query_petsc, search_petsc
+#     hint_petsc
 #
 # Variables set on success
 #     HAVE_PETSC
@@ -34,7 +35,7 @@
 
 #------------------------------------------------------------------------------
 
-# Reset variables
+# Reset
 no_petsc()
 {
     unset HAVE_PETSC PETSC_INC_DIR PETSC_LIB_DIR
@@ -67,48 +68,18 @@ INFORMATION
 }
 
 
-# Query settings
-query_petsc()
-{
-    local config="config.sh/petsc"
-    local settings
-
-    if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile -mode=o "$config")"
-    then
-        . "$settings"
-        _process_query petsc "$PETSC_ARCH_PATH"
-    else
-        echo "(no $config settings)" 1>&2
-        echo "petsc=unknown"
-    fi
-}
-
-
 # On success, return 0 and export variables
 # -> HAVE_PETSC, PETSC_INC_DIR, PETSC_LIB_DIR
-have_petsc()
+#
+# $1 = prefix (eg, PETSC_ARCH_PATH)
+search_petsc()
 {
     local warn="==> skip petsc"
-    local config="config.sh/petsc"
-    local settings
-
-    # Setup - prefer current environment value? (TDB)
-    if [ ! -d "$PETSC_ARCH_PATH" ]
-    then
-        if settings="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config")"
-        then
-            . "$settings"
-        else
-            [ -n "$warn" ] && echo "$warn (no $config settings)"
-            return 2
-        fi
-    fi
-
-    # Expected location, include/library names
-    local prefix="$PETSC_ARCH_PATH"
     local incName="petsc.h"
     local libName="libpetsc"
     local pkgName="PETSc"
+
+    local prefix="${1:-system}"
     local header library
 
     # ----------------------------------
@@ -168,7 +139,50 @@ have_petsc()
 }
 
 
-# Reset variables
+# On success, return 0 and export variables
+# -> HAVE_PETSC, PETSC_INC_DIR, PETSC_LIB_DIR
+have_petsc()
+{
+    local warn="==> skip petsc"
+    local config="config.sh/petsc"
+    local file
+
+    # Setup - prefer current environment value? (TDB)
+    if [ ! -d "$PETSC_ARCH_PATH" ]
+    then
+        if file="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config")"
+        then
+            . "$file"
+        else
+            [ -n "$warn" ] && echo "$warn (no $config)"
+            return 2
+        fi
+    fi
+
+    search_petsc "$PETSC_ARCH_PATH"
+}
+
+
+# Query settings
+query_petsc()
+{
+    local config="config.sh/petsc"
+    local file
+
+    if file="$("$WM_PROJECT_DIR"/bin/foamEtcFile -mode=o "$config")"
+    then
+        . "$file"
+        _process_query petsc "$PETSC_ARCH_PATH"
+    else
+        echo "(no $config)" 1>&2
+        echo "petsc=unknown"
+    fi
+}
+
+
+#------------------------------------------------------------------------------
+
+# Reset
 no_petsc
 
 # Test/query

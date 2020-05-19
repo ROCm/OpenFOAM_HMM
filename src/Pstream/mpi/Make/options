@@ -1,6 +1,11 @@
 sinclude $(GENERAL_RULES)/mplib$(WM_MPLIB)
 sinclude $(DEFAULT_RULES)/mplib$(WM_MPLIB)
 
+/* Default is PROJECT LIB/mpi target */
+ifeq (,$(FOAM_MPI_LIBBIN))
+    FOAM_MPI_LIBBIN := $(FOAM_LIBBIN)/$(FOAM_MPI)
+endif
+
 EXE_INC  = $(PFLAGS) $(PINC) $(c++LESSWARN)
 
 LIB_LIBS = $(PLIBS)

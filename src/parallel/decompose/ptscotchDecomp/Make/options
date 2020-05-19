@@ -5,6 +5,11 @@
 sinclude $(GENERAL_RULES)/mplib$(WM_MPLIB)
 sinclude $(DEFAULT_RULES)/mplib$(WM_MPLIB)
 
+/* Default is PROJECT LIB/mpi target */
+ifeq (,$(strip $(FOAM_MPI_LIBBIN)))
+    FOAM_MPI_LIBBIN := $(FOAM_LIBBIN)/$(FOAM_MPI)
+endif
+
 EXE_INC = \
     -I$(PTSCOTCH_INC_DIR) \
     -I$(SCOTCH_INC_DIR) \
@@ -22,8 +27,8 @@ LIB_LIBS = \
     -lscotch \
     -lptscotch
 
-/* Combined into libptscotch for windows compile */
-ifneq ($(WM_OSTYPE),MSwindows)
+/* errexit, except for windows compile (already in library) */
+ifeq (,$(findstring windows,$(WM_OSTYPE)))
     LIB_LIBS += -lptscotcherrexit
 endif
 
