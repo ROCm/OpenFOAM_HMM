@@ -6,11 +6,10 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2016-2019 OpenCFD Ltd.
+#     Copyright (C) 2016-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # File
 #     etc/config.sh/aliases
@@ -102,8 +101,11 @@ unset -f foamPV 2>/dev/null
 foamPV()
 {
     . "$WM_PROJECT_DIR/etc/config.sh/paraview" "${@+ParaView_VERSION=$@}"
-    local pvdir="${ParaView_DIR##*/}"
-    echo "${pvdir:-ParaView_DIR not set}" 1>&2
+    # If not already reported
+    if [ -z "$FOAM_VERBOSE" ]
+    then
+        echo "paraview=${ParaView_DIR##*/}" 1>&2
+    fi
 }
 
 

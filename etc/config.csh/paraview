@@ -46,6 +46,9 @@
 #
 #         setenv LD_LIBRARY_PATH $ParaView_DIR/lib/paraview-5.4:$LD_LIBRARY_PATH
 #
+# Additional Notes
+#     PV_PLUGIN_PATH is *only* set if the directory actually exists.
+#
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
@@ -77,6 +80,9 @@ while ( $#argv > 0 )
     shift
 end
 
+unset pv_plugin_dir
+unsetenv PV_PLUGIN_PATH
+
 if ($?ParaView_VERSION) then
 switch ("$ParaView_VERSION")
 case "":
@@ -85,7 +91,6 @@ case "":
     breaksw
 
 case "none":
-    unsetenv PV_PLUGIN_PATH
     setenv ParaView_DIR   # Defined but empty (used by foamPV alias)
 
     if ($?FOAM_VERBOSE && $?prompt) then
@@ -100,14 +105,27 @@ case "system":
     if ("${pv_api}" == "") then
         unsetenv ParaView_DIR PV_PLUGIN_PATH
     else
-        setenv PV_PLUGIN_PATH "$FOAM_LIBBIN/paraview-$pv_api"
+        # Get ParaView_DIR from `which paraview`
+        # Eg, /usr/bin/paraview -> /usr/bin -> /usr
+
+        set pv_dir=`which paraview`
+        if ( -x "$pv_dir" ) then
+            set pv_dir="${pv_dir:h}"
+            setenv ParaView_DIR "${pv_dir:h}"
+        endif
+
+        set pv_plugin_dir="$FOAM_LIBBIN/paraview-$pv_api"
+        if ( -d "$pv_plugin_dir" ) then
+            setenv PV_PLUGIN_PATH "$pv_plugin_dir"
+        else
+            set pv_plugin_dir="${pv_plugin_dir} (missing)"  # For message
+        endif
     endif
 
     if ($?FOAM_VERBOSE && $?prompt) then
-        echo "Using paraview (disabled)"
-        if ( $?PV_PLUGIN_PATH ) then
+        if ( $?pv_plugin_dir ) then
             echo "Using paraview (system)"
-            echo "    PV_PLUGIN_PATH       : $PV_PLUGIN_PATH"
+            echo "    plugins         : ${pv_plugin_dir}" 1>&2
         else
             echo "system paraview (not found)"
         endif
@@ -132,12 +150,10 @@ default:
     endsw
 
     setenv ParaView_DIR "$archDir/ParaView-$ParaView_VERSION"
+    set pv_plugin_dir="$FOAM_LIBBIN/paraview-$pv_api"
 
     # Set paths if binaries are present
     if ( -r "$ParaView_DIR" ) then
-        # The OpenFOAM plugin directory must be the first in PV_PLUGIN_PATH
-        # and have paraview-major.minor encoded in its name
-        setenv PV_PLUGIN_PATH "$FOAM_LIBBIN/paraview-$pv_api"
         setenv PATH "${ParaView_DIR}/bin:${PATH}"
         set pvLibDir="unknown"
 
@@ -176,16 +192,24 @@ default:
             set pvLibDir="unknown"
         end
 
+        # OpenFOAM plugin directory must be the first in PV_PLUGIN_PATH
+        # and have paraview-major.minor encoded in its name
+        if ( -d "$pv_plugin_dir" ) then
+            setenv PV_PLUGIN_PATH "$pv_plugin_dir"
+        else
+            set pv_plugin_dir="${pv_plugin_dir} (missing)"  # For message
+        endif
+
         if ($?FOAM_VERBOSE && $?prompt) then
             echo "Using paraview"
-            echo "    ParaView_DIR         : $ParaView_DIR"
-            echo "    library dir          : $pvLibDir"
-            echo "    PV_PLUGIN_PATH       : $PV_PLUGIN_PATH"
+            echo "    ParaView_DIR    : $ParaView_DIR"
+            echo "    library         : $pvLibDir"
+            echo "    plugins         : ${pv_plugin_dir}"
         endif
     else
         if ($?FOAM_VERBOSE && $?prompt) then
             echo "No paraview found"
-            echo "    ParaView_DIR         : $ParaView_DIR"
+            echo "    ParaView_DIR    : $ParaView_DIR"
         endif
 
         unsetenv PV_PLUGIN_PATH
@@ -201,6 +225,6 @@ endif
 unsetenv ParaView_VERSION ParaView_QT
 
 unset archDir libDir
-unset pv_api pvLibDir pvPython qtDir
+unset pv_api pv_plugin_dir pvLibDir pvPython qtDir
 
 #------------------------------------------------------------------------------

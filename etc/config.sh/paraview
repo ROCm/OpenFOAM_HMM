@@ -50,6 +50,10 @@
 # Note
 #     When _foamAddLib is unset (eg, called from makeParaView or from foamPV):
 #       - the ParaView_VERSION variable is retained.
+#
+# Additional Notes
+#     PV_PLUGIN_PATH is *only* set if the directory actually exists.
+#
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
@@ -98,12 +102,13 @@ case "$ParaView_VERSION" in
     ;;
 
 (system)
-    unset PV_PLUGIN_PATH
+    unset ParaView_DIR PV_PLUGIN_PATH
     eval "$($WM_PROJECT_DIR/bin/foamEtcFile -sh -config paraview-system)"
     ;;
 
 (*)
     # ParaView_VERSION set and non-empty
+    unset ParaView_DIR PV_PLUGIN_PATH
 
     # Set API to correspond to VERSION
     # pv_api is <digits>.<digits> from ParaView_VERSION
@@ -120,14 +125,11 @@ case "$ParaView_VERSION" in
     esac
 
     export ParaView_DIR="$archDir/ParaView-$ParaView_VERSION"
-    unset PV_PLUGIN_PATH
+    pv_plugin_dir="$FOAM_LIBBIN/paraview-$pv_api"
 
     # Set paths if binaries are present
     if [ -r "$ParaView_DIR" ]
     then
-        # The OpenFOAM plugin directory must be the first in PV_PLUGIN_PATH
-        # and have paraview-major.minor encoded in its name
-        export PV_PLUGIN_PATH="$FOAM_LIBBIN/paraview-$pv_api"
         export PATH="$ParaView_DIR/bin:$PATH"
 
         # QT libraries as required, and Qt5_DIR for the root directory.
@@ -169,12 +171,21 @@ case "$ParaView_VERSION" in
             unset pvLibDir
         done
 
+        # OpenFOAM plugin directory must be the first in PV_PLUGIN_PATH
+        # and have paraview-major.minor encoded in its name
+        if [ -d "$pv_plugin_dir" ]
+        then
+            export PV_PLUGIN_PATH="$pv_plugin_dir"
+        else
+            pv_plugin_dir="${pv_plugin_dir} (missing)"  # For message
+        fi
+
         if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
         then
             echo "Using paraview" 1>&2
-            echo "    ParaView_DIR         : $ParaView_DIR" 1>&2
-            echo "    library dir          : $pvLibDir" 1>&2
-            echo "    PV_PLUGIN_PATH       : $PV_PLUGIN_PATH" 1>&2
+            echo "    ParaView_DIR    : $ParaView_DIR" 1>&2
+            echo "    library         : $pvLibDir" 1>&2
+            echo "    plugins         : $pv_plugin_dir" 1>&2
         fi
     else
         if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
@@ -183,7 +194,7 @@ case "$ParaView_VERSION" in
             echo "    ParaView_DIR         : $ParaView_DIR" 1>&2
         fi
 
-        unset ParaView_DIR PV_PLUGIN_PATH
+        unset ParaView_DIR
     fi
     ;;
 esac
@@ -197,6 +208,6 @@ then
 fi
 
 unset archDir libDir
-unset pv_api pvLibDir pvPython qtDir
+unset pv_api pv_plugin_dir pvLibDir pvPython qtDir
 
 #------------------------------------------------------------------------------

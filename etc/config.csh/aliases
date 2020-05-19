@@ -67,7 +67,7 @@ alias foamVersion \
 # Change ParaView version
 # ~~~~~~~~~~~~~~~~~~~~~~~
 alias foamPV \
-    'source $WM_PROJECT_DIR/etc/config.csh/paraview ParaView_VERSION=\!*; echo ${ParaView_DIR:t}'
+    'source $WM_PROJECT_DIR/etc/config.csh/paraview ParaView_VERSION=\!*; echo paraview=${ParaView_DIR:t}'
 
 
 #------------------------------------------------------------------------------

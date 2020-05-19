@@ -37,8 +37,9 @@ eval \
 #------------------------------------------------------------------------------
 
 ParaView_DIR="$(command -v paraview 2>/dev/null)"
+unset PV_PLUGIN_PATH pv_plugin_dir
 
-# Do have paraview?
+# Have paraview?
 # Obtain major.minor from `paraview --version`
 if [ -n "$ParaView_DIR" ]
 then
@@ -63,19 +64,26 @@ fi
 case "$pv_api" in
 ([0-9]*.[0-9]*)
     export ParaView_DIR
-    export PV_PLUGIN_PATH="$FOAM_LIBBIN/paraview-$pv_api"
+    pv_plugin_dir="$FOAM_LIBBIN/paraview-$pv_api"
+
+    if [ -d "$pv_plugin_dir" ]
+    then
+        export PV_PLUGIN_PATH="$pv_plugin_dir"
+    else
+        pv_plugin_dir="${pv_plugin_dir} (missing)"  # For message
+    fi
     ;;
 (*)
-    unset ParaView_DIR PV_PLUGIN_PATH
+    unset ParaView_DIR
     ;;
 esac
 
 if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
 then
-    if [ -n "$PV_PLUGIN_PATH" ]
+    if [ -n "$ParaView_DIR" ]
     then
         echo "Using paraview (system)" 1>&2
-        echo "    PV_PLUGIN_PATH       : $PV_PLUGIN_PATH" 1>&2
+        echo "    plugins         : $pv_plugin_dir" 1>&2
     else
         echo "system paraview (not found)" 1>&2
     fi
@@ -92,6 +100,6 @@ else
 fi
 
 unset archDir
-unset pv_api
+unset pv_api pv_plugin_dir
 
 #------------------------------------------------------------------------------
