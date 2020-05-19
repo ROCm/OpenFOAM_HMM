@@ -77,7 +77,12 @@ if [ -d "$WM_PROJECT_DIR/modules" ]
 then
     echo "========================================"
     echo "Compile OpenFOAM modules"
+    echo "    ignoring possible compilation errors"
+    echo "    make certain to check the output file"
     echo
+    set +e
+    export WM_CONTINUE_ON_ERROR=true
+
     (cd "$WM_PROJECT_DIR/modules" 2>/dev/null && wmake -all)
 fi
 
