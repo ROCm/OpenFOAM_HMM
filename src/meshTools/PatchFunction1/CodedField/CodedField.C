@@ -105,13 +105,6 @@ Foam::PatchFunction1Types::CodedField<Type>::codeDict
       ? dict
       : dict.subDict(name_)
     );
-
-    //return
-    //(
-    //    dict.found(name_)
-    //  ? dict.subDict(name_)
-    //  : dict
-    //);
 }
 
 
@@ -154,8 +147,7 @@ Foam::PatchFunction1Types::CodedField<Type>::CodedField
     PatchFunction1<Type>(pp, entryName, dict, faceValues),
     codedBase(),
     dict_(dict),
-    //name_(dict.getCompat<word>("name", {{"redirectType", 1706}}))
-    name_(dict.lookupOrDefault<word>("name", entryName))
+    name_(dict.getOrDefault<word>("name", entryName))
 {
     updateLibrary(name_);
 }
@@ -164,27 +156,27 @@ Foam::PatchFunction1Types::CodedField<Type>::CodedField
 template<class Type>
 Foam::PatchFunction1Types::CodedField<Type>::CodedField
 (
-    const CodedField<Type>& ut
+    const CodedField<Type>& rhs
 )
 :
-    PatchFunction1<Type>(ut),
+    PatchFunction1<Type>(rhs),
     codedBase(),
-    dict_(ut.dict_),
-    name_(ut.name_)
+    dict_(rhs.dict_),
+    name_(rhs.name_)
 {}
 
 
 template<class Type>
 Foam::PatchFunction1Types::CodedField<Type>::CodedField
 (
-    const CodedField<Type>& ut,
+    const CodedField<Type>& rhs,
     const polyPatch& pp
 )
 :
-    PatchFunction1<Type>(ut, pp),
+    PatchFunction1<Type>(rhs, pp),
     codedBase(),
-    dict_(ut.dict_),
-    name_(ut.name_)
+    dict_(rhs.dict_),
+    name_(rhs.name_)
 {}
 
 
@@ -194,7 +186,7 @@ template<class Type>
 const Foam::PatchFunction1<Type>&
 Foam::PatchFunction1Types::CodedField<Type>::redirectFunction() const
 {
-    if (!redirectFunctionPtr_.valid())
+    if (!redirectFunctionPtr_)
     {
         // Construct a PatchFunction1 containing the input code
         dictionary completeDict(dict_);
@@ -206,7 +198,7 @@ Foam::PatchFunction1Types::CodedField<Type>::redirectFunction() const
         dictionary dict;
         dict.add(name_, completeDict);
 
-        redirectFunctionPtr_.set
+        redirectFunctionPtr_.reset
         (
             PatchFunction1<Type>::New
             (
@@ -214,7 +206,7 @@ Foam::PatchFunction1Types::CodedField<Type>::redirectFunction() const
                 name_,
                 dict,
                 this->faceValues_
-            ).ptr()
+            )
         );
     }
     return *redirectFunctionPtr_;
@@ -228,7 +220,7 @@ Foam::PatchFunction1Types::CodedField<Type>::value
     const scalar x
 ) const
 {
-    // Make sure library containing user-defined fvPatchField is up-to-date
+    // Ensure library containing user-defined code is up-to-date
     updateLibrary(name_);
 
     return redirectFunction().value(x);
@@ -243,7 +235,7 @@ Foam::PatchFunction1Types::CodedField<Type>::integrate
     const scalar x2
 ) const
 {
-    // Make sure library containing user-defined fvPatchField is up-to-date
+    // Ensure library containing user-defined code is up-to-date
     updateLibrary(name_);
 
     return redirectFunction().integrate(x1, x2);

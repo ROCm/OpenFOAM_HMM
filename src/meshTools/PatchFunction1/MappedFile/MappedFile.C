@@ -45,7 +45,7 @@ Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
     dictConstructed_(true),
     fieldTableName_(entryName),
     setAverage_(dict.lookupOrDefault("setAverage", false)),
-    perturb_(dict.lookupOrDefault("perturb", 1e-5)),
+    perturb_(dict.lookupOrDefault<scalar>("perturb", 1e-5)),
     pointsName_(dict.lookupOrDefault<word>("points", "points")),
     mapMethod_
     (
@@ -63,7 +63,7 @@ Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
     endSampleTime_(-1),
     endSampledValues_(0),
     endAverage_(Zero),
-    offset_()
+    offset_(nullptr)
 {
     if (dict.found("offset"))
     {
@@ -99,7 +99,7 @@ Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
     dictConstructed_(false),
     fieldTableName_(fieldTableName),
     setAverage_(dict.lookupOrDefault("setAverage", false)),
-    perturb_(dict.lookupOrDefault("perturb", 1e-5)),
+    perturb_(dict.lookupOrDefault<scalar>("perturb", 1e-5)),
     pointsName_(dict.lookupOrDefault<word>("points", "points")),
     mapMethod_
     (
@@ -117,7 +117,7 @@ Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
     endSampleTime_(-1),
     endSampledValues_(0),
     endAverage_(Zero),
-    offset_()
+    offset_(nullptr)
 {
     if (dict.found("offset"))
     {
@@ -241,7 +241,7 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
     const polyMesh& mesh = this->patch_.boundaryMesh().mesh();
 
     // Initialise
-    if (mapperPtr_.empty())
+    if (!mapperPtr_)
     {
         // Reread values and interpolate
         fileName samplePointsFile
@@ -294,7 +294,6 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
                 )
             );
         }
-
 
 
         // Read the times for which data is available
@@ -479,7 +478,7 @@ Foam::PatchFunction1Types::MappedFile<Type>::value
     checkTable(x);
 
     auto tfld = tmp<Field<Type>>::New(startSampledValues_.size());
-    Field<Type>& fld = tfld.ref();
+    auto& fld = tfld.ref();
     Type wantedAverage;
 
     if (endSampleTime_ == -1)
@@ -563,7 +562,7 @@ Foam::PatchFunction1Types::MappedFile<Type>::value
     }
 
     // Apply offset to mapped values
-    if (offset_.valid())
+    if (offset_)
     {
         fld += offset_->value(x);
     }
@@ -600,8 +599,8 @@ void Foam::PatchFunction1Types::MappedFile<Type>::writeData
 {
     PatchFunction1<Type>::writeData(os);
 
-    // Check if field name explicitly provided (e.g. through timeVaryingMapped
-    // bc)
+    // Check if field name explicitly provided
+    // (e.g. through timeVaryingMapped bc)
     if (dictConstructed_)
     {
         os.writeEntry(this->name(), type());
@@ -630,7 +629,7 @@ void Foam::PatchFunction1Types::MappedFile<Type>::writeData
         mapMethod_
     );
 
-    if (offset_.valid())
+    if (offset_)
     {
         offset_->writeData(os);
     }

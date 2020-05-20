@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +30,8 @@ License
 template<class Type>
 Foam::coordinateScaling<Type>::coordinateScaling()
 :
+    coordSys_(nullptr),
+    scale_(),
     active_(false)
 {}
 
@@ -49,9 +50,9 @@ Foam::coordinateScaling<Type>::coordinateScaling
       : nullptr
     ),
     scale_(3),
-    active_(coordSys_.valid())
+    active_(bool(coordSys_))
 {
-    for (direction dir = 0; dir < vector::nComponents; dir++)
+    for (direction dir = 0; dir < vector::nComponents; ++dir)
     {
         const word key("scale" + Foam::name(dir+1));
 
@@ -65,18 +66,11 @@ Foam::coordinateScaling<Type>::coordinateScaling
 
 
 template<class Type>
-Foam::coordinateScaling<Type>::coordinateScaling(const coordinateScaling& cs)
+Foam::coordinateScaling<Type>::coordinateScaling(const coordinateScaling& rhs)
 :
-    coordSys_(cs.coordSys_.clone()),
-    scale_(cs.scale_),
-    active_(cs.active_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::coordinateScaling<Type>::~coordinateScaling()
+    coordSys_(rhs.coordSys_.clone()),
+    scale_(rhs.scale_),
+    active_(rhs.active_)
 {}
 
 
@@ -89,13 +83,13 @@ Foam::tmp<Foam::Field<Type>> Foam::coordinateScaling<Type>::transform
     const Field<Type>& p0
 ) const
 {
-    tmp<Field<Type>> tfld(new Field<Type>(p0));
-    Field<Type>& fld = tfld.ref();
+    auto tfld = tmp<Field<Type>>::New(p0);
+    auto& fld = tfld.ref();
 
-    if (coordSys_.valid())
+    if (coordSys_)
     {
         const vectorField local(coordSys_->localPosition(pos));
-        for (direction dir = 0; dir < vector::nComponents; dir++)
+        for (direction dir = 0; dir < vector::nComponents; ++dir)
         {
             if (scale_.set(dir))
             {
@@ -109,9 +103,9 @@ Foam::tmp<Foam::Field<Type>> Foam::coordinateScaling<Type>::transform
 
         return coordSys_->transform(pos, fld);
     }
-    else
+    else if (scale_.size())
     {
-        for (direction dir = 0; dir < vector::nComponents; dir++)
+        for (direction dir = 0; dir < vector::nComponents; ++dir)
         {
             if (scale_.set(dir))
             {
@@ -122,15 +116,16 @@ Foam::tmp<Foam::Field<Type>> Foam::coordinateScaling<Type>::transform
                 );
             }
         }
-        return fld;
     }
+
+    return tfld;
 }
 
 
 template<class Type>
 void Foam::coordinateScaling<Type>::writeEntry(Ostream& os) const
 {
-    if (coordSys_.valid())
+    if (coordSys_)
     {
         coordSys_->writeEntry(coordinateSystem::typeName_(), os);
     }

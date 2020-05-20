@@ -97,9 +97,9 @@ class CodedField
     public PatchFunction1<Type>,
     protected codedBase
 {
-    // Private data
+    // Private Data
 
-        //- Dictionary contents for the boundary condition
+        //- Dictionary contents for the function
         const dictionary dict_;
 
         const word name_;
@@ -136,7 +136,7 @@ class CodedField
 
 public:
 
-    // Static data members
+    // Static Data Members
 
         //- Name of the C code template to be used
         static constexpr const char* const codeTemplateC
@@ -147,8 +147,7 @@ public:
             = "codedPatchFunction1Template.H";
 
 
-
-    // Runtime type information
+    //- Runtime type information
     TypeName("coded");
 
 
@@ -164,13 +163,13 @@ public:
             const bool faceValues = true
         );
 
-        //- Copy constructor
-        explicit CodedField(const CodedField<Type>& ut);
+        //- Copy construct
+        explicit CodedField(const CodedField<Type>& rhs);
 
-        //- Copy constructor setting patch
+        //- Copy construct, setting patch
         explicit CodedField
         (
-            const CodedField<Type>& ut,
+            const CodedField<Type>& rhs,
             const polyPatch& pp
         );
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,15 +55,15 @@ namespace Foam
 template<class Type>
 class coordinateScaling
 {
-    // Private data
+    // Private Data
 
-        //- Local co-ordinate system
+        //- Local coordinate system
         const autoPtr<coordinateSystem> coordSys_;
 
-        //- In local co-ordinate system component-wise scaling
+        //- In local coordinate system component-wise scaling
         PtrList<Function1<Type>> scale_;
 
-        //- Cached whether any scaling or coordinate system
+        //- Cache whether any scaling or coordinate system
         bool active_;
 
 
@@ -76,25 +76,25 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         coordinateScaling();
 
         //- Construct from registry and dictionary
         coordinateScaling
         (
-            const objectRegistry&,
-            const dictionary&
+            const objectRegistry& obr,
+            const dictionary& dict
         );
 
         //- Construct copy
-        coordinateScaling(const coordinateScaling&);
+        coordinateScaling(const coordinateScaling& rhs);
 
 
     //- Destructor
-    virtual ~coordinateScaling();
+    virtual ~coordinateScaling() = default;
 
 
-    // Member functions
+    // Member Functions
 
         //- Has any scaling or coordinate transformation
         bool active() const
@@ -116,12 +116,13 @@ public:
         ) const;
 
         //- Write dictionary entry
-        virtual void writeEntry(Ostream&) const;
+        virtual void writeEntry(Ostream& os) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Template specializations
 template<>
 tmp<Field<label>> coordinateScaling<label>::transform
 (

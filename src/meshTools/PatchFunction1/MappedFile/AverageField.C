@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,11 +41,11 @@ Foam::AverageField<Type>::AverageField(const label size)
 template<class Type>
 Foam::AverageField<Type>::AverageField
 (
-    const Field<Type>& f,
+    const Field<Type>& fld,
     const Type& average
 )
 :
-    Field<Type>(f),
+    Field<Type>(fld),
     average_(average)
 {}
 

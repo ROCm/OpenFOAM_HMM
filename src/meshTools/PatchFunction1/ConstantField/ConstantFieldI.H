@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,10 +41,8 @@ Foam::PatchFunction1Types::ConstantField<Type>::value
     {
         return this->transform(value_);
     }
-    else
-    {
-        return value_;
-    }
+
+    return value_;
 }
 
 
@@ -57,12 +56,10 @@ Foam::PatchFunction1Types::ConstantField<Type>::integrate
 {
     if (this->coordSys_.active())
     {
-        return (x2 - x1)* this->transform(value_);
+        return (x2 - x1) * this->transform(value_);
     }
-    else
-    {
-        return (x2 - x1)*value_;
-    }
+
+    return (x2 - x1)*value_;
 }
 
 

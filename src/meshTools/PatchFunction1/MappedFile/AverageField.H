@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +54,7 @@ class AverageField
 :
     public Field<Type>
 {
-    // Private data
+    // Private Data
 
         //- The average of the field
         Type average_;
@@ -64,16 +65,16 @@ public:
     // Constructors
 
         //- Construct from size (does not set values)
-        AverageField(const label size);
+        explicit AverageField(const label size);
 
         //- Construct from components
-        AverageField(const Field<Type>&, const Type& average);
+        AverageField(const Field<Type>& fld, const Type& average);
 
         //- Construct from Istream
-        AverageField(Istream&);
+        explicit AverageField(Istream& is);
 
 
-    // Member functions
+    // Member Functions
 
         const Type& average() const;
 

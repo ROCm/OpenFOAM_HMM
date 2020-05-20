@@ -81,13 +81,13 @@ public:
             const bool faceValues = true
         );
 
-        //- Construct as copy
+        //- Copy construct
         ${typeName}PatchFunction1${FieldType}
         (
             const ${typeName}PatchFunction1${FieldType}&
         );
 
-        //- Construct as copy, resetting patch
+        //- Copy construct, resetting patch
         ${typeName}PatchFunction1${FieldType}
         (
             const ${typeName}PatchFunction1${FieldType}&,
@@ -122,20 +122,20 @@ public:
 
     // Member Functions
 
-            //- Return value as a function of (scalar) independent variable
-            virtual tmp<Field<${TemplateType}>> value(const scalar x) const;
+        //- Return value as a function of (scalar) independent variable
+        virtual tmp<Field<${TemplateType}>> value(const scalar x) const;
 
-            //- Is value constant (i.e. independent of x)
-            virtual bool constant() const
-            {
-                return false;
-            }
+        //- Is value constant (i.e. independent of x)
+        virtual bool constant() const
+        {
+            return false;
+        }
 
-            //- Is value uniform (i.e. independent of coordinate)
-            virtual bool uniform() const
-            {
-                return false;
-            }
+        //- Is value uniform (i.e. independent of coordinate)
+        virtual bool uniform() const
+        {
+            return false;
+        }
 };
 
 

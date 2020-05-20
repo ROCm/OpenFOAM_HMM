@@ -60,7 +60,7 @@ class ConstantField
 :
     public PatchFunction1<Type>
 {
-    // Private data
+    // Private Data
 
         //- Is uniform?
         bool isUniform_;
@@ -90,7 +90,7 @@ class ConstantField
 
 public:
 
-    // Runtime type information
+    //- Runtime type information
     TypeName("constant");
 
 
@@ -118,7 +118,7 @@ public:
             const bool faceValues = true
         );
 
-        //- Copy constructor
+        //- Copy construct
         explicit ConstantField(const ConstantField<Type>& cnst);
 
         //- Copy constructor setting patch

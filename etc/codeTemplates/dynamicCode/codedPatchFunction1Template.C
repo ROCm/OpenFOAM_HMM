@@ -108,21 +108,21 @@ ${typeName}PatchFunction1${FieldType}
 ${typeName}PatchFunction1${FieldType}::
 ${typeName}PatchFunction1${FieldType}
 (
-    const ${typeName}PatchFunction1${FieldType}& ut
+    const ${typeName}PatchFunction1${FieldType}& rhs
 )
 :
-    PatchFunction1<${TemplateType}>(ut)
+    PatchFunction1<${TemplateType}>(rhs)
 {}
 
 
 ${typeName}PatchFunction1${FieldType}::
 ${typeName}PatchFunction1${FieldType}
 (
-    const ${typeName}PatchFunction1${FieldType}& ut,
+    const ${typeName}PatchFunction1${FieldType}& rhs,
     const polyPatch& pp
 )
 :
-    PatchFunction1<${TemplateType}>(ut, pp)
+    PatchFunction1<${TemplateType}>(rhs, pp)
 {}
 
 
@@ -137,7 +137,6 @@ ${typeName}PatchFunction1${FieldType}::value
 //{{{ begin code
     ${code}
 //}}} end code
-
 }
 
 
