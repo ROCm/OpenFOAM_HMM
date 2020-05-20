@@ -32,46 +32,6 @@ License
 #include "fvPatch.H"
 #include "pointMesh.H"
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-const Foam::fvPatch&
-Foam::expressions::patchExprFieldBase::getFvPatch(const facePointPatch& pp)
-{
-    const polyMesh& pmesh = pp.boundaryMesh().mesh().mesh();
-
-    const fvMesh* meshptr = isA<fvMesh>(pmesh);
-
-    if (!meshptr)
-    {
-        FatalErrorInFunction
-            << "Point patch not attached to a base fvMesh, "
-            << "cannot use patch expressions" << nl << endl
-            << exit(FatalError);
-    }
-
-    return meshptr->boundary()[pp.index()];
-}
-
-
-const Foam::fvPatch&
-Foam::expressions::patchExprFieldBase::getFvPatch(const polyPatch& pp)
-{
-    const polyMesh& pmesh = pp.boundaryMesh().mesh();
-
-    const fvMesh* meshptr = isA<fvMesh>(pmesh);
-
-    if (!meshptr)
-    {
-        FatalErrorInFunction
-            << "Poly patch not attached to a base fvMesh, "
-            << "cannot use patch expressions" << nl << endl
-            << exit(FatalError);
-    }
-
-    return meshptr->boundary()[pp.index()];
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::expressions::patchExprFieldBase::patchExprFieldBase()

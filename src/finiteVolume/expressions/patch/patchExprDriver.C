@@ -69,30 +69,13 @@ addNamedToRunTimeSelectionTable
 
 namespace Foam
 {
-    static label getPatchID(const fvMesh& mesh, const word& patchName)
-    {
-        const auto& bMesh = mesh.boundaryMesh();
-
-        const label patchId = bMesh.findPatchID(patchName);
-
-        if (patchId < 0)
-        {
-            FatalErrorInFunction
-                << "No patch " << patchName << " found in "
-                << flatOutput(bMesh.names()) << nl
-                << exit(FatalError);
-        }
-        return patchId;
-    }
-
-
-    static inline const fvPatch& findFvPatch
+    static inline const fvPatch& lookupFvPatch
     (
         const fvMesh& mesh,
         const word& patchName
     )
     {
-        return mesh.boundary()[getPatchID(mesh, patchName)];
+        return mesh.boundary()[patchName];
     }
 
 } // End namespace Foam
@@ -106,7 +89,7 @@ const Foam::fvPatch& Foam::expressions::patchExpr::parseDriver::getFvPatch
     const dictionary& dict
 )
 {
-    return findFvPatch
+    return lookupFvPatch
     (
         regionMesh(dict, fvm, true),
         dict.get<word>("patch")
@@ -154,7 +137,7 @@ Foam::expressions::patchExpr::parseDriver::parseDriver
     const fvMesh& mesh
 )
 :
-    parseDriver(findFvPatch(mesh, patchName))
+    parseDriver(lookupFvPatch(mesh, patchName))
 {}
 
 

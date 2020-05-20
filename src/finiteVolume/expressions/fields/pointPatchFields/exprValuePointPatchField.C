@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Original code Copyright (C) 2010-2018 Bernhard Gschaider
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2010-2018 Bernhard Gschaider
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,9 +44,9 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
     expressions::patchExprFieldBase(false),
     driver_
     (
-        expressions::patchExprFieldBase::getFvPatch
+        fvPatch::lookupPatch
         (
-            dynamicCast<const facePointPatch>(this->patch())
+            dynamicCast<const facePointPatch>(this->patch()).patch()
         )
     )
 {}
@@ -65,9 +65,9 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
     expressions::patchExprFieldBase(ptf),
     driver_
     (
-        expressions::patchExprFieldBase::getFvPatch
+        fvPatch::lookupPatch
         (
-            dynamicCast<const facePointPatch>(this->patch())
+            dynamicCast<const facePointPatch>(this->patch()).patch()
         ),
         ptf.driver_
     )
@@ -86,9 +86,9 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
     expressions::patchExprFieldBase(dict, false, true),
     driver_
     (
-        expressions::patchExprFieldBase::getFvPatch
+        fvPatch::lookupPatch
         (
-            dynamicCast<const facePointPatch>(this->patch())
+            dynamicCast<const facePointPatch>(this->patch()).patch()
         ),
         dict
     )
@@ -138,9 +138,9 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
     expressions::patchExprFieldBase(ptf),
     driver_
     (
-        expressions::patchExprFieldBase::getFvPatch
+        fvPatch::lookupPatch
         (
-            dynamicCast<const facePointPatch>(this->patch())
+            dynamicCast<const facePointPatch>(this->patch()).patch()
         ),
         ptf.driver_
     )
@@ -157,9 +157,9 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
     expressions::patchExprFieldBase(ptf),
     driver_
     (
-        expressions::patchExprFieldBase::getFvPatch
+        fvPatch::lookupPatch
         (
-            dynamicCast<const facePointPatch>(this->patch())
+            dynamicCast<const facePointPatch>(this->patch()).patch()
         ),
         ptf.driver_
     )
@@ -215,5 +215,6 @@ void Foam::exprValuePointPatchField<Type>::write(Ostream& os) const
 
     driver_.writeCommon(os,this->debug_ || debug);
 }
+
 
 // ************************************************************************* //

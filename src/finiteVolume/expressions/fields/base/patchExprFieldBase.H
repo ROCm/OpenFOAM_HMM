@@ -87,15 +87,6 @@ protected:
 
 public:
 
-    // Static Methods
-
-       //- Find (guess) fvPatch from a pointPatch
-       static const fvPatch& getFvPatch(const facePointPatch& fp);
-
-       //- Find (guess) fvPatch from a polyPatch
-       static const fvPatch& getFvPatch(const polyPatch& pp);
-
-
     // Constructors
 
         //- Default construct

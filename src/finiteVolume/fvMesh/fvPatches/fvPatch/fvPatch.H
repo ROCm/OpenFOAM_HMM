@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,6 +55,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class fvBoundaryMesh;
 class surfaceInterpolation;
 
@@ -63,22 +65,13 @@ class surfaceInterpolation;
 
 class fvPatch
 {
-    // Private data
+    // Private Data
 
         //- Reference to the underlying polyPatch
         const polyPatch& polyPatch_;
 
         //- Reference to boundary mesh
         const fvBoundaryMesh& boundaryMesh_;
-
-
-    // Private Member Functions
-
-        //- No copy construct
-        fvPatch(const fvPatch&) = delete;
-
-        //- No copy assignment
-        void operator=(const fvPatch&) = delete;
 
 
 protected:
@@ -94,6 +87,11 @@ protected:
         //- Correct patches after moving points
         virtual void movePoints();
 
+        //- No copy construct
+        fvPatch(const fvPatch&) = delete;
+
+        //- No copy assignment
+        void operator=(const fvPatch&) = delete;
 
 public:
 
@@ -139,6 +137,11 @@ public:
 
 
     // Member Functions
+
+        //- Lookup the polyPatch index on corresponding fvMesh
+        //  \note Fatal if the polyPatch is not associated with a fvMesh
+        static const fvPatch& lookupPatch(const polyPatch& p);
+
 
     // Access
 

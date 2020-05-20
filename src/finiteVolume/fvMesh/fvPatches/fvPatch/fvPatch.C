@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,6 +44,23 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+const Foam::fvPatch& Foam::fvPatch::lookupPatch(const polyPatch& p)
+{
+    const fvMesh* meshptr = isA<fvMesh>(p.boundaryMesh().mesh());
+
+    if (!meshptr)
+    {
+        FatalErrorInFunction
+            << "The polyPatch is not attached to a base fvMesh" << nl
+            << exit(FatalError);
+    }
+
+    return meshptr->boundary()[p.index()];
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::fvPatch::fvPatch(const polyPatch& p, const fvBoundaryMesh& bm)
@@ -55,7 +73,7 @@ Foam::fvPatch::fvPatch(const polyPatch& p, const fvBoundaryMesh& bm)
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::fvPatch::~fvPatch()
-{}
+{}  // fvBoundaryMesh was forward declared
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -100,8 +118,8 @@ const Foam::vectorField& Foam::fvPatch::Cf() const
 
 Foam::tmp<Foam::vectorField> Foam::fvPatch::Cn() const
 {
-    tmp<vectorField> tcc(new vectorField(size()));
-    vectorField& cc = tcc.ref();
+    auto tcc = tmp<vectorField>::New(size());
+    auto& cc = tcc.ref();
 
     const labelUList& faceCells = this->faceCells();
 
