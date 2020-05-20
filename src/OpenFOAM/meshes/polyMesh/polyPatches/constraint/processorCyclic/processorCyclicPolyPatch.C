@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -323,8 +323,12 @@ void Foam::processorCyclicPolyPatch::initOrder
     const primitivePatch& pp
 ) const
 {
-    // For now use the same algorithm as processorPolyPatch
-    processorPolyPatch::initOrder(pBufs, pp);
+    // Send the patch points and faces across. Note that this is exactly the
+    // same as the processorPolyPatch::initOrder in COINCIDENTFULLMATCH
+    // mode.
+    UOPstream toNeighbour(neighbProcNo(), pBufs);
+    toNeighbour << pp.localPoints()
+                << pp.localFaces();
 }
 
 
@@ -336,8 +340,26 @@ bool Foam::processorCyclicPolyPatch::order
     labelList& rotation
 ) const
 {
-    // For now use the same algorithm as processorPolyPatch
-    return processorPolyPatch::order(pBufs, pp, faceMap, rotation);
+    // Receive the remote patch
+    vectorField masterPts;
+    faceList masterFaces;
+    autoPtr<primitivePatch> masterPtr;
+    {
+        UIPstream fromNeighbour(neighbProcNo(), pBufs);
+        fromNeighbour >> masterPts >> masterFaces;
+        SubList<face> fcs(masterFaces, masterFaces.size());
+        masterPtr.set(new primitivePatch(fcs, masterPts));
+    }
+
+    const cyclicPolyPatch& cycPatch =
+        refCast<const cyclicPolyPatch>(referPatch());
+
+    // (ab)use the cyclicPolyPatch ordering:
+    //  - owner side stores geometry
+    //  - slave side does ordering according to owner side
+    cycPatch.neighbPatch().initOrder(pBufs, masterPtr());
+
+    return cycPatch.order(pBufs, pp, faceMap, rotation);
 }
 
 
