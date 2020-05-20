@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,6 +46,7 @@ License
 #include "labelPairHashes.H"
 #include "ListOps.H"
 #include "globalIndex.H"
+#include "cyclicACMIPolyPatch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -302,13 +303,39 @@ Foam::label Foam::fvMeshDistribute::findNonEmptyPatch() const
     // put into.
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
+
+    // Mark 'special' patches : -coupled, -duplicate faces. These probably
+    // should not be used to (temporarily) store processor faces ...
+
+    bitSet isCoupledPatch(patches.size());
+    forAll(patches, patchi)
+    {
+        const polyPatch& pp = patches[patchi];
+
+        if (isA<cyclicACMIPolyPatch>(pp))
+        {
+            isCoupledPatch.set(patchi);
+            const cyclicACMIPolyPatch& cpp =
+                refCast<const cyclicACMIPolyPatch>(pp);
+            const label dupPatchID = cpp.nonOverlapPatchID();
+            if (dupPatchID != -1)
+            {
+                isCoupledPatch.set(dupPatchID);
+            }
+        }
+        else if (pp.coupled())
+        {
+            isCoupledPatch.set(patchi);
+        }
+    }
+
     label nonEmptyPatchi = -1;
 
     forAllReverse(patches, patchi)
     {
         const polyPatch& pp = patches[patchi];
 
-        if (!isA<emptyPolyPatch>(pp) && !pp.coupled())
+        if (!isA<emptyPolyPatch>(pp) && !isCoupledPatch(patchi))
         {
             nonEmptyPatchi = patchi;
             break;
@@ -1846,7 +1873,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
 
 
     // Find patch to temporarily put exposed and processor faces into.
-    label oldInternalPatchi = findNonEmptyPatch();
+    const label oldInternalPatchi = findNonEmptyPatch();
 
 
     // Delete processor patches, starting from the back. Move all faces into
