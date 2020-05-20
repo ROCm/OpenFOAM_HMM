@@ -100,6 +100,8 @@ Usage
 #include "meshRefinement.H"
 #include "pointFields.H"
 
+#include "cyclicACMIFvPatch.H"
+
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -765,8 +767,9 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
             forAll(bfld, patchi)
             {
                 auto& pfld = bfld[patchi];
+                const auto& fvp = mesh.boundary()[patchi];
 
-                if (pfld.patch().coupled())
+                if (fvp.coupled() && !isA<cyclicACMIFvPatch>(fvp))
                 {
                     pfld.initEvaluate(Pstream::defaultCommsType);
                 }
@@ -798,9 +801,10 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
             forAll(patchSchedule, patchEvali)
             {
                 const label patchi = patchSchedule[patchEvali].patch;
+                const auto& fvp = mesh.boundary()[patchi];
                 auto& pfld = bfld[patchi];
 
-                if (pfld.patch().coupled())
+                if (fvp.coupled() && !isA<cyclicACMIFvPatch>(fvp))
                 {
                     if (patchSchedule[patchEvali].init)
                     {
