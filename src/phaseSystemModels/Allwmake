@@ -4,9 +4,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 #------------------------------------------------------------------------------
 
-wmakeLnInclude reactingEulerFoam/interfacialCompositionModels
-wmakeLnInclude reactingEulerFoam/interfacialModels
-wmakeLnInclude reactingEulerFoam/derivedFvPatchFields
+wmakeLnInclude reactingEulerFoam/phaseSystems
 
 case "$WM_COMPILER" in
 Mingw*)
@@ -18,7 +16,6 @@ esac
 
 #------------------------------------------------------------------------------
 
-wmake $targetType  reactingEulerFoam/phaseSystems
 wmake $targetType  reactingEulerFoam/interfacialModels
 wmake $targetType  reactingEulerFoam/interfacialCompositionModels
 wmake $targetType  reactingEulerFoam/derivedFvPatchFields
@@ -28,5 +25,7 @@ wmake $targetType  reactingEulerFoam/reactingMultiphaseEulerFoam/multiphaseCompr
 
 wmake $targetType  reactingEulerFoam/reactingTwoPhaseEulerFoam/twoPhaseSystem
 wmake $targetType  reactingEulerFoam/reactingTwoPhaseEulerFoam/twoPhaseCompressibleTurbulenceModels
+
+wmake $targetType  reactingEulerFoam/phaseSystems
 
 #------------------------------------------------------------------------------

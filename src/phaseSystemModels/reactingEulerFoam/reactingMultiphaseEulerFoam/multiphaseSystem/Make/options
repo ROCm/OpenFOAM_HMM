@@ -22,5 +22,4 @@ LIB_LIBS = \
     -lfvOptions \
     -lmeshTools \
     -lsampling \
-    -lcombustionModels \
-    -lreactingPhaseSystem
+    -lcombustionModels

@@ -15,7 +15,6 @@ LIB_LIBS = \
     -lfiniteVolume \
     -lfvOptions \
     -lmeshTools \
-    -lreactingPhaseSystem \
     -lreactingEulerianInterfacialModels \
     -lreactingEulerianInterfacialCompositionModels \
     -lturbulenceModels \
