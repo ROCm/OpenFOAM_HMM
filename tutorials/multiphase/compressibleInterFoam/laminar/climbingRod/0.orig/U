@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1912                                 |
+|  \\    /   O peration     | Version:  v2006                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -25,7 +25,7 @@ boundaryField
         type            rotatingWallVelocity;
         axis            (0 1 0);
         origin          (0 0 0);
-        omega           constant 13.2; // 2.1 rev/s
+        omega           constant #eval{ 2.1 * (2*pi()) };  // rev/s -> rads/s
         value           uniform (0 0 0);
     }
 
