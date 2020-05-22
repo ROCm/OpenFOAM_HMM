@@ -50,10 +50,4 @@ Foam::Function1Types::quadraticRamp::quadraticRamp
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::Function1Types::quadraticRamp::~quadraticRamp()
-{}
-
-
 // ************************************************************************* //

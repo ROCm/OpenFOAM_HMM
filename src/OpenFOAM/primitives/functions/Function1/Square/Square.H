@@ -99,7 +99,7 @@ class Square
 :
     public Function1<Type>
 {
-    // Private data
+    // Private Data
 
         //- Start-time for the square function
         scalar t0_;
@@ -145,11 +145,11 @@ public:
         );
 
         //- Copy constructor
-        explicit Square(const Square<Type>& se);
+        explicit Square(const Square<Type>& rhs);
 
 
     //- Destructor
-    virtual ~Square();
+    virtual ~Square() = default;
 
 
     // Member Functions

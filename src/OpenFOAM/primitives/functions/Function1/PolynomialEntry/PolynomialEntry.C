@@ -40,8 +40,8 @@ Foam::Function1Types::Polynomial<Type>::Polynomial
     coeffs_(),
     canIntegrate_(true)
 {
-    Istream& is(dict.lookup(entryName));
-    word entryType(is);
+    Istream& is = dict.lookup(entryName);
+    const word entryType(is);
 
     is  >> coeffs_;
 
@@ -118,13 +118,6 @@ Foam::Function1Types::Polynomial<Type>::Polynomial(const Polynomial& poly)
     Function1<Type>(poly),
     coeffs_(poly.coeffs_),
     canIntegrate_(poly.canIntegrate_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::Function1Types::Polynomial<Type>::~Polynomial()
 {}
 
 

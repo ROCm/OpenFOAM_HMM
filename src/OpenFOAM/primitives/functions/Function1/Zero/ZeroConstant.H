@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,18 +69,21 @@ class ZeroConstant
 
 public:
 
-    // Runtime type information
+    //- Runtime type information
     TypeName("zero");
 
 
     // Constructors
+
+        //- Construct from entry name
+        explicit ZeroConstant(const word& entryName);
 
         //- Construct from entry name and dictionary
         ZeroConstant(const word& entryName, const dictionary& dict);
 
 
     //- Destructor
-    virtual ~ZeroConstant();
+    virtual ~ZeroConstant() = default;
 
 
     // Member Functions

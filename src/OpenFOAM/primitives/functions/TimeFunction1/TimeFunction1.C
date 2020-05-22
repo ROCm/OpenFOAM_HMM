@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,24 +33,28 @@ License
 template<class Type>
 Foam::TimeFunction1<Type>::TimeFunction1
 (
-    const Time& t,
-    const word& name,
+    const Time& runTime,
+    const word& entryName,
     const dictionary& dict
 )
 :
-    time_(t),
-    name_(name),
-    entry_(Function1<Type>::New(name, dict))
+    time_(runTime),
+    name_(entryName),
+    entry_(Function1<Type>::New(entryName, dict))
 {
-    entry_->convertTimeBase(t);
+    entry_->convertTimeBase(runTime);
 }
 
 
 template<class Type>
-Foam::TimeFunction1<Type>::TimeFunction1(const Time& t, const word& name)
+Foam::TimeFunction1<Type>::TimeFunction1
+(
+    const Time& runTime,
+    const word& entryName
+)
 :
-    time_(t),
-    name_(name),
+    time_(runTime),
+    name_(entryName),
     entry_(nullptr)
 {}
 
@@ -57,24 +62,12 @@ Foam::TimeFunction1<Type>::TimeFunction1(const Time& t, const word& name)
 template<class Type>
 Foam::TimeFunction1<Type>::TimeFunction1
 (
-    const TimeFunction1<Type>& tde
+    const TimeFunction1<Type>& rhs
 )
 :
-    time_(tde.time_),
-    name_(tde.name_),
-    entry_()
-{
-    if (tde.entry_.valid())
-    {
-        entry_.reset(tde.entry_->clone().ptr());
-    }
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::TimeFunction1<Type>::~TimeFunction1()
+    time_(rhs.time_),
+    name_(rhs.name_),
+    entry_(rhs.entry_) // steal/reuse (missing clone!)
 {}
 
 
@@ -83,15 +76,7 @@ Foam::TimeFunction1<Type>::~TimeFunction1()
 template<class Type>
 void Foam::TimeFunction1<Type>::reset(const dictionary& dict)
 {
-    entry_.reset
-    (
-        Function1<Type>::New
-        (
-            name_,
-            dict
-        ).ptr()
-    );
-
+    entry_ = Function1<Type>::New(name_, dict);
     entry_->convertTimeBase(time_);
 }
 
@@ -127,10 +112,14 @@ template<class Type>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const TimeFunction1<Type>& de
+    const TimeFunction1<Type>& rhs
 )
 {
-    return de.entry_->operator<<(os, de);
+    if (rhs.entry_)
+    {
+        rhs.entry_->operator<<(os, rhs);
+    }
+    return os;
 }
 
 

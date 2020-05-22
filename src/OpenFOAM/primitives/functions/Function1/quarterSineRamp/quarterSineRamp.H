@@ -58,30 +58,20 @@ class quarterSineRamp
 :
     public ramp
 {
-    // Private Member Functions
-
-        //- No copy assignment
-        void operator=(const quarterSineRamp&) = delete;
-
-
 public:
 
-    // Runtime type information
+    //- Runtime type information
     TypeName("quarterSineRamp");
 
 
     // Constructors
 
         //- Construct from entry name and dictionary
-        quarterSineRamp
-        (
-            const word& entryName,
-            const dictionary& dict
-        );
+        quarterSineRamp(const word& entryName, const dictionary& dict);
 
 
     //- Destructor
-    virtual ~quarterSineRamp();
+    virtual ~quarterSineRamp() = default;
 
 
     // Member Functions

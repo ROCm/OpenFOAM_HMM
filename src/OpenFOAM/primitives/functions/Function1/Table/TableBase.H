@@ -46,6 +46,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class interpolationWeights;
 
 namespace Function1Types

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,12 +59,6 @@ class quarterCosineRamp
 :
     public ramp
 {
-    // Private Member Functions
-
-        //- No copy assignment
-        void operator=(const quarterCosineRamp&) = delete;
-
-
 public:
 
     // Runtime type information
@@ -73,15 +68,11 @@ public:
     // Constructors
 
         //- Construct from entry name and dictionary
-        quarterCosineRamp
-        (
-            const word& entryName,
-            const dictionary& dict
-        );
+        quarterCosineRamp(const word& entryName, const dictionary& dict);
 
 
     //- Destructor
-    virtual ~quarterCosineRamp();
+    virtual ~quarterCosineRamp() = default;
 
 
     // Member Functions

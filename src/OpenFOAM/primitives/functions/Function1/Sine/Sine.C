@@ -66,13 +66,6 @@ Foam::Function1Types::Sine<Type>::Sine(const Sine<Type>& se)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::Function1Types::Sine<Type>::~Sine()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>

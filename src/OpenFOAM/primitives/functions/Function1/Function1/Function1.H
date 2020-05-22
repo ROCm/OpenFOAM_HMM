@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,6 +33,38 @@ Description
     provide functions to return the (interpolated) value, and integral between
     limits.
 
+    The New factory method attempts to deal with varying types of input.
+    It accepts primitive or dictionary entries for dispatching to different
+    function types, but wraps unspecified types as "constant".
+
+    In the dictionary form, the coefficents are the dictionary itself.
+    This is arguably the more readable form.
+    For example,
+    \verbatim
+        <entryName>
+        {
+            type      linearRamp;
+            start     10;
+            duration  20;
+        }
+    \endverbatim
+
+    In the primitive form, the coefficents are provided separately.
+    For example,
+    \verbatim
+        <entryName>   linearRamp;
+        <entryName>Coeffs
+        {
+            start     10;
+            duration  20;
+        }
+    \endverbatim
+    The coeffs dictionary is optional, since it is not required by all types.
+    For example,
+    \verbatim
+        <entryName>   zero;
+    \endverbatim
+
 SourceFiles
     Function1.C
     Function1New.C
@@ -50,10 +82,8 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class Time;
-
-// Forward declaration of friend functions and operators
 template<class Type> class Function1;
 template<class Type> Ostream& operator<<(Ostream&, const Function1<Type>&);
 
@@ -66,18 +96,17 @@ class Function1
 :
     public refCount
 {
-    // Private Member Functions
-
-        //- No copy assignment
-        void operator=(const Function1<Type>&) = delete;
-
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Name of entry
         const word name_;
+
+    // Protected Member Functions
+
+        //- No copy assignment
+        void operator=(const Function1<Type>&) = delete;
 
 
 public:
@@ -107,7 +136,7 @@ public:
         explicit Function1(const word& entryName);
 
         //- Copy constructor
-        explicit Function1(const Function1<Type>& f1);
+        explicit Function1(const Function1<Type>& rhs);
 
         //- Construct and return a clone
         virtual tmp<Function1<Type>> clone() const = 0;

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,7 +88,7 @@ class ramp
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Start-time of the ramp function
         scalar start_;
@@ -96,7 +97,7 @@ protected:
         scalar duration_;
 
         //- Simple linear ramp function
-        //  which form the basis of many more complex ramp functions
+        //- that forms the basis of many more complex ramp functions
         inline scalar linearRamp(const scalar t) const
         {
             return max(min((t - start_)/duration_, 1), 0);
@@ -127,7 +128,7 @@ public:
 
 
     //- Destructor
-    virtual ~ramp();
+    virtual ~ramp() = default;
 
 
     // Member Functions

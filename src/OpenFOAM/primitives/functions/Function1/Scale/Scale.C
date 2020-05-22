@@ -51,18 +51,11 @@ Foam::Function1Types::Scale<Type>::Scale
 
 
 template<class Type>
-Foam::Function1Types::Scale<Type>::Scale(const Scale<Type>& se)
+Foam::Function1Types::Scale<Type>::Scale(const Scale<Type>& rhs)
 :
-    Function1<Type>(se),
-    scale_(se.scale_.clone()),
-    value_(se.value_.clone())
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::Function1Types::Scale<Type>::~Scale()
+    Function1<Type>(rhs),
+    scale_(rhs.scale_.clone()),
+    value_(rhs.value_.clone())
 {}
 
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,10 +41,10 @@ Foam::Function1<Type>::Function1(const word& entryName)
 
 
 template<class Type>
-Foam::Function1<Type>::Function1(const Function1<Type>& de)
+Foam::Function1<Type>::Function1(const Function1<Type>& rhs)
 :
     refCount(),
-    name_(de.name_)
+    name_(rhs.name_)
 {}
 
 
@@ -65,9 +66,9 @@ template<class Type>
 Type Foam::Function1<Type>::value(const scalar x) const
 {
     NotImplemented;
-
     return Zero;
 }
+
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::Function1<Type>::value
@@ -84,7 +85,6 @@ template<class Type>
 Type Foam::Function1<Type>::integrate(const scalar x1, const scalar x2) const
 {
     NotImplemented;
-
     return Zero;
 }
 
@@ -174,13 +174,13 @@ template<class Type>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const Function1<Type>& f1
+    const Function1<Type>& rhs
 )
 {
     os.check(FUNCTION_NAME);
 
-    os  << f1.name_;
-    f1.writeData(os);
+    os  << rhs.name_;
+    rhs.writeData(os);
 
     return os;
 }

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +28,7 @@ Class
     Foam::Function1Types::quadraticRamp
 
 Description
-    Quadratic ramp function starting from 0 and increasing quadraticRampally
+    Quadratic ramp function starting from 0 and increasing quadratically
     to 1 from \c t_0 over the \c duration and remaining at 1 thereafter.
 
 See also
@@ -58,30 +59,20 @@ class quadraticRamp
 :
     public ramp
 {
-    // Private Member Functions
-
-        //- No copy assignment
-        void operator=(const quadraticRamp&) = delete;
-
-
 public:
 
-    // Runtime type information
+    //- Runtime type information
     TypeName("quadraticRamp");
 
 
     // Constructors
 
         //- Construct from entry name and dictionary
-        quadraticRamp
-        (
-            const word& entryName,
-            const dictionary& dict
-        );
+        quadraticRamp(const word& entryName, const dictionary& dict);
 
 
     //- Destructor
-    virtual ~quadraticRamp();
+    virtual ~quadraticRamp() = default;
 
 
     // Member Functions

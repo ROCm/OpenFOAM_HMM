@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,7 +88,7 @@ Foam::polynomialFunction::polynomialFunction(const label order)
 :
     scalarList(order, Zero),
     logActive_(false),
-    logCoeff_(0.0)
+    logCoeff_(0)
 {
     if (this->empty())
     {
@@ -110,7 +111,7 @@ Foam::polynomialFunction::polynomialFunction(const UList<scalar>& coeffs)
 :
     scalarList(coeffs),
     logActive_(false),
-    logCoeff_(0.0)
+    logCoeff_(0)
 {
     if (this->empty())
     {
@@ -125,7 +126,7 @@ Foam::polynomialFunction::polynomialFunction(Istream& is)
 :
     scalarList(is),
     logActive_(false),
-    logCoeff_(0.0)
+    logCoeff_(0)
 {
     if (this->empty())
     {
@@ -134,12 +135,6 @@ Foam::polynomialFunction::polynomialFunction(Istream& is)
             << nl << exit(FatalError);
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::polynomialFunction::~polynomialFunction()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -310,18 +305,13 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const polynomialFunction& poly)
     // output like VectorSpace
     os  << token::BEGIN_LIST;
 
-    if (!poly.empty())
+    forAll(poly, i)
     {
-        for (int i=0; i<poly.size()-1; i++)
-        {
-            os  << poly[i] << token::SPACE;
-        }
-        os  << poly.last();
+        if (i) os << token::SPACE;
+        os  << poly[i];
     }
     os  << token::END_LIST;
 
-
-    // Check state of Ostream
     os.check(FUNCTION_NAME);
 
     return os;

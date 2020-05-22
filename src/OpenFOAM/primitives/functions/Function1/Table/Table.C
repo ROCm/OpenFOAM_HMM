@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,7 @@ Foam::Function1Types::Table<Type>::Table
     TableBase<Type>(entryName, dict)
 {
     Istream& is = dict.lookup(entryName);
-    word entryType(is);
+    const word entryType(is);
     is  >> this->table_;
     TableBase<Type>::check();
 }

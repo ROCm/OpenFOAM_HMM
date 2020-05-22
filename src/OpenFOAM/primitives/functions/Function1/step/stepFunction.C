@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "quarterSineRamp.H"
+#include "stepFunction.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -33,14 +33,14 @@ namespace Foam
 {
 namespace Function1Types
 {
-    makeScalarFunction1(quarterSineRamp);
+    makeScalarFunction1(stepFunction);
 }
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::Function1Types::quarterSineRamp::quarterSineRamp
+Foam::Function1Types::stepFunction::stepFunction
 (
     const word& entryName,
     const dictionary& dict

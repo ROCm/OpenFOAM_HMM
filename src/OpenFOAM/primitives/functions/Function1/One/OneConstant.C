@@ -47,13 +47,6 @@ Foam::Function1Types::OneConstant<Type>::OneConstant
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::Function1Types::OneConstant<Type>::~OneConstant()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>

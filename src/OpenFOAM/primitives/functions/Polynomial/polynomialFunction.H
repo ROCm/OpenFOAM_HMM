@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,12 +64,9 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class polynomialFunction;
-
-// Forward declaration of friend functions
 Ostream& operator<<(Ostream&, const polynomialFunction&);
-
 
 /*---------------------------------------------------------------------------*\
                      Class polynomialFunction Declaration
@@ -78,7 +76,7 @@ class polynomialFunction
 :
     private scalarList
 {
-    // Private data
+    // Private Data
 
         //- Include the log term? - only activated using integralMinus1()
         bool logActive_;
@@ -94,7 +92,7 @@ class polynomialFunction
         static polynomialFunction cloneIntegral
         (
             const polynomialFunction&,
-            const scalar intConstant = 0.0
+            const scalar intConstant = 0
         );
 
         //- Return integral coefficients when lowest order is -1.
@@ -102,13 +100,11 @@ class polynomialFunction
         static polynomialFunction cloneIntegralMinus1
         (
             const polynomialFunction&,
-            const scalar intConstant = 0.0
+            const scalar intConstant = 0
         );
-
 
         //- No copy assignment
         void operator=(const polynomialFunction&) = delete;
-
 
 
 public:
@@ -119,26 +115,26 @@ public:
 
     // Constructors
 
-        //- Construct a particular size, with all coefficients = 0.0
-        explicit polynomialFunction(const label);
+        //- Construct a particular size, with all coefficients as 0
+        explicit polynomialFunction(const label order);
 
         //- Copy constructor
-        polynomialFunction(const polynomialFunction&);
+        polynomialFunction(const polynomialFunction& rhs);
 
         //- Construct from a list of coefficients
         explicit polynomialFunction(const UList<scalar>& coeffs);
 
         //- Construct from Istream
-        polynomialFunction(Istream&);
+        explicit polynomialFunction(Istream& is);
 
 
     //- Destructor
-    virtual ~polynomialFunction();
+    virtual ~polynomialFunction() = default;
 
 
     // Member Functions
 
-            //- Return the number of coefficients
+            //- The number of coefficients
             using scalarList::size;
 
             //- Return coefficient

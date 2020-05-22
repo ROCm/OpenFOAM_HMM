@@ -36,11 +36,11 @@ template<class Type>
 const Foam::interpolationWeights&
 Foam::Function1Types::TableBase<Type>::interpolator() const
 {
-    if (interpolatorPtr_.empty())
+    if (!interpolatorPtr_)
     {
         // Re-work table into linear list
         tableSamplesPtr_.reset(new scalarField(table_.size()));
-        scalarField& samples = *tableSamplesPtr_;
+        auto& samples = *tableSamplesPtr_;
         forAll(table_, i)
         {
             samples[i] = table_[i].first();
@@ -69,7 +69,7 @@ Foam::Function1Types::TableBase<Type>::TableBase
     name_(name),
     bounding_
     (
-        bounds::repeatableBoundingNames.lookupOrDefault
+        bounds::repeatableBoundingNames.getOrDefault
         (
             "outOfBounds",
             dict,
@@ -79,9 +79,11 @@ Foam::Function1Types::TableBase<Type>::TableBase
     ),
     interpolationScheme_
     (
-        dict.lookupOrDefault<word>("interpolationScheme", "linear")
+        dict.getOrDefault<word>("interpolationScheme", "linear")
     ),
-    table_()
+    table_(),
+    tableSamplesPtr_(nullptr),
+    interpolatorPtr_(nullptr)
 {}
 
 
@@ -93,8 +95,8 @@ Foam::Function1Types::TableBase<Type>::TableBase(const TableBase<Type>& tbl)
     bounding_(tbl.bounding_),
     interpolationScheme_(tbl.interpolationScheme_),
     table_(tbl.table_),
-    tableSamplesPtr_(tbl.tableSamplesPtr_),
-    interpolatorPtr_(tbl.interpolatorPtr_)
+    tableSamplesPtr_(tbl.tableSamplesPtr_.clone()),
+    interpolatorPtr_(tbl.interpolatorPtr_)  // steal/reuse (missing clone!)
 {}
 
 

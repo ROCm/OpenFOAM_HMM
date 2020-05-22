@@ -50,10 +50,4 @@ Foam::Function1Types::quarterCosineRamp::quarterCosineRamp
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::Function1Types::quarterCosineRamp::~quarterCosineRamp()
-{}
-
-
 // ************************************************************************* //

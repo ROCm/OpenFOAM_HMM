@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,11 +37,12 @@ Foam::Ostream& Foam::operator<<
     const Polynomial<PolySize>& poly
 )
 {
-    os  << static_cast
-            <VectorSpace<Polynomial<PolySize>, scalar, PolySize>>(poly);
-
-    os.check(FUNCTION_NAME);
-    return os;
+    return
+        os <<
+        static_cast
+        <
+            VectorSpace<Polynomial<PolySize>, scalar, PolySize>
+        >(poly);
 }
 
 

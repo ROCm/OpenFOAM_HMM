@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,15 +46,12 @@ SourceFiles
 
 namespace Foam
 {
-template<class Type>
-class TimeFunction1;
+
+// Forward Declarations
+template<class Type> class TimeFunction1;
 
 template<class Type>
-Ostream& operator<<
-(
-    Ostream&,
-    const TimeFunction1<Type>&
-);
+Ostream& operator<<(Ostream&, const TimeFunction1<Type>&);
 
 /*---------------------------------------------------------------------------*\
                        Class TimeFunction1 Declaration
@@ -62,10 +60,9 @@ Ostream& operator<<
 template<class Type>
 class TimeFunction1
 {
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Reference to the time database
         const Time& time_;
@@ -81,27 +78,27 @@ public:
 
     // Constructor
 
-        //- Construct from entry name
+        //- Construct from entry name and dictionary
         TimeFunction1
         (
-            const Time& t,
+            const Time& runTime,
             const word& name,
             const dictionary& dict
         );
 
-        //- Construct null from entry name
+        //- Construct from entry name
         TimeFunction1
         (
-            const Time& t,
+            const Time& runTime,
             const word& entryName
         );
 
-        //- Copy constructor
-        TimeFunction1(const TimeFunction1<Type>& tde);
+        //- Copy construct
+        TimeFunction1(const TimeFunction1<Type>& rhs);
 
 
     //- Destructor
-    virtual ~TimeFunction1();
+    virtual ~TimeFunction1() = default;
 
 
     // Member Functions

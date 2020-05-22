@@ -50,10 +50,4 @@ Foam::Function1Types::halfCosineRamp::halfCosineRamp
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::Function1Types::halfCosineRamp::~halfCosineRamp()
-{}
-
-
 // ************************************************************************* //

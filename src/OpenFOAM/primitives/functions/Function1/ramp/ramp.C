@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +32,7 @@ License
 
 void Foam::Function1Types::ramp::read(const dictionary& coeffs)
 {
-    start_ = coeffs.lookupOrDefault<scalar>("start", 0);
+    start_ = coeffs.getOrDefault<scalar>("start", 0);
     coeffs.readEntry("duration", duration_);
 }
 
@@ -46,12 +47,6 @@ Foam::Function1Types::ramp::ramp
 {
     read(dict);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::Function1Types::ramp::~ramp()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

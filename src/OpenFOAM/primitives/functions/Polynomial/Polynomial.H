@@ -65,16 +65,10 @@ namespace Foam
 {
 
 // Forward Declarations
-template<int PolySize>
-class Polynomial;
+template<int PolySize> class Polynomial;
 
 template<int PolySize>
-Ostream& operator<<
-(
-    Ostream&,
-    const Polynomial<PolySize>&
-);
-
+Ostream& operator<<( Ostream&, const Polynomial<PolySize>&);
 
 /*---------------------------------------------------------------------------*\
                         Class Polynomial Declaration

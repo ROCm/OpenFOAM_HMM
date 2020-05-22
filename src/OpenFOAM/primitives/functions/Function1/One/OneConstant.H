@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,7 +69,7 @@ class OneConstant
 
 public:
 
-    // Runtime type information
+    //- Runtime type information
     TypeName("one");
 
 
@@ -88,7 +89,7 @@ public:
 
 
     //- Destructor
-    virtual ~OneConstant();
+    virtual ~OneConstant() = default;
 
 
     // Member Functions

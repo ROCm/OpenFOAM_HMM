@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +31,13 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
+Foam::Function1Types::ZeroConstant<Type>::ZeroConstant(const word& entryName)
+:
+    Function1<Type>(entryName)
+{}
+
+
+template<class Type>
 Foam::Function1Types::ZeroConstant<Type>::ZeroConstant
 (
     const word& entryName,
@@ -37,13 +45,6 @@ Foam::Function1Types::ZeroConstant<Type>::ZeroConstant
 )
 :
     Function1<Type>(entryName)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::Function1Types::ZeroConstant<Type>::~ZeroConstant()
 {}
 
 

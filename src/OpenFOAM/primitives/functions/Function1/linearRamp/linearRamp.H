@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +28,7 @@ Class
     Foam::Function1Types::linearRamp
 
 Description
-    Linear ramp function starting from 0 and increasing linearRamply to 1 from
+    Linear ramp function starting from 0 and increasing linearly to 1 from
     \c start over the \c duration and remaining at 1 thereafter.
 
 See also
@@ -58,12 +59,6 @@ class linearRamp
 :
     public ramp
 {
-    // Private Member Functions
-
-        //- No copy assignment
-        void operator=(const linearRamp&) = delete;
-
-
 public:
 
     // Runtime type information
@@ -73,15 +68,11 @@ public:
     // Constructors
 
         //- Construct from entry name and dictionary
-        linearRamp
-        (
-            const word& entryName,
-            const dictionary& dict
-        );
+        linearRamp(const word& entryName, const dictionary& dict);
 
 
     //- Destructor
-    virtual ~linearRamp();
+    virtual ~linearRamp() = default;
 
 
     // Member Functions

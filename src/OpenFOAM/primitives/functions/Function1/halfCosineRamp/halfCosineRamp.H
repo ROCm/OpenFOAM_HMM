@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,30 +59,20 @@ class halfCosineRamp
 :
     public ramp
 {
-    // Private Member Functions
-
-        //- No copy assignment
-        void operator=(const halfCosineRamp&) = delete;
-
-
 public:
 
-    // Runtime type information
+    //- Runtime type information
     TypeName("halfCosineRamp");
 
 
     // Constructors
 
         //- Construct from entry name and dictionary
-        halfCosineRamp
-        (
-            const word& entryName,
-            const dictionary& dict
-        );
+        halfCosineRamp(const word& entryName, const dictionary& dict);
 
 
     //- Destructor
-    virtual ~halfCosineRamp();
+    virtual ~halfCosineRamp() = default;
 
 
     // Member Functions

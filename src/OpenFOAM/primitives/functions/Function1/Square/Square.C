@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,8 +33,8 @@ License
 template<class Type>
 void Foam::Function1Types::Square<Type>::read(const dictionary& coeffs)
 {
-    t0_ = coeffs.lookupOrDefault<scalar>("t0", 0);
-    markSpace_ = coeffs.lookupOrDefault<scalar>("markSpace", 1);
+    t0_ = coeffs.getOrDefault<scalar>("t0", 0);
+    markSpace_ = coeffs.getOrDefault<scalar>("markSpace", 1);
     amplitude_ = Function1<scalar>::New("amplitude", coeffs);
     frequency_ = Function1<scalar>::New("frequency", coeffs);
     scale_ = Function1<Type>::New("scale", coeffs);
@@ -65,13 +65,6 @@ Foam::Function1Types::Square<Type>::Square(const Square<Type>& se)
     frequency_(se.frequency_.clone()),
     scale_(se.scale_.clone()),
     level_(se.level_.clone())
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::Function1Types::Square<Type>::~Square()
 {}
 
 

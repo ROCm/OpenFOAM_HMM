@@ -142,7 +142,7 @@ public:
 
 
     //- Destructor
-    virtual ~Sine();
+    virtual ~Sine() = default;
 
 
     // Member Functions

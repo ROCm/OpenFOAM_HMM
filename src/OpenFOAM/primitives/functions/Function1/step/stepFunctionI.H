@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,29 +25,22 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "quarterSineRamp.H"
+#include "stepFunction.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-namespace Foam
-{
-namespace Function1Types
-{
-    makeScalarFunction1(quarterSineRamp);
-}
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::Function1Types::quarterSineRamp::quarterSineRamp
+inline Foam::scalar Foam::Function1Types::stepFunction::value
 (
-    const word& entryName,
-    const dictionary& dict
-)
-:
-    ramp(entryName, dict)
-{}
+    const scalar t
+) const
+{
+    if (t < start_ || t > start_ + duration_)
+    {
+        return 0;
+    }
+
+    return 1;
+}
 
 
 // ************************************************************************* //

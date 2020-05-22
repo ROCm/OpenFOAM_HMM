@@ -50,10 +50,4 @@ Foam::Function1Types::linearRamp::linearRamp
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::Function1Types::linearRamp::~linearRamp()
-{}
-
-
 // ************************************************************************* //

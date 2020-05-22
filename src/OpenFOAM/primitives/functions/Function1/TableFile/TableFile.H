@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +35,7 @@ Description
         <entryName> tableFile;
         <entryName>Coeffs
         {
-            fileName            dataFile;    // name of data file
+            file                dataFile;    // name of data file
             outOfBounds         clamp;       // optional out-of-bounds handling
             interpolationScheme linear;      // optional interpolation method
         }
@@ -109,7 +109,7 @@ public:
     virtual ~TableFile() = default;
 
 
-    // I/O
+    // Member Functions
 
         //- Write in dictionary format
         virtual void writeData(Ostream& os) const;

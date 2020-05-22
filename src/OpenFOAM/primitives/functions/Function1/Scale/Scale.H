@@ -92,7 +92,7 @@ class Scale
 :
     public Function1<Type>
 {
-    // Private data
+    // Private Data
 
         //- Scalar scaling function
         autoPtr<Function1<scalar>> scale_;
@@ -112,7 +112,7 @@ class Scale
 
 public:
 
-    // Runtime type information
+    //- Runtime type information
     TypeName("scale");
 
 
@@ -125,12 +125,12 @@ public:
             const dictionary& dict
         );
 
-        //- Copy constructor
-        explicit Scale(const Scale<Type>& se);
+        //- Copy construct
+        explicit Scale(const Scale<Type>& rhs);
 
 
     //- Destructor
-    virtual ~Scale();
+    virtual ~Scale() = default;
 
 
     // Member Functions
