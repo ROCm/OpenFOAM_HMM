@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,7 +82,7 @@ Usage
         mode            coefficient;
 
         Ta              constant 300.0;
-        h               uniform 10.0;
+        h               constant 10.0;
         thicknessLayers (0.1 0.2 0.3 0.4);
         kappaLayers     (1 2 3 4);
 
@@ -90,6 +91,12 @@ Usage
         value           $internalField;
     }
     \endverbatim
+
+Note
+    Quantities that are considered "global" (eg, power, ambient temperature)
+    can be specified as Function1 types.
+    Quantities that may have local variations (eg, htc, heat-flux)
+    can be specified as PatchFunction1 types.
 
 See also
     Foam::temperatureCoupledBase
@@ -105,7 +112,7 @@ SourceFiles
 
 #include "mixedFvPatchFields.H"
 #include "temperatureCoupledBase.H"
-#include "Function1.H"
+#include "PatchFunction1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -123,14 +130,14 @@ class externalWallHeatFluxTemperatureFvPatchScalarField
 {
 public:
 
-    // Public data
+    // Public Data
 
         //- Operation mode enumeration
         enum operationMode
         {
-            fixedPower,                 //!< Fixed heat power [W]
-            fixedHeatFlux,              //!< Fixed heat flux [W/m2]
-            fixedHeatTransferCoeff,     //!< Fixed heat transfer coefficient
+            fixedPower,             //!< Heat power [W]
+            fixedHeatFlux,          //!< Heat flux [W/m2]
+            fixedHeatTransferCoeff, //!< Heat transfer coefficient [W/m^2/K]
         };
 
         static const Enum<operationMode> operationModeNames;
@@ -138,19 +145,19 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Operation mode
         operationMode mode_;
 
         //- Heat power [W]
-        scalar Q_;
+        autoPtr<Function1<scalar>> Q_;
 
         //- Heat flux [W/m2]
-        scalarField q_;
+        autoPtr<PatchFunction1<scalar>> q_;
 
         //- Heat transfer coefficient [W/m2K]
-        scalarField h_;
+        autoPtr<PatchFunction1<scalar>> h_;
 
         //- Ambient temperature [K]
         autoPtr<Function1<scalar>> Ta_;
