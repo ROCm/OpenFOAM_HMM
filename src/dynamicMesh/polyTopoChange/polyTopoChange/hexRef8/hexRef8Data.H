@@ -108,7 +108,7 @@ public:
 
 
     //- Destructor
-    ~hexRef8Data() = default;
+    ~hexRef8Data();
 
 
     // Member Functions

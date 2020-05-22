@@ -28,4 +28,3 @@ LIB_LIBS = \
     -lreactingEulerianInterfacialCompositionModels \
     -lreactingEulerianInterfacialModels \
     -lreactingEulerianFvPatchFields
-    

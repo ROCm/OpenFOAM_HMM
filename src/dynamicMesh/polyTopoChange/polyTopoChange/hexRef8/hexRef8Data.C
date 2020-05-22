@@ -225,6 +225,12 @@ Foam::hexRef8Data::hexRef8Data
 }
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::hexRef8Data::~hexRef8Data()
+{}  // refinementHistory forward declared
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::hexRef8Data::sync(const IOobject& io)
