@@ -143,10 +143,14 @@ static inline bool groupResourceDir(Foam::fileName& queried)
     #endif
 
     // Compile-time paths
-    queried = Foam::foamVersion::configuredProjectDir/Foam::string("site/etc");
-    if (queried.size() > 8 && Foam::isDir(queried))
+    queried = Foam::foamVersion::configuredProjectDir();
+    if (queried.size())
     {
-        return true;
+        queried /= "site/etc";
+        if (Foam::isDir(queried))
+        {
+            return true;
+        }
     }
 
     queried.clear();
@@ -175,16 +179,23 @@ static inline bool projectResourceDir(Foam::fileName& queried)
 
     // Compile-time paths
 
-    queried = Foam::foamVersion::configuredEtcDir;
-    if (Foam::isDir(queried))
+    queried = Foam::foamVersion::configuredEtcDir();
+    if (queried.size())
     {
-        return true;
+        if (Foam::isDir(queried))
+        {
+            return true;
+        }
     }
 
-    queried = Foam::foamVersion::configuredProjectDir/Foam::word("etc");
-    if (queried.size() > 3 && Foam::isDir(queried))
+    queried = Foam::foamVersion::configuredProjectDir();
+    if (queried.size())
     {
-        return true;
+        queried /= "etc";
+        if (Foam::isDir(queried))
+        {
+            return true;
+        }
     }
 
     queried.clear();

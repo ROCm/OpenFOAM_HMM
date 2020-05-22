@@ -114,6 +114,8 @@ const std::string Foam::foamVersion::version
 };
 
 
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
 unsigned Foam::foamVersion::labelByteSize(const std::string& str)
 {
     return getTaggedSize("label=", str) / 8;
@@ -126,20 +128,27 @@ unsigned Foam::foamVersion::scalarByteSize(const std::string& str)
 }
 
 
-const std::string Foam::foamVersion::configuredProjectDir
+// These two are defined as functions to avoid static initialization
+// order problems with older gcc.
+
+std::string Foam::foamVersion::configuredProjectDir()
 {
 #ifdef FOAM_CONFIGURED_PROJECT_DIR
-    FOAM_CONFIGURED_PROJECT_DIR
+    return FOAM_CONFIGURED_PROJECT_DIR ;
+#else
+    return std::string{};
 #endif
-};
+}
 
 
-const std::string Foam::foamVersion::configuredEtcDir
+std::string Foam::foamVersion::configuredEtcDir()
 {
 #ifdef FOAM_CONFIGURED_PROJECT_ETC
-    FOAM_CONFIGURED_PROJECT_ETC
+    return FOAM_CONFIGURED_PROJECT_ETC ;
+#else
+    return std::string{};
 #endif
-};
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

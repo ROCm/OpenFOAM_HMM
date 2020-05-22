@@ -126,12 +126,14 @@ namespace Foam
         void printBuildInfo(const bool full=true);
 
         //- Compile-time definition of the OpenFOAM project directory
-        //  Usually not defined - functional equivalent to WM_PROJECT_DIR
-        extern const std::string configuredProjectDir;
+        //- or empty if not defined.
+        //  Functional equivalent to WM_PROJECT_DIR.
+        std::string configuredProjectDir();
 
         //- Compile-time definition of the OpenFOAM etc/ directory
-        //  Usually not defined - functional equivalent to WM_PROJECT_DIR/etc
-        extern const std::string configuredEtcDir;
+        //- or empty if not defined.
+        //  Functional equivalent to WM_PROJECT_DIR/etc
+        std::string configuredEtcDir();
     }
 }
 

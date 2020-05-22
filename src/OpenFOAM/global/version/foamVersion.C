@@ -30,7 +30,7 @@ License
 
 // Static data members are constructed in global.Cver
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 bool Foam::foamVersion::patched()
 {
