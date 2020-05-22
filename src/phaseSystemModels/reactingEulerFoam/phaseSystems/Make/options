@@ -27,6 +27,5 @@ LIB_LIBS = \
     -lcombustionModels \
     -lreactingEulerianInterfacialCompositionModels \
     -lreactingEulerianInterfacialModels \
-    -lreactingEulerianFvPatchFields \
-    -lmultiphaseReactingTurbulenceModels \
-    -ltwoPhaseReactingTurbulenceModels
+    -lreactingEulerianFvPatchFields
+    
