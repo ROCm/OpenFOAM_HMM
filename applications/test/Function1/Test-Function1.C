@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +35,7 @@ Description
 #include "fvCFD.H"
 #include "Function1.H"
 #include "scalarIndList.H"
+#include "scalarField.H"
 #include "IOdictionary.H"
 #include "linearInterpolationWeights.H"
 #include "splineInterpolationWeights.H"
@@ -42,104 +44,121 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::noParallel();
+
+    const word dictName("function1Properties");
+
+    argList::addBoolOption("all", "Test all functions in function1Properties");
+
+    argList::addArgument("function1");
+    argList::addArgument("...");
+    argList::addArgument("functionN");
+    argList::noMandatoryArgs();
+
     #include "setRootCase.H"
     #include "createTime.H"
-    #include "createMesh.H"
 
-{
-    scalarField samples(4);
-    samples[0] = 0;
-    samples[1] = 1;
-    samples[2] = 2;
-    samples[3] = 3;
-    scalarField values(4);
-    values = 1.0;
-    //values[0] = 0.0;
-    //values[1] = 1.0;
+    {
+        scalarField samples({0, 1, 2, 3});
 
-    linearInterpolationWeights interpolator
-    //splineInterpolationWeights interpolator
-    (
-        samples
-    );
-    labelList indices;
-    scalarField weights;
+        scalarField values(4, scalar(1));
 
-    interpolator.integrationWeights(1.1, 1.2, indices, weights);
-    Pout<< "indices:" << indices << endl;
-    Pout<< "weights:" << weights << endl;
-
-    scalar baseSum = interpolator.weightedSum
-    (
-        weights,
-        scalarUIndList(values, indices)
-    );
-    Pout<< "baseSum=" << baseSum << nl << nl << endl;
-
-
-//    interpolator.integrationWeights(-0.01, 0, indices, weights);
-//    scalar partialSum = interpolator.weightedSum
-//    (
-//        weights,
-//        scalarUIndList(values, indices)
-//    );
-//    Pout<< "partialSum=" << partialSum << nl << nl << endl;
-//
-//
-//    interpolator.integrationWeights(-0.01, 1, indices, weights);
-//    //Pout<< "samples:" << samples << endl;
-//    //Pout<< "indices:" << indices << endl;
-//    //Pout<< "weights:" << weights << endl;
-//    scalar sum = interpolator.weightedSum
-//    (
-//        weights,
-//        scalarUIndList(values, indices)
-//    );
-//    Pout<< "integrand=" << sum << nl << nl << endl;
-
-
-    return 1;
-}
-
-    IOdictionary function1Properties
-    (
-        IOobject
+        linearInterpolationWeights interpolator
+        //splineInterpolationWeights interpolator
         (
-            "function1Properties",
-            runTime.constant(),
-            mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE
-        )
-    );
+            samples
+        );
+        labelList indices;
+        scalarField weights;
 
-    autoPtr<Function1<scalar>> function1
-    (
-        Function1<scalar>::New
+        interpolator.integrationWeights(1.1, 1.2, indices, weights);
+        Pout<< "indices:" << indices << nl
+            << "weights:" << weights << nl;
+
+        scalar baseSum = interpolator.weightedSum
         (
-            "function1",
-            function1Properties
-        )
-    );
+            weights,
+            scalarUIndList(values, indices)
+        );
+        Pout<< "baseSum=" << baseSum << nl << nl << endl;
 
-    scalar x0 = function1Properties.get<scalar>("x0");
-    scalar x1 = function1Properties.get<scalar>("x1");
+        // interpolator.integrationWeights(-0.01, 0, indices, weights);
+        // scalar partialSum = interpolator.weightedSum
+        // (
+        //     weights,
+        //     scalarUIndList(values, indices)
+        // );
+        // Pout<< "partialSum=" << partialSum << nl << nl << endl;
 
-    Info<< "Data entry type: " << function1().type() << nl << endl;
+        // interpolator.integrationWeights(-0.01, 1, indices, weights);
+        // //Pout<< "samples:" << samples << endl;
+        // //Pout<< "indices:" << indices << endl;
+        // //Pout<< "weights:" << weights << endl;
+        // scalar sum = interpolator.weightedSum
+        // (
+        //     weights,
+        //     scalarUIndList(values, indices)
+        // );
+        // Pout<< "integrand=" << sum << nl << nl << endl;
+    }
 
-    Info<< "Inputs" << nl
-        << "    x0 = " << x0 << nl
-        << "    x1 = " << x1 << nl
-        << endl;
+    if (args.found("all") || args.size() > 1)
+    {
+        #include "setConstantRunTimeDictionaryIO.H"
 
-    Info<< "Interpolation" << nl
-        << "    f(x0) = " << function1().value(x0) << nl
-        << "    f(x1) = " << function1().value(x1) << nl
-        << endl;
+        IOdictionary propsDict(dictIO);
 
-    Info<< "Integration" << nl
-        << "    int(f(x)) lim(x0->x1) = " << function1().integrate(x0, x1) << nl
-        << endl;
+        const scalarField xvals(propsDict.lookup("x"));
+
+        Info<< "Entries" << flatOutput(propsDict.toc()) << nl << nl;
+
+        Info<< "Inputs" << nl
+            << "    x = " << xvals << nl
+            << endl;
+
+        DynamicList<word> functionNames;
+
+        auto nameFilter = [](const word& val)
+        {
+            return !(val == "x" || val.ends_with("Coeffs"));
+        };
+
+        if (args.found("all"))
+        {
+            for (const word& f : propsDict.toc())
+            {
+                if (nameFilter(f))
+                {
+                    functionNames.append(f);
+                }
+            }
+        }
+        else
+        {
+            for (label argi=1; argi < args.size(); ++argi)
+            {
+                functionNames.append(args[argi]);
+            }
+        }
+
+        for (const word& funName : functionNames)
+        {
+            auto function1 = Function1<scalar>::New(funName, propsDict);
+
+            // Info<< "Data entry type: " << function1().type() << nl;
+            Info<< "////" << nl;
+            function1().writeData(Info);
+            Info<< nl;
+
+            Info<< "Values" << nl;
+            for (const scalar& x : xvals)
+            {
+                Info<< "    f(" << x << ") = " << function1().value(x) << nl;
+            }
+
+            Info<< endl;
+        }
+    }
 
     return 0;
 }

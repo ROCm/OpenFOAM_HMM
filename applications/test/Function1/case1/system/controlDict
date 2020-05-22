@@ -10,16 +10,17 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
-    object      function1Properties;
+    location    "system";
+    object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-x0  0.5;
-x1  1;
+application     none;
 
+deltaT          1;
 
-function1 table ((0 0)(10 1));
+writeControl    timeStep;
 
+writeInterval   10;
 
 // ************************************************************************* //

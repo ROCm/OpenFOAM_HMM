@@ -267,6 +267,8 @@ $(patchExpr)/patchExprDriverFields.C
 $(patchExpr)/patchExprLemonParser.lyy-m4
 $(patchExpr)/patchExprScanner.cc
 
+$(expr)/PatchFunction1/makePatchFunction1Expression.C
+
 volumeExpr = $(expr)/volume
 $(volumeExpr)/volumeExpr.C
 $(volumeExpr)/volumeExprDriver.C

@@ -164,6 +164,8 @@ $(fieldExpr)/fieldExprDriverFields.C
 $(fieldExpr)/fieldExprLemonParser.lyy-m4
 $(fieldExpr)/fieldExprScanner.cc
 
+$(expr)/Function1/makeFunction1Expression.C
+
 
 ops = primitives/ops
 $(ops)/flipOp.C

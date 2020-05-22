@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -98,7 +98,7 @@ public:
 
     // Constructors
 
-        //- Construct null - uses size = 1
+        //- Default construct - uses size = 1
         parseDriver();
 
         //- Construct with specified size
@@ -108,7 +108,7 @@ public:
         parseDriver(const label len, const dictionary& dict);
 
         //- Construct for specified size with copy of driver context
-        parseDriver(const label len, const parseDriver& driver_);
+        parseDriver(const label len, const parseDriver& rhs);
 
 
     //- Destructor

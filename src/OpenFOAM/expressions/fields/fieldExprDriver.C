@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,11 +81,11 @@ Foam::expressions::fieldExpr::parseDriver::parseDriver
 Foam::expressions::fieldExpr::parseDriver::parseDriver
 (
     const label len,
-    const parseDriver& driver_
+    const parseDriver& rhs
 )
 :
     parsing::genericRagelLemonDriver(),
-    expressions::exprDriver(driver_),
+    expressions::exprDriver(rhs),
     size_(len)
 {}
 
