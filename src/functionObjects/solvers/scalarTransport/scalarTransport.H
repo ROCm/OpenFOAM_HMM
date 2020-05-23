@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +57,7 @@ Usage
         scalar1
         {
             type            scalarTransport;
-            libs            ("libsolverFunctionObjects.so");
+            libs            (solverFunctionObjects);
 
             resetOnStartUp  no;
             region          cabin;
@@ -81,7 +81,7 @@ Usage
         sTransport
         {
             type            scalarTransport;
-            libs            ("libsolverFunctionObjects.so");
+            libs            (solverFunctionObjects);
 
             enabled         true;
             writeControl    outputTime;

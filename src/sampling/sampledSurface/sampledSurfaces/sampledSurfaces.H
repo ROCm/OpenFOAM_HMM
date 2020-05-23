@@ -38,7 +38,7 @@ Description
     surfaces
     {
         type    surfaces;
-        libs    ("libsampling.so");
+        libs    (sampling);
 
         // Write at same frequency as fields
         writeControl    outputTime;

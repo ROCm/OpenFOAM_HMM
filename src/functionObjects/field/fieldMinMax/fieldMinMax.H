@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2017 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,7 +44,7 @@ Usage
     fieldMinMax1
     {
         type        fieldMinMax;
-        libs        ("libfieldFunctionObjects.so");
+        libs        (fieldFunctionObjects);
         ...
         writeToFile yes;
         log         yes;

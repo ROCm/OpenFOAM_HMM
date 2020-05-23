@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +38,7 @@ Description
     cloudWrite1
     {
         type            vtkCloud;
-        libs            ("liblagrangianFunctionObjects.so");
+        libs            (lagrangianFunctionObjects);
         writeControl    writeTime;
         writeInterval   1;
         format          ascii;

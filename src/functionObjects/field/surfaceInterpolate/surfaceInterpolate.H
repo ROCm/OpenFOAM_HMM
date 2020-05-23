@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +47,7 @@ Usage
     surfaceInterpolate1
     {
         type        surfaceInterpolate;
-        libs        ("libfieldFunctionObjects.so");
+        libs        (fieldFunctionObjects);
         ...
         fields      ((p pNear)(U UNear));
     }

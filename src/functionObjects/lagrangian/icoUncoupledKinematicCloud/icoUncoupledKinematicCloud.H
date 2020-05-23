@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,8 +51,8 @@ Usage
     \verbatim
         tracks
         {
-            libs        ("liblagrangianFunctionObjects.so");
-            type        icoUncoupledKinematicCloud;
+            type    icoUncoupledKinematicCloud;
+            libs    (lagrangianFunctionObjects);
         }
     \endverbatim
 

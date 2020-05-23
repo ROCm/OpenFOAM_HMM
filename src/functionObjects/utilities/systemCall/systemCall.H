@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +44,7 @@ Usage
     systemCall1
     {
         type        systemCall;
-        libs        ("libutilityFunctionObjects.so");
+        libs        (utilityFunctionObjects);
         ...
         executeCalls
         (

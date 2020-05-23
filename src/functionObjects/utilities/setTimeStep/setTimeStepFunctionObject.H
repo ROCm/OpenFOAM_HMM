@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,7 +45,7 @@ Usage
     setTimeStep1
     {
         type        setTimeStep;
-        libs        ("libutilityFunctionObjects.so");
+        libs        (utilityFunctionObjects);
 
         deltaT      table ((0 5e-4)(0.01 1e-3));
 

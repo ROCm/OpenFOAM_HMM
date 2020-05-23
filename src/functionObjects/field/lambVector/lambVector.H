@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,7 @@ Usage
     lambVector1
     {
         type        lambVector;
-        libs        ("libfieldFunctionObjects.so");
+        libs        (fieldFunctionObjects);
         field       UMean;
         ... Base options of fieldExpression ...
     }

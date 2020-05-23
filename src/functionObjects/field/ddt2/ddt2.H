@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,7 @@ Usage
     dpdt2
     {
         type        ddt2;
-        libs        ("libfieldFunctionObjects.so");
+        libs        (fieldFunctionObjects);
         fields      (p);
         result      d@@dt2;
         ...

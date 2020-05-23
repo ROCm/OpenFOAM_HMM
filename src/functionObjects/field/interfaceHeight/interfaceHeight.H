@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2019 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +40,7 @@ Description
     interfaceHeight1
     {
         type           interfaceHeight;
-        libs           ("libfieldFunctionObjects.so");
+        libs           (fieldFunctionObjects);
         alpha          alpha.water;
         locations      ((0 0 0) (10 0 0) (20 0 0));
     }

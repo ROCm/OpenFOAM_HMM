@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +41,7 @@ Description
     Tdiff
     {
         type            subtract;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         fields          (T Tmean);
         result          Tdiff;
         executeControl  writeTime;

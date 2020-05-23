@@ -81,7 +81,7 @@ Usage
     pressure1
     {
         type        pressure;
-        libs        ("libfieldFunctionObjects.so");
+        libs        (fieldFunctionObjects);
         ...
         mode        staticCoeff;
     }

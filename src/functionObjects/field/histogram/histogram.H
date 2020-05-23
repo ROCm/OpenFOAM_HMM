@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,8 +39,7 @@ Usage
     histogram1
     {
         type            histogram;
-
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
 
         field           p;
         nBins           100;

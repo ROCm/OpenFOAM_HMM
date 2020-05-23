@@ -46,7 +46,7 @@ Usage
     Example of function object specification:
     \verbatim
         type            heatTransferCoeff;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         ...
         htcModel        ReynoldsAnalogy;
         UInf            (20 0 0);

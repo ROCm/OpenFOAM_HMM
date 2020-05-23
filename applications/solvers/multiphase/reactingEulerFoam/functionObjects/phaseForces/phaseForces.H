@@ -41,8 +41,8 @@ Description
     \verbatim
     phaseForces.water
     {
-        type            phaseForces;
-        libs ("libreactingEulerFoamFunctionObjects.so");
+        type phaseForces;
+        libs (reactingEulerFoamFunctionObjects);
         writeControl    writeTime;
         writeInterval   1;
 

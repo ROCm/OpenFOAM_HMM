@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +41,7 @@ Description
     Ttot
     {
         type            add;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         fields          (T Tdelta);
         result          Ttot;
         executeControl  writeTime;

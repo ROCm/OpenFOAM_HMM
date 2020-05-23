@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,7 @@ Usage
     momentum1
     {
         type        momentum;
-        libs        ("libfieldFunctionObjects.so");
+        libs        (fieldFunctionObjects);
         ...
         log         yes;
 

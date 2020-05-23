@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +38,7 @@ Usage
     hydrostaticPressure1
     {
         type        hydrostaticPressure;
-        libs        ("libinitialisationFunctionObjects.so");
+        libs        (initialisationFunctionObjects);
         ...
     }
     \endverbatim

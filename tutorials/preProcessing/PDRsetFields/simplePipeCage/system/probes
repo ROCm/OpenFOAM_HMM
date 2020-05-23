@@ -19,7 +19,7 @@ probes
     name    probes;
     type    probes;
 
-    libs    ("libsampling.so");
+    libs    (sampling);
 
     writeControl   timeStep;
     writeInterval  1;

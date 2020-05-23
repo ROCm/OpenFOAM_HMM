@@ -56,7 +56,7 @@ functions
     interfaceHeight1
     {
         type           interfaceHeight;
-        libs           ("libfieldFunctionObjects.so");
+        libs           (fieldFunctionObjects);
         alpha          alpha.liquid;
         locations      ((0 0 0));
         direction       (1 0 0);

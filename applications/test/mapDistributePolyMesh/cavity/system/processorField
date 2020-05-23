@@ -19,8 +19,7 @@ functions
     processorField
     {
         type            processorField;
-
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
 
         enabled         true;
 
@@ -29,8 +28,7 @@ functions
     cellID
     {
         type coded;
-
-        libs ("libutilityFunctionObjects.so");
+        libs (utilityFunctionObjects);
 
         name cellID;
 

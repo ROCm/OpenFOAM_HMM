@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,7 +37,7 @@ Usage
     extractEulerianParticles1
     {
         type            extractEulerianParticles;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         ...
         faceZone        f0;
         nLocations      10;

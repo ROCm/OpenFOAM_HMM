@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +36,7 @@ Description
     time
     {
         type            timeInfo;
-
-        libs            ("libutilityFunctionObjects.so");
+        libs            (utilityFunctionObjects);
 
         writeControl    timeStep;
         writeInterval   1;

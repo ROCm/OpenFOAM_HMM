@@ -43,7 +43,7 @@ Usage
     wallHeatFlux1
     {
         type        wallHeatFlux;
-        libs        ("libfieldFunctionObjects.so");
+        libs        (fieldFunctionObjects);
         ...
         region      fluid;
         patches     (".*Wall");

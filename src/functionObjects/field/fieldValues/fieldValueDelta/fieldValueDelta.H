@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2017 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,7 @@ Usage
     fieldValueDelta1
     {
         type            fieldValueDelta;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         operation       subtract;
 
         region1

@@ -49,7 +49,7 @@ functions
     yPlus
     {
         type            yPlus;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         writeControl    writeTime;
     }
 }

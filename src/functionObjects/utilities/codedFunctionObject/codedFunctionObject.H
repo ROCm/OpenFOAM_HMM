@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,9 +51,9 @@ Usage
     \verbatim
     difference
     {
-        libs        ("libutilityFunctionObjects.so");
-
         type coded;
+        libs (utilityFunctionObjects);
+
         // Name of on-the-fly generated functionObject
         name writeMagU;
         codeWrite

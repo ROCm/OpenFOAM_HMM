@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,7 @@ Usage
     Example of function object specification:
     \verbatim
         type            heatTransferCoeff;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
         ...
         htcModel        localReferenceTemperature;
         ...

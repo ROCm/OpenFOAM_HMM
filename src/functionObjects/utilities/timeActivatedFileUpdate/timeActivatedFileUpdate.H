@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,7 @@ Usage
     fileUpdate1
     {
         type              timeActivatedFileUpdate;
-        libs              ("libutilityFunctionObjects.so");
+        libs              (utilityFunctionObjects);
         writeControl      timeStep;
         writeInterval     1;
         fileToUpdate      "<system>/fvSolution";

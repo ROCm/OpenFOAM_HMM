@@ -57,7 +57,7 @@ Usage
     Curle1
     {
         type        Curle;
-        libs        ("libfieldFunctionObjects.so");
+        libs        (fieldFunctionObjects);
         ...
         patches     (surface1 surface2);
         c0          330;

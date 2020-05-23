@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,7 @@ Usage
     cloudInfo1
     {
         type        cloudInfo;
-        libs        ("liblagrangianFunctionObjects.so");
+        libs        (lagrangianFunctionObjects);
         ...
         clouds
         (

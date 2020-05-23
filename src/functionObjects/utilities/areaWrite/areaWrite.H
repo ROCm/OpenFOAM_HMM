@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +35,7 @@ Description
     surfaces
     {
         type    areaWrite;
-        libs    ("libutilityFunctionObjects.so");
+        libs    (utilityFunctionObjects);
 
         // Write at same frequency as fields
         writeControl    outputTime;

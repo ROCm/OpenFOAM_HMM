@@ -18,16 +18,10 @@ functions
 {
     processorField1
     {
-        // Type of functionObject
         type            processorField;
+        libs            (fieldFunctionObjects);
 
-        // Where to load it from (if not already in solver)
-        libs            ("libfieldFunctionObjects.so");
-
-        // Function object enabled flag
         enabled         true;
-
-        // When to output the average fields
         writeControl    writeTime;
     }
 }

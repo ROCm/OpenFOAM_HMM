@@ -42,7 +42,7 @@ Usage
     volFieldValue1
     {
         type            volFieldValue;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
 
         log             true;
         writeControl    writeTime;

@@ -38,7 +38,7 @@ Description
     box.all.numberDensity.volume.bubbles
     {
         type sizeDistribution;
-        libs ("libreactingEulerFoamFunctionObjects.so");
+        libs (reactingEulerFoamFunctionObjects);
         writeControl    outputTime;
         writeInterval   1;
         log             true;

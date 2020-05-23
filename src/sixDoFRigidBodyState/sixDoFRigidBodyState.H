@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +38,7 @@ Description
     sixDoFRigidBodyState
     {
         type           sixDoFRigidBodyState;
-        libs           ("libsixDoFRigidBodyState.so");
+        libs           (sixDoFRigidBodyState);
         angleFormat    degrees;
     }
     \endverbatim

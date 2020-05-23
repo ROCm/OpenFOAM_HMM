@@ -19,7 +19,7 @@ FoamFile
 type            runTimePostProcessing;
 
 // Where to load it from
-libs            ("runTimePostProcessing");
+libs            (runTimePostProcessing);
 
 // Function object enabled flag
 enabled         true;

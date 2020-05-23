@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2014 OpenFOAM Foundation
-    Copyright (C) 2015-2017 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,7 +61,7 @@ functions
     myFunctionObject    // user-defined name of function object entry
     {
         type                functionObjectType;
-        libs                ("libMyFunctionObjectlib.so");
+        libs                (myFunctionObjectLib);
         region              defaultRegion;
         enabled             yes;
         timeStart           0;

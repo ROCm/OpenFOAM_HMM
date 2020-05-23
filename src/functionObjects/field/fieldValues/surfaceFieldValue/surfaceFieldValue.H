@@ -46,7 +46,7 @@ Usage
     movingWallPatch
     {
         type            surfaceFieldValue;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
 
         log             true;
         writeControl    writeTime;
@@ -62,7 +62,7 @@ Usage
     surfaceFieldValue1
     {
         type            surfaceFieldValue;
-        libs            ("libfieldFunctionObjects.so");
+        libs            (fieldFunctionObjects);
 
         log             true;
         writeControl    writeTime;
