@@ -490,7 +490,9 @@ Foam::Time::Time
     const word& ctrlDictName,
     const argList& args,
     const word& systemName,
-    const word& constantName
+    const word& constantName,
+    const bool enableFunctionObjects,
+    const bool enableLibs
 )
 :
     TimePaths(args, systemName, constantName),
@@ -544,15 +546,21 @@ Foam::Time::Time
       : false
     )
     {
-        functionObjects_.on();
+        if (enableFunctionObjects)
+        {
+            functionObjects_.on();
+        }
     }
 
     // Libraries
     //
-    // * enabled unless '-no-libs' option was used
+    // * enable by default unless '-no-libs' option was used
     if (!args.found("no-libs"))
     {
-        libs_.open(controlDict_, "libs");
+        if (enableLibs)
+        {
+            libs_.open(controlDict_, "libs");
+        }
     }
 
     // Explicitly set read flags on objectRegistry so anything constructed
@@ -716,10 +724,8 @@ Foam::autoPtr<Foam::Time> Foam::Time::New()
     return
         autoPtr<Time>::New
         (
-            ".",            // root-path
-            ".",            // case-name
-            "system",
-            "constant",
+            fileName("."),  // root-path
+            fileName("."),  // case-name
             false,          // No enableFunctionObjects
             false           // No enableLibs
         );
@@ -733,8 +739,19 @@ Foam::autoPtr<Foam::Time> Foam::Time::New(const fileName& caseDir)
         (
             caseDir.path(), // root-path
             caseDir.name(), // case-name
-            "system",
-            "constant",
+            false,          // No enableFunctionObjects
+            false           // No enableLibs
+        );
+}
+
+
+Foam::autoPtr<Foam::Time> Foam::Time::New(const argList& args)
+{
+    return
+        autoPtr<Time>::New
+        (
+            Time::controlDictName,
+            args,
             false,          // No enableFunctionObjects
             false           // No enableLibs
         );

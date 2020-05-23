@@ -62,7 +62,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class argList;
 class profilingTrigger;
 class OSstream;
@@ -221,54 +221,106 @@ private:
 
 public:
 
-    TypeName("time");
+    // Static Data Members
 
-    //- The default control dictionary name (normally "controlDict")
-    static word controlDictName;
+        //- The default control dictionary name (normally "controlDict")
+        static word controlDictName;
+
+
+    //- Runtime type information
+    TypeName("time");
 
 
     // Constructors
 
-        //- Construct given name of dictionary to read and argument list
+        //- Construct from dictionary name to read and argument list.
+        //  Uses "system" and "constant" for its directories.
+        inline Time
+        (
+            const word& ctrlDictName,
+            const argList& args,
+            const bool enableFunctionObjects = true,
+            const bool enableLibs = true
+        );
+
+        //- Construct given name of dictionary to read and root/case paths.
+        //  Uses "system" and "constant" for its directories.
+        inline Time
+        (
+            const word& ctrlDictName,
+            const fileName& rootPath,
+            const fileName& caseName,
+            const bool enableFunctionObjects = true,
+            const bool enableLibs = true
+        );
+
+        //- Construct given dictionary and root/case paths.
+        //  Uses "system" and "constant" for its directories.
+        inline Time
+        (
+            const dictionary& dict,
+            const fileName& rootPath,
+            const fileName& caseName,
+            const bool enableFunctionObjects = true,
+            const bool enableLibs = true
+        );
+
+        //- Construct at endTime and root/case paths.
+        //  Uses "system" and "constant" for its directories.
+        inline Time
+        (
+            const fileName& rootPath,
+            const fileName& caseName,
+            const bool enableFunctionObjects = true,
+            const bool enableLibs = true
+        );
+
+        //- Construct from dictionary name to read and argument list.
+        //  Use specified system/constant directory names.
         Time
         (
             const word& ctrlDictName,
             const argList& args,
-            const word& systemName = "system",
-            const word& constantName = "constant"
+            const word& systemName,     //!< "system" directory name
+            const word& constantName,   //!< "constant" directory name
+            const bool enableFunctionObjects = true,
+            const bool enableLibs = true
         );
 
-        //- Construct given name of dictionary to read, rootPath and casePath
+        //- Construct given name of dictionary to read and root/case paths.
+        //  Use specified system/constant directory names.
         Time
         (
             const word& ctrlDictName,
             const fileName& rootPath,
             const fileName& caseName,
-            const word& systemName = "system",
-            const word& constantName = "constant",
+            const word& systemName,     //!< "system" directory name
+            const word& constantName,   //!< "constant" directory name
             const bool enableFunctionObjects = true,
             const bool enableLibs = true
         );
 
-        //- Construct given dictionary, rootPath and casePath
+        //- Construct given dictionary and root/case paths.
+        //  Use specified system/constant directory names.
         Time
         (
             const dictionary& dict,
             const fileName& rootPath,
             const fileName& caseName,
-            const word& systemName = "system",
-            const word& constantName = "constant",
+            const word& systemName,     //!< "system" directory name
+            const word& constantName,   //!< "constant" directory name
             const bool enableFunctionObjects = true,
             const bool enableLibs = true
         );
 
-        //- Construct given endTime, rootPath and casePath
+        //- Construct given endTime and root/case paths.
+        //  Use specified system/constant directory names.
         Time
         (
             const fileName& rootPath,
             const fileName& caseName,
-            const word& systemName = "system",
-            const word& constantName = "constant",
+            const word& systemName,     //!< "system" directory name
+            const word& constantName,   //!< "constant" directory name
             const bool enableFunctionObjects = true,
             const bool enableLibs = true
         );
@@ -276,11 +328,14 @@ public:
 
     // Selectors
 
-        //- Construct dummy time, without functionObjects or libraries
+        //- Construct (dummy) Time - no functionObjects or libraries
         static autoPtr<Time> New();
 
-        //- Construct dummy time, without functionObjects or libraries
+        //- Construct (dummy) Time - no functionObjects or libraries
         static autoPtr<Time> New(const fileName& caseDir);
+
+        //- Construct (dummy) Time - no functionObjects or libraries
+        static autoPtr<Time> New(const argList& args);
 
 
     //- Destructor
@@ -605,6 +660,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "TimeI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

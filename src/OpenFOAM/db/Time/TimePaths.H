@@ -46,7 +46,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class argList;
 
 /*---------------------------------------------------------------------------*\
@@ -56,7 +56,7 @@ class argList;
 
 class TimePaths
 {
-    // Private data
+    // Private Data
 
         bool processorCase_;
         bool distributed_;
@@ -79,7 +79,7 @@ public:
     // Constructors
 
         //- Construct using characteristics given by the argList
-        TimePaths
+        explicit TimePaths
         (
             const argList& args,
             const word& systemName = "system",
