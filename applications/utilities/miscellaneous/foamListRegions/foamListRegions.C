@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,8 +68,14 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
-    // As per "createTime.H", but quieter.
-    Time runTime(Time::controlDictName, args);
+    // Silent version of "createTime.H", without libraries
+    Time runTime
+    (
+        Time::controlDictName,
+        args,
+        false,  // no enableFunctionObjects
+        false   // no enableLibs
+    );
 
     regionProperties rp(runTime);
 
@@ -78,24 +84,32 @@ int main(int argc, char *argv[])
 
     if (args.size() > 1)
     {
-        regionTypes.setSize(args.size()-1);
+        regionTypes.resize(args.size()-1);
+
+        // No duplicates
+        wordHashSet uniq;
 
         label nTypes = 0;
         for (label argi = 1; argi < args.size(); ++argi)
         {
             regionTypes[nTypes] = args[argi];
 
-            if (rp.found(regionTypes[nTypes]))
+            const word& regType = regionTypes[nTypes];
+
+            if (uniq.insert(regType))
             {
-                ++nTypes;
-            }
-            else
-            {
-                std::cerr<< "No region-type: " << regionTypes[nTypes] << nl;
+                if (rp.found(regType))
+                {
+                    ++nTypes;
+                }
+                else
+                {
+                    InfoErr<< "No region-type: " << regType << nl;
+                }
             }
         }
 
-        regionTypes.setSize(nTypes);
+        regionTypes.resize(nTypes);
     }
     else
     {
