@@ -212,11 +212,20 @@ Foam::messageStream::operator Foam::OSstream&()
 {
     if (level)
     {
+        // stderr instead of stdout
+        // - INFO_STDERR
+        // - WARNING when infoDetailLevel == 0
+        const bool useSerr =
+        (
+            (severity_ == INFO_STDERR)
+         || (severity_ == WARNING && Foam::infoDetailLevel == 0)
+        );
+
         const bool collect =
         (
             severity_ == INFO
-         || severity_ == INFO_STDERR
          || severity_ == WARNING
+         || useSerr
         );
 
 
@@ -226,10 +235,11 @@ Foam::messageStream::operator Foam::OSstream&()
             return Snull;
         }
 
+
         OSstream& os =
         (
             (collect || !Pstream::parRun())
-          ? ((severity_ == INFO_STDERR) ? Serr : Sout)
+          ? (useSerr ? Serr : Sout)
           : Pout
         );
 
