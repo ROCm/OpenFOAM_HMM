@@ -3465,35 +3465,30 @@ const Foam::dictionary& Foam::meshRefinement::subDict
 (
     const dictionary& dict,
     const word& keyword,
-    const bool noExit
+    const bool noExit,
+    enum keyType::option matchOpt
 )
 {
-    if (noExit)
-    {
-        // Find non-recursive with patterns
-        const dictionary::const_searcher finder
-        (
-            dict.csearch
-            (
-                keyword,
-                keyType::REGEX
-            )
-        );
+    const auto finder(dict.csearch(keyword, matchOpt));
 
-        if (!finder.found())
+    if (!finder.good())
+    {
+        auto& err = FatalIOErrorInFunction(dict);
+
+        err << "Entry '" << keyword << "' not found in dictionary "
+            << dict.name() << nl;
+
+        if (noExit)
         {
-            FatalIOErrorInFunction(dict)
-                << "Entry '" << keyword << "' not found in dictionary "
-                << dict.name();
             return dictionary::null;
         }
         else
         {
-            return finder.dict();
+            err << exit(FatalIOError);
         }
     }
 
-    return dict.subDict(keyword);
+    return finder.dict();
 }
 
 
@@ -3501,31 +3496,31 @@ Foam::ITstream& Foam::meshRefinement::lookup
 (
     const dictionary& dict,
     const word& keyword,
-    const bool noExit
+    const bool noExit,
+    enum keyType::option matchOpt
 )
 {
-    if (noExit)
-    {
-        const dictionary::const_searcher finder
-        (
-            dict.csearch(keyword, keyType::REGEX)
-        );
+    const auto finder(dict.csearch(keyword, matchOpt));
 
-        if (!finder.found())
+    if (!finder.good())
+    {
+        auto& err = FatalIOErrorInFunction(dict);
+
+        err << "Entry '" << keyword << "' not found in dictionary "
+            << dict.name() << nl;
+
+        if (noExit)
         {
-            FatalIOErrorInFunction(dict)
-                << "Entry '" << keyword << "' not found in dictionary "
-                << dict.name();
             // Fake entry
             return dict.first()->stream();
         }
         else
         {
-            return finder.ref().stream();
+            err << exit(FatalIOError);
         }
     }
 
-    return dict.lookup(keyword);
+    return finder.ref().stream();
 }
 
 

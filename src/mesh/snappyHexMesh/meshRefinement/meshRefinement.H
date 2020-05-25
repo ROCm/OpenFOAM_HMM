@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,7 +66,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward Declarations
 class fvMesh;
 class mapDistributePolyMesh;
 class decompositionMethod;
@@ -79,7 +79,6 @@ class removePoints;
 class localPointRegion;
 class snapParameters;
 
-
 /*---------------------------------------------------------------------------*\
                        Class meshRefinement Declaration
 \*---------------------------------------------------------------------------*/
@@ -88,7 +87,7 @@ class meshRefinement
 {
 public:
 
-    // Public data types
+    // Public Data Types
 
         //- Enumeration for what to debug. Used as a bit-pattern.
         enum debugType
@@ -143,7 +142,7 @@ public:
 
 private:
 
-    // Static data members
+    // Static Data Members
 
         //- Control of writing level
         static writeType writeLevel_;
@@ -152,7 +151,7 @@ private:
         //static outputType outputLevel_;
 
 
-    // Private data
+    // Private Data
 
         //- Reference to mesh
         fvMesh& mesh_;
@@ -1701,7 +1700,7 @@ public:
                 const word& keyword,
                 const bool noExit,
                 enum keyType::option matchOpt = keyType::REGEX,
-                const Type& defaultValue = Zero
+                const Type& deflt = Zero
             );
 
             //- Wrapper around dictionary::subDict which does not exit
@@ -1709,7 +1708,8 @@ public:
             (
                 const dictionary& dict,
                 const word& keyword,
-                const bool noExit
+                const bool noExit,
+                enum keyType::option matchOpt = keyType::REGEX
             );
 
             //- Wrapper around dictionary::lookup which does not exit
@@ -1717,7 +1717,8 @@ public:
             (
                 const dictionary& dict,
                 const word& keyword,
-                const bool noExit
+                const bool noExit,
+                enum keyType::option matchOpt = keyType::REGEX
             );
 };
 

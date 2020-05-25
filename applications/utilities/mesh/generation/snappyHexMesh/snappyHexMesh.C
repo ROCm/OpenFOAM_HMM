@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1259,7 +1259,10 @@ int main(int argc, char *argv[])
     refinementFeatures features
     (
         mesh,
-        meshRefinement::lookup(refineDict, "features", dryRun),
+        PtrList<dictionary>
+        (
+            meshRefinement::lookup(refineDict, "features", dryRun)
+        ),
         dryRun
     );
     Info<< "Read features in = "

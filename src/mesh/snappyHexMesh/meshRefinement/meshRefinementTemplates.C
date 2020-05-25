@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,8 +33,8 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Add a T entry
-template<class T> void Foam::meshRefinement::updateList
+template<class T>
+void Foam::meshRefinement::updateList
 (
     const labelList& newToOld,
     const T& nullValue,
@@ -45,7 +45,7 @@ template<class T> void Foam::meshRefinement::updateList
 
     forAll(newElems, i)
     {
-        label oldI = newToOld[i];
+        const label oldI = newToOld[i];
 
         if (oldI >= 0)
         {
@@ -332,26 +332,18 @@ Type Foam::meshRefinement::get
     const word& keyword,
     const bool noExit,
     enum keyType::option matchOpt,
-    const Type& defaultValue
+    const Type& deflt
 )
 {
-    Type val(defaultValue);
+    Type val(deflt);
 
-    if
-    (
-       !dict.readEntry
-        (
-            keyword,
-            val,
-            matchOpt,
-            !noExit
-        )
-    )
+    if (!dict.readEntry(keyword, val, matchOpt, !noExit))
     {
-        FatalIOError
+        FatalIOErrorInFunction(dict)
             << "Entry '" << keyword << "' not found in dictionary "
-            << dict.name() << endl;
+            << dict.name() << nl;
     }
+
     return val;
 }
 
