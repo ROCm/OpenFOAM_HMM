@@ -121,21 +121,21 @@ inline void Foam::PtrList<T>::append(T* ptr)
 template<class T>
 inline void Foam::PtrList<T>::append(autoPtr<T>& aptr)
 {
-    return UPtrList<T>::append(aptr.release());
+    UPtrList<T>::append(aptr.release());
 }
 
 
 template<class T>
 inline void Foam::PtrList<T>::append(autoPtr<T>&& aptr)
 {
-    return UPtrList<T>::append(aptr.release());
+    UPtrList<T>::append(aptr.release());
 }
 
 
 template<class T>
 inline void Foam::PtrList<T>::append(const tmp<T>& tptr)
 {
-    return UPtrList<T>::append(tptr.ptr());
+    UPtrList<T>::append(tptr.ptr());
 }
 
 
