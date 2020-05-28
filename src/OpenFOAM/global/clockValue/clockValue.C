@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,61 +26,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "clockValue.H"
-#include "IOstreams.H"
-
 #include <sstream>
 #include <iomanip>
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::clockValue::clockValue()
-:
-    value_(value_type::zero())
-{}
-
-
-Foam::clockValue::clockValue(const value_type& value)
-:
-    value_(value)
-{}
-
-
-Foam::clockValue::clockValue(bool useNow)
-:
-    value_(value_type::zero())
-{
-    if (useNow)
-    {
-        update();
-    }
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::clockValue::clear()
-{
-    value_ = value_type::zero();
-}
-
-
-void Foam::clockValue::update()
-{
-    value_ = std::chrono::high_resolution_clock::now().time_since_epoch();
-}
-
-
-Foam::clockValue Foam::clockValue::elapsed() const
-{
-    return (now() -= *this);
-}
-
-
-long Foam::clockValue::seconds() const
-{
-    return std::chrono::duration_cast<std::chrono::seconds>(value_).count();
-}
-
 
 std::string Foam::clockValue::str() const
 {
@@ -125,46 +74,6 @@ std::string Foam::clockValue::str() const
     }
 
     return os.str();
-}
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-Foam::clockValue::operator double () const
-{
-    return
-    (
-        (double(value_.count()) * value_type::period::num)
-      / value_type::period::den
-    );
-}
-
-
-Foam::clockValue& Foam::clockValue::operator-=(const clockValue& rhs)
-{
-    value_ -= rhs.value_;
-    return *this;
-}
-
-
-Foam::clockValue& Foam::clockValue::operator+=(const clockValue& rhs)
-{
-    value_ += rhs.value_;
-    return *this;
-}
-
-
-// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
-
-Foam::clockValue Foam::operator-(const clockValue& a, const clockValue& b)
-{
-    return clockValue(a.value() - b.value());
-}
-
-
-Foam::clockValue Foam::operator+(const clockValue& a, const clockValue& b)
-{
-    return clockValue(a.value() + b.value());
 }
 
 

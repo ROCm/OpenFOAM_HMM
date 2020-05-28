@@ -128,7 +128,7 @@ double Foam::clock::elapsedClockTime() const
 
 double Foam::clock::clockTimeIncrement() const
 {
-    const value_type prev(last_);
+    const auto prev(last_);
 
     last_ = getTime();
     return ::difftime(last_, prev);

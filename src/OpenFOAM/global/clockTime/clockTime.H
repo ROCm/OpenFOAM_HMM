@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,11 +28,21 @@ Class
     Foam::clockTime
 
 Description
-    Starts timing (using rtc) and returns elapsed time from start.
-    Better resolution (2uSec instead of ~20mSec) than cpuTime.
+    Starts timing and returns elapsed time from start.
+    Uses std::chrono::high_resolution_clock for better resolution
+    (2uSec instead of ~20mSec) than cpuTime.
+
+Note
+    It has twice the storage requirement of a simple clockValue since
+    it tracks both total and incremental elapsed times.
+    Additionally, it always invokes a clock query on construction
+    which may make it less desirable for arrays of values (for example).
+
+See Also
+    Foam::clockValue
 
 SourceFiles
-    clockTime.C
+    clockTimeI.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -54,43 +64,44 @@ class clockTime
 {
     // Private Data
 
-        //- The values being used.
-        typedef clockValue value_type;
+        //- Time point at start, or after resetTime
+        clockValue start_;
 
-        //- Start time, at the time of construction
-        value_type start_;
-
-        //- Last time when elapsedTime or timeIncrement was called
-        mutable value_type last_;
+        //- Time point when elapsedTime or timeIncrement was called
+        mutable clockValue last_;
 
 
 public:
 
     // Constructors
 
-        //- Construct with the current clock time for the starting value
-        clockTime();
+        //- Construct with the current clock value for the start point
+        inline clockTime();
 
-        //- Construct with the given clock value for the starting value
-        clockTime(const clockValue& clockval);
+        //- Implicit construct from the clock value as the start point
+        inline clockTime(const clockValue& clockval);
 
 
     // Member Functions
 
-        //- Reset to use the current time for the start time
-        void resetTime();
+        //- Reset to use the current clock value for the start point
+        inline void resetTime();
 
-        //- Return time (in seconds) from the start
-        double elapsedTime() const;
+        //- The time [seconds] since the start point
+        inline double elapsedTime() const;
 
-        //- Return time (in seconds) since last call to timeIncrement()
-        double timeIncrement() const;
+        //- The time [seconds] since the last call to timeIncrement()
+        inline double timeIncrement() const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "clockTimeI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

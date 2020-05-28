@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,8 +31,8 @@ Description
 #include "OSspecific.H"
 #include "clock.H"
 #include "clockTime.H"
-#include "cpuTime.H"
 #include "clockValue.H"
+#include "cpuTime.H"
 
 using namespace Foam;
 
@@ -42,7 +42,7 @@ void testEpoch()
 {
     Info<< nl << "Test epoch" << nl;
 
-    ClockValue now(true);
+    const auto now = ClockValue::now();
 
     Info<< "epoch = " << now.str() << "  # day-hh:mm::ss" << nl
         << "epoch = " << now << nl;
@@ -73,7 +73,8 @@ void testElapsed()
         << "elapsed = " << a.elapsed().seconds() << nl
         << "elapsed = " << a.elapsed().str() << nl;
 
-    ClockValue b(true);
+    const ClockValue b(true);  // ClockValue::now()
+    Info<< "clockValue() " << b << nl;
 
     Info<< "(" << b << " - " << a << ") = " << (b - a) << nl;
     Info<< "(" << b << " + " << a << ") = " << (b + a) << nl;
@@ -86,7 +87,7 @@ void testElapsed()
 int main(int argc, char *argv[])
 {
     {
-        Foam::clock sysClock();
+        Foam::clock sysClock;
 
         Info<< "clock: date "  << clock::date() << nl
             << "clock: time "  << clock::clockTime() << nl
@@ -116,8 +117,8 @@ int main(int argc, char *argv[])
 
         Info<< "sleep 2..." << endl;
         sleep(2);
-        Info<< "elapsed   = " << clk.elapsedTime() << nl;
         Info<< "increment = " << clk.timeIncrement() << nl;
+        Info<< "elapsed   = " << clk.elapsedTime() << nl;
     }
 
     Info<< "End\n" << endl;

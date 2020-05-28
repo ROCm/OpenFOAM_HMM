@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,18 +25,16 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "clockTime.H"
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::clockTime::clockTime()
+inline Foam::clockTime::clockTime()
 :
-    start_(true),
+    start_(true),  // == clockValue::now()
     last_(start_)
 {}
 
 
-Foam::clockTime::clockTime(const clockValue& clockval)
+inline Foam::clockTime::clockTime(const clockValue& clockval)
 :
     start_(clockval),
     last_(start_)
@@ -45,25 +43,25 @@ Foam::clockTime::clockTime(const clockValue& clockval)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::clockTime::resetTime()
+inline void Foam::clockTime::resetTime()
 {
     last_.update();
     start_ = last_;
 }
 
 
-double Foam::clockTime::elapsedTime() const
+inline double Foam::clockTime::elapsedTime() const
 {
     last_.update();
-    return (last_ - start_);
+    return static_cast<double>(last_ - start_);
 }
 
 
-double Foam::clockTime::timeIncrement() const
+inline double Foam::clockTime::timeIncrement() const
 {
-    const value_type prev(last_);
+    const auto prev(last_);
     last_.update();
-    return (last_ - prev);
+    return static_cast<double>(last_ - prev);
 }
 
 

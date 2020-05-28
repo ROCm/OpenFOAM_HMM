@@ -4,7 +4,6 @@ global/global.Cver
 global/argList/argList.C
 global/argList/argListHelp.C
 global/clock/clock.C
-global/clockTime/clockTime.C
 global/clockValue/clockValue.C
 global/cpuTime/cpuTimeCxx.C
 global/debug/simpleObjectRegistry.C

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,50 +52,56 @@ namespace Foam
 
 class clock
 {
-    // Private data
+    // Private Data
 
-        //- Time structure used
-        typedef time_t value_type;
-
-        //- Start time in seconds, at the time of construction
-        value_type start_;
+        //- Time point at start (in seconds)
+        time_t start_;
 
         //- Last time when elapsedClockTime or clockTimeIncrement was called
-        mutable value_type last_;
+        mutable time_t last_;
+
 
 public:
 
     // Constructors
 
-        //- Construct null, storing the start time
+        //- Construct with the current clock time for the start point
         clock();
 
 
-    // Static Member Functions
+    // Low-level Member Functions
 
         //- Get the current clock time in seconds
         static time_t getTime();
 
-        //- Return the current wall-clock date as a raw struct
+        //- The current wall-clock date as a raw struct
+        //  \deprecated(2020-05) may be removed in future versions
         static const struct tm rawDate();
 
-        //- Return the current wall-clock date/time as a string
-        //  format according to ISO-8601 (yyyy-mm-ddThh:mm:ss)
+
+    // Static Member Functions
+
+        //- The current wall-clock date/time (in local time) as a string
+        //- in ISO-8601 format (yyyy-mm-ddThh:mm:ss).
+        //  Without time-zone information.
         static std::string dateTime();
 
-        //- Return the current wall-clock date as a string
+        //- The current wall-clock date as a string formatted as
+        //- (MON dd yyyy), where MON is Jan, Feb, etc.
         static std::string date();
 
-        //- Return the current wall-clock time as a string
+        //- The current wall-clock (in local time) as a string formatted as
+        //- as (hh:mm:ss).
+        //  Without time-zone information.
         static std::string clockTime();
 
 
     // Member Functions
 
-        //- Returns wall-clock time from clock instantiation
+        //- Returns wall-clock time since clock instantiation
         double elapsedClockTime() const;
 
-        //- Returns wall-clock time from last call of clockTimeIncrement()
+        //- Returns wall-clock time since last clockTimeIncrement() call
         double clockTimeIncrement() const;
 };
 
