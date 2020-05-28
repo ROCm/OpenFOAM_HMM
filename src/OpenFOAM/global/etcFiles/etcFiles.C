@@ -30,6 +30,24 @@ License
 #include "foamVersion.H"
 #include "OSspecific.H"
 
+#ifdef FULLDEBUG
+#ifndef FOAM_RESOURCE_USER_CONFIG_DIRNAME
+# warning FOAM_RESOURCE_USER_CONFIG_DIRNAME undefined (was this intentional?)
+#endif
+
+#ifndef FOAM_RESOURCE_SITE_ENVNAME
+# warning FOAM_RESOURCE_SITE_ENVNAME undefined (was this intentional?)
+#endif
+
+#ifndef FOAM_RESOURCE_SITE_FALLBACK_ENVNAME
+# warning FOAM_RESOURCE_SITE_FALLBACK_ENVNAME undefined (was this intentional?)
+#endif
+#endif
+
+// Always use these names
+#undef  FOAM_PROJECT_ENVNAME
+#define FOAM_PROJECT_ENVNAME "WM_PROJECT_DIR"
+
 // * * * * * * * * * * * * * * Static Functions  * * * * * * * * * * * * * * //
 
 //
@@ -70,8 +88,8 @@ static inline void errorMandatoryNotFound
     // setup at all.
 
     std::cerr
-        << "--> FOAM FATAL ERROR :\n    "
-        "Could not find mandatory etc entry (mode="
+        << "--> FOAM FATAL ERROR :\n"
+        "    Could not find mandatory etc entry (mode="
         << locationToString(location) << ")\n    '"
         << name << "'\n"
         << std::endl;
@@ -96,9 +114,6 @@ static inline bool userResourceDir(Foam::fileName& queried)
         // But we would have worse problems elsewhere if that were the case.
         return true;
     }
-    #elif defined FULLDEBUG
-        #warning FOAM_RESOURCE_USER_CONFIG_DIRNAME \
-        is undefined (was this intentional?)
     #endif
 
     return false;
@@ -120,38 +135,30 @@ static inline bool groupResourceDir(Foam::fileName& queried)
 {
     #ifdef FOAM_RESOURCE_SITE_ENVNAME
     queried = Foam::getEnv(FOAM_RESOURCE_SITE_ENVNAME)/"etc";
-    if (queried.size() > 3)
+    if (queried.size() > 4)
     {
         return Foam::isDir(queried);
     }
-    #elif defined FULLDEBUG
-        #warning FOAM_RESOURCE_SITE_ENVNAME \
-        is undefined (was this intentional?)
     #endif
 
     // Fallback when WM_PROJECT_SITE is unset
 
     #ifdef FOAM_RESOURCE_SITE_FALLBACK_ENVNAME
     queried = Foam::getEnv(FOAM_RESOURCE_SITE_FALLBACK_ENVNAME)/"site/etc";
-    if (queried.size() > 8 && Foam::isDir(queried))
+    if (queried.size() > 9 && Foam::isDir(queried))
     {
         return true;
     }
-    #elif defined FULLDEBUG
-        #warning FOAM_RESOURCE_SITE_FALLBACK_ENVNAME \
-        is undefined (was this intentional?)
     #endif
 
     // Compile-time paths
-    queried = Foam::foamVersion::configuredProjectDir();
-    if (queried.size())
+    #ifdef FOAM_CONFIGURED_PROJECT_DIR
+    queried = FOAM_CONFIGURED_PROJECT_DIR "/site/etc";
+    if (queried.size() > 9 && Foam::isDir(queried))
     {
-        queried /= "site/etc";
-        if (Foam::isDir(queried))
-        {
-            return true;
-        }
+        return true;
     }
+    #endif
 
     queried.clear();
     return false;
@@ -171,32 +178,29 @@ static inline bool groupResourceDir(Foam::fileName& queried)
 //   - FOAM_CONFIGURED_PROJECT_DIR/"etc"
 static inline bool projectResourceDir(Foam::fileName& queried)
 {
-    queried = Foam::getEnv("WM_PROJECT_DIR")/"etc";
-    if (queried.size() > 3 && Foam::isDir(queried))
+    queried = Foam::getEnv(FOAM_PROJECT_ENVNAME)/"etc";
+    if (queried.size() > 4 && Foam::isDir(queried))
     {
         return true;
     }
 
     // Compile-time paths
 
-    queried = Foam::foamVersion::configuredEtcDir();
-    if (queried.size())
+    #ifdef FOAM_CONFIGURED_PROJECT_ETC
+    queried = FOAM_CONFIGURED_PROJECT_ETC;
+    if (Foam::isDir(queried))
     {
-        if (Foam::isDir(queried))
-        {
-            return true;
-        }
+        return true;
     }
+    #endif
 
-    queried = Foam::foamVersion::configuredProjectDir();
-    if (queried.size())
+    #ifdef FOAM_CONFIGURED_PROJECT_DIR
+    queried = FOAM_CONFIGURED_PROJECT_DIR "/etc";
+    if (queried.size() > 4 && Foam::isDir(queried))
     {
-        queried /= "etc";
-        if (Foam::isDir(queried))
-        {
-            return true;
-        }
+        return true;
     }
+    #endif
 
     queried.clear();
     return false;

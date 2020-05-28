@@ -8,6 +8,6 @@ namespace Foam
     void printTest()
     {
         Info<< nl;
-        foamVersion::printBuildInfo();
+        foamVersion::printBuildInfo(Info().stdStream());
     }
 }

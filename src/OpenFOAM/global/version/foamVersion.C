@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,28 +37,28 @@ bool Foam::foamVersion::patched()
     // Patch-level, when defined (non-zero) and not some @TOKEN@ rubbish
     return
     (
-        foamVersion::patch.size() && foamVersion::patch[0] != '@'
+        (foamVersion::patch.size() && foamVersion::patch[0] != '@')
      && (foamVersion::patch.size() > 1 || foamVersion::patch[0] != '0')
     );
 }
 
 
-void Foam::foamVersion::printBuildInfo(const bool full)
+void Foam::foamVersion::printBuildInfo(std::ostream& os, const bool full)
 {
-    Info<< "Using: OpenFOAM-" << foamVersion::version.c_str()
+    os  << "Using: OpenFOAM-" << foamVersion::version
         << " (" << foamVersion::api << ") - visit www.openfoam.com\n"
-        << "Build: " << foamVersion::build.c_str();
+        << "Build: " << foamVersion::build;
 
     if (foamVersion::patched())
     {
         // Patch-level, when defined
-        Info<< " (patch=" << foamVersion::patch.c_str() << ')';
+        os  << " (patch=" << foamVersion::patch << ')';
     }
-    Info<< nl;
+    os  << '\n';
 
     if (full)
     {
-        Info<< "Arch:  " << foamVersion::buildArch.c_str() << nl;
+        os  << "Arch:  " << foamVersion::buildArch << '\n';
     }
 }
 

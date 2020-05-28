@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -828,9 +828,9 @@ Foam::argList::argList
                 ++argi;
                 if (argi >= args_.size())
                 {
-                    foamVersion::printBuildInfo(false);
+                    foamVersion::printBuildInfo(Info().stdStream(), false);
 
-                    Info<<nl
+                    Info<< nl
                         <<"Error: option '-" << optName
                         << "' requires an argument" << nl << nl
                         << "See '" << executable_ << " -help' for usage"
@@ -997,7 +997,7 @@ void Foam::argList::parse
     // Print the collected error messages and exit if check fails
     if (!check(checkArgs, checkOpts))
     {
-        foamVersion::printBuildInfo(false);
+        foamVersion::printBuildInfo(Info().stdStream(), false);
         FatalError.write(Info, false);
 
         Pstream::exit(1); // works for serial and parallel

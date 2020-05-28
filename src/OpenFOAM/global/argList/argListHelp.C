@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +41,7 @@ static inline int apiYear()
     return 2000 + (foamVersion::api / 100);
 }
 
-// manpage Footer
+// Footer for manpage
 static inline void printManFooter()
 {
     Info<< ".SH \"SEE ALSO\"" << nl
@@ -428,7 +428,7 @@ void Foam::argList::printUsage(bool full) const
     printNotes();
 
     Info<< nl;
-    foamVersion::printBuildInfo(true);
+    foamVersion::printBuildInfo(Info().stdStream(), true);
     Info<< endl;
 }
 

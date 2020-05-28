@@ -54,7 +54,7 @@ SourceFiles
 #ifndef foamVersion_H
 #define foamVersion_H
 
-#include "stdFoam.H"
+#include <iostream>
 #include <string>
 
 //- The directory name for user-resources within the HOME directory
@@ -113,7 +113,7 @@ namespace Foam
         //- Extract scalar size (in bytes) from "scalar=" tag in string
         unsigned scalarByteSize(const std::string& str);
 
-        //- Print information about version, build, arch to Info
+        //- Print information about version, build, arch to output stream
         //
         //  Eg,
         //  \code
@@ -122,8 +122,9 @@ namespace Foam
         //      Arch:  <ARCH_INFO>
         //  \endcode
         //
+        //  \param os   the output stream
         //  \param full includes Arch information
-        void printBuildInfo(const bool full=true);
+        void printBuildInfo(std::ostream& os, const bool full=true);
 
         //- Compile-time definition of the OpenFOAM project directory
         //- or empty if not defined.
