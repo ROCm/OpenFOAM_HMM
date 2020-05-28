@@ -10,56 +10,50 @@
 #     Copyright (C) 2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
-#     foamSystemCheck
+#     bin/foamSystemCheck
 #
 # Description
-#     Checks the machine system and the user's
-#     personal configuration for running OpenFOAM.
+#     Check the machine, software components, and the environment
+#     for installing OpenFOAM.
 #
 #------------------------------------------------------------------------------
 
-# STATIC VARIABLES
-# ~~~~~~~~~~~~~~~~
-HLINE="-----------------------------------------------------------------------"
-WIDTH=16
-unset fatalError
+# General
+WIDTH=12
 
-# FUNCTIONS
-# ~~~~~~~~~
+# System variables
+HOST="$(uname -n)"
+OSTYPE="$(uname -s)"
+
+# Global variables
+unset fatalError criticalError
+
+#==============================================================================
+#                             HELPER FUNCTIONS
+#==============================================================================
+
+hline()
+{
+    echo "-------------------------------------------------------------------------------"
+}
+
+
 heading()
 {
     echo
     echo "$1"
-    echo "$HLINE"
-}
-
-lenBase()
-{
-    echo $1 | tr -d " " | wc -m | tr -d " "
 }
 
 length()
 {
-    NOCHAR=$(lenBase $1)
-    NOCHAR=$(expr $NOCHAR - 1)
-    [ $NOCHAR -ge 0 ] || NOCHAR=0
-    echo $NOCHAR
+    ## echo "length <$1>" 1>&2
+    nChars="$(echo "$1" | tr -d ' ' | wc -c)"
+    nChars="$((nChars - 1))"  # Remove newline from the count
+    [ "$nChars" -ge 0 ] || nChars=0
+    echo "$nChars"
 }
 
 fixlen()
@@ -82,57 +76,102 @@ fixlen()
     fi
 }
 
-# MAIN CODE
-# ~~~~~~~~~
+
+# -----------------------------------------------------------------------------
+
+checkEnvironment()
+{
+    if [ -d "$WM_PROJECT_DIR" ]
+    then
+        echo "$(fixlen OpenFOAM:   $WIDTH) ${WM_PROJECT_DIR##*/}"
+    else
+        echo
+        echo "ERROR: OpenFOAM environment not configured."
+        echo
+        echo "    Please see the information in the README.md"
+        echo "    <OpenFOAM installation dir>/OpenFOAM-${WM_PROJECT_VERSION}/README.md"
+        echo "    for information on setting-up the OpenFOAM environment."
+        echo
+        fatalError="x${fatalError}"
+        exit 1
+    fi
+
+    if [ -d "$WM_THIRD_PARTY_DIR" ]
+    then
+        echo "$(fixlen ThirdParty: $WIDTH) ${WM_THIRD_PARTY_DIR##*/}"
+    else
+        echo "$(fixlen ThirdParty: $WIDTH) [missing]"
+        echo "This can be intentional, or indicate a faulty installation"
+    fi
+}
+
+
+checkUserShell()
+{
+    echo "$(fixlen Shell: $WIDTH) ${SHELL##*/}"
+    case "$SHELL" in
+    */csh | */tcsh | */bash | */ksh)
+        ;;
+    */dash | */zsh)
+        echo "[The ${SHELL##*/} shell is generally okay to use]"
+        ;;
+    *)
+        echo "ERROR: Cannot identify the shell you are running."
+        echo "       OpenFOAM ${WM_PROJECT_VERSION} is compatible with "
+        echo "       csh, tcsh, bash, ksh (and possibly dash, zsh)"
+        echo
+        fatalError="x${fatalError}"
+        ;;
+    esac
+}
+
+
+checkHostName()
+{
+    echo "$(fixlen Host: $WIDTH) $HOST"
+    if [ -z "$HOST" ]
+    then
+        echo "ERROR: Cannot stat hostname."
+        echo "       OpenFOAM ${WM_PROJECT_VERSION} needs a valid hostname."
+        echo "       Contact your system administrator."
+        echo
+        fatalError="x${fatalError}"
+    fi
+}
+
+
+checkOS()
+{
+    case "$OSTYPE" in
+    Linux* | Darwin* | SunOS )
+        echo "$(fixlen OS: $WIDTH) $OSTYPE version $(uname -r)"
+        ;;
+    *)
+        echo "ERROR: Incompatible operating system \"$OSTYPE\"."
+        echo "       OpenFOAM ${WM_PROJECT_VERSION} is currently available for"
+        echo "       Linux, Darwin and SunOS only."
+        echo
+        fatalError="x${fatalError}"
+        ;;
+    esac
+}
+
+#==============================================================================
+#                                MAIN SCRIPT
+#==============================================================================
+
 heading "Checking basic system..."
+hline
 
-# check shell
-echo "$(fixlen Shell: $WIDTH) $SHELL"
-case "$SHELL" in
-*/csh | */tcsh | */bash | */ksh)
-    ;;
-*)
-    echo "ERROR: Cannot identify the current shell."
-    echo "       OpenFOAM $WM_PROJECT_VERSION is compatible"
-    echo "       with csh, tcsh, ksh and bash."
-    echo
-    fatalError=true
-    ;;
-esac
-
-# check hostname
-HOST=$(uname -n)
-echo "$(fixlen Host: $WIDTH) $HOST"
-if [ $(length $HOST) -eq 0 ]
-then
-    echo "ERROR: Cannot stat hostname."
-    echo "       OpenFOAM $WM_PROJECT_VERSION needs a valid hostname to"
-    echo "       function. Contact your system administrator."
-    echo
-    fatalError=true
-fi
-
-# check os
-OSTYPE=$(uname -s)
-case "$OSTYPE" in
-Linux* | Darwin* | SunOS )
-    echo "$(fixlen OS: $WIDTH) $OSTYPE version $(uname -r)"
-    ;;
-*)
-    echo "ERROR: Incompatible operating system \"$OSTYPE\"."
-    echo "       OpenFOAM $WM_PROJECT_VERSION is currently available for "
-    echo "       Linux, Darwin and SunOS only."
-    echo
-    fatalError=true
-    ;;
-esac
-
+checkUserShell
+checkHostName
+checkOS
 
 # check user name
-USER_NAME=$LOGNAME
+USER_NAME="$LOGNAME"
 if [ $(length $USER_NAME) -eq 0 ]
 then
-    USER_NAME=$USER
+    USER_NAME="$USER"
 fi
 
 echo "$(fixlen User: $WIDTH) ${USER_NAME}"
@@ -142,25 +181,26 @@ then
     echo "       OpenFOAM $WM_PROJECT_VERSION needs a valid user name."
     echo "       Contact your system administrator. "
     echo
-    fatalError=true
+    fatalError="x${fatalError}"
 fi
 
-
 echo
-echo
-if [ "$fatalError" = true ]
+if [ -n "$fatalError" ]
 then
-    echo "System check: FAIL"
-    echo "=================="
-    echo "Your system is not currently compatible with OpenFOAM installation "
-    echo "requirements. Review the error messages and consult the documentation"
-    echo "for further instructions."
-    echo
+    cat << FAILED
+System check: FAIL
+==================
+Your system may not compatible with the current OpenFOAM requirements.
+Review the error messages and consult the documentation for further information
+FAILED
 else
-    echo "System check: PASS"
-    echo "=================="
-    echo "Continue OpenFOAM installation."
-    echo
+    cat << PASSED
+System check: PASS
+==================
+Can continue to OpenFOAM installation.
+PASSED
 fi
+
+echo
 
 #------------------------------------------------------------------------------

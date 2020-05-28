@@ -10,41 +10,29 @@
 #     Copyright (C) 2019-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
-#     foamInstallationTest
+#     bin/foamInstallationTest
 #
 # Description
-#     Check the machine system, the installation of OpenFOAM, and the user's
-#     personal configuration for running OpenFOAM.
+#     Check the machine, software components, and the OpenFOAM environment
+#     for running OpenFOAM.
 #
 #------------------------------------------------------------------------------
 
 # Base settings
 MIN_VERSION_GCC=4.8.5
+MIN_VERSION_LLVM=3.7.1
 
 # General
 WIDTH=20
 
 # System variables
-HOST=$(uname -n)
-OSTYPE=$(uname -s)
+HOST="$(uname -n)"
+OSTYPE="$(uname -s)"
 
-# OpenFOAM application to test for the Version
+# OpenFOAM application to test for existence. Obtain version from wmake.
 foamTestApp=icoFoam
 
 # Global variables
@@ -62,7 +50,6 @@ hline()
 
 heading()
 {
-    echo
     echo
     echo "$1"
 }
@@ -99,7 +86,7 @@ reportEnv()
 
     if [ -n "$EXP_ENV" ]
     then
-        if test -e "$EXP_ENV"
+        if [ -e "$EXP_ENV" ]
         then
             EXISTS=" yes "
             if [ "$2" != noPath ]
@@ -125,7 +112,7 @@ reportEnv()
         fi
         echo "$(fixlen "$1" 21) $(fixlen "$EXP_ENV" 40) $EXISTS $ON_PATH $CRIT"
     else
-        echo "$(fixlen "$1" 21) --------- env variable not set ---------            $3"
+        echo "$(fixlen "$1" 21) $(fixlen "[env variable unset]" 40)            $3"
     fi
 
     ERROR=false
@@ -144,11 +131,17 @@ reportEnv()
 
 findExec()
 {
+    if [ -x "$2" ] && [ ! -d "$2" ]
+    then
+        echo "$2"
+        return 0
+    fi
+
     oldIFS=$IFS
     IFS=':'
     for d in $1
     do
-        if test ! -d "$d/$2" -a -x "$d/$2"
+        if [ -x "$d/$2" ] && [ ! -d "$d/$2" ]
         then
             IFS=$oldIFS
             echo "$d/$2"
@@ -201,7 +194,7 @@ vercmp_3()
     fi
 
     # Patch
-    if [ -n "$arg1Patch" -a -n "$arg2Patch" ]
+    if [ -n "$arg1Patch" ] && [ -n "$arg2Patch" ]
     then
         if [ "$arg1Patch" -gt "$arg2Patch" ]
         then
@@ -218,12 +211,14 @@ reportExecutable()
     APP_NAME="$1"
     APP_SPEC="$2"
     APP_PATH="$(findExec $PATH $1)"
+    VERSION="unknown"
+
     if [ -z "$APP_PATH" ]
     then
-        echo "$(fixlen "$1" 9)" "*** not installed ***"
+        echo "$(fixlen "${1##*/}" 9)" "*** not installed ***"
         VERSION=""
         case "$1" in
-        gcc* | $foamTestApp)
+        *gcc* | *clang* | "$foamTestApp")
             echo "          CRITICAL ERROR"
             criticalError="x${criticalError}"
             ;;
@@ -231,17 +226,44 @@ reportExecutable()
         echo
         return 1
     fi
+
     case "$APP_NAME" in
-    $foamTestApp)
-        VERSION=$($APP_NAME -case /dev/null 2>&1 \
-            | sed -ne 's/^.*Version: *\([^ ][^ ]*\).*/\1/p')
+    "$foamTestApp")
+        VERSION=$($APP_NAME -help 2>&1 \
+            | sed -ne 's/^.*Build: *\([^ ][^ ]*\).*/\1/p')
+
+        # Cannot do much with the build info:
+        #     Build: 51e3d2a8ae-20200528 (patch=200506)
+        # so just treat as available/not available
+        if [ -n "$VERSION" ]
+        then
+            VERSION="exists"
+        fi
         ;;
+
     flex)
         VERSION=$(flex --version /dev/null 2>&1 \
             | sed -ne 's/flex \([0-9][0-9.]*\).*/\1/p')
         ;;
     wmake)
         VERSION="$(wmake --version 2>/dev/null)"
+        ;;
+    *clang*)
+        VERSION=$($APP_NAME --version 2>/dev/null \
+            | sed -ne '1{s/^.*version \([0-9][.0-9]*\).*/\1/p;}')
+
+        if ! vercmp_3 "$MIN_VERSION_LLVM" "$VERSION"
+        then
+            case "$APP_NAME" in
+                (*clang++*) SHORT_NAME=clang++ ;;
+                (*)         SHORT_NAME=clang ;;
+            esac
+            echo "ERROR: $SHORT_NAME version is too old for this release of OpenFOAM"
+            echo "    User version    : $VERSION"
+            echo "    Minimum required: $MIN_VERSION_GCC"
+            echo
+            fatalError="x${fatalError}"
+        fi
         ;;
     *gcc* | *g++*)
         VERSION=$($APP_NAME -v 2>&1 \
@@ -250,85 +272,77 @@ reportExecutable()
         if ! vercmp_3 "$MIN_VERSION_GCC" "$VERSION"
         then
             case "$APP_NAME" in
-            gcc*)
-                SHORT_NAME=gcc
-                ;;
-            g++*)
-                SHORT_NAME=g++
-                ;;
+                (*g++*) SHORT_NAME=g++ ;;
+                (*)     SHORT_NAME=gcc ;;
             esac
-
             echo "ERROR: $SHORT_NAME version is too old for this release of OpenFOAM"
             echo "    User version    : $VERSION"
             echo "    Minimum required: $MIN_VERSION_GCC"
-            echo ""
+            echo
             fatalError="x${fatalError}"
         fi
         ;;
-    gtar)
-        VERSION=$($APP_PATH --version | head -1)
-        ;;
-    tar)
-        VERSION=$($APP_PATH --version | head -1 | cut -d" " -f4)
-        ;;
-    gzip)
-        case "$OSTYPE" in
-        SunOS)
-            VERSION=$($APP_NAME --version 2>&1 | grep gzip | cut -d" " -f2)
-            ;;
-        *)
-            VERSION=$($APP_NAME --version | head -1 | cut -d" " -f2)
-            ;;
-        esac
-        ;;
     esac
+
     if [ "$APP_PATH" = "$APP_SPEC" ] || [ -z "$APP_SPEC" ]
     then
-        echo "$(fixlen "$APP_NAME" 9) $(fixlen "$VERSION" 10) $(fixlen "$APP_PATH" 58)"
+        echo "$(fixlen "${APP_NAME##*/}" 12) $(fixlen "$VERSION" 10) $(fixlen "$APP_PATH" 55)"
     else
-        echo "$(fixlen "$APP_NAME" 9) $(fixlen "$VERSION" 10)"
+        echo "$(fixlen "${APP_NAME##*/}" 12) $(fixlen "$VERSION" 10)"
         echo "WARNING:  Conflicting installations:"
         echo "          OpenFOAM settings        : $APP_SPEC"
         echo "          current path             : $APP_PATH"
         case "$APP_NAME" in
-        gcc | $foamTestApp)
+        *clang* | *gcc* | "$foamTestApp")
             echo "          CRITICAL ERROR"
             criticalError="x${criticalError}"
             ;;
         esac
-        echo ""
+        echo
     fi
 }
 
 
-checkOpenFOAMEnvironment()
+checkEnvironment()
 {
-    [ -d "$WM_PROJECT_DIR" ] && [ -d "$WM_THIRD_PARTY_DIR" ] || {
-        echo ""
-        echo "FATAL ERROR: OpenFOAM environment not configured."
-        echo ""
-        echo "    Please follow the download and installation link in README.html:"
-        echo "    <OpenFOAM installation dir>/OpenFOAM-${WM_PROJECT_VERSION}/README.html"
+    if [ -d "$WM_PROJECT_DIR" ]
+    then
+        echo "$(fixlen OpenFOAM:   $WIDTH) ${WM_PROJECT_DIR##*/}"
+    else
+        echo
+        echo "ERROR: OpenFOAM environment not configured."
+        echo
+        echo "    Please see the information in the README.md"
+        echo "    <OpenFOAM installation dir>/OpenFOAM-${WM_PROJECT_VERSION}/README.md"
         echo "    for information on setting-up the OpenFOAM environment."
-        echo ""
+        echo
+        fatalError="x${fatalError}"
         exit 1
-    }
+    fi
 
-    echo "$(fixlen OpenFOAM:   $WIDTH) ${WM_PROJECT_DIR##*/}"
-    echo "$(fixlen ThirdParty: $WIDTH) ${WM_THIRD_PARTY_DIR##*/}"
+    if [ -d "$WM_THIRD_PARTY_DIR" ]
+    then
+        echo "$(fixlen ThirdParty: $WIDTH) ${WM_THIRD_PARTY_DIR##*/}"
+    else
+        echo "$(fixlen ThirdParty: $WIDTH) [missing]"
+        echo "This can be intentional, or indicate a faulty installation"
+    fi
 }
 
 
 checkUserShell()
 {
     echo "$(fixlen Shell: $WIDTH) ${SHELL##*/}"
-    case $SHELL in
+    case "$SHELL" in
     */csh | */tcsh | */bash | */ksh)
         ;;
+    */dash | */zsh)
+        echo "[The ${SHELL##*/} shell is generally okay to use]"
+        ;;
     *)
-        echo "FATAL ERROR: Cannot identify the shell you are running."
-        echo "             OpenFOAM ${WM_PROJECT_VERSION} is compatible with "
-        echo "             csh, tcsh, ksh and bash."
+        echo "ERROR: Cannot identify the shell you are running."
+        echo "       OpenFOAM ${WM_PROJECT_VERSION} is compatible with "
+        echo "       csh, tcsh, bash, ksh (and possibly dash, zsh)"
         echo
         fatalError="x${fatalError}"
         ;;
@@ -341,10 +355,9 @@ checkHostName()
     echo "$(fixlen Host: $WIDTH) $HOST"
     if [ -z "$HOST" ]
     then
-        echo "FATAL ERROR: Cannot stat hostname."
-        echo "             Contact your system administrator, "
-        echo "             OpenFOAM ${WM_PROJECT_VERSION} needs a valid "
-        echo "             hostname to function."
+        echo "ERROR: Cannot stat hostname."
+        echo "       OpenFOAM ${WM_PROJECT_VERSION} needs a valid hostname."
+        echo "       Contact your system administrator."
         echo
         fatalError="x${fatalError}"
     fi
@@ -358,9 +371,9 @@ checkOS()
         echo "$(fixlen OS: $WIDTH) $OSTYPE version $(uname -r)"
         ;;
     *)
-        echo "FATAL ERROR: Incompatible operating system \"$OSTYPE\"."
-        echo "             OpenFOAM ${FWM_PROJECT_VERSION} is currently "
-        echo "             available for Linux, Darwin and SunOS only."
+        echo "ERROR: Incompatible operating system \"$OSTYPE\"."
+        echo "       OpenFOAM ${WM_PROJECT_VERSION} is currently available for"
+        echo "       Linux, Darwin and SunOS only."
         echo
         fatalError="x${fatalError}"
         ;;
@@ -371,13 +384,13 @@ checkOS()
 #==============================================================================
 #                                MAIN SCRIPT
 #==============================================================================
-#
-echo "Executing $0:"
+
+echo "Executing ${0##*/}"
 
 #------------------------------------------------------------------------------
 heading "Basic setup :"
 hline
-checkOpenFOAMEnvironment
+checkEnvironment
 checkUserShell
 checkHostName
 checkOS
@@ -385,7 +398,7 @@ hline
 
 #------------------------------------------------------------------------------
 heading "Main OpenFOAM env variables :"
-COL1=$(fixlen EnvironmentVariable 21)
+COL1=$(fixlen Environment 21)
 COL2=$(fixlen FileOrDirectory 40)
 COL3="Valid"
 COL4="Path"
@@ -394,7 +407,8 @@ hline
 echo "$COL1 $COL2 $COL3      $COL5"
 hline
 reportEnv '$WM_PROJECT_USER_DIR' noPath  no
-reportEnv '$WM_THIRD_PARTY_DIR'  noPath  yes
+reportEnv '$WM_THIRD_PARTY_DIR'  noPath  maybe
+reportEnv '$WM_PROJECT_SITE'     noPath  no
 hline
 
 #------------------------------------------------------------------------------
@@ -403,7 +417,7 @@ hline
 echo "$COL1 $COL2 $COL3 $COL4 $COL5"
 hline
 reportEnv '$WM_PROJECT_DIR'   '$PATH'  yes
-echo ""
+echo
 reportEnv '$FOAM_APPBIN'      '$PATH'  yes
 reportEnv '$FOAM_SITE_APPBIN' '$PATH'  no
 reportEnv '$FOAM_USER_APPBIN' '$PATH'  no
@@ -425,22 +439,25 @@ hline
 #------------------------------------------------------------------------------
 heading "Software Components"
 hline
-echo "$(fixlen Software 9) $(fixlen Version 10) $(fixlen Location 10)"
+echo "$(fixlen Software 12) $(fixlen Version 10) $(fixlen Location 10)"
 hline
 reportExecutable flex
 reportExecutable wmake
-reportExecutable "$(wmake -show-c)"
-reportExecutable "$(wmake -show-cxx)"
-reportExecutable gzip
-if [ "$OSTYPE" = Linux ]
-then
-    reportExecutable tar
-else
-    reportExecutable gtar
-fi
-reportExecutable $foamTestApp  "$FOAM_APPBIN/$foamTestApp"
 
+for compilerType in c cxx
+do
+    compiler="$(wmake -show-path-"$compilerType" 2>/dev/null)"
+    if [ -n "$compiler" ]
+    then
+        reportExecutable "$compiler"
+    else
+        echo "unknown $compilerType compiler for $WM_COMPILER"
+        fatalError="x${fatalError}"
+    fi
+done
 hline
+reportExecutable "$foamTestApp"  "$FOAM_APPBIN/$foamTestApp"
+
 
 #------------------------------------------------------------------------------
 heading "Summary"
