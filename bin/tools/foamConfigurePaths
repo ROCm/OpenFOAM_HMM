@@ -28,11 +28,17 @@
 #         Alternative etc directory for shipped files
 #
 #------------------------------------------------------------------------------
-printHelp() {
+# Locate the project directory relative to this script
 
+projectDir="$(\cd "${0%/*}" && \pwd -L)"    # The project/bin/tools dir
+projectDir="${projectDir%/*}"               # The project/bin dir
+projectDir="${projectDir%/*}"               # The project dir
+
+#------------------------------------------------------------------------------
+printHelp() {
     case "$1" in
     (*compat*)
-        cat<<HELP_COMPAT
+        cat << HELP_COMPAT
 Obsolete options:
   -foamInstall DIR    [obsolete]
   -projectName NAME   [obsolete]
@@ -55,7 +61,7 @@ HELP_COMPAT
         ;;
     esac
 
-    cat<<HELP_HEAD
+    cat << HELP_HEAD
 
 usage: $0 options
 
@@ -76,8 +82,8 @@ Basic
 Compiler
   -system-compiler NAME The 'system' compiler to use (eg, Gcc, Clang, Icc,...)
   -third-compiler NAME  The 'ThirdParty' compiler to use (eg, Clang40,...)
-  -gcc VER            The 'default_gcc_version' for ThirdParty Gcc
-  -clang VER          The 'default_clang_version' for ThirdParty Clang
+  -gcc VER            ThirdParty 'default_gcc_version' (eg, gcc-7.5.0)
+  -clang VER          ThirdParty 'default_clang_version' (eg, llvm-10.0.0)
   gmp-VERSION         For ThirdParty gcc (gmp-system for system library)
   mpfr-VERSION        For ThirdParty gcc (mpfr-system for system library)
   mpc-VERSION         For ThirdParty gcc (mpc-system for system library)
@@ -102,7 +108,7 @@ HELP_HEAD
 
     case "$1" in
     (*full*)
-        cat<<HELP_FULL
+        cat << HELP_FULL
 Components specified by absolute path
   -adios-path DIR     Path for 'ADIOS2_ARCH_PATH' (overrides -adios)
   -boost-path DIR     Path for 'BOOST_ARCH_PATH'  (overrides -boost)
@@ -128,7 +134,7 @@ HELP_FULL
         ;;
     esac
 
-    cat<<HELP_TAIL_COMMON
+    cat << HELP_TAIL_COMMON
 Adjusts hardcoded versions and installation paths (POSIX and C-shell)
 for OpenFOAM.
 
@@ -152,25 +158,19 @@ die()
 }
 
 # -----------------------------------------------------------------------------
-projectDir="$(\pwd -L)"     # Project dir
 
-# Check that it appears to be an OpenFOAM installation
-if [ -f etc/bashrc ] && [ -d "META-INFO" ]
+# Check that it appears to be an OpenFOAM installation and
+# use foamEtcFile to locate files, but only edit shipped files
+
+if [ -d "$projectDir/META-INFO" ] && [ -x "$projectDir"/bin/foamEtcFile ]
 then
     echo "Configuring OpenFOAM ($projectDir)" 1>&2
-else
-    die "Please run from the OpenFOAM top-level installation directory" \
-        "No etc/bashrc or META-INFO/ found"
-fi
-
-# Use foamEtcFile to locate files, but only edit shipped files
-if [ -x bin/foamEtcFile ]
-then
     _foamEtc() {
-        bin/foamEtcFile -mode=o "$@"
+        "$projectDir"/bin/foamEtcFile -mode=o "$@"
     }
 else
-    die "No bin/foamEtcFile found in installation"
+    die "Does not appear to be an OpenFOAM installation" \
+        "No META-INFO/ and/or bin/foamEtcFile found"
 fi
 
 
@@ -299,8 +299,14 @@ replaceEtcCsh()
 # $2 value
 getOptionValue()
 {
-   [ -n "$2" ] || die "'$1' option requires an argument"
-   echo "$2"
+    local value="$2"
+    [ -n "$value" ] || die "'$1' option requires an argument"
+
+    # Remove any surrounding double quotes
+    value="${value%\"}"
+    value="${value#\"}"
+
+    echo "$value"
 }
 
 
@@ -433,13 +439,6 @@ CONFIG_CSH
         replaceEtc     bashrc  WM_PROJECT_VERSION "$optionValue"
         replaceEtcCsh  cshrc   WM_PROJECT_VERSION "$optionValue"
         adjusted=true
-        shift
-        ;;
-
-    -archOption | --archOption)
-        # Replace WM_ARCH_OPTION=...
-        optionValue=$(getOptionValue "$@")
-        echo "Ignoring $1 option: no longer supported" 1>&2
         shift
         ;;
 
@@ -836,10 +835,17 @@ CONFIG_CSH
         echo "Enable/disable FOAM_SIGFPE now via controlDict" 1>&2
         ;;
 
+    -archOption | --archOption)
+        # Replace WM_ARCH_OPTION=...
+        optionValue=$(getOptionValue "$@")
+        echo "Ignoring $1 option: no longer supported" 1>&2
+        shift
+        ;;
+
     -foamInstall | --foamInstall | -projectName | --projectName)
         # Removed for 1812
         optionValue=$(getOptionValue "$@")
-        echo "Ignoring obsolete option $1" 1>&2
+        echo "Ignoring $1 option: obsolete" 1>&2
         shift
         ;;
 
