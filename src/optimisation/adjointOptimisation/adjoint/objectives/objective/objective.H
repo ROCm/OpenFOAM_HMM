@@ -72,6 +72,7 @@ protected:
         const word objectiveName_;
         bool computeMeanFields_;
         bool nullified_;
+        bool normalize_;
 
         //- Objective function value and weight
         scalar J_;
@@ -82,12 +83,21 @@ protected:
         //- Objective weight
         scalar weight_;
 
-        // Objective integration start and end times (for unsteady flows)
+        //- Normalization factor
+        autoPtr<scalar> normFactor_;
+
+        //- Target value, in case the objective is used as a constraint
+        //  Should be used in caution and with updateMethods than get affected
+        //  by the target value, without requiring a sqr (e.g. SQP, MMA)
+        scalar target_;
+
+        //- Objective integration start and end times (for unsteady flows)
         autoPtr<scalar> integrationStartTimePtr_;
         autoPtr<scalar> integrationEndTimePtr_;
 
-        // Contribution to field sensitivity derivatives
-        // Topology optimisation
+        //- Contribution to field sensitivity derivatives
+        //  Topology optimisation or other variants with
+        //  as many design variables as the mesh cells
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         autoPtr<volScalarField> dJdbPtr_;
@@ -247,6 +257,12 @@ public:
 
         //- Return the objective function weight
         scalar weight() const;
+
+        //- Is the objective normalized
+        bool normalize() const;
+
+        //- Normalize all fields allocated by the objective
+        virtual void doNormalization();
 
         //- Check whether this is an objective integration time
         bool isWithinIntegrationTime() const;

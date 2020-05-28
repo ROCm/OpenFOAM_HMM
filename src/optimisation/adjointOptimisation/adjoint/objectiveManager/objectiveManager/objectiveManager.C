@@ -151,12 +151,16 @@ bool objectiveManager::readDict(const dictionary& dict)
     return true;
 }
 
+
 void objectiveManager::updateNormalizationFactor()
 {
     // Update normalization factors for all objectives
     for (objective& obj : objectives_)
     {
-        obj.updateNormalizationFactor();
+        if (obj.normalize())
+        {
+            obj.updateNormalizationFactor();
+        }
     }
 }
 

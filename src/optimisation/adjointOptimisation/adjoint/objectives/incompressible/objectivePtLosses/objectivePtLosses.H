@@ -59,8 +59,10 @@ class objectivePtLosses
 {
     // Private data
 
+        //- Patches on which to compute losses
         labelList patches_;
 
+        //- Total pressure per patch on patches_
         scalarField patchPt_;
 
 

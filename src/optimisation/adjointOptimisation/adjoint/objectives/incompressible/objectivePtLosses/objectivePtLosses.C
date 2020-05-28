@@ -247,6 +247,7 @@ void objectivePtLosses::write() const
             setObjectiveFilePtr();
             objFunctionFilePtr_() << setw(4)     << "#"        << " ";
             objFunctionFilePtr_() << setw(width) << "ptLosses" << " ";
+            objFunctionFilePtr_() << setw(width) << "JCycle"   << " ";
             forAll(patches_, oI)
             {
                 label patchI = patches_[oI];
@@ -258,6 +259,7 @@ void objectivePtLosses::write() const
 
         objFunctionFilePtr_() << setw(4)     << mesh_.time().value() << " ";
         objFunctionFilePtr_() << setw(width) << J_ << " ";
+        objFunctionFilePtr_() << setw(width) << JCycle() << " ";
         forAll(patchPt_, pI)
         {
             objFunctionFilePtr_() << setw(width) << patchPt_[pI] << " ";

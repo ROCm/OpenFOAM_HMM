@@ -165,6 +165,9 @@ public:
         //- Return the objective function value
         virtual scalar J() = 0;
 
+        //- Normalize all fields allocated by the objective
+        virtual void doNormalization();
+
         //- Contribution to field adjoint momentum eqs
         const volVectorField& dJdv();
 

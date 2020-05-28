@@ -129,10 +129,13 @@ objective::objective
     objectiveName_(dict.dictName()),
     computeMeanFields_(false), // is reset in derived classes
     nullified_(false),
+    normalize_(dict.getOrDefault<bool>("normalize", false)),
 
     J_(Zero),
     JMean_(this->getOrDefault<scalar>("JMean", Zero)),
     weight_(Zero),
+    normFactor_(nullptr),
+    target_(dict.getOrDefault<scalar>("target", Zero)),
 
     integrationStartTimePtr_(nullptr),
     integrationEndTimePtr_(nullptr),
@@ -173,6 +176,20 @@ objective::objective
         (
             new scalar(dict.get<scalar>("integrationEndTime"))
         );
+    }
+
+    // Set normalization factor, if present
+    if (normalize_)
+    {
+        scalar normFactor(Zero);
+        if (dict.readIfPresent("normFactor", normFactor))
+        {
+            normFactor_.reset(new scalar(normFactor));
+        }
+        else if (this->readIfPresent("normFactor", normFactor))
+        {
+            normFactor_.reset(new scalar(normFactor));
+        }
     }
 }
 
@@ -234,13 +251,26 @@ scalar objective::JCycle() const
     {
         J = JMean_;
     }
+
+    // Subtract target, in case the objective is used as a constraint
+    J -= target_;
+
+    // Normalize here, in order to get the correct value for line search
+    if (normalize_ && normFactor_.valid())
+    {
+        J /= normFactor_();
+    }
+
     return J;
 }
 
 
 void objective::updateNormalizationFactor()
 {
-    // Does nothing in base
+    if (normalize_ && normFactor_.empty())
+    {
+        normFactor_.reset(new scalar(JCycle()));
+    }
 }
 
 
@@ -286,6 +316,62 @@ void objective::accumulateJMean()
 scalar objective::weight() const
 {
     return weight_;
+}
+
+
+bool objective::normalize() const
+{
+    return normalize_;
+}
+
+
+void objective::doNormalization()
+{
+    if (normalize_ && normFactor_.valid())
+    {
+        const scalar oneOverNorm(1./normFactor_());
+
+        if (hasdJdb())
+        {
+            dJdbPtr_().primitiveFieldRef() *= oneOverNorm;
+        }
+        if (hasBoundarydJdb())
+        {
+            bdJdbPtr_() *= oneOverNorm;
+        }
+        if (hasdSdbMult())
+        {
+            bdSdbMultPtr_() *= oneOverNorm;
+        }
+        if (hasdndbMult())
+        {
+            bdndbMultPtr_() *= oneOverNorm;
+        }
+        if (hasdxdbMult())
+        {
+            bdxdbMultPtr_() *= oneOverNorm;
+        }
+        if (hasdxdbDirectMult())
+        {
+            bdxdbDirectMultPtr_() *= oneOverNorm;
+        }
+        if (hasBoundaryEdgeContribution())
+        {
+            bEdgeContribution_() *= oneOverNorm;
+        }
+        if (hasDivDxDbMult())
+        {
+            divDxDbMultPtr_() *= oneOverNorm;
+        }
+        if (hasGradDxDbMult())
+        {
+            gradDxDbMultPtr_() *= oneOverNorm;
+        }
+        if (hasBoundarydJdStress())
+        {
+            bdJdStressPtr_() *= oneOverNorm;
+        }
+    }
 }
 
 
@@ -667,6 +753,10 @@ void objective::writeMeanValue() const
 bool objective::writeData(Ostream& os) const
 {
     os.writeEntry("JMean", JMean_);
+    if (normFactor_.valid())
+    {
+        os.writeEntry("normFactor", normFactor_());
+    }
     return os.good();
 }
 
