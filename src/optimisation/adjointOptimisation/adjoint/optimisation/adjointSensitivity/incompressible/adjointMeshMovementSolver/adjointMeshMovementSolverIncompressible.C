@@ -146,9 +146,7 @@ void adjointMeshMovementSolver::solve()
 
         Info<< "Max ma " << gMax(mag(ma_)()) << endl;
 
-        Info<< "ExecutionTime = " << mesh_.time().elapsedCpuTime() << " s"
-            << "  ClockTime = " << mesh_.time().elapsedClockTime() << " s"
-            << nl << endl;
+        mesh_.time().printExecutionTime(Info);
 
         // Check convergence
         if (residual < tolerance_)

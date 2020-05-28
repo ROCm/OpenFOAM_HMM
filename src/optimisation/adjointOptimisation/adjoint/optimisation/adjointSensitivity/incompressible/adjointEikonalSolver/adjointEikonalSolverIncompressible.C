@@ -207,9 +207,7 @@ void adjointEikonalSolver::solve()
         scalar residual = daEqn.solve().initialResidual();
         Info<< "Max da " << gMax(mag(da_)()) << endl;
 
-        Info<< "ExecutionTime = " << mesh_.time().elapsedCpuTime() << " s"
-            << "  ClockTime = " << mesh_.time().elapsedClockTime() << " s"
-            << nl << endl;
+        mesh_.time().printExecutionTime(Info);
 
         // Check convergence
         if (residual < tolerance_)
