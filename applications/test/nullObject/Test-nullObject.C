@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,9 +47,8 @@ class SimpleClass
 {
 public:
 
-    //- Null constructor
-    SimpleClass()
-    {}
+    //- Default construct
+    SimpleClass() {}
 };
 
 
@@ -148,6 +147,12 @@ int main()
         printInfo(faceList::null());
         printInfo(pointField::null());
     }
+
+    // Test swallow assigment (like std::ignore)
+    // Looks pretty ugly though!
+
+    NullObject::nullObject = "hello world";
+    NullObject::nullObject = labelList({1, 2, 3});
 
     Info<< nl;
 

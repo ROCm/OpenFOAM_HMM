@@ -105,31 +105,41 @@ public:
         }
 
         //- Zero valued integer content
-        inline unsigned long value() const
+        inline constexpr unsigned long value() const
         {
-            return data_[0].val;
+            return 0;
         }
 
         //- No elements
-        inline bool empty() const
+        inline constexpr bool empty() const
         {
             return true;
         }
 
         //- Zero elements
-        inline label size() const
+        inline constexpr label size() const
         {
             return 0;
         }
 
         //- No-op method (for HashTable replacement)
-        inline const NullObject& toc() const
+        inline constexpr const NullObject& toc() const
         {
             return *this;
         }
 
         //- No-op method (for HashTable replacement)
-        inline const NullObject& sortedToc() const
+        inline constexpr const NullObject& sortedToc() const
+        {
+            return *this;
+        }
+
+
+    // Member Operators
+
+        //- Swallow assignment (cf, std::ignore)
+        template<class T>
+        inline constexpr const NullObject& operator=(const T&) const
         {
             return *this;
         }
@@ -146,13 +156,13 @@ extern const NullObject* nullObjectPtr;
 
 // IOstream Operators
 
-//- Read from Istream consumes no content.
-inline Istream& operator>>(Istream& is, NullObject&) noexcept
+//- Read from Istream consumes no content
+inline Istream& operator>>(Istream& is, const NullObject&) noexcept
 {
     return is;
 }
 
-//- Write to Ostream emits no content.
+//- Write to Ostream emits no content
 inline Ostream& operator<<(Ostream& os, const NullObject&) noexcept
 {
     return os;
