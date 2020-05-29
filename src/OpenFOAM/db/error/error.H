@@ -114,6 +114,7 @@ public:
 
     // Member Functions
 
+        //- The accumulated error message
         string message() const;
 
         //- Clear any messages

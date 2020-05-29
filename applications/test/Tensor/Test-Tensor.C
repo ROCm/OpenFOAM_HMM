@@ -44,8 +44,7 @@ Description
 #include "tensor.H"
 #include "transform.H"
 #include "Random.H"
-#include "floatScalar.H"
-#include "doubleScalar.H"
+#include "scalar.H"
 #include "complex.H"
 
 using namespace Foam;

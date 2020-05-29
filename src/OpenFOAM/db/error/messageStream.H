@@ -86,7 +86,7 @@ public:
 
 protected:
 
-    // Private Data
+    // Protected Data
 
         string title_;
         errorSeverity severity_;

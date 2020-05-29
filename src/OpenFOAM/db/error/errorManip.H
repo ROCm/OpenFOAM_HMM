@@ -55,7 +55,7 @@ Description
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 template<class Err> class errorManip;
 template<class Err> Ostream& operator<<(Ostream&, errorManip<Err>);
 
