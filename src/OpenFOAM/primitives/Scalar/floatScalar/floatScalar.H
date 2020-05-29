@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,18 +38,19 @@ SourceFiles
 #ifndef floatScalar_H
 #define floatScalar_H
 
+#include "scalarFwd.H"
 #include "doubleFloat.H"
 #include "direction.H"
 #include "word.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Typedef (floatScalar) in scalarFwd.H
+
 namespace Foam
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-typedef float floatScalar;
 
 // Largest and smallest scalar values allowed in certain parts of the code.
 // See std::numeric_limits max(), min(), epsilon()

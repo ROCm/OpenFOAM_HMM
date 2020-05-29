@@ -44,19 +44,14 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Typedefs (floatScalar, doubleScalar, scalar, solveScalar) in scalarFwd.H
+
 #if defined(WM_SP) || defined(WM_SPDP)
 
-// Define scalar as a float
+// With scalar == (float), solveScalar == (float | double)
 
 namespace Foam
 {
-    typedef floatScalar scalar;
-    #if defined(WM_SPDP)
-    typedef doubleScalar solveScalar;
-    #else
-    typedef floatScalar solveScalar;
-    #endif
-
     constexpr scalar GREAT = floatScalarGREAT;
     constexpr scalar VGREAT = floatScalarVGREAT;
     constexpr scalar ROOTVGREAT = floatScalarROOTVGREAT;
@@ -101,13 +96,10 @@ namespace Foam
 
 #elif defined(WM_DP)
 
-// Define scalar as a double
+// With scalar == (double), solveScalar == (double)
 
 namespace Foam
 {
-    typedef doubleScalar scalar;
-    typedef doubleScalar solveScalar;
-
     constexpr scalar GREAT = doubleScalarGREAT;
     constexpr scalar VGREAT = doubleScalarVGREAT;
     constexpr scalar ROOTVGREAT = doubleScalarROOTVGREAT;
@@ -151,6 +143,8 @@ namespace Foam
     void readRawScalar(Istream& is, scalar* data, size_t nElem = 1);
 }
 
+#else
+//    #error "PRECISION must be set to WM_SP, WM_SPDP or WM_DP"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

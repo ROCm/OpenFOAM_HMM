@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,6 +40,7 @@ Description
 #define uLabel_H
 
 #include "uint.H"
+#include "labelFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,10 +48,7 @@ Description
 #define UINT_ADD_DEF_SIZE(x,s,y) UINT_ADD_SIZE(x,s,y)
 #define UINT_SIZE(x,y) UINT_ADD_DEF_SIZE(x,WM_LABEL_SIZE,y)
 
-#if WM_LABEL_SIZE != 32 && WM_LABEL_SIZE != 64
-    #error "uLabel.H: WM_LABEL_SIZE must be set to either 32 or 64"
-#endif
-
+// Size checks and typedefs (uLabel) in labelFwd.H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,8 +56,6 @@ namespace Foam
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-typedef UINT_SIZE(uint, _t) uLabel;
 
 constexpr uLabel uLabelMax = UINT_SIZE(UINT, _MAX);
 

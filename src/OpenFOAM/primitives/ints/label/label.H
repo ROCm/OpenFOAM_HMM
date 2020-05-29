@@ -40,6 +40,7 @@ Description
 #define label_H
 
 #include "int.H"
+#include "labelFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,10 +48,7 @@ Description
 #define INT_ADD_DEF_SIZE(x,s,y) INT_ADD_SIZE(x,s,y)
 #define INT_SIZE(x,y) INT_ADD_DEF_SIZE(x,WM_LABEL_SIZE,y)
 
-#if WM_LABEL_SIZE != 32 && WM_LABEL_SIZE != 64
-    #error "label.H: WM_LABEL_SIZE must be set to either 32 or 64"
-#endif
-
+// Size checks and typedefs (label) in labelFwd.H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,8 +56,6 @@ namespace Foam
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-typedef INT_SIZE(int, _t) label;
 
 constexpr label labelMin = INT_SIZE(INT, _MIN);
 constexpr label labelMax = INT_SIZE(INT, _MAX);

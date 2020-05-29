@@ -44,7 +44,7 @@ SeeAlso
 #ifndef zero_H
 #define zero_H
 
-#include "label.H"
+#include "labelFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -133,13 +133,13 @@ static constexpr const zero Zero;
 
 // IOstream Operators
 
-//- Read from Istream consumes no content.
+//- Read from Istream consumes no content
 inline constexpr Istream& operator>>(Istream& is, zero&) noexcept
 {
     return is;
 }
 
-//- Write to Ostream emits no content.
+//- Write to Ostream emits no content
 inline constexpr Ostream& operator<<(Ostream& os, const zero::null&) noexcept
 {
     return os;
@@ -153,6 +153,7 @@ inline constexpr Ostream& operator<<(Ostream& os, const zero::null&) noexcept
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Global Operators, Functions
+
 #include "zeroI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
