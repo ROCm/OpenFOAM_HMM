@@ -107,31 +107,31 @@ public:
         }
 
         //- Zero valued integer content
-        inline constexpr unsigned long value() const
+        inline unsigned long value() const
         {
             return 0;
         }
 
         //- No elements
-        inline constexpr bool empty() const
+        inline bool empty() const
         {
             return true;
         }
 
         //- Zero elements
-        inline constexpr label size() const
+        inline label size() const
         {
             return 0;
         }
 
         //- No-op method (for HashTable replacement)
-        inline constexpr const NullObject& toc() const
+        inline const NullObject& toc() const
         {
             return *this;
         }
 
         //- No-op method (for HashTable replacement)
-        inline constexpr const NullObject& sortedToc() const
+        inline const NullObject& sortedToc() const
         {
             return *this;
         }
@@ -141,7 +141,7 @@ public:
 
         //- Swallow assignment (cf, std::ignore)
         template<class T>
-        inline constexpr const NullObject& operator=(const T&) const
+        inline const NullObject& operator=(const T&) const
         {
             return *this;
         }
