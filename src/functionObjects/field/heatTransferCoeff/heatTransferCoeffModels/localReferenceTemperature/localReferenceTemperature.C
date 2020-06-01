@@ -74,10 +74,11 @@ bool Foam::heatTransferCoeffModels::localReferenceTemperature::read
 
 void Foam::heatTransferCoeffModels::localReferenceTemperature::htc
 (
-    volScalarField& htc
+    volScalarField& htc,
+    const FieldField<Field, scalar>& q
 )
 {
-    const FieldField<Field, scalar> qBf(q());
+    ///const FieldField<Field, scalar> qBf(q());
     const volScalarField& T = mesh_.lookupObject<volScalarField>(TName_);
     const volScalarField::Boundary& Tbf = T.boundaryField();
     const scalar eps = ROOTVSMALL;
@@ -87,7 +88,7 @@ void Foam::heatTransferCoeffModels::localReferenceTemperature::htc
     for (const label patchi : patchSet_)
     {
         const scalarField Tc(Tbf[patchi].patchInternalField());
-        htcBf[patchi] = qBf[patchi]/(Tc - Tbf[patchi] + eps);
+        htcBf[patchi] = q[patchi]/(Tc - Tbf[patchi] + eps);
     }
 }
 

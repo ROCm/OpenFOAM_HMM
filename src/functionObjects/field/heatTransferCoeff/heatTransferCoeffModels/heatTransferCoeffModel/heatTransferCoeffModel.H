@@ -47,7 +47,6 @@ SourceFiles
 #include "dictionary.H"
 #include "HashSet.H"
 #include "volFields.H"
-
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -66,7 +65,7 @@ class heatTransferCoeffModel
 {
 protected:
 
-    // Protected Data
+    // Public Data
 
         //- Mesh reference
         const fvMesh& mesh_;
@@ -77,16 +76,20 @@ protected:
         //- Temperature name
         const word TName_;
 
-        //- Name of radiative heat flux name, default = qr
+        //- Name of radiative heat flux (default = qr)
         word qrName_;
 
 
+protected:
+
     // Protected Member Functions
 
-        tmp<FieldField<Field, scalar>> q() const;
-
         //- Set the heat transfer coefficient
-        virtual void htc(volScalarField& htc) = 0;
+        virtual void htc
+        (
+            volScalarField& htc,
+            const FieldField<Field, scalar>& q
+        ) = 0;
 
         //- No copy construct
         heatTransferCoeffModel(const heatTransferCoeffModel&) = delete;
@@ -145,10 +148,42 @@ public:
 
     // Member Functions
 
+        //- The mesh reference
+        const fvMesh& mesh() const
+        {
+            return mesh_;
+        }
+
+        //- Wall patches to process
+        const labelHashSet& patchSet() const
+        {
+            return patchSet_;
+        }
+
+        //- Temperature name
+        const word& TName() const
+        {
+            return TName_;
+        }
+
+        //- Name of radiative heat flux
+        const word& qrName() const
+        {
+            return qrName_;
+        }
+
+
         //- Read from dictionary
         virtual bool read(const dictionary& dict);
 
-        virtual bool calc(volScalarField& result);
+        virtual bool calc
+        (
+            volScalarField& result,
+            const FieldField<Field, scalar>& q
+        );
+
+        //- Return q boundary fields
+        tmp<FieldField<Field, scalar>> q() const;
 };
 
 

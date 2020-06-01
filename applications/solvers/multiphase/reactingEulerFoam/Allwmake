@@ -16,6 +16,5 @@ esac
 
 reactingTwoPhaseEulerFoam/Allwmake $targetType $*
 reactingMultiphaseEulerFoam/Allwmake $targetType $*
-wmake $targetType functionObjects
 
 #------------------------------------------------------------------------------

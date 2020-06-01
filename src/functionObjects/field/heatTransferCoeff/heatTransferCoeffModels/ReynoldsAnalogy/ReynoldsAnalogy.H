@@ -131,7 +131,11 @@ protected:
         tmp<FieldField<Field, scalar>> Cf() const;
 
         //- Set the heat transfer coefficient
-        virtual void htc(volScalarField& htc);
+        virtual void htc
+        (
+            volScalarField& htc,
+            const FieldField<Field, scalar>& q
+        );
 
 
         //- No copy construct

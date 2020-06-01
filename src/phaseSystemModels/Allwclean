@@ -11,5 +11,6 @@ wclean libso reactingEulerFoam/reactingMultiphaseEulerFoam/multiphaseCompressibl
 
 wclean libso reactingEulerFoam/reactingTwoPhaseEulerFoam/twoPhaseSystem
 wclean libso reactingEulerFoam/reactingTwoPhaseEulerFoam/twoPhaseCompressibleTurbulenceModels
+wclean libso  reactingEulerFoam/functionObjects
 
 #------------------------------------------------------------------------------

@@ -100,8 +100,8 @@ wmake $targetType engine
 
 conversion/Allwmake $targetType $*
 
-phaseSystemModels/Allwmake $targetType $*
 functionObjects/Allwmake $targetType $*
+phaseSystemModels/Allwmake $targetType $*
 
 wmake $targetType lumpedPointMotion
 wmake $targetType sixDoFRigidBodyMotion

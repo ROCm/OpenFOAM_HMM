@@ -122,6 +122,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class heatTransferCoeffModel;
 
 namespace functionObjects
@@ -135,29 +136,25 @@ class heatTransferCoeff
 :
     public fieldExpression
 {
-
-private:
-
-    // Private data
+    // Private Data
 
         //- Heat transfer coefficient model
         autoPtr<heatTransferCoeffModel> htcModelPtr_;
 
 
-    // Private Member Functions
+protected:
+
+    // Protected Member Functions
+
+        //- Calculate the heat transfer coefficient field
+        //  \return true on success
+        virtual bool calc();
 
         //- No copy construct
         heatTransferCoeff(const heatTransferCoeff&) = delete;
 
         //- No copy assignment
         void operator=(const heatTransferCoeff&) = delete;
-
-
-protected:
-
-        //- Calculate the heat transfer coefficient field and return true
-        // if successful
-        virtual bool calc();
 
 
 public:
@@ -185,7 +182,7 @@ public:
     // Member Functions
 
         //- Read the heatTransferCoeff data
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 };
 
 

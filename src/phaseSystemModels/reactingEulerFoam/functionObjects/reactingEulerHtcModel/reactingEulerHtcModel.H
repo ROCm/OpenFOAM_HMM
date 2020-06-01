@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,120 +24,95 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::heatTransferCoeffModels::fixedReferenceTemperature
+    Foam::reactingEulerHtcModel
 
 Description
-    Heat transfer coefficient calculation that employs a fixed reference
-    temperature
-
-    The heat transfer coefficient is specified by:
-
-    \f[
-        h = \frac{q}{T_{ref} - T_w}
-    \f]
-
-Usage
-    Example of function object specification:
-    \verbatim
-        type            heatTransferCoeff;
-        libs            (fieldFunctionObjects);
-        ...
-        htcModel        fixedReferenceTemperature;
-        TRef            300;
-        ...
-    \endverbatim
-
-    Where the entries comprise:
-    \table
-        Property     | Description                          | Required | Default
-        type         | type name: heatTransferCoeff         | yes |
-        htcModel     | selected htc model                   | yes |
-        TRef         | reference temperature                | yes |
-    \endtable
+    A heat transfer coefficient for reactingEuler solvers
 
 SourceFiles
-    fixedReferenceTemperature.C
-
-SeeAlso
-    Foam::heatTransferCoeffModel
+    reactingEulerHtcModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef heatTransferCoeffModels_fixedReferenceTemperature_H
-#define heatTransferCoeffModels_fixedReferenceTemperature_H
+#ifndef reactingEulerHtcModel_H
+#define reactingEulerHtcModel_H
 
+#include "HashSet.H"
+#include "volFields.H"
+#include "fieldExpression.H"
+#include "runTimeSelectionTables.H"
 #include "heatTransferCoeffModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace heatTransferCoeffModels
+namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class fixedReferenceTemperature Declaration
+                   Class reactingEulerHtcModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class fixedReferenceTemperature
+class reactingEulerHtcModel
 :
-    public heatTransferCoeffModel
+    public fieldExpression
 {
+    // Private Data
+
+        //- Heat transfer coefficient model
+        autoPtr<heatTransferCoeffModel> htcModelPtr_;
+
+
 protected:
-
-    // Protected Data
-
-        //- Reference temperature
-        scalar TRef_;
-
 
     // Protected Member Functions
 
-        //- Set the heat transfer coefficient
-        virtual void htc
-        (
-            volScalarField& htc,
-            const FieldField<Field, scalar>& q
-        );
+        //- Calculate the heat transfer coefficient field
+        //  \return true on success
+        virtual bool calc();
+
+        //- Calculate heat flux
+        tmp<FieldField<Field, scalar>> q() const;
 
         //- No copy construct
-        fixedReferenceTemperature(const fixedReferenceTemperature&) = delete;
+        reactingEulerHtcModel(const reactingEulerHtcModel&) = delete;
 
         //- No copy assignment
-        void operator=(const fixedReferenceTemperature&) = delete;
+        void operator=(const reactingEulerHtcModel&) = delete;
 
 
 public:
 
     //- Runtime type information
-    TypeName("fixedReferenceTemperature");
+    TypeName("reactingEulerHtcModel");
 
 
     // Constructors
 
         //- Construct from components
-        fixedReferenceTemperature
+        reactingEulerHtcModel
         (
-            const dictionary& dict,
-            const fvMesh& mesh,
-            const word& TName
+            const word& name,
+            const Time& runTime,
+            const dictionary& dict
         );
 
 
     //- Destructor
-    virtual ~fixedReferenceTemperature() = default;
+    virtual ~reactingEulerHtcModel() = default;
 
 
     // Member Functions
 
-        //- Read from dictionary
+        //- Read the heatTransferCoeff data
         virtual bool read(const dictionary& dict);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace heatTransferCoeffModels
+} // End namespace functionObjects
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

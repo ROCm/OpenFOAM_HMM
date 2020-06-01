@@ -81,21 +81,22 @@ class localReferenceTemperature
 :
     public heatTransferCoeffModel
 {
-    // Private Member Functions
+protected:
+
+    // Protected Member Functions
+
+        //- Set the heat transfer coefficient
+        virtual void htc
+        (
+            volScalarField& htc,
+            const FieldField<Field, scalar>& q
+        );
 
         //- No copy construct
         localReferenceTemperature(const localReferenceTemperature&) = delete;
 
         //- No copy assignment
         void operator=(const localReferenceTemperature&) = delete;
-
-
-protected:
-
-    // Protected Member Functions
-
-        //- Set the heat transfer coefficient
-        virtual void htc(volScalarField& htc);
 
 
 public:

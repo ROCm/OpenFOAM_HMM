@@ -30,7 +30,6 @@ License
 #include "fluidThermo.H"
 #include "turbulentTransportModel.H"
 #include "turbulentFluidThermoModel.H"
-#include "phaseSystem.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -91,32 +90,10 @@ Foam::heatTransferCoeffModel::q() const
             q[patchi] = alphabf[patchi]*hebf[patchi].snGrad();
         }
     }
-    else if (mesh_.foundObject<phaseSystem>("phaseProperties"))
-    {
-        const phaseSystem& fluid =
-        (
-            mesh_.lookupObject<phaseSystem>("phaseProperties")
-        );
-
-        for (label patchi : patchSet_)
-        {
-            forAll(fluid.phases(), phasei)
-            {
-                const phaseModel& phase = fluid.phases()[phasei];
-                const fvPatchScalarField& alpha =
-                    phase.boundaryField()[patchi];
-                const volScalarField& he = phase.thermo().he();
-                const volScalarField::Boundary& hebf = he.boundaryField();
-
-                q[patchi] +=
-                    alpha*phase.alphaEff(patchi)()*hebf[patchi].snGrad();
-            }
-        }
-    }
     else
     {
         FatalErrorInFunction
-            << "Unable to find a valid thermo model to evaluate q"
+            << "Unable to find a valid thermo model to evaluate q" << nl
             << exit(FatalError);
     }
 
@@ -158,11 +135,7 @@ Foam::heatTransferCoeffModel::heatTransferCoeffModel
 
 bool Foam::heatTransferCoeffModel::read(const dictionary& dict)
 {
-    patchSet_ =
-        mesh_.boundaryMesh().patchSet
-        (
-            dict.get<wordRes>("patches")
-        );
+    patchSet_ = mesh_.boundaryMesh().patchSet(dict.get<wordRes>("patches"));
 
     dict.readIfPresent("qr", qrName_);
 
@@ -170,9 +143,13 @@ bool Foam::heatTransferCoeffModel::read(const dictionary& dict)
 }
 
 
-bool Foam::heatTransferCoeffModel::calc(volScalarField& result)
+bool Foam::heatTransferCoeffModel::calc
+(
+    volScalarField& result,
+    const FieldField<Field, scalar>& q
+)
 {
-    htc(result);
+    htc(result, q);
 
     return true;
 }

@@ -243,7 +243,11 @@ bool Foam::heatTransferCoeffModels::ReynoldsAnalogy::read
 }
 
 
-void Foam::heatTransferCoeffModels::ReynoldsAnalogy::htc(volScalarField& htc)
+void Foam::heatTransferCoeffModels::ReynoldsAnalogy::htc
+(
+    volScalarField& htc,
+    const FieldField<Field, scalar>& q
+)
 {
     const FieldField<Field, scalar> CfBf(Cf());
     const scalar magU = mag(URef_);

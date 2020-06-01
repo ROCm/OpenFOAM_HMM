@@ -27,5 +27,6 @@ wmake $targetType  reactingEulerFoam/reactingTwoPhaseEulerFoam/twoPhaseSystem
 wmake $targetType  reactingEulerFoam/reactingTwoPhaseEulerFoam/twoPhaseCompressibleTurbulenceModels
 
 wmake $targetType  reactingEulerFoam/phaseSystems
+wmake $targetType  reactingEulerFoam/functionObjects
 
 #------------------------------------------------------------------------------

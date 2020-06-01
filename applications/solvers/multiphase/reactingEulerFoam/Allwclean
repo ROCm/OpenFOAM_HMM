@@ -3,6 +3,5 @@ cd "${0%/*}" || exit    # Run from this directory
 
 wclean reactingTwoPhaseEulerFoam
 wclean reactingMultiphaseEulerFoam
-wclean libso functionObjects
 
 #------------------------------------------------------------------------------

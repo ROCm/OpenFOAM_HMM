@@ -63,8 +63,8 @@ functions
 {
     htc
     {
-        type            heatTransferCoeff;
-        libs            (fieldFunctionObjects);
+        type            reactingEulerHtcModel;
+        libs            (reactingEulerFoamFunctionObjects);
         region          water;
         field           T.liquid;
         writeControl    outputTime;
@@ -94,7 +94,7 @@ functions
 
         operation       areaAverage;
 
-        fields          ( heatTransferCoeff(T.liquid) );
+        fields          ( reactingEulerHtcModel(T.liquid) );
     }
 }
 
