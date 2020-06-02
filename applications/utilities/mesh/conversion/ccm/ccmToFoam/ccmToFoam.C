@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
     }
 
     // By default, no scaling
-    const scalar scaleFactor = args.get<scalar>("scale", 1);
+    const scalar scaleFactor = args.getOrDefault<scalar>("scale", 1);
 
     // Default to binary output, unless otherwise specified
     const IOstream::streamFormat format =

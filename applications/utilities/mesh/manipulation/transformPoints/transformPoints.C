@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -261,13 +261,13 @@ int main(int argc, char *argv[])
 
     if (args.found("time"))
     {
-        if (args.opt("time") == "constant")
+        if (args["time"] == "constant")
         {
             runTime.setTime(instant(0, "constant"), 0);
         }
         else
         {
-            scalar timeValue = args.get<scalar>("time");
+            const scalar timeValue = args.get<scalar>("time");
             runTime.setTime(instant(timeValue), 0);
         }
     }

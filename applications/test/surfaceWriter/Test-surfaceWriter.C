@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,8 +84,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    const word writerType =
-        args.lookupOrDefault<word>("type", exportName.ext());
+    const word writerType = args.getOrDefault<word>("type", exportName.ext());
 
     auto surfWriter = surfaceWriter::New(writerType);
 

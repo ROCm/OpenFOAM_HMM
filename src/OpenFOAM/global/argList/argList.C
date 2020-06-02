@@ -288,6 +288,16 @@ void Foam::argList::checkITstream(const ITstream& is, const word& optName)
 }
 
 
+void Foam::argList::raiseBadInput(const word& optName) const
+{
+    // Can use FatalError
+    // predicate checks are not used at the earliest stages
+    FatalErrorIn(executable())
+        << "Option -" << optName << " with invalid input" << nl
+        << exit(FatalError);
+}
+
+
 void Foam::argList::addArgument
 (
     const string& argName,

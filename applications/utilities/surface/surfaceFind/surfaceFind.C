@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,9 +64,9 @@ int main(int argc, char *argv[])
 
     const point samplePt
     (
-        args.get<scalar>("x", 0),
-        args.get<scalar>("y", 0),
-        args.get<scalar>("z", 0)
+        args.getOrDefault<scalar>("x", 0),
+        args.getOrDefault<scalar>("y", 0),
+        args.getOrDefault<scalar>("z", 0)
     );
     Info<< "Looking for nearest face/vertex to " << samplePt << endl;
 

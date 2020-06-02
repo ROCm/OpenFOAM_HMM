@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,10 +29,52 @@ Description
 
 #include "argList.H"
 #include "IOstreams.H"
+#include "MinMax.H"
 #include "Switch.H"
 #include "StringStream.H"
 
 using namespace Foam;
+
+
+void predicateTests_label(const word& optName, const argList& args)
+{
+    Info<< "predicate tests for " << optName << nl;
+
+    const bool throwingError = FatalError.throwExceptions();
+    try
+    {
+        label val;
+        val = args.getCheck<label>(optName, labelMinMax::ge(0));
+    }
+    catch (const Foam::error& err)
+    {
+        Info<< "Caught FatalError "
+            << err << nl << endl;
+    }
+
+    FatalError.throwExceptions(throwingError);
+}
+
+
+void predicateTests_scalar(const word& optName, const argList& args)
+{
+    Info<< "predicate tests for " << optName << nl;
+
+    const bool throwingError = FatalError.throwExceptions();
+    try
+    {
+        scalar val;
+        val = args.getCheck<scalar>(optName, scalarMinMax::ge(0));
+    }
+    catch (const Foam::error& err)
+    {
+        Info<< "Caught FatalError "
+            << err << nl << endl;
+    }
+
+    FatalError.throwExceptions(throwingError);
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
@@ -47,6 +89,11 @@ int main(int argc, char *argv[])
     argList::addOption("scalar", "value", "Test parsing of scalar");
     argList::addOption("string", "value", "Test string lookup");
     argList::addOption("relative", "PATH", "Test relativePath");
+    argList::addBoolOption
+    (
+        "predicates",
+        "Apply some predicate tests (for label and scalar)"
+    );
 
     // These are actually lies (never had -parseLabel, -parseScalar etc),
     // but good for testing...
@@ -105,6 +152,11 @@ int main(int argc, char *argv[])
     if (args.readIfPresent("label", ival))
     {
         Info<< ival << nl;
+
+        if (args.found("predicates"))
+        {
+            predicateTests_label("label", args);
+        }
     }
     else
     {
@@ -115,6 +167,11 @@ int main(int argc, char *argv[])
     if (args.readIfPresent("scalar", sval))
     {
         Info<< sval << nl;
+
+        if (args.found("predicates"))
+        {
+            predicateTests_scalar("scalar", args);
+        }
     }
     else
     {

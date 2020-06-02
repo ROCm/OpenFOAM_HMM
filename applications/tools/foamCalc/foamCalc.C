@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
     }
 
     {
-        const int prec = args.lookupOrDefault<int>("precision", 0u);
+        const int prec = args.getOrDefault<int>("precision", 0u);
         if (prec > 0)
         {
             IOstream::defaultPrecision(prec);

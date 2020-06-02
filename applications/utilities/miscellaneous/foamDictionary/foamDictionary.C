@@ -360,7 +360,7 @@ int main(int argc, char *argv[])
 
     // Set the default output precision
     {
-        const unsigned prec = args.lookupOrDefault<unsigned>("precision", 0u);
+        const unsigned prec = args.getOrDefault<unsigned>("precision", 0u);
         if (prec)
         {
             // if (Pstream::master())

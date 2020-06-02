@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,7 +69,7 @@ int readNumProcs
                     IOobject::NO_WRITE,
                     false // do not register
                 ),
-                args.get<fileName>(optionName, "")
+                args.getOrDefault<fileName>(optionName, "")
             )
         )
     );

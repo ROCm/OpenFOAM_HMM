@@ -894,7 +894,7 @@ int main(int argc, char *argv[])
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE
                 ),
-                args.get<fileName>("decomposeParDict", "")
+                args.getOrDefault<fileName>("decomposeParDict", "")
             )
         );
 
@@ -1979,7 +1979,7 @@ int main(int argc, char *argv[])
 
         fileName outFileName
         (
-            args.get<fileName>
+            args.getOrDefault<fileName>
             (
                 "outFile",
                 "constant/triSurface/simplifiedSurface.stl"

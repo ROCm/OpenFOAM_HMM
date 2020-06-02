@@ -250,7 +250,7 @@ int main(int argc, char *argv[])
                 IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE
             ),
-            args.get<fileName>("dict", "")
+            args.getOrDefault<fileName>("dict", "")
         )
     );
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
         const word dictName("refineMeshDict");
 
         // Obtain dictPath here for messages
-        fileName dictPath = args.get<fileName>("dict", "");
+        fileName dictPath = args.getOrDefault<fileName>("dict", "");
 
         IOobject dictIO = IOobject::selectIO
         (

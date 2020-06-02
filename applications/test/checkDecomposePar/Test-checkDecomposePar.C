@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,7 +86,8 @@ int main(int argc, char *argv[])
     instantList times = timeSelector::selectIfPresent(runTime, args);
 
     // Allow override of decomposeParDict location
-    const fileName decompDictFile = args.get<fileName>("decomposeParDict", "");
+    const fileName decompDictFile =
+        args.getOrDefault<fileName>("decomposeParDict", "");
 
     wordList regionNames;
     wordList regionDirs;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -330,7 +330,8 @@ int main(int argc, char *argv[])
 
 
     // Allow override of decomposeParDict location
-    const fileName decompDictFile = args.get<fileName>("decomposeParDict", "");
+    const fileName decompDictFile =
+        args.getOrDefault<fileName>("decomposeParDict", "");
 
     // Get all region names
     wordList regionNames;
@@ -344,7 +345,8 @@ int main(int argc, char *argv[])
     else
     {
         regionNames.resize(1);
-        regionNames.first() = args.get<word>("region", fvMesh::defaultRegion);
+        regionNames.first() =
+            args.getOrDefault<word>("region", fvMesh::defaultRegion);
     }
 
     forAll(regionNames, regioni)

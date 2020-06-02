@@ -6,6 +6,7 @@
     \\/      M anipulation   |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -198,7 +199,7 @@ int main(int argc, char *argv[])
     }
 
     {
-        const label celli = args.get<label>("cell", 0);
+        const label celli = args.getOrDefault<label>("cell", 0);
 
         tensorField mI(momentOfInertia::meshInertia(mesh));
 

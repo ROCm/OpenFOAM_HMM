@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
 
 
     const fileName importName(args[1]);
-    const word exportName(args.get<word>("name", "default"));
+    const word exportName(args.getOrDefault<word>("name", "default"));
 
     const word readFileType
     (
@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
                 IOobject::NO_WRITE,
                 false
             ),
-            args.get<fileName>("dict", "")
+            args.getOrDefault<fileName>("dict", "")
         );
 
         if (!ioCsys.typeHeaderOk<coordinateSystems>(false))

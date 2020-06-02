@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
     Time runTime(args.rootPath(), args.caseName());
 
     const fileName exportName(args[1]);
-    const word importName(args.get<word>("name", "default"));
+    const word importName(args.getOrDefault<word>("name", "default"));
 
     const word writeFileType
     (
@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
                 IOobject::NO_WRITE,
                 false
             ),
-            args.get<fileName>("dict", "")
+            args.getOrDefault<fileName>("dict", "")
         );
 
         if (!ioCsys.typeHeaderOk<coordinateSystems>(false))

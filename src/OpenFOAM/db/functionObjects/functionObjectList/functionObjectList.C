@@ -333,7 +333,7 @@ bool Foam::functionObjectList::readFunctionObject
     }
 
     // Insert the region name if specified
-    if (region != word::null)
+    if (!region.empty())
     {
         funcDict.set("region", region);
     }
@@ -403,7 +403,7 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
 
     dictionary& functionsDict = controlDict.subDict("functions");
 
-    const word regionName = args.get<word>("region", "");
+    const word regionName = args.getOrDefault<word>("region", "");
 
     bool modifiedControlDict = false;
 

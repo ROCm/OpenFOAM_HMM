@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -383,7 +383,7 @@ int main(int argc, char *argv[])
 
     // Sin of angle between two consecutive edges on a face.
     // If sin(angle) larger than this the face will be considered concave.
-    const scalar concaveAngle = args.get<scalar>("concaveAngle", 30);
+    const scalar concaveAngle = args.getOrDefault<scalar>("concaveAngle", 30);
 
     const scalar concaveSin = Foam::sin(degToRad(concaveAngle));
 

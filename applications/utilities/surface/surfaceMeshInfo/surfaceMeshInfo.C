@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
     // use UnsortedMeshedSurface, not MeshedSurface to maintain ordering
     UnsortedMeshedSurface<face> surf(importName);
 
-    const scalar scaling = args.get<scalar>("scale", -1);
+    const scalar scaling = args.getOrDefault<scalar>("scale", -1);
     if (scaling > 0)
     {
         DetailInfo << " -scale " << scaling << nl;

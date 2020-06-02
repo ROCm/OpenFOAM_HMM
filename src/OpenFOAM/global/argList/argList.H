@@ -176,6 +176,9 @@ class argList
         template<class T>
         static inline void readList(ITstream& is, List<T>& list);
 
+        //- Trigger FatalError for given option
+        void raiseBadInput(const word& optName) const;
+
         //- Set rootPath_, globalCase_, case_ from one of the following forms
         //   * [-case dir]
         //   * cwd
@@ -392,9 +395,16 @@ public:
         inline T get(const word& optName) const;
 
         //- Get a value from the named option if present, or return default.
-        //  Identical to getOrDefault().
         template<class T>
-        inline T get(const word& optName, const T& deflt) const;
+        inline T getOrDefault(const word& optName, const T& deflt) const;
+
+        //- Get a List of values from the named option,
+        //- treating a single entry like a list of size 1.
+        //  \param optName  the option name to read from
+        //  \param mandatory if the option is non-mandatory, the behaviour
+        //      is similar to readListIfPresent().
+        template<class T>
+        inline List<T> getList(const word& optName, bool mandatory=true) const;
 
         //- Read a value from the named option if present.
         //  \return true if the named option was found.
@@ -412,38 +422,72 @@ public:
             const T& deflt
         ) const;
 
-        //- Get a value from the named option if present, or return default.
-        template<class T>
-        inline T getOrDefault(const word& optName, const T& deflt) const;
-
-        //- Get a List of values from the named option,
-        //- treating a single entry like a list of size 1.
-        //  \param optName  the option name to read from
-        //  \param mandatory if the option is non-mandatory, the behaviour
-        //      is similar to readListIfPresent().
-        template<class T>
-        inline List<T> getList(const word& optName, bool mandatory=true) const;
-
         //- If named option is present, get a List of values
         //- treating a single entry like a list of size 1.
         //  \return true if the named option was found.
         template<class T>
         inline bool readListIfPresent(const word& optName, List<T>& list) const;
 
+        //- Read the named option and check its validity.
+        //  FatalError if mandatory and not found, or if the predicate check
+        //  failed.
+        //
+        //  \param optName the option name
+        //  \param val the value to read into
+        //  \param pred the value check predicate
+        //
+        //  \return true if the entry was found.
+        template<class T, class Predicate>
+        inline bool readCheck
+        (
+            const word& optName,
+            T& val,
+            const Predicate& pred,
+            bool mandatory = true
+        ) const;
 
-        //- Alternative name for option get(const word& optName)
-        template<class T=string>
-        T opt(const word& optName) const
-        {
-            return this->get<T>(optName);
-        }
+        //- Read the named option if present and check its validity.
+        //  FatalError if found and the predicate check failed.
+        //
+        //  \param optName the option name
+        //  \param val the value to read into
+        //  \param pred the value check predicate
+        //
+        //  \return true if the entry was found.
+        template<class T, class Predicate>
+        inline bool readCheckIfPresent
+        (
+            const word& optName,
+            T& val,
+            const Predicate& pred
+        ) const;
 
-        //- Alternative name for option get(const word& optName, ...)
-        template<class T>
-        T opt(const word& optName, const T& deflt) const
-        {
-            return this->get<T>(optName, deflt);
-        }
+        //- Get a value from the named option with additional checking.
+        //  FatalError if the predicate check failed.
+        //
+        //  \param optName the option name
+        //  \param pred the value check predicate
+        template<class T, class Predicate>
+        T getCheck
+        (
+            const word& optName,
+            const Predicate& pred
+        ) const;
+
+        //- Get a value from the named option with additional checking
+        //- (if present), or return default.
+        //  FatalError if the predicate check on the retrieved value failed.
+        //
+        //  \param optName the option name
+        //  \param deflt the default return value
+        //  \param pred the value check predicate
+        template<class T, class Predicate>
+        T getCheckOrDefault
+        (
+            const word& optName,
+            const T& deflt,
+            const Predicate& pred
+        ) const;
 
 
     // Edit
@@ -612,11 +656,36 @@ public:
 
     // Housekeeping
 
-        //- Get a value from the named option if present, or return default.
+        //- Deprecated(2020-05) identical to get(const word& optName)
+        //  \deprecated(2020-05) - use get() method
+        template<class T=string>
+        T opt(const word& optName) const
+        {
+            return this->get<T>(optName);
+        }
+
+        //- Deprecated(2020-05) identical to getOrDefault(...)
+        //  \deprecated(2020-05) - use getOrDefault() method
+        template<class T>
+        T opt(const word& optName, const T& deflt) const
+        {
+            return this->getOrDefault<T>(optName, deflt);
+        }
+
+        //- Deprecated(2020-05) identical to getOrDefault(...)
+        //  \deprecated(2020-05) - use getOrDefault() method
+        template<class T>
+        T get(const word& optName, const T& deflt) const
+        {
+            return this->getOrDefault<T>(optName, deflt);
+        }
+
+        //- Deprecated(2020-05) identical to getOrDefault(...)
+        //  \deprecated(2020-05) - use getOrDefault() method
         template<class T>
         T lookupOrDefault(const word& optName, const T& deflt) const
         {
-            return getOrDefault<T>(optName, deflt);
+            return this->getOrDefault<T>(optName, deflt);
         }
 
 

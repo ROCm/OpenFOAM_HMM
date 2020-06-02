@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,7 +88,8 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    const fileName kivaFileName = args.get<fileName>("file", "otape17");
+    const fileName kivaFileName =
+        args.getOrDefault<fileName>("file", "otape17");
 
     kivaVersions kivaVersion = kiva3v;
     if (args.found("version"))
@@ -113,7 +115,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    const scalar zHeadMin = args.get<scalar>("zHeadMin", -GREAT);
+    const scalar zHeadMin = args.getOrDefault<scalar>("zHeadMin", -GREAT);
 
     #include "readKivaGrid.H"
 

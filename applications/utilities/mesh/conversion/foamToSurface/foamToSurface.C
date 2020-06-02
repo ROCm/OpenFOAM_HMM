@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,7 +84,7 @@ int main(int argc, char *argv[])
 
     fileName exportName = args[1];
 
-    const scalar scaleFactor = args.get<scalar>("scale", 0);
+    const scalar scaleFactor = args.getOrDefault<scalar>("scale", 0);
     const bool doTriangulate = args.found("tri");
 
     fileName exportBase = exportName.lessExt();

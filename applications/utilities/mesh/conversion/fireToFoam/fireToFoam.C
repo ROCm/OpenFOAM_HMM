@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
     (
         args[1],
         // Default no scaling
-        args.get<scalar>("scale", 1)
+        args.getOrDefault<scalar>("scale", 1)
     );
 
 

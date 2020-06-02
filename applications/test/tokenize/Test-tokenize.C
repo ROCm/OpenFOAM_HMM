@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +54,7 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv, false, true);
 
-    const label repeat = args.get<label>("repeat", 1);
+    const label repeat = args.getOrDefault<label>("repeat", 1);
 
     const bool optVerbose = args.found("verbose");
 

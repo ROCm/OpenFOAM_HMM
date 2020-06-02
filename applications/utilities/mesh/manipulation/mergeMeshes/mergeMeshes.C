@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,10 +106,10 @@ int main(int argc, char *argv[])
     fileName addCase = args[2];
 
     const word masterRegion =
-        args.get<word>("masterRegion", polyMesh::defaultRegion);
+        args.getOrDefault<word>("masterRegion", polyMesh::defaultRegion);
 
     const word addRegion =
-        args.get<word>("addRegion", polyMesh::defaultRegion);
+        args.getOrDefault<word>("addRegion", polyMesh::defaultRegion);
 
     // Since we don't use argList processor directory detection, add it to
     // the casename ourselves so it triggers the logic inside TimePath.

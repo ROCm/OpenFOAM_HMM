@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -95,7 +96,7 @@ int main(int argc, char *argv[])
         Info<< "outside" << endl;
     }
 
-    const scalar scaling = args.get<scalar>("scale", -1);
+    const scalar scaling = args.getOrDefault<scalar>("scale", -1);
     if (scaling > 0)
     {
         Info<< "Input scaling: " << scaling << nl;

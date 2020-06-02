@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,7 +71,7 @@ int main(int argc, char *argv[])
     const scalar   mergeTol = args.get<scalar>(2);
     const fileName outFileName = args[3];
 
-    const scalar scaling = args.get<scalar>("scale", -1);
+    const scalar scaling = args.getOrDefault<scalar>("scale", -1);
 
     Info<< "Reading surface from " << surfFileName << " ..." << nl
         << "Merging points within " << mergeTol << " metre." << nl;

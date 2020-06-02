@@ -323,7 +323,7 @@ int main(int argc, char *argv[])
         FatalError.exit();
     }
 
-    const scalar scaleFactor = args.get<scalar>("scale", 1);
+    const scalar scaleFactor = args.getOrDefault<scalar>("scale", 1);
 
     #include "createTime.H"
 

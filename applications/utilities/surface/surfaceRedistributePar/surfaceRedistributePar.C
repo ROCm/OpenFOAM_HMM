@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE
                 ),
-                args.get<fileName>("decomposeParDict", "")
+                args.getOrDefault<fileName>("decomposeParDict", "")
             )
         );
 

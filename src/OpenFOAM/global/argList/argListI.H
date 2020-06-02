@@ -282,7 +282,11 @@ inline T Foam::argList::get(const word& optName) const
 
 
 template<class T>
-inline T Foam::argList::get(const word& optName, const T& deflt) const
+inline T Foam::argList::getOrDefault
+(
+    const word& optName,
+    const T& deflt
+) const
 {
     if (found(optName))
     {
@@ -325,22 +329,6 @@ inline bool Foam::argList::readIfPresent
 
     val = deflt;
     return false;
-}
-
-
-template<class T>
-inline T Foam::argList::getOrDefault
-(
-    const word& optName,
-    const T& deflt
-) const
-{
-    if (found(optName))
-    {
-        return get<T>(optName);
-    }
-
-    return deflt;
 }
 
 
@@ -399,6 +387,80 @@ inline bool Foam::argList::readListIfPresent
     }
 
     return false;
+}
+
+
+template<class T, class Predicate>
+inline bool Foam::argList::readCheck
+(
+    const word& optName,
+    T& val,
+    const Predicate& pred,
+    bool mandatory
+) const
+{
+    if (readIfPresent<T>(optName, val))
+    {
+        if (!pred(val))
+        {
+            raiseBadInput(optName);
+        }
+
+        return true;
+    }
+    else if (mandatory)
+    {
+        FatalError(executable())
+            << "Option -" << optName << " not specified" << nl
+            << exit(FatalError);
+    }
+
+    return false;
+}
+
+
+template<class T, class Predicate>
+inline bool Foam::argList::readCheckIfPresent
+(
+    const word& optName,
+    T& val,
+    const Predicate& pred
+) const
+{
+    return readCheck<T>(optName, val, pred, false);
+}
+
+
+template<class T, class Predicate>
+inline T Foam::argList::getCheck
+(
+    const word& optName,
+    const Predicate& pred
+) const
+{
+    T val;
+    readCheck<T>(optName, val, pred, true);
+    return val;
+}
+
+
+template<class T, class Predicate>
+inline T Foam::argList::getCheckOrDefault
+(
+    const word& optName,
+    const T& deflt,
+    const Predicate& pred
+) const
+{
+    // Could predicate check default as well (for FULLDEBUG)
+
+    T val;
+    if (readCheck<T>(optName, val, pred, false))
+    {
+        return val;
+    }
+
+    return deflt;
 }
 
 

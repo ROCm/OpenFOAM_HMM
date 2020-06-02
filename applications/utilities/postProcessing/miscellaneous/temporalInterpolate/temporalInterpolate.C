@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -237,12 +237,12 @@ int main(int argc, char *argv[])
     }
 
 
-    const int divisions = args.get<int>("divisions", 1);
+    const int divisions = args.getOrDefault<int>("divisions", 1);
     Info<< "Using " << divisions << " per time interval" << nl << endl;
 
 
     const word interpolationType =
-        args.get<word>("interpolationType", "linear");
+        args.getOrDefault<word>("interpolationType", "linear");
 
     Info<< "Using interpolation " << interpolationType << nl << endl;
 

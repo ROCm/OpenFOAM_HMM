@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,7 +68,7 @@ int main(int argc, char *argv[])
 
     bool useBSpline = args.found("B");
     bool useCatmullRom = args.found("CMR");
-    const label nSeg = args.get<label>("n", 20);
+    const label nSeg = args.getOrDefault<label>("n", 20);
 
     if (!useCatmullRom && !useBSpline)
     {

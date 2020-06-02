@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
-    const label maxCount = args.get<label>("max", 1000);
+    const label maxCount = args.getOrDefault<label>("max", 1000);
 
     externalFileCoupler coupler;
 

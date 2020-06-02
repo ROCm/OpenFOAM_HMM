@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv, false, true);
 
-    const scalar currTime = args.get<scalar>("time", GREAT);
+    const scalar currTime = args.getOrDefault<scalar>("time", GREAT);
 
     Info<< "Using currTime = " << currTime << nl
         << "when loading " << (args.size()-1) << " files" << nl << nl;

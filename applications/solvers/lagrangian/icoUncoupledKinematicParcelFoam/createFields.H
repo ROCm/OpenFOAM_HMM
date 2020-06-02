@@ -59,7 +59,7 @@ volScalarField mu
 
 const word kinematicCloudName
 (
-    args.get<word>("cloud", "kinematicCloud")
+    args.getOrDefault<word>("cloud", "kinematicCloud")
 );
 
 Info<< "Constructing kinematicCloud " << kinematicCloudName << endl;

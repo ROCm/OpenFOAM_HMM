@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
     argList args(argc, argv);
 
     {
-        const unsigned prec = args.lookupOrDefault<unsigned>("precision", 0u);
+        const unsigned prec = args.getOrDefault<unsigned>("precision", 0u);
         if (prec)
         {
             Info<< "Output write precision set to " << prec << endl;

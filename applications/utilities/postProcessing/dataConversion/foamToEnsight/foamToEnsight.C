@@ -357,7 +357,7 @@ int main(int argc, char *argv[])
 
     // Forced point interpolation?
     caseOpts.nodeValues(doPointValues && args.found("nodeValues"));
-    caseOpts.width(args.get<label>("width", 8));
+    caseOpts.width(args.getOrDefault<label>("width", 8));
     caseOpts.overwrite(!args.found("no-overwrite")); // Remove existing?
 
     // Can also have separate directory for lagrangian
@@ -366,7 +366,7 @@ int main(int argc, char *argv[])
     // Define sub-directory name to use for EnSight data.
     // The path to the ensight directory is at case level only
     // - For parallel cases, data only written from master
-    fileName outputDir = args.get<word>("name", "EnSight");
+    fileName outputDir = args.getOrDefault<word>("name", "EnSight");
     if (!outputDir.isAbsolute())
     {
         outputDir = args.globalPath()/outputDir;

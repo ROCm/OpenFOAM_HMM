@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 
     // Allow override of decomposeParDict location
     const fileName decompDictFile =
-        args.get<fileName>("decomposeParDict", "");
+        args.getOrDefault<fileName>("decomposeParDict", "");
 
     IOdictionary foamyHexMeshDict
     (

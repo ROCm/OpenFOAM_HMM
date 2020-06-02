@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -338,8 +338,9 @@ int main(int argc, char *argv[])
     const fileName surfFileName = args[1];
     const bool checkSelfIntersect = args.found("checkSelfIntersection");
     const bool splitNonManifold = args.found("splitNonManifold");
-    const label outputThreshold = args.get<label>("outputThreshold", 10);
-    const word surfaceFormat = args.get<word>("writeSets", "");
+    const label outputThreshold =
+        args.getOrDefault<label>("outputThreshold", 10);
+    const word surfaceFormat = args.getOrDefault<word>("writeSets", "");
     const bool writeSets = !surfaceFormat.empty();
 
     autoPtr<surfaceWriter> surfWriter;
