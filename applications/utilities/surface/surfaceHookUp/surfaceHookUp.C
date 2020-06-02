@@ -277,7 +277,7 @@ int main(int argc, char *argv[])
     );
     argList::noParallel();
     argList::addArgument("hookTolerance", "The point merge tolerance");
-    argList::addOption("dict", "file", "Use alternative surfaceHookUpDict");
+    argList::addOption("dict", "file", "Alternative surfaceHookUpDict");
 
     #include "setRootCase.H"
     #include "createTime.H"
@@ -285,7 +285,7 @@ int main(int argc, char *argv[])
     const word dictName("surfaceHookUpDict");
     #include "setSystemRunTimeDictionaryIO.H"
 
-    Info<< "Reading " << dictName << nl << endl;
+    Info<< "Reading " << dictIO.name() << nl << endl;
 
     const IOdictionary dict(dictIO);
 

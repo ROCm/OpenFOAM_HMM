@@ -779,7 +779,7 @@ int main(int argc, char *argv[])
         "file",
         "Name of the file to save the simplified surface to"
     );
-    argList::addOption("dict", "file", "Use alternative snappyHexMeshDict");
+    argList::addOption("dict", "file", "Alternative snappyHexMeshDict");
 
     argList::noFunctionObjects();  // Never use function objects
 

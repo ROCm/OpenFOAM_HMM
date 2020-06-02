@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,12 +42,7 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::noFunctionObjects();
-    argList::addOption
-    (
-        "dict",
-        "file",
-        "Alternative dictionary for the PDRblockMesh description"
-    );
+    argList::addOption("dict", "file", "Alternative PDRblockMeshDict");
 
     #include "setRootCase.H"
     #include "createTime.H"
@@ -56,7 +51,7 @@ int main(int argc, char *argv[])
 
     #include "setSystemRunTimeDictionaryIO.H"
 
-    Info<< "Reading " << dictName << nl << endl;
+    Info<< "Reading " << dictIO.name() << nl << endl;
 
     IOdictionary meshDict(dictIO);
 

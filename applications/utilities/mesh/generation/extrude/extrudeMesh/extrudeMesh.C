@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
     );
 
     #include "addRegionOption.H"
-    argList::addOption("dict", "file", "Use alternative extrudeMeshDict");
+    argList::addOption("dict", "file", "Alternative extrudeMeshDict");
     #include "setRootCase.H"
     #include "createTimeExtruded.H"
 

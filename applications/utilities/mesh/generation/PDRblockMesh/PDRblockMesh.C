@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -95,12 +95,7 @@ int main(int argc, char *argv[])
         "noClean",
         "Do not remove any existing polyMesh/ directory or files"
     );
-    argList::addOption
-    (
-        "dict",
-        "file",
-        "Alternative dictionary for the PDRblockMesh description"
-    );
+    argList::addOption("dict", "file", "Alternative PDRblockMeshDict");
     argList::addOption
     (
         "time",

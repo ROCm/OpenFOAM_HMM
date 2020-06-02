@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -444,7 +444,7 @@ int main(int argc, char *argv[])
         "Does not duplicate points."
     );
 
-    argList::addOption("dict", "file", "Use alternative createBafflesDict");
+    argList::addOption("dict", "file", "Alternative createBafflesDict");
     #include "addOverwriteOption.H"
     #include "addRegionOption.H"
 
@@ -468,7 +468,7 @@ int main(int argc, char *argv[])
 
     PtrList<faceSelection> selectors;
     {
-        Info<< "Reading baffle criteria from " << dictName << nl << endl;
+        Info<< "Reading baffle criteria from " << dictIO.name() << nl << endl;
         IOdictionary dict(dictIO);
 
         internalFacesOnly = dict.get<bool>("internalFacesOnly");

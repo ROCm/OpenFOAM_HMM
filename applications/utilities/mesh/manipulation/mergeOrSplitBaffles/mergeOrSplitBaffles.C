@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -286,7 +286,12 @@ int main(int argc, char *argv[])
 
     #include "addOverwriteOption.H"
     #include "addRegionOption.H"
-    #include "addDictOption.H"
+    argList::addBoolOption
+    (
+        "dict",
+        "file",
+        "Specify a dictionary to read actions from"
+    );
     argList::addBoolOption
     (
         "detectOnly",
@@ -330,7 +335,7 @@ int main(int argc, char *argv[])
         const word dictName;
         #include "setSystemMeshDictionaryIO.H"
 
-        Info<< "Reading " << dictName << "\n" << endl;
+        Info<< "Reading " << dictIO.name() << nl << endl;
         IOdictionary dict(dictIO);
 
         if (dict.found("detect"))

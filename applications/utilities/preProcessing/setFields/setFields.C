@@ -403,7 +403,7 @@ int main(int argc, char *argv[])
         "Set values on a selected set of cells/patch-faces via a dictionary"
     );
 
-    argList::addOption("dict", "file", "Use alternative setFieldsDict");
+    argList::addOption("dict", "file", "Alternative setFieldsDict");
 
     #include "addRegionOption.H"
     #include "setRootCase.H"
@@ -413,7 +413,7 @@ int main(int argc, char *argv[])
     const word dictName("setFieldsDict");
     #include "setSystemMeshDictionaryIO.H"
 
-    Info<< "Reading " << dictName << "\n" << endl;
+    Info<< "Reading " << dictIO.name() << nl << endl;
 
     IOdictionary setFieldsDict(dictIO);
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
         "Mirrors a mesh around a given plane."
     );
 
-    argList::addOption("dict", "file", "Use alternative mirrorMeshDict");
+    argList::addOption("dict", "file", "Alternative mirrorMeshDict");
     argList::setAdvanced("decomposeParDict");
 
     #include "addOverwriteOption.H"
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 
     #include "setSystemRunTimeDictionaryIO.H"
 
-    Info<< "Reading " << dictName << "\n" << endl;
+    Info<< "Reading " << dictIO.name() << nl << endl;
 
     const IOdictionary mirrorDict(dictIO);
 

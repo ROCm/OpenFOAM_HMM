@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 Shell Research Ltd.
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
         "Specify a time"
     );
 
-    argList::addOption("dict", "file", "Use alternative PDRsetFieldsDict");
+    argList::addOption("dict", "file", "Alternative PDRsetFieldsDict");
 
     argList::addBoolOption
     (
@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
     const word dictName("PDRsetFieldsDict");
     #include "setSystemRunTimeDictionaryIO.H"
 
-    Info<< "Reading " << dictName << "\n" << endl;
+    Info<< "Reading " << dictIO.name() << nl << endl;
 
     IOdictionary setFieldsDict(dictIO);
 

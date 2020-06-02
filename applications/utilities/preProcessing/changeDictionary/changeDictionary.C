@@ -399,7 +399,7 @@ int main(int argc, char *argv[])
         " (such as the patch type for fields and polyMesh/boundary files)."
     );
 
-    argList::addOption("dict", "file", "Use alternative changeDictionaryDict");
+    argList::addOption("dict", "file", "Alternative changeDictionaryDict");
 
     argList::addOption
     (

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
 
     argList::noCheckProcessorDirectories();
 
-    argList::addOption("dict", "file", "Use alternative noiseDict");
+    argList::addOption("dict", "file", "Alternative noiseDict");
 
     #include "setRootCase.H"
     #include "createTime.H"
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
     const word dictName("noiseDict");
     #include "setSystemRunTimeDictionaryIO.H"
 
-    Info<< "Reading " << dictName << "\n" << endl;
+    Info<< "Reading " << dictIO.name() << nl << endl;
 
     IOdictionary dict(dictIO);
 

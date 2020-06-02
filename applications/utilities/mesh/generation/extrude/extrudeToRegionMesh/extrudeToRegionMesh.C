@@ -1428,7 +1428,7 @@ int main(int argc, char *argv[])
 
     argList::addOption
     (
-        "dict", "file", "Use alternative extrudeToRegionMeshDict"
+        "dict", "file", "Alternative extrudeToRegionMeshDict"
     );
 
     #include "setRootCase.H"

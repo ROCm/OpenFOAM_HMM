@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
         "Add patches (regions) to a surface with a user-selectable method"
     );
     argList::noParallel();
-    argList::addOption("dict", "file", "Use alternative surfacePatchDict");
+    argList::addOption("dict", "file", "Alternative surfacePatchDict");
 
     #include "setRootCase.H"
     #include "createTime.H"

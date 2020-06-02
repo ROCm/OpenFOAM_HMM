@@ -55,7 +55,7 @@ Usage
         Scale factor when writing files.
 
       - \par -dict \<dictionary\>
-        Use alternative dictionary for constant/coordinateSystems.
+        Alternative dictionary for constant/coordinateSystems.
 
       - \par -from \<coordinateSystem\>
         Specify a coordinate system when reading files.

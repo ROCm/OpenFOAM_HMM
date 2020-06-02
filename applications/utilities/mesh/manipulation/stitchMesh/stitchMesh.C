@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
     #include "addOverwriteOption.H"
     #include "addRegionOption.H"
 
-    argList::addOption("dict", "file", "Use alternative stitchMeshDict");
+    argList::addOption("dict", "file", "Alternative stitchMeshDict");
 
     argList::addBoolOption
     (
@@ -296,7 +296,7 @@ int main(int argc, char *argv[])
 
         #include "setSystemRunTimeDictionaryIO.H"
 
-        Info<< "Reading " << dictName;
+        Info<< "Reading " << dictIO.name() << flush;
 
         IOdictionary stitchDict(dictIO);
 

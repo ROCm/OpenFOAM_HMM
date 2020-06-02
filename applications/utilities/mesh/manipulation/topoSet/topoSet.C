@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
 
     timeSelector::addOptions(true, false);  // constant(true), zero(false)
 
-    argList::addOption("dict", "file", "Use alternative topoSetDict");
+    argList::addOption("dict", "file", "Alternative topoSetDict");
 
     #include "addRegionOption.H"
     argList::addBoolOption
@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
     const word dictName("topoSetDict");
     #include "setSystemMeshDictionaryIO.H"
 
-    Info<< "Reading " << dictName << nl << endl;
+    Info<< "Reading " << dictIO.name() << nl << endl;
 
     IOdictionary topoSetDict(dictIO);
 

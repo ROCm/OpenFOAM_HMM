@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -618,7 +618,7 @@ int main(int argc, char *argv[])
     #include "addOverwriteOption.H"
     #include "addTimeOptions.H"
 
-    argList::addOption("dict", "file", "Use alternative renumberMeshDict");
+    argList::addOption("dict", "file", "Alternative renumberMeshDict");
 
     argList::addBoolOption
     (
@@ -707,7 +707,7 @@ int main(int argc, char *argv[])
         const word dictName("renumberMeshDict");
         #include "setSystemMeshDictionaryIO.H"
 
-        Info<< "Renumber according to " << dictName << nl << endl;
+        Info<< "Renumber according to " << dictIO.name() << nl << endl;
 
         renumberDictPtr.reset(new IOdictionary(dictIO));
         const IOdictionary& renumberDict = renumberDictPtr();

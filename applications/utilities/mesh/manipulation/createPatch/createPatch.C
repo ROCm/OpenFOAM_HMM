@@ -521,7 +521,7 @@ int main(int argc, char *argv[])
 
     #include "addOverwriteOption.H"
     #include "addRegionOption.H"
-    argList::addOption("dict", "file", "Use alternative createPatchDict");
+    argList::addOption("dict", "file", "Alternative createPatchDict");
     argList::addBoolOption
     (
         "writeObj",

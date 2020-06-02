@@ -134,12 +134,7 @@ int main(int argc, char *argv[])
         "noClean",
         "Do not remove any existing polyMesh/ directory or files"
     );
-    argList::addOption
-    (
-        "dict",
-        "file",
-        "Alternative dictionary for the blockMesh description"
-    );
+    argList::addOption("dict", "file", "Alternative blockMeshDict");
     argList::addBoolOption
     (
         "sets",

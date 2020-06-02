@@ -235,7 +235,7 @@ int main(int argc, char *argv[])
     const word dictName("surfaceFeatureExtractDict");
     #include "setSystemRunTimeDictionaryIO.H"
 
-    Info<< "Reading " << dictName << nl << endl;
+    Info<< "Reading " << dictIO.name() << nl << endl;
     const IOdictionary dict(dictIO);
 
     // Loader for available triSurface surface files

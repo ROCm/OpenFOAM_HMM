@@ -116,11 +116,16 @@ int main(int argc, char *argv[])
         "geometry scaling factor"
     );
 
-    #include "addDictOption.H"
+    argList::addOption
+    (
+        "dict",
+        "file",
+        "Dictionary of intersect options"
+    );
 
     argList::addNote
     (
-        "test intersect of two surfaces. Writes obj file"
+        "Test intersect of two surfaces. Writes obj file"
     );
     argList::noParallel();
     argList::noFunctionObjects();

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
         " algorithm. Writes a map of fine to coarse grid."
     );
 
-    argList::addOption("dict", "file", "Use alternative viewFactorsDict");
+    argList::addOption("dict", "file", "Alternative viewFactorsDict");
     #include "addRegionOption.H"
 
     #include "setRootCase.H"

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,7 +85,7 @@ int main(int argc, char *argv[])
         "Collapse faces that are in the supplied face set"
     );
 
-    argList::addOption("dict", "file", "Use alternative collapseDict");
+    argList::addOption("dict", "file", "Alternative collapseDict");
 
     #include "addOverwriteOption.H"
 
@@ -102,7 +103,7 @@ int main(int argc, char *argv[])
     const word dictName("collapseDict");
     #include "setSystemMeshDictionaryIO.H"
 
-    Info<< "Reading " << dictName << nl << endl;
+    Info<< "Reading " << dictIO.name() << nl << endl;
 
     IOdictionary collapseDict(dictIO);
 
