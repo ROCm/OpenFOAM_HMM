@@ -876,7 +876,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
 
     weightFieldName_ = "none";
     needsUpdate_ = true;
-    writeArea_ = dict.lookupOrDefault("writeArea", false);
+    writeArea_ = dict.getOrDefault("writeArea", false);
     totalArea_ = 0;
     nFaces_ = 0;
     faceId_.clear();

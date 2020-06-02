@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,7 +69,7 @@ LaheyKEpsilon<BasicTurbulenceModel>::LaheyKEpsilon
 
     alphaInversion_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "alphaInversion",
             this->coeffDict_,
@@ -79,7 +79,7 @@ LaheyKEpsilon<BasicTurbulenceModel>::LaheyKEpsilon
 
     Cp_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cp",
             this->coeffDict_,
@@ -89,7 +89,7 @@ LaheyKEpsilon<BasicTurbulenceModel>::LaheyKEpsilon
 
     C3_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "C3",
             this->coeffDict_,
@@ -99,7 +99,7 @@ LaheyKEpsilon<BasicTurbulenceModel>::LaheyKEpsilon
 
     Cmub_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cmub",
             this->coeffDict_,

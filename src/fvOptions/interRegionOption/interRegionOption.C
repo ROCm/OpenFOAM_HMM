@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,13 +68,13 @@ void Foam::fv::interRegionOption::setMapper()
                 (
                     mesh_,
                     nbrMesh,
-                    meshToMesh::interpolationMethodNames_.lookupOrDefault
+                    meshToMesh::interpolationMethodNames_.getOrDefault
                     (
                         "interpolationMethod",
                         coeffs_,
                         meshToMesh::interpolationMethod::imCellVolumeWeight
                     ),
-                    meshToMesh::procMapMethodNames_.lookupOrDefault
+                    meshToMesh::procMapMethodNames_.getOrDefault
                     (
                         "procMapMethod",
                         coeffs_,
@@ -112,7 +112,7 @@ Foam::fv::interRegionOption::interRegionOption
         dict,
         mesh
     ),
-    master_(coeffs_.lookupOrDefault("master", true)),
+    master_(coeffs_.getOrDefault("master", true)),
     nbrRegionName_(coeffs_.get<word>("nbrRegion")),
     meshInterpPtr_()
 {

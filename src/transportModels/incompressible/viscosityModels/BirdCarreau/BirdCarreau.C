@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,7 +80,7 @@ Foam::viscosityModels::BirdCarreau::BirdCarreau
     n_("n", dimless, BirdCarreauCoeffs_),
     a_
     (
-        BirdCarreauCoeffs_.lookupOrDefault
+        BirdCarreauCoeffs_.getOrDefault
         (
             "a",
             dimensionedScalar("a", dimless, 2)
@@ -117,7 +117,7 @@ bool Foam::viscosityModels::BirdCarreau::read
     BirdCarreauCoeffs_.readEntry("nuInf", nuInf_);
     BirdCarreauCoeffs_.readEntry("k", k_);
     BirdCarreauCoeffs_.readEntry("n", n_);
-    a_ = BirdCarreauCoeffs_.lookupOrDefault
+    a_ = BirdCarreauCoeffs_.getOrDefault
     (
         "a",
         dimensionedScalar("a", dimless, 2)

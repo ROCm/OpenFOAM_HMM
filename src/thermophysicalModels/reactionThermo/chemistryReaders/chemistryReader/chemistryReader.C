@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +41,7 @@ Foam::chemistryReader<ThermoType>::New
     // Use specified reader or default to CHEMKIN for backward compatibility
     const word readerName
     (
-        thermoDict.lookupOrDefault<word>("chemistryReader", "chemkinReader")
+        thermoDict.getOrDefault<word>("chemistryReader", "chemkinReader")
     );
 
     Info<< "Selecting chemistryReader " << readerName << endl;

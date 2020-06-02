@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,11 +125,11 @@ Foam::sampledSurface::sampledSurface
     const dictionary& dict
 )
 :
-    name_(dict.lookupOrDefault<word>("name", name)),
+    name_(dict.getOrDefault<word>("name", name)),
     mesh_(mesh),
-    enabled_(dict.lookupOrDefault("enabled", true)),
-    invariant_(dict.lookupOrDefault("invariant", false)),
-    interpolate_(dict.lookupOrDefault("interpolate", false)),
+    enabled_(dict.getOrDefault("enabled", true)),
+    invariant_(dict.getOrDefault("invariant", false)),
+    interpolate_(dict.getOrDefault("interpolate", false)),
     area_(-1)
 {}
 

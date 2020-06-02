@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +52,7 @@ Foam::profileModel::profileModel(const dictionary& dict, const word& name)
 :
     dict_(dict),
     name_(name),
-    fName_(dict.lookupOrDefault<fileName>("file", fileName::null))
+    fName_(dict.getOrDefault<fileName>("file", fileName::null))
 {}
 
 

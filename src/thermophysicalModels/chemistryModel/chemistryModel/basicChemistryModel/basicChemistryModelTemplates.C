@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,10 +78,10 @@ Foam::autoPtr<ChemistryModel> Foam::basicChemistryModel::New
 
     const word methodName
     (
-        chemistryTypeDict.lookupOrDefault<word>
+        chemistryTypeDict.getOrDefault<word>
         (
             "method",
-            chemistryTypeDict.lookupOrDefault<bool>("TDAC", false)
+            chemistryTypeDict.getOrDefault<bool>("TDAC", false)
           ? "TDAC"
           : "standard"
         )

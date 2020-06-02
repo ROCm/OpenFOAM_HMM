@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -739,10 +739,10 @@ Foam::searchableCone::searchableCone
     searchableSurface(io),
     point1_(dict.get<point>("point1")),
     radius1_(dict.get<scalar>("radius1")),
-    innerRadius1_(dict.lookupOrDefault<scalar>("innerRadius1", 0)),
+    innerRadius1_(dict.getOrDefault<scalar>("innerRadius1", 0)),
     point2_(dict.get<point>("point2")),
     radius2_(dict.get<scalar>("radius2")),
-    innerRadius2_(dict.lookupOrDefault<scalar>("innerRadius2", 0)),
+    innerRadius2_(dict.getOrDefault<scalar>("innerRadius2", 0)),
     magDir_(mag(point2_-point1_)),
     unitDir_((point2_-point1_)/magDir_)
 {

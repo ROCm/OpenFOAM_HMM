@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,7 +69,7 @@ Foam::fixedNormalSlipFvPatchField<Type>::fixedNormalSlipFvPatchField
     transformFvPatchField<Type>(p, iF),
     fixedValue_("fixedValue", dict, p.size())
 {
-    this->patchType() = dict.lookupOrDefault<word>("patchType", word::null);
+    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
     evaluate();
 }
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -105,7 +105,7 @@ qZeta::qZeta
 
     Cmu_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cmu",
             coeffDict_,
@@ -114,7 +114,7 @@ qZeta::qZeta
     ),
     C1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "C1",
             coeffDict_,
@@ -123,7 +123,7 @@ qZeta::qZeta
     ),
     C2_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "C2",
             coeffDict_,
@@ -132,7 +132,7 @@ qZeta::qZeta
     ),
     sigmaZeta_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "sigmaZeta",
             coeffDict_,
@@ -141,7 +141,7 @@ qZeta::qZeta
     ),
     anisotropic_
     (
-        Switch::lookupOrAddToDict
+        Switch::getOrAddToDict
         (
             "anisotropic",
             coeffDict_,

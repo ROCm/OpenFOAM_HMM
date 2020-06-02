@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -131,9 +131,9 @@ Foam::cellCentreSet::cellCentreSet
         name,
         mesh,
         searchEngine,
-        dict.lookupOrDefault<word>("axis", "xyz")
+        dict.getOrDefault<word>("axis", "xyz")
     ),
-    bounds_(dict.lookupOrDefault("bounds", boundBox::invertedBox))
+    bounds_(dict.getOrDefault("bounds", boundBox::invertedBox))
 {
     genSamples();
 }

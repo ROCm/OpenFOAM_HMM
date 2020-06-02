@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -527,7 +527,7 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
 :
     CloudFunctionObject<CloudType>(dict, owner, modelName, typeName),
     mode_(mtUnknown),
-    parcelType_(this->coeffDict().lookupOrDefault("parcelType", -1)),
+    parcelType_(this->coeffDict().getOrDefault("parcelType", -1)),
     removeCollected_(this->coeffDict().getBool("removeCollected")),
     resetOnWrite_(this->coeffDict().getBool("resetOnWrite")),
     log_(this->coeffDict().getBool("log")),

@@ -649,49 +649,49 @@ Foam::NURBS3DVolume::NURBS3DVolume
     basisU_(dict.get<label>("nCPsU"), dict.get<label>("degreeU")),
     basisV_(dict.get<label>("nCPsV"), dict.get<label>("degreeV")),
     basisW_(dict.get<label>("nCPsW"), dict.get<label>("degreeW")),
-    maxIter_(dict.lookupOrDefault<label>("maxIterations", 10)),
-    tolerance_(dict.lookupOrDefault<scalar>("tolerance", 1.e-10)),
-    nMaxBound_(dict.lookupOrDefault<scalar>("nMaxBoundIterations", 4)),
+    maxIter_(dict.getOrDefault<label>("maxIterations", 10)),
+    tolerance_(dict.getOrDefault<scalar>("tolerance", 1.e-10)),
+    nMaxBound_(dict.getOrDefault<scalar>("nMaxBoundIterations", 4)),
     cps_(0),
     mapPtr_(nullptr),
     reverseMapPtr_(nullptr),
     parametricCoordinatesPtr_(nullptr),
     localSystemCoordinates_(mesh_.nPoints(), Zero),
-    confineX1movement_(dict.lookupOrDefault<bool>("confineX1movement", false)),
-    confineX2movement_(dict.lookupOrDefault<bool>("confineX2movement", false)),
-    confineX3movement_(dict.lookupOrDefault<bool>("confineX3movement", false)),
+    confineX1movement_(dict.getOrDefault<bool>("confineX1movement", false)),
+    confineX2movement_(dict.getOrDefault<bool>("confineX2movement", false)),
+    confineX3movement_(dict.getOrDefault<bool>("confineX3movement", false)),
     confineBoundaryControlPoints_
     (
-        dict.lookupOrDefault<bool>("confineBoundaryControlPoints", true)
+        dict.getOrDefault<bool>("confineBoundaryControlPoints", true)
     ),
     boundUMinCPs_
     (
-        dict.lookupOrDefault<boolListList3>("boundUMinCPs", boolListList3(0))
+        dict.getOrDefault<boolListList3>("boundUMinCPs", boolListList3(0))
     ),
     boundUMaxCPs_
     (
-        dict.lookupOrDefault<boolListList3>("boundUMaxCPs", boolListList3(0))
+        dict.getOrDefault<boolListList3>("boundUMaxCPs", boolListList3(0))
     ),
     boundVMinCPs_
     (
-        dict.lookupOrDefault<boolListList3>("boundVMinCPs", boolListList3(0))
+        dict.getOrDefault<boolListList3>("boundVMinCPs", boolListList3(0))
     ),
     boundVMaxCPs_
     (
-        dict.lookupOrDefault<boolListList3>("boundVMaxCPs", boolListList3(0))
+        dict.getOrDefault<boolListList3>("boundVMaxCPs", boolListList3(0))
     ),
     boundWMinCPs_
     (
-        dict.lookupOrDefault<boolListList3>("boundWMinCPs", boolListList3(0))
+        dict.getOrDefault<boolListList3>("boundWMinCPs", boolListList3(0))
     ),
     boundWMaxCPs_
     (
-        dict.lookupOrDefault<boolListList3>("boundWMaxCPs", boolListList3(0))
+        dict.getOrDefault<boolListList3>("boundWMaxCPs", boolListList3(0))
     ),
     activeControlPoints_(0), //zero here, execute sanity checks first
     activeDesignVariables_(0), //zero here, execute sanity checks first
     cpsFolder_("controlPoints"),
-    readStoredData_(dict.lookupOrDefault<bool>("readStoredData", true))
+    readStoredData_(dict.getOrDefault<bool>("readStoredData", true))
 {
     // Create folders
     makeFolders();

@@ -178,8 +178,8 @@ Foam::meltingEvaporationModels::interfaceHeatResistance<Thermo, OtherThermo>
         this->mesh_,
         dimensionedScalar(dimMass/dimArea/dimTemperature/dimTime, Zero)
     ),
-    isoAlpha_(dict.lookupOrDefault<scalar>("isoAlpha", 0.5)),
-    spread_(dict.lookupOrDefault<scalar>("spread", 3))
+    isoAlpha_(dict.getOrDefault<scalar>("isoAlpha", 0.5)),
+    spread_(dict.getOrDefault<scalar>("spread", 3))
 {}
 
 

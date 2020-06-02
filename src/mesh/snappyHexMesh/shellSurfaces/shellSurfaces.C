@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -692,7 +692,7 @@ Foam::shellSurfaces::shellSurfaces
             nSmoothExpansion_[shellI] = 0;
             nSmoothPosition_[shellI] = 0;
             smoothDirection_[shellI] =
-                dict.lookupOrDefault("smoothDirection", vector::zero);
+                dict.getOrDefault("smoothDirection", vector::zero);
 
             if (smoothDirection_[shellI] != vector::zero)
             {
@@ -711,7 +711,7 @@ Foam::shellSurfaces::shellSurfaces
 
             FixedList<label, 3> gapSpec
             (
-                dict.lookupOrDefault
+                dict.getOrDefault
                 (
                     "gapLevel",
                     nullGapLevel
@@ -741,7 +741,7 @@ Foam::shellSurfaces::shellSurfaces
                         );
                         FixedList<label, 3> gapSpec
                         (
-                            regionDict.lookupOrDefault
+                            regionDict.getOrDefault
                             (
                                 "gapLevel",
                                 nullGapLevel

@@ -797,7 +797,7 @@ bool Foam::functionObjectList::read()
 
             const dictionary& dict = dEntry.dict();
 
-            bool enabled = dict.lookupOrDefault("enabled", true);
+            bool enabled = dict.getOrDefault("enabled", true);
 
             newDigs[nFunc] = dict.digest();
 

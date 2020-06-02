@@ -59,24 +59,24 @@ Foam::diameterModels::linearTsub::linearTsub
 :
     diameterModel(diameterProperties, phase),
     liquidPhaseName_(diameterProperties.lookup("liquidPhase")),
-    d2_("d2", dimLength, diameterProperties.lookupOrDefault("d2", 0.0015)),
+    d2_("d2", dimLength, diameterProperties.getOrDefault("d2", 0.0015)),
     Tsub2_
     (
         "Tsub2",
          dimTemperature,
-         diameterProperties.lookupOrDefault("Tsub2", 0)
+         diameterProperties.getOrDefault("Tsub2", 0)
     ),
     d1_
     (
         "d1",
         dimLength,
-        diameterProperties.lookupOrDefault("d1", 0.00015)
+        diameterProperties.getOrDefault("d1", 0.00015)
     ),
     Tsub1_
     (
         "Tsub1",
         dimTemperature,
-        diameterProperties.lookupOrDefault("Tsub1", 13.5)
+        diameterProperties.getOrDefault("Tsub1", 13.5)
     ),
     d_
     (

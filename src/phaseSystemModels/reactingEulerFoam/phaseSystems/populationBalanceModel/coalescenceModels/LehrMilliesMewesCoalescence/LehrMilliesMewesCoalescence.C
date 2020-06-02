@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2019 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,11 +64,11 @@ LehrMilliesMewesCoalescence
     coalescenceModel(popBal, dict),
     uCrit_
     (
-        dimensionedScalar::lookupOrDefault("uCrit", dict, dimVelocity, 0.08)
+        dimensionedScalar::getOrDefault("uCrit", dict, dimVelocity, 0.08)
     ),
     alphaMax_
     (
-        dimensionedScalar::lookupOrDefault("alphaMax", dict, dimless, 0.6)
+        dimensionedScalar::getOrDefault("alphaMax", dict, dimless, 0.6)
     )
 {}
 

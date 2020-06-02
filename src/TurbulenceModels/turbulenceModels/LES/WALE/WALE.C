@@ -128,7 +128,7 @@ WALE<BasicTurbulenceModel>::WALE
 
     Ck_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Ck",
             this->coeffDict_,
@@ -138,7 +138,7 @@ WALE<BasicTurbulenceModel>::WALE
 
     Cw_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cw",
             this->coeffDict_,

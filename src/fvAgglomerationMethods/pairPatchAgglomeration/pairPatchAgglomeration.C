@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -206,7 +206,7 @@ Foam::pairPatchAgglomeration::pairPatchAgglomeration
 :
     mergeLevels_
     (
-        controlDict.lookupOrDefault<label>("mergeLevels", 2)
+        controlDict.getOrDefault<label>("mergeLevels", 2)
     ),
     maxLevels_(50),
     nFacesInCoarsestLevel_
@@ -219,7 +219,7 @@ Foam::pairPatchAgglomeration::pairPatchAgglomeration
     //),
     featureAngle_
     (
-        controlDict.lookupOrDefault<scalar>("featureAngle", 0)
+        controlDict.getOrDefault<scalar>("featureAngle", 0)
     ),
     nFaces_(maxLevels_),
     restrictAddressing_(maxLevels_),

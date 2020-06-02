@@ -1256,7 +1256,7 @@ bool Foam::dynamicRefineFvMesh::update()
             refineDict.get<scalar>("lowerRefineLevel");
         const scalar upperRefineLevel =
             refineDict.get<scalar>("upperRefineLevel");
-        const scalar unrefineLevel = refineDict.lookupOrDefault<scalar>
+        const scalar unrefineLevel = refineDict.getOrDefault<scalar>
         (
             "unrefineLevel",
             GREAT

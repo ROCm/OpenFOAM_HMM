@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +56,7 @@ Foam::surfaceTensionModels::temperatureDependent::temperatureDependent
 )
 :
     surfaceTensionModel(mesh),
-    TName_(dict.lookupOrDefault<word>("T", "T")),
+    TName_(dict.getOrDefault<word>("T", "T")),
     sigma_(Function1<scalar>::New("sigma", dict))
 {}
 
@@ -110,7 +111,7 @@ bool Foam::surfaceTensionModels::temperatureDependent::readDict
 {
     const dictionary& sigmaDict = surfaceTensionModel::sigmaDict(dict);
 
-    TName_ = sigmaDict.lookupOrDefault<word>("T", "T");
+    TName_ = sigmaDict.getOrDefault<word>("T", "T");
     sigma_ = Function1<scalar>::New("sigma", sigmaDict);
 
     return true;

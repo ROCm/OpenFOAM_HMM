@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,7 +84,7 @@ semiPermeableBaffleVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(p, iF),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho"))
+    rhoName_(dict.getOrDefault<word>("rho", "rho"))
 {
     fvPatchVectorField::operator==(vectorField("value", dict, p.size()));
 }

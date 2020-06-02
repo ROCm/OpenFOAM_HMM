@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,7 +59,7 @@ waveDisplacementPointPatchVectorField
     fixedValuePointPatchField<vector>(p, iF, dict),
     amplitude_(dict.lookup("amplitude")),
     omega_(dict.get<scalar>("omega")),
-    waveNumber_(dict.lookupOrDefault<vector>("waveNumber", Zero))
+    waveNumber_(dict.getOrDefault<vector>("waveNumber", Zero))
 {
     if (!dict.found("value"))
     {

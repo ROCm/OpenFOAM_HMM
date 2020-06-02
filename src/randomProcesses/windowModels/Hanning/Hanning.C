@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,7 @@ Hanning::Hanning(const dictionary& dict, const label nSamples)
     windowModel(dict, nSamples),
     symmetric_(dict.get<bool>("symmetric")),
     extended_(dict.get<bool>("extended")),
-    alpha_(dict.lookupOrDefault("alpha", 0.5)) // Hamming = 0.54
+    alpha_(dict.getOrDefault<scalar>("alpha", 0.5))  // Hamming = 0.54
 {
     // Extend range if required
     const label offset = extended_ ? 1 : 0;

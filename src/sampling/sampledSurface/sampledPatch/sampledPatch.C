@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,7 +70,7 @@ Foam::sampledPatch::sampledPatch
 :
     sampledSurface(name, mesh, dict),
     patchNames_(dict.get<wordRes>("patches")),
-    triangulate_(dict.lookupOrDefault("triangulate", false)),
+    triangulate_(dict.getOrDefault("triangulate", false)),
     needsUpdate_(true)
 {}
 

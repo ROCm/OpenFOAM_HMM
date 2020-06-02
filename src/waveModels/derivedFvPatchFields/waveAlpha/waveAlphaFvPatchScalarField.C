@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 IH-Cantabria
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,7 +65,7 @@ Foam::waveAlphaFvPatchScalarField::waveAlphaFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF, dict),
-    waveDictName_(dict.lookupOrDefault<word>("waveDict", waveModel::dictName))
+    waveDictName_(dict.getOrDefault<word>("waveDict", waveModel::dictName))
 {}
 
 

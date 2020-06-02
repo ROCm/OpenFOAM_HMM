@@ -819,15 +819,15 @@ turbulentDFSEMInletFvPatchVectorField
 :
     fixedValueFvPatchField<vector>(p, iF, dict),
     delta_(dict.get<scalar>("delta")),
-    d_(dict.getOrDefault<scalar>("d", 1.0)),
+    d_(dict.getOrDefault<scalar>("d", 1)),
     kappa_(dict.getOrDefault<scalar>("kappa", 0.41)),
 
     perturb_(dict.getOrDefault<scalar>("perturb", 1e-5)),
     mapMethod_(dict.getOrDefault<word>("mapMethod", "nearestCell")),
     mapperPtr_(nullptr),
-    interpolateR_(dict.getOrDefault<bool>("interpolateR", false)),
-    interpolateL_(dict.getOrDefault<bool>("interpolateL", false)),
-    interpolateU_(dict.getOrDefault<bool>("interpolateU", false)),
+    interpolateR_(dict.getOrDefault("interpolateR", false)),
+    interpolateL_(dict.getOrDefault("interpolateL", false)),
+    interpolateU_(dict.getOrDefault("interpolateU", false)),
     R_(interpolateOrRead<symmTensor>("R", dict, interpolateR_)),
     L_(interpolateOrRead<scalar>("L", dict, interpolateL_)),
     U_(interpolateOrRead<vector>("U", dict, interpolateU_)),
@@ -850,7 +850,7 @@ turbulentDFSEMInletFvPatchVectorField
     curTimeIndex_(-1),
     patchBounds_(boundBox::invertedBox),
     singleProc_(false),
-    writeEddies_(dict.getOrDefault<bool>("writeEddies", false))
+    writeEddies_(dict.getOrDefault("writeEddies", false))
 {
     eddy::debug = debug;
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd
+    Copyright (C) 2017-2020 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -179,8 +179,8 @@ alphatJayatillekeWallFunctionFvPatchScalarField
 :
     fixedValueFvPatchScalarField(p, iF, dict),
     Prt_(dict.get<scalar>("Prt")), // force read to avoid ambiguity
-    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
-    E_(dict.lookupOrDefault<scalar>("E", 9.8))
+    kappa_(dict.getOrDefault<scalar>("kappa", 0.41)),
+    E_(dict.getOrDefault<scalar>("E", 9.8))
 {
     checkType();
 }

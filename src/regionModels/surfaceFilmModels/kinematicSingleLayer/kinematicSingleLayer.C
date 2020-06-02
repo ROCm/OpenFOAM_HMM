@@ -444,7 +444,7 @@ kinematicSingleLayer::kinematicSingleLayer
     surfaceFilmRegionModel(modelType, mesh, g, regionType),
 
     momentumPredictor_(solution().subDict("PISO").lookup("momentumPredictor")),
-    nOuterCorr_(solution().subDict("PISO").lookupOrDefault("nOuterCorr", 1)),
+    nOuterCorr_(solution().subDict("PISO").getOrDefault("nOuterCorr", 1)),
     nCorr_(solution().subDict("PISO").get<label>("nCorr")),
     nNonOrthCorr_
     (
@@ -454,7 +454,7 @@ kinematicSingleLayer::kinematicSingleLayer
     cumulativeContErr_(0.0),
 
     deltaSmall_("deltaSmall", dimLength, SMALL),
-    deltaCoLimit_(solution().lookupOrDefault("deltaCoLimit", 1e-4)),
+    deltaCoLimit_(solution().getOrDefault<scalar>("deltaCoLimit", 1e-4)),
 
     rho_
     (

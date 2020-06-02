@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -140,8 +141,8 @@ Foam::fv::interRegionHeatTransferModel::interRegionHeatTransferModel
         dimensionedScalar(dimEnergy/dimTime/dimTemperature/dimVolume, Zero),
         zeroGradientFvPatchScalarField::typeName
     ),
-    TName_(coeffs_.lookupOrDefault<word>("T", "T")),
-    TNbrName_(coeffs_.lookupOrDefault<word>("TNbr", "T"))
+    TName_(coeffs_.getOrDefault<word>("T", "T")),
+    TNbrName_(coeffs_.getOrDefault<word>("TNbr", "T"))
 {
     if (active())
     {

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -203,7 +204,7 @@ thermalBaffleModel::thermalBaffleModel
     thickness_(),
     delta_("delta", dimLength, Zero),
     oneD_(false),
-    constantThickness_(dict.lookupOrDefault("constantThickness", true))
+    constantThickness_(dict.getOrDefault("constantThickness", true))
 {
     init();
 }
@@ -219,7 +220,7 @@ thermalBaffleModel::thermalBaffleModel
     thickness_(),
     delta_("delta", dimLength, Zero),
     oneD_(false),
-    constantThickness_(lookupOrDefault("constantThickness", true))
+    constantThickness_(getOrDefault("constantThickness", true))
 {
     init();
 }

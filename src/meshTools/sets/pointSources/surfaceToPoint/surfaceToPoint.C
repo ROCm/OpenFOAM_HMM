@@ -156,7 +156,7 @@ Foam::surfaceToPoint::surfaceToPoint
     topoSetPointSource(mesh),
     surfName_(dict.get<fileName>("file").expand()),
     surfType_(dict.getOrDefault<word>("fileType", word::null)),
-    scale_(dict.lookupOrDefault<scalar>("scale", -1)),
+    scale_(dict.getOrDefault<scalar>("scale", -1)),
     nearDist_(dict.get<scalar>("nearDistance")),
     includeInside_(dict.get<bool>("includeInside")),
     includeOutside_(dict.get<bool>("includeOutside"))

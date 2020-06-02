@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -134,7 +135,7 @@ void Foam::conformationSurfaces::readFeatures
 )
 {
     const word featureMethod =
-        featureDict.lookupOrDefault<word>("featureMethod", "none");
+        featureDict.getOrDefault<word>("featureMethod", "none");
 
     if (featureMethod == "extendedFeatureEdgeMesh")
     {
@@ -217,7 +218,7 @@ void Foam::conformationSurfaces::readFeatures
 )
 {
     const word featureMethod =
-        featureDict.lookupOrDefault<word>("featureMethod", "none");
+        featureDict.getOrDefault<word>("featureMethod", "none");
 
     if (featureMethod == "extendedFeatureEdgeMesh")
     {
@@ -380,7 +381,7 @@ Foam::conformationSurfaces::conformationSurfaces
             (
                 extendedFeatureEdgeMesh::sideVolumeTypeNames_
                 [
-                    dict.lookupOrDefault<word>
+                    dict.getOrDefault<word>
                     (
                         "meshableSide",
                         "inside"
@@ -452,7 +453,7 @@ Foam::conformationSurfaces::conformationSurfaces
                             regionI,
                             extendedFeatureEdgeMesh::sideVolumeTypeNames_
                             [
-                                 regionDict.lookupOrDefault<word>
+                                 regionDict.getOrDefault<word>
                                  (
                                      "meshableSide",
                                      extendedFeatureEdgeMesh::

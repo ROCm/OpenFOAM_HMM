@@ -348,7 +348,7 @@ Foam::patchSeedSet::patchSeedSet
     maxPoints_(dict.get<label>("maxPoints")),
     selectedLocations_
     (
-        dict.lookupOrDefault<pointField>
+        dict.getOrDefault<pointField>
         (
             "points",
             pointField(0)

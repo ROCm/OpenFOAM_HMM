@@ -116,17 +116,17 @@ bool Foam::functionObjects::ensightWrite::read(const dictionary& dict)
 
     // Writer options
 
-    consecutive_ = dict.lookupOrDefault("consecutive", false);
+    consecutive_ = dict.getOrDefault("consecutive", false);
 
-    writeOpts_.useBoundaryMesh(dict.lookupOrDefault("boundary", true));
-    writeOpts_.useInternalMesh(dict.lookupOrDefault("internal", true));
+    writeOpts_.useBoundaryMesh(dict.getOrDefault("boundary", true));
+    writeOpts_.useInternalMesh(dict.getOrDefault("internal", true));
 
 
     // Warn if noPatches keyword (1806) exists and contradicts our settings
     // Cannot readily use Compat since the boolean has the opposite value.
     if
     (
-        dict.lookupOrDefault("noPatches", false)
+        dict.getOrDefault("noPatches", false)
      && writeOpts_.useBoundaryMesh()
     )
     {
@@ -151,9 +151,9 @@ bool Foam::functionObjects::ensightWrite::read(const dictionary& dict)
 
     // Case options
 
-    caseOpts_.nodeValues(dict.lookupOrDefault("nodeValues", false));
-    caseOpts_.width(dict.lookupOrDefault<label>("width", 8));
-    caseOpts_.overwrite(dict.lookupOrDefault("overwrite", false));
+    caseOpts_.nodeValues(dict.getOrDefault("nodeValues", false));
+    caseOpts_.width(dict.getOrDefault<label>("width", 8));
+    caseOpts_.overwrite(dict.getOrDefault("overwrite", false));
 
 
     // Output directory

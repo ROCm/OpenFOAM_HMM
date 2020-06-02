@@ -59,7 +59,7 @@ Foam::wallBoilingModels::CHFModels::Jeschar::Jeschar
 )
 :
     MHFModel(),
-    Kmhf_(dict.lookupOrDefault<scalar>("Kmhf", 1))
+    Kmhf_(dict.getOrDefault<scalar>("Kmhf", 1))
 {}
 
 

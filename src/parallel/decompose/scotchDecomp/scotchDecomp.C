@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,7 +107,7 @@ Foam::label Foam::scotchDecomp::decomposeSerial
 ) const
 {
     // Dump graph
-    if (coeffsDict_.lookupOrDefault("writeGraph", false))
+    if (coeffsDict_.getOrDefault("writeGraph", false))
     {
         OFstream str(graphPath_);
 

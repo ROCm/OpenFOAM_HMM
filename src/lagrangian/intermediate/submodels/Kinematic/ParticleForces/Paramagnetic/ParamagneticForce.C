@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +43,7 @@ Foam::ParamagneticForce<CloudType>::ParamagneticForce
     ParticleForce<CloudType>(owner, mesh, dict, typeName, true),
     HdotGradHName_
     (
-        this->coeffs().template lookupOrDefault<word>("HdotGradH", "HdotGradH")
+        this->coeffs().template getOrDefault<word>("HdotGradH", "HdotGradH")
     ),
     HdotGradHInterpPtr_(nullptr),
     magneticSusceptibility_

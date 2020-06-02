@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,8 +81,8 @@ standardPhaseChange::standardPhaseChange
     phaseChangeModel(typeName, film, dict),
     deltaMin_(coeffDict_.get<scalar>("deltaMin")),
     L_(coeffDict_.get<scalar>("L")),
-    TbFactor_(coeffDict_.lookupOrDefault<scalar>("TbFactor", 1.1)),
-    YInfZero_(coeffDict_.lookupOrDefault<Switch>("YInfZero", false))
+    TbFactor_(coeffDict_.getOrDefault<scalar>("TbFactor", 1.1)),
+    YInfZero_(coeffDict_.getOrDefault<Switch>("YInfZero", false))
 {}
 
 

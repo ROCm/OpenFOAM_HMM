@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -228,17 +228,17 @@ void Foam::MULES::limiterCorr
 
     const scalar smoothLimiter
     (
-        MULEScontrols.lookupOrDefault<scalar>("smoothLimiter", 0)
+        MULEScontrols.getOrDefault<scalar>("smoothLimiter", 0)
     );
 
     const scalar extremaCoeff
     (
-        MULEScontrols.lookupOrDefault<scalar>("extremaCoeff", 0)
+        MULEScontrols.getOrDefault<scalar>("extremaCoeff", 0)
     );
 
     const scalar boundaryExtremaCoeff
     (
-        MULEScontrols.lookupOrDefault<scalar>
+        MULEScontrols.getOrDefault<scalar>
         (
             "boundaryExtremaCoeff",
             extremaCoeff

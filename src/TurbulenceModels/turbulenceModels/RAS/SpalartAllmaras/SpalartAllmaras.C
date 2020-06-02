@@ -170,7 +170,7 @@ SpalartAllmaras<BasicTurbulenceModel>::SpalartAllmaras
 
     sigmaNut_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "sigmaNut",
             this->coeffDict_,
@@ -179,7 +179,7 @@ SpalartAllmaras<BasicTurbulenceModel>::SpalartAllmaras
     ),
     kappa_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "kappa",
             this->coeffDict_,
@@ -189,7 +189,7 @@ SpalartAllmaras<BasicTurbulenceModel>::SpalartAllmaras
 
     Cb1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cb1",
             this->coeffDict_,
@@ -198,7 +198,7 @@ SpalartAllmaras<BasicTurbulenceModel>::SpalartAllmaras
     ),
     Cb2_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cb2",
             this->coeffDict_,
@@ -208,7 +208,7 @@ SpalartAllmaras<BasicTurbulenceModel>::SpalartAllmaras
     Cw1_(Cb1_/sqr(kappa_) + (1.0 + Cb2_)/sigmaNut_),
     Cw2_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cw2",
             this->coeffDict_,
@@ -217,7 +217,7 @@ SpalartAllmaras<BasicTurbulenceModel>::SpalartAllmaras
     ),
     Cw3_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cw3",
             this->coeffDict_,
@@ -226,7 +226,7 @@ SpalartAllmaras<BasicTurbulenceModel>::SpalartAllmaras
     ),
     Cv1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cv1",
             this->coeffDict_,
@@ -235,7 +235,7 @@ SpalartAllmaras<BasicTurbulenceModel>::SpalartAllmaras
     ),
     Cs_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cs",
             this->coeffDict_,

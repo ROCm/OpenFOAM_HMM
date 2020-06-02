@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018-2019 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,7 +62,7 @@ LaakkonenAlopaeusAittamaa
     breakupModel(popBal, dict),
     C1_
     (
-        dimensionedScalar::lookupOrDefault
+        dimensionedScalar::getOrDefault
         (
             "C1",
             dict,
@@ -69,8 +70,8 @@ LaakkonenAlopaeusAittamaa
             6.0
         )
     ),
-    C2_(dimensionedScalar::lookupOrDefault("C2", dict, dimless, 0.04)),
-    C3_(dimensionedScalar::lookupOrDefault("C3", dict, dimless, 0.01))
+    C2_(dimensionedScalar::getOrDefault("C2", dict, dimless, 0.04)),
+    C3_(dimensionedScalar::getOrDefault("C3", dict, dimless, 0.01))
 {}
 
 

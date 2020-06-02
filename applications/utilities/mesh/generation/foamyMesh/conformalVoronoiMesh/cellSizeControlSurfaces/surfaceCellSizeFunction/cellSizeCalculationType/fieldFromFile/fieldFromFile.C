@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,7 +71,7 @@ Foam::fieldFromFile::fieldFromFile
     ),
     cellSizeMultipleCoeff_
     (
-        coeffsDict_.lookupOrDefault<scalar>("cellSizeMultipleCoeff", 1)
+        coeffsDict_.getOrDefault<scalar>("cellSizeMultipleCoeff", 1)
     )
 {}
 

@@ -108,7 +108,7 @@ Smagorinsky<BasicTurbulenceModel>::Smagorinsky
 
     Ck_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Ck",
             this->coeffDict_,

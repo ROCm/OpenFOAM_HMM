@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,7 +71,7 @@ Foam::InflationInjection<CloudType>::InflationInjection
     newParticles_(),
     volumeAccumulator_(0.0),
     fraction_(1.0),
-    selfSeed_(this->coeffDict().lookupOrDefault("selfSeed", false)),
+    selfSeed_(this->coeffDict().getOrDefault("selfSeed", false)),
     dSeed_(SMALL),
     sizeDistribution_
     (

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,7 +91,7 @@ Foam::faPatchField<Type>::faPatchField
     patch_(p),
     internalField_(iF),
     updated_(false),
-    patchType_(dict.lookupOrDefault<word>("patchType", word::null))
+    patchType_(dict.getOrDefault<word>("patchType", word::null))
 {
     if (dict.found("value"))
     {

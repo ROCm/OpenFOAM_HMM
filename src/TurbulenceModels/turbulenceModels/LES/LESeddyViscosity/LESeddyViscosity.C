@@ -65,7 +65,7 @@ LESeddyViscosity<BasicTurbulenceModel>::LESeddyViscosity
 
     Ce_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Ce",
             this->coeffDict_,

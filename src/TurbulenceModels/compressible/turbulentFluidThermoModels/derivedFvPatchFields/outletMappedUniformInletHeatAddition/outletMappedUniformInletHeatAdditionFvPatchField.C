@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,10 +77,10 @@ outletMappedUniformInletHeatAdditionFvPatchField
 :
     fixedValueFvPatchScalarField(p, iF, dict),
     outletPatchName_(dict.get<word>("outletPatch")),
-    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
+    phiName_(dict.getOrDefault<word>("phi", "phi")),
     Q_(dict.get<scalar>("Q")),
-    TMin_(dict.lookupOrDefault<scalar>("TMin", 0)),
-    TMax_(dict.lookupOrDefault<scalar>("TMax", 5000))
+    TMin_(dict.getOrDefault<scalar>("TMin", 0)),
+    TMax_(dict.getOrDefault<scalar>("TMax", 5000))
 {}
 
 

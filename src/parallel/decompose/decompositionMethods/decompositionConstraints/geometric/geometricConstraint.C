@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +60,7 @@ Foam::decompositionConstraints::geometric::geometric
     decompositionConstraint(dict, typeName),
     sources_(),
     selection_(coeffDict_.subDict("selection")),
-    grow_(dict.lookupOrDefault<bool>("grow", false))
+    grow_(dict.getOrDefault("grow", false))
 {
     // Stored as dictionary, since we do not have the mesh at this stage
 

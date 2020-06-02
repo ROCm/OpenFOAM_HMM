@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,7 @@ Foam::windowModel::windowModel(const dictionary& dict, const label nSamples)
 :
     scalarField(nSamples),
     nOverlapSamples_(0),
-    nWindow_(dict.lookupOrDefault("nWindow", -1))
+    nWindow_(dict.getOrDefault("nWindow", -1))
 {
     nOverlapSamples_ = floor
     (

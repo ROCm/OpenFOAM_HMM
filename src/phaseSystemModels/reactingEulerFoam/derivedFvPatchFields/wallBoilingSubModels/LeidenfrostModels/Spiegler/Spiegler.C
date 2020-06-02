@@ -57,7 +57,7 @@ Foam::wallBoilingModels::LeidenfrostModels::Spiegler::Spiegler
 )
 :
     LeidenfrostModel(),
-    Tcrit_(dict.lookupOrDefault<scalar>("Tcrit", 374))
+    Tcrit_(dict.getOrDefault<scalar>("Tcrit", 374))
 {}
 
 

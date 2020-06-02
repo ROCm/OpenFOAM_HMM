@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -570,7 +570,7 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
 {
     DebugInfo<< FUNCTION_NAME << " : Start of analysis" << endl;
 
-    scalar layerRelax(dict_.lookupOrDefault("layerRelax", 1.0));
+    scalar layerRelax(dict_.getOrDefault("layerRelax", 1.0));
     const labelIOList& zoneID = this->zoneID();
     label nZones = meshParts_.size();
 

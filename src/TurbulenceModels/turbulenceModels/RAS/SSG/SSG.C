@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd
+    Copyright (C) 2018-2020 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,7 +79,7 @@ SSG<BasicTurbulenceModel>::SSG
 
     Cmu_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cmu",
             this->coeffDict_,
@@ -88,7 +88,7 @@ SSG<BasicTurbulenceModel>::SSG
     ),
     C1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "C1",
             this->coeffDict_,
@@ -97,7 +97,7 @@ SSG<BasicTurbulenceModel>::SSG
     ),
     C1s_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "C1s",
             this->coeffDict_,
@@ -106,7 +106,7 @@ SSG<BasicTurbulenceModel>::SSG
     ),
     C2_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "C2",
             this->coeffDict_,
@@ -115,7 +115,7 @@ SSG<BasicTurbulenceModel>::SSG
     ),
     C3_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "C3",
             this->coeffDict_,
@@ -124,7 +124,7 @@ SSG<BasicTurbulenceModel>::SSG
     ),
     C3s_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "C3s",
             this->coeffDict_,
@@ -133,7 +133,7 @@ SSG<BasicTurbulenceModel>::SSG
     ),
     C4_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "C4",
             this->coeffDict_,
@@ -142,7 +142,7 @@ SSG<BasicTurbulenceModel>::SSG
     ),
     C5_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "C5",
             this->coeffDict_,
@@ -152,7 +152,7 @@ SSG<BasicTurbulenceModel>::SSG
 
     Ceps1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Ceps1",
             this->coeffDict_,
@@ -161,7 +161,7 @@ SSG<BasicTurbulenceModel>::SSG
     ),
     Ceps2_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Ceps2",
             this->coeffDict_,
@@ -170,7 +170,7 @@ SSG<BasicTurbulenceModel>::SSG
     ),
     Cs_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cs",
             this->coeffDict_,
@@ -179,7 +179,7 @@ SSG<BasicTurbulenceModel>::SSG
     ),
     Ceps_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Ceps",
             this->coeffDict_,

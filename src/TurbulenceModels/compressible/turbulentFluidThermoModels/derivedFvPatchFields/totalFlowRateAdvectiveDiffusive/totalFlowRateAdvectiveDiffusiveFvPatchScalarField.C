@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,9 +62,9 @@ totalFlowRateAdvectiveDiffusiveFvPatchScalarField
 )
 :
     mixedFvPatchField<scalar>(p, iF),
-    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "none")),
-    massFluxFraction_(dict.lookupOrDefault<scalar>("massFluxFraction", 1.0))
+    phiName_(dict.getOrDefault<word>("phi", "phi")),
+    rhoName_(dict.getOrDefault<word>("rho", "none")),
+    massFluxFraction_(dict.getOrDefault<scalar>("massFluxFraction", 1))
 {
 
     refValue() = 1.0;

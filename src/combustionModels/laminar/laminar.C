@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,7 +50,7 @@ Foam::combustionModels::laminar<ReactionThermo>::laminar
     ),
     integrateReactionRate_
     (
-        this->coeffs().lookupOrDefault("integrateReactionRate", true)
+        this->coeffs().getOrDefault("integrateReactionRate", true)
     )
 {
     if (integrateReactionRate_)
@@ -176,7 +176,7 @@ bool Foam::combustionModels::laminar<ReactionThermo>::read()
     if (ChemistryCombustion<ReactionThermo>::read())
     {
         integrateReactionRate_ =
-            this->coeffs().lookupOrDefault("integrateReactionRate", true);
+            this->coeffs().getOrDefault("integrateReactionRate", true);
         return true;
     }
 

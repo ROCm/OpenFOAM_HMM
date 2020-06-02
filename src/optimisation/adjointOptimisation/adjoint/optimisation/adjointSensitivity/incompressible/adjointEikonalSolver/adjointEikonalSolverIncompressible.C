@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,9 +64,9 @@ wordList adjointEikonalSolver::patchTypes() const
 
 void adjointEikonalSolver::read()
 {
-    nEikonalIters_ = dict_.lookupOrDefault<label>("iters", 1000);
-    tolerance_ = dict_.lookupOrDefault<scalar>("tolerance", 1e-6);
-    epsilon_ = dict_.lookupOrDefault<scalar>("epsilon", 0.1);
+    nEikonalIters_ = dict_.getOrDefault<label>("iters", 1000);
+    tolerance_ = dict_.getOrDefault<scalar>("tolerance", 1e-6);
+    epsilon_ = dict_.getOrDefault<scalar>("epsilon", 0.1);
 }
 
 

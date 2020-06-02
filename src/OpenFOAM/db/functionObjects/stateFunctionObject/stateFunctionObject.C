@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,7 +85,7 @@ bool Foam::functionObjects::stateFunctionObject::setTrigger
     IOdictionary& stateDict = this->stateDict();
 
     label oldTriggeri =
-        stateDict.lookupOrDefault<label>("triggerIndex", labelMin);
+        stateDict.getOrDefault<label>("triggerIndex", labelMin);
 
     if (triggeri > oldTriggeri)
     {
@@ -101,7 +101,7 @@ Foam::label Foam::functionObjects::stateFunctionObject::getTrigger() const
 {
     const IOdictionary& stateDict = this->stateDict();
 
-    return stateDict.lookupOrDefault<label>("triggerIndex", labelMin);
+    return stateDict.getOrDefault<label>("triggerIndex", labelMin);
 }
 
 

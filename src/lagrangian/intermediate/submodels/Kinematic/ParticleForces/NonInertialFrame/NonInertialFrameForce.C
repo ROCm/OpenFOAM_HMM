@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +42,7 @@ Foam::NonInertialFrameForce<CloudType>::NonInertialFrameForce
     ParticleForce<CloudType>(owner, mesh, dict, typeName, true),
     WName_
     (
-        this->coeffs().template lookupOrDefault<word>
+        this->coeffs().template getOrDefault<word>
         (
             "linearAcceleration",
             "linearAcceleration"
@@ -50,7 +51,7 @@ Foam::NonInertialFrameForce<CloudType>::NonInertialFrameForce
     W_(Zero),
     omegaName_
     (
-        this->coeffs().template lookupOrDefault<word>
+        this->coeffs().template getOrDefault<word>
         (
             "angularVelocity",
             "angularVelocity"
@@ -59,7 +60,7 @@ Foam::NonInertialFrameForce<CloudType>::NonInertialFrameForce
     omega_(Zero),
     omegaDotName_
     (
-        this->coeffs().template lookupOrDefault<word>
+        this->coeffs().template getOrDefault<word>
         (
             "angularAcceleration",
             "angularAcceleration"
@@ -68,7 +69,7 @@ Foam::NonInertialFrameForce<CloudType>::NonInertialFrameForce
     omegaDot_(Zero),
     centreOfRotationName_
     (
-        this->coeffs().template lookupOrDefault<word>
+        this->coeffs().template getOrDefault<word>
         (
             "centreOfRotation",
             "centreOfRotation"

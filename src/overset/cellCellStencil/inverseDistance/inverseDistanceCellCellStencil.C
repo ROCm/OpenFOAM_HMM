@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1741,9 +1741,9 @@ Foam::cellCellStencils::inverseDistance::~inverseDistance()
 
 bool Foam::cellCellStencils::inverseDistance::update()
 {
-    scalar layerRelax(dict_.lookupOrDefault("layerRelax", 1.0));
+    scalar layerRelax(dict_.getOrDefault("layerRelax", 1.0));
 
-    scalar tol = dict_.lookupOrDefault("tolerance", 1e-10);
+    scalar tol = dict_.getOrDefault("tolerance", 1e-10);
     smallVec_ = mesh_.bounds().span()*tol;
 
     const labelIOList& zoneID = this->zoneID();

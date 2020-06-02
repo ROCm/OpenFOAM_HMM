@@ -1,4 +1,4 @@
 #include "readDyMControls.H"
 
-correctPhi = pimple.dict().lookupOrDefault("correctPhi", true);
+correctPhi = pimple.dict().getOrDefault("correctPhi", true);
 maxAcousticCo = runTime.controlDict().get<scalar>("maxAcousticCo");

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,7 +69,7 @@ Foam::mixtureViscosityModels::plastic::plastic
         (
             IOobject::groupName
             (
-                viscosityProperties.lookupOrDefault<word>("alpha", "alpha"),
+                viscosityProperties.getOrDefault<word>("alpha", "alpha"),
                 viscosityProperties.dictName()
             )
         )

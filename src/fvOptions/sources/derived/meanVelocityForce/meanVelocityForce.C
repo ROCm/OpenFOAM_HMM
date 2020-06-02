@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -93,7 +93,7 @@ Foam::fv::meanVelocityForce::meanVelocityForce
     gradP0_(0.0),
     dGradP_(0.0),
     flowDir_(Ubar_/mag(Ubar_)),
-    relaxation_(coeffs_.lookupOrDefault<scalar>("relaxation", 1.0)),
+    relaxation_(coeffs_.getOrDefault<scalar>("relaxation", 1)),
     rAPtr_(nullptr)
 {
     coeffs_.readEntry("fields", fieldNames_);

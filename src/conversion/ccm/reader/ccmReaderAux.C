@@ -48,12 +48,12 @@ Foam::Map<Foam::word> Foam::ccm::reader::selectPorous
 
     forAllConstIters(table, iter)
     {
-        if (iter().lookupOrDefault<label>("PorosityId", 0) != 0)
+        if (iter().getOrDefault<label>("PorosityId", 0) != 0)
         {
             lookup.insert
             (
                 iter.key(),
-                iter().lookupOrDefault<word>
+                iter().getOrDefault<word>
                 (
                     "Label",
                     "cellTable_" + Foam::name(iter.key())

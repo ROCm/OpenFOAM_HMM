@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,11 +77,11 @@ Foam::variableHeightFlowRateFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
+    phiName_(dict.getOrDefault<word>("phi", "phi")),
     lowerBound_(dict.get<scalar>("lowerBound")),
     upperBound_(dict.get<scalar>("upperBound"))
 {
-    patchType() = dict.lookupOrDefault<word>("patchType", word::null);
+    patchType() = dict.getOrDefault<word>("patchType", word::null);
     this->refValue() = 0.0;
 
     if (dict.found("value"))

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -189,7 +189,7 @@ SpalartAllmarasIDDES<BasicTurbulenceModel>::SpalartAllmarasIDDES
 
     Cdt1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cdt1",
             this->coeffDict_,
@@ -198,7 +198,7 @@ SpalartAllmarasIDDES<BasicTurbulenceModel>::SpalartAllmarasIDDES
     ),
     Cdt2_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cdt2",
             this->coeffDict_,
@@ -207,7 +207,7 @@ SpalartAllmarasIDDES<BasicTurbulenceModel>::SpalartAllmarasIDDES
     ),
     Cl_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cl",
             this->coeffDict_,
@@ -216,7 +216,7 @@ SpalartAllmarasIDDES<BasicTurbulenceModel>::SpalartAllmarasIDDES
     ),
     Ct_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Ct",
             this->coeffDict_,

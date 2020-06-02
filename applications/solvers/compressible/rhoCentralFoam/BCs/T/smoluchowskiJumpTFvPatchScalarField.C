@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,13 +83,13 @@ Foam::smoluchowskiJumpTFvPatchScalarField::smoluchowskiJumpTFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    UName_(dict.lookupOrDefault<word>("U", "U")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
-    psiName_(dict.lookupOrDefault<word>("psi", "thermo:psi")),
-    muName_(dict.lookupOrDefault<word>("mu", "thermo:mu")),
+    UName_(dict.getOrDefault<word>("U", "U")),
+    rhoName_(dict.getOrDefault<word>("rho", "rho")),
+    psiName_(dict.getOrDefault<word>("psi", "thermo:psi")),
+    muName_(dict.getOrDefault<word>("mu", "thermo:mu")),
     accommodationCoeff_(dict.get<scalar>("accommodationCoeff")),
     Twall_("Twall", dict, p.size()),
-    gamma_(dict.lookupOrDefault<scalar>("gamma", 1.4))
+    gamma_(dict.getOrDefault<scalar>("gamma", 1.4))
 {
     if
     (

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,7 +69,7 @@ Foam::inletOutletFaPatchField<Type>::inletOutletFaPatchField
 )
 :
     mixedFaPatchField<Type>(p, iF),
-    phiName_(dict.lookupOrDefault<word>("phi", "phi"))
+    phiName_(dict.getOrDefault<word>("phi", "phi"))
 {
     this->refValue() = Field<Type>("inletValue", dict, p.size());
 

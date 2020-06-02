@@ -96,15 +96,15 @@ Foam::expressions::exprDriver::exprDriver
     stashedTokenId_(0),
 
     // Controls
-    debugScanner_(dict.lookupOrDefault("debugScanner", false)),
-    debugParser_(dict.lookupOrDefault("debugParser", false)),
+    debugScanner_(dict.getOrDefault("debugScanner", false)),
+    debugParser_(dict.getOrDefault("debugParser", false)),
     allowShadowing_
     (
-        dict.lookupOrDefault("allowShadowing", false)
+        dict.getOrDefault("allowShadowing", false)
     ),
     prevIterIsOldTime_
     (
-        dict.lookupOrDefault("prevIterIsOldTime", false)
+        dict.getOrDefault("prevIterIsOldTime", false)
     ),
     cacheReadFields_(cacheReadFields),
     searchInMemory_(searchInMemory || cacheReadFields),
@@ -142,9 +142,9 @@ Foam::expressions::exprDriver::exprDriver
 :
     exprDriver
     (
-        dict.lookupOrDefault("cacheReadFields", false),
-        dict.lookupOrDefault("searchInMemory", true),
-        dict.lookupOrDefault("searchFiles", false),
+        dict.getOrDefault("cacheReadFields", false),
+        dict.getOrDefault("searchInMemory", true),
+        dict.getOrDefault("searchFiles", false),
         dict
     )
 {

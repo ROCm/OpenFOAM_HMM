@@ -5,22 +5,22 @@
 
     scalar maxCo
     (
-        pimpleDict.lookupOrDefault<scalar>("maxCo", 0.8)
+        pimpleDict.getOrDefault<scalar>("maxCo", 0.8)
     );
 
     scalar rDeltaTSmoothingCoeff
     (
-        pimpleDict.lookupOrDefault<scalar>("rDeltaTSmoothingCoeff", 0.02)
+        pimpleDict.getOrDefault<scalar>("rDeltaTSmoothingCoeff", 0.02)
     );
 
     scalar rDeltaTDampingCoeff
     (
-        pimpleDict.lookupOrDefault<scalar>("rDeltaTDampingCoeff", 1.0)
+        pimpleDict.getOrDefault<scalar>("rDeltaTDampingCoeff", 1.0)
     );
 
     scalar maxDeltaT
     (
-        pimpleDict.lookupOrDefault<scalar>("maxDeltaT", GREAT)
+        pimpleDict.getOrDefault<scalar>("maxDeltaT", GREAT)
     );
 
     volScalarField rDeltaT0("rDeltaT0", rDeltaT);

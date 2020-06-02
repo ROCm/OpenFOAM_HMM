@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,7 @@ Foam::cellSizeAndAlignmentControl::cellSizeAndAlignmentControl
     defaultCellSize_(defaultCellSize),
     forceInitialPointInsertion_
     (
-        dict.lookupOrDefault<Switch>
+        dict.getOrDefault<Switch>
         (
             "forceInitialPointInsertion",
             Switch::OFF

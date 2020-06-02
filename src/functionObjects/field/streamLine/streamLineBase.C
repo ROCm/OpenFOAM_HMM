@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -882,7 +882,7 @@ bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
 
     Info<< type() << " " << name() << ":" << nl;
 
-    UName_ = dict.lookupOrDefault<word>("U", "U");
+    UName_ = dict.getOrDefault<word>("U", "U");
 
     if (fields_.empty())
     {
@@ -944,7 +944,7 @@ bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
     }
 
 
-    interpolationScheme_ = dict.lookupOrDefault
+    interpolationScheme_ = dict.getOrDefault
     (
         "interpolationScheme",
         interpolationCellPoint<scalar>::typeName
@@ -952,7 +952,7 @@ bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
 
     //Info<< "    using interpolation " << interpolationScheme_ << endl;
 
-    cloudName_ = dict.lookupOrDefault<word>("cloud", type());
+    cloudName_ = dict.getOrDefault<word>("cloud", type());
 
     sampledSetPtr_.clear();
     sampledSetAxis_.clear();

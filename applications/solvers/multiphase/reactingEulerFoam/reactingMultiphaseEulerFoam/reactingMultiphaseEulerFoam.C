@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,11 +66,11 @@ int main(int argc, char *argv[])
 
     Switch faceMomentum
     (
-        pimple.dict().lookupOrDefault<Switch>("faceMomentum", false)
+        pimple.dict().getOrDefault<Switch>("faceMomentum", false)
     );
     Switch partialElimination
     (
-        pimple.dict().lookupOrDefault<Switch>("partialElimination", false)
+        pimple.dict().getOrDefault<Switch>("partialElimination", false)
     );
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -82,7 +83,7 @@ int main(int argc, char *argv[])
 
         int nEnergyCorrectors
         (
-            pimple.dict().lookupOrDefault<int>("nEnergyCorrectors", 1)
+            pimple.dict().getOrDefault<int>("nEnergyCorrectors", 1)
         );
 
         if (LTS)

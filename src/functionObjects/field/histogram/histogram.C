@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -110,8 +110,8 @@ bool Foam::functionObjects::histogram::read(const dictionary& dict)
 
     dict.readEntry("field", fieldName_);
 
-    max_ = dict.lookupOrDefault<scalar>("max", -GREAT);
-    min_ = dict.lookupOrDefault<scalar>("min", GREAT);
+    max_ = dict.getOrDefault<scalar>("max", -GREAT);
+    min_ = dict.getOrDefault<scalar>("min", GREAT);
     dict.readEntry("nBins", nBins_);
 
     const word format(dict.get<word>("setFormat"));

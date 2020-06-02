@@ -974,9 +974,9 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
 
     needsUpdate_ = true;
     mode_ = modeTypeNames_.get("mode", dict);
-    phiName_ = dict.lookupOrDefault<word>("phi", "phi");
-    scaleFactor_ = dict.lookupOrDefault<scalar>("scaleFactor", 1.0);
-    tolerance_   = dict.lookupOrDefault<scalar>("tolerance", 0.8);
+    phiName_ = dict.getOrDefault<word>("phi", "phi");
+    scaleFactor_ = dict.getOrDefault<scalar>("scaleFactor", 1);
+    tolerance_   = dict.getOrDefault<scalar>("tolerance", 0.8);
 
     zoneNames_.clear();
     zoneDirections_.clear();

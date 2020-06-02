@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -322,8 +323,8 @@ surfaceDisplacementPointPatchVectorField
     surfacesDict_(dict.subDict("geometry")),
     projectMode_(projectModeNames_.get("projectMode", dict)),
     projectDir_(dict.get<vector>("projectDirection")),
-    wedgePlane_(dict.lookupOrDefault("wedgePlane", -1)),
-    frozenPointsZone_(dict.lookupOrDefault("frozenPointsZone", word::null))
+    wedgePlane_(dict.getOrDefault("wedgePlane", -1)),
+    frozenPointsZone_(dict.getOrDefault("frozenPointsZone", word::null))
 {
     if (velocity_.x() < 0 || velocity_.y() < 0 || velocity_.z() < 0)
     {

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,7 +79,7 @@ LRR<BasicTurbulenceModel>::LRR
 
     Cmu_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cmu",
             this->coeffDict_,
@@ -88,7 +88,7 @@ LRR<BasicTurbulenceModel>::LRR
     ),
     C1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "C1",
             this->coeffDict_,
@@ -97,7 +97,7 @@ LRR<BasicTurbulenceModel>::LRR
     ),
     C2_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "C2",
             this->coeffDict_,
@@ -106,7 +106,7 @@ LRR<BasicTurbulenceModel>::LRR
     ),
     Ceps1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Ceps1",
             this->coeffDict_,
@@ -115,7 +115,7 @@ LRR<BasicTurbulenceModel>::LRR
     ),
     Ceps2_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Ceps2",
             this->coeffDict_,
@@ -124,7 +124,7 @@ LRR<BasicTurbulenceModel>::LRR
     ),
     Cs_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cs",
             this->coeffDict_,
@@ -133,7 +133,7 @@ LRR<BasicTurbulenceModel>::LRR
     ),
     Ceps_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Ceps",
             this->coeffDict_,
@@ -143,7 +143,7 @@ LRR<BasicTurbulenceModel>::LRR
 
     wallReflection_
     (
-        Switch::lookupOrAddToDict
+        Switch::getOrAddToDict
         (
             "wallReflection",
             this->coeffDict_,
@@ -152,7 +152,7 @@ LRR<BasicTurbulenceModel>::LRR
     ),
     kappa_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "kappa",
             this->coeffDict_,
@@ -161,7 +161,7 @@ LRR<BasicTurbulenceModel>::LRR
     ),
     Cref1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cref1",
             this->coeffDict_,
@@ -170,7 +170,7 @@ LRR<BasicTurbulenceModel>::LRR
     ),
     Cref2_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cref2",
             this->coeffDict_,

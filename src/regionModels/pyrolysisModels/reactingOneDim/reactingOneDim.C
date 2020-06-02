@@ -58,10 +58,10 @@ void reactingOneDim::readReactingOneDimControls()
     solution.readEntry("nNonOrthCorr", nNonOrthCorr_);
     time().controlDict().readEntry("maxDi", maxDiff_);
     coeffs().readEntry("minimumDelta", minimumDelta_);
-    gasHSource_ = coeffs().lookupOrDefault("gasHSource", false);
+    gasHSource_ = coeffs().getOrDefault("gasHSource", false);
     coeffs().readEntry("qrHSource", qrHSource_);
     useChemistrySolvers_ =
-        coeffs().lookupOrDefault("useChemistrySolvers", true);
+        coeffs().getOrDefault("useChemistrySolvers", true);
 }
 
 

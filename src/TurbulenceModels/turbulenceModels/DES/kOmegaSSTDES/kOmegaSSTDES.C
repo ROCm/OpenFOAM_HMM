@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -122,7 +122,7 @@ kOmegaSSTDES<BasicTurbulenceModel>::kOmegaSSTDES
 
     kappa_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "kappa",
             this->coeffDict_,
@@ -131,7 +131,7 @@ kOmegaSSTDES<BasicTurbulenceModel>::kOmegaSSTDES
     ),
     CDESkom_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "CDESkom",
             this->coeffDict_,
@@ -140,7 +140,7 @@ kOmegaSSTDES<BasicTurbulenceModel>::kOmegaSSTDES
     ),
     CDESkeps_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "CDESkeps",
             this->coeffDict_,

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +40,7 @@ Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::DAC
     chemistryReductionMethod<CompType, ThermoType>(dict, chemistry),
     searchInitSet_(this->coeffsDict_.subDict("initialSet").size()),
     zprime_(0),
-    nbCLarge_(this->coeffsDict_.template lookupOrDefault<label>("nbCLarge", 3)),
+    nbCLarge_(this->coeffsDict_.template getOrDefault<label>("nbCLarge", 3)),
     sC_(this->nSpecie_, 0),
     sH_(this->nSpecie_, 0),
     sO_(this->nSpecie_, 0),
@@ -51,7 +52,7 @@ Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::DAC
     NOId_(-1),
     automaticSIS_
     (
-        this->coeffsDict_.template lookupOrDefault<Switch>
+        this->coeffsDict_.template getOrDefault<Switch>
         (
             "automaticSIS",
             true
@@ -59,27 +60,27 @@ Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::DAC
     ),
     phiTol_
     (
-        this->coeffsDict_.template lookupOrDefault<scalar>
+        this->coeffsDict_.template getOrDefault<scalar>
         (
             "phiTol", this->tolerance()
         )
     ),
     NOxThreshold_
     (
-        this->coeffsDict_.template lookupOrDefault<scalar>
+        this->coeffsDict_.template getOrDefault<scalar>
         (
             "NOxThreshold",
             1800
         )
     ),
-    CO2Name_(this->coeffsDict_.template lookupOrDefault<word>("CO2", "CO2")),
-    COName_(this->coeffsDict_.template lookupOrDefault<word>("CO", "CO")),
-    HO2Name_(this->coeffsDict_.template lookupOrDefault<word>("HO2", "HO2")),
-    H2OName_(this->coeffsDict_.template lookupOrDefault<word>("H2O", "H2O")),
-    NOName_(this->coeffsDict_.template lookupOrDefault<word>("NO", "NO")),
+    CO2Name_(this->coeffsDict_.template getOrDefault<word>("CO2", "CO2")),
+    COName_(this->coeffsDict_.template getOrDefault<word>("CO", "CO")),
+    HO2Name_(this->coeffsDict_.template getOrDefault<word>("HO2", "HO2")),
+    H2OName_(this->coeffsDict_.template getOrDefault<word>("H2O", "H2O")),
+    NOName_(this->coeffsDict_.template getOrDefault<word>("NO", "NO")),
     forceFuelInclusion_
     (
-        this->coeffsDict_.template lookupOrDefault<Switch>
+        this->coeffsDict_.template getOrDefault<Switch>
         (
             "forceFuelInclusion",
             false

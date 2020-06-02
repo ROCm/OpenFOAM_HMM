@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -202,16 +202,16 @@ Foam::LBFGS::LBFGS
     // Construct null matrix since we dont know the dimension yet
     etaHessian_
     (
-        coeffsDict().lookupOrDefault<scalar>("etaHessian", 1)
+        coeffsDict().getOrDefault<scalar>("etaHessian", 1)
     ),
     nSteepestDescent_
     (
-        coeffsDict().lookupOrDefault<label>("nSteepestDescent", 1)
+        coeffsDict().getOrDefault<label>("nSteepestDescent", 1)
     ),
     activeDesignVars_(0),
     nPrevSteps_
     (
-        coeffsDict().lookupOrDefault<label>("nPrevSteps", 10)
+        coeffsDict().getOrDefault<label>("nPrevSteps", 10)
     ),
     y_(nPrevSteps_),
     s_(nPrevSteps_),

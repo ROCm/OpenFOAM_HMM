@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -568,7 +568,7 @@ bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
     timeFunctionObject::read(dict);
     externalFileCoupler::readDict(dict);
 
-    calcFrequency_ = dict.lookupOrDefault("calcFrequency", 1);
+    calcFrequency_ = dict.getOrDefault("calcFrequency", 1);
 
     // Leave trigger intact
 

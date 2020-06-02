@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,7 @@ Foam::triSurfaceMeshFeatures::triSurfaceMeshFeatures
     (
         extendedFeatureEdgeMesh::sideVolumeTypeNames_
         [
-            dict.lookupOrDefault<word>("meshableSide", "inside")
+            dict.getOrDefault<word>("meshableSide", "inside")
         ]
     )
 {

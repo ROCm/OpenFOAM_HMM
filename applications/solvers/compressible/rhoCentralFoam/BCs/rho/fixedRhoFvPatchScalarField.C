@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,8 +67,8 @@ Foam::fixedRhoFvPatchScalarField::fixedRhoFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict),
-    pName_(dict.lookupOrDefault<word>("p", "p")),
-    psiName_(dict.lookupOrDefault<word>("psi", "thermo:psi"))
+    pName_(dict.getOrDefault<word>("p", "p")),
+    psiName_(dict.getOrDefault<word>("psi", "thermo:psi"))
 {}
 
 

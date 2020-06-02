@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -806,7 +806,7 @@ Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
     spanScale_(coeffsDict.get<scalar>("spanScale")),
     minCellSizeLimit_
     (
-        coeffsDict.lookupOrDefault<scalar>("minCellSizeLimit", 0.0)
+        coeffsDict.getOrDefault<scalar>("minCellSizeLimit", 0)
     ),
     minLevels_(coeffsDict.get<label>("minLevels")),
     volRes_(coeffsDict.get<label>("sampleResolution")),

@@ -247,12 +247,12 @@ Foam::MRFZone::MRFZone
     mesh_(mesh),
     name_(name),
     coeffs_(dict),
-    active_(coeffs_.lookupOrDefault("active", true)),
+    active_(coeffs_.getOrDefault("active", true)),
     cellZoneName_(cellZoneName),
     cellZoneID_(),
     excludedPatchNames_
     (
-        coeffs_.lookupOrDefault<wordRes>("nonRotatingPatches", wordRes())
+        coeffs_.getOrDefault<wordRes>("nonRotatingPatches", wordRes())
     ),
     origin_(coeffs_.get<vector>("origin")),
     axis_(coeffs_.get<vector>("axis").normalise()),
@@ -593,7 +593,7 @@ bool Foam::MRFZone::read(const dictionary& dict)
 {
     coeffs_ = dict;
 
-    active_ = coeffs_.lookupOrDefault("active", true);
+    active_ = coeffs_.getOrDefault("active", true);
     coeffs_.readEntry("cellZone", cellZoneName_);
     cellZoneID_ = mesh_.cellZones().findZoneID(cellZoneName_);
 

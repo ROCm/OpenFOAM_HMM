@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,10 +68,10 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
 )
 :
     uniformJumpFvPatchField<Type>(p, iF, dict),
-    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
-    uniformJump_(dict.lookupOrDefault("uniformJump", false)),
-    nonDimensional_(dict.lookupOrDefault("nonDimensional", false)),
+    phiName_(dict.getOrDefault<word>("phi", "phi")),
+    rhoName_(dict.getOrDefault<word>("rho", "rho")),
+    uniformJump_(dict.getOrDefault("uniformJump", false)),
+    nonDimensional_(dict.getOrDefault("nonDimensional", false)),
     rpm_(0),
     dm_(0)
 {

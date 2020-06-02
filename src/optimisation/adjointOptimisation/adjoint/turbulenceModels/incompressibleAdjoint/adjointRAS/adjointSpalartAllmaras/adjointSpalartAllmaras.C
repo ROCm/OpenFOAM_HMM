@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -491,7 +491,7 @@ adjointSpalartAllmaras::adjointSpalartAllmaras
 
     sigmaNut_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "sigmaNut",
             this->coeffDict_,
@@ -500,7 +500,7 @@ adjointSpalartAllmaras::adjointSpalartAllmaras
     ),
     kappa_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "kappa",
             this->coeffDict_,
@@ -510,7 +510,7 @@ adjointSpalartAllmaras::adjointSpalartAllmaras
 
     Cb1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cb1",
             this->coeffDict_,
@@ -519,7 +519,7 @@ adjointSpalartAllmaras::adjointSpalartAllmaras
     ),
     Cb2_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cb2",
             this->coeffDict_,
@@ -529,7 +529,7 @@ adjointSpalartAllmaras::adjointSpalartAllmaras
     Cw1_(Cb1_/sqr(kappa_) + (1.0 + Cb2_)/sigmaNut_),
     Cw2_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cw2",
             this->coeffDict_,
@@ -538,7 +538,7 @@ adjointSpalartAllmaras::adjointSpalartAllmaras
     ),
     Cw3_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cw3",
             this->coeffDict_,
@@ -547,7 +547,7 @@ adjointSpalartAllmaras::adjointSpalartAllmaras
     ),
     Cv1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cv1",
             this->coeffDict_,
@@ -556,7 +556,7 @@ adjointSpalartAllmaras::adjointSpalartAllmaras
     ),
     Cs_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cs",
             this->coeffDict_,
@@ -566,7 +566,7 @@ adjointSpalartAllmaras::adjointSpalartAllmaras
 
     limitAdjointProduction_
     (
-        coeffDict_.lookupOrDefault<bool>("limitAdjointProduction",true)
+        coeffDict_.getOrDefault("limitAdjointProduction", true)
     ),
 
     y_(primalVars_.RASModelVariables()().d()),

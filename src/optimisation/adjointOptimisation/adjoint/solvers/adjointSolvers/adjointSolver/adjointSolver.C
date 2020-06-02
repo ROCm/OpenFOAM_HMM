@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,9 +63,9 @@ Foam::adjointSolver::adjointSolver
     sensitivities_(nullptr),
     computeSensitivities_
     (
-        dict.lookupOrDefault<bool>("computeSensitivities", true)
+        dict.getOrDefault<bool>("computeSensitivities", true)
     ),
-    isConstraint_(dict.lookupOrDefault<bool>("isConstraint", false))
+    isConstraint_(dict.getOrDefault<bool>("isConstraint", false))
 {
     // Update objective-related quantities to get correct derivatives
     // in case of continuation
@@ -128,7 +128,7 @@ bool Foam::adjointSolver::readDict(const dictionary& dict)
     if (solver::readDict(dict))
     {
         computeSensitivities_ =
-            dict.lookupOrDefault<bool>("computeSensitivities", true);
+            dict.getOrDefault<bool>("computeSensitivities", true);
 
         objectiveManagerPtr_->readDict(dict.subDict("objectives"));
 

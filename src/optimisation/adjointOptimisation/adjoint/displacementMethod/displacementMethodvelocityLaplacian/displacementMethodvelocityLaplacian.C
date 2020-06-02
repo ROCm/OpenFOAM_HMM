@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,7 +94,7 @@ displacementMethodvelocityLaplacian::displacementMethodvelocityLaplacian
                 IOobject::AUTO_WRITE,
                 false
             )
-        ).subDict("velocityLaplacianCoeffs").lookupOrDefault<bool>
+        ).subDict("velocityLaplacianCoeffs").getOrDefault<bool>
         (
             "resetFields",
             true

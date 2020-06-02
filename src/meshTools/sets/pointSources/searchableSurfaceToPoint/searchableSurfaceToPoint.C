@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,7 +81,7 @@ Foam::word Foam::searchableSurfaceToPoint::getSurfaceName
     //     mySurf.stl { .. }
     // The dictName() method will only return the "stl" ending.
 
-    return dict.lookupOrDefault<word>("surfaceName", defaultName);
+    return dict.getOrDefault<word>("surfaceName", defaultName);
 }
 
 

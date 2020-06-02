@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,12 +41,12 @@ Foam::PatchFunction1Types::MappedField<Type>::MappedField
 :
     PatchFunction1<Type>(pp, entryName, dict),
     fieldTableName_(entryName),
-    setAverage_(dict.lookupOrDefault("setAverage", false)),
-    perturb_(dict.lookupOrDefault("perturb", 1e-5)),
-    pointsName_(dict.lookupOrDefault<word>("points", "points")),
+    setAverage_(dict.getOrDefault("setAverage", false)),
+    perturb_(dict.getOrDefault<scalar>("perturb", 1e-5)),
+    pointsName_(dict.getOrDefault<word>("points", "points")),
     mapMethod_
     (
-        dict.lookupOrDefault<word>
+        dict.getOrDefault<word>
         (
             "mapMethod",
             "planarInterpolation"

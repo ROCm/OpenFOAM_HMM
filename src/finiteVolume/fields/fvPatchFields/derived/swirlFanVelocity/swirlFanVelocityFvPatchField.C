@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -139,12 +139,12 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
 )
 :
     fixedJumpFvPatchField<vector>(p, iF, dict),
-    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    pName_(dict.lookupOrDefault<word>("p", "p")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
+    phiName_(dict.getOrDefault<word>("phi", "phi")),
+    pName_(dict.getOrDefault<word>("p", "p")),
+    rhoName_(dict.getOrDefault<word>("rho", "rho")),
     origin_
     (
-        dict.lookupOrDefault
+        dict.getOrDefault
         (
             "origin",
             returnReduce(patch().size(), maxOp<label>())
@@ -158,11 +158,11 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
       ? Function1<scalar>::New("rpm", dict)
       : nullptr
     ),
-    rEff_(dict.lookupOrDefault<scalar>("rEff", 0)),
-    fanEff_(dict.lookupOrDefault<scalar>("fanEff", 1)),
-    rInner_(dict.lookupOrDefault<scalar>("rInner", 0)),
-    rOuter_(dict.lookupOrDefault<scalar>("rOuter", 0)),
-    useRealRadius_(dict.lookupOrDefault("useRealRadius", false))
+    rEff_(dict.getOrDefault<scalar>("rEff", 0)),
+    fanEff_(dict.getOrDefault<scalar>("fanEff", 1)),
+    rInner_(dict.getOrDefault<scalar>("rInner", 0)),
+    rOuter_(dict.getOrDefault<scalar>("rOuter", 0)),
+    useRealRadius_(dict.getOrDefault("useRealRadius", false))
 {}
 
 

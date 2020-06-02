@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -282,16 +282,16 @@ Foam::SQP::SQP(const fvMesh& mesh, const dictionary& dict)
 
     etaHessian_
     (
-        coeffsDict().lookupOrDefault<scalar>("etaHessian", 1)
+        coeffsDict().getOrDefault<scalar>("etaHessian", 1)
     ),
     activeDesignVars_(0),
     scaleFirstHessian_
     (
-        coeffsDict().lookupOrDefault<bool>("scaleFirstHessian", false)
+        coeffsDict().getOrDefault<bool>("scaleFirstHessian", false)
     ),
     dumpingThreshold_
     (
-        coeffsDict().lookupOrDefault<scalar>("dumpingThreshold", 0.2)
+        coeffsDict().getOrDefault<scalar>("dumpingThreshold", 0.2)
     ),
     LagrangianDerivatives_(0),
     Hessian_(),  // construct null matrix since we dont know the dimension yet
@@ -310,7 +310,7 @@ Foam::SQP::SQP(const fvMesh& mesh, const dictionary& dict)
     mu_(Zero),
     delta_
     (
-        coeffsDict().lookupOrDefault<scalar>("delta", 0.1)
+        coeffsDict().getOrDefault<scalar>("delta", 0.1)
     )
 {
     if

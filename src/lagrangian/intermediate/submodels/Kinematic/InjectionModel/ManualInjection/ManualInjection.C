@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,7 +70,7 @@ Foam::ManualInjection<CloudType>::ManualInjection
     ),
     ignoreOutOfBounds_
     (
-        this->coeffDict().lookupOrDefault("ignoreOutOfBounds", false)
+        this->coeffDict().getOrDefault("ignoreOutOfBounds", false)
     )
 {
     updateMesh();

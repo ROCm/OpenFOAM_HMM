@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,8 +74,8 @@ adjointWallVelocityFvPatchVectorField
 :
     fixedValueFvPatchVectorField(p, iF),
     adjointBoundaryCondition(p, iF, dict.get<word>("solverName")),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
-    E_(dict.lookupOrDefault<scalar>("E", 9.8))
+    kappa_(dict.getOrDefault<scalar>("kappa", 0.41)),
+    E_(dict.getOrDefault<scalar>("E", 9.8))
 {
     fvPatchField<vector>::operator=
     (

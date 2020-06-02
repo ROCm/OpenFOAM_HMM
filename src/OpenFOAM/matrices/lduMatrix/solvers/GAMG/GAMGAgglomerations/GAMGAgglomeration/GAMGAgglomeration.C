@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -240,7 +240,7 @@ Foam::GAMGAgglomeration::GAMGAgglomeration
 
     nCellsInCoarsestLevel_
     (
-        controlDict.lookupOrDefault<label>("nCellsInCoarsestLevel", 10)
+        controlDict.getOrDefault<label>("nCellsInCoarsestLevel", 10)
     ),
     meshInterfaces_(mesh.interfaces()),
     procAgglomeratorPtr_
@@ -305,7 +305,7 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
     {
         const word agglomeratorType
         (
-            controlDict.lookupOrDefault<word>("agglomerator", "faceAreaPair")
+            controlDict.getOrDefault<word>("agglomerator", "faceAreaPair")
         );
 
         const_cast<Time&>(mesh.thisDb().time()).libs().open
@@ -359,7 +359,7 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
     {
         const word agglomeratorType
         (
-            controlDict.lookupOrDefault<word>("agglomerator", "faceAreaPair")
+            controlDict.getOrDefault<word>("agglomerator", "faceAreaPair")
         );
 
         const_cast<Time&>(mesh.thisDb().time()).libs().open
@@ -405,7 +405,7 @@ Foam::autoPtr<Foam::GAMGAgglomeration> Foam::GAMGAgglomeration::New
 {
     const word agglomeratorType
     (
-        controlDict.lookupOrDefault<word>("agglomerator", "faceAreaPair")
+        controlDict.getOrDefault<word>("agglomerator", "faceAreaPair")
     );
 
     const_cast<Time&>(mesh.thisDb().time()).libs().open

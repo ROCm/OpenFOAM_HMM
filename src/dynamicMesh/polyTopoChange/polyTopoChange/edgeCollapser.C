@@ -1212,19 +1212,19 @@ Foam::edgeCollapser::edgeCollapser
     mesh_(mesh),
     guardFraction_
     (
-        dict.lookupOrDefault<scalar>("guardFraction", 0)
+        dict.getOrDefault<scalar>("guardFraction", 0)
     ),
     maxCollapseFaceToPointSideLengthCoeff_
     (
-        dict.lookupOrDefault<scalar>("maxCollapseFaceToPointSideLengthCoeff", 0)
+        dict.getOrDefault<scalar>("maxCollapseFaceToPointSideLengthCoeff", 0)
     ),
     allowEarlyCollapseToPoint_
     (
-        dict.lookupOrDefault("allowEarlyCollapseToPoint", true)
+        dict.getOrDefault("allowEarlyCollapseToPoint", true)
     ),
     allowEarlyCollapseCoeff_
     (
-        dict.lookupOrDefault<scalar>("allowEarlyCollapseCoeff", 0)
+        dict.getOrDefault<scalar>("allowEarlyCollapseCoeff", 0)
     )
 {
     if (debug)

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd
+    Copyright (C) 2017-2020 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,7 +90,7 @@ Foam::fanPressureFvPatchScalarField::fanPressureFvPatchScalarField
     direction_(fanFlowDirectionNames_.get("direction", dict)),
     rpm_(0),
     dm_(0),
-    nonDimensional_(dict.lookupOrDefault("nonDimensional", false))
+    nonDimensional_(dict.getOrDefault("nonDimensional", false))
 {
     if (nonDimensional_)
     {

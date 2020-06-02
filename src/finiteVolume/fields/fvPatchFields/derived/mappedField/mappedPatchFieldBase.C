@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,13 +82,13 @@ Foam::mappedPatchFieldBase<Type>::mappedPatchFieldBase
     patchField_(patchField),
     fieldName_
     (
-        dict.template lookupOrDefault<word>
+        dict.template getOrDefault<word>
         (
             "field",
             patchField_.internalField().name()
         )
     ),
-    setAverage_(dict.lookupOrDefault("setAverage", false)),
+    setAverage_(dict.getOrDefault("setAverage", false)),
     average_(getAverage(dict, setAverage_)),
     interpolationScheme_(interpolationCell<Type>::typeName)
 {

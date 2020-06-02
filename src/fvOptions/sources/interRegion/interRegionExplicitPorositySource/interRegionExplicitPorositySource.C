@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -120,8 +121,8 @@ Foam::fv::interRegionExplicitPorositySource::interRegionExplicitPorositySource
     interRegionOption(name, modelType, dict, mesh),
     porosityPtr_(nullptr),
     firstIter_(true),
-    UName_(coeffs_.lookupOrDefault<word>("U", "U")),
-    muName_(coeffs_.lookupOrDefault<word>("mu", "thermo:mu"))
+    UName_(coeffs_.getOrDefault<word>("U", "U")),
+    muName_(coeffs_.getOrDefault<word>("mu", "thermo:mu"))
 {
     if (active_)
     {

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,7 +85,7 @@ equationInitialResidualCondition::equationInitialResidualCondition
     runTimeCondition(name, obr, dict, state),
     fieldSelection_(obr, true),
     value_(dict.get<scalar>("value")),
-    timeStart_(dict.lookupOrDefault("timeStart", -GREAT)),
+    timeStart_(dict.getOrDefault("timeStart", -GREAT)),
     mode_(operatingModeNames.get("mode", dict))
 {
     fieldSelection_.read(dict);

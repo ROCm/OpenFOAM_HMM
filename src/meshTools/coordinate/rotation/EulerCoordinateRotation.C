@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -297,10 +297,10 @@ Foam::coordinateRotations::euler::euler(const dictionary& dict)
 :
     coordinateRotation(),
     angles_(dict.getCompat<vector>("angles", {{"rotation", 1806}})),
-    degrees_(dict.lookupOrDefault("degrees", true)),
+    degrees_(dict.getOrDefault("degrees", true)),
     order_
     (
-        quaternion::eulerOrderNames.lookupOrDefault
+        quaternion::eulerOrderNames.getOrDefault
         (
             "order",
             dict,

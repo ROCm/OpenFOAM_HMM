@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,7 +79,7 @@ kOmega<BasicTurbulenceModel>::kOmega
 
     Cmu_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "betaStar",
             this->coeffDict_,
@@ -88,7 +88,7 @@ kOmega<BasicTurbulenceModel>::kOmega
     ),
     beta_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "beta",
             this->coeffDict_,
@@ -97,7 +97,7 @@ kOmega<BasicTurbulenceModel>::kOmega
     ),
     gamma_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "gamma",
             this->coeffDict_,
@@ -106,7 +106,7 @@ kOmega<BasicTurbulenceModel>::kOmega
     ),
     alphaK_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "alphaK",
             this->coeffDict_,
@@ -115,7 +115,7 @@ kOmega<BasicTurbulenceModel>::kOmega
     ),
     alphaOmega_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "alphaOmega",
             this->coeffDict_,

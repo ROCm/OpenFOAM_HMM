@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,7 @@ namespace Foam
 
 bool Foam::SIMPLEControlOpt::read()
 {
-    nInitialIters_ = dict().lookupOrDefault<label>("nInitialIters", nIters_);
+    nInitialIters_ = dict().getOrDefault<label>("nInitialIters", nIters_);
     return SIMPLEControl::read();
 }
 

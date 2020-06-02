@@ -59,7 +59,7 @@ Foam::wallBoilingModels::CHFModels::Zuber::Zuber
 )
 :
     CHFModel(),
-    Cn_(dict.lookupOrDefault<scalar>("Cn", 0.131))
+    Cn_(dict.getOrDefault<scalar>("Cn", 0.131))
 {}
 
 

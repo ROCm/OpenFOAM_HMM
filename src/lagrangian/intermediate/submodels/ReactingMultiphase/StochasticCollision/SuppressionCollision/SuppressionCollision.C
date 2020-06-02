@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,7 +75,7 @@ Foam::SuppressionCollision<CloudType>::SuppressionCollision
     suppressionCloud_(this->coeffDict().lookup("suppressionCloud")),
     suppressedParcelType_
     (
-        this->coeffDict().lookupOrDefault("suppressedParcelType", -1)
+        this->coeffDict().getOrDefault("suppressedParcelType", -1)
     )
 {}
 

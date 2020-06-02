@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,12 +63,12 @@ phaseHydrostaticPressureFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    phaseFraction_(dict.lookupOrDefault<word>("phaseFraction", "alpha")),
+    phaseFraction_(dict.getOrDefault<word>("phaseFraction", "alpha")),
     rho_(dict.get<scalar>("rho")),
     pRefValue_(dict.get<scalar>("pRefValue")),
     pRefPoint_(dict.lookup("pRefPoint"))
 {
-    this->patchType() = dict.lookupOrDefault<word>("patchType", word::null);
+    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
 
     this->refValue() = pRefValue_;
 

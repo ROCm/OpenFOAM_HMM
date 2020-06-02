@@ -100,7 +100,7 @@ Foam::interpolationTable<Type>::interpolationTable(const dictionary& dict)
     List<value_type>(),
     bounding_
     (
-        bounds::repeatableBoundingNames.lookupOrDefault
+        bounds::repeatableBoundingNames.getOrDefault
         (
             "outOfBounds",
             dict,

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -95,7 +95,7 @@ bool Foam::functionObjects::surfaceDistance::read
 {
     fvMeshFunctionObject::read(dict);
 
-    doCells_ = dict.lookupOrDefault("calculateCells", true);
+    doCells_ = dict.getOrDefault("calculateCells", true);
 
     geomPtr_.clear();
     geomPtr_.set

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -445,50 +445,50 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
         dimensionedScalar(dimless, Zero),
         zeroGradientFvPatchScalarField::typeName
     ),
-    nonOrthogonality_(dict.lookupOrDefault<Switch>("switchNonOrtho", false)),
-    gradCc_(dict.lookupOrDefault<Switch>("switchGradCc", false)),
-    residuals_(dict.lookupOrDefault<Switch>("switchResiduals", false)),
-    faceWeight_(dict.lookupOrDefault<Switch>("switchFaceWeight", false)),
-    skewness_(dict.lookupOrDefault<Switch>("switchSkewness", false)),
-    Co_(dict.lookupOrDefault<Switch>("switchCo", false)),
+    nonOrthogonality_(dict.getOrDefault<Switch>("switchNonOrtho", false)),
+    gradCc_(dict.getOrDefault<Switch>("switchGradCc", false)),
+    residuals_(dict.getOrDefault<Switch>("switchResiduals", false)),
+    faceWeight_(dict.getOrDefault<Switch>("switchFaceWeight", false)),
+    skewness_(dict.getOrDefault<Switch>("switchSkewness", false)),
+    Co_(dict.getOrDefault<Switch>("switchCo", false)),
 
     maxNonOrthogonality_
     (
-        dict.lookupOrDefault<scalar>("maxNonOrthogonality", 20.0)
+        dict.getOrDefault<scalar>("maxNonOrthogonality", 20)
     ),
     minNonOrthogonality_
     (
-        dict.lookupOrDefault<scalar>("minNonOrthogonality", 60.0)
+        dict.getOrDefault<scalar>("minNonOrthogonality", 60)
     ),
-    maxGradCc_(dict.lookupOrDefault<scalar>("maxGradCc", 3.0)),
-    minGradCc_(dict.lookupOrDefault<scalar>("minGradCc", 4.0)),
-    maxResidual_(dict.lookupOrDefault<scalar>("maxResidual", 10.0)),
-    minFaceWeight_(dict.lookupOrDefault<scalar>("minFaceWeight", 0.3)),
-    maxFaceWeight_(dict.lookupOrDefault<scalar>("maxFaceWeight", 0.2)),
-    maxSkewness_(dict.lookupOrDefault<scalar>("maxSkewness", 2.0)),
-    minSkewness_(dict.lookupOrDefault<scalar>("minSkewness", 3.0)),
-    Co1_(dict.lookupOrDefault<scalar>("Co1", 1.0)),
-    Co2_(dict.lookupOrDefault<scalar>("Co2", 10.0)),
+    maxGradCc_(dict.getOrDefault<scalar>("maxGradCc", 3)),
+    minGradCc_(dict.getOrDefault<scalar>("minGradCc", 4)),
+    maxResidual_(dict.getOrDefault<scalar>("maxResidual", 10)),
+    minFaceWeight_(dict.getOrDefault<scalar>("minFaceWeight", 0.3)),
+    maxFaceWeight_(dict.getOrDefault<scalar>("maxFaceWeight", 0.2)),
+    maxSkewness_(dict.getOrDefault<scalar>("maxSkewness", 2)),
+    minSkewness_(dict.getOrDefault<scalar>("minSkewness", 3)),
+    Co1_(dict.getOrDefault<scalar>("Co1", 1)),
+    Co2_(dict.getOrDefault<scalar>("Co2", 10)),
 
     nonOrthogonalityName_
     (
-        dict.lookupOrDefault<word>("nonOrthogonality", "nonOrthoAngle")
+        dict.getOrDefault<word>("nonOrthogonality", "nonOrthoAngle")
     ),
     faceWeightName_
     (
-        dict.lookupOrDefault<word>("faceWeight", "faceWeight")
+        dict.getOrDefault<word>("faceWeight", "faceWeight")
     ),
     skewnessName_
     (
-        dict.lookupOrDefault<word>("skewness", "skewness")
+        dict.getOrDefault<word>("skewness", "skewness")
     ),
     residualName_
     (
-        dict.lookupOrDefault<word>("residual", "initialResidual:p")
+        dict.getOrDefault<word>("residual", "initialResidual:p")
     ),
     UName_
     (
-         dict.lookupOrDefault<word>("U", "U")
+         dict.getOrDefault<word>("U", "U")
     ),
 
     tolerance_(0.001),
@@ -496,9 +496,9 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
     errorIntegral_(mesh_.nCells(), Zero),
     oldError_(mesh_.nCells(), Zero),
     oldErrorIntegral_(mesh_.nCells(), Zero),
-    P_(dict.lookupOrDefault<scalar>("P", 3)),
-    I_(dict.lookupOrDefault<scalar>("I", 0.0)),
-    D_(dict.lookupOrDefault<scalar>("D", 0.25))
+    P_(dict.getOrDefault<scalar>("P", 3)),
+    I_(dict.getOrDefault<scalar>("I", 0)),
+    D_(dict.getOrDefault<scalar>("D", 0.25))
 {
     read(dict);
     setResultName(typeName, "");

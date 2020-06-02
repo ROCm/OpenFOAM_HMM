@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,7 +88,7 @@ displacementMethodelasticityMotionSolver
                 IOobject::AUTO_WRITE,
                 false
             )
-        ).subDict("elasticityMotionSolverCoeffs").lookupOrDefault<bool>
+        ).subDict("elasticityMotionSolverCoeffs").getOrDefault<bool>
         (
             "resetFields",
             true

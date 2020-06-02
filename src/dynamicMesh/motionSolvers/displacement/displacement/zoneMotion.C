@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,10 +44,10 @@ Foam::zoneMotion::zoneMotion
     moveAllCells_(false)
 {
     word cellZoneName =
-        dict.lookupOrDefault<word>("cellZone", "none");
+        dict.getOrDefault<word>("cellZone", "none");
 
     word cellSetName =
-        dict.lookupOrDefault<word>("cellSet", "none");
+        dict.getOrDefault<word>("cellSet", "none");
 
     if ((cellZoneName != "none") && (cellSetName != "none"))
     {

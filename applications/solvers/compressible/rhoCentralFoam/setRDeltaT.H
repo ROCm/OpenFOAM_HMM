@@ -3,7 +3,7 @@
 
     scalar rDeltaTSmoothingCoeff
     (
-        runTime.controlDict().lookupOrDefault<scalar>
+        runTime.controlDict().getOrDefault<scalar>
         (
             "rDeltaTSmoothingCoeff",
             0.02

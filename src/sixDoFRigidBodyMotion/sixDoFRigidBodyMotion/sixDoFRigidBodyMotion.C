@@ -110,7 +110,7 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     rConstraints_(tensor::I),
     initialCentreOfMass_
     (
-        dict.lookupOrDefault
+        dict.getOrDefault
         (
             "initialCentreOfMass",
             dict.get<vector>("centreOfMass")
@@ -119,17 +119,17 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     initialCentreOfRotation_(initialCentreOfMass_),
     initialQ_
     (
-        dict.lookupOrDefault
+        dict.getOrDefault
         (
             "initialOrientation",
-            dict.lookupOrDefault("orientation", tensor::I)
+            dict.getOrDefault("orientation", tensor::I)
         )
     ),
     mass_(dict.get<scalar>("mass")),
     momentOfInertia_(dict.get<diagTensor>("momentOfInertia")),
-    aRelax_(dict.lookupOrDefault<scalar>("accelerationRelaxation", 1.0)),
-    aDamp_(dict.lookupOrDefault<scalar>("accelerationDamping", 1.0)),
-    report_(dict.lookupOrDefault("report", false)),
+    aRelax_(dict.getOrDefault<scalar>("accelerationRelaxation", 1)),
+    aDamp_(dict.getOrDefault<scalar>("accelerationDamping", 1)),
+    report_(dict.getOrDefault("report", false)),
     solver_(sixDoFSolver::New(dict.subDict("solver"), *this))
 {
     addRestraints(dict);

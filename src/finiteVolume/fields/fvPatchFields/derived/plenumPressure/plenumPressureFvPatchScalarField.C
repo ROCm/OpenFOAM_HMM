@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,9 +80,9 @@ Foam::plenumPressureFvPatchScalarField::plenumPressureFvPatchScalarField
     hasRho_(false),
     inletAreaRatio_(dict.get<scalar>("inletAreaRatio")),
     inletDischargeCoefficient_(dict.get<scalar>("inletDischargeCoefficient")),
-    timeScale_(dict.lookupOrDefault<scalar>("timeScale", 0)),
-    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    UName_(dict.lookupOrDefault<word>("U", "U"))
+    timeScale_(dict.getOrDefault<scalar>("timeScale", 0)),
+    phiName_(dict.getOrDefault<word>("phi", "phi")),
+    UName_(dict.getOrDefault<word>("U", "U"))
 {
     hasRho_ = dict.readIfPresent("rho", rho_);
 }

@@ -396,7 +396,7 @@ bool Foam::functionObjects::vtkCloud::read(const dictionary& dict)
     // Info<< type() << " " << name() << " output-format: "
     //     << writeOpts_.description() << nl;
 
-    const int padWidth = dict.lookupOrDefault<int>("width", 8);
+    const int padWidth = dict.getOrDefault<int>("width", 8);
 
     // Appropriate printf format - Enforce min/max sanity limits
     if (padWidth < 1 || padWidth > 31)
@@ -408,10 +408,10 @@ bool Foam::functionObjects::vtkCloud::read(const dictionary& dict)
         printf_ = "%0" + std::to_string(padWidth) + "d";
     }
 
-    // useTimeName_ = dict.lookupOrDefault<bool>("useTimeName", false);
+    // useTimeName_ = dict.getOrDefault("useTimeName", false);
 
-    useVerts_ = dict.lookupOrDefault<bool>("cellData", false);
-    pruneEmpty_ = dict.lookupOrDefault<bool>("prune", false);
+    useVerts_ = dict.getOrDefault("cellData", false);
+    pruneEmpty_ = dict.getOrDefault("prune", false);
 
     selectClouds_.clear();
     dict.readIfPresent("clouds", selectClouds_);
@@ -420,7 +420,7 @@ bool Foam::functionObjects::vtkCloud::read(const dictionary& dict)
     {
         selectClouds_.resize(1);
         selectClouds_.first() =
-            dict.lookupOrDefault<word>("cloud", cloud::defaultName);
+            dict.getOrDefault<word>("cloud", cloud::defaultName);
     }
 
     selectFields_.clear();

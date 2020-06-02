@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,9 +82,9 @@ turbulentMixingLengthDissipationRateInletFvPatchScalarField
 :
     inletOutletFvPatchScalarField(p, iF),
     mixingLength_(dict.get<scalar>("mixingLength")),
-    kName_(dict.lookupOrDefault<word>("k", "k"))
+    kName_(dict.getOrDefault<word>("k", "k"))
 {
-    this->phiName_ = dict.lookupOrDefault<word>("phi", "phi");
+    this->phiName_ = dict.getOrDefault<word>("phi", "phi");
 
     fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
 
@@ -138,7 +139,7 @@ void turbulentMixingLengthDissipationRateInletFvPatchScalarField::updateCoeffs()
     );
 
     const scalar Cmu =
-        turbModel.coeffDict().lookupOrDefault<scalar>("Cmu", 0.09);
+        turbModel.coeffDict().getOrDefault<scalar>("Cmu", 0.09);
 
     const scalar Cmu75 = pow(Cmu, 0.75);
 

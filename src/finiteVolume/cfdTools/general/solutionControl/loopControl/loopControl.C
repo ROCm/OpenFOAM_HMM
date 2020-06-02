@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,7 @@ void Foam::loopControl::read(const dictionary& dict)
 {
     clear();
 
-    bool enabled = dict.lookupOrDefault("enabled", true);
+    bool enabled = dict.getOrDefault("enabled", true);
 
     if (enabled)
     {
@@ -119,7 +119,7 @@ bool Foam::loopControl::checkConverged() const
             const word& variableName = dataDictEntry.keyword();
 
             const scalar absTol =
-                convergenceDict_.lookupOrDefault<scalar>(variableName, -1);
+                convergenceDict_.getOrDefault<scalar>(variableName, -1);
 
             if (absTol > 0)
             {

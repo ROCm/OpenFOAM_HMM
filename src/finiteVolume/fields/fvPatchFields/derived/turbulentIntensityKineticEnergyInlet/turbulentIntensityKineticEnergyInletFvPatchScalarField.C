@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,10 +74,10 @@ turbulentIntensityKineticEnergyInletFvPatchScalarField
 :
     inletOutletFvPatchScalarField(p, iF),
     intensity_(dict.get<scalar>("intensity")),
-    UName_(dict.lookupOrDefault<word>("U", "U"))
+    UName_(dict.getOrDefault<word>("U", "U"))
 {
-    this->patchType() = dict.lookupOrDefault<word>("patchType", word::null);
-    this->phiName_ = dict.lookupOrDefault<word>("phi", "phi");
+    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
+    this->phiName_ = dict.getOrDefault<word>("phi", "phi");
 
     if (intensity_ < 0 || intensity_ > 1)
     {

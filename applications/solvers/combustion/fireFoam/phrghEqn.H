@@ -1,4 +1,4 @@
-if (pimple.dict().lookupOrDefault("hydrostaticInitialization", false))
+if (pimple.dict().getOrDefault("hydrostaticInitialization", false))
 {
     volScalarField& ph_rgh = regIOobject::store
     (
@@ -24,7 +24,7 @@ if (pimple.dict().lookupOrDefault("hydrostaticInitialization", false))
 
         label nCorr
         (
-            pimple.dict().lookupOrDefault<label>("nHydrostaticCorrectors", 5)
+            pimple.dict().getOrDefault<label>("nHydrostaticCorrectors", 5)
         );
 
         for (label i=0; i<nCorr; i++)

@@ -351,7 +351,7 @@ Foam::binaryTree<CompType, ThermoType>::binaryTree
     maxNLeafs_(coeffsDict.get<label>("maxNLeafs")),
     size_(0),
     n2ndSearch_(0),
-    max2ndSearch_(coeffsDict.lookupOrDefault("max2ndSearch",0)),
+    max2ndSearch_(coeffsDict.getOrDefault("max2ndSearch", 0)),
     coeffsDict_(coeffsDict)
 {}
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -547,12 +547,12 @@ Foam::PairCollision<CloudType>::PairCollision
     (
         owner.mesh(),
         this->coeffDict().getScalar("maxInteractionDistance"),
-        this->coeffDict().lookupOrDefault
+        this->coeffDict().getOrDefault
         (
             "writeReferredParticleCloud",
             false
         ),
-        this->coeffDict().lookupOrDefault("U", word("U"))
+        this->coeffDict().template getOrDefault<word>("U", "U")
     )
 {}
 

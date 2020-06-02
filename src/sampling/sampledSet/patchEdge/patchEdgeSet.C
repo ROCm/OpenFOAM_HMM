@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -207,7 +207,7 @@ Foam::patchEdgeSet::patchEdgeSet
             dict.get<word>("surfaceType"),
             IOobject
             (
-                dict.lookupOrDefault("surfaceName", name),
+                dict.getOrDefault("surfaceName", name),
                 mesh.time().constant(), // directory
                 "triSurface",           // instance
                 mesh.time(),            // registry

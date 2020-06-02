@@ -1,10 +1,10 @@
 #include "readTimeControls.H"
 
-correctPhi = pimple.dict().lookupOrDefault("correctPhi", false);
+correctPhi = pimple.dict().getOrDefault("correctPhi", false);
 
-checkMeshCourantNo = pimple.dict().lookupOrDefault("checkMeshCourantNo", false);
+checkMeshCourantNo = pimple.dict().getOrDefault("checkMeshCourantNo", false);
 
 massFluxInterpolation =
-    pimple.dict().lookupOrDefault("massFluxInterpolation", false);
+    pimple.dict().getOrDefault("massFluxInterpolation", false);
 
-ddtCorr = pimple.dict().lookupOrDefault("ddtCorr", true);
+ddtCorr = pimple.dict().getOrDefault("ddtCorr", true);

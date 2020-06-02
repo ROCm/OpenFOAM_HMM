@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -124,7 +125,7 @@ bool Foam::fv::explicitPorositySource::read(const dictionary& dict)
         if (!coeffs_.readIfPresent("UNames", fieldNames_))
         {
             fieldNames_.resize(1);
-            fieldNames_.first() = coeffs_.lookupOrDefault<word>("U", "U");
+            fieldNames_.first() = coeffs_.getOrDefault<word>("U", "U");
         }
 
         applied_.setSize(fieldNames_.size(), false);

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -840,7 +841,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
             IOobject::NO_WRITE
         ),
         foamyHexMeshDict.subDict("geometry"),
-        foamyHexMeshDict.lookupOrDefault("singleRegionName", true)
+        foamyHexMeshDict.getOrDefault("singleRegionName", true)
     ),
     geometryToConformTo_
     (

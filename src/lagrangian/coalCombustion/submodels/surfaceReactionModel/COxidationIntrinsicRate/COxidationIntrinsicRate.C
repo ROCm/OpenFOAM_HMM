@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +48,7 @@ Foam::COxidationIntrinsicRate<CloudType>::COxidationIntrinsicRate
     Ai_(this->coeffDict().getScalar("Ai")),
     Ei_(this->coeffDict().getScalar("Ei")),
     Ag_(this->coeffDict().getScalar("Ag")),
-    tau_(this->coeffDict().lookupOrDefault("tau", sqrt(2.0))),
+    tau_(this->coeffDict().getOrDefault("tau", sqrt(2.0))),
     CsLocalId_(-1),
     O2GlobalId_(owner.composition().carrierId("O2")),
     CO2GlobalId_(owner.composition().carrierId("CO2")),

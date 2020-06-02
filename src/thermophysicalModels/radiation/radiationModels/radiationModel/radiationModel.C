@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,7 +87,7 @@ void Foam::radiation::radiationModel::initialise()
 {
     if (radiation_)
     {
-        solverFreq_ = max(1, lookupOrDefault<label>("solverFreq", 1));
+        solverFreq_ = max(1, getOrDefault<label>("solverFreq", 1));
 
         if (this->found("absorptionEmissionModel"))
         {
@@ -148,7 +148,7 @@ Foam::radiation::radiationModel::radiationModel
     mesh_(T.mesh()),
     time_(T.time()),
     T_(T),
-    radiation_(lookupOrDefault("radiation", true)),
+    radiation_(getOrDefault("radiation", true)),
     coeffs_(subOrEmptyDict(type + "Coeffs")),
     solverFreq_(1),
     firstIter_(true),
@@ -187,7 +187,7 @@ Foam::radiation::radiationModel::radiationModel
     mesh_(T.mesh()),
     time_(T.time()),
     T_(T),
-    radiation_(lookupOrDefault("radiation", true)),
+    radiation_(getOrDefault("radiation", true)),
     coeffs_(subOrEmptyDict(type + "Coeffs")),
     solverFreq_(1),
     firstIter_(true),
@@ -214,7 +214,7 @@ bool Foam::radiation::radiationModel::read()
         readEntry("radiation", radiation_);
         coeffs_ = subOrEmptyDict(type() + "Coeffs");
 
-        solverFreq_ = lookupOrDefault<label>("solverFreq", 1);
+        solverFreq_ = getOrDefault<label>("solverFreq", 1);
         solverFreq_ = max(1, solverFreq_);
 
         return true;

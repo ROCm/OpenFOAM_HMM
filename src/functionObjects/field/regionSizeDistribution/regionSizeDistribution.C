@@ -322,7 +322,7 @@ Foam::functionObjects::regionSizeDistribution::regionSizeDistribution
     writeFile(obr_, name),
     alphaName_(dict.get<word>("field")),
     patchNames_(dict.get<wordRes>("patches")),
-    isoPlanes_(dict.lookupOrDefault("isoPlanes", false))
+    isoPlanes_(dict.getOrDefault("isoPlanes", false))
 {
     read(dict);
 }

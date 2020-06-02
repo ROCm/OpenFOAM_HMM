@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -220,7 +220,7 @@ Foam::searchableSurfaces::searchableSurfaces
         const word& key = dEntry.keyword();
         const dictionary& dict = topDict.subDict(key);
 
-        names_[surfI] = dict.lookupOrDefault<word>("name", key);
+        names_[surfI] = dict.getOrDefault<word>("name", key);
 
         // Make IOobject with correct name
         autoPtr<IOobject> namedIO(io.clone());

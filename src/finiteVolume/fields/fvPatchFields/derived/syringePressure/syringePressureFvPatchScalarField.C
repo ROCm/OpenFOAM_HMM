@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,7 +65,7 @@ Foam::syringePressureFvPatchScalarField::syringePressureFvPatchScalarField
     psi_(dict.get<scalar>("psi")),
     ams_(dict.get<scalar>("ams")),
     ams0_(ams_),
-    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
+    phiName_(dict.getOrDefault<word>("phi", "phi")),
     curTimeIndex_(-1)
 {
     scalar ps = (psI_*VsI_ + ams_/psi_)/Vs(db().time().value());

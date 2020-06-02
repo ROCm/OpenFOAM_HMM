@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -181,14 +181,14 @@ Foam::functionObjects::scalarTransport::scalarTransport
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    fieldName_(dict.lookupOrDefault<word>("field", "s")),
-    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
-    nutName_(dict.lookupOrDefault<word>("nut", "none")),
-    phaseName_(dict.lookupOrDefault<word>("phase", "none")),
+    fieldName_(dict.getOrDefault<word>("field", "s")),
+    phiName_(dict.getOrDefault<word>("phi", "phi")),
+    rhoName_(dict.getOrDefault<word>("rho", "rho")),
+    nutName_(dict.getOrDefault<word>("nut", "none")),
+    phaseName_(dict.getOrDefault<word>("phase", "none")),
     phasePhiCompressedName_
     (
-        dict.lookupOrDefault<word>("phasePhiCompressed", "alphaPhiUn")
+        dict.getOrDefault<word>("phasePhiCompressed", "alphaPhiUn")
     ),
     D_(0),
     constantD_(false),
@@ -196,7 +196,7 @@ Foam::functionObjects::scalarTransport::scalarTransport
     resetOnStartUp_(false),
     schemesField_("unknown-schemesField"),
     fvOptions_(mesh_),
-    bounded01_(dict.lookupOrDefault("bounded01", true))
+    bounded01_(dict.getOrDefault("bounded01", true))
 {
     read(dict);
 
@@ -229,10 +229,10 @@ bool Foam::functionObjects::scalarTransport::read(const dictionary& dict)
     dict.readIfPresent("phase", phaseName_);
     dict.readIfPresent("bounded01", bounded01_);
 
-    schemesField_ = dict.lookupOrDefault("schemesField", fieldName_);
+    schemesField_ = dict.getOrDefault("schemesField", fieldName_);
     constantD_ = dict.readIfPresent("D", D_);
-    alphaD_ = dict.lookupOrDefault("alphaD", 1.0);
-    alphaDt_ = dict.lookupOrDefault("alphaDt", 1.0);
+    alphaD_ = dict.getOrDefault<scalar>("alphaD", 1);
+    alphaDt_ = dict.getOrDefault<scalar>("alphaDt", 1);
 
     dict.readIfPresent("nCorr", nCorr_);
     dict.readIfPresent("resetOnStartUp", resetOnStartUp_);

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -169,7 +170,7 @@ Foam::searchableSurfaceControl::searchableSurfaceControl
         geometryToConformTo,
         defaultCellSize
     ),
-    surfaceName_(controlFunctionDict.lookupOrDefault<word>("surface", name)),
+    surfaceName_(controlFunctionDict.getOrDefault<word>("surface", name)),
     searchableSurface_(geometryToConformTo.geometry()[surfaceName_]),
     geometryToConformTo_(geometryToConformTo),
     cellSizeFunctions_(1),

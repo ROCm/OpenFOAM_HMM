@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -318,26 +318,26 @@ sensitivitySurface::sensitivitySurface
 void sensitivitySurface::read()
 {
     includeSurfaceArea_ =
-        dict().lookupOrDefault<bool>("includeSurfaceArea", true);
+        dict().getOrDefault<bool>("includeSurfaceArea", true);
     includePressureTerm_ =
-        dict().lookupOrDefault<bool>("includePressure", true);
+        dict().getOrDefault<bool>("includePressure", true);
     includeGradStressTerm_ =
-        dict().lookupOrDefault<bool>("includeGradStressTerm", true);
+        dict().getOrDefault<bool>("includeGradStressTerm", true);
     includeTransposeStresses_ =
-        dict().lookupOrDefault<bool>("includeTransposeStresses", true);
-    includeDivTerm_ = dict().lookupOrDefault<bool>("includeDivTerm", false);
+        dict().getOrDefault<bool>("includeTransposeStresses", true);
+    includeDivTerm_ = dict().getOrDefault<bool>("includeDivTerm", false);
     includeDistance_ =
-        dict().lookupOrDefault<bool>
+        dict().getOrDefault<bool>
         (
             "includeDistance",
             adjointVars_.adjointTurbulence().ref().includeDistance()
         );
     includeMeshMovement_ =
-        dict().lookupOrDefault<bool>("includeMeshMovement", true);
+        dict().getOrDefault<bool>("includeMeshMovement", true);
     includeObjective_ =
-        dict().lookupOrDefault<bool>("includeObjectiveContribution", true);
+        dict().getOrDefault<bool>("includeObjectiveContribution", true);
     writeGeometricInfo_ =
-        dict().lookupOrDefault<bool>("writeGeometricInfo", false);
+        dict().getOrDefault<bool>("writeGeometricInfo", false);
 
     // Allocate new solvers if necessary
     if (includeDistance_ && eikonalSolver_.empty())

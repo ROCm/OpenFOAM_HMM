@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -109,7 +109,7 @@ RNGkEpsilon<BasicTurbulenceModel>::RNGkEpsilon
 
     Cmu_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cmu",
             this->coeffDict_,
@@ -118,7 +118,7 @@ RNGkEpsilon<BasicTurbulenceModel>::RNGkEpsilon
     ),
     C1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "C1",
             this->coeffDict_,
@@ -127,7 +127,7 @@ RNGkEpsilon<BasicTurbulenceModel>::RNGkEpsilon
     ),
     C2_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "C2",
             this->coeffDict_,
@@ -136,7 +136,7 @@ RNGkEpsilon<BasicTurbulenceModel>::RNGkEpsilon
     ),
     C3_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "C3",
             this->coeffDict_,
@@ -145,7 +145,7 @@ RNGkEpsilon<BasicTurbulenceModel>::RNGkEpsilon
     ),
     sigmak_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "sigmak",
             this->coeffDict_,
@@ -154,7 +154,7 @@ RNGkEpsilon<BasicTurbulenceModel>::RNGkEpsilon
     ),
     sigmaEps_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "sigmaEps",
             this->coeffDict_,
@@ -163,7 +163,7 @@ RNGkEpsilon<BasicTurbulenceModel>::RNGkEpsilon
     ),
     eta0_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "eta0",
             this->coeffDict_,
@@ -172,7 +172,7 @@ RNGkEpsilon<BasicTurbulenceModel>::RNGkEpsilon
     ),
     beta_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "beta",
             this->coeffDict_,

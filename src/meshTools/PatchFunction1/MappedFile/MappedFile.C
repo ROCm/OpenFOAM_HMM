@@ -44,12 +44,12 @@ Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
     PatchFunction1<Type>(pp, entryName, dict, faceValues),
     dictConstructed_(true),
     fieldTableName_(entryName),
-    setAverage_(dict.lookupOrDefault("setAverage", false)),
-    perturb_(dict.lookupOrDefault<scalar>("perturb", 1e-5)),
-    pointsName_(dict.lookupOrDefault<word>("points", "points")),
+    setAverage_(dict.getOrDefault("setAverage", false)),
+    perturb_(dict.getOrDefault<scalar>("perturb", 1e-5)),
+    pointsName_(dict.getOrDefault<word>("points", "points")),
     mapMethod_
     (
-        dict.lookupOrDefault<word>
+        dict.getOrDefault<word>
         (
             "mapMethod",
             "planarInterpolation"
@@ -98,12 +98,12 @@ Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
     PatchFunction1<Type>(pp, entryName, dict, faceValues),
     dictConstructed_(false),
     fieldTableName_(fieldTableName),
-    setAverage_(dict.lookupOrDefault("setAverage", false)),
-    perturb_(dict.lookupOrDefault<scalar>("perturb", 1e-5)),
-    pointsName_(dict.lookupOrDefault<word>("points", "points")),
+    setAverage_(dict.getOrDefault("setAverage", false)),
+    perturb_(dict.getOrDefault<scalar>("perturb", 1e-5)),
+    pointsName_(dict.getOrDefault<word>("points", "points")),
     mapMethod_
     (
-        dict.lookupOrDefault<word>
+        dict.getOrDefault<word>
         (
             "mapMethod",
             "planarInterpolation"

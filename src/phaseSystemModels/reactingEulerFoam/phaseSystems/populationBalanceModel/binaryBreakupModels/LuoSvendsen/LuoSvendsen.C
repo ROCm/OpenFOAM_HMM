@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2019 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,11 +63,11 @@ Foam::diameterModels::binaryBreakupModels::LuoSvendsen::LuoSvendsen
     gammaUpperReg2by11_(),
     gammaUpperReg5by11_(),
     gammaUpperReg8by11_(),
-    C4_(dimensionedScalar::lookupOrDefault("C4", dict, dimless, 0.923)),
-    beta_(dimensionedScalar::lookupOrDefault("beta", dict, dimless, 2.05)),
+    C4_(dimensionedScalar::getOrDefault("C4", dict, dimless, 0.923)),
+    beta_(dimensionedScalar::getOrDefault("beta", dict, dimless, 2.05)),
     minEddyRatio_
     (
-        dimensionedScalar::lookupOrDefault("minEddyRatio", dict, dimless, 11.4)
+        dimensionedScalar::getOrDefault("minEddyRatio", dict, dimless, 11.4)
     ),
     kolmogorovLengthScale_
     (

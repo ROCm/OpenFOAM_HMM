@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -214,14 +214,14 @@ humidityTemperatureCoupledMixedFvPatchScalarField
     mixedFvPatchScalarField(p, iF),
     temperatureCoupledBase(patch(), dict),
     mode_(mtCondensationAndEvaporation),
-    pName_(dict.lookupOrDefault<word>("p", "p")),
-    UName_(dict.lookupOrDefault<word>("U", "U")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
-    muName_(dict.lookupOrDefault<word>("mu", "thermo:mu")),
-    TnbrName_(dict.lookupOrDefault<word>("Tnbr", "T")),
-    qrNbrName_(dict.lookupOrDefault<word>("qrNbr", "none")),
-    qrName_(dict.lookupOrDefault<word>("qr", "none")),
-    specieName_(dict.lookupOrDefault<word>("specie", "none")),
+    pName_(dict.getOrDefault<word>("p", "p")),
+    UName_(dict.getOrDefault<word>("U", "U")),
+    rhoName_(dict.getOrDefault<word>("rho", "rho")),
+    muName_(dict.getOrDefault<word>("mu", "thermo:mu")),
+    TnbrName_(dict.getOrDefault<word>("Tnbr", "T")),
+    qrNbrName_(dict.getOrDefault<word>("qrNbr", "none")),
+    qrName_(dict.getOrDefault<word>("qr", "none")),
+    specieName_(dict.getOrDefault<word>("specie", "none")),
     liquid_(nullptr),
     liquidDict_(),
     mass_(patch().size(), Zero),

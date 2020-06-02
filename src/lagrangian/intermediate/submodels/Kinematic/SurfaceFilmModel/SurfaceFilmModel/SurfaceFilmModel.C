@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,7 +62,7 @@ Foam::SurfaceFilmModel<CloudType>::SurfaceFilmModel
     g_(owner.g()),
     ejectedParcelType_
     (
-        this->coeffDict().lookupOrDefault("ejectedParcelType", -1)
+        this->coeffDict().getOrDefault("ejectedParcelType", -1)
     ),
     massParcelPatch_(0),
     diameterParcelPatch_(0),

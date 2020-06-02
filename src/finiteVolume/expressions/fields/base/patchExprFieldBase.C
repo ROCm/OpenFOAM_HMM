@@ -63,7 +63,7 @@ Foam::expressions::patchExprFieldBase::patchExprFieldBase
 :
     debug_(dict.getOrDefault("debug", false)),
     allowGradient_(allowGradient),
-    evalOnConstruct_(dict.getOrDefault<bool>("evalOnConstruct", false)),
+    evalOnConstruct_(dict.getOrDefault("evalOnConstruct", false)),
     valueExpr_(),
     gradExpr_(),
     fracExpr_()

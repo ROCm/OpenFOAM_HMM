@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,9 +54,9 @@ void sensitivityBezierFI::read()
 {
     // Laplace solution controls
     const dictionary dxdbDict = dict_.subOrEmptyDict("dxdbSolver");
-    meshMovementIters_ = dxdbDict.lookupOrDefault<label>("iters", 1000);
+    meshMovementIters_ = dxdbDict.getOrDefault<label>("iters", 1000);
     meshMovementResidualLimit_ =
-        dxdbDict.lookupOrDefault<scalar>("tolerance", 1.e-07);
+        dxdbDict.getOrDefault<scalar>("tolerance", 1.e-07);
 
     // Read variables related to the adjoint eikonal solver
     FIBase::read();

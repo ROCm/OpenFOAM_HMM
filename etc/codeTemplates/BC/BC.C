@@ -79,7 +79,7 @@ CONSTRUCT
     data_(dict.get<TYPE>("data")),
     fieldData_("fieldData", dict, p.size()),
     timeVsData_(Function1<TYPE>::New("timeVsData", dict)),
-    wordData_(dict.lookupOrDefault<word>("wordName", "wordDefault")),
+    wordData_(dict.getOrDefault<word>("wordName", "wordDefault")),
     labelData_(-1),
     boolData_(false)
 {

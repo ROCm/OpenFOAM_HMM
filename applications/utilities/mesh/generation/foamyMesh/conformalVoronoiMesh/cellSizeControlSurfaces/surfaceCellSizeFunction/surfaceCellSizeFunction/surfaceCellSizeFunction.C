@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,7 @@ Foam::surfaceCellSizeFunction::surfaceCellSizeFunction
     defaultCellSize_(defaultCellSize),
     refinementFactor_
     (
-        lookupOrDefault<scalar>("refinementFactor", 1.0)
+        getOrDefault<scalar>("refinementFactor", 1)
     )
 {}
 

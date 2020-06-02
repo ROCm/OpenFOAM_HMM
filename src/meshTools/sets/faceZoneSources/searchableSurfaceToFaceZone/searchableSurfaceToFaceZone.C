@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,7 +74,7 @@ Foam::word Foam::searchableSurfaceToFaceZone::getSurfaceName
 
 
     return
-        dict.lookupOrDefaultCompat<word>
+        dict.getOrDefaultCompat<word>
         (
             "surfaceName",
             {{"name", 1806}},

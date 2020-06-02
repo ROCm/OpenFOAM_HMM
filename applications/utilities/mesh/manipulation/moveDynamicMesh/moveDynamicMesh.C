@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
 
     bool moveMeshOuterCorrectors
     (
-        pimple.dict().lookupOrDefault("moveMeshOuterCorrectors", false)
+        pimple.dict().getOrDefault("moveMeshOuterCorrectors", false)
     );
 
     while (runTime.loop())

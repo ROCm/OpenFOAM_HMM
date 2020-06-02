@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -158,7 +158,7 @@ Foam::PatchInteractionModel<CloudType>::PatchInteractionModel
         this->coeffDict(),
         false                   // Do not write by default
     ),
-    UName_(this->coeffDict().lookupOrDefault("U", word("U"))),
+    UName_(this->coeffDict().template getOrDefault<word>("U", "U")),
     escapedParcels_(0),
     escapedMass_(0.0)
 {}

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,7 +126,7 @@ Foam::CV2D::CV2D
             IOobject::NO_WRITE
         ),
         cvMeshDict.subDict("geometry"),
-        cvMeshDict.lookupOrDefault("singleRegionName", true)
+        cvMeshDict.getOrDefault("singleRegionName", true)
     ),
     qSurf_
     (

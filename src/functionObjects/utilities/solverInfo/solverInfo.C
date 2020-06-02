@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -148,7 +148,7 @@ bool Foam::functionObjects::solverInfo::read(const dictionary& dict)
         fieldSet_.read(dict);
 
         writeResidualFields_ =
-            dict.lookupOrDefault("writeResidualFields", false);
+            dict.getOrDefault("writeResidualFields", false);
 
         residualFieldNames_.clear();
 

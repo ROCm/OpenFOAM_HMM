@@ -17,7 +17,7 @@
 
     const dictionary& eosDict = thermoDict.subDict("equationOfState");
 
-    bool local = eosDict.lookupOrDefault("local", false);
+    bool local = eosDict.getOrDefault("local", false);
 
     // Evolve T as:
     //

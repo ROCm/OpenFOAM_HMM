@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,8 +94,8 @@ Foam::sampledCuttingSurface::sampledCuttingSurface
     sampledSurface(defaultSurfaceName, mesh, dict),
     cuttingSurface(defaultSurfaceName, mesh, dict),
     zoneNames_(),
-    bounds_(dict.lookupOrDefault("bounds", boundBox::invertedBox)),
-    triangulate_(dict.lookupOrDefault("triangulate", true)),
+    bounds_(dict.getOrDefault("bounds", boundBox::invertedBox)),
+    triangulate_(dict.getOrDefault("triangulate", true)),
     needsUpdate_(true)
 {
     if (!dict.readIfPresent("zones", zoneNames_) && dict.found("zone"))

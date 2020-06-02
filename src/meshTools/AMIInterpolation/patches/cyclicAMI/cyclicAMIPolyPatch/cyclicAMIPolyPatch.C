@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -518,7 +518,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
 )
 :
     coupledPolyPatch(name, dict, index, bm, patchType),
-    nbrPatchName_(dict.lookupOrDefault<word>("neighbourPatch", "")),
+    nbrPatchName_(dict.getOrDefault<word>("neighbourPatch", "")),
     coupleGroup_(dict),
     nbrPatchID_(-1),
     rotationAxis_(Zero),
@@ -531,7 +531,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     (
         AMIPatchToPatchInterpolation::interpolationMethodNames_
         [
-            dict.lookupOrDefault
+            dict.getOrDefault
             (
                 "method",
                 AMIPatchToPatchInterpolation::interpolationMethodNames_
@@ -541,9 +541,9 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
             )
         ]
     ),
-    AMIReverse_(dict.lookupOrDefault("flipNormals", false)),
+    AMIReverse_(dict.getOrDefault("flipNormals", false)),
     AMIRequireMatch_(true),
-    AMILowWeightCorrection_(dict.lookupOrDefault("lowWeightCorrection", -1.0)),
+    AMILowWeightCorrection_(dict.getOrDefault("lowWeightCorrection", -1.0)),
     surfPtr_(nullptr),
     surfDict_(dict.subOrEmptyDict("surface"))
 {
@@ -764,11 +764,11 @@ const Foam::cyclicAMIPolyPatch& Foam::cyclicAMIPolyPatch::neighbPatch() const
 const Foam::autoPtr<Foam::searchableSurface>&
 Foam::cyclicAMIPolyPatch::surfPtr() const
 {
-    const word surfType(surfDict_.lookupOrDefault<word>("type", "none"));
+    const word surfType(surfDict_.getOrDefault<word>("type", "none"));
 
     if (!surfPtr_.valid() && owner() && surfType != "none")
     {
-        word surfName(surfDict_.lookupOrDefault("name", name()));
+        word surfName(surfDict_.getOrDefault("name", name()));
 
         const polyMesh& mesh = boundaryMesh().mesh();
 

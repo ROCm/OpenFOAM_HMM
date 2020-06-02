@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2017 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -132,9 +132,9 @@ bool Foam::functionObjects::fieldMinMax::read(const dictionary& dict)
     fvMeshFunctionObject::read(dict);
     writeFile::read(dict);
 
-    location_ = dict.lookupOrDefault("location", true);
+    location_ = dict.getOrDefault("location", true);
 
-    mode_ = modeTypeNames_.lookupOrDefault("mode", dict, modeType::mdMag);
+    mode_ = modeTypeNames_.getOrDefault("mode", dict, modeType::mdMag);
 
     fieldSet_.read(dict);
 

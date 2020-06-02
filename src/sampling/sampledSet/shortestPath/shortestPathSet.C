@@ -1416,8 +1416,8 @@ Foam::shortestPathSet::shortestPathSet
     insidePoints_(dict.get<pointField>("insidePoints")),
     outsidePoints_(dict.get<pointField>("outsidePoints"))
 {
-    const label maxIter(dict.lookupOrDefault<label>("maxIter", 50));
-    const bool markLeakPath(dict.lookupOrDefault<bool>("markLeakPath", true));
+    const label maxIter(dict.getOrDefault<label>("maxIter", 50));
+    const bool markLeakPath(dict.getOrDefault("markLeakPath", true));
 
     const polyBoundaryMesh& pbm = mesh.boundaryMesh();
 

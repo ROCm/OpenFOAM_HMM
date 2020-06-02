@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -163,11 +163,11 @@ bool Foam::sixDoFRigidBodyMotionRestraints::linearSpringDamper::read
     sixDoFRigidBodyMotionRestraint::read(sDoFRBMRDict);
 
     sDoFRBMRCoeffs_.readEntry("refAttachmentPt", refAttachmentPt_);
-    psi_ = sDoFRBMRCoeffs_.lookupOrDefault<scalar>("psi", 1.0);
+    psi_ = sDoFRBMRCoeffs_.getOrDefault<scalar>("psi", 1);
     sDoFRBMRCoeffs_.readEntry("wn", wn_);
     sDoFRBMRCoeffs_.readEntry("restLength", restLength_);
     sDoFRBMRCoeffs_.readEntry("numberOfChains", numberOfChains_);
-    frelax_ = sDoFRBMRCoeffs_.lookupOrDefault<scalar>("frelax", 0.8);
+    frelax_ = sDoFRBMRCoeffs_.getOrDefault<scalar>("frelax", 0.8);
 
     return true;
 }
@@ -183,7 +183,7 @@ void Foam::sixDoFRigidBodyMotionRestraints::linearSpringDamper::write
     os.writeEntry("wn", wn_);
     os.writeEntry("restLength", restLength_);
     os.writeEntry("numberOfChains", numberOfChains_);
-    os.writeEntryIfDifferent<scalar>("psi", 1.0, psi_);
+    os.writeEntryIfDifferent<scalar>("psi", 1, psi_);
     os.writeEntryIfDifferent<scalar>("frelax", 0.8, frelax_);
 }
 

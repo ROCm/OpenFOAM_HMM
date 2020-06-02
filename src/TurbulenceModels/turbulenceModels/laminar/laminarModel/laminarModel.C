@@ -69,7 +69,7 @@ Foam::laminarModel<BasicTurbulenceModel>::laminarModel
     ),
 
     laminarDict_(this->subOrEmptyDict("laminar")),
-    printCoeffs_(laminarDict_.lookupOrDefault<Switch>("printCoeffs", false)),
+    printCoeffs_(laminarDict_.getOrDefault<Switch>("printCoeffs", false)),
     coeffDict_(laminarDict_.optionalSubDict(type + "Coeffs"))
 {
     // Force the construction of the mesh deltaCoeffs which may be needed

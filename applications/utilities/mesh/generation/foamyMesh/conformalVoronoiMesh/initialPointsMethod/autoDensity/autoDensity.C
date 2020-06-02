@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -884,14 +884,14 @@ autoDensity::autoDensity
     globalTrialPoints_(0),
     minCellSizeLimit_
     (
-        detailsDict().lookupOrDefault<scalar>("minCellSizeLimit", 0.0)
+        detailsDict().getOrDefault<scalar>("minCellSizeLimit", 0)
     ),
     minLevels_(detailsDict().get<label>("minLevels")),
     maxSizeRatio_(detailsDict().get<scalar>("maxSizeRatio")),
     volRes_(detailsDict().get<label>("sampleResolution")),
     surfRes_
     (
-        detailsDict().lookupOrDefault<label>("surfaceSampleResolution", volRes_)
+        detailsDict().getOrDefault<label>("surfaceSampleResolution", volRes_)
     )
 {
     if (maxSizeRatio_ <= 1.0)

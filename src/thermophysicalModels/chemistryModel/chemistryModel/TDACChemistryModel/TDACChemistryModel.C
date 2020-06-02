@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,7 @@ Foam::TDACChemistryModel<ReactionThermo, ThermoType>::TDACChemistryModel
     StandardChemistryModel<ReactionThermo, ThermoType>(thermo),
     variableTimeStep_
     (
-        this->mesh().time().controlDict().lookupOrDefault
+        this->mesh().time().controlDict().getOrDefault
         (
             "adjustTimeStep",
             false

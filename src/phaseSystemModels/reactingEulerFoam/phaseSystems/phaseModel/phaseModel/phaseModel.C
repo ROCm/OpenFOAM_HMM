@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2019 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,7 +71,7 @@ Foam::phaseModel::phaseModel
         dimless,
         fluid.subDict(phaseName)
     ),
-    alphaMax_(fluid.subDict(phaseName).lookupOrDefault<scalar>("alphaMax", 1))
+    alphaMax_(fluid.subDict(phaseName).getOrDefault<scalar>("alphaMax", 1))
 {
     diameterModel_ = diameterModel::New(fluid.subDict(phaseName), *this);
 }

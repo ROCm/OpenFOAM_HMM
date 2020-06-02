@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -102,7 +103,7 @@ bool Foam::sixDoFRigidBodyMotionConstraints::plane::read
 {
     sixDoFRigidBodyMotionConstraint::read(sDoFRBMCDict);
 
-    centreOfRotation_ = sDoFRBMCCoeffs_.lookupOrDefault
+    centreOfRotation_ = sDoFRBMCCoeffs_.getOrDefault
     (
         "centreOfRotation",
         motion_.initialCentreOfMass()

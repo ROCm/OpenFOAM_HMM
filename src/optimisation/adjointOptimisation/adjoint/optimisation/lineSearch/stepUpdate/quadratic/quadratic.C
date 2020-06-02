@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,7 @@ namespace Foam
 Foam::quadratic::quadratic(const dictionary& dict)
 :
     stepUpdate(dict),
-    minRatio_(coeffsDict().lookupOrDefault<scalar>("minRatio", 0.1)),
+    minRatio_(coeffsDict().getOrDefault<scalar>("minRatio", 0.1)),
     firstMeritValue_(Zero),
     secondMeritValue_(Zero),
     meritDerivative_(Zero)

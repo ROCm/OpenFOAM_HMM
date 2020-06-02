@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -509,9 +509,9 @@ Foam::ThermoSurfaceFilm<CloudType>::ThermoSurfaceFilm
     {
         this->coeffDict().readEntry("deltaWet", deltaWet_);
         splashParcelType_ =
-            this->coeffDict().lookupOrDefault("splashParcelType", -1);
+            this->coeffDict().getOrDefault("splashParcelType", -1);
         parcelsPerSplash_ =
-            this->coeffDict().lookupOrDefault("parcelsPerSplash", 2);
+            this->coeffDict().getOrDefault("parcelsPerSplash", 2);
         this->coeffDict().readEntry("Adry", Adry_);
         this->coeffDict().readEntry("Awet", Awet_);
         this->coeffDict().readEntry("Cf", Cf_);

@@ -1,6 +1,6 @@
 #include "readTimeControls.H"
 
-correctPhi = pimple.dict().lookupOrDefault("correctPhi", true);
+correctPhi = pimple.dict().getOrDefault("correctPhi", true);
 
 checkMeshCourantNo =
-    pimple.dict().lookupOrDefault("checkMeshCourantNo", false);
+    pimple.dict().getOrDefault("checkMeshCourantNo", false);

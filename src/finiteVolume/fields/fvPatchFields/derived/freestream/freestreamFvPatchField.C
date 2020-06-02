@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,9 +53,9 @@ Foam::freestreamFvPatchField<Type>::freestreamFvPatchField
     inletOutletFvPatchField<Type>(p, iF),
     freestreamBCPtr_()
 {
-    this->patchType() = dict.lookupOrDefault<word>("patchType", word::null);
+    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
 
-    this->phiName_ = dict.lookupOrDefault<word>("phi","phi");
+    this->phiName_ = dict.getOrDefault<word>("phi", "phi");
 
     if (dict.found("freestreamValue"))
     {

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,8 +63,8 @@ semiPermeableBaffleMassFractionFvPatchScalarField
 :
     mappedPatchBase(p.patch(), NEARESTPATCHFACE, dict),
     mixedFvPatchScalarField(p, iF),
-    c_(dict.lookupOrDefault<scalar>("c", 0)),
-    phiName_(dict.lookupOrDefault<word>("phi", "phi"))
+    c_(dict.getOrDefault<scalar>("c", 0)),
+    phiName_(dict.getOrDefault<word>("phi", "phi"))
 {
     fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
 

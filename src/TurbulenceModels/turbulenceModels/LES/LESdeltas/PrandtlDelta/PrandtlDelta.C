@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,10 +73,10 @@ Foam::LESModels::PrandtlDelta::PrandtlDelta
             dict.optionalSubDict(type() + "Coeffs")
         )
     ),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
+    kappa_(dict.getOrDefault<scalar>("kappa", 0.41)),
     Cdelta_
     (
-        dict.optionalSubDict(type() + "Coeffs").lookupOrDefault<scalar>
+        dict.optionalSubDict(type() + "Coeffs").getOrDefault<scalar>
         (
             "Cdelta",
             0.158

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -183,7 +183,7 @@ directionalPressureGradientExplicitSource
     zoneID_(mesh_.faceZones().findZoneID(faceZoneName_)),
     faceId_(),
     facePatchId_(),
-    relaxationFactor_(coeffs_.lookupOrDefault<scalar>("relaxationFactor",0.3)),
+    relaxationFactor_(coeffs_.getOrDefault<scalar>("relaxationFactor", 0.3)),
     cellFaceMap_(cells_.size(), -1)
 {
     coeffs_.readEntry("fields", fieldNames_);
@@ -546,7 +546,7 @@ bool Foam::fv::directionalPressureGradientExplicitSource::read
     const dictionary coeffs(dict.subDict(typeName + "Coeffs"));
 
     relaxationFactor_ =
-        coeffs.lookupOrDefault<scalar>("relaxationFactor", 0.3);
+        coeffs.getOrDefault<scalar>("relaxationFactor", 0.3);
 
     coeffs.readEntry("flowDir", flowDir_);
     flowDir_.normalise();

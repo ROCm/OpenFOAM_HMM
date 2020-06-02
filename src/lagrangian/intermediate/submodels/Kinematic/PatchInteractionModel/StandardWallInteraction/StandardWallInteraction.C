@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,7 +75,7 @@ Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
     injIdToIndex_()
 {
     const bool outputByInjectorId =
-        this->coeffDict().lookupOrDefault("outputByInjectorId", false);
+        this->coeffDict().getOrDefault("outputByInjectorId", false);
 
     switch (interactionType_)
     {
@@ -93,8 +93,8 @@ Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
         }
         case PatchInteractionModel<CloudType>::itRebound:
         {
-            e_ = this->coeffDict().lookupOrDefault("e", 1.0);
-            mu_ = this->coeffDict().lookupOrDefault("mu", 0.0);
+            e_ = this->coeffDict().getOrDefault("e", 1.0);
+            mu_ = this->coeffDict().getOrDefault("mu", 0.0);
             break;
         }
         default:

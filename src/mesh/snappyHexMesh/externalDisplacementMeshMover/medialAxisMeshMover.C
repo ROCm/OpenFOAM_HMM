@@ -178,11 +178,9 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
     );
 
     //- When to slip along wall
-    const scalar slipFeatureAngle =
+    const scalar slipFeatureAngle
     (
-        coeffDict.found("slipFeatureAngle")
-      ? coeffDict.get<scalar>("slipFeatureAngle")
-      : 0.5*featureAngle
+        coeffDict.getOrDefault<scalar>("slipFeatureAngle", (0.5*featureAngle))
     );
 
     //- Smooth internal normals
@@ -192,13 +190,13 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
     );
 
     //- Number of edges walking out
-    const label nMedialAxisIter = coeffDict.lookupOrDefault<label>
+    const label nMedialAxisIter = coeffDict.getOrDefault<label>
     (
         "nMedialAxisIter",
         mesh().globalData().nTotalPoints()
     );
 
-    const bool disableWallEdges = coeffDict.lookupOrDefault<bool>
+    const bool disableWallEdges = coeffDict.getOrDefault<bool>
     (
         "disableWallEdges",
         false
@@ -1386,7 +1384,7 @@ void Foam::medialAxisMeshMover::calculateDisplacement
 
     //- (lambda-mu) smoothing of internal displacement
     const label nSmoothDisplacement =
-        coeffDict.lookupOrDefault("nSmoothDisplacement", 0);
+        coeffDict.getOrDefault("nSmoothDisplacement", 0);
 
     //- Layer thickness too big
     const scalar maxThicknessToMedialRatio =
@@ -1396,7 +1394,7 @@ void Foam::medialAxisMeshMover::calculateDisplacement
     const scalar featureAngle = coeffDict.get<scalar>("featureAngle");
 
     //- Stop layer growth where mesh wraps around sharp edge
-    scalar layerTerminationAngle = coeffDict.lookupOrDefault<scalar>
+    scalar layerTerminationAngle = coeffDict.getOrDefault<scalar>
     (
         "layerTerminationAngle",
         0.5*featureAngle
@@ -1408,14 +1406,14 @@ void Foam::medialAxisMeshMover::calculateDisplacement
         coeffDict.get<label>("nSmoothThickness");
 
     //- Number of edges walking out
-    const label nMedialAxisIter = coeffDict.lookupOrDefault<label>
+    const label nMedialAxisIter = coeffDict.getOrDefault<label>
     (
         "nMedialAxisIter",
         mesh().globalData().nTotalPoints()
     );
 
     //- Use strict extrusionIsland detection
-    const bool detectExtrusionIsland = coeffDict.lookupOrDefault
+    const bool detectExtrusionIsland = coeffDict.getOrDefault
     (
         "detectExtrusionIsland",
         false

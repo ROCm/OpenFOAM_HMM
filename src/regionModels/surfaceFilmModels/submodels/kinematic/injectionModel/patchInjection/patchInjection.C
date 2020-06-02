@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +52,7 @@ patchInjection::patchInjection
 )
 :
     injectionModel(type(), film, dict),
-    deltaStable_(coeffDict_.lookupOrDefault<scalar>("deltaStable", 0))
+    deltaStable_(coeffDict_.getOrDefault<scalar>("deltaStable", 0))
 {
     const polyBoundaryMesh& pbm = film.regionMesh().boundaryMesh();
     patchIDs_.setSize

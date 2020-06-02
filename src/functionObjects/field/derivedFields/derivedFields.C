@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -199,7 +199,7 @@ bool Foam::functionObjects::derivedFields::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict),
 
-    rhoRef_ = dict.lookupOrDefault<scalar>("rhoRef", 1);
+    rhoRef_ = dict.getOrDefault<scalar>("rhoRef", 1);
 
     wordList derivedNames(dict.get<wordList>("derived"));
 

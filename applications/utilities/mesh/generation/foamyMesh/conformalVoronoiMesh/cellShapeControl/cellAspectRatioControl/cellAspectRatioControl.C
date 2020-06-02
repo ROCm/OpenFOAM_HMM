@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,10 +37,10 @@ Foam::cellAspectRatioControl::cellAspectRatioControl
 )
 :
     aspectRatioDict_(motionDict.subOrEmptyDict("cellAspectRatioControl")),
-    aspectRatio_(aspectRatioDict_.lookupOrDefault<scalar>("aspectRatio", 1.0)),
+    aspectRatio_(aspectRatioDict_.getOrDefault<scalar>("aspectRatio", 1)),
     aspectRatioDirection_
     (
-        aspectRatioDict_.lookupOrDefault<vector>
+        aspectRatioDict_.getOrDefault<vector>
         (
             "aspectRatioDirection",
             Zero

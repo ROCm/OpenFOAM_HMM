@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2019 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,9 +58,9 @@ TolubinskiKostanchuk::TolubinskiKostanchuk
 )
 :
     departureDiameterModel(),
-    dRef_(dict.lookupOrDefault<scalar>("dRef", 6e-4)),
-    dMax_(dict.lookupOrDefault<scalar>("dMax", 0.0014)),
-    dMin_(dict.lookupOrDefault<scalar>("dMin", 1e-6))
+    dRef_(dict.getOrDefault<scalar>("dRef", 6e-4)),
+    dMax_(dict.getOrDefault<scalar>("dMax", 0.0014)),
+    dMin_(dict.getOrDefault<scalar>("dMin", 1e-6))
 {}
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -405,12 +405,12 @@ Foam::regionToCell::regionToCell
 )
 :
     topoSetCellSource(mesh),
-    setName_(dict.lookupOrDefault<word>("set", "none")),
+    setName_(dict.getOrDefault<word>("set", "none")),
     insidePoints_
     (
         dict.getCompat<pointField>("insidePoints", {{ "insidePoint", 0 }})
     ),
-    nErode_(dict.lookupOrDefault<label>("nErode", 0))
+    nErode_(dict.getOrDefault<label>("nErode", 0))
 {}
 
 

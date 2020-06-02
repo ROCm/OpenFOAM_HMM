@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -201,10 +201,10 @@ Foam::fv::tabulatedNTUHeatTransfer::tabulatedNTUHeatTransfer
 )
 :
     interRegionHeatTransferModel(name, modelType, dict, mesh),
-    UName_(coeffs_.lookupOrDefault<word>("U", "U")),
-    UNbrName_(coeffs_.lookupOrDefault<word>("UNbr", "U")),
-    rhoName_(coeffs_.lookupOrDefault<word>("rho", "rho")),
-    rhoNbrName_(coeffs_.lookupOrDefault<word>("rhoNbr", "rho")),
+    UName_(coeffs_.getOrDefault<word>("U", "U")),
+    UNbrName_(coeffs_.getOrDefault<word>("UNbr", "U")),
+    rhoName_(coeffs_.getOrDefault<word>("rho", "rho")),
+    rhoNbrName_(coeffs_.getOrDefault<word>("rhoNbr", "rho")),
     ntuTable_(),
     geometryMode_(gmCalculated),
     Ain_(-1),

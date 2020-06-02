@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,12 +33,12 @@ Description
 \*---------------------------------------------------------------------------*/
 
 bool adjustTimeStep =
-    runTime.controlDict().lookupOrDefault("adjustTimeStep", false);
+    runTime.controlDict().getOrDefault("adjustTimeStep", false);
 
 scalar maxCo =
-    runTime.controlDict().lookupOrDefault<scalar>("maxCo", 1.0);
+    runTime.controlDict().getOrDefault<scalar>("maxCo", 1);
 
 scalar maxDeltaT =
-    runTime.controlDict().lookupOrDefault<scalar>("maxDeltaT", GREAT);
+    runTime.controlDict().getOrDefault<scalar>("maxDeltaT", GREAT);
 
 // ************************************************************************* //

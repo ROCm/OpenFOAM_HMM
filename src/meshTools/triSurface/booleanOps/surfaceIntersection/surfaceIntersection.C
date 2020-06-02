@@ -1199,7 +1199,7 @@ Foam::surfaceIntersection::surfaceIntersection
 {
     setOptions(dict);
 
-    const intersectionType cutFrom = selfIntersectionNames.lookupOrDefault
+    const intersectionType cutFrom = selfIntersectionNames.getOrDefault
     (
         "intersectionMethod",
         dict,

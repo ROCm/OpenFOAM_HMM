@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2018 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -212,14 +212,14 @@ Foam::functionObjects::writeFile::writeFile
 bool Foam::functionObjects::writeFile::read(const dictionary& dict)
 {
     writePrecision_ =
-        dict.lookupOrDefault("writePrecision", IOstream::defaultPrecision());
+        dict.getOrDefault("writePrecision", IOstream::defaultPrecision());
 
     // Only write on master
     writeToFile_ =
-        Pstream::master() && dict.lookupOrDefault("writeToFile", writeToFile_);
+        Pstream::master() && dict.getOrDefault("writeToFile", writeToFile_);
 
     // Use user time, e.g. CA deg in preference to seconds
-    useUserTime_ = dict.lookupOrDefault("useUserTime", true);
+    useUserTime_ = dict.getOrDefault("useUserTime", true);
 
     return true;
 }

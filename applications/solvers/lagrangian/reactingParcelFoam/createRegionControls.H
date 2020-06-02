@@ -1,5 +1,5 @@
 bool solvePrimaryRegion
 (
-    pimple.dict().lookupOrDefault("solvePrimaryRegion", true)
+    pimple.dict().getOrDefault("solvePrimaryRegion", true)
 );
 

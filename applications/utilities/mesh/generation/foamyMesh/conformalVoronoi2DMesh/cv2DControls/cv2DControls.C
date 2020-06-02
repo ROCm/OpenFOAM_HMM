@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,12 +76,12 @@ Foam::cv2DControls::cv2DControls
 
     objOutput_
     (
-        motionControl_.lookupOrDefault<Switch>("objOutput", false)
+        motionControl_.getOrDefault<Switch>("objOutput", false)
     ),
 
     meshedSurfaceOutput_
     (
-        motionControl_.lookupOrDefault<Switch>("meshedSurfaceOutput", false)
+        motionControl_.getOrDefault<Switch>("meshedSurfaceOutput", false)
     ),
 
     randomiseInitialGrid_

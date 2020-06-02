@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,9 +74,9 @@ Foam::temperatureCoupledBase::temperatureCoupledBase
 :
     patch_(patch),
     method_(KMethodTypeNames_.get("kappaMethod", dict)),
-    kappaName_(dict.lookupOrDefault<word>("kappa", "none")),
-    alphaAniName_(dict.lookupOrDefault<word>("alphaAni","none")),
-    alphaName_(dict.lookupOrDefault<word>("alpha","none"))
+    kappaName_(dict.getOrDefault<word>("kappa", "none")),
+    alphaAniName_(dict.getOrDefault<word>("alphaAni", "none")),
+    alphaName_(dict.getOrDefault<word>("alpha", "none"))
 {
     switch (method_)
     {

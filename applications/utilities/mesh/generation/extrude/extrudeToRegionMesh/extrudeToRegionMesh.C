@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1498,7 +1498,7 @@ int main(int argc, char *argv[])
     word oneDPatchType(emptyPolyPatch::typeName);
     if (oneD)
     {
-        oneDNonManifoldEdges = dict.lookupOrDefault("nonManifold", false);
+        oneDNonManifoldEdges = dict.getOrDefault("nonManifold", false);
         oneDPatchType = dict.get<word>("oneDPolyPatchType");
     }
 

@@ -1,4 +1,4 @@
 bool ddtCorr
 (
-    pimple.dict().lookupOrDefault("ddtCorr", true)
+    pimple.dict().getOrDefault("ddtCorr", true)
 );

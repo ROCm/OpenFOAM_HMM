@@ -107,8 +107,8 @@ Foam::sampledPlane::sampledPlane
     sampledSurface(name, mesh, dict),
     cuttingPlane(plane(dict)),
     zoneNames_(),
-    bounds_(dict.lookupOrDefault("bounds", boundBox::invertedBox)),
-    triangulate_(dict.lookupOrDefault("triangulate", true)),
+    bounds_(dict.getOrDefault("bounds", boundBox::invertedBox)),
+    triangulate_(dict.getOrDefault("triangulate", true)),
     needsUpdate_(true)
 {
     if (!dict.readIfPresent("zones", zoneNames_) && dict.found("zone"))

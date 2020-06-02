@@ -95,7 +95,7 @@ void Foam::foamChemistryReader<ThermoType>::readSpeciesComposition()
             currentComposition[eni].name() = elemNames[eni];
 
             currentComposition[eni].nAtoms() =
-                elemsDict->lookupOrDefault<label>
+                elemsDict->getOrDefault<label>
                 (
                     elemNames[eni],
                     0

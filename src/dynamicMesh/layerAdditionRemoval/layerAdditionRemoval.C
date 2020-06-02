@@ -143,7 +143,7 @@ Foam::layerAdditionRemoval::layerAdditionRemoval
     minLayerThickness_(dict.get<scalar>("minLayerThickness")),
     maxLayerThickness_(dict.get<scalar>("maxLayerThickness")),
     thicknessFromVolume_(dict.getOrDefault("thicknessFromVolume", true)),
-    oldLayerThickness_(dict.getOrDefault<scalar>("oldLayerThickness", -1.0)),
+    oldLayerThickness_(dict.getOrDefault<scalar>("oldLayerThickness", -1)),
     pointsPairingPtr_(nullptr),
     facesPairingPtr_(nullptr),
     triggerRemoval_(-1),

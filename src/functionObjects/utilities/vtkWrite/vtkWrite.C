@@ -170,11 +170,11 @@ bool Foam::functionObjects::vtkWrite::read(const dictionary& dict)
     // We probably cannot trust old information after a reread
     series_.clear();
 
-    // verbose_ = dict.lookupOrDefault<bool>("verbose", true);
-    doInternal_ = dict.lookupOrDefault<bool>("internal", true);
-    doBoundary_ = dict.lookupOrDefault<bool>("boundary", true);
-    oneBoundary_ = dict.lookupOrDefault<bool>("single", false);
-    interpolate_ = dict.lookupOrDefault<bool>("interpolate", false);
+    // verbose_ = dict.getOrDefault("verbose", true);
+    doInternal_ = dict.getOrDefault("internal", true);
+    doBoundary_ = dict.getOrDefault("boundary", true);
+    oneBoundary_ = dict.getOrDefault("single", false);
+    interpolate_ = dict.getOrDefault("interpolate", false);
 
     //
     // Writer options - default is xml base64
@@ -197,7 +197,7 @@ bool Foam::functionObjects::vtkWrite::read(const dictionary& dict)
     // Info<< type() << " " << name() << " output-format: "
     //     << writeOpts_.description() << nl;
 
-    const int padWidth = dict.lookupOrDefault<int>("width", 8);
+    const int padWidth = dict.getOrDefault<int>("width", 8);
 
     // Appropriate printf format - Enforce min/max sanity limits
     if (padWidth < 1 || padWidth > 31)
@@ -213,8 +213,8 @@ bool Foam::functionObjects::vtkWrite::read(const dictionary& dict)
     // Other options
     //
 
-    decompose_ = dict.lookupOrDefault("decompose", false);
-    writeIds_ = dict.lookupOrDefault("writeIds", false);
+    decompose_ = dict.getOrDefault("decompose", false);
+    writeIds_ = dict.getOrDefault("writeIds", false);
 
 
     // Output directory

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -98,8 +99,8 @@ Foam::uniformInterpolationTable<Type>::uniformInterpolationTable
     List<scalar>(2, Zero),
     x0_(dict.get<scalar>("x0")),
     dx_(dict.get<scalar>("dx")),
-    log10_(dict.lookupOrDefault<Switch>("log10", false)),
-    bound_(dict.lookupOrDefault<Switch>("bound", false))
+    log10_(dict.getOrDefault<Switch>("log10", false)),
+    bound_(dict.getOrDefault<Switch>("bound", false))
 {
     if (initialiseOnly)
     {

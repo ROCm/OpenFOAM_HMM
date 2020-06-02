@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,7 +91,7 @@ Foam::radiation::mixtureFractionSoot<ThermoType>::mixtureFractionSoot
     sootMax_(-1),
     mappingFieldName_
     (
-        coeffsDict_.lookupOrDefault<word>("mappingField", "none")
+        coeffsDict_.getOrDefault<word>("mappingField", "none")
     ),
     mapFieldMax_(1),
     thermo_(mesh.lookupObject<fluidThermo>(basicThermo::dictName)),

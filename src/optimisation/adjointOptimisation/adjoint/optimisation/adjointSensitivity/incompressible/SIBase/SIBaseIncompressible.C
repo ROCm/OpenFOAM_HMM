@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,7 @@ void SIBase::read()
 {
     surfaceSensitivity_.read();
     includeObjective_ =
-        dict().lookupOrDefault<bool>("includeObjectiveContribution", true);
+        dict().getOrDefault<bool>("includeObjectiveContribution", true);
 
     // If includeObjective is set to true both here and in the surface
     // sensitivities, set the one in the latter to false to avoid double

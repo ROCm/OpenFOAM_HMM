@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,7 +61,7 @@ Foam::constraintProjection::constraintProjection
     constrainedOptimisationMethod(mesh, dict),
     useCorrection_
     (
-        coeffsDict().lookupOrDefault<bool>("useCorrection", true)
+        coeffsDict().getOrDefault<bool>("useCorrection", true)
     )
 {}
 

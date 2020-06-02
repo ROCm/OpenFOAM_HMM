@@ -264,7 +264,7 @@ int main(int argc, char *argv[])
     const ExtrudeMode mode = ExtrudeModeNames.get("constructFrom", dict);
 
     // Any merging of small edges
-    const scalar mergeTol(dict.lookupOrDefault<scalar>("mergeTol", 1e-4));
+    const scalar mergeTol(dict.getOrDefault<scalar>("mergeTol", 1e-4));
 
     Info<< "Extruding from " << ExtrudeModeNames[mode]
         << " using model " << model().type() << endl;

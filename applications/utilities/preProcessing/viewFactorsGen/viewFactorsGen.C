@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -281,12 +281,12 @@ int main(int argc, char *argv[])
     const word viewFactorWall("viewFactorWall");
 
     const bool writeViewFactors =
-        viewFactorDict.lookupOrDefault("writeViewFactorMatrix", false);
+        viewFactorDict.getOrDefault("writeViewFactorMatrix", false);
 
     const bool dumpRays =
-        viewFactorDict.lookupOrDefault("dumpRays", false);
+        viewFactorDict.getOrDefault("dumpRays", false);
 
-    const label debug = viewFactorDict.lookupOrDefault<label>("debug", 0);
+    const label debug = viewFactorDict.getOrDefault<label>("debug", 0);
 
     // Read agglomeration map
     labelListIOList finalAgglom

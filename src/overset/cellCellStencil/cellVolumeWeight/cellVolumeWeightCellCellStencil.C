@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2014-2019 OpenCFD Ltd.
+    Copyright (C) 2014-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -746,7 +746,7 @@ Foam::cellCellStencils::cellVolumeWeight::~cellVolumeWeight()
 
 bool Foam::cellCellStencils::cellVolumeWeight::update()
 {
-    scalar layerRelax(dict_.lookupOrDefault("layerRelax", 1.0));
+    scalar layerRelax(dict_.getOrDefault("layerRelax", 1.0));
     const labelIOList& zoneID = this->zoneID();
 
     label nZones = gMax(zoneID)+1;

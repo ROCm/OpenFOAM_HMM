@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,7 +67,7 @@ Foam::faceSelections::searchableSurfaceSelection::searchableSurfaceSelection
             dict.get<word>("surface"),
             IOobject
             (
-                dict.lookupOrDefault("name", mesh.objectRegistry::db().name()),
+                dict.getOrDefault("name", mesh.objectRegistry::db().name()),
                 mesh.time().constant(),
                 "triSurface",
                 mesh.objectRegistry::db(),

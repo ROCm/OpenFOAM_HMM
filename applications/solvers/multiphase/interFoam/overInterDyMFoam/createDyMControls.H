@@ -1,30 +1,30 @@
 bool correctPhi
 (
-    pimple.dict().lookupOrDefault("correctPhi", true)
+    pimple.dict().getOrDefault("correctPhi", true)
 );
 
 bool checkMeshCourantNo
 (
-    pimple.dict().lookupOrDefault("checkMeshCourantNo", false)
+    pimple.dict().getOrDefault("checkMeshCourantNo", false)
 );
 
 bool moveMeshOuterCorrectors
 (
-    pimple.dict().lookupOrDefault("moveMeshOuterCorrectors", false)
+    pimple.dict().getOrDefault("moveMeshOuterCorrectors", false)
 );
 
 
 bool massFluxInterpolation
 (
-    pimple.dict().lookupOrDefault("massFluxInterpolation", false)
+    pimple.dict().getOrDefault("massFluxInterpolation", false)
 );
 
 bool adjustFringe
 (
-    pimple.dict().lookupOrDefault("oversetAdjustPhi", false)
+    pimple.dict().getOrDefault("oversetAdjustPhi", false)
 );
 
 bool ddtCorr
 (
-    pimple.dict().lookupOrDefault("ddtCorr", true)
+    pimple.dict().getOrDefault("ddtCorr", true)
 );

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,19 +42,19 @@ Foam::combustionModels::EDC<ReactionThermo>::EDC
     laminar<ReactionThermo>(modelType, thermo, turb, combustionProperties),
     version_
     (
-        EDCversionNames.lookupOrDefault
+        EDCversionNames.getOrDefault
         (
             "version",
             this->coeffs(),
             EDCdefaultVersion
         )
     ),
-    C1_(this->coeffs().lookupOrDefault("C1", 0.05774)),
-    C2_(this->coeffs().lookupOrDefault("C2", 0.5)),
-    Cgamma_(this->coeffs().lookupOrDefault("Cgamma", 2.1377)),
-    Ctau_(this->coeffs().lookupOrDefault("Ctau", 0.4083)),
-    exp1_(this->coeffs().lookupOrDefault("exp1", EDCexp1[int(version_)])),
-    exp2_(this->coeffs().lookupOrDefault("exp2", EDCexp2[int(version_)])),
+    C1_(this->coeffs().getOrDefault("C1", 0.05774)),
+    C2_(this->coeffs().getOrDefault("C2", 0.5)),
+    Cgamma_(this->coeffs().getOrDefault("Cgamma", 2.1377)),
+    Ctau_(this->coeffs().getOrDefault("Ctau", 0.4083)),
+    exp1_(this->coeffs().getOrDefault("exp1", EDCexp1[int(version_)])),
+    exp2_(this->coeffs().getOrDefault("exp2", EDCexp2[int(version_)])),
     kappa_
     (
         IOobject
@@ -221,19 +221,19 @@ bool Foam::combustionModels::EDC<ReactionThermo>::read()
     {
         version_ =
         (
-            EDCversionNames.lookupOrDefault
+            EDCversionNames.getOrDefault
             (
                 "version",
                 this->coeffs(),
                 EDCdefaultVersion
             )
         );
-        C1_ = this->coeffs().lookupOrDefault("C1", 0.05774);
-        C2_ = this->coeffs().lookupOrDefault("C2", 0.5);
-        Cgamma_ = this->coeffs().lookupOrDefault("Cgamma", 2.1377);
-        Ctau_ = this->coeffs().lookupOrDefault("Ctau", 0.4083);
-        exp1_ = this->coeffs().lookupOrDefault("exp1", EDCexp1[int(version_)]);
-        exp2_ = this->coeffs().lookupOrDefault("exp2", EDCexp2[int(version_)]);
+        C1_ = this->coeffs().getOrDefault("C1", 0.05774);
+        C2_ = this->coeffs().getOrDefault("C2", 0.5);
+        Cgamma_ = this->coeffs().getOrDefault("Cgamma", 2.1377);
+        Ctau_ = this->coeffs().getOrDefault("Ctau", 0.4083);
+        exp1_ = this->coeffs().getOrDefault("exp1", EDCexp1[int(version_)]);
+        exp2_ = this->coeffs().getOrDefault("exp2", EDCexp2[int(version_)]);
 
         return true;
     }

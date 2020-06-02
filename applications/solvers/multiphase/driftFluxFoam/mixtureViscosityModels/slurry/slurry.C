@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,7 +65,7 @@ Foam::mixtureViscosityModels::slurry::slurry
         (
             IOobject::groupName
             (
-                viscosityProperties.lookupOrDefault<word>("alpha", "alpha"),
+                viscosityProperties.getOrDefault<word>("alpha", "alpha"),
                 viscosityProperties.dictName()
             )
         )

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -387,7 +387,7 @@ kOmegaSSTLM<BasicTurbulenceModel>::kOmegaSSTLM
 
     ca1_
     (
-        dimensionedScalar::lookupOrAddToDict
+        dimensionedScalar::getOrAddToDict
         (
             "ca1",
             this->coeffDict_,
@@ -396,7 +396,7 @@ kOmegaSSTLM<BasicTurbulenceModel>::kOmegaSSTLM
     ),
     ca2_
     (
-        dimensionedScalar::lookupOrAddToDict
+        dimensionedScalar::getOrAddToDict
         (
             "ca2",
             this->coeffDict_,
@@ -405,7 +405,7 @@ kOmegaSSTLM<BasicTurbulenceModel>::kOmegaSSTLM
     ),
     ce1_
     (
-        dimensionedScalar::lookupOrAddToDict
+        dimensionedScalar::getOrAddToDict
         (
             "ce1",
             this->coeffDict_,
@@ -414,7 +414,7 @@ kOmegaSSTLM<BasicTurbulenceModel>::kOmegaSSTLM
     ),
     ce2_
     (
-        dimensionedScalar::lookupOrAddToDict
+        dimensionedScalar::getOrAddToDict
         (
             "ce2",
             this->coeffDict_,
@@ -423,7 +423,7 @@ kOmegaSSTLM<BasicTurbulenceModel>::kOmegaSSTLM
     ),
     cThetat_
     (
-        dimensionedScalar::lookupOrAddToDict
+        dimensionedScalar::getOrAddToDict
         (
             "cThetat",
             this->coeffDict_,
@@ -432,7 +432,7 @@ kOmegaSSTLM<BasicTurbulenceModel>::kOmegaSSTLM
     ),
     sigmaThetat_
     (
-        dimensionedScalar::lookupOrAddToDict
+        dimensionedScalar::getOrAddToDict
         (
             "sigmaThetat",
             this->coeffDict_,
@@ -441,11 +441,11 @@ kOmegaSSTLM<BasicTurbulenceModel>::kOmegaSSTLM
     ),
     lambdaErr_
     (
-        this->coeffDict_.lookupOrDefault("lambdaErr", 1e-6)
+        this->coeffDict_.template getOrDefault<scalar>("lambdaErr", 1e-6)
     ),
     maxLambdaIter_
     (
-        this->coeffDict_.lookupOrDefault("maxLambdaIter", 10)
+        this->coeffDict_.template getOrDefault<label>("maxLambdaIter", 10)
     ),
     deltaU_("deltaU", dimVelocity, SMALL),
 

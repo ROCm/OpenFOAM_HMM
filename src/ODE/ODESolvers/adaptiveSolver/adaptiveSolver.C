@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,11 +37,11 @@ Foam::adaptiveSolver::adaptiveSolver
     const dictionary& dict
 )
 :
-    safeScale_(dict.lookupOrDefault<scalar>("safeScale", 0.9)),
-    alphaInc_(dict.lookupOrDefault<scalar>("alphaIncrease", 0.2)),
-    alphaDec_(dict.lookupOrDefault<scalar>("alphaDecrease", 0.25)),
-    minScale_(dict.lookupOrDefault<scalar>("minScale", 0.2)),
-    maxScale_(dict.lookupOrDefault<scalar>("maxScale", 10)),
+    safeScale_(dict.getOrDefault<scalar>("safeScale", 0.9)),
+    alphaInc_(dict.getOrDefault<scalar>("alphaIncrease", 0.2)),
+    alphaDec_(dict.getOrDefault<scalar>("alphaDecrease", 0.25)),
+    minScale_(dict.getOrDefault<scalar>("minScale", 0.2)),
+    maxScale_(dict.getOrDefault<scalar>("maxScale", 10)),
     dydx0_(ode.nEqns()),
     yTemp_(ode.nEqns())
 {}

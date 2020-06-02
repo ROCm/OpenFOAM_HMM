@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2019 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,9 +66,9 @@ alphatFixedDmdtWallBoilingWallFunctionFvPatchScalarField
 :
     alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField(p, iF, dict),
     vaporPhaseName_(dict.lookup("vaporPhase")),
-    relax_(dict.lookupOrDefault<scalar>("relax", 1.0)),
-    fixedDmdt_(dict.lookupOrDefault<scalar>("fixedDmdt", 0.0)),
-    L_(dict.lookupOrDefault<scalar>("L", 0.0))
+    relax_(dict.getOrDefault<scalar>("relax", 1)),
+    fixedDmdt_(dict.getOrDefault<scalar>("fixedDmdt", 0)),
+    L_(dict.getOrDefault<scalar>("L", 0))
 {}
 
 

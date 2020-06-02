@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,9 +35,9 @@ bool Foam::RBD::rigidBodyMotion::read(const dictionary& dict)
 {
     rigidBodyModel::read(dict);
 
-    aRelax_ = dict.lookupOrDefault<scalar>("accelerationRelaxation", 1.0);
-    aDamp_ = dict.lookupOrDefault<scalar>("accelerationDamping", 1.0);
-    report_ = dict.lookupOrDefault<Switch>("report", false);
+    aRelax_ = dict.getOrDefault<scalar>("accelerationRelaxation", 1);
+    aDamp_ = dict.getOrDefault<scalar>("accelerationDamping", 1);
+    report_ = dict.getOrDefault<Switch>("report", false);
 
     return true;
 }

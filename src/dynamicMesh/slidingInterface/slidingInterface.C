@@ -676,42 +676,42 @@ const Foam::pointField& Foam::slidingInterface::pointProjection() const
 
 void Foam::slidingInterface::setTolerances(const dictionary&dict, bool report)
 {
-    pointMergeTol_ = dict.lookupOrDefault<scalar>
+    pointMergeTol_ = dict.getOrDefault<scalar>
     (
         "pointMergeTol",
         pointMergeTol_
     );
-    edgeMergeTol_ = dict.lookupOrDefault<scalar>
+    edgeMergeTol_ = dict.getOrDefault<scalar>
     (
         "edgeMergeTol",
         edgeMergeTol_
     );
-    nFacesPerSlaveEdge_ = dict.lookupOrDefault<label>
+    nFacesPerSlaveEdge_ = dict.getOrDefault<label>
     (
         "nFacesPerSlaveEdge",
         nFacesPerSlaveEdge_
     );
-    edgeFaceEscapeLimit_ = dict.lookupOrDefault<label>
+    edgeFaceEscapeLimit_ = dict.getOrDefault<label>
     (
         "edgeFaceEscapeLimit",
         edgeFaceEscapeLimit_
     );
-    integralAdjTol_ = dict.lookupOrDefault<scalar>
+    integralAdjTol_ = dict.getOrDefault<scalar>
     (
         "integralAdjTol",
         integralAdjTol_
     );
-    edgeMasterCatchFraction_ = dict.lookupOrDefault<scalar>
+    edgeMasterCatchFraction_ = dict.getOrDefault<scalar>
     (
         "edgeMasterCatchFraction",
         edgeMasterCatchFraction_
     );
-    edgeCoPlanarTol_ = dict.lookupOrDefault<scalar>
+    edgeCoPlanarTol_ = dict.getOrDefault<scalar>
     (
         "edgeCoPlanarTol",
         edgeCoPlanarTol_
     );
-    edgeEndCutoffTol_ = dict.lookupOrDefault<scalar>
+    edgeEndCutoffTol_ = dict.getOrDefault<scalar>
     (
         "edgeEndCutoffTol",
         edgeEndCutoffTol_

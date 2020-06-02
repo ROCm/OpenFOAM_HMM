@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,9 +55,9 @@ Foam::porosityModels::solidification::solidification
 )
 :
     porosityModel(name, modelType, mesh, dict, cellZoneName),
-    TName_(coeffs_.lookupOrDefault<word>("T", "T")),
-    alphaName_(coeffs_.lookupOrDefault<word>("alpha", "none")),
-    rhoName_(coeffs_.lookupOrDefault<word>("rho", "rho")),
+    TName_(coeffs_.getOrDefault<word>("T", "T")),
+    alphaName_(coeffs_.getOrDefault<word>("alpha", "none")),
+    rhoName_(coeffs_.getOrDefault<word>("rho", "rho")),
     D_(Function1<scalar>::New("D", coeffs_))
 {}
 

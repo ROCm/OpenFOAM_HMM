@@ -96,7 +96,7 @@ Foam::interpolation2DTable<Type>::interpolation2DTable(const dictionary& dict)
     List<value_type>(),
     bounding_
     (
-        bounds::normalBoundingNames.lookupOrDefault
+        bounds::normalBoundingNames.getOrDefault
         (
             "outOfBounds",
             dict,

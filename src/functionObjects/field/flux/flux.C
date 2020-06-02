@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,7 +81,7 @@ Foam::functionObjects::flux::flux
 )
 :
     fieldExpression(name, runTime, dict),
-    rhoName_(dict.lookupOrDefault<word>("rho", "none"))
+    rhoName_(dict.getOrDefault<word>("rho", "none"))
 {}
 
 

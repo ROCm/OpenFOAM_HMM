@@ -22,9 +22,9 @@
 
 bool adjustFringe
 (
-    simple.dict().lookupOrDefault("oversetAdjustPhi", false)
+    simple.dict().getOrDefault("oversetAdjustPhi", false)
 );
 bool massFluxInterpolation
 (
-    simple.dict().lookupOrDefault("massFluxInterpolation", false)
+    simple.dict().getOrDefault("massFluxInterpolation", false)
 );

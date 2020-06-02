@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -670,7 +670,7 @@ void Foam::KinematicCloud<CloudType>::preEvolve()
     updateCellOccupancy();
 
     pAmbient_ = constProps_.dict().template
-        lookupOrDefault<scalar>("pAmbient", pAmbient_);
+        getOrDefault<scalar>("pAmbient", pAmbient_);
 
     functions_.preEvolve();
 }

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +41,7 @@ Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>::Lee
     InterfaceCompositionModel<Thermo, OtherThermo>(dict, pair),
     C_("C", inv(dimTime), dict),
     Tactivate_("Tactivate", dimTemperature, dict),
-    alphaMin_(dict.lookupOrDefault<scalar>("alphaMin", 0))
+    alphaMin_(dict.getOrDefault<scalar>("alphaMin", 0))
 {}
 
 

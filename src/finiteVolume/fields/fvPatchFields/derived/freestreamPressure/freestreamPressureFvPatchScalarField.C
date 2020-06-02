@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +53,7 @@ freestreamPressureFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    UName_(dict.lookupOrDefault<word>("U", "U"))
+    UName_(dict.getOrDefault<word>("U", "U"))
 {
     freestreamValue() = scalarField("freestreamValue", dict, p.size());
 

@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +48,7 @@ defineTypeNameAndDebug(FIBase, 0);
 void FIBase::read()
 {
     includeDistance_ =
-        dict_.lookupOrDefault<bool>
+        dict_.getOrDefault<bool>
         (
             "includeDistance",
             adjointVars_.adjointTurbulence().ref().includeDistance()

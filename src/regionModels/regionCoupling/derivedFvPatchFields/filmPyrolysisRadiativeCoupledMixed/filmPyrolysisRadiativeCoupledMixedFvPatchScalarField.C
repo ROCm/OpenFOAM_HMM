@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -163,15 +163,15 @@ filmPyrolysisRadiativeCoupledMixedFvPatchScalarField
     temperatureCoupledBase(patch(), dict),
     filmRegionName_
     (
-        dict.lookupOrDefault<word>("filmRegion", "surfaceFilmProperties")
+        dict.getOrDefault<word>("filmRegion", "surfaceFilmProperties")
     ),
     pyrolysisRegionName_
     (
-        dict.lookupOrDefault<word>("pyrolysisRegion", "pyrolysisProperties")
+        dict.getOrDefault<word>("pyrolysisRegion", "pyrolysisProperties")
     ),
     TnbrName_(dict.lookup("Tnbr")),
     qrName_(dict.lookup("qr")),
-    convectiveScaling_(dict.lookupOrDefault<scalar>("convectiveScaling", 1.0)),
+    convectiveScaling_(dict.getOrDefault<scalar>("convectiveScaling", 1)),
     filmDeltaDry_(dict.get<scalar>("filmDeltaDry")),
     filmDeltaWet_(dict.get<scalar>("filmDeltaWet"))
 {

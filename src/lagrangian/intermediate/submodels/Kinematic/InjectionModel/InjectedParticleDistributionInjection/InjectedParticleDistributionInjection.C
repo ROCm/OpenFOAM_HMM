@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -259,7 +259,7 @@ InjectedParticleDistributionInjection
     ),
     resampleSize_
     (
-        this->coeffDict().lookupOrDefault("resampleSize", label(100))
+        this->coeffDict().getOrDefault("resampleSize", label(100))
     ),
     applyDistributionMassTotal_
     (
@@ -267,7 +267,7 @@ InjectedParticleDistributionInjection
     ),
     ignoreOutOfBounds_
     (
-        this->coeffDict().lookupOrDefault("ignoreOutOfBounds", false)
+        this->coeffDict().getOrDefault("ignoreOutOfBounds", false)
     ),
     nParcelsInjected_(this->parcelsAddedTotal()),
     nParcelsInjected0_(0),

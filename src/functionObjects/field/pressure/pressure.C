@@ -378,8 +378,8 @@ bool Foam::functionObjects::pressure::read(const dictionary& dict)
 
     fieldExpression::read(dict);
 
-    UName_   = dict.lookupOrDefault<word>("U", "U");
-    rhoName_ = dict.lookupOrDefault<word>("rho", "rho");
+    UName_   = dict.getOrDefault<word>("U", "U");
+    rhoName_ = dict.getOrDefault<word>("rho", "rho");
 
     if (rhoName_ == "rhoInf")
     {
@@ -414,7 +414,7 @@ bool Foam::functionObjects::pressure::read(const dictionary& dict)
 
     Info<< "    Operating mode: " << modeNames[mode_] << nl;
 
-    pRef_ = dict.lookupOrDefault<scalar>("pRef", 0);
+    pRef_ = dict.getOrDefault<scalar>("pRef", 0);
 
     if
     (
@@ -460,7 +460,7 @@ bool Foam::functionObjects::pressure::read(const dictionary& dict)
         rhoInfInitialised_ = true;
     }
 
-    resultName_ = dict.lookupOrDefault<word>("result", resultName());
+    resultName_ = dict.getOrDefault<word>("result", resultName());
 
     Info<< endl;
 

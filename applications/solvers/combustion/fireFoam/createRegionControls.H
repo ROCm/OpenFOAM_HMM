@@ -12,12 +12,12 @@ IOdictionary additionalControlsDict
 
 bool solvePrimaryRegion
 (
-    additionalControlsDict.lookupOrDefault("solvePrimaryRegion", true)
+    additionalControlsDict.getOrDefault("solvePrimaryRegion", true)
 );
 
 bool solvePyrolysisRegion
 (
-    additionalControlsDict.lookupOrDefault("solvePyrolysisRegion", true)
+    additionalControlsDict.getOrDefault("solvePyrolysisRegion", true)
 );
 
 scalar maxDi = pyrolysis.maxDiff();

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,10 +117,10 @@ Foam::LESModels::vanDriestDelta::vanDriestDelta
             dict.subDict(type() + "Coeffs")
         )
     ),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
+    kappa_(dict.getOrDefault<scalar>("kappa", 0.41)),
     Aplus_
     (
-        dict.optionalSubDict(type() + "Coeffs").lookupOrDefault<scalar>
+        dict.optionalSubDict(type() + "Coeffs").getOrDefault<scalar>
         (
             "Aplus",
             26.0
@@ -127,7 +128,7 @@ Foam::LESModels::vanDriestDelta::vanDriestDelta
     ),
     Cdelta_
     (
-        dict.optionalSubDict(type() + "Coeffs").lookupOrDefault<scalar>
+        dict.optionalSubDict(type() + "Coeffs").getOrDefault<scalar>
         (
             "Cdelta",
             0.158
@@ -135,7 +136,7 @@ Foam::LESModels::vanDriestDelta::vanDriestDelta
     ),
     calcInterval_
     (
-        dict.optionalSubDict(type() + "Coeffs").lookupOrDefault<label>
+        dict.optionalSubDict(type() + "Coeffs").getOrDefault<label>
         (
             "calcInterval",
             1

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -171,15 +171,15 @@ Foam::fv::solidificationMeltingSource::solidificationMeltingSource
     cellSetOption(sourceName, modelType, dict, mesh),
     Tmelt_(coeffs_.get<scalar>("Tmelt")),
     L_(coeffs_.get<scalar>("L")),
-    relax_(coeffs_.lookupOrDefault("relax", 0.9)),
+    relax_(coeffs_.getOrDefault<scalar>("relax", 0.9)),
     mode_(thermoModeTypeNames_.get("thermoMode", coeffs_)),
     rhoRef_(coeffs_.get<scalar>("rhoRef")),
-    TName_(coeffs_.lookupOrDefault<word>("T", "T")),
-    CpName_(coeffs_.lookupOrDefault<word>("Cp", "Cp")),
-    UName_(coeffs_.lookupOrDefault<word>("U", "U")),
-    phiName_(coeffs_.lookupOrDefault<word>("phi", "phi")),
-    Cu_(coeffs_.lookupOrDefault<scalar>("Cu", 100000)),
-    q_(coeffs_.lookupOrDefault("q", 0.001)),
+    TName_(coeffs_.getOrDefault<word>("T", "T")),
+    CpName_(coeffs_.getOrDefault<word>("Cp", "Cp")),
+    UName_(coeffs_.getOrDefault<word>("U", "U")),
+    phiName_(coeffs_.getOrDefault<word>("phi", "phi")),
+    Cu_(coeffs_.getOrDefault<scalar>("Cu", 100000)),
+    q_(coeffs_.getOrDefault<scalar>("q", 0.001)),
     beta_(coeffs_.get<scalar>("beta")),
     alpha1_
     (
