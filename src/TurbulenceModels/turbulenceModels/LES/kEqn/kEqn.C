@@ -106,7 +106,7 @@ kEqn<BasicTurbulenceModel>::kEqn
 
     Ck_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Ck",
             this->coeffDict_,

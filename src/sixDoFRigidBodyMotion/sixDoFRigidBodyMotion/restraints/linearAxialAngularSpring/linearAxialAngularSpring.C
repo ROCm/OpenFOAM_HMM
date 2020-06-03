@@ -151,7 +151,7 @@ bool Foam::sixDoFRigidBodyMotionRestraints::linearAxialAngularSpring::read
 {
     sixDoFRigidBodyMotionRestraint::read(sDoFRBMRDict);
 
-    refQ_ = sDoFRBMRCoeffs_.lookupOrDefault<tensor>("referenceOrientation", I);
+    refQ_ = sDoFRBMRCoeffs_.getOrDefault<tensor>("referenceOrientation", I);
 
     if (mag(mag(refQ_) - sqrt(3.0)) > ROOTSMALL)
     {

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -108,9 +108,9 @@ Foam::wallDist::wallDist
         dimensionedScalar("y" & patchTypeName_, dimLength, SMALL),
         patchDistMethod::patchTypes<scalar>(mesh, patchIDs_)
     ),
-    nRequired_(dict_.lookupOrDefault("nRequired", false)),
+    nRequired_(dict_.getOrDefault("nRequired", false)),
     n_(volVectorField::null()),
-    updateInterval_(dict_.lookupOrDefault<label>("updateInterval", 1)),
+    updateInterval_(dict_.getOrDefault<label>("updateInterval", 1)),
     requireUpdate_(true)
 {
     if (nRequired_)
@@ -162,9 +162,9 @@ Foam::wallDist::wallDist
         dimensionedScalar("y" & patchTypeName_, dimLength, SMALL),
         patchDistMethod::patchTypes<scalar>(mesh, patchIDs_)
     ),
-    nRequired_(dict_.lookupOrDefault("nRequired", false)),
+    nRequired_(dict_.getOrDefault("nRequired", false)),
     n_(volVectorField::null()),
-    updateInterval_(dict_.lookupOrDefault<label>("updateInterval", 1)),
+    updateInterval_(dict_.getOrDefault<label>("updateInterval", 1)),
     requireUpdate_(true)
 {
     if (nRequired_)

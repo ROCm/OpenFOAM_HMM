@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,9 +66,9 @@ Foam::RBD::rigidBodyMotion::rigidBodyMotion
     motionState_(*this, dict),
     motionState0_(motionState_),
     X00_(X0_.size()),
-    aRelax_(dict.lookupOrDefault<scalar>("accelerationRelaxation", 1.0)),
-    aDamp_(dict.lookupOrDefault<scalar>("accelerationDamping", 1.0)),
-    report_(dict.lookupOrDefault<Switch>("report", false)),
+    aRelax_(dict.getOrDefault<scalar>("accelerationRelaxation", 1)),
+    aDamp_(dict.getOrDefault<scalar>("accelerationDamping", 1)),
+    report_(dict.getOrDefault<Switch>("report", false)),
     solver_(rigidBodySolver::New(*this, dict.subDict("solver")))
 {
     if (dict.found("g"))
@@ -90,9 +91,9 @@ Foam::RBD::rigidBodyMotion::rigidBodyMotion
     motionState_(*this, stateDict),
     motionState0_(motionState_),
     X00_(X0_.size()),
-    aRelax_(dict.lookupOrDefault<scalar>("accelerationRelaxation", 1.0)),
-    aDamp_(dict.lookupOrDefault<scalar>("accelerationDamping", 1.0)),
-    report_(dict.lookupOrDefault<Switch>("report", false)),
+    aRelax_(dict.getOrDefault<scalar>("accelerationRelaxation", 1)),
+    aDamp_(dict.getOrDefault<scalar>("accelerationDamping", 1)),
+    report_(dict.getOrDefault<Switch>("report", false)),
     solver_(rigidBodySolver::New(*this, dict.subDict("solver")))
 {
     if (dict.found("g"))

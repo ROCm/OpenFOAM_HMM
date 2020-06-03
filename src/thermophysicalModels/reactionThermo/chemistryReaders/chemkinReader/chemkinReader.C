@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -859,8 +860,8 @@ Foam::chemkinReader::chemkinReader
     specieNames_(10),
     speciesTable_(species),
     reactions_(speciesTable_, speciesThermo_),
-    newFormat_(thermoDict.lookupOrDefault("newFormat", false)),
-    imbalanceTol_(thermoDict.lookupOrDefault("imbalanceTolerance", ROOTSMALL))
+    newFormat_(thermoDict.getOrDefault("newFormat", false)),
+    imbalanceTol_(thermoDict.getOrDefault("imbalanceTolerance", ROOTSMALL))
 {
     if (newFormat_)
     {

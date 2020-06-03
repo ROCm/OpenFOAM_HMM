@@ -307,7 +307,7 @@ Foam::omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF, dict),
-    blended_(dict.getOrDefault<bool>("blended", true)),
+    blended_(dict.getOrDefault("blended", true)),
     initialised_(false),
     master_(-1),
     beta1_(dict.getOrDefault<scalar>("beta1", 0.075)),

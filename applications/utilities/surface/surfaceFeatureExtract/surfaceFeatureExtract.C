@@ -272,7 +272,7 @@ int main(int argc, char *argv[])
         // We don't needs the intersectionMethod yet, but can use it
         // for setting a reasonable loading option
         const surfaceIntersection::intersectionType selfIntersect =
-            surfaceIntersection::selfIntersectionNames.lookupOrDefault
+            surfaceIntersection::selfIntersectionNames.getOrDefault
             (
                 "intersectionMethod",
                 surfaceDict,
@@ -320,7 +320,7 @@ int main(int argc, char *argv[])
 
         // Loading option - default depends on context
         triSurfaceLoader::loadingOption loadingOption =
-            triSurfaceLoader::loadingOptionNames.lookupOrDefault
+            triSurfaceLoader::loadingOptionNames.getOrDefault
             (
                 "loadingOption",
                 surfaceDict,
@@ -384,9 +384,9 @@ int main(int argc, char *argv[])
             const dictionary& trimDict = surfaceDict.subDict("trimFeatures");
 
             const scalar minLen =
-                trimDict.lookupOrDefault<scalar>("minLen", 0);
+                trimDict.getOrDefault<scalar>("minLen", 0);
             const label minElem =
-                trimDict.lookupOrDefault<label>("minElem", 0);
+                trimDict.getOrDefault<label>("minElem", 0);
 
             // Trim away small groups of features
             if (minLen > 0 || minElem > 0)
@@ -461,7 +461,7 @@ int main(int argc, char *argv[])
             }
 
             // Suboption: "nonManifoldEdges" (false: remove non-manifold edges)
-            if (!subsetDict.lookupOrDefault("nonManifoldEdges", true))
+            if (!subsetDict.getOrDefault("nonManifoldEdges", true))
             {
                 Info<< "Removing all non-manifold edges"
                     << " (edges with > 2 connected faces) unless they"
@@ -476,7 +476,7 @@ int main(int argc, char *argv[])
             }
 
             // Suboption: "openEdges" (false: remove open edges)
-            if (!subsetDict.lookupOrDefault("openEdges", true))
+            if (!subsetDict.getOrDefault("openEdges", true))
             {
                 Info<< "Removing all open edges"
                     << " (edges with 1 connected face)" << endl;
@@ -656,13 +656,13 @@ int main(int argc, char *argv[])
         // Output information
 
         const bool optCloseness =
-            surfaceDict.lookupOrDefault("closeness", false);
+            surfaceDict.getOrDefault("closeness", false);
 
         const bool optProximity =
-            surfaceDict.lookupOrDefault("featureProximity", false);
+            surfaceDict.getOrDefault("featureProximity", false);
 
         const bool optCurvature =
-            surfaceDict.lookupOrDefault("curvature", false);
+            surfaceDict.getOrDefault("curvature", false);
 
 
         // For VTK legacy format, we would need an a priori count of
@@ -723,7 +723,7 @@ int main(int argc, char *argv[])
         if (optCloseness)
         {
             const scalar maxProximity =
-                surfaceDict.lookupOrDefault<scalar>("maxFeatureProximity", 1);
+                surfaceDict.getOrDefault<scalar>("maxFeatureProximity", 1);
 
             tmp<scalarField> tproximity =
                 edgeMeshTools::writeFeatureProximity

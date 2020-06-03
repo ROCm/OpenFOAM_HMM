@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,12 +69,12 @@ int main(int argc, char *argv[])
 
     bool faceMomentum
     (
-        pimple.dict().lookupOrDefault("faceMomentum", false)
+        pimple.dict().getOrDefault("faceMomentum", false)
     );
 
     bool implicitPhasePressure
     (
-        mesh.solverDict(alpha1.name()).lookupOrDefault
+        mesh.solverDict(alpha1.name()).getOrDefault
         (
             "implicitPhasePressure", false
         )

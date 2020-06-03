@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -180,7 +180,7 @@ Foam::basicThermo::basicThermo
     p_(lookupOrConstruct(mesh, "p", pOwner_)),
 
     T_(lookupOrConstruct(mesh, phasePropertyName("T"), TOwner_)),
-    TOwner_(lookupOrDefault<Switch>("updateT", TOwner_)),
+    TOwner_(getOrDefault<Switch>("updateT", TOwner_)),
 
     alpha_
     (
@@ -196,7 +196,7 @@ Foam::basicThermo::basicThermo
         dimensionedScalar(dimensionSet(1, -1, -1, 0, 0), Zero)
     ),
 
-    dpdt_(lookupOrDefault<Switch>("dpdt", true))
+    dpdt_(getOrDefault<Switch>("dpdt", true))
 {}
 
 
@@ -225,7 +225,7 @@ Foam::basicThermo::basicThermo
     p_(lookupOrConstruct(mesh, "p", pOwner_)),
 
     T_(lookupOrConstruct(mesh, phasePropertyName("T"), TOwner_)),
-    TOwner_(lookupOrDefault<Switch>("updateT", TOwner_)),
+    TOwner_(getOrDefault<Switch>("updateT", TOwner_)),
 
     alpha_
     (
@@ -241,7 +241,7 @@ Foam::basicThermo::basicThermo
         dimensionedScalar(dimensionSet(1, -1, -1, 0, 0), Zero)
     ),
 
-    dpdt_(lookupOrDefault<Switch>("dpdt", true))
+    dpdt_(getOrDefault<Switch>("dpdt", true))
 {}
 
 
@@ -269,7 +269,7 @@ Foam::basicThermo::basicThermo
     p_(lookupOrConstruct(mesh, "p", pOwner_)),
 
     T_(lookupOrConstruct(mesh, "T", TOwner_)),
-    TOwner_(lookupOrDefault<Switch>("updateT", TOwner_)),
+    TOwner_(getOrDefault<Switch>("updateT", TOwner_)),
 
     alpha_
     (
@@ -285,7 +285,7 @@ Foam::basicThermo::basicThermo
         dimensionedScalar(dimensionSet(1, -1, -1, 0, 0), Zero)
     ),
 
-    dpdt_(lookupOrDefault<Switch>("dpdt", true))
+    dpdt_(getOrDefault<Switch>("dpdt", true))
 {
     if (debug)
     {

@@ -313,7 +313,7 @@ void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>::solveYi
 
     scalar nYiSubCycles
     (
-        MULEScontrols.lookupOrDefault<scalar>("nYiSubCycles", 1)
+        MULEScontrols.getOrDefault<scalar>("nYiSubCycles", 1)
     );
 
     forAll(X_, i)

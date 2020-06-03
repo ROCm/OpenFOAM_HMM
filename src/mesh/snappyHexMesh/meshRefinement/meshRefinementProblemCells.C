@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -534,7 +534,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
 
     // Collapse checking parameters
     const scalar volFraction =
-        motionDict.lookupOrDefault<scalar>("minVolCollapseRatio", -1);
+        motionDict.getOrDefault<scalar>("minVolCollapseRatio", -1);
 
     const bool checkCollapse = (volFraction > 0);
     scalar minArea = -1;

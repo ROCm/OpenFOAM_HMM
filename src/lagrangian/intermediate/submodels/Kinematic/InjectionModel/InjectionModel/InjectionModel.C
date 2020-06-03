@@ -311,13 +311,13 @@ Foam::InjectionModel<CloudType>::InjectionModel
     timeStep0_(this->template getModelProperty<scalar>("timeStep0")),
     minParticlesPerParcel_
     (
-        this->coeffDict().lookupOrDefault("minParticlesPerParcel", scalar(1))
+        this->coeffDict().getOrDefault("minParticlesPerParcel", scalar(1))
     ),
     delayedVolume_(0.0),
-    injectorID_(this->coeffDict().lookupOrDefault("injectorID", -1)),
+    injectorID_(this->coeffDict().getOrDefault("injectorID", -1)),
     ignoreOutOfBounds_
     (
-        this->coeffDict().lookupOrDefault("ignoreOutOfBounds", false)
+        this->coeffDict().getOrDefault("ignoreOutOfBounds", false)
     )
 {
     // Provide some info

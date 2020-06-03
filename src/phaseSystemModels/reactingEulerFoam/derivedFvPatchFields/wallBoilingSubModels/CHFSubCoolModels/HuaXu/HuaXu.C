@@ -59,7 +59,7 @@ Foam::wallBoilingModels::CHFModels::HuaXu::HuaXu
 )
 :
     CHFSubCoolModel(),
-    Kburn_(dict.lookupOrDefault<scalar>("Kburn", 1.5))
+    Kburn_(dict.getOrDefault<scalar>("Kburn", 1.5))
 {}
 
 

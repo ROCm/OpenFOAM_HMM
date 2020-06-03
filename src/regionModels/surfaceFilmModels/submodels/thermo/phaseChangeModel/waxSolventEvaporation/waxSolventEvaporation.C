@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -128,8 +129,8 @@ waxSolventEvaporation::waxSolventEvaporation
     ),
     deltaMin_(coeffDict_.get<scalar>("deltaMin")),
     L_(coeffDict_.get<scalar>("L")),
-    TbFactor_(coeffDict_.lookupOrDefault<scalar>("TbFactor", 1.1)),
-    YInfZero_(coeffDict_.lookupOrDefault("YInfZero", false)),
+    TbFactor_(coeffDict_.getOrDefault<scalar>("TbFactor", 1.1)),
+    YInfZero_(coeffDict_.getOrDefault("YInfZero", false)),
     activityCoeff_
     (
         Function1<scalar>::New("activityCoeff", coeffDict_)

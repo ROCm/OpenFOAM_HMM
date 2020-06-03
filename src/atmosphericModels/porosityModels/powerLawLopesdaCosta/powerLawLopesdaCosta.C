@@ -310,7 +310,7 @@ Foam::porosityModels::powerLawLopesdaCosta::powerLawLopesdaCosta
     ),
     Cd_(coeffs_.get<scalar>("Cd")),
     C1_(coeffs_.get<scalar>("C1")),
-    rhoName_(coeffs_.lookupOrDefault<word>("rho", "rho"))
+    rhoName_(coeffs_.getOrDefault<word>("rho", "rho"))
 {}
 
 

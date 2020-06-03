@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -105,7 +105,7 @@ ShihQuadraticKE::ShihQuadraticKE
 
     Ceps1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Ceps1",
             coeffDict_,
@@ -114,7 +114,7 @@ ShihQuadraticKE::ShihQuadraticKE
     ),
     Ceps2_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Ceps2",
             coeffDict_,
@@ -123,7 +123,7 @@ ShihQuadraticKE::ShihQuadraticKE
     ),
     sigmak_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "sigmak",
             coeffDict_,
@@ -132,7 +132,7 @@ ShihQuadraticKE::ShihQuadraticKE
     ),
     sigmaEps_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "sigmaEps",
             coeffDict_,
@@ -141,7 +141,7 @@ ShihQuadraticKE::ShihQuadraticKE
     ),
     Cmu1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cmu1",
             coeffDict_,
@@ -150,7 +150,7 @@ ShihQuadraticKE::ShihQuadraticKE
     ),
     Cmu2_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cmu2",
             coeffDict_,
@@ -159,7 +159,7 @@ ShihQuadraticKE::ShihQuadraticKE
     ),
     Cbeta_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cbeta",
             coeffDict_,
@@ -168,7 +168,7 @@ ShihQuadraticKE::ShihQuadraticKE
     ),
     Cbeta1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cbeta1",
             coeffDict_,
@@ -177,7 +177,7 @@ ShihQuadraticKE::ShihQuadraticKE
     ),
     Cbeta2_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cbeta2",
             coeffDict_,
@@ -186,7 +186,7 @@ ShihQuadraticKE::ShihQuadraticKE
     ),
     Cbeta3_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cbeta3",
             coeffDict_,

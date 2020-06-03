@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,7 +74,7 @@ Foam::cuttingSurface::cuttingSurface
             dict.get<word>("surfaceType"),
             IOobject
             (
-                dict.lookupOrDefault("surfaceName", defaultSurfaceName),
+                dict.getOrDefault("surfaceName", defaultSurfaceName),
                 mesh.time().constant(), // directory
                 "triSurface",           // instance
                 mesh.time(),            // registry

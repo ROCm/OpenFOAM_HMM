@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -575,7 +576,7 @@ Foam::MomentumTransferPhaseSystem<BasePhaseSystem>::phiFs
 
         const bool implicitPhasePressure =
             this->mesh_.solverDict(phase.volScalarField::name()).
-            template lookupOrDefault<Switch>
+            template getOrDefault<Switch>
             (
                 "implicitPhasePressure",
                 false
@@ -738,7 +739,7 @@ Foam::MomentumTransferPhaseSystem<BasePhaseSystem>::phiFfs
 
         const bool implicitPhasePressure =
             this->mesh_.solverDict(phase.volScalarField::name()).
-            template lookupOrDefault<Switch>
+            template getOrDefault<Switch>
             (
                 "implicitPhasePressure",
                 false

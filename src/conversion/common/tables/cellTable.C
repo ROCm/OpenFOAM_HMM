@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -148,7 +148,7 @@ Foam::Map<Foam::word> Foam::cellTable::names() const
         lookup.insert
         (
             iter.key(),
-            iter().lookupOrDefault<word>
+            iter().getOrDefault<word>
             (
                 "Label",
                 "cellTable_" + Foam::name(iter.key())
@@ -169,7 +169,7 @@ Foam::Map<Foam::word> Foam::cellTable::names
 
     forAllConstIters(*this, iter)
     {
-        const word lookupName = iter().lookupOrDefault<word>
+        const word lookupName = iter().getOrDefault<word>
         (
             "Label",
             "cellTable_" + Foam::name(iter.key())
@@ -208,7 +208,7 @@ Foam::label Foam::cellTable::findIndex(const word& name) const
 
     forAllConstIters(*this, iter)
     {
-        if (iter().lookupOrDefault<word>("Label", word::null) == name)
+        if (iter().getOrDefault<word>("Label", word::null) == name)
         {
             return iter.key();
         }
@@ -227,7 +227,7 @@ Foam::Map<Foam::word> Foam::cellTable::materialTypes() const
         lookup.insert
         (
             iter.key(),
-            iter().lookupOrDefault<word>("MaterialType", defaultMaterial_)
+            iter().getOrDefault<word>("MaterialType", defaultMaterial_)
         );
     }
 
@@ -247,13 +247,13 @@ Foam::Map<Foam::word> Foam::cellTable::selectType(const word& matl) const
         if
         (
             matl
-         == dict.lookupOrDefault<word>("MaterialType", defaultMaterial_)
+         == dict.getOrDefault<word>("MaterialType", defaultMaterial_)
         )
         {
             lookup.insert
             (
                 index,
-                dict.lookupOrDefault<word>
+                dict.getOrDefault<word>
                 (
                     "Label",
                     "cellTable_" + Foam::name(iter.key())

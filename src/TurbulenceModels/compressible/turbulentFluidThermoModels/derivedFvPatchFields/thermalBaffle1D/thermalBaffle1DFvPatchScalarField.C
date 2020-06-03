@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -97,7 +98,7 @@ thermalBaffle1DFvPatchScalarField
     mappedPatchBase(p.patch(), NEARESTPATCHFACE, dict),
     mixedFvPatchScalarField(p, iF),
     TName_("T"),
-    baffleActivated_(dict.lookupOrDefault("baffleActivated", true)),
+    baffleActivated_(dict.getOrDefault("baffleActivated", true)),
     thickness_(),
     qs_(p.size(), 0),
     solidDict_(dict),
@@ -105,9 +106,9 @@ thermalBaffle1DFvPatchScalarField
     qrPrevious_(p.size(), Zero),
     qrRelaxation_
     (
-        dict.lookupOrDefaultCompat("qrRelaxation", {{"relaxation", 1712}}, 1)
+        dict.getOrDefaultCompat("qrRelaxation", {{"relaxation", 1712}}, 1)
     ),
-    qrName_(dict.lookupOrDefault<word>("qr", "none"))
+    qrName_(dict.getOrDefault<word>("qr", "none"))
 {
     fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
 

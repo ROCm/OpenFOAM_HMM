@@ -5,5 +5,5 @@ const dictionary& potentialFlow
 
 const int nNonOrthCorr
 (
-    potentialFlow.lookupOrDefault<int>("nNonOrthogonalCorrectors", 0)
+    potentialFlow.getOrDefault<int>("nNonOrthogonalCorrectors", 0)
 );

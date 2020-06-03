@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,7 +62,7 @@ solidification::solidification
     T0_(coeffDict_.get<scalar>("T0")),
     maxSolidificationFrac_
     (
-        coeffDict_.lookupOrDefault("maxSolidificationFrac", 0.2)
+        coeffDict_.getOrDefault<scalar>("maxSolidificationFrac", 0.2)
     ),
     maxSolidificationRate_
     (

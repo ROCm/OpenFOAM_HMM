@@ -49,16 +49,16 @@ Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::ISAT
     runTime_(chemistry.time()),
     chPMaxLifeTime_
     (
-        this->coeffsDict_.lookupOrDefault("chPMaxLifeTime", INT_MAX)
+        this->coeffsDict_.getOrDefault("chPMaxLifeTime", INT_MAX)
     ),
-    maxGrowth_(this->coeffsDict_.lookupOrDefault("maxGrowth", INT_MAX)),
+    maxGrowth_(this->coeffsDict_.getOrDefault("maxGrowth", INT_MAX)),
     checkEntireTreeInterval_
     (
-        this->coeffsDict_.lookupOrDefault("checkEntireTreeInterval", INT_MAX)
+        this->coeffsDict_.getOrDefault("checkEntireTreeInterval", INT_MAX)
     ),
     maxDepthFactor_
     (
-        this->coeffsDict_.lookupOrDefault
+        this->coeffsDict_.getOrDefault
         (
             "maxDepthFactor",
             (chemisTree_.maxNLeafs() - 1)
@@ -67,15 +67,15 @@ Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::ISAT
     ),
     minBalanceThreshold_
     (
-        this->coeffsDict_.lookupOrDefault
+        this->coeffsDict_.getOrDefault
         (
             "minBalanceThreshold",0.1*chemisTree_.maxNLeafs()
         )
     ),
-    MRURetrieve_(this->coeffsDict_.lookupOrDefault("MRURetrieve", false)),
-    maxMRUSize_(this->coeffsDict_.lookupOrDefault("maxMRUSize", 0)),
+    MRURetrieve_(this->coeffsDict_.getOrDefault("MRURetrieve", false)),
+    maxMRUSize_(this->coeffsDict_.getOrDefault("maxMRUSize", 0)),
     lastSearch_(nullptr),
-    growPoints_(this->coeffsDict_.lookupOrDefault("growPoints", true)),
+    growPoints_(this->coeffsDict_.getOrDefault("growPoints", true)),
     nRetrieved_(0),
     nGrowth_(0),
     nAdd_(0),

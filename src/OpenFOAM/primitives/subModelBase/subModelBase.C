@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -142,7 +142,7 @@ const Foam::dictionary& Foam::subModelBase::properties() const
 
 bool Foam::subModelBase::defaultCoeffs(const bool printMsg) const
 {
-    bool def = coeffDict_.lookupOrDefault("defaultCoeffs", false);
+    bool def = coeffDict_.getOrDefault("defaultCoeffs", false);
     if (printMsg && def)
     {
         Info<< incrIndent;

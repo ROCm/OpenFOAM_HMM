@@ -78,7 +78,7 @@ DeardorffDiffStress<BasicTurbulenceModel>::DeardorffDiffStress
 
     Ck_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Ck",
             this->coeffDict_,
@@ -87,7 +87,7 @@ DeardorffDiffStress<BasicTurbulenceModel>::DeardorffDiffStress
     ),
     Cm_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cm",
             this->coeffDict_,
@@ -96,7 +96,7 @@ DeardorffDiffStress<BasicTurbulenceModel>::DeardorffDiffStress
     ),
     Ce_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Ce",
             this->coeffDict_,
@@ -105,7 +105,7 @@ DeardorffDiffStress<BasicTurbulenceModel>::DeardorffDiffStress
     ),
     Cs_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cs",
             this->coeffDict_,

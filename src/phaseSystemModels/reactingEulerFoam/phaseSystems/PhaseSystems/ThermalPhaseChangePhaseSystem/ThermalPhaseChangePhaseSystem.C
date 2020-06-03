@@ -79,7 +79,7 @@ ThermalPhaseChangePhaseSystem
 )
 :
     BasePhaseSystem(mesh),
-    volatile_(this->template lookupOrDefault<word>("volatile", "none")),
+    volatile_(this->template getOrDefault<word>("volatile", "none")),
     saturationModel_
     (
         saturationModel::New(this->subDict("saturationModel"), mesh)

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -165,7 +165,7 @@ bool Foam::RBD::restraints::prescribedRotation::read
 {
     restraint::read(dict);
 
-    refQ_ = coeffs_.lookupOrDefault<tensor>("referenceOrientation", I);
+    refQ_ = coeffs_.getOrDefault<tensor>("referenceOrientation", I);
 
     if (mag(mag(refQ_) - sqrt(3.0)) > ROOTSMALL)
     {

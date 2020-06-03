@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,23 +35,23 @@ License
     scalar maxCo(pimpleDict.get<scalar>("maxCo"));
 
     // Maximum time scale
-    scalar maxDeltaT(pimpleDict.lookupOrDefault<scalar>("maxDeltaT", GREAT));
+    scalar maxDeltaT(pimpleDict.getOrDefault<scalar>("maxDeltaT", GREAT));
 
     // Smoothing parameter (0-1) when smoothing iterations > 0
     scalar rDeltaTSmoothingCoeff
     (
-        pimpleDict.lookupOrDefault<scalar>("rDeltaTSmoothingCoeff", 0.1)
+        pimpleDict.getOrDefault<scalar>("rDeltaTSmoothingCoeff", 0.1)
     );
 
     // Damping coefficient (1-0)
     scalar rDeltaTDampingCoeff
     (
-        pimpleDict.lookupOrDefault<scalar>("rDeltaTDampingCoeff", 0.2)
+        pimpleDict.getOrDefault<scalar>("rDeltaTDampingCoeff", 0.2)
     );
 
     // Maximum change in cell temperature per iteration
     // (relative to previous value)
-    scalar alphaTemp(pimpleDict.lookupOrDefault("alphaTemp", 0.05));
+    scalar alphaTemp(pimpleDict.getOrDefault("alphaTemp", 0.05));
 
 
     Info<< "Time scales min/max:" << endl;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -115,7 +115,7 @@ Foam::sphereToCell::sphereToCell
         mesh,
         dict.getCompat<vector>("origin", {{"centre", -1806}}),
         dict.get<scalar>("radius"),
-        dict.lookupOrDefault<scalar>("innerRadius", 0)
+        dict.getOrDefault<scalar>("innerRadius", 0)
     )
 {}
 

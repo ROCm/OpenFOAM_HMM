@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,7 +71,7 @@ sixDoFRigidBodyDisplacementPointPatchVectorField
     fixedValuePointPatchField<vector>(p, iF, dict),
     motion_(dict, dict, db().time()),
     rhoInf_(1.0),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
+    rhoName_(dict.getOrDefault<word>("rho", "rho")),
     lookupGravity_(-1),
     g_(Zero),
     curTimeIndex_(-1)

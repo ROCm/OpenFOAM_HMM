@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -263,7 +263,7 @@ SpalartAllmarasDES<BasicTurbulenceModel>::SpalartAllmarasDES
 
     sigmaNut_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "sigmaNut",
             this->coeffDict_,
@@ -272,7 +272,7 @@ SpalartAllmarasDES<BasicTurbulenceModel>::SpalartAllmarasDES
     ),
     kappa_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "kappa",
             this->coeffDict_,
@@ -281,7 +281,7 @@ SpalartAllmarasDES<BasicTurbulenceModel>::SpalartAllmarasDES
     ),
     Cb1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cb1",
             this->coeffDict_,
@@ -290,7 +290,7 @@ SpalartAllmarasDES<BasicTurbulenceModel>::SpalartAllmarasDES
     ),
     Cb2_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cb2",
             this->coeffDict_,
@@ -300,7 +300,7 @@ SpalartAllmarasDES<BasicTurbulenceModel>::SpalartAllmarasDES
     Cw1_(Cb1_/sqr(kappa_) + (1.0 + Cb2_)/sigmaNut_),
     Cw2_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cw2",
             this->coeffDict_,
@@ -309,7 +309,7 @@ SpalartAllmarasDES<BasicTurbulenceModel>::SpalartAllmarasDES
     ),
     Cw3_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cw3",
             this->coeffDict_,
@@ -318,7 +318,7 @@ SpalartAllmarasDES<BasicTurbulenceModel>::SpalartAllmarasDES
     ),
     Cv1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cv1",
             this->coeffDict_,
@@ -327,7 +327,7 @@ SpalartAllmarasDES<BasicTurbulenceModel>::SpalartAllmarasDES
     ),
     Cs_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cs",
             this->coeffDict_,
@@ -336,7 +336,7 @@ SpalartAllmarasDES<BasicTurbulenceModel>::SpalartAllmarasDES
     ),
     CDES_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "CDES",
             this->coeffDict_,
@@ -345,7 +345,7 @@ SpalartAllmarasDES<BasicTurbulenceModel>::SpalartAllmarasDES
     ),
     ck_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "ck",
             this->coeffDict_,
@@ -354,7 +354,7 @@ SpalartAllmarasDES<BasicTurbulenceModel>::SpalartAllmarasDES
     ),
     lowReCorrection_
     (
-        Switch::lookupOrAddToDict
+        Switch::getOrAddToDict
         (
             "lowReCorrection",
             this->coeffDict_,
@@ -363,7 +363,7 @@ SpalartAllmarasDES<BasicTurbulenceModel>::SpalartAllmarasDES
     ),
     Ct3_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Ct3",
             this->coeffDict_,
@@ -372,7 +372,7 @@ SpalartAllmarasDES<BasicTurbulenceModel>::SpalartAllmarasDES
     ),
     Ct4_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Ct4",
             this->coeffDict_,
@@ -381,7 +381,7 @@ SpalartAllmarasDES<BasicTurbulenceModel>::SpalartAllmarasDES
     ),
     fwStar_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "fwStar",
             this->coeffDict_,

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,7 +125,7 @@ LaunderSharmaKE<BasicTurbulenceModel>::LaunderSharmaKE
 
     Cmu_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cmu",
             this->coeffDict_,
@@ -134,7 +134,7 @@ LaunderSharmaKE<BasicTurbulenceModel>::LaunderSharmaKE
     ),
     C1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "C1",
             this->coeffDict_,
@@ -143,7 +143,7 @@ LaunderSharmaKE<BasicTurbulenceModel>::LaunderSharmaKE
     ),
     C2_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "C2",
             this->coeffDict_,
@@ -152,7 +152,7 @@ LaunderSharmaKE<BasicTurbulenceModel>::LaunderSharmaKE
     ),
     C3_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "C3",
             this->coeffDict_,
@@ -161,7 +161,7 @@ LaunderSharmaKE<BasicTurbulenceModel>::LaunderSharmaKE
     ),
     sigmak_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "sigmak",
             this->coeffDict_,
@@ -170,7 +170,7 @@ LaunderSharmaKE<BasicTurbulenceModel>::LaunderSharmaKE
     ),
     sigmaEps_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "sigmaEps",
             this->coeffDict_,

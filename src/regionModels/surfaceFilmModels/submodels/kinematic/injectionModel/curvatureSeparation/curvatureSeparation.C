@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -228,7 +229,7 @@ curvatureSeparation::curvatureSeparation
 :
     injectionModel(type(), film, dict),
     gradNHat_(fvc::grad(film.nHat())),
-    deltaByR1Min_(coeffDict_.lookupOrDefault<scalar>("deltaByR1Min", 0)),
+    deltaByR1Min_(coeffDict_.getOrDefault<scalar>("deltaByR1Min", 0)),
     definedPatchRadii_(),
     magG_(mag(film.g().value())),
     gHat_(Zero)

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -159,24 +159,24 @@ bool Foam::externalFileCoupler::readDict(const dictionary& dict)
         dict.readEntry("commsDir", commsDir_);
         commsDir_.expand();
         commsDir_.clean();
-        statusDone_ = dict.lookupOrDefault<word>("statusDone", "done");
-        slaveFirst_ = dict.lookupOrDefault("initByExternal", false);
+        statusDone_ = dict.getOrDefault<word>("statusDone", "done");
+        slaveFirst_ = dict.getOrDefault("initByExternal", false);
 
         Info<< type() << ": initialize" << nl
             << "    directory: " << commsDir_ << nl
             << "    slave-first: " << Switch(slaveFirst_) << endl;
     }
 
-    waitInterval_ = dict.lookupOrDefault("waitInterval", 1u);
+    waitInterval_ = dict.getOrDefault("waitInterval", 1u);
     if (!waitInterval_)
     {
         // Enforce non-zero sleep
         waitInterval_ = 1u;
     }
 
-    timeOut_ = dict.lookupOrDefault("timeOut", 100*waitInterval_);
+    timeOut_ = dict.getOrDefault("timeOut", 100*waitInterval_);
 
-    log = dict.lookupOrDefault("log", false);
+    log = dict.getOrDefault("log", false);
 
     return true;
 }

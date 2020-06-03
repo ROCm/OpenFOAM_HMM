@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2019 Zeljko Tukovic, FSB Zagreb.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,7 +69,7 @@ freeSurfaceVelocityFvPatchVectorField
 :
     fixedGradientFvPatchVectorField(p, iF)
 {
-    patchType() = dict.lookupOrDefault<word>("patchType", word::null);
+    patchType() = dict.getOrDefault<word>("patchType", word::null);
     fvPatchVectorField::operator=(patchInternalField());
 }
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,7 +74,7 @@ mixtureKEpsilon<BasicTurbulenceModel>::mixtureKEpsilon
 
     Cmu_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cmu",
             this->coeffDict_,
@@ -82,7 +83,7 @@ mixtureKEpsilon<BasicTurbulenceModel>::mixtureKEpsilon
     ),
     C1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "C1",
             this->coeffDict_,
@@ -91,7 +92,7 @@ mixtureKEpsilon<BasicTurbulenceModel>::mixtureKEpsilon
     ),
     C2_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "C2",
             this->coeffDict_,
@@ -100,7 +101,7 @@ mixtureKEpsilon<BasicTurbulenceModel>::mixtureKEpsilon
     ),
     C3_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "C3",
             this->coeffDict_,
@@ -109,7 +110,7 @@ mixtureKEpsilon<BasicTurbulenceModel>::mixtureKEpsilon
     ),
     Cp_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cp",
             this->coeffDict_,
@@ -118,7 +119,7 @@ mixtureKEpsilon<BasicTurbulenceModel>::mixtureKEpsilon
     ),
     sigmak_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "sigmak",
             this->coeffDict_,
@@ -127,7 +128,7 @@ mixtureKEpsilon<BasicTurbulenceModel>::mixtureKEpsilon
     ),
     sigmaEps_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "sigmaEps",
             this->coeffDict_,

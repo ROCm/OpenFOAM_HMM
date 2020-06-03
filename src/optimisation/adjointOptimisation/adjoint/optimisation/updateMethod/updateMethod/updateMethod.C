@@ -228,7 +228,7 @@ Foam::updateMethod::updateMethod
     correctionFolder_(mesh_.time().globalPath()/"optimisation"/"correction"),
     globalSum_
     (
-        dict.lookupOrDefault<bool>("globalSum", false)
+        dict.getOrDefault<bool>("globalSum", false)
     )
 {
     // Create folder to store corrections

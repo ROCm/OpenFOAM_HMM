@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,7 +73,7 @@ Foam::Istream& Foam::functionObjects::operator>>
     faItem.mean_ = dict.get<bool>("mean");
     faItem.prime2Mean_ = dict.get<bool>("prime2Mean");
     faItem.base_ = faItem.baseTypeNames_.get("base", dict);
-    faItem.window_ = dict.lookupOrDefault<scalar>("window", -1.0);
+    faItem.window_ = dict.getOrDefault<scalar>("window", -1);
 
     if (faItem.window_ > 0)
     {
@@ -93,7 +93,7 @@ Foam::Istream& Foam::functionObjects::operator>>
                     << exit(FatalIOError);
             }
 
-            faItem.windowName_ = dict.lookupOrDefault<word>("windowName", "");
+            faItem.windowName_ = dict.getOrDefault<word>("windowName", "");
 
             if (faItem.windowType_ == fieldAverageItem::windowType::EXACT)
             {

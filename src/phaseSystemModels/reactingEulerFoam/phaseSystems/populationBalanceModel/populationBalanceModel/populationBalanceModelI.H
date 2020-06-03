@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +39,7 @@ Foam::diameterModels::populationBalanceModel::sourceUpdateInterval() const
 {
     return
         mesh_.solverDict(name_)
-       .lookupOrDefault<label>("sourceUpdateInterval", 1);
+       .getOrDefault<label>("sourceUpdateInterval", 1);
 }
 
 

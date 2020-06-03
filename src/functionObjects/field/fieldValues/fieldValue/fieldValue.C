@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -104,7 +104,7 @@ bool Foam::functionObjects::fieldValue::read(const dictionary& dict)
 
     dict.readEntry("fields", fields_);
     dict.readEntry("writeFields", writeFields_);
-    scaleFactor_ = dict.lookupOrDefault<scalar>("scaleFactor", 1.0);
+    scaleFactor_ = dict.getOrDefault<scalar>("scaleFactor", 1);
 
     return true;
 }

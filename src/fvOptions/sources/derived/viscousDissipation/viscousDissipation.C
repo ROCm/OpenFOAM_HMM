@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,11 +96,11 @@ Foam::fv::viscousDissipation::viscousDissipation
 )
 :
     option(sourceName, modelType, dict, mesh),
-    UName_(coeffs_.lookupOrDefault<word>("U", "U")),
-    rhoName_(coeffs_.lookupOrDefault<word>("rho", "none")),
+    UName_(coeffs_.getOrDefault<word>("U", "U")),
+    rhoName_(coeffs_.getOrDefault<word>("rho", "none")),
     rho_
     (
-        coeffs_.lookupOrDefault
+        coeffs_.getOrDefault
         (
             "rhoInf",
             dimensionedScalar("rho", dimDensity, 0)

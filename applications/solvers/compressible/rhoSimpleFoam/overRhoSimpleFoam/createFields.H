@@ -82,5 +82,5 @@ dimensionedScalar initialMass = fvc::domainIntegrate(rho);
 
 bool adjustFringe
 (
-    simple.dict().lookupOrDefault("oversetAdjustPhi", false)
+    simple.dict().getOrDefault("oversetAdjustPhi", false)
 );

@@ -709,7 +709,7 @@ void Foam::fvMatrix<Type>::relax()
 {
     word name = psi_.select
     (
-        psi_.mesh().data::template lookupOrDefault<bool>
+        psi_.mesh().data::template getOrDefault<bool>
         ("finalIteration", false)
     );
 
@@ -1000,7 +1000,7 @@ const Foam::dictionary& Foam::fvMatrix<Type>::solverDict() const
     (
         psi_.select
         (
-            psi_.mesh().data::template lookupOrDefault<bool>
+            psi_.mesh().data::template getOrDefault<bool>
             ("finalIteration", false)
         )
     );

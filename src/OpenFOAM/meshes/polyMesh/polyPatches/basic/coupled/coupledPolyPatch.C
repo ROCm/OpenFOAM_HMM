@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -500,10 +501,10 @@ Foam::coupledPolyPatch::coupledPolyPatch
 )
 :
     polyPatch(name, dict, index, bm, patchType),
-    matchTolerance_(dict.lookupOrDefault("matchTolerance", defaultMatchTol_)),
+    matchTolerance_(dict.getOrDefault("matchTolerance", defaultMatchTol_)),
     transform_
     (
-        transformTypeNames.lookupOrDefault
+        transformTypeNames.getOrDefault
         (
             "transform",
             dict,

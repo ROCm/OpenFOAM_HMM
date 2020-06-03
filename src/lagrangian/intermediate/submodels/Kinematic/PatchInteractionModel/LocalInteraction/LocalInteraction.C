@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,13 +64,13 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
     massEscape_(nEscape_.size()),
     nStick_(nEscape_.size()),
     massStick_(nEscape_.size()),
-    writeFields_(this->coeffDict().lookupOrDefault("writeFields", false)),
+    writeFields_(this->coeffDict().getOrDefault("writeFields", false)),
     injIdToIndex_(),
     massEscapePtr_(nullptr),
     massStickPtr_(nullptr)
 {
     const bool outputByInjectorId
-        = this->coeffDict().lookupOrDefault("outputByInjectorId", false);
+        = this->coeffDict().getOrDefault("outputByInjectorId", false);
 
     if (writeFields_)
     {

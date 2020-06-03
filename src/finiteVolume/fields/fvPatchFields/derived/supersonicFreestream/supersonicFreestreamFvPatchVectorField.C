@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,15 +64,15 @@ supersonicFreestreamFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(p, iF),
-    TName_(dict.lookupOrDefault<word>("T", "T")),
-    pName_(dict.lookupOrDefault<word>("p", "p")),
-    psiName_(dict.lookupOrDefault<word>("psi", "thermo:psi")),
+    TName_(dict.getOrDefault<word>("T", "T")),
+    pName_(dict.getOrDefault<word>("p", "p")),
+    psiName_(dict.getOrDefault<word>("psi", "thermo:psi")),
     UInf_(dict.lookup("UInf")),
     pInf_(dict.get<scalar>("pInf")),
     TInf_(dict.get<scalar>("TInf")),
     gamma_(dict.get<scalar>("gamma"))
 {
-    patchType() = dict.lookupOrDefault<word>("patchType", word::null);
+    patchType() = dict.getOrDefault<word>("patchType", word::null);
 
     if (dict.found("value"))
     {

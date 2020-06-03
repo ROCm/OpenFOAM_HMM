@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,7 +62,7 @@ atmBoundaryLayerInletKFvPatchScalarField
     inletOutletFvPatchScalarField(p, iF),
     atmBoundaryLayer(iF.time(), p.patch(), dict)
 {
-    phiName_ = dict.lookupOrDefault<word>("phi", "phi");
+    phiName_ = dict.getOrDefault<word>("phi", "phi");
 
     refValue() = k(patch().Cf());
     refGrad() = 0;

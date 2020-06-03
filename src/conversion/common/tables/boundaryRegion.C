@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,7 +78,7 @@ Foam::Map<Foam::word> Foam::boundaryRegion::names() const
         lookup.insert
         (
             iter.key(),
-            iter().lookupOrDefault<word>
+            iter().getOrDefault<word>
             (
                 "Label",
                 "boundaryRegion_" + Foam::name(iter.key())
@@ -99,7 +99,7 @@ Foam::Map<Foam::word> Foam::boundaryRegion::names
 
     forAllConstIters(*this, iter)
     {
-        const word lookupName = iter().lookupOrDefault<word>
+        const word lookupName = iter().getOrDefault<word>
         (
             "Label",
             "boundaryRegion_" + Foam::name(iter.key())
@@ -124,7 +124,7 @@ Foam::Map<Foam::word> Foam::boundaryRegion::boundaryTypes() const
         lookup.insert
         (
             iter.key(),
-            iter().lookupOrDefault<word>("BoundaryType", "patch")
+            iter().getOrDefault<word>("BoundaryType", "patch")
         );
     }
 
@@ -141,7 +141,7 @@ Foam::label Foam::boundaryRegion::findIndex(const word& name) const
 
     forAllConstIters(*this, iter)
     {
-        if (iter().lookupOrDefault<word>("Label", word::null) == name)
+        if (iter().getOrDefault<word>("Label", word::null) == name)
         {
             return iter.key();
         }

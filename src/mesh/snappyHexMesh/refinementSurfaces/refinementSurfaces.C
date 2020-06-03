@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -249,7 +249,7 @@ Foam::refinementSurfaces::refinementSurfaces
 
             globalMinLevel[surfI] = refLevel[0];
             globalMaxLevel[surfI] = refLevel[1];
-            globalLevelIncr[surfI] = dict.lookupOrDefault
+            globalLevelIncr[surfI] = dict.getOrDefault
             (
                 "gapLevelIncrement",
                 gapLevelIncrement
@@ -275,7 +275,7 @@ Foam::refinementSurfaces::refinementSurfaces
 
             // Optional gapLevel specification
 
-            globalGapLevel[surfI] = dict.lookupOrDefault
+            globalGapLevel[surfI] = dict.getOrDefault
             (
                 "gapLevel",
                 nullGapLevel
@@ -358,7 +358,7 @@ Foam::refinementSurfaces::refinementSurfaces
 
                         regionMinLevel[surfI].insert(regionI, refLevel[0]);
                         regionMaxLevel[surfI].insert(regionI, refLevel[1]);
-                        label levelIncr = regionDict.lookupOrDefault
+                        label levelIncr = regionDict.getOrDefault
                         (
                             "gapLevelIncrement",
                             gapLevelIncrement
@@ -388,7 +388,7 @@ Foam::refinementSurfaces::refinementSurfaces
 
                         FixedList<label, 3> gapSpec
                         (
-                            regionDict.lookupOrDefault
+                            regionDict.getOrDefault
                             (
                                 "gapLevel",
                                 nullGapLevel

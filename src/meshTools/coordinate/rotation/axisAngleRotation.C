@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -148,7 +148,7 @@ Foam::coordinateRotations::axisAngle::axisAngle(const dictionary& dict)
     (
         dict.get<vector>("axis"),
         dict.get<scalar>("angle"),
-        dict.lookupOrDefault("degrees", true)
+        dict.getOrDefault("degrees", true)
     )
 {}
 

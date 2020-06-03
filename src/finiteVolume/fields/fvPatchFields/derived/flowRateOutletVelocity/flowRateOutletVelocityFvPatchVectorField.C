@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,7 +57,7 @@ flowRateOutletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF, dict, false),
-    rhoOutlet_(dict.lookupOrDefault<scalar>("rhoOutlet", -VGREAT))
+    rhoOutlet_(dict.getOrDefault<scalar>("rhoOutlet", -VGREAT))
 {
     if (dict.found("volumetricFlowRate"))
     {
@@ -68,7 +69,7 @@ flowRateOutletVelocityFvPatchVectorField
     {
         volumetric_ = false;
         flowRate_ = Function1<scalar>::New("massFlowRate", dict);
-        rhoName_ = dict.lookupOrDefault<word>("rho", "rho");
+        rhoName_ = dict.getOrDefault<word>("rho", "rho");
     }
     else
     {

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,8 +44,8 @@ Foam::PatchFlowRateInjection<CloudType>::PatchFlowRateInjection
 :
     InjectionModel<CloudType>(dict, owner, modelName,typeName),
     patchInjectionBase(owner.mesh(), this->coeffDict().getWord("patch")),
-    phiName_(this->coeffDict().template lookupOrDefault<word>("phi", "phi")),
-    rhoName_(this->coeffDict().template lookupOrDefault<word>("rho", "rho")),
+    phiName_(this->coeffDict().template getOrDefault<word>("phi", "phi")),
+    rhoName_(this->coeffDict().template getOrDefault<word>("rho", "rho")),
     duration_(this->coeffDict().getScalar("duration")),
     concentration_
     (

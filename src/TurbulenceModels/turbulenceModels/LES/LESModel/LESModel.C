@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,12 +69,12 @@ Foam::LESModel<BasicTurbulenceModel>::LESModel
 
     LESDict_(this->subOrEmptyDict("LES")),
     turbulence_(LESDict_.get<Switch>("turbulence")),
-    printCoeffs_(LESDict_.lookupOrDefault<Switch>("printCoeffs", false)),
+    printCoeffs_(LESDict_.getOrDefault<Switch>("printCoeffs", false)),
     coeffDict_(LESDict_.optionalSubDict(type + "Coeffs")),
 
     kMin_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "kMin",
             LESDict_,
@@ -85,7 +85,7 @@ Foam::LESModel<BasicTurbulenceModel>::LESModel
 
     epsilonMin_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "epsilonMin",
             LESDict_,
@@ -96,7 +96,7 @@ Foam::LESModel<BasicTurbulenceModel>::LESModel
 
     omegaMin_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "omegaMin",
             LESDict_,

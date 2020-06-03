@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,7 +66,7 @@ Foam::uniformFixedGradientFvPatchField<Type>::uniformFixedGradientFvPatchField
     fixedGradientFvPatchField<Type>(p, iF),
     uniformGradient_(Function1<Type>::New("uniformGradient", dict))
 {
-    this->patchType() = dict.lookupOrDefault<word>("patchType", word::null);
+    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
     this->evaluate();
 }
 

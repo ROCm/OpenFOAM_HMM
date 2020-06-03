@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,7 +125,7 @@ Foam::cylinderToFace::cylinderToFace
         dict.get<point>("p1"),
         dict.get<point>("p2"),
         dict.get<scalar>("radius"),
-        dict.lookupOrDefault<scalar>("innerRadius", 0)
+        dict.getOrDefault<scalar>("innerRadius", 0)
     )
 {}
 

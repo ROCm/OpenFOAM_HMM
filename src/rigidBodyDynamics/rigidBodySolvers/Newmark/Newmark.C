@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,13 +53,13 @@ Foam::RBD::rigidBodySolvers::Newmark::Newmark
 )
 :
     rigidBodySolver(body),
-    gamma_(dict.lookupOrDefault<scalar>("gamma", 0.5)),
+    gamma_(dict.getOrDefault<scalar>("gamma", 0.5)),
     beta_
     (
         max
         (
             0.25*sqr(gamma_ + 0.5),
-            dict.lookupOrDefault<scalar>("beta", 0.25)
+            dict.getOrDefault<scalar>("beta", 0.25)
         )
     )
 {}

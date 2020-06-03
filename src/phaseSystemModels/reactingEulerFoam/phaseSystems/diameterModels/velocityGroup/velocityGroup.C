@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2019 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -221,13 +222,13 @@ Foam::diameterModels::velocityGroup::velocityGroup
 {
     if
     (
-        phase_.mesh().solverDict(popBalName_).lookupOrDefault<Switch>
+        phase_.mesh().solverDict(popBalName_).getOrDefault<Switch>
         (
             "renormalizeAtRestart",
             false
         )
      ||
-        phase_.mesh().solverDict(popBalName_).lookupOrDefault<Switch>
+        phase_.mesh().solverDict(popBalName_).getOrDefault<Switch>
         (
             "renormalize",
             false
@@ -306,7 +307,7 @@ void Foam::diameterModels::velocityGroup::postSolve()
 
     if
     (
-        phase_.mesh().solverDict(popBalName_).lookupOrDefault<Switch>
+        phase_.mesh().solverDict(popBalName_).getOrDefault<Switch>
         (
             "renormalize",
             false

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -549,8 +549,8 @@ Foam::faceReflecting::faceReflecting
 )
 :
     mesh_(mesh),
-    nTheta_(dict.subDict("reflecting").lookupOrDefault<label>("nTheta", 10)),
-    nPhi_(dict.subDict("reflecting").lookupOrDefault<label>("nPhi", 10)),
+    nTheta_(dict.subDict("reflecting").getOrDefault<label>("nTheta", 10)),
+    nPhi_(dict.subDict("reflecting").getOrDefault<label>("nPhi", 10)),
     nRay_(0),
     refDiscAngles_(0),
     spectralDistribution_(spectralDistribution),

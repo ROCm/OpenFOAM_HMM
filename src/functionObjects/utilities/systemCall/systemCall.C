@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -112,7 +112,7 @@ bool Foam::functionObjects::systemCall::read(const dictionary& dict)
     dict.readIfPresent("executeCalls", executeCalls_);
     dict.readIfPresent("writeCalls", writeCalls_);
     dict.readIfPresent("endCalls", endCalls_);
-    masterOnly_ = dict.lookupOrDefault("master", false);
+    masterOnly_ = dict.getOrDefault("master", false);
 
     if (executeCalls_.empty() && endCalls_.empty() && writeCalls_.empty())
     {

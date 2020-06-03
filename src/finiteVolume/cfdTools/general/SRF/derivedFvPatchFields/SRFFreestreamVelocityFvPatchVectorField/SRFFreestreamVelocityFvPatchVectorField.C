@@ -73,10 +73,10 @@ SRFFreestreamVelocityFvPatchVectorField
 )
 :
     inletOutletFvPatchVectorField(p, iF),
-    relative_(dict.lookupOrDefault("relative", false)),
+    relative_(dict.getOrDefault("relative", false)),
     UInf_(dict.get<vector>("UInf"))
 {
-    this->phiName_ = dict.lookupOrDefault<word>("phi", "phi");
+    this->phiName_ = dict.getOrDefault<word>("phi", "phi");
 
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
 }

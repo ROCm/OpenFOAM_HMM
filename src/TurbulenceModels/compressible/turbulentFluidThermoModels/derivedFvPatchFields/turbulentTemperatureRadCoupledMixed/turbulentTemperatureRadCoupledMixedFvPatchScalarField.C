@@ -103,13 +103,13 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     temperatureCoupledBase(patch(), dict),
-    TnbrName_(dict.lookupOrDefault<word>("Tnbr", "T")),
-    qrNbrName_(dict.lookupOrDefault<word>("qrNbr", "none")),
-    qrName_(dict.lookupOrDefault<word>("qr", "none")),
+    TnbrName_(dict.getOrDefault<word>("Tnbr", "T")),
+    qrNbrName_(dict.getOrDefault<word>("qrNbr", "none")),
+    qrName_(dict.getOrDefault<word>("qr", "none")),
     thicknessLayers_(0),
     kappaLayers_(0),
     contactRes_(0.0),
-    thermalInertia_(dict.lookupOrDefault<Switch>("thermalInertia", false))
+    thermalInertia_(dict.getOrDefault<Switch>("thermalInertia", false))
 {
     if (!isA<mappedPatchBase>(this->patch().patch()))
     {

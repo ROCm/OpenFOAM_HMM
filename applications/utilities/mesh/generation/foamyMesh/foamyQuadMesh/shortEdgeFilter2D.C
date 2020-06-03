@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -157,7 +158,7 @@ Foam::shortEdgeFilter2D::shortEdgeFilter2D
     shortEdgeFilterFactor_(dict.get<scalar>("shortEdgeFilterFactor")),
     edgeAttachedToBoundaryFactor_
     (
-        dict.lookupOrDefault<scalar>("edgeAttachedToBoundaryFactor", 2.0)
+        dict.getOrDefault<scalar>("edgeAttachedToBoundaryFactor", 2.0)
     ),
     patchNames_(wordList()),
     patchSizes_(labelList()),

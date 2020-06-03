@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -115,7 +115,7 @@ Foam::fvPatchField<Type>::fvPatchField
     internalField_(iF),
     updated_(false),
     manipulatedMatrix_(false),
-    patchType_(dict.lookupOrDefault<word>("patchType", word::null))
+    patchType_(dict.getOrDefault<word>("patchType", word::null))
 {
     if (valueRequired)
     {

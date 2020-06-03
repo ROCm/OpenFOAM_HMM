@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -202,7 +202,7 @@ Foam::lumpedPointMovement::lumpedPointMovement
     relax_(1),
     interpolationScheme_
     (
-        dict.lookupOrDefault<word>
+        dict.getOrDefault<word>
         (
             "interpolationScheme",
             linearInterpolationWeights::typeName
@@ -279,7 +279,7 @@ void Foam::lumpedPointMovement::readDict(const dictionary& dict)
     const dictionary& commDict = dict.subDict("communication");
     coupler_.readDict(commDict);
 
-    // TODO: calcFrequency_  = dict.lookupOrDefault("calcFrequency", 1);
+    // TODO: calcFrequency_  = dict.getOrDefault("calcFrequency", 1);
 
     commDict.readEntry("inputName", inputName_);
     commDict.readEntry("outputName", outputName_);
@@ -483,9 +483,9 @@ bool Foam::lumpedPointMovement::forcesAndMoments
 
     const polyBoundaryMesh& patches = pmesh.boundaryMesh();
 
-    const word pName(forcesDict_.lookupOrDefault<word>("p", "p"));
-    scalar pRef   = forcesDict_.lookupOrDefault<scalar>("pRef",   0.0);
-    scalar rhoRef = forcesDict_.lookupOrDefault<scalar>("rhoRef", 1.0);
+    const word pName(forcesDict_.getOrDefault<word>("p", "p"));
+    scalar pRef   = forcesDict_.getOrDefault<scalar>("pRef",   0);
+    scalar rhoRef = forcesDict_.getOrDefault<scalar>("rhoRef", 1);
 
 
     // Calculated force per patch - cache

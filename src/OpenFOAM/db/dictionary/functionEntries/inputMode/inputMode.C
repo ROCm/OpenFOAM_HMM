@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -118,7 +118,7 @@ bool Foam::functionEntries::inputMode::execute
 {
     const word modeName(is);
 
-    // Like Enum::lookupOrDefault() with failsafe behaviour
+    // Like Enum::getOrDefault() with failsafe behaviour
     if (selectableNames.found(modeName))
     {
         entry::globalInputMode = selectableNames.get(modeName);

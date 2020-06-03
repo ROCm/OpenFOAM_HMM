@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,7 +76,7 @@ int main(int argc, char *argv[])
 
     bool faceMomentum
     (
-        pimple.dict().lookupOrDefault("faceMomentum", false)
+        pimple.dict().getOrDefault("faceMomentum", false)
     );
 
     #include "pUf/createRDeltaTf.H"
@@ -90,7 +91,7 @@ int main(int argc, char *argv[])
 
         int nEnergyCorrectors
         (
-            pimple.dict().lookupOrDefault<int>("nEnergyCorrectors", 1)
+            pimple.dict().getOrDefault<int>("nEnergyCorrectors", 1)
         );
 
         if (LTS)

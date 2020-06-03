@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,11 +41,11 @@ namespace Foam
 bool Foam::solverControl::read()
 {
     // Read basic entries
-    printMaxMags_ = solutionDict().lookupOrDefault<bool>("printMaxMags", false);
+    printMaxMags_ = solutionDict().getOrDefault<bool>("printMaxMags", false);
 
     // Manage averaging
     dictionary averagingDict = solutionDict().subOrEmptyDict("averaging");
-    averageStartIter_ = averagingDict.lookupOrDefault<label>("startIter", -1);
+    averageStartIter_ = averagingDict.getOrDefault<label>("startIter", -1);
 
     return true;
 }
@@ -58,17 +58,17 @@ Foam::solverControl::solverControl(const solver& solver)
     solver_(solver),
     printMaxMags_(true),
     iter_(0),
-    averageIter_(solver.lookupOrDefault<label>("averageIter", 0)),
+    averageIter_(solver.getOrDefault<label>("averageIter", 0)),
     averageStartIter_(-1),
     // Non run-time modifiable options read in the constructor only
     storeInitValues_
     (
-        solverDict().lookupOrDefault<bool>("storeInitValues", false)
+        solverDict().getOrDefault<bool>("storeInitValues", false)
     ),
     average_
     (
         solutionDict().subOrEmptyDict("averaging").
-            lookupOrDefault<bool>("average", false)
+            getOrDefault<bool>("average", false)
     )
 {
     read();

@@ -3,15 +3,15 @@
 
 bool correctPhi
 (
-    pimple.dict().lookupOrDefault("correctPhi", mesh.dynamic())
+    pimple.dict().getOrDefault("correctPhi", mesh.dynamic())
 );
 
 bool checkMeshCourantNo
 (
-    pimple.dict().lookupOrDefault("checkMeshCourantNo", false)
+    pimple.dict().getOrDefault("checkMeshCourantNo", false)
 );
 
 bool moveMeshOuterCorrectors
 (
-    pimple.dict().lookupOrDefault("moveMeshOuterCorrectors", false)
+    pimple.dict().getOrDefault("moveMeshOuterCorrectors", false)
 );

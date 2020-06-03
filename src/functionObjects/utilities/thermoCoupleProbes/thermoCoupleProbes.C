@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +57,7 @@ Foam::functionObjects::thermoCoupleProbes::thermoCoupleProbes
 :
     probes(name, runTime, dict, loadFromFiles, false),
     ODESystem(),
-    UName_(dict.lookupOrDefault<word>("U", "U")),
+    UName_(dict.getOrDefault<word>("U", "U")),
     radiationFieldName_(dict.get<word>("radiationField")),
     thermo_(mesh_.lookupObject<fluidThermo>(basicThermo::dictName)),
     odeSolver_(nullptr),

@@ -811,7 +811,7 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
 
     Info<< type() << " " << name() << ":" << nl;
 
-    directForceDensity_ = dict.lookupOrDefault("directForceDensity", false);
+    directForceDensity_ = dict.getOrDefault("directForceDensity", false);
 
     patchSet_ =
         mesh_.boundaryMesh().patchSet
@@ -905,7 +905,7 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
         }
     }
 
-    writeFields_ = dict.lookupOrDefault("writeFields", false);
+    writeFields_ = dict.getOrDefault("writeFields", false);
 
     if (writeFields_)
     {

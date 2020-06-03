@@ -84,7 +84,7 @@ Foam::processorCyclicPolyPatch::processorCyclicPolyPatch
 :
     processorPolyPatch(name, dict, index, bm, patchType),
     referPatchName_(dict.lookup("referPatch")),
-    tag_(dict.lookupOrDefault<int>("tag", -1)),
+    tag_(dict.getOrDefault<int>("tag", -1)),
     referPatchID_(-1)
 {}
 

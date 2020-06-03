@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,9 +74,9 @@ Foam::totalTemperatureFvPatchScalarField::totalTemperatureFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict, false),
-    UName_(dict.lookupOrDefault<word>("U", "U")),
-    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    psiName_(dict.lookupOrDefault<word>("psi", "thermo:psi")),
+    UName_(dict.getOrDefault<word>("U", "U")),
+    phiName_(dict.getOrDefault<word>("phi", "phi")),
+    psiName_(dict.getOrDefault<word>("psi", "thermo:psi")),
     gamma_(dict.get<scalar>("gamma")),
     T0_("T0", dict, p.size())
 {

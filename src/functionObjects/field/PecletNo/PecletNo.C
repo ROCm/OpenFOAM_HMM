@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -152,7 +152,7 @@ Foam::functionObjects::PecletNo::~PecletNo()
 
 bool Foam::functionObjects::PecletNo::read(const dictionary& dict)
 {
-    rhoName_ = dict.lookupOrDefault<word>("rho", "rho");
+    rhoName_ = dict.getOrDefault<word>("rho", "rho");
 
     return true;
 }

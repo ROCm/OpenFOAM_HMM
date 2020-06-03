@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +36,7 @@ Foam::polyMeshFilterSettings::polyMeshFilterSettings(const dictionary& dict)
     dict_(dict),
     controlMeshQuality_
     (
-        dict_.lookupOrDefault<Switch>("controlMeshQuality", false)
+        dict_.getOrDefault<Switch>("controlMeshQuality", false)
     ),
     collapseEdgesCoeffDict_(dict_.subDict("collapseEdgesCoeffs")),
     collapseFacesCoeffDict_(dict_.subOrEmptyDict("collapseFacesCoeffs")),
@@ -53,39 +54,27 @@ Foam::polyMeshFilterSettings::polyMeshFilterSettings(const dictionary& dict)
     ),
     edgeReductionFactor_
     (
-        meshQualityCoeffDict_.lookupOrDefault<scalar>("edgeReductionFactor", -1)
+        meshQualityCoeffDict_.getOrDefault<scalar>("edgeReductionFactor", -1)
     ),
     maxIterations_
     (
-        meshQualityCoeffDict_.lookupOrAddDefault<label>("maximumIterations", 1)
+        meshQualityCoeffDict_.getOrAdd<label>("maximumIterations", 1)
     ),
     maxSmoothIters_
     (
-        meshQualityCoeffDict_.lookupOrAddDefault<label>
-        (
-            "maximumSmoothingIterations",
-            0
-        )
+        meshQualityCoeffDict_.getOrAdd<label>("maximumSmoothingIterations", 0)
     ),
     initialFaceLengthFactor_
     (
-        collapseFacesCoeffDict_.lookupOrAddDefault<scalar>
-        (
-            "initialFaceLengthFactor",
-            -1
-        )
+        collapseFacesCoeffDict_.getOrAdd<scalar>("initialFaceLengthFactor", -1)
     ),
     faceReductionFactor_
     (
-        meshQualityCoeffDict_.lookupOrAddDefault<scalar>
-        (
-            "faceReductionFactor",
-            -1
-        )
+        meshQualityCoeffDict_.getOrAdd<scalar>("faceReductionFactor", -1)
     ),
     maxPointErrorCount_
     (
-        meshQualityCoeffDict_.lookupOrAddDefault<label>("maxPointErrorCount", 0)
+        meshQualityCoeffDict_.getOrAdd<label>("maxPointErrorCount", 0)
     )
 {}
 

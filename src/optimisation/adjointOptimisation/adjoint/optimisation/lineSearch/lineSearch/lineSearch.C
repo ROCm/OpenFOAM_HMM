@@ -71,16 +71,16 @@ Foam::lineSearch::lineSearch(const dictionary& dict, const Time& time)
     newMeritValue_(Zero),
     prevMeritDeriv_
     (
-        lineSearchDict_.lookupOrDefault<scalar>("prevMeritDeriv", Zero)
+        lineSearchDict_.getOrDefault<scalar>("prevMeritDeriv", Zero)
     ),
-    initialStep_(dict.lookupOrDefault<scalar>("initialStep", 1.)),
-    minStep_(dict.lookupOrDefault<scalar>("minStep", 0.3)),
+    initialStep_(dict.getOrDefault<scalar>("initialStep", 1.)),
+    minStep_(dict.getOrDefault<scalar>("minStep", 0.3)),
     step_(Zero),
-    iter_(lineSearchDict_.lookupOrDefault<label>("iter", 0)),
-    maxIters_(dict.lookupOrDefault<label>("maxIters", 4)),
+    iter_(lineSearchDict_.getOrDefault<label>("iter", 0)),
+    maxIters_(dict.getOrDefault<label>("maxIters", 4)),
     extrapolateInitialStep_
     (
-        dict.lookupOrDefault<bool>
+        dict.getOrDefault<bool>
         (
             "extrapolateInitialStep",
             false

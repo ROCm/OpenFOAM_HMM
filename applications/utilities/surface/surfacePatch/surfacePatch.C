@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
             IOobject::NO_WRITE
         ),
         meshDict.subDict("geometry"),
-        meshDict.lookupOrDefault("singleRegionName", true)
+        meshDict.getOrDefault("singleRegionName", true)
     );
 
 

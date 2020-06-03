@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,10 +80,10 @@ surfaceAlignedSBRStressFvMotionSolver
         fvMesh_,
         dimensionedVector(dimless, Zero)
     ),
-    maxAng_(coeffDict().lookupOrDefault<scalar>("maxAng", 80.0)),
-    minAng_(coeffDict().lookupOrDefault<scalar>("minAng", 20.0)),
-    accFactor_(coeffDict().lookupOrDefault<scalar>("accFactor", 1.0)),
-    smoothFactor_(coeffDict().lookupOrDefault<scalar>("smoothFactor", 0.9)),
+    maxAng_(coeffDict().getOrDefault<scalar>("maxAng", 80)),
+    minAng_(coeffDict().getOrDefault<scalar>("minAng", 20)),
+    accFactor_(coeffDict().getOrDefault<scalar>("accFactor", 1)),
+    smoothFactor_(coeffDict().getOrDefault<scalar>("smoothFactor", 0.9)),
     nNonOrthogonalCorr_(coeffDict().get<label>("nNonOrthogonalCorr")),
     pointDisplacement_(pointDisplacement()),
     sigmaD_
@@ -99,7 +99,7 @@ surfaceAlignedSBRStressFvMotionSolver
         fvMesh_,
         dimensionedSymmTensor(dimless, Zero)
     ),
-    minSigmaDiff_(coeffDict().lookupOrDefault<scalar>("minSigmaDiff", 1e-4))
+    minSigmaDiff_(coeffDict().getOrDefault<scalar>("minSigmaDiff", 1e-4))
 {
     forAll(surfaceNames_, i)
     {

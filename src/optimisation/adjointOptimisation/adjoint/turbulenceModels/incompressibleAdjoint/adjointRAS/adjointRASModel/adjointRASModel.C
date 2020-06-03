@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -140,7 +140,7 @@ adjointRASModel::adjointRASModel
     objectiveManager_(objManager),
 
     adjointTurbulence_(get<word>("adjointTurbulence")),
-    printCoeffs_(lookupOrDefault<Switch>("printCoeffs", false)),
+    printCoeffs_(getOrDefault<Switch>("printCoeffs", false)),
     coeffDict_(subOrEmptyDict(type + "Coeffs")),
 
     y_(mesh_),

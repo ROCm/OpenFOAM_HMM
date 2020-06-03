@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,14 +77,14 @@ filmPyrolysisTemperatureCoupledFvPatchScalarField
     fixedValueFvPatchScalarField(p, iF, dict),
     filmRegionName_
     (
-        dict.lookupOrDefault<word>("filmRegion", "surfaceFilmProperties")
+        dict.getOrDefault<word>("filmRegion", "surfaceFilmProperties")
     ),
     pyrolysisRegionName_
     (
-        dict.lookupOrDefault<word>("pyrolysisRegion", "pyrolysisProperties")
+        dict.getOrDefault<word>("pyrolysisRegion", "pyrolysisProperties")
     ),
-    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho"))
+    phiName_(dict.getOrDefault<word>("phi", "phi")),
+    rhoName_(dict.getOrDefault<word>("rho", "rho"))
 {}
 
 

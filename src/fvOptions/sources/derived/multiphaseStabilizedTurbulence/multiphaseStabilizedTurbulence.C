@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,7 +62,7 @@ Foam::fv::multiphaseStabilizedTurbulence::multiphaseStabilizedTurbulence
     rhoName_(coeffs_.getOrDefault<word>("rho", "rho")),
     Cmu_
     (
-        dimensionedScalar::lookupOrAddToDict
+        dimensionedScalar::getOrAddToDict
         (
             "Cmu",
             coeffs_,
@@ -71,7 +71,7 @@ Foam::fv::multiphaseStabilizedTurbulence::multiphaseStabilizedTurbulence
     ),
     C_
     (
-        dimensionedScalar::lookupOrAddToDict
+        dimensionedScalar::getOrAddToDict
         (
             "C",
             coeffs_,
@@ -80,7 +80,7 @@ Foam::fv::multiphaseStabilizedTurbulence::multiphaseStabilizedTurbulence
     ),
     lambda2_
     (
-        dimensionedScalar::lookupOrAddToDict
+        dimensionedScalar::getOrAddToDict
         (
             "lambda2",
             coeffs_,
@@ -89,7 +89,7 @@ Foam::fv::multiphaseStabilizedTurbulence::multiphaseStabilizedTurbulence
     ),
     alpha_
     (
-        dimensionedScalar::lookupOrAddToDict
+        dimensionedScalar::getOrAddToDict
         (
             "alpha",
             coeffs_,

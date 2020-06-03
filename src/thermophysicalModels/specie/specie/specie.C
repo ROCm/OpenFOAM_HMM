@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +42,7 @@ namespace Foam
 Foam::specie::specie(const dictionary& dict)
 :
     name_(dict.dictName()),
-    Y_(dict.subDict("specie").lookupOrDefault<scalar>("massFraction", 1)),
+    Y_(dict.subDict("specie").getOrDefault<scalar>("massFraction", 1)),
     molWeight_(dict.subDict("specie").get<scalar>("molWeight"))
 {}
 

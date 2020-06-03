@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018-2019 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,10 +62,10 @@ PrinceBlanch
 )
 :
     coalescenceModel(popBal, dict),
-    C1_(dimensionedScalar::lookupOrDefault("C1", dict, dimless, 0.356)),
+    C1_(dimensionedScalar::getOrDefault("C1", dict, dimless, 0.356)),
     h0_
     (
-        dimensionedScalar::lookupOrDefault
+        dimensionedScalar::getOrDefault
         (
             "h0",
             dict,
@@ -74,7 +75,7 @@ PrinceBlanch
     ),
     hf_
     (
-        dimensionedScalar::lookupOrDefault
+        dimensionedScalar::getOrDefault
         (
             "hf",
             dict,

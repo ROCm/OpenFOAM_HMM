@@ -354,7 +354,7 @@ Foam::radiation::laserDTRM::laserDTRM(const volScalarField& T)
     focalLaserRadius_(get<scalar>("focalLaserRadius")),
     qualityBeamLaser_
     (
-        lookupOrDefault<scalar>("qualityBeamLaser", 0.0)
+        getOrDefault<scalar>("qualityBeamLaser", 0)
     ),
 
     sigma_(0),
@@ -364,7 +364,7 @@ Foam::radiation::laserDTRM::laserDTRM(const volScalarField& T)
 
     reflectionSwitch_(false),
 
-    alphaCut_(lookupOrDefault<scalar>("alphaCut", 0.5)),
+    alphaCut_(getOrDefault<scalar>("alphaCut", 0.5)),
 
     a_
     (
@@ -451,7 +451,7 @@ Foam::radiation::laserDTRM::laserDTRM
     focalLaserRadius_(get<scalar>("focalLaserRadius")),
     qualityBeamLaser_
     (
-        lookupOrDefault<scalar>("qualityBeamLaser", 0.0)
+        getOrDefault<scalar>("qualityBeamLaser", 0)
     ),
 
     sigma_(0),
@@ -461,7 +461,7 @@ Foam::radiation::laserDTRM::laserDTRM
 
     reflectionSwitch_(false),
 
-    alphaCut_(lookupOrDefault<scalar>("alphaCut", 0.5)),
+    alphaCut_(getOrDefault<scalar>("alphaCut", 0.5)),
 
     a_
     (

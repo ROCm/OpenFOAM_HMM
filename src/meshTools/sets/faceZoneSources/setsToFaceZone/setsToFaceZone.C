@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,7 +77,7 @@ Foam::setsToFaceZone::setsToFaceZone
     topoSetSource(mesh),
     faceSetName_(dict.get<word>("faceSet")),
     cellSetName_(dict.get<word>("cellSet")),
-    flip_(dict.lookupOrDefault("flip", false))
+    flip_(dict.getOrDefault("flip", false))
 {}
 
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,17 +48,17 @@ Foam::sixDoFRigidBodyMotionState::sixDoFRigidBodyMotionState
 :
     centreOfRotation_
     (
-        dict.lookupOrDefault
+        dict.getOrDefault
         (
             "centreOfRotation",
-            dict.lookupOrDefault("centreOfMass", vector::zero)
+            dict.getOrDefault("centreOfMass", vector::zero)
         )
     ),
-    Q_(dict.lookupOrDefault("orientation", tensor::I)),
-    v_(dict.lookupOrDefault("velocity", vector::zero)),
-    a_(dict.lookupOrDefault("acceleration", vector::zero)),
-    pi_(dict.lookupOrDefault("angularMomentum", vector::zero)),
-    tau_(dict.lookupOrDefault("torque", vector::zero))
+    Q_(dict.getOrDefault("orientation", tensor::I)),
+    v_(dict.getOrDefault("velocity", vector::zero)),
+    a_(dict.getOrDefault("acceleration", vector::zero)),
+    pi_(dict.getOrDefault("angularMomentum", vector::zero)),
+    tau_(dict.getOrDefault("torque", vector::zero))
 {}
 
 

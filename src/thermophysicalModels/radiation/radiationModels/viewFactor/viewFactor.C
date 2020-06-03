@@ -258,7 +258,7 @@ Foam::radiation::viewFactor::viewFactor(const volScalarField& T)
     pivotIndices_(0),
     useSolarLoad_(false),
     solarLoad_(),
-    nBands_(coeffs_.lookupOrDefault<label>("nBands", 1))
+    nBands_(coeffs_.getOrDefault<label>("nBands", 1))
 {
     initialise();
 }
@@ -320,7 +320,7 @@ Foam::radiation::viewFactor::viewFactor
     pivotIndices_(0),
     useSolarLoad_(false),
     solarLoad_(),
-    nBands_(coeffs_.lookupOrDefault<label>("nBands", 1))
+    nBands_(coeffs_.getOrDefault<label>("nBands", 1))
 {
     initialise();
 }

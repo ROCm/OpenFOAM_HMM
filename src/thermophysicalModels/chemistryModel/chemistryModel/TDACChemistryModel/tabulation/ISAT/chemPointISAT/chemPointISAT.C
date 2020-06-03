@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -228,8 +228,8 @@ Foam::chemPointISAT<CompType, ThermoType>::chemPointISAT
     timeTag_(chemistry_.timeSteps()),
     lastTimeUsed_(chemistry_.timeSteps()),
     toRemove_(false),
-    maxNumNewDim_(coeffsDict.lookupOrDefault("maxNumNewDim", 0)),
-    printProportion_(coeffsDict.lookupOrDefault("printProportion", false)),
+    maxNumNewDim_(coeffsDict.getOrDefault("maxNumNewDim", 0)),
+    printProportion_(coeffsDict.getOrDefault("printProportion", false)),
     numRetrieve_(0),
     nLifeTime_(0),
     completeToSimplifiedIndex_

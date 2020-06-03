@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,7 +125,7 @@ bool Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::read
 {
     sixDoFRigidBodyMotionRestraint::read(sDoFRBMRDict);
 
-    refQ_ = sDoFRBMRCoeffs_.lookupOrDefault<tensor>("referenceOrientation", I);
+    refQ_ = sDoFRBMRCoeffs_.getOrDefault<tensor>("referenceOrientation", I);
 
     if (mag(mag(refQ_) - sqrt(3.0)) > ROOTSMALL)
     {

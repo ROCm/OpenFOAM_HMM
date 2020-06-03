@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,14 +79,14 @@ inletOutletTotalTemperatureFvPatchScalarField
 )
 :
     inletOutletFvPatchScalarField(p, iF),
-    UName_(dict.lookupOrDefault<word>("U", "U")),
-    psiName_(dict.lookupOrDefault<word>("psi", "thermo:psi")),
+    UName_(dict.getOrDefault<word>("U", "U")),
+    psiName_(dict.getOrDefault<word>("psi", "thermo:psi")),
     gamma_(dict.get<scalar>("gamma")),
     T0_("T0", dict, p.size())
 {
-    this->patchType() = dict.lookupOrDefault<word>("patchType", word::null);
+    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
 
-    this->phiName_ = dict.lookupOrDefault<word>("phi", "phi");
+    this->phiName_ = dict.getOrDefault<word>("phi", "phi");
 
     this->refValue() = Zero;
     if (dict.found("value"))

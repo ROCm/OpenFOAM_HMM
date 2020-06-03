@@ -853,12 +853,12 @@ int main(int argc, char *argv[])
         dryRun
     );
 
-    const bool keepPatches(meshDict.lookupOrDefault("keepPatches", false));
+    const bool keepPatches(meshDict.getOrDefault("keepPatches", false));
 
     // format to be used for writing lines
     const word setFormat
     (
-        meshDict.lookupOrDefault
+        meshDict.getOrDefault<word>
         (
             "setFormat",
             vtkSetWriter<scalar>::typeName
@@ -871,7 +871,7 @@ int main(int argc, char *argv[])
 
     const scalar maxSizeRatio
     (
-        meshDict.lookupOrDefault<scalar>("maxSizeRatio", 100.0)
+        meshDict.getOrDefault<scalar>("maxSizeRatio", 100)
     );
 
 
@@ -919,7 +919,7 @@ int main(int argc, char *argv[])
     // Set debug level
     meshRefinement::debugType debugLevel = meshRefinement::debugType
     (
-        meshDict.lookupOrDefault<label>
+        meshDict.getOrDefault<label>
         (
             "debug",
             0
@@ -1004,7 +1004,7 @@ int main(int argc, char *argv[])
             IOobject::NO_WRITE
         ),
         geometryDict,
-        meshDict.lookupOrDefault("singleRegionName", true)
+        meshDict.getOrDefault("singleRegionName", true)
     );
 
 
@@ -1059,7 +1059,7 @@ int main(int argc, char *argv[])
                 allGeometry,
                 conformationDict,
                 shapeControlDict,
-                refineDict.lookupOrDefault("gapLevelIncrement", 0),
+                refineDict.getOrDefault("gapLevelIncrement", 0),
                 initialCellSize/defaultCellSize
             );
 
@@ -1078,7 +1078,7 @@ int main(int argc, char *argv[])
                     "refinementSurfaces",
                     dryRun
                 ),
-                refineDict.lookupOrDefault("gapLevelIncrement", 0),
+                refineDict.getOrDefault("gapLevelIncrement", 0),
                 dryRun
             )
         );
@@ -1714,7 +1714,7 @@ int main(int argc, char *argv[])
     {
         const bool mergePatchFaces
         (
-            meshDict.lookupOrDefault("mergePatchFaces", true)
+            meshDict.getOrDefault("mergePatchFaces", true)
         );
 
         if (!mergePatchFaces)
@@ -1728,7 +1728,7 @@ int main(int argc, char *argv[])
         {
             const bool mergeAcrossPatches
             (
-                meshDict.lookupOrDefault("mergeAcrossPatches", false)
+                meshDict.getOrDefault("mergeAcrossPatches", false)
             );
 
             if (mergeAcrossPatches)

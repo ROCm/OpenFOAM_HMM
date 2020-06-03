@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -161,7 +161,7 @@ Foam::InjectedParticleInjection<CloudType>::InjectedParticleInjection
     volume_(this->template getModelProperty<scalarList>("volume")),
     ignoreOutOfBounds_
     (
-        this->coeffDict().lookupOrDefault("ignoreOutOfBounds", false)
+        this->coeffDict().getOrDefault("ignoreOutOfBounds", false)
     ),
     currentParticlei_
     (

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,14 +64,14 @@ fixedNormalInletOutletVelocityFvPatchVectorField
 )
 :
     directionMixedFvPatchVectorField(p, iF),
-    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
+    phiName_(dict.getOrDefault<word>("phi", "phi")),
     fixTangentialInflow_(dict.lookup("fixTangentialInflow")),
     normalVelocity_
     (
         fvPatchVectorField::New(p, iF, dict.subDict("normalVelocity"))
     )
 {
-    patchType() = dict.lookupOrDefault<word>("patchType", word::null);
+    patchType() = dict.getOrDefault<word>("patchType", word::null);
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
     refValue() = normalVelocity();
     refGrad() = Zero;

@@ -55,23 +55,23 @@ VoFPatchTransfer::VoFPatchTransfer
     transferModel(type(), film, dict),
     deltaFactorToVoF_
     (
-        coeffDict_.lookupOrDefault<scalar>("deltaFactorToVoF", 1.0)
+        coeffDict_.getOrDefault<scalar>("deltaFactorToVoF", 1.0)
     ),
     deltaFactorToFilm_
     (
-        coeffDict_.lookupOrDefault<scalar>("deltaFactorToFilm", 0.5)
+        coeffDict_.getOrDefault<scalar>("deltaFactorToFilm", 0.5)
     ),
     alphaToVoF_
     (
-        coeffDict_.lookupOrDefault<scalar>("alphaToVoF", 0.5)
+        coeffDict_.getOrDefault<scalar>("alphaToVoF", 0.5)
     ),
     alphaToFilm_
     (
-        coeffDict_.lookupOrDefault<scalar>("alphaToFilm", 0.1)
+        coeffDict_.getOrDefault<scalar>("alphaToFilm", 0.1)
     ),
     transferRateCoeff_
     (
-        coeffDict_.lookupOrDefault<scalar>("transferRateCoeff", 0.1)
+        coeffDict_.getOrDefault<scalar>("transferRateCoeff", 0.1)
     ),
     patchIDs_(),
     patchTransferredMasses_()

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,12 +44,12 @@ bool Foam::solutionControl::read(const bool absTolOnly)
 
     // Read solution controls
     nNonOrthCorr_ =
-        solutionDict.lookupOrDefault<label>("nNonOrthogonalCorrectors", 0);
+        solutionDict.getOrDefault<label>("nNonOrthogonalCorrectors", 0);
     momentumPredictor_ =
-        solutionDict.lookupOrDefault("momentumPredictor", true);
-    transonic_ = solutionDict.lookupOrDefault("transonic", false);
-    consistent_ = solutionDict.lookupOrDefault("consistent", false);
-    frozenFlow_ = solutionDict.lookupOrDefault("frozenFlow", false);
+        solutionDict.getOrDefault("momentumPredictor", true);
+    transonic_ = solutionDict.getOrDefault("transonic", false);
+    consistent_ = solutionDict.getOrDefault("consistent", false);
+    frozenFlow_ = solutionDict.getOrDefault("frozenFlow", false);
 
     // Read residual information
     const dictionary residualDict

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,12 +44,12 @@ bool Foam::pimpleControl::read()
 
     const dictionary pimpleDict(dict());
 
-    solveFlow_ = pimpleDict.lookupOrDefault("solveFlow", true);
-    nCorrPIMPLE_ = pimpleDict.lookupOrDefault<label>("nOuterCorrectors", 1);
-    nCorrPISO_ = pimpleDict.lookupOrDefault<label>("nCorrectors", 1);
-    SIMPLErho_ = pimpleDict.lookupOrDefault("SIMPLErho", false);
+    solveFlow_ = pimpleDict.getOrDefault("solveFlow", true);
+    nCorrPIMPLE_ = pimpleDict.getOrDefault<label>("nOuterCorrectors", 1);
+    nCorrPISO_ = pimpleDict.getOrDefault<label>("nCorrectors", 1);
+    SIMPLErho_ = pimpleDict.getOrDefault("SIMPLErho", false);
     turbOnFinalIterOnly_ =
-        pimpleDict.lookupOrDefault("turbOnFinalIterOnly", true);
+        pimpleDict.getOrDefault("turbOnFinalIterOnly", true);
 
     return true;
 }

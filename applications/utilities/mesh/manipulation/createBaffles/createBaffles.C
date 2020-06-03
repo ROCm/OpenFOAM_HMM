@@ -472,7 +472,7 @@ int main(int argc, char *argv[])
         IOdictionary dict(dictIO);
 
         internalFacesOnly = dict.get<bool>("internalFacesOnly");
-        noFields = dict.lookupOrDefault("noFields", false);
+        noFields = dict.getOrDefault("noFields", false);
 
         const dictionary& selectionsDict = dict.subDict("baffles");
 
@@ -735,7 +735,7 @@ int main(int argc, char *argv[])
                 // (ie 3D thermal baffles)
 
                 const bool sameGroup =
-                    patchSource.lookupOrDefault("sameGroup", true);
+                    patchSource.getOrDefault("sameGroup", true);
 
                 if (!sameGroup)
                 {
@@ -915,7 +915,7 @@ int main(int argc, char *argv[])
                 const dictionary& patchSource = dict.subDict("patchPairs");
 
                 const bool sameGroup =
-                    patchSource.lookupOrDefault("sameGroup", true);
+                    patchSource.getOrDefault("sameGroup", true);
 
                 const word& groupName = selectors[selectorI].name();
 

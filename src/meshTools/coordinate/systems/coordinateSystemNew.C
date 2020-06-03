@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -163,7 +163,7 @@ Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
         dictPtr = coordinateSystem::subDictCompat(dictPtr);
     }
 
-    word modelType = dictPtr->lookupOrDefault<word>
+    word modelType = dictPtr->getOrDefault<word>
     (
         "type",
         coordSystem::cartesian::typeName_()
@@ -191,7 +191,7 @@ Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
         dictPtr = coordinateSystem::subDictCompat(dictPtr);
     }
 
-    const word modelType = dictPtr->lookupOrDefault<word>
+    const word modelType = dictPtr->getOrDefault<word>
     (
         "type",
         coordSystem::cartesian::typeName_()

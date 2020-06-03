@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,7 +50,7 @@ Foam::faceSelection::faceSelection
     name_(name),
     mesh_(mesh),
     dict_(dict),
-    flip_(dict.lookupOrDefault("flip", false))
+    flip_(dict.getOrDefault("flip", false))
 {}
 
 

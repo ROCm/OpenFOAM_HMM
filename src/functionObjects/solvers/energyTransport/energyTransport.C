@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -203,9 +203,9 @@ Foam::functionObjects::energyTransport::energyTransport
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    fieldName_(dict.lookupOrDefault<word>("field", "T")),
-    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
+    fieldName_(dict.getOrDefault<word>("field", "T")),
+    phiName_(dict.getOrDefault<word>("phi", "phi")),
+    rhoName_(dict.getOrDefault<word>("rho", "rho")),
     nCorr_(0),
     schemesField_("unknown-schemesField"),
     fvOptions_(mesh_),
@@ -332,7 +332,7 @@ bool Foam::functionObjects::energyTransport::read(const dictionary& dict)
     dict.readIfPresent("phi", phiName_);
     dict.readIfPresent("rho", rhoName_);
 
-    schemesField_ = dict.lookupOrDefault("schemesField", fieldName_);
+    schemesField_ = dict.getOrDefault("schemesField", fieldName_);
 
     dict.readIfPresent("nCorr", nCorr_);
 

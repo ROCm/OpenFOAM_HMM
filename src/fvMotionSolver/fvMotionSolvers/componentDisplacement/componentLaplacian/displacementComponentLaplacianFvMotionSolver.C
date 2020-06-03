@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -95,7 +95,7 @@ displacementComponentLaplacianFvMotionSolver
       : -1
     )
 {
-    if (coeffDict().lookupOrDefault("applyPointLocation", true))
+    if (coeffDict().getOrDefault("applyPointLocation", true))
     {
         pointLocation_.reset
         (

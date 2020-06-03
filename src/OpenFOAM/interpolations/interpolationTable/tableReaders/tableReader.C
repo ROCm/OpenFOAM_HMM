@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +36,7 @@ Foam::autoPtr<Foam::tableReader<Type>> Foam::tableReader<Type>::New
     const dictionary& spec
 )
 {
-    const word readerType = spec.lookupOrDefault<word>
+    const word readerType = spec.getOrDefault<word>
     (
         "readerType",
         "openFoam"

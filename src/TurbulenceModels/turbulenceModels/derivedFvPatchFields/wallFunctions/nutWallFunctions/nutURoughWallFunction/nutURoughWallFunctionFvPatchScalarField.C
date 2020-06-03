@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -268,8 +268,8 @@ nutURoughWallFunctionFvPatchScalarField
     roughnessHeight_(dict.get<scalar>("roughnessHeight")),
     roughnessConstant_(dict.get<scalar>("roughnessConstant")),
     roughnessFactor_(dict.get<scalar>("roughnessFactor")),
-    maxIter_(dict.lookupOrDefault<label>("maxIter", 10)),
-    tolerance_(dict.lookupOrDefault<scalar>("tolerance", 0.0001))
+    maxIter_(dict.getOrDefault<label>("maxIter", 10)),
+    tolerance_(dict.getOrDefault<scalar>("tolerance", 0.0001))
 {}
 
 

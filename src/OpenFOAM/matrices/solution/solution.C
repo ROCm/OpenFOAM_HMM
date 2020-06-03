@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,7 +50,7 @@ void Foam::solution::read(const dictionary& dict)
     if (dict.found("cache"))
     {
         cache_ = dict.subDict("cache");
-        caching_ = cache_.lookupOrDefault("active", true);
+        caching_ = cache_.getOrDefault("active", true);
     }
 
     if (dict.found("relaxationFactors"))
@@ -92,10 +92,10 @@ void Foam::solution::read(const dictionary& dict)
         }
 
         fieldRelaxDefault_ =
-            fieldRelaxDict_.lookupOrDefault<scalar>("default", 0.0);
+            fieldRelaxDict_.getOrDefault<scalar>("default", 0);
 
         eqnRelaxDefault_ =
-            eqnRelaxDict_.lookupOrDefault<scalar>("default", 0.0);
+            eqnRelaxDict_.getOrDefault<scalar>("default", 0);
 
         DebugInfo
             << "Relaxation factors:" << nl

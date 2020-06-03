@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,15 +83,15 @@ Foam::maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
 )
 :
     partialSlipFvPatchVectorField(p, iF),
-    TName_(dict.lookupOrDefault<word>("T", "T")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
-    psiName_(dict.lookupOrDefault<word>("psi", "thermo:psi")),
-    muName_(dict.lookupOrDefault<word>("mu", "thermo:mu")),
-    tauMCName_(dict.lookupOrDefault<word>("tauMC", "tauMC")),
+    TName_(dict.getOrDefault<word>("T", "T")),
+    rhoName_(dict.getOrDefault<word>("rho", "rho")),
+    psiName_(dict.getOrDefault<word>("psi", "thermo:psi")),
+    muName_(dict.getOrDefault<word>("mu", "thermo:mu")),
+    tauMCName_(dict.getOrDefault<word>("tauMC", "tauMC")),
     accommodationCoeff_(dict.get<scalar>("accommodationCoeff")),
     Uwall_("Uwall", dict, p.size()),
-    thermalCreep_(dict.lookupOrDefault("thermalCreep", true)),
-    curvature_(dict.lookupOrDefault("curvature", true))
+    thermalCreep_(dict.getOrDefault("thermalCreep", true)),
+    curvature_(dict.getOrDefault("curvature", true))
 {
     if
     (

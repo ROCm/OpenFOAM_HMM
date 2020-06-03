@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,8 +50,8 @@ Foam::sixDoFSolvers::CrankNicolson::CrankNicolson
 )
 :
     sixDoFSolver(dict, body),
-    aoc_(dict.lookupOrDefault<scalar>("aoc", 0.5)),
-    voc_(dict.lookupOrDefault<scalar>("voc", 0.5))
+    aoc_(dict.getOrDefault<scalar>("aoc", 0.5)),
+    voc_(dict.getOrDefault<scalar>("voc", 0.5))
 {}
 
 

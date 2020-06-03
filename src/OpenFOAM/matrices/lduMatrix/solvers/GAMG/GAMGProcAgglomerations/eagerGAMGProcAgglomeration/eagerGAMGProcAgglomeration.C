@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +54,7 @@ Foam::eagerGAMGProcAgglomeration::eagerGAMGProcAgglomeration
 )
 :
     GAMGProcAgglomeration(agglom, controlDict),
-    mergeLevels_(controlDict.lookupOrDefault<label>("mergeLevels", 1))
+    mergeLevels_(controlDict.getOrDefault<label>("mergeLevels", 1))
 {}
 
 

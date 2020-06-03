@@ -15,4 +15,4 @@ const label sampleFrequency(propsDict.get<label>("sampleFrequency"));
 
 const label maxPositions(propsDict.get<label>("maxPositions"));
 
-const word setFormat(propsDict.lookupOrDefault<word>("setFormat", "vtk"));
+const word setFormat(propsDict.getOrDefault<word>("setFormat", "vtk"));

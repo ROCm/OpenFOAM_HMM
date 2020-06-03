@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -134,16 +134,16 @@ pressurePIDControlInletVelocityFvPatchVectorField
     upstreamName_(dict.lookup("upstream")),
     downstreamName_(dict.lookup("downstream")),
     deltaP_(dict.get<scalar>("deltaP")),
-    shapeFactor_(dict.lookupOrDefault<scalar>("shapeFactor", 0)),
-    pName_(dict.lookupOrDefault<word>("p", "p")),
-    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "none")),
+    shapeFactor_(dict.getOrDefault<scalar>("shapeFactor", 0)),
+    pName_(dict.getOrDefault<word>("p", "p")),
+    phiName_(dict.getOrDefault<word>("phi", "phi")),
+    rhoName_(dict.getOrDefault<word>("rho", "none")),
     P_(dict.get<scalar>("P")),
     I_(dict.get<scalar>("I")),
     D_(dict.get<scalar>("D")),
     Q_(- gSum(*this & patch().Sf())),
-    error_(dict.lookupOrDefault<scalar>("error", 0)),
-    errorIntegral_(dict.lookupOrDefault<scalar>("errorIntegral", 0)),
+    error_(dict.getOrDefault<scalar>("error", 0)),
+    errorIntegral_(dict.getOrDefault<scalar>("errorIntegral", 0)),
     oldQ_(0),
     oldError_(0),
     oldErrorIntegral_(0),

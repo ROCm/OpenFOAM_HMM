@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,7 +47,7 @@ linearRadial::linearRadial(const dictionary& dict)
 :
     extrudeModel(typeName, dict),
     R_(coeffDict_.get<scalar>("R")),
-    Rsurface_(coeffDict_.lookupOrDefault<scalar>("Rsurface", -1))
+    Rsurface_(coeffDict_.getOrDefault<scalar>("Rsurface", -1))
 {}
 
 

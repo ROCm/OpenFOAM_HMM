@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,11 +68,11 @@ timeVaryingMappedFixedValuePointPatchField
 :
     fixedValuePointPatchField<Type>(p, iF, dict, false),
     fieldTableName_(iF.name()),
-    setAverage_(dict.lookupOrDefault("setAverage", false)),
-    perturb_(dict.lookupOrDefault("perturb", 1e-5)),
+    setAverage_(dict.getOrDefault("setAverage", false)),
+    perturb_(dict.getOrDefault("perturb", 1e-5)),
     mapMethod_
     (
-        dict.lookupOrDefault<word>
+        dict.getOrDefault<word>
         (
             "mapMethod",
             "planarInterpolation"

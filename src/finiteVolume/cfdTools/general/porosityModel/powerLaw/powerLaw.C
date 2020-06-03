@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,7 +57,7 @@ Foam::porosityModels::powerLaw::powerLaw
     porosityModel(name, modelType, mesh, dict, cellZoneName),
     C0_(coeffs_.get<scalar>("C0")),
     C1_(coeffs_.get<scalar>("C1")),
-    rhoName_(coeffs_.lookupOrDefault<word>("rho", "rho"))
+    rhoName_(coeffs_.getOrDefault<word>("rho", "rho"))
 {}
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -173,7 +173,7 @@ void Foam::decompositionMethod::readConstraints()
 
             const dictionary& dict = dEntry.dict();
 
-            if (dict.lookupOrDefault("enabled", true))
+            if (dict.getOrDefault("enabled", true))
             {
                 constraints_.append(decompositionConstraint::New(dict));
             }

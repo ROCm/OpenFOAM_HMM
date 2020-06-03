@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +55,7 @@ Foam::fixedMeanOutletInletFvPatchField<Type>::fixedMeanOutletInletFvPatchField
     outletInletFvPatchField<Type>(p, iF),
     meanValue_(Function1<Type>::New("meanValue", dict))
 {
-    this->phiName_ = dict.lookupOrDefault<word>("phi", "phi");
+    this->phiName_ = dict.getOrDefault<word>("phi", "phi");
 
     fvPatchField<Type>::operator=
     (

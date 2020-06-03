@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -123,7 +124,7 @@ Foam::cloudSolution::~cloudSolution()
 void Foam::cloudSolution::read()
 {
     // For transient runs the Lagrangian tracking may be transient or steady
-    transient_ = dict_.lookupOrDefault("transient", false);
+    transient_ = dict_.getOrDefault("transient", false);
 
     // For LTS and steady-state runs the Lagrangian tracking cannot be transient
     if (transient_)

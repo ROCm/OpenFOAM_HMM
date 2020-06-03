@@ -227,11 +227,11 @@ turbulentTemperatureTwoPhaseRadCoupledMixedFvPatchScalarField
     mixedFvPatchScalarField(p, iF),
     regionType_(regionTypeNames_.get("region", dict)),
     method_(KMethodTypeNames_.get("kappaMethod", dict)),
-    kappaName_(dict.lookupOrDefault<word>("kappa", "none")),
+    kappaName_(dict.getOrDefault<word>("kappa", "none")),
     otherPhaseName_(dict.get<word>("otherPhase")),
-    TnbrName_(dict.lookupOrDefault<word>("Tnbr", "T")),
-    qrNbrName_(dict.lookupOrDefault<word>("qrNbr", "none")),
-    qrName_(dict.lookupOrDefault<word>("qr", "none"))
+    TnbrName_(dict.getOrDefault<word>("Tnbr", "T")),
+    qrNbrName_(dict.getOrDefault<word>("qrNbr", "none")),
+    qrName_(dict.getOrDefault<word>("qr", "none"))
 {
     if (!isA<mappedPatchBase>(this->patch().patch()))
     {

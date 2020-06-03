@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -151,9 +151,9 @@ Foam::sampledThresholdCellFaces::sampledThresholdCellFaces
 :
     sampledSurface(name, mesh, dict),
     fieldName_(dict.get<word>("field")),
-    lowerThreshold_(dict.lookupOrDefault<scalar>("lowerLimit", -VGREAT)),
-    upperThreshold_(dict.lookupOrDefault<scalar>("upperLimit", VGREAT)),
-    triangulate_(dict.lookupOrDefault("triangulate", false)),
+    lowerThreshold_(dict.getOrDefault<scalar>("lowerLimit", -VGREAT)),
+    upperThreshold_(dict.getOrDefault<scalar>("upperLimit", VGREAT)),
+    triangulate_(dict.getOrDefault("triangulate", false)),
     prevTimeIndex_(-1),
     meshCells_()
 {

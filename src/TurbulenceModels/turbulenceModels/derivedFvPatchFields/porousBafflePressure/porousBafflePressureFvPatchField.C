@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,12 +57,12 @@ Foam::porousBafflePressureFvPatchField::porousBafflePressureFvPatchField
 )
 :
     fixedJumpFvPatchField<scalar>(p, iF),
-    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
+    phiName_(dict.getOrDefault<word>("phi", "phi")),
+    rhoName_(dict.getOrDefault<word>("rho", "rho")),
     D_(Function1<scalar>::New("D", dict)),
     I_(Function1<scalar>::New("I", dict)),
     length_(dict.get<scalar>("length")),
-    uniformJump_(dict.lookupOrDefault("uniformJump", false))
+    uniformJump_(dict.getOrDefault("uniformJump", false))
 {
     fvPatchField<scalar>::operator=
     (

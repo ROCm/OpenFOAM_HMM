@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,7 +72,7 @@ interstitialInletVelocityFvPatchVectorField
 :
     fixedValueFvPatchVectorField(p, iF, dict),
     inletVelocity_("inletVelocity", dict, p.size()),
-    alphaName_(dict.lookupOrDefault<word>("alpha", "alpha"))
+    alphaName_(dict.getOrDefault<word>("alpha", "alpha"))
 {}
 
 

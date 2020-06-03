@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2019 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -362,7 +362,7 @@ Foam::functionObjects::sizeDistribution::sizeDistribution
     nCells_(0),
     cellId_(),
     volume_(0.0),
-    writeVolume_(dict.lookupOrDefault("writeVolume", false)),
+    writeVolume_(dict.getOrDefault("writeVolume", false)),
     popBal_
     (
         obr_.lookupObject<Foam::diameterModels::populationBalanceModel>
@@ -371,8 +371,8 @@ Foam::functionObjects::sizeDistribution::sizeDistribution
         )
     ),
     N_(popBal_.sizeGroups().size()),
-    momentOrder_(dict.lookupOrDefault<label>("momentOrder", 0)),
-    normalize_(dict.lookupOrDefault("normalize", false)),
+    momentOrder_(dict.getOrDefault<label>("momentOrder", 0)),
+    normalize_(dict.getOrDefault("normalize", false)),
     sumN_(0.0),
     sumV_(0.0)
 {

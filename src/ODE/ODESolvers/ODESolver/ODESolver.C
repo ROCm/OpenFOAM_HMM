@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,9 +65,9 @@ Foam::ODESolver::ODESolver(const ODESystem& ode, const dictionary& dict)
     odes_(ode),
     maxN_(ode.nEqns()),
     n_(ode.nEqns()),
-    absTol_(n_, dict.lookupOrDefault<scalar>("absTol", SMALL)),
-    relTol_(n_, dict.lookupOrDefault<scalar>("relTol", 1e-4)),
-    maxSteps_(dict.lookupOrDefault<label>("maxSteps", 10000))
+    absTol_(n_, dict.getOrDefault<scalar>("absTol", SMALL)),
+    relTol_(n_, dict.getOrDefault<scalar>("relTol", 1e-4)),
+    maxSteps_(dict.getOrDefault<label>("maxSteps", 10000))
 {}
 
 

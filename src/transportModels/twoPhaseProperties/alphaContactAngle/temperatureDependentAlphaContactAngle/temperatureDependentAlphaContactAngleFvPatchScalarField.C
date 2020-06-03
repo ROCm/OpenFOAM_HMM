@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +55,7 @@ temperatureDependentAlphaContactAngleFvPatchScalarField
 )
 :
     alphaContactAngleTwoPhaseFvPatchScalarField(p, iF, dict),
-    TName_(dict.lookupOrDefault<word>("T", "T")),
+    TName_(dict.getOrDefault<word>("T", "T")),
     theta0_(Function1<scalar>::New("theta0", dict))
 {
     evaluate();

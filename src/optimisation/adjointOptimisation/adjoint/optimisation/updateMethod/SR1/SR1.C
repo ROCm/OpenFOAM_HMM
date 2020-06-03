@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -163,15 +163,15 @@ Foam::SR1::SR1(const fvMesh& mesh, const dictionary& dict)
     // Construct null matrix since we dont know the dimension yet
     etaHessian_
     (
-        coeffsDict().lookupOrDefault<scalar>("etaHessian", 1)
+        coeffsDict().getOrDefault<scalar>("etaHessian", 1)
     ),
     nSteepestDescent_
     (
-        coeffsDict().lookupOrDefault<label>("nSteepestDescent", 1)
+        coeffsDict().getOrDefault<label>("nSteepestDescent", 1)
     ),
     ratioThreshold_
     (
-        coeffsDict().lookupOrDefault<scalar>("ratioThreshold", 1e-08)
+        coeffsDict().getOrDefault<scalar>("ratioThreshold", 1e-08)
     ),
     activeDesignVars_(0),
     HessianInv_(),

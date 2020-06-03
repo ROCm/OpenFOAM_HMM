@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,7 +70,7 @@ Foam::functionObjects::runTimeControls::averageCondition::averageCondition
     functionObjectName_(dict.get<word>("functionObject")),
     fieldNames_(dict.get<wordList>("fields")),
     tolerance_(dict.get<scalar>("tolerance")),
-    window_(dict.lookupOrDefault<scalar>("window", -1)),
+    window_(dict.getOrDefault<scalar>("window", -1)),
     windowType_
     (
         window_ > 0
@@ -78,8 +78,8 @@ Foam::functionObjects::runTimeControls::averageCondition::averageCondition
       : windowType::NONE
     ),
     totalTime_(fieldNames_.size(), scalar(0)),
-    resetOnRestart_(dict.lookupOrDefault<bool>("resetOnRestart", false)),
-    nIterStartUp_(dict.lookupOrDefault<label>("nIterStartUp", 10)),
+    resetOnRestart_(dict.getOrDefault("resetOnRestart", false)),
+    nIterStartUp_(dict.getOrDefault<label>("nIterStartUp", 10)),
     iter_(-1)
 {
     dictionary& conditionDict = this->conditionDict();

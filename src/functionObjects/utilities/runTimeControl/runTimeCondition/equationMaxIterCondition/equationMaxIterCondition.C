@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,7 +65,7 @@ equationMaxIterCondition
     runTimeCondition(name, obr, dict, state),
     fieldNames_(dict.get<wordList>("fields")),
     threshold_(dict.get<label>("threshold")),
-    startIter_(dict.lookupOrDefault("startIter", 2))
+    startIter_(dict.getOrDefault("startIter", 2))
 {
     if (!fieldNames_.size())
     {

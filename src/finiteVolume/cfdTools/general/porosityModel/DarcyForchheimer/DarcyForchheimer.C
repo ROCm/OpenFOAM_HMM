@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,9 +60,9 @@ Foam::porosityModels::DarcyForchheimer::DarcyForchheimer
     fXYZ_("f", dimless/dimLength, coeffs_),
     D_(cellZoneIDs_.size()),
     F_(cellZoneIDs_.size()),
-    rhoName_(coeffs_.lookupOrDefault<word>("rho", "rho")),
-    muName_(coeffs_.lookupOrDefault<word>("mu", "thermo:mu")),
-    nuName_(coeffs_.lookupOrDefault<word>("nu", "nu"))
+    rhoName_(coeffs_.getOrDefault<word>("rho", "rho")),
+    muName_(coeffs_.getOrDefault<word>("mu", "thermo:mu")),
+    nuName_(coeffs_.getOrDefault<word>("nu", "nu"))
 {
     adjustNegativeResistance(dXYZ_);
     adjustNegativeResistance(fXYZ_);

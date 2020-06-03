@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -249,8 +249,8 @@ nutUSpaldingWallFunctionFvPatchScalarField
 )
 :
     nutWallFunctionFvPatchScalarField(p, iF, dict),
-    maxIter_(dict.lookupOrDefault<label>("maxIter", 10)),
-    tolerance_(dict.lookupOrDefault<scalar>("tolerance", 0.01))
+    maxIter_(dict.getOrDefault<label>("maxIter", 10)),
+    tolerance_(dict.getOrDefault<scalar>("tolerance", 0.01))
     //invocations_(0),
     //nontrivial_(0),
     //nonconvergence_(0),

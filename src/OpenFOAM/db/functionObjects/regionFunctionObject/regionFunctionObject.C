@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -135,12 +135,12 @@ Foam::functionObjects::regionFunctionObject::regionFunctionObject
 )
 :
     stateFunctionObject(name, runTime),
-    subRegistryName_(dict.lookupOrDefault<word>("subRegion", word::null)),
+    subRegistryName_(dict.getOrDefault<word>("subRegion", word::null)),
     obr_
     (
         runTime.lookupObject<objectRegistry>
         (
-            dict.lookupOrDefault("region", polyMesh::defaultRegion)
+            dict.getOrDefault("region", polyMesh::defaultRegion)
         )
     ),
     obrPtr_(nullptr)
@@ -155,7 +155,7 @@ Foam::functionObjects::regionFunctionObject::regionFunctionObject
 )
 :
     stateFunctionObject(name, obr.time()),
-    subRegistryName_(dict.lookupOrDefault<word>("subRegion", word::null)),
+    subRegistryName_(dict.getOrDefault<word>("subRegion", word::null)),
     obr_(obr),
     obrPtr_(nullptr)
 {}
@@ -167,7 +167,7 @@ bool Foam::functionObjects::regionFunctionObject::read(const dictionary& dict)
 {
     stateFunctionObject::read(dict);
 
-    subRegistryName_ = dict.lookupOrDefault<word>("subRegion", word::null);
+    subRegistryName_ = dict.getOrDefault<word>("subRegion", word::null);
 
     obrPtr_ = nullptr;
 

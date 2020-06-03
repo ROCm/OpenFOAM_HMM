@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,7 +86,7 @@ Foam::PatchCollisionDensity<CloudType>::PatchCollisionDensity
 )
 :
     CloudFunctionObject<CloudType>(dict, owner, modelName, typeName),
-    minSpeed_(dict.lookupOrDefault<scalar>("minSpeed", -1)),
+    minSpeed_(dict.getOrDefault<scalar>("minSpeed", -1)),
     collisionDensity_
     (
         this->owner().mesh().boundary(),

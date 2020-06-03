@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -155,7 +155,7 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::read
         // Set the action to perform when all conditions are satisfied
         // - set to end for backwards compatibility with v1806
         satisfiedAction_ =
-            satisfiedActionNames.lookupOrDefault
+            satisfiedActionNames.getOrDefault
             (
                 "satisfiedAction",
                 dict,

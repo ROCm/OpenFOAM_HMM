@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,7 +33,7 @@ License
 template<class Type>
 void Foam::Function1Types::Sine<Type>::read(const dictionary& coeffs)
 {
-    t0_ = coeffs.lookupOrDefault<scalar>("t0", 0);
+    t0_ = coeffs.getOrDefault<scalar>("t0", 0);
     amplitude_ = Function1<scalar>::New("amplitude", coeffs);
     frequency_ = Function1<scalar>::New("frequency", coeffs);
     scale_ = Function1<Type>::New("scale", coeffs);

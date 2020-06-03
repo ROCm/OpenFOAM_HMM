@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -162,10 +162,10 @@ Foam::lduMatrix::solver::solver
 
 void Foam::lduMatrix::solver::readControls()
 {
-    maxIter_ = controlDict_.lookupOrDefault<label>("maxIter", defaultMaxIter_);
-    minIter_ = controlDict_.lookupOrDefault<label>("minIter", 0);
-    tolerance_ = controlDict_.lookupOrDefault<scalar>("tolerance", 1e-6);
-    relTol_ = controlDict_.lookupOrDefault<scalar>("relTol", 0);
+    maxIter_ = controlDict_.getOrDefault<label>("maxIter", defaultMaxIter_);
+    minIter_ = controlDict_.getOrDefault<label>("minIter", 0);
+    tolerance_ = controlDict_.getOrDefault<scalar>("tolerance", 1e-6);
+    relTol_ = controlDict_.getOrDefault<scalar>("relTol", 0);
 }
 
 

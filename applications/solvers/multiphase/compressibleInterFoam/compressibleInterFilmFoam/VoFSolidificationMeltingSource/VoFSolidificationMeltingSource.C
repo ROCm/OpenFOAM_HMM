@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -124,9 +125,9 @@ Foam::fv::VoFSolidificationMeltingSource::VoFSolidificationMeltingSource
     cellSetOption(sourceName, modelType, dict, mesh),
     alphaSolidT_(Function1<scalar>::New("alphaSolidT", coeffs_)),
     L_("L", dimEnergy/dimMass, coeffs_),
-    relax_(coeffs_.lookupOrDefault("relax", 0.9)),
-    Cu_(coeffs_.lookupOrDefault<scalar>("Cu", 100000)),
-    q_(coeffs_.lookupOrDefault("q", 0.001)),
+    relax_(coeffs_.getOrDefault("relax", 0.9)),
+    Cu_(coeffs_.getOrDefault<scalar>("Cu", 100000)),
+    q_(coeffs_.getOrDefault<scalar>("q", 0.001)),
     alphaSolid_
     (
         IOobject

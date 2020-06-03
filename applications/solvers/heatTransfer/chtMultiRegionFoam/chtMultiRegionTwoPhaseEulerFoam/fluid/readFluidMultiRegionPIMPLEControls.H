@@ -2,10 +2,10 @@
 
     Switch faceMomentum
     (
-        pimpleDict.lookupOrDefault<Switch>("faceMomentum", false)
+        pimpleDict.getOrDefault<Switch>("faceMomentum", false)
     );
 
     int nEnergyCorrectors
     (
-        pimpleDict.lookupOrDefault<int>("nEnergyCorrectors", 1)
+        pimpleDict.getOrDefault<int>("nEnergyCorrectors", 1)
     );

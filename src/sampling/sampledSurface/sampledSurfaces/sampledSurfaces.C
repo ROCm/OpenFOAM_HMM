@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -279,14 +279,14 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
     nFaces_.clear();
     fieldSelection_.clear();
 
-    verbose_ = dict.lookupOrDefault("verbose", false);
-    onExecute_ = dict.lookupOrDefault("sampleOnExecute", false);
+    verbose_ = dict.getOrDefault("verbose", false);
+    onExecute_ = dict.getOrDefault("sampleOnExecute", false);
 
     sampleFaceScheme_ =
-        dict.lookupOrDefault<word>("sampleScheme", "cell");
+        dict.getOrDefault<word>("sampleScheme", "cell");
 
     sampleNodeScheme_ =
-        dict.lookupOrDefault<word>("interpolationScheme", "cellPoint");
+        dict.getOrDefault<word>("interpolationScheme", "cellPoint");
 
     const entry* eptr = dict.findEntry("surfaces");
 
@@ -297,7 +297,7 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
     const dictionary formatOptions(dict.subOrEmptyDict("formatOptions"));
 
     // Store on registry?
-    const bool dfltStore = dict.lookupOrDefault("store", false);
+    const bool dfltStore = dict.getOrDefault("store", false);
 
     if (eptr && eptr->isDict())
     {
@@ -335,11 +335,11 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
             surfs.set(surfi, surf);
 
             // Define additional action(s)
-            if (surfDict.lookupOrDefault("store", dfltStore))
+            if (surfDict.getOrDefault("store", dfltStore))
             {
                 actions_[surfi] |= ACTION_STORE;
             }
-            if (surfDict.lookupOrDefault("surfMeshStore", false))
+            if (surfDict.getOrDefault("surfMeshStore", false))
             {
                 actions_[surfi] |= ACTION_SURF_MESH;
             }
@@ -401,11 +401,11 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
             surfs.set(surfi, surf);
 
             // Define additional action(s)
-            if (surfDict.lookupOrDefault("store", dfltStore))
+            if (surfDict.getOrDefault("store", dfltStore))
             {
                 actions_[surfi] |= ACTION_STORE;
             }
-            if (surfDict.lookupOrDefault("surfMeshStore", false))
+            if (surfDict.getOrDefault("surfMeshStore", false))
             {
                 actions_[surfi] |= ACTION_SURF_MESH;
             }

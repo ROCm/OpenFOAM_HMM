@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -145,7 +145,7 @@ bool Foam::functionObjects::dataCloud::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
 
-    const int padWidth = dict.lookupOrDefault<int>("width", 8);
+    const int padWidth = dict.getOrDefault<int>("width", 8);
 
     // Appropriate printf format - Enforce min/max sanity limits
     if (padWidth < 1 || padWidth > 31)
@@ -158,7 +158,7 @@ bool Foam::functionObjects::dataCloud::read(const dictionary& dict)
     }
 
     precision_ =
-        dict.lookupOrDefault("precision", IOstream::defaultPrecision());
+        dict.getOrDefault("precision", IOstream::defaultPrecision());
 
 
     selectClouds_.clear();
@@ -168,7 +168,7 @@ bool Foam::functionObjects::dataCloud::read(const dictionary& dict)
     {
         selectClouds_.resize(1);
         selectClouds_.first() =
-            dict.lookupOrDefault<word>("cloud", cloud::defaultName);
+            dict.getOrDefault<word>("cloud", cloud::defaultName);
     }
 
     dict.readEntry("field", fieldName_);

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,8 +44,8 @@ Foam::extrudeModel::extrudeModel
     const dictionary& dict
 )
 :
-    nLayers_(dict.lookupOrDefault<label>("nLayers", 1)),
-    expansionRatio_(dict.lookupOrDefault<scalar>("expansionRatio", 1)),
+    nLayers_(dict.getOrDefault<label>("nLayers", 1)),
+    expansionRatio_(dict.getOrDefault<scalar>("expansionRatio", 1)),
     coeffDict_(dict.optionalSubDict(modelType + "Coeffs"))
 {
     DebugInfo

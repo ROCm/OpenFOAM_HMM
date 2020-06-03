@@ -75,7 +75,7 @@ MarshakRadiationFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    TName_(dict.lookupOrDefault<word>("T", "T"))
+    TName_(dict.getOrDefault<word>("T", "T"))
 {
     if (dict.found("value"))
     {

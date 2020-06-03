@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,7 +88,7 @@ bool Foam::functionObjects::timeInfo::read(const dictionary& dict)
     timeFunctionObject::read(dict);
     writeFile::read(dict);
 
-    perTimeStep_ = dict.lookupOrDefault("perTimeStep", false);
+    perTimeStep_ = dict.getOrDefault("perTimeStep", false);
     return true;
 }
 

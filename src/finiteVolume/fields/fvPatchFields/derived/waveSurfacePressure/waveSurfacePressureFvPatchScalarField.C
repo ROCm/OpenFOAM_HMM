@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,9 +84,9 @@ waveSurfacePressureFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict),
-    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    zetaName_(dict.lookupOrDefault<word>("zeta", "zeta")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho"))
+    phiName_(dict.getOrDefault<word>("phi", "phi")),
+    zetaName_(dict.getOrDefault<word>("zeta", "zeta")),
+    rhoName_(dict.getOrDefault<word>("rho", "rho"))
 {}
 
 

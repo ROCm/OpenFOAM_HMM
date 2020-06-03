@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,7 +116,7 @@ Foam::functionObjects::ddt2::ddt2
     resultName_(word::null),
     blacklist_(),
     results_(),
-    mag_(dict.lookupOrDefault("mag", false))
+    mag_(dict.getOrDefault("mag", false))
 {
     read(dict);
 }
@@ -141,7 +141,7 @@ bool Foam::functionObjects::ddt2::read(const dictionary& dict)
 
     Info<< type() << " fields: " << selectFields_ << nl;
 
-    resultName_ = dict.lookupOrDefault<word>
+    resultName_ = dict.getOrDefault<word>
     (
         "result",
         ( mag_ ? "mag(ddt(@@))" : "magSqr(ddt(@@))" )

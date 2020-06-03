@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2010-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -140,9 +140,9 @@ Foam::expressions::fvExprDriver::fvExprDriver
 :
     fvExprDriver
     (
-        dict.lookupOrDefault("cacheReadFields", false),
-        dict.lookupOrDefault("searchInMemory", true),
-        dict.lookupOrDefault("searchFiles", false),
+        dict.getOrDefault("cacheReadFields", false),
+        dict.getOrDefault("searchInMemory", true),
+        dict.getOrDefault("searchFiles", false),
         dict
     )
 {

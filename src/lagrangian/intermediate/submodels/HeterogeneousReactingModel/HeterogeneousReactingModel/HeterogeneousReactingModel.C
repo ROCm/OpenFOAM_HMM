@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +51,7 @@ Foam::HeterogeneousReactingModel<CloudType>::HeterogeneousReactingModel
 :
     CloudSubModelBase<CloudType>(owner, dict, typeName, type),
     dMass_(0.0),
-    nF_(this->coeffDict().template lookupOrDefault<label>("nF", 1))
+    nF_(this->coeffDict().template getOrDefault<label>("nF", 1))
 {}
 
 

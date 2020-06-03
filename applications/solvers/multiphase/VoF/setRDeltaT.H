@@ -5,52 +5,52 @@
 
     scalar maxCo
     (
-        pimpleDict.lookupOrDefault<scalar>("maxCo", 0.9)
+        pimpleDict.getOrDefault<scalar>("maxCo", 0.9)
     );
 
     scalar maxAlphaCo
     (
-        pimpleDict.lookupOrDefault<scalar>("maxAlphaCo", 0.2)
+        pimpleDict.getOrDefault<scalar>("maxAlphaCo", 0.2)
     );
 
     scalar rDeltaTSmoothingCoeff
     (
-        pimpleDict.lookupOrDefault<scalar>("rDeltaTSmoothingCoeff", 0.1)
+        pimpleDict.getOrDefault<scalar>("rDeltaTSmoothingCoeff", 0.1)
     );
 
     label nAlphaSpreadIter
     (
-        pimpleDict.lookupOrDefault<label>("nAlphaSpreadIter", 1)
+        pimpleDict.getOrDefault<label>("nAlphaSpreadIter", 1)
     );
 
     scalar alphaSpreadDiff
     (
-        pimpleDict.lookupOrDefault<scalar>("alphaSpreadDiff", 0.2)
+        pimpleDict.getOrDefault<scalar>("alphaSpreadDiff", 0.2)
     );
 
     scalar alphaSpreadMax
     (
-        pimpleDict.lookupOrDefault<scalar>("alphaSpreadMax", 0.99)
+        pimpleDict.getOrDefault<scalar>("alphaSpreadMax", 0.99)
     );
 
     scalar alphaSpreadMin
     (
-        pimpleDict.lookupOrDefault<scalar>("alphaSpreadMin", 0.01)
+        pimpleDict.getOrDefault<scalar>("alphaSpreadMin", 0.01)
     );
 
     label nAlphaSweepIter
     (
-        pimpleDict.lookupOrDefault<label>("nAlphaSweepIter", 5)
+        pimpleDict.getOrDefault<label>("nAlphaSweepIter", 5)
     );
 
     scalar rDeltaTDampingCoeff
     (
-        pimpleDict.lookupOrDefault<scalar>("rDeltaTDampingCoeff", 1.0)
+        pimpleDict.getOrDefault<scalar>("rDeltaTDampingCoeff", 1.0)
     );
 
     scalar maxDeltaT
     (
-        pimpleDict.lookupOrDefault<scalar>("maxDeltaT", GREAT)
+        pimpleDict.getOrDefault<scalar>("maxDeltaT", GREAT)
     );
 
     volScalarField rDeltaT0("rDeltaT0", rDeltaT);

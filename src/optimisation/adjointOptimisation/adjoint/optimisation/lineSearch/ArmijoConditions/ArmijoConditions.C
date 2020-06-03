@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,7 @@ Foam::ArmijoConditions::ArmijoConditions
 )
 :
     lineSearch(dict, time),
-    c1_(coeffsDict().lookupOrDefault<scalar>("c1", 1.e-4))
+    c1_(coeffsDict().getOrDefault<scalar>("c1", 1.e-4))
 {}
 
 

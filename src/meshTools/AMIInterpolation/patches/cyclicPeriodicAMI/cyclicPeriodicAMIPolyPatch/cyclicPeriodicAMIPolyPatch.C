@@ -598,9 +598,9 @@ Foam::cyclicPeriodicAMIPolyPatch::cyclicPeriodicAMIPolyPatch
     cyclicAMIPolyPatch(name, dict, index, bm, patchType),
     periodicPatchName_(dict.lookup("periodicPatch")),
     periodicPatchID_(-1),
-    nTransforms_(dict.lookupOrDefault<label>("nTransforms", 0)),
-    nSectors_(dict.lookupOrDefault<label>("nSectors", 0)),
-    maxIter_(dict.lookupOrDefault<label>("maxIter", 36))
+    nTransforms_(dict.getOrDefault<label>("nTransforms", 0)),
+    nSectors_(dict.getOrDefault<label>("nSectors", 0)),
+    maxIter_(dict.getOrDefault<label>("maxIter", 36))
 {}
 
 

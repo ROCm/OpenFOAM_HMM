@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2019 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,8 +46,8 @@ fixedMultiPhaseHeatFluxFvPatchScalarField
 :
     fixedValueFvPatchScalarField(p, iF),
     q_(p.size(), Zero),
-    relax_(1.0),
-    Tmin_(0.0)
+    relax_(1),
+    Tmin_(273)
 {}
 
 
@@ -60,8 +61,8 @@ fixedMultiPhaseHeatFluxFvPatchScalarField
 :
     fixedValueFvPatchScalarField(p, iF, dict),
     q_("q", dict, p.size()),
-    relax_(dict.lookupOrDefault<scalar>("relax", 1.0)),
-    Tmin_(dict.lookupOrDefault<scalar>("Tmin", 273))
+    relax_(dict.getOrDefault<scalar>("relax", 1)),
+    Tmin_(dict.getOrDefault<scalar>("Tmin", 273))
 {}
 
 
@@ -120,9 +121,7 @@ void Foam::fixedMultiPhaseHeatFluxFvPatchScalarField::updateCoeffs()
 
     // Lookup the fluid model
     const phaseSystem& fluid =
-        (
-            db().lookupObject<phaseSystem>("phaseProperties")
-        );
+        db().lookupObject<phaseSystem>("phaseProperties");
 
     const scalarField& Tp = *this;
 

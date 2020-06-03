@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -131,13 +132,13 @@ Foam::cvControls::cvControls
         motionDict.get<scalar>("minimumCellSizeCoeff")*defaultCellSize_;
 
     objOutput_ =
-        motionDict.lookupOrDefault<Switch>("objOutput", false);
+        motionDict.getOrDefault<Switch>("objOutput", false);
 
     timeChecks_ =
-        motionDict.lookupOrDefault<Switch>("timeChecks", false);
+        motionDict.getOrDefault<Switch>("timeChecks", false);
 
     printVertexInfo_ =
-        motionDict.lookupOrDefault<Switch>("printVertexInfo", false);
+        motionDict.getOrDefault<Switch>("printVertexInfo", false);
 
     if (Pstream::parRun())
     {
@@ -190,10 +191,10 @@ Foam::cvControls::cvControls
     );
 
     filterEdges_ =
-        filteringDict.lookupOrDefault<Switch>("filterEdges", true);
+        filteringDict.getOrDefault<Switch>("filterEdges", true);
 
     filterFaces_ =
-        filteringDict.lookupOrDefault<Switch>("filterFaces", false);
+        filteringDict.getOrDefault<Switch>("filterFaces", false);
 
     if (filterFaces_)
     {

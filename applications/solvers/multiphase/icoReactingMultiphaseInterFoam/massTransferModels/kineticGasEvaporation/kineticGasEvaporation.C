@@ -161,7 +161,7 @@ Foam::meltingEvaporationModels::kineticGasEvaporation<Thermo, OtherThermo>
         this->mesh_,
         dimensionedScalar(dimDensity/dimTime, Zero)
     ),
-    isoAlpha_(dict.lookupOrDefault<scalar>("isoAlpha", 0.5))
+    isoAlpha_(dict.getOrDefault<scalar>("isoAlpha", 0.5))
 {
     word speciesName = IOobject::member(this->transferSpecie());
 

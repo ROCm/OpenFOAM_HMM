@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,7 +56,7 @@ Foam::solidBodyMotionFunctions::drivenLinearMotion::drivenLinearMotion
 :
     solidBodyMotionFunction(SBMFCoeffs, runTime),
     CofGvelocity_(SBMFCoeffs.get<word>("CofGvelocity")),
-    normal_(SBMFCoeffs.lookupOrDefault<vector>("normal", Zero)),
+    normal_(SBMFCoeffs.getOrDefault<vector>("normal", Zero)),
     CofGvel_
     (
         IOobject

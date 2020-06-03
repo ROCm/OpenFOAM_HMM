@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,9 +89,9 @@ incompressibleTwoPhaseInteractingMixture
     (
         "d",
         dimLength,
-        muModel_->viscosityProperties().lookupOrDefault("d", 0.0)
+        muModel_->viscosityProperties().getOrDefault("d", 0.0)
     ),
-    alphaMax_(muModel_->viscosityProperties().lookupOrDefault("alphaMax", 1.0)),
+    alphaMax_(muModel_->viscosityProperties().getOrDefault("alphaMax", 1.0)),
 
     U_(U),
     phi_(phi),
@@ -132,11 +132,11 @@ bool Foam::incompressibleTwoPhaseInteractingMixture::read()
             (
                 "d",
                 dimLength,
-                muModel_->viscosityProperties().lookupOrDefault("d", 0)
+                muModel_->viscosityProperties().getOrDefault("d", 0)
             );
 
             alphaMax_ =
-                muModel_->viscosityProperties().lookupOrDefault
+                muModel_->viscosityProperties().getOrDefault
                 (
                     "alphaMax",
                     1.0

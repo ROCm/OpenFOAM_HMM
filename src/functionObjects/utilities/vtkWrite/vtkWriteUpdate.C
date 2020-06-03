@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -241,7 +241,7 @@ bool Foam::functionObjects::vtkWrite::readSelection(const dictionary& dict)
     {
         selectRegions_.resize(1);
         selectRegions_.first() =
-            dict.lookupOrDefault<word>("region", polyMesh::defaultRegion);
+            dict.getOrDefault<word>("region", polyMesh::defaultRegion);
     }
 
     // Restrict to specified meshes

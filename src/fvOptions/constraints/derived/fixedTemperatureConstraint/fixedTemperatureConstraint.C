@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,7 +86,7 @@ Foam::fv::fixedTemperatureConstraint::fixedTemperatureConstraint
         }
         case tmLookup:
         {
-            TName_ = coeffs_.lookupOrDefault<word>("T", "T");
+            TName_ = coeffs_.getOrDefault<word>("T", "T");
             break;
         }
         default:

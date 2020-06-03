@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,10 +85,10 @@ Foam::functionObjects::runTimeControls::runTimeCondition::runTimeCondition
     name_(name),
     obr_(obr),
     state_(state),
-    active_(dict.lookupOrDefault("active", true)),
+    active_(dict.getOrDefault("active", true)),
     conditionDict_(setConditionDict()),
-    groupID_(dict.lookupOrDefault("groupID", -1)),
-    log(dict.lookupOrDefault("log", true))
+    groupID_(dict.getOrDefault("groupID", -1)),
+    log(dict.getOrDefault("log", true))
 {}
 
 

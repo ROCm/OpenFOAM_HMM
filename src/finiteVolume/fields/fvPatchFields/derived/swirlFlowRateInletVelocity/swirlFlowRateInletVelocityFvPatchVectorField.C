@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,11 +61,11 @@ swirlFlowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF, dict),
-    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
+    phiName_(dict.getOrDefault<word>("phi", "phi")),
+    rhoName_(dict.getOrDefault<word>("rho", "rho")),
     origin_
     (
-        dict.lookupOrDefault
+        dict.getOrDefault
         (
             "origin",
             returnReduce(patch().size(), maxOp<label>())
@@ -75,7 +75,7 @@ swirlFlowRateInletVelocityFvPatchVectorField
     ),
     axis_
     (
-        dict.lookupOrDefault
+        dict.getOrDefault
         (
             "axis",
             returnReduce(patch().size(), maxOp<label>())

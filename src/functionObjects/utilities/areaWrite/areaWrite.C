@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -139,7 +139,7 @@ bool Foam::areaWrite::read(const dictionary& dict)
         )
     );
 
-    verbose_ = dict.lookupOrDefault("verbose", false);
+    verbose_ = dict.getOrDefault("verbose", false);
 
     // All possible area meshes for the given fvMesh region
     meshes_ = obr().lookupClass<faMesh>();

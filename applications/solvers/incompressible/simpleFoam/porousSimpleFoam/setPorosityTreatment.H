@@ -5,7 +5,7 @@ int nUCorr = 0;
 if (pZones.active())
 {
     // nUCorrectors for pressureImplicitPorosity
-    nUCorr = simple.dict().lookupOrDefault<int>("nUCorrectors", 0);
+    nUCorr = simple.dict().getOrDefault<int>("nUCorrectors", 0);
 
     if (nUCorr > 0)
     {

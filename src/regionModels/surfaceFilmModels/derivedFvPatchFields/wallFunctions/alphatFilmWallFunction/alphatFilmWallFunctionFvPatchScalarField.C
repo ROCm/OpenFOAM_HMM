@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,13 +93,13 @@ alphatFilmWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(p, iF, dict),
     filmRegionName_
     (
-        dict.lookupOrDefault<word>("filmRegion", "surfaceFilmProperties")
+        dict.getOrDefault<word>("filmRegion", "surfaceFilmProperties")
     ),
-    B_(dict.lookupOrDefault("B", 5.5)),
-    yPlusCrit_(dict.lookupOrDefault("yPlusCrit", 11.05)),
-    Cmu_(dict.lookupOrDefault("Cmu", 0.09)),
-    kappa_(dict.lookupOrDefault("kappa", 0.41)),
-    Prt_(dict.lookupOrDefault("Prt", 0.85))
+    B_(dict.getOrDefault("B", 5.5)),
+    yPlusCrit_(dict.getOrDefault("yPlusCrit", 11.05)),
+    Cmu_(dict.getOrDefault("Cmu", 0.09)),
+    kappa_(dict.getOrDefault("kappa", 0.41)),
+    Prt_(dict.getOrDefault("Prt", 0.85))
 {}
 
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2019 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,8 +64,8 @@ Luo
 )
 :
     coalescenceModel(popBal, dict),
-    beta_(dimensionedScalar::lookupOrDefault("beta", dict, dimless, 2.05)),
-    C1_(dimensionedScalar::lookupOrDefault("C1", dict, dimless, 1.0))
+    beta_(dimensionedScalar::getOrDefault("beta", dict, dimless, 2.05)),
+    C1_(dimensionedScalar::getOrDefault("C1", dict, dimless, 1.0))
 {}
 
 

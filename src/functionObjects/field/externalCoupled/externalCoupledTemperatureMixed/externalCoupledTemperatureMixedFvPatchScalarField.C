@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -122,7 +122,7 @@ externalCoupledTemperatureMixedFvPatchScalarField
     outTempType_(outputTemperatureType::WALL),
     refTempType_
     (
-        refTemperatureNames.lookupOrDefault
+        refTemperatureNames.getOrDefault
         (
             "htcRefTemperature",
             dict,

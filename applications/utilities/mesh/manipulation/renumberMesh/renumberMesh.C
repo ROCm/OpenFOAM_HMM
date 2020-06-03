@@ -714,7 +714,7 @@ int main(int argc, char *argv[])
 
         renumberPtr = renumberMethod::New(renumberDict);
 
-        sortCoupledFaceCells = renumberDict.lookupOrDefault
+        sortCoupledFaceCells = renumberDict.getOrDefault
         (
             "sortCoupledFaceCells",
             false
@@ -725,7 +725,7 @@ int main(int argc, char *argv[])
                 << endl;
         }
 
-        blockSize = renumberDict.lookupOrDefault("blockSize", 0);
+        blockSize = renumberDict.getOrDefault("blockSize", 0);
         if (blockSize > 0)
         {
             Info<< "Ordering cells into regions of size " << blockSize
@@ -743,7 +743,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        orderPoints = renumberDict.lookupOrDefault("orderPoints", false);
+        orderPoints = renumberDict.getOrDefault("orderPoints", false);
         if (orderPoints)
         {
             Info<< "Ordering points into internal and boundary points." << nl

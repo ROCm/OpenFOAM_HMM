@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -95,8 +96,8 @@ Foam::fv::tabulatedHeatTransfer::tabulatedHeatTransfer
 )
 :
     interRegionHeatTransferModel(name, modelType, dict, mesh),
-    UName_(coeffs_.lookupOrDefault<word>("U", "U")),
-    UNbrName_(coeffs_.lookupOrDefault<word>("UNbr", "U")),
+    UName_(coeffs_.getOrDefault<word>("U", "U")),
+    UNbrName_(coeffs_.getOrDefault<word>("UNbr", "U")),
     hTable_(),
     AoV_(),
     startTimeName_(mesh.time().timeName())

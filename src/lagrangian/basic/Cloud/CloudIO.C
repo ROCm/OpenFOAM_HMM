@@ -60,7 +60,7 @@ void Foam::Cloud<ParticleType>::readCloudUniformProperties()
         // Fall back to positions mode if the entry is not present for
         // backwards compatibility
         geometryType_ =
-            cloud::geometryTypeNames.lookupOrDefault
+            cloud::geometryTypeNames.getOrDefault
             (
                 "geometry",
                 uniformPropsDict,

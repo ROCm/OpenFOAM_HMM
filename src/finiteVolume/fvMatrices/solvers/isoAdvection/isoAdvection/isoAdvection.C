@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 DHI
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
     Copyright (C) 2019 Johan Roenby
 -------------------------------------------------------------------------------
 License
@@ -80,11 +80,11 @@ Foam::isoAdvection::isoAdvection
     ap_(mesh_.nPoints()),
 
     // Tolerances and solution controls
-    nAlphaBounds_(dict_.lookupOrDefault<label>("nAlphaBounds", 3)),
-    isoFaceTol_(dict_.lookupOrDefault<scalar>("isoFaceTol", 1e-8)),
-    surfCellTol_(dict_.lookupOrDefault<scalar>("surfCellTol", 1e-8)),
-    gradAlphaBasedNormal_(dict_.lookupOrDefault("gradAlphaNormal", false)),
-    writeIsoFacesToFile_(dict_.lookupOrDefault("writeIsoFaces", false)),
+    nAlphaBounds_(dict_.getOrDefault<label>("nAlphaBounds", 3)),
+    isoFaceTol_(dict_.getOrDefault<scalar>("isoFaceTol", 1e-8)),
+    surfCellTol_(dict_.getOrDefault<scalar>("surfCellTol", 1e-8)),
+    gradAlphaBasedNormal_(dict_.getOrDefault("gradAlphaNormal", false)),
+    writeIsoFacesToFile_(dict_.getOrDefault("writeIsoFaces", false)),
 
     // Cell cutting data
     surfCells_(label(0.2*mesh_.nCells())),
@@ -889,7 +889,7 @@ void Foam::isoAdvection::applyBruteForceBounding()
 {
     bool alpha1Changed = false;
 
-    scalar snapAlphaTol = dict_.lookupOrDefault<scalar>("snapTol", 0);
+    scalar snapAlphaTol = dict_.getOrDefault<scalar>("snapTol", 0);
     if (snapAlphaTol > 0)
     {
         alpha1_ =
@@ -901,7 +901,7 @@ void Foam::isoAdvection::applyBruteForceBounding()
         alpha1Changed = true;
     }
 
-    if (dict_.lookupOrDefault("clip", true))
+    if (dict_.getOrDefault("clip", true))
     {
         alpha1_ = min(scalar(1), max(scalar(0), alpha1_));
         alpha1Changed = true;
@@ -918,7 +918,7 @@ void Foam::isoAdvection::writeSurfaceCells() const
 {
     if (!mesh_.time().writeTime()) return;
 
-    if (dict_.lookupOrDefault("writeSurfCells", false))
+    if (dict_.getOrDefault("writeSurfCells", false))
     {
         cellSet cSet
         (
@@ -942,7 +942,7 @@ void Foam::isoAdvection::writeBoundedCells() const
 {
     if (!mesh_.time().writeTime()) return;
 
-    if (dict_.lookupOrDefault("writeBoundedCells", false))
+    if (dict_.getOrDefault("writeBoundedCells", false))
     {
         cellSet cSet
         (

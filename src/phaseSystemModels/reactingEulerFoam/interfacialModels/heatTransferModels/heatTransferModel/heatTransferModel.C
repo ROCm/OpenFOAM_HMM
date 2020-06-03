@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +55,7 @@ Foam::heatTransferModel::heatTransferModel
     (
         "residualAlpha",
         dimless,
-        dict.lookupOrDefault<scalar>
+        dict.getOrDefault<scalar>
         (
             "residualAlpha",
             pair_.ordered()

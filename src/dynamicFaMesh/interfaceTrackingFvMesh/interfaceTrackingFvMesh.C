@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2019 Zeljko Tukovic, FSB Zagreb.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1570,12 +1571,12 @@ Foam::interfaceTrackingFvMesh::interfaceTrackingFvMesh(const IOobject& io)
         motion().get<bool>("normalMotionDir")
     ),
     motionDir_(Zero),
-    smoothing_(motion().lookupOrDefault("smoothing", false)),
-    pureFreeSurface_(motion().lookupOrDefault("pureFreeSurface", true)),
-    rigidFreeSurface_(motion().lookupOrDefault("rigidFreeSurface", false)),
+    smoothing_(motion().getOrDefault("smoothing", false)),
+    pureFreeSurface_(motion().getOrDefault("pureFreeSurface", true)),
+    rigidFreeSurface_(motion().getOrDefault("rigidFreeSurface", false)),
     correctContactLineNormals_
     (
-        motion().lookupOrDefault("correctContactLineNormals", false)
+        motion().getOrDefault("correctContactLineNormals", false)
     ),
     sigma0_("zero", dimForce/dimLength/dimDensity, Zero),
     rho_("one", dimDensity, 1.0),
@@ -1632,8 +1633,8 @@ Foam::interfaceTrackingFvMesh::interfaceTrackingFvMesh
         motion().get<bool>("normalMotionDir")
     ),
     motionDir_(Zero),
-    smoothing_(motion().lookupOrDefault("smoothing", false)),
-    pureFreeSurface_(motion().lookupOrDefault("pureFreeSurface", true)),
+    smoothing_(motion().getOrDefault("smoothing", false)),
+    pureFreeSurface_(motion().getOrDefault("pureFreeSurface", true)),
     sigma0_("zero", dimForce/dimLength/dimDensity, Zero),
     rho_("one", dimDensity, 1.0),
     timeIndex_(-1),

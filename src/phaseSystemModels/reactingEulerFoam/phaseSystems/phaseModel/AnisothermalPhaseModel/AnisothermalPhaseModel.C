@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +41,7 @@ Foam::AnisothermalPhaseModel<BasePhaseModel>::filterPressureWork
     const volScalarField& alpha = *this;
 
     scalar pressureWorkAlphaLimit =
-        this->thermo_->lookupOrDefault("pressureWorkAlphaLimit", 0.0);
+        this->thermo_->getOrDefault<scalar>("pressureWorkAlphaLimit", 0);
 
     if (pressureWorkAlphaLimit > 0)
     {

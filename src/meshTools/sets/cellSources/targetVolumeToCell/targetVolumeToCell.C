@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -306,7 +306,7 @@ Foam::targetVolumeToCell::targetVolumeToCell
         mesh,
         dict.get<scalar>("volume"),
         dict.get<vector>("normal"),
-        dict.lookupOrDefault<word>("set", "")
+        dict.getOrDefault<word>("set", "")
     )
 {}
 

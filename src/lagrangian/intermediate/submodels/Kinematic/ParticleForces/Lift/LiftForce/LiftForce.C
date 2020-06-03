@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +58,7 @@ Foam::LiftForce<CloudType>::LiftForce
 )
 :
     ParticleForce<CloudType>(owner, mesh, dict, forceType, true),
-    UName_(this->coeffs().template lookupOrDefault<word>("U", "U")),
+    UName_(this->coeffs().template getOrDefault<word>("U", "U")),
     curlUcInterpPtr_(nullptr)
 {}
 

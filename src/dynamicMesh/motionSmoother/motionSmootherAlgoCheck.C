@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -117,7 +118,7 @@ bool Foam::motionSmootherAlgo::checkMesh
     );
     const scalar minFaceFlatness
     (
-        dict.lookupOrDefault<scalar>
+        dict.getOrDefault<scalar>
         (
             "minFaceFlatness", -1, keyType::REGEX_RECURSIVE
         )

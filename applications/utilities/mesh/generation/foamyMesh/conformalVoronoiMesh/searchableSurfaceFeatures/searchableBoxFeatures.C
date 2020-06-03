@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,7 +59,7 @@ Foam::searchableBoxFeatures::searchableBoxFeatures
     (
         extendedFeatureEdgeMesh::sideVolumeTypeNames_
         [
-            dict.lookupOrDefault<word>("meshableSide", "inside")
+            dict.getOrDefault<word>("meshableSide", "inside")
         ]
     )
 {

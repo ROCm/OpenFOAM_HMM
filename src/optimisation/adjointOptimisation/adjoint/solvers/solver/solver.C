@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,7 +63,7 @@ Foam::solver::solver
     managerType_(managerType),
     dict_(dict),
     solverName_(dict.dictName()),
-    active_(dict.lookupOrDefault<bool>("active", true)),
+    active_(dict.getOrDefault("active", true)),
     optTypeSource_(nullptr),
     vars_(nullptr)
 {}
@@ -87,7 +87,7 @@ bool Foam::solver::readDict(const dictionary& dict)
     // running. At the very least, this should trigger writing before stopping.
     // Additional problems if we have an adjontSolver corresponding to a
     // constraint. To be revisited
-    //active_ = dict.lookupOrDefault<bool>("active", true);
+    //active_ = dict.getOrDefault<bool>("active", true);
 
     return true;
 }

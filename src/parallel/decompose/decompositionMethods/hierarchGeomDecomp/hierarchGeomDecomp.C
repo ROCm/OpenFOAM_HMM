@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +57,7 @@ namespace Foam
 
 void Foam::hierarchGeomDecomp::setOrder()
 {
-    const word order(coeffsDict_.lookupOrDefault<word>("order", ""));
+    const word order(coeffsDict_.getOrDefault<word>("order", ""));
 
     if (order.empty())
     {

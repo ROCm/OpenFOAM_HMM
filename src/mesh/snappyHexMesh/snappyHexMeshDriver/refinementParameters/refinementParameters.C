@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,7 +56,7 @@ Foam::refinementParameters::refinementParameters
     ),
     planarAngle_
     (
-        dict.lookupOrDefault
+        dict.getOrDefault
         (
             "planarAngle",
             dict.get<scalar>("resolveFeatureAngle")
@@ -68,7 +68,7 @@ Foam::refinementParameters::refinementParameters
     ),
     locationsOutsideMesh_
     (
-        dict.lookupOrDefault
+        dict.getOrDefault
         (
             "locationsOutsideMesh",
             pointField(0)
@@ -81,19 +81,19 @@ Foam::refinementParameters::refinementParameters
     ),
     useTopologicalSnapDetection_
     (
-        dict.lookupOrDefault("useTopologicalSnapDetection", true)
+        dict.getOrDefault("useTopologicalSnapDetection", true)
     ),
-    maxLoadUnbalance_(dict.lookupOrDefault<scalar>("maxLoadUnbalance", 0)),
+    maxLoadUnbalance_(dict.getOrDefault<scalar>("maxLoadUnbalance", 0)),
     handleSnapProblems_
     (
-        dict.lookupOrDefault<Switch>("handleSnapProblems", true)
+        dict.getOrDefault<Switch>("handleSnapProblems", true)
     ),
     interfaceRefine_
     (
-        dict.lookupOrDefault<Switch>("interfaceRefine", true)
+        dict.getOrDefault<Switch>("interfaceRefine", true)
     ),
-    nErodeCellZone_(dict.lookupOrDefault<label>("nCellZoneErodeIter", 0)),
-    nFilterIter_(dict.lookupOrDefault<label>("nFilterIter", 2)),
+    nErodeCellZone_(dict.getOrDefault<label>("nCellZoneErodeIter", 0)),
+    nFilterIter_(dict.getOrDefault<label>("nFilterIter", 2)),
     dryRun_(dryRun)
 {
     point locationInMesh;

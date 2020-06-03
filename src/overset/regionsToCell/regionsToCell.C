@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -433,14 +433,14 @@ Foam::regionsToCell::regionsToCell
 )
 :
     topoSetCellSource(mesh),
-    setName_(dict.lookupOrDefault<word>("set", "none")),
+    setName_(dict.getOrDefault<word>("set", "none")),
     insidePoints_
     (
         dict.found("insidePoints")
       ? dict.lookup("insidePoints")
       : dict.lookup("insidePoint")
     ),
-    nErode_(dict.lookupOrDefault<label>("nErode", 0))
+    nErode_(dict.getOrDefault<label>("nErode", 0))
 {}
 
 

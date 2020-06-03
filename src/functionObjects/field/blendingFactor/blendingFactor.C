@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -115,7 +115,7 @@ bool Foam::functionObjects::blendingFactor::read(const dictionary& dict)
 {
     if (fieldExpression::read(dict) && writeFile::read(dict))
     {
-        phiName_ = dict.lookupOrDefault<word>("phi", "phi");
+        phiName_ = dict.getOrDefault<word>("phi", "phi");
 
         tolerance_ = 0.001;
         if

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018-2019 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,8 +60,8 @@ CoulaloglouTavlaridesCoalescence
 )
 :
     coalescenceModel(popBal, dict),
-    C1_(dimensionedScalar::lookupOrDefault("C1", dict, dimless, 2.8)),
-    C2_(dimensionedScalar::lookupOrDefault("C2", dict, inv(dimArea), 1.83e9))
+    C1_(dimensionedScalar::getOrDefault("C1", dict, dimless, 2.8)),
+    C2_(dimensionedScalar::getOrDefault("C2", dict, inv(dimArea), 1.83e9))
 {}
 
 

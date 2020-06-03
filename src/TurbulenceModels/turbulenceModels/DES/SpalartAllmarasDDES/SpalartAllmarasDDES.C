@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -131,7 +131,7 @@ SpalartAllmarasDDES<BasicTurbulenceModel>::SpalartAllmarasDDES
 
     Cd1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cd1",
             this->coeffDict_,
@@ -140,7 +140,7 @@ SpalartAllmarasDDES<BasicTurbulenceModel>::SpalartAllmarasDDES
     ),
     Cd2_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "Cd2",
             this->coeffDict_,

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018-2019 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +56,7 @@ Foam::diameterModels::driftModels::phaseChange::phaseChange
 :
     driftModel(popBal, dict),
     pairKeys_(dict.lookup("pairs")),
-    numberWeighted_(dict.lookupOrDefault<Switch>("numberWeighted", false)),
+    numberWeighted_(dict.getOrDefault<Switch>("numberWeighted", false)),
     W_(pairKeys_.size())
 {
     const phaseSystem& fluid = popBal_.fluid();

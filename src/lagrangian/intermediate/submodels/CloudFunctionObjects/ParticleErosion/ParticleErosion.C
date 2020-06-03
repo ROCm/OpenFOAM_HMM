@@ -77,8 +77,8 @@ Foam::ParticleErosion<CloudType>::ParticleErosion
     QPtr_(nullptr),
     patchIDs_(),
     p_(this->coeffDict().getScalar("p")),
-    psi_(this->coeffDict().template lookupOrDefault<scalar>("psi", 2.0)),
-    K_(this->coeffDict().template lookupOrDefault<scalar>("K", 2.0))
+    psi_(this->coeffDict().template getOrDefault<scalar>("psi", 2.0)),
+    K_(this->coeffDict().template getOrDefault<scalar>("K", 2.0))
 {
     const wordList allPatchNames(owner.mesh().boundaryMesh().names());
     const wordRes patchNames

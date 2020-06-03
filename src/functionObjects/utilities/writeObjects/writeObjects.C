@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,7 +75,7 @@ Foam::functionObjects::writeObjects::writeObjects
     (
         runTime.lookupObject<objectRegistry>
         (
-            dict.lookupOrDefault("region", polyMesh::defaultRegion)
+            dict.getOrDefault("region", polyMesh::defaultRegion)
         )
     ),
     writeOption_(ANY_WRITE),
@@ -105,7 +105,7 @@ bool Foam::functionObjects::writeObjects::read(const dictionary& dict)
         dict.readEntry("objects", objectNames_);
     }
 
-    writeOption_ = writeOptionNames_.lookupOrDefault
+    writeOption_ = writeOptionNames_.getOrDefault
     (
         "writeOption",
         dict,

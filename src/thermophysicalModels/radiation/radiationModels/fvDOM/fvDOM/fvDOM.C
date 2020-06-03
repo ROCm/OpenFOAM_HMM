@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -411,15 +411,20 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
     IRay_(0),
     tolerance_
     (
-        coeffs_.lookupOrDefaultCompat("tolerance", {{"convergence", 1712}}, 0.0)
+        coeffs_.getOrDefaultCompat<scalar>
+        (
+            "tolerance",
+            {{"convergence", 1712}},
+            0
+        )
     ),
-    maxIter_(coeffs_.lookupOrDefault<label>("maxIter", 50)),
+    maxIter_(coeffs_.getOrDefault<label>("maxIter", 50)),
     omegaMax_(0),
     useSolarLoad_(false),
     solarLoad_(),
     meshOrientation_
     (
-        coeffs_.lookupOrDefault<vector>("meshOrientation", Zero)
+        coeffs_.getOrDefault<vector>("meshOrientation", Zero)
     ),
     useExternalBeam_(false),
     spectralDistribution_(),
@@ -511,15 +516,20 @@ Foam::radiation::fvDOM::fvDOM
     IRay_(0),
     tolerance_
     (
-        coeffs_.lookupOrDefaultCompat("tolerance", {{"convergence", 1712}}, 0.0)
+        coeffs_.getOrDefaultCompat<scalar>
+        (
+            "tolerance",
+            {{"convergence", 1712}},
+            0
+        )
     ),
-    maxIter_(coeffs_.lookupOrDefault<label>("maxIter", 50)),
+    maxIter_(coeffs_.getOrDefault<label>("maxIter", 50)),
     omegaMax_(0),
     useSolarLoad_(false),
     solarLoad_(),
     meshOrientation_
     (
-        coeffs_.lookupOrDefault<vector>("meshOrientation", Zero)
+        coeffs_.getOrDefault<vector>("meshOrientation", Zero)
     ),
     useExternalBeam_(false),
     spectralDistribution_(),

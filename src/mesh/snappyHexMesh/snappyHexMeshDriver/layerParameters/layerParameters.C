@@ -121,7 +121,7 @@ Foam::layerParameters::layerParameters
     featureAngle_(meshRefinement::get<scalar>(dict, "featureAngle", dryRun)),
     mergePatchFacesAngle_
     (
-        dict.lookupOrDefault<scalar>
+        dict.getOrDefault<scalar>
         (
             "mergePatchFacesAngle",
             featureAngle_
@@ -129,7 +129,7 @@ Foam::layerParameters::layerParameters
     ),
     concaveAngle_
     (
-        dict.lookupOrDefault("concaveAngle", defaultConcaveAngle)
+        dict.getOrDefault<scalar>("concaveAngle", defaultConcaveAngle)
     ),
     nGrow_(meshRefinement::get<label>(dict, "nGrow", dryRun)),
     maxFaceThicknessRatio_
@@ -144,7 +144,7 @@ Foam::layerParameters::layerParameters
     nRelaxedIter_(labelMax),
     meshShrinker_
     (
-        dict.lookupOrDefault
+        dict.getOrDefault
         (
             "meshShrinker",
             medialAxisMeshMover::typeName

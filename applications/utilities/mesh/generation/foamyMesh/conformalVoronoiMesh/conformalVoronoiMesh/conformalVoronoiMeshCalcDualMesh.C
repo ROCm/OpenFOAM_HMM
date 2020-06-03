@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1716,7 +1716,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
     forAll(procNeighbours, patchi)
     {
         procNeighbours[patchi] =
-            patchDicts[patchi].lookupOrDefault<label>("neighbProcNo", -1);
+            patchDicts[patchi].getOrDefault<label>("neighbProcNo", -1);
     }
 
     List<DynamicList<face>> patchFaces(nPatches, DynamicList<face>(0));
@@ -2338,7 +2338,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
             if (patchFaces[nbI].size() > 0)
             {
                 const label neighbour =
-                    patchDicts[nbI].lookupOrDefault<label>("neighbProcNo", -1);
+                    patchDicts[nbI].getOrDefault<label>("neighbProcNo", -1);
 
                 faceList procPatchFaces = patchFaces[nbI];
 

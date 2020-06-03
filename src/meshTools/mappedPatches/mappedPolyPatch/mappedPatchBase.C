@@ -760,11 +760,11 @@ void Foam::mappedPatchBase::calcMapping() const
 const Foam::autoPtr<Foam::searchableSurface>& Foam::mappedPatchBase::surfPtr()
 const
 {
-    const word surfType(surfDict_.lookupOrDefault<word>("type", "none"));
+    const word surfType(surfDict_.getOrDefault<word>("type", "none"));
 
     if (!surfPtr_.valid() && surfType != "none")
     {
-        word surfName(surfDict_.lookupOrDefault("name", patch_.name()));
+        word surfName(surfDict_.getOrDefault("name", patch_.name()));
 
         const polyMesh& mesh = patch_.boundaryMesh().mesh();
 
@@ -959,9 +959,9 @@ Foam::mappedPatchBase::mappedPatchBase
 )
 :
     patch_(pp),
-    sampleRegion_(dict.lookupOrDefault<word>("sampleRegion", "")),
+    sampleRegion_(dict.getOrDefault<word>("sampleRegion", "")),
     mode_(sampleModeNames_.get("sampleMode", dict)),
-    samplePatch_(dict.lookupOrDefault<word>("samplePatch", "")),
+    samplePatch_(dict.getOrDefault<word>("samplePatch", "")),
     coupleGroup_(dict),
     offsetMode_(UNIFORM),
     offset_(Zero),
@@ -970,7 +970,7 @@ Foam::mappedPatchBase::mappedPatchBase
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
     mapPtr_(nullptr),
     AMIPtr_(nullptr),
-    AMIReverse_(dict.lookupOrDefault("flipNormals", false)),
+    AMIReverse_(dict.getOrDefault("flipNormals", false)),
     surfPtr_(nullptr),
     surfDict_(dict.subOrEmptyDict("surface"))
 {
@@ -1034,10 +1034,10 @@ Foam::mappedPatchBase::mappedPatchBase
 )
 :
     patch_(pp),
-    sampleRegion_(dict.lookupOrDefault<word>("sampleRegion", "")),
+    sampleRegion_(dict.getOrDefault<word>("sampleRegion", "")),
     mode_(mode),
-    samplePatch_(dict.lookupOrDefault<word>("samplePatch", "")),
-    coupleGroup_(dict), //dict.lookupOrDefault<word>("coupleGroup", "")),
+    samplePatch_(dict.getOrDefault<word>("samplePatch", "")),
+    coupleGroup_(dict), //dict.getOrDefault<word>("coupleGroup", "")),
     offsetMode_(UNIFORM),
     offset_(Zero),
     offsets_(0),
@@ -1045,7 +1045,7 @@ Foam::mappedPatchBase::mappedPatchBase
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
     mapPtr_(nullptr),
     AMIPtr_(nullptr),
-    AMIReverse_(dict.lookupOrDefault("flipNormals", false)),
+    AMIReverse_(dict.getOrDefault("flipNormals", false)),
     surfPtr_(nullptr),
     surfDict_(dict.subOrEmptyDict("surface"))
 {

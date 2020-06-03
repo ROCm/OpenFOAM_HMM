@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,7 @@ Foam::viscosityModels::Arrhenius<ViscousModel>::Arrhenius
     ),
     alpha_("alpha", inv(dimTemperature), ArrheniusCoeffs_),
     Talpha_("Talpha", dimTemperature, ArrheniusCoeffs_),
-    fieldName_(ArrheniusCoeffs_.lookupOrDefault<word>("field","T")),
+    fieldName_(ArrheniusCoeffs_.getOrDefault<word>("field", "T")),
     mesh_(U.mesh())
 {
     const auto* fldPtr = mesh_.findObject<volScalarField>(fieldName_);

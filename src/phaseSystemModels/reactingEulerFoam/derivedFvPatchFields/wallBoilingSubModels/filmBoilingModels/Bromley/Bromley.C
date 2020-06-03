@@ -60,8 +60,8 @@ Foam::wallBoilingModels::filmBoilingModels::Bromley::Bromley
 )
 :
     filmBoilingModel(),
-    Cn_(dict.lookupOrDefault<scalar>("Cn", 0.62)),
-    emissivity_(dict.lookupOrDefault<scalar>("emissivity", 1)),
+    Cn_(dict.getOrDefault<scalar>("Cn", 0.62)),
+    emissivity_(dict.getOrDefault<scalar>("emissivity", 1)),
     L_(dict.get<scalar>("L"))
 {}
 

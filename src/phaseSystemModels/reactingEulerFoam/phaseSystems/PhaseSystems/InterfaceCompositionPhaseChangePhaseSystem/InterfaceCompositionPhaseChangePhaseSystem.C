@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -99,7 +100,7 @@ InterfaceCompositionPhaseChangePhaseSystem
     BasePhaseSystem(mesh),
     nInterfaceCorrectors_
     (
-        this->template lookupOrDefault<label>("nInterfaceCorrectors", 1)
+        this->template getOrDefault<label>("nInterfaceCorrectors", 1)
     )
 {
     this->generatePairsAndSubModels

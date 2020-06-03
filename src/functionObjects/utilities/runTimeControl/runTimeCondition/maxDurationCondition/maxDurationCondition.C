@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,7 +64,7 @@ maxDurationCondition
     duration_(dict.get<scalar>("duration")),
     startTime_(-1),
     initialised_(false),
-    resetOnRestart_(dict.lookupOrDefault("resetOnRestart", false))
+    resetOnRestart_(dict.getOrDefault("resetOnRestart", false))
 {
     if
     (

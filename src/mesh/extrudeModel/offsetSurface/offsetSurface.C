@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +51,7 @@ addToRunTimeSelectionTable(extrudeModel, offsetSurface, dictionary);
 offsetSurface::offsetSurface(const dictionary& dict)
 :
     extrudeModel(typeName, dict),
-    project_(coeffDict_.lookupOrDefault("project", false))
+    project_(coeffDict_.getOrDefault("project", false))
 {
     // Read surface
     fileName baseName(coeffDict_.get<fileName>("baseSurface").expand());

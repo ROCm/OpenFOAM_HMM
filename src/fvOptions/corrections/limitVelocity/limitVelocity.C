@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,7 +58,7 @@ Foam::fv::limitVelocity::limitVelocity
 )
 :
     cellSetOption(name, modelType, dict, mesh),
-    UName_(coeffs_.lookupOrDefault<word>("U", "U")),
+    UName_(coeffs_.getOrDefault<word>("U", "U")),
     max_(coeffs_.get<scalar>("max"))
 {
     fieldNames_.setSize(1, UName_);

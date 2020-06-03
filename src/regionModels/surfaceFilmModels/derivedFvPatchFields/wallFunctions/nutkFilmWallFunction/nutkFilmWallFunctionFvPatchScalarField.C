@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -189,10 +190,10 @@ nutkFilmWallFunctionFvPatchScalarField::nutkFilmWallFunctionFvPatchScalarField
     nutkWallFunctionFvPatchScalarField(p, iF, dict),
     filmRegionName_
     (
-        dict.lookupOrDefault<word>("filmRegion", "surfaceFilmProperties")
+        dict.getOrDefault<word>("filmRegion", "surfaceFilmProperties")
     ),
-    B_(dict.lookupOrDefault("B", 5.5)),
-    yPlusCrit_(dict.lookupOrDefault("yPlusCrit", 11.05))
+    B_(dict.getOrDefault("B", 5.5)),
+    yPlusCrit_(dict.getOrDefault("yPlusCrit", 11.05))
 {}
 
 

@@ -117,9 +117,9 @@ Foam::rigidBodyMeshMotion::rigidBodyMeshMotion
         )
       : coeffDict()
     ),
-    test_(coeffDict().lookupOrDefault("test", false)),
+    test_(coeffDict().getOrDefault("test", false)),
     rhoInf_(1.0),
-    rhoName_(coeffDict().lookupOrDefault<word>("rho", "rho")),
+    rhoName_(coeffDict().getOrDefault<word>("rho", "rho")),
     ramp_(nullptr),
     curTimeIndex_(-1)
 {
@@ -267,7 +267,7 @@ void Foam::rigidBodyMeshMotion::solve()
     }
     else
     {
-        const label nIter(coeffDict().lookupOrDefault("nIter", 1));
+        const label nIter(coeffDict().getOrDefault<label>("nIter", 1));
 
         for (label i=0; i<nIter; i++)
         {

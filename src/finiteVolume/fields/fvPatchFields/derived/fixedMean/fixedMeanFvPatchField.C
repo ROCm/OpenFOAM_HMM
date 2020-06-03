@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,7 @@ Foam::fixedMeanFvPatchField<Type>::fixedMeanFvPatchField
     fixedValueFvPatchField<Type>(p, iF, dict),
     meanValue_(Function1<Type>::New("meanValue", dict))
 {
-    this->patchType() = dict.lookupOrDefault<word>("patchType", word::null);
+    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
 }
 
 

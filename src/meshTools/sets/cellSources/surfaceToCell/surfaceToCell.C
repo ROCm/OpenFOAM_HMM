@@ -441,7 +441,7 @@ Foam::surfaceToCell::surfaceToCell
     includeOutside_(dict.get<bool>("includeOutside")),
     useSurfaceOrientation_
     (
-        dict.lookupOrDefault("useSurfaceOrientation", false)
+        dict.getOrDefault("useSurfaceOrientation", false)
     ),
     nearDist_(dict.get<scalar>("nearDistance")),
     curvature_(dict.get<scalar>("curvature")),
@@ -451,7 +451,7 @@ Foam::surfaceToCell::surfaceToCell
         (
             surfName_,
             dict.getOrDefault<word>("fileType", word::null),
-            dict.lookupOrDefault<scalar>("scale", -1)
+            dict.getOrDefault<scalar>("scale", -1)
         )
     ),
     querySurfPtr_(new triSurfaceSearch(*surfPtr_)),

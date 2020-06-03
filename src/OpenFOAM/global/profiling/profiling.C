@@ -266,17 +266,17 @@ Foam::profiling::profiling
     times_(),
     sysInfo_
     (
-        dict.lookupOrDefault("sysInfo", false)
+        dict.getOrDefault("sysInfo", false)
       ? new profilingSysInfo() : nullptr
     ),
     cpuInfo_
     (
-        dict.lookupOrDefault("cpuInfo", false)
+        dict.getOrDefault("cpuInfo", false)
       ? new cpuInfo() : nullptr
     ),
     memInfo_
     (
-        dict.lookupOrDefault("memInfo", false)
+        dict.getOrDefault("memInfo", false)
       ? new memInfo() : nullptr
     )
 {

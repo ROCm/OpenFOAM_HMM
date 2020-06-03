@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -316,9 +316,9 @@ bool Foam::fv::effectivenessHeatExchangerSource::read(const dictionary& dict)
 {
     if (cellSetOption::read(dict))
     {
-        UName_ = coeffs_.lookupOrDefault<word>("U", "U");
-        TName_ = coeffs_.lookupOrDefault<word>("T", "T");
-        phiName_ = coeffs_.lookupOrDefault<word>("phi", "phi");
+        UName_ = coeffs_.getOrDefault<word>("U", "U");
+        TName_ = coeffs_.getOrDefault<word>("T", "T");
+        phiName_ = coeffs_.getOrDefault<word>("phi", "phi");
         coeffs_.readEntry("faceZone", faceZoneName_);
 
         coeffs_.readEntry("secondaryMassFlowRate", secondaryMassFlowRate_);

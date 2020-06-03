@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,7 +94,7 @@ void Foam::lumpedPointState::readDict(const dictionary& dict)
             dict,
             quaternion::eulerOrder::ZXZ
         );
-    degrees_ = dict.lookupOrDefault("degrees", false);
+    degrees_ = dict.getOrDefault("degrees", false);
 
     deleteDemandDrivenData(rotationPtr_);
 }

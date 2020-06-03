@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,7 +57,7 @@ outletMappedUniformInletFvPatchField
 :
     fixedValueFvPatchField<Type>(p, iF, dict),
     outletPatchName_(dict.lookup("outletPatch")),
-    phiName_(dict.lookupOrDefault<word>("phi", "phi"))
+    phiName_(dict.getOrDefault<word>("phi", "phi"))
 {}
 
 

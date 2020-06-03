@@ -100,9 +100,9 @@ Foam::rigidBodyMeshMotionSolver::rigidBodyMeshMotionSolver
         )
       : coeffDict()
     ),
-    test_(coeffDict().lookupOrDefault("test", false)),
+    test_(coeffDict().getOrDefault("test", false)),
     rhoInf_(1.0),
-    rhoName_(coeffDict().lookupOrDefault<word>("rho", "rho")),
+    rhoName_(coeffDict().getOrDefault<word>("rho", "rho")),
     curTimeIndex_(-1),
     meshSolverPtr_
     (

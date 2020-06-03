@@ -1416,7 +1416,7 @@ public:
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use keyType::option version
         template<class T>
-        FOAM_DEPRECATED_FOR(2018-10, "lookupOrDefault(keyType::option)")
+        FOAM_DEPRECATED_FOR(2018-10, "getOrDefault(keyType::option)")
         T lookupOrDefault
         (
             const word& keyword,
@@ -1425,15 +1425,13 @@ public:
             bool patternMatch = true
         ) const
         {
-            return
-                lookupOrDefault
-                (keyword, matchOpt(recursive, patternMatch));
+            return getOrDefault(keyword, matchOpt(recursive, patternMatch));
         }
 
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use keyType::option version
         template<class T>
-        FOAM_DEPRECATED_FOR(2018-10, "lookupOrAddDefault(keyType::option)")
+        FOAM_DEPRECATED_FOR(2018-10, "getOrAdd(keyType::option)")
         T lookupOrAddDefault
         (
             const word& keyword,
@@ -1442,9 +1440,7 @@ public:
             bool patternMatch = true
         )
         {
-            return
-                lookupOrAddDefault
-                (keyword, deflt, matchOpt(recursive, patternMatch));
+            return getOrAdd(keyword, deflt, matchOpt(recursive, patternMatch));
         }
 
         //- Deprecated(2018-10)

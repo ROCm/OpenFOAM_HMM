@@ -46,7 +46,7 @@ namespace Foam
 
     word fileOperation::defaultFileHandler
     (
-        debug::optimisationSwitches().lookupOrAddDefault<word>
+        debug::optimisationSwitches().getOrAdd<word>
         (
             "fileHandler",
             //Foam::fileOperations::uncollatedFileOperation::typeName,

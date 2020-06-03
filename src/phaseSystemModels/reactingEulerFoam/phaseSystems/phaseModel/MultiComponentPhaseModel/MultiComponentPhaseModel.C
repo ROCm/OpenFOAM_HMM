@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,7 +65,7 @@ Foam::MultiComponentPhaseModel<BasePhaseModel>::MultiComponentPhaseModel
 {
     const word inertSpecie
     (
-        this->thermo_->lookupOrDefault("inertSpecie", word::null)
+        this->thermo_->getOrDefault("inertSpecie", word::null)
     );
 
     if (inertSpecie != word::null)

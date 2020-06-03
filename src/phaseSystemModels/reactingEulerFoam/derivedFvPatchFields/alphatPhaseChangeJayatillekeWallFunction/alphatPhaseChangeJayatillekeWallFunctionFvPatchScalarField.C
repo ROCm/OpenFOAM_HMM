@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2019 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -251,10 +252,10 @@ alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField
 )
 :
     alphatPhaseChangeWallFunctionFvPatchScalarField(p, iF, dict),
-    Prt_(dict.lookupOrDefault<scalar>("Prt", 0.85)),
-    Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
-    E_(dict.lookupOrDefault<scalar>("E", 9.8))
+    Prt_(dict.getOrDefault<scalar>("Prt", 0.85)),
+    Cmu_(dict.getOrDefault<scalar>("Cmu", 0.09)),
+    kappa_(dict.getOrDefault<scalar>("kappa", 0.41)),
+    E_(dict.getOrDefault<scalar>("E", 9.8))
 {}
 
 

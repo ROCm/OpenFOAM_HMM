@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,12 +81,12 @@ ATCModel::ATCModel
     primalVars_(primalVars),
     adjointVars_(adjointVars),
     dict_(dict),
-    extraConvection_(dict_.lookupOrDefault<scalar>("extraConvection", Zero)),
-    extraDiffusion_(dict_.lookupOrDefault<scalar>("extraDiffusion", Zero)),
-    nSmooth_(dict_.lookupOrDefault<label>("nSmooth", 0)),
+    extraConvection_(dict_.getOrDefault<scalar>("extraConvection", Zero)),
+    extraDiffusion_(dict_.getOrDefault<scalar>("extraDiffusion", Zero)),
+    nSmooth_(dict_.getOrDefault<label>("nSmooth", 0)),
     reconstructGradients_
     (
-        dict_.lookupOrDefault<bool>("reconstructGradients", false)
+        dict_.getOrDefault("reconstructGradients", false)
     ),
     adjointSolverName_(adjointVars.solverName()),
     zeroATCcells_(zeroATCcells::New(mesh, dict_)),
@@ -225,7 +225,7 @@ tmp<volScalarField> ATCModel::createLimiter
 {
     autoPtr<zeroATCcells> zeroType(zeroATCcells::New(mesh, dict));
     const labelList& zeroCells = zeroType->getZeroATCcells();
-    const label nSmooth = dict.lookupOrDefault<label>("nSmooth", 0);
+    const label nSmooth = dict.getOrDefault<label>("nSmooth", 0);
 
     tmp<volScalarField> tlimiter
     (

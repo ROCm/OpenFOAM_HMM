@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,7 @@ namespace Foam
 Foam::bisection::bisection(const dictionary& dict)
 :
     stepUpdate(dict),
-    ratio_(coeffsDict().lookupOrDefault<scalar>("ratio", 0.7))
+    ratio_(coeffsDict().getOrDefault<scalar>("ratio", 0.7))
 {}
 
 

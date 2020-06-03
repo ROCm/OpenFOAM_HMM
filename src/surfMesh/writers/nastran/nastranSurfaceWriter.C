@@ -371,7 +371,7 @@ Foam::surfaceWriters::nastranWriter::nastranWriter
     surfaceWriter(options),
     writeFormat_
     (
-        fileFormats::NASCore::fieldFormatNames.lookupOrDefault
+        fileFormats::NASCore::fieldFormatNames.getOrDefault
         (
             "format",
             options,

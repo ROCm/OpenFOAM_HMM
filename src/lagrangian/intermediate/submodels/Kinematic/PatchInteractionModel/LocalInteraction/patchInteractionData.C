@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,8 +83,8 @@ Foam::Istream& Foam::operator>>
     pid.patchName_ = dictEntry.keyword();
 
     dict.readEntry("type", pid.interactionTypeName_);
-    pid.e_ = dict.lookupOrDefault<scalar>("e", 1.0);
-    pid.mu_ = dict.lookupOrDefault<scalar>("mu", 0.0);
+    pid.e_ = dict.getOrDefault<scalar>("e", 1);
+    pid.mu_ = dict.getOrDefault<scalar>("mu", 0);
 
     return is;
 }

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,7 +76,7 @@ T dimensionedConstant
     {
         dictionary& groupDict = unitDict.subDict(group);
 
-        // Leaner version of dictionary lookupOrAddDefault()
+        // Leaner version of dictionary::getOrAdd()
         // without writeOptionalEntries
 
         if (groupDict.found(varName))

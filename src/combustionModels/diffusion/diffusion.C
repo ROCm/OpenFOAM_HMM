@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,7 @@ diffusion<ReactionThermo, ThermoType>::diffusion
         combustionProperties
     ),
     C_(this->coeffs().getScalar("C")),
-    oxidantName_(this->coeffs().template lookupOrDefault<word>("oxidant", "O2"))
+    oxidantName_(this->coeffs().template getOrDefault<word>("oxidant", "O2"))
 {}
 
 

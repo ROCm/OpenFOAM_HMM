@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -148,7 +148,7 @@ Foam::functionObjects::volRegion::volRegion
     V_(Zero),
     regionType_
     (
-        regionTypeNames_.lookupOrDefault
+        regionTypeNames_.getOrDefault
         (
             "regionType",
             dict,

@@ -246,7 +246,7 @@ kOmegaSSTBase<BasicEddyViscosityModel>::kOmegaSSTBase
 
     alphaK1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "alphaK1",
             this->coeffDict_,
@@ -255,7 +255,7 @@ kOmegaSSTBase<BasicEddyViscosityModel>::kOmegaSSTBase
     ),
     alphaK2_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "alphaK2",
             this->coeffDict_,
@@ -264,7 +264,7 @@ kOmegaSSTBase<BasicEddyViscosityModel>::kOmegaSSTBase
     ),
     alphaOmega1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "alphaOmega1",
             this->coeffDict_,
@@ -273,7 +273,7 @@ kOmegaSSTBase<BasicEddyViscosityModel>::kOmegaSSTBase
     ),
     alphaOmega2_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "alphaOmega2",
             this->coeffDict_,
@@ -282,7 +282,7 @@ kOmegaSSTBase<BasicEddyViscosityModel>::kOmegaSSTBase
     ),
     gamma1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "gamma1",
             this->coeffDict_,
@@ -291,7 +291,7 @@ kOmegaSSTBase<BasicEddyViscosityModel>::kOmegaSSTBase
     ),
     gamma2_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "gamma2",
             this->coeffDict_,
@@ -300,7 +300,7 @@ kOmegaSSTBase<BasicEddyViscosityModel>::kOmegaSSTBase
     ),
     beta1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "beta1",
             this->coeffDict_,
@@ -309,7 +309,7 @@ kOmegaSSTBase<BasicEddyViscosityModel>::kOmegaSSTBase
     ),
     beta2_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "beta2",
             this->coeffDict_,
@@ -318,7 +318,7 @@ kOmegaSSTBase<BasicEddyViscosityModel>::kOmegaSSTBase
     ),
     betaStar_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "betaStar",
             this->coeffDict_,
@@ -327,7 +327,7 @@ kOmegaSSTBase<BasicEddyViscosityModel>::kOmegaSSTBase
     ),
     a1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "a1",
             this->coeffDict_,
@@ -336,7 +336,7 @@ kOmegaSSTBase<BasicEddyViscosityModel>::kOmegaSSTBase
     ),
     b1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "b1",
             this->coeffDict_,
@@ -345,7 +345,7 @@ kOmegaSSTBase<BasicEddyViscosityModel>::kOmegaSSTBase
     ),
     c1_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "c1",
             this->coeffDict_,
@@ -354,7 +354,7 @@ kOmegaSSTBase<BasicEddyViscosityModel>::kOmegaSSTBase
     ),
     F3_
     (
-        Switch::lookupOrAddToDict
+        Switch::getOrAddToDict
         (
             "F3",
             this->coeffDict_,
@@ -390,7 +390,7 @@ kOmegaSSTBase<BasicEddyViscosityModel>::kOmegaSSTBase
     ),
     decayControl_
     (
-        Switch::lookupOrAddToDict
+        Switch::getOrAddToDict
         (
             "decayControl",
             this->coeffDict_,
@@ -399,7 +399,7 @@ kOmegaSSTBase<BasicEddyViscosityModel>::kOmegaSSTBase
     ),
     kInf_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "kInf",
             this->coeffDict_,
@@ -409,7 +409,7 @@ kOmegaSSTBase<BasicEddyViscosityModel>::kOmegaSSTBase
     ),
     omegaInf_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensioned<scalar>::getOrAddToDict
         (
             "omegaInf",
             this->coeffDict_,

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -427,20 +427,20 @@ bool Foam::functionObjects::momentum::read(const dictionary& dict)
     Info<< type() << " " << name() << ":" << nl;
 
     // Optional entries U and p
-    UName_ = dict.lookupOrDefault<word>("U", "U");
-    pName_ = dict.lookupOrDefault<word>("p", "p");
-    rhoName_ = dict.lookupOrDefault<word>("rho", "rho");
-    rhoRef_ = dict.lookupOrDefault<scalar>("rhoRef", 1.0);
-    hasCsys_ = dict.lookupOrDefault("cylindrical", false);
+    UName_ = dict.getOrDefault<word>("U", "U");
+    pName_ = dict.getOrDefault<word>("p", "p");
+    rhoName_ = dict.getOrDefault<word>("rho", "rho");
+    rhoRef_ = dict.getOrDefault<scalar>("rhoRef", 1);
+    hasCsys_ = dict.getOrDefault("cylindrical", false);
 
     if (hasCsys_)
     {
         csys_ = coordSystem::cylindrical(dict);
     }
 
-    writeMomentum_ = dict.lookupOrDefault("writeMomentum", false);
-    writeVelocity_ = dict.lookupOrDefault("writeVelocity", false);
-    writePosition_ = dict.lookupOrDefault("writePosition", false);
+    writeMomentum_ = dict.getOrDefault("writeMomentum", false);
+    writeVelocity_ = dict.getOrDefault("writeVelocity", false);
+    writePosition_ = dict.getOrDefault("writePosition", false);
 
     Info<<"Integrating for selection: "
         << regionTypeNames_[regionType_]

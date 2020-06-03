@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,9 +72,9 @@ Foam::patchDistMethods::advectionDiffusion::advectionDiffusion
             patchIDs
         )
     ),
-    epsilon_(coeffs_.lookupOrDefault<scalar>("epsilon", 0.1)),
-    tolerance_(coeffs_.lookupOrDefault<scalar>("tolerance", 1e-3)),
-    maxIter_(coeffs_.lookupOrDefault<int>("maxIter", 10)),
+    epsilon_(coeffs_.getOrDefault<scalar>("epsilon", 0.1)),
+    tolerance_(coeffs_.getOrDefault<scalar>("tolerance", 1e-3)),
+    maxIter_(coeffs_.getOrDefault<int>("maxIter", 10)),
     predicted_(false)
 {}
 

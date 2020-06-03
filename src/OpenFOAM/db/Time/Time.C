@@ -145,7 +145,7 @@ void Foam::Time::adjustDeltaT()
 void Foam::Time::setControls()
 {
     // default is to resume calculation from "latestTime"
-    const word startFrom = controlDict_.lookupOrDefault<word>
+    const word startFrom = controlDict_.getOrDefault<word>
     (
         "startFrom",
         "latestTime"
@@ -290,7 +290,7 @@ void Foam::Time::setControls()
 
     // Read and set the deltaT only if time-step adjustment is active
     // otherwise use the deltaT from the controlDict
-    if (controlDict_.lookupOrDefault("adjustTimeStep", false))
+    if (controlDict_.getOrDefault("adjustTimeStep", false))
     {
         if (timeDict.readIfPresent("deltaT", deltaT_))
         {
@@ -379,7 +379,7 @@ void Foam::Time::setMonitoring(const bool forceProfiling)
     else if
     (
         profilingDict
-     && profilingDict->lookupOrDefault("active", true)
+     && profilingDict->getOrDefault("active", true)
     )
     {
         profiling::initialize
@@ -999,7 +999,7 @@ bool Foam::Time::stopAt(const stopAtControls stopCtrl) const
 
 bool Foam::Time::isAdjustTimeStep() const
 {
-    return controlDict_.lookupOrDefault("adjustTimeStep", false);
+    return controlDict_.getOrDefault("adjustTimeStep", false);
 }
 
 
