@@ -30,6 +30,8 @@ License
 #include "Time.H"
 #include "globalIndex.H"
 #include "meshToMeshMethod.H"
+#include "nearestFaceAMI.H"
+#include "faceAreaWeightAMI.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -633,25 +635,27 @@ void Foam::meshToMesh::calculate(const word& methodName, const bool normalise)
 }
 
 
-Foam::AMIPatchToPatchInterpolation::interpolationMethod
-Foam::meshToMesh::interpolationMethodAMI(const interpolationMethod method)
+Foam::word Foam::meshToMesh::interpolationMethodAMI
+(
+    const interpolationMethod method
+)
 {
     switch (method)
     {
         case interpolationMethod::imDirect:
         {
-            return AMIPatchToPatchInterpolation::imNearestFace;
+            return nearestFaceAMI::typeName;
             break;
         }
         case interpolationMethod::imMapNearest:
         {
-            return AMIPatchToPatchInterpolation::imNearestFace;
+            return nearestFaceAMI::typeName;
             break;
         }
         case interpolationMethod::imCellVolumeWeight:
         case interpolationMethod::imCorrectedCellVolumeWeight:
         {
-            return AMIPatchToPatchInterpolation::imFaceAreaWeight;
+            return faceAreaWeightAMI::typeName;
             break;
         }
         default:
@@ -662,7 +666,7 @@ Foam::meshToMesh::interpolationMethodAMI(const interpolationMethod method)
         }
     }
 
-    return AMIPatchToPatchInterpolation::imNearestFace;
+    return nearestFaceAMI::typeName;
 }
 
 
@@ -695,17 +699,16 @@ void Foam::meshToMesh::calculatePatchAMIs(const word& AMIMethodName)
         patchAMIs_.set
         (
             i,
-            new AMIPatchToPatchInterpolation
+            AMIInterpolation::New
             (
-                srcPP,
-                tgtPP,
-                faceAreaIntersect::tmMesh,
-                false,
                 AMIMethodName,
-                -1,
-                true // flip target patch since patch normals are aligned
+                false, // requireMatch
+                true,  // flip target patch since patch normals are aligned
+                -1     // low weight correction
             )
         );
+
+        patchAMIs_[i].calculate(srcPP, tgtPP);
 
         Info<< decrIndent;
     }
@@ -862,10 +865,7 @@ Foam::meshToMesh::meshToMesh
     constructNoCuttingPatches
     (
         interpolationMethodNames_[method],
-        AMIPatchToPatchInterpolation::interpolationMethodNames_
-        [
-            interpolationMethodAMI(method)
-        ],
+        interpolationMethodAMI(method),
         interpAllPatches
     );
 }
@@ -933,10 +933,7 @@ Foam::meshToMesh::meshToMesh
     constructFromCuttingPatches
     (
         interpolationMethodNames_[method],
-        AMIPatchToPatchInterpolation::interpolationMethodNames_
-        [
-            interpolationMethodAMI(method)
-        ],
+        interpolationMethodAMI(method),
         patchMap,
         cuttingPatches,
         normalise

@@ -47,6 +47,7 @@ License
 #include "gravityMeshObject.H"
 #include "turbulentTransportModel.H"
 #include "demandDrivenData.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

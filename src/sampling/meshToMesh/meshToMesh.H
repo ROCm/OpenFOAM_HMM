@@ -394,8 +394,7 @@ public:
             inline scalar V() const;
 
             //- Conversion between mesh and patch interpolation methods
-            static AMIPatchToPatchInterpolation::interpolationMethod
-            interpolationMethodAMI
+            static word interpolationMethodAMI
             (
                 const interpolationMethod method
             );

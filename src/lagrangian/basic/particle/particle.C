@@ -31,6 +31,7 @@ License
 #include "treeDataCell.H"
 #include "cubicEqn.H"
 #include "registerSwitch.H"
+#include "indexedOctree.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

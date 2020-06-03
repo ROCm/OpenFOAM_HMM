@@ -794,9 +794,11 @@ void Foam::mappedPatchBase::calcAMI() const
 {
     if (AMIPtr_->upToDate())
     {
-        WarningInFunction
+        DebugInFunction
             << "AMI already up-to-date"
             << endl;
+
+        return;
     }
 
     const polyPatch& nbr = samplePolyPatch();
@@ -1040,7 +1042,7 @@ Foam::mappedPatchBase::mappedPatchBase
     (
         AMIInterpolation::New
         (
-            dict.lookupOrDefault("AMIMethod", faceAreaWeightAMI::typeName),
+            dict.getOrDefault("AMIMethod", faceAreaWeightAMI::typeName),
             dict,
             AMIReverse_
         )
