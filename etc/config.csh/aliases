@@ -6,11 +6,10 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2017-2018 OpenCFD Ltd.
+#     Copyright (C) 2017-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # File
 #     etc/config.csh/aliases
@@ -38,13 +37,13 @@ alias wmUnset 'source $WM_PROJECT_DIR/etc/config.csh/unset'
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 alias foam 'cd $WM_PROJECT_DIR'
 
-alias src 'cd $FOAM_SRC'
+alias src 'cd $WM_PROJECT_DIR/src'
 alias lib 'cd $FOAM_LIBBIN'
-alias app 'cd $FOAM_APP'
-alias sol 'cd $FOAM_SOLVERS'
-alias util 'cd $FOAM_UTILITIES'
-alias tut 'cd $FOAM_TUTORIALS'
-alias run 'cd $FOAM_RUN'
+alias app 'cd $WM_PROJECT_DIR/applications'
+alias sol 'cd $WM_PROJECT_DIR/applications/solvers'
+alias util 'cd $WM_PROJECT_DIR/applications/utilities'
+alias tut 'cd $WM_PROJECT_DIR/tutorials'
+alias run 'cd $WM_PROJECT_USER_DIR/run'
 
 alias ufoam 'cd $WM_PROJECT_USER_DIR'
 alias uapp 'cd $WM_PROJECT_USER_DIR/applications'

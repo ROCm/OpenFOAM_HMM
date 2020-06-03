@@ -22,7 +22,7 @@
 
 # Change compiled version aliases
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-alias wmSet='. $WM_PROJECT_DIR/etc/bashrc'
+alias wmSet='. ${WM_PROJECT_DIR:?}/etc/bashrc'
 alias wmInt32='wmSet WM_LABEL_SIZE=32'
 alias wmInt64='wmSet WM_LABEL_SIZE=64'
 alias wmDP='wmSet WM_PRECISION_OPTION=DP'
@@ -30,24 +30,24 @@ alias wmSP='wmSet WM_PRECISION_OPTION=SP'
 alias wmSPDP='wmSet WM_PRECISION_OPTION=SPDP'
 
 # Clear env
-alias wmUnset='. $WM_PROJECT_DIR/etc/config.sh/unset'
+alias wmUnset='. ${WM_PROJECT_DIR:?}/etc/config.sh/unset'
 
 # Change directory aliases
 # ~~~~~~~~~~~~~~~~~~~~~~~~
-alias foam='cd $WM_PROJECT_DIR'
+alias foam='cd ${WM_PROJECT_DIR:?}'
 
-alias src='cd $FOAM_SRC'
-alias lib='cd $FOAM_LIBBIN'
-alias app='cd $FOAM_APP'
-alias sol='cd $FOAM_SOLVERS'
-alias util='cd $FOAM_UTILITIES'
-alias tut='cd $FOAM_TUTORIALS'
-alias run='cd $FOAM_RUN'
+alias src='cd ${WM_PROJECT_DIR:?}/src'
+alias lib='cd ${FOAM_LIBBIN:?}'
+alias app='cd ${WM_PROJECT_DIR:?}/applications'
+alias sol='cd ${WM_PROJECT_DIR:?}/applications/solvers'
+alias util='cd ${WM_PROJECT_DIR:?}/applications/utilities'
+alias tut='cd ${FOAM_TUTORIALS:-${WM_PROJECT_DIR:?}/tutorials}'
+alias run='cd ${FOAM_RUN:-${WM_PROJECT_USER_DIR:?}/run}'
 
-alias ufoam='cd $WM_PROJECT_USER_DIR'
-alias uapp='cd $WM_PROJECT_USER_DIR/applications'
-alias usol='cd $WM_PROJECT_USER_DIR/applications/solvers'
-alias uutil='cd $WM_PROJECT_USER_DIR/applications/utilities'
+alias ufoam='cd ${WM_PROJECT_USER_DIR:?}'
+alias uapp='cd ${WM_PROJECT_USER_DIR:?}/applications'
+alias usol='cd ${WM_PROJECT_USER_DIR:?}/applications/solvers'
+alias uutil='cd ${WM_PROJECT_USER_DIR:?}/applications/utilities'
 
 
 # Refresh the environment
