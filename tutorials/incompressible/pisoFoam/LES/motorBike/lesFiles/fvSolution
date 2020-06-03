@@ -38,7 +38,9 @@ solvers
         // solution tolerance
         coarsestLevelCorr
         {
-            solver          PCG;
+            // For limited residual reduction (relTol) PPCR behaves better
+            // than PCG (or PPCG)
+            solver          PPCR;   //PCG;
             preconditioner  DIC;
             relTol          0.05;
         }
