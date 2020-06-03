@@ -80,11 +80,11 @@ OptimisationSwitches
 
     // On NFS mounted file system: maximum wait for files to appear/get
     // updated. Set to 0 on distributed case.
-    fileModificationSkew 10;
+    fileModificationSkew 5;
 
     // How often retest (using above fileModificationSkew) before giving up.
     // Default is 1.
-    //maxFileModificationPolls 100;
+    maxFileModificationPolls 20;
 
     //- Modification checking:
     //  - timeStamp         : use modification time on file
