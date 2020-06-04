@@ -20,8 +20,8 @@ starcd/STARCDMeshWriter.C
 
 polyDualMesh/polyDualMesh.C
 
-vtk/output/foamVtkInternalWriter.H
-vtk/output/foamVtkPatchWriter.H
+vtk/output/foamVtkInternalWriter.C
+vtk/output/foamVtkPatchWriter.C
 vtk/output/foamVtkSurfaceFieldWriter.C
 
 LIB = $(FOAM_LIBBIN)/libconversion
