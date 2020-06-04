@@ -24,7 +24,7 @@ constructFrom patch;
 //constructFrom surface;
 
 // If construct from patch/mesh:
-sourceCase "../cavity";
+sourceCase    "$FOAM_CASE";
 sourcePatches (movingWall);
 
 // If construct from patch: patch to use for back (can be same as sourcePatch)
