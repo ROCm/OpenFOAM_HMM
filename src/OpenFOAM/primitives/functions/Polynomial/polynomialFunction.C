@@ -39,7 +39,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-
 Foam::polynomialFunction Foam::polynomialFunction::cloneIntegral
 (
     const polynomialFunction& poly,
@@ -82,13 +81,9 @@ Foam::polynomialFunction Foam::polynomialFunction::cloneIntegralMinus1
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::polynomialFunction::polynomialFunction(const label order)
-:
-    scalarList(order, Zero),
-    logActive_(false),
-    logCoeff_(0)
+void Foam::polynomialFunction::checkSize() const
 {
     if (this->empty())
     {
@@ -99,12 +94,37 @@ Foam::polynomialFunction::polynomialFunction(const label order)
 }
 
 
-Foam::polynomialFunction::polynomialFunction(const polynomialFunction& poly)
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::polynomialFunction::polynomialFunction()
 :
-    scalarList(poly),
-    logActive_(poly.logActive_),
-    logCoeff_(poly.logCoeff_)
+    scalarList(1, Zero),
+    logActive_(false),
+    logCoeff_(0)
 {}
+
+
+Foam::polynomialFunction::polynomialFunction(const label order)
+:
+    scalarList(order, Zero),
+    logActive_(false),
+    logCoeff_(0)
+{
+    checkSize();
+}
+
+
+Foam::polynomialFunction::polynomialFunction
+(
+    const std::initializer_list<scalar> coeffs
+)
+:
+    scalarList(coeffs),
+    logActive_(false),
+    logCoeff_(0)
+{
+    checkSize();
+}
 
 
 Foam::polynomialFunction::polynomialFunction(const UList<scalar>& coeffs)
@@ -113,12 +133,7 @@ Foam::polynomialFunction::polynomialFunction(const UList<scalar>& coeffs)
     logActive_(false),
     logCoeff_(0)
 {
-    if (this->empty())
-    {
-        FatalErrorInFunction
-            << "polynomialFunction coefficients are invalid (empty)"
-            << nl << exit(FatalError);
-    }
+    checkSize();
 }
 
 
@@ -128,12 +143,7 @@ Foam::polynomialFunction::polynomialFunction(Istream& is)
     logActive_(false),
     logCoeff_(0)
 {
-    if (this->empty())
-    {
-        FatalErrorInFunction
-            << "polynomialFunction coefficients are invalid (empty)"
-            << nl << exit(FatalError);
-    }
+    checkSize();
 }
 
 
@@ -156,7 +166,7 @@ Foam::scalar Foam::polynomialFunction::value(const scalar x) const
     const scalarList& coeffs = *this;
     scalar val = coeffs[0];
 
-    // avoid costly pow() in calculation
+    // Avoid costly pow() in calculation
     scalar powX = x;
     for (label i=1; i<coeffs.size(); ++i)
     {
@@ -188,7 +198,7 @@ Foam::scalar Foam::polynomialFunction::integrate
             << nl << abort(FatalError);
     }
 
-    // avoid costly pow() in calculation
+    // Avoid costly pow() in calculation
     scalar powX1 = x1;
     scalar powX2 = x2;
 
@@ -225,21 +235,14 @@ Foam::polynomialFunction::operator+=(const polynomialFunction& poly)
 {
     scalarList& coeffs = *this;
 
-    if (coeffs.size() > poly.size())
+    if (coeffs.size() < poly.size())
     {
-        forAll(poly, i)
-        {
-            coeffs[i] += poly[i];
-        }
+        coeffs.resize(poly.size(), Zero);
     }
-    else
-    {
-        coeffs.setSize(poly.size(), 0.0);
 
-        forAll(coeffs, i)
-        {
-            coeffs[i] += poly[i];
-        }
+    forAll(poly, i)
+    {
+        coeffs[i] += poly[i];
     }
 
     return *this;
@@ -251,21 +254,14 @@ Foam::polynomialFunction::operator-=(const polynomialFunction& poly)
 {
     scalarList& coeffs = *this;
 
-    if (coeffs.size() > poly.size())
+    if (coeffs.size() < poly.size())
     {
-        forAll(poly, i)
-        {
-            coeffs[i] -= poly[i];
-        }
+        coeffs.resize(poly.size(), Zero);
     }
-    else
-    {
-        coeffs.setSize(poly.size(), 0.0);
 
-        forAll(coeffs, i)
-        {
-            coeffs[i] -= poly[i];
-        }
+    forAll(poly, i)
+    {
+        coeffs[i] -= poly[i];
     }
 
     return *this;
@@ -299,6 +295,20 @@ Foam::polynomialFunction::operator/=(const scalar s)
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+Foam::Istream& Foam::operator>>(Istream& is, polynomialFunction& poly)
+{
+    // Log handling may be unreliable
+    poly.logActive_ = false;
+    poly.logCoeff_ = 0;
+
+    is >> static_cast<scalarList&>(poly);
+
+    poly.checkSize();
+
+    return is;
+}
+
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const polynomialFunction& poly)
 {

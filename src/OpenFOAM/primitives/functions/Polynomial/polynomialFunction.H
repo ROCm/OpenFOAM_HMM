@@ -66,7 +66,9 @@ namespace Foam
 
 // Forward Declarations
 class polynomialFunction;
-Ostream& operator<<(Ostream&, const polynomialFunction&);
+
+Istream& operator>>(Istream&, polynomialFunction& poly);
+Ostream& operator<<(Ostream&, const polynomialFunction& poly);
 
 /*---------------------------------------------------------------------------*\
                      Class polynomialFunction Declaration
@@ -103,6 +105,9 @@ class polynomialFunction
             const scalar intConstant = 0
         );
 
+        //- Check size is non-zero or trigger FatalErrot
+        void checkSize() const;
+
         //- No copy assignment
         void operator=(const polynomialFunction&) = delete;
 
@@ -113,13 +118,19 @@ public:
     TypeName("polynomialFunction");
 
 
+    // Generated Methods: copy construct, copy assignment
+
+
     // Constructors
 
-        //- Construct a particular size, with all coefficients as 0
+        //- Default construct as size 1 with coefficient == 0
+        polynomialFunction();
+
+        //- Construct a particular size, with all coefficients == 0
         explicit polynomialFunction(const label order);
 
-        //- Copy constructor
-        polynomialFunction(const polynomialFunction& rhs);
+        //- Construct from an initializer list of coefficients
+        explicit polynomialFunction(std::initializer_list<scalar> coeffs);
 
         //- Construct from a list of coefficients
         explicit polynomialFunction(const UList<scalar>& coeffs);
@@ -134,20 +145,22 @@ public:
 
     // Member Functions
 
-            //- The number of coefficients
-            using scalarList::size;
+        //- Non-zero number of coefficients
+        using scalarList::empty;
 
-            //- Return coefficient
-            using scalarList::operator[];
+        //- The number of coefficients
+        using scalarList::size;
+
+        //- Return coefficient at given index
+        using scalarList::operator[];
 
 
         // Access
 
-
-            //- Return true if the log term is active
+            //- True if the log term is active
             bool logActive() const;
 
-            //- Return the log coefficient
+            //- The log coefficient
             scalar logCoeff() const;
 
 
@@ -164,14 +177,14 @@ public:
             //  Argument becomes zeroth element (constant of integration)
             polynomialFunction integral
             (
-                const scalar intConstant = 0.0
+                const scalar intConstant = 0
             ) const;
 
             //- Return integral coefficients when lowest order is -1.
             //  Argument becomes zeroth element (constant of integration)
             polynomialFunction integralMinus1
             (
-                const scalar intConstant = 0.0
+                const scalar intConstant = 0
             ) const;
 
 
@@ -184,12 +197,12 @@ public:
         polynomialFunction& operator/=(const scalar);
 
 
-    //- Ostream Operator
-    friend Ostream& operator<<(Ostream&, const polynomialFunction&);
+    // IOstream Operators
+
+    friend Istream& operator>>(Istream&, polynomialFunction& poly);
+    friend Ostream& operator<<(Ostream&, const polynomialFunction& poly);
 };
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,13 +33,32 @@ License
 template<int PolySize>
 Foam::Polynomial<PolySize>::Polynomial()
 :
+    VectorSpace<Polynomial<PolySize>, scalar, PolySize>(Zero),
+    logActive_(false),
+    logCoeff_(0)
+{}
+
+
+template<int PolySize>
+Foam::Polynomial<PolySize>::Polynomial(std::initializer_list<scalar> coeffs)
+:
     VectorSpace<Polynomial<PolySize>, scalar, PolySize>(),
     logActive_(false),
     logCoeff_(0)
 {
-    for (int i = 0; i < PolySize; ++i)
+    if (coeffs.size() != PolySize)
     {
-        this->v_[i] = 0;
+        FatalErrorInFunction
+            << "Size mismatch: Needed " << PolySize
+            << " but given " << label(coeffs.size())
+            << nl << exit(FatalError);
+    }
+
+    auto iter = coeffs.begin();
+    for (int i=0; i<PolySize; ++i)
+    {
+        this->v_[i] = *iter;
+        ++iter;
     }
 }
 
@@ -50,7 +70,7 @@ Foam::Polynomial<PolySize>::Polynomial(const scalar coeffs[PolySize])
     logActive_(false),
     logCoeff_(0)
 {
-    for (int i=0; i<PolySize; i++)
+    for (int i=0; i<PolySize; ++i)
     {
         this->v_[i] = coeffs[i];
     }
@@ -95,7 +115,7 @@ Foam::Polynomial<PolySize>::Polynomial(const word& name, Istream& is)
     logActive_(false),
     logCoeff_(0)
 {
-    word isName(is);
+    const word isName(is);
 
     if (isName != name)
     {
@@ -104,15 +124,11 @@ Foam::Polynomial<PolySize>::Polynomial(const word& name, Istream& is)
             << nl << exit(FatalError);
     }
 
-    VectorSpace<Polynomial<PolySize>, scalar, PolySize>::
-        operator=(VectorSpace<Polynomial<PolySize>, scalar, PolySize>(is));
-
-    if (this->size() == 0)
-    {
-        FatalErrorInFunction
-            << "Polynomial coefficients for entry " << isName
-            << " are invalid (empty)" << nl << exit(FatalError);
-    }
+    is >>
+        static_cast
+        <
+            VectorSpace<Polynomial<PolySize>, scalar, PolySize>&
+        >(*this);
 }
 
 
@@ -137,12 +153,12 @@ Foam::scalar Foam::Polynomial<PolySize>::value(const scalar x) const
 {
     scalar val = this->v_[0];
 
-    // avoid costly pow() in calculation
-    scalar powX = 1;
+    // Avoid costly pow() in calculation
+    scalar powX = x;
     for (label i=1; i<PolySize; ++i)
     {
-        powX *= x;
         val += this->v_[i]*powX;
+        powX *= x;
     }
 
     if (logActive_)
@@ -161,14 +177,14 @@ Foam::scalar Foam::Polynomial<PolySize>::derivative(const scalar x) const
 
     if (PolySize > 1)
     {
-        // avoid costly pow() in calculation
+        // Avoid costly pow() in calculation
         deriv += this->v_[1];
 
-        scalar powX = 1;
+        scalar powX = x;
         for (label i=2; i<PolySize; ++i)
         {
-            powX *= x;
             deriv += i*this->v_[i]*powX;
+            powX *= x;
         }
     }
 
@@ -188,7 +204,7 @@ Foam::scalar Foam::Polynomial<PolySize>::integral
     const scalar x2
 ) const
 {
-    // avoid costly pow() in calculation
+    // Avoid costly pow() in calculation
     scalar powX1 = x1;
     scalar powX2 = x2;
 

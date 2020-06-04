@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,24 +25,29 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    PolynomialTest
+    Test-Polynomial
 
 Description
     Test application for the templated Polynomial class
 
 \*---------------------------------------------------------------------------*/
 
-#include "StringStream.H"
 #include "Polynomial.H"
+#include "FixedList.H"
 #include "polynomialFunction.H"
+#include "ITstream.H"
+#include "OTstream.H"
 #include "Random.H"
 #include "cpuTime.H"
 
 using namespace Foam;
 
-const int PolySize = 8;
-const scalar coeff[] = { 0.11, 0.45, -0.94, 1.58, -2.58, 0.08, 3.15, -4.78 };
-const char* polyDef = "(0.11 0.45 -0.94 1.58 -2.58 0.08 3.15 -4.78)";
+std::initializer_list<scalar> coeffs
+{
+    0.11, 0.45, -0.94, 1.58, -2.58, 0.08, 3.15, -4.78
+};
+
+const FixedList<scalar, 8> coeff(coeffs);
 
 
 scalar polyValue(const scalar x)
@@ -76,10 +82,10 @@ scalar intPolyValue(const scalar x)
 
 scalar polyValue1(const scalar x)
 {
-    // "normal" evaluation using pow()
+    // Naive evaluation using pow()
     scalar value = coeff[0];
 
-    for (int i=1; i < PolySize; ++i)
+    for (label i=1; i < coeff.size(); ++i)
     {
         value += coeff[i]*pow(x, i);
     }
@@ -90,11 +96,11 @@ scalar polyValue1(const scalar x)
 
 scalar polyValue2(const scalar x)
 {
-    // calculation avoiding pow()
+    // Calculation avoiding pow()
     scalar value = coeff[0];
 
     scalar powX = x;
-    for (int i=1; i < PolySize; ++i)
+    for (label i=1; i < coeff.size(); ++i)
     {
         value += coeff[i] * powX;
         powX *= x;
@@ -108,19 +114,27 @@ scalar polyValue2(const scalar x)
 
 int main(int argc, char *argv[])
 {
-    const label n = 10000;
-    const label nIters = 1000;
-    scalar sum = 0.0;
+    constexpr label n = 10000;
+    constexpr label nIters = 1000;
+    scalar sum = 0;
 
-    Info<< "null poly = " << (Polynomial<8>()) << nl
-        << "null poly = " << (polynomialFunction(8)) << nl
+    Info<< "null poly = " << (Polynomial<8>{}) << nl
+        << "null poly = " << (polynomialFunction{8}) << nl
         << endl;
 
-    Polynomial<8> poly(coeff);
-    Polynomial<9> intPoly(poly.integral(0.0));
+    Polynomial<8> poly{coeffs};
+    Polynomial<9> intPoly{poly.integral(0)};
 
-    IStringStream is(polyDef);
-    polynomialFunction polyfunc(is);
+    polynomialFunction polyfunc;
+
+    // Could profit from a bi-directional stream
+    {
+        OTstream os;
+        os << poly;
+
+        ITstream is("input", std::move(os.tokens()));
+        is >> polyfunc;
+    }
 
     Info<< "poly = " << poly << nl
         << "intPoly = " << intPoly << nl
@@ -152,7 +166,7 @@ int main(int argc, char *argv[])
     Info<< "2.5*poly = " << polyCopy << nl << endl;
 
     Random rnd(123456);
-    for (int i=0; i<10; i++)
+    for (label i=0; i<10; ++i)
     {
         scalar x = rnd.sample01<scalar>()*100;
 
@@ -162,18 +176,18 @@ int main(int argc, char *argv[])
         scalar pxTest = poly.value(x);
         scalar ipxTest = intPoly.value(x);
 
-        Info<<"\nx = " << x << endl;
-        Info<< "    px, pxTest = " << px << ", " << pxTest << endl;
-        Info<< "    ipx, ipxTest = " << ipx << ", " << ipxTest << endl;
+        Info<<"\nx = " << x << nl
+            << "    px, pxTest = " << px << ", " << pxTest << nl
+            << "    ipx, ipxTest = " << ipx << ", " << ipxTest << nl;
 
         if (mag(px - pxTest) > SMALL)
         {
-            Info<< "    *** WARNING: px != pxTest: " << px - pxTest << endl;
+            Info<< "    *** WARNING: px != pxTest: " << px - pxTest << nl;
         }
 
         if (mag(ipx - ipxTest) > SMALL)
         {
-            Info<< "    *** WARNING: ipx != ipxTest: " << ipx - ipxTest << endl;
+            Info<< "    *** WARNING: ipx != ipxTest: " << ipx - ipxTest << nl;
         }
 
         Info<< endl;
@@ -188,7 +202,7 @@ int main(int argc, char *argv[])
 
     cpuTime timer;
 
-    for (int loop = 0; loop < n; ++loop)
+    for (label loop = 0; loop < n; ++loop)
     {
         sum = 0.0;
         for (label iter = 0; iter < nIters; ++iter)
@@ -199,7 +213,7 @@ int main(int argc, char *argv[])
     Info<< "value:        " << sum
         << " in " << timer.cpuTimeIncrement() << " s\n";
 
-    for (int loop = 0; loop < n; ++loop)
+    for (label loop = 0; loop < n; ++loop)
     {
         sum = 0.0;
         for (label iter = 0; iter < nIters; ++iter)
@@ -211,7 +225,7 @@ int main(int argc, char *argv[])
         << " in " << timer.cpuTimeIncrement() << " s\n";
 
 
-    for (int loop = 0; loop < n; ++loop)
+    for (label loop = 0; loop < n; ++loop)
     {
         sum = 0.0;
         for (label iter = 0; iter < nIters; ++iter)
@@ -223,7 +237,7 @@ int main(int argc, char *argv[])
         << " in " << timer.cpuTimeIncrement() << " s\n";
 
 
-    for (int loop = 0; loop < n; ++loop)
+    for (label loop = 0; loop < n; ++loop)
     {
         sum = 0.0;
         for (label iter = 0; iter < nIters; ++iter)
@@ -234,7 +248,7 @@ int main(int argc, char *argv[])
     Info<< "hard-coded 1: " << sum
         << " in " << timer.cpuTimeIncrement() << " s\n";
 
-    for (int loop = 0; loop < n; ++loop)
+    for (label loop = 0; loop < n; ++loop)
     {
         sum = 0.0;
         for (label iter = 0; iter < nIters; ++iter)

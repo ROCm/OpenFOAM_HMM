@@ -57,6 +57,7 @@ SourceFiles
 #include "scalar.H"
 #include "Ostream.H"
 #include "VectorSpace.H"
+#include <initializer_list>
 #include <type_traits>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -66,9 +67,6 @@ namespace Foam
 
 // Forward Declarations
 template<int PolySize> class Polynomial;
-
-template<int PolySize>
-Ostream& operator<<( Ostream&, const Polynomial<PolySize>&);
 
 /*---------------------------------------------------------------------------*\
                         Class Polynomial Declaration
@@ -105,6 +103,9 @@ public:
 
         //- Default construct, with all coefficients = 0
         Polynomial();
+
+        //- Construct from an initializer list of coefficients
+        Polynomial(std::initializer_list<scalar> coeffs);
 
         //- Construct from C-array of coefficients
         explicit Polynomial(const scalar coeffs[PolySize]);
@@ -150,12 +151,7 @@ public:
             polyType integralMinus1(const scalar intConstant = 0.0) const;
 
 
-    //- Ostream Operator
-    friend Ostream& operator<< <PolySize>
-    (
-        Ostream&,
-        const Polynomial&
-    );
+    // IOstream Operators - uses VectorSpace operators
 };
 
 
@@ -167,7 +163,6 @@ public:
 
 #ifdef NoRepository
     #include "Polynomial.C"
-    #include "PolynomialIO.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
