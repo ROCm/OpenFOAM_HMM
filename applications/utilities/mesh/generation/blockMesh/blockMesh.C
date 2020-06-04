@@ -46,6 +46,9 @@ Usage
       - \par -write-obj
         Write topology as a set of edges in OBJ format and exit.
 
+      - \par -write-vtk
+        Write topology as VTK file (xml, ascii) and exit.
+
       - \par -merge-points
         Merge points instead of default topological merge
 
@@ -71,6 +74,7 @@ Usage
 #include "IOPtrList.H"
 
 #include "blockMesh.H"
+#include "foamVtkInternalMeshWriter.H"
 #include "attachPolyTopoChanger.H"
 #include "polyTopoChange.H"
 #include "emptyPolyPatch.H"
@@ -121,6 +125,12 @@ int main(int argc, char *argv[])
         "Write block edges and centres as obj files and exit"
     );
     argList::addOptionCompat("write-obj", {"blockTopology", 1912});
+
+    argList::addBoolOption
+    (
+        "write-vtk",
+        "Write topology as VTK file and exit"
+    );
 
     argList::addBoolOption
     (
@@ -226,7 +236,7 @@ int main(int argc, char *argv[])
         {
             OFstream os(runTime.path()/"blockTopology.obj");
 
-            Info<< "Writing block structure as obj format: "
+            Info<< "Writing block structure in obj format: "
                 << os.name().name() << endl;
 
             blocks.writeTopology(os);
@@ -236,7 +246,7 @@ int main(int argc, char *argv[])
         {
             OFstream os(runTime.path()/"blockCentres.obj");
 
-            Info<< "Writing block centres as obj format: "
+            Info<< "Writing block centres in obj format: "
                 << os.name().name() << endl;
 
             for (const point& cc : blocks.topology().cellCentres())
@@ -245,6 +255,35 @@ int main(int argc, char *argv[])
             }
         }
     }
+
+    if (args.found("write-vtk"))
+    {
+        quickExit = true;
+
+        // non-legacy and ASCII (mesh is small, want readable output)
+        const vtk::outputOptions writeOpts = vtk::formatType::INLINE_ASCII;
+
+        Info<< nl;
+
+        const polyMesh& topoMesh = blocks.topology();
+        const vtk::vtuCells topoCells(topoMesh, writeOpts);
+
+        vtk::internalMeshWriter writer
+        (
+            topoMesh,
+            topoCells,
+            writeOpts,
+            runTime.path()/"blockTopology"
+        );
+
+        Info<< "Writing block topology in vtk format: "
+            << args.relativePath(writer.output()).c_str() << endl;
+
+        writer.writeGeometry();
+        writer.beginCellData();
+        writer.writeCellIDs();
+    }
+
 
     if (quickExit)
     {
