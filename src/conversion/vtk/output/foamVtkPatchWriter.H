@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,8 +39,10 @@ Note
     In the future, the duplicate points at processor connections
     may be addressed using ghost points.
 
+See Also
+    Foam::vtk::patchMeshWriter
+
 SourceFiles
-    foamVtkPatchWriter.C
     foamVtkPatchWriterTemplates.C
 
 \*---------------------------------------------------------------------------*/
@@ -48,7 +50,7 @@ SourceFiles
 #ifndef foamVtkPatchWriter_H
 #define foamVtkPatchWriter_H
 
-#include "foamVtkFileWriter.H"
+#include "foamVtkPatchMeshWriter.H"
 #include "volFields.H"
 #include "pointFields.H"
 #include "PrimitivePatchInterpolation.H"
@@ -66,52 +68,15 @@ namespace vtk
 
 class patchWriter
 :
-    public vtk::fileWriter
+    public vtk::patchMeshWriter
 {
     // Private Member Data
-
-        //- Reference to the OpenFOAM mesh (or subset)
-        const fvMesh& mesh_;
-
-        //- The selected patch ids
-        labelList patchIDs_;
 
         //- Use internal field value instead of patch value
         bool useNearCellValue_;
 
-        //- The number of field points for the current Piece
-        label numberOfPoints_;
-
-        //- The number of field cells (faces) for the current Piece
-        label numberOfCells_;
-
-        //- Local number of points
-        label nLocalPoints_;
-
-        //- Local number of faces
-        label nLocalFaces_;
-
-        //- Local face vertices (connectivity) count. Sum of face sizes.
-        label nLocalVerts_;
-
 
     // Private Member Functions
-
-        //- Determine sizes (nLocalPoints_, nLocalFaces_, nLocalVerts_),
-        //- and begin piece.
-        void beginPiece();
-
-        //- Write patch points
-        void writePoints();
-
-        //- Write patch faces, legacy format
-        //  \param pointOffset processor-local point offset
-        void writePolysLegacy(const label pointOffset);
-
-        //- Write patch faces
-        //  \param pointOffset processor-local point offset
-        void writePolys(const label pointOffset);
-
 
         //- No copy construct
         patchWriter(const patchWriter&) = delete;
@@ -125,50 +90,68 @@ public:
     // Constructors
 
         //- Construct from components (default format INLINE_BASE64)
+        //
         //  \param useNearCellValue to use cell instead of patch values
         patchWriter
         (
-            const fvMesh& mesh,
+            const polyMesh& mesh,
             const labelList& patchIDs,
             const vtk::outputOptions opts = vtk::formatType::INLINE_BASE64,
             const bool useNearCellValue = false
-        );
+        )
+        :
+            vtk::patchMeshWriter(mesh, patchIDs, opts),
+            useNearCellValue_(useNearCellValue)
+        {}
 
         //- Construct from components (default format INLINE_BASE64),
         //- and open the file for writing.
         //  The file name is with/without an extension.
         patchWriter
         (
-            const fvMesh& mesh,
+            const polyMesh& mesh,
             const labelList& patchIDs,
             const fileName& file,
             bool parallel = Pstream::parRun()
-        );
+        )
+        :
+            vtk::patchMeshWriter(mesh, patchIDs, file, parallel),
+            useNearCellValue_(false)
+        {}
 
         //- Construct from components (default format INLINE_BASE64),
-        //- Construct from components and open the file for writing.
+        //- and open the file for writing.
         //  The file name is with/without an extension.
         patchWriter
         (
-            const fvMesh& mesh,
+            const polyMesh& mesh,
             const labelList& patchIDs,
             const vtk::outputOptions opts,
             const fileName& file,
             bool parallel = Pstream::parRun()
-        );
+        )
+        :
+            vtk::patchMeshWriter(mesh, patchIDs, opts, file, parallel),
+            useNearCellValue_(false)
+        {}
 
         //- Construct from components and open the file for writing.
         //  The file name is with/without an extension.
+        //
         //  \param useNearCellValue to use cell instead of patch values
         patchWriter
         (
-            const fvMesh& mesh,
+            const polyMesh& mesh,
             const labelList& patchIDs,
             const vtk::outputOptions opts,
             const bool useNearCellValue,
             const fileName& file,
             bool parallel = Pstream::parRun()
-        );
+        )
+        :
+            vtk::patchMeshWriter(mesh, patchIDs, opts, file, parallel),
+            useNearCellValue_(useNearCellValue)
+        {}
 
 
     //- Destructor
@@ -177,67 +160,7 @@ public:
 
     // Member Functions
 
-        //- File extension for current format type.
-        using vtk::fileWriter::ext;
-
-        //- File extension for given output type
-        inline static word ext(vtk::outputOptions opts)
-        {
-            return opts.ext(vtk::fileTag::POLY_DATA);
-        }
-
-        //- The patch IDs
-        inline const labelList& patchIDs() const
-        {
-            return patchIDs_;
-        }
-
-        //- Write file header (non-collective)
-        //  \note Expected calling states: (OPENED).
-        virtual bool beginFile(std::string title = "");
-
-        //- Write patch topology
-        //  Also writes the file header if not previously written.
-        //  \note Must be called prior to writing CellData or PointData
-        virtual bool writeGeometry();
-
-        //- Begin CellData output section for specified number of fields.
-        //  Must be called prior to writing any cell data fields.
-        //  \param nFields is for legacy format only.
-        //      When nFields=0, this a no-op for legacy format.
-        //  \note Expected calling states: (PIECE | POINT_DATA).
-        //
-        //  \return True if the state changed
-        virtual bool beginCellData(label nFields = 0);
-
-        //- Begin PointData for specified number of fields.
-        //  Must be called prior to writing any point data fields.
-        //  \param nFields is for legacy format only.
-        //      When nFields=0, this a no-op for legacy format.
-        //  \note Expected calling states: (PIECE | CELL_DATA).
-        //
-        //  \return True if the state changed
-        virtual bool beginPointData(label nFields = 0);
-
-
-        //- Write patch ids as CellData.
-        //  Must be called within the CELL_DATA state.
-        void writePatchIDs();
-
-        //- Write processor ids as CellData. This is no-op in serial.
-        //  Must be called within the CELL_DATA state.
-        bool writeProcIDs();
-
-        //- Write processor neighbour ids as CellData. This is no-op in serial.
-        //  Must be called within the CELL_DATA state.
-        bool writeNeighIDs();
-
-
     // Write
-
-        //- Write a uniform field of Cell (Face) or Point values
-        template<class Type>
-        void writeUniform(const word& fieldName, const Type& val);
 
         //- Write point field
         template<class Type, template<class> class PatchField>
@@ -281,7 +204,6 @@ public:
 #ifdef NoRepository
     #include "foamVtkPatchWriterTemplates.C"
 #endif
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

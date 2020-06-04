@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,17 +25,18 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "foamVtkInternalWriter.H"
+#include "foamVtkInternalMeshWriter.H"
 #include "globalIndex.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-int Foam::vtk::internalWriter::debug = 0;
+int Foam::vtk::internalMeshWriter::debug = 0;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::vtk::internalWriter::beginPiece()
+void Foam::vtk::internalMeshWriter::beginPiece()
 {
     // Basic sizes
 
@@ -67,7 +68,7 @@ void Foam::vtk::internalWriter::beginPiece()
 }
 
 
-void Foam::vtk::internalWriter::writePoints()
+void Foam::vtk::internalMeshWriter::writePoints()
 {
     if (format_)
     {
@@ -125,7 +126,7 @@ void Foam::vtk::internalWriter::writePoints()
 }
 
 
-void Foam::vtk::internalWriter::writeCellsLegacy(const label pointOffset)
+void Foam::vtk::internalMeshWriter::writeCellsLegacy(const label pointOffset)
 {
     const List<uint8_t>& cellTypes = vtuCells_.cellTypes();
     const labelList& vertLabels = vtuCells_.vertLabels();
@@ -205,7 +206,7 @@ void Foam::vtk::internalWriter::writeCellsLegacy(const label pointOffset)
 }
 
 
-void Foam::vtk::internalWriter::writeCellsConnectivity(const label pointOffset)
+void Foam::vtk::internalMeshWriter::writeCellsConnectivity(const label pointOffset)
 {
     //
     // 'connectivity'
@@ -343,7 +344,7 @@ void Foam::vtk::internalWriter::writeCellsConnectivity(const label pointOffset)
 }
 
 
-void Foam::vtk::internalWriter::writeCellsFaces(const label pointOffset)
+void Foam::vtk::internalMeshWriter::writeCellsFaces(const label pointOffset)
 {
     label nFaceLabels = vtuCells_.faceLabels().size();
 
@@ -476,9 +477,9 @@ void Foam::vtk::internalWriter::writeCellsFaces(const label pointOffset)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::vtk::internalWriter::internalWriter
+Foam::vtk::internalMeshWriter::internalMeshWriter
 (
-    const fvMesh& mesh,
+    const polyMesh& mesh,
     const vtk::vtuCells& cells,
     const vtk::outputOptions opts
 )
@@ -494,30 +495,30 @@ Foam::vtk::internalWriter::internalWriter
 }
 
 
-Foam::vtk::internalWriter::internalWriter
+Foam::vtk::internalMeshWriter::internalMeshWriter
 (
-    const fvMesh& mesh,
+    const polyMesh& mesh,
     const vtk::vtuCells& cells,
     const fileName& file,
     bool parallel
 )
 :
-    internalWriter(mesh, cells)
+    internalMeshWriter(mesh, cells)
 {
     open(file, parallel);
 }
 
 
-Foam::vtk::internalWriter::internalWriter
+Foam::vtk::internalMeshWriter::internalMeshWriter
 (
-    const fvMesh& mesh,
+    const polyMesh& mesh,
     const vtk::vtuCells& cells,
     const vtk::outputOptions opts,
     const fileName& file,
     bool parallel
 )
 :
-    internalWriter(mesh, cells, opts)
+    internalMeshWriter(mesh, cells, opts)
 {
     open(file, parallel);
 }
@@ -525,7 +526,7 @@ Foam::vtk::internalWriter::internalWriter
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::vtk::internalWriter::beginFile(std::string title)
+bool Foam::vtk::internalMeshWriter::beginFile(std::string title)
 {
     if (title.size())
     {
@@ -563,7 +564,7 @@ bool Foam::vtk::internalWriter::beginFile(std::string title)
 }
 
 
-bool Foam::vtk::internalWriter::writeGeometry()
+bool Foam::vtk::internalMeshWriter::writeGeometry()
 {
     enter_Piece();
 
@@ -600,19 +601,19 @@ bool Foam::vtk::internalWriter::writeGeometry()
 }
 
 
-bool Foam::vtk::internalWriter::beginCellData(label nFields)
+bool Foam::vtk::internalMeshWriter::beginCellData(label nFields)
 {
     return enter_CellData(numberOfCells_, nFields);
 }
 
 
-bool Foam::vtk::internalWriter::beginPointData(label nFields)
+bool Foam::vtk::internalMeshWriter::beginPointData(label nFields)
 {
     return enter_PointData(numberOfPoints_, nFields);
 }
 
 
-void Foam::vtk::internalWriter::writeCellIDs()
+void Foam::vtk::internalMeshWriter::writeCellIDs()
 {
     if (isState(outputState::CELL_DATA))
     {
@@ -665,7 +666,7 @@ void Foam::vtk::internalWriter::writeCellIDs()
 }
 
 
-bool Foam::vtk::internalWriter::writeProcIDs()
+bool Foam::vtk::internalMeshWriter::writeProcIDs()
 {
     if (!parallel_)
     {
@@ -727,7 +728,7 @@ bool Foam::vtk::internalWriter::writeProcIDs()
 }
 
 
-void Foam::vtk::internalWriter::writePointIDs()
+void Foam::vtk::internalMeshWriter::writePointIDs()
 {
     if (isState(outputState::POINT_DATA))
     {

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,13 +25,15 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "foamVtkPatchWriter.H"
+#include "foamVtkPatchMeshWriter.H"
 #include "foamVtkOutput.H"
 #include "globalIndex.H"
+#include "Time.H"
+#include "processorPolyPatch.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::vtk::patchWriter::beginPiece()
+void Foam::vtk::patchMeshWriter::beginPiece()
 {
     // Basic sizes
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
@@ -78,7 +80,7 @@ void Foam::vtk::patchWriter::beginPiece()
 }
 
 
-void Foam::vtk::patchWriter::writePoints()
+void Foam::vtk::patchMeshWriter::writePoints()
 {
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
@@ -173,7 +175,7 @@ void Foam::vtk::patchWriter::writePoints()
 }
 
 
-void Foam::vtk::patchWriter::writePolysLegacy(const label pointOffset)
+void Foam::vtk::patchMeshWriter::writePolysLegacy(const label pointOffset)
 {
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
@@ -244,7 +246,7 @@ void Foam::vtk::patchWriter::writePolysLegacy(const label pointOffset)
 }
 
 
-void Foam::vtk::patchWriter::writePolys(const label pointOffset)
+void Foam::vtk::patchMeshWriter::writePolys(const label pointOffset)
 {
     if (format_)
     {
@@ -387,18 +389,16 @@ void Foam::vtk::patchWriter::writePolys(const label pointOffset)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::vtk::patchWriter::patchWriter
+Foam::vtk::patchMeshWriter::patchMeshWriter
 (
-    const fvMesh& mesh,
+    const polyMesh& mesh,
     const labelList& patchIDs,
-    const vtk::outputOptions opts,
-    const bool useNearCellValue
+    const vtk::outputOptions opts
 )
 :
     vtk::fileWriter(vtk::fileTag::POLY_DATA, opts),
     mesh_(mesh),
     patchIDs_(patchIDs),
-    useNearCellValue_(useNearCellValue),
     numberOfPoints_(0),
     numberOfCells_(0),
     nLocalPoints_(0),
@@ -410,46 +410,30 @@ Foam::vtk::patchWriter::patchWriter
 }
 
 
-Foam::vtk::patchWriter::patchWriter
+Foam::vtk::patchMeshWriter::patchMeshWriter
 (
-    const fvMesh& mesh,
+    const polyMesh& mesh,
     const labelList& patchIDs,
     const fileName& file,
     bool parallel
 )
 :
-    patchWriter(mesh, patchIDs)
+    patchMeshWriter(mesh, patchIDs)
 {
     open(file, parallel);
 }
 
 
-Foam::vtk::patchWriter::patchWriter
+Foam::vtk::patchMeshWriter::patchMeshWriter
 (
-    const fvMesh& mesh,
+    const polyMesh& mesh,
     const labelList& patchIDs,
     const vtk::outputOptions opts,
     const fileName& file,
     bool parallel
 )
 :
-    patchWriter(mesh, patchIDs, opts)
-{
-    open(file, parallel);
-}
-
-
-Foam::vtk::patchWriter::patchWriter
-(
-    const fvMesh& mesh,
-    const labelList& patchIDs,
-    const vtk::outputOptions opts,
-    const bool useNearCellValue,
-    const fileName& file,
-    bool parallel
-)
-:
-    patchWriter(mesh, patchIDs, opts, useNearCellValue)
+    patchMeshWriter(mesh, patchIDs, opts)
 {
     open(file, parallel);
 }
@@ -457,7 +441,7 @@ Foam::vtk::patchWriter::patchWriter
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::vtk::patchWriter::beginFile(std::string title)
+bool Foam::vtk::patchMeshWriter::beginFile(std::string title)
 {
     if (title.size())
     {
@@ -507,7 +491,7 @@ bool Foam::vtk::patchWriter::beginFile(std::string title)
 }
 
 
-bool Foam::vtk::patchWriter::writeGeometry()
+bool Foam::vtk::patchMeshWriter::writeGeometry()
 {
     enter_Piece();
 
@@ -533,19 +517,19 @@ bool Foam::vtk::patchWriter::writeGeometry()
 }
 
 
-bool Foam::vtk::patchWriter::beginCellData(label nFields)
+bool Foam::vtk::patchMeshWriter::beginCellData(label nFields)
 {
     return enter_CellData(numberOfCells_, nFields);
 }
 
 
-bool Foam::vtk::patchWriter::beginPointData(label nFields)
+bool Foam::vtk::patchMeshWriter::beginPointData(label nFields)
 {
     return enter_PointData(numberOfPoints_, nFields);
 }
 
 
-void Foam::vtk::patchWriter::writePatchIDs()
+void Foam::vtk::patchMeshWriter::writePatchIDs()
 {
     if (isState(outputState::CELL_DATA))
     {
@@ -656,7 +640,7 @@ void Foam::vtk::patchWriter::writePatchIDs()
 }
 
 
-bool Foam::vtk::patchWriter::writeProcIDs()
+bool Foam::vtk::patchMeshWriter::writeProcIDs()
 {
     // This is different than for internalWriter.
     // Here we allow procIDs whenever running in parallel, even if the
@@ -740,7 +724,7 @@ bool Foam::vtk::patchWriter::writeProcIDs()
 }
 
 
-bool Foam::vtk::patchWriter::writeNeighIDs()
+bool Foam::vtk::patchMeshWriter::writeNeighIDs()
 {
     if (!Pstream::parRun())
     {

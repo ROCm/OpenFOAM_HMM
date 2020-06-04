@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,8 +40,10 @@ Note
     In the future, the duplicate points at processor connections
     may be addressed using ghost points.
 
+See Also
+    Foam::vtk::internalMeshWriter
+
 SourceFiles
-    foamVtkInternalWriter.C
     foamVtkInternalWriterTemplates.C
 
 \*---------------------------------------------------------------------------*/
@@ -49,8 +51,7 @@ SourceFiles
 #ifndef foamVtkInternalWriter_H
 #define foamVtkInternalWriter_H
 
-#include "foamVtkFileWriter.H"
-#include "foamVtuCells.H"
+#include "foamVtkInternalMeshWriter.H"
 #include "volFields.H"
 #include "pointFields.H"
 
@@ -59,7 +60,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class volPointInterpolation;
 
 namespace vtk
@@ -71,43 +72,9 @@ namespace vtk
 
 class internalWriter
 :
-    public vtk::fileWriter
+    public vtk::internalMeshWriter
 {
-    // Private Member Data
-
-        //- Reference to the OpenFOAM mesh (or subset)
-        const fvMesh& mesh_;
-
-        //- The volume cells (internalMesh)
-        const vtuCells& vtuCells_;
-
-        //- The number of field points for the current Piece
-        label numberOfPoints_;
-
-        //- The number of field cells for the current Piece
-        label numberOfCells_;
-
-
     // Private Member Functions
-
-        //- Begin piece
-        void beginPiece();
-
-        //- Write mesh points
-        void writePoints();
-
-        //- Write cells (connectivity and type), legacy format
-        //  \param pointOffset processor-local point offset
-        void writeCellsLegacy(const label pointOffset);
-
-        //- Write cells connectivity
-        //  \param pointOffset processor-local point offset
-        void writeCellsConnectivity(const label pointOffset);
-
-        //- Write cells face streams
-        //  \param pointOffset processor-local point offset
-        void writeCellsFaces(const label pointOffset);
-
 
         //- No copy construct
         internalWriter(const internalWriter&) = delete;
@@ -118,43 +85,46 @@ class internalWriter
 
 public:
 
-    //- Debug information
-    static int debug;
-
-//- File extension for given output type
-//  constexpr static vtk::fileTag content = vtk::fileTag::UNSTRUCTURED_GRID;
-
-
     // Constructors
 
         //- Construct from components (default format INLINE_BASE64),
         internalWriter
         (
-            const fvMesh& mesh,
+            const polyMesh& mesh,
             const vtk::vtuCells& cells,
             const vtk::outputOptions opts = vtk::formatType::INLINE_BASE64
-        );
+        )
+        :
+            vtk::internalMeshWriter(mesh, cells, opts)
+        {}
+
 
         //- Construct from components (default format INLINE_BASE64),
         //  The file name is with/without an extension.
         internalWriter
         (
-            const fvMesh& mesh,
+            const polyMesh& mesh,
             const vtk::vtuCells& cells,
             const fileName& file,
             bool parallel = Pstream::parRun()
-        );
+        )
+        :
+            vtk::internalMeshWriter(mesh, cells, file, parallel)
+        {}
 
         //- Construct from components (default format INLINE_BASE64),
         //  The file name is with/without an extension.
         internalWriter
         (
-            const fvMesh& mesh,
+            const polyMesh& mesh,
             const vtk::vtuCells& cells,
             const vtk::outputOptions opts,
             const fileName& file,
             bool parallel = Pstream::parRun()
-        );
+        )
+        :
+            vtk::internalMeshWriter(mesh, cells, opts, file, parallel)
+        {}
 
 
     //- Destructor
@@ -163,62 +133,7 @@ public:
 
     // Member Functions
 
-        //- File extension for current format type.
-        using vtk::fileWriter::ext;
-
-        //- File extension for given output type
-        inline static word ext(vtk::outputOptions opts)
-        {
-            return opts.ext(vtk::fileTag::UNSTRUCTURED_GRID);
-        }
-
-
-        //- Write file header (non-collective)
-        //  \note Expected calling states: (OPENED)
-        virtual bool beginFile(std::string title = "");
-
-        //- Write mesh topology.
-        //  Also writes the file header if not previously written.
-        //  \note Must be called prior to writing CellData or PointData
-        virtual bool writeGeometry();
-
-        //- Begin CellData output section for specified number of fields.
-        //  Must be called prior to writing any cell data fields.
-        //  \param nFields is for legacy format only.
-        //      When nFields=0, this a no-op for legacy format.
-        //  \note Expected calling states: (PIECE | POINT_DATA).
-        //
-        //  \return True if the state changed
-        virtual bool beginCellData(label nFields = 0);
-
-        //- Begin PointData for specified number of fields.
-        //  Must be called prior to writing any point data fields.
-        //  \param nFields is for legacy format only.
-        //      When nFields=0, this a no-op for legacy format.
-        //  \note Expected calling states: (PIECE | CELL_DATA).
-        //
-        //  \return True if the state changed
-        virtual bool beginPointData(label nFields = 0);
-
-
-        //- Write cell ids as CellData.
-        //  Must be called within the CELL_DATA state.
-        void writeCellIDs();
-
-        //- Write processor ids as CellData. This is no-op in serial.
-        //  Must be called within the CELL_DATA state.
-        bool writeProcIDs();
-
-        //- Write point ids as PointData.
-        //  Must be called within the POINT_DATA state.
-        void writePointIDs();
-
-
     // Write
-
-        //- Write a uniform field of Cell or Point values
-        template<class Type>
-        void writeUniform(const word& fieldName, const Type& val);
 
         //- Write point field
         //  Interpolate to originating cell centre for decomposed cells.
@@ -228,7 +143,7 @@ public:
             const GeometricField<Type, PatchField, pointMesh>& field
         );
 
-        //- Write the internal field
+        //- Write the internal field (CellData)
         template<class Type>
         void write
         (

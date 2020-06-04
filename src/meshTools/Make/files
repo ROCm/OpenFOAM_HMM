@@ -302,6 +302,8 @@ PatchFunction1/CodedField/makeCodedFields.C
 meshStructure/meshStructure.C
 
 output/foamVtkIndPatchWriter.C
+output/foamVtkInternalMeshWriter.C
+output/foamVtkPatchMeshWriter.C
 output/foamVtkWriteTopoSet.C
 output/foamVtkWriteFaceSet.C
 output/foamVtkWritePointSet.C

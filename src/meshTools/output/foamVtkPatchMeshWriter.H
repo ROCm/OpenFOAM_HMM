@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,11 +24,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::vtk::indirectPatchWriter
+    Foam::vtk::patchMeshWriter
 
 Description
-    Write indirectPrimitivePatch faces/points (optionally with fields)
-    as a vtp file or a legacy vtk file.
+    Write OpenFOAM patches and patch fields in VTP or legacy vtk format.
 
     The file output states are managed by the Foam::vtk::fileWriter class.
     FieldData (eg, TimeValue) must appear before any geometry pieces.
@@ -40,17 +39,20 @@ Note
     In the future, the duplicate points at processor connections
     may be addressed using ghost points.
 
+See Also
+    Foam::vtk::patchWriter
+
 SourceFiles
-    foamVtkIndPatchWriter.C
-    foamVtkIndPatchWriterTemplates.C
+    foamVtkPatchMeshWriter.C
+    foamVtkPatchMeshWriterTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtkIndPatchWriter_H
-#define foamVtkIndPatchWriter_H
+#ifndef foamVtkPatchMeshWriter_H
+#define foamVtkPatchMeshWriter_H
 
 #include "foamVtkFileWriter.H"
-#include "indirectPrimitivePatch.H"
+#include "polyMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,17 +62,22 @@ namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class vtk::indirectPatchWriter Declaration
+                    Class vtk::patchMeshWriter Declaration
 \*---------------------------------------------------------------------------*/
 
-class indirectPatchWriter
+class patchMeshWriter
 :
     public vtk::fileWriter
 {
-    // Private Member Data
+protected:
 
-        //- Reference to the faces as an indirect patch
-        const indirectPrimitivePatch& pp_;
+    // Protected Member Data
+
+        //- Reference to the OpenFOAM mesh (or subset)
+        const polyMesh& mesh_;
+
+        //- The selected patch ids
+        labelList patchIDs_;
 
         //- The number of field points for the current Piece
         label numberOfPoints_;
@@ -91,7 +98,7 @@ class indirectPatchWriter
     // Private Member Functions
 
         //- Determine sizes (nLocalPoints_, nLocalFaces_, nLocalVerts_),
-        //- and begin piece
+        //- and begin piece.
         void beginPiece();
 
         //- Write patch points
@@ -107,38 +114,43 @@ class indirectPatchWriter
 
 
         //- No copy construct
-        indirectPatchWriter(const indirectPatchWriter&) = delete;
+        patchMeshWriter(const patchMeshWriter&) = delete;
 
         //- No copy assignment
-        void operator=(const indirectPatchWriter&) = delete;
+        void operator=(const patchMeshWriter&) = delete;
 
 
 public:
 
     // Constructors
 
-        //- Construct from patch (default output INLINE_BASE64)
-        explicit indirectPatchWriter
+        //- Construct from components (default format INLINE_BASE64)
+        //  \param useNearCellValue to use cell instead of patch values
+        patchMeshWriter
         (
-            const indirectPrimitivePatch& pp,
+            const polyMesh& mesh,
+            const labelList& patchIDs,
             const vtk::outputOptions opts = vtk::formatType::INLINE_BASE64
         );
 
-        //- Construct from components (default output INLINE_BASE64),
-        //  and open the file for writing.
+        //- Construct from components (default format INLINE_BASE64),
+        //- and open the file for writing.
         //  The file name is with/without an extension.
-        indirectPatchWriter
+        patchMeshWriter
         (
-            const indirectPrimitivePatch& pp,
+            const polyMesh& mesh,
+            const labelList& patchIDs,
             const fileName& file,
             bool parallel = Pstream::parRun()
         );
 
+        //- Construct from components (default format INLINE_BASE64),
         //- Construct from components and open the file for writing.
         //  The file name is with/without an extension.
-        indirectPatchWriter
+        patchMeshWriter
         (
-            const indirectPrimitivePatch& pp,
+            const polyMesh& mesh,
+            const labelList& patchIDs,
             const vtk::outputOptions opts,
             const fileName& file,
             bool parallel = Pstream::parRun()
@@ -146,7 +158,7 @@ public:
 
 
     //- Destructor
-    virtual ~indirectPatchWriter() = default;
+    virtual ~patchMeshWriter() = default;
 
 
     // Member Functions
@@ -160,12 +172,11 @@ public:
             return opts.ext(vtk::fileTag::POLY_DATA);
         }
 
-        //- Reference to the indirect patch
-        inline const indirectPrimitivePatch& patch() const
+        //- The patch IDs
+        inline const labelList& patchIDs() const
         {
-            return pp_;
+            return patchIDs_;
         }
-
 
         //- Write file header (non-collective)
         //  \note Expected calling states: (OPENED).
@@ -195,15 +206,24 @@ public:
         virtual bool beginPointData(label nFields = 0);
 
 
+        //- Write patch ids as CellData.
+        //  Must be called within the CELL_DATA state.
+        void writePatchIDs();
+
+        //- Write processor ids as CellData. This is no-op in serial.
+        //  Must be called within the CELL_DATA state.
+        bool writeProcIDs();
+
+        //- Write processor neighbour ids as CellData. This is no-op in serial.
+        //  Must be called within the CELL_DATA state.
+        bool writeNeighIDs();
+
+
     // Write
 
         //- Write a uniform field of Cell (Face) or Point values
         template<class Type>
         void writeUniform(const word& fieldName, const Type& val);
-
-        //- Write a list of Cell (Face) or Point values
-        template<class Type>
-        void write(const word& fieldName, const UList<Type>& field);
 };
 
 
@@ -215,7 +235,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "foamVtkIndPatchWriterTemplates.C"
+    #include "foamVtkPatchMeshWriterTemplates.C"
 #endif
 
 

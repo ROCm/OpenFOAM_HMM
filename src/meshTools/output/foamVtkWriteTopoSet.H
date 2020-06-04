@@ -49,7 +49,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class polyMesh;
 class topoSet;
 class faceSet;
