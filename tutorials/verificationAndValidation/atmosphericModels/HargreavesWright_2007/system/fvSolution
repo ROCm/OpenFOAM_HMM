@@ -9,47 +9,50 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      epsilon;
+    class       dictionary;
+    object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -3 0 0 0 0];
-
-#include        "include/initialConditions"
-
-internalField   uniform $turbulentEpsilon;
-
-boundaryField
+solvers
 {
-    terrain
+    p
     {
-        type            epsilonWallFunction;
-        Cmu             0.09;
-        kappa           0.4;
-        E               9.8;
-        value           $internalField;
+        solver           GAMG;
+        smoother         GaussSeidel;
+        tolerance        1e-8;
+        relTol           0.01;
     }
 
-    outlet
+    "(U|k|epsilon|omega)"
     {
-        type            inletOutlet;
-        inletValue      uniform $turbulentEpsilon;
-        value           $internalField;
+        solver           smoothSolver;
+        smoother         GaussSeidel;
+        tolerance        1e-8;
+        relTol           0.01;
     }
+}
 
-    inlet
+SIMPLE
+{
+    nNonOrthogonalCorrectors 0;
+    consistent               true;
+    pRefCell                 0;
+    pRefValue                0;
+}
+
+relaxationFactors
+{
+    equations
     {
-        type            atmBoundaryLayerInletEpsilon;
-        #include        "include/ABLConditions"
+        U                    0.9;
+        "(k|epsilon|omega)"  0.7;
     }
+}
 
-    ground
-    {
-        type            zeroGradient;
-    }
-
-    #include "include/sideAndTopPatches"
+cache
+{
+    grad(U);
 }
 
 

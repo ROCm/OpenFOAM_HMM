@@ -1,0 +1,79 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1912                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version         2.0;
+    format          ascii;
+    class           dictionary;
+    location        system;
+    object          sampleDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// The locations of the sample profiles correspond to:
+// Hargreaves-Wright (2007), Fig.6
+// DOI:10.1016/j.jweia.2006.08.002
+
+samples
+{
+    type                    sets;
+    libs                    (sampling);
+    setFormat               raw;
+    interpolationScheme     cell;
+    fields                  (U k epsilon nut omega);
+    writeControl            writeTime;
+
+    sets
+    (
+        x_0mPatch    // inlet patch face centres
+        {
+            type        face;
+            axis        z;
+            start       (0 50 0);
+            end         (0 50 500);
+        }
+        x_0mCell    // inlet-first cell centres
+        {
+            type        midPoint;
+            axis        z;
+            start       (5.0 50 0);
+            end         (5.0 50 500);
+        }
+        x_2500m
+        {
+            type        face;
+            axis        z;
+            start       (2500 50 0);
+            end         (2500 50 500);
+        }
+        x_4000m
+        {
+            type        face;
+            axis        z;
+            start       (4000 50 0);
+            end         (4000 50 500);
+        }
+        x_5000mCell    // outlet patch face centres
+        {
+            type        face;
+            axis        z;
+            start       (4995 50 0);
+            end         (4995 50 500);
+        }
+        x_5000mPatch    // outlet-first cell centres
+        {
+            type        face;
+            axis        z;
+            start       (5000 50 0);
+            end         (5000 50 500);
+        }
+    );
+}
+
+
+// *********************************************************************** //

@@ -3,15 +3,16 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-# Make dummy 0 directory
-rm -rf 0
-mkdir 0
+restore0Dir
 
 runApplication blockMesh
-cp system/decomposeParDict.hierarchical system/decomposeParDict
+
+cp -f system/decomposeParDict.hierarchical system/decomposeParDict
+
 runApplication decomposePar
 
-cp system/decomposeParDict.ptscotch system/decomposeParDict
+cp -f system/decomposeParDict.ptscotch system/decomposeParDict
+
 runParallel snappyHexMesh -overwrite
 
 find . -iname '*level*' -type f -delete
@@ -20,9 +21,11 @@ find . -iname '*level*' -type f -delete
 restore0Dir -processor
 
 runParallel topoSet
+
 runParallel $(getApplication)
 
 runApplication reconstructParMesh -constant
+
 runApplication reconstructPar
 
 #------------------------------------------------------------------------------

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,29 +31,77 @@ Group
     grpRASBoundaryConditions grpInletBoundaryConditions
 
 Description
-    This boundary condition specifies a velocity inlet profile appropriate
-    for atmospheric boundary layers (ABL).
+    This boundary condition provides a log-law type ground-normal inflow
+    boundary condition for streamwise component of wind velocity, i.e. \c u,
+    for homogeneous, two-dimensional, dry-air, equilibrium and neutral
+    atmospheric boundary layer modelling.
 
-    See Foam::atmBoundaryLayer for details.
+    The ground-normal streamwise flow speed profile expression:
+
+        \f[
+            u = \frac{u^*}{\kappa} \ln \left( \frac{z - d + z_0}{z_0} \right)
+        \f]
+
+        \f[
+            v = w = 0
+        \f]
+
+    where
+    \vartable
+      u        | Ground-normal streamwise flow speed profile    [m/s]
+      v        | Spanwise flow speed                            [m/s]
+      w        | Ground-normal flow speed                       [m/s]
+      u^*      | Friction velocity                              [m/s]
+      \kappa   | von Kármán constant                            [-]
+      z        | Ground-normal coordinate component             [m]
+      d        | Ground-normal displacement height              [m]
+      z_0      | Aerodynamic roughness length                   [m]
+    \endvartable
+
+Usage
+    \heading Required fields
+    \plaintable
+        U   | Velocity                                          [m/s]
+    \endplaintable
 
     Example of the boundary condition specification:
     \verbatim
-    ground
+    inlet
     {
+        // Mandatory entries (unmodifiable)
         type            atmBoundaryLayerInletVelocity;
-        n               (1 0 0);
+
+        // Mandatory (inherited) entries (unmodifiable)
+        flowDir         (1 0 0);
         z               (0 0 1);
         Uref            10.0;
-        Zref            20.0;
+        Zref            0.0;
         z0              uniform 0.1;
-        zGround         uniform 0.0;
+        d               uniform 0.0;
+
+        // Optional (inherited) entries (unmodifiable)
+        kappa           0.41;
+        Cmu             0.09;
+        initABL         true;
+        phi             phi;
+        C1              0.0;
+        C2              1.0;
+
+        // Conditional mandatory (inherited) entries (runtime modifiable)
+        value           uniform (0 0 0);    // when initABL=false
     }
     \endverbatim
 
+    The inherited entries are elaborated in:
+     - \link atmBoundaryLayer.H \endlink
+     - \link inletOutletFvPatchField.H \endlink
+
 See also
-    Foam::atmBoundaryLayer,
-    Foam::atmBoundaryLayerInletKFvPatchScalarField,
-    Foam::atmBoundaryLayerInletEpsilonFvPatchScalarField
+    - Foam::atmBoundaryLayer
+    - Foam::atmBoundaryLayer::atmBoundaryLayerInletKFvPatchScalarField
+    - Foam::atmBoundaryLayer::atmBoundaryLayerInletEpsilonFvPatchScalarField
+    - Foam::atmBoundaryLayer::atmBoundaryLayerInletOmegaFvPatchScalarField
+    - ExtendedCodeGuide::atmBoundaryLayer::atmBoundaryLayerInletVelocity
 
 SourceFiles
     atmBoundaryLayerInletVelocityFvPatchVectorField.C
@@ -105,7 +154,7 @@ public:
         );
 
         //- Construct by mapping given
-        // atmBoundaryLayerInletVelocityFvPatchVectorField onto a new patch
+        //- atmBoundaryLayerInletVelocityFvPatchVectorField onto a new patch
         atmBoundaryLayerInletVelocityFvPatchVectorField
         (
             const atmBoundaryLayerInletVelocityFvPatchVectorField&,
@@ -143,7 +192,7 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();

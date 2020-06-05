@@ -68,13 +68,14 @@ atmBoundaryLayerInletKFvPatchScalarField
     refGrad() = 0;
     valueFraction() = 1;
 
-    if (dict.found("value"))
+    if (!initABL_)
     {
         scalarField::operator=(scalarField("value", dict, p.size()));
     }
     else
     {
         scalarField::operator=(refValue());
+        initABL_ = false;
     }
 }
 
@@ -148,8 +149,8 @@ void atmBoundaryLayerInletKFvPatchScalarField::rmap
 void atmBoundaryLayerInletKFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
-    atmBoundaryLayer::write(os);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
+    atmBoundaryLayer::write(os);
     writeEntry("value", os);
 }
 

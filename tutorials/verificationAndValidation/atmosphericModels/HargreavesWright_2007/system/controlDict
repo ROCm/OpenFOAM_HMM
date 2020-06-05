@@ -9,47 +9,53 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      epsilon;
+    class       dictionary;
+    object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -3 0 0 0 0];
+application     simpleFoam;
 
-#include        "include/initialConditions"
+startFrom       latestTime;
 
-internalField   uniform $turbulentEpsilon;
+startTime       0;
 
-boundaryField
+stopAt          endTime;
+
+endTime         5000;
+
+deltaT          1;
+
+writeControl    timeStep;
+
+writeInterval   500;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  12;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable yes;
+
+
+functions
 {
-    terrain
-    {
-        type            epsilonWallFunction;
-        Cmu             0.09;
-        kappa           0.4;
-        E               9.8;
-        value           $internalField;
-    }
+    #include "sampleDict"
 
-    outlet
+    minMax
     {
-        type            inletOutlet;
-        inletValue      uniform $turbulentEpsilon;
-        value           $internalField;
+      type          fieldMinMax;
+      libs          (fieldFunctionObjects);
+      writeControl  writeTime;
+      fields        (U);
     }
-
-    inlet
-    {
-        type            atmBoundaryLayerInletEpsilon;
-        #include        "include/ABLConditions"
-    }
-
-    ground
-    {
-        type            zeroGradient;
-    }
-
-    #include "include/sideAndTopPatches"
 }
 
 

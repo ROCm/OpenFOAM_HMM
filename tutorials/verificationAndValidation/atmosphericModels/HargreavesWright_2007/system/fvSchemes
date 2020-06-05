@@ -9,47 +9,49 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      epsilon;
+    class       dictionary;
+    object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -3 0 0 0 0];
-
-#include        "include/initialConditions"
-
-internalField   uniform $turbulentEpsilon;
-
-boundaryField
+ddtSchemes
 {
-    terrain
-    {
-        type            epsilonWallFunction;
-        Cmu             0.09;
-        kappa           0.4;
-        E               9.8;
-        value           $internalField;
-    }
+    default             steadyState;
+}
 
-    outlet
-    {
-        type            inletOutlet;
-        inletValue      uniform $turbulentEpsilon;
-        value           $internalField;
-    }
+gradSchemes
+{
+    default             Gauss linear;
+}
 
-    inlet
-    {
-        type            atmBoundaryLayerInletEpsilon;
-        #include        "include/ABLConditions"
-    }
+divSchemes
+{
+    default             none;
+    div(phi,U)          bounded Gauss linear;
+    div(phi,epsilon)    bounded Gauss limitedLinear 1;
+    div(phi,omega)      bounded Gauss limitedLinear 1;
+    div(phi,k)          bounded Gauss limitedLinear 1;
+    div((nuEff*dev2(T(grad(U)))))    Gauss linear;
+}
 
-    ground
-    {
-        type            zeroGradient;
-    }
+laplacianSchemes
+{
+    default             Gauss linear uncorrected;
+}
 
-    #include "include/sideAndTopPatches"
+interpolationSchemes
+{
+    default             linear;
+}
+
+snGradSchemes
+{
+    default             uncorrected;
+}
+
+wallDist
+{
+    method              meshWave;
 }
 
 
