@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1912                                 |
+|  \\    /   O peration     | Version:  v2006                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -24,6 +24,7 @@ solvers
         nAlphaBounds    3;
         snapTol         1e-12;
         clip            true;
+        reconstructionScheme isoAlpha;
 
         nAlphaSubCycles 1;
         cAlpha          1; // Note: cAlpha is not used by isoAdvector but must
@@ -43,14 +44,14 @@ solvers
     {
         solver          GAMG;
         smoother        DICGaussSeidel;
-        tolerance       1e-07;
+        tolerance       1e-09;
         relTol          0.05;
     }
 
     p_rghFinal
     {
         $p_rgh;
-        tolerance       1e-07;
+        tolerance       1e-09;
         relTol          0;
     }
 

@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1912                                 |
+|  \\    /   O peration     | Version:  v2006                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -28,6 +28,7 @@ solvers
         cAlpha          1; // Note: cAlpha is not used by isoAdvector but must
                            // be specified because interfacePropertes object
                            // reads it during construction.
+        reconstructionScheme isoAlpha; // plicRDF
     }
 
     "pcorr.*"
