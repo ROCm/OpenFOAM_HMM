@@ -79,6 +79,7 @@ pressure/pressure.C
 MachNo/MachNo.C
 Curle/Curle.C
 reference/reference.C
+log/log.C
 
 fieldsExpression/fieldsExpression.C
 add/add.C

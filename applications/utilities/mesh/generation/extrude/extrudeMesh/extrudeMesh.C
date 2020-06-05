@@ -881,6 +881,7 @@ int main(int argc, char *argv[])
 
         // Put all modifications into meshMod
         bool anyChange = collapser.setRefinement(allPointInfo, meshMod);
+        reduce(anyChange, orOp<bool>());
 
         if (anyChange)
         {
