@@ -1,3 +1,4 @@
+/* Install into FOAM_LIBBIN to support 'fake' builds (to test packaging) */
 dummyLib.C
 
 LIB = $(FOAM_LIBBIN)/libOpenFOAM-dummy
