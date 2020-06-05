@@ -55,7 +55,7 @@ case SYSTEMOPENMPI*:
     breaksw
 
 case OPENMPI:
-    setenv FOAM_MPI openmpi-1.10.7
+    setenv FOAM_MPI openmpi-4.0.3
     _foamEtc -config openmpi                    # <- Adjustments (optional)
 
     # Respect MPI_ARCH_PATH if set to valid directory (eg, user adjustments)
