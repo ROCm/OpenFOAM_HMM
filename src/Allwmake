@@ -71,12 +71,13 @@ parallel/Allwmake $targetType $*
 wmake $targetType dynamicFvMesh
 wmake $targetType topoChangerFvMesh
 
+transportModels/Allwmake $targetType $*
 wmake $targetType sampling
 randomProcesses/Allwmake $targetType $*
 
 wmake $targetType ODE
 
-transportModels/Allwmake $targetType $*
+
 thermophysicalModels/Allwmake $targetType $*
 TurbulenceModels/Allwmake $targetType $*
 wmake $targetType combustionModels

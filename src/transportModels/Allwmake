@@ -10,5 +10,6 @@ wmake $targetType twoPhaseProperties
 wmake $targetType incompressible
 wmake $targetType compressible
 wmake $targetType immiscibleIncompressibleTwoPhaseMixture
+wmake $targetType geometricVoF
 
 #------------------------------------------------------------------------------

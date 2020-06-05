@@ -7,7 +7,8 @@ EXE_INC = \
     -I$(LIB_SRC)/thermophysicalModels/reactionThermo/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/solidThermo/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/solidSpecie/lnInclude \
-    -I$(LIB_SRC)/transportModels/compressible/lnInclude
+    -I$(LIB_SRC)/transportModels/compressible/lnInclude \
+    -I$(LIB_SRC)/transportModels/geometricVoF/lnInclude
 
 LIB_LIBS = \
     -lfiniteVolume \
@@ -15,4 +16,5 @@ LIB_LIBS = \
     -lfluidThermophysicalModels \
     -lreactionThermophysicalModels \
     -lsolidThermo \
-    -lsolidSpecie
+    -lsolidSpecie \
+    -lgeometricVoF

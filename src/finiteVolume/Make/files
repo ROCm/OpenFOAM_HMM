@@ -93,6 +93,10 @@ $(faceToCell)/extendedFaceToCellStencil.C
 $(faceToCell)/extendedCentredFaceToCellStencil.C
 $(faceToCell)/MeshObjects/centredCFCFaceToCellStencilObject.C
 
+fvMesh/zoneDistribute/zoneStencils/zoneCellStencils.C
+fvMesh/zoneDistribute/zoneStencils/zoneCPCStencil.C
+fvMesh/zoneDistribute/zoneDistribute.C
+
 functionObjects/fvMeshFunctionObject/fvMeshFunctionObject.C
 functionObjects/volRegion/volRegion.C
 functionObjects/fieldSelections/fieldSelection/fieldSelection.C
@@ -286,10 +290,12 @@ $(fieldExpr)/pointPatchFields/exprValuePointPatchFields.C
 fvMatrices/fvMatrices.C
 fvMatrices/fvScalarMatrix/fvScalarMatrix.C
 fvMatrices/solvers/MULES/MULES.C
-fvMatrices/solvers/isoAdvection/isoCutCell/isoCutCell.C
-fvMatrices/solvers/isoAdvection/isoCutFace/isoCutFace.C
-fvMatrices/solvers/isoAdvection/isoAdvection/isoAdvection.C
 fvMatrices/solvers/GAMGSymSolver/GAMGAgglomerations/faceAreaPairGAMGAgglomeration/faceAreaPairGAMGAgglomeration.C
+
+fvMatrices/solvers/multiDimPolyFitter/multiDimPolyFunctions/multiDimPolyFunctions.C
+fvMatrices/solvers/multiDimPolyFitter/multiDimPolyFunctions/polyDegree1.C
+fvMatrices/solvers/multiDimPolyFitter/multiDimPolyFitter.C
+fvMatrices/solvers/multiDimPolyFitter/leastSquareGrad.C
 
 interpolation = interpolation/interpolation
 $(interpolation)/interpolation/interpolations.C

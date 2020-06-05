@@ -7,6 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 DHI
     Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (c) 2017-2020, German Aerospace Center (DLR)
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,86 +29,94 @@ Application
     setAlphaField
 
 Description
-    Uses isoCutCell to create a volume fraction field from either a cylinder,
+    Uses cutCellIso to create a volume fraction field from either a cylinder,
     a sphere or a plane.
 
     Original code supplied by Johan Roenby, DHI (2016)
+    Modification Henning Scheufler, DLR (2019)
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "isoCutFace.H"
-#include "isoCutCell.H"
-#include "Enum.H"
-#include "mathematicalConstants.H"
 
-using namespace Foam::constant;
+#include "triSurface.H"
+#include "triSurfaceTools.H"
+
+#include "implicitFunction.H"
+
+#include "cutCellIso.H"
+#include "OBJstream.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-class shapeSelector
+void isoFacesToFile
+(
+    const DynamicList<List<point>>& faces,
+    const word& fileName
+)
 {
-    public:
+    // Writing isofaces to OBJ file for inspection in paraview
+    OBJstream os(fileName + ".obj");
 
-        enum class shapeType
+    if (Pstream::parRun())
+    {
+        // Collect points from all the processors
+        List<DynamicList<List<point>>> allProcFaces(Pstream::nProcs());
+        allProcFaces[Pstream::myProcNo()] = faces;
+        Pstream::gatherList(allProcFaces);
+
+        if (Pstream::master())
         {
-            PLANE,
-            SPHERE,
-            CYLINDER,
-            SIN
-        };
+            Info<< "Writing file: " << fileName << endl;
 
-    static const Foam::Enum<shapeType> shapeTypeNames;
-};
+            for (const DynamicList<List<point>>& procFaces : allProcFaces)
+            {
+                for (const List<point>& facePts : procFaces)
+                {
+                    os.write(face(identity(facePts.size())), facePts);
+                }
+            }
+        }
+    }
+    else
+    {
+        Info<< "Writing file: " << fileName << endl;
 
-
-const Foam::Enum
-<
-    shapeSelector::shapeType
->
-shapeSelector::shapeTypeNames
-({
-    { shapeSelector::shapeType::PLANE, "plane" },
-    { shapeSelector::shapeType::SPHERE, "sphere" },
-    { shapeSelector::shapeType::CYLINDER, "cylinder" },
-    { shapeSelector::shapeType::SIN, "sin" },
-});
+        for (const List<point>& facePts : faces)
+        {
+            os.write(face(identity(facePts.size())), facePts);
+        }
+    }
+}
 
 
 int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Uses isoCutCell to create a volume fraction field from a"
-        " cylinder, sphere or a plane."
+        "Uses cutCellIso to create a volume fraction field from an "
+        "implicit function."
     );
 
+    #include "addDictOption.H"
+    #include "addRegionOption.H"
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedMesh.H"
 
-    Info<< "Reading setAlphaFieldDict\n" << endl;
+    const word dictName("setAlphaFieldDict");
+    #include "setSystemMeshDictionaryIO.H"
 
-    IOdictionary dict
-    (
-        IOobject
-        (
-            "setAlphaFieldDict",
-            runTime.system(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
-    );
+    IOdictionary setAlphaFieldDict(dictIO);
 
-    const shapeSelector::shapeType surfType
-    (
-        shapeSelector::shapeTypeNames.get("type", dict)
-    );
-    const vector origin(dict.getCompat<vector>("origin", {{"centre", 1806}}));
-    const word fieldName(dict.get<word>("field"));
+    Info<< "Reading " << setAlphaFieldDict.name() << endl;
 
-    Info<< "Reading field " << fieldName << "\n" << endl;
+    const word fieldName = setAlphaFieldDict.get<word>("field");
+    const bool invert = setAlphaFieldDict.getOrDefault("invert", false);
+    const bool writeOBJ = setAlphaFieldDict.getOrDefault("writeOBJ", false);
+
+    Info<< "Reading field " << fieldName << nl << endl;
     volScalarField alpha1
     (
         IOobject
@@ -121,85 +130,76 @@ int main(int argc, char *argv[])
         mesh
     );
 
-    scalar f0 = 0;
-    scalarField f(mesh.points().size());
+    autoPtr<implicitFunction> func = implicitFunction::New
+    (
+        setAlphaFieldDict.get<word>("type"),
+        setAlphaFieldDict
+    );
 
-    Info<< "Processing type '" << shapeSelector::shapeTypeNames[surfType]
-        << "'" << endl;
+    scalarField f(mesh.nPoints(), Zero);
 
-    switch (surfType)
+    forAll(f, pi)
     {
-        case shapeSelector::shapeType::PLANE:
-        {
-            const vector direction(dict.get<vector>("direction"));
+        f[pi] = func->value(mesh.points()[pi]);
+    };
 
-            f = -(mesh.points() - origin) & (direction/mag(direction));
-            f0 = 0;
-            break;
+    cutCellIso cutCell(mesh, f);
+
+    DynamicList<List<point>> facePts;
+
+    DynamicList<triSurface> surface;
+
+    surfaceScalarField cellToCellDist(mag(mesh.delta()));
+
+    forAll(alpha1, cellI)
+    {
+        label cellStatus = cutCell.calcSubCell(cellI, 0.0);
+
+        if (cellStatus == -1)
+        {
+            alpha1[cellI] = 1;
         }
-        case shapeSelector::shapeType::SPHERE:
+        else if (cellStatus == 1)
         {
-            const scalar radius(dict.get<scalar>("radius"));
-
-            f = -mag(mesh.points() - origin);
-            f0 = -radius;
-            break;
+            alpha1[cellI] = 0;
         }
-        case shapeSelector::shapeType::CYLINDER:
+        else if (cellStatus == 0)
         {
-            const scalar radius(dict.get<scalar>("radius"));
-            const vector direction(dict.get<vector>("direction"));
-
-            f = -sqrt
-            (
-                sqr(mag(mesh.points() - origin))
-              - sqr(mag((mesh.points() - origin) & direction))
-            );
-            f0 = -radius;
-            break;
-        }
-        case shapeSelector::shapeType::SIN:
-        {
-            const scalar period(dict.get<scalar>("period"));
-            const scalar amplitude(dict.get<scalar>("amplitude"));
-            const vector up(dict.get<vector>("up"));
-            const vector direction(dict.get<vector>("direction"));
-
-            const scalarField xx
-            (
-                (mesh.points() - origin) & direction/mag(direction)
-            );
-            const scalarField zz((mesh.points() - origin) & up/mag(up));
-
-            f = amplitude*Foam::sin(2*mathematical::pi*xx/period) - zz;
-            f0 = 0;
-            break;
+            if (mag(cutCell.faceArea()) != 0)
+            {
+                alpha1[cellI] = max(min(cutCell.VolumeOfFluid(), 1), 0);
+                if (writeOBJ && (mag(cutCell.faceArea()) >= 1e-14))
+                {
+                    facePts.append(cutCell.facePoints());
+                }
+            }
         }
     }
 
-
-    // Define function on mesh points and isovalue
-
-    // Calculating alpha1 volScalarField from f = f0 isosurface
-    isoCutCell icc(mesh, f);
-    icc.volumeOfFluid(alpha1, f0);
-
-    if (dict.getOrDefault("invertAlpha", false))
+    if (writeOBJ)
     {
-        alpha1 = 1 - alpha1;
+        isoFacesToFile(facePts, fieldName + "0");
     }
 
-    // Writing volScalarField alpha1
     ISstream::defaultPrecision(18);
+
+    if (invert)
+    {
+        alpha1 = scalar(1) - alpha1;
+    }
+
+    alpha1.correctBoundaryConditions();
+
+    Info<< "Writing new alpha field " << alpha1.name() << endl;
     alpha1.write();
 
-    Info<< nl << "Phase-1 volume fraction = "
-        << alpha1.weightedAverage(mesh.Vsc()).value()
-        << "  Min(" << alpha1.name() << ") = " << min(alpha1).value()
-        << "  Max(" << alpha1.name() << ") - 1 = " << max(alpha1).value() - 1
-        << nl << endl;
+    const scalarField& alpha = alpha1.internalField();
 
-    Info<< "End\n" << endl;
+    Info<< "sum(alpha*V):" << gSum(mesh.V()*alpha)
+        << ", 1-max(alpha1): " << 1 - gMax(alpha)
+        << " min(alpha1): " << gMin(alpha) << endl;
+
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

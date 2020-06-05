@@ -9,6 +9,7 @@
     Copyright (C) 2016 DHI
     Copyright (C) 2017 OpenCFD Ltd.
     Copyright (C) 2018 Johan Roenby
+    Copyright (C) 2019-2020 DLR
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,6 +64,7 @@ Description
 #include "fvOptions.H"
 #include "CorrectPhi.H"
 #include "fvcSmooth.H"
+#include "dynamicRefineFvMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -113,13 +115,28 @@ int main(int argc, char *argv[])
         {
             if (pimple.firstIter() || moveMeshOuterCorrectors)
             {
+                if (isA<dynamicRefineFvMesh>(mesh))
+                {
+                    advector.surf().reconstruct();
+                }
+
                 mesh.update();
 
                 if (mesh.changing())
                 {
-
                     gh = (g & mesh.C()) - ghRef;
                     ghf = (g & mesh.Cf()) - ghRef;
+
+                    if (isA<dynamicRefineFvMesh>(mesh))
+                    {
+                        advector.surf().mapAlphaField();
+                        alpha2 = 1.0 - alpha1;
+                        alpha2.correctBoundaryConditions();
+                        rho == alpha1*rho1 + alpha2*rho2;
+                        rho.correctBoundaryConditions();
+                        rho.oldTime() = rho;
+                        alpha2.oldTime() = alpha2;
+                    }
 
                     MRF.update();
 
