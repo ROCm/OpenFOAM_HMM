@@ -1,0 +1,229 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1912                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     pimpleFoam;
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         200;
+
+deltaT          0.05;
+
+writeControl    runTime;
+
+writeInterval   50;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  16;
+
+timeFormat      general;
+
+timePrecision   8;
+
+runTimeModifiable false;
+
+
+functions
+{
+    mapFields1
+    {
+        type            mapFields;
+        libs            (fieldFunctionObjects);
+        mapRegion       coarseMesh;
+        mapMethod       cellVolumeWeight;
+        consistent      no;
+        patchMap        ();
+        cuttingPatches  ();
+        fields          ( U p );
+
+        timeStart       10;
+        timeEnd         2000;
+
+        executeControl  timeStep;
+        executeInterval 10;
+
+        writeControl    timeStep;
+        writeInterval   50;
+    }
+
+    STDMD1U
+    {
+        // Mandatory entries
+        type                STDMD;
+        libs                (fieldFunctionObjects);
+        field               U;
+
+        // Optional entries
+        modeSorter          firstSnap;
+
+        // Optional (inherited) entries
+        region              coarseMesh;  // mapFields must be executed before.
+        timeStart           10;
+        executeControl      timeStep;
+        executeInterval     10;
+        writeControl        onEnd;
+    }
+
+    STDMD1p
+    {
+        // Mandatory entries
+        type                STDMD;
+        libs                (fieldFunctionObjects);
+        field               p;
+
+        // Optional entries
+        modeSorter          firstSnap;
+
+        // Optional (inherited) entries
+        region              coarseMesh;
+        timeStart           10;
+        executeControl      timeStep;
+        executeInterval     10;
+        writeControl        onEnd;
+    }
+
+    STDMD2U
+    {
+        // Mandatory entries
+        type                STDMD;
+        libs                (fieldFunctionObjects);
+        field               U;
+
+        // Optional entries
+        modeSorter          firstSnap;
+        nModes              2;
+        maxRank             2;
+        nGramSchmidt        5;
+        fMin                0;
+        fMax                1000000000;
+        testEigen           true;
+        dumpEigen           true;
+        minBasis            0.00000001;
+        minEVal             0.00000001;
+        absTol              0.001;
+        relTol              0.0001;
+
+        // Optional (inherited) entries
+        timeStart           50;
+        timeEnd             2000;
+        executeControl      timeStep;
+        executeInterval     10;
+        writeControl        onEnd;
+    }
+
+    STDMD3U
+    {
+        // Mandatory entries
+        type                STDMD;
+        libs                (fieldFunctionObjects);
+        field               U;
+
+        // Optional entries
+        modeSorter          firstSnap;
+
+        // Optional (inherited) entries
+        region              coarseMesh;
+        timeStart           10;
+        timeEnd             150;
+        executeControl      timeStep;
+        executeInterval     10;
+        writeControl        runTime;
+        writeInterval       50;
+    }
+
+    STDMD4U
+    {
+        // Mandatory entries
+        type                STDMD;
+        libs                (fieldFunctionObjects);
+        field               U;
+
+        // Optional entries
+        modeSorter          kiewat;
+
+        // Optional (inherited) entries
+        region              coarseMesh;
+        timeStart           10;
+        executeControl      timeStep;
+        executeInterval     10;
+        writeControl        onEnd;
+    }
+
+    STDMD4p
+    {
+        // Mandatory entries
+        type                STDMD;
+        libs                (fieldFunctionObjects);
+        field               p;
+
+        // Optional entries
+        modeSorter          kiewat;
+
+        // Optional (inherited) entries
+        region              coarseMesh;
+        timeStart           10;
+        executeControl      timeStep;
+        executeInterval     10;
+        writeControl        onEnd;
+    }
+
+    STDMD5U
+    {
+        // Mandatory entries
+        type                STDMD;
+        libs                (fieldFunctionObjects);
+        field               U;
+
+        // Optional entries
+        modeSorter          kouZhang;
+
+        // Optional (inherited) entries
+        region              coarseMesh;
+        timeStart           10;
+        executeControl      timeStep;
+        executeInterval     10;
+        writeControl        onEnd;
+    }
+
+    STDMD5p
+    {
+        // Mandatory entries
+        type                STDMD;
+        libs                (fieldFunctionObjects);
+        field               p;
+
+        // Optional entries
+        modeSorter          kouZhang;
+
+        // Optional (inherited) entries
+        region              coarseMesh;
+        timeStart           10;
+        executeControl      timeStep;
+        executeInterval     10;
+        writeControl        onEnd;
+    }
+}
+
+
+// ************************************************************************* //

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,13 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class Type>
-inline Foam::RectangularMatrix<Type>::RectangularMatrix()
-:
-    Matrix<RectangularMatrix<Type>, Type>()
-{}
-
 
 template<class Type>
 inline Foam::RectangularMatrix<Type>::RectangularMatrix
@@ -197,8 +190,38 @@ inline void Foam::RectangularMatrix<Type>::operator=(const Type& val)
 namespace Foam
 {
 
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+class typeOfInnerProduct<Type, RectangularMatrix<Type>, RectangularMatrix<Type>>
+{
+public:
+
+    typedef RectangularMatrix<Type> type;
+};
+
+
+template<class Type>
+class typeOfInnerProduct<Type, RectangularMatrix<Type>, SquareMatrix<Type>>
+{
+public:
+
+    typedef RectangularMatrix<Type> type;
+};
+
+
+template<class Type>
+class typeOfInnerProduct<Type, SquareMatrix<Type>, RectangularMatrix<Type>>
+{
+public:
+
+    typedef RectangularMatrix<Type> type;
+};
+
+
 // * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
 
+// Return the outer product of Field-Field as RectangularMatrix
 template<class Type>
 inline Foam::RectangularMatrix<Type> outer
 (
@@ -223,6 +246,5 @@ inline Foam::RectangularMatrix<Type> outer
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
 
 // ************************************************************************* //

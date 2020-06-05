@@ -1,0 +1,25 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+./Allrun.pre
+
+runApplication decomposePar
+
+runParallel renumberMesh -overwrite
+
+cp -f system/decomposeParDict system/coarseMesh
+
+runApplication -s coarseMesh decomposePar -region coarseMesh
+
+runParallel -s coarseMesh renumberMesh -overwrite -region coarseMesh
+
+runParallel $(getApplication)
+
+runParallel -s main redistributePar -reconstruct -latestTime
+
+runParallel -s coarseMesh redistributePar -reconstruct \
+    -region coarseMesh -time '50,100,200'
+
+#------------------------------------------------------------------------------

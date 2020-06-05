@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,13 +36,6 @@ License
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class Type>
-inline Foam::SymmetricSquareMatrix<Type>::SymmetricSquareMatrix()
-:
-    Matrix<SymmetricSquareMatrix<Type>, Type>()
-{}
-
 
 template<class Type>
 inline Foam::SymmetricSquareMatrix<Type>::SymmetricSquareMatrix(const label n)

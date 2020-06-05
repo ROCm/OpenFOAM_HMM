@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,11 @@ Class
     Foam::DiagonalMatrix
 
 Description
-    A 2D diagonal matrix of objects of type \<Type\>, size (N x N)
+    A templated (N x N) diagonal matrix of objects of \<Type\>, effectively
+    containing N elements, derived from List.
+
+See also
+    Test-DiagonalMatrix.C
 
 SourceFiles
     DiagonalMatrix.C
@@ -39,6 +43,7 @@ SourceFiles
 #define DiagonalMatrix_H
 
 #include "List.H"
+#include <numeric>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,19 +64,27 @@ class DiagonalMatrix
 {
 public:
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null.
-        DiagonalMatrix<Type>();
+        //- Default construct
+        DiagonalMatrix() = default;
+
+        //- Copy construct
+        DiagonalMatrix(const DiagonalMatrix&) = default;
+
+        //- Copy assignment
+        DiagonalMatrix& operator=(const DiagonalMatrix&) = default;
+
+
+    // Constructors
 
         //- Construct empty from size
         explicit DiagonalMatrix<Type>(const label n);
 
-        //- Construct from size
-        //- initializing all elements to the given value
+        //- Construct from size and initialise all elems to zero
         DiagonalMatrix<Type>(const label n, const zero);
 
-        //- Construct from size and a value
+        //- Construct from size and initialise all elems to value
         DiagonalMatrix<Type>(const label n, const Type& val);
 
         //- Construct from the diagonal of a Matrix
@@ -81,17 +94,18 @@ public:
 
     // Member Functions
 
-        //- Invert the diagonal matrix and return itself
-        DiagonalMatrix<Type>& invert();
+        //- Return the matrix inverse into itself if no elem is equal to zero
+        void invert();
 
+        //- Return a sort permutation labelList according to
+        //- a given comparison on the diagonal entries
+        template<class CompOp>
+        List<label> sortPermutation(CompOp& compare) const;
+
+        //- Column-reorder this Matrix according to
+        //- a given permutation labelList
+        void applyPermutation(const List<label>& p);
 };
-
-
-// Global functions
-
-//- Return the diagonal Matrix inverse
-template<class Type>
-DiagonalMatrix<Type> inv(const DiagonalMatrix<Type>& mat);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

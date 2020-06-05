@@ -176,7 +176,7 @@ void Foam::MatrixBlock<MatrixType>::operator=
     const ConstMatrixBlock<MatrixType>& Mb
 )
 {
-    if (this != &Mb)
+    if (reinterpret_cast<const ConstMatrixBlock<MatrixType>*>(this) != &Mb)
     {
         if (mRows_ != Mb.m() || nCols_ != Mb.n())
         {
@@ -233,7 +233,7 @@ void Foam::MatrixBlock<MatrixType>::operator=
     const ConstMatrixBlock<MatrixType2>& Mb
 )
 {
-    if (this != &Mb)
+    if (reinterpret_cast<const ConstMatrixBlock<MatrixType2>*>(this) != &Mb)
     {
         if (mRows_ != Mb.m() || nCols_ != Mb.n())
         {
