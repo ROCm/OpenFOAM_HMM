@@ -543,9 +543,9 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::update()
 void Foam::functionObjects::fieldValues::surfaceFieldValue::writeFileHeader
 (
     Ostream& os
-) const
+)
 {
-    if (operation_ != opNone)
+    if (canWriteHeader() && (operation_ != opNone))
     {
         writeCommented(os, "Region type : ");
         os << regionTypeNames_[regionType_] << " " << regionName_ << endl;
@@ -575,6 +575,8 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::writeFileHeader
 
         os  << endl;
     }
+
+    writtenHeader_ = true;
 }
 
 
