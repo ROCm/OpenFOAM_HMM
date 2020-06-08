@@ -169,6 +169,12 @@ endif
 if ( $?FOAM_SITE_LIBBIN ) then
    set foamOldDirs="$foamOldDirs $FOAM_SITE_LIBBIN"
 endif
+if ( $?FOAM_MODULE_APPBIN ) then
+   set foamOldDirs="$foamOldDirs $FOAM_MODULE_APPBIN"
+endif
+if ( $?FOAM_MODULE_LIBBIN ) then
+   set foamOldDirs="$foamOldDirs $FOAM_MODULE_LIBBIN"
+endif
 
 # [WM_PROJECT_DIR] - Location of this OpenFOAM version
 setenv WM_PROJECT_DIR "$projectDir"

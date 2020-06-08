@@ -51,6 +51,7 @@
 #
 # Environment
 #     FOAM_EXTRA_CFLAGS FOAM_EXTRA_CXXFLAGS FOAM_EXTRA_LDFLAGS
+#     FOAM_MODULE_PREFIX
 #
 # See also
 #     wmakeLnInclude, wmakeLnIncludeAll, wmakeCollect, wdep, wrmdep, wrmo,
@@ -81,6 +82,9 @@ if [ -n "$1" ]
 then
 cat<<HELP_FULL
   -debug            Define c++DBUG='-DFULLDEBUG -g -O0' as override
+  -module-prefix=PATH   Specify FOAM_MODULE_PREFIX as absolute/relative path
+  -module-prefix=TYPE   Specify FOAM_MODULE_PREFIX as predefined type
+                        (u,user | g,group | o,openfoam)
   -no-scheduler     Disable scheduled parallel compilation
   -show-api         Print api value (from Make rules)
   -show-ext-so      Print shared library extension (with '.' separator)
@@ -140,6 +144,7 @@ Special targets:
 
 Environment
   FOAM_EXTRA_CFLAGS FOAM_EXTRA_CXXFLAGS FOAM_EXTRA_LDFLAGS
+  FOAM_MODULE_PREFIX
 
 HELP_TAIL_FULL
 else
@@ -226,6 +231,40 @@ do
         -debug)
             optDebug="-DFULLDEBUG -g -O0"
             ;;
+
+        -module-prefix=*)
+            optPrefix="${1#*=}"
+            case "$optPrefix" in
+            # Prefix: user
+            (u | user)
+                export FOAM_MODULE_PREFIX="${FOAM_USER_LIBBIN%/*}"
+                ;;
+
+            # Prefix: group
+            (g | group)
+                export FOAM_MODULE_PREFIX="${FOAM_SITE_LIBBIN%/*}"
+                ;;
+
+            # Prefix: openfoam (other)
+            (o | openfoam)
+                export FOAM_MODULE_PREFIX="${FOAM_LIBBIN%/*}"
+                ;;
+
+            # Prefix: custom (absolute or relative)
+            (*)
+                export FOAM_MODULE_PREFIX="$optPrefix"
+                : "${FOAM_MODULE_PREFIX:=/usr/local}"  # Default (autoconf)
+
+                # Require absolute path
+                [ "${FOAM_MODULE_PREFIX#/}" != "${FOAM_MODULE_PREFIX}" ] || \
+                    FOAM_MODULE_PREFIX="${PWD}/${FOAM_MODULE_PREFIX}"
+                ;;
+            esac
+
+            unset FOAM_MODULE_APPBIN FOAM_MODULE_LIBBIN
+            echo "Module prefix = $FOAM_MODULE_PREFIX" 1>&2
+            ;;
+
         -show-api | -show-ext-so | \
         -show-compile-c   | -show-c   | -show-cflags   | -show-cflags-arch | \
         -show-compile-cxx | -show-cxx | -show-cxxflags | -show-cxxflags-arch )
