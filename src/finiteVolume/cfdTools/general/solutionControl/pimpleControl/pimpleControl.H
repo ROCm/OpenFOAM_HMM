@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -93,6 +93,10 @@ protected:
 
             //- Converged flag
             bool converged_;
+
+            //- Flag to indicate wheter the final solver is used only on the
+            //  final pimple iter
+            bool finalOnLastPimpleIterOnly_;
 
 
     // Protected Member Functions

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,9 +97,18 @@ inline bool Foam::pimpleControl::finalIter() const
 
 inline bool Foam::pimpleControl::finalInnerIter() const
 {
-    return
-       corrPISO_ == nCorrPISO_
-    && corrNonOrtho_ == nNonOrthCorr_ + 1;
+    bool finalInnerIter =
+        corrPISO_ == nCorrPISO_
+     && corrNonOrtho_ == nNonOrthCorr_ + 1;
+
+    if (finalOnLastPimpleIterOnly_)
+    {
+        return finalInnerIter && finalIter();
+    }
+    else
+    {
+        return finalInnerIter;
+    }
 }
 
 
