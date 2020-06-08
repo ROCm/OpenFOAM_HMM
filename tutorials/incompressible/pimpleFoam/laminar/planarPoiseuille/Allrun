@@ -15,6 +15,12 @@ then
     endTime=25
 fi
 
+if ! canCompile
+then
+    echo "skipping tutorial $PWD"
+    exit 0
+fi
+
 #------------------------------------------------------------------------------
 
 # Compute the case in 'serial' mode, and collect the data

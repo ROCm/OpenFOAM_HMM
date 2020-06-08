@@ -6,11 +6,10 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2015-2018 OpenCFD Ltd.
+#     Copyright (C) 2015-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     RunFunctions
@@ -51,6 +50,33 @@ isTest()
 notTest()
 {
     for i; do [ "$i" = "-test" ] && return 1; done
+    return 0
+}
+
+#
+# Test for wmake and compiler suite or emit warning
+#
+canCompile()
+{
+    if ! command -v wmake >/dev/null
+    then
+        echo "No wmake command found ... cannot compile" 1>&2
+        return 1
+    fi
+
+    local cxx_compiler
+    cxx_compiler="$(wmake -show-cxx 2>/dev/null)"
+
+    if [ -z "$cxx_compiler" ]
+    then
+        echo "No wmake rule for C++ compiler? ... cannot compile" 1>&2
+        return 1
+    elif ! command -v "$cxx_compiler"  >/dev/null
+    then
+        echo "No path to C++ compiler ($cxx_compiler) ... cannot compile" 1>&2
+        return 1
+    fi
+
     return 0
 }
 
