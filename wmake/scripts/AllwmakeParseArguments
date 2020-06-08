@@ -28,9 +28,15 @@
 # Parsed options (wmake)
 #     -debug
 #     -q | -queue
+#     -module-prefix=...
+#         Exports FOAM_MODULE_PREFIX value.
+#         Unsets FOAM_MODULE_APPBIN, FOAM_MODULE_LIBBIN.
+#         Handles (user|group|openfoam) or (u|g|o) as per foamEtcFile,
+#         or absolute/relative paths
 #
 # Parsed options (special)
 #     -l | -log | -log=FILE
+#     -prefix=...   same as -module-prefix=...
 #
 #------------------------------------------------------------------------------
 # Check environment
@@ -54,11 +60,15 @@ Executing ${0##*/} is equivalent to
 
    wmake -all [OPTIONS]
 
-With these additional options:
-   -l | -log | -log=name
+With additional options:
+    -l | -log           Tee output to log.\$WM_OPTIONS
+    -log=NAME           Tee output to given filename
+    -prefix=...         Identical to wmake -module-prefix
+    -no-recursion       Prevent recursive call (do NOT call 'wmake -all')
+    -fromWmake          Same as -no-recursion
 
 See
-   wmake -help (or wmake -help-full)
+    wmake -help (or wmake -help-full)
 
 USAGE
     exit 0  # clean exit
@@ -69,7 +79,7 @@ USAGE
 # Parse the arguments and options
 #------------------------------------------------------------------------------
 
-unset fromWmake optDebug optLog optQueue
+unset optDebug optLog optNonRecursive optPrefix optQueue
 
 for arg in "$@"
 do
@@ -80,19 +90,58 @@ do
     -h | -help*)
         usage
         ;;
-    -fromWmake)
-        # If called from wmake (to avoid recursion)
-        fromWmake=true
+
+    -no-recurs* | -fromWmake)
+        # Avoid recursion (eg, if called from wmake)
+        optNonRecursive=true
+        continue    # Handled argument
         ;;
+
+    -prefix=* | -module-prefix=*)
+        optPrefix="${arg#*=}"
+        case "$optPrefix" in
+        # Prefix: user
+        (u | user)
+            export FOAM_MODULE_PREFIX="${FOAM_USER_LIBBIN%/*}"
+            ;;
+
+        # Prefix: group
+        (g | group)
+            export FOAM_MODULE_PREFIX="${FOAM_SITE_LIBBIN%/*}"
+            ;;
+
+        # Prefix: openfoam (other)
+        (o | openfoam)
+            export FOAM_MODULE_PREFIX="${FOAM_LIBBIN%/*}"
+            ;;
+
+        # Prefix: custom (absolute or relative)
+        (*)
+            export FOAM_MODULE_PREFIX="$optPrefix"
+            : "${FOAM_MODULE_PREFIX:=/usr/local}"  # Default (autoconf)
+
+            # Require absolute path
+            [ "${FOAM_MODULE_PREFIX#/}" != "${FOAM_MODULE_PREFIX}" ] || \
+                FOAM_MODULE_PREFIX="${PWD}/${FOAM_MODULE_PREFIX}"
+            ;;
+        esac
+
+        unset FOAM_MODULE_APPBIN FOAM_MODULE_LIBBIN
+        echo "Module prefix = $FOAM_MODULE_PREFIX" 1>&2
+        continue    # Handled argument
+        ;;
+
     -k | -keep-going | -non-stop)
         # Keep going, ignoring errors
         export WM_CONTINUE_ON_ERROR=true
         continue    # Permanently remove arg
         ;;
+
     -l | -log)
         optLog="log.${WM_OPTIONS:-build}"
         continue    # Permanently remove arg
         ;;
+
     -log=*)
         optLog="${arg##*=}"
         if [ -d "$optLog" ]
@@ -104,17 +153,20 @@ do
         fi
         continue    # Permanently remove arg
         ;;
+
     -debug)
         optDebug="-debug"
         continue    # Permanently remove arg
         ;;
+
     -q | -queue)
         optQueue="-queue"
         continue    # Permanently remove arg
         ;;
+
     lib | libo | libso | dep | objects)
         # Target type
-        targetType=$arg
+        targetType="$arg"
         ;;
     esac
 
@@ -127,7 +179,7 @@ done
 # Execute wmake -all if not called from wmake
 #------------------------------------------------------------------------------
 
-if [ -z "$fromWmake" ]
+if [ -z "$optNonRecursive" ]
 then
     if [ -z "$optLog" ]
     then
@@ -140,7 +192,7 @@ then
         # Need to cleanup after the tee
         rc=$? # Error code from tee (not wmake), but not entirely important
         echo "Done logging to '$optLog'" 1>&2
-        exit $rc
+        exit "$rc"
     fi
 fi
 
@@ -159,7 +211,7 @@ fi
 # Cleanup local variables and functions
 #------------------------------------------------------------------------------
 
-unset fromWmake optDebug optLog optQueue
+unset optNonRecursive optDebug optLog optPrefix optQueue
 unset -f usage
 
 

@@ -1,7 +1,6 @@
 #!/bin/sh
 cd "${0%/*}" || exit                                # Run from this directory
-# No AllwmakeParseArguments [infinite loop via Allwmake]
-. ${WM_PROJECT_DIR:?}/wmake/scripts/wmake.wmake-args
+. ${WM_PROJECT_DIR:?}/wmake/scripts/AllwmakeParseArguments -no-recursion
 . ${WM_PROJECT_DIR:?}/wmake/scripts/wmakeFunctions  # Require wmake functions
 . ${WM_PROJECT_DIR:?}/wmake/scripts/have_scotch
 

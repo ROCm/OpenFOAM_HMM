@@ -73,7 +73,12 @@ echo
 applications/Allwmake $targetType $*
 
 # Additional components/modules
-if [ -d "$WM_PROJECT_DIR/modules" ]
+if [ "$FOAM_MODULE_PREFIX" = false ]
+then
+    echo "========================================"
+    echo "OpenFOAM modules disabled (prefix=false)"
+    echo
+elif [ -d "$WM_PROJECT_DIR/modules" ]
 then
     echo "========================================"
     echo "Compile OpenFOAM modules"
@@ -82,6 +87,10 @@ then
     echo
     set +e
     export WM_CONTINUE_ON_ERROR=true
+
+    # Default build into OpenFOAM project locations
+    : "${FOAM_MODULE_PREFIX:=${FOAM_LIBBIN%/*}}"
+    export FOAM_MODULE_PREFIX
 
     (cd "$WM_PROJECT_DIR/modules" 2>/dev/null && wmake -all)
 fi
