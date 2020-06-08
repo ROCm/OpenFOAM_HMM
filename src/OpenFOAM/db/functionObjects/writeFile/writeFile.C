@@ -221,8 +221,7 @@ bool Foam::functionObjects::writeFile::read(const dictionary& dict)
             labelMinMax::ge(0)
         );
 
-    updateHeader_ =
-        dict.lookupOrDefault("updateHeader", updateHeader_);
+    updateHeader_ = dict.getOrDefault("updateHeader", updateHeader_);
 
     // Only write on master
     writeToFile_ =

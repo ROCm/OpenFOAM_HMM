@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1912                                 |
+|  \\    /   O peration     | Version:  v2006                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -27,33 +27,33 @@ boundaryField
         Ta              constant 300.0;
         h
         {
-            type            coded;
+            type        coded;
+
             codeInclude
             #{
                 #include "volFields.H"
             #};
+
             code
             #{
-                const objectRegistry& Db =
-                    patch_.boundaryMesh().mesh().thisDb();
+                const auto& T =
+                    patch_.boundaryMesh().mesh()
+                        .lookupObject<volScalarField>("T");
 
-                const volScalarField& T =
-                    Db.lookupObject<volScalarField>("T");
-
-                tmp<scalarField> thtc(new scalarField(patch_.size(), 300.0));
-                scalarField& htc =  thtc.ref();
+                auto thtc = tmp<scalarField>::New(patch_.size(), 300.0);
+                auto& htc = thtc.ref();
 
                 const scalarField Tp(T.boundaryField()[patch_.index()]);
 
-                forAll (htc, faceI)
+                forAll(htc, facei)
                 {
-                    if (Tp[faceI] >= 1000.0)
+                    if (Tp[facei] >= 1000.0)
                     {
-                        htc[faceI] = 800;
+                        htc[facei] = 800;
                     }
-                    else if (1000.0 >= Tp[faceI] >= 600.0)
+                    else if (Tp[facei] >= 600.0)
                     {
-                         htc[faceI] = 0.2*Tp[faceI]+200;
+                        htc[facei] = 0.2*Tp[facei]+200;
                     }
                 }
 
