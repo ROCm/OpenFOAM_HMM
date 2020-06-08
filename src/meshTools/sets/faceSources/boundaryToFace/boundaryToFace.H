@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,10 +28,48 @@ Class
     Foam::boundaryToFace
 
 Description
-    A topoSetFaceSource to select all external (boundary) faces.
+    A \c topoSetFaceSource to select faces on all external boundaries.
 
-    \heading Dictionary parameters
-    None
+    Operands:
+    \table
+      Operand   | Type    | Location
+      output    | faceSet | $FOAM_CASE/constant/polyMesh/sets/\<set\>
+    \endtable
+
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        faceSet;
+        action      <action>;
+
+        // Mandatory entries
+        source      boundaryToFace;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                          | Type | Req'd | Dflt
+      name       | Name of faceSet                      | word |  yes  | -
+      type       | Type name: faceSet                   | word |  yes  | -
+      action     | Action applied on faces - see below  | word |  yes  | -
+      source     | Source name: boundaryToFace          | word |  yes  | -
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new faceSet from selected faces
+      add      | Add selected faces into this faceSet
+      subtract | Remove selected faces from this faceSet
+    \endverbatim
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetFaceSource
+    - Foam::patchToFace
 
 SourceFiles
     boundaryToFace.C
@@ -56,7 +94,7 @@ class boundaryToFace
 :
     public topoSetFaceSource
 {
-    // Private data
+    // Private Data
 
         //- Add usage string
         static addToUsageTable usage_;
@@ -71,6 +109,7 @@ public:
 
     //- Runtime type information
     TypeName("boundaryToFace");
+
 
     // Constructors
 
@@ -95,7 +134,6 @@ public:
             const topoSetSource::setAction action,
             topoSet& set
         ) const;
-
 };
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,14 +28,53 @@ Class
     Foam::normalToFace
 
 Description
-    A topoSetFaceSource to select faces based on normal.
+    A \c topoSetFaceSource to select faces whose surface normal aligned
+    with a given direction.
 
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                       | Required  | Default
-        normal      | The normal for selecting faces    | yes   |
-        cos         | Tolerance angle (range -1, +1)    | yes   |
+      Operand   | Type    | Location
+      output    | faceSet | $FOAM_CASE/constant/polyMesh/sets/\<set\>
     \endtable
+
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        faceSet;
+        action      <action>;
+
+        // Mandatory entries
+        source      normalToFace;
+        normal      (1 0 0);
+        cos         0.01;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                         | Type | Req'd | Dflt
+      name       | Name of faceSet                     | word |  yes  | -
+      type       | Type name: faceSet                  | word |  yes  | -
+      action     | Action applied on faces - see below | word |  yes  | -
+      source     | Source name: normalToFace           | word |  yes  | -
+      normal     | The surface normal direction        | vector | yes | -
+      cos        | Tolerance angle (range -1, +1), i.e. cosine of angle <!--
+               --> between the input normal and face normal | scalar | yes | -
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new faceSet from selected faces
+      add      | Add selected faces into this faceSet
+      subtract | Remove selected faces from this faceSet
+    \endverbatim
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetFaceSource
 
 SourceFiles
     normalToFace.C
@@ -60,13 +99,12 @@ class normalToFace
 :
     public topoSetFaceSource
 {
-
-private:
+    // Private Data
 
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- (unit)vector to compare to
+        //- The surface normal direction
         vector normal_;
 
         //- Tolerance (i.e. cos of angle between normal_ and faceNormal)
@@ -83,6 +121,7 @@ public:
 
     //- Runtime type information
     TypeName("normalToFace");
+
 
     // Constructors
 
@@ -112,7 +151,6 @@ public:
             const topoSetSource::setAction action,
             topoSet& set
         ) const;
-
 };
 
 

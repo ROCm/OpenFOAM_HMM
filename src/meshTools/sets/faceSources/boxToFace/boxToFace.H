@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,20 +28,80 @@ Class
     Foam::boxToFace
 
 Description
-    A topoSetFaceSource to select faces based on face centres inside box.
+    A \c topoSetFaceSource to select all faces
+    whose face centre inside given bounding box(es).
 
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                           | Required | Default
-        boxes       | Multiple bounding boxes               | partly   |
-        box         | A single bounding box                 | partly   |
-        min         | Minimum point for a single box        | partly   |
-        max         | Maximum point for a single box        | partly   |
+      Operand   | Type    | Location
+      output    | faceSet | $FOAM_CASE/constant/polyMesh/sets/\<set\>
     \endtable
 
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        faceSet;
+        action      <action>;
+
+        // Mandatory entries
+        source      boxToFace;
+
+        // Conditional mandatory entries
+        // Select either of the below
+
+        // Option-1
+        boxes
+        (
+            (<minX> <minY> <minZ>) (<maxX> <maxY> <maxZ>) // box-1
+            (<minX> <minY> <minZ>) (<maxX> <maxY> <maxZ>) // box-2
+            ...
+        );
+
+        // Option-2
+        box (<minX> <minY> <minZ>) (<maxX> <maxY> <maxZ>);
+
+        // Option-3
+        min (<minX> <minY> <minZ>);
+        max (<maxX> <maxY> <maxZ>);
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                         | Type | Req'd | Dflt
+      name       | Name of faceSet                     | word |  yes  | -
+      type       | Type name: faceSet                  | word |  yes  | -
+      action     | Action applied on faces - see below | word |  yes  | -
+      source     | Source name: boxToFace              | word |  yes  | -
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new faceSet from selected cells
+      add      | Add selected cells into this faceSet
+      subtract | Remove selected cells from this faceSet
+    \endverbatim
+
+    Options for the conditional mandatory entries:
+    \verbatim
+      Entry    | Description                    | Type       | Req'd  | Dflt
+      boxes    | Multiple bounding boxes        | vectorList | cond'l | -
+      box      | A single bounding box          | vector     | cond'l | -
+      min      | Minimum point for a single box | vector     | cond'l | -
+      max      | Maximum point for a single box | vector     | cond'l | -
+    \verbatim
+
 Note
-    Must specify "boxes", "box" or a "min/max" pair
-    (compatibility with searchable box) - highest to lowest precedence.
+    The order of precedence among the conditional mandatory entries from the
+    highest to the lowest is \c boxes, \c box or a \c min-max pair
+    (compatibility with \c searchableBox).
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetFaceSource
 
 SourceFiles
     boxToFace.C
@@ -67,7 +127,7 @@ class boxToFace
 :
     public topoSetFaceSource
 {
-    // Private data
+    // Private Data
 
         //- Add usage string
         static addToUsageTable usage_;
@@ -85,6 +145,7 @@ public:
 
     //- Runtime type information
     TypeName("boxToFace");
+
 
     // Constructors
 

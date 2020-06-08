@@ -131,7 +131,15 @@ Foam::fieldToCell::fieldToCell
     fieldName_(fieldName),
     min_(min),
     max_(max)
-{}
+{
+    if (min_ > max_)
+    {
+        WarningInFunction
+            << "Input min value = " << min_ << " is larger than "
+            << "input max value = " << max_ << " for field = " << fieldName_
+            << endl;
+    }
+}
 
 
 Foam::fieldToCell::fieldToCell

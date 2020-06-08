@@ -28,31 +28,87 @@ Class
     Foam::surfaceToCell
 
 Description
-    A topoSetCellSource to select cells based on relation to surface.
+    A \c topoSetCellSource to select cells based on
+    relation to a surface given by an external file.
 
-    Selects:
-    - all cells inside/outside/cut by surface
-    - all cells inside/outside surface ('useSurfaceOrientation', requires closed
-      surface)
+    \c surfaceToCell can select:
+    - all cells inside/outside/cut by a surface
+    - all cells inside/outside surface (\c useSurfaceOrientation,
+    requires closed surface)
     - cells with centre nearer than XXX to surface
     - cells with centre nearer than XXX to surface \b and with normal
       at nearest point to centre and cell-corners differing by
-      more than YYY (i.e., point of high curvature)
+      more than YYY (i.e. point of high curvature)
 
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                       | Required  | Default
-        file        | The surface "filename"            | yes   |
-        fileType    | The surface format                | no    |
-        scale       | Surface scaling factor            | no    | -1
-        nearDistance | Near distance to the surface     | yes   |
-        curvature    | surface curvature selection      | yes   |
-        outsidePoints| Points outside of surface        | yes   |
-        includeCut     | Include cut cells (bool)       | yes   |
-        includeInside  | Include inside cells (bool)    | yes   |
-        includeOutside | Include outside cells (bool)   | yes   |
-        useSurfaceOrientation | useSurfaceOrientation   | no    | false
+      Operand    | Type       | Location
+      input      | triSurface | $FOAM_CASE/constant/triSurface/\<file\>
+      output     | cellSet    | $FOAM_CASE/constant/polyMesh/sets/\<set\>
     \endtable
+
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name            <name>;
+        type            cellSet;
+        action          <action>;
+
+        // Mandatory entries
+        source          surfaceToCell;
+        file            <surfaceFileName>;
+        outsidePoints
+        (
+            (<p1x> <p1y> <p1z>)
+            (<p2x> <p2y> <p2z>)
+            ...
+        );
+        includeCut      false;
+        includeInside   false;
+        includeOutside  true;
+        nearDistance    0.5;
+        curvature       1.0;
+
+        // Optional entries
+        useSurfaceOrientation false;
+        fileType        stl;
+        scale           2.0;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                         | Type | Req'd | Dflt
+      name       | Name of cellSet                     | word |  yes  | -
+      type       | Type name: cellSet                  | word |  yes  | -
+      action     | Action applied on cells - see below | word |  yes  | -
+      source     | Source name: surfaceToCell          | word |  yes  | -
+      file       | The surface "filename"              | word |  yes  | -
+      outsidePoints | List of points that define outside of the surface <!--
+                                                   --> | vectorList | yes | -
+      includeCut | Flag to include cut cells           | bool |  yes  | -
+      includeInside | Flag to include inside cells     | bool |  yes  | -
+      includeOutside | Flag to include outside cells   | bool |  yes  | -
+      useSurfaceOrientation | Flag to use inherently the orientation of <!--
+                            --> the surface            | bool |  no   | false
+      nearDistance | Near distance to the surface      | scalar | yes | -
+      curvature    | Surface curvature                 | scalar | yes | -
+      fileType     | The format of the surface file    | word   | no  | ""
+      scale        | Surface scaling factor            | scalar | no  | -1
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new cellSet from selected cells
+      add      | Add selected cells into this cellSet
+      subtract | Remove selected cells from this cellSet
+    \endverbatim
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetCellSource
 
 SourceFiles
     surfaceToCell.C

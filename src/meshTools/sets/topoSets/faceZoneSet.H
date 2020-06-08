@@ -54,7 +54,7 @@ class faceZoneSet
 :
     public faceSet
 {
-    // Private data
+    // Private Data
 
         const polyMesh& mesh_;
 

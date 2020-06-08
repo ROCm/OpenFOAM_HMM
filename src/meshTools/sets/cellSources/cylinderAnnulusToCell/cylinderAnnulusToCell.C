@@ -121,7 +121,15 @@ Foam::cylinderAnnulusToCell::cylinderAnnulusToCell
     point2_(point2),
     radius_(radius),
     innerRadius_(innerRadius)
-{}
+{
+    if (innerRadius_ > radius_)
+    {
+        FatalErrorInFunction
+            << "inner radius = " << innerRadius_ << "cannot be larger than "
+            << "outer radius = " << radius_
+            << exit(FatalIOError);
+    }
+}
 
 
 Foam::cylinderAnnulusToCell::cylinderAnnulusToCell
@@ -135,8 +143,8 @@ Foam::cylinderAnnulusToCell::cylinderAnnulusToCell
         mesh,
         dict.get<point>("p1"),
         dict.get<point>("p2"),
-        dict.get<scalar>("outerRadius"),
-        dict.get<scalar>("innerRadius")
+        dict.getCheck<scalar>("outerRadius", scalarMinMax::ge(SMALL)),
+        dict.getCheck<scalar>("innerRadius", scalarMinMax::ge(0))
     )
 {}
 

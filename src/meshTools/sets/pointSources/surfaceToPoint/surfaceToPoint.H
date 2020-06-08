@@ -28,24 +28,69 @@ Class
     Foam::surfaceToPoint
 
 Description
-    A topoSetPointSource to select points based on relation to surface.
+    A \c topoSetPointSource to select points based on
+    relation to a surface given by an external file.
 
-    Select based on:
+    \c surfaceToPoint can select based on:
     - distance to surface
     - inside/outside status to surface
       (Uses normal of nearest surface triangle so requires valid surface
-      topology!)
+      topology.)
 
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                       | Required  | Default
-        file        | The surface "filename"            | yes   |
-        fileType    | The surface format                | no    |
-        scale       | Surface scaling factor            | no    | -1
-        nearDistance   | Near distance to the surface   | yes   |
-        includeInside  | Include inside cells (bool)    | yes   |
-        includeOutside | Include outside cells (bool)   | yes   |
+      Operand    | Type       | Location
+      input      | triSurface | $FOAM_CASE/constant/triSurface/\<file\>
+      output     | pointSet   | $FOAM_CASE/constant/polyMesh/sets/\<set\>
     \endtable
+
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name            <name>;
+        type            pointSet;
+        action          <action>;
+
+        // Mandatory entries
+        source          surfaceToPoint;
+        file            <surfaceFileName>;
+        includeInside   false;
+        includeOutside  true;
+        nearDistance    0.5;
+
+        // Optional entries
+        fileType        stl;
+        scale           2.0;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                           | Type | Req'd | Dflt
+      name       | Name of pointSet                      | word |  yes  | -
+      type       | Type name: pointSet                   | word |  yes  | -
+      action     | Action applied on points - see below  | word |  yes  | -
+      source     | Source name: surfaceToPoint           | word |  yes  | -
+      file       | The surface "filename"                | word |  yes  | -
+      fileType   | The format of the surface file        | word |  no   | ""
+      nearDistance | Near distance to the surface        | scalar | yes | -
+      includeInside | Flag to include inside cells       | bool |  yes  | -
+      includeOutside | Flag to include outside cells     | bool |  yes  | -
+      scale        | Surface scaling factor              | scalar | no  | -1
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new pointSet from selected points
+      add      | Add selected points into this pointSet
+      subtract | Remove selected points from this pointSet
+    \endverbatim
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetPointSource
 
 SourceFiles
     surfaceToPoint.C
@@ -102,10 +147,12 @@ class surfaceToPoint
         //- Check settings at construction time.
         void checkSettings() const;
 
+
 public:
 
     //- Runtime type information
     TypeName("surfaceToPoint");
+
 
     // Constructors
 
@@ -137,7 +184,6 @@ public:
             const topoSetSource::setAction action,
             topoSet& set
         ) const;
-
 };
 
 

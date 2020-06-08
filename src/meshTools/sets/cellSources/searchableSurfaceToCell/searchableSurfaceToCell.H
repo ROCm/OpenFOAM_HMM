@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,16 +27,55 @@ Class
     Foam::searchableSurfaceToCell
 
 Description
-    A topoSetCellSource to select cells with centres within a
-    searchableSurface.
+    A \c topoSetCellSource to select cells whose cell
+    centre enclosed by a given \c searchableSurface.
 
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                           | Required | Default
-        surfaceType | The searchable surface type           | yes   |
-        surfaceName | Name for the IOobject                 | no    | mesh-name
-        surface     | Same as 'surfaceType'                 | no    |
+      Operand   | Type        | Location
+      input     | triSurface  | $FOAM_CASE/constant/triSurface/\<file\>
+      output    | cellSet     | $FOAM_CASE/constant/polyMesh/sets/\<set\>
     \endtable
+
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        cellSet;
+        action      <action>;
+
+        // Mandatory entries
+        source      searchableSurfaceToCell;
+        surfaceType <surfaceTypeName>;
+
+        // Optional entries
+        surfaceName <surfaceName>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                         | Type | Req'd | Dflt
+      name       | Name of cellSet                     | word |  yes  | -
+      type       | Type name: cellSet                  | word |  yes  | -
+      action     | Action applied on cells - see below | word |  yes  | -
+      source     | Source name: searchableSurfaceToCell | word |  yes | -
+      surfaceType | The searchable surface type        | word |  yes  | -
+      surfaceName | Name for the IOobject              | word | no | mesh-name
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new cellSet from selected cells
+      add      | Add selected cells into this cellSet
+      subtract | Remove selected cells from this cellSet
+    \endverbatim
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetCellSource
 
 SourceFiles
     searchableSurfaceToCell.C

@@ -55,7 +55,7 @@ class topoBitSet
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         bitSet selected_;
 
@@ -154,7 +154,6 @@ public:
 
         //- Subtract elements present in set.
         virtual void subtractSet(const topoSet& set);
-
 };
 
 

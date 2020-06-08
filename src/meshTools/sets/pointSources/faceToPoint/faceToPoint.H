@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,18 +28,81 @@ Class
     Foam::faceToPoint
 
 Description
-    A topoSetPointSource to select points based on usage in faces.
+    A \c topoSetPointSource to select all
+    points based on usage in given \c faceSet(s).
 
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                       | Required | Default
-        sets        | The faceSet names to use          | possibly |
-        set         | The faceSet name to use           | possibly |
-        option      | Selection type (all)              | yes   |
+      Operand   | Type       | Location
+      input     | faceSet(s) | $FOAM_CASE/constant/polyMesh/sets/\<set\>
+      output    | pointSet   | $FOAM_CASE/constant/polyMesh/sets/\<set\>
     \endtable
 
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        pointSet;
+        action      <action>;
+
+        // Mandatory entries
+        source      faceToPoint;
+        option      <option>;
+
+        // Conditional mandatory entries
+        // Select either of the below
+
+        // Option-1
+        sets
+        (
+            <faceSetName0>
+            <faceSetName1>
+            ...
+        );
+
+        // Option-2
+        set     <faceSetName>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                          | Type | Req'd | Dflt
+      name       | Name of pointSet                     | word |  yes  | -
+      type       | Type name: pointSet                  | word |  yes  | -
+      action     | Action applied on points - see below | word |  yes  | -
+      source     | Source name: faceToPoint             | word |  yes  | -
+      option     | Selection type - see below           | word |  yes  | -
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new pointSet from selected points
+      add      | Add selected points into this pointSet
+      subtract | Remove selected points from this pointSet
+    \endverbatim
+
+    Options for the \c option entry:
+    \verbatim
+      all       | Select all points of faces in the faceSet
+    \endverbatim
+
+    Options for the conditional mandatory entries:
+    \verbatim
+      Entry    | Description                | Type     | Req'd  | Dflt
+      sets     | Names of input faceSets    | wordList | cond'l | -
+      set      | Name of input faceSet      | word     | cond'l | -
+    \verbatim
+
 Note
-    Must specify "sets" or "set" (highest to lowest precedence).
+    The order of precedence among the conditional mandatory entries from the
+    highest to the lowest is \c sets, and \c set.
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetPointSource
 
 SourceFiles
     faceToPoint.C
@@ -73,7 +136,10 @@ public:
             ALL
         };
 
+
 private:
+
+    // Private Data
 
         //- Add usage string
         static addToUsageTable usage_;
@@ -89,7 +155,6 @@ private:
 
     // Private Member Functions
 
-        //- Depending on face to cell option add to or delete from cellSet.
         void combine(topoSet& set, const bool add, const word& setName) const;
 
 
@@ -97,6 +162,7 @@ public:
 
     //- Runtime type information
     TypeName("faceToPoint");
+
 
     // Constructors
 
@@ -126,7 +192,6 @@ public:
             const topoSetSource::setAction action,
             topoSet& set
         ) const;
-
 };
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,16 +28,56 @@ Class
     Foam::sphereToCell
 
 Description
-    A topoSetCellSource to select cells based on cell centres inside sphere.
+    A \c topoSetCellSource to select cells based
+    on cell centres inside a given bounding sphere.
 
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                           | Required | Default
-        origin      | The origin (centre) of the sphere     | yes   |
-        radius      | The (outer) radius of sphere          | yes   |
-        innerRadius | The inner radius of sphere            | no    | 0
-        centre      | Alternative for 'origin'              | no    |
+      Operand   | Type    | Location
+      output    | cellSet | $FOAM_CASE/constant/polyMesh/sets/\<set\>
     \endtable
+
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        cellSet;
+        action      <action>;
+
+        // Mandatory entries
+        source      sphereToCell;
+        origin      (0 0 0);
+        radius      0.5;
+
+        // Optional entries
+        innerRadius 0;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                         | Type | Req'd | Dflt
+      name       | Name of cellSet                     | word |  yes  | -
+      type       | Type name: cellSet                  | word |  yes  | -
+      action     | Action applied on cells - see below | word |  yes  | -
+      source     | Source name: sphereToCell           | word |  yes  | -
+      origin     | The origin (centre) of the sphere   | vector | yes | -
+      radius     | The (outer) radius of sphere        | scalar | yes | -
+      innerRadius | The inner radius of sphere         | scalar | no  | 0
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new cellSet from selected cells
+      add      | Add selected cells into this cellSet
+      subtract | Remove selected cells from this cellSet
+    \endverbatim
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetCellSource
 
 SourceFiles
     sphereToCell.C
@@ -62,8 +102,7 @@ class sphereToCell
 :
     public topoSetCellSource
 {
-
-    // Private data
+    // Private Data
 
         //- Add usage string
         static addToUsageTable usage_;
@@ -118,7 +157,6 @@ public:
             const topoSetSource::setAction action,
             topoSet& set
         ) const;
-
 };
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,18 +28,73 @@ Class
     Foam::zoneToPoint
 
 Description
-    A topoSetPointSource to select points based on one or more pointZones.
+    A \c topoSetPointSource to convert \c pointZone(s) to a \c pointSet.
 
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                           | Required | Default
-        zones       | The point zone names or regexs        | possibly |
-        zone        | The point zone name or regex          | possibly |
-        name        | Older specification for 'zone'        | no    |
+      Operand   | Type         | Location
+      input     | pointZone(s) | $FOAM_CASE/constant/polyMesh/pointZones
+      output    | pointSet     | $FOAM_CASE/constant/polyMesh/sets/\<set\>
     \endtable
 
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        pointSet;
+        action      <action>;
+
+        // Mandatory entries
+        source      zoneToPoint;
+
+        // Conditional mandatory entries
+        // Select either of the below
+
+        // Option-1
+        zones
+        (
+            <pointZoneName0>
+            <pointZoneName1>
+            ...
+        );
+
+        // Option-2
+        zone     <pointZoneName>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                           | Type | Req'd | Dflt
+      name       | Name of pointSet                      | word |  yes  | -
+      type       | Type name: pointSet                   | word |  yes  | -
+      action     | Action applied on points - see below  | word |  yes  | -
+      source     | Source name: zoneToPoint              | word |  yes  | -
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new pointSet from selected points
+      add      | Add selected points into this pointSet
+      subtract | Remove selected points from this pointSet
+    \endverbatim
+
+    Options for the conditional mandatory entries:
+    \verbatim
+      Entry    | Description                | Type     | Req'd  | Dflt
+      zones    | Names of input pointZones  | wordList | cond'l | -
+      zone     | Name of input pointZone    | word     | cond'l | -
+    \verbatim
+
 Note
-    Must specify "zones", "zone" or "name" (highest to lowest precedence).
+    The order of precedence among the conditional mandatory entries from the
+    highest to the lowest is \c zones, and \c zone.
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetPointSource
 
 SourceFiles
     zoneToPoint.C
@@ -65,8 +120,7 @@ class zoneToPoint
 :
     public topoSetPointSource
 {
-
-    // Private data
+    // Private Data
 
         //- Add usage string
         static addToUsageTable usage_;
@@ -84,6 +138,7 @@ public:
 
     //- Runtime type information
     TypeName("zoneToPoint");
+
 
     // Constructors
 
@@ -108,7 +163,6 @@ public:
             const topoSetSource::setAction action,
             topoSet& set
         ) const;
-
 };
 
 

@@ -208,7 +208,8 @@ void Foam::haloToCell::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Cannot create new of halo (needs a starting set)"
+            Info<< "    action=new option is not available for haloToCell" << nl
+                << "    Cannot create new of halo (needs a starting set)"
                 << endl;
         }
 

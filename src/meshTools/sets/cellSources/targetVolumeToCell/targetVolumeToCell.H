@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,16 +28,56 @@ Class
     Foam::targetVolumeToCell
 
 Description
-    A topoSetCellSource to select cells based on the wanted volume of selected
-    cells. Adapts a plane until it has enough.
+    A \c topoSetCellSource to select cells based on a target
+    volume of cells. Adapts a plane until it has enough.
 
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                       | Required  | Default
-        volume      | The target volume (m^3)           | yes   |
-        normal      | The plane normal                  | yes   |
-        set         | Restrict to named cellSet         | no    | ""
+      Operand   | Type    | Location
+      output    | cellSet | $FOAM_CASE/constant/polyMesh/sets/\<set\>
     \endtable
+
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        cellSet;
+        action      <action>;
+
+        // Mandatory entries
+        source      targetVolumeToCell;
+        volume      10;
+        normal      (1 0 0);
+
+        // Optional entries
+        set         <cellSetName>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                         | Type | Req'd | Dflt
+      name       | Name of cellSet                     | word |  yes  | -
+      type       | Type name: cellSet                  | word |  yes  | -
+      action     | Action applied on cells - see below | word |  yes  | -
+      source     | Source name: targetVolumeToCell     | word |  yes  | -
+      volume     | The target volume [m3]              | scalar | yes | -
+      normal     | The plane normal                    | vector | yes | -
+      set        | Restrict to named cellSet           | word |  no   | ""
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new cellSet from selected cells
+      add      | Add selected cells into this cellSet
+      subtract | Remove selected cells from this cellSet
+    \endverbatim
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetCellSource
 
 SourceFiles
     targetVolumeToCell.C
@@ -65,13 +105,12 @@ class targetVolumeToCell
 :
     public topoSetCellSource
 {
-
-    // Private data
+    // Private Data
 
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Wanted volume
+        //- Target volume
         const scalar vol_;
 
         //- Normal of plane to sweep
@@ -100,6 +139,7 @@ public:
 
     //- Runtime type information
     TypeName("targetVolumeToCell");
+
 
     // Constructors
 
@@ -130,7 +170,6 @@ public:
             const topoSetSource::setAction action,
             topoSet& set
         ) const;
-
 };
 
 

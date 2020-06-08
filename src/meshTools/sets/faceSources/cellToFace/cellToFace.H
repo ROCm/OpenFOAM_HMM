@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,22 +28,81 @@ Class
     Foam::cellToFace
 
 Description
-    A topoSetFaceSource to select a faceSet from a cellSet.
+    A \c topoSetFaceSource to select all the faces from given \c cellSet(s).
 
-    Either use 'all' cell faces, or only faces that have cells
-    on 'both' sides.
-
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                       | Required  | Default
-        sets        | The cellSet names to use          | possibly |
-        set         | The cellSet name to use           | possibly |
-        option      | Selection (all/both)              | yes   |
+      Operand   | Type       | Location
+      input     | cellSet(s) | $FOAM_CASE/constant/polyMesh/sets/\<set\>
+      output    | faceSet    | $FOAM_CASE/constant/polyMesh/sets/\<set\>
     \endtable
 
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        faceSet;
+        action      <action>;
+
+        // Mandatory entries
+        source      cellToFace;
+        option      <option>;
+
+        // Conditional mandatory entries
+        // Select either of the below
+
+        // Option-1
+        sets
+        (
+            <cellSetName1>
+            <cellSetName2>
+            ...
+        );
+
+        // Option-2
+        set <cellSetName>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                         | Type | Req'd | Dflt
+      name       | Name of faceSet                     | word |  yes  | -
+      type       | Type name: faceSet                  | word |  yes  | -
+      action     | Action applied on faces - see below | word |  yes  | -
+      source     | Source name: cellToFace             | word |  yes  | -
+      option     | Selection type - see below          | word |  yes  | -
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new faceSet from selected cells of cellSet(s)
+      add      | Add selected faces of cellSet(s) into this faceSet
+      subtract | Remove selected faces of cellSet(s) from this faceSet
+    \endverbatim
+
+    Options for the \c option entry:
+    \verbatim
+      all     | All faces of cells in the cellSet
+      both    | Faces where both neighbours are in the cellSet
+    \endverbatim
+
+    Options for the conditional mandatory entries:
+    \verbatim
+      Entry    | Description                    | Type     | Req'd  | Dflt
+      sets     | Names of input cellSets        | wordList | cond'l | -
+      set      | Name of input cellSet          | word     | cond'l | -
+    \verbatim
+
 Note
-    Must specify "sets" or "set" (highest to lowest precedence).
-    When picking up coupled faces, it uses cells on neighbouring processors.
+    The order of precedence among the conditional mandatory entries from the
+    highest to the lowest is \c sets, and \c set.
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetFaceSource
 
 SourceFiles
     cellToFace.C
@@ -80,15 +139,17 @@ public:
 
 private:
 
+    // Private Data
+
         //- Add usage string
         static addToUsageTable usage_;
 
         static const Enum<cellAction> cellActionNames_;
 
-        //- Names of sets to use
+        //- Names of cellSets to use
         wordList names_;
 
-        //- Option
+        //- Selection type
         cellAction option_;
 
 
@@ -102,6 +163,7 @@ public:
 
     //- Runtime type information
     TypeName("cellToFace");
+
 
     // Constructors
 
@@ -131,7 +193,6 @@ public:
             const topoSetSource::setAction action,
             topoSet& set
         ) const;
-
 };
 
 

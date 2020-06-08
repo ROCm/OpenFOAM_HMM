@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,16 +27,55 @@ Class
     Foam::searchableSurfaceToFace
 
 Description
-    A topoSetFaceSource to select faces with centres within a
-    searchableSurface.
+    A \c topoSetFaceSource to select faces whose face
+    centre enclosed by a given \c searchableSurface.
 
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                           | Required | Default
-        surfaceType | The searchable surface type           | yes   |
-        surfaceName | Name for the IOobject                 | no    | mesh-name
-        surface     | Same as 'surfaceType'                 | no    |
+      Operand   | Type        | Location
+      input     | triSurface  | $FOAM_CASE/constant/triSurface/\<file\>
+      output    | faceSet     | $FOAM_CASE/constant/polyMesh/sets/\<set\>
     \endtable
+
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        faceSet;
+        action      <action>;
+
+        // Mandatory entries
+        source      searchableSurfaceToFace;
+        surfaceType <surfaceTypeName>;
+
+        // Optional entries
+        surfaceName <surfaceName>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                         | Type | Req'd | Dflt
+      name       | Name of faceSet                     | word |  yes  | -
+      type       | Type name: faceSet                  | word |  yes  | -
+      action     | Action applied on faces - see below | word |  yes  | -
+      source     | Source name: searchableSurfaceToFace | word |  yes | -
+      surfaceType | The searchable surface type        | word |  yes  | -
+      surfaceName | Name for the IOobject              | word | no | mesh-name
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new faceSet from selected faces
+      add      | Add selected faces into this faceSet
+      subtract | Remove selected faces from this faceSet
+    \endverbatim
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetFaceSource
 
 SourceFiles
     searchableSurfaceToFace.C

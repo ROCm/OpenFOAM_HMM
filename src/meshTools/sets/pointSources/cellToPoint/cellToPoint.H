@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,18 +28,80 @@ Class
     Foam::cellToPoint
 
 Description
-    A topoSetPointSource to select points based on usage in cells.
+    A \c topoSetPointSource to select all the points from given \c cellSet(s).
 
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                       | Required  | Default
-        sets        | The cellSet names to use          | possibly |
-        set         | The cellSet name to use           | possibly |
-        option      | Selection type (all)              | yes   |
+      Operand   | Type       | Location
+      input     | cellSet(s) | $FOAM_CASE/constant/polyMesh/sets/\<set\>
+      output    | pointSet   | $FOAM_CASE/constant/polyMesh/sets/\<set\>
     \endtable
 
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        pointSet;
+        action      <action>;
+
+        // Mandatory entries
+        source      cellToPoint;
+        option      <option>;
+
+        // Conditional mandatory entries
+        // Select either of the below
+
+        // Option-1
+        sets
+        (
+            <pointSetName1>
+            <pointSetName2>
+            ...
+        );
+
+        // Option-2
+        set <pointSetName>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                          | Type | Req'd | Dflt
+      name       | Name of pointSet                     | word |  yes  | -
+      type       | Type name: pointSet                  | word |  yes  | -
+      action     | Action applied on points - see below | word |  yes  | -
+      source     | Source name: cellToPoint             | word |  yes  | -
+      option     | Selection type - see below           | word |  yes  | -
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new pointSet from selected points
+      add      | Add selected points into this pointSet
+      subtract | Remove selected points from this pointSet
+    \endverbatim
+
+    Options for the \c option entry:
+    \verbatim
+      all      | Select all points of cells in the cellSet
+    \endverbatim
+
+    Options for the conditional mandatory entries:
+    \verbatim
+      Entry    | Description                    | Type     | Req'd  | Dflt
+      sets     | Names of input cellSets        | wordList | cond'l | -
+      set      | Name of input cellSet          | word     | cond'l | -
+    \verbatim
+
 Note
-    Must specify "sets" or "set" (highest to lowest precedence).
+    The order of precedence among the conditional mandatory entries from the
+    highest to the lowest is \c sets, and \c set.
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetPointSource
 
 SourceFiles
     cellToPoint.C
@@ -73,7 +135,10 @@ public:
             ALL
         };
 
+
 private:
+
+    // Private Data
 
         //- Add usage string
         static addToUsageTable usage_;
@@ -89,7 +154,6 @@ private:
 
     // Private Member Functions
 
-        //- Depending on face to cell option add to or delete from cellSet.
         void combine(topoSet& set, const bool add, const word& setName) const;
 
 
@@ -97,6 +161,7 @@ public:
 
     //- Runtime type information
     TypeName("cellToPoint");
+
 
     // Constructors
 
@@ -126,7 +191,6 @@ public:
             const topoSetSource::setAction action,
             topoSet& set
         ) const;
-
 };
 
 

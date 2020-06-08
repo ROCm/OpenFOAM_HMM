@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,14 +28,55 @@ Class
     Foam::labelToFace
 
 Description
-    A topoSetFaceSource to select faces given explicitly provided face labels.
+    A \c topoSetFaceSource to select faces
+    based on explicitly given face labels.
 
-    \heading Dictionary parameters
+    Operands:
     \table
-        Property    | Description                       | Required  | Default
-        normal      | The normal for selecting faces    | yes   |
-        cos         | Tolerance angle (range -1, +1)    | yes   |
+      Operand   | Type    | Location
+      output    | faceSet | $FOAM_CASE/constant/polyMesh/sets/\<set\>
     \endtable
+
+Usage
+    Minimal example by using \c system/topoSetDict.actions:
+    \verbatim
+    {
+        // Mandatory (inherited) entries
+        name        <name>;
+        type        faceSet;
+        action      <action>;
+
+        // Mandatory entries
+        source      labelToFace;
+        value
+        (
+            <faceLabel1>
+            <faceLabel2>
+            ...
+        );
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                         | Type | Req'd | Dflt
+      name       | Name of faceSet                     | word |  yes  | -
+      type       | Type name: faceSet                  | word |  yes  | -
+      action     | Action applied on faces - see below | word |  yes  | -
+      source     | Source name: labelToFace            | word |  yes  | -
+      value      | Input face labels                   | labelList | yes | -
+    \endtable
+
+    Options for the \c action entry:
+    \verbatim
+      new      | Create a new faceSet from selected faces
+      add      | Add selected faces into this faceSet
+      subtract | Remove selected faces from this faceSet
+    \endverbatim
+
+See also
+    - Foam::topoSetSource
+    - Foam::topoSetFaceSource
 
 SourceFiles
     labelToFace.C
@@ -60,8 +101,7 @@ class labelToFace
 :
     public topoSetFaceSource
 {
-
-    // Private data
+    // Private Data
 
         //- Add usage string
         static addToUsageTable usage_;
@@ -74,6 +114,7 @@ public:
 
     //- Runtime type information
     TypeName("labelToFace");
+
 
     // Constructors
 
@@ -101,7 +142,6 @@ public:
             const topoSetSource::setAction action,
             topoSet& set
         ) const;
-
 };
 
 

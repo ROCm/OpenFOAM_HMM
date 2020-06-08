@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -131,7 +131,7 @@ Foam::nbrToCell::nbrToCell
     const dictionary& dict
 )
 :
-    nbrToCell(mesh, dict.get<label>("neighbours"))
+    nbrToCell(mesh, dict.getCheck<label>("neighbours", labelMinMax::ge(1)))
 {}
 
 
