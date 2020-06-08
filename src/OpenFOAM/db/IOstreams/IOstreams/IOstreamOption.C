@@ -155,14 +155,16 @@ Foam::IOstreamOption::versionNumber::versionNumber(const token& tok)
     {
         (*this) = versionNumber(tok.stringToken());
     }
-    else if (tok.isScalar())
+    else if (tok.isNumber())
     {
-        (*this) = versionNumber(float(tok.scalarToken()));
+        // Accept integer or floating-point
+        // Eg, '2.0' becomes '2' after foamDictionary -expand
+        (*this) = versionNumber(float(tok.number()));
     }
     else
     {
         WarningInFunction
-            << "Wrong token for version - expected word/float, found "
+            << "Wrong token for version - expected word/number, found "
             << tok.info() << nl;
     }
 }
