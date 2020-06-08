@@ -147,7 +147,7 @@ Foam::meltingEvaporationModels::interfaceHeatResistance<Thermo, OtherThermo>
             this->mesh_.time().timeName(),
             this->mesh_,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         ),
         this->mesh_,
         dimensionedScalar(dimDensity/dimTime, Zero)
@@ -160,7 +160,7 @@ Foam::meltingEvaporationModels::interfaceHeatResistance<Thermo, OtherThermo>
             this->mesh_.time().timeName(),
             this->mesh_,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            IOobject::NO_WRITE
         ),
         this->mesh_,
         dimensionedScalar(dimDensity/dimTime, Zero)
@@ -173,7 +173,7 @@ Foam::meltingEvaporationModels::interfaceHeatResistance<Thermo, OtherThermo>
             this->mesh_.time().timeName(),
             this->mesh_,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            IOobject::NO_WRITE
         ),
         this->mesh_,
         dimensionedScalar(dimMass/dimArea/dimTemperature/dimTime, Zero)
