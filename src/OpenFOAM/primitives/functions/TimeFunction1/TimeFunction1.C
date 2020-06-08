@@ -67,8 +67,13 @@ Foam::TimeFunction1<Type>::TimeFunction1
 :
     time_(rhs.time_),
     name_(rhs.name_),
-    entry_(rhs.entry_) // steal/reuse (missing clone!)
-{}
+    entry_(nullptr) // steal/reuse (missing clone!)
+{
+    if (rhs.entry_)
+    {
+        entry_.reset(rhs.entry_->clone().ptr());
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
