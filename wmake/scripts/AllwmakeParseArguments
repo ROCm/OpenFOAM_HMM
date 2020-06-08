@@ -94,7 +94,7 @@ do
     -no-recurs* | -fromWmake)
         # Avoid recursion (eg, if called from wmake)
         optNonRecursive=true
-        continue    # Handled argument
+        # Pass onwards to other Allwmake scripts
         ;;
 
     -prefix=* | -module-prefix=*)
