@@ -14,3 +14,6 @@
 [submodule "visualization"]
 	path = modules/visualization
 	url = https://develop.openfoam.com/modules/visualization.git
+[submodule "external-solver"]
+	path = modules/external-solver
+	url = https://develop.openfoam.com/Modules/external-solver.git
