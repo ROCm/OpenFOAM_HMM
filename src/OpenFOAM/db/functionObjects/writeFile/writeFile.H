@@ -59,7 +59,6 @@ namespace functionObjects
 
 class writeFile
 {
-
 protected:
 
     // Protected data
