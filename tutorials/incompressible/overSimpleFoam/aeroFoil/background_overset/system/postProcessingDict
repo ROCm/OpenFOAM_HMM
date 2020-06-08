@@ -18,18 +18,23 @@ functions
 {
     processorField1
     {
-        // Type of functionObject
+        // Mandatory entries
         type            processorField;
-
-        // Where to load it from (if not already in solver)
         libs            (fieldFunctionObjects);
 
-        // Function object enabled flag
+        // Optional (inherited) entries
+        result          procField;
+        region          region0;
         enabled         true;
-
-        // When to output the average fields
+        log             true;
+        timeStart       0;
+        timeEnd         5000;
+        executeControl  timeStep;
+        executeInterval 1;
         writeControl    writeTime;
+        writeInterval   -1;
     }
 }
+
 
 // ************************************************************************* //

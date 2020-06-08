@@ -30,17 +30,26 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Writes a scalar field whose value is the distance to the nearest surface.
-    The output field name is 'surfaceDistance'.
+    Computes the distance to the nearest surface from a given geometry.
+
+    Operands:
+    \table
+      Operand        | Type            | Location
+      input          | -               | -
+      output file    | -               | -
+      output field   | volScalarField  | $FOAM_CASE/\<time\>/surfaceDistance
+    \endtable
 
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
-    surfaceDistance
+    surfaceDistance1
     {
+        // Mandatory entries (unmodifiable)
         type            surfaceDistance;
         libs            (fieldFunctionObjects);
 
+        // Mandatory entries (runtime modifiable)
         geometry
         {
             motorBike.obj
@@ -49,25 +58,33 @@ Usage
                 name motorBike;
             }
         }
+
+        // Optional entries (runtime modifiable)
+        calculateCells  true;
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description                  | Required | Default
-        type         | Type name: surfaceDistance   | yes |
-        geometry     | Surfaces                     | yes  | no
-        doCells      | Calculate distance from cell | no | true
+      Property     | Description                           | Type | Req'd | Dflt
+      type         | Type name: surfaceDistance            | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects    | word |  yes  | -
+      geometry     | Surface details                       | dict |  yes  | -
+      calculateCells  | Calculate distance from cell       | bool |  no   | true
     \endtable
 
-    Run with e.g.
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
 
-        postProcess -func surfaceDistance
-
+    Usage by the \c postProcess utility is not available.
 
 See also
-    Foam::functionObjects::fvMeshFunctionObject
-    Foam::functionObjects::timeControl
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - ExtendedCodeGuide::functionObjects::field::surfaceDistance
 
 SourceFiles
     surfaceDistance.C
@@ -104,24 +121,13 @@ class surfaceDistance
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Switch to calculate distance-to-cells
         Switch doCells_;
 
         //- Geometry
         autoPtr<searchableSurfaces> geomPtr_;
-
-
-private:
-
-    // Private member functions
-
-        //- No copy construct
-        surfaceDistance(const surfaceDistance&) = delete;
-
-        //- No copy assignment
-        void operator=(const surfaceDistance&) = delete;
 
 
 public:
@@ -141,9 +147,15 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        surfaceDistance(const surfaceDistance&) = delete;
+
+        //- No copy assignment
+        void operator=(const surfaceDistance&) = delete;
+
 
     //- Destructor
-    virtual ~surfaceDistance();
+    virtual ~surfaceDistance() = default;
 
 
     // Member Functions

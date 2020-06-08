@@ -30,44 +30,68 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Limits fields to user-specified min and max bounds
+    Limits input fields to user-specified min and max bounds.
+
+    Operands:
+    \table
+      Operand          | Type           | Location
+      input            | vol<Type>Field | $FOAM_CASE/<time>/<inpField>
+      output file      | -              | -
+      output field     | vol<Type>Field | $FOAM_CASE/<time>/<outField>
+    \endtable
+
+    where \c \<Type\>=Scalar/Vector/SphericalTensor/SymmTensor/Tensor.
 
 Note
-    For non-scalar field types, the user limit is used to create a
+    For non-scalar types of input field, the user limit is used to create a
     scaling factor using the field magnitudes.
 
 Usage
-    Example of function object specification:
-
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     limitFields1
     {
-        type        limitFields;
-        libs        (fieldFunctionObjects);
+        // Mandatory entries (unmodifiable)
+        type            limitFields;
+        libs            (fieldFunctionObjects);
+
+        // Mandatory entries (runtime modifiable)
+        fields          (U);
+        limit           max;
+        max             100;
+
+        // Optional (inherited) entries
         ...
-        fields      (U);
-        limit       max;
-        max         100;
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description                          | Required | Default
-        type         | type name: limitFields               | yes |
-        fields       | list of fields to process            | yes |
-        limit        | bound to limit - see below           | yes |
-        min          | min limit value                      | partly |
-        max          | max limit value                      | partly |
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: limitFields             | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+      fields       | List of fields to process          | wordList | yes | -
+      limit        | Bound to limit - see below         | word |  yes  | -
+      min          | Min limit value                  | scalar | conditional | -
+      max          | Max limit value                  | scalar | conditional | -
     \endtable
 
-    The \c limit entry can take the value:
-    - \c min : specify a minimum value
-    - \c max : specify a maximum value
-    - \c both : specify a minimum value and a maximum value
+    Options for the \c limit entry:
+    \verbatim
+        min  : specify a minimum value
+        max  : specify a maximum value
+        both : specify a minimum value and a maximum value
+    \endverbatim
+
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+
+    Usage by the \c postProcess utility is not available.
 
 See also
-    Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - ExtendedCodeGuide::functionObjects::field::limitFields
 
 SourceFiles
     limitFields.C
@@ -141,13 +165,6 @@ protected:
         bool limitField(const word& fieldName);
 
 
-        //- No copy construct
-        limitFields(const limitFields&) = delete;
-
-        //- No copy assignment
-        void operator=(const limitFields&) = delete;
-
-
 public:
 
     //- Runtime type information
@@ -163,6 +180,12 @@ public:
             const Time& runTime,
             const dictionary& dict
         );
+
+        //- No copy construct
+        limitFields(const limitFields&) = delete;
+
+        //- No copy assignment
+        void operator=(const limitFields&) = delete;
 
 
     //- Destructor

@@ -31,15 +31,46 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Base class for field value-based function objects.
+    Intermediate class for handling field value-based function objects.
+
+Usage
+    Minimal example by using \c system/controlDict.functions:
+    \verbatim
+    <userDefinedSubDictName1>
+    {
+        // Mandatory and other optional entries
+        ...
+
+        // Mandatory (inherited) entries (runtime modifiable)
+        fields            (<field1> <field2> ... <fieldN>);
+
+        // Optional (inherited) entries (runtime modifiable)
+        writeFields       false;
+        scaleFactor       1.0;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property    | Description                 | Type     | Req'd | Dflt
+      fields      | Names of operand fields     | wordList |  yes  | -
+      writeFields | Flag to output field values | bool     |  no   | false
+      scaleFactor | Scaling factor              | scalar   |  no   | 1.0
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link writeFile.H \endlink
 
 See also
-    Foam::functionObject
-    Foam::functionObjects::fvMeshFunctionObject
-    Foam::functionObjects::writeFile
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObjects::writeFile
+    - ExtendedCodeGuide::functionObjects::field::fieldValue
 
 SourceFiles
     fieldValue.C
+    fieldValueTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -70,22 +101,22 @@ class fieldValue
 
 protected:
 
-    // Protected data
+    // Protected Data
 
-        //- Optional scaling factor
+        //- Flag to output field values
+        bool writeFields_;
+
+        //- Name of region (patch, zone, etc.)
+        word regionName_;
+
+        //- Scaling factor
         scalar scaleFactor_;
 
         //- Construction dictionary
         dictionary dict_;
 
-        //- Name of region (patch, zone, etc.)
-        word regionName_;
-
-        //- List of field names to operate on
+        //- Names of operand fields
         wordList fields_;
-
-        //- Output field values flag
-        bool writeFields_;
 
 
     // Protected Member Functions
@@ -151,7 +182,7 @@ public:
 
 
     //- Destructor
-    virtual ~fieldValue();
+    virtual ~fieldValue() = default;
 
 
     // Member Functions

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,13 +39,7 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(DESModelRegions, 0);
-
-    addToRunTimeSelectionTable
-    (
-        functionObject,
-        DESModelRegions,
-        dictionary
-    );
+    addToRunTimeSelectionTable(functionObject, DESModelRegions, dictionary);
 }
 }
 
@@ -59,7 +53,7 @@ void Foam::functionObjects::DESModelRegions::writeFileHeader(Ostream& os) const
     writeCommented(os, "Time");
     writeTabbed(os, "LES");
     writeTabbed(os, "RAS");
-    os << endl;
+    os  << endl;
 }
 
 
@@ -98,12 +92,6 @@ Foam::functionObjects::DESModelRegions::DESModelRegions
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::DESModelRegions::~DESModelRegions()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::DESModelRegions::read(const dictionary& dict)
@@ -135,7 +123,7 @@ bool Foam::functionObjects::DESModelRegions::execute()
 
         DESModelRegions == model.LESRegion();
 
-        scalar prc =
+        const scalar prc =
             gSum(DESModelRegions.primitiveField()*mesh_.V())
            /gSum(mesh_.V())*100.0;
 

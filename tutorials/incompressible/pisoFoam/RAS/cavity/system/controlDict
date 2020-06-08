@@ -46,4 +46,52 @@ timePrecision   6;
 runTimeModifiable true;
 
 
+functions
+{
+    #include "FOfieldAverage"
+    #include "FOadd"
+    #include "FOblendingFactor"
+    #include "FOcomponents"
+    #include "FOCourantNo"
+    #include "FOcontinuityError"
+    #include "FOddt"
+    #include "FOddt2"
+    #include "FOdiv"
+    #include "FOenstrophy"
+    #include "FOflowType"
+    #include "FOflux"
+    #include "FOgrad"
+    #include "FOhistogram"
+    #include "FOLambda2"
+    #include "FOLambVector"
+    #include "FOlimitFields"
+    #include "FOmag"
+    #include "FOmagSqr"
+    #include "FOmomentum"
+    #include "FOnearWallFields"
+    #include "FOPecletNo"
+    #include "FOpressure"
+    #include "FOprocessorField"
+    #include "FOproudmanAcousticPower"
+    #include "FOQ"
+    #include "FOrandomise"
+    #include "FOreadFields"
+    #include "FOsetFlow"
+    #include "FOstreamFunction"
+    #include "FOstreamLine"
+    #include "FOsubtract"
+    //#include "FOsurfaceDistance"
+    #include "FOsurfaceInterpolate"
+    #include "FOturbulenceFields"
+    #include "FOvalueAverage"
+    #include "FOvorticity"
+    #include "FOreference"
+    #include "FOwallShearStress"
+    #include "FOwriteCellCentres"
+    #include "FOwriteCellVolumes"
+    #include "FOyPlus"
+    #include "FOzeroGradient"
+}
+
+
 // ************************************************************************* //

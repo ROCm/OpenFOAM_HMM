@@ -104,7 +104,7 @@ public:
     TypeName("heatTransferCoeffModel");
 
 
-    // Declare run-time constructor selection table
+    // Declare runtime constructor selection table
 
         declareRunTimeSelectionTable
         (

@@ -30,59 +30,85 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Calculates and outputs a field whose values are offset to a reference
+    Computes a field whose values are offset to a reference
     value obtained by sampling the field at a user-specified location.
 
     The field values are calculated using:
 
     \f[
-        ref_c = s(f_{c}(t) - f_p + f_{off})
+        r_c = s(f_{c}(t) - f_p + f_{off})
     \f]
 
     where
     \vartable
-        ref_c    | field values at cell
-        s        | optional scale factor (default = 1)
-        f_{c}(t) | current field values at cell at this time
-        f_p      | field value at position
-        f_{off}  | offset field value (default = 0)
+        r_c             | field values at cell
+        s               | optional scale factor (default = 1)
+        f_{c}(t)        | current field values at cell at this time
+        f_p             | field value at position
+        f_{off}         | offset field value (default = 0)
     \endvartable
 
+    Operands:
+    \table
+      Operand       | Type                       | Location
+      input         | {vol,surface}\<Type\>Field <!--
+                --> | $FOAM_CASE/\<time\>/\<inpField\>
+      output file   | -                          | -
+      output field  | {vol,surface}\<Type\>Field <!--
+                --> | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
+
+    where \c \<Type\>=Scalar/Vector/SphericalTensor/SymmTensor/Tensor.
+
 Usage
-    Example of function object specification to calculate the reference field:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
-    pRef
+    reference1
     {
+        // Mandatory entries (unmodifiable)
         type        reference;
         libs        (fieldFunctionObjects);
-        ...
-        field       p;
-        result      pRef;
+
+        // Mandatory (inherited) entry (runtime modifiable)
+        field       <field>;
+
+        // Optional entries (runtime modifiable)
         position    (0 0 0);
-        scale       1.2;
-        offset      100000;
+        scale       1.0;
+        offset      0.0;
+        interpolationScheme    cell;
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
     Where the entries comprise:
     \table
-        Property     | Description             | Required | Default value
-        type         | Type name: reference    | yes      |
-        field        | Name of field           | yes      |
-        result       | Name of result field    | no       | reference(\<field\>)
-        position     | Position to sample      | no       | \<not used\>
-        scale        | Scale value             | no       | 1
-        offset       | Offset value            | no       | zero
-        log          | Log to standard output  | no       | yes
+        Property     | Description                | Type | Req'd | Dflt
+        type         | Type name: reference       | word | yes   | -
+        field        | Name of the operand field  | word | yes   | -
+        position     | Position to sample         | vector | no  | \<not used\>
+        scale        | Scale value                | scalar | no  | 1.0
+        offset       | Offset value               | scalar | no  | 0.0
+        interpolationScheme  | Sampling scheme    | word   | no  | cell
     \endtable
 
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link fieldExpression.H \endlink
+
+    Usage by the \c postProcess utility is not available.
 
 See also
-    Foam::functionObjects::fieldExpression
-    Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObjects::fieldExpression
+    - ExtendedCodeGuide::functionObjects::field::reference
 
 SourceFiles
     reference.C
+    referenceTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -107,13 +133,7 @@ class reference
 :
     public fieldExpression
 {
-    // Private data
-
-        //- Local copy of dictionary used for construction
-        dictionary localDict_;
-
-        //- Sample location
-        point position_;
+    // Private Data
 
         //- Flag to indicate that the position is set
         bool positionIsSet_;
@@ -126,6 +146,12 @@ class reference
 
         //- Scale factor
         scalar scale_;
+
+        //- Local copy of dictionary used for construction
+        dictionary localDict_;
+
+        //- Sample location
+        point position_;
 
 
     // Private Member Functions
@@ -154,9 +180,15 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        reference(const reference&) = delete;
+
+        //- No copy assignment
+        void operator=(const reference&) = delete;
+
 
     //- Destructor
-    virtual ~reference();
+    virtual ~reference() = default;
 
 
     // Public Member Functions

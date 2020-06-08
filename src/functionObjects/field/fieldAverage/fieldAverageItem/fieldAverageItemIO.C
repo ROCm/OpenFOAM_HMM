@@ -73,7 +73,11 @@ Foam::Istream& Foam::functionObjects::operator>>
     faItem.mean_ = dict.get<bool>("mean");
     faItem.prime2Mean_ = dict.get<bool>("prime2Mean");
     faItem.base_ = faItem.baseTypeNames_.get("base", dict);
+<<<<<<< HEAD
     faItem.window_ = dict.getOrDefault<scalar>("window", -1);
+=======
+    faItem.window_ = dict.getOrDefault<scalar>("window", -1.0);
+>>>>>>> DOC: elaborate the usage of function objects
 
     if (faItem.window_ > 0)
     {

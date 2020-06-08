@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,18 +31,64 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Calculates the magnitude of a field.
+    Computes the magnitude of an input field.
 
-    The operation can be applied to any volume or surface fields generating a
-    volume or surface scalar field.
-    With the %subRegion option, also supports fields on functionObject
-    surface output (eg, sampledSurfaces).
+    Operands:
+    \table
+      Operand      | Type                     | Location
+      input      | {vol,surface}\<Type\>Field | $FOAM_CASE/\<time\>/\<inpField\>
+      output file  | -                        | -
+      output field | {vol,surface}ScalarField | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
+
+    where \c \<Type\>=Scalar/Vector/SphericalTensor/SymmTensor/Tensor.
+
+    With the \c subRegion option, also supports fields on function object
+    surface output (e.g. sampledSurfaces).
+
+Usage
+    Minimal example by using \c system/controlDict.functions:
+    \verbatim
+    mag1
+    {
+        // Mandatory entries (unmodifiable)
+        type            mag;
+        libs            (fieldFunctionObjects);
+
+        // Mandatory (inherited) entries (runtime modifiable)
+        field           <field>;
+
+        // Optional (inherited) entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: mag                     | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+      field        | Name of the operand field          | word |  yes  | -
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link fieldExpression.H \endlink
+
+    Minimal example by using the \c postProcess utility:
+    \verbatim
+        postProcess -func "mag(<field>)"
+    \endverbatim
 
 See also
-    Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObjects::fieldExpression
+    - ExtendedCodeGuide::functionObjects::field::mag
 
 SourceFiles
     mag.C
+    magTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -91,6 +137,12 @@ public:
             const Time& runTime,
             const dictionary& dict
         );
+
+        //- No copy construct
+        mag(const mag&) = delete;
+
+        //- No copy assignment
+        void operator=(const mag&) = delete;
 
 
     //- Destructor

@@ -34,77 +34,114 @@ Description
     Generates streamline data by sampling a set of user-specified fields along a
     particle track, transported by a user-specified velocity field.
 
+    Operands:
+    \table
+      Operand        | Type  | Location
+      input          | -     | -
+      output file    | -     <!--
+                 --> | $FOAM_CASE/postProcessing/sets/\<FO\>/\<time\>/\<file\>
+      output field   | -     | -
+    \endtable
+
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     streamLine1
     {
+        // Mandatory entries (unmodifiable)
         type            streamLine;
         libs            (fieldFunctionObjects);
 
-        writeControl    writeTime;
-
+        // Mandatory entries (runtime modifiable)
+        U               <fieldTrack>;
+        fields          (<fieldTrack> <field1> ... <fieldN>);
         setFormat       vtk;
-        U               U;
-        //Deprecated: trackForward    yes;
-        direction       bidirectional;    // or forward/backward
-
-        fields
-        (
-            U
-            p
-        );
-
+        direction       bidirectional;
         lifeTime        10000;
-        trackLength     1e-3;
-        nSubCycle       5;
-        bounds          (0.2 -10 -10)(0.22 10 10);
         cloud           particleTracks;
-
         seedSampleSet
         {
             type        uniform;
-            axis        x;  //distance;
+            axis        x;
             start       (-0.0205 0.0001 0.00001);
             end         (-0.0205 0.0005 0.00001);
             nPoints     100;
         }
+
+        // Optional entries (runtime modifiable)
+        bounds          (0.2 -10 -10)(0.22 10 10);
+        trackLength     1e-3;
+        nSubCycle       1;
+        interpolationScheme cellPoint;
+
+        // Deprecated
+        // trackForward true;
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description             | Required    | Default value
-        type         | Type name: streamLine   | yes         |
-        setFormat    | Output data type        | yes         |
-        U            | Tracking velocity field name | no     | U
-        fields       | Fields to sample        | yes         |
-        direction    | Direction to track    | yes         |
-        lifetime     | Maximum number of particle tracking steps | yes |
-        trackLength  | Tracking segment length | no          |
-        nSubCycle    | Number of tracking steps per cell | no|
-        cloud        | Cloud name to use       | yes         |
-        bounds       | Bounding box to trim tracks | no | invertedBox
-        seedSampleSet| Seeding method (see below)| yes       |
+      Property     | Description                           | Type | Req'd | Dflt
+      type         | Type name: streamLine                 | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects    | word |  yes  | -
+      U            | Name of tracking velocity field       | word |  yes  | -
+      fields       | Names of operand fields to sample     | wordList | yes | -
+      setFormat    | Type of output data                   | word |  yes  | -
+      direction    | Direction to track                    | vector | yes | -
+      lifetime     | Maximum number of particle tracking steps | label | yes | -
+      cloud        | Name of cloud                         | word |  yes  | -
+      seedSampleSet| Name of seeding method (see below)    | word |  yes  | -
+      bounds       | Bounding box to trim tracks    | vector | no | invertedBox
+      trackLength  | Tracking segment length              | scalar | no | VGREAT
+      nSubCycle    | Number of tracking steps per cell    | label  | no | 1
+      interpolationScheme | Interp. scheme for sample   | word | no | cellPoint
     \endtable
 
-    Where \c seedSampleSet \c type is typically one of
-    \plaintable
+    Options for the \c seedSampleSet entry:
+    \verbatim
         uniform | uniform particle seeding
         cloud   | cloud of points
         triSurfaceMeshPointSet | points according to a tri-surface mesh
-    \endplaintable
+    \endverbatim
+
+    Options for the \c setFormat entry:
+    \verbatim
+        csv
+        ensight
+        gnuplot
+        jplot
+        nastran
+        raw
+        vtk
+        xmgr
+    \endverbatim
+
+    Options for the \c direction entry:
+    \verbatim
+        bidirectional
+        forward
+        backward
+    \endverbatim
+
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+
+    Usage by the \c postProcess utility is not available.
 
 Note
-    When specifying the track resolution, the \c trackLength OR \c nSubCycle
-    option should be used
+    When specifying the track resolution, the \c trackLength or \c nSubCycle
+    option should be used.
 
 See also
-    Foam::functionObject
-    Foam::functionObjects::timeControl
-    Foam::sampledSet
-    Foam::wallBoundedStreamLine
-    Foam::streamLineBase
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - Foam::sampledSet
+    - Foam::wallBoundedStreamLine
+    - Foam::streamLineBase
+    - ExtendedCodeGuide::functionObjects::field::streamLine
 
 SourceFiles
     streamLine.C
@@ -135,19 +172,10 @@ class streamLine
 :
     public streamLineBase
 {
-    // Private data
+    // Private Data
 
         //- Number of subcycling steps
         label nSubCycle_;
-
-
-   // Private Member Functions
-
-        //- No copy construct
-        streamLine(const streamLine&) = delete;
-
-        //- No copy assignment
-        void operator=(const streamLine&) = delete;
 
 
 public:
@@ -166,9 +194,15 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        streamLine(const streamLine&) = delete;
+
+        //- No copy assignment
+        void operator=(const streamLine&) = delete;
+
 
     //- Destructor
-    virtual ~streamLine();
+    virtual ~streamLine() = default;
 
 
     // Member Functions

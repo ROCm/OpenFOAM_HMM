@@ -1,11 +1,17 @@
-// -*- C++ -*-
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1912                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
 
 // Control for external coupled simulation
 externalCoupled
 {
-    type    externalCoupled;
-    libs    (fieldFunctionObjects);
-    log     true;
+    // Mandatory entries
+    type            externalCoupled;
+    libs            (fieldFunctionObjects);
 
     // Directory to use for communication
     commsDir        "<case>/comms";
@@ -30,6 +36,23 @@ externalCoupled
             }
         }
     }
+
+    // Optional entries
+    waitInterval    1;
+    // timeOut         100;
+    statusDone      done;  // Any arbitrary status=... value
+    calcFrequency   1;
+
+    // Optional (inherited) entries
+    region              region0;
+    enabled             true;
+    log                 true;
+    /*timeStart           0;
+    timeEnd             1000;
+    executeControl      timeStep;
+    executeInterval     1;
+    writeControl        timeStep;
+    writeInterval       1;*/
 }
 
 

@@ -30,52 +30,72 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Calculates the spatial minimum and maximum extents of a field
+    Computes the spatial minimum and maximum extents of an input field.
 
     The extents are derived from the bound box limits after identifying the
     locations where field values exceed the user-supplied threshold value.
 
+    Operands:
+    \table
+      Operand        | Type | Location
+      input          | -    | -
+      output file    | dat  | $FOAM_CASE/postProcessing/\<FO\>/\<time\>/\<file\>
+      output field   | -    | -
+    \endtable
+
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     fieldExtents1
     {
-        type        fieldExtents;
-        libs        (fieldFunctionObjects);
+        // Mandatory entries (unmodifiable)
+        type                fieldExtents;
+        libs                (fieldFunctionObjects);
+
+        // Mandatory entries (runtime modifiable)
+        fields              (<field1> <field2> ... <fieldN>);
+        threshold           0.5;
+
+        // Optional entries (runtime modifiable)
+        internalField       true;
+        referencePosition   (0 0 0);
+
+        // Optional (inherited) entries
         ...
-        writeToFile yes;
-        log         yes;
-        fields      (alpha);
-        threshold   0.5;
-        patches     ();
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property      | Description              | Required   | Default value
-        type          | type name: fieldExtents  | yes        |
-        writeToFile   | write extents data to file | no       | yes
-        log           | write extents data to standard output | no | yes
-        internalField | Process the internal field | no       | yes
-        threshold     | Field value to identify extents boundary | yes |
-        referencePosition | Reference position   | no         | (0 0 0)
-        fields        | list of fields to process | yes       |
-        patches       | list of patches to process | no       | \<all patches\>
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: fieldExtents            | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+      threshold    | Value to identify extents boundary | scalar | yes | -
+      fields       | List of operand fields             | wordList | yes | -
+      internalField | Flag to process the internal field | bool |  no  | true
+      referencePosition | Reference position            | vector | no  | (0 0 0)
+      patches  | List of patches to process  | wordList  | no  | \<all patches\>
     \endtable
 
-    Output data is written to the file \<timeDir\>/fieldExtents.dat
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link writeFile.H \endlink
+
+    Usage by the \c postProcess utility is not available.
 
 Note
     For non-scalar fields, the magnitude of the field is employed and compared
-    to the threshold value.
+    to the value of \c threshold.
 
 See also
-    Foam::functionObjects::fvMeshFunctionObject
-    Foam::functionObjects::writeFile
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObjects::writeFile
+    - ExtendedCodeGuide::functionObjects::field::fieldExtents
 
 SourceFiles
     fieldExtents.C
+    fieldExtentsTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -102,9 +122,10 @@ class fieldExtents
     public fvMeshFunctionObject,
     public writeFile
 {
+
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Flag to write the internal field extents
         bool internalField_;
@@ -112,7 +133,7 @@ protected:
         //- Threshold value
         scalar threshold_;
 
-        //- Reference position; default = (0 0 0)
+        //- Reference position
         point C0_;
 
         //- Fields to assess
@@ -142,12 +163,6 @@ protected:
             const bool calcMag = false
         );
 
-        //- No copy construct
-        fieldExtents(const fieldExtents&) = delete;
-
-        //- No copy assignment
-        void operator=(const fieldExtents&) = delete;
-
 
 public:
 
@@ -164,6 +179,12 @@ public:
             const Time& runTime,
             const dictionary& dict
         );
+
+        //- No copy construct
+        fieldExtents(const fieldExtents&) = delete;
+
+        //- No copy assignment
+        void operator=(const fieldExtents&) = delete;
 
 
     //- Destructor

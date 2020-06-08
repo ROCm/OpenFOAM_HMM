@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,13 +31,38 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Base class for field expression function objects
+    Intermediate class for handling field expression function objects
+    (e.g. \c blendingFactor etc.) whereinto a single field is input.
+
+Usage
+    Minimal example by using \c system/controlDict.functions:
+    \verbatim
+    <userDefinedSubDictName1>
+    {
+        // Mandatory and other optional entries
+        ...
+
+        // Optional (inherited) entries (runtime modifiable)
+        field             <field>;
+        result            <fieldResult>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description               | Type | Req'd | Dflt
+      field     | Name of the operand field | word | yes   | -
+      result    | Name of the output field  | word | no    | \<FO\>(\<field\>)
+    \endtable
 
 See also
-    Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - ExtendedCodeGuide::functionObjects::field::fieldExpression
 
 SourceFiles
     fieldExpression.C
+    fieldExpressionTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -75,18 +100,15 @@ protected:
 
     // Protected Member Functions
 
+        //- Calculate the components of the field and return true if successful
         virtual bool calc() = 0;
 
+        //- Set the name of result field
         void setResultName(const word& typeName, const word& defaultArg);
 
+        //- Return true if required objects are found
         template<class Type>
         bool foundObject(const word& name, const bool verbose = true) const;
-
-        //- No copy construct
-        fieldExpression(const fieldExpression&) = delete;
-
-        //- No copy assignment
-        void operator=(const fieldExpression&) = delete;
 
 
 public:
@@ -106,6 +128,12 @@ public:
             const word& fieldName = word::null,
             const word& resultName = word::null
         );
+
+        //- No copy construct
+        fieldExpression(const fieldExpression&) = delete;
+
+        //- No copy assignment
+        void operator=(const fieldExpression&) = delete;
 
 
     //- Destructor

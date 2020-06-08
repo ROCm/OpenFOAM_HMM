@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,16 +30,56 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Calculates the flux of a field.  The operation is limited to
-    surfaceVectorFields and volVectorFields, and the output is a
-    surfaceScalarField.
+    Computes the flux of an input vector field.
+
+    Operands:
+    \table
+      Operand      | Type                     | Location
+      input        | {vol,surface}VectorField | $FOAM_CASE/\<time\>/\<inpField\>
+      output file  | -                        | -
+      output field | surfaceScalarField       | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
+
+Usage
+    Minimal example by using \c system/controlDict.functions:
+    \verbatim
+    flowType1
+    {
+        // Mandatory entries (unmodifiable)
+        type            flux;
+        libs            (fieldFunctionObjects);
+
+        // Optional entries (runtime modifiable)
+        rho             none;
+
+        // Optional (inherited) entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+        Property     | Description                        | Type | Req'd | Dflt
+        type         | Type name: flux                    | word |  yes  | -
+        libs         | Library name: fieldFunctionObjects | word |  yes  | -
+        rho          | Name of density field              | word |  no   | none
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link fieldExpression.H \endlink
+
+    Usage by the \c postProcess utility is not available.
 
 See also
-    Foam::functionObjects::fieldExpression
-    Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObject
+    - Foam::functionObjects::fieldExpression
+    - Foam::functionObjects::fvMeshFunctionObject
+    - ExtendedCodeGuide::functionObjects::field::flux
 
 SourceFiles
     flux.C
+    fluxTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -63,6 +103,12 @@ class flux
 :
     public fieldExpression
 {
+    // Private Data
+
+        //- Name of density field
+        word rhoName_;
+
+
     // Private Member Functions
 
         //- Calculate the flux of a volVectorField and register the result
@@ -75,9 +121,6 @@ class flux
 
         //- Calculate the flux field and return true if successful
         virtual bool calc();
-
-        //- rho flied name
-        word rhoName_;
 
 
 public:
@@ -96,9 +139,15 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        flux(const flux&) = delete;
+
+        //- No copy assignment
+        void operator=(const flux&) = delete;
+
 
     //- Destructor
-    virtual ~flux();
+    virtual ~flux() = default;
 };
 
 

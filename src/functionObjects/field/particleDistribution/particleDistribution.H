@@ -32,40 +32,66 @@ Group
 Description
     Generates a particle distribution for lagrangian data at a given time.
 
+    Operands:
+    \table
+      Operand        | Type | Location
+      input          | -    | -
+      output file    | dat  | $FOAM_CASE/postProcessing/\<FO\>/\<time\>/\<file\>
+      output field   | -    | -
+    \endtable
+
 Usage
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     particleDistribution1
     {
+        // Mandatory entries (unmodifiable)
         type        particleDistribution;
         libs        (fieldFunctionObjects);
-        ...
-        cloud       "myCloud";
+
+        // Mandatory entries (runtime modifiable)
+        cloud       <cloudName>;
         nameVsBinWidth
         (
             (d 0.1)
             (U 10)
         );
         setFormat   raw;
+
+        // Optional entries (runtime modifiable)
+        tagField    none;
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property    | Description              |  Required  | Default value
-        type        | Type name: particleDistribution | yes |
-        cloud       | Name of cloud to process | Yes        |
-        nameVsBinWidth | List of cloud field vs bin width | Yes |
-        tagField    | Name of cloud field to use to group particles | no | none
-        setFormat   | Output format            | yes         |
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: particleDistribution    | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+      cloud        | Name of cloud to process           | word |  yes  | -
+      nameVsBinWidth | List of cloud field-bin width | wordHashTable | yes | -
+      setFormat      | Output format                 | word          |  yes  | -
+      tagField | Name of cloud field to use group particles | word | no | none
     \endtable
 
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link writeFile.H \endlink
+
+    Usage by the \c postProcess utility is not available.
+
 See also
-    Foam::functionObjects::fvMeshFunctionObject
-    Foam::functionObjects::writeFile
-    Foam::functionObjects::timeControl
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObjects::writeFile
+    - ExtendedCodeGuide::functionObjects::field::particleDistribution
 
 SourceFiles
     particleDistribution.C
+    particleDistributionTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -97,19 +123,19 @@ class particleDistribution
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Cloud name
         word cloudName_;
-
-        //- List of field name vs. bin width
-        List<Tuple2<word, scalar>> nameVsBinWidth_;
 
         //- Tag field name - used to filter the particles into groups
         word tagFieldName_;
 
         //- Random number generator - used by distribution models
         Random rndGen_;
+
+        //- List of field name vs. bin width
+        List<Tuple2<word, scalar>> nameVsBinWidth_;
 
         //- Writer
         autoPtr<writer<scalar>> writerPtr_;
@@ -135,12 +161,6 @@ protected:
             const List<DynamicList<label>>& addr
         );
 
-        //- No copy construct
-        particleDistribution(const particleDistribution&) = delete;
-
-        //- No copy assignment
-        void operator=(const particleDistribution&) = delete;
-
 
 public:
 
@@ -158,9 +178,15 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        particleDistribution(const particleDistribution&) = delete;
+
+        //- No copy assignment
+        void operator=(const particleDistribution&) = delete;
+
 
     //- Destructor
-    virtual ~particleDistribution();
+    virtual ~particleDistribution() = default;
 
 
     // Member Functions

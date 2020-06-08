@@ -30,17 +30,18 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Calculates the acoustic power due to the volume of isotropic turbulence
-    using Proudman's formula
+    Computes the acoustic power due to the volume of isotropic turbulence
+    using Proudman's formula.
 
-    The acoustic power \f$ P_A \f$ [W/m3] in terms of turbulence \f$ k \f$
-    and \f$ \epsilon \f$ is given as:
+    The acoustic power, i.e. \f$ P_A \f$ [\f$W/m^3\f$], in terms of turbulent
+    kinetic energy, i.e. \f$ k \f$, and turbulent kinetic energy dissipation
+    rate, i.e. \f$ \epsilon \f$, is given as:
 
         \f[
-            P_A = alpha_\epsilon \rho \epsilon M_t^5
+            P_A = \alpha_\epsilon \rho \epsilon M_t^5
         \f]
 
-    where \f$ alpha_\epsilon \f$ is a constant (0.1) and
+    where \f$ \alpha_\epsilon = 0.1 \f$ is a constant and
 
         \f[
             M_t = \frac{\sqrt{2 k}}{a_0}
@@ -50,35 +51,55 @@ Description
     dB using:
 
         \f[
-            L_P = 10 \log \frac{P_A}{P_ref}
+            L_P = 10 \log \frac{P_A}{P_{ref}}
         \f]
 
-    where \f$ P_ref \f$ is a constant (1e-12 W/m3)
+    where \f$ P_{ref} = 1e^{-12} \f$ [\f$W/m^3\f$] is a constant.
+
+    Operands:
+    \table
+      Operand        | Type           | Location
+      input          | volScalarField | $FOAM_CASE/\<time\>/\<inpField\>
+      output file    | -              | -
+      output field   | volScalarField | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
 
 Usage
-    Example of function object specification to calculate the Proudman acoustic
-    power:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     proudmanAcousticPower1
     {
+        // Mandatory entries (unmodifiable)
         type        proudmanAcousticPower;
         libs        (fieldFunctionObjects);
-        ...
 
-        // Required additional entries for incompressible calculations
+        // Optional entries (runtime modifiable)
+        alphaEps    0.1;
+        // For incompressible flow simulations
         rhoInf      1.225;
         aRef        340;
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property | Description                              | Required | Default
-        type     | type name: proudmanAcousticPower         | yes |
-        rhoInf   | Freestream density (for incompressible)  | no  |
-        aRef     | Reference speed of sound (for incompressible) | no  |
-        alphaEps | Model coefficient                        | no  | 0.1
+      Property     | Description                         | Type | Req'd | Dflt
+      type         | Type name: proudmanAcousticPower    | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects  | word |  yes  | -
+      rhoInf       | Freestream density (for incompressible) | scalar <!--
+               --> | conditional | -
+      aRef         | Speed of sound (incompressible)     | scalar <!--
+               --> | conditional | -
+      alphaEps     | Empirical model coefficient         | scalar | no | 0.1
     \endtable
+
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+
+    Usage by the \c postProcess utility is not available.
 
 Note
     The freestream density and reference speed of sound are only necessary
@@ -86,7 +107,9 @@ Note
     cases.
 
 See also
-    Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - ExtendedCodeGuide::functionObjects::field::proudmanAcousticPower
 
 SourceFiles
     proudmanAcousticPower.C
@@ -114,18 +137,16 @@ class proudmanAcousticPower
 :
     public fvMeshFunctionObject
 {
-private:
-
     // Private Data
+
+        //- Empirical model coefficient
+        scalar alphaEps_;
 
         //- Freestream density (incompressible calcs only)
         dimensionedScalar rhoInf_;
 
         //- Reference speed of sound (incompressible calcs only)
         dimensionedScalar aRef_;
-
-        //- Model coefficient; default = 0.1
-        scalar alphaEps_;
 
 
     // Private Member Functions
@@ -152,6 +173,12 @@ public:
             const Time& runTime,
             const dictionary&
         );
+
+        //- No copy construct
+        proudmanAcousticPower(const proudmanAcousticPower&) = delete;
+
+        //- No copy assignment
+        void operator=(const proudmanAcousticPower&) = delete;
 
 
     //- Destructor

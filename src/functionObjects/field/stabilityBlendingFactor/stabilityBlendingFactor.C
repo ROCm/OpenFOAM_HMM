@@ -454,21 +454,21 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
 
     maxNonOrthogonality_
     (
-        dict.getOrDefault<scalar>("maxNonOrthogonality", 20)
+        dict.getOrDefault<scalar>("maxNonOrthogonality", 20.0)
     ),
     minNonOrthogonality_
     (
-        dict.getOrDefault<scalar>("minNonOrthogonality", 60)
+        dict.getOrDefault<scalar>("minNonOrthogonality", 60.0)
     ),
-    maxGradCc_(dict.getOrDefault<scalar>("maxGradCc", 3)),
-    minGradCc_(dict.getOrDefault<scalar>("minGradCc", 4)),
-    maxResidual_(dict.getOrDefault<scalar>("maxResidual", 10)),
+    maxGradCc_(dict.getOrDefault<scalar>("maxGradCc", 3.0)),
+    minGradCc_(dict.getOrDefault<scalar>("minGradCc", 4.0)),
+    maxResidual_(dict.getOrDefault<scalar>("maxResidual", 10.0)),
     minFaceWeight_(dict.getOrDefault<scalar>("minFaceWeight", 0.3)),
     maxFaceWeight_(dict.getOrDefault<scalar>("maxFaceWeight", 0.2)),
-    maxSkewness_(dict.getOrDefault<scalar>("maxSkewness", 2)),
-    minSkewness_(dict.getOrDefault<scalar>("minSkewness", 3)),
-    Co1_(dict.getOrDefault<scalar>("Co1", 1)),
-    Co2_(dict.getOrDefault<scalar>("Co2", 10)),
+    maxSkewness_(dict.getOrDefault<scalar>("maxSkewness", 2.0)),
+    minSkewness_(dict.getOrDefault<scalar>("minSkewness", 3.0)),
+    Co1_(dict.getOrDefault<scalar>("Co1", 1.0)),
+    Co2_(dict.getOrDefault<scalar>("Co2", 10.0)),
 
     nonOrthogonalityName_
     (
@@ -497,7 +497,7 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
     oldError_(mesh_.nCells(), Zero),
     oldErrorIntegral_(mesh_.nCells(), Zero),
     P_(dict.getOrDefault<scalar>("P", 3)),
-    I_(dict.getOrDefault<scalar>("I", 0)),
+    I_(dict.getOrDefault<scalar>("I", 0.0)),
     D_(dict.getOrDefault<scalar>("D", 0.25))
 {
     read(dict);
@@ -625,12 +625,6 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
 
     init(true);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::stabilityBlendingFactor::~stabilityBlendingFactor()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

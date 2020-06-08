@@ -31,36 +31,51 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Evaluates and outputs turbulence y+ for turbulence models.
+    Computes the near wall \f$y_1^+\f$ for turbulence models.
 
-    The field is stored on the mesh database so that it can be
-    retrieved and used for other applications.
+    Operands:
+    \table
+      Operand        | Type           | Location
+      input          | -              | -
+      output file    | dat | $FOAM_CASE/postProcessing/\<FO\>/\<time\>/\<file\>
+      output field   | volScalarField | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
 
 Usage
-    Example of function object specification to calculate the y+ (LES):
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     yPlus1
     {
+        // Mandatory entries (unmodifiable)
         type        yPlus;
         libs        (fieldFunctionObjects);
+
+        // Optional (inherited) entries
         ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description             | Required    | Default value
-        type         | Type name: yPlus        | yes         |
-        result       | Name of y+ field        | no          | \<function name\>
-        log          | Log to standard output  | no          | yes
+      Property   | Description                        | Type | Req'd | Dflt
+      type       | Type name: yPlus                   | word |  yes  | -
+      libs       | Library name: fieldFunctionObjects | word |  yes  | -
     \endtable
 
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link writeFile.H \endlink
+
+    Minimal example by using the \c postProcess utility:
+    \verbatim
+        <solver> -postProcess -func yPlus
+    \endverbatim
 
 See also
-    Foam::functionObject
-    Foam::functionObjects::fvMeshFunctionObject
-    Foam::functionObjects::writeFile
-    Foam::functionObjects::timeControl
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObjects::writeFile
+    - ExtendedCodeGuide::functionObjects::field::yPlus
 
 SourceFiles
     yPlus.C
@@ -96,12 +111,6 @@ class yPlus
         //- File header information
         virtual void writeFileHeader(Ostream& os) const;
 
-        //- No copy construct
-        yPlus(const yPlus&) = delete;
-
-        //- No copy assignment
-        void operator=(const yPlus&) = delete;
-
 
 public:
 
@@ -119,9 +128,15 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        yPlus(const yPlus&) = delete;
+
+        //- No copy assignment
+        void operator=(const yPlus&) = delete;
+
 
     //- Destructor
-    virtual ~yPlus();
+    virtual ~yPlus() = default;
 
 
     // Member Functions

@@ -43,6 +43,7 @@ namespace functionObjects
 }
 }
 
+
 const Foam::Enum
 <
     Foam::functionObjects::pressure::mode
@@ -56,6 +57,7 @@ Foam::functionObjects::pressure::modeNames
     { TOTAL_COEFF, "totalCoeff" },
 });
 
+
 const Foam::Enum
 <
     Foam::functionObjects::pressure::hydrostaticMode
@@ -66,6 +68,7 @@ Foam::functionObjects::pressure::hydrostaticModeNames
     { ADD, "add" },
     { SUBTRACT, "subtract" },
 });
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -284,7 +287,6 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::calcPressure
         return tresult;
     }
 
-
     return tresult;
 }
 
@@ -439,14 +441,13 @@ bool Foam::functionObjects::pressure::read(const dictionary& dict)
     }
 
 
-
     if (mode_ & COEFF)
     {
         dict.readEntry("pInf", pInf_);
         dict.readEntry("UInf", UInf_);
         dict.readEntry("rhoInf", rhoInf_);
 
-        scalar zeroCheck = 0.5*rhoInf_*magSqr(UInf_) + pInf_;
+        const scalar zeroCheck = 0.5*rhoInf_*magSqr(UInf_) + pInf_;
 
         if (mag(zeroCheck) < ROOTVSMALL)
         {

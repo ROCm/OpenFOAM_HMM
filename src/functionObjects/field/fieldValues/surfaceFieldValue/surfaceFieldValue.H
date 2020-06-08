@@ -31,120 +31,137 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Provides a 'face regionType' variant of the fieldValues function object.
+    Provides a 'face regionType' variant of the \c fieldValues function object.
 
     Given a list of user-specified fields and a selection of mesh (or general
     surface) faces, a number of operations can be performed, such as sums,
     averages and integrations.
 
     For example, to calculate the volumetric or mass flux across a patch,
-    apply the 'sum' operator to the flux field (typically \c phi)
+    apply the 'sum' operator to the flux field (typically \c phi).
 
 Usage
-    Examples of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
-    movingWallPatch
+    surfaceFieldValuePatch1
     {
+        // Mandatory entries (unmodifiable)
         type            surfaceFieldValue;
         libs            (fieldFunctionObjects);
 
-        log             true;
-        writeControl    writeTime;
-        writeFields     false;
-
+        // Mandatory entries (runtime modifiable)
+        fields          (<field1> <field2> ... <fieldN>);
+        operation       <operationType>;
         regionType      patch;
-        name            movingWall;
+        name            <patch>;
 
-        operation       areaAverage;
-        fields          (p phi U);
+        // Optional entries (runtime modifiable)
+        postOperation   none;
+        weightField     alpha1;
+        scaleFactor     1.0;
+        writeArea       false;
+        surfaceFormat   none;
+
+        // Optional (inherited) entries
+        ...
     }
 
-    surfaceFieldValue1
+    surfaceFieldValueFaceZone1
     {
+        // Mandatory entries (unmodifiable)
         type            surfaceFieldValue;
         libs            (fieldFunctionObjects);
 
-        log             true;
-        writeControl    writeTime;
-        writeFields     true;
-
-        surfaceFormat   none;
+        // Mandatory entries (runtime modifiable)
+        fields          (<field1> <field2> ... <fieldN>);
+        operation       <operationType>;
         regionType      faceZone;
-        name            f0;
+        name            <faceZone>;
 
-        operation       sum;
+        // Optional entries (runtime modifiable)
+        postOperation   none;
         weightField     alpha1;
-        fields          (p phi U);
+        scaleFactor     1.0;
+        writeArea       false;
+        surfaceFormat   none;
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description                          | Required | Default
-        type         | Type name: surfaceFieldValue         | yes |
-        log          | Write data to standard output        | no  | no
-        regionType   | Face regionType: see below           | yes |
-        name         | Name for regionType                  | yes |
-        operation    | Operation to perform                 | yes |
-        postOperation | Post-operation to perform           | no  | none
-        fields       | List of fields to operate on         | yes |
-        weightField  | Name of field to apply weighting     | no  |
-        scaleFactor  | Output value scaling factor          | no  | 1
-        writeArea    | Write the surface area               | no  |
-        writeFields  | Write the region field values        | yes |
-        surfaceFormat | Output value format                 | no  | none
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: surfaceFieldValue       | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+      fields       | Names of operand fields            | wordList | yes | -
+      regionType   | Face regionType: see below         | word |  yes  | -
+      name         | Name for regionType                | word |  yes  | -
+      operation    | Operation type: see below          | word |  yes  | -
+      postOperation | Post-operation type: see below    | word |  no   | none
+      weightField  | Name of field to apply weighting   | word |  no   | none
+      scaleFactor  | Output value scaling factor        | scalar |  no  | 1.0
+      writeArea    | Write the surface area             | bool |  no   | false
+      surfaceFormat | Output value format               | word <!--
+                --> | conditional on writeFields  | none
     \endtable
 
-    Where \c regionType is defined by
+    The inherited entries are elaborated in:
+     - \link fieldValue.H \endlink
+
+    Options for the \c regionType entry:
     \plaintable
-        faceZone     | The \b name entry to specify the faceZone
-        patch        | The \b name entry to specify the patch
-        functionObjectSurface | The \b name entry to specify a polySurface
-        sampledSurface | A \b sampledSurfaceDict sub-dictionary and \b name
+      faceZone              | The \b name entry to specify the faceZone
+      patch                 | The \b name entry to specify the patch
+      functionObjectSurface | The \b name entry to specify a polySurface
+      sampledSurface        | A \b sampledSurfaceDict sub-dictionary and \b name
     \endplaintable
 
-    The \c operation is one of:
+    Options for the \c operation entry:
     \plaintable
-       none          | no operation
-       min           | minimum
-       max           | maximum
-       sum           | sum
-       sumMag        | sum of component magnitudes
-       sumDirection  | sum values that are positive in given direction
-       sumDirectionBalance | sum of balance of values in given direction
-       average       | ensemble average
-       areaAverage   | area-weighted average
-       areaIntegrate | area integral
-       CoV           | coefficient of variation: standard deviation/mean
-       areaNormalAverage | area-weighted average in face normal direction
-       areaNormalIntegrate | area-weighted integral in face normal directon
-       uniformity    | uniformity index
-       weightedSum           | weighted sum
-       weightedAverage       | weighted average
-       weightedAreaAverage   | weighted area average
-       weightedAreaIntegrate | weighted area integral
-       weightedUniformity    | weighted uniformity index
-       absWeightedSum           | sum using absolute weighting
-       absWeightedAverage       | average using absolute weighting
-       absWeightedAreaAverage   | area average using absolute weighting
-       absWeightedAreaIntegrate | area integral using absolute weighting
-       absWeightedUniformity    | uniformity index using absolute weighting
+      none          | no operation
+      min           | minimum
+      max           | maximum
+      sum           | sum
+      sumMag        | sum of component magnitudes
+      sumDirection  | sum values that are positive in given direction
+      sumDirectionBalance | sum of balance of values in given direction
+      average       | ensemble average
+      areaAverage   | area-weighted average
+      areaIntegrate | area integral
+      CoV           | coefficient of variation: standard deviation/mean
+      areaNormalAverage | area-weighted average in face normal direction
+      areaNormalIntegrate | area-weighted integral in face normal directon
+      uniformity    | uniformity index
+      weightedSum           | weighted sum
+      weightedAverage       | weighted average
+      weightedAreaAverage   | weighted area average
+      weightedAreaIntegrate | weighted area integral
+      weightedUniformity    | weighted uniformity index
+      absWeightedSum           | sum using absolute weighting
+      absWeightedAverage       | average using absolute weighting
+      absWeightedAreaAverage   | area average using absolute weighting
+      absWeightedAreaIntegrate | area integral using absolute weighting
+      absWeightedUniformity    | uniformity index using absolute weighting
     \endplaintable
 
-    The \c postOperation is one of:
+    Options for the \c postOperation entry:
     \plaintable
        none          | No additional operation after calculation
        mag           | Component-wise \c mag() after normal operation
        sqrt          | Component-wise \c sqrt() after normal operation
     \endplaintable
 
+    Usage by the \c postProcess utility is not available.
+
 Note
-    - The values reported by the areaNormalAverage and areaNormalIntegrate
+    - The values reported by the \c areaNormalAverage and \c areaNormalIntegrate
       operations are written as the first component of a field with the same
       rank as the input field.
-    - Faces on empty patches get ignored
-    - If the field is a volField the \c faceZone can only consist of boundary
-      faces
+    - Faces on empty patches get ignored.
+    - If the field is a volField the \c faceZone
+      can only consist of boundary faces.
     - Using \c functionObjectSurface:
       - The keyword %subRegion should not be used to select surfaces.
         Instead specify the regionType 'functionObjectSurface' and provide
@@ -159,7 +176,7 @@ Note
         - take care when using isoSurfaces - these might have duplicate
           triangles and so integration might be wrong
 
-    Uniformity
+    Uniformity:
     \f[
         UI(\phi) = 1 - \frac{1}{2 \overline{\phi} A}
         \int{\left| W \phi \cdot \hat{n} - \bar{W} \bar{\phi}\right| d\vec{A}}
@@ -171,12 +188,13 @@ Note
     \f$ \phi = \vec{U} \f$.
 
     A scalar concentration uniformity index is calculated with either
-    \f$ \rho \vec{U} \f$ or \f$ \vec{U} \f$ for weighting and
+    \f$ \rho \vec U \f$ or \f$ \vec U \f$ for weighting and
     \f$ \phi = conc \f$.
 
 See also
-    Foam::fieldValues
-    Foam::functionObject
+    - Foam::functionObject
+    - Foam::functionObjects::fieldValues::fieldValue
+    - ExtendedCodeGuide::functionObjects::field::surfaceFieldValue
 
 SourceFiles
     surfaceFieldValue.C
@@ -555,6 +573,12 @@ public:
             const objectRegistry& obr,
             const dictionary& dict
         );
+
+        //- No copy construct
+        surfaceFieldValue(const surfaceFieldValue&) = delete;
+
+        //- No copy assignment
+        void operator=(const surfaceFieldValue&) = delete;
 
 
     //- Destructor

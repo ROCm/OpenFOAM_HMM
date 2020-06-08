@@ -65,7 +65,7 @@ ddt/ddt.C
 mag/mag.C
 magSqr/magSqr.C
 vorticity/vorticity.C
-lambVector/lambVector.C
+LambVector/LambVector.C
 enstrophy/enstrophy.C
 Q/Q.C
 Lambda2/Lambda2.C

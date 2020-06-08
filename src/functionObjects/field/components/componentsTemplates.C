@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,13 +36,13 @@ bool Foam::functionObjects::components::calcFieldComponents()
 {
     typedef typename GeoFieldType::value_type Type;
 
-    const GeoFieldType& field(lookupObject<GeoFieldType>(fieldName_));
+    const GeoFieldType& field = lookupObject<GeoFieldType>(fieldName_);
 
     resultNames_.setSize(Type::nComponents);
 
     bool stored = true;
 
-    for (direction i=0; i<Type::nComponents; i++)
+    for (direction i = 0; i < Type::nComponents; ++i)
     {
         resultName_ = fieldName_ + word(Type::componentNames[i]);
         resultNames_[i] = resultName_;

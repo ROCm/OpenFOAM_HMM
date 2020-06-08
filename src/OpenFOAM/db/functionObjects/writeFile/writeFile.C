@@ -214,7 +214,12 @@ Foam::functionObjects::writeFile::writeFile
 bool Foam::functionObjects::writeFile::read(const dictionary& dict)
 {
     writePrecision_ =
-        dict.getOrDefault("writePrecision", IOstream::defaultPrecision());
+        dict.getCheckOrDefault
+        (
+            "writePrecision",
+            IOstream::defaultPrecision(),
+            labelMinMax::ge(0)
+        );
 
     updateHeader_ =
         dict.lookupOrDefault("updateHeader", updateHeader_);

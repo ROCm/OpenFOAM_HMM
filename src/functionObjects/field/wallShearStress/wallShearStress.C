@@ -50,13 +50,12 @@ namespace functionObjects
 
 void Foam::functionObjects::wallShearStress::writeFileHeader(Ostream& os) const
 {
-    // Add headers to output data
     writeHeader(os, "Wall shear stress");
     writeCommented(os, "Time");
     writeTabbed(os, "patch");
     writeTabbed(os, "min");
     writeTabbed(os, "max");
-    os << endl;
+    os  << endl;
 }
 
 

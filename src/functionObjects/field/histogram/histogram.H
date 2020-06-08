@@ -31,45 +31,69 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Write the volume-weighted histogram of a volScalarField.
+    Computes the volume-weighted histogram of an input \c volScalarField.
+
+    Operands:
+    \table
+      Operand        | Type              | Location
+      input          | volScalarField    | $FOAM_CASE/\<time\>/\<inpField\>
+      output file    | dat  | $FOAM_CASE/postProcessing/\<FO\>/\<time\>/\<file\>
+      output field   | -                 | -
+    \endtable
+
+    The set written contains two columns, the first the volume averaged values,
+    the second the raw bin count.
 
 Usage
-    Example:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     histogram1
     {
-        type            histogram;
-        libs            (fieldFunctionObjects);
+        // Mandatory entries (unmodifiable)
+        type        histogram;
+        libs        (fieldFunctionObjects);
 
-        field           p;
-        nBins           100;
-        min             -5;
-        max             5;
-        setFormat       gnuplot;
+        // Mandatory (inherited) entries (runtime modifiable)
+        field       p;
+        nBins       100;
+        setFormat   gnuplot;
+
+        // Optional entries (runtime modifiable)
+        max         5;
+        min        -5;
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description             | Required    | Default value
-        type         | type name: histogram    | yes         |
-        field        | Field to analyse        | yes         |
-        nBins        | Number of bins for the histogram | yes|
-        max          | Maximum value sampled   | no          | field max
-        min          | minimum value sampled   | no          | 0
-        setFormat    | Output format           | yes         |
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: histogram               | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+      field        | Name of operand field              | word |  yes  | -
+      nBins        | Number of histogram bins           | label | yes  | -
+      setFormat    | Output format                      | word |  yes  | -
+      max          | Maximum value sampled       | scalar | no  | fieldMax
+      min          | minimum value sampled       | scalar | no  | 0.0
     \endtable
 
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link writeFile.H \endlink
+
+    Usage by the \c postProcess utility is not available.
+
 Note
-    If max is not provided it will use the field's min and max as the bin
-    extremes. If max is provided but not min it will use 0. The set written
-    contains two columns, the first the volume averaged values, the second
-    the raw bin count.
+    If \c max is not provided it will use the field's min and max as the bin
+    extremes. If \c max is provided but not \c min it will use 0.
 
 See also
-    Foam::functionObject
-    Foam::functionObjects::fvMeshFunctionObject
-    Foam::functionObjects::writeFile
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObjects::writeFile
+    - ExtendedCodeGuide::functionObjects::field::histogram
 
 SourceFiles
     histogram.C
@@ -99,7 +123,10 @@ class histogram
     public fvMeshFunctionObject,
     public writeFile
 {
-    // Private data
+    // Private Data
+
+        //- Number of bins
+        label nBins_;
 
         //- Name of field
         word fieldName_;
@@ -109,9 +136,6 @@ class histogram
 
         //- Minimum value
         scalar min_;
-
-        //- Number of bins
-        label nBins_;
 
         //- Output formatter to write
         autoPtr<writer<scalar>> formatterPtr_;
@@ -126,12 +150,6 @@ class histogram
             const scalarField& normalizedValues,
             const scalarField& absoluteValues
         ) const;
-
-        //- No copy construct
-        histogram(const histogram&) = delete;
-
-        //- No copy assignment
-        void operator=(const histogram&) = delete;
 
 
 public:
@@ -150,9 +168,15 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        histogram(const histogram&) = delete;
+
+        //- No copy assignment
+        void operator=(const histogram&) = delete;
+
 
     // Destructor
-    virtual ~histogram();
+    virtual ~histogram() = default;
 
 
     // Member Functions
@@ -160,10 +184,10 @@ public:
         //- Read the histogram data
         virtual bool read(const dictionary&);
 
-        //- Execute, currently does nothing
+        //- Execute (effectively no-op)
         virtual bool execute();
 
-        //- Calculate the histogram and write.
+        //- Calculate the histogram and write
         //  postProcess overrides the usual writeControl behaviour and
         //  forces writing always (used in post-processing mode)
         virtual bool write();

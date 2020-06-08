@@ -53,16 +53,40 @@ maxAlphaCo      1;
 
 maxDeltaT       1;
 
+
 functions
 {
     extractEulerianParticles1
     {
+        // Mandatory entries
         type            extractEulerianParticles;
         libs            (fieldFunctionObjects);
-        writeControl    writeTime;
         faceZone        collector;
         alpha           alpha.water;
+
+        // Optional entries
+        alphaThreshold  0.1;
         nLocations      20;
+        U               U;
+        rho             rho;
+        phi             phi;
+        //minDiameter     1e-30;
+        //maxDiameter     1e30;
+
+        // Optional (inherited) entries
+        writePrecision   6;
+        writeToFile      true;
+        useUserTime      false;
+
+        region          region0;
+        enabled         true;
+        log             true;
+        timeStart       0;
+        timeEnd         1000;
+        executeControl  timeStep;
+        executeInterval 1;
+        writeControl    writeTime;
+        writeInterval   -1;
     }
 }
 

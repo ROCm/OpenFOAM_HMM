@@ -230,11 +230,11 @@ Foam::functionObjects::interfaceHeight::interfaceHeight
 :
     fvMeshFunctionObject(name, runTime, dict),
     logFiles(obr_, name),
-    alphaName_("alpha"),
     liquid_(true),
-    locations_(),
+    alphaName_("alpha"),
     interpolationScheme_("cellPoint"),
-    direction_(vector::zero)
+    direction_(vector::zero),
+    locations_()
 {
     read(dict);
     resetNames({"height", "position"});
@@ -242,12 +242,6 @@ Foam::functionObjects::interfaceHeight::interfaceHeight
     writeFileHeader(fileID::heightFile);
     writeFileHeader(fileID::positionFile);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::interfaceHeight::~interfaceHeight()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

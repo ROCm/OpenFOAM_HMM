@@ -11,7 +11,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 type            vorticity;
-libs            ("libfieldFunctionObjects.so");
+libs            (fieldFunctionObjects);
 
 field           U;
 

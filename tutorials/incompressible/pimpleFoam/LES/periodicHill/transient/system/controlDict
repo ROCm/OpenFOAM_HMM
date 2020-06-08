@@ -77,13 +77,9 @@ functions
 
     columnAverage
     {
+        // Mandatory entries
         type            columnAverage;
         libs            (fieldFunctionObjects);
-
-        executeControl  writeTime;
-        writeControl    none;
-        timeStart       1500.5; // approx 2x flow-throughs
-
         // Note: include processorCyclics!
         patches         (front "proc.*throughfront");
         fields
@@ -93,6 +89,17 @@ functions
             UMean
             UPrime2Mean
         );
+
+        // Optional (inherited) entries
+        region          region0;
+        enabled         true;
+        log             true;
+        timeStart       1500.5; // approx 2x flow-throughs
+        // timeEnd          inf;
+        executeControl  writeTime;
+        // executeInterval -1;
+        writeControl    none;
+        // writeInterval   -1;
     }
 
     sample

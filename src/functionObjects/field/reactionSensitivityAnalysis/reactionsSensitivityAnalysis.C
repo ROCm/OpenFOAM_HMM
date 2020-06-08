@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -182,14 +182,14 @@ reactionsSensitivityAnalysis
 :
     fvMeshFunctionObject(name, runTime, dict),
     writeFile(mesh_, name),
+    nReactions_(0),
+    startTime_(0),
+    endTime_(0),
     production_(0),
     consumption_(0),
     productionInt_(0),
     consumptionInt_(0),
-    startTime_(0),
-    endTime_(0),
     speciesNames_(),
-    nReactions_(0),
     prodFilePtr_(),
     consFilePtr_(),
     prodIntFilePtr_(),
@@ -249,14 +249,6 @@ reactionsSensitivityAnalysis
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class chemistryType>
-Foam::functionObjects::reactionsSensitivityAnalysis<chemistryType>::
-~reactionsSensitivityAnalysis()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class chemistryType>
@@ -267,6 +259,7 @@ bool Foam::functionObjects::reactionsSensitivityAnalysis<chemistryType>::read
 {
     fvMeshFunctionObject::read(dict);
     writeFile::read(dict);
+
     return true;
 }
 

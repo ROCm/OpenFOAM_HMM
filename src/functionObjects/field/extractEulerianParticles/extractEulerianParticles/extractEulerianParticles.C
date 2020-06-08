@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,7 +44,6 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(extractEulerianParticles, 0);
-
     addToRunTimeSelectionTable
     (
         functionObject,
@@ -272,7 +271,7 @@ void Foam::functionObjects::extractEulerianParticles::collectParticle
     {
         if (Pstream::master())
         {
-            const scalar d = cbrt(6*p.V/constant::mathematical::pi);
+            const scalar d = cbrt(6.0*p.V/constant::mathematical::pi);
             const point position = p.VC/(p.V + ROOTVSMALL);
             const vector U = p.VU/(p.V + ROOTVSMALL);
             label tag = -1;

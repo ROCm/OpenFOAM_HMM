@@ -126,9 +126,9 @@ bool Foam::functionObjects::fieldExtents::read(const dictionary& dict)
 {
     if (fvMeshFunctionObject::read(dict) && writeFile::read(dict))
     {
-        threshold_ = dict.get<scalar>("threshold");
-
         dict.readIfPresent<bool>("internalField", internalField_);
+
+        threshold_ = dict.get<scalar>("threshold");
 
         dict.readIfPresent<vector>("referencePosition", C0_);
 

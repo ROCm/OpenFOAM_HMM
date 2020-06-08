@@ -30,34 +30,60 @@ Group
     grpFieldFunctionObjects
 
 Description
-    A limited set of predefined derived fields ("rhoU", "pTotal").
+    Computes two predefined derived fields, i.e. \c rhoU, and \c pTotal, where
+    the defined fields are hard-coded as follows:
 
+    \vartable
+      rhoU              | \f$ \rho \vec U \f$
+      pTotal            | \f$ p + 1/2 \rho \, mag(\vec U)^2 \f$
+    \endvartable
+
+    Operands:
+    \table
+      Operand       | Type                    | Location
+      input         | vol{Scalar,Vector}Field | $FOAM_CASE/\<time\>/\<inpField\>
+      output file   | -                       | -
+      output field  | vol{Scalar,Vector}Field | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
+
+Usage
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
-    derived
+    derivedFields1
     {
-        type    derivedFields;
-        libs    (fieldFunctionObjects);
+        // Mandatory entries (unmodifiable)
+        type            derivedFields;
+        libs            (fieldFunctionObjects);
 
-        fields  (rhoU pTotal);
+        // Mandatory entries (runtime modifiable)
+        derived         (rhoU pTotal);
 
-        // Optional: reference density for incompressible
-        rhoRef  1.25;
+        // Optional entries (runtime modifiable)
+        rhoRef          1.0;
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    Entries:
+    where the entries mean:
     \table
-        Property | Description                              | Required | Default
-        type     | derivedFields                            | yes |
-        derived  | Derived fields (pTotal/rhoU)             | yes |
-        rhoRef   | Reference density (incompressible)       | no  | 1
+      Property     | Description                           | Type | Req'd | Dflt
+      type         | Type name: derivedFields              | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects    | word |  yes  | -
+      derived      | Names of operand fields (rhoU/pTotal) | word |  yes  | -
+      rhoRef  | Reference density for incompressible flows | scalar | no  | 1.0
     \endtable
 
-    The known derived fields
-    \plaintable
-       rhoU          | (rho * U)
-       pTotal        | (p + 1/2 * rho * U)
-    \endplaintable
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+
+    Usage by the \c postProcess utility is not available.
+
+See also
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - ExtendedCodeGuide::functionObjects::field::derivedFields
 
 SourceFiles
     derivedFields.C
@@ -89,7 +115,7 @@ public:
 
     // Public Enumerations
 
-        //- Derived/calculated field type
+        //- Options for the derived/calculated field type
         enum derivedType
         {
             NONE = 0,           //!< "none"
@@ -98,7 +124,7 @@ public:
             UNKNOWN
         };
 
-        //- Known derived field types
+        //- Names for derivedType
         static const Enum<derivedType> knownNames;
 
 
@@ -113,7 +139,7 @@ protected:
         scalar rhoRef_;
 
 
-    // Private Member Functions
+    // Protected Member Functions
 
         //- Hard-coded derived field (rho * U)
         //  \return true if field did not previously exist
@@ -139,6 +165,12 @@ public:
             const Time& runTime,
             const dictionary& dict
         );
+
+        //- No copy construct
+        derivedFields(const derivedFields&) = delete;
+
+        //- No copy assignment
+        void operator=(const derivedFields&) = delete;
 
 
     //- Destructor

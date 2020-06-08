@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,22 +31,70 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Calculates and writes the flowType of a velocity field.
+    Computes the flow type indicator of an input velocity field.
 
-    The flow type parameter is obtained according to the following equation:
+    The flow type indicator is obtained according to the following equation:
+    \f[
+        \lambda = \frac{|D| - |\omega|}{|D| + |\omega|}
+    \f]
+
+    where
+    \vartable
+      \lambda | Flow type indicator
+      D       | Symmetric part of the gradient tensor of velocity
+      \omega  | Skew-symmetric part of the gradient tensor of velocity
+    \endvartable
+
+    The flow type indicator values mean:
     \verbatim
-                 |D| - |Omega|
-        lambda = -------------
-                 |D| + |Omega|
+      -1 = rotational flow
+       0 = simple shear flow
+       1 = planar extensional flow
+    \endverbatim
 
-        -1 = rotational flow
-         0 = simple shear flow
-         1 = planar extensional flow
+    Operands:
+    \table
+      Operand          | Type           | Location
+      input            | volVectorField | $FOAM_CASE/\<time\>/\<inpField\>
+      output file      | -              | -
+      output field     | volScalarField | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
+
+Usage
+    Minimal example by using \c system/controlDict.functions:
+    \verbatim
+    flowType1
+    {
+        // Mandatory entries (unmodifiable)
+        type            flowType;
+        libs            (fieldFunctionObjects);
+
+        // Optional (inherited) entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: flowType                | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link fieldExpression.H \endlink
+
+    Minimal example by using the \c postProcess utility:
+    \verbatim
+        postProcess -func flowType
     \endverbatim
 
 See also
-    Foam::functionObjects::fieldExpression
-    Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObject
+    - Foam::functionObjects::fieldExpression
+    - Foam::functionObjects::fvMeshFunctionObject
+    - ExtendedCodeGuide::functionObjects::field::flowType
 
 SourceFiles
     flowType.C
@@ -94,9 +143,15 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        flowType(const flowType&) = delete;
+
+        //- No copy assignment
+        void operator=(const flowType&) = delete;
+
 
     //- Destructor
-    virtual ~flowType();
+    virtual ~flowType() = default;
 };
 
 

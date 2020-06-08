@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) YEAR YEAR AUTHOR,AFFILIATION
+    Copyright (C) YEAR AUTHOR, AFFILIATION
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,34 +27,120 @@ Class
     Foam::functionObjects::FUNCTIONOBJECT
 
 Group
+    grpFieldFunctionObjects
 
 Description
-    This function object...
+    <minimal description of the function object>
 
-    Example of function object specification:
+    <equation>
+    \f[
+        x = x_{ref}^x + \rho \omega
+    \f]
+
+    <variable-explanation table>
+    where
+    \vartable
+      \rho        | <explanation> [units, e.g. kg/m3]
+      \omega      | \f$ \nabla \cdot \vec U \f$
+      ...         | ...
+    \endvartable
+
+    <inline equation>
+    where \f$ x_k \f$ is ...
+
+    <input-output table>
+    \table
+      Operand      | Type                 | Location
+      input        | {vol,surface}\<Type\>Field(s) <!--
+               --> |$FOAM_CASE/\<time\>/\<inpField\>s
+      output file  | dat                  <!--
+              -->  | $FOAM_CASE/postProcessing/\<FO\>/\<time\>/\<file\>
+      output field | volScalarField       | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
+
+Usage
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     FUNCTIONOBJECT1
     {
+        // Mandatory entries (unmodifiable)
         type           FUNCTIONOBJECT;
-        libs ("libFUNCTIONOBJECTFunctionObject.so");
+        libs           (FUNCTIONOBJECTFunctionObject);
+
+        // Mandatory entries (runtime modifiable)
         ...
-        wordData       someWord;
-        scalarData     1.0;
-        labelData      1;
+
+        // Mandatory (inherited) entries (unmodifiable)
+        ...
+
+        // Mandatory (inherited) entries (runtime unmodifiable)
+        ...
+
+        // Optional entries (unmodifiable)
+        ...
+
+        // Optional entries (runtime modifiable)
+        boolData       <bool>;
+        labelData      <label>;
+        wordData       <word>;
+        scalarData     <scalar>;
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-Usage
+    where the entries mean:
     \table
-        Property     | Description               | Required | Default value
-        type         | type name: FUNCTIONOBJECT | yes      |
-        wordData     | some word option...       | no       | defaultWord
-        scalarData   | some scalar value...      | yes      |
-        labelData    | some label value...       | yes      |
+      Property   | Description                      | Type | Req'd | Dflt
+      type       | Type name: FUNCTIONOBJECT        | word |  yes  | -
+      libs       | Library name: FUNCTIONOBJECTFunctionObject  <!--
+             --> | word  | yes | -
+      boolData   | <explanation>                    | bool |  yes  | -
+      labelData  | <explanation>                    | label |  yes | -
+      wordData   | <explanation>                    | word |  yes  | -
+      scalarData | <explanation>                    | scalar |  no | 1.0
+      wordListData  | <explanation>                 | wordList | yes | -
     \endtable
+
+    Options for the \c ENTRY entry:
+    \verbatim
+        <option1>
+        <option2> | <explanation>
+      ...
+    \endverbatim
+
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link fieldExpression.H \endlink
+     - \link fieldsExpression.H \endlink
+     - \link writeFile.H \endlink
+     ...
+
+    <if \c postProcess is applicable>
+    Minimal example by using the \c postProcess utility:
+    \verbatim
+        postProcess -func FUNCTIONOBJECT
+    \endverbatim
+
+    <if \c postProcess is not applicable>
+    Usage by the \c postProcess utility is not available.
+
+Note
+    - <note1>
+    - <note2>
+    ...
+
+See also
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - ExtendedCodeGuide::functionObjects::field::FUNCTIONOBJECT
+    ...
 
 SourceFiles
     FUNCTIONOBJECT.C
+    FUNCTIONOBJECTTEMPLATES.C
+    ...
 
 \*---------------------------------------------------------------------------*/
 
@@ -78,26 +164,19 @@ class FUNCTIONOBJECT
 :
     public fvMeshFunctionObject
 {
-    // Private data
+    // Private Data
+
+        //- bool
+        bool boolData_;
+
+        //- label
+        label labelData_;
 
         //- word
         word wordData_;
 
         //- scalar
         scalar scalarData_;
-
-        //- label
-        label labelData_;
-
-
-    // Private Member Functions
-
-
-        //- No copy construct
-        FUNCTIONOBJECT(const FUNCTIONOBJECT&);
-
-        //- No copy assignment
-        void operator=(const FUNCTIONOBJECT&);
 
 
 public:
@@ -116,9 +195,15 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        FUNCTIONOBJECT(const FUNCTIONOBJECT&) = delete;
+
+        //- No copy assignment
+        void operator=(const FUNCTIONOBJECT&) = delete;
+
 
     //- Destructor
-    virtual ~FUNCTIONOBJECT();
+    virtual ~FUNCTIONOBJECT() = default;
 
 
     // Member Functions

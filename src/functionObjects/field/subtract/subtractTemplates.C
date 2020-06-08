@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,7 +38,7 @@ Foam::functionObjects::subtract::calcFieldType() const
       - lookupObject<GeoFieldType>(fieldNames_[1])
     );
 
-    for (label i=2; i<fieldNames_.size(); i++)
+    for (label i = 2; i < fieldNames_.size(); ++i)
     {
         tresult.ref() -= lookupObject<GeoFieldType>(fieldNames_[i]);
     }

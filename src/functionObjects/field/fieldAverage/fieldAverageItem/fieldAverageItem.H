@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,9 +29,11 @@ Class
 
 Description
     Helper class to describe what form of averaging to apply.  A set will be
-    applied to each base field in Foam::fieldAverage, of the form:
+    applied to each base field in Foam::fieldAverage, of the following form.
 
+Usage
     \verbatim
+    <field1>
     {
         mean            on;
         prime2Mean      on;
@@ -44,14 +46,33 @@ Description
     }
     \endverbatim
 
-    The averaging window corresponds to the averaging interval (iters or time)
-    If not specified, the averaging is over 'all iters/time'
+    where the entries mean:
+    \table
+      Property     | Description                        | Type | Req'd | Dflt
+      mean         | Flag to calculate average          | bool |  yes  | -
+      prime2Mean   | Flag to calculate prime-square average | bool |  yes  | -
+      base         | Type of averaging interval         | word | yes   | -
+      window       | Averaging window                   | scalar | no  |
+      windowName   | Name of the averaging window       | word   | no  | ""
+      windowType   | Type of averaging window           | word   | no  |
+      allowRestart | Flag to allow restart for windowType=exact | bool | no |
+    \endtable
 
-    Available window types:
-    - \c none : no windowing
-    - \c exact : exact windowing - additional files will be stored and written
-    - \c approximate : approximate variant that does not store/write additional
-      fields
+    Options for the \c base entry:
+    \verbatim
+      time | Averaging interval is based on time
+      iter | Averaging interval is based on iterations
+    \endverbatim
+
+    Options for the \c windowType entry:
+    \verbatim
+      none  | no windowing
+      exact | allow additional files will be stored and written
+      approximate | disallow additional files will be stored and written
+    \endverbatim
+
+Note
+    To employ the \c prime2Mean option, the \c mean option must be enabled.
 
 SourceFiles
     fieldAverageItem.C
@@ -92,7 +113,7 @@ class fieldAverageItem
 {
 public:
 
-    // Public data
+    // Public Data
 
         // File and field name extensions
 
@@ -121,7 +142,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Active flag
         bool active_;

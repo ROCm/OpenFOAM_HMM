@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,13 +38,7 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(turbulenceFields, 0);
-
-    addToRunTimeSelectionTable
-    (
-        functionObject,
-        turbulenceFields,
-        dictionary
-    );
+    addToRunTimeSelectionTable(functionObject, turbulenceFields, dictionary);
 }
 }
 
@@ -88,7 +82,7 @@ Foam::functionObjects::turbulenceFields::incompressibleFieldNames_
 });
 
 
-const Foam::word Foam::functionObjects::turbulenceFields::modelName
+const Foam::word Foam::functionObjects::turbulenceFields::modelName_
 (
     Foam::turbulenceModel::propertiesName
 );
@@ -98,11 +92,11 @@ const Foam::word Foam::functionObjects::turbulenceFields::modelName
 
 bool Foam::functionObjects::turbulenceFields::compressible()
 {
-    if (obr_.foundObject<compressible::turbulenceModel>(modelName))
+    if (obr_.foundObject<compressible::turbulenceModel>(modelName_))
     {
         return true;
     }
-    else if (obr_.foundObject<incompressible::turbulenceModel>(modelName))
+    else if (obr_.foundObject<incompressible::turbulenceModel>(modelName_))
     {
         return false;
     }
@@ -131,12 +125,6 @@ Foam::functionObjects::turbulenceFields::turbulenceFields
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::turbulenceFields::~turbulenceFields()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::turbulenceFields::read(const dictionary& dict)
@@ -158,7 +146,7 @@ bool Foam::functionObjects::turbulenceFields::read(const dictionary& dict)
         Info<< "storing fields:" << nl;
         for (const word& f : fieldSet_)
         {
-            Info<< "    " << modelName << ':' << f << nl;
+            Info<< "    " << modelName_ << ':' << f << nl;
         }
         Info<< endl;
     }
@@ -178,7 +166,7 @@ bool Foam::functionObjects::turbulenceFields::execute()
     if (comp)
     {
         const compressible::turbulenceModel& model =
-            obr_.lookupObject<compressible::turbulenceModel>(modelName);
+            obr_.lookupObject<compressible::turbulenceModel>(modelName_);
 
         for (const word& f : fieldSet_)
         {
@@ -255,7 +243,7 @@ bool Foam::functionObjects::turbulenceFields::execute()
     else
     {
         const incompressible::turbulenceModel& model =
-            obr_.lookupObject<incompressible::turbulenceModel>(modelName);
+            obr_.lookupObject<incompressible::turbulenceModel>(modelName_);
 
         for (const word& f : fieldSet_)
         {
@@ -328,7 +316,7 @@ bool Foam::functionObjects::turbulenceFields::write()
 {
     for (const word& f : fieldSet_)
     {
-        const word fieldName = modelName + ':' + f;
+        const word fieldName = modelName_ + ':' + f;
         writeObject(fieldName);
     }
 

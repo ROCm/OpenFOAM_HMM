@@ -30,37 +30,57 @@ Group
     grpFieldFunctionObjects
 
 Description
-    This function object calculates the magnitude squared
-    of d(scalarField)/dt.
+    Computes the magnitude or magnitude squared of the Eulerian time derivative
+    of an input volume field for time-variant simulations
+    (not appropriate to steady-state simulations).
 
-    The result can be used further for determining variance or RMS values
-    (for example).
+    The result can be further used for determining e.g. variance or RMS values.
+
+    Operands:
+    \table
+      Operand           | Type           | Location
+      input             | vol\<Type\>Field | $FOAM_CASE/\<time\>/\<inpField\>
+      output file       | -              | -
+      output field      | vol\<Type\>Field | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
+
+    where \c \<Type\>=Scalar/Vector/SphericalTensor/SymmTensor/Tensor.
 
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
-    dpdt2
+    ddt21
     {
-        type        ddt2;
-        libs        (fieldFunctionObjects);
-        fields      (p);
-        result      d@@dt2;
+        // Mandatory entries (unmodifiable)
+        type            ddt2;
+        libs            (fieldFunctionObjects);
+
+        // Mandatory entries (runtime modifiable)
+        fields          (<field1> <field2> ... <fieldN>);
+
+        // Optional entries (unmodifiable)
+        mag             false;
+
+        // Optional entries (runtime modifiable)
+        result          d@@dt2;
+
+        // Optional (inherited) entries
         ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property | Description                | Required  | Default value
-        type     | type name: ddt2            | yes       |
-        fields   | Name of fields to process  | yes       |
-        result   | Name of results            | no        | magSqr(ddt(@@))
-        log      | Log to standard output     | no        | yes
-        mag      | Use 'mag' instead of 'magSqr' | no     | false
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: ddt2                    | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+      fields       | Names of the operand fields        | wordList | yes | -
+      mag          | Compute 'mag' instead of 'magSqr'  | bool |  no   | false
+      result       | Name of results     | word |  no   | magSqr(ddt2(@@))
     \endtable
 
-    Note that the optional 'mag' entry cannot be changed during the simulation
-    since it alters the dimensions of the output field.
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
 
     A list of fields can contain exact names or regular expressions.
     The token '\@\@' in the result name is replaced by the name of the source
@@ -69,6 +89,13 @@ Usage
 
     The function object will skip over fields that appear to have
     already been processed (ie, their names are similar to the output names).
+
+    Usage by the \c postProcess utility is not available.
+
+See also
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - ExtendedCodeGuide::functionObjects::field::ddt2
 
 SourceFiles
     ddt2.C
@@ -101,29 +128,29 @@ class ddt2
 :
     public fvMeshFunctionObject
 {
-    // Private data
+    // Private Data
 
-        //- Name of fields to process.
+        //- Name of fields to process
         wordRes selectFields_;
 
-        //- Formatting for the result fields.
+        //- Formatting for the result fields
         word resultName_;
 
-        //- Avoid processing the same field twice.
+        //- Avoid processing the same field twice
         mutable regExp blacklist_;
 
-        //- Hashed names of result fields.
+        //- Hashed names of result fields
         wordHashSet results_;
 
-        //- Use 'mag' instead of 'magSqr'.
+        //- Flat to use 'mag' instead of 'magSqr'
         //  Cannot be adjusted during the simulation since it alters the
-        //  dimensions of the output field.
+        //  dimensions of the output field
         const bool mag_;
 
 
     // Private Member Functions
 
-        //- Check that string contains the appropriate substitution token(s).
+        //- Check that string contains the appropriate substitution token(s)
         static bool checkFormatName(const std::string& str);
 
 
@@ -134,15 +161,8 @@ class ddt2
         template<class FieldType>
         int apply(const word& inputName, int& state);
 
-        //- Process by trying to apply for various volume field types.
+        //- Process by trying to apply for various volume field types
         int process(const word& inputName);
-
-
-        //- No copy construct
-        ddt2(const ddt2&) = delete;
-
-        //- No copy assignment
-        void operator=(const ddt2&) = delete;
 
 
 public:
@@ -161,6 +181,12 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        ddt2(const ddt2&) = delete;
+
+        //- No copy assignment
+        void operator=(const ddt2&) = delete;
+
 
     //- Destructor
     virtual ~ddt2() = default;
@@ -174,7 +200,7 @@ public:
         //- Calculate the ddt2 fields
         virtual bool execute();
 
-        //- Write the ddt fields
+        //- Write the ddt2 fields
         virtual bool write();
 };
 

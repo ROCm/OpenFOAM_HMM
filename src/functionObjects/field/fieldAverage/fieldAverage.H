@@ -31,11 +31,9 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Calculates average quantities for a user-specified selection of volumetric
-    and surface fields.
-    With the %subRegion option, also supports fields on functionObject
-    surface output (eg, sampledSurfaces).
-
+    Computes ensemble- and/or time-based field averages, with optional
+    windowing, for a user-specified selection of volumetric and/or surface
+    fields.
 
     Fields are entered as a list of sub-dictionaries, which indicate the type of
     averages to perform, and can be updated during the calculation.  The current
@@ -49,18 +47,19 @@ Description
             \overline{x'}^2 = \frac{1}{N}\displaystyle\sum\limits_{i=0}^N
             (x_i - \overline{x})^2
         \f]
-    - \c base: average over 'time', or 'iteration' (\f$N\f$ in the above)
+    - \c base: average over 'time', or 'iteration' (\c N in the above)
     - \c window: optional averaging window, specified in 'base' units
 
     Average field names are constructed by concatenating the base field with
-    the averaging type, e.g. when averaging field 'U', the resultant fields
-    are:
+    the averaging type, e.g. when averaging field 'U', the name of resultant
+    fields becomes:
     - arithmetic mean field, \c UMean
     - prime-squared field, \c UPrime2Mean
 
     Information regarding the number of averaging steps, and total averaging
     time are written on a per-field basis to the
-    \c "<functionObject name>Properties" dictionary, located in \<time\>/uniform
+    \c "<functionObject name>Properties" dictionary,
+    located in \c \<time\>/uniform.
 
     When restarting form a previous calculation, the averaging is continuous or
     may be restarted using the \c restartOnRestart option.
@@ -70,61 +69,84 @@ Description
     periodicRestart option and setting \c restartPeriod to the required
     averaging period.
 
+    With the \c subRegion option, also supports fields on function object
+    surface output (e.g., \c sampledSurfaces).
+
+    Operands:
+    \table
+      Operand      | Type                          | Location
+      input        | {vol,surface}\<Type\>Field(s) <!--
+               --> |$FOAM_CASE/\<time\>/\<inpField\>s
+      output file  | -                             | -
+      output field | {vol,surface}\<Type\>Field(s) <!--
+               --> | $FOAM_CASE/\<time\>/\<outField\>s
+    \endtable
+
+    where \c \<Type\>=Scalar/Vector/SphericalTensor/SymmTensor/Tensor.
+
 Usage
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     fieldAverage1
     {
+        // Mandatory entries (unmodifiable)
         type                fieldAverage;
         libs                (fieldFunctionObjects);
 
-        writeControl        writeTime;
+        // Mandatory entries (runtime modifiable)
+        fields
+        (
+            <field1>
+            {
+                // Optional (inherited) entries
+                ...
+            }
 
+            ...
+
+            <fieldN>
+            {
+                ...
+            }
+        );
+
+        // Optional entries (runtime modifiable)
         restartOnRestart    false;
         restartOnOutput     false;
         periodicRestart     false;
         restartPeriod       0.002;
 
-        fields
-        (
-            U
-            {
-                mean            on;
-                prime2Mean      on;
-                base            time;
-                windowType      exact;
-                window          10.0;
-                windowName      w1;
-            }
-            p
-            {
-                mean            on;
-                prime2Mean      on;
-                base            time;
-            }
-        );
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property        | Description                       | Required | Default
-        type            | Type name: fieldAverage           | yes |
-        restartOnRestart| Restart the averaging on restart  | no  | no
-        restartOnOutput | Restart the averaging on output   | no  | no
-        periodicRestart | Periodically restart the averaging | no  | no
-        restartPeriod   | Periodic restart period            | conditional |
-        restartTime     | One-shot reset of the averaging    | no | great
-        fields          | list of fields and averaging options | yes |
-        subRegion       | Name for alternative objectRegistry  | no  | ""
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: fieldAverage            | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+      fields       | Names of the operand fields and averaging options <!--
+               --> | dict |  yes  | -
+      restartOnRestart| Restart the averaging on restart | bool | no     | false
+      restartOnOutput | Restart the averaging on output  | bool | no     | false
+      periodicRestart | Periodically restart the averaging | bool | no   | false
+      restartPeriod   | Periodic restart period   | scalar | conditional | -
+      restartTime     | One-shot reset of the averaging  | scalar | no   | GREAT
+      subRegion    | Name for alternative objectRegistry | word   | no   | ""
     \endtable
 
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link fieldAverageItem.H \endlink
 
-Note
-    To employ the \c prime2Mean option, the \c mean option must be selected.
+    Usage by the \c postProcess utility is not available.
 
 See also
-    Foam::functionObjects::fvMeshFunctionObject
-    Foam::functionObject
+    - Foam::functionObject
+    - Foam::functionObjects::fieldAverageItem
+    - Foam::functionObjects::fvMeshFunctionObject
+    - ExtendedCodeGuide::functionObjects::field::fieldAverage
 
 SourceFiles
     fieldAverage.C
@@ -159,7 +181,7 @@ class fieldAverage
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Time at last call, prevents repeated averaging
         label prevTimeIndex_;
@@ -279,13 +301,6 @@ protected:
             void readAveragingProperties();
 
 
-        //- No copy construct
-        fieldAverage(const fieldAverage&) = delete;
-
-        //- No copy assignment
-        void operator=(const fieldAverage&) = delete;
-
-
 public:
 
     //- Runtime type information
@@ -301,6 +316,12 @@ public:
             const Time& runTime,
             const dictionary&
         );
+
+        //- No copy construct
+        fieldAverage(const fieldAverage&) = delete;
+
+        //- No copy assignment
+        void operator=(const fieldAverage&) = delete;
 
 
     //- Destructor

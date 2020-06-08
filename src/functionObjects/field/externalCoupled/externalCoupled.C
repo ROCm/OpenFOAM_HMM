@@ -42,15 +42,9 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(externalCoupled, 0);
-
-    addToRunTimeSelectionTable
-    (
-        functionObject,
-        externalCoupled,
-        dictionary
-    );
-} // End namespace functionObject
-} // End namespace Foam
+    addToRunTimeSelectionTable(functionObject, externalCoupled, dictionary);
+}
+}
 
 Foam::string Foam::functionObjects::externalCoupled::patchKey = "// Patch:";
 
@@ -568,7 +562,8 @@ bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
     timeFunctionObject::read(dict);
     externalFileCoupler::readDict(dict);
 
-    calcFrequency_ = dict.getOrDefault("calcFrequency", 1);
+    calcFrequency_ =
+        dict.getCheckOrDefault("calcFrequency", 1, labelMinMax::ge(1));
 
     // Leave trigger intact
 

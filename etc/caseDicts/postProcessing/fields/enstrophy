@@ -11,7 +11,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 type            enstrophy;
-libs            ("libfieldFunctionObjects.so");
+libs            (fieldFunctionObjects);
 
 field           U;
 

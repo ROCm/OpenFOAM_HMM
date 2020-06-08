@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "lambVector.H"
+#include "LambVector.H"
 #include "fvcCurl.H"
 #include "fvcDiv.H"
 #include "addToRunTimeSelectionTable.H"
@@ -36,14 +36,14 @@ namespace Foam
 {
 namespace functionObjects
 {
-    defineTypeNameAndDebug(lambVector, 0);
-    addToRunTimeSelectionTable(functionObject, lambVector, dictionary);
+    defineTypeNameAndDebug(LambVector, 0);
+    addToRunTimeSelectionTable(functionObject, LambVector, dictionary);
 }
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool Foam::functionObjects::lambVector::calc()
+bool Foam::functionObjects::LambVector::calc()
 {
     if (foundObject<volVectorField>(fieldName_))
     {
@@ -57,7 +57,7 @@ bool Foam::functionObjects::lambVector::calc()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::functionObjects::lambVector::lambVector
+Foam::functionObjects::LambVector::LambVector
 (
     const word& name,
     const Time& runTime,
@@ -66,7 +66,8 @@ Foam::functionObjects::lambVector::lambVector
 :
     fieldExpression(name, runTime, dict, "U")
 {
-    setResultName(typeName, fieldName_);
+    setResultName(typeName, "U");
 }
+
 
 // ************************************************************************* //

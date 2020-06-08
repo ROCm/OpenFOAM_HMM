@@ -115,8 +115,8 @@ bool Foam::functionObjects::continuityError::write()
     const volScalarField error(fvc::div(*phiPtr));
     const scalar deltaT = mesh_.time().deltaTValue();
 
-    scalar local = deltaT*mag(error)().weightedAverage(mesh_.V()).value();
-    scalar global = deltaT*error.weightedAverage(mesh_.V()).value();
+    const scalar local = deltaT*mag(error)().weightedAverage(mesh_.V()).value();
+    const scalar global = deltaT*error.weightedAverage(mesh_.V()).value();
     cumulative_ += global;
 
     Ostream& os = file();

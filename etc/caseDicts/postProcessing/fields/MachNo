@@ -11,7 +11,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 type            MachNo;
-libs            ("libfieldFunctionObjects.so");
+libs            (fieldFunctionObjects);
 
 field           U;
 

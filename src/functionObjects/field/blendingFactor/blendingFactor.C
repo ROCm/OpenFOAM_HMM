@@ -103,12 +103,6 @@ Foam::functionObjects::blendingFactor::blendingFactor
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::blendingFactor::~blendingFactor()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::blendingFactor::read(const dictionary& dict)
@@ -117,17 +111,13 @@ bool Foam::functionObjects::blendingFactor::read(const dictionary& dict)
     {
         phiName_ = dict.getOrDefault<word>("phi", "phi");
 
-        tolerance_ = 0.001;
-        if
-        (
-            dict.readIfPresent("tolerance", tolerance_)
-         && (tolerance_ < 0 || tolerance_ > 1)
-        )
-        {
-            FatalErrorInFunction
-                << "tolerance must be in the range 0 to 1.  Supplied value: "
-                << tolerance_ << exit(FatalError);
-        }
+        tolerance_ =
+            dict.getCheckOrDefault
+            (
+                "tolerance",
+                0.001,
+                [&](const scalar tol){ return (tol > 0) && (tol < 1); }
+            );
 
         return true;
     }
@@ -147,10 +137,8 @@ bool Foam::functionObjects::blendingFactor::write()
         label nCellsScheme1 = 0;
         label nCellsScheme2 = 0;
         label nCellsBlended = 0;
-        forAll(indicator, celli)
+        for (const auto i : indicator)
         {
-            scalar i = indicator[celli];
-
             if (i < tolerance_)
             {
                 nCellsScheme1++;

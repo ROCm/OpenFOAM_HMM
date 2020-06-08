@@ -11,7 +11,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 type            Q;
-libs            ("libfieldFunctionObjects.so");
+libs            (fieldFunctionObjects);
 
 field           U;
 

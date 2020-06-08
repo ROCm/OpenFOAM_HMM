@@ -430,7 +430,7 @@ bool Foam::functionObjects::momentum::read(const dictionary& dict)
     UName_ = dict.getOrDefault<word>("U", "U");
     pName_ = dict.getOrDefault<word>("p", "p");
     rhoName_ = dict.getOrDefault<word>("rho", "rho");
-    rhoRef_ = dict.getOrDefault<scalar>("rhoRef", 1);
+    rhoRef_ = dict.getOrDefault<scalar>("rhoRef", 1.0);
     hasCsys_ = dict.getOrDefault("cylindrical", false);
 
     if (hasCsys_)

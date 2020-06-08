@@ -35,39 +35,19 @@ near
     distance        0.001;
 }
 
+
 // Use UNear to track along wall
 wallBoundedStreamLines
 {
-    // Where to load it from (if not already in solver)
-    libs            (fieldFunctionObjects);
+    // Mandatory entries
     type            wallBoundedStreamLine;
-
-    // Output every
-    writeControl    writeTime;
-
-    setFormat       vtk; //gnuplot; //xmgr; //raw; //jplot;
-
-    // Velocity field to use for tracking.
-    U               UNear;
-
-    // Interpolation method. Default is cellPoint.
-    // interpolationScheme pointMVC;
-
-    // Tracked forwards (+U) or backwards (-U)
-    trackForward    true;
-
-    interpolationScheme cellPoint;
-
-    // Names of fields to sample. Should contain above velocity field!
-    fields (p U k UNear);
-
-    // Steps particles can travel before being removed
-    lifeTime        100;
-
-    // Cloud name to use
+    libs            (fieldFunctionObjects);
+    U               UNear;           // Velocity field to use for tracking.
+    fields          (p U k UNear);   // Names of fields to sample.
+    setFormat       vtk;    //gnuplot; //xmgr; //raw; //jplot;
+    direction       forward;
+    lifeTime        100;    // Steps particles can travel before being removed
     cloud           wallBoundedParticleTracks;
-
-    // Seeding method.
     seedSampleSet
     {
         type        patchSeed;
@@ -75,7 +55,6 @@ wallBoundedStreamLines
         uniformCoeffs
         {
             axis        x;  //distance;
-
             start       (0.0035 0.0999 0.0001);
             end         (0.0035 0.0999 0.0099);
             nPoints     20;
@@ -94,6 +73,26 @@ wallBoundedStreamLines
             maxPoints   20000;
         }
     }
+
+    // Optional entries
+    // bounds          (0.2 -10 -10)(0.22 10 10);
+    // trackLength     1e-3;
+    // nSubCycle       1;
+    interpolationScheme cellPoint;
+
+    // Deprecated
+    // trackForward    true;
+
+    // Optional (inherited) entries
+    region          region0;
+    enabled         true;
+    log             true;
+    timeStart       0;
+    timeEnd         1000;
+    executeControl  timeStep;
+    executeInterval 1;
+    writeControl    writeTime;
+    writeInterval   -1;
 }
 
 

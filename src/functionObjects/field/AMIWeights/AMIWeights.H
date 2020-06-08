@@ -30,33 +30,60 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Reports the min/max/average AMI weights to text file and optionally
-    writes VTK surfaces of the sum of the weights, and mask field for
-    ACMI patches.
+    Computes the min/max/average weights of arbitrary mesh interface (AMI)
+    patches, and optionally reports to a text file or writes VTK surfaces of
+    the sum of the weights and mask fields for arbitrarily coupled mesh
+    interface (ACMI) patches.
+
+    Operands:
+    \table
+      Operand           | Type           | Location
+      input             | -              | -
+      output file       | dat            | $POST/\<file\>
+      output field      | vtp            | $POST/\<AMINames\>_{src,tgt}.vtp
+    \endtable
+
+    where \c $POST=$FOAM_CASE/postProcessing/\<FO\>/\<time\>.
 
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     AMIWeights1
     {
+        // Mandatory entries (unmodifiable)
         type        AMIWeights;
         libs        (fieldFunctionObjects);
-        writeFields yes;
+
+        // Mandatory entries (runtime modifiable)
+        writeFields false;
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description             | Required    | Default value
-        type         | type name: AMIWeights   | yes         |
-        writeFields  | write weights as VTK fields | yes     |
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: AMIWeights              | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+      writeFields  | Write weights as VTK fields        | bool |  yes  | -
     \endtable
 
-    Output data is written to the file \<timeDir\>/AMIWeights.dat
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link writeFile.H \endlink
+
+    Minimal example by using the \c postProcess utility:
+    \verbatim
+        postProcess -func AMIWeights
+    \endverbatim
 
 See also
-    Foam::functionObjects::fvMeshFunctionObject
-    Foam::functionObjects::writeFile
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObjects::writeFile
+    - ExtendedCodeGuide::functionObjects::field::AMIWeights
 
 SourceFiles
     AMIWeights.C
@@ -89,7 +116,7 @@ class AMIWeights
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Flag to write AMI fields (as VTK files)
         bool writeFields_;
@@ -106,6 +133,7 @@ protected:
         //- Helper function to report patch information
         virtual void reportPatch(const cyclicAMIPolyPatch& pp);
 
+        //- Write weight field
         void writeWeightField
         (
             const cyclicAMIPolyPatch& cpp,
@@ -113,13 +141,8 @@ protected:
             const word& side
         ) const;
 
+        //- Write weight fields if writeFields=true
         void writeWeightFields(const cyclicAMIPolyPatch& cpp) const;
-
-        //- No copy construct
-        AMIWeights(const AMIWeights&) = delete;
-
-        //- No copy assignment
-        void operator=(const AMIWeights&) = delete;
 
 
 public:
@@ -137,6 +160,12 @@ public:
             const Time& runTime,
             const dictionary& dict
         );
+
+        //- No copy construct
+        AMIWeights(const AMIWeights&) = delete;
+
+        //- No copy assignment
+        void operator=(const AMIWeights&) = delete;
 
 
     //- Destructor

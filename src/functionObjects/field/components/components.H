@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,16 +31,75 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Calculates the components of a field.
+    Extracts the components of elements of a field and outputs the result
+    into new fields, where the fields possess the same sizes and dimensions.
 
-    The operation can be applied to any volume or surface fields generating a
-    volume or surface scalar fields for each component.
+    Depending on the base type of the input field, the number of output fields
+    and output suffixes are as follows (the base type cannot be scalar since
+    scalars have no components):
+
+    \table
+      Base type         | Number of components | Suffixes
+      vector            | 3                    | (x y z)
+      sphericalTensor   | 3                    | (x y z)
+      symmTensor        | 6                    | (xx xy xz yy yz zz)
+      tensor            | 9                    | (xx xy xz yx yy yz zx zy zz)
+    \endtable
+
+    Operands:
+    \table
+      Operand           | Type                                        | Location
+      input             | {vol,surface}\<Type\>Field (Type != Scalar) <!--
+                    --> | $FOAM_CASE/\<time\>/\<inpField\>
+      output file       | -                                           | -
+      output field      | {vol,surface}ScalarField for each component <!--
+                    --> | $FOAM_CASE/\<time\>/\<outField\>\<suffix\>
+    \endtable
+
+    where \c \<Type\>=Scalar/Vector/SphericalTensor/SymmTensor/Tensor.
+
+Usage
+    Minimal example by using \c system/controlDict.functions:
+    \verbatim
+    components1
+    {
+        // Mandatory entries (unmodifiable)
+        type            components;
+        libs            (fieldFunctionObjects);
+
+        // Mandatory (inherited) entry (runtime modifiable)
+        field           <field>;
+
+        // Optional (inherited) entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: components              | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+      field        | Name of the operand field          | word |  yes  | -
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link fieldExpression.H \endlink
+
+    Minimal example by using the \c postProcess utility:
+    \verbatim
+        postProcess -func "components(<field>)"
+    \endverbatim
 
 See also
-    Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - ExtendedCodeGuide::functionObjects::field::components
 
 SourceFiles
     components.C
+    componentsTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -64,7 +123,7 @@ class components
 :
     public fieldExpression
 {
-    // Private member data
+    // Private Member Data
 
         //- List of the component field names
         wordList resultNames_;
@@ -73,12 +132,12 @@ class components
     // Private Member Functions
 
         //- Calculate the components of the field with the specified type
-        //  and register the result
+        //- and register the result
         template<class GeoFieldType>
         bool calcFieldComponents();
 
         //- Calculate the components of the field with the specified
-        //  element type and register the result
+        //- element type and register the result
         template<class Type>
         bool calcComponents();
 
@@ -101,6 +160,12 @@ public:
             const Time& runTime,
             const dictionary& dict
         );
+
+        //- No copy construct
+        components(const components&) = delete;
+
+        //- No copy assignment
+        void operator=(const components&) = delete;
 
 
     //- Destructor

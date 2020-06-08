@@ -31,27 +31,49 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Writes the cell-volumes volScalarField.
+    Writes the cell-volumes \c volScalarField.
+
+    Operands:
+    \table
+      Operand        | Type           | Location
+      input          | -              | -
+      output file    | -              | -
+      output field   | volScalarField | $FOAM_CASE/\<time\>/V
+    \endtable
 
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     writeCellVolumes
     {
+        // Mandatory entries (unmodifiable)
         type        writeCellVolumes;
         libs        (fieldFunctionObjects);
+
+        // Optional (inherited) entries
         ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property  | Description                 | Required    | Default value
-        type      | type name: writeCellVolumes | yes       |
+      Property   | Description                        | Type | Req'd | Dflt
+      type       | Type name: writeCellVolumes        | word |  yes  | -
+      libs       | Library name: fieldFunctionObjects | word |  yes  | -
     \endtable
 
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+
+    Minimal example by using the \c postProcess utility:
+    \verbatim
+        postProcess -func writeCellVolumes
+    \endverbatim
+
 See also
-    Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - ExtendedCodeGuide::functionObjects::field::writeCellVolumes
 
 SourceFiles
     writeCellVolumes.C
@@ -78,15 +100,6 @@ class writeCellVolumes
 :
     public fvMeshFunctionObject
 {
-    // Private member functions
-
-        //- No copy construct
-        writeCellVolumes(const writeCellVolumes&) = delete;
-
-        //- No copy assignment
-        void operator=(const writeCellVolumes&) = delete;
-
-
 public:
 
     //- Runtime type information
@@ -103,9 +116,15 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        writeCellVolumes(const writeCellVolumes&) = delete;
+
+        //- No copy assignment
+        void operator=(const writeCellVolumes&) = delete;
+
 
     //- Destructor
-    virtual ~writeCellVolumes();
+    virtual ~writeCellVolumes() = default;
 
 
     // Member Functions

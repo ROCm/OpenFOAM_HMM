@@ -11,7 +11,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 type            processorField;
-libs            ("libfieldFunctionObjects.so");
+libs            (fieldFunctionObjects);
 
 executeControl  writeTime;
 writeControl    writeTime;

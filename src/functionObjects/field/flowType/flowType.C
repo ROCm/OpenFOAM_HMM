@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,13 +37,7 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(flowType, 0);
-
-    addToRunTimeSelectionTable
-    (
-        functionObject,
-        flowType,
-        dictionary
-    );
+    addToRunTimeSelectionTable(functionObject, flowType, dictionary);
 }
 }
 
@@ -58,9 +52,9 @@ bool Foam::functionObjects::flowType::calc()
         const tmp<volTensorField> tgradU(fvc::grad(U));
         const volTensorField& gradU = tgradU();
 
-        volScalarField magD(mag(symm(gradU)));
-        volScalarField magOmega (mag(skew(gradU)));
-        dimensionedScalar smallMagD("smallMagD", magD.dimensions(), SMALL);
+        const volScalarField magD(mag(symm(gradU)));
+        const volScalarField magOmega(mag(skew(gradU)));
+        const dimensionedScalar smallMagD("sMagD", magD.dimensions(), SMALL);
 
         const volTensorField SSplusWW
         (
@@ -92,12 +86,6 @@ Foam::functionObjects::flowType::flowType
 {
     setResultName(typeName, "U");
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::flowType::~flowType()
-{}
 
 
 // ************************************************************************* //

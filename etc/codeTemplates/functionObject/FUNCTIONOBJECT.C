@@ -52,28 +52,23 @@ Foam::functionObjects::FUNCTIONOBJECT::FUNCTIONOBJECT
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
+    boolData_(dict.getOrDefault<bool>("boolData"), true),
+    labelData_(dict.get<label>("labelData")),
     wordData_(dict.getOrDefault<word>("wordData", "defaultWord")),
-    scalarData_(dict.get<scalar>("scalarData")),
-    labelData_(dict.get<label>("labelData"))
+    scalarData_(dict.getOrDefault<scalar>("scalarData", 1.0))
 {
     read(dict);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::FUNCTIONOBJECT::~FUNCTIONOBJECT()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::FUNCTIONOBJECT::read(const dictionary& dict)
 {
-    dict.readIfPresent("wordData", wordData_);
-
-    dict.readEntry("scalarData", scalarData_);
+    dict.readEntry("boolData", boolData_);
     dict.readEntry("labelData", labelData_);
+    dict.readIfPresent("wordData", wordData_);
+    dict.readEntry("scalarData", scalarData_);
 
     return true;
 }

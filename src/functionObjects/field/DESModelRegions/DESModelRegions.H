@@ -31,32 +31,61 @@ Group
     grpFieldFunctionObjects
 
 Description
-    This function object writes out an indicator field for DES turbulence
-    calculations, that is:
-    - 0 for RAS regions
-    - 1 for LES regions
+    Computes an indicator field for detached eddy simulation (DES) turbulence
+    calculations, where the values of the indicator mean:
 
-    The field is stored on the mesh database so that it can be retrieved and
-    used for other applications.
+    \verbatim
+      0 = Reynolds-averaged Navier-Stokes (RAS) regions
+      1 = Large eddy simulation (LES) regions
+    \endverbatim
+
+    Operands:
+    \table
+      Operand         | Type              | Location
+      input           | -                 | -
+      output file     | dat | $FOAM_CASE/postProcessing/\<FO\>/\<time\>/\<file\>
+      output field    | volScalarField    | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
 
 Usage
-    Example of function object specification to generate DES indicator field:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     DESModelRegions1
     {
+        // Mandatory entries (unmodifiable)
         type        DESModelRegions;
         libs        (fieldFunctionObjects);
+
+        // Optional entries (runtime modifiable)
+        result      DESField;
+
+        // Optional (inherited) entries
         ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description             | Required    | Default value
-        type         | type name: DESModelRegions| yes       |
-        resultName   | Name of DES indicator field | no      | \<function name\>
-        log          | log to standard output  | no          | yes
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: DESModelRegions         | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+      result       | Name of DES indicator field        | word |  no   | <FO>
     \endtable
+
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link writeFile.H \endlink
+
+    Usage by the \c postProcess utility is not available.
+
+Note
+    \c DESModelRegions function object can only be executed for DES simulations.
+
+See also
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObjects::writeFile
+    - ExtendedCodeGuide::functionObjects::field::DESModelRegions
 
 SourceFiles
     DESModelRegions.C
@@ -89,9 +118,9 @@ class DESModelRegions
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
-        //- Result name
+        //- Name of DES indicator field
         word resultName_;
 
 
@@ -99,12 +128,6 @@ protected:
 
         //- File header information
         virtual void writeFileHeader(Ostream& os) const;
-
-        //- No copy construct
-        DESModelRegions(const DESModelRegions&) = delete;
-
-        //- No copy assignment
-        void operator=(const DESModelRegions&) = delete;
 
 
 public:
@@ -114,6 +137,7 @@ public:
 
 
     // Constructors
+
         //- Construct from Time and dictionary
         DESModelRegions
         (
@@ -122,9 +146,15 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        DESModelRegions(const DESModelRegions&) = delete;
+
+        //- No copy assignment
+        void operator=(const DESModelRegions&) = delete;
+
 
     //- Destructor
-    virtual ~DESModelRegions();
+    virtual ~DESModelRegions() = default;
 
 
     // Member Functions

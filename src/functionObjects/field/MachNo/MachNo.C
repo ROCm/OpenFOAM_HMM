@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,13 +37,7 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(MachNo, 0);
-
-    addToRunTimeSelectionTable
-    (
-        functionObject,
-        MachNo,
-        dictionary
-    );
+    addToRunTimeSelectionTable(functionObject, MachNo, dictionary);
 }
 }
 
@@ -87,12 +81,6 @@ Foam::functionObjects::MachNo::MachNo
 {
     setResultName("Ma", "U");
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::MachNo::~MachNo()
-{}
 
 
 // ************************************************************************* //

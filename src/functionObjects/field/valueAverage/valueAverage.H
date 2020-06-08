@@ -31,42 +31,63 @@ Group
     grpFieldFunctionObjects
 
 Description
-    This function object calculates the average value from the output of
-    function objects that generate singular values.
+    Computes the ensemble- or time-based singular-value average values,
+    with optional windowing, from the output of function objects
+    that generate non-field type values (e.g. \c Cd of \c forceCoeffs or
+    \c momentum_x in \c momentum function objects).
+
+    Operands:
+    \table
+      Operand        | Type | Location
+      input          | -    | -
+      output file    | dat  | $FOAM_CASE/postProcessing/\<FO\>/\<time\>/\<file\>
+      output field   | -    | -
+    \endtable
 
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     valueAverage1
     {
-        type        valueAverage;
-        libs        (fieldFunctionObjects);
+        // Mandatory entries (unmodifiable)
+        type              valueAverage;
+        libs              (fieldFunctionObjects);
+
+        // Mandatory entries (runtime modifiable)
+        functionObject    <FO>;                       // forceCoeffs1;
+        fields            (<field1> ... <fieldN>);    // (Cm Cd Cl);
+
+        // Optional entries (runtime modifiable)
+        resetOnRestart    false;
+        window            0.5;
+
+        // Optional (inherited) entries
         ...
-        writeToFile yes;
-        log         yes;
-        functionObject forceCoeffs1;
-        fields      (Cm Cd Cl);
-        window      0.5;
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description             | Required    | Default value
-        type         | type name: valueAverage | yes         |
-        writeToFile  | write average data to file |  no      | yes
-        log          | write average data to standard output | no | yes
-        fields       | list of fields to process | yes       |
-        functionObject | Name of function object to retrieve data from | yes |
-        resetOnRestart | Reset the averaging on restart | no | no |
+      Property     | Description                           | Type | Req'd | Dflt
+      type         | Type name: valueAverage               | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects    | word |  yes  | -
+      functionObject | Name of function object to retrieve data | word | yes | -
+      fields       | Names of operand fields               | wordList | yes | -
+      resetOnRestart | Reset the averaging on restart      | bool | no | false
+      window       | Averaging window                    | scalar | no | VGREAT
     \endtable
 
-    Output data is written to the file \<timeDir\>/valueAverage.dat
+    The inherited entries are elaborated in:
+     - \link regionFunctionObject.H \endlink
+     - \link writeFile.H \endlink
+
+    Usage by the \c postProcess utility is not available.
 
 See also
-    Foam::functionObject
-    Foam::functionObjects::stateFunctionObject
-    Foam::functionObjects::writeFile
+    - Foam::functionObject
+    - Foam::functionObjects::stateFunctionObject
+    - Foam::functionObjects::writeFile
+    - ExtendedCodeGuide::functionObjects::field::valueAverage
 
 SourceFiles
     valueAverage.C
@@ -98,7 +119,7 @@ class valueAverage
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Name of function object to retrieve data from
         word functionObjectName_;
@@ -132,6 +153,23 @@ protected:
         //- Output file header information
         virtual void writeFileHeader(Ostream& os) const;
 
+
+public:
+
+    //- Runtime type information
+    TypeName("valueAverage");
+
+
+    // Constructors
+
+        //- Construct from Time and dictionary
+        valueAverage
+        (
+            const word& name,
+            const Time& runTime,
+            const dictionary& dict
+        );
+
         //- No copy construct
         valueAverage(const valueAverage&) = delete;
 
@@ -139,21 +177,8 @@ protected:
         void operator=(const valueAverage&) = delete;
 
 
-public:
-
-    //- Runtime type information
-    TypeName("valueAverage");
-
-    //- Constructor
-    valueAverage
-    (
-        const word& name,
-        const Time& runTime,
-        const dictionary& dict
-    );
-
     //- Destructor
-    virtual ~valueAverage();
+    virtual ~valueAverage() = default;
 
 
     // Public Member Functions

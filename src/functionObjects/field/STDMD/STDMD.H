@@ -46,57 +46,58 @@ Description
 
     References:
     \verbatim
-    STDMD and mode-sorting algorithms (tags:K, HRDC, KZ, HWR):
-        Kiewat, M. (2019).
-        Streaming modal decomposition approaches for vehicle aerodynamics.
-        PhD thesis. Munich: Technical University of Munich.
-        URL:mediatum.ub.tum.de/doc/1482652/1482652.pdf
+        STDMD and mode-sorting algorithms (tags:K, HRDC, KZ, HWR):
+            Kiewat, M. (2019).
+            Streaming modal decomposition approaches for vehicle aerodynamics.
+            PhD thesis. Munich: Technical University of Munich.
+            URL:mediatum.ub.tum.de/doc/1482652/1482652.pdf
 
-        Hemati, M. S., Rowley, C. W., Deem, E. A., & Cattafesta, L. N. (2017).
-        De-biasing the dynamic mode decomposition for applied Koopman
-        spectral analysis of noisy datasets.
-        Theoretical and Computational Fluid Dynamics, 31(4), 349-368.
-        DOI:10.1007/s00162-017-0432-2
+            Hemati, M. S., Rowley, C. W.,
+            Deem, E. A., & Cattafesta, L. N. (2017).
+            De-biasing the dynamic mode decomposition
+            for applied Koopman spectral analysis of noisy datasets.
+            Theoretical and Computational Fluid Dynamics, 31(4), 349-368.
+            DOI:10.1007/s00162-017-0432-2
 
-        Kou, J., & Zhang, W. (2017).
-        An improved criterion to select dominant modes from dynamic mode
-        decomposition.
-        European Journal of Mechanics-B/Fluids, 62, 109-129.
-        DOI:10.1016/j.euromechflu.2016.11.015
+            Kou, J., & Zhang, W. (2017).
+            An improved criterion to select
+            dominant modes from dynamic mode decomposition.
+            European Journal of Mechanics-B/Fluids, 62, 109-129.
+            DOI:10.1016/j.euromechflu.2016.11.015
 
-        Hemati, M. S., Williams, M. O., & Rowley, C. W. (2014).
-        Dynamic mode decomposition for large and streaming datasets.
-        Physics of Fluids, 26(11), 111701.
-        DOI:10.1063/1.4901016
+            Hemati, M. S., Williams, M. O., & Rowley, C. W. (2014).
+            Dynamic mode decomposition for large and streaming datasets.
+            Physics of Fluids, 26(11), 111701.
+            DOI:10.1063/1.4901016
 
-    Parallel classical Gram-Schmidt process (tag:Ka):
-        Katagiri, T. (2003).
-        Performance evaluation of parallel Gram-Schmidt re-orthogonalization
-        methods.
-        In: Palma J. M. L. M., Sousa A. A., Dongarra J., Hernández V. (eds)
-        High Performance Computing for Computational Science — VECPAR 2002.
-        Lecture Notes in Computer Science, vol 2565, p. 302-314.
-        Berlin, Heidelberg: Springer.
-        DOI:10.1007/3-540-36569-9_19
+        Parallel classical Gram-Schmidt process (tag:Ka):
+            Katagiri, T. (2003).
+            Performance evaluation of parallel
+            Gram-Schmidt re-orthogonalization methods.
+            In: Palma J. M. L. M., Sousa A. A., Dongarra J., Hernández V. (eds)
+            High Performance Computing for Computational Science — VECPAR 2002.
+            Lecture Notes in Computer Science, vol 2565, p. 302-314.
+            Berlin, Heidelberg: Springer.
+            DOI:10.1007/3-540-36569-9_19
 
-    Parallel direct tall-skinny QR decomposition (tags:BGD, DGHL):
-        Benson, A. R., Gleich, D. F., & Demmel, J. (2013).
-        Direct QR factorizations for tall-and-skinny matrices in MapReduce
-        architectures.
-        2013 IEEE International Conference on Big Data.
-        DOI:10.1109/bigdata.2013.6691583
+        Parallel direct tall-skinny QR decomposition (tags:BGD, DGHL):
+            Benson, A. R., Gleich, D. F., & Demmel, J. (2013).
+            Direct QR factorizations for
+            tall-and-skinny matrices in MapReduce architectures.
+            2013 IEEE International Conference on Big Data.
+            DOI:10.1109/bigdata.2013.6691583
 
-        Demmel, J., Grigori, L., Hoemmen, M., & Langou, J. (2012).
-        Communication-optimal parallel and sequential QR and LU
-        factorizations.
-        SIAM Journal on Scientific Computing, 34(1), A206-A239.
-        DOI:10.1137/080731992
+            Demmel, J., Grigori, L., Hoemmen, M., & Langou, J. (2012).
+            Communication-optimal parallel
+            and sequential QR and LU factorizations.
+            SIAM Journal on Scientific Computing, 34(1), A206-A239.
+            DOI:10.1137/080731992
 
-    DMD properties:
-        Brunton S. L. (2018).
-        Dynamic mode decomposition overview.
-        Seattle, Washington: University of Washington.
-        youtu.be/sQvrK8AGCAo (Retrieved:24-04-20)
+        DMD properties:
+            Brunton S. L. (2018).
+            Dynamic mode decomposition overview.
+            Seattle, Washington: University of Washington.
+            youtu.be/sQvrK8AGCAo (Retrieved:24-04-20)
     \endverbatim
 
     Operands:
@@ -109,7 +110,7 @@ Description
       output field | volScalarField(s) | $FOAM_CASE/\<time\>/\<outField\>(s)
     \endtable
 
-    where Type={Scalar,SphericalTensor,SymmTensor,Tensor}.
+    where \c \<Type\>=Scalar/Vector/SphericalTensor/SymmTensor/Tensor.
 
     Output fields:
     \verbatim

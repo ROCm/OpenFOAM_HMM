@@ -31,30 +31,69 @@ Group
     grpFieldFunctionObjects
 
 Description
-    From the first field subtract the remaining fields in the list.
+    Subtracts a given list of (at least one or more) fields from a field and
+    produces a new field, where the fields possess the same sizes and
+    dimensions.
 
-    The operation can be applied to any volume or surface fields generating a
-    volume or surface scalar field.
-
-    Example of function object specification:
     \verbatim
-    Tdiff
+        fieldResult = field1 - field2 - ... - fieldN
+    \endverbatim
+
+    Operands:
+    \table
+      Operand      | Type                          | Location
+      input        | {vol,surface}\<Type\>Field(s) <!--
+               --> | $FOAM_CASE/\<time\>/\<inpField\>s
+      output file  | -                             | -
+      output field | {vol,surface}\<Type\>Field    <!--
+               --> | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
+
+    where \c \<Type\>=Scalar/Vector/SphericalTensor/SymmTensor/Tensor.
+
+Usage
+    Minimal example by using \c system/controlDict.functions:
+    \verbatim
+    subtract1
     {
+        // Mandatory entries (unmodifiable)
         type            subtract;
         libs            (fieldFunctionObjects);
-        fields          (T Tmean);
-        result          Tdiff;
-        executeControl  writeTime;
-        writeControl    writeTime;
+
+        // Mandatory (inherited) entry (runtime modifiable)
+        fields          (<field1> <field2> ... <fieldN>);
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
+    where the entries mean:
+    \table
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: subtract                | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+      fields       | Names of the operand fields        | wordList |  yes  | -
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link fieldsExpression.H \endlink
+
+    Minimal example by using the \c postProcess utility:
+    \verbatim
+        postProcess -func "subtract(<field1>, <field2>, ..., <fieldN>)"
+    \endverbatim
+
 See also
-    Foam::functionObjects::fieldsExpression
-    Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObject
+    - Foam::functionObjects::fieldsExpression
+    - Foam::functionObjects::fvMeshFunctionObject
+    - ExtendedCodeGuide::functionObjects::field::subtract
 
 SourceFiles
     subtract.C
+    subtractTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -81,7 +120,7 @@ class subtract
     // Private Member Functions
 
         //- Subtract the list of fields of the specified type
-        //  and return the result
+        //- and return the result
         template<class GeoFieldType>
         tmp<GeoFieldType> calcFieldType() const;
 
@@ -108,9 +147,15 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        subtract(const subtract&) = delete;
+
+        //- No copy assignment
+        void operator=(const subtract&) = delete;
+
 
     //- Destructor
-    virtual ~subtract();
+    virtual ~subtract() = default;
 };
 
 

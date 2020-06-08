@@ -51,18 +51,38 @@ maxCo           0.01;
 maxAlphaCo      0.01;
 maxAlphaDdt     0.01;
 
+
 functions
 {
     interfaceHeight1
     {
-        type           interfaceHeight;
-        libs           (fieldFunctionObjects);
-        alpha          alpha.liquid;
-        locations      ((0 0 0));
+        // Mandatory entries
+        type            interfaceHeight;
+        libs            (fieldFunctionObjects);
+        locations       ((0 0 0));
+
+        // Optional entries
+        alpha           alpha.liquid;
         direction       (1 0 0);
+        liquid          true;
+        interpolationScheme    cellPoint;
+
+        // Optional (inherited) entries
+        writePrecision   16;
+        writeToFile      true;
+        useUserTime      true;
+
+        region          region0;
+        enabled         true;
+        log             true;
+        timeStart       0;
+        timeEnd         1000;
+        executeControl  timeStep;
+        executeInterval 1;
         writeControl    timeStep;
         writeInterval   3;
     }
 }
+
 
 // ************************************************************************* //

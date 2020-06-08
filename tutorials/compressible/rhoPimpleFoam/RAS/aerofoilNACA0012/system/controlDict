@@ -46,7 +46,7 @@ runTimeModifiable true;
 
 functions
 {
-    #includeFunc MachNo
+    #include "FOMachNo"
     #includeFunc solverInfo
 }
 

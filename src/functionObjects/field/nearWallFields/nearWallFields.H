@@ -31,53 +31,62 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Samples near-patch volume fields.
+    Samples near-patch volume fields within an input distance range.
 
-    Fields are stored
-    - every time step the field is updated with new values
-    - at output it writes the fields
+    Operands:
+    \table
+      Operand        | Type             | Location
+      input          | vol\<Type\>Field | $FOAM_CASE/\<time\>/\<inpField\>
+      output file    | -                | -
+      output field   | vol\<Type\>Field | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
 
-    This functionObject can either be used
-    - to calculate a new field as a  post-processing step or
-    - since the fields are registered, used in another functionObject
+    where \c \<Type\>=Scalar/Vector/SphericalTensor/SymmTensor/Tensor.
 
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     nearWallFields1
     {
-        type        nearWallFields;
-        libs        (fieldFunctionObjects);
-
-        writeControl writeTime;
-
+        // Mandatory entries (unmodifiable)
+        type            nearWallFields;
+        libs            (fieldFunctionObjects);
         fields
         (
-            (p pNear)
-            (U UNear)
+            (<field1> <outField1>)
+            (<field2> <outField2>)
         );
+        patches         (<patch1> <patch2> ... <patchN>);
+        distance        0.01;
 
-        patches     (movingWall);
-
-        distance    0.13;
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property | Description               | Required    | Default value
-        type     | type name: nearWallFields | yes         |
-        fields   | list of fields with corresponding output field names | yes |
-        patches  | list of patches to sample | yes         |
-        distance | distance from patch to sample | yes     |
-        log      | Log to standard output    | no          | yes
+      Property     | Description                        | Type | Req'd  | Dflt
+      type         | Type name: nearWallFields          | word |  yes   | -
+      libs         | Library name: fieldFunctionObjects | word |  yes   | -
+      fields       | Names of input-output fields | wordHashTable | yes | -
+      patches      | Names of patches to sample       | wordList | yes  | -
+      distance | Wall-normal distance from patch to sample | scalar | yes  | -
     \endtable
 
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+
+    Usage by the \c postProcess utility is not available.
+
 See also
-    Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - ExtendedCodeGuide::functionObjects::field::nearWallFields
 
 SourceFiles
     nearWallFields.C
+    nearWallFieldsTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -106,15 +115,12 @@ class nearWallFields
 {
 protected:
 
-    // Protected Member Data
+    // Protected Data
 
         // Read from dictionary
 
             //- Fields to process (input-name output-name)
             List<Tuple2<word, word>> fieldSet_;
-
-            //- Switch to send output to Info as well as to file
-            Switch log_;
 
             //- Patches to sample
             labelHashSet patchSet_;
@@ -176,12 +182,6 @@ protected:
         ) const;
 
 
-        //- No copy construct
-        nearWallFields(const nearWallFields&) = delete;
-
-        //- No copy assignment
-        void operator=(const nearWallFields&) = delete;
-
 public:
 
     //- Runtime type information
@@ -198,6 +198,12 @@ public:
             const Time& runTime,
             const dictionary& dict
         );
+
+        //- No copy construct
+        nearWallFields(const nearWallFields&) = delete;
+
+        //- No copy assignment
+        void operator=(const nearWallFields&) = delete;
 
 
     //- Destructor

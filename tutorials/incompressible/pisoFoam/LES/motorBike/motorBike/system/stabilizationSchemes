@@ -11,48 +11,69 @@ residuals
     type                solverInfo;
     libs                (utilityFunctionObjects);
     writeResidualFields true;
-    writeControl        outputTime;
+    writeControl        writeTime;
     fields              (p);
 }
 
 blendingFactor
 {
+    // Mandatory entries
     type                stabilityBlendingFactor;
     libs                (fieldFunctionObjects);
-    log                 true;
-    writeToFile         false;
+    field               U;
+    result              UBlendingFactor;
 
+    // Optional entries
+    tolerance           0.001;
+
+    // Any of the options can be chosen in combinations
+    // Option-1
     switchNonOrtho      yes;
-    switchGradCc        no;
-    switchResiduals     yes;
-    switchSkewness      no;
-    switchFaceWeight    no;
-    switchCo            no;
-
     maxNonOrthogonality 20;
     minNonOrthogonality 60;
 
+    // Option-2
+    switchGradCc        no;
     maxGradCc           3;
     minGradCc           4;
 
+    // Option-3
+    switchResiduals     yes;
     maxResidual         100;
-
     P                   5;
     I                   0.01;
     D                   0.5;
 
+    // Option-4
+    switchFaceWeight    no;
     minFaceWeight       0.3;
     maxFaceWeight       0.2;
 
-    Co1                 1;
-    Co2                 2;
-
+    // Option-5
+    switchSkewness      no;
     maxSkewness         2;
     minSkewness         3;
 
+    // Option-6
+    switchCo            no;
+    Co1                 1;
+    Co2                 2;
 
-    field               U;
-    result              UBlendingFactor;
+    // Optional (inherited) entries
+    writePrecision  10;
+    writeToFile     false;
+    useUserTime     true;
+
+    region          region0;
+    enabled         true;
+    log             true;
+    timeStart       0;
+    timeEnd         1000;
+    executeControl  timeStep;
+    executeInterval 1;
+    writeControl    writeTime;
+    writeInterval   -1;
 }
+
 
 // ************************************************************************* //

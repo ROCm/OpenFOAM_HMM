@@ -31,8 +31,8 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Creates a size distribution via interrogating a continuous phase fraction
-    field.
+    Creates a droplet size distribution via interrogating a continuous phase
+    fraction field.
 
     Looks up a phase-fraction (alpha) field and splits the mesh into regions
     based on where the field is below the threshold value.  These
@@ -50,7 +50,7 @@ Description
     - alpha_liquidCore : alpha with outside liquid core set to 0
     - alpha_background : alpha with outside background set to 0.
 
-    %Histogram:
+    Histogram:
     - determine histogram of diameter (given minDiameter, maxDiameter, nBins)
     - write graph of number of droplets per bin
     - write graph of sum, average and deviation of droplet volume per bin
@@ -60,40 +60,57 @@ Description
       downstream of the injector determined by origin, direction and maxDiameter
       up to maxDownstream
 
+    Operands:
+    \table
+      Operand           | Type              | Location
+      input             | -                 | -
+      output file       | -                 <!--
+                    --> | $FOAM_CASE/postProcessing/\<FO\>/\<time\>/\<files\>
+      output field      | -                 | -
+    \endtable
+
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     regionSizeDistribution1
     {
+        // Mandatory entries (unmodifiable)
         type            regionSizeDistribution;
         libs            (fieldFunctionObjects);
-        ...
+
+        // Mandatory entries (runtime modifiable)
         field           alpha;
         patches         (inlet);
-        threshold       0.4;
         fields          (p U);
+        threshold       0.4;
+        maxDiameter     5e-5;
         nBins           100;
-        maxDiameter     0.5e-4;
-        minDiameter     0;
         setFormat       gnuplot;
-        origin          (0 0 0);
-        coordinateRoation
+
+        // Optional entries (runtime modifiable)
+        minDiameter     0.0;
+        coordinateSystem
         {
-            type            cartesian;
-            e3              (0 1 1);
-            e1              (1 0 0);
+            origin  (0 0 0);
+            rotation
+            {
+                type    axes;
+                e3      (0 0 1);
+                e1      (1 0 0);
+            }
         }
 
-        // Optional downstream iso-plane bins.
+        // Optional downstream iso-plane bins
         isoPlanes       true;
 
+            // Mandatory entries if isoPlanes=true   (runtime modifiable)
             // Plane normal and point definition
-            direction       (1 0 1);
             origin          (1e-4 0 5e-4);
+            direction       (1 0 1);
 
             // Maximum diameter of the cylinder formed by the origin point
             // and direction
-            maxDiameter     3e-4;
+            maxD            3e-4;
 
             // Maximum downstream distance
             maxDownstream   6e-4;
@@ -101,41 +118,54 @@ Usage
             // Number of iso-plane bins
             nDownstreamBins 20;
 
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description             | Required    | Default value
-        type         | type name: regionSizeDistribution |yes|
-        field        | phase field to interrogate | yes      |
-        patches      | patches from which the liquid core is identified | yes|
-        threshold    | phase fraction applied to delimit regions | yes |
-        fields       | fields to sample        | yes         |
-        nBins        | number of bins for histogram | yes    |
-        maxDiameter  | maximum region equivalent diameter | yes |
-        minDiameter  | minimum region equivalent diameter | no  | 0
-        setFormat    | writing format          | yes         |
-        origin       | origin of local coordinate system | yes    |
-        coordinateRoation | orientation of local coordinate system | no
-        log          | Log to standard output  | no          | yes
-        isoPlanes    | switch for isoPlanes    | no          | false
-        origin       | origin of the plane when isoPlanes is used | no | none
-        direction    | direction of the plane when isoPlanes is used | no | none
-        maxDiameter  | maximum diameter of the sampling cylinder when
-                       isoPlanes is used | no | none
-        nDownstreamBins  | number of bins when isoPlanes is used | no | none
-        maxDownstream  | maximum distance from origin when isoPlanes is used
-                       | no | none
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: regionSizeDistribution  | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+      field        | Phase field to interrogate         | word |  yes  | -
+      patches      | Patches wherefrom the liquid core is identified <!--
+                                                    --> | wordList | yes | -
+      fields     | Fields to sample                     | wordList | yes | -
+      threshold  | Phase fraction applied to delimit regions | scalar | yes | -
+      maxDiameter  | Maximum droplet diameter           | scalar | yes | -
+      minDiameter  | Minimum droplet diameter           | scalar | no  | 0.0
+      nBins        | Number of bins for histogram       | label  | yes | -
+      setFormat    | Output format                      | word   | yes | -
+      isoPlanes    | Flag for isoPlanes                 | bool | no    | false
+      origin       | Origin of the plane when isoPlanes is used <!--
+                                                    --> | vector | yes | -
+      direction   <!--
+      --> | Direction of the plane when isoPlanes is used | vector | yes | -
+      maxD        | Maximum diameter of the sampling <!--
+                --> cylinder when isoPlanes is used     | vector | yes | -
+      nDownstreamBins  <!--
+      --> | Number of bins when isoPlanes is used       | label | yes  | -
+      maxDownstream  <!--
+      --> | Maximum distance from origin when isoPlanes is used <!--
+                                                    --> | scalar | yes | -
     \endtable
 
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link writeFile.H \endlink
+
+    Usage by the \c postProcess utility is not available.
+
 See also
-    Foam::functionObject
-    Foam::functionObjects::fvMeshFunctionObject
-    Foam::functionObjects::writeFile
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObjects::writeFile
+    - ExtendedCodeGuide::functionObjects::field::regionSizeDistribution
 
 SourceFiles
     regionSizeDistribution.C
+    regionSizeDistributionTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -156,7 +186,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
 class regionSplit;
 
 namespace functionObjects
@@ -171,16 +200,13 @@ class regionSizeDistribution
     public fvMeshFunctionObject,
     public writeFile
 {
-    // Private data
+    // Private Data
+
+        //- Number of bins
+        label nBins_;
 
         //- Name of field
         word alphaName_;
-
-        //- Patches to walk from
-        wordRes patchNames_;
-
-        //- Switch to send output to Info as well as to file
-        Switch log_;
 
         //- Clip value
         scalar threshold_;
@@ -191,8 +217,8 @@ class regionSizeDistribution
         //- Minimum droplet diameter
         scalar minDiam_;
 
-        //- Number of bins
-        label nBins_;
+        //- Patches to walk from
+        wordRes patchNames_;
 
         //- Names of fields to sample on regions
         wordRes fields_;
@@ -205,9 +231,6 @@ class regionSizeDistribution
 
         // Optional extra definition of bins on planes downstream to the origin
         // point and maximum diameter
-
-            //- Switch to enable iso-planes sampling
-            bool isoPlanes_;
 
             //- Optional origin point
             vector origin_;
@@ -223,6 +246,9 @@ class regionSizeDistribution
 
             //- Optional maximum downstream coordinate from origin
             scalar maxDownstream_;
+
+            //- Switch to enable iso-planes sampling
+            bool isoPlanes_;
 
 
     // Private Member Functions
@@ -242,7 +268,7 @@ class regionSizeDistribution
         ) const;
 
         //- Write volfields with the parts of alpha which are not
-        //  droplets (liquidCore, backGround)
+        //- droplets (liquidCore, backGround)
         void writeAlphaFields
         (
             const regionSplit& regions,
@@ -272,21 +298,13 @@ class regionSizeDistribution
         (
             const word& fieldName,              // name of field
             const scalarField& cellField,       // per cell field data
-
             const regionSplit& regions,         // per cell the region(=droplet)
             const labelList& sortedRegions,     // valid regions in sorted order
             const scalarField& sortedNormalisation,
-
             const labelList& indices,           // index of bin for each region
             const scalarField& binCount,        // per bin number of regions
             const coordSet& coords              // graph data for bins
         ) const;
-
-        //- No copy construct
-        regionSizeDistribution(const regionSizeDistribution&) = delete;
-
-        //- No copy assignment
-        void operator=(const regionSizeDistribution&) = delete;
 
 
 public:
@@ -306,10 +324,15 @@ public:
             const dictionary&
         );
 
+        //- No copy construct
+        regionSizeDistribution(const regionSizeDistribution&) = delete;
+
+        //- No copy assignment
+        void operator=(const regionSizeDistribution&) = delete;
+
 
     // Destructor
-
-        virtual ~regionSizeDistribution();
+    virtual ~regionSizeDistribution() = default;
 
 
     // Member Functions

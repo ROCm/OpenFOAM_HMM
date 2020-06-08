@@ -12,7 +12,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 type            XiReactionRate;
-libs            ("libfieldFunctionObjects.so");
+libs            (fieldFunctionObjects);
 
 fields          (b Xi Su);
 

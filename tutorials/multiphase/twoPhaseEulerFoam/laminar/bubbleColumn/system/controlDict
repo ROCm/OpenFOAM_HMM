@@ -54,6 +54,15 @@ maxDeltaT       1;
 
 functions
 {
+    add1
+    {
+        type            add;
+        libs            (fieldFunctionObjects);
+        fields          (U.air U.water);
+        result          U.total;
+        writeControl    writeTime;
+    }
+
     fieldAverage1
     {
         type            fieldAverage;

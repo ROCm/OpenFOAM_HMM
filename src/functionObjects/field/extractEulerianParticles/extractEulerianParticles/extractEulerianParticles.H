@@ -30,41 +30,80 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Generates particle size information from Eulerian calculations, e.g. VoF.
+    Generates particle size information from Eulerian calculations, e.g. \c VoF.
+
+    Operands:
+    \table
+      Operand           | Type        | Location
+      input             | -           | -
+      output file       | -           | -
+      output field 1    | scalarField | $OUTPUT/d
+      output field 2    | scalarField | $OUTPUT/soi
+      output field 3    | labelField  | $OUTPUT/tag
+      output field 4    | vectorField | $OUTPUT/U
+    \endtable
+
+    where \c $OUTPUT=$FOAM_CASE/\<time\>/lagrangian/eulerianParticleCloud.
 
 Usage
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
     extractEulerianParticles1
     {
+        // Mandatory entries (unmodifiable)
         type            extractEulerianParticles;
         libs            (fieldFunctionObjects);
-        ...
+
+        // Mandatory entries (runtime modifiable)
         faceZone        f0;
-        nLocations      10;
         alpha           alpha.water;
+
+        // Optional entries (runtime modifiable)
+        alphaThreshold  0.1;
+        nLocations      0;
         U               U;
         rho             rho;
         phi             phi;
+        minDiameter     1e-30;
+        maxDiameter     1e30;
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description             | Required | Default value
-        type         | type name: extractEulerianParticles | yes |
-        faceZone     | Name of faceZone used as collection surface | yes |
-        alpha        | Name of phase indicator field | yes |
-        alphaThreshold | Threshold for alpha field | no | 0.1 |
-        nLocations   | Number of injection bins to generate  | no | 0 |
-        U            | Name of velocity field  | no | U |
-        rho          | Name of density field   | no | rho |
-        phi          | Name of flux field      | no | phi |
-        minDiameter  | min diameter            | no | small |
-        maxDiameter  | max diameter            | no | great |
+      Property   | Description                          | Type | Req'd | Dflt
+      type       | Type name: extractEulerianParticles  | word |  yes  | -
+      libs       | Library name: fieldFunctionObjects   | word |  yes  | -
+      faceZone   | Name of faceZone used as collection surface | word  | yes | -
+      alpha      | Name of phase indicator field        | word |  yes  | -
+      alphaThreshold | Threshold for alpha field        | scalar | no  | 0.1
+      nLocations | Number of injection bins to generate | label  | no  | 0
+      U          | Name of velocity field               | word   | no  | U
+      rho        | Name of density field                | word   | no  | rho
+      phi        | Name of flux field                   | word   | no  | phi
+      minDiameter | Minimum diameter                    | scalar | no  | SMALL
+      maxDiameter | Maximum diameter                    | scalar | no  | GREAT
     \endtable
+
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link writeFile.H \endlink
+
+    Usage by the \c postProcess utility is not available.
+
+See also
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObjects::writeFile
+    - Foam::eulerianParticle
+    - ExtendedCodeGuide::functionObjects::field::extractEulerianParticles
 
 SourceFiles
     extractEulerianParticles.C
+    extractEulerianParticlesTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -95,10 +134,9 @@ class extractEulerianParticles
     public fvMeshFunctionObject,
     public writeFile
 {
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Storage for collected particles
         injectedParticleCloud cloud_;
@@ -236,12 +274,6 @@ protected:
             const label globalFaceI
         ) const;
 
-        //- No copy construct
-        extractEulerianParticles(const extractEulerianParticles&) = delete;
-
-        //- No copy assignment
-        void operator=(const extractEulerianParticles&) = delete;
-
 
 public:
 
@@ -260,6 +292,12 @@ public:
             const Time& runTime,
             const dictionary& dict
         );
+
+        //- No copy construct
+        extractEulerianParticles(const extractEulerianParticles&) = delete;
+
+        //- No copy assignment
+        void operator=(const extractEulerianParticles&) = delete;
 
 
     //- Destructor

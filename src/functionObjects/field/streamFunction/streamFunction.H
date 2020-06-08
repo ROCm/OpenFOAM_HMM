@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,12 +31,51 @@ Group
     grpFieldFunctionObjects
 
 Description
-    This function object calculates and outputs the stream-function as a
-    pointScalarField.
+    Computes the stream function (i.e. https://w.wiki/Ncm).
+
+    Operands:
+    \table
+      Operand        | Type                   | Location
+      input          | surfaceScalarField     | $FOAM_CASE/\<time\>/\<inpField\>
+      output file    | -                      | -
+      output field   | pointScalarField       | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
+
+Usage
+    Minimal example by using \c system/controlDict.functions:
+    \verbatim
+    streamFunction1
+    {
+        // Mandatory entries (unmodifiable)
+        type        streamFunction;
+        libs        (fieldFunctionObjects);
+
+        // Optional (inherited) entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property     | Description                        | Type | Req'd | Dflt
+      type         | Type name: streamFunction          | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects | word |  yes  | -
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link fieldExpression.H \endlink
+
+    Minimal example by using the \c postProcess utility:
+    \verbatim
+        postProcess -func streamFunction
+    \endverbatim
 
 See also
-    Foam::functionObjects::fieldExpression
-    Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObject
+    - Foam::functionObjects::fieldExpression
+    - Foam::functionObjects::fvMeshFunctionObject
+    - ExtendedCodeGuide::functionObjects::field::streamFunction
 
 SourceFiles
     streamFunction.C
@@ -66,7 +106,8 @@ class streamFunction
 {
     // Private Member Functions
 
-    tmp<pointScalarField> calc(const surfaceScalarField& phi) const;
+        //- Return the stream function field
+        tmp<pointScalarField> calc(const surfaceScalarField& phi) const;
 
         //- Calculate the stream-function and return true if successful
         virtual bool calc();
@@ -89,9 +130,15 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        streamFunction(const streamFunction&) = delete;
+
+        //- No copy assignment
+        void operator=(const streamFunction&) = delete;
+
 
     //- Destructor
-    virtual ~streamFunction();
+    virtual ~streamFunction() = default;
 };
 
 

@@ -34,25 +34,44 @@ Description
     Writes the turbulent flame-speed and reaction-rate volScalarFields for the
     Xi-based combustion models.
 
+    Operands:
+    \table
+      Operand        | Type           | Location
+      input          | -              | -
+      output file    | -              | -
+      output field   | volScalarField | $FOAM_CASE/\<time\>/{St,wdot}
+    \endtable
+
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
-    XiReactionRate
+    XiReactionRate1
     {
+        // Mandatory entries (unmodifiable)
         type        XiReactionRate;
         libs        (fieldFunctionObjects);
+
+        // Optional (inherited) entries
         ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property  | Description                 | Required  | Default value
-        type      | type name: XiReactionRate   | yes       |
+      Property   | Description                        | Type | Req'd | Dflt
+      type       | Type name: XiReactionRate          | word |  yes  | -
+      libs       | Library name: fieldFunctionObjects | word |  yes  | -
     \endtable
 
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+
+    Usage by the \c postProcess utility is not available.
+
 See also
-    Foam::functionObjects::fvMeshFunctionObject
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - ExtendedCodeGuide::functionObjects::field::XiReactionRate
 
 SourceFiles
     XiReactionRate.C
@@ -79,15 +98,6 @@ class XiReactionRate
 :
     public fvMeshFunctionObject
 {
-    // Private member functions
-
-        //- No copy construct
-        XiReactionRate(const XiReactionRate&) = delete;
-
-        //- No copy assignment
-        void operator=(const XiReactionRate&) = delete;
-
-
 public:
 
     //- Runtime type information
@@ -104,9 +114,15 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        XiReactionRate(const XiReactionRate&) = delete;
+
+        //- No copy assignment
+        void operator=(const XiReactionRate&) = delete;
+
 
     //- Destructor
-    virtual ~XiReactionRate();
+    virtual ~XiReactionRate() = default;
 
 
     // Member Functions

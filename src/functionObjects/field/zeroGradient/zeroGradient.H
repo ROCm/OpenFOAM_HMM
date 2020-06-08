@@ -30,42 +30,69 @@ Group
     grpFieldFunctionObjects
 
 Description
-    This function object creates a volume field with zero-gradient
+    Creates a volume field with zero-gradient
     boundary conditions from another volume field.
 
     The result can be used, for example, to post-process near-wall
     field values.
 
+    Operands:
+    \table
+      Operand        | Type                | Location
+      input          | vol\<Type\>Field    | $FOAM_CASE/\<time\>/\<inpField\>
+      output file    | -                   | -
+      output field   | vol\<Type\>Field    | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
+
+    where \c \<Type\>=Scalar/Vector/SphericalTensor/SymmTensor/Tensor.
+
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
-    zeroGrad
+    zeroGradient1
     {
+        // Mandatory entries (unmodifiable)
         type        zeroGradient;
         libs        (fieldFunctionObjects);
-        fields      (U "(T|k|epsilon|omega)");
-        result      @@nearWall;
+
+        // Mandatory entries (runtime modifiable)
+        fields      (<field1> ... <fieldN>); \\(U "(T|k|epsilon|omega)");
+
+        // Optional entries (runtime modifiable)
+        result      @@<name>;
+
+        // Optional (inherited) entries
         ...
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property | Description                | Required  | Default value
-        type     | type name: zeroGradient    | yes       |
-        fields   | Name of fields to process  | yes       |
-        result   | Name of results            | no        | zeroGradient(@@)
-        log      | Log to standard output     | no        | no
+      Property     | Description                           | Type | Req'd | Dflt
+      type         | Type name: zeroGradient               | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects    | word |  yes  | -
+      fields       | Name of the operand fields            | wordList | yes | -
+      result       | Name of the output field    | word | no | zeroGradient(@@)
     \endtable
 
-    A list of fields can contain exact names or regular expressions.
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+
+    Usage by the \c postProcess utility is not available.
+
+Note
+    - A list of fields can contain exact names or regular expressions.
     The token '\@\@' in the result name is replaced by the name of the source
     field. In the special case of a single source field (specified as
     a non-regex), the '\@\@' token checking is suppressed.
-
-    The function object will skip over fields that would not benefit
-    - ie, only processor, empty, zeroGradient, symmetry patches.
+    - The function object will skip over fields that would not benefit
+    i.e., only processor, empty, zeroGradient, symmetry patches.
     This check should also prevent processing fields multiple times.
+
+See also
+    - Foam::functionObject
+    - Foam::functionObjects::fvMeshFunctionObject
+    - ExtendedCodeGuide::functionObjects::field::zeroGradient
 
 SourceFiles
     zeroGradient.C
@@ -96,26 +123,26 @@ class zeroGradient
 :
     public fvMeshFunctionObject
 {
-    // Private data
+    // Private Data
 
-        //- Name of fields to process.
+        //- Name of fields to process
         wordRes selectFields_;
 
-        //- Formatting for the result fields.
+        //- Formatting for the result fields
         word resultName_;
 
-        //- Hashed names of result fields, and their type.
+        //- Hashed names of result fields, and their type
         HashTable<word> results_;
 
 
     // Private Member Functions
 
-        //- Check that string contains the appropriate substitution token(s).
+        //- Check that string contains the appropriate substitution token(s)
         static bool checkFormatName(const std::string& str);
 
 
         //- Accept unless field only has constraint patches
-        //  (ie, empty/zero-gradient/processor).
+        //  (ie, empty/zero-gradient/processor)
         //  This should also avoid fields that were already processed by
         //  zeroGradient.
         template<class Type>
@@ -125,15 +152,8 @@ class zeroGradient
         template<class Type>
         int apply(const word& inputName, int& state);
 
-        //- Process by trying to apply for various volume field types.
+        //- Process by trying to apply for various volume field types
         int process(const word& inputName);
-
-
-        //- No copy construct
-        zeroGradient(const zeroGradient&) = delete;
-
-        //- No copy assignment
-        void operator=(const zeroGradient&) = delete;
 
 
 public:
@@ -151,6 +171,12 @@ public:
             const Time& runTime,
             const dictionary& dict
         );
+
+        //- No copy construct
+        zeroGradient(const zeroGradient&) = delete;
+
+        //- No copy assignment
+        void operator=(const zeroGradient&) = delete;
 
 
     //- Destructor
