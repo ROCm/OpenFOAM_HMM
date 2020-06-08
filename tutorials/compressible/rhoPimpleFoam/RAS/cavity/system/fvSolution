@@ -58,6 +58,7 @@ PIMPLE
     momentumPredictor yes;
     nOuterCorrectors 1;
     nCorrectors     2;
+    finalOnLastPimpleIterOnly   true;
     nNonOrthogonalCorrectors 0;
 
     pMax            1.2e5;
