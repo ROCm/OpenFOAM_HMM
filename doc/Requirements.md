@@ -1,11 +1,11 @@
 ## OpenFOAM&reg; System Requirements
 
-OpenFOAM requires a functioning C++11 compiler and `make` build toolchain.
+OpenFOAM requires a functioning C++11 compiler and GNU `make` build toolchain.
 
 ### Minimum recommended versions
 
 - gcc : 4.8.5
-- cmake: 3.3 (required for ParaView and CGAL build)
+- cmake: 3.8 (required for ParaView and CGAL build)
 - boost: 1.48 (required for CGAL build and some functionality)
 - fftw: 3.3.7 (recommended - required for FFT-related functionality)
 - paraview: 5.5.2 (for visualization)
@@ -28,12 +28,12 @@ To check the installed versions
 
 ### Additional utilities
 
-- flex : **not 2.6.2, 2.6.3** (fails for building scotch)
+- flex : ***not 2.6.2, 2.6.3*** (fails for building scotch)
 - m4 : no known minimum level
 - QT : 5.9 (optional - for ParaView build)
 
 
-### Ubuntu (eg, 19.04)
+### Ubuntu (eg, 20.04)
 
 Install dependencies by executing the following lines on the command line:
 ```
@@ -42,13 +42,13 @@ sudo apt-get install libgmp-dev libmpfr-dev libmpc-dev
 ```
 
 Additional libraries will be required if compiling ParaView from
-source, however it is suggested to skipped this initially since
+source, however it is recommended to skipped this initially since
 it generally represent the main compilation difficulty.
 In many cases, a system installation of paraview or a
 [precompiled binary][download ParaView]
 will be much easier.
 
-Some libraries can be installed from from the operating system, or
+Some libraries can be installed from the operating system, or
 compiled from the ThirdParty directory.
 The default configuration for OpenFOAM assumes OpenMPI from the system
 and ThirdParty installations for most others (boost, CGAL, FFTW,
@@ -59,7 +59,7 @@ more system libraries on Ubuntu.
 To inspect the available system versions, use the `apt-cache show`
 command. For example,
 ```
-sudo apt-cache show fftw3-dev
+sudo apt-cache show libboost-dev
 ```
 
 | Program   | apt-cache show  | Ubuntu  | Version |
