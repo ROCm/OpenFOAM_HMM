@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +37,7 @@ template<class Type>
 bool Foam::functionObjects::readFields::loadField(const word& fieldName)
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
+    typedef typename VolFieldType::Internal IntVolFieldType;
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
     /// typedef DimensionedField<Type, surfGeoMesh> SurfFieldType;
 
@@ -44,6 +45,13 @@ bool Foam::functionObjects::readFields::loadField(const word& fieldName)
     {
         DebugInfo
             << "readFields : " << VolFieldType::typeName
+            << " " << fieldName << " already in database"
+            << endl;
+    }
+    else if (foundObject<IntVolFieldType>(fieldName))
+    {
+        DebugInfo
+            << "readFields : " << IntVolFieldType::typeName
             << " " << fieldName << " already in database"
             << endl;
     }
@@ -76,7 +84,15 @@ bool Foam::functionObjects::readFields::loadField(const word& fieldName)
         {
             // Store field on mesh database
             Log << "    Reading " << fieldName << endl;
-            VolFieldType* fldPtr(new VolFieldType(fieldHeader, mesh_));
+            auto* fldPtr(new VolFieldType(fieldHeader, mesh_));
+            mesh_.objectRegistry::store(fldPtr);
+            return true;
+        }
+        else if (fieldHeader.typeHeaderOk<IntVolFieldType>(true, true, false))
+        {
+            // Store field on mesh database
+            Log << "    Reading " << fieldName << endl;
+            auto* fldPtr(new IntVolFieldType(fieldHeader, mesh_));
             mesh_.objectRegistry::store(fldPtr);
             return true;
         }
@@ -84,7 +100,7 @@ bool Foam::functionObjects::readFields::loadField(const word& fieldName)
         {
             // Store field on mesh database
             Log << "    Reading " << fieldName << endl;
-            SurfaceFieldType* fldPtr(new SurfaceFieldType(fieldHeader, mesh_));
+            auto* fldPtr(new SurfaceFieldType(fieldHeader, mesh_));
             mesh_.objectRegistry::store(fldPtr);
             return true;
         }
@@ -97,7 +113,7 @@ bool Foam::functionObjects::readFields::loadField(const word& fieldName)
         ///
         ///         // Store field on surfMesh database
         ///         Log << "    Reading " << fieldName << endl;
-        ///         SurfFieldType* fldPtr(new SurfFieldType(fieldHeader, s));
+        ///         auto* fldPtr(new SurfFieldType(fieldHeader, s));
         ///         s.store(fldPtr);
         ///         return true;
         ///     }

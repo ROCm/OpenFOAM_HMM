@@ -37,9 +37,14 @@ bool Foam::functionObjects::fieldValues::volFieldValue::validField
     const word& fieldName
 ) const
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> vf;
+    typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
+    typedef typename VolFieldType::Internal IntVolFieldType;
 
-    if (obr_.foundObject<vf>(fieldName))
+    if
+    (
+        obr_.foundObject<VolFieldType>(fieldName)
+     || obr_.foundObject<IntVolFieldType>(fieldName)
+    )
     {
         return true;
     }
@@ -56,11 +61,16 @@ Foam::functionObjects::fieldValues::volFieldValue::getFieldValues
     const bool mustGet
 ) const
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> vf;
+    typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
+    typedef typename VolFieldType::Internal IntVolFieldType;
 
-    if (obr_.foundObject<vf>(fieldName))
+    if (obr_.foundObject<VolFieldType>(fieldName))
     {
-        return filterField(obr_.lookupObject<vf>(fieldName));
+        return filterField(obr_.lookupObject<VolFieldType>(fieldName));
+    }
+    else if (obr_.foundObject<IntVolFieldType>(fieldName))
+    {
+        return filterField(obr_.lookupObject<IntVolFieldType>(fieldName));
     }
 
     if (mustGet)
