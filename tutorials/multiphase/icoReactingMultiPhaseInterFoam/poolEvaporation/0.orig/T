@@ -22,7 +22,45 @@ boundaryField
 {
     left
     {
-        type            zeroGradient;
+        type            externalWallHeatFluxTemperature;
+        mode            coefficient;
+        Ta              constant 300.0;
+        h
+        {
+            type            coded;
+            codeInclude
+            #{
+                #include "volFields.H"
+            #};
+            code
+            #{
+                const objectRegistry& Db =
+                    patch_.boundaryMesh().mesh().thisDb();
+
+                const volScalarField& T =
+                    Db.lookupObject<volScalarField>("T");
+
+                tmp<scalarField> thtc(new scalarField(patch_.size(), 300.0));
+                scalarField& htc =  thtc.ref();
+
+                const scalarField Tp(T.boundaryField()[patch_.index()]);
+
+                forAll (htc, faceI)
+                {
+                    if (Tp[faceI] >= 1000.0)
+                    {
+                        htc[faceI] = 800;
+                    }
+                    else if (1000.0 >= Tp[faceI] >= 600.0)
+                    {
+                         htc[faceI] = 0.2*Tp[faceI]+200;
+                    }
+                }
+
+                return thtc;
+            #};
+        }
+        kappaMethod     fluidThermo;
         value           $internalField;
     }
     right
