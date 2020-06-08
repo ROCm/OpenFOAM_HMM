@@ -139,23 +139,9 @@ class Curle
 
 protected:
 
-<<<<<<< HEAD
-    // Protected Member Functions
-
-        //- Calculate acoustic pressure field and return true if successful
-        virtual bool calc();
-
-        //- No copy construct
-        Curle(const Curle&) = delete;
-
-        //- No copy assignment
-        void operator=(const Curle&) = delete;
-
-=======
         //- Calculate the acoustic pressure field and return true if successful
         virtual bool calc();
 
->>>>>>> DOC: elaborate the usage of function objects
 
 public:
 
