@@ -230,6 +230,17 @@ Foam::polynomialFunction::integralMinus1(const scalar intConstant) const
 
 // * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 
+bool Foam::polynomialFunction::operator==(const polynomialFunction& rhs) const
+{
+    return
+    (
+        scalarList::operator==(static_cast<const scalarList&>(rhs))
+     && logActive_ == rhs.logActive_
+     && (!logActive_ || (logCoeff_ == rhs.logCoeff_))
+    );
+}
+
+
 Foam::polynomialFunction&
 Foam::polynomialFunction::operator+=(const polynomialFunction& poly)
 {

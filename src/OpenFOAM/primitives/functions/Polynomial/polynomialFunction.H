@@ -108,9 +108,6 @@ class polynomialFunction
         //- Check size is non-zero or trigger FatalErrot
         void checkSize() const;
 
-        //- No copy assignment
-        void operator=(const polynomialFunction&) = delete;
-
 
 public:
 
@@ -189,6 +186,14 @@ public:
 
 
     // Member Operators
+
+        //- Equality of coefficients, and logCoeff (if active)
+        bool operator==(const polynomialFunction& rhs) const;
+
+        bool operator!=(const polynomialFunction& rhs) const
+        {
+            return !operator==(rhs);
+        }
 
         polynomialFunction& operator+=(const polynomialFunction&);
         polynomialFunction& operator-=(const polynomialFunction&);
