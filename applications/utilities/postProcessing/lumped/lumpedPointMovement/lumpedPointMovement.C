@@ -40,14 +40,49 @@ Description
 
 #include "argList.H"
 #include "Time.H"
-#include "timeSelector.H"
-
 #include "OFstream.H"
-
+#include "foamVtkSeriesWriter.H"
 #include "lumpedPointTools.H"
 #include "lumpedPointIOMovement.H"
 
 using namespace Foam;
+
+
+inline List<lumpedPointStateTuple> getResponseTable
+(
+    const fileName& file,
+    const lumpedPointState& state0
+)
+{
+    return lumpedPointTools::lumpedPointStates
+    (
+        file,
+        state0.rotationOrder(),
+        state0.degrees()
+    );
+}
+
+
+void echoTableLimits
+(
+    const List<lumpedPointStateTuple>& tbl,
+    const label span,
+    const label maxOut
+)
+{
+    Info<< "Using response table with " << tbl.size() << " entries" << nl;
+
+    if (span)
+    {
+        Info<< "Increment input by " << span << nl;
+    }
+
+    if (maxOut)
+    {
+        Info<< "Stopping after " << maxOut << " outputs" << nl;
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,7 +94,6 @@ int main(int argc, char *argv[])
         " for diagnostic purposes."
     );
 
-    argList::noParallel();
     argList::noFunctionObjects();  // Never use function objects
     argList::addOption
     (
@@ -71,13 +105,24 @@ int main(int argc, char *argv[])
     (
         "span",
         "N",
-        "Increment each input by factor N (default: 1)"
+        "Increment each input by N (default: 1)"
     );
     argList::addOption
     (
         "scale",
         "factor",
         "Relaxation/scaling factor for movement (default: 1)"
+    );
+    argList::addOption
+    (
+        "visual-length",
+        "len",
+        "Visualization length for planes (visualized as triangles)"
+    );
+    argList::addBoolOption
+    (
+        "dry-run",
+        "Test movement without a mesh"
     );
     argList::addBoolOption
     (
@@ -96,45 +141,70 @@ int main(int argc, char *argv[])
     const label maxOut = Foam::max(0, args.getOrDefault<label>("max", 0));
     const label span   = Foam::max(1, args.getOrDefault<label>("span", 1));
 
-    const scalar relax = args.getOrDefault<scalar>("scale", 1);
-
+    // Control parameters
+    const bool dryrun = args.found("dry-run");
     const bool slave = args.found("slave");
     const bool removeLock = args.found("removeLock");
 
-    #include "createTime.H"
+    const scalar relax = args.getOrDefault<scalar>("scale", 1);
 
-    autoPtr<lumpedPointIOMovement> movement = lumpedPointIOMovement::New
-    (
-        runTime
-    );
+    args.readIfPresent("visual-length", lumpedPointState::visLength);
 
-    if (!movement.valid())
-    {
-        Info<< "no valid movement given" << endl;
-        return 1;
-    }
+    const fileName responseFile(args[1]);
 
-    List<lumpedPointStateTuple> responseTable =
-        lumpedPointTools::lumpedPointStates(args[1]);
-
-    Info<< "Using response table with " << responseTable.size()
-        << " entries" << endl;
-
-    Info << "Increment input by " << span << nl;
-
-    if (maxOut)
-    {
-        Info<< "Stopping after " << maxOut << " outputs" << endl;
-    }
+    // ----------------------------------------------------------------------
+    // Slave mode
+    // ----------------------------------------------------------------------
 
     if (slave)
     {
         Info<< "Running as slave responder" << endl;
 
-        externalFileCoupler& coupler = movement().coupler();
+        if (Pstream::parRun())
+        {
+            FatalErrorInFunction
+                << "Running as slave responder is not permitted in parallel"
+                << nl
+                << exit(FatalError);
+        }
 
-        label count = 0;
-        for (label index = 0; index < responseTable.size(); index += span)
+        #include "createTime.H"
+
+        // Create movement without a mesh
+        autoPtr<lumpedPointIOMovement> movementPtr =
+            lumpedPointIOMovement::New(runTime);
+
+        if (!movementPtr)
+        {
+            Info<< "No valid movement found" << endl;
+            return 1;
+        }
+        auto& movement = *movementPtr;
+
+        // Reference state0
+        const lumpedPointState& state0 = movement.state0();
+
+        List<lumpedPointStateTuple> responseTable =
+            getResponseTable(responseFile, state0);
+
+        echoTableLimits(responseTable, span, maxOut);
+
+        if (dryrun)
+        {
+            Info<< "dry-run: response table with " << responseTable.size()
+                << " entries" << nl
+                << "\nEnd\n" << endl;
+            return 0;
+        }
+
+        externalFileCoupler& coupler = movement.coupler();
+
+        for
+        (
+            label timei = 0, outputCount = 0;
+            timei < responseTable.size();
+            timei += span
+        )
         {
             Info<< args.executable() << ": waiting for master" << endl;
 
@@ -146,14 +216,14 @@ int main(int argc, char *argv[])
                 break;
             }
 
-            lumpedPointState state = responseTable[index].second();
-            state.relax(relax, movement().state0());
+            lumpedPointState state = responseTable[timei].second();
+            state.relax(relax, state0);
 
             // Generate input for OpenFOAM
-            OFstream os(coupler.resolveFile(movement().inputName()));
+            OFstream os(coupler.resolveFile(movement.inputName()));
             if
             (
-                movement().inputFormat()
+                movement.inputFormat()
              == lumpedPointState::inputFormatType::PLAIN
             )
             {
@@ -161,101 +231,236 @@ int main(int argc, char *argv[])
             }
             else
             {
-                os.writeEntry("time", responseTable[index].first());
+                os.writeEntry("time", responseTable[timei].first());
                 state.writeDict(os);
             }
 
             Info<< args.executable()
-                << ": updated to state " << index
+                << ": updated to state " << timei
                 << " - switch to master"
                 << endl;
 
             // Let OpenFOAM know that it can continue
             coupler.useMaster();
 
-            if (maxOut && ++count >= maxOut)
+            ++outputCount;
+
+            if (maxOut && outputCount >= maxOut)
             {
                 Info<< args.executable()
-                    <<": stopping after " << maxOut << " outputs" << endl;
+                    << ": stopping after " << maxOut << " outputs" << endl;
                 break;
             }
         }
 
         if (removeLock)
         {
-            Info<< args.executable() <<": removing lock file" << endl;
+            Info<< args.executable() << ": removing lock file" << endl;
             coupler.useSlave();  // This removes the lock-file
         }
+
+        Info<< args.executable() << ": finishing" << nl;
+
+        Info<< "\nEnd\n" << endl;
+        return 0;
     }
-    else
+
+
+    // ----------------------------------------------------------------------
+    // dry-run
+    // ----------------------------------------------------------------------
+
+    if (dryrun)
     {
-        runTime.setTime(instant(0, runTime.constant()), 0);
+        Info<< "dry-run: creating states only" << nl;
 
-        #include "createNamedPolyMesh.H"
+        #include "createTime.H"
 
-        const labelList patchLst = lumpedPointTools::lumpedPointPatchList(mesh);
-        if (patchLst.empty())
+        // Create movement without a mesh
+        autoPtr<lumpedPointIOMovement> movementPtr =
+            lumpedPointIOMovement::New(runTime);
+
+        if (!movementPtr)
         {
-            Info<< "no patch list found" << endl;
-            return 2;
+            Info<< "No valid movement found" << endl;
+            return 1;
         }
+        auto& movement = *movementPtr;
 
-        pointIOField points0 = lumpedPointTools::points0Field(mesh);
-        movement().setBoundBox(mesh, patchLst, points0);
+        // Reference state0
+        const lumpedPointState& state0 = movement.state0();
 
-        label index = 0;
+        List<lumpedPointStateTuple> responseTable =
+            getResponseTable(responseFile, state0);
 
-        // Initial geometry
-        movement().writeVTP("geom_init.vtp", mesh, patchLst, points0);
+        echoTableLimits(responseTable, span, maxOut);
 
-        forAll(responseTable, i)
+
+        vtk::seriesWriter stateSeries;
+
+        for
+        (
+            label timei = 0, outputCount = 0;
+            timei < responseTable.size();
+            timei += span
+        )
         {
-            const bool output = ((i % span) == 0);
-            lumpedPointState state = responseTable[i].second();
-            state.relax(relax, movement().state0());
+            lumpedPointState state = responseTable[timei].second();
 
-            if (output)
-            {
-                Info<<"output [" << i << "/"
-                    << responseTable.size() << "]" << endl;
-            }
-            else
-            {
-                continue;
-            }
+            state += movement.origin();
+            movement.scalePoints(state);
+            state.relax(relax, state0);
+
+            Info<< "output [" << timei << '/' << responseTable.size() << ']';
 
             // State/response = what comes back from FEM
             {
-                const word outputName = word::printf("state_%06d.vtp", index);
+                const word outputName =
+                    word::printf("state_%06d.vtp", outputCount);
 
-                Info<<"    " << outputName << endl;
+                Info<< "  " << outputName;
 
-                state.writeVTP(outputName, movement().axis());
+                movement.writeStateVTP(state, outputName);
+                stateSeries.append(outputCount, outputName);
             }
 
+            Info<< endl;
+
+            ++outputCount;
+
+            if (maxOut && outputCount >= maxOut)
             {
-                const word outputName = word::printf("geom_%06d.vtp", index);
-
-                Info<<"    " << outputName << endl;
-
-                movement().writeVTP(outputName, state, mesh, patchLst, points0);
+                Info<< "Max output " << maxOut << " ... stopping" << endl;
+                break;
             }
+        }
 
-            {
-                ++index;
+        // Write file series
 
-                bool canOutput = !maxOut || (index <= maxOut);
-                if (!canOutput)
-                {
-                    Info<<"stopping output after "
-                        << maxOut << " outputs" << endl;
-                    break;
-                }
-            }
+        if (stateSeries.size())
+        {
+            Info<< nl << "write state.vtp.series" << nl;
+            stateSeries.write("state.vtp");
+        }
+
+        Info<< "\nEnd\n" << endl;
+        return 0;
+    }
+
+
+    // ----------------------------------------------------------------------
+    // test patch movement
+    // ----------------------------------------------------------------------
+
+    #include "createTime.H"
+
+    runTime.setTime(instant(runTime.constant()), 0);
+
+    #include "createNamedMesh.H"
+
+    // Create movement with mesh
+    autoPtr<lumpedPointIOMovement> movementPtr =
+        lumpedPointIOMovement::New(mesh);
+
+    if (!movementPtr)
+    {
+        Info<< "No valid movement found" << endl;
+        return 1;
+    }
+    auto& movement = *movementPtr;
+
+    // Reference state0
+    const lumpedPointState& state0 = movement.state0();
+
+    List<lumpedPointStateTuple> responseTable =
+        getResponseTable(responseFile, state0);
+
+    echoTableLimits(responseTable, span, maxOut);
+
+    pointIOField points0(lumpedPointTools::points0Field(mesh));
+
+    const label nPatches = lumpedPointTools::setPatchControls(mesh, points0);
+    if (!nPatches)
+    {
+        Info<< "No point patches with lumped movement found" << endl;
+        return 2;
+    }
+
+    Info<< "Lumped point patch controls set on "
+        << nPatches << " patches" << nl;
+
+    lumpedPointTools::setInterpolators(mesh, points0);
+
+
+    // Output vtk file series
+    vtk::seriesWriter stateSeries;
+    vtk::seriesWriter geomSeries;
+
+    // Initial geometry
+    movement.writeVTP("geom_init.vtp", state0, mesh, points0);
+
+    lumpedPointTools::setInterpolators(mesh);
+
+    for
+    (
+        label timei = 0, outputCount = 0;
+        timei < responseTable.size();
+        timei += span
+    )
+    {
+        lumpedPointState state = responseTable[timei].second();
+
+        state += movement.origin();
+        movement.scalePoints(state);
+        state.relax(relax, state0);
+
+        Info<< "output [" << timei << '/' << responseTable.size() << ']';
+
+        // State/response = what comes back from FEM
+        {
+            const word outputName =
+                word::printf("state_%06d.vtp", outputCount);
+
+            Info<< "  " << outputName;
+
+            movement.writeStateVTP(state, outputName);
+            stateSeries.append(outputCount, outputName);
+        }
+
+        {
+            const word outputName =
+                word::printf("geom_%06d.vtp", outputCount);
+
+            Info<< "  " << outputName;
+
+            movement.writeVTP(outputName, state, mesh, points0);
+            geomSeries.append(outputCount, outputName);
+        }
+
+        Info<< endl;
+
+        ++outputCount;
+
+        if (maxOut && outputCount >= maxOut)
+        {
+            Info<< "Max output " << maxOut << " ... stopping" << endl;
+            break;
         }
     }
 
-    Info<< args.executable() << ": finishing" << nl;
+
+    // Write file series
+
+    if (geomSeries.size())
+    {
+        Info<< nl << "write geom.vtp.series" << nl;
+        geomSeries.write("geom.vtp");
+    }
+    if (stateSeries.size())
+    {
+        Info<< nl << "write state.vtp.series" << nl;
+        stateSeries.write("state.vtp");
+    }
 
     Info<< "\nEnd\n" << endl;
 

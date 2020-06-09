@@ -27,17 +27,29 @@ License
 
 #include "lumpedPointMovement.H"
 #include "lumpedPointIOMovement.H"
-#include "demandDrivenData.H"
-#include "linearInterpolationWeights.H"
 #include "Fstream.H"
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "PtrMap.H"
-#include "faceZoneMesh.H"
+#include "triFace.H"
+#include "labelPair.H"
+#include "indexedOctree.H"
+#include "treeDataPoint.H"
+#include "pointIndexHit.H"
+#include "pointPatch.H"
 #include "PstreamReduceOps.H"
 
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+int Foam::lumpedPointMovement::debug
+(
+    ::Foam::debug::debugSwitch("lumpedPointMovement", 0)
+);
+
+
+const Foam::word
+Foam::lumpedPointMovement::canonicalName("lumpedPointMovement");
+
 
 const Foam::Enum
 <
@@ -62,9 +74,6 @@ Foam::lumpedPointMovement::scalingNames
 });
 
 
-const Foam::word
-Foam::lumpedPointMovement::canonicalName("lumpedPointMovement");
-
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
@@ -73,21 +82,9 @@ namespace Foam
 
 //! \cond fileScope
 //- Space-separated vector value (ASCII)
-static inline Ostream& putPlain(Ostream& os, const vector& val)
+static inline Ostream& putPlain(Ostream& os, const vector& v)
 {
-    os  << val.x() << ' ' << val.y() << ' ' << val.z();
-    return os;
-}
-
-
-//! \cond fileScope
-//- Space-separated vector value (ASCII)
-static inline Ostream& putTime(Ostream& os, const Time& t)
-{
-    os  <<"Time index=" << t.timeIndex()
-        << " value=" << t.timeOutputValue();
-
-    return os;
+    return os << v.x() << ' ' << v.y() << ' ' << v.z();
 }
 
 
@@ -119,61 +116,18 @@ static void writeList(Ostream& os, const string& header, const UList<T>& list)
 } // End namespace Foam
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::lumpedPointMovement::calcThresholds() const
-{
-    thresholdPtr_ = new scalarField(locations_);
-
-    scalarField& thresh = *thresholdPtr_;
-
-    for (label i=1; i < thresh.size(); ++i)
-    {
-        thresh[i-1] =
-        (
-            locations_[i-1]
-          + (division_ * (locations_[i] - locations_[i-1]))
-        );
-    }
-}
-
-
-Foam::label Foam::lumpedPointMovement::threshold(scalar pos) const
-{
-    const scalarField& thresh = this->thresholds();
-    const label n = thresh.size();
-
-    // Clamp above and below
-    //
-    // ? may need special treatment to clamp values below the first threshold ?
-    // ? special treatment when 'axis' is negative ?
-
-    for (label i=0; i < n; ++i)
-    {
-        if (pos < thresh[i])
-        {
-            return i;
-        }
-    }
-
-    // everything above goes into the last zone too
-    return n-1;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::lumpedPointMovement::lumpedPointMovement()
 :
-    axis_(0,0,1),
-    locations_(),
-    division_(0),
+    origin_(Zero),
+    state0_(),
+    state_(),
+    originalIds_(),
+    controllers_(),
+    patchControls_(),
     relax_(1),
-    interpolationScheme_(linearInterpolationWeights::typeName),
     ownerId_(-1),
-    boundBox_(),
-    centre_(),
-    autoCentre_(true),
     forcesDict_(),
     coupler_(),
     inputName_("positions.in"),
@@ -181,12 +135,10 @@ Foam::lumpedPointMovement::lumpedPointMovement()
     logName_("movement.log"),
     inputFormat_(lumpedPointState::inputFormatType::DICTIONARY),
     outputFormat_(outputFormatType::DICTIONARY),
-    scaleInput_(-1.0),
-    scaleOutput_(-1.0),
-    state0_(),
-    state_(),
-    thresholdPtr_(0),
-    interpolatorPtr_()
+    scaleInput_(-1),
+    scaleOutput_(-1),
+    calcFrequency_(1),
+    lastTrigger_(-1)
 {}
 
 
@@ -196,107 +148,139 @@ Foam::lumpedPointMovement::lumpedPointMovement
     label ownerId
 )
 :
-    axis_(0,0,1),
-    locations_(),
-    division_(0),
+    origin_(Zero),
+    state0_(),
+    state_(),
+    originalIds_(),
+    controllers_(),
+    patchControls_(),
     relax_(1),
-    interpolationScheme_
-    (
-        dict.getOrDefault<word>
-        (
-            "interpolationScheme",
-            linearInterpolationWeights::typeName
-        )
-    ),
     ownerId_(ownerId),
-    boundBox_(),
-    centre_(),
-    autoCentre_(true),
     forcesDict_(),
     coupler_(),
     inputName_("positions.in"),
     outputName_("forces.out"),
     logName_("movement.log"),
-    scaleInput_(-1.0),
-    scaleOutput_(-1.0),
-    state0_(),
-    state_(),
-    thresholdPtr_(0),
-    interpolatorPtr_()
+    scaleInput_(-1),
+    scaleOutput_(-1),
+    calcFrequency_(1),
+    lastTrigger_(-1)
 {
     readDict(dict);
 }
 
 
-// * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::lumpedPointMovement::~lumpedPointMovement()
+bool Foam::lumpedPointMovement::couplingPending(const label timeIndex) const
 {
-    deleteDemandDrivenData(thresholdPtr_);
+    return (timeIndex >= lastTrigger_ + calcFrequency_);
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+void Foam::lumpedPointMovement::couplingCompleted(const label timeIndex) const
+{
+    lastTrigger_ = timeIndex;
+}
+
 
 void Foam::lumpedPointMovement::readDict(const dictionary& dict)
 {
-    // assume the worst
-    deleteDemandDrivenData(thresholdPtr_);
+    origin_ = dict.getOrDefault<point>("origin", Zero);
 
-    dict.readEntry("axis", axis_);
+    // Initial point locations (zero rotation)
+    auto tpoints0 = tmp<pointField>::New();
+    auto& points0 = tpoints0.ref();
 
-    division_ = 0;
-    if (dict.readIfPresent("division", division_))
+    dict.readEntry("points", points0);
+    points0 += origin_;
+
+    originalIds_.clear();
+    controllers_.clear();
+    patchControls_.clear();
+
+
+    // The FEA ids for the points (optional)
+    Map<label> pointIdMap;
+
+    if (dict.readIfPresent("pointLabels", originalIds_) && originalIds_.size())
     {
-        if (division_ < 0)
+        if (originalIds_.size() != points0.size())
         {
-            division_ = 0;
+            FatalIOErrorInFunction(dict)
+                << "Incorrect number of pointLabels. Had "
+                << originalIds_.size() << " for " << points0.size() << " points"
+                << nl << endl
+                << exit(FatalIOError);
         }
-        else if (division_ > 1)
+
+        labelHashSet duplicates;
+
+        label pointi = 0;
+
+        for (const label id : originalIds_)
         {
-            division_ = 1;
+            if (!pointIdMap.insert(id, pointi))
+            {
+                duplicates.set(id);
+            }
+
+            ++pointi;
+        }
+
+        if (!duplicates.empty())
+        {
+            FatalIOErrorInFunction(dict)
+                << "Found duplicate point ids "
+                << flatOutput(duplicates.sortedToc()) << nl << endl
+                << exit(FatalIOError);
         }
     }
 
-    dict.readIfPresent("relax", relax_);
-
-    dict.readEntry("locations", locations_);
-
-    if (dict.readIfPresent("interpolationScheme", interpolationScheme_))
+    const dictionary* dictptr = dict.findDict("controllers");
+    if (dictptr)
     {
-        interpolatorPtr_.clear();
+        controllers_ = HashPtrTable<lumpedPointController>(*dictptr);
+
+        // Verify the input
+        forAllIters(controllers_, iter)
+        {
+            (*iter)->remapPointLabels(points0.size(), pointIdMap);
+        }
+    }
+    else
+    {
+        // Add single global controller
+        // Warning?
+
+        controllers_.clear();
     }
 
-    autoCentre_ = !dict.readIfPresent("centre", centre_);
-
-    // Initial state from initial locations, with zero rotation
-    tmp<vectorField> pts = locations_ * axis_;
-    state0_ = lumpedPointState(pts);
-    state_  = state0_;
+    relax_ = dict.getOrDefault<scalar>("relax", 1);
+    scalarMinMax::zero_one().inplaceClip(relax_);
 
     forcesDict_.merge(dict.subOrEmptyDict("forces"));
 
     const dictionary& commDict = dict.subDict("communication");
     coupler_.readDict(commDict);
 
-    // TODO: calcFrequency_  = dict.getOrDefault("calcFrequency", 1);
+    calcFrequency_ = commDict.getOrDefault<label>("calcFrequency", 1);
+
+    // Leave trigger intact
 
     commDict.readEntry("inputName", inputName_);
     commDict.readEntry("outputName", outputName_);
     commDict.readIfPresent("logName", logName_);
 
-    inputFormat_ =
-        lumpedPointState::formatNames.get("inputFormat", commDict);
-
-    outputFormat_ =
-        lumpedPointMovement::formatNames.get("outputFormat", commDict);
+    inputFormat_ = lumpedPointState::formatNames.get("inputFormat", commDict);
+    outputFormat_ = formatNames.get("outputFormat", commDict);
 
     scaleInput_  = -1;
     scaleOutput_ = -1;
 
     const dictionary* scaleDict = nullptr;
 
-    if ((scaleDict = commDict.findDict("scaleInput")))
+    if ((scaleDict = commDict.findDict("scaleInput")) != nullptr)
     {
         for (int i=0; i < scaleInput_.size(); ++i)
         {
@@ -314,7 +298,7 @@ void Foam::lumpedPointMovement::readDict(const dictionary& dict)
         }
     }
 
-    if ((scaleDict = commDict.findDict("scaleOutput")))
+    if ((scaleDict = commDict.findDict("scaleOutput")) != nullptr)
     {
         for (int i=0; i < scaleOutput_.size(); ++i)
         {
@@ -331,125 +315,575 @@ void Foam::lumpedPointMovement::readDict(const dictionary& dict)
             }
         }
     }
+
+    state0_ = lumpedPointState
+    (
+        tpoints0,
+        quaternion::eulerOrderNames.getOrDefault
+        (
+            "rotationOrder",
+            dict,
+            quaternion::eulerOrder::ZXZ
+        ),
+        dict.getOrDefault("degrees", false)
+    );
+
+    state0_.scalePoints(scaleInput_[scalingType::LENGTH]);
+
+    state_ = state0_;
 }
 
 
-void Foam::lumpedPointMovement::setBoundBox
+bool Foam::lumpedPointMovement::hasPatchControl
 (
-    const polyMesh& mesh,
-    const labelUList& patchIds,
-    const pointField& points0
-)
+    const polyPatch& pp
+) const
 {
-    boundBox_ = boundBox::invertedBox;
+    return hasPatchControl(pp.index());
+}
 
-    const polyBoundaryMesh& patches = mesh.boundaryMesh();
-    for (const label patchId : patchIds)
+
+bool Foam::lumpedPointMovement::hasInterpolator
+(
+    const pointPatch& fpatch
+) const
+{
+    return hasInterpolator(fpatch.index());
+}
+
+
+void Foam::lumpedPointMovement::checkPatchControl
+(
+    const polyPatch& pp
+) const
+{
+    const auto ctrlIter = patchControls_.cfind(pp.index());
+
+    if (!ctrlIter.good())
     {
-        boundBox_.add(points0, patches[patchId].meshPoints());
+        FatalErrorInFunction
+            << "No controllers for patch " << pp.name()
+            << exit(FatalError);
     }
 
-    boundBox_.reduce();
+    const patchControl& ctrl = *ctrlIter;
 
-    if (autoCentre_)
+    for (const word& ctrlName : ctrl.names_)
     {
-        centre_ = boundBox_.centre();
-        centre_ -= (centre_ & axis_) * axis_;
-        if (lumpedPointIOMovement::debug)
+        const auto iter = controllers_.cfind(ctrlName);
+
+        if (!iter.good())
         {
-            Pout<<"autoCentre on " << centre_
-                << " boundBox: " << boundBox_ << endl;
-        }
-    }
-    else
-    {
-        // User-specified centre
-        if (lumpedPointIOMovement::debug)
-        {
-            Pout<<"centre on " << centre_
-                << " boundBox: " << boundBox_ << endl;
+            FatalErrorInFunction
+                << "No controller: " << ctrlName << nl
+                << " For patch " << pp.name()
+                << exit(FatalError);
         }
     }
 }
 
 
-void Foam::lumpedPointMovement::setMapping
+void Foam::lumpedPointMovement::setPatchControl
 (
-    const polyMesh& mesh,
-    const labelUList& patchIds,
+    const polyPatch& pp,
+    const wordList& ctrlNames,
     const pointField& points0
 )
 {
-    setBoundBox(mesh, patchIds, points0);
+    // Reference mass centres
+    const pointField& lumpedCentres0 = state0().points();
 
-    faceZones_.clear();
+    const label patchIndex = pp.index();
 
-    // Local storage location (boundary faces only)
-    const label firstFace = mesh.nInternalFaces();
-    labelList faceToZoneID(mesh.nFaces() - firstFace, -1);
+    // Info<<"Add patch control for patch " << patchIndex << " "
+    //     << pp.name() << nl;
 
-    // Number of faces per zone
-    labelList nFaces(thresholds().size(), Zero);
+    patchControl& ctrl = patchControls_(patchIndex);
+    ctrl.names_ = ctrlNames;
 
-    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+    labelList& faceToPoint = ctrl.faceToPoint_;
+    faceToPoint.resize(pp.size(), -1);
 
-    for (const label patchId : patchIds)
+    checkPatchControl(pp);
+
+    const faceList& faces = pp.boundaryMesh().mesh().faces();
+
+    // Subset of points to search (if specified)
+    labelHashSet subsetPointIds;
+
+    for (const word& ctrlName : ctrl.names_)
     {
-        const polyPatch& pp = patches[patchId];
+        const auto iter = controllers_.cfind(ctrlName);
 
-        // Classify faces into respective zones according to their centres
-        label meshFaceI = pp.start();
-
-        forAll(pp, i)
+        if (!iter.good())
         {
-            const face& f = mesh.faces()[meshFaceI];
-            label zoneId = this->threshold(f.centre(points0));
-
-            // localize storage location
-            faceToZoneID[meshFaceI - firstFace] = zoneId;
-            ++nFaces[zoneId];
-
-            ++meshFaceI;
+            FatalErrorInFunction
+                << "No controller: " << ctrlName << nl
+                << exit(FatalError);
         }
+
+        const labelList& pointLabels = (*iter)->pointLabels();
+
+        subsetPointIds.insert(pointLabels);
     }
 
-    if (lumpedPointIOMovement::debug)
+    if (ctrl.names_.size() && subsetPointIds.empty())
     {
-        Pout<<"faces per zone:" << nFaces << endl;
+        FatalErrorInFunction
+            << "Controllers specified, but without any points" << nl
+            << exit(FatalError);
     }
 
-    faceZones_.setSize(nFaces.size());
 
-    label nZonedFaces = 0;
-    forAll(nFaces, zonei)
+    treeDataPoint treePoints
+    (
+        lumpedCentres0,
+        subsetPointIds.sortedToc(),
+        subsetPointIds.size()
+    );
+
+
+    treeBoundBox bb(lumpedCentres0);
+    bb.inflate(0.01);
+
+    indexedOctree<treeDataPoint> ppTree
+    (
+        treePoints,
+        bb,     // overall search domain
+        8,      // maxLevel
+        10,     // leafsize
+        3.0     // duplicity
+    );
+
+    const scalar searchDistSqr(sqr(GREAT));
+
+    const label patchStart = pp.start();
+    forAll(pp, patchFacei)
     {
-        label n = nFaces[zonei];
-        labelList& addr = faceZones_[zonei];
-        addr.setSize(n);
+        const point fc(faces[patchStart + patchFacei].centre(points0));
 
-        n = 0;
-        forAll(faceToZoneID, faceI)
+        // Store the original pointId, not subset id
+        faceToPoint[patchFacei] =
+            treePoints.pointLabel
+            (
+                ppTree.findNearest(fc, searchDistSqr).index()
+            );
+    }
+
+    if (debug)
+    {
+        Pout<<"Added face mapping for patch: " << patchIndex << endl;
+    }
+}
+
+
+void Foam::lumpedPointMovement::setInterpolator
+(
+    const pointPatch& fpatch,
+    const pointField& points0
+)
+{
+    // Reference mass centres
+    const pointField& lumpedCentres0 = state0().points();
+
+    const label patchIndex = fpatch.index();
+
+    patchControl& ctrl = patchControls_(patchIndex);
+
+    List<lumpedPointInterpolator>& interpList = ctrl.interp_;
+    interpList.clear();
+
+    // The connectivity, adjacency list
+    Map<labelHashSet> adjacency;
+
+    // Subset of points to search (if specified)
+    labelHashSet subsetPointIds;
+
+    for (const word& ctrlName : ctrl.names_)
+    {
+        const auto iter = controllers_.cfind(ctrlName);
+
+        if (!iter.good())
         {
-            if (faceToZoneID[faceI] == zonei)
+            FatalErrorInFunction
+                << "No controller: " << ctrlName << nl
+                << exit(FatalError);
+        }
+
+        const labelList& pointLabels = (*iter)->pointLabels();
+
+        subsetPointIds.insert(pointLabels);
+
+        // Adjacency lists
+        forAll(pointLabels, i)
+        {
+            const label curr = pointLabels[i];
+
+            if (i)
             {
-                // from local storage to global mesh face
-                label meshFaceI = faceI + firstFace;
+                const label prev = pointLabels[i-1];
+                adjacency(prev).insert(curr);
+                adjacency(curr).insert(prev);
+            }
+            else if (!adjacency.found(curr))
+            {
+                adjacency(curr).clear();
+            }
+        }
+    }
 
-                addr[n] = meshFaceI;
-                ++n;
+    if (ctrl.names_.empty())
+    {
+        // Adjacency lists
+        const label len = state0().size();
+
+        for (label i=0; i < len; ++i)
+        {
+            const label curr = i;
+
+            if (i)
+            {
+                const label prev = i-1;
+                adjacency(prev).insert(curr);
+                adjacency(curr).insert(prev);
+            }
+            else if (!adjacency.found(curr))
+            {
+                adjacency(curr).clear();
+            }
+        }
+    }
+
+    if (ctrl.names_.size() && subsetPointIds.empty())
+    {
+        FatalErrorInFunction
+            << "Controllers specified, but without any points" << nl
+            << exit(FatalError);
+    }
+
+
+    // Pairs defining connecting points as triangles
+    Map<labelPairList> adjacencyPairs;
+
+    barycentric2D bary;
+
+    {
+        // Pairs for the ends
+        DynamicList<labelPair> pairs;
+
+        // Mag sin(angle) around the triangle point 0,
+        // used to sort the generated triangles according to the acute angle
+        DynamicList<scalar> acuteAngles;
+
+        forAllConstIters(adjacency, iter)
+        {
+            const label nearest = iter.key();
+
+            labelList neighbours(iter.val().sortedToc());
+
+            const label len = neighbours.size();
+
+            pairs.clear();
+            acuteAngles.clear();
+
+            const point& nearPt = lumpedCentres0[nearest];
+
+            for (label j=1; j < len; ++j)
+            {
+                for (label i=0; i < j; ++i)
+                {
+                    labelPair neiPair(neighbours[i], neighbours[j]);
+
+                    triPointRef tri
+                    (
+                        nearPt,
+                        lumpedCentres0[neiPair.first()],
+                        lumpedCentres0[neiPair.second()]
+                    );
+
+                    // Require non-degenerate triangles
+                    if (tri.pointToBarycentric(tri.a(), bary) > SMALL)
+                    {
+                        // Triangle OK
+                        pairs.append(neiPair);
+
+                        vector ab(normalised(tri.b() - tri.a()));
+                        vector ac(normalised(tri.c() - tri.a()));
+
+                        // Angle between neighbouring edges
+                        // Use negative cosine to map [0-180] -> [-1 .. +1]
+
+                        acuteAngles.append(-(ab & ac));
+                    }
+                }
+            }
+
+            if (pairs.size() > 1)
+            {
+                // Sort by acute angle
+                labelList order(sortedOrder(acuteAngles));
+                inplaceReorder(order, pairs);
+            }
+
+            adjacencyPairs.insert(nearest, pairs);
+        }
+    }
+
+    if (debug & 2)
+    {
+        Info<< "Adjacency table for patch: " << fpatch.name() << nl;
+
+        for (const label own : adjacency.sortedToc())
+        {
+            Info<< own << " =>";
+            for (const label nei : adjacency[own].sortedToc())
+            {
+                Info<< ' ' << nei;
+            }
+
+            if (originalIds_.size())
+            {
+                Info<< "  # " << originalIds_[own] << " =>";
+                for (const label nei : adjacency[own].sortedToc())
+                {
+                    Info<< ' ' << originalIds_[nei];
+                }
+            }
+
+            Info<< "  # tri " << flatOutput(adjacencyPairs[own]);
+            Info<< nl;
+        }
+    }
+
+    treeDataPoint treePoints
+    (
+        lumpedCentres0,
+        subsetPointIds.sortedToc(),
+        subsetPointIds.size()
+    );
+
+    treeBoundBox bb(lumpedCentres0);
+    bb.inflate(0.01);
+
+    indexedOctree<treeDataPoint> ppTree
+    (
+        treePoints,
+        bb,     // overall search domain
+        8,      // maxLevel
+        10,     // leafsize
+        3.0     // duplicity
+    );
+
+
+    // Searching
+
+    const scalar searchDistSqr(sqr(GREAT));
+
+    const labelList& meshPoints = fpatch.meshPoints();
+
+    interpList.resize(meshPoints.size());
+
+    DynamicList<scalar> unsortedNeiWeightDist;
+    DynamicList<label>  unsortedNeighbours;
+
+    forAll(meshPoints, pointi)
+    {
+        const point& ptOnMesh = points0[meshPoints[pointi]];
+
+        // Nearest (original) point id
+        const label nearest =
+            treePoints.pointLabel
+            (
+                ppTree.findNearest(ptOnMesh, searchDistSqr).index()
+            );
+
+        interpList[pointi].nearest(nearest);
+
+        if (nearest == -1)
+        {
+            // Should not really happen
+            continue;
+        }
+
+        // Have the nearest lumped point, now find the next nearest
+        // but check that the direction is also correct.
+
+        // OK: within the 0-1 bounds
+        // 1+----+0
+        //      .
+        //     .
+        //    +pt
+
+        const point& nearPt = lumpedCentres0[nearest];
+
+        const linePointRef toMeshPt(nearPt, ptOnMesh);
+
+        const labelPairList& adjacentPairs = adjacencyPairs[nearest];
+
+        unsortedNeighbours = adjacency[nearest].toc();
+        unsortedNeiWeightDist.resize(unsortedNeighbours.size());
+
+        forAll(unsortedNeighbours, nbri)
+        {
+            unsortedNeiWeightDist[nbri] =
+                magSqr(ptOnMesh - lumpedCentres0[unsortedNeighbours[nbri]]);
+        }
+
+        // Sort by distance
+        labelList distOrder(sortedOrder(unsortedNeiWeightDist));
+
+        label ngood = 0;
+
+        // Recalculate distance as weighting
+        for (const label nbri : distOrder)
+        {
+            const label nextPointi = unsortedNeighbours[nbri];
+
+            const point& nextPt = lumpedCentres0[nextPointi];
+
+            const linePointRef toNextPt(nearPt, nextPt);
+
+            const scalar weight =
+                (toMeshPt.vec() & toNextPt.unitVec()) / toNextPt.mag();
+
+            if (weight < 0)
+            {
+                // Reject: wrong direction or other bad value
+                continue;
+            }
+            else
+            {
+                // Store weight
+                unsortedNeiWeightDist[nbri] = weight;
+
+                // Retain good weight
+                distOrder[ngood] = nbri;
+                ++ngood;
             }
         }
 
-        addr.setSize(n);
-        nZonedFaces += n;
+        distOrder.resize(ngood);
 
-        if (lumpedPointIOMovement::debug)
+        if (distOrder.size() < 1)
         {
-            Pout<< "Created faceZone[" << zonei << "] "
-                << returnReduce(n, sumOp<label>()) << " faces, "
-                << thresholds()[zonei] << " threshold" << nl;
+            continue;
+        }
+
+        UIndirectList<label>  neighbours(unsortedNeighbours, distOrder);
+        UIndirectList<scalar> neiWeight(unsortedNeiWeightDist, distOrder);
+
+        bool useFirst = true;
+
+        if (neighbours.size() > 1 && adjacentPairs.size())
+        {
+            // Check for best two neighbours
+
+            bitSet neiPointid;
+            neiPointid.set(neighbours);
+
+            for (const labelPair& ends : adjacentPairs)
+            {
+                label nei1 = ends.first();
+                label nei2 = ends.second();
+
+                if (!neiPointid.test(nei1) || !neiPointid.test(nei2))
+                {
+                    // Reject, invalid combination for this point location
+                    continue;
+                }
+                else if (neighbours.find(nei2) < neighbours.find(nei1))
+                {
+                    // Order by distance, which is not really needed,
+                    // but helps with diagnostics
+                    Swap(nei1, nei2);
+                }
+
+
+                triFace triF(nearest, nei1, nei2);
+
+                if
+                (
+                    triF.tri(lumpedCentres0).pointToBarycentric(ptOnMesh, bary)
+                  > SMALL
+                 && !bary.outside()
+                )
+                {
+                    // Use barycentric weights
+                    interpList[pointi].set(triF, bary);
+
+                    useFirst = false;
+                    break;
+                }
+            }
+        }
+
+        if (useFirst)
+        {
+            // Use geometrically closest neighbour
+            interpList[pointi].next(neighbours.first(), neiWeight.first());
         }
     }
+}
+
+
+Foam::List<Foam::scalar> Foam::lumpedPointMovement::areas
+(
+    const polyMesh& pmesh
+) const
+{
+    const label nLumpedPoints = state0().size();
+
+    List<scalar> zoneAreas(nLumpedPoints, Zero);
+
+    if (patchControls_.empty())
+    {
+        WarningInFunction
+            << "Attempted to calculate areas without setMapping()"
+            << nl << endl;
+        return zoneAreas;
+    }
+
+    const polyBoundaryMesh& patches = pmesh.boundaryMesh();
+
+    // fvMesh and has pressure field
+    if (isA<fvMesh>(pmesh))
+    {
+        const fvMesh& mesh = dynamicCast<const fvMesh>(pmesh);
+
+        // Face areas (on patches)
+        const surfaceVectorField::Boundary& patchSf =
+            mesh.Sf().boundaryField();
+
+        forAllConstIters(patchControls_, iter)
+        {
+            const label patchIndex = iter.key();
+            const patchControl& ctrl = iter.val();
+
+            const labelList& faceToPoint = ctrl.faceToPoint_;
+
+            const polyPatch& pp = patches[patchIndex];
+
+            forAll(pp, patchFacei)
+            {
+                // Force from the patch-face into sum
+                const label pointIndex = faceToPoint[patchFacei];
+
+                if (pointIndex < 0)
+                {
+                    // Unmapped, for whatever reason?
+                    continue;
+                }
+
+                // Force from the patch-face into sum
+                zoneAreas[pointIndex] += mag(patchSf[patchIndex][patchFacei]);
+            }
+        }
+    }
+
+    Pstream::listCombineGather(zoneAreas, plusEqOp<scalar>());
+    Pstream::listCombineScatter(zoneAreas);
+
+    return zoneAreas;
 }
 
 
@@ -460,17 +894,19 @@ bool Foam::lumpedPointMovement::forcesAndMoments
     List<vector>& moments
 ) const
 {
-    forces.setSize(faceZones_.size());
-    moments.setSize(faceZones_.size());
+    const label nLumpedPoints = state0().size();
 
-    if (faceZones_.empty())
+    forces.resize(nLumpedPoints);
+    moments.resize(nLumpedPoints);
+
+    if (patchControls_.empty())
     {
         WarningInFunction
             << "Attempted to calculate forces without setMapping()"
             << nl << endl;
 
-        forces.setSize(thresholds().size(), Zero);
-        moments.setSize(thresholds().size(), Zero);
+        forces.resize(nLumpedPoints, Zero);
+        moments.resize(nLumpedPoints, Zero);
         return false;
     }
 
@@ -478,7 +914,7 @@ bool Foam::lumpedPointMovement::forcesAndMoments
     forces = Zero;
     moments = Zero;
 
-    // The mass centres
+    // Current mass centres
     const pointField& lumpedCentres = state().points();
 
     const polyBoundaryMesh& patches = pmesh.boundaryMesh();
@@ -499,17 +935,14 @@ bool Foam::lumpedPointMovement::forcesAndMoments
         const fvMesh& mesh = dynamicCast<const fvMesh>(pmesh);
         const volScalarField& p = *pPtr;
 
-        // face centres (on patches)
-        const surfaceVectorField::Boundary& patchCf =
-            mesh.Cf().boundaryField();
+        // Face centres (on patches)
+        const surfaceVectorField::Boundary& patchCf = mesh.Cf().boundaryField();
 
-        // face areas (on patches)
-        const surfaceVectorField::Boundary& patchSf =
-            mesh.Sf().boundaryField();
+        // Face areas (on patches)
+        const surfaceVectorField::Boundary& patchSf = mesh.Sf().boundaryField();
 
         // Pressure (on patches)
-        const volScalarField::Boundary& patchPress =
-            p.boundaryField();
+        const volScalarField::Boundary& patchPress = p.boundaryField();
 
         // rhoRef if the pressure field is dynamic, i.e. p/rho otherwise 1
         rhoRef = (p.dimensions() == dimPressure ? 1.0 : rhoRef);
@@ -517,62 +950,63 @@ bool Foam::lumpedPointMovement::forcesAndMoments
         // Scale pRef by density for incompressible simulations
         pRef /= rhoRef;
 
-        forAll(faceZones_, zonei)
+        forAllConstIters(patchControls_, iter)
         {
-            const labelList& zn = faceZones_[zonei];
+            const label patchIndex = iter.key();
+            const patchControl& ctrl = iter.val();
 
-            forAll(zn, localFaceI)
+            const labelList& faceToPoint = ctrl.faceToPoint_;
+
+            if (!forceOnPatches.found(patchIndex))
             {
-                const label meshFaceI = zn[localFaceI];
+                // Patch faces are +ve outwards,
+                // so the forces (exerted by fluid on solid)
+                // already have the correct sign
+                forceOnPatches.set
+                (
+                    patchIndex,
+                    (
+                        rhoRef
+                      * patchSf[patchIndex] * (patchPress[patchIndex] - pRef)
+                    ).ptr()
+                );
+            }
 
-                // locate which patch this face is on,
-                // and its offset within the patch
-                const label patchI = patches.whichPatch(meshFaceI);
-                if (patchI == -1)
+            const vectorField& forceOnPatch = *forceOnPatches[patchIndex];
+
+            const polyPatch& pp = patches[patchIndex];
+
+            forAll(pp, patchFacei)
+            {
+                // Force from the patch-face into sum
+                const label pointIndex = faceToPoint[patchFacei];
+
+                if (pointIndex < 0)
                 {
-                    // Should not happen - could also warn
+                    // Unmapped, for whatever reason?
                     continue;
                 }
 
-                const label patchFaceI = meshFaceI - patches[patchI].start();
-
-                if (!forceOnPatches.found(patchI))
-                {
-                    // Patch faces are +ve outwards,
-                    // so the forces (exerted by fluid on solid)
-                    // already have the correct sign
-                    forceOnPatches.set
-                    (
-                        patchI,
-                        (
-                            rhoRef
-                          * patchSf[patchI] * (patchPress[patchI] - pRef)
-                        ).ptr()
-                    );
-                }
-
-                const vectorField& forceOnPatch = *forceOnPatches[patchI];
-
                 // Force from the patch-face into sum
-                forces[zonei] += forceOnPatch[patchFaceI];
+                forces[pointIndex] += forceOnPatch[patchFacei];
 
-                // effective torque arm:
+                // Effective torque arm:
                 // - translated into the lumped-points coordinate system
                 //   prior to determining the distance
-                const vector lever =
+                const vector lever
                 (
-                    patchCf[patchI][patchFaceI] - centre_
-                  - lumpedCentres[zonei]
+                    patchCf[patchIndex][patchFacei]
+                  - lumpedCentres[pointIndex]
                 );
 
                 // Moment from the patch-face into sum
-                moments[zonei] += lever ^ forceOnPatch[patchFaceI];
+                moments[pointIndex] += lever ^ forceOnPatch[patchFacei];
             }
         }
     }
     else
     {
-        Info<<"no pressure" << endl;
+        Info<<"No pressure field" << endl;
     }
 
     Pstream::listCombineGather(forces, plusEqOp<vector>());
@@ -585,90 +1019,105 @@ bool Foam::lumpedPointMovement::forcesAndMoments
 }
 
 
-// \cond fileScope
-template<class T>
-static inline T interpolatedValue
-(
-    const Foam::UList<T> input,
-    const Foam::labelUList& indices,
-    const Foam::scalarField& weights
-)
-{
-    T result = weights[0] * input[indices[0]];
-    for (Foam::label i=1; i < indices.size(); ++i)
-    {
-        result += weights[i] * input[indices[i]];
-    }
-
-    return result;
-}
-// \endcond
-
-
 Foam::tmp<Foam::pointField>
-Foam::lumpedPointMovement::displacePoints
+Foam::lumpedPointMovement::pointsDisplacement
 (
-    const pointField& points0,
-    const labelList& pointLabels
+    const pointPatch& fpatch,
+    const pointField& points0
 ) const
 {
-    return displacePoints(state(), points0, pointLabels);
+    return pointsDisplacement(state(), fpatch, points0);
 }
 
 
 Foam::tmp<Foam::pointField>
-Foam::lumpedPointMovement::displacePoints
+Foam::lumpedPointMovement::pointsDisplacement
 (
     const lumpedPointState& state,
-    const pointField& points0,
-    const labelList& pointLabels
+    const pointPatch& fpatch,
+    const pointField& points0
 ) const
 {
-    // storage for the interpolation indices/weights
-    labelList   indices;
-    scalarField weights;
-    const interpolationWeights& interp = interpolator();
+    const label patchIndex = fpatch.index();
 
-    // The mass centres
+    // Reference mass centres
+    const pointField& lumpedCentres0 = state0().points();
+
+    // Current mass centres
     const pointField& lumpedCentres = state.points();
 
-    // local-to-global transformation tensor
+    // The local-to-global transformation tensor
     const tensorField& localToGlobal = state.rotations();
 
-    // could also verify the sizes (state vs original)
+    const labelList& meshPoints = fpatch.meshPoints();
 
-    tmp<pointField> tdisp(new pointField(pointLabels.size()));
-    pointField& disp = tdisp.ref();
+    // Could also verify the sizes (state vs original)
 
-    forAll(pointLabels, ptI)
+    auto tdisp = tmp<pointField>::New(fpatch.size());
+    auto& disp = tdisp.ref();
+
+    // The interpolator
+    const List<lumpedPointInterpolator>& interpList
+        = patchControls_[patchIndex].interp_;
+
+    forAll(meshPoints, pointi)
     {
-        const point& p0 = points0[pointLabels[ptI]];
+        const lumpedPointInterpolator& interp = interpList[pointi];
 
-        // Interpolation factor based on the axis component
-        // of the original point (location)
-        scalar where = p0 & axis_;
+        const point& p0 = points0[meshPoints[pointi]];
 
-        interp.valueWeights(where, indices, weights);
+        const vector origin0 = interp.interpolate(lumpedCentres0);
+        const vector origin = interp.interpolate(lumpedCentres);
+        const tensor rotTensor = interp.interpolate(localToGlobal);
 
-        vector origin    = interpolatedValue(lumpedCentres, indices, weights);
-        tensor rotTensor = interpolatedValue(localToGlobal, indices, weights);
+        disp[pointi] = (rotTensor & (p0 - origin0)) + origin - p0;
+    }
 
-        if (indices.size() == 1)
-        {
-            // out-of-bounds, use corresponding end-point
-            where = locations_[indices[0]];
-        }
+    return tdisp;
+}
 
-        // local point:
-        // - translated into the lumped-points coordinate system
-        // - relative to the interpolation (where) location
-        const vector local = (p0 - (where * axis_)) - centre_;
 
-        // local-to-global rotation and translation
-        // - translate back out of the lumped-points coordinate system
-        //
-        // -> subtract p0 to return displacements
-        disp[ptI] = (rotTensor & local) + origin + centre_ - p0;
+Foam::tmp<Foam::pointField>
+Foam::lumpedPointMovement::pointsPosition
+(
+    const lumpedPointState& state,
+    const pointPatch& fpatch,
+    const pointField& points0
+) const
+{
+    const label patchIndex = fpatch.index();
+
+    // Reference mass centres
+    const pointField& lumpedCentres0 = state0().points();
+
+    // Current mass centres
+    const pointField& lumpedCentres = state.points();
+
+    // The local-to-global transformation tensor
+    const tensorField& localToGlobal = state.rotations();
+
+    const labelList& meshPoints = fpatch.meshPoints();
+
+    // Could also verify the sizes (state vs original)
+
+    auto tdisp = tmp<pointField>::New(fpatch.size());
+    auto& disp = tdisp.ref();
+
+    // The interpolator
+    const List<lumpedPointInterpolator>& interpList =
+        patchControls_[patchIndex].interp_;
+
+    forAll(meshPoints, pointi)
+    {
+        const lumpedPointInterpolator& interp = interpList[pointi];
+
+        const point& p0 = points0[meshPoints[pointi]];
+
+        const vector origin0 = interp.interpolate(lumpedCentres0);
+        const vector origin = interp.interpolate(lumpedCentres);
+        const tensor rotTensor = interp.interpolate(localToGlobal);
+
+        disp[pointi] = (rotTensor & (p0 - origin0)) + origin;
     }
 
     return tdisp;
@@ -677,10 +1126,8 @@ Foam::lumpedPointMovement::displacePoints
 
 void Foam::lumpedPointMovement::writeDict(Ostream& os) const
 {
-    os.writeEntry("axis", axis_);
-    os.writeEntry("locations", locations_);
-    os.writeEntry("division", division_);
-    // os.writeEntry("interpolationScheme", interpolationScheme_);
+    // os.writeEntry("axis", axis_);
+    // os.writeEntry("locations", locations_);
 }
 
 
@@ -688,13 +1135,15 @@ bool Foam::lumpedPointMovement::readState()
 {
     lumpedPointState prev = state_;
 
-    bool status = state_.readData
+    const bool status = state_.readData
     (
         inputFormat_,
-        coupler().resolveFile(inputName_)
+        coupler().resolveFile(inputName_),
+        state0().rotationOrder(),
+        state0().degrees()
     );
 
-    state_.scalePoints(scaleInput_[scalingType::LENGTH]);
+    scalePoints(state_);
 
     state_.relax(relax_, prev);
 
@@ -718,8 +1167,10 @@ bool Foam::lumpedPointMovement::writeData
         os  <<"########" << nl;
         if (timeinfo)
         {
-            os <<"# ";
-            putTime(os, *timeinfo) << nl;
+            const Time& t = *timeinfo;
+
+            os  <<"# Time index=" << t.timeIndex() << nl
+                <<"# Time value=" << t.timeOutputValue() << nl;
         }
         os  <<"# size=" << this->size() << nl
             <<"# columns (points) (forces)";
@@ -781,11 +1232,11 @@ bool Foam::lumpedPointMovement::writeData
 
         os <<"########" << nl;
 
-        forAll(locations_, i)
+        forAll(state0().points(), i)
         {
-            const vector pos = scaleLength * (locations_[i] * axis_);
+            const point& pt = state0().points()[i];
 
-            putPlain(os, pos) << ' ';
+            putPlain(os, scaleLength * pt) << ' ';
 
             if (i < forces.size())
             {
@@ -823,12 +1274,14 @@ bool Foam::lumpedPointMovement::writeData
         os  <<"////////" << nl;
         if (timeinfo)
         {
-            os <<"// ";
-            putTime(os, *timeinfo) << nl;
+            const Time& t = *timeinfo;
+
+            os  <<"// Time index=" << t.timeIndex() << nl;
+            os.writeEntry("time", t.timeOutputValue());
         }
         os  << nl;
 
-        writeList(os, "points", (locations_*axis_)());
+        writeList(os, "points", state0().points());
         writeList(os, "forces", forces);
 
         if (writeMoments)
@@ -878,22 +1331,6 @@ bool Foam::lumpedPointMovement::writeData
     }
 
     return true;
-}
-
-
-const Foam::interpolationWeights&
-Foam::lumpedPointMovement::interpolator() const
-{
-    if (!interpolatorPtr_.valid())
-    {
-        interpolatorPtr_ = interpolationWeights::New
-        (
-            interpolationScheme_,
-            locations_
-        );
-    }
-
-    return *interpolatorPtr_;
 }
 
 

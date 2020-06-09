@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,57 +25,68 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-inline bool Foam::lumpedPointState::valid() const
+#include "lumpedPointController.H"
+#include "dictionary.H"
+#include "labelField.H"
+#include "Map.H"
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::lumpedPointController::lumpedPointController() noexcept
+:
+    pointLabels_()
+{}
+
+
+Foam::lumpedPointController::lumpedPointController
+(
+    const labelUList& pointLabels
+)
+:
+    pointLabels_(pointLabels)
+{}
+
+
+Foam::lumpedPointController::lumpedPointController
+(
+    labelList&& pointLabels
+)
+:
+    pointLabels_(std::move(pointLabels))
+{}
+
+
+Foam::lumpedPointController::lumpedPointController
+(
+    const dictionary& dict
+)
+:
+    pointLabels_(dict.get<labelList>("pointLabels"))
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::lumpedPointController::remapPointLabels
+(
+    const label nPoints,
+    const Map<label>& originalIds
+)
 {
-    return points_.size() && points_.size() == angles_.size();
-}
-
-
-inline bool Foam::lumpedPointState::empty() const
-{
-    return points_.empty();
-}
-
-
-inline Foam::label Foam::lumpedPointState::size() const
-{
-    return points_.size();
-}
-
-
-inline const Foam::pointField& Foam::lumpedPointState::points() const
-{
-    return points_;
-}
-
-
-inline const Foam::vectorField& Foam::lumpedPointState::angles() const
-{
-    return angles_;
-}
-
-
-inline const Foam::tensorField& Foam::lumpedPointState::rotations() const
-{
-    if (!rotationPtr_)
+    if (originalIds.size())
     {
-        calcRotations();
+        for (label& pointi : pointLabels_)
+        {
+            pointi = originalIds[pointi];
+        }
     }
 
-    return *rotationPtr_;
-}
-
-
-inline Foam::quaternion::eulerOrder
-Foam::lumpedPointState::rotationOrder() const
-{
-    return order_;
-}
-
-
-inline bool Foam::lumpedPointState::degrees() const
-{
-    return degrees_;
+    if (min(pointLabels_) < 0 || max(pointLabels_) >= nPoints)
+    {
+        FatalErrorInFunction
+            << "Point id out-of-range: " << flatOutput(pointLabels_) << nl
+            << exit(FatalError);
+    }
 }
 
 

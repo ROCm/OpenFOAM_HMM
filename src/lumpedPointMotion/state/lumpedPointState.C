@@ -26,7 +26,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "lumpedPointState.H"
-#include "demandDrivenData.H"
 #include "unitConversion.H"
 #include "EulerCoordinateRotation.H"
 #include "IFstream.H"
@@ -42,6 +41,11 @@ Foam::lumpedPointState::formatNames
     { inputFormatType::PLAIN, "plain" },
     { inputFormatType::DICTIONARY, "dictionary" },
 });
+
+
+Foam::scalar Foam::lumpedPointState::visLength = 0.1;
+
+bool Foam::lumpedPointState::visUnused = true;
 
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
@@ -69,7 +73,7 @@ static Foam::string getLineNoComment
 
 void Foam::lumpedPointState::calcRotations() const
 {
-    rotationPtr_ = new tensorField(angles_.size());
+    rotationPtr_.reset(new tensorField(angles_.size()));
 
     auto rotIter = rotationPtr_->begin();
 
@@ -83,20 +87,26 @@ void Foam::lumpedPointState::calcRotations() const
 }
 
 
-void Foam::lumpedPointState::readDict(const dictionary& dict)
+void Foam::lumpedPointState::readDict
+(
+    const dictionary& dict,
+    const quaternion::eulerOrder rotOrder,
+    const bool degrees
+)
 {
     dict.readEntry("points", points_);
     dict.readEntry("angles", angles_);
     order_ =
         quaternion::eulerOrderNames.getOrDefault
         (
-            "order",
+            "rotationOrder",
             dict,
-            quaternion::eulerOrder::ZXZ
+            rotOrder
         );
-    degrees_ = dict.getOrDefault("degrees", false);
 
-    deleteDemandDrivenData(rotationPtr_);
+    degrees_ = dict.getOrDefault("degrees", degrees);
+
+    rotationPtr_.reset(nullptr);
 }
 
 
@@ -122,43 +132,82 @@ Foam::lumpedPointState::lumpedPointState(const lumpedPointState& rhs)
 {}
 
 
-Foam::lumpedPointState::lumpedPointState(const pointField& pts)
+Foam::lumpedPointState::lumpedPointState
+(
+    const pointField& pts,
+    const vectorField& ang,
+    const quaternion::eulerOrder rotOrder,
+    const bool degrees
+)
 :
     points_(pts),
-    angles_(points_.size(), Zero),
-    order_(quaternion::eulerOrder::ZXZ),
-    degrees_(false),
-    rotationPtr_(nullptr)
-{}
-
-
-Foam::lumpedPointState::lumpedPointState(tmp<pointField>& pts)
-:
-    points_(pts),
-    angles_(points_.size(), Zero),
-    order_(quaternion::eulerOrder::ZXZ),
-    degrees_(false),
-    rotationPtr_(nullptr)
-{}
-
-
-Foam::lumpedPointState::lumpedPointState(const dictionary& dict)
-:
-    points_(),
-    angles_(),
-    order_(quaternion::eulerOrder::ZXZ),
-    degrees_(false),
+    angles_(ang),
+    order_(rotOrder),
+    degrees_(degrees),
     rotationPtr_(nullptr)
 {
-    readDict(dict);
+    if (points_.size() != angles_.size())
+    {
+        #ifdef FULLDEBUG
+        FatalErrorInFunction
+            << "Have " << points_.size() << " points but "
+            << angles_.size() << " angles" << nl
+            exit(FatalError);
+        #else
+        WarningInFunction
+            << "Have " << points_.size() << " points but "
+            << angles_.size() << " angles, resizing angles to match" << nl;
+        #endif
+
+        angles_.resize(points_.size(), Zero);
+    }
 }
 
 
-// * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
+Foam::lumpedPointState::lumpedPointState
+(
+    const pointField& pts,
+    const quaternion::eulerOrder rotOrder,
+    const bool degrees
+)
+:
+    points_(pts),
+    angles_(points_.size(), Zero),
+    order_(rotOrder),
+    degrees_(degrees),
+    rotationPtr_(nullptr)
+{}
 
-Foam::lumpedPointState::~lumpedPointState()
+
+Foam::lumpedPointState::lumpedPointState
+(
+    tmp<pointField>& pts,
+    const quaternion::eulerOrder rotOrder,
+    const bool degrees
+)
+:
+    points_(pts),
+    angles_(points_.size(), Zero),
+    order_(rotOrder),
+    degrees_(false),
+    rotationPtr_(nullptr)
+{}
+
+
+Foam::lumpedPointState::lumpedPointState
+(
+    const dictionary& dict,
+    const quaternion::eulerOrder rotOrder,
+    const bool degrees
+)
+:
+    points_(),
+    angles_(),
+    order_(rotOrder),
+    degrees_(degrees),
+    rotationPtr_(nullptr)
 {
-    deleteDemandDrivenData(rotationPtr_);
+    readDict(dict, rotOrder, degrees);
 }
 
 
@@ -171,7 +220,16 @@ void Foam::lumpedPointState::operator=(const lumpedPointState& rhs)
     order_   = rhs.order_;
     degrees_ = rhs.degrees_;
 
-    deleteDemandDrivenData(rotationPtr_);
+    rotationPtr_.reset(nullptr);
+}
+
+
+void Foam::lumpedPointState::operator+=(const point& origin)
+{
+    for (point& p : points_)
+    {
+        p += origin;
+    }
 }
 
 
@@ -209,11 +267,16 @@ void Foam::lumpedPointState::relax
 
     angles_ = convert*prev.angles_ + alpha*(angles_ - convert*prev.angles_);
 
-    deleteDemandDrivenData(rotationPtr_);
+    rotationPtr_.reset(nullptr);
 }
 
 
-bool Foam::lumpedPointState::readPlain(Istream& is)
+bool Foam::lumpedPointState::readPlain
+(
+    Istream& is,
+    const quaternion::eulerOrder rotOrder,
+    const bool degrees
+)
 {
     // Assume generic input stream so we can do line-based input
     ISstream& iss = dynamic_cast<ISstream&>(is);
@@ -226,8 +289,8 @@ bool Foam::lumpedPointState::readPlain(Istream& is)
         isstr >> count;
     }
 
-    points_.setSize(count);
-    angles_.setSize(count);
+    points_.resize(count);
+    angles_.resize(count);
 
     count = 0;
     forAll(points_, i)
@@ -242,21 +305,26 @@ bool Foam::lumpedPointState::readPlain(Istream& is)
         ++count;
     }
 
-    points_.setSize(count);
-    angles_.setSize(count);
+    points_.resize(count);
+    angles_.resize(count);
     order_ = quaternion::eulerOrder::ZXZ;
     degrees_ = false;
 
-    deleteDemandDrivenData(rotationPtr_);
+    rotationPtr_.reset(nullptr);
 
     return count;
 }
 
 
-bool Foam::lumpedPointState::readData(Istream& is)
+bool Foam::lumpedPointState::readData
+(
+    Istream& is,
+    const quaternion::eulerOrder rotOrder,
+    const bool degrees
+)
 {
     dictionary dict(is);
-    readDict(dict);
+    readDict(dict, rotOrder, degrees);
 
     return points_.size();
 }
@@ -292,9 +360,9 @@ void Foam::lumpedPointState::writePlain(Ostream& os) const
 
     forAll(points_, i)
     {
-        const vector& pt = points_[i];
+        const vector& p = points_[i];
 
-        os  << pt.x() << ' ' << pt.y() << ' ' << pt.z();
+        os  << p.x() << ' ' << p.y() << ' ' << p.z();
 
         if (i < angles_.size())
         {
@@ -312,8 +380,10 @@ void Foam::lumpedPointState::writePlain(Ostream& os) const
 
 bool Foam::lumpedPointState::readData
 (
-    const inputFormatType& fmt,
-    const fileName& file
+    const inputFormatType fmt,
+    const fileName& file,
+    const quaternion::eulerOrder rotOrder,
+    const bool degrees
 )
 {
     bool ok = false;
@@ -323,11 +393,11 @@ bool Foam::lumpedPointState::readData
 
         if (fmt == inputFormatType::PLAIN)
         {
-            ok = this->readPlain(is);
+            ok = this->readPlain(is, rotOrder, degrees);
         }
         else
         {
-            ok = this->readData(is);
+            ok = this->readData(is, rotOrder, degrees);
         }
     }
 
@@ -375,7 +445,7 @@ bool Foam::lumpedPointState::readData
             toBelow << points_ << angles_ << degrees_;
         }
 
-        deleteDemandDrivenData(rotationPtr_);
+        rotationPtr_.reset(nullptr);
 
         // MPI barrier
         Pstream::scatter(ok);

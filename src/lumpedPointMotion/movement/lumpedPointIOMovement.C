@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,16 +32,16 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(lumpedPointIOMovement, 0);
+    defineTypeName(lumpedPointIOMovement);
 }
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-const Foam::lumpedPointIOMovement*
-Foam::lumpedPointIOMovement::lookupInRegistry(const objectRegistry& obr)
+Foam::lumpedPointIOMovement*
+Foam::lumpedPointIOMovement::getMovementObject(const objectRegistry& obr)
 {
-    return obr.findObject<lumpedPointIOMovement>
+    return obr.getObjectPtr<lumpedPointIOMovement>
     (
         lumpedPointMovement::canonicalName
     );
@@ -120,7 +120,7 @@ bool Foam::lumpedPointIOMovement::writeData(Ostream& os) const
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const lumpedPointIOMovement& obj)
 {

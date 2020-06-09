@@ -3,9 +3,8 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-# Copy building from resources directory
-mkdir -p constant/triSurface/
-cp $FOAM_TUTORIALS/resources/geometry/building_wtc2.obj constant/triSurface/
+# Get geometry and other resources
+./Allrun.init
 
 # runApplication surfaceFeatureExtract
 runApplication blockMesh

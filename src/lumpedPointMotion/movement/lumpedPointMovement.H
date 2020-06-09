@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,9 +27,9 @@ Class
     Foam::lumpedPointMovement
 
 Description
-    The movement \a driver that describes initial point locations, the
-    segmentation for pressure integration, the current state of the
-    points/rotations, and forwarding to the externalFileCoupler
+    The movement \a driver that describes initial point locations,
+    the current state of the points/rotations,
+    and forwarding to the externalFileCoupler
     communication coordinator.
 
     The lumpedPointIOMovement class is simply a registered version of
@@ -41,14 +41,15 @@ Description
     \heading Dictionary parameters
     \table
         Property    | Description                           | Required | Default
-        axis        | Reference axis for the locations      | yes |
-        locations   | List of lumped point locations        | yes |
-        centre      | Offset of patch points to locations   | no | automatic
-        division    | Division (0-1) for pressure forces    | no | 0
-        relax       | Relaxation/scaling for updating positions | no  |
-        interpolationScheme | The interpolation scheme      | yes |
-        forces      | Optional forces dictionary            | no |
-        communication | Required communication dictionary   | yes |
+        points      | Initial locations of lumped points    | yes |
+        pointLabels | The FEA ids for the points            | no  |
+        origin      | Shift offset when reading points      | no  | (0 0 0)
+        rotationOrder | The Euler rotation order            | no  | zxz
+        degrees     | Input rotations in degrees            | no  | false
+        relax       | Relaxation/scaling for updating positions | no  | 1
+        controllers | Motion controllers (dictionary)       | yes |
+        forces      | Force settings (dictionary)           | no  |
+        communication | Communication settings (dictionary) | yes |
     \endtable
 
     \heading Parameters for communication dictionary
@@ -60,7 +61,8 @@ Description
         inputFormat | Input format: dictionary/plain    | yes |
         outputFormat | Output format: dictionary/plain  | yes |
         scaleInput  | Input scaling parameter dictionary | no |
-        scaleOutput | Output scaling parameter dictionary | no |
+        scaleOutput | Output scaling parameter dictionary | no  |
+        calcFrequency | Calculation/coupling frequency    | no  | 1
     \endtable
 
     \heading Parameters for optional communication/scaleInput dictionary
@@ -95,28 +97,25 @@ SourceFiles
 
 #include "dictionary.H"
 #include "scalarList.H"
-#include "scalarField.H"
-#include "pointField.H"
-#include "vectorField.H"
-#include "tensorField.H"
-#include "vector.H"
-#include "interpolationWeights.H"
+#include "primitiveFields.H"
 #include "IOobject.H"
 #include "tmp.H"
-#include "faceZoneMeshFwd.H"
+#include "HashPtrTable.H"
 #include "externalFileCoupler.H"
+#include "lumpedPointController.H"
+#include "lumpedPointInterpolator.H"
 #include "lumpedPointState.H"
-#include "boundBox.H"
 #include "Enum.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class polyMesh;
+class polyPatch;
+class pointPatch;
 class Time;
 
 /*---------------------------------------------------------------------------*\
@@ -127,61 +126,72 @@ class lumpedPointMovement
 {
 public:
 
-    //- Output format types
-    enum class outputFormatType
-    {
-        PLAIN,      //!< "plain" is a simple ASCII format
-        DICTIONARY  //!< "dictionary" is the OpenFOAM dictionary format
-    };
+    // Data Types
 
-    //- Output format types
-    enum scalingType
-    {
-        LENGTH = 0, //!< The "length" scaling
-        FORCE,      //!< The "force" scaling
-        MOMENT      //!< The "moment" scaling
-    };
+        //- Output format types
+        enum class outputFormatType
+        {
+            PLAIN,      //!< "plain" is a simple ASCII format
+            DICTIONARY  //!< "dictionary" is the OpenFOAM dictionary format
+        };
 
-    // Static data
+        //- Output format types
+        enum scalingType
+        {
+            LENGTH = 0, //!< The "length" scaling
+            FORCE,      //!< The "force" scaling
+            MOMENT      //!< The "moment" scaling
+        };
 
-    //- Names for the output format types
-    static const Enum<outputFormatType> formatNames;
 
-    //- Names for the scaling types
-    static const Enum<scalingType> scalingNames;
+    // Static Data
+
+        //- Names for the output format types
+        static const Enum<outputFormatType> formatNames;
+
+        //- Names for the scaling types
+        static const Enum<scalingType> scalingNames;
 
 
 private:
 
-    // Private data
+    // Private Class
 
-        //- Reference axis for the locations
-        vector axis_;
+        //- The controller names and faceCentre mapping for a patch
+        struct patchControl
+        {
+            wordList names_;
+            labelList faceToPoint_;
+            List<lumpedPointInterpolator> interp_;
+        };
 
-        //- The locations of the lumped points within the reference axis
-        //  The interpolator needs scalarField, not scalarList.
-        scalarField locations_;
 
-        //- The division when calculating pressure forces (0-1)
-        scalar division_;
+    // Private Data
+
+        //- The offset for lumped points, used on input.
+        point origin_;
+
+        //- The initial state of positions with zero rotations.
+        lumpedPointState state0_;
+
+        //- The current state (positions, rotations)
+        //  Eg, as response from external application
+        lumpedPointState state_;
+
+        //- The original point ids (optional information)
+        labelList originalIds_;
+
+        //- Connectivity for the controllers
+        HashPtrTable<lumpedPointController> controllers_;
+
+        //- The controller names and faceCentre mapping for patches
+        Map<patchControl> patchControls_;
 
         //- The relaxation factor when moving points (default: 1)
         scalar relax_;
 
-        //- The interpolation type (linear|spline)
-        word interpolationScheme_;
-
-        //- Optional owner information
+        //- Optional owner information (patch owner)
         label ownerId_;
-
-        //- The bounding box (if set)
-        boundBox boundBox_;
-
-        //- The offset of patch points to compared to the locations
-        point centre_;
-
-        //- Calculate centre based on the bounding box
-        bool autoCentre_;
 
         //- Dictionary of controls for force calculation
         dictionary forcesDict_;
@@ -189,46 +199,29 @@ private:
         //- Communication control
         externalFileCoupler coupler_;
 
-        //- File io
+        //- File IO names
         word inputName_;
         word outputName_;
         word logName_;
 
+        //- The input format for points, rotations
         lumpedPointState::inputFormatType inputFormat_;
+
+        //- The output format for forces, moments
         outputFormatType outputFormat_;
 
-        //- Optional scale factors for input/output files
+        //- Scale factors for input/output files (optional)
         FixedList<scalar, 1> scaleInput_;
         FixedList<scalar, 3> scaleOutput_;
 
+        //- Calculation frequency
+        label calcFrequency_;
 
-    // Demand-driven private data
-
-        //- The initial state (positions, rotations)
-        lumpedPointState state0_;
-
-        //- The current state (positions, rotations)
-        //  Eg, as response from external application
-        lumpedPointState state_;
-
-        //- Threshold locations for pressure forces
-        mutable scalarField* thresholdPtr_;
-
-        //- User-specified interpolator
-        mutable autoPtr<interpolationWeights> interpolatorPtr_;
-
-        //- Pressure zones (only used from the master patch)
-        mutable List<labelList> faceZones_;
+        //- The last timeIndex when coupling was triggered
+        mutable label lastTrigger_;
 
 
     // Private Member Functions
-
-        //- Calculate threshold locations
-        void calcThresholds() const;
-
-        //- Classify the position to be located in one of the threshold zones
-        label threshold(scalar pos) const;
-
 
         //- No copy construct
         lumpedPointMovement(const lumpedPointMovement&) = delete;
@@ -236,9 +229,13 @@ private:
         //- No copy assignment
         void operator=(const lumpedPointMovement&) = delete;
 
+
 public:
 
-    // Static data members
+    // Static Data Members
+
+        //- Debug switch
+        static int debug;
 
         //- The canonical name ("lumpedPointMovement") for the dictionary
         static const word canonicalName;
@@ -246,15 +243,15 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         lumpedPointMovement();
 
         //- Construct from dictionary, optionally with some owner information
-        lumpedPointMovement(const dictionary& dict, label ownerId=-1);
+        explicit lumpedPointMovement(const dictionary& dict, label ownerId=-1);
 
 
     //- Destructor
-    virtual ~lumpedPointMovement();
+    virtual ~lumpedPointMovement() = default;
 
 
     // Member Functions
@@ -269,28 +266,11 @@ public:
         //- The number of lumped points (number of locations)
         inline label size() const;
 
-        //- The normalized reference axis
-        inline const vector& axis() const;
-
-        //- Read access to the locations
-        inline const scalarField& locations() const;
-
-        //- The division (0-1) when calculating pressure forces
-        inline scalar division() const;
-
         //- An owner Id, if needed for bookkeeping purposes
         inline label ownerId() const;
 
         //- Change the owner id, if needed for bookkeeping purposes
         inline void ownerId(label id);
-
-
-        //- Threshold locations for pressure forces
-        inline const scalarField& thresholds() const;
-
-        //- Classify the position to be located in one of the threshold zones
-        inline label threshold(const point& position) const;
-
 
         //- Communication control
         inline const externalFileCoupler& coupler() const;
@@ -298,11 +278,23 @@ public:
         //- Communication control
         inline externalFileCoupler& coupler();
 
+        //- Check if coupling is pending (according to the calcFrequency)
+        bool couplingPending(const label timeIndex) const;
+
+        //- Register that coupling is completed at this calcFrequency
+        void couplingCompleted(const label timeIndex) const;
+
         //- The initial state (positions/rotations)
         inline const lumpedPointState& state0() const;
 
         //- The current state (positions/rotations)
         inline const lumpedPointState& state() const;
+
+        //- The offset for lumped points, used on input.
+        inline const point& origin() const;
+
+        //- Scale the lumped points (on input).
+        inline void scalePoints(lumpedPointState& state) const;
 
         //- The relaxation factor when changing states
         inline scalar relax() const;
@@ -325,25 +317,40 @@ public:
         //- The output (forces) file format
         inline lumpedPointMovement::outputFormatType outputFormat() const;
 
+        //- The Euler-angle rotation order
+        inline quaternion::eulerOrder rotationOrder() const;
 
-        //- Define the bounding-box required to enclose the specified patches.
-        //  Calculates the centre as required.
+        //-  Rotation angles in degrees
+        inline bool degrees() const;
+
+        //- Check if patch control exists for specified patch
+        inline bool hasPatchControl(const label patchIndex) const;
+
+        //- Check if patch control exists for specified patch
+        bool hasPatchControl(const polyPatch& pp) const;
+
+        //- Check if patch control exists for specified patch
+        bool hasInterpolator(const pointPatch& fpatch) const;
+
+        //- Check if patch control exists for specified patch
+        void checkPatchControl(const polyPatch& pp) const;
+
+        //- Define pressure-zones mapping for faces in the specified patches.
+        //  The face centres are compared to the controller points,
         //
-        //  \param mesh     The volume mesh reference
-        //  \param patchIds The patch ids to be included in the bounding box.
+        //  \param pp       The patch with a control
+        //  \param ctrlNames The patch ids to be included in the mapping
         //  \param points0  The initial mesh points, prior to movement
-        void setBoundBox
+        void setPatchControl
         (
-            const polyMesh& mesh,
-            const labelUList& patchIds,
+            const polyPatch& pp,
+            const wordList& ctrlNames,
             const pointField& points0
         );
 
 
-        //- Define the pressure-zones mapping for faces in the specified
-        //  patches.
-        //  The face centres are compared to the threshold positions,
-        //  which are determined by locations along the defined axis.
+        //- Define pressure-zones mapping for faces in the specified patches.
+        //  The face centres are compared to the controller points,
         //
         //  \param mesh     The volume mesh reference
         //  \param patchIds The patch ids to be included in the mapping
@@ -356,13 +363,21 @@ public:
         );
 
 
+        //- Check if patch control exists for specified patch
+        void setInterpolator
+        (
+            const pointPatch& fpatch,
+            const pointField& points0
+        );
+
         //- True if the pressure-zones mapping has already been performed
         inline bool hasMapping() const;
 
-        //- Return the pressure-zones mapping with the associated
-        //  patch face ids.
-        inline const List<labelList>& zones() const;
+        //- Check if patch interpolator exists for specified patch
+        inline bool hasInterpolator(const label patchIndex) const;
 
+        //- The areas for each pressure-zone.
+        List<scalar> areas(const polyMesh& pmesh) const;
 
         //- The forces and moments acting on each pressure-zone.
         //  The zones must be previously defined via setMapping.
@@ -375,24 +390,28 @@ public:
 
 
         //- Displace points according to the current state
-        tmp<pointField> displacePoints
+        tmp<pointField> pointsDisplacement
         (
-            const pointField& points0,
-            const labelList& pointLabels
+            const pointPatch& fpatch,
+            const pointField& points0
         ) const;
-
 
         //- Displace points according to specified state
-        tmp<pointField> displacePoints
+        tmp<pointField> pointsDisplacement
         (
             const lumpedPointState& state,
-            const pointField& points0,
-            const labelList& pointLabels
+            const pointPatch& fpatch,
+            const pointField& points0
         ) const;
 
+        //- The points absolute position according to specified state
+        tmp<pointField> pointsPosition
+        (
+            const lumpedPointState& state,
+            const pointPatch& fpatch,
+            const pointField& points0
+        ) const;
 
-        //- Interpolation weights
-        const interpolationWeights& interpolator() const;
 
         //- Write axis, locations, division as a dictionary
         void writeDict(Ostream& os) const;
@@ -419,6 +438,13 @@ public:
         bool readState();
 
         //- Write state as VTK PolyData format.
+        void writeStateVTP
+        (
+            const lumpedPointState& state,
+            const fileName& file
+        ) const;
+
+        //- Write state as VTK PolyData format.
         void writeStateVTP(const fileName& file) const;
 
         //- Write forces on points as VTK PolyData format.
@@ -438,14 +464,12 @@ public:
             const pointField& points0
         ) const;
 
-
         //- Write displaced geometry according to the current state,
         //  write as VTK PolyData format.
         void writeVTP
         (
             const fileName& file,
             const polyMesh& mesh,
-            const labelUList& patchIds,
             const pointField& points0
         ) const;
 
@@ -456,25 +480,8 @@ public:
             const fileName& file,
             const lumpedPointState& state,
             const polyMesh& mesh,
-            const labelUList& patchLst,
             const pointField& points0
         ) const;
-
-
-    // Housekeeping
-
-        //- Deprecated(2018-08) compatibility method
-        //  \deprecated(2018-08) - use IOobject::selectIO directly
-        static IOobject selectIO
-        (
-            const IOobject& io,
-            const fileName& altFile,
-            const word& ioName = ""
-        )
-        {
-            return IOobject::selectIO(io, altFile, ioName);
-        }
-
 };
 
 

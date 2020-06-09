@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1912                                 |
+|  \\    /   O peration     | Version:  v2006                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -15,36 +15,59 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Reference axis for the locations
-axis            (0 0 1);
+//- The initial locations of the lumped points
+points
+(
 
-// Locations of the lumped points
-locations       11(0 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5);
+);
 
-// Division for pressure forces (0-1)
-division        0.5;
+//- The FEA point labels for the points (optional)
+// pointLabels
+// (
+//
+// );
 
-//- If present, the offset of patch points compared to the locations
-//  Otherwise determined from the bounding box
-// centre          (0 0 0);
+//- The motion controllers.
+//  The pointLabels are an adjacency list of point connectivity.
+//
+//  Controllers are joined by common point labels between lists
+//  (or internally - eg, ring structure) when they appear in the corresponding
+//  point displacement patch
+controllers
+{
+    control1
+    {
+        pointLabels (0 1 2 3 4);
+    }
+    control2
+    {
+        pointLabels (1 5 6);
+    }
+}
 
-//- The interpolation scheme
-interpolationScheme linear;
 
-//- Relaxation/scaling factor when updating positions
-relax           1.0;
+//- Input offset to shift ALL lumped points when reading (default: 0 0 0)
+// origin  (0 0 0);
 
+//- The Euler rotation order (default: zxz)
+// rotationOrder zxz;
+
+//- Input rotations in degrees instead of radians (default: false)
+// degrees false;
+
+//- Relaxation/scaling factor when updating positions (default: 1)
+// relax   1.0;
 
 forces
 {
-    //- The pressure name (default: p)
-    p           p;
+    //- Pressure name (default: p)
+    p       p;
 
     //- Reference pressure [Pa] (default: 0)
-    pRef        0;
+    pRef    0;
 
     //- Reference density for incompressible calculations (default: 1)
-    rhoRef      1;
+    rhoRef  1;
 }
 
 
@@ -60,6 +83,9 @@ communication
 
     initByExternal  false;
 
+    // Coupling frequency in time-steps (default: 1-steps)
+    // calcFrequency   1;
+
     // Input file of positions/rotation, written by external application
     inputName       positions.in;
 
@@ -70,26 +96,28 @@ communication
     logName         movement.log;
 
     inputFormat     dictionary;
+
     outputFormat    dictionary;
 
-    // Scaling applied to values read from 'inputName'
+    // Scaling applied to values read from 'inputName',
+    // also applies to points (above)
     scaleInput
     {
         //- Length multiplier (to metres). Eg 0.001 for [mm] -> [m]
-        length      1;
+        length  1;
     }
 
     // Scaling applied to values written to 'outputName'
     scaleOutput
     {
         //- Length multiplier (from metres). Eg 1000 for [m] -> [mm]
-        length      1;
+        length  1;
 
         //- Force units multiplier (from Pa)
-        force       1;
+        force   1;
 
         //- Moment units multiplier (from N.m)
-        moment      1;
+        moment  1;
     }
 }
 

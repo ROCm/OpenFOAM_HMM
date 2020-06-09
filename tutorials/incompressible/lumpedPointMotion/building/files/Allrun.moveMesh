@@ -3,16 +3,14 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-# The 0/ field only
-# runApplication reconstructPar -withZero -time 0
-runApplication reconstructParMesh -constant -withZero -time 0
+# Cleanup old junk that may prevent things from starting
+rm -f comms/OpenFOAM.lock
 
-# Check the location of the pressure zones
-# runParallel lumpedPointZones    <<- Parallel file writing not yet done
-runApplication lumpedPointZones
+# If OpenFOAM stops prematurely, trigger the external solver to stop
+trap '[ -e comms/OpenFOAM.lock ] && echo "status=done" > comms/OpenFOAM.lock' EXIT TERM INT
 
-# Simulated external solver
-# Use -scale=1 to see the excessively large movements
+# Simulated external solver.
+# Using -scale 0.01 since input movement table included visual scaling
 
 if false
 then
@@ -22,12 +20,15 @@ then
 
     # Use response file for states
     runApplication -overwrite \
-        lumpedPointMovement -span 25 -scale 1 response.txt
+        lumpedPointMovement -scale 0.01 -removeLock -slave response.txt &
 else
 
     # Generate states on demand
     runApplication -overwrite \
-        ../code/building-motion -scale 1 -deltaT 0.025 -nTimes 201
+        ../code/building-motion -scale 0.01 -removeLock -slave &
 fi
+
+# Run moveMesh with deltaT corresponding to dynamicMeshDict updateInterval
+runParallel moveMesh -deltaT 0.001
 
 #------------------------------------------------------------------------------

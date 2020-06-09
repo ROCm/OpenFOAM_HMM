@@ -10,9 +10,23 @@ rm -f comms/OpenFOAM.lock
 trap '[ -e comms/OpenFOAM.lock ] && echo "status=done" > comms/OpenFOAM.lock' EXIT TERM INT
 
 # Simulated external solver.
-# Using -scale since the input movement table is excessively large
-runApplication -overwrite \
-    lumpedPointMovement -scale 0.01 -removeLock -slave ../files/response.txt &
+# Using -scale 0.01 since input movement table included visual scaling
+
+if false
+then
+    # Create response file
+    runApplication -overwrite \
+        ../code/building-motion -deltaT 0.001 -nTimes 5001 -output response.txt
+
+    # Use response file for states
+    runApplication -overwrite \
+        lumpedPointMovement -scale 0.01 -removeLock -slave response.txt &
+else
+
+    # Generate states on demand
+    runApplication -overwrite \
+        ../code/building-motion -scale 0.01 -removeLock -slave &
+fi
 
 # Run OpenFOAM
 runParallel $(getApplication)

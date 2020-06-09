@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,6 +39,7 @@ Description
 
 #include "lumpedPointTools.H"
 #include "lumpedPointIOMovement.H"
+#include "fvMesh.H"
 
 using namespace Foam;
 
@@ -52,8 +53,25 @@ int main(int argc, char *argv[])
         " pressure integration zones used by lumpedPoint BC."
     );
 
-    argList::noParallel();    // The VTP writer is not yet in parallel
     argList::noFunctionObjects();  // Never use function objects
+
+    argList::addBoolOption
+    (
+        "dry-run",
+        "Test initial lumped points state without a mesh"
+    );
+    argList::addOption
+    (
+        "visual-length",
+        "len",
+        "Visualization length for planes (visualized as triangles)"
+    );
+
+    argList::addBoolOption
+    (
+        "no-interpolate",
+        "Suppress calculation/display of point interpolators"
+    );
 
     argList::addBoolOption
     (
@@ -62,47 +80,89 @@ int main(int argc, char *argv[])
     );
 
     #include "addRegionOption.H"
+
     #include "setRootCase.H"
+
+    const bool noInterpolate = args.found("no-interpolate");
+
+    const bool dryrun = args.found("dry-run");
 
     // const bool verbose = args.found("verbose");
 
+    args.readIfPresent("visual-length", lumpedPointState::visLength);
+
     #include "createTime.H"
 
-    runTime.setTime(instant(0, runTime.constant()), 0);
+    if (dryrun)
+    {
+        // Create without a mesh
+        autoPtr<lumpedPointIOMovement> movement =
+            lumpedPointIOMovement::New(runTime);
 
-    #include "createNamedPolyMesh.H"
+        if (!movement.valid())
+        {
+            Info<< "No valid movement found" << endl;
+            return 1;
+        }
 
-    autoPtr<lumpedPointIOMovement> movement = lumpedPointIOMovement::New
-    (
-        runTime
-    );
+        const word outputName("state.vtp");
+
+        Info<< "dry-run: writing " << outputName << nl;
+
+        movement().writeStateVTP(movement().state0(), outputName);
+
+        Info<< "\nEnd\n" << endl;
+
+        return 0;
+    }
+
+
+    runTime.setTime(instant(runTime.constant()), 0);
+
+    #include "createNamedMesh.H"
+
+    autoPtr<lumpedPointIOMovement> movement = lumpedPointIOMovement::New(mesh);
 
     if (!movement.valid())
     {
-        Info<< "no valid movement found" << endl;
+        Info<< "No valid movement found" << endl;
         return 1;
     }
 
-    const labelList patchLst = lumpedPointTools::lumpedPointPatchList(mesh);
-    if (patchLst.empty())
+    // Initial positions/rotations
+    movement().writeStateVTP("state.vtp");
+
+    pointIOField points0(lumpedPointTools::points0Field(mesh));
+
+    const label nPatches = lumpedPointTools::setPatchControls(mesh, points0);
+    if (!nPatches)
     {
-        Info<< "no patch list found" << endl;
+        Info<< "No point patches with lumped movement found" << endl;
         return 2;
     }
 
-    pointIOField points0 = lumpedPointTools::points0Field(mesh);
-    movement().setMapping(mesh, patchLst, points0);
+    Info<<"Lumped point patch controls set on "
+        << nPatches << " patches" << nl;
 
-    // Initial geometry, but with zone colouring
-    movement().writeZonesVTP("lumpedPointZones.vtp", mesh, points0);
+    Info<<"Areas per point: " << flatOutput(movement().areas(mesh)) << nl;
 
-    // Initial positions/rotations
-    movement().writeStateVTP("initialState.vtp");
+    if (noInterpolate)
+    {
+        // Initial geometry, with zones
+        movement().writeZonesVTP("lumpedPointZones.vtp", mesh, points0);
+    }
+    else
+    {
+        lumpedPointTools::setInterpolators(mesh, points0);
+
+        // Initial geometry, with zones and interpolations
+        movement().writeVTP("lumpedPointZones.vtp", mesh, points0);
+    }
 
     Info<< nl
+        << "wrote 'state.vtp' (reference state)" << nl
         << "wrote 'lumpedPointZones.vtp'" << nl
-        << "wrote 'initialState.vtp'" << nl
-        << "End\n" << endl;
+        << "\nEnd\n" << endl;
 
     return 0;
 }

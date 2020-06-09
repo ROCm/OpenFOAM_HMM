@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,16 +27,54 @@ License
 
 #include "lumpedPointMovement.H"
 #include "polyMesh.H"
+#include "pointMesh.H"
 #include "OFstream.H"
-#include "uindirectPrimitivePatch.H"
-
 #include "foamVtkOutput.H"
+#include "foamVtkSurfaceWriter.H"
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
+void Foam::lumpedPointMovement::writeStateVTP
+(
+    const lumpedPointState& state,
+    const fileName& file
+) const
+{
+    if (!Pstream::master())
+    {
+        // No extra information available from slaves, write on master only.
+        return;
+    }
+
+    labelListList lines;
+
+    label nLines = controllers_.size();
+
+    if (nLines)
+    {
+        lines.resize(nLines);
+        nLines = 0;
+
+        for (const word& ctrlName : controllers_.sortedToc())
+        {
+            lines[nLines] = controllers_[ctrlName]->pointLabels();
+            ++nLines;
+        }
+    }
+    else
+    {
+        // Default - global with all points as a single line
+        lines.resize(1);
+        lines.first() = identity(state.size());
+    }
+
+    state.writeVTP(file, lines, originalIds_);
+}
+
+
 void Foam::lumpedPointMovement::writeStateVTP(const fileName& file) const
 {
-    state().writeVTP(file, axis());
+    writeStateVTP(state(), file);
 }
 
 
@@ -47,6 +85,12 @@ void Foam::lumpedPointMovement::writeForcesAndMomentsVTP
     const UList<vector>& moments
 ) const
 {
+    if (!Pstream::master())
+    {
+        // Force, moments already reduced
+        return;
+    }
+
     OFstream fos(file);
     std::ostream& os = fos.stdStream();
 
@@ -60,7 +104,7 @@ void Foam::lumpedPointMovement::writeForcesAndMomentsVTP
         .beginVTKFile<vtk::fileTag::POLY_DATA>();
 
     //
-    // The 'spine' of lumped mass points
+    // The 'backbone' of lumped mass points
     //
     const label nPoints = state().points().size();
 
@@ -176,126 +220,38 @@ void Foam::lumpedPointMovement::writeZonesVTP
     const pointField& points0
 ) const
 {
-    OFstream fos(file);
-    std::ostream& os = fos.stdStream();
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+    const labelList patchIds(patchControls_.sortedToc());
 
-    autoPtr<vtk::formatter> format = vtk::newFormatter
+    vtk::surfaceWriter writer
     (
-        os,
-        vtk::formatType::INLINE_ASCII
+        pointField::null(),
+        faceList::null(),
+        vtk::formatType::INLINE_ASCII,
+        file
     );
 
-    format().xmlHeader()
-        .beginVTKFile<vtk::fileTag::POLY_DATA>();
-
-    forAll(faceZones_, zoneI)
+    for (const label patchi : patchIds)
     {
-        uindirectPrimitivePatch pp
+        const labelList& faceToPoint = patchControls_[patchi].faceToPoint_;
+
+        primitivePatch pp
         (
-            UIndirectList<face>(mesh.faces(), faceZones_[zoneI]),
+            SubList<face>(mesh.faces(), patches[patchi].range()),
             points0
         );
 
-        format()
-            .tag
-            (
-                vtk::fileTag::PIECE,
-                vtk::fileAttr::NUMBER_OF_POINTS, pp.nPoints(),
-                vtk::fileAttr::NUMBER_OF_POLYS,  pp.size()
-            );
+        writer.piece(pp.localPoints(), pp.localFaces());
 
-        // 'points'
-        {
-            const uint64_t payLoad = vtk::sizeofData<float, 3>(pp.nPoints());
+        writer.writeGeometry();
 
-            format()
-                .tag(vtk::fileTag::POINTS)
-                .beginDataArray<float, 3>(vtk::dataArrayAttr::POINTS);
+        writer.beginCellData(2);
 
-            format().writeSize(payLoad);
-            vtk::writeList(format(), pp.localPoints());
-            format().flush();
+        writer.writeUniform("patchId", patchi);
+        writer.write("lumpedId", faceToPoint);
 
-            format()
-                .endDataArray()
-                .endTag(vtk::fileTag::POINTS);
-        }
-
-        // <Polys>
-        format().tag(vtk::fileTag::POLYS);
-
-        //
-        // 'connectivity'
-        //
-        {
-            label nVerts = 0;
-            for (const face& f : pp)
-            {
-                nVerts += f.size();
-            }
-
-            const uint64_t payLoad = vtk::sizeofData<label>(nVerts);
-
-            format().beginDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY);
-            format().writeSize(payLoad);
-
-            for (const face& f : pp.localFaces())
-            {
-                vtk::writeList(format(), f);
-            }
-            format().flush();
-
-            format().endDataArray();
-        }
-
-        //
-        // 'offsets'  (connectivity offsets)
-        //
-        {
-            const uint64_t payLoad = vtk::sizeofData<label>(pp.size());
-
-            format().beginDataArray<label>(vtk::dataArrayAttr::OFFSETS);
-            format().writeSize(payLoad);
-
-            label off = 0;
-            forAll(pp, facei)
-            {
-                const face& f = pp[facei];
-                off += f.size();
-
-                format().write(off);
-            }
-            format().flush();
-
-            format().endDataArray();
-        }
-
-        format().endTag(vtk::fileTag::POLYS);
-
-
-        format().beginCellData();
-
-        // zone Id
-        {
-            const uint64_t payLoad = vtk::sizeofData<label>(pp.size());
-
-            format().beginDataArray<label>("zoneId");
-            format().writeSize(payLoad);
-
-            vtk::write(format(), zoneI, pp.size());
-
-            format().flush();
-
-            format().endDataArray();
-        }
-
-        format().endCellData();
-
-        format().endPiece();
+        writer.endCellData();
     }
-
-    format().endTag(vtk::fileTag::POLY_DATA)
-        .endVTKFile();
 }
 
 
@@ -303,11 +259,10 @@ void Foam::lumpedPointMovement::writeVTP
 (
     const fileName& file,
     const polyMesh& mesh,
-    const labelUList& patchIds,
     const pointField& points0
 ) const
 {
-    writeVTP(file, state(), mesh, patchIds, points0);
+    writeVTP(file, state(), mesh, points0);
 }
 
 
@@ -316,119 +271,100 @@ void Foam::lumpedPointMovement::writeVTP
     const fileName& file,
     const lumpedPointState& state,
     const polyMesh& mesh,
-    const labelUList& patchIds,
     const pointField& points0
 ) const
 {
-    const polyBoundaryMesh& boundaryMesh = mesh.boundaryMesh();
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+    const labelList patchIds(patchControls_.sortedToc());
 
-    OFstream fos(file);
-    std::ostream& os = fos.stdStream();
+    pointMesh ptMesh(mesh);
 
-    autoPtr<vtk::formatter> format = vtk::newFormatter
+    vtk::surfaceWriter writer
     (
-        os,
-        vtk::formatType::INLINE_ASCII
+        pointField::null(),
+        faceList::null(),
+        vtk::formatType::INLINE_ASCII,
+        file
     );
 
-    format().xmlHeader()
-        .beginVTKFile<vtk::fileTag::POLY_DATA>();
-
-    for (const label patchId : patchIds)
+    for (const label patchi : patchIds)
     {
-        const polyPatch& pp = boundaryMesh[patchId];
+        const polyPatch& pp = patches[patchi];
 
-        format()
-            .tag
-            (
-                vtk::fileTag::PIECE,
-                vtk::fileAttr::NUMBER_OF_POINTS, pp.nPoints(),
-                vtk::fileAttr::NUMBER_OF_POLYS,  pp.size()
-            );
+        const pointPatch& ptPatch = ptMesh.boundary()[patchi];
 
-        // 'points'
+        // Current position (not displacement)
+        tmp<pointField> tpts = pointsPosition(state, ptPatch, points0);
+
+        writer.piece(tpts(), pp.localFaces());
+
+        writer.writeGeometry();
+
+        // Face mapping
+        const labelList& faceToPoint = patchControls_[patchi].faceToPoint_;
+
+        writer.beginCellData(2);
+
+        writer.writeUniform("patchId", patchi);
+        writer.write("lumpedId", faceToPoint);
+
+        writer.endCellData();
+
+        // The interpolator
+        const List<lumpedPointInterpolator>& interpList
+            = patchControls_[patchi].interp_;
+
+        writer.beginPointData(3);
+
+        // Nearest, Next
         {
-            const uint64_t payLoad = vtk::sizeofData<float, 3>(pp.nPoints());
+            labelList intData(interpList.size());
 
-            format()
-                .tag(vtk::fileTag::POINTS)
-                .beginDataArray<float, 3>(vtk::dataArrayAttr::POINTS);
+            forAll(interpList, i)
+            {
+                intData[i] = interpList[i].nearest();
+            }
+            writer.write("nearest", intData);
 
-            // Could be more efficient, but not often needed
-            tmp<pointField> tpts = displacePoints
-            (
-                state,
-                points0,
-                pp.meshPoints()
-            ) + pointField(points0, pp.meshPoints());
+            forAll(interpList, i)
+            {
+                intData[i] = interpList[i].next1();
+            }
+            writer.write("next1", intData);
 
-            const pointField& pts = tpts();
 
-            format().writeSize(payLoad);
-            vtk::writeList(format(), pts);
-            format().flush();
-
-            format()
-                .endDataArray()
-                .endTag(vtk::fileTag::POINTS);
+            forAll(interpList, i)
+            {
+                intData[i] = interpList[i].next2();
+            }
+            writer.write("next2", intData);
         }
 
-        // <Polys>
-        format().tag(vtk::fileTag::POLYS);
-
-
-        //
-        // 'connectivity'
-        //
+        // Weights
         {
-            label nVerts = 0;
-            for (const face& f : pp)
+            scalarList floatData(interpList.size());
+
+            forAll(interpList, i)
             {
-                nVerts += f.size();
+                floatData[i] = interpList[i].weight0();
             }
+            writer.write("weight", floatData);
 
-            const uint64_t payLoad = vtk::sizeofData<label>(nVerts);
-
-            format().beginDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY);
-            format().writeSize(payLoad);
-
-            for (const face& f : pp.localFaces())
+            forAll(interpList, i)
             {
-                vtk::writeList(format(), f);
+                floatData[i] = interpList[i].weight1();
             }
-            format().flush();
+            writer.write("weight1", floatData);
 
-            format().endDataArray();
+            forAll(interpList, i)
+            {
+                floatData[i] = interpList[i].weight2();
+            }
+            writer.write("weight2", floatData);
         }
 
-        //
-        // 'offsets'  (connectivity offsets)
-        //
-        {
-            const uint64_t payLoad = vtk::sizeofData<label>(pp.size());
-
-            format().beginDataArray<label>(vtk::dataArrayAttr::OFFSETS);
-            format().writeSize(payLoad);
-
-            label off = 0;
-            for (const face& f : pp)
-            {
-                off += f.size();
-
-                format().write(off);
-            }
-            format().flush();
-
-            format().endDataArray();
-        }
-
-        format().endTag(vtk::fileTag::POLYS);
-
-        format().endPiece();
+        writer.endPointData();
     }
-
-    format().endTag(vtk::fileTag::POLY_DATA)
-        .endVTKFile();
 }
 
 

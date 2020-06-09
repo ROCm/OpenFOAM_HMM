@@ -1,3 +1,5 @@
+controller/lumpedPointController.C
+
 state/lumpedPointState.C
 state/lumpedPointStateWriter.C
 
