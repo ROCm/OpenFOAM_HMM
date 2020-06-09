@@ -28,6 +28,7 @@ Application
 
 Description
     Test of master/slave communication etc.
+
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
@@ -41,55 +42,78 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::noBanner();
     argList::noParallel();
+    argList::addOption("sleep", "N", "sleep to add between calls");
     argList::addOption("max", "N", "max number of calls (default: 1000)");
     argList::addBoolOption("slave", "run as slave");
 
     #include "setRootCase.H"
 
     const label maxCount = args.getOrDefault<label>("max", 1000);
+    const label sleeping = args.getOrDefault<label>("sleep", 0);
 
     externalFileCoupler coupler;
 
     if (args.found("slave"))
     {
         const word role = "slave";
-        Info<< "Running as " << role << " max=" << maxCount << endl;
+        const word other = "master";
+        Info<< "Running as " << role << " max=" << maxCount
+            << " (sleep " << sleeping << ')' << endl;
 
         for (label count = 0; count < maxCount; ++count)
         {
             // Wait for master, but stop if status=done was seen
+            Info<< role << '[' << count << "] wait for " << other << endl;
 
-            Info<< role << ": waiting for master" << endl;
             if (!coupler.waitForMaster())
             {
                 Info<< role << ": stopping. status=done was detected" << endl;
                 break;
             }
 
-            Info<< role << ": switch to master" << endl;
+            if (sleeping)
+            {
+                sleep(sleeping);
+            }
+
+            // Info<< role << ": switch to " << other << endl;
             coupler.useMaster();
         }
+
+        Info<< role << ": exiting" << endl;
     }
     else
     {
         const word role = "master";
-        Info<< "Running as " << role << " max=" << maxCount << endl;
+        const word other = "slave";
+        Info<< "Running as " << role << " max=" << maxCount
+            << " (sleep " << sleeping << ')' << endl;
 
         for (label count = 0; count < maxCount; ++count)
         {
             // Wait for slave, but stop if status=done was seen
 
-            Info<< role << ": waiting for slave" << endl;
+            Info<< role << '[' << count << "] wait for " << other << endl;
+
             if (!coupler.waitForSlave())
             {
                 Info<< role << ": stopping. status=done was detected" << endl;
                 break;
             }
 
-            Info<< role << ": switch to slave" << endl;
+            if (sleeping)
+            {
+                sleep(sleeping);
+            }
+
+            // Info<< role << ": switch to " << other << endl;
             coupler.useSlave();
         }
+
+        // shudown - slave should notice and terminate
+        Info<< role << ": exiting" << endl;
     }
 
     return 0;

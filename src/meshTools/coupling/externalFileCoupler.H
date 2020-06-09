@@ -290,7 +290,6 @@ public:
 
         //- Remove files written by OpenFOAM
         void removeDirectory() const;
-
 };
 
 

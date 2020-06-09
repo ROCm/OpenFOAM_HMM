@@ -471,9 +471,6 @@ $(general)/pressureControl/pressureControl.C
 $(general)/levelSet/levelSet.C
 $(general)/meshObjects/gravity/gravityMeshObject.C
 
-coupling = $(general)/coupling
-$(coupling)/externalFileCoupler.C
-
 solutionControl = $(general)/solutionControl
 $(solutionControl)/solutionControl/solutionControl.C
 $(solutionControl)/loopControl/loopControl.C
