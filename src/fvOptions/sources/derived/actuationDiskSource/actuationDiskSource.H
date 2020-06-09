@@ -5,7 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 ENERCON GmbH
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,36 +31,175 @@ Group
     grpFvOptionsSources
 
 Description
-    Actuation disk source
+    Applies sources on \c U to enable actuator disk models for aero/hydro thrust
+    loading of horizontal axis turbines on surrounding flow field in
+    terms of energy conversion processes.
 
-    Constant values for momentum source for actuation disk
-    \f[
-        T = 2 \rho A U_{o}^2 a (1-a)
-    \f]
-    and
-    \f[
-        U_1 = (1 - a)U_{o}
-    \f]
-
-    where:
-    \vartable
-        A   | disk area
-        U_o | upstream velocity
-        a   | 1 - Cp/Ct
-        U_1 | velocity at the disk
-    \endvartable
-
-Usage
-    Example usage:
+    Corrections applied to:
     \verbatim
-    fields          (U);        // names of fields to apply source
-    diskDir         (-1 0 0);   // disk direction
-    Cp              0.1;        // power coefficient
-    Ct              0.5;        // thrust coefficient
-    diskArea        5.0;        // disk area
-    upstreamPoint   (0 0 0);    // upstream point
+      U         | Velocity    [m/s]
     \endverbatim
 
+    Required fields:
+    \verbatim
+      U         | Velocity    [m/s]
+    \endverbatim
+
+    Available options for force computations:
+    \verbatim
+      Froude          | Froude's one-dimensional ideal actuator disk method
+      variableScaling | Variable-scaling actuator disk method
+    \endverbatim
+
+    The expressions for \c Froude method:
+    \f[
+        T = 2 \rho A | \vec{U_o} \cdot \vec{n} |^2 a (1-a)
+    \f]
+    with
+    \f[
+        a = 1 - \frac{C_p}{C_T}
+    \f]
+    where
+    \vartable
+      T         | Thrust magnitude
+      \rho      | Monitored incoming fluid density
+      A         | Actuator disk planar surface area
+      \vec{U_o} | Incoming velocity spatial-averaged on monitored region
+      \vec{n}   | Surface-normal vector of the actuator disk pointing upstream
+      a         | Axial induction factor
+      C_p       | Power coefficient
+      C_T       | Thrust coefficient
+    \endvartable
+
+    The expressions for \c variableScaling method:
+    \f[
+        T = 0.5 \rho A | \vec{U_m} \cdot \vec{n} |^2 C_T^*
+    \f]
+    with
+    \f[
+        C_T^* = C_T \left( \frac{ |\vec{U_{ref}}| }{ |\vec{U_m}| } \right)^2
+    \f]
+    where
+    \vartable
+        T         | Thrust magnitude
+        \rho      | Monitored incoming fluid density
+        A         | Actuator disk planar surface area
+        \vec{U_m} | Incoming velocity spatial-averaged on actuator disk
+        \vec{n}   | Surface-normal vector of the actuator disk pointing upstream
+        \vec{U_{ref}} | Incoming velocity spatial-averaged on monitored region
+        C_T       | Thrust coefficient
+        C_T^*     | Calibrated thrust coefficient
+    \endvartable
+
+    Reference
+    \verbatim
+        Froude's one-dimensional ideal actuator disk (tags:F,BJSB):
+            Froude, R. E. (1889).
+            On the part played in propulsion by differences of fluid pressure.
+            Trans. Inst. Naval Architects, 30, 390.
+
+            Burton, T., Jenkins, N., Sharpe, D., & Bossanyi, E. (2011).
+            Wind energy handbook, 2nd edition.
+            Chichester, the United Kingdom. John Wiley & Sons.
+            Print ISBN:978-0-470-69975-1
+            DOI:10.1002/9781119992714
+
+        Variable-scaling method (tags:LSRMKT,LS):
+            van der Laan, M. P., Sørensen, N. N., Réthoré, P. E.,
+            Mann, J., Kelly, M. C., & Troldborg, N. (2015).
+            The k‐ε‐fP model applied to double wind turbine
+            wakes using different actuator disk force methods.
+            Wind Energy, 18(12), 2223-2240.
+            DOI:10.1002/we.1816
+
+            van der Laan, M. P., Sørensen, N. N., Réthoré, P. E., Mann, J.,
+            Kelly, M. C., Troldborg, N., Hansen, K. S., & Murcia, J. P. (2015).
+            The k‐ε‐fP model applied to wind farms.
+            Wind Energy, 18(12), 2065-2084.
+            DOI:10.1002/we.1804
+    \endverbatim
+
+Usage
+    Example by using \c constant/fvOptions:
+    \verbatim
+    actuationDiskSource1
+    {
+        // Mandatory entries (unmodifiable)
+        type            actuationDiskSource;
+        monitorMethod   <points|cellSet>;
+        monitorCoeffs
+        {
+            // Option-1
+            points
+            (
+                (p1x p1y p1z)
+                (p2x p2y p2z)
+                ...
+            );
+
+            // Option-2
+            cellSet     <monitorCellSet>;
+        }
+
+        // Mandatory (inherited) entries (unmodifiable)
+        selectionMode   <mode>;    // e.g. cellSet as shown below
+        cellSet         <cellSetName>;
+
+        // Mandatory entries (runtime modifiable)
+        diskArea        40.0;
+        diskDir         (1 0 0);
+        Cp              <Function1>;
+        Ct              <Function1>;
+
+        // Optional entries (unmodifiable)
+        variant         <forceMethod>;
+
+        // Optional entries (runtime modifiable)
+        sink            true;
+        writeFileStart  0;
+        writeFileEnd    100;
+
+        // Optional (inherited) entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property   | Description                         | Type | Req'd    | Dflt
+      type       | Type name: actuationDiskSource      | word | yes      | -
+      diskArea   | Actuator disk planar surface area [m2] | scalar | yes | -
+      diskDir    | Surface-normal vector of the actuator disk <!--
+               --> pointing upstream                   | vector    | yes | -
+      Cp         | Power coefficient                   | Function1 | yes | -
+      Ct         | Thrust coefficient                  | Function1 | yes | -
+      monitorMethod | Type of incoming velocity monitoring method   <!--
+               -->    - see below                      | word      | yes | -
+      variant    | Type of the force computation method - see below <!--
+               -->                                     | word | no | Froude
+      sink        | Flag for body forces to act as a source (true)  <!--
+               -->  or a sink (false)                  | bool   | no  | true
+      writeFileStart | Start time for file output      | scalar | no  | 0
+      writeFileEnd   | End time for file output        | scalar | no  | VGREAT
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link fvOption.H \endlink
+      - \link cellSetOption.H \endlink
+      - \link writeFile.H \endlink
+      - \link Function1.H \endlink
+
+    Options for the \c monitorMethod entry:
+    \verbatim
+      points  | Monitor incoming velocity field at a given set of points
+      cellSet | Monitor incoming velocity field at a given cellSet
+    \endverbatim
+
+    Options for the \c variant entry:
+    \verbatim
+      Froude          | Froude's one-dimensional ideal actuator disk method
+      variableScaling | Variable-scaling actuator disk method
+    \endverbatim
 
 SourceFiles
     actuationDiskSource.C
@@ -71,6 +211,8 @@ SourceFiles
 #define actuationDiskSource_H
 
 #include "cellSetOption.H"
+#include "writeFile.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -85,55 +227,107 @@ namespace fv
 
 class actuationDiskSource
 :
-    public cellSetOption
+    public cellSetOption,
+    public functionObjects::writeFile
 {
 
 protected:
 
-    // Protected data
+    // Protected Enumerations
 
-        //- Disk area normal
-        vector diskDir_;
+        //- Options for the force computation method types
+        enum forceMethodType
+        {
+            FROUDE,                 //!< "Froude's ideal actuator disk method"
+            VARIABLE_SCALING,       //!< "Variable-scaling actuator disk method"
+        };
 
-        //- Power coefficient
-        scalar Cp_;
+        //- Names for forceMethodType
+        static const Enum<forceMethodType> forceMethodTypeNames;
 
-        //- Thrust coefficient
-        scalar Ct_;
+        //- Options for the incoming velocity monitoring method types
+        enum monitorMethodType
+        {
+            POINTS,                 //!< "A set of points"
+            CELLSET                 //!< "A cellSet"
+        };
 
-        //- Disk area
+        //- Names for monitorMethodType
+        static const Enum<monitorMethodType> monitorMethodTypeNames;
+
+
+    // Protected Data
+
+        //- The type of the force computation method
+        const enum forceMethodType forceMethod_;
+
+        //- The type of incoming velocity monitoring method
+        const enum monitorMethodType monitorMethod_;
+
+        //- Flag for body forces to act as a source (true) or a sink (false)
+        label sink_;
+
+        //- Start time for file output
+        scalar writeFileStart_;
+
+        //- End time for file output
+        scalar writeFileEnd_;
+
+        //- Actuator disk planar surface area [m2]
         scalar diskArea_;
 
-        //- Upstream point sample
-        point upstreamPoint_;
+        //- Surface-normal vector of the actuator disk pointing upstream
+        vector diskDir_;
 
-        //- Upstream cell ID
-        label upstreamCellId_;
+        //- Velocity vs power coefficients
+        autoPtr<Function1<scalar>> UvsCpPtr_;
+
+        //- Velocity vs thrust coefficients
+        autoPtr<Function1<scalar>> UvsCtPtr_;
+
+        //- Set of cells whereat the incoming velocity is monitored
+        labelList monitorCells_;
+
+
+    // Protected Member Functions
+
+        //- Output file header information
+        virtual void writeFileHeader(Ostream& os);
 
 
 private:
 
     // Private Member Functions
 
-        //- Check data
-        void checkData() const;
+        //- Locate the set of cells whereat the incoming velocity is monitored
+        void setMonitorCells(const dictionary& subDict);
 
-        //- Add resistance to the UEqn
-        template<class RhoFieldType>
-        void addActuationDiskAxialInertialResistance
+        //- Compute the selected force computation method type
+        template<class AlphaFieldType, class RhoFieldType>
+        void calc
         (
-            vectorField& Usource,
-            const labelList& cells,
-            const scalarField& V,
+            const AlphaFieldType& alpha,
             const RhoFieldType& rho,
-            const vectorField& U
-        ) const;
+            fvMatrix<vector>& eqn
+        );
 
-        //- No copy construct
-        actuationDiskSource(const actuationDiskSource&) = delete;
+        //- Compute Froude's ideal actuator disk method
+        template<class AlphaFieldType, class RhoFieldType>
+        void calcFroudeMethod
+        (
+            const AlphaFieldType& alpha,
+            const RhoFieldType& rho,
+            fvMatrix<vector>& eqn
+        );
 
-        //- No copy assignment
-        void operator=(const actuationDiskSource&) = delete;
+        //- Compute variable-scaling actuator disk method
+        template<class AlphaFieldType, class RhoFieldType>
+        void calcVariableScalingMethod
+        (
+            const AlphaFieldType& alpha,
+            const RhoFieldType& rho,
+            fvMatrix<vector>& eqn
+        );
 
 
 public:
@@ -153,6 +347,12 @@ public:
             const fvMesh& mesh
         );
 
+        //- No copy construct
+        actuationDiskSource(const actuationDiskSource&) = delete;
+
+        //- No copy assignment
+        void operator=(const actuationDiskSource&) = delete;
+
 
     //- Destructor
     virtual ~actuationDiskSource() = default;
@@ -161,18 +361,6 @@ public:
     // Member Functions
 
         // Access
-
-            //- Return Cp
-            scalar Cp() const
-            {
-                return Cp_;
-            }
-
-            //- Return Ct
-            scalar Ct() const
-            {
-                return Ct_;
-            }
 
             //- Normal disk direction
             const vector& diskDir() const
@@ -199,6 +387,15 @@ public:
             //- Source term to compressible momentum equation
             virtual void addSup
             (
+                const volScalarField& rho,
+                fvMatrix<vector>& eqn,
+                const label fieldi
+            );
+
+            //- Source term to phase-compressible momentum equation
+            virtual void addSup
+            (
+                const volScalarField& alpha,
                 const volScalarField& rho,
                 fvMatrix<vector>& eqn,
                 const label fieldi

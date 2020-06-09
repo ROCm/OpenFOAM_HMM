@@ -1,0 +1,25 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+RASModel="kEpsilon"    # "kOmegaSST"
+
+sed -e "s|RAS_MODEL|$RASModel|g" constant/turbulenceProperties.temp > \
+    constant/turbulenceProperties
+
+restore0Dir
+
+cp -rf constant/polyMesh.orig constant/polyMesh
+
+runApplication mapFields ../precursor -sourceTime latestTime
+
+runApplication decomposePar -force
+
+runParallel renumberMesh -overwrite
+
+runParallel $(getApplication)
+
+runParallel redistributePar -reconstruct -latestTime
+
+#------------------------------------------------------------------------------

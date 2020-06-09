@@ -1,0 +1,159 @@
+/*--------------------------------*- C++ -*----------------------------------*/
+
+type                sets;
+libs                (sampling);
+interpolationScheme cellPoint;
+setFormat           raw;
+
+writeControl        writeTime;
+
+fields
+(
+    T
+    p_rgh
+    U
+    k
+    nut
+);
+
+sets
+(
+    lineZM_C20
+    {
+        type        uniform;
+        axis        distance;
+        start       (0.0 0.0 21.0);
+        end         (0.0 0.0 500.0);
+        nPoints     500;
+    }
+
+    lineFlowDirM_C20
+    {
+        type        uniform;
+        axis        distance;
+        start       (-9000 0.0 40.0);
+        end         (9000 0.0 40.0);
+        nPoints     500;
+    }
+
+    lineFlowDirM_C100
+    {
+        type        uniform;
+        axis        distance;
+        start       (-9000 0.0 120.0);
+        end         (9000 0.0 120.0);
+        nPoints     500;
+    }
+
+    lineFlowDirM_C200
+    {
+        type        uniform;
+        axis        distance;
+        start       (-9000 0.0 220.0);
+        end         (9000 0.0 220.0);
+        nPoints     500;
+    }
+
+    lineFlowDirM_C1000
+    {
+        type        uniform;
+        axis        distance;
+        start       (-9000 0.0 1020.0);
+        end         (9000 0.0 1020.0);
+        nPoints     500;
+    }
+
+    lineZM_I20
+    {
+        type        uniform;
+        axis        distance;
+        start       (-9000.0 0.0 21.0);
+        end         (-9000.0 0.0 500.0);
+        nPoints     500;
+    }
+
+    lineFlowDirM_I20
+    {
+        type        uniform;
+        axis        distance;
+        start       (-9000 0.0 40.0);
+        end         (9000 0.0 40.0);
+        nPoints     500;
+    }
+
+    lineFlowDirM_I100
+    {
+        type        uniform;
+        axis        distance;
+        start       (-9000 0.0 120.0);
+        end         (9000 0.0 120.0);
+        nPoints     500;
+    }
+
+    lineFlowDirM_I200
+    {
+        type        uniform;
+        axis        distance;
+        start       (-9000 0.0 220.0);
+        end         (9000 0.0 220.0);
+        nPoints     500;
+    }
+
+    lineFlowDirM_I1000
+    {
+        type        uniform;
+        axis        distance;
+        start       (-9000 0.0 1020.0);
+        end         (9000 0.0 1020.0);
+        nPoints     500;
+    }
+
+    lineZM_O20
+    {
+        type        uniform;
+        axis        distance;
+        start       (9000.0 0.0 21.0);
+        end         (9000.0 0.0 500.0);
+        nPoints     500;
+    }
+
+    lineFlowDirM_O20
+    {
+        type        uniform;
+        axis        distance;
+        start       (-9000 0.0 40.0);
+        end         (9000.0 0.0 40.0);
+        nPoints     500;
+    }
+
+    lineFlowDirM_O100
+    {
+        type        uniform;
+        axis        distance;
+        start       (-9000 0.0 120.0);
+        end         (9000.0 0.0 120.0);
+        nPoints     500;
+    }
+
+    lineFlowDirM_O200
+    {
+        type        uniform;
+        axis        distance;
+        start       (-9000 0.0 220.0);
+        end         (9000.0 0.0 220.0);
+        nPoints     500;
+    }
+
+    lineFlowDirM_O1000
+    {
+        type        uniform;
+        axis        distance;
+        start       (-9000 0.0 1020.0);
+        end         (9000.0 0.0 1020.0);
+        nPoints     500;
+    }
+);
+
+
+// ************************************************************************* //
+
