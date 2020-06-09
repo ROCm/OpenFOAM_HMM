@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,9 +51,22 @@ int main(int argc, char *argv[])
         "A solver utility for moving meshes"
     );
 
+    argList::addOption
+    (
+        "deltaT",
+        "time",
+        "Override deltaT for accelerated motion"
+    );
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedMesh.H"
+
+    scalar deltaT = 0;
+    if (args.readIfPresent("deltaT", deltaT))
+    {
+        runTime.setDeltaT(deltaT);
+    }
 
     autoPtr<motionSolver> motionPtr = motionSolver::New(mesh);
 
