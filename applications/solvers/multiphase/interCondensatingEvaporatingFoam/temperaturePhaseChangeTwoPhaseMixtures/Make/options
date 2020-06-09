@@ -1,16 +1,17 @@
-
 EXE_INC = \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
-    -I$(LIB_SRC)/transportModels/twoPhaseMixture/lnInclude \
     -I$(LIB_SRC)/transportModels \
+    -I$(LIB_SRC)/transportModels/twoPhaseMixture/lnInclude \
+    -I$(LIB_SRC)/transportModels/geometricVoF/lnInclude \
     -I$(LIB_SRC)/transportModels/interfaceProperties/lnInclude \
-    -I$(LIB_SRC)/transportModels/incompressible/lnInclude \
-    -I$(LIB_SRC)/finiteVolume/lnInclude
+    -I$(LIB_SRC)/transportModels/incompressible/lnInclude
 
 LIB_LIBS = \
+    -lfiniteVolume \
+    -lgeometricVoF \
     -ltwoPhaseMixture \
     -linterfaceProperties \
     -ltwoPhaseProperties \
     -lincompressibleTransportModels \
-    -lfiniteVolume \
     -lfluidThermophysicalModels

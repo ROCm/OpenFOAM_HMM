@@ -28,7 +28,7 @@ License
 
 #include "interfaceHeatResistance.H"
 #include "constants.H"
-#include "isoCutCell.H"
+#include "cutCellIso.H"
 #include "volPointInterpolation.H"
 #include "wallPolyPatch.H"
 #include "fvcSmooth.H"
@@ -52,7 +52,7 @@ interfaceHeatResistance<Thermo, OtherThermo>
         volPointInterpolation::New(mesh).interpolate(alpha)
     );
 
-    isoCutCell cutCell(mesh, ap);
+    cutCellIso cutCell(mesh, ap);
 
     forAll(interfaceArea_, celli)
     {
@@ -61,7 +61,7 @@ interfaceHeatResistance<Thermo, OtherThermo>
         if (status == 0) // cell is cut
         {
             interfaceArea_[celli] =
-                mag(cutCell.isoFaceArea())/mesh.V()[celli];
+                mag(cutCell.faceArea())/mesh.V()[celli];
         }
     }
 
