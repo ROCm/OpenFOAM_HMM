@@ -127,7 +127,7 @@ protected:
             const fvPatch& patch,
             scalarField& G,
             scalarField& omega
-        ) override final;
+        );
 
 
 public:
@@ -199,6 +199,10 @@ public:
         }
 
 
+    //- Destructor
+    virtual ~atmOmegaWallFunctionFvPatchScalarField() = default;
+
+
     // Member Functions
 
         // Mapping functions
@@ -217,7 +221,7 @@ public:
         // I-O
 
             //- Write
-            virtual void write(Ostream&) const override;
+            virtual void write(Ostream&) const;
 };
 
 

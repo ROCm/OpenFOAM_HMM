@@ -80,7 +80,7 @@ Foam::fv::atmBuoyancyTurbSource::calcC3
     // (ARAL:Eq. 10), with a typo of (C2_) instead of using (C2_ - 1.0)
     volScalarField::Internal alphaB(1.0 - LbyLmax);
 
-    alphaB ==
+    alphaB =
         neg0(Rig)*(1.0 - (1.0 + (C2_ - 1.0)/(C2_ - C1_))*LbyLmax)
       + pos(Rig)*(1.0 - LbyLmax);
 
@@ -114,7 +114,7 @@ Foam::fv::atmBuoyancyTurbSource::calcC3
     // (ARAL:Eq. 10)
     volScalarField::Internal alphaB(1.0 - LbyLmax);
 
-    alphaB ==
+    alphaB =
         neg0(Rig)*(1.0 - (1.0 + beta/(beta - gamma))*LbyLmax)
       + pos(Rig)*(1.0 - LbyLmax);
 

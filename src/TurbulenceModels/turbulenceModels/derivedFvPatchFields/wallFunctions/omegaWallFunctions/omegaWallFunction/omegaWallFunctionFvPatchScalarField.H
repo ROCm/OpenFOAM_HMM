@@ -386,6 +386,9 @@ public:
             );
         }
 
+    //- Destructor
+    virtual ~omegaWallFunctionFvPatchScalarField() = default;
+
 
     // Member Functions
 

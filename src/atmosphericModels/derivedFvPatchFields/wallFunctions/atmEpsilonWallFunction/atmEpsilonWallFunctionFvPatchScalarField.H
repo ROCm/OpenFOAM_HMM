@@ -129,7 +129,7 @@ protected:
             const fvPatch& patch,
             scalarField& G,
             scalarField& epsilon
-        ) override final;
+        );
 
 
 public:
@@ -199,6 +199,9 @@ public:
                 new atmEpsilonWallFunctionFvPatchScalarField(*this, iF)
             );
         }
+
+    //- Destructor
+    virtual ~atmEpsilonWallFunctionFvPatchScalarField() = default;
 
 
     // Member Functions
