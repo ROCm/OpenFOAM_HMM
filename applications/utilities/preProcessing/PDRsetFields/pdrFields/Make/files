@@ -1,5 +1,3 @@
-PDRsetFields.C
-
 PDRarrays.C
 PDRarraysAnalyse.C
 PDRarraysCalc.C
@@ -16,4 +14,4 @@ obstacles/PDRobstacleTypes.C
 obstacles/PDRobstacleLegacyIO.C
 obstacles/PDRobstacleLegacyRead.C
 
-EXE = $(FOAM_APPBIN)/PDRsetFields
+LIB = $(FOAM_LIBBIN)/libpdrFields
