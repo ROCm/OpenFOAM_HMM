@@ -5,8 +5,9 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 RASModel="kEpsilon"    # "kOmegaSST"
 
-sed -e "s|RAS_MODEL|$RASModel|g" constant/turbulenceProperties.temp > \
-    constant/turbulenceProperties
+sed -e "s|RAS_MODEL|$RASModel|g" \
+    constant/turbulenceProperties.template \
+  > constant/turbulenceProperties
 
 restore0Dir
 

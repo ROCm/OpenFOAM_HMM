@@ -5,7 +5,8 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 restore0Dir
 
-rm -f 0/qPlant.temp
+# Without template file(s)
+rm -f 0/qPlant.template
 
 runApplication blockMesh
 
