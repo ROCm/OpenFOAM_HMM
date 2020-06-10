@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,6 +94,7 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
         // Collect cells to test for inside/outside in shell
         labelList cellToCompact(mesh_.nCells(), -1);
         labelList bFaceToCompact(mesh_.nBoundaryFaces(), -1);
+        labelList gapShell;
         List<FixedList<label, 3>> shellGapInfo;
         List<volumeType> shellGapMode;
         {
@@ -135,22 +136,69 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
             (
                 compactToCc,
                 compactToLevel,
+
+                gapShell,
                 shellGapInfo,
                 shellGapMode
             );
         }
 
 
+        //const fileName dir(mesh_.time().path()/timeName());
+        //if (debug)
+        //{
+        //    mkDir(dir);
+        //    OBJstream insideStr(dir/"insideShell.obj");
+        //    OBJstream outsideStr(dir/"outsideShell.obj");
+        //    Pout<< "Writing points to:" << nl
+        //        << "    inside : " << insideStr.name() << nl
+        //        << "    outside: " << outsideStr.name() << nl
+        //        << endl;
+        //
+        //    forAll(cellToCompact, celli)
+        //    {
+        //        const label compacti = cellToCompact[celli];
+        //
+        //        if (compacti != -1)
+        //        {
+        //            if (gapShell[compacti] != -1)
+        //            {
+        //                insideStr.write(mesh_.cellCentres()[celli]);
+        //            }
+        //            else
+        //            {
+        //                outsideStr.write(mesh_.cellCentres()[celli]);
+        //            }
+        //        }
+        //    }
+        //    forAll(bFaceToCompact, bFacei)
+        //    {
+        //        const label compacti = bFaceToCompact[bFacei];
+        //        if (compacti != -1)
+        //        {
+        //            if (gapShell[compacti] != -1)
+        //            {
+        //                insideStr.write(neiCc[bFacei]);
+        //            }
+        //            else
+        //            {
+        //                outsideStr.write(neiCc[bFacei]);
+        //            }
+        //        }
+        //    }
+        //}
+
+
         const List<FixedList<label, 3>>& extendedGapLevel =
             surfaces_.extendedGapLevel();
         const List<volumeType>& extendedGapMode =
             surfaces_.extendedGapMode();
+        const boolList& extendedGapSelf = surfaces_.gapSelf();
 
         labelList ccSurface1;
         List<pointIndexHit> ccHit1;
         labelList ccRegion1;
         vectorField ccNormal1;
-
         {
             labelList ccSurface2;
             List<pointIndexHit> ccHit2;
@@ -218,6 +266,7 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
                         shellGapMode[compactI],
                         extendedGapLevel[globalRegionI],
                         extendedGapMode[globalRegionI],
+
                         gapInfo,
                         gapMode
                     );
@@ -266,6 +315,7 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
                             shellGapMode[compactI],
                             extendedGapLevel[globalRegionI],
                             extendedGapMode[globalRegionI],
+
                             gapInfo,
                             gapMode
                         );
@@ -320,6 +370,7 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
                             shellGapMode[compactI],
                             extendedGapLevel[globalRegionI],
                             extendedGapMode[globalRegionI],
+
                             gapInfo,
                             gapMode
                         );
@@ -402,7 +453,33 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
 
         forAll(surf1, i)
         {
-            if (surf1[i] != -1 && surf2[i] != -1)
+            // Combine selfProx of shell and surfaces. Ignore regions for
+            // now
+            const label cellI = cellMap[i];
+            const label shelli =
+            (
+                cellToCompact[cellI] != -1
+              ? gapShell[cellToCompact[cellI]]
+              : -1
+            );
+
+            bool selfProx = true;
+            if (shelli != -1)
+            {
+                selfProx = shells_.gapSelf()[shelli][0];
+            }
+            if (surf1[i] != -1 && selfProx)
+            {
+                const label globalRegioni = surfaces_.globalRegion(surf1[i], 0);
+                selfProx = extendedGapSelf[globalRegioni];
+            }
+
+            if
+            (
+                surf1[i] != -1
+             && surf2[i] != -1
+             && (surf2[i] != surf1[i] || selfProx)
+            )
             {
                 // Found intersection with surface. Check opposite normal.
                 label cellI = cellMap[i];
@@ -1000,6 +1077,7 @@ void Foam::meshRefinement::selectGapCandidates
     const label nRefine,
 
     labelList& cellMap,
+    labelList& gapShell,
     List<FixedList<label, 3>>& shellGapInfo,
     List<volumeType>& shellGapMode
 ) const
@@ -1029,6 +1107,8 @@ void Foam::meshRefinement::selectGapCandidates
     (
         pointField(cellCentres, cellMap),
         labelUIndList(cellLevel, cellMap)(),
+
+        gapShell,
         shellGapInfo,
         shellGapMode
     );
@@ -1051,6 +1131,7 @@ void Foam::meshRefinement::selectGapCandidates
 
     map.setSize(compactI);
     cellMap = labelUIndList(cellMap, map)();
+    gapShell = labelUIndList(gapShell, map)();
     shellGapInfo = UIndirectList<FixedList<label, 3>>(shellGapInfo, map)();
     shellGapMode = UIndirectList<volumeType>(shellGapMode, map)();
 }
@@ -1062,6 +1143,7 @@ void Foam::meshRefinement::mergeGapInfo
     const volumeType shellGapMode,
     const FixedList<label, 3>& surfGapInfo,
     const volumeType surfGapMode,
+
     FixedList<label, 3>& gapInfo,
     volumeType& gapMode
 ) const
@@ -1114,6 +1196,7 @@ Foam::label Foam::meshRefinement::markInternalGapRefinement
     const List<FixedList<label, 3>>& extendedGapLevel =
         surfaces_.extendedGapLevel();
     const List<volumeType>& extendedGapMode = surfaces_.extendedGapMode();
+    const boolList& extendedGapSelf = surfaces_.gapSelf();
 
     // Get the gap level for the shells
     const labelList maxLevel(shells_.maxGapLevel());
@@ -1124,6 +1207,7 @@ Foam::label Foam::meshRefinement::markInternalGapRefinement
     {
         // Collect cells to test
         labelList cellMap;
+        labelList gapShell;
         List<FixedList<label, 3>> shellGapInfo;
         List<volumeType> shellGapMode;
         selectGapCandidates
@@ -1132,6 +1216,7 @@ Foam::label Foam::meshRefinement::markInternalGapRefinement
             nRefine,
 
             cellMap,
+            gapShell,
             shellGapInfo,
             shellGapMode
         );
@@ -1194,8 +1279,10 @@ Foam::label Foam::meshRefinement::markInternalGapRefinement
                 (
                     shellGapInfo[i],
                     shellGapMode[i],
+
                     extendedGapLevel[globalRegionI],
                     extendedGapMode[globalRegionI],
+
                     gapInfo,
                     gapMode
                 );
@@ -1288,15 +1375,35 @@ Foam::label Foam::meshRefinement::markInternalGapRefinement
         // Extract cell based gap size
         forAll(surf1, i)
         {
-            if (surf1[i] != -1 && surf2[i] != -1)
+            // Combine selfProx of shell and surfaces. Ignore regions for
+            // now
+            const label shelli = gapShell[map[i]];
+
+            bool selfProx = true;
+            if (shelli != -1)
+            {
+                selfProx = shells_.gapSelf()[shelli][0];
+            }
+            if (surf1[i] != -1 && selfProx)
+            {
+                const label globalRegioni = surfaces_.globalRegion(surf1[i], 0);
+                selfProx = extendedGapSelf[globalRegioni];
+            }
+
+            if
+            (
+                surf1[i] != -1
+             && surf2[i] != -1
+             && (surf2[i] != surf1[i] || selfProx)
+            )
             {
                 // Found intersections with surface. Check for
                 // - small gap
                 // - coplanar normals
 
-                label cellI = cellMap[i];
+                const label cellI = cellMap[i];
 
-                scalar d2 = magSqr(hit1[i].hitPoint()-hit2[i].hitPoint());
+                const scalar d2 = magSqr(hit1[i].hitPoint()-hit2[i].hitPoint());
 
                 if
                 (
@@ -1479,6 +1586,7 @@ Foam::label Foam::meshRefinement::markSmallFeatureRefinement
     const List<FixedList<label, 3>>& extendedGapLevel =
         surfaces_.extendedGapLevel();
     const List<volumeType>& extendedGapMode = surfaces_.extendedGapMode();
+    const boolList& extendedGapSelf = surfaces_.gapSelf();
 
     label oldNRefine = nRefine;
 
@@ -1535,10 +1643,13 @@ Foam::label Foam::meshRefinement::markSmallFeatureRefinement
         // applicable specification (minLevel <= celllevel < maxLevel)
         List<FixedList<label, 3>> shellGapInfo;
         List<volumeType> shellGapMode;
+        labelList gapShell;
         shells_.findHigherGapLevel
         (
             ctrs,
             labelList(ctrs.size(), Zero),
+
+            gapShell,
             shellGapInfo,
             shellGapMode
         );
@@ -1566,8 +1677,10 @@ Foam::label Foam::meshRefinement::markSmallFeatureRefinement
                 (
                     shellGapInfo[i],
                     shellGapMode[i],
+
                     extendedGapLevel[globalRegionI],
                     extendedGapMode[globalRegionI],
+
                     gapInfo,
                     gapMode
                 );
@@ -1647,7 +1760,25 @@ Foam::label Foam::meshRefinement::markSmallFeatureRefinement
 
         forAll(surfaceHit, i)
         {
-            if (surfaceHit[i] != -1) // && surf2[i] != -1)
+            // Combine selfProx of shell and surfaces. Ignore regions for
+            // now
+            const label shelli = gapShell[map[i]];
+            bool selfProx = true;
+            if (shelli != -1)
+            {
+                selfProx = shells_.gapSelf()[shelli][0];
+            }
+            if (surfI != -1 && selfProx)
+            {
+                const label globalRegioni = surfaces_.globalRegion(surfI, 0);
+                selfProx = extendedGapSelf[globalRegioni];
+            }
+
+            if
+            (
+                surfaceHit[i] != -1
+             && (surfaceHit[i] != surfI || selfProx)
+            )
             {
                 // Found intersection with surface. Check coplanar normals.
                 label cellI = cellMap[i];

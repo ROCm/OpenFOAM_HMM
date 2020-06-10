@@ -282,6 +282,7 @@ castellatedMeshControls
         //    //           cell selection. Default is 'mixed' i.e. keep cells
         //    //           whilst doing the gap-level refinement.
         //    //gapMode inside;  // inside/outside/mixed
+        //    //gapSelf false;   // ignore gaps in same surface
         //}
 
         //wakeBox

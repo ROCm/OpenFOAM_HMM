@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,6 +116,9 @@ private:
             //- Per shell, per region the small-gap level specification
             List<List<volumeType>> extendedGapMode_;
 
+            //- Per shell, per region whether to allow selfProximity refinement
+            boolListList selfProximity_;
+
 
     // Private data
 
@@ -205,6 +208,13 @@ public:
             {
                 return extendedGapMode_;
             }
+
+            //- Per shell, per region whether to test for gap with same surface
+            const boolListList& gapSelf() const
+            {
+                return selfProximity_;
+            }
+
 
         // Query
 

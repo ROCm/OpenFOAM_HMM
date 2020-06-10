@@ -201,6 +201,7 @@ Foam::refinementSurfaces::refinementSurfaces
 
     List<FixedList<label, 3>> globalGapLevel(surfI);
     List<volumeType> globalGapMode(surfI);
+    boolList globalGapSelf(surfI);
 
     scalarField globalAngle(surfI, -GREAT);
     PtrList<dictionary> globalPatchInfo(surfI);
@@ -213,6 +214,7 @@ Foam::refinementSurfaces::refinementSurfaces
     List<Map<label>> regionLevelIncr(surfI);
     List<Map<FixedList<label, 3>>> regionGapLevel(surfI);
     List<Map<volumeType>> regionGapMode(surfI);
+    List<Map<bool>> regionGapSelf(surfI);
     List<Map<scalar>> regionAngle(surfI);
     List<Map<autoPtr<dictionary>>> regionPatchInfo(surfI);
     List<Map<label>> regionBlockLevel(surfI);
@@ -300,6 +302,8 @@ Foam::refinementSurfaces::refinementSurfaces
                     << exit(FatalIOError);
             }
 
+            globalGapSelf[surfI] =
+                dict.getOrDefault<bool>("gapSelf", true);
 
             const searchableSurface& surface = allGeometry_[surfaces_[surfI]];
 
@@ -418,7 +422,15 @@ Foam::refinementSurfaces::refinementSurfaces
                                 << " gapMode:" << gapModeSpec.str()
                                 << exit(FatalIOError);
                         }
-
+                        regionGapSelf[surfI].insert
+                        (
+                            regionI,
+                            regionDict.getOrDefault<bool>
+                            (
+                                "gapSelf",
+                                true
+                            )
+                        );
 
                         if (regionDict.found("perpendicularAngle"))
                         {
@@ -484,6 +496,8 @@ Foam::refinementSurfaces::refinementSurfaces
     extendedGapLevel_ = nullGapLevel;
     extendedGapMode_.setSize(nRegions);
     extendedGapMode_ = volumeType::UNKNOWN;
+    selfProximity_.setSize(nRegions);
+    selfProximity_ = true;
     perpendicularAngle_.setSize(nRegions);
     perpendicularAngle_ = -GREAT;
     patchInfo_.setSize(nRegions);
@@ -507,6 +521,7 @@ Foam::refinementSurfaces::refinementSurfaces
               + globalLevelIncr[surfI];
             extendedGapLevel_[globalRegionI] = globalGapLevel[surfI];
             extendedGapMode_[globalRegionI] = globalGapMode[surfI];
+            selfProximity_[globalRegionI] = globalGapSelf[surfI];
             perpendicularAngle_[globalRegionI] = globalAngle[surfI];
             if (globalPatchInfo.set(surfI))
             {
@@ -533,6 +548,8 @@ Foam::refinementSurfaces::refinementSurfaces
                 regionGapLevel[surfI][iter.key()];
             extendedGapMode_[globalRegionI] =
                 regionGapMode[surfI][iter.key()];
+            selfProximity_[globalRegionI] =
+                regionGapSelf[surfI][iter.key()];
         }
         forAllConstIters(regionAngle[surfI], iter)
         {

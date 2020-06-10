@@ -102,6 +102,10 @@ class refinementSurfaces
         //- From global region number to side of surface to detect
         List<volumeType> extendedGapMode_;
 
+        //- From global region number to whether to allow selfProximity
+        //  (in gap refinement)
+        boolList selfProximity_;
+
         //- From global region number to perpendicular angle
         scalarField perpendicularAngle_;
 
@@ -239,6 +243,13 @@ public:
             const List<volumeType>& extendedGapMode() const
             {
                 return extendedGapMode_;
+            }
+
+            //- From global region number to whether to detect gaps to same
+            //  surface (in gap refinement)
+            const boolList& gapSelf() const
+            {
+                return selfProximity_;
             }
 
             //- From global region number to perpendicular angle

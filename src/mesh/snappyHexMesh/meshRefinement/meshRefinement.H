@@ -434,6 +434,7 @@ private:
                 const label nRefine,
 
                 labelList& cellMap,
+                labelList& gapShell,
                 List<FixedList<label, 3>>& shellGapInfo,
                 List<volumeType>& shellGapMode
             ) const;

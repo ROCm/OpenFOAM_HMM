@@ -610,6 +610,7 @@ Foam::shellSurfaces::shellSurfaces
 
     extendedGapLevel_.setSize(shellI);
     extendedGapMode_.setSize(shellI);
+    selfProximity_.setSize(shellI);
 
     FixedList<label, 3> nullGapLevel;
     nullGapLevel[0] = 0;
@@ -724,6 +725,13 @@ Foam::shellSurfaces::shellSurfaces
             extendedGapMode_[shellI] =
                 volumeType("gapMode", dict, volumeType::MIXED);
 
+            // Detect self-intersections
+            selfProximity_[shellI].setSize
+            (
+                regionNames.size(),
+                dict.getOrDefault<bool>("gapSelf", true)
+            );
+
 
             // Override on a per-region basis?
 
@@ -755,6 +763,13 @@ Foam::shellSurfaces::shellSurfaces
                                 "gapMode",
                                 regionDict,
                                 volumeType::MIXED
+                            );
+
+                        selfProximity_[shellI][regionI] =
+                            regionDict.getOrDefault<bool>
+                            (
+                                "gapSelf",
+                                true
                             );
                     }
                 }
