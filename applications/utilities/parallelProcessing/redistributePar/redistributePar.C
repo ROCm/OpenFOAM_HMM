@@ -763,7 +763,7 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
          || Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking
         )
         {
-            label nReq = Pstream::nRequests();
+            const label nReq = Pstream::nRequests();
 
             forAll(bfld, patchi)
             {

@@ -95,6 +95,8 @@ void Foam::volPointInterpolation::addSeparated
     typename GeometricField<Type, pointPatchField, pointMesh>::
         Boundary& pfbf = pf.boundaryFieldRef();
 
+    const label nReq = Pstream::nRequests();
+
     forAll(pfbf, patchi)
     {
         if (pfbf[patchi].coupled())
@@ -109,7 +111,7 @@ void Foam::volPointInterpolation::addSeparated
     }
 
     // Block for any outstanding requests
-    Pstream::waitRequests();
+    Pstream::waitRequests(nReq);
 
     forAll(pfbf, patchi)
     {

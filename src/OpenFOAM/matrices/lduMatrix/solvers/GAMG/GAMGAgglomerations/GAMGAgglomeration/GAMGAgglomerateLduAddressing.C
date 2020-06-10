@@ -279,6 +279,8 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
         patchFaceRestrictAddressing_[fineLevelIndex];
 
 
+    const label nReq = Pstream::nRequests();
+
     // Initialise transfer of restrict addressing on the interface
     forAll(fineInterfaces, inti)
     {
@@ -294,7 +296,7 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
 
     if (Pstream::parRun())
     {
-        Pstream::waitRequests();
+        Pstream::waitRequests(nReq);
     }
 
 

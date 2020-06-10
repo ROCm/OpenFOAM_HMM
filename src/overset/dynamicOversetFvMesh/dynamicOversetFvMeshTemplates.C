@@ -899,7 +899,7 @@ void Foam::dynamicOversetFvMesh::correctCoupledBoundaryConditions(GeoField& fld)
 {
     typename GeoField::Boundary& bfld = fld.boundaryFieldRef();
 
-    label nReq = Pstream::nRequests();
+    const label nReq = Pstream::nRequests();
 
     forAll(bfld, patchi)
     {

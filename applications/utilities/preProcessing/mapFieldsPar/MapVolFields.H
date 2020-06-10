@@ -50,7 +50,7 @@ void evaluateConstraintTypes(GeometricField<Type, fvPatchField, volMesh>& fld)
      || Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking
     )
     {
-        label nReq = Pstream::nRequests();
+        const label nReq = Pstream::nRequests();
 
         forAll(fldBf, patchi)
         {

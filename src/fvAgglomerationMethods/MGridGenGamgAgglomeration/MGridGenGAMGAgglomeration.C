@@ -55,6 +55,8 @@ void Foam::MGridGenGAMGAgglomeration::swap
     PtrList<labelList>& nbrValues
 ) const
 {
+    const label nReq = Pstream::nRequests();
+
     // Initialise transfer of restrict addressing on the interface
     forAll(interfaces, inti)
     {
@@ -70,7 +72,7 @@ void Foam::MGridGenGAMGAgglomeration::swap
 
     if (Pstream::parRun())
     {
-        Pstream::waitRequests();
+        Pstream::waitRequests(nReq);
     }
 
     // Get the interface agglomeration

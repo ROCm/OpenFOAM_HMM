@@ -414,7 +414,7 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::Boundary::evaluate()
      || Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking
     )
     {
-        label nReq = Pstream::nRequests();
+        const label nReq = Pstream::nRequests();
 
         forAll(*this, patchi)
         {

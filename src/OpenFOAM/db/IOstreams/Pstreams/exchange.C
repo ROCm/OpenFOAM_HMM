@@ -46,7 +46,7 @@ void Foam::Pstream::exchangeContainer
     const bool block
 )
 {
-    label startOfRequests = Pstream::nRequests();
+    const label startOfRequests = Pstream::nRequests();
 
     // Set up receives
     // ~~~~~~~~~~~~~~~
@@ -120,7 +120,7 @@ void Foam::Pstream::exchangeBuf
     const bool block
 )
 {
-    label startOfRequests = Pstream::nRequests();
+    const label startOfRequests = Pstream::nRequests();
 
     // Set up receives
     // ~~~~~~~~~~~~~~~
