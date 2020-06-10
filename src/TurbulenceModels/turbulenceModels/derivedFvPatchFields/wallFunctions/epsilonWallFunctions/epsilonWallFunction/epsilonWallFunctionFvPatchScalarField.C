@@ -622,8 +622,7 @@ void Foam::epsilonWallFunctionFvPatchScalarField::write
 ) const
 {
     os.writeEntry("lowReCorrection", lowReCorrection_);
-    os.writeKeyword("blending") << blendingTypeNames[blending_]
-        << token::END_STATEMENT << nl;
+    os.writeEntry("blending", blendingTypeNames[blending_]);
     os.writeEntry("n", n_);
     fixedValueFvPatchField<scalar>::write(os);
 }
