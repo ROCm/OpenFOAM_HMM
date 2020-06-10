@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,7 +80,7 @@ Foam::functionObjects::fieldCoordinateSystemTransform::transformFieldName
     const word& fieldName
 ) const
 {
-    return fieldName + ":Transformed";
+    return IOobject::scopedName(fieldName, "Transformed");
 }
 
 
@@ -90,7 +90,7 @@ Foam::functionObjects::fieldCoordinateSystemTransform::srotTensor() const
     typedef surfaceTensorField FieldType;
     typedef surfaceTensorField::Boundary BoundaryType;
 
-    if (!rotTensorSurface_.valid())
+    if (!rotTensorSurface_)
     {
         tensorField rotations(csysPtr_->R(mesh_.faceCentres()));
 
@@ -135,7 +135,7 @@ Foam::functionObjects::fieldCoordinateSystemTransform::vrotTensor() const
     typedef volTensorField FieldType;
     typedef volTensorField::Boundary BoundaryType;
 
-    if (!rotTensorVolume_.valid())
+    if (!rotTensorVolume_)
     {
         tensorField rotations(csysPtr_->R(mesh_.cellCentres()));
 

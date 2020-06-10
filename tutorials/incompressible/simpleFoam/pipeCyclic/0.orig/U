@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1912                                 |
+|  \\    /   O peration     | Version:  v2006                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -29,12 +29,16 @@ boundaryField
 
         code
         #{
+            // Uncomment for testing on non-windows systems [fragile]
+            // IOobject::scopeSeparator = '_';
+
             const vector axis(1, 0, 0);
 
             vectorField v(2.0*this->patch().Cf() ^ axis);
             v.replace(vector::X, 1.0);
             operator==(v);
         #};
+
         value           $internalField;
     }
 

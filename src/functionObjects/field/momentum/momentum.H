@@ -135,7 +135,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class dimensionSet;
 
 namespace functionObjects
@@ -224,6 +224,15 @@ protected:
 
         //- Write momentum data
         void writeValues(Ostream& os);
+
+    // Protected Member Functions
+
+        //- Return a scoped name
+        //  TODO - revisit issue #1675
+        word scopedName(const word& base) const
+        {
+            return IOobject::scopedName(this->name(), base);
+        }
 
 
 public:
