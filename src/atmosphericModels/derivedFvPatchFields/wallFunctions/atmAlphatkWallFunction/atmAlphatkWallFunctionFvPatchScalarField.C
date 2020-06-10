@@ -249,7 +249,7 @@ void atmAlphatkWallFunctionFvPatchScalarField::updateCoeffs()
 
     // lower bound values to avoid unrealistic
     // negative temperatures on the ground
-    alphatw = max(alphatw, 0.01);
+    alphatw = max(alphatw, scalar(0.01));
 
     fixedValueFvPatchField<scalar>::updateCoeffs();
 }

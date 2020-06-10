@@ -98,7 +98,7 @@ tmp<scalarField> atmNutkWallFunctionFvPatchScalarField::calcNut() const
 
     if (boundNut_)
     {
-        nutw = max(nutw, 0.0);
+        nutw = max(nutw, scalar(0.0));
     }
 
     return tnutw;
