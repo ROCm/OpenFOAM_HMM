@@ -77,8 +77,8 @@ void Foam::functionObjects::interfaceHeight::writePositions()
 
     if (Pstream::master())
     {
-        file(fileID::heightFile) << mesh_.time().timeName() << tab;
-        file(fileID::positionFile) << mesh_.time().timeName() << tab;
+        files(fileID::heightFile) << mesh_.time().timeName() << tab;
+        files(fileID::positionFile) << mesh_.time().timeName() << tab;
     }
 
     forAll(locations_, li)
@@ -136,86 +136,90 @@ void Foam::functionObjects::interfaceHeight::writePositions()
 
             const Foam::Omanip<int> w = valueWidth(1);
 
-            file(fileID::heightFile) << w << hIB << w << hIL;
-            file(fileID::positionFile) << '(' << w << p.x() << w << p.y()
+            files(fileID::heightFile) << w << hIB << w << hIL;
+            files(fileID::positionFile) << '(' << w << p.x() << w << p.y()
                 << valueWidth() << p.z() << ") ";
         }
     }
 
     if (Pstream::master())
     {
-        file(fileID::heightFile).endl();
-        file(fileID::positionFile).endl();
+        files(fileID::heightFile).endl();
+        files(fileID::positionFile).endl();
     }
 }
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::functionObjects::interfaceHeight::writeFileHeader(const fileID i)
+void Foam::functionObjects::interfaceHeight::writeFileHeader(const fileID fid)
 {
     forAll(locations_, li)
     {
         writeHeaderValue
         (
-            file(i),
+            files(fid),
             "Location " + Foam::name(li),
             locations_[li]
         );
     }
 
-    switch (fileID(i))
+    switch (fileID(fid))
     {
         case fileID::heightFile:
+        {
             writeHeaderValue
             (
-                file(fileID::heightFile),
+                files(fid),
                 "hB",
                 "Interface height above the boundary"
             );
             writeHeaderValue
             (
-                file(fileID::heightFile),
+                files(fid),
                 "hL",
                 "Interface height above the location"
             );
             break;
+        }
         case fileID::positionFile:
-            writeHeaderValue(file(i), "p", "Interface position");
+        {
+            writeHeaderValue(files(fid), "p", "Interface position");
             break;
+        }
     }
 
     const Foam::Omanip<int> w = valueWidth(1);
 
-    writeCommented(file(i), "Location");
+    writeCommented(files(fid), "Location");
     forAll(locations_, li)
     {
-        switch (fileID(i))
+        switch (fid)
         {
             case fileID::heightFile:
-                file(i) << w << li << w << ' ';
+                files(fid) << w << li << w << ' ';
                 break;
             case fileID::positionFile:
-                file(i) << w << li << w << ' ' << w << ' ' << "  ";
+                files(fid) << w << li << w << ' ' << w << ' ' << "  ";
                 break;
         }
     }
-    file(i).endl();
+    files(fid).endl();
 
-    writeCommented(file(i), "Time");
+    writeCommented(files(fid), "Time");
     forAll(locations_, li)
     {
-        switch (fileID(i))
+        switch (fid)
         {
             case fileID::heightFile:
-                file(i) << w << "hB" << w << "hL";
+                files(fid) << w << "hB" << w << "hL";
                 break;
             case fileID::positionFile:
-                file(i) << w << "p" << w << ' ' << w << ' ' << "  ";
+                files(fid) << w << "p" << w << ' ' << w << ' ' << "  ";
                 break;
         }
     }
-    file(i).endl();
+    files(fid).endl();
 }
 
 
@@ -248,7 +252,6 @@ Foam::functionObjects::interfaceHeight::interfaceHeight
 
 bool Foam::functionObjects::interfaceHeight::read(const dictionary& dict)
 {
-
     dict.readIfPresent("alpha", alphaName_);
     dict.readIfPresent("liquid", liquid_);
     dict.readEntry("locations", locations_);

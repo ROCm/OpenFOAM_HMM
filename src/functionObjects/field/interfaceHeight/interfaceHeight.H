@@ -156,18 +156,12 @@ class interfaceHeight
         };
 
 
-        Ostream& file(const fileID fid)
-        {
-            return logFiles::files(label(fid));
-        }
-
-
 protected:
 
     // Protected Member Functions
 
         //- Output file header information
-        virtual void writeFileHeader(const fileID i);
+        virtual void writeFileHeader(const fileID fid);
 
 
 public:
@@ -198,6 +192,16 @@ public:
 
 
     // Member Functions
+
+        //- Inherit logFiles methods
+        using logFiles::files;
+
+        //- Return file corresponding to enumeration
+        OFstream& files(const fileID fid)
+        {
+            return logFiles::files(label(fid));
+        }
+
 
         //- Read
         virtual bool read(const dictionary&);
