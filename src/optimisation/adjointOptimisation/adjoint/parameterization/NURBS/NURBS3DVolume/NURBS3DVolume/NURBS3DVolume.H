@@ -112,26 +112,26 @@ protected:
 
         //- Confine movement in certain directions and control points. Refers
         //- to the local system
-        label confineX1movement_;
+        label confineUMovement_;
 
-        label confineX2movement_;
+        label confineVMovement_;
 
-        label confineX3movement_;
+        label confineWMovement_;
 
         label confineBoundaryControlPoints_;
 
         //- Which movement components to freeze in each plane
-        boolListList3 boundUMinCPs_;
+        boolListList3 confineUMinCPs_;
 
-        boolListList3 boundUMaxCPs_;
+        boolListList3 confineUMaxCPs_;
 
-        boolListList3 boundVMinCPs_;
+        boolListList3 confineVMinCPs_;
 
-        boolListList3 boundVMaxCPs_;
+        boolListList3 confineVMaxCPs_;
 
-        boolListList3 boundWMinCPs_;
+        boolListList3 confineWMinCPs_;
 
-        boolListList3 boundWMaxCPs_;
+        boolListList3 confineWMaxCPs_;
 
         //- Which of the cps are moved in an optimisation
         boolList activeControlPoints_;
@@ -449,11 +449,11 @@ public:
                 inline const vectorField& getControlPoints() const;
 
                 //- Get confine movements
-                inline bool confineX1movement() const;
+                inline bool confineUMovement() const;
 
-                inline bool confineX2movement() const;
+                inline bool confineVMovement() const;
 
-                inline bool confineX3movement() const;
+                inline bool confineWMovement() const;
 
                 //- Get basis functions
                 inline const NURBSbasis& basisU() const;
