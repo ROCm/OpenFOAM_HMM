@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016, 2019 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,31 +31,57 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a wall constraint on turbulent kinetic
+    This boundary condition provides a wall constraint on the turbulent kinetic
     energy, i.e. \c k, for low- and high-Reynolds number turbulence models.
 
-    The model operates in two modes, based on the computed viscous-to-turbulent
-    switch-over \c y+ value derived from \c kappa and \c E.
-
 Usage
-    \table
-        Property     | Description             | Required    | Default value
-        Ceps2        | Model coefficient       | no          |  1.9
-        Ck           | Model coefficient       | no          | -0.416
-        Bk           | Model coefficient       | no          |  8.366
-        C            | Model coefficient       | no          |  11.0
-    \endtable
-
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
-        // Mandatory entries
+        // Mandatory entries (unmodifiable)
         type            kLowReWallFunction;
 
-        // Optional entries
+        // Optional entries (unmodifiable)
+        Ceps2           1.9;
+        Ck              -0.416;
+        Bk              8.366;
+        C               11.0;
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                     | Type   | Req'd | Dflt
+      type      | Type name: kLowReWallFunction   | word | yes    | -
+      Ceps2     | Model coefficient               | scalar | no    |  1.9
+      Ck        | Model coefficient               | scalar | no    | -0.416
+      Bk        | Model coefficient               | scalar | no    |  8.366
+      C         | Model coefficient               | scalar | no    |  11.0
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link fixedValueFvPatchField.H \endlink
+
+    Viscous and inertial sublayer predictions for \c k are blended in
+    a stepwise manner:
+
+    \f[
+        k = k_{log} \qquad if \quad y^+ > y^+_{lam}
+    \f]
+    \f[
+        k = k_{vis} \qquad if \quad y^+ <= y^+_{lam}
+    \f]
+    where
+    \vartable
+      k_{vis}   | k prediction in the viscous sublayer
+      k_{log}   | k prediction in the inertial sublayer
+      y^+       | estimated wall-normal height of the cell centre in wall units
+      y^+_{lam} | estimated intersection of the viscous and inertial sublayers
+    \endvartable
 
 Note
     The coefficients \c Cmu, \c kappa, and \c E are obtained from
@@ -63,7 +89,8 @@ Note
     possesses the same set of values for these coefficients.
 
 See also
-    Foam::fixedValueFvPatchField
+    - Foam::fixedValueFvPatchField
+    - Foam::kqRWallFunctionFvPatchScalarField
 
 SourceFiles
     kLowReWallFunctionFvPatchScalarField.C
@@ -129,7 +156,7 @@ public:
         );
 
         //- Construct by mapping given kLowReWallFunctionFvPatchScalarField
-        //  onto a new patch
+        //- onto a new patch
         kLowReWallFunctionFvPatchScalarField
         (
             const kLowReWallFunctionFvPatchScalarField&,

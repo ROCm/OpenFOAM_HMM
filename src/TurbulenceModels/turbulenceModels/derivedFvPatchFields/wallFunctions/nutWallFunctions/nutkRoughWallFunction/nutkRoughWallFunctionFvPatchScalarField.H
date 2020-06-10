@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016, 2019 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,38 +33,38 @@ Group
 Description
     This boundary condition provides a wall constraint on the turbulent
     kinematic viscosity, i.e. \c nut, when using wall functions for rough walls,
-    based on turbulent kinetic energy, \c k. The condition manipulates the \c E
-    parameter to account for roughness effects.
+    based on the turbulent kinetic energy, \c k. The condition manipulates the
+    wall roughness parameter, i.e. \c E, to account for roughness effects.
 
-    Parameter ranges
+    Parameter ranges:
     - roughness height = sand-grain roughness (0 for smooth walls)
     - roughness constant = 0.5-1.0
 
 Usage
-    \table
-        Property     | Description                 | Required  | Default value
-        Ks           | Sand-grain roughness height | yes       |
-        Cs           | Roughness constant          | yes       |
-        Cmu          | Model coefficient           | no        | 0.09
-        kappa        | Von Karman constant         | no        | 0.41
-        E            | Model coefficient           | no        | 9.8
-    \endtable
-
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
-        // Mandatory entries
+        // Mandatory entries (unmodifiable)
         type            nutkRoughWallFunction;
         Ks              uniform 0;
         Cs              uniform 0.5;
 
-        // Optional entries
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-See also
-    Foam::nutkRoughWallFunctionFvPatchScalarField
+    where the entries mean:
+    \table
+      Property    | Description                       | Type   | Req'd  | Dflt
+      type        | Type name: nutkRoughWallFunction  | word   | yes    | -
+      Ks          | Sand-grain roughness height  | scalarField | yes    | -
+      Cs          | Roughness constant           | scalarField | yes    | -
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link nutkWallFunctionFvPatchScalarField.H \endlink
 
 SourceFiles
     nutkRoughWallFunctionFvPatchScalarField.C

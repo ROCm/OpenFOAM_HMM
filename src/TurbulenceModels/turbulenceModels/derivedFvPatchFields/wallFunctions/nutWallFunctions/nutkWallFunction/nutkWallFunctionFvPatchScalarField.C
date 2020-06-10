@@ -67,10 +67,13 @@ calcNut() const
 
         const scalar yPlus = Cmu25*y[facei]*sqrt(k[celli])/nuw[facei];
 
-        if (yPlusLam_ < yPlus)
-        {
-            nutw[facei] = nuw[facei]*(yPlus*kappa_/log(E_*yPlus) - 1.0);
-        }
+        // Viscous sublayer contribution
+        const scalar nutVis = 0.0;
+
+        // Inertial sublayer contribution
+        const scalar nutLog = nuw[facei]*(yPlus*kappa_/log(E_*yPlus) - 1.0);
+
+        nutw[facei] = blend(nutVis, nutLog, yPlus);
     }
 
     return tnutw;

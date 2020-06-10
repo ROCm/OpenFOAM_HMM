@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,7 @@ Group
 
 Description
     This boundary condition provides a wall constraint on the turbulent
-    kinematic viscosity, i.e. \c nut, when using wall functions for rough walls,
+    viscosity, i.e. \c nut, when using wall functions for rough walls,
     based on velocity, \c U, using Spalding's law to give a continuous \c nut
     profile to the wall (y+ = 0)
 
@@ -43,51 +43,53 @@ Description
 
     where
     \vartable
-        y^+     | non-dimensional position
-        u^+     | non-dimensional velocity
-        \kappa  | Von Karman constant
+        y^+     | Non-dimensional position
+        u^+     | Non-dimensional velocity
+        \kappa  | von Kármán constant
     \endvartable
 
 Usage
-    \table
-        Property   | Description             | Required    | Default value
-        Cmu        | Model coefficient       | no          | 0.09
-        kappa      | Von Karman constant     | no          | 0.41
-        E          | Model coefficient       | no          | 9.8
-        maxIter    | Number of Newton-Raphson iterations   | no          | 10
-        tolerance  | Convergence tolerance   | no          | 0.0001
-    \endtable
-
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
-        // Mandatory entries
+        // Mandatory entries (unmodifiable)
         type            nutUSpaldingWallFunction;
 
-        // Optional entries
+        // Optional entries (unmodifiable)
+        maxIter         10;
+        tolerance       0.0001;
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-See also
-    Foam::nutWallFunctionFvPatchScalarField
+    where the entries mean:
+    \table
+      Property  | Description                         | Type   | Req'd  | Dflt
+      type      | Type name: nutUBlendedWallFunction  | word   | yes    | -
+      maxIter   | Number of Newton-Raphson iterations | label  | no     | 10
+      tolerance | Convergence tolerance               | scalar | no     | 0.0001
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link nutWallFunctionFvPatchScalarField.H \endlink
 
 Note
-    Suffers from non-exact restart since correctNut() (called through
-    turbulence->validate) returns a slightly different value every time
+    - Suffers from non-exact restart since \c correctNut() (called through
+    \c turbulence->validate) returns a slightly different value every time
     it is called. This is since the seed for the Newton-Raphson iteration
-    uses the current value of *this (= nut).
+    uses the current value of \c *this (\c =nut ).
 
-    This can be avoided by overriding the tolerance. This also switches on
+    - This can be avoided by overriding the tolerance. This also switches on
     a pre-detection whether the current nut already satisfies the turbulence
     conditions and if so does not change it at all. This means that the nut
     only changes if it 'has really changed'. This probably should be used with
-    a tight tolerance, e.g.
+    a tight tolerance, to make sure to kick every iteration, e.g.
 
         maxIter     100;
         tolerance   1e-7;
-
-    to make sure to kick every iteration.
 
 SourceFiles
     nutUSpaldingWallFunctionFvPatchScalarField.C
@@ -131,7 +133,7 @@ protected:
 
     // Protected Member Functions
 
-        //- Calculate the turbulence viscosity
+        //- Calculate the turbulent viscosity
         virtual tmp<scalarField> calcNut() const;
 
         //- Calculate the friction velocity

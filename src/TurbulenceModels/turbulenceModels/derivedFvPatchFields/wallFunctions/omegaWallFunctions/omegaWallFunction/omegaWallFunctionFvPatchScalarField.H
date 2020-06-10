@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016, 2019 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,68 +31,167 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a wall constraint on specific turbulent
-    kinetic energy dissipation rate, i.e. \c omega, for low- and high-Reynolds
-    number turbulence models.
+    This boundary condition provides a wall constraint on the specific
+    dissipation rate, i.e. \c omega, and the turbulent kinetic energy
+    production contribution, i.e. \c G, for low- and high-Reynolds number
+    turbulence models.
 
-    The near-wall omega may be either blended between the viscous region and
-    logarithmic region values using:
-
-        \f[
-            \omega = sqrt(\omega_{vis}^2 + \omega_{log}^2)
-        \f]
-
-    where
-
-    \vartable
-        \omega_{vis} | omega in viscous region
-        \omega_{log} | omega in logarithmic region
-    \endvartable
-
-    see eq.(15) of:
+    Reference:
     \verbatim
-        Menter, F., Esch, T.
-        "Elements of Industrial Heat Transfer Prediction"
-        16th Brazilian Congress of Mechanical Engineering (COBEM),
-        Nov. 2001
+        Binomial blending of the viscous and inertial sublayers (tag:ME):
+            Menter, F., & Esch, T. (2001).
+            Elements of industrial heat transfer prediction.
+            In Proceedings of the 16th Brazilian Congress of Mechanical
+            Engineering (COBEM), November 2001. vol. 20, p. 117-127.
+
+        Exponential/Max blending of the viscous and inertial sublayers (tag:PH):
+            Popovac, M., & Hanjalić, K. (2007).
+            Compound wall treatment for RANS computation of complex
+            turbulent flows and heat transfer.
+            Flow, turbulence and combustion, 78(2), 177-202.
+            DOI:10.1007/s10494-006-9067-x
+
+        Tanh blending of the viscous and inertial sublayers (tag:KAS):
+            Knopp, T., Alrutz, T., & Schwamborn, D. (2006).
+            A grid and flow adaptive wall-function method for RANS
+            turbulence modelling.
+            Journal of Computational Physics, 220(1), 19-40.
+            DOI:10.1016/j.jcp.2006.05.003
     \endverbatim
 
-    or switched between these values based on the viscous-to-turbulent \c y+
-    value derived from \c kappa and \c E.
-
 Usage
-    \table
-        Property     | Description             | Required    | Default value
-        beta1        | Model coefficient       | no          | 0.075
-        blended      | Blending switch         | no          | false
-    \endtable
-
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
-        // Mandatory entries
+        // Mandatory entries (unmodifiable)
         type            omegaWallFunction;
 
-        // Optional entries
+        // Optional entries (unmodifiable)
+        beta1           0.075;
+        blending        binomial2;
+        n               2.0;
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
+    \table
+      Property  | Description                     | Type | Req'd  | Dflt
+      type      | Type name: omegaWallFunction    | word | yes    | -
+      blended   | Blending switch (Deprecated)    | bool | no     | true
+      beta1     | Model coefficient               | scalar | no   | 0.075
+      blending  | Viscous/inertial sublayer blending method <!--
+                -->                               | word  | no    | binomial2
+      n         | Binomial blending exponent      | sclar | no    | 2.0
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link fixedValueFvPatchField.H \endlink
+      - \link nutWallFunctionFvPatchScalarField.H \endlink
+
+    Options for the \c blending entry:
+    \verbatim
+      stepwise    | Stepwise switch (discontinuous)
+      max         | Maximum value switch (discontinuous)
+      binomial2   | Binomial blending (smooth) n = 2
+      binomial    | Binomial blending (smooth)
+      exponential | Exponential blending (smooth)
+      tanh        | Tanh blending (smooth)
+    \endverbatim
+
+    wherein \c omega predictions for the viscous and inertial sublayers are
+    blended according to the following expressions:
+
+    - \c stepwise:
+
+    \f[
+        \omega = \omega_{log} \qquad if \quad y^+ > y^+_{lam}
+    \f]
+    \f[
+        \omega = \omega_{vis} \qquad if \quad y^+ <= y^+_{lam}
+    \f]
+
+    where
+    \vartable
+      \omega       | \f$\omega\f$ at \f$y^+\f$
+      \omega_{vis} | \f$\omega\f$ computed by using viscous sublayer assumptions
+      \omega_{log} |\f$\omega\f$ computed by using inertial sublayer assumptions
+      y^+    | estimated wall-normal height of the cell centre in wall units
+      y^+_{lam}  | estimated intersection of the viscous and inertial sublayers
+    \endvartable
+
+
+    - \c max (PH:Eq. 27):
+
+    \f[
+        \omega = max(\omega_{vis}, \omega_{log})
+    \f]
+
+
+    - \c binomial2 (ME:Eq. 15) (default):
+
+    \f[
+        \omega = \sqrt{(\omega_{vis})^2 + (\omega_{log})^2}
+    \f]
+
+
+    - \c binomial:
+
+    \f[
+        \omega = ((\omega_{vis})^n + (\omega_{log})^n)^{1/n}
+    \f]
+
+    where
+    \vartable
+        n             | Binomial blending exponent
+    \endvartable
+
+
+    - \c exponential (PH:Eq. 32):
+
+    \f[
+        \omega = \omega_{vis} \exp[-\Gamma] + \omega_{log} \exp[-1/\Gamma]
+    \f]
+
+    where (PH:Eq. 31)
+    \vartable
+        \Gamma | Blending expression
+        \Gamma | \f$0.01 (y^+)^4 / (1.0 + 5.0 y^+)\f$
+    \endvartable
+
+
+    - \c tanh (KAS:Eqs. 33-34):
+
+    \f[
+        \omega = \phi \omega_{b1} + (1 - \phi)\omega_{b2}
+    \f]
+
+    where
+    \vartable
+        \phi        | \f$tanh((y^+/10)^4)\f$
+        \omega_{b1} | \f$\omega_{vis} + \omega_{log}\f$
+        \omega_{b2} | \f$(\omega_{vis}^{1.2} + \omega_{log}^1.2)^{1/1.2}\f$
+    \endvartable
+
+
+    \c G predictions for the viscous and inertial sublayers are blended
+    in a stepwise manner, and \c G below \f$y^+_{lam}\f$ (i.e. in the viscous
+    sublayer) is presumed to be zero.
+
 Note
-    The coefficients \c Cmu, \c kappa, and \c E are obtained from
+  - The coefficients \c Cmu, \c kappa, and \c E are obtained from
     the specified \c nutWallFunction in order to ensure that each patch
     possesses the same set of values for these coefficients.
-
-    Some tests have shown that the stepwise switching method provides
-    more accurate predictions for 10 < y+ < 30 when used with high Reynolds
-    number wall-functions.
-
-    In addition, the stepwise switching method provides accurate predictions
-    when used with continuous wall-functions.
+  - The reason why \c binomial2 and \c binomial blending methods exist at
+    the same time is to ensure the elementwise backward compatibility with
+    the previous versions since \c binomial2 and \c binomial with n=2 will
+    yield slightly different output due to the miniscule differences in the
+    implementation of the basic functions (i.e. pow, sqrt, sqr).
 
 See also
-    Foam::fixedInternalValueFvPatchField
-    Foam::epsilonWallFunctionFvPatchScalarField
+    - Foam::epsilonWallFunctionFvPatchScalarField
 
 SourceFiles
     omegaWallFunctionFvPatchScalarField.C
@@ -119,6 +218,35 @@ class omegaWallFunctionFvPatchScalarField
 :
     public fixedValueFvPatchField<scalar>
 {
+private:
+
+    // Private Enumerations
+
+        //- Options for the blending treatment of viscous and inertial sublayers
+        enum blendingType
+        {
+            STEPWISE,       //!< "Stepwise switch (discontinuous)"
+            MAX,            //!< "Maximum value switch (discontinuous)"
+            BINOMIAL2,      //!< "Binomial blending (smooth) n = 2"
+            BINOMIAL,       //!< "Binomial blending (smooth)"
+            EXPONENTIAL,    //!< "Exponential blending (smooth)"
+            TANH            //!< "Tanh blending (smooth)"
+        };
+
+        //- Names for blendingType
+        static const Enum<blendingType> blendingTypeNames;
+
+
+    // Private Data
+
+        //- Blending treatment (default = blendingType::BINOMIAL2)
+        enum blendingType blending_;
+
+        //- Blending exponent being used when
+        //- blendingType is blendingType::BINOMIAL (default = 2)
+        const scalar n_;
+
+
 protected:
 
     // Protected Data
@@ -126,7 +254,8 @@ protected:
         //- Tolerance used in weighted calculations
         static scalar tolerance_;
 
-        //- Blending switch
+        //- Deprecated(2019-11) Blending switch
+        //  \deprecated(2019-11) - use blending:: options
         bool blended_;
 
         //- Initialised flag

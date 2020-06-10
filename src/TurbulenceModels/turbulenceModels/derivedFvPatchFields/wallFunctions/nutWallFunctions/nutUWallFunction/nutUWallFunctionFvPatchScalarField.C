@@ -61,11 +61,14 @@ Foam::nutUWallFunctionFvPatchScalarField::calcNut() const
 
     forAll(yPlus, facei)
     {
-        if (yPlusLam_ < yPlus[facei])
-        {
-            nutw[facei] =
-                nuw[facei]*(yPlus[facei]*kappa_/log(E_*yPlus[facei]) - 1.0);
-        }
+        // Viscous sublayer contribution
+        const scalar nutVis = 0.0;
+
+        // Inertial sublayer contribution
+        const scalar nutLog =
+            nuw[facei]*(yPlus[facei]*kappa_/log(E_*yPlus[facei]) - 1.0);
+
+        nutw[facei] = blend(nutVis, nutLog, yPlus[facei]);
     }
 
     return tnutw;
