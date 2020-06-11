@@ -46,7 +46,7 @@ Description
     Format options:
     \table
         Property    | Description                           | Required | Default
-        header      | Generate files with FoamFile header   | no  | false
+        header      | Generate files with FoamFile header   | no  | true
         format      | ascii/binary                          | no  | ascii
         compression | Use file compression                  | no  | false
     \endtable
@@ -63,7 +63,6 @@ Description
         {
             boundaryData
             {
-                header  true;
                 format  binary;
             }
         }

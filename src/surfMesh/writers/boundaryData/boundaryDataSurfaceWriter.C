@@ -55,7 +55,7 @@ namespace surfaceWriters
 Foam::surfaceWriters::boundaryDataWriter::boundaryDataWriter()
 :
     surfaceWriter(),
-    header_(false),
+    header_(true),
     streamOpt_()
 {}
 
@@ -66,7 +66,7 @@ Foam::surfaceWriters::boundaryDataWriter::boundaryDataWriter
 )
 :
     surfaceWriter(options),
-    header_(options.getOrDefault("header", false)),
+    header_(options.getOrDefault("header", true)),
     streamOpt_
     (
         IOstream::formatEnum("format", options, IOstream::ASCII),
