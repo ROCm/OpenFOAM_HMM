@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -338,6 +338,18 @@ public:
 
             //- Return const access to mass fractions of mixture []
             inline const scalarField& Y() const;
+
+            //- Return const access to mass fractions of gases
+            //  Note: for compatibilty only - returns Y()
+            inline const scalarField& YGas() const;
+
+            //- Return const access to mass fractions of liquids
+            //  Note: for compatibilty only - returns Y()
+            inline const scalarField& YLiquid() const;
+
+            //- Return const access to mass fractions of solids
+            //  Note: for compatibilty only - returns Y()
+            inline const scalarField& YSolid() const;
 
 
         // Edit

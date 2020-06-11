@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -169,6 +170,29 @@ inline const Foam::scalarField& Foam::ReactingParcel<ParcelType>::Y() const
     return Y_;
 }
 
+
+template<class ParcelType>
+inline const Foam::scalarField& Foam::ReactingParcel<ParcelType>::YGas() const
+{
+    return Y_;
+}
+
+
+template<class ParcelType>
+inline const Foam::scalarField&
+Foam::ReactingParcel<ParcelType>::YLiquid() const
+{
+    return Y_;
+}
+
+
+template<class ParcelType>
+inline const Foam::scalarField&
+Foam::ReactingParcel<ParcelType>::YSolid() const
+{
+    return Y_;
+}
+ 
 
 template<class ParcelType>
 inline Foam::scalar& Foam::ReactingParcel<ParcelType>::mass0()
