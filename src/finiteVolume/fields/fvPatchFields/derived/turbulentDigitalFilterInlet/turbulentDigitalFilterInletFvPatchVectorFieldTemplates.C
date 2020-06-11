@@ -28,7 +28,7 @@ License
 
 #include "pointToPointPlanarInterpolation.H"
 #include "Time.H"
-#include "IFstream.H"
+#include "rawIOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -73,31 +73,55 @@ Foam::turbulentDigitalFilterInletFvPatchVectorField::interpolateBoundaryData
 {
     const word& patchName = this->patch().name();
 
-    fileName valsFile
+    //fileName valsFile
+    //(
+    //    fileHandler().filePath
+    //    (
+    //        fileName
+    //        (
+    //            this->db().time().path()
+    //           /this->db().time().caseConstant()
+    //           /"boundaryData"
+    //           /patchName
+    //           /"0"
+    //           /fieldName
+    //        )
+    //    )
+    //);
+    //
+    //autoPtr<ISstream> isPtr
+    //(
+    //    fileHandler().NewIFstream
+    //    (
+    //        valsFile
+    //    )
+    //);
+    //
+    //Field<Type> vals(isPtr());
+
+    // Reread values and interpolate
+    const fileName valsFile
     (
-        fileHandler().filePath
-        (
-            fileName
-            (
-                this->db().time().path()
-               /this->db().time().caseConstant()
-               /"boundaryData"
-               /patchName
-               /"0"
-               /fieldName
-            )
-        )
+        this->db().time().globalPath()
+       /this->db().time().constant()
+       /"boundaryData"
+       /patchName
+       /"0"
+       /fieldName
     );
 
-    autoPtr<ISstream> isPtr
+    IOobject io
     (
-        fileHandler().NewIFstream
-        (
-            valsFile
-        )
+        valsFile,           // absolute path
+        this->db().time(),
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE,
+        false,              // no need to register
+        true                // is global object (currently not used)
     );
 
-    Field<Type> vals(isPtr());
+    const rawIOField<Type> vals(io, false);
+
 
     Info<< "Turbulent DFM/FSM patch " << patchName
         << ": Interpolating field " << fieldName

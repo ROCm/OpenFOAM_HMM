@@ -837,7 +837,6 @@ DebugSwitches
     sampledSet          0;
     sampledSurface      0;
     saturateEvaporationModel 0;
-    scalarAverageField  0;
     scalarField         0;
     scaleSimilarity     0;
     scatterModel        0;
@@ -864,7 +863,6 @@ DebugSwitches
     spectEddyVisc       0;
     sphereToCell        0;
     spherical           0;
-    sphericalTensorAverageField 0;
     sphericalTensorField 0;
     standardDragModel   0;
     standardEvaporationModel 0;
@@ -895,12 +893,10 @@ DebugSwitches
     surfaceWriter       0;
     surfaces            0;
     swirlInjector       0;
-    symmTensorAverageField 0;
     symmTensorField     0;
     symmetryPlane       0;
     symmetry            0;
     syringePressure     0;
-    tensorAverageField  0;
     tensorField         0;
     tetDecomposedPolyMesh 0;
     thermoCloud         0;
@@ -950,7 +946,6 @@ DebugSwitches
     vanLeer01           0;
     vanLeerV            0;
     vector2DField       0;
-    vectorAverageField  0;
     vectorField         0;
     velocityComponentLaplacian 0;
     velocityLaplacian   0;

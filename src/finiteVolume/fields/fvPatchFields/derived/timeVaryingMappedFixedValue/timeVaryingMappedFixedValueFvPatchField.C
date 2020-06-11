@@ -28,8 +28,6 @@ License
 
 #include "timeVaryingMappedFixedValueFvPatchField.H"
 #include "Time.H"
-#include "AverageField.H"
-#include "IFstream.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

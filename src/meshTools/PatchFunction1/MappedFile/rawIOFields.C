@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -26,63 +25,25 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "AverageField.H"
+#include "rawIOField.H"
+#include "fieldTypes.H"
+#include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::AverageField<Type>::AverageField(const label size)
-:
-    Field<Type>(size),
-    average_(Zero)
-{}
-
-
-template<class Type>
-Foam::AverageField<Type>::AverageField
-(
-    const Field<Type>& fld,
-    const Type& average
-)
-:
-    Field<Type>(fld),
-    average_(average)
-{}
-
-
-template<class Type>
-Foam::AverageField<Type>::AverageField(Istream& is)
-:
-    Field<Type>(is),
-    average_(pTraits<Type>(is))
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-const Type& Foam::AverageField<Type>::average() const
+namespace Foam
 {
-    return average_;
-}
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<class Type>
-Type&Foam::AverageField<Type>::average()
-{
-    return average_;
-}
+defineNamedTemplateTypeNameAndDebug(rawIOField<scalar>, 0);
+defineNamedTemplateTypeNameAndDebug(rawIOField<vector>, 0);
+defineNamedTemplateTypeNameAndDebug(rawIOField<sphericalTensor>, 0);
+defineNamedTemplateTypeNameAndDebug(rawIOField<symmTensor>, 0);
+defineNamedTemplateTypeNameAndDebug(rawIOField<tensor>, 0);
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-bool Foam::AverageField<Type>::writeData(Ostream& os) const
-{
-    os  << static_cast<const Field<Type>&>(*this)
-        << token::NL
-        << average_;
-
-    return os.good();
-}
-
+} // End namespace Foam
 
 // ************************************************************************* //

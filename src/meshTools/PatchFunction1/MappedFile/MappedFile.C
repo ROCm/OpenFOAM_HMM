@@ -26,8 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "polyMesh.H"
-#include "IFstream.H"
-#include "AverageField.H"
+#include "rawIOField.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -239,21 +238,33 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
 ) const
 {
     const polyMesh& mesh = this->patch_.boundaryMesh().mesh();
+    const Time& time = mesh.time();
 
     // Initialise
     if (!mapperPtr_)
     {
         // Reread values and interpolate
-        fileName samplePointsFile
+        const fileName samplePointsFile
         (
-            mesh.time().globalPath()
-           /mesh.time().constant()
+            time.globalPath()
+           /time.constant()
            /"boundaryData"
            /this->patch_.name()
            /pointsName_
         );
 
-        pointField samplePoints((IFstream(samplePointsFile)()));
+        IOobject io
+        (
+            samplePointsFile,   // absolute path
+            time,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false,              // no need to register
+            true                // is global object (currently not used)
+        );
+
+        // Read data
+        const rawIOField<point> samplePoints(io, false);
 
         DebugInfo
             << "Read " << samplePoints.size() << " sample points from "
@@ -329,7 +340,7 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
             << "Have sampling values for "
             << pointToPointPlanarInterpolation::timeNames(sampleTimes_) << nl
             << "In directory "
-            <<  mesh.time().constant()/"boundaryData"/this->patch_.name()
+            <<  time.constant()/"boundaryData"/this->patch_.name()
             << "\n    on patch " << this->patch_.name()
             << " of field " << fieldTableName_
             << exit(FatalError);
@@ -369,27 +380,30 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
 
 
             // Reread values and interpolate
-            fileName valsFile
+            const fileName valsFile
             (
-                mesh.time().globalPath()
-               /mesh.time().constant()
+                time.globalPath()
+               /time.constant()
                /"boundaryData"
                /this->patch_.name()
                /sampleTimes_[startSampleTime_].name()
                /fieldTableName_
             );
 
-            Field<Type> vals;
+            IOobject io
+            (
+                valsFile,   // absolute path
+                time,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false,              // no need to register
+                true                // is global object (currently not used)
+            );
 
+            const rawIOField<Type> vals(io, setAverage_);
             if (setAverage_)
             {
-                AverageField<Type> avals((IFstream(valsFile)()));
-                vals = avals;
-                startAverage_ = avals.average();
-            }
-            else
-            {
-                IFstream(valsFile)() >> vals;
+                startAverage_ = vals.average();
             }
 
             if (vals.size() != mapperPtr_().sourceSize())
@@ -432,25 +446,28 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
             // Reread values and interpolate
             fileName valsFile
             (
-                mesh.time().globalPath()
-               /mesh.time().constant()
+                time.globalPath()
+               /time.constant()
                /"boundaryData"
                /this->patch_.name()
                /sampleTimes_[endSampleTime_].name()
                /fieldTableName_
             );
 
-            Field<Type> vals;
+            IOobject io
+            (
+                valsFile,   // absolute path
+                time,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false,              // no need to register
+                true                // is global object (currently not used)
+            );
 
+            const rawIOField<Type> vals(io, setAverage_);
             if (setAverage_)
             {
-                AverageField<Type> avals((IFstream(valsFile)()));
-                vals = avals;
-                endAverage_ = avals.average();
-            }
-            else
-            {
-                IFstream(valsFile)() >> vals;
+                endAverage_ = vals.average();
             }
 
             if (vals.size() != mapperPtr_().sourceSize())

@@ -61,6 +61,16 @@ functions
     {
         type            surfaces;
         surfaceFormat   boundaryData;
+        formatOptions
+        {
+            //// Optionally specify write options
+            //boundaryData
+            //{
+            //    header      true;       // write as OpenFOAM object
+            //    format      binary;     // write binary or ascii
+            //    compression false;      // compress after writing
+            //}
+        }
         writeControl    writeTime;
         interpolationScheme cell;
         fields

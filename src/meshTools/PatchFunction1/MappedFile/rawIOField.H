@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -25,20 +24,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::AverageField
+    Foam::rawIOField
 
 Description
-    A primitive field with a separate average value.
+    Like IOField but falls back to raw IFstream if no header found.
+    Optionally reads average value. For use in MappedFile container.
 
 SourceFiles
-    AverageField.C
+    rawIOField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef AverageField_H
-#define AverageField_H
+#ifndef rawIOField_H
+#define rawIOField_H
 
-#include "Field.H"
+#include "IOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,41 +46,53 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class AverageField Declaration
+                         Class rawIOField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class AverageField
+class rawIOField
 :
+    public regIOobject,
     public Field<Type>
 {
     // Private Data
 
-        //- The average of the field
+        //- The average of the field (Zero if not used)
         Type average_;
 
 
 public:
 
+    TypeName("rawField");
+
+
     // Constructors
 
-        //- Construct from size (does not set values)
-        explicit AverageField(const label size);
+        //- Default copy construct
+        rawIOField(const rawIOField&) = default;
 
-        //- Construct from components
-        AverageField(const Field<Type>& fld, const Type& average);
+        //- Construct from IOobject
+        explicit rawIOField(const IOobject& io, const bool readAverage);
 
-        //- Construct from Istream
-        explicit AverageField(Istream& is);
+
+    //- Destructor
+    virtual ~rawIOField() = default;
 
 
     // Member Functions
 
-        const Type& average() const;
-
-        Type& average();
+        const Type& average() const
+        {
+            return average_;
+        }
 
         bool writeData(Ostream& os) const;
+
+
+    // Member Operators
+
+        //- Copy or move assignment of entries
+        using Field<Type>::operator=;
 };
 
 
@@ -91,7 +103,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "AverageField.C"
+    #include "rawIOField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

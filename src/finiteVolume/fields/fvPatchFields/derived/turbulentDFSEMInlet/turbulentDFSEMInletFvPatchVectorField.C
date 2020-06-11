@@ -31,8 +31,9 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "momentOfInertia.H"
-#include "Fstream.H"
+#include "OFstream.H"
 #include "globalIndex.H"
+#include "rawIOField.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -108,31 +109,30 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::writeLumleyCoeffs() const
     // Before interpolation/raw data
     if (interpolateR_)
     {
-        fileName valsFile
+        const fileName valsFile
         (
-            fileHandler().filePath
+            fileName
             (
-                fileName
-                (
-                    db().time().path()
-                   /db().time().caseConstant()
-                   /"boundaryData"
-                   /this->patch().name()
-                   /"0"
-                   /"R"
-                )
+                this->db().time().globalPath()
+               /this->db().time().constant()
+               /"boundaryData"
+               /this->patch().name()
+               /"0"
+               /"R"
             )
         );
 
-        autoPtr<ISstream> isPtr
+        IOobject io
         (
-            fileHandler().NewIFstream
-            (
-                valsFile
-            )
+            valsFile,   // absolute path
+            this->db().time(),
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false,              // no need to register
+            true                // is global object (currently not used)
         );
 
-        Field<symmTensor> Rexp(isPtr());
+        const rawIOField<symmTensor> Rexp(io, false);
 
         OFstream os(db().time().path()/"lumley_input.out");
 
@@ -192,17 +192,40 @@ Foam::turbulentDFSEMInletFvPatchVectorField::patchMapper() const
     // Initialise interpolation (2D planar interpolation by triangulation)
     if (mapperPtr_.empty())
     {
-        // Reread values and interpolate
-        fileName samplePointsFile
+        //// Reread values and interpolate
+        //fileName samplePointsFile
+        //(
+        //    this->db().time().path()
+        //   /this->db().time().caseConstant()
+        //   /"boundaryData"
+        //   /this->patch().name()
+        //   /"points"
+        //);
+        //
+        //pointField samplePoints((IFstream(samplePointsFile)()));
+
+        const fileName samplePointsFile
         (
-            this->db().time().path()
-           /this->db().time().caseConstant()
+            this->db().time().globalPath()
+           /this->db().time().constant()
            /"boundaryData"
            /this->patch().name()
            /"points"
         );
 
-        pointField samplePoints((IFstream(samplePointsFile)()));
+        IOobject io
+        (
+            samplePointsFile,   // absolute path
+            this->db().time(),
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false,              // no need to register
+            true                // is global object (currently not used)
+        );
+
+        // Read data
+        const rawIOField<point> samplePoints(io, false);
+
 
         DebugInFunction
             << " Read " << samplePoints.size() << " sample points from "

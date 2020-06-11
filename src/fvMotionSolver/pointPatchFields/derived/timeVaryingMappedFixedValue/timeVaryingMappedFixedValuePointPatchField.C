@@ -28,8 +28,7 @@ License
 
 #include "timeVaryingMappedFixedValuePointPatchField.H"
 #include "Time.H"
-#include "AverageField.H"
-#include "IFstream.H"
+#include "rawIOField.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -246,6 +245,8 @@ void Foam::timeVaryingMappedFixedValuePointPatchField<Type>::rmap
 template<class Type>
 void Foam::timeVaryingMappedFixedValuePointPatchField<Type>::checkTable()
 {
+   const Time& time = this->db().time();
+
     // Initialise
     if (startSampleTime_ == -1 && endSampleTime_ == -1)
     {
@@ -284,15 +285,26 @@ void Foam::timeVaryingMappedFixedValuePointPatchField<Type>::checkTable()
         }
 
         // Reread values and interpolate
-        fileName samplePointsFile
+        const fileName samplePointsFile
         (
-            this->db().time().caseConstant()
+            time.caseConstant()
            /"boundaryData"
            /this->patch().name()
            /"points"
         );
 
-        pointField samplePoints((IFstream(samplePointsFile)()));
+        IOobject io
+        (
+            samplePointsFile,   // absolute path
+            time,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false,              // no need to register
+            true                // is global object (currently not used)
+        );
+
+        // Read data
+        const rawIOField<point> samplePoints(io, false);
 
         // tbd: run-time selection
         bool nearestOnly =
@@ -335,7 +347,7 @@ void Foam::timeVaryingMappedFixedValuePointPatchField<Type>::checkTable()
     (
         sampleTimes_,
         startSampleTime_,
-        this->db().time().value(),
+        time.value(),
         lo,
         hi
     );
@@ -344,11 +356,11 @@ void Foam::timeVaryingMappedFixedValuePointPatchField<Type>::checkTable()
     {
         FatalErrorInFunction
             << "Cannot find starting sampling values for current time "
-            << this->db().time().value() << nl
+            << time.value() << nl
             << "Have sampling values for times "
             << pointToPointPlanarInterpolation::timeNames(sampleTimes_) << nl
             << "In directory "
-            <<  this->db().time().constant()/"boundaryData"/this->patch().name()
+            <<  time.constant()/"boundaryData"/this->patch().name()
             << "\n    on patch " << this->patch().name()
             << " of field " << fieldTableName_
             << exit(FatalError);
@@ -387,26 +399,29 @@ void Foam::timeVaryingMappedFixedValuePointPatchField<Type>::checkTable()
             }
 
             // Reread values and interpolate
-            fileName valsFile
+            const fileName valsFile
             (
-                this->db().time().caseConstant()
+                time.caseConstant()
                /"boundaryData"
                /this->patch().name()
                /sampleTimes_[startSampleTime_].name()
                /fieldTableName_
             );
 
-            Field<Type> vals;
+            IOobject io
+            (
+                valsFile,   // absolute path
+                time,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false,              // no need to register
+                true                // is global object (currently not used)
+            );
 
+            const rawIOField<Type> vals(io, setAverage_);
             if (setAverage_)
             {
-                AverageField<Type> avals((IFstream(valsFile)()));
-                vals = avals;
-                startAverage_ = avals.average();
-            }
-            else
-            {
-                IFstream(valsFile)() >> vals;
+                startAverage_ = vals.average();
             }
 
             if (vals.size() != mapperPtr_().sourceSize())
@@ -447,26 +462,30 @@ void Foam::timeVaryingMappedFixedValuePointPatchField<Type>::checkTable()
             }
 
             // Reread values and interpolate
-            fileName valsFile
+            const fileName valsFile
             (
-                this->db().time().caseConstant()
+                time.caseConstant()
                /"boundaryData"
                /this->patch().name()
                /sampleTimes_[endSampleTime_].name()
                /fieldTableName_
             );
 
-            Field<Type> vals;
+            IOobject io
+            (
+                valsFile,   // absolute path
+                time,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false,              // no need to register
+                true                // is global object (currently not used)
+            );
 
+
+            const rawIOField<Type> vals(io, setAverage_);
             if (setAverage_)
             {
-                AverageField<Type> avals((IFstream(valsFile)()));
-                vals = avals;
-                endAverage_ = avals.average();
-            }
-            else
-            {
-                IFstream(valsFile)() >> vals;
+                endAverage_ = vals.average();
             }
 
             if (vals.size() != mapperPtr_().sourceSize())
