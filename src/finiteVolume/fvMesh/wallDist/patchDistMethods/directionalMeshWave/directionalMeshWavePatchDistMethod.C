@@ -59,7 +59,7 @@ Foam::patchDistMethods::directionalMeshWave::directionalMeshWave
 )
 :
     Foam::patchDistMethods::meshWave(dict, mesh, patchIDs),
-    n_(dict.get<vector>("n"))
+    n_(dict.get<vector>("normal"))
 {}
 
 

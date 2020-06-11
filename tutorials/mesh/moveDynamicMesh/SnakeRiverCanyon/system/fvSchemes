@@ -49,7 +49,7 @@ snGradSchemes
 wallDist
 {
     method          directionalMeshWave;
-    n               (0 0 1);
+    normal          (0 0 1);
 }
 
 
