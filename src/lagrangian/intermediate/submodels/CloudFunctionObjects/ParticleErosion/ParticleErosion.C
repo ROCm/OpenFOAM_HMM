@@ -31,6 +31,37 @@ License
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
 template<class CloudType>
+void Foam::ParticleErosion<CloudType>::resetQ()
+{
+    if (QPtr_.valid())
+    {
+        QPtr_->primitiveFieldRef() = 0.0;
+    }
+    else
+    {
+        const fvMesh& mesh = this->owner().mesh();
+
+        QPtr_.reset
+        (
+            new volScalarField
+            (
+                IOobject
+                (
+                    this->owner().name() + "Q",
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::READ_IF_PRESENT,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensionedScalar(dimVolume, Zero)
+            )
+        );
+    }
+}
+
+
+template<class CloudType>
 Foam::label Foam::ParticleErosion<CloudType>::applyToPatch
 (
     const label globalPatchi
@@ -103,8 +134,8 @@ Foam::ParticleErosion<CloudType>::ParticleErosion
 
     patchIDs_ = uniqIds.sortedToc();
 
-    // trigger creation of the Q field
-    preEvolve();
+    // Trigger creation of the Q field
+    resetQ();
 }
 
 
@@ -126,33 +157,12 @@ Foam::ParticleErosion<CloudType>::ParticleErosion
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-void Foam::ParticleErosion<CloudType>::preEvolve()
+void Foam::ParticleErosion<CloudType>::preEvolve
+(
+    const typename parcelType::trackingData& td
+)
 {
-    if (QPtr_.valid())
-    {
-        QPtr_->primitiveFieldRef() = 0.0;
-    }
-    else
-    {
-        const fvMesh& mesh = this->owner().mesh();
-
-        QPtr_.reset
-        (
-            new volScalarField
-            (
-                IOobject
-                (
-                    this->owner().name() + "Q",
-                    mesh.time().timeName(),
-                    mesh,
-                    IOobject::READ_IF_PRESENT,
-                    IOobject::NO_WRITE
-                ),
-                mesh,
-                dimensionedScalar(dimVolume, Zero)
-            )
-        );
-    }
+    resetQ();
 }
 
 

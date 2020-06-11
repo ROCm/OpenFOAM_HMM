@@ -228,7 +228,12 @@ subModels
 
 
 cloudFunctions
-{}
+{
+    WeberNumber1
+    {
+        type    WeberNumber;
+    }
+}
 
 
 // ************************************************************************* //

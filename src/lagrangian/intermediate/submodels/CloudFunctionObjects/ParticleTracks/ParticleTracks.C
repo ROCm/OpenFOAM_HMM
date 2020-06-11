@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,17 +86,13 @@ Foam::ParticleTracks<CloudType>::ParticleTracks
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::ParticleTracks<CloudType>::~ParticleTracks()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-void Foam::ParticleTracks<CloudType>::preEvolve()
+void Foam::ParticleTracks<CloudType>::preEvolve
+(
+    const typename parcelType::trackingData& td
+)
 {
     if (!cloudPtr_.valid())
     {

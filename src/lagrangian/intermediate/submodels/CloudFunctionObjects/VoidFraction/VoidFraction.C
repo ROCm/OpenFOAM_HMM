@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,17 +71,13 @@ Foam::VoidFraction<CloudType>::VoidFraction
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::VoidFraction<CloudType>::~VoidFraction()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-void Foam::VoidFraction<CloudType>::preEvolve()
+void Foam::VoidFraction<CloudType>::preEvolve
+(
+    const typename parcelType::trackingData& td
+)
 {
     if (thetaPtr_.valid())
     {
@@ -111,7 +108,10 @@ void Foam::VoidFraction<CloudType>::preEvolve()
 
 
 template<class CloudType>
-void Foam::VoidFraction<CloudType>::postEvolve()
+void Foam::VoidFraction<CloudType>::postEvolve
+(
+    const typename parcelType::trackingData& td
+)
 {
     volScalarField& theta = thetaPtr_();
 
@@ -119,7 +119,7 @@ void Foam::VoidFraction<CloudType>::postEvolve()
 
     theta.primitiveFieldRef() /= mesh.time().deltaTValue()*mesh.V();
 
-    CloudFunctionObject<CloudType>::postEvolve();
+    CloudFunctionObject<CloudType>::postEvolve(td);
 }
 
 

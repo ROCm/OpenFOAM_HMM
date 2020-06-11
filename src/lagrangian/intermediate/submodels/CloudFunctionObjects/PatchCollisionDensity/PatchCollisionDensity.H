@@ -120,20 +120,18 @@ public:
 
 
     //- Destructor
-    virtual ~PatchCollisionDensity();
+    virtual ~PatchCollisionDensity() = default;
 
 
     // Member Functions
 
-        // Evaluation
-
-            //- Post-patch hook
-            virtual void postPatch
-            (
-                const parcelType& p,
-                const polyPatch& pp,
-                bool& keepParticle
-            );
+        //- Post-patch hook
+        virtual void postPatch
+        (
+            const parcelType& p,
+            const polyPatch& pp,
+            bool& keepParticle
+        );
 };
 
 

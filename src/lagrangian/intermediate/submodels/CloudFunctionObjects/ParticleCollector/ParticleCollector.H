@@ -273,18 +273,13 @@ public:
 
 
     //- Destructor
-    virtual ~ParticleCollector();
+    virtual ~ParticleCollector() = default;
 
 
     // Member Functions
 
-    // Access
-
         //- Should data be reset on write?
         inline bool resetOnWrite() const;
-
-
-    // Evaluation
 
         //- Post-move hook
         virtual void postMove

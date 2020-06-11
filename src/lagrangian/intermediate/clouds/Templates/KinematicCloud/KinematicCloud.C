@@ -104,7 +104,7 @@ void Foam::KinematicCloud<CloudType>::solve
     {
         cloud.storeState();
 
-        cloud.preEvolve();
+        cloud.preEvolve(td);
 
         evolveCloud(cloud, td);
 
@@ -115,7 +115,7 @@ void Foam::KinematicCloud<CloudType>::solve
     }
     else
     {
-        cloud.preEvolve();
+        cloud.preEvolve(td);
 
         evolveCloud(cloud, td);
 
@@ -127,7 +127,7 @@ void Foam::KinematicCloud<CloudType>::solve
 
     cloud.info();
 
-    cloud.postEvolve();
+    cloud.postEvolve(td);
 
     if (solution_.steadyState())
     {
@@ -230,7 +230,10 @@ void Foam::KinematicCloud<CloudType>::evolveCloud
 
 
 template<class CloudType>
-void Foam::KinematicCloud<CloudType>::postEvolve()
+void Foam::KinematicCloud<CloudType>::postEvolve
+(
+    const typename parcelType::trackingData& td
+)
 {
     Info<< endl;
 
@@ -243,7 +246,7 @@ void Foam::KinematicCloud<CloudType>::postEvolve()
 
     forces_.cacheFields(false);
 
-    functions_.postEvolve();
+    functions_.postEvolve(td);
 
     solution_.nextIter();
 
@@ -306,8 +309,8 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
         IOobject
         (
             cloudName + "Properties",
-            rho.mesh().time().constant(),
-            rho.mesh(),
+            mesh_.time().constant(),
+            mesh_,
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
@@ -506,8 +509,8 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
         IOobject
         (
             name + "Properties",
-            mesh.time().constant(),
-            mesh,
+            mesh_.time().constant(),
+            mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
             false
@@ -657,7 +660,10 @@ void Foam::KinematicCloud<CloudType>::scaleSources()
 
 
 template<class CloudType>
-void Foam::KinematicCloud<CloudType>::preEvolve()
+void Foam::KinematicCloud<CloudType>::preEvolve
+(
+    const typename parcelType::trackingData& td
+)
 {
     // force calculation of mesh dimensions - needed for parallel runs
     // with topology change due to lazy evaluation of valid mesh dimensions
@@ -672,7 +678,7 @@ void Foam::KinematicCloud<CloudType>::preEvolve()
     pAmbient_ = constProps_.dict().template
         getOrDefault<scalar>("pAmbient", pAmbient_);
 
-    functions_.preEvolve();
+    functions_.preEvolve(td);
 }
 
 

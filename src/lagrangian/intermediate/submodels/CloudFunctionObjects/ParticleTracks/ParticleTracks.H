@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -118,7 +118,7 @@ public:
 
 
     //- Destructor
-    virtual ~ParticleTracks();
+    virtual ~ParticleTracks() = default;
 
 
     // Member Functions
@@ -144,7 +144,10 @@ public:
     // Evaluation
 
         //- Pre-evolve hook
-        virtual void preEvolve();
+        virtual void preEvolve
+        (
+            const typename parcelType::trackingData& td
+        );
 
         //- Post-face hook
         virtual void postFace(const parcelType& p, bool& keepParticle);

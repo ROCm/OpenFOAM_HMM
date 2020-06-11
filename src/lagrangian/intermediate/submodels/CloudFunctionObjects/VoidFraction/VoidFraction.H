@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,7 +108,7 @@ public:
 
 
     //- Destructor
-    virtual ~VoidFraction();
+    virtual ~VoidFraction() = default;
 
 
     // Member Functions
@@ -115,10 +116,16 @@ public:
         // Evaluation
 
             //- Pre-evolve hook
-            virtual void preEvolve();
+            virtual void preEvolve
+            (
+                const typename parcelType::trackingData& td
+            );
 
             //- Post-evolve hook
-            virtual void postEvolve();
+            virtual void postEvolve
+            (
+                const typename parcelType::trackingData& td
+            );
 
             //- Post-move hook
             virtual void postMove

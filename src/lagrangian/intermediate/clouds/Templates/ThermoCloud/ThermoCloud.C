@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -446,9 +447,12 @@ void Foam::ThermoCloud<CloudType>::scaleSources()
 
 
 template<class CloudType>
-void Foam::ThermoCloud<CloudType>::preEvolve()
+void Foam::ThermoCloud<CloudType>::preEvolve
+(
+    const typename parcelType::trackingData& td
+)
 {
-    CloudType::preEvolve();
+    CloudType::preEvolve(td);
 
     this->pAmbient() = thermo_.thermo().p().average().value();
 }

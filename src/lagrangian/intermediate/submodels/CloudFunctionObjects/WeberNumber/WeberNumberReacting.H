@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,28 +24,23 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::FacePostProcessing
+    Foam::WeberNumberReacting
 
 Group
     grpLagrangianIntermediateFunctionObjects
 
 Description
-    Records particle face quantities on used-specified face zone
-
-    Currently supports:
-        accumulated mass
-        average mass flux
+    Creates particle Weber number field on the cloud
 
 SourceFiles
-    FacePostProcessing.C
+    WeberNumberReacting.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef FacePostProcessing_H
-#define FacePostProcessing_H
+#ifndef WeberNumberReacting_H
+#define WeberNumberReacting_H
 
 #include "CloudFunctionObject.H"
-#include "faceZone.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,81 +48,32 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class FacePostProcessing Declaration
+                       Class WeberNumberReacting Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class FacePostProcessing
+class WeberNumberReacting
 :
     public CloudFunctionObject<CloudType>
 {
-        //- Convenience typedef for parcel type
-        typedef typename CloudType::parcelType parcelType;
-
-
     // Private Data
 
-        //- Face zone IDs
-        labelList faceZoneIDs_;
+        // Typedefs
 
-        //- Surface output format
-        const word surfaceFormat_;
-
-        //- Should be reset/cleared on writing?
-        bool resetOnWrite_;
-
-        //- Flag to indicate whether data should be written to file
-        bool log_;
-
-        //- Total time
-        scalar totalTime_;
-
-        //- Mass storage
-        List<scalarField> mass_;
-
-        //- Mass total storage
-        List<scalarField> massTotal_;
-
-        //- Mass flow rate storage
-        List<scalarField> massFlowRate_;
-
-        //- Output file pointer per zone
-        PtrList<OFstream> outputFilePtr_;
-
-        //- Last calculation time
-        scalar timeOld_;
-
-
-    // Private Member Functions
-
-        //- Helper function to create log files
-        void makeLogFile
-        (
-            const word& zoneName,
-            const label zoneI,
-            const label nFaces,
-            const scalar totArea
-        );
-
-
-protected:
-
-    // Protected Member Functions
-
-        //- Write post-processing info
-        void write();
+            //- Convenience typedef for parcel type
+            typedef typename CloudType::parcelType parcelType;
 
 
 public:
 
     //- Runtime type information
-    TypeName("facePostProcessing");
+    TypeName("WeberNumber");
 
 
     // Constructors
 
         //- Construct from dictionary
-        FacePostProcessing
+        WeberNumberReacting
         (
             const dictionary& dict,
             CloudType& owner,
@@ -136,29 +81,26 @@ public:
         );
 
         //- Construct copy
-        FacePostProcessing(const FacePostProcessing<CloudType>& ppm);
+        WeberNumberReacting(const WeberNumberReacting<CloudType>& vf);
 
         //- Construct and return a clone
         virtual autoPtr<CloudFunctionObject<CloudType>> clone() const
         {
             return autoPtr<CloudFunctionObject<CloudType>>
             (
-                new FacePostProcessing<CloudType>(*this)
+                new WeberNumberReacting<CloudType>(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~FacePostProcessing() = default;
+    virtual ~WeberNumberReacting() = default;
 
 
     // Member Functions
 
-        //- Should data be reset on write?
-        inline bool resetOnWrite() const;
-
-        //- Post-face hook
-        virtual void postFace(const parcelType& p, bool& keepParticle);
+        //- Post-evolve hook
+        virtual void postEvolve(const typename parcelType::trackingData& td);
 };
 
 
@@ -168,12 +110,8 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "FacePostProcessingI.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 #ifdef NoRepository
-    #include "FacePostProcessing.C"
+    #include "WeberNumberReacting.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
