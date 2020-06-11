@@ -19,4 +19,6 @@ reconstructionSchemes/plicSchemes/plicRDF/plicRDF.C
 
 advectionSchemes/isoAdvection/isoAdvection.C
 
+sampledInterface/sampledInterface.C
+
 LIB = $(FOAM_LIBBIN)/libgeometricVoF

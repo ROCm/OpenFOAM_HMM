@@ -50,7 +50,6 @@ sampledSurface/sampledSurface/sampledSurface.C
 sampledSurface/sampledSurface/sampledSurfaceRegister.C
 sampledSurface/sampledSurfaces/sampledSurfaces.C
 sampledSurface/thresholdCellFaces/sampledThresholdCellFaces.C
-sampledSurface/sampledInterface/sampledInterface.C
 
 readers = sampledSurface/readers
 
