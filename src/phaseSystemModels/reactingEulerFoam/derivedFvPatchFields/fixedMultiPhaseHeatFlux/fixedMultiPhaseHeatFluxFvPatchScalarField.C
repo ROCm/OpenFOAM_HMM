@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2019 OpenFOAM Foundation
+    Copyright (C) 2015-2020 OpenFOAM Foundation
     Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -165,6 +165,31 @@ void Foam::fixedMultiPhaseHeatFluxFvPatchScalarField::updateCoeffs()
     operator==((1 - relax_)*Tp + relax_*max(Tmin_,(q_ + A)/(B)));
 
     fixedValueFvPatchScalarField::updateCoeffs();
+}
+
+
+void Foam::fixedMultiPhaseHeatFluxFvPatchScalarField::autoMap
+(
+    const fvPatchFieldMapper& m
+)
+{
+    fixedValueFvPatchScalarField::autoMap(m);
+    m(q_);
+}
+
+
+void Foam::fixedMultiPhaseHeatFluxFvPatchScalarField::rmap
+(
+    const fvPatchScalarField& ptf,
+    const labelList& addr
+)
+{
+    fixedValueFvPatchScalarField::rmap(ptf, addr);
+
+    const fixedMultiPhaseHeatFluxFvPatchScalarField& mptf =
+        refCast<const fixedMultiPhaseHeatFluxFvPatchScalarField>(ptf);
+
+    q_.rmap(mptf.q_, addr);
 }
 
 

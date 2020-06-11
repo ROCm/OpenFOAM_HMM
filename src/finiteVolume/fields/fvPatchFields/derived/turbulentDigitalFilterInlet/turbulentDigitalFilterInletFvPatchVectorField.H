@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,152 +30,179 @@ Group
     grpInletBoundaryConditions
 
 Description
-    Velocity boundary condition generating synthetic turbulence-alike
-    time-series for LES and DES turbulent flow computations.
+    Digital-filter based boundary condition for velocity, i.e. \c U, to generate
+    synthetic turbulence-alike time-series for LES and DES turbulent flow
+    computations from input turbulence statistics.
 
-    To this end, two synthetic turbulence generators can be chosen:
-
-    - Digital-filter method-based generator (DFM)
-
+    References:
     \verbatim
-    Klein, M., Sadiki, A., and Janicka, J.
-        A digital filter based generation of inflow data for spatially
-        developing direct numerical or large eddy simulations,
-        Journal of Computational Physics (2003) 186(2):652-665.
-        doi:10.1016/S0021-9991(03)00090-1
+        Digital-filter method-based generator (DFM) (tag:KSJ):
+            Klein, M., Sadiki, A., & Janicka, J. (2003).
+            A digital filter based generation of inflow data for spatially
+            developing direct numerical or large eddy simulations.
+            Journal of computational Physics, 186(2), 652-665.
+            DOI:10.1016/S0021-9991(03)00090-1
+
+        Forward-stepwise method-based generator (FSM) (tag:XC)
+            Xie, Z. T., & Castro, I. P. (2008).
+            Efficient generation of inflow conditions for
+            large eddy simulation of street-scale flows.
+            Flow, turbulence and combustion, 81(3), 449-470.
+            DOI:10.1007/s10494-008-9151-5
+
+        Mass-inflow rate correction (tag:KCX):
+            Kim, Y., Castro, I. P., & Xie, Z. T. (2013).
+            Divergence-free turbulence inflow conditions for
+            large-eddy simulations with incompressible flow solvers.
+            Computers & Fluids, 84, 56-68.
+            DOI:10.1016/j.compfluid.2013.06.001
     \endverbatim
 
-    - Forward-stepwise method-based generator (FSM)
-
-    \verbatim
-    Xie, Z.-T., and Castro, I.
-        Efficient generation of inflow conditions for large eddy simulation of
-        street-scale flows, Flow, Turbulence and Combustion (2008) 81(3):449-470
-        doi:10.1007/s10494-008-9151-5
-    \endverbatim
-
-    In DFM or FSM, a random number set (mostly white noise), and a group
+    In \c DFM or \c FSM, a random number set (mostly white noise), and a group
     of target statistics (mostly mean flow, Reynolds stress tensor profiles and
-    length-scale sets) are fused into a new number set (stochastic time-series,
+    length-scale sets) are merged into a new number set (stochastic time-series,
     yet consisting of the statistics) by a chain of mathematical operations
     whose characteristics are designated by the target statistics, so that the
     realised statistics of the new sets could match the target.
 
+    \verbatim
     Random number sets ---->-|
                              |
                          DFM or FSM ---> New stochastic time-series consisting
                              |           turbulence statistics
     Turbulence statistics ->-|
+    \endverbatim
 
-    The main difference between DFM and FSM is that the latter replaces the
-    streamwise convolution summation in DFM by a simpler and a quantitatively
-    justified equivalent procedure in order to reduce computational costs.
-    Accordingly, the latter potentially brings resource advantages for
-    computations involving relatively large length-scale sets and small
-    time-steps.
+    The main difference between \c DFM and \c FSM is that \c FSM replaces
+    the expensive-to-run streamwise convolution summation in \c DFM by a simpler
+    and an almost-equivalent-in-effect numerical procedure in order to reduce
+    computational costs. Accordingly, \c FSM potentially brings computational
+    resource advantages for computations involving relatively large streamwise
+    length-scale sets and small time-steps.
 
-    Synthetic turbulence is produced on a virtual rectangular structured-mesh
-    turbulence plane, which is parallel to the actual patch, and is mapped onto
-    the chosen patch by the selected mapping method.
+    Synthetic turbulence is generated on a virtual rectangular structured-mesh
+    plane, which is parallel to the chosen patch, and is mapped onto this patch
+    by the selected mapping method.
 
 Usage
-    \table
-     Property    | Description                     | Required    | Default value
-     planeDivisions   | Number of nodes on turbulence plane (e2, e3) [-] | yes |
-     L        | Integral length-scale set (9-comp):{e1,e2,e3}{u,v,w} [m] | yes |
-     R         | Reynolds stress tensor set (xx xy xz yy yz zz) [m2/s2]  | yes |
-     patchNormalSpeed    | Characteristic mean flow speed  [m/s] | yes |
-     isGaussian  | Autocorrelation function form                 | no | true
-     isFixedSeed | Flag to identify random-number seed is fixed  | no | true
-     isContinuous   | Flag for random-number restart behaviour   | no | false
-     isCorrectedFlowRate | Flag for mass flow rate correction    | no | true
-     interpolateR     | Placeholder flag: interpolate R field    | no | false
-     interpolateUMean | Placeholder flag: interpolate UMean field   | no | false
-     isInsideMesh | Placeholder flag: TP is inside mesh or on patch | no | false
-     isTaylorHypot | Placeholder flag: Taylor's hypothesis is on | no | true
-     mapMethod   | Method to map reference values             | no | nearestCell
-     threshold   | Threshold to avoid unintentional 'tiny' input | no | 1e-8
-     modelConst  | Model constant (Klein et al., Eq. 14)         | no | -0.5*PI
-     perturb     | Point perturbation for interpolation          | no | 1e-5
-     const1FSM | A model coefficient in FSM (Xie-Castro, Eq. 14) | no | -0.25*PI
-     const2FSM | A model coefficient in FSM (Xie-Castro, Eq. 14) | no | -0.5*PI
-    \endtable
-
-    Minimal example of the boundary condition specification with commented
-    options:
+    Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
-        type                turbulentDigitalFilter;
-        variant             digitalFilter;          // reducedDigitalFilter;
-        planeDivisions      (<planeDivisionsHeight> <planeDivisionsWidth>);
-        L               (<Lxu> <Lxv> <Lxw> <Lyu> <Lyv> <Lyw> <Lzu> <Lzv> <Lzw>);
-        R                   (<Rxx> <Rxy> <Rxz> <Ryy> <Ryz> <Rzz>);
-        patchNormalSpeed    <characteristic flow speed>;
-        value               uniform (0 0 0);        // mandatory placeholder
+        // Mandatory entries (unmodifiable)
+        type                turbulentDigitalFilterInlet;
+        n                   (<nHeight> <nWidth>);
+        L                   (<L1> <L2> ... <L9>);
+        R                   uniform (<Rxx> <Rxy> <Rxz> <Ryy> <Ryz> <Rzz>);
+        UMean               uniform (1 0 0);
+        Ubulk               10.0;
 
-        // Optional entries with default input
-        isGaussian          true;           // false    // always false for FSM
-        isFixedSeed         true;           // false
-        isContinuous        false;          // true
-        isCorrectedFlowRate true;           // false
-        interpolateR        false;          // placeholder
-        interpolateUMean    false;          // placeholder
-        isInsideMesh        false;          // placeholder
-        isTaylorHypot       true;           // placeholder
-        mapMethod           nearestCell;    // planarInterpolation
-        threshold           1e-8;
-        modelConst          -1.5707;        //-0.5*PI;
+        // Optional entries (unmodifiable)
+        fsm                 false;
+        Gaussian            true;     // always false for FSM
+        fixSeed             true;
+        continuous          false;
+        correctFlowRate     true;
+        mapMethod           nearestCell;
         perturb             1e-5;
+        C1                  -1.5707;  //-0.5*PI;
+        C1FSM               -0.7854   //-0.25*PI;
+        C2FSM               -1.5707;  //-0.5*PI;
 
-        // Optional entries for only FSM with default input
-        const1FSM           -0.7854         //-0.25*PI;
-        const2FSM           -1.5707;        //-0.5*PI;
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    Among the dictionary entries, two entries can be input as patch profiles:
+    where the entries mean:
+    \table
+      Property | Description                            | Type  | Req'd | Dflt
+      type     | Type name: turbulentDigitalFilterInlet | word  | yes   | -
+      n        | Number of cells on turbulence generation plane <!--
+                                           --> | tuple of labels | yes   | -
+      L        | Integral length-scale set <!--
+              --> (Lxu Lxv Lxw Lyu Lyv Lyw Lzu Lzv Lzw) [m] | tensor | yes | -
+      R        | Reynolds stress tensor set <!--
+              --> (xx xy xz yy yz zz) [m2/s2]      | symmTensorField | yes | -
+      UMean    | Mean velocity profile [m/s]       | vectorField     | yes | -
+      Ubulk    | Characteristic patch-normal bulk flow speed  [m/s] <!--
+                                                        --> | scalar | yes | -
+      fsm      | Flag to turn on the forward-stepwise method | bool | no | false
+      Gaussian | Autocorrelation function form         | bool | no | true
+      fixSeed  | Flag to fix random-number generator seed to 1234 <!--
+             --> or generate a new seed based on clock-time per simulation <!--
+                                                     --> | bool | no | true
+      continuous | Flag to write random-number sets at output time, <!--
+             --> and to read them on restart. Otherwise, generate <!--
+             --> new random-number sets of restart       | bool | no  false
+      correctFlowRate | Flag to correct mass-inflow rate on turbulence <!--
+                    --> plane in (only) streamwise direction | bool | no | true
+      mapMethod  | Interpolation-to-patch method      | word | no | nearestCell
+      perturb    | Point perturbation for planarInterpolation mapMethod <!--
+                                                  --> | scalar | no | 1e-5
+      C1         | Model constant shaping autocorrelation function <!--
+                                     --> (KSJ:Eq. 14) | scalar | no | -0.5*PI
+      C1FSM | Model coefficient in FSM (XC:Eq. 14)    | scalar | no | -0.25*PI
+      C2FSM | Model coefficient in FSM (XC:Eq. 14)    | scalar | no | -0.5*PI
+    \endtable
 
+    The inherited entries are elaborated in:
+      - \link fixedValueFvPatchFields.H \endlink
+
+    Options for the \c fsm entry:
     \verbatim
-     - Reynolds stress tensor, R
-     - Mean velocity, UMean
+      false | Method due to (KSJ)
+      true  | Method due to (XC)
     \endverbatim
 
-    Profile data and corresponding coordinates are then input in the following
-    directories:
-
+    Options for the \c Gaussian entry:
     \verbatim
-     - $FOAM_CASE/constant/boundaryData/\<patchName\>/points
-     - $FOAM_CASE/constant/boundaryData/\<patchName\>/0/\{R|UMean\}
+      true  | Gaussian function
+      false | Exponential function (only option for FSM)
     \endverbatim
 
-    The profile data and corresponding coordinates take the same form used by
-    the \c timeVaryingMappedFixedValue and \c turbulentDFSEMInlet boundary
-    conditions, consisting of a \c points file containing a list of 3-D
-    coordinates, and profile data files providing a value per coordinate.
+    Options for the \c mapMethod entry:
+    \verbatim
+      nearestCell         | One-to-one direct map, no interpolation
+      planarInterpolation | Bilinear interpolation
+    \endverbatim
 
-    Reynolds stress tensor and mean velocity input are in the global coordinate
-    system whereas integral length scale set input is in the local patch
-    coordinate system.
+    Patch-profile input is available for two entries:
+    \verbatim
+      R     | Reynolds stress tensor
+      UMean | Mean velocity
+    \endverbatim
+    where the input profiles and profile coordinates are located in:
+    \verbatim
+      Coordinates | $FOAM_CASE/constant/boundaryData/\<patchName\>/points
+      R/UMean     | $FOAM_CASE/constant/boundaryData/\<patchName\>/0/\{R/UMean\}
+    \endverbatim
 
-    It is assumed that the patch normal direction is \c e1, and the remaining
-    patch plane directions are \c e2 and \c e3 following the right-handed
-    coordinate system, which should be taken into consideration when the
-    integral length scale set is input. The first three integral scale entries,
-    i.e. L_e1u, Le1v, Le2w, should always correspond to the length scales
-    that are in association with the convective mean flow direction.
+    \c points file contains a list of three-dimensional coordinates, and
+    profile data files provide a value corresponding to each coordinate.
 
 Note
-    - \c mapMethod \c planarInterpolation option requires point coordinates
-    which can form a plane, thus input point coordinates varying only in a
-    single direction will trigger error.
-    - \c adjustTimeStep = true option is not fully supported at the moment.
+    - \c mapMethod=planarInterpolation option needs point coordinates that can
+    form a plane.
+    - \c adjustTimeStep=true option is currently not fully supported.
+    - In order to obtain Reynolds stress tensor information, experiments, RANS
+    simulations or engineering relations can be used.
+    - \c continuous=true means deterministic-statistical consistent restart
+    (relatively more expensive), and \c continuous=false means deterministic
+    discontinuity in synthetic turbulence time-series by keeping statistical
+    consistency (relatively cheaper).
+    - For \c L, the first three entries should always correspond to the
+    length scales in association with the convective (streamwise) mean flow
+    direction.
+    - Streamwise integral length scales are converted to integral time scales
+    by using Taylor's frozen turbulence hypothesis, and \c Ubulk.
 
-SeeAlso
-    turbulentDFSEMInletFvPatchVectorField.C
+See also
+    - turbulentDFSEMInletFvPatchVectorField.C
 
 SourceFiles
     turbulentDigitalFilterInletFvPatchVectorField.C
+    turbulentDigitalFilterInletFvPatchVectorFieldTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -184,7 +211,6 @@ SourceFiles
 
 #include "fixedValueFvPatchFields.H"
 #include "Random.H"
-#include <functional>
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -202,171 +228,124 @@ class turbulentDigitalFilterInletFvPatchVectorField
 :
     public fixedValueFvPatchVectorField
 {
-
-    // Private Enumerations
-
-        //- Options for the synthetic turbulence generator variant
-        enum variantType : uint8_t
-        {
-            DIGITAL_FILTER = 1,    //!< Digital-filter method (Klein et al.)
-            FORWARD_STEPWISE = 2,  //!< Forward-stepwise method (Xie-Castro)
-        };
-
-        //- Names for variant types
-        static const Enum<variantType> variantNames;
-
-
     // Private Data
 
-        //- 2D interpolation (for 'planarInterpolation' mapMethod)
+        //- Bilinear interpolation (for 'mapMethod=planarInterpolation')
         mutable autoPtr<pointToPointPlanarInterpolation> mapperPtr_;
 
-        //- Selected option for the synthetic turbulence generator variant
-        const enum variantType variant_;
+        //- Flag to enable the forward-stepwise method
+        const bool fsm_;
 
-        //- Flag: correlation function form is Gaussian or Exponential
-        //  for variantType::DIGITAL_FILTER, default=Gaussian
-        //  for variantType::FORWARD_STEPWISE, default=Exponential (only option)
-        const bool isGaussian_;
+        //- Flag to select correlation function form: Gaussian or exponential
+        const bool Gaussian_;
 
-        //- Flag: random-number generator seed is fixed (default=true) or
-        //- generated pseudo-randomly based on clock-time per simulation
-        const bool isFixedSeed_;
+        //- Flag to fix the random-number generator seed to 1234 or
+        //- generate a new seed based on clock-time per simulation
+        const bool fixSeed_;
 
-        //- Flag: write non-manipulated random-number sets at output time, and
-        //- to read them on restart. Otherwise, generate new random-number sets
-        //- on restart. (default=false)
-        //  true: deterministic & statistically consistent, more expensive
-        //  false: deterministic discontinuity & statistically consistent, cheaper
-        const bool isContinuous_;
+        //- Flag to write random-number sets at output time, and to read them
+        //- on restart. Otherwise, generate new random-number sets on restart
+        const bool continuous_;
 
-        //- Flag: mass flow rate is corrected on turbulence plane (default=true)
-        const bool isCorrectedFlowRate_;
+        //- Flag to correct mass flow rate on turbulence plane
+        const bool correctFlowRate_;
 
-        //- Flag: interpolate R field (default=false)
-        bool interpolateR_;
+        //- Internal flag to read R from data files
+        bool interpR_;
 
-        //- Flag: interpolate UMean field (default=false)
-        bool interpolateUMean_;
-
-        //- Flag: turbulence plane is inside mesh or on a patch (default=false)
-        //  Currently, true option is not available.
-        const bool isInsideMesh_;
-
-        //- Flag: convert streamwise (x) length scales to time scales by
-        //- Taylor's 'frozen turbulence' hypothesis (default=true)
-        //  Currently, false option is not available.
-        const bool isTaylorHypot_;
+        //- Internal flag to read UMean from data files
+        bool interpUMean_;
 
         //- Method for interpolation between a patch and turbulence plane
-        //- (default=nearestCell)
-        //  Options:
-        //   - nearestCell: one-to-one direct map, no interpolation
-        //   - planarInterpolation: bilinear interpolation
         const word mapMethod_;
 
         //- Current time index
         label curTimeIndex_;
 
-        //- Threshold to avoid unintentional 'tiny' input scalars (default=1e-8)
-        const scalar tiny_;
+        //- Characteristic patch-normal bulk flow speed [m/s]
+        const scalar Ubulk_;
 
-        //- Characteristic (e.g. bulk) mean speed of flow in the patch normal
-        //- direction [m/s]
-        const scalar patchNormalSpeed_;
+        //- Model constant shaping autocorrelation function (KSJ:Eq. 14)
+        const scalar C1_;
 
-        //- Model constant shaping autocorr function [-] (default='-0.5*pi')
-        //  (Klein et al., 2003, Eq. 14)
-        const scalar modelConst_;
-
-        //- Fraction of perturbation (fraction of bounding box) to add (for
-        //- 'planarInterpolation' mapMethod)
+        //- Fraction of perturbation (fraction of bounding box) to add
         const scalar perturb_;
 
-        //- Initial (first time-step) mass/vol flow rate [m^3/s]
-        scalar initialFlowRate_;
+        //- First time-step mass/volumetric flow rate
+        scalar flowRate_;
 
         //- Random number generator
         Random rndGen_;
 
-        //- Number of nodes on turbulence plane (e2 e3) [-]
-        const Tuple2<label, label> planeDivisions_;
+        //- Number of cells on turbulence plane (<nHeight> <nWidth>) [-]
+        const Tuple2<label, label> n_;
 
-        //- Turbulence plane mesh size (reversed) (e2 e3) [1/m]
+        //- Uniform mesh size on turbulence plane (reversed) [1/m]
         Vector2D<scalar> invDelta_;
 
-        //- Nearest cell mapping: Index pairs between patch and turbulence plane
+        //- Index pairs between patch and turbulence plane
+        //- for the nearest cell mapping
         const List<Pair<label>> indexPairs_;
 
-        //- Reynolds stress tensor profile (xx xy xz yy yz zz) in global
-        //- coordinates [m^2/s^2]
-        symmTensorField R_;
+        //- Reynolds stress tensor profile field in global coordinates [m2/s2]
+        const symmTensorField R_;
 
-        //- Lund-Wu-Squires transformation (Cholesky decomp.) [m/s]
+        //- Lund-Wu-Squires transformed R field (Cholesky decomp.) [m/s]
         //- Mapped onto actual mesh patch rather than turbulence plane
-        //  (Klein et al., 2003, Eq. 5)
-        symmTensorField LundWuSquires_;
+        //  (KSJ:Eq. 5)
+        const symmTensorField Lund_;
 
-        //- Mean inlet velocity profile in global coordinates [m/s]
+        //- Mean inlet velocity profile field in global coordinates [m/s]
         vectorField UMean_;
 
         //- Integral length-scale set per turbulence plane section in local
         //- coordinates (e1u, e1v, e1w, e2u, e2v, e2w, e3u, e3v, e3w) [m]
-        //  First three entries should always correspond to the length scales
-        //  in association with the convective mean flow direction
         //  Backup of L_ for restart purposes
         const tensor Lbak_;
 
-        //- Integral length-scale set in mesh units [node]
+        //- Integral length-scale set in mesh units [cell]
         const tensor L_;
 
         //- One of the two model coefficients in FSM
-        //  (Xie-Castro, 2008, the argument of the first exp func in Eq. 14)
-        const scalar const1FSM_;
+        //  (XC:The argument of the first exp func in Eq. 14)
+        const scalar C1FSM_;
 
         //- One of the two model coefficients in FSM
-        //  (Xie-Castro, 2008, the argument of the second exp func in Eq. 14)
-        const scalar const2FSM_;
+        //  (XC:The argument of the second exp func in Eq. 14)
+        const scalar C2FSM_;
 
         //- One of the two exponential functions in FSM
-        //  (Xie-Castro, 2008, the first exponential function in Eq. 14)
-        const List<scalar> constList1FSM_;
+        //  (XC:The first exponential function in Eq. 14)
+        const List<scalar> coeffs1FSM_;
 
         //- One of the two exponential functions in FSM
-        //  (Xie-Castro, 2008, the first exponential function in Eq. 14)
-        const List<scalar> constList2FSM_;
+        //  (XC:The first exponential function in Eq. 14)
+        const List<scalar> coeffs2FSM_;
 
-        //- Number of nodes in random-number box [node]
+        //- Number of cells in random-number box [cell]
         //- Random-number sets within box are filtered with filterCoeffs_
-        //- (e1u, e1v, e1w, e2u, e2v, e2w, e3u, e3v, e3w)
-        const List<label> lenRandomBox_;
+        const List<label> szBox_;
 
-        //- Convenience factors for 2-D random-number box [-]
-        const List<label> randomBoxFactors2D_;
+        //- Convenience factors for two-dimensional random-number box [-]
+        const List<label> boxFactors2D_;
 
-        //- Convenience factors for 3-D randomNum box [-]
-        const List<label> randomBoxFactors3D_;
+        //- Convenience factors for three-dimensional random-number box [-]
+        const List<label> boxFactors3D_;
 
         //- Index to the first elem of last plane of random-number box [-]
         const List<label> iNextToLastPlane_;
 
-        //- Random-number sets distributed over a 3-D box (u, v, w)
-        List<List<scalar>> randomBox_;
+        //- Random-number sets distributed over three-dimensional box (u, v, w)
+        List<List<scalar>> box_;
 
-        //- Filter coefficients corresponding to L_ [-]
+        //- Filter coefficients corresponding to L [-]
         const List<List<scalar>> filterCoeffs_;
 
-        //- Filter-applied random-number sets [m/s] (effectively turb plane)
-        List<List<scalar>> filteredRandomBox_;
+        //- Filter-applied random-number sets [m/s], i.e. turbulence plane
+        List<List<scalar>> filteredBox_;
 
         //- Filter-applied previous-time-step velocity field [m/s] used in FSM
         vectorField U0_;
-
-        //- Run-time function selector between the original and reduced methods
-        const std::function
-        <
-            void(turbulentDigitalFilterInletFvPatchVectorField*, vectorField&)
-        > computeVariant;
 
 
     // Private Member Functions
@@ -393,88 +372,66 @@ class turbulentDigitalFilterInletFvPatchVectorField
 
         //- Generate random-number sets obeying the standard normal distribution
         template<class Form, class Type>
-        Form generateRandomSet(const label len);
+        Form randomSet(const label len);
 
         //- Compute nearest cell index-pairs between turbulence plane and patch
-        List<Pair<label>> patchIndexPairs();
+        List<Pair<label>> indexPairs();
 
-        //- Check R_ (mapped on actual mesh) for mathematical domain errors
-        void checkRTensorRealisable() const;
+        //- Check R on patch for mathematical domain errors
+        void checkR() const;
 
         //- Compute Lund-Wu-Squires transformation
-        //  (Klein et al., 2003, Eq. 5)
-        symmTensorField computeLundWuSquires() const;
+        symmTensorField calcLund() const;
 
-        //- Compute patch-normal into the domain
-        vector computePatchNormal() const;
+        //- Compute the first time-step mass/
+        //- volumetric flow rate based on UMean
+        scalar calcFlowRate() const;
 
-        //- Compute initial (first time-step) mass/vol flow rate based on UMean_
-        scalar computeInitialFlowRate() const;
-
-        //- Convert streamwise integral length scales to integral time scales
-        //- via Taylor's frozen turbulence hypothesis
-        void convertToTimeScale(tensor& L) const;
-
-        //- Convert length scale phys. unit to turbulence plane mesh-size unit
-        //- (Klein et al., 2003, Eq. 13)
-        tensor convertScalesToGridUnits(const tensor& L) const;
+        //- Convert integral length scales in meters
+        //- to turbulence plane cell-size units
+        tensor meterToCell(const tensor& L) const;
 
         //- Resource allocation functions for the convenience factors
-        List<label> initLenRandomBox() const;
-        List<label> initBoxFactors2D() const;
-        List<label> initBoxFactors3D() const;
-        List<label> initBoxPlaneFactors() const;
+        List<label> initBox() const;
+        List<label> initFactors2D() const;
+        List<label> initFactors3D() const;
+        List<label> initPlaneFactors() const;
 
         //- Compute various convenience factors for random-number box
-        List<List<scalar>> fillRandomBox();
+        List<List<scalar>> fillBox();
 
         //- Compute filter coeffs once per simulation
-        //  (Klein et al., 2003, Eq. 14)
-        List<List<scalar>> computeFilterCoeffs() const;
+        List<List<scalar>> calcFilterCoeffs() const;
 
         //- Discard current time-step random-box plane (closest to patch) by
-        //- shifting from the back to the front, and dd new plane to the back
-        void rndShiftRefill();
+        //- shifting from the back to the front, and add new plane to the back
+        void shiftRefill();
 
-        //- Map two-point correlated random-number sets on patch based on chosen
-        //- mapping method
-        void mapFilteredRandomBox(vectorField& U);
+        //- Map two-point correlated random-number sets
+        //- on patch based on chosen mapping method
+        void mapFilteredBox(vectorField& U);
 
-        //- Map R_ on patch
-        void embedOnePointCorrs(vectorField& U) const;
+        //- Embed one-point correlations, i.e. R, on patch
+        void onePointCorrs(vectorField& U) const;
 
-        //- Map UMean_ on patch
-        void embedMeanVelocity(vectorField& U) const;
+        //- Embed two-point correlations, i.e. L, on box
+        //  Three-dimensional "valid"-type separable
+        //  convolution summation algorithm
+        //  (Based on Song Ho Ahn's two-dimensional "full"-type convolution)
+        void twoPointCorrs();
 
-        //- Correct mass/vol flow rate in (only) streamwise direction
-        void correctFlowRate(vectorField& U) const;
+        //- Compute coeffs1FSM_ once per simulation
+        List<scalar> calcCoeffs1FSM() const;
 
-        //- 3-D 'valid'-type 'separable' convolution summation algorithm
-        //  'Inspired' from Song Ho Ahn's 2-D 'full'-type convolution algorithm
-        //  with his permission
-        void embedTwoPointCorrs();
-
-        //- Compute the DFM (Klein et al., 2003)
-        void computeDFM(vectorField& U);
-
-        //- Compute the reduced DFM (i.e. hybrid FSM-DFM) (Xie-Castro, 2008)
-        void computeReducedDFM(vectorField& U);
-
-        //- Compute constList1FSM_ once per simulation
-        List<scalar> computeConstList1FSM() const;
-
-        //- Compute constList2FSM_ once per simulation
-        List<scalar> computeConstList2FSM() const;
-
-        //- Compute the forward-stepwise method
-        //  (Xie-Castro, 2008, Eq. 14)
-        void computeFSM(vectorField& U);
+        //- Compute coeffs2FSM_ once per simulation
+        List<scalar> calcCoeffs2FSM() const;
 
 
 public:
 
    //- Runtime type information
    TypeName("turbulentDigitalFilterInlet");
+
 
     // Constructors
 
@@ -548,6 +505,19 @@ public:
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
+
+
+        // Mapping functions
+
+            //- Map (and resize as needed) from self given a mapping object
+            virtual void autoMap(const fvPatchFieldMapper& m);
+
+            //- Reverse map the given fvPatchField onto this fvPatchField
+            virtual void rmap
+            (
+                const fvPatchVectorField& ptf,
+                const labelList& addr
+            );
 
 
        //- Write

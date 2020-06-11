@@ -1,0 +1,135 @@
+#!/bin/sh
+cd "${0%/*}" || exit                        # Run from this directory
+#------------------------------------------------------------------------------
+
+plotCellR() {
+    timeDir=$1
+    echo "    Plotting the normal and Reynolds stresses on cell."
+
+    outName="stress-cell.png"
+    gnuplot<<PLT_CELL_R
+    set terminal pngcairo font "helvetica,20" size 1000, 800
+    set xrange [0:1]
+    set yrange [-1:8]
+    set grid
+    set key top right
+    set key samplen 2
+    set key spacing 0.75
+    set xlabel "Channel height from the bottomWall [m]"
+    set ylabel "<u_i^' u_i^'> [m2/s2]"
+    set offset .05, .05
+    set output "$outName"
+    set title "Normal and Reynolds stresses on cell"
+
+    input = "$timeDir/inletCell_UPrime2Mean.xy"
+    bench = "constant/pointsRdata"
+
+    plot \
+        input u 1:2 t "<u^' u^'>" w l lw 2 lc rgb "#009E73", \
+        input u 1:5 t "<v^' v^'>" w l lw 2 lc rgb "#F0E440", \
+        input u 1:7 t "<w^' w^'>" w l lw 2 lc rgb "#0072B2", \
+        input u 1:3 t "<u^' v^'>" w l lw 2 lc rgb "#D55E00", \
+        bench u 2:4 t "<u^' u^'>_{DNS}" w l lw 2 dt 2 lc rgb "#009E73", \
+        bench u 2:7 t "<v^' v^'>_{DNS}" w l lw 2 dt 2 lc rgb "#F0E440", \
+        bench u 2:9 t "<w^' w^'>_{DNS}" w l lw 2 dt 2 lc rgb "#0072B2", \
+        bench u 2:5 t "<u^' v^'>_{DNS}" w l lw 2 dt 2 lc rgb "#D55E00"
+PLT_CELL_R
+}
+
+
+plotPatchR() {
+    timeDir=$1
+    echo "    Plotting the normal and Reynolds stresses on inlet patch faces."
+
+    outName="stress-patch.png"
+    gnuplot<<PLT_PATCH_R
+    set terminal pngcairo font "helvetica,20" size 1000, 800
+    set xrange [0:1]
+    set yrange [-1:8]
+    set grid
+    set key top right
+    set key samplen 2
+    set key spacing 0.75
+    set xlabel "Channel height from the bottomWall [m]"
+    set ylabel "<u_i^' u_i^'> [m2/s2]"
+    set offset .05, .05
+    set output "$outName"
+    set title "Normal and Reynolds stresses on patch"
+
+    input = "$timeDir/inletPatch_UPrime2Mean.xy"
+    bench = "constant/pointsRdata"
+
+    plot \
+        input u 1:2 t "<u^' u^'>" w l lw 2 lc rgb "#009E73", \
+        input u 1:5 t "<v^' v^'>" w l lw 2 lc rgb "#F0E440", \
+        input u 1:7 t "<w^' w^'>" w l lw 2 lc rgb "#0072B2", \
+        input u 1:3 t "<u^' v^'>" w l lw 2 lc rgb "#D55E00", \
+        bench u 2:4 t "<u^' u^'>_{DNS}" w l lw 2 dt 2 lc rgb "#009E73", \
+        bench u 2:7 t "<v^' v^'>_{DNS}" w l lw 2 dt 2 lc rgb "#F0E440", \
+        bench u 2:9 t "<w^' w^'>_{DNS}" w l lw 2 dt 2 lc rgb "#0072B2", \
+        bench u 2:5 t "<u^' v^'>_{DNS}" w l lw 2 dt 2 lc rgb "#D55E00"
+PLT_PATCH_R
+}
+
+
+plotPatchUMean() {
+    timeDir=$1
+    echo "    Plotting the streamwise mean flow speed on inlet patch faces."
+
+    outName="u-patch.png"
+    gnuplot<<PLT_PATCH_UMEAN
+    set terminal pngcairo font "helvetica,20" size 1000, 800
+    set xrange [0:1]
+    set yrange [0:25]
+    set grid
+    set key top right
+    set key samplen 2
+    set key spacing 0.75
+    set xlabel "Channel height from the bottomWall [m]"
+    set ylabel "u [m/s]"
+    set offset .05, .05
+    set output "$outName"
+
+    input = "$timeDir/inletPatch_UMean.xy"
+    bench = "constant/pointsUMeanData"
+
+    plot \
+        input u 1:2 t "u" w l lw 2 lc rgb "#009E73", \
+        bench u 2:4 t "u_{DNS}" w l lw 2 dt 2 lc rgb "#009E73"
+PLT_PATCH_UMEAN
+}
+
+
+#------------------------------------------------------------------------------
+
+# Require gnuplot
+command -v gnuplot >/dev/null || {
+    echo "gnuplot not found - skipping graph creation" 1>&2
+    exit 1
+}
+
+# Prepare the benchmark data
+cp -f constant/boundaryData/inlet/0/R constant/R
+cp -f constant/boundaryData/inlet/points constant/points
+cp -f constant/boundaryData/inlet.DFM/0/UMean constant/UMean
+cat constant/R | tr -d '()' > constant/Rdata
+cat constant/points | tr -d '()' > constant/pointsData
+cat constant/UMean | tr -d '()' > constant/UMeanData
+paste constant/pointsData constant/Rdata > constant/pointsRdata
+paste constant/pointsData constant/UMeanData > constant/pointsUMeanData
+
+# The latestTime in postProcessing/sampling1
+timeDir=$(foamListTimes -case postProcessing/sampling1 -latestTime 2>/dev/null)
+[ -n "$timeDir" ] || {
+    echo "No postProcessing/sampling1 found - skipping graph creation" 1>&2
+    exit 1
+}
+
+timeDir="postProcessing/sampling1/$timeDir"
+
+plotCellR "$timeDir"
+plotPatchR "$timeDir"
+plotPatchUMean "$timeDir"
+
+
+#------------------------------------------------------------------------------

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2011-2020 OpenFOAM Foundation
     Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -32,9 +32,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "meshToMesh0.H"
-#include "SubField.H"
 
-#include "indexedOctree.H"
 #include "treeDataCell.H"
 #include "treeDataFace.H"
 
@@ -273,6 +271,11 @@ void Foam::meshToMesh0::cellAddresses
             if (boundaryCell[curCell])
             {
                 cellAddressing_[toI] = oc.findInside(p);
+
+                if (cellAddressing_[toI] != -1)
+                {
+                    curCell = cellAddressing_[toI];
+                }
             }
             else
             {
@@ -325,6 +328,11 @@ void Foam::meshToMesh0::cellAddresses
                 {
                     // Still not found so use the octree
                     cellAddressing_[toI] = oc.findInside(p);
+
+                    if (cellAddressing_[toI] != -1)
+                    {
+                        curCell = cellAddressing_[toI];
+                    }
                 }
             }
         }

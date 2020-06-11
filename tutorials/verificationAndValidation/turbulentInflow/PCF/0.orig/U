@@ -9,28 +9,41 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "system";
-    object      fieldAverage;
+    class       volVectorField;
+    object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-fieldAverage1
-{
-    type                fieldAverage;
-    libs                (fieldFunctionObjects);
-    writeControl        writeTime;
-    timeStart           $/timeStart;
+dimensions      [0 1 -1 0 0 0 0];
 
-    fields
-    (
-        U
-        {
-            mean        on;
-            prime2Mean  on;
-            base        time;
-        }
-    );
+internalField   uniform (0 0 0);
+
+boundaryField
+{
+    "bottomWall|topWall"
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
+
+    "left|right"
+    {
+        type            cyclic;
+    }
+
+    inlet
+    {
+        value           $internalField;
+    }
+    #include            "inlet/U"
+
+    outlet
+    {
+        type            inletOutlet;
+        inletValue      $internalField;
+        value           $internalField;
+    }
 }
+
 
 // ************************************************************************* //

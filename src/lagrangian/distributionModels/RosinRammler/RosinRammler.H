@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2011-2020 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,19 +30,18 @@ Description
     Rosin-Rammler distributionModel
 
    \f[
-       cumulative model =
-           (1.0 - exp( -(( x - d0)/d)^n )
-         / (1.0 - exp( -((d1 - d0)/d)^n )
+       CDF(x) =
+            (1 - exp(-(x/d)^n + (d_0/d)^n)
+           /(1 - exp(-(d_1/d)^n + (d_0/d)^n)
    \f]
-
 
 SourceFiles
     RosinRammler.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef distributionModels_RosinRammler_H
-#define distributionModels_RosinRammler_H
+#ifndef RosinRammler_H
+#define RosinRammler_H
 
 #include "distributionModel.H"
 
@@ -61,7 +60,7 @@ class RosinRammler
 :
     public distributionModel
 {
-    // Private data
+    // Private Data
 
         //- Distribution minimum
         scalar minValue_;
@@ -71,7 +70,10 @@ class RosinRammler
 
         // Model coefficients
 
+            //- Scale parameter
             scalar d_;
+
+            //- Shape parameter
             scalar n_;
 
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,43 +31,63 @@ Group
     grpRASBoundaryConditions grpInletBoundaryConditions
 
 Description
-    This boundary condition provides a turbulence dissipation, \f$\epsilon\f$
-    (epsilon) inlet condition based on a specified mixing length.  The patch
-    values are calculated using:
+    This boundary condition provides an inlet condition for turbulent kinetic
+    energy dissipation rate, i.e. \c epsilon, based on a specified mixing
+    length.  The patch values are calculated using:
 
         \f[
             \epsilon_p = \frac{C_{\mu}^{0.75} k^{1.5}}{L}
         \f]
 
     where
-
     \vartable
-        \epsilon_p | patch epsilon values
-        C_{\mu} | Model coefficient, set to 0.09
-        k       | turbulence kinetic energy
-        L       | length scale
+      \epsilon_p | Patch epsilon values     [m2/s3]
+      C_\mu      | Empirical model constant retrived from turbulence model
+      k          | Turbulent kinetic energy [m2/s2]
+      L          | Mixing length scale      [m]
     \endvartable
 
 Usage
-    \table
-        Property     | Description             | Required    | Default value
-        mixingLength | Length scale [m]        | yes         |
-        phi          | flux field name         | no          | phi
-        k            | turbulence kinetic energy field name | no | k
-    \endtable
-
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
+        // Mandatory entries (unmodifiable)
         type            turbulentMixingLengthDissipationRateInlet;
+
+        // Mandatory entries (runtime modifiable)
         mixingLength    0.005;
-        value           uniform 200;   // placeholder
+
+        // Optional entries (runtime modifiable)
+        Cmu             0.09;
+        k               k;
+        phi             phi;
+
+        // Placeholder
+        value           uniform 200;
     }
     \endverbatim
 
+    where the entries mean:
+    \table
+      Property     | Description                  | Type   | Req'd | Dflt
+      mixingLength | Mixing length scale [m]      | scalar |  yes  | -
+      Cmu          | Empirical model constant     | scalar |  no   | 0.09
+      phi          | Name of flux field           | word   |  no   | phi
+      k            | Name of turbulent kinetic energy field | word | no | k
+    \endtable
+
 Note
-    In the event of reverse flow, a zero-gradient condition is applied
+    - The boundary condition is derived from \c inletOutlet condition.
+      Therefore, in the event of reverse flow, a zero-gradient condition
+      is applied.
+    - The order of precedence to input the empirical model constant \c Cmu is:
+      turbulence model, boundary condition dictionary, and default value=0.09.
+    - The empirical model constant \c Cmu is not a spatiotemporal variant field.
+      Therefore, the use of the boundary condition may not be fully consistent
+      with the turbulence models where \c Cmu is a variant field, such as
+      \c realizableKE closure model in this respect. Nevertheless, workflow
+      observations suggest that the matter poses no importance.
 
 See also
     Foam::inletOutletFvPatchField
@@ -94,13 +115,16 @@ class turbulentMixingLengthDissipationRateInletFvPatchScalarField
 :
     public inletOutletFvPatchScalarField
 {
-    // Private data
-
-        //- Turbulent length scale
-        scalar mixingLength_;
+    // Private Data
 
         //- Name of the turbulent kinetic energy field
         word kName_;
+
+        //- Mixing length scale
+        scalar mixingLength_;
+
+        //- Empirical model constant
+        scalar Cmu_;
 
 
 public:
@@ -127,8 +151,8 @@ public:
         );
 
         //- Construct by mapping given
-        //  turbulentMixingLengthDissipationRateInletFvPatchScalarField
-        //  onto a new patch
+        //- turbulentMixingLengthDissipationRateInletFvPatchScalarField
+        //- onto a new patch
         turbulentMixingLengthDissipationRateInletFvPatchScalarField
         (
             const turbulentMixingLengthDissipationRateInletFvPatchScalarField&,
@@ -179,7 +203,7 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();

@@ -4,6 +4,11 @@ cd "${0%/*}" || exit                                # Run from this directory
 #------------------------------------------------------------------------------
 
 cleanCase0
-\rm -rf system/controlDict constant/boundaryData/inlet results
+
+rm -f system/controlDict
+rm -rf constant/boundaryData/inlet
+rm -rf results
+rm -f *.png
+rm -f constant/{R*,points*,UMean*}
 
 #------------------------------------------------------------------------------

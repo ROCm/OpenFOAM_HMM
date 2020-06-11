@@ -4,15 +4,6 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
 #------------------------------------------------------------------------------
 
-endTime=10
-\cp system/controlDict.template system/controlDict
-if notTest "$@"
-then
-    endTime=85
-fi
-\sed -i "s|END_TIME|$endTime|g" system/controlDict
-
-
 # Collect data into the 'results' directory,
 # and clean the case for the next run
 #
@@ -20,14 +11,15 @@ fi
 # ----
 collectData(){
     model=$1
-    \echo "    Moving results into 'results/$model'"
-    results="results/$model"
-    \mkdir -p "$results"
+    runType=$2
+    echo "    Moving results into 'results/$model.$runType'"
+    results="results/$model.$runType"
+    mkdir -p "$results"
     timeDir=$(foamListTimes -latestTime)
-    \mv -f log* *.png postProcessing "$timeDir" "$results" 2>/dev/null
+    mv -f log* *.png postProcessing "$timeDir" "$results" 2>/dev/null
 
     cleanTimeDirectories
-    \rm -rf processor* > /dev/null 2>&1
+    rm -rf processor* > /dev/null 2>&1
 }
 
 
@@ -40,13 +32,13 @@ serialRun(){
     models=$*
     for model in $models
     do
-        \echo "    Running with the synthetic turbulence model: $model"
-        (\cd 0 && \ln -snf "inlet.$model" inlet)
-        (\cd constant/boundaryData && \ln -snf "inlet.$model" inlet)
+        echo "    Running with the synthetic turbulence model: $model"
+        (cd 0 && ln -snf "inlet.$model" inlet)
+        (cd constant/boundaryData && ln -snf "inlet.$model" inlet)
 
         runApplication -s "$model" $(getApplication)
         ./plot
-        collectData $model
+        collectData $model "serial"
     done
 }
 
@@ -60,36 +52,35 @@ parallelRun(){
     models=$*
     for model in $models
     do
-        \echo "    Running with the synthetic turbulence model: $model"
-        (\cd 0 && \ln -snf "inlet.$model" inlet)
-        (\cd constant/boundaryData && \ln -snf "inlet.$model" inlet)
+        echo "    Running with the synthetic turbulence model: $model"
+        (cd 0 && ln -snf "inlet.$model" inlet)
+        (cd constant/boundaryData && ln -snf "inlet.$model" inlet)
 
-        runApplication -s "$model" decomposePar
+        runApplication -s "$model" decomposePar -force
         runParallel -s "$model" $(getApplication)
+        runApplication -s "$model" reconstructPar -latestTime
         ./plot
-
-        collectData $model
+        collectData $model "parallel"
     done
 }
 
 
 #------------------------------------------------------------------------------
 
-# Synthetic inflow models
+# Prepare the numerical setup
+./Allrun.pre
+
+# Run with the synthetic turbulence models
 models="
-reducedDigitalFilter
-digitalFilter
+FSM
+DFM
 DFSEM
 "
 
-# Prepare the numerical setup
-runApplication blockMesh
-restore0Dir
-\rm -rf "results"
+parallelRun $models
 
-# Run with the synthetic turbulence models
 serialRun $models
-#parallelRun $models
 
 
 #------------------------------------------------------------------------------
+

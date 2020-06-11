@@ -1,12 +1,11 @@
-Synthetic turbulence inflow tests
-======================
+#------------------------------------------------------------------------------
 
 The following three synthetic turbulence inflow boundary conditions are
 examined through a single-cell-domain smooth-wall plane channel flow setup:
 
-- turbulentDFSEMInlet
-- turbulentDigitalFilterInlet variant=digitalFilter
-- turbulentDigitalFilterInlet variant=reducedDigitalFilter
+- turbulentDFSEMInlet (DFSEM)
+- turbulentDigitalFilterInlet (DFM)
+- turbulentDigitalFilterInlet with the forward-stepwise method (FSM)
 
 The input statistics are obtained from:
 
@@ -22,13 +21,12 @@ The data is available online from (Retrieved: 21-06-2019):
 
     https://turbulence.oden.utexas.edu/data/MKM/chan395/
 
-Serial executing (comment out 'parallelRun'):
-
-./Allrun
-
-Parallel (decompositionMethod=scotch) executing (comment out 'serialRun'):
+Executing:
 
 ./Allrun
 
 The script will run the test case, and collect the plots and samples into
 the 'results' directory.
+
+
+#------------------------------------------------------------------------------

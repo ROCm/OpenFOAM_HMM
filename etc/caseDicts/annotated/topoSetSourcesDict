@@ -241,6 +241,12 @@ cellSet_doc
         //     name    ".*Zone";
         // }
     }
+
+    //- Cells attached to the outside of the input cellSet
+    {
+        source      haloToCell;
+        steps       3;          // Number of grow/shrink steps to use
+    }
 }
 
 

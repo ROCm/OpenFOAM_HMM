@@ -7,16 +7,25 @@
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
-    version     2.0;
-    format      ascii;
-    class       dictionary;
-    note        "mesh decomposition control dictionary";
-    object      decomposeParDict;
+    version         2.0;
+    format          ascii;
+    class           dictionary;
+    location        system;
+    object          probesDict;
 }
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-numberOfSubdomains  3;
+// Fields to be probed (runTime modifiable)
+fields
+(
+    T H2O p kT
+);
 
-method          scotch;
+// Locations to be probed (runTime modifiable)
+probeLocations
+(
+    (0.005 0.0 0.0)
+);
 
-// ************************************************************************* //
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -9,17 +9,24 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volVectorField;
-    object      U;
+    class       dictionary;
+    object      setExprBoundaryFieldsDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inlet
+pattern
 {
-    type            turbulentDFSEMInlet;
-    delta           1;
-    nCellPerEddy    1;
-    mapMethod       nearestCell;
+    field   T;
+
+    expressions
+    (
+        {
+            patch   outlet2;
+            target  something;
+            expression #{ (pos().x() < 1e-4 ? 60 : 120) #};
+        }
+    );
 }
+
 
 // ************************************************************************* //
