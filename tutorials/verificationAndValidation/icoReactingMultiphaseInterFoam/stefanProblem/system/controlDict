@@ -54,12 +54,13 @@ maxAlphaDdt     0.01;
 
 functions
 {
+
     interfaceHeight1
     {
         // Mandatory entries
         type            interfaceHeight;
         libs            (fieldFunctionObjects);
-        locations       ((0 0 0));
+        locations       ((0 0 1e-5));
 
         // Optional entries
         alpha           alpha.liquid;
@@ -82,6 +83,7 @@ functions
         writeControl    timeStep;
         writeInterval   3;
     }
+
 }
 
 

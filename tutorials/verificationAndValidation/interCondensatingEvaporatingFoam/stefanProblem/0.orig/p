@@ -20,23 +20,10 @@ internalField   uniform 1e5;
 
 boundaryField
 {
-  sideWalls
+  ".*"
   {
-      type            fixedFluxPressure;
-  }
-
-  faceWall
-  {
-      type            fixedFluxPressure;
-  }
-
-  outlet
-  {
-      //type            fixedValue;
-      type            totalPressure;
-      rho             rho;
-      p0              uniform 1e5;
-      value           uniform 1e5;
+      type            calculated;
+      value           uniform 1e5; 
   }
 
   frontAndBack
