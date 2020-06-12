@@ -136,10 +136,16 @@ void Foam::functionObjects::fieldAverage::calcAverages()
     }
 
     bool doRestart = false;
-    if (periodicRestart_ && currentTime > restartPeriod_*periodIndex_)
+    if (periodicRestart_)
     {
-        doRestart = true;
-        periodIndex_++;
+        const scalar deltaT = obr().time().deltaTValue();
+        const scalar nextTime = restartPeriod_*periodIndex_ + 0.5*deltaT;
+
+        if (currentTime > nextTime)
+        {
+            doRestart = true;
+            ++periodIndex_;
+        }
     }
 
     if (currentTime >= restartTime_)
