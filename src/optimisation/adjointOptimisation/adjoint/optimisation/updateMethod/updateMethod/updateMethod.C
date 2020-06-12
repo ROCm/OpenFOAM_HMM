@@ -127,7 +127,7 @@ Foam::updateMethod::inv(SquareMatrix<scalar> A)
     label n(A.n());
     SquareMatrix<scalar> invA(n, Zero);
 
-    //- LU decomposition of A
+    // LU decomposition of A
     labelList pivotIndices(n, Zero);
     LUDecompose(A, pivotIndices);
     DebugInfo

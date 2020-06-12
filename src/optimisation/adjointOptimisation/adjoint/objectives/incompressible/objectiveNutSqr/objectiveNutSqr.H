@@ -85,7 +85,7 @@ public:
 
     // Constructors
 
-        //- from components
+        //- From components
         objectiveNutSqr
         (
             const fvMesh& mesh,
@@ -110,7 +110,7 @@ public:
         void update_dJdTMvar1();
 
         //- Update field to be added to be added to volume-based
-        //  sensitivity derivatives, emerging from delta ( dV ) / delta b
+        //- sensitivity derivatives, emerging from delta ( dV ) / delta b
         void update_divDxDbMultiplier();
 };
 

@@ -65,7 +65,7 @@ objectiveNutSqr::objectiveNutSqr
         mesh_.cellZones().indices(this->dict().get<wordRes>("zones"))
     )
 {
-    //- Allocate source term for the adjoint turbulence model
+    // Allocate source term for the adjoint turbulence model
     dJdTMvar1Ptr_.reset
     (
         createZeroFieldPtr<scalar>
@@ -75,7 +75,7 @@ objectiveNutSqr::objectiveNutSqr
             (dimless/dimTime/dimTime)
         )
     );
-    //- Allocate term to be added to volume-based sensitivity derivatives
+    // Allocate term to be added to volume-based sensitivity derivatives
     divDxDbMultPtr_.reset
     (
         createZeroFieldPtr<scalar>
@@ -87,7 +87,7 @@ objectiveNutSqr::objectiveNutSqr
             dimensionSet(0,0,0,0,0,0,0)
         )
     );
-    //- set file pointer
+    // set file pointer
     //objFunctionFilePtr_ = new OFstream(objFunctionFolder_/type());
 }
 

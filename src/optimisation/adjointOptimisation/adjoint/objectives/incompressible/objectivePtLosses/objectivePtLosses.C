@@ -234,7 +234,7 @@ void objectivePtLosses::update_boundarydJdvt()
 }
 
 
-void objectivePtLosses::write() const
+bool objectivePtLosses::write(const bool valid) const
 {
     if (Pstream::master())
     {
@@ -266,6 +266,8 @@ void objectivePtLosses::write() const
         }
         objFunctionFilePtr_() << endl;
     }
+
+    return true;
 }
 
 

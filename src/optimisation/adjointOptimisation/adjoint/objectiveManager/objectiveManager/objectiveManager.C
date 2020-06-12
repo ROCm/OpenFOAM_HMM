@@ -177,7 +177,7 @@ void objectiveManager::update()
 
 void objectiveManager::updateOrNullify()
 {
-    //- Update contributions to adjoint if true, otherwise return nulls
+    // Update contributions to adjoint if true, otherwise return nulls
     for (objective& obj : objectives_)
     {
         if (obj.isWithinIntegrationTime())

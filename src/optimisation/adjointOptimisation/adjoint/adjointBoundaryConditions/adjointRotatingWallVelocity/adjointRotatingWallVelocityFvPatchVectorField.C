@@ -70,8 +70,8 @@ adjointRotatingWallVelocityFvPatchVectorField
 )
 :
     adjointWallVelocityFvPatchVectorField(p, iF, dict),
-    origin_(dict.lookup("origin")),
-    axis_(dict.lookup("axis")),
+    origin_(dict.get<vector>("origin")),
+    axis_(dict.get<vector>("axis")),
     omega_(Function1<scalar>::New("omega", dict))
 {}
 

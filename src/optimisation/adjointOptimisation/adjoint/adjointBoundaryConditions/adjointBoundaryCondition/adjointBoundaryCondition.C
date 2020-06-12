@@ -266,10 +266,8 @@ template<class Type>
 const ATCModel& adjointBoundaryCondition<Type>::getATC() const
 {
     return
-        patch_.boundaryMesh().mesh().lookupObject<ATCModel>
-        (
-            "ATCModel" + adjointSolverName_
-        );
+        patch_.boundaryMesh().mesh().template
+            lookupObject<ATCModel>("ATCModel" + adjointSolverName_);
 }
 
 

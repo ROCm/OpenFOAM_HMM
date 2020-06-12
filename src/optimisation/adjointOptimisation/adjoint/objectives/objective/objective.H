@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2020 PCOpt/NTUA
     Copyright (C) 2013-2020 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -373,7 +373,7 @@ public:
         {}
 
         //- Write objective function history
-        virtual void write() const;
+        virtual bool write(const bool valid = true) const;
 
         //- Write objective function history at each primal solver iteration
         virtual void writeInstantaneousValue() const;

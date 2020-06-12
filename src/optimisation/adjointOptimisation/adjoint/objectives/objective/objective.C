@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2020 PCOpt/NTUA
     Copyright (C) 2013-2020 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -677,7 +677,7 @@ void objective::nullify()
 }
 
 
-void objective::write() const
+bool objective::write(const bool valid) const
 {
     if (Pstream::master())
     {
@@ -691,6 +691,8 @@ void objective::write() const
 
         objFunctionFilePtr_() << mesh_.time().value() << tab << J_ << endl;
     }
+
+    return true;
 }
 
 
