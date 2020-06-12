@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -42,7 +42,7 @@ adjointWallVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(p, iF),
-    adjointBoundaryCondition(p, iF, word::null),
+    adjointVectorBoundaryCondition(p, iF, word::null),
     kappa_(0.41),
     E_(9.8)
 {}
@@ -58,7 +58,7 @@ adjointWallVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(ptf, p, iF, mapper),
-    adjointBoundaryCondition(p, iF, ptf.adjointSolverName_),
+    adjointVectorBoundaryCondition(p, iF, ptf.adjointSolverName_),
     kappa_(ptf.kappa_),
     E_(ptf.E_)
 {}
@@ -73,7 +73,7 @@ adjointWallVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(p, iF),
-    adjointBoundaryCondition(p, iF, dict.get<word>("solverName")),
+    adjointVectorBoundaryCondition(p, iF, dict.get<word>("solverName")),
     kappa_(dict.getOrDefault<scalar>("kappa", 0.41)),
     E_(dict.getOrDefault<scalar>("E", 9.8))
 {
@@ -92,7 +92,7 @@ adjointWallVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(pivpvf, iF),
-    adjointBoundaryCondition(pivpvf),
+    adjointVectorBoundaryCondition(pivpvf),
     kappa_(pivpvf.kappa_),
     E_(pivpvf.E_)
 {}

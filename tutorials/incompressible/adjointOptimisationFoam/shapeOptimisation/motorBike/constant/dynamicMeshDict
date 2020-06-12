@@ -30,17 +30,17 @@ volumetricBSplinesMotionSolverCoeffs
 
         controlPointsDefinition fromFile;
 
-        confineX1movement false;
-        confineX2movement false;
-        confineX3movement false;
+        confineUMovement false;
+        confineVMovement false;
+        confineWMovement false;
         confineBoundaryControlPoints false;
 
-        boundUMinCPs ( (true true true) (true true true) );
-        boundUMaxCPs ( (true true true) );
-        boundVMinCPs ( (true true true) (true true true) );
-        boundVMaxCPs ( (true true true) (true true true) );
-        boundWMinCPs ( (true true true) );
-        boundWMaxCPs ( (true true true) (true true true) );
+        confineUMinCPs ( (true true true) (true true true) );
+        confineUMaxCPs ( (true true true) );
+        confineVMinCPs ( (true true true) (true true true) );
+        confineVMaxCPs ( (true true true) (true true true) );
+        confineWMinCPs ( (true true true) );
+        confineWMaxCPs ( (true true true) (true true true) );
     }
 }
 

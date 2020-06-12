@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -127,6 +127,67 @@ autoPtr<objectiveIncompressible> objectiveIncompressible::New
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void objectiveIncompressible::doNormalization()
+{
+    if (normalize_ && normFactor_.valid())
+    {
+        const scalar oneOverNorm(1./normFactor_());
+
+        if (hasdJdv())
+        {
+            dJdvPtr_().primitiveFieldRef() *= oneOverNorm;
+        }
+        if (hasdJdp())
+        {
+            dJdpPtr_().primitiveFieldRef() *= oneOverNorm;
+        }
+        if (hasdJdT())
+        {
+            dJdTPtr_().primitiveFieldRef() *= oneOverNorm;
+        }
+        if (hasdJdTMVar1())
+        {
+            dJdTMvar1Ptr_().primitiveFieldRef() *= oneOverNorm;
+        }
+        if (hasdJdTMVar2())
+        {
+            dJdTMvar2Ptr_().primitiveFieldRef() *= oneOverNorm;
+        }
+        if (hasBoundarydJdv())
+        {
+            bdJdvPtr_() *= oneOverNorm;
+        }
+        if (hasBoundarydJdvn())
+        {
+            bdJdvnPtr_() *= oneOverNorm;
+        }
+        if (hasBoundarydJdvt())
+        {
+            bdJdvtPtr_() *= oneOverNorm;
+        }
+        if (hasBoundarydJdp())
+        {
+            bdJdpPtr_() *= oneOverNorm;
+        }
+        if (hasBoundarydJdT())
+        {
+            bdJdTPtr_() *= oneOverNorm;
+        }
+        if (hasBoundarydJdTMVar1())
+        {
+            bdJdTMvar1Ptr_() *= oneOverNorm;
+        }
+        if (hasBoundarydJdTMVar2())
+        {
+            bdJdTMvar2Ptr_() *= oneOverNorm;
+        }
+
+        // Normalize geometric fields
+        objective::doNormalization();
+    }
+}
+
 
 const volVectorField& objectiveIncompressible::dJdv()
 {
@@ -418,6 +479,9 @@ void objectiveIncompressible::update()
     update_dxdbDirectMultiplier();
     update_boundaryEdgeContribution();
     update_dJdStressMultiplier();
+
+    // Divide everything with normalization factor
+    doNormalization();
 }
 
 
@@ -482,9 +546,9 @@ void objectiveIncompressible::nullify()
 }
 
 
-void objectiveIncompressible::write() const
+bool objectiveIncompressible::write(const bool valid) const
 {
-    objective::write();
+    return objective::write(valid);
 }
 
 

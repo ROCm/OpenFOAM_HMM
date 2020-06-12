@@ -5,9 +5,9 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,6 +40,7 @@ SourceFiles
 #ifndef objective_H
 #define objective_H
 
+#include "localIOdictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
 #include "OFstream.H"
@@ -57,6 +58,8 @@ namespace Foam
 \*---------------------------------------------------------------------------*/
 
 class objective
+:
+    public localIOdictionary
 {
 protected:
 
@@ -69,18 +72,32 @@ protected:
         const word objectiveName_;
         bool computeMeanFields_;
         bool nullified_;
+        bool normalize_;
 
-        // Objective function value and weight
+        //- Objective function value and weight
         scalar J_;
-        scalar JMean_;  //average value
+
+        //- Average objective value
+        scalar JMean_;
+
+        //- Objective weight
         scalar weight_;
 
-        // Objective integration start and end times (for unsteady flows)
+        //- Normalization factor
+        autoPtr<scalar> normFactor_;
+
+        //- Target value, in case the objective is used as a constraint
+        //  Should be used in caution and with updateMethods than get affected
+        //  by the target value, without requiring a sqr (e.g. SQP, MMA)
+        scalar target_;
+
+        //- Objective integration start and end times (for unsteady flows)
         autoPtr<scalar> integrationStartTimePtr_;
         autoPtr<scalar> integrationEndTimePtr_;
 
-        // Contribution to field sensitivity derivatives
-        // Topology optimisation
+        //- Contribution to field sensitivity derivatives
+        //  Topology optimisation or other variants with
+        //  as many design variables as the mesh cells
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         autoPtr<volScalarField> dJdbPtr_;
@@ -241,6 +258,12 @@ public:
         //- Return the objective function weight
         scalar weight() const;
 
+        //- Is the objective normalized
+        bool normalize() const;
+
+        //- Normalize all fields allocated by the objective
+        virtual void doNormalization();
+
         //- Check whether this is an objective integration time
         bool isWithinIntegrationTime() const;
 
@@ -350,13 +373,19 @@ public:
         {}
 
         //- Write objective function history
-        virtual void write() const;
+        virtual bool write(const bool valid = true) const;
 
         //- Write objective function history at each primal solver iteration
         virtual void writeInstantaneousValue() const;
 
+        //- Write objective function history at each primal solver iteration
+        virtual void writeInstantaneousSeparator() const;
+
         //- Write mean objective function history
         virtual void writeMeanValue() const;
+
+        //- Write averaged objective for continuation
+        virtual bool writeData(Ostream& os) const;
 
         // Inline functions for checking whether pointers are set or not
         inline const word& objectiveName() const;

@@ -129,6 +129,9 @@ public:
         //- Get start CP ID for each box
         labelList getStartCpID() const;
 
+        //- Find box of certain control point
+        label findBoxID(const label cpI) const;
+
         //- Get active design variables
         const labelList& getActiveDesignVariables() const;
 

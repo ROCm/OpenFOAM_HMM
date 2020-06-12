@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -195,14 +195,21 @@ void sensitivitySurface::addGeometricSens()
 
 void sensitivitySurface::setSuffixName()
 {
+    word suffix(dict().getOrDefault<word>("suffix", word::null));
     // Determine suffix for fields holding the sens
     if (includeMeshMovement_)
     {
-        shapeSensitivitiesBase::setSuffix(adjointVars_.solverName() + "ESI");
+        shapeSensitivitiesBase::setSuffix
+        (
+            adjointVars_.solverName() + "ESI" + suffix
+        );
     }
     else
     {
-        shapeSensitivitiesBase::setSuffix(adjointVars_.solverName() + "SI");
+        shapeSensitivitiesBase::setSuffix
+        (
+            adjointVars_.solverName() + "SI" + suffix
+        );
     }
 }
 
@@ -707,7 +714,7 @@ void sensitivitySurface::clearSensitivities()
     }
     // Reset sensitivity fields
     adjointSensitivity::clearSensitivities();
-    shapeSensitivitiesBase::clear();
+    shapeSensitivitiesBase::clearSensitivities();
 }
 
 

@@ -121,6 +121,12 @@ const scalarField& adjointSensitivity::calculateSensitivities()
 }
 
 
+const scalarField& adjointSensitivity::getSensitivities() const
+{
+    return derivatives_;
+}
+
+
 void adjointSensitivity::clearSensitivities()
 {
     derivatives_ = scalar(0);

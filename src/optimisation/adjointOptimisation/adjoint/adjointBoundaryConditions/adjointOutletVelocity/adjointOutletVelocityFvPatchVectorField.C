@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -102,7 +102,7 @@ adjointOutletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(p, iF),
-    adjointBoundaryCondition(p, iF, word::null)
+    adjointVectorBoundaryCondition(p, iF, word::null)
 {}
 
 
@@ -116,7 +116,7 @@ adjointOutletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(ptf, p, iF, mapper),
-    adjointBoundaryCondition(p, iF, ptf.adjointSolverName_)
+    adjointVectorBoundaryCondition(p, iF, ptf.adjointSolverName_)
 {}
 
 
@@ -129,7 +129,7 @@ adjointOutletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(p, iF),
-    adjointBoundaryCondition(p, iF, dict.get<word>("solverName"))
+    adjointVectorBoundaryCondition(p, iF, dict.get<word>("solverName"))
 {
     fvPatchField<vector>::operator=
     (
@@ -146,7 +146,7 @@ adjointOutletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(pivpvf, iF),
-    adjointBoundaryCondition(pivpvf)
+    adjointVectorBoundaryCondition(pivpvf)
 {}
 
 

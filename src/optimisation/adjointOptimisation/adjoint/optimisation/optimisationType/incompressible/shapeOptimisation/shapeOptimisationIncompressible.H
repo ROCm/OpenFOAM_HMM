@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -76,6 +76,10 @@ protected:
 
     // Protected Member Functions
 
+        //- Update the design variables given their correction
+        virtual void updateDesignVariables(scalarField& correction);
+
+        //- Compute eta if not set in the first step
         virtual void computeEta(scalarField& correction);
 
 
@@ -113,20 +117,14 @@ public:
 
     // Member Functions
 
-       //- Master function. Calls all the others
-       void update();
+        //- Store design variables, as the starting point for line search
+        virtual void storeDesignVariables();
 
-       //- Update design variables based on a given correction
-       virtual void update(scalarField& correction);
+        //- Store design variables, as the starting point for line search
+        virtual void resetDesignVariables();
 
-       //- Store design variables, as the starting point for line search
-       virtual void storeDesignVariables();
-
-       //- Store design variables, as the starting point for line search
-       virtual void resetDesignVariables();
-
-       //- Write useful quantities to files
-       virtual void write();
+        //- Write useful quantities to files
+        virtual void write();
 };
 
 

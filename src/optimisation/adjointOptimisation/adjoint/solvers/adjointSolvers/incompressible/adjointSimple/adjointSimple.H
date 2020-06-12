@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -167,6 +167,14 @@ public:
 
             //- Return the base sensitivity object
             virtual sensitivity& getSensitivityBase();
+
+            //- Update primal based quantities
+            //- related to the objective functions.
+            //  Also writes the objective function values to files.
+            //  Written here and not in the postLoop function of the primal
+            //  to make sure we don't pollute the objective files with
+            //  objectives of non-converged linearSearch iterations
+            virtual void updatePrimalBasedQuantities();
 
             //- Write average iteration
             virtual bool writeData(Ostream& os) const;

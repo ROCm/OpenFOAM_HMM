@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -84,7 +84,7 @@ FIBase::FIBase
     fv::optionAdjointList& fvOptionsAdjoint
 )
 :
-    adjointSensitivity
+    shapeSensitivities
     (
         mesh,
         dict,
@@ -93,7 +93,6 @@ FIBase::FIBase
         objectiveManager,
         fvOptionsAdjoint
     ),
-    shapeSensitivitiesBase(mesh, dict),
     gradDxDbMult_
     (
         IOobject
@@ -109,9 +108,6 @@ FIBase::FIBase
     ),
     divDxDbMult_(mesh_.nCells(), Zero),
     optionsDxDbMult_(mesh_.nCells(), Zero),
-    dSfdbMult_(createZeroBoundaryPtr<vector>(mesh_)),
-    dnfdbMult_(createZeroBoundaryPtr<vector>(mesh_)),
-    dxdbDirectMult_(createZeroBoundaryPtr<vector>(mesh_)),
 
     includeDistance_(false),
     eikonalSolver_(nullptr)
@@ -165,18 +161,11 @@ void FIBase::accumulateIntegrand(const scalar dt)
     }
 
     // Accumulate direct sensitivities
-    for (const label patchI : sensitivityPatchIDs_)
-    {
-        const scalarField magSfDt(mesh_.boundary()[patchI].magSf()*dt);
-        for (objective& func : functions)
-        {
-            const scalar wei = func.weight();
-            dSfdbMult_()[patchI] += wei*func.dSdbMultiplier(patchI)*dt;
-            dnfdbMult_()[patchI] += wei*func.dndbMultiplier(patchI)*magSfDt;
-            dxdbDirectMult_()[patchI] +=
-                wei*func.dxdbDirectMultiplier(patchI)*magSfDt;
-        }
-    }
+    accumulateDirectSensitivityIntegrand(dt);
+
+    // Accumulate sensitivities due to boundary conditions
+    accumulateBCSensitivityIntegrand(dt);
+
 }
 
 
@@ -185,24 +174,13 @@ void FIBase::clearSensitivities()
     gradDxDbMult_ = dimensionedTensor(gradDxDbMult_.dimensions(), Zero);
     divDxDbMult_ = Zero;
     optionsDxDbMult_ = vector::zero;
-    dSfdbMult_() = vector::zero;
-    dnfdbMult_() = vector::zero;
-    dxdbDirectMult_() = vector::zero;
 
     if (includeDistance_)
     {
         eikonalSolver_->reset();
     }
 
-    adjointSensitivity::clearSensitivities();
-    shapeSensitivitiesBase::clear();
-}
-
-
-void FIBase::write(const word& baseName)
-{
-    adjointSensitivity::write(baseName);
-    shapeSensitivitiesBase::write();
+    shapeSensitivities::clearSensitivities();
 }
 
 

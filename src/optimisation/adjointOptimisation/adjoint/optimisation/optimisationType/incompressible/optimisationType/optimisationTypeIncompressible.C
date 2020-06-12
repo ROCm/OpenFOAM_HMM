@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -157,14 +157,79 @@ autoPtr<optimisationType> optimisationType::New
 
 // * * * * * * * * * * * * * * *  Member Functions   * * * * * * * * * * * * //
 
+void optimisationType::update()
+{
+    // Compute update of the design variables
+    tmp<scalarField> tcorrection(computeDirection());
+    scalarField& correction = tcorrection.ref();
+
+    // Update design variables given the correction
+    update(correction);
+
+    // If direction has been scaled (say by setting the initial eta), the
+    // old correction has to be updated
+    updateOldCorrection(correction);
+    write();
+}
+
+
+void optimisationType::update(scalarField& direction)
+{
+    // Compute eta if needed
+    computeEta(direction);
+
+    // Multiply with line search step, if necessary
+    scalarField correction(direction);
+    if (lineSearch_.valid())
+    {
+        correction *= lineSearch_->step();
+    }
+
+    // Update the design variables
+    updateDesignVariables(correction);
+}
+
+
 tmp<scalarField> optimisationType::computeDirection()
 {
-    // Sum contributions
+    // Sum contributions for sensitivities and objective/constraint values
     scalarField objectiveSens;
     PtrList<scalarField> constraintSens;
     scalar objectiveValue(Zero);
     scalarField constraintValues;
 
+    updateGradientsAndValues
+    (
+        objectiveSens,
+        constraintSens,
+        objectiveValue,
+        constraintValues
+    );
+
+    // Based on the sensitivities, return design variables correction
+    updateMethod_->setObjectiveDeriv(objectiveSens);
+    updateMethod_->setConstraintDeriv(constraintSens);
+    updateMethod_->setObjectiveValue(objectiveValue);
+    updateMethod_->setConstraintValues(constraintValues);
+    tmp<scalarField> tcorrection
+    (
+        new scalarField(objectiveSens.size(), Zero)
+    );
+    scalarField& correction = tcorrection.ref();
+    correction = updateMethod_->returnCorrection();
+
+    return tcorrection;
+}
+
+
+void optimisationType::updateGradientsAndValues
+(
+    scalarField& objectiveSens,
+    PtrList<scalarField>& constraintSens,
+    scalar& objectiveValue,
+    scalarField& constraintValues
+)
+{
     for (adjointSolverManager& adjSolvManager : adjointSolvManagers_)
     {
         const scalar opWeight = adjSolvManager.operatingPointWeight();
@@ -212,20 +277,6 @@ tmp<scalarField> optimisationType::computeDirection()
         }
         constraintValues += opWeight*cValues();
     }
-
-    // Based on the sensitivities, return design variables correction
-    updateMethod_->setObjectiveDeriv(objectiveSens);
-    updateMethod_->setConstraintDeriv(constraintSens);
-    updateMethod_->setObjectiveValue(objectiveValue);
-    updateMethod_->setConstraintValues(constraintValues);
-    tmp<scalarField> tcorrection
-    (
-        new scalarField(objectiveSens.size(), Zero)
-    );
-    scalarField& correction = tcorrection.ref();
-    correction = updateMethod_->returnCorrection();
-
-    return tcorrection;
 }
 
 

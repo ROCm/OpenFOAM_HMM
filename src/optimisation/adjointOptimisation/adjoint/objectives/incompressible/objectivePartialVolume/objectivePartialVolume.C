@@ -133,7 +133,7 @@ void objectivePartialVolume::update_dSdbMultiplier()
 }
 
 
-void objectivePartialVolume::write() const
+bool objectivePartialVolume::write(const bool valid) const
 {
     if (Pstream::master())
     {
@@ -153,6 +153,8 @@ void objectivePartialVolume::write() const
         objFunctionFilePtr_() << setw(width) << J_ << " ";
         objFunctionFilePtr_() << setw(width) << initVol_ << endl;
     }
+
+    return true;
 }
 
 

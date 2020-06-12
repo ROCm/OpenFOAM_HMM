@@ -83,6 +83,7 @@ sensitivityVolBSplinesFI::sensitivityVolBSplinesFI
     dVdbSens_(0),
     distanceSens_(0),
     optionsSens_(0),
+    bcSens_(0),
 
     derivativesFolder_("optimisation"/type() + "Derivatives")
 {
@@ -97,6 +98,7 @@ sensitivityVolBSplinesFI::sensitivityVolBSplinesFI
     dVdbSens_ = vectorField(nCPs, Zero);
     distanceSens_ = vectorField(nCPs, Zero);
     optionsSens_ = vectorField(nCPs, Zero);
+    bcSens_ = vectorField(nCPs, Zero);
 
     // Create folder to store sensitivities
     mkDir(derivativesFolder_);
@@ -143,6 +145,12 @@ void sensitivityVolBSplinesFI::assembleSensitivities()
         vectorField dxdbSens = boxes[iNURB].computeControlPointSensitivities
         (
             dxdbDirectMult_(),
+            sensitivityPatchIDs_.toc()
+        );
+
+        vectorField bcSens = boxes[iNURB].computeControlPointSensitivities
+        (
+            bcDxDbMult_(),
             sensitivityPatchIDs_.toc()
         );
 
@@ -267,6 +275,9 @@ void sensitivityVolBSplinesFI::assembleSensitivities()
             // dxdbSens storage
             dxdbDirectSens_[globalCP] = dxdbSens[cpI];
 
+            // bcSens storage
+            bcSens_[globalCP] = bcSens[cpI];
+
             boxSensitivities[cpI] =
                 flowSens_[globalCP]
               + dSdbSens_[globalCP]
@@ -274,7 +285,8 @@ void sensitivityVolBSplinesFI::assembleSensitivities()
               + dVdbSens_[globalCP]
               + distanceSens_[globalCP]
               + dxdbDirectSens_[globalCP]
-              + optionsSens_[globalCP];
+              + optionsSens_[globalCP]
+              + bcSens_[globalCP];
         }
 
         // Zero sensitivities in non-active design variables
@@ -302,6 +314,7 @@ void sensitivityVolBSplinesFI::assembleSensitivities()
     volBSplinesBase_.boundControlPointMovement(distanceSens_);
     volBSplinesBase_.boundControlPointMovement(dxdbDirectSens_);
     volBSplinesBase_.boundControlPointMovement(optionsSens_);
+    volBSplinesBase_.boundControlPointMovement(bcSens_);
 }
 
 
@@ -314,6 +327,7 @@ void sensitivityVolBSplinesFI::clearSensitivities()
     dVdbSens_ = vector::zero;
     distanceSens_ = vector::zero;
     optionsSens_ = vector::zero;
+    bcSens_ = vector::zero;
 
     FIBase::clearSensitivities();
 }
@@ -359,7 +373,10 @@ void sensitivityVolBSplinesFI::write(const word& baseName)
             << setw(width) << "distance::z" << " "
             << setw(width) << "options::x" << " "
             << setw(width) << "options::y" << " "
-            << setw(width) << "options::z" << endl;
+            << setw(width) << "options::z" << " "
+            << setw(width) << "dvdb::x" << " "
+            << setw(width) << "dvdb::y" << " "
+            << setw(width) << "dvdb::z" << endl;
 
         label passedCPs(0);
         label lastActive(-1);
@@ -401,7 +418,10 @@ void sensitivityVolBSplinesFI::write(const word& baseName)
                         << setw(width) << distanceSens_[globalCP].z() << " "
                         << setw(width) << optionsSens_[globalCP].x() << " "
                         << setw(width) << optionsSens_[globalCP].y() << " "
-                        << setw(width) << optionsSens_[globalCP].z() << endl;
+                        << setw(width) << optionsSens_[globalCP].z() << " "
+                        << setw(width) << bcSens_[globalCP].x() << " "
+                        << setw(width) << bcSens_[globalCP].y() << " "
+                        << setw(width) << bcSens_[globalCP].z() << endl;
                 }
             }
             passedCPs += nb;

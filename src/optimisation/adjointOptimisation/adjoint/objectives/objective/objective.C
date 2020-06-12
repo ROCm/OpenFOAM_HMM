@@ -5,9 +5,9 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,6 +106,22 @@ objective::objective
     const word& primalSolverName
 )
 :
+    localIOdictionary
+    (
+        IOobject
+        (
+            dict.dictName(),
+            mesh.time().timeName(),
+            fileName("uniform")/fileName("objectives")/adjointSolverName,
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        // avoid type checking since dictionary is read using the
+        // derived type name and type() will result in "objective"
+        // here
+        word::null
+    ),
     mesh_(mesh),
     dict_(dict),
     adjointSolverName_(adjointSolverName),
@@ -113,10 +129,13 @@ objective::objective
     objectiveName_(dict.dictName()),
     computeMeanFields_(false), // is reset in derived classes
     nullified_(false),
+    normalize_(dict.getOrDefault<bool>("normalize", false)),
 
     J_(Zero),
-    JMean_(Zero),
+    JMean_(this->getOrDefault<scalar>("JMean", Zero)),
     weight_(Zero),
+    normFactor_(nullptr),
+    target_(dict.getOrDefault<scalar>("target", Zero)),
 
     integrationStartTimePtr_(nullptr),
     integrationEndTimePtr_(nullptr),
@@ -159,19 +178,18 @@ objective::objective
         );
     }
 
-    // Read JMean from dictionary, if present
-    IOobject headObjectiveIODict
-    (
-        "objectiveDict" + objectiveName_,
-        mesh_.time().timeName(),
-        "uniform",
-        mesh_,
-        IOobject::READ_IF_PRESENT,
-        IOobject::NO_WRITE
-    );
-    if (headObjectiveIODict.typeHeaderOk<IOdictionary>(false))
+    // Set normalization factor, if present
+    if (normalize_)
     {
-        JMean_ = IOdictionary(headObjectiveIODict).get<scalar>("JMean");
+        scalar normFactor(Zero);
+        if (dict.readIfPresent("normFactor", normFactor))
+        {
+            normFactor_.reset(new scalar(normFactor));
+        }
+        else if (this->readIfPresent("normFactor", normFactor))
+        {
+            normFactor_.reset(new scalar(normFactor));
+        }
     }
 }
 
@@ -233,13 +251,26 @@ scalar objective::JCycle() const
     {
         J = JMean_;
     }
+
+    // Subtract target, in case the objective is used as a constraint
+    J -= target_;
+
+    // Normalize here, in order to get the correct value for line search
+    if (normalize_ && normFactor_.valid())
+    {
+        J /= normFactor_();
+    }
+
     return J;
 }
 
 
 void objective::updateNormalizationFactor()
 {
-    // Does nothing in base
+    if (normalize_ && normFactor_.empty())
+    {
+        normFactor_.reset(new scalar(JCycle()));
+    }
 }
 
 
@@ -285,6 +316,62 @@ void objective::accumulateJMean()
 scalar objective::weight() const
 {
     return weight_;
+}
+
+
+bool objective::normalize() const
+{
+    return normalize_;
+}
+
+
+void objective::doNormalization()
+{
+    if (normalize_ && normFactor_.valid())
+    {
+        const scalar oneOverNorm(1./normFactor_());
+
+        if (hasdJdb())
+        {
+            dJdbPtr_().primitiveFieldRef() *= oneOverNorm;
+        }
+        if (hasBoundarydJdb())
+        {
+            bdJdbPtr_() *= oneOverNorm;
+        }
+        if (hasdSdbMult())
+        {
+            bdSdbMultPtr_() *= oneOverNorm;
+        }
+        if (hasdndbMult())
+        {
+            bdndbMultPtr_() *= oneOverNorm;
+        }
+        if (hasdxdbMult())
+        {
+            bdxdbMultPtr_() *= oneOverNorm;
+        }
+        if (hasdxdbDirectMult())
+        {
+            bdxdbDirectMultPtr_() *= oneOverNorm;
+        }
+        if (hasBoundaryEdgeContribution())
+        {
+            bEdgeContribution_() *= oneOverNorm;
+        }
+        if (hasDivDxDbMult())
+        {
+            divDxDbMultPtr_() *= oneOverNorm;
+        }
+        if (hasGradDxDbMult())
+        {
+            gradDxDbMultPtr_() *= oneOverNorm;
+        }
+        if (hasBoundarydJdStress())
+        {
+            bdJdStressPtr_() *= oneOverNorm;
+        }
+    }
 }
 
 
@@ -590,7 +677,7 @@ void objective::nullify()
 }
 
 
-void objective::write() const
+bool objective::write(const bool valid) const
 {
     if (Pstream::master())
     {
@@ -604,6 +691,8 @@ void objective::write() const
 
         objFunctionFilePtr_() << mesh_.time().value() << tab << J_ << endl;
     }
+
+    return true;
 }
 
 
@@ -620,6 +709,18 @@ void objective::writeInstantaneousValue() const
         }
 
         instantValueFilePtr_() << mesh_.time().value() << tab << J_ << endl;
+    }
+}
+
+
+void objective::writeInstantaneousSeparator() const
+{
+    if (Pstream::master())
+    {
+        if (instantValueFilePtr_.valid())
+        {
+            instantValueFilePtr_() << endl;
+        }
     }
 }
 
@@ -648,22 +749,17 @@ void objective::writeMeanValue() const
                 << mesh_.time().value() << tab << JMean_ << endl;
         }
     }
-    // Write mean value under time/uniform, to allow for lineSearch to work
-    // appropriately in continuation runs, when field averaging is used
-    IOdictionary objectiveDict
-    (
-        IOobject
-        (
-            "objectiveDict" + objectiveName_,
-            mesh_.time().timeName(),
-            "uniform",
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        )
-    );
-    objectiveDict.add<scalar>("JMean", JMean_);
-    objectiveDict.regIOobject::write();
+}
+
+
+bool objective::writeData(Ostream& os) const
+{
+    os.writeEntry("JMean", JMean_);
+    if (normFactor_.valid())
+    {
+        os.writeEntry("normFactor", normFactor_());
+    }
+    return os.good();
 }
 
 

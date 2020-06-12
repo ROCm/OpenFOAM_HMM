@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -77,6 +77,7 @@ sensitivityBezier::sensitivityBezier
     dSdbSens_(Bezier_.nBezier(), Zero),
     dndbSens_(Bezier_.nBezier(), Zero),
     dxdbDirectSens_(Bezier_.nBezier(), Zero),
+    bcSens_(Bezier_.nBezier(), Zero),
     derivativesFolder_("optimisation"/type() + "Derivatives")
 {
     derivatives_ = scalarField(3*Bezier_.nBezier(), Zero);
@@ -137,9 +138,12 @@ void sensitivityBezier::assembleSensitivities()
                 dxdbDirectSens_[iCP] +=
                     gSum((dxdbDirectMult_()[patchI] & dxidXj));
             }
+
+            // Sensitivities from boundary conditions
+            bcSens_[iCP] += gSum(bcDxDbMult_()[patchI] & dxidXj);
         }
     }
-    sens_ = flowSens_ + dSdbSens_ + dndbSens_ + dxdbDirectSens_;
+    sens_ = flowSens_ + dSdbSens_ + dndbSens_ + dxdbDirectSens_ + bcSens_;
 
     // Transform sensitivities to scalarField in order to cooperate with
     // updateMethod
@@ -159,6 +163,7 @@ void sensitivityBezier::assembleSensitivities()
             dSdbSens_[cpI].x() = Zero;
             dndbSens_[cpI].x() = Zero;
             dxdbDirectSens_[cpI].x() = Zero;
+            bcSens_[cpI].x() = Zero;
         }
         if (confineYmovement[cpI])
         {
@@ -167,6 +172,7 @@ void sensitivityBezier::assembleSensitivities()
             dSdbSens_[cpI].y() = Zero;
             dndbSens_[cpI].y() = Zero;
             dxdbDirectSens_[cpI].y() = Zero;
+            bcSens_[cpI].y() = Zero;
         }
         if (confineZmovement[cpI])
         {
@@ -175,6 +181,7 @@ void sensitivityBezier::assembleSensitivities()
             dSdbSens_[cpI].z() = Zero;
             dndbSens_[cpI].z() = Zero;
             dxdbDirectSens_[cpI].z() = Zero;
+            bcSens_[cpI].z() = Zero;
         }
     }
 }
@@ -187,6 +194,7 @@ void sensitivityBezier::clearSensitivities()
     dSdbSens_ = Zero;
     dndbSens_ = Zero;
     dxdbDirectSens_ = Zero;
+    bcSens_ = Zero;
 
     SIBase::clearSensitivities();
 }
@@ -195,6 +203,9 @@ void sensitivityBezier::clearSensitivities()
 void sensitivityBezier::write(const word& baseName)
 {
     Info<< "Writing control point sensitivities to file" << endl;
+    // Write sensitivity map
+    SIBase::write(baseName);
+    // Write control point sensitivities
     if (Pstream::master())
     {
         OFstream derivFile
@@ -210,7 +221,8 @@ void sensitivityBezier::write(const word& baseName)
             << setw(width) << "flow" << " "
             << setw(width) << "dSdb" << " "
             << setw(width) << "dndb" << " "
-            << setw(width) << "dxdbDirect" << endl;
+            << setw(width) << "dxdbDirect" << " "
+            << setw(width) << "dvdb" << endl;
         label nDV = derivatives_.size();
         label nBezier = Bezier_.nBezier();
         const boolListList& confineMovement = Bezier_.confineMovement();
@@ -229,7 +241,8 @@ void sensitivityBezier::write(const word& baseName)
                     << setw(width) << flowSens_[iCP].component(idir) << " "
                     << setw(width) << dSdbSens_[iCP].component(idir) << " "
                     << setw(width) << dndbSens_[iCP].component(idir) << " "
-                    << setw(width) << dxdbDirectSens_[iCP].component(idir)
+                    << setw(width) << dxdbDirectSens_[iCP].component(idir) << " "
+                    << setw(width) << bcSens_[iCP].component(idir)
                     << endl;
             }
         }

@@ -151,12 +151,16 @@ bool objectiveManager::readDict(const dictionary& dict)
     return true;
 }
 
+
 void objectiveManager::updateNormalizationFactor()
 {
     // Update normalization factors for all objectives
     for (objective& obj : objectives_)
     {
-        obj.updateNormalizationFactor();
+        if (obj.normalize())
+        {
+            obj.updateNormalizationFactor();
+        }
     }
 }
 
@@ -173,7 +177,7 @@ void objectiveManager::update()
 
 void objectiveManager::updateOrNullify()
 {
-    //- Update contributions to adjoint if true, otherwise return nulls
+    // Update contributions to adjoint if true, otherwise return nulls
     for (objective& obj : objectives_)
     {
         if (obj.isWithinIntegrationTime())

@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -92,6 +92,9 @@ protected:
 
         //- Term depending on fvOptions
         scalarField optionsSens_;
+
+        //- Term depending on the differenation of boundary conditions
+        scalarField bcSens_;
 
         fileName derivativesFolder_;
 

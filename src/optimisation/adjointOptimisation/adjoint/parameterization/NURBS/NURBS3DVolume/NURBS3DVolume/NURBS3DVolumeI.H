@@ -56,21 +56,21 @@ inline const Foam::vectorField& Foam::NURBS3DVolume::getControlPoints() const
 }
 
 
-inline bool Foam::NURBS3DVolume::confineX1movement() const
+inline bool Foam::NURBS3DVolume::confineUMovement() const
 {
-    return confineX1movement_;
+    return confineUMovement_;
 }
 
 
-inline bool Foam::NURBS3DVolume::confineX2movement() const
+inline bool Foam::NURBS3DVolume::confineVMovement() const
 {
-    return confineX2movement_;
+    return confineVMovement_;
 }
 
 
-inline bool Foam::NURBS3DVolume::confineX3movement() const
+inline bool Foam::NURBS3DVolume::confineWMovement() const
 {
-    return confineX3movement_;
+    return confineWMovement_;
 }
 
 

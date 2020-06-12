@@ -76,7 +76,7 @@ Foam::optMeshMovement::optMeshMovement
         dict.getOrDefault("writeMeshQualityMetrics", false)
     )
 {
-    //- Set maxAllowedDisplacement if provided
+    // Set maxAllowedDisplacement if provided
     if (dict.found("maxAllowedDisplacement"))
     {
         maxAllowedDisplacement_.reset

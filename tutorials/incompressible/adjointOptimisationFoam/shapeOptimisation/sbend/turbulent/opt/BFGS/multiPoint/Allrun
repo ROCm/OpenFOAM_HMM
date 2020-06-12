@@ -7,7 +7,6 @@ resourcesDir=$FOAM_TUTORIALS/incompressible/adjointOptimisationFoam/resources
 
 \cp -r $resourcesDir/meshes/sbend/polyMesh constant
 runApplication decomposePar
-runParallel writeActiveDesignVariables
 runParallel $(getApplication)
 runParallel cumulativeDisplacement
 

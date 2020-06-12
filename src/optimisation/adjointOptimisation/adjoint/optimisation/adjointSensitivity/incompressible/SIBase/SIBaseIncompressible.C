@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -50,6 +50,8 @@ void SIBase::read()
     surfaceSensitivity_.read();
     includeObjective_ =
         dict().getOrDefault<bool>("includeObjectiveContribution", true);
+    writeSensitivityMap_ =
+        dict().getOrDefault<bool>("writeSensitivityMap", false);
 
     // If includeObjective is set to true both here and in the surface
     // sensitivities, set the one in the latter to false to avoid double
@@ -83,7 +85,7 @@ SIBase::SIBase
     fv::optionAdjointList& fvOptionsAdjoint
 )
 :
-    adjointSensitivity
+    shapeSensitivities
     (
         mesh,
         dict,
@@ -92,12 +94,11 @@ SIBase::SIBase
         objectiveManager,
         fvOptionsAdjoint
     ),
-    shapeSensitivitiesBase(mesh, dict),
     surfaceSensitivity_
     (
         mesh,
         // Ideally, subOrEmptyDict would be used.
-        // Since we need a recursive search in shapeSensitivitiesBase though
+        // Since we need a recursive search in shapeSensitivities though
         // and the dict returned by subOrEmptyDict (if found)
         // does not know its parent, optionalSubDict is used
         dict.optionalSubDict("surfaceSensitivities"),
@@ -106,10 +107,8 @@ SIBase::SIBase
         objectiveManager,
         fvOptionsAdjoint
     ),
-    dSfdbMult_(createZeroBoundaryPtr<vector>(mesh_)),
-    dnfdbMult_(createZeroBoundaryPtr<vector>(mesh_)),
-    dxdbDirectMult_(createZeroBoundaryPtr<vector>(mesh_)),
-    includeObjective_(true)
+    includeObjective_(true),
+    writeSensitivityMap_(true)
 {
     read();
 }
@@ -141,42 +140,34 @@ void SIBase::accumulateIntegrand(const scalar dt)
     // Accumulate direct sensitivities
     if (includeObjective_)
     {
-        PtrList<objective>& functions
-        (
-            objectiveManager_.getObjectiveFunctions()
-        );
-        for (const label patchI : sensitivityPatchIDs_)
-        {
-            const scalarField magSfDt(mesh_.boundary()[patchI].magSf()*dt);
-            for (objective& func : functions)
-            {
-                const scalar wei = func.weight();
-                dSfdbMult_()[patchI] += wei*func.dSdbMultiplier(patchI)*dt;
-                dnfdbMult_()[patchI] += wei*func.dndbMultiplier(patchI)*magSfDt;
-                dxdbDirectMult_()[patchI] +=
-                    wei*func.dxdbDirectMultiplier(patchI)*magSfDt;
-            }
-        }
+        accumulateDirectSensitivityIntegrand(dt);
     }
+
+    // Accumulate sensitivities due to boundary conditions
+    accumulateBCSensitivityIntegrand(dt);
 }
 
 
 void SIBase::clearSensitivities()
 {
     surfaceSensitivity_.clearSensitivities();
-    dSfdbMult_() = vector::zero;
-    dnfdbMult_() = vector::zero;
-    dxdbDirectMult_() = vector::zero;
+    shapeSensitivities::clearSensitivities();
+}
 
-    adjointSensitivity::clearSensitivities();
-    shapeSensitivitiesBase::clear();
+
+const sensitivitySurface& SIBase::getSurfaceSensitivities() const
+{
+    return surfaceSensitivity_;
 }
 
 
 void SIBase::write(const word& baseName)
 {
-    adjointSensitivity::write(baseName);
-    shapeSensitivitiesBase::write();
+    shapeSensitivities::write(baseName);
+    if (writeSensitivityMap_)
+    {
+        surfaceSensitivity_.write(baseName);
+    }
 }
 
 

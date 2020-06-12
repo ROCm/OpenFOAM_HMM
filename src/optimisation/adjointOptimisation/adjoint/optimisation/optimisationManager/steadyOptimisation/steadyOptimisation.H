@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -75,10 +75,10 @@ protected:
     // Protected Member Functions
 
         //- Update design variables using a line-search
-        void lineSearchUpdate(scalarField& direction);
+        void lineSearchUpdate();
 
         //- Update design variables using a fixed step
-        void fixedStepUpdate(scalarField& direction);
+        void fixedStepUpdate();
 
 
 public:

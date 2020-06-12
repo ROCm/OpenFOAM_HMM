@@ -39,7 +39,6 @@ runParallel $decompDict patchSummary
 runParallel $decompDict potentialFoam
 runParallel $decompDict checkMesh -writeFields '(nonOrthoAngle)' -constant
 
-runParallel $decompDict writeActiveDesignVariables
 runParallel $decompDict $(getApplication)
 runParallel $decompDict cumulativeDisplacement
 

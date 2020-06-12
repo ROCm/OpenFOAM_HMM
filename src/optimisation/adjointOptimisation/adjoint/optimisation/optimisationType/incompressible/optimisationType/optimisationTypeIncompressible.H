@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -69,7 +69,11 @@ protected:
         autoPtr<volScalarField> sourcePtr_;
         autoPtr<lineSearch> lineSearch_;
 
-        virtual void computeEta(scalarField& correction)=0;
+        //- Update the design variables given their correction
+        virtual void updateDesignVariables(scalarField& correction) = 0;
+
+        //- Compute eta if not set in the first step
+        virtual void computeEta(scalarField& correction) = 0;
 
 
 private:
@@ -132,10 +136,10 @@ public:
         virtual ~optimisationType() = default;
 
         //- Update design variables
-        virtual void update() = 0;
+        virtual void update();
 
         //- Update design variables based on a given correction
-        virtual void update(scalarField& correction) = 0;
+        virtual void update(scalarField& correction);
 
         //- Store design variables, as the starting point for line search
         virtual void storeDesignVariables() = 0;
@@ -145,6 +149,15 @@ public:
 
         //- Compute update direction
         virtual tmp<scalarField> computeDirection();
+
+        //- Compute cumulative objective and constraint gradients
+        virtual void updateGradientsAndValues
+        (
+            scalarField& objectiveSens,
+            PtrList<scalarField>& constraintSens,
+            scalar& objectiveValue,
+            scalarField& constraintValues
+        );
 
         //- Compute the merit function of the optimisation problem.
         //  Could be different than the objective function in case of

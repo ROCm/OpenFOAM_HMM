@@ -113,6 +113,30 @@ void sensitivityVolBSplines::computeObjectiveContributions()
 }
 
 
+void sensitivityVolBSplines::computeBCContributions()
+{
+    label passedCPs = 0;
+    PtrList<NURBS3DVolume>& boxes = volBSplinesBase_.boxesRef();
+    forAll(boxes, iNURB)
+    {
+        vectorField sensBcsDxDb =
+            boxes[iNURB].computeControlPointSensitivities
+            (
+                bcDxDbMult_(),
+                sensitivityPatchIDs_.toc()
+            );
+
+        // Transfer to global list
+        forAll(sensBcsDxDb, cpI)
+        {
+            bcSens_[passedCPs + cpI] = sensBcsDxDb[cpI];
+        }
+        passedCPs += sensBcsDxDb.size();
+    }
+    volBSplinesBase_.boundControlPointMovement(bcSens_);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 sensitivityVolBSplines::sensitivityVolBSplines
@@ -143,16 +167,18 @@ sensitivityVolBSplines::sensitivityVolBSplines
     dSdbSens_(0),
     dndbSens_(0),
     dxdbDirectSens_(0),
+    bcSens_(0),
 
     derivativesFolder_("optimisation"/type() + "Derivatives")
 {
     // No boundary field pointers need to be allocated
-    label nCPs = volBSplinesBase_.getTotalControlPointsNumber();
+    const label nCPs(volBSplinesBase_.getTotalControlPointsNumber());
     derivatives_ = scalarField(3*nCPs, Zero);
     flowSens_ = vectorField(nCPs, Zero);
     dSdbSens_ = vectorField(nCPs, Zero);
     dndbSens_ = vectorField(nCPs, Zero);
     dxdbDirectSens_ = vectorField(nCPs, Zero);
+    bcSens_ = vectorField(nCPs, Zero);
 
     // Create folder to store sensitivities
     mkDir(derivativesFolder_);
@@ -199,6 +225,8 @@ void sensitivityVolBSplines::assembleSensitivities()
     // false for sensitivityVolBSplines
     computeObjectiveContributions();
 
+    computeBCContributions();
+
     // Transform sensitivites to scalarField in order to cooperate with
     // updateMethod
     forAll(flowSens_, cpI)
@@ -207,17 +235,20 @@ void sensitivityVolBSplines::assembleSensitivities()
             flowSens_[cpI].x()
           + dSdbSens_[cpI].x()
           + dndbSens_[cpI].x()
-          + dxdbDirectSens_[cpI].x();
+          + dxdbDirectSens_[cpI].x()
+          + bcSens_[cpI].x();
         derivatives_[3*cpI + 1] =
             flowSens_[cpI].y()
           + dSdbSens_[cpI].y()
           + dndbSens_[cpI].y()
-          + dxdbDirectSens_[cpI].y();
+          + dxdbDirectSens_[cpI].y()
+          + bcSens_[cpI].y();
         derivatives_[3*cpI + 2] =
             flowSens_[cpI].z()
           + dSdbSens_[cpI].z()
           + dndbSens_[cpI].z()
-          + dxdbDirectSens_[cpI].z();
+          + dxdbDirectSens_[cpI].z()
+          + bcSens_[cpI].z();
     }
 }
 
@@ -228,6 +259,7 @@ void sensitivityVolBSplines::clearSensitivities()
     dSdbSens_ = vector::zero;
     dndbSens_ = vector::zero;
     dxdbDirectSens_ = vector::zero;
+    bcSens_ = vector::zero;
 
     SIBase::clearSensitivities();
 }
@@ -236,6 +268,9 @@ void sensitivityVolBSplines::clearSensitivities()
 void sensitivityVolBSplines::write(const word& baseName)
 {
     Info<< "Writing control point sensitivities to file" << endl;
+    // Write sensitivity map
+    SIBase::write(baseName);
+    // Write control point sensitivities
     if (Pstream::master())
     {
         OFstream derivFile
@@ -262,7 +297,10 @@ void sensitivityVolBSplines::write(const word& baseName)
             << setw(width) << "dndb::z" << " "
             << setw(width) << "dxdbDirect::x" << " "
             << setw(width) << "dxdbDirect::y" << " "
-            << setw(width) << "dxdbDirect::z" << endl;
+            << setw(width) << "dxdbDirect::z" << " "
+            << setw(width) << "dvdb::x" << " "
+            << setw(width) << "dvdb::y" << " "
+            << setw(width) << "dvdb::z" << endl;
 
         label passedCPs(0);
         label lastActive(-1);
@@ -298,7 +336,10 @@ void sensitivityVolBSplines::write(const word& baseName)
                        << setw(width) << dndbSens_[globalCP].z() << " "
                        << setw(width) << dxdbDirectSens_[globalCP].x() << " "
                        << setw(width) << dxdbDirectSens_[globalCP].y() << " "
-                       << setw(width) << dxdbDirectSens_[globalCP].z()
+                       << setw(width) << dxdbDirectSens_[globalCP].z() << " "
+                       << setw(width) << bcSens_[globalCP].x() << " "
+                       << setw(width) << bcSens_[globalCP].y() << " "
+                       << setw(width) << bcSens_[globalCP].z()
                        << endl;
                 }
             }
