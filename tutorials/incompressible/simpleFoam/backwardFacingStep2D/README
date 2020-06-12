@@ -3,7 +3,7 @@ Steady flow over a 2D backward facing step
 This canonical case is based on the description by Driver and Seegmiller
 
     D.M. Driver and H.L. Seegmiller. Features of a reattaching turbulent shear
-    layer in divergent channel flow. AIAA Journal, 23(2):163–171, 1985. 
+    layer in divergent channel flow. AIAA Journal, 23(2):163–171, 1985.
 
 where the mesh is based on the Langley Research Center Turbulence Modeling
 Resource set-up provided at:
@@ -18,5 +18,5 @@ shear stress and velocity profiles at various cross-sections.
 
 For further information please visit:
 
-    openfoam.com/documentation/cpp-guide/html/verification-validation-turbulent-backward-facing-step.html
+    https://www.openfoam.com/documentation/guides/latest/doc/verification-validation-turbulent-backward-facing-step.html
 
