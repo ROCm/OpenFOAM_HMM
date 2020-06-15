@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,10 +32,8 @@ Description
     accept the new objects.
 
     Internal storage is a compact array and the list can be shrunk to compact
-    storage. The increase of list size is controlled by three template
-    parameters, which allows the list storage to either increase by the given
-    increment or by the given multiplier and divider (allowing non-integer
-    multiples).
+    storage. The increase of list size uses a doubling strategy, with the
+    SizeMin template parameter dictating a lower bound.
 
 SourceFiles
     DynamicListI.H
@@ -54,7 +52,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 template<class T, int SizeMin> class DynamicList;
 
 template<class T, int SizeMin>
@@ -97,6 +95,7 @@ class DynamicList
         //- Subset elements in range
         label subsetElements(const labelRange& slice);
 
+
 protected:
 
     // Protected Member Functions
@@ -107,7 +106,7 @@ protected:
 
 public:
 
-    // Related types
+    // Related Types
 
         //- Declare friendship with the List class
         friend class List<T>;
@@ -115,7 +114,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct, an empty list without allocation.
         inline constexpr DynamicList() noexcept;
 
         //- Construct an empty list with given reserve size.
@@ -312,8 +311,8 @@ public:
 
         // Member Operators
 
-            //- Return non-const access to an element, resizing list if
-            //  necessary
+            //- Return non-const access to an element,
+            //- resizing list if necessary
             inline T& operator()(const label i);
 
             //- Assignment of all addressed entries to the given value
@@ -372,7 +371,6 @@ public:
                 Istream& is,
                 DynamicList<T, SizeMin>& lst
             );
-
 };
 
 
