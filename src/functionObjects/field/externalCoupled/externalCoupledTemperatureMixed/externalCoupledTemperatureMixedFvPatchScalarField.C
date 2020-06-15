@@ -89,23 +89,23 @@ externalCoupledTemperatureMixedFvPatchScalarField
     externalCoupledMixedFvPatchField<scalar>(p, iF),
     outTempType_(outputTemperatureType::WALL),
     refTempType_(refTemperatureType::CELL),
-    Tref_(Zero)
+    Tref_(nullptr)
 {}
 
 
 Foam::externalCoupledTemperatureMixedFvPatchScalarField::
 externalCoupledTemperatureMixedFvPatchScalarField
 (
-    const externalCoupledTemperatureMixedFvPatchScalarField& ptf,
+    const externalCoupledTemperatureMixedFvPatchScalarField& rhs,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
-    externalCoupledMixedFvPatchField<scalar>(ptf, p, iF, mapper),
-    outTempType_(ptf.outTempType_),
-    refTempType_(ptf.refTempType_),
-    Tref_(ptf.Tref_)
+    externalCoupledMixedFvPatchField<scalar>(rhs, p, iF, mapper),
+    outTempType_(rhs.outTempType_),
+    refTempType_(rhs.refTempType_),
+    Tref_(rhs.Tref_.clone())
 {}
 
 
@@ -129,7 +129,7 @@ externalCoupledTemperatureMixedFvPatchScalarField
             refTemperatureType::CELL
         )
     ),
-    Tref_(Zero)
+    Tref_(nullptr)
 {
     if (dict.found("outputTemperature"))
     {
@@ -146,7 +146,7 @@ externalCoupledTemperatureMixedFvPatchScalarField
 
     if (refTempType_ == refTemperatureType::USER)
     {
-        Tref_ = dict.get<scalar>("Tref");
+        Tref_ = Function1<scalar>::New("Tref", dict);
     }
 
     if (dict.found("refValue"))
@@ -185,27 +185,27 @@ externalCoupledTemperatureMixedFvPatchScalarField
 Foam::externalCoupledTemperatureMixedFvPatchScalarField::
 externalCoupledTemperatureMixedFvPatchScalarField
 (
-    const externalCoupledTemperatureMixedFvPatchScalarField& ecmpf
+    const externalCoupledTemperatureMixedFvPatchScalarField& rhs
 )
 :
-    externalCoupledMixedFvPatchField<scalar>(ecmpf),
-    outTempType_(ecmpf.outTempType_),
-    refTempType_(ecmpf.refTempType_),
-    Tref_(ecmpf.Tref_)
+    externalCoupledMixedFvPatchField<scalar>(rhs),
+    outTempType_(rhs.outTempType_),
+    refTempType_(rhs.refTempType_),
+    Tref_(rhs.Tref_.clone())
 {}
 
 
 Foam::externalCoupledTemperatureMixedFvPatchScalarField::
 externalCoupledTemperatureMixedFvPatchScalarField
 (
-    const externalCoupledTemperatureMixedFvPatchScalarField& ecmpf,
+    const externalCoupledTemperatureMixedFvPatchScalarField& rhs,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    externalCoupledMixedFvPatchField<scalar>(ecmpf, iF),
-    outTempType_(ecmpf.outTempType_),
-    refTempType_(ecmpf.refTempType_),
-    Tref_(ecmpf.Tref_)
+    externalCoupledMixedFvPatchField<scalar>(rhs, iF),
+    outTempType_(rhs.outTempType_),
+    refTempType_(rhs.refTempType_),
+    Tref_(rhs.Tref_.clone())
 {}
 
 
@@ -270,7 +270,10 @@ void Foam::externalCoupledTemperatureMixedFvPatchScalarField::writeData
     if (refTempType_ == refTemperatureType::USER)
     {
         // User-specified reference temperature
-        tfluid = tmp<scalarField>::New(size(), Tref_);
+        const scalar currTref =
+            Tref_->value(this->db().time().timeOutputValue());
+
+        tfluid = tmp<scalarField>::New(size(), currTref);
     }
     else
     {
@@ -344,9 +347,9 @@ void Foam::externalCoupledTemperatureMixedFvPatchScalarField::write
         refTemperatureNames[refTempType_]
     );
 
-    if (refTempType_ == refTemperatureType::USER)
+    if (Tref_)
     {
-        os.writeEntry("Tref", Tref_);
+        Tref_->writeData(os);
     }
 }
 

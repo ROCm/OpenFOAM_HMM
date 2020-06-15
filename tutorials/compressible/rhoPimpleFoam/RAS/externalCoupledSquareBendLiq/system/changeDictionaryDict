@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1912                                 |
+|  \\    /   O peration     | Version:  v2006                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -29,7 +29,16 @@ T
         inletWalls
         {
             type        externalCoupledTemperature;
-            // outputTemperature   fluid; // fluid|wall
+            outputTemperature   fluid;      // (fluid|wall)
+            htcRefTemperature   user;       // (cell|user)
+
+            Tref
+            {
+                type        expression;
+
+                // arg() means time here
+                expression  #{ arg() <= 0.1 ? 300 : 320 #};
+            }
         }
     }
 }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -98,6 +98,9 @@ Usage
         Tref     | Reference temperature [K] for htc        | conditional |
     \endtable
 
+    The user-specified reference temperature Tref is specified as
+    a Foam::Function1 of time but spatially uniform.
+
 SeeAlso
     externalCoupledFunctionObject
     mixedFvPatchField
@@ -112,6 +115,7 @@ SourceFiles
 #define externalCoupledTemperatureMixedFvPatchScalarField_H
 
 #include "externalCoupledMixedFvPatchFields.H"
+#include "Function1.H"
 #include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -159,7 +163,7 @@ class externalCoupledTemperatureMixedFvPatchScalarField
         enum refTemperatureType refTempType_;
 
         //- User-specified reference temperature for HTC calculation
-        scalar Tref_;
+        autoPtr<Function1<scalar>> Tref_;
 
 
 public:
@@ -238,7 +242,7 @@ public:
     virtual ~externalCoupledTemperatureMixedFvPatchScalarField() = default;
 
 
-    // Member functions
+    // Member Functions
 
         //- Write header
         virtual void writeHeader(Ostream& os) const;
