@@ -32,8 +32,8 @@ Group
 
 Description
     This boundary condition provides a wall constraint on the turbulent
-    viscosity, i.e. \c nut, based on turbulent kinetic energy, \c k, and
-    velocity, i.e. \c U, for atmospheric boundary layer modelling.
+    viscosity, i.e. \c nut, based on the turbulent kinetic energy, \c k,
+    and velocity, i.e. \c U, for atmospheric boundary layer modelling.
 
     The governing equation of the boundary condition:
 
@@ -64,32 +64,35 @@ Description
         k       | turbulent kinetic energy
     \endvartable
 
+    References:
+    \verbatim
+        Theoretical expressions (tags:RH, SBJM, SM):
+            Richards, P. J., & Hoxey, R. P. (1993).
+            Appropriate boundary conditions for computational wind
+            engineering models using the k-ε turbulence model.
+            In Computational Wind Engineering 1 (pp. 145-153).
+            DOI:10.1016/B978-0-444-81688-7.50018-8
+
+            Sørensen, N. N., Bechmann, A., Johansen, J., Myllerup, L.,
+            Botha, P., Vinther, S., & Nielsen, B. S. (2007).
+            Identification of severe wind conditions using
+            a Reynolds Averaged Navier-Stokes solver.
+            In Journal of Physics: Conference
+            series (Vol. 75, No. 1, p. 012053).
+            DOI:10.1088/1742-6596/75/1/012053
+
+            Sumner, J., & Masson, C. (2012).
+            k−ε simulations of the neutral atmospheric boundary layer:
+            analysis and correction of discretization errors on practical grids.
+            International journal for numerical
+            methods in fluids, 70(6), 724-741.
+            DOI:10.1002/fld.2709
+    \endverbatim
+
     Required fields:
     \verbatim
       nut     | Turbulent viscosity      [m2/s]
       k       | Turbulent kinetic energy [m2/s2]
-    \endverbatim
-
-    References:
-    \verbatim
-        Richards, P. J., & Hoxey, R. P. (1993).
-        Appropriate boundary conditions for computational wind
-        engineering models using the k-ε turbulence model.
-        In Computational Wind Engineering 1 (pp. 145-153).
-        DOI:10.1016/B978-0-444-81688-7.50018-8
-
-        Sørensen, N. N., Bechmann, A., Johansen, J., Myllerup, L.,
-        Botha, P., Vinther, S., & Nielsen, B. S. (2007).
-        Identification of severe wind conditions using
-        a Reynolds Averaged Navier-Stokes solver.
-        In Journal of Physics: Conference series (Vol. 75, No. 1, p. 012053).
-        DOI:10.1088/1742-6596/75/1/012053
-
-        Sumner, J., & Masson, C. (2012).
-        k− ε simulations of the neutral atmospheric boundary layer:
-        analysis and correction of discretization errors on practical grids.
-        International journal for numerical methods in fluids, 70(6), 724-741.
-        DOI:10.1002/fld.2709
     \endverbatim
 
 Usage
@@ -111,10 +114,10 @@ Usage
 
     where the entries mean:
     \table
-        Property | Description                       | Type   | Req'd  | Dflt
-        type     | Type name: nutAtmWallFunction     | word   | yes    | -
-        z0Min | Minimum surface roughness length [m] | scalar | yes    | -
-        z0    | Surface roughness length [m] | PatchFunction1<scalar> | yes | -
+      Property | Description                       | Type   | Req'd  | Dflt
+      type     | Type name: nutAtmWallFunction     | word   | yes    | -
+      z0Min | Minimum surface roughness length [m] | scalar | yes    | -
+      z0    | Surface roughness length [m] | PatchFunction1<scalar> | yes | -
     \endtable
 
     The inherited entries are elaborated in:

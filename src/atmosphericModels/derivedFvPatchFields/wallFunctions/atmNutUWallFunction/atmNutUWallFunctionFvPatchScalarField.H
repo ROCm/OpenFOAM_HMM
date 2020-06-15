@@ -32,9 +32,9 @@ Group
 
 Description
     This boundary condition provides a wall constraint on the turbulent
-    viscosity, i.e. \c nut, based on velocity, \c U, for atmospheric boundary
-    layer modelling.  It is designed to be used in conjunction with the
-    \c atmBoundaryLayerInletVelocity boundary condition.
+    viscosity, i.e. \c nut, based on velocity, i.e. \c U, for atmospheric
+    boundary layer modelling.  It is designed to be used in conjunction
+    with the \c atmBoundaryLayerInletVelocity boundary condition.
 
     The governing equation of the boundary condition:
 
@@ -80,7 +80,7 @@ Usage
       Property | Description                      | Type   | Req'd  | Dflt
       type     | Type name: atmNutUWallFunction   | word   | yes    | -
       z0       | Surface roughness length [m] | PatchFunction1<scalar> | yes | -
-      boundNut | Flag: zero-bound nut at the wall | bool   | no     | true
+      boundNut | Flag: zero-bound nut near wall   | bool   | no     | true
     \endtable
 
     The inherited entries are elaborated in:

@@ -31,8 +31,10 @@ Group
 
 Description
     This boundary condition provides a wall constraint on the turbulent
-    viscosity, i.e. \c nut, when using wall functions based on
-    a blending of viscous and inertial sublayer contributions.
+    viscosity, i.e. \c nut, based on velocity, i.e. \c U, using a
+    binomial-function wall-function blending method between the viscous
+    and inertial sublayer predictions of \c nut for low- and high-Reynolds
+    number turbulence models.
 
         \f[
             u_\tau = (u_{\tau,v}^n + u_{\tau,l}^n)^{1/n}
@@ -46,12 +48,13 @@ Description
     \endvartable
 
     Reference:
-    See the section that describes 'automatic wall treatment'
     \verbatim
-        Menter, F., Ferreira, J. C., Esch, T., Konno, B. (2003).
-        The SST Turbulence Model with Improved Wall Treatment
-        for Heat Transfer Predictions in Gas Turbines.
-        Proceedings of the International Gas Turbine Congress 2003 Tokyo
+        See the section that describes 'automatic wall treatment':
+            Menter, F., Ferreira, J. C., Esch, T., Konno, B. (2003).
+            The SST turbulence model with improved wall treatment
+            for heat transfer predictions in gas turbines.
+            In Proceedings of the International Gas Turbine Congress.
+            November, 2003. Tokyo, Japan. pp. 2-7.
     \endverbatim
 
 Usage
@@ -62,7 +65,7 @@ Usage
         // Mandatory entries (unmodifiable)
         type            nutUBlendedWallFunction;
 
-        // Optional entries
+        // Optional entries (unmodifiable)
         n               4.0;
 
         // Optional (inherited) entries
@@ -72,9 +75,9 @@ Usage
 
     where the entries mean:
     \table
-      Property  | Description                         | Type | Req'd  | Dflt
-      type      | Type name: nutUBlendedWallFunction  | word | yes    | -
-      n         | Blending factor                     | scalar | no   | 4.0
+      Property  | Description                         | Type   | Req'd  | Dflt
+      type      | Type name: nutUBlendedWallFunction  | word   | yes    | -
+      n         | Blending factor                     | scalar | no     | 4.0
     \endtable
 
     The inherited entries are elaborated in:

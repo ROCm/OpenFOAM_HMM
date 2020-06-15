@@ -31,8 +31,8 @@ Group
     grpRASBoundaryConditions grpInletBoundaryConditions
 
 Description
-    This boundary condition provides a log-law type ground-normal inflow
-    boundary condition for turbulent kinetic energy, i.e. \c k,
+    This boundary condition provides a log-law type ground-normal inlet
+    boundary condition for the turbulent kinetic energy, i.e. \c k,
     for homogeneous, two-dimensional, dry-air, equilibrium and neutral
     atmospheric boundary layer modelling.
 
@@ -52,12 +52,12 @@ Description
       C_2      | Curve-fitting coefficient for \c YGCJ profiles [-]
     \endvartable
 
-Usage
-    \heading Required fields
-    \plaintable
-        k    | Turbulent kinetic energy                         [m^2/s^2]
-    \endplaintable
+    Required fields:
+    \verbatim
+        k    | Turbulent kinetic energy                         [m2/s2]
+    \endverbatim
 
+Usage
     Example of the boundary condition specification:
     \verbatim
     inlet
@@ -65,26 +65,18 @@ Usage
         // Mandatory entries (unmodifiable)
         type            atmBoundaryLayerInletK;
 
-        // Mandatory (inherited) entries (unmodifiable)
-        Uref            10.0;
-        Zref            0.0;
-        z0              uniform 0.1;
-        d               uniform 0.0;
+        // Mandatory/Optional (inherited) entries (unmodifiable)
+        ...
         flowDir         (1 0 0);    // not used
-        z               (0 0 1);    // not used
-
-        // Optional (inherited) entries (unmodifiable)
-        kappa           0.41;
-        Cmu             0.09;
-        initABL         true;
-        phi             phi;
-        C1              0.0;
-        C2              1.0;
-
-        // Conditional mandatory (inherited) entries (runtime modifiable)
-        value           uniform 0;    // when initABL=false
+        zDir            (0 0 1);    // not used
     }
     \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                         | Type | Req'd | Deflt
+      type      | Type name: atmBoundaryLayerInletK   | word | yes   | -
+    \endtable
 
     The inherited entries are elaborated in:
      - \link atmBoundaryLayer.H \endlink
@@ -92,10 +84,9 @@ Usage
 
 See also
     - Foam::atmBoundaryLayer
-    - Foam::atmBoundaryLayer::atmBoundaryLayerInletVelocityFvPatchVectorField
-    - Foam::atmBoundaryLayer::atmBoundaryLayerInletEpsilonFvPatchScalarField
-    - Foam::atmBoundaryLayer::atmBoundaryLayerInletOmegaFvPatchScalarField
-    - ExtendedCodeGuide::atmBoundaryLayer::atmBoundaryLayerInletK
+    - Foam::atmBoundaryLayerInletVelocityFvPatchVectorField
+    - Foam::atmBoundaryLayerInletEpsilonFvPatchScalarField
+    - Foam::atmBoundaryLayerInletOmegaFvPatchScalarField
 
 SourceFiles
     atmBoundaryLayerInletKFvPatchScalarField.C

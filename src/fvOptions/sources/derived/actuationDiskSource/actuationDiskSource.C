@@ -5,6 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
+    Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2020 ENERCON GmbH
     Copyright (C) 2018-2020 OpenCFD Ltd
 -------------------------------------------------------------------------------
@@ -94,7 +95,7 @@ void Foam::fv::actuationDiskSource::writeFileHeader(Ostream& os)
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::fv::actuationDiskSource::setMonitorCells(const dictionary& subDict)
+void Foam::fv::actuationDiskSource::setMonitorCells(const dictionary& dict)
 {
     switch (monitorMethod_)
     {
@@ -105,7 +106,17 @@ void Foam::fv::actuationDiskSource::setMonitorCells(const dictionary& subDict)
             labelHashSet selectedCells;
 
             List<point> monitorPoints;
-            subDict.readEntry("points", monitorPoints);
+
+            if (dict.found("monitorCoeffs"))
+            {
+                const dictionary subDict(dict.subDict("monitorCoeffs"));
+                subDict.readIfPresent("points", monitorPoints);
+            }
+            else
+            {
+                monitorPoints.resize(1);
+                monitorPoints[0] = dict.get<point>("upstreamPoint");
+            }
 
             for (const auto& monitorPoint : monitorPoints)
             {
@@ -171,10 +182,11 @@ Foam::fv::actuationDiskSource::actuationDiskSource
     ),
     monitorMethod_
     (
-        monitorMethodTypeNames.get
+        monitorMethodTypeNames.getOrDefault
         (
             "monitorMethod",
-            dict
+            dict,
+            monitorMethodType::POINTS
         )
     ),
     sink_
@@ -205,7 +217,8 @@ Foam::fv::actuationDiskSource::actuationDiskSource
     UvsCtPtr_(Function1<scalar>::New("Ct", dict)),
     monitorCells_()
 {
-    setMonitorCells((dict.subDict("monitorCoeffs")));
+    //setMonitorCells((dict.subDict("monitorCoeffs")));
+    setMonitorCells(dict);
 
     fieldNames_.setSize(1, "U");
 

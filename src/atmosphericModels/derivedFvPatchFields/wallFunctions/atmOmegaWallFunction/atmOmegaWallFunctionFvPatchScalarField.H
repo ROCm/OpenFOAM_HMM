@@ -31,13 +31,10 @@ Group
     grpAtmWallFunctions
 
 Description
-    This boundary condition provides a wall constraint on specific dissipation
-    rate, i.e. \c omega, for atmospheric boundary layer modelling.
-
-    Required fields:
-    \verbatim
-      omega    | Specific dissipation rate    [1/s]
-    \endverbatim
+    This boundary condition provides a wall constraint on the specific
+    dissipation rate, i.e. \c omega, and the turbulent kinetic energy
+    production contribution, i.e. \c G, for atmospheric boundary
+    layer modelling.
 
     References:
     \verbatim
@@ -52,6 +49,11 @@ Description
             On the wall boundary condition for turbulence models.
             Chalmers University of Technology, Depart. of Thermo and Fluid Dyn.
             Internal Report 00/4. Sweden: Göteborg.
+    \endverbatim
+
+    Required fields:
+    \verbatim
+      omega    | Specific dissipation rate    [1/s]
     \endverbatim
 
 Usage
@@ -79,7 +81,6 @@ Usage
 
     The inherited entries are elaborated in:
       - \link omegaWallFunctionFvPatchScalarField.H \endlink
-      - \link nutWallFunctionFvPatchScalarField.H \endlink
       - \link PatchFunction1.H \endlink
 
 See also

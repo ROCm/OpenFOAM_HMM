@@ -32,8 +32,8 @@ Group
     grpAtmWallFunctions
 
 Description
-    This boundary condition provides a wall constraint on turbulent
-    viscosity, i.e. \c nut, based on turbulent kinetic energy, \c k
+    This boundary condition provides a wall constraint on the turbulent
+    viscosity, i.e. \c nut, based on the turbulent kinetic energy, i.e. \c k,
     for atmospheric boundary layer modelling.  It is designed to be used in
     conjunction with the \c atmBoundaryLayerInletVelocity boundary condition.
 
@@ -67,6 +67,12 @@ Description
             DOI:10.1016/j.jweia.2006.08.002
     \endverbatim
 
+    Required fields:
+    \verbatim
+      nut    | Turbulent viscosity              [m2/s]
+      k      | Turbulent kinetic energy         [m2/s2]
+    \endverbatim
+
 Usage
     Example of the boundary condition specification:
     \verbatim
@@ -91,7 +97,7 @@ Usage
       Property | Description                      | Type   | Req'd    | Dflt
       type     | Type name: atmNutkWallFunction   | word   | yes      | -
       z0       | Surface roughness length [m] | PatchFunction1<scalar> | yes | -
-      boundNut | Flag: zero-bound nut at the wall | bool   | no       | false
+      boundNut | Flag: zero-bound nut near wall   | bool   | no       | false
     \endtable
 
     The inherited entries are elaborated in:
@@ -100,6 +106,7 @@ Usage
 
 Note
     - \c boundNut entry is set \c false for backward compatibility reasons.
+    - \c nutkAtmRoughWallFunction was renamed to \c atmNutkWallFunction.
 
 See also
     - Foam::nutkWallFunctionFvPatchField

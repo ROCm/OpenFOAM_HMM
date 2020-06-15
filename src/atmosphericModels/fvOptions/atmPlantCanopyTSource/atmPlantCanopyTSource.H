@@ -31,8 +31,8 @@ Group
     grpFvOptionsSources
 
 Description
-    Applies sources on temperature \c T to incorporate effects
-    of plant canopy for atmospheric boundary layer modelling.
+    Applies sources on temperature, i.e. \c T, to incorporate
+    effects of plant canopy for atmospheric boundary layer modelling.
 
     Corrections applied to:
     \verbatim
@@ -41,8 +41,8 @@ Description
 
     Required fields:
     \verbatim
-      T             | Temperature             [K]
-      qPlant        | Heat flux               [m2/s3]
+      T             | Temperature                             [K]
+      qPlant        | Tree-height based specific heat flux    [m2/s3]
     \endverbatim
 
 Usage

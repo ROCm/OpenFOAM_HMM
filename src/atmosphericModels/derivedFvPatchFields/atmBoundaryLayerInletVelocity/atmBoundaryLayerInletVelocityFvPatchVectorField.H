@@ -31,10 +31,10 @@ Group
     grpRASBoundaryConditions grpInletBoundaryConditions
 
 Description
-    This boundary condition provides a log-law type ground-normal inflow
-    boundary condition for streamwise component of wind velocity, i.e. \c u,
-    for homogeneous, two-dimensional, dry-air, equilibrium and neutral
-    atmospheric boundary layer modelling.
+    This boundary condition provides a log-law type ground-normal inlet
+    boundary condition for the streamwise component of wind velocity,
+    i.e. \c u, for homogeneous, two-dimensional, dry-air, equilibrium
+    and neutral atmospheric boundary layer modelling.
 
     The ground-normal streamwise flow speed profile expression:
 
@@ -58,12 +58,12 @@ Description
       z_0      | Aerodynamic roughness length                   [m]
     \endvartable
 
-Usage
-    \heading Required fields
-    \plaintable
+    Required fields:
+    \verbatim
         U   | Velocity                                          [m/s]
-    \endplaintable
+    \endverbatim
 
+Usage
     Example of the boundary condition specification:
     \verbatim
     inlet
@@ -71,26 +71,16 @@ Usage
         // Mandatory entries (unmodifiable)
         type            atmBoundaryLayerInletVelocity;
 
-        // Mandatory (inherited) entries (unmodifiable)
-        flowDir         (1 0 0);
-        z               (0 0 1);
-        Uref            10.0;
-        Zref            0.0;
-        z0              uniform 0.1;
-        d               uniform 0.0;
-
-        // Optional (inherited) entries (unmodifiable)
-        kappa           0.41;
-        Cmu             0.09;
-        initABL         true;
-        phi             phi;
-        C1              0.0;
-        C2              1.0;
-
-        // Conditional mandatory (inherited) entries (runtime modifiable)
-        value           uniform (0 0 0);    // when initABL=false
+        // Mandatory/Optional (inherited) entries (unmodifiable)
+        ...
     }
     \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                            | Type | Req'd | Deflt
+      type      | Type name: atmBoundaryLayerInletVelocity | word | yes   | -
+    \endtable
 
     The inherited entries are elaborated in:
      - \link atmBoundaryLayer.H \endlink
@@ -98,10 +88,9 @@ Usage
 
 See also
     - Foam::atmBoundaryLayer
-    - Foam::atmBoundaryLayer::atmBoundaryLayerInletKFvPatchScalarField
-    - Foam::atmBoundaryLayer::atmBoundaryLayerInletEpsilonFvPatchScalarField
-    - Foam::atmBoundaryLayer::atmBoundaryLayerInletOmegaFvPatchScalarField
-    - ExtendedCodeGuide::atmBoundaryLayer::atmBoundaryLayerInletVelocity
+    - Foam::atmBoundaryLayerInletKFvPatchScalarField
+    - Foam::atmBoundaryLayerInletEpsilonFvPatchScalarField
+    - Foam::atmBoundaryLayerInletOmegaFvPatchScalarField
 
 SourceFiles
     atmBoundaryLayerInletVelocityFvPatchVectorField.C

@@ -34,16 +34,6 @@ Description
     Applies corrections to incorporate the horizontal and vertical components
     of the Coriolis force for which the rotating frame is Earth.
 
-    Corrections applied on:
-    \verbatim
-      U    | Velocity                  [m/s]
-    \endverbatim
-
-    Required fields:
-    \verbatim
-      U    | Velocity                  [m/s]
-    \endverbatim
-
     The Coriolis force is an inertial or fictitious force that acts on
     objects that are in motion within a frame of reference that rotates with
     respect to an inertial frame.
@@ -59,6 +49,16 @@ Description
     the atmosphere or water in the ocean. Such motions are constrained by the
     surface of Earth, so only the horizontal component of the Coriolis
     force is generally important.
+
+    Corrections applied on:
+    \verbatim
+      U    | Velocity                  [m/s]
+    \endverbatim
+
+    Required fields:
+    \verbatim
+      U    | Velocity                  [m/s]
+    \endverbatim
 
     References:
     \verbatim
@@ -80,6 +80,8 @@ Usage
             selectionMode    all;
 
             // Conditional mandatory entries (unmodifiable)
+            // Select either of the below
+
             // Option-1: to directly input rotation vector
             Omega        (0 0 5.65156e-5);
 

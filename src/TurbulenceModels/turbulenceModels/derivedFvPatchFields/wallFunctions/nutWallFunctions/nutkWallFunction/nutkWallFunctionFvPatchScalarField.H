@@ -32,8 +32,8 @@ Group
 
 Description
     This boundary condition provides a wall constraint on the turbulent
-    viscosity, i.e. \c nut, when using wall functions,
-    based on the turbulent kinetic energy, \c k.
+    viscosity, i.e. \c nut, based on the turbulent kinetic energy,
+    i.e. \c k, for for low- and high-Reynolds number turbulence models.
 
 Usage
     Example of the boundary condition specification:

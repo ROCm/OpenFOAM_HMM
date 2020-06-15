@@ -3,10 +3,10 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-endTime=85
+endTime=10
 if notTest "$@"
 then
-    endTime=10
+    endTime=85
 fi
 
 sed "s|END_TIME|$endTime|g" system/controlDict.template > system/controlDict
@@ -18,3 +18,4 @@ runApplication blockMesh
 rm -rf results
 
 #------------------------------------------------------------------------------
+

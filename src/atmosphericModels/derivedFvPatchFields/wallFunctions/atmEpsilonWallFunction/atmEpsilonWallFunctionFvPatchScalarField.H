@@ -31,14 +31,10 @@ Group
     grpAtmWallFunctions
 
 Description
-    This boundary condition provides a wall constraint on turbulent kinetic
-    energy dissipation rate, i.e. \c epsilon, for atmospheric boundary layer
-    flows in neutral stratification conditions.
-
-    Required fields:
-    \verbatim
-      epsilon    | Turbulent kinetic energy dissipation rate    [m2/s3]
-    \endverbatim
+    This boundary condition provides a wall constraint on the turbulent kinetic
+    energy dissipation rate, i.e. \c epsilon, and the turbulent kinetic energy
+    production contribution, i.e. \c G, for atmospheric boundary layer
+    modelling.
 
     References:
     \verbatim
@@ -54,6 +50,11 @@ Description
             engineering models using the k-ε turbulence model.
             In Computational Wind Engineering 1 (pp. 145-153).
             DOI:10.1016/B978-0-444-81688-7.50018-8
+    \endverbatim
+
+    Required fields:
+    \verbatim
+      epsilon    | Turbulent kinetic energy dissipation rate    [m2/s3]
     \endverbatim
 
 Usage
@@ -81,7 +82,6 @@ Usage
 
     The inherited entries are elaborated in:
       - \link epsilonWallFunctionFvPatchScalarField.H \endlink
-      - \link nutWallFunctionFvPatchScalarField.H \endlink
       - \link PatchFunction1 \endlink
 
 See also

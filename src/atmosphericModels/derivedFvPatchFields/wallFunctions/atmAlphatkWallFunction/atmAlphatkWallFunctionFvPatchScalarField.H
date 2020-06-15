@@ -31,10 +31,10 @@ Group
     grpAtmWallFunctions
 
 Description
-    This boundary condition provides a wall constraint on kinematic turbulent
-    thermal conductivity, \c alphat, for atmospheric boundary layer modelling.
-    It assumes a logarithmic distribution of the potential temperature within
-    the first cell.
+    This boundary condition provides a wall constraint on the kinematic
+    turbulent thermal conductivity, i.e. \c alphat, for atmospheric boundary
+    layer modelling.  It assumes a logarithmic distribution of the potential
+    temperature within the first cell.
 
     Required fields:
     \verbatim
@@ -47,7 +47,7 @@ Usage
     <patchName>
     {
         // Mandatory entries (unmodifiable)
-        type            alphatkAtmWallFunction;
+        type            atmAlphatkWallFunction;
 
         // Mandatory entries (runtime modifiable)
         Pr              0.90;
@@ -66,7 +66,7 @@ Usage
     where the entries mean:
     \table
       Property | Description                      | Type   | Req'd     | Dflt
-      type     | Type name: alphatAtmWallFunction | word   | yes       | -
+      type     | Type name: atmAlphatkWallFunction | word   | yes       | -
       Pr       | Molecular Prandtl number     | TimeFunction1<scalar>  | yes | -
       Prt      | Turbulent Prandtl number     | PatchFunction1<scalar> | yes | -
       z0       | Surface roughness length [m] | PatchFunction1<scalar> | yes | -

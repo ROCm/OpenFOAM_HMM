@@ -31,7 +31,7 @@ Group
     grpRASBoundaryConditions grpInletBoundaryConditions
 
 Description
-    Base class to set log-law type ground-normal inflow boundary conditions for
+    Base class to set log-law type ground-normal inlet boundary conditions for
     wind velocity and turbulence quantities for homogeneous, two-dimensional,
     dry-air, equilibrium and neutral atmospheric boundary layer (ABL) modelling.
 
@@ -85,15 +85,6 @@ Description
       C_2      | Curve-fitting coefficient for \c YGCJ profiles       [-]
     \endvartable
 
-Note
-    - The \c RH expressions are special cases of those in \c YGCJ when \c C1=0
-    and \c C2=1. Both \c C1 and \c C2 can be determined by nonlinear fitting
-    of (\c YGCJ:Eq. 19) with an experimental dataset for \c k. By default,
-    \c atmBoundaryLayerInlet boundary conditions compute \c RH expressions.
-    - \c z is the ground-normal height relative to the global minimum height
-    of the inlet patch; therefore, the minimum of \c z is always zero
-    irrespective of the absolute z-coordinate of the computational patch.
-
     Reference:
     \verbatim
         The ground-normal profile expressions (tag:RH):
@@ -135,6 +126,35 @@ Note
     \endverbatim
 
 Usage
+    Example of the entries provided for the inherited boundary conditions:
+    \verbatim
+    inlet
+    {
+        // Mandatory and other optional entries
+        ...
+
+        // Mandatory (inherited) entries (runtime modifiable)
+        flowDir         (1 0 0);
+        zDir            (0 0 1);
+        Uref            10.0;
+        Zref            0.0;
+        z0              uniform 0.1;
+        d               uniform 0.0;
+
+        // Optional (inherited) entries (unmodifiable)
+        kappa           0.41;
+        Cmu             0.09;
+        initABL         true;
+        phi             phi;
+        C1              0.0;
+        C2              1.0;
+
+        // Conditional mandatory (inherited) entries (runtime modifiable)
+        value           uniform 0;    // when initABL=false
+    }
+    \endverbatim
+
+    where the entries mean:
     \table
       Property  | Description              | Type          | Req'd | Deflt
       flowDir   | Flow direction           | TimeFunction1<vector> | yes | -
@@ -160,6 +180,13 @@ Usage
     \endtable
 
 Note
+    - The \c RH expressions are special cases of those in \c YGCJ when \c C1=0
+    and \c C2=1. Both \c C1 and \c C2 can be determined by nonlinear fitting
+    of (\c YGCJ:Eqs. 19-20) with an experimental dataset for \c k. By default,
+    \c atmBoundaryLayerInlet boundary conditions compute \c RH expressions.
+    - \c z is the ground-normal height relative to the global minimum height
+    of the inlet patch; therefore, the minimum of \c z is always zero
+    irrespective of the absolute z-coordinate of the computational patch.
     - The derived ABL expressions automatically satisfy the simplified transport
     equation for \c k. Yet the same expressions only satisfy the simplified
     transport equation for \c epsilon when the model constants \c sigmaEpsilon
@@ -176,11 +203,10 @@ Note
     with obstacles such as trees or buildings" (E:p. 28).
 
 See also
-    - Foam::atmBoundaryLayer::atmBoundaryLayerInletVelocityFvPatchVectorField
-    - Foam::atmBoundaryLayer::atmBoundaryLayerInletKFvPatchScalarField
-    - Foam::atmBoundaryLayer::atmBoundaryLayerInletEpsilonFvPatchScalarField
-    - Foam::atmBoundaryLayer::atmBoundaryLayerInletOmegaFvPatchScalarField
-    - ExtendedCodeGuide::atmBoundaryLayer
+    - Foam::atmBoundaryLayerInletVelocityFvPatchVectorField
+    - Foam::atmBoundaryLayerInletKFvPatchScalarField
+    - Foam::atmBoundaryLayerInletEpsilonFvPatchScalarField
+    - Foam::atmBoundaryLayerInletOmegaFvPatchScalarField
 
 SourceFiles
     atmBoundaryLayer.C

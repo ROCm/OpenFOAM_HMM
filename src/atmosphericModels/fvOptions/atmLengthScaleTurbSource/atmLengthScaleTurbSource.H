@@ -53,7 +53,7 @@ Description
             A limited-length-scale k-ε model for the neutral and
             stably-stratified atmospheric boundary layer.
             Boundary-layer meteorology, 83(1), 75-98.
-            DOI:10.1023/A:100025221
+            DOI:10.1023/A:1000252210512
 
         Mixing-length scale limiter for omega (tag:L):
             Langner, J. (2016).

@@ -44,6 +44,7 @@ scalar atmAlphatkWallFunctionFvPatchScalarField::tolerance_ = 0.01;
 
 label atmAlphatkWallFunctionFvPatchScalarField::maxIters_ = 10;
 
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void atmAlphatkWallFunctionFvPatchScalarField::checkType()

@@ -38,11 +38,11 @@ plotUxUpstream() {
     inp1="$timeDir/x_0mPatch_U.xy"
 
     plot \
-        "system/benchmark-data-HargreavesWright2007/Ux-HW-RH-Fig6a" \
+        "system/atm-HargreavesWright-2007/Ux-HW-RH-Fig6a" \
             u 1:2 t "RH" w p ps 2 pt 6 lc rgb "#000000", \
-        "system/benchmark-data-HargreavesWright2007/Ux-HW-RH-Fig6a" \
+        "system/atm-HargreavesWright-2007/Ux-HW-RH-Fig6a" \
             u 1:2 t "HW, x=2500m" w p ps 1 pt 5 lc rgb "#E69F00", \
-        "system/benchmark-data-HargreavesWright2007/Ux-HW-RH-Fig6a" \
+        "system/atm-HargreavesWright-2007/Ux-HW-RH-Fig6a" \
             u 1:2 t "HW, x=4000m" w p ps 0.5 pt 4 lc rgb "#56B4E9", \
         inp0 u 2:((\$1-$zMin)/zRef) t "OF, x=0m (Patch)" w l lw 2 lc rgb "#009E73", \
         inp1 u 2:((\$1-$zMin)/zRef) t "OF, x=0m (Cell)" w l lw 2 lc rgb "#F0E440"
@@ -72,11 +72,11 @@ plotUxMid() {
     inp3="$timeDir/x_4000m_U.xy"
 
     plot \
-        "system/benchmark-data-HargreavesWright2007/Ux-HW-RH-Fig6a" \
+        "system/atm-HargreavesWright-2007/Ux-HW-RH-Fig6a" \
             u 1:2 t "RH" w p ps 2 pt 6 lc rgb "#000000", \
-        "system/benchmark-data-HargreavesWright2007/Ux-HW-RH-Fig6a" \
+        "system/atm-HargreavesWright-2007/Ux-HW-RH-Fig6a" \
             u 1:2 t "HW, x=2500m" w p ps 1 pt 5 lc rgb "#E69F00", \
-        "system/benchmark-data-HargreavesWright2007/Ux-HW-RH-Fig6a" \
+        "system/atm-HargreavesWright-2007/Ux-HW-RH-Fig6a" \
             u 1:2 t "HW, x=4000m" w p ps 0.5 pt 4 lc rgb "#56B4E9", \
         inp2 u 2:((\$1-$zMin)/zRef) t "OF, x=2500m" w l lw 2 lc rgb "#0072B2", \
         inp3 u 2:((\$1-$zMin)/zRef) t "OF, x=4000m" w l lw 2 lc rgb "#D55E00"
@@ -106,11 +106,11 @@ plotUxDownstream() {
     inp5="$timeDir/x_5000mPatch_U.xy"
 
     plot \
-        "system/benchmark-data-HargreavesWright2007/Ux-HW-RH-Fig6a" \
+        "system/atm-HargreavesWright-2007/Ux-HW-RH-Fig6a" \
             u 1:2 t "RH" w p ps 2 pt 6 lc rgb "#000000", \
-        "system/benchmark-data-HargreavesWright2007/Ux-HW-RH-Fig6a" \
+        "system/atm-HargreavesWright-2007/Ux-HW-RH-Fig6a" \
             u 1:2 t "HW, x=2500m" w p ps 1 pt 5 lc rgb "#E69F00", \
-        "system/benchmark-data-HargreavesWright2007/Ux-HW-RH-Fig6a" \
+        "system/atm-HargreavesWright-2007/Ux-HW-RH-Fig6a" \
             u 1:2 t "HW, x=4000m" w p ps 0.5 pt 4 lc rgb "#56B4E9", \
         inp4 u 2:((\$1-$zMin)/zRef) t "OF, x=5000m (Cell)" w l lw 2 lc rgb "#CC79A7", \
         inp5 u 2:((\$1-$zMin)/zRef) t "OF, x=5000m (Patch)" w l lw 2 lc rgb "#440154"
@@ -146,11 +146,11 @@ plotK() {
     inp5="$timeDir/x_5000mPatch_$items.xy"
 
     plot \
-        "system/benchmark-data-HargreavesWright2007/k-RH-Fig6b" \
+        "system/atm-HargreavesWright-2007/k-RH-Fig6b" \
             u 1:2 t "RH" w p ps 2 pt 6 lc rgb "#000000", \
-        "system/benchmark-data-HargreavesWright2007/k-HW-Fig6b-2500" \
+        "system/atm-HargreavesWright-2007/k-HW-Fig6b-2500" \
             u 1:2 t "HW, x=2500m" w p ps 1 pt 5 lc rgb "#E69F00", \
-        "system/benchmark-data-HargreavesWright2007/k-HW-Fig6b-4000" \
+        "system/atm-HargreavesWright-2007/k-HW-Fig6b-4000" \
             u 1:2 t "HW, x=4000m" w p ps 0.5 pt 4 lc rgb "#56B4E9", \
         inp0 u $seq:((\$1-$zMin)/zRef) t "OF, x=0m (Patch)" w l lw 2 lc rgb "#009E73", \
         inp1 u $seq:((\$1-$zMin)/zRef) t "OF, x=0m (Cell)" w l lw 2 lc rgb "#F0E440", \
@@ -191,11 +191,11 @@ plotEpsilon() {
     inp5="$timeDir/x_5000mPatch_$items.xy"
 
     plot \
-        "system/benchmark-data-HargreavesWright2007/epsilon-HW-RH-Fig6c" \
+        "system/atm-HargreavesWright-2007/epsilon-HW-RH-Fig6c" \
             u 1:2 t "RH" w p ps 2 pt 6 lc rgb "#000000", \
-        "system/benchmark-data-HargreavesWright2007/epsilon-HW-RH-Fig6c" \
+        "system/atm-HargreavesWright-2007/epsilon-HW-RH-Fig6c" \
             u 1:2 t "HW, x=2500m" w p ps 1 pt 5 lc rgb "#E69F00", \
-        "system/benchmark-data-HargreavesWright2007/epsilon-HW-RH-Fig6c" \
+        "system/atm-HargreavesWright-2007/epsilon-HW-RH-Fig6c" \
             u 1:2 t "HW, x=4000m" w p ps 0.5 pt 4 lc rgb "#56B4E9", \
         inp0 u 2:((\$1-$zMin)/zRef) t "OF, x=0m (Patch)" w l lw 2 lc rgb "#009E73", \
         inp1 u 2:((\$1-$zMin)/zRef) t "OF, x=0m (Cell)" w l lw 2 lc rgb "#F0E440", \
@@ -273,11 +273,11 @@ plotMut() {
     inp5="$timeDir/x_5000mPatch_$items.xy"
 
     plot \
-        "system/benchmark-data-HargreavesWright2007/mut-RH-Fig6d" \
+        "system/atm-HargreavesWright-2007/mut-RH-Fig6d" \
             u 1:2 t "RH" w p ps 2 pt 6 lc rgb "#000000", \
-        "system/benchmark-data-HargreavesWright2007/mut-HW-Fig6d-2500" \
+        "system/atm-HargreavesWright-2007/mut-HW-Fig6d-2500" \
             u 1:2 t "HW, x=2500m" w p ps 1 pt 5 lc rgb "#E69F00", \
-        "system/benchmark-data-HargreavesWright2007/mut-HW-Fig6d-4000" \
+        "system/atm-HargreavesWright-2007/mut-HW-Fig6d-4000" \
             u 1:2 t "HW, x=4000m" w p ps 0.5 pt 4 lc rgb "#56B4E9", \
         inp0 u $seq:((\$1-$zMin)/zRef) t "OF, x=0m (Patch)" w l lw 2 lc rgb "#009E73", \
         inp1 u $seq:((\$1-$zMin)/zRef) t "OF, x=0m (Cell)" w l lw 2 lc rgb "#F0E440", \

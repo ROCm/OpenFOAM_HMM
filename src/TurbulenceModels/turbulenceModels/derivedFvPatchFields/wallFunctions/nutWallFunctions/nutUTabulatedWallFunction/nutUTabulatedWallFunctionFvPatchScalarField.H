@@ -32,10 +32,10 @@ Group
 
 Description
     This boundary condition provides a wall constraint on the turbulent
-    viscosity, i.e. \c nut, when using wall functions, based on
-    velocity, i.e. \c U.
+    viscosity, i.e. \c nut, based on velocity, i.e. \c U, for low- and
+    high-Reynolds number turbulence models.
 
-    As input, the user specifies a look-up table of \c U+ as a function of
+    As input, the user specifies a look-up table of \c u+ as a function of
     near-wall Reynolds number.
 
     The table should be located in the \c $FOAM_CASE/constant directory.
@@ -58,7 +58,7 @@ Usage
     \table
       Property    | Description                          | Type | Req'd | Dflt
       type        | Type name: nutUTabulatedWallFunction | word | yes   | -
-      uPlusTable  | U+ as a function of Re table name    | word | yes   | -
+      uPlusTable  | u+ as a function of Re table name    | word | yes   | -
     \endtable
 
     The inherited entries are elaborated in:

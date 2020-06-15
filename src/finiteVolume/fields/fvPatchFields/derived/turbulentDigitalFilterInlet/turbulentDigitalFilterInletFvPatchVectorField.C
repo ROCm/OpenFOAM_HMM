@@ -38,18 +38,6 @@ Foam::turbulentDigitalFilterInletFvPatchVectorField::patchMapper() const
     // Initialise interpolation (2D planar interpolation by triangulation)
     if (mapperPtr_.empty())
     {
-        //// Reread values and interpolate
-        //fileName samplePointsFile
-        //(
-        //    this->db().time().path()
-        //   /this->db().time().caseConstant()
-        //   /"boundaryData"
-        //   /this->patch().name()
-        //   /"points"
-        //);
-        //
-        //pointField samplePoints((IFstream(samplePointsFile)()));
-
         // Reread values and interpolate
         const fileName samplePointsFile
         (
@@ -72,7 +60,6 @@ Foam::turbulentDigitalFilterInletFvPatchVectorField::patchMapper() const
 
         // Read data
         const rawIOField<point> samplePoints(io, false);
-
 
         // tbd: run-time selection
         bool nearestOnly =

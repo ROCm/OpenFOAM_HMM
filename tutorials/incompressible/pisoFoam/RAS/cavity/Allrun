@@ -7,6 +7,9 @@ runApplication blockMesh
 
 restore0Dir
 
+runApplication topoSet
+
 runApplication $(getApplication)
 
 #------------------------------------------------------------------------------
+

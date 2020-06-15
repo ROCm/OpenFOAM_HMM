@@ -42,9 +42,9 @@ Description
 
     Required fields:
     \verbatim
-     epsilon/omega   | Dissipation rate OR specific dissipation rate [m2/s3]/[1/s]
-     plantCd         | Plant canopy drag coefficient                 [-]
-     leafAreaDensity | Leaf area density                             [1/m]
+      epsilon/omega   | Dissipation rate OR Spec. dissipation rate [m2/s3]/[1/s]
+      plantCd         | Plant canopy drag coefficient              [-]
+      leafAreaDensity | Leaf area density                          [1/m]
     \endverbatim
 
     References:

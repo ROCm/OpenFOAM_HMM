@@ -56,7 +56,7 @@ Usage
     where the entries mean:
     \table
       Property  | Description                     | Type   | Req'd | Dflt
-      type      | Type name: kLowReWallFunction   | word | yes    | -
+      type      | Type name: kLowReWallFunction   | word   | yes   | -
       Ceps2     | Model coefficient               | scalar | no    |  1.9
       Ck        | Model coefficient               | scalar | no    | -0.416
       Bk        | Model coefficient               | scalar | no    |  8.366

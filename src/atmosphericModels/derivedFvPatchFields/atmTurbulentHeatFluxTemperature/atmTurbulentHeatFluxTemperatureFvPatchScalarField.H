@@ -32,13 +32,13 @@ Group
 
 Description
     This boundary condition provides a fixed heat constraint on temperature,
-    i.e. \c T, to specify temperature gradient.  Input heat source either
-    specified in terms of an absolute power [W], or as a flux [W/m2].
+    i.e. \c T, to specify temperature gradient through an input heat source
+    which can either be specified as absolute power [W], or as flux [W/m2].
 
     Required fields:
     \verbatim
-      nut    | Turbulent viscosity              [m2/s]
-      k      | Turbulent kinetic energy         [m2/s2]
+      nut    | Turbulent viscosity                   [m2/s]
+      k      | Turbulent kinetic energy              [m2/s2]
     \endverbatim
 
 Usage
@@ -64,22 +64,24 @@ Usage
     \table
       Property     | Description                         | Type | Req'd | Dflt
       heatSource   | Heat source type                    | word |  yes  | -
-      alphaEff     | Name of turbulent thermal diff. field [kg/m/s]  <!--
-                                                -->            | word | yes | -
-      Cp0          | Specific heat capacity  | TimeFunction1<scalar>  | yes | -
-      q            | Heat source value       | PatchFunction1<scalar> | yes | -
+      alphaEff     | Name of turbulent thermal diff. field [kg/m/s] <!--
+                                                     --> | word | yes   | -
+      Cp0          | Specific heat capacity [m2/s2/K] <!--
+                                     --> | TimeFunction1<scalar>  | yes | -
+      q            | Heat source value [W (power) or W/m2 (flux)] <!--
+                                     --> | PatchFunction1<scalar> | yes | -
     \endtable
-
-    Options for the \c heatSource entry:
-    \verbatim
-      power  | Absolute power heat source [W]
-      flux   | Flux heat source [W/m^2]
-    \endverbatim
 
     The inherited entries are elaborated in:
      - \link fixedGradientFvPatchScalarField.H \endlink
      - \link TimeFunction1.H \endlink
      - \link PatchFunction1.H \endlink
+
+    Options for the \c heatSource entry:
+    \verbatim
+      power  | Absolute power heat source [W]
+      flux   | Flux heat source [W/m2]
+    \endverbatim
 
 SourceFiles
     atmTurbulentHeatFluxTemperatureFvPatchScalarField.C
@@ -128,7 +130,7 @@ class atmTurbulentHeatFluxTemperatureFvPatchScalarField
         //- Name of effective thermal diffusivity field [kg/m/s]
         word alphaEffName_;
 
-        //- Specific heat capacity [-]
+        //- Specific heat capacity [m2/s2/K]
         TimeFunction1<scalar> Cp0_;
 
         //- Heat power [W] or flux [W/m2]

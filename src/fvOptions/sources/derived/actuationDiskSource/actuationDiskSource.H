@@ -5,6 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
+    Copyright (C) 2011-2017 OpenFOAM Foundation
     Copyright (C) 2020 ENERCON GmbH
     Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
@@ -31,19 +32,9 @@ Group
     grpFvOptionsSources
 
 Description
-    Applies sources on \c U to enable actuator disk models for aero/hydro thrust
-    loading of horizontal axis turbines on surrounding flow field in
-    terms of energy conversion processes.
-
-    Corrections applied to:
-    \verbatim
-      U         | Velocity    [m/s]
-    \endverbatim
-
-    Required fields:
-    \verbatim
-      U         | Velocity    [m/s]
-    \endverbatim
+    Applies sources on velocity, i.e. \c U, to enable actuator disk models
+    for aero/hydro thrust loading of horizontal axis turbines on surrounding
+    flow field in terms of energy conversion processes.
 
     Available options for force computations:
     \verbatim
@@ -119,6 +110,16 @@ Description
             DOI:10.1002/we.1804
     \endverbatim
 
+    Corrections applied to:
+    \verbatim
+      U         | Velocity    [m/s]
+    \endverbatim
+
+    Required fields:
+    \verbatim
+      U         | Velocity    [m/s]
+    \endverbatim
+
 Usage
     Example by using \c constant/fvOptions:
     \verbatim
@@ -126,6 +127,18 @@ Usage
     {
         // Mandatory entries (unmodifiable)
         type            actuationDiskSource;
+
+        // Mandatory (inherited) entries (unmodifiable)
+        selectionMode   <mode>;    // e.g. cellSet as shown below
+        cellSet         <cellSetName>;
+
+        // Mandatory entries (runtime modifiable)
+        diskArea        40.0;
+        diskDir         (1 0 0);
+        Cp              <Function1>;
+        Ct              <Function1>;
+
+        // Conditional optional entries (unmodifiable)
         monitorMethod   <points|cellSet>;
         monitorCoeffs
         {
@@ -140,16 +153,6 @@ Usage
             // Option-2
             cellSet     <monitorCellSet>;
         }
-
-        // Mandatory (inherited) entries (unmodifiable)
-        selectionMode   <mode>;    // e.g. cellSet as shown below
-        cellSet         <cellSetName>;
-
-        // Mandatory entries (runtime modifiable)
-        diskArea        40.0;
-        diskDir         (1 0 0);
-        Cp              <Function1>;
-        Ct              <Function1>;
 
         // Optional entries (unmodifiable)
         variant         <forceMethod>;
@@ -168,15 +171,15 @@ Usage
     \table
       Property   | Description                         | Type | Req'd    | Dflt
       type       | Type name: actuationDiskSource      | word | yes      | -
-      diskArea   | Actuator disk planar surface area [m2] | scalar | yes | -
+      diskArea   | Actuator disk planar surface area   | scalar | yes | -
       diskDir    | Surface-normal vector of the actuator disk <!--
                --> pointing upstream                   | vector    | yes | -
       Cp         | Power coefficient                   | Function1 | yes | -
       Ct         | Thrust coefficient                  | Function1 | yes | -
       monitorMethod | Type of incoming velocity monitoring method   <!--
-               -->    - see below                      | word      | yes | -
+               -->    - see below                      | word | no  | points
       variant    | Type of the force computation method - see below <!--
-               -->                                     | word | no | Froude
+               -->                                     | word | no  | Froude
       sink        | Flag for body forces to act as a source (true)  <!--
                -->  or a sink (false)                  | bool   | no  | true
       writeFileStart | Start time for file output      | scalar | no  | 0
@@ -230,7 +233,6 @@ class actuationDiskSource
     public cellSetOption,
     public functionObjects::writeFile
 {
-
 protected:
 
     // Protected Enumerations
