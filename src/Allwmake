@@ -71,8 +71,8 @@ parallel/Allwmake $targetType $*
 wmake $targetType dynamicFvMesh
 wmake $targetType topoChangerFvMesh
 
-transportModels/Allwmake $targetType $*
 wmake $targetType sampling
+transportModels/Allwmake $targetType $*
 randomProcesses/Allwmake $targetType $*
 
 wmake $targetType ODE
