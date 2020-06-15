@@ -13,16 +13,30 @@ OpenFOAM requires a functioning C++11 compiler and GNU `make` build toolchain.
 If using the Intel&reg; compiler, `17.0.1 20161005` is the minimum
 usable version.
 
-
 To check the installed versions
 
 | Program       | To check the version  |
 |---------------|-----------------------|
-| gcc           | gcc --version         |
-| icc           | icc --version         |
-| openmpi       | orterun --version     |
-| cmake         | cmake --version       |
-| openmpi       | orterun --version     |
+| gcc           | `gcc --version`       |
+| icc           | `icc --version`       |
+| cmake         | `cmake --version`     |
+| openmpi       | `orterun --version`   |
+
+
+#### Cautionary note for system openmpi
+
+When using system openmpi, some caution is required due to the
+[openmpi issue 5375](https://github.com/open-mpi/ompi/issues/5375) that
+affected several versions of the openmpi2 or openmpi3 series.
+
+| series    | major/minor | Minimum version
+|-----------|-------------|-------------------|
+| openmpi1  | all         | not affected      |
+| openmpi2  | 2.0         | avoid this series |
+| openmpi2  | 2.1         | 2.1.6 |
+| openmpi3  | 3.0         | 3.0.4 |
+| openmpi3  | 3.1         | 3.1.4 |
+| openmpi4  | all         | not affected |
 
 
 
@@ -37,8 +51,14 @@ To check the installed versions
 
 Install dependencies by executing the following lines on the command line:
 ```
-sudo apt-get install build-essential flex cmake zlib1g-dev libopenmpi-dev openmpi-bin gnuplot libreadline-dev libncurses-dev
+sudo apt-get update
+sudo apt-get install build-essential autoconf autotools-dev cmake gawk gnuplot
+sudo apt-get install flex libfl-dev libreadline-dev zlib1g-dev openmpi-bin libopenmpi-dev mpi-default-bin mpi-default-dev
 sudo apt-get install libgmp-dev libmpfr-dev libmpc-dev
+```
+If you intend to use system components, you can also install the following:
+```
+apt-get install libscotch-dev libptscotch-dev libfftw3-dev libboost-system-dev libboost-thread-dev libcgal-dev
 ```
 
 Additional libraries will be required if compiling ParaView from
@@ -60,23 +80,25 @@ To inspect the available system versions, use the `apt-cache show`
 command. For example,
 ```
 sudo apt-cache show libboost-dev
+sudo apt-cache show libfftw3-dev
+...
 ```
 
 | Program   | apt-cache show  | Ubuntu  | Version |
 |-----------|-----------------|---------|---------|
-| boost     | libboost-dev    | 19.04   | 1.67    |
-| CGAL      | libcgal-dev     | 19.04   | 4.13    |
-| FFTW      | libfftw3-dev    | 19.04   | 3.3.8   |
-| scotch    | libscotch-dev   | 19.04   | 6.0.6   |
+| boost     | libboost-dev    | 20.04   | 1.71.0  |
+| CGAL      | libcgal-dev     | 20.04   | 5.0.2   |
+| FFTW      | libfftw3-dev    | 20.04   | 3.3.8   |
+| scotch    | libscotch-dev   | 20.04   | 6.0.9   |
 
 
 | Program   | Ubuntu    | Program version |
 |-----------|-----------|-----------------|
-| gcc       | 19.04     | 8.3.0           |
-| openmpi   | 19.04     | 3.1.3           |
-| cmake     | 19.04     | 3.13.4          |
-| flex      | 19.04     | 2.6.4           |
-| m4        | 15.1      | 1.4.18          |
+| gcc       | 20.04     | 9.3.0           |
+| openmpi   | 20.04     | 4.0.3           |
+| cmake     | 20.04     | 3.16.3          |
+| flex      | 20.04     | 2.6.4           |
+| m4        | 20.04     | 1.4.18          |
 
 
 ### openSUSE (eg, Leap-15.1)
@@ -86,8 +108,14 @@ the command line:
 
 ```
 sudo zypper install -t pattern devel_C_C++
-sudo zypper install cmake boost-devel mpfr-devel gmp-devel openmpi-devel gnuplot
+sudo zypper install cmake gnuplot flex libfl-devel readline-devel zlib-devel openmpi-devel
+sudo zypper install libgmp-devel libmpfr-devel libmpc-devel
 ```
+If you intend to use system components, you can also install the following:
+```
+sudo zypper install fftw3-devel libboost_system-devel libboost_thread-devel
+```
+but note that scotch and cgal are only available via the science repository.
 
 This installs
 
@@ -175,4 +203,4 @@ A partial list is given in the [ThirdParty requirements][link third-require].
 [link third-require]: https://develop.openfoam.com/Development/ThirdParty-common/blob/develop/Requirements.md
 
 ---
-Copyright 2019 OpenCFD Ltd
+Copyright 2019-2020 OpenCFD Ltd
