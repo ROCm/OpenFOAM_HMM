@@ -11,5 +11,6 @@ wmake $targetType VoFphaseCompressibleTurbulenceModels
 wmake $targetType
 wmake $targetType compressibleInterDyMFoam
 wmake $targetType compressibleInterFilmFoam
+wmake $targetType compressibleInterIsoFoam
 
 #------------------------------------------------------------------------------

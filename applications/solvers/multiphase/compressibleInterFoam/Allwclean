@@ -8,5 +8,6 @@ wclean libso VoFphaseCompressibleTurbulenceModels
 wclean
 wclean compressibleInterDyMFoam
 wclean compressibleInterFilmFoam
+wclean compressibleInterIsoFoam
 
 #------------------------------------------------------------------------------
