@@ -23,8 +23,11 @@ mingw64-winpthreads-devel
 
 mingw64-libfftw3
 mingw64-fftw3-devel
+
+mingw64-libz
+mingw64-zlib-devel
 ```
-This setup is missing `zlib`, so download that manually and compile as a
+If the `zlib` (or `libz`) setup does not worksetup, it is possible to download that manually and compile as a
 *static* library.
 ```
 CC="$(wmake -show-c)" CFLAGS="$(wmake -show-cflags)" ./configure --static
@@ -91,15 +94,17 @@ On openSUSE these runtime libraries are provided by the packages:
 ```
 mingw64-libgcc_s_seh1
 mingw64-libstdc++6
+mingw64-libz
 ```
 
 When running, the `WM_PROJECT_DIR` environment must be set.
 OpenFOAM will otherwise not be able to locate its files.
 
 
-## Known limitations (2019-06-24)
+## Known limitations (2020-06-16)
 
 - kahip does not build
+- ptscotch does not build
 - boost should build ok, but no CGAL support (ie, no foamyHexMesh)
 - no ParaView plugin, runTimePostProcessing
 - reacting EulerFoam solvers have too many interdependencies and do

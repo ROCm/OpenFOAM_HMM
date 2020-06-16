@@ -1,0 +1,43 @@
+#!/bin/sh
+cd "${0%/*}" || exit                            # Run from this directory
+targetType=libso
+. "${WM_PROJECT_DIR:?}"/wmake/scripts/AllwmakeParseArguments
+
+#------------------------------------------------------------------------------
+# Default build into OpenFOAM project locations unless specified with
+# -prefix or FOAM_MODULE_PREFIX env varable
+
+: "${FOAM_MODULE_PREFIX:=${FOAM_LIBBIN%/*}}"
+export FOAM_MODULE_PREFIX
+
+
+#------------------------------------------------------------------------------
+
+# Skip some directory names
+filterDir() {
+    case "$1" in
+    (build | platforms | doc)
+        echo ""
+        ;;
+    (*)
+        echo "$1"
+        ;;
+    esac
+}
+
+
+# Build each first-level directory with an Allwmake* file
+for moduleName in \
+    $(find . -mindepth 2 -maxdepth 2 -name 'Allwmake*' -print | \
+      sed -e 's@^\./@@; s@/.*$@@;' | sort | uniq)
+do
+    moduleName="$(filterDir "$moduleName")"
+
+    if [ -d "$moduleName" ]
+    then
+        ( cd "$moduleName" && wmake -all $targetType )
+    fi
+done
+
+
+#------------------------------------------------------------------------------
