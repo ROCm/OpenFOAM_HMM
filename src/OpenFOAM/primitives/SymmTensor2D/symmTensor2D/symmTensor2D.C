@@ -97,7 +97,7 @@ Foam::vector2D Foam::eigenValues(const symmTensor2D& T)
     //(K:Eqs. 3.2-3.3)
     const scalar skewTrace = T.xx() - T.yy();
     const scalar trace = tr(T);
-    const scalar gap = sign(skewTrace)*hypot(skewTrace, 2.0*T.xy());
+    const scalar gap = sign(skewTrace)*hypot(skewTrace, 2*T.xy());
 
     return vector2D(0.5*(trace + gap), 0.5*(trace - gap));
 }
@@ -163,7 +163,7 @@ Foam::tensor2D Foam::eigenVectors
 
     if (mag(skewTrace) > SMALL)
     {
-        const scalar phi = 0.5*atan(2.0*T.xy()/skewTrace);
+        const scalar phi = 0.5*atan(2*T.xy()/skewTrace);
         const scalar cphi = cos(phi);
         const scalar sphi = sin(phi);
         return tensor2D(cphi, sphi, -sphi, cphi);

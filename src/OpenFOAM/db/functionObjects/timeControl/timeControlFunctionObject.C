@@ -598,7 +598,7 @@ bool Foam::functionObjects::timeControl::adjustTimeStep()
                 // For tiny deltaT the label can overflow!
                 if
                 (
-                    nSteps < labelMax
+                    nSteps < scalar(labelMax)
                  && (
                         deltaTCoeff_ != GREAT
                      || nSteps < nStepsToStartTimeChange_
@@ -644,7 +644,7 @@ bool Foam::functionObjects::timeControl::adjustTimeStep()
                     requiredDeltaTCoeff = seriesDTCoeff_;
                 }
                 // Avoid divide by zero if we need ratio = 1
-                if (1/Foam::log(requiredDeltaTCoeff)> labelMax)
+                if (1/Foam::log(requiredDeltaTCoeff) > scalar(labelMax))
                 {
                     requiredDeltaTCoeff = deltaTCoeff_;
                 }
