@@ -30,6 +30,18 @@ Class
 Description
     Cyclic patch for Arbitrary Mesh Interface (AMI)
 
+    Includes provision for updating the patch topology to enforce a 1-to-1
+    face match across the interface, based on the \c createAMIFaces flag.
+
+    The manipulations are based on the reference:
+
+    \verbatim
+    H.J. Aguerre, S. Márquez Damián, J.M. Gimenez, N.M.Nigro, Conservative
+    handling of arbitrary non-conformal interfaces using an efficient
+    supermesh, Journal of Computational Physics 335(15) 21-49. 2017.
+    https://doi.org/10.1016/j.jcp.2017.01.018.
+    \endverbatim
+
 SourceFiles
     cyclicAMIPolyPatch.C
 
@@ -145,13 +157,19 @@ protected:
 
         // Topology change
 
+            //- Collect faces to remove in the topoChange container
             virtual bool removeAMIFaces(polyTopoChange& topoChange);
 
+            //- Collect faces to add in the topoChange container
             virtual bool addAMIFaces(polyTopoChange& topoChange);
 
+            //- Set properties of newly inserted faces after topological changes
             virtual void setAMIFaces();
 
+            //- Helper to re-apply the geometric scaling lost during mesh
+            //- updates
             virtual void restoreScaledGeometry();
+
 
         //- Create and return pointer to the projection surface
         const autoPtr<searchableSurface>& surfPtr() const;
