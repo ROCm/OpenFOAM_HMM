@@ -38,7 +38,9 @@ License
 #include <cstring>
 
 #ifndef FULLDEBUG
+#ifndef NDEBUG
 #define NDEBUG
+#endif
 #endif
 #include <cassert>
 

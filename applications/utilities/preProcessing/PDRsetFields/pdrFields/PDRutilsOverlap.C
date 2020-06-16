@@ -31,7 +31,9 @@ License
 #include "mathematicalConstants.H"
 
 #ifndef FULLDEBUG
+#ifndef NDEBUG
 #define NDEBUG
+#endif
 #endif
 #include <cassert>
 
