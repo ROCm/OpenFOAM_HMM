@@ -22,7 +22,8 @@ sed -e "s|RAS_MODEL|$RASmodel|g" \
     constant/turbulenceProperties.template \
   > constant/turbulenceProperties
 sed -e "s|L_MAX|$Lmax|g" constant/fvOptions.template > constant/fvOptions
-sed -e "s|Q_PLANT|$qPlant|g" 0.orig/qPlant.template > 0/qPlant
+sed -e "s|Q_PLANT|$qPlant|g" 0/qPlant.template > 0/qPlant
+rm -f 0/qPlant.template
 
 runApplication renumberMesh -overwrite
 

@@ -192,18 +192,6 @@ Foam::turbulentDFSEMInletFvPatchVectorField::patchMapper() const
     // Initialise interpolation (2D planar interpolation by triangulation)
     if (mapperPtr_.empty())
     {
-        //// Reread values and interpolate
-        //fileName samplePointsFile
-        //(
-        //    this->db().time().path()
-        //   /this->db().time().caseConstant()
-        //   /"boundaryData"
-        //   /this->patch().name()
-        //   /"points"
-        //);
-        //
-        //pointField samplePoints((IFstream(samplePointsFile)()));
-
         const fileName samplePointsFile
         (
             this->db().time().globalPath()

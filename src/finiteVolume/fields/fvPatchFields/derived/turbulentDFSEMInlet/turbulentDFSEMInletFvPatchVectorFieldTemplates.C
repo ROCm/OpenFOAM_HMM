@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd
+    Copyright (C) 2016-2020 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,32 +72,6 @@ Foam::turbulentDFSEMInletFvPatchVectorField::interpolateBoundaryData
 ) const
 {
     const word& patchName = this->patch().name();
-
-    //fileName valsFile
-    //(
-    //    fileHandler().filePath
-    //    (
-    //        fileName
-    //        (
-    //            this->db().time().path()
-    //           /this->db().time().caseConstant()
-    //           /"boundaryData"
-    //           /patchName
-    //           /"0"
-    //           /fieldName
-    //        )
-    //    )
-    //);
-    //
-    //autoPtr<ISstream> isPtr
-    //(
-    //    fileHandler().NewIFstream
-    //    (
-    //        valsFile
-    //    )
-    //);
-    //
-    //Field<Type> vals(isPtr());
 
     const fileName valsFile
     (

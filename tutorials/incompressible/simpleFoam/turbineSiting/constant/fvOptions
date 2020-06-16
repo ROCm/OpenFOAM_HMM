@@ -27,9 +27,7 @@ disk1
     sink            true;
     Cp              0.386;
     Ct              0.58;
-
-    monitorMethod points;
-
+    monitorMethod   points;
     monitorCoeffs
     {
         points
@@ -43,25 +41,13 @@ disk1
 disk2
 {
     type            actuationDiskSource;
-    variant         Froude;     // variableScaling;
     selectionMode   cellSet;
     cellSet         actuationDisk2;
-    writeToFile     true;
-    sink            true;
     Cp              0.53;
     Ct              0.58;
     diskArea        40;
     diskDir         (1 0 0);
-
-    monitorMethod points;
-
-    monitorCoeffs
-    {
-        points
-        (
-            (581753 4785663 1070)
-        );
-    }
+    upstreamPoint   (581753 4785663 1070);
 }
 
 

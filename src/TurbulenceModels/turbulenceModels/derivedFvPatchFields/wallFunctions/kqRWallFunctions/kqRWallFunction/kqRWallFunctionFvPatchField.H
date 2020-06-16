@@ -32,8 +32,10 @@ Group
 
 Description
     This boundary condition provides a simple wrapper around the zero-gradient
-    condition, which can be used for \c k, \c q, and \c R fields for
-    the case of high Reynolds number flow using wall functions.
+    condition, which can be used for the turbulent kinetic energy, i.e. \c k,
+    square-root of turbulent kinetic energy, i.e. \c q, and Reynolds stress
+    tensor fields, i.e. \c R, for the cases of high Reynolds number flow
+    using wall functions.
 
 Usage
     Example of the boundary condition specification:

@@ -72,32 +72,6 @@ Foam::turbulentDigitalFilterInletFvPatchVectorField::interpolateBoundaryData
 {
     const word& patchName = this->patch().name();
 
-    //fileName valsFile
-    //(
-    //    fileHandler().filePath
-    //    (
-    //        fileName
-    //        (
-    //            this->db().time().path()
-    //           /this->db().time().caseConstant()
-    //           /"boundaryData"
-    //           /patchName
-    //           /"0"
-    //           /fieldName
-    //        )
-    //    )
-    //);
-    //
-    //autoPtr<ISstream> isPtr
-    //(
-    //    fileHandler().NewIFstream
-    //    (
-    //        valsFile
-    //    )
-    //);
-    //
-    //Field<Type> vals(isPtr());
-
     // Reread values and interpolate
     const fileName valsFile
     (

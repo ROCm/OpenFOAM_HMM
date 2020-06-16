@@ -74,9 +74,9 @@ Usage
     \table
       Property  | Description                       | Type | Req'd  | Dflt
       type      | Type name: epsilonWallFunction    | word | yes    | -
-      lowReCorrection | Flag for low-Re correction  | bool |  no    | false
+      lowReCorrection | Flag: apply low-Re correction | bool |  no  | false
       blending  | Viscous/inertial sublayer blending method <!--
-                -->                                 | word |  no    | stepwise
+                                                --> | word |  no    | stepwise
       n         | Binomial blending exponent        | scalar | no   | 2.0
     \endtable
 
@@ -189,8 +189,6 @@ class epsilonWallFunctionFvPatchScalarField
 :
     public fixedValueFvPatchField<scalar>
 {
-private:
-
     // Private Enumerations
 
         //- Options for the blending treatment of viscous and inertial sublayers

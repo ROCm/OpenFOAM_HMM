@@ -32,9 +32,8 @@ Group
 
 Description
     This boundary condition provides a wall constraint on the turbulent
-    viscosity, i.e. \c nut, when using wall functions for rough walls,
-    based on velocity, \c U, using Spalding's law to give a continuous \c nut
-    profile to the wall (y+ = 0)
+    viscosity, i.e. \c nut, based on velocity, i.e. \c U. Using Spalding's
+    law gives a continuous \c nut profile to the wall.
 
         \f[
             y^+ = u^+ + \frac{1}{E} \left[exp(\kappa u^+) - 1 - \kappa u^+\,
@@ -81,13 +80,11 @@ Note
     \c turbulence->validate) returns a slightly different value every time
     it is called. This is since the seed for the Newton-Raphson iteration
     uses the current value of \c *this (\c =nut ).
-
     - This can be avoided by overriding the tolerance. This also switches on
     a pre-detection whether the current nut already satisfies the turbulence
     conditions and if so does not change it at all. This means that the nut
     only changes if it 'has really changed'. This probably should be used with
     a tight tolerance, to make sure to kick every iteration, e.g.
-
         maxIter     100;
         tolerance   1e-7;
 

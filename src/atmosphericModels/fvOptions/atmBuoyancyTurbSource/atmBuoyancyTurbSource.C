@@ -48,7 +48,7 @@ void Foam::fv::atmBuoyancyTurbSource::calcB()
     //- Temperature field [K]
     const volScalarField& T = mesh_.lookupObjectRef<volScalarField>("T");
 
-    //- Turbulent heat transfer coefficient field [m2/s]
+    //- Kinematic turbulent thermal conductivity field [m2/s]
     const volScalarField& alphat =
         mesh_.lookupObjectRef<volScalarField>("alphat");
 
@@ -146,19 +146,6 @@ Foam::fv::atmBuoyancyTurbSource::atmBuoyancyTurbSource
                 "Lmax",
                 41.575,
                 [&](const scalar Lmax){ return Lmax > SMALL; }
-            )
-        )
-    ),
-    n_
-    (
-        dimensionedScalar
-        (
-            dimless,
-            coeffs_.getCheckOrDefault<scalar>
-            (
-                "n",
-                3.0,
-                [&](const scalar n){ return n > SMALL; }
             )
         )
     ),

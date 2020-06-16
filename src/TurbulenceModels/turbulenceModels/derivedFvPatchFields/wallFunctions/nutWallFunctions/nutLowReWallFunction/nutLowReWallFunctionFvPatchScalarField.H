@@ -31,8 +31,8 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a wall constraint on the turbulent
-    viscosity, i.e. \c nut for low Reynolds number models.
+    This boundary condition provides a wall constraint on the
+    turbulent viscosity, i.e. \c nut, for low Reynolds number models.
     It sets \c nut to zero, and provides an access function to calculate \c y+.
 
 Usage

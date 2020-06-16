@@ -78,13 +78,12 @@ Usage
     \endverbatim
 
     \table
-      Property  | Description                     | Type | Req'd  | Dflt
-      type      | Type name: omegaWallFunction    | word | yes    | -
-      blended   | Blending switch (Deprecated)    | bool | no     | true
-      beta1     | Model coefficient               | scalar | no   | 0.075
+      Property  | Description                     | Type   | Req'd  | Dflt
+      type      | Type name: omegaWallFunction    | word   | yes    | -
+      beta1     | Model coefficient               | scalar | no     | 0.075
       blending  | Viscous/inertial sublayer blending method <!--
-                -->                               | word  | no    | binomial2
-      n         | Binomial blending exponent      | sclar | no    | 2.0
+                                              --> | word   | no     | binomial2
+      n         | Binomial blending exponent      | scalar | no     | 2.0
     \endtable
 
     The inherited entries are elaborated in:
@@ -185,10 +184,10 @@ Note
     the specified \c nutWallFunction in order to ensure that each patch
     possesses the same set of values for these coefficients.
   - The reason why \c binomial2 and \c binomial blending methods exist at
-    the same time is to ensure the elementwise backward compatibility with
-    the previous versions since \c binomial2 and \c binomial with n=2 will
-    yield slightly different output due to the miniscule differences in the
-    implementation of the basic functions (i.e. pow, sqrt, sqr).
+    the same time is to ensure the bitwise regression with the previous
+    versions since \c binomial2 and \c binomial with \c n=2 will yield
+    slightly different output due to the miniscule differences in the
+    implementation of the basic functions (i.e. \c pow, \c sqrt, \c sqr).
 
 See also
     - Foam::epsilonWallFunctionFvPatchScalarField
@@ -218,8 +217,6 @@ class omegaWallFunctionFvPatchScalarField
 :
     public fixedValueFvPatchField<scalar>
 {
-private:
-
     // Private Enumerations
 
         //- Options for the blending treatment of viscous and inertial sublayers

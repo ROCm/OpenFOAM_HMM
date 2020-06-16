@@ -34,7 +34,7 @@ Description
     Applies sources on \c k and either \c epsilon or \c omega to prevent them
     droping below a specified ambient value for atmospheric boundary
     layer modelling.  Such adjustment reportedly increases numerical
-    stability for very stable atmospheric conditions, and prevents
+    stability for very stable atmospheric stability conditions, and prevents
     nonphysical oscillations in regions of low shear at higher altitudes.
 
     Corrections applied to:
@@ -50,8 +50,8 @@ Description
 
     Required fields:
     \verbatim
-     k             | Turbulent kinetic energy                      [m2/s2]
-     epsilon/omega | Dissipation rate OR Specific dissipation rate [m2/s3]/[1/s]
+      k             | Turbulent kinetic energy                    [m2/s2]
+      epsilon/omega | Dissipation rate OR Spec. dissipation rate  [m2/s3]/[1/s]
     \endverbatim
 
     References:
@@ -95,10 +95,10 @@ Usage
     \table
       Property   | Description                     | Type   | Req'd  | Dflt
       type       | Type name: atmAmbientTurbSource | word   | yes    | -
-      kAmb       | Ambient value for k             | scalar | yes    | -
+      kAmb       | Ambient value for \c k          | scalar | yes    | -
       rho        | Name of density field           | word   | no     | rho
-      epsilonAmb | Ambient value for epsilon       | scalar | no     | 0.0
-      omegaAmb   | Ambient value for omega         | scalar | no     | 0.0
+      epsilonAmb | Ambient value for \c epsilon    | scalar | no     | 0.0
+      omegaAmb   | Ambient value for \c omega      | scalar | no     | 0.0
     \endtable
 
     The inherited entries are elaborated in:

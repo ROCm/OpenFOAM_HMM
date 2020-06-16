@@ -32,8 +32,8 @@ Group
 
 Description
     This boundary condition provides a wall constraint on the turbulent
-    viscosity, i.e. \c nut, when using wall functions, based on
-    velocity, \c U.
+    viscosity, i.e. \c nut, based on velocity, i.e. \c U, for low- and
+    high-Reynolds number turbulence models.
 
 Usage
     Example of the boundary condition specification:

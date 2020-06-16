@@ -31,7 +31,7 @@ Group
     grpFvOptionsSources
 
 Description
-    Applies sources on velocity \c U to incorporate effects
+    Applies sources on velocity, i.e. \c U, to incorporate effects
     of plant canopy for atmospheric boundary layer modelling.
 
     Corrections applied to:

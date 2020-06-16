@@ -33,10 +33,10 @@ Group
 Description
     Computes the Obukhov length field and associated friction velocity field.
 
-    When scaled by the ground-normal height, i.e. z, the Obukhov length becomes
-    a dimensionless stability parameter, i.e. z/L, for atmospheric boundary
-    layer modelling, expressing the relative roles of buoyancy and shear in the
-    production and dissipation of turbulent kinetic energy.
+    When scaled by the ground-normal height, i.e. \c z, the Obukhov length
+    becomes a dimensionless stability parameter, i.e. \c z/L, for atmospheric
+    boundary layer modelling, expressing the relative roles of buoyancy and
+    shear in the production and dissipation of turbulent kinetic energy.
 
     \f[
         u^* = \sqrt{\max (\nu_t \sqrt{2 |\symm{\grad{\u}}|^2}, VSMALL)}
@@ -85,11 +85,11 @@ Description
 
     Required fields:
     \verbatim
-     U           | Velocity                                 [m/s]
-     T           | Temperature                              [K]
-     nut         | Turbulent viscosity                      [m2/s]
-     alphat      | Kinematic turbulent thermal conductivity [m2/s]/[kg/m/s]
-     g           | Gravitational acceleration               [m/s2]
+      U           | Velocity                                 [m/s]
+      T           | Temperature                              [K]
+      nut         | Turbulent viscosity                      [m2/s]
+      alphat      | Kinematic turbulent thermal conductivity [m2/s]/[kg/m/s]
+      g           | Gravitational acceleration               [m/s2]
     \endverbatim
 
     \table
@@ -134,7 +134,7 @@ Usage
       rhoRef    | Reference density (to convert from kinematic to static <!--
                                        --> pressure) | scalar | no  | 1.0
       kappa     | von Kármán constant                | scalar | no  | 0.40
-      beta      | Thermal expansion coefficient [1/K] | scalar | no | 3e-3
+      beta      | Thermal expansion coefficient      | scalar | no | 3e-3
     \endtable
 
     The inherited entries are elaborated in:

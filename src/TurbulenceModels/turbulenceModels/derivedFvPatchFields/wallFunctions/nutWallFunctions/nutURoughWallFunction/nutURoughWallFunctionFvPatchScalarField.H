@@ -32,8 +32,8 @@ Group
 
 Description
     This boundary condition provides a wall constraint on the turbulent
-    viscosity, i.e. \c nut, when using wall functions for rough walls,
-    based on velocity, \c U.
+    viscosity, i.e. \c nut, based on velocity i.e. \c U, for low- and
+    high-Reynolds number turbulence models for rough walls.
 
 Usage
     Example of the boundary condition specification:
@@ -74,9 +74,6 @@ Note
     \c turbulence->validate) returns a slightly different value every time
     it is called.
     See \link nutUSpaldingWallFunctionFvPatchScalarField.C \endlink.
-    - Can be avoided by seeding the NR with e.g. the laminar viscosity
-    or tightening the convergence tolerance to e.g. 1e-7 and the max
-    number of iterations to 100.
 
 SourceFiles
     nutURoughWallFunctionFvPatchScalarField.C

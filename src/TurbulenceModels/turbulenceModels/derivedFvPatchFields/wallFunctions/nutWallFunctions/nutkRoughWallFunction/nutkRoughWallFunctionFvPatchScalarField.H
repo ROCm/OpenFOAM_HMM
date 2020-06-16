@@ -32,9 +32,10 @@ Group
 
 Description
     This boundary condition provides a wall constraint on the turbulent
-    kinematic viscosity, i.e. \c nut, when using wall functions for rough walls,
-    based on the turbulent kinetic energy, \c k. The condition manipulates the
-    wall roughness parameter, i.e. \c E, to account for roughness effects.
+    viscosity, i.e. \c nut, when using wall functions for rough walls,
+    based on the turbulent kinetic energy, i.e. \c k. The condition
+    manipulates the wall roughness parameter, i.e. \c E, to account
+    for roughness effects.
 
     Parameter ranges:
     - roughness height = sand-grain roughness (0 for smooth walls)
@@ -105,7 +106,7 @@ protected:
         //- Compute the roughness function
         virtual scalar fnRough(const scalar KsPlus, const scalar Cs) const;
 
-        //- Calculate the turbulence viscosity
+        //- Calculate the turbulent viscosity
         virtual tmp<scalarField> calcNut() const;
 
 

@@ -31,10 +31,10 @@ Group
     grpRASBoundaryConditions grpInletBoundaryConditions
 
 Description
-    This boundary condition provides a log-law type ground-normal inflow
-    boundary condition for turbulent kinetic energy dissipation rate, i.e.
-    \c epsilon, for homogeneous, two-dimensional, dry-air, equilibrium and
-    neutral atmospheric boundary layer modelling.
+    This boundary condition provides a log-law type ground-normal inlet
+    boundary condition for the turbulent kinetic energy dissipation rate,
+    i.e. \c epsilon, for homogeneous, two-dimensional, dry-air, equilibrium
+    and neutral atmospheric boundary layer modelling.
 
     The ground-normal \c epsilon profile expression:
 
@@ -53,14 +53,14 @@ Description
       d        | Ground-normal displacement height              [m]
       C_1      | Curve-fitting coefficient for \c YGCJ profiles [-]
       C_2      | Curve-fitting coefficient for \c YGCJ profiles [-]
- \endvartable
+    \endvartable
+
+    Required fields:
+    \verbatim
+        epsilon   | Turbulent kinetic energy dissipation rate   [m2/s3]
+    \endverbatim
 
 Usage
-    \heading Required fields
-    \plaintable
-        epsilon   | Turbulent kinetic energy dissipation rate   [m^2/s^3]
-    \endplaintable
-
     Example of the boundary condition specification:
     \verbatim
     inlet
@@ -68,26 +68,16 @@ Usage
         // Mandatory entries (unmodifiable)
         type            atmBoundaryLayerInletEpsilon;
 
-        // Mandatory (inherited) entries (unmodifiable)
-        flowDir         (1 0 0);
-        z               (0 0 1);
-        Uref            10.0;
-        Zref            0.0;
-        z0              uniform 0.1;
-        d               uniform 0.0;
-
-        // Optional (inherited) entries (unmodifiable)
-        kappa           0.41;
-        Cmu             0.09;
-        initABL         true;
-        phi             phi;
-        C1              0.0;
-        C2              1.0;
-
-        // Conditional mandatory (inherited) entries (runtime modifiable)
-        value           uniform 0;    // when initABL=false
+        // Mandatory/Optional (inherited) entries (unmodifiable)
+        ...
     }
     \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                             | Type | Req'd | Deflt
+      type      | Type name: atmBoundaryLayerInletEpsilon | word | yes   | -
+    \endtable
 
     The inherited entries are elaborated in:
      - \link atmBoundaryLayer.H \endlink
@@ -95,10 +85,9 @@ Usage
 
 See also
     - Foam::atmBoundaryLayer
-    - Foam::atmBoundaryLayer::atmBoundaryLayerInletKFvPatchScalarField
-    - Foam::atmBoundaryLayer::atmBoundaryLayerInletOmegaFvPatchScalarField
-    - Foam::atmBoundaryLayer::atmBoundaryLayerInletVelocityFvPatchVectorField
-    - ExtendedCodeGuide::atmBoundaryLayer::atmBoundaryLayerInletEpsilon
+    - Foam::atmBoundaryLayerInletKFvPatchScalarField
+    - Foam::atmBoundaryLayerInletOmegaFvPatchScalarField
+    - Foam::atmBoundaryLayerInletVelocityFvPatchVectorField
 
 SourceFiles
     atmBoundaryLayerInletEpsilonFvPatchScalarField.C

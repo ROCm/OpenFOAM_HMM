@@ -58,7 +58,6 @@ atmBuoyancyTurbSource1
         selectionMode   all;
         rho             rho;
         Lmax            L_MAX;
-        n               3.0;
         beta            3.3e-03;
     }
 }

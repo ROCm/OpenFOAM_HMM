@@ -48,6 +48,7 @@ Foam::epsilonWallFunctionFvPatchScalarField::blendingTypeNames
 
 Foam::scalar Foam::epsilonWallFunctionFvPatchScalarField::tolerance_ = 1e-5;
 
+
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
 void Foam::epsilonWallFunctionFvPatchScalarField::setMaster()

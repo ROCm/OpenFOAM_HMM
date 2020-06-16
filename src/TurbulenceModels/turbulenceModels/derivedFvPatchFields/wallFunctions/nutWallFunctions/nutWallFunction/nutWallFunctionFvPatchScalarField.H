@@ -35,6 +35,8 @@ Description
     boundary conditions which provide a wall constraint on various fields, such
     as turbulent viscosity, i.e. \c nut, or turbulent kinetic energy dissipation
     rate, i.e. \c epsilon, for low- and high-Reynolds number turbulence models.
+    The class is not an executable itself, yet a provider for common entries
+    to its derived boundary conditions.
 
     Reference:
     \verbatim
@@ -72,6 +74,7 @@ Usage
         E               9.8;
         blending        stepwise;
         n               4.0;
+        U               U;
 
         // Optional (inherited) entries
         ...
@@ -86,6 +89,7 @@ Usage
       E         | Wall roughness parameter       | scalar | no    | 9.8
       blending  | Viscous/inertial sublayer blending | word | no  | stepwise
       n         | Binomial blending exponent     | scalar | no    | 2.0
+      U         | Name of the velocity field     | word   | no    | U
     \endtable
 
     The inherited entries are elaborated in:
@@ -151,11 +155,8 @@ Usage
       \Gamma       | \f$0.01 (y^+)^4 / (1.0 + 5.0 y^+)\f$
     \endvartable
 
-Note
-    - \c nutWallFunction is not directly usable.
-
 See also
-    Foam::fixedValueFvPatchField
+    - Foam::fixedValueFvPatchField
 
 SourceFiles
     nutWallFunctionFvPatchScalarField.C

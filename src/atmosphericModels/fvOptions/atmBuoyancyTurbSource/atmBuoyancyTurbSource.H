@@ -47,10 +47,10 @@ Description
 
     Required fields:
     \verbatim
-     k             | Turbulent kinetic energy                      [m2/s2]
-     epsilon/omega | Dissipation rate OR Specific dissipation rate [m2/s3]/[1/s]
-     T             | Temperature                                   [K]
-     alphat        | Turbulent heat tranfer coefficient            [m2/s]
+      k             | Turbulent kinetic energy                   [m2/s2]
+      epsilon/omega | Dissipation rate OR Spec. dissipation rate [m2/s3]/[1/s]
+      T             | Temperature                                [K]
+      alphat        | Kinematic turbulent thermal conductivity   [m2/s]
     \endverbatim
 
     References:
@@ -60,7 +60,7 @@ Description
             Consistent two-equation closure modelling for atmospheric
             research: buoyancy and vegetation implementations.
             Boundary-layer meteorology, 145(2), 307-327.
-            DOI: 10.1007/s10546-012-9726-5
+            DOI:10.1007/s10546-012-9726-5
 
             Alletto, M., Radi, A., Adib, J., Langner, J.,
             Peralta, C., Altmikus, A., & Letzel, M. (2018).
@@ -98,7 +98,6 @@ Usage
             // Optional (unmodifiable)
             rho          rho;
             Lmax         41.575;
-            n            3.0;
             beta         3.3e-03;
         }
 
@@ -113,7 +112,6 @@ Usage
       type      | Type name: atmBuoyancyTurbSource  | word   | yes    | -
       rho       | Name of density field             | word   | no     | rho
       Lmax      | Maximum mixing-length scale       | scalar | no     | 41.575
-      n         | Mixing-length scale exponent      | scalar | no     | 3.0
       beta      | Thermal expansion coefficient     | scalar | no     | 3.3e-03
     \endtable
 
@@ -159,9 +157,6 @@ class atmBuoyancyTurbSource
 
         //- Maximum mixing-length scale [m]
         const dimensionedScalar Lmax_;
-
-        //- Mixing-length scale exponent
-        const dimensionedScalar n_;
 
         //- Thermal expansion coefficient [1/K]
         const dimensionedScalar beta_;

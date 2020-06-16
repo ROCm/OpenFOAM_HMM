@@ -30,7 +30,7 @@ boundaryField
 
     ground
     {
-        type            nutkAtmRoughWallFunction;
+        type            atmNutkWallFunction;
         kappa           $kappa;
         Cmu             $Cmu;
         z0              $z0;
