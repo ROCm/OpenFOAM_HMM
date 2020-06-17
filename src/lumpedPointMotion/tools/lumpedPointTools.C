@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,14 +28,13 @@ License
 #include "IFstream.H"
 #include "IOobjectList.H"
 #include "volFields.H"
-
+#include "points0MotionSolver.H"
 #include "lumpedPointDisplacementPointPatchVectorField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    // file-scope
     template<class GeoFieldType>
     static autoPtr<GeoFieldType> loadPointField
     (
@@ -72,21 +71,35 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Foam::List<Foam::lumpedPointStateTuple>
-Foam::lumpedPointTools::lumpedPointStates(Istream& is)
+Foam::lumpedPointTools::lumpedPointStates
+(
+    const dictionary& dict,
+    quaternion::eulerOrder rotOrder,
+    bool degrees
+)
 {
-    dictionary contents(is);
-    List<dictionary> entries(contents.lookup("response"));
+    quaternion::eulerOrderNames.readIfPresent
+    (
+        "rotationOrder",
+        dict,
+        rotOrder
+    );
+
+    dict.readIfPresent("degrees", degrees);
+
+    Info<<"Reading states\n";
+    List<dictionary> entries(dict.lookup("response"));
 
     DynamicList<Tuple2<scalar, lumpedPointState>> states(entries.size());
 
-    for (const dictionary& dict : entries)
+    for (const dictionary& subDict : entries)
     {
         states.append
         (
             lumpedPointStateTuple
             (
-                dict.get<scalar>("time"),
-                lumpedPointState(dict)
+                subDict.get<scalar>("time"),
+                lumpedPointState(subDict)
             )
         );
     }
@@ -96,33 +109,36 @@ Foam::lumpedPointTools::lumpedPointStates(Istream& is)
 
 
 Foam::List<Foam::lumpedPointStateTuple>
-Foam::lumpedPointTools::lumpedPointStates(const fileName& file)
+Foam::lumpedPointTools::lumpedPointStates
+(
+    Istream& is,
+    quaternion::eulerOrder rotOrder,
+    bool degrees
+)
+{
+    dictionary dict(is);
+    return lumpedPointStates(dict, rotOrder, degrees);
+}
+
+
+Foam::List<Foam::lumpedPointStateTuple>
+Foam::lumpedPointTools::lumpedPointStates
+(
+    const fileName& file,
+    quaternion::eulerOrder rotOrder,
+    bool degrees
+)
 {
     IFstream is(file);
-    return lumpedPointStates(is);
+    return lumpedPointStates(is, rotOrder, degrees);
 }
 
 
 Foam::pointIOField
 Foam::lumpedPointTools::points0Field(const polyMesh& mesh)
 {
-    pointIOField pts
-    (
-        IOobject
-        (
-            "points",
-            mesh.time().constant(),
-            polyMesh::meshSubDir,
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false // Do not re-register
-        )
-    );
-
-    return pts;
+    return pointIOField(points0MotionSolver::points0IO(mesh));
 }
-
 
 
 Foam::labelList
@@ -141,19 +157,127 @@ Foam::labelList Foam::lumpedPointTools::lumpedPointPatchList
 
     pointMesh pMesh(mesh);
 
-    autoPtr<pointVectorField> displacePtr = loadPointField<pointVectorField>
-    (
-        pMesh,
-        objects0.findObject("pointDisplacement")
-    );
+    autoPtr<pointVectorField> displacePtr =
+        loadPointField<pointVectorField>
+        (
+            pMesh,
+            objects0.findObject("pointDisplacement")
+        );
 
-    if (!displacePtr.valid())
+    if (!displacePtr)
     {
-        Info<< "no valid pointDisplacement" << endl;
+        Info<< "No valid pointDisplacement" << endl;
         return labelList();
     }
 
-    return lumpedPointPatchList(displacePtr());
+    return lumpedPointPatchList(*displacePtr);
+}
+
+
+Foam::label
+Foam::lumpedPointTools::setPatchControls
+(
+    const pointVectorField& pvf,
+    const pointField& points0
+)
+{
+    return
+        lumpedPointDisplacementPointPatchVectorField::setPatchControls
+        (
+            pvf,
+            points0
+        );
+}
+
+
+Foam::label Foam::lumpedPointTools::setPatchControls
+(
+    const fvMesh& mesh,
+    const pointField& points0
+)
+{
+    IOobjectList objects0(mesh, "0");
+
+    pointMesh pMesh(mesh);
+
+    autoPtr<pointVectorField> displacePtr =
+        loadPointField<pointVectorField>
+        (
+            pMesh,
+            objects0.findObject("pointDisplacement")
+        );
+
+    if (!displacePtr)
+    {
+        Info<< "No valid pointDisplacement" << endl;
+        return 0;
+    }
+
+    return setPatchControls(*displacePtr, points0);
+}
+
+
+Foam::label Foam::lumpedPointTools::setPatchControls
+(
+    const fvMesh& mesh
+)
+{
+    pointIOField points0(points0Field(mesh));
+
+    return setPatchControls(mesh, points0);
+}
+
+
+Foam::label Foam::lumpedPointTools::setInterpolators
+(
+    const pointVectorField& pvf,
+    const pointField& points0
+)
+{
+    return
+        lumpedPointDisplacementPointPatchVectorField::setInterpolators
+        (
+            pvf,
+            points0
+        );
+}
+
+
+Foam::label Foam::lumpedPointTools::setInterpolators
+(
+    const fvMesh& mesh,
+    const pointField& points0
+)
+{
+    IOobjectList objects0(mesh, "0");
+
+    pointMesh pMesh(mesh);
+
+    autoPtr<pointVectorField> displacePtr =
+        loadPointField<pointVectorField>
+        (
+            pMesh,
+            objects0.findObject("pointDisplacement")
+        );
+
+    if (!displacePtr)
+    {
+        Info<< "No valid pointDisplacement" << endl;
+        return 0;
+    }
+
+    return setInterpolators(*displacePtr, points0);
+}
+
+
+Foam::label Foam::lumpedPointTools::setInterpolators
+(
+    const fvMesh& mesh
+)
+{
+    pointIOField points0(points0Field(mesh));
+
+    return setInterpolators(mesh, points0);
 }
 
 

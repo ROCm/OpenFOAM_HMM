@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,11 +39,10 @@ SourceFiles
 #define lumpedPointTools_H
 
 #include "labelList.H"
-#include "polyMesh.H"
+#include "fvMesh.H"
 #include "pointMesh.H"
 #include "pointFields.H"
 #include "Tuple2.H"
-
 #include "lumpedPointState.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -51,6 +50,7 @@ SourceFiles
 namespace Foam
 {
 
+// Typedefs
 typedef Tuple2<scalar, lumpedPointState> lumpedPointStateTuple;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -58,22 +58,62 @@ typedef Tuple2<scalar, lumpedPointState> lumpedPointStateTuple;
 namespace lumpedPointTools
 {
 
+//- Load a list of states from a dictionary
+List<lumpedPointStateTuple> lumpedPointStates
+(
+    const dictionary& dict,
+    quaternion::eulerOrder rotOrder = quaternion::eulerOrder::ZXZ,
+    bool degrees = false
+);
+
 //- Load a list of states from an Istream
-List<lumpedPointStateTuple> lumpedPointStates(Istream& is);
+List<lumpedPointStateTuple> lumpedPointStates
+(
+    Istream& is,
+    quaternion::eulerOrder rotOrder = quaternion::eulerOrder::ZXZ,
+    bool degrees = false
+);
 
 //- Load a list of states from a file
-List<lumpedPointStateTuple> lumpedPointStates(const fileName& file);
-
+List<lumpedPointStateTuple> lumpedPointStates
+(
+    const fileName& file,
+    quaternion::eulerOrder rotOrder = quaternion::eulerOrder::ZXZ,
+    bool degrees = false
+);
 
 //- Return the 0 or constant points field
 pointIOField points0Field(const polyMesh& mesh);
 
-//- Return the patch-ids associated a "lumpedPointDisplacement" type
+//- Return the patch-ids associated with a "lumpedPointDisplacement" type
 labelList lumpedPointPatchList(const pointVectorField& pvf);
 
 //- Get the "pointDisplacement" at time 0 and use that to determine which
-//  patches have a "lumpedPointDisplacement" type
+//- patches have a "lumpedPointDisplacement" type
 labelList lumpedPointPatchList(const polyMesh& mesh);
+
+//- Return the patch-ids associated with a "lumpedPointDisplacement" type
+label setPatchControls(const pointVectorField& pvf, const pointField& points0);
+
+//- Get the "pointDisplacement" at time 0 and use that to determine which
+//- patches have a "lumpedPointDisplacement" type
+label setPatchControls(const fvMesh& mesh, const pointField& points0);
+
+//- Get the "pointDisplacement" at time 0 and use that to determine which
+//- patches have a "lumpedPointDisplacement" type
+label setPatchControls(const fvMesh& mesh);
+
+
+//- Return the patch-ids associated with a "lumpedPointDisplacement" type
+label setInterpolators(const pointVectorField& pvf, const pointField& points0);
+
+//- Get the "pointDisplacement" at time 0 and use that to determine which
+//- patches have a "lumpedPointDisplacement" type
+label setInterpolators(const fvMesh& mesh, const pointField& points0);
+
+//- Get the "pointDisplacement" at time 0 and use that to determine which
+//- patches have a "lumpedPointDisplacement" type
+label setInterpolators(const fvMesh& mesh);
 
 } // End namespace lumpedPointTools
 

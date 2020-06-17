@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,6 +63,19 @@ inline const Foam::tensorField& Foam::lumpedPointState::rotations() const
     }
 
     return *rotationPtr_;
+}
+
+
+inline Foam::quaternion::eulerOrder
+Foam::lumpedPointState::rotationOrder() const
+{
+    return order_;
+}
+
+
+inline bool Foam::lumpedPointState::degrees() const
+{
+    return degrees_;
 }
 
 

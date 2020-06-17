@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,11 +46,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-class lumpedPointIOMovement;
-
-Ostream& operator<<(Ostream& os, const lumpedPointIOMovement& obj);
-
 /*---------------------------------------------------------------------------*\
                     Class lumpedPointIOMovement Declaration
 \*---------------------------------------------------------------------------*/
@@ -68,22 +63,23 @@ class lumpedPointIOMovement
         //- No copy assignment
         void operator=(const lumpedPointIOMovement&) = delete;
 
+
 public:
 
     //- Runtime type information
-    TypeName("lumpedPointMovement");
+    TypeNameNoDebug("lumpedPointMovement");
 
 
     // Static Member Functions
 
-        //- Lookup pointer to object in the object-registry,
-        //  return nullptr if found.
-        static const lumpedPointIOMovement* lookupInRegistry
+        //- Find the movement object or nullptr if not found
+        static lumpedPointIOMovement* getMovementObject
         (
             const objectRegistry& obr
         );
 
-        //- Create a new object in the registry by reading system dictionary
+        //- Create a movement object in the registry by
+        //- reading system dictionary
         static autoPtr<lumpedPointIOMovement> New
         (
             const objectRegistry& obr,
@@ -94,34 +90,25 @@ public:
     // Constructors
 
         //- Construct from IOobject, optionally with some owner information
-        explicit lumpedPointIOMovement
-        (
-            const IOobject& io,
-            label ownerId = -1
-        );
+        explicit lumpedPointIOMovement(const IOobject& io, label ownerId = -1);
 
 
     //- Destructor
-    ~lumpedPointIOMovement() = default;
+    virtual ~lumpedPointIOMovement() = default;
 
 
     // Member Functions
 
-        //- readData member function used by regIOobject
+        //- The readData member function used by regIOobject
         bool readData(Istream& is);
 
-        //- writeData member function required by regIOobject
+        //- The writeData member function required by regIOobject
         bool writeData(Ostream& os) const;
-
-
-    // IOstream Operators
-
-        friend Ostream& operator<<
-        (
-            Ostream& os,
-            const lumpedPointIOMovement& obj
-        );
 };
+
+
+// IOstream Operators
+Ostream& operator<<(Ostream& os, const lumpedPointIOMovement& obj);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

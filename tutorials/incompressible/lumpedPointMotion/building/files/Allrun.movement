@@ -12,7 +12,22 @@ runApplication reconstructParMesh -constant -withZero -time 0
 runApplication lumpedPointZones
 
 # Simulated external solver
-# Using -scale=1 to see the excessively large movements
-runApplication lumpedPointMovement -span 25 -scale 1 ../files/response.txt
+# Use -scale=1 to see the excessively large movements
+
+if false
+then
+    # Create response file
+    runApplication -overwrite \
+        ../code/building-motion -deltaT 0.001 -nTimes 5001 -output response.txt
+
+    # Use response file for states
+    runApplication -overwrite \
+        lumpedPointMovement -span 25 -scale 1 response.txt
+else
+
+    # Generate states on demand
+    runApplication -overwrite \
+        ../code/building-motion -scale 1 -deltaT 0.025 -nTimes 201
+fi
 
 #------------------------------------------------------------------------------

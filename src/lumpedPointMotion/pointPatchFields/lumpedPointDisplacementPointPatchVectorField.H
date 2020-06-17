@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,6 +42,7 @@ Description
     {
         type    lumpedPointDisplacement;
         value   uniform (0 0 0);
+        controllers ( controllerName1 controllerName2 );
     }
     \endverbatim
 
@@ -67,7 +68,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class interpolationWeights;
 
 /*---------------------------------------------------------------------------*\
@@ -78,7 +79,14 @@ class lumpedPointDisplacementPointPatchVectorField
 :
     public fixedValuePointPatchField<vector>
 {
-    // Private data
+    // Private Data
+
+        //- Names of the movement controller(s) in use
+        wordList controllers_;
+
+        //- Backup method for getting "points0" without a motion solver
+        mutable autoPtr<pointIOField> points0Ptr_;
+
 
     //- Convenience typedefs
     typedef lumpedPointDisplacementPointPatchVectorField patchType;
@@ -167,7 +175,27 @@ public:
     virtual ~lumpedPointDisplacementPointPatchVectorField();
 
 
-    // Member functions
+    // Member Functions
+
+        //- The controller names for this patch
+        const wordList& controllers() const
+        {
+            return controllers_;
+        }
+
+        //- Set all patch controls for patches of this type
+        static label setPatchControls
+        (
+            const pointVectorField& pvf,
+            const pointField& points0
+        );
+
+        //- Set all patch controls for patches of this type
+        static label setInterpolators
+        (
+            const pointVectorField& pvf,
+            const pointField& points0
+        );
 
         //- The ids for all patches of this type
         static labelList patchIds(const pointVectorField& pvf);
