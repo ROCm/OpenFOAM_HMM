@@ -50,15 +50,15 @@ functions
     momErr
     {
         type        momentumError;
+        libs        (fieldFunctionObjects);
         executeControl  writeTime;
         writeControl    writeTime;
-        libs        (libfieldFunctionObjects);
     }
     
     contErr
     {
-        libs        (libfieldFunctionObjects);
         type        div;
+        libs        (fieldFunctionObjects);
         field       phi;
         executeControl  writeTime;
         writeControl    writeTime;

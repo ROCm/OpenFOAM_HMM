@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1912                                 |
+|  \\    /   O peration     | Version:  v2006                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -13,11 +13,11 @@ flux
     libs            (fieldFunctionObjects);
     mode            functionObjectSurface;
     surfaces
-    (
+    {
         sampled.plane-0.25
         sampled.plane-0.45
         sampled.plane-0.55
-    );
+    }
 
     // Optional entries
     phi             rhoU;

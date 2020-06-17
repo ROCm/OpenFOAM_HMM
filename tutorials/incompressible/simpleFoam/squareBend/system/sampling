@@ -91,7 +91,7 @@ sampled
     }
 
     surfaces
-    (
+    {
         // Top channel
         plane1
         {
@@ -117,7 +117,7 @@ sampled
             surfaceType triSurfaceMesh;
             surfaceName angledPlane.obj;
         }
-    );
+    }
 }
 
 

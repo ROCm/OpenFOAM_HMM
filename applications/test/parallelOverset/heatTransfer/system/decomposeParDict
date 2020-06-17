@@ -29,16 +29,10 @@ numberOfSubdomains  2;
 
 method          hierarchical;
 
-hierarchicalCoeffs
+coeffs
 {
     n           (1 2 1);
-    delta       0.001;
-    order       xyz;
-}
-
-manualCoeffs
-{
-    dataFile    "decompositionData";
+    // order       xyz;    //< default order = xyz
 }
 
 // ************************************************************************* //
