@@ -65,4 +65,3 @@
     const dimensionedScalar rhoMin = rhoMinFluid[i];
 
     const pressureControl& pressureControl = pressureControls[i];
-

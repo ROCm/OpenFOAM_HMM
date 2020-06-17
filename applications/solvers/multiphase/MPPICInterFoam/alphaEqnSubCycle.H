@@ -40,4 +40,3 @@ else
 
 rho == alpha1*rho1 + alpha2*rho2;
 mu = mixture.mu();
-

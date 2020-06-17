@@ -107,5 +107,3 @@ void Foam::wallBoilingModels::TDNBModels::Schroeder::write
 }
 
 // ************************************************************************* //
-
-

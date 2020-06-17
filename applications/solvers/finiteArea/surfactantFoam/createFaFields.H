@@ -57,4 +57,3 @@ edgeScalarField phis
     ),
     linearEdgeInterpolate(Us) & aMesh.Le()
 );
-

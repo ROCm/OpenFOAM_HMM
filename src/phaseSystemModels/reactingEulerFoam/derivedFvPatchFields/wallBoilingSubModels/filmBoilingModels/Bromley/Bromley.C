@@ -137,5 +137,3 @@ void Foam::wallBoilingModels::filmBoilingModels::Bromley::write
 
 
 // ************************************************************************* //
-
-

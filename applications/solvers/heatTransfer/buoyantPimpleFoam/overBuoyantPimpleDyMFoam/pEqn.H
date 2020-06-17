@@ -1,4 +1,3 @@
-
 dimensionedScalar compressibility = fvc::domainIntegrate(psi);
 bool compressible = (compressibility.value() > SMALL);
 

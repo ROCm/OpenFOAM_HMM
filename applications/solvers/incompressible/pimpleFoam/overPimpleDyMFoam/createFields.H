@@ -77,4 +77,3 @@ surfaceScalarField phiHbyA
     ),
     fvc::flux(U)
 );
-

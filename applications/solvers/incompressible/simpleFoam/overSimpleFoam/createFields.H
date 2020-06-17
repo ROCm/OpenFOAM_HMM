@@ -43,4 +43,3 @@ autoPtr<incompressible::turbulenceModel> turbulence
 );
 
 #include "createMRF.H"
-

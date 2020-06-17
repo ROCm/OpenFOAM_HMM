@@ -401,7 +401,7 @@ int main()
         // Separation of close eigenvalues of a real symmetric matrix.
         // Jour. Research of the National Bureau of Standards, 47(4), 291-297.
         // DOI:10.6028/jres.047.037
-        // 
+        //
         // 8x8 symmetric square matrix consisting of close real eigenvalues
         // ibid, p. 294
         // {
@@ -505,7 +505,7 @@ int main()
         for (label i = 0; i < numberOfTests; ++i)
         {
             const label mRows = rndGen.position(100, 200);
- 
+
             for (const auto& eps : epsilons)
             {
                 const SquareMatrix<doubleScalar> A(mRows, eps);

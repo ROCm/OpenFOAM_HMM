@@ -111,5 +111,3 @@ void Foam::wallBoilingModels::CHFModels::Zuber::write(Ostream& os) const
 
 
 // ************************************************************************* //
-
-

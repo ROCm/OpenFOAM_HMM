@@ -27,7 +27,6 @@ boundaryField
     }
     ceiling
     {
-        
         type               compressible::thermalBaffle;
 
         // Underlying coupled boundary condition
@@ -95,8 +94,6 @@ boundaryField
         {
             thickness           0.1;
         }
-
-    
     }
     inlet
     {

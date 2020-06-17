@@ -54,7 +54,7 @@ functions
         executeControl  writeTime;
         writeControl    writeTime;
     }
-    
+
     contErr
     {
         type        div;
@@ -63,7 +63,7 @@ functions
         executeControl  writeTime;
         writeControl    writeTime;
     }
-    
+
 }
 
 

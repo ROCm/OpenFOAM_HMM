@@ -12,4 +12,3 @@ runApplication topoSet
 runApplication $(getApplication)
 
 #------------------------------------------------------------------------------
-

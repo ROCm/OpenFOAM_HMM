@@ -192,7 +192,7 @@ Foam::ReactingParcel<ParcelType>::YSolid() const
 {
     return Y_;
 }
- 
+
 
 template<class ParcelType>
 inline Foam::scalar& Foam::ReactingParcel<ParcelType>::mass0()

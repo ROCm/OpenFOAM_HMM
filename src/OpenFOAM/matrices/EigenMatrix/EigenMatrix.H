@@ -35,7 +35,7 @@ Description
     a diagonalisable nonsymmetric real square matrix into its canonical form,
     whereby the matrix is represented in terms of its eigenvalues and
     eigenvectors.
-    
+
     The eigenvalue equation (i.e. eigenvalue problem) is:
 
     \f[

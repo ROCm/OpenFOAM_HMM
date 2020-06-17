@@ -3,7 +3,7 @@
 
   Before opening a new issue, make sure to search for keywords in the issues
   filtered by the "bug" label and check to see if it has already been reported
-  
+
   You can see how your report will be rendered on the platform by using the
   "preview" tab above
 -->

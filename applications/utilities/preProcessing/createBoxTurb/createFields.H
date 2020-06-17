@@ -30,4 +30,3 @@ const vector delta
 );
 
 Random rndGen(1234);
-

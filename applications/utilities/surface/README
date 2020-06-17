@@ -44,4 +44,3 @@ surfaceToPatch
 
 surfaceMeshConvert
 - Similar to surfaceConvert, but uses surfMesh library
-

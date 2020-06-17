@@ -48,4 +48,3 @@
     }
 
     Info<< "Courant Number max: " << CoNum << endl;
-

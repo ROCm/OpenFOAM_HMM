@@ -114,5 +114,3 @@ void Foam::wallBoilingModels::CHFModels::Jeschar::write
 
 
 // ************************************************************************* //
-
-
