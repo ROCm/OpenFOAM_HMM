@@ -66,7 +66,8 @@ Foam::nutUWallFunctionFvPatchScalarField::calcNut() const
 
         // Inertial sublayer contribution
         const scalar nutLog =
-            nuw[facei]*(yPlus[facei]*kappa_/log(E_*yPlus[facei]) - 1.0);
+            nuw[facei]
+           *(yPlus[facei]*kappa_/log(max(E_*yPlus[facei], 1 + 1e-4)) - 1.0);
 
         nutw[facei] = blend(nutVis, nutLog, yPlus[facei]);
     }
