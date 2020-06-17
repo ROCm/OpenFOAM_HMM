@@ -56,7 +56,7 @@ functions
     surfaces
     {
         type            surfaces;
-        libs            ("libsampling.so");
+        libs            (geometricVoF sampling);
         writeControl    writeTime;
 
         surfaceFormat   vtp;

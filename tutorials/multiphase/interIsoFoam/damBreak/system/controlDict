@@ -59,7 +59,7 @@ functions
     surfaces
     {
         type            surfaces;
-        libs            ("libsampling.so");
+        libs            (geometricVoF sampling);
         writeControl    writeTime;
 
         surfaceFormat   vtp;
@@ -68,14 +68,13 @@ functions
         interpolationScheme cell;
 
         surfaces
-        (
+        {
             freeSurf
             {
                 type            interface;
                 interpolate     false;
             }
-
-        );
+        }
     }
 }
 
