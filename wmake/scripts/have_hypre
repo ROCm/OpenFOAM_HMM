@@ -45,9 +45,9 @@ no_hypre()
 echo_hypre()
 {
     echo "hypre=${HAVE_HYPRE:-false}"
-    echo "root=$HYPRE_ARCH_PATH"
-    echo "include=$HYPRE_INC_DIR"
-    echo "library=$HYPRE_LIB_DIR"
+    echo "root=\"$HYPRE_ARCH_PATH\""
+    echo "include=\"$HYPRE_INC_DIR\""
+    echo "library=\"$HYPRE_LIB_DIR\""
 }
 
 

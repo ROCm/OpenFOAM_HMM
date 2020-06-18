@@ -10,29 +10,8 @@ targetType=libso
 : "${FOAM_MODULE_PREFIX:=${FOAM_LIBBIN%/*}}"
 export FOAM_MODULE_PREFIX
 
-
-#------------------------------------------------------------------------------
-
-# Skip some directory names
-filterDir() {
-    case "$1" in
-    (build | platforms | doc)
-        echo ""
-        ;;
-    (*)
-        echo "$1"
-        ;;
-    esac
-}
-
-
-# Build each first-level directory with an Allwmake* file
-for moduleName in \
-    $(find . -mindepth 2 -maxdepth 2 -name 'Allwmake*' -print | \
-      sed -e 's@^\./@@; s@/.*$@@;' | sort | uniq)
+for moduleName in $(./list-modules)
 do
-    moduleName="$(filterDir "$moduleName")"
-
     if [ -d "$moduleName" ]
     then
         ( cd "$moduleName" && wmake -all $targetType )

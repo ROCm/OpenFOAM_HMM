@@ -45,9 +45,9 @@ no_mgridgen()
 echo_mgridgen()
 {
     echo "mgridgen=${HAVE_MGRIDGEN:-false}"
-    echo "root=$MGRIDGEN_ARCH_PATH"
-    echo "include=$MGRIDGEN_INC_DIR"
-    echo "library=$MGRIDGEN_LIB_DIR"
+    echo "root=\"$MGRIDGEN_ARCH_PATH\""
+    echo "include=\"$MGRIDGEN_INC_DIR\""
+    echo "library=\"$MGRIDGEN_LIB_DIR\""
 }
 
 

@@ -44,9 +44,9 @@ no_zoltan()
 echo_zoltan()
 {
     echo "zoltan=${HAVE_ZOLTAN:-false}"
-    echo "root=$ZOLTAN_ARCH_PATH"
-    echo "include=$ZOLTAN_INC_DIR"
-    echo "library=$ZOLTAN_LIB_DIR"
+    echo "root=\"$ZOLTAN_ARCH_PATH\""
+    echo "include=\"$ZOLTAN_INC_DIR\""
+    echo "library=\"$ZOLTAN_LIB_DIR\""
 }
 
 

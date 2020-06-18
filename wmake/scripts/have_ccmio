@@ -44,9 +44,9 @@ no_ccmio()
 echo_ccmio()
 {
     echo "ccmio=${HAVE_CCMIO:-false}"
-    echo "root=$CCMIO_ARCH_PATH"
-    echo "include=$CCMIO_INC_DIR"
-    echo "library=$CCMIO_LIB_DIR"
+    echo "root=\"$CCMIO_ARCH_PATH\""
+    echo "include=\"$CCMIO_INC_DIR\""
+    echo "library=\"$CCMIO_LIB_DIR\""
 }
 
 

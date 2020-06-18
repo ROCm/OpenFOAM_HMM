@@ -55,14 +55,14 @@ no_scotch()
 echo_scotch()
 {
     echo "scotch=${HAVE_SCOTCH:-false}"
-    echo "root=$SCOTCH_ARCH_PATH"
-    echo "include=$SCOTCH_INC_DIR"
-    echo "library=$SCOTCH_LIB_DIR"
+    echo "root=\"$SCOTCH_ARCH_PATH\""
+    echo "include=\"$SCOTCH_INC_DIR\""
+    echo "library=\"$SCOTCH_LIB_DIR\""
     echo
     echo "ptscotch=${HAVE_PTSCOTCH:-false}"
-    echo "root=$PTSCOTCH_ARCH_PATH"
-    echo "include=$PTSCOTCH_INC_DIR"
-    echo "library=$PTSCOTCH_LIB_DIR"
+    echo "root=\"$PTSCOTCH_ARCH_PATH\""
+    echo "include=\"$PTSCOTCH_INC_DIR\""
+    echo "library=\"$PTSCOTCH_LIB_DIR\""
 }
 
 

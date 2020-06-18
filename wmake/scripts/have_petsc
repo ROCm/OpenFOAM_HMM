@@ -46,9 +46,9 @@ no_petsc()
 echo_petsc()
 {
     echo "petsc=${HAVE_PETSC:-false}"
-    echo "root=$PETSC_ARCH_PATH"
-    echo "include=$PETSC_INC_DIR"
-    echo "library=$PETSC_LIB_DIR"
+    echo "root=\"$PETSC_ARCH_PATH\""
+    echo "include=\"$PETSC_INC_DIR\""
+    echo "library=\"$PETSC_LIB_DIR\""
 }
 
 

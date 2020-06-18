@@ -50,9 +50,9 @@ echo_cgal()
 {
     echo "cgal=${HAVE_CGAL:-false}"
     echo "flavour=$CGAL_FLAVOUR"
-    echo "root=$CGAL_ARCH_PATH"
-    echo "include=$CGAL_INC_DIR"
-    echo "library=$CGAL_LIB_DIR"
+    echo "root=\"$CGAL_ARCH_PATH\""
+    echo "include=\"$CGAL_INC_DIR\""
+    echo "library=\"$CGAL_LIB_DIR\""
 }
 
 

@@ -41,12 +41,13 @@ printHelp() {
 Usage: ${0##*/} [OPTION]
 options:
   -case <dir>       specify starting directory, default is cwd
-  -self | -skipFirst avoid Allrun, Alltest script (prevent infinite recursion)
+  -self             avoid Allrun, Alltest script (prevent infinite recursion)
   -test             prefer Alltest script, pass -test argument to scripts
   -help             print the usage
 
 Recursively run Allrun/Alltest or blockMesh+application,
 starting with the current directory or the specified -case directory.
+The -skipFirst option is the same as -self.
 
 USAGE
    exit 0  # clean exit

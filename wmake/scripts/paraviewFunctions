@@ -53,9 +53,9 @@ no_paraview()
 echo_paraview()
 {
     echo "paraview=${HAVE_PVPLUGIN_SUPPORT:-false}"
-    echo "root=$ParaView_DIR"
-    echo "include=$PARAVIEW_INC_DIR"
-    echo "plugin=$FOAM_PV_PLUGIN_LIBBIN"
+    echo "root=\"$ParaView_DIR\""
+    echo "include=\"$PARAVIEW_INC_DIR\""
+    echo "plugin=\"$FOAM_PV_PLUGIN_LIBBIN\""
     echo "api=$PARAVIEW_API"
 }
 

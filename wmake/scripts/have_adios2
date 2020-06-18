@@ -45,9 +45,9 @@ no_adios2()
 echo_adios2()
 {
     echo "adios2=${HAVE_ADIOS2:-false}"
-    echo "root=$ADIOS2_ARCH_PATH"
-    echo "include=$ADIOS2_INC_DIR"
-    echo "library=$ADIOS2_LIB_DIR"
+    echo "root=\"$ADIOS2_ARCH_PATH\""
+    echo "include=\"$ADIOS2_INC_DIR\""
+    echo "library=\"$ADIOS2_LIB_DIR\""
 }
 
 

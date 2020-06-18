@@ -45,9 +45,9 @@ no_metis()
 echo_metis()
 {
     echo "metis=${HAVE_METIS:-false}"
-    echo "root=$METIS_ARCH_PATH"
-    echo "include=$METIS_INC_DIR"
-    echo "library=$METIS_LIB_DIR"
+    echo "root=\"$METIS_ARCH_PATH\""
+    echo "include=\"$METIS_INC_DIR\""
+    echo "library=\"$METIS_LIB_DIR\""
 }
 
 

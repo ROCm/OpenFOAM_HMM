@@ -45,9 +45,9 @@ no_kahip()
 echo_kahip()
 {
     echo "kahip=${HAVE_KAHIP:-false}"
-    echo "root=$KAHIP_ARCH_PATH"
-    echo "include=$KAHIP_INC_DIR"
-    echo "library=$KAHIP_LIB_DIR"
+    echo "root=\"$KAHIP_ARCH_PATH\""
+    echo "include=\"$KAHIP_INC_DIR\""
+    echo "library=\"$KAHIP_LIB_DIR\""
 }
 
 

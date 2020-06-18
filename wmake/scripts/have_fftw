@@ -45,9 +45,9 @@ no_fftw()
 echo_fftw()
 {
     echo "fftw=${HAVE_FFTW:-false}"
-    echo "root=$FFTW_ARCH_PATH"
-    echo "include=$FFTW_INC_DIR"
-    echo "library=$FFTW_LIB_DIR"
+    echo "root=\"$FFTW_ARCH_PATH\""
+    echo "include=\"$FFTW_INC_DIR\""
+    echo "library=\"$FFTW_LIB_DIR\""
 }
 
 

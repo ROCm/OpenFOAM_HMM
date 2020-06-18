@@ -20,7 +20,7 @@
 #     and all its subdirectories.
 #
 #------------------------------------------------------------------------------
-. $WM_PROJECT_DIR/bin/tools/CleanFunctions  # Tutorial clean functions
+. ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions  # Tutorial clean functions
 
 thisScript="$0"
 if [ "/${thisScript#/}" != "$thisScript" ]
@@ -41,6 +41,7 @@ options:
 
 Recursively clean an OpenFOAM case directory.
 By default uses Allclean, Allwclean when present.
+The -skipFirst option is the same as -self.
 
 USAGE
    exit 0  # clean exit
@@ -80,7 +81,7 @@ then
             exit 2
         }
         ;;
-    -self*)
+    -self* | -skipFirst)
         skipSelf=true
         ;;
     --)
@@ -133,7 +134,7 @@ else
     # Recurse into subdirectories
     for caseName in *
     do
-        ( cd $caseName 2>/dev/null && "$thisScript" )
+        ( cd "$caseName" 2>/dev/null && "$thisScript" )
     done
 fi
 

@@ -45,9 +45,9 @@ no_boost()
 echo_boost()
 {
     echo "boost=${HAVE_BOOST:-false}"
-    echo "root=$BOOST_ARCH_PATH"
-    echo "include=$BOOST_INC_DIR"
-    echo "library=$BOOST_LIB_DIR"
+    echo "root=\"$BOOST_ARCH_PATH\""
+    echo "include=\"$BOOST_INC_DIR\""
+    echo "library=\"$BOOST_LIB_DIR\""
 }
 
 

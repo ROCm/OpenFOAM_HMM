@@ -43,8 +43,8 @@ no_readline()
 echo_readline()
 {
     echo "readline=${HAVE_LIBREADLINE:-false}"
-    echo "include=$READLINE_INC_DIR"
-    echo "library=$READLINE_LIB_DIR"
+    echo "include=\"$READLINE_INC_DIR\""
+    echo "library=\"$READLINE_LIB_DIR\""
 }
 
 
