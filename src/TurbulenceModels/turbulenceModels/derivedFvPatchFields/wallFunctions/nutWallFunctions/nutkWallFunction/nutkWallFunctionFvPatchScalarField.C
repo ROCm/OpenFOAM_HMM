@@ -71,7 +71,8 @@ calcNut() const
         const scalar nutVis = 0.0;
 
         // Inertial sublayer contribution
-        const scalar nutLog = nuw[facei]*(yPlus*kappa_/log(E_*yPlus) - 1.0);
+        const scalar nutLog =
+            nuw[facei]*(yPlus*kappa_/log(max(E_*yPlus, 1 + 1e-4)) - 1.0);
 
         nutw[facei] = blend(nutVis, nutLog, yPlus);
     }

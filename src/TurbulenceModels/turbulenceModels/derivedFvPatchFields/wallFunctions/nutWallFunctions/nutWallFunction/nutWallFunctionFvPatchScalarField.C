@@ -180,8 +180,11 @@ Foam::nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
     ),
     UName_(dict.getOrDefault<word>("U", word::null)),
     Cmu_(dict.getOrDefault<scalar>("Cmu", 0.09)),
-    kappa_(dict.getOrDefault<scalar>("kappa", 0.41)),
-    E_(dict.getOrDefault<scalar>("E", 9.8)),
+    kappa_
+    (
+        dict.getCheckOrDefault<scalar>("kappa", 0.41, scalarMinMax::ge(SMALL))
+    ),
+    E_(dict.getCheckOrDefault<scalar>("E", 9.8, scalarMinMax::ge(SMALL))),
     yPlusLam_(yPlusLam(kappa_, E_))
 {
     checkType();
