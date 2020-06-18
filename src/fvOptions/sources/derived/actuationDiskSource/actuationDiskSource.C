@@ -107,15 +107,15 @@ void Foam::fv::actuationDiskSource::setMonitorCells(const dictionary& dict)
 
             List<point> monitorPoints;
 
-            if (dict.found("monitorCoeffs"))
+            const dictionary* coeffsDictPtr = dict.findDict("monitorCoeffs");
+            if (coeffsDictPtr)
             {
-                const dictionary subDict(dict.subDict("monitorCoeffs"));
-                subDict.readIfPresent("points", monitorPoints);
+                coeffsDictPtr->readIfPresent("points", monitorPoints);
             }
             else
             {
                 monitorPoints.resize(1);
-                monitorPoints[0] = dict.get<point>("upstreamPoint");
+                dict.readEntry("upstreamPoint", monitorPoints.first());
             }
 
             for (const auto& monitorPoint : monitorPoints)
@@ -170,13 +170,13 @@ Foam::fv::actuationDiskSource::actuationDiskSource
 )
 :
     cellSetOption(name, modelType, dict, mesh),
-    writeFile(mesh, name, modelType, dict),
+    writeFile(mesh, name, modelType, coeffs_),
     forceMethod_
     (
         forceMethodTypeNames.getOrDefault
         (
             "variant",
-            dict,
+            coeffs_,
             forceMethodType::FROUDE
         )
     ),
@@ -185,21 +185,21 @@ Foam::fv::actuationDiskSource::actuationDiskSource
         monitorMethodTypeNames.getOrDefault
         (
             "monitorMethod",
-            dict,
+            coeffs_,
             monitorMethodType::POINTS
         )
     ),
     sink_
     (
-        dict.getOrDefault<bool>("sink", true)
+        coeffs_.getOrDefault<bool>("sink", true)
       ? 1
       : -1
     ),
-    writeFileStart_(dict.getOrDefault<scalar>("writeFileStart", 0)),
-    writeFileEnd_(dict.getOrDefault<scalar>("writeFileEnd", VGREAT)),
+    writeFileStart_(coeffs_.getOrDefault<scalar>("writeFileStart", 0)),
+    writeFileEnd_(coeffs_.getOrDefault<scalar>("writeFileEnd", VGREAT)),
     diskArea_
     (
-        dict.getCheck<scalar>
+        coeffs_.getCheck<scalar>
         (
             "diskArea",
             scalarMinMax::ge(VSMALL)
@@ -207,18 +207,17 @@ Foam::fv::actuationDiskSource::actuationDiskSource
     ),
     diskDir_
     (
-        dict.getCheck<vector>
+        coeffs_.getCheck<vector>
         (
             "diskDir",
             [&](const vector& vec){ return mag(vec) > VSMALL; }
         ).normalise()
     ),
-    UvsCpPtr_(Function1<scalar>::New("Cp", dict)),
-    UvsCtPtr_(Function1<scalar>::New("Ct", dict)),
+    UvsCpPtr_(Function1<scalar>::New("Cp", coeffs_)),
+    UvsCtPtr_(Function1<scalar>::New("Ct", coeffs_)),
     monitorCells_()
 {
-    //setMonitorCells((dict.subDict("monitorCoeffs")));
-    setMonitorCells(dict);
+    setMonitorCells(coeffs_);
 
     fieldNames_.setSize(1, "U");
 

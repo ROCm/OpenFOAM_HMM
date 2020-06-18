@@ -302,7 +302,7 @@ private:
     // Private Member Functions
 
         //- Locate the set of cells whereat the incoming velocity is monitored
-        void setMonitorCells(const dictionary& subDict);
+        void setMonitorCells(const dictionary& dict);
 
         //- Compute the selected force computation method type
         template<class AlphaFieldType, class RhoFieldType>
