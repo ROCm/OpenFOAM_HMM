@@ -123,6 +123,25 @@ void Foam::ensightSurfaceReader::debugSection
 }
 
 
+Foam::fileName Foam::ensightSurfaceReader::replaceMask
+(
+    const fileName& fName,
+    const label timeIndex
+) const
+{
+    fileName result(fName);
+    std::ostringstream oss;
+
+    label nMask = stringOps::count(fName, '*');
+    const std::string maskStr(nMask, '*');
+    oss << std::setfill('0') << std::setw(nMask) << timeIndex;
+    const word indexStr = oss.str();
+    result.replace(maskStr, indexStr);
+
+    return result;
+}
+
+
 Foam::Pair<Foam::ensightSurfaceReader::idTypes>
 Foam::ensightSurfaceReader::readGeometryHeader(ensightReadFile& is) const
 {
@@ -230,6 +249,8 @@ void Foam::ensightSurfaceReader::readCase(IFstream& is)
     // - use the last entry
     meshFileName_ = stringOps::splitSpace(buffer).last().str();
 
+    DebugInfo << "mesh file:" << meshFileName_ << endl;
+
     debugSection("VARIABLE", is);
 
     // Read the field description
@@ -330,13 +351,17 @@ Foam::ensightSurfaceReader::ensightSurfaceReader(const fileName& fName)
 
 // * * * * * * * * * * * * * Public Member Functions   * * * * * * * * * * * //
 
-const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry()
+const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry
+(
+    const label timeIndex
+)
 {
     DebugInFunction << endl;
 
     if (!surfPtr_.valid())
     {
-        IFstream isBinary(baseDir_/meshFileName_, IOstream::BINARY);
+        fileName meshInstance(replaceMask(meshFileName_, timeIndex));
+        IFstream isBinary(baseDir_/meshInstance, IOstream::BINARY);
 
         if (!isBinary.good())
         {
@@ -391,7 +416,7 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry()
         }
 
 
-        ensightReadFile is(baseDir_/meshFileName_, streamFormat_);
+        ensightReadFile is(baseDir_/meshInstance, streamFormat_);
 
         DebugInfo
             << "File: " << is.name() << nl;

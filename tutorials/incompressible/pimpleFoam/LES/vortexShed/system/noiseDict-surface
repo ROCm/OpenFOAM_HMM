@@ -34,7 +34,7 @@ surfaceNoiseCoeffs
 
 
     // Input file
-    file        "postProcessing/cuttingPlane/zNormal/zNormal.case";
+    file        "postProcessing/curleSurface/surface/surface.case";
 
     // Surface reader
     reader      ensight;
@@ -53,13 +53,13 @@ surfaceNoiseCoeffs
     }
 
     // Pressure field
-    p               Curle;
+    p               pCurle;
 
     // Number of samples in sampling window
     // default = 2^16 (=65536)
-    N               1024;
+    N               4096;
 
-    rhoRef          1.205;
+    rhoRef          1;
 }
 
 

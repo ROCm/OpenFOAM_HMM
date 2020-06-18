@@ -43,57 +43,12 @@ namespace functionObjects
 }
 }
 
-
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-bool Foam::functionObjects::Curle::calc()
-{
-    if (foundObject<volScalarField>(fieldName_))
-    {
-        // Evaluate pressure force time derivative
-
-        const volScalarField& p = lookupObject<volScalarField>(fieldName_);
-        const volScalarField dpdt(scopedName("dpdt"), fvc::ddt(p));
-        const volScalarField::Boundary& dpdtBf = dpdt.boundaryField();
-        const surfaceVectorField::Boundary& SfBf = mesh_.Sf().boundaryField();
-
-        dimensionedVector dfdt("dfdt", p.dimensions()*dimArea/dimTime, Zero);
-
-        for (const label patchi : patchSet_)
-        {
-            dfdt.value() += sum(dpdtBf[patchi]*SfBf[patchi]);
-        }
-
-        reduce(dfdt.value(), sumOp<vector>());
-
-
-        // Construct and store Curle acoustic pressure
-
-        const volVectorField& C = mesh_.C();
-
-        auto tpDash = tmp<volScalarField>::New
-        (
-            IOobject
-            (
-                resultName_,
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh_,
-            dimensionedScalar(p.dimensions(), Zero)
-        );
-        auto& pDash = tpDash.ref();
-
-        const volVectorField d(scopedName("d"), C - x0_);
-        pDash = (d/magSqr(d) & dfdt)/(4.0*mathematical::pi*c0_);
-
-        return store(resultName_, tpDash);
-    }
-
-    return false;
-}
+const Foam::Enum<Foam::functionObjects::Curle::modeType>
+Foam::functionObjects::Curle::modeTypeNames_
+({
+    { modeType::point, "point" },
+    { modeType::surface, "surface" },
+});
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -105,14 +60,17 @@ Foam::functionObjects::Curle::Curle
     const dictionary& dict
 )
 :
-    fieldExpression(name, runTime, dict, "p"),
+    fvMeshFunctionObject(name, runTime, dict),
+    writeFile(mesh_, name),
+    pName_("p"),
     patchSet_(),
-    x0_("x0", dimLength,  Zero),
-    c0_("c0", dimVelocity, Zero)
+    observerPositions_(),
+    c0_(0),
+    rawFilePtrs_(),
+    inputSurface_(),
+    surfaceWriterPtr_(nullptr)
 {
     read(dict);
-
-    setResultName(typeName, fieldName_);
 }
 
 
@@ -120,57 +78,192 @@ Foam::functionObjects::Curle::Curle
 
 bool Foam::functionObjects::Curle::read(const dictionary& dict)
 {
-    if (fieldExpression::read(dict))
+    if (!(fvMeshFunctionObject::read(dict) && writeFile::read(dict)))
     {
-        patchSet_ =
-            mesh_.boundaryMesh().patchSet
-            (
-                dict.get<wordRes>("patches")
-            );
-
-        if (patchSet_.empty())
-        {
-            WarningInFunction
-                << "No patches defined"
-                << endl;
-
-            return false;
-        }
-
-        // Read the reference speed of sound
-        dict.readEntry("c0", c0_);
-
-        if (c0_.value() < VSMALL)
-        {
-            FatalErrorInFunction
-                << "Reference speed of sound = " << c0_
-                << " cannot be negative or zero."
-                << abort(FatalError);
-        }
-
-        // Set the location of the effective point source to the area-average
-        // of the patch face centres
-        const volVectorField::Boundary& Cbf = mesh_.C().boundaryField();
-        const surfaceScalarField::Boundary& magSfBf =
-            mesh_.magSf().boundaryField();
-
-        x0_.value() = vector::zero;
-        scalar sumMagSf = 0;
-        for (auto patchi : patchSet_)
-        {
-            x0_.value() += sum(Cbf[patchi]*magSfBf[patchi]);
-            sumMagSf += sum(magSfBf[patchi]);
-        }
-
-        reduce(x0_.value(), sumOp<vector>());
-        reduce(sumMagSf, sumOp<scalar>());
-
-        x0_.value() /= sumMagSf + ROOTVSMALL;
-
-        return true;
+        return false;
     }
 
-    return false;
+    dict.readIfPresent("p", pName_);
+
+    patchSet_ = mesh_.boundaryMesh().patchSet(dict.get<wordRes>("patches"));
+
+    if (patchSet_.empty())
+    {
+        WarningInFunction
+            << "No patches defined"
+            << endl;
+
+        return false;
+    }
+
+    const modeType inputMode = modeTypeNames_.get("input", dict);
+
+    switch (inputMode)
+    {
+        case modeType::point:
+        {
+            observerPositions_ = dict.get<List<point>>("observerPositions");
+            break;
+        }
+        case modeType::surface:
+        {
+            const fileName fName = (dict.get<fileName>("surface")).expand();
+            inputSurface_ = MeshedSurface<face>(fName);
+
+            observerPositions_ = inputSurface_.Cf();
+        }
+    }
+
+    if (observerPositions_.empty())
+    {
+        WarningInFunction
+            << "No observer positions defined"
+            << endl;
+
+        return false;
+    }
+
+    const auto outputMode = modeTypeNames_.get("output", dict);
+
+    switch (outputMode)
+    {
+        case modeType::point:
+        {
+            rawFilePtrs_.setSize(observerPositions_.size());
+            forAll(rawFilePtrs_, filei)
+            {
+                rawFilePtrs_.set
+                (
+                    filei,
+                    createFile("observer" + Foam::name(filei))
+                );
+
+                if (rawFilePtrs_.set(filei))
+                {
+                    OFstream& os = rawFilePtrs_[filei];
+
+                    writeHeaderValue(os, "Observer", filei);
+                    writeHeaderValue(os, "Position", observerPositions_[filei]);
+                    writeCommented(os, "Time");
+                    writeTabbed(os, "p(Curle)");
+                    os  << endl;
+                }
+            }
+            break;
+        }
+        case modeType::surface:
+        {
+            if (inputMode != modeType::surface)
+            {
+                FatalIOErrorInFunction(dict)
+                    << "Surface output is only available when input mode is "
+                    << "type '" << modeTypeNames_[modeType::surface] << "'"
+                    << abort(FatalIOError);
+            }
+
+            const word surfaceType(dict.get<word>("surfaceType"));
+            surfaceWriterPtr_ = surfaceWriter::New
+            (
+                surfaceType,
+                dict.subOrEmptyDict("formatOptions").subOrEmptyDict(surfaceType)
+            );
+
+            // Use outputDir/TIME/surface-name
+            surfaceWriterPtr_->useTimeDir() = true;
+        }
+    }
+
+    // Read the reference speed of sound
+    dict.readEntry("c0", c0_);
+
+    if (c0_ < VSMALL)
+    {
+        FatalErrorInFunction
+            << "Reference speed of sound = " << c0_
+            << " cannot be negative or zero."
+            << abort(FatalError);
+    }
+
+    return true;
+}
+
+
+bool Foam::functionObjects::Curle::execute()
+{
+    if (!foundObject<volScalarField>(pName_))
+    {
+        return false;
+    }
+
+    const volScalarField& p = lookupObject<volScalarField>(pName_);
+    const volScalarField::Boundary& pBf = p.boundaryField();
+    const volScalarField dpdt(scopedName("dpdt"), fvc::ddt(p));
+    const volScalarField::Boundary& dpdtBf = dpdt.boundaryField();
+    const surfaceVectorField::Boundary& SfBf = mesh_.Sf().boundaryField();
+    const surfaceVectorField::Boundary& CfBf = mesh_.Cf().boundaryField();
+
+    scalarField pDash(observerPositions_.size(), 0);
+
+    for (auto patchi : patchSet_)
+    {
+        const scalarField& pp = pBf[patchi];
+        const scalarField& dpdtp = dpdtBf[patchi];
+        const vectorField& Sfp = SfBf[patchi];
+        const vectorField& Cfp = CfBf[patchi];
+
+        forAll(observerPositions_, pointi)
+        {
+            const vectorField r(Cfp - observerPositions_[pointi]);
+            const scalarField invMagR(1/(mag(r) + ROOTVSMALL));
+
+            pDash[pointi] +=
+                sum((pp*sqr(invMagR) + invMagR/c0_*dpdtp)*(Sfp & r));
+        }
+    }
+    Pstream::listCombineGather(pDash, plusEqOp<scalar>());
+    Pstream::listCombineScatter(pDash);
+
+    if (surfaceWriterPtr_)
+    {
+        if (Pstream::master())
+        {
+            // Time-aware, with time spliced into the output path
+            surfaceWriterPtr_->beginTime(time_);
+
+            surfaceWriterPtr_->open
+            (
+                inputSurface_.points(),
+                inputSurface_.surfFaces(),
+                (baseFileDir()/name()/"surface"),
+                false  // serial - already merged
+            );
+
+            surfaceWriterPtr_->write("p(Curle)", pDash);
+
+            surfaceWriterPtr_->endTime();
+            surfaceWriterPtr_->clear();
+        }
+    }
+    else
+    {
+        forAll(observerPositions_, pointi)
+        {
+            if (rawFilePtrs_.set(pointi))
+            {
+                OFstream& os = rawFilePtrs_[pointi];
+                writeCurrentTime(os);
+                os  << pDash[pointi] << endl;
+            }
+        }
+    }
+
+    return true;
+}
+
+
+bool Foam::functionObjects::Curle::write()
+{
+    return true;
 }
 
 

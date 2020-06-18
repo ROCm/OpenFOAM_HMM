@@ -104,7 +104,8 @@ void surfaceNoise::initialise(const fileName& fName)
         deltaT_ = checkUniformTimeStep(times_);
 
         // Read the surface geometry
-        const meshedSurface& surf = readerPtr_->geometry();
+        // Note: hard-coded to read mesh from first time index
+        const meshedSurface& surf = readerPtr_->geometry(0);
         nFace_ = surf.size();
     }
 
@@ -208,7 +209,6 @@ void surfaceNoise::readSurfaceData
 
             Info<< "    time: " << times_[i] << endl;
             const scalarField p(readerPtr_->field(timeI, pIndex_, scalar(0)));
-
             forAll(p, faceI)
             {
                 pData[faceI][i] = p[faceI]*rhoRef_;
@@ -256,7 +256,8 @@ Foam::scalar surfaceNoise::writeSurfaceData
         scalar areaAverage = 0;
         if (Pstream::master())
         {
-            const meshedSurface& surf = readerPtr_->geometry();
+            // Note: hard-coded to read mesh from first time index
+            const meshedSurface& surf = readerPtr_->geometry(0);
 
             scalarField allData(surf.size());
 
@@ -298,7 +299,7 @@ Foam::scalar surfaceNoise::writeSurfaceData
 
             // TO BE VERIFIED: area-averaged values
             // areaAverage = sum(allData*surf.magSf())/sum(surf.magSf());
-            areaAverage = sum(allData)/allData.size();
+            areaAverage = sum(allData)/(allData.size() + ROOTVSMALL);
         }
         Pstream::scatter(areaAverage);
 
@@ -306,7 +307,8 @@ Foam::scalar surfaceNoise::writeSurfaceData
     }
     else
     {
-        const meshedSurface& surf = readerPtr_->geometry();
+        // Note: hard-coded to read mesh from first time index
+        const meshedSurface& surf = readerPtr_->geometry(0);
 
         if (writeSurface)
         {
@@ -329,7 +331,7 @@ Foam::scalar surfaceNoise::writeSurfaceData
 
         // TO BE VERIFIED: area-averaged values
         // return sum(data*surf.magSf())/sum(surf.magSf());
-        return sum(data)/data.size();
+        return sum(data)/(data.size() + ROOTVSMALL);
     }
 }
 
@@ -357,7 +359,8 @@ Foam::scalar surfaceNoise::surfaceAverage
         scalar areaAverage = 0;
         if (Pstream::master())
         {
-            const meshedSurface& surf = readerPtr_->geometry();
+            // Note: hard-coded to read mesh from first time index
+            const meshedSurface& surf = readerPtr_->geometry(0);
 
             scalarField allData(surf.size());
 

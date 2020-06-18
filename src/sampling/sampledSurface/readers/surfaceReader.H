@@ -101,7 +101,7 @@ public:
     // Member Functions
 
         //- Return a reference to the surface geometry
-        virtual const meshedSurface& geometry() = 0;
+        virtual const meshedSurface& geometry(const label timeIndex) = 0;
 
         //- Return a list of the available times
         virtual instantList times() const = 0;

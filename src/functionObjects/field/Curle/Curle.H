@@ -35,15 +35,21 @@ Description
     Curle's analogy is implemented as:
 
     \f[
-        p' = \frac{1}{4 \pi c_0}\frac{\vec d}{|\vec d|^2}\cdot\frac{d\vec F}{dt}
+        p' = \frac{1}{4 \pi}
+             \frac{\vec{r}}{| \vec{r} | ^2} \cdot
+             \left(
+                \frac{\vec{F}}{| \vec{r} |}
+              + \frac{1}{c_0}\frac{d(\vec{F})}{d(t)}
+             \right)
     \f]
 
     where
     \vartable
-      p'        | Curle's acoustic pressure     [Pa] or [Pa \f$(m^3/\rho)\f$]
-      c_0       | Reference speed of sound              [m/s]
-      \vec d    | Distance vector to observer locations [m]
-      \vec F    | Force                         [N] or [N (\f$m^3/\rho\f$)]
+        p'          | Curle's acoustic pressure [Pa] or [Pa (m3/kg)]
+        c_0         | Reference speed of sound [m/s]
+        \vec{r}     | Distance vector to observer locations [m]
+        \vec{F}     | Force [N] or [N (m3/kg)]
+        t           | time [s]
     \endvartable
 
     Operands:
@@ -62,16 +68,27 @@ Usage
     \verbatim
     Curle1
     {
-        // Mandatory entries (unmodifiable)
         type            Curle;
-        libs            (fieldFunctionObjects);
-
-        // Mandatory entries (runtime modifiable)
-        patches         (<patch1> <patch2> ... <patchN>)
-        c0              343;
-
-        // Optional (inherited) entries
+        libs            ("libfieldFunctionObjects.so");
         ...
+        patches         (surface1 surface2);
+        c0              330;
+
+
+        // Input - either points or surface
+
+        input           points;
+        observerPositions ((0 0 0)(1 0 0));
+
+        //input           surface;
+        //surface         "inputSurface.obj"
+
+
+        // Output - either points or surface
+        output          points;
+
+        //output          surface;
+        //surfaceType     ensight;
     }
     \endverbatim
 
@@ -80,8 +97,14 @@ Usage
       Property     | Description                        | Type | Req'd | Dflt
       type         | Type name: Curle                   | word |  yes  | -
       libs         | Library name: fieldFunctionObjects | word |  yes  | -
-      patches      | Names of the operand patches       | wordList | yes | -
-      c0           | Reference speed of sound [m/s]     | scalar | yes | -
+      p            | Pressure field name                | word |  no   | p
+      patches      | Sound generation patch names       | wordList | yes | -
+      c0           | Reference speed of sound           | scalar | yes | -
+      input        | Input type                         | word | yes   | -
+      observerPositions | List of observer positions (x y z) | pointList | no |-
+      surface      | Input surface file name            | word | no    | -
+      output       | Output type                        | word | yes   | -
+      surfaceType  | Output surface type                | word | no    | -
     \endtable
 
     The inherited entries are elaborated in:
@@ -93,7 +116,7 @@ Usage
 See also
     - Foam::functionObject
     - Foam::functionObjects::fvMeshFunctionObject
-    - Foam::functionObjects::fieldExpression
+    - Foam::functionObjects::writeFile
     - ExtendedCodeGuide::functionObjects::field::Curle
 
 SourceFiles
@@ -104,9 +127,11 @@ SourceFiles
 #ifndef functionObjects_Curle_H
 #define functionObjects_Curle_H
 
-#include "fieldExpression.H"
-#include "dimensionedScalar.H"
-#include "dimensionedVector.H"
+#include "fvMeshFunctionObject.H"
+#include "writeFile.H"
+#include "Enum.H"
+#include "MeshedSurface.H"
+#include "surfaceWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -121,26 +146,40 @@ namespace functionObjects
 
 class Curle
 :
-    public fieldExpression
+    public fvMeshFunctionObject,
+    public writeFile
 {
+    enum class modeType
+    {
+        point,
+        surface
+    };
+
+    static const Enum<modeType> modeTypeNames_;
+
+
     // Private Data
 
-        // Read from dictionary
+        //- Name of pressure field; default = p
+        word pName_;
 
-            //- Patches to integrate forces over
-            labelHashSet patchSet_;
+        //- Patches to integrate forces over
+        labelHashSet patchSet_;
 
-            //- Area-averaged centre of patch faces
-            dimensionedVector x0_;
+        //- Observer positions
+        List<point> observerPositions_;
 
-            //- Reference speed of sound
-            dimensionedScalar c0_;
+        //- Reference speed of sound
+        scalar c0_;
 
+        //- Output files when sampling points
+        PtrList<OFstream> rawFilePtrs_;
 
-protected:
+        //- Input surface when sampling a surface
+        MeshedSurface<face> inputSurface_;
 
-        //- Calculate the acoustic pressure field and return true if successful
-        virtual bool calc();
+        //- Ouput surface when sampling a surface
+        autoPtr<surfaceWriter> surfaceWriterPtr_;
 
 
 public:
@@ -174,6 +213,10 @@ public:
 
         //- Read the Curle data
         virtual bool read(const dictionary&);
+
+        virtual bool execute();
+
+        virtual bool write();
 };
 
 

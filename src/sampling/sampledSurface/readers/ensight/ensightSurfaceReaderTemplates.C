@@ -70,24 +70,7 @@ Foam::tmp<Foam::Field<Type>> Foam::ensightSurfaceReader::readField
     const word& fieldName(fieldNames_[fieldIndex]);
     const label fileIndex = timeStartIndex_ + timeIndex*timeIncrement_;
 
-    fileName fieldFileName(fieldFileNames_[fieldIndex]);
-
-    std::ostringstream oss;
-    label nMask = 0;
-    for (size_t chari = 0; chari < fieldFileName.size(); ++chari)
-    {
-        if (fieldFileName[chari] == '*')
-        {
-            nMask++;
-        }
-    }
-
-    const std::string maskStr(nMask, '*');
-    oss << std::setfill('0') << std::setw(nMask) << fileIndex;
-    const word indexStr = oss.str();
-    fieldFileName.replace(maskStr, indexStr);
-
-
+    fileName fieldFileName(replaceMask(fieldFileNames_[fieldIndex], fileIndex));
     ensightReadFile is(baseDir_/fieldFileName, streamFormat_);
 
     if (!is.good())

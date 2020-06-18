@@ -30,14 +30,24 @@ boundaryField
         type            zeroGradient;
     }
 
-    "outlet|top|bottom"
+    outlet
     {
-        type            totalPressure;
+        type            fixedValue; // totalPressure;
         rho             none;
         psi             none;
         p0              $internalField;
         gamma           1;
         value           $internalField;
+    }
+
+    "(top|bottom)"
+    {
+        type            zeroGradient;
+    }
+
+    frontAndBack
+    {
+        type            empty;
     }
 }
 

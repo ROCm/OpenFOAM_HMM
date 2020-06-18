@@ -33,10 +33,15 @@ boundaryField
         value           $internalField;
     }
 
-    "outlet|top|bottom"
+    "(outlet|top|bottom)"
     {
         type            calculated;
         value           $internalField;
+    }
+
+    frontAndBack
+    {
+        type            empty;
     }
 }
 

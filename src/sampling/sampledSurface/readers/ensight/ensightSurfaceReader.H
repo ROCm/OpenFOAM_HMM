@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -112,6 +112,13 @@ protected:
         //- Read and check a section header
         void debugSection(const word& expected, IFstream& is) const;
 
+        //- Replace the mask with an 0 padded string
+        fileName replaceMask
+        (
+            const fileName& fName,
+            const label timeIndex
+        ) const;
+
         //- Read (and discard) geometry file header.
         //  \return information about node/element id handling
         Pair<idTypes> readGeometryHeader(ensightReadFile& is) const;
@@ -164,7 +171,7 @@ public:
     // Member Functions
 
         //- Return a reference to the surface geometry
-        virtual const meshedSurface& geometry();
+        virtual const meshedSurface& geometry(const label timeIndex);
 
         //- Return a list of the available times
         virtual instantList times() const;
