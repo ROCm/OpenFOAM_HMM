@@ -34,8 +34,10 @@ pointNoiseCoeffs
 
     files
     (
-        "postProcessing/probes/0/p"
-        "postProcessing/probes/0.1/Curle"
+        "postProcessing/curlePoint/0/observer0.dat"
+        "postProcessing/curlePoint/0/observer1.dat"
+        "postProcessing/curlePoint/0/observer2.dat"
+        "postProcessing/curlePoint/0/observer3.dat"
     );
 
     nHeaderLine     6;
@@ -48,7 +50,7 @@ pointNoiseCoeffs
     // default = 2^16 (=65536)
     N               4096;
 
-    rhoRef          1.205;
+    rhoRef          1;
 }
 
 

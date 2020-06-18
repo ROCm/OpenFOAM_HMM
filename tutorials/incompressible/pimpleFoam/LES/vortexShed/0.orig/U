@@ -16,19 +16,20 @@ FoamFile
 
 dimensions      [0 1 -1 0 0 0 0];
 
-internalField   uniform (40 0 0);
+internalField   uniform (0.025 0 0);
 
 boundaryField
 {
     cylinder
     {
-        type            noSlip;
+        type            fixedValue;
+        value           uniform (0 0 0);
     }
 
     inlet
     {
         type            fixedValue;
-        value           $internalField;
+        value           uniform (0.025 0 0);
     }
 
     outlet
@@ -38,10 +39,14 @@ boundaryField
         inletValue      uniform (0 0 0);
     }
 
-    "top|bottom"
+    "(top|bottom)"
     {
-        type            pressureInletOutletVelocity;
-        value           uniform (0 0 0);
+        type            slip;
+    }
+
+    frontAndBack
+    {
+        type            empty;
     }
 }
 
