@@ -22,6 +22,7 @@
 #
 # Functions provided
 #     have_hypre, no_hypre, echo_hypre, query_hypre, search_hypre
+#     hint_hypre
 #
 # Variables set on success
 #     HAVE_HYPRE
@@ -48,6 +49,20 @@ echo_hypre()
     echo "root=\"$HYPRE_ARCH_PATH\""
     echo "include=\"$HYPRE_INC_DIR\""
     echo "library=\"$HYPRE_LIB_DIR\""
+}
+
+
+# Hint for enabling
+hint_hypre()
+{
+    /bin/cat<<INFORMATION 1>&2
+==> hypre not found?
+Define manually, enable in OpenFOAM etc/bashrc, or try the following [POSIX]:
+
+    eval \$(foamEtcFile -sh -config hypre -- -force)
+
+==
+INFORMATION
 }
 
 
@@ -114,9 +129,12 @@ have_hypre()
     local config="config.sh/hypre"
     local file
 
-    # Setup - prefer current environment value? (TDB)
-    if [ ! -d "$HYPRE_ARCH_PATH" ]
+    # Setup - prefer current environment value
+    if [ -d "$HYPRE_ARCH_PATH" ] || [ "$HYPRE_ARCH_PATH" = system ]
     then
+        :
+    else
+        # Use config file
         if file="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config")"
         then
             . "$file"
@@ -160,6 +178,9 @@ case "$1" in
     ;;
 -query)
     query_hypre
+    ;;
+-hint)
+    hint_hypre
     ;;
 esac
 

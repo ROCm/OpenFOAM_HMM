@@ -56,9 +56,7 @@ hint_adios2()
 {
     /bin/cat<<INFORMATION 1>&2
 ==> adios2 not found?
-
-Enable in the OpenFOAM etc/bashrc, define manually or try with the
-following (POSIX shell):
+Define manually, enable in OpenFOAM etc/bashrc, or try the following [POSIX]:
 
     eval \$(foamEtcFile -sh -config adios2 -- -force)
 
@@ -172,6 +170,9 @@ case "$1" in
     ;;
 -query)
     query_adios2
+    ;;
+-hint)
+    hint_adios2
     ;;
 esac
 
