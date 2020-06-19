@@ -519,6 +519,10 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
 
     label oldFaceID = 0;
     label regioni = 0;
+
+    // Dummy tracking data
+    bool dummyData{false};
+
     while (search)
     {
         DynamicList<label> changedEdges;
@@ -527,7 +531,7 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
         label seedFacei = labelMax;
         for (; oldFaceID < patch.size(); oldFaceID++)
         {
-            if (allFaceInfo[oldFaceID].data() == -1)
+            if (!allFaceInfo[oldFaceID].valid<bool>(dummyData))
             {
                 seedFacei = globalFaces.toGlobal(oldFaceID);
                 break;
@@ -542,21 +546,21 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
 
         if (globalFaces.isLocal(seedFacei))
         {
-            label localFacei = globalFaces.toLocal(seedFacei);
+            const label localFacei = globalFaces.toLocal(seedFacei);
             const labelList& fEdges = patch.faceEdges()[localFacei];
 
-            forAll(fEdges, i)
+            for (const label edgei : fEdges)
             {
-                if (allEdgeInfo[fEdges[i]].data() != -1)
+                if (allEdgeInfo[edgei].valid<bool>(dummyData))
                 {
                     WarningInFunction
                         << "Problem in edge face wave: attempted to assign a "
                         << "value to an edge that has already been visited. "
-                        << "Edge info: " << allEdgeInfo[fEdges[i]]
+                        << "Edge info: " << allEdgeInfo[edgei]
                         << endl;
                 }
 
-                changedEdges.append(fEdges[i]);
+                changedEdges.append(edgei);
                 changedInfo.append
                 (
                     edgeTopoDistanceData<label>
@@ -604,7 +608,17 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
     }
 
     // Collect the data per region
-    label nRegion = regioni;
+    const label nRegion = regioni;
+
+    #ifdef FULLDEBUG
+    // May wish to have enabled always
+    if (nRegion == 0)
+    {
+         FatalErrorInFunction
+            << "Region split failed" << nl
+            << exit(FatalError);
+    }
+    #endif
 
     List<DynamicList<label>> regionFaceIDs(nRegion);
     List<DynamicList<label>> regionFacePatchIDs(nRegion);
