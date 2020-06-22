@@ -1,7 +1,8 @@
 PtrList<uniformDimensionedScalarField> cumulativeContErrIO(fluidRegions.size());
 forAll(cumulativeContErrIO, i)
 {
-    #include "setRegionFluidFields.H"
+    const fvMesh& mesh = fluidRegions[i];
+
     cumulativeContErrIO.set
     (
         i,
