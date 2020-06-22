@@ -99,6 +99,26 @@ void Foam::cyclicAMIFvPatch::makeWeights(scalarField& w) const
 }
 
 
+void Foam::cyclicAMIFvPatch::makeDeltaCoeffs(scalarField& coeffs) const
+{
+    // Apply correction to default coeffs
+}
+
+
+void Foam::cyclicAMIFvPatch::makeNonOrthoDeltaCoeffs(scalarField& coeffs) const
+{
+    // Apply correction to default coeffs
+    //coeffs = Zero;
+}
+
+
+void Foam::cyclicAMIFvPatch::makeNonOrthoCorrVectors(vectorField& vecs) const
+{
+    // Apply correction to default vectors
+    //vecs = Zero;
+}
+
+
 Foam::tmp<Foam::vectorField> Foam::cyclicAMIFvPatch::delta() const
 {
     const cyclicAMIFvPatch& nbrPatch = neighbFvPatch();
