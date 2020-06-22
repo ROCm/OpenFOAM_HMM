@@ -456,10 +456,19 @@ const Foam::fileName& Foam::IOobject::caseName() const
 Foam::fileName Foam::IOobject::path() const
 {
     // A file is 'outside' of the case if it has been specified using an
-    // absolute path (starts with '/')
+    // absolute path
 
-    if (instance().starts_with('/'))
+    const auto first = instance().find('/');
+
+    if
+    (
+        first == 0
+        #ifdef _WIN32
+     || (first == 2 && instance()[1] == ':')  // Eg, d:/path
+        #endif
+    )
     {
+        // Absolute path (starts with '/' or 'd:/')
         return instance();
     }
 
