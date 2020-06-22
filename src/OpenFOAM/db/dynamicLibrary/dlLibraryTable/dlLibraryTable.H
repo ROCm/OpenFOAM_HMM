@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,7 @@ Description
 
 SourceFiles
     dlLibraryTable.C
+    dlLibraryTableTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,6 +40,7 @@ SourceFiles
 #define dlLibraryTable_H
 
 #include "DynamicList.H"
+#include "InfoProxy.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,25 +66,31 @@ class dlLibraryTable
         //  Warning messages, but no additional side-effects.
         void* openLibrary(const fileName& libName, bool verbose);
 
-        //- No copy construct
-        dlLibraryTable(const dlLibraryTable&) = delete;
-
-        //- No copy assignment
-        void operator=(const dlLibraryTable&) = delete;
-
 
 public:
 
     // Declare name of the class and its debug switch
     ClassName("dlLibraryTable");
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
+        //- Default construct
         dlLibraryTable() = default;
+
+        //- No copy construct
+        dlLibraryTable(const dlLibraryTable&) = delete;
 
         //- Move construct
         dlLibraryTable(dlLibraryTable&&) = default;
+
+        //- No copy assignment
+        void operator=(const dlLibraryTable&) = delete;
+
+        //- Move assignment
+        dlLibraryTable& operator=(dlLibraryTable&&) = default;
+
+
+    // Constructors
 
         //- Open specified libraries. Ignores duplicate names.
         explicit dlLibraryTable
@@ -102,11 +110,23 @@ public:
 
     // Member Functions
 
-        //- True if no there are no libraries loaded by the table
+        //- True if there are no libraries loaded by the table
         bool empty() const;
 
         //- The number of libraries loaded by the table
         label size() const;
+
+        //- Names of the libraries in use, or requested
+        const UList<fileName>& names() const
+        {
+            return libNames_;
+        }
+
+        //- Pointers to the libraries in use. Access with caution.
+        const UList<void*>& pointers() const
+        {
+            return libPtrs_;
+        }
 
         //- Clearing closes all libraries loaded by the table.
         void clear(bool verbose = true);
@@ -152,10 +172,14 @@ public:
         );
 
 
-    // Member Operators
+    // Info
 
-        //- Move assignment
-        dlLibraryTable& operator=(dlLibraryTable&&) = default;
+        //- Return info proxy.
+        //  Used to print library table information to a stream
+        InfoProxy<dlLibraryTable> info() const
+        {
+            return *this;
+        }
 };
 
 

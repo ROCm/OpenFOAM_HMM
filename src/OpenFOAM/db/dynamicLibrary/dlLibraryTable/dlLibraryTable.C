@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -312,11 +312,13 @@ bool Foam::dlLibraryTable::close
         return false;
     }
 
+    void* ptr = libPtrs_[index];
+
     DebugInFunction
         << "Closing " << libName
-        << " with handle " << Foam::name(libPtrs_[index]) << nl;
+        << " with handle " << Foam::name(ptr) << nl;
 
-    const bool ok = Foam::dlClose(libPtrs_[index]);
+    const bool ok = Foam::dlClose(ptr);
 
     libPtrs_[index] = nullptr;
     libNames_[index].clear();
@@ -364,6 +366,37 @@ bool Foam::dlLibraryTable::open
     }
 
     return nOpen && nOpen == libNames.size();
+}
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+template<>
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const InfoProxy<dlLibraryTable>& ip
+)
+{
+    const dlLibraryTable& tbl = ip.t_;
+
+    os << token::BEGIN_LIST << nl;
+
+    // Lengths of pointers/names are guaranteed interally to be identical
+    forAll(tbl.pointers(), i)
+    {
+        const void* ptr = tbl.pointers()[i];
+        const fileName& libName = tbl.names()[i];
+
+        // Also write out empty filenames
+        // (specified with '-lib' but did not load)
+
+        os  << Foam::name(ptr) << token::SPACE << libName << nl;
+    }
+
+    os << token::END_LIST << nl;
+
+    return os;
 }
 
 

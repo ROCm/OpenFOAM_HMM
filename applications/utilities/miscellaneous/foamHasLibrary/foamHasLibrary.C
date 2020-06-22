@@ -40,6 +40,9 @@ Usage
         Success if any of the libraries can be loaded.
         Does not short-circuit.
 
+      - \par -detail
+        Additional detail (meaning may change).
+
       - \par -verbose
         Additional verbosity
 
@@ -72,6 +75,11 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
+        "detail",
+        "Additional detail"
+    );
+    argList::addBoolOption
+    (
         "verbose",
         "Additional verbosity"
     );
@@ -85,6 +93,7 @@ int main(int argc, char *argv[])
     #include "foamDlOpenLibs.H"
 
     const bool testOr = args.found("or");
+    const bool detail = args.found("detail");
     const bool verbose = args.found("verbose");
 
     label ngood = 0;
@@ -134,14 +143,12 @@ int main(int argc, char *argv[])
         }
     }
 
-    const bool okay
-    (
-        testOr
-      ? (ngood > 0 || nbad == 0)
-      : nbad == 0
-    );
+    if (detail)
+    {
+        InfoErr << libs.info();
+    }
 
-    return okay ? 0 : 1;
+    return (nbad == 0 || (testOr && ngood > 0)) ? 0 : 1;
 }
 
 
