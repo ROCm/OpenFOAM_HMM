@@ -46,7 +46,7 @@ Usage
         \endverbatim
 
       - \par -excludePatches NAME | LIST
-        Specify single or multiple patches (name or regex) not to extract.
+        Exclude single or multiple patches (name or regex) from extracting.
         For example,
         \verbatim
           -excludePatches '( inlet_1 inlet_2 "proc.*")'
@@ -74,15 +74,15 @@ int main(int argc, char *argv[])
     (
         "patches",
         "wordRes",
-        "Specify single patch or multiple patches to write\n"
+        "Specify single patch or multiple patches to extract\n"
         "Eg, 'top' or '( front \".*back\" )'"
     );
     argList::addOption
     (
         "excludePatches",
         "wordRes",
-        "Specify single patch or multiple patches to exclude from writing."
-        " Eg, 'outlet' or '( inlet \".*Wall\" )'"
+        "Exclude single or multiple patches (name or regex) from extracting.\n"
+        "Eg, 'outlet' or '( inlet \".*Wall\" )'"
     );
 
     argList::addArgument("input", "The input surface file");

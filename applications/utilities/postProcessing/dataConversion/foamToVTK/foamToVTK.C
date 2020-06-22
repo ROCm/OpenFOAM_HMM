@@ -113,7 +113,7 @@ Usage
         \endverbatim
 
       - \par -excludePatches NAME | LIST
-        Specify single or multiple patches (name or regex) not to convert.
+        Exclude single or multiple patches (name or regex) from writing.
         For example,
         \verbatim
           -excludePatches '( inlet_1 inlet_2 "proc.*")'
@@ -431,8 +431,8 @@ int main(int argc, char *argv[])
     (
         "excludePatches",
         "wordRes",
-        "Specify single patch or multiple patches to exclude from writing."
-        " Eg, 'outlet' or '( inlet \".*Wall\" )'",
+        "Exclude single or multiple patches from writing\n"
+        "Eg, 'outlet' or '( inlet \".*Wall\" )'",
         true  // mark as an advanced option
     );
     argList::ignoreOptionCompat
