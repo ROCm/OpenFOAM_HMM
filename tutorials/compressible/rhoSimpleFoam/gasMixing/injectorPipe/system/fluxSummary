@@ -13,11 +13,11 @@ flux
     libs            (fieldFunctionObjects);
     mode            functionObjectSurface;
     surfaces
-    {
+    (
         sampled.plane-0.25
         sampled.plane-0.45
         sampled.plane-0.55
-    }
+    );
 
     // Optional entries
     phi             rhoU;
