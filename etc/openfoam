@@ -60,6 +60,7 @@ options:
   -show-patch           Print META-INFO patch value and exit
   -show-prefix          Print project directory and exit
   -test-tutorial        Forward arguments to tutorials/AutoTest
+  -init=FILE            Alternative initialization file (expert option)
   -verbose              Set FOAM_VERBOSE=true (interactive only)
   -help                 Print the usage
 
@@ -102,7 +103,7 @@ getApiInfo()
 # - No inheritance of FOAM_SETTINGS
 # - No default verbosity (only as command-line option)
 unset FOAM_CONFIG_ETC FOAM_SETTINGS FOAM_VERBOSE
-unset _foamEtcDir _foamSettings _foamScriptCommand
+unset _foamEtcDir _foamSettings _foamScriptCommand _foamSourceBashEnv
 unset optTestTut
 
 # Parse options
@@ -147,7 +148,7 @@ do
         fi
         ;;
 
-    -sp | -dp | -spdp )
+    -sp | -dp | -spdp)
         # WM_PRECISION_OPTION=(SP|DP|SPDP)
         setting=$(echo "${1#-}" | sed -e 's/-//g;y/sdp/SDP/')
         _foamSettings="$_foamSettings${_foamSettings:+ }WM_PRECISION_OPTION=$setting"
@@ -165,6 +166,10 @@ do
 
     -prefix=*)
         projectDir="${1#*=}"
+        ;;
+
+    -init=*)
+        _foamSourceBashEnv="${1#*=}"
         ;;
 
     -verbose)
@@ -209,17 +214,26 @@ then
     . "$WM_PROJECT_DIR/etc/config.sh/unset" || true
 fi
 
+
 unset interactive
 
 if [ "$#" -eq 0 ] && [ -z "$_foamScriptCommand" ] && [ -z "$optTestTut" ]
 then
-    # Interactive shell, chain off via a file
     interactive=true
-    _foamSourceBashEnv="$projectDir/bin/tools/source-bashrc"
-else
-    # Non-interactive shell, use the OPENFOAM etc/bashrc
-    _foamSourceBashEnv="$projectDir/etc/bashrc"
 fi
+
+if [ -z "$_foamSourceBashEnv" ]
+then
+    if [ -n "$interactive" ]
+    then
+        # Interactive shell, chain off via a file
+        _foamSourceBashEnv="$projectDir/bin/tools/source-bashrc"
+    else
+        # Default: OPENFOAM etc/bashrc
+        _foamSourceBashEnv="$projectDir/etc/bashrc"
+    fi
+fi
+
 
 [ -f "$_foamSourceBashEnv" ] || {
     echo "Error: file not found: $_foamSourceBashEnv" 1>&2

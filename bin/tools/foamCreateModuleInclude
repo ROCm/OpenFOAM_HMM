@@ -35,6 +35,7 @@ options:
   -paraview         Retain paraview elements
   -sh | -tcl        Output flavour (default: -tcl)
   -debug            Retain intermediate files for debugging purposes
+  -reduce=NUM       Environment reduction level (experimental)
   -help             Print the usage
 
 Create module settings for inclusion in a top-level openfoam module.
@@ -58,7 +59,7 @@ die()
 
 #------------------------------------------------------------------------------
 
-unset optBackend optDebug optAliases optPrefs optFlavour optParaview
+unset optBackend optDebug optAliases optPrefs optFlavour optReduce optParaview
 unset preloads projectDir
 unset moduleOutput moduleTmpDir
 
@@ -81,6 +82,9 @@ do
     -paraview)
         optParaview=true
         ;;
+    -reduce=[0-9]*)
+        optReduce="${1#*=}"
+        ;;
     -prefs=*)
         optPrefs="${1#*=}"
         ;;
@@ -96,11 +100,11 @@ do
     --recursive-backend--)
         optBackend=true
         ;;
-    -tcl)
-        optFlavour="tcl"
-        ;;
     -sh)
         optFlavour="sh"
+        ;;
+    -tcl)
+        optFlavour="tcl"
         ;;
     -*)
         die "unknown option: $1"
@@ -169,6 +173,7 @@ then
         "${optDebug:+-debug}" \
         "${optAliases:+-aliases}" \
         "${optParaview:+-paraview}" \
+        "${optReduce:+-reduce=$optReduce}" \
         "${optPrefs:+-prefs=$optPrefs}" \
         "${optFlavour:+-$optFlavour}" \
         "${moduleOutput:+-output=$moduleOutput}" \
@@ -365,6 +370,22 @@ unset FOAM_APP FOAM_SRC FOAM_SOLVERS FOAM_UTILITIES
 
 unset SCOTCH_VERSION
 
+# More optimization (environment reduction).
+# Values are currently arbitrary
+: "${optReduce:=0}"
+
+if [ "$optReduce" -gt 0 ]
+then
+    unset FOAM_USER_APPBIN FOAM_USER_LIBBIN
+fi
+
+if [ "$optReduce" -gt 1 ]
+then
+    unset FOAM_TUTORIALS
+    unset FOAM_EXT_LIBBIN
+    unset FOAM_APPBIN FOAM_LIBBIN
+fi
+
 
 # Remove non-essential aliases
 unalias wmDP        2>/dev/null
@@ -411,29 +432,30 @@ diff "$tmpFiles".alias.pre.log  "$tmpFiles".alias.post.log > "$tmpFiles".alias.d
 # --------------------------------------------------
 # Output functions
 
-if [ "$foamCreateModule_flavour" = "sh" ]
-then
+case "$foamCreateModule_flavour" in
+("sh")
     # Shell
 
     subst_USER_PREFIX='${HOME}/OpenFOAM/${USER}-${WM_PROJECT_VERSION}/platforms/${WM_OPTIONS}'
 
+    # Output 'NAME=VAL' as 'export NAME="VAL"' but prune 'NAME='
     format_export() {
-        sed -e 's/^\([^=]*\)=\(.*\)$/export \1="\2"/' ;
+        sed -e '/=$/d; s/^\([^=]*\)=\(.*\)$/export \1="\2"/' ;
     }
 
     prepend_path() {
         local envname="$1"
-        if [ -n "$envname" ]
+        if [ -z "$envname" ]
         then
+            echo "Warning: no envname specified" 1>&2
+            sed -e 'd'
+        else
             sed \
                 -e '/""/d' \
                 -e '/^$/d' \
                 -e 's/^/export '"$envname"'=/' \
                 -e 's/"$/${'"$envname"':+:}${'"$envname"'}"/' \
                 ;
-        else
-            echo "Warning: no envname specified" 1>&2
-            sed -e 'd'
         fi
     }
 
@@ -476,34 +498,54 @@ then
         sed -r -n -e 's/^> (alias)?/alias/p'
     }
 
-else
+    ;;
+
+(*)
     # Tcl
 
     subst_USER_PREFIX='$env(HOME)/OpenFOAM/$env(USER)-$env(WM_PROJECT_VERSION)/platforms/$env(WM_OPTIONS)'
 
 
+    # Output 'NAME=VAL' as 'setenv NAME "VAL"' but prune 'NAME='
     format_export() {
-        sed -e 's/^\([^=]*\)=\(.*\)$/setenv \1 "\2"/' ;
+        sed -e '/=$/d; s/^\([^=]*\)=\(.*\)$/setenv \1 "\2"/' ;
     }
 
     prepend_path() {
         local envname="$1"
-        if [ -n "$envname" ]
+        if [ -z "$envname" ]
         then
+            echo "Warning: no envname specified" 1>&2
+            sed -e 'd'
+        else
             sed \
                 -e '/""/d' \
                 -e '/^$/d' \
                 -e 's/^/prepend-path '"$envname"' /' \
                 ;
-        else
-            echo "Warning: no envname specified" 1>&2
-            sed -e 'd'
         fi
     }
 
     unset sedFilter1
     unset sedFilter2a sedFilter2b
     unset sedFilter3a sedFilter3b
+
+    if [ -n "$WM_OPTIONS" ]
+    then
+        sedFilter1='s@/'"$WM_OPTIONS"'/@/$env(WM_OPTIONS)/@g'
+    fi
+
+    if [ -n "$WM_PROJECT_DIR" ]
+    then
+        sedFilter2a='s@^'"$WM_PROJECT_DIR"'/\(platforms\|bin\|wmake\|tutorials\)@$env(WM_PROJECT_DIR)/\1@;'
+        sedFilter2b='s@='"$WM_PROJECT_DIR"'/\(platforms\|bin\|wmake\|tutorials\)@=$env(WM_PROJECT_DIR)/\1@;'
+    fi
+
+    if [ -n "$WM_THIRD_PARTY_DIR" ]
+    then
+        sedFilter3a='s@^'"$WM_THIRD_PARTY_DIR"'/\(platforms\|bin\|wmake\|tutorials\)@$env(WM_THIRD_PARTY_DIR)/\1@;'
+        sedFilter3b='s@='"$WM_THIRD_PARTY_DIR"'/\(platforms\|bin\|wmake\|tutorials\)@=$env(WM_THIRD_PARTY_DIR)/\1@;'
+    fi
 
     # Generalize environment.
     # Needs rethinking, duplicates logic from etc/config.sh/settings
@@ -523,10 +565,14 @@ else
         sed -r -n -e 's/^> (alias)?/set-alias /p' | \
         sed -e "s/='/ \"/" -e "s/'$/\"/"
     }
-fi
+
+    ;;
+esac
 
 
 # --------------------------------------------------
+# Preamble
+
 echo "# --------------------" >| "$moduleOutput"
 echo "# OpenFOAM environment" >> "$moduleOutput"
 
@@ -540,21 +586,33 @@ echo "# --------------------" >> "$moduleOutput"
 echo >> "$moduleOutput"
 
 
-# Known project values first
-for envname in \
-    WM_PROJECT_DIR \
-    WM_THIRD_PARTY_DIR \
-    WM_PROJECT \
-    WM_PROJECT_VERSION \
-    WM_OPTIONS \
-;
-do
-    value="$(eval echo \$$envname)"
-    if [ -n "$value" ] && [ "$value" != '$' ]
-    then
-        echo "$envname=$value" | format_export >> "$moduleOutput"
-    fi
-done
+# Project directory
+echo "WM_PROJECT_DIR=$WM_PROJECT_DIR" | format_export >> "$moduleOutput"
+
+# ThirdParty directory. May be relative to the project directory
+absDir="$WM_THIRD_PARTY_DIR"
+relDir="${absDir#${WM_PROJECT_DIR}/}"
+if [ "$relDir" != "$absDir" ]
+then
+    # Ugly but workable
+    case "$foamCreateModule_flavour" in
+    ("sh")
+        echo "WM_THIRD_PARTY_DIR=\${WM_PROJECT_DIR}/$relDir"
+        ;;
+    (*)
+        # Tcl
+        echo "WM_THIRD_PARTY_DIR=\$env(WM_PROJECT_DIR)/$relDir"
+        ;;
+    esac
+else
+    echo "WM_THIRD_PARTY_DIR=$absDir"
+fi | format_export >> "$moduleOutput"
+
+
+echo "WM_PROJECT=$WM_PROJECT" | format_export >> "$moduleOutput"
+echo "WM_PROJECT_VERSION=$WM_PROJECT_VERSION" | format_export >> "$moduleOutput"
+echo "WM_OPTIONS=$WM_OPTIONS" | format_export >> "$moduleOutput"
+
 echo >> "$moduleOutput"
 
 # Environment other than PATH, MANPATH, LD_LIBRARY_PATH
@@ -645,8 +703,9 @@ sed \
 
 cat "$tmpFiles".ldpath.diff.log | prepend_path LD_LIBRARY_PATH >> "$moduleOutput"
 
+
 # -------------------
-# Aliases
+# Aliases, Finalize
 # Some diff give "> alias". Others give ">", needed extended regular expressions '-r'
 
 echo >> "$moduleOutput"
