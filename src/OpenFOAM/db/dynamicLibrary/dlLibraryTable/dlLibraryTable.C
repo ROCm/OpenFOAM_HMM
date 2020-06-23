@@ -371,7 +371,6 @@ bool Foam::dlLibraryTable::open
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-template<>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,

@@ -47,6 +47,10 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
+class dlLibraryTable;
+Ostream& operator<<(Ostream& os, const InfoProxy<dlLibraryTable>& info);
+
 /*---------------------------------------------------------------------------*\
                        Class dlLibraryTable Declaration
 \*---------------------------------------------------------------------------*/
