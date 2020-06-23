@@ -280,9 +280,18 @@ void Foam::externalCoupledTemperatureMixedFvPatchScalarField::writeData
 
     const scalarField Tfluid(tfluid);
 
-
     // Heat transfer coefficient [W/m2/K]
-    const scalarField htc(qDot/(max(Twall - Tfluid), 1e-3));
+    // This htc needs to be always larger or equal to zero
+    //const scalarField htc(qDot/max(Twall - Tfluid, 1e-3));
+    scalarField htc(qDot.size(), 0);
+    forAll (qDot, i)
+    {
+        scalar deltaT = mag(Twall[i] - Tfluid[i]);
+        if (deltaT > 1e-3)
+        {
+            htc[i] = sign(qDot[i])*qDot[i]/deltaT;
+        }
+    }
 
     const Field<scalar>& magSf = this->patch().magSf();
 
