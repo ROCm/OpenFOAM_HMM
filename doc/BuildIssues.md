@@ -1,3 +1,14 @@
+## Known Build Issues (OpenFOAM-v2006)
+
+### Windows cross-compilation
+
+The reacting Euler multiphase solvers currently do not build for
+Windows. Compile with the `-k` option to skip over these applications
+for now.
+
+Compilation of kahip and ptscotch do not work.
+
+
 ## Known Build Issues (OpenFOAM-v1912)
 
 ### ParaView, ParaView-Catalyst

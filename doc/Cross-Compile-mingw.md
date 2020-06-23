@@ -1,12 +1,12 @@
-# Notes for cross-compiling with mingw
+## Notes for cross-compiling with mingw
 
-## Minimum version
+### Minimum version
 
 The mingw cross-compiler should be at least version 8.2.0 (tested) or
 slightly older. Versions that are much older may have faulty regex
 implementations.
 
-## Host setup
+### Host setup
 
 On openSUSE use the packages for compilation:
 ```
@@ -84,7 +84,7 @@ export FFTW_ARCH_PATH=/usr/x86_64-w64-mingw32/sys-root/mingw
 ```
 
 
-## Run-time setup
+### Run-time setup
 
 When using the cross-compiled executables and libraries, the
 corresponding runtime libraries will be required.
@@ -101,7 +101,7 @@ When running, the `WM_PROJECT_DIR` environment must be set.
 OpenFOAM will otherwise not be able to locate its files.
 
 
-## Known limitations (2020-06-16)
+### Known limitations (2020-06-16)
 
 - kahip does not build
 - ptscotch does not build

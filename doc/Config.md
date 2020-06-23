@@ -1,4 +1,4 @@
-# OpenFOAM Configuration
+## OpenFOAM Configuration
 
 The main OpenFOAM settings are located in the parent `etc/` directory
 with both POSIX (bash, dash,...) and csh shells being supported.
@@ -28,7 +28,7 @@ configuration files for the corresponding shell:
   settings
 
 
-## OpenFOAM configuration layers
+### OpenFOAM configuration layers
 
 Before launching into manually adjusting the configuration, it is
 useful to first understand how OpenFOAM supports different
@@ -55,7 +55,7 @@ Making configuration changes under the *user* or *group* directories
 allows you to preserve these across upgrades and makes it easier (if
 necessary) to revert to the original values.
 
-## Making changes to the configuration
+### Making changes to the configuration
 
 The first encounter with the OpenFOAM configuration files can be
 somewhat intimidating. There are indeed quite a few different bits of
@@ -205,7 +205,7 @@ Using this tool has some restrictions:
   between Gcc48, Gcc82 etc.
 
 
-## Working in groups
+### Working in groups
 
 When an OpenFOAM cluster installation is being used by several
 different people or interest groups it can be highly interesting to

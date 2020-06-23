@@ -1,4 +1,4 @@
-# About OpenFOAM
+## About OpenFOAM
 OpenFOAM is a free, open source CFD software [released and developed by OpenCFD Ltd since 2004](http://www.openfoam.com/history/).
 It has a large user base across most areas of engineering and science, from both commercial and academic organisations.
 OpenFOAM has an extensive range of features to solve anything from complex fluid flows involving chemical reactions, turbulence and heat transfer, to acoustics, solid mechanics and electromagnetics.
@@ -11,7 +11,7 @@ individual and group contributors, integrations
 [governance guided activities](https://www.openfoam.com/governance/).
 
 
-# Copyright
+## Copyright
 
 OpenFOAM is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -22,7 +22,7 @@ description of the GNU General Public License terms under which you
 may redistribute files.
 
 
-# OpenFOAM Trademark
+## OpenFOAM Trademark
 
 OpenCFD Ltd grants use of its OpenFOAM trademark by Third Parties on a
 licence basis. ESI Group and OpenFOAM Foundation Ltd are currently
@@ -35,7 +35,7 @@ any questions on the use of the OpenFOAM trademark.
 Violations of the Trademark are monitored, and will be duly prosecuted.
 
 
-# Using OpenFOAM
+## Using OpenFOAM
 
 If OpenFOAM has already been compiled on your system, simply source
 the appropriate `etc/bashrc` or `etc/cshrc` file and get started.
@@ -44,7 +44,7 @@ For example, for the OpenFOAM-v1912 version:
 source /installation/path/OpenFOAM-v1912/etc/bashrc
 ```
 
-# Compiling OpenFOAM
+## Compiling OpenFOAM
 
 If you are compiling OpenFOAM from source, please see the relevant
 guides:
@@ -55,7 +55,7 @@ guides:
 | [ThirdParty][repo third] | [readme][link third-readme] | [system requirements][link third-require] | [build][link third-build] |
 
 
-# How do I know which version I am currently using?
+## How do I know which version I am currently using?
 
 The value of the `$WM_PROJECT_DIR` or even `$WM_PROJECT_VERSION` are
 not guaranteed to have any correspondence to the OpenFOAM release
@@ -110,7 +110,7 @@ patching changes made within the currently active environment and
 should be used with caution.
 
 
-# ThirdParty directory
+## ThirdParty directory
 
 OpenFOAM normally ships with a directory of 3rd-party software and
 build scripts for some 3rd-party software that is either necessary or
@@ -197,7 +197,7 @@ ThirdParty directory will contain either an `Allwmake` file or a
 [link third-require]: https://develop.openfoam.com/Development/ThirdParty-common/blob/develop/Requirements.md
 
 
-# Useful Links
+## Useful Links
 
 - Download [source](https://sourceforge.net/projects/openfoam/files/) and [download and installation instructions](http://www.openfoam.com/download/)
 - [Documentation](http://www.openfoam.com/documentation)

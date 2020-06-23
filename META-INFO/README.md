@@ -1,4 +1,4 @@
-# META-INFO
+## META-INFO
 
 Meta-information is generally for OpenFOAM internal use only.
 
@@ -12,7 +12,7 @@ will need to be updated accordingly:
   - etc/openfoam
   - wmake/scripts/wmake-build-info
 
-## api-info
+### api-info
 
 This file and its contents are to be tracked by git.
 
@@ -21,7 +21,7 @@ This file and its contents are to be tracked by git.
 - File content (patch) is manually generated content.
 
 
-## build-info
+### build-info
 
 This file is ***never*** to be tracked by git, but may be present in
 shipped source archives.
@@ -30,9 +30,9 @@ shipped source archives.
   git information and cached from previous wmake (api)
 
 
-## Content types
+### Content types
 
-### api
+#### api
 
 Format: `date +%y%m`
 
@@ -41,7 +41,7 @@ Format: `date +%y%m`
   Example, `1712` for the Dec-2017 release.
 
 
-### patch
+#### patch
 
 Format: `date +%y%m%d`
 
@@ -57,7 +57,7 @@ ascribed too much meaning, but will often correspond to the last
 merge with a *maintenance* (*eg*, `master`) branch.
 
 
-## Flow of information
+### Flow of information
 
 Changes in the build information must be reflected in information
 available in the final binaries. Conversely, it is necessary for later
@@ -76,11 +76,11 @@ the saved information needs synchronization. The command
 `wmake -build-info -update` performs the synchronization.
 
 
-## Notes
+### Notes
 
 The saved information is split into two separate files. The `api-info`
 contains more permanent information, whereas the `build-info` is more
 transient in nature.
 
 ----
-2020-05-05
+2020-06-23

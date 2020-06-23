@@ -1,3 +1,5 @@
+[[_TOC_]]
+
 ## OpenFOAM Modules
 
 This directory is a location for additional OpenFOAM components or
@@ -10,13 +12,20 @@ appropriate `Allwmake` (or `Allwmake.override`) file.
 
 Any individual _module_ will normally also be able to exist outside of
 the module directory structure and will typically build into user
-locations (`$FOAM_USER_APPBIN` and/or `$FOAM_USER_LIBBIN`).
+locations (`$FOAM_USER_APPBIN`, `$FOAM_USER_LIBBIN`).
 
 When compiled from the top-level OpenFOAM `Allwmake` or the
 `modules/Allwmake`, they should build into OpenFOAM project locations
-(`$FOAM_APPBIN` and/or `$FOAM_LIBBIN`). This can be adjusted by
+(`$FOAM_APPBIN`, `$FOAM_LIBBIN`). This can be adjusted by
 supplying an alternative `-prefix=` to the corresponding Allwmake
 command.
+
+| Command    | Install location |
+|------------|------------------|
+| ./Allwmake -prefix=user | `$FOAM_USER_APPBIN`, `$FOAM_USER_LIBBIN` |
+| ./Allwmake -prefix=group | `$FOAM_SITE_APPBIN`, `$FOAM_SITE_LIBBIN` |
+| ./Allwmake -prefix=openfoam | `$FOAM_APPBIN`, `$FOAM_LIBBIN` |
+| ./Allwmake -prefix=/some/pathname | `/some/pathname/bin`, `/some/pathname/lib` |
 
 
 ### Adding additional components

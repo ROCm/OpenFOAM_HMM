@@ -139,4 +139,4 @@ More details in the [ThirdParty build guide][link third-build].
 [link third-require]: https://develop.openfoam.com/Development/ThirdParty-common/blob/develop/Requirements.md
 
 ---
-Copyright 2019 OpenCFD Ltd
+Copyright 2019-2020 OpenCFD Ltd
