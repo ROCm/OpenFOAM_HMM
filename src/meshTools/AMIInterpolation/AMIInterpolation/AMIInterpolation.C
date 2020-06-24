@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,78 +27,104 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "AMIInterpolation.H"
-#include "AMIMethod.H"
 #include "meshTools.H"
 #include "mapDistribute.H"
 #include "flipOp.H"
 #include "profiling.H"
+#include "triPointRef.H"
+#include "OFstream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<class SourcePatch, class TargetPatch>
-const Foam::Enum
-<
-    typename Foam::AMIInterpolation<SourcePatch, TargetPatch>::
-    interpolationMethod
->
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolationMethodNames_
-({
-    { interpolationMethod::imDirect, "directAMI" },
-    { interpolationMethod::imMapNearest, "mapNearestAMI" },
-    { interpolationMethod::imFaceAreaWeight, "faceAreaWeightAMI" },
-    { interpolationMethod::imPartialFaceAreaWeight, "partialFaceAreaWeightAMI" }
-});
-
-template<class SourcePatch, class TargetPatch>
-bool Foam::AMIInterpolation<SourcePatch, TargetPatch>::cacheIntersections_ =
-    false;
-
-template<class SourcePatch, class TargetPatch>
-template<class Patch>
-Foam::tmp<Foam::scalarField>
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::patchMagSf
-(
-    const Patch& patch,
-    const faceAreaIntersect::triangulationMode triMode
-)
+namespace Foam
 {
-    tmp<scalarField> tResult(new scalarField(patch.size(), Zero));
-    scalarField& result = tResult.ref();
+    defineTypeNameAndDebug(AMIInterpolation, 0);
+    defineRunTimeSelectionTable(AMIInterpolation, dict);
+    defineRunTimeSelectionTable(AMIInterpolation, component);
+}
 
-    const pointField& patchPoints = patch.localPoints();
+bool Foam::AMIInterpolation::cacheIntersections_ = false;
 
-    faceList patchFaceTris;
 
-    forAll(result, patchFacei)
-    {
-        faceAreaIntersect::triangulate
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::indexedOctree<Foam::AMIInterpolation::treeType>>
+Foam::AMIInterpolation::createTree
+(
+    const primitivePatch& patch
+) const
+{
+    treeBoundBox bb(patch.points(), patch.meshPoints());
+    bb.inflate(0.01);
+
+    return autoPtr<indexedOctree<treeType>>::New
+    (
+        treeType
         (
-            patch.localFaces()[patchFacei],
-            patchPoints,
-            triMode,
-            patchFaceTris
-        );
-
-        forAll(patchFaceTris, i)
-        {
-            result[patchFacei] +=
-                triPointRef
-                (
-                    patchPoints[patchFaceTris[i][0]],
-                    patchPoints[patchFaceTris[i][1]],
-                    patchPoints[patchFaceTris[i][2]]
-                ).mag();
-        }
-    }
-
-    return tResult;
+            false,
+            patch,
+            indexedOctree<treeType>::perturbTol()
+        ),
+        bb,                         // overall search domain
+        8,                          // maxLevel
+        10,                         // leaf size
+        3.0                         // duplicity
+    );
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+Foam::label Foam::AMIInterpolation::calcDistribution
+(
+    const primitivePatch& srcPatch,
+    const primitivePatch& tgtPatch
+) const
+{
+    label proci = 0;
 
-template<class SourcePatch, class TargetPatch>
-void Foam::AMIInterpolation<SourcePatch, TargetPatch>::projectPointsToSurface
+    if (Pstream::parRun())
+    {
+        labelList facesPresentOnProc(Pstream::nProcs(), Zero);
+        if ((srcPatch.size() > 0) || (tgtPatch.size() > 0))
+        {
+            facesPresentOnProc[Pstream::myProcNo()] = 1;
+        }
+        else
+        {
+            facesPresentOnProc[Pstream::myProcNo()] = 0;
+        }
+
+        Pstream::gatherList(facesPresentOnProc);
+        Pstream::scatterList(facesPresentOnProc);
+
+        label nHaveFaces = sum(facesPresentOnProc);
+
+        if (nHaveFaces > 1)
+        {
+            proci = -1;
+            if (debug)
+            {
+                InfoInFunction
+                    << "AMI split across multiple processors" << endl;
+            }
+        }
+        else if (nHaveFaces == 1)
+        {
+            proci = facesPresentOnProc.find(1);
+            if (debug)
+            {
+                InfoInFunction
+                    << "AMI local to processor" << proci << endl;
+            }
+        }
+    }
+
+
+    // Either not parallel or no faces on any processor
+    return proci;
+}
+
+
+void Foam::AMIInterpolation::projectPointsToSurface
 (
     const searchableSurface& surf,
     pointField& pts
@@ -138,8 +164,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::projectPointsToSurface
 }
 
 
-template<class SourcePatch, class TargetPatch>
-void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
+void Foam::AMIInterpolation::normaliseWeights
 (
     const scalarList& patchAreas,
     const word& patchName,
@@ -167,7 +192,6 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
 
             scalar s = sum(w);
             scalar t = s/denom;
-
             if (conformal)
             {
                 denom = s;
@@ -179,10 +203,9 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
             }
 
             wghtSum[facei] = t;
-
             if (t < lowWeightTol)
             {
-                nLowWeight++;
+                ++nLowWeight;
             }
         }
         else
@@ -190,7 +213,6 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
             wghtSum[facei] = 0;
         }
     }
-
 
     if (output)
     {
@@ -220,8 +242,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
 }
 
 
-template<class SourcePatch, class TargetPatch>
-void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
+void Foam::AMIInterpolation::agglomerate
 (
     const autoPtr<mapDistribute>& targetMapPtr,
     const scalarList& fineSrcMagSf,
@@ -264,7 +285,6 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
         }
     }
 
-
     // Agglomerate weights and indices
     if (targetMapPtr.valid())
     {
@@ -298,7 +318,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
         //           the slots are equal to face indices.
         // A mapDistribute has:
         // - a subMap : these are face indices
-        // - a constructMap : these are from 'transferred-date' to slots
+        // - a constructMap : these are from 'transferred-data' to slots
 
         labelListList tgtSubMap(Pstream::nProcs());
 
@@ -492,10 +512,10 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
 
             forAll(elems, i)
             {
-                label elemi = elems[i];
-                label coarseElemi = targetRestrictAddressing[elemi];
+                const label elemi = elems[i];
+                const label coarseElemi = targetRestrictAddressing[elemi];
 
-                label index = newElems.find(coarseElemi);
+                const label index = newElems.find(coarseElemi);
                 if (index == -1)
                 {
                     newElems.append(coarseElemi);
@@ -524,235 +544,87 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
 }
 
 
-template<class SourcePatch, class TargetPatch>
-void Foam::AMIInterpolation<SourcePatch, TargetPatch>::constructFromSurface
-(
-    const SourcePatch& srcPatch,
-    const TargetPatch& tgtPatch,
-    const autoPtr<searchableSurface>& surfPtr
-)
-{
-    if (surfPtr.valid())
-    {
-        // Create new patches for source and target
-        pointField srcPoints = srcPatch.points();
-        SourcePatch srcPatch0
-        (
-            SubList<face>
-            (
-                srcPatch,
-                srcPatch.size(),
-                0
-            ),
-            srcPoints
-        );
-
-        if (debug)
-        {
-            OFstream os("amiSrcPoints.obj");
-            for (const point& pt : srcPoints)
-            {
-                meshTools::writeOBJ(os, pt);
-            }
-        }
-
-        pointField tgtPoints = tgtPatch.points();
-        TargetPatch tgtPatch0
-        (
-            SubList<face>
-            (
-                tgtPatch,
-                tgtPatch.size(),
-                0
-            ),
-            tgtPoints
-        );
-
-        if (debug)
-        {
-            OFstream os("amiTgtPoints.obj");
-            for (const point& pt : tgtPoints)
-            {
-                meshTools::writeOBJ(os, pt);
-            }
-        }
-
-
-        // Map source and target patches onto projection surface
-        projectPointsToSurface(surfPtr(), srcPoints);
-        projectPointsToSurface(surfPtr(), tgtPoints);
-
-
-        // Calculate AMI interpolation
-        update(srcPatch0, tgtPatch0);
-    }
-    else
-    {
-        update(srcPatch, tgtPatch);
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class SourcePatch, class TargetPatch>
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
+Foam::AMIInterpolation::AMIInterpolation
 (
-    const SourcePatch& srcPatch,
-    const TargetPatch& tgtPatch,
-    const faceAreaIntersect::triangulationMode& triMode,
-    const bool requireMatch,
-    const interpolationMethod& method,
-    const scalar lowWeightCorrection,
+    const dictionary& dict,
     const bool reverseTarget
 )
 :
-    methodName_(interpolationMethodNames_[method]),
-    reverseTarget_(reverseTarget),
-    requireMatch_(requireMatch),
+    requireMatch_(dict.getOrDefault("requireMatch", true)),
+    reverseTarget_(dict.getOrDefault("reverseTarget", reverseTarget)),
+    lowWeightCorrection_(dict.getOrDefault<scalar>("lowWeightCorrection", -1)),
     singlePatchProc_(-999),
-    lowWeightCorrection_(lowWeightCorrection),
     srcMagSf_(),
     srcAddress_(),
     srcWeights_(),
     srcWeightsSum_(),
+    srcCentroids_(),
+    srcMapPtr_(nullptr),
     tgtMagSf_(),
     tgtAddress_(),
     tgtWeights_(),
     tgtWeightsSum_(),
-    triMode_(triMode),
-    srcMapPtr_(nullptr),
-    tgtMapPtr_(nullptr)
-{
-    update(srcPatch, tgtPatch);
-}
+    tgtCentroids_(),
+    tgtMapPtr_(nullptr),
+    upToDate_(false)
+{}
 
 
-template<class SourcePatch, class TargetPatch>
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
+Foam::AMIInterpolation::AMIInterpolation
 (
-    const SourcePatch& srcPatch,
-    const TargetPatch& tgtPatch,
-    const faceAreaIntersect::triangulationMode& triMode,
     const bool requireMatch,
-    const word& methodName,
-    const scalar lowWeightCorrection,
-    const bool reverseTarget
+    const bool reverseTarget,
+    const scalar lowWeightCorrection
 )
 :
-    methodName_(methodName),
-    reverseTarget_(reverseTarget),
     requireMatch_(requireMatch),
-    singlePatchProc_(-999),
+    reverseTarget_(reverseTarget),
     lowWeightCorrection_(lowWeightCorrection),
+    singlePatchProc_(-999),
     srcMagSf_(),
     srcAddress_(),
     srcWeights_(),
     srcWeightsSum_(),
+    srcCentroids_(),
+    srcPatchPts_(),
+    srcMapPtr_(nullptr),
     tgtMagSf_(),
     tgtAddress_(),
     tgtWeights_(),
     tgtWeightsSum_(),
-    triMode_(triMode),
-    srcMapPtr_(nullptr),
-    tgtMapPtr_(nullptr)
-{
-    update(srcPatch, tgtPatch);
-}
+    tgtCentroids_(),
+    tgtPatchPts_(),
+    tgtMapPtr_(nullptr),
+    upToDate_(false)
+{}
 
 
-template<class SourcePatch, class TargetPatch>
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
+Foam::AMIInterpolation::AMIInterpolation
 (
-    const SourcePatch& srcPatch,
-    const TargetPatch& tgtPatch,
-    const autoPtr<searchableSurface>& surfPtr,
-    const faceAreaIntersect::triangulationMode& triMode,
-    const bool requireMatch,
-    const interpolationMethod& method,
-    const scalar lowWeightCorrection,
-    const bool reverseTarget
-)
-:
-    methodName_(interpolationMethodNames_[method]),
-    reverseTarget_(reverseTarget),
-    requireMatch_(requireMatch),
-    singlePatchProc_(-999),
-    lowWeightCorrection_(lowWeightCorrection),
-    srcMagSf_(),
-    srcAddress_(),
-    srcWeights_(),
-    srcWeightsSum_(),
-    tgtMagSf_(),
-    tgtAddress_(),
-    tgtWeights_(),
-    tgtWeightsSum_(),
-    triMode_(triMode),
-    srcMapPtr_(nullptr),
-    tgtMapPtr_(nullptr)
-{
-    constructFromSurface(srcPatch, tgtPatch, surfPtr);
-}
-
-
-template<class SourcePatch, class TargetPatch>
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
-(
-    const SourcePatch& srcPatch,
-    const TargetPatch& tgtPatch,
-    const autoPtr<searchableSurface>& surfPtr,
-    const faceAreaIntersect::triangulationMode& triMode,
-    const bool requireMatch,
-    const word& methodName,
-    const scalar lowWeightCorrection,
-    const bool reverseTarget
-)
-:
-    methodName_(methodName),
-    reverseTarget_(reverseTarget),
-    requireMatch_(requireMatch),
-    singlePatchProc_(-999),
-    lowWeightCorrection_(lowWeightCorrection),
-    srcMagSf_(),
-    srcAddress_(),
-    srcWeights_(),
-    srcWeightsSum_(),
-    tgtMagSf_(),
-    tgtAddress_(),
-    tgtWeights_(),
-    tgtWeightsSum_(),
-    triMode_(triMode),
-    srcMapPtr_(nullptr),
-    tgtMapPtr_(nullptr)
-{
-    constructFromSurface(srcPatch, tgtPatch, surfPtr);
-}
-
-
-template<class SourcePatch, class TargetPatch>
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
-(
-    const AMIInterpolation<SourcePatch, TargetPatch>& fineAMI,
+    const AMIInterpolation& fineAMI,
     const labelList& sourceRestrictAddressing,
     const labelList& targetRestrictAddressing
 )
 :
-    methodName_(fineAMI.methodName_),
-    reverseTarget_(fineAMI.reverseTarget_),
     requireMatch_(fineAMI.requireMatch_),
-    singlePatchProc_(fineAMI.singlePatchProc_),
+    reverseTarget_(fineAMI.reverseTarget_),
     lowWeightCorrection_(-1.0),
+    singlePatchProc_(fineAMI.singlePatchProc_),
     srcMagSf_(),
     srcAddress_(),
     srcWeights_(),
     srcWeightsSum_(),
+    srcPatchPts_(),
+    srcMapPtr_(nullptr),
     tgtMagSf_(),
     tgtAddress_(),
     tgtWeights_(),
     tgtWeightsSum_(),
-    triMode_(fineAMI.triMode_),
-    srcMapPtr_(nullptr),
-    tgtMapPtr_(nullptr)
+    tgtPatchPts_(),
+    tgtMapPtr_(nullptr),
+    upToDate_(false)
 {
     label sourceCoarseSize =
     (
@@ -834,23 +706,67 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
-
-template<class SourcePatch, class TargetPatch>
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::~AMIInterpolation()
+Foam::AMIInterpolation::AMIInterpolation(const AMIInterpolation& ami)
+:
+    requireMatch_(ami.requireMatch_),
+    reverseTarget_(ami.reverseTarget_),
+    lowWeightCorrection_(ami.lowWeightCorrection_),
+    singlePatchProc_(ami.singlePatchProc_),
+    srcMagSf_(ami.srcMagSf_),
+    srcAddress_(ami.srcAddress_),
+    srcWeights_(ami.srcWeights_),
+    srcWeightsSum_(ami.srcWeightsSum_),
+    srcCentroids_(ami.srcCentroids_),
+    srcMapPtr_(nullptr),
+    tgtMagSf_(ami.tgtMagSf_),
+    tgtAddress_(ami.tgtAddress_),
+    tgtWeights_(ami.tgtWeights_),
+    tgtWeightsSum_(ami.tgtWeightsSum_),
+    tgtCentroids_(ami.tgtCentroids_),
+    tgtMapPtr_(nullptr),
+    upToDate_(false)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class SourcePatch, class TargetPatch>
-void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
+bool Foam::AMIInterpolation::calculate
 (
-    const SourcePatch& srcPatch,
-    const TargetPatch& tgtPatch
+    const primitivePatch& srcPatch,
+    const primitivePatch& tgtPatch,
+    const autoPtr<searchableSurface>& surfPtr
 )
 {
-    addProfiling(ami, "AMIInterpolation::update");
+    if (upToDate_)
+    {
+        return false;
+    }
+
+    addProfiling(ami, "AMIInterpolation::calculate");
+
+    if (surfPtr)
+    {
+        srcPatchPts_ = srcPatch.points();
+        projectPointsToSurface(surfPtr(), srcPatchPts_);
+        tsrcPatch0_ = tmpNrc<primitivePatch>::New
+        (
+            SubList<face>(srcPatch),
+            srcPatchPts_
+        );
+
+        tgtPatchPts_ = tgtPatch.points();
+        projectPointsToSurface(surfPtr(), tgtPatchPts_);
+        ttgtPatch0_ = tmpNrc<primitivePatch>::New
+        (
+            SubList<face>(tgtPatch),
+            tgtPatchPts_
+        );
+    }
+    else
+    {
+        tsrcPatch0_.cref(srcPatch);
+        ttgtPatch0_.cref(tgtPatch);
+    }
 
     label srcTotalSize = returnReduce(srcPatch.size(), sumOp<label>());
     label tgtTotalSize = returnReduce(tgtPatch.size(), sumOp<label>());
@@ -860,7 +776,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
         DebugInfo<< "AMI: no source faces present - no addressing constructed"
             << endl;
 
-        return;
+        return false;
     }
 
     Info<< indent
@@ -869,219 +785,70 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
         << tgtTotalSize << " target faces"
         << endl;
 
-    // Calculate if patches present on multiple processors
     singlePatchProc_ = calcDistribution(srcPatch, tgtPatch);
-
-    if (singlePatchProc_ == -1)
-    {
-        // Convert local addressing to global addressing
-        globalIndex globalSrcFaces(srcPatch.size());
-        globalIndex globalTgtFaces(tgtPatch.size());
-
-        // Create processor map of overlapping faces. This map gets
-        // (possibly remote) faces from the tgtPatch such that they (together)
-        // cover all of the srcPatch
-        autoPtr<mapDistribute> mapPtr = calcProcMap(srcPatch, tgtPatch);
-        const mapDistribute& map = mapPtr();
-
-        // Create new target patch that fully encompasses source patch
-
-        // Faces and points
-        faceList newTgtFaces;
-        pointField newTgtPoints;
-
-        // Original faces from tgtPatch (in globalIndexing since might be
-        // remote)
-        labelList tgtFaceIDs;
-        distributeAndMergePatches
-        (
-            map,
-            tgtPatch,
-            globalTgtFaces,
-            newTgtFaces,
-            newTgtPoints,
-            tgtFaceIDs
-        );
-
-        const TargetPatch
-            newTgtPatch
-            (
-                SubList<face>
-                (
-                    newTgtFaces,
-                    newTgtFaces.size()
-                ),
-                newTgtPoints
-            );
-
-        // Calculate AMI interpolation
-        autoPtr<AMIMethod<SourcePatch, TargetPatch>> AMIPtr
-        (
-            AMIMethod<SourcePatch, TargetPatch>::New
-            (
-                methodName_,
-                srcPatch,
-                newTgtPatch,
-                triMode_,
-                reverseTarget_,
-                requireMatch_ && (lowWeightCorrection_ < 0)
-            )
-        );
-
-        AMIPtr->calculate
-        (
-            srcAddress_,
-            srcWeights_,
-            tgtAddress_,
-            tgtWeights_
-        );
-
-
-        // Note: using patch face areas calculated by the AMI method
-        // - TODO: move into the calculate or normalise method?
-        AMIPtr->setMagSf(tgtPatch, map, srcMagSf_, tgtMagSf_);
-
-
-        // Now
-        // ~~~
-        //  srcAddress_ :   per srcPatch face a list of the newTgtPatch (not
-        //                  tgtPatch) faces it overlaps
-        //  tgtAddress_ :   per newTgtPatch (not tgtPatch) face a list of the
-        //                  srcPatch faces it overlaps
-
-        if (debug)
-        {
-            writeFaceConnectivity(srcPatch, newTgtPatch, srcAddress_);
-        }
-
-
-        // Rework newTgtPatch indices into globalIndices of tgtPatch
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-        for (labelList& addressing : srcAddress_)
-        {
-            for (label& addr : addressing)
-            {
-                addr = tgtFaceIDs[addr];
-            }
-        }
-
-        for (labelList& addressing : tgtAddress_)
-        {
-            globalSrcFaces.inplaceToGlobal(addressing);
-        }
-
-        // Send data back to originating procs. Note that contributions
-        // from different processors get added (ListOps::appendEqOp)
-
-        mapDistributeBase::distribute
-        (
-            Pstream::commsTypes::nonBlocking,
-            List<labelPair>(),
-            tgtPatch.size(),
-            map.constructMap(),
-            false,                      // has flip
-            map.subMap(),
-            false,                      // has flip
-            tgtAddress_,
-            ListOps::appendEqOp<label>(),
-            flipOp(),                   // flip operation
-            labelList()
-        );
-
-        mapDistributeBase::distribute
-        (
-            Pstream::commsTypes::nonBlocking,
-            List<labelPair>(),
-            tgtPatch.size(),
-            map.constructMap(),
-            false,
-            map.subMap(),
-            false,
-            tgtWeights_,
-            ListOps::appendEqOp<scalar>(),
-            flipOp(),
-            scalarList()
-        );
-
-        // weights normalisation
-        AMIPtr->normaliseWeights(true, *this);
-
-        // Cache maps and reset addresses
-        List<Map<label>> cMap;
-        srcMapPtr_.reset(new mapDistribute(globalSrcFaces, tgtAddress_, cMap));
-        tgtMapPtr_.reset(new mapDistribute(globalTgtFaces, srcAddress_, cMap));
-    }
-    else
-    {
-        // Calculate AMI interpolation
-        autoPtr<AMIMethod<SourcePatch, TargetPatch>> AMIPtr
-        (
-            AMIMethod<SourcePatch, TargetPatch>::New
-            (
-                methodName_,
-                srcPatch,
-                tgtPatch,
-                triMode_,
-                reverseTarget_,
-                requireMatch_ && (lowWeightCorrection_ < 0)
-            )
-        );
-
-        AMIPtr->calculate
-        (
-            srcAddress_,
-            srcWeights_,
-            tgtAddress_,
-            tgtWeights_
-        );
-
-        srcMagSf_.transfer(AMIPtr->srcMagSf());
-        tgtMagSf_.transfer(AMIPtr->tgtMagSf());
-
-        AMIPtr->normaliseWeights(true, *this);
-    }
 
     if (debug)
     {
-        Info<< "AMIInterpolation : Constructed addressing and weights" << nl
-            << "    triMode        :"
-            << faceAreaIntersect::triangulationModeNames_[triMode_] << nl
+        Info<< "AMIInterpolation:" << nl
             << "    singlePatchProc:" << singlePatchProc_ << nl
-            << "    srcMagSf       :" << gSum(srcMagSf_) << nl
-            << "    tgtMagSf       :" << gSum(tgtMagSf_) << nl
             << endl;
     }
+
+    return true;
 }
 
 
-template<class SourcePatch, class TargetPatch>
-void Foam::AMIInterpolation<SourcePatch, TargetPatch>::append
+void Foam::AMIInterpolation::reset
 (
-    const SourcePatch& srcPatch,
-    const TargetPatch& tgtPatch
+    autoPtr<mapDistribute>&& srcToTgtMap,
+    autoPtr<mapDistribute>&& tgtToSrcMap,
+    labelListList&& srcAddress,
+    scalarListList&& srcWeights,
+    labelListList&& tgtAddress,
+    scalarListList&& tgtWeights
+)
+{
+    DebugInFunction<< endl;
+
+    srcAddress_.transfer(srcAddress);
+    srcWeights_.transfer(srcWeights);
+    tgtAddress_.transfer(tgtAddress);
+    tgtWeights_.transfer(tgtWeights);
+
+    // Reset the sums of the weights
+    srcWeightsSum_.setSize(srcWeights_.size());
+    forAll(srcWeights_, facei)
+    {
+        srcWeightsSum_[facei] = sum(srcWeights_[facei]);
+    }
+
+    tgtWeightsSum_.setSize(tgtWeights_.size());
+    forAll(tgtWeights_, facei)
+    {
+        tgtWeightsSum_[facei] = sum(tgtWeights_[facei]);
+    }
+
+    srcMapPtr_ = srcToTgtMap;
+    tgtMapPtr_ = tgtToSrcMap;
+
+    upToDate_ = true;
+}
+
+
+void Foam::AMIInterpolation::append
+(
+    const primitivePatch& srcPatch,
+    const primitivePatch& tgtPatch
 )
 {
     addProfiling(ami, "AMIInterpolation::append");
 
     // Create a new interpolation
-    autoPtr<AMIInterpolation<SourcePatch, TargetPatch>> newPtr
-    (
-        new AMIInterpolation<SourcePatch, TargetPatch>
-        (
-            srcPatch,
-            tgtPatch,
-            triMode_,
-            requireMatch_,
-            methodName_,
-            lowWeightCorrection_,
-            reverseTarget_
-        )
-    );
+    auto newPtr = clone();
+    newPtr->calculate(srcPatch, tgtPatch);
 
     // If parallel then combine the mapDistribution and re-index
-    if (singlePatchProc_ == -1)
+    if (distributed())
     {
         labelListList& srcSubMap = srcMapPtr_->subMap();
         labelListList& srcConstructMap = srcMapPtr_->constructMap();
@@ -1140,8 +907,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::append
             {
                 forAll(tgtAddress_[tgti], tgtj)
                 {
-                    tgtAddress_[tgti][tgtj] =
-                        mapMap[tgtAddress_[tgti][tgtj]];
+                    tgtAddress_[tgti][tgtj] = mapMap[tgtAddress_[tgti][tgtj]];
                 }
             }
 
@@ -1248,8 +1014,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::append
 }
 
 
-template<class SourcePatch, class TargetPatch>
-void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
+void Foam::AMIInterpolation::normaliseWeights
 (
     const bool conformal,
     const bool output
@@ -1281,327 +1046,10 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
 }
 
 
-template<class SourcePatch, class TargetPatch>
-template<class Type, class CombineOp>
-void Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
+Foam::label Foam::AMIInterpolation::srcPointFace
 (
-    const UList<Type>& fld,
-    const CombineOp& cop,
-    List<Type>& result,
-    const UList<Type>& defaultValues
-) const
-{
-    addProfiling(ami, "AMIInterpolation::interpolateToTarget");
-
-    if (fld.size() != srcAddress_.size())
-    {
-        FatalErrorInFunction
-            << "Supplied field size is not equal to source patch size" << nl
-            << "    source patch   = " << srcAddress_.size() << nl
-            << "    target patch   = " << tgtAddress_.size() << nl
-            << "    supplied field = " << fld.size()
-            << abort(FatalError);
-    }
-
-    if (lowWeightCorrection_ > 0)
-    {
-        if (defaultValues.size() != tgtAddress_.size())
-        {
-            FatalErrorInFunction
-                << "Employing default values when sum of weights falls below "
-                << lowWeightCorrection_
-                << " but supplied default field size is not equal to target "
-                << "patch size" << nl
-                << "    default values = " << defaultValues.size() << nl
-                << "    target patch   = " << tgtAddress_.size() << nl
-                << abort(FatalError);
-        }
-    }
-
-    result.setSize(tgtAddress_.size());
-
-    if (singlePatchProc_ == -1)
-    {
-        const mapDistribute& map = srcMapPtr_();
-
-        List<Type> work(fld);
-        map.distribute(work);
-
-        forAll(result, facei)
-        {
-            if (tgtWeightsSum_[facei] < lowWeightCorrection_)
-            {
-                result[facei] = defaultValues[facei];
-            }
-            else
-            {
-                const labelList& faces = tgtAddress_[facei];
-                const scalarList& weights = tgtWeights_[facei];
-
-                forAll(faces, i)
-                {
-                    cop(result[facei], facei, work[faces[i]], weights[i]);
-                }
-            }
-        }
-    }
-    else
-    {
-        forAll(result, facei)
-        {
-            if (tgtWeightsSum_[facei] < lowWeightCorrection_)
-            {
-                result[facei] = defaultValues[facei];
-            }
-            else
-            {
-                const labelList& faces = tgtAddress_[facei];
-                const scalarList& weights = tgtWeights_[facei];
-
-                forAll(faces, i)
-                {
-                    cop(result[facei], facei, fld[faces[i]], weights[i]);
-                }
-            }
-        }
-    }
-}
-
-
-template<class SourcePatch, class TargetPatch>
-template<class Type, class CombineOp>
-void Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
-(
-    const UList<Type>& fld,
-    const CombineOp& cop,
-    List<Type>& result,
-    const UList<Type>& defaultValues
-) const
-{
-    addProfiling(ami, "AMIInterpolation::interpolateToSource");
-
-    if (fld.size() != tgtAddress_.size())
-    {
-        FatalErrorInFunction
-            << "Supplied field size is not equal to target patch size" << nl
-            << "    source patch   = " << srcAddress_.size() << nl
-            << "    target patch   = " << tgtAddress_.size() << nl
-            << "    supplied field = " << fld.size()
-            << abort(FatalError);
-    }
-
-    if (lowWeightCorrection_ > 0)
-    {
-        if (defaultValues.size() != srcAddress_.size())
-        {
-            FatalErrorInFunction
-                << "Employing default values when sum of weights falls below "
-                << lowWeightCorrection_
-                << " but supplied default field size is not equal to target "
-                << "patch size" << nl
-                << "    default values = " << defaultValues.size() << nl
-                << "    source patch   = " << srcAddress_.size() << nl
-                << abort(FatalError);
-        }
-    }
-
-    result.setSize(srcAddress_.size());
-
-    if (singlePatchProc_ == -1)
-    {
-        const mapDistribute& map = tgtMapPtr_();
-
-        List<Type> work(fld);
-        map.distribute(work);
-
-        forAll(result, facei)
-        {
-            if (srcWeightsSum_[facei] < lowWeightCorrection_)
-            {
-                result[facei] = defaultValues[facei];
-            }
-            else
-            {
-                const labelList& faces = srcAddress_[facei];
-                const scalarList& weights = srcWeights_[facei];
-
-                forAll(faces, i)
-                {
-                    cop(result[facei], facei, work[faces[i]], weights[i]);
-                }
-            }
-        }
-    }
-    else
-    {
-        forAll(result, facei)
-        {
-            if (srcWeightsSum_[facei] < lowWeightCorrection_)
-            {
-                result[facei] = defaultValues[facei];
-            }
-            else
-            {
-                const labelList& faces = srcAddress_[facei];
-                const scalarList& weights = srcWeights_[facei];
-
-                forAll(faces, i)
-                {
-                    cop(result[facei], facei, fld[faces[i]], weights[i]);
-                }
-            }
-        }
-    }
-}
-
-
-template<class SourcePatch, class TargetPatch>
-template<class Type, class CombineOp>
-Foam::tmp<Foam::Field<Type>>
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
-(
-    const Field<Type>& fld,
-    const CombineOp& cop,
-    const UList<Type>& defaultValues
-) const
-{
-    tmp<Field<Type>> tresult
-    (
-        new Field<Type>
-        (
-            srcAddress_.size(),
-            Zero
-        )
-    );
-
-    interpolateToSource
-    (
-        fld,
-        multiplyWeightedOp<Type, CombineOp>(cop),
-        tresult.ref(),
-        defaultValues
-    );
-
-    return tresult;
-}
-
-
-template<class SourcePatch, class TargetPatch>
-template<class Type, class CombineOp>
-Foam::tmp<Foam::Field<Type>>
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
-(
-    const tmp<Field<Type>>& tFld,
-    const CombineOp& cop,
-    const UList<Type>& defaultValues
-) const
-{
-    return interpolateToSource(tFld(), cop, defaultValues);
-}
-
-
-template<class SourcePatch, class TargetPatch>
-template<class Type, class CombineOp>
-Foam::tmp<Foam::Field<Type>>
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
-(
-    const Field<Type>& fld,
-    const CombineOp& cop,
-    const UList<Type>& defaultValues
-) const
-{
-    tmp<Field<Type>> tresult
-    (
-        new Field<Type>
-        (
-            tgtAddress_.size(),
-            Zero
-        )
-    );
-
-    interpolateToTarget
-    (
-        fld,
-        multiplyWeightedOp<Type, CombineOp>(cop),
-        tresult.ref(),
-        defaultValues
-    );
-
-    return tresult;
-}
-
-
-template<class SourcePatch, class TargetPatch>
-template<class Type, class CombineOp>
-Foam::tmp<Foam::Field<Type>>
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
-(
-    const tmp<Field<Type>>& tFld,
-    const CombineOp& cop,
-    const UList<Type>& defaultValues
-) const
-{
-    return interpolateToTarget(tFld(), cop, defaultValues);
-}
-
-
-template<class SourcePatch, class TargetPatch>
-template<class Type>
-Foam::tmp<Foam::Field<Type>>
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
-(
-    const Field<Type>& fld,
-    const UList<Type>& defaultValues
-) const
-{
-    return interpolateToSource(fld, plusEqOp<Type>(), defaultValues);
-}
-
-
-template<class SourcePatch, class TargetPatch>
-template<class Type>
-Foam::tmp<Foam::Field<Type>>
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
-(
-    const tmp<Field<Type>>& tFld,
-    const UList<Type>& defaultValues
-) const
-{
-    return interpolateToSource(tFld(), plusEqOp<Type>(), defaultValues);
-}
-
-
-template<class SourcePatch, class TargetPatch>
-template<class Type>
-Foam::tmp<Foam::Field<Type>>
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
-(
-    const Field<Type>& fld,
-    const UList<Type>& defaultValues
-) const
-{
-    return interpolateToTarget(fld, plusEqOp<Type>(), defaultValues);
-}
-
-
-template<class SourcePatch, class TargetPatch>
-template<class Type>
-Foam::tmp<Foam::Field<Type>>
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
-(
-    const tmp<Field<Type>>& tFld,
-    const UList<Type>& defaultValues
-) const
-{
-    return interpolateToTarget(tFld(), plusEqOp<Type>(), defaultValues);
-}
-
-
-template<class SourcePatch, class TargetPatch>
-Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcPointFace
-(
-    const SourcePatch& srcPatch,
-    const TargetPatch& tgtPatch,
+    const primitivePatch& srcPatch,
+    const primitivePatch& tgtPatch,
     const vector& n,
     const label tgtFacei,
     point& tgtPoint
@@ -1645,11 +1093,10 @@ const
 }
 
 
-template<class SourcePatch, class TargetPatch>
-Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtPointFace
+Foam::label Foam::AMIInterpolation::tgtPointFace
 (
-    const SourcePatch& srcPatch,
-    const TargetPatch& tgtPatch,
+    const primitivePatch& srcPatch,
+    const primitivePatch& tgtPatch,
     const vector& n,
     const label srcFacei,
     point& srcPoint
@@ -1693,11 +1140,73 @@ const
 }
 
 
-template<class SourcePatch, class TargetPatch>
-void Foam::AMIInterpolation<SourcePatch, TargetPatch>::writeFaceConnectivity
+bool Foam::AMIInterpolation::checkSymmetricWeights(const bool log) const
+{
+    if (Pstream::parRun() && (singlePatchProc_ == -1))
+    {
+        Log << "Checks only valid for serial running (currently)" << endl;
+
+        return true;
+    }
+
+    bool symmetricSrc = true;
+
+    Log << "    Checking for missing src face in tgt lists" << nl;
+
+    forAll(srcAddress_, srcFacei)
+    {
+        const labelList& tgtIds = srcAddress_[srcFacei];
+        for (const label tgtFacei : tgtIds)
+        {
+            if (!tgtAddress_[tgtFacei].found(srcFacei))
+            {
+                symmetricSrc = false;
+
+                Log << "       srcFacei:" << srcFacei
+                    << " not found in tgtToSrc list for tgtFacei:"
+                    << tgtFacei << nl;
+            }
+        }
+    }
+
+    if (symmetricSrc)
+    {
+        Log << "    - symmetric" << endl;
+    }
+
+    bool symmetricTgt = true;
+
+    Log << "    Checking for missing tgt face in src lists" << nl;
+
+    forAll(tgtAddress_, tgtFacei)
+    {
+        const labelList& srcIds = tgtAddress_[tgtFacei];
+        for (const label srcFacei : srcIds)
+        {
+            if (!srcAddress_[srcFacei].found(tgtFacei))
+            {
+                symmetricTgt = false;
+
+                Log << "       tgtFacei:" << tgtFacei
+                    << " not found in srcToTgt list for srcFacei:"
+                    << srcFacei << nl;
+            }
+        }
+    }
+
+    if (symmetricTgt)
+    {
+        Log << "    - symmetric" << endl;
+    }
+
+    return symmetricSrc && symmetricTgt;
+}
+
+
+void Foam::AMIInterpolation::writeFaceConnectivity
 (
-    const SourcePatch& srcPatch,
-    const TargetPatch& tgtPatch,
+    const primitivePatch& srcPatch,
+    const primitivePatch& tgtPatch,
     const labelListList& srcAddress
 )
 const
@@ -1722,6 +1231,22 @@ const
 
             pti += 2;
         }
+    }
+}
+
+
+void Foam::AMIInterpolation::write(Ostream& os) const
+{
+    os.writeEntry("AMIMethod", type());
+
+    if (reverseTarget_)
+    {
+        os.writeEntry("flipNormals", reverseTarget_);
+    }
+
+    if (lowWeightCorrection_ > 0)
+    {
+        os.writeEntry("lowWeightCorrection", lowWeightCorrection_);
     }
 }
 

@@ -81,6 +81,15 @@ protected:
         //- Make patch weighting factors
         virtual void makeWeights(scalarField&) const;
 
+        //- Correct patch deltaCoeffs
+        virtual void makeDeltaCoeffs(scalarField&) const;
+
+        //- Correct patch non-ortho deltaCoeffs
+        virtual void makeNonOrthoDeltaCoeffs(scalarField&) const;
+
+        //- Correct patch non-ortho correction vectors
+        virtual void makeNonOrthoCorrVectors(vectorField&) const;
+
         //- Initialise the patches for moving points
         virtual void initMovePoints();
 

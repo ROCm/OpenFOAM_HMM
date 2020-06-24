@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,23 +25,40 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "AMIPatchToPatchInterpolation.H"
-#include "AMIMethod.H"
-#include "directAMI.H"
-#include "mapNearestAMI.H"
-#include "faceAreaWeightAMI.H"
-#include "partialFaceAreaWeightAMI.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+inline const Foam::primitivePatch& Foam::advancingFrontAMI::srcPatch() const
 {
-    makeAMIMethod(AMIPatchToPatchInterpolation);
+    if (!tsrcPatch0_.valid())
+    {
+        FatalErrorInFunction
+            << "tsrcPatch0_ not allocated"
+            << abort(FatalError);
+    }
 
-    makeAMIMethodType(AMIPatchToPatchInterpolation, directAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, mapNearestAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, faceAreaWeightAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, partialFaceAreaWeightAMI);
+    return tsrcPatch0_();
+}
+
+
+inline const Foam::primitivePatch& Foam::advancingFrontAMI::tgtPatch() const
+{
+    if (extendedTgtPatchPtr_)
+    {
+        return extendedTgtPatchPtr_();
+    }
+
+    if (!ttgtPatch0_.valid())
+    {
+        FatalErrorInFunction
+            << "srcPatch0Ptr not allocated"
+            << abort(FatalError);
+    }
+
+    return ttgtPatch0_();
+}
+
+
+inline const Foam::labelList& Foam::advancingFrontAMI::srcNonOverlap() const
+{
+    return srcNonOverlap_;
 }
 
 

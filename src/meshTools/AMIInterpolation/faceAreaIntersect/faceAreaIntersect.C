@@ -219,13 +219,15 @@ void Foam::faceAreaIntersect::triSliceWithPlane
 }
 
 
-Foam::scalar Foam::faceAreaIntersect::triangleIntersect
+void Foam::faceAreaIntersect::triangleIntersect
 (
     const triPoints& src,
     const point& tgt0,
     const point& tgt1,
     const point& tgt2,
-    const vector& n
+    const vector& n,
+    scalar& area,
+    vector& centroid
 ) const
 {
     // Work storage
@@ -241,7 +243,7 @@ Foam::scalar Foam::faceAreaIntersect::triangleIntersect
     const scalar srcArea(triArea(src));
     if (srcArea < ROOTVSMALL)
     {
-        return 0.0;
+        return;
     }
 
     // Typical length scale
@@ -255,7 +257,7 @@ Foam::scalar Foam::faceAreaIntersect::triangleIntersect
         scalar s = mag(tgt1 - tgt0);
         if (s < ROOTVSMALL)
         {
-            return 0.0;
+            return;
         }
 
         // Note: outer product with n pre-scaled with edge length. This is
@@ -268,7 +270,7 @@ Foam::scalar Foam::faceAreaIntersect::triangleIntersect
             // Triangle either zero edge length (s == 0) or
             // perpendicular to face normal n. In either case zero
             // overlap area
-            return 0.0;
+            return;
         }
         else
         {
@@ -279,7 +281,7 @@ Foam::scalar Foam::faceAreaIntersect::triangleIntersect
 
     if (nWorkTris1 == 0)
     {
-        return 0.0;
+        return;
     }
 
     // Edge 1
@@ -290,7 +292,7 @@ Foam::scalar Foam::faceAreaIntersect::triangleIntersect
         scalar s = mag(tgt2 - tgt1);
         if (s < ROOTVSMALL)
         {
-            return 0.0;
+            return;
         }
         const vector n1((tgt1 - tgt2)^(-s*n));
         const scalar magSqrN1(magSqr(n1));
@@ -300,7 +302,7 @@ Foam::scalar Foam::faceAreaIntersect::triangleIntersect
             // Triangle either zero edge length (s == 0) or
             // perpendicular to face normal n. In either case zero
             // overlap area
-            return 0.0;
+            return;
         }
         else
         {
@@ -315,7 +317,7 @@ Foam::scalar Foam::faceAreaIntersect::triangleIntersect
 
             if (nWorkTris2 == 0)
             {
-                return 0.0;
+                return;
             }
         }
     }
@@ -328,7 +330,7 @@ Foam::scalar Foam::faceAreaIntersect::triangleIntersect
         scalar s = mag(tgt2 - tgt0);
         if (s < ROOTVSMALL)
         {
-            return 0.0;
+            return;
         }
         const vector n2((tgt2 - tgt0)^(-s*n));
         const scalar magSqrN2(magSqr(n2));
@@ -338,7 +340,7 @@ Foam::scalar Foam::faceAreaIntersect::triangleIntersect
             // Triangle either zero edge length (s == 0) or
             // perpendicular to face normal n. In either case zero
             // overlap area
-            return 0.0;
+            return;
         }
         else
         {
@@ -353,23 +355,25 @@ Foam::scalar Foam::faceAreaIntersect::triangleIntersect
 
             if (nWorkTris1 == 0)
             {
-                return 0.0;
+                return;
             }
             else
             {
                 // Calculate area of sub-triangles
-                scalar area = 0.0;
                 for (label i = 0; i < nWorkTris1; ++i)
                 {
-                    area += triArea(workTris1[i]);
+                    // Area of intersection
+                    const scalar currArea = triArea(workTris1[i]);
+                    area += currArea;
+
+                    // Area-weighted centroid of intersection
+                    centroid += currArea*triCentroid(workTris1[i]);
 
                     if (cacheTriangulation_)
                     {
                         triangles_.append(workTris1[i]);
                     }
                 }
-
-                return area;
             }
         }
     }
@@ -443,12 +447,13 @@ void Foam::faceAreaIntersect::triangulate
 }
 
 
-
-Foam::scalar Foam::faceAreaIntersect::calc
+void Foam::faceAreaIntersect::calc
 (
     const face& faceA,
     const face& faceB,
-    const vector& n
+    const vector& n,
+    scalar& area,
+    vector& centroid
 ) const
 {
     if (cacheTriangulation_)
@@ -456,8 +461,10 @@ Foam::scalar Foam::faceAreaIntersect::calc
         triangles_.clear();
     }
 
+    area = 0.0;
+    centroid = vector::zero;
+
     // Intersect triangles
-    scalar totalArea = 0.0;
     for (const face& triA : trisA_)
     {
         triPoints tpA = getTriPoints(pointsA_, triA, false);
@@ -466,32 +473,38 @@ Foam::scalar Foam::faceAreaIntersect::calc
         {
             if (reverseB_)
             {
-                totalArea +=
-                    triangleIntersect
-                    (
-                        tpA,
-                        pointsB_[triB[0]],
-                        pointsB_[triB[1]],
-                        pointsB_[triB[2]],
-                        n
-                    );
+                triangleIntersect
+                (
+                    tpA,
+                    pointsB_[triB[0]],
+                    pointsB_[triB[1]],
+                    pointsB_[triB[2]],
+                    n,
+                    area,
+                    centroid
+                );
             }
             else
             {
-                totalArea +=
-                    triangleIntersect
-                    (
-                        tpA,
-                        pointsB_[triB[2]],
-                        pointsB_[triB[1]],
-                        pointsB_[triB[0]],
-                        n
-                    );
+                triangleIntersect
+                (
+                    tpA,
+                    pointsB_[triB[2]],
+                    pointsB_[triB[1]],
+                    pointsB_[triB[0]],
+                    n,
+                    area,
+                    centroid
+                );
             }
         }
     }
 
-    return totalArea;
+    // Area weighed centroid
+    if (area > 0)
+    {
+        centroid /= area;
+    }
 }
 
 
@@ -503,8 +516,10 @@ bool Foam::faceAreaIntersect::overlaps
     const scalar threshold
 ) const
 {
+    scalar area = 0.0;
+    vector centroid(Zero);
+
     // Intersect triangles
-    scalar totalArea = 0.0;
     for (const face& triA : trisA_)
     {
         const triPoints tpA = getTriPoints(pointsA_, triA, false);
@@ -513,30 +528,32 @@ bool Foam::faceAreaIntersect::overlaps
         {
             if (reverseB_)
             {
-                totalArea +=
-                    triangleIntersect
-                    (
-                        tpA,
-                        pointsB_[triB[0]],
-                        pointsB_[triB[1]],
-                        pointsB_[triB[2]],
-                        n
-                    );
+                triangleIntersect
+                (
+                    tpA,
+                    pointsB_[triB[0]],
+                    pointsB_[triB[1]],
+                    pointsB_[triB[2]],
+                    n,
+                    area,
+                    centroid
+                );
             }
             else
             {
-                totalArea +=
-                    triangleIntersect
-                    (
-                        tpA,
-                        pointsB_[triB[2]],
-                        pointsB_[triB[1]],
-                        pointsB_[triB[0]],
-                        n
-                    );
+                triangleIntersect
+                (
+                    tpA,
+                    pointsB_[triB[2]],
+                    pointsB_[triB[1]],
+                    pointsB_[triB[0]],
+                    n,
+                    area,
+                    centroid
+                );
             }
 
-            if (totalArea > threshold)
+            if (area > threshold)
             {
                 return true;
             }

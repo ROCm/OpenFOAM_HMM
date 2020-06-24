@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cyclicPeriodicAMIPolyPatch.H"
+#include "partialFaceAreaWeightAMI.H"
 #include "addToRunTimeSelectionTable.H"
 
 // For debugging
@@ -228,10 +229,7 @@ void Foam::cyclicPeriodicAMIPolyPatch::writeOBJ
 }
 
 
-void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
-(
-    const AMIPatchToPatchInterpolation::interpolationMethod& AMIMethod
-) const
+void Foam::cyclicPeriodicAMIPolyPatch::resetAMI() const
 {
     if (owner())
     {
@@ -326,20 +324,8 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
         );
 
         // Construct a new AMI interpolation between the initial patch locations
-        AMIPtr_.reset
-        (
-            new AMIPatchToPatchInterpolation
-            (
-                thisPatch0,
-                nbrPatch0,
-                surfPtr(),
-                faceAreaIntersect::tmMesh,
-                false,
-                AMIPatchToPatchInterpolation::imPartialFaceAreaWeight,
-                AMILowWeightCorrection_,
-                AMIReverse_
-            )
-        );
+        AMIPtr_->setRequireMatch(false);
+        AMIPtr_->calculate(thisPatch0, nbrPatch0, surfPtr());
 
         // Number of geometry replications
         label iter(0);
@@ -358,7 +344,6 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
         // Weight sum averages
         scalar srcSum(gAverage(AMIPtr_->srcWeightsSum()));
         scalar tgtSum(gAverage(AMIPtr_->tgtWeightsSum()));
-
         // Direction (or rather side of AMI : this or nbr patch) of
         // geometry replication
         bool direction = nTransforms_ >= 0;
@@ -520,16 +505,12 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
                 << "The current matchTolerance : " << matchTolerance()
                 << ", sum of owner weights : " << srcSum
                 << ", sum of neighbour weights : " << tgtSum
-                 << "." << nl
+                << "." << nl
                 << "This is only acceptable during post-processing"
                 << "; not during running. Improve your mesh or increase"
                 << " the 'matchTolerance' setting in the patch specification."
                 << endl;
         }
-
-        // Normalise the weights. Disable printing since weights are
-        // still areas.
-        AMIPtr_->normaliseWeights(true, false);
 
         // Print some statistics
         const label nFace = returnReduce(size(), sumOp<label>());
@@ -577,7 +558,17 @@ Foam::cyclicPeriodicAMIPolyPatch::cyclicPeriodicAMIPolyPatch
     const transformType transform
 )
 :
-    cyclicAMIPolyPatch(name, size, start, index, bm, patchType, transform),
+    cyclicAMIPolyPatch
+    (
+        name,
+        size,
+        start,
+        index,
+        bm,
+        patchType,
+        transform,
+        partialFaceAreaWeightAMI::typeName
+    ),
     periodicPatchName_(word::null),
     periodicPatchID_(-1),
     nTransforms_(0),
@@ -595,7 +586,15 @@ Foam::cyclicPeriodicAMIPolyPatch::cyclicPeriodicAMIPolyPatch
     const word& patchType
 )
 :
-    cyclicAMIPolyPatch(name, dict, index, bm, patchType),
+    cyclicAMIPolyPatch
+    (
+        name,
+        dict,
+        index,
+        bm,
+        patchType,
+        partialFaceAreaWeightAMI::typeName
+    ),
     periodicPatchName_(dict.lookup("periodicPatch")),
     periodicPatchID_(-1),
     nTransforms_(dict.getOrDefault<label>("nTransforms", 0)),

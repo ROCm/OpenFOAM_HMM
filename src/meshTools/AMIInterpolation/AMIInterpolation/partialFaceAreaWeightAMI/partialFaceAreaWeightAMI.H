@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,35 +49,34 @@ namespace Foam
                   Class partialFaceAreaWeightAMI Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class SourcePatch, class TargetPatch>
 class partialFaceAreaWeightAMI
 :
-    public faceAreaWeightAMI<SourcePatch, TargetPatch>
+    public faceAreaWeightAMI
 {
 
 private:
 
     // Private Member Functions
 
-        //- No copy construct
-        partialFaceAreaWeightAMI(const partialFaceAreaWeightAMI&) = delete;
-
         //- No copy assignment
         void operator=(const partialFaceAreaWeightAMI&) = delete;
 
-        // Marching front
 
-            //- Set the source and target seed faces
-            virtual void setNextFaces
-            (
-                label& startSeedi,
-                label& srcFacei,
-                label& tgtFacei,
-                const boolList& mapFlag,
-                labelList& seedFaces,
-                const DynamicList<label>& visitedFaces,
-                bool errorOnNotFound = true
-            ) const;
+protected:
+
+    // Protected Member Functions
+
+        //- Set the source and target seed faces
+        virtual bool setNextFaces
+        (
+            label& startSeedi,
+            label& srcFacei,
+            label& tgtFacei,
+            const bitSet& mapFlag,
+            labelList& seedFaces,
+            const DynamicList<label>& visitedFaces,
+            const bool errorOnNotFound = true
+        ) const;
 
 
 public:
@@ -88,62 +87,57 @@ public:
 
     // Constructors
 
+        //- Construct from dictionary
+        partialFaceAreaWeightAMI
+        (
+            const dictionary& dict,
+            const bool reverseTarget = false
+        );
+
         //- Construct from components
         partialFaceAreaWeightAMI
         (
-            const SourcePatch& srcPatch,
-            const TargetPatch& tgtPatch,
-            const faceAreaIntersect::triangulationMode& triMode,
+            const bool requireMatch = false,
             const bool reverseTarget = false,
-            const bool requireMatch = true
+            const scalar lowWeightCorrection = -1,
+            const faceAreaIntersect::triangulationMode triMode =
+                faceAreaIntersect::tmMesh,
+            const bool restartUncoveredSourceFace = true
         );
+
+        //- Construct as copy
+        partialFaceAreaWeightAMI(const partialFaceAreaWeightAMI& ami);
+
+        //- Construct and return a clone
+        virtual autoPtr<AMIInterpolation> clone() const
+        {
+            return
+                autoPtr<AMIInterpolation>(new partialFaceAreaWeightAMI(*this));
+        }
 
 
     //- Destructor
-    virtual ~partialFaceAreaWeightAMI();
+    virtual ~partialFaceAreaWeightAMI() = default;
 
 
     // Member Functions
 
-        // Access
+        //- Flag to indicate that interpolation patches are conformal
+        virtual bool conformal() const;
 
-            //- Flag to indicate that interpolation patches are conformal
-            virtual bool conformal() const;
-
-
-        // Manipulation
-
-            //- Update addressing and weights
-            virtual void calculate
-            (
-                labelListList& srcAddress,
-                scalarListList& srcWeights,
-                labelListList& tgtAddress,
-                scalarListList& tgtWeights,
-                label srcFacei = -1,
-                label tgtFacei = -1
-            );
-
-            //- Set the face areas for parallel runs
-            virtual void setMagSf
-            (
-                const TargetPatch& tgtPatch,
-                const mapDistribute& map,
-                scalarList& srcMagSf,
-                scalarList& tgtMagSf
-            ) const;
+        //- Update addressing, weights and (optional) centroids
+        virtual bool calculate
+        (
+            const primitivePatch& srcPatch,
+            const primitivePatch& tgtPatch,
+            const autoPtr<searchableSurface>& surfPtr = nullptr
+        );
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "partialFaceAreaWeightAMI.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

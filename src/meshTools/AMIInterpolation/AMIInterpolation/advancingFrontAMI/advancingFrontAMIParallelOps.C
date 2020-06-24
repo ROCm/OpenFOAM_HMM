@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,62 +26,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "AMIInterpolation.H"
+#include "advancingFrontAMI.H"
 #include "mergePoints.H"
 #include "mapDistribute.H"
 #include "AABBTree.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class SourcePatch, class TargetPatch>
-Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcDistribution
-(
-    const SourcePatch& srcPatch,
-    const TargetPatch& tgtPatch
-) const
-{
-    label proci = 0;
-
-    if (Pstream::parRun())
-    {
-        labelList facesPresentOnProc(Pstream::nProcs(), Zero);
-        if ((srcPatch.size() > 0) || (tgtPatch.size() > 0))
-        {
-            facesPresentOnProc[Pstream::myProcNo()] = 1;
-        }
-        else
-        {
-            facesPresentOnProc[Pstream::myProcNo()] = 0;
-        }
-
-        Pstream::gatherList(facesPresentOnProc);
-        Pstream::scatterList(facesPresentOnProc);
-
-        label nHaveFaces = sum(facesPresentOnProc);
-
-        if (nHaveFaces > 1)
-        {
-            proci = -1;
-            DebugInFunction
-                << "AMI split across multiple processors" << endl;
-        }
-        else if (nHaveFaces == 1)
-        {
-            proci = facesPresentOnProc.find(1);
-            DebugInFunction
-                << "AMI local to processor" << proci << endl;
-        }
-    }
-
-
-    // Either not parallel or no faces on any processor
-    return proci;
-}
-
-
-template<class SourcePatch, class TargetPatch>
-Foam::label
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcOverlappingProcs
+Foam::label Foam::advancingFrontAMI::calcOverlappingProcs
 (
     const List<treeBoundBoxList>& procBb,
     const treeBoundBox& bb,
@@ -102,7 +54,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcOverlappingProcs
             if (tbb.overlaps(bb))
             {
                 overlaps[proci] = true;
-                nOverlaps++;
+                ++nOverlaps;
                 break;
             }
         }
@@ -112,11 +64,10 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcOverlappingProcs
 }
 
 
-template<class SourcePatch, class TargetPatch>
-void Foam::AMIInterpolation<SourcePatch, TargetPatch>::distributePatches
+void Foam::advancingFrontAMI::distributePatches
 (
     const mapDistribute& map,
-    const TargetPatch& pp,
+    const primitivePatch& pp,
     const globalIndex& gi,
     List<faceList>& faces,
     List<pointField>& points,
@@ -197,12 +148,10 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::distributePatches
 }
 
 
-template<class SourcePatch, class TargetPatch>
-void Foam::AMIInterpolation<SourcePatch, TargetPatch>::
-distributeAndMergePatches
+void Foam::advancingFrontAMI::distributeAndMergePatches
 (
     const mapDistribute& map,
-    const TargetPatch& tgtPatch,
+    const primitivePatch& tgtPatch,
     const globalIndex& gi,
     faceList& tgtFaces,
     pointField& tgtPoints,
@@ -311,12 +260,10 @@ distributeAndMergePatches
 }
 
 
-template<class SourcePatch, class TargetPatch>
-Foam::autoPtr<Foam::mapDistribute>
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcProcMap
+Foam::autoPtr<Foam::mapDistribute> Foam::advancingFrontAMI::calcProcMap
 (
-    const SourcePatch& srcPatch,
-    const TargetPatch& tgtPatch
+    const primitivePatch& srcPatch,
+    const primitivePatch& tgtPatch
 ) const
 {
     // Get decomposition of patch

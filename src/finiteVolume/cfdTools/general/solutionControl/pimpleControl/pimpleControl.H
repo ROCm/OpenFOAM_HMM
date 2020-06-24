@@ -85,18 +85,21 @@ protected:
             label corrPISO_;
 
             //- Flag to indicate whether to update density in SIMPLE
-            //  rather than PISO mode
+            //- rather than PISO mode
             bool SIMPLErho_;
 
             //- Flag to indicate whether to only solve turbulence on final iter
             bool turbOnFinalIterOnly_;
 
+            //- Flag to indicate wheter the final solver is used only on the
+            //- final pimple iter
+            bool finalOnLastPimpleIterOnly_;
+
+            //- Flag to indicate that ddtCorr should be applied; default = yes
+            bool ddtCorr_;
+
             //- Converged flag
             bool converged_;
-
-            //- Flag to indicate wheter the final solver is used only on the
-            //  final pimple iter
-            bool finalOnLastPimpleIterOnly_;
 
 
     // Protected Member Functions
@@ -181,6 +184,9 @@ public:
 
             //- Return true to solve for turbulence
             inline bool turbCorr();
+
+            //- Return true to apply ddtCorr
+            inline bool ddtCorr() const;
 };
 
 

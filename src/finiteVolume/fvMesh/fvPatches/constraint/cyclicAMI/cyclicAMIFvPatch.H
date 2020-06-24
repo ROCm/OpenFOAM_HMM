@@ -68,6 +68,18 @@ protected:
         //- Make patch weighting factors
         void makeWeights(scalarField&) const;
 
+        //- Correct patch deltaCoeffs
+        virtual void makeDeltaCoeffs(scalarField&) const;
+
+        //- Correct patch non-ortho deltaCoeffs
+        virtual void makeNonOrthoDeltaCoeffs(scalarField&) const;
+
+        //- Correct patch non-ortho correction vectors
+        virtual void makeNonOrthoCorrVectors(vectorField&) const;
+
+        //- Correct patches after moving points
+        virtual void movePoints();
+
 
 public:
 
@@ -156,8 +168,8 @@ public:
             }
 
             //- Return true if this patch is coupled. This is equivalent
-            //  to the coupledPolyPatch::coupled() if parallel running or
-            //  both sides present, false otherwise
+            //- to the coupledPolyPatch::coupled() if parallel running or
+            //- both sides present, false otherwise
             virtual bool coupled() const;
 
             //- Return delta (P to N) vectors across coupled patch
@@ -187,7 +199,7 @@ public:
         // Interface transfer functions
 
             //- Return the values of the given internal data adjacent to
-            //  the interface as a field
+            //- the interface as a field
             virtual tmp<labelField> interfaceInternalField
             (
                 const labelUList& internalData

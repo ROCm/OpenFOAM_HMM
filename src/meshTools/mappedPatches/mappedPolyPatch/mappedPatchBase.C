@@ -45,6 +45,7 @@ License
 #include "syncTools.H"
 #include "treeDataCell.H"
 #include "DynamicField.H"
+#include "faceAreaWeightAMI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -791,14 +792,14 @@ const
 
 void Foam::mappedPatchBase::calcAMI() const
 {
-    if (AMIPtr_.valid())
+    if (AMIPtr_->upToDate())
     {
-        FatalErrorInFunction
-            << "AMI already calculated" << exit(FatalError);
+        DebugInFunction
+            << "AMI already up-to-date"
+            << endl;
+
+        return;
     }
-
-    AMIPtr_.clear();
-
 
     const polyPatch& nbr = samplePolyPatch();
 
@@ -829,29 +830,13 @@ void Foam::mappedPatchBase::calcAMI() const
     }
 
     // Construct/apply AMI interpolation to determine addressing and weights
-    AMIPtr_.reset
-    (
-        new AMIPatchToPatchInterpolation
-        (
-            patch_,
-            nbrPatch0,
-            surfPtr(),
-            faceAreaIntersect::tmMesh,
-            true,
-            AMIPatchToPatchInterpolation::imFaceAreaWeight,
-            -1,
-            AMIReverse_
-        )
-    );
+    AMIPtr_->calculate(patch_, nbrPatch0, surfPtr());
 }
 
 
 // * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * * * * //
 
-Foam::mappedPatchBase::mappedPatchBase
-(
-    const polyPatch& pp
-)
+Foam::mappedPatchBase::mappedPatchBase(const polyPatch& pp)
 :
     patch_(pp),
     sampleRegion_(patch_.boundaryMesh().mesh().name()),
@@ -864,8 +849,8 @@ Foam::mappedPatchBase::mappedPatchBase
     distance_(0),
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
     mapPtr_(nullptr),
-    AMIPtr_(nullptr),
     AMIReverse_(false),
+    AMIPtr_(new faceAreaWeightAMI(true, AMIReverse_)),
     surfPtr_(nullptr),
     surfDict_(fileName("surface"))
 {}
@@ -891,8 +876,8 @@ Foam::mappedPatchBase::mappedPatchBase
     distance_(0),
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
     mapPtr_(nullptr),
-    AMIPtr_(nullptr),
     AMIReverse_(false),
+    AMIPtr_(new faceAreaWeightAMI(true, AMIReverse_)),
     surfPtr_(nullptr),
     surfDict_(fileName("surface"))
 {}
@@ -918,8 +903,8 @@ Foam::mappedPatchBase::mappedPatchBase
     distance_(0),
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
     mapPtr_(nullptr),
-    AMIPtr_(nullptr),
     AMIReverse_(false),
+    AMIPtr_(new faceAreaWeightAMI(true, AMIReverse_)),
     surfPtr_(nullptr),
     surfDict_(fileName("surface"))
 {}
@@ -945,8 +930,8 @@ Foam::mappedPatchBase::mappedPatchBase
     distance_(distance),
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
     mapPtr_(nullptr),
-    AMIPtr_(nullptr),
     AMIReverse_(false),
+    AMIPtr_(new faceAreaWeightAMI(true, AMIReverse_)),
     surfPtr_(nullptr),
     surfDict_(fileName("surface"))
 {}
@@ -969,8 +954,16 @@ Foam::mappedPatchBase::mappedPatchBase
     distance_(0),
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
     mapPtr_(nullptr),
-    AMIPtr_(nullptr),
     AMIReverse_(dict.getOrDefault("flipNormals", false)),
+    AMIPtr_
+    (
+        AMIInterpolation::New
+        (
+            dict.getOrDefault("AMIMethod", faceAreaWeightAMI::typeName),
+            dict,
+            AMIReverse_
+        )
+    ),
     surfPtr_(nullptr),
     surfDict_(dict.subOrEmptyDict("surface"))
 {
@@ -1044,8 +1037,16 @@ Foam::mappedPatchBase::mappedPatchBase
     distance_(0),
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
     mapPtr_(nullptr),
-    AMIPtr_(nullptr),
     AMIReverse_(dict.getOrDefault("flipNormals", false)),
+    AMIPtr_
+    (
+        AMIInterpolation::New
+        (
+            dict.getOrDefault("AMIMethod", faceAreaWeightAMI::typeName),
+            dict,
+            AMIReverse_
+        )
+    ),
     surfPtr_(nullptr),
     surfDict_(dict.subOrEmptyDict("surface"))
 {
@@ -1089,8 +1090,8 @@ Foam::mappedPatchBase::mappedPatchBase
     distance_(mpb.distance_),
     sameRegion_(mpb.sameRegion_),
     mapPtr_(nullptr),
-    AMIPtr_(nullptr),
     AMIReverse_(mpb.AMIReverse_),
+    AMIPtr_(mpb.AMIPtr_->clone()),
     surfPtr_(nullptr),
     surfDict_(mpb.surfDict_)
 {}
@@ -1119,8 +1120,8 @@ Foam::mappedPatchBase::mappedPatchBase
     distance_(mpb.distance_),
     sameRegion_(mpb.sameRegion_),
     mapPtr_(nullptr),
-    AMIPtr_(nullptr),
     AMIReverse_(mpb.AMIReverse_),
+    AMIPtr_(mpb.AMIPtr_->clone()),
     surfPtr_(nullptr),
     surfDict_(mpb.surfDict_)
 {}
@@ -1137,8 +1138,8 @@ Foam::mappedPatchBase::~mappedPatchBase()
 void Foam::mappedPatchBase::clearOut()
 {
     mapPtr_.clear();
-    AMIPtr_.clear();
     surfPtr_.clear();
+    AMIPtr_->upToDate() = false;
 }
 
 

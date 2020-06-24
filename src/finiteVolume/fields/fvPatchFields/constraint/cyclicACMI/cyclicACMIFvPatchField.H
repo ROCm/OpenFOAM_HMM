@@ -173,7 +173,7 @@ public:
 
             //- Return true if this patch field fixes a value
             //  Needed to check if a level has to be specified while solving
-            //  Poissons equations
+            //  Poisson equations
             virtual bool fixesValue() const
             {
                 const scalarField& mask =

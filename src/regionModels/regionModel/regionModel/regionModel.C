@@ -31,6 +31,7 @@ License
 #include "Time.H"
 #include "mappedWallPolyPatch.H"
 #include "zeroGradientFvPatchFields.H"
+#include "faceAreaWeightAMI.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -209,17 +210,15 @@ Foam::regionModels::regionModel::interRegionAMI
             interRegionAMI_[nbrRegionID].set
             (
                 regionPatchi,
-                new AMIPatchToPatchInterpolation
+                AMIInterpolation::New
                 (
-                    p,
-                    nbrP,
-                    faceAreaIntersect::tmMesh,
-                    true,
-                    AMIPatchToPatchInterpolation::imFaceAreaWeight,
-                    -1,
+                    faceAreaWeightAMI::typeName,
+                    true, // requireMatch
                     flip
                 )
             );
+
+            interRegionAMI_[nbrRegionID][regionPatchi].calculate(p, nbrP);
 
             UPstream::msgType() = oldTag;
         }
@@ -252,17 +251,15 @@ Foam::regionModels::regionModel::interRegionAMI
         interRegionAMI_[nbrRegionID].set
         (
             regionPatchi,
-            new AMIPatchToPatchInterpolation
+            AMIInterpolation::New
             (
-                p,
-                nbrP,
-                faceAreaIntersect::tmMesh,
-                true,
-                AMIPatchToPatchInterpolation::imFaceAreaWeight,
-                -1,
-                flip
+                faceAreaWeightAMI::typeName,
+                true, // requireMatch
+                flip // reverse
             )
         );
+
+        interRegionAMI_[nbrRegionID][regionPatchi].calculate(p, nbrP);
 
         UPstream::msgType() = oldTag;
 

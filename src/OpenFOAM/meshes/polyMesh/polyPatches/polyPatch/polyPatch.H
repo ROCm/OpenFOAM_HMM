@@ -55,6 +55,7 @@ namespace Foam
 // Forward declarations
 class polyBoundaryMesh;
 class polyPatch;
+class polyTopoChange;
 class PstreamBuffers;
 
 Ostream& operator<<(Ostream&, const polyPatch&);
@@ -418,6 +419,19 @@ public:
             labelList& faceMap,
             labelList& rotation
         ) const;
+
+        //- For dynamic mesh cases - return true if this patch will change the
+        //- topology
+        virtual bool changeTopology() const
+        {
+            return false;
+        }
+
+        //- Collect topology changes in a polyTopoChange object
+        virtual bool setTopology(polyTopoChange&)
+        {
+            return false;
+        }
 
 
     // Member operators

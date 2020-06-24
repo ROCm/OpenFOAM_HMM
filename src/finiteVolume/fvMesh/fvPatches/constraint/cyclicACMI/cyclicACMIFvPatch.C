@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,9 +27,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cyclicACMIFvPatch.H"
-#include "addToRunTimeSelectionTable.H"
 #include "fvMesh.H"
 #include "transform.H"
+#include "surfaceFields.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -41,45 +43,14 @@ namespace Foam
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-void Foam::cyclicACMIFvPatch::updateAreas() const
+void Foam::cyclicACMIFvPatch::resetPatchAreas(const fvPatch& fvp) const
 {
-    if (cyclicACMIPolyPatch_.updated())
-    {
-        if (debug)
-        {
-            Pout<< "cyclicACMIFvPatch::updateAreas() : updating fv areas for "
-                << name() << " and " << this->nonOverlapPatch().name()
-                << endl;
-        }
+    const_cast<vectorField&>(fvp.Sf()) = fvp.patch().faceAreas();
+    const_cast<vectorField&>(fvp.Cf()) = fvp.patch().faceCentres();
+    const_cast<scalarField&>(fvp.magSf()) = mag(fvp.patch().faceAreas());
 
-        // owner couple
-        const_cast<vectorField&>(Sf()) = patch().faceAreas();
-        const_cast<scalarField&>(magSf()) = mag(patch().faceAreas());
-
-        // owner non-overlapping
-        const fvPatch& nonOverlapPatch = this->nonOverlapPatch();
-        const_cast<vectorField&>(nonOverlapPatch.Sf()) =
-            nonOverlapPatch.patch().faceAreas();
-        const_cast<scalarField&>(nonOverlapPatch.magSf()) =
-            mag(nonOverlapPatch.patch().faceAreas());
-
-        // neighbour couple
-        const cyclicACMIFvPatch& nbrACMI = neighbPatch();
-        const_cast<vectorField&>(nbrACMI.Sf()) =
-            nbrACMI.patch().faceAreas();
-        const_cast<scalarField&>(nbrACMI.magSf()) =
-            mag(nbrACMI.patch().faceAreas());
-
-        // neighbour non-overlapping
-        const fvPatch& nbrNonOverlapPatch = nbrACMI.nonOverlapPatch();
-        const_cast<vectorField&>(nbrNonOverlapPatch.Sf()) =
-            nbrNonOverlapPatch.patch().faceAreas();
-        const_cast<scalarField&>(nbrNonOverlapPatch.magSf()) =
-            mag(nbrNonOverlapPatch.patch().faceAreas());
-
-        // set the updated flag
-        cyclicACMIPolyPatch_.setUpdated(false);
-    }
+    DebugPout
+        << fvp.patch().name() << " area:" << sum(fvp.magSf()) << endl;
 }
 
 
@@ -100,13 +71,13 @@ void Foam::cyclicACMIFvPatch::makeWeights(scalarField& w) const
             )
         );
 
-        scalar tol = cyclicACMIPolyPatch::tolerance();
+        const scalar tol = cyclicACMIPolyPatch::tolerance();
 
 
         forAll(deltas, facei)
         {
-            scalar di = deltas[facei];
-            scalar dni = nbrDeltas[facei];
+            scalar di = mag(deltas[facei]);
+            scalar dni = mag(nbrDeltas[facei]);
 
             if (dni < tol)
             {
@@ -147,8 +118,7 @@ Foam::tmp<Foam::vectorField> Foam::cyclicACMIFvPatch::delta() const
 
         vectorField nbrPatchD(interpolate(nbrPatch.coupledFvPatch::delta()));
 
-
-        tmp<vectorField> tpdv(new vectorField(patchD.size()));
+        auto tpdv = tmp<vectorField>::New(patchD.size());
         vectorField& pdv = tpdv.ref();
 
         // do the transformation if necessary
@@ -198,6 +168,102 @@ Foam::tmp<Foam::labelField> Foam::cyclicACMIFvPatch::internalFieldTransfer
 ) const
 {
     return neighbFvPatch().patchInternalField(iF);
+}
+
+
+void Foam::cyclicACMIFvPatch::movePoints()
+{
+    if (!cyclicACMIPolyPatch_.owner())
+    {
+        return;
+    }
+
+    // Set the patch face areas to be consistent with the changes made at the
+    // polyPatch level
+
+    const fvPatch& nonOverlapPatch = this->nonOverlapPatch();
+    const cyclicACMIFvPatch& nbrACMI = neighbPatch();
+    const fvPatch& nbrNonOverlapPatch = nbrACMI.nonOverlapPatch();
+
+    resetPatchAreas(*this);
+    resetPatchAreas(nonOverlapPatch);
+    resetPatchAreas(nbrACMI);
+    resetPatchAreas(nbrNonOverlapPatch);
+
+    // Scale the mesh flux
+
+    const labelListList& newSrcAddr = AMI().srcAddress();
+    const labelListList& newTgtAddr = AMI().tgtAddress();
+
+    const fvMesh& mesh = boundaryMesh().mesh();
+    surfaceScalarField& meshPhi = const_cast<fvMesh&>(mesh).setPhi();
+    surfaceScalarField::Boundary& meshPhiBf = meshPhi.boundaryFieldRef();
+
+    // Note: phip and phiNonOverlapp will be different sizes if new faces
+    // have been added
+    scalarField& phip = meshPhiBf[cyclicACMIPolyPatch_.index()];
+    scalarField& phiNonOverlapp =
+        meshPhiBf[nonOverlapPatch.patch().index()];
+
+    const auto& localFaces = cyclicACMIPolyPatch_.localFaces();
+    const auto& localPoints = cyclicACMIPolyPatch_.localPoints();
+
+    forAll(phip, facei)
+    {
+        if (newSrcAddr[facei].empty())
+        {
+            // AMI patch with no connection to other coupled faces
+            phip[facei] = 0.0;
+        }
+        else
+        {
+            // Scale the mesh flux according to the area fraction
+            const face& fAMI = localFaces[facei];
+
+            // Note: using raw point locations to calculate the geometric
+            // area - faces areas are currently scaled (decoupled from
+            // mesh points)
+            const scalar geomArea = fAMI.mag(localPoints);
+            phip[facei] *= magSf()[facei]/geomArea;
+        }
+    }
+
+    forAll(phiNonOverlapp, facei)
+    {
+        const scalar w = 1.0 - cyclicACMIPolyPatch_.srcMask()[facei];
+        phiNonOverlapp[facei] *= w;
+    }
+
+    scalarField& nbrPhip = meshPhiBf[nbrACMI.patch().index()];
+    scalarField& nbrPhiNonOverlapp =
+        meshPhiBf[nbrNonOverlapPatch.patch().index()];
+
+    const auto& nbrLocalFaces = nbrACMI.patch().localFaces();
+    const auto& nbrLocalPoints = nbrACMI.patch().localPoints();
+
+    forAll(nbrPhip, facei)
+    {
+        if (newTgtAddr[facei].empty())
+        {
+            nbrPhip[facei] = 0.0;
+        }
+        else
+        {
+            const face& fAMI = nbrLocalFaces[facei];
+
+            // Note: using raw point locations to calculate the geometric
+            // area - faces areas are currently scaled (decoupled from
+            // mesh points)
+            const scalar geomArea = fAMI.mag(nbrLocalPoints);
+            nbrPhip[facei] *= nbrACMI.magSf()[facei]/geomArea;
+        }
+    }
+
+    forAll(nbrPhiNonOverlapp, facei)
+    {
+        const scalar w = 1.0 - cyclicACMIPolyPatch_.tgtMask()[facei];
+        nbrPhiNonOverlapp[facei] *= w;
+    }
 }
 
 

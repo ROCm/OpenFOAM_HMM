@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,170 +26,203 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-template<class SourcePatch, class TargetPatch>
-inline Foam::label
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::singlePatchProc() const
+inline const Foam::primitivePatch& Foam::AMIInterpolation::srcPatch0() const
 {
-    return singlePatchProc_;
+    if (!tsrcPatch0_.valid())
+    {
+        FatalErrorInFunction
+            << "tsrcPatch0Ptr_ not set"
+            << abort(FatalError);
+    }
+
+    return tsrcPatch0_();
 }
 
 
-template<class SourcePatch, class TargetPatch>
-inline Foam::scalar
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::lowWeightCorrection() const
+inline const Foam::primitivePatch& Foam::AMIInterpolation::tgtPatch0() const
+{
+
+    if (!ttgtPatch0_.valid())
+    {
+        FatalErrorInFunction
+            << "ttgtPatch0Ptr_ not set"
+            << abort(FatalError);
+    }
+
+    return ttgtPatch0_();
+}
+
+
+inline bool Foam::AMIInterpolation::upToDate() const
+{
+    return upToDate_;
+}
+
+
+inline bool& Foam::AMIInterpolation::upToDate()
+{
+    return upToDate_;
+}
+
+
+inline bool Foam::AMIInterpolation::distributed() const
+{
+    return singlePatchProc_ == -1;
+}
+
+
+inline bool Foam::AMIInterpolation::requireMatch() const
+{
+    return requireMatch_ && lowWeightCorrection_ < 0;
+}
+
+
+inline bool Foam::AMIInterpolation::setRequireMatch(const bool flag)
+{
+    requireMatch_ = flag;
+    return requireMatch_;
+}
+
+
+inline bool Foam::AMIInterpolation::reverseTarget() const
+{
+    return reverseTarget_;
+}
+
+
+inline Foam::scalar Foam::AMIInterpolation::lowWeightCorrection() const
 {
     return lowWeightCorrection_;
 }
 
 
-template<class SourcePatch, class TargetPatch>
-inline bool
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::
-applyLowWeightCorrection() const
+inline bool Foam::AMIInterpolation::applyLowWeightCorrection() const
 {
     return lowWeightCorrection_ > 0;
 }
 
 
-template<class SourcePatch, class TargetPatch>
-inline const Foam::List<Foam::scalar>&
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcMagSf() const
+inline Foam::label Foam::AMIInterpolation::singlePatchProc() const
+{
+    return singlePatchProc_;
+}
+
+
+inline const Foam::List<Foam::scalar>& Foam::AMIInterpolation::srcMagSf() const
 {
     return srcMagSf_;
 }
 
 
-template<class SourcePatch, class TargetPatch>
-inline Foam::List<Foam::scalar>&
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcMagSf()
+inline Foam::List<Foam::scalar>& Foam::AMIInterpolation::srcMagSf()
 {
     return srcMagSf_;
 }
 
 
-template<class SourcePatch, class TargetPatch>
-inline const Foam::labelListList&
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcAddress() const
+inline const Foam::labelListList& Foam::AMIInterpolation::srcAddress() const
 {
     return srcAddress_;
 }
 
 
-template<class SourcePatch, class TargetPatch>
-inline Foam::labelListList&
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcAddress()
+inline Foam::labelListList& Foam::AMIInterpolation::srcAddress()
 {
     return srcAddress_;
 }
 
 
-template<class SourcePatch, class TargetPatch>
-inline const Foam::scalarListList&
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcWeights() const
+inline const Foam::scalarListList& Foam::AMIInterpolation::srcWeights() const
 {
     return srcWeights_;
 }
 
 
-template<class SourcePatch, class TargetPatch>
-inline Foam::scalarListList&
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcWeights()
+inline Foam::scalarListList& Foam::AMIInterpolation::srcWeights()
 {
     return srcWeights_;
 }
 
 
-template<class SourcePatch, class TargetPatch>
-inline const Foam::scalarField&
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcWeightsSum() const
+inline const Foam::scalarField& Foam::AMIInterpolation::srcWeightsSum() const
 {
     return srcWeightsSum_;
 }
 
 
-template<class SourcePatch, class TargetPatch>
-inline Foam::scalarField&
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcWeightsSum()
+inline Foam::scalarField& Foam::AMIInterpolation::srcWeightsSum()
 {
     return srcWeightsSum_;
 }
 
 
-template<class SourcePatch, class TargetPatch>
-inline const Foam::mapDistribute&
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcMap() const
+inline const Foam::pointListList& Foam::AMIInterpolation::srcCentroids() const
+{
+    return srcCentroids_;
+}
+
+
+inline Foam::pointListList& Foam::AMIInterpolation::srcCentroids()
+{
+    return srcCentroids_;
+}
+
+
+inline const Foam::mapDistribute& Foam::AMIInterpolation::srcMap() const
 {
     return *srcMapPtr_;
 }
 
 
-template<class SourcePatch, class TargetPatch>
-inline const Foam::List<Foam::scalar>&
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtMagSf() const
+inline const Foam::List<Foam::scalar>& Foam::AMIInterpolation::tgtMagSf() const
 {
     return tgtMagSf_;
 }
 
 
-template<class SourcePatch, class TargetPatch>
-inline Foam::List<Foam::scalar>&
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtMagSf()
+inline Foam::List<Foam::scalar>& Foam::AMIInterpolation::tgtMagSf()
 {
     return tgtMagSf_;
 }
 
 
-template<class SourcePatch, class TargetPatch>
-inline const Foam::labelListList&
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtAddress() const
+inline const Foam::labelListList& Foam::AMIInterpolation::tgtAddress() const
 {
     return tgtAddress_;
 }
 
 
-template<class SourcePatch, class TargetPatch>
-inline Foam::labelListList&
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtAddress()
+inline Foam::labelListList& Foam::AMIInterpolation::tgtAddress()
 {
     return tgtAddress_;
 }
 
 
-template<class SourcePatch, class TargetPatch>
-inline const Foam::scalarListList&
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtWeights() const
+inline const Foam::scalarListList& Foam::AMIInterpolation::tgtWeights() const
 {
     return tgtWeights_;
 }
 
 
-template<class SourcePatch, class TargetPatch>
-inline Foam::scalarListList&
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtWeights()
+inline Foam::scalarListList& Foam::AMIInterpolation::tgtWeights()
 {
     return tgtWeights_;
 }
 
 
-template<class SourcePatch, class TargetPatch>
-inline const Foam::scalarField&
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtWeightsSum() const
+inline const Foam::scalarField& Foam::AMIInterpolation::tgtWeightsSum() const
 {
     return tgtWeightsSum_;
 }
 
 
-template<class SourcePatch, class TargetPatch>
-inline Foam::scalarField&
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtWeightsSum()
+inline Foam::scalarField& Foam::AMIInterpolation::tgtWeightsSum()
 {
     return tgtWeightsSum_;
 }
 
 
-template<class SourcePatch, class TargetPatch>
-inline const Foam::mapDistribute&
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtMap() const
+inline const Foam::mapDistribute& Foam::AMIInterpolation::tgtMap() const
 {
     return *tgtMapPtr_;
 }

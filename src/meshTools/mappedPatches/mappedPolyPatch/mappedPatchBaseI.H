@@ -172,13 +172,10 @@ inline const Foam::AMIPatchToPatchInterpolation& Foam::mappedPatchBase::AMI
 
     if (topoChange || forceUpdate)
     {
-        AMIPtr_.clear();
+        AMIPtr_->upToDate() = false;
     }
 
-    if (AMIPtr_.empty())
-    {
-        calcAMI();
-    }
+    calcAMI();
 
     return *AMIPtr_;
 }

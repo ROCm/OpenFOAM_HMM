@@ -113,6 +113,15 @@ inline Foam::scalar Foam::faceAreaIntersect::triArea(const triPoints& t) const
 }
 
 
+inline Foam::vector Foam::faceAreaIntersect::triCentroid
+(
+    const triPoints& t
+) const
+{
+    return (t[0] + t[1] + t[2])/3;
+}
+
+
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::scalar& Foam::faceAreaIntersect::tolerance()

@@ -252,11 +252,7 @@ int main(int argc, char *argv[])
         meshToMesh::interpolationMethod method =
             meshToMesh::interpolationMethodNames_[mapMethod];
 
-        patchMapMethod =
-            AMIPatchToPatchInterpolation::interpolationMethodNames_
-            [
-                meshToMesh::interpolationMethodAMI(method)
-            ];
+        patchMapMethod = meshToMesh::interpolationMethodAMI(method);
     }
 
     word procMapMethod =

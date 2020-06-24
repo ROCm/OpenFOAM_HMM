@@ -52,6 +52,7 @@ bool Foam::pimpleControl::read()
         pimpleDict.getOrDefault("turbOnFinalIterOnly", true);
     finalOnLastPimpleIterOnly_ =
         pimpleDict.getOrDefault("finalOnLastPimpleIterOnly", false);
+    ddtCorr_ = pimpleDict.getOrDefault("ddtCorr", true);
 
     return true;
 }
@@ -155,8 +156,9 @@ Foam::pimpleControl::pimpleControl
     corrPISO_(0),
     SIMPLErho_(false),
     turbOnFinalIterOnly_(true),
-    converged_(false),
-    finalOnLastPimpleIterOnly_(false)
+    finalOnLastPimpleIterOnly_(false),
+    ddtCorr_(true),
+    converged_(false)
 {
     read();
 

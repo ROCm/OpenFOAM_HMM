@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,46 +25,66 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "AMIInterpolation.H"
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class SourcePatch, class TargetPatch>
-Foam::autoPtr<Foam::AMIMethod<SourcePatch, TargetPatch>>
-Foam::AMIMethod<SourcePatch, TargetPatch>::New
+Foam::autoPtr<Foam::AMIInterpolation> Foam::AMIInterpolation::New
 (
-    const word& methodName,
-    const SourcePatch& srcPatch,
-    const TargetPatch& tgtPatch,
-    const faceAreaIntersect::triangulationMode& triMode,
-    const bool reverseTarget,
-    const bool requireMatch
+    const word& modelName,
+    const dictionary& dict,
+    const bool reverseTarget
 )
 {
-    DebugInfo << "Selecting AMIMethod " << methodName << endl;
+    DebugInfo << "Selecting model " << modelName << endl;
 
-    auto cstrIter = componentsConstructorTablePtr_->cfind(methodName);
+    auto cstrIter = dictConstructorTablePtr_->cfind(modelName);
 
     if (!cstrIter.found())
     {
         FatalErrorInLookup
         (
-            "AMIMethod",
-            methodName,
-            *componentsConstructorTablePtr_
+            typeName,
+            modelName,
+            *dictConstructorTablePtr_
         ) << exit(FatalError);
     }
 
-    return autoPtr<AMIMethod<SourcePatch, TargetPatch>>
+    return autoPtr<AMIInterpolation>(cstrIter()(dict, reverseTarget));
+}
+
+
+Foam::autoPtr<Foam::AMIInterpolation> Foam::AMIInterpolation::New
+(
+    const word& modelName,
+    const bool requireMatch,
+    const bool reverseTarget,
+    const scalar lowWeightCorrection
+)
+{
+    DebugInfo << "Selecting model " << modelName << endl;
+
+    auto cstrIter = componentConstructorTablePtr_->cfind(modelName);
+
+    if (!cstrIter.found())
+    {
+        FatalErrorInLookup
+        (
+            typeName,
+            modelName,
+            *componentConstructorTablePtr_
+        ) << exit(FatalError);
+    }
+
+    return autoPtr<AMIInterpolation>
     (
         cstrIter()
         (
-            srcPatch,
-            tgtPatch,
-            triMode,
+            requireMatch,
             reverseTarget,
-            requireMatch
+            lowWeightCorrection
         )
     );
 }
-
 
 // ************************************************************************* //

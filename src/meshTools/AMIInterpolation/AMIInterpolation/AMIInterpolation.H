@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,6 +61,12 @@ SourceFiles
 #include "globalIndex.H"
 #include "ops.H"
 #include "Enum.H"
+#include "pointList.H"
+#include "indexedOctree.H"
+#include "treeDataPrimitivePatch.H"
+
+#include "runTimeSelectionTables.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,68 +74,39 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class AMIInterpolationName Declaration
-\*---------------------------------------------------------------------------*/
-
-TemplateName(AMIInterpolation);
-
-
-/*---------------------------------------------------------------------------*\
                       Class AMIInterpolation Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class SourcePatch, class TargetPatch>
 class AMIInterpolation
-:
-    public AMIInterpolationName
 {
 public:
 
     // Public data types
 
-        //- Enumeration specifying interpolation method
-        enum interpolationMethod
-        {
-            imDirect,
-            imMapNearest,
-            imFaceAreaWeight,
-            imPartialFaceAreaWeight
-        };
-
-        static const Enum<interpolationMethod> interpolationMethodNames_;
-
         static bool cacheIntersections_;
 
-        //- Calculate the patch face magnitudes for the given tri-mode
-        template<class Patch>
-        static tmp<scalarField> patchMagSf
-        (
-            const Patch& patch,
-            const faceAreaIntersect::triangulationMode triMode
-        );
 
+protected:
 
-private:
+    //- Local typedef to octree tree-type
+    typedef treeDataPrimitivePatch<primitivePatch> treeType;
 
-    // Private data
+    // Protected data
 
-        //- Interpolation method
-        const word methodName_;
+        //- Flag to indicate that the two patches must be matched/an overlap
+        //- exists between them
+        bool requireMatch_;
 
         //- Flag to indicate that the two patches are co-directional and
         //- that the orientation of the target patch should be reversed
         const bool reverseTarget_;
 
-        //- Flag to indicate that the two patches must be matched/an overlap
-        //- exists between them
-        const bool requireMatch_;
+        //- Threshold weight below which interpolation is deactivated
+        scalar lowWeightCorrection_;
 
         //- Index of processor that holds all of both sides. -1 in all other
         //- cases
         label singlePatchProc_;
-
-        //- Threshold weight below which interpolation is deactivated
-        scalar lowWeightCorrection_;
 
 
         // Source patch
@@ -146,6 +123,19 @@ private:
             //- Sum of weights of target faces per source face
             scalarField srcWeightsSum_;
 
+            //- Centroid of target faces per source face
+            pointListList srcCentroids_;
+
+            //- Source patch points if input points are manipulated, e.g.
+            //- projected
+            pointField srcPatchPts_;
+
+            //- Source patch using manipulated input points
+            tmpNrc<primitivePatch> tsrcPatch0_;
+
+            //- Source map pointer - parallel running only
+            autoPtr<mapDistribute> srcMapPtr_;
+
 
         // Target patch
 
@@ -161,70 +151,43 @@ private:
             //- Sum of weights of source faces per target face
             scalarField tgtWeightsSum_;
 
+            //- Centroid of source faces per target face
+            pointListList tgtCentroids_;
 
-        //- Face triangulation mode
-        const faceAreaIntersect::triangulationMode triMode_;
+            //- Target patch points if input points are manipulated, e.g.
+            //- projected
+            pointField tgtPatchPts_;
 
-        //- Source map pointer - parallel running only
-        autoPtr<mapDistribute> srcMapPtr_;
+            //- Target patch using manipulated input points
+            tmpNrc<primitivePatch> ttgtPatch0_;
 
-        //- Target map pointer - parallel running only
-        autoPtr<mapDistribute> tgtMapPtr_;
+            //- Target map pointer - parallel running only
+            autoPtr<mapDistribute> tgtMapPtr_;
+
+        //- Up-to-date flag
+        bool upToDate_;
 
 
-    // Private Member Functions
-
-        //- No copy construct
-        AMIInterpolation(const AMIInterpolation&) = delete;
+    // Protected Member Functions
 
         //- No copy assignment
         void operator=(const AMIInterpolation&) = delete;
 
 
-        // Parallel functionality
+        // Initialisation
+
+            //- Reset the octree for the patch face search
+            autoPtr<indexedOctree<treeType>> createTree
+            (
+                const primitivePatch& patch
+            ) const;
 
             //- Calculate if patches are on multiple processors
             label calcDistribution
             (
-                const SourcePatch& srcPatch,
-                const TargetPatch& tgtPatch
+                const primitivePatch& srcPatch,
+                const primitivePatch& tgtPatch
             ) const;
-
-            label calcOverlappingProcs
-            (
-                const List<treeBoundBoxList>& procBb,
-                const treeBoundBox& bb,
-                boolList& overlaps
-            ) const;
-
-            void distributePatches
-            (
-                const mapDistribute& map,
-                const TargetPatch& pp,
-                const globalIndex& gi,
-                List<faceList>& faces,
-                List<pointField>& points,
-                List<labelList>& tgtFaceIDs
-            ) const;
-
-            void distributeAndMergePatches
-            (
-                const mapDistribute& map,
-                const TargetPatch& tgtPatch,
-                const globalIndex& gi,
-                faceList& tgtFaces,
-                pointField& tgtPoints,
-                labelList& tgtFaceIDs
-            ) const;
-
-            autoPtr<mapDistribute> calcProcMap
-            (
-                const SourcePatch& srcPatch,
-                const TargetPatch& tgtPatch
-            ) const;
-
-
-        // Initialisation
 
             //- Project points to surface
             void projectPointsToSurface
@@ -232,6 +195,15 @@ private:
                 const searchableSurface& surf,
                 pointField& pts
             ) const;
+
+
+        // Access
+
+            //- Return the orginal src patch with optionally updated points
+            inline const primitivePatch& srcPatch0() const;
+
+            //- Return the orginal tgt patch with optionally updated points
+            inline const primitivePatch& tgtPatch0() const;
 
 
         // Evaluation
@@ -273,102 +245,137 @@ private:
                 autoPtr<mapDistribute>& tgtMap
             );
 
-            void constructFromSurface
-            (
-                const SourcePatch& srcPatch,
-                const TargetPatch& tgtPatch,
-                const autoPtr<searchableSurface>& surfPtr
-            );
 
 public:
 
+    //- Runtime type information
+    TypeName("AMIInterpolation");
+
+    // Selection tables
+
+        //- Selection table for dictionary construction
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            AMIInterpolation,
+            dict,
+            (
+                const dictionary& dict,
+                const bool reverseTarget
+            ),
+            (
+                dict,
+                reverseTarget
+            )
+        );
+
+        //- Selection table for component-wise construction
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            AMIInterpolation,
+            component,
+            (
+                const bool requireMatch,
+                const bool reverseTarget,
+                const scalar lowWeightCorrection
+            ),
+            (
+                requireMatch,
+                reverseTarget,
+                lowWeightCorrection
+            )
+        );
+
+        //- Selector for dictionary
+        static autoPtr<AMIInterpolation> New
+        (
+            const word& modelName,
+            const dictionary& dict,
+            const bool reverseTarget = false
+        );
+
+        //- Selector for components
+        static autoPtr<AMIInterpolation> New
+        (
+            const word& modelName,
+            const bool requireMatch = true,
+            const bool reverseTarget = false,
+            const scalar lowWeightCorrection = -1
+        );
+
+
     // Constructors
 
-        //- Construct from components
+        //- Construct from dictionary
         AMIInterpolation
         (
-            const SourcePatch& srcPatch,
-            const TargetPatch& tgtPatch,
-            const faceAreaIntersect::triangulationMode& triMode,
-            const bool requireMatch = true,
-            const interpolationMethod& method = imFaceAreaWeight,
-            const scalar lowWeightCorrection = -1,
+            const dictionary& dict,
             const bool reverseTarget = false
         );
 
         //- Construct from components
         AMIInterpolation
         (
-            const SourcePatch& srcPatch,
-            const TargetPatch& tgtPatch,
-            const faceAreaIntersect::triangulationMode& triMode,
             const bool requireMatch = true,
-            const word& methodName =
-                interpolationMethodNames_[imFaceAreaWeight],
-            const scalar lowWeightCorrection = -1,
-            const bool reverseTarget = false
-        );
-
-        //- Construct from components, with projection surface
-        AMIInterpolation
-        (
-            const SourcePatch& srcPatch,
-            const TargetPatch& tgtPatch,
-            const autoPtr<searchableSurface>& surf,
-            const faceAreaIntersect::triangulationMode& triMode,
-            const bool requireMatch = true,
-            const interpolationMethod& method = imFaceAreaWeight,
-            const scalar lowWeightCorrection = -1,
-            const bool reverseTarget = false
-        );
-
-        //- Construct from components, with projection surface
-        AMIInterpolation
-        (
-            const SourcePatch& srcPatch,
-            const TargetPatch& tgtPatch,
-            const autoPtr<searchableSurface>& surf,
-            const faceAreaIntersect::triangulationMode& triMode,
-            const bool requireMatch = true,
-            const word& methodName =
-                interpolationMethodNames_[imFaceAreaWeight],
-            const scalar lowWeightCorrection = -1,
-            const bool reverseTarget = false
+            const bool reverseTarget = false,
+            const scalar lowWeightCorrection = -1
         );
 
         //- Construct from agglomeration of AMIInterpolation. Agglomeration
-        //  passed in as new coarse size and addressing from fine from coarse
+        //- passed in as new coarse size and addressing from fine from coarse
         AMIInterpolation
         (
-            const AMIInterpolation<SourcePatch, TargetPatch>& fineAMI,
+            const AMIInterpolation& fineAMI,
             const labelList& sourceRestrictAddressing,
             const labelList& neighbourRestrictAddressing
         );
 
+        //- Construct as copy
+        AMIInterpolation(const AMIInterpolation& ami);
+
+        //- Construct and return a clone
+        virtual autoPtr<AMIInterpolation> clone() const
+        {
+            return autoPtr<AMIInterpolation>::New(*this);
+        }
+
 
     //- Destructor
-    ~AMIInterpolation();
-
-    // Typedef to SourcePatch type this AMIInterpolation is instantiated on
-    typedef SourcePatch sourcePatchType;
-
-    // Typedef to TargetPatch type this AMIInterpolation is instantiated on
-    typedef TargetPatch targetPatchType;
+    virtual ~AMIInterpolation() = default;
 
 
     // Member Functions
 
         // Access
 
-            //- Set to -1, or the processor holding all faces (both sides) of
-            //- the AMI
-            inline label singlePatchProc() const;
+            //- Access to the up-to-date flag
+            inline bool upToDate() const;
+
+            //- Access to the up-to-date flag
+            inline bool& upToDate();
+
+            //- Access to the distributed flag
+            inline bool distributed() const;
+
+            //- Access to the requireMatch flag
+            inline bool requireMatch() const;
+
+            //- Access to the requireMatch flag
+            inline bool setRequireMatch(const bool flag);
+
+            //- Access to the reverseTarget flag
+            inline bool reverseTarget() const;
 
             //- Threshold weight below which interpolation is deactivated
             inline scalar lowWeightCorrection() const;
 
             //- Return true if employing a 'lowWeightCorrection'
             inline bool applyLowWeightCorrection() const;
+
+            //- Set to -1, or the processor holding all faces (both sides) of
+            //- the AMI
+            inline label singlePatchProc() const;
 
 
             // Source patch
@@ -398,6 +405,12 @@ public:
                 //- Return access to normalisation factor of source
                 //- patch weights (i.e. the sum before normalisation)
                 inline scalarField& srcWeightsSum();
+
+                //- Return const access to source patch face centroids
+                inline const pointListList& srcCentroids() const;
+
+                //- Return access to source patch face centroids
+                inline pointListList& srcCentroids();
 
                 //- Source map pointer - valid only if singlePatchProc = -1
                 //- This gets source data into a form to be consumed by
@@ -441,18 +454,30 @@ public:
 
         // Manipulation
 
-            //- Update addressing and weights
-            void update
+            //- Update addressing, weights and (optional) centroids
+            virtual bool calculate
             (
-                const SourcePatch& srcPatch,
-                const TargetPatch& tgtPatch
+                const primitivePatch& srcPatch,
+                const primitivePatch& tgtPatch,
+                const autoPtr<searchableSurface>& surfPtr = nullptr
+            );
+
+            //- Set the maps, addresses and weights from an external source
+            void reset
+            (
+                autoPtr<mapDistribute>&& srcToTgtMap,
+                autoPtr<mapDistribute>&& tgtToSrcMap,
+                labelListList&& srcAddress,
+                scalarListList&& srcWeights,
+                labelListList&& tgtAddress,
+                scalarListList&& tgtWeights
             );
 
             //- Append additional addressing and weights
             void append
             (
-                const SourcePatch& srcPatch,
-                const TargetPatch& tgtPatch
+                const primitivePatch& srcPatch,
+                const primitivePatch& tgtPatch
             );
 
             //- Normalise the weights
@@ -560,8 +585,8 @@ public:
             //- Return source patch face index of point on target patch face
             label srcPointFace
             (
-                const SourcePatch& srcPatch,
-                const TargetPatch& tgtPatch,
+                const primitivePatch& srcPatch,
+                const primitivePatch& tgtPatch,
                 const vector& n,
                 const label tgtFacei,
                 point& tgtPoint
@@ -571,8 +596,8 @@ public:
             //- Return target patch face index of point on source patch face
             label tgtPointFace
             (
-                const SourcePatch& srcPatch,
-                const TargetPatch& tgtPatch,
+                const primitivePatch& srcPatch,
+                const primitivePatch& tgtPatch,
                 const vector& n,
                 const label srcFacei,
                 point& srcPoint
@@ -582,13 +607,23 @@ public:
 
         // Checks
 
+            //- Check if src addresses are present in tgt addresses and
+            //- viceversa
+            bool checkSymmetricWeights(const bool log) const;
+
             //- Write face connectivity as OBJ file
             void writeFaceConnectivity
             (
-                const SourcePatch& srcPatch,
-                const TargetPatch& tgtPatch,
+                const primitivePatch& srcPatch,
+                const primitivePatch& tgtPatch,
                 const labelListList& srcAddress
             ) const;
+
+
+        // I-O
+
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 
@@ -603,8 +638,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "AMIInterpolation.C"
-    #include "AMIInterpolationParallelOps.C"
+    #include "AMIInterpolationTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

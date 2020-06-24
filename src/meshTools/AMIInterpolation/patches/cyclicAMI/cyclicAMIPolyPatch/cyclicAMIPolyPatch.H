@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +30,18 @@ Class
 Description
     Cyclic patch for Arbitrary Mesh Interface (AMI)
 
+    Includes provision for updating the patch topology to enforce a 1-to-1
+    face match across the interface, based on the \c createAMIFaces flag.
+
+    The manipulations are based on the reference:
+
+    \verbatim
+    H.J. Aguerre, S. Márquez Damián, J.M. Gimenez, N.M.Nigro, Conservative
+    handling of arbitrary non-conformal interfaces using an efficient
+    supermesh, Journal of Computational Physics 335(15) 21-49. 2017.
+    https://doi.org/10.1016/j.jcp.2017.01.018.
+    \endverbatim
+
 SourceFiles
     cyclicAMIPolyPatch.C
 
@@ -41,6 +54,7 @@ SourceFiles
 #include "AMIPatchToPatchInterpolation.H"
 #include "polyBoundaryMesh.H"
 #include "coupleGroupIdentifier.H"
+#include "faceAreaWeightAMI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -110,33 +124,61 @@ protected:
         //- AMI interpolation class
         mutable autoPtr<AMIPatchToPatchInterpolation> AMIPtr_;
 
-        //- AMI method
-        const AMIPatchToPatchInterpolation::interpolationMethod AMIMethod_;
-
-        //- Flag to indicate that slave patch should be reversed for AMI
-        const bool AMIReverse_;
-
-        //- Flag to indicate that patches should match/overlap
-        bool AMIRequireMatch_;
-
-        //- Low weight correction threshold for AMI
-        const scalar AMILowWeightCorrection_;
+        //- Dictionary used during projection surface construction
+        const dictionary surfDict_;
 
         //- Projection surface
         mutable autoPtr<searchableSurface> surfPtr_;
 
-        //- Dictionary used during projection surface construction
-        const dictionary surfDict_;
+
+        // Change of topology as AMI is updated
+
+            //- Flag to indicate that new AMI faces will created
+            //  Set by the call to changeTopology
+            mutable bool createAMIFaces_;
+
+            //- Move face centres (default = no)
+            bool moveFaceCentres_;
+
+            mutable bool updatingAMI_;
+
+            labelListList srcFaceIDs_;
+
+            labelListList tgtFaceIDs_;
+
+            //- Temporary storage for AMI face areas
+            mutable vectorField faceAreas0_;
+
+            //- Temporary storage for AMI face centres
+            mutable vectorField faceCentres0_;
 
 
     // Protected Member Functions
 
-        //- Reset the AMI interpolator
-        virtual void resetAMI
-        (
-            const AMIPatchToPatchInterpolation::interpolationMethod& AMIMethod =
-                AMIPatchToPatchInterpolation::imFaceAreaWeight
-        ) const;
+        // Topology change
+
+            //- Collect faces to remove in the topoChange container
+            virtual bool removeAMIFaces(polyTopoChange& topoChange);
+
+            //- Collect faces to add in the topoChange container
+            virtual bool addAMIFaces(polyTopoChange& topoChange);
+
+            //- Set properties of newly inserted faces after topological changes
+            virtual void setAMIFaces();
+
+            //- Helper to re-apply the geometric scaling lost during mesh
+            //- updates
+            virtual void restoreScaledGeometry();
+
+
+        //- Create and return pointer to the projection surface
+        const autoPtr<searchableSurface>& surfPtr() const;
+
+        //- Reset the AMI interpolator, supply patch points
+        virtual void resetAMI(const UList<point>& points) const;
+
+        //-  Reset the AMI interpolator, use current patch points
+        virtual void resetAMI() const;
 
         //- Recalculate the transformation tensors
         virtual void calcTransforms();
@@ -180,7 +222,8 @@ public:
             const label index,
             const polyBoundaryMesh& bm,
             const word& patchType,
-            const transformType transform = UNKNOWN
+            const transformType transform = UNKNOWN,
+            const word& defaultAMIMethod = faceAreaWeightAMI::typeName
         );
 
         //- Construct from dictionary
@@ -190,7 +233,8 @@ public:
             const dictionary& dict,
             const label index,
             const polyBoundaryMesh& bm,
-            const word& patchType
+            const word& patchType,
+            const word& defaultAMIMethod = faceAreaWeightAMI::typeName
         );
 
         //- Construct as copy, resetting the boundary mesh
@@ -274,15 +318,34 @@ public:
 
 
     //- Destructor
-    virtual ~cyclicAMIPolyPatch();
+    virtual ~cyclicAMIPolyPatch() = default;
 
 
     // Member Functions
 
         // Access
 
+            //- Tolerance used e.g. for area calculations/limits
+            static const scalar tolerance_;
+
+            //- Flag to indicate whether the AMI can be reset
+            inline bool canResetAMI() const;
+
+            //- Return access to the createAMIFaces flag
+            inline bool createAMIFaces() const;
+
+            //- Return access to the updated flag
+            inline bool updatingAMI() const;
+
+            //- Return true if this patch changes the mesh topology
+            //  True when createAMIFaces is true
+            virtual bool changeTopology() const;
+
+            //- Set topology changes in the polyTopoChange object
+            virtual bool setTopology(polyTopoChange& topoChange);
+
             //- Is patch 'coupled'. Note that on AMI the geometry is not
-            //  coupled but the fields are!
+            //- coupled but the fields are!
             virtual bool coupled() const
             {
                 return false;
@@ -300,14 +363,25 @@ public:
             //- Return a reference to the neighbour patch
             virtual const cyclicAMIPolyPatch& neighbPatch() const;
 
-            //- Return a reference to the projection surface
-            const autoPtr<searchableSurface>& surfPtr() const;
-
             //- Return a reference to the AMI interpolator
             const AMIPatchToPatchInterpolation& AMI() const;
 
+            //- Helper function to return the weights
+            inline const scalarListList& weights() const;
+
+            //- Helper function to return the weights sum
+            inline const scalarField& weightsSum() const;
+
             //- Return true if applying the low weight correction
             bool applyLowWeightCorrection() const;
+
+            //- Return access to the initial face areas
+            //  Used for topology change
+            inline vectorField& faceAreas0() const;
+
+            //- Return access to the initial face centres
+            //  Used for topology change
+            inline vectorField& faceCentres0() const;
 
 
             // Transformations
@@ -388,7 +462,7 @@ public:
         );
 
         //- Initialize ordering for primitivePatch. Does not
-        //  refer to *this (except for name() and type() etc.)
+        //- refer to *this (except for name() and type() etc.)
         virtual void initOrder
         (
             PstreamBuffers&,
@@ -409,7 +483,7 @@ public:
         ) const;
 
         //- Return face index on neighbour patch which shares point p
-        //  following trajectory vector n
+        //- following trajectory vector n
         label pointFace
         (
             const label facei,

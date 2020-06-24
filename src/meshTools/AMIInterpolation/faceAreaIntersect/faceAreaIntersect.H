@@ -46,6 +46,7 @@ SourceFiles
 #include "face.H"
 #include "triPoints.H"
 #include "Enum.H"
+#include "searchableSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -97,6 +98,7 @@ private:
 
     // Static data members
 
+        //- Tolerance
         static scalar tol;
 
 
@@ -132,6 +134,9 @@ private:
         //- Return triangle area
         inline scalar triArea(const triPoints& t) const;
 
+        //- Return triangle centre
+        inline vector triCentroid(const triPoints& t) const;
+
         //- Slice triangle with plane and generate new cut sub-triangles
         void triSliceWithPlane
         (
@@ -143,13 +148,15 @@ private:
         ) const;
 
         //- Return area of intersection of triangles src and tgt
-        scalar triangleIntersect
+        void triangleIntersect
         (
             const triPoints& src,
             const point& tgt0,
             const point& tgt1,
             const point& tgt2,
-            const vector& n
+            const vector& n,
+            scalar& area,
+            vector& centroid
         ) const;
 
 
@@ -199,12 +206,15 @@ public:
             DynamicList<face>& faces
         );
 
-        //- Return area of intersection of faceA with faceB
-        scalar calc
+        //- Return area of intersection of faceA with faceB and effective
+        //- face centre
+        void calc
         (
             const face& faceA,
             const face& faceB,
-            const vector& n
+            const vector& n,
+            scalar& area,
+            vector& centroid
         ) const;
 
         //- Return area of intersection of faceA with faceB

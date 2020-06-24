@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,6 +41,7 @@ SourceFiles
 #include "cyclicAMIPolyPatch.H"
 #include "AMIPatchToPatchInterpolation.H"
 #include "polyBoundaryMesh.H"
+#include "partialFaceAreaWeightAMI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,9 +61,6 @@ private:
 
     // Private data
 
-        //- Fraction of face area below which face is considered disconnected
-        static const scalar tolerance_;
-
         //- Name of non-overlapping patch
         const word nonOverlapPatchName_;
 
@@ -75,20 +73,30 @@ private:
         //- Mask/weighting for target patch
         mutable scalarField tgtMask_;
 
-        //- Flag to indicate that AMI has been updated
-        mutable bool updated_;
-
 
 protected:
 
     // Protected Member Functions
 
-        //- Reset the AMI interpolator
-        virtual void resetAMI
+        //- Report coverage statics, e.g. number of uncovered/blended/covered
+        //- faces
+        void reportCoverage
         (
-            const AMIPatchToPatchInterpolation::interpolationMethod& AMIMethod =
-                AMIPatchToPatchInterpolation::imFaceAreaWeight
+            const word& name,
+            const scalarField& weightSum
         ) const;
+
+        //- Reset the AMI interpolator, supply patch points
+        virtual void resetAMI(const UList<point>& points) const;
+
+        //-  Reset the AMI interpolator, use current patch points
+        virtual void resetAMI() const;
+
+        //- Scale patch face areas to maintain physical area
+        virtual void scalePatchFaceAreas();
+
+        //- Scale patch face areas to maintain physical area
+        virtual void scalePatchFaceAreas(const cyclicACMIPolyPatch& acmipp);
 
         //- Initialise the calculation of the patch geometry
         virtual void initGeometry(PstreamBuffers&);
@@ -111,12 +119,6 @@ protected:
         //- Clear geometry
         virtual void clearGeom();
 
-        //- Return the mask/weighting for the source patch
-        virtual const scalarField& srcMask() const;
-
-        //- Return the mask/weighting for the target patch
-        virtual const scalarField& tgtMask() const;
-
 
 public:
 
@@ -135,7 +137,8 @@ public:
             const label index,
             const polyBoundaryMesh& bm,
             const word& patchType,
-            const transformType transform = UNKNOWN
+            const transformType transform = UNKNOWN,
+            const word& defaultAMIMethod = partialFaceAreaWeightAMI::typeName
         );
 
         //- Construct from dictionary
@@ -145,7 +148,8 @@ public:
             const dictionary& dict,
             const label index,
             const polyBoundaryMesh& bm,
-            const word& patchType
+            const word& patchType,
+            const word& defaultAMIMethod = partialFaceAreaWeightAMI::typeName
         );
 
         //- Construct as copy, resetting the boundary mesh
@@ -235,18 +239,12 @@ public:
 
 
     //- Destructor
-    virtual ~cyclicACMIPolyPatch();
+    virtual ~cyclicACMIPolyPatch() = default;
 
 
     // Member Functions
 
         // Access
-
-            //- Reset the updated flag
-            inline void setUpdated(bool flag) const;
-
-            //- Return access to the updated flag
-            inline bool updated() const;
 
             //- Return a reference to the neighbour patch
             virtual const cyclicACMIPolyPatch& neighbPatch() const;
@@ -263,8 +261,14 @@ public:
             //- Return a reference to the non-overlapping patch
             inline polyPatch& nonOverlapPatch();
 
-            //- Mask field where 1 = overlap, 0 = no-overlap
+            //- Mask field where 1 = overlap(coupled), 0 = no-overlap
             inline const scalarField& mask() const;
+
+            //- Return the mask/weighting for the source patch
+            virtual const scalarField& srcMask() const;
+
+            //- Return the mask/weighting for the target patch
+            virtual const scalarField& tgtMask() const;
 
             //- Overlap tolerance
             inline static scalar tolerance();
