@@ -75,10 +75,9 @@ objectivePartialVolume::objectivePartialVolume
     if (!dict.readIfPresent("initialVolume", initVol_))
     {
         const scalar oneThird(1.0/3.0);
-        forAllConstIters(objectivePatches_, iter)
+        for (const label patchi : objectivePatches_)
         {
-            label patchI = iter.key();
-            const fvPatch& patch = mesh_.boundary()[patchI];
+            const fvPatch& patch = mesh_.boundary()[patchi];
             initVol_ -= oneThird*gSum(patch.Sf() & patch.Cf());
         }
     }
@@ -95,10 +94,9 @@ scalar objectivePartialVolume::J()
 {
     J_ = Zero;
     const scalar oneThird(1.0/3.0);
-    forAllConstIters(objectivePatches_, iter)
+    for (const label patchi : objectivePatches_)
     {
-        label patchI = iter.key();
-        const fvPatch& patch = mesh_.boundary()[patchI];
+        const fvPatch& patch = mesh_.boundary()[patchi];
         J_ -= oneThird*gSum(patch.Sf() & patch.Cf());
     }
     J_ -= initVol_;
@@ -110,13 +108,12 @@ scalar objectivePartialVolume::J()
 void objectivePartialVolume::update_dxdbDirectMultiplier()
 {
     const scalar oneThird(1.0/3.0);
-    forAllConstIter(labelHashSet, objectivePatches_, iter)
+    for (const label patchi : objectivePatches_)
     {
-        label pI = iter.key();
-        const fvPatch& patch = mesh_.boundary()[pI];
+        const fvPatch& patch = mesh_.boundary()[patchi];
         tmp<vectorField> tnf = patch.nf();
         const vectorField& nf = tnf();
-        bdxdbDirectMultPtr_()[pI]  = -oneThird*nf/initVol_;
+        bdxdbDirectMultPtr_()[patchi] = -oneThird*nf/initVol_;
     }
 }
 
@@ -124,11 +121,10 @@ void objectivePartialVolume::update_dxdbDirectMultiplier()
 void objectivePartialVolume::update_dSdbMultiplier()
 {
     const scalar oneThird(1.0/3.0);
-    forAllConstIter(labelHashSet, objectivePatches_, iter)
+    for (const label patchi : objectivePatches_)
     {
-        label pI = iter.key();
-        const fvPatch& patch = mesh_.boundary()[pI];
-        bdSdbMultPtr_()[pI]  = -oneThird*patch.Cf()/initVol_;
+        const fvPatch& patch = mesh_.boundary()[patchi];
+        bdSdbMultPtr_()[patchi] = -oneThird*patch.Cf()/initVol_;
     }
 }
 
