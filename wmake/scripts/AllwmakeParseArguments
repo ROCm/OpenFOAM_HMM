@@ -61,11 +61,11 @@ Executing ${0##*/} is equivalent to
    wmake -all [OPTIONS]
 
 With additional options:
-    -l | -log           Tee output to log.\$WM_OPTIONS
-    -log=NAME           Tee output to given filename
-    -prefix=...         Identical to wmake -module-prefix
-    -no-recursion       Prevent recursive call (do NOT call 'wmake -all')
-    -fromWmake          Same as -no-recursion
+    -l | -log       Tee output to log.\$WM_OPTIONS
+    -log=NAME       Tee output to given filename
+    -prefix=...     Define FOAM_MODULE_PREFIX (same as wmake -module-prefix)
+    -no-recursion   Prevent recursive call (do NOT call 'wmake -all')
+    -fromWmake      Same as -no-recursion
 
 See
     wmake -help (or wmake -help-full)
@@ -97,7 +97,7 @@ do
         # Pass onwards to other Allwmake scripts
         ;;
 
-    -prefix=* | -module-prefix=*)
+    -module-prefix=* | -prefix=* | --prefix=*)
         optPrefix="${arg#*=}"
         case "$optPrefix" in
         # Prefix: user
