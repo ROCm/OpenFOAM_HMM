@@ -260,7 +260,7 @@ void Foam::volBSplinesBase::boundControlPointMovement
         vectorField localControlPointsMovement(nb, Zero);
 
         // Set localControlPointsMovement
-        forAll (localControlPointsMovement, iCPM)
+        forAll(localControlPointsMovement, iCPM)
         {
             localControlPointsMovement[iCPM] =
                 controlPointsMovement[pastControlPoints + iCPM];
@@ -292,7 +292,7 @@ void Foam::volBSplinesBase::moveControlPoints
         vectorField localControlPointsMovement(nb, Zero);
 
         // Set localControlPointsMovement
-        forAll (localControlPointsMovement, iCPM)
+        forAll(localControlPointsMovement, iCPM)
         {
             localControlPointsMovement[iCPM] =
                 controlPointsMovement[pastControlPoints + iCPM];

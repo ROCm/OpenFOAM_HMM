@@ -468,7 +468,7 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
             // Convective thermal diffusivity for single phase
             const scalarField alphatv(calcAlphat(*this));
 
-            forAll (*this, i)
+            forAll(*this, i)
             {
                 this->operator[](i) =
                 (
@@ -802,7 +802,7 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
             // Use to identify regimes per face
             labelField regimeTypes(A1.size(), -1);
 
-            forAll (*this, i)
+            forAll(*this, i)
             {
                 if (Tw[i] > Tsatw[i])
                 {
@@ -1004,7 +1004,7 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
                     scalarField nFilms(this->size(), 0);
                     scalarField nNonBoilings(this->size(), 0);
 
-                    forAll (*this, i)
+                    forAll(*this, i)
                     {
                         //faceRegimes[i] = regimeTypes[i];
                         switch (regimeTypes[i])

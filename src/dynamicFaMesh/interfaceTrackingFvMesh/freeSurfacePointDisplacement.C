@@ -315,7 +315,7 @@ Foam::interfaceTrackingFvMesh::pointDisplacement()
     }
 
     // Calculate displacement of processor patch points
-    forAll (aMesh().boundary(), patchI)
+    forAll(aMesh().boundary(), patchI)
     {
         if
         (

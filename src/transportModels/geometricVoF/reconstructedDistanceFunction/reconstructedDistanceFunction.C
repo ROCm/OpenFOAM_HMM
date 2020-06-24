@@ -280,7 +280,7 @@ const Foam::volScalarField&  Foam::reconstructedDistanceFunction::constructRDF
                 scalar avgWeight = 0;
                 const point p = mesh_.C()[celli];
 
-                forAll (stencil[celli],i)
+                forAll(stencil[celli], i)
                 {
                     const label gblIdx = stencil[celli][i];
                     vector n = -distribute.getValue(normal, mapNormal, gblIdx);
@@ -334,7 +334,7 @@ const Foam::volScalarField&  Foam::reconstructedDistanceFunction::constructRDF
                     scalar avgWeight = 0;
                     const point p = mesh_.C().boundaryField()[patchI][i];
 
-                    forAll (stencil[pCellI], j)
+                    forAll(stencil[pCellI], j)
                     {
                         const label gblIdx = stencil[pCellI][j];
                         vector n = -distribute.getValue(normal, mapNormal, gblIdx);
