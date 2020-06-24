@@ -8,6 +8,11 @@ for now.
 
 Compilation of kahip and ptscotch do not work.
 
+### Thermo problems with Clang
+
+Previous versions (1906, 1912) experienced some Clang builds issues
+with thermophysical libraries. These are resolved with clang-10.
+
 
 ## Known Build Issues (OpenFOAM-v1912)
 
