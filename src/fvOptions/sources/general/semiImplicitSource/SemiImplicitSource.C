@@ -30,6 +30,7 @@ License
 #include "fvMesh.H"
 #include "fvMatrices.H"
 #include "fvmSup.H"
+#include "Constant.H"
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
@@ -53,14 +54,46 @@ void Foam::fv::SemiImplicitSource<Type>::setFieldData(const dictionary& dict)
     label count = dict.size();
 
     fieldNames_.resize(count);
-    injectionRate_.resize(count);
+    Su_.resize(count);
+    Sp_.resize(count);
+
     applied_.resize(count, false);
 
     count = 0;
     for (const entry& dEntry : dict)
     {
         fieldNames_[count] = dEntry.keyword();
-        dEntry.readEntry(injectionRate_[count]);
+
+        if (!dEntry.isDict())
+        {
+            Tuple2<Type, scalar> injectionRate;
+            dEntry.readEntry(injectionRate);
+
+            Su_.set
+            (
+                count,
+                new Function1Types::Constant<Type>
+                (
+                    "Su",
+                    injectionRate.first()
+                )
+            );
+            Sp_.set
+            (
+                count,
+                new Function1Types::Constant<scalar>
+                (
+                    "Sp",
+                    injectionRate.second()
+                )
+            );
+        }
+        else
+        {
+            const dictionary& Sdict = dEntry.dict();
+            Su_.set(count, Function1<Type>::New("Su", Sdict));
+            Sp_.set(count, Function1<scalar>::New("Sp", Sdict));
+        }
 
         ++count;
     }
@@ -86,8 +119,7 @@ Foam::fv::SemiImplicitSource<Type>::SemiImplicitSource
 :
     cellSetOption(name, modelType, dict, mesh),
     volumeMode_(vmAbsolute),
-    VDash_(1.0),
-    injectionRate_()
+    VDash_(1.0)
 {
     read(dict);
 }
@@ -125,7 +157,9 @@ void Foam::fv::SemiImplicitSource<Type>::addSup
         false
     );
 
-    UIndirectList<Type>(Su, cells_) = injectionRate_[fieldi].first()/VDash_;
+    const scalar tmVal = mesh_.time().timeOutputValue();
+
+    UIndirectList<Type>(Su, cells_) = Su_[fieldi].value(tmVal)/VDash_;
 
     volScalarField::Internal Sp
     (
@@ -142,7 +176,7 @@ void Foam::fv::SemiImplicitSource<Type>::addSup
         false
     );
 
-    UIndirectList<scalar>(Sp, cells_) = injectionRate_[fieldi].second()/VDash_;
+    UIndirectList<scalar>(Sp, cells_) = Sp_[fieldi].value(tmVal)/VDash_;
 
     eqn += Su + fvm::SuSp(Sp, psi);
 }
@@ -164,7 +198,6 @@ void Foam::fv::SemiImplicitSource<Type>::addSup
 
     return this->addSup(eqn, fieldi);
 }
-
 
 
 template<class Type>

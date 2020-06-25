@@ -38,26 +38,10 @@ Foam::fv::SemiImplicitSource<Type>::volumeMode() const
 
 
 template<class Type>
-inline const Foam::List<Foam::Tuple2<Type, Foam::scalar>>&
-Foam::fv::SemiImplicitSource<Type>::injectionRate() const
-{
-    return injectionRate_;
-}
-
-
-template<class Type>
 inline typename Foam::fv::SemiImplicitSource<Type>::volumeModeType&
 Foam::fv::SemiImplicitSource<Type>::volumeMode()
 {
     return volumeMode_;
-}
-
-
-template<class Type>
-inline Foam::List<Foam::Tuple2<Type,
-Foam::scalar>>& Foam::fv::SemiImplicitSource<Type>::injectionRate()
-{
-    return injectionRate_;
 }
 
 

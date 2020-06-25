@@ -60,6 +60,31 @@ Description
     - absolute: values are given as \<quantity\>
     - specific: values are given as \<quantity\>/m3
 
+    The injectionRate can also be specified as a Function1 by having
+    dictionaries for the field entries instead:
+
+    \verbatim
+    injectionRateSuSp
+    {
+        k
+        {
+            // Time-ramp from 0 to 30.7 at time 5
+            Su table
+            (
+                (0 0.0)
+                (5 30.7)
+            );
+            Sp      0.0;
+        }
+        epsilon
+        {
+            Su      1.5;
+            Sp      0.0;
+        }
+    }
+    \endverbatim
+
+
 See also
     Foam::fvOption
 
@@ -74,6 +99,7 @@ SourceFiles
 #include "Tuple2.H"
 #include "cellSetOption.H"
 #include "Enum.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -128,7 +154,8 @@ protected:
         scalar VDash_;
 
         //- Source field values
-        List<Tuple2<Type, scalar>> injectionRate_;
+        PtrList<Function1<Type>> Su_;
+        PtrList<Function1<scalar>> Sp_;
 
 
     // Protected functions
@@ -162,17 +189,11 @@ public:
             //- Return const access to the volume mode
             inline const volumeModeType& volumeMode() const;
 
-            //- Return const access to the source field values
-            inline const List<Tuple2<Type, scalar>>& injectionRate() const;
-
 
         // Edit
 
             //- Return access to the volume mode
             inline volumeModeType& volumeMode();
-
-            //- Return access to the source field values
-            inline List<Tuple2<Type, scalar>>& injectionRate();
 
 
         // Evaluation
