@@ -112,12 +112,12 @@ protected:
         //- Read and check a section header
         void debugSection(const word& expected, IFstream& is) const;
 
-        //- Replace the mask with an 0 padded string
-        fileName replaceMask
+        //- Replace the '*' mask chars with a 0 padded string.
+        static fileName replaceMask
         (
             const fileName& fName,
             const label timeIndex
-        ) const;
+        );
 
         //- Read (and discard) geometry file header.
         //  \return information about node/element id handling
@@ -158,10 +158,11 @@ public:
     //- Runtime type information
     TypeName("ensight");
 
+
     // Constructors
 
         //- Construct from fileName
-        ensightSurfaceReader(const fileName& fName);
+        explicit ensightSurfaceReader(const fileName& fName);
 
 
     //- Destructor

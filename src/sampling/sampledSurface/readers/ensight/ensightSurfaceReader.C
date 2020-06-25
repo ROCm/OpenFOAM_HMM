@@ -127,16 +127,24 @@ Foam::fileName Foam::ensightSurfaceReader::replaceMask
 (
     const fileName& fName,
     const label timeIndex
-) const
+)
 {
     fileName result(fName);
-    std::ostringstream oss;
 
-    label nMask = stringOps::count(fName, '*');
-    const std::string maskStr(nMask, '*');
-    oss << std::setfill('0') << std::setw(nMask) << timeIndex;
-    const word indexStr = oss.str();
-    result.replace(maskStr, indexStr);
+    const auto nMask = stringOps::count(fName, '*');
+
+    // If there are any '*' chars, they are assumed to be contiguous
+    // Eg, data/******/geometry
+
+    if (nMask)
+    {
+        std::ostringstream oss;
+        oss << std::setfill('0') << std::setw(nMask) << timeIndex;
+
+        const std::string maskStr(nMask, '*');
+        const std::string indexStr = oss.str();
+        result.replace(maskStr, indexStr);
+    }
 
     return result;
 }
