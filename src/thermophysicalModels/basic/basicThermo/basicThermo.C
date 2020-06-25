@@ -275,7 +275,7 @@ Foam::basicThermo::basicThermo
     (
         IOobject
         (
-            "thermo:alpha",
+            phasePropertyName("thermo:alpha"),
             mesh.time().timeName(),
             mesh,
             IOobject::READ_IF_PRESENT,
