@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,18 @@ Class
     Foam::PatchFunction1Types::MappedFile
 
 Description
+    Patch value mapping from file
+
+    Options:
+    \table
+        Property | Description                              | Required | Default
+        mapMethod | (nearest/planarInterpolation)    | no | planarInterpolation
+        offset   | Time-varying offset values to interpolated data | no |
+        fieldTable | Name of field data table               | no  | field-name
+        points   | The name of the points file              | no  | points
+        perturb  | Perturbation fraction of bounding box    | no  | 1e-5
+        setAverage | adjust mapped field to maintain average value | no  | false
+    \endtable
 
 SourceFiles
     MappedFile.C
@@ -56,7 +68,7 @@ class MappedFile
 :
     public PatchFunction1<Type>
 {
-    // Private data
+    // Private Data
 
         //- Whether constructed from dictionary
         const bool dictConstructed_;
@@ -65,7 +77,7 @@ class MappedFile
         word fieldTableName_;
 
         //- If true adjust the mapped field to maintain average value
-        Switch setAverage_;
+        bool setAverage_;
 
         //- Fraction of perturbation (fraction of bounding box) to add
         scalar perturb_;
@@ -114,7 +126,7 @@ class MappedFile
 
 public:
 
-    // Runtime type information
+    //- Runtime type information
     TypeName("mappedFile");
 
 
