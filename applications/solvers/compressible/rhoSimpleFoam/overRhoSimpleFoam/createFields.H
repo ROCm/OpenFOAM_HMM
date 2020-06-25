@@ -80,7 +80,3 @@ dimensionedScalar initialMass = fvc::domainIntegrate(rho);
 
 #include "createInterpolatedCells.H"
 
-bool adjustFringe
-(
-    simple.dict().getOrDefault("oversetAdjustPhi", false)
-);

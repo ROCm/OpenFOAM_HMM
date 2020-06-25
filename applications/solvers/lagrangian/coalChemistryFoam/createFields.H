@@ -22,8 +22,6 @@ if (!composition.species().found(inertSpecie))
 }
 
 volScalarField& p = thermo.p();
-const volScalarField& T = thermo.T();
-const volScalarField& psi = thermo.psi();
 
 multivariateSurfaceInterpolationScheme<scalar>::fieldTable fields;
 
