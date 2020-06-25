@@ -17,13 +17,13 @@ FoamFile
 
 application     compressibleInterFoam;
 
-startFrom       latestTime;
+startFrom       startTime;
 
 startTime       0;
 
 stopAt          endTime;
 
-endTime         25;
+endTime         20;
 
 deltaT          1e-3;
 

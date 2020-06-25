@@ -21,7 +21,7 @@ solvers
     {
         nAlphaCorr      2;
         nAlphaSubCycles 1;
-        cAlpha          1;
+        cAlpha          0.8;
 
         MULESCorr       yes;
         nLimiterIter    5;
@@ -46,6 +46,7 @@ solvers
         preconditioner  DIC;
         tolerance       1e-9;
         relTol          0.05;
+        minIter         1;
     }
 
     p_rghFinal

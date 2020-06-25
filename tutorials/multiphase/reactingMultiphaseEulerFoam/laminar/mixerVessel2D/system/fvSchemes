@@ -30,8 +30,8 @@ divSchemes
     "div\(phi,alpha.*\)"    Gauss vanLeer;
     "div\(phir,alpha.*,alpha.*\)"   Gauss vanLeer;
 
-    "div\(alphaRhoPhi.*,U.*\)"      Gauss limitedLinear 1;
-    "div\(phi.*,U.*\)"              Gauss limitedLinear 1;
+    "div\(alphaRhoPhi.*,U.*\)"      Gauss upwind;
+    "div\(phi.*,U.*\)"              Gauss upwind;
 
     "div\(alphaRhoPhi.*,(h|e).*\)"  Gauss limitedLinear 1;
     "div\(alphaRhoPhi.*,K.*\)"      Gauss limitedLinear 1;
@@ -42,7 +42,7 @@ divSchemes
 
 laplacianSchemes
 {
-    default         Gauss linear corrected;
+    default         Gauss linear uncorrected;
 }
 
 interpolationSchemes
@@ -52,7 +52,7 @@ interpolationSchemes
 
 snGradSchemes
 {
-    default         corrected;
+    default         uncorrected;
 }
 
 // ************************************************************************* //

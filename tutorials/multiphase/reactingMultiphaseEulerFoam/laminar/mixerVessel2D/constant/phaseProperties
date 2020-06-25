@@ -94,7 +94,8 @@ blending
         minPartlyContinuousAlpha.mercury 0.3;
         minFullyContinuousAlpha.air 0.7;
         minPartlyContinuousAlpha.air 0.3;
-    }*/
+    }
+*/
 }
 
 surfaceTension
@@ -102,17 +103,17 @@ surfaceTension
     (air and water)
     {
         type            constant;
-        sigma           0.07;
+        sigma           0.0;
     }
     (air and oil)
     {
         type            constant;
-        sigma           0.07;
+        sigma           0.0;
     }
     (air and mercury)
     {
         type            constant;
-        sigma           0.07;
+        sigma           0.0;
     }
     (water and oil)
     {
