@@ -75,7 +75,7 @@ protected:
         //- Calculates area and centre of the cutting face
         static void calcGeomDataCutFace
         (
-            const DynamicList<DynamicList<point> >& faceEdges,
+            const DynamicList<DynamicList<point>>& faceEdges,
             const vector& subCellCentre,
             vector& faceArea,
             vector& faceCentre

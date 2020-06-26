@@ -444,7 +444,7 @@ Foam::interfaceTrackingFvMesh::pointDisplacement()
 
         for (label k=0; k<aMesh().globalData().nGlobalPoints(); k++)
         {
-            List<List<vector> > procLsPoints(Pstream::nProcs());
+            List<List<vector>> procLsPoints(Pstream::nProcs());
 
             label curSharedPointIndex = addr.find(k);
 

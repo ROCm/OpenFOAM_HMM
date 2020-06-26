@@ -119,7 +119,7 @@ public:
 
 
         //- Construct and return a clone
-        virtual autoPtr<pointPatchField<Type> > clone() const
+        virtual autoPtr<pointPatchField<Type>> clone() const
         {
             return autoPtr<pointPatchField<Type>>
             (

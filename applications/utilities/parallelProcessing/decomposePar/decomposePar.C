@@ -42,7 +42,7 @@ Usage
         Decompose all regions in regionProperties. Does not check for
         existence of processor*.
 
-      - \par - case <dir>
+      - \par -case \<dir\>
         Specify case directory to use (instead of the cwd).
 
       - \par -cellDist
@@ -58,11 +58,11 @@ Usage
       - \par -copyZero
         Copy \a 0 directory to processor* rather than decompose the fields.
 
-      - \par -debug-switch <name=val>
+      - \par -debug-switch \<name=val\>
         Specify the value of a registered debug switch. Default is 1
         if the value is omitted. (Can be used multiple times)
 
-      - \par -decomposeParDict <file>
+      - \par -decomposeParDict \<file\>
         Use specified file for decomposePar dictionary.
 
       - \par -dry-run
@@ -72,7 +72,7 @@ Usage
       - \par -fields
         Use existing geometry decomposition and convert fields only.
 
-      - \par fileHandler <handler>
+      - \par fileHandler \<handler\>
         Override the file handler type.
 
       - \par -force
@@ -87,14 +87,14 @@ Usage
         be used with caution when the underlying (serial) geometry or the
         decomposition method etc. have been changed between decompositions.
 
-      - \par -info-switch <name=val>
+      - \par -info-switch \<name=val\>
         Specify the value of a registered info switch. Default is 1
         if the value is omitted. (Can be used multiple times)
 
       - \par -latestTime
         Select the latest time.
 
-      - \par -lib <name>
+      - \par -lib \<name\>
         Additional library or library list to load (can be used multiple times).
 
       - \par -noFunctionObjects
@@ -106,14 +106,14 @@ Usage
       - \par -noZero
         Exclude the \a 0 dir from the times list.
 
-      - \par -opt-switch <name=val>
+      - \par -opt-switch \<name=val\>
         Specify the value of a registered optimisation switch (int/bool).
         Default is 1 if the value is omitted. (Can be used multiple times)
 
       - \par -region \<regionName\>
         Decompose named region. Does not check for existence of processor*.
 
-      - \par -time <ranges>
+      - \par -time \<ranges\>
         Override controlDict settings and decompose selected times. Does not
         re-decompose the mesh i.e. does not handle moving mesh or changing
         mesh cases. Eg, ':10,20 40:70 1000:', 'none', etc.
