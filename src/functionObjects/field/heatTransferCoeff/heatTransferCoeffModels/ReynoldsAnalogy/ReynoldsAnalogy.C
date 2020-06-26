@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,10 +81,10 @@ Foam::heatTransferCoeffModels::ReynoldsAnalogy::Cp(const label patchi) const
         const label n = mesh_.boundary()[patchi].size();
         return tmp<Field<scalar>>::New(n, CpRef_);
     }
-    else if (mesh_.foundObject<fluidThermo>(fluidThermo::typeName))
+    else if (mesh_.foundObject<fluidThermo>(fluidThermo::dictName))
     {
         const fluidThermo& thermo =
-            mesh_.lookupObject<fluidThermo>(fluidThermo::typeName);
+            mesh_.lookupObject<fluidThermo>(fluidThermo::dictName);
 
         const scalarField& pp = thermo.p().boundaryField()[patchi];
         const scalarField& Tp = thermo.T().boundaryField()[patchi];
