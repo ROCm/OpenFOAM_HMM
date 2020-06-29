@@ -29,10 +29,19 @@
 #     - debian : implicitly disables git queries
 #
 # Note
-#     When a 'debian/' directory exists, the '.git/' directory is most
-#     likely from debian and not from OpenFOAM (ie, useless here).
-#     This corresponds to an implicit '-no-git', which has no effect
-#     when building from pristine sources.
+#     There is a corner case when obtaining build information from git.
+#     It is possible that OpenFOAM has been imported into a debian form,
+#     in which case the '.git/' directory is most from debian and cannot
+#     be used to obtain an OpenFOAM sha1 value.
+#
+#     Ad hoc logic (slightly messy):
+#     1) Have an 'openfoam.debian/' directory.
+#        Assume that debian control has been added to OpenFOAM.
+#        Can use git to obtain build information.
+#     2) Have a 'debian/' directory only.
+#        Assume OpenFOAM has been added into a debian project.
+#        Treat as '-no-git', which which has no effect
+#        when building from pristine sources.
 #
 # SeeAlso
 #     META-INFO/README.md for other routines that also use META-INFO.
@@ -145,8 +154,10 @@ done
 [ -d "$META_INFO" ] || \
     die "No ${META_INFO##*/}/ directory for project"
 
-# Disable git queries for debian packaging (see notes above)
-if [ -d "$WM_PROJECT_DIR/debian" ]
+# Debian handling (see notes above)
+# - disable git queries if debian project and not internal "debianization"
+if [ -d "$WM_PROJECT_DIR/debian" ] \
+&& [ ! -e "$WM_PROJECT_DIR/openfoam.debian" ]
 then
     unset FOAM_GIT_DIR
 fi
