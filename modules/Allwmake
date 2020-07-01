@@ -7,8 +7,21 @@ targetType=libso
 # Default build into OpenFOAM project locations unless specified with
 # -prefix or FOAM_MODULE_PREFIX env varable
 
-: "${FOAM_MODULE_PREFIX:=${FOAM_LIBBIN%/*}}"
+# Long form to avoid dash 0.5.8 error (issue #1757)
+[ -n "$FOAM_MODULE_PREFIX" ] || FOAM_MODULE_PREFIX="${FOAM_LIBBIN%/*}"
 export FOAM_MODULE_PREFIX
+
+echo "========================================"
+echo "Compile OpenFOAM modules"
+echo "prefix = $FOAM_MODULE_PREFIX"
+echo
+echo "    ignoring possible compilation errors"
+echo "    make certain to check the output file"
+echo
+set +e
+export WM_CONTINUE_ON_ERROR=true
+
+#------------------------------------------------------------------------------
 
 for moduleName in $(./list-modules)
 do
