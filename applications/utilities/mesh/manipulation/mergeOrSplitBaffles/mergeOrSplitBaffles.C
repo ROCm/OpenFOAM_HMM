@@ -286,7 +286,7 @@ int main(int argc, char *argv[])
 
     #include "addOverwriteOption.H"
     #include "addRegionOption.H"
-    argList::addBoolOption
+    argList::addOption
     (
         "dict",
         "file",
