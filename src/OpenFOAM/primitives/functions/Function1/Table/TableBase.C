@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -95,8 +95,8 @@ Foam::Function1Types::TableBase<Type>::TableBase(const TableBase<Type>& tbl)
     bounding_(tbl.bounding_),
     interpolationScheme_(tbl.interpolationScheme_),
     table_(tbl.table_),
-    tableSamplesPtr_(tbl.tableSamplesPtr_.clone()),
-    interpolatorPtr_(tbl.interpolatorPtr_)  // steal/reuse (missing clone!)
+    tableSamplesPtr_(nullptr),
+    interpolatorPtr_(nullptr)
 {}
 
 
