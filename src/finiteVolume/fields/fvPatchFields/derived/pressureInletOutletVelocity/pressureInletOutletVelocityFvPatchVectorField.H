@@ -30,7 +30,7 @@ Group
     grpInletBoundaryConditions grpOutletBoundaryConditions
 
 Description
-    This velocity inlet/outlet boundary condition is applied to pressure
+    This velocity inlet/outlet boundary condition is applied to velocity
     boundaries where the pressure is specified.  A zero-gradient condition is
     applied for outflow (as defined by the flux); for inflow, the velocity is
     obtained from the patch-face normal component of the internal-cell value.
