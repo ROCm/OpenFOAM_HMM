@@ -34,7 +34,7 @@ Description
     calculated as:
 
         \f[
-            p = pa - \vec{g} & \vec{r}
+            p = pa - \vec{g} \cdot \vec{r}
         \f]
 
     where
