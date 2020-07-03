@@ -3,10 +3,15 @@
 Prior to building, ensure that the [system requirements][link openfoam-require]
 are satisfied (including any special [cross-compiling][link openfoam-cross]
 considerations), and source the correct OpenFOAM environment.
-For example, for the OpenFOAM-v1906 version:
+For example, for the OpenFOAM-v2006 version:
 ```
-source /installation/path/OpenFOAM-v1906/etc/bashrc
+source <installation path>/OpenFOAM-v2006/etc/bashrc
 ```
+e.g. if installed under the `~/OpenFOAM` directory
+```
+source ~/OpenFOAM/OpenFOAM-v2006/etc/bashrc
+```
+
 
 ## Preliminaries
 
