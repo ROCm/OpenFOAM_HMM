@@ -1093,7 +1093,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
             newPoints[meshPoints[i]] += disp[i];
         }
 
-        syncTools::syncPointList
+        syncTools::syncPointPositions
         (
             mesh_,
             newPoints,

@@ -676,15 +676,42 @@ void Foam::snappySnapDriver::calcNearestFacePointProperties
         List<point>(),
         mapDistribute::transform()
     );
-    syncTools::syncPointList
-    (
-        mesh,
-        pp.meshPoints(),
-        pointFaceCentres,
-        listPlusEqOp<point>(),
-        List<point>(),
-        mapDistribute::transformPosition()
-    );
+
+    {
+        // Make into displacement before synchronising to avoid any problems
+        // with parallel cyclics
+        pointField localPoints(pp.points(), pp.meshPoints());
+        forAll(pointFaceCentres, pointi)
+        {
+            const point& pt = pp.points()[pp.meshPoints()[pointi]];
+
+            List<point>& pFc = pointFaceCentres[pointi];
+            for (point& p : pFc)
+            {
+                p -= pt;
+            }
+        }
+        syncTools::syncPointList
+        (
+            mesh,
+            pp.meshPoints(),
+            pointFaceCentres,
+            listPlusEqOp<point>(),
+            List<point>(),
+            mapDistribute::transform()
+        );
+        forAll(pointFaceCentres, pointi)
+        {
+            const point& pt = pp.points()[pp.meshPoints()[pointi]];
+
+            List<point>& pFc = pointFaceCentres[pointi];
+            for (point& p : pFc)
+            {
+                p += pt;
+            }
+        }
+    }
+
     syncTools::syncPointList
     (
         mesh,

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,6 +48,7 @@ Description
 #include "localPointRegion.H"
 #include "PatchTools.H"
 #include "refinementFeatures.H"
+#include "weightedPosition.H"
 #include "profiling.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -234,8 +235,11 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothInternalDisplacement
 
 
     // Calculate average of connected cells
-    labelList nCells(mesh.nPoints(), Zero);
-    pointField sumLocation(mesh.nPoints(), Zero);
+    Field<weightedPosition> sumLocation
+    (
+        mesh.nPoints(),
+        pTraits<weightedPosition>::zero
+    );
 
     forAll(isMovingPoint, pointi)
     {
@@ -243,22 +247,22 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothInternalDisplacement
         {
             const labelList& pCells = mesh.pointCells(pointi);
 
-            forAll(pCells, i)
+            sumLocation[pointi].first() = pCells.size();
+            for (const label celli : pCells)
             {
-                sumLocation[pointi] += mesh.cellCentres()[pCells[i]];
-                nCells[pointi]++;
+                sumLocation[pointi].second() += mesh.cellCentres()[celli];
             }
         }
     }
 
     // Sum
-    syncTools::syncPointList(mesh, nCells, plusEqOp<label>(), label(0));
     syncTools::syncPointList
     (
         mesh,
         sumLocation,
-        plusEqOp<point>(),
-        vector::zero
+        weightedPosition::plusEqOp,     // combine op
+        pTraits<weightedPosition>::zero,// null value (not used)
+        pTraits<weightedPosition>::zero // transform class
     );
 
     tmp<pointField> tdisplacement(new pointField(mesh.nPoints(), Zero));
@@ -268,10 +272,12 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothInternalDisplacement
 
     forAll(displacement, pointi)
     {
-        if (nCells[pointi] > 0)
+        const weightedPosition& wp = sumLocation[pointi];
+        if (mag(wp.first()) > VSMALL)
         {
             displacement[pointi] =
-                sumLocation[pointi]/nCells[pointi]-mesh.points()[pointi];
+                wp.second()/wp.first()
+              - mesh.points()[pointi];
             nAdapted++;
         }
     }
@@ -355,56 +361,61 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothPatchDisplacement
     // Get average position of boundary face centres
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    vectorField avgBoundary(pointFaces.size(), Zero);
-    labelList nBoundary(pointFaces.size(), Zero);
-
-    forAll(pointFaces, patchPointi)
+    Field<weightedPosition> avgBoundary
+    (
+        pointFaces.size(),
+        pTraits<weightedPosition>::zero
+    );
     {
-        const labelList& pFaces = pointFaces[patchPointi];
-
-        forAll(pFaces, pfi)
+        forAll(pointFaces, patchPointi)
         {
-            label facei = pFaces[pfi];
+            const labelList& pFaces = pointFaces[patchPointi];
 
-            if (isMasterFace.test(pp.addressing()[facei]))
+            forAll(pFaces, pfi)
             {
-                avgBoundary[patchPointi] += pp[facei].centre(points);
-                nBoundary[patchPointi]++;
+                label facei = pFaces[pfi];
+
+                if (isMasterFace.test(pp.addressing()[facei]))
+                {
+                    avgBoundary[patchPointi].first() += 1.0;
+                    avgBoundary[patchPointi].second() +=
+                        pp[facei].centre(points);
+                }
             }
         }
-    }
 
-    syncTools::syncPointList
-    (
-        mesh,
-        pp.meshPoints(),
-        avgBoundary,
-        plusEqOp<point>(),  // combine op
-        vector::zero        // null value
-    );
-    syncTools::syncPointList
-    (
-        mesh,
-        pp.meshPoints(),
-        nBoundary,
-        plusEqOp<label>(),  // combine op
-        label(0)            // null value
-    );
+        syncTools::syncPointList
+        (
+            mesh,
+            pp.meshPoints(),
+            avgBoundary,
+            weightedPosition::plusEqOp,     // combine op
+            pTraits<weightedPosition>::zero,// null value (not used)
+            pTraits<weightedPosition>::zero // transform class
+        );
 
-    forAll(avgBoundary, i)
-    {
-        avgBoundary[i] /= nBoundary[i];
+        // Normalise
+        forAll(avgBoundary, i)
+        {
+            // Note: what if there is no master boundary face?
+            if (mag(avgBoundary[i].first()) > VSMALL)
+            {
+                avgBoundary[i].second() /= avgBoundary[i].first();
+            }
+        }
     }
 
 
     // Get average position of internal face centres
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    vectorField avgInternal;
-    labelList nInternal;
+    Field<weightedPosition> avgInternal;
     {
-        vectorField globalSum(mesh.nPoints(), Zero);
-        labelList globalNum(mesh.nPoints(), Zero);
+        Field<weightedPosition> globalSum
+        (
+            mesh.nPoints(),
+            pTraits<weightedPosition>::zero
+        );
 
         // Note: no use of pointFaces
         const faceList& faces = mesh.faces();
@@ -416,8 +427,9 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothPatchDisplacement
 
             forAll(f, fp)
             {
-                globalSum[f[fp]] += fc;
-                globalNum[f[fp]]++;
+                weightedPosition& wp = globalSum[f[fp]];
+                wp.first() += 1.0;
+                wp.second() += fc;
             }
         }
 
@@ -444,8 +456,9 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothPatchDisplacement
 
                     forAll(f, fp)
                     {
-                        globalSum[f[fp]] += fc;
-                        globalNum[f[fp]]++;
+                        weightedPosition& wp = globalSum[f[fp]];
+                        wp.first() += 1.0;
+                        wp.second() += fc;
                     }
                 }
             }
@@ -455,35 +468,28 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothPatchDisplacement
         (
             mesh,
             globalSum,
-            plusEqOp<vector>(), // combine op
-            vector::zero        // null value
-        );
-        syncTools::syncPointList
-        (
-            mesh,
-            globalNum,
-            plusEqOp<label>(),  // combine op
-            label(0)            // null value
+            weightedPosition::plusEqOp,     // combine op
+            pTraits<weightedPosition>::zero,// null value (not used)
+            pTraits<weightedPosition>::zero // transform class
         );
 
+
         avgInternal.setSize(meshPoints.size());
-        nInternal.setSize(meshPoints.size());
 
         forAll(avgInternal, patchPointi)
         {
             label meshPointi = meshPoints[patchPointi];
+            const weightedPosition& wp = globalSum[meshPointi];
 
-            nInternal[patchPointi] = globalNum[meshPointi];
-
-            if (nInternal[patchPointi] == 0)
+            avgInternal[patchPointi].first() = wp.first();
+            if (mag(wp.first()) < VSMALL)
             {
-                avgInternal[patchPointi] = globalSum[meshPointi];
+                // Set to zero?
+                avgInternal[patchPointi].second() = wp.second();
             }
             else
             {
-                avgInternal[patchPointi] =
-                    globalSum[meshPointi]
-                  / nInternal[patchPointi];
+                avgInternal[patchPointi].second() = wp.second()/wp.first();
             }
         }
     }
@@ -514,12 +520,14 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothPatchDisplacement
         label meshPointi = meshPoints[i];
         const point& currentPos = pp.points()[meshPointi];
 
-        // Now we have the two average points: avgBoundary and avgInternal
-        // and how many boundary/internal faces connect to the point
-        // (nBoundary, nInternal)
+        // Now we have the two average points and their counts:
+        //  avgBoundary and avgInternal
         // Do some blending between the two.
         // Note: the following section has some reasoning behind it but the
         // blending factors can be experimented with.
+
+        const weightedPosition& internal = avgInternal[i];
+        const weightedPosition& boundary = avgBoundary[i];
 
         point newPos;
 
@@ -532,14 +540,17 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothPatchDisplacement
 
             point avgPos =
                 (
-                   internalBlend*nInternal[i]*avgInternal[i]
-                  +(1-internalBlend)*nBoundary[i]*avgBoundary[i]
+                   internalBlend*internal.first()*internal.second()
+                  +(1-internalBlend)*boundary.first()*boundary.second()
                 )
-              / (internalBlend*nInternal[i]+(1-internalBlend)*nBoundary[i]);
+              / (
+                    internalBlend*internal.first()
+                   +(1-internalBlend)*boundary.first()
+                );
 
             newPos = (1-blend)*avgPos + blend*currentPos;
         }
-        else if (nInternal[i] == 0)
+        else if (internal.first() == 0)
         {
             // Non-manifold without internal faces. Use any connected cell
             // as internal point instead. Use precalculated any cell to avoid
@@ -550,7 +561,7 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothPatchDisplacement
             scalar cellCBlend = 0.8;
             scalar blend = 0.1;
 
-            point avgPos = (1-cellCBlend)*avgBoundary[i] + cellCBlend*cc;
+            point avgPos = (1-cellCBlend)*boundary.second() + cellCBlend*cc;
 
             newPos = (1-blend)*avgPos + blend*currentPos;
         }
@@ -561,8 +572,8 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothPatchDisplacement
             scalar blend = 0.1;
 
             point avgPos =
-                internalBlend*avgInternal[i]
-              + (1-internalBlend)*avgBoundary[i];
+                internalBlend*internal.second()
+              + (1-internalBlend)*boundary.second();
 
             newPos = (1-blend)*avgPos + blend*currentPos;
         }
@@ -980,26 +991,22 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::avgCellCentres
 {
     const labelListList& pointFaces = pp.pointFaces();
 
-
-    tmp<pointField> tavgBoundary
+    Field<weightedPosition> avgBoundary
     (
-        new pointField(pointFaces.size(), Zero)
+        pointFaces.size(),
+        pTraits<weightedPosition>::zero
     );
-    pointField& avgBoundary = tavgBoundary.ref();
-    labelList nBoundary(pointFaces.size(), Zero);
 
     forAll(pointFaces, pointi)
     {
         const labelList& pFaces = pointFaces[pointi];
 
+        avgBoundary[pointi].first() = pFaces.size();
         forAll(pFaces, pfi)
         {
             label facei = pFaces[pfi];
-            label meshFacei = pp.addressing()[facei];
-
-            label own = mesh.faceOwner()[meshFacei];
-            avgBoundary[pointi] += mesh.cellCentres()[own];
-            nBoundary[pointi]++;
+            label own = mesh.faceOwner()[pp.addressing()[facei]];
+            avgBoundary[pointi].second() += mesh.cellCentres()[own];
         }
     }
 
@@ -1008,22 +1015,14 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::avgCellCentres
         mesh,
         pp.meshPoints(),
         avgBoundary,
-        plusEqOp<point>(),  // combine op
-        vector::zero        // null value
-    );
-    syncTools::syncPointList
-    (
-        mesh,
-        pp.meshPoints(),
-        nBoundary,
-        plusEqOp<label>(),  // combine op
-        label(0)            // null value
+        weightedPosition::plusEqOp,     // combine op
+        pTraits<weightedPosition>::zero,// null value (not used)
+        pTraits<weightedPosition>::zero // transform class
     );
 
-    forAll(avgBoundary, i)
-    {
-        avgBoundary[i] /= nBoundary[i];
-    }
+    tmp<pointField> tavgBoundary(new pointField(avgBoundary.size()));
+    weightedPosition::getPoints(avgBoundary, tavgBoundary.ref());
+
     return tavgBoundary;
 }
 

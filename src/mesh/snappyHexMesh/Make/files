@@ -17,6 +17,7 @@ meshRefinement/meshRefinementGapRefine.C
 meshRefinement/meshRefinementBlock.C
 meshRefinement/wallPoints.C
 meshRefinement/patchFaceOrientation.C
+meshRefinement/weightedPosition.C
 
 refinementFeatures/refinementFeatures.C
 refinementSurfaces/surfaceZonesInfo.C
