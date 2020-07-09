@@ -133,7 +133,7 @@ private:
     // Private data
 
         //- Profiling trigger for time-loop (for run, loop)
-        mutable profilingTrigger* loopProfiling_;
+        mutable std::unique_ptr<profilingTrigger> loopProfiling_;
 
         //- Any loaded dynamic libraries. Make sure to construct before
         //  reading controlDict.

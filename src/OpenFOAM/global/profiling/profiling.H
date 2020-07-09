@@ -30,7 +30,7 @@ Class
 Description
     Code profiling.
 
-    This is typically activated from within the system/controlDict as follows
+    This is typically activated from within system/controlDict as follows
     (defaults shown):
     \code
         profiling
@@ -61,17 +61,20 @@ SourceFiles
 #include "PtrDynList.H"
 #include "Time.H"
 #include "clockTime.H"
+#include <memory>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class Ostream;
 class cpuInfo;
 class memInfo;
+class profilingInformation;
 class profilingSysInfo;
+class profilingTrigger;
 
 /*---------------------------------------------------------------------------*\
                           Class profiling Declaration
@@ -88,14 +91,15 @@ public:
         typedef profilingInformation Information;
         typedef profilingTrigger Trigger;
 
-    // Static data members
+
+    // Static Data Members
 
         //- Flag if profiling is allowed
         static int allowed;
 
 private:
 
-    // Private classes, typedefs
+    // Private Typedefs
 
         typedef profilingSysInfo sysInfo;
 
@@ -103,7 +107,7 @@ private:
     // Private Static Data Members
 
         //- Only one global object is possible
-        static profiling* singleton_;
+        static std::unique_ptr<profiling> singleton_;
 
 
     // Private Data Members
@@ -111,7 +115,7 @@ private:
         //- The owner of the profiling
         const Time& owner_;
 
-        //- Storage of profiling information
+        //- Storage of profiling information (memory management)
         PtrDynList<Information> pool_;
 
         //- Parent/child relationships for lookup purposes
@@ -124,13 +128,13 @@ private:
         DynamicList<clockValue> times_;
 
         //- General system information (optional)
-        sysInfo* sysInfo_;
+        std::unique_ptr<sysInfo> sysInfo_;
 
         //- CPU-Information (optional)
-        cpuInfo* cpuInfo_;
+        std::unique_ptr<cpuInfo> cpuInfo_;
 
         //- MEM-Information (optional)
-        memInfo* memInfo_;
+        std::unique_ptr<memInfo> memInfo_;
 
 
     // Private Member Functions
@@ -153,7 +157,12 @@ protected:
     // Constructors
 
         //- Construct IO object, everything enabled
-        profiling(const IOobject& io, const Time& owner);
+        profiling
+        (
+            const IOobject& io,
+            const Time& owner,
+            const bool allEnabled = true
+        );
 
         //- Construct IO object with finer control over behaviour
         profiling
@@ -164,15 +173,11 @@ protected:
         );
 
 
-    //- Destructor
-    ~profiling();
-
-
     // Protected Member Functions
 
         //- Clear all profiling and restart with new profiling
         //  \return pointer to stored information element
-        Information* create(const zero);
+        Information* create();
 
         //- Get or create named profiling information element with the
         //- specified parent.
@@ -218,7 +223,12 @@ protected:
         //- Remove the information from the top of the stack
         static void unstack(const profilingInformation* info);
 
+
 public:
+
+    //- Destructor. Top-level clears the singleton.
+    ~profiling();
+
 
     // Static Member Functions
 

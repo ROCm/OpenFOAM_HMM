@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2009-2016 Bernhard Gschaider
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,8 +27,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "profilingInformation.H"
-#include "Switch.H"
 #include "IOstreams.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -93,8 +93,6 @@ Foam::Ostream& Foam::profilingInformation::write
     const scalar childTimes
 ) const
 {
-    // write in dictionary format
-
     os.beginBlock(word("trigger" + Foam::name(id_)));
 
     os.writeEntry("id",             id_);
@@ -104,7 +102,7 @@ Foam::Ostream& Foam::profilingInformation::write
     os.writeEntry("totalTime",      totalTime() + elapsedTime);
     os.writeEntry("childTime",      childTime() + childTimes);
     os.writeEntryIfDifferent<int>("maxMem", 0, maxMem_);
-    os.writeEntry("active",         Switch(active()));
+    os.writeEntry("active",         Switch::name(active()));
 
     os.endBlock();
 
@@ -112,7 +110,7 @@ Foam::Ostream& Foam::profilingInformation::write
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const profilingInformation& info)
 {

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2009-2016 Bernhard Gschaider
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,12 +47,8 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-class profilingInformation;
-class Ostream;
-
-Ostream& operator<<(Ostream& os, const profilingInformation& info);
-
+// Forward Declarations
+class profiling;
 
 /*---------------------------------------------------------------------------*\
                     Class profilingInformation Declaration
@@ -60,7 +56,7 @@ Ostream& operator<<(Ostream& os, const profilingInformation& info);
 
 class profilingInformation
 {
-    // Private Data Members
+    // Private Data
 
         //- Unique id to identify it
         const label id_;
@@ -88,43 +84,30 @@ class profilingInformation
         mutable bool active_;
 
 
-    // Private Member Functions
+protected:
+
+    // Friendship
+
+        //- Allow creation of master-element, setActive etc.
+        friend class profiling;
+
+
+    // Constructors
+
+        //- Default construct - only the master-element
+        profilingInformation();
+
+
+    // Protected Member Functions
+
+        //- Mark as being active or passive)
+        void setActive(bool state) const;
 
         //- No copy construct
         profilingInformation(const profilingInformation&) = delete;
 
         //- No copy assignment
         void operator=(const profilingInformation&) = delete;
-
-
-protected:
-
-    // Friendship
-
-        friend class profiling;
-
-
-    // Constructors
-
-        //- Construct null - only the master-element
-        profilingInformation();
-
-
-    // Member Functions
-
-        //- Mark as being active or passive)
-        void setActive(bool state) const;
-
-        //- Write the profiling times, optionally with additional values
-        //  Use dictionary format.
-        Ostream& write
-        (
-            Ostream& os,
-            const bool offset = false,
-            const scalar elapsedTime = 0,
-            const scalar childTime = 0
-        ) const;
-
 
 public:
 
@@ -147,49 +130,42 @@ public:
 
     // Access
 
-        inline label id() const
+        label id() const
         {
             return id_;
         }
 
-
-        inline const string& description() const
+        const string& description() const
         {
             return description_;
         }
 
-
-        inline profilingInformation& parent() const
+        profilingInformation& parent() const
         {
             return *parent_;
         }
 
-
-        inline label calls() const
+        label calls() const
         {
             return calls_;
         }
 
-
-        inline scalar totalTime() const
+        scalar totalTime() const
         {
             return totalTime_;
         }
 
-
-        inline scalar childTime() const
+        scalar childTime() const
         {
             return childTime_;
         }
 
-
-        inline int maxMem() const
+        int maxMem() const
         {
             return maxMem_;
         }
 
-
-        inline bool active() const
+        bool active() const
         {
             return active_;
         }
@@ -201,15 +177,23 @@ public:
         void update(const scalar elapsedTime);
 
 
-    // IOstream Operators
+    // Write
 
-        friend Ostream& operator<<
+        //- Write the profiling times, optionally with additional values
+        //  Uses dictionary format.
+        Ostream& write
         (
             Ostream& os,
-            const profilingInformation& info
-        );
-
+            const bool offset = false,
+            const scalar elapsedTime = 0,
+            const scalar childTime = 0
+        ) const;
 };
+
+
+// Global Operators
+
+Ostream& operator<<(Ostream& os, const profilingInformation& info);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -217,6 +201,7 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 
 #endif
 

@@ -31,10 +31,8 @@ License
 #include "argList.H"
 #include "HashSet.H"
 #include "profiling.H"
-#include "demandDrivenData.H"
 #include "IOdictionary.H"
 #include "registerSwitch.H"
-
 #include <sstream>
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
@@ -762,7 +760,7 @@ Foam::autoPtr<Foam::Time> Foam::Time::New(const argList& args)
 
 Foam::Time::~Time()
 {
-    deleteDemandDrivenData(loopProfiling_);
+    loopProfiling_.reset(nullptr);
 
     forAllReverse(controlDict_.watchIndices(), i)
     {
@@ -889,7 +887,7 @@ Foam::Time::stopAtControls Foam::Time::stopAt() const
 
 bool Foam::Time::run() const
 {
-    deleteDemandDrivenData(loopProfiling_);
+    loopProfiling_.reset(nullptr);
 
     bool isRunning = value() < (endTime_ - 0.5*deltaT_);
 
@@ -948,8 +946,10 @@ bool Foam::Time::run() const
         // (re)trigger profiling
         if (profiling::active())
         {
-            loopProfiling_ =
-                new profilingTrigger("time.run() " + objectRegistry::name());
+            loopProfiling_.reset
+            (
+                new profilingTrigger("time.run() " + objectRegistry::name())
+            );
         }
     }
 

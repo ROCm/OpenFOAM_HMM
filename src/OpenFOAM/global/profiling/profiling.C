@@ -32,17 +32,16 @@ License
 #include "profilingSysInfo.H"
 #include "cpuInfo.H"
 #include "memInfo.H"
-#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 int Foam::profiling::allowed(Foam::debug::infoSwitch("allowProfiling", 1));
-Foam::profiling* Foam::profiling::singleton_(nullptr);
+std::unique_ptr<Foam::profiling> Foam::profiling::singleton_(nullptr);
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-Foam::profilingInformation* Foam::profiling::create(const zero)
+Foam::profilingInformation* Foam::profiling::create()
 {
     // Top-level entry: reset everything
     pool_.clear();
@@ -50,7 +49,7 @@ Foam::profilingInformation* Foam::profiling::create(const zero)
     stack_.clear();
     times_.clear();
 
-    Information* info = new Information();
+    Information* info = new Information;
 
     pool_.append(info);
     children_.resize(pool_.size());
@@ -151,7 +150,7 @@ void Foam::profiling::initialize
 {
     if (allowed && !singleton_)
     {
-        singleton_ = new profiling(ioObj, owner);
+        singleton_.reset(new profiling(ioObj, owner));
     }
 }
 
@@ -165,7 +164,7 @@ void Foam::profiling::initialize
 {
     if (allowed && !singleton_)
     {
-        singleton_ = new profiling(dict, ioObj, owner);
+        singleton_.reset(new profiling(dict, ioObj, owner));
     }
 }
 
@@ -174,8 +173,7 @@ void Foam::profiling::stop(const Time& owner)
 {
     if (singleton_ && &owner == &(singleton_->owner_))
     {
-        delete singleton_;
-        singleton_ = nullptr;
+        singleton_.reset(nullptr);
     }
 }
 
@@ -214,8 +212,8 @@ void Foam::profiling::unstack(const profilingInformation *info)
         if (info->id() != top->id())
         {
             FatalErrorInFunction
-                << "The profiling information to unstack has different"
-                << " id than on the top of the profiling stack" << nl
+                << "Profiling information to unstack has different id than"
+                << " the top of the profiling stack" << nl
                 << "  info: " << info->id() << " (" << info->description()
                 << ")\n"
                 << "  top:  " << top->id()  << " (" << top->description()
@@ -231,7 +229,8 @@ void Foam::profiling::unstack(const profilingInformation *info)
 Foam::profiling::profiling
 (
     const IOobject& io,
-    const Time& owner
+    const Time& owner,
+    const bool allEnabled
 )
 :
     IOdictionary(io),
@@ -240,11 +239,18 @@ Foam::profiling::profiling
     children_(),
     stack_(),
     times_(),
-    sysInfo_(new profilingSysInfo()),
-    cpuInfo_(new cpuInfo()),
-    memInfo_(new memInfo())
+    sysInfo_(nullptr),
+    cpuInfo_(nullptr),
+    memInfo_(nullptr)
 {
-    Information *info = this->create(Zero);
+    if (allEnabled)
+    {
+        sysInfo_.reset(new profilingSysInfo);
+        cpuInfo_.reset(new cpuInfo);
+        memInfo_.reset(new memInfo);
+    }
+
+    Information *info = this->create();
     this->beginTimer(info);
 
     DetailInfo << "profiling initialized" << nl;
@@ -258,32 +264,20 @@ Foam::profiling::profiling
     const Time& owner
 )
 :
-    IOdictionary(io),
-    owner_(owner),
-    pool_(),
-    children_(),
-    stack_(),
-    times_(),
-    sysInfo_
-    (
-        dict.getOrDefault("sysInfo", false)
-      ? new profilingSysInfo() : nullptr
-    ),
-    cpuInfo_
-    (
-        dict.getOrDefault("cpuInfo", false)
-      ? new cpuInfo() : nullptr
-    ),
-    memInfo_
-    (
-        dict.getOrDefault("memInfo", false)
-      ? new memInfo() : nullptr
-    )
+    profiling(io, owner, false)
 {
-    Information *info = this->create(Zero);
-    this->beginTimer(info);
-
-    DetailInfo << "profiling initialized" << nl;
+    if (dict.getOrDefault("sysInfo", false))
+    {
+        sysInfo_.reset(new profilingSysInfo);
+    }
+    if (dict.getOrDefault("cpuInfo", false))
+    {
+        cpuInfo_.reset(new cpuInfo);
+    }
+    if (dict.getOrDefault("memInfo", false))
+    {
+        memInfo_.reset(new memInfo);
+    }
 }
 
 
@@ -291,13 +285,9 @@ Foam::profiling::profiling
 
 Foam::profiling::~profiling()
 {
-    deleteDemandDrivenData(sysInfo_);
-    deleteDemandDrivenData(cpuInfo_);
-    deleteDemandDrivenData(memInfo_);
-
-    if (singleton_ == this)
+    if (this == singleton_.get())
     {
-        singleton_ = nullptr;
+        singleton_.reset(nullptr);
     }
 }
 

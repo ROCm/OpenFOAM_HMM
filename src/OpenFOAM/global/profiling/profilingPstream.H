@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,8 +27,8 @@ Class
     Foam::profilingPstream
 
 Description
-    Timers and values for simple (simplistic) mpi-profiling. The entire
-    class behaves as a singleton.
+    Timers and values for simple (simplistic) mpi-profiling.
+    The entire class behaves as a singleton.
 
 SourceFiles
     profilingPstream.C
@@ -38,10 +38,9 @@ SourceFiles
 #ifndef profilingPstream_H
 #define profilingPstream_H
 
-#include "autoPtr.H"
 #include "cpuTime.H"
-#include "scalar.H"
 #include "FixedList.H"
+#include <memory>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,37 +53,47 @@ namespace Foam
 
 class profilingPstream
 {
-    //- Timer to use
-    static autoPtr<cpuTime> timer_;
-
-    //- Stash for timer during suspend
-    static autoPtr<cpuTime> suspend_;
-
-    //- The timing values
-    static FixedList<scalar, 5> times_;
-
-
 public:
 
-    //- Enumeration within times array
-    enum timingType
-    {
-        GATHER = 0,
-        SCATTER,
-        REDUCE,
-        WAIT,
-        ALL_TO_ALL
-    };
+    // Public Types
+
+        //- Enumeration within times array
+        enum timingType
+        {
+            GATHER = 0,
+            SCATTER,
+            REDUCE,
+            WAIT,
+            ALL_TO_ALL
+        };
+
+        //- The timing values
+        typedef FixedList<double, 5> timingList;
+
+
+private:
+
+    // Private Static Data
+
+        //- The timer to use
+        static std::unique_ptr<cpuTime> timer_;
+
+        //- The timing values
+        static timingList times_;
+
+        //- Is timer in a suspend state?
+        static bool suspend_;
+
 
 public:
 
     // Constructors
 
-        //- Construct and enable global timer
+        //- Default construct, enables global timer
         profilingPstream();
 
 
-    //- Destructor - remove global timer
+    //- Destructor, disables global timer
     ~profilingPstream();
 
 
@@ -97,25 +106,31 @@ public:
         static void disable();
 
         //- Suspend use of timer (if active)
-        static void suspend();
+        inline static void suspend()
+        {
+            suspend_ = bool(timer_);
+        }
 
         //- Resume use of timer (if previously active)
-        static void resume();
+        static void resume()
+        {
+            suspend_ = false;
+        }
 
         //- Timer is active
         inline static bool active()
         {
-            return timer_.valid();
+            return !suspend_ && bool(timer_);
         }
 
         //- Access to the timing information
-        inline static FixedList<scalar, 5>& times()
+        inline static timingList& times()
         {
             return times_;
         }
 
-        //- Access to the timing information
-        inline static scalar times(const enum timingType idx)
+        //- Access to the timing information at given index
+        inline static double times(const enum timingType idx)
         {
             return times_[idx];
         }
@@ -123,7 +138,7 @@ public:
         //- Update timer prior to measurement
         inline static void beginTiming()
         {
-            if (timer_.valid())
+            if (active())
             {
                 (void) timer_->cpuTimeIncrement();
             }
@@ -132,7 +147,7 @@ public:
         //- Add time increment
         inline static void addTime(const enum timingType idx)
         {
-            if (timer_.valid())
+            if (active())
             {
                 times_[idx] += timer_->cpuTimeIncrement();
             }

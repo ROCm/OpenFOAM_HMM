@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,11 +29,11 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::cpuTime> Foam::profilingPstream::timer_(nullptr);
+std::unique_ptr<Foam::cpuTime> Foam::profilingPstream::timer_(nullptr);
 
-Foam::autoPtr<Foam::cpuTime> Foam::profilingPstream::suspend_(nullptr);
+Foam::profilingPstream::timingList Foam::profilingPstream::times_(Zero);
 
-Foam::FixedList<Foam::scalar, 5> Foam::profilingPstream::times_(Zero);
+bool Foam::profilingPstream::suspend_(false);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -56,14 +56,9 @@ Foam::profilingPstream::~profilingPstream()
 
 void Foam::profilingPstream::enable()
 {
-    if (timer_.valid())
+    if (timer_)
     {
-        timer_->resetCpuTime(); // Not really needed ...
-    }
-    else if (suspend_.valid())
-    {
-        suspend_.swap(timer_);
-        timer_->resetCpuTime(); // Not really needed ...
+        timer_->resetCpuTime(); // Not necessarily required ...
     }
     else
     {
@@ -71,31 +66,14 @@ void Foam::profilingPstream::enable()
         times_ = Zero;
     }
 
-    suspend_.clear();
+    suspend_ = false;
 }
 
 
 void Foam::profilingPstream::disable()
 {
-    timer_.clear();
-    suspend_.clear();
-}
-
-
-void Foam::profilingPstream::suspend()
-{
-    suspend_.clear();
-    suspend_.swap(timer_);
-}
-
-
-void Foam::profilingPstream::resume()
-{
-    if (suspend_.valid())
-    {
-        timer_.clear();
-        timer_.swap(suspend_);
-    }
+    timer_.reset(nullptr);
+    suspend_ = false;
 }
 
 

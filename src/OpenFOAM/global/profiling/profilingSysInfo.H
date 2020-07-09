@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,9 +42,8 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class Ostream;
-class profilingSysInfo;
 
 /*---------------------------------------------------------------------------*\
                       Class profilingSysInfo Declaration
@@ -54,20 +53,7 @@ class profilingSysInfo
 {
 public:
 
-    // Constructors
-
-        //- Construct null
-        profilingSysInfo() = default;
-
-
-    //- Destructor
-    ~profilingSysInfo() = default;
-
-
     // Member Functions
-
-        //- Update it with a new timing information
-        void update();
 
         //- Write the profiling system-info, use dictionary format.
         Ostream& write(Ostream& os) const;
