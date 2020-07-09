@@ -29,7 +29,6 @@ License
 #include "argList.H"
 #include "OSspecific.H"
 #include "clock.H"
-#include "IFstream.H"
 #include "dictionary.H"
 #include "IOobject.H"
 #include "JobInfo.H"
@@ -1252,17 +1251,29 @@ void Foam::argList::parse
                 // Use values from decomposeParDict, the location was already
                 // established above.
 
-                IFstream decompDictStream(source);
+                // Disable any parallel comms happening inside the fileHandler
+                // since we are on master. This can happen e.g. inside
+                // the masterUncollated/collated handler. 
+                const bool oldParRun = Pstream::parRun();
+                Pstream::parRun() = false;
 
-                if (!decompDictStream.good())
+                autoPtr<ISstream> decompDictStream
+                (
+                    fileHandler().NewIFstream(source)
+                );
+
+                if (!decompDictStream.valid() || !decompDictStream->good())
                 {
                     FatalError
                         << "Cannot read decomposeParDict from "
-                        << decompDictStream.name()
-                        << exit(FatalError);
+                        << source << exit(FatalError);
                 }
 
-                dictionary decompDict(decompDictStream);
+                dictionary decompDict(*decompDictStream);
+
+                // Restore parallel behaviour
+                Pstream::parRun() = oldParRun;
+
 
                 decompDict.readEntry("numberOfSubdomains", dictNProcs);
 
