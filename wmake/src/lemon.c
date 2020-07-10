@@ -1,7 +1,6 @@
-/*
- * Part of check-in [https://www.sqlite.org/src/info/fccfb8a9ed3c1df9]
- * artifact:
- * https://www.sqlite.org/src/raw/tool/lemon.c?name=a361b85fa230560b783006ac002a6a8bad214c3b9d7fa48980aecc2b691ddcad
+/* https://sqlite.org/src/artifact/600a58b9
+ * Artifact 600a58b9d1b8ec5419373982428e927ca208826edacb91ca42ab94514d006039:
+ * File tool/lemon.c part of check-in [951d22b7] at 2020-07-03
  */
 /*
 ** This file contains all sources (including headers) to the LEMON
@@ -406,7 +405,6 @@ struct lemon {
   struct symbol *errsym;   /* The error symbol */
   struct symbol *wildcard; /* Token that matches anything */
   char *name;              /* Name of the generated parser */
-  char *namesp;            /* Surrounding namespace for generated parser */
   char *arg;               /* Declaration of the 3th argument to parser */
   char *ctx;               /* Declaration of 2nd argument to constructor */
   char *tokentype;         /* Type of terminal symbols in the parser stack */
@@ -429,8 +427,10 @@ struct lemon {
   int nlookaheadtab;       /* Number of entries in yy_lookahead[] */
   int tablesize;           /* Total table size of all tables in bytes */
   int basisflag;           /* Print only basis configurations */
+  int printPreprocessed;   /* Show preprocessor output on stdout */
   int has_fallback;        /* True if any %fallback is seen in the grammar */
   int nolinenosflag;       /* True if #line statements should not be printed */
+  int linkage;             /* 1 if %static provided (use static linkage) */
   char *argv0;             /* Name of the program */
 };
 
@@ -1561,8 +1561,9 @@ static void handle_d_option(char *z){
 }
 
 /* Remember the name of the code extension (automatically prefix '.')
+** default is "c" extension
 */
-static char *code_ext = NULL;
+static char *code_ext = ".c";
 static void handle_e_option(char *z){
   code_ext = (char *) malloc( lemonStrlen(z)+2 );
   if( code_ext==0 ){
@@ -1659,6 +1660,7 @@ int main(int argc, char **argv)
   static int nolinenosflag = 0;
   static int noResort = 0;
   static int sqlFlag = 0;
+  static int printPP = 0;
 
   static struct s_options options[] = {
     {OPT_FLAG, "b", (char*)&basisflag, "Print only the basis in report."},
@@ -1666,6 +1668,7 @@ int main(int argc, char **argv)
     {OPT_FSTR, "d", (char*)&handle_d_option, "Output directory.  Default '.'"},
     {OPT_FSTR, "D", (char*)handle_D_option, "Define an %ifdef macro."},
     {OPT_FSTR, "e", (char*)&handle_e_option, "Output code extension.  Default 'c'"},
+    {OPT_FLAG, "E", (char*)&printPP, "Print input file after preprocessing."},
     {OPT_FSTR, "f", 0, "Ignored.  (Placeholder for -f compiler options.)"},
     {OPT_FLAG, "g", (char*)&rpflag, "Print grammar without actions."},
     {OPT_FSTR, "I", 0, "Ignored.  (Placeholder for '-I' compiler options.)"},
@@ -1710,11 +1713,12 @@ int main(int argc, char **argv)
   lem.filename = OptArg(0);
   lem.basisflag = basisflag;
   lem.nolinenosflag = nolinenosflag;
+  lem.printPreprocessed = printPP;
   Symbol_new("$");
 
   /* Parse the input file */
   Parse(&lem);
-  if( lem.errorcnt ) exit(lem.errorcnt);
+  if( lem.printPreprocessed || lem.errorcnt ) exit(lem.errorcnt);
   if( lem.nrule==0 ){
     fprintf(stderr,"Empty grammar.\n");
     exit(1);
@@ -2286,6 +2290,7 @@ static void parseonetoken(struct pstate *psp)
       psp->preccounter = 0;
       psp->firstrule = psp->lastrule = 0;
       psp->gp->nrule = 0;
+      psp->gp->linkage = 0;
       /* Fall thru to next case */
     case WAITING_FOR_DECL_OR_RULE:
       if( x[0]=='%' ){
@@ -2509,9 +2514,6 @@ static void parseonetoken(struct pstate *psp)
         if( strcmp(x,"name")==0 ){
           psp->declargslot = &(psp->gp->name);
           psp->insertLineMacro = 0;
-        }else if( strcmp(x,"namespace")==0 ){
-          psp->declargslot = &(psp->gp->namesp);
-          psp->insertLineMacro = 0;
         }else if( strcmp(x,"include")==0 ){
           psp->declargslot = &(psp->gp->include);
         }else if( strcmp(x,"code")==0 ){
@@ -2574,6 +2576,11 @@ static void parseonetoken(struct pstate *psp)
           psp->state = WAITING_FOR_WILDCARD_ID;
         }else if( strcmp(x,"token_class")==0 ){
           psp->state = WAITING_FOR_CLASS_ID;
+        }else if( strcmp(x,"static")==0 ){
+          /* %static is boolean-like */
+          psp->gp->linkage = 1; /* 1 = static (True) */
+          psp->insertLineMacro = 0;
+          psp->state = WAITING_FOR_DECL_OR_RULE;
         }else{
           ErrorMsg(psp->filename,psp->tokenlineno,
             "Unknown declaration keyword: \"%%%s\".",x);
@@ -2806,13 +2813,108 @@ static void parseonetoken(struct pstate *psp)
   }
 }
 
+/* The text in the input is part of the argument to an %ifdef or %ifndef.
+** Evaluate the text as a boolean expression.  Return true or false.
+*/
+static int eval_preprocessor_boolean(char *z, int lineno){
+  int neg = 0;
+  int res = 0;
+  int okTerm = 1;
+  int i;
+  for(i=0; z[i]!=0; i++){
+    if( ISSPACE(z[i]) ) continue;
+    if( z[i]=='!' ){
+      if( !okTerm ) goto pp_syntax_error;
+      neg = !neg;
+      continue;
+    }
+    if( z[i]=='|' && z[i+1]=='|' ){
+      if( okTerm ) goto pp_syntax_error;
+      if( res ) return 1;
+      i++;
+      okTerm = 1;
+      continue;
+    }
+    if( z[i]=='&' && z[i+1]=='&' ){
+      if( okTerm ) goto pp_syntax_error;
+      if( !res ) return 0;
+      i++;
+      okTerm = 1;
+      continue;
+    }
+    if( z[i]=='(' ){
+      int k;
+      int n = 1;
+      if( !okTerm ) goto pp_syntax_error;
+      for(k=i+1; z[k]; k++){
+        if( z[k]==')' ){
+          n--;
+          if( n==0 ){
+            z[k] = 0;
+            res = eval_preprocessor_boolean(&z[i+1], -1);
+            z[k] = ')';
+            if( res<0 ){
+              i = i-res;
+              goto pp_syntax_error;
+            }
+            i = k;
+            break;
+          }
+        }else if( z[k]=='(' ){
+          n++;
+        }else if( z[k]==0 ){
+          i = k;
+          goto pp_syntax_error;
+        }
+      }
+      if( neg ){
+        res = !res;
+        neg = 0;
+      }
+      okTerm = 0;
+      continue;
+    }
+    if( ISALPHA(z[i]) ){
+      int j, k, n;
+      if( !okTerm ) goto pp_syntax_error;
+      for(k=i+1; ISALNUM(z[k]) || z[k]=='_'; k++){}
+      n = k - i;
+      res = 0;
+      for(j=0; j<nDefine; j++){
+        if( strncmp(azDefine[j],&z[i],n)==0 && azDefine[j][n]==0 ){
+          res = 1;
+          break;
+        }
+      }
+      i = k-1;
+      if( neg ){
+        res = !res;
+        neg = 0;
+      }
+      okTerm = 0;
+      continue;
+    }
+    goto pp_syntax_error;
+  }
+  return res;
+
+pp_syntax_error:
+  if( lineno>0 ){
+    fprintf(stderr, "%%if syntax error on line %d.\n", lineno);
+    fprintf(stderr, "  %.*s <-- syntax error here\n", i+1, z);
+    exit(1);
+  }else{
+    return -(i+1);
+  }
+}
+
 /* Run the preprocessor over the input file text.  The global variables
 ** azDefine[0] through azDefine[nDefine-1] contains the names of all defined
 ** macros.  This routine looks for "%ifdef" and "%ifndef" and "%endif" and
 ** comments them out.  Text in between is also commented out as appropriate.
 */
 static void preprocess_input(char *z){
-  int i, j, k, n;
+  int i, j, k;
   int exclude = 0;
   int start = 0;
   int lineno = 1;
@@ -2828,21 +2930,33 @@ static void preprocess_input(char *z){
         }
       }
       for(j=i; z[j] && z[j]!='\n'; j++) z[j] = ' ';
-    }else if( (strncmp(&z[i],"%ifdef",6)==0 && ISSPACE(z[i+6]))
-          || (strncmp(&z[i],"%ifndef",7)==0 && ISSPACE(z[i+7])) ){
+    }else if( strncmp(&z[i],"%else",5)==0 && ISSPACE(z[i+5]) ){
+      if( exclude==1){
+        exclude = 0;
+        for(j=start; j<i; j++) if( z[j]!='\n' ) z[j] = ' ';
+      }else if( exclude==0 ){
+        exclude = 1;
+        start = i;
+        start_lineno = lineno;
+      }
+      for(j=i; z[j] && z[j]!='\n'; j++) z[j] = ' ';
+    }else if( strncmp(&z[i],"%ifdef ",7)==0
+          || strncmp(&z[i],"%if ",4)==0
+          || strncmp(&z[i],"%ifndef ",8)==0 ){
       if( exclude ){
         exclude++;
       }else{
-        for(j=i+7; ISSPACE(z[j]); j++){}
-        for(n=0; z[j+n] && !ISSPACE(z[j+n]); n++){}
-        exclude = 1;
-        for(k=0; k<nDefine; k++){
-          if( strncmp(azDefine[k],&z[j],n)==0 && lemonStrlen(azDefine[k])==n ){
-            exclude = 0;
-            break;
-          }
-        }
-        if( z[i+3]=='n' ) exclude = !exclude;
+        int isNot;
+        int iBool;
+        for(j=i; z[j] && !ISSPACE(z[j]); j++){}
+        iBool = j;
+        isNot = (j==i+7);
+        while( z[j] && z[j]!='\n' ){ j++; }
+        k = z[j];
+        z[j] = 0;
+        exclude = eval_preprocessor_boolean(&z[iBool], lineno);
+        z[j] = k;
+        if( !isNot ) exclude = !exclude;
         if( exclude ){
           start = i;
           start_lineno = lineno;
@@ -2910,6 +3024,10 @@ void Parse(struct lemon *gp)
 
   /* Make an initial pass through the file to handle %ifdef and %ifndef */
   preprocess_input(filebuf);
+  if( gp->printPreprocessed ){
+    printf("%s\n", filebuf);
+    return;
+  }
 
   /* Now scan the text of the input file */
   lineno = 1;
@@ -3499,83 +3617,20 @@ PRIVATE int compute_action(struct lemon *lemp, struct action *ap)
 #define LINESIZE 1000
 /* The next cluster of routines are for reading the template file
 ** and writing the results to the generated parser */
-
-/* Helper function to emit begin of namespace when namesp!=0
-** Converts "ns1::ns2" to "namespace ns1 { namespace ns2 {"
-*/
-PRIVATE void tplt_namespace_begin(char *namesp, FILE *out)
-{
-  if(!namesp) return;
-  while (ISSPACE(*namesp)) ++namesp;
-
-  char *cp = namesp;
-  do {
-      fprintf(out,"namespace ");
-      cp = strchr(namesp, ':');
-      if (cp) {
-          while (namesp != cp) {
-              fputc(*namesp,out);
-              ++namesp;
-          }
-          while(*namesp == ':') ++namesp;
-      }
-      else {
-          while (*namesp && !ISSPACE(*namesp)) {
-              fputc(*namesp,out);
-              ++namesp;
-          }
-      }
-      fprintf(out, " {");
-  } while (cp);
-  fputc('\n',out);
-}
-
-/* Helper function to emit end of namespace when namesp!=0
-** Converts "ns1::ns2" to "}} // End namespace"
-*/
-PRIVATE void tplt_namespace_end(char *namesp, FILE *out)
-{
-  if(!namesp) return;
-  while (ISSPACE(*namesp)) ++namesp;
-
-  char *cp = namesp;
-  do {
-      cp = strchr(cp, ':');
-      if (cp) {
-          while(*cp == ':') ++cp;
-      }
-      fputc('}',out);
-  } while (cp);
-
-  fprintf(out," // End namespace %s\n", namesp);
-}
-
 /* The first function transfers data from "in" to "out" until
 ** a line is seen which begins with "%%".  The line number is
 ** tracked.
 **
 ** if name!=0, then any word that begin with "Parse" is changed to
 ** begin with *name instead.
-**
-** if namesp!=0, then replace %namespace_begin / %namespace_end
 */
-PRIVATE void tplt_xfer(char *name, char *namesp, FILE *in, FILE *out, int *lineno)
+PRIVATE void tplt_xfer(char *name, FILE *in, FILE *out, int *lineno)
 {
   int i, iStart;
   char line[LINESIZE];
   while( fgets(line,LINESIZE,in) && (line[0]!='%' || line[1]!='%') ){
     (*lineno)++;
     iStart = 0;
-    if(line[0]=='%' && line[1]=='n'){
-      if(strncmp(&line[1],"namespace_begin",15)==0){
-        tplt_namespace_begin(namesp, out);
-        continue;
-      }else if(strncmp(&line[1],"namespace_end",13)==0){
-        tplt_namespace_end(namesp, out);
-        continue;
-      }
-    }
-
     if( name ){
       for(i=0; line[i]; i++){
         if( line[i]=='P' && strncmp(&line[i],"Parse",5)==0
@@ -4272,8 +4327,7 @@ void ReportTable(
 
   in = tplt_open(lemp);
   if( in==0 ) return;
-  if(code_ext) out = file_open(lemp,code_ext,"wb");
-  else out = file_open(lemp,".c","wb");
+  out = file_open(lemp,code_ext,"wb");
   if( out==0 ){
     fclose(in);
     return;
@@ -4351,7 +4405,7 @@ void ReportTable(
     fprintf(sql, "COMMIT;\n");
   }
   lineno = 1;
-  tplt_xfer(lemp->name,lemp->namesp,in,out,&lineno);
+  tplt_xfer(lemp->name,in,out,&lineno);
 
   /* Generate the include code, if any */
   tplt_print(out,lemp,lemp->include,&lineno);
@@ -4360,7 +4414,7 @@ void ReportTable(
     fprintf(out,"#include \"%s\"\n", incName); lineno++;
     free(incName);
   }
-  tplt_xfer(lemp->name,lemp->namesp,in,out,&lineno);
+  tplt_xfer(lemp->name,in,out,&lineno);
 
   /* Generate #defines for all tokens */
   if( mhflag ){
@@ -4374,9 +4428,12 @@ void ReportTable(
     }
     fprintf(out,"#endif\n"); lineno++;
   }
-  tplt_xfer(lemp->name,lemp->namesp,in,out,&lineno);
+  tplt_xfer(lemp->name,in,out,&lineno);
 
   /* Generate the defines */
+  if( lemp->linkage ){
+    fprintf(out,"#define YYFUNCAPI static\n"); lineno++;
+  }
   fprintf(out,"#define YYCODETYPE %s\n",
     minimum_size_type(0, lemp->nsymbol, &szCodeType)); lineno++;
   fprintf(out,"#define YYNOCODE %d\n",lemp->nsymbol);  lineno++;
@@ -4539,7 +4596,7 @@ void ReportTable(
   fprintf(out,"#define YY_MIN_REDUCE        %d\n", lemp->minReduce); lineno++;
   i = lemp->minReduce + lemp->nrule;
   fprintf(out,"#define YY_MAX_REDUCE        %d\n", i-1); lineno++;
-  tplt_xfer(lemp->name,lemp->namesp,in,out,&lineno);
+  tplt_xfer(lemp->name,in,out,&lineno);
 
   /* Now output the action table and its associates:
   **
@@ -4677,7 +4734,7 @@ void ReportTable(
     }
   }
   fprintf(out, "};\n"); lineno++;
-  tplt_xfer(lemp->name,lemp->namesp,in,out,&lineno);
+  tplt_xfer(lemp->name,in,out,&lineno);
 
   /* Generate the table of fallback tokens.
   */
@@ -4698,7 +4755,7 @@ void ReportTable(
       lineno++;
     }
   }
-  tplt_xfer(lemp->name,lemp->namesp, in, out, &lineno);
+  tplt_xfer(lemp->name, in, out, &lineno);
 
   /* Generate a table containing the symbolic name of every symbol
   */
@@ -4706,7 +4763,7 @@ void ReportTable(
     lemon_sprintf(line,"\"%s\",",lemp->symbols[i]->name);
     fprintf(out,"  /* %4d */ \"%s\",\n",i, lemp->symbols[i]->name); lineno++;
   }
-  tplt_xfer(lemp->name,lemp->namesp,in,out,&lineno);
+  tplt_xfer(lemp->name,in,out,&lineno);
 
   /* Generate a table containing a text string that describes every
   ** rule in the rule set of the grammar.  This information is used
@@ -4718,7 +4775,7 @@ void ReportTable(
     writeRuleText(out, rp);
     fprintf(out,"\",\n"); lineno++;
   }
-  tplt_xfer(lemp->name,lemp->namesp,in,out,&lineno);
+  tplt_xfer(lemp->name,in,out,&lineno);
 
   /* Generate code which executes every time a symbol is popped from
   ** the stack while processing errors or while destroying the parser.
@@ -4781,11 +4838,11 @@ void ReportTable(
     emit_destructor_code(out,lemp->symbols[i],lemp,&lineno);
     fprintf(out,"      break;\n"); lineno++;
   }
-  tplt_xfer(lemp->name,lemp->namesp,in,out,&lineno);
+  tplt_xfer(lemp->name,in,out,&lineno);
 
   /* Generate code which executes whenever the parser stack overflows */
   tplt_print(out,lemp,lemp->overflow,&lineno);
-  tplt_xfer(lemp->name,lemp->namesp,in,out,&lineno);
+  tplt_xfer(lemp->name,in,out,&lineno);
 
   /* Generate the tables of rule information.  yyRuleInfoLhs[] and
   ** yyRuleInfoNRhs[].
@@ -4798,13 +4855,13 @@ void ReportTable(
      rule_print(out, rp);
     fprintf(out," */\n"); lineno++;
   }
-  tplt_xfer(lemp->name,lemp->namesp,in,out,&lineno);
+  tplt_xfer(lemp->name,in,out,&lineno);
   for(i=0, rp=lemp->rule; rp; rp=rp->next, i++){
     fprintf(out,"  %3d,  /* (%d) ", -rp->nrhs, i);
     rule_print(out, rp);
     fprintf(out," */\n"); lineno++;
   }
-  tplt_xfer(lemp->name,lemp->namesp,in,out,&lineno);
+  tplt_xfer(lemp->name,in,out,&lineno);
 
   /* Generate code which execution during each REDUCE action */
   i = 0;
@@ -4857,19 +4914,19 @@ void ReportTable(
     }
   }
   fprintf(out,"        break;\n"); lineno++;
-  tplt_xfer(lemp->name,lemp->namesp,in,out,&lineno);
+  tplt_xfer(lemp->name,in,out,&lineno);
 
   /* Generate code which executes if a parse fails */
   tplt_print(out,lemp,lemp->failure,&lineno);
-  tplt_xfer(lemp->name,lemp->namesp,in,out,&lineno);
+  tplt_xfer(lemp->name,in,out,&lineno);
 
   /* Generate code which executes when a syntax error occurs */
   tplt_print(out,lemp,lemp->error,&lineno);
-  tplt_xfer(lemp->name,lemp->namesp,in,out,&lineno);
+  tplt_xfer(lemp->name,in,out,&lineno);
 
   /* Generate code which executes when the parser accepts its input */
   tplt_print(out,lemp,lemp->accept,&lineno);
-  tplt_xfer(lemp->name,lemp->namesp,in,out,&lineno);
+  tplt_xfer(lemp->name,in,out,&lineno);
 
   /* Append any addition code the user desires */
   tplt_print(out,lemp,lemp->extracode,&lineno);

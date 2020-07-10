@@ -93,6 +93,12 @@
 /************* End control #defines *******************************************/
 #define YY_NLOOKAHEAD ((int)(sizeof(yy_lookahead)/sizeof(yy_lookahead[0])))
 
+/* Default linkage for exposed parser routines is global
+*/
+#ifndef YYFUNCAPI
+# define YYFUNCAPI
+#endif
+
 /* Define the yytestcase() macro to be a no-op if is not already defined
 ** otherwise.
 **
@@ -251,14 +257,13 @@ static char *yyTracePrompt = 0;
 ** Outputs:
 ** None.
 */
-%namespace_begin
+YYFUNCAPI
 void ParseTrace(FILE *TraceFILE, char *zTracePrompt){
   yyTraceFILE = TraceFILE;
   yyTracePrompt = zTracePrompt;
   if( yyTraceFILE==0 ) yyTracePrompt = 0;
   else if( yyTracePrompt==0 ) yyTraceFILE = 0;
 }
-%namespace_end
 #endif /* NDEBUG */
 
 #if defined(YYCOVERAGE) || !defined(NDEBUG)
@@ -322,7 +327,7 @@ static int yyGrowStack(yyParser *p){
 
 /* Initialize a new parser that has already been allocated.
 */
-%namespace_begin
+YYFUNCAPI
 void ParseInit(void *yypRawParser ParseCTX_PDECL){
   yyParser *yypParser = (yyParser*)yypRawParser;
   ParseCTX_STORE
@@ -348,7 +353,6 @@ void ParseInit(void *yypRawParser ParseCTX_PDECL){
   yypParser->yystackEnd = &yypParser->yystack[YYSTACKDEPTH-1];
 #endif
 }
-%namespace_end
 
 #ifndef Parse_ENGINEALWAYSONSTACK
 /*
@@ -363,7 +367,7 @@ void ParseInit(void *yypRawParser ParseCTX_PDECL){
 ** A pointer to a parser.  This pointer is used in subsequent calls
 ** to Parse and ParseFree.
 */
-%namespace_begin
+YYFUNCAPI
 void *ParseAlloc(void *(*mallocProc)(YYMALLOCARGTYPE) ParseCTX_PDECL){
   yyParser *yypParser;
   yypParser = (yyParser*)(*mallocProc)( (YYMALLOCARGTYPE)sizeof(yyParser) );
@@ -373,7 +377,6 @@ void *ParseAlloc(void *(*mallocProc)(YYMALLOCARGTYPE) ParseCTX_PDECL){
   }
   return (void*)yypParser;
 }
-%namespace_end
 #endif /* Parse_ENGINEALWAYSONSTACK */
 
 
@@ -433,7 +436,7 @@ static void yy_pop_parser_stack(yyParser *pParser){
 /*
 ** Clear all secondary memory allocations from the parser
 */
-%namespace_begin
+YYFUNCAPI
 void ParseFinalize(void *p){
   yyParser *pParser = (yyParser*)p;
   while( pParser->yytos>pParser->yystack ) yy_pop_parser_stack(pParser);
@@ -441,7 +444,6 @@ void ParseFinalize(void *p){
   if( pParser->yystack!=&pParser->yystk0 ) free(pParser->yystack);
 #endif
 }
-%namespace_end
 
 #ifndef Parse_ENGINEALWAYSONSTACK
 /*
@@ -452,7 +454,7 @@ void ParseFinalize(void *p){
 ** is defined in a %include section of the input grammar) then it is
 ** assumed that the input pointer is never NULL.
 */
-%namespace_begin
+YYFUNCAPI
 void ParseFree(
   void *p,                    /* The parser to be deleted */
   void (*freeProc)(void*)     /* Function used to reclaim memory */
@@ -463,19 +465,17 @@ void ParseFree(
   ParseFinalize(p);
   (*freeProc)(p);
 }
-%namespace_end
 #endif /* Parse_ENGINEALWAYSONSTACK */
 
 /*
 ** Return the peak depth of the stack for a parser.
 */
 #ifdef YYTRACKMAXSTACKDEPTH
-%namespace_begin
+YYFUNCAPI
 int ParseStackPeak(void *p){
   yyParser *pParser = (yyParser*)p;
   return pParser->yyhwm;
 }
-%namespace_end
 #endif
 
 /* This array of booleans keeps track of the parser statement
@@ -496,7 +496,7 @@ static unsigned char yycoverage[YYNSTATE][YYNTOKEN];
 ** Return the number of missed state/lookahead combinations.
 */
 #if defined(YYCOVERAGE)
-%namespace_begin
+YYFUNCAPI
 int ParseCoverage(FILE *out){
   int stateno, iLookAhead, i;
   int nMissed = 0;
@@ -514,7 +514,6 @@ int ParseCoverage(FILE *out){
   }
   return nMissed;
 }
-%namespace_end
 #endif
 
 /*
@@ -905,7 +904,7 @@ static void yy_accept(
 ** Outputs:
 ** None.
 */
-%namespace_begin
+YYFUNCAPI
 void Parse(
   void *yyp,                   /* The parser */
   int yymajor,                 /* The major token code number */
@@ -1075,13 +1074,12 @@ void Parse(
 #endif
   return;
 }
-%namespace_end
 
 /*
 ** Return the fallback token corresponding to canonical token iToken, or
 ** 0 if iToken has no fallback.
 */
-%namespace_begin
+YYFUNCAPI
 int ParseFallback(int iToken){
 #ifdef YYFALLBACK
   assert( iToken<(int)(sizeof(yyFallback)/sizeof(yyFallback[0])) );
@@ -1091,4 +1089,3 @@ int ParseFallback(int iToken){
   return 0;
 #endif
 }
-%namespace_end

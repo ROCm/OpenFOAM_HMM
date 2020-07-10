@@ -1,23 +1,21 @@
 Minimal changes to lemon for C++ integration.
 
-- New '-e' command line option to define the code extension.
+- Additional '-e' command line option to define the code extension.
   By default this is 'c', but with this option can define something
-  like -ecxx etc for using a C++ compiler.
+  like '-ecxx' etc for using a C++ compiler.
 
-- New '%namespace' directive. This can be used to embed the 'Parse*'
-  routines into a C++ namespace. The namespace can be anonymous or
-  contain multiple nested namespaces. For example,
+- Additional '%static' Lemon directive, which is boolean-like:
 
-      %namespace {}
-      %namespace {ns1::ns2::ns3}
+      %static
 
-
-  One simple means to encapsulate code is to use an anonymous
-  namespace for the Lemon code and place all C++ interface code with
-  the %code block in the same translation unit.
+  This adds a 'static' qualifier to all of the 'Parse*' routines that
+  would otherwise have global linkage, thus making them only visible
+  in the same file-scope.
+  Can subsequently place all of the C++ interface code within a %code
+  block in the same translation unit.
 
   This allows good encapsulation without fundamentally changing how
   Lemon works.
 
 --
-2019-09-27
+2020-07-10
