@@ -255,15 +255,8 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothInternalDisplacement
         }
     }
 
-    // Sum
-    syncTools::syncPointList
-    (
-        mesh,
-        sumLocation,
-        weightedPosition::plusEqOp,     // combine op
-        pTraits<weightedPosition>::zero,// null value (not used)
-        pTraits<weightedPosition>::zero // transform class
-    );
+    // Add coupled contributions
+    weightedPosition::syncPoints(mesh, sumLocation);
 
     tmp<pointField> tdisplacement(new pointField(mesh.nPoints(), Zero));
     pointField& displacement = tdisplacement.ref();
@@ -384,15 +377,8 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothPatchDisplacement
             }
         }
 
-        syncTools::syncPointList
-        (
-            mesh,
-            pp.meshPoints(),
-            avgBoundary,
-            weightedPosition::plusEqOp,     // combine op
-            pTraits<weightedPosition>::zero,// null value (not used)
-            pTraits<weightedPosition>::zero // transform class
-        );
+        // Add coupled contributions
+        weightedPosition::syncPoints(mesh, pp.meshPoints(), avgBoundary);
 
         // Normalise
         forAll(avgBoundary, i)
@@ -464,15 +450,8 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothPatchDisplacement
             }
         }
 
-        syncTools::syncPointList
-        (
-            mesh,
-            globalSum,
-            weightedPosition::plusEqOp,     // combine op
-            pTraits<weightedPosition>::zero,// null value (not used)
-            pTraits<weightedPosition>::zero // transform class
-        );
-
+        // Add coupled contributions
+        weightedPosition::syncPoints(mesh, globalSum);
 
         avgInternal.setSize(meshPoints.size());
 
@@ -1010,15 +989,8 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::avgCellCentres
         }
     }
 
-    syncTools::syncPointList
-    (
-        mesh,
-        pp.meshPoints(),
-        avgBoundary,
-        weightedPosition::plusEqOp,     // combine op
-        pTraits<weightedPosition>::zero,// null value (not used)
-        pTraits<weightedPosition>::zero // transform class
-    );
+    // Add coupled contributions
+    weightedPosition::syncPoints(mesh, pp.meshPoints(), avgBoundary);
 
     tmp<pointField> tavgBoundary(new pointField(avgBoundary.size()));
     weightedPosition::getPoints(avgBoundary, tavgBoundary.ref());

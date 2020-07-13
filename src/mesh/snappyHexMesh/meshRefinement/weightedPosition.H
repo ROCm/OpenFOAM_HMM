@@ -79,6 +79,7 @@ namespace Foam
 class weightedPosition;
 class vectorTensorTransform;
 class coupledPolyPatch;
+class polyMesh;
 
 //- pTraits
 template<>
@@ -160,6 +161,22 @@ public:
                 const coupledPolyPatch& cpp,
                 Container<weightedPosition>& map
             ) const;
+
+
+        //- Synchronisation for mesh point positions
+        static void syncPoints
+        (
+            const polyMesh& mesh,
+            List<weightedPosition>&
+        );
+
+        //- Synchronisation for patch point positions
+        static void syncPoints
+        (
+            const polyMesh& mesh,
+            const labelUList& meshPoints,
+            List<weightedPosition>&
+        );
 };
 
 

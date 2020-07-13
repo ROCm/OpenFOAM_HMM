@@ -28,6 +28,8 @@ License
 #include "weightedPosition.H"
 #include "vectorTensorTransform.H"
 #include "coupledPolyPatch.H"
+#include "polyMesh.H"
+#include "syncTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -147,6 +149,56 @@ void Foam::weightedPosition::operator()
     cpp.transformPosition(pfld);
 
     setPoints(pfld, fld);
+}
+
+
+void Foam::weightedPosition::syncPoints
+(
+    const polyMesh& mesh,
+    List<weightedPosition>& fld
+)
+{
+    if (fld.size() != mesh.nPoints())
+    {
+        FatalErrorInFunction << "Size of field " << fld.size()
+            << " does not correspond to the number of points in the mesh "
+            << mesh.nPoints() << exit(FatalError);
+    }
+
+    syncTools::syncPointList
+    (
+        mesh,
+        fld,
+        weightedPosition::plusEqOp,     // combine op
+        pTraits<weightedPosition>::zero,// null value (not used)
+        pTraits<weightedPosition>::zero // transform class
+    );
+}
+
+
+void Foam::weightedPosition::syncPoints
+(
+    const polyMesh& mesh,
+    const labelUList& meshPoints,
+    List<weightedPosition>& fld
+)
+{
+    if (fld.size() != meshPoints.size())
+    {
+        FatalErrorInFunction << "Size of field " << fld.size()
+            << " does not correspond to the number of points supplied "
+            << meshPoints.size() << exit(FatalError);
+    }
+
+    syncTools::syncPointList
+    (
+        mesh,
+        meshPoints,
+        fld,
+        weightedPosition::plusEqOp,     // combine op
+        pTraits<weightedPosition>::zero,// null value (not used)
+        pTraits<weightedPosition>::zero // transform class
+    );
 }
 
 
