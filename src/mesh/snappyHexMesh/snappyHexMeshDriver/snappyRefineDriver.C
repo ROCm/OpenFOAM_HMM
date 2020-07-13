@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,6 +47,8 @@ License
 #include "fvMeshSubset.H"
 #include "interpolationTable.H"
 #include "snappyVoxelMeshDriver.H"
+#include "regionSplit.H"
+#include "removeCells.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -2869,6 +2871,142 @@ void Foam::snappyRefineDriver::mergePatchFaces
 }
 
 
+void Foam::snappyRefineDriver::deleteSmallRegions
+(
+    const refinementParameters& refineParams
+)
+{
+    const fvMesh& mesh = meshRefiner_.mesh();
+    const cellZoneMesh& czm = mesh.cellZones();
+
+    //const labelList zoneIDs
+    //(
+    //    meshRefiner_.getZones
+    //    (
+    //        List<surfaceZonesInfo::faceZoneType> fzTypes
+    //        ({
+    //            surfaceZonesInfo::BAFFLE,
+    //            surfaceZonesInfo::BOUNDARY,
+    //        });
+    //    )
+    //);
+    const labelList zoneIDs(identity(mesh.faceZones().size()));
+
+    // Get faceZone and patch(es) per face (or -1 if face not on faceZone)
+    labelList faceZoneID;
+    labelList ownPatch;
+    labelList neiPatch;
+    labelList nB;       // local count of faces per faceZone
+    meshRefiner_.getZoneFaces(zoneIDs, faceZoneID, ownPatch, neiPatch, nB);
+
+
+    // Mark all faces on outside of zones. Note: assumes that faceZones
+    // are consistent with the outside of cellZones ...
+
+    boolList isBlockedFace(mesh.nFaces(), false);
+    meshRefiner_.selectSeparatedCoupledFaces(isBlockedFace);
+
+    forAll(ownPatch, facei)
+    {
+        if (ownPatch[facei] != -1)
+        {
+            isBlockedFace[facei] = true;
+        }
+    }
+
+    // Map from cell to zone. Not that background cells are not -1 but
+    // cellZones.size()
+    labelList cellToZone(mesh.nCells(), czm.size());
+    for (const auto& cz : czm)
+    {
+        UIndirectList<label>(cellToZone, cz) = cz.index();
+    }
+
+    // Walk to split into regions
+    const regionSplit cellRegion(mesh, isBlockedFace);
+
+    // Count number of cells per zone and per region
+    labelList nCellsPerRegion(cellRegion.nRegions(), 0);
+    labelList regionToZone(cellRegion.nRegions(), -2);
+    labelList nCellsPerZone(czm.size()+1, 0);
+    forAll(cellRegion, celli)
+    {
+        const label regioni = cellRegion[celli];
+        const label zonei = cellToZone[celli];
+
+        // Zone for this region
+        regionToZone[regioni] = zonei;
+
+        nCellsPerRegion[regioni]++;
+        nCellsPerZone[zonei]++;
+    }
+    Pstream::listCombineGather(nCellsPerRegion, plusEqOp<label>());
+    Pstream::listCombineGather(regionToZone, maxEqOp<label>());
+    Pstream::listCombineGather(nCellsPerZone, plusEqOp<label>());
+
+
+    // Mark small regions
+    forAll(nCellsPerRegion, regioni)
+    {
+        const label zonei = regionToZone[regioni];
+
+        if
+        (
+            nCellsPerRegion[regioni]
+          < refineParams.minCellFraction()*nCellsPerZone[zonei]
+        )
+        {
+            Info<< "Deleting region " << regioni
+                << " (size " << nCellsPerRegion[regioni]
+                << ") of zone size " << nCellsPerZone[zonei]
+                << endl;
+
+            // Mark region to be deleted. 0 size (= global) should never
+            // occur.
+            nCellsPerRegion[regioni] = 0;
+        }
+    }
+
+    DynamicList<label> cellsToRemove(mesh.nCells()/128);
+    forAll(cellRegion, celli)
+    {
+        if (nCellsPerRegion[cellRegion[celli]] == 0)
+        {
+            cellsToRemove.append(celli);
+        }
+    }
+    const label nTotCellsToRemove = returnReduce
+    (
+        cellsToRemove.size(),
+        sumOp<label>()
+    );
+    if (nTotCellsToRemove > 0)
+    {
+        Info<< "Deleting " << nTotCellsToRemove
+            << " cells in small regions" << endl;
+
+        removeCells cellRemover(mesh);
+
+        cellsToRemove.shrink();
+        const labelList exposedFaces
+        (
+            cellRemover.getExposedFaces(cellsToRemove)
+        );
+        const labelList exposedPatch
+        (
+            UIndirectList<label>(ownPatch, exposedFaces)
+        );
+        (void)meshRefiner_.doRemoveCells
+        (
+            cellsToRemove,
+            exposedFaces,
+            exposedPatch,
+            cellRemover
+        );
+    }
+}
+
+
 void Foam::snappyRefineDriver::doRefine
 (
     const dictionary& refineDict,
@@ -3096,6 +3234,17 @@ void Foam::snappyRefineDriver::doRefine
     if (prepareForSnapping)
     {
         mergePatchFaces(mergeType, refineParams, motionDict);
+    }
+
+
+    if (refineParams.minCellFraction() > 0)
+    {
+        // Some small disconnected bits of mesh might remain since at
+        // this point faceZones have not been converted into e.g. baffles.
+        // We don't know whether e.g. the baffles are reset to be cyclicAMI
+        // thus reconnecting. For now check if there are any particularly
+        // small regions.
+        deleteSmallRegions(refineParams);
     }
 
 

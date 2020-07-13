@@ -94,6 +94,7 @@ Foam::refinementParameters::refinementParameters
     ),
     nErodeCellZone_(dict.getOrDefault<label>("nCellZoneErodeIter", 0)),
     nFilterIter_(dict.getOrDefault<label>("nFilterIter", 2)),
+    minCellFraction_(dict.getOrDefault<scalar>("minCellFraction", 0)),
     dryRun_(dryRun)
 {
     point locationInMesh;

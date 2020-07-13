@@ -244,15 +244,6 @@ private:
             labelList& minLevel
         ) const;
 
-        //- Remove cells. Put exposedFaces into exposedPatchIDs.
-        autoPtr<mapPolyMesh> doRemoveCells
-        (
-            const labelList& cellsToRemove,
-            const labelList& exposedFaces,
-            const labelList& exposedPatchIDs,
-            removeCells& cellRemover
-        );
-
         //- Get cells which are inside any closed surface. Note that
         //  all closed surfaces
         //  will have already been oriented to have keepPoint outside.
@@ -1336,6 +1327,16 @@ public:
                 const List<labelPair>& baffles
             );
 
+            //- Get per-face information (faceZone, master/slave patch)
+            void getZoneFaces
+            (
+                const labelList& zoneIDs,
+                labelList& faceZoneID,
+                labelList& ownPatch,
+                labelList& neiPatch,
+                labelList& nBaffles
+            ) const;
+
             //- Create baffles for faces on faceZones. Return created baffles
             //  (= pairs of faces) and corresponding faceZone
             autoPtr<mapPolyMesh> createZoneBaffles
@@ -1456,6 +1457,15 @@ public:
                 const pointField& locationsOutsideMesh,
                 const bool exitIfLeakPath,
                 const writer<scalar>& leakPathFormatter
+            );
+
+            //- Remove cells. Put exposedFaces into exposedPatchIDs.
+            autoPtr<mapPolyMesh> doRemoveCells
+            (
+                const labelList& cellsToRemove,
+                const labelList& exposedFaces,
+                const labelList& exposedPatchIDs,
+                removeCells& cellRemover
             );
 
             //- Split faces into two

@@ -715,6 +715,67 @@ Foam::List<Foam::labelPair> Foam::meshRefinement::subsetBaffles
 }
 
 
+void Foam::meshRefinement::getZoneFaces
+(
+    const labelList& zoneIDs,
+    labelList& faceZoneID,
+    labelList& ownPatch,
+    labelList& neiPatch,
+    labelList& nBaffles
+) const
+{
+    const faceZoneMesh& faceZones = mesh_.faceZones();
+
+    // Per (internal) face the patch related to the faceZone
+    ownPatch.setSize(mesh_.nFaces());
+    ownPatch= -1;
+    neiPatch.setSize(mesh_.nFaces());
+    neiPatch = -1;
+    faceZoneID.setSize(mesh_.nFaces());
+    faceZoneID = -1;
+    nBaffles.setSize(zoneIDs.size());
+    nBaffles = Zero;
+
+    forAll(zoneIDs, j)
+    {
+        label zoneI = zoneIDs[j];
+        const faceZone& fz = faceZones[zoneI];
+        const word& masterName = faceZoneToMasterPatch_[fz.name()];
+        label masterPatchI = mesh_.boundaryMesh().findPatchID(masterName);
+        const word& slaveName = faceZoneToSlavePatch_[fz.name()];
+        label slavePatchI = mesh_.boundaryMesh().findPatchID(slaveName);
+
+        if (masterPatchI == -1 || slavePatchI == -1)
+        {
+            FatalErrorInFunction
+                << "Problem: masterPatchI:" << masterPatchI
+                << " slavePatchI:" << slavePatchI << exit(FatalError);
+        }
+
+        forAll(fz, i)
+        {
+            label faceI = fz[i];
+            if (mesh_.isInternalFace(faceI))
+            {
+                if (fz.flipMap()[i])
+                {
+                    ownPatch[faceI] = slavePatchI;
+                    neiPatch[faceI] = masterPatchI;
+                }
+                else
+                {
+                    ownPatch[faceI] = masterPatchI;
+                    neiPatch[faceI] = slavePatchI;
+                }
+                faceZoneID[faceI] = zoneI;
+
+                nBaffles[j]++;
+            }
+        }
+    }
+}
+
+
 Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createZoneBaffles
 (
     const labelList& zoneIDs,
@@ -731,52 +792,12 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createZoneBaffles
         // Split internal faces on interface surfaces
         Info<< "Converting zoned faces into baffles ..." << endl;
 
-        // Per (internal) face the patch it should go into
-        labelList ownPatch(mesh_.nFaces(), -1);
-        labelList neiPatch(mesh_.nFaces(), -1);
-        labelList faceZoneID(mesh_.nFaces(), -1);
-
-        labelList nBaffles(zoneIDs.size(), Zero);
-
-        forAll(zoneIDs, j)
-        {
-            label zoneI = zoneIDs[j];
-
-            const faceZone& fz = faceZones[zoneI];
-
-            const word& masterName = faceZoneToMasterPatch_[fz.name()];
-            label masterPatchI = mesh_.boundaryMesh().findPatchID(masterName);
-            const word& slaveName = faceZoneToSlavePatch_[fz.name()];
-            label slavePatchI = mesh_.boundaryMesh().findPatchID(slaveName);
-
-            if (masterPatchI == -1 || slavePatchI == -1)
-            {
-                FatalErrorInFunction
-                    << "Problem: masterPatchI:" << masterPatchI
-                    << " slavePatchI:" << slavePatchI << exit(FatalError);
-            }
-
-            forAll(fz, i)
-            {
-                label faceI = fz[i];
-                if (mesh_.isInternalFace(faceI))
-                {
-                    if (fz.flipMap()[i])
-                    {
-                        ownPatch[faceI] = slavePatchI;
-                        neiPatch[faceI] = masterPatchI;
-                    }
-                    else
-                    {
-                        ownPatch[faceI] = masterPatchI;
-                        neiPatch[faceI] = slavePatchI;
-                    }
-                    faceZoneID[faceI] = zoneI;
-
-                    nBaffles[j]++;
-                }
-            }
-        }
+        // Get faceZone and patch(es) per face (or -1 if face not on faceZone)
+        labelList faceZoneID;
+        labelList ownPatch;
+        labelList neiPatch;
+        labelList nBaffles;
+        getZoneFaces(zoneIDs, faceZoneID, ownPatch, neiPatch, nBaffles);
 
         label nLocalBaffles = sum(nBaffles);
 

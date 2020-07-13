@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -112,6 +112,8 @@ class refinementParameters
         const label nErodeCellZone_;
 
         const label nFilterIter_;
+
+        const scalar minCellFraction_;
 
         const bool dryRun_;
 
@@ -233,6 +235,13 @@ public:
             label nFilterIter() const
             {
                 return nFilterIter_;
+            }
+
+            //- When are disconnected regions small. Fraction of overall size
+            //  of a zone or background. Default 0.
+            scalar minCellFraction() const
+            {
+                return minCellFraction_;
             }
 
 

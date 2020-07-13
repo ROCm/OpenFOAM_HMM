@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -231,6 +231,10 @@ class snappyRefineDriver
             const refinementParameters& refineParams,
             const dictionary& motionDict
         );
+
+        //- Optionally delete some small regions
+        void deleteSmallRegions(const refinementParameters&);
+
 
         //- No copy construct
         snappyRefineDriver(const snappyRefineDriver&) = delete;
