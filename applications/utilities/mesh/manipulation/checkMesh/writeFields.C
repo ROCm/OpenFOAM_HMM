@@ -616,6 +616,17 @@ void Foam::writeFields
     }
     if (selectedFields.found("faceZone"))
     {
+        // Determine for each face the zone index (scalar for ease of
+        // manipulation)
+        scalarField zoneID(mesh.nFaces(), -1);
+        const faceZoneMesh& czs = mesh.faceZones();
+        for (const auto& zone : czs)
+        {
+            UIndirectList<scalar>(zoneID, zone) = zone.index();
+        }
+
+
+        // Split into internal and boundary values
         surfaceScalarField faceZone
         (
             IOobject
@@ -632,10 +643,13 @@ void Foam::writeFields
             calculatedFvsPatchScalarField::typeName
         );
 
-        const faceZoneMesh& czs = mesh.faceZones();
-        for (const auto& zone : czs)
+        faceZone.primitiveFieldRef() =
+            SubField<scalar>(zoneID, mesh.nInternalFaces());
+        surfaceScalarField::Boundary& bfld = faceZone.boundaryFieldRef();
+        for (auto& pfld : bfld)
         {
-            UIndirectList<scalar>(faceZone, zone) = zone.index();
+            const fvPatch& fvp = pfld.patch();
+            pfld == SubField<scalar>(zoneID, fvp.size(), fvp.start());
         }
 
         //faceZone.correctBoundaryConditions();
