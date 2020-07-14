@@ -98,12 +98,7 @@ void* Foam::codedBase::loadLibrary
 {
     // Avoid compilation by loading an existing library
 
-    void* handle =
-    (
-        !libPath.empty() && libs().open(libPath, false)
-      ? libs().findLibrary(libPath)
-      : nullptr
-    );
+    void* handle = libs().open(libPath, false);
 
     if (!handle)
     {
@@ -115,25 +110,9 @@ void* Foam::codedBase::loadLibrary
     // Manual execution of code after loading.
     // This is mandatory for codedBase.
 
-    void* rawSymbol = dlSymFind(handle, funcName);
+    const bool ok = libs().loadHook(handle, funcName, false);
 
-    if (rawSymbol)
-    {
-        loaderType fun = reinterpret_cast<loaderType>(rawSymbol);
-
-        if (fun)
-        {
-            (*fun)(true);    // force load
-        }
-        else
-        {
-            FatalIOErrorInFunction(context.dict())
-                << "Failed symbol lookup " << funcName.c_str() << nl
-                << "from " << libPath << nl
-                << exit(FatalIOError);
-        }
-    }
-    else
+    if (!ok)
     {
         FatalIOErrorInFunction(context.dict())
             << "Failed symbol lookup " << funcName.c_str() << nl
@@ -160,12 +139,7 @@ void Foam::codedBase::unloadLibrary
     const dynamicCodeContext& context
 ) const
 {
-    void* handle =
-    (
-        !libPath.empty() && libs().open(libPath, false)
-      ? libs().findLibrary(libPath)
-      : nullptr
-    );
+    void* handle = libs().open(libPath, false);
 
     if (!handle)
     {
@@ -175,23 +149,13 @@ void Foam::codedBase::unloadLibrary
     // Manual execution of code before unloading.
     // This is mandatory for codedBase.
 
-    void* rawSymbol = dlSymFind(handle, funcName);
+    const bool ok = libs().unloadHook(handle, funcName, false);
 
-    if (rawSymbol)
+    if (!ok)
     {
-        loaderType fun = reinterpret_cast<loaderType>(rawSymbol);
-
-        if (fun)
-        {
-            (*fun)(false);    // force unload
-        }
-        else
-        {
-            FatalIOErrorInFunction(context.dict())
-                << "Failed symbol lookup " << funcName.c_str() << nl
-                << "from " << libPath << nl
-                << exit(FatalIOError);
-        }
+        IOWarningInFunction(context.dict())
+            << "Failed looking up symbol " << funcName << nl
+            << "from " << libPath << nl;
     }
 
     if (!libs().close(libPath, false))
@@ -389,7 +353,7 @@ void Foam::codedBase::updateLibrary
     unloadLibrary
     (
         oldLibPath_,
-        dynamicCode::libraryBaseName(oldLibPath_),
+        dlLibraryTable::basename(oldLibPath_),
         context
     );
 

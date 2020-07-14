@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +47,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class dynamicCodeContext;
 class ISstream;
 class OSstream;
@@ -60,10 +60,12 @@ class SHA1Digest;
 class dynamicCode
 {
 public:
+
     typedef Tuple2<fileName, string> fileAndContent;
 
 private:
-    // Private data
+
+    // Private Data
 
         //- Root for dynamic code compilation
         fileName codeRoot_;
@@ -104,7 +106,7 @@ private:
 
 protected:
 
-    // Static data members
+    // Static Data Members
 
         //- Root of the LIB target for Make/files
         static const char* const libTargetRoot;
@@ -151,7 +153,7 @@ protected:
 
 public:
 
-    // Static data members
+    // Static Data Members
 
         //- Name of the code template environment variable
         //  Used to located the codeTemplateName
@@ -170,15 +172,12 @@ public:
         //- Check security for creating dynamic code
         static void checkSecurity(const char* title, const dictionary&);
 
-        //- Return the library basename without leading 'lib' or trailing '.so'
-        static word libraryBaseName(const fileName& libPath);
-
 
     // Constructors
 
         //- Construct for a specified code name and code directory name
         //  Defaults to using the code name for the code directory name
-        dynamicCode
+        explicit dynamicCode
         (
             const word& codeName,
             const word& codeDirName = ""

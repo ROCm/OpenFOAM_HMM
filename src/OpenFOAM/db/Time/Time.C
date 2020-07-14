@@ -471,7 +471,7 @@ Foam::Time::Time
 
     if (enableLibs)
     {
-        libs_.open(controlDict_, "libs");
+        libs_.open("libs", controlDict_);
     }
 
     // Explicitly set read flags on objectRegistry so anything constructed
@@ -553,12 +553,9 @@ Foam::Time::Time
     // Libraries
     //
     // * enable by default unless '-no-libs' option was used
-    if (!args.found("no-libs"))
+    if (enableLibs && !args.found("no-libs"))
     {
-        if (enableLibs)
-        {
-            libs_.open(controlDict_, "libs");
-        }
+        libs_.open("libs", controlDict_);
     }
 
     // Explicitly set read flags on objectRegistry so anything constructed
@@ -634,7 +631,7 @@ Foam::Time::Time
 
     if (enableLibs)
     {
-        libs_.open(controlDict_, "libs");
+        libs_.open("libs", controlDict_);
     }
 
 
@@ -708,7 +705,7 @@ Foam::Time::Time
 
     if (enableLibs)
     {
-        libs_.open(controlDict_, "libs");
+        libs_.open("libs", controlDict_);
     }
 
     setMonitoring(); // for profiling etc

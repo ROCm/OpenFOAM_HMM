@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,13 +73,6 @@ class codedBase
 
         //- Previously loaded library
         mutable fileName oldLibPath_;
-
-
-    // Data Types
-
-        //- Global loader/unloader function type
-        //  Called with true on load, false on unload.
-        typedef void (*loaderType)(bool);
 
 
     // Private Member Functions

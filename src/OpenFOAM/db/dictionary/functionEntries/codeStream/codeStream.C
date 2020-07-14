@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -145,18 +145,13 @@ Foam::functionEntries::codeStream::getFunction
 
         if (isA<baseIOdictionary>(topDict))
         {
-            // Cached access to dl libs. Guarantees clean up upon destruction
-            // of Time.
-            dlLibraryTable& dlLibs = libs(parentDict);
-            if (dlLibs.open(libPath, false))
-            {
-                lib = dlLibs.findLibrary(libPath);
-            }
+            // Cached access to libs, with cleanup upon termination
+            lib = libs(parentDict).open(libPath, false);
         }
         else
         {
             // Uncached opening of libPath. Do not complain if cannot be loaded
-            lib = dlOpen(libPath, false);
+            lib = Foam::dlOpen(libPath, false);
         }
     }
 
@@ -299,14 +294,13 @@ Foam::functionEntries::codeStream::getFunction
 
         if (isA<baseIOdictionary>(topDict))
         {
-            // Cached access to dl libs. Guarantees clean up upon destruction
-            // of Time.
-            dlLibraryTable& dlLibs = libs(parentDict);
-
+            // Cached access to libs, with cleanup upon termination
             DebugPout
                 << "Opening cached dictionary:" << libPath << endl;
 
-            if (!dlLibs.open(libPath, false))
+            lib = libs(parentDict).open(libPath, false);
+
+            if (!lib)
             {
                 FatalIOErrorInFunction(parentDict)
                     << "Failed loading library " << libPath << nl
@@ -314,8 +308,6 @@ Foam::functionEntries::codeStream::getFunction
                     << " in system/controlDict?"
                     << exit(FatalIOError);
             }
-
-            lib = dlLibs.findLibrary(libPath);
         }
         else
         {
@@ -323,7 +315,7 @@ Foam::functionEntries::codeStream::getFunction
             DebugPout
                 << "Opening uncached dictionary:" << libPath << endl;
 
-            lib = dlOpen(libPath, true);
+            lib = Foam::dlOpen(libPath, true);
         }
     }
 
@@ -346,7 +338,7 @@ Foam::functionEntries::codeStream::getFunction
     streamingFunctionType function =
         reinterpret_cast<streamingFunctionType>
         (
-            dlSym(lib, dynCode.codeName())
+            Foam::dlSym(lib, dynCode.codeName())
         );
 
 

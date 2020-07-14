@@ -29,13 +29,130 @@ License
 #include "dlLibraryTable.H"
 #include "OSspecific.H"
 #include "IOstreams.H"
-#include "int.H"
+
+// Could be constexpr in the header if required
+#ifdef __APPLE__
+    #define EXT_SO  "dylib"
+#elif defined _WIN32
+    #define EXT_SO  "dll"
+#else
+    #define EXT_SO  "so"
+#endif
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
     defineTypeNameAndDebug(dlLibraryTable, 0);
+}
+
+std::unique_ptr<Foam::dlLibraryTable> Foam::dlLibraryTable::global_(nullptr);
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::word Foam::dlLibraryTable::basename(const fileName& libPath)
+{
+    word libName(libPath.nameLessExt());
+    libName.removeStart("lib");  // Remove leading 'lib' from name
+    return libName;
+}
+
+
+Foam::word Foam::dlLibraryTable::fullname(word libName)
+{
+    if (libName.empty())
+    {
+        return libName;
+    }
+
+    // Add leading 'lib' and trailing '.so'
+    return "lib" + libName.ext(EXT_SO);
+}
+
+
+Foam::dlLibraryTable& Foam::dlLibraryTable::libs()
+{
+    if (!global_)
+    {
+        global_.reset(new dlLibraryTable{});
+    }
+
+    return *global_;
+}
+
+
+bool Foam::dlLibraryTable::functionHook
+(
+    const bool load,
+    void* handle,
+    const std::string& funcName,
+    const bool verbose,
+    const std::string& context
+)
+{
+    if (!handle || funcName.empty())
+    {
+        return false;
+    }
+
+    bool ok = false;
+
+    void* symbol = Foam::dlSymFind(handle, funcName);
+
+    if (symbol)
+    {
+        // Execute loader/unloader code
+        try
+        {
+            loaderType fun = reinterpret_cast<loaderType>(symbol);
+
+            if (fun)
+            {
+                (*fun)(load);
+                ok = true;
+            }
+        }
+        catch (...)
+        {}
+    }
+
+    if (verbose && !ok)
+    {
+        auto& err = WarningInFunction
+            << "Failed symbol lookup " << funcName.c_str() << nl;
+
+        if (!context.empty())
+        {
+            err << "from " << context.c_str() << nl;
+        }
+    }
+
+    return ok;
+}
+
+
+bool Foam::dlLibraryTable::loadHook
+(
+    void* handle,
+    const std::string& funcName,
+    const bool verbose,
+    const std::string& context
+)
+{
+    return functionHook(true, handle, funcName, verbose, context);
+}
+
+
+bool Foam::dlLibraryTable::unloadHook
+(
+    void* handle,
+    const std::string& funcName,
+    const bool verbose,
+    const std::string& context
+)
+{
+    return functionHook(false, handle, funcName, verbose, context);
 }
 
 
@@ -84,12 +201,37 @@ Foam::dlLibraryTable::dlLibraryTable
 
 Foam::dlLibraryTable::dlLibraryTable
 (
-    const dictionary& dict,
-    const word& libsEntry
+    std::initializer_list<fileName> libNames,
+    bool verbose
 )
 {
-    dlLibraryTable::open(dict, libsEntry);
+    dlLibraryTable::open(libNames, verbose);
 }
+
+
+Foam::dlLibraryTable::dlLibraryTable
+(
+    const word& libsEntry,
+    const dictionary& dict,
+    bool verbose
+)
+{
+    fileNameList libNames;
+    dict.readIfPresent(libsEntry, libNames);
+    dlLibraryTable::open(libNames, verbose);
+}
+
+
+Foam::dlLibraryTable::dlLibraryTable
+(
+    const dictionary& dict,
+    const word& libsEntry,
+    bool verbose
+
+)
+:
+    dlLibraryTable(libsEntry, dict, verbose)
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -129,6 +271,30 @@ Foam::label Foam::dlLibraryTable::size() const
     }
 
     return nLoaded;
+}
+
+
+Foam::List<Foam::fileName> Foam::dlLibraryTable::loaded() const
+{
+    List<fileName> list(libNames_.size());
+
+    label nLoaded = 0;
+
+    forAll(libNames_, i)
+    {
+        void* ptr = libPtrs_[i];
+        const fileName& libName = libNames_[i];
+
+        if (ptr != nullptr && !libName.empty())
+        {
+            list[nLoaded] = libName;
+            ++nLoaded;
+        }
+    }
+
+    list.resize(nLoaded);
+
+    return list;
 }
 
 
@@ -231,12 +397,14 @@ bool Foam::dlLibraryTable::open(bool verbose)
 
     forAll(libPtrs_, i)
     {
+        void* ptr = libPtrs_[i];
         const fileName& libName = libNames_[i];
 
-        if (libPtrs_[i] == nullptr && !libName.empty())
+        if (ptr == nullptr && !libName.empty())
         {
             ++nCand;
-            void* ptr = openLibrary(libName, verbose);
+
+            ptr = openLibrary(libName, verbose);
 
             if (ptr)
             {
@@ -260,6 +428,7 @@ void* Foam::dlLibraryTable::open
     bool verbose
 )
 {
+    // Handles empty name silently
     void* ptr = openLibrary(libName, verbose);
 
     if (ptr)
@@ -278,7 +447,34 @@ bool Foam::dlLibraryTable::open
     bool verbose
 )
 {
-    label nOpen = 0;
+    decltype(libNames.size()) nOpen = 0;
+
+    for (const fileName& libName : libNames)
+    {
+        const label index = libNames_.find(libName);
+
+        if (index >= 0 && libPtrs_[index] != nullptr)
+        {
+            // Already known and opened
+            ++nOpen;
+        }
+        else if (dlLibraryTable::open(libName, verbose))
+        {
+            ++nOpen;
+        }
+    }
+
+    return nOpen && nOpen == libNames.size();
+}
+
+
+bool Foam::dlLibraryTable::open
+(
+    std::initializer_list<fileName> libNames,
+    bool verbose
+)
+{
+    decltype(libNames.size()) nOpen = 0;
 
     for (const fileName& libName : libNames)
     {
@@ -307,12 +503,18 @@ bool Foam::dlLibraryTable::close
 {
     const label index = libNames_.rfind(libName);
 
-    if (index < 0)
+    if (index < 0 || libName.empty())
     {
         return false;
     }
 
     void* ptr = libPtrs_[index];
+
+    if (ptr == nullptr)
+    {
+        libNames_[index].clear();
+        return false;
+    }
 
     DebugInFunction
         << "Closing " << libName
@@ -323,7 +525,23 @@ bool Foam::dlLibraryTable::close
     libPtrs_[index] = nullptr;
     libNames_[index].clear();
 
-    if (!ok && verbose)
+    if (ok)
+    {
+        // From man dlopen(3)
+        // ...
+        // a dynamically loaded shared object is not deallocated until
+        // dlclose() has been called on it as many times as dlopen()
+        // has succeeded on it.
+
+        // Handle aliased library names
+        for (label idx = 0; (idx = libPtrs_.find(ptr, idx)) >= 0; ++idx)
+        {
+            (void) Foam::dlClose(ptr);
+            libPtrs_[idx] = nullptr;
+            libNames_[idx].clear();
+        }
+    }
+    else if (verbose)
     {
         WarningInFunction
             << "Could not close " << libName << endl;
@@ -337,7 +555,7 @@ void* Foam::dlLibraryTable::findLibrary(const fileName& libName)
 {
     const label index = libNames_.rfind(libName);
 
-    if (index < 0)
+    if (index < 0 || libName.empty())
     {
         return nullptr;
     }
@@ -348,24 +566,27 @@ void* Foam::dlLibraryTable::findLibrary(const fileName& libName)
 
 bool Foam::dlLibraryTable::open
 (
+    const word& libsEntry,
+    const dictionary& dict,
+    bool verbose
+)
+{
+    fileNameList libNames;
+    return
+    (
+        dict.readIfPresent(libsEntry, libNames)
+     && dlLibraryTable::open(libNames, verbose)
+    );
+}
+
+
+bool Foam::dlLibraryTable::open
+(
     const dictionary& dict,
     const word& libsEntry
 )
 {
-    fileNameList libNames;
-    dict.readIfPresent(libsEntry, libNames);
-
-    label nOpen = 0;
-
-    for (const fileName& libName : libNames)
-    {
-        if (dlLibraryTable::open(libName))  // verbose = true
-        {
-            ++nOpen;
-        }
-    }
-
-    return nOpen && nOpen == libNames.size();
+    return dlLibraryTable::open(libsEntry, dict, true); // verbose = true
 }
 
 
@@ -381,7 +602,7 @@ Foam::Ostream& Foam::operator<<
 
     os << token::BEGIN_LIST << nl;
 
-    // Lengths of pointers/names are guaranteed interally to be identical
+    // Lengths of pointers/names are guaranteed internally to be identical
     forAll(tbl.pointers(), i)
     {
         const void* ptr = tbl.pointers()[i];

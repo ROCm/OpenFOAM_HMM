@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,6 @@ License
 
 #include "dlLibraryTable.H"
 #include "dictionary.H"
-#include "fileNameList.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -37,35 +36,30 @@ bool Foam::dlLibraryTable::open
 (
     const dictionary& dict,
     const word& libsEntry,
-    const TablePtr& tablePtr
+    const TablePtr& tablePtr,
+    bool verbose
 )
 {
-    fileNameList libNames;
+    List<fileName> libNames;
     dict.readIfPresent(libsEntry, libNames);
 
     label nOpen = 0;
 
     for (const fileName& libName : libNames)
     {
-        const label nEntries = (tablePtr ? tablePtr->size() : 0);
+        const label nEntries = (tablePtr ? tablePtr->size() : -1);
 
-        if (dlLibraryTable::open(libName))
+        if (dlLibraryTable::open(libName, verbose))
         {
             ++nOpen;
 
-            if (debug && (!tablePtr || tablePtr->size() <= nEntries))
+            if (debug && tablePtr != nullptr && tablePtr->size() <= nEntries)
             {
                 WarningInFunction
                     << "library " << libName
                     << " did not introduce any new entries"
                     << nl << endl;
             }
-        }
-        else
-        {
-            WarningInFunction
-                << "Could not open library " << libName
-                << nl << endl;
         }
     }
 

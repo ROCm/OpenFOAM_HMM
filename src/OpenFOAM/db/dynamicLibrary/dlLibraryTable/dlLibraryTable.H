@@ -30,6 +30,10 @@ Class
 Description
     A table of dynamically loaded libraries.
 
+SeeAlso
+    Foam::dlOpen
+    Foam::dlClose
+
 SourceFiles
     dlLibraryTable.C
     dlLibraryTableTemplates.C
@@ -40,7 +44,9 @@ SourceFiles
 #define dlLibraryTable_H
 
 #include "DynamicList.H"
+#include "fileName.H"
 #include "InfoProxy.H"
+#include <memory>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,14 +63,34 @@ Ostream& operator<<(Ostream& os, const InfoProxy<dlLibraryTable>& info);
 
 class dlLibraryTable
 {
+    // Static Data
+
+        //- Global singleton of dynamic libraries
+        static std::unique_ptr<dlLibraryTable> global_;
+
+
     // Private Data
 
+        //- Pointers to the loaded libraries
         DynamicList<void*> libPtrs_;
 
+        //- Names of loaded libraries, or of libraries to be loaded
         DynamicList<fileName> libNames_;
 
 
     // Private Member Functions
+
+        //- Load/unload hook.
+        //  \return true if the function was found and executed
+        static bool functionHook
+        (
+            const bool load,    //!< true = on-load, false = on-unload
+            void* handle,       //!< library handle
+            const std::string& funcName,
+            const bool verbose,
+            const std::string& context
+        );
+
 
         //- Open specified library name and return pointer.
         //  Warning messages, but no additional side-effects.
@@ -73,8 +99,16 @@ class dlLibraryTable
 
 public:
 
-    // Declare name of the class and its debug switch
+    // Public Data Types
+
+        //- Global loader/unloader function type (C-linkage)
+        //  Called with true on load, false on unload.
+        typedef void (*loaderType)(bool);
+
+
+    //- Declare name of the class and its debug switch
     ClassName("dlLibraryTable");
+
 
     // Generated Methods
 
@@ -96,20 +130,80 @@ public:
 
     // Constructors
 
-        //- Open specified libraries. Ignores duplicate names.
+        //- Open specified libraries, warn by default if problems occur
+        //  Ignores duplicate names.
         explicit dlLibraryTable
         (
             const UList<fileName>& libNames,
             bool verbose = true
         );
 
-        //- Open all libraries listed in the 'libsEntry' entry in the
-        //- given dictionary. Verbose = true.
-        dlLibraryTable(const dictionary& dict, const word& libsEntry);
+        //- Open specified libraries, warn by default if problems occur
+        //  Ignores duplicate names.
+        explicit dlLibraryTable
+        (
+            std::initializer_list<fileName> libNames,
+            bool verbose = true
+        );
+
+        //- Open libraries listed in 'libsEntry' entry in the dictionary,
+        //- warn by default if problems occur
+        dlLibraryTable
+        (
+            const word& libsEntry,
+            const dictionary& dict,
+            bool verbose = true
+        );
+
+        //- Open libraries listed in 'libsEntry' entry in the dictionary,
+        //- warn by default if problems occur
+        dlLibraryTable
+        (
+            const dictionary& dict,
+            const word& libsEntry,
+            bool verbose = true
+        );
 
 
     //- Destructor. Closes all libraries loaded by the table.
     ~dlLibraryTable();
+
+
+    // Static Member Functions
+
+        //- Library basename without leading 'lib' or trailing '.so'
+        static word basename(const fileName& libPath);
+
+        //- Library fullname, prefix with 'lib', suffix with '.so'
+        //  \note the suffix is system-dependent
+        static word fullname(word libName);
+
+        //- Table of global libraries
+        static dlLibraryTable& libs();
+
+        //- Low-level interface to execute global "void funcName(true)"
+        //- from the library, typically for additional loading.
+        //  If called, it should be the first step after opening a library.
+        //  \return true if the function was found and executed
+        static bool loadHook
+        (
+            void* handle,
+            const std::string& funcName,
+            const bool verbose = false,
+            const std::string& context = "" //!< Calling context for warnings
+        );
+
+        //- Low-level interface to execute global "void funcName(false)"
+        //- from the library, typically for unloading.
+        //  If called, it should be the last step before closing a library.
+        //  \return true if the function was found and executed
+        static bool unloadHook
+        (
+            void* handle,
+            const std::string& funcName,
+            const bool verbose = false,
+            const std::string& context = "" //!< Calling context for warnings
+        );
 
 
     // Member Functions
@@ -119,6 +213,9 @@ public:
 
         //- The number of libraries loaded by the table
         label size() const;
+
+        //- Names of the libraries in use
+        List<fileName> loaded() const;
 
         //- Names of the libraries in use, or requested
         const UList<fileName>& names() const
@@ -147,21 +244,41 @@ public:
         //- These names will normally have been added with the append() method.
         bool open(bool verbose = true);
 
-        //- Open the named library, optionally warn if problems occur
+        //- Open the named library, warn by default if problems occur.
+        //  An empty name is a silent no-op and always returns nullptr.
+        //  \return a pointer to the library opened, or nullptr on failure.
         void* open(const fileName& libName, bool verbose = true);
 
-        //- Open the named libraries, optionally warn if problems occur
+        //- Open the named libraries, warn by default if problems occur.
         //  Ignores duplicate names.
         bool open(const UList<fileName>& libNames, bool verbose = true);
 
+        //- Open the named libraries, warn by default if problems occur.
+        //  Ignores duplicate names.
+        bool open
+        (
+            std::initializer_list<fileName> libNames,
+            bool verbose = true
+        );
+
         //- Close the named library, optionally warn if problems occur
+        //  Using an empty name is a no-op and always returns false.
         bool close(const fileName& libName, bool verbose = true);
 
         //- Find the handle of the named library
+        //  Using an empty name is a no-op and always returns nullptr.
         void* findLibrary(const fileName& libName);
 
-        //- Open all libraries listed in the 'libsEntry' entry in the
-        //- given dictionary.
+        //- Open libraries listed in the 'libsEntry' entry in the dictionary.
+        bool open
+        (
+            const word& libsEntry,
+            const dictionary& dict,
+            bool verbose = true
+        );
+
+        //- Open libraries listed in the 'libsEntry' entry in the dictionary.
+        //  Verbose = true
         bool open(const dictionary& dict, const word& libsEntry);
 
         //- Open all libraries listed in the 'libsEntry' entry in the
@@ -172,7 +289,8 @@ public:
         (
             const dictionary& dict,
             const word& libsEntry,
-            const TablePtr& tablePtr
+            const TablePtr& tablePtr,
+            bool verbose = true
         );
 
 
