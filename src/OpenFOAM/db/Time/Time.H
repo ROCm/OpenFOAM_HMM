@@ -130,14 +130,14 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Profiling trigger for time-loop (for run, loop)
         mutable std::unique_ptr<profilingTrigger> loopProfiling_;
 
-        //- Any loaded dynamic libraries. Make sure to construct before
-        //  reading controlDict.
-        dlLibraryTable libs_;
+        //- Any loaded dynamic libraries
+        //  Construct before reading controlDict
+        mutable dlLibraryTable libs_;
 
         //- The controlDict
         unwatchedIOdictionary controlDict_;
@@ -145,7 +145,7 @@ private:
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         label startTimeIndex_;
 
@@ -502,14 +502,8 @@ public:
                 return functionObjects_;
             }
 
-            //- External access to the loaded libraries
-            const dlLibraryTable& libs() const
-            {
-                return libs_;
-            }
-
-            //- External access to the loaded libraries
-            dlLibraryTable& libs()
+            //- Mutable access to the loaded dynamic libraries
+            dlLibraryTable& libs() const
             {
                 return libs_;
             }

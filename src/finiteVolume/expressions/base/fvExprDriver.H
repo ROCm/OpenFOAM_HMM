@@ -69,7 +69,6 @@ SourceFiles
 #include "pointMesh.H"
 #include "volFields.H"
 #include "topoSetSource.H"
-#include "dlLibraryTable.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -117,9 +116,6 @@ class fvExprDriver
 
         //- The name of the other mesh (if it is to be required)
         word otherMeshName_;
-
-        //- Additional libraries
-        dlLibraryTable libs_;
 
         //- Writing and restoring
         autoPtr<exprDriverWriter> writer_;

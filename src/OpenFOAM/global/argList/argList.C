@@ -854,8 +854,8 @@ Foam::argList::argList
                 if (strcmp(optName, "lib") == 0)
                 {
                     // The '-lib' option:
-                    // Append name(s) to libs_ for later opening
-                    libs_.append(this->getList<fileName>(argi));
+                    // Append name(s) to libs for later opening
+                    libs().append(this->getList<fileName>(argi));
                 }
                 else if (strcmp(optName, "debug-switch") == 0)
                 {
@@ -1066,8 +1066,8 @@ void Foam::argList::parse
             jobInfo.add("foamBuild", build);
         }
 
-        // Load additional libraries
-        libs_.open(bannerEnabled());
+        // Load additional libraries (verbosity according to banner setting)
+        libs().open(bannerEnabled());
     }
 
 
@@ -1253,7 +1253,7 @@ void Foam::argList::parse
 
                 // Disable any parallel comms happening inside the fileHandler
                 // since we are on master. This can happen e.g. inside
-                // the masterUncollated/collated handler. 
+                // the masterUncollated/collated handler.
                 const bool oldParRun = Pstream::parRun();
                 Pstream::parRun() = false;
 

@@ -141,7 +141,7 @@ bool Foam::dynamicCode::resolveTemplates
     DynamicList<fileName>& badFiles
 )
 {
-    // Try to get template from FOAM_CODESTREAM_TEMPLATES
+    // Try to get template from FOAM_CODE_TEMPLATES
     const fileName templateDir(Foam::getEnv(codeTemplateEnvName));
 
     bool allOkay = true;

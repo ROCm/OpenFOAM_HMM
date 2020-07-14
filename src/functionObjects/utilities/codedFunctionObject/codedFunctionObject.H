@@ -60,6 +60,7 @@ Usage
         #{
             // Lookup U
             const volVectorField& U = mesh().lookupObject<volVectorField>("U");
+
             // Write
             mag(U)().write();
         #};
@@ -99,7 +100,7 @@ class codedFunctionObject
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Input dictionary
         dictionary dict_;
@@ -118,7 +119,7 @@ protected:
 
     // Protected Member Functions
 
-        //- Get the loaded dynamic libraries
+        //- Mutable access to the loaded dynamic libraries
         virtual dlLibraryTable& libs() const;
 
         //- Adapt the context for the current object

@@ -142,7 +142,7 @@ class argList
         HashTable<string> options_;
 
         //- Additional libraries
-        dlLibraryTable libs_;
+        mutable dlLibraryTable libs_;
 
         word executable_;
         fileName rootPath_;
@@ -346,11 +346,8 @@ public:
         //- Return the ParRunControl
         inline const ParRunControl& parRunControl() const;
 
-        //- Access to the loaded libraries
-        inline const dlLibraryTable& libs() const;
-
-        //- Access to the loaded libraries
-        inline dlLibraryTable& libs();
+        //- Mutable access to the loaded dynamic libraries
+        inline dlLibraryTable& libs() const;
 
         //- The number of arguments
         inline label size() const noexcept;

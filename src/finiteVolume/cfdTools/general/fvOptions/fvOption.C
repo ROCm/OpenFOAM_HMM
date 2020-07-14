@@ -79,7 +79,7 @@ Foam::autoPtr<Foam::fv::option> Foam::fv::option::New
     Info<< indent
         << "Selecting finite volume options type " << modelType << endl;
 
-    const_cast<Time&>(mesh.time()).libs().open
+    mesh.time().libs().open
     (
         coeffs,
         "libs",

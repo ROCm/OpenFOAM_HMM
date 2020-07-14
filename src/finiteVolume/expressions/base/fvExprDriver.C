@@ -112,7 +112,6 @@ Foam::expressions::fvExprDriver::fvExprDriver
     storedVariables_(),
     specialVariablesIndex_(-1),
     otherMeshName_(),
-    libs_(),
     writer_(nullptr)
 {}
 
@@ -128,7 +127,6 @@ Foam::expressions::fvExprDriver::fvExprDriver
     storedVariables_(rhs.storedVariables_),
     specialVariablesIndex_(rhs.specialVariablesIndex_),
     otherMeshName_(),
-    libs_(),
     writer_(nullptr)
 {}
 
@@ -165,12 +163,15 @@ bool Foam::expressions::fvExprDriver::readDict
 {
     expressions::exprDriver::readDict(dict);
 
-    // wordList plugins;
+    // fileNameList plugins;
     // if (dict.readIfPresent("functionPlugins", plugins))
     // {
-    //     for (const word& plugin : plugins)
+    //     for (const fileName& libName : plugins)
     //     {
-    //         libs_.open("libswak" + plugin + "FunctionPlugin.so");
+    //         this->runTime().libs().open
+    //         (
+    //             "libswak" + libName + "FunctionPlugin"  // verbose = true
+    //         );
     //     }
     // }
 

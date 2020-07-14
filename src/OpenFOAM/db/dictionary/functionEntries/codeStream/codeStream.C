@@ -73,7 +73,7 @@ Foam::dlLibraryTable& Foam::functionEntries::codeStream::libs
     (
         dict.topDict()
     );
-    return const_cast<Time&>(d.time()).libs();
+    return d.time().libs();
 }
 
 

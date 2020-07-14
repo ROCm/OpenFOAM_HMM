@@ -771,7 +771,7 @@ bool Foam::functionObjectList::read()
 
         addProfiling(fo, "functionObjects::read");
 
-        const_cast<Time&>(time_).libs().open
+        time_.libs().open
         (
             functionsDict,
             "libs",

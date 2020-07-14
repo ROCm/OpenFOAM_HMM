@@ -106,7 +106,7 @@ class codedFixedValuePointPatchField
     public fixedValuePointPatchField<Type>,
     protected codedBase
 {
-    // Private data
+    // Private Data
 
         //- Dictionary contents for the boundary condition
         mutable dictionary dict_;
@@ -120,7 +120,7 @@ class codedFixedValuePointPatchField
 
         const IOdictionary& dict() const;
 
-        //- Get the loaded dynamic libraries
+        //- Mutable access to the loaded dynamic libraries
         virtual dlLibraryTable& libs() const;
 
         //- Adapt the context for the current object

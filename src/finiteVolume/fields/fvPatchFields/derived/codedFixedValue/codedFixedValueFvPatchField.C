@@ -66,7 +66,7 @@ const Foam::IOdictionary& Foam::codedFixedValueFvPatchField<Type>::dict() const
 template<class Type>
 Foam::dlLibraryTable& Foam::codedFixedValueFvPatchField<Type>::libs() const
 {
-    return const_cast<dlLibraryTable&>(this->db().time().libs());
+    return this->db().time().libs();
 }
 
 

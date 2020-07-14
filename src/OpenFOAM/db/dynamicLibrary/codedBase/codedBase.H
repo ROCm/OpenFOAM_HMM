@@ -49,6 +49,7 @@ SourceFiles
 
 #include "dictionary.H"
 #include "dynamicCodeContext.H"
+#include "fileName.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -100,12 +101,6 @@ class codedBase
             const dynamicCodeContext& context
         ) const;
 
-        //- No copy construct
-        codedBase(const codedBase&) = delete;
-
-        //- No copy assignment
-        void operator=(const codedBase&) = delete;
-
 
 protected:
 
@@ -141,7 +136,7 @@ protected:
         //- or use the codeDict() to generate one
         void updateLibrary(const word& name) const;
 
-        //- Get the loaded dynamic libraries
+        //- Mutable access to the loaded dynamic libraries
         virtual dlLibraryTable& libs() const = 0;
 
         //- Adapt the context for the current object
@@ -161,6 +156,13 @@ protected:
         virtual const dictionary& codeDict() const = 0;
 
 
+        //- No copy construct
+        codedBase(const codedBase&) = delete;
+
+        //- No copy assignment
+        void operator=(const codedBase&) = delete;
+
+
 public:
 
     //- Runtime type information
@@ -169,7 +171,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         codedBase() = default;
 
 

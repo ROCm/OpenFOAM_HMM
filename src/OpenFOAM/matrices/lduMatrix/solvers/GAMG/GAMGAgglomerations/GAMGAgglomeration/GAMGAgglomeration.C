@@ -308,7 +308,7 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
             controlDict.getOrDefault<word>("agglomerator", "faceAreaPair")
         );
 
-        const_cast<Time&>(mesh.thisDb().time()).libs().open
+        mesh.thisDb().time().libs().open
         (
             controlDict,
             "geometricGAMGAgglomerationLibs",
@@ -362,7 +362,7 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
             controlDict.getOrDefault<word>("agglomerator", "faceAreaPair")
         );
 
-        const_cast<Time&>(mesh.thisDb().time()).libs().open
+        mesh.thisDb().time().libs().open
         (
             controlDict,
             "algebraicGAMGAgglomerationLibs",
@@ -408,7 +408,7 @@ Foam::autoPtr<Foam::GAMGAgglomeration> Foam::GAMGAgglomeration::New
         controlDict.getOrDefault<word>("agglomerator", "faceAreaPair")
     );
 
-    const_cast<Time&>(mesh.thisDb().time()).libs().open
+    mesh.thisDb().time().libs().open
     (
         controlDict,
         "geometricGAMGAgglomerationLibs",
