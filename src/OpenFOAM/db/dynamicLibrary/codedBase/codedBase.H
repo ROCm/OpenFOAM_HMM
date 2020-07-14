@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,6 +49,7 @@ SourceFiles
 
 #include "dictionary.H"
 #include "dynamicCodeContext.H"
+#include "fileName.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,13 +76,6 @@ class codedBase
         mutable fileName oldLibPath_;
 
 
-    // Data Types
-
-        //- Global loader/unloader function type
-        //  Called with true on load, false on unload.
-        typedef void (*loaderType)(bool);
-
-
     // Private Member Functions
 
         //- Load specified library and execute funcName(true)
@@ -106,12 +100,6 @@ class codedBase
             dynamicCode& dynCode,
             const dynamicCodeContext& context
         ) const;
-
-        //- No copy construct
-        codedBase(const codedBase&) = delete;
-
-        //- No copy assignment
-        void operator=(const codedBase&) = delete;
 
 
 protected:
@@ -148,7 +136,7 @@ protected:
         //- or use the codeDict() to generate one
         void updateLibrary(const word& name) const;
 
-        //- Get the loaded dynamic libraries
+        //- Mutable access to the loaded dynamic libraries
         virtual dlLibraryTable& libs() const = 0;
 
         //- Adapt the context for the current object
@@ -168,6 +156,13 @@ protected:
         virtual const dictionary& codeDict() const = 0;
 
 
+        //- No copy construct
+        codedBase(const codedBase&) = delete;
+
+        //- No copy assignment
+        void operator=(const codedBase&) = delete;
+
+
 public:
 
     //- Runtime type information
@@ -176,7 +171,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         codedBase() = default;
 
 

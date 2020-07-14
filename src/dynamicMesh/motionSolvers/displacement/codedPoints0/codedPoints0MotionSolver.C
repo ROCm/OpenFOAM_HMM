@@ -89,7 +89,7 @@ void Foam::codedPoints0MotionSolver::prepare
 
 Foam::dlLibraryTable& Foam::codedPoints0MotionSolver::libs() const
 {
-    return const_cast<Time&>(mesh().time()).libs();
+    return mesh().time().libs();
 }
 
 

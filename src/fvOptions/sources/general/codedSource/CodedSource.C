@@ -87,7 +87,7 @@ void Foam::fv::CodedSource<Type>::prepare
 template<class Type>
 Foam::dlLibraryTable& Foam::fv::CodedSource<Type>::libs() const
 {
-    return const_cast<Time&>(mesh_.time()).libs();
+    return mesh_.time().libs();
 }
 
 

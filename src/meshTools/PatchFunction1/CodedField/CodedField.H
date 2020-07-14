@@ -88,7 +88,7 @@ namespace PatchFunction1Types
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class CodedField Declaration
+                         Class CodedField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -109,7 +109,15 @@ class CodedField
 
     // Private Member Functions
 
-        //- Get the loaded dynamic libraries
+        //- Get reference to the underlying Function1
+        const PatchFunction1<Type>& redirectFunction() const;
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- Mutable access to the loaded dynamic libraries
         virtual dlLibraryTable& libs() const;
 
         //- Adapt the context for the current object
@@ -120,9 +128,6 @@ class CodedField
 
         // Clear the ptr to the redirected object
         virtual void clearRedirect() const;
-
-        //- Get reference to the underlying Function1
-        const PatchFunction1<Type>& redirectFunction() const;
 
         // Get the (sub)dictionary to initialize the codeContext
         virtual const dictionary& codeDict(const dictionary& fullDict) const;

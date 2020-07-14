@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,7 @@ License
 
 #include "dynamicCode.H"
 #include "dynamicCodeContext.H"
+#include "dlLibraryTable.H"
 #include "argList.H"
 #include "stringOps.H"
 #include "Fstream.H"
@@ -36,15 +37,6 @@ License
 #include "etcFiles.H"
 #include "dictionary.H"
 #include "foamVersion.H"
-
-#ifdef __APPLE__
-    #define EXT_SO  ".dylib"
-#elif defined _WIN32
-    #define EXT_SO  ".dll"
-#else
-    #define EXT_SO  ".so"
-#endif
-
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -103,14 +95,6 @@ void Foam::dynamicCode::checkSecurity
 }
 
 
-Foam::word Foam::dynamicCode::libraryBaseName(const fileName& libPath)
-{
-    word libName(libPath.nameLessExt());
-    libName.removeStart("lib");  // Remove leading 'lib' from name
-    return libName;
-}
-
-
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::dynamicCode::copyAndFilter
@@ -157,7 +141,7 @@ bool Foam::dynamicCode::resolveTemplates
     DynamicList<fileName>& badFiles
 )
 {
-    // Try to get template from FOAM_CODESTREAM_TEMPLATES
+    // Try to get template from FOAM_CODE_TEMPLATES
     const fileName templateDir(Foam::getEnv(codeTemplateEnvName));
 
     bool allOkay = true;
@@ -328,13 +312,13 @@ Foam::fileName Foam::dynamicCode::codeRelPath() const
 
 Foam::fileName Foam::dynamicCode::libPath() const
 {
-    return codeRoot_/libSubDir_/"lib" + codeName_ + EXT_SO;
+    return codeRoot_/libSubDir_/dlLibraryTable::fullname(codeName_);
 }
 
 
 Foam::fileName Foam::dynamicCode::libRelPath() const
 {
-    return codeRelPath()/libSubDir_/"lib" + codeName_ + EXT_SO;
+    return codeRelPath()/libSubDir_/dlLibraryTable::fullname(codeName_);
 }
 
 
@@ -514,16 +498,10 @@ bool Foam::dynamicCode::wmakeLibso() const
     //   cmd[0] = stringOps::expand("$WM_PROJECT_DIR/wmake/wmake");
 
     // This can take a bit longer, so report that we are starting wmake
+    // Even with details turned off, we want some feedback
 
-    if (Foam::infoDetailLevel > 0)
-    {
-        Info<< "Invoking wmake libso " << this->codePath().c_str() << endl;
-    }
-    else
-    {
-        // Even with details turned off, we want some feedback
-        Serr<< "Invoking wmake libso " << this->codePath().c_str() << endl;
-    }
+    OSstream& os = (Foam::infoDetailLevel > 0 ? Info : Serr);
+    os  << "Invoking wmake libso " << this->codePath().c_str() << endl;
 
     if (Foam::system(cmd) == 0)
     {

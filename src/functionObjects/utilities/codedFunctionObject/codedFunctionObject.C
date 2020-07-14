@@ -96,7 +96,7 @@ void Foam::functionObjects::codedFunctionObject::prepare
 
 Foam::dlLibraryTable& Foam::functionObjects::codedFunctionObject::libs() const
 {
-    return const_cast<Time&>(time_).libs();
+    return time_.libs();
 }
 
 

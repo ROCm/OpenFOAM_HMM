@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -112,13 +112,7 @@ inline const Foam::ParRunControl& Foam::argList::parRunControl() const
 }
 
 
-inline const Foam::dlLibraryTable& Foam::argList::libs() const
-{
-    return libs_;
-}
-
-
-inline Foam::dlLibraryTable& Foam::argList::libs()
+inline Foam::dlLibraryTable& Foam::argList::libs() const
 {
     return libs_;
 }

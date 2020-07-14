@@ -126,7 +126,6 @@ class CodedSource
     public cellSetOption,
     protected codedBase
 {
-
 protected:
 
     // Protected Data
@@ -143,7 +142,7 @@ protected:
 
     // Protected Member Functions
 
-        //- Get the loaded dynamic libraries
+        //- Mutable access to the loaded dynamic libraries
         virtual dlLibraryTable& libs() const;
 
         //- Adapt the context for the current object

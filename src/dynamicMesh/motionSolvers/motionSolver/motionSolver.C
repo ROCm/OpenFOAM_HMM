@@ -116,7 +116,7 @@ Foam::autoPtr<Foam::motionSolver> Foam::motionSolver::New
 
     Info<< "Selecting motion solver: " << solverName << nl;
 
-    const_cast<Time&>(mesh.time()).libs().open
+    mesh.time().libs().open
     (
         solverDict,
         "motionSolverLibs",

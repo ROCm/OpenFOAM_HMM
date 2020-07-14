@@ -94,7 +94,7 @@ Foam::displacementMotionSolver::New
 {
     Info<< "Selecting motion solver: " << solverTypeName << endl;
 
-    const_cast<Time&>(mesh.time()).libs().open
+    mesh.time().libs().open
     (
         solverDict,
         "motionSolverLibs",

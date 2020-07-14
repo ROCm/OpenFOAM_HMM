@@ -58,7 +58,7 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
 
         Info<< "Selecting dynamicFvMesh " << modelType << endl;
 
-        const_cast<Time&>(io.time()).libs().open
+        io.time().libs().open
         (
             dict,
             "dynamicFvMeshLibs",

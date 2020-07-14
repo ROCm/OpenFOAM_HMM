@@ -83,7 +83,7 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
 
         if (finder.found())
         {
-            const_cast<Time&>(runTime).libs().open
+            runTime.libs().open
             (
                 dict,
                 finder.ref().keyword(),
@@ -93,7 +93,7 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
     }
 
     // This is the simplified version without compatibility messages
-    // const_cast<Time&>(runTime).libs().open
+    // runTime.libs().open
     // (
     //     dict,
     //     "libs",

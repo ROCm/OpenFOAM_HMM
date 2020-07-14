@@ -121,7 +121,7 @@ class codedFixedValueFvPatchField
 
         const IOdictionary& dict() const;
 
-        //- Get the loaded dynamic libraries
+        //- Mutable access to the loaded dynamic libraries
         virtual dlLibraryTable& libs() const;
 
         //- Adapt the context for the current object

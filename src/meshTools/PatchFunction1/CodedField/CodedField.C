@@ -27,16 +27,13 @@ License
 
 #include "dynamicCode.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class Type>
 Foam::dlLibraryTable&
 Foam::PatchFunction1Types::CodedField<Type>::libs() const
 {
-    const dlLibraryTable& timeLibs =
-        this->patch_.boundaryMesh().mesh().time().libs();
-
-    return const_cast<dlLibraryTable&>(timeLibs);
+    return this->patch_.boundaryMesh().mesh().time().libs();
 }
 
 
