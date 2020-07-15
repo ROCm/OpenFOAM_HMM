@@ -81,7 +81,7 @@ protected:
         autoPtr<objectiveManager> objectiveManagerPtr_;
 
         //- Sensitivities field
-        tmp<scalarField> sensitivities_;
+        autoPtr<scalarField> sensitivities_;
 
         //- Are sensitivities computed
         bool computeSensitivities_;

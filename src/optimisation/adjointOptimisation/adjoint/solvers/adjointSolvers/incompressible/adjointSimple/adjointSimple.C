@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2020 PCOpt/NTUA
     Copyright (C) 2013-2020 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -161,7 +161,7 @@ bool Foam::adjointSimple::readDict(const dictionary& dict)
 {
     if (incompressibleAdjointSolver::readDict(dict))
     {
-        if (adjointSensitivity_.valid())
+        if (adjointSensitivity_)
         {
             const IOdictionary& optDict =
                 mesh_.lookupObject<IOdictionary>("optimisationDict");
@@ -336,11 +336,11 @@ void Foam::adjointSimple::computeObjectiveSensitivities()
     {
         adjointSensitivity_->accumulateIntegrand(scalar(1));
         const scalarField& sens = adjointSensitivity_->calculateSensitivities();
-        if (sensitivities_.empty())
+        if (!sensitivities_)
         {
             sensitivities_.reset(new scalarField(sens.size(), Zero));
         }
-        sensitivities_.ref() = sens;
+        *sensitivities_ = sens;
     }
     else
     {
@@ -351,7 +351,7 @@ void Foam::adjointSimple::computeObjectiveSensitivities()
 
 const Foam::scalarField& Foam::adjointSimple::getObjectiveSensitivities()
 {
-    if (!sensitivities_.valid())
+    if (!sensitivities_)
     {
         computeObjectiveSensitivities();
     }
@@ -372,7 +372,7 @@ void Foam::adjointSimple::clearSensitivities()
 
 Foam::sensitivity& Foam::adjointSimple::getSensitivityBase()
 {
-    if (!adjointSensitivity_.valid())
+    if (!adjointSensitivity_)
     {
         FatalErrorInFunction
             << "Sensitivity object not allocated" << nl

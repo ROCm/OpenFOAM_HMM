@@ -151,7 +151,7 @@ void Foam::solver::updateOptTypeSource
     const autoPtr<volScalarField>& optSourcePtr
 )
 {
-    if (optSourcePtr.valid())
+    if (optSourcePtr)
     {
         const volScalarField& optSource = optSourcePtr();
         optTypeSource_ = &optSource;
