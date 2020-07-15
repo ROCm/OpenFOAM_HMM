@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +32,7 @@ template<class CloudType>
 inline const Foam::interpolation<Foam::vector>&
 Foam::PressureGradientForce<CloudType>::DUcDtInterp() const
 {
-    if (!DUcDtInterpPtr_.valid())
+    if (!DUcDtInterpPtr_)
     {
         FatalErrorInFunction
             << "Carrier phase DUcDt interpolation object not set"

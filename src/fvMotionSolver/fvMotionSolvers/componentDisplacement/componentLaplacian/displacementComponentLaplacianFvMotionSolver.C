@@ -145,7 +145,7 @@ Foam::displacementComponentLaplacianFvMotionSolver::curPoints() const
         pointDisplacement_
     );
 
-    if (pointLocation_.valid())
+    if (pointLocation_)
     {
         if (debug)
         {

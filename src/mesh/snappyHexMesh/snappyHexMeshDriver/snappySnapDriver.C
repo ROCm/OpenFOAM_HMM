@@ -1478,7 +1478,7 @@ void Foam::snappySnapDriver::detectNearSurfaces
                     // TBD: check if the attraction (to nearest) would attract
                     // good enough and not override attraction
 
-                    if (gapStr.valid())
+                    if (gapStr)
                     {
                         const point& intPt = hit2[pointi].hitPoint();
                         gapStr().write(linePointRef(pt, intPt));
@@ -1620,7 +1620,7 @@ void Foam::snappySnapDriver::detectNearSurfaces
                             )
                         )
                         {
-                            if (gapStr.valid())
+                            if (gapStr)
                             {
                                 const point& intPt = hit2[i].hitPoint();
                                 gapStr().write(linePointRef(pt, intPt));
@@ -2982,7 +2982,7 @@ void Foam::snappySnapDriver::doSnap
             false   // baffle zones
         );
 
-        if (mapPtr.valid())
+        if (mapPtr)
         {
             if (debug & meshRefinement::MESH)
             {

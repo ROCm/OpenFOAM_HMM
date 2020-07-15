@@ -111,7 +111,9 @@ void Foam::phaseSystem::generatePairsAndSubModels
 
     forAllConstIter(typename modelTypeTable, tempModels, iter)
     {
-        if (!iter().valid())
+        const autoPtr<modelType>& modelPtr = iter.val();
+
+        if (!modelPtr)
         {
             continue;
         }

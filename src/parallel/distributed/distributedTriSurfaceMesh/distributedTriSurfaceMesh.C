@@ -1601,7 +1601,7 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
         "distributedTriSurfaceMesh::independentlyDistributedBbs"
     );
 
-    if (!decomposer_.valid())
+    if (!decomposer_)
     {
         // Use singleton decomposeParDict. Cannot use decompositionModel
         // here since we've only got Time and not a mesh.
@@ -1619,7 +1619,7 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
         }
         else
         {
-            if (!decomposeParDict_.valid())
+            if (!decomposeParDict_)
             {
                 decomposeParDict_.reset
                 (
@@ -1637,7 +1637,7 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
                     )
                 );
             }
-            decomposer_ = decompositionMethod::New(decomposeParDict_());
+            decomposer_ = decompositionMethod::New(*decomposeParDict_);
         }
     }
 
@@ -2756,7 +2756,7 @@ void Foam::distributedTriSurfaceMesh::clearOut()
 
 const Foam::globalIndex& Foam::distributedTriSurfaceMesh::globalTris() const
 {
-    if (!globalTris_.valid())
+    if (!globalTris_)
     {
         globalTris_.reset(new globalIndex(triSurface::size()));
     }

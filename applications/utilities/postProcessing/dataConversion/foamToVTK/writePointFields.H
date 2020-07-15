@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,7 +83,7 @@ bool writePointField
     const auto& field = tproxied();
 
     // Internal
-    if (internalWriter.valid())
+    if (internalWriter)
     {
         internalWriter->write(field);
     }

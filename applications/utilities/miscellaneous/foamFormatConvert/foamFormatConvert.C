@@ -426,9 +426,9 @@ int main(int argc, char *argv[])
 
         if (!lagrangianDirs.empty())
         {
-            if (meshPtr.valid())
+            if (meshPtr)
             {
-                meshPtr().readUpdate();
+                meshPtr->readUpdate();
             }
             else
             {

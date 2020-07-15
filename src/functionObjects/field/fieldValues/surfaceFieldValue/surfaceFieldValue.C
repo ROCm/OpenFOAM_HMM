@@ -399,9 +399,9 @@ combineSurfaceGeometry
             points = s.points();
         }
     }
-    else if (sampledPtr_.valid())
+    else if (sampledPtr_)
     {
-        const sampledSurface& s = sampledPtr_();
+        const sampledSurface& s = *sampledPtr_;
 
         if (Pstream::parRun())
         {
@@ -443,9 +443,9 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::totalArea() const
 
         totalArea = gSum(s.magSf());
     }
-    else if (sampledPtr_.valid())
+    else if (sampledPtr_)
     {
-        totalArea = gSum(sampledPtr_().magSf());
+        totalArea = gSum(sampledPtr_->magSf());
     }
     else
     {
@@ -482,7 +482,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::usesSf() const
 
 bool Foam::functionObjects::fieldValues::surfaceFieldValue::update()
 {
-    if (sampledPtr_.valid())
+    if (sampledPtr_)
     {
         sampledPtr_->update();
     }
@@ -1022,9 +1022,9 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::write()
             const polySurface& s = dynamicCast<const polySurface>(obr());
             Sf = s.Sf();
         }
-        else if (sampledPtr_.valid())
+        else if (sampledPtr_)
         {
-            Sf = sampledPtr_().Sf();
+            Sf = sampledPtr_->Sf();
         }
         else
         {
@@ -1036,7 +1036,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::write()
     faceList faces;
     pointField points;
 
-    if (surfaceWriterPtr_.valid())
+    if (surfaceWriterPtr_)
     {
         if (withTopologicalMerge())
         {

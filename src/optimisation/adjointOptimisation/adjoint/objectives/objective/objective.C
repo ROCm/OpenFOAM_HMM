@@ -428,7 +428,7 @@ const volScalarField& objective::dJdb()
         );
     }
 
-    return dJdbPtr_();
+    return *dJdbPtr_;
 }
 
 
@@ -514,7 +514,7 @@ const boundaryVectorField& objective::boundarydJdb()
     {
         bdJdbPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     }
-    return bdJdbPtr_();
+    return *bdJdbPtr_;
 }
 
 
@@ -524,7 +524,7 @@ const boundaryVectorField& objective::dSdbMultiplier()
     {
         bdSdbMultPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     }
-    return bdSdbMultPtr_();
+    return *bdSdbMultPtr_;
 }
 
 
@@ -534,7 +534,7 @@ const boundaryVectorField& objective::dndbMultiplier()
     {
         bdndbMultPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     }
-    return bdndbMultPtr_();
+    return *bdndbMultPtr_;
 }
 
 
@@ -544,7 +544,7 @@ const boundaryVectorField& objective::dxdbMultiplier()
     {
         bdxdbMultPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     }
-    return bdxdbMultPtr_();
+    return *bdxdbMultPtr_;
 }
 
 
@@ -554,7 +554,7 @@ const boundaryVectorField& objective::dxdbDirectMultiplier()
     {
         bdxdbDirectMultPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     }
-    return bdxdbDirectMultPtr_();
+    return *bdxdbDirectMultPtr_;
 }
 
 
@@ -567,7 +567,7 @@ const vectorField3& objective::boundaryEdgeMultiplier()
             << endl << endl
             << exit(FatalError);
     }
-    return bEdgeContribution_();
+    return *bEdgeContribution_;
 }
 
 
@@ -577,7 +577,7 @@ const boundaryTensorField& objective::boundarydJdStress()
     {
         bdJdStressPtr_.reset(createZeroBoundaryPtr<tensor>(mesh_));
     }
-    return bdJdStressPtr_();
+    return *bdJdStressPtr_;
 }
 
 
@@ -598,7 +598,7 @@ const volScalarField& objective::divDxDbMultiplier()
             )
         );
     }
-    return divDxDbMultPtr_();
+    return *divDxDbMultPtr_;
 }
 
 
@@ -618,7 +618,7 @@ const volTensorField& objective::gradDxDbMultiplier()
             )
         );
     }
-    return gradDxDbMultPtr_();
+    return *gradDxDbMultPtr_;
 }
 
 

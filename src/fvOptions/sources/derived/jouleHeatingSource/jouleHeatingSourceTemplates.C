@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -95,7 +95,7 @@ Foam::fv::jouleHeatingSource::updateSigma
     VolFieldType& sigma =
         mesh_.lookupObjectRef<VolFieldType>(typeName + ":sigma");
 
-    if (!sigmaVsTPtr.valid())
+    if (!sigmaVsTPtr)
     {
         // Electrical conductivity field, sigma, was specified by the user
         return sigma;

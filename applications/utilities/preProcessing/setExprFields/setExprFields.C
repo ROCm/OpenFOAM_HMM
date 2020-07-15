@@ -802,9 +802,9 @@ int main(int argc, char *argv[])
                 ctrl
             );
         }
-        else if (exprDictPtr.valid())
+        else if (exprDictPtr)
         {
-            const dictionary& exprDict = exprDictPtr();
+            const dictionary& exprDict = *exprDictPtr;
 
             // Read set construct info from dictionary
             PtrList<entry> actions(exprDict.lookup("expressions"));
@@ -898,7 +898,7 @@ int main(int argc, char *argv[])
                 );
             }
         }
-        else if (exprDictPtr.valid())
+        else
         {
             FatalErrorInFunction
                 << "No command-line or dictionary??" << nl << endl

@@ -382,12 +382,12 @@ bool sensitivitySurface::readDict(const dictionary& dict)
 {
     if (sensitivity::readDict(dict))
     {
-        if (eikonalSolver_.valid())
+        if (eikonalSolver_)
         {
             eikonalSolver_().readDict(dict);
         }
 
-        if (meshMovementSolver_.valid())
+        if (meshMovementSolver_)
         {
             meshMovementSolver_().readDict(dict);
         }

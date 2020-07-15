@@ -204,7 +204,7 @@ const volVectorField& objectiveIncompressible::dJdv()
             )
         );
     }
-    return dJdvPtr_();
+    return *dJdvPtr_;
 }
 
 
@@ -223,7 +223,7 @@ const volScalarField& objectiveIncompressible::dJdp()
             )
         );
     }
-    return dJdpPtr_();
+    return *dJdpPtr_;
 }
 
 
@@ -242,7 +242,7 @@ const volScalarField& objectiveIncompressible::dJdT()
             )
         );
     }
-    return dJdTPtr_();
+    return *dJdTPtr_;
 }
 
 
@@ -261,7 +261,7 @@ const volScalarField& objectiveIncompressible::dJdTMvar1()
             )
         );
     }
-    return dJdTMvar1Ptr_();
+    return *dJdTMvar1Ptr_;
 }
 
 
@@ -280,7 +280,7 @@ const volScalarField& objectiveIncompressible::dJdTMvar2()
             )
         );
     }
-    return dJdTMvar2Ptr_();
+    return *dJdTMvar2Ptr_;
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -352,7 +352,7 @@ bool Foam::sampledIsoSurface::updateGeometry() const
     // Clear derived data
     clearGeom();
 
-    if (subMeshPtr_.valid())
+    if (subMeshPtr_)
     {
         const volScalarField& vfld = *volSubFieldPtr_;
 
@@ -396,9 +396,9 @@ bool Foam::sampledIsoSurface::updateGeometry() const
             << "    average        : " << Switch(average_) << nl
             << "    isoField       : " << isoField_ << nl
             << "    isoValue       : " << isoVal_ << nl;
-        if (subMeshPtr_.valid())
+        if (subMeshPtr_)
         {
-            Pout<< "    zone size      : " << subMeshPtr_().subMesh().nCells()
+            Pout<< "    zone size      : " << subMeshPtr_->subMesh().nCells()
                 << nl;
         }
         Pout<< "    points         : " << points().size() << nl

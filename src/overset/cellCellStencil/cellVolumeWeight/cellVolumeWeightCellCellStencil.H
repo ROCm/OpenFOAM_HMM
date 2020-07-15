@@ -207,7 +207,7 @@ public:
         //- Return a communication schedule
         virtual const mapDistribute& cellInterpolationMap() const
         {
-            if (!cellInterpolationMap_.valid())
+            if (!cellInterpolationMap_)
             {
                 const_cast<cellVolumeWeight&>(*this).update();
             }

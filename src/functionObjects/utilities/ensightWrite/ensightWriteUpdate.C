@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -146,7 +146,7 @@ bool Foam::functionObjects::ensightWrite::update()
     //     ensMesh_.clear();
     //     meshSubset_.clear();
     // }
-    // else if (ensMesh_.valid())
+    // else if (ensMesh_)
     // {
     //     ensMesh_->expire();
     // }
@@ -157,13 +157,13 @@ bool Foam::functionObjects::ensightWrite::update()
 
     meshState_ = polyMesh::UNCHANGED;
 
-    if (!ensMesh_.valid())
+    if (!ensMesh_)
     {
         ensMesh_.reset(new ensightMesh(meshSubset_.mesh(), writeOpts_));
     }
-    else if (ensMesh_().needsUpdate())
+    else if (ensMesh_->needsUpdate())
     {
-        ensMesh_().correct();
+        ensMesh_->correct();
     }
 
     return true;

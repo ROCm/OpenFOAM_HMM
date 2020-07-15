@@ -333,7 +333,7 @@ bool Foam::mixerFvMesh::update()
     // Make changes. Use inflation (so put new points in topoChangeMap)
     autoPtr<mapPolyMesh> topoChangeMap = topoChanger_.changeMesh(true);
 
-    if (topoChangeMap.valid())
+    if (topoChangeMap)
     {
         DebugInFunction << "Mesh topology is changing" << nl;
 

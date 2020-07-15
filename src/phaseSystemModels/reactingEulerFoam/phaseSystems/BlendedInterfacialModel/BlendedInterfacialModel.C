@@ -143,7 +143,7 @@ Foam::BlendedInterfacialModel<ModelType>::evaluate
         )
     );
 
-    if (model_.valid())
+    if (model_)
     {
         if (subtract)
         {
@@ -156,12 +156,12 @@ Foam::BlendedInterfacialModel<ModelType>::evaluate
         x.ref() += (model_().*method)(args ...)*(scalar(1) - f1() - f2());
     }
 
-    if (model1In2_.valid())
+    if (model1In2_)
     {
         x.ref() += (model1In2_().*method)(args ...)*f1;
     }
 
-    if (model2In1_.valid())
+    if (model2In1_)
     {
         tmp<typeGeoField> dx = (model2In1_().*method)(args ...)*f2;
 

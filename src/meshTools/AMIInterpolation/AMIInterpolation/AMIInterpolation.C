@@ -286,7 +286,7 @@ void Foam::AMIInterpolation::agglomerate
     }
 
     // Agglomerate weights and indices
-    if (targetMapPtr.valid())
+    if (targetMapPtr)
     {
         const mapDistribute& map = targetMapPtr();
 

@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2020 PCOpt/NTUA
     Copyright (C) 2013-2020 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -225,7 +225,7 @@ void Foam::steadyOptimisation::updateDesignVariables()
 {
     // Update design variables using either a line-search scheme or
     // a fixed-step update
-    if (optType_->getLineSearch().valid())
+    if (optType_->getLineSearch())
     {
         lineSearchUpdate();
     }

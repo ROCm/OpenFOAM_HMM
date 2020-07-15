@@ -1518,7 +1518,7 @@ void Foam::snappySnapDriver::releasePointsNextToMultiPatch
                 patchAttraction[pointi] = rawPatchAttraction[pointi];
                 patchConstraints[pointi] = rawPatchConstraints[pointi];
 
-                //if (multiPatchStr.valid())
+                //if (multiPatchStr)
                 //{
                 //    Pout<< "Adding constraint on multiPatchPoint:"
                 //        << pp.localPoints()[pointi]
@@ -1571,7 +1571,7 @@ void Foam::snappySnapDriver::releasePointsNextToMultiPatch
                     patchConstraints[pointi] = pointConstraint();
                     nChanged++;
 
-                    if (multiPatchStr.valid())
+                    if (multiPatchStr)
                     {
                         multiPatchStr().write(pp.localPoints()[pointi]);
                     }
@@ -2514,7 +2514,7 @@ void Foam::snappySnapDriver::determineFeatures
                         if (info.hit())
                         {
                             // Dump
-                            if (featureEdgeStr.valid())
+                            if (featureEdgeStr)
                             {
                                 featureEdgeStr().write
                                 (
@@ -2524,7 +2524,7 @@ void Foam::snappySnapDriver::determineFeatures
                         }
                         else
                         {
-                            if (missedEdgeStr.valid())
+                            if (missedEdgeStr)
                             {
                                 missedEdgeStr().write
                                 (
@@ -2708,7 +2708,7 @@ void Foam::snappySnapDriver::determineFeatures
                 }
                 else
                 {
-                    if (missedEdgeStr.valid())
+                    if (missedEdgeStr)
                     {
                         missedEdgeStr().write
                         (
@@ -2927,7 +2927,7 @@ void Foam::snappySnapDriver::determineBaffleFeatures
             pointStatus[e[0]] = 0;
             pointStatus[e[1]] = 0;
 
-            if (baffleEdgeStr.valid())
+            if (baffleEdgeStr)
             {
                 const point& p0 = pp.localPoints()[e[0]];
                 const point& p1 = pp.localPoints()[e[1]];
@@ -3823,7 +3823,7 @@ void Foam::snappySnapDriver::preventFaceSqueeze
 
                     patchAttraction[pointi] = nearestAttraction[pointi];
 
-                    if (strPtr.valid())
+                    if (strPtr)
                     {
                         strPtr().write
                         (

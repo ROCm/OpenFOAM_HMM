@@ -121,7 +121,7 @@ void Foam::NURBS3DVolume::computeParametricCoordinates
 {
     scalar timeBef = mesh_.time().elapsedCpuTime();
 
-    if (parametricCoordinatesPtr_.valid())
+    if (parametricCoordinatesPtr_)
     {
         FatalErrorInFunction
            << "Attempting to recompute parametric coordinates"

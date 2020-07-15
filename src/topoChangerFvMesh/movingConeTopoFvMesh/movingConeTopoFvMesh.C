@@ -321,7 +321,7 @@ bool Foam::movingConeTopoFvMesh::update()
         << " curLeft:" << curLeft_ << " curRight:" << curRight_
         << endl;
 
-    if (topoChangeMap.valid())
+    if (topoChangeMap)
     {
         Info<< "Topology change. Calculating motion points" << endl;
 

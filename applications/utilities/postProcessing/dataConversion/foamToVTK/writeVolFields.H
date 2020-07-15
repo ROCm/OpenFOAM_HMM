@@ -63,7 +63,7 @@ bool writeVolField
     const auto& field = tfield();
 
     // Internal
-    if (internalWriter.valid())
+    if (internalWriter)
     {
         internalWriter->write(field);
     }

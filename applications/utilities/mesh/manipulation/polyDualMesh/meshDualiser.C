@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1035,9 +1036,9 @@ void Foam::meshDualiser::setRefinement
             -1,     //masterCellID,
             -1      //zoneID
         );
-        if (dualCcStr.valid())
+        if (dualCcStr)
         {
-            meshTools::writeOBJ(dualCcStr(), mesh_.points()[pointi]);
+            meshTools::writeOBJ(*dualCcStr, mesh_.points()[pointi]);
         }
     }
 
@@ -1079,11 +1080,11 @@ void Foam::meshDualiser::setRefinement
                 -1,                                         //masterCellID
                 mesh_.cellZones().whichZone(pCells[pCelli]) //zoneID
             );
-            if (dualCcStr.valid())
+            if (dualCcStr)
             {
                 meshTools::writeOBJ
                 (
-                    dualCcStr(),
+                    *dualCcStr,
                     0.5*(mesh_.points()[pointi]+cellCentres[pCells[pCelli]])
                 );
             }
@@ -1104,9 +1105,9 @@ void Foam::meshDualiser::setRefinement
                 -1      //zoneID
             );
 
-            if (dualCcStr.valid())
+            if (dualCcStr)
             {
-                meshTools::writeOBJ(dualCcStr(), mesh_.points()[pointi]);
+                meshTools::writeOBJ(*dualCcStr, mesh_.points()[pointi]);
             }
         }
     }

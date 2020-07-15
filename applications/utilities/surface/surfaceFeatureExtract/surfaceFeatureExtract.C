@@ -711,7 +711,7 @@ int main(int argc, char *argv[])
                     10   // externalAngleTolerance
                 );
 
-            if (vtkWriter.valid())
+            if (vtkWriter)
             {
                 vtkWriter->beginCellData();
                 vtkWriter->write("internalCloseness", tcloseness[0]());
@@ -735,7 +735,7 @@ int main(int argc, char *argv[])
                     maxProximity
                 );
 
-            if (vtkWriter.valid())
+            if (vtkWriter)
             {
                 vtkWriter->beginCellData();
                 vtkWriter->write("featureProximity", tproximity());
@@ -753,7 +753,7 @@ int main(int argc, char *argv[])
                     surf
                 );
 
-            if (vtkWriter.valid())
+            if (vtkWriter)
             {
                 vtkWriter->beginPointData();
                 vtkWriter->write("curvature", tcurvature());

@@ -54,7 +54,7 @@ Foam::label Foam::functionObjects::vtkWrite::writeVolFields
         const auto& field = tfield();
 
         // Internal
-        if (internalWriter.valid())
+        if (internalWriter)
         {
             ok = true;
             internalWriter->write(field);

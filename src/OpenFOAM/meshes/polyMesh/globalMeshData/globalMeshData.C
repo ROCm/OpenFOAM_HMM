@@ -1837,7 +1837,7 @@ void Foam::globalMeshData::clearOut()
 
 const Foam::labelList& Foam::globalMeshData::sharedPointGlobalLabels() const
 {
-    if (!sharedPointGlobalLabelsPtr_.valid())
+    if (!sharedPointGlobalLabelsPtr_)
     {
         sharedPointGlobalLabelsPtr_.reset
         (
@@ -2015,7 +2015,7 @@ Foam::label Foam::globalMeshData::nGlobalPoints() const
 
 const Foam::labelList& Foam::globalMeshData::sharedPointLabels() const
 {
-    if (!sharedPointLabelsPtr_.valid())
+    if (!sharedPointLabelsPtr_)
     {
         calcSharedPoints();
     }
@@ -2025,7 +2025,7 @@ const Foam::labelList& Foam::globalMeshData::sharedPointLabels() const
 
 const Foam::labelList& Foam::globalMeshData::sharedPointAddr() const
 {
-    if (!sharedPointAddrPtr_.valid())
+    if (!sharedPointAddrPtr_)
     {
         calcSharedPoints();
     }
@@ -2045,7 +2045,7 @@ Foam::label Foam::globalMeshData::nGlobalEdges() const
 
 const Foam::labelList& Foam::globalMeshData::sharedEdgeLabels() const
 {
-    if (!sharedEdgeLabelsPtr_.valid())
+    if (!sharedEdgeLabelsPtr_)
     {
         calcSharedEdges();
     }
@@ -2055,7 +2055,7 @@ const Foam::labelList& Foam::globalMeshData::sharedEdgeLabels() const
 
 const Foam::labelList& Foam::globalMeshData::sharedEdgeAddr() const
 {
-    if (!sharedEdgeAddrPtr_.valid())
+    if (!sharedEdgeAddrPtr_)
     {
         calcSharedEdges();
     }
@@ -2065,7 +2065,7 @@ const Foam::labelList& Foam::globalMeshData::sharedEdgeAddr() const
 
 const Foam::indirectPrimitivePatch& Foam::globalMeshData::coupledPatch() const
 {
-    if (!coupledPatchPtr_.valid())
+    if (!coupledPatchPtr_)
     {
         const polyBoundaryMesh& bMesh = mesh_.boundaryMesh();
 
@@ -2126,7 +2126,7 @@ const Foam::indirectPrimitivePatch& Foam::globalMeshData::coupledPatch() const
 
 const Foam::labelList& Foam::globalMeshData::coupledPatchMeshEdges() const
 {
-    if (!coupledPatchMeshEdgesPtr_.valid())
+    if (!coupledPatchMeshEdgesPtr_)
     {
         coupledPatchMeshEdgesPtr_.reset
         (
@@ -2147,7 +2147,7 @@ const Foam::labelList& Foam::globalMeshData::coupledPatchMeshEdges() const
 const Foam::Map<Foam::label>& Foam::globalMeshData::coupledPatchMeshEdgeMap()
 const
 {
-    if (!coupledPatchMeshEdgeMapPtr_.valid())
+    if (!coupledPatchMeshEdgeMapPtr_)
     {
         const labelList& me = coupledPatchMeshEdges();
 
@@ -2165,7 +2165,7 @@ const
 
 const Foam::globalIndex& Foam::globalMeshData::globalPointNumbering() const
 {
-    if (!globalPointNumberingPtr_.valid())
+    if (!globalPointNumberingPtr_)
     {
         globalPointNumberingPtr_.reset
         (
@@ -2179,7 +2179,7 @@ const Foam::globalIndex& Foam::globalMeshData::globalPointNumbering() const
 const Foam::globalIndexAndTransform&
 Foam::globalMeshData::globalTransforms() const
 {
-    if (!globalTransformsPtr_.valid())
+    if (!globalTransformsPtr_)
     {
         globalTransformsPtr_.reset(new globalIndexAndTransform(mesh_));
     }
@@ -2189,7 +2189,7 @@ Foam::globalMeshData::globalTransforms() const
 
 const Foam::labelListList& Foam::globalMeshData::globalPointSlaves() const
 {
-    if (!globalPointSlavesPtr_.valid())
+    if (!globalPointSlavesPtr_)
     {
         calcGlobalPointSlaves();
     }
@@ -2200,7 +2200,7 @@ const Foam::labelListList& Foam::globalMeshData::globalPointSlaves() const
 const Foam::labelListList& Foam::globalMeshData::globalPointTransformedSlaves()
 const
 {
-    if (!globalPointTransformedSlavesPtr_.valid())
+    if (!globalPointTransformedSlavesPtr_)
     {
         calcGlobalPointSlaves();
     }
@@ -2210,7 +2210,7 @@ const
 
 const Foam::mapDistribute& Foam::globalMeshData::globalPointSlavesMap() const
 {
-    if (!globalPointSlavesMapPtr_.valid())
+    if (!globalPointSlavesMapPtr_)
     {
         calcGlobalPointSlaves();
     }
@@ -2220,7 +2220,7 @@ const Foam::mapDistribute& Foam::globalMeshData::globalPointSlavesMap() const
 
 const Foam::globalIndex& Foam::globalMeshData::globalEdgeNumbering() const
 {
-    if (!globalEdgeNumberingPtr_.valid())
+    if (!globalEdgeNumberingPtr_)
     {
         globalEdgeNumberingPtr_.reset
         (
@@ -2233,7 +2233,7 @@ const Foam::globalIndex& Foam::globalMeshData::globalEdgeNumbering() const
 
 const Foam::labelListList& Foam::globalMeshData::globalEdgeSlaves() const
 {
-    if (!globalEdgeSlavesPtr_.valid())
+    if (!globalEdgeSlavesPtr_)
     {
         calcGlobalEdgeSlaves();
     }
@@ -2244,7 +2244,7 @@ const Foam::labelListList& Foam::globalMeshData::globalEdgeSlaves() const
 const Foam::labelListList& Foam::globalMeshData::globalEdgeTransformedSlaves()
 const
 {
-    if (!globalEdgeTransformedSlavesPtr_.valid())
+    if (!globalEdgeTransformedSlavesPtr_)
     {
         calcGlobalEdgeSlaves();
     }
@@ -2254,7 +2254,7 @@ const
 
 const Foam::bitSet& Foam::globalMeshData::globalEdgeOrientation() const
 {
-    if (!globalEdgeOrientationPtr_.valid())
+    if (!globalEdgeOrientationPtr_)
     {
         calcGlobalEdgeOrientation();
     }
@@ -2264,7 +2264,7 @@ const Foam::bitSet& Foam::globalMeshData::globalEdgeOrientation() const
 
 const Foam::mapDistribute& Foam::globalMeshData::globalEdgeSlavesMap() const
 {
-    if (!globalEdgeSlavesMapPtr_.valid())
+    if (!globalEdgeSlavesMapPtr_)
     {
         calcGlobalEdgeSlaves();
     }
@@ -2275,7 +2275,7 @@ const Foam::mapDistribute& Foam::globalMeshData::globalEdgeSlavesMap() const
 const Foam::globalIndex& Foam::globalMeshData::globalBoundaryFaceNumbering()
 const
 {
-    if (!globalBoundaryFaceNumberingPtr_.valid())
+    if (!globalBoundaryFaceNumberingPtr_)
     {
         calcGlobalPointBoundaryFaces();
     }
@@ -2286,7 +2286,7 @@ const
 const Foam::labelListList& Foam::globalMeshData::globalPointBoundaryFaces()
 const
 {
-    if (!globalPointBoundaryFacesPtr_.valid())
+    if (!globalPointBoundaryFacesPtr_)
     {
         calcGlobalPointBoundaryFaces();
     }
@@ -2297,7 +2297,7 @@ const
 const Foam::labelListList&
 Foam::globalMeshData::globalPointTransformedBoundaryFaces() const
 {
-    if (!globalPointTransformedBoundaryFacesPtr_.valid())
+    if (!globalPointTransformedBoundaryFacesPtr_)
     {
         calcGlobalPointBoundaryFaces();
     }
@@ -2308,7 +2308,7 @@ Foam::globalMeshData::globalPointTransformedBoundaryFaces() const
 const Foam::mapDistribute& Foam::globalMeshData::globalPointBoundaryFacesMap()
 const
 {
-    if (!globalPointBoundaryFacesMapPtr_.valid())
+    if (!globalPointBoundaryFacesMapPtr_)
     {
         calcGlobalPointBoundaryFaces();
     }
@@ -2318,7 +2318,7 @@ const
 
 const Foam::labelList& Foam::globalMeshData::boundaryCells() const
 {
-    if (!boundaryCellsPtr_.valid())
+    if (!boundaryCellsPtr_)
     {
         calcGlobalPointBoundaryCells();
     }
@@ -2329,7 +2329,7 @@ const Foam::labelList& Foam::globalMeshData::boundaryCells() const
 const Foam::globalIndex& Foam::globalMeshData::globalBoundaryCellNumbering()
 const
 {
-    if (!globalBoundaryCellNumberingPtr_.valid())
+    if (!globalBoundaryCellNumberingPtr_)
     {
         calcGlobalPointBoundaryCells();
     }
@@ -2340,7 +2340,7 @@ const
 const Foam::labelListList& Foam::globalMeshData::globalPointBoundaryCells()
 const
 {
-    if (!globalPointBoundaryCellsPtr_.valid())
+    if (!globalPointBoundaryCellsPtr_)
     {
         calcGlobalPointBoundaryCells();
     }
@@ -2351,7 +2351,7 @@ const
 const Foam::labelListList&
 Foam::globalMeshData::globalPointTransformedBoundaryCells() const
 {
-    if (!globalPointTransformedBoundaryCellsPtr_.valid())
+    if (!globalPointTransformedBoundaryCellsPtr_)
     {
         calcGlobalPointBoundaryCells();
     }
@@ -2362,7 +2362,7 @@ Foam::globalMeshData::globalPointTransformedBoundaryCells() const
 const Foam::mapDistribute& Foam::globalMeshData::globalPointBoundaryCellsMap()
 const
 {
-    if (!globalPointBoundaryCellsMapPtr_.valid())
+    if (!globalPointBoundaryCellsMapPtr_)
     {
         calcGlobalPointBoundaryCells();
     }
@@ -2372,7 +2372,7 @@ const
 
 const Foam::labelListList& Foam::globalMeshData::globalCoPointSlaves() const
 {
-    if (!globalCoPointSlavesPtr_.valid())
+    if (!globalCoPointSlavesPtr_)
     {
         calcGlobalCoPointSlaves();
     }
@@ -2382,7 +2382,7 @@ const Foam::labelListList& Foam::globalMeshData::globalCoPointSlaves() const
 
 const Foam::mapDistribute& Foam::globalMeshData::globalCoPointSlavesMap() const
 {
-    if (!globalCoPointSlavesMapPtr_.valid())
+    if (!globalCoPointSlavesMapPtr_)
     {
         calcGlobalCoPointSlaves();
     }

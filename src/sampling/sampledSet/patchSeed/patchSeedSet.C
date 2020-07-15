@@ -81,11 +81,11 @@ void Foam::patchSeedSet::calcSamples
     }
 
 
-    if (!rndGenPtr_.valid())
+    if (!rndGenPtr_)
     {
         rndGenPtr_.reset(new Random(0));
     }
-    Random& rndGen = rndGenPtr_();
+    Random& rndGen = *rndGenPtr_;
 
 
     if (selectedLocations_.size())

@@ -60,7 +60,7 @@ bool writeDimField
 
     const auto& field = tfield();
 
-    if (internalWriter.valid())
+    if (internalWriter)
     {
         internalWriter->write(field);
     }

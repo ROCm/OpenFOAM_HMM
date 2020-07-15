@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,7 +76,7 @@ bool Foam::rawTopoChangerFvMesh::update()
     // Do any topology changes. Sets topoChanging (through polyTopoChange)
     autoPtr<mapPolyMesh> topoChangeMap = topoChanger_.changeMesh(true);
 
-    bool hasChanged = topoChangeMap.valid();
+    const bool hasChanged = bool(topoChangeMap);
 
     if (hasChanged)
     {

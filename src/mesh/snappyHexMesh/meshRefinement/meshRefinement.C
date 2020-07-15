@@ -2926,7 +2926,7 @@ void Foam::meshRefinement::distribute(const mapDistributePolyMesh& map)
                 pointMap
             );
 
-            if (faceMap.valid())
+            if (faceMap)
             {
                 // (ab)use the instance() to signal current modification time
                 geometry[i].instance() = geometry[i].time().timeName();

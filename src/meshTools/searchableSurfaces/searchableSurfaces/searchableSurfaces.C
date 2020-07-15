@@ -697,7 +697,7 @@ bool Foam::searchableSurfaces::checkIntersection
                             << " locations."
                             << endl;
 
-                        if (setWriter.valid())
+                        if (setWriter)
                         {
                             scalarField dist(mag(intersections));
                             coordSet track

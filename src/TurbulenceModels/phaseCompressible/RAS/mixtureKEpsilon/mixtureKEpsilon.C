@@ -224,7 +224,7 @@ void mixtureKEpsilon<BasicTurbulenceModel>::correctInletOutlet
 template<class BasicTurbulenceModel>
 void mixtureKEpsilon<BasicTurbulenceModel>::initMixtureFields()
 {
-    if (rhom_.valid()) return;
+    if (rhom_) return;
 
     // Local references to gas-phase properties
     const volScalarField& kg = this->k_;

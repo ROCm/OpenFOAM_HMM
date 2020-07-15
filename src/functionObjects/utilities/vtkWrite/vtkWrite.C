@@ -521,7 +521,7 @@ bool Foam::functionObjects::vtkWrite::write()
 
         // CellData
         {
-            if (internalWriter.valid())
+            if (internalWriter)
             {
                 // Optionally with cellID and procID fields
                 internalWriter->beginCellData
@@ -580,7 +580,7 @@ bool Foam::functionObjects::vtkWrite::write()
         if (interpolate_)
         {
             // Begin PointData
-            if (internalWriter.valid())
+            if (internalWriter)
             {
                 internalWriter->beginPointData
                 (
@@ -631,7 +631,7 @@ bool Foam::functionObjects::vtkWrite::write()
 
 
         // Finish writers
-        if (internalWriter.valid())
+        if (internalWriter)
         {
             internalWriter->close();
         }

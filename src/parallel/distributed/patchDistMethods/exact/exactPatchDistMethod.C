@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,7 +46,7 @@ namespace patchDistMethods
 const Foam::distributedTriSurfaceMesh&
 Foam::patchDistMethods::exact::patchSurface() const
 {
-    if (!patchSurfPtr_.valid())
+    if (!patchSurfPtr_)
     {
         const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
 

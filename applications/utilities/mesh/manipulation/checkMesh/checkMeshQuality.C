@@ -30,7 +30,7 @@ Foam::label Foam::checkMeshQuality
             faces.instance() = mesh.pointsInstance();
             faces.write();
 
-            if (writer.valid())
+            if (writer)
             {
                 mergeAndWrite(*writer, faces);
             }

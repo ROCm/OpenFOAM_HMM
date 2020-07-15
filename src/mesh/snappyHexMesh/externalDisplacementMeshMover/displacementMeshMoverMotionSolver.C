@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,7 +70,7 @@ Foam::displacementMeshMoverMotionSolver::
 Foam::externalDisplacementMeshMover&
 Foam::displacementMeshMoverMotionSolver::meshMover() const
 {
-    if (!meshMoverPtr_.valid())
+    if (!meshMoverPtr_)
     {
         const word moverType(coeffDict().get<word>("meshMover"));
 
@@ -122,7 +123,7 @@ void Foam::displacementMeshMoverMotionSolver::movePoints(const pointField& p)
     displacementMotionSolver::movePoints(p);
 
     // Update meshMover for new geometry
-    if (meshMoverPtr_.valid())
+    if (meshMoverPtr_)
     {
         meshMover().movePoints(p);
     }

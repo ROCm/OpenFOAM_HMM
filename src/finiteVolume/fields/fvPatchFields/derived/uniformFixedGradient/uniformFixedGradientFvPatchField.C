@@ -107,7 +107,7 @@ Foam::uniformFixedGradientFvPatchField<Type>::uniformFixedGradientFvPatchField
     uniformGradient_(ptf.uniformGradient_.clone())
 {
     // Evaluate the profile if defined
-    if (ptf.uniformGradient_.valid())
+    if (ptf.uniformGradient_)
     {
         this->evaluate();
     }

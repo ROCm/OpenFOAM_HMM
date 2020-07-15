@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -518,7 +518,7 @@ void Foam::expressions::exprResult::operator=(const exprResult& rhs)
                 << exit(FatalError);
         }
     }
-    else if (objectPtr_.valid())
+    else if (objectPtr_)
     {
         FatalErrorInFunction
             << "Assignment with general content not possible" << nl

@@ -106,7 +106,7 @@ Foam::Istream& Foam::regIOobject::readStream(const bool valid)
     }
 
     // Construct object stream and read header if not already constructed
-    if (!isPtr_.valid())
+    if (!isPtr_)
     {
         fileName objPath;
         if (watchIndices_.size())
@@ -152,7 +152,7 @@ Foam::Istream& Foam::regIOobject::readStream
     }
 
     // Construct IFstream if not already constructed
-    if (!isPtr_.valid())
+    if (!isPtr_)
     {
         readStream(valid);
 
@@ -189,7 +189,7 @@ void Foam::regIOobject::close()
             << endl;
     }
 
-    isPtr_.clear();
+    isPtr_.reset(nullptr);
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -365,7 +365,7 @@ void Foam::linearValveLayersFvMesh::update()
     setMorphTimeIndex(3*time().timeIndex() + 1);
     updateMesh();
 
-    if (topoChangeMap.valid())
+    if (topoChangeMap)
     {
         if (topoChangeMap().hasMotionPoints())
         {

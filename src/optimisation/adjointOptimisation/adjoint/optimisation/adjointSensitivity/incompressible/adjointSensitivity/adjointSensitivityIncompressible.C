@@ -130,7 +130,7 @@ const scalarField& adjointSensitivity::getSensitivities() const
 void adjointSensitivity::clearSensitivities()
 {
     derivatives_ = scalar(0);
-    if (fieldSensPtr_.valid())
+    if (fieldSensPtr_)
     {
         fieldSensPtr_().primitiveFieldRef() = scalar(0);
     }

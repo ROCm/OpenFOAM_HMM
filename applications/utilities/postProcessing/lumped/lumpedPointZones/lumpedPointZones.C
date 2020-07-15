@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
         autoPtr<lumpedPointIOMovement> movement =
             lumpedPointIOMovement::New(runTime);
 
-        if (!movement.valid())
+        if (!movement)
         {
             Info<< "No valid movement found" << endl;
             return 1;
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
 
     autoPtr<lumpedPointIOMovement> movement = lumpedPointIOMovement::New(mesh);
 
-    if (!movement.valid())
+    if (!movement)
     {
         Info<< "No valid movement found" << endl;
         return 1;

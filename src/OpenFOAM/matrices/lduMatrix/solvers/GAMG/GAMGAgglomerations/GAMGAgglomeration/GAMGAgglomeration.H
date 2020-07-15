@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -447,7 +447,7 @@ public:
             //- Whether to agglomerate across processors
             bool processorAgglomerate() const
             {
-                return procAgglomeratorPtr_.valid();
+                return bool(procAgglomeratorPtr_);
             }
 
             //- Mapping from processor to agglomerated processor (global, all

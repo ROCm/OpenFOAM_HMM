@@ -241,7 +241,7 @@ Foam::OFstream& Foam::functionObjects::writeFile::file()
         return Snull;
     }
 
-    if (!filePtr_.valid())
+    if (!filePtr_)
     {
         FatalErrorInFunction
             << "File pointer not allocated\n";

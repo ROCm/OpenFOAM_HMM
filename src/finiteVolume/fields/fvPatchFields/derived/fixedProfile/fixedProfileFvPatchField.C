@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -131,7 +132,7 @@ Foam::fixedProfileFvPatchField<Type>::fixedProfileFvPatchField
     origin_(ptf.origin_)
 {
     // Evaluate the profile if defined
-    if (ptf.profile_.valid())
+    if (ptf.profile_)
     {
         this->evaluate();
     }

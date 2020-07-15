@@ -534,7 +534,7 @@ void Foam::cellCellStencils::cellVolumeWeight::interpolatePatchTypes
     // Initialise to not-mapped
     result = -1;
 
-    if (mapPtr.valid())
+    if (mapPtr)
     {
         // Pull remote data into order of addressing
         labelList work(patchTypes);
@@ -861,9 +861,9 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
                         label cellI = tgtCellMap[tgtCellI];
                         tgtGlobalCells[tgtCellI] = globalCells.toGlobal(cellI);
                     }
-                    if (mapper.tgtMap().valid())
+                    if (mapper.tgtMap())
                     {
-                        mapper.tgtMap()().distribute(tgtGlobalCells);
+                        mapper.tgtMap()->distribute(tgtGlobalCells);
                     }
                 }
                 combineCellTypes
@@ -904,9 +904,9 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
                         label cellI = srcCellMap[srcCellI];
                         srcGlobalCells[srcCellI] = globalCells.toGlobal(cellI);
                     }
-                    if (mapper.srcMap().valid())
+                    if (mapper.srcMap())
                     {
-                        mapper.srcMap()().distribute(srcGlobalCells);
+                        mapper.srcMap()->distribute(srcGlobalCells);
                     }
                 }
 

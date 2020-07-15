@@ -366,7 +366,7 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry
 {
     DebugInFunction << endl;
 
-    if (!surfPtr_.valid())
+    if (!surfPtr_)
     {
         fileName meshInstance(replaceMask(meshFileName_, timeIndex));
         IFstream isBinary(baseDir_/meshInstance, IOstream::BINARY);

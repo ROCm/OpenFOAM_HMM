@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -245,7 +245,7 @@ Foam::displacementLaplacianFvMotionSolver::
 Foam::motionDiffusivity&
 Foam::displacementLaplacianFvMotionSolver::diffusivity()
 {
-    if (!diffusivityPtr_.valid())
+    if (!diffusivityPtr_)
     {
         diffusivityPtr_ = motionDiffusivity::New
         (
@@ -267,7 +267,7 @@ Foam::displacementLaplacianFvMotionSolver::curPoints() const
         pointDisplacement_
     );
 
-    if (pointLocation_.valid())
+    if (pointLocation_)
     {
         if (debug)
         {

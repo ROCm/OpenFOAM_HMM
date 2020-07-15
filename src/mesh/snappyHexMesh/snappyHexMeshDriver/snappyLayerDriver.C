@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -834,7 +834,7 @@ void Foam::snappyLayerDriver::handleFeatureAngle
 
                     nFeats++;
 
-                    if (str.valid())
+                    if (str)
                     {
                         const point& p0 = pp.localPoints()[e[0]];
                         const point& p1 = pp.localPoints()[e[1]];
@@ -3341,9 +3341,9 @@ void Foam::snappyLayerDriver::addLayers
     // be done by snapping phase
     {
         autoPtr<mapPolyMesh> map = meshRefiner_.dupNonManifoldBoundaryPoints();
-        if (map.valid())
+        if (map)
         {
-            const labelList& reverseFaceMap = map().reverseFaceMap();
+            const labelList& reverseFaceMap = map->reverseFaceMap();
             forAll(baffles, i)
             {
                 label f0 = reverseFaceMap[baffles[i].first()];
@@ -3538,7 +3538,7 @@ void Foam::snappyLayerDriver::addLayers
             regionSide
         );
 
-        if (map.valid())
+        if (map)
         {
             // Store point duplication
             pointToMaster.setSize(mesh.nPoints(), -1);
@@ -4530,7 +4530,7 @@ void Foam::snappyLayerDriver::addLayers
 
 
         autoPtr<mapPolyMesh> map = meshRefiner_.mergePoints(pointToMaster);
-        if (map.valid())
+        if (map)
         {
             inplaceReorder(map().reverseCellMap(), cellNLayers);
 
@@ -4554,7 +4554,7 @@ void Foam::snappyLayerDriver::addLayers
             true,   // internal zones
             false   // baffle zones
         );
-        if (map.valid())
+        if (map)
         {
             inplaceReorder(map().reverseCellMap(), cellNLayers);
 

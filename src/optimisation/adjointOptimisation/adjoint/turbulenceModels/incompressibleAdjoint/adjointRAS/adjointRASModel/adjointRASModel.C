@@ -66,7 +66,7 @@ void adjointRASModel::setMeanFields()
     const solverControl& solControl = adjointVars_.getSolverControl();
     if (solControl.average())
     {
-        if (adjointTMVariable1Ptr_.valid())
+        if (adjointTMVariable1Ptr_)
         {
             adjointTMVariable1MeanPtr_.reset
             (
@@ -85,7 +85,7 @@ void adjointRASModel::setMeanFields()
             );
         }
 
-        if (adjointTMVariable2Ptr_.valid())
+        if (adjointTMVariable2Ptr_)
         {
             adjointTMVariable2MeanPtr_.reset
             (
@@ -420,12 +420,12 @@ void adjointRASModel::resetMeanFields()
     const solverControl& solControl = adjointVars_.getSolverControl();
     if (solControl.average())
     {
-        if (adjointTMVariable1MeanPtr_.valid())
+        if (adjointTMVariable1MeanPtr_)
         {
             adjointTMVariable1MeanPtr_() ==
                 dimensionedScalar(adjointTMVariable1Ptr_().dimensions(), Zero);
         }
-        if (adjointTMVariable2MeanPtr_.valid())
+        if (adjointTMVariable2MeanPtr_)
         {
             adjointTMVariable2MeanPtr_() ==
                 dimensionedScalar(adjointTMVariable2Ptr_().dimensions(), Zero);
@@ -443,13 +443,13 @@ void adjointRASModel::computeMeanFields()
         scalar avIter(iAverageIter);
         scalar oneOverItP1 = 1./(avIter+1);
         scalar mult = avIter*oneOverItP1;
-        if (adjointTMVariable1MeanPtr_.valid())
+        if (adjointTMVariable1MeanPtr_)
         {
             adjointTMVariable1MeanPtr_() ==
                 adjointTMVariable1Ptr_()*mult
               + getAdjointTMVariable1Inst()*oneOverItP1;
         }
-        if (adjointTMVariable2MeanPtr_.valid())
+        if (adjointTMVariable2MeanPtr_)
         {
             adjointTMVariable2MeanPtr_() ==
                 adjointTMVariable2Ptr_()*mult

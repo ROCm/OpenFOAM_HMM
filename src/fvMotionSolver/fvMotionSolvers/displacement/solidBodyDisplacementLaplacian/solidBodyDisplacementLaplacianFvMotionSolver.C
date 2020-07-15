@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -249,7 +249,7 @@ Foam::solidBodyDisplacementLaplacianFvMotionSolver::
 Foam::motionDiffusivity&
 Foam::solidBodyDisplacementLaplacianFvMotionSolver::diffusivity()
 {
-    if (!diffusivityPtr_.valid())
+    if (!diffusivityPtr_)
     {
         diffusivityPtr_ = motionDiffusivity::New
         (
@@ -277,7 +277,7 @@ Foam::solidBodyDisplacementLaplacianFvMotionSolver::curPoints() const
     );
     const pointField& newPoints = tnewPoints();
 
-    if (pointLocation_.valid())
+    if (pointLocation_)
     {
         if (debug)
         {

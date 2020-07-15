@@ -33,7 +33,7 @@ License
 template<class CloudType>
 void Foam::VoidFraction<CloudType>::write()
 {
-    if (thetaPtr_.valid())
+    if (thetaPtr_)
     {
         thetaPtr_->write();
     }
@@ -79,7 +79,7 @@ void Foam::VoidFraction<CloudType>::preEvolve
     const typename parcelType::trackingData& td
 )
 {
-    if (thetaPtr_.valid())
+    if (thetaPtr_)
     {
         thetaPtr_->primitiveFieldRef() = 0.0;
     }

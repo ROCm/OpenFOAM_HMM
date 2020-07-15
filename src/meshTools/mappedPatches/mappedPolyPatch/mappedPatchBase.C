@@ -517,7 +517,7 @@ void Foam::mappedPatchBase::findSamples
 void Foam::mappedPatchBase::calcMapping() const
 {
     static bool hasWarned = false;
-    if (mapPtr_.valid())
+    if (mapPtr_)
     {
         FatalErrorInFunction
             << "Mapping already calculated" << exit(FatalError);

@@ -122,7 +122,7 @@ bool FIBase::readDict(const dictionary& dict)
 {
     if (sensitivity::readDict(dict))
     {
-        if (eikonalSolver_.valid())
+        if (eikonalSolver_)
         {
             eikonalSolver_().readDict(dict);
         }

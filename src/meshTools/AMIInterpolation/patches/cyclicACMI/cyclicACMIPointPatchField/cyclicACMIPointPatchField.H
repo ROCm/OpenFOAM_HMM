@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +56,7 @@ class cyclicACMIPointPatchField
 :
     public coupledPointPatchField<Type>
 {
-    // Private data
+    // Private Data
 
         //- Local reference cast into the cyclicACMI patch
         const cyclicACMIPointPatch& cyclicACMIPatch_;
@@ -73,7 +74,7 @@ class cyclicACMIPointPatchField
         //- Owner side patch interpolation
         const PrimitivePatchInterpolation<primitivePatch>& ppi() const
         {
-            if (!ppiPtr_.valid())
+            if (!ppiPtr_)
             {
                 ppiPtr_.reset
                 (
@@ -90,7 +91,7 @@ class cyclicACMIPointPatchField
         //- Neighbour side patch interpolation
         const PrimitivePatchInterpolation<primitivePatch>& nbrPpi() const
         {
-            if (!nbrPpiPtr_.valid())
+            if (!nbrPpiPtr_)
             {
                 nbrPpiPtr_.reset
                 (

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -144,7 +144,7 @@ Foam::functionObjects::codedFunctionObject::codedFunctionObject
 Foam::functionObject&
 Foam::functionObjects::codedFunctionObject::redirectFunctionObject() const
 {
-    if (!redirectFunctionObjectPtr_.valid())
+    if (!redirectFunctionObjectPtr_)
     {
         dictionary constructDict(dict_);
         constructDict.set("type", name_);

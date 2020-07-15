@@ -121,7 +121,7 @@ void Foam::regionModels::regionModel::initialise()
             << "between regions will not be possible" << endl;
     }
 
-    if (!outputPropertiesPtr_.valid())
+    if (!outputPropertiesPtr_)
     {
         const fileName uniformPath(word("uniform")/"regionModels");
 

@@ -36,7 +36,7 @@ License
 template<class CloudType>
 void Foam::ParticleTracks<CloudType>::write()
 {
-    if (cloudPtr_.valid())
+    if (cloudPtr_)
     {
         cloudPtr_->write();
 
@@ -94,7 +94,7 @@ void Foam::ParticleTracks<CloudType>::preEvolve
     const typename parcelType::trackingData& td
 )
 {
-    if (!cloudPtr_.valid())
+    if (!cloudPtr_)
     {
         cloudPtr_.reset
         (
@@ -113,10 +113,10 @@ void Foam::ParticleTracks<CloudType>::postFace(const parcelType& p, bool&)
      || this->owner().solution().transient()
     )
     {
-        if (!cloudPtr_.valid())
+        if (!cloudPtr_)
         {
             FatalErrorInFunction
-             << "Cloud storage not allocated" << abort(FatalError);
+                << "Cloud storage not allocated" << abort(FatalError);
         }
 
         const label count =
