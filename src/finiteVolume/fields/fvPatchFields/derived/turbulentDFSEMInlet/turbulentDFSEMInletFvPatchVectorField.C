@@ -190,7 +190,7 @@ const Foam::pointToPointPlanarInterpolation&
 Foam::turbulentDFSEMInletFvPatchVectorField::patchMapper() const
 {
     // Initialise interpolation (2D planar interpolation by triangulation)
-    if (mapperPtr_.empty())
+    if (!mapperPtr_)
     {
         const fileName samplePointsFile
         (

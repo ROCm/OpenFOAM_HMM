@@ -44,7 +44,7 @@ namespace Foam
 
 Foam::scalar Foam::optMeshMovement::getMaxAllowedDisplacement() const
 {
-    if (maxAllowedDisplacement_.empty())
+    if (!maxAllowedDisplacement_)
     {
         FatalErrorInFunction
             << "maxAllowedDisplacement requested but not set" << nl

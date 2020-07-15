@@ -260,7 +260,7 @@ bool adjointRASModel::read()
 
 volScalarField& adjointRASModel::getAdjointTMVariable1Inst()
 {
-    if (adjointTMVariable1Ptr_.empty())
+    if (!adjointTMVariable1Ptr_)
     {
         // if pointer is not set, set it to a zero field
         adjointTMVariable1Ptr_.reset
@@ -287,7 +287,7 @@ volScalarField& adjointRASModel::getAdjointTMVariable1Inst()
 
 volScalarField& adjointRASModel::getAdjointTMVariable2Inst()
 {
-    if (adjointTMVariable2Ptr_.empty())
+    if (!adjointTMVariable2Ptr_)
     {
         // if pointer is not set, set it to a zero field
         adjointTMVariable2Ptr_.reset

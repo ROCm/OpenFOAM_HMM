@@ -237,7 +237,7 @@ void Foam::fv::meanVelocityForce::constrain
     const label
 )
 {
-    if (rAPtr_.empty())
+    if (!rAPtr_)
     {
         rAPtr_.reset
         (

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -220,7 +220,7 @@ void Foam::sampledSets::sampleAndWrite(fieldGroup<Type>& fields)
         const bool interpolate = interpolationScheme_ != "cell";
 
         // Create or use existing writer
-        if (fields.formatter.empty())
+        if (!fields.formatter)
         {
             fields = writeFormat_;
         }

@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -2038,7 +2038,7 @@ scalar NURBS3DSurface::lengthDerivativeV
 
 const labelList& NURBS3DSurface::getBoundaryCPIDs()
 {
-    if(boundaryCPIDs_.empty())
+    if (!boundaryCPIDs_)
     {
         const label uNCPs(uBasis_.nCPs());
         const label vNCPs(vBasis_.nCPs());
@@ -2082,7 +2082,7 @@ const labelList& NURBS3DSurface::getBoundaryCPIs()
 
 const label& NURBS3DSurface::whichBoundaryCPI(const label& globalCPI)
 {
-    if(whichBoundaryCPID_.empty())
+    if (!whichBoundaryCPID_)
     {
         getBoundaryCPIDs();
     }

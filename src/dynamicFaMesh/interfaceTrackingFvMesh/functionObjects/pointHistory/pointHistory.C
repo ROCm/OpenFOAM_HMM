@@ -91,7 +91,7 @@ Foam::pointHistory::pointHistory
     refHistoryPoint_(dict.lookup("refHistoryPoint")),
     processor_(-1),
     fileName_(dict.get<word>("fileName")),
-    historyFilePtr_()
+    historyFilePtr_(nullptr)
 {
     Info<< "Creating " << this->name() << " function object." << endl;
 
@@ -144,7 +144,7 @@ Foam::pointHistory::pointHistory
     }
 
     // Create history file if not already created
-    if (historyFilePtr_.empty())
+    if (!historyFilePtr_)
     {
         // File update
         if (Pstream::master())
@@ -180,13 +180,11 @@ Foam::pointHistory::pointHistory
             );
 
             // Add headers to output data
-            if (historyFilePtr_.valid())
+            if (historyFilePtr_)
             {
                 historyFilePtr_()
-                    << "# Time" << tab << "X" << tab
-                        << "Y" << tab << "Z";
-
-                historyFilePtr_() << endl;
+                    << "# Time" << tab << "X" << tab << "Y" << tab << "Z"
+                    << endl;
             }
         }
     }

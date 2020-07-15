@@ -110,7 +110,7 @@ thermalBaffleFvPatchScalarField::thermalBaffleFvPatchScalarField
         && regionName != "none"
     )
     {
-        if (extrudeMeshPtr_.empty())
+        if (!extrudeMeshPtr_)
         {
             createPatchMesh();
         }
@@ -249,14 +249,6 @@ void thermalBaffleFvPatchScalarField::createPatchMesh()
             regionPatches
         )
     );
-
-    if (extrudeMeshPtr_.empty())
-    {
-        WarningInFunction
-            << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
-            << " patchMeshPtr not set."
-            << endl;
-    }
 }
 
 

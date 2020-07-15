@@ -126,7 +126,7 @@ bool Foam::SIMPLEControlOpt::loop()
     Time& runTime = const_cast<Time&>(mesh_.time());
 
     // Sub-cycle time if this is the first iter
-    if (subCycledTimePtr_.empty())
+    if (!subCycledTimePtr_)
     {
         subCycledTimePtr_.reset(new subCycleTime(runTime, nIters()));
         Info<< "Solving equations for solver "

@@ -75,7 +75,7 @@ void sensitivitySurfacePoints::read()
         dict().getOrDefault<bool>("includeObjectiveContribution", true);
 
     // Allocate new solvers if necessary
-    if (includeDistance_ && eikonalSolver_.empty())
+    if (includeDistance_ && !eikonalSolver_)
     {
         eikonalSolver_.reset
         (
@@ -90,7 +90,7 @@ void sensitivitySurfacePoints::read()
         );
     }
 
-    if (includeMeshMovement_ && meshMovementSolver_.empty())
+    if (includeMeshMovement_ && !meshMovementSolver_)
     {
         meshMovementSolver_.reset
         (

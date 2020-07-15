@@ -110,7 +110,7 @@ void Foam::sampledSurfaces::performAction
 
         if (s.interpolate())
         {
-            if (interpPtr.empty())
+            if (!interpPtr)
             {
                 interpPtr = interpolation<Type>::New
                 (
@@ -123,7 +123,7 @@ void Foam::sampledSurfaces::performAction
         }
         else
         {
-            if (samplePtr.empty())
+            if (!samplePtr)
             {
                 samplePtr = interpolation<Type>::New
                 (

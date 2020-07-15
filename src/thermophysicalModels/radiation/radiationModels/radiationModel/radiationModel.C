@@ -237,7 +237,7 @@ void Foam::radiation::radiationModel::correct()
         firstIter_ = false;
     }
 
-    if (!soot_.empty())
+    if (soot_)
     {
         soot_->correct();
     }

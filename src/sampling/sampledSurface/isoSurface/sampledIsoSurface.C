@@ -74,7 +74,7 @@ void Foam::sampledIsoSurface::getIsoFields() const
 
         if
         (
-            storedVolFieldPtr_.empty()
+            !storedVolFieldPtr_
          || (fvm.time().timeName() != storedVolFieldPtr_().instance())
         )
         {
@@ -126,7 +126,7 @@ void Foam::sampledIsoSurface::getIsoFields() const
     // (volPointInterpolation::interpolate with cache=false deletes any
     //  registered one or if mesh.changing())
 
-    if (subMeshPtr_.empty())
+    if (!subMeshPtr_)
     {
         const word pointFldName =
             "volPointInterpolate_"
@@ -316,8 +316,8 @@ bool Foam::sampledIsoSurface::updateGeometry() const
     // Get sub-mesh if any
     if
     (
-        (-1 != mesh().cellZones().findIndex(zoneNames_))
-     && subMeshPtr_.empty()
+        !subMeshPtr_
+     && (-1 != mesh().cellZones().findIndex(zoneNames_))
     )
     {
         const polyBoundaryMesh& patches = mesh().boundaryMesh();

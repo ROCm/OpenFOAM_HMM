@@ -205,7 +205,7 @@ void Foam::triSurfaceSearch::clearOut()
 const Foam::indexedOctree<Foam::treeDataTriSurface>&
 Foam::triSurfaceSearch::tree() const
 {
-    if (treePtr_.empty())
+    if (!treePtr_)
     {
         // Calculate bb without constructing local point numbering.
         treeBoundBox bb(Zero, Zero);

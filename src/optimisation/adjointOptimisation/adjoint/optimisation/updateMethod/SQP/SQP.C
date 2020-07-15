@@ -427,7 +427,7 @@ void Foam::SQP::write()
         constraintsSize = constraintsSize*(width + 1) + 2;
 
         // Open file and write header
-        if (meritFunctionFile_.empty())
+        if (!meritFunctionFile_)
         {
             meritFunctionFile_.reset
             (

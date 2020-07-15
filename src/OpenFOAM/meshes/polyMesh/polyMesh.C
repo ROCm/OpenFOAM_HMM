@@ -860,7 +860,7 @@ Foam::label Foam::polyMesh::nSolutionD() const
 
 const Foam::labelIOList& Foam::polyMesh::tetBasePtIs() const
 {
-    if (tetBasePtIsPtr_.empty())
+    if (!tetBasePtIsPtr_)
     {
         if (debug)
         {
@@ -894,7 +894,7 @@ const Foam::labelIOList& Foam::polyMesh::tetBasePtIs() const
 const Foam::indexedOctree<Foam::treeDataCell>&
 Foam::polyMesh::cellTree() const
 {
-    if (cellTreePtr_.empty())
+    if (!cellTreePtr_)
     {
         treeBoundBox overallBb(points());
 
@@ -1087,7 +1087,7 @@ const Foam::labelList& Foam::polyMesh::faceNeighbour() const
 
 const Foam::pointField& Foam::polyMesh::oldPoints() const
 {
-    if (oldPointsPtr_.empty())
+    if (!oldPointsPtr_)
     {
         if (debug)
         {
@@ -1233,7 +1233,7 @@ void Foam::polyMesh::resetMotion() const
 
 const Foam::globalMeshData& Foam::polyMesh::globalData() const
 {
-    if (globalMeshDataPtr_.empty())
+    if (!globalMeshDataPtr_)
     {
         if (debug)
         {

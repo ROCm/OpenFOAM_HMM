@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -625,7 +626,7 @@ void Foam::DistributedDelaunayMesh<Triangulation>::sync
         return;
     }
 
-    if (allBackgroundMeshBounds_.empty())
+    if (!allBackgroundMeshBounds_)
     {
         distributeBoundBoxes(bb);
     }
@@ -810,7 +811,7 @@ void Foam::DistributedDelaunayMesh<Triangulation>::sync(const boundBox& bb)
         return;
     }
 
-    if (allBackgroundMeshBounds_.empty())
+    if (!allBackgroundMeshBounds_)
     {
         distributeBoundBoxes(bb);
     }

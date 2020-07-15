@@ -347,7 +347,7 @@ void sensitivitySurface::read()
         dict().getOrDefault<bool>("writeGeometricInfo", false);
 
     // Allocate new solvers if necessary
-    if (includeDistance_ && eikonalSolver_.empty())
+    if (includeDistance_ && !eikonalSolver_)
     {
         eikonalSolver_.reset
         (
@@ -361,7 +361,7 @@ void sensitivitySurface::read()
             )
         );
     }
-    if (includeMeshMovement_ && meshMovementSolver_.empty())
+    if (includeMeshMovement_ && !meshMovementSolver_)
     {
         meshMovementSolver_.reset
         (

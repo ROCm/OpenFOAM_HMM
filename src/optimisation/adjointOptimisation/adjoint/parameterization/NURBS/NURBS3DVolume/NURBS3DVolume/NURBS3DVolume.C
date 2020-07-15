@@ -1657,7 +1657,7 @@ Foam::scalar Foam::NURBS3DVolume::computeMaxBoundaryDisplacement
 
 Foam::tmp<Foam::vectorField> Foam::NURBS3DVolume::getPointsInBox()
 {
-    if (mapPtr_.empty())
+    if (!mapPtr_)
     {
         findPointsInBox(localSystemCoordinates_);
     }
@@ -1672,7 +1672,7 @@ Foam::tmp<Foam::vectorField> Foam::NURBS3DVolume::getPointsInBox()
 
 const Foam::labelList& Foam::NURBS3DVolume::getMap()
 {
-    if (mapPtr_.empty())
+    if (!mapPtr_)
     {
         findPointsInBox(localSystemCoordinates_);
     }
@@ -1683,7 +1683,7 @@ const Foam::labelList& Foam::NURBS3DVolume::getMap()
 
 const Foam::labelList& Foam::NURBS3DVolume::getReverseMap()
 {
-    if (reverseMapPtr_.empty())
+    if (!reverseMapPtr_)
     {
         findPointsInBox(localSystemCoordinates_);
     }
@@ -1695,11 +1695,11 @@ const Foam::labelList& Foam::NURBS3DVolume::getReverseMap()
 const Foam::pointVectorField& Foam::NURBS3DVolume::getParametricCoordinates()
 {
     // If not computed yet, compute parametric coordinates
-    if (parametricCoordinatesPtr_.empty())
+    if (!parametricCoordinatesPtr_)
     {
         // Find mesh points inside control points box
         // if they have been identified yet
-        if (mapPtr_.empty())
+        if (!mapPtr_)
         {
             findPointsInBox(localSystemCoordinates_);
         }
