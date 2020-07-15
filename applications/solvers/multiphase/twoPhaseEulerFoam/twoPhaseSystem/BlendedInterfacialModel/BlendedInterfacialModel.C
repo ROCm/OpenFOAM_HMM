@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -129,12 +130,12 @@ Foam::BlendedInterfacialModel<modelType>::K() const
 {
     tmp<volScalarField> f1, f2;
 
-    if (model_.valid() || model1In2_.valid())
+    if (model_ || model1In2_)
     {
         f1 = blending_.f1(pair1In2_.dispersed(), pair2In1_.dispersed());
     }
 
-    if (model_.valid() || model2In1_.valid())
+    if (model_ || model2In1_)
     {
         f2 = blending_.f2(pair1In2_.dispersed(), pair2In1_.dispersed());
     }
@@ -157,17 +158,17 @@ Foam::BlendedInterfacialModel<modelType>::K() const
         )
     );
 
-    if (model_.valid())
+    if (model_)
     {
         x.ref() += model_->K()*(f1() - f2());
     }
 
-    if (model1In2_.valid())
+    if (model1In2_)
     {
         x.ref() += model1In2_->K()*(1 - f1);
     }
 
-    if (model2In1_.valid())
+    if (model2In1_)
     {
         x.ref() += model2In1_->K()*f2;
     }
@@ -175,7 +176,7 @@ Foam::BlendedInterfacialModel<modelType>::K() const
     if
     (
         correctFixedFluxBCs_
-     && (model_.valid() || model1In2_.valid() || model2In1_.valid())
+     && (model_ || model1In2_ || model2In1_)
     )
     {
         correctFixedFluxBCs(x.ref());
@@ -191,7 +192,7 @@ Foam::BlendedInterfacialModel<modelType>::Kf() const
 {
     tmp<surfaceScalarField> f1, f2;
 
-    if (model_.valid() || model1In2_.valid())
+    if (model_ || model1In2_)
     {
         f1 = fvc::interpolate
         (
@@ -199,7 +200,7 @@ Foam::BlendedInterfacialModel<modelType>::Kf() const
         );
     }
 
-    if (model_.valid() || model2In1_.valid())
+    if (model_ || model2In1_)
     {
         f2 = fvc::interpolate
         (
@@ -225,17 +226,17 @@ Foam::BlendedInterfacialModel<modelType>::Kf() const
         )
     );
 
-    if (model_.valid())
+    if (model_)
     {
         x.ref() += model_->Kf()*(f1() - f2());
     }
 
-    if (model1In2_.valid())
+    if (model1In2_)
     {
         x.ref() += model1In2_->Kf()*(1 - f1);
     }
 
-    if (model2In1_.valid())
+    if (model2In1_)
     {
         x.ref() += model2In1_->Kf()*f2;
     }
@@ -243,7 +244,7 @@ Foam::BlendedInterfacialModel<modelType>::Kf() const
     if
     (
         correctFixedFluxBCs_
-     && (model_.valid() || model1In2_.valid() || model2In1_.valid())
+     && (model_ || model1In2_ || model2In1_)
     )
     {
         correctFixedFluxBCs(x.ref());
@@ -260,12 +261,12 @@ Foam::BlendedInterfacialModel<modelType>::F() const
 {
     tmp<volScalarField> f1, f2;
 
-    if (model_.valid() || model1In2_.valid())
+    if (model_ || model1In2_)
     {
         f1 = blending_.f1(pair1In2_.dispersed(), pair2In1_.dispersed());
     }
 
-    if (model_.valid() || model2In1_.valid())
+    if (model_ || model2In1_)
     {
         f2 = blending_.f2(pair1In2_.dispersed(), pair2In1_.dispersed());
     }
@@ -285,17 +286,17 @@ Foam::BlendedInterfacialModel<modelType>::F() const
         dimensioned<Type>(modelType::dimF, Zero)
     );
 
-    if (model_.valid())
+    if (model_)
     {
         x.ref() += model_->F()*(f1() - f2());
     }
 
-    if (model1In2_.valid())
+    if (model1In2_)
     {
         x.ref() += model1In2_->F()*(1 - f1);
     }
 
-    if (model2In1_.valid())
+    if (model2In1_)
     {
         x.ref() -= model2In1_->F()*f2; // note : subtraction
     }
@@ -303,7 +304,7 @@ Foam::BlendedInterfacialModel<modelType>::F() const
     if
     (
         correctFixedFluxBCs_
-     && (model_.valid() || model1In2_.valid() || model2In1_.valid())
+     && (model_ || model1In2_ || model2In1_)
     )
     {
         correctFixedFluxBCs(x.ref());
@@ -319,7 +320,7 @@ Foam::BlendedInterfacialModel<modelType>::Ff() const
 {
     tmp<surfaceScalarField> f1, f2;
 
-    if (model_.valid() || model1In2_.valid())
+    if (model_ || model1In2_)
     {
         f1 = fvc::interpolate
         (
@@ -327,7 +328,7 @@ Foam::BlendedInterfacialModel<modelType>::Ff() const
         );
     }
 
-    if (model_.valid() || model2In1_.valid())
+    if (model_ || model2In1_)
     {
         f2 = fvc::interpolate
         (
@@ -352,17 +353,17 @@ Foam::BlendedInterfacialModel<modelType>::Ff() const
 
     x.ref().setOriented();
 
-    if (model_.valid())
+    if (model_)
     {
         x.ref() += model_->Ff()*(f1() - f2());
     }
 
-    if (model1In2_.valid())
+    if (model1In2_)
     {
         x.ref() += model1In2_->Ff()*(1 - f1);
     }
 
-    if (model2In1_.valid())
+    if (model2In1_)
     {
         x.ref() -= model2In1_->Ff()*f2; // note : subtraction
     }
@@ -370,7 +371,7 @@ Foam::BlendedInterfacialModel<modelType>::Ff() const
     if
     (
         correctFixedFluxBCs_
-     && (model_.valid() || model1In2_.valid() || model2In1_.valid())
+     && (model_ || model1In2_ || model2In1_)
     )
     {
         correctFixedFluxBCs(x.ref());
@@ -386,12 +387,12 @@ Foam::BlendedInterfacialModel<modelType>::D() const
 {
     tmp<volScalarField> f1, f2;
 
-    if (model_.valid() || model1In2_.valid())
+    if (model_ || model1In2_)
     {
         f1 = blending_.f1(pair1In2_.dispersed(), pair2In1_.dispersed());
     }
 
-    if (model_.valid() || model2In1_.valid())
+    if (model_ || model2In1_)
     {
         f2 = blending_.f2(pair1In2_.dispersed(), pair2In1_.dispersed());
     }
@@ -414,17 +415,17 @@ Foam::BlendedInterfacialModel<modelType>::D() const
         )
     );
 
-    if (model_.valid())
+    if (model_)
     {
         x.ref() += model_->D()*(f1() - f2());
     }
 
-    if (model1In2_.valid())
+    if (model1In2_)
     {
         x.ref() += model1In2_->D()*(1 - f1);
     }
 
-    if (model2In1_.valid())
+    if (model2In1_)
     {
         x.ref() += model2In1_->D()*f2;
     }
@@ -432,7 +433,7 @@ Foam::BlendedInterfacialModel<modelType>::D() const
     if
     (
         correctFixedFluxBCs_
-     && (model_.valid() || model1In2_.valid() || model2In1_.valid())
+     && (model_ || model1In2_ || model2In1_)
     )
     {
         correctFixedFluxBCs(x.ref());
@@ -451,8 +452,8 @@ bool Foam::BlendedInterfacialModel<modelType>::hasModel
     return
     (
         &phase == &(pair_.phase1())
-      ? model1In2_.valid()
-      : model2In1_.valid()
+      ? bool(model1In2_)
+      : bool(model2In1_)
     );
 }
 

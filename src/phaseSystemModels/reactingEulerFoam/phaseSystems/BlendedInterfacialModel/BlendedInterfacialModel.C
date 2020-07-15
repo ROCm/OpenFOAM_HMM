@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,7 +107,7 @@ Foam::BlendedInterfacialModel<ModelType>::evaluate
 
     tmp<scalarGeoField> f1, f2;
 
-    if (model_.valid() || model1In2_.valid())
+    if (model_ || model1In2_)
     {
         f1 =
             blendedInterfacialModel::interpolate<scalarGeoField>
@@ -115,7 +116,7 @@ Foam::BlendedInterfacialModel<ModelType>::evaluate
             );
     }
 
-    if (model_.valid() || model2In1_.valid())
+    if (model_ || model2In1_)
     {
         f2 =
             blendedInterfacialModel::interpolate<scalarGeoField>
@@ -177,7 +178,7 @@ Foam::BlendedInterfacialModel<ModelType>::evaluate
     if
     (
         correctFixedFluxBCs_
-     && (model_.valid() || model1In2_.valid() || model2In1_.valid())
+     && (model_ || model1In2_ || model2In1_)
     )
     {
         correctFixedFluxBCs(x.ref());
@@ -300,8 +301,8 @@ bool Foam::BlendedInterfacialModel<ModelType>::hasModel
 {
     return
        &phase == &(phase1_)
-      ? model1In2_.valid()
-      : model2In1_.valid();
+      ? bool(model1In2_)
+      : bool(model2In1_);
 }
 
 

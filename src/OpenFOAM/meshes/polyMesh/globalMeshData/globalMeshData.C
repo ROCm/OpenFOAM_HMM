@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -128,8 +128,8 @@ void Foam::globalMeshData::calcSharedPoints() const
     if
     (
         nGlobalPoints_ != -1
-     || sharedPointLabelsPtr_.valid()
-     || sharedPointAddrPtr_.valid()
+     || sharedPointLabelsPtr_
+     || sharedPointAddrPtr_
     )
     {
         FatalErrorInFunction
@@ -295,8 +295,8 @@ void Foam::globalMeshData::calcSharedEdges() const
     if
     (
         nGlobalEdges_ != -1
-     || sharedEdgeLabelsPtr_.valid()
-     || sharedEdgeAddrPtr_.valid()
+     || sharedEdgeLabelsPtr_
+     || sharedEdgeAddrPtr_
     )
     {
         FatalErrorInFunction

@@ -954,7 +954,7 @@ Foam::label Foam::checkGeometry
             patchWriter.reset(new surfaceWriters::vtkWriter());
         }
 
-        surfaceWriter& wr = (surfWriter.valid() ? *surfWriter : *patchWriter);
+        surfaceWriter& wr = (surfWriter ? *surfWriter : *patchWriter);
 
         // Currently only do AMI checks
 

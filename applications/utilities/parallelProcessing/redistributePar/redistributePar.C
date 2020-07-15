@@ -1415,9 +1415,9 @@ autoPtr<mapDistributePolyMesh> createReconstructMap
 
     autoPtr<mapDistributePolyMesh> mapPtr;
 
-    if (baseMeshPtr.valid() && baseMeshPtr().nCells())
+    if (baseMeshPtr && baseMeshPtr->nCells())
     {
-        const fvMesh& baseMesh = baseMeshPtr();
+        const fvMesh& baseMesh = *baseMeshPtr;
 
         labelListList cellSubMap(Pstream::nProcs());
         cellSubMap[Pstream::masterNo()] = identity(mesh.nCells());

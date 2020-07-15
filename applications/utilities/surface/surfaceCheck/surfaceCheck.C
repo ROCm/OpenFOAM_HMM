@@ -1043,7 +1043,7 @@ int main(int argc, char *argv[])
         //            )
         //        );
         //
-        //        if (hitInfo.hit() && intStreamPtr.valid())
+        //        if (hitInfo.hit() && intStreamPtr)
         //        {
         //            intStreamPtr().write(hitInfo.hitPoint());
         //

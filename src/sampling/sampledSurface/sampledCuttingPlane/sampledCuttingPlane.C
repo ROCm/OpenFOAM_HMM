@@ -164,8 +164,8 @@ void Foam::sampledCuttingPlane::createGeometry()
     // Select either the submesh or the underlying mesh
     const fvMesh& mesh =
     (
-        subMeshPtr_.valid()
-      ? subMeshPtr_().subMesh()
+        subMeshPtr_
+      ? subMeshPtr_->subMesh()
       : fvm
     );
 

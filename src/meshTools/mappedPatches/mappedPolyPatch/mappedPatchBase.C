@@ -763,7 +763,7 @@ const
 {
     const word surfType(surfDict_.getOrDefault<word>("type", "none"));
 
-    if (!surfPtr_.valid() && surfType != "none")
+    if (!surfPtr_ && surfType != "none")
     {
         word surfName(surfDict_.getOrDefault("name", patch_.name()));
 

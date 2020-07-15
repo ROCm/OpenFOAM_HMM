@@ -723,7 +723,7 @@ int main(int argc, char *argv[])
 
         mesh.readUpdate();
 
-        if (args.found("dummy-phi") && !dummyPhi.valid())
+        if (args.found("dummy-phi") && !dummyPhi)
         {
             Info<< "Adding a dummy phi" << endl;
             dummyPhi.reset

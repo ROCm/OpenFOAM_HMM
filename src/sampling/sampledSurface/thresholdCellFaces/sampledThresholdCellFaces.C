@@ -102,8 +102,9 @@ bool Foam::sampledThresholdCellFaces::updateGeometry() const
             fvm
         );
     }
+
     const volScalarField& cellFld =
-        (fieldReadPtr.valid() ? *fieldReadPtr : *cellFldPtr);
+        (fieldReadPtr ? *fieldReadPtr : *cellFldPtr);
 
 
     thresholdCellFaces surf

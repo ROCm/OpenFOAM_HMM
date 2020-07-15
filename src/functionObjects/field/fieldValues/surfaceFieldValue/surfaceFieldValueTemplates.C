@@ -370,7 +370,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
         Field<Type> values(getFieldValues<Type>(fieldName, true));
 
         // Write raw values on surface if specified
-        if (surfaceWriterPtr_.valid() && surfaceWriterPtr_->enabled())
+        if (surfaceWriterPtr_ && surfaceWriterPtr_->enabled())
         {
             Field<Type> allValues(values);
             combineFields(allValues);

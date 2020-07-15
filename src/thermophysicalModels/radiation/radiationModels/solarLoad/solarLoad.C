@@ -439,7 +439,7 @@ void Foam::radiation::solarLoad::calculateQdiff
     );
 
 
-    if (finalAgglom_.size() > 0 && coarseMesh_.empty())
+    if (!coarseMesh_ && !finalAgglom_.empty())
     {
         coarseMesh_.reset
         (

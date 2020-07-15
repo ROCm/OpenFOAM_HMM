@@ -413,8 +413,8 @@ bool Foam::functionObjects::regionSizeDistribution::write()
 
     const volScalarField& alpha =
     (
-         alphaPtr.valid()
-       ? alphaPtr()
+         alphaPtr
+       ? *alphaPtr
        : obr_.lookupObject<volScalarField>(alphaName_)
     );
 

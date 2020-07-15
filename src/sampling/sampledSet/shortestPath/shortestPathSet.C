@@ -969,7 +969,7 @@ void Foam::shortestPathSet::genSamples
             markLeakPath,
             iter,
             mesh,
-            (isBlockedFace.valid() ? isBlockedFace() : isBoundaryFace),
+            (isBlockedFace ? *isBlockedFace : isBoundaryFace),
             insidePoint,
             insideCelli,
             outsidePoint,

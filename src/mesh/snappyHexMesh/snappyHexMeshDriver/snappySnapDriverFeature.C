@@ -1253,11 +1253,11 @@ void Foam::snappySnapDriver::featureAttractionUsingReconstruction
 
             const point& pt = pp.localPoints()[pointi];
 
-            if (patchConstraints[pointi].first() == 2 && feStr.valid())
+            if (feStr && patchConstraints[pointi].first() == 2)
             {
                 feStr().write(linePointRef(pt, pt+patchAttraction[pointi]));
             }
-            else if (patchConstraints[pointi].first() == 3 && fpStr.valid())
+            else if (fpStr && patchConstraints[pointi].first() == 3)
             {
                 fpStr().write(linePointRef(pt, pt+patchAttraction[pointi]));
             }
@@ -2580,11 +2580,7 @@ void Foam::snappySnapDriver::determineFeatures
                             hasSnapped = true;
 
                             // Debug: dump missed feature point
-                            if
-                            (
-                                missedMP0Str.valid()
-                            && !nearInfo.second().hit()
-                            )
+                            if (missedMP0Str && !nearInfo.second().hit())
                             {
                                 missedMP0Str().write
                                 (
@@ -2649,11 +2645,7 @@ void Foam::snappySnapDriver::determineFeatures
                             }
 
                             // Debug: dump missed feature point
-                            if
-                            (
-                                missedMP1Str.valid()
-                            && !nearInfo.second().hit()
-                            )
+                            if (missedMP1Str && !nearInfo.second().hit())
                             {
                                 missedMP1Str().write
                                 (
@@ -2693,8 +2685,8 @@ void Foam::snappySnapDriver::determineFeatures
                 {
                     if
                     (
-                        patchConstraints[pointi].first() == 3
-                     && featurePointStr.valid()
+                        featurePointStr
+                     && patchConstraints[pointi].first() == 3
                     )
                     {
                         featurePointStr().write
@@ -2704,8 +2696,8 @@ void Foam::snappySnapDriver::determineFeatures
                     }
                     else if
                     (
-                        patchConstraints[pointi].first() == 2
-                     && featureEdgeStr.valid()
+                        featureEdgeStr
+                     && patchConstraints[pointi].first() == 2
                     )
                     {
                         featureEdgeStr().write
@@ -2812,7 +2804,7 @@ void Foam::snappySnapDriver::determineFeatures
                 }
 
                 const pointIndexHit& info = nearInfo.second();
-                if (info.hit() && featurePointStr.valid())
+                if (featurePointStr && info.hit())
                 {
                     featurePointStr().write
                     (

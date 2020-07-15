@@ -63,7 +63,7 @@ Foam::label Foam::NURBS3DVolume::getCPID
 void Foam::NURBS3DVolume::findPointsInBox(const vectorField& meshPoints)
 {
     // It is considered an error to recompute points in the control boxes
-    if (mapPtr_.valid() || reverseMapPtr_.valid())
+    if (mapPtr_ || reverseMapPtr_)
     {
         FatalErrorInFunction
            << "Attempting to recompute points residing within control boxes"

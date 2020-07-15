@@ -190,7 +190,7 @@ bool Foam::expressions::fvExprDriver::readDict
     {
         ITstream& is = eptr->stream();
 
-        if (writer_.valid() && storedVariables_.size())
+        if (writer_ && !storedVariables_.empty())
         {
             WarningInFunction
                 // << "Context: " << driverContext_ << nl
@@ -216,7 +216,7 @@ bool Foam::expressions::fvExprDriver::readDict
     {
         ITstream& is = eptr->stream();
 
-        if (writer_.valid() && delayedVariables_.size())
+        if (writer_ && !delayedVariables_.empty())
         {
             WarningInFunction
                 // << "Context: " << driverContext_ << nl

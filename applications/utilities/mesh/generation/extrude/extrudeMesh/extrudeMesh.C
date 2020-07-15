@@ -815,9 +815,9 @@ int main(int argc, char *argv[])
 
     polyMesh& mesh =
     (
-        meshFromMesh.valid()
-      ? meshFromMesh()
-      : meshFromSurface()
+        meshFromMesh
+      ? *meshFromMesh
+      : *meshFromSurface
     );
 
 

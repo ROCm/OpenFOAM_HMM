@@ -646,12 +646,12 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
 
             if
             (
-                CHFModel_.valid()
-                && CHFSoobModel_.valid()
-                && TDNBModel_.valid()
-                && MHFModel_.valid()
-                && LeidenfrostModel_.valid()
-                && filmBoilingModel_.valid()
+                CHFModel_
+             && CHFSoobModel_
+             && TDNBModel_
+             && MHFModel_
+             && LeidenfrostModel_
+             && filmBoilingModel_
             )
             {
 
