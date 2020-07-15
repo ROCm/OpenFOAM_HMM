@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,6 +55,7 @@ SourceFiles
 #define NURBS3DVolume_H
 
 #include "NURBSbasis.H"
+#include "boolVector.H"
 #include "pointMesh.H"
 #include "pointPatchField.H"
 #include "pointPatchFieldsFwd.H"
@@ -73,9 +74,9 @@ class NURBS3DVolume
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
-        typedef List<FixedList<bool, 3>> boolListList3;
+        typedef List<boolVector> boolVectorList;
 
         //- NURBS basis functions
         const fvMesh& mesh_;
@@ -121,17 +122,17 @@ protected:
         label confineBoundaryControlPoints_;
 
         //- Which movement components to freeze in each plane
-        boolListList3 confineUMinCPs_;
+        boolVectorList confineUMinCPs_;
 
-        boolListList3 confineUMaxCPs_;
+        boolVectorList confineUMaxCPs_;
 
-        boolListList3 confineVMinCPs_;
+        boolVectorList confineVMinCPs_;
 
-        boolListList3 confineVMaxCPs_;
+        boolVectorList confineVMaxCPs_;
 
-        boolListList3 confineWMinCPs_;
+        boolVectorList confineWMinCPs_;
 
-        boolListList3 confineWMaxCPs_;
+        boolVectorList confineWMaxCPs_;
 
         //- Which of the cps are moved in an optimisation
         boolList activeControlPoints_;
@@ -186,7 +187,7 @@ protected:
         void confineControlPoint(const label cpI);
 
         //- Confine specific movements for a prescribed control point
-        void confineControlPoint(const label cpI, const FixedList<bool, 3>&);
+        void confineControlPoint(const label cpI, const boolVector&);
 
         //- Create folders to store cps and derivatives
         void makeFolders();

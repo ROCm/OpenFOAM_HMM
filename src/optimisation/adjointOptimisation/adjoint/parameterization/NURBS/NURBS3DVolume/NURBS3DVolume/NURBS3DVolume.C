@@ -499,7 +499,7 @@ void Foam::NURBS3DVolume::continuityRealatedConfinement()
     // preserve continuity at the boundary of the parameterized space
     forAll(confineUMinCPs_, iCPu)
     {
-        const FixedList<bool, 3>& confineSlice = confineUMinCPs_[iCPu];
+        const boolVector& confineSlice = confineUMinCPs_[iCPu];
         // Control points at the start of the parameterized space
         for (label iCPw = 0; iCPw < nCPsW; iCPw++)
         {
@@ -512,7 +512,7 @@ void Foam::NURBS3DVolume::continuityRealatedConfinement()
 
     forAll(confineUMaxCPs_, sliceI)
     {
-        const FixedList<bool, 3>& confineSlice = confineUMaxCPs_[sliceI];
+        const boolVector& confineSlice = confineUMaxCPs_[sliceI];
         label iCPu = nCPsU - 1 - sliceI;
         // Control points at the end of the parameterized space
         for (label iCPw = 0; iCPw < nCPsW; iCPw++)
@@ -528,7 +528,7 @@ void Foam::NURBS3DVolume::continuityRealatedConfinement()
     // preserve continuity at the boundary of the parameterized space
     forAll(confineVMinCPs_, iCPv)
     {
-        const FixedList<bool, 3>& confineSlice = confineVMinCPs_[iCPv];
+        const boolVector& confineSlice = confineVMinCPs_[iCPv];
         // Control points at the start of the parameterized space
         for (label iCPw = 0; iCPw < nCPsW; iCPw++)
         {
@@ -541,7 +541,7 @@ void Foam::NURBS3DVolume::continuityRealatedConfinement()
 
     forAll(confineVMaxCPs_, sliceI)
     {
-        const FixedList<bool, 3>& confineSlice = confineVMaxCPs_[sliceI];
+        const boolVector& confineSlice = confineVMaxCPs_[sliceI];
         label iCPv = nCPsV - 1 - sliceI;
         // Control points at the end of the parameterized space
         for (label iCPw = 0; iCPw < nCPsW; iCPw++)
@@ -557,7 +557,7 @@ void Foam::NURBS3DVolume::continuityRealatedConfinement()
     // preserve continuity at the boundary of the parameterized space
     forAll(confineWMinCPs_, iCPw)
     {
-        const FixedList<bool, 3>& confineSlice = confineWMinCPs_[iCPw];
+        const boolVector& confineSlice = confineWMinCPs_[iCPw];
         // Control points at the start of the parameterized space
         for (label iCPv = 0; iCPv < nCPsV; iCPv++)
         {
@@ -570,7 +570,7 @@ void Foam::NURBS3DVolume::continuityRealatedConfinement()
 
     forAll(confineWMaxCPs_, sliceI)
     {
-        const FixedList<bool, 3>& confineSlice = confineWMaxCPs_[sliceI];
+        const boolVector& confineSlice = confineWMaxCPs_[sliceI];
         label iCPw = nCPsW - 1 - sliceI;
         // Control points at the end of the parameterized space
         for (label iCPv = 0; iCPv < nCPsV; iCPv++)
@@ -616,7 +616,7 @@ void Foam::NURBS3DVolume::confineControlPoint(const label cpI)
 void Foam::NURBS3DVolume::confineControlPoint
 (
     const label cpI,
-    const FixedList<bool, 3>& confineDirections
+    const boolVector& confineDirections
 )
 {
     if (cpI < 0 || cpI > cps_.size() -1)
@@ -628,9 +628,9 @@ void Foam::NURBS3DVolume::confineControlPoint
     }
     else
     {
-        if (confineDirections[0]) activeDesignVariables_[3*cpI] = false;
-        if (confineDirections[1]) activeDesignVariables_[3*cpI + 1] = false;
-        if (confineDirections[2]) activeDesignVariables_[3*cpI + 2] = false;
+        if (confineDirections.x()) activeDesignVariables_[3*cpI] = false;
+        if (confineDirections.y()) activeDesignVariables_[3*cpI + 1] = false;
+        if (confineDirections.z()) activeDesignVariables_[3*cpI + 2] = false;
     }
 }
 
@@ -684,44 +684,44 @@ Foam::NURBS3DVolume::NURBS3DVolume
     ),
     confineUMinCPs_
     (
-        dict.getOrDefaultCompat<boolListList3>
+        dict.getOrDefaultCompat<boolVectorList>
         (
-            "confineUMinCPs", {{"boundUMinCPs", 1912}}, boolListList3(0)
+            "confineUMinCPs", {{"boundUMinCPs", 1912}}, boolVectorList()
         )
     ),
     confineUMaxCPs_
     (
-        dict.getOrDefaultCompat<boolListList3>
+        dict.getOrDefaultCompat<boolVectorList>
         (
-            "confineUMaxCPs", {{"boundUMaxCPs", 1912}}, boolListList3(0)
+            "confineUMaxCPs", {{"boundUMaxCPs", 1912}}, boolVectorList()
         )
     ),
     confineVMinCPs_
     (
-        dict.getOrDefaultCompat<boolListList3>
+        dict.getOrDefaultCompat<boolVectorList>
         (
-            "confineVMinCPs", {{"boundVMinCPs", 1912}}, boolListList3(0)
+            "confineVMinCPs", {{"boundVMinCPs", 1912}}, boolVectorList()
         )
     ),
     confineVMaxCPs_
     (
-        dict.getOrDefaultCompat<boolListList3>
+        dict.getOrDefaultCompat<boolVectorList>
         (
-            "confineVMaxCPs", {{"boundVMaxCPs", 1912}}, boolListList3(0)
+            "confineVMaxCPs", {{"boundVMaxCPs", 1912}}, boolVectorList()
         )
     ),
     confineWMinCPs_
     (
-        dict.getOrDefaultCompat<boolListList3>
+        dict.getOrDefaultCompat<boolVectorList>
         (
-            "confineWMinCPs", {{"boundWMinCPs", 1912}}, boolListList3(0)
+            "confineWMinCPs", {{"boundWMinCPs", 1912}}, boolVectorList()
         )
     ),
     confineWMaxCPs_
     (
-        dict.getOrDefaultCompat<boolListList3>
+        dict.getOrDefaultCompat<boolVectorList>
         (
-            "confineWMaxCPs", {{"boundWMaxCPs", 1912}}, boolListList3(0)
+            "confineWMaxCPs", {{"boundWMaxCPs", 1912}}, boolVectorList()
         )
     ),
     activeControlPoints_(0), //zero here, execute sanity checks first
