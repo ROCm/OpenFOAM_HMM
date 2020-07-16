@@ -655,6 +655,16 @@ bool found
 );
 
 
+//- Linear search to find all occurences of given element.
+template<class ListType, class UnaryPredicate>
+labelList findIndices
+(
+    const ListType& input,
+    const UnaryPredicate& pred,
+    label start=0
+);
+
+
 //- Set various locations of the list with a specified value.
 //
 //  \param list the list to modify

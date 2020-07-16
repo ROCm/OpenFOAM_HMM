@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1167,6 +1167,55 @@ bool Foam::ListOps::found
 )
 {
     return (ListOps::find(input, pred, start) >= 0);
+}
+
+
+template<class ListType, class UnaryPredicate>
+Foam::labelList Foam::ListOps::findIndices
+(
+    const ListType& input,
+    const UnaryPredicate& pred,
+    label start
+)
+{
+    const label len = input.size();
+
+    // Pass 1: count occurrences
+    label count = 0;
+
+    if (start >= 0)
+    {
+        for (label i = start; i < len; ++i)
+        {
+            if (pred(input[i]))
+            {
+                if (!count) start = i;  // adjust start for second pass
+                ++count;
+            }
+        }
+    }
+
+    labelList indices(count);
+
+    // Pass 2: fill content
+    if (count)
+    {
+        const label total = count;
+        count = 0;
+        for (label i = start; i < len; ++i)
+        {
+            if (pred(input[i]))
+            {
+                indices[count] = i;
+                if (++count == total)  // early termination
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+    return indices;
 }
 
 
