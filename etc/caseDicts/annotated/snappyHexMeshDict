@@ -462,6 +462,12 @@ castellatedMeshControls
     //           (currently only a single layer growth i.e. -1 is supported)
     //           Default value is 0.
     //nCellZoneErodeIter 2;
+
+    // Optional: delete any region smaller than below fraction of the overall
+    //           size (on a per-zone basis). This is occasionally useful
+    //           when generating meshes with faceZones as baffles or boundary
+    //           faces.
+    //minCellFraction 0.001;
 }
 
 // Settings for the snapping.
