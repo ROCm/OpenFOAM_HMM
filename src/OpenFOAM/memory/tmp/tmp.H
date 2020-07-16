@@ -49,7 +49,7 @@ See also
 
 #include "refCount.H"
 #include "word.H"
-#include <utility>
+#include "stdFoam.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -160,7 +160,10 @@ public:
 
     // Query
 
-        //- True if a null pointer/reference
+        //- Deprecated(2020-07) True if a null managed pointer
+        //
+        //  \deprecated(2020-07) - use bool operator
+        FOAM_DEPRECATED_FOR(2020-07, "bool operator")
         bool empty() const noexcept { return !ptr_; }
 
         //- True for non-null pointer/reference
