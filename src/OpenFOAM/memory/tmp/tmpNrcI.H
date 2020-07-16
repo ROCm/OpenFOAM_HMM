@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -153,27 +153,6 @@ inline Foam::tmpNrc<T>::~tmpNrc()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-inline bool Foam::tmpNrc<T>::isTmp() const noexcept
-{
-    return type_ == PTR;
-}
-
-
-template<class T>
-inline bool Foam::tmpNrc<T>::empty() const noexcept
-{
-    return (!ptr_ && isTmp());
-}
-
-
-template<class T>
-inline bool Foam::tmpNrc<T>::valid() const noexcept
-{
-    return (ptr_ || type_ == CREF);
-}
-
-
-template<class T>
 inline bool Foam::tmpNrc<T>::movable() const noexcept
 {
     return (type_ == PTR && ptr_);
@@ -184,20 +163,6 @@ template<class T>
 inline Foam::word Foam::tmpNrc<T>::typeName() const
 {
     return "tmpNrc<" + word(typeid(T).name()) + '>';
-}
-
-
-template<class T>
-inline T* Foam::tmpNrc<T>::get() noexcept
-{
-    return ptr_; // non-const pointer
-}
-
-
-template<class T>
-inline const T* Foam::tmpNrc<T>::get() const noexcept
-{
-    return ptr_; // const pointer
 }
 
 
@@ -230,7 +195,7 @@ inline T& Foam::tmpNrc<T>::ref() const
                 << abort(FatalError);
         }
     }
-    else
+    else // if (type_ == CREF)
     {
         FatalErrorInFunction
             << "Attempted non-const reference to const object from a "
@@ -268,10 +233,10 @@ inline T* Foam::tmpNrc<T>::ptr() const
                 << abort(FatalError);
         }
 
-        T* ptr = ptr_;
+        T* p = ptr_;
         ptr_ = nullptr;
 
-        return ptr;
+        return p;
     }
 
     return ptr_->clone().ptr();
@@ -286,15 +251,6 @@ inline void Foam::tmpNrc<T>::clear() const noexcept
         delete ptr_;
         ptr_ = nullptr;
     }
-}
-
-
-template<class T>
-inline void Foam::tmpNrc<T>::reset() noexcept
-{
-    clear();
-    ptr_ = nullptr;
-    type_ = PTR;
 }
 
 
@@ -406,30 +362,6 @@ inline T* Foam::tmpNrc<T>::operator->()
 
 
 template<class T>
-inline Foam::tmpNrc<T>::operator bool() const noexcept
-{
-    return (ptr_ || type_ == CREF);
-}
-
-
-template<class T>
-inline void Foam::tmpNrc<T>::operator=(T* p)
-{
-    clear();
-
-    if (!p)
-    {
-        FatalErrorInFunction
-            << "Attempted copy of a deallocated " << typeName()
-            << abort(FatalError);
-    }
-
-    ptr_ = p;
-    type_ = PTR;
-}
-
-
-template<class T>
 inline void Foam::tmpNrc<T>::operator=(const tmpNrc<T>& t)
 {
     if (&t == this)
@@ -476,6 +408,23 @@ inline void Foam::tmpNrc<T>::operator=(tmpNrc<T>&& other) noexcept
 
     other.ptr_ = nullptr;
     other.type_ = PTR;
+}
+
+
+template<class T>
+inline void Foam::tmpNrc<T>::operator=(T* p)
+{
+    clear();
+
+    if (!p)
+    {
+        FatalErrorInFunction
+            << "Attempted copy of a deallocated " << typeName()
+            << abort(FatalError);
+    }
+
+    ptr_ = p;
+    type_ = PTR;
 }
 
 
