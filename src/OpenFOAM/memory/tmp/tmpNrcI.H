@@ -224,15 +224,15 @@ inline T& Foam::tmpNrc<T>::constCast() const
 template<class T>
 inline T* Foam::tmpNrc<T>::ptr() const
 {
+    if (!ptr_)
+    {
+        FatalErrorInFunction
+            << typeName() << " deallocated"
+            << abort(FatalError);
+    }
+
     if (isTmp())
     {
-        if (!ptr_)
-        {
-            FatalErrorInFunction
-                << typeName() << " deallocated"
-                << abort(FatalError);
-        }
-
         T* p = ptr_;
         ptr_ = nullptr;
 

@@ -260,15 +260,16 @@ inline T& Foam::tmp<T>::constCast() const
 template<class T>
 inline T* Foam::tmp<T>::ptr() const
 {
+    if (!ptr_)
+    {
+        FatalErrorInFunction
+            << typeName() << " deallocated"
+            << abort(FatalError);
+    }
+
     if (isTmp())
     {
-        if (!ptr_)
-        {
-            FatalErrorInFunction
-                << typeName() << " deallocated"
-                << abort(FatalError);
-        }
-        else if (!ptr_->unique())
+        if (!ptr_->unique())
         {
             FatalErrorInFunction
                 << "Attempt to acquire pointer to object referred to"
