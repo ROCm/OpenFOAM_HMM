@@ -16,7 +16,7 @@ FoamFile
 
 solvers
 {
-    "(p|Phi)"
+    "(p|Phi|cellDisplacement)"
     {
         solver          PCG;
         preconditioner  DIC;

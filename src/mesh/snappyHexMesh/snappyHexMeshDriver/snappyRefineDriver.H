@@ -125,7 +125,8 @@ class snappyRefineDriver
         label surfaceOnlyRefine
         (
             const refinementParameters& refineParams,
-            const label maxIter
+            const label maxIter,
+            const label leakBlockageIter    // when to start leak closing
         );
 
         //- Refine all cells in small gaps

@@ -393,7 +393,8 @@ Foam::layerParameters::layerParameters
             "meshShrinker",
             medialAxisMeshMover::typeName
         )
-    )
+    ),
+    nOuterIter_(dict.getOrDefault<scalar>("nOuterIter", 1))
 {
     // Detect layer specification mode
 
@@ -692,6 +693,56 @@ Foam::layerParameters::layerParameters
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::scalar Foam::layerParameters::layerThickness
+(
+    const label nLayers,
+    const scalar layerThickness,    // overall layer thickness
+    const scalar expansionRatio,
+
+    const label layerStart,         // start in nLayers
+    const label layerSize           // size of slice of nLayers
+)
+{
+    if (layerSize == 0 || nLayers == 0)
+    {
+        return 0.0;
+    }
+    else if (layerSize > nLayers || layerStart >= nLayers)
+    {
+        FatalErrorInFunction    << "Illegal input for slice of layer:"
+            << " overall nLayers:" << nLayers
+            << " slice nLayers:" << layerSize
+            << " slice start:" << layerStart
+            << exit(FatalError);
+        return 0.0;
+    }
+    else if (mag(expansionRatio-1) < SMALL)
+    {
+        return layerThickness*layerSize/nLayers;
+    }
+    else
+    {
+        const scalar firstLayerThickness =
+            finalLayerThicknessRatio(nLayers, expansionRatio)
+          * layerThickness
+          / pow(expansionRatio, nLayers-1);
+
+        // Calculate thickness of single layer at layerStart
+        const scalar startThickness =
+            firstLayerThickness
+           *pow(expansionRatio, layerStart);
+
+        // See below for formula
+        const scalar thickness =
+            startThickness
+           *(1.0 - pow(expansionRatio, layerSize))
+           /(1.0 - expansionRatio);
+
+        return thickness;
+    }
+}
+
 
 Foam::scalar Foam::layerParameters::layerThickness
 (

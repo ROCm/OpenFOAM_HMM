@@ -121,26 +121,28 @@ private:
             scalarField minThickness_;
 
 
-        scalar featureAngle_;
+        const scalar featureAngle_;
 
-        scalar mergePatchFacesAngle_;
+        const scalar mergePatchFacesAngle_;
 
-        scalar concaveAngle_;
+        const scalar concaveAngle_;
 
-        label nGrow_;
+        const label nGrow_;
 
-        scalar maxFaceThicknessRatio_;
+        const scalar maxFaceThicknessRatio_;
 
-        label nBufferCellsNoExtrude_;
+        const label nBufferCellsNoExtrude_;
 
-        label nLayerIter_;
+        const label nLayerIter_;
 
         label nRelaxedIter_;
 
         //- Any additional reporting
-        bool additionalReporting_;
+        const bool additionalReporting_;
 
-        word meshShrinker_;
+        const word meshShrinker_;
+
+        const label nOuterIter_;
 
 
     // Private Member Functions
@@ -277,6 +279,15 @@ public:
                 return nLayerIter_;
             }
 
+            //- Outer loop to add layer by layer. Can be set to >= max layers
+            //  in which case layers get added one at a time. This can help
+            //  layer insertion since the newly added layers get included in
+            //  the shrinking. Default is 1 -> add all layers in one go.
+            label nOuterIter() const
+            {
+                return nOuterIter_;
+            }
+
             //- Number of iterations after which relaxed motion rules
             //  are to be used.
             label nRelaxedIter() const
@@ -379,6 +390,16 @@ public:
             (
                 const label nLayers,
                 const scalar expansionRatio
+            );
+
+            //- Determine overall thickness of a slice (usually 1 layer)
+            static scalar layerThickness
+            (
+                const label nLayers,
+                const scalar layerThickness,    // overall thickness
+                const scalar expansionRatio,    // expansion ratio
+                const label layerStart,         // starting layer (0=firstLayer)
+                const label layerSize           // number of layers in slice
             );
 };
 

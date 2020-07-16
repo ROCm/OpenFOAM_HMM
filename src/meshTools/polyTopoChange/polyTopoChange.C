@@ -888,18 +888,7 @@ void Foam::polyTopoChange::reorderCompactFaces
 }
 
 
-// Compact all and orders points and faces:
-// - points into internal followed by external points
-// - internalfaces upper-triangular
-// - externalfaces after internal ones.
-void Foam::polyTopoChange::compact
-(
-    const bool orderCells,
-    const bool orderPoints,
-    label& nInternalPoints,
-    labelList& patchSizes,
-    labelList& patchStarts
-)
+void Foam::polyTopoChange::shrink()
 {
     points_.shrink();
     pointMap_.shrink();
@@ -915,7 +904,23 @@ void Foam::polyTopoChange::compact
     cellMap_.shrink();
     reverseCellMap_.shrink();
     cellZone_.shrink();
+}
 
+
+// Compact all and orders points and faces:
+// - points into internal followed by external points
+// - internalfaces upper-triangular
+// - externalfaces after internal ones.
+void Foam::polyTopoChange::compact
+(
+    const bool orderCells,
+    const bool orderPoints,
+    label& nInternalPoints,
+    labelList& patchSizes,
+    labelList& patchStarts
+)
+{
+    shrink();
 
     // Compact points
     label nActivePoints = 0;

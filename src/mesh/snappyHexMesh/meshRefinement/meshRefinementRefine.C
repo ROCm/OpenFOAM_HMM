@@ -2310,6 +2310,7 @@ Foam::labelList Foam::meshRefinement::refineCandidates
         // Limit refinement
         // ~~~~~~~~~~~~~~~~
 
+        if (limitShells_.shells().size())
         {
             label nUnmarked = unmarkInternalRefinement(refineCell, nRefine);
             if (nUnmarked > 0)

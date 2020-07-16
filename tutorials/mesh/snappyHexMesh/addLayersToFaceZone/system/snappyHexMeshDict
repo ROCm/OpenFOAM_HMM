@@ -174,16 +174,15 @@ addLayersControls
     // size of the refined cell outside layer (true) or absolute sizes (false).
     relativeSizes false;
 
-    // Expansion factor for layer mesh
-    expansionRatio 1.0;
-
-    firstLayerThickness 0.2e-3;
+    // Layers defined by overall thickness and expansion ratio
+    thickness           0.7e-3;
+    firstLayerThickness 0.1e-3;
 
     // Minimum overall thickness of total layers. If for any reason layer
     // cannot be above minThickness do not add layer.
     // If relativeSizes this is relative to undistorted size of cell
     // outside layer..
-    minThickness 0.1e-3;
+    minThickness 0.0001e-3;
 
 
     // Per final patch (so not geometry!) the layer information
@@ -191,19 +190,19 @@ addLayersControls
     {
         maxY
         {
-            nSurfaceLayers 2;
+            nSurfaceLayers 3;
         }
         minY
         {
-            nSurfaceLayers 2;
+            nSurfaceLayers 3;
         }
         A
         {
-            nSurfaceLayers 2;
+            nSurfaceLayers 3;
         }
         A_slave
         {
-            nSurfaceLayers 2;
+            nSurfaceLayers 3;
         }
     }
 
@@ -257,13 +256,28 @@ addLayersControls
         // Number of smoothing iterations of interior mesh movement direction
         nSmoothNormals 3;
 
-
-    // Mesh shrinking
-
         // Optional: at non-patched sides allow mesh to slip if extrusion
         // direction makes angle larger than slipFeatureAngle. Default is
         // 0.5*featureAngle.
         slipFeatureAngle 30;
+
+
+    //// Motion solver instead of default medial axis
+    //
+    //    //- Use displacementMotionSolver to shrink mesh
+    //    meshShrinker displacementMotionSolver;
+    //
+    //    //- Use laplacian for shrinking
+    //    solver displacementLaplacian;
+    //
+    //    displacementLaplacianCoeffs
+    //    {
+    //        diffusivity quadratic inverseDistance ("m.*");
+    //    }
+
+
+
+    // Mesh shrinking
 
         // Maximum number of snapping relaxation iterations. Should stop
         // before upon reaching a correct mesh.
@@ -276,18 +290,10 @@ addLayersControls
         // exit if it reaches this number of iterations; possibly with an
         // illegal mesh.
         nLayerIter 50;
-//
-//        // Max number of iterations after which relaxed meshQuality controls
-//        // get used. Up to nRelaxedIter it uses the settings in
-//        // meshQualityControls,
-//        // after nRelaxedIter it uses the values in
-//        // meshQualityControls::relaxed.
-//        nRelaxedIter 20;
-//
-//        // Additional reporting: if there are just a few faces where there
-//        // are mesh errors (after adding the layers) print their face centres.
-//        // This helps in tracking down problematic mesh areas.
-//        //additionalReporting true;
+
+        // Overall number of outer layer of iterations. Default is 1 -> all
+        // layers are added in one pass.
+        nOuterIter 3;
 }
 
 // Generic mesh quality settings. At any undoable phase these determine
@@ -313,5 +319,15 @@ meshQualityControls
 // Note: the write tolerance needs to be higher than this.
 mergeTolerance 1e-6;
 
+debugFlags
+(
+    //mesh
+);
+
+// Write flags
+writeFlags
+(
+    //layerFields     // write volScalarField for layer coverage
+);
 
 // ************************************************************************* //

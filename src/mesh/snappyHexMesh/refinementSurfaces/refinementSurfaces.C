@@ -207,6 +207,7 @@ Foam::refinementSurfaces::refinementSurfaces
     PtrList<dictionary> globalPatchInfo(surfI);
 
     labelList globalBlockLevel(surfI, labelMax);
+    labelList globalLeakLevel(surfI, labelMax);
 
     // Per surface, per region data
     List<Map<label>> regionMinLevel(surfI);
@@ -218,6 +219,7 @@ Foam::refinementSurfaces::refinementSurfaces
     List<Map<scalar>> regionAngle(surfI);
     List<Map<autoPtr<dictionary>>> regionPatchInfo(surfI);
     List<Map<label>> regionBlockLevel(surfI);
+    List<Map<label>> regionLeakLevel(surfI);
 
     wordHashSet unmatchedKeys(surfacesDict.toc());
 
@@ -330,6 +332,7 @@ Foam::refinementSurfaces::refinementSurfaces
             }
             dict.readIfPresent("perpendicularAngle", globalAngle[surfI]);
             dict.readIfPresent("blockLevel", globalBlockLevel[surfI]);
+            dict.readIfPresent("leakLevel", globalLeakLevel[surfI]);
 
 
             if (dict.found("regions"))
@@ -455,6 +458,10 @@ Foam::refinementSurfaces::refinementSurfaces
                         {
                             regionBlockLevel[surfI].insert(regionI, l);
                         }
+                        if (regionDict.readIfPresent<label>("leakLevel", l))
+                        {
+                            regionLeakLevel[surfI].insert(regionI, l);
+                        }
                     }
                 }
             }
@@ -503,6 +510,8 @@ Foam::refinementSurfaces::refinementSurfaces
     patchInfo_.setSize(nRegions);
     blockLevel_.setSize(nRegions);
     blockLevel_ = labelMax;
+    leakLevel_.setSize(nRegions);
+    leakLevel_ = labelMax;
 
 
     forAll(globalMinLevel, surfI)
@@ -532,6 +541,7 @@ Foam::refinementSurfaces::refinementSurfaces
                 );
             }
             blockLevel_[globalRegionI] = globalBlockLevel[surfI];
+            leakLevel_[globalRegionI] = globalLeakLevel[surfI];
         }
 
         // Overwrite with region specific information
@@ -572,6 +582,7 @@ Foam::refinementSurfaces::refinementSurfaces
             const label globalRegionI = regionOffset_[surfI] + iter.key();
 
             blockLevel_[globalRegionI] = iter.val();
+            leakLevel_[globalRegionI] = iter.val();
         }
     }
 }

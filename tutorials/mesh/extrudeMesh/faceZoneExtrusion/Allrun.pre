@@ -3,18 +3,23 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-paraFoam -vtk -touch
-
-restore0Dir
+touch case.foam
 
 runApplication blockMesh
 
+# Generate f0Zone faceZone
 runApplication topoSet
 
-runApplication snappyHexMesh -overwrite
+runApplication extrudeMesh
 
 runApplication checkMesh
 
-runApplication simpleFoam
+#- Extrude some internal faces into owner
+
+runApplication -s flip topoSet -dict system/topoSetDict.flip
+
+runApplication -s flip extrudeMesh -dict system/extrudeMeshDict.flip
+
+runApplication -s flip checkMesh
 
 #------------------------------------------------------------------------------

@@ -511,6 +511,10 @@ public:
                 const label nCells
             );
 
+            //- Shrink storage (does not remove any elements; just compacts
+            //- dynamic lists
+            void shrink();
+
             //- Move all points. Incompatible with other topology changes.
             void movePoints(const pointField& newPoints);
 

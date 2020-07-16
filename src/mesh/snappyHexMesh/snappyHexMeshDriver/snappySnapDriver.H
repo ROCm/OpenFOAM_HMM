@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -140,6 +141,16 @@ class snappySnapDriver
             (
                 const indirectPrimitivePatch&,
                 const vectorField&
+            );
+
+            //- Freeze points on pointZone or (inside of) faceZone
+            static void freezeExposedPoints
+            (
+                const meshRefinement& meshRefiner,
+                const word& fzName,     // faceZone name
+                const word& pzName,     // pointZone name
+                const indirectPrimitivePatch& outside,
+                vectorField& patchDisp
             );
 
             //- Detect warpage

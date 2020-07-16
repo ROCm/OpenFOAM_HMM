@@ -343,7 +343,8 @@ Foam::label Foam::snappyRefineDriver::smallFeatureRefine
 Foam::label Foam::snappyRefineDriver::surfaceOnlyRefine
 (
     const refinementParameters& refineParams,
-    const label maxIter
+    const label maxIter,
+    const label leakBlockageIter
 )
 {
     if (dryRun_)
@@ -360,6 +361,7 @@ Foam::label Foam::snappyRefineDriver::surfaceOnlyRefine
 
     addProfiling(surface, "snappyHexMesh::refine::surface");
     const fvMesh& mesh = meshRefiner_.mesh();
+    const refinementSurfaces& surfaces = meshRefiner_.surfaces();
 
     // Determine the maximum refinement level over all surfaces. This
     // determines the minimum number of surface refinement iterations.
@@ -372,6 +374,52 @@ Foam::label Foam::snappyRefineDriver::surfaceOnlyRefine
             << "Surface refinement iteration " << iter << nl
             << "------------------------------" << nl
             << endl;
+
+
+        // Do optional leak closing (by removing cells)
+        if (iter >= leakBlockageIter)
+        {
+            // Block off intersections with unzoned surfaces with specified
+            // leakLevel < iter
+            const labelList unnamedSurfaces
+            (
+                surfaceZonesInfo::getUnnamedSurfaces
+                (
+                    surfaces.surfZones()
+                )
+            );
+
+            DynamicList<label> selectedSurfaces(unnamedSurfaces.size());
+            for (const label surfi : unnamedSurfaces)
+            {
+                const label regioni = surfaces.globalRegion(surfi, 0);
+
+                // Take shortcut: assume all cells on surface are refined to
+                // its refinement level at iteration iter. So just use the
+                // iteration to see if the surface is a candidate.
+                if (iter > surfaces.leakLevel()[regioni])
+                {
+                    selectedSurfaces.append(surfi);
+                }
+            }
+
+            if
+            (
+                selectedSurfaces.size()
+             && refineParams.locationsOutsideMesh().size()
+            )
+            {
+               meshRefiner_.blockLeakFaces
+                (
+                    globalToMasterPatch_,
+                    globalToSlavePatch_,
+                    refineParams.locationsInMesh(),
+                    refineParams.zonesInMesh(),
+                    refineParams.locationsOutsideMesh(),
+                    selectedSurfaces
+                );
+            }
+        }
 
 
         // Determine cells to refine
@@ -1762,15 +1810,19 @@ void Foam::snappyRefineDriver::removeInsideCells
     }
 
     // Remove any cells inside limitShells with level -1
-    meshRefiner_.removeLimitShells
-    (
-        nBufferLayers,
-        1,
-        globalToMasterPatch_,
-        globalToSlavePatch_,
-        refineParams.locationsInMesh(),
-        refineParams.zonesInMesh()
-    );
+    if (meshRefiner_.limitShells().shells().size())
+    {
+        meshRefiner_.removeLimitShells
+        (
+            nBufferLayers,
+            1,
+            globalToMasterPatch_,
+            globalToSlavePatch_,
+            refineParams.locationsInMesh(),
+            refineParams.zonesInMesh(),
+            refineParams.locationsOutsideMesh()
+        );
+    }
 
     // Fix any additional (e.g. locationsOutsideMesh). Note: probably not
     // necessary.
@@ -2783,8 +2835,7 @@ void Foam::snappyRefineDriver::baffleAndSplitMesh
             globalToMasterPatch_,
             globalToSlavePatch_,
             refineParams.locationsInMesh(),
-            refineParams.locationsOutsideMesh(),
-            setFormatter_
+            refineParams.locationsOutsideMesh()
         );
     }
 }
@@ -2829,6 +2880,8 @@ void Foam::snappyRefineDriver::zonify
             refineParams.nErodeCellZone(),
             refineParams.locationsInMesh(),
             refineParams.zonesInMesh(),
+            refineParams.locationsOutsideMesh(),
+            setFormatter_,
             zonesToFaceZone
         );
 
@@ -2916,8 +2969,7 @@ void Foam::snappyRefineDriver::splitAndMergeBaffles
         globalToMasterPatch_,
         globalToSlavePatch_,
         refineParams.locationsInMesh(),
-        refineParams.locationsOutsideMesh(),
-        setFormatter_
+        refineParams.locationsOutsideMesh()
     );
 
     if (debug)
@@ -3332,7 +3384,8 @@ void Foam::snappyRefineDriver::doRefine
         surfaceOnlyRefine
         (
             refineParams,
-            20     // maxIter
+            20,         // maxIter
+            labelMax    // no leak detection yet since all in same cell
         );
 
         // Refine cells that contain a gap
@@ -3348,7 +3401,8 @@ void Foam::snappyRefineDriver::doRefine
     surfaceOnlyRefine
     (
         refineParams,
-        100     // maxIter
+        100,    // maxIter
+        0       // Iteration to start leak detection and closure
     );
 
     // Pass1 of automatic gap-level refinement: surface-intersected cells
@@ -3424,17 +3478,31 @@ void Foam::snappyRefineDriver::doRefine
         100    // maxIter
     );
 
-    //// Re-remove cells inbetween two surfaces. The shell refinement/
-    //// directional shell refinement might have caused new small
-    //// gaps to be resolved. This is currently disabled since it finds
-    //// gaps just because it very occasionally walks around already removed
-    //// gaps and still finds 'opposite' surfaces. This probably need additional
-    //// path-length counting to avoid walking huge distances.
-    //surfaceProximityBlock
-    //(
-    //    refineParams,
-    //    1  //100     // maxIter
-    //);
+    // Block gaps (always, ignore surface leakLevel)
+    if (refineParams.locationsOutsideMesh().size())
+    {
+        // For now: only check leaks on meshed surfaces. The problem is that
+        // blockLeakFaces always generates baffles any not just faceZones ...
+        const labelList unnamedSurfaces
+        (
+            surfaceZonesInfo::getUnnamedSurfaces
+            (
+                meshRefiner_.surfaces().surfZones()
+            )
+        );
+        if (unnamedSurfaces.size())
+        {
+            meshRefiner_.blockLeakFaces
+            (
+                globalToMasterPatch_,
+                globalToSlavePatch_,
+                refineParams.locationsInMesh(),
+                refineParams.zonesInMesh(),
+                refineParams.locationsOutsideMesh(),
+                unnamedSurfaces
+            );
+        }
+    }
 
     if
     (

@@ -24,8 +24,10 @@ constructFrom patch;
 //constructFrom surface;
 
 // If construct from patch/mesh:
-sourceCase    "<case>";
-sourcePatches (movingWall);
+sourceCase      "<case>";
+// and one of sourcePatches or sourceFaceZones (but not both):
+sourceFaceZones (someFacesZone);
+sourcePatches   (movingWall);
 
 // If construct from patch: patch to use for back (can be same as sourcePatch)
 exposedPatchName movingWall;

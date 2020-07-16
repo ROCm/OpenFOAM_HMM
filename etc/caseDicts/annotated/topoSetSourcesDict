@@ -384,6 +384,28 @@ faceSet_doc
     }
 
 
+    //- Faces to close connection between points in different 'zones'
+    {
+        source  holeToFace;
+        points
+        (
+            ((0.2 0.2 -10) (1.3 0.4 -0.1))  // points for zone 0
+            ((10 10 10))                    // points for zone 1
+        );
+
+        // optional blocked faces (all uncoupled boundary faces are always
+        // blocked)
+        faceSet blockedFaces;
+
+        // optional subset of cells to operate in (default is all cells)
+        cellSet candidateCells;
+
+        // optional erosion of resulting set. This does some local optimisations
+        // to minimise the set of faces
+        erode true;
+    }
+
+
     //- All faces of faceZone
     {
         source  zoneToFace;

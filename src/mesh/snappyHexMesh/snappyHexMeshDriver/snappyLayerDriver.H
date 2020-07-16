@@ -32,6 +32,7 @@ Description
 
 SourceFiles
     snappyLayerDriver.C
+    snappyLayerDriverOneByOne.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,6 +40,7 @@ SourceFiles
 #define snappyLayerDriver_H
 
 #include "meshRefinement.H"
+#include "scalarIOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,6 +54,7 @@ class motionSmoother;
 class addPatchCellLayer;
 class faceSet;
 class layerParameters;
+class externalDisplacementMeshMover;
 
 /*---------------------------------------------------------------------------*\
                            Class snappyLayerDriver Declaration
@@ -250,11 +253,49 @@ private:
                     const labelList& patchToNLayers,
                     const labelList& patchIDs,
                     const indirectPrimitivePatch& pp,
-                    pointField& patchDisp,
+
                     labelList& patchNLayers,
                     List<extrudeMode>& extrudeStatus,
                     label& nIdealAddedCells
                 ) const;
+
+                //- Determine number of layers per point; include static checks
+                //- on invalid extrusion (e.g. non-manifold)
+                label setPointNumLayers
+                (
+                    const layerParameters& layerParams,
+
+                    const labelList& numLayers,
+                    const labelList& patchIDs,
+                    const indirectPrimitivePatch& pp,
+                    const labelListList& edgeGlobalFaces,
+
+                    vectorField& patchDisp,
+                    labelList& patchNLayers,
+                    List<extrudeMode>&
+                ) const;
+                autoPtr<externalDisplacementMeshMover> makeMeshMover
+                (
+                    const layerParameters& layerParams,
+                    const dictionary& motionDict,
+                    const labelList& internalFaceZones,
+                    const scalarIOField& minThickness,
+                    pointVectorField& displacement
+                ) const;
+                void mapFaceZonePoints
+                (
+                    const mapPolyMesh& map,
+                    labelPairList& baffles,
+                    labelList& pointToMaster
+                ) const;
+                void updatePatch
+                (
+                    const labelList& patchIDs,
+                    const mapPolyMesh& map,
+                    autoPtr<indirectPrimitivePatch>& pp,
+                    labelList& newToOldPatchPoints
+                ) const;
+
 
                 //- Helper function to make a pointVectorField with correct
                 //  bcs for layer addition:
@@ -277,6 +318,25 @@ private:
                     labelList& patchNLayers,
                     List<extrudeMode>& extrudeStatus
                 ) const;
+
+                //- Duplicate points on faceZones with layers
+                void dupFaceZonePoints
+                (
+                    const labelList& patchIDs,  // patch indices
+                    const labelList& numLayers, // number of layers per patch
+                    List<labelPair> baffles,
+                    labelList& pointToMaster
+                );
+
+                //- Re-merge points/faces on faceZones. Opposite of
+                //- dupFaceZonePoints above
+                void mergeFaceZonePoints
+                (
+                    const labelList& pointToMaster,
+                    labelList& cellNLayers,
+                    scalarField& faceRealThickness,
+                    scalarField& faceWantedThickness
+                );
 
                 //- See what zones and patches edges should be extruded into
                 void determineSidePatches
@@ -600,8 +660,52 @@ public:
                 const meshRefinement::FaceMergeType mergeType
             );
 
+            void addLayers
+            (
+                const layerParameters& layerParams,
+                const label nLayerIter,
+
+                const dictionary& motionDict,
+                const label nRelaxedIter,
+                const label nAllowableErrors,
+
+                const labelList& patchIDs,
+                const labelList& internalFaceZones,
+                const List<labelPair>& baffles,
+                const labelList& numLayers,
+                const label nIdealTotAddedCells,
+
+                const globalIndex& globalFaces,
+                indirectPrimitivePatch& pp,
+                const labelListList& edgeGlobalFaces,
+                const labelList& edgePatchID,
+                const labelList& edgeZoneID,
+                const boolList& edgeFlip,
+                const labelList& inflateFaceID,
+                const scalarField& thickness,
+                const scalarIOField& minThickness,
+                const scalarField& expansionRatio,
+                vectorField& patchDisp,
+                labelList& patchNLayers,
+                List<extrudeMode>& extrudeStatus,
+                polyTopoChange& savedMeshMod,
+                labelList& cellNLayers,
+                scalarField& faceRealThickness
+            );
+
             //- Add cell layers
             void addLayers
+            (
+                const layerParameters& layerParams,
+                const dictionary& motionDict,
+                const labelList& patchIDs,
+                const label nAllowableErrors,
+                decompositionMethod& decomposer,
+                fvMeshDistribute& distributor
+            );
+
+            //- For debugging. Can be removed.
+            void addLayersSinglePass
             (
                 const layerParameters& layerParams,
                 const dictionary& motionDict,

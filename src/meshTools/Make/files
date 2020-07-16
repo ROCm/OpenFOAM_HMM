@@ -214,6 +214,7 @@ $(faceSources)/regionToFace/regionToFace.C
 $(faceSources)/searchableSurfaceToFace/searchableSurfaceToFace.C
 $(faceSources)/sphereToFace/sphereToFace.C
 $(faceSources)/zoneToFace/zoneToFace.C
+$(faceSources)/holeToFace/holeToFace.C
 
 pointSources = topoSet/pointSources
 $(pointSources)/topoSetPointSource/topoSetPointSource.C

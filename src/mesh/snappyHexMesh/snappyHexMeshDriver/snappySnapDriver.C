@@ -741,6 +741,75 @@ bool Foam::snappySnapDriver::outwardsDisplacement
 }
 
 
+void Foam::snappySnapDriver::freezeExposedPoints
+(
+    const meshRefinement& meshRefiner,
+    const word& fzName,     // faceZone name
+    const word& pzName,     // pointZone name
+    const indirectPrimitivePatch& outside,
+    vectorField& outsideDisp
+)
+{
+    const fvMesh& mesh = meshRefiner.mesh();
+    const pointZoneMesh& pointZones = mesh.pointZones();
+
+    bitSet isFrozenPoint(mesh.nPoints());
+
+    // Add frozen points
+    const label pointZonei = pointZones.findZoneID(pzName);
+    if (pointZonei != -1)
+    {
+        isFrozenPoint.set(pointZones[pointZonei]);
+    }
+
+    // Add (inside) points of frozen faces
+    const faceZoneMesh& faceZones = mesh.faceZones();
+    const label faceZonei = faceZones.findZoneID(fzName);
+    if (faceZonei != -1)
+    {
+        const uindirectPrimitivePatch pp
+        (
+            UIndirectList<face>(mesh.faces(), faceZones[faceZonei]),
+            mesh.points()
+        );
+
+        // Count number of faces per edge
+        const labelList nEdgeFaces(meshRefiner.countEdgeFaces(pp));
+
+        // Freeze all internal points
+        forAll(nEdgeFaces, edgei)
+        {
+            if (nEdgeFaces[edgei] != 1)
+            {
+                const edge& e = pp.edges()[edgei];
+                isFrozenPoint.set(pp.meshPoints()[e[0]]);
+                isFrozenPoint.set(pp.meshPoints()[e[1]]);
+            }
+        }
+    }
+
+    syncTools::syncPointList
+    (
+        mesh,
+        isFrozenPoint,
+        orEqOp<unsigned int>(),
+        0u
+    );
+
+    if (returnReduce(isFrozenPoint.count(), sumOp<label>()))
+    {
+        for (const label pointi : isFrozenPoint)
+        {
+            const auto& iter = outside.meshPointMap().find(pointi);
+            if (iter.found())
+            {
+                outsideDisp[iter()] = Zero;
+            }
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::snappySnapDriver::snappySnapDriver
@@ -2798,6 +2867,16 @@ void Foam::snappySnapDriver::doSnap
 
             // Check for displacement being outwards.
             outwardsDisplacement(pp, disp);
+
+            // Freeze points on exposed points/faces
+            freezeExposedPoints
+            (
+                meshRefiner_,
+                "frozenFaces",      // faceZone name
+                "frozenPoints",     // pointZone name
+                pp,
+                disp
+            );
 
             // Set initial distribution of displacement field (on patches)
             // from patchDisp and make displacement consistent with b.c.

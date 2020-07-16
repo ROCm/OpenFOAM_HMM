@@ -96,6 +96,10 @@ class refinementSurfaces
         //  needs to apply
         labelList blockLevel_;
 
+        //- From global region number to cell level at which leakage detection
+        //  needs to apply
+        labelList leakLevel_;
+
         //- From global region number to small-gap level specification
         List<FixedList<label, 3>> extendedGapLevel_;
 
@@ -226,6 +230,13 @@ public:
             const labelList& blockLevel() const
             {
                 return blockLevel_;
+            }
+
+            //- From global region number to cell level at which leakage
+            //- detection is applied. labelMax if not set.
+            const labelList& leakLevel() const
+            {
+                return leakLevel_;
             }
 
             //- From global region number to specification of gap and its

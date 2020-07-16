@@ -399,6 +399,7 @@ public:
                 const labelListList& globalEdgeFaces,
                 const scalarField& expansionRatio,
                 const indirectPrimitivePatch& pp,
+                const bitSet& flip,
 
                 const labelList& sidePatchID,
                 const labelList& sideZoneID,
@@ -431,6 +432,7 @@ public:
                     globalEdgeFaces,
                     scalarField(pp.nPoints(), 1.0),     // expansion ration
                     pp,
+                    bitSet(pp.size()),                  // flip
 
                     sidePatchID,
                     labelList(pp.nEdges(), -1),         // zoneID

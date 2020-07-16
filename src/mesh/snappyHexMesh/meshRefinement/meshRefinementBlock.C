@@ -32,12 +32,26 @@ License
 #include "removeCells.H"
 #include "unitConversion.H"
 #include "bitSet.H"
+#include "volFields.H"
 
+// Leak path
+#include "shortestPathSet.H"
+#include "meshSearch.H"
+#include "topoDistanceData.H"
 #include "FaceCellWave.H"
+#include "removeCells.H"
+#include "regionSplit.H"
+
 #include "volFields.H"
 #include "wallPoints.H"
 #include "searchableSurfaces.H"
 #include "distributedTriSurfaceMesh.H"
+
+#include "holeToFace.H"
+#include "refinementParameters.H"
+#include "uindirectPrimitivePatch.H"
+#include "OBJstream.H"
+#include "PatchTools.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -1125,6 +1139,1026 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::removeGapCells
         exposedPatches,
         cellRemover
     );
+}
+
+
+void Foam::meshRefinement::selectIntersectedFaces
+(
+    const labelList& selectedSurfaces,
+    boolList& isBlockedFace
+) const
+{
+    // Like meshRefinement::selectSeparatedCoupledFaces. tbd: convert to bitSet
+
+    // Check that no connection between inside and outside points
+    isBlockedFace.setSize(mesh_.nFaces(), false);
+
+    // Block off separated couples.
+    selectSeparatedCoupledFaces(isBlockedFace);
+
+    // Block off intersections with selected surfaces
+
+    // Mark per face (for efficiency)
+    boolList isSelectedSurf(surfaces_.surfaces().size(), false);
+    UIndirectList<bool>(isSelectedSurf, selectedSurfaces) = true;
+
+    forAll(surfaceIndex_, facei)
+    {
+        const label surfi = surfaceIndex_[facei];
+        if (surfi != -1 && isSelectedSurf[surfi])
+        {
+            isBlockedFace[facei] = true;
+        }
+    }
+}
+
+
+//Foam::labelList Foam::meshRefinement::detectLeakCells
+//(
+//    const boolList& isBlockedFace,
+//    const labelList& leakFaces,
+//    const labelList& seedCells
+//) const
+//{
+//    int dummyTrackData = 0;
+//    List<topoDistanceData<label>> allFaceInfo(mesh_.nFaces());
+//    List<topoDistanceData<label>> allCellInfo(mesh_.nCells());
+//
+//    // Block faces
+//    forAll(isBlockedFace, facei)
+//    {
+//        if (isBlockedFace[facei])
+//        {
+//            allFaceInfo[facei] = topoDistanceData<label>(labelMax, 123);
+//        }
+//    }
+//    for (const label facei : leakFaces)
+//    {
+//        allFaceInfo[facei] = topoDistanceData<label>(labelMax, 123);
+//    }
+//
+//    // Walk from inside cell
+//    DynamicList<topoDistanceData<label>> faceDist;
+//    DynamicList<label> cFaces1;
+//    for (const label celli : seedCells)
+//    {
+//        if (celli != -1)
+//        {
+//            const labelList& cFaces = mesh_.cells()[celli];
+//            faceDist.reserve(cFaces.size());
+//            cFaces1.reserve(cFaces.size());
+//
+//            for (const label facei : cFaces)
+//            {
+//                if (!allFaceInfo[facei].valid(dummyTrackData))
+//                {
+//                    cFaces1.append(facei);
+//                    faceDist.append(topoDistanceData<label>(0, 123));
+//                }
+//            }
+//        }
+//    }
+//
+//    // Walk through face-cell wave till all cells are reached
+//    FaceCellWave<topoDistanceData<label>> wallDistCalc
+//    (
+//        mesh_,
+//        cFaces1,
+//        faceDist,
+//        allFaceInfo,
+//        allCellInfo,
+//        mesh_.globalData().nTotalCells()+1   // max iterations
+//    );
+//
+//    label nRemove = 0;
+//    for (const label facei : leakFaces)
+//    {
+//        const label own = mesh_.faceOwner()[facei];
+//        if (!allCellInfo[own].valid(dummyTrackData))
+//        {
+//            nRemove++;
+//        }
+//        if (mesh_.isInternalFace(facei))
+//        {
+//            const label nei = mesh_.faceNeighbour()[facei];
+//            if (!allCellInfo[nei].valid(dummyTrackData))
+//            {
+//                nRemove++;
+//            }
+//        }
+//    }
+//
+//    labelList cellsToRemove(nRemove);
+//    nRemove = 0;
+//    for (const label facei : leakFaces)
+//    {
+//        const label own = mesh_.faceOwner()[facei];
+//        if (!allCellInfo[own].valid(dummyTrackData))
+//        {
+//            cellsToRemove[nRemove++] = own;
+//        }
+//        if (mesh_.isInternalFace(facei))
+//        {
+//            const label nei = mesh_.faceNeighbour()[facei];
+//            if (!allCellInfo[nei].valid(dummyTrackData))
+//            {
+//                cellsToRemove[nRemove++] = nei;
+//            }
+//        }
+//    }
+//
+//    if (debug)
+//    {
+//        volScalarField fld
+//        (
+//            IOobject
+//            (
+//                "cellsToKeep",
+//                mesh_.time().timeName(),
+//                mesh_,
+//                IOobject::NO_READ,
+//                IOobject::NO_WRITE
+//            ),
+//            mesh_,
+//            dimensionedScalar(dimless, Zero)
+//        );
+//        forAll(allCellInfo, celli)
+//        {
+//            if (allCellInfo[celli].valid(dummyTrackData))
+//            {
+//                fld[celli] = allCellInfo[celli].distance();
+//            }
+//        }
+//        forAll(fld.boundaryField(), patchi)
+//        {
+//            const polyPatch& pp = mesh_.boundaryMesh()[patchi];
+//            SubList<topoDistanceData<label>> p(pp.patchSlice(allFaceInfo));
+//            scalarField pfld
+//            (
+//                fld.boundaryField()[patchi].size(),
+//                Zero
+//            );
+//            forAll(pfld, i)
+//            {
+//                if (p[i].valid(dummyTrackData))
+//                {
+//                    pfld[i] = 1.0*p[i].distance();
+//                }
+//            }
+//            fld.boundaryFieldRef()[patchi] == pfld;
+//        }
+//        //Note: do not swap cell values so do not do
+//        //fld.correctBoundaryConditions();
+//        Pout<< "Writing distance field for initial cells "
+//            << seedCells << " to " << fld.objectPath() << endl;
+//        fld.write();
+//    }
+//
+//    return cellsToRemove;
+//}
+//
+//
+//Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::removeLeakCells
+//(
+//    const labelList& globalToMasterPatch,
+//    const labelList& globalToSlavePatch,
+//    const pointField& locationsInMesh,
+//    const wordList& zonesInMesh,
+//    const pointField& locationsOutsideMesh,
+//    const labelList& selectedSurfaces
+//)
+//{
+//    boolList isBlockedFace;
+//    selectIntersectedFaces(selectedSurfaces, isBlockedFace);
+//
+//    // Determine cell regions
+//    const regionSplit cellRegion(mesh_, isBlockedFace);
+//
+//    // Detect locationsInMesh regions
+//    labelList insideCells(locationsInMesh.size(), -1);
+//    labelList insideRegions(locationsInMesh.size(), -1);
+//    forAll(locationsInMesh, i)
+//    {
+//        insideCells[i] = findCell
+//        (
+//            mesh_,
+//            mergeDistance_*vector::one,   //perturbVec,
+//            locationsInMesh[i]
+//        );
+//        if (insideCells[i] != -1)
+//        {
+//            insideRegions[i] = cellRegion[insideCells[i]];
+//        }
+//        reduce(insideRegions[i], maxOp<label>());
+//
+//        if (insideRegions[i] == -1)
+//        {
+//            // See if we can perturb a bit
+//            insideCells[i] = findCell
+//            (
+//                mesh_,
+//                mergeDistance_*vector::one,   //perturbVec,
+//                locationsInMesh[i]+mergeDistance_*vector::one
+//            );
+//            if (insideCells[i] != -1)
+//            {
+//                insideRegions[i] = cellRegion[insideCells[i]];
+//            }
+//            reduce(insideRegions[i], maxOp<label>());
+//
+//            if (insideRegions[i] == -1)
+//            {
+//                FatalErrorInFunction
+//                    << "Cannot find locationInMesh " << locationsInMesh[i]
+//                    << " on any processor" << exit(FatalError);
+//            }
+//        }
+//    }
+//
+//
+//    // Check that all the locations outside the
+//    // mesh do not conflict with those inside
+//
+//    bool haveLeak = false;
+//    forAll(locationsOutsideMesh, i)
+//    {
+//        // Find the region containing the point
+//        label regioni = findRegion
+//        (
+//            mesh_,
+//            cellRegion,
+//            mergeDistance_*vector::one,   //perturbVec,
+//            locationsOutsideMesh[i]
+//        );
+//
+//        if (regioni != -1)
+//        {
+//            // Check for locationsOutsideMesh overlapping with inside ones
+//            if (insideRegions.find(regioni) != -1)
+//            {
+//                haveLeak = true;
+//                WarningInFunction
+//                    << "Outside location " << locationsOutsideMesh[i]
+//                    << " in region " << regioni
+//                    << " is connected to one of the inside points "
+//                    << locationsInMesh << endl;
+//            }
+//        }
+//    }
+//
+//
+//    autoPtr<mapPolyMesh> mapPtr;
+//    if (returnReduce(haveLeak, orOp<bool>()))
+//    {
+//        // Use shortestPathSet to provide a minimum set of faces needed
+//        // to close hole. Tbd: maybe directly use wave?
+//        meshSearch searchEngine(mesh_);
+//        shortestPathSet leakPath
+//        (
+//            "leakPath",
+//            mesh_,
+//            searchEngine,
+//            coordSet::coordFormatNames[coordSet::coordFormat::DISTANCE],
+//            true,
+//            50,    // tbd. Number of iterations. This is the maximum
+//                    // number of faces in the leak hole
+//
+//            //pbm.groupPatchIDs()["wall"],  // patch to grow from
+//            meshedPatches(),   // patch to grow from
+//
+//            locationsInMesh,
+//            locationsOutsideMesh,
+//            isBlockedFace
+//        );
+//
+//
+//        // Use leak path to find minimum set of cells to delete
+//        const labelList cellsToRemove
+//        (
+//            detectLeakCells
+//            (
+//                isBlockedFace,
+//                leakPath.leakFaces(),
+//                insideCells
+//            )
+//        );
+//
+//        // Re-do intersections to find nearest unnamed surface
+//        const label defaultRegion
+//        (
+//            surfaces().globalRegion
+//            (
+//                selectedSurfaces[0],
+//                0
+//            )
+//        );
+//
+//        const labelList nearestRegion
+//        (
+//            nearestIntersection
+//            (
+//                selectedSurfaces,
+//                defaultRegion
+//            )
+//        );
+//
+//
+//        // Remove cells
+//        removeCells cellRemover(mesh_);
+//        const labelList exposedFaces
+//        (
+//            cellRemover.getExposedFaces(cellsToRemove)
+//        );
+//
+//        labelList exposedPatches(exposedFaces.size());
+//        forAll(exposedFaces, i)
+//        {
+//            label facei = exposedFaces[i];
+//            exposedPatches[i] = globalToMasterPatch[nearestRegion[facei]];
+//        }
+//
+//        mapPtr = doRemoveCells
+//        (
+//            cellsToRemove,
+//            exposedFaces,
+//            exposedPatches,
+//            cellRemover
+//        );
+//
+//
+//        // Put the exposed faces into a special faceZone
+//        {
+//            // Add to "frozenFaces" zone
+//            faceZoneMesh& faceZones = mesh_.faceZones();
+//
+//            // Get current frozen faces (if any)
+//            bitSet isFrozenFace(mesh_.nFaces());
+//            label zonei = faceZones.findZoneID("frozenFaces");
+//            if (zonei != -1)
+//            {
+//                const bitSet oldSet(mesh_.nFaces(), faceZones[zonei]);
+//                isFrozenFace.set(oldSet);
+//            }
+//
+//            // Add newly exposed faces (if not yet in any faceZone!)
+//            const labelList exposed
+//            (
+//                renumber
+//                (
+//                    mapPtr().reverseFaceMap(),
+//                    exposedFaces
+//                )
+//            );
+//            bitSet isZonedFace(mesh_.nFaces(), faceZones.zoneMap().toc());
+//            for (const label facei : exposed)
+//            {
+//                if (!isZonedFace[facei])
+//                {
+//                    isFrozenFace.set(facei);
+//                }
+//            }
+//
+//            syncTools::syncFaceList
+//            (
+//                mesh_,
+//                isFrozenFace,
+//                orEqOp<unsigned int>(),
+//                0u
+//            );
+//
+//            // Add faceZone if non existing
+//            faceZones.clearAddressing();
+//            if (zonei == -1)
+//            {
+//                zonei = faceZones.size();
+//                faceZones.setSize(zonei+1);
+//                faceZones.set
+//                (
+//                    zonei,
+//                    new faceZone
+//                    (
+//                        "frozenFaces",              // name
+//                        labelList(0),               // addressing
+//                        boolList(0),                // flip
+//                        zonei,                      // index
+//                        faceZones                   // faceZoneMesh
+//                    )
+//                );
+//            }
+//
+//            // Update faceZone with new contents
+//            labelList frozenFaces(isFrozenFace.toc());
+//            boolList frozenFlip(frozenFaces.size(), false);
+//
+//            faceZones[zonei].resetAddressing
+//            (
+//                std::move(frozenFaces),
+//                std::move(frozenFlip)
+//            );
+//        }
+//
+//
+//        //// Put the exposed points into a special pointZone
+//        //if (false)
+//        //{
+//        //    const labelList meshFaceIDs
+//        //    (
+//        //        renumber
+//        //        (
+//        //            mapPtr().reverseFaceMap(),
+//        //            exposedFaces
+//        //        )
+//        //    );
+//        //    const uindirectPrimitivePatch pp
+//        //    (
+//        //        UIndirectList<face>(mesh_.faces(), meshFaceIDs),
+//        //        mesh_.points()
+//        //    );
+//        //
+//        //    // Count number of faces per edge
+//        //    const labelListList& edgeFaces = pp.edgeFaces();
+//        //    labelList nEdgeFaces(edgeFaces.size());
+//        //    forAll(edgeFaces, edgei)
+//        //    {
+//        //        nEdgeFaces[edgei] = edgeFaces[edgei].size();
+//        //    }
+//        //
+//        //    // Sync across processor patches
+//        //    if (Pstream::parRun())
+//        //    {
+//        //        const globalMeshData& globalData = mesh_.globalData();
+//        //        const mapDistribute& map = globalData.globalEdgeSlavesMap();
+//        //        const indirectPrimitivePatch& cpp =
+//        //            globalData.coupledPatch();
+//        //
+//        //        // Match pp edges to coupled edges
+//        //        labelList patchEdges;
+//        //        labelList coupledEdges;
+//        //        PackedBoolList sameEdgeOrientation;
+//        //        PatchTools::matchEdges
+//        //        (
+//        //            pp,
+//        //            cpp,
+//        //            patchEdges,
+//        //            coupledEdges,
+//        //            sameEdgeOrientation
+//        //        );
+//        //
+//        //
+//        //        // Convert patch-edge data into cpp-edge data
+//        //        labelList coupledNEdgeFaces(map.constructSize(), Zero);
+//        //        UIndirectList<label>(coupledNEdgeFaces, coupledEdges) =
+//        //            UIndirectList<label>(nEdgeFaces, patchEdges);
+//        //
+//        //        // Synchronise
+//        //        globalData.syncData
+//        //        (
+//        //            coupledNEdgeFaces,
+//        //            globalData.globalEdgeSlaves(),
+//        //            globalData.globalEdgeTransformedSlaves(),
+//        //            map,
+//        //            plusEqOp<label>()
+//        //        );
+//        //
+//        //        // Convert back from cpp-edge to patch-edge
+//        //        UIndirectList<label>(nEdgeFaces, patchEdges) =
+//        //            UIndirectList<label>(coupledNEdgeFaces, coupledEdges);
+//        //    }
+//        //
+//        //    // Freeze all internal points
+//        //    bitSet isFrozenPoint(mesh_.nPoints());
+//        //    forAll(nEdgeFaces, edgei)
+//        //    {
+//        //        if (nEdgeFaces[edgei] != 1)
+//        //        {
+//        //            const edge& e = pp.edges()[edgei];
+//        //            isFrozenPoint.set(pp.meshPoints()[e[0]]);
+//        //            isFrozenPoint.set(pp.meshPoints()[e[1]]);
+//        //        }
+//        //    }
+//        //    // Add to "frozenPoints" zone
+//        //    pointZoneMesh& pointZones = mesh_.pointZones();
+//        //    pointZones.clearAddressing();
+//        //    label zonei = pointZones.findZoneID("frozenPoints");
+//        //    if (zonei != -1)
+//        //    {
+//        //        const bitSet oldSet(mesh_.nPoints(), pointZones[zonei]);
+//        //        // Add to isFrozenPoint
+//        //        isFrozenPoint.set(oldSet);
+//        //    }
+//        //
+//        //    syncTools::syncPointList
+//        //    (
+//        //        mesh_,
+//        //        isFrozenPoint,
+//        //        orEqOp<unsigned int>(),
+//        //        0u
+//        //    );
+//        //
+//        //    if (zonei == -1)
+//        //    {
+//        //        zonei = pointZones.size();
+//        //        pointZones.setSize(zonei+1);
+//        //        pointZones.set
+//        //        (
+//        //            zonei,
+//        //            new pointZone
+//        //            (
+//        //                "frozenPoints",             // name
+//        //                isFrozenPoint.sortedToc(),  // addressing
+//        //                zonei,                      // index
+//        //                pointZones                  // pointZoneMesh
+//        //            )
+//        //        );
+//        //    }
+//        //}
+//
+//
+//        if (debug&meshRefinement::MESH)
+//        {
+//            const_cast<Time&>(mesh_.time())++;
+//
+//            Pout<< "Writing current mesh to time "
+//                << timeName() << endl;
+//            write
+//            (
+//                meshRefinement::debugType(debug),
+//                meshRefinement::writeType
+//                (
+//                    meshRefinement::writeLevel()
+//                  | meshRefinement::WRITEMESH
+//                ),
+//                mesh_.time().path()/timeName()
+//            );
+//            Pout<< "Dumped mesh in = "
+//                << mesh_.time().cpuTimeIncrement() << " s\n" << nl << endl;
+//        }
+//    }
+//    return mapPtr;
+//}
+
+
+//Foam::autoPtr<Foam::mapDistribute> Foam::meshRefinement::nearestFace
+//(
+//    const globalIndex& globalSeedFaces,
+//    const labelList& seedFaces,
+//    const labelList& closureFaces
+//) const
+//{
+//    // Takes a set of faces for which we have information (seedFaces,
+//    // globalSeedFaces - these are e.g. intersected faces) and walks out
+//    // across nonSeedFace. Returns for
+//    // every nonSeedFace the nearest seed face (in global indexing).
+//    // Used e.g. in hole closing. Assumes that seedFaces, closureFaces
+//    // are a small subset of the master
+//    // so are not large - it uses edge addressing on the closureFaces
+//
+//
+//    if (seedFaces.size() != globalSeedFaces.localSize())
+//    {
+//        FatalErrorInFunction << "problem : seedFaces:" << seedFaces.size()
+//            << " globalSeedFaces:" << globalSeedFaces.localSize()
+//            << exit(FatalError);
+//    }
+//
+//    //// Mark mesh points that are used by any closureFaces. This is for
+//    //// initial filtering
+//    //bitSet isNonSeedPoint(mesh.nPoints());
+//    //for (const label facei : closureFaces)
+//    //{
+//    //    isNonSeedPoint.set(mesh_.faces()[facei]);
+//    //}
+//    //syncTools::syncPointList
+//    //(
+//    //    mesh_,
+//    //    isNonSeedPoint,
+//    //    orEqOp<unsigned int>(),
+//    //    0u
+//    //);
+//
+//    // Make patch
+//    const uindirectPrimitivePatch pp
+//    (
+//        IndirectList<face>(mesh_.faces(), closureFaces),
+//        mesh_.points()
+//    );
+//    const edgeList& edges = pp.edges();
+//    const labelList& mp = pp.meshPoints();
+//    const label nBndEdges = pp.nEdges() - pp.nInternalEdges();
+//
+//    // For all faces in seedFaces mark the edge with a face. No special
+//    // handling for multiple faces sharing the edge - first one wins
+//    EdgeMap<label> edgeMap(pp.nEdges());
+//    for (const label facei : seedFaces)
+//    {
+//        const label globalFacei = globalSeedFaces.toGlobal(facei);
+//        const face& f = mesh_.faces()[facei];
+//        forAll(f, fp)
+//        {
+//            label nextFp = f.fcIndex(fp);
+//            edgeMap.insert(edge(f[fp], f[nextFp]), globalFacei);
+//        }
+//    }
+//    syncTools::syncEdgeMap(mesh_, edgeMap, maxEqOp<label>());
+//
+//
+//
+//    // Seed
+//    DynamicList<label> initialEdges(2*nBndEdges);
+//    DynamicList<edgeTopoDistanceData<label, uindirectPrimitivePatch>>
+//        initialEdgesInfo(2*nBndEdges);
+//    forAll(edges, edgei)
+//    {
+//        const edge& e = edges[edgei];
+//        const edge meshE = edge(mp[e[0]], mp[e[1]]);
+//
+//        EdgeMap<label>::const_iterator iter = edgeMap.find(meshE);
+//        if (iter.found())
+//        {
+//            initialEdges.append(edgei);
+//            initialEdgesInfo.append
+//            (
+//                edgeTopoDistanceData<label, uindirectPrimitivePatch>
+//                (
+//                    0,          // distance
+//                    iter()      // globalFacei
+//                )
+//            );
+//        }
+//    }
+//
+//    // Data on all edges and faces
+//    List<edgeTopoDistanceData<label, uindirectPrimitivePatch>> allEdgeInfo
+//    (
+//        pp.nEdges()
+//    );
+//    List<edgeTopoDistanceData<label, uindirectPrimitivePatch>> allFaceInfo
+//    (
+//        pp.size()
+//    );
+//
+//    // Walk
+//    PatchEdgeFaceWave
+//    <
+//        uindirectPrimitivePatch,
+//        edgeTopoDistanceData<label, uindirectPrimitivePatch>
+//    > calc
+//    (
+//        mesh_,
+//        pp,
+//        initialEdges,
+//        initialEdgesInfo,
+//        allEdgeInfo,
+//        allFaceInfo,
+//        returnReduce(pp.nEdges(), sumOp<label>())
+//    );
+//
+//
+//    // Per non-seed face the seed face
+//    labelList closureToSeed(pp.size(), -1);
+//    forAll(allFaceInfo, facei)
+//    {
+//        if (allFaceInfo[facei].valid(calc.data()))
+//        {
+//            closureToSeed[facei] = allFaceInfo[facei].data();
+//        }
+//    }
+//
+//    List<Map<label>> compactMap;
+//    return autoPtr<mapDistribute>::New
+//    (
+//        globalSeedFaces,
+//        closureToSeed,
+//        compactMap
+//    );
+//}
+
+
+Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::blockLeakFaces
+(
+    const labelList& globalToMasterPatch,
+    const labelList& globalToSlavePatch,
+    const pointField& locationsInMesh,
+    const wordList& zonesInMesh,
+    const pointField& locationsOutsideMesh,
+    const labelList& selectedSurfaces
+)
+{
+    // Problem: this is based on cached intersection information. This might
+    // not include the surface we actually want to use. In which case the
+    // surface would not be seen as intersected!
+    boolList isBlockedFace;
+    selectIntersectedFaces(selectedSurfaces, isBlockedFace);
+
+    // Determine cell regions
+    const regionSplit cellRegion(mesh_, isBlockedFace);
+
+    // Detect locationsInMesh regions
+    labelList insideCells(locationsInMesh.size(), -1);
+    labelList insideRegions(locationsInMesh.size(), -1);
+    forAll(locationsInMesh, i)
+    {
+        insideCells[i] = findCell
+        (
+            mesh_,
+            mergeDistance_*vector::one,   //perturbVec,
+            locationsInMesh[i]
+        );
+        if (insideCells[i] != -1)
+        {
+            insideRegions[i] = cellRegion[insideCells[i]];
+        }
+        reduce(insideRegions[i], maxOp<label>());
+
+        if (insideRegions[i] == -1)
+        {
+            // See if we can perturb a bit
+            insideCells[i] = findCell
+            (
+                mesh_,
+                mergeDistance_*vector::one,   //perturbVec,
+                locationsInMesh[i]+mergeDistance_*vector::one
+            );
+            if (insideCells[i] != -1)
+            {
+                insideRegions[i] = cellRegion[insideCells[i]];
+            }
+            reduce(insideRegions[i], maxOp<label>());
+
+            if (insideRegions[i] == -1)
+            {
+                FatalErrorInFunction
+                    << "Cannot find locationInMesh " << locationsInMesh[i]
+                    << " on any processor" << exit(FatalError);
+            }
+        }
+    }
+
+
+    // Check that all the locations outside the
+    // mesh do not conflict with those inside
+
+    bool haveLeak = false;
+    forAll(locationsOutsideMesh, i)
+    {
+        // Find the region containing the point
+        label regioni = findRegion
+        (
+            mesh_,
+            cellRegion,
+            mergeDistance_*vector::one,   //perturbVec,
+            locationsOutsideMesh[i]
+        );
+
+        if (regioni != -1)
+        {
+            // Check for locationsOutsideMesh overlapping with inside ones
+            if (insideRegions.find(regioni) != -1)
+            {
+                haveLeak = true;
+                WarningInFunction
+                    << "Outside location " << locationsOutsideMesh[i]
+                    << " in region " << regioni
+                    << " is connected to one of the inside points "
+                    << locationsInMesh << endl;
+            }
+        }
+    }
+
+
+    autoPtr<mapPolyMesh> mapPtr;
+    if (returnReduce(haveLeak, orOp<bool>()))
+    {
+        // Use holeToFace to provide a minimum set of faces needed
+        // to close hole.
+
+        const List<pointField> allLocations
+        (
+            refinementParameters::zonePoints
+            (
+                locationsInMesh,
+                zonesInMesh,
+                locationsOutsideMesh
+            )
+        );
+
+        const labelList blockingFaces(findIndices(isBlockedFace, true));
+
+        labelList closureFaces;
+        labelList closureToBlocked;
+        autoPtr<mapDistribute> closureMapPtr;
+        {
+            const globalIndex globalBlockingFaces(blockingFaces.size());
+
+            closureMapPtr = holeToFace::calcClosure
+            (
+                mesh_,
+                allLocations,
+                blockingFaces,
+                globalBlockingFaces,
+                true,                   // allow erosion
+
+                closureFaces,
+                closureToBlocked
+            );
+
+            if (debug)
+            {
+                Pout<< "meshRefinement::blockLeakFaces :"
+                    << " found closure faces:" << closureFaces.size()
+                    << "  map:" << closureMapPtr.valid() << endl;
+            }
+
+            if (!closureMapPtr.valid())
+            {
+                FatalErrorInFunction
+                    << "have leak but did not find any closure faces"
+                    << exit(FatalError);
+            }
+        }
+
+        // Baffle faces
+        labelList ownPatch(mesh_.nFaces(), -1);
+        labelList neiPatch(mesh_.nFaces(), -1);
+
+        // Keep (global) boundary faces in their patch
+        {
+            const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+            for (label patchi = 0; patchi < patches.nNonProcessor(); ++patchi)
+            {
+                const polyPatch& pp = patches[patchi];
+
+                forAll(pp, i)
+                {
+                    ownPatch[pp.start()+i] = patchi;
+                    neiPatch[pp.start()+i] = patchi;
+                }
+            }
+        }
+
+        const faceZoneMesh& fzs = mesh_.faceZones();
+
+        // Mark zone per face
+        labelList faceToZone(mesh_.nFaces(), -1);
+        boolList faceToFlip(mesh_.nFaces(), false);
+        forAll(fzs, zonei)
+        {
+            const labelList& addressing = fzs[zonei];
+            const boolList& flipMap = fzs[zonei].flipMap();
+
+            forAll(addressing, i)
+            {
+                faceToZone[addressing[i]] = zonei;
+                faceToFlip[addressing[i]] = flipMap[i];
+            }
+        }
+
+
+        // Fetch patch and zone info from blockingFaces
+        labelList packedOwnPatch(labelUIndList(ownPatch, blockingFaces));
+        closureMapPtr->distribute(packedOwnPatch);
+        labelList packedNeiPatch(labelUIndList(neiPatch, blockingFaces));
+        closureMapPtr->distribute(packedNeiPatch);
+        labelList packedZone(labelUIndList(faceToZone, blockingFaces));
+        closureMapPtr->distribute(packedZone);
+        boolList packedFlip(UIndirectList<bool>(faceToFlip, blockingFaces));
+        closureMapPtr->distribute(packedFlip);
+        forAll(closureFaces, i)
+        {
+            const label facei = closureFaces[i];
+            const label sloti = closureToBlocked[i];
+
+            if (sloti != -1)
+            {
+                // TBD. how to orient own/nei patch?
+                ownPatch[facei] = packedOwnPatch[sloti];
+                neiPatch[facei] = packedNeiPatch[sloti];
+                faceToZone[facei] = packedZone[sloti];
+                faceToFlip[facei] = packedFlip[sloti];
+            }
+        }
+
+
+        // Add faces to faceZone. For now do this outside of createBaffles
+        // below
+        {
+            List<DynamicList<label>> zoneToFaces(fzs.size());
+            List<DynamicList<bool>> zoneToFlip(fzs.size());
+
+            // Add any to-be-patched face
+            forAll(faceToZone, facei)
+            {
+                const label zonei = faceToZone[facei];
+                if (zonei != -1)
+                {
+                    zoneToFaces[zonei].append(facei);
+                    zoneToFlip[zonei].append(faceToFlip[facei]);
+                }
+            }
+
+            forAll(zoneToFaces, zonei)
+            {
+                surfaceZonesInfo::addFaceZone
+                (
+                    fzs[zonei].name(),
+                    zoneToFaces[zonei],
+                    zoneToFlip[zonei],
+                    mesh_
+                );
+            }
+        }
+
+        // Put the points of closureFaces into a special pointZone
+        {
+            const uindirectPrimitivePatch pp
+            (
+                UIndirectList<face>(mesh_.faces(), closureFaces),
+                mesh_.points()
+            );
+
+            // Count number of faces per edge
+            const labelList nEdgeFaces(countEdgeFaces(pp));
+
+            // Freeze all internal points
+            bitSet isFrozenPoint(mesh_.nPoints());
+            forAll(nEdgeFaces, edgei)
+            {
+                if (nEdgeFaces[edgei] != 1)
+                {
+                    const edge& e = pp.edges()[edgei];
+                    isFrozenPoint.set(pp.meshPoints()[e[0]]);
+                    isFrozenPoint.set(pp.meshPoints()[e[1]]);
+                }
+            }
+
+            // Lookup/add pointZone and include its points
+            pointZoneMesh& pointZones =
+                const_cast<pointZoneMesh&>(mesh_.pointZones());
+            const label zonei = addPointZone("frozenPoints");
+            const bitSet oldSet(mesh_.nPoints(), pointZones[zonei]);
+            isFrozenPoint.set(oldSet);
+
+            syncTools::syncPointList
+            (
+                mesh_,
+                isFrozenPoint,
+                orEqOp<unsigned int>(),
+                0u
+            );
+
+            // Override addressing
+            pointZones.clearAddressing();
+            pointZones[zonei] = isFrozenPoint.sortedToc();
+        }
+
+
+
+        // Create baffles for faces
+        mapPtr = createBaffles(ownPatch, neiPatch);
+
+        //// Put the exposed faces into a special faceZone
+        //{
+        //    // Add newly exposed faces (if not yet in any faceZone!)
+        //    const labelList exposed
+        //    (
+        //        renumber
+        //        (
+        //            mapPtr().reverseFaceMap(),
+        //            blockingFaces
+        //        )
+        //    );
+        //
+        //    surfaceZonesInfo::addFaceZone
+        //    (
+        //        "frozenFaces",
+        //        exposed,
+        //        boolList(exposed.size(), false),
+        //        mesh_
+        //    );
+        //}
+
+
+        if (debug&meshRefinement::MESH)
+        {
+            const_cast<Time&>(mesh_.time())++;
+
+            Pout<< "Writing current mesh to time "
+                << timeName() << endl;
+            write
+            (
+                meshRefinement::debugType(debug),
+                meshRefinement::writeType
+                (
+                    meshRefinement::writeLevel()
+                  | meshRefinement::WRITEMESH
+                ),
+                mesh_.time().path()/timeName()
+            );
+            Pout<< "Dumped mesh in = "
+                << mesh_.time().cpuTimeIncrement() << " s\n" << nl << endl;
+        }
+    }
+    return mapPtr;
 }
 
 

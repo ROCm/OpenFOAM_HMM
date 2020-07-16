@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020,2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -199,7 +199,8 @@ public:
     static tmp<pointField> pointNormals
     (
         const polyMesh&,
-        const PrimitivePatch<FaceList, PointField>&
+        const PrimitivePatch<FaceList, PointField>&,
+        const bitSet& flipMap = bitSet::null()
     );
 
 
@@ -211,7 +212,8 @@ public:
         const polyMesh&,
         const PrimitivePatch<FaceList, PointField>&,
         const labelList& patchEdges,
-        const labelList& coupledEdges
+        const labelList& coupledEdges,
+        const bitSet& flipMap = bitSet::null()
     );
 
 

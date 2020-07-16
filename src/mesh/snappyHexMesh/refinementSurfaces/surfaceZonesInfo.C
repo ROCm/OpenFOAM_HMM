@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -522,6 +522,7 @@ Foam::label Foam::surfaceZonesInfo::addFaceZone
     {
         zoneI = faceZones.size();
         faceZones.setSize(zoneI+1);
+
         faceZones.set
         (
             zoneI,
@@ -535,6 +536,75 @@ Foam::label Foam::surfaceZonesInfo::addFaceZone
             )
         );
     }
+//    else
+//    {
+//        // Already have faceZone. Add to addressing (if necessary)
+//
+//        faceZone& fz = faceZones[zoneI];
+//
+//        DebugVar(fz.size());
+//        DebugVar(fz.addressing().size());
+//
+//        if (fz.size() != addressing.size())
+//        {
+//            faceZones.clearAddressing();
+//            fz.resetAddressing(addressing, flipMap);
+//        }
+//        else
+//        {
+//            const labelList& oldAddressing = fz;
+//            const boolList& oldFlipMap = fz.flipMap();
+//
+//            bitSet isZoneFace(mesh.nFaces(), oldAddressing);
+//            bitSet isZoneFlip(mesh.nFaces());
+//            forAll(oldAddressing, i)
+//            {
+//                const label facei = oldAddressing[i];
+//                isZoneFlip[facei] = oldFlipMap[i];
+//            }
+//
+//            const bitSet newZoneFace(mesh.nFaces(), addressing);
+//            bitSet newZoneFlip(mesh.nFaces());
+//            forAll(addressing, i)
+//            {
+//                if (flipMap[i])
+//                {
+//                    newZoneFlip.set(addressing[i]);
+//                }
+//            }
+//
+//            bool isChanged = false;
+//            forAll(isZoneFace, facei)
+//            {
+//                if
+//                (
+//                    isZoneFace[facei] != newZoneFace[facei]
+//                 || isZoneFlip[facei] != newZoneFlip[facei]
+//                )
+//                {
+//                    isZoneFace[facei] = newZoneFace[facei];
+//                    isZoneFlip[facei] = newZoneFlip[facei];
+//                    isChanged = true;
+//                }
+//            }
+//
+//            if (isChanged)
+//            {
+//                labelList newAddressing(isZoneFace.sortedToc());
+//                boolList newFlip(newAddressing.size(), false);
+//                forAll(newAddressing, i)
+//                {
+//                    newFlip[i] = isZoneFlip[newAddressing[i]];
+//                }
+//                faceZones.clearAddressing();
+//                fz.resetAddressing
+//                (
+//                    std::move(newAddressing),
+//                    std::move(newFlip)
+//                );
+//            }
+//        }
+//    }
     return zoneI;
 }
 

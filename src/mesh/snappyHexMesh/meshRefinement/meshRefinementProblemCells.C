@@ -380,12 +380,15 @@ bool Foam::meshRefinement::isCollapsedCell
 // are not baffled at this stage)
 // Used to remove cells by baffling all their faces and have the
 // splitMeshRegions chuck away non used regions.
-Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
+void Foam::meshRefinement::markFacesOnProblemCells
 (
     const dictionary& motionDict,
     const bool removeEdgeConnectedCells,
     const scalarField& perpendicularAngle,
-    const labelList& globalToPatch
+    const labelList& globalToPatch,
+
+    labelList& facePatch,
+    labelList& faceZone
 ) const
 {
     const labelList& cellLevel = meshCutter_.cellLevel();
@@ -401,7 +404,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
 
     // Fill boundary data. All elements on meshed patches get marked.
     // Get the labels of added patches.
-    labelList adaptPatchIDs(meshedPatches());
+    const labelList adaptPatchIDs(meshedPatches());
 
     forAll(adaptPatchIDs, i)
     {
@@ -424,13 +427,18 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
     }
 
 
-    // Per face the nearest adaptPatch
-    const labelList nearestAdaptPatch(nearestPatch(adaptPatchIDs));
+    // Per mesh face the nearest adaptPatch and its faceZone (if any)
+    labelList nearestAdaptPatch;
+    labelList nearestAdaptZone;
+    nearestPatch(adaptPatchIDs, nearestAdaptPatch, nearestAdaptZone);
 
 
     // Per internal face (boundary faces not used) the patch that the
     // baffle should get (or -1)
-    labelList facePatch(mesh_.nFaces(), -1);
+    facePatch.setSize(mesh_.nFaces());
+    facePatch = -1;
+    faceZone.setSize(mesh_.nFaces());
+    faceZone = -1;
 
     // Swap neighbouring cell centres and cell level
     labelList neiLevel(mesh_.nBoundaryFaces());
@@ -474,6 +482,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
                 if (facePatch[facei] == -1 && mesh_.isInternalFace(facei))
                 {
                     facePatch[facei] = nearestAdaptPatch[facei];
+                    faceZone[facei] = nearestAdaptZone[facei];
                     nBaffleFaces++;
 
                     // Mark face as a 'boundary'
@@ -714,6 +723,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
                         )
                         {
                             facePatch[facei] = nearestAdaptPatch[facei];
+                            faceZone[facei] = nearestAdaptZone[facei];
                             nBaffleFaces++;
 
                             // Mark face as a 'boundary'
@@ -795,6 +805,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
                             )
                             {
                                 facePatch[facei] = nearestAdaptPatch[facei];
+                                faceZone[facei] = nearestAdaptZone[facei];
                                 nBaffleFaces++;
 
                                 // Mark face as a 'boundary'
@@ -882,6 +893,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
                 else
                 {
                     facePatch[facei] = nearestAdaptPatch[facei];
+                    faceZone[facei] = nearestAdaptZone[facei];
                     nBaffleFaces++;
 
                     // Do NOT update boundary data since this would grow blocked
@@ -937,6 +949,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
                         else
                         {
                             facePatch[facei] = nearestAdaptPatch[facei];
+                            faceZone[facei] = nearestAdaptZone[facei];
                             if (isMasterFace.test(facei))
                             {
                                 ++nBaffleFaces;
@@ -964,6 +977,12 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
             facePatch,
             maxEqOp<label>()
         );
+        syncTools::syncFaceList
+        (
+            mesh_,
+            faceZone,
+            maxEqOp<label>()
+        );
     }
 
     Info<< "markFacesOnProblemCells : marked "
@@ -978,26 +997,27 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
             << " internal faces from getting converted into baffles."
             << endl;
     }
-
-    return facePatch;
 }
 
 
 // Mark faces to be baffled to prevent snapping problems. Does
 // test to find nearest surface and checks which faces would get squashed.
-Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
+void Foam::meshRefinement::markFacesOnProblemCellsGeometric
 (
     const snapParameters& snapParams,
     const dictionary& motionDict,
     const labelList& globalToMasterPatch,
-    const labelList& globalToSlavePatch
+    const labelList& globalToSlavePatch,
+
+    labelList& facePatch,
+    labelList& faceZone
 ) const
 {
     pointField oldPoints(mesh_.points());
 
     // Repeat (most of) snappySnapDriver::doSnap
     {
-        labelList adaptPatchIDs(meshedPatches());
+        const labelList adaptPatchIDs(meshedPatches());
 
         // Construct addressing engine.
         autoPtr<indirectPrimitivePatch> ppPtr
@@ -1106,11 +1126,17 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
 
 
     // Per face the nearest adaptPatch
-    const labelList nearestAdaptPatch(nearestPatch(meshedPatches()));
+    //const labelList nearestAdaptPatch(nearestPatch(meshedPatches()));
+    labelList nearestAdaptPatch;
+    labelList nearestAdaptZone;
+    nearestPatch(meshedPatches(), nearestAdaptPatch, nearestAdaptZone);
 
     // Per face (internal or coupled!) the patch that the
     // baffle should get (or -1).
-    labelList facePatch(mesh_.nFaces(), -1);
+    facePatch.setSize(mesh_.nFaces());
+    facePatch = -1;
+    faceZone.setSize(mesh_.nFaces());
+    faceZone = -1;
     // Count of baffled faces
     label nBaffleFaces = 0;
 
@@ -1218,6 +1244,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
             if (patchi == -1 || mesh_.boundaryMesh()[patchi].coupled())
             {
                 facePatch[facei] = nearestAdaptPatch[facei];
+                faceZone[facei] = nearestAdaptZone[facei];
                 nBaffleFaces++;
 
                 //Pout<< "    " << facei
@@ -1244,8 +1271,12 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
         facePatch,
         maxEqOp<label>()
     );
-
-    return facePatch;
+    syncTools::syncFaceList
+    (
+        mesh_,
+        faceZone,
+        maxEqOp<label>()
+    );
 }
 
 

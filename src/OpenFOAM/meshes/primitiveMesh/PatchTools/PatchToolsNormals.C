@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +38,8 @@ Foam::tmp<Foam::pointField>
 Foam::PatchTools::pointNormals
 (
     const polyMesh& mesh,
-    const PrimitivePatch<FaceList, PointField>& p
+    const PrimitivePatch<FaceList, PointField>& p,
+    const bitSet& pFlip
 )
 {
     const globalMeshData& globalData = mesh.globalData();
@@ -72,7 +73,9 @@ Foam::PatchTools::pointNormals
                 pNormals.setSize(pFaces.size());
                 forAll(pFaces, i)
                 {
-                    pNormals[i] = p.faceNormals()[pFaces[i]];
+                    const label facei = pFaces[i];
+                    const vector& n = p.faceNormals()[facei];
+                    pNormals[i] = ((pFlip.empty() || !pFlip[facei]) ? n : -n);
                 }
             }
         }
@@ -165,7 +168,7 @@ Foam::PatchTools::pointNormals
             const vector& n = faceNormals[facei];
             forAll(f, fp)
             {
-                extrudeN[f[fp]] += n;
+                extrudeN[f[fp]] += ((pFlip.empty() || !pFlip[facei]) ? n : -n);
             }
         }
         extrudeN /= mag(extrudeN)+VSMALL;
@@ -196,7 +199,8 @@ Foam::PatchTools::edgeNormals
     const polyMesh& mesh,
     const PrimitivePatch<FaceList, PointField>& p,
     const labelList& patchEdges,
-    const labelList& coupledEdges
+    const labelList& coupledEdges,
+    const bitSet& pFlip
 )
 {
     // 1. Start off with local normals
@@ -213,7 +217,13 @@ Foam::PatchTools::edgeNormals
             const labelList& eFaces = edgeFaces[edgei];
             for (const label facei : eFaces)
             {
-                edgeNormals[edgei] += faceNormals[facei];
+                const vector& n = faceNormals[facei];
+                edgeNormals[edgei] +=
+                (
+                    (pFlip.empty() || !pFlip[facei])
+                  ? n
+                  : -n
+                );
             }
         }
         edgeNormals /= mag(edgeNormals)+VSMALL;

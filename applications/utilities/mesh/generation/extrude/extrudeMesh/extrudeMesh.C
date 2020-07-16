@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -124,6 +124,38 @@ labelList patchFaces(const polyBoundaryMesh& patches, const wordList& names)
 }
 
 
+void zoneFaces
+(
+    const faceZoneMesh& fzs,
+    const wordList& names,
+    labelList& faceLabels,
+    bitSet& faceFlip
+)
+{
+    label n = 0;
+
+    forAll(names, i)
+    {
+        const auto& pp = fzs[fzs.findZoneID(names[i])];
+        n += pp.size();
+    }
+    faceLabels.setSize(n);
+    faceFlip.setSize(n);
+    n = 0;
+    forAll(names, i)
+    {
+        const auto& pp = fzs[fzs.findZoneID(names[i])];
+        const boolList& ppFlip = pp.flipMap();
+        forAll(pp, i)
+        {
+            faceLabels[n] = pp[i];
+            faceFlip[n] = ppFlip[i];
+            n++;
+        }
+    }
+}
+
+
 void updateFaceLabels(const mapPolyMesh& map, labelList& faceLabels)
 {
     const labelList& reverseMap = map.reverseFaceMap();
@@ -233,7 +265,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        regionName = polyMesh::defaultRegion;
+        regionName = fvMesh::defaultRegion;
         Info<< "Create mesh for time = "
             << runTimeExtruded.timeName() << nl << endl;
     }
@@ -317,16 +349,34 @@ int main(int argc, char *argv[])
                 sourceCaseDir/("processor" + Foam::name(Pstream::myProcNo()));
         }
         wordList sourcePatches;
-        dict.readEntry("sourcePatches", sourcePatches);
-
-        if (sourcePatches.size() == 1)
+        wordList sourceFaceZones;
+        if
+        (
+            dict.readIfPresent
+            (
+                "sourcePatches",
+                sourcePatches,
+                keyType::LITERAL
+            )
+        )
         {
-            frontPatchName = sourcePatches[0];
+            if (sourcePatches.size() == 1)
+            {
+                frontPatchName = sourcePatches[0];
+            }
+
+            Info<< "Extruding patches " << sourcePatches
+                << " on mesh " << sourceCasePath << nl
+                << endl;
+        }
+        else
+        {
+            dict.readEntry("sourceFaceZones", sourceFaceZones);
+            Info<< "Extruding faceZones " << sourceFaceZones
+                << " on mesh " << sourceCasePath << nl
+                << endl;
         }
 
-        Info<< "Extruding patches " << sourcePatches
-            << " on mesh " << sourceCasePath << nl
-            << endl;
 
         Time runTime
         (
@@ -344,7 +394,17 @@ int main(int argc, char *argv[])
         // creating separate mesh.
         addPatchCellLayer layerExtrude(mesh, (mode == MESH));
 
-        const labelList meshFaces(patchFaces(patches, sourcePatches));
+        labelList meshFaces;
+        bitSet faceFlips;
+        if (sourceFaceZones.size())
+        {
+            zoneFaces(mesh.faceZones(), sourceFaceZones, meshFaces, faceFlips);
+        }
+        else
+        {
+            meshFaces = patchFaces(patches, sourcePatches);
+            faceFlips.setSize(meshFaces.size());
+        }
 
         if (mode == PATCH && flipNormals)
         {
@@ -411,7 +471,7 @@ int main(int argc, char *argv[])
         // Determine extrudePatch normal
         pointField extrudePatchPointNormals
         (
-            PatchTools::pointNormals(mesh, extrudePatch)
+            PatchTools::pointNormals(mesh, extrudePatch, faceFlips)
         );
 
 
@@ -642,6 +702,7 @@ int main(int argc, char *argv[])
 
             ratio,              // expansion ratio
             extrudePatch,       // patch faces to extrude
+            faceFlips,          // side to extrude (for internal/coupled faces)
 
             edgePatchID,        // if boundary edge: patch for extruded face
             edgeZoneID,         // optional zone for extruded face
@@ -787,7 +848,7 @@ int main(int argc, char *argv[])
             (
                 IOobject
                 (
-                    polyMesh::defaultRegion,
+                    extrudedMesh::defaultRegion,
                     runTimeExtruded.constant(),
                     runTimeExtruded
                 ),

@@ -45,6 +45,40 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(addPatchCellLayer, 0);
+
+    // Reduction class to get minimum value over face.
+    class minEqOpFace
+    {
+    public:
+
+        void operator()(face& x, const face& y) const
+        {
+            if (x.size())
+            {
+                if (y.size())
+                {
+                    label j = 0;
+                    forAll(x, i)
+                    {
+                        x[i] = min(x[i], y[j]);
+
+                        j = y.rcIndex(j);
+                    }
+                }
+            }
+            else if (y.size())
+            {
+                x.setSize(y.size());
+                label j = 0;
+                forAll(x, i)
+                {
+                    x[i] = y[j];
+                    j = y.rcIndex(j);
+                }
+            }
+        }
+    };
+
 }
 
 
@@ -300,6 +334,8 @@ Foam::label Foam::addPatchCellLayer::addSideFace
 
 
         //Pout<< "Added boundary face:" << newFace
+        //    << " atfc:" << newFace.centre(meshMod.points())
+        //    << " n:" << newFace.unitNormal(meshMod.points())
         //    << " own:" << addedCells[ownFacei][layerOwn]
         //    << " patch:" << newPatchID
         //    << endl;
@@ -405,6 +441,8 @@ Foam::label Foam::addPatchCellLayer::addSideFace
         );
 
         //Pout<< "Added internal face:" << newFace
+        //    << " atfc:" << newFace.centre(meshMod.points())
+        //    << " n:" << newFace.unitNormal(meshMod.points())
         //    << " own:" << addedCells[ownFacei][layerOwn]
         //    << " nei:" << addedCells[nbrFacei][layerNbr]
         //    << endl;
@@ -920,36 +958,37 @@ void Foam::addPatchCellLayer::globalEdgeInfo
 
                                     meshEdgeToFace[edgei] =
                                         globalFaces.toGlobal(facei);
+                                }
 
-                                    // Override any patch info
-                                    if (meshEdgeToPatch[edgei] == -1)
+                                // Override any patch info. Note that
+                                // meshEdgeToFace might be an internal face.
+                                if (meshEdgeToPatch[edgei] == -1)
+                                {
+                                    meshEdgeToPatch[edgei] = pp.index();
+                                }
+
+                                // Override any zone info
+                                if (meshEdgeToZone[edgei] == -1)
+                                {
+                                    meshEdgeToZone[edgei] =
+                                        faceToZone[facei];
+                                    const edge& meshE = mesh.edges()[edgei];
+                                    const int d = edge::compare(e, meshE);
+                                    if (d == 1)
                                     {
-                                        meshEdgeToPatch[edgei] = pp.index();
+                                        meshEdgeToFlip[edgei] =
+                                            faceToFlip[facei];
                                     }
-
-                                    // Override any zone info
-                                    if (meshEdgeToZone[edgei] == -1)
+                                    else if (d == -1)
                                     {
-                                        meshEdgeToZone[edgei] =
-                                            faceToZone[facei];
-                                        const edge& meshE = mesh.edges()[edgei];
-                                        const int d = edge::compare(e, meshE);
-                                        if (d == 1)
-                                        {
-                                            meshEdgeToFlip[edgei] =
-                                                faceToFlip[facei];
-                                        }
-                                        else if (d == -1)
-                                        {
-                                            meshEdgeToFlip[edgei] =
-                                               !faceToFlip[facei];
-                                        }
-                                        else
-                                        {
-                                            FatalErrorInFunction
-                                                << "big problem"
-                                                << exit(FatalError);
-                                        }
+                                        meshEdgeToFlip[edgei] =
+                                           !faceToFlip[facei];
+                                    }
+                                    else
+                                    {
+                                        FatalErrorInFunction
+                                            << "big problem"
+                                            << exit(FatalError);
                                     }
                                 }
                             }
@@ -961,6 +1000,7 @@ void Foam::addPatchCellLayer::globalEdgeInfo
             }
         }
     }
+
 
     // Synchronise across coupled edges. Max patch/face/faceZone wins
     syncTools::syncEdgeList
@@ -1420,6 +1460,7 @@ void Foam::addPatchCellLayer::setRefinement
     const labelListList& globalEdgeFaces,
     const scalarField& expansionRatio,
     const indirectPrimitivePatch& pp,
+    const bitSet& ppFlip,
 
     const labelList& edgePatchID,
     const labelList& edgeZoneID,
@@ -1446,6 +1487,7 @@ void Foam::addPatchCellLayer::setRefinement
         pp.nPoints() != firstLayerDisp.size()
      || pp.nPoints() != nPointLayers.size()
      || pp.size() != nFaceLayers.size()
+     || pp.size() != ppFlip.size()
     )
     {
         FatalErrorInFunction
@@ -1455,9 +1497,89 @@ void Foam::addPatchCellLayer::setRefinement
             << "  displacement:" << firstLayerDisp.size()
             << "  nPointLayers:" << nPointLayers.size() << nl
             << " patch.nFaces:" << pp.size()
+            << " flip map:" << ppFlip.size()
             << "  nFaceLayers:" << nFaceLayers.size()
             << abort(FatalError);
     }
+    if (!addToMesh_)
+    {
+        // flip map should be false
+        if (ppFlip.count())
+        {
+            FatalErrorInFunction
+                << "In generating stand-alone mesh the flip map should be empty"
+                << ". Instead it is " << ppFlip.count()
+                << abort(FatalError);
+        }
+    }
+    else
+    {
+        // Maybe check for adding to neighbour of boundary faces? How about
+        // coupled faces where the faceZone flipMap is negated
+
+        // For all boundary faces:
+        //  -1 : not extruded
+        //   0 : extruded from owner outwards (flip = false)
+        //   1 : extrude from neighbour outwards
+        labelList stateAndFlip(mesh_.nBoundaryFaces(), 0);
+        forAll(pp.addressing(), patchFacei)
+        {
+            if (nFaceLayers[patchFacei] > 0)
+            {
+                const label meshFacei = pp.addressing()[patchFacei];
+                const label bFacei = meshFacei-mesh_.nInternalFaces();
+                if (bFacei >= 0)
+                {
+                    stateAndFlip[bFacei] = label(ppFlip[patchFacei]);
+                }
+            }
+        }
+        // Make sure uncoupled patches do not trigger the error below
+        for (const auto& patch : mesh_.boundaryMesh())
+        {
+            if (!patch.coupled())
+            {
+                forAll(patch, i)
+                {
+                    label& state = stateAndFlip[patch.offset()+i];
+                    state = (state == 0 ? 1 : 0);
+                }
+            }
+        }
+        syncTools::swapBoundaryFaceList(mesh_, stateAndFlip);
+
+        forAll(pp.addressing(), patchFacei)
+        {
+            if (nFaceLayers[patchFacei] > 0)
+            {
+                const label meshFacei = pp.addressing()[patchFacei];
+                const label bFacei = meshFacei-mesh_.nInternalFaces();
+                if (bFacei >= 0)
+                {
+                    if (stateAndFlip[bFacei] == -1)
+                    {
+                        FatalErrorInFunction
+                            << "At extruded face:" << meshFacei
+                            << " at:" << mesh_.faceCentres()[meshFacei]
+                            << " locally have nLayers:"
+                            << nFaceLayers[patchFacei]
+                            << " but remotely have none" << exit(FatalError);
+                    }
+                    else if (stateAndFlip[bFacei] == label(ppFlip[patchFacei]))
+                    {
+                        FatalErrorInFunction
+                            << "At extruded face:" << meshFacei
+                            << " at:" << mesh_.faceCentres()[meshFacei]
+                            << " locally have flip:" << ppFlip[patchFacei]
+                            << " which is not the opposite of coupled version "
+                            << stateAndFlip[bFacei]
+                            << exit(FatalError);
+                    }
+                }
+            }
+        }
+    }
+
 
     forAll(nPointLayers, i)
     {
@@ -1502,6 +1624,19 @@ void Foam::addPatchCellLayer::setRefinement
 
 
     const labelList& meshPoints = pp.meshPoints();
+
+
+    // Determine which points are on which side of the extrusion
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    bitSet isBlockedFace(mesh_.nFaces());
+    forAll(nFaceLayers, patchFacei)
+    {
+        if (nFaceLayers[patchFacei] > 0)
+        {
+            isBlockedFace.set(pp.addressing()[patchFacei]);
+        }
+    }
 
     // Some storage for edge-face-addressing.
     DynamicList<label> ef;
@@ -1636,49 +1771,51 @@ void Foam::addPatchCellLayer::setRefinement
                         << abort(FatalError);
                 }
 
-                label myFacei = pp.addressing()[eFaces[0]];
-
-                label meshEdgei = meshEdges[edgei];
-
-                // Mesh faces using edge
-                const labelList& meshFaces = mesh_.edgeFaces(meshEdgei, ef);
-
-                // Check that there is only one patchface using edge.
-                const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
-                label bFacei = -1;
-
-                forAll(meshFaces, i)
-                {
-                    label facei = meshFaces[i];
-
-                    if (facei != myFacei)
-                    {
-                        if (!mesh_.isInternalFace(facei))
-                        {
-                            if (bFacei == -1)
-                            {
-                                bFacei = facei;
-                            }
-                            else
-                            {
-                                FatalErrorInFunction
-                                    << "boundary-edge-to-be-extruded:"
-                                    << pp.points()[meshPoints[e[0]]]
-                                    << pp.points()[meshPoints[e[1]]]
-                                    << " has more than two boundary faces"
-                                    << " using it:"
-                                    << bFacei << " fc:"
-                                    << mesh_.faceCentres()[bFacei]
-                                    << " patch:" << patches.whichPatch(bFacei)
-                                    << " and " << facei << " fc:"
-                                    << mesh_.faceCentres()[facei]
-                                    << " patch:" << patches.whichPatch(facei)
-                                    << abort(FatalError);
-                            }
-                        }
-                    }
-                }
+                //label myFacei = pp.addressing()[eFaces[0]];
+                //
+                //label meshEdgei = meshEdges[edgei];
+                //
+                //// Mesh faces using edge
+                //const labelList& meshFaces = mesh_.edgeFaces(meshEdgei, ef);
+                //
+                //// Check that there is only one patchface using edge.
+                //const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+                //
+                //label bFacei = -1;
+                //
+                //forAll(meshFaces, i)
+                //{
+                //    label facei = meshFaces[i];
+                //
+                //    if (facei != myFacei)
+                //    {
+                //        if (!mesh_.isInternalFace(facei))
+                //        {
+                //            if (bFacei == -1)
+                //            {
+                //                bFacei = facei;
+                //            }
+                //            else
+                //            {
+                //                //FatalErrorInFunction
+                //                WarningInFunction
+                //                    << "boundary-edge-to-be-extruded:"
+                //                    << pp.points()[meshPoints[e[0]]]
+                //                    << pp.points()[meshPoints[e[1]]]
+                //                    << " has more than one boundary faces"
+                //                    << " using it:"
+                //                    << bFacei << " fc:"
+                //                    << mesh_.faceCentres()[bFacei]
+                //                    << " patch:" << patches.whichPatch(bFacei)
+                //                    << " and " << facei << " fc:"
+                //                    << mesh_.faceCentres()[facei]
+                //                    << " patch:" << patches.whichPatch(facei)
+                //                    << endl;
+                //                    //abort(FatalError);
+                //            }
+                //        }
+                //    }
+                //}
             }
         }
     }
@@ -1723,6 +1860,198 @@ void Foam::addPatchCellLayer::setRefinement
     }
 
 
+    // Store per face whether it uses the duplicated point or the original one
+    // Also mark any affected cells. We could transport the duplicated point
+    // itself but since it is a processor-local index only we only transport
+    // a boolean.
+
+    // Per face, per index in face either labelMax or a valid index. Note:
+    // most faces are not affected in which case the face will be zero size
+    // and only have a nullptr and a size.
+    faceList baseFaces(mesh_.nFaces());
+    bitSet isAffectedCell(mesh_.nCells());
+    {
+        const faceList& localFaces = pp.localFaces();
+        forAll(localFaces, patchFacei)
+        {
+            const face& f = localFaces[patchFacei];
+            forAll(f, fp)
+            {
+                const label patchPointi = f[fp];
+                if (nPointLayers[patchPointi] > 0)
+                {
+                    const label meshFacei = pp.addressing()[patchFacei];
+                    face& baseF = baseFaces[meshFacei];
+                    // Initialise to labelMax if not yet sized
+                    baseF.setSize(f.size(), labelMax);
+                    baseF[fp] = pp.meshPoints()[patchPointi];
+
+                    if (ppFlip[patchFacei])
+                    {
+                        // Neighbour stays. Affected points on the owner side.
+                        const label celli = mesh_.faceOwner()[meshFacei];
+                        isAffectedCell.set(celli);
+                    }
+                    else if (mesh_.isInternalFace(meshFacei))
+                    {
+                        // Owner unaffected. Unaffected points on neighbour side
+                        const label celli = mesh_.faceNeighbour()[meshFacei];
+                        isAffectedCell.set(celli);
+                    }
+                }
+            }
+        }
+    }
+
+    // Transport affected side across faces. Could do across edges: say we have
+    // a loose cell edge-(but not face-)connected to face-to-be-extruded do
+    // we want it to move with the extrusion or stay connected to the original?
+    // For now just keep it connected to the original.
+    {
+        // Work space
+        Map<label> minPointValue(128);
+        faceList oldBoundaryFaces(mesh_.nBoundaryFaces());
+
+        while (true)
+        {
+            bitSet newIsAffectedCell(mesh_.nCells());
+
+            label nChanged = 0;
+            for (const label celli : isAffectedCell)
+            {
+                const cell& cFaces = mesh_.cells()[celli];
+
+                // 1. Determine marked base points. Inside a single cell all
+                //    faces use the same 'instance' of a point.
+                minPointValue.clear();
+                for (const label facei : cFaces)
+                {
+                    const face& baseF = baseFaces[facei];
+                    const face& f = mesh_.faces()[facei];
+
+                    if (baseF.size())
+                    {
+                        forAll(f, fp)
+                        {
+                            if (baseF[fp] != labelMax)
+                            {
+                                // Could check here for inconsistent patchPoint
+                                // e.g. cell using both sides of a
+                                // face-to-be-extruded. Is not possible!
+                                minPointValue.insert(f[fp], baseF[fp]);
+                            }
+                        }
+                    }
+                }
+
+                //Pout<< "For cell:" << celli
+                //    << " at:" << mesh_.cellCentres()[celli]
+                //    << " have minPointValue:" << minPointValue
+                //    << endl;
+
+                // 2. Transport marked points on all cell points
+                for (const label facei : cFaces)
+                {
+                    const face& f = mesh_.faces()[facei];
+                    face& baseF = baseFaces[facei];
+
+                    const label oldNChanged = nChanged;
+                    forAll(f, fp)
+                    {
+                        const auto fnd = minPointValue.find(f[fp]);
+                        if (fnd.found())
+                        {
+                            baseF.setSize(f.size(), labelMax);
+                            if (baseF[fp] == labelMax)
+                            {
+                                baseF[fp] = fnd();
+                                nChanged++;
+
+                                //Pout<< "For cell:" << celli
+                                //    << " at:" << mesh_.cellCentres()[celli]
+                                //    << " on face:" << facei
+                                //    << " points:"
+                                //    << UIndirectList<point>(mesh_.points(), f)
+                                //    << " now have baseFace:" << baseF
+                                //    << endl;
+                            }
+                        }
+                    }
+
+                    if (!isBlockedFace(facei) && nChanged > oldNChanged)
+                    {
+                        // Mark neighbouring cells
+                        const label own = mesh_.faceOwner()[facei];
+                        if (!isAffectedCell[own])
+                        {
+                            newIsAffectedCell.set(own);
+                        }
+                        if (mesh_.isInternalFace(facei))
+                        {
+                            const label nei = mesh_.faceNeighbour()[facei];
+                            if (!isAffectedCell[nei])
+                            {
+                                newIsAffectedCell.set(nei);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (debug)
+            {
+                Pout<< "isAffectedCell:" << isAffectedCell.count() << endl;
+                Pout<< "newIsAffectedCell:" << newIsAffectedCell.count()
+                    << endl;
+                Pout<< "nChanged:" << nChanged << endl;
+            }
+
+            if (returnReduce(nChanged, sumOp<label>()) == 0)
+            {
+                break;
+            }
+
+
+            // Transport minimum across coupled faces
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+            SubList<face> l
+            (
+                baseFaces,
+                mesh_.nBoundaryFaces(),
+                mesh_.nInternalFaces()
+            );
+            oldBoundaryFaces = l;
+            syncTools::syncBoundaryFaceList
+            (
+                mesh_,
+                l,
+                minEqOpFace(),
+                Foam::dummyTransform()  // dummy transformation
+            );
+
+            forAll(l, bFacei)
+            {
+                // Note: avoid special handling of comparing zero-sized faces
+                //       (see face::operator==). Review.
+                const labelUList& baseVts = l[bFacei];
+                const labelUList& oldVts = oldBoundaryFaces[bFacei];
+                if (baseVts != oldVts)
+                {
+                    const label facei = mesh_.nInternalFaces()+bFacei;
+                    const label own = mesh_.faceOwner()[facei];
+                    if (!isAffectedCell[own])
+                    {
+                        newIsAffectedCell.set(own);
+                    }
+                }
+            }
+
+            isAffectedCell = newIsAffectedCell;
+        }
+    }
+
+
     //
     // Create new points
     //
@@ -1734,18 +2063,21 @@ void Foam::addPatchCellLayer::setRefinement
         copiedPatchPoints.setSize(firstLayerDisp.size());
         forAll(firstLayerDisp, patchPointi)
         {
-            label meshPointi = meshPoints[patchPointi];
-            label zoneI = mesh_.pointZones().whichZone(meshPointi);
-            copiedPatchPoints[patchPointi] = meshMod.setAction
-            (
-                polyAddPoint
+            if (addedPoints_[patchPointi].size())
+            {
+                label meshPointi = meshPoints[patchPointi];
+                label zoneI = mesh_.pointZones().whichZone(meshPointi);
+                copiedPatchPoints[patchPointi] = meshMod.setAction
                 (
-                    mesh_.points()[meshPointi],         // point
-                    -1,         // master point
-                    zoneI,      // zone for point
-                    true        // supports a cell
-                )
-            );
+                    polyAddPoint
+                    (
+                        mesh_.points()[meshPointi],         // point
+                        -1,         // master point
+                        zoneI,      // zone for point
+                        true        // supports a cell
+                    )
+                );
+            }
         }
     }
 
@@ -1755,9 +2087,8 @@ void Foam::addPatchCellLayer::setRefinement
     {
         if (addedPoints_[patchPointi].size())
         {
-            label meshPointi = meshPoints[patchPointi];
-
-            label zoneI = mesh_.pointZones().whichZone(meshPointi);
+            const label meshPointi = meshPoints[patchPointi];
+            const label zoneI = mesh_.pointZones().whichZone(meshPointi);
 
             point pt = mesh_.points()[meshPointi];
 
@@ -1767,7 +2098,7 @@ void Foam::addPatchCellLayer::setRefinement
             {
                 pt += disp;
 
-                label addedVertI = meshMod.setAction
+                const label addedVertI = meshMod.setAction
                 (
                     polyAddPoint
                     (
@@ -1777,6 +2108,12 @@ void Foam::addPatchCellLayer::setRefinement
                         true        // supports a cell
                     )
                 );
+
+
+                //Pout<< "Adding point:" << addedVertI << " at:" << pt
+                //    << " from point:" << meshPointi
+                //    << " at:" << mesh_.points()[meshPointi]
+                //    << endl;
 
                 addedPoints_[patchPointi][i] = addedVertI;
 
@@ -1796,31 +2133,56 @@ void Foam::addPatchCellLayer::setRefinement
     {
         if (nFaceLayers[patchFacei] > 0)
         {
-            addedCells[patchFacei].setSize(nFaceLayers[patchFacei]);
+            const label meshFacei = pp.addressing()[patchFacei];
 
-            label meshFacei = pp.addressing()[patchFacei];
-
-            label ownZoneI = mesh_.cellZones().whichZone
-            (
-                mesh_.faceOwner()[meshFacei]
-            );
-
-            for (label i = 0; i < nFaceLayers[patchFacei]; i++)
+            label extrudeCelli = -2;
+            label extrudeZonei;
+            if (!addToMesh_)
             {
-                // Note: add from cell (owner of patch face) or from face?
-                // for now add from cell so we can map easily.
-                addedCells[patchFacei][i] = meshMod.setAction
-                (
-                    polyAddCell
+                extrudeCelli = -1;
+                const label ownCelli = mesh_.faceOwner()[meshFacei];
+                extrudeZonei = mesh_.cellZones().whichZone(ownCelli);
+            }
+            else if (!ppFlip[patchFacei])
+            {
+                // Normal: extrude from owner face
+                extrudeCelli = mesh_.faceOwner()[meshFacei];
+                extrudeZonei = mesh_.cellZones().whichZone(extrudeCelli);
+            }
+            else if (mesh_.isInternalFace(meshFacei))
+            {
+                // Extrude from neighbour face (if internal). Might be
+                // that it is a coupled face and the other side is
+                // extruded
+                extrudeCelli = mesh_.faceNeighbour()[meshFacei];
+                extrudeZonei = mesh_.cellZones().whichZone(extrudeCelli);
+            }
+
+            if (extrudeCelli != -2)
+            {
+                addedCells[patchFacei].setSize(nFaceLayers[patchFacei]);
+
+                for (label i = 0; i < nFaceLayers[patchFacei]; i++)
+                {
+                    // Note: add from cell (owner of patch face) or from face?
+                    // for now add from cell so we can map easily.
+                    addedCells[patchFacei][i] = meshMod.setAction
                     (
-                        -1,             // master point
-                        -1,             // master edge
-                        -1,             // master face
-                        (addToMesh_ ? mesh_.faceOwner()[meshFacei] : -1),
-                                        //master
-                        ownZoneI        // zone for cell
-                    )
-                );
+                        polyAddCell
+                        (
+                            -1,             // master point
+                            -1,             // master edge
+                            -1,             // master face
+                            extrudeCelli,   // master cell
+                            extrudeZonei    // zone for cell
+                        )
+                    );
+
+                    //Pout<< "Added cell:" << addedCells[patchFacei][i]
+                    //    << " from master:" << extrudeCelli
+                    //    << " at:" << mesh_.cellCentres()[extrudeCelli]
+                    //    << endl;
+                }
             }
         }
     }
@@ -1870,20 +2232,50 @@ void Foam::addPatchCellLayer::setRefinement
                         newFace[fp] = addedPoints_[f[fp]][i+offset];
                     }
                 }
-
+                //Pout<< "   newFace:" << newFace << endl;
+                //Pout<< "   coords:"
+                //    << UIndirectList<point>(meshMod.points(), newFace)
+                //    << " normal:" << newFace.unitNormal(meshMod.points())
+                //    << endl;
 
                 // Get new neighbour
+                label own = addedCells[patchFacei][i];
                 label nei;
                 label patchi;
                 label zoneI = -1;
                 bool flip = false;
-
+                bool fluxFlip = false;
 
                 if (i == addedCells[patchFacei].size()-1)
                 {
-                    // Top layer so is patch face.
-                    nei = -1;
+                    // Top layer so is either patch face or connects to
+                    // the other cell
                     patchi = patchID[patchFacei];
+                    if (patchi == -1)
+                    {
+                        // Internal face
+                        nei =
+                        (
+                           !ppFlip[patchFacei]
+                          ? mesh_.faceNeighbour()[meshFacei]
+                          : mesh_.faceOwner()[meshFacei]
+                        );
+
+                        if (ppFlip[patchFacei])
+                        {
+                            newFace = newFace.reverseFace();
+                        }
+                        //Pout<< "** adding top (internal) face:"
+                        //    << " at:" << mesh_.faceCentres()[meshFacei]
+                        //   <<  " own:" << own << " nei:" << nei
+                        //    << " patchi:" << patchi
+                        //    << " newFace:" << newFace
+                        //    << endl;
+                    }
+                    else
+                    {
+                        nei = -1;
+                    }
                     zoneI = mesh_.faceZones().whichZone(meshFacei);
                     if (zoneI != -1)
                     {
@@ -1898,29 +2290,55 @@ void Foam::addPatchCellLayer::setRefinement
                     patchi = -1;
                 }
 
+                if (nei != -1 && nei < own)
+                {
+                    // Wrongly oriented internal face
+                    newFace = newFace.reverseFace();
+                    std::swap(own, nei);
+                    flip = !flip;
+                    fluxFlip = true;
+
+                    //Pout<< "Flipped newFace:"
+                    //    << newFace.unitNormal(meshMod.points())
+                    //    << " own:" << own
+                    //    << " nei:" << nei
+                    //    << endl;
+                }
+
+
 
                 layerFaces_[patchFacei][i+1] = meshMod.setAction
                 (
                     polyAddFace
                     (
                         newFace,                    // face
-                        addedCells[patchFacei][i],  // owner
+                        own,                        // owner
                         nei,                        // neighbour
                         -1,                         // master point
                         -1,                         // master edge
                         (addToMesh_ ? meshFacei : -1), // master face
-                        false,                      // flux flip
+                        fluxFlip,                   // flux flip
                         patchi,                     // patch for face
                         zoneI,                      // zone for face
                         flip                        // face zone flip
                     )
                 );
+
+                //Pout<< "added layer face:" << layerFaces_[patchFacei][i+1]
+                //    << " verts:" << newFace
+                //    << " newFc:" << newFace.centre(meshMod.points())
+                //    << " originalFc:" << mesh_.faceCentres()[meshFacei]
+                //    << nl
+                //    << "     n:" << newFace.unitNormal(meshMod.points())
+                //    << " own:" << own << " nei:" << nei
+                //    << " patchi:" << patchi
+                //    << endl;
             }
         }
     }
 
     //
-    // Modify old patch faces to be on the inside
+    // Modify owner faces to have addedCells as neighbour
     //
 
     if (addToMesh_)
@@ -1932,22 +2350,39 @@ void Foam::addPatchCellLayer::setRefinement
                 label meshFacei = pp.addressing()[patchFacei];
 
                 layerFaces_[patchFacei][0] = meshFacei;
+                const face& f = pp[patchFacei];
+
+                const label own =
+                (
+                    !ppFlip[patchFacei]
+                  ? mesh_.faceOwner()[meshFacei]
+                  : mesh_.faceNeighbour()[meshFacei]
+                );
+                const label nei = addedCells[patchFacei][0];
 
                 meshMod.setAction
                 (
                     polyModifyFace
                     (
-                        pp[patchFacei],                 // modified face
+                        (ppFlip[patchFacei] ? f.reverseFace() : f),// verts
                         meshFacei,                      // label of face
-                        mesh_.faceOwner()[meshFacei],   // owner
-                        addedCells[patchFacei][0],      // neighbour
-                        false,                          // face flip
+                        own,                            // owner
+                        nei,                            // neighbour
+                        ppFlip[patchFacei],             // face flip
                         -1,                             // patch for face
                         true, //false,                  // remove from zone
                         -1, //zoneI,                    // zone for face
                         false                           // face flip in zone
                     )
                 );
+
+                //Pout<< "Modified bottom face " << meshFacei
+                //    << " at:" << mesh_.faceCentres()[meshFacei]
+                //    << " new own:" << own << " new nei:" << nei
+                //    << " verts:" << meshMod.faces()[meshFacei]
+                //    << " n:"
+                //    << meshMod.faces()[meshFacei].unitNormal(meshMod.points())
+                //    << endl;
             }
         }
     }
@@ -1957,7 +2392,7 @@ void Foam::addPatchCellLayer::setRefinement
         // in the exposed patch ID.
         forAll(pp, patchFacei)
         {
-            if (nFaceLayers[patchFacei] > 0)
+            if (addedCells[patchFacei].size())
             {
                 label meshFacei = pp.addressing()[patchFacei];
                 label zoneI = mesh_.faceZones().whichZone(meshFacei);
@@ -2283,6 +2718,13 @@ void Foam::addPatchCellLayer::setRefinement
 
                         newFace.setSize(newFp);
 
+                        // Walked edges as if owner face was extruded. Reverse
+                        // for neighbour face extrusion.
+                        if (ppFlip[patchFacei])
+                        {
+                            newFace = newFace.reverseFace();
+                        }
+
                         if (debug)
                         {
                             labelHashSet verts(2*newFace.size());
@@ -2369,6 +2811,98 @@ void Foam::addPatchCellLayer::setRefinement
                         );
                     }
                 }
+            }
+        }
+    }
+
+
+    // Adjust side faces if they're on the side where points were duplicated
+    // (i.e. adding to internal faces). Like duplicatePoints::setRefinement.
+    if (addToMesh_)
+    {
+        face newFace;
+
+        forAll(baseFaces, facei)
+        {
+            const face& f = mesh_.faces()[facei];
+            const face& baseF = baseFaces[facei];
+
+            if (isBlockedFace(facei) || baseF.empty())
+            {
+                // Either part of patch or no duplicated points on face
+                continue;
+            }
+
+            // Start off from original face
+            newFace = f;
+            forAll(f, fp)
+            {
+                const label meshPointi = f[fp];
+                if (baseF[fp] != labelMax)
+                {
+                    // Duplicated point
+                    const label patchPointi = pp.meshPointMap()[meshPointi];
+                    const label addedPointi = addedPoints_[patchPointi].last();
+
+                    //Pout<< "    For point:" << meshPointi
+                    //    << " at:" << mesh_.points()[meshPointi]
+                    //    << " at:" << pp.localPoints()[patchPointi]
+                    //    << " using addedpoint:" << addedPointi
+                    //    << " at:" << meshMod.points()[addedPointi]
+                    //    << endl;
+
+                    newFace[fp] = addedPointi;
+                }
+            }
+
+            //Pout<< "for face:" << facei << nl
+            //    << "    old:" << f
+            //    << " n:" << newFace.unitNormal(meshMod.points())
+            //    << " coords:" << UIndirectList<point>(mesh_.points(), f)
+            //    << nl
+            //    << "    new:" << newFace
+            //    << " n:" << newFace.unitNormal(meshMod.points())
+            //    << " coords:"
+            //    << UIndirectList<point>(meshMod.points(), newFace)
+            //    << endl;
+
+            // Get current zone info
+            label zoneID = mesh_.faceZones().whichZone(facei);
+            bool zoneFlip = false;
+            if (zoneID >= 0)
+            {
+                const faceZone& fZone = mesh_.faceZones()[zoneID];
+                zoneFlip = fZone.flipMap()[fZone.whichFace(facei)];
+            }
+
+
+            if (mesh_.isInternalFace(facei))
+            {
+                meshMod.modifyFace
+                (
+                    newFace,                    // modified face
+                    facei,                      // label of modified face
+                    mesh_.faceOwner()[facei],   // owner
+                    mesh_.faceNeighbour()[facei],   // neighbour
+                    false,                      // face flip
+                    -1,                         // patch for face
+                    zoneID,                     // zone for face
+                    zoneFlip                    // face flip in zone
+                );
+            }
+            else
+            {
+                meshMod.modifyFace
+                (
+                    newFace,                    // modified face
+                    facei,                      // label of modified face
+                    mesh_.faceOwner()[facei],   // owner
+                    -1,                         // neighbour
+                    false,                      // face flip
+                    patches.whichPatch(facei),  // patch for face
+                    zoneID,                     // zone for face
+                    zoneFlip                    // face flip in zone
+                );
             }
         }
     }

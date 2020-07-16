@@ -1,4 +1,5 @@
 snappyHexMeshDriver/snappyLayerDriver.C
+snappyHexMeshDriver/snappyLayerDriverSinglePass.C
 snappyHexMeshDriver/snappySnapDriver.C
 snappyHexMeshDriver/snappySnapDriverFeature.C
 snappyHexMeshDriver/snappyRefineDriver.C

@@ -52,6 +52,7 @@ SourceFiles
 #include "autoPtr.H"
 #include "labelPairHashes.H"
 #include "indirectPrimitivePatch.H"
+#include "uindirectPrimitivePatch.H"
 #include "pointFieldsFwd.H"
 #include "Tuple2.H"
 #include "pointIndexHit.H"
@@ -69,6 +70,7 @@ namespace Foam
 // Forward Declarations
 class fvMesh;
 class mapDistributePolyMesh;
+class mapDistribute;
 class decompositionMethod;
 class refinementSurfaces;
 class refinementFeatures;
@@ -584,6 +586,8 @@ private:
                 const labelList& globalToMasterPatch,
                 const pointField& locationsInMesh,
                 const wordList& regionsInMesh,
+                const pointField& locationsOutsideMesh,
+                const refPtr<writer<scalar>>& leakPathFormatter,
 
                 const labelList& neiLevel,
                 const pointField& neiCc,
@@ -611,6 +615,17 @@ private:
                 const label neiPatch,
                 polyTopoChange& meshMod
             ) const;
+
+            //- Write leak path
+            static fileName writeLeakPath
+            (
+                const polyMesh& mesh,
+                const pointField& locationsInMesh,
+                const pointField& locationsOutsideMesh,
+                const writer<scalar>& leakPathFormatter,
+                const boolList& blockedFace
+            );
+
 
         // Problem cell handling
 
@@ -658,12 +673,37 @@ private:
             //- Returns list with for every internal face -1 or the patch
             //  they should be baffled into. If removeEdgeConnectedCells is set
             //  removes cells based on perpendicularAngle.
-            labelList markFacesOnProblemCells
+            void markFacesOnProblemCells
             (
                 const dictionary& motionDict,
                 const bool removeEdgeConnectedCells,
                 const scalarField& perpendicularAngle,
-                const labelList& globalToMasterPatch
+                const labelList& globalToMasterPatch,
+
+                labelList& facePatch,
+                labelList& faceZone
+            ) const;
+
+            //- Calculates for every face the nearest 'start' face. Any
+            //  unreached face does not get set (faceToStart[facei] = -1)
+            void nearestFace
+            (
+                const labelUList& startFaces,
+                const bitSet& isBlockedFace,
+
+                autoPtr<mapDistribute>& mapPtr,
+                labelList& faceToStart,
+                const label nIter = labelMax
+            ) const;
+
+            //- Calculates for every face the label of the nearest
+            //  patch its zone. Any unreached face (disconnected mesh?) becomes
+            //  adaptPatchIDs[0]
+            void nearestPatch
+            (
+                const labelList& adaptPatchIDs,
+                labelList& nearestPatch,
+                labelList& nearestZone
             ) const;
 
             //- Returns list with for every face the label of the nearest
@@ -682,12 +722,15 @@ private:
 
             //- Returns list with for every internal face -1 or the patch
             //  they should be baffled into.
-            labelList markFacesOnProblemCellsGeometric
+            void markFacesOnProblemCellsGeometric
             (
                 const snapParameters& snapParams,
                 const dictionary& motionDict,
                 const labelList& globalToMasterPatch,
-                const labelList& globalToSlavePatch
+                const labelList& globalToSlavePatch,
+
+                labelList& facePatch,
+                labelList& faceZone
             ) const;
 
 
@@ -802,6 +845,8 @@ private:
                 const label backgroundZoneID,
                 const pointField& locationsInMesh,
                 const wordList& zonesInMesh,
+                const pointField& locationsOutsideMesh,
+                const refPtr<writer<scalar>>& leakPathFormatter,
 
                 labelList& cellToZone,
                 labelList& unnamedRegion1,
@@ -1156,6 +1201,47 @@ public:
                     const label growIter
                 );
 
+            // Blocking leaks (by blocking cells)
+
+                //- Faces currently on boundary or intersected by surface
+                void selectIntersectedFaces
+                (
+                    const labelList& surfaces,
+                    boolList& isBlockedFace
+                ) const;
+
+                //- Return list of cells to block by walking from the seedCells
+                //  until reaching a leak face
+                labelList detectLeakCells
+                (
+                    const boolList& isBlockedFace,
+                    const labelList& leakFaces,
+                    const labelList& seedCells
+                ) const;
+
+                //- Remove minimum amount of cells to break any leak from
+                //  inside to outside
+                autoPtr<mapPolyMesh> removeLeakCells
+                (
+                    const labelList& globalToMasterPatch,
+                    const labelList& globalToSlavePatch,
+                    const pointField& locationsInMesh,
+                    const pointField& locationsOutsideMesh,
+                    const labelList& selectedSurfaces
+                );
+
+                //- Baffle faces to break any leak from inside to outside
+                autoPtr<mapPolyMesh> blockLeakFaces
+                (
+                    const labelList& globalToMasterPatch,
+                    const labelList& globalToSlavePatch,
+                    const pointField& locationsInMesh,
+                    const wordList& zonesInMesh,
+                    const pointField& locationsOutsideMesh,
+                    const labelList& selectedSurfaces
+                );
+
+
             //- Refine some cells
             autoPtr<mapPolyMesh> refine(const labelList& cellsToRefine);
 
@@ -1217,7 +1303,7 @@ public:
                 const pointField& locationsInMesh,
                 const wordList& regionsInMesh,
                 const pointField& locationsOutsideMesh,
-                const writer<scalar>& leakPathFormatter
+                const refPtr<writer<scalar>>& leakPathFormatter
             );
 
             //- Merge free-standing baffles
@@ -1233,8 +1319,7 @@ public:
                 const labelList& globalToMasterPatch,
                 const labelList& globalToSlavePatch,
                 const pointField& locationsInMesh,
-                const pointField& locationsOutsideMesh,
-                const writer<scalar>& leakPathFormatter
+                const pointField& locationsOutsideMesh
             );
 
             //- Split off (with optional buffer layers) unreachable areas
@@ -1260,7 +1345,8 @@ public:
                 const labelList& globalToMasterPatch,
                 const labelList& globalToSlavePatch,
                 const pointField& locationsInMesh,
-                const wordList& regionsInMesh
+                const wordList& regionsInMesh,
+                const pointField& locationsOutsideMesh
             );
 
             //- Find boundary points that connect to more than one cell
@@ -1349,6 +1435,8 @@ public:
                 const label nErodeCellZones,
                 const pointField& locationsInMesh,
                 const wordList& regionsInMesh,
+                const pointField& locationsOutsideMesh,
+                const refPtr<writer<scalar>>& leakPathFormatter,
                 wordPairHashTable& zonesToFaceZone
             );
 
@@ -1394,11 +1482,49 @@ public:
                 surfaceZonesInfo::faceZoneType& fzType
             ) const;
 
+            //- Add pointZone if does not exist. Return index of zone
+            label addPointZone(const word& name);
+
+            //- Count number of faces per patch edge. Parallel consistent.
+            labelList countEdgeFaces(const uindirectPrimitivePatch& pp) const;
+
             //- Select coupled faces that are not collocated
             void selectSeparatedCoupledFaces(boolList&) const;
 
             //- Find any intersection of surface. Store in surfaceIndex_.
             void updateIntersections(const labelList& changedFaces);
+
+            //- Calculate nearest intersection for selected mesh faces
+            void nearestIntersection
+            (
+                const labelList& surfacesToTest,
+                const labelList& testFaces,
+
+                labelList& surface1,
+                List<pointIndexHit>& hit1,
+                labelList& region1,
+                labelList& surface2,
+                List<pointIndexHit>& hit2,
+                labelList& region2
+            ) const;
+
+            //- Remove cells. Put exposedFaces into exposedPatchIDs.
+            autoPtr<mapPolyMesh> doRemoveCells
+            (
+                const labelList& cellsToRemove,
+                const labelList& exposedFaces,
+                const labelList& exposedPatchIDs,
+                removeCells& cellRemover
+            );
+
+            //- Find cell point is in. Uses optional perturbation to re-test.
+            //  Returns -1 on processors that do not have the cell.
+            static label findCell
+            (
+                const polyMesh&,
+                const vector& perturbVec,
+                const point& p
+            );
 
             //- Find region point is in. Uses optional perturbation to re-test.
             static label findRegion
@@ -1418,7 +1544,7 @@ public:
                 const pointField& locationsInMesh,
                 const pointField& locationsOutsideMesh,
                 const bool exitIfLeakPath,
-                const writer<scalar>& leakPathFormatter,
+                const refPtr<writer<scalar>>& leakPathFormatter,
                 const label nRegions,
                 labelList& cellRegion,
                 const boolList& blockedFace
@@ -1433,16 +1559,7 @@ public:
                 const pointField& locationsInMesh,
                 const pointField& locationsOutsideMesh,
                 const bool exitIfLeakPath,
-                const writer<scalar>& leakPathFormatter
-            );
-
-            //- Remove cells. Put exposedFaces into exposedPatchIDs.
-            autoPtr<mapPolyMesh> doRemoveCells
-            (
-                const labelList& cellsToRemove,
-                const labelList& exposedFaces,
-                const labelList& exposedPatchIDs,
-                removeCells& cellRemover
+                const refPtr<writer<scalar>>& leakPathFormatter
             );
 
             //- Split faces into two

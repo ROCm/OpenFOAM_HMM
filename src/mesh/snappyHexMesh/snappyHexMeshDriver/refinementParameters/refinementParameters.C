@@ -311,4 +311,46 @@ Foam::labelList Foam::refinementParameters::unzonedLocations
 }
 
 
+Foam::List<Foam::pointField> Foam::refinementParameters::zonePoints
+(
+    const pointField& locationsInMesh,
+    const wordList& zonesInMesh,
+    const pointField& locationsOutsideMesh
+)
+{
+    // Sort locations according to zone. Add outside as last element
+    DynamicList<pointField> allLocations(zonesInMesh.size()+1);
+    DynamicList<word> allZoneNames(allLocations.size());
+
+    forAll(zonesInMesh, i)
+    {
+        const word name
+        (
+            zonesInMesh[i] == word::null
+          ? "none"
+          : zonesInMesh[i]
+        );
+        const point& pt = locationsInMesh[i];
+
+        const label index = allZoneNames.find(name);
+        if (index == -1)
+        {
+            allZoneNames.append(name);
+            allLocations.append(pointField(1, pt));
+        }
+        else
+        {
+            allLocations[index].append(pt);
+        }
+    }
+
+    allZoneNames.append("outside");
+    allLocations.append(locationsOutsideMesh);
+
+    allLocations.shrink();
+
+    return std::move(allLocations);
+}
+
+
 // ************************************************************************* //

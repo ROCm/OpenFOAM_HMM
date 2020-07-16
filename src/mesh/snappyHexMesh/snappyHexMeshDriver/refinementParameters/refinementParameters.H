@@ -281,6 +281,15 @@ public:
             //- Extract indices of unnamed locations ('keepPoints')
             static labelList unzonedLocations(const wordList& zonesInMesh);
 
+            //- Helper: per zone (entry in zonesInMesh) the locations with
+            //          additionally locationsOutsideMesh as last. Used in
+            //          hole filling
+            static List<pointField> zonePoints
+            (
+                const pointField& locationsInMesh,
+                const wordList& zonesInMesh,
+                const pointField& locationsOutsideMesh
+            );
 };
 
 
