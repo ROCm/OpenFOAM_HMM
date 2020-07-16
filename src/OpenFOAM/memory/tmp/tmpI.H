@@ -464,8 +464,6 @@ inline void Foam::tmp<T>::operator=(tmp<T>&& other) noexcept
 template<class T>
 inline void Foam::tmp<T>::operator=(T* p)
 {
-    clear();
-
     if (!p)
     {
         FatalErrorInFunction
@@ -480,8 +478,14 @@ inline void Foam::tmp<T>::operator=(T* p)
             << abort(FatalError);
     }
 
-    ptr_ = p;
-    type_ = PTR;
+    reset(p);
+}
+
+
+template<class T>
+inline void Foam::tmp<T>::operator=(std::nullptr_t) noexcept
+{
+    reset(nullptr);
 }
 
 

@@ -234,9 +234,8 @@ public:
         //  Fatal for a null pointer
         inline void operator=(T* p);
 
-        //- No assignment from literal nullptr.
-        //  Consistent with run-time check for nullptr on assignment.
-        void operator=(std::nullptr_t) = delete;
+        //- Reset via assignment from literal nullptr
+        inline void operator=(std::nullptr_t) noexcept;
 
         //- Conversion to tmp - releases pointer or copies reference
         inline operator tmp<T>();

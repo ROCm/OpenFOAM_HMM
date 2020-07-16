@@ -255,9 +255,8 @@ public:
         //  Fatal for a null pointer, or when the pointer is non-unique.
         inline void operator=(T* p);
 
-        //- No assignment from literal nullptr.
-        //  Consistent with run-time check for nullptr on assignment.
-        void operator=(std::nullptr_t) = delete;
+        //- Reset via assignment from literal nullptr
+        inline void operator=(std::nullptr_t) noexcept;
 };
 
 
