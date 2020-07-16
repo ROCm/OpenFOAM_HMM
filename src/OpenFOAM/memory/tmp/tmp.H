@@ -160,11 +160,11 @@ public:
 
     // Query
 
-        //- True if a null managed pointer
-        bool empty() const noexcept { return !ptr_ && type_ == PTR; }
+        //- True if a null pointer/reference
+        bool empty() const noexcept { return !ptr_; }
 
-        //- True for non-null managed pointer or an object reference
-        bool valid() const noexcept { return ptr_ || type_ == CREF; }
+        //- True for non-null pointer/reference
+        bool valid() const noexcept { return ptr_; }
 
         //- True if this is a managed pointer (not a reference)
         bool isTmp() const noexcept { return type_ == PTR; }
@@ -241,8 +241,8 @@ public:
         //  Fatal for a null managed pointer or if the object is const.
         inline T* operator->();
 
-        //- Non-null managed pointer or an object reference : valid()
-        explicit operator bool() const noexcept { return ptr_ ||type_ == CREF; }
+        //- Non-null pointer/reference : valid()
+        explicit operator bool() const noexcept { return ptr_; }
 
         //- Transfer ownership of the managed pointer.
         //  Fatal for a null managed pointer or if the object is const.
