@@ -152,7 +152,7 @@ Foam::lumpedPointState::lumpedPointState
         FatalErrorInFunction
             << "Have " << points_.size() << " points but "
             << angles_.size() << " angles" << nl
-            exit(FatalError);
+            << exit(FatalError);
         #else
         WarningInFunction
             << "Have " << points_.size() << " points but "
