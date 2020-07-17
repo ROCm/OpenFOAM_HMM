@@ -104,7 +104,7 @@ void Foam::sixDoFRigidBodyMotion::write(Ostream& os) const
         os.endBlock();
     }
 
-    if (!solver_.empty())
+    if (solver_)
     {
         os  << indent << "solver";
         solver_->write(os);

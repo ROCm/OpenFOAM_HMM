@@ -277,7 +277,7 @@ int main(int argc, char *argv[])
         surf.cleanup(true);
     }
 
-    if (fromCsys.valid())
+    if (fromCsys)
     {
         Info<< "move points from coordinate system: "
             << fromCsys->name() << endl;
@@ -285,7 +285,7 @@ int main(int argc, char *argv[])
         surf.movePoints(tpf());
     }
 
-    if (toCsys.valid())
+    if (toCsys)
     {
         Info<< "move points to coordinate system: "
             << toCsys->name() << endl;

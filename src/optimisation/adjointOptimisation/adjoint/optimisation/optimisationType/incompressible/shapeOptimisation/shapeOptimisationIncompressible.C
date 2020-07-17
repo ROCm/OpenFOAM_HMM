@@ -91,7 +91,7 @@ void shapeOptimisation::computeEta
     {
         // In the unlikely event that eta is not set and the line search step
         // is not 1, multiply with it
-        // if (lineSearch_.valid()) correction *= lineSearch_->step();
+        // if (lineSearch_) correction *= lineSearch_->step();
 
         // Compute eta based on desirable mesh movement size
         scalar eta = optMeshMovement_->computeEta(correction);

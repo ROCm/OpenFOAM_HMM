@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,7 @@ See also
 
 #include "refCount.H"
 #include "word.H"
-#include <utility>
+#include "stdFoam.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -69,20 +69,21 @@ class tmp
         enum refType
         {
             PTR,    //!< Managing a pointer (ref-counted)
-            CREF    //!< Using a const-reference to an object
+            CREF    //!< Using (const) reference to an object
         };
 
-        //- The managed pointer or the address of const-reference object
+        //- The managed pointer or address of the object (reference)
         mutable T* ptr_;
 
-        //- The type (managed pointer | const-reference object)
+        //- The type (managed pointer | object reference)
         mutable refType type_;
 
 
     // Private Member Operators
 
         //- Increment the ref-count for a managed pointer
-        inline void operator++();
+        //- and check that it is not oversubscribed
+        inline void incrCount();
 
 
 public:
@@ -122,7 +123,7 @@ public:
 
     // Constructors
 
-        //- Construct with no managed pointer.
+        //- Default construct, no managed pointer.
         inline constexpr tmp() noexcept;
 
         //- Construct with no managed pointer.
@@ -159,15 +160,17 @@ public:
 
     // Query
 
-        //- True if this is a managed pointer (not a const reference)
-        inline bool isTmp() const noexcept;
+        //- Deprecated(2020-07) True if a null managed pointer
+        //
+        //  \deprecated(2020-07) - use bool operator
+        FOAM_DEPRECATED_FOR(2020-07, "bool operator")
+        bool empty() const noexcept { return !ptr_; }
 
-        //- True if this is a non-null managed pointer
-        inline bool empty() const noexcept;
+        //- True for non-null pointer/reference
+        bool valid() const noexcept { return ptr_; }
 
-        //- True if this is a non-null managed pointer,
-        //- or is a const object reference
-        inline bool valid() const noexcept;
+        //- True if this is a managed pointer (not a reference)
+        bool isTmp() const noexcept { return type_ == PTR; }
 
         //- True if this is a non-null managed pointer with a unique ref-count
         inline bool movable() const noexcept;
@@ -179,10 +182,10 @@ public:
     // Access
 
         //- Return pointer without nullptr checking.
-        inline T* get() noexcept;
+        T* get() noexcept { return ptr_; }
 
         //- Return const pointer without nullptr checking.
-        inline const T* get() const noexcept;
+        const T* get() const noexcept { return ptr_; }
 
         //- Return the const object reference or a const reference to the
         //- contents of a non-null managed pointer.
@@ -211,12 +214,8 @@ public:
         //- delete object and set pointer to nullptr
         inline void clear() const noexcept;
 
-        //- Release ownership of managed temporary object.
-        //  After this call no object is managed.
-        inline void reset() noexcept;
-
         //- Delete managed temporary object and set to new given pointer
-        inline void reset(T* p) noexcept;
+        inline void reset(T* p = nullptr) noexcept;
 
         //- Clear existing and transfer ownership.
         inline void reset(tmp<T>&& other) noexcept;
@@ -245,12 +244,8 @@ public:
         //  Fatal for a null managed pointer or if the object is const.
         inline T* operator->();
 
-        //- Is non-null managed pointer or const object reference : valid()
-        explicit inline operator bool() const noexcept;
-
-        //- Take ownership of the pointer.
-        //  Fatal for a null pointer, or when the pointer is non-unique.
-        inline void operator=(T* p);
+        //- Non-null pointer/reference : valid()
+        explicit operator bool() const noexcept { return ptr_; }
 
         //- Transfer ownership of the managed pointer.
         //  Fatal for a null managed pointer or if the object is const.
@@ -259,12 +254,12 @@ public:
         //- Clear existing and transfer ownership.
         inline void operator=(tmp<T>&& other) noexcept;
 
+        //- Take ownership of the pointer.
+        //  Fatal for a null pointer, or when the pointer is non-unique.
+        inline void operator=(T* p);
 
-    // Housekeeping
-
-        //- No assignment from literal nullptr.
-        //  Consistent with run-time check for nullptr on assignment.
-        void operator=(std::nullptr_t) = delete;
+        //- Reset via assignment from literal nullptr
+        inline void operator=(std::nullptr_t) noexcept;
 };
 
 

@@ -176,7 +176,7 @@ Foam::List<Foam::labelPair> Foam::mapDistributeBase::schedule
 
 const Foam::List<Foam::labelPair>& Foam::mapDistributeBase::schedule() const
 {
-    if (schedulePtr_.empty())
+    if (!schedulePtr_)
     {
         schedulePtr_.reset
         (

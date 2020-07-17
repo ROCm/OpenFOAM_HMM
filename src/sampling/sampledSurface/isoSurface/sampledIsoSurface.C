@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,7 +74,7 @@ void Foam::sampledIsoSurface::getIsoFields() const
 
         if
         (
-            storedVolFieldPtr_.empty()
+            !storedVolFieldPtr_
          || (fvm.time().timeName() != storedVolFieldPtr_().instance())
         )
         {
@@ -126,7 +126,7 @@ void Foam::sampledIsoSurface::getIsoFields() const
     // (volPointInterpolation::interpolate with cache=false deletes any
     //  registered one or if mesh.changing())
 
-    if (subMeshPtr_.empty())
+    if (!subMeshPtr_)
     {
         const word pointFldName =
             "volPointInterpolate_"
@@ -316,8 +316,8 @@ bool Foam::sampledIsoSurface::updateGeometry() const
     // Get sub-mesh if any
     if
     (
-        (-1 != mesh().cellZones().findIndex(zoneNames_))
-     && subMeshPtr_.empty()
+        !subMeshPtr_
+     && (-1 != mesh().cellZones().findIndex(zoneNames_))
     )
     {
         const polyBoundaryMesh& patches = mesh().boundaryMesh();
@@ -352,7 +352,7 @@ bool Foam::sampledIsoSurface::updateGeometry() const
     // Clear derived data
     clearGeom();
 
-    if (subMeshPtr_.valid())
+    if (subMeshPtr_)
     {
         const volScalarField& vfld = *volSubFieldPtr_;
 
@@ -396,9 +396,9 @@ bool Foam::sampledIsoSurface::updateGeometry() const
             << "    average        : " << Switch(average_) << nl
             << "    isoField       : " << isoField_ << nl
             << "    isoValue       : " << isoVal_ << nl;
-        if (subMeshPtr_.valid())
+        if (subMeshPtr_)
         {
-            Pout<< "    zone size      : " << subMeshPtr_().subMesh().nCells()
+            Pout<< "    zone size      : " << subMeshPtr_->subMesh().nCells()
                 << nl;
         }
         Pout<< "    points         : " << points().size() << nl

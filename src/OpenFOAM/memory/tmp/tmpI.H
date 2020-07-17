@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,7 @@ License
 // * * * * * * * * * * * * * Private Member Operators  * * * * * * * * * * * //
 
 template<class T>
-inline void Foam::tmp<T>::operator++()
+inline void Foam::tmp<T>::incrCount()
 {
     ptr_->operator++();
 
@@ -138,7 +138,7 @@ inline Foam::tmp<T>::tmp(const tmp<T>& t)
     {
         if (ptr_)
         {
-            operator++();
+            this->incrCount();
         }
         else
         {
@@ -166,7 +166,7 @@ inline Foam::tmp<T>::tmp(const tmp<T>& t, bool reuse)
             }
             else
             {
-                operator++();
+                this->incrCount();
             }
         }
         else
@@ -189,27 +189,6 @@ inline Foam::tmp<T>::~tmp()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-inline bool Foam::tmp<T>::isTmp() const noexcept
-{
-    return type_ == PTR;
-}
-
-
-template<class T>
-inline bool Foam::tmp<T>::empty() const noexcept
-{
-    return (!ptr_ && isTmp());
-}
-
-
-template<class T>
-inline bool Foam::tmp<T>::valid() const noexcept
-{
-    return (ptr_ || type_ == CREF);
-}
-
-
-template<class T>
 inline bool Foam::tmp<T>::movable() const noexcept
 {
     return (type_ == PTR && ptr_ && ptr_->unique());
@@ -220,20 +199,6 @@ template<class T>
 inline Foam::word Foam::tmp<T>::typeName() const
 {
     return "tmp<" + word(typeid(T).name()) + '>';
-}
-
-
-template<class T>
-inline T* Foam::tmp<T>::get() noexcept
-{
-    return ptr_; // non-const pointer
-}
-
-
-template<class T>
-inline const T* Foam::tmp<T>::get() const noexcept
-{
-    return ptr_; // const pointer
 }
 
 
@@ -266,7 +231,7 @@ inline T& Foam::tmp<T>::ref() const
                 << abort(FatalError);
         }
     }
-    else
+    else // if (type_ == CREF)
     {
         FatalErrorInFunction
             << "Attempted non-const reference to const object from a "
@@ -295,15 +260,16 @@ inline T& Foam::tmp<T>::constCast() const
 template<class T>
 inline T* Foam::tmp<T>::ptr() const
 {
+    if (!ptr_)
+    {
+        FatalErrorInFunction
+            << typeName() << " deallocated"
+            << abort(FatalError);
+    }
+
     if (isTmp())
     {
-        if (!ptr_)
-        {
-            FatalErrorInFunction
-                << typeName() << " deallocated"
-                << abort(FatalError);
-        }
-        else if (!ptr_->unique())
+        if (!ptr_->unique())
         {
             FatalErrorInFunction
                 << "Attempt to acquire pointer to object referred to"
@@ -311,10 +277,10 @@ inline T* Foam::tmp<T>::ptr() const
                 << abort(FatalError);
         }
 
-        T* ptr = ptr_;
+        T* p = ptr_;
         ptr_ = nullptr;
 
-        return ptr;
+        return p;
     }
 
     return ptr_->clone().ptr();
@@ -336,15 +302,6 @@ inline void Foam::tmp<T>::clear() const noexcept
         }
         ptr_ = nullptr;
     }
-}
-
-
-template<class T>
-inline void Foam::tmp<T>::reset() noexcept
-{
-    clear();
-    ptr_ = nullptr;
-    type_ = PTR;
 }
 
 
@@ -456,37 +413,6 @@ inline T* Foam::tmp<T>::operator->()
 
 
 template<class T>
-inline Foam::tmp<T>::operator bool() const noexcept
-{
-    return (ptr_ || type_ == CREF);
-}
-
-
-template<class T>
-inline void Foam::tmp<T>::operator=(T* p)
-{
-    clear();
-
-    if (!p)
-    {
-        FatalErrorInFunction
-            << "Attempted copy of a deallocated " << typeName()
-            << abort(FatalError);
-    }
-    else if (!p->unique())
-    {
-        FatalErrorInFunction
-            << "Attempted assignment of a " << typeName()
-            << " to non-unique pointer"
-            << abort(FatalError);
-    }
-
-    ptr_ = p;
-    type_ = PTR;
-}
-
-
-template<class T>
 inline void Foam::tmp<T>::operator=(const tmp<T>& t)
 {
     if (&t == this)
@@ -533,6 +459,34 @@ inline void Foam::tmp<T>::operator=(tmp<T>&& other) noexcept
 
     other.ptr_ = nullptr;
     other.type_ = PTR;
+}
+
+
+template<class T>
+inline void Foam::tmp<T>::operator=(T* p)
+{
+    if (!p)
+    {
+        FatalErrorInFunction
+            << "Attempted copy of a deallocated " << typeName()
+            << abort(FatalError);
+    }
+    else if (!p->unique())
+    {
+        FatalErrorInFunction
+            << "Attempted assignment of a " << typeName()
+            << " to non-unique pointer"
+            << abort(FatalError);
+    }
+
+    reset(p);
+}
+
+
+template<class T>
+inline void Foam::tmp<T>::operator=(std::nullptr_t) noexcept
+{
+    reset(nullptr);
 }
 
 

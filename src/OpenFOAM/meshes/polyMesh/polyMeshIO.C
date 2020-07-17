@@ -64,7 +64,7 @@ void Foam::polyMesh::setInstance
     cellZones_.writeOpt() = wOpt;
     cellZones_.instance() = inst;
 
-    if (tetBasePtIsPtr_.valid())
+    if (tetBasePtIsPtr_)
     {
         tetBasePtIsPtr_->writeOpt() = wOpt;
         tetBasePtIsPtr_->instance() = inst;

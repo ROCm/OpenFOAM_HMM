@@ -605,7 +605,7 @@ Foam::meshSearch::~meshSearch()
 
 const Foam::treeBoundBox& Foam::meshSearch::dataBoundBox() const
 {
-    if (!overallBbPtr_.valid())
+    if (!overallBbPtr_)
     {
         Random rndGen(261782);
         overallBbPtr_.reset
@@ -628,7 +628,7 @@ const Foam::treeBoundBox& Foam::meshSearch::dataBoundBox() const
 const Foam::indexedOctree<Foam::treeDataFace>&
 Foam::meshSearch::boundaryTree() const
 {
-    if (!boundaryTreePtr_.valid())
+    if (!boundaryTreePtr_)
     {
         // All boundary faces (not just walls)
         labelList bndFaces
@@ -662,7 +662,7 @@ Foam::meshSearch::boundaryTree() const
 const Foam::indexedOctree<Foam::treeDataFace>&
 Foam::meshSearch::nonCoupledBoundaryTree() const
 {
-    if (!nonCoupledBoundaryTreePtr_.valid())
+    if (!nonCoupledBoundaryTreePtr_)
     {
         // All non-coupled boundary faces (not just walls)
         const polyBoundaryMesh& patches = mesh_.boundaryMesh();
@@ -707,7 +707,7 @@ Foam::meshSearch::nonCoupledBoundaryTree() const
 const Foam::indexedOctree<Foam::treeDataCell>&
 Foam::meshSearch::cellTree() const
 {
-    if (!cellTreePtr_.valid())
+    if (!cellTreePtr_)
     {
         cellTreePtr_.reset
         (

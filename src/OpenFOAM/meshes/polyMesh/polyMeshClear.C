@@ -80,7 +80,7 @@ void Foam::polyMesh::updateGeom
     DebugInFunction
         << "Updating geometric data with newPoints:"
         << newPoints.size() << " newTetBasePtIs:"
-        << newTetBasePtIsPtr.valid() << endl;
+        << bool(newTetBasePtIsPtr) << endl;
 
     if (points_.size() != 0 && points_.size() != newPoints.size())
     {
@@ -128,7 +128,7 @@ void Foam::polyMesh::updateGeom
     points_.transfer(newPoints);
 
     // Optional new tet base points
-    if (newTetBasePtIsPtr.valid())
+    if (newTetBasePtIsPtr)
     {
         tetBasePtIsPtr_ = std::move(newTetBasePtIsPtr);
     }

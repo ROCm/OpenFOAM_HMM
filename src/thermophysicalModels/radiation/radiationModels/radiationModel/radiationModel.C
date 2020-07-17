@@ -237,7 +237,7 @@ void Foam::radiation::radiationModel::correct()
         firstIter_ = false;
     }
 
-    if (!soot_.empty())
+    if (soot_)
     {
         soot_->correct();
     }
@@ -306,7 +306,7 @@ Foam::tmp<Foam::fvScalarMatrix> Foam::radiation::radiationModel::ST
 const Foam::radiation::absorptionEmissionModel&
 Foam::radiation::radiationModel::absorptionEmission() const
 {
-    if (!absorptionEmission_.valid())
+    if (!absorptionEmission_)
     {
         FatalErrorInFunction
             << "Requested radiation absorptionEmission model, but model is "
@@ -320,7 +320,7 @@ Foam::radiation::radiationModel::absorptionEmission() const
 const Foam::radiation::sootModel&
 Foam::radiation::radiationModel::soot() const
 {
-    if (!soot_.valid())
+    if (!soot_)
     {
         FatalErrorInFunction
             << "Requested radiation sootModel model, but model is "
@@ -334,7 +334,7 @@ Foam::radiation::radiationModel::soot() const
 const Foam::radiation::transmissivityModel&
 Foam::radiation::radiationModel::transmissivity() const
 {
-    if (!transmissivity_.valid())
+    if (!transmissivity_)
     {
         FatalErrorInFunction
             << "Requested radiation sootModel model, but model is "

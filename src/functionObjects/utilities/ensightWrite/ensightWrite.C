@@ -189,7 +189,7 @@ bool Foam::functionObjects::ensightWrite::execute()
 
 bool Foam::functionObjects::ensightWrite::write()
 {
-    if (!ensCase_.valid())
+    if (!ensCase_)
     {
         ensCase_.reset
         (

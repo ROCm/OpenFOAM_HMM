@@ -51,7 +51,7 @@ namespace fv
 const Foam::interpolation2DTable<Foam::scalar>&
 Foam::fv::tabulatedHeatTransfer::hTable()
 {
-    if (!hTable_.valid())
+    if (!hTable_)
     {
         hTable_.reset(new interpolation2DTable<scalar>(coeffs_));
     }
@@ -62,7 +62,7 @@ Foam::fv::tabulatedHeatTransfer::hTable()
 
 const Foam::volScalarField& Foam::fv::tabulatedHeatTransfer::AoV()
 {
-    if (!AoV_.valid())
+    if (!AoV_)
     {
         AoV_.reset
         (

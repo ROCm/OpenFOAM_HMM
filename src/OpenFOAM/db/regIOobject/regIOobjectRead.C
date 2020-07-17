@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,7 +106,7 @@ Foam::Istream& Foam::regIOobject::readStream(const bool valid)
     }
 
     // Construct object stream and read header if not already constructed
-    if (!isPtr_.valid())
+    if (!isPtr_)
     {
         fileName objPath;
         if (watchIndices_.size())
@@ -152,7 +152,7 @@ Foam::Istream& Foam::regIOobject::readStream
     }
 
     // Construct IFstream if not already constructed
-    if (!isPtr_.valid())
+    if (!isPtr_)
     {
         readStream(valid);
 
@@ -185,11 +185,11 @@ void Foam::regIOobject::close()
     {
         Pout<< "regIOobject::close() : "
             << "finished reading "
-            << (isPtr_.valid() ? isPtr_().name() : "dummy")
+            << (isPtr_ ? isPtr_->name() : "dummy")
             << endl;
     }
 
-    isPtr_.clear();
+    isPtr_.reset(nullptr);
 }
 
 

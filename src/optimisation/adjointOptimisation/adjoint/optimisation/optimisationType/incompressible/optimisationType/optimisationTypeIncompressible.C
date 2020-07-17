@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2020 PCOpt/NTUA
     Copyright (C) 2013-2020 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -180,7 +180,7 @@ void optimisationType::update(scalarField& direction)
 
     // Multiply with line search step, if necessary
     scalarField correction(direction);
-    if (lineSearch_.valid())
+    if (lineSearch_)
     {
         correction *= lineSearch_->step();
     }

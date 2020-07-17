@@ -50,7 +50,7 @@ namespace Foam
 
 class refCount
 {
-    // Private data
+    // Private Data
     int count_;
 
 
@@ -62,7 +62,7 @@ public:
 
     // Constructors
 
-        //- Construct null initializing count to 0
+        //- Default construct, initializing count to 0
         constexpr refCount() noexcept
         :
             count_(0)

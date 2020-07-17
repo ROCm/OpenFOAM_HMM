@@ -65,7 +65,7 @@ Foam::functionObjects::streamLineBase::trackDirTypeNames
 const Foam::word&
 Foam::functionObjects::streamLineBase::sampledSetAxis() const
 {
-    if (sampledSetPtr_.empty())
+    if (!sampledSetPtr_)
     {
         sampledSetPoints();
     }
@@ -77,7 +77,7 @@ Foam::functionObjects::streamLineBase::sampledSetAxis() const
 const Foam::sampledSet&
 Foam::functionObjects::streamLineBase::sampledSetPoints() const
 {
-    if (sampledSetPtr_.empty())
+    if (!sampledSetPtr_)
     {
         sampledSetPtr_ = sampledSet::New
         (

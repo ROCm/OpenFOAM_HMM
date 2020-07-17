@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,7 @@ void Foam::functionObjects::forceCoeffs::createFiles()
 {
     // Note: Only possible to create bin files after bins have been initialised
 
-    if (writeToFile() && !coeffFilePtr_.valid())
+    if (writeToFile() && !coeffFilePtr_)
     {
         coeffFilePtr_ = createFile("coefficient");
         writeIntegratedHeader("Coefficients", coeffFilePtr_());

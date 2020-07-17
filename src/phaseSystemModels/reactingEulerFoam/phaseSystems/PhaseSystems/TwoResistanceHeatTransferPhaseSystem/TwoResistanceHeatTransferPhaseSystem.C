@@ -65,14 +65,14 @@ TwoResistanceHeatTransferPhaseSystem
     {
         const phasePair& pair = this->phasePairs_[heatTransferModelIter.key()];
 
-        if (!heatTransferModels_[pair].first().valid())
+        if (!heatTransferModels_[pair].first())
         {
             FatalErrorInFunction
                 << "A heat transfer model for the " << pair.phase1().name()
                 << " side of the " << pair << " pair is not specified"
                 << exit(FatalError);
         }
-        if (!heatTransferModels_[pair].second().valid())
+        if (!heatTransferModels_[pair].second())
         {
             FatalErrorInFunction
                 << "A heat transfer model for the " << pair.phase2().name()

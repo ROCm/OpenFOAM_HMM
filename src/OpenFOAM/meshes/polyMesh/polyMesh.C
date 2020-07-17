@@ -699,25 +699,25 @@ void Foam::polyMesh::resetPrimitives
 
     // Take over new primitive data.
     // Optimized to avoid overwriting data at all
-    if (points.valid())
+    if (points)
     {
-        points_.transfer(points());
+        points_.transfer(*points);
         bounds_ = boundBox(points_, validBoundary);
     }
 
-    if (faces.valid())
+    if (faces)
     {
-        faces_.transfer(faces());
+        faces_.transfer(*faces);
     }
 
-    if (owner.valid())
+    if (owner)
     {
-        owner_.transfer(owner());
+        owner_.transfer(*owner);
     }
 
-    if (neighbour.valid())
+    if (neighbour)
     {
-        neighbour_.transfer(neighbour());
+        neighbour_.transfer(*neighbour);
     }
 
 
@@ -860,7 +860,7 @@ Foam::label Foam::polyMesh::nSolutionD() const
 
 const Foam::labelIOList& Foam::polyMesh::tetBasePtIs() const
 {
-    if (tetBasePtIsPtr_.empty())
+    if (!tetBasePtIsPtr_)
     {
         if (debug)
         {
@@ -894,7 +894,7 @@ const Foam::labelIOList& Foam::polyMesh::tetBasePtIs() const
 const Foam::indexedOctree<Foam::treeDataCell>&
 Foam::polyMesh::cellTree() const
 {
-    if (cellTreePtr_.empty())
+    if (!cellTreePtr_)
     {
         treeBoundBox overallBb(points());
 
@@ -922,7 +922,7 @@ Foam::polyMesh::cellTree() const
         );
     }
 
-    return cellTreePtr_();
+    return *cellTreePtr_;
 }
 
 
@@ -1087,7 +1087,7 @@ const Foam::labelList& Foam::polyMesh::faceNeighbour() const
 
 const Foam::pointField& Foam::polyMesh::oldPoints() const
 {
-    if (oldPointsPtr_.empty())
+    if (!oldPointsPtr_)
     {
         if (debug)
         {
@@ -1160,11 +1160,11 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
     points_.instance() = time().timeName();
     points_.eventNo() = getEvent();
 
-    if (tetBasePtIsPtr_.valid())
+    if (tetBasePtIsPtr_)
     {
-        tetBasePtIsPtr_().writeOpt() = IOobject::AUTO_WRITE;
-        tetBasePtIsPtr_().instance() = time().timeName();
-        tetBasePtIsPtr_().eventNo() = getEvent();
+        tetBasePtIsPtr_->writeOpt() = IOobject::AUTO_WRITE;
+        tetBasePtIsPtr_->instance() = time().timeName();
+        tetBasePtIsPtr_->eventNo() = getEvent();
     }
 
     tmp<scalarField> sweptVols = primitiveMesh::movePoints
@@ -1174,9 +1174,9 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
     );
 
     // Adjust parallel shared points
-    if (globalMeshDataPtr_.valid())
+    if (globalMeshDataPtr_)
     {
-        globalMeshDataPtr_().movePoints(points_);
+        globalMeshDataPtr_->movePoints(points_);
     }
 
     // Force recalculation of all geometric data with new points
@@ -1233,7 +1233,7 @@ void Foam::polyMesh::resetMotion() const
 
 const Foam::globalMeshData& Foam::polyMesh::globalData() const
 {
-    if (globalMeshDataPtr_.empty())
+    if (!globalMeshDataPtr_)
     {
         if (debug)
         {

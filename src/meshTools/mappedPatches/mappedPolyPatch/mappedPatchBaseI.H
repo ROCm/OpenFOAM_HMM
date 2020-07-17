@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -150,10 +151,10 @@ inline const Foam::mapDistribute& Foam::mappedPatchBase::map() const
 
     if (topoChange)
     {
-        mapPtr_.clear();
+        mapPtr_.reset(nullptr);
     }
 
-    if (mapPtr_.empty())
+    if (!mapPtr_)
     {
         calcMapping();
     }

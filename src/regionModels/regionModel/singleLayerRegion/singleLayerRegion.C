@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -208,7 +209,7 @@ Foam::regionModels::singleLayerRegion::~singleLayerRegion()
 
 const Foam::volVectorField& Foam::regionModels::singleLayerRegion::nHat() const
 {
-    if (!nHatPtr_.valid())
+    if (!nHatPtr_)
     {
         FatalErrorInFunction
             << "Region patch normal vectors not available"
@@ -221,7 +222,7 @@ const Foam::volVectorField& Foam::regionModels::singleLayerRegion::nHat() const
 
 const Foam::volScalarField& Foam::regionModels::singleLayerRegion::magSf() const
 {
-    if (!magSfPtr_.valid())
+    if (!magSfPtr_)
     {
         FatalErrorInFunction
             << "Region patch areas not available"

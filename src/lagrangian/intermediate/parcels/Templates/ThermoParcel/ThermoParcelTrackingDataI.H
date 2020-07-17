@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -123,7 +124,7 @@ template<class ParcelType>
 inline const Foam::interpolation<Foam::scalar>&
 Foam::ThermoParcel<ParcelType>::trackingData::GInterp() const
 {
-    if (!GInterp_.valid())
+    if (!GInterp_)
     {
         FatalErrorInFunction
             << "Radiation G interpolation object not set"

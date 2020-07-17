@@ -55,7 +55,7 @@ void FIBase::read()
         );
 
     // Allocate distance solver if needed
-    if (includeDistance_ && eikonalSolver_.empty())
+    if (includeDistance_ && !eikonalSolver_)
     {
         eikonalSolver_.reset
         (
@@ -122,7 +122,7 @@ bool FIBase::readDict(const dictionary& dict)
 {
     if (sensitivity::readDict(dict))
     {
-        if (eikonalSolver_.valid())
+        if (eikonalSolver_)
         {
             eikonalSolver_().readDict(dict);
         }

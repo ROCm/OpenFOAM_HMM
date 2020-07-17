@@ -43,7 +43,7 @@ namespace Foam
 void Foam::shapeSensitivitiesBase::writeFaceBasedSens() const
 {
     // Wall face sensitivity projected to normal
-    if (wallFaceSensNormalPtr_.valid())
+    if (wallFaceSensNormalPtr_)
     {
         constructAndWriteSensitivityField<scalar>
         (
@@ -55,7 +55,7 @@ void Foam::shapeSensitivitiesBase::writeFaceBasedSens() const
     if (writeAllSurfaceFiles_)
     {
         // Wall face sensitivity vectors
-        if (wallFaceSensVecPtr_.valid())
+        if (wallFaceSensVecPtr_)
         {
             constructAndWriteSensitivityField<vector>
             (
@@ -65,7 +65,7 @@ void Foam::shapeSensitivitiesBase::writeFaceBasedSens() const
         }
 
         // Normal sens as vectors
-        if (wallFaceSensNormalVecPtr_.valid())
+        if (wallFaceSensNormalVecPtr_)
         {
             constructAndWriteSensitivityField<vector>
             (
@@ -80,7 +80,7 @@ void Foam::shapeSensitivitiesBase::writeFaceBasedSens() const
 void Foam::shapeSensitivitiesBase::writePointBasedSens() const
 {
     // Wall point sensitivity projected to normal
-    if (wallPointSensNormalPtr_.valid())
+    if (wallPointSensNormalPtr_)
     {
         constructAndWriteSensitivtyPointField<scalar>
         (
@@ -95,7 +95,7 @@ void Foam::shapeSensitivitiesBase::writePointBasedSens() const
     if (writeAllSurfaceFiles_)
     {
         // Wall point sensitivity vectors
-        if (wallPointSensVecPtr_.valid())
+        if (wallPointSensVecPtr_)
         {
             constructAndWriteSensitivtyPointField<vector>
             (
@@ -105,7 +105,7 @@ void Foam::shapeSensitivitiesBase::writePointBasedSens() const
         }
 
         // Normal point as vectors
-        if (wallPointSensNormalVecPtr_.valid())
+        if (wallPointSensNormalVecPtr_)
         {
             constructAndWriteSensitivtyPointField<vector>
             (
@@ -175,35 +175,35 @@ void Foam::shapeSensitivitiesBase::setSensitivityPatchIDs
 void Foam::shapeSensitivitiesBase::clearSensitivities()
 {
     // Face-based boundary sens
-    if (wallFaceSensVecPtr_.valid())
+    if (wallFaceSensVecPtr_)
     {
         wallFaceSensVecPtr_() = vector::zero;
     }
-    if (wallFaceSensNormalVecPtr_.valid())
+    if (wallFaceSensNormalVecPtr_)
     {
         wallFaceSensNormalVecPtr_() = vector::zero;
     }
-    if (wallFaceSensNormalPtr_.valid())
+    if (wallFaceSensNormalPtr_)
     {
         wallFaceSensNormalPtr_() = scalar(0);
     }
 
     // Point-based boundary sens
-    if (wallPointSensVecPtr_.valid())
+    if (wallPointSensVecPtr_)
     {
         for (vectorField& patchSens : wallPointSensVecPtr_())
         {
             patchSens = vector::zero;
         }
     }
-    if (wallPointSensNormalVecPtr_.valid())
+    if (wallPointSensNormalVecPtr_)
     {
         for (vectorField& patchSens : wallPointSensNormalVecPtr_())
         {
             patchSens = vector::zero;
         }
     }
-    if (wallPointSensNormalPtr_.valid())
+    if (wallPointSensNormalPtr_)
     {
         for (scalarField& patchSens : wallPointSensNormalPtr_())
         {
@@ -229,7 +229,7 @@ void Foam::shapeSensitivitiesBase::setSuffix(const word& suffix)
 Foam::tmp<Foam::volVectorField>
 Foam::shapeSensitivitiesBase::getWallFaceSensVec()
 {
-    if (wallFaceSensVecPtr_.valid())
+    if (wallFaceSensVecPtr_)
     {
         return
             constructVolSensitivtyField<vector>
@@ -260,7 +260,7 @@ Foam::shapeSensitivitiesBase::getWallFaceSensVec()
 Foam::tmp<Foam::volScalarField>
 Foam::shapeSensitivitiesBase::getWallFaceSensNormal()
 {
-    if (wallFaceSensNormalPtr_.valid())
+    if (wallFaceSensNormalPtr_)
     {
         return
             constructVolSensitivtyField<scalar>
@@ -290,7 +290,7 @@ Foam::shapeSensitivitiesBase::getWallFaceSensNormal()
 Foam::tmp<Foam::volVectorField>
 Foam::shapeSensitivitiesBase::getWallFaceSensNormalVec()
 {
-    if (wallFaceSensNormalVecPtr_.valid())
+    if (wallFaceSensNormalVecPtr_)
     {
         return
             constructVolSensitivtyField<vector>

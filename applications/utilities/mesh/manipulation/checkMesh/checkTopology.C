@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -202,7 +202,7 @@ Foam::label Foam::checkTopology
                 << " illegal cells to set " << cells.name() << endl;
             cells.instance() = mesh.pointsInstance();
             cells.write();
-            if (surfWriter.valid())
+            if (surfWriter)
             {
                 mergeAndWrite(*surfWriter, cells);
             }
@@ -226,7 +226,7 @@ Foam::label Foam::checkTopology
                 << " unused points to set " << points.name() << endl;
             points.instance() = mesh.pointsInstance();
             points.write();
-            if (setWriter.valid())
+            if (setWriter)
             {
                 mergeAndWrite(*setWriter, points);
             }
@@ -248,7 +248,7 @@ Foam::label Foam::checkTopology
                 << " unordered faces to set " << faces.name() << endl;
             faces.instance() = mesh.pointsInstance();
             faces.write();
-            if (surfWriter.valid())
+            if (surfWriter)
             {
                 mergeAndWrite(*surfWriter, faces);
             }
@@ -268,7 +268,7 @@ Foam::label Foam::checkTopology
                 << faces.name() << endl;
             faces.instance() = mesh.pointsInstance();
             faces.write();
-            if (surfWriter.valid())
+            if (surfWriter)
             {
                 mergeAndWrite(*surfWriter, faces);
             }
@@ -289,7 +289,7 @@ Foam::label Foam::checkTopology
                 << endl;
             cells.instance() = mesh.pointsInstance();
             cells.write();
-            if (surfWriter.valid())
+            if (surfWriter)
             {
                 mergeAndWrite(*surfWriter, cells);
             }
@@ -313,7 +313,7 @@ Foam::label Foam::checkTopology
                 << faces.name() << endl;
             faces.instance() = mesh.pointsInstance();
             faces.write();
-            if (surfWriter.valid())
+            if (surfWriter)
             {
                 mergeAndWrite(*surfWriter, faces);
             }
@@ -368,7 +368,7 @@ Foam::label Foam::checkTopology
                 << endl;
             oneCells.instance() = mesh.pointsInstance();
             oneCells.write();
-            if (surfWriter.valid())
+            if (surfWriter)
             {
                 mergeAndWrite(*surfWriter, oneCells);
             }
@@ -384,7 +384,7 @@ Foam::label Foam::checkTopology
                 << endl;
             twoCells.instance() = mesh.pointsInstance();
             twoCells.write();
-            if (surfWriter.valid())
+            if (surfWriter)
             {
                 mergeAndWrite(*surfWriter, twoCells);
             }
@@ -529,7 +529,7 @@ Foam::label Foam::checkTopology
                     << " points that are in multiple regions to set "
                     << points.name() << endl;
                 points.write();
-                if (setWriter.valid())
+                if (setWriter)
                 {
                     mergeAndWrite(*setWriter, points);
                 }
@@ -640,7 +640,7 @@ Foam::label Foam::checkTopology
             << " conflicting points to set " << points.name() << endl;
         points.instance() = mesh.pointsInstance();
         points.write();
-        if (setWriter.valid())
+        if (setWriter)
         {
             mergeAndWrite(*setWriter, points);
         }

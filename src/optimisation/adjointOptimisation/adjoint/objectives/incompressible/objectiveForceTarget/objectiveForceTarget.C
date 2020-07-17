@@ -83,7 +83,7 @@ bool objectiveForceTarget::write(const bool valid) const
         // in order to avoid various instantiations of the same objective
         // opening the same file
         unsigned int width = IOstream::defaultPrecision() + 5;
-        if (objFunctionFilePtr_.empty())
+        if (!objFunctionFilePtr_)
         {
             setObjectiveFilePtr();
             objFunctionFilePtr_()

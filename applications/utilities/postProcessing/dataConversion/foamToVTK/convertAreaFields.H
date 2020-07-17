@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,7 +56,7 @@ if (doFiniteArea)
         FatalError.throwExceptions(throwing);
     }
 
-    if (faMeshPtr.valid() && nAreaFields)
+    if (faMeshPtr && nAreaFields)
     {
         reportFields::area(Info, objects);
 

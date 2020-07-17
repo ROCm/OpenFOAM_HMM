@@ -137,9 +137,9 @@ label mergePatchFaces
         // Faces in error.
         labelHashSet errorFaces;
 
-        if (qualDictPtr.valid())
+        if (qualDictPtr)
         {
-            motionSmoother::checkMesh(false, mesh, qualDictPtr(), errorFaces);
+            motionSmoother::checkMesh(false, mesh, *qualDictPtr, errorFaces);
         }
         else
         {
@@ -440,7 +440,7 @@ int main(int argc, char *argv[])
     );
 
     // Merge points on straight edges and remove unused points
-    if (qualDict.valid())
+    if (qualDict)
     {
         Info<< "Merging all 'loose' points on surface edges, "
             << "regardless of the angle they make." << endl;

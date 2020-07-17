@@ -495,7 +495,7 @@ void Foam::functionObjectList::resetState()
 
 Foam::IOdictionary& Foam::functionObjectList::stateDict()
 {
-    if (!stateDictPtr_.valid())
+    if (!stateDictPtr_)
     {
         createStateDict();
     }
@@ -506,7 +506,7 @@ Foam::IOdictionary& Foam::functionObjectList::stateDict()
 
 const Foam::IOdictionary& Foam::functionObjectList::stateDict() const
 {
-    if (!stateDictPtr_.valid())
+    if (!stateDictPtr_)
     {
         createStateDict();
     }
@@ -517,7 +517,7 @@ const Foam::IOdictionary& Foam::functionObjectList::stateDict() const
 
 Foam::objectRegistry& Foam::functionObjectList::storedObjects()
 {
-    if (!objectsRegistryPtr_.valid())
+    if (!objectsRegistryPtr_)
     {
         createOutputRegistry();
     }
@@ -528,7 +528,7 @@ Foam::objectRegistry& Foam::functionObjectList::storedObjects()
 
 const Foam::objectRegistry& Foam::functionObjectList::storedObjects() const
 {
-    if (!objectsRegistryPtr_.valid())
+    if (!objectsRegistryPtr_)
     {
         createOutputRegistry();
     }
@@ -727,7 +727,7 @@ bool Foam::functionObjectList::adjustTimeStep()
 
 bool Foam::functionObjectList::read()
 {
-    if (!stateDictPtr_.valid())
+    if (!stateDictPtr_)
     {
         createStateDict();
     }
@@ -903,7 +903,7 @@ bool Foam::functionObjectList::read()
                 FatalIOError.throwExceptions(throwingIOerr);
 
                 // Required functionObject to be valid on all processors
-                if (returnReduce(foPtr.valid(), andOp<bool>()))
+                if (returnReduce(bool(foPtr), andOp<bool>()))
                 {
                     objPtr.reset(foPtr.release());
                 }

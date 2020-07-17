@@ -416,7 +416,7 @@ void Foam::refinementFeatures::findHigherLevel
 const Foam::PtrList<Foam::indexedOctree<Foam::treeDataEdge>>&
 Foam::refinementFeatures::regionEdgeTrees() const
 {
-    if (!regionEdgeTreesPtr_.valid())
+    if (!regionEdgeTreesPtr_)
     {
         regionEdgeTreesPtr_.reset
         (

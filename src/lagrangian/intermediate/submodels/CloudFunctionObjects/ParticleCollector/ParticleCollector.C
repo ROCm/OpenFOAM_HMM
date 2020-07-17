@@ -447,7 +447,7 @@ void Foam::ParticleCollector<CloudType>::write()
         sumTotalMass += faceMassTotal[facei];
         sumAverageMFR += faceMassFlowRate[facei];
 
-        if (outputFilePtr_.valid())
+        if (outputFilePtr_)
         {
             outputFilePtr_()
                 << time.timeName()

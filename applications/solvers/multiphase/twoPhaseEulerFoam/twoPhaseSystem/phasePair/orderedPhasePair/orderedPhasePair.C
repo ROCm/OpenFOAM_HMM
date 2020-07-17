@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,7 +86,7 @@ Foam::word Foam::orderedPhasePair::name() const
 
 Foam::tmp<Foam::volScalarField> Foam::orderedPhasePair::E() const
 {
-    if (!aspectRatio_.valid())
+    if (!aspectRatio_)
     {
         FatalErrorInFunction
             << "Aspect ratio model not specified for " << *this << "."

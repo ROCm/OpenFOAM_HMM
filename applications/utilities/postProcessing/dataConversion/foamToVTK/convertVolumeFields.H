@@ -262,7 +262,7 @@ Description
     // CellData
     {
         // Begin CellData
-        if (internalWriter.valid())
+        if (internalWriter)
         {
             // Optionally with cellID and procID fields
             internalWriter->beginCellData
@@ -323,7 +323,7 @@ Description
     if (doPointValues)
     {
         // Begin PointData
-        if (internalWriter.valid())
+        if (internalWriter)
         {
             internalWriter->beginPointData
             (
@@ -386,7 +386,7 @@ Description
 
 
     // Finish writers
-    if (internalWriter.valid())
+    if (internalWriter)
     {
         internalWriter->close();
     }

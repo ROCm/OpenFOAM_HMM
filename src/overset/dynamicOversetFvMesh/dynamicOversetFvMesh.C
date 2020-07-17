@@ -551,7 +551,7 @@ const Foam::lduAddressing& Foam::dynamicOversetFvMesh::lduAddr() const
         //return dynamicMotionSolverFvMesh::lduAddr();
         return dynamicFvMesh::lduAddr();
     }
-    if (lduPtr_.empty())
+    if (!lduPtr_)
     {
         // Build extended addressing
         updateAddressing();
@@ -567,7 +567,7 @@ Foam::lduInterfacePtrsList Foam::dynamicOversetFvMesh::interfaces() const
         //return dynamicMotionSolverFvMesh::interfaces();
         return dynamicFvMesh::interfaces();
     }
-    if (lduPtr_.empty())
+    if (!lduPtr_)
     {
         // Build extended addressing
         updateAddressing();
@@ -579,7 +579,7 @@ Foam::lduInterfacePtrsList Foam::dynamicOversetFvMesh::interfaces() const
 const Foam::fvMeshPrimitiveLduAddressing&
 Foam::dynamicOversetFvMesh::primitiveLduAddr() const
 {
-    if (lduPtr_.empty())
+    if (!lduPtr_)
     {
         FatalErrorInFunction
             << "Extended addressing not allocated" << abort(FatalError);

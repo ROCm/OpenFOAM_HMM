@@ -672,9 +672,9 @@ void readFields
             // Load field (but not oldTime)
             readField(io, mesh, i, fields);
             // Create zero sized field and send
-            if (subsetterPtr.valid())
+            if (subsetterPtr)
             {
-                tmp<GeoField> tsubfld = subsetterPtr().interpolate(fields[i]);
+                tmp<GeoField> tsubfld = subsetterPtr->interpolate(fields[i]);
 
                 // Send to all processors that don't have a mesh
                 for (label procI = 1; procI < Pstream::nProcs(); ++procI)
@@ -1415,9 +1415,9 @@ autoPtr<mapDistributePolyMesh> createReconstructMap
 
     autoPtr<mapDistributePolyMesh> mapPtr;
 
-    if (baseMeshPtr.valid() && baseMeshPtr().nCells())
+    if (baseMeshPtr && baseMeshPtr->nCells())
     {
-        const fvMesh& baseMesh = baseMeshPtr();
+        const fvMesh& baseMesh = *baseMeshPtr;
 
         labelListList cellSubMap(Pstream::nProcs());
         cellSubMap[Pstream::masterNo()] = identity(mesh.nCells());
@@ -1803,7 +1803,7 @@ void reconstructLagrangian
 
     if (cloudNames.size())
     {
-        if (!lagrangianReconstructorPtr.valid())
+        if (!lagrangianReconstructorPtr)
         {
             lagrangianReconstructorPtr.reset
             (
@@ -2116,7 +2116,7 @@ void redistributeLagrangian
 {
     if (clouds.size())
     {
-        if (!lagrangianReconstructorPtr.valid())
+        if (!lagrangianReconstructorPtr)
         {
             lagrangianReconstructorPtr.reset
             (
@@ -2804,7 +2804,7 @@ int main(int argc, char *argv[])
                     Info<< "    Detected topology change;"
                         << " reconstructing addressing" << nl << endl;
 
-                    if (baseMeshPtr.valid())
+                    if (baseMeshPtr)
                     {
                         // Cannot do a baseMesh::readUpdate() since not all
                         // processors will have mesh files. So instead just

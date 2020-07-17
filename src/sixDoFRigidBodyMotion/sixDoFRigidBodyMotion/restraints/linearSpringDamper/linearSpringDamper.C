@@ -79,7 +79,7 @@ void Foam::sixDoFRigidBodyMotionRestraints::linearSpringDamper::restrain
     vector& restraintMoment
 ) const
 {
-    if (anchor_.empty())
+    if (!anchor_)
     {
         anchor_.reset
         (

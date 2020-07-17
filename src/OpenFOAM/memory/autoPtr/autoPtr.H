@@ -140,9 +140,12 @@ public:
 
     // Member Functions
 
-    // Check
+    // Query
 
-        //- True if the managed pointer is null
+        //- Deprecated(2020-07) True if the managed pointer is null
+        //
+        //  \deprecated(2020-07) - use bool operator
+        FOAM_DEPRECATED_FOR(2020-07, "bool operator")
         bool empty() const noexcept { return !ptr_; }
 
         //- True if the managed pointer is non-null

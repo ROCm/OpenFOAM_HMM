@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,73 +32,73 @@ License
 
 inline bool Foam::objectiveIncompressible::hasdJdv() const
 {
-    return dJdvPtr_.valid();
+    return bool(dJdvPtr_);
 }
 
 
 inline bool Foam::objectiveIncompressible::hasdJdp() const
 {
-    return dJdpPtr_.valid();
+    return bool(dJdpPtr_);
 }
 
 
 inline bool Foam::objectiveIncompressible::hasdJdT() const
 {
-    return dJdTPtr_.valid();
+    return bool(dJdTPtr_);
 }
 
 
 inline bool Foam::objectiveIncompressible::hasdJdTMVar1() const
 {
-    return dJdTMvar1Ptr_.valid();
+    return bool(dJdTMvar1Ptr_);
 }
 
 
 inline bool Foam::objectiveIncompressible::hasdJdTMVar2() const
 {
-    return dJdTMvar2Ptr_.valid();
+    return bool(dJdTMvar2Ptr_);
 }
 
 
 inline bool Foam::objectiveIncompressible::hasBoundarydJdv() const
 {
-    return bdJdvPtr_.valid();
+    return bool(bdJdvPtr_);
 }
 
 
 inline bool Foam::objectiveIncompressible::hasBoundarydJdvn() const
 {
-    return bdJdvnPtr_.valid();
+    return bool(bdJdvnPtr_);
 }
 
 
 inline bool Foam::objectiveIncompressible::hasBoundarydJdvt() const
 {
-    return bdJdvtPtr_.valid();
+    return bool(bdJdvtPtr_);
 }
 
 
 inline bool Foam::objectiveIncompressible::hasBoundarydJdp() const
 {
-    return bdJdpPtr_.valid();
+    return bool(bdJdpPtr_);
 }
 
 
 inline bool Foam::objectiveIncompressible::hasBoundarydJdT() const
 {
-    return bdJdTPtr_.valid();
+    return bool(bdJdTPtr_);
 }
 
 
 inline bool Foam::objectiveIncompressible::hasBoundarydJdTMVar1() const
 {
-    return bdJdTMvar1Ptr_.valid();
+    return bool(bdJdTMvar1Ptr_);
 }
 
 
 inline bool Foam::objectiveIncompressible::hasBoundarydJdTMVar2() const
 {
-    return bdJdTMvar2Ptr_.valid();
+    return bool(bdJdTMvar2Ptr_);
 }
 
 

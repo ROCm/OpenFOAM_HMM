@@ -539,7 +539,7 @@ Foam::label Foam::checkGeometry
                     << nonAlignedPoints.name() << endl;
                 nonAlignedPoints.instance() = mesh.pointsInstance();
                 nonAlignedPoints.write();
-                if (setWriter.valid())
+                if (setWriter)
                 {
                     mergeAndWrite(*setWriter, nonAlignedPoints);
                 }
@@ -573,7 +573,7 @@ Foam::label Foam::checkGeometry
                     << " non closed cells to set " << cells.name() << endl;
                 cells.instance() = mesh.pointsInstance();
                 cells.write();
-                if (surfWriter.valid())
+                if (surfWriter)
                 {
                     mergeAndWrite(*surfWriter, cells);
                 }
@@ -589,7 +589,7 @@ Foam::label Foam::checkGeometry
                 << aspectCells.name() << endl;
             aspectCells.instance() = mesh.pointsInstance();
             aspectCells.write();
-            if (surfWriter.valid())
+            if (surfWriter)
             {
                 mergeAndWrite(*surfWriter, aspectCells);
             }
@@ -610,7 +610,7 @@ Foam::label Foam::checkGeometry
                     << " zero area faces to set " << faces.name() << endl;
                 faces.instance() = mesh.pointsInstance();
                 faces.write();
-                if (surfWriter.valid())
+                if (surfWriter)
                 {
                     mergeAndWrite(*surfWriter, faces);
                 }
@@ -632,7 +632,7 @@ Foam::label Foam::checkGeometry
                     << " zero volume cells to set " << cells.name() << endl;
                 cells.instance() = mesh.pointsInstance();
                 cells.write();
-                if (surfWriter.valid())
+                if (surfWriter)
                 {
                     mergeAndWrite(*surfWriter, cells);
                 }
@@ -655,7 +655,7 @@ Foam::label Foam::checkGeometry
                 << " non-orthogonal faces to set " << faces.name() << endl;
             faces.instance() = mesh.pointsInstance();
             faces.write();
-            if (surfWriter.valid())
+            if (surfWriter)
             {
                 mergeAndWrite(*surfWriter, faces);
             }
@@ -677,7 +677,7 @@ Foam::label Foam::checkGeometry
                     << faces.name() << endl;
                 faces.instance() = mesh.pointsInstance();
                 faces.write();
-                if (surfWriter.valid())
+                if (surfWriter)
                 {
                     mergeAndWrite(*surfWriter, faces);
                 }
@@ -699,7 +699,7 @@ Foam::label Foam::checkGeometry
                     << " skew faces to set " << faces.name() << endl;
                 faces.instance() = mesh.pointsInstance();
                 faces.write();
-                if (surfWriter.valid())
+                if (surfWriter)
                 {
                     mergeAndWrite(*surfWriter, faces);
                 }
@@ -723,7 +723,7 @@ Foam::label Foam::checkGeometry
                     << faces.name() << endl;
                 faces.instance() = mesh.pointsInstance();
                 faces.write();
-                if (surfWriter.valid())
+                if (surfWriter)
                 {
                     mergeAndWrite(*surfWriter, faces);
                 }
@@ -756,7 +756,7 @@ Foam::label Foam::checkGeometry
                     << "decomposition tets to set " << faces.name() << endl;
                 faces.instance() = mesh.pointsInstance();
                 faces.write();
-                if (surfWriter.valid())
+                if (surfWriter)
                 {
                     mergeAndWrite(*surfWriter, faces);
                 }
@@ -781,7 +781,7 @@ Foam::label Foam::checkGeometry
                     << endl;
                 points.instance() = mesh.pointsInstance();
                 points.write();
-                if (setWriter.valid())
+                if (setWriter)
                 {
                     mergeAndWrite(*setWriter, points);
                 }
@@ -804,7 +804,7 @@ Foam::label Foam::checkGeometry
                     << " apart) points to set " << nearPoints.name() << endl;
                 nearPoints.instance() = mesh.pointsInstance();
                 nearPoints.write();
-                if (setWriter.valid())
+                if (setWriter)
                 {
                     mergeAndWrite(*setWriter, nearPoints);
                 }
@@ -828,7 +828,7 @@ Foam::label Foam::checkGeometry
                     << endl;
                 faces.instance() = mesh.pointsInstance();
                 faces.write();
-                if (surfWriter.valid())
+                if (surfWriter)
                 {
                     mergeAndWrite(*surfWriter, faces);
                 }
@@ -851,7 +851,7 @@ Foam::label Foam::checkGeometry
                     << " warped faces to set " << faces.name() << endl;
                 faces.instance() = mesh.pointsInstance();
                 faces.write();
-                if (surfWriter.valid())
+                if (surfWriter)
                 {
                     mergeAndWrite(*surfWriter, faces);
                 }
@@ -872,7 +872,7 @@ Foam::label Foam::checkGeometry
                 << " under-determined cells to set " << cells.name() << endl;
             cells.instance() = mesh.pointsInstance();
             cells.write();
-            if (surfWriter.valid())
+            if (surfWriter)
             {
                 mergeAndWrite(*surfWriter, cells);
             }
@@ -892,7 +892,7 @@ Foam::label Foam::checkGeometry
                 << " concave cells to set " << cells.name() << endl;
             cells.instance() = mesh.pointsInstance();
             cells.write();
-            if (surfWriter.valid())
+            if (surfWriter)
             {
                 mergeAndWrite(*surfWriter, cells);
             }
@@ -913,7 +913,7 @@ Foam::label Foam::checkGeometry
                 << faces.name() << endl;
             faces.instance() = mesh.pointsInstance();
             faces.write();
-            if (surfWriter.valid())
+            if (surfWriter)
             {
                 mergeAndWrite(*surfWriter, faces);
             }
@@ -934,7 +934,7 @@ Foam::label Foam::checkGeometry
                 << faces.name() << endl;
             faces.instance() = mesh.pointsInstance();
             faces.write();
-            if (surfWriter.valid())
+            if (surfWriter)
             {
                 mergeAndWrite(*surfWriter, faces);
             }
@@ -949,12 +949,12 @@ Foam::label Foam::checkGeometry
         const word procAndTime(Foam::name(Pstream::myProcNo()) + "_" + tmName);
 
         autoPtr<surfaceWriter> patchWriter;
-        if (!surfWriter.valid())
+        if (!surfWriter)
         {
             patchWriter.reset(new surfaceWriters::vtkWriter());
         }
 
-        surfaceWriter& wr = (surfWriter.valid() ? *surfWriter : *patchWriter);
+        surfaceWriter& wr = (surfWriter ? *surfWriter : *patchWriter);
 
         // Currently only do AMI checks
 

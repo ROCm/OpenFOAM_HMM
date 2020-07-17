@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd
+    Copyright (C) 2016-2020 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,7 +73,7 @@ bool Foam::dynamicMotionSolverTopoFvMesh::update()
     // Do mesh changes (not using inflation - points added directly into mesh)
     autoPtr<mapPolyMesh> topoChangeMap = topoChanger_.changeMesh(false);
 
-    if (topoChangeMap.valid())
+    if (topoChangeMap)
     {
         Info << "Executing mesh topology update" << endl;
         motionPtr_->updateMesh(topoChangeMap());

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -104,7 +105,7 @@ Foam::regionModels::regionModel::solution() const
 inline const Foam::IOdictionary&
 Foam::regionModels::regionModel::outputProperties() const
 {
-    if (!outputPropertiesPtr_.valid())
+    if (!outputPropertiesPtr_)
     {
         FatalErrorInFunction
             << "outputProperties dictionary not available"
@@ -118,7 +119,7 @@ Foam::regionModels::regionModel::outputProperties() const
 inline Foam::IOdictionary&
 Foam::regionModels::regionModel::outputProperties()
 {
-    if (!outputPropertiesPtr_.valid())
+    if (!outputPropertiesPtr_)
     {
         FatalErrorInFunction
             << "outputProperties dictionary not available"

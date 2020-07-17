@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,8 +53,8 @@ Foam::token Foam::dictionaryTokens::keywordToken(const entry& e)
 
 bool Foam::dictionaryTokens::setIterator() const
 {
-    primIter_.clear();
-    dictIter_.clear();
+    primIter_.reset(nullptr);
+    dictIter_.reset(nullptr);
 
     if (entryIter_ != dict_.cend())
     {
@@ -166,8 +166,8 @@ bool Foam::dictionaryTokens::good() const
         entryIter_ != dict_.cend()
      &&
         (
-            (primIter_.valid() && primIter_().good())
-         || (dictIter_.valid() && dictIter_().good())
+            (primIter_ && primIter_->good())
+         || (dictIter_ && dictIter_->good())
         )
     );
 }
@@ -189,8 +189,8 @@ const Foam::token& Foam::dictionaryTokens::operator*() const
 {
     if (good())
     {
-        if (primIter_.valid()) return *(primIter_());
-        if (dictIter_.valid()) return *(dictIter_());
+        if (primIter_) return *(*primIter_);
+        if (dictIter_) return *(*dictIter_);
     }
 
     return token::undefinedToken;
@@ -251,8 +251,8 @@ bool Foam::dictionaryTokens::operator++()
 
     if (ok)
     {
-        if (primIter_.valid()) ok = ++(primIter_());
-        if (dictIter_.valid()) ok = ++(dictIter_());
+        if (primIter_) ok = ++(*primIter_);
+        if (dictIter_) ok = ++(*dictIter_);
 
         if (!ok)
         {

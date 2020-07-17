@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -115,7 +115,7 @@ Foam::radiation::boundaryRadiationProperties::emissivity
     scalarField* T
 ) const
 {
-    if (!radBoundaryPropertiesPtrList_[patchi].empty())
+    if (radBoundaryPropertiesPtrList_[patchi])
     {
         return radBoundaryPropertiesPtrList_[patchi]->e
         (
@@ -144,7 +144,7 @@ Foam::scalar Foam::radiation::boundaryRadiationProperties::faceEmissivity
     scalar T
 ) const
 {
-    if (!radBoundaryPropertiesPtrList_[patchi].empty())
+    if (radBoundaryPropertiesPtrList_[patchi])
     {
         return radBoundaryPropertiesPtrList_[patchi]->e
         (
@@ -174,7 +174,7 @@ Foam::radiation::boundaryRadiationProperties::absorptivity
     scalarField* T
 ) const
 {
-    if (!radBoundaryPropertiesPtrList_[patchi].empty())
+    if (radBoundaryPropertiesPtrList_[patchi])
     {
         return radBoundaryPropertiesPtrList_[patchi]->a
         (
@@ -203,7 +203,7 @@ Foam::scalar Foam::radiation::boundaryRadiationProperties::faceAbsorptivity
     scalar T
 ) const
 {
-    if (!radBoundaryPropertiesPtrList_[patchi].empty())
+    if (radBoundaryPropertiesPtrList_[patchi])
     {
         return radBoundaryPropertiesPtrList_[patchi]->a
         (
@@ -233,7 +233,7 @@ Foam::radiation::boundaryRadiationProperties::transmissivity
     scalarField* T
 ) const
 {
-    if (!radBoundaryPropertiesPtrList_[patchi].empty())
+    if (radBoundaryPropertiesPtrList_[patchi])
     {
         return radBoundaryPropertiesPtrList_[patchi]->t
         (
@@ -262,7 +262,7 @@ Foam::scalar Foam::radiation::boundaryRadiationProperties::faceTransmissivity
     scalar T
 ) const
 {
-    if (!radBoundaryPropertiesPtrList_[patchi].empty())
+    if (radBoundaryPropertiesPtrList_[patchi])
     {
         return radBoundaryPropertiesPtrList_[patchi]->t
         (
@@ -292,7 +292,7 @@ Foam::radiation::boundaryRadiationProperties::diffReflectivity
     scalarField* T
 ) const
 {
-    if (!radBoundaryPropertiesPtrList_[patchi].empty())
+    if (radBoundaryPropertiesPtrList_[patchi])
     {
         return radBoundaryPropertiesPtrList_[patchi]->rDiff
         (
@@ -321,7 +321,7 @@ Foam::scalar Foam::radiation::boundaryRadiationProperties::faceDiffReflectivity
     scalar T
 ) const
 {
-    if (!radBoundaryPropertiesPtrList_[patchi].empty())
+    if (radBoundaryPropertiesPtrList_[patchi])
     {
         return radBoundaryPropertiesPtrList_[patchi]->rDiff
         (
@@ -351,7 +351,7 @@ Foam::radiation::boundaryRadiationProperties::specReflectivity
     scalarField* T
 ) const
 {
-    if (!radBoundaryPropertiesPtrList_[patchi].empty())
+    if (radBoundaryPropertiesPtrList_[patchi])
     {
         return radBoundaryPropertiesPtrList_[patchi]->rSpec
         (
@@ -380,7 +380,7 @@ Foam::scalar Foam::radiation::boundaryRadiationProperties::faceSpecReflectivity
     scalar T
 ) const
 {
-    if (!radBoundaryPropertiesPtrList_[patchi].empty())
+    if (radBoundaryPropertiesPtrList_[patchi])
     {
         return radBoundaryPropertiesPtrList_[patchi]->rSpec
         (

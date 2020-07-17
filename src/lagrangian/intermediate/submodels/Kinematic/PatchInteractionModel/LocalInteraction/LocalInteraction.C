@@ -154,7 +154,7 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
 template<class CloudType>
 Foam::volScalarField& Foam::LocalInteraction<CloudType>::massEscape()
 {
-    if (!massEscapePtr_.valid())
+    if (!massEscapePtr_)
     {
         const fvMesh& mesh = this->owner().mesh();
 
@@ -183,7 +183,7 @@ Foam::volScalarField& Foam::LocalInteraction<CloudType>::massEscape()
 template<class CloudType>
 Foam::volScalarField& Foam::LocalInteraction<CloudType>::massStick()
 {
-    if (!massStickPtr_.valid())
+    if (!massStickPtr_)
     {
         const fvMesh& mesh = this->owner().mesh();
 

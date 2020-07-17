@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -528,7 +528,7 @@ void Foam::processorPolyPatch::updateMesh(PstreamBuffers& pBufs)
 
 const Foam::labelList& Foam::processorPolyPatch::neighbPoints() const
 {
-    if (!neighbPointsPtr_.valid())
+    if (!neighbPointsPtr_)
     {
         FatalErrorInFunction
             << "No extended addressing calculated for patch " << name()
@@ -540,7 +540,7 @@ const Foam::labelList& Foam::processorPolyPatch::neighbPoints() const
 
 const Foam::labelList& Foam::processorPolyPatch::neighbEdges() const
 {
-    if (!neighbEdgesPtr_.valid())
+    if (!neighbEdgesPtr_)
     {
         FatalErrorInFunction
             << "No extended addressing calculated for patch " << name()

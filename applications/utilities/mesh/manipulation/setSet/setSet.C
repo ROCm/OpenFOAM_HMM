@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -393,9 +393,9 @@ bool doCommand
             currentSet.resize(max(currentSet.size(), typSize));
         }
 
-        if (currentSetPtr.valid())
+        if (currentSetPtr)
         {
-            topoSet& currentSet = currentSetPtr();
+            topoSet& currentSet = *currentSetPtr;
 
             Info<< "    Set:" << currentSet.name()
                 << "  Size:" << returnReduce(currentSet.size(), sumOp<label>())
@@ -829,9 +829,9 @@ int main(int argc, char *argv[])
 
             commandStatus stat = INVALID;
 
-            if (fileStreamPtr.valid())
+            if (fileStreamPtr)
             {
-                if (!fileStreamPtr().good())
+                if (!fileStreamPtr->good())
                 {
                     Info<< "End of batch file" << endl;
                     // No error.

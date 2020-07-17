@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2010-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -261,16 +261,16 @@ Foam::Ostream& Foam::expressions::fvExprDriver::writeCommon
 
 void Foam::expressions::fvExprDriver::createWriterAndRead(const word& name)
 {
-    if (hasDataToWrite() && !writer_.valid())
+    if (!writer_ && hasDataToWrite())
     {
-        writer_.set(new exprDriverWriter(name + "_" + this->type(), *this));
+        writer_.reset(new exprDriverWriter(name + "_" + this->type(), *this));
     }
 }
 
 
 void Foam::expressions::fvExprDriver::tryWrite() const
 {
-    if (writer_.valid() && mesh().time().outputTime())
+    if (writer_ && mesh().time().outputTime())
     {
         writer_->write();
     }

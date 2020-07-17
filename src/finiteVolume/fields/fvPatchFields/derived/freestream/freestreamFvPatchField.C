@@ -102,7 +102,7 @@ Foam::freestreamFvPatchField<Type>::freestreamFvPatchField
     inletOutletFvPatchField<Type>(ptf, p, iF, mapper),
     freestreamBCPtr_()
 {
-    if (ptf.freestreamBCPtr_.valid())
+    if (ptf.freestreamBCPtr_)
     {
         freestreamBCPtr_ =
             fvPatchField<Type>::New(ptf.freestreamBCPtr_(), p, iF, mapper);
@@ -119,7 +119,7 @@ Foam::freestreamFvPatchField<Type>::freestreamFvPatchField
     inletOutletFvPatchField<Type>(ptf),
     freestreamBCPtr_()
 {
-    if (ptf.freestreamBCPtr_.valid())
+    if (ptf.freestreamBCPtr_)
     {
         freestreamBCPtr_ = ptf.freestreamBCPtr_->clone();
     }
@@ -136,7 +136,7 @@ Foam::freestreamFvPatchField<Type>::freestreamFvPatchField
     inletOutletFvPatchField<Type>(ptf, iF),
     freestreamBCPtr_()
 {
-    if (ptf.freestreamBCPtr_.valid())
+    if (ptf.freestreamBCPtr_)
     {
         freestreamBCPtr_ = ptf.freestreamBCPtr_->clone();
     }
@@ -149,7 +149,7 @@ template<class Type>
 void Foam::freestreamFvPatchField<Type>::autoMap(const fvPatchFieldMapper& m)
 {
     inletOutletFvPatchField<Type>::autoMap(m);
-    if (freestreamBCPtr_.valid())
+    if (freestreamBCPtr_)
     {
         freestreamBCPtr_->autoMap(m);
     }
@@ -167,7 +167,7 @@ void Foam::freestreamFvPatchField<Type>::rmap
 
     const auto& fsptf = refCast<const freestreamFvPatchField<Type>>(ptf);
 
-    if (fsptf.freestreamBCPtr_.valid())
+    if (fsptf.freestreamBCPtr_)
     {
         freestreamBCPtr_->rmap(fsptf.freestreamBCPtr_(), addr);
     }
@@ -182,7 +182,7 @@ void Foam::freestreamFvPatchField<Type>::updateCoeffs()
         return;
     }
 
-    if (freestreamBCPtr_.valid())
+    if (freestreamBCPtr_)
     {
         freestreamBCPtr_->evaluate();
         freestreamValue() = freestreamBCPtr_();
@@ -198,7 +198,7 @@ void Foam::freestreamFvPatchField<Type>::write(Ostream& os) const
     fvPatchField<Type>::write(os);
     os.writeEntryIfDifferent<word>("phi", "phi", this->phiName_);
 
-    if (freestreamBCPtr_.valid())
+    if (freestreamBCPtr_)
     {
         os.beginBlock("freestreamBC");
         freestreamBCPtr_->write(os);

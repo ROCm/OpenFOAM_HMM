@@ -33,7 +33,7 @@ License
 template<class CloudType>
 void Foam::ParticleErosion<CloudType>::resetQ()
 {
-    if (QPtr_.valid())
+    if (QPtr_)
     {
         QPtr_->primitiveFieldRef() = 0.0;
     }
@@ -82,7 +82,7 @@ Foam::label Foam::ParticleErosion<CloudType>::applyToPatch
 template<class CloudType>
 void Foam::ParticleErosion<CloudType>::write()
 {
-    if (QPtr_.valid())
+    if (QPtr_)
     {
         QPtr_->write();
     }

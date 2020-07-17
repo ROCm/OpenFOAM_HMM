@@ -81,9 +81,9 @@ void Foam::ParticleTrap<CloudType>::preEvolve
         alphaPtr_ = &alpha;
     }
 
-    if (gradAlphaPtr_.valid())
+    if (gradAlphaPtr_)
     {
-        gradAlphaPtr_() == fvc::grad(*alphaPtr_);
+        *gradAlphaPtr_ == fvc::grad(*alphaPtr_);
     }
     else
     {

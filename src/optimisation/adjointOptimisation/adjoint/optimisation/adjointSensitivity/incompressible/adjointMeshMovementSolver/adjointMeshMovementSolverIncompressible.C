@@ -122,7 +122,7 @@ void adjointMeshMovementSolver::solve()
     read();
 
     // Add source from the adjoint eikonal equation
-    if (adjointEikonalSolverPtr_.valid())
+    if (adjointEikonalSolverPtr_)
     {
         source_ -=
             fvc::div(adjointEikonalSolverPtr_().getFISensitivityTerm()().T());

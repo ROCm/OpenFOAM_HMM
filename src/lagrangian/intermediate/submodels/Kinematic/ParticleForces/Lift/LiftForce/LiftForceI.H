@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +32,7 @@ template<class CloudType>
 inline const Foam::interpolation<Foam::vector>&
 Foam::LiftForce<CloudType>::curlUcInterp() const
 {
-    if (!curlUcInterpPtr_.valid())
+    if (!curlUcInterpPtr_)
     {
         FatalErrorInFunction
             << "Carrier phase curlUc interpolation object not set"

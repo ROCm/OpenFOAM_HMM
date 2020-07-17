@@ -139,7 +139,7 @@ void Foam::KinematicCloud<CloudType>::solve
 template<class CloudType>
 void Foam::KinematicCloud<CloudType>::buildCellOccupancy()
 {
-    if (cellOccupancyPtr_.empty())
+    if (!cellOccupancyPtr_)
     {
         cellOccupancyPtr_.reset
         (
@@ -174,7 +174,7 @@ void Foam::KinematicCloud<CloudType>::updateCellOccupancy()
     // Only build the cellOccupancy if the pointer is set, i.e. it has
     // been requested before.
 
-    if (cellOccupancyPtr_.valid())
+    if (cellOccupancyPtr_)
     {
         buildCellOccupancy();
     }

@@ -94,19 +94,19 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::getFieldValues
     {
         const vf& fld = lookupObject<vf>(fieldName);
 
-        if (sampledPtr_.valid())
+        if (sampledPtr_)
         {
-            if (sampledPtr_().interpolate())
+            if (sampledPtr_->interpolate())
             {
                 const interpolationCellPoint<Type> interp(fld);
 
-                return sampledPtr_().interpolate(interp);
+                return sampledPtr_->interpolate(interp);
             }
             else
             {
                 const interpolationCell<Type> interp(fld);
 
-                return sampledPtr_().sample(interp);
+                return sampledPtr_->sample(interp);
             }
         }
         else
@@ -370,7 +370,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
         Field<Type> values(getFieldValues<Type>(fieldName, true));
 
         // Write raw values on surface if specified
-        if (surfaceWriterPtr_.valid() && surfaceWriterPtr_->enabled())
+        if (surfaceWriterPtr_ && surfaceWriterPtr_->enabled())
         {
             Field<Type> allValues(values);
             combineFields(allValues);

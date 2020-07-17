@@ -394,7 +394,7 @@ surfaceDisplacementPointPatchVectorField
 const Foam::searchableSurfaces&
 Foam::surfaceDisplacementPointPatchVectorField::surfaces() const
 {
-    if (surfacesPtr_.empty())
+    if (!surfacesPtr_)
     {
         surfacesPtr_.reset
         (

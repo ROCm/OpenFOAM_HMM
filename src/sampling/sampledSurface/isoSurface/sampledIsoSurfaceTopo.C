@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,7 +107,7 @@ bool Foam::sampledIsoSurfaceTopo::updateGeometry() const
     }
 
     const volScalarField& cellFld =
-        (fieldReadPtr.valid() ? *fieldReadPtr : *cellFldPtr);
+        (fieldReadPtr ? *fieldReadPtr : *cellFldPtr);
 
     auto tpointFld = volPointInterpolation::New(fvm).interpolate(cellFld);
 

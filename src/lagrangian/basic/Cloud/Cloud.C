@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -343,7 +344,7 @@ void Foam::Cloud<ParticleType>::move
 template<class ParticleType>
 void Foam::Cloud<ParticleType>::autoMap(const mapPolyMesh& mapper)
 {
-    if (!globalPositionsPtr_.valid())
+    if (!globalPositionsPtr_)
     {
         FatalErrorInFunction
             << "Global positions are not available. "

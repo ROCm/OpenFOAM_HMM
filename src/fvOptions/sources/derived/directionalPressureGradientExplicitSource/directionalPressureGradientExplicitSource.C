@@ -501,7 +501,7 @@ void Foam::fv::directionalPressureGradientExplicitSource::constrain
     const label
 )
 {
-    if (invAPtr_.empty())
+    if (!invAPtr_)
     {
         invAPtr_.reset
         (

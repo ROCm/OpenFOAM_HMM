@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,7 @@ Foam::label Foam::functionObjects::vtkWrite::writeVolFields
         const auto& field = tfield();
 
         // Internal
-        if (internalWriter.valid())
+        if (internalWriter)
         {
             ok = true;
             internalWriter->write(field);
@@ -126,7 +126,7 @@ Foam::label Foam::functionObjects::vtkWrite::writeVolFields
         const auto& field = tfield();
 
         // Internal
-        if (internalWriter.valid() && pInterp.valid())
+        if (internalWriter && pInterp)
         {
             ok = true;
             internalWriter->write(field, *pInterp);

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd
+    Copyright (C) 2018-2020 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -225,7 +225,7 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
         else
         {
             // Demand driven load the IDefault field
-            if (!IDefaultPtr.valid())
+            if (!IDefaultPtr)
             {
                 IDefaultPtr.reset
                 (

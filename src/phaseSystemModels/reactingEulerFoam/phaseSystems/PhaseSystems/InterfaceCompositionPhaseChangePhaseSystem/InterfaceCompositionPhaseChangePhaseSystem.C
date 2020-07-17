@@ -155,7 +155,7 @@ InterfaceCompositionPhaseChangePhaseSystem
 
         const phasePair& uoPair = this->phasePairs_[key];
 
-        if (!massTransferModels_[uoPair][uoPair.index(phase)].valid())
+        if (!massTransferModels_[uoPair][uoPair.index(phase)])
         {
             FatalErrorInFunction
                 << "A mass transfer model for the " << pair.phase1().name()

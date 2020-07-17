@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -645,7 +646,7 @@ public:
 
                 bool hasOldCellVolumes() const
                 {
-                    return oldCellVolumesPtr_.valid();
+                    return bool(oldCellVolumesPtr_);
                 }
 
                 const scalarField& oldCellVolumes() const

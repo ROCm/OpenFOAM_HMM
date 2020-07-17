@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -122,7 +123,7 @@ const Foam::basicSpecieMixture& Foam::SLGThermo::carrier() const
 
 const Foam::liquidMixtureProperties& Foam::SLGThermo::liquids() const
 {
-    if (!liquids_.valid())
+    if (!liquids_)
     {
         FatalErrorInFunction
             << "liquids requested, but object is not allocated"
@@ -135,7 +136,7 @@ const Foam::liquidMixtureProperties& Foam::SLGThermo::liquids() const
 
 const Foam::solidMixtureProperties& Foam::SLGThermo::solids() const
 {
-    if (!solids_.valid())
+    if (!solids_)
     {
         FatalErrorInFunction
             << "solids requested, but object is not allocated"
@@ -230,13 +231,13 @@ bool Foam::SLGThermo::hasMultiComponentCarrier() const
 
 bool Foam::SLGThermo::hasLiquids() const
 {
-    return liquids_.valid();
+    return bool(liquids_);
 }
 
 
 bool Foam::SLGThermo::hasSolids() const
 {
-    return solids_.valid();
+    return bool(solids_);
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -228,7 +228,7 @@ template<class Type>
 const Foam::pointPatchField<Type>&
 Foam::codedFixedValuePointPatchField<Type>::redirectPatchField() const
 {
-    if (!redirectPatchFieldPtr_.valid())
+    if (!redirectPatchFieldPtr_)
     {
         // Construct a patch
         // Make sure to construct the patchfield with up-to-date value

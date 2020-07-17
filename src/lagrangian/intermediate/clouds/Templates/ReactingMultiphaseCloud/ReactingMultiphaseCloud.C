@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -279,7 +280,7 @@ void Foam::ReactingMultiphaseCloud<CloudType>::info()
 template<class CloudType>
 void Foam::ReactingMultiphaseCloud<CloudType>::writeFields() const
 {
-    if (this->compositionModel_.valid())
+    if (this->compositionModel_)
     {
         CloudType::particleType::writeFields(*this, this->composition());
     }

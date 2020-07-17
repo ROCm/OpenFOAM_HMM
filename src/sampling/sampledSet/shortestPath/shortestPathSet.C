@@ -969,7 +969,7 @@ void Foam::shortestPathSet::genSamples
             markLeakPath,
             iter,
             mesh,
-            (isBlockedFace.valid() ? isBlockedFace() : isBoundaryFace),
+            (isBlockedFace ? *isBlockedFace : isBoundaryFace),
             insidePoint,
             insideCelli,
             outsidePoint,
@@ -1023,10 +1023,7 @@ void Foam::shortestPathSet::genSamples
             // Normal operation: walking has closed some wall-connected faces
             // If previous iteration was markLeakPath-mode make sure to revert
             // to normal operation (i.e. face marked in isLeakFace)
-            if (isBlockedFace.valid())
-            {
-                isBlockedFace.clear();
-            }
+            isBlockedFace.reset(nullptr);
             markLeakPath = false;
         }
         else
@@ -1048,7 +1045,7 @@ void Foam::shortestPathSet::genSamples
 
 
             // Revert to boundaryFaces only
-            if (!isBlockedFace.valid())
+            if (!isBlockedFace)
             {
                 //Pout<< "** Starting from original boundary faces." << endl;
                 isBlockedFace.reset(new bitSet(isBoundaryFace));

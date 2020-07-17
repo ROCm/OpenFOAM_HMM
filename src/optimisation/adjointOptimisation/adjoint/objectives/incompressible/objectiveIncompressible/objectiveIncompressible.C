@@ -130,7 +130,7 @@ autoPtr<objectiveIncompressible> objectiveIncompressible::New
 
 void objectiveIncompressible::doNormalization()
 {
-    if (normalize_ && normFactor_.valid())
+    if (normalize_ && normFactor_)
     {
         const scalar oneOverNorm(1./normFactor_());
 
@@ -191,7 +191,7 @@ void objectiveIncompressible::doNormalization()
 
 const volVectorField& objectiveIncompressible::dJdv()
 {
-    if (dJdvPtr_.empty())
+    if (!dJdvPtr_)
     {
         // If pointer is not set, set it to a zero field
         dJdvPtr_.reset
@@ -204,13 +204,13 @@ const volVectorField& objectiveIncompressible::dJdv()
             )
         );
     }
-    return dJdvPtr_();
+    return *dJdvPtr_;
 }
 
 
 const volScalarField& objectiveIncompressible::dJdp()
 {
-    if (dJdpPtr_.empty())
+    if (!dJdpPtr_)
     {
         // If pointer is not set, set it to a zero field
         dJdpPtr_.reset
@@ -223,13 +223,13 @@ const volScalarField& objectiveIncompressible::dJdp()
             )
         );
     }
-    return dJdpPtr_();
+    return *dJdpPtr_;
 }
 
 
 const volScalarField& objectiveIncompressible::dJdT()
 {
-    if (dJdTPtr_.empty())
+    if (!dJdTPtr_)
     {
         // If pointer is not set, set it to a zero field
         dJdTPtr_.reset
@@ -242,13 +242,13 @@ const volScalarField& objectiveIncompressible::dJdT()
             )
         );
     }
-    return dJdTPtr_();
+    return *dJdTPtr_;
 }
 
 
 const volScalarField& objectiveIncompressible::dJdTMvar1()
 {
-    if (dJdTMvar1Ptr_.empty())
+    if (!dJdTMvar1Ptr_)
     {
         // If pointer is not set, set it to a zero field
         dJdTMvar1Ptr_.reset
@@ -261,13 +261,13 @@ const volScalarField& objectiveIncompressible::dJdTMvar1()
             )
         );
     }
-    return dJdTMvar1Ptr_();
+    return *dJdTMvar1Ptr_;
 }
 
 
 const volScalarField& objectiveIncompressible::dJdTMvar2()
 {
-    if (dJdTMvar2Ptr_.empty())
+    if (!dJdTMvar2Ptr_)
     {
         // If pointer is not set, set it to a zero field
         dJdTMvar2Ptr_.reset
@@ -280,7 +280,7 @@ const volScalarField& objectiveIncompressible::dJdTMvar2()
             )
         );
     }
-    return dJdTMvar2Ptr_();
+    return *dJdTMvar2Ptr_;
 }
 
 
@@ -289,7 +289,7 @@ const fvPatchVectorField& objectiveIncompressible::boundarydJdv
     const label patchI
 )
 {
-    if (bdJdvPtr_.empty())
+    if (!bdJdvPtr_)
     {
         bdJdvPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     }
@@ -302,7 +302,7 @@ const fvPatchScalarField& objectiveIncompressible::boundarydJdvn
     const label patchI
 )
 {
-    if (bdJdvnPtr_.empty())
+    if (!bdJdvnPtr_)
     {
         bdJdvnPtr_.reset(createZeroBoundaryPtr<scalar>(mesh_));
     }
@@ -315,7 +315,7 @@ const fvPatchVectorField& objectiveIncompressible::boundarydJdvt
     const label patchI
 )
 {
-    if (bdJdvtPtr_.empty())
+    if (!bdJdvtPtr_)
     {
         bdJdvtPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     }
@@ -328,7 +328,7 @@ const fvPatchVectorField& objectiveIncompressible::boundarydJdp
     const label patchI
 )
 {
-    if (bdJdpPtr_.empty())
+    if (!bdJdpPtr_)
     {
         bdJdpPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     }
@@ -341,7 +341,7 @@ const fvPatchScalarField& objectiveIncompressible::boundarydJdT
     const label patchI
 )
 {
-    if (bdJdTPtr_.empty())
+    if (!bdJdTPtr_)
     {
         bdJdTPtr_.reset(createZeroBoundaryPtr<scalar>(mesh_));
     }
@@ -354,7 +354,7 @@ const fvPatchScalarField& objectiveIncompressible::boundarydJdTMvar1
     const label patchI
 )
 {
-    if (bdJdTMvar1Ptr_.empty())
+    if (!bdJdTMvar1Ptr_)
     {
         bdJdTMvar1Ptr_.reset(createZeroBoundaryPtr<scalar>(mesh_));
     }
@@ -367,7 +367,7 @@ const fvPatchScalarField& objectiveIncompressible::boundarydJdTMvar2
     const label patchI
 )
 {
-    if (bdJdTMvar2Ptr_.empty())
+    if (!bdJdTMvar2Ptr_)
     {
         bdJdTMvar2Ptr_.reset(createZeroBoundaryPtr<scalar>(mesh_));
     }
@@ -377,7 +377,7 @@ const fvPatchScalarField& objectiveIncompressible::boundarydJdTMvar2
 
 const boundaryVectorField& objectiveIncompressible::boundarydJdv()
 {
-    if (bdJdvPtr_.empty())
+    if (!bdJdvPtr_)
     {
         bdJdvPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     }
@@ -387,7 +387,7 @@ const boundaryVectorField& objectiveIncompressible::boundarydJdv()
 
 const boundaryScalarField& objectiveIncompressible::boundarydJdvn()
 {
-    if (bdJdvnPtr_.empty())
+    if (!bdJdvnPtr_)
     {
         bdJdvnPtr_.reset(createZeroBoundaryPtr<scalar>(mesh_));
     }
@@ -397,7 +397,7 @@ const boundaryScalarField& objectiveIncompressible::boundarydJdvn()
 
 const boundaryVectorField& objectiveIncompressible::boundarydJdvt()
 {
-    if (bdJdvtPtr_.empty())
+    if (!bdJdvtPtr_)
     {
         bdJdvtPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     }
@@ -407,7 +407,7 @@ const boundaryVectorField& objectiveIncompressible::boundarydJdvt()
 
 const boundaryVectorField& objectiveIncompressible::boundarydJdp()
 {
-    if (bdJdpPtr_.empty())
+    if (!bdJdpPtr_)
     {
         bdJdpPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     }
@@ -417,7 +417,7 @@ const boundaryVectorField& objectiveIncompressible::boundarydJdp()
 
 const boundaryScalarField& objectiveIncompressible::boundarydJdT()
 {
-    if (bdJdTPtr_.empty())
+    if (!bdJdTPtr_)
     {
         bdJdTPtr_.reset(createZeroBoundaryPtr<scalar>(mesh_));
     }
@@ -427,7 +427,7 @@ const boundaryScalarField& objectiveIncompressible::boundarydJdT()
 
 const boundaryScalarField& objectiveIncompressible::boundarydJdTMvar1()
 {
-    if (bdJdTMvar1Ptr_.empty())
+    if (!bdJdTMvar1Ptr_)
     {
         bdJdTMvar1Ptr_.reset(createZeroBoundaryPtr<scalar>(mesh_));
     }
@@ -437,7 +437,7 @@ const boundaryScalarField& objectiveIncompressible::boundarydJdTMvar1()
 
 const boundaryScalarField& objectiveIncompressible::boundarydJdTMvar2()
 {
-    if (bdJdTMvar2Ptr_.empty())
+    if (!bdJdTMvar2Ptr_)
     {
         bdJdTMvar2Ptr_.reset(createZeroBoundaryPtr<scalar>(mesh_));
     }

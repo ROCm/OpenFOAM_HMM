@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -283,7 +283,7 @@ inline bool Foam::expressions::exprResult::isBool() const
 
 inline bool Foam::expressions::exprResult::isObject() const
 {
-    return objectPtr_.valid();
+    return bool(objectPtr_);
 }
 
 

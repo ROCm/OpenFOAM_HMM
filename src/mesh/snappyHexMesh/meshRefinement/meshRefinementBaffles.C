@@ -257,7 +257,7 @@ void Foam::meshRefinement::getIntersections
 
         if (hit1[i].hit() && hit2[i].hit())
         {
-            if (str.valid())
+            if (str)
             {
                 str().write(linePointRef(start[i], hit1[i].rawPoint()));
                 str().write

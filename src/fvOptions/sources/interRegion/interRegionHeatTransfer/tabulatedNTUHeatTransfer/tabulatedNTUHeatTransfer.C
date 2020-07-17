@@ -61,7 +61,7 @@ Foam::fv::tabulatedNTUHeatTransfer::geometryModelNames_
 const Foam::interpolation2DTable<Foam::scalar>&
 Foam::fv::tabulatedNTUHeatTransfer::ntuTable()
 {
-    if (!ntuTable_.valid())
+    if (!ntuTable_)
     {
         ntuTable_.reset(new interpolation2DTable<scalar>(coeffs_));
     }

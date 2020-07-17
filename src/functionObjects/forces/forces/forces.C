@@ -58,7 +58,7 @@ void Foam::functionObjects::forces::createFiles()
 {
     // Note: Only possible to create bin files after bins have been initialised
 
-    if (writeToFile() && !forceFilePtr_.valid())
+    if (writeToFile() && !forceFilePtr_)
     {
         forceFilePtr_ = createFile("force");
         writeIntegratedHeader("Force", forceFilePtr_());

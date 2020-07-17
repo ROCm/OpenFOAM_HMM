@@ -1262,7 +1262,7 @@ void Foam::argList::parse
                     fileHandler().NewIFstream(source)
                 );
 
-                if (!decompDictStream.valid() || !decompDictStream->good())
+                if (!decompDictStream || !decompDictStream->good())
                 {
                     FatalError
                         << "Cannot read decomposeParDict from "

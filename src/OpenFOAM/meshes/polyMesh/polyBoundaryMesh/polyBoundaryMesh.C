@@ -329,7 +329,7 @@ Foam::polyBoundaryMesh::neighbourEdges() const
             << " boundaries." << endl;
     }
 
-    if (!neighbourEdgesPtr_.valid())
+    if (!neighbourEdgesPtr_)
     {
         neighbourEdgesPtr_.reset(new List<labelPairList>(size()));
         List<labelPairList>& neighbourEdges = neighbourEdgesPtr_();
@@ -451,7 +451,7 @@ Foam::polyBoundaryMesh::neighbourEdges() const
 
 const Foam::labelList& Foam::polyBoundaryMesh::patchID() const
 {
-    if (!patchIDPtr_.valid())
+    if (!patchIDPtr_)
     {
         patchIDPtr_.reset(new labelList(mesh_.nBoundaryFaces()));
         labelList& list = *patchIDPtr_;
@@ -476,7 +476,7 @@ const Foam::labelList& Foam::polyBoundaryMesh::patchID() const
 const Foam::HashTable<Foam::labelList>&
 Foam::polyBoundaryMesh::groupPatchIDs() const
 {
-    if (!groupPatchIDsPtr_.valid())
+    if (!groupPatchIDsPtr_)
     {
         groupPatchIDsPtr_.reset(new HashTable<labelList>(16));
         auto& groupPatchIDs = *groupPatchIDsPtr_;

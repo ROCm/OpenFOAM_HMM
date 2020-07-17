@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,7 +38,7 @@ Foam::fv::interRegionHeatTransferModel::nbrRegionName() const
 inline const Foam::meshToMesh&
 Foam::fv::interRegionHeatTransferModel::meshInterp() const
 {
-    if (!meshInterpPtr_.valid())
+    if (!meshInterpPtr_)
     {
         FatalErrorInFunction
             << "Interpolation object not set"

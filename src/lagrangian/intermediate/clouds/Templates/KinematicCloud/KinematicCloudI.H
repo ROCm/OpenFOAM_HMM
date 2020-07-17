@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -370,7 +370,7 @@ template<class CloudType>
 inline Foam::List<Foam::DynamicList<typename CloudType::particleType*>>&
 Foam::KinematicCloud<CloudType>::cellOccupancy()
 {
-    if (cellOccupancyPtr_.empty())
+    if (!cellOccupancyPtr_)
     {
         buildCellOccupancy();
     }

@@ -161,7 +161,7 @@ void Foam::interpolationTable<Type>::write(Ostream& os) const
 {
     os.writeEntry("file", fileName_);
     os.writeEntry("outOfBounds", bounds::repeatableBoundingNames[bounding_]);
-    if (reader_.valid())
+    if (reader_)
     {
         reader_->write(os);
     }

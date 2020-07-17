@@ -331,13 +331,13 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI() const
         label iter(0);
         label nTransformsOld(nTransforms_);
 
-        if (ownStr.valid())
+        if (ownStr)
         {
-            writeOBJ(thisPatch0, ownStr());
+            writeOBJ(thisPatch0, *ownStr);
         }
-        if (neiStr.valid())
+        if (neiStr)
         {
-            writeOBJ(nbrPatch0, neiStr());
+            writeOBJ(nbrPatch0, *neiStr);
         }
 
 
@@ -392,9 +392,9 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI() const
 
                 AMIPtr_->append(thisPatch, nbrPatch0);
 
-                if (ownStr.valid())
+                if (ownStr)
                 {
-                    writeOBJ(thisPatch, ownStr());
+                    writeOBJ(thisPatch, *ownStr);
                 }
             }
             else
@@ -411,9 +411,9 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI() const
 
                 AMIPtr_->append(thisPatch0, nbrPatch);
 
-                if (neiStr.valid())
+                if (neiStr)
                 {
-                    writeOBJ(nbrPatch, neiStr());
+                    writeOBJ(nbrPatch, *neiStr);
                 }
             }
 
@@ -445,15 +445,8 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI() const
 
 
         // Close debug streams
-        if (ownStr.valid())
-        {
-            ownStr.clear();
-        }
-        if (neiStr.valid())
-        {
-            neiStr.clear();
-        }
-
+        ownStr.reset(nullptr);
+        neiStr.reset(nullptr);
 
 
         // Average the number of transformations

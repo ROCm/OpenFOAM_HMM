@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -153,7 +153,7 @@ RASModelVariables::autoTmp
 RASModelVariables::cloneAutoTmp(const autoTmp& source) const
 {
     autoTmp returnField(nullptr);
-    if (source.valid() && source().valid())
+    if (source && source->valid())
     {
         const volScalarField& sf = source()();
         DebugInfo

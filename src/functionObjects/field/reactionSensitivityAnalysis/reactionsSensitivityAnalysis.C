@@ -34,7 +34,7 @@ template<class chemistryType>
 void Foam::functionObjects::reactionsSensitivityAnalysis<chemistryType>::
 createFileNames()
 {
-    if (writeToFile() && !prodFilePtr_.valid())
+    if (writeToFile() && !prodFilePtr_)
     {
         prodFilePtr_ = createFile("production");
         writeHeader(prodFilePtr_(), "production");

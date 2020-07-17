@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -170,10 +170,10 @@ Foam::procFacesGAMGProcAgglomeration::processorAgglomeration
     tmp<labelField> tfineToCoarse(new labelField(0));
     labelField& fineToCoarse = tfineToCoarse.ref();
 
-    if (singleCellMeshPtr.valid())
+    if (singleCellMeshPtr)
     {
         // On master call the agglomerator
-        const lduPrimitiveMesh& singleCellMesh = singleCellMeshPtr();
+        const lduPrimitiveMesh& singleCellMesh = *singleCellMeshPtr;
 
         label nCoarseProcs;
         fineToCoarse = pairGAMGAgglomeration::agglomerate

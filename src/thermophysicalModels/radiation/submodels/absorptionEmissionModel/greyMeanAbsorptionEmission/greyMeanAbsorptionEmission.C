@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -129,7 +130,7 @@ Foam::radiation::greyMeanAbsorptionEmission::greyMeanAbsorptionEmission
 
         volScalarField* fldPtr = mesh.getObjectPtr<volScalarField>(specieName);
 
-        if (!lookUpTablePtr_.empty())
+        if (lookUpTablePtr_)
         {
             if (lookUpTablePtr_().found(specieName))
             {

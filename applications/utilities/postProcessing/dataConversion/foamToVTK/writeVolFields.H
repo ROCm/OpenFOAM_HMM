@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,7 +63,7 @@ bool writeVolField
     const auto& field = tfield();
 
     // Internal
-    if (internalWriter.valid())
+    if (internalWriter)
     {
         internalWriter->write(field);
     }
@@ -99,7 +99,7 @@ bool writeVolField
     const auto& field = tfield();
 
     // Internal
-    if (internalWriter.valid() && pInterp.valid())
+    if (internalWriter && pInterp)
     {
         internalWriter->write(field, *pInterp);
     }

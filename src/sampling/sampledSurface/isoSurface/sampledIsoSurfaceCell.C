@@ -107,7 +107,7 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
     }
 
     const volScalarField& cellFld =
-        (fieldReadPtr.valid() ? *fieldReadPtr : *cellFldPtr);
+        (fieldReadPtr ? *fieldReadPtr : *cellFldPtr);
 
     auto tpointFld = volPointInterpolation::New(fvm).interpolate(cellFld);
 

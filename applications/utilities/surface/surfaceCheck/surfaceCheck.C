@@ -469,7 +469,7 @@ int main(int argc, char *argv[])
             Info<< "Surface has " << illegalFaces.size()
                 << " illegal triangles." << endl;
 
-            if (surfWriter.valid())
+            if (surfWriter)
             {
                 boolList isIllegalFace(surf.size(), false);
                 UIndirectList<bool>(isIllegalFace, illegalFaces) = true;
@@ -598,7 +598,7 @@ int main(int argc, char *argv[])
         }
 
         // Dump for subsetting
-        if (surfWriter.valid())
+        if (surfWriter)
         {
             // Transcribe faces
             faceList faces(surf.size());
@@ -867,7 +867,7 @@ int main(int argc, char *argv[])
         {
             Info<< "Splitting surface into parts ..." << endl << endl;
 
-            if (!surfWriter.valid())
+            if (!surfWriter)
             {
                 surfWriter.reset(new surfaceWriters::vtkWriter());
             }
@@ -933,7 +933,7 @@ int main(int argc, char *argv[])
 
         if (outputThreshold > 0)
         {
-            if (!surfWriter.valid())
+            if (!surfWriter)
             {
                 surfWriter.reset(new surfaceWriters::vtkWriter());
             }
@@ -1001,7 +1001,7 @@ int main(int argc, char *argv[])
             {
                 nInt++;
 
-                if (intStreamPtr.valid())
+                if (intStreamPtr)
                 {
                     intStreamPtr().write(hitInfo.hitPoint());
                 }
@@ -1013,7 +1013,7 @@ int main(int argc, char *argv[])
                 {
                     nInt++;
 
-                    if (intStreamPtr.valid())
+                    if (intStreamPtr)
                     {
                         intStreamPtr().write(hitInfo2.hitPoint());
                     }
@@ -1043,7 +1043,7 @@ int main(int argc, char *argv[])
         //            )
         //        );
         //
-        //        if (hitInfo.hit() && intStreamPtr.valid())
+        //        if (hitInfo.hit() && intStreamPtr)
         //        {
         //            intStreamPtr().write(hitInfo.hitPoint());
         //
@@ -1070,7 +1070,7 @@ int main(int argc, char *argv[])
             Info<< "Surface is self-intersecting at " << nInt
                 << " locations." << endl;
 
-            if (intStreamPtr.valid())
+            if (intStreamPtr)
             {
                 Info<< "Writing intersection points to "
                     << intStreamPtr().name() << endl;

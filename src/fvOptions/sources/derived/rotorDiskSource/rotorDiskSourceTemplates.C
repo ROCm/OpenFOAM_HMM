@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,7 @@ void Foam::fv::rotorDiskSource::calculate
     scalar AOAmax = -GREAT;
 
     // Cached position-dependent rotations available?
-    const bool hasCache = Rcyl_.valid();
+    const bool hasCache = bool(Rcyl_);
 
     forAll(cells_, i)
     {

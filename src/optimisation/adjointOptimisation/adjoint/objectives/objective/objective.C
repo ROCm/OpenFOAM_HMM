@@ -256,7 +256,7 @@ scalar objective::JCycle() const
     J -= target_;
 
     // Normalize here, in order to get the correct value for line search
-    if (normalize_ && normFactor_.valid())
+    if (normalize_ && normFactor_)
     {
         J /= normFactor_();
     }
@@ -267,7 +267,7 @@ scalar objective::JCycle() const
 
 void objective::updateNormalizationFactor()
 {
-    if (normalize_ && normFactor_.empty())
+    if (normalize_ && !normFactor_)
     {
         normFactor_.reset(new scalar(JCycle()));
     }
@@ -327,7 +327,7 @@ bool objective::normalize() const
 
 void objective::doNormalization()
 {
-    if (normalize_ && normFactor_.valid())
+    if (normalize_ && normFactor_)
     {
         const scalar oneOverNorm(1./normFactor_());
 
@@ -414,7 +414,7 @@ void objective::incrementIntegrationTimes(const scalar timeSpan)
 
 const volScalarField& objective::dJdb()
 {
-    if (dJdbPtr_.empty())
+    if (!dJdbPtr_)
     {
         // If pointer is not set, set it to a zero field
         dJdbPtr_.reset
@@ -428,13 +428,13 @@ const volScalarField& objective::dJdb()
         );
     }
 
-    return dJdbPtr_();
+    return *dJdbPtr_;
 }
 
 
 const fvPatchVectorField& objective::boundarydJdb(const label patchI)
 {
-    if (bdJdbPtr_.empty())
+    if (!bdJdbPtr_)
     {
         bdJdbPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     }
@@ -444,7 +444,7 @@ const fvPatchVectorField& objective::boundarydJdb(const label patchI)
 
 const fvPatchVectorField& objective::dSdbMultiplier(const label patchI)
 {
-    if (bdSdbMultPtr_.empty())
+    if (!bdSdbMultPtr_)
     {
         bdSdbMultPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     }
@@ -454,7 +454,7 @@ const fvPatchVectorField& objective::dSdbMultiplier(const label patchI)
 
 const fvPatchVectorField& objective::dndbMultiplier(const label patchI)
 {
-    if (bdndbMultPtr_.empty())
+    if (!bdndbMultPtr_)
     {
         bdndbMultPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     }
@@ -464,7 +464,7 @@ const fvPatchVectorField& objective::dndbMultiplier(const label patchI)
 
 const fvPatchVectorField& objective::dxdbMultiplier(const label patchI)
 {
-    if (bdxdbMultPtr_.empty())
+    if (!bdxdbMultPtr_)
     {
         bdxdbMultPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     }
@@ -474,7 +474,7 @@ const fvPatchVectorField& objective::dxdbMultiplier(const label patchI)
 
 const fvPatchVectorField& objective::dxdbDirectMultiplier(const label patchI)
 {
-    if (bdxdbDirectMultPtr_.empty())
+    if (!bdxdbDirectMultPtr_)
     {
         bdxdbDirectMultPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     }
@@ -488,7 +488,7 @@ const vectorField& objective::boundaryEdgeMultiplier
     const label edgeI
 )
 {
-    if (bdxdbDirectMultPtr_.empty())
+    if (!bdxdbDirectMultPtr_)
     {
         FatalErrorInFunction
             << "Unallocated boundaryEdgeMultiplier field"
@@ -500,7 +500,7 @@ const vectorField& objective::boundaryEdgeMultiplier
 
 const fvPatchTensorField& objective::boundarydJdStress(const label patchI)
 {
-    if (bdJdStressPtr_.empty())
+    if (!bdJdStressPtr_)
     {
         bdJdStressPtr_.reset(createZeroBoundaryPtr<tensor>(mesh_));
     }
@@ -510,80 +510,80 @@ const fvPatchTensorField& objective::boundarydJdStress(const label patchI)
 
 const boundaryVectorField& objective::boundarydJdb()
 {
-    if (bdJdbPtr_.empty())
+    if (!bdJdbPtr_)
     {
         bdJdbPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     }
-    return bdJdbPtr_();
+    return *bdJdbPtr_;
 }
 
 
 const boundaryVectorField& objective::dSdbMultiplier()
 {
-    if (bdSdbMultPtr_.empty())
+    if (!bdSdbMultPtr_)
     {
         bdSdbMultPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     }
-    return bdSdbMultPtr_();
+    return *bdSdbMultPtr_;
 }
 
 
 const boundaryVectorField& objective::dndbMultiplier()
 {
-    if (bdndbMultPtr_.empty())
+    if (!bdndbMultPtr_)
     {
         bdndbMultPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     }
-    return bdndbMultPtr_();
+    return *bdndbMultPtr_;
 }
 
 
 const boundaryVectorField& objective::dxdbMultiplier()
 {
-    if (bdxdbMultPtr_.empty())
+    if (!bdxdbMultPtr_)
     {
         bdxdbMultPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     }
-    return bdxdbMultPtr_();
+    return *bdxdbMultPtr_;
 }
 
 
 const boundaryVectorField& objective::dxdbDirectMultiplier()
 {
-    if (bdxdbDirectMultPtr_.empty())
+    if (!bdxdbDirectMultPtr_)
     {
         bdxdbDirectMultPtr_.reset(createZeroBoundaryPtr<vector>(mesh_));
     }
-    return bdxdbDirectMultPtr_();
+    return *bdxdbDirectMultPtr_;
 }
 
 
 const vectorField3& objective::boundaryEdgeMultiplier()
 {
-    if (bdxdbDirectMultPtr_.empty())
+    if (!bdxdbDirectMultPtr_)
     {
         FatalErrorInFunction
             << "Unallocated boundaryEdgeMultiplier field"
             << endl << endl
             << exit(FatalError);
     }
-    return bEdgeContribution_();
+    return *bEdgeContribution_;
 }
 
 
 const boundaryTensorField& objective::boundarydJdStress()
 {
-    if (bdJdStressPtr_.empty())
+    if (!bdJdStressPtr_)
     {
         bdJdStressPtr_.reset(createZeroBoundaryPtr<tensor>(mesh_));
     }
-    return bdJdStressPtr_();
+    return *bdJdStressPtr_;
 }
 
 
 const volScalarField& objective::divDxDbMultiplier()
 {
-    if (divDxDbMultPtr_.empty())
+    if (!divDxDbMultPtr_)
     {
         // If pointer is not set, set it to a zero field
         divDxDbMultPtr_.reset
@@ -598,13 +598,13 @@ const volScalarField& objective::divDxDbMultiplier()
             )
         );
     }
-    return divDxDbMultPtr_();
+    return *divDxDbMultPtr_;
 }
 
 
 const volTensorField& objective::gradDxDbMultiplier()
 {
-    if (gradDxDbMultPtr_.empty())
+    if (!gradDxDbMultPtr_)
     {
         // If pointer is not set, set it to a zero field
         gradDxDbMultPtr_.reset
@@ -618,7 +618,7 @@ const volTensorField& objective::gradDxDbMultiplier()
             )
         );
     }
-    return gradDxDbMultPtr_();
+    return *gradDxDbMultPtr_;
 }
 
 
@@ -684,7 +684,7 @@ bool objective::write(const bool valid) const
         // File is opened only upon invocation of the write function
         // in order to avoid various instantiations of the same objective
         // opening the same file
-        if (objFunctionFilePtr_.empty())
+        if (!objFunctionFilePtr_)
         {
             setObjectiveFilePtr();
         }
@@ -703,7 +703,7 @@ void objective::writeInstantaneousValue() const
         // File is opened only upon invocation of the write function
         // in order to avoid various instantiations of the same objective
         // opening the same file
-        if (instantValueFilePtr_.empty())
+        if (!instantValueFilePtr_)
         {
             setInstantValueFilePtr();
         }
@@ -717,7 +717,7 @@ void objective::writeInstantaneousSeparator() const
 {
     if (Pstream::master())
     {
-        if (instantValueFilePtr_.valid())
+        if (instantValueFilePtr_)
         {
             instantValueFilePtr_() << endl;
         }
@@ -740,7 +740,7 @@ void objective::writeMeanValue() const
             // File is opened only upon invocation of the write function
             // in order to avoid various instantiations of the same objective
             // opening the same file
-            if (meanValueFilePtr_.empty())
+            if (!meanValueFilePtr_)
             {
                 setMeanValueFilePtr();
             }
@@ -755,7 +755,7 @@ void objective::writeMeanValue() const
 bool objective::writeData(Ostream& os) const
 {
     os.writeEntry("JMean", JMean_);
-    if (normFactor_.valid())
+    if (normFactor_)
     {
         os.writeEntry("normFactor", normFactor_());
     }

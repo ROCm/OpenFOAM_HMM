@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,73 +38,73 @@ inline const Foam::word& Foam::objective::objectiveName() const
 
 inline bool Foam::objective::hasdJdb() const
 {
-    return dJdbPtr_.valid();
+    return bool(dJdbPtr_);
 }
 
 
 inline bool Foam::objective::hasBoundarydJdb() const
 {
-    return bdJdbPtr_.valid();
+    return bool(bdJdbPtr_);
 }
 
 
 inline bool Foam::objective::hasdSdbMult() const
 {
-    return bdSdbMultPtr_.valid();
+    return bool(bdSdbMultPtr_);
 }
 
 
 inline bool Foam::objective::hasdndbMult() const
 {
-    return bdndbMultPtr_.valid();
+    return bool(bdndbMultPtr_);
 }
 
 
 inline bool Foam::objective::hasdxdbMult() const
 {
-    return bdxdbMultPtr_.valid();
+    return bool(bdxdbMultPtr_);
 }
 
 
 inline bool Foam::objective::hasdxdbDirectMult() const
 {
-    return bdxdbDirectMultPtr_.valid();
+    return bool(bdxdbDirectMultPtr_);
 }
 
 
 inline bool Foam::objective::hasBoundaryEdgeContribution() const
 {
-    return bEdgeContribution_.valid();
+    return bool(bEdgeContribution_);
 }
 
 
 inline bool Foam::objective::hasDivDxDbMult() const
 {
-    return divDxDbMultPtr_.valid();
+    return bool(divDxDbMultPtr_);
 }
 
 
 inline bool Foam::objective::hasGradDxDbMult() const
 {
-    return gradDxDbMultPtr_.valid();
+    return bool(gradDxDbMultPtr_);
 }
 
 
 inline bool Foam::objective::hasBoundarydJdStress() const
 {
-    return bdJdStressPtr_.valid();
+    return bool(bdJdStressPtr_);
 }
 
 
 inline bool Foam::objective::hasIntegrationStartTime() const
 {
-    return integrationStartTimePtr_.valid();
+    return bool(integrationStartTimePtr_);
 }
 
 
 inline bool Foam::objective::hasIntegrationEndTime() const
 {
-    return integrationEndTimePtr_.valid();
+    return bool(integrationEndTimePtr_);
 }
 
 // ************************************************************************* //

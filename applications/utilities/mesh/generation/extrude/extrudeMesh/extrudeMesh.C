@@ -731,9 +731,9 @@ int main(int argc, char *argv[])
         );
 
         // Update
-        if (refDataPtr.valid())
+        if (refDataPtr)
         {
-            refDataPtr().updateMesh(map());
+            refDataPtr->updateMesh(map());
         }
 
         // Store added cells
@@ -815,9 +815,9 @@ int main(int argc, char *argv[])
 
     polyMesh& mesh =
     (
-        meshFromMesh.valid()
-      ? meshFromMesh()
-      : meshFromSurface()
+        meshFromMesh
+      ? *meshFromMesh
+      : *meshFromSurface
     );
 
 
@@ -896,9 +896,9 @@ int main(int argc, char *argv[])
             updateFaceLabels(map(), backPatchFaces);
             updateCellSet(map(), addedCellsSet);
 
-            if (refDataPtr.valid())
+            if (refDataPtr)
             {
-                refDataPtr().updateMesh(map());
+                refDataPtr->updateMesh(map());
             }
 
             // Move mesh (if inflation used)
@@ -1029,9 +1029,9 @@ int main(int argc, char *argv[])
         // Update local data
         updateCellSet(map(), addedCellsSet);
 
-        if (refDataPtr.valid())
+        if (refDataPtr)
         {
-            refDataPtr().updateMesh(map());
+            refDataPtr->updateMesh(map());
         }
 
         // Move mesh (if inflation used)
@@ -1067,9 +1067,9 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (refDataPtr.valid())
+    if (refDataPtr)
     {
-        refDataPtr().write();
+        refDataPtr->write();
     }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,7 +58,7 @@ void Foam::radiation::solarLoad::updateReflectedRays
     const labelHashSet& includePatches
 )
 {
-    if (reflectedFaces_.empty() && !hitFaces_.empty())
+    if (!reflectedFaces_ && hitFaces_)
     {
         reflectedFaces_.reset
         (
@@ -117,7 +117,7 @@ void Foam::radiation::solarLoad::updateReflectedRays
 
 bool Foam::radiation::solarLoad::updateHitFaces()
 {
-    if (hitFaces_.empty())
+    if (!hitFaces_)
     {
          hitFaces_.reset(new faceShading(mesh_, solarCalc_.direction()));
          return true;
@@ -439,7 +439,7 @@ void Foam::radiation::solarLoad::calculateQdiff
     );
 
 
-    if (finalAgglom_.size() > 0 && coarseMesh_.empty())
+    if (!coarseMesh_ && !finalAgglom_.empty())
     {
         coarseMesh_.reset
         (

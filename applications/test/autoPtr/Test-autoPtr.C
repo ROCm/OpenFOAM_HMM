@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,7 +44,7 @@ void testTransfer1(autoPtr<labelList> ap)
     // Passed in copy, so automatically removes content
     // Transfer would be nice, but not actually needed
 
-    Info<< "recv " << Switch::name(ap.valid()) << nl;
+    Info<< "recv " << Switch::name(bool(ap)) << nl;
 }
 
 
@@ -53,7 +53,7 @@ void testTransfer1(autoPtr<labelList> ap)
 void testTransfer2(autoPtr<labelList>&& ap)
 {
     // As rvalue, so this time we actually get to manage content
-    Info<< "recv " << Switch::name(ap.valid()) << nl;
+    Info<< "recv " << Switch::name(bool(ap)) << nl;
 }
 
 
@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
 
         testTransfer2(std::move(list));
 
-        Info<<"now have valid=" << Switch::name(list.valid());
+        Info<<"now have valid=" << Switch::name(bool(list));
 
         if (list)
         {
@@ -209,9 +209,9 @@ int main(int argc, char *argv[])
 
         testTransfer2(std::move(list));
 
-        Info<<"now have valid=" << Switch::name(list.valid());
+        Info<<"now have valid=" << Switch::name(bool(list));
 
-        if (list.valid())
+        if (list)
         {
             Info<< nl
                 << flatOutput(*list) << " @ " << name(list->cdata())
@@ -229,7 +229,7 @@ int main(int argc, char *argv[])
         auto ptr1 = autoPtr<labelList>::New();
         auto ptr2 = autoPtr<labelList>::New();
 
-        Info<<"ptr valid: " << ptr1.valid() << nl;
+        Info<<"ptr valid: " << bool(ptr1) << nl;
 
         // Refuses to compile (good!):   ptr1 = new labelList(10);
 

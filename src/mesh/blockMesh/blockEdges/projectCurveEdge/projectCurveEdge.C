@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -181,7 +182,7 @@ Foam::projectCurveEdge::position(const scalarList& lambdas) const
                 points.last() = endPt;
             }
 
-            if (debugStr.valid())
+            if (debugStr)
             {
                 forAll(points, i)
                 {
@@ -241,7 +242,7 @@ Foam::projectCurveEdge::position(const scalarList& lambdas) const
         }
 
 
-        if (debugStr.valid())
+        if (debugStr)
         {
             forAll(points, i)
             {

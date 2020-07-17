@@ -413,8 +413,8 @@ bool Foam::functionObjects::regionSizeDistribution::write()
 
     const volScalarField& alpha =
     (
-         alphaPtr.valid()
-       ? alphaPtr()
+         alphaPtr
+       ? *alphaPtr
        : obr_.lookupObject<volScalarField>(alphaName_)
     );
 
@@ -903,7 +903,7 @@ bool Foam::functionObjects::regionSizeDistribution::write()
                     volVectorField
                 >(fldName).primitiveField();
 
-                if (csysPtr_.valid())
+                if (csysPtr_)
                 {
                     Log << "Transforming vector field " << fldName
                         << " with coordinate system "
