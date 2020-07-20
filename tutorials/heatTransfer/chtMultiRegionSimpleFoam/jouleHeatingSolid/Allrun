@@ -7,6 +7,9 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 runApplication $(getApplication)
 
-./createGraphs
+if notTest "$@"
+then
+    ./createGraphs
+fi
 
 #------------------------------------------------------------------------------
