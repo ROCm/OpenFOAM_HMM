@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -214,8 +214,8 @@ Foam::polyTopoChanger::topoChangeRequest() const
     // Collect changes from all modifiers
     const PtrList<polyMeshModifier>& topoChanges = *this;
 
-    polyTopoChange* refPtr(new polyTopoChange(mesh()));
-    polyTopoChange& ref = *refPtr;
+    auto ptr = autoPtr<polyTopoChange>::New(mesh());
+    polyTopoChange& ref = ptr.ref();
 
     forAll(topoChanges, morphI)
     {
@@ -225,7 +225,7 @@ Foam::polyTopoChanger::topoChangeRequest() const
         }
     }
 
-    return autoPtr<polyTopoChange>(refPtr);
+    return ptr;
 }
 
 
