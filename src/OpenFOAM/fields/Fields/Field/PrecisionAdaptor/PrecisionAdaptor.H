@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,18 +27,19 @@ Class
     Foam::PrecisionAdaptor
 
 Description
-    Conversion adaptor for Field that either wraps as a tmp reference
-    or creates the necessary tmp and copies the values on construction
-    and destruction.
-    This provides automatic conversion between (scalar) types for use
-    with linear solvers able to run mixed precision.
+    Conversion adaptor for Field/List that either wrap the input as a
+    reference, or creates a temporary pointer and copies the values
+    on construction/destruction.
+
+    This provides, for example, automatic conversion between types
+    for linear solvers able to run mixed precision.
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef PrecisionAdaptor_H
 #define PrecisionAdaptor_H
 
-#include "tmpNrc.H"
+#include "refPtr.H"
 #include "Field.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -46,22 +47,19 @@ Description
 namespace Foam
 {
 
-//- A const Field wrapper with possible data conversion
+//- A const Field/List wrapper with possible data conversion
 template<class Type, class InputType, template<class> class Container = Field>
 class ConstPrecisionAdaptor
 :
-    public tmpNrc<Container<Type>>
+    public refPtr<Container<Type>>
 {
     // Private Member Functions
 
         //- Copy in field
         void copyInput(const Container<InputType>& input)
         {
-            this->clear();
-
-            Container<Type>* p = new Container<Type>(input.size());
-            this->reset(p);
-            std::copy(input.cbegin(), input.cend(), p->begin());
+            this->reset(new Container<Type>(input.size()));
+            std::copy(input.cbegin(), input.cend(), this->ref().begin());
         }
 
         //- Construct from tmp Field, copy/move as required
@@ -71,19 +69,20 @@ class ConstPrecisionAdaptor
             {
                 auto& tinput = reinterpret_cast<tmp<Container<Type>>&>(input);
 
-                if (tinput.isTmp())
+                if (tinput.is_pointer())
                 {
-                    // Reset to tmp
+                    // Acquire control of the managed pointer
                     this->reset(tinput.ptr());
                 }
                 else
                 {
+                    // Use const reference
                     this->cref(tinput.cref());
                 }
             }
             else
             {
-                this->copyInput(input());
+                this->copyInput(input.cref());
             }
             input.clear();
         }
@@ -100,10 +99,11 @@ public:
         //- Construct from Container<InputType>, copying on input as required
         ConstPrecisionAdaptor(const Container<InputType>& input)
         :
-            tmpNrc<Container<Type>>()
+            refPtr<Container<Type>>()
         {
             if (std::is_same<Type, InputType>::value)
             {
+                // Use const reference directly
                 this->cref(reinterpret_cast<const FieldType&>(input));
             }
             else
@@ -116,7 +116,7 @@ public:
         //- Construct from tmp Container, copy/move as required
         ConstPrecisionAdaptor(tmp<Container<InputType>>&& input)
         :
-            tmpNrc<Container<Type>>()
+            refPtr<Container<Type>>()
         {
             this->moveInput(input);
         }
@@ -125,13 +125,15 @@ public:
         //- Construct from tmp Container, copy/move as required
         ConstPrecisionAdaptor(const tmp<Container<InputType>>& input)
         :
-            tmpNrc<Container<Type>>()
+            refPtr<Container<Type>>()
         {
             this->moveInput(const_cast<tmp<Container<InputType>>&>(input));
         }
 
 
     // Member Functions
+
+        // May need in the future: using refPtr<Container<Type>>::get;
 
         //- Return the field
         static const Container<Type>& get
@@ -154,15 +156,15 @@ public:
 };
 
 
-//- A Field wrapper with possible data conversion
+//- A non-const Field/List wrapper with possible data conversion
 template<class Type, class InputType, template<class> class Container = Field>
 class PrecisionAdaptor
 :
-    public tmpNrc<Container<Type>>
+    public refPtr<Container<Type>>
 {
     // Private Data
 
-        //- Reference to underlying field
+        //- Reference to underlying (input) data
         Container<InputType>& ref_;
 
 
@@ -171,11 +173,10 @@ class PrecisionAdaptor
         //- Copy in field
         void copyInput(const Container<InputType>& input, const bool copy)
         {
-            Container<Type>* p = new Container<Type>(input.size());
-            this->reset(p);
+            this->reset(new Container<Type>(input.size()));
             if (copy)
             {
-                std::copy(input.cbegin(), input.cend(), p->begin());
+                std::copy(input.cbegin(), input.cend(), this->ref().begin());
             }
         }
 
@@ -191,12 +192,13 @@ public:
         //- Construct from Container<InputType>, copying on input if required
         PrecisionAdaptor(Container<InputType>& input, const bool copy = true)
         :
-            tmpNrc<Container<Type>>(),
+            refPtr<Container<Type>>(),
             ref_(input)
         {
             if (std::is_same<Type, InputType>::value)
             {
-                this->cref(reinterpret_cast<const FieldType&>(input));
+                // Use non-const reference directly
+                this->ref(reinterpret_cast<FieldType&>(ref_));
             }
             else
             {
@@ -205,25 +207,16 @@ public:
         }
 
 
-    //- Destructor, copying on destroy
+    //- Destructor, copy back on destroy
     ~PrecisionAdaptor()
     {
-        if (this->isTmp())
+        if (this->is_pointer())
         {
             const FieldType& store = this->cref();
-            ref_.resize(store.size());
+            ref_.resize(store.size());  // extra safety
             std::copy(store.cbegin(), store.cend(), ref_.begin());
         }
     }
-
-
-    // Member Functions
-
-        //- Allow modification without const-ref check
-        FieldType& ref()
-        {
-            return this->constCast();
-        }
 };
 
 

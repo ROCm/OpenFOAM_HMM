@@ -49,7 +49,7 @@ Description
 #include "fileMonitor.H"
 #include "labelList.H"
 #include "Switch.H"
-#include "tmpNrc.H"
+#include "refPtr.H"
 #include "Enum.H"
 #include "Tuple2.H"
 
@@ -135,17 +135,18 @@ protected:
         //- Helper: check for file (isFile) or directory (!isFile)
         static bool isFileOrDir(const bool isFile, const fileName&);
 
-        //- Lookup name of processorsDDD using cache. Return empty fileName
-        //  if not found.
-        tmpNrc<dirIndexList> lookupAndCacheProcessorsPath
+        //- Lookup name of processorsDDD using cache.
+        //  \return empty fileName if not found.
+        refPtr<dirIndexList> lookupAndCacheProcessorsPath
         (
             const fileName&,
             const bool syncPar
         ) const;
 
-        //- Lookup name of processorsDDD using cache. Return empty fileName
-        //  if not found. To be called on all processors
-        virtual tmpNrc<dirIndexList> lookupProcessorsPath
+        //- Lookup name of processorsDDD using cache.
+        //  \note To be called on all processors
+        //  \return empty fileName if not found.
+        virtual refPtr<dirIndexList> lookupProcessorsPath
         (
             const fileName&
         ) const;

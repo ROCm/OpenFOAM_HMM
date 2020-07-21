@@ -231,7 +231,7 @@ inline T& Foam::tmp<T>::ref() const
                 << abort(FatalError);
         }
     }
-    else // if (type_ == CREF)
+    else if (type_ == CREF)
     {
         FatalErrorInFunction
             << "Attempted non-const reference to const object from a "
@@ -246,14 +246,7 @@ inline T& Foam::tmp<T>::ref() const
 template<class T>
 inline T& Foam::tmp<T>::constCast() const
 {
-    if (isTmp() && !ptr_)
-    {
-        FatalErrorInFunction
-            << typeName() << " deallocated"
-            << abort(FatalError);
-    }
-
-    return const_cast<T&>(*ptr_);
+    return const_cast<T&>(cref());
 }
 
 
@@ -337,6 +330,15 @@ inline void Foam::tmp<T>::cref(const T& obj) noexcept
     clear();
     ptr_ = const_cast<T*>(&obj);
     type_ = CREF;
+}
+
+
+template<class T>
+inline void Foam::tmp<T>::ref(T& obj) noexcept
+{
+    clear();
+    ptr_ = &obj;
+    type_ = REF;
 }
 
 

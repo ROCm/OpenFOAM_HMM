@@ -25,13 +25,13 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::tmpNrc
+    Foam::refPtr
 
 Description
-    A class for managing temporary objects without reference counting.
+    A class for managing references or pointers (no reference counting)
 
 SourceFiles
-    tmpNrcI.H
+    refPtrI.H
 
 See also
     Foam::autoPtr
@@ -39,8 +39,8 @@ See also
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef tmpNrc_H
-#define tmpNrc_H
+#ifndef refPtr_H
+#define refPtr_H
 
 #include "tmp.H"
 
@@ -50,11 +50,11 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                             Class tmpNrc Declaration
+                             Class refPtr Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T>
-class tmpNrc
+class refPtr
 {
     // Private Data
 
@@ -62,7 +62,8 @@ class tmpNrc
         enum refType
         {
             PTR,    //!< Managing a pointer (not ref-counted)
-            CREF    //!< Using (const) reference to an object
+            CREF,   //!< Using (const) reference to an object
+            REF     //!< Using (non-const) reference to an object
         };
 
         //- The managed pointer or address of the object (reference)
@@ -76,10 +77,10 @@ public:
 
     // STL type definitions
 
-        //- Type of object being managed
+        //- Type of object being managed or referenced
         typedef T element_type;
 
-        //- Pointer to type of object being managed
+        //- Pointer to type of object being managed or referenced
         typedef T* pointer;
 
 
@@ -89,50 +90,50 @@ public:
 
     // Factory Methods
 
-        //- Construct tmpNrc of T with forwarding arguments
+        //- Construct refPtr of T with forwarding arguments
         //  \param args list of arguments with which an instance of T
         //      will be constructed.
         //
         //  \note Similar to std::make_shared, but the overload for
         //      array types is not disabled.
         template<class... Args>
-        inline static tmpNrc<T> New(Args&&... args);
+        inline static refPtr<T> New(Args&&... args);
 
-        //- Construct tmpNrc from derived type with forwarding arguments
+        //- Construct refPtr from derived type with forwarding arguments
         //  \param args list of arguments with which an instance of U
         //      will be constructed.
         //
         //  \note Similar to New but for derived types
         template<class U, class... Args>
-        inline static tmpNrc<T> NewFrom(Args&&... args);
+        inline static refPtr<T> NewFrom(Args&&... args);
 
 
     // Constructors
 
         //- Default construct, no managed pointer.
-        inline constexpr tmpNrc() noexcept;
+        inline constexpr refPtr() noexcept;
 
         //- Construct with no managed pointer.
-        inline constexpr tmpNrc(std::nullptr_t) noexcept;
+        inline constexpr refPtr(std::nullptr_t) noexcept;
 
         //- Construct, taking ownership of the pointer.
-        inline explicit tmpNrc(T* p) noexcept;
+        inline explicit refPtr(T* p) noexcept;
 
         //- Construct for a const reference to an object.
-        inline tmpNrc(const T& obj) noexcept;
+        inline refPtr(const T& obj) noexcept;
 
         //- Move construct, transferring ownership.
-        inline tmpNrc(tmpNrc<T>&& t) noexcept;
+        inline refPtr(refPtr<T>&& t) noexcept;
 
         //- Copy construct
-        inline tmpNrc(const tmpNrc<T>& t);
+        inline refPtr(const refPtr<T>& t);
 
         //- Copy construct. Optionally reusing pointer.
-        inline tmpNrc(const tmpNrc<T>& t, bool reuse);
+        inline refPtr(const refPtr<T>& t, bool reuse);
 
 
     //- Destructor: deletes managed pointer
-    inline ~tmpNrc();
+    inline ~refPtr();
 
 
     // Member Functions
@@ -147,6 +148,9 @@ public:
 
         //- True for non-null pointer/reference
         bool valid() const noexcept { return ptr_; }
+
+        //- True if this is a managed pointer (not a reference)
+        bool is_pointer() const noexcept { return type_ == PTR; }
 
         //- True if this is a managed pointer (not a reference)
         bool isTmp() const noexcept { return type_ == PTR; }
@@ -166,8 +170,8 @@ public:
         //- Return const pointer without nullptr checking.
         const T* get() const noexcept { return ptr_; }
 
-        //- Return the const object reference or a const reference to the
-        //- contents of a non-null managed pointer.
+        //- Return const reference to the object or to the contents
+        //- of a (non-null) managed pointer.
         //  Fatal for a null managed pointer
         inline const T& cref() const;
 
@@ -185,8 +189,7 @@ public:
 
     // Edit
 
-        //- Return managed pointer for reuse, or clone() the const object
-        //- reference.
+        //- Return managed pointer for reuse, or clone() the object reference.
         inline T* ptr() const;
 
         //- If object pointer points to valid object:
@@ -197,19 +200,21 @@ public:
         inline void reset(T* p = nullptr) noexcept;
 
         //- Clear existing and transfer ownership.
-        inline void reset(tmpNrc<T>&& other) noexcept;
+        inline void reset(refPtr<T>&& other) noexcept;
 
-        //- Delete managed temporary object and set to const reference
+        //- Delete managed temporary object and set to (const) reference
         inline void cref(const T& obj) noexcept;
 
+        //- Delete managed temporary object and set to (non-const) reference
+        inline void ref(T& obj) noexcept;
+
         //- Swaps the managed object with other.
-        inline void swap(tmpNrc<T>& other) noexcept;
+        inline void swap(refPtr<T>& other) noexcept;
 
 
     // Member Operators
 
-        //- Return const reference to the object.
-        //  Identical to cref() method.
+        //- Identical to cref() method.
         inline const T& operator()() const;
 
         //- Cast to underlying data type, using the cref() method.
@@ -228,10 +233,10 @@ public:
 
         //- Transfer ownership of the managed pointer.
         //  Fatal for a null managed pointer or if the object is const.
-        inline void operator=(const tmpNrc<T>& t);
+        inline void operator=(const refPtr<T>& t);
 
         //- Clear existing and transfer ownership.
-        inline void operator=(tmpNrc<T>&& other) noexcept;
+        inline void operator=(refPtr<T>&& other) noexcept;
 
         //- Take ownership of the pointer.
         //  Fatal for a null pointer
@@ -247,10 +252,10 @@ public:
 
 // Global Functions
 
-//- Specializes the Swap algorithm for tmpNrc.
+//- Specializes the Swap algorithm for refPtr.
 //  Swaps the pointers and types of lhs and rhs. Calls \c lhs.swap(rhs)
 template<class T>
-void Swap(tmpNrc<T>& lhs, tmpNrc<T>& rhs)
+void Swap(refPtr<T>& lhs, refPtr<T>& rhs)
 {
     lhs.swap(rhs);
 }
@@ -262,7 +267,7 @@ void Swap(tmpNrc<T>& lhs, tmpNrc<T>& rhs)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "tmpNrcI.H"
+#include "refPtrI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

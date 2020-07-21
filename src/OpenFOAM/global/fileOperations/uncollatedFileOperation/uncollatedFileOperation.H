@@ -68,9 +68,10 @@ protected:
             const bool search
         ) const;
 
-        //- Lookup name of processorsDDD using cache. Return empty fileName
-        //  if not found. Do not use any parallel synchronisation
-        virtual tmpNrc<dirIndexList> lookupProcessorsPath
+        //- Lookup name of processorsDDD using cache.
+        //  \not Do not use any parallel synchronisation
+        //  \return empty fileName if not found.
+        virtual refPtr<dirIndexList> lookupProcessorsPath
         (
             const fileName&
         ) const;

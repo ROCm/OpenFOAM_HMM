@@ -40,6 +40,7 @@ SourceFiles
 
 See also
     Foam::autoPtr
+    Foam::refPtr
     Foam::refCount
 
 \*---------------------------------------------------------------------------*/
@@ -69,7 +70,8 @@ class tmp
         enum refType
         {
             PTR,    //!< Managing a pointer (ref-counted)
-            CREF    //!< Using (const) reference to an object
+            CREF,   //!< Using (const) reference to an object
+            REF     //!< Using (non-const) reference to an object
         };
 
         //- The managed pointer or address of the object (reference)
@@ -170,6 +172,9 @@ public:
         bool valid() const noexcept { return ptr_; }
 
         //- True if this is a managed pointer (not a reference)
+        bool is_pointer() const noexcept { return type_ == PTR; }
+
+        //- True if this is a managed pointer (not a reference)
         bool isTmp() const noexcept { return type_ == PTR; }
 
         //- True if this is a non-null managed pointer with a unique ref-count
@@ -187,8 +192,8 @@ public:
         //- Return const pointer without nullptr checking.
         const T* get() const noexcept { return ptr_; }
 
-        //- Return the const object reference or a const reference to the
-        //- contents of a non-null managed pointer.
+        //- Return const reference to the object or to the contents
+        //- of a (non-null) managed pointer.
         //  Fatal for a null managed pointer
         inline const T& cref() const;
 
@@ -200,14 +205,13 @@ public:
         //- Non-const dereference, even if the object is const.
         //  This is similar to ref(), but applies a const_cast to access
         //  const objects.
-        //  Fatal for a null managed pointer.
+        //  Fatal for a null pointer.
         inline T& constCast() const;
 
 
     // Edit
 
-        //- Return managed pointer for reuse, or clone() the const object
-        //- reference.
+        //- Return managed pointer for reuse, or clone() the object reference.
         inline T* ptr() const;
 
         //- If object pointer points to valid object:
@@ -220,8 +224,11 @@ public:
         //- Clear existing and transfer ownership.
         inline void reset(tmp<T>&& other) noexcept;
 
-        //- Delete managed temporary object and set to const reference
+        //- Delete managed temporary object and set to (const) reference
         inline void cref(const T& obj) noexcept;
+
+        //- Delete managed temporary object and set to (non-const) reference
+        inline void ref(T& obj) noexcept;
 
         //- Swaps the managed object with other.
         inline void swap(tmp<T>& other) noexcept;
@@ -229,8 +236,7 @@ public:
 
     // Member Operators
 
-        //- Return const reference to the object.
-        //  Identical to cref() method.
+        //- Identical to cref() method.
         inline const T& operator()() const;
 
         //- Cast to underlying data type, using the cref() method.

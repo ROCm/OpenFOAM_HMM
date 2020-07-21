@@ -199,7 +199,7 @@ Foam::fileOperations::masterUncollatedFileOperation::filePathInfo
         // 2. Check processors/
         if (io.time().processorCase())
         {
-            tmpNrc<dirIndexList> pDirs(lookupProcessorsPath(io.objectPath()));
+            refPtr<dirIndexList> pDirs(lookupProcessorsPath(io.objectPath()));
             forAll(pDirs(), i)
             {
                 const fileName& pDir = pDirs()[i].first();
@@ -268,7 +268,7 @@ Foam::fileOperations::masterUncollatedFileOperation::filePathInfo
             if (newInstancePath.size() && newInstancePath != io.instance())
             {
                 // 1. Try processors equivalent
-                tmpNrc<dirIndexList> pDirs
+                refPtr<dirIndexList> pDirs
                 (
                     lookupProcessorsPath(io.objectPath())
                 );
@@ -1499,7 +1499,7 @@ Foam::fileOperations::masterUncollatedFileOperation::findInstance
     //         parent directory in case of parallel)
 
 
-    tmpNrc<dirIndexList> pDirs(lookupProcessorsPath(io.objectPath()));
+    refPtr<dirIndexList> pDirs(lookupProcessorsPath(io.objectPath()));
 
     word foundInstance;
 

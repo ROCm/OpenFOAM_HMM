@@ -41,7 +41,6 @@ Description
     orientations (opposite normals).  The 'reverseTarget' flag can be used to
     reverse the orientation of the target patch.
 
-
 SourceFiles
     AMIInterpolation.C
     AMIInterpolationName.C
@@ -60,6 +59,7 @@ SourceFiles
 #include "faceAreaIntersect.H"
 #include "globalIndex.H"
 #include "ops.H"
+#include "refPtr.H"
 #include "Enum.H"
 #include "pointList.H"
 #include "indexedOctree.H"
@@ -131,7 +131,7 @@ protected:
             pointField srcPatchPts_;
 
             //- Source patch using manipulated input points
-            tmpNrc<primitivePatch> tsrcPatch0_;
+            refPtr<primitivePatch> tsrcPatch0_;
 
             //- Source map pointer - parallel running only
             autoPtr<mapDistribute> srcMapPtr_;
@@ -159,7 +159,7 @@ protected:
             pointField tgtPatchPts_;
 
             //- Target patch using manipulated input points
-            tmpNrc<primitivePatch> ttgtPatch0_;
+            refPtr<primitivePatch> ttgtPatch0_;
 
             //- Target map pointer - parallel running only
             autoPtr<mapDistribute> tgtMapPtr_;

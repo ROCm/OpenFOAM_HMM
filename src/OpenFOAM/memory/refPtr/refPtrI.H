@@ -33,24 +33,24 @@ License
 
 template<class T>
 template<class... Args>
-inline Foam::tmpNrc<T> Foam::tmpNrc<T>::New(Args&&... args)
+inline Foam::refPtr<T> Foam::refPtr<T>::New(Args&&... args)
 {
-    return tmpNrc<T>(new T(std::forward<Args>(args)...));
+    return refPtr<T>(new T(std::forward<Args>(args)...));
 }
 
 
 template<class T>
 template<class U, class... Args>
-inline Foam::tmpNrc<T> Foam::tmpNrc<T>::NewFrom(Args&&... args)
+inline Foam::refPtr<T> Foam::refPtr<T>::NewFrom(Args&&... args)
 {
-    return tmpNrc<T>(new U(std::forward<Args>(args)...));
+    return refPtr<T>(new U(std::forward<Args>(args)...));
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
-inline constexpr Foam::tmpNrc<T>::tmpNrc() noexcept
+inline constexpr Foam::refPtr<T>::refPtr() noexcept
 :
     ptr_(nullptr),
     type_(PTR)
@@ -58,7 +58,7 @@ inline constexpr Foam::tmpNrc<T>::tmpNrc() noexcept
 
 
 template<class T>
-inline constexpr Foam::tmpNrc<T>::tmpNrc(std::nullptr_t) noexcept
+inline constexpr Foam::refPtr<T>::refPtr(std::nullptr_t) noexcept
 :
     ptr_(nullptr),
     type_(PTR)
@@ -66,7 +66,7 @@ inline constexpr Foam::tmpNrc<T>::tmpNrc(std::nullptr_t) noexcept
 
 
 template<class T>
-inline Foam::tmpNrc<T>::tmpNrc(T* p) noexcept
+inline Foam::refPtr<T>::refPtr(T* p) noexcept
 :
     ptr_(p),
     type_(PTR)
@@ -74,7 +74,7 @@ inline Foam::tmpNrc<T>::tmpNrc(T* p) noexcept
 
 
 template<class T>
-inline Foam::tmpNrc<T>::tmpNrc(const T& obj) noexcept
+inline Foam::refPtr<T>::refPtr(const T& obj) noexcept
 :
     ptr_(const_cast<T*>(&obj)),
     type_(CREF)
@@ -82,7 +82,7 @@ inline Foam::tmpNrc<T>::tmpNrc(const T& obj) noexcept
 
 
 template<class T>
-inline Foam::tmpNrc<T>::tmpNrc(tmpNrc<T>&& t) noexcept
+inline Foam::refPtr<T>::refPtr(refPtr<T>&& t) noexcept
 :
     ptr_(t.ptr_),
     type_(t.type_)
@@ -93,7 +93,7 @@ inline Foam::tmpNrc<T>::tmpNrc(tmpNrc<T>&& t) noexcept
 
 
 template<class T>
-inline Foam::tmpNrc<T>::tmpNrc(const tmpNrc<T>& t)
+inline Foam::refPtr<T>::refPtr(const refPtr<T>& t)
 :
     ptr_(t.ptr_),
     type_(t.type_)
@@ -115,7 +115,7 @@ inline Foam::tmpNrc<T>::tmpNrc(const tmpNrc<T>& t)
 
 
 template<class T>
-inline Foam::tmpNrc<T>::tmpNrc(const tmpNrc<T>& t, bool reuse)
+inline Foam::refPtr<T>::refPtr(const refPtr<T>& t, bool reuse)
 :
     ptr_(t.ptr_),
     type_(t.type_)
@@ -144,7 +144,7 @@ inline Foam::tmpNrc<T>::tmpNrc(const tmpNrc<T>& t, bool reuse)
 
 
 template<class T>
-inline Foam::tmpNrc<T>::~tmpNrc()
+inline Foam::refPtr<T>::~refPtr()
 {
     clear();
 }
@@ -153,21 +153,21 @@ inline Foam::tmpNrc<T>::~tmpNrc()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-inline bool Foam::tmpNrc<T>::movable() const noexcept
+inline bool Foam::refPtr<T>::movable() const noexcept
 {
     return (type_ == PTR && ptr_);
 }
 
 
 template<class T>
-inline Foam::word Foam::tmpNrc<T>::typeName() const
+inline Foam::word Foam::refPtr<T>::typeName() const
 {
-    return "tmpNrc<" + word(typeid(T).name()) + '>';
+    return "refPtr<" + word(typeid(T).name()) + '>';
 }
 
 
 template<class T>
-inline const T& Foam::tmpNrc<T>::cref() const
+inline const T& Foam::refPtr<T>::cref() const
 {
     if (isTmp())
     {
@@ -184,7 +184,7 @@ inline const T& Foam::tmpNrc<T>::cref() const
 
 
 template<class T>
-inline T& Foam::tmpNrc<T>::ref() const
+inline T& Foam::refPtr<T>::ref() const
 {
     if (isTmp())
     {
@@ -195,7 +195,7 @@ inline T& Foam::tmpNrc<T>::ref() const
                 << abort(FatalError);
         }
     }
-    else // if (type_ == CREF)
+    else if (type_ == CREF)
     {
         FatalErrorInFunction
             << "Attempted non-const reference to const object from a "
@@ -208,21 +208,14 @@ inline T& Foam::tmpNrc<T>::ref() const
 
 
 template<class T>
-inline T& Foam::tmpNrc<T>::constCast() const
+inline T& Foam::refPtr<T>::constCast() const
 {
-    if (isTmp() && !ptr_)
-    {
-        FatalErrorInFunction
-            << typeName() << " deallocated"
-            << abort(FatalError);
-    }
-
-    return const_cast<T&>(*ptr_);
+    return const_cast<T&>(cref());
 }
 
 
 template<class T>
-inline T* Foam::tmpNrc<T>::ptr() const
+inline T* Foam::refPtr<T>::ptr() const
 {
     if (!ptr_)
     {
@@ -244,7 +237,7 @@ inline T* Foam::tmpNrc<T>::ptr() const
 
 
 template<class T>
-inline void Foam::tmpNrc<T>::clear() const noexcept
+inline void Foam::refPtr<T>::clear() const noexcept
 {
     if (isTmp() && ptr_)
     {
@@ -255,7 +248,7 @@ inline void Foam::tmpNrc<T>::clear() const noexcept
 
 
 template<class T>
-inline void Foam::tmpNrc<T>::reset(T* p) noexcept
+inline void Foam::refPtr<T>::reset(T* p) noexcept
 {
     clear();
     ptr_ = p;
@@ -264,7 +257,7 @@ inline void Foam::tmpNrc<T>::reset(T* p) noexcept
 
 
 template<class T>
-inline void Foam::tmpNrc<T>::reset(tmpNrc<T>&& other) noexcept
+inline void Foam::refPtr<T>::reset(refPtr<T>&& other) noexcept
 {
     if (&other == this)
     {
@@ -281,7 +274,7 @@ inline void Foam::tmpNrc<T>::reset(tmpNrc<T>&& other) noexcept
 
 
 template<class T>
-inline void Foam::tmpNrc<T>::cref(const T& obj) noexcept
+inline void Foam::refPtr<T>::cref(const T& obj) noexcept
 {
     clear();
     ptr_ = const_cast<T*>(&obj);
@@ -290,7 +283,16 @@ inline void Foam::tmpNrc<T>::cref(const T& obj) noexcept
 
 
 template<class T>
-inline void Foam::tmpNrc<T>::swap(tmpNrc<T>& other) noexcept
+inline void Foam::refPtr<T>::ref(T& obj) noexcept
+{
+    clear();
+    ptr_ = &obj;
+    type_ = REF;
+}
+
+
+template<class T>
+inline void Foam::refPtr<T>::swap(refPtr<T>& other) noexcept
 {
     if (&other == this)
     {
@@ -311,21 +313,21 @@ inline void Foam::tmpNrc<T>::swap(tmpNrc<T>& other) noexcept
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
-inline const T& Foam::tmpNrc<T>::operator()() const
+inline const T& Foam::refPtr<T>::operator()() const
 {
     return cref();
 }
 
 
 template<class T>
-inline Foam::tmpNrc<T>::operator const T&() const
+inline Foam::refPtr<T>::operator const T&() const
 {
     return cref();
 }
 
 
 template<class T>
-inline const T* Foam::tmpNrc<T>::operator->() const
+inline const T* Foam::refPtr<T>::operator->() const
 {
     if (!ptr_ && isTmp())
     {
@@ -339,7 +341,7 @@ inline const T* Foam::tmpNrc<T>::operator->() const
 
 
 template<class T>
-inline T* Foam::tmpNrc<T>::operator->()
+inline T* Foam::refPtr<T>::operator->()
 {
     if (isTmp())
     {
@@ -362,7 +364,7 @@ inline T* Foam::tmpNrc<T>::operator->()
 
 
 template<class T>
-inline void Foam::tmpNrc<T>::operator=(const tmpNrc<T>& t)
+inline void Foam::refPtr<T>::operator=(const refPtr<T>& t)
 {
     if (&t == this)
     {
@@ -395,7 +397,7 @@ inline void Foam::tmpNrc<T>::operator=(const tmpNrc<T>& t)
 
 
 template<class T>
-inline void Foam::tmpNrc<T>::operator=(tmpNrc<T>&& other) noexcept
+inline void Foam::refPtr<T>::operator=(refPtr<T>&& other) noexcept
 {
     if (&other == this)
     {
@@ -412,7 +414,7 @@ inline void Foam::tmpNrc<T>::operator=(tmpNrc<T>&& other) noexcept
 
 
 template<class T>
-inline void Foam::tmpNrc<T>::operator=(T* p)
+inline void Foam::refPtr<T>::operator=(T* p)
 {
     if (!p)
     {
@@ -426,14 +428,14 @@ inline void Foam::tmpNrc<T>::operator=(T* p)
 
 
 template<class T>
-inline void Foam::tmpNrc<T>::operator=(std::nullptr_t) noexcept
+inline void Foam::refPtr<T>::operator=(std::nullptr_t) noexcept
 {
     reset(nullptr);
 }
 
 
 template<class T>
-inline Foam::tmpNrc<T>::operator tmp<T>()
+inline Foam::refPtr<T>::operator tmp<T>()
 {
     if (isTmp())
     {

@@ -233,7 +233,7 @@ bool Foam::fileOperation::isFileOrDir(const bool isFile, const fileName& f)
 }
 
 
-Foam::tmpNrc<Foam::fileOperation::dirIndexList>
+Foam::refPtr<Foam::fileOperation::dirIndexList>
 Foam::fileOperation::lookupAndCacheProcessorsPath
 (
     const fileName& fName,
@@ -361,11 +361,12 @@ Foam::fileOperation::lookupAndCacheProcessorsPath
             return procsDirs_[procPath];
         }
     }
-    return tmpNrc<dirIndexList>(new dirIndexList(0, dirIndex()));
+
+    return refPtr<dirIndexList>::New();
 }
 
 
-Foam::tmpNrc<Foam::fileOperation::dirIndexList>
+Foam::refPtr<Foam::fileOperation::dirIndexList>
 Foam::fileOperation::lookupProcessorsPath(const fileName& fName) const
 {
     // Use parallel synchronisation
@@ -531,7 +532,7 @@ Foam::fileName Foam::fileOperation::filePath(const fileName& fName) const
     if (proci != -1)
     {
         // Get all processor directories
-        tmpNrc<dirIndexList> procDirs(lookupProcessorsPath(fName));
+        refPtr<dirIndexList> procDirs(lookupProcessorsPath(fName));
         forAll(procDirs(), i)
         {
             const fileName& procDir = procDirs()[i].first();
@@ -688,7 +689,7 @@ Foam::instantList Foam::fileOperation::findTimes
 
 
     // Get all processor directories
-    tmpNrc<dirIndexList> procDirs(lookupProcessorsPath(directory));
+    refPtr<dirIndexList> procDirs(lookupProcessorsPath(directory));
     forAll(procDirs(), i)
     {
         const fileName& procDir = procDirs()[i].first();

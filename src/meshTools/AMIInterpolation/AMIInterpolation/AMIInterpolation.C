@@ -748,7 +748,7 @@ bool Foam::AMIInterpolation::calculate
     {
         srcPatchPts_ = srcPatch.points();
         projectPointsToSurface(surfPtr(), srcPatchPts_);
-        tsrcPatch0_ = tmpNrc<primitivePatch>::New
+        tsrcPatch0_ = refPtr<primitivePatch>::New
         (
             SubList<face>(srcPatch),
             srcPatchPts_
@@ -756,7 +756,7 @@ bool Foam::AMIInterpolation::calculate
 
         tgtPatchPts_ = tgtPatch.points();
         projectPointsToSurface(surfPtr(), tgtPatchPts_);
-        ttgtPatch0_ = tmpNrc<primitivePatch>::New
+        ttgtPatch0_ = refPtr<primitivePatch>::New
         (
             SubList<face>(tgtPatch),
             tgtPatchPts_
