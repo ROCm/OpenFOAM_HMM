@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -180,7 +181,7 @@ class CrankNicolsonDdtScheme
 
         //- Check if the ddt0 needs to be evaluated for this time-step
         template<class GeoField>
-        bool evaluate(const DDt0Field<GeoField>& ddt0) const;
+        bool evaluate(DDt0Field<GeoField>& ddt0);
 
         //- Return the coefficient for Euler scheme for the first time-step
         //  for and CN thereafter

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -184,10 +185,12 @@ template<class Type>
 template<class GeoField>
 bool CrankNicolsonDdtScheme<Type>::evaluate
 (
-    const DDt0Field<GeoField>& ddt0
-) const
+    DDt0Field<GeoField>& ddt0
+)
 {
-    return ddt0.timeIndex() != mesh().time().timeIndex();
+    bool evaluated = (ddt0.timeIndex() != mesh().time().timeIndex());
+    ddt0.timeIndex() = mesh().time().timeIndex();
+    return evaluated;
 }
 
 
@@ -872,6 +875,7 @@ CrankNicolsonDdtScheme<Type>::fvmDdt
         {
             ddt0 = rDtCoef0_(ddt0)*(vf.oldTime() - vf.oldTime().oldTime())
                  - offCentre_(ddt0());
+
         }
 
         fvm.source() =
