@@ -369,7 +369,7 @@ extern messageStream SeriousError;
 //- Report an information message using Foam::Pout
 //  for FUNCTION_NAME in file __FILE__ at line __LINE__
 //  if the local debug switch is true
-#define DebugPoutInFunction                                                        \
+#define DebugPoutInFunction                                                    \
     if (debug) PoutInFunction
 
 //- Report a variable name and value

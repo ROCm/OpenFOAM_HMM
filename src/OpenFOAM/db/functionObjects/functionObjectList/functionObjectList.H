@@ -79,9 +79,8 @@ class functionObjectList
         //- Reference to Time
         const Time& time_;
 
-        //- The parent dictionary containing a "functions" entry
-        //  This entry can either be a list or a dictionary of
-        //  functionObject specifications
+        //- The parent dictionary containing a "functions" sub-dictionary
+        //- of functionObject specifications
         const dictionary& parentDict_;
 
         //- Function object properties - stores state information
@@ -146,12 +145,11 @@ public:
             const bool execution=true
         );
 
-        //- Construct from Time, a dictionary with "functions" entry
-        //  and the execution setting.
+        //- Construct from Time, a dictionary with a "functions" entry
+        //- and the execution setting.
         //  \param[in]  runTime - the other Time instance to construct from
         //  \param[in]  parentDict - the parent dictionary containing
-        //    a "functions" entry, which can either be a list or a dictionary
-        //    of functionObject specifications.
+        //    a "functions" sub-dictionary of functionObject specifications.
         //  \param[in]  execution - whether the function objects should execute
         //    or not. Default: true.
         functionObjectList

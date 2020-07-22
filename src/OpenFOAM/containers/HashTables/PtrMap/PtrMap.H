@@ -65,7 +65,7 @@ public:
 
     // Constructors
 
-        //- Construct null with default table capacity
+        //- Default construct with default table capacity
         PtrMap()
         :
             parent_type()

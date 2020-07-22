@@ -73,7 +73,7 @@ public:
 
     // Constructors
 
-        //- Construct null with default table capacity
+        //- Default construct with default table capacity
         Map()
         :
             parent_type()
@@ -125,8 +125,6 @@ public:
         {
             parent_type::operator=(std::move(rhs));
         }
-
-
 };
 
 

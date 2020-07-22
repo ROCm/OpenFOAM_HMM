@@ -98,9 +98,9 @@ Description
 
     where the entries mean:
     \table
-        Property | Description                            | Type | Req'd | Dflt
+        Property | Description                            | Type | Reqd | Deflt
         type     | Type name of function object           | word |  yes  | -
-        libs     | Library name containing implementation | word |  yes  | -
+        libs     | Library name(s) for implementation     | words | no  | -
         region   | Name of region for multi-region cases  | word | no | region0
         enabled  | Switch to turn function object on/off  | bool | no | true
         log     | Switch to write log info to standard output | bool | no | true
@@ -199,7 +199,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class Time;
 class polyMesh;
 class mapPolyMesh;
