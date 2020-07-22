@@ -45,6 +45,11 @@ Usage
 
 SourceFiles
     error.C
+    IOerror.C
+
+SeeAlso
+    Foam::errorManip
+    Foam::errorManipArg
 
 \*---------------------------------------------------------------------------*/
 
@@ -52,6 +57,7 @@ SourceFiles
 #define error_H
 
 #include "messageStream.H"
+#include <memory>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -80,8 +86,8 @@ protected:
         string functionName_;
         string sourceFileName_;
         label sourceFileLineNumber_;
-        bool throwExceptions_;
-        OStringStream* messageStreamPtr_;
+        bool throwing_;
+        std::unique_ptr<OStringStream> messageStreamPtr_;
 
 
 public:
@@ -138,15 +144,15 @@ public:
         //- Return the current exception throwing (on or off)
         bool throwing() const
         {
-            return throwExceptions_;
+            return throwing_;
         }
 
         //- Activate/deactivate exception throwing
         //  \return the previous throwing state
         inline bool throwExceptions(bool doThrow)
         {
-            const bool prev = throwExceptions_;
-            throwExceptions_ = doThrow;
+            const bool prev = throwing_;
+            throwing_ = doThrow;
             return prev;
         }
 

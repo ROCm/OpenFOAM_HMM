@@ -135,17 +135,17 @@ exit(error& err, const int errNo = 1)
 }
 
 
-inline errorManip<error>
-abort(error& err)
-{
-    return errorManip<error>(&error::abort, err);
-}
-
-
 inline errorManipArg<IOerror, int>
 exit(IOerror& err, const int errNo = 1)
 {
     return errorManipArg<IOerror, int>(&IOerror::exit, err, errNo);
+}
+
+
+inline errorManip<error>
+abort(error& err)
+{
+    return errorManip<error>(&error::abort, err);
 }
 
 

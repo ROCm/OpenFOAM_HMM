@@ -170,14 +170,14 @@ Foam::IOerror::operator Foam::dictionary() const
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::IOerror::exitOrAbort(const int, const bool isAbort)
+void Foam::IOerror::exitOrAbort(const int errNo, const bool isAbort)
 {
-    if (!throwExceptions_ && JobInfo::constructed)
+    if (!throwing_ && JobInfo::constructed)
     {
         jobInfo.add("FatalIOError", operator dictionary());
-        if (isAbort)
+        if (isAbort || hasEnv("FOAM_ABORT"))
         {
             jobInfo.abort();
         }
@@ -187,14 +187,7 @@ void Foam::IOerror::exitOrAbort(const int, const bool isAbort)
         }
     }
 
-    if (hasEnv("FOAM_ABORT"))
-    {
-        Perr<< nl << *this << nl
-            << "\nFOAM aborting (FOAM_ABORT set)\n" << endl;
-        printStack(Perr);
-        std::abort();
-    }
-    else if (throwExceptions_)
+    if (throwing_ && !isAbort)
     {
         // Make a copy of the error to throw
         IOerror errorException(*this);
@@ -204,20 +197,27 @@ void Foam::IOerror::exitOrAbort(const int, const bool isAbort)
 
         throw errorException;
     }
+    else if (hasEnv("FOAM_ABORT"))
+    {
+        Perr<< nl << *this << nl
+            << "\nFOAM aborting (FOAM_ABORT set)\n" << endl;
+        error::printStack(Perr);
+        std::abort();
+    }
     else if (Pstream::parRun())
     {
         if (isAbort)
         {
             Perr<< nl << *this << nl
                 << "\nFOAM parallel run aborting\n" << endl;
-            printStack(Perr);
+            error::printStack(Perr);
             Pstream::abort();
         }
         else
         {
             Perr<< nl << *this << nl
                 << "\nFOAM parallel run exiting\n" << endl;
-            Pstream::exit(1);
+            Pstream::exit(errNo);
         }
     }
     else
@@ -226,7 +226,7 @@ void Foam::IOerror::exitOrAbort(const int, const bool isAbort)
         {
             Perr<< nl << *this << nl
                 << "\nFOAM aborting\n" << endl;
-            printStack(Perr);
+            error::printStack(Perr);
 
             #ifdef _WIN32
             std::exit(1);  // Prefer exit() to avoid unnecessary warnings
@@ -238,15 +238,17 @@ void Foam::IOerror::exitOrAbort(const int, const bool isAbort)
         {
             Perr<< nl << *this << nl
                 << "\nFOAM exiting\n" << endl;
-            std::exit(1);
+            std::exit(errNo);
         }
     }
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 void Foam::IOerror::exit(const int)
 {
-    exitOrAbort(1, hasEnv("FOAM_ABORT"));
+    exitOrAbort(1, false);
 }
 
 

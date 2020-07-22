@@ -79,17 +79,9 @@ Foam::error::error(const string& title)
     functionName_("unknown"),
     sourceFileName_("unknown"),
     sourceFileLineNumber_(0),
-    throwExceptions_(false),
+    throwing_(false),
     messageStreamPtr_(new OStringStream())
-{
-    if (!messageStreamPtr_->good())
-    {
-        Perr<< nl
-            << "error::error(const string&) : cannot open error stream"
-            << endl;
-        exit(1);
-    }
-}
+{}
 
 
 Foam::error::error(const dictionary& errDict)
@@ -99,17 +91,9 @@ Foam::error::error(const dictionary& errDict)
     functionName_(errDict.get<string>("functionName")),
     sourceFileName_(errDict.get<string>("sourceFileName")),
     sourceFileLineNumber_(errDict.get<label>("sourceFileLineNumber")),
-    throwExceptions_(false),
+    throwing_(false),
     messageStreamPtr_(new OStringStream())
-{
-    if (!messageStreamPtr_->good())
-    {
-        Perr<< nl
-            << "error::error(const dictionary&) : cannot open error stream"
-            << endl;
-        exit(1);
-    }
-}
+{}
 
 
 Foam::error::error(const error& err)
@@ -119,7 +103,7 @@ Foam::error::error(const error& err)
     functionName_(err.functionName_),
     sourceFileName_(err.sourceFileName_),
     sourceFileLineNumber_(err.sourceFileLineNumber_),
-    throwExceptions_(err.throwExceptions_),
+    throwing_(err.throwing_),
     messageStreamPtr_(new OStringStream(*err.messageStreamPtr_))
 {}
 
@@ -127,9 +111,7 @@ Foam::error::error(const error& err)
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::error::~error() noexcept
-{
-    delete messageStreamPtr_;
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
@@ -208,27 +190,14 @@ Foam::error::operator Foam::dictionary() const
     return errDict;
 }
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::string Foam::error::message() const
-{
-    return messageStreamPtr_->str();
-}
-
-
-void Foam::error::clear() const
-{
-    return messageStreamPtr_->reset();
-}
-
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::error::exitOrAbort(const int errNo, const bool isAbort)
 {
-    if (!throwExceptions_ && JobInfo::constructed)
+    if (!throwing_ && JobInfo::constructed)
     {
         jobInfo.add("FatalError", operator dictionary());
-        if (isAbort)
+        if (isAbort || hasEnv("FOAM_ABORT"))
         {
             jobInfo.abort();
         }
@@ -238,14 +207,7 @@ void Foam::error::exitOrAbort(const int errNo, const bool isAbort)
         }
     }
 
-    if (hasEnv("FOAM_ABORT"))
-    {
-        Perr<< nl << *this << nl
-            << "\nFOAM aborting (FOAM_ABORT set)\n" << endl;
-        printStack(Perr);
-        std::abort();
-    }
-    else if (throwExceptions_)
+    if (throwing_ && !isAbort)
     {
         // Make a copy of the error to throw
         error errorException(*this);
@@ -255,13 +217,20 @@ void Foam::error::exitOrAbort(const int errNo, const bool isAbort)
 
         throw errorException;
     }
+    else if (hasEnv("FOAM_ABORT"))
+    {
+        Perr<< nl << *this << nl
+            << "\nFOAM aborting (FOAM_ABORT set)\n" << endl;
+        error::printStack(Perr);
+        std::abort();
+    }
     else if (Pstream::parRun())
     {
         if (isAbort)
         {
             Perr<< nl << *this << nl
                 << "\nFOAM parallel run aborting\n" << endl;
-            printStack(Perr);
+            error::printStack(Perr);
             Pstream::abort();
         }
         else
@@ -277,7 +246,7 @@ void Foam::error::exitOrAbort(const int errNo, const bool isAbort)
         {
             Perr<< nl << *this << nl
                 << "\nFOAM aborting\n" << endl;
-            printStack(Perr);
+            error::printStack(Perr);
 
             #ifdef _WIN32
             std::exit(1);  // Prefer exit() to avoid unnecessary warnings
@@ -295,9 +264,23 @@ void Foam::error::exitOrAbort(const int errNo, const bool isAbort)
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::string Foam::error::message() const
+{
+    return messageStreamPtr_->str();
+}
+
+
+void Foam::error::clear() const
+{
+    return messageStreamPtr_->reset();
+}
+
+
 void Foam::error::exit(const int errNo)
 {
-    exitOrAbort(errNo, hasEnv("FOAM_ABORT"));
+    exitOrAbort(errNo, false);
 }
 
 
