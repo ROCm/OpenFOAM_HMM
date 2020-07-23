@@ -142,31 +142,45 @@ int main(int argc, char *argv[])
     const word surfaceFormat = args.getOrDefault<word>("writeSets", "");
     const bool writeSets = surfaceFormat.size();
 
+
+    // All potential writeable fields
+    const wordHashSet allFields
+    ({
+        "nonOrthoAngle",
+        "faceWeight",
+        "skewness",
+        "cellDeterminant",
+        "aspectRatio",
+        "cellShapes",
+        "cellVolume",
+        "cellVolumeRatio",
+        "minTetVolume",
+        "minPyrVolume",
+        "cellRegion",
+        "wallDistance",
+        "cellZone",
+        "faceZone"
+    });
+
     wordHashSet selectedFields;
-    bool writeFields = args.readIfPresent
-    (
-        "writeFields",
-        selectedFields
-    );
-    if (!writeFields && args.found("writeAllFields"))
+    if (args.found("writeFields"))
     {
-        selectedFields.insert
-        ({
-            "nonOrthoAngle",
-            "faceWeight",
-            "skewness",
-            "cellDeterminant",
-            "aspectRatio",
-            "cellShapes",
-            "cellVolume",
-            "cellVolumeRatio",
-            "minTetVolume",
-            "minPyrVolume",
-            "cellRegion",
-            "wallDistance",
-            "cellZone",
-            "faceZone"
-        });
+        selectedFields = args.getList<word>("writeFields");
+        wordHashSet badFields(selectedFields);
+        badFields -= allFields;
+
+        if (!badFields.empty())
+        {
+            FatalErrorInFunction
+                << "Illegal field(s) " << flatOutput(badFields.sortedToc())
+                << nl
+                << "Valid fields are " << flatOutput(allFields.sortedToc())
+                << nl << exit(FatalError);
+        }
+    }
+    else if (args.found("writeAllFields"))
+    {
+        selectedFields = allFields;
     }
 
 
