@@ -898,7 +898,7 @@ int main(int argc, char *argv[])
                 );
             }
         }
-        else if (exprDictPtr.valid())
+        else
         {
             FatalErrorInFunction
                 << "No command-line or dictionary??" << nl << endl
