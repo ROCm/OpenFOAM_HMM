@@ -166,8 +166,7 @@ int main(int argc, char *argv[])
     if (args.found("writeFields"))
     {
         selectedFields = args.getList<word>("writeFields");
-        wordHashSet badFields(selectedFields);
-        badFields -= allFields;
+        const wordHashSet badFields(selectedFields - allFields);
 
         if (!badFields.empty())
         {
@@ -229,7 +228,7 @@ int main(int argc, char *argv[])
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE
                 )
-           )
+            )
         );
     }
 

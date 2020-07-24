@@ -320,17 +320,11 @@ void Foam::faceZoneSet::sync(const polyMesh& mesh)
     {
         const labelHashSet zoneSet(addressing_);
 
-        // Get elements that are in zone but not faceSet
-        labelHashSet badSet(zoneSet);
-        badSet -= *this;
+        // Elements that are in zone but not faceSet, and
+        // elements that are in faceSet but not in zone
+        labelHashSet badSet(*this ^ zoneSet);
 
-        // Add elements that are in faceSet but not in zone
-        labelHashSet fSet(*this);
-        fSet -= zoneSet;
-
-        badSet += fSet;
-
-        label nBad = returnReduce(badSet.size(), sumOp<label>());
+        const label nBad = returnReduce(badSet.size(), sumOp<label>());
 
         if (nBad)
         {
