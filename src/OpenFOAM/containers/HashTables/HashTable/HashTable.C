@@ -405,7 +405,7 @@ bool Foam::HashTable<T, Key, Hash>::erase(const iterator& iter)
 template<class T, class Key, class Hash>
 bool Foam::HashTable<T, Key, Hash>::erase(const Key& key)
 {
-    auto iter = find(key);
+    iterator iter(find(key));
     return erase(iter);
 }
 

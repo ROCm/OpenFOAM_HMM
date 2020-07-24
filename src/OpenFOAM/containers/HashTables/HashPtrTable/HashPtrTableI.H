@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,12 +49,12 @@ template<class T, class Key, class Hash>
 inline bool Foam::HashPtrTable<T, Key, Hash>::insert
 (
     const Key& key,
-    autoPtr<T>& aptr
+    autoPtr<T>&& ptr
 )
 {
-    if (parent_type::insert(key, aptr.get()))
+    if (parent_type::insert(key, ptr.get()))
     {
-        aptr.release(); // Now owned by HashPtrTable
+        ptr.release(); // Now owned by HashPtrTable
         return true;
     }
 
@@ -66,12 +66,12 @@ template<class T, class Key, class Hash>
 inline bool Foam::HashPtrTable<T, Key, Hash>::insert
 (
     const Key& key,
-    autoPtr<T>&& aptr
+    autoPtr<T>&& ptr
 )
 {
-    if (parent_type::insert(key, aptr.get()))
+    if (parent_type::insert(key, ptr.get()))
     {
-        aptr.release(); // Now owned by HashPtrTable
+        ptr.release(); // Now owned by HashPtrTable
         return true;
     }
 
@@ -94,10 +94,10 @@ template<class T, class Key, class Hash>
 inline bool Foam::HashPtrTable<T, Key, Hash>::set
 (
     const Key& key,
-    autoPtr<T>& aptr
+    autoPtr<T>& ptr
 )
 {
-    return this->set(key, aptr.release());
+    return this->set(key, ptr.release());
 }
 
 
@@ -105,10 +105,10 @@ template<class T, class Key, class Hash>
 inline bool Foam::HashPtrTable<T, Key, Hash>::set
 (
     const Key& key,
-    autoPtr<T>&& aptr
+    autoPtr<T>&& ptr
 )
 {
-    return this->set(key, aptr.release());
+    return this->set(key, ptr.release());
 }
 
 

@@ -313,20 +313,19 @@ public:
     // Member Operators
 
         //- Return true if the entry exists, same as found()
+        //  \note this allows use of HashSet as a predicate test
         inline bool operator()(const Key& key) const noexcept;
 
         //- Return true if the entry exists, same as found().
         inline bool operator[](const Key& key) const noexcept;
 
-        using parent_type::operator=;
-
-        //- Copy assignment
+        //- Copy assign
         void operator=(const this_type& rhs)
         {
             parent_type::operator=(rhs);
         }
 
-        //- Move assignment
+        //- Move assign
         void operator=(this_type&& rhs)
         {
             parent_type::operator=(std::move(rhs));
@@ -429,33 +428,43 @@ MinMax<label> minMax(const labelHashSet& set);
 
 //- Write the list of HashSet keys
 template<class Key, class Hash>
-Ostream& operator<<(Ostream& os, const HashSet<Key, Hash>& tbl);
+Ostream& operator<<(Ostream& os, const HashSet<Key, Hash>& rhs);
 
 
-//- Combine entries from HashSets
+//- Combine entries (OR) for two HashSets
+//  See HashSet::operator|= for more details.
 template<class Key, class Hash>
 HashSet<Key, Hash> operator|
 (
-    const HashSet<Key, Hash>& hash1,
-    const HashSet<Key, Hash>& hash2
+    const HashSet<Key, Hash>& a,
+    const HashSet<Key, Hash>& b
 );
 
-
-//- Create a HashSet that only contains entries found in both HashSets
+//- Subset (AND) intersection of two HashSet
+//  See HashSet::operator&= for more details.
 template<class Key, class Hash>
 HashSet<Key, Hash> operator&
 (
-    const HashSet<Key, Hash>& hash1,
-    const HashSet<Key, Hash>& hash2
+    const HashSet<Key, Hash>& a,
+    const HashSet<Key, Hash>& b
 );
 
-
-//- Create a HashSet that only contains unique entries (xor)
+//- Create a HashSet that only contains unique entries (XOR)
+//  See HashSet::operator^= for more details.
 template<class Key, class Hash>
 HashSet<Key, Hash> operator^
 (
-    const HashSet<Key, Hash>& hash1,
-    const HashSet<Key, Hash>& hash2
+    const HashSet<Key, Hash>& a,
+    const HashSet<Key, Hash>& b
+);
+
+//- Subset difference of two HashSets
+//  See HashSet::operator-= for more details.
+template<class Key, class Hash>
+HashSet<Key, Hash> operator-
+(
+    const HashSet<Key, Hash>& a,
+    const HashSet<Key, Hash>& b
 );
 
 

@@ -136,12 +136,13 @@ inline Foam::label Foam::HashSet<Key, Hash>::insert
 )
 {
     label changed = 0;
-    for (; first != last; ++first)
+    while (first != last)
     {
         if (insert(*first))
         {
             ++changed;
         }
+        ++first;
     }
     return changed;
 }
@@ -374,9 +375,9 @@ Foam::HashSet<Key, Hash>::operator-=(const HashSet<Key, Hash>& rhs)
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class Key, class Hash>
-Foam::Ostream& Foam::operator<<(Ostream& os, const HashSet<Key, Hash>& tbl)
+Foam::Ostream& Foam::operator<<(Ostream& os, const HashSet<Key, Hash>& rhs)
 {
-    return tbl.writeKeys(os, Detail::ListPolicy::short_length<Key>::value);
+    return rhs.writeKeys(os, Detail::ListPolicy::short_length<Key>::value);
 }
 
 
@@ -385,39 +386,68 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const HashSet<Key, Hash>& tbl)
 template<class Key, class Hash>
 Foam::HashSet<Key, Hash> Foam::operator|
 (
-    const HashSet<Key, Hash>& hash1,
-    const HashSet<Key, Hash>& hash2
+    const HashSet<Key, Hash>& a,
+    const HashSet<Key, Hash>& b
 )
 {
-    HashSet<Key, Hash> out(hash1);
-    out |= hash2;
-    return out;
+    HashSet<Key, Hash> result(a);
+    result |= b;
+    return result;
 }
 
 
 template<class Key, class Hash>
 Foam::HashSet<Key, Hash> Foam::operator&
 (
-    const HashSet<Key, Hash>& hash1,
-    const HashSet<Key, Hash>& hash2
+    const HashSet<Key, Hash>& a,
+    const HashSet<Key, Hash>& b
 )
 {
-    HashSet<Key, Hash> out(hash1);
-    out &= hash2;
-    return out;
+    HashSet<Key, Hash> result(a.capacity());
+
+    for (const Key& k : a)
+    {
+        if (b.found(k))
+        {
+            result.insert(k);
+        }
+    }
+
+    return result;
 }
 
 
 template<class Key, class Hash>
 Foam::HashSet<Key, Hash> Foam::operator^
 (
-    const HashSet<Key, Hash>& hash1,
-    const HashSet<Key, Hash>& hash2
+    const HashSet<Key, Hash>& a,
+    const HashSet<Key, Hash>& b
 )
 {
-    HashSet<Key, Hash> out(hash1);
-    out ^= hash2;
-    return out;
+    HashSet<Key, Hash> result(a);
+    result ^= b;
+    return result;
+}
+
+
+template<class Key, class Hash>
+Foam::HashSet<Key, Hash> Foam::operator-
+(
+    const HashSet<Key, Hash>& a,
+    const HashSet<Key, Hash>& b
+)
+{
+    HashSet<Key, Hash> result(a.capacity());
+
+    for (const Key& k : a)
+    {
+        if (!b.found(k))
+        {
+            result.insert(k);
+        }
+    }
+
+    return result;
 }
 
 

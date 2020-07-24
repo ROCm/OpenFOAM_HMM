@@ -32,6 +32,7 @@ Description
 
 SourceFiles
     HashPtrTable.C
+    HashPtrTableI.H
     HashPtrTableIO.C
 
 \*---------------------------------------------------------------------------*/
@@ -46,10 +47,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-
-class Istream;
-class Ostream;
+// Forward Declarations
 
 template<class T> class autoPtr;
 template<class T, class Key, class Hash> class HashPtrTable;
@@ -92,7 +90,7 @@ public:
 
     // Constructors
 
-        //- Construct null with default table capacity
+        //- Default construct with default table capacity
         inline HashPtrTable();
 
         //- Construct given initial table capacity
@@ -108,11 +106,11 @@ public:
         //- Construct from dictionary with default dictionary constructor class
         explicit HashPtrTable(const dictionary& dict);
 
-        //- Copy construct
-        HashPtrTable(const this_type& ht);
+        //- Copy construct, making a copy of each element
+        HashPtrTable(const this_type& rhs);
 
         //- Move construct
-        HashPtrTable(this_type&& ht);
+        HashPtrTable(this_type&& rhs);
 
 
     //- Destructor
@@ -172,7 +170,7 @@ public:
         );
 
 
-    // Housekeeping
+    // Override HashTable methods
 
         //- No insert() with raw pointers (potential memory leaks).
         //- Use insert() with autoPtr or set()
@@ -181,21 +179,21 @@ public:
         //- Insert a new entry, not overwriting existing entries.
         //
         //  \return True if the entry inserted (not previously in table)
-        inline bool insert(const Key& key, autoPtr<T>& aptr);
+        inline bool insert(const Key& key, autoPtr<T>& ptr);
 
         //- Insert a new entry, not overwriting existing entries.
         //
         //  \return True if the entry inserted (not previously in table)
-        inline bool insert(const Key& key, autoPtr<T>&& aptr);
+        inline bool insert(const Key& key, autoPtr<T>&& ptr);
 
         //- Assign a new entry, overwriting existing entries.
         inline bool set(const Key& key, T* ptr);
 
         //- Assign a new entry, overwriting existing entries.
-        inline bool set(const Key& key, autoPtr<T>& aptr);
+        inline bool set(const Key& key, autoPtr<T>& ptr);
 
         //- Assign a new entry, overwriting existing entries.
-        inline bool set(const Key& key, autoPtr<T>&& aptr);
+        inline bool set(const Key& key, autoPtr<T>&& ptr);
 };
 
 
