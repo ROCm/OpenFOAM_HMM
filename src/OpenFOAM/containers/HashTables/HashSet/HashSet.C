@@ -65,10 +65,7 @@ Foam::HashSet<Key, Hash>::HashSet(const FixedList<Key, N>& list)
 :
     parent_type(2*list.size())
 {
-    for (const auto& k : list)
-    {
-        this->insert(k);
-    }
+    insert(list.begin(), list.end());
 }
 
 
@@ -77,10 +74,7 @@ Foam::HashSet<Key, Hash>::HashSet(const UList<Key>& list)
 :
     parent_type(2*list.size())
 {
-    for (const auto& k : list)
-    {
-        this->insert(k);
-    }
+    insert(list.begin(), list.end());
 }
 
 
@@ -90,10 +84,7 @@ Foam::HashSet<Key, Hash>::HashSet(const IndirectListBase<Key, Addr>& list)
 :
     parent_type(2*list.size())
 {
-    for (const auto& k : list)
-    {
-        this->insert(k);
-    }
+    insert(list.begin(), list.end());
 }
 
 
@@ -102,10 +93,7 @@ Foam::HashSet<Key, Hash>::HashSet(std::initializer_list<Key> list)
 :
     parent_type(2*list.size())
 {
-    for (const auto& k : list)
-    {
-        this->insert(k);
-    }
+    insert(list.begin(), list.end());
 }
 
 
