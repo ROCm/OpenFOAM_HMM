@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,15 +31,16 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
 void Foam::MULES::limitSum(UPtrList<scalarField>& phiPsiCorrs)
 {
+    const label nPhases = phiPsiCorrs.size();
+
     forAll(phiPsiCorrs[0], facei)
     {
         scalar sumPos = 0;
         scalar sumNeg = 0;
 
-        for (int phasei=0; phasei<phiPsiCorrs.size(); phasei++)
+        for (label phasei = 0; phasei < nPhases; ++phasei)
         {
             if (phiPsiCorrs[phasei][facei] > 0)
             {
@@ -57,7 +58,7 @@ void Foam::MULES::limitSum(UPtrList<scalarField>& phiPsiCorrs)
         {
             scalar lambda = -sumNeg/sumPos;
 
-            for (int phasei=0; phasei<phiPsiCorrs.size(); phasei++)
+            for (label phasei = 0; phasei < nPhases; ++phasei)
             {
                 if (phiPsiCorrs[phasei][facei] > 0)
                 {
@@ -69,7 +70,7 @@ void Foam::MULES::limitSum(UPtrList<scalarField>& phiPsiCorrs)
         {
             scalar lambda = -sumPos/sumNeg;
 
-            for (int phasei=0; phasei<phiPsiCorrs.size(); phasei++)
+            for (label phasei = 0; phasei < nPhases; ++phasei)
             {
                 if (phiPsiCorrs[phasei][facei] < 0)
                 {
@@ -94,25 +95,25 @@ void Foam::MULES::limitSum
     forAll(phiPsiCorrs[0], facei)
     {
         scalar alphaNotFixed = 0, corrNotFixed = 0;
-        forAllConstIter(labelHashSet, notFixed, iter)
+        for (const label phasei : notFixed)
         {
-            alphaNotFixed += alphas[iter.key()][facei];
-            corrNotFixed += phiPsiCorrs[iter.key()][facei];
+            alphaNotFixed += alphas[phasei][facei];
+            corrNotFixed += phiPsiCorrs[phasei][facei];
         }
 
         scalar corrFixed = 0;
-        forAllConstIter(labelHashSet, fixed, iter)
+        for (const label phasei : fixed)
         {
-            corrFixed += phiPsiCorrs[iter.key()][facei];
+            corrFixed += phiPsiCorrs[phasei][facei];
         }
 
         const scalar sumCorr = corrNotFixed + corrFixed;
 
         const scalar lambda = - sumCorr/alphaNotFixed;
 
-        forAllConstIter(labelHashSet, notFixed, iter)
+        for (const label phasei : notFixed)
         {
-            phiPsiCorrs[iter.key()][facei] += lambda*alphas[iter.key()][facei];
+            phiPsiCorrs[phasei][facei] += lambda*alphas[phasei][facei];
         }
     }
 }
