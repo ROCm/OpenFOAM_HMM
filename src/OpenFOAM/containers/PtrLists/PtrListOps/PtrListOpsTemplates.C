@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,7 +79,7 @@ void Foam::sortedOrder
 template<class T>
 void Foam::sort(UPtrList<T>& list)
 {
-    labelList order(input.size());
+    labelList order(list.size());
     sortedOrder(list, order);
     list.sortOrder(order, false);  // false = allow nullptr
 }
@@ -88,7 +88,7 @@ void Foam::sort(UPtrList<T>& list)
 template<class T, class Compare>
 void Foam::sort(UPtrList<T>& list, const Compare& comp)
 {
-    labelList order(input.size());
+    labelList order(list.size());
     sortedOrder(list, order, comp);
     list.sortOrder(order, false);  // false = allow nullptr
 }
