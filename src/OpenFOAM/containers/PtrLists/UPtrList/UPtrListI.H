@@ -108,6 +108,20 @@ inline bool Foam::UPtrList<T>::empty() const noexcept
 
 
 template<class T>
+inline T* Foam::UPtrList<T>::get(const label i)
+{
+    return ptrs_[i];
+}
+
+
+template<class T>
+inline const T* Foam::UPtrList<T>::get(const label i) const
+{
+    return ptrs_[i];
+}
+
+
+template<class T>
 inline void Foam::UPtrList<T>::clear()
 {
     ptrs_.clear();

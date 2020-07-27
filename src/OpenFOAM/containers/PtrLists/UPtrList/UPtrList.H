@@ -157,10 +157,18 @@ public:
         //- Return reference to the last element of the list
         inline const T& last() const;
 
+        //- Return pointer to element (can be nullptr),
+        //  without bounds checking.
+        inline T* get(const label i);
+
         //- Return const pointer to element (can be nullptr),
         //  without bounds checking.
+        inline const T* get(const label i) const;
+
+        //- Return const pointer to element (can be nullptr),
+        //  without bounds checking - same as get().
         //  The return value can also be tested as a bool.
-        const T* set(const label i) const { return ptrs_[i]; }
+        const T* set(const label i) const { return this->get(i); }
 
 
     // Edit
@@ -212,7 +220,7 @@ public:
         //- Return reference to the element
         inline T& operator[](const label i);
 
-        //- Return const pointer to the element.
+        //- Return const pointer to the element - same as get().
         inline const T* operator()(const label i) const;
 
         //- Copy assignment (shallow copies addresses)

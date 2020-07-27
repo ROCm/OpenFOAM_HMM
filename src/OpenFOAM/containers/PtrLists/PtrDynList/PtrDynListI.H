@@ -100,7 +100,7 @@ inline Foam::label Foam::PtrDynList<T, SizeMin>::capacity() const noexcept
 
 
 template<class T, int SizeMin>
-inline const T* Foam::PtrDynList<T, SizeMin>::set(const label i) const
+inline const T* Foam::PtrDynList<T, SizeMin>::get(const label i) const
 {
     return (i >= 0 && i < PtrList<T>::size()) ? PtrList<T>::get(i) : nullptr;
 }

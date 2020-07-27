@@ -46,6 +46,18 @@ inline Foam::HashPtrTable<T, Key, Hash>::HashPtrTable(const label size)
 // * * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
+inline const T* Foam::HashPtrTable<T, Key, Hash>::get(const Key& key) const
+{
+    const const_iterator iter(this->cfind(key));
+    if (iter.good())
+    {
+        return iter.val();
+    }
+    return nullptr;
+}
+
+
+template<class T, class Key, class Hash>
 template<class... Args>
 inline bool Foam::HashPtrTable<T, Key, Hash>::emplace
 (

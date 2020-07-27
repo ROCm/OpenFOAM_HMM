@@ -134,9 +134,9 @@ public:
     // Access
 
         //- Return const pointer to element (can be nullptr),
-        //  without bounds checking.
+        //  without bounds checking - same as get().
         //  The return value can also be tested as a bool.
-        const T* set(const label i) const { return UPtrList<T>::set(i); }
+        const T* set(const label i) const { return this->get(i); }
 
 
     // Edit

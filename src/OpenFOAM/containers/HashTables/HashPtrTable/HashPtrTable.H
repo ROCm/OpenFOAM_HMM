@@ -120,6 +120,13 @@ public:
 
     // Member Functions
 
+    // Access
+
+        //- Return const pointer associated with given entry,
+        //- returning a nullptr if the key does not exist in the table.
+        inline const T* get(const Key& key) const;
+
+
     // Edit
 
         //- Remove entry specified by given iterator.

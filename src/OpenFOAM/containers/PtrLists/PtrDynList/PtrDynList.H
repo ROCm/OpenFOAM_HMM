@@ -108,10 +108,14 @@ public:
         //- Size of the underlying storage.
         inline label capacity() const noexcept;
 
+        //- Return const pointer to element (can be nullptr),
+        //  with bounds checking.
+        inline const T* get(const label i) const;
+
         //- Return const pointer to element (if set) or nullptr,
         //  with bounds checking.
         //  The return value can be tested as a bool.
-        inline const T* set(const label i) const;
+        const T* set(const label i) const { return this->get(i); }
 
 
     // Edit

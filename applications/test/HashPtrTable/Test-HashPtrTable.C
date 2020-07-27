@@ -198,6 +198,24 @@ int main()
 
         Info<< "Table: " << tbl << nl;
 
+        Info<< nl << "Check exists, non-null" << nl;
+
+        for (const word& k : { "abc", "foo", "pi" })
+        {
+            Info<< "    " << k << ' ';
+
+            const auto* inspect = tbl.get(k);
+
+            if (inspect)
+            {
+                Info<< *inspect << nl;
+            }
+            else
+            {
+                Info<< "(null)" << nl;
+            }
+        }
+
         Info<< nl << "... overwrite again" << nl;
 
         tbl.set("abc", new Scalar(42.1));
