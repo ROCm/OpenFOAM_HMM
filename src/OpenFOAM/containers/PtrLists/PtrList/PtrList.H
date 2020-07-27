@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,6 +48,8 @@ SourceFiles
 
 #include "UPtrList.H"
 #include "SLPtrListFwd.H"
+#include <memory>
+#include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,13 +57,11 @@ namespace Foam
 {
 
 // Forward Declarations
-
 template<class T> class autoPtr;
+template<class T> class refPtr;
 template<class T> class tmp;
 template<class T> class PtrList;
-
 template<class T> Istream& operator>>(Istream& is, PtrList<T>& list);
-
 
 /*---------------------------------------------------------------------------*\
                            Class PtrList Declaration
@@ -87,7 +87,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         inline constexpr PtrList() noexcept;
 
         //- Construct with specified size, each element initialized to nullptr
@@ -130,6 +130,17 @@ public:
         template<class... Args>
         PtrList<T> clone(Args&&... args) const;
 
+
+    // Access
+
+        //- Return const pointer to element (can be nullptr),
+        //  without bounds checking.
+        //  The return value can also be tested as a bool.
+        const T* set(const label i) const { return UPtrList<T>::set(i); }
+
+
+    // Edit
+
         //- Clear the PtrList. Delete allocated entries and set size to zero.
         inline void clear();
 
@@ -140,41 +151,57 @@ public:
         //- Same as resize()
         inline void setSize(const label newLen);
 
+        //- Construct and append an element to the end of the list
+        template<class... Args>
+        inline void emplace_append(Args&&... args);
+
         //- Append an element to the end of the list
         inline void append(T* ptr);
 
         //- Move append an element to the end of the list
-        inline void append(autoPtr<T>& aptr);
+        inline void append(autoPtr<T>& ptr);
 
         //- Move append an element to the end of the list
-        inline void append(autoPtr<T>&& aptr);
+        inline void append(autoPtr<T>&& ptr);
+
+        //- Move append an element to the end of the list
+        inline void append(std::unique_ptr<T>&& ptr);
+
+        //- Move or clone append a refPtr to the end of the list
+        inline void append(const refPtr<T>& ptr);
 
         //- Move or clone append a tmp to the end of the list
-        inline void append(const tmp<T>& tptr);
+        inline void append(const tmp<T>& ptr);
 
-        //- Transfer into this list and annul the argument list
-        inline void transfer(PtrList<T>& list);
-
-        //- Return const pointer to element (if set) or nullptr.
-        //  The return value can be tested as a bool.
-        inline const T* set(const label i) const;
+        //- Construct and set an element
+        template<class... Args>
+        inline autoPtr<T> emplace(const label i, Args&&... args);
 
         //- Set element to given pointer and return old element (can be null)
         //  No-op if the new pointer value is identical to the current content.
         inline autoPtr<T> set(const label i, T* ptr);
 
         //- Set element to given autoPtr and return old element
-        inline autoPtr<T> set(const label i, autoPtr<T>& aptr);
+        inline autoPtr<T> set(const label i, autoPtr<T>& ptr);
 
         //- Set element to given autoPtr and return old element
-        inline autoPtr<T> set(const label i, autoPtr<T>&& aptr);
+        inline autoPtr<T> set(const label i, autoPtr<T>&& ptr);
+
+        //- Set element to given unique_ptr and return old element
+        inline autoPtr<T> set(const label i, std::unique_ptr<T>&& ptr);
+
+        //- Set element to given refPtr and return old element
+        inline autoPtr<T> set(const label i, const refPtr<T>& ptr);
 
         //- Set element to given tmp and return old element
-        inline autoPtr<T> set(const label i, const tmp<T>& tptr);
+        inline autoPtr<T> set(const label i, const tmp<T>& ptr);
 
         //- Release ownership of the pointer at the given position.
         //  Out of bounds addressing is a no-op and returns nullptr.
         inline autoPtr<T> release(const label i);
+
+        //- Transfer into this list and annul the argument list
+        inline void transfer(PtrList<T>& list);
 
 
     // Member Operators
@@ -192,7 +219,6 @@ public:
 
         //- Read from Istream, discarding contents of existing list
         friend Istream& operator>> <T>(Istream& is, PtrList<T>& list);
-
 };
 
 

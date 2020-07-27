@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,6 +43,8 @@ SourceFiles
 
 #include "PtrList.H"
 #include <type_traits>
+#include <memory>
+#include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,7 +52,6 @@ namespace Foam
 {
 
 // Forward Declarations
-
 template<class T, int SizeMin> class PtrDynList;
 
 /*---------------------------------------------------------------------------*\
@@ -107,6 +108,11 @@ public:
         //- Size of the underlying storage.
         inline label capacity() const noexcept;
 
+        //- Return const pointer to element (if set) or nullptr,
+        //  with bounds checking.
+        //  The return value can be tested as a bool.
+        inline const T* set(const label i) const;
+
 
     // Edit
 
@@ -145,14 +151,27 @@ public:
         //  \return the number of non-null entries
         inline label squeezeNull();
 
+        //- Construct and append an element to the end of the list
+        template<class... Args>
+        inline void emplace_append(Args&&... args);
+
         //- Append an element to the end of the list
         inline void append(T* ptr);
 
         //- Move append an element to the end of the list
-        inline void append(const autoPtr<T>& aptr);
+        inline void append(autoPtr<T>& ptr);
+
+        //- Move append an element to the end of the list
+        inline void append(autoPtr<T>&& ptr);
+
+        //- Move append an element to the end of the list
+        inline void append(std::unique_ptr<T>&& ptr);
 
         //- Move or clone append a tmp to the end of the list
-        inline void append(const tmp<T>& tptr);
+        inline void append(const refPtr<T>& ptr);
+
+        //- Move or clone append a tmp to the end of the list
+        inline void append(const tmp<T>& ptr);
 
         //- Move append another list to the end of this list.
         inline void append(PtrList<T>&& other);
@@ -164,18 +183,27 @@ public:
         //- Remove and return the top element
         inline autoPtr<T> remove();
 
-        //- Return const pointer to element (if set) or nullptr.
-        //  The return value can be tested as a bool.
-        inline const T* set(const label i) const;
+        //- Construct and set an element
+        template<class... Args>
+        inline autoPtr<T> emplace(const label i, Args&&... args);
 
         //- Set element to given pointer and return old element (can be null)
         inline autoPtr<T> set(const label i, T* ptr);
 
         //- Set element to given autoPtr and return old element
-        inline autoPtr<T> set(const label i, const autoPtr<T>& aptr);
+        inline autoPtr<T> set(const label i, autoPtr<T>& ptr);
+
+        //- Set element to given autoPtr and return old element
+        inline autoPtr<T> set(const label i, autoPtr<T>&& ptr);
+
+        //- Set element to given pointer and return old element
+        inline autoPtr<T> set(const label i, std::unique_ptr<T>&& ptr);
+
+        //- Set element to given refPtr and return old element
+        inline autoPtr<T> set(const label i, const refPtr<T>& ptr);
 
         //- Set element to given tmp and return old element
-        inline autoPtr<T> set(const label i, const tmp<T>& tptr);
+        inline autoPtr<T> set(const label i, const tmp<T>& ptr);
 
         //- Reorder elements. Reordering must be unique (ie, shuffle).
         inline void reorder(const labelUList& oldToNew);

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,12 +59,9 @@ namespace Foam
 {
 
 // Forward Declarations
-
 template<class T> class PtrList;
 template<class T> class UPtrList;
-
 template<class T> Ostream& operator<<(Ostream& os, const UPtrList<T>& list);
-
 
 /*---------------------------------------------------------------------------*\
                           Class UPtrList Declaration
@@ -109,7 +106,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         inline constexpr UPtrList() noexcept;
 
         //- Construct with specified size, each element initialized to nullptr
@@ -126,8 +123,11 @@ public:
 
         //- Shallow copy from PtrList.
         //  The argument is non-const to reflect that the UPtrList can change
-        //  the values (but not the addresses) of the original list.
+        //  the values (not the addresses) within the original list.
         explicit UPtrList(PtrList<T>& list);
+
+        //- Construct from UList of pointers
+        inline explicit UPtrList(const UList<T*>& list);
 
         //- Construct from UList, taking the address of each list element
         //  The argument is non-const to reflect that the UPtrList can change
@@ -157,6 +157,11 @@ public:
         //- Return reference to the last element of the list
         inline const T& last() const;
 
+        //- Return const pointer to element (can be nullptr),
+        //  without bounds checking.
+        //  The return value can also be tested as a bool.
+        const T* set(const label i) const { return ptrs_[i]; }
+
 
     // Edit
 
@@ -183,10 +188,6 @@ public:
         //- Transfer contents into this list and annul the argument
         inline void transfer(UPtrList<T>& list);
 
-        //- Return const pointer to element (if set) or nullptr.
-        //  The return value can be tested as a bool.
-        inline const T* set(const label i) const;
-
         //- Set element to specified pointer and return the old list element,
         //- which can be a nullptr.
         //  No-op if the new pointer value is identical to the current content.
@@ -211,7 +212,7 @@ public:
         //- Return reference to the element
         inline T& operator[](const label i);
 
-        //- Return const pointer to the element
+        //- Return const pointer to the element.
         inline const T* operator()(const label i) const;
 
         //- Copy assignment (shallow copies addresses)

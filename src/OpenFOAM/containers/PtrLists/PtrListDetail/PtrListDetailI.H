@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,6 +38,16 @@ template<class T>
 inline Foam::Detail::PtrListDetail<T>::PtrListDetail(const label len)
 :
     List<T*>(len, reinterpret_cast<T*>(0))
+{}
+
+
+template<class T>
+inline Foam::Detail::PtrListDetail<T>::PtrListDetail
+(
+    const UList<T*>& list
+)
+:
+    List<T*>(list)
 {}
 
 

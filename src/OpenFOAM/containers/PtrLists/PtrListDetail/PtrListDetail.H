@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,9 +31,13 @@ Description
     This class is considered implementation detail and should not normally
     be used other than by OpenFOAM container classes.
 
+    It stores a list of pointers, but makes leaves memory management
+    to the caller or sub-class.
+    The free() method can be used explicitly as required.
+
 SourceFiles
-    PtrListDetailI.H
     PtrListDetail.C
+    PtrListDetailI.H
     PtrListDetailIO.C
 
 \*---------------------------------------------------------------------------*/
@@ -47,10 +51,6 @@ SourceFiles
 
 namespace Foam
 {
-
-// Forward declarations
-class Ostream;
-
 namespace Detail
 {
 
@@ -67,11 +67,15 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         inline constexpr PtrListDetail() noexcept;
 
         //- Construct with specified size, each element initialized to nullptr
-        inline PtrListDetail(const label len);
+        inline explicit PtrListDetail(const label len);
+
+        //- Copy a list of pointers.
+        //  The caller is responsible for memory management.
+        inline explicit PtrListDetail(const UList<T*>& list);
 
         //- Copy construct (shallow copies addresses)
         inline PtrListDetail(const PtrListDetail<T>& list);
@@ -125,7 +129,6 @@ public:
         void setSize(const label) = delete;
         void setSize(const label, const T&) = delete;
         void setSize(const label, const T*) = delete;
-
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,6 +67,13 @@ template<class T>
 inline Foam::UPtrList<T>::UPtrList(UPtrList<T>& list, bool reuse)
 :
     ptrs_(list.ptrs_, reuse)
+{}
+
+
+template<class T>
+inline Foam::UPtrList<T>::UPtrList(const UList<T*>& list)
+:
+    ptrs_(list)
 {}
 
 
@@ -169,13 +176,6 @@ inline void Foam::UPtrList<T>::append(T* ptr)
     const label idx = this->size();
     ptrs_.resize(idx + 1);
     ptrs_[idx] = ptr;
-}
-
-
-template<class T>
-inline const T* Foam::UPtrList<T>::set(const label i) const
-{
-    return ptrs_[i];
 }
 
 

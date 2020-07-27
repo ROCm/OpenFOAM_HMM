@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -278,7 +278,7 @@ int main(int argc, char *argv[])
         llist1.insert(new Scalar(200));
         llist1.insert(new Scalar(300));
 
-        DLPtrList<Scalar>::const_iterator citer = llist1.begin();
+        auto citer = llist1.begin();
 
         Info<< *citer << endl;
         Info<< typeid(*citer).name() << endl;
@@ -324,15 +324,18 @@ int main(int argc, char *argv[])
         list1.set(i, new Scalar(1.3*i));
     }
 
+    Info<<"Emplace set " << list2.size() << " values" << nl;
     forAll(list2, i)
     {
-        list2.set(i, new Scalar(10 + 1.3*i));
+        list2.emplace(i, (10 + 1.3*i));
     }
 
     for (label i = 0; i < 5; ++i)
     {
         listApp.append(new Scalar(1.3*i));
     }
+    listApp.emplace_append(100);
+
 
     Info<< nl
         <<"list1: " << list1 << nl
@@ -529,8 +532,8 @@ int main(int argc, char *argv[])
     }
 
     PtrList<plane> planes;
-    planes.append(new plane(vector::one, vector::one));
-    planes.append(new plane(vector(1,2,3), vector::one));
+    planes.emplace_append(vector::one, vector::one);
+    planes.emplace_append(vector(1,2,3), vector::one);
 
     Info<< nl << "appended values" << nl;
     for (const plane& p : planes)
@@ -543,15 +546,18 @@ int main(int argc, char *argv[])
     PtrDynList<plane> dynPlanes;
 
     {
-        dynPlanes.append(new plane(vector::one, vector::one));
-        dynPlanes.append(new plane(vector(1,2,3), vector::one));
+        dynPlanes.emplace_append(vector::one, vector::one);
+        dynPlanes.emplace_append(vector(1,2,3), vector::one);
         dynPlanes.append(nullptr);
 
         dynPlanes.set(6, new plane(vector(2,2,1), vector::one));
         dynPlanes.set(10, new plane(vector(4,5,6), vector::one));
+
+        dynPlanes.emplace(12, vector(3,2,1), vector::one);
+        dynPlanes.emplace_append(Zero, vector::one);
     }
 
-    Info<< nl << "PtrList: ";
+    Info<< nl << "PtrDynList: ";
     report(Info, dynPlanes, true);
 
     dynPlanes.resize(9);

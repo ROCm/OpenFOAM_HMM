@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "autoPtr.H"
+#include "refPtr.H"
 #include "tmp.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -71,14 +72,10 @@ inline Foam::PtrList<T>::PtrList(PtrList<T>&& list)
 template<class T>
 inline Foam::PtrList<T>::PtrList(UList<T*>& list)
 :
-    UPtrList<T>(list.size())
+    UPtrList<T>(list)
 {
-    // Take ownership of the pointer
-    forAll(list, i)
-    {
-        set(i, list[i]);
-        list[i] = nullptr;
-    }
+    // Took ownership of the pointers
+    list = reinterpret_cast<T*>(0);
 }
 
 
@@ -112,6 +109,14 @@ inline void Foam::PtrList<T>::setSize(const label newLen)
 
 
 template<class T>
+template<class... Args>
+inline void Foam::PtrList<T>::emplace_append(Args&&... args)
+{
+    UPtrList<T>::append(new T(std::forward<Args>(args)...));
+}
+
+
+template<class T>
 inline void Foam::PtrList<T>::append(T* ptr)
 {
     UPtrList<T>::append(ptr);
@@ -119,58 +124,115 @@ inline void Foam::PtrList<T>::append(T* ptr)
 
 
 template<class T>
-inline void Foam::PtrList<T>::append(autoPtr<T>& aptr)
+inline void Foam::PtrList<T>::append(autoPtr<T>& ptr)
 {
-    UPtrList<T>::append(aptr.release());
+    UPtrList<T>::append(ptr.release());
 }
 
 
 template<class T>
-inline void Foam::PtrList<T>::append(autoPtr<T>&& aptr)
+inline void Foam::PtrList<T>::append(autoPtr<T>&& ptr)
 {
-    UPtrList<T>::append(aptr.release());
+    UPtrList<T>::append(ptr.release());
 }
 
 
 template<class T>
-inline void Foam::PtrList<T>::append(const tmp<T>& tptr)
+inline void Foam::PtrList<T>::append(std::unique_ptr<T>&& ptr)
 {
-    UPtrList<T>::append(tptr.ptr());
+    UPtrList<T>::append(ptr.release());
 }
 
 
 template<class T>
-inline const T* Foam::PtrList<T>::set(const label i) const
+inline void Foam::PtrList<T>::append(const refPtr<T>& ptr)
 {
-    return UPtrList<T>::set(i);
+    UPtrList<T>::append(ptr.ptr());
+}
+
+
+template<class T>
+inline void Foam::PtrList<T>::append(const tmp<T>& ptr)
+{
+    UPtrList<T>::append(ptr.ptr());
+}
+
+
+template<class T>
+template<class... Args>
+inline Foam::autoPtr<T> Foam::PtrList<T>::emplace
+(
+    const label i,
+    Args&&... args
+)
+{
+    return set(i, new T(std::forward<Args>(args)...));
 }
 
 
 template<class T>
 inline Foam::autoPtr<T> Foam::PtrList<T>::set(const label i, T* ptr)
 {
+    // UPtrList::set returns a nullptr if trying to set with the same
+    // pointer (again). This prevents the autoPtr from managing the
+    // memory (avoids possible double deletion).
+
     return autoPtr<T>(UPtrList<T>::set(i, ptr));
 }
 
 
 template<class T>
-inline Foam::autoPtr<T> Foam::PtrList<T>::set(const label i, autoPtr<T>& aptr)
+inline Foam::autoPtr<T> Foam::PtrList<T>::set
+(
+    const label i,
+    autoPtr<T>& ptr
+)
 {
-    return set(i, aptr.release());
+    return set(i, ptr.release());
 }
 
 
 template<class T>
-inline Foam::autoPtr<T> Foam::PtrList<T>::set(const label i, autoPtr<T>&& aptr)
+inline Foam::autoPtr<T> Foam::PtrList<T>::set
+(
+    const label i,
+    autoPtr<T>&& ptr
+)
 {
-    return set(i, aptr.release());
+    return set(i, ptr.release());
 }
 
 
 template<class T>
-inline Foam::autoPtr<T> Foam::PtrList<T>::set(const label i, const tmp<T>& tptr)
+inline Foam::autoPtr<T> Foam::PtrList<T>::set
+(
+    const label i,
+    std::unique_ptr<T>&& ptr
+)
 {
-    return set(i, tptr.ptr());
+    return set(i, ptr.release());
+}
+
+
+template<class T>
+inline Foam::autoPtr<T> Foam::PtrList<T>::set
+(
+    const label i,
+    const refPtr<T>& ptr
+)
+{
+    return set(i, ptr.ptr());
+}
+
+
+template<class T>
+inline Foam::autoPtr<T> Foam::PtrList<T>::set
+(
+    const label i,
+    const tmp<T>& ptr
+)
+{
+    return set(i, ptr.ptr());
 }
 
 
