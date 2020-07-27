@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +38,7 @@ License
 #include "perfectFluid.H"
 #include "PengRobinsonGas.H"
 #include "adiabaticPerfectFluid.H"
+#include "icoTabulated.H"
 
 #include "hConstThermo.H"
 #include "eConstThermo.H"
@@ -61,7 +63,7 @@ License
 namespace Foam
 {
 
-/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * Private Static Data * * * * * * * * * * * * * */
 
 makeThermos
 (
@@ -143,6 +145,18 @@ makeThermos
     constTransport,
     sensibleEnthalpy,
     hConstThermo,
+    icoTabulated,
+    specie
+);
+
+makeThermos
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    constTransport,
+    sensibleEnthalpy,
+    hConstThermo,
     adiabaticPerfectFluid,
     specie
 );
@@ -202,8 +216,32 @@ makeThermos
     pureMixture,
     sutherlandTransport,
     sensibleEnthalpy,
+    hConstThermo,
+    icoTabulated,
+    specie
+);
+
+makeThermos
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    sutherlandTransport,
+    sensibleEnthalpy,
     janafThermo,
     incompressiblePerfectGas,
+    specie
+);
+
+makeThermos
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    sutherlandTransport,
+    sensibleEnthalpy,
+    janafThermo,
+    icoTabulated,
     specie
 );
 
@@ -264,6 +302,18 @@ makeThermos
     sensibleEnthalpy,
     hPolynomialThermo,
     PengRobinsonGas,
+    specie
+);
+
+makeThermos
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    polynomialTransport,
+    sensibleEnthalpy,
+    hPolynomialThermo,
+    icoTabulated,
     specie
 );
 
@@ -298,6 +348,18 @@ makeThermos
     rhoThermo,
     heRhoThermo,
     pureMixture,
+    constTransport,
+    sensibleInternalEnergy,
+    hConstThermo,
+    icoTabulated,
+    specie
+);
+
+makeThermos
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
     sutherlandTransport,
     sensibleInternalEnergy,
     hConstThermo,
@@ -312,8 +374,32 @@ makeThermos
     pureMixture,
     sutherlandTransport,
     sensibleInternalEnergy,
+    hConstThermo,
+    icoTabulated,
+    specie
+);
+
+makeThermos
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    sutherlandTransport,
+    sensibleInternalEnergy,
     janafThermo,
     perfectGas,
+    specie
+);
+
+makeThermos
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    sutherlandTransport,
+    sensibleInternalEnergy,
+    janafThermo,
+    icoTabulated,
     specie
 );
 
@@ -424,6 +510,18 @@ makeThermos
     sensibleInternalEnergy,
     hPolynomialThermo,
     icoPolynomial,
+    specie
+);
+
+makeThermos
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    polynomialTransport,
+    sensibleInternalEnergy,
+    hPolynomialThermo,
+    icoTabulated,
     specie
 );
 

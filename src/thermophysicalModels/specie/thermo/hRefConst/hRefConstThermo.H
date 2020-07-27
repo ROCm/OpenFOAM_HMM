@@ -89,7 +89,7 @@ class hRefConstThermo
 :
     public EquationOfState
 {
-    // Private data
+    // Private Data
 
         scalar Cp_;
         scalar Hf_;
@@ -135,7 +135,7 @@ public:
             return "hRefConst<" + EquationOfState::typeName() + '>';
         }
 
-        //- Limit the temperature to be in the range Tlow_ to Thigh_
+        //- Limit temperature to be within the range
         inline scalar limit(const scalar T) const;
 
 

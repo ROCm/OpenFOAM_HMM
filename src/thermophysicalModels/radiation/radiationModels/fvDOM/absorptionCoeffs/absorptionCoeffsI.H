@@ -27,39 +27,39 @@ License
 
 inline bool Foam::radiation::absorptionCoeffs::invTemp() const
 {
-    return  invTemp_;
+    return invTemp_;
 }
 
 
 inline Foam::scalar Foam::radiation::absorptionCoeffs::Tcommon() const
 {
-    return  Tcommon_;
+    return Tcommon_;
 }
 
 
 inline Foam::scalar Foam::radiation::absorptionCoeffs::Tlow() const
 {
-    return  Tlow_;
+    return Tlow_;
 }
 
 
 inline Foam::scalar Foam::radiation::absorptionCoeffs::Thigh() const
 {
-    return  Thigh_;
+    return Thigh_;
 }
 
 
 inline const Foam::radiation::absorptionCoeffs::coeffArray&
 Foam::radiation::absorptionCoeffs::highACoeffs() const
 {
-    return  highACoeffs_;
+    return highACoeffs_;
 }
 
 
 inline const Foam::radiation::absorptionCoeffs::coeffArray&
 Foam::radiation::absorptionCoeffs::lowACoeffs() const
 {
-    return  lowACoeffs_;
+    return lowACoeffs_;
 }
 
 

@@ -18,15 +18,14 @@ simulationType laminar;
 
 laminar
 {
-    laminarModel        LAMINAR_MODEL;
+    model       LAMINAR_MODEL;
+    printCoeffs on;
 
     MaxwellCoeffs
     {
-        nuM             1;
-        lambda          5;
+        nuM         1;
+        lambda      5;
     }
-
-    printCoeffs         on;
 }
 
 // ************************************************************************* //

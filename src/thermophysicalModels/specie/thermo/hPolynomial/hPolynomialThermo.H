@@ -191,7 +191,7 @@ public:
             return "hPolynomial<" + EquationOfState::typeName() + '>';
         }
 
-        //- Limit the temperature to be in the range Tlow_ to Thigh_
+        //- Limit temperature to be within the range
         inline scalar limit(const scalar) const;
 
 

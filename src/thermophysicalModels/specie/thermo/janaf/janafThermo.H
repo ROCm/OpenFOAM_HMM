@@ -50,7 +50,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 
 template<class EquationOfState> class janafThermo;
 
@@ -92,18 +92,17 @@ class janafThermo
 :
     public EquationOfState
 {
-
 public:
 
-    // Public data
+    // Public Data
 
-        static const int nCoeffs_ = 7;
+        static constexpr int nCoeffs_ = 7;
         typedef FixedList<scalar, nCoeffs_> coeffArray;
 
 
 private:
 
-    // Private data
+    // Private Data
 
         // Temperature limits of applicability of functions
         scalar Tlow_, Thigh_, Tcommon_;
