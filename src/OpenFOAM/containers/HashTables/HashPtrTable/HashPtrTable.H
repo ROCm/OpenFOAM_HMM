@@ -28,7 +28,8 @@ Class
     Foam::HashPtrTable
 
 Description
-    A HashTable of pointers to objects of type \<T\>.
+    A HashTable of pointers to objects of type \<T\>,
+    with deallocation management of the pointers.
 
 SourceFiles
     HashPtrTable.C

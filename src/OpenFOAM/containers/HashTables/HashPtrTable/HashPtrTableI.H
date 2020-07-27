@@ -144,7 +144,16 @@ inline bool Foam::HashPtrTable<T, Key, Hash>::set
     T* ptr
 )
 {
-    return this->parent_type::set(key, ptr);
+    const T* old = this->get(key);
+
+    const bool ok = this->parent_type::set(key, ptr);
+
+    if (ok && old != ptr)
+    {
+        delete const_cast<T*>(old);
+    }
+
+    return ok;
 }
 
 
