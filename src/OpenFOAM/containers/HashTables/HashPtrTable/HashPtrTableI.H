@@ -46,6 +46,52 @@ inline Foam::HashPtrTable<T, Key, Hash>::HashPtrTable(const label size)
 // * * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
+template<class... Args>
+inline bool Foam::HashPtrTable<T, Key, Hash>::emplace
+(
+    const Key& key,
+    Args&&... args
+)
+{
+    // Use insertion semantics
+    return
+    (
+        !parent_type::found(key)
+     && this->parent_type::set(key, new T(std::forward<Args>(args)...))
+    );
+}
+
+
+template<class T, class Key, class Hash>
+template<class... Args>
+inline bool Foam::HashPtrTable<T, Key, Hash>::emplace_set
+(
+    const Key& key,
+    Args&&... args
+)
+{
+    return this->set(key, new T(std::forward<Args>(args)...));
+}
+
+
+template<class T, class Key, class Hash>
+inline bool Foam::HashPtrTable<T, Key, Hash>::insert
+(
+    const Key& key,
+    autoPtr<T>& ptr
+)
+{
+    if (parent_type::insert(key, ptr.get()))
+    {
+        ptr.release(); // Now owned by HashPtrTable
+        return true;
+    }
+
+    return false;
+}
+
+
+template<class T, class Key, class Hash>
 inline bool Foam::HashPtrTable<T, Key, Hash>::insert
 (
     const Key& key,
@@ -66,7 +112,7 @@ template<class T, class Key, class Hash>
 inline bool Foam::HashPtrTable<T, Key, Hash>::insert
 (
     const Key& key,
-    autoPtr<T>&& ptr
+    std::unique_ptr<T>&& ptr
 )
 {
     if (parent_type::insert(key, ptr.get()))
@@ -106,6 +152,17 @@ inline bool Foam::HashPtrTable<T, Key, Hash>::set
 (
     const Key& key,
     autoPtr<T>&& ptr
+)
+{
+    return this->set(key, ptr.release());
+}
+
+
+template<class T, class Key, class Hash>
+inline bool Foam::HashPtrTable<T, Key, Hash>::set
+(
+    const Key& key,
+    std::unique_ptr<T>&& ptr
 )
 {
     return this->set(key, ptr.release());

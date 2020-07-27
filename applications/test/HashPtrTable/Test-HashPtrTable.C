@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,45 @@ Description
 #include "HashPtrTable.H"
 
 using namespace Foam;
+
+class Scalar
+{
+    scalar data_;
+
+public:
+
+    Scalar()
+    :
+        data_(0)
+    {}
+
+    Scalar(scalar val)
+    :
+        data_(val)
+    {}
+
+    ~Scalar()
+    {
+        Info<<"delete Scalar: " << data_ << endl;
+    }
+
+    const scalar& value() const
+    {
+        return data_;
+    }
+
+    scalar& value()
+    {
+        return data_;
+    }
+
+    friend Ostream& operator<<(Ostream& os, const Scalar& val)
+    {
+        os  << val.data_;
+        return os;
+    }
+};
+
 
 template<class T>
 void printTable(const HashPtrTable<T>& table)
@@ -146,6 +185,38 @@ int main()
 
     Info<<"old" << nl;
     printTable(moved);
+
+
+    Info<< "Verifying deletion characteristics" << nl;
+    {
+        HashPtrTable<Scalar> tbl;
+        tbl.set("abc", new Scalar(42.1));
+        tbl.set("def", nullptr);
+        tbl.set("pi", new Scalar(3.14159));
+        tbl.set("natlog", new Scalar(2.718282));
+        tbl.insert("sqrt2", autoPtr<Scalar>::New(1.414214));
+
+        Info<< "Table: " << tbl << nl;
+
+        Info<< nl << "... overwrite again" << nl;
+
+        tbl.set("abc", new Scalar(42.1));
+        tbl.set("def", nullptr);
+        tbl.set("pi", new Scalar(3.14159));
+        tbl.set("natlog", new Scalar(2.718282));
+
+        tbl.emplace("other", 15.6);
+
+        Info<< "Table: " << tbl << nl;
+
+        Info << nl << "Test emplace and emplace_set" << nl;
+
+        tbl.emplace("abc", 100);
+        tbl.emplace_set("def", 100);
+        tbl.emplace_set("other", 100);
+
+        Info<< "Table: " << tbl << nl;
+    }
 
     return 0;
 }

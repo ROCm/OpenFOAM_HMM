@@ -364,6 +364,11 @@ public:
         template<class... Args>
         inline bool emplace(const Key& key, Args&&... args);
 
+        //- Emplace set an entry, overwriting any existing entries.
+        //  \return True, since it always overwrites any entries.
+        template<class... Args>
+        inline bool emplace_set(const Key& key, Args&&... args);
+
         //- Copy insert a new entry, not overwriting existing entries.
         //  \return True if the entry did not previously exist in the table.
         inline bool insert(const Key& key, const T& obj);

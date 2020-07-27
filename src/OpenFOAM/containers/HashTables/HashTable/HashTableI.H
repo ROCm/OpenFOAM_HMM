@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -160,6 +160,18 @@ inline bool Foam::HashTable<T, Key, Hash>::emplace
 )
 {
     return this->setEntry(false, key, std::forward<Args>(args)...);
+}
+
+
+template<class T, class Key, class Hash>
+template<class... Args>
+inline bool Foam::HashTable<T, Key, Hash>::emplace_set
+(
+    const Key& key,
+    Args&&... args
+)
+{
+    return this->setEntry(true, key, std::forward<Args>(args)...);
 }
 
 

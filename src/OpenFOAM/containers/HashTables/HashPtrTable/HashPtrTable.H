@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,6 +41,7 @@ SourceFiles
 #define HashPtrTable_H
 
 #include "HashTable.H"
+#include <memory>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -172,6 +173,16 @@ public:
 
     // Override HashTable methods
 
+        //- Emplace insert a new entry, not overwriting existing entries.
+        //  \return True if the entry did not previously exist in the table.
+        template<class... Args>
+        inline bool emplace(const Key& key, Args&&... args);
+
+        //- Emplace set an entry, overwriting any existing entries.
+        //  \return True, since it always overwrites any entries.
+        template<class... Args>
+        inline bool emplace_set(const Key& key, Args&&... args);
+
         //- No insert() with raw pointers (potential memory leaks).
         //- Use insert() with autoPtr or set()
         inline bool insert(const Key&, T*) = delete;
@@ -186,6 +197,11 @@ public:
         //  \return True if the entry inserted (not previously in table)
         inline bool insert(const Key& key, autoPtr<T>&& ptr);
 
+        //- Insert a new entry, not overwriting existing entries.
+        //
+        //  \return True if the entry inserted (not previously in table)
+        inline bool insert(const Key& key, std::unique_ptr<T>&& ptr);
+
         //- Assign a new entry, overwriting existing entries.
         inline bool set(const Key& key, T* ptr);
 
@@ -194,6 +210,9 @@ public:
 
         //- Assign a new entry, overwriting existing entries.
         inline bool set(const Key& key, autoPtr<T>&& ptr);
+
+        //- Assign a new entry, overwriting existing entries.
+        inline bool set(const Key& key, std::unique_ptr<T>&& ptr);
 };
 
 

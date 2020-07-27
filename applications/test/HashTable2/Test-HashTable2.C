@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -252,8 +252,10 @@ int main(int argc, char *argv[])
         ltable1.insert("abc", identity(2));
         ltable1.insert("def", identity(3));
         ltable1.insert("ghi", identity(4));
-        ltable1.emplace("jkl", 10, -35);
+        ltable1.emplace("jkl", label(10), -35);
         ltable1.emplace("mno");
+        ltable1.emplace("def", label(2), -2);      // no overwrite
+        ltable1.emplace_set("ghi", label(2), -2);  // overwrite
 
         labelList list1(identity(4, -4));
 
