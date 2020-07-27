@@ -58,8 +58,8 @@ void Foam::LBFGS::allocateMatrices()
     label nVars(activeDesignVars_.size());
     for (label i = 0; i < nPrevSteps_; i++)
     {
-        y_.set(i, scalarField(nVars, Zero));
-        s_.set(i, scalarField(nVars, Zero));
+        y_.set(i, new scalarField(nVars, Zero));
+        s_.set(i, new scalarField(nVars, Zero));
     }
 }
 
@@ -120,8 +120,8 @@ void Foam::LBFGS::LBFGSUpdate()
     label nSteps(min(counter_, nPrevSteps_));
     label nLast(nSteps - 1);
     scalarField q(objectiveDerivatives_, activeDesignVars_);
-    scalarField a(nSteps, 0.);
-    scalarField r(nSteps, 0.);
+    scalarField a(nSteps, Zero);
+    scalarField r(nSteps, Zero);
     for (label i = nLast; i > -1; --i)
     {
         r[i] = 1./globalSum(y_[i]*s_[i]);
