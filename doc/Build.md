@@ -1,7 +1,7 @@
 ## OpenFOAM&reg; Quick Build Guide
 
 Prior to building, ensure that the [system requirements][link openfoam-require]
-are satisfied (including any special [cross-compiling][link openfoam-cross]
+are satisfied (including any special [cross-compiling][wiki-cross-compile]
 considerations), and source the correct OpenFOAM environment.
 For example, for the OpenFOAM-v2006 version:
 ```
@@ -137,7 +137,7 @@ More details in the [ThirdParty build guide][link third-build].
 [link openfoam-issues]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/BuildIssues.md
 [link openfoam-config]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/Config.md
 [link openfoam-build]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/Build.md
-[link openfoam-cross]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/Cross-Compile-mingw.md
+[wiki-cross-compile]: https://develop.openfoam.com/Development/openfoam/-/wikis/guides/build/cross-compile-mingw
 [link openfoam-require]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/Requirements.md
 [link third-readme]: https://develop.openfoam.com/Development/ThirdParty-common/blob/develop/README.md
 [link third-build]: https://develop.openfoam.com/Development/ThirdParty-common/blob/develop/BUILD.md

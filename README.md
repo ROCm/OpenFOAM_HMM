@@ -199,11 +199,11 @@ ThirdParty directory will contain either an `Allwmake` file or a
 
 ## Useful Links
 
-- Download [source](https://sourceforge.net/projects/openfoam/files/) and [download and installation instructions](http://www.openfoam.com/download/)
+- Download [source](https://dl.openfoam.com/source/) and [download and installation instructions](http://www.openfoam.com/download/)
 - [Documentation](http://www.openfoam.com/documentation)
 - [Reporting bugs/issues/feature requests](http://www.openfoam.com/code/bug-reporting.php)
-- [Issue tracker](https://develop.openfoam.com/Development/openfoam/issues)
-- [Wiki](http://wiki.openfoam.com/) and [code wiki](https://develop.openfoam.com/Development/openfoam/wikis/)
+- [Issue tracker](https://develop.openfoam.com/Development/openfoam/-/issues)
+- [Code wiki](https://develop.openfoam.com/Development/openfoam/-/wikis/) and [general wiki](http://wiki.openfoam.com/)
 - [Community](http://www.openfoam.com/community/), [Governance](http://www.openfoam.com/governance/)
 - [Contacting OpenCFD](http://www.openfoam.com/contact/)
 
