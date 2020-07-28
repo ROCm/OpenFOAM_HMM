@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2019 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -704,7 +705,7 @@ void Foam::multiphaseSystem::solve()
         phase.alphaRhoPhiRef() =
             fvc::interpolate(phase.rho())*phase.alphaPhi();
 
-        phase.clip(0, 1);
+        phase.clip(SMALL, 1 - SMALL);
     }
 
     calcAlphas();

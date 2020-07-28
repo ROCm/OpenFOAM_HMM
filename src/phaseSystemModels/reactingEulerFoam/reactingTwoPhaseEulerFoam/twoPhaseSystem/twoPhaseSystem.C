@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -339,7 +340,7 @@ void Foam::twoPhaseSystem::solve()
             << endl;
 
         // Ensure the phase-fractions are bounded
-        alpha1.clip(0, 1);
+        alpha1.clip(SMALL, 1 - SMALL);
 
         // Update the phase-fraction of the other phase
         alpha2 = scalar(1) - alpha1;
