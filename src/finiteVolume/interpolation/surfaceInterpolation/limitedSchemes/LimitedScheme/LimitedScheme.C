@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -177,7 +178,11 @@ Foam::LimitedScheme<Type, Limiter, LimitFunc>::limiter
 
         calcLimiter(phi, limiterField);
 
-        return limiterField;
+        return tmp<surfaceScalarField>::New
+        (
+            limiterFieldName,
+            limiterField
+        );
     }
     else
     {
