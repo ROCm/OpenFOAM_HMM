@@ -100,6 +100,7 @@ SourceFiles
 #include "primitiveFields.H"
 #include "IOobject.H"
 #include "tmp.H"
+#include "Tuple2.H"
 #include "HashPtrTable.H"
 #include "externalFileCoupler.H"
 #include "lumpedPointController.H"
@@ -116,7 +117,6 @@ namespace Foam
 class polyMesh;
 class polyPatch;
 class pointPatch;
-class Time;
 
 /*---------------------------------------------------------------------------*\
                      Class lumpedPointMovement Declaration
@@ -423,7 +423,7 @@ public:
             const UList<vector>& forces,
             const UList<vector>& moments,
             const outputFormatType fmt = outputFormatType::PLAIN,
-            const Time* timeinfo = nullptr
+            const Tuple2<scalar, scalar>* timesWritten = nullptr
         ) const;
 
         //- Write points, forces, moments
@@ -431,7 +431,7 @@ public:
         (
             const UList<vector>& forces,
             const UList<vector>& moments = List<vector>(),
-            const Time* timeinfo = nullptr
+            const Tuple2<scalar, scalar>* timesWritten = nullptr
         ) const;
 
         //- Read state from file, applying relaxation as requested

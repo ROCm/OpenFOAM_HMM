@@ -208,7 +208,9 @@ lumpedPointDisplacementPointPatchVectorField
 )
 :
     fixedValuePointPatchField<vector>(p, iF),
-    controllers_()
+    controllers_(),
+    dataWritten_(0, 0),
+    points0Ptr_(nullptr)
 {}
 
 
@@ -221,9 +223,13 @@ lumpedPointDisplacementPointPatchVectorField
 )
 :
     fixedValuePointPatchField<vector>(p, iF, dict),
-    controllers_()
+    controllers_(),
+    dataWritten_(0, 0),
+    points0Ptr_(nullptr)
 {
     dict.readIfPresent("controllers", controllers_);
+
+    dict.readIfPresent("dataWritten", dataWritten_);
 
     if (controllers_.empty())
     {
@@ -239,26 +245,30 @@ lumpedPointDisplacementPointPatchVectorField
 Foam::lumpedPointDisplacementPointPatchVectorField::
 lumpedPointDisplacementPointPatchVectorField
 (
-    const lumpedPointDisplacementPointPatchVectorField& pf,
+    const lumpedPointDisplacementPointPatchVectorField& rhs,
     const pointPatch& p,
     const DimensionedField<vector, pointMesh>& iF,
     const pointPatchFieldMapper& mapper
 )
 :
-    fixedValuePointPatchField<vector>(pf, p, iF, mapper),
-    controllers_(pf.controllers_)
+    fixedValuePointPatchField<vector>(rhs, p, iF, mapper),
+    controllers_(rhs.controllers_),
+    dataWritten_(rhs.dataWritten_),
+    points0Ptr_(nullptr)
 {}
 
 
 Foam::lumpedPointDisplacementPointPatchVectorField::
 lumpedPointDisplacementPointPatchVectorField
 (
-    const lumpedPointDisplacementPointPatchVectorField& pf,
+    const lumpedPointDisplacementPointPatchVectorField& rhs,
     const DimensionedField<vector, pointMesh>& iF
 )
 :
-    fixedValuePointPatchField<vector>(pf, iF),
-    controllers_(pf.controllers_)
+    fixedValuePointPatchField<vector>(rhs, iF),
+    controllers_(rhs.controllers_),
+    dataWritten_(rhs.dataWritten_),
+    points0Ptr_(nullptr)
 {}
 
 
@@ -336,7 +346,7 @@ void Foam::lumpedPointDisplacementPointPatchVectorField::updateCoeffs()
         }
         else if (movement().couplingPending(timeIndex))
         {
-            // Trigger is pending, or coupling not yet not initialized
+            // Trigger is pending, or coupling not yet initialized
             triggered = 1;
         }
 
@@ -351,21 +361,24 @@ void Foam::lumpedPointDisplacementPointPatchVectorField::updateCoeffs()
                 Pout<<"gatherForces: " << forces << " called from patch "
                     << this->patch().index() << endl;
 
-                if (Pstream::master())
-                {
-                    Pout<<"output forces to file: called from patch "
-                        << this->patch().index() << nl
-                        <<"# " << forces.size() << " force entries" << nl
-                        <<"# fx fy fz" << nl
-                        <<"output forces to file: "
-                        << forces << " called from patch "
-                        << this->patch().index() << endl;
-                }
+                Info<< "output forces to file: called from patch "
+                    << this->patch().index() << nl
+                    << "# " << forces.size() << " force entries" << nl
+                    << "# fx fy fz" << nl
+                    << "output forces to file: "
+                    << forces << " called from patch "
+                    << this->patch().index() << endl;
             }
+
+            // Update times when data (forces) were written
+            // With first=time, second=prevTime
+
+            dataWritten_.second() = dataWritten_.first();
+            dataWritten_.first() = this->db().time().timeOutputValue();
 
             if (Pstream::master())
             {
-                movement().writeData(forces, moments, &(this->db().time()));
+                movement().writeData(forces, moments, &dataWritten_);
 
                 // Signal external source to execute
                 movement().coupler().useSlave();
@@ -425,6 +438,12 @@ const
     if (controllers_.size())
     {
         os.writeEntry("controllers", controllers_);
+    }
+
+    // Times when data were written is only meaningful on the owner patch
+    if (movement().ownerId() == this->patch().index())
+    {
+        os.writeEntry("dataWritten", dataWritten_);
     }
 
     writeEntry("value", os);

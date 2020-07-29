@@ -1157,7 +1157,7 @@ bool Foam::lumpedPointMovement::writeData
     const UList<vector>& forces,
     const UList<vector>& moments,
     const outputFormatType fmt,
-    const Time* timeinfo
+    const Tuple2<scalar, scalar>* timesWritten
 ) const
 {
     const bool writeMoments = (moments.size() == forces.size());
@@ -1165,15 +1165,13 @@ bool Foam::lumpedPointMovement::writeData
     if (fmt == outputFormatType::PLAIN)
     {
         os  <<"########" << nl;
-        if (timeinfo)
+        if (timesWritten)
         {
-            const Time& t = *timeinfo;
-
-            os  <<"# Time index=" << t.timeIndex() << nl
-                <<"# Time value=" << t.timeOutputValue() << nl;
+            os  << "# Time value=" << timesWritten->first() << nl
+                << "# Time prev=" << timesWritten->second() << nl;
         }
-        os  <<"# size=" << this->size() << nl
-            <<"# columns (points) (forces)";
+        os  << "# size=" << this->size() << nl
+            << "# columns (points) (forces)";
 
         if (writeMoments)
         {
@@ -1272,12 +1270,10 @@ bool Foam::lumpedPointMovement::writeData
         // - ensure lists have consistent format
 
         os  <<"////////" << nl;
-        if (timeinfo)
+        if (timesWritten)
         {
-            const Time& t = *timeinfo;
-
-            os  <<"// Time index=" << t.timeIndex() << nl;
-            os.writeEntry("time", t.timeOutputValue());
+            os.writeEntry("time", timesWritten->first());
+            os.writeEntry("prevTime", timesWritten->second());
         }
         os  << nl;
 
@@ -1298,7 +1294,7 @@ bool Foam::lumpedPointMovement::writeData
 (
     const UList<vector>& forces,
     const UList<vector>& moments,
-    const Time* timeinfo
+    const Tuple2<scalar, scalar>* timesWritten
 ) const
 {
     if (!Pstream::master())
@@ -1308,26 +1304,24 @@ bool Foam::lumpedPointMovement::writeData
 
     // Regular output
     {
-        const fileName output(coupler().resolveFile(outputName_));
-        OFstream os(output, IOstream::ASCII);
+        OFstream os
+        (
+            coupler().resolveFile(outputName_)
+        );
 
-        writeData(os, forces, moments, outputFormat_, timeinfo);
+        writeData(os, forces, moments, outputFormat_, timesWritten);
     }
 
     // Log output
     {
-        const fileName output(coupler().resolveFile(logName_));
-
         OFstream os
         (
-            output,
-            IOstream::ASCII,
-            IOstream::currentVersion,
-            IOstream::UNCOMPRESSED,
-            true // append mode
+            coupler().resolveFile(logName_),
+            IOstreamOption(),
+            true  // append
         );
 
-        writeData(os, forces, moments, outputFormatType::PLAIN, timeinfo);
+        writeData(os, forces, moments, outputFormatType::PLAIN, timesWritten);
     }
 
     return true;

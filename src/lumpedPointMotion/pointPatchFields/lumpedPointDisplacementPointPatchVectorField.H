@@ -56,10 +56,7 @@ SourceFiles
 
 #include "fixedValuePointPatchField.H"
 #include "lumpedPointMovement.H"
-#include "lumpedPointState.H"
 #include "lumpedPointIOMovement.H"
-#include "labelList.H"
-#include "tmp.H"
 #include "pointField.H"
 #include "pointFieldsFwd.H"
 
@@ -84,13 +81,18 @@ class lumpedPointDisplacementPointPatchVectorField
         //- Names of the movement controller(s) in use
         wordList controllers_;
 
+        //- Times when data (forces) were written
+        //  With first=time, second=prevTime
+        Tuple2<scalar, scalar> dataWritten_;
+
         //- Backup method for getting "points0" without a motion solver
         mutable autoPtr<pointIOField> points0Ptr_;
 
 
-    //- Convenience typedefs
-    typedef lumpedPointDisplacementPointPatchVectorField patchType;
-    typedef DimensionedField<vector, pointMesh> fieldType;
+    // Convenience typedefs
+
+        typedef lumpedPointDisplacementPointPatchVectorField patchType;
+        typedef DimensionedField<vector, pointMesh> fieldType;
 
 
 protected:
@@ -130,7 +132,7 @@ public:
         //- Construct by mapping given patchField<vector> onto a new patch
         lumpedPointDisplacementPointPatchVectorField
         (
-            const lumpedPointDisplacementPointPatchVectorField& pf,
+            const lumpedPointDisplacementPointPatchVectorField& rhs,
             const pointPatch& p,
             const DimensionedField<vector, pointMesh>& iF,
             const pointPatchFieldMapper& mapper
@@ -151,7 +153,7 @@ public:
         //- Construct as copy setting internal field reference
         lumpedPointDisplacementPointPatchVectorField
         (
-            const lumpedPointDisplacementPointPatchVectorField& pf,
+            const lumpedPointDisplacementPointPatchVectorField& rhs,
             const DimensionedField<vector, pointMesh>& iF
         );
 
@@ -170,6 +172,7 @@ public:
                 )
             );
         }
+
 
     //- Destructor. De-register movement if in use and managed by this patch
     virtual ~lumpedPointDisplacementPointPatchVectorField();
