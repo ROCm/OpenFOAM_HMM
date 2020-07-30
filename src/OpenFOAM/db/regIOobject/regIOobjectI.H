@@ -75,47 +75,47 @@ inline Type& Foam::regIOobject::store(Type* p)
 
 
 template<class Type>
-inline Type& Foam::regIOobject::store(autoPtr<Type>& aptr)
+inline Type& Foam::regIOobject::store(autoPtr<Type>& ptr)
 {
     // Pass management to objectRegistry
-    return store(aptr.release());
+    return store(ptr.release());
 }
 
 
 template<class Type>
-inline Type& Foam::regIOobject::store(autoPtr<Type>&& aptr)
+inline Type& Foam::regIOobject::store(autoPtr<Type>&& ptr)
 {
     // Pass management to objectRegistry
-    return store(aptr.release());
+    return store(ptr.release());
 }
 
 
 template<class Type>
-inline Type& Foam::regIOobject::store(tmp<Type>& tptr)
+inline Type& Foam::regIOobject::store(refPtr<Type>& ptr)
 {
     Type* p = nullptr;
 
-    if (tptr.isTmp())
+    if (ptr.is_pointer())
     {
-        // Pass management to objectRegistry
-        p = tptr.ptr();
+        // Acquire ownership, pass management to objectRegistry
+        p = ptr.ptr();
 
         store(p);
 
-        // Adjust tmp<> access to use the stored reference
-        tptr.cref(*p);
+        // Change parameter to access the stored reference
+        ptr.cref(*p);
     }
     else
     {
-        // Taking ownership of a const-ref does not make much sense.
+        // Taking ownership of reference does not make much sense.
         // - Storing the object won't actually do so, it will be removed
         //   when the original object goes out of scope.
         // - Storing a clone may not be what we want.
 
-        p = tptr.get();
+        p = ptr.get();
 
         WarningInFunction
-            << "Refuse to store tmp to const-ref: " << p->name()
+            << "Refuse to store reference: " << p->name()
             << ". Likely indicates a coding error\n";
     }
 
@@ -124,10 +124,51 @@ inline Type& Foam::regIOobject::store(tmp<Type>& tptr)
 
 
 template<class Type>
-inline Type& Foam::regIOobject::store(tmp<Type>&& tptr)
+inline Type& Foam::regIOobject::store(refPtr<Type>&& ptr)
 {
-    // Treat like a normal reference
-    return store(tptr);
+    // Forward as named reference, which also does a move
+    return store(ptr);
+}
+
+
+template<class Type>
+inline Type& Foam::regIOobject::store(tmp<Type>& ptr)
+{
+    Type* p = nullptr;
+
+    if (ptr.is_pointer())
+    {
+        // Acquire ownership, pass management to objectRegistry
+        p = ptr.ptr();
+
+        store(p);
+
+        // Change parameter to access the stored reference
+        ptr.cref(*p);
+    }
+    else
+    {
+        // Taking ownership of reference does not make much sense.
+        // - Storing the object won't actually do so, it will be removed
+        //   when the original object goes out of scope.
+        // - Storing a clone may not be what we want.
+
+        p = ptr.get();
+
+        WarningInFunction
+            << "Refuse to store reference: " << p->name()
+            << ". Likely indicates a coding error\n";
+    }
+
+    return *p;
+}
+
+
+template<class Type>
+inline Type& Foam::regIOobject::store(tmp<Type>&& ptr)
+{
+    // Forward as named reference, which also does a move
+    return store(ptr);
 }
 
 

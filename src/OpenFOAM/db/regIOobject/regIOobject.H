@@ -42,6 +42,8 @@ SourceFiles
 #define regIOobject_H
 
 #include "IOobject.H"
+#include "refPtr.H"
+#include "tmp.H"
 #include "typeInfo.H"
 #include "stdFoam.H"
 #include "OSspecific.H"
@@ -52,6 +54,8 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
+
 namespace functionEntries
 {
     class codeStream;
@@ -59,7 +63,6 @@ namespace functionEntries
 namespace fileOperations
 {
     class uncollatedFileOperation;
-    class masterUncollatedFileOperation;
 }
 
 /*---------------------------------------------------------------------------*\
@@ -118,11 +121,9 @@ private:
 
 public:
 
-        //- Declare friendship with classes that need access to
-        //- masterOnlyReading
+        //- Friendship with classes needing access to masterOnlyReading
         friend class functionEntries::codeStream;
         friend class fileOperations::uncollatedFileOperation;
-        friend class fileOperations::masterUncollatedFileOperation;
 
 
     // Static data
@@ -184,41 +185,46 @@ public:
             //  \return true if now ownedByRegistry
             inline bool store();
 
-            //- Register object pointer with its registry
-            //- and transfer ownership to the registry.
-            //  \return reference to the object.
+            //- Transfer pointer ownership to its registry.
+            //  \return reference to the stored object
             template<class Type>
             inline static Type& store(Type* p);
 
-            //- Register object pointer with its registry
-            //- and transfer ownership to the registry.
-            //  Clears the autoPtr parameter.
-            //  \return reference to the object.
+            //- Transfer pointer ownership to its registry.
+            //  Resets (clears) the parameter.
+            //  \return reference to the stored object
             template<class Type>
-            inline static Type& store(autoPtr<Type>& aptr);
+            inline static Type& store(autoPtr<Type>& ptr);
 
-            //- Register object pointer with its registry
-            //- and transfer ownership to the registry.
-            //  Clears the autoPtr parameter.
-            //  \return reference to the object.
+            //- Transfer pointer ownership to its registry.
+            //  Resets (clears) the parameter.
+            //  \return reference to the stored object
             template<class Type>
-            inline static Type& store(autoPtr<Type>&& aptr);
+            inline static Type& store(autoPtr<Type>&& ptr);
 
-            //- Register temporary pointer with its registry
-            //- and transfer ownership of pointer to the registry.
-            //  After the call, tmp parameter changes from PTR to CREF.
-            //
-            //  \return reference to the object.
+            //- Transfer pointer ownership to its registry.
+            //  Changes parameter from PTR to CREF (do not rely on this).
+            //  \return reference to the stored object
             template<class Type>
-            inline static Type& store(tmp<Type>& tptr);
+            inline static Type& store(refPtr<Type>& ptr);
 
-            //- Register temporary pointer with its registry
-            //- and transfer ownership of pointer to the registry.
-            //  After the call, the tmp parameter content is \em unspecified.
-            //
-            //  \return reference to the object.
+            //- Transfer pointer ownership to its registry.
+            //  Changes parameter from PTR to CREF (do not rely on this).
+            //  \return reference to the stored object
             template<class Type>
-            inline static Type& store(tmp<Type>&& tptr);
+            inline static Type& store(refPtr<Type>&& ptr);
+
+            //- Transfer pointer ownership to its registry.
+            //  Changes parameter from PTR to CREF (do not rely on this).
+            //  \return reference to the stored object
+            template<class Type>
+            inline static Type& store(tmp<Type>& ptr);
+
+            //- Transfer pointer ownership to its registry.
+            //  Changes parameter from PTR to CREF (do not rely on this).
+            //  \return reference to the stored object
+            template<class Type>
+            inline static Type& store(tmp<Type>&& ptr);
 
             //- Release ownership of this object from its registry
             //  \param unregister optionally set as non-registered
