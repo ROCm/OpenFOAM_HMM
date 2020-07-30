@@ -47,6 +47,13 @@ inline Foam::refPtr<T> Foam::refPtr<T>::NewFrom(Args&&... args)
 }
 
 
+template<class T>
+inline Foam::word Foam::refPtr<T>::typeName()
+{
+    return "refPtr<" + word(typeid(T).name()) + '>';
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
@@ -82,32 +89,33 @@ inline Foam::refPtr<T>::refPtr(const T& obj) noexcept
 
 
 template<class T>
-inline Foam::refPtr<T>::refPtr(refPtr<T>&& t) noexcept
+inline Foam::refPtr<T>::refPtr(refPtr<T>&& rhs) noexcept
 :
-    ptr_(t.ptr_),
-    type_(t.type_)
+    ptr_(rhs.ptr_),
+    type_(rhs.type_)
 {
-    t.ptr_ = nullptr;
-    t.type_ = PTR;
+    rhs.ptr_ = nullptr;
+    rhs.type_ = PTR;
 }
 
 
 template<class T>
-inline Foam::refPtr<T>::refPtr(const refPtr<T>& t)
+inline Foam::refPtr<T>::refPtr(const refPtr<T>& rhs)
 :
-    ptr_(t.ptr_),
-    type_(t.type_)
+    ptr_(rhs.ptr_),
+    type_(rhs.type_)
 {
-    if (isTmp())
+    if (type_ == PTR)
     {
         if (ptr_)
         {
-            t.type_ = CREF;
+            rhs.type_ = REF;  // (shallow copy)
         }
         else
         {
             FatalErrorInFunction
-                << "Attempted copy of a deallocated " << typeName()
+                << "Attempted copy of a deallocated "
+                << this->typeName()
                 << abort(FatalError);
         }
     }
@@ -115,28 +123,30 @@ inline Foam::refPtr<T>::refPtr(const refPtr<T>& t)
 
 
 template<class T>
-inline Foam::refPtr<T>::refPtr(const refPtr<T>& t, bool reuse)
+inline Foam::refPtr<T>::refPtr(const refPtr<T>& rhs, bool reuse)
 :
-    ptr_(t.ptr_),
-    type_(t.type_)
+    ptr_(rhs.ptr_),
+    type_(rhs.type_)
 {
-    if (isTmp())
+    if (type_ == PTR)
     {
         if (ptr_)
         {
             if (reuse)
             {
-                t.ptr_ = nullptr; // t.type_ already set as PTR
+                rhs.ptr_ = nullptr;
+                // Note: rhs.type_ already set as PTR
             }
             else
             {
-                t.type_ = CREF;
+                rhs.type_ = REF;  // (shallow copy)
             }
         }
         else
         {
             FatalErrorInFunction
-                << "Attempted copy of a deallocated " << typeName()
+                << "Attempted copy of a deallocated "
+                << this->typeName()
                 << abort(FatalError);
         }
     }
@@ -160,21 +170,14 @@ inline bool Foam::refPtr<T>::movable() const noexcept
 
 
 template<class T>
-inline Foam::word Foam::refPtr<T>::typeName() const
-{
-    return "refPtr<" + word(typeid(T).name()) + '>';
-}
-
-
-template<class T>
 inline const T& Foam::refPtr<T>::cref() const
 {
-    if (isTmp())
+    if (type_ == PTR)
     {
         if (!ptr_)
         {
             FatalErrorInFunction
-                << typeName() << " deallocated"
+                << this->typeName() << " deallocated"
                 << abort(FatalError);
         }
     }
@@ -186,12 +189,12 @@ inline const T& Foam::refPtr<T>::cref() const
 template<class T>
 inline T& Foam::refPtr<T>::ref() const
 {
-    if (isTmp())
+    if (type_ == PTR)
     {
         if (!ptr_)
         {
             FatalErrorInFunction
-                << typeName() << " deallocated"
+                << this->typeName() << " deallocated"
                 << abort(FatalError);
         }
     }
@@ -199,7 +202,7 @@ inline T& Foam::refPtr<T>::ref() const
     {
         FatalErrorInFunction
             << "Attempted non-const reference to const object from a "
-            << typeName()
+            << this->typeName()
             << abort(FatalError);
     }
 
@@ -220,12 +223,13 @@ inline T* Foam::refPtr<T>::ptr() const
     if (!ptr_)
     {
         FatalErrorInFunction
-            << typeName() << " deallocated"
+            << this->typeName() << " deallocated"
             << abort(FatalError);
     }
 
-    if (isTmp())
+    if (type_ == PTR)
     {
+        // Release pointer
         T* p = ptr_;
         ptr_ = nullptr;
 
@@ -239,7 +243,7 @@ inline T* Foam::refPtr<T>::ptr() const
 template<class T>
 inline void Foam::refPtr<T>::clear() const noexcept
 {
-    if (isTmp() && ptr_)
+    if (type_ == PTR && ptr_)
     {
         delete ptr_;
         ptr_ = nullptr;
@@ -299,7 +303,7 @@ inline void Foam::refPtr<T>::swap(refPtr<T>& other) noexcept
         return;  // Self-swap is a no-op
     }
 
-    // Copy/assign for pointer types
+    // Swap is just copy/assign for pointer and enum types
     T* p = ptr_;
     ptr_ = other.ptr_;
     other.ptr_ = p;
@@ -329,11 +333,14 @@ inline Foam::refPtr<T>::operator const T&() const
 template<class T>
 inline const T* Foam::refPtr<T>::operator->() const
 {
-    if (!ptr_ && isTmp())
+    if (type_ == PTR)
     {
-        FatalErrorInFunction
-            << typeName() << " deallocated"
-            << abort(FatalError);
+        if (!ptr_)
+        {
+            FatalErrorInFunction
+                << this->typeName() << " deallocated"
+                << abort(FatalError);
+        }
     }
 
     return ptr_;
@@ -343,19 +350,20 @@ inline const T* Foam::refPtr<T>::operator->() const
 template<class T>
 inline T* Foam::refPtr<T>::operator->()
 {
-    if (isTmp())
+    if (type_ == PTR)
     {
         if (!ptr_)
         {
             FatalErrorInFunction
-                << typeName() << " deallocated"
+                << this->typeName() << " deallocated"
                 << abort(FatalError);
         }
     }
-    else
+    else if (type_ == CREF)
     {
         FatalErrorInFunction
-            << "Attempt to cast const object to non-const for a " << typeName()
+            << "Attempt to cast const object to non-const for a "
+            << this->typeName()
             << abort(FatalError);
     }
 
@@ -364,33 +372,34 @@ inline T* Foam::refPtr<T>::operator->()
 
 
 template<class T>
-inline void Foam::refPtr<T>::operator=(const refPtr<T>& t)
+inline void Foam::refPtr<T>::operator=(const refPtr<T>& other)
 {
-    if (&t == this)
+    if (&other == this)
     {
         return;  // Self-assignment is a no-op
     }
 
     clear();
 
-    if (t.isTmp())
+    if (other.type_ == PTR)
     {
-        ptr_ = t.ptr_;
+        ptr_ = other.ptr_;
         type_ = PTR;
-        t.ptr_ = nullptr;
+        other.ptr_ = nullptr;
 
         if (!ptr_)
         {
             FatalErrorInFunction
-                << "Attempted assignment to a deallocated " << typeName()
+                << "Attempted assignment of a deallocated "
+                << this->typeName()
                 << abort(FatalError);
         }
     }
     else
     {
         FatalErrorInFunction
-            << "Attempted assignment to a const reference to an object"
-            << " of type " << typeid(T).name()
+            << "Attempted assignment of an object reference of type "
+            << typeid(T).name()
             << abort(FatalError);
     }
 }
@@ -419,7 +428,8 @@ inline void Foam::refPtr<T>::operator=(T* p)
     if (!p)
     {
         FatalErrorInFunction
-            << "Attempted copy of a deallocated " << typeName()
+            << "Attempted copy of a deallocated "
+            << this->typeName()
             << abort(FatalError);
     }
 
@@ -437,7 +447,7 @@ inline void Foam::refPtr<T>::operator=(std::nullptr_t) noexcept
 template<class T>
 inline Foam::refPtr<T>::operator tmp<T>()
 {
-    if (isTmp())
+    if (type_ == PTR)
     {
         return tmp<T>(ptr());
     }

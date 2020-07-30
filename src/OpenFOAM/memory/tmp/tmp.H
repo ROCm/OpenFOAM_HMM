@@ -139,19 +139,19 @@ public:
 
         //- Move construct, transferring ownership.
         //  Does not affect ref-count
-        inline tmp(tmp<T>&& t) noexcept;
+        inline tmp(tmp<T>&& rhs) noexcept;
 
         //- Move construct, transferring ownership.
         //  Does not affect ref-count
         //  \note Non-standard definition - should be non-const
-        inline tmp(const tmp<T>&& t) noexcept;
+        inline tmp(const tmp<T>&& rhs) noexcept;
 
         //- Copy construct, incrementing ref-count of managed pointer.
         //  \note Non-standard definition - should be non-const
-        inline tmp(const tmp<T>& t);
+        inline tmp(const tmp<T>& rhs);
 
-        //- Copy construct. Optionally reusing ref-counted pointer.
-        inline tmp(const tmp<T>& t, bool reuse);
+        //- Copy/move construct. Optionally reusing ref-counted pointer.
+        inline tmp(const tmp<T>& rhs, bool reuse);
 
 
     //- Destructor: deletes managed pointer when the ref-count is 0
@@ -159,6 +159,10 @@ public:
 
 
     // Member Functions
+
+        //- The type-name, constructed from type-name of T
+        inline static word typeName();
+
 
     // Query
 
@@ -174,14 +178,11 @@ public:
         //- True if this is a managed pointer (not a reference)
         bool is_pointer() const noexcept { return type_ == PTR; }
 
-        //- True if this is a managed pointer (not a reference)
+        //- Identical to is_pointer()
         bool isTmp() const noexcept { return type_ == PTR; }
 
         //- True if this is a non-null managed pointer with a unique ref-count
         inline bool movable() const noexcept;
-
-        //- Return type-name of the tmp, constructed from type-name of T
-        inline word typeName() const;
 
 
     // Access
@@ -202,9 +203,8 @@ public:
         //  Fatal for a null managed pointer or if the object is const.
         inline T& ref() const;
 
-        //- Non-const dereference, even if the object is const.
-        //  This is similar to ref(), but applies a const_cast to access
-        //  const objects.
+        //- Return non-const reference to the object or to the contents
+        //- of a (non-null) managed pointer, with an additional const_cast.
         //  Fatal for a null pointer.
         inline T& constCast() const;
 
@@ -255,7 +255,7 @@ public:
 
         //- Transfer ownership of the managed pointer.
         //  Fatal for a null managed pointer or if the object is const.
-        inline void operator=(const tmp<T>& t);
+        inline void operator=(const tmp<T>& other);
 
         //- Clear existing and transfer ownership.
         inline void operator=(tmp<T>&& other) noexcept;
@@ -271,7 +271,7 @@ public:
 
 // Global Functions
 
-//- Specializes the Swap algorithm for tmp.
+//- Specialized Swap algorithm for tmp.
 //  Swaps the pointers and types of lhs and rhs. Calls \c lhs.swap(rhs)
 template<class T>
 void Swap(tmp<T>& lhs, tmp<T>& rhs)

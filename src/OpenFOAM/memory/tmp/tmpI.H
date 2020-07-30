@@ -40,7 +40,8 @@ inline void Foam::tmp<T>::incrCount()
     {
         FatalErrorInFunction
             << "Attempt to create more than 2 tmp's referring to"
-               " the same object of type " << typeName()
+               " the same object of type "
+            << tmp<T>::typeName()
             << abort(FatalError);
     }
 }
@@ -61,6 +62,13 @@ template<class U, class... Args>
 inline Foam::tmp<T> Foam::tmp<T>::NewFrom(Args&&... args)
 {
     return tmp<T>(new U(std::forward<Args>(args)...));
+}
+
+
+template<class T>
+inline Foam::word Foam::tmp<T>::typeName()
+{
+    return "tmp<" + word(typeid(T).name()) + '>';
 }
 
 
@@ -91,7 +99,8 @@ inline Foam::tmp<T>::tmp(T* p)
     if (p && !p->unique())
     {
         FatalErrorInFunction
-            << "Attempted construction of a " << typeName()
+            << "Attempted construction of a "
+            << this->typeName()
             << " from non-unique pointer"
             << abort(FatalError);
     }
@@ -107,34 +116,34 @@ inline Foam::tmp<T>::tmp(const T& obj) noexcept
 
 
 template<class T>
-inline Foam::tmp<T>::tmp(tmp<T>&& t) noexcept
+inline Foam::tmp<T>::tmp(tmp<T>&& rhs) noexcept
 :
-    ptr_(t.ptr_),
-    type_(t.type_)
+    ptr_(rhs.ptr_),
+    type_(rhs.type_)
 {
-    t.ptr_ = nullptr;
-    t.type_ = PTR;
+    rhs.ptr_ = nullptr;
+    rhs.type_ = PTR;
 }
 
 
 template<class T>
-inline Foam::tmp<T>::tmp(const tmp<T>&& t) noexcept
+inline Foam::tmp<T>::tmp(const tmp<T>&& rhs) noexcept
 :
-    ptr_(t.ptr_),
-    type_(t.type_)
+    ptr_(rhs.ptr_),
+    type_(rhs.type_)
 {
-    t.ptr_ = nullptr;
-    t.type_ = PTR;
+    rhs.ptr_ = nullptr;
+    rhs.type_ = PTR;
 }
 
 
 template<class T>
-inline Foam::tmp<T>::tmp(const tmp<T>& t)
+inline Foam::tmp<T>::tmp(const tmp<T>& rhs)
 :
-    ptr_(t.ptr_),
-    type_(t.type_)
+    ptr_(rhs.ptr_),
+    type_(rhs.type_)
 {
-    if (isTmp())
+    if (type_ == PTR)
     {
         if (ptr_)
         {
@@ -143,7 +152,8 @@ inline Foam::tmp<T>::tmp(const tmp<T>& t)
         else
         {
             FatalErrorInFunction
-                << "Attempted copy of a deallocated " << typeName()
+                << "Attempted copy of a deallocated "
+                << this->typeName()
                 << abort(FatalError);
         }
     }
@@ -151,18 +161,19 @@ inline Foam::tmp<T>::tmp(const tmp<T>& t)
 
 
 template<class T>
-inline Foam::tmp<T>::tmp(const tmp<T>& t, bool reuse)
+inline Foam::tmp<T>::tmp(const tmp<T>& rhs, bool reuse)
 :
-    ptr_(t.ptr_),
-    type_(t.type_)
+    ptr_(rhs.ptr_),
+    type_(rhs.type_)
 {
-    if (isTmp())
+    if (type_ == PTR)
     {
         if (ptr_)
         {
             if (reuse)
             {
-                t.ptr_ = nullptr; // t.type_ already set as PTR
+                rhs.ptr_ = nullptr;
+                // Note: rhs.type_ already set as PTR
             }
             else
             {
@@ -172,7 +183,8 @@ inline Foam::tmp<T>::tmp(const tmp<T>& t, bool reuse)
         else
         {
             FatalErrorInFunction
-                << "Attempted copy of a deallocated " << typeName()
+                << "Attempted copy of a deallocated "
+                << this->typeName()
                 << abort(FatalError);
         }
     }
@@ -196,21 +208,14 @@ inline bool Foam::tmp<T>::movable() const noexcept
 
 
 template<class T>
-inline Foam::word Foam::tmp<T>::typeName() const
-{
-    return "tmp<" + word(typeid(T).name()) + '>';
-}
-
-
-template<class T>
 inline const T& Foam::tmp<T>::cref() const
 {
-    if (isTmp())
+    if (type_ == PTR)
     {
         if (!ptr_)
         {
             FatalErrorInFunction
-                << typeName() << " deallocated"
+                << this->typeName() << " deallocated"
                 << abort(FatalError);
         }
     }
@@ -222,12 +227,12 @@ inline const T& Foam::tmp<T>::cref() const
 template<class T>
 inline T& Foam::tmp<T>::ref() const
 {
-    if (isTmp())
+    if (type_ == PTR)
     {
         if (!ptr_)
         {
             FatalErrorInFunction
-                << typeName() << " deallocated"
+                << this->typeName() << " deallocated"
                 << abort(FatalError);
         }
     }
@@ -235,7 +240,7 @@ inline T& Foam::tmp<T>::ref() const
     {
         FatalErrorInFunction
             << "Attempted non-const reference to const object from a "
-            << typeName()
+            << this->typeName()
             << abort(FatalError);
     }
 
@@ -256,20 +261,22 @@ inline T* Foam::tmp<T>::ptr() const
     if (!ptr_)
     {
         FatalErrorInFunction
-            << typeName() << " deallocated"
+            << this->typeName() << " deallocated"
             << abort(FatalError);
     }
 
-    if (isTmp())
+    if (type_ == PTR)
     {
         if (!ptr_->unique())
         {
             FatalErrorInFunction
                 << "Attempt to acquire pointer to object referred to"
-                << " by multiple temporaries of type " << typeName()
+                << " by multiple temporaries of type "
+                << this->typeName()
                 << abort(FatalError);
         }
 
+        // Release pointer
         T* p = ptr_;
         ptr_ = nullptr;
 
@@ -283,7 +290,7 @@ inline T* Foam::tmp<T>::ptr() const
 template<class T>
 inline void Foam::tmp<T>::clear() const noexcept
 {
-    if (isTmp() && ptr_)
+    if (type_ == PTR && ptr_)
     {
         if (ptr_->unique())
         {
@@ -350,7 +357,7 @@ inline void Foam::tmp<T>::swap(tmp<T>& other) noexcept
         return;  // Self-swap is a no-op
     }
 
-    // Copy/assign for pointer types
+    // Swap is just copy/assign for pointer and enum types
     T* p = ptr_;
     ptr_ = other.ptr_;
     other.ptr_ = p;
@@ -380,11 +387,14 @@ inline Foam::tmp<T>::operator const T&() const
 template<class T>
 inline const T* Foam::tmp<T>::operator->() const
 {
-    if (!ptr_ && isTmp())
+    if (type_ == PTR)
     {
-        FatalErrorInFunction
-            << typeName() << " deallocated"
-            << abort(FatalError);
+        if (!ptr_)
+        {
+            FatalErrorInFunction
+                << this->typeName() << " deallocated"
+                << abort(FatalError);
+        }
     }
 
     return ptr_;
@@ -394,19 +404,20 @@ inline const T* Foam::tmp<T>::operator->() const
 template<class T>
 inline T* Foam::tmp<T>::operator->()
 {
-    if (isTmp())
+    if (type_ == PTR)
     {
         if (!ptr_)
         {
             FatalErrorInFunction
-                << typeName() << " deallocated"
+                << this->typeName() << " deallocated"
                 << abort(FatalError);
         }
     }
-    else
+    else if (type_ == CREF)
     {
         FatalErrorInFunction
-            << "Attempt to cast const object to non-const for a " << typeName()
+            << "Attempt to cast const object to non-const for a "
+            << this->typeName()
             << abort(FatalError);
     }
 
@@ -415,33 +426,34 @@ inline T* Foam::tmp<T>::operator->()
 
 
 template<class T>
-inline void Foam::tmp<T>::operator=(const tmp<T>& t)
+inline void Foam::tmp<T>::operator=(const tmp<T>& other)
 {
-    if (&t == this)
+    if (&other == this)
     {
         return;  // Self-assignment is a no-op
     }
 
     clear();
 
-    if (t.isTmp())
+    if (other.type_ == PTR)
     {
-        ptr_ = t.ptr_;
+        ptr_ = other.ptr_;
         type_ = PTR;
-        t.ptr_ = nullptr;
+        other.ptr_ = nullptr;
 
         if (!ptr_)
         {
             FatalErrorInFunction
-                << "Attempted assignment to a deallocated " << typeName()
+                << "Attempted assignment of a deallocated "
+                << this->typeName()
                 << abort(FatalError);
         }
     }
     else
     {
         FatalErrorInFunction
-            << "Attempted assignment to a const reference to an object"
-            << " of type " << typeid(T).name()
+            << "Attempted assignment of an object reference of type "
+            << typeid(T).name()
             << abort(FatalError);
     }
 }
@@ -470,13 +482,15 @@ inline void Foam::tmp<T>::operator=(T* p)
     if (!p)
     {
         FatalErrorInFunction
-            << "Attempted copy of a deallocated " << typeName()
+            << "Attempted copy of a deallocated "
+            << this->typeName()
             << abort(FatalError);
     }
     else if (!p->unique())
     {
         FatalErrorInFunction
-            << "Attempted assignment of a " << typeName()
+            << "Attempted assignment of a "
+            << this->typeName()
             << " to non-unique pointer"
             << abort(FatalError);
     }
