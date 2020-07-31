@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,8 +59,7 @@ SourceFiles
 #ifndef SmagorinskyZhang_H
 #define SmagorinskyZhang_H
 
-#include "LESModel.H"
-#include "eddyViscosity.H"
+#include "Smagorinsky.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -78,7 +77,7 @@ class SmagorinskyZhang
 :
     public Smagorinsky<BasicTurbulenceModel>
 {
-    // Private data
+    // Private Data
 
         mutable const PhaseCompressibleTurbulenceModel
         <
@@ -104,7 +103,7 @@ class SmagorinskyZhang
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         // Model coefficients
 

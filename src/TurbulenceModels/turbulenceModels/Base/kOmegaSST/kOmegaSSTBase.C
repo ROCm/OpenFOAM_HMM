@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "kOmegaSSTBase.H"
+#include "fvOptions.H"
 #include "bound.H"
 #include "wallDist.H"
 
