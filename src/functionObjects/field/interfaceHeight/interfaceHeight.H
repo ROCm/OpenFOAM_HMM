@@ -76,8 +76,8 @@ Usage
       libs         | Library name: fieldFunctionObjects | word |  yes  | -
       locations    | Locations to report the height at  | vectorList | yes | -
       alpha        | Name of alpha field                | word |  no   | alpha
-      liquid     | Flag if the alpha field that of the liquid | bool | no | true
-      direction  | Direction of interface               | vector | no  | g
+      liquid       | Flag if the alpha field that of the liquid | bool | no | true
+      direction    | Direction of interface               | vector | no  | g
       interpolationScheme | Interpolation scheme        | word | no | cellPoint
     \endtable
 
