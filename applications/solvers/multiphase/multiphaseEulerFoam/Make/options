@@ -1,7 +1,8 @@
+phaseSystem = $(LIB_SRC)/phaseSystemModels/multiphaseEuler
+
 EXE_INC = \
-    -ImultiphaseSystem/lnInclude \
-    -ImultiphaseFixedFluxPressure \
-    -IinterfacialModels/lnInclude \
+    -I${phaseSystem}/multiphaseSystem/lnInclude \
+    -I${phaseSystem}/interfacialModels/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/transportModels \
@@ -16,9 +17,9 @@ EXE_LIBS = \
     -lfiniteVolume \
     -lfvOptions \
     -lmeshTools \
-    -lmultiphaseSystem \
     -linterfaceProperties \
     -lincompressibleTransportModels \
-    -lcompressibleMultiphaseEulerianInterfacialModels \
     -lturbulenceModels \
-    -lincompressibleTurbulenceModels
+    -lincompressibleTurbulenceModels \
+    -lmultiphaseSystem \
+    -lcompressibleMultiphaseEulerianInterfacialModels

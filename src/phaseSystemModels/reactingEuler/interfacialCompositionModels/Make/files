@@ -1,0 +1,28 @@
+massTransfer = massTransferModels
+
+$(massTransfer)/massTransferModel/massTransferModel.C
+$(massTransfer)/massTransferModel/massTransferModelNew.C
+$(massTransfer)/Frossling/Frossling.C
+$(massTransfer)/sphericalMassTransfer/sphericalMassTransfer.C
+
+surfaceTension = surfaceTensionModels
+$(surfaceTension)/surfaceTensionModel/surfaceTensionModel.C
+$(surfaceTension)/surfaceTensionModel/surfaceTensionModelNew.C
+$(surfaceTension)/constantSurfaceTensionCoefficient/constantSurfaceTensionCoefficient.C
+
+composition = interfaceCompositionModels
+$(composition)/interfaceCompositionModel/interfaceCompositionModel.C
+$(composition)/interfaceCompositionModel/interfaceCompositionModelNew.C
+$(composition)/InterfaceCompositionModel/InterfaceCompositionModels.C
+
+saturation = saturationModels
+$(saturation)/saturationModel/saturationModel.C
+$(saturation)/saturationModel/saturationModelNew.C
+$(saturation)/Antoine/Antoine.C
+$(saturation)/AntoineExtended/AntoineExtended.C
+$(saturation)/ArdenBuck/ArdenBuck.C
+$(saturation)/polynomial/polynomial.C
+$(saturation)/function1/function1.C
+$(saturation)/constantSaturationConditions/constantSaturationConditions.C
+
+LIB = $(FOAM_LIBBIN)/libreactingEulerianInterfacialCompositionModels

@@ -1,0 +1,19 @@
+drag = dragModels
+$(drag)/dragModel/dragModel.C
+$(drag)/dragModel/dragModelNew.C
+$(drag)/Ergun/Ergun.C
+$(drag)/GidaspowErgunWenYu/GidaspowErgunWenYu.C
+$(drag)/GidaspowSchillerNaumann/GidaspowSchillerNaumann.C
+$(drag)/SchillerNaumann/SchillerNaumann.C
+$(drag)/Gibilaro/Gibilaro.C
+$(drag)/WenYu/WenYu.C
+$(drag)/SyamlalOBrien/SyamlalOBrien.C
+$(drag)/blended/blended.C
+$(drag)/interface/interface.C
+
+heatTransfer = heatTransferModels
+$(heatTransfer)/heatTransferModel/heatTransferModel.C
+$(heatTransfer)/heatTransferModel/heatTransferModelNew.C
+$(heatTransfer)/RanzMarshall/RanzMarshall.C
+
+LIB = $(FOAM_LIBBIN)/libcompressibleMultiphaseEulerianInterfacialModels

@@ -1,0 +1,19 @@
+phaseModel/phaseModel/phaseModel.C
+phaseModel/phaseModel/phaseModelNew.C
+phaseModel/phaseModel/phaseModels.C
+
+phasePair/phasePair.C
+phasePair/phasePairKey.C
+phasePair/orderedPhasePair.C
+
+phaseSystem/phaseSystem.C
+
+multiphaseSystem/multiphaseSystem.C
+multiphaseSystem/multiphaseSystemNew.C
+multiphaseSystem/multiphaseSystems.C
+
+interfaceModels/porousModels/porousModel/porousModel.C
+interfaceModels/porousModels/porousModel/porousModelNew.C
+interfaceModels/porousModels/VollerPrakash/VollerPrakash.C
+
+LIB = $(FOAM_LIBBIN)/libincompressibleMultiphaseSystems

@@ -1,6 +1,8 @@
+phaseSystem = $(LIB_SRC)/phaseSystemModels/multiphaseInter
+
 EXE_INC = \
-    -I./phasesSystem/lnInclude \
-    -I./CompressibleMultiPhaseTurbulenceModels/lnInclude \
+    -I${phaseSystem}/phasesSystem/lnInclude \
+    -I${phaseSystem}/compressibleMultiPhaseTurbulenceModels/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/fvOptions/lnInclude\
     -I$(LIB_SRC)/meshTools/lnInclude \
@@ -24,10 +26,10 @@ EXE_LIBS = \
     -lcompressibleTransportModels \
     -lradiationModels \
     -lfluidThermophysicalModels \
-    -lIncompressibleMultiphaseSystems \
-    -lCompressibleMultiPhaseTurbulenceModels \
     -lmassTransferModels \
     -lsolidThermo \
     -lsolidSpecie \
     -ltwoPhaseProperties \
-    -llaserDTRM
+    -llaserDTRM \
+    -lincompressibleMultiphaseSystems \
+    -lcompressibleMultiPhaseTurbulenceModels

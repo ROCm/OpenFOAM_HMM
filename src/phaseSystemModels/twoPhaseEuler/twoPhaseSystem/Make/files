@@ -1,0 +1,32 @@
+phaseModel/phaseModel.C
+
+phasePair/phasePairKey.C
+phasePair/phasePair.C
+phasePair/orderedPhasePair.C
+
+twoPhaseSystem/twoPhaseSystem.C
+
+
+diameter = diameterModels
+$(diameter)/diameterModel/diameterModel.C
+$(diameter)/diameterModel/diameterModelNew.C
+$(diameter)/constantDiameter/constantDiameter.C
+$(diameter)/isothermalDiameter/isothermalDiameter.C
+
+diameterModels/IATE/IATE.C
+
+IATEsources = diameterModels/IATE/IATEsources
+$(IATEsources)/IATEsource/IATEsource.C
+$(IATEsources)/wakeEntrainmentCoalescence/wakeEntrainmentCoalescence.C
+$(IATEsources)/turbulentBreakUp/turbulentBreakUp.C
+$(IATEsources)/randomCoalescence/randomCoalescence.C
+
+blending = BlendedInterfacialModel/blendingMethods
+$(blending)/blendingMethod/blendingMethod.C
+$(blending)/blendingMethod/blendingMethodNew.C
+$(blending)/noBlending/noBlending.C
+$(blending)/linear/linear.C
+$(blending)/hyperbolic/hyperbolic.C
+
+
+LIB = $(FOAM_LIBBIN)/libcompressibleTwoPhaseSystem

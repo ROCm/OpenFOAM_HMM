@@ -1,11 +1,13 @@
+phaseSystem = $(LIB_SRC)/phaseSystemModels/reactingEuler
+
 EXE_INC = \
     -I.. \
-    -I$(FOAM_SOLVERS)/multiphase/reactingEulerFoam/reactingTwoPhaseEulerFoam \
-    -I$(LIB_SRC)/phaseSystemModels/reactingEulerFoam/reactingTwoPhaseEulerFoam/twoPhaseSystem/lnInclude \
-    -I$(LIB_SRC)/phaseSystemModels/reactingEulerFoam/reactingTwoPhaseEulerFoam/twoPhaseCompressibleTurbulenceModels/lnInclude \
-    -I$(LIB_SRC)/phaseSystemModels/reactingEulerFoam/phaseSystems/lnInclude \
-    -I$(LIB_SRC)/phaseSystemModels/reactingEulerFoam/interfacialModels/lnInclude \
-    -I$(LIB_SRC)/phaseSystemModels/reactingEulerFoam/interfacialCompositionModels/lnInclude \
+    -I$(FOAM_SOLVERS)/multiphase/reactingTwoPhaseEulerFoam \
+    -I${phaseSystem}/twoPhaseSystem/lnInclude \
+    -I${phaseSystem}/twoPhaseCompressibleTurbulenceModels/lnInclude \
+    -I${phaseSystem}/phaseSystems/lnInclude \
+    -I${phaseSystem}/interfacialModels/lnInclude \
+    -I${phaseSystem}/interfacialCompositionModels/lnInclude \
     -I./fluid \
     -I../solid \
     -I../fluid \
@@ -23,18 +25,17 @@ EXE_INC = \
     -I$(LIB_SRC)/TurbulenceModels/phaseCompressible/lnInclude \
     -I$(LIB_SRC)/regionModels/regionModel/lnInclude
 
-
 EXE_LIBS = \
+    -lfiniteVolume \
+    -lfvOptions \
+    -lmeshTools \
+    -lsampling \
     -lcompressibleTransportModels \
     -lfluidThermophysicalModels \
     -lspecie \
     -lsolidThermo \
-    -ltwoPhaseReactingTurbulenceModels \
-    -lmeshTools \
-    -lfiniteVolume \
-    -lfvOptions \
     -lradiationModels \
     -lregionModels \
-    -lsampling \
     -lreactingTwoPhaseSystem \
+    -ltwoPhaseReactingTurbulenceModels \
     -lreactingPhaseSystem
