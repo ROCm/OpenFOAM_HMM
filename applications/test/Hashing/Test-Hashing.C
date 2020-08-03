@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,6 +38,7 @@ Description
 #include "stringList.H"
 #include "labelList.H"
 #include "labelPair.H"
+#include "wordPair.H"
 #include "edgeList.H"
 #include "faceList.H"
 #include "triFaceList.H"
@@ -154,8 +155,6 @@ void reportHashList(const UList<labelList>& list)
 }
 
 
-typedef Pair<word> wordPair;
-
 void reportHashList(const UList<wordPair>& list)
 {
     Info<<"contiguous = " << is_contiguous<wordPair>::value << nl << nl;
@@ -269,16 +268,20 @@ int main(int argc, char *argv[])
 
     IFstream is("hashingTests");
 
-    if (!is.good())
+    if (is.good())
     {
-        Info<< "No \"hashingTests\" file found ...\n";
+        Info<< nl << "Process " << is.name() << " file ..." << nl;
+    }
+    else
+    {
+        Info<< nl << "No " << is.name() << " file found ..." << nl;
     }
 
-    while (is.good())
-    {
-        const word listType(is);
+    token tok;
 
-        if (listType.empty()) continue;
+    while (is.good() && is.read(tok) && tok.good())
+    {
+        const word listType(tok.wordToken());
 
         Info<< nl;
         IOobject::writeDivider(Info) << listType << nl;
@@ -286,7 +289,6 @@ int main(int argc, char *argv[])
         if (listType == "stringList")
         {
             stringList list(is);
-
             reportHashList(list);
         }
         else if (listType == "labelList")

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,11 +51,12 @@ See also
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 template<class T> class Pair;
 
 // Common pair types
 typedef Pair<label> labelPair;      //!< A pair of labels
+typedef Pair<word> wordPair;        //!< A pair of words
 
 
 /*---------------------------------------------------------------------------*\
@@ -67,12 +68,11 @@ class Pair
 :
     public FixedList<T, 2>
 {
-
 public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         Pair() = default;
 
         //- Copy construct from components
