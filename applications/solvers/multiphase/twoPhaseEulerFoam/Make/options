@@ -2,7 +2,6 @@ phaseSystem = $(LIB_SRC)/phaseSystemModels/twoPhaseEuler
 
 EXE_INC = \
     -I${phaseSystem}/phaseCompressibleTurbulenceModels/lnInclude \
-    -I${phaseSystem}/twoPhaseEuler/interfacialModels/lnInclude \
     -I${phaseSystem}/twoPhaseSystem/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
@@ -25,6 +24,5 @@ EXE_LIBS = \
     -lturbulenceModels \
     -lcompressibleTurbulenceModels \
     -lincompressibleTransportModels \
-    -lphaseCompressibleTurbulenceModels \
     -lcompressibleTwoPhaseSystem \
-    -lcompressibleEulerianInterfacialModels
+    -lphaseCompressibleTurbulenceModels

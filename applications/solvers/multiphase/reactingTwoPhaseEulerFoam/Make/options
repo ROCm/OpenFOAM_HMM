@@ -3,9 +3,7 @@ phaseSystem = $(LIB_SRC)/phaseSystemModels/reactingEuler
 EXE_INC = \
     -I${phaseSystem}/twoPhaseSystem/lnInclude \
     -I${phaseSystem}/twoPhaseCompressibleTurbulenceModels/lnInclude \
-    -I${phaseSystem}/phaseSystems/lnInclude \
-    -I${phaseSystem}/interfacialCompositionModels/lnInclude \
-    -I${phaseSystem}/interfacialModels/lnInclude \
+    -I${phaseSystem}/multiphaseSystem/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/sampling/lnInclude \
@@ -20,8 +18,6 @@ EXE_LIBS = \
     -lfvOptions \
     -lmeshTools \
     -lsampling \
-    -lreactingPhaseSystem \
+    -lreactingMultiphaseSystem \
     -lreactingTwoPhaseSystem \
-    -lreactingEulerianInterfacialModels \
-    -lreactingEulerianInterfacialCompositionModels \
     -ltwoPhaseReactingTurbulenceModels

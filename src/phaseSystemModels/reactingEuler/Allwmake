@@ -5,18 +5,10 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 # echo "making ${PWD##*/}"
 
-wmakeLnInclude phaseSystems
-wmake $targetType interfacialModels
-wmake $targetType interfacialCompositionModels
-wmake $targetType derivedFvPatchFields
-
 wmake $targetType multiphaseSystem
-wmake $targetType multiphaseCompressibleTurbulenceModels
+wmake $targetType functionObjects
 
 wmake $targetType twoPhaseSystem
 wmake $targetType twoPhaseCompressibleTurbulenceModels
-
-wmake $targetType phaseSystems
-wmake $targetType functionObjects
 
 #------------------------------------------------------------------------------

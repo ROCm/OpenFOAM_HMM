@@ -3,9 +3,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/wmake/scripts/AllwmakeParseArguments
 #------------------------------------------------------------------------------
 
-wmakeLnInclude interfacialModels
 wmake $targetType twoPhaseSystem
-wmake $targetType interfacialModels
 wmake $targetType phaseCompressibleTurbulenceModels
 
 #------------------------------------------------------------------------------

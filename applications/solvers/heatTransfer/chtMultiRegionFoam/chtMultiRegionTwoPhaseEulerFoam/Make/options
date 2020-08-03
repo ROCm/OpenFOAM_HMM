@@ -5,9 +5,7 @@ EXE_INC = \
     -I$(FOAM_SOLVERS)/multiphase/reactingTwoPhaseEulerFoam \
     -I${phaseSystem}/twoPhaseSystem/lnInclude \
     -I${phaseSystem}/twoPhaseCompressibleTurbulenceModels/lnInclude \
-    -I${phaseSystem}/phaseSystems/lnInclude \
-    -I${phaseSystem}/interfacialModels/lnInclude \
-    -I${phaseSystem}/interfacialCompositionModels/lnInclude \
+    -I${phaseSystem}/multiphaseSystem/lnInclude \
     -I./fluid \
     -I../solid \
     -I../fluid \
@@ -36,6 +34,6 @@ EXE_LIBS = \
     -lsolidThermo \
     -lradiationModels \
     -lregionModels \
+    -lreactingMultiphaseSystem \
     -lreactingTwoPhaseSystem \
-    -ltwoPhaseReactingTurbulenceModels \
-    -lreactingPhaseSystem
+    -ltwoPhaseReactingTurbulenceModels

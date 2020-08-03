@@ -1,12 +1,7 @@
 EXE_INC = \
-    -I../interfacialModels/lnInclude \
-    -I../interfacialCompositionModels/lnInclude \
-    -I../phaseSystems/lnInclude \
-    -I../twoPhaseCompressibleTurbulenceModels/lnInclude \
-    -I../derivedFvPatchFields/lnInclude \
+    -I../multiphaseSystem/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
-    -I$(LIB_SRC)/sampling/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/reactionThermo/lnInclude \
@@ -19,7 +14,7 @@ EXE_INC = \
 LIB_LIBS = \
     -lfiniteVolume \
     -lmeshTools \
-    -lsampling \
     -lcombustionModels \
     -lturbulenceModels \
-    -lcompressibleTurbulenceModels
+    -lcompressibleTurbulenceModels \
+    -lreactingMultiphaseSystem

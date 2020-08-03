@@ -1,8 +1,7 @@
 phaseSystem = $(LIB_SRC)/phaseSystemModels/reactingEuler
 
 EXE_INC = \
-    -I${phaseSystem}/interfacialModels/lnInclude \
-    -I${phaseSystem}/phaseSystems/lnInclude \
+    -I${phaseSystem}/multiphaseSystem/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
     -I$(LIB_SRC)/transportModels/compressible/lnInclude \
@@ -11,4 +10,4 @@ EXE_INC = \
 LIB_LIBS = \
     -lfiniteVolume \
     -lfieldFunctionObjects \
-    -lreactingPhaseSystem
+    -lreactingMultiphaseSystem

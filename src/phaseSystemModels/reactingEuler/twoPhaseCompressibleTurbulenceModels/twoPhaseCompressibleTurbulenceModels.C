@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,6 +36,11 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Base models defined in multiphaseCompressibleTurbulenceModels.C
+//
+// Additional two-phase only models
+
+// Typedefs
 defineTurbulenceModelTypes
 (
     volScalarField,
@@ -44,20 +50,6 @@ defineTurbulenceModelTypes
     ThermalDiffusivity,
     phaseModel
 );
-
-makeBaseTurbulenceModel
-(
-    volScalarField,
-    volScalarField,
-    compressibleTurbulenceModel,
-    PhaseCompressibleTurbulenceModel,
-    ThermalDiffusivity,
-    phaseModel
-);
-
-#define makeLaminarModel(Type)                                                 \
-    makeTemplatedLaminarModel                                                  \
-    (phaseModelPhaseCompressibleTurbulenceModel, laminar, Type)
 
 #define makeRASModel(Type)                                                     \
     makeTemplatedTurbulenceModel                                               \
@@ -72,19 +64,15 @@ makeBaseTurbulenceModel
 // Laminar models
 // -------------------------------------------------------------------------- //
 
-#include "Stokes.H"
-makeLaminarModel(Stokes);
+// "Stokes.H"
 
 
 // -------------------------------------------------------------------------- //
 // RAS models
 // -------------------------------------------------------------------------- //
 
-#include "kEpsilon.H"
-makeRASModel(kEpsilon);
-
-#include "kOmegaSST.H"
-makeRASModel(kOmegaSST);
+// "kEpsilon.H"
+// "kOmegaSST.H"
 
 #include "kOmegaSSTSato.H"
 makeRASModel(kOmegaSSTSato);
@@ -98,16 +86,13 @@ makeRASModel(LaheyKEpsilon);
 #include "continuousGasKEpsilon.H"
 makeRASModel(continuousGasKEpsilon);
 
-#include "Smagorinsky.H"
-makeLESModel(Smagorinsky);
-
-#include "kEqn.H"
-makeLESModel(kEqn);
-
 
 // -------------------------------------------------------------------------- //
 // LES models
 // -------------------------------------------------------------------------- //
+
+// "Smagorinsky.H"
+// "kEqn.H"
 
 #include "SmagorinskyZhang.H"
 makeLESModel(SmagorinskyZhang);

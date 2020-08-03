@@ -12,8 +12,21 @@ multiphaseSystem/multiphaseSystem.C
 multiphaseSystem/multiphaseSystemNew.C
 multiphaseSystem/multiphaseSystems.C
 
-interfaceModels/porousModels/porousModel/porousModel.C
-interfaceModels/porousModels/porousModel/porousModelNew.C
-interfaceModels/porousModels/VollerPrakash/VollerPrakash.C
+interfaceCompositionModel/interfaceCompositionModel.C
+interfaceCompositionModel/interfaceCompositionModelNew.C
+InterfaceCompositionModel/InterfaceCompositionModels.C
+
+porous = interfaceModels/porousModels
+$(porous)/porousModel/porousModel.C
+$(porous)/porousModel/porousModelNew.C
+$(porous)/VollerPrakash/VollerPrakash.C
+
+/* Ununsed? */
+/*
+surfaceTension = interfaceModels/surfaceTensionModels
+$(surfaceTension)/surfaceTensionModel/surfaceTensionModel.C
+$(surfaceTension)/surfaceTensionModel/surfaceTensionModelNew.C
+$(surfaceTension)/constantSurfaceTensionCoefficient/constantSurfaceTensionCoefficient.C
+*/
 
 LIB = $(FOAM_LIBBIN)/libincompressibleMultiphaseSystems

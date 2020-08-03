@@ -26,7 +26,6 @@ EXE_LIBS = \
     -lcompressibleTransportModels \
     -lradiationModels \
     -lfluidThermophysicalModels \
-    -lmassTransferModels \
     -lsolidThermo \
     -lsolidSpecie \
     -ltwoPhaseProperties \

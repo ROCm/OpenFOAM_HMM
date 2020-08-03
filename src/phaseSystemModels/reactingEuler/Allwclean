@@ -4,19 +4,10 @@ cd "${0%/*}" || exit    # Run from this directory
 
 # echo "cleaning ${PWD##*/}"
 
-wclean libso phaseSystems
-wclean libso interfacialModels
-wclean libso interfacialCompositionModels
-wclean libso derivedFvPatchFields
-
-# multiphase
 wclean libso multiphaseSystem
-wclean libso multiphaseCompressibleTurbulenceModels
+wclean libso functionObjects
 
-# twoPhase
 wclean libso twoPhaseSystem
 wclean libso twoPhaseCompressibleTurbulenceModels
-
-wclean libso functionObjects
 
 #------------------------------------------------------------------------------

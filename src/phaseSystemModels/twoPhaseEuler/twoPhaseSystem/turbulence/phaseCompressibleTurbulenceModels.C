@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2014-2016 OpenFOAM Foundation
     Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -41,12 +40,19 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Base models defined in compressibleTwoPhaseSystem
-//
-// Additional models only
-
 // Typedefs
 defineTurbulenceModelTypes
+(
+    volScalarField,
+    volScalarField,
+    compressibleTurbulenceModel,
+    PhaseCompressibleTurbulenceModel,
+    ThermalDiffusivity,
+    phaseModel
+);
+
+// Base models
+makeBaseTurbulenceModel
 (
     volScalarField,
     volScalarField,
@@ -60,75 +66,13 @@ defineTurbulenceModelTypes
     makeTemplatedLaminarModel                                                  \
     (phaseModelPhaseCompressibleTurbulenceModel, laminar, Type)
 
-#define makeRASModel(Type)                                                     \
-    makeTemplatedTurbulenceModel                                               \
-    (phaseModelPhaseCompressibleTurbulenceModel, RAS, Type)
-
-#define makeLESModel(Type)                                                     \
-    makeTemplatedTurbulenceModel                                               \
-    (phaseModelPhaseCompressibleTurbulenceModel, LES, Type)
 
 // -------------------------------------------------------------------------- //
 // Laminar models
 // -------------------------------------------------------------------------- //
 
-// #include "Stokes.H"
-
-
-// -------------------------------------------------------------------------- //
-// RAS models
-// -------------------------------------------------------------------------- //
-
-#include "kEpsilon.H"
-makeRASModel(kEpsilon);
-
-#include "kOmegaSST.H"
-makeRASModel(kOmegaSST);
-
-#include "kOmegaSSTSato.H"
-makeRASModel(kOmegaSSTSato);
-
-#include "mixtureKEpsilon.H"
-makeRASModel(mixtureKEpsilon);
-
-#include "LaheyKEpsilon.H"
-makeRASModel(LaheyKEpsilon);
-
-#include "continuousGasKEpsilon.H"
-makeRASModel(continuousGasKEpsilon);
-
-
-// -------------------------------------------------------------------------- //
-// LES models
-// -------------------------------------------------------------------------- //
-
-#include "Smagorinsky.H"
-makeLESModel(Smagorinsky);
-
-#include "kEqn.H"
-makeLESModel(kEqn);
-
-#include "SmagorinskyZhang.H"
-makeLESModel(SmagorinskyZhang);
-
-#include "NicenoKEqn.H"
-makeLESModel(NicenoKEqn);
-
-#include "continuousGasKEqn.H"
-makeLESModel(continuousGasKEqn);
-
-
-// -------------------------------------------------------------------------- //
-// Additional models
-// -------------------------------------------------------------------------- //
-
-#include "kineticTheoryModel.H"
-makeTurbulenceModel
-(phaseModelPhaseCompressibleTurbulenceModel, RAS, kineticTheoryModel);
-
-#include "phasePressureModel.H"
-makeTurbulenceModel
-(phaseModelPhaseCompressibleTurbulenceModel, RAS, phasePressureModel);
+#include "Stokes.H"
+makeLaminarModel(Stokes);
 
 
 // ************************************************************************* //

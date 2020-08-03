@@ -3,9 +3,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/wmake/scripts/AllwmakeParseArguments
 #------------------------------------------------------------------------------
 
-wmakeLnInclude massTransferModels
 wmake $targetType phasesSystem
-wmake $targetType massTransferModels
 wmake $targetType compressibleMultiPhaseTurbulenceModels
 
 #------------------------------------------------------------------------------
