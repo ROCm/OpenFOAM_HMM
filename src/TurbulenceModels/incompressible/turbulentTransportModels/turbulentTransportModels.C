@@ -29,6 +29,15 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+defineTurbulenceModelTypes
+(
+    geometricOneField,
+    geometricOneField,
+    incompressibleTurbulenceModel,
+    IncompressibleTurbulenceModel,
+    transportModel
+);
+
 makeBaseTurbulenceModel
 (
     geometricOneField,

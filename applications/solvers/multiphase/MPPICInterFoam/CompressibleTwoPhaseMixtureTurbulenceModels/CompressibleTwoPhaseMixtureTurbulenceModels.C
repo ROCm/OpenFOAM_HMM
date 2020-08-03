@@ -33,7 +33,9 @@ License
 #include "turbulentTransportModel.H"
 #include "LESModel.H"
 
-makeTurbulenceModelTypes
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+defineTurbulenceModelTypes
 (
     volScalarField,
     geometricOneField,

@@ -37,6 +37,18 @@ License
 #include "RASModel.H"
 #include "LESModel.H"
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+defineTurbulenceModelTypes
+(
+    geometricOneField,
+    volScalarField,
+    compressibleTurbulenceModel,
+    CompressibleTurbulenceModel,
+    ThermalDiffusivity,
+    multiphaseSystem
+);
+
 makeBaseTurbulenceModel
 (
     geometricOneField,
@@ -59,16 +71,32 @@ makeBaseTurbulenceModel
     makeTemplatedTurbulenceModel                                               \
     (multiphaseSystemCompressibleTurbulenceModel, LES, Type)
 
+
+// -------------------------------------------------------------------------- //
+// Laminar models
+// -------------------------------------------------------------------------- //
+
 #include "Stokes.H"
 makeLaminarModel(Stokes);
 
+
+// -------------------------------------------------------------------------- //
+// RAS models
+// -------------------------------------------------------------------------- //
+
 #include "kEpsilon.H"
 makeRASModel(kEpsilon);
+
+
+// -------------------------------------------------------------------------- //
+// LES models
+// -------------------------------------------------------------------------- //
 
 #include "Smagorinsky.H"
 makeLESModel(Smagorinsky);
 
 #include "kEqn.H"
 makeLESModel(kEqn);
+
 
 // ************************************************************************* //

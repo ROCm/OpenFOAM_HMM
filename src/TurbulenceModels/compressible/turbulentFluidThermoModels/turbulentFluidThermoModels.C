@@ -29,6 +29,16 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+defineTurbulenceModelTypes
+(
+    geometricOneField,
+    volScalarField,
+    compressibleTurbulenceModel,
+    CompressibleTurbulenceModel,
+    ThermalDiffusivity,
+    fluidThermo
+);
+
 makeBaseTurbulenceModel
 (
     geometricOneField,

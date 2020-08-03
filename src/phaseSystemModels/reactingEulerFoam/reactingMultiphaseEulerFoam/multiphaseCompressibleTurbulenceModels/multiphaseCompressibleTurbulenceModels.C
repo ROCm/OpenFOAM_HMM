@@ -35,7 +35,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeTurbulenceModelTypes
+defineTurbulenceModelTypes
 (
     volScalarField,
     volScalarField,
@@ -67,14 +67,29 @@ makeBaseTurbulenceModel
     makeTemplatedTurbulenceModel                                               \
     (phaseModelPhaseCompressibleTurbulenceModel, LES, Type)
 
+
+// -------------------------------------------------------------------------- //
+// Laminar models
+// -------------------------------------------------------------------------- //
+
 #include "Stokes.H"
 makeLaminarModel(Stokes);
+
+
+// -------------------------------------------------------------------------- //
+// RAS models
+// -------------------------------------------------------------------------- //
 
 #include "kEpsilon.H"
 makeRASModel(kEpsilon);
 
 #include "kOmegaSST.H"
 makeRASModel(kOmegaSST);
+
+
+// -------------------------------------------------------------------------- //
+// LES models
+// -------------------------------------------------------------------------- //
 
 #include "Smagorinsky.H"
 makeLESModel(Smagorinsky);

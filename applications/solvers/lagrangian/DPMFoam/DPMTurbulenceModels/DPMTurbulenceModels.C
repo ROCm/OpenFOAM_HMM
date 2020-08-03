@@ -36,7 +36,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeTurbulenceModelTypes
+defineTurbulenceModelTypes
 (
     volScalarField,
     geometricOneField,

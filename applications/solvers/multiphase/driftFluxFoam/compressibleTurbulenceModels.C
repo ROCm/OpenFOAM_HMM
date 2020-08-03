@@ -36,7 +36,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeTurbulenceModelTypes
+defineTurbulenceModelTypes
 (
     geometricOneField,
     volScalarField,
@@ -78,14 +78,28 @@ makeBaseTurbulenceModel
         Type                                                                   \
     )
 
+// -------------------------------------------------------------------------- //
+// Laminar models
+// -------------------------------------------------------------------------- //
+
 #include "Stokes.H"
 makeLaminarModel(Stokes);
+
+
+// -------------------------------------------------------------------------- //
+// RAS models
+// -------------------------------------------------------------------------- //
 
 #include "kEpsilon.H"
 makeRASModel(kEpsilon);
 
 #include "buoyantKEpsilon.H"
 makeRASModel(buoyantKEpsilon);
+
+
+// -------------------------------------------------------------------------- //
+// LES models
+// -------------------------------------------------------------------------- //
 
 #include "Smagorinsky.H"
 makeLESModel(Smagorinsky);

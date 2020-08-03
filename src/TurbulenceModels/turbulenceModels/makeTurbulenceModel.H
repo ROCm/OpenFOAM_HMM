@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,19 +26,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#define makeTurbulenceModelTypes(Alpha, Rho, baseModel, BaseModel, Transport)  \
-                                                                               \
-    namespace Foam                                                             \
-    {                                                                          \
-        typedef BaseModel<Transport> Transport##BaseModel;                     \
-        typedef laminarModel<Transport##BaseModel>                             \
-            laminar##Transport##BaseModel;                                     \
-        typedef RASModel<Transport##BaseModel> RAS##Transport##BaseModel;      \
-        typedef LESModel<Transport##BaseModel> LES##Transport##BaseModel;      \
-    }
-
-
-#define makeBaseTurbulenceModel(Alpha, Rho, baseModel, BaseModel, Transport)   \
+//- Define turbulence model typedefs, with EddyDiffusivity
+#define defineTurbulenceModelTypes(                                            \
+    Alpha, Rho, baseModel, BaseModel, Transport)                               \
                                                                                \
     namespace Foam                                                             \
     {                                                                          \
@@ -49,13 +40,38 @@ License
             Transport                                                          \
         > Transport##baseModel;                                                \
                                                                                \
+        typedef BaseModel<Transport>                                           \
+            Transport##BaseModel;                                              \
+                                                                               \
+        typedef laminarModel<Transport##BaseModel>                             \
+            laminar##Transport##BaseModel;                                     \
+                                                                               \
+        typedef RASModel<Transport##BaseModel>                                 \
+            RAS##Transport##BaseModel;                                         \
+                                                                               \
+        typedef LESModel<Transport##BaseModel>                                 \
+            LES##Transport##BaseModel;                                         \
+    }
+
+// Legacy name
+#define makeTurbulenceModelTypes(a, b, c, d, e) \
+    defineTurbulenceModelTypes(a, b, c, d, e)
+
+
+#define makeBaseTurbulenceModel(Alpha, Rho, baseModel, BaseModel, Transport)   \
+    /* Turbulence typedefs */                                                  \
+    defineTurbulenceModelTypes(Alpha, Rho, baseModel, BaseModel, Transport)    \
+                                                                               \
+    namespace Foam                                                             \
+    {                                                                          \
+        /* Turbulence selection table */                                       \
         defineTemplateRunTimeSelectionTable                                    \
         (                                                                      \
             Transport##baseModel,                                              \
             dictionary                                                         \
         );                                                                     \
                                                                                \
-                                                                               \
+        /* Laminar models */                                                   \
         defineNamedTemplateTypeNameAndDebug(laminar##Transport##BaseModel, 0); \
                                                                                \
         defineTemplateRunTimeSelectionTable                                    \
@@ -68,7 +84,7 @@ License
             dictionary                                                         \
         );                                                                     \
                                                                                \
-                                                                               \
+        /* RAS models */                                                       \
         defineNamedTemplateTypeNameAndDebug(RAS##Transport##BaseModel, 0);     \
                                                                                \
         defineTemplateRunTimeSelectionTable                                    \
@@ -81,7 +97,7 @@ License
             dictionary                                                         \
         );                                                                     \
                                                                                \
-                                                                               \
+        /* LES models */                                                       \
         defineNamedTemplateTypeNameAndDebug(LES##Transport##BaseModel, 0);     \
                                                                                \
         defineTemplateRunTimeSelectionTable                                    \
