@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2015 OpenFOAM Foundation
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,10 +50,35 @@ Foam::aspectRatioModel::aspectRatioModel
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::aspectRatioModel::~aspectRatioModel()
-{}
+Foam::autoPtr<Foam::aspectRatioModel>
+Foam::aspectRatioModel::New
+(
+    const dictionary& dict,
+    const phasePair& pair
+)
+{
+    const word modelType(dict.get<word>("type"));
+
+    Info<< "Selecting aspectRatioModel for "
+        << pair << ": " << modelType << endl;
+
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+
+    if (!cstrIter.found())
+    {
+        FatalIOErrorInLookup
+        (
+            dict,
+            "aspectRatioModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
+    }
+
+    return cstrIter()(dict, pair);
+}
 
 
 // ************************************************************************* //

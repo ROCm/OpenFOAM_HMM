@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,11 +65,35 @@ Foam::heatTransferModel::heatTransferModel
     )
 {}
 
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+Foam::autoPtr<Foam::heatTransferModel>
+Foam::heatTransferModel::New
+(
+    const dictionary& dict,
+    const phasePair& pair
+)
+{
+    const word modelType(dict.get<word>("type"));
 
-Foam::heatTransferModel::~heatTransferModel()
-{}
+    Info<< "Selecting heatTransferModel for "
+        << pair << ": " << modelType << endl;
+
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+
+    if (!cstrIter.found())
+    {
+        FatalIOErrorInLookup
+        (
+            dict,
+            "heatTransferModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << abort(FatalIOError);
+    }
+
+    return cstrIter()(dict, pair);
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

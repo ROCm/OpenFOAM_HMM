@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2019 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,11 +28,10 @@ Class
     Foam::diameterModel
 
 Description
-    A2stract base-class for dispersed-phase particle diameter models.
+    Abstract base-class for dispersed-phase particle diameter models.
 
 SourceFiles
     diameterModel.C
-    newDiameterModel.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -53,12 +53,12 @@ namespace Foam
 
 class diameterModel
 {
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         dictionary diameterProperties_;
+
         const phaseModel& phase_;
 
 
@@ -76,10 +76,10 @@ public:
             diameterModel,
             dictionary,
             (
-                const dictionary& diameterProperties,
+                const dictionary& dict,
                 const phaseModel& phase
             ),
-            (diameterProperties, phase)
+            (dict, phase)
         );
 
 
@@ -87,13 +87,13 @@ public:
 
         diameterModel
         (
-            const dictionary& diameterProperties,
+            const dictionary& dict,
             const phaseModel& phase
         );
 
 
     //- Destructor
-    virtual ~diameterModel();
+    virtual ~diameterModel() = default;
 
 
     // Selectors

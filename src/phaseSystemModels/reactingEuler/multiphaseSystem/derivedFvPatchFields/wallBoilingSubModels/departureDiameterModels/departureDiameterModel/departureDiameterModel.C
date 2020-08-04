@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2019 OpenFOAM Foundation
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,16 +40,33 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::wallBoilingModels::departureDiameterModel::departureDiameterModel()
-{}
+Foam::autoPtr<Foam::wallBoilingModels::departureDiameterModel>
+Foam::wallBoilingModels::departureDiameterModel::New
+(
+    const dictionary& dict
+)
+{
+    const word modelType(dict.get<word>("type"));
 
+    Info<< "Selecting departureDiameterModel: " << modelType << endl;
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
-Foam::wallBoilingModels::departureDiameterModel::~departureDiameterModel()
-{}
+    if (!cstrIter.found())
+    {
+        FatalIOErrorInLookup
+        (
+            dict,
+            "departureDiameterModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << abort(FatalIOError);
+    }
+
+    return cstrIter()(dict);
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

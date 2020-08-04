@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +55,7 @@ class heatTransferModel
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         const dictionary& interfaceDict_;
         const volScalarField& alpha1_;
@@ -76,12 +77,12 @@ public:
             heatTransferModel,
             dictionary,
             (
-                const dictionary& interfaceDict,
+                const dictionary& dict,
                 const volScalarField& alpha1,
                 const phaseModel& phase1,
                 const phaseModel& phase2
             ),
-            (interfaceDict, alpha1, phase1, phase2)
+            (dict, alpha1, phase1, phase2)
         );
 
 
@@ -89,7 +90,7 @@ public:
 
         heatTransferModel
         (
-            const dictionary& interfaceDict,
+            const dictionary& dict,
             const volScalarField& alpha1,
             const phaseModel& phase1,
             const phaseModel& phase2
@@ -97,14 +98,14 @@ public:
 
 
     //- Destructor
-    virtual ~heatTransferModel();
+    virtual ~heatTransferModel() = default;
 
 
     // Selectors
 
         static autoPtr<heatTransferModel> New
         (
-            const dictionary& interfaceDict,
+            const dictionary& dict,
             const volScalarField& alpha1,
             const phaseModel& phase1,
             const phaseModel& phase2

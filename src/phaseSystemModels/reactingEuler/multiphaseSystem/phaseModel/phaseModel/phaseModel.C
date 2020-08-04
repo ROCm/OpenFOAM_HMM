@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2019 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,10 +77,45 @@ Foam::phaseModel::phaseModel
 }
 
 
-Foam::autoPtr<Foam::phaseModel> Foam::phaseModel::clone() const
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::phaseModel>
+Foam::phaseModel::clone() const
 {
     NotImplemented;
-    return autoPtr<phaseModel>(nullptr);
+    return nullptr;
+}
+
+
+Foam::autoPtr<Foam::phaseModel>
+Foam::phaseModel::New
+(
+    const phaseSystem& fluid,
+    const word& phaseName,
+    const label index
+)
+{
+    const dictionary& dict = fluid.subDict(phaseName);
+
+    const word modelType(dict.get<word>("type"));
+
+    Info<< "Selecting phaseModel for "
+        << phaseName << ": " << modelType << endl;
+
+    auto cstrIter = phaseSystemConstructorTablePtr_->cfind(modelType);
+
+    if (!cstrIter.found())
+    {
+        FatalIOErrorInLookup
+        (
+            dict,
+            "phaseModel",
+            modelType,
+            *phaseSystemConstructorTablePtr_
+        ) << abort(FatalIOError);
+    }
+
+    return cstrIter()(fluid, phaseName, index);
 }
 
 

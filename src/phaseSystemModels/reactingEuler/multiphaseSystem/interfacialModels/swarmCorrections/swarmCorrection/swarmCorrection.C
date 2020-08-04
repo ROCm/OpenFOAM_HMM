@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2018 OpenFOAM Foundation
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,10 +50,35 @@ Foam::swarmCorrection::swarmCorrection
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selector  * * * * * * * * * * * * * * * * //
 
-Foam::swarmCorrection::~swarmCorrection()
-{}
+Foam::autoPtr<Foam::swarmCorrection>
+Foam::swarmCorrection::New
+(
+    const dictionary& dict,
+    const phasePair& pair
+)
+{
+    const word modelType(dict.get<word>("type"));
+
+    Info<< "Selecting swarmCorrection for "
+        << pair << ": " << modelType << endl;
+
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+
+    if (!cstrIter.found())
+    {
+        FatalIOErrorInLookup
+        (
+            dict,
+            "swarmCorrection",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << abort(FatalIOError);
+    }
+
+    return cstrIter()(dict, pair);
+}
 
 
 // ************************************************************************* //

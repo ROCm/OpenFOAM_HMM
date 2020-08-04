@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2018 OpenFOAM Foundation
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,10 +46,36 @@ Foam::blendingMethod::blendingMethod
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::blendingMethod::~blendingMethod()
-{}
+Foam::autoPtr<Foam::blendingMethod>
+Foam::blendingMethod::New
+(
+    const word& modelName,
+    const dictionary& dict,
+    const wordList& phaseNames
+)
+{
+    const word modelType(dict.get<word>("type"));
+
+    Info<< "Selecting " << modelName << " blending method: "
+        << modelType << endl;
+
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+
+    if (!cstrIter.found())
+    {
+        FatalIOErrorInLookup
+        (
+            dict,
+            "blendingMethod",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << abort(FatalIOError);
+    }
+
+    return cstrIter()(dict, phaseNames);
+}
 
 
 // ************************************************************************* //

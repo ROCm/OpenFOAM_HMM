@@ -50,7 +50,7 @@ Foam::StationaryPhaseModel<BasePhaseModel>::zeroField
                 this->mesh()
             ),
             this->mesh(),
-            dimensioned<Type>("zero", dims, pTraits<Type>::zero)
+            dimensioned<Type>(dims, Zero)
         )
     );
 }

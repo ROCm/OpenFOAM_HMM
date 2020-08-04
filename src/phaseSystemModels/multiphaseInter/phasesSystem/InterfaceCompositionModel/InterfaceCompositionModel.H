@@ -45,6 +45,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class phaseModel;
 class phasePair;
 template <class ThermoType> class pureMixture;

@@ -41,8 +41,8 @@ SourceFiles
 
 #include "volFields.H"
 #include "dictionary.H"
-#include "runTimeSelectionTables.H"
 #include "Enum.H"
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,7 +61,7 @@ class interfaceCompositionModel
 {
 public:
 
-    // Public type
+    // Public Types
 
         //- Enumeration for variable based mass transfer models
         enum modelVariable
@@ -72,18 +72,18 @@ public:
             alpha /* alpha source */
         };
 
-        static const Enum<modelVariable> modelVariableNames;
+protected:
 
-        //- Enumeration for model variables
+    // Protected Data
+
+        //- Selection names for the modelVariable
+        static const Enum<modelVariable> modelVariableNames_;
+
+        //- Enumeration for the model variable
         modelVariable modelVariable_;
 
         //- Add volume change in pEq
         bool includeVolChange_;
-
-
-protected:
-
-    // Protected Data
 
         //- Phase pair
         const phasePair& pair_;
@@ -141,11 +141,10 @@ public:
 
     // Member Functions
 
-
         //- Return the transferring species name
         const word transferSpecie() const;
 
-        //- Return pair
+        //- The phase pair
         const phasePair& pair() const;
 
         //- Interface mass fraction
@@ -206,7 +205,7 @@ public:
         bool includeVolChange();
 
         //- Returns the variable on which the model is based
-        const word variable() const;
+        const word& variable() const;
 };
 
 

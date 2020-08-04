@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2019 OpenFOAM Foundation
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,16 +40,33 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::wallBoilingModels::nucleationSiteModel::nucleationSiteModel()
-{}
+Foam::autoPtr<Foam::wallBoilingModels::nucleationSiteModel>
+Foam::wallBoilingModels::nucleationSiteModel::New
+(
+    const dictionary& dict
+)
+{
+    const word modelType(dict.get<word>("type"));
 
+    Info<< "Selecting nucleationSiteModel: " << modelType << endl;
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
-Foam::wallBoilingModels::nucleationSiteModel::~nucleationSiteModel()
-{}
+    if (!cstrIter.found())
+    {
+        FatalIOErrorInLookup
+        (
+            dict,
+            "nucleationSiteModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << abort(FatalIOError);
+    }
+
+    return cstrIter()(dict);
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

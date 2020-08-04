@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,13 +62,40 @@ Foam::phaseModel::phaseModel
 {}
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-const Foam::word& Foam::phaseModel::name() const
+Foam::autoPtr<Foam::phaseModel>
+Foam::phaseModel::New
+(
+    const phaseSystem& fluid,
+    const word& phaseName
+)
 {
-    return name_;
+    const dictionary& dict = fluid.subDict(phaseName);
+
+    const word modelType(dict.get<word>("type"));
+
+    Info<< "Selecting phaseModel for "
+        << phaseName << ": " << modelType << endl;
+
+    const auto cstrIter = phaseSystemConstructorTablePtr_->cfind(modelType);
+
+    if (!cstrIter.found())
+    {
+        FatalIOErrorInLookup
+        (
+            dict,
+            "phaseModel",
+            modelType,
+            *phaseSystemConstructorTablePtr_
+        ) << exit(FatalIOError);
+    }
+
+    return cstrIter()(fluid, phaseName);
 }
 
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const Foam::phaseSystem& Foam::phaseModel::fluid() const
 {

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,18 +53,9 @@ namespace kineticTheoryModels
 
 class conductivityModel
 {
-    // Private member functions
-
-        //- Disallow default bitwise copy construct
-        conductivityModel(const conductivityModel&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const conductivityModel&);
-
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         const dictionary& dict_;
 
@@ -89,7 +81,7 @@ public:
     // Constructors
 
         //- Construct from components
-        conductivityModel(const dictionary& dict);
+        explicit conductivityModel(const dictionary& dict);
 
 
     // Selectors
@@ -101,7 +93,7 @@ public:
 
 
     //- Destructor
-    virtual ~conductivityModel();
+    virtual ~conductivityModel() = default;
 
 
     // Member Functions

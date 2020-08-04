@@ -30,7 +30,6 @@ License
 #include "interfaceCompositionModel.H"
 #include "massTransferModel.H"
 
-
 // * * * * * * * * * * * * Private Member Functions * * * * * * * * * * * * //
 
 template<class BasePhaseSystem>
@@ -58,21 +57,12 @@ Foam::InterfaceCompositionPhaseChangePhaseSystem<BasePhaseSystem>::iDmdt
         {
             const scalar iDmdtSign = Pair<word>::compare(pair, key);
 
-            forAllConstIter
+            for
             (
-                hashedWordList,
-                interfaceCompositionModels_[pair]->species(),
-                memberIter
+                const word& member
+              : interfaceCompositionModels_[pair]->species()
             )
             {
-                const word& member = *memberIter;
-
-                const word name(IOobject::groupName(member, phase.name()));
-                const word otherName
-                (
-                    IOobject::groupName(member, otherPhase.name())
-                );
-
                 tIDmdt.ref() +=
                     iDmdtSign
                    *(
@@ -85,7 +75,6 @@ Foam::InterfaceCompositionPhaseChangePhaseSystem<BasePhaseSystem>::iDmdt
 
     return tIDmdt;
 }
-
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -202,10 +191,8 @@ InterfaceCompositionPhaseChangePhaseSystem
         iDmdtSu_.set(pair, new HashPtrTable<volScalarField>());
         iDmdtSp_.set(pair, new HashPtrTable<volScalarField>());
 
-        forAllConstIter(hashedWordList, compositionModel.species(), memberIter)
+        for (const word& member : compositionModel.species())
         {
-            const word& member = *memberIter;
-
             iDmdtSu_[pair]->set
             (
                 member,
@@ -284,16 +271,8 @@ Foam::InterfaceCompositionPhaseChangePhaseSystem<BasePhaseSystem>::dmdts() const
         const phaseModel& phase = pair.phase1();
         const phaseModel& otherPhase = pair.phase2();
 
-        forAllConstIter(hashedWordList, compositionModel.species(), memberIter)
+        for (const word& member : compositionModel.species())
         {
-            const word& member = *memberIter;
-
-            const word name(IOobject::groupName(member, phase.name()));
-            const word otherName
-            (
-                IOobject::groupName(member, otherPhase.name())
-            );
-
             const volScalarField iDmdt
             (
                 *(*iDmdtSu_[pair])[member]
@@ -344,10 +323,12 @@ massTransfer() const
             massTransferModels_[unorderedPair][unorderedPair.index(phase)]->K()
         );
 
-        forAllConstIter(hashedWordList, compositionModel.species(), memberIter)
+        for
+        (
+            const word& member
+          : compositionModel.species()
+        )
         {
-            const word& member = *memberIter;
-
             const word name(IOobject::groupName(member, phase.name()));
             const word otherName
             (

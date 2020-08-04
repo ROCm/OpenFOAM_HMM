@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +31,6 @@ Description
 
 SourceFiles
     wallLubricationModel.C
-    newWallLubricationModel.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -47,6 +47,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class phasePair;
 
 /*---------------------------------------------------------------------------*\
@@ -59,7 +60,7 @@ class wallLubricationModel
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Phase pair
         const phasePair& pair_;
@@ -103,7 +104,7 @@ public:
 
 
     //- Destructor
-    virtual ~wallLubricationModel();
+    virtual ~wallLubricationModel() = default;
 
 
     // Selectors

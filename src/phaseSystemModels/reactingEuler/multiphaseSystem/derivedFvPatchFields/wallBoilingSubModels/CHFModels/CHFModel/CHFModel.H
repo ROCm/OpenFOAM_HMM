@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd
+    Copyright (C) 2018-2020 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,6 @@ Description
 
 SourceFiles
     CHFModel.C
-    newCHFModel.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -57,15 +56,6 @@ namespace wallBoilingModels
 
 class CHFModel
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        CHFModel(const CHFModel&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const CHFModel&);
-
-
 public:
 
     //- Runtime type information
@@ -85,20 +75,19 @@ public:
     );
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        CHFModel();
+        //- Default construct
+        CHFModel() = default;
+
+        //- Destructor
+        virtual ~CHFModel() = default;
 
 
     // Selectors
 
-        //- Select null constructed
+        //- Select default constructed
         static autoPtr<CHFModel> New(const dictionary& dict);
-
-
-    //- Destructor
-    virtual ~CHFModel();
 
 
     // Member Functions
@@ -119,6 +108,7 @@ public:
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 } // End namespace wallBoilingModels
 } // End namespace Foam
 

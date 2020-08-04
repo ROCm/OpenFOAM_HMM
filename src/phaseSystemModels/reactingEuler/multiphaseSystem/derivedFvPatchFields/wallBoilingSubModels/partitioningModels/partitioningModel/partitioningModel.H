@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +32,6 @@ Description
 
 SourceFiles
     partitioningModel.C
-    newpartitioningModel.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -55,15 +55,6 @@ namespace wallBoilingModels
 
 class partitioningModel
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        partitioningModel(const partitioningModel&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const partitioningModel&);
-
-
 public:
 
     //- Runtime type information
@@ -85,18 +76,18 @@ public:
 
     // Constructors
 
-        //- Construct null
-        partitioningModel();
+        //- Default construct
+        partitioningModel() = default;
 
 
     // Selectors
 
-        //- Select null constructed
+        //- Select default constructed
         static autoPtr<partitioningModel> New(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~partitioningModel();
+    virtual ~partitioningModel() = default;
 
 
     // Member Functions
@@ -112,6 +103,7 @@ public:
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 } // End namespace wallBoilingModels
 } // End namespace Foam
 

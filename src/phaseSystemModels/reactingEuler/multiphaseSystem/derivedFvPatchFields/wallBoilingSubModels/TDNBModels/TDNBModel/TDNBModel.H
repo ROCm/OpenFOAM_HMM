@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd
+    Copyright (C) 2018-2020 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,6 @@ Description
 
 SourceFiles
     TDNBModel.C
-    newTDNBModel.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -57,15 +56,6 @@ namespace wallBoilingModels
 
 class TDNBModel
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        TDNBModel(const TDNBModel&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const TDNBModel&);
-
-
 public:
 
     //- Runtime type information
@@ -85,20 +75,19 @@ public:
     );
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        TDNBModel();
+        //- Default construct
+        TDNBModel() = default;
+
+        //- Destructor
+        virtual ~TDNBModel() = default;
 
 
     // Selectors
 
-        //- Select null constructed
+        //- Select default constructed
         static autoPtr<TDNBModel> New(const dictionary& dict);
-
-
-    //- Destructor
-    virtual ~TDNBModel();
 
 
     // Member Functions
@@ -119,6 +108,7 @@ public:
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 } // End namespace wallBoilingModels
 } // End namespace Foam
 

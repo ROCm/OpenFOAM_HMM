@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +31,6 @@ Description
 
 SourceFiles
     dragModel.C
-    newDragModel.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -46,6 +46,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class phasePair;
 class swarmCorrection;
 
@@ -59,7 +60,7 @@ class dragModel
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Phase pair
         const phasePair& pair_;

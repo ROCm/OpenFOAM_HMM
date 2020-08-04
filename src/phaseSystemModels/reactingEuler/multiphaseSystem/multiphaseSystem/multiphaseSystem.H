@@ -44,6 +44,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class dragModel;
 class virtualMassModel;
 
@@ -55,18 +56,16 @@ class multiphaseSystem
 :
     public phaseSystem
 {
-private:
-
-    // Private typedefs
+    // Private Typedefs
 
         typedef HashTable<scalar, phasePairKey, phasePairKey::hash>
             cAlphaTable;
 
 
-    // Private data
+    // Private Data
 
-        //- The indexed phase-fraction field; e.g., 1 for water, 2 for air, 3
-        //  for oil, etc...
+        //- The indexed phase-fraction field;
+        //  E.g., 1 for water, 2 for air, 3 for oil, etc...
         volScalarField alphas_;
 
         //-
@@ -76,7 +75,7 @@ private:
         const dimensionedScalar deltaN_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         void calcAlphas();
 
@@ -146,11 +145,11 @@ public:
     // Constructors
 
         //- Construct from fvMesh
-        multiphaseSystem(const fvMesh& mesh);
+        explicit multiphaseSystem(const fvMesh& mesh);
 
 
     //- Destructor
-    virtual ~multiphaseSystem();
+    virtual ~multiphaseSystem() = default;
 
 
     // Selectors

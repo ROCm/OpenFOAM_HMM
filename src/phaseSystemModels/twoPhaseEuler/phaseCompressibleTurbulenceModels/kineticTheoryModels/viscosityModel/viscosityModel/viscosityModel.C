@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,10 +51,33 @@ Foam::kineticTheoryModels::viscosityModel::viscosityModel
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::kineticTheoryModels::viscosityModel::~viscosityModel()
-{}
+Foam::autoPtr<Foam::kineticTheoryModels::viscosityModel>
+Foam::kineticTheoryModels::viscosityModel::New
+(
+    const dictionary& dict
+)
+{
+    const word modelType(dict.get<word>("viscosityModel"));
+
+    Info<< "Selecting viscosityModel " << modelType << endl;
+
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+
+    if (!cstrIter.found())
+    {
+        FatalIOErrorInLookup
+        (
+            dict,
+            "viscosityModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
+    }
+
+    return autoPtr<viscosityModel>(cstrIter()(dict));
+}
 
 
 // ************************************************************************* //

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +32,6 @@ Description
 
 SourceFiles
     departureDiameterModel.C
-    newdepartureDiameterModel.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -52,20 +52,11 @@ namespace wallBoilingModels
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class departureDiameterModel Declaration
+                   Class departureDiameterModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class departureDiameterModel
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        departureDiameterModel(const departureDiameterModel&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const departureDiameterModel&);
-
-
 public:
 
     //- Runtime type information
@@ -85,20 +76,19 @@ public:
     );
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        departureDiameterModel();
+        //- Default construct
+        departureDiameterModel() = default;
+
+        //- Destructor
+        virtual ~departureDiameterModel() = default;
 
 
     // Selectors
 
-        //- Select null constructed
+        //- Select default constructed
         static autoPtr<departureDiameterModel> New(const dictionary& dict);
-
-
-    //- Destructor
-    virtual ~departureDiameterModel();
 
 
     // Member Functions
@@ -119,6 +109,7 @@ public:
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 } // End namespace wallBoilingModels
 } // End namespace Foam
 

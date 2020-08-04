@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +31,6 @@ Description
 
 SourceFiles
     swarmCorrection.C
-    newSwarmCorrection.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -46,6 +46,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class phasePair;
 
 /*---------------------------------------------------------------------------*\
@@ -56,7 +57,7 @@ class swarmCorrection
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Phase pair
         const phasePair& pair_;
@@ -93,7 +94,7 @@ public:
 
 
     //- Destructor
-    virtual ~swarmCorrection();
+    virtual ~swarmCorrection() = default;
 
 
     // Selectors

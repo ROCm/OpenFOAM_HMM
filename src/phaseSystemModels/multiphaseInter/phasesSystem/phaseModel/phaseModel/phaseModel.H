@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,10 +28,8 @@ Class
 
 Description
 
-
 SourceFiles
     phaseModel.C
-    newphaseModel.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -51,6 +49,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class phaseSystem;
 
 /*---------------------------------------------------------------------------*\
@@ -110,8 +109,11 @@ public:
 
     // Member Functions
 
-        //- Return the name of this phase
-        const word& name() const;
+        //- The name of this phase
+        const word& name() const
+        {
+            return name_;
+        }
 
         //- Return the system to which this phase belongs
         const phaseSystem& fluid() const;

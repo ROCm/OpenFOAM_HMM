@@ -39,16 +39,33 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::wallBoilingModels::CHFModel::CHFModel()
-{}
+Foam::autoPtr<Foam::wallBoilingModels::CHFModel>
+Foam::wallBoilingModels::CHFModel::New
+(
+    const dictionary& dict
+)
+{
+    const word modelType(dict.get<word>("type"));
 
+    Info<< "Selecting CHFModel: " << modelType << endl;
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
-Foam::wallBoilingModels::CHFModel::~CHFModel()
-{}
+    if (!cstrIter.found())
+    {
+        FatalIOErrorInLookup
+        (
+            dict,
+            "CHFModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << abort(FatalIOError);
+    }
+
+    return cstrIter()(dict);
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

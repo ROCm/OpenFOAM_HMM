@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +32,6 @@ Description
 
 SourceFiles
     diameterModel.C
-    newDiameterModel.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -55,9 +55,10 @@ class diameterModel
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         const dictionary& dict_;
+
         const phaseModel& phase_;
 
 
@@ -92,7 +93,7 @@ public:
 
 
     //- Destructor
-    virtual ~diameterModel();
+    virtual ~diameterModel() = default;
 
 
     // Selectors

@@ -31,7 +31,6 @@ Description
 
 SourceFiles
     nucleationSiteModel.C
-    newnucleationSiteModel.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -48,6 +47,7 @@ SourceFiles
 
 namespace Foam
 {
+
 namespace wallBoilingModels
 {
 
@@ -57,15 +57,6 @@ namespace wallBoilingModels
 
 class nucleationSiteModel
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        nucleationSiteModel(const nucleationSiteModel&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const nucleationSiteModel&);
-
-
 public:
 
     //- Runtime type information
@@ -87,18 +78,18 @@ public:
 
     // Constructors
 
-        //- Construct null
-        nucleationSiteModel();
+        //- Default construct
+        nucleationSiteModel() = default;
 
 
     // Selectors
 
-        //- Select null constructed
+        //- Select default constructed
         static autoPtr<nucleationSiteModel> New(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~nucleationSiteModel();
+    virtual ~nucleationSiteModel() = default;
 
 
     // Member Functions
@@ -119,6 +110,7 @@ public:
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 } // End namespace wallBoilingModels
 } // End namespace Foam
 

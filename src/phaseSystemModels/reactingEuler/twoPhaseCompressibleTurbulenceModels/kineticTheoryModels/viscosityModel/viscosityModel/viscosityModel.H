@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,18 +55,9 @@ namespace kineticTheoryModels
 
 class viscosityModel
 {
-    // Private member functions
-
-        //- Disallow default bitwise copy construct
-        viscosityModel(const viscosityModel&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const viscosityModel&);
-
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         const dictionary& dict_;
 
@@ -91,7 +83,7 @@ public:
     // Constructors
 
         //- Construct from components
-        viscosityModel(const dictionary& dict);
+        explicit viscosityModel(const dictionary& dict);
 
 
     // Selectors
@@ -103,7 +95,7 @@ public:
 
 
     //- Destructor
-    virtual ~viscosityModel();
+    virtual ~viscosityModel() = default;
 
 
     // Member Functions

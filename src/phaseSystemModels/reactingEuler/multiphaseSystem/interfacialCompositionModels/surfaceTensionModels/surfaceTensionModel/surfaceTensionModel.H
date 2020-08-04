@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +31,6 @@ Description
 
 SourceFiles
     surfaceTensionModel.C
-    newAspectRatioModel.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -46,6 +46,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class phasePair;
 
 /*---------------------------------------------------------------------------*\
@@ -58,7 +59,7 @@ class surfaceTensionModel
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Phase pair
         const phasePair& pair_;
@@ -85,7 +86,7 @@ public:
     );
 
 
-    // Static data members
+    // Static Data Members
 
         //- Coefficient dimensions
         static const dimensionSet dimSigma;
@@ -103,7 +104,7 @@ public:
 
 
     //- Destructor
-    virtual ~surfaceTensionModel();
+    virtual ~surfaceTensionModel() = default;
 
 
     // Selectors

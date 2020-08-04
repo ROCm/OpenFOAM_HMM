@@ -87,7 +87,7 @@ void Foam::multiphaseSystem::solveAlphas()
             mesh_
         ),
         mesh_,
-        dimensionedScalar("one", dimless, 1)
+        dimensionedScalar("1", dimless, 1)
     );
     forAll(stationaryPhases(), stationaryPhasei)
     {
@@ -223,7 +223,7 @@ void Foam::multiphaseSystem::solveAlphas()
                 mesh_
             ),
             mesh_,
-            dimensionedScalar("zero", dimless/dimTime, 0)
+            dimensionedScalar(dimless/dimTime, Zero)
         );
 
         volScalarField::Internal Su
@@ -316,7 +316,7 @@ void Foam::multiphaseSystem::solveAlphas()
             mesh_
         ),
         mesh_,
-        dimensionedScalar("zero", dimless, 0)
+        dimensionedScalar(dimless, Zero)
     );
     forAll(movingPhases(), movingPhasei)
     {
@@ -521,7 +521,7 @@ Foam::multiphaseSystem::multiphaseSystem
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedScalar("zero", dimless, 0)
+        dimensionedScalar(dimless, Zero)
     ),
 
     cAlphas_(lookup("interfaceCompression")),
@@ -540,12 +540,6 @@ Foam::multiphaseSystem::multiphaseSystem
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::multiphaseSystem::~multiphaseSystem()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::surfaceScalarField> Foam::multiphaseSystem::surfaceTension
@@ -559,7 +553,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::multiphaseSystem::surfaceTension
         (
             "surfaceTension",
             mesh_,
-            dimensionedScalar("zero", dimensionSet(1, -2, -2, 0, 0), 0)
+            dimensionedScalar(dimensionSet(1, -2, -2, 0, 0), Zero)
         )
     );
 
@@ -602,7 +596,7 @@ Foam::multiphaseSystem::nearInterface() const
         (
             "nearInterface",
             mesh_,
-            dimensionedScalar("zero", dimless, 0)
+            dimensionedScalar(dimless, Zero)
         )
     );
 
@@ -660,7 +654,7 @@ void Foam::multiphaseSystem::solve()
                         mesh_
                     ),
                     mesh_,
-                    dimensionedScalar("zero", dimensionSet(0, 3, -1, 0, 0), 0)
+                    dimensionedScalar(dimensionSet(0, 3, -1, 0, 0), Zero)
                 )
             );
         }

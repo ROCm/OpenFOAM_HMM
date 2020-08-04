@@ -30,7 +30,6 @@ Description
 
 SourceFiles
     dragModel.C
-    newDragModel.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -54,7 +53,7 @@ class dragModel
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         const dictionary& interfaceDict_;
         const phaseModel& phase1_;
@@ -88,21 +87,21 @@ public:
 
         dragModel
         (
-            const dictionary& interfaceDict,
+            const dictionary& dict,
             const phaseModel& phase1,
             const phaseModel& phase2
         );
 
 
     //- Destructor
-    virtual ~dragModel();
+    virtual ~dragModel() = default;
 
 
     // Selectors
 
         static autoPtr<dragModel> New
         (
-            const dictionary& interfaceDict,
+            const dictionary& dict,
             const phaseModel& phase1,
             const phaseModel& phase2
         );

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +55,7 @@ class isothermal
 :
     public diameterModel
 {
-    // Private data
+    // Private Data
 
         //- Reference diameter for the isothermal expansion
         dimensionedScalar d0_;
@@ -80,7 +81,7 @@ public:
 
 
     //- Destructor
-    virtual ~isothermal();
+    virtual ~isothermal() = default;
 
 
     // Member Functions

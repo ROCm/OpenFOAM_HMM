@@ -30,7 +30,8 @@ License
 
 // * * * * * * * * * * * * * * * * Selector  * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::twoPhaseSystem> Foam::twoPhaseSystem::New
+Foam::autoPtr<Foam::twoPhaseSystem>
+Foam::twoPhaseSystem::New
 (
     const fvMesh& mesh
 )

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,7 +35,6 @@ namespace Foam
 namespace kineticTheoryModels
 {
     defineTypeNameAndDebug(frictionalStressModel, 0);
-
     defineRunTimeSelectionTable(frictionalStressModel, dictionary);
 }
 }
@@ -51,10 +51,33 @@ Foam::kineticTheoryModels::frictionalStressModel::frictionalStressModel
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::kineticTheoryModels::frictionalStressModel::~frictionalStressModel()
-{}
+Foam::autoPtr<Foam::kineticTheoryModels::frictionalStressModel>
+Foam::kineticTheoryModels::frictionalStressModel::New
+(
+    const dictionary& dict
+)
+{
+    const word modelType(dict.get<word>("frictionalStressModel"));
+
+    Info<< "Selecting frictionalStressModel " << modelType << endl;
+
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+
+    if (!cstrIter.found())
+    {
+        FatalIOErrorInLookup
+        (
+            dict,
+            "frictionalStressModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << abort(FatalIOError);
+    }
+
+    return autoPtr<frictionalStressModel>(cstrIter()(dict));
+}
 
 
 // ************************************************************************* //

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,6 +46,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class phasePair;
 
 /*---------------------------------------------------------------------------*\
@@ -55,7 +57,7 @@ class phaseTransferModel
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Phase pair
         const phasePair& pair_;
@@ -82,7 +84,7 @@ public:
         );
 
 
-    // Static data members
+    // Static Data Members
 
         //- Mass transfer rate dimensions
         static const dimensionSet dimDmdt;
@@ -99,7 +101,7 @@ public:
 
 
     //- Destructor
-    virtual ~phaseTransferModel();
+    virtual ~phaseTransferModel() = default;
 
 
     // Selectors

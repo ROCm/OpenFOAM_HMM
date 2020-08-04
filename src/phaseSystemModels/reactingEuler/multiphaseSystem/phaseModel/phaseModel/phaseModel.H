@@ -48,6 +48,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class phaseSystem;
 class diameterModel;
 
@@ -59,7 +60,7 @@ class phaseModel
 :
     public volScalarField
 {
-    // Private data
+    // Private Data
 
         //- Reference to the phaseSystem to which this phase belongs
         const phaseSystem& fluid_;
@@ -145,7 +146,7 @@ public:
 
             autoPtr<phaseModel> operator()(Istream& is) const
             {
-                indexCounter_++;
+                ++indexCounter_;
                 return autoPtr<phaseModel>
                 (
                     phaseModel::New(fluid_, word(is), indexCounter_)

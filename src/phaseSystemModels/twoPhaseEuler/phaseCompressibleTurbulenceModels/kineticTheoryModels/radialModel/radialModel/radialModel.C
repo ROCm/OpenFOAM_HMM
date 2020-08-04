@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,10 +52,33 @@ Foam::kineticTheoryModels::radialModel::radialModel
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::kineticTheoryModels::radialModel::~radialModel()
-{}
+Foam::autoPtr<Foam::kineticTheoryModels::radialModel>
+Foam::kineticTheoryModels::radialModel::New
+(
+    const dictionary& dict
+)
+{
+    const word modelType(dict.get<word>("radialModel"));
+
+    Info<< "Selecting radialModel " << modelType << endl;
+
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+
+    if (!cstrIter.found())
+    {
+        FatalIOErrorInLookup
+        (
+            dict,
+            "radialModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
+    }
+
+    return autoPtr<radialModel>(cstrIter()(dict));
+}
 
 
 // ************************************************************************* //

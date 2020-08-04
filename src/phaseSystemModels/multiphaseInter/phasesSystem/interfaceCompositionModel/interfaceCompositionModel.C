@@ -39,7 +39,7 @@ namespace Foam
 
 
 const Foam::Enum<Foam::interfaceCompositionModel::modelVariable>
-Foam::interfaceCompositionModel::modelVariableNames
+Foam::interfaceCompositionModel::modelVariableNames_
 {
     { modelVariable::T, "temperature" },
     { modelVariable::P, "pressure" },
@@ -58,7 +58,7 @@ Foam::interfaceCompositionModel::interfaceCompositionModel
 :
     modelVariable_
     (
-        modelVariableNames.getOrDefault
+        modelVariableNames_.getOrDefault
         (
             "variable",
             dict,
@@ -70,6 +70,45 @@ Foam::interfaceCompositionModel::interfaceCompositionModel
     speciesName_(dict.getOrDefault<word>("species", "none")),
     mesh_(pair_.from().mesh())
 {}
+
+
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::interfaceCompositionModel>
+Foam::interfaceCompositionModel::New
+(
+    const dictionary& dict,
+    const phasePair& pair
+)
+{
+    const word modelType
+    (
+        dict.get<word>("type")
+      + "<"
+      + pair.phase1().thermo().type()
+      + ","
+      + pair.phase2().thermo().type()
+      + ">"
+    );
+
+    Info<< "Selecting interfaceCompositionModel for "
+        << pair << ": " << modelType << endl;
+
+    const auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+
+    if (!cstrIter.found())
+    {
+        FatalIOErrorInLookup
+        (
+            dict,
+            "interfaceCompositionModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
+    }
+
+    return cstrIter()(dict, pair);
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -86,9 +125,9 @@ const Foam::phasePair& Foam::interfaceCompositionModel::pair() const
 }
 
 
-const Foam::word Foam::interfaceCompositionModel::variable() const
+const Foam::word& Foam::interfaceCompositionModel::variable() const
 {
-    return modelVariableNames[modelVariable_];
+    return modelVariableNames_[modelVariable_];
 }
 
 
@@ -102,5 +141,6 @@ bool Foam::interfaceCompositionModel::includeVolChange()
 {
     return includeVolChange_;
 }
+
 
 // ************************************************************************* //

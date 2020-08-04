@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,6 +50,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class phaseModel;
 class phasePair;
 
@@ -60,7 +62,7 @@ class interfaceCompositionModel
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Phase pair
         const phasePair& pair_;
@@ -118,8 +120,11 @@ public:
         //- Update the composition
         virtual void update(const volScalarField& Tf) = 0;
 
-        //- Return the transferring species names
-        const hashedWordList& species() const;
+        //- The transferring species names
+        const hashedWordList& species() const
+        {
+            return speciesNames_;
+        }
 
         //- Returns whether the species is transported by the model and
         //- provides the name of the diffused species

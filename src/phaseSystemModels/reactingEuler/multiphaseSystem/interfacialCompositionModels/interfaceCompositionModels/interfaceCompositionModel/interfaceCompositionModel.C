@@ -51,13 +51,46 @@ Foam::interfaceCompositionModel::interfaceCompositionModel
 {}
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-const Foam::hashedWordList& Foam::interfaceCompositionModel::species() const
+Foam::autoPtr<Foam::interfaceCompositionModel>
+Foam::interfaceCompositionModel::New
+(
+    const dictionary& dict,
+    const phasePair& pair
+)
 {
-    return speciesNames_;
+    const word modelType
+    (
+        dict.get<word>("type")
+      + "<"
+      + pair.phase1().thermo().type()
+      + ","
+      + pair.phase2().thermo().type()
+      + ">"
+    );
+
+    Info<< "Selecting interfaceCompositionModel for "
+        << pair << ": " << modelType << endl;
+
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+
+    if (!cstrIter.found())
+    {
+        FatalIOErrorInLookup
+        (
+            dict,
+            "interfaceCompositionModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << abort(FatalIOError);
+    }
+
+    return cstrIter()(dict, pair);
 }
 
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::interfaceCompositionModel::transports(word& speciesName) const
 {

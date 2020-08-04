@@ -27,11 +27,10 @@ Class
     Foam::diameterModel
 
 Description
-    A2stract base-class for dispersed-phase particle diameter models.
+    Abstract base-class for dispersed-phase particle diameter models.
 
 SourceFiles
     diameterModel.C
-    newDiameterModel.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -53,12 +52,12 @@ namespace Foam
 
 class diameterModel
 {
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         dictionary diameterProperties_;
+
         const phaseModel& phase_;
 
 
@@ -76,10 +75,10 @@ public:
             diameterModel,
             dictionary,
             (
-                const dictionary& diameterProperties,
+                const dictionary& dict,
                 const phaseModel& phase
             ),
-            (diameterProperties, phase)
+            (dict, phase)
         );
 
 
@@ -87,20 +86,20 @@ public:
 
         diameterModel
         (
-            const dictionary& diameterProperties,
+            const dictionary& dict,
             const phaseModel& phase
         );
 
 
     //- Destructor
-    virtual ~diameterModel();
+    virtual ~diameterModel() = default;
 
 
     // Selectors
 
         static autoPtr<diameterModel> New
         (
-            const dictionary& diameterProperties,
+            const dictionary& dict,
             const phaseModel& phase
         );
 
@@ -126,7 +125,7 @@ public:
         virtual void correct();
 
         //- Read phaseProperties dictionary
-        virtual bool read(const dictionary& phaseProperties) = 0;
+        virtual bool read(const dictionary& dict) = 0;
 };
 
 

@@ -59,12 +59,6 @@ Foam::diameterModels::constant::constant
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::diameterModels::constant::~constant()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField> Foam::diameterModels::constant::d() const

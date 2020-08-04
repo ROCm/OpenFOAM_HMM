@@ -6,10 +6,8 @@ phasePair/orderedPhasePair.C
 
 twoPhaseSystem/twoPhaseSystem.C
 
-
 diameter = diameterModels
 $(diameter)/diameterModel/diameterModel.C
-$(diameter)/diameterModel/diameterModelNew.C
 $(diameter)/constantDiameter/constantDiameter.C
 $(diameter)/isothermalDiameter/isothermalDiameter.C
 
@@ -23,7 +21,6 @@ $(IATEsources)/randomCoalescence/randomCoalescence.C
 
 blending = BlendedInterfacialModel/blendingMethods
 $(blending)/blendingMethod/blendingMethod.C
-$(blending)/blendingMethod/blendingMethodNew.C
 $(blending)/noBlending/noBlending.C
 $(blending)/linear/linear.C
 $(blending)/hyperbolic/hyperbolic.C
@@ -33,7 +30,6 @@ interfacialModels/wallDependentModel/wallDependentModel.C
 
 aspectRatio = interfacialModels/aspectRatioModels
 $(aspectRatio)/aspectRatioModel/aspectRatioModel.C
-$(aspectRatio)/aspectRatioModel/aspectRatioModelNew.C
 $(aspectRatio)/constantAspectRatio/constantAspectRatio.C
 $(aspectRatio)/TomiyamaAspectRatio/TomiyamaAspectRatio.C
 $(aspectRatio)/VakhrushevEfremov/VakhrushevEfremov.C
@@ -41,7 +37,6 @@ $(aspectRatio)/Wellek/Wellek.C
 
 drag = interfacialModels/dragModels
 $(drag)/dragModel/dragModel.C
-$(drag)/dragModel/dragModelNew.C
 $(drag)/segregated/segregated.C
 $(drag)/Ergun/Ergun.C
 $(drag)/Gibilaro/Gibilaro.C
@@ -57,7 +52,6 @@ $(drag)/IshiiZuber/IshiiZuber.C
 
 lift = interfacialModels/liftModels
 $(lift)/liftModel/liftModel.C
-$(lift)/liftModel/liftModelNew.C
 $(lift)/noLift/noLift.C
 $(lift)/constantLiftCoefficient/constantLiftCoefficient.C
 $(lift)/Moraga/Moraga.C
@@ -66,19 +60,16 @@ $(lift)/TomiyamaLift/TomiyamaLift.C
 
 heatTransfer = interfacialModels/heatTransferModels
 $(heatTransfer)/heatTransferModel/heatTransferModel.C
-$(heatTransfer)/heatTransferModel/heatTransferModelNew.C
 $(heatTransfer)/RanzMarshall/RanzMarshall.C
 $(heatTransfer)/sphericalHeatTransfer/sphericalHeatTransfer.C
 
 swarm = interfacialModels/swarmCorrections
 $(swarm)/swarmCorrection/swarmCorrection.C
-$(swarm)/swarmCorrection/swarmCorrectionNew.C
 $(swarm)/noSwarm/noSwarm.C
 $(swarm)/TomiyamaSwarm/TomiyamaSwarm.C
 
 dispersion = interfacialModels/turbulentDispersionModels
 $(dispersion)/turbulentDispersionModel/turbulentDispersionModel.C
-$(dispersion)/turbulentDispersionModel/turbulentDispersionModelNew.C
 $(dispersion)/noTurbulentDispersion/noTurbulentDispersion.C
 $(dispersion)/constantTurbulentDispersionCoefficient/constantTurbulentDispersionCoefficient.C
 $(dispersion)/Burns/Burns.C
@@ -87,14 +78,12 @@ $(dispersion)/LopezDeBertodano/LopezDeBertodano.C
 
 virtualMass = interfacialModels/virtualMassModels
 $(virtualMass)/virtualMassModel/virtualMassModel.C
-$(virtualMass)/virtualMassModel/virtualMassModelNew.C
 $(virtualMass)/noVirtualMass/noVirtualMass.C
 $(virtualMass)/constantVirtualMassCoefficient/constantVirtualMassCoefficient.C
 $(virtualMass)/Lamb/Lamb.C
 
 lubrication = interfacialModels/wallLubricationModels
 $(lubrication)/wallLubricationModel/wallLubricationModel.C
-$(lubrication)/wallLubricationModel/wallLubricationModelNew.C
 $(lubrication)/noWallLubrication/noWallLubrication.C
 $(lubrication)/Antal/Antal.C
 $(lubrication)/Frank/Frank.C

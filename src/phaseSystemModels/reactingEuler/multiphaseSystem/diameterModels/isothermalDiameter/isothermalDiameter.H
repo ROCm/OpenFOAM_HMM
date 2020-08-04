@@ -54,7 +54,7 @@ class isothermal
 :
     public diameterModel
 {
-    // Private data
+    // Private Data
 
         //- Reference diameter for the isothermal expansion
         dimensionedScalar d0_;
@@ -83,7 +83,7 @@ public:
 
 
     //- Destructor
-    virtual ~isothermal();
+    virtual ~isothermal() = default;
 
 
     // Member Functions

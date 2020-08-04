@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +31,6 @@ Description
 
 SourceFiles
     saturationModel.C
-    newSaturationModel.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -57,11 +57,11 @@ class saturationModel
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        saturationModel(const saturationModel&);
+        //- No copy construct
+        saturationModel(const saturationModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const saturationModel&);
+        //- No copy assignment
+        void operator=(const saturationModel&) = delete;
 
 
 public:
@@ -85,13 +85,13 @@ public:
 
     // Constructors
 
-        //- Construct null
-        saturationModel(const objectRegistry& db);
+        //- Default constructed (from registry)
+        explicit saturationModel(const objectRegistry& db);
 
 
     // Selectors
 
-        //- Select null constructed
+        //- Select default constructed
         static autoPtr<saturationModel> New
         (
             const dictionary& dict,
@@ -100,7 +100,7 @@ public:
 
 
     //- Destructor
-    virtual ~saturationModel();
+    virtual ~saturationModel() = default;
 
 
     // Member Functions

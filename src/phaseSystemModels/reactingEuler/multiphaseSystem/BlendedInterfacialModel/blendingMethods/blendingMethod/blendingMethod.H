@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,7 +75,7 @@ public:
     // Constructors
 
         //- Construct from a dictionary
-        blendingMethod
+        explicit blendingMethod
         (
             const dictionary& dict
         );
@@ -91,7 +92,7 @@ public:
 
 
     //- Destructor
-    virtual ~blendingMethod();
+    virtual ~blendingMethod() = default;
 
 
     // Member Functions

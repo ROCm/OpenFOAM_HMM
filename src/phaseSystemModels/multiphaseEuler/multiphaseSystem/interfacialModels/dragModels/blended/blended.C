@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,12 +59,6 @@ Foam::dragModels::blended::blended
     dragModel(interfaceDict, phase1, phase2),
     dragModel1_(New(interfaceDict.subDict(phase1.name()), phase1, phase2)),
     dragModel2_(New(interfaceDict.subDict(phase2.name()), phase2, phase1))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::dragModels::blended::~blended()
 {}
 
 

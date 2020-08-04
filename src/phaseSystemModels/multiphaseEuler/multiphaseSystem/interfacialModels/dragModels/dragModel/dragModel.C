@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,23 +41,50 @@ namespace Foam
 
 Foam::dragModel::dragModel
 (
-    const dictionary& interfaceDict,
+    const dictionary& dict,
     const phaseModel& phase1,
     const phaseModel& phase2
 )
 :
-    interfaceDict_(interfaceDict),
+    interfaceDict_(dict),
     phase1_(phase1),
     phase2_(phase2),
-    residualPhaseFraction_("residualPhaseFraction", dimless, interfaceDict),
-    residualSlip_("residualSlip", dimVelocity, interfaceDict)
+    residualPhaseFraction_("residualPhaseFraction", dimless, dict),
+    residualSlip_("residualSlip", dimVelocity, dict)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::dragModel::~dragModel()
-{}
+Foam::autoPtr<Foam::dragModel> Foam::dragModel::New
+(
+    const dictionary& dict,
+    const phaseModel& phase1,
+    const phaseModel& phase2
+)
+{
+    const word modelType(dict.get<word>("type"));
+
+    Info<< "Selecting dragModel for phase "
+        << phase1.name()
+        << ": "
+        << modelType << endl;
+
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+
+    if (!cstrIter.found())
+    {
+        FatalIOErrorInLookup
+        (
+            dict,
+            "dragModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
+    }
+
+    return cstrIter()(dict, phase1, phase2);
+}
 
 
 // ************************************************************************* //

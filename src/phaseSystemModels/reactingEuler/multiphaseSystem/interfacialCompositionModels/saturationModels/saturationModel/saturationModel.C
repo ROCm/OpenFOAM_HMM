@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2018 OpenFOAM Foundation
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,10 +53,34 @@ Foam::saturationModel::saturationModel(const objectRegistry& db)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::saturationModel::~saturationModel()
-{}
+Foam::autoPtr<Foam::saturationModel>
+Foam::saturationModel::New
+(
+    const dictionary& dict,
+    const objectRegistry& db
+)
+{
+    const word modelType(dict.get<word>("type"));
+
+    Info<< "Selecting saturationModel: " << modelType << endl;
+
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+
+    if (!cstrIter.found())
+    {
+        FatalIOErrorInLookup
+        (
+            dict,
+            "saturationModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << abort(FatalIOError);
+    }
+
+    return cstrIter()(dict, db);
+}
 
 
 // ************************************************************************* //

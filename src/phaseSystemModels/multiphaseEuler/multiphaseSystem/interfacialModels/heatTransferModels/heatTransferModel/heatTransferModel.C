@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,23 +41,54 @@ namespace Foam
 
 Foam::heatTransferModel::heatTransferModel
 (
-    const dictionary& interfaceDict,
+    const dictionary& dict,
     const volScalarField& alpha1,
     const phaseModel& phase1,
     const phaseModel& phase2
 )
 :
-    interfaceDict_(interfaceDict),
+    interfaceDict_(dict),
     alpha1_(alpha1),
     phase1_(phase1),
     phase2_(phase2)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::heatTransferModel::~heatTransferModel()
-{}
+Foam::autoPtr<Foam::heatTransferModel> Foam::heatTransferModel::New
+(
+    const dictionary& dict,
+    const volScalarField& alpha1,
+    const phaseModel& phase1,
+    const phaseModel& phase2
+)
+{
+    const word modelType
+    (
+        dict.get<word>("heatTransferModel" + phase1.name())
+    );
+
+    Info<< "Selecting heatTransferModel for phase "
+        << phase1.name()
+        << ": "
+        << modelType << endl;
+
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+
+    if (!cstrIter.found())
+    {
+        FatalIOErrorInLookup
+        (
+            dict,
+            "heatTransferModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
+    }
+
+    return cstrIter()(dict, alpha1, phase1, phase2);
+}
 
 
 // ************************************************************************* //

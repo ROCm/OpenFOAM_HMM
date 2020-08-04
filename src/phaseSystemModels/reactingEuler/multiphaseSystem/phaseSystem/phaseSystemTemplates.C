@@ -331,7 +331,7 @@ void Foam::phaseSystem::fillFields
                     this->mesh_
                 ),
                 this->mesh_,
-                dimensioned<Type>("zero", dims, pTraits<Type>::zero)
+                dimensioned<Type>(dims, Zero)
             )
         );
     }
@@ -367,7 +367,7 @@ void Foam::phaseSystem::fillFields
                     this->mesh_
                 ),
                 this->mesh_,
-                dimensioned<Type>("zero", dims, pTraits<Type>::zero)
+                dimensioned<Type>(dims, Zero)
             )
         );
     }

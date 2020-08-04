@@ -73,7 +73,7 @@ public:
 
 
     //- Destructor
-    virtual ~interface();
+    virtual ~interface() = default;
 
 
     // Member Functions

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +32,6 @@ Description
 
 SourceFiles
     departureFrequencyModel.C
-    newdepartureFrequencyModel.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -52,20 +52,11 @@ namespace wallBoilingModels
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class departureFrequencyModel Declaration
+                   Class departureFrequencyModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class departureFrequencyModel
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        departureFrequencyModel(const departureFrequencyModel&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const departureFrequencyModel&);
-
-
 public:
 
     //- Runtime type information
@@ -85,20 +76,19 @@ public:
     );
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        departureFrequencyModel();
+        //- Default construct
+        departureFrequencyModel() = default;
+
+        //- Destructor
+        virtual ~departureFrequencyModel() = default;
 
 
     // Selectors
 
-        //- Select null constructed
+        //- Select default constructed
         static autoPtr<departureFrequencyModel> New(const dictionary& dict);
-
-
-    //- Destructor
-    virtual ~departureFrequencyModel();
 
 
     // Member Functions
@@ -117,6 +107,7 @@ public:
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 } // End namespace wallBoilingModels
 } // End namespace Foam
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,10 +52,33 @@ Foam::kineticTheoryModels::conductivityModel::conductivityModel
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::kineticTheoryModels::conductivityModel::~conductivityModel()
-{}
+Foam::autoPtr<Foam::kineticTheoryModels::conductivityModel>
+Foam::kineticTheoryModels::conductivityModel::New
+(
+    const dictionary& dict
+)
+{
+    const word modelType(dict.get<word>("conductivityModel"));
+
+    Info<< "Selecting conductivityModel " << modelType << endl;
+
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+
+    if (!cstrIter.found())
+    {
+        FatalIOErrorInLookup
+        (
+            dict,
+            "conductivityModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
+    }
+
+    return autoPtr<conductivityModel>(cstrIter()(dict));
+}
 
 
 // ************************************************************************* //

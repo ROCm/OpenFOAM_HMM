@@ -1,5 +1,4 @@
 phaseModel/phaseModel/phaseModel.C
-phaseModel/phaseModel/phaseModelNew.C
 phaseModel/phaseModel/phaseModels.C
 
 phasePair/phasePairKey.C
@@ -16,7 +15,6 @@ reactionThermo/hRefConstThermos.C
 
 diameter = diameterModels
 $(diameter)/diameterModel/diameterModel.C
-$(diameter)/diameterModel/diameterModelNew.C
 $(diameter)/constantDiameter/constantDiameter.C
 $(diameter)/isothermalDiameter/isothermalDiameter.C
 $(diameter)/linearTsubDiameter/linearTsubDiameter.C
@@ -65,7 +63,6 @@ $(nucleation)/wallBoiling/wallBoiling.C
 
 blending = BlendedInterfacialModel/blendingMethods
 $(blending)/blendingMethod/blendingMethod.C
-$(blending)/blendingMethod/blendingMethodNew.C
 $(blending)/noBlending/noBlending.C
 $(blending)/linear/linear.C
 $(blending)/hyperbolic/hyperbolic.C
@@ -75,7 +72,6 @@ interfacialModels/wallDependentModel/wallDependentModel.C
 
 aspectRatio = interfacialModels/aspectRatioModels
 $(aspectRatio)/aspectRatioModel/aspectRatioModel.C
-$(aspectRatio)/aspectRatioModel/aspectRatioModelNew.C
 $(aspectRatio)/constantAspectRatio/constantAspectRatio.C
 $(aspectRatio)/TomiyamaAspectRatio/TomiyamaAspectRatio.C
 $(aspectRatio)/VakhrushevEfremov/VakhrushevEfremov.C
@@ -83,7 +79,6 @@ $(aspectRatio)/Wellek/Wellek.C
 
 drag = interfacialModels/dragModels
 $(drag)/dragModel/dragModel.C
-$(drag)/dragModel/dragModelNew.C
 $(drag)/Beetstra/Beetstra.C
 $(drag)/segregated/segregated.C
 $(drag)/Ergun/Ergun.C
@@ -103,7 +98,6 @@ $(drag)/AttouFerschneider/AttouFerschneider.C
 
 lift = interfacialModels/liftModels
 $(lift)/liftModel/liftModel.C
-$(lift)/liftModel/liftModelNew.C
 $(lift)/noLift/noLift.C
 $(lift)/constantLiftCoefficient/constantLiftCoefficient.C
 $(lift)/Moraga/Moraga.C
@@ -113,25 +107,21 @@ $(lift)/wallDampedLift/wallDampedLift.C
 
 heatTransfer = interfacialModels/heatTransferModels
 $(heatTransfer)/heatTransferModel/heatTransferModel.C
-$(heatTransfer)/heatTransferModel/heatTransferModelNew.C
 $(heatTransfer)/constantNu/constantNuHeatTransfer.C
 $(heatTransfer)/RanzMarshall/RanzMarshall.C
 $(heatTransfer)/sphericalHeatTransfer/sphericalHeatTransfer.C
 
 phaseTransfer = interfacialModels/phaseTransferModels
 $(phaseTransfer)/phaseTransferModel/phaseTransferModel.C
-$(phaseTransfer)/phaseTransferModel/phaseTransferModelNew.C
 $(phaseTransfer)/deposition/deposition.C
 
 swarm = interfacialModels/swarmCorrections
 $(swarm)/swarmCorrection/swarmCorrection.C
-$(swarm)/swarmCorrection/swarmCorrectionNew.C
 $(swarm)/noSwarm/noSwarm.C
 $(swarm)/TomiyamaSwarm/TomiyamaSwarm.C
 
 dispersion = interfacialModels/turbulentDispersionModels
 $(dispersion)/turbulentDispersionModel/turbulentDispersionModel.C
-$(dispersion)/turbulentDispersionModel/turbulentDispersionModelNew.C
 $(dispersion)/noTurbulentDispersion/noTurbulentDispersion.C
 $(dispersion)/constantTurbulentDispersionCoefficient/constantTurbulentDispersionCoefficient.C
 $(dispersion)/Burns/Burns.C
@@ -140,14 +130,12 @@ $(dispersion)/LopezDeBertodano/LopezDeBertodano.C
 
 virtualMass = interfacialModels/virtualMassModels
 $(virtualMass)/virtualMassModel/virtualMassModel.C
-$(virtualMass)/virtualMassModel/virtualMassModelNew.C
 $(virtualMass)/noVirtualMass/noVirtualMass.C
 $(virtualMass)/constantVirtualMassCoefficient/constantVirtualMassCoefficient.C
 $(virtualMass)/Lamb/Lamb.C
 
 damping = interfacialModels/wallDampingModels
 $(damping)/wallDampingModel/wallDampingModel.C
-$(damping)/wallDampingModel/wallDampingModelNew.C
 $(damping)/noWallDamping/noWallDamping.C
 $(damping)/interpolated/interpolatedWallDamping.C
 $(damping)/linear/linearWallDamping.C
@@ -156,7 +144,6 @@ $(damping)/sine/sineWallDamping.C
 
 lubrication = interfacialModels/wallLubricationModels
 $(lubrication)/wallLubricationModel/wallLubricationModel.C
-$(lubrication)/wallLubricationModel/wallLubricationModelNew.C
 $(lubrication)/noWallLubrication/noWallLubrication.C
 $(lubrication)/Antal/Antal.C
 $(lubrication)/Frank/Frank.C
@@ -164,18 +151,15 @@ $(lubrication)/TomiyamaWallLubrication/TomiyamaWallLubrication.C
 
 composition = interfacialCompositionModels/interfaceCompositionModels
 $(composition)/interfaceCompositionModel/interfaceCompositionModel.C
-$(composition)/interfaceCompositionModel/interfaceCompositionModelNew.C
 $(composition)/InterfaceCompositionModel/InterfaceCompositionModels.C
 
 massTransfer = interfacialCompositionModels/massTransferModels
 $(massTransfer)/massTransferModel/massTransferModel.C
-$(massTransfer)/massTransferModel/massTransferModelNew.C
 $(massTransfer)/Frossling/Frossling.C
 $(massTransfer)/sphericalMassTransfer/sphericalMassTransfer.C
 
 saturation = interfacialCompositionModels/saturationModels
 $(saturation)/saturationModel/saturationModel.C
-$(saturation)/saturationModel/saturationModelNew.C
 $(saturation)/Antoine/Antoine.C
 $(saturation)/AntoineExtended/AntoineExtended.C
 $(saturation)/ArdenBuck/ArdenBuck.C
@@ -185,7 +169,6 @@ $(saturation)/constantSaturationConditions/constantSaturationConditions.C
 
 surfaceTension = interfacialCompositionModels/surfaceTensionModels
 $(surfaceTension)/surfaceTensionModel/surfaceTensionModel.C
-$(surfaceTension)/surfaceTensionModel/surfaceTensionModelNew.C
 $(surfaceTension)/constantSurfaceTensionCoefficient/constantSurfaceTensionCoefficient.C
 
 
@@ -204,7 +187,6 @@ wallBoilingSubModels = derivedFvPatchFields/wallBoilingSubModels
 
 partitioning = $(wallBoilingSubModels)/partitioningModels
 $(partitioning)/partitioningModel/partitioningModel.C
-$(partitioning)/partitioningModel/partitioningModelNew.C
 $(partitioning)/phaseFraction/phaseFraction.C
 $(partitioning)/Lavieville/Lavieville.C
 $(partitioning)/cosine/cosine.C
@@ -212,48 +194,39 @@ $(partitioning)/linear/linear.C
 
 nucleationSite = $(wallBoilingSubModels)/nucleationSiteModels
 $(nucleationSite)/nucleationSiteModel/nucleationSiteModel.C
-$(nucleationSite)/nucleationSiteModel/nucleationSiteModelNew.C
 $(nucleationSite)/LemmertChawla/LemmertChawla.C
 
 departureDiam = $(wallBoilingSubModels)/departureDiameterModels
 $(departureDiam)/departureDiameterModel/departureDiameterModel.C
-$(departureDiam)/departureDiameterModel/departureDiameterModelNew.C
 $(departureDiam)/TolubinskiKostanchuk/TolubinskiKostanchuk.C
 $(departureDiam)/KocamustafaogullariIshii/KocamustafaogullariIshii.C
 
 departureFreq = $(wallBoilingSubModels)/departureFrequencyModels
 $(departureFreq)/departureFrequencyModel/departureFrequencyModel.C
-$(departureFreq)/departureFrequencyModel/departureFrequencyModelNew.C
 $(departureFreq)/Cole/Cole.C
 
 CHFModels = $(wallBoilingSubModels)/CHFModels
 $(CHFModels)/CHFModel/CHFModel.C
-$(CHFModels)/CHFModel/CHFModelNew.C
 $(CHFModels)/Zuber/Zuber.C
 
 CHFSubCoolModels = $(wallBoilingSubModels)/CHFSubCoolModels
 $(CHFSubCoolModels)/CHFSubCoolModel/CHFSubCoolModel.C
-$(CHFSubCoolModels)/CHFSubCoolModel/CHFSubCoolModelNew.C
 $(CHFSubCoolModels)/HuaXu/HuaXu.C
 
 filmBoiling = $(wallBoilingSubModels)/filmBoilingModels
 $(filmBoiling)/filmBoilingModel/filmBoilingModel.C
-$(filmBoiling)/filmBoilingModel/filmBoilingModelNew.C
 $(filmBoiling)/Bromley/Bromley.C
 
 Leidenfrost = $(wallBoilingSubModels)/LeidenfrostModels
 $(Leidenfrost)/LeidenfrostModel/LeidenfrostModel.C
-$(Leidenfrost)/LeidenfrostModel/LeidenfrostModelNew.C
 $(Leidenfrost)/Spiegler/Spiegler.C
 
 MHFModels = $(wallBoilingSubModels)/MHFModels
 $(MHFModels)/MHFModel/MHFModel.C
-$(MHFModels)/MHFModel/MHFModelNew.C
 $(MHFModels)/Jeschar/Jeschar.C
 
 TDNBModels = $(wallBoilingSubModels)/TDNBModels
 $(TDNBModels)/TDNBModel/TDNBModel.C
-$(TDNBModels)/TDNBModel/TDNBModelNew.C
 $(TDNBModels)/Schroeder/Schroeder.C
 
 /* Turbulence */

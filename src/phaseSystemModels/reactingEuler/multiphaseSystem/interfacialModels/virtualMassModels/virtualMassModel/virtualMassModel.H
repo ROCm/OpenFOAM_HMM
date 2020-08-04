@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +31,6 @@ Description
 
 SourceFiles
     virtualMassModel.C
-    newVirtualMassModel.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -46,6 +46,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class phasePair;
 
 /*---------------------------------------------------------------------------*\
@@ -58,7 +59,7 @@ class virtualMassModel
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Phase pair
         const phasePair& pair_;
@@ -86,7 +87,7 @@ public:
         );
 
 
-    // Static data members
+    // Static Data Members
 
         //- Coefficient dimensions
         static const dimensionSet dimK;
@@ -104,7 +105,7 @@ public:
 
 
     //- Destructor
-    virtual ~virtualMassModel();
+    virtual ~virtualMassModel() = default;
 
 
     // Selectors

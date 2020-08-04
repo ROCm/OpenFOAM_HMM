@@ -54,7 +54,7 @@ class constant
 :
     public diameterModel
 {
-    // Private data
+    // Private Data
 
         //- The constant diameter of the phase
         dimensionedScalar d_;

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,6 +45,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class fvMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -57,7 +58,7 @@ class porousModel
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Reference to mesh
         const fvMesh& mesh_;
@@ -85,7 +86,7 @@ public:
 
     // Constructors
 
-        //- Construct from a dictionary and a phase pair
+        //- Construct from a dictionary and mesh
         porousModel
         (
             const dictionary& dict,
@@ -108,7 +109,7 @@ public:
 
     // Member Functions
 
-        //- Momemtum source
+        //- Momentum source
         virtual  tmp<volScalarField> S() const = 0;
 
         //- Dummy write for regIOobject

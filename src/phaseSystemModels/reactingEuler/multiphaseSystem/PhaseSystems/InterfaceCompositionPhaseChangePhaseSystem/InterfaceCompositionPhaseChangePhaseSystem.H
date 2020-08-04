@@ -49,6 +49,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class interfaceCompositionModel;
 class massTransferModel;
 
@@ -63,7 +64,7 @@ class InterfaceCompositionPhaseChangePhaseSystem
 {
 protected:
 
-    // Protected typedefs
+    // Protected Typedefs
 
         typedef HashTable
         <
@@ -84,14 +85,17 @@ protected:
             HashPtrTable<volScalarField>,
             phasePairKey,
             phasePairKey::hash
-        >
-        iDmdtSuSpTable;
+        > iDmdtSuSpTable;
 
-        typedef HashPtrTable<volScalarField, phasePairKey, phasePairKey::hash>
-            iDmdtTable;
+        typedef HashPtrTable
+        <
+            volScalarField,
+            phasePairKey,
+            phasePairKey::hash
+        > iDmdtTable;
 
 
-    // Protected data
+    // Protected Data
 
         // Sub Models
 
@@ -111,7 +115,7 @@ protected:
             mutable iDmdtSuSpTable iDmdtSp_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Return the interfacial mass transfer rate for a pair for a pair
         virtual tmp<volScalarField> iDmdt(const phasePairKey& key) const;
@@ -122,7 +126,7 @@ public:
     // Constructors
 
         //- Construct from fvMesh
-        InterfaceCompositionPhaseChangePhaseSystem(const fvMesh&);
+        explicit InterfaceCompositionPhaseChangePhaseSystem(const fvMesh&);
 
 
     //- Destructor

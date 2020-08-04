@@ -121,12 +121,6 @@ Foam::dragModels::AttouFerschneider::AttouFerschneider
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::dragModels::AttouFerschneider::~AttouFerschneider()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>

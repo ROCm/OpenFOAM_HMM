@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +30,6 @@ Description
 
 SourceFiles
     surfaceTensionModel.C
-    surfaceTensionModelNew.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -46,6 +45,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class phasePair;
 
 /*---------------------------------------------------------------------------*\
@@ -58,7 +58,7 @@ class surfaceTensionModel
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Phase pair
         const phasePair& pair_;
@@ -111,7 +111,7 @@ public:
 
     // Member Functions
 
-        //- Aspect ratio
+        //- Surface tension
         virtual tmp<volScalarField> sigma() const = 0;
 
         //- Dummy write for regIOobject

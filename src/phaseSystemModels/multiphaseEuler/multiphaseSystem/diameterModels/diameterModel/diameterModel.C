@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,10 +50,40 @@ Foam::diameterModel::diameterModel
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::diameterModel::~diameterModel()
-{}
+Foam::autoPtr<Foam::diameterModel> Foam::diameterModel::New
+(
+    const dictionary& dict,
+    const phaseModel& phase
+)
+{
+    const word modelType(dict.get<word>("diameterModel"));
+
+    Info<< "Selecting diameterModel for phase "
+        << phase.name()
+        << ": "
+        << modelType << endl;
+
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+
+    if (!cstrIter.found())
+    {
+        FatalIOErrorInLookup
+        (
+            dict,
+            "diameterModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
+    }
+
+    return cstrIter()
+    (
+        dict.optionalSubDict(modelType + "Coeffs"),
+        phase
+    );
+}
 
 
 // ************************************************************************* //

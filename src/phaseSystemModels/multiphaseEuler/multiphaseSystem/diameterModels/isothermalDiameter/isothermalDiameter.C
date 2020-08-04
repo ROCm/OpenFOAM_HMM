@@ -60,12 +60,6 @@ Foam::diameterModels::isothermal::isothermal
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::diameterModels::isothermal::~isothermal()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField> Foam::diameterModels::isothermal::d() const

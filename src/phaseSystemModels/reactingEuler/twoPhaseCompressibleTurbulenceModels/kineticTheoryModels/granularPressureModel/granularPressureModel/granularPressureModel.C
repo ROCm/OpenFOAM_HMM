@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,10 +52,33 @@ Foam::kineticTheoryModels::granularPressureModel::granularPressureModel
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::kineticTheoryModels::granularPressureModel::~granularPressureModel()
-{}
+Foam::autoPtr<Foam::kineticTheoryModels::granularPressureModel>
+Foam::kineticTheoryModels::granularPressureModel::New
+(
+    const dictionary& dict
+)
+{
+    const word modelType(dict.get<word>("granularPressureModel"));
+
+    Info<< "Selecting granularPressureModel " << modelType << endl;
+
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+
+    if (!cstrIter.found())
+    {
+        FatalIOErrorInLookup
+        (
+            dict,
+            "granularPressureModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << abort(FatalIOError);
+    }
+
+    return autoPtr<granularPressureModel>(cstrIter()(dict));
+}
 
 
 // ************************************************************************* //
