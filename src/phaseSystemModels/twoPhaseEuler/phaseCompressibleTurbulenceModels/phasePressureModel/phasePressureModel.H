@@ -82,12 +82,7 @@ class phasePressureModel
         >>>
     >
 {
-    // Private data
-
-        // Input Fields
-
-            const phaseModel& phase_;
-
+    // Private Data
 
         // Kinetic Theory Model coefficients
 
@@ -106,6 +101,7 @@ class phasePressureModel
 
     // Private Member Functions
 
+        //- Disabled
         void correctNut()
         {}
 

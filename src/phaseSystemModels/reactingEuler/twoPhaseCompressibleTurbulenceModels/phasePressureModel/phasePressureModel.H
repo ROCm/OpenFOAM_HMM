@@ -78,12 +78,7 @@ class phasePressureModel
         RASModel<EddyDiffusivity<phaseCompressibleTurbulenceModel>>
     >
 {
-    // Private data
-
-        // Input Fields
-
-            const phaseModel& phase_;
-
+    // Private Data
 
         // Kinetic Theory Model coefficients
 
@@ -102,14 +97,15 @@ class phasePressureModel
 
     // Private Member Functions
 
+        //- Disabled
         void correctNut()
         {}
 
-        //- Disallow default bitwise copy construct
-        phasePressureModel(const phasePressureModel&);
+        //- No copy construct
+        phasePressureModel(const phasePressureModel&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const phasePressureModel&);
+        //- No copy assignment
+        void operator=(const phasePressureModel&) = delete;
 
 
 public:
