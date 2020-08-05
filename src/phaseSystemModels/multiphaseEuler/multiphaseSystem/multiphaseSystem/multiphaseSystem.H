@@ -190,9 +190,6 @@ private:
         //- Stabilisation for normalisation of the interface normal
         const dimensionedScalar deltaN_;
 
-        //- Conversion factor for degrees into radians
-        static const scalar convertToRad;
-
 
     // Private member functions
 
