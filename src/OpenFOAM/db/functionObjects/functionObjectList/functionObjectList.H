@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,43 @@ Description
     List of function objects with start(), execute() and end() functions
     that is called for each object.
 
+    \verbatim
+    functions   // sub-dictionary name under the system/controlDict file
+    {
+        ..optional entries..
+
+        <userDict1>
+        {
+            // Mandatory entries
+            type    <typeName>;
+            libs    (<libName> .. <libName>);
+            ...
+        }
+
+        <userDict2>
+        {
+            ...
+        }
+
+        ...
+    }
+    \endverbatim
+
+    with optional entries:
+    \table
+        Property | Description                            | Type | Reqd | Deflt
+        libs     | Preloaded library names                | words | no  | -
+        errors   | Error handling (default/warn/ignore/strict) | word | no | inherits
+    \endtable
+
+    The optional \c errors entry controls how FatalError is caught
+    during construction and execute/write. FatalIOError is unaffected.
+    - \c default : warn on construction errors, fatal on runtime errors
+    - \c warn : warn on construction and runtime errors
+    - \c ignore : ignore construction and runtime errors
+    - \c strict : fatal on construction and runtime errors
+    .
+
 See also
     Foam::functionObject
     Foam::functionObjects::timeControl
@@ -44,6 +81,7 @@ SourceFiles
 #define functionObjectList_H
 
 #include "PtrList.H"
+#include "Enum.H"
 #include "functionObject.H"
 #include "SHA1Digest.H"
 #include "HashTable.H"
@@ -55,7 +93,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class argList;
 class mapPolyMesh;
 class wordRe;
@@ -68,13 +106,36 @@ class functionObjectList
 :
     private PtrList<functionObject>
 {
-    // Private data
+    // Data Types
+
+        //- Handling of construction or execution errors
+        enum class errorHandlingType : uint8_t
+        {
+            DEFAULT = 0,  //!< Warn on construct, Fatal on runtime
+            WARN,         //!< Warn on construct, Warn on runtime
+            IGNORE,       //!< Ignore on construct, Ignore on runtime
+            STRICT,       //!< Fatal on construct, Fatal on runtime
+        };
+
+        //- Names for error handling types
+        static const Enum<errorHandlingType> errorHandlingNames_;
+
+
+    // Private Data
+
+        //- A list of error/warning handling
+        List<errorHandlingType> errorHandling_;
 
         //- A list of SHA1 digests for the function object dictionaries
         List<SHA1Digest> digests_;
 
-        //- Quick lookup of the index into functions/digests
+        //- Quick lookup of the index into functions/digests/errorHandling
         HashTable<label> indices_;
+
+        //- Track the number of warnings per function object and limit
+        //  to a predefined number to avoid flooding the display.
+        //  Clear on re-read of functions.
+        HashTable<uint32_t> warnings_;
 
         //- Reference to Time
         const Time& time_;
@@ -118,6 +179,19 @@ class functionObjectList
         //- Search the specified directory for functionObject
         //- configuration files, add to the given map and recurse
         static void listDir(const fileName& dir, wordHashSet& available);
+
+        //- Like Enum::getOrDefault, but with additional code to warn if
+        //- the 'key' is not a primitive entry.
+        //
+        //  This additional treatment is to ensure that potentially existing
+        //  code with an "errors" functionObject will continue to run.
+        errorHandlingType getOrDefaultErrorHandling
+        (
+            const word& key,
+            const dictionary& dict,
+            const errorHandlingType deflt
+        ) const;
+
 
         //- No copy construct
         functionObjectList(const functionObjectList&) = delete;
@@ -214,7 +288,7 @@ public:
         void clear();
 
         //- Find the ID of a given function object by name, -1 if not found.
-        label findObjectID(const word& name) const;
+        label findObjectID(const word& objName) const;
 
         //- Print a list of functionObject configuration files in the
         //- directories located using

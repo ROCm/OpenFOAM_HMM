@@ -56,13 +56,15 @@ Description
     sub-dictionary, typically as in the following example:
 
     \verbatim
-    functions    // sub-dictionary name under the system/controlDict file
+    functions   // sub-dictionary name under the system/controlDict file
     {
-        <userDefinedSubDictName1>
+        ..optional entries..
+
+        <dictName1>
         {
             // Mandatory entries
-            type                <functionObjectTypeName>;
-            libs                (<libType>FunctionObjects);
+            type    <functionObjectTypeName>;
+            libs    (<libType>FunctionObjects);
 
             // Mandatory entries defined in <functionObjectType>
             ...
@@ -82,14 +84,14 @@ Description
             writeInterval       1;
         }
 
-        <userDefinedSubDictName2>
+        <dictName2>
         {
             ...
         }
 
         ...
 
-        <userDefinedSubDictNameN>
+        <dictNameN>
         {
             ...
         }
@@ -101,6 +103,7 @@ Description
         Property | Description                            | Type | Reqd | Deflt
         type     | Type name of function object           | word |  yes  | -
         libs     | Library name(s) for implementation     | words | no  | -
+        errors   | Error handling (default/warn/ignore/strict) | word | no | inherits
         region   | Name of region for multi-region cases  | word | no | region0
         enabled  | Switch to turn function object on/off  | bool | no | true
         log     | Switch to write log info to standard output | bool | no | true
@@ -111,6 +114,9 @@ Description
         writeControl    | See time controls below     | word | no    | timeStep
         writeInterval   | Steps/time between write phases    | label | no  | 1
     \endtable
+
+    If the \c errors entry is missing, it uses the value (if any)
+    specified within the top-level functionObjectList.
 
     Time controls:
     \table
