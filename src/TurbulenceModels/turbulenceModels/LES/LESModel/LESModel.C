@@ -151,7 +151,11 @@ Foam::LESModel<BasicTurbulenceModel>::New
 
     const dictionary& dict = modelDict.subDict("LES");
 
-    const word modelType(dict.get<word>("LESModel"));
+    const word modelType
+    (
+        // "LESModel" for v2006 and earlier
+        dict.getCompat<word>("model", {{"LESModel", -2006}})
+    );
 
     Info<< "Selecting LES turbulence model " << modelType << endl;
 
@@ -162,7 +166,7 @@ Foam::LESModel<BasicTurbulenceModel>::New
         FatalIOErrorInLookup
         (
             dict,
-            "LESModel",
+            "LES model",
             modelType,
             *dictionaryConstructorTablePtr_
         ) << exit(FatalIOError);

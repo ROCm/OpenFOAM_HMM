@@ -112,7 +112,11 @@ Foam::laminarModel<BasicTurbulenceModel>::New
     {
         const dictionary& dict = *dictptr;
 
-        const word modelType(dict.get<word>("laminarModel"));
+        const word modelType
+        (
+            // laminarModel -> model (after v2006)
+            dict.getCompat<word>("model", {{"laminarModel", -2006}})
+        );
 
         Info<< "Selecting laminar stress model " << modelType << endl;
 
@@ -123,7 +127,7 @@ Foam::laminarModel<BasicTurbulenceModel>::New
             FatalIOErrorInLookup
             (
                 dict,
-                "laminarModel",
+                "laminar model",
                 modelType,
                 *dictionaryConstructorTablePtr_
             ) << exit(FatalIOError);

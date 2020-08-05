@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -93,17 +93,18 @@ Foam::dictionary Foam::solverTemplate::readFluidFieldTemplates
 
     const dictionary fieldModels(solverDict.subDict("fluidModels"));
 
-    word turbulenceModel("laminar"); // default to laminar
-    word turbulenceType("none");
+    word turbModel("laminar"); // default to laminar
+    word turbType("none");
 
-    if (fieldModels.readIfPresent("turbulenceModel", turbulenceType))
+    if (fieldModels.readIfPresent("turbulenceModel", turbType))
     {
-        if (turbulenceType == "turbulenceModel")
+        if (turbType == "turbulenceModel")
         {
             IOdictionary turbPropDict
             (
                 IOobject
                 (
+                    // turbulenceModel::propertiesName
                     "turbulenceProperties",
                     runTime.constant(),
                     regionName,
@@ -118,17 +119,19 @@ Foam::dictionary Foam::solverTemplate::readFluidFieldTemplates
 
             if (modelType == "laminar")
             {
-                // Leave turbulenceModel as laminar
+                // Leave as laminar
             }
             else if (modelType == "RAS")
             {
+                // "RASModel" for v2006 and earlier
                 turbPropDict.subDict(modelType)
-                    .readEntry("RASModel", turbulenceModel);
+                    .readCompat("model", {{"RASModel", -2006}}, turbModel);
             }
             else if (modelType == "LES")
             {
+                // "LESModel" for v2006 and earlier
                 turbPropDict.subDict(modelType)
-                    .readEntry("LESModel", turbulenceModel);
+                    .readCompat("model", {{"LESModel", -2006}}, turbModel);
             }
             else
             {
@@ -141,20 +144,19 @@ Foam::dictionary Foam::solverTemplate::readFluidFieldTemplates
         else
         {
             FatalErrorInFunction
-                << "Unhandled turbulence model option " << turbulenceType
+                << "Unhandled turbulence model option " << turbType
                 << ". Valid options are turbulenceModel"
                 << exit(FatalError);
         }
     }
 
-    Info<< "    Selecting " << turbulenceType << ": " << turbulenceModel
-        << endl;
+    Info<< "    Selecting " << turbType << ": " << turbModel << endl;
 
     IOdictionary turbModelDict
     (
         IOobject
         (
-            fileName(turbModelDir/turbulenceModel),
+            fileName(turbModelDir/turbModel),
             runTime,
             IOobject::MUST_READ
         )

@@ -141,7 +141,11 @@ Foam::RASModel<BasicTurbulenceModel>::New
 
     const dictionary& dict = modelDict.subDict("RAS");
 
-    const word modelType(dict.get<word>("RASModel"));
+    const word modelType
+    (
+        // "RASModel" for v2006 and earlier
+        dict.getCompat<word>("model", {{"RASModel", -2006}})
+    );
 
     Info<< "Selecting RAS turbulence model " << modelType << endl;
 
@@ -152,7 +156,7 @@ Foam::RASModel<BasicTurbulenceModel>::New
         FatalIOErrorInLookup
         (
             dict,
-            "RASModel",
+            "RAS model",
             modelType,
             *dictionaryConstructorTablePtr_
         ) << exit(FatalIOError);

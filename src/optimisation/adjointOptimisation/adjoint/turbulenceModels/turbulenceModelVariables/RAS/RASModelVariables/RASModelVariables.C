@@ -272,9 +272,19 @@ autoPtr<RASModelVariables> RASModelVariables::New
         )
     );
 
-    const dictionary dict(modelDict.subOrEmptyDict("RAS"));
+    word modelType("laminar"); // default to laminar
 
-    const word modelType(dict.getOrDefault<word>("RASModel", "laminar"));
+    const dictionary* dictptr = modelDict.findDict("RAS");
+
+    if (dictptr)
+    {
+        // "RASModel" for v2006 and earlier
+        dictptr->readCompat("model", {{"RASModel", -2006}}, modelType);
+    }
+    else
+    {
+        dictptr = &dictionary::null;
+    }
 
     Info<< "Creating references for RASModel variables : " << modelType << endl;
 
@@ -284,7 +294,7 @@ autoPtr<RASModelVariables> RASModelVariables::New
     {
         FatalIOErrorInLookup
         (
-            dict,
+            *dictptr,
             "RASModelVariables",
             modelType,
             *dictionaryConstructorTablePtr_
