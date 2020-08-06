@@ -6,29 +6,20 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2017-2019 OpenCFD Ltd.
+#     Copyright (C) 2017-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # File
 #     Makefile
 #
 # Description
-#     Makefile used to compile wmake utilities.
+#     Makefile for compiling wmake toolchain.
+#
+# Note
+#     The 'createCode' script is used to pre-generate the scanner code
+#     since ragel is not very prevalent.
 #
 #------------------------------------------------------------------------------
 
@@ -55,7 +46,7 @@ WM_COMPILE_OPTION = Opt
 GENERAL_RULES   = $(WM_DIR)/rules/General
 include $(GENERAL_RULES)/general
 
-archHost    := $(WM_ARCH)$(WM_COMPILER)
+archBuild   := $(WM_ARCH)$(WM_COMPILER)
 archTarget  := $(shell basename $(WMAKE_BIN))
 
 
@@ -71,8 +62,8 @@ all: $(WMAKE_BIN)/lemon$(EXT_EXE) $(WMAKE_BIN)/wmkdepend$(EXT_EXE) message
 old: $(WMAKE_BIN)/wmkdep$(EXT_EXE)
 
 message:
-ifneq ($(archHost),$(archTarget))
-	@echo "built wmake-bin ($(archTarget)) for $(archHost) host"
+ifneq ($(archBuild),$(archTarget))
+	@echo "built wmake-bin ($(archTarget)) with $(archBuild)"
 else
 	@echo "built wmake-bin ($(archTarget))"
 endif

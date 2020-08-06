@@ -21,19 +21,26 @@ then
     exit 1
 fi
 
-case "$WM_COMPILER" in
-Mingw*)
-    # Host wmake toolchain with system gcc (when cross-compiling)
+
+if [ "${WM_COMPILER%Mingw}" != "$WM_COMPILER" ] && [ "$WM_ARCH" != win64 ]
+then
+    # Mingw cross-compilation
+
+    # Toolchain for build (system gcc)
     make \
         WM_COMPILER=Gcc WM_COMPILER_TYPE=system \
         WMAKE_BIN="${WM_PROJECT_DIR}/platforms/tools/${WM_ARCH}${WM_COMPILER}" \
         "$@"
-    ;;
 
-*)
+    # Toolchain for target (mingw)
+    make \
+        WMAKE_BIN="${WM_PROJECT_DIR}/platforms/tools/win64${WM_COMPILER}" \
+        "$@"
+else
+
     # Regular wmake toolchain
     make "$@"
-    ;;
-esac
+
+fi
 
 #------------------------------------------------------------------------------
