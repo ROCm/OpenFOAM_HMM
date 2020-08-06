@@ -37,13 +37,62 @@ License
 #include "Tuple2.H"
 #include "etcFiles.H"
 #include "IOdictionary.H"
+#include "Pstream.H"
+#include "OSspecific.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
+
+//- Max number of warnings (per functionObject)
+static constexpr const uint32_t maxWarnings = 10u;
 
 Foam::fileName Foam::functionObjectList::functionObjectDictPath
 (
     "caseDicts/postProcessing"
 );
+
+
+const Foam::Enum
+<
+    Foam::functionObjectList::errorHandlingType
+>
+Foam::functionObjectList::errorHandlingNames_
+({
+    { errorHandlingType::DEFAULT, "default" },
+    { errorHandlingType::WARN, "warn" },
+    { errorHandlingType::IGNORE, "ignore" },
+    { errorHandlingType::STRICT, "strict" },
+});
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    //- Mimic exit handling of the error class
+    static void exitNow(const error& err)
+    {
+        if (hasEnv("FOAM_ABORT"))
+        {
+            Perr<< nl << err << nl
+                << "\nFOAM aborting (FOAM_ABORT set)\n" << endl;
+            error::printStack(Perr);
+            std::abort();
+        }
+        else if (Pstream::parRun())
+        {
+            Perr<< nl << err << nl
+                << "\nFOAM parallel run exiting\n" << endl;
+            Pstream::exit(1);
+        }
+        else
+        {
+            Perr<< nl << err << nl
+                << "\nFOAM exiting\n" << endl;
+            std::exit(1);
+        }
+    }
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -282,7 +331,7 @@ bool Foam::functionObjectList::readFunctionObject
     // Search for the functionObject dictionary
     fileName path = functionObjectList::findDict(funcName);
 
-    if (path == fileName::null)
+    if (path.empty())
     {
         WarningInFunction
             << "Cannot find functionObject file " << funcName << endl;
@@ -291,7 +340,7 @@ bool Foam::functionObjectList::readFunctionObject
 
     // Read the functionObject dictionary
     autoPtr<ISstream> fileStreamPtr(fileHandler().NewIFstream(path));
-    ISstream& fileStream = fileStreamPtr();
+    ISstream& fileStream = *fileStreamPtr;
 
     dictionary funcsDict(fileStream);
     dictionary* funcDictPtr = funcsDict.findDict(funcName);
@@ -347,6 +396,45 @@ bool Foam::functionObjectList::readFunctionObject
 }
 
 
+Foam::functionObjectList::errorHandlingType
+Foam::functionObjectList::getOrDefaultErrorHandling
+(
+    const word& key,
+    const dictionary& dict,
+    const errorHandlingType deflt
+) const
+{
+    const entry* eptr = dict.findEntry(key, keyType::LITERAL);
+
+    if (eptr)
+    {
+        if (eptr->isDict())
+        {
+            Warning
+                << "The sub-dictionary '" << key
+                << "' masks error handling for functions" << endl;
+        }
+        else
+        {
+            const word enumName(eptr->get<word>());
+
+            if (!errorHandlingNames_.found(enumName))
+            {
+                // Failed the name lookup
+                FatalIOErrorInFunction(dict)
+                    << enumName << " is not in enumeration: "
+                    << errorHandlingNames_ << nl
+                    << exit(FatalIOError);
+            }
+
+            return errorHandlingNames_.get(enumName);
+        }
+    }
+
+    return deflt;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::functionObjectList::functionObjectList
@@ -355,15 +443,7 @@ Foam::functionObjectList::functionObjectList
     const bool execution
 )
 :
-    PtrList<functionObject>(),
-    digests_(),
-    indices_(),
-    time_(runTime),
-    parentDict_(runTime.controlDict()),
-    stateDictPtr_(),
-    objectsRegistryPtr_(),
-    execution_(execution),
-    updated_(false)
+    functionObjectList(runTime, runTime.controlDict(), execution)
 {}
 
 
@@ -375,12 +455,14 @@ Foam::functionObjectList::functionObjectList
 )
 :
     PtrList<functionObject>(),
+    errorHandling_(),
     digests_(),
     indices_(),
+    warnings_(),
     time_(runTime),
     parentDict_(parentDict),
-    stateDictPtr_(),
-    objectsRegistryPtr_(),
+    stateDictPtr_(nullptr),
+    objectsRegistryPtr_(nullptr),
     execution_(execution),
     updated_(false)
 {}
@@ -442,9 +524,7 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
     {
         modifiedControlDict = true;
 
-        wordList funcNames = args.getList<word>("funcs");
-
-        for (const word& funcName : funcNames)
+        for (const word& funcName : args.getList<word>("funcs"))
         {
             readFunctionObject
             (
@@ -478,17 +558,14 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
 
 Foam::label Foam::functionObjectList::triggerIndex() const
 {
-    label triggeri = labelMin;
-    stateDict().readIfPresent("triggerIndex", triggeri);
-
-    return triggeri;
+    return stateDict().getOrDefault<label>("triggerIndex", labelMin);
 }
 
 
 void Foam::functionObjectList::resetState()
 {
     // Reset (re-read) the state dictionary
-    stateDictPtr_.clear();
+    stateDictPtr_.reset(nullptr);
     createStateDict();
 }
 
@@ -540,19 +617,21 @@ const Foam::objectRegistry& Foam::functionObjectList::storedObjects() const
 void Foam::functionObjectList::clear()
 {
     PtrList<functionObject>::clear();
+    errorHandling_.clear();
     digests_.clear();
     indices_.clear();
+    warnings_.clear();
     updated_ = false;
 }
 
 
-Foam::label Foam::functionObjectList::findObjectID(const word& name) const
+Foam::label Foam::functionObjectList::findObjectID(const word& objName) const
 {
     label id = 0;
 
     for (const functionObject& funcObj : functions())
     {
-        if (funcObj.name() == name)
+        if (funcObj.name() == objName)
         {
             return id;
         }
@@ -600,19 +679,140 @@ bool Foam::functionObjectList::execute()
             read();
         }
 
+        auto errIter = errorHandling_.cbegin();
+
         for (functionObject& funcObj : functions())
         {
+            const errorHandlingType errorHandling = *errIter;
+            ++errIter;
+
             const word& objName = funcObj.name();
-            {
-                addProfiling(fo, "functionObject::" + objName + "::execute");
 
-                ok = funcObj.execute() && ok;
+            if
+            (
+                errorHandling == errorHandlingType::WARN
+             || errorHandling == errorHandlingType::IGNORE
+            )
+            {
+                // Throw FatalError, FatalIOError as exceptions
+
+                const bool throwingError = FatalError.throwExceptions();
+                const bool throwingIOerr = FatalIOError.throwExceptions();
+
+                bool hadError = false;
+
+                // execute()
+                try
+                {
+                    addProfiling
+                    (
+                        fo,
+                        "functionObject::" + objName + "::execute"
+                    );
+
+                    ok = funcObj.execute() && ok;
+                }
+                catch (const Foam::error& err)
+                {
+                    // Treat IOerror and error identically
+                    uint32_t nWarnings;
+                    hadError = true;
+
+                    if
+                    (
+                        errorHandling != errorHandlingType::IGNORE
+                     && (nWarnings = ++warnings_(objName)) <= maxWarnings
+                    )
+                    {
+                        // Trickery to get original message
+                        err.write(Warning, false);
+                        Info<< nl
+                            << "--> execute() function object '"
+                            << objName << "'";
+
+                        if (nWarnings == maxWarnings)
+                        {
+                            Info<< nl << "... silencing further warnings";
+                        }
+
+                        Info<< nl << endl;
+                    }
+                }
+
+                if (hadError)
+                {
+                    // Restore previous state
+                    FatalError.throwExceptions(throwingError);
+                    FatalIOError.throwExceptions(throwingIOerr);
+                    continue;
+                }
+
+                // write()
+                try
+                {
+                    addProfiling
+                    (
+                        fo,
+                        "functionObject::" + objName + ":write"
+                    );
+
+                    ok = funcObj.write() && ok;
+                }
+                catch (const Foam::error& err)
+                {
+                    // Treat IOerror and error identically
+                    uint32_t nWarnings;
+
+                    if
+                    (
+                        errorHandling != errorHandlingType::IGNORE
+                     && (nWarnings = ++warnings_(objName)) <= maxWarnings
+                    )
+                    {
+                        // Trickery to get original message
+                        err.write(Warning, false);
+                        Info<< nl
+                            << "--> write() function object '"
+                            << objName << "'";
+
+                        if (nWarnings == maxWarnings)
+                        {
+                            Info<< nl << "... silencing further warnings";
+                        }
+
+                        Info<< nl << endl;
+                    }
+                }
+
+                // Restore previous state
+                FatalError.throwExceptions(throwingError);
+                FatalIOError.throwExceptions(throwingIOerr);
             }
-
+            else
             {
-                addProfiling(fo, "functionObject::" + objName + "::write");
+                // No special trapping of errors
 
-                ok = funcObj.write() && ok;
+                // execute()
+                {
+                    addProfiling
+                    (
+                        fo,
+                        "functionObject::" + objName + "::execute"
+                    );
+
+                    ok = funcObj.execute() && ok;
+                }
+
+                // write()
+                {
+                    addProfiling
+                    (
+                        fo,
+                        "functionObject::" + objName + ":write"
+                    );
+
+                    ok = funcObj.write() && ok;
+                }
             }
         }
     }
@@ -620,7 +820,7 @@ bool Foam::functionObjectList::execute()
     // Force writing of state dictionary after function object execution
     if (time_.writeTime())
     {
-        label oldPrecision = IOstream::precision_;
+        const auto oldPrecision = IOstream::precision_;
         IOstream::precision_ = 16;
 
         stateDictPtr_->writeObject
@@ -644,6 +844,8 @@ bool Foam::functionObjectList::execute(const label subIndex)
     {
         for (functionObject& funcObj : functions())
         {
+            // Probably do not need try/catch...
+
             ok = funcObj.execute(subIndex) && ok;
         }
     }
@@ -666,6 +868,8 @@ bool Foam::functionObjectList::execute
         {
             if (stringOps::match(functionNames, funcObj.name()))
             {
+                // Probably do not need try/catch...
+
                 ok = funcObj.execute(subIndex) && ok;
             }
         }
@@ -686,13 +890,55 @@ bool Foam::functionObjectList::end()
             read();
         }
 
+        auto errIter = errorHandling_.cbegin();
+
         for (functionObject& funcObj : functions())
         {
+            const errorHandlingType errorHandling = *errIter;
+            ++errIter;
+
             const word& objName = funcObj.name();
 
-            addProfiling(fo, "functionObject::" + objName + "::end");
+            // Ignore failure on end() - not much we can do anyhow
 
-            ok = funcObj.end() && ok;
+            // Throw FatalError, FatalIOError as exceptions
+            const bool throwingError = FatalError.throwExceptions();
+            const bool throwingIOerr = FatalIOError.throwExceptions();
+
+            try
+            {
+                addProfiling(fo, "functionObject::" + objName + "::end");
+                ok = funcObj.end() && ok;
+            }
+            catch (const Foam::error& err)
+            {
+                // Treat IOerror and error identically
+                uint32_t nWarnings;
+
+                if
+                (
+                    errorHandling != errorHandlingType::IGNORE
+                 && (nWarnings = ++warnings_(objName)) <= maxWarnings
+                )
+                {
+                    // Trickery to get original message
+                    err.write(Warning, false);
+                    Info<< nl
+                        << "--> end() function object '"
+                        << objName << "'";
+
+                    if (nWarnings == maxWarnings)
+                    {
+                        Info<< nl << "... silencing further warnings";
+                    }
+
+                    Info<< nl << endl;
+                }
+            }
+
+            // Restore previous state
+            FatalError.throwExceptions(throwingError);
+            FatalIOError.throwExceptions(throwingIOerr);
         }
     }
 
@@ -715,7 +961,13 @@ bool Foam::functionObjectList::adjustTimeStep()
         {
             const word& objName = funcObj.name();
 
-            addProfiling(fo, "functionObject::" + objName + "::adjustTimeStep");
+            // Probably do not need try/catch...
+
+            addProfiling
+            (
+                fo,
+                "functionObject::" + objName + "::adjustTimeStep"
+            );
 
             ok = funcObj.adjustTimeStep() && ok;
         }
@@ -750,8 +1002,10 @@ bool Foam::functionObjectList::read()
     {
         // No functions
         PtrList<functionObject>::clear();
+        errorHandling_.clear();
         digests_.clear();
         indices_.clear();
+        warnings_.clear();
     }
     else if (!entryPtr->isDict())
     {
@@ -767,16 +1021,33 @@ bool Foam::functionObjectList::read()
 
         PtrList<functionObject> newPtrs(functionsDict.size());
         List<SHA1Digest> newDigs(functionsDict.size());
+
+        errorHandling_.resize
+        (
+            functionsDict.size(),
+            errorHandlingType::DEFAULT
+        );
+
         HashTable<label> newIndices;
 
         addProfiling(fo, "functionObjects::read");
 
+        // Top-level "libs" specification (optional)
         time_.libs().open
         (
             functionsDict,
             "libs",
             functionObject::dictionaryConstructorTablePtr_
         );
+
+        // Top-level "errors" specification (optional)
+        const errorHandlingType errorHandlingFallback =
+            getOrDefaultErrorHandling
+            (
+                "errors",
+                functionsDict,
+                errorHandlingType::DEFAULT
+            );
 
         label nFunc = 0;
 
@@ -786,7 +1057,7 @@ bool Foam::functionObjectList::read()
 
             if (!dEntry.isDict())
             {
-                if (key != "libs")
+                if (key != "errors" && key != "libs")
                 {
                     IOWarningInFunction(parentDict_)
                         << "Entry " << key << " is not a dictionary" << endl;
@@ -799,66 +1070,67 @@ bool Foam::functionObjectList::read()
 
             bool enabled = dict.getOrDefault("enabled", true);
 
+            // Per-function "errors" specification
+            const errorHandlingType errorHandling =
+                getOrDefaultErrorHandling
+                (
+                    "errors",
+                    dict,
+                    errorHandlingFallback
+                );
+
+            errorHandling_[nFunc] = errorHandling;
+
             newDigs[nFunc] = dict.digest();
 
             label oldIndex = -1;
             autoPtr<functionObject> objPtr = remove(key, oldIndex);
 
+            const bool needsTimeControl =
+                functionObjects::timeControl::entriesPresent(dict);
+
             if (objPtr)
             {
-                // Re-read if dictionary content changed for
-                // existing functionObject
+                // Existing functionObject:
+                // Re-read if dictionary content changed and did not
+                // change timeControl <-> regular
+
                 if (enabled && newDigs[nFunc] != digests_[oldIndex])
                 {
-                    addProfiling
-                    (
-                        fo2,
-                        "functionObject::" + objPtr->name() + "::read"
-                    );
+                    const bool wasTimeControl =
+                        isA<functionObjects::timeControl>(*objPtr);
 
-                    if (functionObjects::timeControl::entriesPresent(dict))
+                    if (needsTimeControl != wasTimeControl)
                     {
-                        if (isA<functionObjects::timeControl>(objPtr()))
-                        {
-                            // Already a time control - normal read
-                            enabled = objPtr->read(dict);
-                        }
-                        else
-                        {
-                            // Was not a time control - need to re-create
-                            objPtr.reset
-                            (
-                                new functionObjects::timeControl
-                                (
-                                    key,
-                                    time_,
-                                    dict
-                                )
-                            );
+                        // Changed from timeControl <-> regular
 
-                            enabled = true;
-                        }
+                        // Fallthrough to 'new'
+                        objPtr.reset(nullptr);
                     }
                     else
                     {
-                        // Plain function object - normal read
+                        // Normal read. Assume no errors to trap
+
+                        addProfiling
+                        (
+                            fo,
+                            "functionObject::" + objPtr->name() + "::read"
+                        );
+
                         enabled = objPtr->read(dict);
                     }
-
-                    ok = enabled && ok;
                 }
 
                 if (!enabled)
                 {
                     // Delete disabled or an invalid(read) functionObject
-                    objPtr.clear();
+                    objPtr.reset(nullptr);
                     continue;
                 }
             }
-            else if (enabled)
-            {
-                autoPtr<functionObject> foPtr;
 
+            if (enabled && !objPtr)
+            {
                 // Throw FatalError, FatalIOError as exceptions
                 const bool throwingError = FatalError.throwExceptions();
                 const bool throwingIOerr = FatalIOError.throwExceptions();
@@ -868,47 +1140,70 @@ bool Foam::functionObjectList::read()
                     // New functionObject
                     addProfiling
                     (
-                        fo2,
+                        fo,
                         "functionObject::" + key + "::new"
                     );
-                    if (functionObjects::timeControl::entriesPresent(dict))
+                    if (needsTimeControl)
                     {
-                        foPtr.reset
+                        objPtr.reset
                         (
                             new functionObjects::timeControl(key, time_, dict)
                         );
                     }
                     else
                     {
-                        foPtr = functionObject::New(key, time_, dict);
+                        objPtr = functionObject::New(key, time_, dict);
                     }
-                }
-                catch (const Foam::IOerror& ioErr)
-                {
-                    Info<< ioErr << nl << endl;
-                    std::exit(1);
                 }
                 catch (const Foam::error& err)
                 {
-                    // Bit of trickery to get the original message
-                    err.write(Warning, false);
-                    InfoInFunction
-                        << nl
-                        << "--> while loading function object '" << key << "'"
-                        << nl << endl;
+                    objPtr.reset(nullptr);  // extra safety
+
+                    switch (errorHandling)
+                    {
+                        case errorHandlingType::IGNORE:
+                            break;
+
+                        case errorHandlingType::STRICT:
+                        {
+                            exitNow(err);
+                            break;
+                        }
+
+                        case errorHandlingType::DEFAULT:
+                        {
+                            if (isA<Foam::IOerror>(err))
+                            {
+                                // Fatal for Foam::IOerror
+                                exitNow(err);
+                                break;
+                            }
+
+                            // Emit warning otherwise
+                            [[fallthrough]];
+                        }
+
+                        case errorHandlingType::WARN:
+                        {
+                            // Trickery to get original message
+                            err.write(Warning, false);
+                            Info<< nl
+                                << "--> loading function object '"
+                                << key << "'"
+                                << nl << endl;
+                            break;
+                        }
+                    }
                 }
 
-                // Restore previous exception throwing state
+                // Restore previous state
                 FatalError.throwExceptions(throwingError);
                 FatalIOError.throwExceptions(throwingIOerr);
 
-                // Required functionObject to be valid on all processors
-                if (returnReduce(bool(foPtr), andOp<bool>()))
+                // Require valid functionObject on all processors
+                if (!returnReduce(bool(objPtr), andOp<bool>()))
                 {
-                    objPtr.reset(foPtr.release());
-                }
-                else
-                {
+                    objPtr.reset(nullptr);
                     ok = false;
                 }
             }
@@ -924,12 +1219,14 @@ bool Foam::functionObjectList::read()
 
         newPtrs.resize(nFunc);
         newDigs.resize(nFunc);
+        errorHandling_.resize(nFunc);
 
         // Updating PtrList of functionObjects deletes any
         // existing unused functionObjects
         PtrList<functionObject>::transfer(newPtrs);
         digests_.transfer(newDigs);
         indices_.transfer(newIndices);
+        warnings_.clear();
     }
 
     return ok;
