@@ -177,6 +177,8 @@ die()
 # Default make is the "make" in the path
 make="make"
 
+# Print compiler/system information (serial only)
+printInfo() { make --no-print-directory -f "$WM_DIR"/makefiles/info "$@"; }
 
 #------------------------------------------------------------------------------
 
@@ -268,11 +270,11 @@ do
         -show-api | -show-ext-so | \
         -show-compile-c   | -show-c   | -show-cflags   | -show-cflags-arch | \
         -show-compile-cxx | -show-cxx | -show-cxxflags | -show-cxxflags-arch )
-            $make -f $WM_DIR/makefiles/info "${1#-show-}"
+            printInfo "${1#-show-}"
             optShow=true
             ;;
         -show-path-c | -show-path-cxx )
-            command -v $($make -f $WM_DIR/makefiles/info "${1#-show-path-}")
+            command -v $(printInfo "${1#-show-path-}")
             optShow=true
             ;;
         -a | -all | all)
@@ -323,7 +325,7 @@ do
             : "${optAll:=all}" # implies 'all', unless previously set
             ;;
         -version | --version)
-            $make -f $WM_DIR/makefiles/info api
+            printInfo api
             optShow=true
             break;
             ;;
