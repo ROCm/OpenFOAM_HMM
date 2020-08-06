@@ -23,6 +23,10 @@ foamDictionary -help > /dev/null 2>&1 || {
 }
 
 
+# Some tests may need #calc
+unset noDynamicCode
+canCompile || noDynamicCode=true
+
 for dict in \
     good*.dict \
     warn*.dict \
@@ -30,6 +34,11 @@ for dict in \
 ;
 do
     [ -f "$dict" ] || continue   # protect against bad globs
+
+    if [ "$noDynamicCode" = true ] && grep -q '#calc' "$dict"
+    then
+        continue
+    fi
 
     # capture stderr, ignore stdout
     stderr=$(foamDictionary -keywords $dict 2>&1 >/dev/null)

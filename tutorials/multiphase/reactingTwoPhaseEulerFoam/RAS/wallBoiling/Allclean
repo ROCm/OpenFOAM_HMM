@@ -8,7 +8,7 @@ cleanCase0
 
 if notTest $@
 then
-    mv -f system/controlDict.orig system/controlDict
+    mv -f system/controlDict.orig system/controlDict 2>/dev/null
 fi
 
 #------------------------------------------------------------------------------

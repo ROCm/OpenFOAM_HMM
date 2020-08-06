@@ -4,6 +4,8 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
 #------------------------------------------------------------------------------
 
+canCompile || exit 0    # Dynamic code
+
 runApplication blockMesh
 
 # Turbulence closure models
