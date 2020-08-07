@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
         Info<< (gradx4a - gradx4[i])/gradx4a << endl;
     }
 
-    Info<< "End" << endl;
+    Info<< "End\n" << endl;
 }
 
 

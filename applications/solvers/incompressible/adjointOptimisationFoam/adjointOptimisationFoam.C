@@ -75,9 +75,10 @@ int main(int argc, char *argv[])
         // Compute all sensitivities
         om.computeSensitivities();
     }
+
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 

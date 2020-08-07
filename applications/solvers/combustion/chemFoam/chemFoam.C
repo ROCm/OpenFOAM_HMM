@@ -93,8 +93,8 @@ int main(int argc, char *argv[])
         runTime.printExecutionTime(Info);
     }
 
-    Info << "Number of steps = " << runTime.timeIndex() << endl;
-    Info << "End" << nl << endl;
+    Info<< "Number of steps = " << runTime.timeIndex() << nl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

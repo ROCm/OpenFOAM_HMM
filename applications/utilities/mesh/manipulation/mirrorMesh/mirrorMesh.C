@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
     refData.updateMesh(map);
     refData.write();
 
-    Info<< "End" << nl << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

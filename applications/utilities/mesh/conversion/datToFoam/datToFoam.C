@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
     runTime.writeEndDivider(pFile);
 
 
-    Info<< "End" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

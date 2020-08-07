@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
         runTime.graphFormat()
     );
 
-    Info<< "End" << nl << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

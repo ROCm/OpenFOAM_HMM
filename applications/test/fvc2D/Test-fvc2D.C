@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
         mesh
     );
 
-    Info<< "End" << endl;
+    Info<< "End\n" << endl;
 }
 
 

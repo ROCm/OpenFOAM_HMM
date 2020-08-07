@@ -66,9 +66,9 @@ int main(int argc, char *argv[])
 
     runTime.printExecutionTime(Info);
 
-    Info<< "End" << endl;
+    Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 
