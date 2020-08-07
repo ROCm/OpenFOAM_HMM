@@ -25,10 +25,21 @@
 // Standard streambuf implementation following Nicolai Josuttis,
 // "The Standard C++ Library".
 // ============================================================================
+//
+// Modifications:
+// 2020-08-07 OpenCFD Ltd.
+// - added HAVE_LIBZ conditional
+// - <cstring> instead of <string.h>
+// - nullptr for return values
+// ============================================================================
 
+// HAVE_LIBZ defined externally
+// #define HAVE_LIBZ
+
+#ifdef HAVE_LIBZ
 #include "gzstream.h"
 #include <iostream>
-#include <string.h>  // for memcpy
+#include <cstring>  // for memcpy
 
 #ifdef GZSTREAM_NAMESPACE
 namespace GZSTREAM_NAMESPACE {
@@ -44,12 +55,12 @@ namespace GZSTREAM_NAMESPACE {
 
 gzstreambuf* gzstreambuf::open( const char* _name, int _open_mode) {
     if ( is_open())
-        return 0;
+        return nullptr;
     mode = _open_mode;
     // no append nor read/write mode
     if ((mode & std::ios::ate) || (mode & std::ios::app)
         || ((mode & std::ios::in) && (mode & std::ios::out)))
-        return 0;
+        return nullptr;
     char  fmode[10];
     char* fmodeptr = fmode;
     if ( mode & std::ios::in)
@@ -59,8 +70,8 @@ gzstreambuf* gzstreambuf::open( const char* _name, int _open_mode) {
     *fmodeptr++ = 'b';
     *fmodeptr = '\0';
     file = gzopen( _name, fmode);
-    if (file == 0)
-        return 0;
+    if (file == nullptr)
+        return nullptr;
     opened = 1;
     return this;
 }
@@ -72,7 +83,7 @@ gzstreambuf * gzstreambuf::close() {
         if ( gzclose( file) == Z_OK)
             return this;
     }
-    return 0;
+    return nullptr;
 }
 
 int gzstreambuf::underflow() { // used for input buffer only
@@ -85,7 +96,7 @@ int gzstreambuf::underflow() { // used for input buffer only
     int n_putback = gptr() - eback();
     if ( n_putback > 4)
         n_putback = 4;
-    memcpy( buffer + (4 - n_putback), gptr() - n_putback, n_putback);
+    std::memcpy( buffer + (4 - n_putback), gptr() - n_putback, n_putback);
 
     int num = gzread( file, buffer+4, bufferSize-4);
     if (num <= 0) // ERROR or EOF
@@ -162,6 +173,9 @@ void gzstreambase::close() {
 #ifdef GZSTREAM_NAMESPACE
 } // namespace GZSTREAM_NAMESPACE
 #endif
+
+
+#endif /* HAVE_LIBZ */
 
 // ============================================================================
 // EOF //

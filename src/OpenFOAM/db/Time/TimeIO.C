@@ -34,6 +34,7 @@ License
 #include "profiling.H"
 #include "IOdictionary.H"
 #include "fileOperation.H"
+#include "fstreamPointer.H"
 
 #include <iomanip>
 
@@ -394,18 +395,26 @@ void Foam::Time::readDict()
             controlDict_.get<word>("writeCompression")
         );
 
-        if
-        (
-            writeStreamOption_.compression() == IOstream::COMPRESSED
-         && writeStreamOption_.format() == IOstream::BINARY
-        )
+        if (writeStreamOption_.compression() == IOstreamOption::COMPRESSED)
         {
-            IOWarningInFunction(controlDict_)
-                << "Disabled binary format compression"
-                << " (inefficient/ineffective)"
-                << endl;
+            if (writeStreamOption_.format() == IOstreamOption::BINARY)
+            {
+                IOWarningInFunction(controlDict_)
+                    << "Disabled binary format compression"
+                    << " (inefficient/ineffective)"
+                    << endl;
 
-            writeStreamOption_.compression(IOstream::UNCOMPRESSED);
+                writeStreamOption_.compression(IOstreamOption::UNCOMPRESSED);
+            }
+            else if (!ofstreamPointer::supports_gz())
+            {
+                IOWarningInFunction(controlDict_)
+                    << "Disabled output compression"
+                    << " (missing libz support)"
+                    << endl;
+
+                writeStreamOption_.compression(IOstreamOption::UNCOMPRESSED);
+            }
         }
     }
 
@@ -523,7 +532,7 @@ bool Foam::Time::writeTimeDict() const
 
     return timeDict.regIOobject::writeObject
     (
-        IOstreamOption(IOstream::ASCII),
+        IOstreamOption(IOstreamOption::ASCII),
         true
     );
 }

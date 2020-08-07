@@ -28,7 +28,6 @@ License
 
 #include "IFstream.H"
 #include "OSspecific.H"
-#include "gzstream.h"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -40,75 +39,53 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::Detail::IFstreamAllocator::IFstreamAllocator(const fileName& pathname)
-:
-    allocatedPtr_(nullptr),
-    detectedCompression_(IOstream::UNCOMPRESSED)
-{
-    if (pathname.empty())
-    {
-        if (IFstream::debug)
-        {
-            InfoInFunction << "Cannot open null file " << endl;
-        }
-    }
-
-    const std::ios_base::openmode mode(std::ios_base::in|std::ios_base::binary);
-
-    allocatedPtr_.reset(new std::ifstream(pathname, mode));
-
-    // If the file is compressed, decompress it before reading.
-    if (!allocatedPtr_->good() && isFile(pathname + ".gz", false))
-    {
-        if (IFstream::debug)
-        {
-            InfoInFunction << "Decompressing " << pathname + ".gz" << endl;
-        }
-
-        allocatedPtr_.reset(new igzstream((pathname + ".gz").c_str(), mode));
-
-        if (allocatedPtr_->good())
-        {
-            detectedCompression_ = IOstream::COMPRESSED;
-        }
-    }
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
 Foam::IFstream::IFstream
 (
     const fileName& pathname,
     IOstreamOption streamOpt
 )
 :
-    Detail::IFstreamAllocator(pathname),
-    ISstream(*allocatedPtr_, pathname, streamOpt)
+    Foam::ifstreamPointer(pathname),
+    ISstream(*(ifstreamPointer::get()), pathname, streamOpt)
 {
-    IOstream::compression(IFstreamAllocator::detectedCompression_);
+    IOstream::compression(ifstreamPointer::whichCompression());
 
     setClosed();
 
-    setState(allocatedPtr_->rdstate());
+    setState(ifstreamPointer::get()->rdstate());
 
-    if (!good())
-    {
-        if (debug)
-        {
-            InfoInFunction
-                << "Could not open file " << pathname
-                << " for input" << nl << info() << Foam::endl;
-        }
-
-        setBad();
-    }
-    else
+    if (good())
     {
         setOpened();
     }
+    else
+    {
+        setBad();
+    }
 
     lineNumber_ = 1;
+
+    if (debug)
+    {
+        if (pathname.empty())
+        {
+            InfoInFunction
+                << "Cannot open empty file name"
+                << Foam::endl;
+        }
+        else if (IOstreamOption::COMPRESSED == IOstream::compression())
+        {
+            InfoInFunction
+                << "Decompressing " << (this->name() + ".gz") << Foam::endl;
+        }
+
+        if (!opened())
+        {
+            InfoInFunction
+                << "Could not open file " << pathname
+                << " for input\n" << info() << Foam::endl;
+        }
+    }
 }
 
 
@@ -116,51 +93,44 @@ Foam::IFstream::IFstream
 
 std::istream& Foam::IFstream::stdStream()
 {
-    if (!allocatedPtr_)
+    std::istream* ptr = ifstreamPointer::get();
+
+    if (!ptr)
     {
         FatalErrorInFunction
-            << "No stream allocated"
+            << "No stream allocated\n"
             << abort(FatalError);
     }
-    return *allocatedPtr_;
+
+    return *ptr;
 }
 
 
 const std::istream& Foam::IFstream::stdStream() const
 {
-    if (!allocatedPtr_)
+    const std::istream* ptr = ifstreamPointer::get();
+
+    if (!ptr)
     {
         FatalErrorInFunction
-            << "No stream allocated"
+            << "No stream allocated\n"
             << abort(FatalError);
     }
-    return *allocatedPtr_;
+
+    return *ptr;
 }
 
 
 void Foam::IFstream::rewind()
 {
-    lineNumber_ = 1;      // Reset line number
+    lineNumber_ = 1;  // Reset line number
 
-    igzstream* gzPtr = nullptr;
-
-    try
+    if (IOstreamOption::COMPRESSED == ifstreamPointer::whichCompression())
     {
-        gzPtr = dynamic_cast<igzstream*>(allocatedPtr_.get());
-    }
-    catch (const std::bad_cast&)
-    {
-        gzPtr = nullptr;
-    }
+        // Special treatment for compressed stream
+        ifstreamPointer::reopen_gz(this->name() + ".gz");
 
-    if (gzPtr)
-    {
-        // Need special treatment for gzstream.
-        gzPtr->close();
-        gzPtr->clear();
-        gzPtr->open((this->name() + ".gz").c_str());
-
-        setState(gzPtr->rdstate());
+        setState(ifstreamPointer::get()->rdstate());
     }
     else
     {

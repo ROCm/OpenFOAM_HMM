@@ -28,81 +28,12 @@ License
 
 #include "OFstream.H"
 #include "OSspecific.H"
-#include "gzstream.h"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
     defineTypeNameAndDebug(OFstream, 0);
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-Foam::Detail::OFstreamAllocator::OFstreamAllocator
-(
-    const fileName& pathname,
-    IOstream::compressionType comp,
-    const bool append
-)
-:
-    allocatedPtr_(nullptr)
-{
-    if (pathname.empty())
-    {
-        if (OFstream::debug)
-        {
-            InfoInFunction << "Cannot open null file " << endl;
-        }
-    }
-
-    std::ios_base::openmode mode(std::ios_base::out|std::ios_base::binary);
-    if (append)
-    {
-        mode |= std::ios_base::app;
-    }
-
-    if (comp == IOstream::COMPRESSED)
-    {
-        // Get identically named uncompressed version out of the way
-        fileName gzPathName(pathname + ".gz");
-
-        fileName::Type pathType = Foam::type(pathname, false);
-        if (pathType == fileName::FILE || pathType == fileName::LINK)
-        {
-            rm(pathname);
-        }
-
-        if (!append && Foam::type(gzPathName) == fileName::LINK)
-        {
-            // Disallow writing into softlink to avoid any problems with
-            // e.g. softlinked initial fields
-            rm(gzPathName);
-        }
-
-        allocatedPtr_.reset(new ogzstream(gzPathName.c_str(), mode));
-    }
-    else
-    {
-        // Get identically named compressed version out of the way
-        fileName gzPathName(pathname + ".gz");
-
-        fileName::Type gzType = Foam::type(gzPathName, false);
-        if (gzType == fileName::FILE || gzType == fileName::LINK)
-        {
-            rm(gzPathName);
-        }
-
-        if (!append && Foam::type(pathname, false) == fileName::LINK)
-        {
-            // Disallow writing into softlink to avoid any problems with
-            // e.g. softlinked initial fields
-            rm(pathname);
-        }
-
-        allocatedPtr_.reset(new std::ofstream(pathname, mode));
-    }
 }
 
 
@@ -115,29 +46,39 @@ Foam::OFstream::OFstream
     const bool append
 )
 :
-    Detail::OFstreamAllocator(pathname, streamOpt.compression(), append),
-    OSstream(*allocatedPtr_, pathname, streamOpt)
+    Foam::ofstreamPointer(pathname, streamOpt.compression(), append),
+    OSstream(*(ofstreamPointer::get()), pathname, streamOpt)
 {
     setClosed();
-    setState(allocatedPtr_->rdstate());
+    setState(ofstreamPointer::get()->rdstate());
 
-    if (!good())
-    {
-        if (debug)
-        {
-            InfoInFunction
-                << "Could not open file " << pathname
-                << " for output" << nl << info() << Foam::endl;
-        }
-
-        setBad();
-    }
-    else
+    if (good())
     {
         setOpened();
     }
+    else
+    {
+        setBad();
+    }
 
     lineNumber_ = 1;
+
+    if (debug)
+    {
+        if (pathname.empty())
+        {
+            InfoInFunction
+                << "Cannot open empty file name"
+                << Foam::endl;
+        }
+
+        if (!opened())
+        {
+            InfoInFunction
+                << "Could not open file " << pathname
+                << " for output\n" << info() << Foam::endl;
+        }
+    }
 }
 
 
@@ -145,23 +86,31 @@ Foam::OFstream::OFstream
 
 std::ostream& Foam::OFstream::stdStream()
 {
-    if (!allocatedPtr_)
+    std::ostream* ptr = ofstreamPointer::get();
+
+    if (!ptr)
     {
         FatalErrorInFunction
-            << "No stream allocated." << abort(FatalError);
+            << "No stream allocated\n"
+            << abort(FatalError);
     }
-    return *allocatedPtr_;
+
+    return *ptr;
 }
 
 
 const std::ostream& Foam::OFstream::stdStream() const
 {
-    if (!allocatedPtr_)
+    const std::ostream* ptr = ofstreamPointer::get();
+
+    if (!ptr)
     {
         FatalErrorInFunction
-            << "No stream allocated." << abort(FatalError);
+            << "No stream allocated\n"
+            << abort(FatalError);
     }
-    return *allocatedPtr_;
+
+    return *ptr;
 }
 
 

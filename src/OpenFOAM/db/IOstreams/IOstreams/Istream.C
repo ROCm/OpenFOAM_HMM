@@ -190,7 +190,7 @@ Foam::Istream& Foam::Istream::operator()() const
 {
     if (!good())
     {
-        check("Istream::operator()");
+        check(FUNCTION_NAME);
         FatalIOError.exit();
     }
 

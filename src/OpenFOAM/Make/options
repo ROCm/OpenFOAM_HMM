@@ -13,5 +13,7 @@ else
     LIB_LIBS += -L$(FOAM_LIBBIN)/dummy -lPstream
 endif
 
-LIB_LIBS += \
-    -lz
+/* libz */
+EXE_INC += -DHAVE_LIBZ
+
+LIB_LIBS += -lz

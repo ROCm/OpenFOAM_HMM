@@ -39,47 +39,13 @@ SourceFiles
 #define OFstream_H
 
 #include "OSstream.H"
-#include "fileName.H"
 #include "className.H"
-#include <fstream>
-#include <memory>
+#include "fstreamPointer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-namespace Detail
-{
-
-/*---------------------------------------------------------------------------*\
-                  Class Detail::OFstreamAllocator Declaration
-\*---------------------------------------------------------------------------*/
-
-//- A std::ostream with the ability to handle compressed files
-class OFstreamAllocator
-{
-protected:
-
-    // Member Data
-
-        //- The allocated stream pointer (ofstream or ogzstream).
-        std::unique_ptr<std::ostream> allocatedPtr_;
-
-
-    // Constructors
-
-        //- Construct from pathname
-        OFstreamAllocator
-        (
-            const fileName& pathname,
-            IOstream::compressionType comp = IOstream::UNCOMPRESSED,
-            const bool append = false
-        );
-};
-
-} // End namespace Detail
-
 
 /*---------------------------------------------------------------------------*\
                           Class OFstream Declaration
@@ -87,7 +53,7 @@ protected:
 
 class OFstream
 :
-    public Detail::OFstreamAllocator,
+    private Foam::ofstreamPointer,
     public OSstream
 {
 public:
@@ -110,9 +76,9 @@ public:
         OFstream
         (
             const fileName& pathname,
-            streamFormat fmt,
-            versionNumber ver = currentVersion,
-            compressionType comp = compressionType::UNCOMPRESSED,
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = currentVersion,
+            IOstreamOption::compressionType comp = IOstreamOption::UNCOMPRESSED,
             const bool append = false
         )
         :
@@ -125,8 +91,6 @@ public:
 
 
     // Member Functions
-
-    // Access
 
         //- Read/write access to the name of the stream
         using OSstream::name;
@@ -143,7 +107,7 @@ public:
 
     // Print
 
-        //- Print stream description to Ostream
+        //- Print stream description
         void print(Ostream& os) const;
 };
 

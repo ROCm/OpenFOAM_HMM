@@ -27,16 +27,16 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "STLCore.H"
-#include "gzstream.h"
 #include "OSspecific.H"
 #include "IFstream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-//! \cond fileScope
-
 // The number of bytes in the STL binary header
 static constexpr const unsigned STLHeaderSize = 80;
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
 // Check if "SOLID" or "solid" appears as the first non-space content.
 // Assume that any leading space is less than 75 chars or so, otherwise
@@ -59,7 +59,6 @@ static bool startsWithSolid(const char header[STLHeaderSize])
      && std::toupper(header[pos+4]) == 'D'
     );
 }
-//! \endcond
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -73,7 +72,7 @@ bool Foam::fileFormats::STLCore::isBinaryName
     return
     (
         format == STLFormat::UNKNOWN
-      ? (filename.ext() == "stlb")
+      ? filename.hasExt("stlb")
       : format == STLFormat::BINARY
     );
 }
@@ -90,19 +89,11 @@ int Foam::fileFormats::STLCore::detectBinaryHeader
     const fileName& filename
 )
 {
-    bool compressed = false;
-    std::unique_ptr<std::istream> streamPtr
-    {
-        new std::ifstream(filename, std::ios::binary)
-    };
+    // Handle compressed (.gz) or uncompressed input files
 
-    // If the file is compressed, decompress it before further checking.
-    if (!streamPtr->good() && isFile(filename + ".gz", false))
-    {
-        compressed = true;
-        streamPtr.reset(new igzstream((filename + ".gz").c_str()));
-    }
-    auto& is = *streamPtr;
+    ifstreamPointer isPtr(filename);
+    const bool unCompressed(IOstream::UNCOMPRESSED == isPtr.whichCompression());
+    auto& is = *isPtr;
 
     if (!is.good())
     {
@@ -130,29 +121,25 @@ int Foam::fileFormats::STLCore::detectBinaryHeader
 
     // Check that stream is OK and number of triangles is positive,
     // if not this may be an ASCII file
-    //
-    // Also compare the file size with that expected from the number of tris
-    // If the comparison is still not sensible then it may be an ASCII file
-    if (!is || nTris < 0)
+
+    bool bad = (!is || nTris < 0);
+
+    if (!bad && unCompressed)
     {
-        return 0;
-    }
-    else if (!compressed)
-    {
+        // Compare file size with that expected from number of tris
+        // If this is not sensible, it may be an ASCII file
+
         const off_t dataFileSize = Foam::fileSize(filename);
 
-        if
-        (
-            nTris < int(dataFileSize - STLHeaderSize)/50
-         || nTris > int(dataFileSize - STLHeaderSize)/25
-        )
-        {
-            return 0;
-        }
+        bad =
+            (
+                nTris < int(dataFileSize - STLHeaderSize)/50
+             || nTris > int(dataFileSize - STLHeaderSize)/25
+            );
     }
 
-    // looks like it might be BINARY, return number of triangles
-    return nTris;
+    // Return number of triangles if it appears to be BINARY and good.
+    return (bad ? 0 : nTris);
 }
 
 
@@ -163,20 +150,18 @@ Foam::fileFormats::STLCore::readBinaryHeader
     label& nTrisEstimated
 )
 {
-    bool bad = false;
-    bool compressed = false;
     nTrisEstimated = 0;
 
-    std::unique_ptr<std::istream> streamPtr
-    {
-        new std::ifstream(filename, std::ios::binary)
-    };
+    std::unique_ptr<std::istream> streamPtr;
+    bool unCompressed(true);
 
-    // If the file is compressed, decompress it before reading.
-    if (!streamPtr->good() && isFile(filename + ".gz", false))
+    // Handle compressed (.gz) or uncompressed input files
     {
-        compressed = true;
-        streamPtr.reset(new igzstream((filename + ".gz").c_str()));
+        ifstreamPointer isPtr(filename);
+        unCompressed = (IOstream::UNCOMPRESSED == isPtr.whichCompression());
+
+        // Take ownership
+        streamPtr.reset(isPtr.release());
     }
     auto& is = *streamPtr;
 
@@ -208,25 +193,21 @@ Foam::fileFormats::STLCore::readBinaryHeader
 
     // Check that stream is OK and number of triangles is positive,
     // if not this maybe an ASCII file
-    //
-    // Also compare the file size with that expected from the number of tris
-    // If the comparison is not sensible then it may be an ASCII file
-    if (!is || nTris < 0)
+
+    bool bad = (!is || nTris < 0);
+
+    if (!bad && unCompressed)
     {
-        bad = true;
-    }
-    else if (!compressed)
-    {
+        // Compare file size with that expected from number of tris
+        // If this is not sensible, it may be an ASCII file
+
         const off_t dataFileSize = Foam::fileSize(filename);
 
-        if
-        (
-            nTris < int(dataFileSize - STLHeaderSize)/50
-         || nTris > int(dataFileSize - STLHeaderSize)/25
-        )
-        {
-            bad = true;
-        }
+        bad =
+            (
+                nTris < int(dataFileSize - STLHeaderSize)/50
+             || nTris > int(dataFileSize - STLHeaderSize)/25
+            );
     }
 
     if (bad)
@@ -237,6 +218,7 @@ Foam::fileFormats::STLCore::readBinaryHeader
     }
 
     nTrisEstimated = nTris;
+
     return streamPtr;
 }
 

@@ -39,45 +39,13 @@ SourceFiles
 #define IFstream_H
 
 #include "ISstream.H"
-#include "fileName.H"
 #include "className.H"
-#include <fstream>
-#include <memory>
+#include "fstreamPointer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-namespace Detail
-{
-
-/*---------------------------------------------------------------------------*\
-                  Class Detail::IFstreamAllocator Declaration
-\*---------------------------------------------------------------------------*/
-
-//- A std::istream with the ability to handle compressed files
-class IFstreamAllocator
-{
-protected:
-
-    // Member Data
-
-        //- The allocated stream pointer (ifstream or igzstream).
-        std::unique_ptr<std::istream> allocatedPtr_;
-
-        //- The detected compression type
-        IOstream::compressionType detectedCompression_;
-
-
-    // Constructors
-
-        //- Construct from pathname
-        IFstreamAllocator(const fileName& pathname);
-};
-
-} // End namespace Detail
-
 
 /*---------------------------------------------------------------------------*\
                           Class IFstream Declaration
@@ -85,7 +53,7 @@ protected:
 
 class IFstream
 :
-    public Detail::IFstreamAllocator,
+    private Foam::ifstreamPointer,
     public ISstream
 {
 public:
@@ -107,8 +75,8 @@ public:
         IFstream
         (
             const fileName& pathname,
-            streamFormat fmt,
-            versionNumber ver = currentVersion
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = currentVersion
         )
         :
             IFstream(pathname, IOstreamOption(fmt, ver))
@@ -121,7 +89,8 @@ public:
 
     // Member Functions
 
-    // Access
+        //- Get character(s)
+        using ISstream::get;
 
         //- Read/write access to the name of the stream
         using ISstream::name;
@@ -141,7 +110,7 @@ public:
 
     // Print
 
-        //- Print stream description to Ostream
+        //- Print stream description
         virtual void print(Ostream& os) const;
 
 
