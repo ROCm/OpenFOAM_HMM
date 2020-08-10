@@ -49,6 +49,9 @@ cgal_version=CGAL-4.12.2
 export BOOST_ARCH_PATH="$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$boost_version"
 export CGAL_ARCH_PATH="$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cgal_version"
 
+# export GMP_ARCH_PATH=...
+# export MPFR_ARCH_PATH=...
+
 # END OF (NORMAL) USER EDITABLE PART
 #------------------------------------------------------------------------------
 if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]

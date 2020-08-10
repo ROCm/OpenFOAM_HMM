@@ -48,6 +48,9 @@ set cgal_version=CGAL-4.12.2
 setenv BOOST_ARCH_PATH "$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$boost_version"
 setenv CGAL_ARCH_PATH "$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cgal_version"
 
+# setenv GMP_ARCH_PATH ...
+# setenv MPFR_ARCH_PATH ...
+
 # END OF (NORMAL) USER EDITABLE PART
 #------------------------------------------------------------------------------
 if ($?FOAM_VERBOSE && $?prompt) then
