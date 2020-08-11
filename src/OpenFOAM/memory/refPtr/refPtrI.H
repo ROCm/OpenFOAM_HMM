@@ -81,6 +81,20 @@ inline Foam::refPtr<T>::refPtr(T* p) noexcept
 
 
 template<class T>
+inline Foam::refPtr<T>::refPtr(autoPtr<T>&& rhs) noexcept
+:
+    refPtr<T>(rhs.release())
+{}
+
+
+template<class T>
+inline Foam::refPtr<T>::refPtr(std::unique_ptr<T>&& rhs) noexcept
+:
+    refPtr<T>(rhs.release())
+{}
+
+
+template<class T>
 inline Foam::refPtr<T>::refPtr(const T& obj) noexcept
 :
     ptr_(const_cast<T*>(&obj)),

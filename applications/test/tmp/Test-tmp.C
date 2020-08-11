@@ -5,23 +5,10 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
-    This file is part of OpenFOAM.
-
-    OpenFOAM is free software: you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+    This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 
 Application
     Test-tmp
@@ -32,6 +19,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "primitiveFields.H"
+#include "Switch.H"
 
 using namespace Foam;
 
@@ -42,18 +30,23 @@ struct myScalarField : public scalarField
 
 
 template<class T>
-void printInfo(const tmp<T>& tmpItem)
+void printInfo(const tmp<T>& item, const bool verbose = false)
 {
-    Info<< "tmp valid:" << tmpItem.valid()
-        << " isTmp:" << tmpItem.isTmp()
-        << " addr: " << name(tmpItem.get());
+    Info<< "tmp valid:" << Switch::name(item.valid())
+        << " pointer:" << Switch::name(item.is_pointer())
+        << " addr: " << name(item.get())
+        << " movable:" << Switch(item.movable());
 
-    if (tmpItem.valid())
+    if (item.valid())
     {
-        Info<< " refCount:" << tmpItem->count();
+        Info<< " refCount:" << item->count();
     }
-
     Info<< nl;
+
+    if (verbose && item.valid())
+    {
+        Info<< "content: " << item() << nl;
+    }
 }
 
 
@@ -75,24 +68,14 @@ int main()
 
     {
         auto tfld1 = tmp<scalarField>::New(20, Zero);
-
-        printInfo(tfld1);
-
-        if (tfld1.valid())
-        {
-            Info<< "tmp: " << tfld1() << nl;
-        }
+        printInfo(tfld1, true);
 
         // Hold on to the old content for a bit
 
         tmp<scalarField> tfld2 =
             tmp<scalarField>::NewFrom<myScalarField>(20, Zero);
 
-        printInfo(tfld2);
-        if (tfld2.valid())
-        {
-            Info<< "tmp: " << tfld2() << nl;
-        }
+        printInfo(tfld2, true);
 
         tfld2.clear();
 

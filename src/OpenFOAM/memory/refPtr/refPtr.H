@@ -42,6 +42,7 @@ See also
 #ifndef refPtr_H
 #define refPtr_H
 
+#include "autoPtr.H"
 #include "tmp.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -118,6 +119,12 @@ public:
 
         //- Construct, taking ownership of the pointer.
         inline explicit refPtr(T* p) noexcept;
+
+        //- Move construct from autoPtr, transferring ownership.
+        inline explicit refPtr(autoPtr<T>&& ptr) noexcept;
+
+        //- Move construct from unique_ptr, transferring ownership.
+        inline explicit refPtr(std::unique_ptr<T>&& ptr) noexcept;
 
         //- Construct for a const reference to an object.
         inline refPtr(const T& obj) noexcept;
@@ -199,6 +206,12 @@ public:
         //- Delete managed temporary object and set to new given pointer
         inline void reset(T* p = nullptr) noexcept;
 
+        //- Clear existing and transfer ownership from autoPtr.
+        void reset(autoPtr<T>&& other) noexcept { reset(other.release()); }
+
+        //- Clear existing and transfer ownership from unique_ptr
+        void reset(std::unique_ptr<T>&& other) { reset(other.release()); }
+
         //- Clear existing and transfer ownership.
         inline void reset(refPtr<T>&& other) noexcept;
 
@@ -233,7 +246,7 @@ public:
 
         //- Transfer ownership of the managed pointer.
         //  Fatal for a null managed pointer or if the object is const.
-        inline void operator=(const refPtr<T>& t);
+        inline void operator=(const refPtr<T>& other);
 
         //- Clear existing and transfer ownership.
         inline void operator=(refPtr<T>&& other) noexcept;
