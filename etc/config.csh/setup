@@ -127,12 +127,10 @@ while ( $#argv > 0 )
     shift
 end
 
-# The prefs may have injected a FOAM_CONFIG_ETC value.
-# Verify that it makes sense before continuing.
+# Verify FOAM_CONFIG_ETC (from calling environment or from prefs)
 if ( $?FOAM_CONFIG_ETC ) then
-    if ( ! -d "$FOAM_CONFIG_ETC" ) then
-        echo "Ignore invalid FOAM_CONFIG_ETC = $FOAM_CONFIG_ETC"
-    else if ( "$FOAM_CONFIG_ETC" == "$WM_PROJECT_DIR/etc" ) then
+    if ( "$FOAM_CONFIG_ETC" == "etc" || "$FOAM_CONFIG_ETC" == "$WM_PROJECT_DIR/etc" ) then
+        # Redundant value
         unsetenv FOAM_CONFIG_ETC
     endif
 endif

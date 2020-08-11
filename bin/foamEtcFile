@@ -68,6 +68,7 @@ options:
   -config           Add config directory prefix for shell type:
                         with -csh* for a config.csh/ prefix
                         with -sh*  for a config.sh/ prefix
+  -etc=[DIR]        set/unset FOAM_CONFIG_ETC for alternative etc directory
   -show-api         Print META-INFO api value and exit
   -show-patch       Print META-INFO patch value and exit
   -with-api=NUM     Specify alternative api value to search with
@@ -118,15 +119,6 @@ optMode=ugo                                         # Default search = 'ugo'
 # Environment overrides
 case "$FOAM_CONFIG_MODE" in ([ugo]*) optMode="$FOAM_CONFIG_MODE" ;; esac
 
-# Verify validity of FOAM_CONFIG_ETC
-if [ -n "$FOAM_CONFIG_ETC" ]
-then
-    if [ ! -d "$FOAM_CONFIG_ETC" ] || [ "$FOAM_CONFIG_ETC" = "$projectDir/etc" ]
-    then
-        # Bad directory or redundant value
-        unset FOAM_CONFIG_ETC
-    fi
-fi
 
 #-------------------------------------------------------------------------------
 
@@ -211,6 +203,10 @@ do
         optSilent=true
         ;;
 
+    -etc=*)
+        # FOAM_CONFIG_ETC for finding files. Empty unsets it (later)
+        export FOAM_CONFIG_ETC="${1#*=}"
+        ;;
     -prefix=* | -version=*)
         echo "ignored defunct option '${1%%=*}'" 1>&2
         ;;
@@ -236,6 +232,23 @@ do
 done
 
 #-------------------------------------------------------------------------------
+
+# Verify FOAM_CONFIG_ETC
+if [ -n "$FOAM_CONFIG_ETC" ]
+then
+    if [ "$FOAM_CONFIG_ETC" = "etc" ] \
+    || [ "$FOAM_CONFIG_ETC" = "$projectDir/etc" ]
+    then
+        # Redundant value
+        unset FOAM_CONFIG_ETC
+    elif [ "${FOAM_CONFIG_ETC#/}" = "$FOAM_CONFIG_ETC" ]
+    then
+        # Relative to project-dir
+        FOAM_CONFIG_ETC="$projectDir/$FOAM_CONFIG_ETC"
+    fi
+else
+    unset FOAM_CONFIG_ETC
+fi
 
 # Establish the API value
 [ -n "$projectApi" ] || projectApi=$(getApiInfo api)

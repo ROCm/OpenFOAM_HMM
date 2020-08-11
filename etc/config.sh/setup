@@ -115,19 +115,19 @@ else
     _foamEval "$@"
 fi
 
-# The prefs may have injected a FOAM_CONFIG_ETC value.
-# Verify that it makes sense before continuing.
+# Verify FOAM_CONFIG_ETC (from calling environment or from prefs)
 if [ -n "$FOAM_CONFIG_ETC" ]
 then
-    if [ ! -d "$FOAM_CONFIG_ETC" ]
-    then
-        echo "Ignore invalid FOAM_CONFIG_ETC = $FOAM_CONFIG_ETC" 1>&2
-        unset FOAM_CONFIG_ETC
-    elif [ "$FOAM_CONFIG_ETC" = "$WM_PROJECT_DIR/etc" ]
+    if [ "$FOAM_CONFIG_ETC" = "etc" ] \
+    || [ "$FOAM_CONFIG_ETC" = "$WM_PROJECT_DIR/etc" ]
     then
         # Redundant value
         unset FOAM_CONFIG_ETC
+    else
+        export FOAM_CONFIG_ETC
     fi
+else
+    unset FOAM_CONFIG_ETC
 fi
 
 

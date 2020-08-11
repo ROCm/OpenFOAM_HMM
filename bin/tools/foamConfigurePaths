@@ -71,7 +71,7 @@ Options
   -help-full          Display full help and exit
 
 Basic
-  -etc=DIR            set FOAM_CONFIG_ETC for alternative project files
+  -etc=[DIR]          set/unset FOAM_CONFIG_ETC for alternative project files
   -project-path DIR   specify 'WM_PROJECT_DIR' (eg, /opt/openfoam1806-patch1)
   -version VER        specify project version (eg, v1806)
   -sp | -SP | -float32 single precision (WM_PRECISION_OPTION)
@@ -416,8 +416,9 @@ CONFIG_CSH
 ## Basic ##
 
    -etc=*)
-        # Define FOAM_CONFIG_ETC for finding files
+        # FOAM_CONFIG_ETC for finding files. Empty unsets it
         export FOAM_CONFIG_ETC="${1#*=}"
+        [ -n "$FOAM_CONFIG_ETC" ] || unset FOAM_CONFIG_ETC
         ;;
 
    -project-path)
