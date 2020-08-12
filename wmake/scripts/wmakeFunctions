@@ -173,13 +173,18 @@ findObjectDir()
     # Default (local) build directory
     if [ -z "$objectsDir" ]
     then
-        relativeDir="$absdir"
-        appDir=.
-        [ -d Make ] || appDir=$(findTarget .) || exit 1 # Fatal
-        absdir=$(expandPath "$appDir"/.)
+        if [ -d "$absdir/Make" ]
+        then
+            objectsDir="${absdir}/Make/${WM_OPTIONS}"
+        else
+            relativeDir="$absdir"
+            appDir=.
+            [ -d Make ] || appDir=$(findTarget .) || exit 1 # Fatal
+            absdir=$(expandPath "$appDir"/.)
 
-        relativeDir="${relativeDir#${absdir}}"
-        objectsDir="${appDir}/Make/${WM_OPTIONS}${relativeDir}"
+            relativeDir="${relativeDir#${absdir}}"
+            objectsDir="${appDir}/Make/${WM_OPTIONS}${relativeDir}"
+        fi
     fi
 
     echo "$objectsDir"
