@@ -1,3 +1,10 @@
+## Known Build Issues (OpenFOAM-v2012)
+
+### Windows cross-compilation
+
+Compilation of adios, kahip, metis, ptscotch, boost/cgal do not work.
+
+
 ## Known Build Issues (OpenFOAM-v2006)
 
 ### Windows cross-compilation
