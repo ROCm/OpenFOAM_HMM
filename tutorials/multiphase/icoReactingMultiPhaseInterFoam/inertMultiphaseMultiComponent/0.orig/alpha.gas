@@ -29,7 +29,7 @@ boundaryField
     {
         type            inletOutlet;
         inletValue      uniform 1;
-        value           uniform 0;
+        value           uniform 1;
     }
 
     left

@@ -20,7 +20,7 @@ thermoType
     mixture         pureMixture;
     transport       const;
     thermo          hConst;
-    equationOfState rhoConst;
+    equationOfState icoTabulated;
     specie          specie;
     energy          sensibleEnthalpy;
 }
@@ -34,7 +34,12 @@ mixture
     }
     equationOfState
     {
-        rho             13529;
+        rho
+        (
+            (200 13525)
+            (350 13529)
+            (400 13520)
+        );
     }
     thermodynamics
     {
