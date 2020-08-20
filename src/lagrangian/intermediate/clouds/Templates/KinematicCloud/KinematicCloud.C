@@ -244,6 +244,8 @@ void Foam::KinematicCloud<CloudType>::postEvolve
 
     this->dispersion().cacheFields(false);
 
+    this->patchInteraction().postEvolve();
+
     forces_.cacheFields(false);
 
     functions_.postEvolve(td);

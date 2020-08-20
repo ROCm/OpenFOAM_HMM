@@ -176,4 +176,25 @@ bool Foam::MultiInteraction<CloudType>::correct
 }
 
 
+template<class CloudType>
+void Foam::MultiInteraction<CloudType>::postEvolve()
+{
+    for (auto& m : models_)
+    {
+        m.postEvolve();
+    }
+}
+
+
+template<class CloudType>
+void Foam::MultiInteraction<CloudType>::info(Ostream& os)
+{
+    for (auto& m : models_)
+    {
+        Info<< "Patch interaction model " << m.type() << ':' << endl;
+        m.info(os);
+    }
+}
+
+
 // ************************************************************************* //

@@ -181,8 +181,10 @@ public:
         ) = 0;
 
         //- Add to escaped parcels
-        void addToEscapedParcels(const scalar mass);
+        virtual void addToEscapedParcels(const scalar mass);
 
+        //- Post-evolve hook
+        virtual void postEvolve();
 
         //- Write patch interaction info to stream
         virtual void info(Ostream& os);
