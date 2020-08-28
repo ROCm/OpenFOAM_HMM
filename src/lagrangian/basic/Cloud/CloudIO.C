@@ -177,6 +177,9 @@ Foam::Cloud<ParticleType>::Cloud
 {
     checkPatches();
 
+    polyMesh_.tetBasePtIs();
+    polyMesh_.oldCellCentres();
+
     initCloud(checkClass);
 }
 
