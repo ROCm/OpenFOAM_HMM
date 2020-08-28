@@ -99,6 +99,9 @@ protected:
             //- Mass of parcels escaped
             scalar escapedMass_;
 
+            //- Maximum relative U with patch for particle to be removed
+            scalar Urmax_;
+
 
     // Protected Member Functions
 
@@ -162,6 +165,8 @@ public:
         //- Return name of velocity field
         const word& UName() const;
 
+        //- Return Urmax
+        const scalar& Urmax() const;
 
     // Member Functions
 
