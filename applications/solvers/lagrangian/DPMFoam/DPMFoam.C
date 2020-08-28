@@ -43,8 +43,8 @@ Description
 #include "pimpleControl.H"
 
 #ifdef MPPIC
-    #include "basicKinematicMPPICCloud.H"
-    #define basicKinematicTypeCloud basicKinematicMPPICCloud
+    #include "basicKinematicCloud.H"
+    #define basicKinematicTypeCloud basicKinematicCloud
 #else
     #include "basicKinematicCollidingCloud.H"
     #define basicKinematicTypeCloud basicKinematicCollidingCloud
@@ -117,6 +117,12 @@ int main(int argc, char *argv[])
         cloudVolSUSu.primitiveFieldRef() = -cloudSU.source()/mesh.V();
         cloudVolSUSu.correctBoundaryConditions();
         cloudSU.source() = Zero;
+
+//         cloudVolSUSu.primitiveFieldRef() =
+//             (cloudSU.diag()*Uc() - cloudSU.source())/mesh.V();
+//         cloudVolSUSu.correctBoundaryConditions();
+//         cloudSU.source() = cloudSU.diag()*Uc();
+
 
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())
