@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +38,11 @@ License
 #include "makeParcelStochasticCollisionModels.H"
 #include "makeParcelSurfaceFilmModels.H"
 
+// MPPIC sub-models
+#include "makeMPPICParcelDampingModels.H"
+#include "makeMPPICParcelIsotropyModels.H"
+#include "makeMPPICParcelPackingModels.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 makeParcelCloudFunctionObjects(basicKinematicCloud);
@@ -48,6 +54,11 @@ makeParcelInjectionModels(basicKinematicCloud);
 makeParcelPatchInteractionModels(basicKinematicCloud);
 makeParcelStochasticCollisionModels(basicKinematicCloud);
 makeParcelSurfaceFilmModels(basicKinematicCloud);
+
+// MPPIC sub-models
+makeMPPICParcelDampingModels(basicKinematicCloud);
+makeMPPICParcelIsotropyModels(basicKinematicCloud);
+makeMPPICParcelPackingModels(basicKinematicCloud);
 
 
 // ************************************************************************* //

@@ -45,6 +45,11 @@ License
 #include "makeReactingParcelCompositionModels.H"
 #include "makeReactingParcelPhaseChangeModels.H"
 
+// MPPIC sub-models
+#include "makeMPPICParcelDampingModels.H"
+#include "makeMPPICParcelIsotropyModels.H"
+#include "makeMPPICParcelPackingModels.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 makeParcelCloudFunctionObjects(basicReactingCloud);
@@ -63,6 +68,11 @@ makeParcelHeatTransferModels(basicReactingCloud);
 // Reacting sub-models
 makeReactingParcelCompositionModels(basicReactingCloud);
 makeReactingParcelPhaseChangeModels(basicReactingCloud);
+
+// MPPIC sub-models
+makeMPPICParcelDampingModels(basicReactingCloud);
+makeMPPICParcelIsotropyModels(basicReactingCloud);
+makeMPPICParcelPackingModels(basicReactingCloud);
 
 
 // ************************************************************************* //

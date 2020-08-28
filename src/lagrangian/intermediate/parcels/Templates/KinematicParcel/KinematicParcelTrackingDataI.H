@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,6 +25,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
+
+#include "AveragingMethod.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class ParcelType>
 template<class TrackCloudType>
@@ -61,6 +66,106 @@ inline Foam::KinematicParcel<ParcelType>::trackingData::trackingData
     rhoc_(Zero),
     Uc_(Zero),
     muc_(Zero),
+
+    volumeAverage_
+    (
+        AveragingMethod<scalar>::New
+        (
+            IOobject
+            (
+                cloud.name() + ":volumeAverage",
+                cloud.db().time().timeName(),
+                cloud.mesh()
+            ),
+            cloud.solution().dict(),
+            cloud.mesh()
+        )
+    ),
+    radiusAverage_
+    (
+        AveragingMethod<scalar>::New
+        (
+            IOobject
+            (
+                cloud.name() + ":radiusAverage",
+                cloud.db().time().timeName(),
+                cloud.mesh()
+            ),
+            cloud.solution().dict(),
+            cloud.mesh()
+        )
+    ),
+    rhoAverage_
+    (
+        AveragingMethod<scalar>::New
+        (
+            IOobject
+            (
+                cloud.name() + ":rhoAverage",
+                cloud.db().time().timeName(),
+                cloud.mesh()
+            ),
+            cloud.solution().dict(),
+            cloud.mesh()
+        )
+    ),
+    uAverage_
+    (
+        AveragingMethod<vector>::New
+        (
+            IOobject
+            (
+                cloud.name() + ":uAverage",
+                cloud.db().time().timeName(),
+                cloud.mesh()
+            ),
+            cloud.solution().dict(),
+            cloud.mesh()
+        )
+    ),
+    uSqrAverage_
+    (
+        AveragingMethod<scalar>::New
+        (
+            IOobject
+            (
+                cloud.name() + ":uSqrAverage",
+                cloud.db().time().timeName(),
+                cloud.mesh()
+            ),
+            cloud.solution().dict(),
+            cloud.mesh()
+        )
+    ),
+    frequencyAverage_
+    (
+        AveragingMethod<scalar>::New
+        (
+            IOobject
+            (
+                cloud.name() + ":frequencyAverage",
+                cloud.db().time().timeName(),
+                cloud.mesh()
+            ),
+            cloud.solution().dict(),
+            cloud.mesh()
+        )
+    ),
+    massAverage_
+    (
+        AveragingMethod<scalar>::New
+        (
+            IOobject
+            (
+                cloud.name() + ":massAverage",
+                cloud.db().time().timeName(),
+                cloud.mesh()
+            ),
+            cloud.solution().dict(),
+            cloud.mesh()
+        )
+    ),
+
     g_(cloud.g().value()),
     part_(part)
 {}
@@ -157,5 +262,108 @@ Foam::KinematicParcel<ParcelType>::trackingData::part()
     return part_;
 }
 
+
+template<class ParcelType>
+template<class TrackCloudType>
+inline void Foam::KinematicParcel<ParcelType>::trackingData::
+updateAverages
+(
+    const TrackCloudType& cloud
+)
+{
+    // zero the sums
+    volumeAverage_() = 0;
+    radiusAverage_() = 0;
+    rhoAverage_() = 0;
+    uAverage_() = Zero;
+    uSqrAverage_() = 0;
+    frequencyAverage_() = 0;
+    massAverage_() = 0;
+
+    // temporary weights
+    autoPtr<AveragingMethod<scalar>> weightAveragePtr
+    (
+        AveragingMethod<scalar>::New
+        (
+            IOobject
+            (
+                cloud.name() + ":weightAverage",
+                cloud.db().time().timeName(),
+                cloud.mesh()
+            ),
+            cloud.solution().dict(),
+            cloud.mesh()
+        )
+    );
+    AveragingMethod<scalar>& weightAverage = weightAveragePtr();
+
+    // averaging sums
+    for (const typename TrackCloudType::parcelType& p : cloud)
+    {
+        const tetIndices tetIs = p.currentTetIndices();
+
+        const scalar m = p.nParticle()*p.mass();
+
+        volumeAverage_->add(p.coordinates(), tetIs, p.nParticle()*p.volume());
+        rhoAverage_->add(p.coordinates(), tetIs, m*p.rho());
+        uAverage_->add(p.coordinates(), tetIs, m*p.U());
+        massAverage_->add(p.coordinates(), tetIs, m);
+    }
+    volumeAverage_->average();
+    massAverage_->average();
+    rhoAverage_->average(*massAverage_);
+    uAverage_->average(*massAverage_);
+
+    // squared velocity deviation
+    for (const typename TrackCloudType::parcelType& p : cloud)
+    {
+        const tetIndices tetIs = p.currentTetIndices();
+
+        const vector u = uAverage_->interpolate(p.coordinates(), tetIs);
+
+        uSqrAverage_->add
+        (
+            p.coordinates(),
+            tetIs,
+            p.nParticle()*p.mass()*magSqr(p.U() - u)
+        );
+    }
+    uSqrAverage_->average(*massAverage_);
+
+    // sauter mean radius
+    radiusAverage_() = volumeAverage_();
+    weightAverage = 0;
+    for (const typename TrackCloudType::parcelType& p : cloud)
+    {
+        const tetIndices tetIs = p.currentTetIndices();
+
+        weightAverage.add
+        (
+            p.coordinates(),
+            tetIs,
+            p.nParticle()*pow(p.volume(), 2.0/3.0)
+        );
+    }
+    weightAverage.average();
+    radiusAverage_->average(weightAverage);
+
+    // collision frequency
+    weightAverage = 0;
+    for (const typename TrackCloudType::parcelType& p : cloud)
+    {
+        const tetIndices tetIs = p.currentTetIndices();
+
+        const scalar a = volumeAverage_->interpolate(p.coordinates(), tetIs);
+        const scalar r = radiusAverage_->interpolate(p.coordinates(), tetIs);
+        const vector u = uAverage_->interpolate(p.coordinates(), tetIs);
+
+        const scalar f = 0.75*a/pow3(r)*sqr(0.5*p.d() + r)*mag(p.U() - u);
+
+        frequencyAverage_->add(p.coordinates(), tetIs, p.nParticle()*f*f);
+
+        weightAverage.add(p.coordinates(), tetIs, p.nParticle()*f);
+    }
+    frequencyAverage_->average(weightAverage);
+}
 
 // ************************************************************************* //

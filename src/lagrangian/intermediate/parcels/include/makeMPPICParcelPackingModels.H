@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,6 +44,15 @@ License
     makePackingModelType(NoPacking, CloudType);                                \
     makePackingModelType(Explicit, CloudType);                                 \
     makePackingModelType(Implicit, CloudType);
+
+
+#define makeMPPICCloudParcelPackingModels(CloudType)                           \
+                                                                               \
+    makePackingModelMPPIC(CloudType);                                          \
+                                                                               \
+    makePackingModelTypeMPPIC(NoPacking, CloudType);                           \
+    makePackingModelTypeMPPIC(Explicit, CloudType);                            \
+    makePackingModelTypeMPPIC(Implicit, CloudType);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
