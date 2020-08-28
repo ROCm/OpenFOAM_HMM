@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,7 +83,10 @@ Foam::DampingModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType(dict.get<word>(typeName));
+    const word modelType
+    (
+        dict.template getOrDefault<word>(typeName, "none")
+    );
 
     Info<< "Selecting damping model " << modelType << endl;
 
