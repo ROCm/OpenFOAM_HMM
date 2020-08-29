@@ -27,6 +27,8 @@ License
 
 #include "cyclicAMIPointPatch.H"
 #include "pointBoundaryMesh.H"
+#include "pointMesh.H"
+#include "Time.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -103,6 +105,16 @@ Foam::cyclicAMIPointPatch::cyclicAMIPointPatch
 
 Foam::cyclicAMIPointPatch::~cyclicAMIPointPatch()
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::cyclicAMIPointPatch::coupled() const
+{
+    return
+        Pstream::parRun()
+     || !this->boundaryMesh().mesh().mesh().time().processorCase();
+}
 
 
 // ************************************************************************* //

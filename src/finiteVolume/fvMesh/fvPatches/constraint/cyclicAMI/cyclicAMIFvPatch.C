@@ -29,6 +29,7 @@ License
 #include "cyclicAMIFvPatch.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvMesh.H"
+#include "Time.H"
 #include "transform.H"
 #include "surfaceFields.H"
 
@@ -52,7 +53,9 @@ namespace Foam
 
 bool Foam::cyclicAMIFvPatch::coupled() const
 {
-    return Pstream::parRun() || (this->size() && neighbFvPatch().size());
+    return
+        Pstream::parRun()
+     || !this->boundaryMesh().mesh().time().processorCase();
 }
 
 

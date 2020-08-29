@@ -112,6 +112,13 @@ Foam::cyclicAMIPointPatchField<Type>::cyclicAMIPointPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
+bool Foam::cyclicAMIPointPatchField<Type>::coupled() const
+{
+    return cyclicAMIPatch_.coupled();
+}
+
+
+template<class Type>
 void Foam::cyclicAMIPointPatchField<Type>::swapAddSeparated
 (
     const Pstream::commsTypes,

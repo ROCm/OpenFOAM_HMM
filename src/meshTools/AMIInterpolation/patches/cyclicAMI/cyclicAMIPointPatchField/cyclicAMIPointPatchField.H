@@ -211,6 +211,10 @@ public:
 
         // Evaluation functions
 
+            //- Return true if coupled. Note that the underlying patch
+            //- is not coupled() - the points don't align.
+            virtual bool coupled() const;
+
             //- Evaluate the patch field
             virtual void evaluate
             (
