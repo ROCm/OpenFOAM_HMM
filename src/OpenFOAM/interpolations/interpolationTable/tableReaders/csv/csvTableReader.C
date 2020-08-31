@@ -37,6 +37,7 @@ template<class Type>
 Foam::labelList Foam::csvTableReader<Type>::getComponentColumns
 (
     const word& name,
+    std::initializer_list<std::pair<const char*,int>> compat,
     const dictionary& dict
 )
 {
@@ -45,7 +46,7 @@ Foam::labelList Foam::csvTableReader<Type>::getComponentColumns
 
     labelList cols;
 
-    ITstream& is = dict.lookup(name);
+    ITstream& is = dict.lookupCompat(name, compat);
     is.format(IOstream::ASCII);
     is >> cols;
     dict.checkITstream(is, name);
@@ -113,8 +114,11 @@ Foam::csvTableReader<Type>::csvTableReader(const dictionary& dict)
 :
     tableReader<Type>(dict),
     headerLine_(dict.get<bool>("hasHeaderLine")),
-    refColumn_(dict.get<label>("timeColumn")),
-    componentColumns_(getComponentColumns("valueColumns", dict)),
+    refColumn_(dict.getCompat<label>("refColumn", {{"timeColumn", 1912}})),
+    componentColumns_
+    (
+        getComponentColumns("componentColumns", {{"valueColumns", 1912}}, dict)
+    ),
     separator_(dict.getOrDefault<string>("separator", ",")[0])
 {}
 
@@ -218,9 +222,9 @@ void Foam::csvTableReader<Type>::write(Ostream& os) const
     tableReader<Type>::write(os);
 
     os.writeEntry("hasHeaderLine", headerLine_);
-    os.writeEntry("timeColumn", refColumn_);
+    os.writeEntry("refColumn", refColumn_);
 
-    // Force writing labelList in ascii
+    // Force writing labelList in ASCII
     const enum IOstream::streamFormat fmt = os.format();
     os.format(IOstream::ASCII);
     os.writeEntry("componentColumns", componentColumns_);

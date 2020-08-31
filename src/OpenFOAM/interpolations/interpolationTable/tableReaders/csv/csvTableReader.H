@@ -76,6 +76,7 @@ class csvTableReader
         static labelList getComponentColumns
         (
             const word& name,
+            std::initializer_list<std::pair<const char*,int>> compat,
             const dictionary& dict
         );
 

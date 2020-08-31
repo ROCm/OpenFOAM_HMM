@@ -27,7 +27,6 @@ boundaryField
         outOfBounds     clamp;
         direction       in;
         readerType      openFoam;
-        hasHeaderLine   true;
         file            "<constant>/FluxVsdP.dat";
         //nonDimensional  true;
         //rpm             300;
