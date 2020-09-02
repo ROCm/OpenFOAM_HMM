@@ -27,8 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "readFields.H"
-#include "volFields.H"
-#include "surfaceFields.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -53,7 +51,7 @@ Foam::functionObjects::readFields::readFields
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    readOnStart_(true),
+    readOnStart_(dict.getOrDefault("readOnStart", true)),
     fieldSet_()
 {
     read(dict);
@@ -71,7 +69,6 @@ bool Foam::functionObjects::readFields::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
 
-    dict.readIfPresent("readOnStart", readOnStart_);
     dict.readEntry("fields", fieldSet_);
 
     return true;
@@ -80,16 +77,49 @@ bool Foam::functionObjects::readFields::read(const dictionary& dict)
 
 bool Foam::functionObjects::readFields::execute()
 {
-    forAll(fieldSet_, fieldi)
+    for (const word& fieldName : fieldSet_)
     {
-        const word& fieldName = fieldSet_[fieldi];
+        // Already loaded?
+        const auto* ptr = mesh_.cfindObject<regIOobject>(fieldName);
 
-        // If necessary load field
-        loadField<scalar>(fieldName);
-        loadField<vector>(fieldName);
-        loadField<sphericalTensor>(fieldName);
-        loadField<symmTensor>(fieldName);
-        loadField<tensor>(fieldName);
+        if (ptr)
+        {
+            DebugInfo
+                << "readFields : "
+                << ptr->name() << " (" << ptr->type()
+                << ") already in database" << endl;
+            continue;
+        }
+
+        // Load field as necessary
+        IOobject io
+        (
+            fieldName,
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        );
+
+        const bool ok =
+        (
+            io.typeHeaderOk<regIOobject>(false) // Preload header info
+         && !io.headerClassName().empty()       // Extra safety
+         &&
+            (
+                loadField<scalar>(io)
+             || loadField<vector>(io)
+             || loadField<sphericalTensor>(io)
+             || loadField<symmTensor>(io)
+             || loadField<tensor>(io)
+            )
+        );
+
+        if (!ok)
+        {
+            DebugInfo
+                << "readFields : failed to load " << fieldName << endl;
+        }
     }
 
     return true;

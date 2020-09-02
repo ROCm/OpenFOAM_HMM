@@ -31,96 +31,38 @@ License
 #include "surfaceFields.H"
 #include "Time.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class FieldType>
+bool Foam::functionObjects::readFields::loadAndStore(const IOobject& io)
+{
+    if (FieldType::typeName == io.headerClassName())
+    {
+        // Store field on mesh database
+        Log << "    Reading " << io.name()
+            << " (" << FieldType::typeName << ')' << endl;
+
+        mesh_.objectRegistry::store(new FieldType(io, mesh_));
+        return true;
+    }
+
+    return false;
+}
+
 
 template<class Type>
-bool Foam::functionObjects::readFields::loadField(const word& fieldName)
+bool Foam::functionObjects::readFields::loadField(const IOobject& io)
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
     typedef typename VolFieldType::Internal IntVolFieldType;
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
-    /// typedef DimensionedField<Type, surfGeoMesh> SurfFieldType;
 
-    if (foundObject<VolFieldType>(fieldName))
-    {
-        DebugInfo
-            << "readFields : " << VolFieldType::typeName
-            << " " << fieldName << " already in database"
-            << endl;
-    }
-    else if (foundObject<IntVolFieldType>(fieldName))
-    {
-        DebugInfo
-            << "readFields : " << IntVolFieldType::typeName
-            << " " << fieldName << " already in database"
-            << endl;
-    }
-    else if (foundObject<SurfaceFieldType>(fieldName))
-    {
-        DebugInfo
-            << "readFields: " << SurfaceFieldType::typeName
-            << " " << fieldName << " already exists in database"
-            << " already in database" << endl;
-    }
-    /// else if (foundObject<SurfFieldType>(fieldName))
-    /// {
-    ///     DebugInfo
-    ///         << "readFields: " << SurfFieldType::typeName
-    ///         << " " << fieldName << " already exists in database"
-    ///         << " already in database" << endl;
-    /// }
-    else
-    {
-        IOobject fieldHeader
-        (
-            fieldName,
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        );
-
-        if (fieldHeader.typeHeaderOk<VolFieldType>(true, true, false))
-        {
-            // Store field on mesh database
-            Log << "    Reading " << fieldName << endl;
-            auto* fldPtr(new VolFieldType(fieldHeader, mesh_));
-            mesh_.objectRegistry::store(fldPtr);
-            return true;
-        }
-        else if (fieldHeader.typeHeaderOk<IntVolFieldType>(true, true, false))
-        {
-            // Store field on mesh database
-            Log << "    Reading " << fieldName << endl;
-            auto* fldPtr(new IntVolFieldType(fieldHeader, mesh_));
-            mesh_.objectRegistry::store(fldPtr);
-            return true;
-        }
-        else if (fieldHeader.typeHeaderOk<SurfaceFieldType>(true, true, false))
-        {
-            // Store field on mesh database
-            Log << "    Reading " << fieldName << endl;
-            auto* fldPtr(new SurfaceFieldType(fieldHeader, mesh_));
-            mesh_.objectRegistry::store(fldPtr);
-            return true;
-        }
-        /// else if (fieldHeader.typeHeaderOk<SurfFieldType>(true, true, false))
-        /// {
-        ///     const surfMesh* surfptr = isA<surfMesh>(obr());
-        ///     if (surfptr)
-        ///     {
-        ///         const surfMesh& s = surfptr;
-        ///
-        ///         // Store field on surfMesh database
-        ///         Log << "    Reading " << fieldName << endl;
-        ///         auto* fldPtr(new SurfFieldType(fieldHeader, s));
-        ///         s.store(fldPtr);
-        ///         return true;
-        ///     }
-        /// }
-    }
-
-    return false;
+    return
+    (
+        loadAndStore<VolFieldType>(io)
+     || loadAndStore<IntVolFieldType>(io)
+     || loadAndStore<SurfaceFieldType>(io)
+    );
 }
 
 

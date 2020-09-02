@@ -56,7 +56,7 @@ Usage
         // Mandatory entries (runtime modifiable)
         fields      (<field1> <field2> ... <fieldN>);
 
-        // Optional entries (runtime modifiable)
+        // Optional entries (runtime unmodifiable)
         readOnStart true;
 
         // Optional (inherited) entries
@@ -115,7 +115,7 @@ protected:
 
     // Protected Data
 
-        //- Flag to read on construction
+        //- Read immediately on construction (default: true)
         bool readOnStart_;
 
         //- Fields to load
@@ -124,9 +124,13 @@ protected:
 
     // Protected Member Functions
 
-        //- Load field
+        //- Attempt load from io, store on database if successful
+        template<class FieldType>
+        bool loadAndStore(const IOobject& io);
+
+        //- Forward to loadAndStore for supported types
         template<class Type>
-        bool loadField(const word&);
+        bool loadField(const IOobject& io);
 
 
 public:
@@ -160,7 +164,7 @@ public:
     // Member Functions
 
         //- Read the set of fields from dictionary
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
         //- Read the fields
         virtual bool execute();
