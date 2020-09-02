@@ -233,7 +233,7 @@ protected:
         //  Checks for availability on any processor.
         inline bool canWeight(const scalarField& weightField) const;
 
-        //- Return true if the field name is valid
+        //- True if the field name is valid (exists, and a supported type)
         template<class Type>
         bool validField(const word& fieldName) const;
 
@@ -242,7 +242,7 @@ protected:
         tmp<Field<Type>> getFieldValues
         (
             const word& fieldName,
-            const bool mustGet = false
+            const bool mandatory = false
         ) const;
 
         //- Apply the 'operation' to the values

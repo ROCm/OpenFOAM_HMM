@@ -40,16 +40,11 @@ bool Foam::functionObjects::fieldValues::volFieldValue::validField
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
     typedef typename VolFieldType::Internal IntVolFieldType;
 
-    if
+    return
     (
         obr_.foundObject<VolFieldType>(fieldName)
      || obr_.foundObject<IntVolFieldType>(fieldName)
-    )
-    {
-        return true;
-    }
-
-    return false;
+    );
 }
 
 
@@ -58,7 +53,7 @@ Foam::tmp<Foam::Field<Type>>
 Foam::functionObjects::fieldValues::volFieldValue::getFieldValues
 (
     const word& fieldName,
-    const bool mustGet
+    const bool mandatory
 ) const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
@@ -73,14 +68,14 @@ Foam::functionObjects::fieldValues::volFieldValue::getFieldValues
         return filterField(obr_.lookupObject<IntVolFieldType>(fieldName));
     }
 
-    if (mustGet)
+    if (mandatory)
     {
         FatalErrorInFunction
             << "Field " << fieldName << " not found in database"
             << abort(FatalError);
     }
 
-    return tmp<Field<Type>>::New(Zero);
+    return tmp<Field<Type>>::New();
 }
 
 
