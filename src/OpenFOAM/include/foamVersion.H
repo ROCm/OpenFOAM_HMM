@@ -31,12 +31,8 @@ Description
 
 Note
     Compile-time version information is conveyed by the \b OPENFOAM define
-    provided in the wmake rules "General/general".
-    The foamVersion.H file is located directly in the src/OpenFOAM/include
-    directory for easier use by external packages and to allow easier
-    modification during packaging.
-
-    Provisions for compile-time configuration of some paths
+    provided in the wmake rules "General/general"
+    and compile-time configuration of some paths via FOAM_EXTRA_CXXFLAGS:
       - FOAM_CONFIGURED_PROJECT_DIR
       - FOAM_CONFIGURED_PROJECT_ETC
 
@@ -45,9 +41,12 @@ Note
     FOAM_EXTRA_CXXFLAGS='-DFOAM_CONFIGURED_PROJECT_ETC=\"/etc/openfoam\"'
     \endverbatim
 
+    The foamVersion.H file is located directly in the src/OpenFOAM/include
+    directory for easier use by external packages and to allow easier
+    modification during packaging.
+
 SourceFiles
-    foamVersion.C
-    global.Cver
+    foamConfig.Cver
 
 \*---------------------------------------------------------------------------*/
 
@@ -56,6 +55,8 @@ SourceFiles
 
 #include <iostream>
 #include <string>
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- The directory name for user-resources within the HOME directory
 //
@@ -76,6 +77,18 @@ SourceFiles
 //  Default: "WM_PROJECT_DIR"
 //  Used by foamEtcFiles() and stringOps::expand()
 #define FOAM_RESOURCE_SITE_FALLBACK_ENVNAME "WM_PROJECT_DIR"
+
+// Fallback project directory name (hard-coded)
+//
+//  Default: undefined
+//  Used by foamEtcFiles()
+/* #undef FOAM_CONFIGURED_PROJECT_DIR */
+
+// Fallback project etc/ directory name (hard-coded)
+//
+//  Default: undefined
+//  Used by foamEtcFiles()
+/* #undef FOAM_CONFIGURED_PROJECT_ETC */
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

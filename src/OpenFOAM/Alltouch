@@ -16,7 +16,7 @@ esac
 if [ -n "$touch" ]
 then
     # Triggers update of version info
-    wrmo global/global.Cver 2>/dev/null
+    wrmo global/foamConfig.Cver 2>/dev/null
 fi
 
 exit 0 # clean exit
