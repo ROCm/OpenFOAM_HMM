@@ -5,6 +5,6 @@ cd "${0%/*}" || exit                                # Run from this directory
 #------------------------------------------------------------------------------
 
 wmake $targetType pdrFields
-wmake PDRsetFields
+wmake $targetType PDRsetFields
 
 #------------------------------------------------------------------------------
