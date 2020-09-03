@@ -568,6 +568,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     coupledPolyPatch(name, size, start, index, bm, patchType, transform),
     nbrPatchName_(word::null),
     nbrPatchID_(-1),
+    fraction_(Zero),
     rotationAxis_(Zero),
     rotationCentre_(Zero),
     rotationAngleDefined_(false),
@@ -603,6 +604,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     nbrPatchName_(dict.getOrDefault<word>("neighbourPatch", word::null)),
     coupleGroup_(dict),
     nbrPatchID_(-1),
+    fraction_(dict.getOrDefault<scalar>("fraction", Zero)),
     rotationAxis_(Zero),
     rotationCentre_(Zero),
     rotationAngleDefined_(false),
@@ -707,6 +709,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     nbrPatchName_(pp.nbrPatchName_),
     coupleGroup_(pp.coupleGroup_),
     nbrPatchID_(-1),
+    fraction_(pp.fraction_),
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_),
     rotationAngleDefined_(pp.rotationAngleDefined_),
@@ -742,6 +745,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     nbrPatchName_(nbrPatchName),
     coupleGroup_(pp.coupleGroup_),
     nbrPatchID_(-1),
+    fraction_(pp.fraction_),
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_),
     rotationAngleDefined_(pp.rotationAngleDefined_),
@@ -784,6 +788,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     nbrPatchName_(pp.nbrPatchName_),
     coupleGroup_(pp.coupleGroup_),
     nbrPatchID_(-1),
+    fraction_(pp.fraction_),
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_),
     rotationAngleDefined_(pp.rotationAngleDefined_),
@@ -1153,6 +1158,8 @@ void Foam::cyclicAMIPolyPatch::write(Ostream& os) const
         os.writeEntry("tgtSize", tgtFaceIDs_.size());
         os.writeEntry("moveFaceCentres", moveFaceCentres_);
     }
+
+    os.writeEntryIfDifferent<scalar>("fraction", Zero, fraction_);
 }
 
 

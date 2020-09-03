@@ -758,12 +758,10 @@ void Foam::KinematicCloud<CloudType>::preEvolve
 
     if (this->dampingModel().active())
     {
-        DebugVar("dampingModel")
         this->dampingModel().cacheFields(true);
     }
     if (this->packingModel().active())
     {
-        DebugVar("packingModel")
         this->packingModel().cacheFields(true);
     }
 
@@ -895,6 +893,48 @@ void Foam::KinematicCloud<CloudType>::info()
     injectors_.info(Info);
     this->surfaceFilm().info(Info);
     this->patchInteraction().info(Info);
+
+    if (this->packingModel().active())
+    {
+        tmp<volScalarField> alpha = this->theta();
+
+        if (this->db().time().writeTime())
+        {
+            alpha().write();
+        }
+
+        const scalar alphaMin = gMin(alpha().primitiveField());
+        const scalar alphaMax = gMax(alpha().primitiveField());
+
+        Info<< "    Min cell volume fraction        = " << alphaMin << endl;
+        Info<< "    Max cell volume fraction        = " << alphaMax << endl;
+
+        if (alphaMax < SMALL)
+        {
+            return;
+        }
+
+        scalar nMin = GREAT;
+
+        forAll(this->mesh().cells(), celli)
+        {
+            const label n = this->cellOccupancy()[celli].size();
+
+            if (n > 0)
+            {
+                const scalar nPack = n*alphaMax/alpha()[celli];
+
+                if (nPack < nMin)
+                {
+                    nMin = nPack;
+                }
+            }
+        }
+
+        reduce(nMin, minOp<scalar>());
+
+        Info<< "    Min dense number of parcels     = " << nMin << endl;
+    }
 }
 
 

@@ -470,13 +470,6 @@ void Foam::particle::hitCyclicAMIPatch
     const label sendFacei = cpp.whichFace(facei_);
     const label receiveFacei = cpp.pointFace(sendFacei, displacement, pos);
 
-    if (false)
-    {
-        Info<< "My new pos : " <<  pos << endl;
-        Info<< "Particle " << origId() << " crossing AMI from " << cpp.name()
-            << " to " << receiveCpp.name() << endl << endl;
-    }
-
     if (receiveFacei < 0)
     {
         // If the patch face of the particle is not known assume that the
@@ -495,9 +488,15 @@ void Foam::particle::hitCyclicAMIPatch
     vector displacementT = displacement;
     cpp.reverseTransformDirection(displacementT, sendFacei);
 
+    // NOTE: The ray used to find the hit location accross the AMI might not
+    // be consistent in the displacement direction. Therefore a particle can
+    // be looping accross AMI patches indefinitely. Advancing the particle
+    // trajectory inside the cell is a possible solution.
+    const vector dispDir = cpp.fraction()*displacementT;
+    stepFraction_ += cpp.fraction();
     locate
     (
-        pos,
+        pos + dispDir,
         &displacementT,
         mesh_.faceOwner()[facei_],
         false,
@@ -534,7 +533,6 @@ void Foam::particle::hitCyclicAMIPatch
 
     //if (onBoundaryFace())
     {
-        //DebugVar("On boudanry")
 //         vector receiveNormal, receiveDisplacement;
 //         patchData(receiveNormal, receiveDisplacement);
 //

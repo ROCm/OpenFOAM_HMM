@@ -52,6 +52,11 @@ License
 #include "makeSprayParcelAtomizationModels.H"
 #include "makeSprayParcelBreakupModels.H"
 
+// MPPIC sub-models
+#include "makeMPPICParcelDampingModels.H"
+#include "makeMPPICParcelIsotropyModels.H"
+#include "makeMPPICParcelPackingModels.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 makeParcelCloudFunctionObjects(basicSprayCloud);
@@ -78,5 +83,9 @@ makeParticleForceModelType(DistortedSphereDragForce, basicSprayCloud);
 makeSprayParcelAtomizationModels(basicSprayCloud);
 makeSprayParcelBreakupModels(basicSprayCloud);
 
+// MPPIC sub-models
+makeMPPICParcelDampingModels(basicSprayCloud);
+makeMPPICParcelIsotropyModels(basicSprayCloud);
+makeMPPICParcelPackingModels(basicSprayCloud);
 
 // ************************************************************************* //

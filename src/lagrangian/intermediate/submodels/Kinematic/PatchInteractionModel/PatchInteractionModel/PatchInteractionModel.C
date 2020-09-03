@@ -162,7 +162,7 @@ Foam::PatchInteractionModel<CloudType>::PatchInteractionModel
     UName_(this->coeffDict().template getOrDefault<word>("U", "U")),
     escapedParcels_(0),
     escapedMass_(0.0),
-    Urmax_(this->coeffDict().template getOrDefault<scalar>("UrMax", 1e-4))
+    Urmax_(this->coeffDict().template getOrDefault<scalar>("UrMax", 0))
 {}
 
 

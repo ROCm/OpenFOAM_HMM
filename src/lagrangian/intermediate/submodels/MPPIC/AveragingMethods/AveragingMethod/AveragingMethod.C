@@ -92,8 +92,6 @@ Foam::AveragingMethod<Type>::New
         dict.template getOrDefault<word>(typeName, "basic")
     );
 
-    //Info<< "Selecting averaging method " << modelType << endl;
-
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())

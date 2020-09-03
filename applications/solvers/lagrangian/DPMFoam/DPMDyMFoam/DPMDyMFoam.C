@@ -111,7 +111,6 @@ int main(int argc, char *argv[])
         continuousPhaseTransport.correct();
         muc = rhoc*continuousPhaseTransport.nu();
 
-        Info<< "Evolving " << kinematicCloud.name() << endl;
         kinematicCloud.evolve();
 
         // Update continuous phase volume fraction field
