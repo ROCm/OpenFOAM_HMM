@@ -127,7 +127,7 @@ void Foam::fv::actuationDiskSource::calcFroudeMethod
         Ostream& os = file();
         writeCurrentTime(os);
 
-        os  << Uref << tab << Cp << tab << Ct << tab << a << tab << T << tab
+        os  << Uref << tab << Cp << tab << Ct << tab << a << tab << T
             << endl;
     }
 }
@@ -238,7 +238,7 @@ void Foam::fv::actuationDiskSource::calcVariableScalingMethod
         Ostream& os = file();
         writeCurrentTime(os);
 
-        os  << Uref << tab << Cp << tab << Ct
+        os  << Uref << tab << Cp << tab << Ct << tab
             << Udisk << tab << CpStar << tab << CtStar << tab << T << tab << P
             << endl;
     }

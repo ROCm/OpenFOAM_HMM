@@ -12,7 +12,7 @@ warning="==> skip optional libccm adapter"
 # Link with static libccmio only (fewer issues)
 if have_ccmio
 then
-    wmake libso || echo "$warning (build issues detected)"
+    wmake $targetType || echo "$warning (build issues detected)"
 else
     echo $warning
 fi

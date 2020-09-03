@@ -43,13 +43,12 @@ Description
 
     Read csv format:
     \verbatim
-        readerType      csv;
-        file            "<constant>/p0vsTime.csv";
-        hasHeaderLine   true;   // skip first line
-        timeColumn      0;      // time is in column 0
-        valueColumns    (1);    // value starts in column 1
+        readerType          csv;
+        file                "<constant>/p0vsTime.csv";
+        hasHeaderLine       true;   // skip first line
+        refColumn           0;      // reference (eg, time) is in column 0
+        componentColumns    (1);    // component values starts in column 1
     \endverbatim
-
 
 Note
     - Accessing an empty list results in an error.

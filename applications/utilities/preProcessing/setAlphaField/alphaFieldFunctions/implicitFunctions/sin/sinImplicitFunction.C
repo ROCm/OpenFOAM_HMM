@@ -72,15 +72,13 @@ Foam::implicitFunctions::sinImplicitFunction::sinImplicitFunction
     const dictionary& dict
 )
 :
-    sinImplicitFunction
-    (
-        dict.get<scalar>("period"),
-        dict.getOrDefault<scalar>("phase", 0),
-        dict.get<scalar>("amplitude"),
-        dict.get<vector>("direction"),
-        dict.get<vector>("up"),
-        dict.get<vector>("origin")
-    )
+    // __INTEL_COMPILER bug with inheriting constructors?? (issue #1821)
+    period_(dict.get<scalar>("period")),
+    phase_(dict.getOrDefault<scalar>("phase", 0)),
+    amplitude_(dict.get<scalar>("amplitude")),
+    up_(dict.get<vector>("up").normalise()),
+    direction_(dict.get<vector>("direction").normalise()),
+    origin_(dict.get<vector>("origin"))
 {}
 
 

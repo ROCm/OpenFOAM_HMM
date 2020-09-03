@@ -264,7 +264,7 @@ void Foam::Function1Types::CSV<Type>::writeData(Ostream& os) const
     os.writeEntry("nHeaderLine", nHeaderLine_);
     os.writeEntry("refColumn", refColumn_);
 
-    // Force writing labelList in ascii
+    // Force writing labelList in ASCII
     const enum IOstream::streamFormat fmt = os.format();
     os.format(IOstream::ASCII);
     os.writeEntry("componentColumns", componentColumns_);

@@ -69,13 +69,12 @@ Foam::implicitFunctions::cylinderImplicitFunction::cylinderImplicitFunction
     const dictionary& dict
 )
 :
-    cylinderImplicitFunction
-    (
-        dict.get<point>("origin"),
-        dict.get<scalar>("radius"),
-        dict.getOrDefault<scalar>("scale", 1),
-        dict.get<vector>("direction")
-    )
+    // __INTEL_COMPILER bug with inheriting constructors?? (issue #1821)
+    origin_(dict.get<point>("origin")),
+    radius_(dict.get<scalar>("radius")),
+    scale_(dict.getOrDefault<scalar>("scale", 1)),
+    direction_(dict.get<vector>("direction").normalise()),
+    project_(tensor::I - direction_*direction_) // outer product
 {}
 
 

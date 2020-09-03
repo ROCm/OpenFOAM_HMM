@@ -313,16 +313,18 @@ fi
 # Clean the 'Make' directory if present
 #------------------------------------------------------------------------------
 
-if [ -d "$MakeDir" ]
+if [ -d "$MakeDir" ] && [ -n "$WM_OPTIONS" ]
 then
-    objectsDir="$MakeDir/$WM_OPTIONS"
-    case "$PWD" in
-    ("$WM_PROJECT_DIR"/*)
-        buildPath="$WM_PROJECT_DIR/build/${WM_OPTIONS}"
-        objectsDir=$buildPath$(echo $PWD | sed s%$WM_PROJECT_DIR%% )
-        ;;
-    esac
-    rm -rf "$objectsDir" 2>/dev/null
+    # Remove in-source directory (if any)
+    rm -rf "$MakeDir/$WM_OPTIONS" 2>/dev/null
+
+    # Remove out-of-source directory (if applicable)
+    relativeDir="${PWD#${WM_PROJECT_DIR}/}"
+    if [ "$relativeDir" != "$PWD" ]
+    then
+        objectsDir="${WM_PROJECT_DIR}/build/${WM_OPTIONS}/${relativeDir}"
+        rm -rf "$objectsDir" 2>/dev/null
+    fi
 fi
 
 #------------------------------------------------------------------------------
