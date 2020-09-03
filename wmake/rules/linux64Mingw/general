@@ -6,7 +6,8 @@ LD      = x86_64-w64-mingw32-ld
 AR      = x86_64-w64-mingw32-ar
 RANLIB  = x86_64-w64-mingw32-ranlib
 
-PROJECT_LIBS = -l$(WM_PROJECT) -L$(FOAM_LIBBIN)/dummy -lPstream
+PROJECT_LIBS = -l$(WM_PROJECT) \
+    -L$(FOAM_LIBBIN)/dummy -lPstream
 
 include $(GENERAL_RULES)/standard
 

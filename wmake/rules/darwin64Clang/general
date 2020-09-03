@@ -1,7 +1,5 @@
 CPP        = cpp -traditional-cpp $(GFLAGS)
 
-PROJECT_LIBS = -l$(WM_PROJECT) -ldl
-
 include $(GENERAL_RULES)/standard
 ## include $(GENERAL_RULES)/Clang/openmp
 
@@ -10,9 +8,10 @@ include $(GENERAL_RULES)/standard
 COMP_OPENMP = -DUSE_OMP -Xpreprocessor -fopenmp
 LINK_OPENMP = -lomp
 # ----
-# Or disable
-# include $(GENERAL_RULES)/no-openmp
-# ----
+
+ifneq (,$(findstring ~openmp,$(WM_COMPILE_CONTROL)))
+    include $(GENERAL_RULES)/no-openmp
+endif
 
 include $(DEFAULT_RULES)/c
 include $(DEFAULT_RULES)/c++

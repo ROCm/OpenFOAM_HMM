@@ -20,6 +20,9 @@ fi
 wmakeLnInclude -u OpenFOAM
 wmakeLnInclude -u OSspecific/"${WM_OSTYPE:-POSIX}"
 
+# Update version info (as required)
+OpenFOAM/Alltouch -check 2>/dev/null
+
 OSspecific/"${WM_OSTYPE:-POSIX}"/Allwmake $targetType $*
 
 case "$WM_COMPILER" in
@@ -37,9 +40,6 @@ Mingw*)
     ;;
 *)
     Pstream/Allwmake $targetType $*
-
-    # Update version info (as required)
-    OpenFOAM/Alltouch -check 2>/dev/null
     ;;
 esac
 

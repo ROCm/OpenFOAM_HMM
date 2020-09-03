@@ -1,5 +1,8 @@
 LINK_LIBS   = $(c++DBUG) -Wl,--as-needed
 
-LINKLIBSO   = $(CC) $(c++FLAGS) -shared
+LINKLIBSO   = $(CC) $(c++FLAGS) -shared \
+    $(FOAM_EXTRA_LDFLAGS)
 
-LINKEXE     = $(CC) $(c++FLAGS) -L$(FOAM_LIBBIN)/dummy -lPstream
+LINKEXE     = $(CC) $(c++FLAGS) \
+    -L$(FOAM_LIBBIN)/dummy -lPstream \
+    $(FOAM_EXTRA_LDFLAGS)

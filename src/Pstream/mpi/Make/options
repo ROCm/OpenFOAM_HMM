@@ -10,4 +10,5 @@ EXE_INC  = $(PFLAGS) $(PINC) $(c++LESSWARN)
 
 LIB_LIBS = $(PLIBS)
 
+/* Project lib dependencies */
 PROJECT_LIBS = -L$(FOAM_LIBBIN) -lOpenFOAM

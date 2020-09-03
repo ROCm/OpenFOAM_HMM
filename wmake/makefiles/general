@@ -59,7 +59,7 @@ PROJECT_INC     = \
     -I$(LIB_SRC)/$(WM_PROJECT)/lnInclude \
     -I$(LIB_SRC)/OSspecific/$(WM_OSTYPE)/lnInclude
 
-PROJECT_LIBS    = -l$(WM_PROJECT)
+PROJECT_LIBS    = -l$(WM_PROJECT) -ldl
 
 EXE_INC         =
 EXE_LIBS        =

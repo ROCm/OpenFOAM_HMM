@@ -19,7 +19,7 @@ LINK_LIBS   = $(c++DBUG)
 # Using "-Wl,--no-undefined,--enable-runtime-pseudo-reloc"
 # does not forgive undefined symbols during linking
 
-LINKLIBSO   = $(CC) $(c++FLAGS) \
+LINKLIBSO   = $(CC) $(c++FLAGS) -shared \
     -Wl,--output-def=$(LIB).def \
     -Wl,--out-implib=$(LIB).dll.a \
     -Wl,--no-undefined \
@@ -27,9 +27,10 @@ LINKLIBSO   = $(CC) $(c++FLAGS) \
     -Wl,--enable-auto-import \
     -Wl,--enable-auto-image-base \
     -Wl,--strip-all \
-    -shared
+    $(FOAM_EXTRA_LDFLAGS)
 
 LINKEXE     = $(CC) $(c++FLAGS) \
     -Wl,--enable-auto-import \
     -Wl,--strip-all \
-    -Wl,--force-exe-suffix
+    -Wl,--force-exe-suffix \
+    $(FOAM_EXTRA_LDFLAGS)

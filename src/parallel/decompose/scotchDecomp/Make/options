@@ -13,6 +13,6 @@ ifeq (,$(findstring windows,$(WM_OSTYPE)))
 endif
 
 /* May require librt, but scotch does not declare the dependency */
-ifeq ($(EXT_SO),.so)
+ifeq (.so,$(EXT_SO))
     LIB_LIBS += -lrt
 endif

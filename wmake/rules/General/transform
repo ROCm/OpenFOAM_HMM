@@ -8,7 +8,7 @@ WMKDEP  := $(WMAKE_BIN)/wmkdepend    # 1. Ragel-based
 
 WMKDEP_FLAGS := -eWM_PROJECT_DIR -eWM_THIRD_PARTY_DIR
 
-ifneq ("$(WM_QUIET)","")
+ifneq ("","$(WM_QUIET)")
     E=@
     define QUIET_MESSAGE
         @echo "    $1: $2";

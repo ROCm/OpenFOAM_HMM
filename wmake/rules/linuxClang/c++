@@ -11,4 +11,10 @@ cxxtoo      = $(Ctoo)
 cctoo       = $(Ctoo)
 cpptoo      = $(Ctoo)
 
-include $(GENERAL_RULES)/Clang/link-c++
+ifneq (,$(findstring +gold,$(WM_COMPILE_CONTROL)))
+    include $(GENERAL_RULES)/Clang/link-gold-c++
+else
+    include $(GENERAL_RULES)/Clang/link-c++
+endif
+
+#------------------------------------------------------------------------------
