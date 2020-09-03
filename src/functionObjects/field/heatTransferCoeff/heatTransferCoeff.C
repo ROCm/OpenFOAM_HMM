@@ -45,9 +45,11 @@ namespace functionObjects
 
 bool Foam::functionObjects::heatTransferCoeff::calc()
 {
-    volScalarField& htc = mesh_.lookupObjectRef<volScalarField>(resultName_);
+    auto& htc = mesh_.lookupObjectRef<volScalarField>(resultName_);
 
     htcModelPtr_->calc(htc, htcModelPtr_->q());
+
+    htc *= L_/kappa_;
 
     return true;
 }
@@ -63,13 +65,15 @@ Foam::functionObjects::heatTransferCoeff::heatTransferCoeff
 )
 :
     fieldExpression(name, runTime, dict),
+    L_(1),
+    kappa_(1),
     htcModelPtr_(nullptr)
 {
     read(dict);
 
     setResultName(typeName, name + ":htc:" + htcModelPtr_->type());
 
-    volScalarField* heatTransferCoeffPtr =
+    auto* heatTransferCoeffPtr =
         new volScalarField
         (
             IOobject
@@ -92,16 +96,19 @@ Foam::functionObjects::heatTransferCoeff::heatTransferCoeff
 
 bool Foam::functionObjects::heatTransferCoeff::read(const dictionary& dict)
 {
-    if (fieldExpression::read(dict))
+    if (!fieldExpression::read(dict))
     {
-        htcModelPtr_ = heatTransferCoeffModel::New(dict, mesh_, fieldName_);
-
-        htcModelPtr_->read(dict);
-
-        return true;
+        return false;
     }
 
-    return false;
+    L_ = dict.getCheckOrDefault<scalar>("L", 1, scalarMinMax::ge(0));
+    kappa_ =
+        dict.getCheckOrDefault<scalar>("kappa", 1, scalarMinMax::ge(SMALL));
+    htcModelPtr_ = heatTransferCoeffModel::New(dict, mesh_, fieldName_);
+
+    htcModelPtr_->read(dict);
+
+    return true;
 }
 
 

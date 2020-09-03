@@ -85,8 +85,7 @@ void Foam::heatTransferCoeffModels::fixedReferenceTemperature::htc
     const FieldField<Field, scalar>& q
 )
 {
-    //const FieldField<Field, scalar> qBf(q());
-    const volScalarField& T = mesh_.lookupObject<volScalarField>(TName_);
+    const auto& T = mesh_.lookupObject<volScalarField>(TName_);
     const volScalarField::Boundary& Tbf = T.boundaryField();
     const scalar eps = ROOTVSMALL;
 

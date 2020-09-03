@@ -27,8 +27,8 @@ Class
     Foam::heatTransferCoeffModels::fixedReferenceTemperature
 
 Description
-    Heat transfer coefficient calculation that employs a fixed reference
-    temperature
+    Heat transfer coefficient calculation
+    that employs a fixed reference temperature.
 
     The heat transfer coefficient is specified by:
 
@@ -36,30 +36,42 @@ Description
         h = \frac{q}{T_{ref} - T_w}
     \f]
 
+    where
+    \vartable
+      h       | Convective heat transfer coefficient of the flow  [W/(m2 K)]
+      q       | Heat flux                                         [W/m2]
+      T_{ref} | Reference temperature of surrounding fluid        [K]
+      T_w     | Patch temperature                                 [K]
+    \endvartable
+
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
-        type            heatTransferCoeff;
-        libs            (fieldFunctionObjects);
+    heatTransferCoeff1
+    {
+        // Mandatory and other optional entries
         ...
         htcModel        fixedReferenceTemperature;
-        TRef            300;
-        ...
+
+        // Conditional mandatory entries (runtime modifiable)
+        Tref            0;
+    }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description                          | Required | Default
-        type         | type name: heatTransferCoeff         | yes |
-        htcModel     | selected htc model                   | yes |
-        TRef         | reference temperature                | yes |
+      Property  | Description                            | Type | Reqd | Dflt
+      type      | Model name: fixedReferenceTemperature  | word | yes  | -
+      Tref      | Reference temperature of surrounding fluid | scalar | yes | -
     \endtable
+
+See also
+  - Foam::heatTransferCoeffModel
+  - Foam::heatTransferCoeffModels::localReferenceTemperature
+  - Foam::heatTransferCoeffModels::ReynoldsAnalogy
 
 SourceFiles
     fixedReferenceTemperature.C
-
-SeeAlso
-    Foam::heatTransferCoeffModel
 
 \*---------------------------------------------------------------------------*/
 
@@ -100,12 +112,6 @@ protected:
             const FieldField<Field, scalar>& q
         );
 
-        //- No copy construct
-        fixedReferenceTemperature(const fixedReferenceTemperature&) = delete;
-
-        //- No copy assignment
-        void operator=(const fixedReferenceTemperature&) = delete;
-
 
 public:
 
@@ -122,6 +128,12 @@ public:
             const fvMesh& mesh,
             const word& TName
         );
+
+        //- No copy construct
+        fixedReferenceTemperature(const fixedReferenceTemperature&) = delete;
+
+        //- No copy assignment
+        void operator=(const fixedReferenceTemperature&) = delete;
 
 
     //- Destructor

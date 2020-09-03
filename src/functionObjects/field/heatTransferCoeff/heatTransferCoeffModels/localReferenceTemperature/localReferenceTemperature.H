@@ -27,8 +27,8 @@ Class
     Foam::heatTransferCoeffModels::localReferenceTemperature
 
 Description
-    Heat transfer coefficient calculation that employs the patch internal
-    field as the reference temperature
+    Heat transfer coefficient calculation that employs
+    the patch internal field as the reference temperature.
 
     The heat transfer coefficient is specified by:
 
@@ -36,28 +36,38 @@ Description
         h = \frac{q}{T_c - T_w}
     \f]
 
+    where
+    \vartable
+      h       | Convective heat transfer coefficient of the flow  [W/(m2 K)]
+      q       | Heat flux                                         [W/m2]
+      T_{ref} | Reference temperature of patch internal field     [K]
+      T_w     | Patch temperature                                 [K]
+    \endvartable
+
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
-        type            heatTransferCoeff;
-        libs            (fieldFunctionObjects);
+    heatTransferCoeff1
+    {
+        // Mandatory and other optional entries
         ...
         htcModel        localReferenceTemperature;
-        ...
+    }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description             | Required    | Default value
-        type         | type name: heatTransferCoeff | yes    |
-        htcModel     | selected htc model      | yes         |
+      Property  | Description                            | Type | Reqd | Dflt
+      type      | Model name: localReferenceTemperature  | word | yes  | -
     \endtable
+
+See also
+  - Foam::heatTransferCoeffModel
+  - Foam::heatTransferCoeffModels::fixedReferenceTemperature
+  - Foam::heatTransferCoeffModels::ReynoldsAnalogy
 
 SourceFiles
     localReferenceTemperature.C
-
-SeeAlso
-    Foam::heatTransferCoeffModel
 
 \*---------------------------------------------------------------------------*/
 

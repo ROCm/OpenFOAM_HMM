@@ -27,10 +27,11 @@ Class
     Foam::heatTransferCoeffModels::ReynoldsAnalogy
 
 Description
-    Heat transfer coefficient calculation based on Reynolds Analogy
+    Heat transfer coefficient calculation based on Reynolds Analogy,
+    which is used to relate turbulent momentum and heat transfer.
 
-    The heat transfer coefficient is derived from the skin friction
-    coefficient:
+    The heat transfer coefficient is derived
+    from the skin friction coefficient:
 
     \f[
         C_f = \frac{\tau_w}{0.5 \rho_\infty |U|^2}
@@ -39,41 +40,65 @@ Description
     as:
 
     \f[
-        h = 0.5 \rho_\infty C_{p,\infty} |U_{\infty}| C_f
+        h = 0.5 \rho_\infty c_{p,\infty} |U_{\infty}| C_f
     \f]
 
+    where
+    \vartable
+      h       | Convective heat transfer coefficient of the flow
+      \rho_\infty  | Reference fluid density
+      c_{p,\infty} | Reference specific heat capacity at constant pressure
+      U_{\infty}   | Reference velocity
+      C_f          | Skin friction coefficient
+      \tau_w       | Wall shear stress
+    \endvartable
+
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
-        type            heatTransferCoeff;
-        libs            (fieldFunctionObjects);
+    heatTransferCoeff1
+    {
+        // Mandatory and other optional entries
         ...
         htcModel        ReynoldsAnalogy;
-        UInf            (20 0 0);
-        Cp              CpInf;
+
+        // Conditional mandatory entries (runtime modifiable)
+        UInf            (10 0 0);
+
+        // Conditional optional entries (runtime modifiable)
+        Cp              <CpName>;
+        rho             <rhoName>;
+
+        // mandatory if Cp == CpInf
         CpInf           1005;
-        ...
+
+        // mandatory if rho == rhoInf
+        rhoInf          1;
+    }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description             | Required    | Default value
-        type         | type name: heatTransferCoeff | yes    |
-        htcModel     | selected htc model      | yes         |
-        UInf         | reference velocity      | yes |
-        Cp           | specific heat capacity field name | no |
-        rho          | density field name      | no |
+      Property  | Description                            | Type | Reqd | Dflt
+      type      | Model name: ReynoldsAnalogy            | word | yes  | -
+      UInf      | Reference velocity                   | scalar | yes  | -
+      Cp      | Name of reference specific heat capacity | word | no   | Cp
+      CpInf   | Reference specific heat capacity value | scalar | cndtnl | -
+      rho     | Name of reference fluid density          | word | no   | rho
+      rhoInf  | Reference fluid density value          | scalar | cndtnl | -
     \endtable
 
-    Note:
-    - to use a reference \c Cp, set \c Cp to \c CpInf
-    - to use a reference \c rho, set \c rho to \c rhoInf
+Note
+  - to use a reference \c Cp, set \c Cp to \c CpInf
+  - to use a reference \c rho, set \c rho to \c rhoInf
+
+See also
+  - Foam::heatTransferCoeffModel
+  - Foam::heatTransferCoeffModels::fixedReferenceTemperature
+  - Foam::heatTransferCoeffModels::localReferenceTemperature
 
 SourceFiles
     ReynoldsAnalogy.C
-
-SeeAlso
-    Foam::heatTransferCoeffModel
 
 \*---------------------------------------------------------------------------*/
 
@@ -138,13 +163,6 @@ protected:
         );
 
 
-        //- No copy construct
-        ReynoldsAnalogy(const ReynoldsAnalogy&) = delete;
-
-        //- No copy assignment
-        void operator=(const ReynoldsAnalogy&) = delete;
-
-
 public:
 
     //- Runtime type information
@@ -160,6 +178,12 @@ public:
             const fvMesh& mesh,
             const word& TName
         );
+
+        //- No copy construct
+        ReynoldsAnalogy(const ReynoldsAnalogy&) = delete;
+
+        //- No copy assignment
+        void operator=(const ReynoldsAnalogy&) = delete;
 
 
     //- Destructor
