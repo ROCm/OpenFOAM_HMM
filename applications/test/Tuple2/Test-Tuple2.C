@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +52,7 @@ struct special1
 
     bool operator()(const type& a, const type& b) const
     {
-        int val = compareOp<label>()(a.first(), b.first());
+        const label val = compareOp<label>()(a.first(), b.first());
         return (val == 0) ? (b.second() < a.second()) : (val < 0);
     }
 };
@@ -66,29 +66,36 @@ struct special2
 
     bool operator()(const type& a, const type& b) const
     {
-        scalar val = compareOp<scalar>()(a.second(), b.second());
+        const scalar val = compareOp<scalar>()(a.second(), b.second());
         return (val == 0) ? (b.first() < a.first()) : (val < 0);
     }
 };
 
 
-// Print info
-void printTuple2(const Tuple2<word, word>& t)
+// Print content and info
+void printTuple2(const word& f, const word& s)
 {
-    Info<< "tuple: " << t << nl;
-
-    Info<< "first  @: " << name(t.first().data()) << nl;
-    Info<< "second @: " << name(t.second().data()) << nl;
+    Info<< '(' << f << ' ' << s << ") @ "
+        << name(f.data()) << ','
+        << name(s.data()) << nl;
 }
 
 
-// Print info
+// Print content and info
+void printTuple2(const Tuple2<word, word>& t)
+{
+    Info<< "tuple: " << t << " @ "
+        << name(t.first().data()) << ','
+        << name(t.second().data()) << nl;
+}
+
+
+// Print content and info
 void printTuple2(const Pair<word>& t)
 {
-    Info<< "tuple: " << t << nl;
-
-    Info<< "first  @: " << name(t.first().data()) << nl;
-    Info<< "second @: " << name(t.second().data()) << nl;
+    Info<< "tuple: " << t << " @ "
+        << name(t.first().data()) << ','
+        << name(t.second().data()) << nl;
 }
 
 
@@ -99,14 +106,12 @@ int main()
 {
     typedef Tuple2<label, scalar> indexedScalar;
 
-    Info<< "null constructed Tuple: " << indexedScalar() << nl;
-    Info<< "null constructed Pair: "  << Pair<scalar>() << nl;
+    Info<< "Default constructed Tuple: " << indexedScalar() << nl;
+    Info<< "Default constructed Pair: "  << Pair<scalar>() << nl;
 
     indexedScalar t2(1, 3.2);
 
-    Info<< "Foam::Tuple2: "
-        << t2 << " => "
-        << t2.first() << ' ' << t2.second() << nl;
+    Info<< "Foam::Tuple2: " << t2 << nl;
 
     // As list. Generated so that we have duplicate indices
     List<indexedScalar> list1(3*4);
@@ -230,30 +235,30 @@ int main()
         word word1("hello");
         word word2("word");
 
-        Info<< "create with " << word1 << " @ " << name(word1.data())
-            << " " << word2 << " @ " << name(word2.data()) << nl;
+        Info<< "create with ";
+        printTuple2(word1, word2);
 
-        Tuple2<word, word> tup(std::move(word2), std::move(word1));
+        Tuple2<word> tup(std::move(word2), std::move(word1));
 
         printTuple2(tup);
 
-        Info<< "input is now " << word1 << " @ " << name(word1.data())
-            << " " << word2 << " @ " << name(word2.data()) << nl;
+        Info<< "input is now ";
+        printTuple2(word1, word2);
     }
 
     {
         word word1("hello");
         word word2("word");
 
-        Info<< "create with " << word1 << " @ " << name(word1.data())
-            << " " << word2 << " @ " << name(word2.data()) << nl;
+        Info<< "create with ";
+        printTuple2(word1, word2);
 
         Pair<word> tup(std::move(word2), std::move(word1));
 
         printTuple2(tup);
 
-        Info<< "input is now " << word1 << " @ " << name(word1.data())
-            << " " << word2 << " @ " << name(word2.data()) << nl;
+        Info<< "input is now ";
+        printTuple2(word1, word2);
     }
 
     Info<< "\nEnd\n" << endl;

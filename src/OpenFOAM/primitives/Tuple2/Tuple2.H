@@ -54,7 +54,7 @@ namespace Foam
                            Class Tuple2 Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class T1, class T2>
+template<class T1, class T2 = T1>
 class Tuple2
 {
     // Private Data
