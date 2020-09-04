@@ -128,7 +128,7 @@ Foam::LiquidEvapFuchsKnudsen<CloudType>::LiquidEvapFuchsKnudsen
     {
         FatalErrorInFunction
             << "Solution is not well defined. It should be (liquid solid)"
-            << nl << endl;
+            << nl <<  exit(FatalError);
     }
     else
     {
@@ -149,16 +149,16 @@ Foam::LiquidEvapFuchsKnudsen<CloudType>::LiquidEvapFuchsKnudsen
         solToSolMap_ =
             owner.composition().localId(idSolid, solution_[1]);
 
-        const word activityCoefficientype
+        const word activityCoefficienType
         (
             this->coeffDict().getWord("activityCoefficient")
         );
 
-        if (activityCoefficientype == "Hoff")
+        if (activityCoefficienType == "Hoff")
         {
             method_ = pHoff;
         }
-        else if (activityCoefficientype == "UNIFAC")
+        else if (activityCoefficienType == "UNIFAC")
         {
             method_ = pUNIFAC;
         }
@@ -187,13 +187,6 @@ Foam::LiquidEvapFuchsKnudsen<CloudType>::LiquidEvapFuchsKnudsen
     liqToCarrierMap_(pcm.liqToCarrierMap_),
     liqToLiqMap_(pcm.liqToLiqMap_),
     solToSolMap_(pcm.solToSolMap_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::LiquidEvapFuchsKnudsen<CloudType>::~LiquidEvapFuchsKnudsen()
 {}
 
 
@@ -229,7 +222,7 @@ void Foam::LiquidEvapFuchsKnudsen<CloudType>::calculate
 
     const scalar YeInf = this->owner().thermo().carrier().Y()[gid][celli];
 
-    scalar sigma = liquids_.properties()[lid].sigma(pc, Ts);
+    const scalar sigma = liquids_.properties()[lid].sigma(pc, Ts);
 
     // Kelvin effect
     const scalar Ke = exp(4*sigma*W/(RR*rho*d*T));

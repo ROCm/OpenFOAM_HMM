@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|  \\    /   O peration     | Version:  v2006                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -27,7 +27,7 @@ endTime         15;
 
 deltaT          8.13e-3;
 
-writeControl    adjustableRunTime;
+writeControl    adjustable;
 
 writeInterval   0.5;
 
@@ -50,10 +50,6 @@ adjustTimeStep  yes;
 maxCo           1.0;
 
 maxDeltaT       1;
-
-functions
-{
-}
 
 
 // ************************************************************************* //

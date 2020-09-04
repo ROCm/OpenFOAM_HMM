@@ -99,7 +99,8 @@ public:
 
     private:
 
-        // Private data
+        // Private Data
+
             //- Minimum pressure [Pa]
             demandDrivenEntry<scalar> pMin_;
 

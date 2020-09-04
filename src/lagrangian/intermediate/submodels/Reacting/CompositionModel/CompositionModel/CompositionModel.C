@@ -556,7 +556,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::rho
 
     scalarField Xgas(Ygas.size(), 0);
     scalar WInv = 0;
-    forAll (Ygas, i)
+    forAll(Ygas, i)
     {
         label cid = phaseProps_[idGas()].carrierIds()[i];
         Xgas[i] = YMix[idGas()]*Ygas[i]/carrier.W(cid);
@@ -564,14 +564,14 @@ Foam::scalar Foam::CompositionModel<CloudType>::rho
     }
 
     scalarField Xliq(Yliq.size(), 0);
-    forAll (Yliq, i)
+    forAll(Yliq, i)
     {
         Xliq[i] = YMix[idLiquid()]*Yliq[i]/thermo.liquids().properties()[i].W();
         WInv += Xliq[i];
     }
 
     scalarField Xsol(Ysol.size(), 0);
-    forAll (Ysol, i)
+    forAll(Ysol, i)
     {
         Xsol[i] = YMix[idSolid()]*Ysol[i]/thermo.solids().properties()[i].W();
         WInv += Xsol[i];
@@ -583,16 +583,16 @@ Foam::scalar Foam::CompositionModel<CloudType>::rho
 
 
     scalar rho = 0;
-    forAll (Xgas, i)
+    forAll(Xgas, i)
     {
         label cid = phaseProps_[idGas()].carrierIds()[i];
         rho += Xgas[i]*carrier.rho(cid, p, T);
     }
-    forAll (Xliq, i)
+    forAll(Xliq, i)
     {
         rho += Xliq[i]*thermo.liquids().properties()[i].rho(p, T);
     }
-    forAll (Xsol, i)
+    forAll(Xsol, i)
     {
         rho += Xsol[i]*thermo.solids().properties()[i].rho();
     }

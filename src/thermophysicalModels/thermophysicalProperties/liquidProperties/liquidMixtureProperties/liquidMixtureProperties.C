@@ -111,7 +111,7 @@ Foam::scalar Foam::liquidMixtureProperties::Tc(const scalarField& X) const
         vTc += x1*properties_[i].Tc();
     }
 
-    return vTc/ (vc + ROOTVSMALL);
+    return vTc/(vc + ROOTVSMALL);
 }
 
 
@@ -471,7 +471,7 @@ Foam::scalar Foam::liquidMixtureProperties::kappa
 
     phii /= (pSum + ROOTVSMALL);
 
-    scalar K = 0.0;
+    scalar K = 0;
 
     forAll(properties_, i)
     {
@@ -514,7 +514,7 @@ Foam::scalar Foam::liquidMixtureProperties::D
         }
     }
 
-    return 1.0/(Dinv + ROOTVSMALL);
+    return 1/(Dinv + ROOTVSMALL);
 }
 
 

@@ -127,7 +127,7 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     );
 
     // Limit phase change mass by availability of each specie
-    forAll (Y, i)
+    forAll(Y, i)
     {
         // evaporation
         if (dMassPC[i] > 0)
@@ -497,7 +497,7 @@ void Foam::ReactingParcel<ParcelType>::calc
         0,
         1.0,
         Y_,
-        scalarField(0),
+        scalarField(),
         dMassPC,
         Sh,
         Ne,

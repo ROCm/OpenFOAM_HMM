@@ -155,7 +155,7 @@ public:
 
 
     //- Destructor
-    virtual ~LiquidEvapFuchsKnudsen();
+    virtual ~LiquidEvapFuchsKnudsen() = default;
 
 
     // Member Functions
