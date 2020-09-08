@@ -29,6 +29,7 @@ License
 #include "nastranSurfaceWriter.H"
 #include "Pair.H"
 #include "IOmanip.H"
+#include "ListOps.H"
 #include "OSspecific.H"
 #include "surfaceWriterMethods.H"
 #include "addToRunTimeSelectionTable.H"
@@ -214,11 +215,15 @@ void Foam::surfaceWriters::nastranWriter::writeGeometry
     const labelList& elemIds = surf.faceIds();
 
     // Possible to use faceIds?
-    bool useOrigFaceIds = (elemIds.size() == faces.size());
+    bool useOrigFaceIds =
+    (
+        elemIds.size() == faces.size()
+     && !ListOps::found(elemIds, lessOp1<label>(0))
+    );
 
+    // Not possible with on-the-fly face decomposition
     if (useOrigFaceIds)
     {
-        // Not possible with on-the-fly face decomposition
         for (const auto& f : faces)
         {
             if (f.size() > 4)
@@ -258,7 +263,6 @@ void Foam::surfaceWriters::nastranWriter::writeGeometry
 
         if (useOrigFaceIds)
         {
-            // When available and not decomposed
             elemId = elemIds[facei];
         }
 

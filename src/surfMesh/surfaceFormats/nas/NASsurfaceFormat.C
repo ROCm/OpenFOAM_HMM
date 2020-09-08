@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "NASsurfaceFormat.H"
+#include "ListOps.H"
 #include "IFstream.H"
 #include "IOmanip.H"
 #include "faceTraits.H"
@@ -458,13 +459,17 @@ void Foam::fileFormats::NASsurfaceFormat<Face>::write
     const bool useFaceMap = (surf.useFaceMap() && zones.size() > 1);
 
     // Possible to use faceIds?
+    // - cannot if there are negative ids (eg, encoded solid/side)
     bool useOrigFaceIds =
-        (!useFaceMap && elemIds.size() == faceLst.size());
+    (
+        !useFaceMap
+     && elemIds.size() == faceLst.size()
+     && !ListOps::found(elemIds, lessOp1<label>(0))
+    );
 
+    // Not possible with on-the-fly face decomposition
     if (useOrigFaceIds)
     {
-        // Not possible with on-the-fly face decomposition
-
         for (const auto& f : faceLst)
         {
             if (f.size() > 4)

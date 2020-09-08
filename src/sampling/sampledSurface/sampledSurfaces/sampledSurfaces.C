@@ -32,6 +32,7 @@ License
 #include "mapPolyMesh.H"
 #include "volFields.H"
 #include "HashOps.H"
+#include "ListOps.H"
 #include "Time.H"
 #include "UIndirectList.H"
 #include "addToRunTimeSelectionTable.H"
@@ -168,12 +169,18 @@ void Foam::sampledSurfaces::countFields()
     forAll(*this, surfi)
     {
         const sampledSurface& s = (*this)[surfi];
+        surfaceWriter& outWriter = writers_[surfi];
 
-        writers_[surfi].nFields() =
+        outWriter.nFields() =
         (
             nVolumeFields
           + (s.withSurfaceFields() ? nSurfaceFields : 0)
-          + ((s.hasFaceIds() && !s.interpolate()) ? 1 : 0)
+          +
+            (
+                // Face-id field, but not if the writer manages that itself
+                !s.interpolate() && s.hasFaceIds() && !outWriter.usesFaceIds()
+              ? 1 : 0
+            )
         );
     }
 }
@@ -319,7 +326,7 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
             const dictionary& surfDict = dEntry.dict();
 
             autoPtr<sampledSurface> surf =
-            sampledSurface::New
+                sampledSurface::New
                 (
                     dEntry.keyword(),
                     mesh_,
@@ -555,20 +562,29 @@ bool Foam::sampledSurfaces::performAction(unsigned request)
 
             outWriter.beginTime(obr_.time());
 
-            // Write original ids
-            if (s.hasFaceIds() && !s.interpolate())
+            // Face-id field, but not if the writer manages that itself
+            if (!s.interpolate() && s.hasFaceIds() && !outWriter.usesFaceIds())
             {
                 // This is still quite horrible.
 
                 Field<label> ids(s.faceIds());
-                ids += label(1);  // From 0-based to 1-based
 
-                writeSurface
+                if
                 (
-                    outWriter,
-                    ids,
-                    "Ids"
-                );
+                    returnReduce
+                    (
+                        !ListOps::found(ids, lessOp1<label>(0)),
+                        andOp<bool>()
+                    )
+                )
+                {
+                    // From 0-based to 1-based, provided there are no
+                    // negative ids (eg, encoded solid/side)
+
+                    ids += label(1);
+                }
+
+                writeSurface(outWriter, ids, "Ids");
             }
         }
     }

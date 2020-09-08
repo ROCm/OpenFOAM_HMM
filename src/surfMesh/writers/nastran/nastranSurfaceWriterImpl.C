@@ -28,6 +28,7 @@ License
 
 #include "OFstream.H"
 #include "IOmanip.H"
+#include "ListOps.H"
 #include "OSspecific.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -254,13 +255,13 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
 
         // Regular (undecomposed) faces
         const faceList& faces = surf.faces();
-        const labelList& elemIds = surf.faceIds();
+        const labelUList& elemIds = surf.faceIds();
 
         // Possible to use faceIds?
-        // Not possible with on-the-fly face decomposition
         const bool useOrigFaceIds =
         (
             elemIds.size() == faces.size()
+         && !ListOps::found(elemIds, lessOp1<label>(0))
          && decompFaces.empty()
         );
 
@@ -273,7 +274,6 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
             {
                 if (useOrigFaceIds)
                 {
-                    // When available and not decomposed
                     elemId = elemIds[facei];
                 }
 
@@ -324,7 +324,6 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
             {
                 if (useOrigFaceIds)
                 {
-                    // When available and not decomposed
                     elemId = elemIds[facei];
                 }
 

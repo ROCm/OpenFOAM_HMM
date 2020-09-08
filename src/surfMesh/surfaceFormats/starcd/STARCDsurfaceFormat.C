@@ -284,11 +284,12 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
     const bool useFaceMap = (surf.useFaceMap() && zones.size() > 1);
 
     // Possible to use faceIds?
+    // - cannot if there are negative ids (eg, encoded solid/side)
     const bool useOrigFaceIds =
     (
         !useFaceMap
-     && surf.useFaceIds()
      && elemIds.size() == faceLst.size()
+     && !ListOps::found(elemIds, lessOp1<label>(0))
     );
 
 

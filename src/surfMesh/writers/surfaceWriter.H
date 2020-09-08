@@ -300,6 +300,14 @@ public:
             return false;
         }
 
+        //- True if the writer format uses faceIds as part of its output.
+        //  Element ids are used by various CAE formats
+        //  (abaqus, nastran, starcd, ...)
+        virtual bool usesFaceIds() const
+        {
+            return false;
+        }
+
 
     // Bookkeeping
 

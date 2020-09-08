@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "starcdSurfaceWriter.H"
+#include "ListOps.H"
 #include "OFstream.H"
 #include "OSspecific.H"
 #include "MeshedSurfaceProxy.H"
@@ -53,7 +54,7 @@ namespace Foam
     template<class Type>
     static inline void writeData(Ostream& os, const Type& val)
     {
-        for (direction cmpt=0; cmpt <  pTraits<Type>::nComponents; ++cmpt)
+        for (direction cmpt=0; cmpt < pTraits<Type>::nComponents; ++cmpt)
         {
             os  << ' ' << component(val, cmpt);
         }
@@ -145,13 +146,23 @@ Foam::fileName Foam::surfaceWriters::starcdWriter::write()
             mkDir(outputFile.path());
         }
 
+        const labelUList& origFaceIds = surf.faceIds();
+
+        // Face ids (if possible)
+        const labelUList& elemIds =
+        (
+            !ListOps::found(origFaceIds, lessOp1<label>(0))
+          ? origFaceIds
+          : labelUList::null()
+        );
+
         MeshedSurfaceProxy<face>
         (
             surf.points(),
             surf.faces(),
             UList<surfZone>::null(), // one zone
             labelUList::null(),      // no faceMap
-            surf.faceIds()           // with face ids (if possible)
+            elemIds                  // face ids
         ).write
         (
             outputFile,
@@ -204,6 +215,8 @@ Foam::fileName Foam::surfaceWriters::starcdWriter::writeTemplate
     // geometry merge() implicit
     tmp<Field<Type>> tfield = mergeField(localValues);
 
+    const meshedSurf& surf = surface();
+
     if (Pstream::master() || !parallel_)
     {
         const auto& values = tfield();
@@ -215,16 +228,26 @@ Foam::fileName Foam::surfaceWriters::starcdWriter::writeTemplate
 
         OFstream os(outputFile, streamOpt_);
 
-        // 1-based ids
-        label elemId = 1;
+        const labelUList& elemIds = surf.faceIds();
+
+        // Possible to use faceIds?
+        const bool useOrigFaceIds =
+        (
+            elemIds.size() == values.size()
+         && !ListOps::found(elemIds, lessOp1<label>(0))
+        );
+
+        label faceIndex = 0;
 
         // No header, just write values
         for (const Type& val : values)
         {
-            os  << elemId;
-            writeData(os, val);
+            const label elemId =
+                (useOrigFaceIds ? elemIds[faceIndex] : faceIndex);
 
-            ++elemId;
+            os  << (elemId + 1);  // 1-based ids
+            writeData(os, val);
+            ++faceIndex;
         }
     }
 

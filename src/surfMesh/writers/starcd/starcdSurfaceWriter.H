@@ -159,6 +159,12 @@ public:
             return true;
         }
 
+        //- Format uses faceIds as part of its output
+        virtual bool usesFaceIds() const // override
+        {
+            return true;
+        }
+
         //- Write surface geometry to file.
         virtual fileName write(); // override
 
