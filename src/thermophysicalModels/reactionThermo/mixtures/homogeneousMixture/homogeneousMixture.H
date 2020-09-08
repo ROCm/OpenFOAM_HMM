@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020      OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,6 +107,16 @@ public:
             return mixture(b_[celli]);
         }
 
+        const ThermoType& cellVolMixture
+        (
+            const scalar p,
+            const scalar T,
+            const label celli
+        ) const
+        {
+            return mixture(b_[celli]);
+        }
+
         const ThermoType& patchFaceMixture
         (
             const label patchi,
@@ -114,6 +125,19 @@ public:
         {
             return mixture(b_.boundaryField()[patchi][facei]);
         }
+
+
+        const ThermoType& patchFaceVolMixture
+        (
+            const scalar p,
+            const scalar T,
+            const label patchi,
+            const label facei
+        ) const
+        {
+            return mixture(b_.boundaryField()[patchi][facei]);
+        }
+
 
         const ThermoType& cellReactants(const label) const
         {
