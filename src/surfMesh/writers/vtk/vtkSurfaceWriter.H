@@ -36,6 +36,7 @@ Description
         format      | ascii or binary format                | no  | binary
         legacy      | Legacy VTK output                     | no  | false
         precision   | Write precision in ascii         | no | same as IOstream
+        fieldScale  | output field scaling (dictionary)     | no    | empty
     \endtable
 
     For example,
@@ -47,6 +48,10 @@ Description
             format      binary;
             legacy      false;
             precision   10;
+            fieldScale
+            {
+               "p.*"   0.01;  // [Pa] -> [mbar]
+            }
         }
     }
     \endverbatim
@@ -104,6 +109,9 @@ class vtkWriter
 
         //- ASCII write precision
         unsigned precision_;
+
+        //- Output field scaling
+        const dictionary fieldScale_;
 
         //- Backend writer - master only
         autoPtr<Foam::vtk::surfaceWriter> writer_;

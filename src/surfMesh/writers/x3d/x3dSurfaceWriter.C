@@ -276,7 +276,7 @@ Foam::fileName Foam::surfaceWriters::x3dWriter::writeTemplate
 
     const meshedSurf& surf = surface();
 
-    // geometry merge() implicit
+    // Implicit geometry merge()
     tmp<Field<Type>> tfield = mergeField(localValues);
 
     if (Pstream::master() || !parallel_)

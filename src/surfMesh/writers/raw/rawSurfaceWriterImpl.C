@@ -152,8 +152,8 @@ Foam::fileName Foam::surfaceWriters::rawWriter::writeTemplate
     }
 
 
-    // geometry merge() implicit
-    tmp<Field<Type>> tfield = mergeField(localValues);
+    // Implicit geometry merge()
+    tmp<Field<Type>> tfield = mergeField(localValues) * varScale;
 
     const meshedSurf& surf = surface();
 
@@ -194,7 +194,7 @@ Foam::fileName Foam::surfaceWriters::rawWriter::writeTemplate
             forAll(values, elemi)
             {
                 writePoint(os, points[elemi]*geometryScale_);
-                writeData(os, values[elemi]*varScale);
+                writeData(os, values[elemi]);
             }
         }
         else
@@ -203,7 +203,7 @@ Foam::fileName Foam::surfaceWriters::rawWriter::writeTemplate
             forAll(values, elemi)
             {
                 writePoint(os, faces[elemi].centre(points)*geometryScale_);
-                writeData(os,  values[elemi]*varScale);
+                writeData(os,  values[elemi]);
             }
         }
     }

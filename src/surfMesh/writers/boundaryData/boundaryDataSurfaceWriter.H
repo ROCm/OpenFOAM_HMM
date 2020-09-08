@@ -49,6 +49,7 @@ Description
         header      | Generate files with FoamFile header   | no  | true
         format      | ascii/binary                          | no  | ascii
         compression | Use file compression                  | no  | false
+        fieldScale  | output field scaling (dictionary)     | no  | empty
     \endtable
 
     Typical way of working:
@@ -64,6 +65,10 @@ Description
             boundaryData
             {
                 format  binary;
+                fieldScale
+                {
+                   "p.*"   0.01;  // [Pa] -> [mbar]
+                }
             }
         }
         surfaces
@@ -148,6 +153,9 @@ class boundaryDataWriter
         //- Output stream option
         IOstreamOption streamOpt_;
 
+        //- Output field scaling
+        const dictionary fieldScale_;
+
 
     // Private Member Functions
 
@@ -172,7 +180,7 @@ public:
         boundaryDataWriter();
 
         //- Construct with some output options
-        boundaryDataWriter(const dictionary& options);
+        explicit boundaryDataWriter(const dictionary& options);
 
         //- Construct from components
         boundaryDataWriter

@@ -34,6 +34,7 @@ Description
     \table
         Property    | Description                           | Required | Default
         compression | Use file compression                  | no  | false
+        fieldScale  | output field scaling (dictionary)     | no  | empty
     \endtable
 
     The geometry is written via the MeshedSurfaceProxy, the fields
@@ -99,6 +100,9 @@ class starcdWriter
 
         //- Output stream option
         IOstreamOption streamOpt_;
+
+        //- Output field scaling
+        const dictionary fieldScale_;
 
 
     // Private Member Functions

@@ -192,6 +192,7 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
         Info<< " to " << outputFile << endl;
     }
 
+
     // Emit any common warnings
     if (format == loadFormat::PLOAD2 && pTraits<Type>::nComponents != 1)
     {
@@ -202,8 +203,8 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
     }
 
 
-    // geometry merge() implicit
-    tmp<Field<Type>> tfield = mergeField(localValues);
+    // Implicit geometry merge()
+    tmp<Field<Type>> tfield = mergeField(localValues) * varScale;
 
     const meshedSurf& surf = surface();
 
@@ -294,7 +295,7 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
                     {
                         v += values[verti];
                     }
-                    v *= (varScale / f.size());
+                    v /= f.size();
 
                     writeFaceValue(os, format, v, ++elemId);
                 }
@@ -310,7 +311,7 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
                     {
                         v += values[verti];
                     }
-                    v *= (varScale / f.size());
+                    v /= f.size();
 
                     writeFaceValue(os, format, v, ++elemId);
                 }
@@ -327,7 +328,7 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
                     elemId = elemIds[facei];
                 }
 
-                const Type v(varScale * *valIter);
+                const Type v(*valIter);
                 ++valIter;
 
                 label nValues =

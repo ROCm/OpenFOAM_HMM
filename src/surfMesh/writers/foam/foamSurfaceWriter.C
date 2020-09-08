@@ -50,7 +50,8 @@ namespace surfaceWriters
 Foam::surfaceWriters::foamWriter::foamWriter()
 :
     surfaceWriter(),
-    streamOpt_()
+    streamOpt_(),
+    fieldScale_()
 {}
 
 
@@ -64,7 +65,8 @@ Foam::surfaceWriters::foamWriter::foamWriter
     (
         IOstream::formatEnum("format", options, IOstream::ASCII),
         IOstream::compressionEnum("compression", options)
-    )
+    ),
+    fieldScale_(options.subOrEmptyDict("fieldScale"))
 {}
 
 
@@ -104,7 +106,7 @@ Foam::fileName Foam::surfaceWriters::foamWriter::write()
     checkOpen();
 
     // Geometry:
-    // - rootdir/<TIME>/surfaceName/{points,faces}
+    // - rootdir/<TIME>/surfaceName/{points,faces,faceCentres}
 
     fileName surfaceDir = outputPath_;
     if (useTimeDir() && !timeName().empty())
@@ -192,14 +194,30 @@ Foam::fileName Foam::surfaceWriters::foamWriter::writeTemplate
       / fieldName
     );
 
+
+    // Output scaling for the variable, but not for integer types.
+    // could also solve with clever templating
+
+    const scalar varScale =
+    (
+        std::is_integral<Type>::value
+      ? scalar(1)
+      : fieldScale_.getOrDefault<scalar>(fieldName, 1)
+    );
+
     if (verbose_)
     {
-        Info<< "Writing field " << fieldName << " to " << surfaceDir << endl;
+        Info<< "Writing field " << fieldName;
+        if (!equal(varScale, 1))
+        {
+            Info<< " (scaling " << varScale << ')';
+        }
+        Info<< " to " << surfaceDir << endl;
     }
 
 
-    // geometry merge() implicit
-    tmp<Field<Type>> tfield =  mergeField(localValues);
+    // Implicit geometry merge()
+    tmp<Field<Type>> tfield = mergeField(localValues) * varScale;
 
     if (Pstream::master())
     {

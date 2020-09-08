@@ -69,7 +69,8 @@ namespace Foam
 Foam::surfaceWriters::starcdWriter::starcdWriter()
 :
     surfaceWriter(),
-    streamOpt_()
+    streamOpt_(),
+    fieldScale_()
 {}
 
 
@@ -83,7 +84,8 @@ Foam::surfaceWriters::starcdWriter::starcdWriter
     (
         IOstream::ASCII,
         IOstream::compressionEnum("compression", options)
-    )
+    ),
+    fieldScale_(options.subOrEmptyDict("fieldScale"))
 {}
 
 
@@ -206,14 +208,30 @@ Foam::fileName Foam::surfaceWriters::starcdWriter::writeTemplate
     outputFile /= fieldName + '_' + outputPath_.name();
     outputFile.ext("usr");
 
+
+    // Output scaling for the variable, but not for integer types.
+    // could also solve with clever templating
+
+    const scalar varScale =
+    (
+        std::is_integral<Type>::value
+      ? scalar(1)
+      : fieldScale_.getOrDefault<scalar>(fieldName, 1)
+    );
+
     if (verbose_)
     {
-        Info<< "Writing field " << fieldName << " to " << outputFile << endl;
+        Info<< "Writing field " << fieldName;
+        if (!equal(varScale, 1))
+        {
+            Info<< " (scaling " << varScale << ')';
+        }
+        Info<< " to " << outputFile << endl;
     }
 
 
-    // geometry merge() implicit
-    tmp<Field<Type>> tfield = mergeField(localValues);
+    // Implicit geometry merge()
+    tmp<Field<Type>> tfield = mergeField(localValues) * varScale;
 
     const meshedSurf& surf = surface();
 

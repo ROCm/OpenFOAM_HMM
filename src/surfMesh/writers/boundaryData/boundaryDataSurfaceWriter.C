@@ -56,7 +56,8 @@ Foam::surfaceWriters::boundaryDataWriter::boundaryDataWriter()
 :
     surfaceWriter(),
     header_(true),
-    streamOpt_()
+    streamOpt_(),
+    fieldScale_()
 {}
 
 
@@ -71,7 +72,8 @@ Foam::surfaceWriters::boundaryDataWriter::boundaryDataWriter
     (
         IOstream::formatEnum("format", options, IOstream::ASCII),
         IOstream::compressionEnum("compression", options)
-    )
+    ),
+    fieldScale_(options.subOrEmptyDict("fieldScale"))
 {}
 
 
@@ -188,12 +190,23 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::writeTemplate
     const fileName outputFile(surfaceDir/timeName()/fieldName);
 
 
+    // Output scaling for the variable, but not for integer types.
+    // could also solve with clever templating
+
+    const scalar varScale =
+    (
+        std::is_integral<Type>::value
+      ? scalar(1)
+      : fieldScale_.getOrDefault<scalar>(fieldName, 1)
+    );
+
+
     // Dummy Time to use as objectRegistry
     autoPtr<Time> dummyTimePtr(Time::New(argList::envGlobalPath()));
 
 
-    // Geometry merge() implicit
-    tmp<Field<Type>> tfield =  mergeField(localValues);
+    // Implicit geometry merge()
+    tmp<Field<Type>> tfield = mergeField(localValues) * varScale;
 
     const meshedSurf& surf = surface();
 

@@ -37,6 +37,11 @@ Description
         {
             format      ascii;
             compression true;
+
+            fieldScale
+            {
+               "p.*"   0.01;  // [Pa] -> [mbar]
+            }
         }
     }
     \endverbatim
@@ -46,6 +51,7 @@ Description
         Property | Description                              | Required | Default
         format   | ascii/binary                             | no  | ascii
         compression | output file compression               | no  | false
+        fieldScale | output field scaling (dictionary)      | no  | empty
     \endtable
 
     \heading Output file locations
@@ -103,8 +109,11 @@ class foamWriter
 {
     // Private Data
 
-        //- Output stream option
+        //- Output stream option (default: IOstream::ASCII, uncompressed)
         IOstreamOption streamOpt_;
+
+        //- Output field scaling
+        const dictionary fieldScale_;
 
 
     // Private Member Functions
