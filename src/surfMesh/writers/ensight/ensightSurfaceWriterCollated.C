@@ -26,122 +26,20 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-// Compare time values with tolerance
-static const equalOp<scalar> equalTimes(ROOTSMALL);
-
-// Use ListOps findLower (with tolerance), to find the location of the next
-// time-related index.
-// The returned index is always 0 or larger (no negative values).
-static label findTimeIndex(const UList<scalar>& list, const scalar val)
-{
-    label idx =
-        findLower
-        (
-            list,
-            val,
-            0,
-            [](const scalar a, const scalar b)
-            {
-                return (a < b) && (Foam::mag(b - a) > ROOTSMALL);
-            }
-        );
-
-    if (idx < 0 || !equalTimes(list[idx], val))
-    {
-        ++idx;
-    }
-
-    return idx;
-}
-
-} // End namespace Foam
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-Foam::label Foam::surfaceWriters::ensightWriter::readPreviousTimes
-(
-    const fileName& baseDir,
-    const word& dictName,
-    const scalar& timeValue
-)
-{
-    // In 1906 and earlier, the fieldsDict contained "meshes" and "times"
-    // entries, each with their own time values.
-    // This makes it more difficult to define the exact correspondence
-    // between geometry intervals and times.
-    //
-    // We now instead track used geometry intervals as a bitSet.
-
-
-    // Only called from master
-
-    label timeIndex = 0;
-
-    labelList geomIndices;
-    scalarList meshTimes;
-
-    cache_.clear();
-
-    const fileName dictFile(baseDir/dictName);
-
-    if (isFile(dictFile))
-    {
-        IFstream is(dictFile);
-
-        if (is.good() && cache_.read(is))
-        {
-            meshes_.clear();
-
-            cache_.readIfPresent("times", times_);
-            timeIndex = findTimeIndex(times_, timeValue);
-
-            if (cache_.readIfPresent("geometry", geomIndices))
-            {
-                // Convert indices to bitSet entries
-                meshes_.set(geomIndices);
-            }
-            else if (cache_.readIfPresent("meshes", meshTimes))
-            {
-                WarningInFunction
-                    << nl
-                    << "Setting geometry timeset information from time values"
-                    << " (fieldsDict from an older OpenFOAM version)." << nl
-                    << "This may not be fully reliable." << nl
-                    << nl;
-
-                for (const scalar& meshTime : meshTimes)
-                {
-                    const label meshIndex = findTimeIndex(times_, meshTime);
-                    meshes_.set(meshIndex);
-                }
-            }
-
-            // Make length consistent with time information.
-            // We read/write the indices instead of simply dumping the bitSet.
-            // This makes the contents more human readable.
-            meshes_.resize(times_.size());
-        }
-    }
-
-    return timeIndex;
-}
-
 
 int Foam::surfaceWriters::ensightWriter::geometryTimeset() const
 {
-    if (meshes_.count() <= 1)
+    const scalarList& times = caching_.times();
+    const bitSet& geoms = caching_.geometries();
+
+    if (geoms.count() <= 1)
     {
         // Static
         return 0;
     }
 
-    if (meshes_.size() == times_.size() && meshes_.all())
+    if (geoms.size() == times.size() && geoms.all())
     {
         // Geometry changing is the same as fields changing
         return 1;
@@ -158,7 +56,7 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated()
 {
     // Collated?
     // ========
-    // Geometry:  rootdir/surfaceName/surfaceName.case
+    // CaseFile:  rootdir/surfaceName/surfaceName.case
     // Geometry:  rootdir/surfaceName/surfaceName.mesh
 
     wroteGeom_ = true;
@@ -173,6 +71,9 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
     const Field<Type>& localValues
 )
 {
+    // Geometry changed since last output? Capture now before any merging.
+    const bool geomChanged = (!upToDate_);
+
     checkOpen();
 
     const ensight::FileName surfName(outputPath_.name());
@@ -181,7 +82,7 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
 
     // Collated
     // ========
-    // Geometry:  rootdir/surfaceName/surfaceName.case
+    // CaseFile:  rootdir/surfaceName/surfaceName.case
     // Geometry:  rootdir/surfaceName/data/<index>/geometry
     // Field:     rootdir/surfaceName/data/<index>/field
 
@@ -210,11 +111,8 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
     }
 
 
-    // Mesh changed since last output? Do before any merging.
-    const bool meshChanged = (!upToDate_);
 
-
-    // geometry merge() implicit
+    // Implicit geometry merge()
     tmp<Field<Type>> tfield = mergeField(localValues);
 
     const meshedSurf& surf = surface();
@@ -226,42 +124,21 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
             mkDir(outputFile.path());
         }
 
-        bool stateChanged = meshChanged;
-
-        const label timeIndex =
-        (
-            times_.empty()
-          ? readPreviousTimes(baseDir, "fieldsDict", timeValue)
-          : findTimeIndex(times_, timeValue)
-        );
-
-
-        // Update stored times list and mesh index
-
-        if (timeIndex < meshes_.size()-1)
-        {
-            // Clear old content when shrinking
-            meshes_.unset(timeIndex);
-        }
-
-        // Extend or truncate list
-        meshes_.resize(timeIndex+1);
-        times_.resize(timeIndex+1, VGREAT);
-
-        if (meshChanged)
-        {
-            meshes_.set(timeIndex);
-        }
-
-        if (!equalTimes(times_[timeIndex], timeValue))
-        {
-            stateChanged = true;
-            times_[timeIndex] = timeValue;
-        }
+        const bool stateChanged =
+            caching_.update
+            (
+                baseDir,
+                timeValue,
+                geomChanged,
+                fieldName,
+                ensightPTraits<Type>::typeName,
+                varName
+            );
 
 
-        // The most current geometry index
-        const label geomIndex(max(0, meshes_.find_last()));
+        // The most current time and geometry indices
+        const label timeIndex = caching_.latestTimeIndex();
+        const label geomIndex = caching_.latestGeomIndex();
 
 
         // This will be used for the name of a static geometry,
@@ -273,126 +150,97 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
 
 
         // Do case file
+        if (stateChanged)
         {
-            // Add time information to dictionary
-            cache_.set("geometry", meshes_.sortedToc());
-            cache_.set("times", times_);
+            OFstream osCase(outputFile, IOstream::ASCII);
 
-            // Debugging, or if needed for older versions:
-            //// cache_.set
-            //// (
-            ////     "meshes",
-            ////     IndirectList<scalar>(times_, meshes_.sortedToc())
-            //// );
+            // Format options
+            osCase.setf(ios_base::left);
+            osCase.setf(ios_base::scientific, ios_base::floatfield);
+            osCase.precision(5);
 
-            // Add field information to dictionary
-            dictionary& fieldsDict = cache_.subDictOrAdd("fields");
-            dictionary& fieldDict = fieldsDict.subDictOrAdd(fieldName);
-
-            if (fieldDict.empty())
+            if (verbose_)
             {
-                fieldDict.set("type", ensightPTraits<Type>::typeName);
-                fieldDict.set("name", varName); // ensight variable name
-                stateChanged = true;
+                Info<< "Writing case file to " << osCase.name() << endl;
             }
 
+            // The geometry can be any of the following:
+            // 0: constant/static
+            // 1: moving, with the same frequency as the data
+            // 2: moving, with different frequency as the data
 
-            if (stateChanged)
+            const label tsGeom = geometryTimeset();
+
+            osCase
+                << "FORMAT" << nl
+                << "type: ensight gold" << nl
+                << nl
+                << "GEOMETRY" << nl;
+
+
+            if (tsGeom)
             {
-                if (verbose_)
-                {
-                    Info<< "Writing state file to fieldsDict" << endl;
-                }
-                {
-                    OFstream os(baseDir/"fieldsDict");
-                    os << "// Summary of Ensight fields, times" << nl << nl;
-                    cache_.write(os, false);
-                }
-
-                OFstream osCase(outputFile, IOstream::ASCII);
-
-                // Format options
-                osCase.setf(ios_base::left);
-                osCase.setf(ios_base::scientific, ios_base::floatfield);
-                osCase.precision(5);
-
-                if (verbose_)
-                {
-                    Info<< "Writing case file to " << osCase.name() << endl;
-                }
-
-                // The geometry can be any of the following:
-                // 0: constant/static
-                // 1: moving, with the same frequency as the data
-                // 2: moving, with different frequency as the data
-
-                const label tsGeom = geometryTimeset();
-
+                // moving
                 osCase
-                    << "FORMAT" << nl
-                    << "type: ensight gold" << nl
-                    << nl
-                    << "GEOMETRY" << nl;
-
-
-                if (tsGeom)
-                {
-                    // moving
-                    osCase
-                        << "model:  " << tsGeom << "   " // time-set (1|2)
-                        << mask << geometryName.name() << nl;
-                }
-                else
-                {
-                    // steady
-                    osCase
-                        << "model:  "
-                        << geometryName.c_str() << nl;
-                }
-
+                    << "model:  " << tsGeom << "   " // time-set (1|2)
+                    << mask << geometryName.name() << nl;
+            }
+            else
+            {
+                // steady
                 osCase
-                    << nl
-                    << "VARIABLE" << nl;
+                    << "model:  "
+                    << geometryName.c_str() << nl;
+            }
+
+            osCase
+                << nl
+                << "VARIABLE" << nl;
 
 
-                for (const entry& dEntry : fieldsDict)
-                {
-                    const dictionary& subDict = dEntry.dict();
+            for (const entry& dEntry : caching_.fieldsDict())
+            {
+                const dictionary& subDict = dEntry.dict();
 
-                    const word fieldType(subDict.get<word>("type"));
-                    const word varName
+                const word varType(subDict.get<word>("type"));
+                const word varName
+                (
+                    subDict.getOrDefault<word>
                     (
-                        subDict.getOrDefault<word>
-                        (
-                            "name",
-                            dEntry.keyword() // fieldName as fallback
-                        )
-                    );
-
-                    osCase
-                        << fieldType
-                        <<
-                        (
-                            this->isPointData()
-                          ? " per node:    1  "  // time-set 1
-                          : " per element: 1  "  // time-set 1
-                        )
-                        << setw(15) << varName << ' '
-                        << mask << varName << nl;
-                }
+                        "name",
+                        dEntry.keyword() // fieldName as fallback
+                    )
+                );
 
                 osCase
-                    << nl
-                    << "TIME" << nl;
-
-                printTimeset(osCase, 1, times_);
-                if (tsGeom == 2)
-                {
-                    printTimeset(osCase, 2, times_, meshes_);
-                }
-
-                osCase << "# end" << nl;
+                    << varType
+                    <<
+                    (
+                        this->isPointData()
+                      ? " per node:    1  "  // time-set 1
+                      : " per element: 1  "  // time-set 1
+                    )
+                    << setw(15) << varName << ' '
+                    << mask << varName << nl;
             }
+
+            osCase
+                << nl
+                << "TIME" << nl;
+
+            printTimeset(osCase, 1, caching_.times());
+            if (tsGeom == 2)
+            {
+                printTimeset
+                (
+                    osCase,
+                    tsGeom,
+                    caching_.times(),
+                    caching_.geometries()
+                );
+            }
+
+            osCase << "# end" << nl;
         }
 
 
@@ -403,27 +251,28 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
         mkDir(dataDir);
 
 
-        const fileName meshFile(baseDir/geometryName);
+        const fileName geomFile(baseDir/geometryName);
 
         // Ensight Geometry
         ensightOutputSurface part
         (
             surf.points(),
             surf.faces(),
-            meshFile.name()
+            geomFile.name()
         );
 
-        if (!exists(meshFile))
+        if (!exists(geomFile))
         {
             if (verbose_)
             {
-                Info<< "Writing mesh file to " << meshFile.name() << endl;
+                Info<< "Writing geometry to " << geomFile.name() << endl;
             }
+
             // Two-argument form for path-name to avoid validating base-dir
             ensightGeoFile osGeom
             (
-                meshFile.path(),
-                meshFile.name(),
+                geomFile.path(),
+                geomFile.name(),
                 writeFormat_
             );
             part.write(osGeom); // serial

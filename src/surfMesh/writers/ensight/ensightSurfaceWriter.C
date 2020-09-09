@@ -56,7 +56,7 @@ void Foam::surfaceWriters::ensightWriter::printTimeset
 (
     OSstream& os,
     const label ts,
-    const scalar& timeValue
+    const scalar timeValue
 )
 {
     os
@@ -176,7 +176,8 @@ Foam::surfaceWriters::ensightWriter::ensightWriter()
 :
     surfaceWriter(),
     writeFormat_(IOstream::ASCII),
-    collateTimes_(true)
+    collateTimes_(true),
+    caching_("fieldsDict")  // Historic name
 {}
 
 
@@ -190,7 +191,8 @@ Foam::surfaceWriters::ensightWriter::ensightWriter
     (
         IOstreamOption::formatEnum("format", options, IOstream::ASCII)
     ),
-    collateTimes_(options.getOrDefault("collateTimes", true))
+    collateTimes_(options.getOrDefault("collateTimes", true)),
+    caching_("fieldsDict")  // Historic name
 {}
 
 
@@ -227,15 +229,13 @@ Foam::surfaceWriters::ensightWriter::ensightWriter
 
 void Foam::surfaceWriters::ensightWriter::close()
 {
-    times_.clear();
-    meshes_.clear();
-    cache_.clear();
+    caching_.clear();
     surfaceWriter::close();
 }
 
 
 // Note that ensight does supports geometry in a separate file,
-// but setting this true leaves mesh files in the wrong places
+// but setting this true leaves geometry files in the wrong places
 // (when there are fields).
 //
 // Make this false to let the field writers take back control

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,8 +61,7 @@ SourceFiles
 #define ensightSurfaceWriter_H
 
 #include "surfaceWriter.H"
-#include "bitSet.H"
-#include "DynamicList.H"
+#include "surfaceWriterCaching.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -87,26 +86,11 @@ class ensightWriter
         //- Collate times (default: true)
         bool collateTimes_;
 
-        //- The collated output times
-        DynamicList<scalar> times_;
-
-        //- Indices in times_ when geometry (mesh) has been written (collated)
-        bitSet meshes_;
-
         //- Cached information for times, geometry, fields (collated)
-        dictionary cache_;
+        writerCaching caching_;
 
 
     // Private Member Functions
-
-        //- Read time information from baseDir / dictName.
-        //  Returns timeIndex corresponding to timeValue
-        label readPreviousTimes
-        (
-            const fileName& baseDir,
-            const word& dictName,
-            const scalar& timeValue
-        );
 
         //- The geometry can be any of the following:
         //
@@ -120,7 +104,7 @@ class ensightWriter
         (
             OSstream& os,
             const label ts,
-            const scalar& timeValue
+            const scalar timeValue
         );
 
         //- Print time-set for ensight case file, with N times and 0-based

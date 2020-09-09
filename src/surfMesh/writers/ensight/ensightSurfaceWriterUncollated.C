@@ -37,7 +37,7 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeUncollated()
 
     // Uncollated
     // ==========
-    // Geometry:  rootdir/<TIME>/surfaceName.case
+    // CaseFile:  rootdir/<TIME>/surfaceName.case
     // Geometry:  rootdir/<TIME>/surfaceName.00000000.mesh
 
     fileName outputDir;
@@ -85,7 +85,7 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeUncollated()
             << nl
             << "TIME" << nl;
 
-        printTimeset(osCase, 1, 0.0);
+        printTimeset(osCase, 1, scalar(0));
 
         ensightOutputSurface part
         (
@@ -116,9 +116,9 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeUncollated
 
     // Uncollated
     // ==========
-    // geometry:  rootdir/time/<field>/surfaceName.case
-    // geometry:  rootdir/time/<field>/surfaceName.<index>.mesh
-    // field:     rootdir/time/<field>/surfaceName.<index>.<field>
+    // CaseFile:  rootdir/time/<field>/surfaceName.case
+    // Geometry:  rootdir/time/<field>/surfaceName.<index>.mesh
+    // Field:     rootdir/time/<field>/surfaceName.<index>.<field>
 
     // Variable name as sub-directory for results. Eg,
     // - VAR1/SURF1.case
