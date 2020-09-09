@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,9 +65,8 @@ public:
 
     // Constructors
 
-        //- Null construct
-        namesList()
-        {}
+        //- Default construct
+        namesList() = default;
 
 
     // Access
@@ -102,11 +101,11 @@ public:
         }
 
 
-        //- Return a list of names matching white-list and not in black-list
+        //- Return a list of names in allow-list and not in deny-list
         List<word> findNames
         (
-            const wordRes& white,
-            const wordRes& black = wordRes()
+            const wordRes& allow,
+            const wordRes& deny = wordRes()
         ) const
         {
             List<word> matched(SLList<T>::size());
@@ -116,16 +115,15 @@ public:
             {
                 const word& name = iter().name();
 
-                if (white.match(name) && !black.match(name))
+                if (allow.match(name) && !deny.match(name))
                 {
                     matched[matchi++] = name;
                 }
             }
-            matched.setSize(matchi);
+            matched.resize(matchi);
 
             return matched;
         }
-
 };
 
 
@@ -258,7 +256,6 @@ public:
 
             return os;
         }
-
 };
 
 
@@ -333,7 +330,6 @@ public:
 
             return os;
         }
-
 };
 
 
@@ -419,7 +415,6 @@ public:
 
             return os;
         }
-
 };
 
 

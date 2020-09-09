@@ -339,8 +339,8 @@ unset WM_DIR
 # Third-party cruft - only used for orig compilation
 # - as per spack installation
 
-# Blacklist '[A-Z].*_ARCH_PATH'
-# Whitelist 'MPI_ARCH_PATH'
+# Remove: '[A-Z].*_ARCH_PATH'
+# Keep:   'MPI_ARCH_PATH'
 
 for envname in $(env | sed -n -e 's/^\(.*ARCH_PATH\)=.*$/\1/p')
 do

@@ -349,16 +349,16 @@ struct foundOp
 
 
 //- Return ids for items with matching names.
-//  Uses a combination of whitelist and blacklist.
+//  Uses a combination of allow and deny lists
 //
-//  An empty whitelist accepts everything that is not blacklisted.
-//  A regex match is trumped by a literal match.
+//  An empty 'allow' list accepts everything not in the 'deny' list.
+//  A literal match has higher priority over a regex match.
 //
 //  Eg,
 //  \verbatim
 //     input:  ( abc apple wall wall1 wall2 )
-//     whitelist:  ( abc  def  "wall.*" )
-//     blacklist:  ( "[ab].*"  wall )
+//     allow:  ( abc  def  "wall.*" )
+//     deny:   ( "[ab].*"  wall )
 //
 //     result:  (abc wall1 wall2)
 //  \endverbatim
@@ -368,8 +368,8 @@ template<class StringListType, class AccessOp = noOp>
 labelList findMatching
 (
     const StringListType& input,
-    const wordRes& whitelist,
-    const wordRes& blacklist = wordRes(),
+    const wordRes& allow,
+    const wordRes& deny = wordRes(),
     AccessOp aop = noOp()
 );
 

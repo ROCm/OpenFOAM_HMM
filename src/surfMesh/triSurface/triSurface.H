@@ -548,8 +548,10 @@ public:
 
         //- Return a new surface subsetted on the selected patch names
         //
-        //  \param[in] includeNames the patch names to white-list
-        //  \param[in] excludeNames the patch names to black-list
+        //  \param[in] includeNames surface patch names to include
+        //  \param[in] excludeNames surface patch names to exclude
+        //
+        //  \see Foam::stringListOps::findMatching for details about matching
         triSurface subsetMesh
         (
             const wordRes& includeNames,

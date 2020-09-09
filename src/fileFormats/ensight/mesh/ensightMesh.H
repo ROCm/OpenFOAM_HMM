@@ -303,10 +303,10 @@ public:
         //- Define patch selection matcher
         void patchSelection(List<wordRe>&& patterns);
 
-        //- Define patch selection blacklist
+        //- Define patch selection to exclude
         void patchExclude(const UList<wordRe>& patterns);
 
-        //- Define patch selection blacklist
+        //- Define patch selection to exclude
         void patchExclude(List<wordRe>&& patterns);
 
         //- Define faceZone selection matcher

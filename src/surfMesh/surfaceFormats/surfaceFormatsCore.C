@@ -59,16 +59,16 @@ Foam::string Foam::fileFormats::surfaceFormatsCore::getLineNoComment
 Foam::labelList Foam::fileFormats::surfaceFormatsCore::getSelectedPatches
 (
     const surfZoneList& patches,
-    const wordRes& whitelist,
-    const wordRes& blacklist
+    const wordRes& allow,
+    const wordRes& deny
 )
 {
     return
         stringListOps::findMatching
         (
             patches,
-            whitelist,
-            blacklist,
+            allow,
+            deny,
             nameOp<surfZone>()
         );
 }

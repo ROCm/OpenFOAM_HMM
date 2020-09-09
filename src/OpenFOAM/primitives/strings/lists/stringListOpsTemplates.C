@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -113,14 +113,14 @@ template<class StringListType, class AccessOp>
 Foam::labelList Foam::stringListOps::findMatching
 (
     const StringListType& input,
-    const wordRes& whitelist,
-    const wordRes& blacklist,
+    const wordRes& allow,
+    const wordRes& deny,
     AccessOp aop
 )
 {
     const label len = input.size();
 
-    if (whitelist.empty() && blacklist.empty())
+    if (allow.empty() && deny.empty())
     {
         return identity(len);
     }
@@ -134,20 +134,20 @@ Foam::labelList Foam::stringListOps::findMatching
 
         bool accept = false;
 
-        if (whitelist.size())
+        if (allow.size())
         {
-            const auto result = whitelist.matched(text);
+            const auto result = allow.matched(text);
 
             accept =
             (
                 result == wordRe::LITERAL
               ? true
-              : (result == wordRe::REGEX && !blacklist.match(text))
+              : (result == wordRe::REGEX && !deny.match(text))
             );
         }
         else
         {
-            accept = !blacklist.match(text);
+            accept = !deny.match(text);
         }
 
         if (accept)

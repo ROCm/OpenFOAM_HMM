@@ -137,7 +137,7 @@ class ddt2
         word resultName_;
 
         //- Avoid processing the same field twice
-        mutable regExp blacklist_;
+        mutable regExp denyField_;
 
         //- Hashed names of result fields
         wordHashSet results_;

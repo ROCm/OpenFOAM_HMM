@@ -76,7 +76,7 @@ bool Foam::functionObjects::ddt2::accept(const word& fieldName) const
 {
     // check input vs possible result names
     // to avoid circular calculations
-    return !blacklist_.match(fieldName);
+    return !denyField_.match(fieldName);
 }
 
 
@@ -108,7 +108,7 @@ Foam::functionObjects::ddt2::ddt2
     fvMeshFunctionObject(name, runTime, dict),
     selectFields_(),
     resultName_(word::null),
-    blacklist_(),
+    denyField_(),
     results_(),
     mag_(dict.getOrDefault("mag", false))
 {
@@ -148,7 +148,7 @@ bool Foam::functionObjects::ddt2::read(const dictionary& dict)
      || checkFormatName(resultName_)
     )
     {
-        blacklist_.set
+        denyField_.set
         (
             string::quotemeta<regExp>
             (
@@ -159,7 +159,7 @@ bool Foam::functionObjects::ddt2::read(const dictionary& dict)
         return true;
     }
 
-    blacklist_.clear();
+    denyField_.clear();
     return false;
 }
 

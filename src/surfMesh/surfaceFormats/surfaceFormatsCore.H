@@ -90,14 +90,14 @@ protected:
         }
 
         //- Return ids for zone/patch that match by name.
-        //  Uses a combination of whitelist and blacklist.
+        //  Uses a combination of allow and deny lists.
         //
-        //  See Foam::stringListOps::findMatching
+        //  \see Foam::stringListOps::findMatching for details about matching
         static labelList getSelectedPatches
         (
             const surfZoneList& patches,
-            const wordRes& whitelist,
-            const wordRes& blacklist = wordRes()
+            const wordRes& allow,
+            const wordRes& deny = wordRes()
         );
 
 

@@ -574,8 +574,10 @@ public:
 
         //- Return a new surface subsetted on the selected zone names
         //
-        //  \param[in] includeNames the zone names to white-list
-        //  \param[in] excludeNames the zone names to black-list
+        //  \param[in] includeNames surface zone names to include
+        //  \param[in] excludeNames surface zone names to exclude
+        //
+        //  \see Foam::stringListOps::findMatching for details about matching
         MeshedSurface subsetMesh
         (
             const wordRes& includeNames,

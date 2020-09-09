@@ -63,8 +63,8 @@ using namespace Foam;
 labelList getSelectedPatches
 (
     const polyBoundaryMesh& patches,
-    const wordRes& whitelist,
-    const wordRes& blacklist
+    const wordRes& allow,
+    const wordRes& deny
 )
 {
     // Name-based selection
@@ -73,8 +73,8 @@ labelList getSelectedPatches
         stringListOps::findMatching
         (
             patches,
-            whitelist,
-            blacklist,
+            allow,
+            deny,
             nameOp<polyPatch>()
         )
     );

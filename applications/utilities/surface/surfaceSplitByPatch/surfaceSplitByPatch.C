@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
             << nl << endl;
     }
 
-    // Identity if both whitelist and blacklist are empty
+    // Identity if both include/exclude lists are empty
     const labelList zoneIndices
     (
         stringListOps::findMatching
