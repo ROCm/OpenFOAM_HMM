@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,7 +93,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class polyMesh;
 class mapDistribute;
 template<class T> class EdgeMap;
@@ -108,8 +109,7 @@ class globalMeshData
 :
     public processorTopology
 {
-
-    // Private data
+    // Private Data
 
         //- Reference to mesh
         const polyMesh& mesh_;
@@ -252,7 +252,7 @@ class globalMeshData
         //- Calculate shared edge addressing
         void calcSharedEdges() const;
 
-       //- Calculate global point addressing.
+        //- Calculate global point addressing.
         void calcGlobalPointSlaves() const;
 
         // Global edge addressing
@@ -313,29 +313,6 @@ class globalMeshData
 
 
 public:
-
-    // Public class
-
-        // To combineReduce a List. Just appends all lists.
-        template<class T>
-        class ListPlusEqOp
-        {
-
-        public:
-
-            void operator()(T& x, const T& y) const
-            {
-                label n = x.size();
-
-                x.setSize(x.size() + y.size());
-
-                forAll(y, i)
-                {
-                    x[n++] = y[i];
-                }
-            }
-        };
-
 
     //- Runtime type information
     ClassName("globalMeshData");
@@ -615,6 +592,34 @@ public:
             //  full parallel analysis to determine shared points and
             //  boundaries.
             void updateMesh();
+
+
+    // Housekeeping
+
+        //- Deprecated(2020-09) use ListOps::appendEqOp
+        //  Uses a different template parameter
+        //  \code
+        //      globalMeshData::ListPlusEqOp<labelList>()
+        //      ListOps::appendEqOp<label>()
+        //  \endcode
+        //
+        //  \deprecated(2020-09) - use ListOps::appendEqOp
+        template<class T>
+        struct ListPlusEqOp
+        {
+            FOAM_DEPRECATED_FOR(2020-09, "ListOps::appendEqOp")
+            void operator()(T& x, const T& y) const
+            {
+                label n = x.size();
+
+                x.setSize(x.size() + y.size());
+
+                forAll(y, i)
+                {
+                    x[n++] = y[i];
+                }
+            }
+        };
 };
 
 
