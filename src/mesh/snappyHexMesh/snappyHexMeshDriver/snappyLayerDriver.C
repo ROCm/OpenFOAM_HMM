@@ -2407,10 +2407,21 @@ void Foam::snappyLayerDriver::setupLayerInfoTruncation
 
             forAll(f, fp)
             {
-                if (patchNLayers[f[fp]] > 0)
+                const label nPointLayers = patchNLayers[f[fp]];
+                if (nPointLayers > 0)
                 {
-                    nPatchFaceLayers[patchFacei] = patchNLayers[f[fp]];
-                    break;
+                    if (nPatchFaceLayers[patchFacei] == -1)
+                    {
+                        nPatchFaceLayers[patchFacei] = nPointLayers;
+                    }
+                    else
+                    {
+                        nPatchFaceLayers[patchFacei] = min
+                        (
+                            nPatchFaceLayers[patchFacei],
+                            nPointLayers
+                        );
+                    }
                 }
             }
         }
