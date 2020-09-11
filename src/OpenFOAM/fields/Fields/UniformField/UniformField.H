@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +37,7 @@ Description
 #define UniformField_H
 
 #include "label.H"
+#include "UniformList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,27 +50,23 @@ namespace Foam
 
 template<class Type>
 class UniformField
+:
+    public UniformList<Type>
 {
-    // Private data
-
-        Type value_;
-
 public:
 
     // Constructors
 
-        //- Construct given value
-        inline UniformField(const Type& value);
+        //- Inherit constructors from UniformList
+        using UniformList<Type>::UniformList;
 
 
-    // Member Operators
+    // Member Functions
 
-
-        inline operator Type() const;
-
-        inline Type operator[](const label) const;
-
-        inline UniformField field() const;
+        UniformField field() const
+        {
+            return UniformField(UniformList<Type>::value());
+        }
 };
 
 
