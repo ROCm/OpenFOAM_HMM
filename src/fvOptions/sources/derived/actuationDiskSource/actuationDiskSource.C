@@ -286,7 +286,7 @@ bool Foam::fv::actuationDiskSource::read(const dictionary& dict)
         dict.readIfPresent("diskArea", diskArea_);
         if (diskArea_ < VSMALL)
         {
-            FatalErrorInFunction
+            FatalIOErrorInFunction(dict)
                 << "Actuator disk has zero area: "
                 << "diskArea = " << diskArea_
                 << exit(FatalIOError);
@@ -296,7 +296,7 @@ bool Foam::fv::actuationDiskSource::read(const dictionary& dict)
         diskDir_.normalise();
         if (mag(diskDir_) < VSMALL)
         {
-            FatalErrorInFunction
+            FatalIOErrorInFunction(dict)
                 << "Actuator disk surface-normal vector is zero: "
                 << "diskDir = " << diskDir_
                 << exit(FatalIOError);
