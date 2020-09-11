@@ -56,10 +56,9 @@ Author
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
-template<class Type>
-class faMatrix;
+// Forward Declarations
+template<class Type> class faMatrix;
+template<class T> class UIndirectList;
 
 template<class Type>
 Ostream& operator<<(Ostream&, const faMatrix<Type>&);
@@ -75,9 +74,10 @@ class faMatrix
     public refCount,
     public lduMatrix
 {
-    // Private data
+    // Private Data
 
-        // Reference to GeometricField<Type, faPatchField, areaMesh>
+        //- Const reference to field
+        //  Converted into a non-const reference at the point of solution.
         const GeometricField<Type, faPatchField, areaMesh>& psi_;
 
         //- Dimension set
@@ -87,20 +87,25 @@ class faMatrix
         Field<Type> source_;
 
         //- Boundary scalar field containing pseudo-matrix coeffs
-        //  for internal faces
+        //- for internal faces
         FieldField<Field, Type> internalCoeffs_;
 
         //- Boundary scalar field containing pseudo-matrix coeffs
-        //  for boundary faces
+        //- for boundary faces
         FieldField<Field, Type> boundaryCoeffs_;
-
 
         //- Face flux field for non-orthogonal correction
         mutable GeometricField<Type, faePatchField, edgeMesh>
             *faceFluxCorrectionPtr_;
 
 
-    // Private member functions
+protected:
+
+    //- Declare friendship with the faSolver class
+    friend class faSolver;
+
+
+    // Protected Member Functions
 
         //- Add patch contribution to internal field
         template<class Type2>
@@ -154,9 +159,21 @@ class faMatrix
             ) const;
 
 
+        // Matrix manipulation functionality
+
+            //- Set solution in given faces to the specified values
+            template<template<class> class ListType>
+            void setValuesFromList
+            (
+                const labelUList& faceLabels,
+                const ListType<Type>& values
+            );
+
+
 public:
 
     //- Solver class returned by the solver function
+    //- used for systems in which it is useful to cache the solver for reuse.
     class faSolver
     {
         faMatrix<Type>& faMat_;
@@ -174,11 +191,11 @@ public:
             {}
 
 
-        // Member functions
+        // Member Functions
 
             //- Solve returning the solution statistics.
             //  Solver controls read from dictionary
-            SolverPerformance<Type> solve(const dictionary&);
+            SolverPerformance<Type> solve(const dictionary& solverControls);
 
             //- Solve returning the solution statistics.
             //  Solver controls read from faSolution
@@ -194,18 +211,18 @@ public:
         //- Construct given a field to solve for
         faMatrix
         (
-            const GeometricField<Type, faPatchField, areaMesh>&,
-            const dimensionSet&
+            const GeometricField<Type, faPatchField, areaMesh>& psi,
+            const dimensionSet& ds
         );
 
-        //- Construct as copy
+        //- Copy construct
         faMatrix(const faMatrix<Type>&);
 
         //- Construct from Istream given field to solve for
         faMatrix
         (
-            const GeometricField<Type, faPatchField, areaMesh>&,
-            Istream&
+            const GeometricField<Type, faPatchField, areaMesh>& psi,
+            Istream& is
         );
 
         //- Clone
@@ -216,7 +233,7 @@ public:
     virtual ~faMatrix();
 
 
-    // Member functions
+    // Member Functions
 
         // Access
 
@@ -241,14 +258,28 @@ public:
             }
 
             //- faBoundary scalar field containing pseudo-matrix coeffs
-            //  for internal cells
+            //- for internal cells
+            const FieldField<Field, Type>& internalCoeffs() const
+            {
+                return internalCoeffs_;
+            }
+
+            //- faBoundary scalar field containing pseudo-matrix coeffs
+            //- for internal cells
             FieldField<Field, Type>& internalCoeffs()
             {
                 return internalCoeffs_;
             }
 
             //- faBoundary scalar field containing pseudo-matrix coeffs
-            //  for boundary cells
+            //- for boundary cells
+            const FieldField<Field, Type>& boundaryCoeffs() const
+            {
+                return boundaryCoeffs_;
+            }
+
+            //- faBoundary scalar field containing pseudo-matrix coeffs
+            //- for boundary cells
             FieldField<Field, Type>& boundaryCoeffs()
             {
                 return boundaryCoeffs_;
@@ -268,23 +299,56 @@ public:
 
         // Operations
 
-            //- Set solution in given cells and eliminate corresponding
-            //  equations from the matrix
+            //- Set solution in given faces to the specified value
+            //- and eliminate the corresponding equations from the matrix.
             void setValues
             (
-                const labelUList& faces,
+                const labelUList& faceLabels,
+                const Type& value
+            );
+
+            //- Set solution in given faces to the specified values
+            //- and eliminate the corresponding equations from the matrix.
+            void setValues
+            (
+                const labelUList& faceLabels,
                 const UList<Type>& values
+            );
+
+            //- Set solution in given faces to the specified values
+            //- and eliminate the corresponding equations from the matrix.
+            void setValues
+            (
+                const labelUList& faceLabels,
+                const UIndirectList<Type>& values
             );
 
             //- Set reference level for solution
             void setReference
             (
                 const label facei,
-                const Type& value
+                const Type& value,
+                const bool forceReference = false
+            );
+
+            //- Set reference level for solution
+            void setReferences
+            (
+                const labelUList& faceLabels,
+                const Type& value,
+                const bool forceReference = false
+            );
+
+            //- Set reference level for solution
+            void setReferences
+            (
+                const labelUList& faceLabels,
+                const UList<Type>& values,
+                const bool forceReference = false
             );
 
             //- Set reference level for a component of the solution
-            //  on a given patch face
+            //- on a given patch face
             void setComponentReference
             (
                 const label patchi,
@@ -297,6 +361,7 @@ public:
             //  alpha = 1 : diagonally equal
             //  alpha < 1 :    ,,      dominant
             //  alpha = 0 : do nothing
+            //  Note: Requires positive diagonal.
             void relax(const scalar alpha);
 
             //- Relax matrix (for steady-state solution).
@@ -327,7 +392,7 @@ public:
             tmp<GeometricField<Type, faePatchField, edgeMesh>> flux() const;
 
 
-    // Member operators
+    // Member Operators
 
         void operator=(const faMatrix<Type>&);
         void operator=(const tmp<faMatrix<Type>>&);
@@ -355,7 +420,7 @@ public:
         void operator*=(const dimensioned<scalar>&);
 
 
-    // Ostream operator
+    // Ostream Operator
 
         friend Ostream& operator<< <Type>
         (
@@ -365,7 +430,7 @@ public:
 };
 
 
-// * * * * * * * * * * * * * * * Global functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class Type>
 void checkMethod
@@ -399,7 +464,7 @@ SolverPerformance<Type> solve(faMatrix<Type>&, Istream&);
 
 
 //- Solve returning the solution statistics given convergence tolerance,
-//  deleting temporary matrix after solution.
+//- deleting temporary matrix after solution.
 //  Solver controls read Istream
 template<class Type>
 SolverPerformance<Type> solve(const tmp<faMatrix<Type>>&, Istream&);
@@ -412,13 +477,13 @@ SolverPerformance<Type> solve(faMatrix<Type>&);
 
 
 //- Solve returning the solution statistics given convergence tolerance,
-//  deleting temporary matrix after solution.
+//- deleting temporary matrix after solution.
 //  Solver controls read faSolution
 template<class Type>
 SolverPerformance<Type> solve(const tmp<faMatrix<Type>>&);
 
 
-// * * * * * * * * * * * * * * * Global operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 template<class Type>
 tmp<faMatrix<Type>> operator-
@@ -779,6 +844,8 @@ tmp<faMatrix<Type>> operator*
 #ifdef NoRepository
     #include "faMatrix.C"
 #endif
+
+// Specialisation for scalars
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

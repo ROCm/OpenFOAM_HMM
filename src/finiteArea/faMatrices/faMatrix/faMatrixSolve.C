@@ -60,10 +60,13 @@ Foam::SolverPerformance<Type> Foam::faMatrix<Type>::solve
         << "solving faMatrix<Type>"
         << endl;
 
+    auto& psi =
+        const_cast<GeometricField<Type, faPatchField, areaMesh>&>(psi_);
+
     SolverPerformance<Type> solverPerfVec
     (
         "faMatrix<Type>::solve",
-        psi_.name()
+        psi.name()
     );
 
     scalarField saveDiag(diag());
@@ -74,10 +77,6 @@ Foam::SolverPerformance<Type> Foam::faMatrix<Type>::solve
     // Note: make a copy of interfaces: no longer a reference
     lduInterfaceFieldPtrsList interfaces =
         psi_.boundaryField().scalarInterfaces();
-
-    // Cast into a non-const to solve
-    GeometricField<Type, faPatchField, areaMesh>& psi =
-        const_cast<GeometricField<Type, faPatchField, areaMesh>&>(psi_);
 
     for (direction cmpt = 0; cmpt < Type::nComponents; ++cmpt)
     {
@@ -179,13 +178,10 @@ Foam::SolverPerformance<Type> Foam::faMatrix<Type>::solve()
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::faMatrix<Type>::residual() const
 {
-    tmp<Field<Type>> tres(source_);
+    tmp<Field<Type>> tres(new Field<Type>(source_));
     Field<Type>& res = tres().ref();
 
     addBoundarySource(res);
-
-    lduInterfaceFieldPtrsList interfaces =
-        psi_.boundaryField().scalarInterfaces();
 
     // Loop over field components
     for (direction cmpt = 0; cmpt < Type::nComponents; ++cmpt)
@@ -208,7 +204,7 @@ Foam::tmp<Foam::Field<Type>> Foam::faMatrix<Type>::residual() const
                 psiCmpt,
                 res.component(cmpt) - boundaryDiagCmpt*psiCmpt,
                 bouCoeffsCmpt,
-                interfaces,
+                psi_.boundaryField().scalarInterfaces(),
                 cmpt
             )
         );

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,8 @@ License
 #include "edgeFields.H"
 #include "calculatedFaPatchFields.H"
 #include "zeroGradientFaPatchFields.H"
+#include "UIndirectList.H"
+#include "UniformList.H"
 #include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -220,10 +222,10 @@ Foam::faMatrix<Type>::faMatrix
     }
 
     // Update the boundary coefficients of psi without changing its event No.
-    GeometricField<Type, faPatchField, areaMesh>& psiRef =
+    auto& psiRef =
         const_cast<GeometricField<Type, faPatchField, areaMesh>&>(psi_);
 
-    label currentStatePsi = psiRef.eventNo();
+    const label currentStatePsi = psiRef.eventNo();
     psiRef.boundaryFieldRef().updateCoeffs();
     psiRef.eventNo() = currentStatePsi;
 }
@@ -298,7 +300,6 @@ Foam::faMatrix<Type>::faMatrix
             )
         );
     }
-
 }
 
 
@@ -319,8 +320,7 @@ template<class Type>
 Foam::faMatrix<Type>::~faMatrix()
 {
     DebugInFunction
-        << "destroying faMatrix<Type> for field " << psi_.name()
-        << endl;
+        << "Destroying faMatrix<Type> for field " << psi_.name() << endl;
 
     deleteDemandDrivenData(faceFluxCorrectionPtr_);
 }
@@ -329,19 +329,22 @@ Foam::faMatrix<Type>::~faMatrix()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::faMatrix<Type>::setValues
+template<template<class> class ListType>
+void Foam::faMatrix<Type>::setValuesFromList
 (
     const labelUList& faceLabels,
-    const UList<Type>& values
+    const ListType<Type>& values
 )
 {
-    const faMesh& mesh = psi_.mesh();
-
+#if 0  /* Specific to foam-extend */
     // Record face labels of eliminated equations
     for (const label i : faceLabels)
     {
         this->eliminatedEqns().insert(i);
     }
+#endif
+
+    const faMesh& mesh = psi_.mesh();
 
     const labelListList& edges = mesh.patch().faceEdges();
     const labelUList& own = mesh.owner();
@@ -352,35 +355,31 @@ void Foam::faMatrix<Type>::setValues
         const_cast
         <
             GeometricField<Type, faPatchField, areaMesh>&
-        >(psi_).internalField();
-
+        >(psi_).primitiveFieldRef();
 
     forAll(faceLabels, i)
     {
-        label facei = faceLabels[i];
+        const label facei = faceLabels[i];
+        const Type& value = values[i];
 
-        psi[facei] = values[i];
-        source_[facei] = values[i]*Diag[facei];
+        psi[facei] = value;
+        source_[facei] = value*Diag[facei];
 
         if (symmetric() || asymmetric())
         {
-            const labelList& c= edges[facei];
-
-            forAll(c, j)
+            for (const label edgei : edges[facei])
             {
-                label edgei = c[j];
-
                 if (mesh.isInternalEdge(edgei))
                 {
                     if (symmetric())
                     {
                         if (facei == own[edgei])
                         {
-                            source_[nei[edgei]] -= upper()[edgei]*values[i];
+                            source_[nei[edgei]] -= upper()[edgei]*value;
                         }
                         else
                         {
-                            source_[own[edgei]] -= upper()[edgei]*values[i];
+                            source_[own[edgei]] -= upper()[edgei]*value;
                         }
 
                         upper()[edgei] = 0.0;
@@ -389,11 +388,11 @@ void Foam::faMatrix<Type>::setValues
                     {
                         if (facei == own[edgei])
                         {
-                            source_[nei[edgei]] -= lower()[edgei]*values[i];
+                            source_[nei[edgei]] -= lower()[edgei]*value;
                         }
                         else
                         {
-                            source_[own[edgei]] -= upper()[edgei]*values[i];
+                            source_[own[edgei]] -= upper()[edgei]*value;
                         }
 
                         upper()[edgei] = 0.0;
@@ -402,18 +401,15 @@ void Foam::faMatrix<Type>::setValues
                 }
                 else
                 {
-                    label patchi = mesh.boundary().whichPatch(edgei);
+                    const label patchi = mesh.boundary().whichPatch(edgei);
 
                     if (internalCoeffs_[patchi].size())
                     {
-                        label patchEdgei =
+                        const label patchEdgei =
                             mesh.boundary()[patchi].whichEdge(edgei);
 
-                        internalCoeffs_[patchi][patchEdgei] =
-                            pTraits<Type>::zero;
-
-                        boundaryCoeffs_[patchi][patchEdgei] =
-                            pTraits<Type>::zero;
+                        internalCoeffs_[patchi][patchEdgei] = Zero;
+                        boundaryCoeffs_[patchi][patchEdgei] = Zero;
                     }
                 }
             }
@@ -423,18 +419,98 @@ void Foam::faMatrix<Type>::setValues
 
 
 template<class Type>
-void Foam::faMatrix<Type>::setReference
+void Foam::faMatrix<Type>::setValues
 (
-    const label facei,
+    const labelUList& faceLabels,
     const Type& value
 )
 {
-    if (psi_.needReference())
+    this->setValuesFromList(faceLabels, UniformList<Type>(value));
+}
+
+
+template<class Type>
+void Foam::faMatrix<Type>::setValues
+(
+    const labelUList& faceLabels,
+    const UList<Type>& values
+)
+{
+    this->setValuesFromList(faceLabels, values);
+}
+
+
+template<class Type>
+void Foam::faMatrix<Type>::setValues
+(
+    const labelUList& faceLabels,
+    const UIndirectList<Type>& values
+)
+{
+    this->setValuesFromList(faceLabels, values);
+}
+
+
+template<class Type>
+void Foam::faMatrix<Type>::setReference
+(
+    const label facei,
+    const Type& value,
+    const bool forceReference
+)
+{
+    if ((forceReference || psi_.needReference()) && facei >= 0)
     {
         if (Pstream::master())
         {
             source()[facei] += diag()[facei]*value;
             diag()[facei] += diag()[facei];
+        }
+    }
+}
+
+
+template<class Type>
+void Foam::faMatrix<Type>::setReferences
+(
+    const labelUList& faceLabels,
+    const Type& value,
+    const bool forceReference
+)
+{
+    if (forceReference || psi_.needReference())
+    {
+        forAll(faceLabels, facei)
+        {
+            const label faceId = faceLabels[facei];
+            if (faceId >= 0)
+            {
+                source()[faceId] += diag()[faceId]*value;
+                diag()[faceId] += diag()[faceId];
+            }
+        }
+    }
+}
+
+
+template<class Type>
+void Foam::faMatrix<Type>::setReferences
+(
+    const labelUList& faceLabels,
+    const UList<Type>& values,
+    const bool forceReference
+)
+{
+    if (forceReference || psi_.needReference())
+    {
+        forAll(faceLabels, facei)
+        {
+            const label faceId = faceLabels[facei];
+            if (faceId >= 0)
+            {
+                source()[faceId] += diag()[faceId]*values[facei];
+                diag()[faceId] += diag()[faceId];
+            }
         }
     }
 }

@@ -32,6 +32,7 @@ License
 #include "extrapolatedCalculatedFvPatchFields.H"
 #include "coupledFvPatchFields.H"
 #include "UIndirectList.H"
+#include "UniformList.H"
 #include "demandDrivenData.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -207,12 +208,8 @@ void Foam::fvMatrix<Type>::setValuesFromList
 
         if (symmetric() || asymmetric())
         {
-            const cell& c = cells[celli];
-
-            forAll(c, j)
+            for (const label facei : cells[celli])
             {
-                const label facei = c[j];
-
                 if (mesh.isInternalFace(facei))
                 {
                     if (symmetric())
@@ -245,18 +242,15 @@ void Foam::fvMatrix<Type>::setValuesFromList
                 }
                 else
                 {
-                    label patchi = mesh.boundaryMesh().whichPatch(facei);
+                    const label patchi = mesh.boundaryMesh().whichPatch(facei);
 
                     if (internalCoeffs_[patchi].size())
                     {
-                        label patchFacei =
+                        const label patchFacei =
                             mesh.boundaryMesh()[patchi].whichFace(facei);
 
-                        internalCoeffs_[patchi][patchFacei] =
-                            Zero;
-
-                        boundaryCoeffs_[patchi][patchFacei] =
-                            Zero;
+                        internalCoeffs_[patchi][patchFacei] = Zero;
+                        boundaryCoeffs_[patchi][patchFacei] = Zero;
                     }
                 }
             }
@@ -310,10 +304,10 @@ Foam::fvMatrix<Type>::fvMatrix
     }
 
     // Update the boundary coefficients of psi without changing its event No.
-    GeometricField<Type, fvPatchField, volMesh>& psiRef =
-       const_cast<GeometricField<Type, fvPatchField, volMesh>&>(psi_);
+    auto& psiRef =
+        const_cast<GeometricField<Type, fvPatchField, volMesh>&>(psi_);
 
-    label currentStatePsi = psiRef.eventNo();
+    const label currentStatePsi = psiRef.eventNo();
     psiRef.boundaryFieldRef().updateCoeffs();
     psiRef.eventNo() = currentStatePsi;
 }
@@ -336,11 +330,11 @@ Foam::fvMatrix<Type>::fvMatrix(const fvMatrix<Type>& fvm)
 
     if (fvm.faceFluxCorrectionPtr_)
     {
-        faceFluxCorrectionPtr_ = new
-        GeometricField<Type, fvsPatchField, surfaceMesh>
-        (
-            *(fvm.faceFluxCorrectionPtr_)
-        );
+        faceFluxCorrectionPtr_ =
+            new GeometricField<Type, fvsPatchField, surfaceMesh>
+            (
+                *(fvm.faceFluxCorrectionPtr_)
+            );
     }
 }
 
@@ -384,8 +378,8 @@ Foam::fvMatrix<Type>::fvMatrix(const tmp<fvMatrix<Type>>& tfvm)
         }
         else
         {
-            faceFluxCorrectionPtr_ = new
-                GeometricField<Type, fvsPatchField, surfaceMesh>
+            faceFluxCorrectionPtr_ =
+                new GeometricField<Type, fvsPatchField, surfaceMesh>
                 (
                     *(tfvm().faceFluxCorrectionPtr_)
                 );
@@ -437,7 +431,6 @@ Foam::fvMatrix<Type>::fvMatrix
             )
         );
     }
-
 }
 
 
@@ -459,14 +452,22 @@ Foam::fvMatrix<Type>::~fvMatrix()
     DebugInFunction
         << "Destroying fvMatrix<Type> for field " << psi_.name() << endl;
 
-    if (faceFluxCorrectionPtr_)
-    {
-        delete faceFluxCorrectionPtr_;
-    }
+    deleteDemandDrivenData(faceFluxCorrectionPtr_);
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+void Foam::fvMatrix<Type>::setValues
+(
+    const labelUList& cellLabels,
+    const Type& value
+)
+{
+    this->setValuesFromList(cellLabels, UniformList<Type>(value));
+}
+
 
 template<class Type>
 void Foam::fvMatrix<Type>::setValues
@@ -514,9 +515,7 @@ void Foam::fvMatrix<Type>::setReferences
     const bool forceReference
 )
 {
-    const bool needRef = (forceReference || psi_.needReference());
-
-    if (needRef)
+    if (forceReference || psi_.needReference())
     {
         forAll(cellLabels, celli)
         {
@@ -539,9 +538,7 @@ void Foam::fvMatrix<Type>::setReferences
     const bool forceReference
 )
 {
-    const bool needRef = (forceReference || psi_.needReference());
-
-    if (needRef)
+    if (forceReference || psi_.needReference())
     {
         forAll(cellLabels, celli)
         {

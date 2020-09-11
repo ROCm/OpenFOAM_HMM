@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,7 +91,7 @@ void Foam::fv::FixedValueConstraint<Type>::constrain
         << pTraits<Type>::typeName
         << ">::constrain for source " << name_ << endl;
 
-    eqn.setValues(cells_, List<Type>(cells_.size(), fieldValues_[fieldi]));
+    eqn.setValues(cells_, fieldValues_[fieldi]);
 }
 
 

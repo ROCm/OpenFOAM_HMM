@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,57 +57,55 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-
-template<class Type>
-class fvMatrix;
-
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh>> operator&
-(
-    const fvMatrix<Type>&,
-    const DimensionedField<Type, volMesh>&
-);
-
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh>> operator&
-(
-    const fvMatrix<Type>&,
-    const tmp<DimensionedField<Type, volMesh>>&
-);
-
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh>> operator&
-(
-    const fvMatrix<Type>&,
-    const tmp<GeometricField<Type, fvPatchField, volMesh>>&
-);
-
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh>> operator&
-(
-    const tmp<fvMatrix<Type>>&,
-    const DimensionedField<Type, volMesh>&
-);
-
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh>> operator&
-(
-    const tmp<fvMatrix<Type>>&,
-    const tmp<DimensionedField<Type, volMesh>>&
-);
-
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh>> operator&
-(
-    const tmp<fvMatrix<Type>>&,
-    const tmp<GeometricField<Type, fvPatchField, volMesh>>&
-);
+// Forward Declarations
+template<class Type> class fvMatrix;
+template<class T> class UIndirectList;
 
 template<class Type>
 Ostream& operator<<(Ostream&, const fvMatrix<Type>&);
 
-template<class T> class UIndirectList;
+
+template<class Type>
+tmp<GeometricField<Type, fvPatchField, volMesh>> operator&
+(
+    const fvMatrix<Type>&,
+    const DimensionedField<Type, volMesh>&
+);
+
+template<class Type>
+tmp<GeometricField<Type, fvPatchField, volMesh>> operator&
+(
+    const fvMatrix<Type>&,
+    const tmp<DimensionedField<Type, volMesh>>&
+);
+
+template<class Type>
+tmp<GeometricField<Type, fvPatchField, volMesh>> operator&
+(
+    const fvMatrix<Type>&,
+    const tmp<GeometricField<Type, fvPatchField, volMesh>>&
+);
+
+template<class Type>
+tmp<GeometricField<Type, fvPatchField, volMesh>> operator&
+(
+    const tmp<fvMatrix<Type>>&,
+    const DimensionedField<Type, volMesh>&
+);
+
+template<class Type>
+tmp<GeometricField<Type, fvPatchField, volMesh>> operator&
+(
+    const tmp<fvMatrix<Type>>&,
+    const tmp<DimensionedField<Type, volMesh>>&
+);
+
+template<class Type>
+tmp<GeometricField<Type, fvPatchField, volMesh>> operator&
+(
+    const tmp<fvMatrix<Type>>&,
+    const tmp<GeometricField<Type, fvPatchField, volMesh>>&
+);
 
 
 /*---------------------------------------------------------------------------*\
@@ -120,9 +118,9 @@ class fvMatrix
     public refCount,
     public lduMatrix
 {
-    // Private data
+    // Private Data
 
-        //- Const reference to GeometricField<Type, fvPatchField, volMesh>
+        //- Const reference to field
         //  Converted into a non-const reference at the point of solution.
         const GeometricField<Type, fvPatchField, volMesh>& psi_;
 
@@ -133,13 +131,12 @@ class fvMatrix
         Field<Type> source_;
 
         //- Boundary scalar field containing pseudo-matrix coeffs
-        //  for internal cells
+        //- for internal cells
         FieldField<Field, Type> internalCoeffs_;
 
         //- Boundary scalar field containing pseudo-matrix coeffs
-        //  for boundary cells
+        //- for boundary cells
         FieldField<Field, Type> boundaryCoeffs_;
-
 
         //- Face flux field for non-orthogonal correction
         mutable GeometricField<Type, fvsPatchField, surfaceMesh>
@@ -204,13 +201,14 @@ protected:
                 const bool couples=true
             ) const;
 
+
         // Matrix manipulation functionality
 
             //- Set solution in given cells to the specified values
             template<template<class> class ListType>
             void setValuesFromList
             (
-                const labelUList& cells,
+                const labelUList& cellLabels,
                 const ListType<Type>& values
             );
 
@@ -218,8 +216,8 @@ protected:
 public:
 
     //- Solver class returned by the solver function
-    //  used for systems in which it is useful to cache the solver for reuse
-    //  e.g. if the solver is potentially expensive to construct (AMG) and can
+    //- used for systems in which it is useful to cache the solver for reuse.
+    //  E.g. if the solver is potentially expensive to construct (AMG) and can
     //  be used several times (PISO)
     class fvSolver
     {
@@ -238,11 +236,11 @@ public:
             {}
 
 
-        // Member functions
+        // Member Functions
 
             //- Solve returning the solution statistics.
-            //  Use the given solver controls
-            SolverPerformance<Type> solve(const dictionary&);
+            //  Solver controls read from dictionary
+            SolverPerformance<Type> solve(const dictionary& solverControls);
 
             //- Solve returning the solution statistics.
             //  Solver controls read from fvSolution
@@ -258,18 +256,22 @@ public:
         //- Construct given a field to solve for
         fvMatrix
         (
-            const GeometricField<Type, fvPatchField, volMesh>&,
-            const dimensionSet&
+            const GeometricField<Type, fvPatchField, volMesh>& psi,
+            const dimensionSet& ds
         );
 
-        //- Construct as copy
+        //- Copy construct
         fvMatrix(const fvMatrix<Type>&);
 
-        //- Construct as copy of tmp<fvMatrix<Type>> deleting argument
+        //- Copy/move construct from tmp<fvMatrix<Type>>
         fvMatrix(const tmp<fvMatrix<Type>>&);
 
         //- Construct from Istream given field to solve for
-        fvMatrix(const GeometricField<Type, fvPatchField, volMesh>&, Istream&);
+        fvMatrix
+        (
+            const GeometricField<Type, fvPatchField, volMesh>& psi,
+            Istream& is
+        );
 
         //- Clone
         tmp<fvMatrix<Type>> clone() const;
@@ -279,7 +281,7 @@ public:
     virtual ~fvMatrix();
 
 
-    // Member functions
+    // Member Functions
 
         // Access
 
@@ -304,28 +306,28 @@ public:
             }
 
             //- fvBoundary scalar field containing pseudo-matrix coeffs
-            //  for internal cells
+            //- for internal cells
             const FieldField<Field, Type>& internalCoeffs() const
             {
                 return internalCoeffs_;
             }
 
             //- fvBoundary scalar field containing pseudo-matrix coeffs
-            //  for internal cells
+            //- for internal cells
             FieldField<Field, Type>& internalCoeffs()
             {
                 return internalCoeffs_;
             }
 
             //- fvBoundary scalar field containing pseudo-matrix coeffs
-            //  for boundary cells
+            //- for boundary cells
             const FieldField<Field, Type>& boundaryCoeffs() const
             {
                 return boundaryCoeffs_;
             }
 
             //- fvBoundary scalar field containing pseudo-matrix coeffs
-            //  for boundary cells
+            //- for boundary cells
             FieldField<Field, Type>& boundaryCoeffs()
             {
                 return boundaryCoeffs_;
@@ -345,19 +347,27 @@ public:
 
         // Operations
 
-            //- Set solution in given cells to the specified values
-            //  and eliminate the corresponding equations from the matrix.
+            //- Set solution in given cells to the specified value
+            //- and eliminate the corresponding equations from the matrix.
             void setValues
             (
-                const labelUList& cells,
+                const labelUList& cellLabels,
+                const Type& value
+            );
+
+            //- Set solution in given cells to the specified values
+            //- and eliminate the corresponding equations from the matrix.
+            void setValues
+            (
+                const labelUList& cellLabels,
                 const UList<Type>& values
             );
 
             //- Set solution in given cells to the specified values
-            //  and eliminate the corresponding equations from the matrix.
+            //- and eliminate the corresponding equations from the matrix.
             void setValues
             (
-                const labelUList& cells,
+                const labelUList& cellLabels,
                 const UIndirectList<Type>& values
             );
 
@@ -369,24 +379,24 @@ public:
                 const bool forceReference = false
             );
 
-            //- Set references level for solution
+            //- Set reference level for solution
             void setReferences
             (
-                const labelUList& cells,
+                const labelUList& cellLabels,
                 const Type& value,
                 const bool forceReference = false
             );
 
-            //- Set references level for solution
+            //- Set reference level for solution
             void setReferences
             (
-                const labelUList& cells,
+                const labelUList& cellLabels,
                 const UList<Type>& values,
                 const bool forceReference = false
             );
 
             //- Set reference level for a component of the solution
-            //  on a given patch face
+            //- on a given patch face
             void setComponentReference
             (
                 const label patchi,
@@ -467,7 +477,7 @@ public:
             const dictionary& solverDict() const;
 
 
-    // Member operators
+    // Member Operators
 
         void operator=(const fvMatrix<Type>&);
         void operator=(const tmp<fvMatrix<Type>>&);
@@ -519,7 +529,7 @@ public:
         void operator*=(const dimensioned<scalar>&);
 
 
-    // Friend operators
+    // Friend Operators
 
         friend tmp<GeometricField<Type, fvPatchField, volMesh>>
         operator& <Type>
@@ -550,7 +560,7 @@ public:
         );
 
 
-    // Ostream operator
+    // Ostream Operator
 
         friend Ostream& operator<< <Type>
         (
@@ -560,7 +570,7 @@ public:
 };
 
 
-// * * * * * * * * * * * * * * * Global functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class Type>
 void checkMethod
@@ -594,7 +604,7 @@ SolverPerformance<Type> solve(fvMatrix<Type>&, const dictionary&);
 
 
 //- Solve returning the solution statistics given convergence tolerance,
-//  deleting temporary matrix after solution.
+//- deleting temporary matrix after solution.
 //  Use the given solver controls
 template<class Type>
 SolverPerformance<Type> solve
@@ -611,25 +621,25 @@ SolverPerformance<Type> solve(fvMatrix<Type>&);
 
 
 //- Solve returning the solution statistics given convergence tolerance,
-//  deleting temporary matrix after solution.
+//- deleting temporary matrix after solution.
 //  Solver controls read fvSolution
 template<class Type>
 SolverPerformance<Type> solve(const tmp<fvMatrix<Type>>&);
 
 
 //- Return the correction form of the given matrix
-//  by subtracting the matrix multiplied by the current field
+//- by subtracting the matrix multiplied by the current field
 template<class Type>
 tmp<fvMatrix<Type>> correction(const fvMatrix<Type>&);
 
 
 //- Return the correction form of the given temporary matrix
-//  by subtracting the matrix multiplied by the current field
+//- by subtracting the matrix multiplied by the current field
 template<class Type>
 tmp<fvMatrix<Type>> correction(const tmp<fvMatrix<Type>>&);
 
 
-// * * * * * * * * * * * * * * * Global operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 template<class Type>
 tmp<fvMatrix<Type>> operator==
