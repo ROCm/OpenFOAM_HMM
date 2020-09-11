@@ -118,7 +118,7 @@ public:
         inline constexpr refPtr(std::nullptr_t) noexcept;
 
         //- Construct, taking ownership of the pointer.
-        inline explicit refPtr(T* p) noexcept;
+        inline explicit constexpr refPtr(T* p) noexcept;
 
         //- Move construct from autoPtr, transferring ownership.
         inline explicit refPtr(autoPtr<T>&& ptr) noexcept;
@@ -127,7 +127,7 @@ public:
         inline explicit refPtr(std::unique_ptr<T>&& ptr) noexcept;
 
         //- Construct for a const reference to an object.
-        inline refPtr(const T& obj) noexcept;
+        inline constexpr refPtr(const T& obj) noexcept;
 
         //- Move construct, transferring ownership.
         inline refPtr(refPtr<T>&& rhs) noexcept;
@@ -227,12 +227,6 @@ public:
 
     // Member Operators
 
-        //- Identical to cref() method.
-        inline const T& operator()() const;
-
-        //- Cast to underlying data type, using the cref() method.
-        inline operator const T&() const;
-
         //- Dereferences (const) pointer to the managed object.
         //  Fatal for a null managed pointer.
         inline const T* operator->() const;
@@ -240,6 +234,12 @@ public:
         //- Dereferences (non-const) pointer to the managed object.
         //  Fatal for a null managed pointer or if the object is const.
         inline T* operator->();
+
+        //- Return const reference to the object - same as cref() method.
+        const T& operator()() const { return cref(); }
+
+        //- Cast to underlying data type, using the cref() method.
+        operator const T&() const { return cref(); }
 
         //- Non-null pointer/reference : valid()
         explicit operator bool() const noexcept { return ptr_; }

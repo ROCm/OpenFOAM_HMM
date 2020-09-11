@@ -108,7 +108,7 @@ inline Foam::tmp<T>::tmp(T* p)
 
 
 template<class T>
-inline Foam::tmp<T>::tmp(const T& obj) noexcept
+inline constexpr Foam::tmp<T>::tmp(const T& obj) noexcept
 :
     ptr_(const_cast<T*>(&obj)),
     type_(CREF)
@@ -352,12 +352,8 @@ inline void Foam::tmp<T>::ref(T& obj) noexcept
 template<class T>
 inline void Foam::tmp<T>::swap(tmp<T>& other) noexcept
 {
-    if (&other == this)
-    {
-        return;  // Self-swap is a no-op
-    }
-
     // Swap is just copy/assign for pointer and enum types
+    // Self-swap is effectively ignored
     T* p = ptr_;
     ptr_ = other.ptr_;
     other.ptr_ = p;
@@ -369,20 +365,6 @@ inline void Foam::tmp<T>::swap(tmp<T>& other) noexcept
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-template<class T>
-inline const T& Foam::tmp<T>::operator()() const
-{
-    return cref();
-}
-
-
-template<class T>
-inline Foam::tmp<T>::operator const T&() const
-{
-    return cref();
-}
-
 
 template<class T>
 inline const T* Foam::tmp<T>::operator->() const

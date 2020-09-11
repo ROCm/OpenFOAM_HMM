@@ -73,7 +73,7 @@ inline constexpr Foam::refPtr<T>::refPtr(std::nullptr_t) noexcept
 
 
 template<class T>
-inline Foam::refPtr<T>::refPtr(T* p) noexcept
+inline constexpr Foam::refPtr<T>::refPtr(T* p) noexcept
 :
     ptr_(p),
     type_(PTR)
@@ -95,7 +95,7 @@ inline Foam::refPtr<T>::refPtr(std::unique_ptr<T>&& rhs) noexcept
 
 
 template<class T>
-inline Foam::refPtr<T>::refPtr(const T& obj) noexcept
+inline constexpr Foam::refPtr<T>::refPtr(const T& obj) noexcept
 :
     ptr_(const_cast<T*>(&obj)),
     type_(CREF)
@@ -312,12 +312,8 @@ inline void Foam::refPtr<T>::ref(T& obj) noexcept
 template<class T>
 inline void Foam::refPtr<T>::swap(refPtr<T>& other) noexcept
 {
-    if (&other == this)
-    {
-        return;  // Self-swap is a no-op
-    }
-
     // Swap is just copy/assign for pointer and enum types
+    // Self-swap is effectively ignored
     T* p = ptr_;
     ptr_ = other.ptr_;
     other.ptr_ = p;
@@ -329,20 +325,6 @@ inline void Foam::refPtr<T>::swap(refPtr<T>& other) noexcept
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-template<class T>
-inline const T& Foam::refPtr<T>::operator()() const
-{
-    return cref();
-}
-
-
-template<class T>
-inline Foam::refPtr<T>::operator const T&() const
-{
-    return cref();
-}
-
 
 template<class T>
 inline const T* Foam::refPtr<T>::operator->() const

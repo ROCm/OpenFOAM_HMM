@@ -135,7 +135,7 @@ public:
         inline explicit tmp(T* p);
 
         //- Construct for a const reference to an object.
-        inline tmp(const T& obj) noexcept;
+        inline constexpr tmp(const T& obj) noexcept;
 
         //- Move construct, transferring ownership.
         //  Does not affect ref-count
@@ -236,12 +236,6 @@ public:
 
     // Member Operators
 
-        //- Identical to cref() method.
-        inline const T& operator()() const;
-
-        //- Cast to underlying data type, using the cref() method.
-        inline operator const T&() const;
-
         //- Dereferences (const) pointer to the managed object.
         //  Fatal for a null managed pointer.
         inline const T* operator->() const;
@@ -249,6 +243,12 @@ public:
         //- Dereferences (non-const) pointer to the managed object.
         //  Fatal for a null managed pointer or if the object is const.
         inline T* operator->();
+
+        //- Return const reference to the object - same as cref() method.
+        const T& operator()() const { return cref(); }
+
+        //- Cast to underlying data type, using the cref() method.
+        operator const T&() const { return cref(); }
 
         //- Non-null pointer/reference : valid()
         explicit operator bool() const noexcept { return ptr_; }

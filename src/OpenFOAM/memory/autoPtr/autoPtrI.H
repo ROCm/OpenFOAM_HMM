@@ -123,6 +123,7 @@ inline void Foam::autoPtr<T>::reset(autoPtr<T>&& ap) noexcept
 template<class T>
 inline void Foam::autoPtr<T>::swap(autoPtr<T>& other) noexcept
 {
+    // Swap is just copy/assign for pointer and enum types
     // Self-swap is effectively ignored
     T* p = ptr_;
     ptr_ = other.ptr_;
