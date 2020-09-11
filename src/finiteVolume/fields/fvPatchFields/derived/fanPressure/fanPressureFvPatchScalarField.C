@@ -30,6 +30,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
 #include "surfaceFields.H"
+#include "TableFile.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -86,12 +87,28 @@ Foam::fanPressureFvPatchScalarField::fanPressureFvPatchScalarField
 )
 :
     totalPressureFvPatchScalarField(p, iF, dict),
-    fanCurve_(dict),
+    fanCurve_(),
     direction_(fanFlowDirectionNames_.get("direction", dict)),
     rpm_(0),
     dm_(0),
     nonDimensional_(dict.getOrDefault("nonDimensional", false))
 {
+    // Backwards compatibility
+    if (dict.found("file"))
+    {
+        fanCurve_.reset
+        (
+            new Function1Types::TableFile<scalar>("fanCurve", dict)
+        );
+    }
+    else
+    {
+        fanCurve_.reset
+        (
+            Function1<scalar>::New("fanCurve", dict)
+        );
+    }
+
     if (nonDimensional_)
     {
         dict.readEntry("rpm", rpm_);
@@ -102,30 +119,30 @@ Foam::fanPressureFvPatchScalarField::fanPressureFvPatchScalarField
 
 Foam::fanPressureFvPatchScalarField::fanPressureFvPatchScalarField
 (
-    const fanPressureFvPatchScalarField& pfopsf
+    const fanPressureFvPatchScalarField& fppsf
 )
 :
-    totalPressureFvPatchScalarField(pfopsf),
-    fanCurve_(pfopsf.fanCurve_),
-    direction_(pfopsf.direction_),
-    rpm_(pfopsf.rpm_),
-    dm_(pfopsf.dm_),
-    nonDimensional_(pfopsf.nonDimensional_)
+    totalPressureFvPatchScalarField(fppsf),
+    fanCurve_(fppsf.fanCurve_.clone()),
+    direction_(fppsf.direction_),
+    rpm_(fppsf.rpm_),
+    dm_(fppsf.dm_),
+    nonDimensional_(fppsf.nonDimensional_)
 {}
 
 
 Foam::fanPressureFvPatchScalarField::fanPressureFvPatchScalarField
 (
-    const fanPressureFvPatchScalarField& pfopsf,
+    const fanPressureFvPatchScalarField& fppsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    totalPressureFvPatchScalarField(pfopsf, iF),
-    fanCurve_(pfopsf.fanCurve_),
-    direction_(pfopsf.direction_),
-    rpm_(pfopsf.rpm_),
-    dm_(pfopsf.dm_),
-    nonDimensional_(pfopsf.nonDimensional_)
+    totalPressureFvPatchScalarField(fppsf, iF),
+    fanCurve_(fppsf.fanCurve_.clone()),
+    direction_(fppsf.direction_),
+    rpm_(fppsf.rpm_),
+    dm_(fppsf.dm_),
+    nonDimensional_(fppsf.nonDimensional_)
 {}
 
 
@@ -139,11 +156,9 @@ void Foam::fanPressureFvPatchScalarField::updateCoeffs()
     }
 
     // Retrieve flux field
-    const surfaceScalarField& phi =
-        db().lookupObject<surfaceScalarField>(phiName());
+    const auto& phi = db().lookupObject<surfaceScalarField>(phiName());
 
-    const fvsPatchField<scalar>& phip =
-        patch().patchField<surfaceScalarField, scalar>(phi);
+    const auto& phip = patch().patchField<surfaceScalarField, scalar>(phi);
 
     int dir = 2*direction_ - 1;
 
@@ -178,7 +193,7 @@ void Foam::fanPressureFvPatchScalarField::updateCoeffs()
     }
 
     // Pressure drop for this flow rate
-    scalar pdFan = fanCurve_(max(volFlowRate, 0.0));
+    scalar pdFan = fanCurve_->value(max(volFlowRate, 0.0));
 
     if (nonDimensional_)
     {
@@ -197,8 +212,9 @@ void Foam::fanPressureFvPatchScalarField::updateCoeffs()
 void Foam::fanPressureFvPatchScalarField::write(Ostream& os) const
 {
     totalPressureFvPatchScalarField::write(os);
-    fanCurve_.write(os);
+    fanCurve_->writeData(os);
     os.writeEntry("direction", fanFlowDirectionNames_[direction_]);
+
     if (nonDimensional_)
     {
         os.writeEntry("nonDimensional", "true");

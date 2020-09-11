@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd
+    Copyright (C) 2017-2020 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,6 +69,7 @@ Usage
     inlet
     {
         type            fanPressure;
+        fanCurve        tableFile;
         file            "fanCurve";
         outOfBounds     clamp;
         direction       in;
@@ -79,6 +80,7 @@ Usage
     outlet
     {
         type            fanPressure;
+        fanCurve        tableFile;
         file            "fanCurve";
         outOfBounds     clamp;
         direction       out;
@@ -90,7 +92,7 @@ Usage
 See also
     Foam::fanFvPatchField
     Foam::totalPressureFvPatchScalarField
-    Foam::interpolationTable
+    Foam::Function1
 
 SourceFiles
    fanPressureFvPatchScalarField.C
@@ -101,7 +103,7 @@ SourceFiles
 #define fanPressureFvPatchScalarField_H
 
 #include "totalPressureFvPatchScalarField.H"
-#include "interpolationTable.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -134,8 +136,8 @@ private:
 
     // Private Data
 
-        //- Tabulated fan curve
-        interpolationTable<scalar> fanCurve_;
+        //- Run-time selectable fan curve
+        autoPtr<Function1<scalar>> fanCurve_;
 
         //- Direction of flow through the fan relative to patch
         fanFlowDirection direction_;
