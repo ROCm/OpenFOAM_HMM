@@ -60,7 +60,7 @@ Foam::Roots<3> Foam::cubicEqn::roots() const
     const scalar p = -(fma(-a, c, w) + fma(b, b/3.0, -w));
     const scalar q = b*b*b*scalar(2)/27 - b*c*a/3 + d*a*a;
     const scalar numDiscr = p*p*p/27 + q*q/4;
-    const scalar discr = (mag(numDiscr) > sqr(SMALL)) ? numDiscr : 0;
+    const scalar discr = (mag(numDiscr) > VSMALL) ? numDiscr : 0;
 
     // Determine the number and types of the roots
     const bool threeReal = discr < 0;
