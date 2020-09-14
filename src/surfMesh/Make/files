@@ -63,6 +63,7 @@ writers = writers
 
 $(writers)/surfaceWriter.C
 $(writers)/caching/surfaceWriterCaching.C
+$(writers)/abaqus/abaqusSurfaceWriter.C
 $(writers)/boundaryData/boundaryDataSurfaceWriter.C
 $(writers)/ensight/ensightSurfaceWriter.C
 $(writers)/foam/foamSurfaceWriter.C
