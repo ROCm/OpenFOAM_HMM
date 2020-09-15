@@ -303,15 +303,12 @@ void Foam::surfaceWriters::nastranWriter::writeGeometry
         // The end offset, which is the next begin offset
         decompOffsets[facei+1] = decompFaces.size();
     }
-}
 
 
-Foam::Ostream& Foam::surfaceWriters::nastranWriter::writeFooter
-(
-    Ostream& os,
-    const meshedSurf& surf
-) const
-{
+    //
+    // SHELL/MAT information
+    //
+
     // Zone id have been used for the PID. Find unique values.
 
     labelList pidsUsed = labelHashSet(surf.zoneIds()).sortedToc();
@@ -339,7 +336,7 @@ Foam::Ostream& Foam::surfaceWriters::nastranWriter::writeFooter
 
     const label MID = 1;
 
-    writeKeyword(os, "MAT1")    << separator_;
+    writeKeyword(os, "MAT1")  << separator_;
     writeValue(os, MID);
 
     for (label i = 0; i < 7; ++i)
@@ -349,8 +346,6 @@ Foam::Ostream& Foam::surfaceWriters::nastranWriter::writeFooter
         writeValue(os, "");
     }
     os << nl;
-
-    return os;
 }
 
 
@@ -361,6 +356,7 @@ Foam::surfaceWriters::nastranWriter::nastranWriter()
     surfaceWriter(),
     writeFormat_(fieldFormat::SHORT),
     fieldMap_(),
+    commonGeometry_(false),
     geometryScale_(1),
     fieldScale_(),
     separator_()
@@ -383,6 +379,7 @@ Foam::surfaceWriters::nastranWriter::nastranWriter
         )
     ),
     fieldMap_(),
+    commonGeometry_(options.getOrDefault("commonGeometry", false)),
     geometryScale_(options.getOrDefault<scalar>("scale", 1)),
     fieldScale_(options.subOrEmptyDict("fieldScale")),
     separator_()
@@ -470,9 +467,7 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::write()
         OFstream os(outputFile);
         fileFormats::NASCore::setPrecision(os, writeFormat_);
 
-        os  << "TITLE=OpenFOAM " << outputPath_.name()
-            << " mesh" << nl
-            << '$' << nl
+        os  << "TITLE=OpenFOAM " << outputPath_.name() << " geometry" << nl
             << "BEGIN BULK" << nl;
 
         labelList decompOffsets;
@@ -480,8 +475,7 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::write()
 
         writeGeometry(os, surf, decompOffsets, decompFaces);
 
-        writeFooter(os, surf)
-            << "ENDDATA" << nl;
+        os  << "ENDDATA" << nl;
     }
 
     wroteGeom_ = true;

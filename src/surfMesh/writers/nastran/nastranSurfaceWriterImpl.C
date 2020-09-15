@@ -145,22 +145,59 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
     const Field<Type>& localValues
 )
 {
-    checkOpen();
+    // Geometry changed since last output? Capture now before any merging.
+    /// const bool geomChanged = (!upToDate_);
 
-    if (!fieldMap_.found(fieldName))
+    // Separate geometry, when commonGeometry = true
+    if (!wroteGeom_ && commonGeometry_)
     {
-        FatalErrorInFunction
-            << "No mapping found between field " << fieldName
-            << " and corresponding Nastran field.  Available types are:"
-            << fieldMap_
-            << exit(FatalError);
-
-        return fileName::null;
+        write();
     }
 
-    const loadFormat format(fieldMap_[fieldName]);
+    checkOpen();
 
-    // Field:  rootdir/<TIME>/field/surfaceName.nas
+    const loadFormat format
+    (
+        fieldMap_.lookup
+        (
+            fieldName,
+            // Default format
+            (
+                pTraits<Type>::nComponents == 1
+              ? loadFormat::PLOAD2
+              : loadFormat::PLOAD4
+            )
+        )
+    );
+
+    if
+    (
+        !std::is_integral<Type>::value  // Handle 'Ids' etc silently
+     && !fieldMap_.empty()
+     && !fieldMap_.found(fieldName)
+    )
+    {
+        WarningInFunction
+            << "No mapping found between field " << fieldName
+            << " and corresponding Nastran field.  Available types:"
+            << fieldMap_ << nl;
+    }
+
+    // Emit any common warnings
+    if (format == loadFormat::PLOAD2 && pTraits<Type>::nComponents != 1)
+    {
+        WarningInFunction
+            << fileFormats::NASCore::loadFormatNames[format]
+            << " cannot be used for higher rank values"
+            << " - reverting to mag()" << endl;
+    }
+
+
+    // Common geometry
+    // Field:  rootdir/<TIME>/<field>_surfaceName.bdf
+
+    // Embedded geometry
+    // Field:  rootdir/<TIME>/<field>/surfaceName.bdf
 
     fileName outputFile = outputPath_.path();
     if (useTimeDir() && !timeName().empty())
@@ -168,8 +205,23 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
         // Splice in time-directory
         outputFile /= timeName();
     }
-    outputFile /= fieldName / outputPath_.name();
-    outputFile.ext("nas");
+
+    fileName geomFileName;
+    if (commonGeometry_)
+    {
+        // Common geometry
+        geomFileName = outputPath_.name().ext("nas");
+
+        // Append <field>_surfaceName.bdf
+        outputFile /= fieldName + '_' + outputPath_.name();
+    }
+    else
+    {
+        // Embedded geometry
+        // Use sub-directory
+        outputFile /= fieldName / outputPath_.name();
+    }
+    outputFile.ext("bdf");
 
 
     // Output scaling for the variable, but not for integer types.
@@ -190,16 +242,6 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
             Info<< " (scaling " << varScale << ')';
         }
         Info<< " to " << outputFile << endl;
-    }
-
-
-    // Emit any common warnings
-    if (format == loadFormat::PLOAD2 && pTraits<Type>::nComponents != 1)
-    {
-        WarningInFunction
-            << fileFormats::NASCore::loadFormatNames[format]
-            << " cannot be used for higher rank values"
-            << " - reverting to mag()" << endl;
     }
 
 
@@ -224,8 +266,6 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
         DynamicList<face> decompFaces;
 
 
-        // Could handle separate geometry here
-
         OFstream os(outputFile);
         fileFormats::NASCore::setPrecision(os, writeFormat_);
 
@@ -238,17 +278,31 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
                 << "$ TIME " << timeName() << nl;
         }
 
-        os  << '$' << nl
-            << "TIME " << timeValue << nl
-            << '$' << nl
+        os  << "TIME " << timeValue << nl
+            << nl
             << "BEGIN BULK" << nl;
 
+        if (commonGeometry_)
+        {
+            os  << "INCLUDE '" << geomFileName.c_str() << "'" << nl;
 
-        writeGeometry(os, surf, decompOffsets, decompFaces);
-
+            // Geometry already written (or suppressed)
+            // - still need decomposition information
+            fileFormats::NASCore::faceDecomposition
+            (
+                surf.points(),
+                surf.faces(),
+                decompOffsets,
+                decompFaces
+            );
+        }
+        else
+        {
+            // Write geometry
+            writeGeometry(os, surf, decompOffsets, decompFaces);
+        }
 
         // Write field
-
         os  << '$' << nl
             << "$ Field data" << nl
             << '$' << nl;
@@ -345,8 +399,7 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
             }
         }
 
-        writeFooter(os, surf)
-            << "ENDDATA" << endl;
+        os  << "ENDDATA" << endl;
     }
 
     wroteGeom_ = true;
