@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -291,9 +291,11 @@ void Foam::volPointInterpolation::interpolateBoundaryField
     // Do points on 'normal' patches from the surrounding patch faces
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    forAll(boundary.meshPoints(), i)
+    const labelList& mp = boundary.meshPoints();
+
+    forAll(mp, i)
     {
-        label pointi = boundary.meshPoints()[i];
+        label pointi = mp[i];
 
         if (isPatchPoint_[pointi])
         {
@@ -318,6 +320,17 @@ void Foam::volPointInterpolation::interpolateBoundaryField
 
     // And add separated contributions
     addSeparated(pf);
+
+    // Optionally normalise
+    if (normalisationPtr_)
+    {
+        const scalarField& normalisation = normalisationPtr_();
+        forAll(mp, i)
+        {
+            pfi[mp[i]] *= normalisation[i];
+        }
+    }
+
 
     // Push master data to slaves. It is possible (not sure how often) for
     // a coupled point to have its master on a different patch so

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +33,7 @@ License
 #include "demandDrivenData.H"
 #include "pointConstraints.H"
 #include "surfaceFields.H"
+#include "processorPointPatch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -42,6 +44,25 @@ namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+bool Foam::volPointInterpolation::hasSeparated(const pointMesh& pMesh)
+{
+    const pointBoundaryMesh& pbm = pMesh.boundary();
+
+    bool hasSpecial = false;
+    for (const auto& pp : pbm)
+    {
+        if (isA<coupledFacePointPatch>(pp) && !isType<processorPointPatch>(pp))
+        {
+            hasSpecial = true;
+            break;
+        }
+    }
+
+    reduce(hasSpecial, orOp<bool>());
+    return hasSpecial;
+}
+
 
 void Foam::volPointInterpolation::calcBoundaryAddressing()
 {
@@ -70,8 +91,10 @@ void Foam::volPointInterpolation::calcBoundaryAddressing()
     boundaryIsPatchFace_.setSize(boundary.size());
     boundaryIsPatchFace_ = false;
 
-    isPatchPoint_.setSize(mesh().nPoints());
-    isPatchPoint_ = false;
+    // Store per mesh point whether it is on any 'real' patch. Currently
+    // boolList just so we can use syncUntransformedData (does not take
+    // bitSet. Tbd)
+    boolList isPatchPoint(mesh().nPoints(), false);
 
     const polyBoundaryMesh& pbm = mesh().boundaryMesh();
 
@@ -99,7 +122,7 @@ void Foam::volPointInterpolation::calcBoundaryAddressing()
 
                 forAll(f, fp)
                 {
-                    isPatchPoint_[f[fp]] = true;
+                    isPatchPoint[f[fp]] = true;
                 }
             }
         }
@@ -107,28 +130,19 @@ void Foam::volPointInterpolation::calcBoundaryAddressing()
 
     // Make sure point status is synchronised so even processor that holds
     // no face of a certain patch still can have boundary points marked.
+    pointConstraints::syncUntransformedData
+    (
+        mesh(),
+        isPatchPoint,
+        orEqOp<bool>()
+    );
+
+    // Convert to bitSet
+    isPatchPoint_.setSize(mesh().nPoints());
+    isPatchPoint_.assign(isPatchPoint);
+
     if (debug)
     {
-        boolList oldData(isPatchPoint_);
-
-        pointConstraints::syncUntransformedData
-        (
-            mesh(),
-            isPatchPoint_,
-            orEqOp<bool>()
-        );
-
-        forAll(isPatchPoint_, pointi)
-        {
-            if (isPatchPoint_[pointi] != oldData[pointi])
-            {
-                Pout<< "volPointInterpolation::calcBoundaryAddressing():"
-                    << " added dangling mesh point:" << pointi
-                    << " at:" << mesh().points()[pointi]
-                    << endl;
-            }
-        }
-
         label nPatchFace = 0;
         forAll(boundaryIsPatchFace_, i)
         {
@@ -242,6 +256,98 @@ void Foam::volPointInterpolation::makeBoundaryWeights(scalarField& sumWeights)
 }
 
 
+void Foam::volPointInterpolation::interpolateOne
+(
+    const tmp<scalarField>& tnormalisation,
+    pointScalarField& pf
+) const
+{
+    if (debug)
+    {
+        Pout<< "volPointInterpolation::interpolateOne("
+            << "pointScalarField&) : "
+            << "interpolating oneField"
+            <<  " from cells to BOUNDARY points "
+            << pf.name() << endl;
+    }
+
+    const primitivePatch& boundary = boundaryPtr_();
+    const labelList& mp = boundary.meshPoints();
+    Field<scalar>& pfi = pf.primitiveFieldRef();
+
+
+    // 1. Interpolate coupled boundary points from cells
+    {
+        forAll(mp, i)
+        {
+            const label pointi = mp[i];
+            if (!isPatchPoint_[pointi])
+            {
+                const scalarList& pw = pointWeights_[pointi];
+
+                scalar& val = pfi[pointi];
+
+                val = Zero;
+                forAll(pw, pointCelli)
+                {
+                    val += pw[pointCelli];
+                }
+            }
+        }
+    }
+
+
+    // 2. Interpolate to the patches preserving fixed value BCs
+    {
+        forAll(mp, i)
+        {
+            const label pointi = mp[i];
+
+            if (isPatchPoint_[pointi])
+            {
+                const labelList& pFaces = boundary.pointFaces()[i];
+                const scalarList& pWeights = boundaryPointWeights_[i];
+
+                scalar& val = pfi[pointi];
+
+                val = Zero;
+                forAll(pFaces, j)
+                {
+                    if (boundaryIsPatchFace_[pFaces[j]])
+                    {
+                        val += pWeights[j];
+                    }
+                }
+            }
+        }
+
+        // Sum collocated contributions
+        pointConstraints::syncUntransformedData
+        (
+            mesh(),
+            pfi,
+            plusEqOp<scalar>()
+        );
+
+        // And add separated contributions
+        addSeparated(pf);
+
+        // Optionally normalise
+        if (tnormalisation)
+        {
+            const scalarField& normalisation = tnormalisation();
+            forAll(mp, i)
+            {
+                pfi[mp[i]] *= normalisation[i];
+            }
+        }
+    }
+
+    // Apply constraints
+    pointConstraints::New(pf.mesh()).constrain(pf, false);
+}
+
+
 void Foam::volPointInterpolation::makeWeights()
 {
     if (debug)
@@ -251,22 +357,28 @@ void Foam::volPointInterpolation::makeWeights()
             << endl;
     }
 
+    const pointMesh& pMesh = pointMesh::New(mesh());
+
     // Update addressing over all boundary faces
     calcBoundaryAddressing();
 
 
     // Running sum of weights
-    pointScalarField sumWeights
+    tmp<pointScalarField> tsumWeights
     (
-        IOobject
+        new pointScalarField
         (
-            "volPointSumWeights",
-            mesh().polyMesh::instance(),
-            mesh()
-        ),
-        pointMesh::New(mesh()),
-        dimensionedScalar(dimless, Zero)
+            IOobject
+            (
+                "volPointSumWeights",
+                mesh().polyMesh::instance(),
+                mesh()
+            ),
+            pMesh,
+            dimensionedScalar(dimless, Zero)
+        )
     );
+    pointScalarField& sumWeights = tsumWeights.ref();
 
 
     // Create internal weights; add to sumWeights
@@ -277,19 +389,8 @@ void Foam::volPointInterpolation::makeWeights()
     makeBoundaryWeights(sumWeights);
 
 
-    //forAll(boundary.meshPoints(), i)
-    //{
-    //    label pointi = boundary.meshPoints()[i];
-    //
-    //    if (isPatchPoint_[pointi])
-    //    {
-    //        Pout<< "Calculated Weight at boundary point:" << i
-    //            << " at:" << mesh().points()[pointi]
-    //            << " sumWeight:" << sumWeights[pointi]
-    //            << " from:" << boundaryPointWeights_[i]
-    //            << endl;
-    //    }
-    //}
+    const primitivePatch& boundary = boundaryPtr_();
+    const labelList& mp = boundary.meshPoints();
 
 
     // Sum collocated contributions
@@ -300,8 +401,10 @@ void Foam::volPointInterpolation::makeWeights()
         plusEqOp<scalar>()
     );
 
+
     // And add separated contributions
     addSeparated(sumWeights);
+
 
     // Push master data to slaves. It is possible (not sure how often) for
     // a coupled point to have its master on a different patch so
@@ -322,11 +425,9 @@ void Foam::volPointInterpolation::makeWeights()
     }
 
     // Normalise boundary weights
-    const primitivePatch& boundary = boundaryPtr_();
-
-    forAll(boundary.meshPoints(), i)
+    forAll(mp, i)
     {
-        label pointi = boundary.meshPoints()[i];
+        const label pointi = mp[i];
 
         scalarList& pw = boundaryPointWeights_[i];
         // Note:pw only sized for isPatchPoint
@@ -334,6 +435,30 @@ void Foam::volPointInterpolation::makeWeights()
         {
             pw[i] /= sumWeights[pointi];
         }
+    }
+
+
+    // Normalise separated contributions
+    if (hasSeparated_)
+    {
+        if (debug)
+        {
+            Pout<< "volPointInterpolation::makeWeights() : "
+                << "detected separated coupled patches"
+                << " - allocating normalisation" << endl;
+        }
+
+        // Sum up effect of interpolating one (on boundary points only)
+        interpolateOne(tmp<scalarField>(), sumWeights);
+
+        // Store as normalisation factor (on boundary points only)
+        normalisationPtr_ = new scalarField(mp.size());
+        normalisationPtr_.ref() = scalar(1.0);
+        normalisationPtr_.ref() /= scalarField(sumWeights, mp);
+    }
+    else
+    {
+        normalisationPtr_.clear();
     }
 
 
@@ -350,7 +475,8 @@ void Foam::volPointInterpolation::makeWeights()
 
 Foam::volPointInterpolation::volPointInterpolation(const fvMesh& vm)
 :
-    MeshObject<fvMesh, Foam::UpdateableMeshObject, volPointInterpolation>(vm)
+    MeshObject<fvMesh, Foam::UpdateableMeshObject, volPointInterpolation>(vm),
+    hasSeparated_(hasSeparated(pointMesh::New(vm)))
 {
     makeWeights();
 }
@@ -366,6 +492,9 @@ Foam::volPointInterpolation::~volPointInterpolation()
 
 void Foam::volPointInterpolation::updateMesh(const mapPolyMesh&)
 {
+    // Recheck whether has coupled patches
+    hasSeparated_ = hasSeparated(pointMesh::New(mesh()));
+
     makeWeights();
 }
 
