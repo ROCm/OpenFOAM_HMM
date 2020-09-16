@@ -51,10 +51,7 @@ Foam::gradingDescriptor::gradingDescriptor
     nDivFraction_(nDivFraction),
     expansionRatio_(expansionRatio)
 {
-    if (expansionRatio_ < 0)
-    {
-        expansionRatio_ = 1.0/(-expansionRatio_);
-    }
+    correct();
 }
 
 
@@ -67,10 +64,7 @@ Foam::gradingDescriptor::gradingDescriptor
     nDivFraction_(1),
     expansionRatio_(expansionRatio)
 {
-    if (expansionRatio_ < 0)
-    {
-        expansionRatio_ = 1.0/(-expansionRatio_);
-    }
+    correct();
 }
 
 
@@ -81,6 +75,15 @@ Foam::gradingDescriptor::gradingDescriptor(Istream& is)
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::gradingDescriptor::correct()
+{
+    if (expansionRatio_ < 0)
+    {
+        expansionRatio_ = 1.0/(-expansionRatio_);
+    }
+}
+
 
 Foam::gradingDescriptor Foam::gradingDescriptor::inv() const
 {
@@ -129,10 +132,7 @@ Foam::Istream& Foam::operator>>(Istream& is, gradingDescriptor& gd)
         is.readEnd("gradingDescriptor");
     }
 
-    if (expansionRatio_ < 0)
-    {
-        expansionRatio_ = 1.0/(-expansionRatio_);
-    }
+    gd.correct();
 
     is.check(FUNCTION_NAME);
     return is;

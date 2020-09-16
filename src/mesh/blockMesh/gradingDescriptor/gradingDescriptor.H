@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +57,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class Istream;
 class Ostream;
 class gradingDescriptor;
@@ -81,12 +81,13 @@ class gradingDescriptor
 
 public:
 
+    // Friendship with gradingDescriptors
     friend class gradingDescriptors;
 
 
     // Constructors
 
-        //- Default constructor
+        //- Default construct (1, 1, 1)
         gradingDescriptor();
 
         //- Construct from components
@@ -110,8 +111,6 @@ public:
 
     // Member Functions
 
-    // Access
-
         scalar blockFraction() const
         {
             return blockFraction_;
@@ -127,7 +126,9 @@ public:
             return expansionRatio_;
         }
 
-    // Member Functions
+        //- Adjust expansion ratio.
+        //  Trap negative value and treat as its inverse.
+        void correct();
 
         //- Return the inverse gradingDescriptor with 1/expansionRatio
         gradingDescriptor inv() const;
@@ -143,8 +144,6 @@ public:
 
         friend Istream& operator>>(Istream&, gradingDescriptor&);
         friend Ostream& operator<<(Ostream&, const gradingDescriptor&);
-
-        friend Istream& operator>>(Istream&, gradingDescriptors&);
 };
 
 
