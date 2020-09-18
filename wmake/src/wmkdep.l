@@ -7,7 +7,7 @@
     \\/      M anipulation   |
 ------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -442,7 +442,7 @@ int main(int argc, char* argv[])
     nextFile(sourceFile);
     yylex();
 
-    fputs("\n\n", stdout);
+    fputs("\n#END\n", stdout);
     fflush(stdout);
 
     for (i = nDirectories-1; i >= 0; --i)
