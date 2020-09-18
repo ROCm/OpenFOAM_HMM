@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,6 +106,8 @@ is_pair()
 
 int main(int argc, char *argv[])
 {
+    argList::noCheckProcessorDirectories();
+
     argList::addBoolOption("assign");
     argList::addBoolOption("iter");
     argList::addBoolOption("swap");
@@ -293,10 +295,25 @@ int main(int argc, char *argv[])
 
     if (Pstream::parRun())
     {
-        if (Pstream::myProcNo() != Pstream::masterNo())
+        if (Pstream::master())
         {
-            Serr<< "slave sending to master "
-                << Pstream::masterNo() << nl;
+            for
+            (
+                int proci = Pstream::firstSlave();
+                proci <= Pstream::lastSlave();
+                ++proci
+            )
+            {
+                IPstream fromSlave(Pstream::commsTypes::blocking, proci);
+                FixedList<label, 2> list3(fromSlave);
+
+                Serr<< "Receiving from " << proci
+                    << " : " << list3 << endl;
+            }
+        }
+        else
+        {
+            Perr<< "Sending to master" << endl;
 
             OPstream toMaster
             (
@@ -306,24 +323,8 @@ int main(int argc, char *argv[])
 
             FixedList<label, 2> list3;
             list3[0] = 0;
-            list3[1] = 1;
+            list3[1] = Pstream::myProcNo();
             toMaster << list3;
-        }
-        else
-        {
-            for
-            (
-                int slave = Pstream::firstSlave();
-                slave <= Pstream::lastSlave();
-                slave++
-            )
-            {
-                Serr << "master receiving from slave " << slave << endl;
-                IPstream fromSlave(Pstream::commsTypes::blocking, slave);
-                FixedList<label, 2> list3(fromSlave);
-
-                Serr<< list3 << endl;
-            }
         }
     }
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +56,7 @@ labelList procNeighbours(const polyMesh& mesh)
     {
         if (isA<processorPolyPatch>(mesh.boundaryMesh()[patchi]))
         {
-            nNeighbours++;
+            ++nNeighbours;
         }
     }
 
@@ -65,16 +66,12 @@ labelList procNeighbours(const polyMesh& mesh)
 
     forAll(mesh.boundaryMesh(), patchi)
     {
-        if (isA<processorPolyPatch>(mesh.boundaryMesh()[patchi]))
+        const processorPolyPatch* procPatch =
+            isA<const processorPolyPatch>(mesh.boundaryMesh()[patchi]);
+
+        if (procPatch)
         {
-            const polyPatch& patch = mesh.boundaryMesh()[patchi];
-
-            const processorPolyPatch& procPatch =
-                refCast<const processorPolyPatch>(patch);
-
-            label procId = procPatch.neighbProcNo() - Pstream::firstSlave() + 1;
-
-            neighbours[nNeighbours++] = procId;
+            neighbours[nNeighbours++] = procPatch->neighbProcNo();
         }
     }
 

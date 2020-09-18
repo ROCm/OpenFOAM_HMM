@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,6 +75,8 @@ void testFind(const T& val, const ListType& lst)
 
 int main(int argc, char *argv[])
 {
+    argList::noCheckProcessorDirectories();
+
     argList::addOption
     (
         "binary",
@@ -148,12 +150,12 @@ int main(int argc, char *argv[])
 
             for
             (
-                int slave = Pstream::firstSlave();
-                slave <= Pstream::lastSlave();
-                ++slave
+                int proci = Pstream::firstSlave();
+                proci <= Pstream::lastSlave();
+                ++proci
             )
             {
-                OPstream toSlave(Pstream::commsTypes::scheduled, slave);
+                OPstream toSlave(Pstream::commsTypes::scheduled, proci);
                 toSlave << idl3;
             }
         }
@@ -175,6 +177,7 @@ int main(int argc, char *argv[])
         bool barrier = true;
         Pstream::scatter(barrier);
     }
+
 
     // SortList
     {

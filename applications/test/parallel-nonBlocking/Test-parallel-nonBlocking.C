@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,7 +70,7 @@ int main(int argc, char *argv[])
 
         PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
-        if (Pstream::myProcNo() != Pstream::masterNo())
+        if (!Pstream::master())
         {
             Perr<< "slave sending to master "
                 << Pstream::masterNo() << endl;
@@ -82,7 +83,7 @@ int main(int argc, char *argv[])
 
         // Consume
         DynamicList<vector> allData;
-        if (Pstream::myProcNo() == Pstream::masterNo())
+        if (Pstream::master())
         {
             // Collect my own data
             allData.append(data);
@@ -103,7 +104,7 @@ int main(int argc, char *argv[])
 
         // Send allData back
         PstreamBuffers pBufs2(Pstream::commsTypes::nonBlocking);
-        if (Pstream::myProcNo() == Pstream::masterNo())
+        if (Pstream::master())
         {
             for
             (
@@ -122,7 +123,7 @@ int main(int argc, char *argv[])
         pBufs2.finishedSends();
 
         // Consume
-        if (Pstream::myProcNo() != Pstream::masterNo())
+        if (!Pstream::master())
         {
             Perr<< "slave receiving from master "
                 << Pstream::masterNo() << endl;

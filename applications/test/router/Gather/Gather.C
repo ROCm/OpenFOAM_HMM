@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,8 +23,6 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
-
-Description
 
 \*---------------------------------------------------------------------------*/
 
@@ -55,29 +54,30 @@ Gather<T0>::Gather(const T0& localData, const bool redistribute)
     {
         if (Pstream::master())
         {
-            this->operator[](0) = localData;
+            auto outIter = this->begin();
+            *outIter = localData;
 
             // Receive data
             for
             (
-                int slave = Pstream::firstSlave(), procIndex = 1;
-                slave <= Pstream::lastSlave();
-                slave++, procIndex++
+                int proci = Pstream::firstSlave();
+                proci <= Pstream::lastSlave();
+                ++proci
             )
             {
-                IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-                fromSlave >> this->operator[](procIndex);
+                IPstream fromSlave(Pstream::commsTypes::scheduled, proci);
+                fromSlave >> *(++outIter);
             }
 
             // Send data
             for
             (
-                int slave = Pstream::firstSlave(), procIndex = 1;
-                slave <= Pstream::lastSlave();
-                slave++, procIndex++
+                int proci = Pstream::firstSlave();
+                proci <= Pstream::lastSlave();
+                ++proci
             )
             {
-                OPstream toSlave(Pstream::commsTypes::scheduled, slave);
+                OPstream toSlave(Pstream::commsTypes::scheduled, proci);
 
                 if (redistribute)
                 {

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,7 +67,7 @@ void testMapDistribute()
     labelList nSend(Pstream::nProcs(), Zero);
     forAll(complexData, i)
     {
-        label procI = complexData[i].first();
+        const label procI = complexData[i].first();
         nSend[procI]++;
     }
 
@@ -80,7 +80,7 @@ void testMapDistribute()
     nSend = 0;
     forAll(complexData, i)
     {
-        label procI = complexData[i].first();
+        const label procI = complexData[i].first();
         sendMap[procI][nSend[procI]++] = i;
     }
 
@@ -152,20 +152,7 @@ void testTransfer(const T& input)
         perrInfo(data) << nl << endl;
     }
 
-    if (Pstream::myProcNo() != Pstream::masterNo())
-    {
-        {
-            Perr<< "slave sending to master " << Pstream::masterNo() << endl;
-            OPstream toMaster(Pstream::commsTypes::blocking, Pstream::masterNo());
-            toMaster << data;
-        }
-
-        Perr<< "slave receiving from master " << Pstream::masterNo() << endl;
-        IPstream fromMaster(Pstream::commsTypes::blocking, Pstream::masterNo());
-        fromMaster >> data;
-        perrInfo(data) << endl;
-    }
-    else
+    if (Pstream::master())
     {
         for
         (
@@ -192,6 +179,19 @@ void testTransfer(const T& input)
             toSlave << data;
         }
     }
+    else
+    {
+        {
+            Perr<< "slave sending to master " << Pstream::masterNo() << endl;
+            OPstream toMaster(Pstream::commsTypes::blocking, Pstream::masterNo());
+            toMaster << data;
+        }
+
+        Perr<< "slave receiving from master " << Pstream::masterNo() << endl;
+        IPstream fromMaster(Pstream::commsTypes::blocking, Pstream::masterNo());
+        fromMaster >> data;
+        perrInfo(data) << endl;
+    }
 }
 
 
@@ -205,30 +205,7 @@ void testTokenized(const T& data)
         Perr<<"test tokenized \"" << data << "\"" << nl << endl;
     }
 
-    if (Pstream::myProcNo() != Pstream::masterNo())
-    {
-        {
-            Perr<< "slave sending to master " << Pstream::masterNo() << endl;
-            OPstream toMaster
-            (
-                Pstream::commsTypes::blocking,
-                Pstream::masterNo()
-            );
-
-            toMaster << data;
-        }
-
-        Perr<< "slave receiving from master " << Pstream::masterNo() << endl;
-        IPstream fromMaster
-        (
-            Pstream::commsTypes::blocking,
-            Pstream::masterNo()
-        );
-
-        fromMaster >> tok;
-        Perr<< tok.info() << endl;
-    }
-    else
+    if (Pstream::master())
     {
         for
         (
@@ -254,6 +231,29 @@ void testTokenized(const T& data)
             OPstream toSlave(Pstream::commsTypes::blocking, slave);
             toSlave << data;
         }
+    }
+    else
+    {
+        {
+            Perr<< "slave sending to master " << Pstream::masterNo() << endl;
+            OPstream toMaster
+            (
+                Pstream::commsTypes::blocking,
+                Pstream::masterNo()
+            );
+
+            toMaster << data;
+        }
+
+        Perr<< "slave receiving from master " << Pstream::masterNo() << endl;
+        IPstream fromMaster
+        (
+            Pstream::commsTypes::blocking,
+            Pstream::masterNo()
+        );
+
+        fromMaster >> tok;
+        Perr<< tok.info() << endl;
     }
 }
 
