@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,35 +25,65 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+#include "label.H"
+#include "token.H"
+#include "Ostream.H"
 
-inline Foam::scalarRanges::scalarRanges(const std::string& str, bool report)
-:
-    List<scalarRange>(scalarRanges::parse(str, report))
-{}
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-inline bool Foam::scalarRanges::match(const scalar& value) const
+namespace Foam
 {
-    for (const scalarRange& range : *this)
+#if 0
+    template<class T>
+    inline static Istream& input(Istream& is, IntRange<T>& range)
     {
-        if (range.match(value))
-        {
-            return true;
-        }
-    }
+        is.readBegin("IntRange");
+        is >> range.start() >> range.size();
+        is.readEnd("IntRange");
 
-    return false;
+        is.check(FUNCTION_NAME);
+        return is;
+    }
+#endif
+
+    template<class T>
+    inline static Ostream& output(Ostream& os, const IntRange<T>& range)
+    {
+        os  << token::BEGIN_LIST
+            << range.start() << token::SPACE << range.size()
+            << token::END_LIST;
+
+        os.check(FUNCTION_NAME);
+        return os;
+    }
 }
 
 
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-inline bool Foam::scalarRanges::operator()(const scalar& value) const
+#if 0
+Foam::Istream& Foam::operator>>(Istream& is, IntRange<int32_t>& range)
 {
-    return match(value);
+    return input(is, range);
+}
+
+
+Foam::Istream& Foam::operator>>(Istream& is, IntRange<int64_t>& range)
+{
+    return input(is, range);
+}
+#endif
+
+
+Foam::Ostream& Foam::operator<<(Ostream& os, const IntRange<int32_t>& range)
+{
+    return output(os, range);
+}
+
+
+Foam::Ostream& Foam::operator<<(Ostream& os, const IntRange<int64_t>& range)
+{
+    return output(os, range);
 }
 
 

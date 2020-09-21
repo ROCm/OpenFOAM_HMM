@@ -180,6 +180,7 @@ $(sha1)/SHA1Digest.C
 primitives/random/Random/Random.C
 
 ranges = primitives/ranges
+$(ranges)/IntRange/IntRanges.C
 $(ranges)/labelRange/labelRange.C
 $(ranges)/labelRange/labelRanges.C
 $(ranges)/scalarRange/scalarRange.C

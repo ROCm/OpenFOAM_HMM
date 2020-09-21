@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,6 +35,19 @@ Description
 
 using namespace Foam;
 
+void printInfo(const labelRange& range)
+{
+    Info<< "first   " << range.first() << nl
+        << "last    " << range.last() << nl
+        << "min     " << range.min() << nl
+        << "max     " << range.max() << nl
+        << "after   " << range.after() << nl
+        << "begin end " << *range.cbegin() << ' ' << *range.cend() << nl;
+
+    // Info<< "rbegin rend " << *range.rbegin() << ' ' << *range.rend() << nl;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //  Main program:
 
@@ -61,9 +74,9 @@ int main(int argc, char *argv[])
         Info<<"test sorting" << endl;
         DynamicList<labelRange> list1(10);
         list1.append(labelRange(25, 8));
-        list1.append(labelRange::identity(8));
+        list1.append(labelRange(8));
         list1.append(labelRange(15, 5));
-        list1.append(labelRange(50, -10));
+        list1.append(labelRange(50, -10, true));
 
         sort(list1);
         Info<<"sorted" << list1 << endl;
@@ -149,19 +162,13 @@ int main(int argc, char *argv[])
         range.reset(5, 5);
         Info<< nl << "Tests on " << range << nl;
 
-        Info<< "first   " << range.first() << nl
-            << "last    " << range.last() << nl
-            << "min     " << range.min() << nl
-            << "max     " << range.max() << nl
-            << "after   " << range.after() << nl
-            << "*begin  " << *range.begin() << nl
-            << "*end    " << *range.end() << nl;
+        printInfo(range);
 
         range += 3;
         Info<< "increase size " << range << nl;
 
         range -= 3;  // Probably not a great idea
-        Info<< "decrese size " << range << nl;
+        Info<< "decrease size " << range << nl;
 
         auto iter = range.begin();
 
@@ -172,6 +179,13 @@ int main(int argc, char *argv[])
 
         iter += 3;
         Info<< "iter: " << *iter << nl;
+
+        Info<< nl << "reversed:" << nl;
+        forAllConstReverseIters(range, iter)
+        {
+            Info<< ' ' << *iter;
+        }
+        Info<< nl;
     }
 
 

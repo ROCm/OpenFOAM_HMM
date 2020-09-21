@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,7 @@ SourceFiles
     sliceRangeI.H
 
 \*---------------------------------------------------------------------------*/
+
 #ifndef sliceRange_H
 #define sliceRange_H
 
@@ -46,6 +47,7 @@ namespace Foam
 {
 
 // Forward Declarations
+class Istream;
 class Ostream;
 template<class T> class List;
 template<class T, unsigned N> class FixedList;
@@ -60,13 +62,13 @@ protected:
 
     // Protected Data
 
-        //- The start point for the interval
+        //- The start of the interval
         label start_;
 
         //- The length of the interval
         label size_;
 
-        //- The stride within the interval
+        //- The stride for the interval
         label stride_;
 
 
@@ -80,45 +82,39 @@ public:
         //- The type that can represent the size of the range
         typedef label size_type;
 
-        //- Forward iterator with const access
+        //- Input iterator with const access
         class const_iterator;
+
+        //- Reverse input iterator with const access
+        class const_reverse_iterator;
+
+
+    // Generated Methods: copy/move construct, copy/move assignment
 
 
     // Constructors
 
-        //- Default copy construct
-        sliceRange(const sliceRange&) = default;
-
-        //- Default move construct
-        sliceRange(sliceRange&&) = default;
-
-        //- An empty slice (0,0,0)
+        //- Default construct an empty slice (0,0,0)
         inline constexpr sliceRange() noexcept;
 
-        //- Construct slice from start/size/stride,
-        //- enforcing non-negative size and stride.
-        inline sliceRange(label start, label size, label stride) noexcept;
+        //- Construct slice from start/size/stride, no checks
+        inline constexpr sliceRange
+        (
+            const label beg,
+            const label len,
+            const label stride
+        ) noexcept;
 
         //- Construct slice from start/size/stride coefficients,
-        //- enforcing non-negative size and stride.
+        //- enforce non-negative size and stride.
         explicit sliceRange(const FixedList<label,3>& coeffs);
 
 
     // Member Functions
 
-        //- Is the range empty?
-        bool empty() const noexcept
-        {
-            return !size_;
-        }
+    // Access
 
-        //- Is the range non-empty?
-        bool valid() const noexcept
-        {
-            return size_;
-        }
-
-        //- The (inclusive) lower value of the range
+        //- The first/start value in the range (inclusive)
         constexpr label start() const noexcept
         {
             return start_;
@@ -136,7 +132,13 @@ public:
             return stride_;
         }
 
-        //- The (inclusive) lower value of the range - same as start()
+        //- True if range is empty (zero-sized)
+        bool empty() const noexcept
+        {
+            return !size_;
+        }
+
+        //- The first/start value in the range (inclusive)
         constexpr label first() const noexcept
         {
             return start_;
@@ -148,20 +150,61 @@ public:
             return start_ + (size_-1) * stride_;
         }
 
-        //- Return the slice as a list of labels
+        //- Return list of labels corresponding to the slice
         List<label> labels() const;
 
 
     // Member Operators
 
-        //- Default copy assignment
-        sliceRange& operator=(const sliceRange&) = default;
-
-        //- Default move assignment
-        sliceRange& operator=(sliceRange&&) = default;
-
         //- Return element in the range, without bounds checking
-        inline label operator[](const label i) const noexcept;
+        label operator[](const label i) const noexcept
+        {
+            return start_ + i * stride_;
+        }
+
+        //- True if range is non-empty
+        explicit operator bool() const noexcept { return bool(size_); }
+
+
+    // Iteration / Generation
+
+        //- A value indexer, for iteration or generation
+        class indexer;
+
+        //- Return a forward values generator
+        inline indexer generator() const;
+
+        //- Return const_iterator to a position within the range,
+        //- with bounds checking.
+        //  \return iterator at the requested position, or end() for
+        //      out of bounds
+        inline const_iterator at(const label i) const;
+
+        //- A const_iterator set to the beginning of the range
+        //  The value returned is guaranteed to be the same as start()
+        inline const_iterator begin() const;
+
+        //- A const_iterator set to the beginning of the range
+        //  The value returned is guaranteed to be the same as start()
+        inline const_iterator cbegin() const;
+
+        //- A const_iterator set to 1 beyond the end of the range.
+        inline const_iterator cend() const;
+
+        //- A const_iterator set to 1 beyond the end of the range.
+        inline const_iterator end() const;
+
+        //- A const_reverse_iterator set to 1 before the end of range
+        inline const_reverse_iterator rbegin() const;
+
+        //- A const_reverse_iterator set to 1 before the end of range
+        inline const_reverse_iterator crbegin() const;
+
+        //- A const_reverse_iterator set to 1 before the begin of range
+        inline const_reverse_iterator rend() const;
+
+        //- A const_reverse_iterator set to 1 before the begin of range
+        inline const_reverse_iterator crend() const;
 
 
     // Iterators
@@ -177,30 +220,51 @@ public:
 
         public:
 
+            // STL definitions (as per std::iterator)
+            typedef label value_type;
+            typedef label difference_type;
+            typedef const label* pointer;
+            typedef label reference;
+
+
         // Constructors
 
-            //- Construct from range at given local index.
-            //  An out-of-range index (eg, negative) creates an 'end' iterator
-            inline indexer(const sliceRange* range, const label i=0);
+            //- Default construct with zero value and stride = 1
+            inline constexpr indexer() noexcept;
+
+            //- Construct with specified value and stride,
+            inline constexpr indexer
+            (
+                const label val,
+                const label stride
+            ) noexcept;
 
 
         // Member Functions
 
-            //- Forward increment, no checking
-            inline void next() noexcept;
+            //- Decrement value
+            void prev() noexcept { value_ -= stride_; }
 
-            //- Forward increment, no checking
-            inline void next(const label n) noexcept;
+            //- Decrease value
+            void prev(const label n) noexcept { value_ -= (n * stride_); }
 
-            //- Test for equality of values, not stride
-            inline bool equals(const indexer& other) const noexcept;
+            //- Increment value
+            void next() noexcept { value_ += stride_; }
 
-        public:
+            //- Increase value
+            void next(const label n) noexcept { value_ += (n * stride_); }
+
+            //- Test for equality of values, ignore stride
+            constexpr bool equals(const indexer& other) const noexcept
+            {
+                return (value_ == other.value_);
+            }
+
 
         // Member Operators
 
             //- Return the value
-            inline label operator*() const noexcept;
+            constexpr label operator*() const noexcept { return value_; }
 
             //- Apply a postfix increment and return the current value.
             //  This operator definition is required for a generator -
@@ -209,89 +273,116 @@ public:
         };
 
 
-        //- Forward iterator with const access
+        //- Bidirectional input iterator with const access
         class const_iterator
         :
-            protected indexer,
-            public std::iterator
-            <
-                std::input_iterator_tag,
-                label,
-                label,
-                const label*,
-                const label&
-            >
+            public indexer
         {
         public:
 
+            // STL definitions (as per std::iterator)
+            typedef std::bidirectional_iterator_tag iterator_category;
+
+
         // Constructors
 
-            //- Construct from range at given local index.
-            //  An out-of-range index (eg, negative) creates an 'end' iterator
-            inline const_iterator(const sliceRange* range, const label i=0);
+            //- Inherit constructors from indexer
+            using indexer::indexer;
 
 
         // Member Operators
 
-            //- Return the (global) value
-            using indexer::operator*;
-
-            //- Prefix increment, no checking
+            //- Prefix increment
             inline const_iterator& operator++() noexcept;
 
-            //- Arbitrary increment, no checking
+            //- Arbitrary increment
             inline const_iterator& operator+=(const label n) noexcept;
 
-            //- Prefix decrement, no checking
+            //- Prefix decrement
             inline const_iterator& operator--() noexcept;
 
-            //- Arbitrary decrement, no checking
+            //- Arbitrary decrement
             inline const_iterator& operator-=(const label n) noexcept;
 
-            //- Test for equality of values, not stride
-            inline bool operator==(const const_iterator& iter) const noexcept;
+            //- Test for equality of values, ignore stride
+            constexpr bool operator==(const const_iterator& iter) const noexcept
+            {
+                return equals(iter);
+            }
 
-            //- Test for inequality of values, not stride
-            inline bool operator!=(const const_iterator& iter) const noexcept;
+            //- Test for inequality of values, ignore stride
+            constexpr bool operator!=(const const_iterator& iter) const noexcept
+            {
+                return !equals(iter);
+            }
         };
 
 
-        //- A const_iterator set to the beginning of the range
-        //  The value returned is guaranteed to be the same as start()
-        inline const_iterator begin() const;
+        //- Bidirectional reverse input iterator with const access
+        class const_reverse_iterator
+        :
+            public indexer
+        {
+        public:
 
-        //- A const_iterator set to the beginning of the range
-        //  The value returned is guaranteed to be the same as start()
-        inline const_iterator cbegin() const;
+            // STL definitions (as per std::iterator)
+            typedef std::bidirectional_iterator_tag iterator_category;
 
-        //- A const_iterator set to 1 beyond the end of the range.
-        //  The value returned is the same as after()
-        inline const const_iterator cend() const;
 
-        //- A const_iterator set to 1 beyond the end of the range.
-        //  The value returned is the same as after()
-        inline const const_iterator end() const;
+        // Constructors
 
-        //- Return a forward values generator
-        inline indexer generator() const;
+            //- Inherit constructors from indexer
+            using indexer::indexer;
 
-        //- Return const_iterator to a position within the range,
-        //- with bounds checking.
-        //  \return iterator at the requested position, or end() for
-        //      out of bounds
-        inline const_iterator at(const label i) const;
+
+        // Member Operators
+
+            //- Prefix increment
+            inline const_reverse_iterator& operator++() noexcept;
+
+            //- Arbitrary increment
+            inline const_reverse_iterator& operator+=(const label n) noexcept;
+
+            //- Prefix decrement
+            inline const_reverse_iterator& operator--() noexcept;
+
+            //- Arbitrary decrement
+            inline const_reverse_iterator& operator-=(const label n) noexcept;
+
+            //- Test for equality of values (not stride)
+            constexpr bool operator==(const const_reverse_iterator& iter)
+            const noexcept
+            {
+                return equals(iter);
+            }
+
+            //- Test for inequality of values (not stride)
+            constexpr bool operator!=(const const_reverse_iterator& iter)
+            const noexcept
+            {
+                return !equals(iter);
+            }
+        };
 };
 
 
-// IOstream Operators
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+//- Read sliceRange from Istream as (start size stride) tuple, no checks
+Istream& operator>>(Istream& is, sliceRange& range);
 
 //- Write sliceRange to Ostream as (start size stride) tuple
 Ostream& operator<<(Ostream& os, const sliceRange& range);
 
 
-// Global Operators
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
-inline bool operator==(const sliceRange& a, const sliceRange& b) noexcept
+//- Test for equality of begin/size/slice values
+inline constexpr bool operator==
+(
+    const sliceRange& a,
+    const sliceRange& b
+) noexcept
 {
     return
     (
@@ -302,16 +393,14 @@ inline bool operator==(const sliceRange& a, const sliceRange& b) noexcept
 }
 
 
-inline bool operator!=(const sliceRange& a, const sliceRange& b) noexcept
-{
-    return !(a == b);
-}
-
-
 //- Comparison function for sorting, compares the start.
-//  If the start values are equal, also compares the size.
-//  If the sizes are equal, also compares the stride.
-inline bool operator<(const sliceRange& a, const sliceRange& b) noexcept
+//  If the start values are equal, compare the sizes.
+//  If the sizes are also equal, compare the strides.
+inline constexpr bool operator<
+(
+    const sliceRange& a,
+    const sliceRange& b
+) noexcept
 {
     return
     (
@@ -330,7 +419,46 @@ inline bool operator<(const sliceRange& a, const sliceRange& b) noexcept
             )
         )
     );
+}
 
+
+// Derived comparisons
+
+inline constexpr bool operator!=
+(
+    const sliceRange& a,
+    const sliceRange& b
+) noexcept
+{
+    return !(a == b);
+}
+
+
+inline constexpr bool operator<=
+(
+    const sliceRange& a,
+    const sliceRange& b
+) noexcept
+{
+    return !(b < a);
+}
+
+inline constexpr bool operator>
+(
+    const sliceRange& a,
+    const sliceRange& b
+) noexcept
+{
+    return (b < a);
+}
+
+inline constexpr bool operator>=
+(
+    const sliceRange& a,
+    const sliceRange& b
+) noexcept
+{
+    return !(a < b);
 }
 
 

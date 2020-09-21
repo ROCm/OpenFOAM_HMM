@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -269,15 +269,11 @@ int main(int argc, char *argv[])
 
         labelList longLabelList = identity(15);
 
-        // This does not work:
+        // This will not work:
         // scalarList slist = identity(15);
         //
         // More writing, but does work:
-        scalarList slist
-        (
-            labelRange::null.begin(),
-            labelRange::identity(15).end()
-        );
+        scalarList slist(labelRange().begin(), labelRange(15).end());
 
         Info<<"scalar identity:" << flatOutput(slist) << endl;
 
@@ -388,7 +384,7 @@ int main(int argc, char *argv[])
         }
         Info<< "sub-sorted: " << flatOutput(longLabelList) << nl;
 
-        // construct from a label-range
+        // Construct from a label-range
         labelRange range(25,15);
 
         labelList ident(range.begin(), range.end());
@@ -408,11 +404,7 @@ int main(int argc, char *argv[])
         // Info<<"range-list (vector)=" << vident << nl;
 
         // Even weird things like this
-        List<scalar> sident4
-        (
-            labelRange().begin(),
-            labelRange::identity(8).end()
-        );
+        List<scalar> sident4(labelRange().begin(), labelRange(8).end());
         Info<<"range-list (scalar)=" << sident4 << nl;
     }
 
@@ -472,8 +464,8 @@ int main(int argc, char *argv[])
         {
             auto scalars = ListOps::create<scalar>
             (
-                labelRange::null.cbegin(),
-                labelRange::identity(15).cend(),
+                labelRange().cbegin(),
+                labelRange(15).cend(),
                 [](const label& val){ return scalar(-1.125*val); }
             );
             Info<< "scalars: " << flatOutput(scalars) << endl;

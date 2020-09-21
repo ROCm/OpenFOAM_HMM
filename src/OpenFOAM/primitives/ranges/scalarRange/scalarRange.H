@@ -92,8 +92,8 @@ class scalarRange
         //- The type of range test
         enum testType type_;
 
-        //- Construct from components without sanity checking
-        inline scalarRange
+        //- Construct from components, no checks
+        inline constexpr scalarRange
         (
             const testType type,
             const scalar minVal,
@@ -111,22 +111,20 @@ public:
 
     // Static Data Members
 
-        //- An empty/inverted range that never matches
-        static const scalarRange null;
-
         //- A range that always matches
         static const scalarRange always;
 
 
     // Constructors
 
-        //- Construct an empty (inverse) range
-        inline scalarRange() noexcept;
+        //- Construct an empty (inverse, NONE) range - never matches
+        inline constexpr scalarRange() noexcept;
 
         //- Construct an exact value matcher
-        inline explicit scalarRange(const scalar value) noexcept;
+        inline explicit constexpr scalarRange(const scalar val) noexcept;
 
         //- Construct a range from min-value to max-value
+        //  Check validity of the range and sets to NONE or EQ if required.
         inline scalarRange(const scalar minVal, const scalar maxVal) noexcept;
 
         //- Copy construct from a min/max range.
@@ -157,34 +155,34 @@ public:
         static scalarRange parse(const std::string& str);
 
 
-        //- Construct a greater-equals bound
-        inline static scalarRange ge(const scalar minVal) noexcept;
+        //- A greater-equals bound
+        inline static constexpr scalarRange ge(const scalar minVal) noexcept;
 
-        //- Construct a greater-than bound
-        inline static scalarRange gt(const scalar minVal) noexcept;
+        //- A greater-than bound
+        inline static constexpr scalarRange gt(const scalar minVal) noexcept;
 
-        //- Construct a greater-equals zero bound
-        inline static scalarRange ge0() noexcept;
+        //- A greater-equals zero bound
+        inline static constexpr scalarRange ge0() noexcept;
 
-        //- Construct a greater-than zero bound
-        inline static scalarRange gt0() noexcept;
+        //- A greater-than zero bound
+        inline static constexpr scalarRange gt0() noexcept;
 
-        //- Construct a less-equals bound
-        inline static scalarRange le(const scalar maxVal) noexcept;
+        //- A less-equals bound
+        inline static constexpr scalarRange le(const scalar maxVal) noexcept;
 
-        //- Construct a less-than bound
-        inline static scalarRange lt(const scalar maxVal) noexcept;
+        //- A less-than bound
+        inline static constexpr scalarRange lt(const scalar maxVal) noexcept;
 
-        //- Construct a greater-equals 0, less-equals 1 bound
-        inline static scalarRange zero_one() noexcept;
+        //- A greater-equals 0, less-equals 1 bound
+        inline static constexpr scalarRange zero_one() noexcept;
 
 
     // Member Functions
 
-        //- Reset to an empty (inverse) range.
+        //- Reset to an empty (inverse, NONE) range.
         inline void clear() noexcept;
 
-        //- True if range is empty (eg, inverted)
+        //- True if range is empty (eg, inverted, NONE)
         inline bool empty() const noexcept;
 
         //- True if range is non-empty.
@@ -212,8 +210,8 @@ public:
         //- Identical to match(), for use as a predicate.
         inline bool operator()(const scalar& val) const;
 
-        inline bool operator==(const scalarRange& rhs) const noexcept;
-        inline bool operator!=(const scalarRange& rhs) const noexcept;
+        inline constexpr bool operator==(const scalarRange& rhs) const noexcept;
+        inline constexpr bool operator!=(const scalarRange& rhs) const noexcept;
 
 
     // IOstream Operators

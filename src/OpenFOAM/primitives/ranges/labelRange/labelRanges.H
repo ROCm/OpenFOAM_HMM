@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,11 +46,9 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class Istream;
 class Ostream;
-
-// Forward declaration of friend functions and operators
 class labelRanges;
 Istream& operator>>(Istream& is, labelRanges& ranges);
 Ostream& operator<<(Ostream& is, const labelRanges& ranges);
@@ -61,11 +59,11 @@ Ostream& operator<<(Ostream& is, const labelRanges& ranges);
 
 class labelRanges
 :
-    private DynamicList<labelRange>
+    private Foam::DynamicList<Foam::labelRange>
 {
-    // Private typedefs for convenience
+    // Private Typedefs
 
-        typedef DynamicList<labelRange> StorageContainer;
+        typedef Foam::DynamicList<Foam::labelRange> StorageContainer;
 
 
     // Private Member Functions
@@ -76,16 +74,18 @@ class labelRanges
         //- Purge empty ranges, by copying down
         void purgeEmpty();
 
-        //- Print the range for debugging purposes
-        Ostream& printRange(Ostream& os, const labelRange& range) const;
-
-
 public:
+
+    // STL type definitions
+
+        //- Input iterator with const access
+        class const_iterator;
+
 
     // Constructors
 
-        //- Construct null
-        inline labelRanges();
+        //- Default construct
+        labelRanges() = default;
 
         //- Construct given size
         inline explicit labelRanges(const label nElem);
@@ -114,40 +114,43 @@ public:
 
     // STL iterator
 
-        //- An STL const_iterator
+        //- Forward input iterator with const access
         class const_iterator
         {
-            friend class labelRanges;
-
-          // Private data
-
-            //- Reference to the list for which this is an iterator
+            //- The list for which this is an iterator
             const labelRanges* list_;
 
-            //- Current list-index
+            //- The index into the list
             label index_;
 
             //- Index of current element at list-index
             label subIndex_;
 
-          // Constructors
-
-            //- Construct from ranges at given index.
-            //  A negative index signals the 'end' position
-            inline const_iterator(const labelRanges* lst, const label i);
-
         public:
 
-          // Member operators
+        // Constructors
 
-            inline bool operator==(const const_iterator& iter) const;
-            inline bool operator!=(const const_iterator& iter) const;
+            //- Construct from range list at given index
+            inline explicit constexpr const_iterator
+            (
+                const labelRanges* list,
+                const label i = 0
+            ) noexcept;
+
+
+        // Member Operators
 
             //- Return the current label
-            inline label operator*();
+            inline label operator*() const;
 
             inline const_iterator& operator++();
             inline const_iterator operator++(int);
+
+            inline constexpr bool operator==(const const_iterator& iter)
+            const noexcept;
+
+            inline constexpr bool operator!=(const const_iterator& iter)
+            const noexcept;
         };
 
 
@@ -168,7 +171,6 @@ public:
 
         friend Istream& operator>>(Istream& is, labelRanges& ranges);
         friend Ostream& operator<<(Ostream& os, const labelRanges& ranges);
-
 };
 
 

@@ -130,8 +130,23 @@ int main(int argc, char *argv[])
 
         for (label i=0; i < 10; ++i)
         {
-            Info<< "    " << gen() << nl;
+            Info<< ' ' << gen();
         }
+        Info<< " ... " << nl;
+
+        Info<< nl << "range-for:" << nl;
+        for (const auto& val : range)
+        {
+            Info<< ' ' << val;
+        }
+        Info<< nl;
+
+        Info<< nl << "reversed:" << nl;
+        forAllConstReverseIters(range, iter)
+        {
+            Info<< ' ' << *iter;
+        }
+        Info<< nl;
     }
 
     // Sliced lists

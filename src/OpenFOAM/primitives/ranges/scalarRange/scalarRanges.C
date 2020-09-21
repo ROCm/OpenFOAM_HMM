@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,7 +33,7 @@ License
 Foam::scalarRanges Foam::scalarRanges::parse
 (
     const std::string& str,
-    bool verbose
+    bool report
 )
 {
     const SubStrings<std::string> items = stringOps::splitAny(str, " ,;");
@@ -44,7 +44,7 @@ Foam::scalarRanges Foam::scalarRanges::parse
 
     for (const auto& item : items)
     {
-        const std::string s = item.str();
+        const std::string s(item.str());
 
         scalarRange& range = ranges[n];
 
@@ -52,9 +52,9 @@ Foam::scalarRanges Foam::scalarRanges::parse
         {
             ++n;
         }
-        else if (verbose)
+        else if (report)
         {
-            Info<< "Bad scalar-range while parsing: " << s << endl;
+            Info<< "Bad scalar-range parsing: " << s << endl;
         }
     }
 

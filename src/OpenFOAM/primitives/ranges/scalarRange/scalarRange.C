@@ -33,8 +33,6 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::scalarRange Foam::scalarRange::null;
-
 const Foam::scalarRange Foam::scalarRange::always
 (
     scalarRange::ALWAYS,
@@ -56,8 +54,8 @@ bool Foam::scalarRange::parse(const std::string& str, scalarRange& range)
         // No colon
 
         // Use Switch to accept none/true/false.
-        // Do not accept shorter ones though (f|n|t|y) or (on|off|yes|no)
-        // since these are not really appropriate here.
+        // Others like (f|n|t|y) and (on|off|yes|no) are not really
+        // appropriate, but don't worry about that now.
 
         if (str.size() >= 4)
         {
@@ -81,9 +79,9 @@ bool Foam::scalarRange::parse(const std::string& str, scalarRange& range)
             range = scalarRange(val);
         }
     }
-    else if (str.find(':', colon+1) != std::string::npos)
+    else if (str[colon+1] == ':')
     {
-        // A second colon is a syntax error
+        // A double colon ("::") is a syntax error
         return false;
     }
     else if (colon == 0)

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,28 +39,24 @@ namespace Foam
     int labelRange::debug(debug::debugSwitch("labelRange", 0));
 }
 
-const Foam::labelRange Foam::labelRange::null;
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::labelRange::labelRange(const MinMax<label>& range) noexcept
 :
-    start_(0),
-    size_(0)
+    labelRange()
 {
     if (range.min() < range.max())
     {
-        start_ = range.min();
-        size_  = (range.max() - range.min()); // Hope for no overflow?
+        start() = range.min();
+        size()  = (range.max() - range.min()); // Hope for no overflow?
     }
 }
 
 
 Foam::labelRange::labelRange(Istream& is)
 :
-    start_(0),
-    size_(0)
+    labelRange()
 {
     is  >> *this;
 }
@@ -70,13 +66,13 @@ Foam::labelRange::labelRange(Istream& is)
 
 Foam::List<Foam::label> Foam::labelRange::labels() const
 {
-    if (size_ <= 0)
+    if (size() <= 0)
     {
         return List<label>();
     }
 
-    List<label> result(size_);
-    std::iota(result.begin(), result.end(), start_);
+    List<label> result(this->size());
+    std::iota(result.begin(), result.end(), this->start());
 
     return result;
 }
@@ -84,18 +80,16 @@ Foam::List<Foam::label> Foam::labelRange::labels() const
 
 void Foam::labelRange::adjust() noexcept
 {
-    if (start_ < 0)
+    if (this->start() < 0)
     {
-        if (size_ > 0)  // Second check needed to avoid (negative) overflow
+        if (this->size() > 0)
         {
-            size_ += start_;
+            // Decrease size accordingly
+            this->size() += this->start();
         }
-        start_ = 0;
+        this->start() = 0;
     }
-    if (size_ < 0)
-    {
-        size_ = 0;  // No negative sizes
-    }
+    clampSize();
 }
 
 
@@ -125,7 +119,7 @@ bool Foam::labelRange::overlaps(const labelRange& range, bool touches) const
 Foam::labelRange Foam::labelRange::join(const labelRange& range) const
 {
     // Trivial cases first
-    if (!size_)
+    if (!this->size())
     {
         return *this;
     }
@@ -140,7 +134,10 @@ Foam::labelRange Foam::labelRange::join(const labelRange& range) const
     // last = start+size-1
     // size = last+1-start
 
-    return labelRange(lower, total);
+    labelRange newRange(lower, total);
+    newRange.clampSize();
+
+    return newRange;
 }
 
 
@@ -203,16 +200,9 @@ Foam::labelRange Foam::labelRange::subset0(const label size) const
 
 Foam::Istream& Foam::operator>>(Istream& is, labelRange& range)
 {
-    label start, size;
-
     is.readBegin("labelRange");
-    is >> start >> size;
+    is >> range.start() >> range.size();
     is.readEnd("labelRange");
-
-    if (size < 0) size = 0;  // No negative sizes
-
-    range.setStart(start);
-    range.setSize(size);
 
     is.check(FUNCTION_NAME);
     return is;

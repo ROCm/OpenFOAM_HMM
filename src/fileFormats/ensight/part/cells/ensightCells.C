@@ -236,7 +236,7 @@ void Foam::ensightCells::classifyImpl
 void Foam::ensightCells::classify(const polyMesh& mesh)
 {
     // All mesh cells
-    classifyImpl(mesh, labelRange::identity(mesh.nCells()));
+    classifyImpl(mesh, labelRange(mesh.nCells()));
 }
 
 

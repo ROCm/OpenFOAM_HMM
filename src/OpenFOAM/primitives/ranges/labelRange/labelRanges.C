@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,29 @@ License
 #include "labelRanges.H"
 #include "ListOps.H"
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+    // Print range for debugging purposes
+    static Ostream& printRange(Ostream& os, const labelRange& range)
+    {
+        if (range.empty())
+        {
+            os  << "empty";
+        }
+        else
+        {
+            os  << range << " = " << range.first() << ":" << range.last();
+        }
+        return os;
+    }
+
+} // End namespace Foam
+
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::labelRanges::insertBefore
@@ -37,79 +60,66 @@ void Foam::labelRanges::insertBefore
     const labelRange& range
 )
 {
-    // insert via copying up
-    label nElem = this->size();
+    auto& list = static_cast<StorageContainer&>(*this);
+
+    // Insert via copying up
+    label nElem = list.size();
 
     if (labelRange::debug)
     {
-        Info<<"before insert "
+        Info<< "before insert "
             << nElem << " elements, insert at " << insert << nl
-            << *this << endl;
+            << list << endl;
     }
 
-    StorageContainer::setSize(nElem+1);
+    list.resize(nElem+1);
 
     if (labelRange::debug)
     {
-        Info<<"copy between " << nElem << " and " << insert << nl;
+        Info<< "copy between " << nElem << " and " << insert << nl;
     }
 
     for (label i = nElem-1; i >= insert; --i)
     {
         if (labelRange::debug)
         {
-            Info<<"copy from " << (i) << " to " << (i+1) << nl;
+            Info<< "copy from " << (i) << " to " << (i+1) << nl;
         }
 
-        StorageContainer::operator[](i+1) = StorageContainer::operator[](i);
+        list[i+1] = list[i];
     }
 
-    // finally insert the range
+    // Finally insert the range
     if (labelRange::debug)
     {
         Info<< "finally insert the range at " << insert << nl;
     }
-    StorageContainer::operator[](insert) = range;
+
+    list[insert] = range;
 }
 
 
 void Foam::labelRanges::purgeEmpty()
 {
-    // purge empty ranges by copying down
+    auto& list = static_cast<StorageContainer&>(*this);
+
+    // Purge empty ranges by copying down
     label nElem = 0;
-    forAll(*this, elemI)
+
+    forAll(list, elemi)
     {
-        if (!StorageContainer::operator[](elemI).empty())
+        if (!list[elemi].empty())
         {
-            if (nElem != elemI)
+            if (nElem != elemi)
             {
-                StorageContainer::operator[](nElem) =
-                    StorageContainer::operator[](elemI);
+                list[nElem] = list[elemi];
             }
             ++nElem;
         }
     }
 
-    // truncate
-    this->StorageContainer::setSize(nElem);
-}
-
-
-Foam::Ostream& Foam::labelRanges::printRange
-(
-    Ostream& os,
-    const labelRange& range
-) const
-{
-    if (range.empty())
-    {
-        os  << "empty";
-    }
-    else
-    {
-        os  << range << " = " << range.first() << ":" << range.last();
-    }
-    return os;
+    // Truncate
+    list.resize(nElem);
 }
 
 
@@ -135,20 +145,22 @@ bool Foam::labelRanges::add(const labelRange& range)
         return true;
     }
 
-    // find the correct place for insertion
-    forAll(*this, elemI)
+    auto& list = static_cast<StorageContainer&>(*this);
+
+    // Find the correct place for insertion
+    forAll(list, elemi)
     {
-        labelRange& currRange = StorageContainer::operator[](elemI);
+        labelRange& currRange = list[elemi];
 
         if (currRange.overlaps(range, true))
         {
             // absorb into the existing (adjacent/overlapping) range
             currRange.join(range);
 
-            // might connect with the next following range(s)
-            for (; elemI < this->size()-1; ++elemI)
+            // Might connect with the next following range(s)
+            for (; elemi < this->size()-1; ++elemi)
             {
-                labelRange& nextRange = StorageContainer::operator[](elemI+1);
+                labelRange& nextRange = list[elemi+1];
                 if (currRange.overlaps(nextRange, true))
                 {
                     currRange.join(nextRange);
@@ -160,14 +172,14 @@ bool Foam::labelRanges::add(const labelRange& range)
                 }
             }
 
-            // done - remove any empty ranges that might have been created
+            // Done - remove any empty ranges that might have been created
             purgeEmpty();
             return true;
             break;
         }
         else if (range < currRange)
         {
-            insertBefore(elemI, range);
+            insertBefore(elemi, range);
             return true;
             break;
         }
@@ -189,19 +201,21 @@ bool Foam::labelRanges::remove(const labelRange& range)
         return status;
     }
 
-    forAll(*this, elemI)
+    auto& list = static_cast<StorageContainer&>(*this);
+
+    forAll(list, elemi)
     {
-        labelRange& currRange = StorageContainer::operator[](elemI);
+        labelRange& currRange = list[elemi];
 
         if (range.first() > currRange.first())
         {
             if (range.last() < currRange.last())
             {
-                // removal of range fragments of currRange
+                // Removal of range fragments of currRange
 
                 if (labelRange::debug)
                 {
-                    Info<<"Fragment removal ";
+                    Info<< "Fragment removal ";
                     printRange(Info, range) << " from ";
                     printRange(Info, currRange) << endl;
                 }
@@ -216,15 +230,16 @@ bool Foam::labelRanges::remove(const labelRange& range)
                 lower = range.last() + 1;
                 upper = currRange.last();
 
-                currRange = labelRange(lower, upper - lower + 1);
+                currRange.reset(lower, upper - lower + 1);
+                currRange.clampSize();
                 status = true;
-                insertBefore(elemI, fragment);
+                insertBefore(elemi, fragment);
 
                 if (labelRange::debug)
                 {
-                    Info<<"fragment ";
+                    Info<< "fragment ";
                     printRange(Info, fragment) << endl;
-                    Info<<"yields ";
+                    Info<< "yields ";
                     printRange(Info, currRange) << endl;
                 }
 
@@ -238,7 +253,7 @@ bool Foam::labelRanges::remove(const labelRange& range)
 
                 if (labelRange::debug)
                 {
-                    Info<<"RHS removal ";
+                    Info<< "RHS removal ";
                     printRange(Info, range) << " from ";
                     printRange(Info, currRange) << endl;
                 }
@@ -246,12 +261,13 @@ bool Foam::labelRanges::remove(const labelRange& range)
                 const label lower = currRange.first();
                 const label upper = range.first() - 1;
 
-                currRange = labelRange(lower, upper - lower + 1);
+                currRange.reset(lower, upper - lower + 1);
+                currRange.clampSize();
                 status = true;
 
                 if (labelRange::debug)
                 {
-                    Info<<"yields ";
+                    Info<< "yields ";
                     printRange(Info, currRange) << endl;
                 }
             }
@@ -264,7 +280,7 @@ bool Foam::labelRanges::remove(const labelRange& range)
 
                 if (labelRange::debug)
                 {
-                    Info<<"LHS removal ";
+                    Info<< "LHS removal ";
                     printRange(Info, range) << " from ";
                     printRange(Info, currRange) << endl;
                 }
@@ -272,12 +288,13 @@ bool Foam::labelRanges::remove(const labelRange& range)
                 const label lower = range.last() + 1;
                 const label upper = currRange.last();
 
-                currRange = labelRange(lower, upper - lower + 1);
+                currRange.reset(lower, upper - lower + 1);
+                currRange.clampSize();
                 status = true;
 
                 if (labelRange::debug)
                 {
-                    Info<<"yields ";
+                    Info<< "yields ";
                     printRange(Info, currRange) << endl;
                 }
             }

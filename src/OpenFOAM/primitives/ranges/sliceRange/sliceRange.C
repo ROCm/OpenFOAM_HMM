@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,12 +50,10 @@ Foam::List<Foam::label> Foam::sliceRange::labels() const
     if (stride_)
     {
         std::copy(cbegin(), cend(), result.begin());
-
-        // Or even this
-        // std::generate(result.begin(), result.end(), generator());
     }
     else
     {
+        // stride = 0 (identical values!)
         std::fill(result.begin(), result.end(), start_);
     }
 
@@ -64,6 +62,21 @@ Foam::List<Foam::label> Foam::sliceRange::labels() const
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+Foam::Istream& Foam::operator>>(Istream& is, sliceRange& range)
+{
+    label beg, len, stride;
+
+    is.readBegin("sliceRange");
+    is >> beg >> len >> stride;
+    is.readEnd("sliceRange");
+
+    range = sliceRange(beg, len, stride);
+
+    is.check(FUNCTION_NAME);
+    return is;
+}
+
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const sliceRange& range)
 {

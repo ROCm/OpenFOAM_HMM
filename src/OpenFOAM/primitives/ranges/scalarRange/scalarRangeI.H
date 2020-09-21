@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::scalarRange::scalarRange
+inline constexpr Foam::scalarRange::scalarRange
 (
     const scalarRange::testType type,
     const scalar minVal,
@@ -40,15 +40,15 @@ inline Foam::scalarRange::scalarRange
 {}
 
 
-inline Foam::scalarRange::scalarRange() noexcept
+inline constexpr Foam::scalarRange::scalarRange() noexcept
 :
     scalarRange(scalarRange::NONE, GREAT, -GREAT)
 {}
 
 
-inline Foam::scalarRange::scalarRange(const scalar value) noexcept
+inline constexpr Foam::scalarRange::scalarRange(const scalar val) noexcept
 :
-    scalarRange(scalarRange::EQ, value, value)
+    scalarRange(scalarRange::EQ, val, val)
 {}
 
 
@@ -66,47 +66,54 @@ inline Foam::scalarRange::scalarRange
     }
     else if (equal(minVal, maxVal))
     {
-        type_ = EQ;
+        type_ = scalarRange::EQ;
     }
 }
 
 
-inline Foam::scalarRange Foam::scalarRange::ge(const scalar minVal) noexcept
+inline constexpr Foam::scalarRange
+Foam::scalarRange::ge(const scalar minVal) noexcept
 {
     return scalarRange(scalarRange::GE, minVal, GREAT);
 }
 
 
-inline Foam::scalarRange Foam::scalarRange::gt(const scalar minVal) noexcept
+inline constexpr Foam::scalarRange
+Foam::scalarRange::gt(const scalar minVal) noexcept
 {
     return scalarRange(scalarRange::GT, minVal, GREAT);
 }
 
 
-inline Foam::scalarRange Foam::scalarRange::ge0() noexcept
+inline constexpr Foam::scalarRange
+Foam::scalarRange::ge0() noexcept
 {
     return scalarRange(scalarRange::GE, 0, GREAT);
 }
 
 
-inline Foam::scalarRange Foam::scalarRange::gt0() noexcept
+inline constexpr Foam::scalarRange
+Foam::scalarRange::gt0() noexcept
 {
     return scalarRange(scalarRange::GT, 0, GREAT);
 }
 
 
-inline Foam::scalarRange Foam::scalarRange::le(const scalar maxVal) noexcept
+inline constexpr Foam::scalarRange
+Foam::scalarRange::le(const scalar maxVal) noexcept
 {
     return scalarRange(scalarRange::LE, -GREAT, maxVal);
 }
 
-inline Foam::scalarRange Foam::scalarRange::lt(const scalar maxVal) noexcept
+inline constexpr Foam::scalarRange
+Foam::scalarRange::lt(const scalar maxVal) noexcept
 {
     return scalarRange(scalarRange::LT, -GREAT, maxVal);
 }
 
 
-inline Foam::scalarRange Foam::scalarRange::zero_one() noexcept
+inline constexpr Foam::scalarRange
+Foam::scalarRange::zero_one() noexcept
 {
     return scalarRange(scalarRange::GE_LE, 0, 1);
 }
@@ -124,13 +131,13 @@ inline void Foam::scalarRange::clear() noexcept
 
 inline bool Foam::scalarRange::empty() const noexcept
 {
-    return type_ == NONE;
+    return type_ == scalarRange::NONE;
 }
 
 
 inline bool Foam::scalarRange::valid() const noexcept
 {
-    return type_;
+    return bool(type_);
 }
 
 
@@ -179,13 +186,13 @@ inline bool Foam::scalarRange::match(const scalar& val) const
 {
     switch (type_)
     {
-        case EQ:    return equal(val, min_);
-        case GE:    return (val >= min_);
-        case GT:    return (val > min_);
-        case LE:    return (val <= max_);
-        case LT:    return (val < max_);
-        case GE_LE: return (val >= min_ && val <= max_);
-        case ALWAYS: return true;
+        case scalarRange::EQ:    return equal(val, min_);
+        case scalarRange::GE:    return (val >= min_);
+        case scalarRange::GT:    return (val > min_);
+        case scalarRange::LE:    return (val <= max_);
+        case scalarRange::LT:    return (val < max_);
+        case scalarRange::GE_LE: return (val >= min_ && val <= max_);
+        case scalarRange::ALWAYS: return true;
         default:    return false;
     }
 }
@@ -199,7 +206,8 @@ inline bool Foam::scalarRange::operator()(const scalar& val) const
 }
 
 
-inline bool Foam::scalarRange::operator==
+inline constexpr bool
+Foam::scalarRange::operator==
 (
     const scalarRange& rhs
 ) const noexcept
@@ -208,12 +216,13 @@ inline bool Foam::scalarRange::operator==
 }
 
 
-inline bool Foam::scalarRange::operator!=
+inline constexpr bool
+Foam::scalarRange::operator!=
 (
     const scalarRange& rhs
 ) const noexcept
 {
-    return !(operator==(rhs));
+    return !(*this == rhs);
 }
 
 

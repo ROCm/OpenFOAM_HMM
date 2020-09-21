@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,69 +26,43 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-inline Foam::labelRanges::labelRanges()
-:
-    StorageContainer()
-{}
-
 
 inline Foam::labelRanges::labelRanges(const label nElem)
 :
-    StorageContainer(nElem)
+    DynamicList<labelRange>(nElem)
 {}
 
 
 // * * * * * * * * * * * * * * * * Iterators * * * * * * * * * * * * * * * * //
 
-inline Foam::labelRanges::const_iterator::const_iterator
+inline constexpr Foam::labelRanges::const_iterator::
+const_iterator
 (
-    const labelRanges* lst,
+    const labelRanges* list,
     const label i
-)
+) noexcept
 :
-    list_(lst),
-    index_(i < 0 ? lst->size() : i),
+    list_(list),
+    index_(i),
     subIndex_(0)
 {}
 
 
-inline bool Foam::labelRanges::const_iterator::operator==
-(
-    const const_iterator& iter
-) const
+inline Foam::label Foam::labelRanges::const_iterator::
+operator*() const
 {
-    return
-    (
-        this->index_    == iter.index_
-     && this->subIndex_ == iter.subIndex_
-    );
-}
-
-
-inline bool Foam::labelRanges::const_iterator::operator!=
-(
-    const const_iterator& iter
-) const
-{
-    return !(this->operator==(iter));
-}
-
-
-inline Foam::label Foam::labelRanges::const_iterator::operator*()
-{
-    return list_->operator[](index_)[subIndex_];
+    return (*list_)[index_][subIndex_];
 }
 
 
 inline Foam::labelRanges::const_iterator&
-Foam::labelRanges::const_iterator::operator++()
+Foam::labelRanges::const_iterator::
+operator++()
 {
-    if (++subIndex_ >= list_->operator[](index_).size())
+    if (++subIndex_ >= (*list_)[index_].size())
     {
-        // Next sub-list
+        // Move to the next range
         ++index_;
         subIndex_ = 0;
     }
@@ -98,45 +72,80 @@ Foam::labelRanges::const_iterator::operator++()
 
 
 inline Foam::labelRanges::const_iterator
-Foam::labelRanges::const_iterator::operator++(int)
+Foam::labelRanges::const_iterator::
+operator++(int)
 {
-    const_iterator old = *this;
+    const_iterator old(*this);
     this->operator++();
     return old;
 }
 
 
-inline Foam::labelRanges::const_iterator Foam::labelRanges::cbegin() const
+inline constexpr bool
+Foam::labelRanges::const_iterator::
+operator==
+(
+    const const_iterator& iter
+) const noexcept
 {
-    return const_iterator(this, 0);
+    return
+    (
+        index_    == iter.index_
+     && subIndex_ == iter.subIndex_
+    );
 }
 
 
-inline const Foam::labelRanges::const_iterator Foam::labelRanges::cend() const
+inline constexpr bool
+Foam::labelRanges::const_iterator::
+operator!=
+(
+    const const_iterator& iter
+) const noexcept
 {
-    return const_iterator(this, -1);
-}
-
-
-inline Foam::labelRanges::const_iterator Foam::labelRanges::begin() const
-{
-    return const_iterator(this, 0);
-}
-
-
-inline const Foam::labelRanges::const_iterator Foam::labelRanges::end() const
-{
-    return const_iterator(this, -1);
+    return !(*this == iter);
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+inline Foam::labelRanges::const_iterator
+Foam::labelRanges::cbegin() const
+{
+    return const_iterator(this);
+}
+
+
+inline const Foam::labelRanges::const_iterator
+Foam::labelRanges::cend() const
+{
+    return const_iterator(this, this->size());
+}
+
+
+inline Foam::labelRanges::const_iterator
+Foam::labelRanges::begin() const
+{
+    return const_iterator(this);
+}
+
+
+inline const Foam::labelRanges::const_iterator
+Foam::labelRanges::end() const
+{
+    return const_iterator(this, this->size());
+}
+
+
 inline bool Foam::labelRanges::found(const label value) const
 {
-    forAll(*this, i)
+    for
+    (
+        const labelRange& range
+      : static_cast<const StorageContainer&>(*this)
+    )
     {
-        if (StorageContainer::operator[](i).found(value))
+        if (range.found(value))
         {
             return true;
         }

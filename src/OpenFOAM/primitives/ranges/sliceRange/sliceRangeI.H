@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,64 +37,42 @@ inline constexpr Foam::sliceRange::sliceRange() noexcept
 {}
 
 
-inline Foam::sliceRange::sliceRange
+inline constexpr Foam::sliceRange::sliceRange
 (
-    const label start,
-    const label size,
+    const label beg,
+    const label len,
     const label stride
 ) noexcept
 :
-    start_(start),
-    size_(std::max(label(0),size)),    // No negative size
-    stride_(std::max(label(0),stride)) // No negative stride
+    start_(beg),
+    size_(len),
+    stride_(stride)
 {}
 
 
 // * * * * * * * * * * * * * * * * Iterators * * * * * * * * * * * * * * * * //
 
-inline Foam::sliceRange::indexer::indexer
-(
-    const sliceRange* range,
-    const label i
-)
+inline constexpr Foam::sliceRange::indexer::indexer() noexcept
 :
-    stride_(range->stride()),
-    value_
-    (
-        range->start()
-      + ((i < 0 || i > range->size()) ? range->size() : i) * stride_
-    )
+    stride_(1),
+    value_(0)
 {}
 
 
-inline void Foam::sliceRange::indexer::next() noexcept
-{
-    value_ += stride_;
-}
-
-
-inline void Foam::sliceRange::indexer::next(const label n) noexcept
-{
-    value_ += (n * stride_);
-}
-
-
-inline bool Foam::sliceRange::indexer::equals
+inline constexpr Foam::sliceRange::indexer::indexer
 (
-    const indexer& other
-) const noexcept
-{
-    return (value_ == other.value_);
-}
+    const label val,
+    const label stride
+) noexcept
+:
+    stride_(stride),
+    value_(val)
+{}
 
 
-inline Foam::label Foam::sliceRange::indexer::operator*() const noexcept
-{
-    return value_;
-}
-
-
-inline Foam::label Foam::sliceRange::indexer::operator()()
+inline Foam::label
+Foam::sliceRange::indexer::
+operator()()
 {
     const label old(value_);
     next();
@@ -102,18 +80,9 @@ inline Foam::label Foam::sliceRange::indexer::operator()()
 }
 
 
-inline Foam::sliceRange::const_iterator::const_iterator
-(
-    const sliceRange* range,
-    const label i
-)
-:
-    indexer(range, i)
-{}
-
-
 inline Foam::sliceRange::const_iterator&
-Foam::sliceRange::const_iterator::operator++() noexcept
+Foam::sliceRange::const_iterator::
+operator++() noexcept
 {
     next();
     return *this;
@@ -121,7 +90,8 @@ Foam::sliceRange::const_iterator::operator++() noexcept
 
 
 inline Foam::sliceRange::const_iterator&
-Foam::sliceRange::const_iterator::operator+=(const label n) noexcept
+Foam::sliceRange::const_iterator::
+operator+=(const label n) noexcept
 {
     next(n);
     return *this;
@@ -129,81 +99,133 @@ Foam::sliceRange::const_iterator::operator+=(const label n) noexcept
 
 
 inline Foam::sliceRange::const_iterator&
-Foam::sliceRange::const_iterator::operator--() noexcept
+Foam::sliceRange::const_iterator::
+operator--() noexcept
 {
-    next(-1);
+    prev();
     return *this;
 }
 
 
 inline Foam::sliceRange::const_iterator&
-Foam::sliceRange::const_iterator::operator-=(const label n) noexcept
+Foam::sliceRange::const_iterator::
+operator-=(const label n) noexcept
 {
-    next(-n);
+    prev(n);
     return *this;
 }
 
 
-inline bool Foam::sliceRange::const_iterator::operator==
-(
-    const const_iterator& iter
-) const noexcept
+inline Foam::sliceRange::const_reverse_iterator&
+Foam::sliceRange::const_reverse_iterator::
+operator++() noexcept
 {
-    return equals(iter);
+    prev();
+    return *this;
 }
 
 
-inline bool Foam::sliceRange::const_iterator::operator!=
-(
-    const const_iterator& iter
-) const noexcept
+inline Foam::sliceRange::const_reverse_iterator&
+Foam::sliceRange::const_reverse_iterator::
+operator+=(const label n) noexcept
 {
-    return !equals(iter);
+    prev(n);
+    return *this;
 }
 
 
-inline Foam::sliceRange::const_iterator Foam::sliceRange::begin() const
+inline Foam::sliceRange::const_reverse_iterator&
+Foam::sliceRange::const_reverse_iterator::
+operator--() noexcept
 {
-    return const_iterator(this, 0);
+    next();
+    return *this;
 }
 
 
-inline Foam::sliceRange::const_iterator Foam::sliceRange::cbegin() const
+inline Foam::sliceRange::const_reverse_iterator&
+Foam::sliceRange::const_reverse_iterator::
+operator-=(const label n) noexcept
 {
-    return const_iterator(this, 0);
+    next(n);
+    return *this;
 }
 
 
-inline const Foam::sliceRange::const_iterator Foam::sliceRange::end() const
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+inline Foam::sliceRange::indexer
+Foam::sliceRange::generator() const
 {
-    return const_iterator(this, -1);
-}
-
-
-inline const Foam::sliceRange::const_iterator Foam::sliceRange::cend() const
-{
-    return const_iterator(this, -1);
-}
-
-
-inline Foam::sliceRange::indexer Foam::sliceRange::generator() const
-{
-    return indexer(this, 0);
+    return indexer(start_, stride_);
 }
 
 
 inline Foam::sliceRange::const_iterator
 Foam::sliceRange::at(const label i) const
 {
-    return const_iterator(this, i);
+    return
+        const_iterator
+        (
+            start_ + ((i < 0 || i > size_) ? size_ : i) * stride_,
+            stride_
+        );
 }
 
 
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-inline Foam::label Foam::sliceRange::operator[](const label i) const noexcept
+inline Foam::sliceRange::const_iterator
+Foam::sliceRange::begin() const
 {
-    return start_ + stride_ * i;
+    return const_iterator(start_, stride_);
+}
+
+
+inline Foam::sliceRange::const_iterator
+Foam::sliceRange::cbegin() const
+{
+    return const_iterator(start_, stride_);
+}
+
+
+inline Foam::sliceRange::const_iterator
+Foam::sliceRange::end() const
+{
+    return const_iterator(start_ + size_*stride_, stride_);
+}
+
+
+inline Foam::sliceRange::const_iterator
+Foam::sliceRange::cend() const
+{
+    return const_iterator(start_ + size_*stride_, stride_);
+}
+
+
+inline Foam::sliceRange::const_reverse_iterator
+Foam::sliceRange::rbegin() const
+{
+    return const_reverse_iterator(start_ + (size_-1)*stride_, stride_);
+}
+
+
+inline Foam::sliceRange::const_reverse_iterator
+Foam::sliceRange::crbegin() const
+{
+    return const_reverse_iterator(start_ + (size_-1)*stride_, stride_);
+}
+
+
+inline Foam::sliceRange::const_reverse_iterator
+Foam::sliceRange::rend() const
+{
+    return const_reverse_iterator(start_ - stride_, stride_);
+}
+
+
+inline Foam::sliceRange::const_reverse_iterator
+Foam::sliceRange::crend() const
+{
+    return const_reverse_iterator(start_ - stride_, stride_);
 }
 
 

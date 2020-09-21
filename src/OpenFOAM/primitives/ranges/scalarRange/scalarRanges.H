@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,16 +63,12 @@ public:
         //- Inherit constructors from List of scalarRange
         using List<scalarRange>::List;
 
-        //- Construct null
-        inline scalarRanges();
-
         //- Construct by parsing string for scalar ranges
         //  The individual items are space, comma or semicolon delimited.
-        //  Optionally report when any range failed to parse
         inline explicit scalarRanges
         (
             const std::string& str,
-            bool verbose = true
+            bool report = true  //!< Report when any range fails to parse
         );
 
 
@@ -80,7 +76,7 @@ public:
 
         //- Construct by parsing string for scalar ranges
         //  The individual items are space, comma or semicolon delimited.
-        static scalarRanges parse(const std::string& str, bool verbose = true);
+        static scalarRanges parse(const std::string& str, bool report = true);
 
 
     // Member Functions
@@ -94,7 +90,6 @@ public:
 
         //- Identical to match(), for use as a predicate.
         inline bool operator()(const scalar& value) const;
-
 };
 
 
