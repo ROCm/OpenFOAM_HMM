@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -264,6 +265,16 @@ public:
                 const scalarField& Y,
                 const scalar p,
                 const scalar T
+            ) const;
+
+            //- Return rho of the full composition
+            virtual scalar rho
+            (
+                const scalarField& Ygas,
+                const scalarField& Yliq,
+                const scalarField& Ysol,
+                const scalar T,
+                const scalar p
             ) const;
 };
 

@@ -79,18 +79,39 @@ public:
     static const std::size_t sizeofFields;
 
 
+
     //- Class to hold reacting parcel constant properties
     class constantProperties
     :
         public ParcelType::constantProperties
     {
-        // Private data
+
+    public:
+
+            //- Type of activity coefficient models
+            enum volumeUpadteType
+            {
+                mConstRho,
+                mConstVol,
+                mUpdateRhoAndVol,
+                mUndefined
+            };
+
+    private:
+
+        // Private Data
 
             //- Minimum pressure [Pa]
             demandDrivenEntry<scalar> pMin_;
 
-            //- Constant volume flag - e.g. during mass transfer
+            //- Method to update particle rho and diameter
+            //- 0: constant rho
+            //- 1: constant volume
+            //- 2: recalculation of rho and volume based on the lost mass
             demandDrivenEntry<bool> constantVolume_;
+
+            //- Method to update vol and rho
+            demandDrivenEntry<label> volUpdateType_;
 
 
     public:
@@ -114,6 +135,9 @@ public:
 
             //- Return const access to the constant volume flag
             inline bool constantVolume() const;
+
+            //- Return const access to the constant volume flag
+            inline label volUpdateType() const;
     };
 
 
@@ -181,6 +205,17 @@ protected:
 
     // Protected Member Functions
 
+            //- Return change of volume due to mass exchange
+            template<class TrackCloudType>
+            scalar updatedDeltaVolume
+            (
+                TrackCloudType& cloud,
+                const scalarField& dMass,
+                const scalar p,
+                const scalar T
+            );
+
+
         //- Calculate Phase change
         template<class TrackCloudType>
         void calcPhaseChange
@@ -195,9 +230,11 @@ protected:
             const scalar d,            // diameter
             const scalar T,            // temperature
             const scalar mass,         // mass
+            const scalar rho,          // density
             const label idPhase,       // id of phase involved in phase change
             const scalar YPhase,       // total mass fraction
-            const scalarField& YComponents, // component mass fractions
+            const scalarField& YLiq,   // liquid component  mass fractions
+            const scalarField& YSol,   // solid component mass fractions
             scalarField& dMassPC,      // mass transfer - local to parcel
             scalar& Sh,                // explicit parcel enthalpy source
             scalar& N,                 // flux of species emitted from parcel

@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -25,29 +24,33 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::LiquidEvaporationBoil
+    Foam::LiquidEvapFuchsKnudsen
 
 Group
     grpLagrangianIntermediatePhaseChangeSubModels
 
 Description
-    Liquid evaporation model
-    - uses ideal gas assumption
-    - includes boiling model based on:
+    Liquid evaporation/condensation model for solution of liquid and solid.
 
+    This model takes into account the Fuchs-Knudsen number correction, the
+    modified Raoult's law is used to obtain the concenration of the evapora
+    ble component on the surface and the activity coefficient is used.
+    The correction Kelvin effect is used.
+
+    Reference:
     \verbatim
-        "Studies of Superheated Fuel Spray Structures and Vaporization in
-        GDI Engines"
-
-        Zuo, B., Gomes, A. M. and Rutland C. J.
-
-        International Journal of Engine Research, 2000, Vol. 1(4), pp. 321-336
+        Xiaole Chen, Yu Feng, Wenqi Zhon, Clement Kleinstreuer.
+        Numerical investigation of the interaction, transport and deposition
+        of multicomponent droplets in a a simple mouth-throat model.
+        Journal of Aerosol Science, 105(2017), 108-127.
+        DOI:10.1016/j.jaerosci.2016.12.001
     \endverbatim
+
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef LiquidEvaporationBoil_H
-#define LiquidEvaporationBoil_H
+#ifndef LiquidEvapFuchsKnudsen_H
+#define LiquidEvapFuchsKnudsen_H
 
 #include "PhaseChangeModel.H"
 #include "liquidMixtureProperties.H"
@@ -57,29 +60,53 @@ Description
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                   Class LiquidEvaporationBoil Declaration
+                     Class LiquidEvapFuchsKnudsen Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class LiquidEvaporationBoil
+class LiquidEvapFuchsKnudsen
 :
     public PhaseChangeModel<CloudType>
 {
+public:
+
+    // Public Enumerations
+
+        //- Type of activity coefficient models
+        enum activityCoeffMethodType
+        {
+            pUNIFAC,
+            pHoff
+        };
+
+
 protected:
 
-    // Protected data
+    // Protected Data
+
+        //- Method used
+        activityCoeffMethodType method_;
+
+        //- Mean gas free path
+        scalar gamma_;
+
+        //- The mass thermal accomodation
+        scalar alpha_;
 
         //- Global liquid properties data
         const liquidMixtureProperties& liquids_;
 
-        //- List of active liquid names
-        List<word> activeLiquids_;
+        //- List of active liquid names i.e (liquidName solidName)
+        List<word> solution_;
 
         //- Mapping between liquid and carrier species
-        List<label> liqToCarrierMap_;
+        label liqToCarrierMap_;
 
         //- Mapping between local and global liquid species
-        List<label> liqToLiqMap_;
+        label liqToLiqMap_;
+
+        //- Mapping between local and global solid species
+        label solToSolMap_;
 
 
     // Protected Member Functions
@@ -90,33 +117,45 @@ protected:
         //- Calculate the carrier phase component volume fractions at celli
         tmp<scalarField> calcXc(const label celli) const;
 
+        //- Calculate volumetric fractions of components in the solution
+        void calcXcSolution
+        (
+            const scalar massliq,
+            const scalar masssol,
+            scalar& Xliq,
+            scalar& Xsol
+        ) const;
+
+        //- Return activity coefficient
+        scalar activityCoeff(const scalar Xliq, const scalar Ysol) const;
+
 
 public:
 
     //- Runtime type information
-    TypeName("liquidEvaporationBoil");
+    TypeName("liquidEvapFuchsKnudsen");
 
 
     // Constructors
 
         //- Construct from dictionary
-        LiquidEvaporationBoil(const dictionary& dict, CloudType& cloud);
+        LiquidEvapFuchsKnudsen(const dictionary& dict, CloudType& cloud);
 
         //- Construct copy
-        LiquidEvaporationBoil(const LiquidEvaporationBoil<CloudType>& pcm);
+        LiquidEvapFuchsKnudsen(const LiquidEvapFuchsKnudsen<CloudType>& pcm);
 
         //- Construct and return a clone
         virtual autoPtr<PhaseChangeModel<CloudType>> clone() const
         {
             return autoPtr<PhaseChangeModel<CloudType>>
             (
-                new LiquidEvaporationBoil<CloudType>(*this)
+                new LiquidEvapFuchsKnudsen<CloudType>(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~LiquidEvaporationBoil();
+    virtual ~LiquidEvapFuchsKnudsen() = default;
 
 
     // Member Functions
@@ -136,7 +175,7 @@ public:
             const scalar pc,
             const scalar Tc,
             const scalarField& X,
-            const scalarField& solMass,
+            const scalarField& Xsol,
             const scalarField& liqMass,
             scalarField& dMassPC
         ) const;
@@ -165,7 +204,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "LiquidEvaporationBoil.C"
+    #include "LiquidEvapFuchsKnudsen.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

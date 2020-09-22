@@ -67,7 +67,7 @@ inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
     dict_(parentDict.subOrEmptyDict("constantProperties")),
     parcelTypeId_(dict_, "parcelTypeId", -1),
     rhoMin_(dict_, "rhoMin", 1e-15),
-    rho0_(dict_, "rho0"),
+    rho0_(dict_, "rho0", -1),
     minParcelMass_(dict_, "minParcelMass", 1e-15)
 {}
 

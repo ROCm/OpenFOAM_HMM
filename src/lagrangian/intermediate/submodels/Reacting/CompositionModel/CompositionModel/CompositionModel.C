@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -261,11 +262,14 @@ Foam::tmp<Foam::scalarField> Foam::CompositionModel<CloudType>::X
             }
             break;
         }
-        default:
+        case phaseProperties::SOLID:
         {
-            FatalErrorInFunction
-                << "Only possible to convert gas and liquid mass fractions"
-                << abort(FatalError);
+            forAll(Y, i)
+            {
+                X[i] = Y[i]/thermo_.solids().properties()[i].W();
+                WInv += X[i];
+            }
+            break;
         }
     }
 
@@ -535,6 +539,67 @@ Foam::scalar Foam::CompositionModel<CloudType>::L
 }
 
 
+template<class CloudType>
+Foam::scalar Foam::CompositionModel<CloudType>::rho
+(
+    const scalarField& Ygas,
+    const scalarField& Yliq,
+    const scalarField& Ysol,
+    const scalar T,
+    const scalar p
+) const
+{
+    const scalarField& YMix = this->YMixture0();
+
+    const auto& carrier = this->carrier();
+    const auto& thermo = this->thermo();
+
+    scalarField Xgas(Ygas.size(), 0);
+    scalar WInv = 0;
+    forAll(Ygas, i)
+    {
+        label cid = phaseProps_[idGas()].carrierIds()[i];
+        Xgas[i] = YMix[idGas()]*Ygas[i]/carrier.W(cid);
+        WInv += Xgas[i];
+    }
+
+    scalarField Xliq(Yliq.size(), 0);
+    forAll(Yliq, i)
+    {
+        Xliq[i] = YMix[idLiquid()]*Yliq[i]/thermo.liquids().properties()[i].W();
+        WInv += Xliq[i];
+    }
+
+    scalarField Xsol(Ysol.size(), 0);
+    forAll(Ysol, i)
+    {
+        Xsol[i] = YMix[idSolid()]*Ysol[i]/thermo.solids().properties()[i].W();
+        WInv += Xsol[i];
+    }
+
+    Xgas /= (WInv + ROOTVSMALL);
+    Xliq /= (WInv + ROOTVSMALL);
+    Xsol /= (WInv + ROOTVSMALL);
+
+
+    scalar rho = 0;
+    forAll(Xgas, i)
+    {
+        label cid = phaseProps_[idGas()].carrierIds()[i];
+        rho += Xgas[i]*carrier.rho(cid, p, T);
+    }
+    forAll(Xliq, i)
+    {
+        rho += Xliq[i]*thermo.liquids().properties()[i].rho(p, T);
+    }
+    forAll(Xsol, i)
+    {
+        rho += Xsol[i]*thermo.solids().properties()[i].rho();
+    }
+
+    return rho;
+
+}
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "CompositionModelNew.C"
