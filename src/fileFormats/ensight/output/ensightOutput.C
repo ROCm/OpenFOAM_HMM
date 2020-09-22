@@ -290,7 +290,12 @@ void Foam::ensightOutput::writeFaceConnectivity
 
     parallel = parallel && Pstream::parRun();
 
-    const label nSlaves = (parallel ? Pstream::nProcs() : 0);
+    const labelRange senders =
+    (
+        parallel
+      ? labelRange(1, Pstream::nProcs()-1)
+      : labelRange()
+    );
 
     if (Pstream::master())
     {
@@ -307,17 +312,19 @@ void Foam::ensightOutput::writeFaceConnectivity
 
         if (Pstream::master())
         {
+            // Main
             os.writeLabels(send);
 
-            for (int slave=1; slave < nSlaves; ++slave)
+            // Others
+            for (const int proci : senders)
             {
-                IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-                labelList recv(fromSlave);
+                IPstream fromOther(Pstream::commsTypes::scheduled, proci);
+                labelList recv(fromOther);
 
                 os.writeLabels(recv);
             }
         }
-        else if (nSlaves)
+        else if (senders)
         {
             OPstream toMaster
             (
@@ -333,17 +340,19 @@ void Foam::ensightOutput::writeFaceConnectivity
     // List of points id for each face
     if (Pstream::master())
     {
+        // Main
         writeFaceList(os, faces);
 
-        for (int slave=1; slave < nSlaves; ++slave)
+        // Others
+        for (const int proci : senders)
         {
-            IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-            List<face> recv(fromSlave);
+            IPstream fromOther(Pstream::commsTypes::scheduled, proci);
+            List<face> recv(fromOther);
 
             writeFaceList(os, recv);
         }
     }
-    else if (nSlaves)
+    else if (senders)
     {
         OPstream toMaster
         (
@@ -372,7 +381,13 @@ void Foam::ensightOutput::writeFaceConnectivity
 
     parallel = parallel && Pstream::parRun();
 
-    const label nSlaves = (parallel ? Pstream::nProcs() : 0);
+    const labelRange senders =
+    (
+        parallel
+      ? labelRange(1, Pstream::nProcs()-1)
+      : labelRange()
+    );
+
 
     if (Pstream::master())
     {
@@ -389,17 +404,19 @@ void Foam::ensightOutput::writeFaceConnectivity
 
         if (Pstream::master())
         {
+            // Main
             os.writeLabels(send);
 
-            for (int slave=1; slave < nSlaves; ++slave)
+            // Others
+            for (const int proci : senders)
             {
-                IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-                labelList recv(fromSlave);
+                IPstream fromOther(Pstream::commsTypes::scheduled, proci);
+                labelList recv(fromOther);
 
                 os.writeLabels(recv);
             }
         }
-        else if (nSlaves)
+        else if (senders)
         {
             OPstream toMaster
             (
@@ -416,17 +433,19 @@ void Foam::ensightOutput::writeFaceConnectivity
 
     if (Pstream::master())
     {
+        // Main
         writeFaceList(os, faces);
 
-        for (int slave=1; slave < nSlaves; ++slave)
+        // Others
+        for (const int proci : senders)
         {
-            IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-            List<face> recv(fromSlave);
+            IPstream fromOther(Pstream::commsTypes::scheduled, proci);
+            List<face> recv(fromOther);
 
             writeFaceList(os, recv);
         }
     }
-    else if (nSlaves)
+    else if (senders)
     {
         OPstream toMaster
         (

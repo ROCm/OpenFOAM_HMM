@@ -44,10 +44,6 @@ void Foam::ensightCells::writePolysConnectivity
 {
     constexpr ensightCells::elemType etype(ensightCells::NFACED);
 
-    // Slaves
-    const label nSlaves = (parallel ? Pstream::nProcs() : 0);
-
-
     const label nTotal = part.total(etype);
     const labelUList& addr = part.cellIds(etype);
 
@@ -55,6 +51,14 @@ void Foam::ensightCells::writePolysConnectivity
     {
         return;
     }
+
+    const labelRange senders =
+    (
+        parallel
+      ? labelRange(1, Pstream::nProcs()-1)
+      : labelRange()
+    );
+
 
     if (Pstream::master())
     {
@@ -72,19 +76,19 @@ void Foam::ensightCells::writePolysConnectivity
 
         if (Pstream::master())
         {
-            // Master
+            // Main
             os.writeLabels(send);
 
-            // Slaves
-            for (int slave=1; slave < nSlaves; ++slave)
+            // Others
+            for (const int proci : senders)
             {
-                IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
+                IPstream fromOther(Pstream::commsTypes::scheduled, proci);
+                labelList recv(fromOther);
 
-                labelList recv(fromSlave);
                 os.writeLabels(recv);
             }
         }
-        else if (nSlaves)
+        else if (senders)
         {
             OPstream toMaster
             (
@@ -106,19 +110,19 @@ void Foam::ensightCells::writePolysConnectivity
 
         if (Pstream::master())
         {
-            // Master
+            // Main
             os.writeLabels(send);
 
-            // Slaves
-            for (int slave=1; slave < nSlaves; ++slave)
+            // Others
+            for (const int proci : senders)
             {
-                IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
+                IPstream fromOther(Pstream::commsTypes::scheduled, proci);
+                labelList recv(fromOther);
 
-                labelList recv(fromSlave);
                 os.writeLabels(recv);
             }
         }
-        else if (nSlaves)
+        else if (senders)
         {
             OPstream toMaster
             (
@@ -134,7 +138,7 @@ void Foam::ensightCells::writePolysConnectivity
     // List of points id for each face of the above list
     if (Pstream::master())
     {
-        // Master
+        // Main
         ensightOutput::writePolysPoints
         (
             os,
@@ -143,15 +147,14 @@ void Foam::ensightCells::writePolysConnectivity
             pointToGlobal
         );
 
-        // Slaves
-        for (int slave=1; slave < nSlaves; ++slave)
+        // Others
+        for (const int proci : senders)
         {
-            IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-
-            cellList  cells(fromSlave);
-            labelList addr(fromSlave);
-            faceList  faces(fromSlave);
-            labelList owner(fromSlave);
+            IPstream fromOther(Pstream::commsTypes::scheduled, proci);
+            cellList  cells(fromOther);
+            labelList addr(fromOther);
+            faceList  faces(fromOther);
+            labelList owner(fromOther);
 
             ensightOutput::writePolysPoints
             (
@@ -163,7 +166,7 @@ void Foam::ensightCells::writePolysConnectivity
             );
         }
     }
-    else if (nSlaves)
+    else if (senders)
     {
         // Renumber faces to use global point numbers
         faceList faces(mesh.faces());
@@ -201,10 +204,6 @@ void Foam::ensightCells::writeShapeConnectivity
             << exit(FatalError);
     }
 
-    // Slaves
-    const label nSlaves = (parallel ? Pstream::nProcs() : 0);
-
-
     const label nTotal = part.total(etype);
     const labelUList& addr = part.cellIds(etype);
 
@@ -212,6 +211,14 @@ void Foam::ensightCells::writeShapeConnectivity
     {
         return;
     }
+
+
+    const labelRange senders =
+    (
+        parallel
+      ? labelRange(1, Pstream::nProcs()-1)
+      : labelRange()
+    );
 
 
     if (Pstream::master())
@@ -231,15 +238,15 @@ void Foam::ensightCells::writeShapeConnectivity
     {
         ensightOutput::writeCellShapes(os, shapes);
 
-        for (int slave=1; slave < nSlaves; ++slave)
+        for (const int proci : senders)
         {
-            IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-            cellShapeList recv(fromSlave);
+            IPstream fromOther(Pstream::commsTypes::scheduled, proci);
+            cellShapeList recv(fromOther);
 
             ensightOutput::writeCellShapes(os, recv);
         }
     }
-    else if (nSlaves)
+    else if (senders)
     {
         OPstream toMaster
         (

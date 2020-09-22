@@ -63,7 +63,13 @@ bool Foam::ensightOutput::Detail::writeCoordinates
 {
     parallel = parallel && Pstream::parRun();
 
-    const label nSlaves = (parallel ? Pstream::nProcs() : 0);
+    const labelRange senders =
+    (
+        parallel
+      ? labelRange(1, Pstream::nProcs()-1)
+      : labelRange()
+    );
+
 
     // Using manual copyComponent(...) instead of fld.component() to support
     // indirect lists etc.
@@ -72,27 +78,28 @@ bool Foam::ensightOutput::Detail::writeCoordinates
 
     if (Pstream::master())
     {
-        // Serial output, or parallel (master)
-
         os.beginPart(partId, partName);
         os.beginCoordinates(nPoints);
 
         for (direction cmpt=0; cmpt < point::nComponents; ++cmpt)
         {
+            // Main
             copyComponent(send, fld, cmpt);
             os.writeList(send);
 
-            for (int slave=1; slave < nSlaves; ++slave)
+            // Others
+            for (const int proci : senders)
             {
-                IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-                scalarField recv(fromSlave);
+                IPstream fromOther(Pstream::commsTypes::scheduled, proci);
+                scalarField recv(fromOther);
+
                 os.writeList(recv);
             }
         }
     }
-    else if (nSlaves)
+    else if (senders)
     {
-        // Parallel (slaves)
+        // Send from other (parallel)
 
         for (direction cmpt=0; cmpt < point::nComponents; ++cmpt)
         {
@@ -123,7 +130,13 @@ bool Foam::ensightOutput::Detail::writeFieldComponents
 {
     parallel = parallel && Pstream::parRun();
 
-    const label nSlaves = (parallel ? Pstream::nProcs() : 0);
+    const labelRange senders =
+    (
+        parallel
+      ? labelRange(1, Pstream::nProcs()-1)
+      : labelRange()
+    );
+
 
     // Preliminary checks
     {
@@ -146,28 +159,29 @@ bool Foam::ensightOutput::Detail::writeFieldComponents
 
     if (Pstream::master())
     {
-        // Serial output, or parallel (master)
-
         os.writeKeyword(key);
 
         for (direction d=0; d < pTraits<Type>::nComponents; ++d)
         {
             const direction cmpt = ensightPTraits<Type>::componentOrder[d];
 
+            // Main
             copyComponent(send, fld, cmpt);
             os.writeList(send);
 
-            for (label slave=1; slave < nSlaves; ++slave)
+            // Others
+            for (const int proci : senders)
             {
-                IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-                scalarField recv(fromSlave);
+                IPstream fromOther(Pstream::commsTypes::scheduled, proci);
+                scalarField recv(fromOther);
+
                 os.writeList(recv);
             }
         }
     }
-    else if (nSlaves)
+    else if (senders)
     {
-        // Parallel (slaves)
+        // Send from other (parallel)
 
         for (direction d=0; d < pTraits<Type>::nComponents; ++d)
         {
