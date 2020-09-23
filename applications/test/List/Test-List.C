@@ -327,7 +327,7 @@ int main(int argc, char *argv[])
         Info<< "normal: " << wList << nl;
     }
 
-    // test SubList and labelRange
+    // Test SubList and labelRange
     {
         Info<< nl;
         labelList longLabelList = identity(25);
@@ -363,7 +363,7 @@ int main(int argc, char *argv[])
         // and complete misses
         longLabelList[{500,50}] = 100;
 
-        // labelRange automatically suppresses -ve size -> nop
+        // -ve size suppressed by internal 'validateRange' = no-op
         longLabelList[{5,-5}] = 42;
         longLabelList[{21,100}] = 42;
 
@@ -379,7 +379,7 @@ int main(int argc, char *argv[])
         //Nope: sort(longLabelList[labelRange(18,5)]);
         {
             // Instead
-            UList<label> sub = longLabelList[labelRange(0, 8)];
+            UList<label> sub = longLabelList[labelRange(8)];
             sort(sub);
         }
         Info<< "sub-sorted: " << flatOutput(longLabelList) << nl;

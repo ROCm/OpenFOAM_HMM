@@ -435,7 +435,7 @@ int main(int argc, char *argv[])
 
         bits.set(labelRange(150, 15));
         Info<< "bits" << nl; report(bits, true);
-        bits.set(labelRange(0, 5));
+        bits.set(labelRange(5));
         Info<< "bits" << nl; report(bits, true);
 
 
@@ -455,7 +455,7 @@ int main(int argc, char *argv[])
         bits.unset(labelRange(35, 16));
         Info<< "bits" << nl; report(bits, true);
 
-        bits.unset(labelRange(0, 50));
+        bits.unset(labelRange(50));
         bits.resize(100000);
         bits.set(labelRange(30, 6));
         bits[33] = false;

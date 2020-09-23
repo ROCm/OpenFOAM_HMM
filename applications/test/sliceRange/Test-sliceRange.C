@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
         Info<< nl << "Random list: " << flatOutput(list1) << nl;
 
         {
-            IndirectSubList<scalar> sublist1(list1, labelRange(0, 10));
+            IndirectSubList<scalar> sublist1(list1, labelRange(10));
 
             Info<< nl << "SubList: " << sublist1.addressing() << " = "
                 << flatOutput(sublist1) << nl;

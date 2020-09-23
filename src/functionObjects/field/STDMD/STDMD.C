@@ -933,7 +933,7 @@ void Foam::functionObjects::STDMD::writeOutput(OFstream& os) const
 
     writeFileHeader(os);
 
-    for (const auto& i : labelRange(0, oFreqs_.size()))
+    for (const label i : labelRange(oFreqs_.size()))
     {
         os  << oFreqs_[i] << tab
             << oMags_[i] << tab

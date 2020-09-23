@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -333,7 +333,7 @@ int main(int argc, char *argv[])
                 labelRange(40, 18),  // trailing portion
                 labelRange(-5, 10),  // leading portion
                 labelRange(10, 8),   // mid-portion
-                labelRange(0, input1.size()), // everything
+                labelRange(input1.size()), // everything
             }
         )
         {

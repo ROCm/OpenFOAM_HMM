@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
         Info<< "addressing: " << addr1.sizes() << nl;
         Info<< "index of (2,2,2) " << addr1.index(2,2,2) << nl;
 
-        for (const label idx : labelRange(0, addr1.size()))
+        for (const label idx : labelRange(addr1.size()))
         {
             Info<< "index of " << idx << " => " << addr1.index(idx) << nl;
         }
