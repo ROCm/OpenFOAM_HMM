@@ -18,8 +18,8 @@ thermoType
 {
     type            heRhoThermo;
     mixture         pureMixture;
-    transport       const;
-    thermo          hConst;
+    transport       tabulated;
+    thermo          hTabulated;
     equationOfState icoTabulated;
     specie          specie;
     energy          sensibleEnthalpy;
@@ -43,13 +43,31 @@ mixture
     }
     thermodynamics
     {
-        Cp              139;
-        Hf              0.0;
+        Hf              0;
+        Sf              0;
+        Cp
+        (
+            (200     139)
+            (350     140)
+            (400     145)
+        );
     }
+
     transport
     {
-        mu              0.0015;
-        Pr              0.8;
+        mu
+        (
+            (200 0.0015)
+            (350 0.002)
+            (400 0.0025)
+        );
+
+        kappa
+        (
+            (200 2.56e-2)
+            (350 3.33e-2)
+            (400 4.72e-2)
+        );
     }
 }
 

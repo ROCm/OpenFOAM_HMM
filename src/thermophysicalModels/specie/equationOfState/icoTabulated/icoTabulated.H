@@ -135,19 +135,19 @@ public:
             //- Return density [kg/m^3]
             inline scalar rho(scalar p, scalar T) const;
 
-            //- Return enthalpy contribution [J/kg]
+            //- Return enthalpy departure [J/kg]
             inline scalar H(const scalar p, const scalar T) const;
 
-            //- Return Cp contribution [J/(kg K]
+            //- Return Cp departure [J/(kg K]
             inline scalar Cp(scalar p, scalar T) const;
 
-            //- Return internal energy contribution [J/kg]
+            //- Return internal energy departure [J/kg]
             inline scalar E(const scalar p, const scalar T) const;
 
-            //- Return Cv contribution [J/(kg K]
+            //- Return Cv departure [J/(kg K]
             inline scalar Cv(scalar p, scalar T) const;
 
-            //- Return entropy contribution to the integral of Cp/T [J/kg/K]
+            //- Return entropy departure to the integral of Cp/T [J/kg/K]
             inline scalar S(const scalar p, const scalar T) const;
 
             //- Return compressibility [s^2/m^2]

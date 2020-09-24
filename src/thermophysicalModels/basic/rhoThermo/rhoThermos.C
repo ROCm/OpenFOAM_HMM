@@ -43,6 +43,7 @@ License
 #include "hConstThermo.H"
 #include "eConstThermo.H"
 #include "janafThermo.H"
+#include "hTabulatedThermo.H"
 #include "sensibleEnthalpy.H"
 #include "sensibleInternalEnergy.H"
 #include "thermo.H"
@@ -54,6 +55,7 @@ License
 #include "icoPolynomial.H"
 #include "hPolynomialThermo.H"
 #include "polynomialTransport.H"
+#include "tabulatedTransport.H"
 
 #include "heRhoThermo.H"
 #include "pureMixture.H"
@@ -106,6 +108,18 @@ makeThermos
     rhoThermo,
     heRhoThermo,
     pureMixture,
+    tabulatedTransport,
+    sensibleEnthalpy,
+    hTabulatedThermo,
+    perfectGas,
+    specie
+);
+
+makeThermos
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
     constTransport,
     sensibleEnthalpy,
     hConstThermo,
@@ -134,6 +148,18 @@ makeThermos
     sensibleEnthalpy,
     hConstThermo,
     rPolynomial,
+    specie
+);
+
+makeThermos
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    tabulatedTransport,
+    sensibleEnthalpy,
+    hTabulatedThermo,
+    icoTabulated,
     specie
 );
 
@@ -250,6 +276,18 @@ makeThermos
     rhoThermo,
     heRhoThermo,
     pureMixture,
+    tabulatedTransport,
+    sensibleEnthalpy,
+    janafThermo,
+    icoTabulated,
+    specie
+);
+
+makeThermos
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
     constTransport,
     sensibleEnthalpy,
     hConstThermo,
@@ -348,9 +386,9 @@ makeThermos
     rhoThermo,
     heRhoThermo,
     pureMixture,
-    constTransport,
+    tabulatedTransport,
     sensibleInternalEnergy,
-    hConstThermo,
+    hTabulatedThermo,
     icoTabulated,
     specie
 );
