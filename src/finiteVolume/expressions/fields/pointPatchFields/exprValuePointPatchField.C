@@ -41,7 +41,7 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
 )
 :
     valuePointPatchField<Type>(p, iF),
-    expressions::patchExprFieldBase(false),
+    expressions::patchExprFieldBase(),
     driver_
     (
         fvPatch::lookupPatch
@@ -83,7 +83,12 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
 )
 :
     valuePointPatchField<Type>(p, iF),
-    expressions::patchExprFieldBase(dict, false, true),
+    expressions::patchExprFieldBase
+    (
+        dict,
+        expressions::patchExprFieldBase::expectedTypes::VALUE_TYPE,
+        true // pointValue
+    ),
     driver_
     (
         fvPatch::lookupPatch
@@ -93,13 +98,14 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
         dict
     )
 {
-    // Basic sanity
+    // Require valueExpr
     if (this->valueExpr_.empty())
     {
         FatalIOErrorInFunction(dict)
             << "The valueExpr was not defined!" << nl
             << exit(FatalIOError);
     }
+
 
     driver_.readDict(dict);
 
@@ -171,33 +177,38 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
 template<class Type>
 void Foam::exprValuePointPatchField<Type>::updateCoeffs()
 {
-    if (debug)
-    {
-        InfoInFunction
-            << "Value: " << this->valueExpr_ << nl
-            << "Variables: ";
-        driver_.writeVariableStrings(Info)  << endl;
-    }
-
     if (this->updated())
     {
         return;
     }
 
+    if (debug)
+    {
+        InfoInFunction
+            << "Value: " << this->valueExpr_ << nl
+            << "Variables: ";
+        driver_.writeVariableStrings(Info) << nl;
+        Info<< "... updating" << endl;
+    }
+
+
     // Expression evaluation
     {
+        bool evalValue = (!this->valueExpr_.empty() && this->valueExpr_ != "0");
+
+
         driver_.clearVariables();
 
-        if (this->valueExpr_.empty())
-        {
-            (*this) == Zero;
-        }
-        else
+        if (evalValue)
         {
             Field<Type>::operator=
             (
                 driver_.evaluate<Type>(this->valueExpr_, true)
             );
+        }
+        else
+        {
+            (*this) == Zero;
         }
     }
 
@@ -211,9 +222,9 @@ void Foam::exprValuePointPatchField<Type>::write(Ostream& os) const
     valuePointPatchField<Type>::write(os);
     expressions::patchExprFieldBase::write(os);
 
-    this->writeEntry("value",os);
+    this->writeEntry("value", os);
 
-    driver_.writeCommon(os,this->debug_ || debug);
+    driver_.writeCommon(os, this->debug_ || debug);
 }
 
 

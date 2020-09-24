@@ -33,21 +33,111 @@ License
 #include "pointMesh.H"
 #include "stringOps.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::expressions::patchExprFieldBase::readExpressions
+(
+    const dictionary& dict,
+    enum expectedTypes expectedType,
+    bool isPointVal
+)
+{
+    if (debug_)
+    {
+        Info<< "Expression BC with " << dict << nl;
+    }
+
+    valueExpr_.clear();
+    gradExpr_.clear();
+    fracExpr_.clear();
+
+    string exprValue, exprGrad, exprFrac;
+    bool evalValue = false, evalGrad = false, evalFrac = false;
+
+    if (expectedTypes::VALUE_TYPE == expectedType)
+    {
+        // Mandatory
+        evalValue = dict.readEntry("valueExpr", exprValue);
+    }
+    else if (expectedTypes::GRADIENT_TYPE == expectedType)
+    {
+        // Mandatory
+        evalGrad = dict.readEntry("gradientExpr", exprGrad);
+    }
+    else
+    {
+        // MIXED_TYPE
+        evalValue = dict.readIfPresent("valueExpr", exprValue);
+        evalGrad = dict.readIfPresent("gradientExpr", exprGrad);
+
+        if (!evalValue && !evalGrad)
+        {
+            FatalIOErrorInFunction(dict)
+                << "Entries 'valueExpr' and 'gradientExpr' "
+                   "(mixed-conditon) not found in dictionary "
+                << dict.name() << nl
+                << exit(FatalIOError);
+        }
+
+        if (debug_)
+        {
+            if (!evalValue)
+            {
+                Info<< "Mixed with no valueExpr" << nl;
+            }
+            if (!evalGrad)
+            {
+                Info<< "Mixed with no gradientExpr" << nl;
+            }
+        }
+    }
+
+
+    // When both value/gradient specified (ie, mixed) expect a fraction
+    // - if missing, defer treatment to inherited BC
+
+    if (evalValue && evalGrad && dict.readIfPresent("fractionExpr", exprFrac))
+    {
+        stringOps::inplaceTrim(exprFrac);
+
+        if (exprFrac == "0" || exprFrac == "1")
+        {
+            // Special cases, handled with more efficiency
+            fracExpr_ = exprFrac;
+        }
+        else if (!exprFrac.empty())
+        {
+            evalFrac = true;
+            if (isPointVal)
+            {
+                exprFrac = "toPoint(" + exprFrac + ")";
+            }
+        }
+    }
+
+
+    // Expansions
+
+    if (evalValue)
+    {
+        valueExpr_ = expressions::exprString(exprValue, dict);
+    }
+    if (evalGrad)
+    {
+        gradExpr_ = expressions::exprString(exprGrad, dict);
+    }
+    if (evalFrac)
+    {
+        fracExpr_ = expressions::exprString(exprFrac, dict);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::expressions::patchExprFieldBase::patchExprFieldBase()
 :
-    patchExprFieldBase(false)
-{}
-
-
-Foam::expressions::patchExprFieldBase::patchExprFieldBase
-(
-    bool allowGradient
-)
-:
     debug_(false),
-    allowGradient_(allowGradient),
     evalOnConstruct_(false),
     valueExpr_(),
     gradExpr_(),
@@ -58,90 +148,18 @@ Foam::expressions::patchExprFieldBase::patchExprFieldBase
 Foam::expressions::patchExprFieldBase::patchExprFieldBase
 (
     const dictionary& dict,
-    bool allowGradient,
+    enum expectedTypes expectedType,
     bool isPointVal
 )
 :
     debug_(dict.getOrDefault("debug", false)),
-    allowGradient_(allowGradient),
     evalOnConstruct_(dict.getOrDefault("evalOnConstruct", false)),
     valueExpr_(),
     gradExpr_(),
     fracExpr_()
 {
-    if (debug_)
-    {
-        Info<< "Expression BC with " << dict << nl;
-    }
-
-    string expr;
-
-    if (dict.readIfPresent("valueExpr", expr))
-    {
-        valueExpr_ = expressions::exprString(expr, dict);
-    }
-    else
-    {
-        // No value expression - same as Zero
-        if (debug_)
-        {
-            Info<< "No valueExpr" << nl;
-        }
-    }
-
-    if (allowGradient)
-    {
-        if (dict.readIfPresent("gradientExpr", expr))
-        {
-            gradExpr_ = expressions::exprString(expr, dict);
-        }
-        else
-        {
-            // No gradient expression - same as Zero
-            if (debug_)
-            {
-                Info<< "No gradientExpr" << nl;
-            }
-        }
-
-        if (dict.readIfPresent("fractionExpr", expr))
-        {
-            stringOps::inplaceTrim(expr);
-
-            if (expr == "0" || expr == "1")
-            {
-                // Special cases, handled with more efficiency
-                fracExpr_ = expr;
-            }
-            else if (!expr.empty())
-            {
-                if (isPointVal)
-                {
-                    expr = "toPoint(" + expr + ")";
-                }
-
-                fracExpr_ = expressions::exprString(expr, dict);
-            }
-        }
-
-        // No fraction expression? - defer treatment to inherited BC
-        // Mixed BC may elect to simply ignore gradient expression
-    }
+    readExpressions(dict, expectedType, isPointVal);
 }
-
-
-Foam::expressions::patchExprFieldBase::patchExprFieldBase
-(
-    const patchExprFieldBase& rhs
-)
-:
-    debug_(rhs.debug_),
-    allowGradient_(rhs.allowGradient_),
-    evalOnConstruct_(rhs.evalOnConstruct_),
-    valueExpr_(rhs.valueExpr_),
-    gradExpr_(rhs.gradExpr_),
-    fracExpr_(rhs.fracExpr_)
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

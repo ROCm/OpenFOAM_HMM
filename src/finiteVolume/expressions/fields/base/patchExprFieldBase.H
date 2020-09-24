@@ -29,14 +29,14 @@ Class
 
 Description
     Base class for managing patches with expressions.
-    The expected input supports values, gradients and mixed conditions
+    The expected input supports value, gradient and mixed conditions.
 
 Usage
     \table
         Property     | Description                          | Required | Default
-        valueExpr    | expression for fixed value           | no  | 0
-        gradientExpr | expression for patch normal gradient | no  | 0
-        fractionExpr | expression for value fraction weight | no  | 1
+        valueExpr    | expression for uniformValue          | partly  | 0
+        gradientExpr | expression for uniformGradient       | partly  | 0
+        fractionExpr | expression for valueFraction         | partly  | depends
     \endtable
 
 SourceFiles
@@ -54,12 +54,6 @@ SourceFiles
 
 namespace Foam
 {
-
-// Forward Declarations
-class facePointPatch;
-class fvPatch;
-class polyPatch;
-
 namespace expressions
 {
 
@@ -71,10 +65,21 @@ class patchExprFieldBase
 {
 protected:
 
+    // Protected Types
+
+        //- Enumeration of expected expressions
+        enum expectedTypes
+        {
+            VALUE_TYPE = 1,
+            GRADIENT_TYPE = 2,
+            MIXED_TYPE = 3
+        };
+
+
     // Protected Data
 
+        //- Add debugging
         bool debug_;
-        bool allowGradient_;
 
         //- Slightly dodgy concept here
         bool evalOnConstruct_;
@@ -85,26 +90,36 @@ protected:
         expressions::exprString fracExpr_;
 
 
+private:
+
+    // Private Member Functions
+
+        //- Read expressions from dictionary
+        void readExpressions
+        (
+            const dictionary& dict,
+            enum expectedTypes expectedType,
+            bool isPointVal = false
+        );
+
+
 public:
+
+    // Generated Methods: copy construct, copy assignment
+
 
     // Constructors
 
         //- Default construct
         patchExprFieldBase();
 
-        //- Construct with specified gradient handling
-        explicit patchExprFieldBase(bool allowGradient);
-
         //- Construct from dictionary
         explicit patchExprFieldBase
         (
             const dictionary& dict,
-            bool allowGradient = false,
+            enum expectedTypes expectedType = expectedTypes::VALUE_TYPE,
             bool isPointVal = false
         );
-
-        //- Copy constructor
-        patchExprFieldBase(const patchExprFieldBase& rhs);
 
 
     // Member Functions

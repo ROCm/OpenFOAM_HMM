@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Original code Copyright (C) 2010-2018 Bernhard Gschaider
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,7 +33,7 @@ Usage
     \table
         Property     | Description                          | Required | Default
         value        | fixed value                          | yes |
-        valueExpr    | expression for fixed value           | yes |
+        valueExpr    | expression for uniformValue          | yes |
     \endtable
 
 SourceFiles
@@ -95,7 +94,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given patchField<Type> onto a new patch
+        //- Construct by mapping onto a new patch
         exprValuePointPatchField
         (
             const exprValuePointPatchField<Type>&,

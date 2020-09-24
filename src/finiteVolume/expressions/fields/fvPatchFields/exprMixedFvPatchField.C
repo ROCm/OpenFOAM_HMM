@@ -49,7 +49,7 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
 )
 :
     mixedFvPatchField<Type>(p, iF),
-    expressions::patchExprFieldBase(true),  // allowGradient
+    expressions::patchExprFieldBase(),
     driver_(this->patch())
 {
     this->refValue() = Zero;
@@ -85,7 +85,11 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
 )
 :
     mixedFvPatchField<Type>(p, iF),
-    expressions::patchExprFieldBase(dict, true),
+    expressions::patchExprFieldBase
+    (
+        dict,
+        expressions::patchExprFieldBase::expectedTypes::MIXED_TYPE
+    ),
     driver_(this->patch(), dict)
 {
     setDebug();

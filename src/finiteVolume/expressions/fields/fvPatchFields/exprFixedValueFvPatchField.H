@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Original code Copyright (C) 2009-2018 Bernhard Gschaider
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,8 +33,12 @@ Usage
     \table
         Property     | Description                          | Required | Default
         value        | fixed value                          | yes |
-        valueExpr    | expression for fixed value           | yes |
+        valueExpr    | expression for uniformValue          | yes |
     \endtable
+
+Note
+    Can also just use uniformFixedValueFvPatchField with an expression
+    for the PatchFunction1.
 
 SourceFiles
     exprFixedValueFvPatchField.C
@@ -102,8 +105,7 @@ public:
             const bool valueRequired=true
         );
 
-        //- Construct by mapping given exprFixedValueFvPatchField
-        //- onto a new patch
+        //- Construct by mapping onto a new patch
         exprFixedValueFvPatchField
         (
             const exprFixedValueFvPatchField<Type>&,

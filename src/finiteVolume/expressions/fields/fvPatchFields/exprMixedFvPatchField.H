@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Original code Copyright (C) 2009-2018 Bernhard Gschaider
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,10 +32,19 @@ Description
 Usage
     \table
         Property     | Description                          | Required | Default
-        valueExpr    | expression for fixed value           | no  | 0
-        gradientExpr | expression for patch normal gradient | no  | 0
-        fractionExpr | expression for value weighting       | no  | 1
+        valueExpr    | expression for uniformValue          | partly  | 0
+        gradientExpr | expression for uniformGradient       | partly  | 0
+        fractionExpr | expression for valueFraction         | partly  | depends
     \endtable
+
+Note
+    For fixed-value boundary conditions, can also just use
+    uniformFixedValueFvPatchField with an expression for the
+    PatchFunction1, or a exprMixedFvPatchField.
+
+    For gradient boundary conditions, can also just use
+    uniformFixedGradientFvPatchField with an expression for the
+    PatchFunction1.
 
 SourceFiles
     exprMixedFvPatchField.C
@@ -102,7 +110,7 @@ public:
             const dictionary& dict
         );
 
-        //- Construct by mapping given exprMixedFvPatchField onto a new patch
+        //- Construct by mapping onto a new patch
         exprMixedFvPatchField
         (
             const exprMixedFvPatchField<Type>&,

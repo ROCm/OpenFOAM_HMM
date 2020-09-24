@@ -50,7 +50,7 @@ Foam::exprFixedValueFvPatchField<Type>::exprFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF),
-    expressions::patchExprFieldBase(false),
+    expressions::patchExprFieldBase(),
     driver_(this->patch())
 {}
 
@@ -83,7 +83,11 @@ Foam::exprFixedValueFvPatchField<Type>::exprFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF),
-    expressions::patchExprFieldBase(dict),
+    expressions::patchExprFieldBase
+    (
+        dict,
+        expressions::patchExprFieldBase::expectedTypes::VALUE_TYPE
+    ),
     driver_(this->patch(), dict)
 {
     setDebug();
@@ -187,14 +191,7 @@ void Foam::exprFixedValueFvPatchField<Type>::updateCoeffs()
 
         if (evalValue)
         {
-            tmp<Field<Type>> tresult(driver_.evaluate<Type>(this->valueExpr_));
-
-            if (debug)
-            {
-                Info<< "Evaluated: " << tresult();
-            }
-
-            (*this) == tresult;
+            (*this) == driver_.evaluate<Type>(this->valueExpr_);
         }
         else
         {
