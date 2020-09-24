@@ -31,6 +31,7 @@ License
 #include "fvMesh.H"
 #include "fvPatch.H"
 #include "pointMesh.H"
+#include "stringOps.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -97,7 +98,6 @@ Foam::expressions::patchExprFieldBase::patchExprFieldBase
         else
         {
             // No gradient expression - same as Zero
-
             if (debug_)
             {
                 Info<< "No gradientExpr" << nl;
@@ -106,7 +106,14 @@ Foam::expressions::patchExprFieldBase::patchExprFieldBase
 
         if (dict.readIfPresent("fractionExpr", expr))
         {
-            if (!expr.empty() && expr != "0")
+            stringOps::inplaceTrim(expr);
+
+            if (expr == "0" || expr == "1")
+            {
+                // Special cases, handled with more efficiency
+                fracExpr_ = expr;
+            }
+            else if (!expr.empty())
             {
                 if (isPointVal)
                 {
@@ -116,11 +123,9 @@ Foam::expressions::patchExprFieldBase::patchExprFieldBase
                 fracExpr_ = expressions::exprString(expr, dict);
             }
         }
-        else
-        {
-            // No fraction expression - same as 1 (one)
-            // Mixed BC may elect to simply ignore gradient expression
-        }
+
+        // No fraction expression? - defer treatment to inherited BC
+        // Mixed BC may elect to simply ignore gradient expression
     }
 }
 

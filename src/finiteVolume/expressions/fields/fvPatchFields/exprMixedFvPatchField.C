@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Original code Copyright (C) 2009-2018 Bernhard Gschaider
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2009-2018 Bernhard Gschaider
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,20 +91,51 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
     setDebug();
     DebugInFunction << nl;
 
-    // Basic sanity checks
+    // Require one or both of valueExpr, gradientExpr
     if (this->valueExpr_.empty() && this->gradExpr_.empty())
     {
-        if (this->valueExpr_.empty())
+        FatalIOErrorInFunction(dict)
+            << "For " << this->internalField().name() << " on "
+            << this->patch().name() << nl
+            << "Require either or both: valueExpr and gradientExpr" << nl
+            << exit(FatalIOError);
+    }
+
+    if (this->fracExpr_.empty())
+    {
+        // No fractionExpr. Expect only one of valueExpr or gradientExpr
+        if (!this->valueExpr_.empty() && !this->gradExpr_.empty())
         {
-            FatalIOErrorInFunction(dict)
-                << "The valueExpr was not defined!" << nl
-                << exit(FatalIOError);
+            IOWarningInFunction(dict)
+                << "For " << this->internalField().name() << " on "
+                << this->patch().name() << nl
+                << "Recommend using fractionExpr when specifying both"
+                << " valueExpr and gradientExpr. Assuming a value of 1."
+                << nl << endl;
         }
+    }
+    else if (this->fracExpr_ == "0")
+    {
+        // Gradient only. Expect gradientExpr
         if (this->gradExpr_.empty())
         {
-            FatalIOErrorInFunction(dict)
-                << "The gradientExpr was not defined!" << nl
-                << exit(FatalIOError);
+            IOWarningInFunction(dict)
+                << "For " << this->internalField().name() << " on "
+                << this->patch().name() << nl
+                << "Gradient only, but did not specify gradientExpr."
+                << nl << endl;
+        }
+    }
+    else if (this->fracExpr_ == "1")
+    {
+        // Value only. Expect valueExpr
+        if (this->valueExpr_.empty())
+        {
+            IOWarningInFunction(dict)
+                << "For " << this->internalField().name() << " on "
+                << this->patch().name() << nl
+                << "Value only, but did not specify valueExpr."
+                << nl << endl;
         }
     }
 
@@ -114,13 +145,11 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
     // Similar to fvPatchField constructor, which we have bypassed
     dict.readIfPresent("patchType", this->patchType());
 
+    bool needsRefValue = true;
     if (dict.found("refValue"))
     {
+        needsRefValue = false;
         this->refValue() = Field<Type>("refValue", dict, p.size());
-    }
-    else
-    {
-        this->refValue() = this->patchInternalField();
     }
 
     if (dict.found("value"))
@@ -130,22 +159,27 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
             Field<Type>("value", dict, p.size())
         );
 
-        if (!dict.found("refValue"))
+        if (needsRefValue)
         {
             // Ensure refValue has a sensible value for the "update" below
-            this->refValue() = Field<Type>("value", dict, p.size());
+            this->refValue() = static_cast<const Field<Type>&>(*this);
         }
     }
     else
     {
+        if (needsRefValue)
+        {
+            this->refValue() = this->patchInternalField();
+        }
+
         fvPatchField<Type>::operator=(this->refValue());
 
+        #ifdef FULLDEBUG
         WarningInFunction
             << "No value defined for "
-            << this->internalField().name()
-            << " on " << this->patch().name() << " therefore using "
-            << "the internal field next to the patch"
-            << endl;
+            << this->internalField().name() << " on "
+            << this->patch().name() << " - using patch internal field" << endl;
+        #endif
     }
 
 
@@ -164,7 +198,7 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
     }
     else
     {
-        this->valueFraction() = 1;
+        this->valueFraction() = scalar(1);
     }
 
 
@@ -234,6 +268,11 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
 template<class Type>
 void Foam::exprMixedFvPatchField<Type>::updateCoeffs()
 {
+    if (this->updated())
+    {
+        return;
+    }
+
     if (debug)
     {
         InfoInFunction
@@ -241,45 +280,67 @@ void Foam::exprMixedFvPatchField<Type>::updateCoeffs()
             << "Gradient: " << this->gradExpr_ << nl
             << "Fraction: " << this->fracExpr_ << nl
             << "Variables: ";
-
-        driver_.writeVariableStrings(Info) << endl;
+        driver_.writeVariableStrings(Info) << nl;
+        Info<< "... updating" << endl;
     }
-
-    if (this->updated())
-    {
-        return;
-    }
-
-    DebugInFunction << " - updating" << nl;
 
 
     // Expression evaluation
     {
-        driver_.clearVariables();
+        bool evalValue = (!this->valueExpr_.empty() && this->valueExpr_ != "0");
+        bool evalGrad = (!this->gradExpr_.empty() && this->gradExpr_ != "0");
+        bool evalFrac = (!this->fracExpr_.empty());
+        scalar fraction = 1;
+
+        // Have one or both of valueExpr, gradientExpr (checked in constructor)
 
         if (this->valueExpr_.empty())
         {
-            this->refValue() = Zero;
+            // No value expression -> gradient only
+            fraction = 0;
+            evalValue = false;
+            evalFrac = false;
         }
-        else
+        else if (this->gradExpr_.empty())
         {
-            this->refValue() = driver_.evaluate<Type>(this->valueExpr_);
-        }
-
-        bool evalGrad = !this->gradExpr_.empty();
-
-        if (this->fracExpr_.empty() || this->fracExpr_ == "1")
-        {
+            // No gradient expression -> value only
+            fraction = 1;
             evalGrad = false;
-            this->valueFraction() = scalar(1);
+            evalFrac = false;
+        }
+        else if (this->fracExpr_.empty())
+        {
+            // No fractionExpr, but has both valueExpr and gradientExpr
+            // -> treat as value only (warning in constructor)
+            fraction = 1;
+            evalGrad = false;
+            evalFrac = false;
         }
         else if (this->fracExpr_ == "0")
         {
-            this->valueFraction() = Zero;
+            // Gradient only
+            fraction = 0;
+            evalValue = false;
+            evalFrac = false;
+        }
+        else if (this->fracExpr_ == "1")
+        {
+            // Value only
+            fraction = 1;
+            evalGrad = false;
+            evalFrac = false;
+        }
+
+
+        driver_.clearVariables();
+
+        if (evalValue)
+        {
+            this->refValue() = driver_.evaluate<Type>(this->valueExpr_);
         }
         else
         {
-            this->valueFraction() = driver_.evaluate<scalar>(this->fracExpr_);
+            this->refValue() = Zero;
         }
 
         if (evalGrad)
@@ -289,6 +350,15 @@ void Foam::exprMixedFvPatchField<Type>::updateCoeffs()
         else
         {
             this->refGrad() = Zero;
+        }
+
+        if (evalFrac)
+        {
+            this->valueFraction() = driver_.evaluate<scalar>(this->fracExpr_);
+        }
+        else
+        {
+            this->valueFraction() = fraction;
         }
     }
 
