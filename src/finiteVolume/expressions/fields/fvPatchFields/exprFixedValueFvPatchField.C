@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Original code Copyright (C) 2009-2018 Bernhard Gschaider
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2009-2018 Bernhard Gschaider
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,13 +89,14 @@ Foam::exprFixedValueFvPatchField<Type>::exprFixedValueFvPatchField
     setDebug();
     DebugInFunction << nl;
 
-    // Basic sanity
+    // Require valueExpr
     if (this->valueExpr_.empty())
     {
         FatalIOErrorInFunction(dict)
             << "The valueExpr was not defined!" << nl
             << exit(FatalIOError);
     }
+
 
     driver_.readDict(dict);
 
@@ -110,11 +111,12 @@ Foam::exprFixedValueFvPatchField<Type>::exprFixedValueFvPatchField
     {
         (*this) == this->patchInternalField();
 
+        #ifdef FULLDEBUG
         WarningInFunction
             << "No value defined for "
             << this->internalField().name() << " on "
-            << this->patch().name() << " - setting to internalField value "
-            << nl;
+            << this->patch().name() << " - using patch internal field" << endl;
+        #endif
     }
 
     if (this->evalOnConstruct_)
@@ -161,31 +163,29 @@ Foam::exprFixedValueFvPatchField<Type>::exprFixedValueFvPatchField
 template<class Type>
 void Foam::exprFixedValueFvPatchField<Type>::updateCoeffs()
 {
-    if (debug)
-    {
-        InfoInFunction
-            << "Value: " << this->valueExpr_ << nl
-            << "Variables: ";
-        driver_.writeVariableStrings(Info) << endl;
-    }
-
     if (this->updated())
     {
         return;
     }
 
-    DebugInFunction
-        << "updating" << nl;
+    if (debug)
+    {
+        InfoInFunction
+            << "Value: " << this->valueExpr_ << nl
+            << "Variables: ";
+        driver_.writeVariableStrings(Info) << nl;
+        Info<< "... updating" << endl;
+    }
+
 
     // Expression evaluation
     {
+        bool evalValue = (!this->valueExpr_.empty() && this->valueExpr_ != "0");
+
+
         driver_.clearVariables();
 
-        if (this->valueExpr_.empty())
-        {
-            (*this) == Zero;
-        }
-        else
+        if (evalValue)
         {
             tmp<Field<Type>> tresult(driver_.evaluate<Type>(this->valueExpr_));
 
@@ -195,6 +195,10 @@ void Foam::exprFixedValueFvPatchField<Type>::updateCoeffs()
             }
 
             (*this) == tresult;
+        }
+        else
+        {
+            (*this) == Zero;
         }
     }
 
