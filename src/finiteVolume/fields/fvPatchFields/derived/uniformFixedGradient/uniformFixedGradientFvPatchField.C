@@ -38,7 +38,7 @@ Foam::uniformFixedGradientFvPatchField<Type>::uniformFixedGradientFvPatchField
 )
 :
     fixedGradientFvPatchField<Type>(p, iF),
-    uniformGradient_()
+    uniformGradient_(nullptr)
 {}
 
 
@@ -51,7 +51,7 @@ Foam::uniformFixedGradientFvPatchField<Type>::uniformFixedGradientFvPatchField
 )
 :
     fixedGradientFvPatchField<Type>(p, iF, fld),
-    uniformGradient_()
+    uniformGradient_(nullptr)
 {}
 
 
@@ -64,7 +64,10 @@ Foam::uniformFixedGradientFvPatchField<Type>::uniformFixedGradientFvPatchField
 )
 :
     fixedGradientFvPatchField<Type>(p, iF),
-    uniformGradient_(Function1<Type>::New("uniformGradient", dict))
+    uniformGradient_
+    (
+        PatchFunction1<Type>::New(p.patch(), "uniformGradient", dict)
+    )
 {
     this->patchType() = dict.getOrDefault<word>("patchType", word::null);
     this->evaluate();

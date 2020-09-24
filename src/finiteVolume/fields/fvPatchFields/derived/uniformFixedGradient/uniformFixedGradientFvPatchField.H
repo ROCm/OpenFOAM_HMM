@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,8 +35,8 @@ Description
 
 Usage
     \table
-        Property     | Description             | Required    | Default value
-        uniformGradient | uniform gradient     | yes         |
+        Property     | Description                  | Required | Default
+        uniformGradient | uniform gradient          | yes |
     \endtable
 
     Example of the boundary condition specification:
@@ -48,9 +49,9 @@ Usage
     \endverbatim
 
 Note
-    The uniformGradient entry is a Function1 type, able to describe time
-    varying functions.  The example above gives the usage for supplying a
-    constant value.
+    The uniformGradient entry is a PatchFunction1 type,
+    able to describe time and spatial varying functions.
+    The example above gives the usage for supplying a constant value.
 
 See also
     Foam::Function1Types
@@ -65,7 +66,7 @@ SourceFiles
 #define uniformFixedGradientFvPatchField_H
 
 #include "fixedGradientFvPatchFields.H"
-#include "Function1.H"
+#include "PatchFunction1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -81,10 +82,10 @@ class uniformFixedGradientFvPatchField
 :
     public fixedGradientFvPatchField<Type>
 {
-    // Private data
+    // Private Data
 
         //- Gradient
-        autoPtr<Function1<Type>> uniformGradient_;
+        autoPtr<PatchFunction1<Type>> uniformGradient_;
 
 
 public:
@@ -118,8 +119,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given uniformFixedGradientFvPatchField
-        //  onto a new patch
+        //- Construct by mapping onto a new patch
         uniformFixedGradientFvPatchField
         (
             const uniformFixedGradientFvPatchField<Type>&,
@@ -169,7 +169,7 @@ public:
         virtual void updateCoeffs();
 
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 };
 
 

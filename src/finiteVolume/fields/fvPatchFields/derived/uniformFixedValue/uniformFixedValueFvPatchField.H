@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ Description
 
 Usage
     \table
-        Property     | Description             | Required    | Default value
-        uniformValue | uniform value           |         yes |
+        Property     | Description                  | Required | Default
+        uniformValue | uniform value                | yes |
     \endtable
 
     Example of the boundary condition specification:
@@ -49,9 +49,9 @@ Usage
     \endverbatim
 
 Note
-    The uniformValue entry is a Function1 type, able to describe time
-    varying functions.  The example above gives the usage for supplying a
-    constant value.
+    The uniformValue entry is a PatchFunction1 type,
+    able to describe time and spatial varying functions.
+    The example above gives the usage for supplying a constant value.
 
 See also
     Foam::Function1Types
@@ -82,8 +82,9 @@ class uniformFixedValueFvPatchField
 :
     public fixedValueFvPatchField<Type>
 {
-    // Private data
+    // Private Data
 
+        //- Value
         autoPtr<PatchFunction1<Type>> uniformValue_;
 
 
@@ -118,8 +119,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given uniformFixedValueFvPatchField
-        //  onto a new patch
+        //- Construct by mapping onto a new patch
         uniformFixedValueFvPatchField
         (
             const uniformFixedValueFvPatchField<Type>&,
@@ -185,7 +185,7 @@ public:
         virtual void updateCoeffs();
 
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 };
 
 
