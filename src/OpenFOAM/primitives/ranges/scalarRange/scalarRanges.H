@@ -34,6 +34,7 @@ SeeAlso
 
 SourceFiles
     scalarRanges.C
+    scalarRangesI.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -63,8 +64,10 @@ public:
         //- Inherit constructors from List of scalarRange
         using List<scalarRange>::List;
 
-        //- Construct by parsing string for scalar ranges
-        //  The individual items are space, comma or semicolon delimited.
+        //- Default construct
+        constexpr scalarRanges() noexcept = default;
+
+        //- Construct by parsing string using the parse() static method
         inline explicit scalarRanges
         (
             const std::string& str,
@@ -76,7 +79,11 @@ public:
 
         //- Construct by parsing string for scalar ranges
         //  The individual items are space, comma or semicolon delimited.
-        static scalarRanges parse(const std::string& str, bool report = true);
+        static scalarRanges parse
+        (
+            const std::string& str,
+            bool report = true  //!< Report when any range fails to parse
+        );
 
 
     // Member Functions
@@ -88,7 +95,7 @@ public:
 
     // Member Operators
 
-        //- Identical to match(), for use as a predicate.
+        //- Use match() as a predicate.
         inline bool operator()(const scalar& value) const;
 };
 
