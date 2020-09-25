@@ -34,9 +34,26 @@ Foam::PatchFunction1Types::ConstantField<Type>::ConstantField
 (
     const polyPatch& pp,
     const word& entryName,
+    const Type& uniformValue,
+    const dictionary& dict,
+    const bool faceValues
+)
+:
+    PatchFunction1<Type>(pp, entryName, dict, faceValues),
+    isUniform_(true),
+    uniformValue_(uniformValue),
+    value_((faceValues ? pp.size() : pp.nPoints()), uniformValue_)
+{}
+
+
+template<class Type>
+Foam::PatchFunction1Types::ConstantField<Type>::ConstantField
+(
+    const polyPatch& pp,
+    const word& entryName,
     const bool isUniform,
     const Type& uniformValue,
-    const Field<Type>& nonUniformValue,
+    const Field<Type>& fieldValues,
     const dictionary& dict,
     const bool faceValues
 )
@@ -44,21 +61,18 @@ Foam::PatchFunction1Types::ConstantField<Type>::ConstantField
     PatchFunction1<Type>(pp, entryName, dict, faceValues),
     isUniform_(isUniform),
     uniformValue_(uniformValue),
-    value_(nonUniformValue)
+    value_(fieldValues)
 {
-    if (faceValues && nonUniformValue.size() != pp.size())
+    const label len = (faceValues ? pp.size() : pp.nPoints());
+
+    if (fieldValues.size() != len)
     {
         FatalIOErrorInFunction(dict)
-            << "Supplied field size " << nonUniformValue.size()
-            << " is not equal to the number of faces " << pp.size()
-            << " of patch " << pp.name() << exit(FatalIOError);
-    }
-    else if (!faceValues && nonUniformValue.size() != pp.nPoints())
-    {
-        FatalIOErrorInFunction(dict)
-            << "Supplied field size " << nonUniformValue.size()
-            << " is not equal to the number of points " << pp.nPoints()
-            << " of patch " << pp.name() << exit(FatalIOError);
+            << "Supplied field size " << fieldValues.size()
+            << " is not equal to the number of "
+            << (faceValues ? "faces" : "points") << ' '
+            << len << " of patch " << pp.name() << nl
+            << exit(FatalIOError);
     }
 }
 
@@ -103,7 +117,7 @@ Foam::Field<Type> Foam::PatchFunction1Types::ConstantField<Type>::getValue
                 is >> list;
                 isUniform = false;
 
-                label currentSize = fld.size();
+                const label currentSize = fld.size();
                 if (currentSize != len)
                 {
                     if
@@ -120,7 +134,7 @@ Foam::Field<Type> Foam::PatchFunction1Types::ConstantField<Type>::getValue
                             << endl;
                         #endif
 
-                        // Resize the data
+                        // Resize (shrink) the data
                         fld.setSize(len);
                     }
                     else
@@ -204,13 +218,13 @@ Foam::PatchFunction1Types::ConstantField<Type>::ConstantField
     uniformValue_(cnst.uniformValue_),
     value_(cnst.value_)
 {
-    // If different sizes do what?
-    value_.setSize
+    // If sizes are different...
+    value_.resize
     (
-        this->faceValues_
-      ? this->patch_.size()
-      : this->patch_.nPoints()
+        (this->faceValues_ ? this->patch_.size() : this->patch_.nPoints()),
+        Zero
     );
+
     if (isUniform_)
     {
         value_ = uniformValue_;

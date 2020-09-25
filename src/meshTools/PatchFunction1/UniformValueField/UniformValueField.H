@@ -62,9 +62,9 @@ class UniformValueField
 :
     public PatchFunction1<Type>
 {
-    // Private data
+    // Private Data
 
-        //- Source of uniform values (in local co-ordinate system)
+        //- Source of uniform values (in local coordinate system)
         autoPtr<Foam::Function1<Type>> uniformValuePtr_;
 
 

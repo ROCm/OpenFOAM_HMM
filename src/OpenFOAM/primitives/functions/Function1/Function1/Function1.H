@@ -103,6 +103,7 @@ protected:
         //- Name of entry
         const word name_;
 
+
     // Protected Member Functions
 
         //- No copy assignment

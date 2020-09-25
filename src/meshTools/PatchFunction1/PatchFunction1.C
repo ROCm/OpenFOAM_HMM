@@ -232,19 +232,19 @@ void Foam::PatchFunction1<Type>::writeData(Ostream& os) const
 }
 
 
-// * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * *  IOStream Operators * * * * * * * * * * * * * //
 
 template<class Type>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const PatchFunction1<Type>& pf1
+    const PatchFunction1<Type>& rhs
 )
 {
     os.check(FUNCTION_NAME);
 
-    os  << pf1.name_;
-    pf1.writeData(os);
+    os  << rhs.name_;
+    rhs.writeData(os);
 
     return os;
 }

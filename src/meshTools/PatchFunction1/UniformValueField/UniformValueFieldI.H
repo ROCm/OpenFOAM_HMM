@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,21 +46,16 @@ Foam::PatchFunction1Types::UniformValueField<Type>::value
     const scalar x
 ) const
 {
-    label sz =
-    (
-        this->faceValues_
-      ? this->patch_.size()
-      : this->patch_.nPoints()
-    );
+    const label len =
+        (this->faceValues_ ? this->patch_.size() : this->patch_.nPoints());
 
-    tmp<Field<Type>> tfld
-    (
+    auto tfld =
         tmp<Field<Type>>::New
         (
-            sz,
+            len,
             uniformValuePtr_->value(x)
-        )
-    );
+        );
+
     return this->transform(tfld);
 }
 
@@ -73,21 +68,16 @@ Foam::PatchFunction1Types::UniformValueField<Type>::integrate
     const scalar x2
 ) const
 {
-    label sz =
-    (
-        this->faceValues_
-      ? this->patch_.size()
-      : this->patch_.nPoints()
-    );
+    const label len =
+        (this->faceValues_ ? this->patch_.size() : this->patch_.nPoints());
 
-    tmp<Field<Type>> tfld
-    (
+    auto tfld =
         tmp<Field<Type>>::New
         (
-            sz,
+            len,
             uniformValuePtr_->integrate(x1, x2)
-        )
-    );
+        );
+
     return this->transform(tfld);
 }
 

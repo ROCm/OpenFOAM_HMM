@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,10 +28,11 @@ License
 
 #include "Constant.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::autoPtr<Foam::Function1<Type>> Foam::Function1<Type>::New
+Foam::autoPtr<Foam::Function1<Type>>
+Foam::Function1<Type>::New
 (
     const word& entryName,
     const dictionary& dict,
@@ -86,10 +87,14 @@ Foam::autoPtr<Foam::Function1<Type>> Foam::Function1<Type>::New
 
         if (!firstToken.isWord())
         {
+            // Backwards-compatibility for reading straight fields
             is.putBack(firstToken);
+
+            const Type constValue = pTraits<Type>(is);
+
             return autoPtr<Function1<Type>>
             (
-                new Function1Types::Constant<Type>(entryName, is)
+                new Function1Types::Constant<Type>(entryName, constValue)
             );
         }
 

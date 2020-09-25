@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,10 +27,11 @@ License
 
 #include "ConstantField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::autoPtr<Foam::PatchFunction1<Type>> Foam::PatchFunction1<Type>::New
+Foam::autoPtr<Foam::PatchFunction1<Type>>
+Foam::PatchFunction1<Type>::New
 (
     const polyPatch& pp,
     const word& entryName,
@@ -47,6 +48,7 @@ Foam::autoPtr<Foam::PatchFunction1<Type>> Foam::PatchFunction1<Type>::New
             << entryName << nl << nl
             << exit(FatalIOError);
 
+        // Failed
         return nullptr;
     }
     else if (eptr->isDict())
@@ -81,11 +83,6 @@ Foam::autoPtr<Foam::PatchFunction1<Type>> Foam::PatchFunction1<Type>::New
             is.putBack(firstToken);
 
             const Type uniformValue = pTraits<Type>(is);
-            const Field<Type> value
-            (
-                (faceValues ? pp.size() : pp.nPoints()),
-                uniformValue
-            );
 
             return autoPtr<PatchFunction1<Type>>
             (
@@ -93,9 +90,7 @@ Foam::autoPtr<Foam::PatchFunction1<Type>> Foam::PatchFunction1<Type>::New
                 (
                     pp,
                     entryName,
-                    true,           // uniform
-                    uniformValue,   // uniform value
-                    value,          // Supply value
+                    uniformValue,
                     dict,
                     faceValues
                 )

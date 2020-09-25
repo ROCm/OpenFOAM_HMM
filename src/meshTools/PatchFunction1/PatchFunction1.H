@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,19 +56,12 @@ SeeAlso
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class Time;
-
-// Forward declaration of friend functions and operators
-template<class Type>
-class PatchFunction1;
+template<class Type> class PatchFunction1;
 
 template<class Type>
-Ostream& operator<<
-(
-    Ostream&,
-    const PatchFunction1<Type>&
-);
+Ostream& operator<<(Ostream&, const PatchFunction1<Type>&);
 
 /*---------------------------------------------------------------------------*\
                        Class PatchFunction1 Declaration
@@ -79,15 +72,9 @@ class PatchFunction1
 :
     public refCount
 {
-    // Private Member Functions
-
-        //- No copy assignment
-        void operator=(const PatchFunction1<Type>&) = delete;
-
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Name of entry
         const word name_;
@@ -100,6 +87,12 @@ protected:
 
         //- Optional local co-ordinate system and scaling
         coordinateScaling<Type> coordSys_;
+
+
+    // Protected Member Functions
+
+        //- No copy assignment
+        void operator=(const PatchFunction1<Type>&) = delete;
 
 
 public:
@@ -249,7 +242,7 @@ public:
             friend Ostream& operator<< <Type>
             (
                 Ostream& os,
-                const PatchFunction1<Type>& func
+                const PatchFunction1<Type>& rhs
             );
 
             //- Write in dictionary format

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,6 +96,16 @@ public:
 
     // Constructors
 
+        //- Construct from a uniform value
+        ConstantField
+        (
+            const polyPatch& pp,
+            const word& entryName,
+            const Type& uniformValue,
+            const dictionary& dict = dictionary::null,
+            const bool faceValues = true
+        );
+
         //- Construct from components
         ConstantField
         (
@@ -103,7 +113,7 @@ public:
             const word& entryName,
             const bool isUniform,
             const Type& uniformValue,
-            const Field<Type>& nonUniformValue,
+            const Field<Type>& fieldValues,
             const dictionary& dict = dictionary::null,
             const bool faceValues = true
         );

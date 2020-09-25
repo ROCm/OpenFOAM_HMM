@@ -103,7 +103,7 @@ public:
 
 
     //- Destructor
-    virtual ~Constant();
+    virtual ~Constant() = default;
 
 
     // Member Functions

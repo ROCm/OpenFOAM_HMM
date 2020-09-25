@@ -52,7 +52,7 @@ Foam::Function1Types::Constant<Type>::Constant
     Function1<Type>(entryName),
     value_(Zero)
 {
-    Istream& is(dict.lookup(entryName));
+    Istream& is = dict.lookup(entryName);
     word entryType(is);
     is  >> value_;
 }
@@ -75,13 +75,6 @@ Foam::Function1Types::Constant<Type>::Constant(const Constant<Type>& cnst)
 :
     Function1<Type>(cnst),
     value_(cnst.value_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::Function1Types::Constant<Type>::~Constant()
 {}
 
 
