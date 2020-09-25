@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,10 +25,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef timeVaryingUniformFixedValueFaPatchFieldsFwd_H
-#define timeVaryingUniformFixedValueFaPatchFieldsFwd_H
+#ifndef uniformFixedValueFaPatchFields_H
+#define uniformFixedValueFaPatchFields_H
 
-#include "faPatchField.H"
+#include "uniformFixedValueFaPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -38,9 +38,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type> class timeVaryingUniformFixedValueFaPatchField;
-
-makeFaPatchTypeFieldTypedefs(timeVaryingUniformFixedValue);
+makeFaPatchTypeFieldTypedefs(uniformFixedValue)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

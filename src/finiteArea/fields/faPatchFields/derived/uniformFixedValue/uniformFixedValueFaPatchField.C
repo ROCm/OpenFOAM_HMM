@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,27 +25,24 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "timeVaryingUniformFixedValueFaPatchField.H"
-#include "Time.H"
+#include "uniformFixedValueFaPatchField.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::timeVaryingUniformFixedValueFaPatchField<Type>::
-timeVaryingUniformFixedValueFaPatchField
+Foam::uniformFixedValueFaPatchField<Type>::uniformFixedValueFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF
 )
 :
     fixedValueFaPatchField<Type>(p, iF),
-    timeSeries_()
+    uniformValue_(nullptr)
 {}
 
 
 template<class Type>
-Foam::timeVaryingUniformFixedValueFaPatchField<Type>::
-timeVaryingUniformFixedValueFaPatchField
+Foam::uniformFixedValueFaPatchField<Type>::uniformFixedValueFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
@@ -53,85 +50,83 @@ timeVaryingUniformFixedValueFaPatchField
 )
 :
     fixedValueFaPatchField<Type>(p, iF),
-    timeSeries_(dict)
+    uniformValue_(Function1<Type>::New("uniformValue", dict))
 {
    if (dict.found("value"))
    {
-       faPatchField<Type>::operator==(Field<Type>("value", dict, p.size()));
+       faPatchField<Type>::operator==
+       (
+           Field<Type>("value", dict, p.size())
+       );
    }
    else
    {
-       updateCoeffs();
+       this->evaluate();
    }
 }
 
 
 template<class Type>
-Foam::timeVaryingUniformFixedValueFaPatchField<Type>::
-timeVaryingUniformFixedValueFaPatchField
+Foam::uniformFixedValueFaPatchField<Type>::uniformFixedValueFaPatchField
 (
-    const timeVaryingUniformFixedValueFaPatchField<Type>& ptf,
+    const uniformFixedValueFaPatchField<Type>& ptf,
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
     const faPatchFieldMapper& mapper
 )
 :
     fixedValueFaPatchField<Type>(ptf, p, iF, mapper),
-    timeSeries_(ptf.timeSeries_)
+    uniformValue_(ptf.uniformValue_.clone())
 {}
 
 
 template<class Type>
-Foam::timeVaryingUniformFixedValueFaPatchField<Type>::
-timeVaryingUniformFixedValueFaPatchField
+Foam::uniformFixedValueFaPatchField<Type>::uniformFixedValueFaPatchField
 (
-    const timeVaryingUniformFixedValueFaPatchField<Type>& ptf
+    const uniformFixedValueFaPatchField<Type>& ptf
 )
 :
     fixedValueFaPatchField<Type>(ptf),
-    timeSeries_(ptf.timeSeries_)
+    uniformValue_(ptf.uniformValue_.clone())
 {}
 
 
 template<class Type>
-Foam::timeVaryingUniformFixedValueFaPatchField<Type>::
-timeVaryingUniformFixedValueFaPatchField
+Foam::uniformFixedValueFaPatchField<Type>::uniformFixedValueFaPatchField
 (
-    const timeVaryingUniformFixedValueFaPatchField<Type>& ptf,
+    const uniformFixedValueFaPatchField<Type>& ptf,
     const DimensionedField<Type, areaMesh>& iF
 )
 :
     fixedValueFaPatchField<Type>(ptf, iF),
-    timeSeries_(ptf.timeSeries_)
+    uniformValue_(ptf.uniformValue_.clone())
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::timeVaryingUniformFixedValueFaPatchField<Type>::updateCoeffs()
+void Foam::uniformFixedValueFaPatchField<Type>::updateCoeffs()
 {
     if (this->updated())
     {
         return;
     }
 
-    faPatchField<Type>::operator==
-    (
-        timeSeries_(this->db().time().timeOutputValue())
-    );
+    const scalar t = this->db().time().timeOutputValue();
+    faPatchField<Type>::operator==(uniformValue_->value(t));
     fixedValueFaPatchField<Type>::updateCoeffs();
 }
 
 
 template<class Type>
-void Foam::timeVaryingUniformFixedValueFaPatchField<Type>::write
+void Foam::uniformFixedValueFaPatchField<Type>::write
 (
     Ostream& os
 ) const
 {
     faPatchField<Type>::write(os);
-    timeSeries_.write(os);
+    uniformValue_->writeData(os);
     this->writeEntry("value", os);
 }
 
