@@ -24,14 +24,17 @@ boundaryField
     inlet
     {
         type            fanPressure;
-        outOfBounds     clamp;
         direction       in;
-        readerType      openFoam;
-        file            "<constant>/FluxVsdP.dat";
+        fanCurve        tableFile;
+        fanCurveCoeffs
+        {
+            file        "<constant>/FluxVsdP.dat";
+            // readerType  openFoam;   // Default
+            // outOfBounds clamp;      // Default
+        }
         //nonDimensional  true;
         //rpm             300;
         //dm              2e-2;
-        outOfBounds     clamp;
         p0              uniform 30;
     }
     outlet1

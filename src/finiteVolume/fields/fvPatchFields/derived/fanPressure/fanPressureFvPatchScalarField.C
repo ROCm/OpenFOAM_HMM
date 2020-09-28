@@ -54,7 +54,7 @@ Foam::fanPressureFvPatchScalarField::fanPressureFvPatchScalarField
 )
 :
     totalPressureFvPatchScalarField(p, iF),
-    fanCurve_(),
+    fanCurve_(nullptr),
     direction_(ffdOut),
     rpm_(0),
     dm_(0),
@@ -87,15 +87,15 @@ Foam::fanPressureFvPatchScalarField::fanPressureFvPatchScalarField
 )
 :
     totalPressureFvPatchScalarField(p, iF, dict),
-    fanCurve_(),
+    fanCurve_(nullptr),
     direction_(fanFlowDirectionNames_.get("direction", dict)),
     rpm_(0),
     dm_(0),
     nonDimensional_(dict.getOrDefault("nonDimensional", false))
 {
-    // Backwards compatibility
-    if (dict.found("file"))
+    if (dict.found("file") && !dict.found("fanCurve"))
     {
+        // Backwards compatibility (2006 and earlier)
         fanCurve_.reset
         (
             new Function1Types::TableFile<scalar>("fanCurve", dict)
@@ -160,7 +160,7 @@ void Foam::fanPressureFvPatchScalarField::updateCoeffs()
 
     const auto& phip = patch().patchField<surfaceScalarField, scalar>(phi);
 
-    int dir = 2*direction_ - 1;
+    const int dir = 2*direction_ - 1;
 
     // Average volumetric flow rate
     scalar volFlowRate = 0;
@@ -193,7 +193,7 @@ void Foam::fanPressureFvPatchScalarField::updateCoeffs()
     }
 
     // Pressure drop for this flow rate
-    scalar pdFan = fanCurve_->value(max(volFlowRate, 0.0));
+    scalar pdFan = fanCurve_->value(max(volFlowRate, scalar(0)));
 
     if (nonDimensional_)
     {

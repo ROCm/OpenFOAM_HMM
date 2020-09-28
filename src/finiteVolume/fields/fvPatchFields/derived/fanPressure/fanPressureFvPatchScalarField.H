@@ -34,10 +34,10 @@ Description
     This boundary condition can be applied to assign either a pressure inlet
     or outlet total pressure condition for a fan.
 
-    The switch nonDimensional can be used for a non-dimensional table. It needs
-    inputs rpm and dm of the fan.
+    The switch nonDimensional can be used for a non-dimensional fan curve.
+    It needs inputs rpm and dm of the fan.
 
-    The nonDimensional flux for the table is calculate as :
+    The nonDimensional flux is calculate as :
 
         phi = 4.0*mDot/(rho*sqr(PI)*dm^3*omega)
         where:
@@ -54,14 +54,15 @@ Description
 
 Usage
     \table
-        Property     | Description             | Required    | Default value
-        file         | fan curve file name     | yes         |
-        outOfBounds  | out of bounds handling  | yes         |
+        Property     | Description                       | Required | Default
+        fanCurve     | Pressure vs flow-rate             | yes |
+        outOfBounds  | out of bounds handling            | yes |
         direction    | direction of flow through fan [in/out] | yes |
-        p0           | environmental total pressure | yes    |
-        nonDimensional | uses non-dimensional table | no | false
-        rpm          | fan rpm for non-dimensional table | no | 0.0
+        p0           | environmental total pressure      | yes |
+        nonDimensional | uses non-dimensional table      | no  | false
+        rpm          | fan rpm for non-dimensional table | no  | 0
         dm           | mean diameter for non-dimensional table | no | 0.0
+        file         | fan curve file name               | legacy |
     \endtable
 
     Example of the boundary condition specification:
@@ -69,25 +70,33 @@ Usage
     inlet
     {
         type            fanPressure;
-        fanCurve        tableFile;
-        file            "fanCurve";
-        outOfBounds     clamp;
         direction       in;
+        fanCurve        tableFile;
+        fanCurveCoeffs
+        {
+            file        "<constant>/fanCurve";
+            outOfBounds clamp;
+        }
         p0              uniform 0;
         value           uniform 0;
     }
 
+    // Legacy specification
     outlet
     {
         type            fanPressure;
-        fanCurve        tableFile;
-        file            "fanCurve";
-        outOfBounds     clamp;
         direction       out;
+        file            "<constant>/fanCurve";
+        outOfBounds     clamp;
         p0              uniform 0;
         value           uniform 0;
     }
     \endverbatim
+
+Note
+    For compatibility with older versions (OpenFOAM-v2006 and earlier),
+    a missing \c fanCurve keyword is treated as a tableFile and makes
+    the \c file keyword mandatory.
 
 See also
     Foam::fanFvPatchField
