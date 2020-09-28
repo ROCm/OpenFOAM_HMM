@@ -60,6 +60,7 @@ SourceFiles
 #define TableFile_H
 
 #include "Function1.H"
+#include "TableBase.H"
 #include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -80,7 +81,7 @@ class TableFile
 {
     // Private Data
 
-        //- File name for csv table (optional)
+        //- File name for table (mandatory)
         fileName fName_;
 
 
@@ -101,8 +102,14 @@ public:
         //- Construct from entry name and "file" found in dictionary
         TableFile(const word& entryName, const dictionary& dict);
 
-        //- Copy constructor
+        //- Copy construct
         explicit TableFile(const TableFile<Type>& tbl);
+
+        //- Construct and return a clone
+        virtual tmp<Function1<Type>> clone() const
+        {
+            return tmp<Function1<Type>>(new TableFile<Type>(*this));
+        }
 
 
     //- Destructor

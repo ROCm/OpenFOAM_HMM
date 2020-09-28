@@ -45,7 +45,7 @@ Foam::Function1Types::TableFile<Type>::TableFile
     fileName expandedFile(fName_);
 
     autoPtr<ISstream> isPtr(fileHandler().NewIFstream(expandedFile.expand()));
-    ISstream& is = isPtr();
+    ISstream& is = *isPtr;
 
     if (!is.good())
     {
