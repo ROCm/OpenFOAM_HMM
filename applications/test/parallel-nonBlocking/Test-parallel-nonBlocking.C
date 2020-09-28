@@ -87,12 +87,7 @@ int main(int argc, char *argv[])
             // Collect my own data
             allData.append(data);
 
-            for
-            (
-                int slave=Pstream::firstSlave();
-                slave<=Pstream::lastSlave();
-                slave++
-            )
+            for (const int slave : Pstream::subProcs())
             {
                 Perr << "master receiving from slave " << slave << endl;
                 UIPstream fromSlave(slave, pBufs);
@@ -105,12 +100,7 @@ int main(int argc, char *argv[])
         PstreamBuffers pBufs2(Pstream::commsTypes::nonBlocking);
         if (Pstream::master())
         {
-            for
-            (
-                int slave=Pstream::firstSlave();
-                slave<=Pstream::lastSlave();
-                slave++
-            )
+            for (const int slave : Pstream::subProcs())
             {
                 Perr << "master sending to slave " << slave << endl;
                 UOPstream toSlave(slave, pBufs2);

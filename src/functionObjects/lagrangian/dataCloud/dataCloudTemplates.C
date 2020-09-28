@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,7 +85,7 @@ void Foam::functionObjects::dataCloud::writeListParallel
         Field<Type> recvField;
 
         // Receive and write
-        for (int slave=1; slave<Pstream::nProcs(); ++slave)
+        for (const int slave : Pstream::subProcs())
         {
             IPstream fromSlave(Pstream::commsTypes::blocking, slave);
 
@@ -142,7 +142,7 @@ void Foam::functionObjects::dataCloud::writeListParallel
         Field<Type> recvField;
 
         // Receive and write
-        for (int slave=1; slave<Pstream::nProcs(); ++slave)
+        for (const int slave : Pstream::subProcs())
         {
             IPstream fromSlave(Pstream::commsTypes::blocking, slave);
 

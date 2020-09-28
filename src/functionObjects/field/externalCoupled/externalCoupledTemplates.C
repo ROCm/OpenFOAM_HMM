@@ -409,7 +409,7 @@ bool Foam::functionObjects::externalCoupled::writeData
                     }
                     masterFilePtr() << os.str().c_str();
 
-                    for (label proci = 1; proci < Pstream::nProcs(); proci++)
+                    for (const int proci : Pstream::subProcs())
                     {
                         IPstream fromSlave
                         (

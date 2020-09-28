@@ -57,12 +57,7 @@ scalar sumReduce
             // Add master value and all slaves
             sum = localValue;
 
-            for
-            (
-                int slave=Pstream::firstSlave();
-                slave<=Pstream::lastSlave(comm);
-                slave++
-            )
+            for (const int slave : UPstream::subProcs(comm))
             {
                 scalar slaveValue;
                 UIPstream::read
@@ -80,12 +75,7 @@ scalar sumReduce
 
             // Send back to slaves
 
-            for
-            (
-                int slave=UPstream::firstSlave();
-                slave<=UPstream::lastSlave(comm);
-                slave++
-            )
+            for (const int slave : UPstream::subProcs(comm))
             {
                 UOPstream::write
                 (

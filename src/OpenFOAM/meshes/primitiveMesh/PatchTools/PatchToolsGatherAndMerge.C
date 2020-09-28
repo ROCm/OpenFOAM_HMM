@@ -170,7 +170,7 @@ void Foam::PatchTools::gatherAndMerge
 
 
             // Receive slave ones
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
+            for (const int slave : Pstream::subProcs())
             {
                 IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
 

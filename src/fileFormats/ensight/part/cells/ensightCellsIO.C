@@ -52,11 +52,11 @@ void Foam::ensightCells::writePolysConnectivity
         return;
     }
 
-    const labelRange senders =
+    const IntRange<int> senders =
     (
         parallel
-      ? labelRange(1, Pstream::nProcs()-1)
-      : labelRange()
+      ? Pstream::subProcs()
+      : IntRange<int>()
     );
 
 
@@ -213,11 +213,11 @@ void Foam::ensightCells::writeShapeConnectivity
     }
 
 
-    const labelRange senders =
+    const IntRange<int> senders =
     (
         parallel
-      ? labelRange(1, Pstream::nProcs()-1)
-      : labelRange()
+      ? Pstream::subProcs()
+      : IntRange<int>()
     );
 
 

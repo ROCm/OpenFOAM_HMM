@@ -1007,7 +1007,7 @@ bool Foam::polyBoundaryMesh::checkParallelSync(const bool report) const
     // Have every processor check but print error on master
     // (in processor sequence).
 
-    for (label proci = 1; proci < Pstream::nProcs(); ++proci)
+    for (const int proci : Pstream::subProcs())
     {
         if
         (

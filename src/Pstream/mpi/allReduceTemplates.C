@@ -54,12 +54,7 @@ void Foam::allReduce
     {
         if (UPstream::master(communicator))
         {
-            for
-            (
-                int proci=UPstream::firstSlave();
-                proci<=UPstream::lastSlave(communicator);
-                ++proci
-            )
+            for (const int proci : UPstream::subProcs(communicator))
             {
                 Type value;
 
@@ -109,12 +104,7 @@ void Foam::allReduce
 
         if (UPstream::master(communicator))
         {
-            for
-            (
-                int proci=UPstream::firstSlave();
-                proci<=UPstream::lastSlave(communicator);
-                ++proci
-            )
+            for (const int proci : UPstream::subProcs(communicator))
             {
                 if
                 (

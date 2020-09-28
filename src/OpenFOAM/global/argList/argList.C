@@ -1105,12 +1105,7 @@ void Foam::argList::parse
             slaveProcs.resize(Pstream::nProcs()-1);
             slaveMachine.resize(Pstream::nProcs()-1);
             label proci = 0;
-            for
-            (
-                int slave = Pstream::firstSlave();
-                slave <= Pstream::lastSlave();
-                slave++
-            )
+            for (const int slave : Pstream::subProcs())
             {
                 IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
 
@@ -1119,7 +1114,7 @@ void Foam::argList::parse
                 fromSlave >> slaveBuild >> slaveMachine[proci] >> slavePid;
 
                 slaveProcs[proci] = slaveMachine[proci] + "." + name(slavePid);
-                proci++;
+                ++proci;
 
                 // Verify that all processors are running the same build
                 if (slaveBuild != foamVersion::build)
@@ -1339,12 +1334,7 @@ void Foam::argList::parse
 
                 // Distribute the master's argument list (with new root)
                 const bool hadCaseOpt = options_.found("case");
-                for
-                (
-                    int slave = Pstream::firstSlave();
-                    slave <= Pstream::lastSlave();
-                    slave++
-                )
+                for (const int slave : Pstream::subProcs())
                 {
                     options_.set("case", roots[slave-1]/globalCase_);
 
@@ -1392,12 +1382,7 @@ void Foam::argList::parse
                 }
 
                 // Distribute the master's argument list (unaltered)
-                for
-                (
-                    int slave = Pstream::firstSlave();
-                    slave <= Pstream::lastSlave();
-                    slave++
-                )
+                for (const int slave : Pstream::subProcs())
                 {
                     OPstream toSlave(Pstream::commsTypes::scheduled, slave);
                     toSlave << args_ << options_ << roots.size();

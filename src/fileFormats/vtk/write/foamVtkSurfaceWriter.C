@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -104,12 +104,7 @@ void Foam::vtk::surfaceWriter::writePoints()
             pointField recv;
 
             // Receive each point field and write
-            for
-            (
-                int slave=Pstream::firstSlave();
-                slave<=Pstream::lastSlave();
-                ++slave
-            )
+            for (const int slave : Pstream::subProcs())
             {
                 IPstream fromSlave(Pstream::commsTypes::blocking, slave);
 

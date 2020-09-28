@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,12 +54,7 @@ void Foam::LUscalarMatrix::solve
 
             SubList<Type>(X, x.size()) = x;
 
-            for
-            (
-                int slave=Pstream::firstSlave();
-                slave<=Pstream::lastSlave(comm_);
-                slave++
-            )
+            for (const int slave : Pstream::subProcs(comm_))
             {
                 IPstream::read
                 (
@@ -94,12 +89,7 @@ void Foam::LUscalarMatrix::solve
 
             x = SubList<Type>(X, x.size());
 
-            for
-            (
-                int slave=Pstream::firstSlave();
-                slave<=Pstream::lastSlave(comm_);
-                slave++
-            )
+            for (const int slave : Pstream::subProcs(comm_))
             {
                 OPstream::write
                 (

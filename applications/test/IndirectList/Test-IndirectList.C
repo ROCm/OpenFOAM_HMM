@@ -148,12 +148,7 @@ int main(int argc, char *argv[])
             Pout<< "full: " << flatOutput(idl3.values()) << nl
                 << "send: " << flatOutput(idl3) << endl;
 
-            for
-            (
-                int proci = Pstream::firstSlave();
-                proci <= Pstream::lastSlave();
-                ++proci
-            )
+            for (const int proci : Pstream::subProcs())
             {
                 OPstream toSlave(Pstream::commsTypes::scheduled, proci);
                 toSlave << idl3;

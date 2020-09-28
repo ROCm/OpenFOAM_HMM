@@ -290,11 +290,11 @@ void Foam::ensightOutput::writeFaceConnectivity
 
     parallel = parallel && Pstream::parRun();
 
-    const labelRange senders =
+    const IntRange<int> senders =
     (
         parallel
-      ? labelRange(1, Pstream::nProcs()-1)
-      : labelRange()
+      ? Pstream::subProcs()
+      : IntRange<int>()
     );
 
     if (Pstream::master())
@@ -381,11 +381,11 @@ void Foam::ensightOutput::writeFaceConnectivity
 
     parallel = parallel && Pstream::parRun();
 
-    const labelRange senders =
+    const IntRange<int> senders =
     (
         parallel
-      ? labelRange(1, Pstream::nProcs()-1)
-      : labelRange()
+      ? Pstream::subProcs()
+      : IntRange<int>()
     );
 
 

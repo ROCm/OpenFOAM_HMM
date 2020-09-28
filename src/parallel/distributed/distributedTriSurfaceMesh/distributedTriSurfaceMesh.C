@@ -1655,7 +1655,7 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
     bool masterOnly;
     {
         masterOnly = true;
-        for (label proci = 1; proci < Pstream::nProcs(); proci++)
+        for (const int proci : Pstream::subProcs())
         {
             if (triIndexer.localSize(proci) != 0)
             {

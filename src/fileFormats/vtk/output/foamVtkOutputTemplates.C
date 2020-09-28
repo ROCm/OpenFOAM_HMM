@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -136,12 +136,7 @@ void Foam::vtk::writeListParallel
         List<Type> recv;
 
         // Receive and write
-        for
-        (
-            int slave=Pstream::firstSlave();
-            slave<=Pstream::lastSlave();
-            ++slave
-        )
+        for (const int slave : Pstream::subProcs())
         {
             IPstream fromSlave(Pstream::commsTypes::blocking, slave);
 
@@ -179,12 +174,7 @@ void Foam::vtk::writeListParallel
         List<Type> recv;
 
         // Receive and write
-        for
-        (
-            int slave=Pstream::firstSlave();
-            slave<=Pstream::lastSlave();
-            ++slave
-        )
+        for (const int slave : Pstream::subProcs())
         {
             IPstream fromSlave(Pstream::commsTypes::blocking, slave);
 
@@ -222,12 +212,7 @@ void Foam::vtk::writeListParallel
         List<Type> recv;
 
         // Receive and write
-        for
-        (
-            int slave=Pstream::firstSlave();
-            slave<=Pstream::lastSlave();
-            ++slave
-        )
+        for (const int slave : Pstream::subProcs())
         {
             IPstream fromSlave(Pstream::commsTypes::blocking, slave);
 
@@ -266,12 +251,7 @@ void Foam::vtk::writeListsParallel
         List<Type> recv1, recv2;
 
         // Receive and write
-        for
-        (
-            int slave=Pstream::firstSlave();
-            slave<=Pstream::lastSlave();
-            ++slave
-        )
+        for (const int slave : Pstream::subProcs())
         {
             IPstream fromSlave(Pstream::commsTypes::blocking, slave);
 
@@ -310,14 +290,9 @@ void Foam::vtk::writeListsParallel
         vtk::writeList(fmt, values2, addressing);
 
         List<Type> recv1, recv2;
-;
+
         // Receive and write
-        for
-        (
-            int slave=Pstream::firstSlave();
-            slave<=Pstream::lastSlave();
-            ++slave
-        )
+        for (const int slave : Pstream::subProcs())
         {
             IPstream fromSlave(Pstream::commsTypes::blocking, slave);
 

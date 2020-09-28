@@ -154,7 +154,7 @@ void Foam::masterOFstream::commit()
                 *std::max_element(recvSizes.cbegin(), recvSizes.cend())
             );
 
-            for (label proci = 1; proci < Pstream::nProcs(); ++proci)
+            for (const int proci : Pstream::subProcs())
             {
                 UIPstream is(proci, pBufs);
 

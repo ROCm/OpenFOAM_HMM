@@ -80,12 +80,7 @@ Foam::List<Foam::labelPair> Foam::mapDistributeBase::schedule
     if (Pstream::master())
     {
         // Receive and merge
-        for
-        (
-            int slave=Pstream::firstSlave();
-            slave<=Pstream::lastSlave();
-            slave++
-        )
+        for (const int slave : Pstream::subProcs())
         {
             IPstream fromSlave(Pstream::commsTypes::scheduled, slave, 0, tag);
             List<labelPair> nbrData(fromSlave);
@@ -101,12 +96,7 @@ Foam::List<Foam::labelPair> Foam::mapDistributeBase::schedule
             }
         }
         // Send back
-        for
-        (
-            int slave=Pstream::firstSlave();
-            slave<=Pstream::lastSlave();
-            slave++
-        )
+        for (const int slave : Pstream::subProcs())
         {
             OPstream toSlave(Pstream::commsTypes::scheduled, slave, 0, tag);
             toSlave << allComms;

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,12 +86,7 @@ Foam::LUscalarMatrix::LUscalarMatrix
 
         if (Pstream::master(comm_))
         {
-            for
-            (
-                int slave=Pstream::firstSlave();
-                slave<=Pstream::lastSlave(comm_);
-                slave++
-            )
+            for (const int slave : Pstream::subProcs(comm_))
             {
                 lduMatrices.set
                 (

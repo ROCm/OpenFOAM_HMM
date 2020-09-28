@@ -340,12 +340,7 @@ bool Foam::decomposedBlockData::readBlocks
             }
 
             // Read slave data
-            for
-            (
-                label proci = 1;
-                proci < UPstream::nProcs(comm);
-                ++proci
-            )
+            for (const int proci : UPstream::subProcs(comm))
             {
                 List<char> elems(is);
                 is.fatalCheck("read(Istream&) : reading entry");
@@ -397,12 +392,7 @@ bool Foam::decomposedBlockData::readBlocks
             }
 
             // Read slave data
-            for
-            (
-                label proci = 1;
-                proci < UPstream::nProcs(comm);
-                ++proci
-            )
+            for (const int proci : UPstream::subProcs(comm))
             {
                 List<char> elems(is);
                 is.fatalCheck("read(Istream&) : reading entry");
@@ -474,12 +464,7 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
             }
 
             // Read slave data
-            for
-            (
-                label proci = 1;
-                proci < UPstream::nProcs(comm);
-                ++proci
-            )
+            for (const int proci : UPstream::subProcs(comm))
             {
                 is >> data;
                 is.fatalCheck("read(Istream&) : reading entry");
@@ -545,12 +530,7 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
             }
 
             // Read slave data
-            for
-            (
-                label proci = 1;
-                proci < UPstream::nProcs(comm);
-                ++proci
-            )
+            for (const int proci : UPstream::subProcs(comm))
             {
                 List<char> elems(is);
                 is.fatalCheck("read(Istream&) : reading entry");
