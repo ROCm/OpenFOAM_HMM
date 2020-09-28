@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -235,7 +235,7 @@ bool Foam::functionObjects::energySpectrum::write()
             vectorField Uijk(nGlobalCells);
             vectorField Cijk(nGlobalCells);
 
-            for (label proci = 0; proci < Pstream::nProcs(); ++proci)
+            for (const int proci : Pstream::allProcs())
             {
                 UIPstream fromProc(proci, pBufs);
                 vectorField Up;

@@ -1303,7 +1303,7 @@ void Foam::refinementHistory::distribute(const mapDistributePolyMesh& map)
 
     // Create subsetted refinement tree consisting of all parents that
     // move in their whole to other processor.
-    for (label proci = 0; proci < Pstream::nProcs(); proci++)
+    for (const int proci : Pstream::allProcs())
     {
         //Pout<< "-- Subetting for processor " << proci << endl;
 
@@ -1412,7 +1412,7 @@ void Foam::refinementHistory::distribute(const mapDistributePolyMesh& map)
     visibleCells_.setSize(mesh.nCells());
     visibleCells_ = -1;
 
-    for (label proci = 0; proci < Pstream::nProcs(); proci++)
+    for (const int proci : Pstream::allProcs())
     {
         IPstream fromNbr(Pstream::commsTypes::blocking, proci);
         List<splitCell8> newSplitCells(fromNbr);

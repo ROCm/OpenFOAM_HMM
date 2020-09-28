@@ -50,7 +50,6 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-
     #include "setRootCase.H"
     #include "createTime.H"
 
@@ -154,7 +153,7 @@ int main(int argc, char *argv[])
     {
         PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
-        for (label proci = 0; proci < Pstream::nProcs(); proci++)
+        for (const int proci : Pstream::allProcs())
         {
             UOPstream toProc(proci, pBufs);
             toProc << Pstream::myProcNo();
@@ -164,7 +163,7 @@ int main(int argc, char *argv[])
         pBufs.finishedSends();
 
         // Consume
-        for (label proci = 0; proci < Pstream::nProcs(); proci++)
+        for (const int proci : Pstream::allProcs())
         {
             UIPstream fromProc(proci, pBufs);
             label data;

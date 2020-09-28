@@ -75,7 +75,7 @@ public:
     static const Enum<commsTypes> commsTypeNames;
 
 
-    // Public classes
+    // Public Classes
 
         //- Structure for communicating between processors
         class commsStruct
@@ -180,7 +180,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- By default this is not a parallel run
         static bool parRun_;
@@ -248,7 +248,7 @@ private:
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Communications type of this stream
         commsTypes commsType_;
@@ -298,7 +298,7 @@ public:
         {}
 
 
-    // Member functions
+    // Member Functions
 
         //- Allocate a new communicator
         static label allocateCommunicator
@@ -424,7 +424,7 @@ public:
             return haveThreads_;
         }
 
-        //- Number of processes in parallel run
+        //- Number of processes in parallel run, and 1 for serial run
         static label nProcs(const label communicator = 0)
         {
             return procIDs_[communicator].size();
@@ -469,6 +469,13 @@ public:
         static int lastSlave(const label communicator = 0)
         {
             return nProcs(communicator) - 1;
+        }
+
+        //- Range of process indices for all processes
+        static IntRange<int> allProcs(const label communicator = 0)
+        {
+            // Proc 0 -> nProcs
+            return IntRange<int>(static_cast<int>(nProcs(communicator)));
         }
 
         //- Communication schedule for linear all-to-master (proc 0)

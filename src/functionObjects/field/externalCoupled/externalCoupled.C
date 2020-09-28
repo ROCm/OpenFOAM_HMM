@@ -117,7 +117,7 @@ void Foam::functionObjects::externalCoupled::readColumns
 
         // Read data from file and send to destination processor
 
-        for (label proci = 0; proci < Pstream::nProcs(); ++proci)
+        for (const int proci : Pstream::allProcs())
         {
             // Temporary storage
             List<scalarField> values(nColumns);
@@ -188,7 +188,7 @@ void Foam::functionObjects::externalCoupled::readLines
 
         // Read line from file and send to destination processor
 
-        for (label proci = 0; proci < Pstream::nProcs(); ++proci)
+        for (const int proci : Pstream::allProcs())
         {
             // Number of rows to read for processor proci
             const label procNRows = globalFaces.localSize(proci);
@@ -314,7 +314,7 @@ void Foam::functionObjects::externalCoupled::writeGeometry
                 allPoints.clear();
                 allFaces.clear();
 
-                for (label proci=0; proci < Pstream::nProcs(); ++proci)
+                for (const int proci : Pstream::allProcs())
                 {
                     allPoints.append(collectedPoints[proci]);
                     allFaces.append(collectedFaces[proci]);

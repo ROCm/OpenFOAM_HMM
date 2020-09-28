@@ -250,7 +250,7 @@ void Foam::cellCellStencils::trackingInverseDistance::markPatchesAsHoles
 
     // 2. Send over srcMesh bits that overlap tgt and do calculation
     pBufs.clear();
-    for (label procI = 0; procI < Pstream::nProcs(); procI++)
+    for (const int procI : Pstream::allProcs())
     {
         if (procI != Pstream::myProcNo())
         {
@@ -267,7 +267,7 @@ void Foam::cellCellStencils::trackingInverseDistance::markPatchesAsHoles
         }
     }
     pBufs.finishedSends();
-    for (label procI = 0; procI < Pstream::nProcs(); procI++)
+    for (const int procI : Pstream::allProcs())
     {
         if (procI != Pstream::myProcNo())
         {
@@ -373,7 +373,7 @@ void Foam::cellCellStencils::trackingInverseDistance::markDonors
     DynamicList<label> tgtOverlapProcs(Pstream::nProcs());
     // (remote) processors where the src overlaps my tgt
     DynamicList<label> srcOverlapProcs(Pstream::nProcs());
-    for (label procI = 0; procI < Pstream::nProcs(); procI++)
+    for (const int procI : Pstream::allProcs())
     {
         if (procI != Pstream::myProcNo())
         {

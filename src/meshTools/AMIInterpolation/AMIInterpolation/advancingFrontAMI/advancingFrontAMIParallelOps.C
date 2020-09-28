@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,7 +76,7 @@ void Foam::advancingFrontAMI::distributePatches
 {
     PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
-    for (label domain = 0; domain < Pstream::nProcs(); ++domain)
+    for (const int domain : Pstream::allProcs())
     {
         const labelList& sendElems = map.subMap()[domain];
 
@@ -132,7 +132,7 @@ void Foam::advancingFrontAMI::distributePatches
     }
 
     // Consume
-    for (label domain = 0; domain < Pstream::nProcs(); ++domain)
+    for (const int domain : Pstream::allProcs())
     {
         const labelList& recvElems = map.constructMap()[domain];
 

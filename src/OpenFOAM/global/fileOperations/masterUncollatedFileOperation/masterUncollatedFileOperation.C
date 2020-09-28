@@ -598,12 +598,7 @@ Foam::fileOperations::masterUncollatedFileOperation::read
                 }
 
                 DynamicList<label> validProcs(Pstream::nProcs(comm));
-                for
-                (
-                    label proci = 0;
-                    proci < Pstream::nProcs(comm);
-                    proci++
-                )
+                for (const int proci : Pstream::allProcs(comm))
                 {
                     if (procValid[proci])
                     {

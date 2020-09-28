@@ -473,7 +473,7 @@ void Foam::backgroundMeshDecomposition::printMeshData
 
     // globalIndex globalBoundaryFaces(mesh.nBoundaryFaces());
 
-    for (label proci = 0; proci < Pstream::nProcs(); proci++)
+    for (const int proci : Pstream::allProcs())
     {
         Info<< "Processor " << proci << " "
             << "Number of cells = " << globalCells.localSize(proci)

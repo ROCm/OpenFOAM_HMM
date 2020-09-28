@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 DLR
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -162,7 +163,7 @@ void Foam::zoneDistribute::setUpCommforZone
         PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
         // Stream data into buffer
-        for (label domain = 0; domain < Pstream::nProcs(); domain++)
+        for (const int domain : Pstream::allProcs())
         {
             if (domain != Pstream::myProcNo())
             {
@@ -176,7 +177,7 @@ void Foam::zoneDistribute::setUpCommforZone
         // wait until everything is written.
         pBufs.finishedSends();
 
-        for (label domain = 0; domain < Pstream::nProcs(); domain++)
+        for (const int domain : Pstream::allProcs())
         {
             send_[domain].clear();
 

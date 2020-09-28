@@ -185,7 +185,7 @@ void printMeshData(const polyMesh& mesh)
     label totProcPatches = 0;
     label maxProcFaces = 0;
 
-    for (label procI = 0; procI < Pstream::nProcs(); ++procI)
+    for (const int procI : Pstream::allProcs())
     {
         Info<< nl
             << "Processor " << procI << nl

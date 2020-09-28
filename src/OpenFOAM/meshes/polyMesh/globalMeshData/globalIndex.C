@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -119,7 +119,7 @@ void Foam::globalIndex::reset
 
     label offset = 0;
     offsets_[0] = 0;
-    for (label proci = 0; proci < Pstream::nProcs(comm); ++proci)
+    for (const int proci : Pstream::allProcs(comm))
     {
         const label oldOffset = offset;
         offset += localSizes[proci];

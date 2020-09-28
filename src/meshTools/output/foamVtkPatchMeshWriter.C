@@ -697,7 +697,7 @@ bool Foam::vtk::patchMeshWriter::writeProcIDs()
         if (Pstream::master())
         {
             // Per-processor ids
-            for (label proci=0; proci < Pstream::nProcs(); ++proci)
+            for (const int proci : Pstream::allProcs())
             {
                 vtk::write(format(), proci, procSizes.localSize(proci));
             }

@@ -109,7 +109,7 @@ void Foam::ptscotchDecomp::check(const int retVal, const char* str)
 //    globalIndex globalCells(initxadj.size()-1);
 //
 //    bool hasZeroDomain = false;
-//    for (label proci = 0; proci < Pstream::nProcs(); proci++)
+//    for (const int proci : Pstream::allProcs())
 //    {
 //        if (globalCells.localSize(proci) == 0)
 //        {

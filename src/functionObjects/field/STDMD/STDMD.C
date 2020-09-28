@@ -293,9 +293,9 @@ void Foam::functionObjects::STDMD::calcAp()
             Log<< tab << "# " << name()
                 << ": Populating the global Rx #" << endl;
             label m = 0;
-            for (label i = 0; i < Pstream::nProcs(); ++i)
+            for (const int i : Pstream::allProcs())
             {
-                label mRows = RxList[i].m();
+                const label mRows = RxList[i].m();
 
                 Rx.subMatrix(m, 0, mRows) = RxList[i];
 

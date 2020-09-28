@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2019-2020 DLR
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -184,7 +185,7 @@ Foam::Map<Type> Foam::zoneDistribute::getDatafromOtherProc
         PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
         // Stream data into buffer
-        for (label domain = 0; domain < Pstream::nProcs(); domain++)
+        for (const int domain : Pstream::allProcs())
         {
             if (domain != Pstream::myProcNo())
             {
@@ -200,7 +201,7 @@ Foam::Map<Type> Foam::zoneDistribute::getDatafromOtherProc
 
         Map<Type> tmpValue;
 
-        for (label domain = 0; domain < Pstream::nProcs(); domain++)
+        for (const int domain : Pstream::allProcs())
         {
             if (domain != Pstream::myProcNo())
             {

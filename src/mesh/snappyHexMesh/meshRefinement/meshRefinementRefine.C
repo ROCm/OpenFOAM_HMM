@@ -2494,7 +2494,7 @@ Foam::meshRefinement::balanceAndRefine
     //    globalIndex globalCells(mesh_.nCells());
     //
     //    Info<< "** Distribution before balancing/refining:" << endl;
-    //    for (label procI = 0; procI < Pstream::nProcs(); procI++)
+    //    for (const int procI : Pstream::allProcs())
     //    {
     //        Info<< "    " << procI << '\t'
     //            << globalCells.localSize(procI) << endl;
@@ -2505,7 +2505,7 @@ Foam::meshRefinement::balanceAndRefine
     //    globalIndex globalCells(cellsToRefine.size());
     //
     //    Info<< "** Cells to be refined:" << endl;
-    //    for (label procI = 0; procI < Pstream::nProcs(); procI++)
+    //    for (const int procI : Pstream::allProcs())
     //    {
     //        Info<< "    " << procI << '\t'
     //            << globalCells.localSize(procI) << endl;
@@ -2567,7 +2567,7 @@ Foam::meshRefinement::balanceAndRefine
         //    globalIndex globalCells(mesh_.nCells());
         //
         //    Info<< "** Distribution after balancing:" << endl;
-        //    for (label procI = 0; procI < Pstream::nProcs(); procI++)
+        //    for (const int procI : Pstream::allProcs())
         //    {
         //        Info<< "    " << procI << '\t'
         //            << globalCells.localSize(procI) << endl;
@@ -2625,7 +2625,7 @@ Foam::meshRefinement::balanceAndRefine
     //    globalIndex globalCells(mesh_.nCells());
     //
     //    Info<< "** After refinement distribution:" << endl;
-    //    for (label procI = 0; procI < Pstream::nProcs(); procI++)
+    //    for (const int procI : Pstream::allProcs())
     //    {
     //        Info<< "    " << procI << '\t'
     //            << globalCells.localSize(procI) << endl;

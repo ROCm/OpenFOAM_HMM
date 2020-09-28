@@ -169,7 +169,7 @@ void surfaceNoise::readSurfaceData
                 p *= rhoRef_;
 
                 // Send subset of faces to each processor
-                for (label procI = 0; procI < Pstream::nProcs(); ++procI)
+                for (const int procI : Pstream::allProcs())
                 {
                     label face0 = procFaceOffset[procI];
                     label nLocalFace =

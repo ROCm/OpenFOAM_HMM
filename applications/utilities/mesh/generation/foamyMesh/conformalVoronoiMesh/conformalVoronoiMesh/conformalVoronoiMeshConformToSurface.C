@@ -703,7 +703,7 @@ Foam::label Foam::conformalVoronoiMesh::synchroniseSurfaceTrees
     label nStoppedInsertion = 0;
 
     // Do the nearness tests here
-    for (label proci = 0; proci < Pstream::nProcs(); ++proci)
+    for (const int proci : Pstream::allProcs())
     {
         // Skip own points
         if (proci >= Pstream::myProcNo())
@@ -795,7 +795,7 @@ Foam::label Foam::conformalVoronoiMesh::synchroniseEdgeTrees
     label nStoppedInsertion = 0;
 
     // Do the nearness tests here
-    for (label proci = 0; proci < Pstream::nProcs(); ++proci)
+    for (const int proci : Pstream::allProcs())
     {
         // Skip own points
         if (proci >= Pstream::myProcNo())
