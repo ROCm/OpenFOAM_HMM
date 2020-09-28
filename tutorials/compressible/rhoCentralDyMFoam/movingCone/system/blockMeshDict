@@ -16,6 +16,8 @@ FoamFile
 
 scale   0.001;
 
+mergeType points;   // Wedge geometry - Merge points instead of topology
+
 vertices
 (
     (-7.5 0 0)
