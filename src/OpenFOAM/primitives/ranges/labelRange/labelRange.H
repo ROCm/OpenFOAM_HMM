@@ -35,10 +35,10 @@ SourceFiles
     labelRangeI.H
 
 \*---------------------------------------------------------------------------*/
+
 #ifndef labelRange_H
 #define labelRange_H
 
-#include "label.H"
 #include "IntRange.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -47,9 +47,6 @@ namespace Foam
 {
 
 // Forward Declarations
-class Istream;
-class Ostream;
-template<class T> class List;
 template<class T> class MinMax;
 
 /*---------------------------------------------------------------------------*\
@@ -151,7 +148,8 @@ public:
 
     // Other
 
-        //- Return list of labels corresponding to the range
+        //- Return list of labels corresponding to the range.
+        //  Same as Foam::identity()
         List<label> labels() const;
 
         //- Return true if the ranges overlap.
@@ -187,7 +185,7 @@ public:
 };
 
 
-// Global Functions
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 //- Conversion/extraction to labelRange operation (functor).
 //  Specializations shall provide a corresponding \c operator().
@@ -203,15 +201,6 @@ public:
 //  };
 //  \endcode
 template<class> struct labelRangeOp;
-
-
-// IOstream Operators
-
-//- Read labelRange from Istream as (start size) tuple, no checks
-Istream& operator>>(Istream& is, labelRange& range);
-
-//- Write labelRange to Ostream as (start size) tuple
-Ostream& operator<<(Ostream& os, const labelRange& range);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

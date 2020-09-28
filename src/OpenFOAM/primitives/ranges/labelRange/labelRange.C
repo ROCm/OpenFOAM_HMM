@@ -27,9 +27,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "labelRange.H"
-#include "MinMax.H"
 #include "List.H"
-#include "token.H"
+#include "MinMax.H"
 #include <numeric>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -66,8 +65,9 @@ Foam::labelRange::labelRange(Istream& is)
 
 Foam::List<Foam::label> Foam::labelRange::labels() const
 {
-    if (size() <= 0)
+    if (size() < 0)
     {
+        // Skip this check?
         return List<label>();
     }
 
@@ -193,30 +193,6 @@ Foam::labelRange Foam::labelRange::subset0(const label size) const
     }
 
     return labelRange();
-}
-
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-Foam::Istream& Foam::operator>>(Istream& is, labelRange& range)
-{
-    is.readBegin("labelRange");
-    is >> range.start() >> range.size();
-    is.readEnd("labelRange");
-
-    is.check(FUNCTION_NAME);
-    return is;
-}
-
-
-Foam::Ostream& Foam::operator<<(Ostream& os, const labelRange& range)
-{
-    os  << token::BEGIN_LIST
-        << range.start() << token::SPACE << range.size()
-        << token::END_LIST;
-
-    os.check(FUNCTION_NAME);
-    return os;
 }
 
 

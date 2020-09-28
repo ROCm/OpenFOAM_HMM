@@ -42,7 +42,7 @@ SourceFiles
 #ifndef IntRange_H
 #define IntRange_H
 
-#include <cstdint>
+#include "labelFwd.H"
 #include <iterator>
 #include <type_traits>
 
@@ -52,7 +52,9 @@ namespace Foam
 {
 
 // Forward Declarations
+class Istream;
 class Ostream;
+template<class T> class List;
 
 /*---------------------------------------------------------------------------*\
                           Class IntRange Declaration
@@ -70,6 +72,7 @@ class IntRange
 
         //- The length of the interval
         IntType size_;
+
 
 protected:
 
@@ -198,6 +201,42 @@ public:
 
         //- True if range is non-empty
         explicit operator bool() const noexcept { return bool(size_); }
+
+
+    // Bidirectional input iterators (const)
+
+        //- Return const_iterator to a position within the range,
+        //- with bounds checking.
+        //  \return iterator at the requested position, or end() for
+        //      out-of-bounds
+        inline const_iterator at(const IntType i) const;
+
+        //- A const_iterator set to the beginning of the range
+        inline const_iterator begin() const;
+
+        //- A const_iterator set to the beginning of the range
+        inline const_iterator cbegin() const;
+
+        //- A const_iterator set to 1 beyond the end of the range.
+        inline const_iterator cend() const;
+
+        //- A const_iterator set to 1 beyond the end of the range.
+        inline const_iterator end() const;
+
+
+    // Bidirectional reverse input iterators (const)
+
+        //- A const_reverse_iterator set to 1 before the end of range
+        inline const_reverse_iterator rbegin() const;
+
+        //- A const_reverse_iterator set to 1 before the end of range
+        inline const_reverse_iterator crbegin() const;
+
+        //- A const_reverse_iterator set to 1 before the begin of range
+        inline const_reverse_iterator rend() const;
+
+        //- A const_reverse_iterator set to 1 before the begin of range
+        inline const_reverse_iterator crend() const;
 
 
     // Iterators
@@ -422,50 +461,39 @@ public:
                 return !(*this < iter);
             }
         };
-
-
-    // Bidirectional input iterators (const)
-
-        //- Return const_iterator to a position within the range,
-        //- with bounds checking.
-        //  \return iterator at the requested position, or end() for
-        //      out-of-bounds
-        inline const_iterator at(const IntType i) const;
-
-        //- A const_iterator set to the beginning of the range
-        inline const_iterator begin() const;
-
-        //- A const_iterator set to the beginning of the range
-        inline const_iterator cbegin() const;
-
-        //- A const_iterator set to 1 beyond the end of the range.
-        inline const_iterator cend() const;
-
-        //- A const_iterator set to 1 beyond the end of the range.
-        inline const_iterator end() const;
-
-
-    // Bidirectional reverse input iterators (const)
-
-        //- A const_reverse_iterator set to 1 before the end of range
-        inline const_reverse_iterator rbegin() const;
-
-        //- A const_reverse_iterator set to 1 before the end of range
-        inline const_reverse_iterator crbegin() const;
-
-        //- A const_reverse_iterator set to 1 before the begin of range
-        inline const_reverse_iterator rend() const;
-
-        //- A const_reverse_iterator set to 1 before the begin of range
-        inline const_reverse_iterator crend() const;
 };
+
+
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+// Identity function for common integer types
+
+//- Identity map from an int32_t IntRange
+List<label> identity(const IntRange<int32_t>& range);
+
+#if defined(WM_LABEL_SIZE) && (WM_LABEL_SIZE >= 64)
+//- Identity map from an int64_t IntRange
+List<label> identity(const IntRange<int64_t>& range);
+#endif
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
+// Input operators for common integer types
+
+//- Read IntRange from Istream as bracketed (start size) tuple, no checks
+Istream& operator>>(Istream& os, IntRange<int32_t>& range);
+
+//- Read IntRange from Istream as bracketed (start size) tuple, no checks
+Istream& operator>>(Istream& os, IntRange<int64_t>& range);
+
+
 // Output operators for common integer types
 
+//- Write IntRange to Ostream as bracketed (start size) tuple
 Ostream& operator<<(Ostream& os, const IntRange<int32_t>& range);
+
+//- Write IntRange to Ostream as bracketed (start size) tuple
 Ostream& operator<<(Ostream& os, const IntRange<int64_t>& range);
 
 

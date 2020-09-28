@@ -71,6 +71,11 @@ int main(int argc, char *argv[])
     }
 
     {
+        labelRange range(5, 10);
+        Info<< "identity: " << identity(range) << nl;
+    }
+
+    {
         Info<<"test sorting" << endl;
         DynamicList<labelRange> list1(10);
         list1.append(labelRange(25, 8));

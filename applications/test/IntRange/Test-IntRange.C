@@ -20,6 +20,7 @@ Description
 #include "argList.H"
 #include "labelPair.H"
 #include "IntRange.H"
+#include "StringStream.H"
 
 using namespace Foam;
 
@@ -66,11 +67,21 @@ int main(int argc, char *argv[])
 
     typedef IntRange<int> intRange;
 
-    Info<< "Default construct int(32): " << IntRange<int32_t>() << nl
-        << "Default construct int(64): " << IntRange<int64_t>() << nl;
+    Info<< "Default construct int32_t: " << IntRange<int32_t>() << nl
+        << "Default construct int64_t: " << IntRange<int64_t>() << nl;
 
     Info<< "  one: " << intRange(10) << nl
         << "  two: " << intRange(5, 10) << nl;
+
+    // Read from stream
+    {
+        IStringStream is("(10 100)");
+        intRange range;
+
+        is >> range;
+
+        Info<< "From stream int32_t: " << range << nl;
+    }
 
     for
     (

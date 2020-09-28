@@ -25,15 +25,32 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "label.H"
 #include "token.H"
+#include "List.H"
+#include "Istream.H"
 #include "Ostream.H"
+#include <numeric>
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-#if 0
+
+    template<class T>
+    inline static List<label> makeIdentity(const IntRange<T>& range)
+    {
+        if (range.size() < 0)
+        {
+            // Skip this check?
+            return List<label>();
+        }
+
+        List<label> result(range.size());
+        std::iota(result.begin(), result.end(), range.start());
+
+        return result;
+    }
+
     template<class T>
     inline static Istream& input(Istream& is, IntRange<T>& range)
     {
@@ -44,7 +61,6 @@ namespace Foam
         is.check(FUNCTION_NAME);
         return is;
     }
-#endif
 
     template<class T>
     inline static Ostream& output(Ostream& os, const IntRange<T>& range)
@@ -56,12 +72,28 @@ namespace Foam
         os.check(FUNCTION_NAME);
         return os;
     }
+
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+Foam::List<Foam::label> Foam::identity(const IntRange<int32_t>& range)
+{
+    return makeIdentity(range);
 }
+
+
+#if defined(WM_LABEL_SIZE) && (WM_LABEL_SIZE >= 64)
+Foam::List<Foam::label> Foam::identity(const IntRange<int64_t>& range)
+{
+    return makeIdentity(range);
+}
+#endif
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-#if 0
 Foam::Istream& Foam::operator>>(Istream& is, IntRange<int32_t>& range)
 {
     return input(is, range);
@@ -72,7 +104,6 @@ Foam::Istream& Foam::operator>>(Istream& is, IntRange<int64_t>& range)
 {
     return input(is, range);
 }
-#endif
 
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const IntRange<int32_t>& range)

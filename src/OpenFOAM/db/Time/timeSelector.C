@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,7 @@ Foam::timeSelector::timeSelector(const std::string& str)
 
 bool Foam::timeSelector::selected(const instant& value) const
 {
-    return scalarRanges::operator()(value.value());
+    return scalarRanges::match(value.value());
 }
 
 

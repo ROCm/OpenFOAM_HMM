@@ -94,6 +94,42 @@ void printInfo(const sliceCoeffs& coeffs)
 }
 
 
+void printForLoop(const sliceRange& range)
+{
+    Info<< "for " << range << nl
+        << "  >";
+
+    for (const label val : range)
+    {
+        Info<< ' ' << val;
+    }
+
+    Info<< nl;
+}
+
+
+template<class IteratorType>
+void printIteratorTest(IteratorType& iter)
+{
+    const auto iter2 = (iter - 5);
+    const auto iter3 = (iter + 5);
+
+    // Info<< typeid(iter).name() << nl;
+
+    Info<< "begin: " << *iter++;
+    Info<< " next: " << *iter;
+    Info<< " next: " << *(++iter);
+    Info<< " [5]: " << iter[5];
+    Info<< " +10: " << *(iter + 10);
+    Info<< " -10: " << *(iter - 10);
+    Info<< nl;
+
+    Info<< "compare: " << *iter2 << " and " << *iter3 << nl;
+    Info<< "   == " << (iter2 == iter3) << nl;
+    Info<< "   <  " << (iter2 < iter3) << nl;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //  Main program:
 
@@ -119,12 +155,25 @@ int main(int argc, char *argv[])
         printInfo(coeffs);
     }
 
+    // Some iterator tests
+    {
+        const sliceRange range(25, 8, 3);
+
+        auto iter1 = range.begin();
+        Info<< nl << "Forward iterator for " << range << nl;
+        printIteratorTest(iter1);
+
+        auto iter2 = range.rbegin();
+        Info<< nl << "Reverse iterator for " << range << nl;
+        printIteratorTest(iter2);
+    }
+
 
     // Generator
     {
         sliceRange range(25, 8, 3);
 
-        Info<< "Generator for " << range << nl;
+        Info<< nl << "Generator for " << range << nl;
 
         auto gen = range.generator();
 
@@ -214,6 +263,16 @@ int main(int argc, char *argv[])
 
         Info<< nl << "set values: " << flatOutput(slice1) << nl
             << " = " << flatOutput(list1) << nl;
+    }
+
+
+    // For loops
+    {
+        Info<< nl << "Test for loops" << nl;
+
+        printForLoop(sliceRange(25, 8, -2));
+        printForLoop(sliceRange(10, 3, 0));
+        printForLoop(sliceRange(10, 3, 2));
     }
 
     Info<< "\nEnd\n" << endl;

@@ -58,9 +58,7 @@ template<class T, unsigned N> class FixedList;
 
 class sliceRange
 {
-protected:
-
-    // Protected Data
+    // Private Data
 
         //- The start of the interval
         label start_;
@@ -177,15 +175,13 @@ public:
         //- Return const_iterator to a position within the range,
         //- with bounds checking.
         //  \return iterator at the requested position, or end() for
-        //      out of bounds
+        //      out-of-bounds
         inline const_iterator at(const label i) const;
 
         //- A const_iterator set to the beginning of the range
-        //  The value returned is guaranteed to be the same as start()
         inline const_iterator begin() const;
 
         //- A const_iterator set to the beginning of the range
-        //  The value returned is guaranteed to be the same as start()
         inline const_iterator cbegin() const;
 
         //- A const_iterator set to 1 beyond the end of the range.
@@ -232,7 +228,7 @@ public:
             //- Default construct with zero value and stride = 1
             inline constexpr indexer() noexcept;
 
-            //- Construct with specified value and stride,
+            //- Construct with specified value and stride
             inline constexpr indexer
             (
                 const label val,
@@ -241,6 +237,18 @@ public:
 
 
         // Member Functions
+
+            //- The current value
+            constexpr label value() const noexcept { return value_; }
+
+            //- The stride
+            constexpr label stride() const noexcept { return stride_; }
+
+            //- Value with offset
+            constexpr label value(const label n) const noexcept
+            {
+                return value_ + (n * stride_);
+            }
 
             //- Decrement value
             void prev() noexcept { value_ -= stride_; }
@@ -254,12 +262,6 @@ public:
             //- Increase value
             void next(const label n) noexcept { value_ += (n * stride_); }
 
-            //- Test for equality of values, ignore stride
-            constexpr bool equals(const indexer& other) const noexcept
-            {
-                return (value_ == other.value_);
-            }
-
 
         // Member Operators
 
@@ -269,7 +271,7 @@ public:
             //- Apply a postfix increment and return the current value.
             //  This operator definition is required for a generator -
             //  see std::generate()
-            inline label operator()();
+            inline label operator()() noexcept;
         };
 
 
@@ -281,7 +283,7 @@ public:
         public:
 
             // STL definitions (as per std::iterator)
-            typedef std::bidirectional_iterator_tag iterator_category;
+            typedef std::random_access_iterator_tag iterator_category;
 
 
         // Constructors
@@ -292,28 +294,81 @@ public:
 
         // Member Operators
 
+            //- Offset dereference operator
+            inline constexpr label operator[](const label n) const noexcept;
+
             //- Prefix increment
             inline const_iterator& operator++() noexcept;
 
-            //- Arbitrary increment
-            inline const_iterator& operator+=(const label n) noexcept;
+            //- Postfix increment
+            inline const_iterator operator++(int) noexcept;
 
             //- Prefix decrement
             inline const_iterator& operator--() noexcept;
 
+            //- Postfix decrement
+            inline const_iterator operator--(int) noexcept;
+
+            //- Arbitrary increment
+            inline const_iterator& operator+=(const label n) noexcept;
+
             //- Arbitrary decrement
             inline const_iterator& operator-=(const label n) noexcept;
 
-            //- Test for equality of values, ignore stride
-            constexpr bool operator==(const const_iterator& iter) const noexcept
+            //- Return iterator with offset
+            inline constexpr const_iterator operator+
+            (
+                const label n
+            ) const noexcept;
+
+            //- Return iterator with offset
+            inline constexpr const_iterator operator-
+            (
+                const label n
+            ) const noexcept;
+
+            //- Difference operator
+            inline constexpr label operator-
+            (
+                const const_iterator& iter
+            ) const noexcept;
+
+
+        // Comparison
+
+            //- Test for equality of values (ignore stride)
+            inline constexpr bool operator==(const const_iterator& iter)
+            const noexcept;
+
+            //- Compare less-than values (ignore stride)
+            inline constexpr bool operator<(const const_iterator& iter)
+            const noexcept;
+
+
+        // Derived comparisons
+
+            constexpr bool operator!=(const const_iterator& iter)
+            const noexcept
             {
-                return equals(iter);
+                return !(*this == iter);
             }
 
-            //- Test for inequality of values, ignore stride
-            constexpr bool operator!=(const const_iterator& iter) const noexcept
+            constexpr bool operator<=(const const_iterator& iter)
+            const noexcept
             {
-                return !equals(iter);
+                return !(iter < *this);
+            }
+
+            constexpr bool operator>(const const_iterator& iter)
+            const noexcept
+            {
+                return (iter < *this);
+            }
+
+            constexpr bool operator>=(const const_iterator& iter)
+            const noexcept
+            {
+                return !(*this < iter);
             }
         };
 
@@ -326,7 +381,7 @@ public:
         public:
 
             // STL definitions (as per std::iterator)
-            typedef std::bidirectional_iterator_tag iterator_category;
+            typedef std::random_access_iterator_tag iterator_category;
 
 
         // Constructors
@@ -337,30 +392,81 @@ public:
 
         // Member Operators
 
+            //- Offset dereference operator
+            inline constexpr label operator[](const label n) const noexcept;
+
             //- Prefix increment
             inline const_reverse_iterator& operator++() noexcept;
 
-            //- Arbitrary increment
-            inline const_reverse_iterator& operator+=(const label n) noexcept;
+            //- Postfix increment
+            inline const_reverse_iterator operator++(int) noexcept;
 
             //- Prefix decrement
             inline const_reverse_iterator& operator--() noexcept;
 
+            //- Postfix decrement
+            inline const_reverse_iterator operator--(int) noexcept;
+
+            //- Arbitrary increment
+            inline const_reverse_iterator& operator+=(const label n) noexcept;
+
             //- Arbitrary decrement
             inline const_reverse_iterator& operator-=(const label n) noexcept;
 
-            //- Test for equality of values (not stride)
-            constexpr bool operator==(const const_reverse_iterator& iter)
-            const noexcept
-            {
-                return equals(iter);
-            }
+            //- Return iterator with offset
+            inline constexpr const_reverse_iterator operator+
+            (
+                const label n
+            ) const noexcept;
 
-            //- Test for inequality of values (not stride)
+            //- Return iterator with offset
+            inline constexpr const_reverse_iterator operator-
+            (
+                const label n
+            ) const noexcept;
+
+            //- Difference operator
+            inline constexpr label operator-
+            (
+                const const_reverse_iterator& iter
+            ) const noexcept;
+
+
+        // Comparison
+
+            //- Test for equality of values (ignore stride)
+            inline constexpr bool operator==(const const_reverse_iterator& iter)
+            const noexcept;
+
+            //- Reverse compare less-than values (ignore stride)
+            inline constexpr bool operator<(const const_reverse_iterator& iter)
+            const noexcept;
+
+
+        // Derived comparisons
+
             constexpr bool operator!=(const const_reverse_iterator& iter)
             const noexcept
             {
-                return !equals(iter);
+                return !(*this == iter);
+            }
+
+            constexpr bool operator<=(const const_reverse_iterator& iter)
+            const noexcept
+            {
+                return !(iter < *this);
+            }
+
+            constexpr bool operator>(const const_reverse_iterator& iter)
+            const noexcept
+            {
+                return (iter < *this);
+            }
+
+            constexpr bool operator>=(const const_reverse_iterator& iter)
+            const noexcept
+            {
+                return !(*this < iter);
             }
         };
 };
