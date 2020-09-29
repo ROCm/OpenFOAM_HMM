@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -387,12 +387,7 @@ void getInterfaceSizes
         if (Pstream::master())
         {
             // Receive and add to my sizes
-            for
-            (
-                int slave=Pstream::firstSlave();
-                slave<=Pstream::lastSlave();
-                slave++
-            )
+            for (const int slave : Pstream::subProcs())
             {
                 IPstream fromSlave(Pstream::commsTypes::blocking, slave);
 

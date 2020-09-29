@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -124,12 +124,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
         );
 
         // Send patches
-        for
-        (
-            int slave=Pstream::firstSlave();
-            slave<=Pstream::lastSlave();
-            slave++
-        )
+        for (const int slave : Pstream::subProcs())
         {
             OPstream toSlave(Pstream::commsTypes::scheduled, slave);
             toSlave << patchEntries;

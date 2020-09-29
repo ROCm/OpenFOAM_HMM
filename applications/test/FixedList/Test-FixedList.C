@@ -297,12 +297,7 @@ int main(int argc, char *argv[])
     {
         if (Pstream::master())
         {
-            for
-            (
-                int proci = Pstream::firstSlave();
-                proci <= Pstream::lastSlave();
-                ++proci
-            )
+            for (const int proci : Pstream::subProcs())
             {
                 IPstream fromSlave(Pstream::commsTypes::blocking, proci);
                 FixedList<label, 2> list3(fromSlave);

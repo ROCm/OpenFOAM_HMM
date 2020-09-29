@@ -75,7 +75,7 @@ public:
     static const Enum<commsTypes> commsTypeNames;
 
 
-    // Public classes
+    // Public Classes
 
         //- Structure for communicating between processors
         class commsStruct
@@ -180,7 +180,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- By default this is not a parallel run
         static bool parRun_;
@@ -248,7 +248,7 @@ private:
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Communications type of this stream
         commsTypes commsType_;
@@ -298,7 +298,7 @@ public:
         {}
 
 
-    // Member functions
+    // Member Functions
 
         //- Allocate a new communicator
         static label allocateCommunicator
@@ -374,7 +374,7 @@ public:
         static void addValidParOptions(HashTable<string>& validParOptions);
 
         //- Initialisation function called from main
-        //  Spawns slave processes and initialises inter-communication
+        //  Spawns sub-processes and initialises inter-communication
         static bool init(int& argc, char**& argv, const bool needsThread);
 
         //- Special purpose initialisation function.
@@ -424,7 +424,7 @@ public:
             return haveThreads_;
         }
 
-        //- Number of processes in parallel run
+        //- Number of processes in parallel run, and 1 for serial run
         static label nProcs(const label communicator = 0)
         {
             return procIDs_[communicator].size();
@@ -459,16 +459,18 @@ public:
             return procIDs_[communicator];
         }
 
-        //- Process index of first slave
-        static constexpr int firstSlave() noexcept
+        //- Range of process indices for all processes
+        static IntRange<int> allProcs(const label communicator = 0)
         {
-            return 1;
+            // Proc 0 -> nProcs
+            return IntRange<int>(static_cast<int>(nProcs(communicator)));
         }
 
-        //- Process index of last slave
-        static int lastSlave(const label communicator = 0)
+        //- Range of process indices for sub-processes
+        static IntRange<int> subProcs(const label communicator = 0)
         {
-            return nProcs(communicator) - 1;
+            // Proc 1 -> nProcs
+            return IntRange<int>(1, static_cast<int>(nProcs(communicator)-1));
         }
 
         //- Communication schedule for linear all-to-master (proc 0)
@@ -571,6 +573,23 @@ public:
             int recvSize,
             const label communicator = 0
         );
+
+
+    // Housekeeping
+
+        //- Process index of first sub-process
+        //  \deprecated(2020-09) use subProcs() method instead
+        static constexpr int firstSlave() noexcept
+        {
+            return 1;
+        }
+
+        //- Process index of last sub-process
+        //  \deprecated(2020-09) use subProcs() method instead
+        static int lastSlave(const label communicator = 0)
+        {
+            return nProcs(communicator) - 1;
+        }
 };
 
 

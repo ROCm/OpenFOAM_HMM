@@ -489,7 +489,7 @@ Foam::label Foam::DistributedDelaunayMesh<Triangulation>::referVertices
 
     pointMap.distribute(parallelVertices);
 
-    for (label proci = 0; proci < Pstream::nProcs(); proci++)
+    for (const int proci : Pstream::allProcs())
     {
         const labelList& constructMap = pointMap.constructMap()[proci];
 

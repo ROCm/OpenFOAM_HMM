@@ -391,12 +391,7 @@ void Foam::globalMeshData::calcSharedEdges() const
         // Receive data from slaves and insert
         if (Pstream::parRun())
         {
-            for
-            (
-                int slave=Pstream::firstSlave();
-                slave<=Pstream::lastSlave();
-                slave++
-            )
+            for (const int slave : Pstream::subProcs())
             {
                 // Receive the edges using shared points from the slave.
                 IPstream fromSlave(Pstream::commsTypes::blocking, slave);
@@ -440,12 +435,7 @@ void Foam::globalMeshData::calcSharedEdges() const
         // Send back to slaves.
         if (Pstream::parRun())
         {
-            for
-            (
-                int slave=Pstream::firstSlave();
-                slave<=Pstream::lastSlave();
-                slave++
-            )
+            for (const int slave : Pstream::subProcs())
             {
                 // Receive the edges using shared points from the slave.
                 OPstream toSlave(Pstream::commsTypes::blocking, slave);
@@ -1907,12 +1897,7 @@ Foam::pointField Foam::globalMeshData::sharedPoints() const
         }
 
         // Receive data from slaves and insert
-        for
-        (
-            int slave=Pstream::firstSlave();
-            slave<=Pstream::lastSlave();
-            slave++
-        )
+        for (const int slave : Pstream::subProcs())
         {
             IPstream fromSlave(Pstream::commsTypes::blocking, slave);
 
@@ -1929,12 +1914,7 @@ Foam::pointField Foam::globalMeshData::sharedPoints() const
         }
 
         // Send back
-        for
-        (
-            int slave=Pstream::firstSlave();
-            slave<=Pstream::lastSlave();
-            slave++
-        )
+        for (const int slave : Pstream::subProcs())
         {
             OPstream toSlave
             (

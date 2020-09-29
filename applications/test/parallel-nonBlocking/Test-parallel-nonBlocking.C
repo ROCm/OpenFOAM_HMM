@@ -50,7 +50,6 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-
     #include "setRootCase.H"
     #include "createTime.H"
 
@@ -88,12 +87,7 @@ int main(int argc, char *argv[])
             // Collect my own data
             allData.append(data);
 
-            for
-            (
-                int slave=Pstream::firstSlave();
-                slave<=Pstream::lastSlave();
-                slave++
-            )
+            for (const int slave : Pstream::subProcs())
             {
                 Perr << "master receiving from slave " << slave << endl;
                 UIPstream fromSlave(slave, pBufs);
@@ -106,12 +100,7 @@ int main(int argc, char *argv[])
         PstreamBuffers pBufs2(Pstream::commsTypes::nonBlocking);
         if (Pstream::master())
         {
-            for
-            (
-                int slave=Pstream::firstSlave();
-                slave<=Pstream::lastSlave();
-                slave++
-            )
+            for (const int slave : Pstream::subProcs())
             {
                 Perr << "master sending to slave " << slave << endl;
                 UOPstream toSlave(slave, pBufs2);
@@ -154,7 +143,7 @@ int main(int argc, char *argv[])
     {
         PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
-        for (label proci = 0; proci < Pstream::nProcs(); proci++)
+        for (const int proci : Pstream::allProcs())
         {
             UOPstream toProc(proci, pBufs);
             toProc << Pstream::myProcNo();
@@ -164,7 +153,7 @@ int main(int argc, char *argv[])
         pBufs.finishedSends();
 
         // Consume
-        for (label proci = 0; proci < Pstream::nProcs(); proci++)
+        for (const int proci : Pstream::allProcs())
         {
             UIPstream fromProc(proci, pBufs);
             label data;

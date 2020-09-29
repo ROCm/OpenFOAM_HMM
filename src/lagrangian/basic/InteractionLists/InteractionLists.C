@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1172,7 +1172,7 @@ void Foam::InteractionLists<ParticleType>::sendReferredData
 
     prepareParticlesToRefer(cellOccupancy);
 
-    for (label domain = 0; domain < Pstream::nProcs(); domain++)
+    for (const int domain : Pstream::allProcs())
     {
         const labelList& subMap = cellMap().subMap()[domain];
 
@@ -1211,7 +1211,7 @@ void Foam::InteractionLists<ParticleType>::receiveReferredData
 
     referredParticles_.setSize(cellMap().constructSize());
 
-    for (label domain = 0; domain < Pstream::nProcs(); domain++)
+    for (const int domain : Pstream::allProcs())
     {
         const labelList& constructMap = cellMap().constructMap()[domain];
 

@@ -598,12 +598,7 @@ Foam::fileOperations::masterUncollatedFileOperation::read
                 }
 
                 DynamicList<label> validProcs(Pstream::nProcs(comm));
-                for
-                (
-                    label proci = 0;
-                    proci < Pstream::nProcs(comm);
-                    proci++
-                )
+                for (const int proci : Pstream::allProcs(comm))
                 {
                     if (procValid[proci])
                     {
@@ -647,12 +642,7 @@ Foam::fileOperations::masterUncollatedFileOperation::read
             }
 
             // Read slave files
-            for
-            (
-                label proci = 1;
-                proci < Pstream::nProcs(comm);
-                proci++
-            )
+            for (const int proci : Pstream::subProcs(comm))
             {
                 if (debug)
                 {
@@ -2396,12 +2386,7 @@ Foam::fileOperations::masterUncollatedFileOperation::NewIFstream
             }
             else
             {
-                for
-                (
-                    label proci = 1;
-                    proci < Pstream::nProcs(Pstream::worldComm);
-                    proci++
-                )
+                for (const int proci : Pstream::subProcs(Pstream::worldComm))
                 {
                     readAndSend
                     (

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -169,7 +169,7 @@ void surfaceNoise::readSurfaceData
                 p *= rhoRef_;
 
                 // Send subset of faces to each processor
-                for (label procI = 0; procI < Pstream::nProcs(); ++procI)
+                for (const int procI : Pstream::allProcs())
                 {
                     label face0 = procFaceOffset[procI];
                     label nLocalFace =
@@ -267,7 +267,7 @@ Foam::scalar surfaceNoise::writeSurfaceData
                 allData[faceI] = data[faceI];
             }
 
-            for (label procI = 1; procI < Pstream::nProcs(); ++procI)
+            for (const int procI : Pstream::subProcs())
             {
                 UIPstream fromProc(procI, pBufs);
                 scalarList dataSlice(fromProc);
@@ -370,7 +370,7 @@ Foam::scalar surfaceNoise::surfaceAverage
                 allData[faceI] = data[faceI];
             }
 
-            for (label procI = 1; procI < Pstream::nProcs(); procI++)
+            for (const int procI : Pstream::subProcs())
             {
                 UIPstream fromProc(procI, pBufs);
                 scalarList dataSlice(fromProc);

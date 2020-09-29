@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -445,7 +445,7 @@ void Foam::mergeAndWrite
             pOffset += myPoints.size();
 
             // Receive slave ones
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
+            for (const int slave : Pstream::subProcs())
             {
                 IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
 

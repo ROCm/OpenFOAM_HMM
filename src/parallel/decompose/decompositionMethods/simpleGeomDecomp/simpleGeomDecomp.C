@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -350,7 +350,7 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
             nTotalPoints += points.size();
 
             // Add slaves
-            for (int slave=1; slave<Pstream::nProcs(); ++slave)
+            for (const int slave : Pstream::subProcs())
             {
                 IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
                 pointField nbrPoints(fromSlave);
@@ -367,7 +367,7 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
             labelList finalDecomp(decomposeOneProc(allPoints));
 
             // Send back
-            for (int slave=1; slave<Pstream::nProcs(); ++slave)
+            for (const int slave : Pstream::subProcs())
             {
                 OPstream toSlave(Pstream::commsTypes::scheduled, slave);
                 toSlave << SubField<label>
@@ -435,7 +435,7 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
             nTotalPoints += points.size();
 
             // Add slaves
-            for (int slave=1; slave<Pstream::nProcs(); ++slave)
+            for (const int slave : Pstream::subProcs())
             {
                 IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
                 pointField nbrPoints(fromSlave);
@@ -459,7 +459,7 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
             labelList finalDecomp(decomposeOneProc(allPoints, allWeights));
 
             // Send back
-            for (int slave=1; slave<Pstream::nProcs(); ++slave)
+            for (const int slave : Pstream::subProcs())
             {
                 OPstream toSlave(Pstream::commsTypes::scheduled, slave);
                 toSlave << SubField<label>

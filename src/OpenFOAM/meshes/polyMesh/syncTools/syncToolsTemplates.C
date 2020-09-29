@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -291,12 +291,7 @@ void Foam::syncTools::syncPointMap
             if (Pstream::master())
             {
                 // Receive the edges using shared points from the slave.
-                for
-                (
-                    int slave=Pstream::firstSlave();
-                    slave<=Pstream::lastSlave();
-                    slave++
-                )
+                for (const int slave : Pstream::subProcs())
                 {
                     IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
                     Map<T> nbrValues(fromSlave);
@@ -315,12 +310,7 @@ void Foam::syncTools::syncPointMap
                 }
 
                 // Send back
-                for
-                (
-                    int slave=Pstream::firstSlave();
-                    slave<=Pstream::lastSlave();
-                    slave++
-                )
+                for (const int slave : Pstream::subProcs())
                 {
                     OPstream toSlave(Pstream::commsTypes::scheduled, slave);
                     toSlave << sharedPointValues;
@@ -656,12 +646,7 @@ void Foam::syncTools::syncEdgeMap
         if (Pstream::master())
         {
             // Receive the edges using shared points from the slave.
-            for
-            (
-                int slave=Pstream::firstSlave();
-                slave<=Pstream::lastSlave();
-                slave++
-            )
+            for (const int slave : Pstream::subProcs())
             {
                 IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
                 EdgeMap<T> nbrValues(fromSlave);
@@ -680,14 +665,8 @@ void Foam::syncTools::syncEdgeMap
             }
 
             // Send back
-            for
-            (
-                int slave=Pstream::firstSlave();
-                slave<=Pstream::lastSlave();
-                slave++
-            )
+            for (const int slave : Pstream::subProcs())
             {
-
                 OPstream toSlave(Pstream::commsTypes::scheduled, slave);
                 toSlave << sharedEdgeValues;
             }

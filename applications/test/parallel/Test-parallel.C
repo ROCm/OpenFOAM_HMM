@@ -154,12 +154,7 @@ void testTransfer(const T& input)
 
     if (Pstream::master())
     {
-        for
-        (
-            int slave = Pstream::firstSlave();
-            slave <= Pstream::lastSlave();
-            ++slave
-        )
+        for (const int slave : Pstream::subProcs())
         {
             Perr<< "master receiving from slave " << slave << endl;
             IPstream fromSlave(Pstream::commsTypes::blocking, slave);
@@ -167,12 +162,7 @@ void testTransfer(const T& input)
             perrInfo(data) << endl;
         }
 
-        for
-        (
-            int slave = Pstream::firstSlave();
-            slave <= Pstream::lastSlave();
-            ++slave
-        )
+        for (const int slave : Pstream::subProcs())
         {
             Perr<< "master sending to slave " << slave << endl;
             OPstream toSlave(Pstream::commsTypes::blocking, slave);
@@ -207,12 +197,7 @@ void testTokenized(const T& data)
 
     if (Pstream::master())
     {
-        for
-        (
-            int slave = Pstream::firstSlave();
-            slave <= Pstream::lastSlave();
-            ++slave
-        )
+        for (const int slave : Pstream::subProcs())
         {
             Perr<< "master receiving from slave " << slave << endl;
             IPstream fromSlave(Pstream::commsTypes::blocking, slave);
@@ -220,12 +205,7 @@ void testTokenized(const T& data)
             Perr<< tok.info() << endl;
         }
 
-        for
-        (
-            int slave = Pstream::firstSlave();
-            slave <= Pstream::lastSlave();
-            ++slave
-        )
+        for (const int slave : Pstream::subProcs())
         {
             Perr<< "master sending to slave " << slave << endl;
             OPstream toSlave(Pstream::commsTypes::blocking, slave);

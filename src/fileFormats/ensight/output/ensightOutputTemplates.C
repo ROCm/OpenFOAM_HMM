@@ -63,11 +63,11 @@ bool Foam::ensightOutput::Detail::writeCoordinates
 {
     parallel = parallel && Pstream::parRun();
 
-    const labelRange senders =
+    const IntRange<int> senders =
     (
         parallel
-      ? labelRange(1, Pstream::nProcs()-1)
-      : labelRange()
+      ? Pstream::subProcs()
+      : IntRange<int>()
     );
 
 
@@ -130,11 +130,11 @@ bool Foam::ensightOutput::Detail::writeFieldComponents
 {
     parallel = parallel && Pstream::parRun();
 
-    const labelRange senders =
+    const IntRange<int> senders =
     (
         parallel
-      ? labelRange(1, Pstream::nProcs()-1)
-      : labelRange()
+      ? Pstream::subProcs()
+      : IntRange<int>()
     );
 
 

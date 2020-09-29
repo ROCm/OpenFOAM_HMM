@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +43,7 @@ Type Foam::fileOperations::masterUncollatedFileOperation::scatterList
     PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking, tag, comm);
     if (Pstream::master(comm))
     {
-        for (label proci = 1; proci < Pstream::nProcs(comm); proci++)
+        for (const int proci : Pstream::subProcs(comm))
         {
             UOPstream os(proci, pBufs);
             os << masterLst[proci];

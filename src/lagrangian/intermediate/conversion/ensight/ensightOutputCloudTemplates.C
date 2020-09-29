@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,7 +71,7 @@ bool Foam::ensightOutput::writeCloudField
         }
 
         // Slaves
-        for (int slave=1; slave<Pstream::nProcs(); ++slave)
+        for (const int slave : Pstream::subProcs())
         {
             IPstream fromSlave(comm, slave);
             Field<Type> recv(fromSlave);

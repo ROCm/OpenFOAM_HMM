@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -133,7 +133,7 @@ inline Foam::scalar Foam::SprayCloud<CloudType>::penetration
         // flatten the mass lists
         List<scalar> allMass(nParcelSum, Zero);
         SortableList<scalar> allDist(nParcelSum, Zero);
-        for (label proci = 0; proci < Pstream::nProcs(); proci++)
+        for (const int proci : Pstream::allProcs())
         {
             SubList<scalar>
             (

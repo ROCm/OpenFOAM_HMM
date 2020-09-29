@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -135,12 +135,7 @@ void Foam::vtk::writeListParallel
         List<uint8_t> recv;
 
         // Receive and write
-        for
-        (
-            int slave=Pstream::firstSlave();
-            slave<=Pstream::lastSlave();
-            ++slave
-        )
+        for (const int slave : Pstream::subProcs())
         {
             IPstream fromSlave(Pstream::commsTypes::blocking, slave);
 
@@ -183,12 +178,7 @@ void Foam::vtk::writeListParallel
         labelList recv;
 
         // Receive and write
-        for
-        (
-            int slave=Pstream::firstSlave();
-            slave<=Pstream::lastSlave();
-            ++slave
-        )
+        for (const int slave : Pstream::subProcs())
         {
             IPstream fromSlave(Pstream::commsTypes::blocking, slave);
 
@@ -218,7 +208,6 @@ void Foam::vtk::writeListParallel
 
 
 // * * * * * * * * * * * * * * Legacy Functions  * * * * * * * * * * * * * * //
-
 
 void Foam::vtk::legacy::fileHeader
 (

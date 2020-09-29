@@ -58,24 +58,14 @@ Gather<T0>::Gather(const T0& localData, const bool redistribute)
             *outIter = localData;
 
             // Receive data
-            for
-            (
-                int proci = Pstream::firstSlave();
-                proci <= Pstream::lastSlave();
-                ++proci
-            )
+            for (const int proci : Pstream::subProcs())
             {
                 IPstream fromSlave(Pstream::commsTypes::scheduled, proci);
                 fromSlave >> *(++outIter);
             }
 
             // Send data
-            for
-            (
-                int proci = Pstream::firstSlave();
-                proci <= Pstream::lastSlave();
-                ++proci
-            )
+            for (const int proci : Pstream::subProcs())
             {
                 OPstream toSlave(Pstream::commsTypes::scheduled, proci);
 

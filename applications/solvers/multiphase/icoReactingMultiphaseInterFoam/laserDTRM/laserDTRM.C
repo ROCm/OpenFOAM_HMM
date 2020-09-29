@@ -707,7 +707,7 @@ void Foam::radiation::laserDTRM::calculate()
         Pstream::gatherList(p0);
         Pstream::scatterList(p0);
 
-        for (label proci = 0; proci < Pstream::nProcs(); ++proci)
+        for (const int proci : Pstream::allProcs())
         {
             const pointField& pos = positions[proci];
             const pointField& pfinal = p0[proci];

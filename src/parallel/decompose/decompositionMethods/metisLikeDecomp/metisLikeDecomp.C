@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,7 +78,7 @@ Foam::label Foam::metisLikeDecomp::decomposeGeneral
             allAdjncy[nTotalConnections++] = adjncy[i];
         }
 
-        for (int slave=1; slave<Pstream::nProcs(); ++slave)
+        for (const int slave : Pstream::subProcs())
         {
             IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
             List<label> nbrAdjncy(fromSlave);
@@ -110,7 +110,7 @@ Foam::label Foam::metisLikeDecomp::decomposeGeneral
 
 
         // Send allFinalDecomp back
-        for (int slave=1; slave<Pstream::nProcs(); ++slave)
+        for (const int slave : Pstream::subProcs())
         {
             OPstream toSlave(Pstream::commsTypes::scheduled, slave);
             toSlave << SubList<label>

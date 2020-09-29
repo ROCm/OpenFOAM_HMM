@@ -185,7 +185,7 @@ void printMeshData(const polyMesh& mesh)
     label totProcPatches = 0;
     label maxProcFaces = 0;
 
-    for (label procI = 0; procI < Pstream::nProcs(); ++procI)
+    for (const int procI : Pstream::allProcs())
     {
         Info<< nl
             << "Processor " << procI << nl
@@ -677,7 +677,7 @@ void readFields
                 tmp<GeoField> tsubfld = subsetterPtr->interpolate(fields[i]);
 
                 // Send to all processors that don't have a mesh
-                for (label procI = 1; procI < Pstream::nProcs(); ++procI)
+                for (const int procI : Pstream::subProcs())
                 {
                     if (!haveMesh[procI])
                     {

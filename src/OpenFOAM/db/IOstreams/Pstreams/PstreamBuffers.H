@@ -39,7 +39,7 @@ Description
     \code
         PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
-        for (label proci = 0; proci < Pstream::nProcs(); ++proci)
+        for (const int proci : Pstream::allProcs())
         {
             if (proci != Pstream::myProcNo())
             {
@@ -52,7 +52,7 @@ Description
 
         pBufs.finishedSends();   // no-op for blocking
 
-        for (label proci = 0; proci < Pstream::nProcs(); ++proci)
+        for (const int proci : Pstream::allProcs())
         {
             if (proci != Pstream::myProcNo())
             {
@@ -61,7 +61,6 @@ Description
             }
         }
     \endcode
-
 
 SourceFiles
     PstreamBuffers.C

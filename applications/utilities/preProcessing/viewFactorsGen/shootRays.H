@@ -7,7 +7,7 @@ const label maxDynListLength
     viewFactorDict.getOrDefault<label>("maxDynListLength", 100000)
 );
 
-for (label proci = 0; proci < Pstream::nProcs(); proci++)
+for (const int proci : Pstream::allProcs())
 {
     // Shoot rays from me to proci. Note that even if processor has
     // 0 faces we still need to call findLine to keep calls synced.

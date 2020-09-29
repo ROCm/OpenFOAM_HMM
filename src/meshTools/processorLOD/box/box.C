@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,7 +61,7 @@ void Foam::processorLODs::box::writeBoxes
     );
 
     label verti = 0;
-    for (label proci = 0; proci < Pstream::nProcs(); ++proci)
+    for (const int proci : Pstream::allProcs())
     {
         if (proci == Pstream::myProcNo())
         {
@@ -111,7 +111,7 @@ void Foam::processorLODs::box::setRefineFlags
     PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
     // Identify src boxes that can be refined and send to all remote procs
-    for (label proci = 0; proci < Pstream::nProcs(); ++proci)
+    for (const int proci : Pstream::allProcs())
     {
         if (proci != Pstream::myProcNo())
         {
@@ -124,7 +124,7 @@ void Foam::processorLODs::box::setRefineFlags
 
     // Test each remote src bb with local tgt objects to identify which remote
     // src boxes can/should be refined
-    for (label proci = 0; proci < Pstream::nProcs(); ++proci)
+    for (const int proci : Pstream::allProcs())
     {
         if (proci == Pstream::myProcNo())
         {
@@ -345,7 +345,7 @@ bool Foam::processorLODs::box::doRefineBoxes
     List<DynamicList<label>> newToOld(Pstream::nProcs());
 
 
-    for (label proci = 0; proci < Pstream::nProcs(); ++proci)
+    for (const int proci : Pstream::allProcs())
     {
         if (proci == Pstream::myProcNo())
         {

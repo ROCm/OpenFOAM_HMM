@@ -139,7 +139,7 @@ void Foam::radiation::viewFactor::initialise()
         DebugInFunction
             << "Insert elements in the matrix..." << endl;
 
-        for (label procI = 0; procI < Pstream::nProcs(); procI++)
+        for (const int procI : Pstream::allProcs())
         {
             insertMatrixElements
             (
