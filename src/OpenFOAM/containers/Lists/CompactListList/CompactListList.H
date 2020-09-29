@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 
 template<class T, class Container> class CompactListList;
 
@@ -82,7 +82,7 @@ template<class T, class Container> Ostream& operator<<
 template<class T, class Container = List<T>>
 class CompactListList
 {
-    // Private data
+    // Private Data
 
         label size_;
 
@@ -99,6 +99,7 @@ public:
 
         //- Return a null CompactListList
         inline static const CompactListList<T, Container>& null();
+
 
     // Constructors
 
@@ -129,7 +130,7 @@ public:
         inline CompactListList(CompactListList<T, Container>&& lst);
 
         //- Construct as copy or re-use as specified.
-        inline CompactListList(CompactListList<T, Container>& lst, bool reuse);
+        inline CompactListList(CompactListList<T, Container>& list, bool reuse);
 
         //- Construct from Istream.
         CompactListList(Istream&);
@@ -198,9 +199,8 @@ public:
             //- Swap contents
             void swap(CompactListList<T, Container>& lst);
 
-            //- Transfer the contents of the argument CompactListList
-            //  into this CompactListList and annul the argument list.
-            void transfer(CompactListList<T, Container>& lst);
+            //- Transfer contents into this and annul the argument
+            void transfer(CompactListList<T, Container>& list);
 
 
         // Other
@@ -215,7 +215,7 @@ public:
             inline label whichColumn(const label row, const label index) const;
 
 
-    // Member operators
+    // Member Operators
 
         //- Return subscript-checked row as UList.
         inline UList<T> operator[](const label i);
@@ -242,7 +242,7 @@ public:
         inline void operator=(CompactListList<T, Container>&& lst);
 
 
-    // Istream operator
+    // IO Operators
 
         //- Read CompactListList from Istream, discarding contents
         //  of existing CompactListList.

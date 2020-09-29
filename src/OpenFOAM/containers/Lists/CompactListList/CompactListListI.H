@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,14 +90,19 @@ inline Foam::CompactListList<T, Container>::CompactListList
 template<class T, class Container>
 inline Foam::CompactListList<T, Container>::CompactListList
 (
-    CompactListList<T, Container>& lst,
+    CompactListList<T, Container>& list,
     bool reuse
 )
 :
-    size_(lst.size()),
-    offsets_(lst.offsets_, reuse),
-    m_(lst.m_, reuse)
-{}
+    size_(list.size()),
+    offsets_(list.offsets_, reuse),
+    m_(list.m_, reuse)
+{
+    if (reuse)
+    {
+        list.size_ = 0;
+    }
+}
 
 
 template<class T, class Container>
