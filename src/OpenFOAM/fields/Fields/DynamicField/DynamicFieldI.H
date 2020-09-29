@@ -399,12 +399,13 @@ inline void Foam::DynamicField<T, SizeMin>::swap
     DynamicField<T, AnySizeMin>& lst
 )
 {
-    if (this == &lst)
+    // Cannot compare 'this' for different types, so use cdata()
+    if (this->cdata() == lst.cdata())
     {
         return;  // Self-swap is a no-op
     }
 
-    DynamicList<T, SizeMin>& cur = *this;
+    DynamicField<T, SizeMin>& cur = *this;
 
     // Make addressable size identical to the allocated capacity
     const label oldSize1 = cur.expandStorage();
@@ -439,6 +440,12 @@ inline void Foam::DynamicField<T, SizeMin>::transfer
     DynamicList<T, AnySizeMin>& list
 )
 {
+    // Cannot compare 'this' for different types, so use cdata()
+    if (this->cdata() == list.cdata())
+    {
+        return;  // Self-swap is a no-op
+    }
+
     // Take over storage as-is (without shrink, without using SizeMin)
     // clear addressing and storage for old list.
     capacity_ = list.capacity();
@@ -455,9 +462,10 @@ inline void Foam::DynamicField<T, SizeMin>::transfer
     DynamicField<T, AnySizeMin>& list
 )
 {
-    if (this == &list)
+    // Cannot compare 'this' for different types, so use cdata()
+    if (this->cdata() == list.cdata())
     {
-        return;  // Self-assignment is a no-op
+        return;  // Self-swap is a no-op
     }
 
     // Take over storage as-is (without shrink, without using SizeMin)

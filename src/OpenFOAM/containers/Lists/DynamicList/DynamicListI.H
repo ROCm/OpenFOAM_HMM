@@ -397,7 +397,8 @@ inline void Foam::DynamicList<T, SizeMin>::swap
     DynamicList<T, AnySizeMin>& lst
 )
 {
-    if (this == &lst)
+    // Cannot compare 'this' for different types, so use cdata()
+    if (this->cdata() == lst.cdata())
     {
         return;  // Self-swap is a no-op
     }
@@ -439,7 +440,8 @@ Foam::DynamicList<T, SizeMin>::transfer
     DynamicList<T, AnySizeMin>& lst
 )
 {
-    if (this == &lst)
+    // Cannot compare 'this' for different types, so use cdata()
+    if (this->cdata() == lst.cdata())
     {
         return;  // Self-assignment is a no-op
     }
@@ -811,18 +813,19 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
 
 
 template<class T, int SizeMin>
-template<int SizeMin2>
+template<int AnySizeMin>
 inline void Foam::DynamicList<T, SizeMin>::operator=
 (
-    const DynamicList<T, SizeMin2>& lst
+    const DynamicList<T, AnySizeMin>& list
 )
 {
-    if (this == &lst)
+    // Cannot compare 'this' for different types, so use cdata()
+    if (this->cdata() == list.cdata())
     {
         return;  // Self-assignment is a no-op
     }
 
-    assignDynList(lst);
+    assignDynList(list);
 }
 
 
@@ -875,19 +878,20 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
 
 
 template<class T, int SizeMin>
-template<int SizeMin2>
+template<int AnySizeMin>
 inline void Foam::DynamicList<T, SizeMin>::operator=
 (
-    DynamicList<T, SizeMin2>&& lst
+    DynamicList<T, AnySizeMin>&& list
 )
 {
-    if (this == &lst)
+    // Cannot compare 'this' for different types, so use cdata()
+    if (this->cdata() == list.cdata())
     {
         return;  // Self-assignment is a no-op
     }
 
     clear();
-    transfer(lst);
+    transfer(list);
 }
 
 

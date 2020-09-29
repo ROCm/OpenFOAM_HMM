@@ -471,7 +471,8 @@ inline void Foam::PtrDynList<T, SizeMin>::operator=
     const PtrDynList<T, AnySizeMin>& list
 )
 {
-    if (this == &list)
+    // Cannot compare 'this' for different types, so use cdata()
+    if (this->cdata() == list.cdata())
     {
         return;  // Self-assignment is a no-op
     }
@@ -522,7 +523,8 @@ inline void Foam::PtrDynList<T, SizeMin>::operator=
     PtrDynList<T, AnySizeMin>&& list
 )
 {
-    if (this == &list)
+    // Cannot compare 'this' for different types, so use cdata()
+    if (this->cdata() == list.cdata())
     {
         return;  // Self-assignment is a no-op
     }
