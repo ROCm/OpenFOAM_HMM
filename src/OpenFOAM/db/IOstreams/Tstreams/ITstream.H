@@ -99,6 +99,22 @@ public:
             setGood();
         }
 
+        //- Construct empty stream with given name
+        explicit ITstream
+        (
+            const string& name,
+            IOstreamOption streamOpt = IOstreamOption()
+        )
+        :
+            Istream(streamOpt),
+            tokenList(),
+            name_(name),
+            tokenIndex_(0)
+        {
+            setOpened();
+            setGood();
+        }
+
         //- Construct from components
         ITstream
         (
@@ -300,21 +316,21 @@ public:
             //- incrementing the index.
             void append(token&& t, const bool lazy);
 
-            //- Copy append a tokenList at the current tokenIndex,
+            //- Copy append a list of tokens at the current tokenIndex,
             //- incrementing the index.
             //
             //  \param newTokens the list of tokens to copy append
             //  \param lazy leaves any excess capacity for further appends.
             //      The caller will be responsible for resizing later.
-            void append(const tokenList& newTokens, const bool lazy);
+            void append(const UList<token>& newTokens, const bool lazy);
 
-            //- Move append a tokenList at the current tokenIndex,
+            //- Move append a list of tokens at the current tokenIndex,
             //- incrementing the index.
             //
             //  \param newTokens the list of tokens to move append
             //  \param lazy leaves any excess capacity for further appends.
             //      The caller will be responsible for resizing later.
-            void append(tokenList&& newTokens, const bool lazy);
+            void append(List<token>&& newTokens, const bool lazy);
 
             //- Set flags of stream
             ios_base::fmtflags flags(const ios_base::fmtflags)
@@ -339,10 +355,10 @@ public:
         void operator=(const ITstream& is);
 
         //- Copy assignment of tokens, with rewind()
-        void operator=(const tokenList& toks);
+        void operator=(const UList<token>& toks);
 
         //- Move assignment of tokens, with rewind()
-        void operator=(tokenList&& toks);
+        void operator=(List<token>&& toks);
 };
 
 

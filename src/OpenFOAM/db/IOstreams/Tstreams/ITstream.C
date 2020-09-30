@@ -425,7 +425,7 @@ void Foam::ITstream::append(token&& t, const bool lazy)
 }
 
 
-void Foam::ITstream::append(const tokenList& newTokens, const bool lazy)
+void Foam::ITstream::append(const UList<token>& newTokens, const bool lazy)
 {
     reserveCapacity(tokenIndex_ + newTokens.size(), lazy);
     tokenList& toks = *this;
@@ -438,7 +438,7 @@ void Foam::ITstream::append(const tokenList& newTokens, const bool lazy)
 }
 
 
-void Foam::ITstream::append(tokenList&& newTokens, const bool lazy)
+void Foam::ITstream::append(List<token>&& newTokens, const bool lazy)
 {
     reserveCapacity(tokenIndex_ + newTokens.size(), lazy);
     tokenList& toks = *this;
@@ -465,7 +465,7 @@ void Foam::ITstream::operator=(const ITstream& is)
 }
 
 
-void Foam::ITstream::operator=(const tokenList& toks)
+void Foam::ITstream::operator=(const UList<token>& toks)
 {
     tokenList::operator=(toks);
 
@@ -473,7 +473,7 @@ void Foam::ITstream::operator=(const tokenList& toks)
 }
 
 
-void Foam::ITstream::operator=(tokenList&& toks)
+void Foam::ITstream::operator=(List<token>&& toks)
 {
     tokenList::operator=(std::move(toks));
 

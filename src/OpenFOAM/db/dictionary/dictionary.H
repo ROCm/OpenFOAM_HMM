@@ -187,7 +187,7 @@ public:
 
         public:
 
-            //- Construct null
+            //- Default construct
             Searcher()
             :
                 dict_(nullptr),
@@ -388,7 +388,7 @@ public:
 
     // Constructors
 
-        //- Construct top-level dictionary null
+        //- Default construct, a top-level empty dictionary
         dictionary();
 
         //- Construct top-level empty dictionary with given name

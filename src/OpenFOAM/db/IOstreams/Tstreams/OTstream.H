@@ -80,12 +80,8 @@ public:
             versionNumber ver = currentVersion
         )
         :
-            Ostream(fmt, ver),
-            DynamicList<token>()
-        {
-            setOpened();
-            setGood();
-        }
+            OTstream(IOstreamOption(fmt, ver))
+        {}
 
         //- Copy construct
         OTstream(const OTstream& os)

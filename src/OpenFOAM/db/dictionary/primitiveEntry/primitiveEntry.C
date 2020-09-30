@@ -213,13 +213,11 @@ bool Foam::primitiveEntry::expandVariable
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::primitiveEntry::primitiveEntry(const keyType& key, const ITstream& is)
+Foam::primitiveEntry::primitiveEntry(const keyType& key)
 :
     entry(key),
-    ITstream(is)
-{
-    name() += '.' + keyword();
-}
+    ITstream(key, tokenList())
+{}
 
 
 Foam::primitiveEntry::primitiveEntry(const keyType& key, const token& tok)
@@ -249,6 +247,15 @@ Foam::primitiveEntry::primitiveEntry
     entry(key),
     ITstream(key, std::move(tokens))
 {}
+
+
+Foam::primitiveEntry::primitiveEntry(const keyType& key, const ITstream& is)
+:
+    entry(key),
+    ITstream(is)
+{
+    name() += '.' + key;
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

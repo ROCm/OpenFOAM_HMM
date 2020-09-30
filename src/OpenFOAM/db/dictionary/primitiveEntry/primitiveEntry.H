@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,6 +54,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class dictionary;
 
 /*---------------------------------------------------------------------------*\
@@ -104,14 +105,9 @@ public:
 
     // Constructors
 
-        //- Construct from keyword and a Istream
-        primitiveEntry(const keyType& key, Istream& is);
-
-        //- Construct from keyword, parent dictionary and Istream
-        primitiveEntry(const keyType& key, const dictionary& dict, Istream& is);
-
-        //- Construct from keyword and a ITstream
-        primitiveEntry(const keyType& key, const ITstream& is);
+        //- Construct from keyword and no tokens.
+        //  Contents to be filled with a later assignment
+        explicit primitiveEntry(const keyType& key);
 
         //- Construct from keyword and a single token
         primitiveEntry(const keyType& key, const token& tok);
@@ -122,10 +118,20 @@ public:
         //- Construct from keyword and by transferring a list of tokens
         primitiveEntry(const keyType& key, List<token>&& tokens);
 
-        //- Construct from keyword and a T
+        //- Construct from keyword and ITstream tokens
+        primitiveEntry(const keyType& key, const ITstream& is);
+
+        //- Construct from keyword and Istream
+        primitiveEntry(const keyType& key, Istream& is);
+
+        //- Construct from keyword, parent dictionary and Istream
+        primitiveEntry(const keyType& key, const dictionary& dict, Istream& is);
+
+        //- Construct from keyword and a value. Uses string stream serialization
         template<class T>
         primitiveEntry(const keyType& key, const T& val);
 
+        //- Clone the entry
         autoPtr<entry> clone(const dictionary&) const
         {
             return autoPtr<entry>(new primitiveEntry(*this));
