@@ -108,24 +108,13 @@ inline Foam::scalar Foam::hTabulatedThermo<EquationOfState>::S
 
 
 template<class EquationOfState>
-inline Foam::scalar Foam::hTabulatedThermo<EquationOfState>::dGdT
+inline Foam::scalar Foam::hTabulatedThermo<EquationOfState>::Gstd
 (
-    const scalar p,
     const scalar T
 ) const
 {
-    return 0;
+    return Cp_.intfdT(Pstd, T) + Hf_ - (Cp_.intfByTdT(Pstd, T) + Sf_)*T;
 }
-
-
-// template<class EquationOfState>
-// inline Foam::scalar Foam::hTabulatedThermo<EquationOfState>::Gstd
-// (
-//     const scalar T
-// ) const
-// {
-//     return Cp_.intfdT(Pstd, T) + Hf_ - (Cp_.intfByTdT(Pstd, T) + Sf_)*T;
-// }
 
 
 template<class EquationOfState>

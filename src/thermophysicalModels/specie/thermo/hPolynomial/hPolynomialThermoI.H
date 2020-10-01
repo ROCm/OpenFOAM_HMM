@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -129,18 +130,12 @@ inline Foam::scalar Foam::hPolynomialThermo<EquationOfState, PolySize>::S
 
 
 template<class EquationOfState, int PolySize>
-inline Foam::scalar Foam::hPolynomialThermo<EquationOfState, PolySize>::dGdT
+inline Foam::scalar Foam::hPolynomialThermo<EquationOfState, PolySize>::Gstd
 (
-    const scalar p,
     const scalar T
 ) const
 {
-    return
-    (
-        hCoeffs_.derivative(T)
-      - T*sCoeffs_.derivative(T)
-      - sCoeffs_.value(T)
-    );
+    return hCoeffs_.value(T) - sCoeffs_.value(T)*T;
 }
 
 

@@ -509,6 +509,18 @@ makeThermos
     constTransport,
     sensibleInternalEnergy,
     eConstThermo,
+    perfectGas,
+    specie
+);
+
+makeThermos
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    constTransport,
+    sensibleInternalEnergy,
+    eConstThermo,
     rPolynomial,
     specie
 );

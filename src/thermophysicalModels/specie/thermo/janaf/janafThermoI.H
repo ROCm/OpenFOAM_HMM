@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -240,14 +241,21 @@ inline Foam::scalar Foam::janafThermo<EquationOfState>::S
 
 
 template<class EquationOfState>
-inline Foam::scalar Foam::janafThermo<EquationOfState>::dGdT
+inline Foam::scalar Foam::janafThermo<EquationOfState>::Gstd
 (
-    const scalar p,
     const scalar T
 ) const
 {
     const coeffArray& a = coeffs(T);
-    return -((a[0] + a[5]/T)/T + a[1]/2 + T*(a[2]/3 + T*(a[3]/4 + T*a[4]/5)));
+    return
+    (
+        (
+            a[0]*(1 - log(T))
+          - (((a[4]/20.0*T + a[3]/12.0)*T + a[2]/6.0)*T + a[1]/2.0)*T
+          - a[6]
+        )*T
+      + a[5]
+    );
 }
 
 

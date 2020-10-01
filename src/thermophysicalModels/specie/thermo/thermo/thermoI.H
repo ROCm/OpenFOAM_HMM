@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -440,15 +441,17 @@ Foam::species::thermo<Thermo, Type>::dKcdTbyKc
     const scalar T
 ) const
 {
-    const scalar nm = this->Y()/this->W();
+    const scalar dKcdTbyKc =
+        (this->S(Pstd, T) + this->Gstd(T)/T)*this->Y()/(RR*T);
 
+    const scalar nm = this->Y()/this->W();
     if (equal(nm, SMALL))
     {
-        return -this->dGdT(Pstd, T)*this->Y()/RR;
+        return dKcdTbyKc;
     }
     else
     {
-        return -(nm/T + this->dGdT(Pstd, T)*this->Y()/RR);
+        return dKcdTbyKc - nm/T;
     }
 }
 

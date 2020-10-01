@@ -79,6 +79,8 @@ makeBaseTurbulenceModel
 #include "Stokes.H"
 makeLaminarModel(Stokes);
 
+#include "generalizedNewtonian.H"
+makeLaminarModel(generalizedNewtonian);
 
 // -------------------------------------------------------------------------- //
 // RAS models
