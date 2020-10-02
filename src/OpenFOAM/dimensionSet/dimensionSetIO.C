@@ -35,7 +35,7 @@ License
 
 Foam::dimensionSet::dimensionSet(const dictionary& dict, const word& entryName)
 {
-    const entry& e = dict.lookupEntry(entryName, keyType::REGEX);
+    const entry& e = dict.lookupEntry(entryName, keyType::LITERAL);
     ITstream& is = e.stream();
 
     is >> *this;

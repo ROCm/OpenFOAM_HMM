@@ -173,7 +173,7 @@ public:
 
     // Constructors
 
-        //- Construct null (dimensionless).
+        //- Default construct (dimensionless).
         dimensionSet();
 
         //- Construct from exponents for the first five or all seven dimensions
