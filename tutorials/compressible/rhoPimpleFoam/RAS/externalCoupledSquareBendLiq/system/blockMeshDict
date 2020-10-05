@@ -16,36 +16,39 @@ FoamFile
 
 scale   0.001;
 
+zmin -25;
+zmax 25;
+
 vertices
 (
-    // front-plane: z = +25mm
+    // front-plane:
     // inlet region
-    (   -50  25   25)           // pt 0
-    (     0  25   25)           // pt 1
-    (   -50  75   25)           // pt 2
-    (     0  75   25)           // pt 3
+    (   -50  25   $zmax)    // pt 0
+    (     0  25   $zmax)    // pt 1
+    (   -50  75   $zmax)    // pt 2
+    (     0  75   $zmax)    // pt 3
     // outlet region
-    (  -500 -75   25)           // pt 4
-    (     0 -75   25)           // pt 5
-    (  -500 -25   25)           // pt 6
-    (     0 -25   25)           // pt 7
+    (  -500 -75   $zmax)    // pt 4
+    (     0 -75   $zmax)    // pt 5
+    (  -500 -25   $zmax)    // pt 6
+    (     0 -25   $zmax)    // pt 7
     // bend mid-points
-    (    25   0   25)           // pt 8
-    (    75   0   25)           // pt 9
-    // back-plane: z = -25mm
+    (    25   0   $zmax)    // pt 8
+    (    75   0   $zmax)    // pt 9
+    // back-plane:
     // inlet region
-    (   -50  25   -25)          // pt 0 + 10
-    (     0  25   -25)          // pt 1 + 10
-    (   -50  75   -25)          // pt 2 + 10
-    (     0  75   -25)          // pt 3 + 10
+    (   -50  25   $zmin)    // pt 0 + 10
+    (     0  25   $zmin)    // pt 1 + 10
+    (   -50  75   $zmin)    // pt 2 + 10
+    (     0  75   $zmin)    // pt 3 + 10
     // outlet region
-    (  -500 -75   -25)          // pt 4 + 10
-    (     0 -75   -25)          // pt 5 + 10
-    (  -500 -25   -25)          // pt 7 + 10
-    (     0 -25   -25)          // pt 8 + 10
+    (  -500 -75   $zmin)    // pt 4 + 10
+    (     0 -75   $zmin)    // pt 5 + 10
+    (  -500 -25   $zmin)    // pt 7 + 10
+    (     0 -25   $zmin)    // pt 8 + 10
     // bend mid-points
-    (    25   0   -25)          // pt 8 + 10
-    (    75   0   -25)          // pt 9 + 10
+    (    25   0   $zmin)    // pt 8 + 10
+    (    75   0   $zmin)    // pt 9 + 10
 );
 
 blocks
@@ -59,16 +62,16 @@ blocks
 
 edges
 (
-   // block 2
-   arc  1  8  ( 17.678  17.678  25)
-   arc 11 18  ( 17.678  17.678 -25)
-   arc  3  9  ( 53.033  53.033  25)
-   arc 13 19  ( 53.033  53.033 -25)
-   // block 3
-   arc  7  8  ( 17.678  -17.678  25)
-   arc 17 18  ( 17.678  -17.678 -25)
-   arc  5  9  ( 53.033  -53.033  25)
-   arc 15 19  ( 53.033  -53.033 -25)
+    // block 2
+    arc  1  8  origin (0 0 $zmax)
+    arc  3  9  origin (0 0 $zmax)
+    arc 11 18  origin (0 0 $zmin)
+    arc 13 19  origin (0 0 $zmin)
+    // block 3
+    arc  7  8  origin (0 0 $zmax)
+    arc  5  9  origin (0 0 $zmax)
+    arc 17 18  origin (0 0 $zmin)
+    arc 15 19  origin (0 0 $zmin)
 );
 
 boundary

@@ -74,14 +74,14 @@ edges #codeStream
 
     code
     #{
-        const scalar xMin = 0.3;
-        const scalar xMax = 1.2;
-        const label nPoints = 100;
-        const scalar dx = (xMax - xMin)/scalar(nPoints - 1);
+        constexpr scalar xMin = 0.3;
+        constexpr scalar xMax = 1.2;
+        constexpr label nPoints = 100;
+        constexpr scalar dx = (xMax - xMin)/scalar(nPoints - 1);
+        constexpr scalar pi = constant::mathematical::pi;
 
         os  << "(" << nl << "spline 2 3" << nl;
         pointField profile(nPoints);
-        const scalar pi = constant::mathematical::pi;
 
         for (label i = 0; i < nPoints; ++i)
         {

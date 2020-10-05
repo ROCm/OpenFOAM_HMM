@@ -73,20 +73,21 @@ blocks
 
 edges
 (
-    arc  8  9 (-3.46410161513775 2 0)
-    arc  9 10 (-4                0 0)
-    arc 10 11 (-3.46410161513775 2 0)
-    arc 11 13 ( 0                4 0)
-    arc 13 12 ( 4                0 0)
-    arc 12  8 ( 0               -4 0)
+    arc  8  9 origin (0 0 0)
+    arc  9 10 origin (0 0 0)
+    arc 10 11 origin (0 0 0)
+    arc 11 13 origin (0 0 0)
+    arc 13 12 origin (0 0 0)
+    arc 12  8 origin (0 0 0)
 
-    arc 26 27 (-3.46410161513775 2 1)
-    arc 27 28 (-4                0 1)
-    arc 28 29 (-3.46410161513775 2 1)
-    arc 29 31 ( 0                4 1)
-    arc 31 30 ( 4                0 1)
-    arc 30 26 ( 0               -4 1)
+    arc 26 27 origin (0 0 1)
+    arc 27 28 origin (0 0 1)
+    arc 28 29 origin (0 0 1)
+    arc 29 31 origin (0 0 1)
+    arc 31 30 origin (0 0 1)
+    arc 30 26 origin (0 0 1)
 );
+
 
 defaultPatch
 {

@@ -16,65 +16,71 @@ FoamFile
 
 scale   1;
 
+// Geometric parameters
+outerRadius 1;
+
+// Divisions in x/y/z directions. Can be unequal.
+nx   10;
+ny   $nx;
+nz   $nx;
+
 geometry
 {
     sphere
     {
         type   sphere;
         origin (0 0 0);
-        radius 1;
+        radius $outerRadius;
     }
 }
 
-v 0.5773502;
-mv -0.5773502;
-
-a 0.7071067;
-ma -0.7071067;
+// Box sizes
+vo   #eval{ sqrt($outerRadius/3) };
+mvo  #eval{ -$vo };
 
 vertices
 (
-    ($mv $mv $mv)
-    ( $v $mv $mv)
-    ( $v  $v $mv)
-    ($mv  $v $mv)
-    ($mv $mv  $v)
-    ( $v $mv  $v)
-    ( $v  $v  $v)
-    ($mv  $v  $v)
+    ($mvo $mvo $mvo)
+    ( $vo $mvo $mvo)
+    ( $vo  $vo $mvo)
+    ($mvo  $vo $mvo)
+    ($mvo $mvo  $vo)
+    ( $vo $mvo  $vo)
+    ( $vo  $vo  $vo)
+    ($mvo  $vo  $vo)
 );
 
 blocks
 (
-    hex (0 1 2 3 4 5 6 7) (10 10 10) simpleGrading (1 1 1)
+    hex (0 1 2 3 4 5 6 7) ($nx $ny $nz) grading (1 1 1)
 );
 
 edges
 (
-    arc 0 1 (0 $ma $ma)
-    arc 2 3 (0 $a $ma)
-    arc 6 7 (0 $a $a)
-    arc 4 5 (0 $ma $a)
+    arc 0 1 origin (0 0 0)
+    arc 2 3 origin (0 0 0)
+    arc 6 7 origin (0 0 0)
+    arc 4 5 origin (0 0 0)
 
-    arc 0 3 ($ma 0 $ma)
-    arc 1 2 ($a 0 $ma)
-    arc 5 6 ($a 0 $a)
-    arc 4 7 ($ma 0 $a)
+    arc 0 3 origin (0 0 0)
+    arc 1 2 origin (0 0 0)
+    arc 5 6 origin (0 0 0)
+    arc 4 7 origin (0 0 0)
 
-    arc 0 4 ($ma $ma 0)
-    arc 1 5 ($a $ma 0)
-    arc 2 6 ($a $a 0)
-    arc 3 7 ($ma $a 0)
+    arc 0 4 origin (0 0 0)
+    arc 1 5 origin (0 0 0)
+    arc 2 6 origin (0 0 0)
+    arc 3 7 origin (0 0 0)
 );
 
 faces
 (
-    project (0 4 7 3) sphere
-    project (2 6 5 1) sphere
-    project (1 5 4 0) sphere
-    project (3 7 6 2) sphere
-    project (0 3 2 1) sphere
-    project (4 5 6 7) sphere
+    project (0 4 7 3) sphere  // x-min
+    project (1 2 6 5) sphere  // x-max
+    project (0 1 5 4) sphere  // y-min
+    project (3 7 6 2) sphere  // y-max
+    project (0 3 2 1) sphere  // z-min
+    project (4 5 6 7) sphere  // z-max
 );
 
 boundary
@@ -84,12 +90,12 @@ boundary
         type wall;
         faces
         (
-            (0 4 7 3)
-            (2 6 5 1)
-            (1 5 4 0)
-            (3 7 6 2)
-            (0 3 2 1)
-            (4 5 6 7)
+            (0 4 7 3)  // x-min
+            (1 2 6 5)  // x-max
+            (0 1 5 4)  // y-min
+            (3 7 6 2)  // y-max
+            (0 3 2 1)  // z-min
+            (4 5 6 7)  // z-max
         );
     }
 );

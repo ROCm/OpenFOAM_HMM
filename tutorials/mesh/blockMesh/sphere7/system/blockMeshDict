@@ -17,103 +17,115 @@ FoamFile
 scale   1;
 verbose no;
 
+// Geometric parameters
+outerRadius 1;
+innerRatio  0.7;
+
+// Divisions in x/y/z and radial directions. Can be unequal.
+nx   10;
+ny   $nx;
+nz   $nx;
+nr   6;
+
 geometry
 {
     sphere
     {
         type   sphere;
         origin (0 0 0);
-        radius 1;
+        radius $outerRadius;
     }
 }
 
+// Outer box sizes
+vo   #eval{ sqrt($outerRadius/3) };
+mvo  #eval{ -$vo };
 
-n    10;
-
-v    0.5773502;
-mv  -0.5773502;
-vh   0.2886751;
-mvh -0.2886751;
-
-a    0.7071067;
-ma  -0.7071067;
-ah   0.3464101;
-mah -0.3464101;
+// Inner box sizes - % of overall dimension
+vi   #eval{ $innerRatio*$vo };
+mvi  #eval{ $innerRatio*$mvo };
 
 vertices
 (
-    ($mvh $mvh $mvh)
-    ( $vh $mvh $mvh)
-    ( $vh  $vh $mvh)
-    ($mvh  $vh $mvh)
-    ($mvh $mvh  $vh)
-    ( $vh $mvh  $vh)
-    ( $vh  $vh  $vh)
-    ($mvh  $vh  $vh)
+    // Inner block
+    ($mvi $mvi $mvi)
+    ( $vi $mvi $mvi)
+    ( $vi  $vi $mvi)
+    ($mvi  $vi $mvi)
+    ($mvi $mvi  $vi)
+    ( $vi $mvi  $vi)
+    ( $vi  $vi  $vi)
+    ($mvi  $vi  $vi)
 
-    ($mv $mv $mv)
-    ( $v $mv $mv)
-    ( $v  $v $mv)
-    ($mv  $v $mv)
-    ($mv $mv  $v)
-    ( $v $mv  $v)
-    ( $v  $v  $v)
-    ($mv  $v  $v)
+    // Outer blocks
+    ($mvo $mvo $mvo)
+    ( $vo $mvo $mvo)
+    ( $vo  $vo $mvo)
+    ($mvo  $vo $mvo)
+    ($mvo $mvo  $vo)
+    ( $vo $mvo  $vo)
+    ( $vo  $vo  $vo)
+    ($mvo  $vo  $vo)
 );
 
 blocks
 (
-    hex ( 0  1  2  3  4  5  6  7) ($n $n $n) simpleGrading (1 1 1)
-    hex ( 9  8 12 13  1  0  4  5) ($n $n $n) simpleGrading (1 1 1)
-    hex (10  9 13 14  2  1  5  6) ($n $n $n) simpleGrading (1 1 1)
-    hex (11 10 14 15  3  2  6  7) ($n $n $n) simpleGrading (1 1 1)
-    hex ( 8 11 15 12  0  3  7  4) ($n $n $n) simpleGrading (1 1 1)
-    hex ( 8  9 10 11  0  1  2  3) ($n $n $n) simpleGrading (1 1 1)
-    hex (13 12 15 14  5  4  7  6) ($n $n $n) simpleGrading (1 1 1)
+    hex (0 1 2 3 4 5 6 7) ($nx $ny $nz) grading (1 1 1)  // Inner block
+
+    // Outer blocks
+    hex ( 8  0  3 11 12  4  7 15) ($nr $ny $nz) grading (1 1 1)  // x-min
+    hex ( 1  9 10  2  5 13 14  6) ($nr $ny $nz) grading (1 1 1)  // x-max
+    hex ( 8  9  1  0 12 13  5  4) ($nx $nr $nz) grading (1 1 1)  // y-min
+    hex ( 3  2 10 11  7  6 14 15) ($nx $nr $nz) grading (1 1 1)  // y-max
+    hex ( 8  9 10 11  0  1  2  3) ($nx $ny $nr) grading (1 1 1)  // z-min
+    hex ( 4  5  6  7 12 13 14 15) ($nx $ny $nr) grading (1 1 1)  // z-max
 );
+
 
 edges
 (
-    arc  8  9 (0 $ma $ma)
-    arc 10 11 (0 $a $ma)
-    arc 14 15 (0 $a $a)
-    arc 12 13 (0 $ma $a)
+    // Outer blocks
+    arc  8  9 origin (0 0 0)
+    arc 10 11 origin (0 0 0)
+    arc 14 15 origin (0 0 0)
+    arc 12 13 origin (0 0 0)
 
-    arc  8 11 ($ma 0 $ma)
-    arc  9 10 ($a 0 $ma)
-    arc 13 14 ($a 0 $a)
-    arc 12 15 ($ma 0 $a)
+    arc  8 11 origin (0 0 0)
+    arc  9 10 origin (0 0 0)
+    arc 13 14 origin (0 0 0)
+    arc 12 15 origin (0 0 0)
 
-    arc  8 12 ($ma $ma 0)
-    arc  9 13 ($a $ma 0)
-    arc 10 14 ($a $a 0)
-    arc 11 15 ($ma $a 0)
+    arc  8 12 origin (0 0 0)
+    arc  9 13 origin (0 0 0)
+    arc 10 14 origin (0 0 0)
+    arc 11 15 origin (0 0 0)
 
+    // Inner block - flattened by factor 1.1
+    arc 0 1 origin 1.1 (0 0 0)
+    arc 2 3 origin 1.1 (0 0 0)
+    arc 6 7 origin 1.1 (0 0 0)
+    arc 4 5 origin 1.1 (0 0 0)
 
-    arc  0  1 (0 $mah $mah)
-    arc  2  3 (0 $ah $mah)
-    arc  6  7 (0 $ah $ah)
-    arc  4  5 (0 $mah $ah)
+    arc 0 3 origin 1.1 (0 0 0)
+    arc 1 2 origin 1.1 (0 0 0)
+    arc 5 6 origin 1.1 (0 0 0)
+    arc 4 7 origin 1.1 (0 0 0)
 
-    arc  0  3 ($mah 0 $mah)
-    arc  1  2 ($ah 0 $mah)
-    arc  5  6 ($ah 0 $ah)
-    arc  4  7 ($mah 0 $ah)
-
-    arc  0  4 ($mah $mah 0)
-    arc  1  5 ($ah $mah 0)
-    arc  2  6 ($ah $ah 0)
-    arc  3  7 ($mah $ah 0)
+    arc 0 4 origin 1.1 (0 0 0)
+    arc 1 5 origin 1.1 (0 0 0)
+    arc 2 6 origin 1.1 (0 0 0)
+    arc 3 7 origin 1.1 (0 0 0)
 );
 
 faces
 (
-    project ( 8 12 15 11) sphere
-    project (10 14 13  9) sphere
-    project ( 9 13 12  8) sphere
-    project (11 15 14 10) sphere
-    project ( 8 11 10  9) sphere
-    project (12 13 14 15) sphere
+    // Outer blocks
+    project ( 8 12 15 11) sphere  // x-min
+    project ( 9 10 14 13) sphere  // x-max
+    project ( 8  9 13 12) sphere  // y-min
+    project (11 15 14 10) sphere  // y-max
+    project ( 8 11 10  9) sphere  // z-min
+    project (12 13 14 15) sphere  // z-max
 );
 
 boundary
@@ -123,12 +135,12 @@ boundary
         type wall;
         faces
         (
-            ( 8 12 15 11)
-            (10 14 13  9)
-            ( 9 13 12  8)
-            (11 15 14 10)
-            ( 8 11 10  9)
-            (12 13 14 15)
+            ( 8 12 15 11)  // x-min
+            ( 9 10 14 13)  // x-max
+            ( 8  9 13 12)  // y-min
+            (11 15 14 10)  // y-max
+            ( 8 11 10  9)  // z-min
+            (12 13 14 15)  // z-max
         );
     }
 );

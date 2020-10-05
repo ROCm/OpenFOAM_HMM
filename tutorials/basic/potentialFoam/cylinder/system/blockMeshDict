@@ -16,6 +16,10 @@ FoamFile
 
 scale   1;
 
+// Front/back locations
+zmin -0.5;
+zmax 0.5;
+
 vertices #codeStream
 {
     codeInclude
@@ -25,34 +29,39 @@ vertices #codeStream
 
     code
     #{
-        pointField points(19);
-        points[0]  = point(0.5, 0, -0.5);
-        points[1]  = point(1, 0, -0.5);
-        points[2]  = point(2, 0, -0.5);
-        points[3]  = point(2, 0.707107, -0.5);
-        points[4]  = point(0.707107, 0.707107, -0.5);
-        points[5]  = point(0.353553, 0.353553, -0.5);
-        points[6]  = point(2, 2, -0.5);
-        points[7]  = point(0.707107, 2, -0.5);
-        points[8]  = point(0, 2, -0.5);
-        points[9]  = point(0, 1, -0.5);
-        points[10] = point(0, 0.5, -0.5);
-        points[11] = point(-0.5, 0, -0.5);
-        points[12] = point(-1, 0, -0.5);
-        points[13] = point(-2, 0, -0.5);
-        points[14] = point(-2, 0.707107, -0.5);
-        points[15] = point(-0.707107, 0.707107, -0.5);
-        points[16] = point(-0.353553, 0.353553, -0.5);
-        points[17] = point(-2, 2, -0.5);
-        points[18] = point(-0.707107, 2, -0.5);
+        // sin(45), cos(45)
+        const scalar sqrt05 = sqrt(0.5);
 
-        // Duplicate z points
-        label sz = points.size();
-        points.setSize(2*sz);
-        for (label i = 0; i < sz; i++)
+        pointField points
+        ({
+            /* 0*/ {0.5, 0, $zmin},
+            /* 1*/ {1, 0, $zmin},
+            /* 2*/ {2, 0, $zmin},
+            /* 3*/ {2, sqrt05, $zmin},
+            /* 4*/ {sqrt05, sqrt05, $zmin},
+            /* 5*/ {sqrt05/2, sqrt05/2, $zmin},
+            /* 6*/ {2, 2, $zmin},
+            /* 7*/ {sqrt05, 2, $zmin},
+            /* 8*/ {0, 2, $zmin},
+            /* 9*/ {0, 1, $zmin},
+            /*10*/ {0, 0.5, $zmin},
+            /*11*/ {-0.5, 0, $zmin},
+            /*12*/ {-1, 0, $zmin},
+            /*13*/ {-2, 0, $zmin},
+            /*14*/ {-2, sqrt05, $zmin},
+            /*15*/ {-sqrt05, sqrt05, $zmin},
+            /*16*/ {-sqrt05/2, sqrt05/2, $zmin},
+            /*17*/ {-2, 2, $zmin},
+            /*18*/ {-sqrt05, 2, $zmin}
+        });
+
+        // Duplicate z points for zmax
+        const label sz = points.size();
+        points.resize(2*sz);
+        for (label i = 0; i < sz; ++i)
         {
             const point& pt = points[i];
-            points[i+sz] = point(pt.x(), pt.y(), -pt.z());
+            points[i + sz] = point(pt.x(), pt.y(), $zmax);
         }
 
         os  << points;
@@ -76,22 +85,24 @@ blocks
 
 edges
 (
-    arc 0 5 (0.469846 0.17101 -0.5)
-    arc 5 10 (0.17101 0.469846 -0.5)
-    arc 1 4 (0.939693 0.34202 -0.5)
-    arc 4 9 (0.34202 0.939693 -0.5)
-    arc 19 24 (0.469846 0.17101 0.5)
-    arc 24 29 (0.17101 0.469846 0.5)
-    arc 20 23 (0.939693 0.34202 0.5)
-    arc 23 28 (0.34202 0.939693 0.5)
-    arc 11 16 (-0.469846 0.17101 -0.5)
-    arc 16 10 (-0.17101 0.469846 -0.5)
-    arc 12 15 (-0.939693 0.34202 -0.5)
-    arc 15 9 (-0.34202 0.939693 -0.5)
-    arc 30 35 (-0.469846 0.17101 0.5)
-    arc 35 29 (-0.17101 0.469846 0.5)
-    arc 31 34 (-0.939693 0.34202 0.5)
-    arc 34 28 (-0.34202 0.939693 0.5)
+    // Inner cylinder
+    arc  0  5 origin (0 0 $zmin)
+    arc  5 10 origin (0 0 $zmin)
+    arc  1  4 origin (0 0 $zmin)
+    arc  4  9 origin (0 0 $zmin)
+    arc 19 24 origin (0 0 $zmax)
+    arc 24 29 origin (0 0 $zmax)
+    arc 20 23 origin (0 0 $zmax)
+    arc 23 28 origin (0 0 $zmax)
+    // Intermediate cylinder
+    arc 11 16 origin (0 0 $zmin)
+    arc 16 10 origin (0 0 $zmin)
+    arc 12 15 origin (0 0 $zmin)
+    arc 15  9 origin (0 0 $zmin)
+    arc 30 35 origin (0 0 $zmax)
+    arc 35 29 origin (0 0 $zmax)
+    arc 31 34 origin (0 0 $zmax)
+    arc 34 28 origin (0 0 $zmax)
 );
 
 boundary
