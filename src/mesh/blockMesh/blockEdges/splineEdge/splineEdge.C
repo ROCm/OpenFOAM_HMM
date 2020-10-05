@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,8 +27,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "splineEdge.H"
+#include "polyLine.H"
 #include "addToRunTimeSelectionTable.H"
-
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -59,7 +59,10 @@ Foam::blockEdges::splineEdge::splineEdge
 )
 :
     blockEdge(points, start, end),
-    CatmullRomSpline(appendEndPoints(points, start, end, internalPoints))
+    CatmullRomSpline
+    (
+        polyLine::concat(points[start_], internalPoints, points[end_])
+    )
 {}
 
 
@@ -73,13 +76,16 @@ Foam::blockEdges::splineEdge::splineEdge
 )
 :
     blockEdge(dict, index, points, is),
-    CatmullRomSpline(appendEndPoints(points, start_, end_, pointField(is)))
+    CatmullRomSpline
+    (
+        polyLine::concat(points[start_], pointField(is), points[end_])
+    )
 {
-    token t(is);
-    is.putBack(t);
+    token tok(is);
+    is.putBack(tok);
 
-    // discard unused start/end tangents
-    if (t == token::BEGIN_LIST)
+    // Discard unused start/end tangents
+    if (tok == token::BEGIN_LIST)
     {
         vector tangent0Ignored(is);
         vector tangent1Ignored(is);

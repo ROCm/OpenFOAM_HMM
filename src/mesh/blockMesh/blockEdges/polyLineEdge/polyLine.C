@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,16 +27,41 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "polyLine.H"
+#include "SubList.H"
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::tmp<Foam::pointField> Foam::polyLine::concat
+(
+    const point& p0,
+    const pointField& intermediate,
+    const point& p1
+)
+{
+    auto tresult = tmp<pointField>::New(intermediate.size() + 2);
+    auto& result = tresult.ref();
+
+    // Intermediate points (knots)
+    SubList<point>(result, intermediate.size(), 1) = intermediate;
+
+    // Start/end points (knots)
+    result.first() = p0;
+    result.last() = p1;
+
+    return tresult;
+}
+
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::polyLine::calcParam()
 {
-    param_.setSize(points_.size());
+    lineLength_ = 0;
+    param_.resize(points_.size());
 
     if (param_.size())
     {
-        param_[0] = 0.0;
+        param_[0] = 0;
 
         for (label i=1; i < param_.size(); i++)
         {
@@ -48,14 +74,9 @@ void Foam::polyLine::calcParam()
         {
             param_[i] /= lineLength_;
         }
-        param_.last() = 1.0;
-    }
-    else
-    {
-        lineLength_ = 0.0;
+        param_.last() = 1;
     }
 }
-
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -63,8 +84,24 @@ void Foam::polyLine::calcParam()
 Foam::polyLine::polyLine(const pointField& ps, const bool)
 :
     points_(ps),
-    lineLength_(0.0),
-    param_(0)
+    lineLength_(0),
+    param_()
+{
+    calcParam();
+}
+
+
+Foam::polyLine::polyLine
+(
+    const point& start,
+    const pointField& intermediate,
+    const point& end,
+    const bool
+)
+:
+    points_(polyLine::concat(start, intermediate, end)),
+    lineLength_(0),
+    param_()
 {
     calcParam();
 }
@@ -101,19 +138,20 @@ Foam::label Foam::polyLine::localParameter(scalar& lambda) const
     // Search table of cumulative distances to find which line-segment
     // we are on.
     // Check the upper bound.
+    // Too small to bother with a binary search...
 
-    label segmentI = 1;
-    while (param_[segmentI] < lambda)
+    label segment = 1;
+    while (param_[segment] < lambda)
     {
-        segmentI++;
+        ++segment;
     }
-    segmentI--;   // We want the corresponding lower bound
+    --segment;   // We want the corresponding lower bound
 
     // The local parameter [0-1] on this line segment
     lambda =
-        (lambda - param_[segmentI])/(param_[segmentI+1] - param_[segmentI]);
+        (lambda - param_[segment])/(param_[segment+1] - param_[segment]);
 
-    return segmentI;
+    return segment;
 }
 
 
@@ -151,8 +189,8 @@ Foam::point Foam::polyLine::position
         return points_.last();
     }
 
-    const point& p0 = points()[segment];
-    const point& p1 = points()[segment+1];
+    const point& p0 = points_[segment];
+    const point& p1 = points_[segment+1];
 
     // Special cases - no calculation needed
     if (mu <= 0.0)
@@ -163,11 +201,9 @@ Foam::point Foam::polyLine::position
     {
         return p1;
     }
-    else
-    {
-        // Linear interpolation
-        return points_[segment] + mu*(p1 - p0);
-    }
+
+    // Linear interpolation
+    return points_[segment] + mu*(p1 - p0);
 }
 
 

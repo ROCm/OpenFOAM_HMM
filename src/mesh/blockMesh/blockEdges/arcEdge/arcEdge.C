@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,10 +44,15 @@ namespace blockEdges
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::coordSystem::cylindrical Foam::blockEdges::arcEdge::calcAngle()
+void Foam::blockEdges::arcEdge::calcFromMidPoint
+(
+    const point& p1,
+    const point& p3,
+    const point& p2
+)
 {
-    const vector a = p2_ - p1_;
-    const vector b = p3_ - p1_;
+    const vector a = p2 - p1;
+    const vector b = p3 - p1;
 
     // Find centre of arcEdge
     const scalar asqr = a & a;
@@ -55,7 +61,7 @@ Foam::coordSystem::cylindrical Foam::blockEdges::arcEdge::calcAngle()
 
     const scalar denom = asqr*bsqr - adotb*adotb;
 
-    if (mag(denom) < VSMALL)
+    if (mag(denom) < ROOTVSMALL)
     {
         FatalErrorInFunction
             << denom
@@ -64,44 +70,120 @@ Foam::coordSystem::cylindrical Foam::blockEdges::arcEdge::calcAngle()
 
     const scalar fact = 0.5*(bsqr - adotb)/denom;
 
-    point centre = 0.5*a + fact*((a ^ b) ^ a);
+    const point centre = p1 + 0.5*a + fact*((a ^ b) ^ a);
 
-    centre += p1_;
+    // Position vectors from centre
+    const vector r1(p1 - centre);
+    const vector r2(p2 - centre);
+    const vector r3(p3 - centre);
 
-    // Find position vectors w.r.t. the arcEdge centre
-    const vector r1(p1_ - centre);
-    const vector r2(p2_ - centre);
-    const vector r3(p3_ - centre);
+    const scalar mag1(mag(r1));
+    const scalar mag3(mag(r3));
 
-    // Find angle (in degrees)
-    angle_ = radToDeg(acos((r3 & r1)/(mag(r3) * mag(r1))));
+    vector arcAxis(r1 ^ r3);
+
+    // The radius from r1 and from r3 will be identical
+    radius_ = mag(r3);
+
+
+    // Determine the angle
+    angle_ = acos((r1 & r3)/(mag1*mag3));
 
     // Check if the vectors define an exterior or an interior arcEdge
     if (((r1 ^ r2) & (r1 ^ r3)) < 0.0)
     {
-        angle_ = 360.0 - angle_;
+        angle_ = constant::mathematical::twoPi - angle_;
     }
 
-    vector arcAxis;
-
-    if (angle_ <= 180.0)
+    if (angle_ <= constant::mathematical::pi)
     {
-        arcAxis = r1 ^ r3;
-
-        if (mag(arcAxis)/(mag(r1)*mag(r3)) < 0.001)
+        if (mag(arcAxis)/(mag1*mag3) < 0.001)
         {
             arcAxis = r1 ^ r2;
         }
     }
     else
     {
-        arcAxis = r3 ^ r1;
+        arcAxis = -arcAxis;
     }
 
-    radius_ = mag(r3);
+    // Corresponding local cylindrical coordinate system
+    cs_ = coordSystem::cylindrical(centre, arcAxis, r1);
+}
 
-    // The corresponding local cylindrical coordinate system (radians)
-    return coordSystem::cylindrical("arc", centre, arcAxis, r1);
+
+void Foam::blockEdges::arcEdge::calcFromCentre
+(
+    const point& p1,
+    const point& p3,
+    const point& centre,
+    bool adjustCentre,
+    scalar rMultiplier
+)
+{
+    // Position vectors from centre
+    const vector r1(p1 - centre);
+    const vector r3(p3 - centre);
+
+    const scalar mag1(mag(r1));
+    const scalar mag3(mag(r3));
+
+    const vector chord(p3 - p1);
+
+    const vector arcAxis(r1 ^ r3);
+
+    // The average radius
+    radius_ = 0.5*(mag1 + mag3);
+
+    // The included angle
+    angle_ = acos((r1 & r3)/(mag1*mag3));
+
+    // TODO? check for 180 degrees (co-linear points)?
+
+    bool needsAdjust = false;
+
+    if (adjustCentre)
+    {
+        needsAdjust = !equal(mag1, mag3);
+
+        if (!equal(rMultiplier, 1))
+        {
+            // The min radius is constrained by the chord,
+            // otherwise bad things will happen.
+
+            needsAdjust = true;
+            radius_ *= rMultiplier;
+            radius_ = max(radius_, (1.001*0.5*mag(chord)));
+        }
+    }
+
+    if (needsAdjust)
+    {
+        // The centre is not equidistant to p1 and p3.
+        // Use the chord and the arcAxis to determine the vector to
+        // the midpoint of the chord and adjust the centre along this
+        // line.
+
+        const point newCentre =
+        (
+            (0.5 * (p3 + p1))                   // mid-chord point
+          + sqrt(sqr(radius_) - 0.25 * magSqr(chord))
+          * normalised(arcAxis ^ chord)         // mid-chord -> centre
+        );
+
+        //// Info<< nl << "Adjust centre. r1=" << mag1 << " r3=" << mag3
+        ////     << " radius=" << radius_ << nl
+        ////     << "angle=" << radToDeg(angle_) << ' '
+        ////     << coordSystem::cylindrical(centre, arcAxis, r1) << nl;
+
+        // Recalculate - do attempt to readjust
+        calcFromCentre(p1, p3, newCentre, false);
+    }
+    else
+    {
+        // Corresponding local cylindrical coordinate system
+        cs_ = coordSystem::cylindrical(centre, arcAxis, r1);
+    }
 }
 
 
@@ -110,17 +192,35 @@ Foam::coordSystem::cylindrical Foam::blockEdges::arcEdge::calcAngle()
 Foam::blockEdges::arcEdge::arcEdge
 (
     const pointField& points,
+    const point& origin,
     const label start,
-    const label end,
-    const point& pMid
+    const label end
 )
 :
     blockEdge(points, start, end),
-    p1_(points_[start_]),
-    p2_(pMid),
-    p3_(points_[end_]),
-    cs_(calcAngle())
-{}
+    radius_(0),
+    angle_(0),
+    cs_()
+{
+    calcFromCentre(points[start_], points[end_], origin);
+}
+
+
+Foam::blockEdges::arcEdge::arcEdge
+(
+    const pointField& points,
+    const label start,
+    const label end,
+    const point& midPoint
+)
+:
+    blockEdge(points, start, end),
+    radius_(0),
+    angle_(0),
+    cs_()
+{
+    calcFromMidPoint(points[start_], points[end_], midPoint);
+}
 
 
 Foam::blockEdges::arcEdge::arcEdge
@@ -133,41 +233,82 @@ Foam::blockEdges::arcEdge::arcEdge
 )
 :
     blockEdge(dict, index, points, is),
-    p1_(points_[start_]),
-    p2_(is),
-    p3_(points_[end_]),
-    cs_(calcAngle())
-{}
+    radius_(0),
+    angle_(0),
+    cs_()
+{
+    point p;
+
+    token tok(is);
+    if (tok.isWord())
+    {
+        // Can be
+        //   - origin (0 0 0)
+        //   - origin 1.2 (0 0 0)
+
+        scalar rMultiplier = 1;
+
+        is >> tok;
+        if (tok.isNumber())
+        {
+            rMultiplier = tok.number();
+        }
+        else
+        {
+            is.putBack(tok);
+        }
+
+        is >> p;  // The origin (centre)
+
+        calcFromCentre(points_[start_], points_[end_], p, true, rMultiplier);
+    }
+    else
+    {
+        is.putBack(tok);
+
+        is >> p;  // A mid-point
+
+        calcFromMidPoint(points_[start_], points_[end_], p);
+    }
+
+    // Debug information
+    #if 0
+    Info<< "arc " << start_ << ' ' << end_
+        << ' ' << position(0.5) << ' ' << cs_
+        // << " radius=" << radius_ << " angle=" << radToDeg(angle_)
+        << nl;
+    #endif
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::point Foam::blockEdges::arcEdge::position(const scalar lambda) const
 {
+    #ifdef FULLDEBUG
     if (lambda < -SMALL || lambda > 1 + SMALL)
     {
-        FatalErrorInFunction
-            << "Parameter out of range, lambda = " << lambda
-            << abort(FatalError);
+        WarningInFunction
+            << "Parameter out of range, lambda = " << lambda << nl;
     }
+    #endif
 
     if (lambda < SMALL)
     {
-        return p1_;
+        return points_[start_];
     }
-    else if (lambda > 1 - SMALL)
+    else if (lambda >= 1 - SMALL)
     {
-        return p3_;
+        return points_[end_];
     }
 
-    // The angle is degrees, the coordinate system in radians
-    return cs_.globalPosition(vector(radius_, degToRad(lambda*angle_), 0));
+    return cs_.globalPosition(vector(radius_, (lambda*angle_), 0));
 }
 
 
-Foam::scalar Foam::blockEdges::arcEdge::length() const
+Foam::scalar Foam::blockEdges::arcEdge::length() const noexcept
 {
-    return degToRad(radius_*angle_);
+    return (radius_*angle_);
 }
 
 

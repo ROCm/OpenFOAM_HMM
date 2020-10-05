@@ -63,7 +63,7 @@ class bezier
 :
     public blockEdge
 {
-private:
+    // Private Data
 
         //- Control points
         pointField control_;
@@ -89,20 +89,20 @@ public:
         //- Construct from components
         bezier
         (
-            const pointField& points,
-            const label start,
-            const label end,
-            const pointField& control
+            const pointField& points,   //!< Referenced point field
+            const label start,      //!< Start point in referenced point field
+            const label end,        //!< End point in referenced point field
+            const pointField& control   //!< The control points
         );
 
-        //- Construct from Istream
+        //- Construct from Istream and point field.
         bezier
         (
             const dictionary& dict,
             const label index,
             const searchableSurfaces& geometry,
-            const pointField&,
-            Istream&
+            const pointField& points,   //!< Referenced point field
+            Istream& is
         );
 
 
@@ -117,6 +117,7 @@ public:
         point position(const scalar lambda) const;
 
         //- Return the length of the curve
+        //  \not NotImplemented
         scalar length() const;
 };
 

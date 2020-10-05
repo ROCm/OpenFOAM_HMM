@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,6 +47,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class blockEdge;
 
 /*---------------------------------------------------------------------------*\
@@ -54,7 +56,7 @@ class blockEdge;
 
 class lineDivide
 {
-    // Private data
+    // Private Data
 
         pointField points_;
 
@@ -67,18 +69,18 @@ public:
         //- Construct from components
         lineDivide
         (
-            const blockEdge&,
-            const label ndiv,
+            const blockEdge& cedge,
+            const label nDiv,
             const gradingDescriptors& gd = gradingDescriptors()
         );
 
 
     // Member Functions
 
-        //- Return the points
+        //- The points
         const pointField& points() const;
 
-        //- Return the list of lambda values
+        //- The list of lambda values
         const scalarList& lambdaDivisions() const;
 };
 

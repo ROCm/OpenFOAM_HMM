@@ -59,7 +59,7 @@ Foam::projectCurveEdge::projectCurveEdge
     geometry_(geometry)
 {
     wordList names(is);
-    surfaces_.setSize(names.size());
+    surfaces_.resize(names.size());
     forAll(names, i)
     {
         surfaces_[i] = geometry_.findSurfaceID(names[i]);
@@ -83,6 +83,14 @@ Foam::projectCurveEdge::projectCurveEdge
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+Foam::point
+Foam::projectCurveEdge::position(const scalar) const
+{
+    NotImplemented;
+    return point::max;
+}
+
+
 Foam::tmp<Foam::pointField>
 Foam::projectCurveEdge::position(const scalarList& lambdas) const
 {
@@ -101,8 +109,8 @@ Foam::projectCurveEdge::position(const scalarList& lambdas) const
     }
 
 
-    tmp<pointField> tpoints(new pointField(lambdas.size()));
-    pointField& points = tpoints.ref();
+    auto tpoints = tmp<pointField>::New(lambdas.size());
+    auto& points = tpoints.ref();
 
     const point& startPt = points_[start_];
     const point& endPt = points_[end_];
@@ -149,10 +157,11 @@ Foam::projectCurveEdge::position(const scalarList& lambdas) const
 
 
     // Upper limit for number of iterations
-    const label maxIter = 10;
+    constexpr label maxIter = 10;
+
     // Residual tolerance
-    const scalar relTol = 0.1;
-    const scalar absTol = 1e-4;
+    constexpr scalar relTol = 0.1;
+    constexpr scalar absTol = 1e-4;
 
     scalar initialResidual = 0.0;
 
@@ -255,6 +264,13 @@ Foam::projectCurveEdge::position(const scalarList& lambdas) const
     }
 
     return tpoints;
+}
+
+
+Foam::scalar Foam::projectCurveEdge::length() const
+{
+    NotImplemented;
+    return 1;
 }
 
 
