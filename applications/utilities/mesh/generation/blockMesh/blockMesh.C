@@ -77,7 +77,6 @@ Usage
 #include "foamVtkInternalMeshWriter.H"
 #include "attachPolyTopoChanger.H"
 #include "polyTopoChange.H"
-#include "emptyPolyPatch.H"
 #include "cyclicPolyPatch.H"
 #include "cellSet.H"
 
@@ -85,7 +84,7 @@ Usage
 #include "OSspecific.H"
 #include "OFstream.H"
 
-#include "Pair.H"
+#include "wordPair.H"
 #include "slidingInterface.H"
 
 using namespace Foam;
@@ -122,7 +121,8 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "write-obj",
-        "Write block edges and centres as obj files and exit"
+        "Write block edges and centres as obj files and exit",
+        true  // (old) mark as advanced option. -write-vtk is preferred
     );
     argList::addOptionCompat("write-obj", {"blockTopology", 1912});
 
@@ -135,9 +135,9 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "merge-points",
-        "Geometric (point) merging instead of topological merging "
-        "(slower, fails with high-aspect cells. default for 1912 and earlier)",
-        true  // mark as an advanced option
+        "Geometric point merging instead of topological merging"
+        " [default for 1912 and earlier]."
+        // NOTE: " Slower, fails with high-aspect cells."
     );
     argList::addBoolOption
     (
@@ -163,6 +163,9 @@ int main(int argc, char *argv[])
 
     // Remove old files, unless disabled
     const bool removeOldFiles = !args.found("noClean");
+
+    // Write cellSets
+    const bool writeCellSets = args.found("sets");
 
     // Default merge (topology), unless otherwise specified
     blockMesh::mergeStrategy strategy(blockMesh::DEFAULT_MERGE);
@@ -329,56 +332,22 @@ int main(int argc, char *argv[])
     }
 
 
-    Info<< nl << "Creating polyMesh from blockMesh" << endl;
+    // Ensure we get information messages, even if turned off in dictionary
+    blocks.verbose(true);
 
-    polyMesh mesh
-    (
-        IOobject
+    autoPtr<polyMesh> meshPtr =
+        blocks.mesh
         (
-            regionName,
-            meshInstance,
-            runTime
-        ),
-        pointField(blocks.points()),  // Copy, could we re-use space?
-        blocks.cells(),
-        blocks.patches(),
-        blocks.patchNames(),
-        blocks.patchDicts(),
-        "defaultFaces",               // Default patch name
-        emptyPolyPatch::typeName      // Default patch type
-    );
+            IOobject(regionName, meshInstance, runTime)
+        );
 
+    polyMesh& mesh = *meshPtr;
 
-    // Handle merging of patch pairs. Dictionary entry "mergePatchPairs"
+    // Merge patch pairs (dictionary entry "mergePatchPairs")
     #include "mergePatchPairs.H"
 
-    // Set any cellZones
-    #include "addCellZones.H"
-
-
-    // Detect any cyclic patches and force re-ordering of the faces
-    {
-        bool hasCyclic = false;
-        for (const polyPatch& pp : mesh.boundaryMesh())
-        {
-            if (isA<cyclicPolyPatch>(pp))
-            {
-                hasCyclic = true;
-                break;
-            }
-        }
-
-        if (hasCyclic)
-        {
-            Info<< nl << "Detected cyclic patches; ordering boundary faces"
-                << endl;
-            const word oldInstance = mesh.instance();
-            polyTopoChange meshMod(mesh);
-            meshMod.changeMesh(mesh, false);
-            mesh.setInstance(oldInstance);
-        }
-    }
-
+    // Handle cyclic patches
+    #include "handleCyclicPatches.H"
 
     // Set the precision of the points data to 10
     IOstream::defaultPrecision(max(10u, IOstream::defaultPrecision()));
@@ -386,7 +355,7 @@ int main(int argc, char *argv[])
     Info<< nl << "Writing polyMesh with "
         << mesh.cellZones().size() << " cellZones";
 
-    if (args.found("sets") && !mesh.cellZones().empty())
+    if (writeCellSets && !mesh.cellZones().empty())
     {
         Info<< " (written as cellSets too)";
     }
@@ -400,7 +369,7 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    if (args.found("sets"))
+    if (writeCellSets)
     {
         for (const cellZone& cz : mesh.cellZones())
         {

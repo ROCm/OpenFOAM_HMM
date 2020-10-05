@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,7 @@ License
 
 #include "blockMesh.H"
 #include "cellModel.H"
+#include "emptyPolyPatch.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -267,6 +268,131 @@ void Foam::blockMesh::createPatches() const
     {
         patches_[patchi] = createPatchFaces(topoPatches[patchi]);
     }
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::polyMesh>
+Foam::blockMesh::mesh(const IOobject& io) const
+{
+    const blockMesh& blkMesh = *this;
+
+    if (verboseOutput)
+    {
+        Info<< nl << "Creating polyMesh from blockMesh" << endl;
+    }
+
+    auto meshPtr = autoPtr<polyMesh>::New
+    (
+        io,
+        pointField(blkMesh.points()),   // Copy, could we re-use space?
+        blkMesh.cells(),
+        blkMesh.patches(),
+        blkMesh.patchNames(),
+        blkMesh.patchDicts(),
+        "defaultFaces",                 // Default patch name
+        emptyPolyPatch::typeName        // Default patch type
+    );
+
+
+    // Set any cellZones
+    const label nZones = blkMesh.numZonedBlocks();
+
+    if (nZones)
+    {
+        polyMesh& pmesh = *meshPtr;
+
+        if (verboseOutput)
+        {
+            Info<< "Adding cell zones" << endl;
+        }
+
+        // Map from zoneName to cellZone index
+        HashTable<label> zoneMap(2*nZones);
+
+        // Cells per zone
+        List<DynamicList<label>> zoneCells(nZones);
+
+        // Running cell counter
+        label celli = 0;
+
+        // Largest zone so far
+        label freeZonei = 0;
+
+        for (const block& b : blkMesh)
+        {
+            const word& zoneName = b.zoneName();
+            const label nCellsInBlock = b.cells().size();
+
+            if (zoneName.size())
+            {
+                const auto iter = zoneMap.cfind(zoneName);
+
+                label zonei = freeZonei;
+
+                if (iter.found())
+                {
+                    zonei = *iter;
+                }
+                else
+                {
+                    zoneMap.insert(zoneName, zonei);
+                    ++freeZonei;
+
+                    if (verboseOutput)
+                    {
+                        Info<< "    " << zonei << '\t' << zoneName << endl;
+                    }
+                }
+
+
+                // Fill with cell ids
+
+                zoneCells[zonei].reserve
+                (
+                    zoneCells[zonei].size() + nCellsInBlock
+                );
+
+                const label endOfFill = celli + nCellsInBlock;
+
+                for (; celli < endOfFill; ++celli)
+                {
+                    zoneCells[zonei].append(celli);
+                }
+            }
+            else
+            {
+                celli += nCellsInBlock;
+            }
+        }
+
+        List<cellZone*> cz(zoneMap.size());
+        forAllConstIters(zoneMap, iter)
+        {
+            const word& zoneName = iter.key();
+            const label zonei = iter.val();
+
+            cz[zonei] = new cellZone
+            (
+                zoneName,
+                zoneCells[zonei].shrink(),
+                zonei,
+                pmesh.cellZones()
+            );
+        }
+
+        pmesh.pointZones().resize(0);
+        pmesh.faceZones().resize(0);
+        pmesh.cellZones().resize(0);
+        pmesh.addZones(List<pointZone*>(), List<faceZone*>(), cz);
+    }
+
+
+    // Merge patch pairs, cyclic must be done elsewhere
+    // - requires libdynamicMesh
+
+    return meshPtr;
 }
 
 
