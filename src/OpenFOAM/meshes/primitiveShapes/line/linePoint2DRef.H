@@ -27,6 +27,7 @@ Typedef
     Foam::linePoint2DRef
 
 Description
+    A line using referred 2D points
 
 \*---------------------------------------------------------------------------*/
 

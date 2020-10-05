@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,17 +33,15 @@ License
 
 const char* const Foam::cell::typeName = "cell";
 
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::labelList Foam::cell::labels(const faceUList& f) const
 {
-    // return the unordered list of vertex labels supporting the cell
-
-    // count the maximum size of all vertices
-    label maxVert = 0;
-
     const labelList& faces = *this;
 
+    // Count the maximum size of all vertices
+    label maxVert = 0;
     forAll(faces, facei)
     {
         maxVert += f[faces[facei]].size();
@@ -65,6 +64,7 @@ Foam::labelList Foam::cell::labels(const faceUList& f) const
     // go through the rest of the faces. For each vertex, check if the point is
     // already inserted (up to maxVert, which now carries the number of real
     // points. If not, add it at the end of the list.
+
     for (label facei = 1; facei < faces.size(); facei++)
     {
         const labelList& curFace = f[faces[facei]];
@@ -87,8 +87,7 @@ Foam::labelList Foam::cell::labels(const faceUList& f) const
             if (!found)
             {
                 p[maxVert] = curPoint;
-
-                maxVert++;
+                ++maxVert;
             }
         }
     }
@@ -121,11 +120,8 @@ Foam::pointField Foam::cell::points
 
 Foam::edgeList Foam::cell::edges(const faceUList& f) const
 {
-    // return the lisf of cell edges
-
     const labelList& curFaces = *this;
 
-    // create a list of edges
     label maxNoEdges = 0;
 
     forAll(curFaces, facei)
@@ -140,10 +136,8 @@ Foam::edgeList Foam::cell::edges(const faceUList& f) const
     {
         const edgeList curFaceEdges = f[curFaces[facei]].edges();
 
-        forAll(curFaceEdges, faceEdgeI)
+        for (const edge& curEdge : curFaceEdges)
         {
-            const edge& curEdge = curFaceEdges[faceEdgeI];
-
             bool edgeFound = false;
 
             for (label addedEdgeI = 0; addedEdgeI < nEdges; addedEdgeI++)
@@ -160,7 +154,7 @@ Foam::edgeList Foam::cell::edges(const faceUList& f) const
             {
                 // Add the new edge onto the list
                 allEdges[nEdges] = curEdge;
-                nEdges++;
+                ++nEdges;
             }
         }
     }
@@ -194,6 +188,7 @@ Foam::point Foam::cell::centre
 
     // first calculate the approximate cell centre as the average of all
     // face centres
+
     vector cEst = Zero;
     scalar sumArea = 0;
 

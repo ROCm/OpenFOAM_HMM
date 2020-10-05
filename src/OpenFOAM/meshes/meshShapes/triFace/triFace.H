@@ -63,7 +63,6 @@ class triFace;
 inline bool operator==(const triFace& a, const triFace& b);
 inline bool operator!=(const triFace& a, const triFace& b);
 
-
 /*---------------------------------------------------------------------------*\
                           Class triFace Declaration
 \*---------------------------------------------------------------------------*/
@@ -76,7 +75,7 @@ public:
 
     // Constructors
 
-        //- Construct null with invalid point labels (-1)
+        //- Default construct, with invalid point labels (-1)
         inline triFace();
 
         //- Construct from three point labels
@@ -93,7 +92,7 @@ public:
         //- Copy construct from a list of three point labels.
         inline explicit triFace(const labelUList& list);
 
-        //- Copy construct from a subset of the input
+        //- Copy construct from a subset of point labels
         inline triFace
         (
             const labelUList& list,

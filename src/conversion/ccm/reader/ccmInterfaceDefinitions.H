@@ -27,6 +27,7 @@ Description
     Containers for holding STARCCM interface definitions
 
 \*---------------------------------------------------------------------------*/
+
 #ifndef ccmInterfaceDefinitions_H
 #define ccmInterfaceDefinitions_H
 

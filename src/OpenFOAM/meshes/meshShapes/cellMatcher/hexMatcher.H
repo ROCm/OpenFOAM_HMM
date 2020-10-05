@@ -76,11 +76,12 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         hexMatcher();
 
+
     //- Destructor
-    ~hexMatcher();
+    ~hexMatcher() = default;
 
 
     // Member Functions

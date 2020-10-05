@@ -38,14 +38,10 @@ Foam::prismMatcher::prismMatcher()
         vertPerCell,
         facePerCell,
         maxVertPerFace,
-        "prism" // same as cellModel::modelNames[cellModel::PRISM]
+        "prism" // == cellModel::modelNames[cellModel::PRISM]
     )
 {}
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::prismMatcher::~prismMatcher()
-{}
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 

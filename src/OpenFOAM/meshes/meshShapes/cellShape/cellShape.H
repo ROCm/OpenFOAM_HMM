@@ -54,11 +54,8 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class cell;
-
-// Forward declaration of friend functions and operators
-
 class cellShape;
 bool operator==(const cellShape& a, const cellShape& b);
 Istream& operator>>(Istream& is, cellShape& s);
@@ -73,7 +70,7 @@ class cellShape
 :
     public labelList
 {
-    // Private data
+    // Private Data
 
         //- Access to the cellShape's model
         const cellModel *m;
@@ -83,10 +80,10 @@ public:
 
     // Constructors
 
-        //- Construct null
-        inline cellShape();
+        //- Default construct
+        inline constexpr cellShape() noexcept;
 
-        //- Construct from components
+        //- Copy construct from components
         inline cellShape
         (
             const cellModel& model,
@@ -94,7 +91,7 @@ public:
             const bool doCollapse = false
         );
 
-        //- Construct from components
+        //- Move construct from components
         inline cellShape
         (
             const cellModel& model,
@@ -102,7 +99,7 @@ public:
             const bool doCollapse = false
         );
 
-        //- Construct from components
+        //- Copy construct from components
         inline cellShape
         (
             const word& modelName,

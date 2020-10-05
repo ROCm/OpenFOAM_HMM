@@ -51,7 +51,6 @@ class labelledTri;
 Istream& operator>>(Istream&, labelledTri&);
 Ostream& operator<<(Ostream&, const labelledTri&);
 
-
 /*---------------------------------------------------------------------------*\
                            Class labelledTri Declaration
 \*---------------------------------------------------------------------------*/
@@ -60,7 +59,7 @@ class labelledTri
 :
     public triFace
 {
-    // Private data
+    // Private Data
 
         label region_;
 
@@ -75,7 +74,7 @@ public:
 
     // Constructors
 
-        //- Construct null with invalid point labels and region (-1).
+        //- Default construct, with invalid point labels and region (-1).
         inline labelledTri();
 
         //- Construct from triFace and region label.

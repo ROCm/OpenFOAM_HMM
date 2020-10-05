@@ -43,6 +43,7 @@ SourceFiles
     scalarRange.C
 
 \*---------------------------------------------------------------------------*/
+
 #ifndef scalarRange_H
 #define scalarRange_H
 

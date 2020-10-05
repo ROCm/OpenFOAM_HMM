@@ -80,8 +80,7 @@ SourceFiles
 #ifndef cellMatcher_H
 #define cellMatcher_H
 
-#include "labelList.H"
-#include "faceList.H"
+#include "cellModel.H"
 #include "Map.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -89,11 +88,10 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-class primitiveMesh;
+// Forward Declarations
 class cell;
-class cellModel;
 class cellShape;
+class primitiveMesh;
 
 /*---------------------------------------------------------------------------*\
                          Class cellMatcher Declaration
@@ -103,7 +101,7 @@ class cellMatcher
 {
 protected:
 
-    // Static functions
+    // Static Functions
 
         //- Given start and end of edge generate unique key
         inline static label edgeKey
@@ -116,7 +114,8 @@ protected:
         //- Step along face either in righthand or lefthand direction
         inline static label nextVert(const label, const label, const bool);
 
-    // Protected data
+
+    // Protected Data
 
         // Map from mesh to local vertex numbering
         Map<label> localPoint_;
@@ -174,11 +173,6 @@ protected:
             const label localFacei
         ) const;
 
-
-private:
-
-    // Private Member Functions
-
         //- No copy construct
         cellMatcher(const cellMatcher&) = delete;
 
@@ -223,6 +217,7 @@ public:
         // Write
 
             void write(Ostream& os) const;
+
 
         // Cell shape dependent
 
@@ -271,7 +266,6 @@ public:
                 const label celli,
                 cellShape& shape
             ) = 0;
-
 };
 
 

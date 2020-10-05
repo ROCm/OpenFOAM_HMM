@@ -42,6 +42,7 @@ SourceFiles
     faceTemplates.C
 
 \*---------------------------------------------------------------------------*/
+
 #ifndef face_H
 #define face_H
 
@@ -63,7 +64,6 @@ namespace Foam
 // Forward Declarations
 class face;
 class triFace;
-
 template<class T, int SizeMin> class DynamicList;
 
 /*---------------------------------------------------------------------------*\
@@ -136,6 +136,7 @@ public:
         EDGE    // Close to edge
     };
 
+
     // Static Data Members
 
         static const char* const typeName;
@@ -144,23 +145,30 @@ public:
     // Constructors
 
         //- Default construct
-        face() = default;
+        constexpr face() noexcept = default;
 
         //- Construct given size, with invalid point labels (-1)
         inline explicit face(const label sz);
 
-        //- Copy construct from list of labels
+        //- Copy construct from list of point labels
         inline explicit face(const labelUList& list);
 
-        //- Copy construct from list of labels
+        //- Move construct from list of point labels
+        inline explicit face(labelList&& list);
+
+        //- Copy construct from an initializer list of point labels
+        inline explicit face(std::initializer_list<label> list);
+
+        //- Copy construct from list of point labels
         template<unsigned N>
         inline explicit face(const FixedList<label, N>& list);
 
-        //- Copy construct from an initializer list of labels
-        inline explicit face(std::initializer_list<label> list);
+        //- Copy construct from subset of point labels
+        inline face(const labelUList& list, const labelUList& indices);
 
-        //- Move construct from list of labels
-        inline explicit face(labelList&& list);
+        //- Copy construct from subset of point labels
+        template<unsigned N>
+        inline face(const labelUList& list, const FixedList<label, N>& indices);
 
         //- Copy construct from triFace
         face(const triFace& f);
@@ -214,6 +222,7 @@ public:
         //  The starting points of the original and reverse face are identical.
         face reverseFace() const;
 
+
         // Navigation through face vertices
 
         //- Return true if the point label is found in face.
@@ -238,7 +247,7 @@ public:
         ) const;
 
         //- Return the inertia tensor, with optional reference
-        //  point and density specification
+        //- point and density specification
         tensor inertia
         (
             const UList<point>& p,
@@ -247,7 +256,7 @@ public:
         ) const;
 
         //- Return potential intersection with face with a ray starting
-        //  at p, direction n (does not need to be normalized)
+        //- at p, direction n (does not need to be normalized)
         //  Does face-centre decomposition and returns triangle intersection
         //  point closest to p. Face-centre is calculated from point average.
         //  For a hit, the distance is signed.  Positive number
@@ -450,6 +459,7 @@ struct offsetOp<face>
 //- Deprecated(2017-04) find the longest edge on a face.
 //- Face point labels index into pts.
 //  \deprecated(2017-04) use class method instead
+FOAM_DEPRECATED_FOR(2017-04, "use face::longestEdge() method")
 label longestEdge(const face& f, const UList<point>& pts);
 
 

@@ -76,11 +76,12 @@ public:
 
     // Constructors
 
-        //- Construct
+        //- Default construct
         prismMatcher();
 
+
     //- Destructor
-    ~prismMatcher();
+    ~prismMatcher() = default;
 
 
     // Member Functions

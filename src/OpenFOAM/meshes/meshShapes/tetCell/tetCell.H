@@ -64,7 +64,6 @@ class tetCell
 :
     public FixedList<label, 4>
 {
-
 public:
 
     // Constructors
@@ -87,7 +86,7 @@ public:
         //- Construct from FixedList of four point labels
         inline tetCell(const FixedList<label, 4>& list);
 
-        //- Copy construct from a subset of the input list
+        //- Copy construct from a subset of point labels
         inline tetCell
         (
             const labelUList& list,

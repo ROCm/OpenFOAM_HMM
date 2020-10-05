@@ -44,7 +44,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 
 template<class Point, class PointRef, class polygonRef>
 class pyramid;
@@ -71,9 +71,10 @@ inline Ostream& operator<<
 template<class Point, class PointRef, class polygonRef>
 class pyramid
 {
-    // Private data
+    // Private Data
 
         polygonRef base_;
+
         PointRef apex_;
 
 
@@ -88,7 +89,7 @@ public:
         inline pyramid(Istream& is);
 
 
-    // Member functions
+    // Member Functions
 
         // Access
 

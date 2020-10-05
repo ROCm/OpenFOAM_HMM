@@ -74,16 +74,16 @@ public:
 
     // Constructors
 
-        //- Construct null with invalid point labels (-1)
+        //- Default construct, with invalid point labels (-1)
         inline edge();
 
         //- Construct from two point labels
         inline edge(const label from, const label to);
 
-        //- Construct from pair of labels
+        //- Construct from pair of point labels
         inline edge(const labelPair& pair);
 
-        //- Construct from list
+        //- Construct from list of point labels
         inline edge(const FixedList<label, 2>& list);
 
         //- Construct from two point labels, sorted with first less-than second
@@ -92,7 +92,7 @@ public:
         //- Construct from list, sorted with first less-than second
         inline edge(const FixedList<label, 2>& list, const bool doSort);
 
-        //- Copy construct from a subset of the input
+        //- Copy construct from a subset of point labels
         inline edge
         (
             const UList<label>& list,

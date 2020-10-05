@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,27 +56,37 @@ class cell
 :
     public labelList
 {
-
 public:
 
-    // Static data members
+    // Static Data Members
 
         static const char* const typeName;
 
 
     // Constructors
 
-        //- Construct null
-        inline cell();
+        //- Default construct
+        constexpr cell() noexcept = default;
 
         //- Construct given size, with invalid point labels (-1)
         inline explicit cell(const label sz);
 
-        //- Copy construct from list of labels
-        inline explicit cell(const labelUList& lst);
+        //- Copy construct from list of face labels
+        inline explicit cell(const labelUList& list);
 
-        //- Move construct from list of labels
-        inline explicit cell(labelList&& lst);
+        //- Move construct from list of face labels
+        inline explicit cell(labelList&& list);
+
+        //- Copy construct from list of face labels
+        template<unsigned N>
+        inline explicit cell(const FixedList<label, N>& list);
+
+        //- Copy construct from subset of face labels
+        inline cell(const labelUList& list, const labelUList& indices);
+
+        //- Copy construct from subset of face labels
+        template<unsigned N>
+        inline cell(const labelUList& list, const FixedList<label, N>& indices);
 
         //- Construct from Istream
         inline cell(Istream& is);
@@ -88,17 +98,17 @@ public:
         inline label nFaces() const;
 
         //- Return unordered list of cell vertices given the list of faces
-        labelList labels(const faceUList& f) const;
+        labelList labels(const faceUList& meshFaces) const;
 
         //- Return the cell vertices given the list of faces and mesh points
         pointField points
         (
-            const faceUList& f,
+            const faceUList& meshFaces,
             const UList<point>& meshPoints
         ) const;
 
         //- Return cell edges
-        edgeList edges(const faceUList& f) const;
+        edgeList edges(const faceUList& meshFaces) const;
 
         //- Return index of opposite face
         label opposingFaceLabel
@@ -124,10 +134,18 @@ public:
         // future.
 
         //- Returns cell centre
-        point centre(const UList<point>& p, const faceUList& f) const;
+        point centre
+        (
+            const UList<point>& meshPoints,
+            const faceUList& meshFaces
+        ) const;
 
         //- Returns cell volume
-        scalar mag(const UList<point>& p, const faceUList& f) const;
+        scalar mag
+        (
+            const UList<point>& meshPoints,
+            const faceUList& meshFaces
+        ) const;
 };
 
 

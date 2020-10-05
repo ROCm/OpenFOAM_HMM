@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,25 +28,45 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::cell::cell()
-{}
-
-
 inline Foam::cell::cell(const label sz)
 :
     labelList(sz, -1)
 {}
 
 
-inline Foam::cell::cell(const labelUList& lst)
+inline Foam::cell::cell(const labelUList& list)
 :
-    labelList(lst)
+    labelList(list)
 {}
 
 
-inline Foam::cell::cell(labelList&& lst)
+template<unsigned N>
+inline Foam::cell::cell(const FixedList<label, N>& list)
 :
-    labelList(std::move(lst))
+    labelList(list)
+{}
+
+
+inline Foam::cell::cell(labelList&& list)
+:
+    labelList(std::move(list))
+{}
+
+
+inline Foam::cell::cell(const labelUList& list, const labelUList& indices)
+:
+    labelList(list, indices)
+{}
+
+
+template<unsigned N>
+inline Foam::cell::cell
+(
+    const labelUList& list,
+    const FixedList<label, N>& indices
+)
+:
+    labelList(list, indices)
 {}
 
 

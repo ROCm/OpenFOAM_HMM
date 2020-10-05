@@ -54,10 +54,9 @@ inline Foam::face::face(const labelUList& list)
 {}
 
 
-template<unsigned N>
-inline Foam::face::face(const FixedList<label, N>& list)
+inline Foam::face::face(labelList&& list)
 :
-    labelList(list)
+    labelList(std::move(list))
 {}
 
 
@@ -67,9 +66,27 @@ inline Foam::face::face(std::initializer_list<label> list)
 {}
 
 
-inline Foam::face::face(labelList&& list)
+template<unsigned N>
+inline Foam::face::face(const FixedList<label, N>& list)
 :
-    labelList(std::move(list))
+    labelList(list)
+{}
+
+
+inline Foam::face::face(const labelUList& list, const labelUList& indices)
+:
+    labelList(list, indices)
+{}
+
+
+template<unsigned N>
+inline Foam::face::face
+(
+    const labelUList& list,
+    const FixedList<label, N>& indices
+)
+:
+    labelList(list, indices)
 {}
 
 

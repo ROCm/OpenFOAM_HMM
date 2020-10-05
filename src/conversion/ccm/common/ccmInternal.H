@@ -27,6 +27,7 @@ Description
     Internal bits for wrapping libccmio - do not use directly
 
 \*---------------------------------------------------------------------------*/
+
 #ifndef ccmInternal_H
 #define ccmInternal_H
 

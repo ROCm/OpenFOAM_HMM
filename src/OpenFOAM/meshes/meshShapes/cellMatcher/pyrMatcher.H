@@ -76,11 +76,12 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         pyrMatcher();
 
+
     //- Destructor
-    ~pyrMatcher();
+    ~pyrMatcher() = default;
 
 
     // Member Functions

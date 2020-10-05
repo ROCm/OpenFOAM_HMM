@@ -76,11 +76,12 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         wedgeMatcher();
 
+
     //- Destructor
-    ~wedgeMatcher();
+    ~wedgeMatcher() = default;
 
 
     // Member Functions

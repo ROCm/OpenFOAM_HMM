@@ -27,6 +27,7 @@ Typedef
     Foam::pyramidPointFaceRef
 
 Description
+    A pyramid using referred points and faces
 
 \*---------------------------------------------------------------------------*/
 

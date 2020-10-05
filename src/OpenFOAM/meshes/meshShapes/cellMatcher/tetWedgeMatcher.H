@@ -76,11 +76,12 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         tetWedgeMatcher();
 
+
     //- Destructor
-    ~tetWedgeMatcher();
+    ~tetWedgeMatcher() = default;
 
 
     // Member Functions

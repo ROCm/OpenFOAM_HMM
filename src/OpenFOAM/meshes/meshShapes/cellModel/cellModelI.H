@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,55 +70,53 @@ inline const Foam::faceList& Foam::cellModel::modelFaces() const
 }
 
 
-//  Return the faces of a cellModel by untangling the geometry
-//  supplied in terms of the face labels
 inline Foam::edgeList Foam::cellModel::edges
 (
     const labelUList& pointLabels
 ) const
 {
-    edgeList e(edges_.size());
+    edgeList theEdges(edges_.size());
 
-    // Translate model labels into global labels
     forAll(edges_, edgei)
     {
-         e[edgei] =
-             edge
-             (
-                 pointLabels[edges_[edgei].start()],
-                 pointLabels[edges_[edgei].end()]
-             );
+        // From model labels to global labels
+        theEdges[edgei] =
+            edge
+            (
+                pointLabels[edges_[edgei].first()],
+                pointLabels[edges_[edgei].second()]
+            );
     }
 
-    return e;
+    return theEdges;
 }
 
 
-//  Return the faces of a cellModel by untangling the geometry
-//  supplied in terms of the face labels
 inline Foam::faceList Foam::cellModel::faces
 (
     const labelUList& pointLabels
 ) const
 {
-    faceList f(faces_.size());
+    faceList theFaces(faces_.size());
 
-    // Translate model labels into global labels
     forAll(faces_, facei)
     {
-         const labelList& curModelLabels = faces_[facei];
-
-         face& curFace = f[facei];
-
-         curFace.setSize(curModelLabels.size());
-
-         forAll(curModelLabels, labeli)
-         {
-             curFace[labeli] = pointLabels[curModelLabels[labeli]];
-         }
+        // From model labels to global labels
+        theFaces[facei] = Foam::face(pointLabels, faces_[facei]);
     }
 
-    return f;
+    return theFaces;
+}
+
+
+inline Foam::face Foam::cellModel::face
+(
+    const label modelFacei,
+    const labelUList& pointLabels
+) const
+{
+    // From model labels to global labels
+    return Foam::face(pointLabels, faces_[modelFacei]);
 }
 
 

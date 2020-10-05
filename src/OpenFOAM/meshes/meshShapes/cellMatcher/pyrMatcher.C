@@ -40,14 +40,8 @@ Foam::pyrMatcher::pyrMatcher()
         vertPerCell,
         facePerCell,
         maxVertPerFace,
-        "pyr" // same as cellModel::modelNames[cellModel::PYR]
+        "pyr" // == cellModel::modelNames[cellModel::PYR]
     )
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::pyrMatcher::~pyrMatcher()
 {}
 
 

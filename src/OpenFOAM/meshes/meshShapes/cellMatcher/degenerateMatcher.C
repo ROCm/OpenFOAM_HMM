@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "degenerateMatcher.H"
+#include "primitiveMesh.H"
 #include "ListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

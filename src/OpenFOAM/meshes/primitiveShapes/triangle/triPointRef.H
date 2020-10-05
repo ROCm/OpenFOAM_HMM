@@ -27,6 +27,7 @@ Typedef
     Foam::triPointRef
 
 Description
+    A triangle using referred points
 
 \*---------------------------------------------------------------------------*/
 

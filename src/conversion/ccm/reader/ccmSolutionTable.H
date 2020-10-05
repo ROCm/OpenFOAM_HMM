@@ -27,6 +27,7 @@ Description
     Containers for holding ccm solution and field listings.
 
 \*---------------------------------------------------------------------------*/
+
 #ifndef ccmSolutionTable_H
 #define ccmSolutionTable_H
 

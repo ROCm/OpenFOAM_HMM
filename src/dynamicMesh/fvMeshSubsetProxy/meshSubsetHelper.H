@@ -8,14 +8,13 @@
     Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
-    This file is part of OpenFOAM, licensed under GNU General Public License
-    <http://www.gnu.org/licenses/>.
+    This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 
 Typedef
     Foam::meshSubsetHelper
 
 Description
-    Compatibility name. Rename (JUL-2018) as Foam::fvMeshSubsetProxy
+    Compatibility name. Renamed (JUL-2018) as Foam::fvMeshSubsetProxy
 
 \*---------------------------------------------------------------------------*/
 

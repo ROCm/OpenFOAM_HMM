@@ -72,7 +72,7 @@ Foam::Istream& Foam::operator>>(Istream& is, cellShape& s)
     }
 
     // Check that a model was found
-    if (!s.m)
+    if (s.m == nullptr)
     {
         FatalIOErrorInFunction(is)
             << "CellShape has unknown model " << t.info()

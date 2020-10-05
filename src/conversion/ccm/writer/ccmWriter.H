@@ -87,6 +87,7 @@ SourceFiles
     ccmWriterSolution.C
 
 \*---------------------------------------------------------------------------*/
+
 #ifndef ccmWriter_H
 #define ccmWriter_H
 

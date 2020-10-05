@@ -38,14 +38,8 @@ Foam::wedgeMatcher::wedgeMatcher()
         vertPerCell,
         facePerCell,
         maxVertPerFace,
-        "wedge" // same as cellModel::modelNames[cellModel::WEDGE]
+        "wedge" // == cellModel::modelNames[cellModel::WEDGE]
     )
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::wedgeMatcher::~wedgeMatcher()
 {}
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,7 +62,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class cellModel;
 Ostream& operator<<(Ostream& os, const cellModel& cm);
 
@@ -93,7 +93,7 @@ public:
         static const Enum<modelType> modelNames;
 
 
-    // Lookup Static Models
+    // Lookup Methods
 
         //- Look up pointer to cellModel by enumeration, or nullptr on failure.
         static const cellModel* ptr(const modelType model);
@@ -155,9 +155,9 @@ public:
     // Constructors
 
         //- Construct from Istream
-        cellModel(Istream& is);
+        explicit cellModel(Istream& is);
 
-        //- Return a new cellModel on free-store created from Istream
+        //- Return a new cellModel created from Istream
         static autoPtr<cellModel> New(Istream& is)
         {
             return autoPtr<cellModel>::New(is);
@@ -170,7 +170,7 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         //- Return model name
         inline const word& name() const;
@@ -193,11 +193,18 @@ public:
         //- Return a raw list of model faces
         inline const faceList& modelFaces() const;
 
-        //- Return list of edges
+        //- Return list of cell edges
         inline edgeList edges(const labelUList& pointLabels) const;
 
-        //- Return list of faces
+        //- Return list of cell faces
         inline faceList faces(const labelUList& pointLabels) const;
+
+        //- Return the cell face for specified model face
+        inline Foam::face face
+        (
+            const label modelFacei,
+            const labelUList& pointLabels
+        ) const;
 
 
         //- Vector centroid
@@ -221,7 +228,7 @@ public:
             return *this;
         }
 
-        //- WriteData member function required by regIOobject
+        //- The writeData member function required by regIOobject
         bool writeData(Ostream& os) const
         {
             os << *this;
@@ -229,20 +236,19 @@ public:
         }
 
 
-    // Ostream operator
+    // Ostream Operator
 
-       friend Ostream& operator<<(Ostream& os, const cellModel& cm);
-
+        friend Ostream& operator<<(Ostream& os, const cellModel& cm);
 };
 
 
-// Ostream operators
+// Ostream Operators
 
 template<>
 Ostream& operator<<(Ostream& os, const InfoProxy<cellModel>& ip);
 
 
-// Global operators
+// Global Operators
 
 //- Equality: true when model pointers are identical
 inline bool operator==(const cellModel& lhs, const cellModel& rhs);

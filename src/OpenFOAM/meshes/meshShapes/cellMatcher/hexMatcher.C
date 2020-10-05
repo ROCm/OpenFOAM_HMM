@@ -38,14 +38,8 @@ Foam::hexMatcher::hexMatcher()
         vertPerCell,
         facePerCell,
         maxVertPerFace,
-        "hex" // same as cellModel::modelNames[cellModel::HEX]
+        "hex" // == cellModel::modelNames[cellModel::HEX]
     )
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::hexMatcher::~hexMatcher()
 {}
 
 

@@ -31,8 +31,9 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::cellShape::cellShape()
+inline constexpr Foam::cellShape::cellShape() noexcept
 :
+    labelList(),
     m(nullptr)
 {}
 

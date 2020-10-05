@@ -27,6 +27,7 @@ Typedef
     Foam::tetPointRef
 
 Description
+    A tetrahedron using referred points
 
 \*---------------------------------------------------------------------------*/
 

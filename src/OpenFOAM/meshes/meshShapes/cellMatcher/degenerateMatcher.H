@@ -60,8 +60,7 @@ namespace Foam
 
 class degenerateMatcher
 {
-
-    // Static data members
+    // Static Data Members
 
         //- Matchers for all degenerate hex shapes
         static hexMatcher hex;
@@ -71,7 +70,8 @@ class degenerateMatcher
         static pyrMatcher pyr;
         static tetMatcher tet;
 
-    // Static functions
+
+    // Static Functions
 
         //- Recognize basic shape
         static cellShape match
@@ -84,13 +84,13 @@ class degenerateMatcher
 
 public:
 
-    // Static data members
+    // Static Functions
 
         //- Recognize shape given faces of a cell
         static cellShape match(const faceList& faces);
 
         //- Recognize given uncollapsed shape (usually hex) with duplicate
-        //  vertices. cellShape just used to extract faces.
+        //- vertices. cellShape just used to extract faces.
         static cellShape match(const cellShape& shape);
 
         //- Recognize shape given mesh and celli

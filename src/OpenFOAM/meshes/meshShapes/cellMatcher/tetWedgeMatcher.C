@@ -40,14 +40,8 @@ Foam::tetWedgeMatcher::tetWedgeMatcher()
         vertPerCell,
         facePerCell,
         maxVertPerFace,
-        "tetWedge" // same as cellModel::modelNames[cellModel::TETWEDGE]
+        "tetWedge" // == cellModel::modelNames[cellModel::TETWEDGE]
     )
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::tetWedgeMatcher::~tetWedgeMatcher()
 {}
 
 

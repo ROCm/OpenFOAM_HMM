@@ -25,9 +25,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "primitiveMesh.H"
-#include "cellModel.H"
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline const Foam::Map<Foam::label>& Foam::cellMatcher::localPoint() const

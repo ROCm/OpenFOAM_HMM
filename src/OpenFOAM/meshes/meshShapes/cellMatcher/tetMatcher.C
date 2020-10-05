@@ -40,19 +40,12 @@ Foam::tetMatcher::tetMatcher()
         vertPerCell,
         facePerCell,
         maxVertPerFace,
-        "tet" // same as cellModel::modelNames[cellModel::TET]
+        "tet" // == cellModel::modelNames[cellModel::TET]
     )
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::tetMatcher::~tetMatcher()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
 
 bool Foam::tetMatcher::matchShape
 (

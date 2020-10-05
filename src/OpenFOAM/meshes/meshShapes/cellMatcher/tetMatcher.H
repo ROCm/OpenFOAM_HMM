@@ -76,11 +76,12 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         tetMatcher();
 
+
     //- Destructor
-    ~tetMatcher();
+    ~tetMatcher() = default;
 
 
     // Member Functions

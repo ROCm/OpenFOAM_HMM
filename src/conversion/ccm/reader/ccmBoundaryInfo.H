@@ -27,6 +27,7 @@ Description
     Container for holding STARCCM boundary information
 
 \*---------------------------------------------------------------------------*/
+
 #ifndef ccmBoundaryInfo_H
 #define ccmBoundaryInfo_H
 

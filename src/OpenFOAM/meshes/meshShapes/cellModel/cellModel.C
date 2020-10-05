@@ -27,7 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cellModel.H"
-#include "pyramid.H"
+#include "pyramidPointFaceRef.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -37,51 +37,37 @@ Foam::vector Foam::cellModel::centre
     const UList<point>& points
 ) const
 {
-    // Estimate centre of cell
+    // Estimate cell centre by averaging the cell points
     vector cEst = Zero;
-
-    // Sum the points indicated by the label list
-    forAll(pointLabels, i)
+    for (const label pointi : pointLabels)
     {
-        cEst += points[pointLabels[i]];
+        cEst += points[pointi];
     }
-
-    // Average by dividing by the number summed over.
     cEst /= scalar(pointLabels.size());
 
 
     // Calculate the centre by breaking the cell into pyramids and
     // volume-weighted averaging their centres
-    scalar sumV = 0.0;
+
+    scalar sumV = 0;
     vector sumVc = Zero;
 
-    const faceList cellFaces = faces(pointLabels);
-
-    forAll(cellFaces, i)
+    forAll(faces_, facei)
     {
-        const face& curFace = cellFaces[i];
+        const Foam::face f(pointLabels, faces_[facei]);
 
-        scalar pyrVol =
-            pyramid<point, const point&, const face&>
-            (
-                curFace,
-                cEst
-            ).mag(points);
+        const scalar pyrVol = pyramidPointFaceRef(f, cEst).mag(points);
 
         if (pyrVol > SMALL)
         {
             WarningInFunction
                 << "zero or negative pyramid volume: " << -pyrVol
-                << " for face " << i
+                << " for face " << facei
                 << endl;
         }
 
-        sumVc -=
-            pyrVol
-           *pyramid<point, const point&, const face&>(curFace, cEst)
-           .centre(points);
-
         sumV -= pyrVol;
+        sumVc -= pyrVol * pyramidPointFaceRef(f, cEst).centre(points);
     }
 
     return sumVc/(sumV + VSMALL);
@@ -94,16 +80,12 @@ Foam::scalar Foam::cellModel::mag
     const UList<point>& points
 ) const
 {
-    // Estimate centre of cell
+    // Estimate cell centre by averaging the cell points
     vector cEst = Zero;
-
-    // Sum the points indicated by the label list
-    forAll(pointLabels, i)
+    for (const label pointi : pointLabels)
     {
-        cEst += points[pointLabels[i]];
+        cEst += points[pointi];
     }
-
-    // Average by dividing by the number summed over.
     cEst /= scalar(pointLabels.size());
 
 
@@ -111,33 +93,27 @@ Foam::scalar Foam::cellModel::mag
     // The sign change is because the faces point outwards
     // and a pyramid is constructed from an inward pointing face
     // and the base centre-apex vector
-    scalar v = 0;
 
-    const faceList cellFaces = faces(pointLabels);
+    scalar sumV = 0;
 
-    forAll(cellFaces, i)
+    forAll(faces_, facei)
     {
-        const face& curFace =cellFaces[i];
+        const Foam::face f(pointLabels, faces_[facei]);
 
-        scalar pyrVol =
-            pyramid<point, const point&, const face&>
-            (
-                curFace,
-                cEst
-            ).mag(points);
+        const scalar pyrVol = pyramidPointFaceRef(f, cEst).mag(points);
 
         if (pyrVol > SMALL)
         {
             WarningInFunction
                 << "zero or negative pyramid volume: " << -pyrVol
-                << " for face " << i
+                << " for face " << facei
                 << endl;
         }
 
-        v -= pyrVol;
+        sumV -= pyrVol;
     }
 
-    return v;
+    return sumV;
 }
 
 
