@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,7 @@ Foam::direction Foam::readDirection(Istream& is)
 }
 
 
-Foam::Istream& Foam::operator>>(Istream& is, direction& d)
+Foam::Istream& Foam::operator>>(Istream& is, direction& val)
 {
     token t(is);
 
@@ -55,7 +55,7 @@ Foam::Istream& Foam::operator>>(Istream& is, direction& d)
 
     if (t.isLabel())
     {
-        d = direction(t.labelToken());
+        val = direction(t.labelToken());
     }
     else
     {
@@ -72,17 +72,17 @@ Foam::Istream& Foam::operator>>(Istream& is, direction& d)
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const direction d)
+Foam::Ostream& Foam::operator<<(Ostream& os, const direction val)
 {
-    os.write(label(d));
+    os.write(label(val));
     os.check(FUNCTION_NAME);
     return os;
 }
 
 
-std::ostream& Foam::operator<<(std::ostream& os, const direction d)
+std::ostream& Foam::operator<<(std::ostream& os, const direction val)
 {
-    os << int(d);
+    os << int(val);
     return os;
 }
 

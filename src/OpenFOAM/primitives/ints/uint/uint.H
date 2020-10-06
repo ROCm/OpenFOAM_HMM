@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +38,7 @@ SourceFiles
 #ifndef uint_H
 #define uint_H
 
+#include "uint8.H"
 #include "uint16.H"
 #include "uint32.H"
 #include "uint64.H"

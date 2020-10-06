@@ -78,6 +78,15 @@ bool Foam::readInt32(const char* buf, int32_t& val)
 }
 
 
+int32_t Foam::readInt32(Istream& is)
+{
+    int32_t val(0);
+    is >> val;
+
+    return val;
+}
+
+
 Foam::Istream& Foam::operator>>(Istream& is, int32_t& val)
 {
     token t(is);
@@ -135,15 +144,6 @@ Foam::Istream& Foam::operator>>(Istream& is, int32_t& val)
 
     is.check(FUNCTION_NAME);
     return is;
-}
-
-
-int32_t Foam::readInt32(Istream& is)
-{
-    int32_t val(0);
-    is >> val;
-
-    return val;
 }
 
 

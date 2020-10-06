@@ -34,6 +34,8 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 const char* const pTraits<Scalar>::typeName = "scalar";
+const char* const pTraits<Scalar>::componentNames[] = { "" };
+
 const Scalar pTraits<Scalar>::zero = 0.0;
 const Scalar pTraits<Scalar>::one = 1.0;
 const Scalar pTraits<Scalar>::min = -ScalarVGREAT;
@@ -41,8 +43,6 @@ const Scalar pTraits<Scalar>::max = ScalarVGREAT;
 const Scalar pTraits<Scalar>::rootMin = -ScalarROOTVGREAT;
 const Scalar pTraits<Scalar>::rootMax = ScalarROOTVGREAT;
 const Scalar pTraits<Scalar>::vsmall = ScalarVSMALL;
-
-const char* const pTraits<Scalar>::componentNames[] = { "" };
 
 
 pTraits<Scalar>::pTraits(const Scalar& val)

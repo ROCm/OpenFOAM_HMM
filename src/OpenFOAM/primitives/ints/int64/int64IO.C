@@ -78,6 +78,15 @@ bool Foam::readInt64(const char* buf, int64_t& val)
 }
 
 
+int64_t Foam::readInt64(Istream& is)
+{
+    int64_t val(0);
+    is >> val;
+
+    return val;
+}
+
+
 Foam::Istream& Foam::operator>>(Istream& is, int64_t& val)
 {
     token t(is);
@@ -135,15 +144,6 @@ Foam::Istream& Foam::operator>>(Istream& is, int64_t& val)
 
     is.check(FUNCTION_NAME);
     return is;
-}
-
-
-int64_t Foam::readInt64(Istream& is)
-{
-    int64_t val(0);
-    is >> val;
-
-    return val;
 }
 
 

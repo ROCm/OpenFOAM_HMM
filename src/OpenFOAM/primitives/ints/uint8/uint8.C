@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2014-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,25 +25,27 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "int32.H"
+#include "uint8.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-const char* const Foam::pTraits<int32_t>::componentNames[] = { "" };
+const char* const Foam::pTraits<uint8_t>::typeName = "uint8";
+const char* const Foam::pTraits<uint8_t>::componentNames[] = { "" };
 
-const int32_t Foam::pTraits<int32_t>::zero = 0;
-const int32_t Foam::pTraits<int32_t>::one = 1;
-const int32_t Foam::pTraits<int32_t>::min = INT32_MIN;
-const int32_t Foam::pTraits<int32_t>::max = INT32_MAX;
-const int32_t Foam::pTraits<int32_t>::rootMin = pTraits<int32_t>::min;
-const int32_t Foam::pTraits<int32_t>::rootMax = pTraits<int32_t>::max;
+const uint8_t Foam::pTraits<uint8_t>::zero = 0;
+const uint8_t Foam::pTraits<uint8_t>::one = 1;
+const uint8_t Foam::pTraits<uint8_t>::min = 0;
+const uint8_t Foam::pTraits<uint8_t>::max = UINT8_MAX;
+const uint8_t Foam::pTraits<uint8_t>::rootMin = 0;
+const uint8_t Foam::pTraits<uint8_t>::rootMax = UINT8_MAX;
 
-Foam::pTraits<int32_t>::pTraits(const int32_t& val)
+
+Foam::pTraits<uint8_t>::pTraits(const uint8_t& val)
 :
     p_(val)
 {}
 
-Foam::pTraits<int32_t>::pTraits(Istream& is)
+Foam::pTraits<uint8_t>::pTraits(Istream& is)
 {
     is >> p_;
 }

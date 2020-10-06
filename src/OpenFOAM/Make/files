@@ -37,6 +37,8 @@ $(chars)/wchar/wcharIO.C
 primitives/direction/directionIO.C
 
 ints = primitives/ints
+$(ints)/uint8/uint8.C
+$(ints)/uint8/uint8IO.C
 $(ints)/uint16/uint16.C
 $(ints)/uint32/uint32.C
 $(ints)/uint32/uint32IO.C

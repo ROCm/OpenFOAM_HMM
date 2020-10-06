@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2014-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,19 +24,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Primitive
-    int64_t
+    uint8_t
 
 Description
-    64bit signed integer
+    8bit unsigned integer
 
 SourceFiles
-    int64.C
-    int64IO.C
+    uint8.C
+    uint8IO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef int64_H
-#define int64_H
+#ifndef primitives_uint8_H
+#define primitives_uint8_H
 
 #include <cstdint>
 #include <climits>
@@ -58,93 +57,46 @@ class Ostream;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- A word representation of int64 value
-inline word name(const int64_t val)
+//- A word representation of uint8 value
+inline word name(const uint8_t val)
 {
-    return word(std::to_string(val), false); // Needs no stripping
+    return word(std::to_string(int(val)), false); // Needs no stripping
 }
 
 
-//- A word representation of int64 value
+//- A word representation of uint8 value
 template<>
-struct nameOp<int64_t>
+struct nameOp<uint8_t>
 {
-    inline word operator()(const int64_t val) const
+    inline word operator()(const uint8_t val) const
     {
-        return word(std::to_string(val), false); // Needs no stripping
+        return word(std::to_string(int(val)), false); // Needs no stripping
     }
 };
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-//- Read int64_t from stream
-int64_t readInt64(Istream& is);
+//- Read uint8_t from stream.
+uint8_t readUint8(Istream& is);
 
-//- Parse entire buffer as a int64_t, skipping leading/trailing whitespace.
-//  \return Parsed value or FatalIOError on any problem
-int64_t readInt64(const char* buf);
-
-//- Parse entire string as a int64_t, skipping leading/trailing whitespace.
-//  \return Parsed value or FatalIOError on any problem
-inline int64_t readInt64(const std::string& str)
-{
-    return readInt64(str.c_str());
-}
-
-//- Read entire buffer as a int64_t, skipping leading/trailing whitespace.
-//  \return True if successful.
-bool readInt64(const char* buf, int64_t& val);
-
-//- Read entire string as a int64_t, skipping leading/trailing whitespace.
-//  \return True if successful.
-inline bool readInt64(const std::string& str, int64_t& val)
-{
-    return readInt64(str.c_str(), val);
-}
-
-//- Same as readInt64
-//  \return True if successful.
-inline bool read(const char* buf, int64_t& val)
-{
-    return readInt64(buf, val);
-}
-
-//- Same as readInt64
-//  \return True if successful.
-inline bool read(const std::string& str, int64_t& val)
-{
-    return readInt64(str, val);
-}
+// IO operators are identical to direction, which is uint8_t
 
 
-Istream& operator>>(Istream& is, int64_t& val);
-Ostream& operator<<(Ostream& os, const int64_t val);
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// On Darwin:
-// long is not unambiguously (int32_t | int64_t)
-// - explicitly resolve for input and output
-#if defined(__APPLE__)
-    Istream& operator>>(Istream& is, long& val);
-    Ostream& operator<<(Ostream& os, const long val);
-#endif
-
-
-//- Template specialization for pTraits<int64_t>
+//- Template specialization for pTraits<uint8_t>
 template<>
-class pTraits<int64_t>
+class pTraits<uint8_t>
 {
-    int64_t p_;
+    uint8_t p_;
 
 public:
 
     // Typedefs
 
         //- Component type
-        typedef int64_t cmptType;
-
-        //- Magnitude type
-        typedef int64_t magType;
+        typedef uint8_t cmptType;
 
 
     // Member Constants
@@ -152,10 +104,10 @@ public:
         //- Dimensionality of space
         static constexpr direction dim = 3;
 
-        //- Rank of int64_t is 0
+        //- Rank of uint8_t is 0
         static constexpr direction rank = 0;
 
-        //- Number of components in int64_t is 1
+        //- Number of components in uint8_t is 1
         static constexpr direction nComponents = 1;
 
 
@@ -163,18 +115,18 @@ public:
 
         static const char* const typeName;
         static const char* const componentNames[];
-        static const int64_t zero;
-        static const int64_t one;
-        static const int64_t min;
-        static const int64_t max;
-        static const int64_t rootMax;
-        static const int64_t rootMin;
+        static const uint8_t zero;
+        static const uint8_t one;
+        static const uint8_t min;
+        static const uint8_t max;
+        static const uint8_t rootMax;
+        static const uint8_t rootMin;
 
 
     // Constructors
 
         //- Copy construct from primitive
-        explicit pTraits(const int64_t& val);
+        explicit pTraits(const uint8_t& val);
 
         //- Read construct from Istream
         explicit pTraits(Istream& is);
@@ -183,23 +135,17 @@ public:
     // Member Functions
 
         //- Access to the value
-        operator int64_t() const
+        operator uint8_t() const
         {
             return p_;
         }
 
         //- Access to the value
-        operator int64_t&()
+        operator uint8_t&()
         {
             return p_;
         }
 };
-
-
-inline int64_t mag(const int64_t val)
-{
-    return ::labs(val);
-}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

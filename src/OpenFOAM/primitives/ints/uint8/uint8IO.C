@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2014-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,28 +25,20 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "int32.H"
+#include "uint8.H"
+#include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-const char* const Foam::pTraits<int32_t>::componentNames[] = { "" };
-
-const int32_t Foam::pTraits<int32_t>::zero = 0;
-const int32_t Foam::pTraits<int32_t>::one = 1;
-const int32_t Foam::pTraits<int32_t>::min = INT32_MIN;
-const int32_t Foam::pTraits<int32_t>::max = INT32_MAX;
-const int32_t Foam::pTraits<int32_t>::rootMin = pTraits<int32_t>::min;
-const int32_t Foam::pTraits<int32_t>::rootMax = pTraits<int32_t>::max;
-
-Foam::pTraits<int32_t>::pTraits(const int32_t& val)
-:
-    p_(val)
-{}
-
-Foam::pTraits<int32_t>::pTraits(Istream& is)
+uint8_t Foam::readUint8(Istream& is)
 {
-    is >> p_;
+    uint8_t val(0);
+    is >> val;
+
+    return val;
 }
+
+// IO operators are identical to direction, which is uint8_t
 
 
 // ************************************************************************* //

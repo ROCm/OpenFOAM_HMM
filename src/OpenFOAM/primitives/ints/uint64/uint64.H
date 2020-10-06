@@ -43,15 +43,16 @@ SourceFiles
 #include <climits>
 #include <cstdlib>
 
-#include "word.H"
-#include "pTraits.H"
 #include "direction.H"
+#include "pTraits.H"
+#include "word.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward Declarations
 class Istream;
 class Ostream;
 

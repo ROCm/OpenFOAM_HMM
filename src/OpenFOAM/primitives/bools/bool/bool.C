@@ -34,10 +34,11 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 const char* const Foam::pTraits<bool>::typeName = "bool";
+const char* const Foam::pTraits<bool>::componentNames[] = { "" };
+
 const bool Foam::pTraits<bool>::zero = false;
 const bool Foam::pTraits<bool>::one = true;
 
-const char* const Foam::pTraits<bool>::componentNames[] = { "" };
 
 Foam::pTraits<bool>::pTraits(const bool& p)
 :

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,13 +28,16 @@ Primitive
     direction
 
 Description
-    Direction is an 8-bit unsigned integer type used to represent the Cartesian
-    directions etc.
+    Direction is an 8-bit unsigned integer type used to represent
+    Cartesian directions, components etc.
+
+Note
+    If a different typedef is used, "uint8.H" must be modified accordingly.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef direction_H
-#define direction_H
+#ifndef primitives_direction_H
+#define primitives_direction_H
 
 #include <cstdint>
 #include <iostream>
@@ -43,6 +47,7 @@ Description
 namespace Foam
 {
 
+// Forward Declarations
 class Istream;
 class Ostream;
 
@@ -50,10 +55,14 @@ class Ostream;
 
 typedef uint8_t direction;
 
+//- Read direction (uint8_t) from stream.
 direction readDirection(Istream& is);
-Istream& operator>>(Istream& is, direction& d);
-Ostream& operator<<(Ostream& os, const direction d);
-std::ostream& operator<<(std::ostream& os, const direction d);
+
+Istream& operator>>(Istream& is, direction& val);
+Ostream& operator<<(Ostream& os, const direction val);
+
+std::ostream& operator<<(std::ostream& os, const direction val);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
