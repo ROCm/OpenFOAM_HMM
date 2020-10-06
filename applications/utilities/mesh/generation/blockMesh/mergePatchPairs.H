@@ -1,6 +1,6 @@
 // Handle merging of patch pairs
 {
-    List<Pair<word>> mergePatchPairs;
+    wordPairList mergePatchPairs;
 
     // Read in a list of dictionaries for the merge patch pairs
     if
@@ -14,19 +14,19 @@
         // Create and add point and face zones and mesh modifiers
         List<pointZone*> pz(mergePatchPairs.size());
         List<faceZone*> fz(3*mergePatchPairs.size());
-        List<cellZone*> cz(0);
+        List<cellZone*> cz;
 
-        forAll(mergePatchPairs, pairI)
+        forAll(mergePatchPairs, pairi)
         {
             const word mergeName
             (
-                mergePatchPairs[pairI].first()
-              + mergePatchPairs[pairI].second()
-              + name(pairI)
+                mergePatchPairs[pairi].first()
+              + mergePatchPairs[pairi].second()
+              + name(pairi)
             );
 
             // An empty zone for cut points
-            pz[pairI] = new pointZone
+            pz[pairi] = new pointZone
             (
                 mergeName + "CutPointZone",
                 0,
@@ -34,11 +34,11 @@
             );
 
             // Master patch
-            const word masterPatchName(mergePatchPairs[pairI].first());
+            const word masterPatchName(mergePatchPairs[pairi].first());
             const polyPatch& masterPatch =
                 mesh.boundaryMesh()[masterPatchName];
 
-            fz[3*pairI] = new faceZone
+            fz[3*pairi] = new faceZone
             (
                 mergeName + "MasterZone",
                 identity(masterPatch.size(), masterPatch.start()),
@@ -48,11 +48,11 @@
             );
 
             // Slave patch
-            const word slavePatchName(mergePatchPairs[pairI].second());
+            const word slavePatchName(mergePatchPairs[pairi].second());
             const polyPatch& slavePatch =
                 mesh.boundaryMesh()[slavePatchName];
 
-            fz[3*pairI + 1] = new faceZone
+            fz[3*pairi + 1] = new faceZone
             (
                 mergeName + "SlaveZone",
                 identity(slavePatch.size(), slavePatch.start()),
@@ -62,7 +62,7 @@
             );
 
             // An empty zone for cut faces
-            fz[3*pairI + 2] = new faceZone
+            fz[3*pairi + 2] = new faceZone
             (
                 mergeName + "CutFaceZone",
                 2,
@@ -78,30 +78,30 @@
         attachPolyTopoChanger polyMeshAttacher(mesh);
         polyMeshAttacher.setSize(mergePatchPairs.size());
 
-        forAll(mergePatchPairs, pairI)
+        forAll(mergePatchPairs, pairi)
         {
             const word mergeName
             (
-                mergePatchPairs[pairI].first()
-              + mergePatchPairs[pairI].second()
-              + name(pairI)
+                mergePatchPairs[pairi].first()
+              + mergePatchPairs[pairi].second()
+              + name(pairi)
             );
 
             // Add the sliding interface mesh modifier
             polyMeshAttacher.set
             (
-                pairI,
+                pairi,
                 new slidingInterface
                 (
-                    "couple" + name(pairI),
-                    pairI,
+                    "couple" + name(pairi),
+                    pairi,
                     polyMeshAttacher,
                     mergeName + "MasterZone",
                     mergeName + "SlaveZone",
                     mergeName + "CutPointZone",
                     mergeName + "CutFaceZone",
-                    mergePatchPairs[pairI].first(),
-                    mergePatchPairs[pairI].second(),
+                    mergePatchPairs[pairi].first(),
+                    mergePatchPairs[pairi].second(),
                     slidingInterface::INTEGRAL, // always integral
                     false,
                     intersection::VISIBLE

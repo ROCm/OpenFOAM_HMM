@@ -153,15 +153,15 @@ blocks
 
 edges
 (
-    arc 4 5 (0 0 -R_burner)
-    arc 5 6 (R_burner 0 0)
-    arc 6 7 (0 0 R_burner)
-    arc 7 4 (-R_burner 0 0)
+    arc 4 5 origin (0 0 0)
+    arc 5 6 origin (0 0 0)
+    arc 6 7 origin (0 0 0)
+    arc 7 4 origin (0 0 0)
 
-    arc 24 25 (0 H_box -R_burner)
-    arc 25 26 (R_burner H_box 0)
-    arc 26 27 (0 H_box R_burner)
-    arc 27 24 (-R_burner H_box 0)
+    arc 24 25 origin (0 H_box 0)
+    arc 25 26 origin (0 H_box 0)
+    arc 26 27 origin (0 H_box 0)
+    arc 27 24 origin (0 H_box 0)
 );
 
 boundary

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,11 +71,21 @@ Foam::blockEdges::lineEdge::lineEdge
 
 Foam::point Foam::blockEdges::lineEdge::position(const scalar lambda) const
 {
-    if (lambda < -SMALL || lambda > 1+SMALL)
+    #ifdef FULLDEBUG
+    if (lambda < -SMALL || lambda > 1 + SMALL)
     {
-        FatalErrorInFunction
-            << "Parameter out of range, lambda = " << lambda
-            << abort(FatalError);
+        WarningInFunction
+            << "Parameter out of range, lambda = " << lambda << nl;
+    }
+    #endif
+
+    if (lambda < SMALL)
+    {
+        return points_[start_];
+    }
+    else if (lambda >= 1 - SMALL)
+    {
+        return points_[end_];
     }
 
     return points_[start_] + lambda * (points_[end_] - points_[start_]);

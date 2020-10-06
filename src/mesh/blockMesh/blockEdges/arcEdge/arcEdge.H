@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,32 @@ Class
     Foam::blockEdges::arcEdge
 
 Description
-    Defines the arcEdge of a circle in terms of 3 points on its circumference
+    A blockEdge defined as an arc of a circle.
+
+    The arc is normally defined by its endpoints and a point on
+    its circumference, typically a midpoint. For example,
+    \verbatim
+    points ((1 0 0) (0 1 0));
+
+    arc 0 1 (0.707107 0.707107 0);
+    \endverbatim
+    The arc can enclose an angle greater than 0 and less than 360 degrees.
+
+    The arc will frequently enclose an angle less than 180 degrees.
+    For the case, it is possible to define the arc by its endpoints and its
+    centre (origin) point. For example,
+    \verbatim
+    arc 0 1 origin (0 0 0);
+    \endverbatim
+    When defined in the way, any discrepancy in the arc radius for the
+    endpoints is resolved by adjusting the origin to ensure that the average
+    radius is satisfied.
+
+    It is also possible to define a \em flatness factor as a multiplier of
+    the calculated radius. For example,
+    \verbatim
+    arc 0 1 origin 1.1 (0 0 0);
+    \endverbatim
 
 SourceFiles
     arcEdge.C
@@ -56,16 +81,13 @@ class arcEdge
 :
     public blockEdge
 {
-    // Private data
-
-        // Begin, mid, end points
-        point p1_, p2_, p3_;
-
-        //- The arc angle (in degrees)
-        scalar angle_;
+    // Private Data
 
         //- The arc radius
         scalar radius_;
+
+        //- The arc angle (radians)
+        scalar angle_;
 
         //- The local cylindrical coordinate system
         coordSystem::cylindrical cs_;
@@ -73,9 +95,27 @@ class arcEdge
 
     // Private Member Functions
 
-        //- Calculate the angle, radius and axis
-        //  \return the cylindrical coordinate system
-        coordSystem::cylindrical calcAngle();
+        //- Calculate angle, radius, cylindrical coordinate system
+        //- from end points and the given point on the circumference
+        void calcFromMidPoint
+        (
+            const point& p1,        //!< Start point
+            const point& p3,        //!< End point
+            const point& p2         //!< Point on circumference
+        );
+
+        //- Calculate angle, radius, cylindrical coordinate system
+        //- from end points and the given origin.
+        //  Optionally adjust centre to accommodate deviations in the
+        //  effective radius to the end-points
+        void calcFromCentre
+        (
+            const point& p1,        //!< Start point
+            const point& p3,        //!< End point
+            const point& centre,    //!< Centre
+            bool adjustCentre = false,  //!< Adjust centre
+            scalar rMultiplier = 1      //!< Adjust radius by this factor
+        );
 
         //- No copy construct
         arcEdge(const arcEdge&) = delete;
@@ -92,23 +132,34 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct from components, given the origin of the circle
         arcEdge
         (
-            const pointField& points,
-            const label start,
-            const label end,
-            const point& pMid
+            const pointField& points,   //!< Referenced point field
+            const point& origin,    //!< The origin of the circle
+            const label start,      //!< Start point in referenced point field
+            const label end         //!< End point in referenced point field
         );
 
-        //- Construct from Istream setting pointsList
+        //- Construct from components, using a point on the circumference
+        arcEdge
+        (
+            const pointField& points,   //!< Referenced point field
+            const label start,      //!< Start point in referenced point field
+            const label end,        //!< End point in referenced point field
+            const point& midPoint   //!< A point on the circumference
+        );
+
+        //- Construct from Istream and point field.
+        //  The Istream can specify either a point on the circumference,
+        //  or with a tag to specify the origin.
         arcEdge
         (
             const dictionary& dict,
             const label index,
-            const searchableSurfaces& geometry,
-            const pointField& points,
-            Istream&
+            const searchableSurfaces& geometry, // unsed
+            const pointField& points,   //!< Referenced point field
+            Istream& is
         );
 
 
@@ -122,7 +173,7 @@ public:
         point position(const scalar lambda) const;
 
         //- The length of the curve
-        scalar length() const;
+        scalar length() const noexcept;
 };
 
 

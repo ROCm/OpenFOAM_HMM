@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,7 @@ License
 
 #include "blockEdge.H"
 #include "blockVertex.H"
+#include "polyLine.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -104,31 +105,21 @@ Foam::autoPtr<Foam::blockEdge> Foam::blockEdge::New
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 Foam::pointField Foam::blockEdge::appendEndPoints
 (
-    const pointField& points,
+    const pointField& pts,
     const label start,
     const label end,
-    const pointField& otherKnots
+    const pointField& intermediate
 )
 {
-    pointField allKnots(otherKnots.size() + 2);
-
-    // Start/end knots
-    allKnots[0] = points[start];
-    allKnots[otherKnots.size() + 1] = points[end];
-
-    // Intermediate knots
-    forAll(otherKnots, knotI)
-    {
-        allKnots[knotI+1] = otherKnots[knotI];
-    }
-
-    return allKnots;
+    return pointField(polyLine::concat(pts[start], intermediate, pts[end]));
 }
 
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::pointField>
 Foam::blockEdge::position(const scalarList& lambdas) const

@@ -134,7 +134,7 @@ Foam::point Foam::CatmullRomSpline::position
 Foam::scalar Foam::CatmullRomSpline::length() const
 {
     NotImplemented;
-    return 1.0;
+    return 1;
 }
 
 

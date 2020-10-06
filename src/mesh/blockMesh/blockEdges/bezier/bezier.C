@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "bezier.H"
+#include "polyLine.H"
 #include "SubList.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -66,7 +67,10 @@ Foam::blockEdges::bezier::bezier
 )
 :
     blockEdge(dict, index, points, is),
-    control_(appendEndPoints(points, start_, end_, pointField(is)))
+    control_
+    (
+        polyLine::concat(points[start_], pointField(is), points[end_])
+    )
 {}
 
 
@@ -94,7 +98,7 @@ Foam::point Foam::blockEdges::bezier::position(const scalar lambda) const
 Foam::scalar Foam::blockEdges::bezier::length() const
 {
     NotImplemented;
-    return 1.0;
+    return 1;
 }
 
 

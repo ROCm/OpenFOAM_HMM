@@ -17,68 +17,81 @@ FoamFile
 scale   1;
 verbose no;
 
+// Geometric parameters
+outerRadius 1;
+innerRatio  0.5;
+
+// Divisions in x/y/z and radial directions. Can be unequal.
+nx   10;
+ny   $nx;
+nz   $nx;
+nr   6;
+
 geometry
 {
     sphere
     {
         type   sphere;
         origin (0 0 0);
-        radius 1;
+        radius $outerRadius;
     }
 
     innerSphere
     {
         type   sphere;
         origin (0 0 0);
-        radius 0.5;
+        radius #eval{ $innerRatio * $outerRadius };
     }
 }
 
-n    10;
 
-// Rough approximation of corner points
-v    0.5773502;
-mv  -0.5773502;
-vh   0.2886751;
-mvh -0.2886751;
+// Outer box sizes (approximate)
+vo   #eval{ sqrt($outerRadius/3) };
+mvo  #eval{ -$vo };
+
+// Inner box sizes - % of overall dimension
+vi   #eval{ $innerRatio*$vo };
+mvi  #eval{ $innerRatio*$mvo };
 
 vertices
 (
     // Inner block points
-    project ($mvh $mvh $mvh) (innerSphere)
-    project ( $vh $mvh $mvh) (innerSphere)
-    project ( $vh  $vh $mvh) (innerSphere)
-    project ($mvh  $vh $mvh) (innerSphere)
-    project ($mvh $mvh  $vh) (innerSphere)
-    project ( $vh $mvh  $vh) (innerSphere)
-    project ( $vh  $vh  $vh) (innerSphere)
-    project ($mvh  $vh  $vh) (innerSphere)
+    project ($mvi $mvi $mvi) (innerSphere)
+    project ( $vi $mvi $mvi) (innerSphere)
+    project ( $vi  $vi $mvi) (innerSphere)
+    project ($mvi  $vi $mvi) (innerSphere)
+    project ($mvi $mvi  $vi) (innerSphere)
+    project ( $vi $mvi  $vi) (innerSphere)
+    project ( $vi  $vi  $vi) (innerSphere)
+    project ($mvi  $vi  $vi) (innerSphere)
 
     // Outer block points
-    project ($mv $mv $mv) (sphere)
-    project ( $v $mv $mv) (sphere)
-    project ( $v  $v $mv) (sphere)
-    project ($mv  $v $mv) (sphere)
-    project ($mv $mv  $v) (sphere)
-    project ( $v $mv  $v) (sphere)
-    project ( $v  $v  $v) (sphere)
-    project ($mv  $v  $v) (sphere)
+    project ($mvo $mvo $mvo) (sphere)
+    project ( $vo $mvo $mvo) (sphere)
+    project ( $vo  $vo $mvo) (sphere)
+    project ($mvo  $vo $mvo) (sphere)
+    project ($mvo $mvo  $vo) (sphere)
+    project ( $vo $mvo  $vo) (sphere)
+    project ( $vo  $vo  $vo) (sphere)
+    project ($mvo  $vo  $vo) (sphere)
 );
 
 blocks
 (
-    hex ( 0  1  2  3  4  5  6  7) ($n $n $n) simpleGrading (1 1 1)
-    hex ( 9  8 12 13  1  0  4  5) ($n $n $n) simpleGrading (1 1 1)
-    hex (10  9 13 14  2  1  5  6) ($n $n $n) simpleGrading (1 1 1)
-    hex (11 10 14 15  3  2  6  7) ($n $n $n) simpleGrading (1 1 1)
-    hex ( 8 11 15 12  0  3  7  4) ($n $n $n) simpleGrading (1 1 1)
-    hex ( 8  9 10 11  0  1  2  3) ($n $n $n) simpleGrading (1 1 1)
-    hex (13 12 15 14  5  4  7  6) ($n $n $n) simpleGrading (1 1 1)
+    hex (0 1 2 3 4 5 6 7) ($nx $ny $nz) grading (1 1 1)  // Inner block
+
+    // Outer blocks
+    hex ( 8  0  3 11 12  4  7 15) ($nr $ny $nz) grading (1 1 1)  // x-min
+    hex ( 1  9 10  2  5 13 14  6) ($nr $ny $nz) grading (1 1 1)  // x-max
+    hex ( 8  9  1  0 12 13  5  4) ($nx $nr $nz) grading (1 1 1)  // y-min
+    hex ( 3  2 10 11  7  6 14 15) ($nx $nr $nz) grading (1 1 1)  // y-max
+    hex ( 8  9 10 11  0  1  2  3) ($nx $ny $nr) grading (1 1 1)  // z-min
+    hex ( 4  5  6  7 12 13 14 15) ($nx $ny $nr) grading (1 1 1)  // z-max
 );
 
 edges
 (
-    // Outer edges
+    // Outer blocks
     project  8  9 (sphere)
     project 10 11 (sphere)
     project 14 15 (sphere)
@@ -94,32 +107,32 @@ edges
     project 10 14 (sphere)
     project 11 15 (sphere)
 
+    // Inner block
+    project 0 1 (innerSphere)
+    project 2 3 (innerSphere)
+    project 6 7 (innerSphere)
+    project 4 5 (innerSphere)
 
-    // Inner edges
-    project  0  1 (innerSphere)
-    project  2  3 (innerSphere)
-    project  6  7 (innerSphere)
-    project  4  5 (innerSphere)
+    project 0 3 (innerSphere)
+    project 1 2 (innerSphere)
+    project 5 6 (innerSphere)
+    project 4 7 (innerSphere)
 
-    project  0  3 (innerSphere)
-    project  1  2 (innerSphere)
-    project  5  6 (innerSphere)
-    project  4  7 (innerSphere)
-
-    project  0  4 (innerSphere)
-    project  1  5 (innerSphere)
-    project  2  6 (innerSphere)
-    project  3  7 (innerSphere)
+    project 0 4 (innerSphere)
+    project 1 5 (innerSphere)
+    project 2 6 (innerSphere)
+    project 3 7 (innerSphere)
 );
 
 faces
 (
-    project ( 8 12 15 11) sphere
-    project (10 14 13  9) sphere
-    project ( 9 13 12  8) sphere
-    project (11 15 14 10) sphere
-    project ( 8 11 10  9) sphere
-    project (12 13 14 15) sphere
+    // Outer blocks
+    project ( 8 12 15 11) sphere  // x-min
+    project ( 9 10 14 13) sphere  // x-max
+    project ( 8  9 13 12) sphere  // y-min
+    project (11 15 14 10) sphere  // y-max
+    project ( 8 11 10  9) sphere  // z-min
+    project (12 13 14 15) sphere  // z-max
 );
 
 boundary
@@ -129,12 +142,12 @@ boundary
         type wall;
         faces
         (
-            ( 8 12 15 11)
-            (10 14 13  9)
-            ( 9 13 12  8)
-            (11 15 14 10)
-            ( 8 11 10  9)
-            (12 13 14 15)
+            ( 8 12 15 11)  // x-min
+            ( 9 10 14 13)  // x-max
+            ( 8  9 13 12)  // y-min
+            (11 15 14 10)  // y-max
+            ( 8 11 10  9)  // z-min
+            (12 13 14 15)  // z-max
         );
     }
 );

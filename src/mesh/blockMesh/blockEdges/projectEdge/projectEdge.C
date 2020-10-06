@@ -26,13 +26,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "searchableSurfacesQueries.H"
 #include "projectEdge.H"
-#include "unitConversion.H"
-#include "addToRunTimeSelectionTable.H"
 #include "pointConstraint.H"
+#include "searchableSurfacesQueries.H"
 #include "OBJstream.H"
 #include "linearInterpolationWeights.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -146,8 +145,8 @@ Foam::projectEdge::position(const scalarList& lambdas) const
     }
 
 
-    tmp<pointField> tpoints(new pointField(lambdas.size()));
-    pointField& points = tpoints.ref();
+    auto tpoints = tmp<pointField>::New(lambdas.size());
+    auto& points = tpoints.ref();
 
     const point& startPt = points_[start_];
     const point& endPt = points_[end_];
@@ -161,10 +160,11 @@ Foam::projectEdge::position(const scalarList& lambdas) const
 
 
     // Upper limit for number of iterations
-    const label maxIter = 10;
+    constexpr label maxIter = 10;
+
     // Residual tolerance
-    const scalar relTol = 0.1;
-    const scalar absTol = 1e-4;
+    constexpr scalar relTol = 0.1;
+    constexpr scalar absTol = 1e-4;
 
     scalar initialResidual = 0.0;
 
@@ -267,6 +267,13 @@ Foam::projectEdge::position(const scalarList& lambdas) const
     }
 
     return tpoints;
+}
+
+
+Foam::scalar Foam::projectEdge::length() const
+{
+    NotImplemented;
+    return 1;
 }
 
 

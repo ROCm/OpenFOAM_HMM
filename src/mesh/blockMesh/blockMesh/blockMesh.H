@@ -226,10 +226,10 @@ public:
 
         //- Construct from IOdictionary for given region
         //  Default is topological merging.
-        blockMesh
+        explicit blockMesh
         (
             const IOdictionary& dict,
-            const word& regionName,
+            const word& regionName = polyMesh::defaultRegion,
             mergeStrategy strategy = mergeStrategy::DEFAULT_MERGE
         );
 
@@ -255,10 +255,10 @@ public:
             }
 
             //- True if the blockMesh topology exists
-            bool valid() const;
+            bool valid() const noexcept;
 
-            //- Reference to point field defining the blockMesh
-            //  these points have not been scaled by scaleFactor
+            //- Reference to point field defining the blockMesh.
+            //  These points are \b not scaled by scaleFactor
             const pointField& vertices() const;
 
             //- Return the blockMesh topology as a polyMesh
@@ -279,8 +279,8 @@ public:
             //- The scaling factor used to convert to metres
             scalar scaleFactor() const;
 
-            //- The points for the entire mesh
-            //  these points have been scaled by scaleFactor
+            //- The points for the entire mesh.
+            //  These points \b are scaled by scaleFactor
             const pointField& points() const;
 
             //- Return cell shapes list
@@ -299,16 +299,26 @@ public:
             label numZonedBlocks() const;
 
 
-        // Edit
+    // Verbosity
 
-            //- Enable/disable verbose information about the progress
-            void verbose(const bool on=true);
+        //- Verbose information?
+        bool verbose() const noexcept;
+
+        //- Enable/disable verbose information about the progress
+        //  \return old value
+        bool verbose(const bool on) noexcept;
 
 
-        // Write
+    // Mesh Generation
 
-            //- Writes edges of blockMesh in OBJ format.
-            void writeTopology(Ostream&) const;
+        //- Create polyMesh, with cell zones
+        autoPtr<polyMesh> mesh(const IOobject& io) const;
+
+
+    // Write
+
+        //- Writes edges of blockMesh in OBJ format.
+        void writeTopology(Ostream& os) const;
 };
 
 

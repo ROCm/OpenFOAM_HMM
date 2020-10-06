@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,21 +80,12 @@ class CatmullRomSpline
 :
     public polyLine
 {
-    // Private Member Functions
-
-        //- No copy construct
-        CatmullRomSpline(const CatmullRomSpline&) = delete;
-
-        //- No copy assignment
-        void operator=(const CatmullRomSpline&) = delete;
-
-
 public:
 
     // Constructors
 
         //- Construct from components
-        CatmullRomSpline
+        explicit CatmullRomSpline
         (
             const pointField& knots,
             const bool notImplementedClosed = false
@@ -102,15 +94,16 @@ public:
 
     // Member Functions
 
-        //- Return the point position corresponding to the curve parameter
+        //- The point position corresponding to the curve parameter
         //  0 <= lambda <= 1
         point position(const scalar lambda) const;
 
-        //- Return the point position corresponding to the local parameter
+        //- The point position corresponding to the local parameter
         //  0 <= lambda <= 1 on the given segment
         point position(const label segment, const scalar lambda) const;
 
-        //- Return the length of the curve
+        //- The length of the curve
+        //  \note NotImplemented
         scalar length() const;
 };
 

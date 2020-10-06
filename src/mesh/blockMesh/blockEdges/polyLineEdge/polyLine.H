@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,26 +53,16 @@ namespace Foam
                           Class polyLine Declaration
 \*---------------------------------------------------------------------------*/
 
-
 class polyLine
 {
-    // Private Member Functions
-
-        //- No copy construct
-        polyLine(const polyLine&) = delete;
-
-        //- No copy assignment
-        void operator=(const polyLine&) = delete;
-
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- The control points or ends of each segments
         pointField points_;
 
-        //- The real line length
+        //- The real (total) line length
         scalar lineLength_;
 
         //- The rational (0-1) cumulative parameter value for each point
@@ -81,11 +72,11 @@ protected:
     // Protected Member Functions
 
         //- Precalculate the rational cumulative parameter value
-        //  and the line-length
+        //- and the line-length
         void calcParam();
 
         //- Return the line segment and the local parameter [0..1]
-        //  corresponding to the global lambda [0..1]
+        //- corresponding to the global lambda [0..1]
         label localParameter(scalar& lambda) const;
 
 
@@ -94,10 +85,30 @@ public:
     // Constructors
 
         //- Construct from components
+        explicit polyLine
+        (
+            const pointField& points,   //!< The poly-line points
+            const bool notImplementedClosed = false
+        );
+
+        //- Construct from begin, intermediate, end points
         polyLine
         (
-            const pointField&,
+            const point& start,             //!< The start point
+            const pointField& intermediate, //!< The intermediate points
+            const point& end,               //!< The end point
             const bool notImplementedClosed = false
+        );
+
+
+    // Static Member Functions
+
+        //- Concatenate begin, intermediate and end points
+        static tmp<pointField> concat
+        (
+            const point& start,             //!< The start point
+            const pointField& intermediate, //!< The intermediate points
+            const point& end                //!< The end point
         );
 
 
@@ -106,18 +117,18 @@ public:
         //- Return const-access to the control-points
         const pointField& points() const;
 
-        //- Return the number of line segments
+        //- The number of line segments
         label nSegments() const;
 
-        //- Return the point position corresponding to the curve parameter
+        //- The point position corresponding to the curve parameter
         //  0 <= lambda <= 1
         point position(const scalar) const;
 
-        //- Return the point position corresponding to the local parameter
+        //- The point position corresponding to the local parameter
         //  0 <= lambda <= 1 on the given segment
         point position(const label segment, const scalar) const;
 
-        //- Return the length of the curve
+        //- The length of the curve
         scalar length() const;
 };
 

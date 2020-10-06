@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,6 +23,12 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+Namespace
+    Foam::blockEdges
+
+Description
+    A namespace for various blockEdge types.
 
 Class
     Foam::blockEdge
@@ -46,12 +52,9 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward Declarations
 class blockEdge;
-
 Ostream& operator<<(Ostream&, const blockEdge&);
-
 
 /*---------------------------------------------------------------------------*\
                          Class blockEdge Declaration
@@ -61,24 +64,29 @@ class blockEdge
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
+        //- The referenced point field
         const pointField& points_;
 
+        //- Index of the start point
         const label start_;
+
+        //- Index of the end point
         const label end_;
 
 
     // Protected Member Functions
 
         //- Return a complete point field by appending the start/end points
-        //  to the given list
+        //- to the given list
+        //  \deprecated(2020-10) use polyLine::concat
         static pointField appendEndPoints
         (
-            const pointField&,
-            const label start,
-            const label end,
-            const pointField& otherKnots
+            const pointField& points,   //!< Referenced point field
+            const label start,      //!< Start point in referenced point field
+            const label end,        //!< End point in referenced point field
+            const pointField& intermediate  //!< Intermediate points (knots)
         );
 
 
@@ -110,18 +118,18 @@ public:
         //- Construct from components
         blockEdge
         (
-            const pointField& points,
-            const label start,
-            const label end
+            const pointField& points,   //!< Referenced point field
+            const label start,      //!< Start point in referenced point field
+            const label end         //!< End point in referenced point field
         );
 
-        //- Construct from Istream setting pointsList
+        //- Construct from Istream and point field.
         blockEdge
         (
             const dictionary& dict,
             const label index,
-            const pointField&,
-            Istream&
+            const pointField& points,   //!< Referenced point field
+            Istream& is
         );
 
         //- Clone function
@@ -133,8 +141,8 @@ public:
             const dictionary& dict,
             const label index,
             const searchableSurfaces& geometry,
-            const pointField&,
-            Istream&
+            const pointField& points,
+            Istream& is
         );
 
         //- Class used for the read-construction of
@@ -174,10 +182,10 @@ public:
 
     // Member Functions
 
-        //- Return label of start point
+        //- Index of start point
         inline label start() const;
 
-        //- Return label of end point
+        //- Index of end point
         inline label end() const;
 
         //- Compare the given start and end points with this curve
@@ -201,22 +209,22 @@ public:
         //  - -1: same edge, but different orientation
         inline int compare(const label start, const label end) const;
 
-        //- Return the point position corresponding to the curve parameter
+        //- The point position corresponding to the curve parameter
         //  0 <= lambda <= 1
         virtual point position(const scalar) const = 0;
 
-        //- Return the point positions corresponding to the curve parameters
+        //- The point positions corresponding to the curve parameters
         //  0 <= lambda <= 1
         virtual tmp<pointField> position(const scalarList&) const;
 
-        //- Return the length of the curve
+        //- The length of the curve
         virtual scalar length() const = 0;
 
         //- Write edge with variable backsubstitution
         void write(Ostream&, const dictionary&) const;
 
 
-    // Ostream operator
+    // Ostream Operator
 
         friend Ostream& operator<<(Ostream&, const blockEdge&);
 };

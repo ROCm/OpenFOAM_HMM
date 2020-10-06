@@ -109,15 +109,23 @@ Foam::blockMesh::blockMesh
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::blockMesh::valid() const
+bool Foam::blockMesh::valid() const noexcept
 {
     return bool(topologyPtr_);
 }
 
 
-void Foam::blockMesh::verbose(const bool on)
+bool Foam::blockMesh::verbose() const noexcept
 {
+    return verboseOutput;
+}
+
+
+bool Foam::blockMesh::verbose(const bool on) noexcept
+{
+    bool old(verboseOutput);
     verboseOutput = on;
+    return old;
 }
 
 

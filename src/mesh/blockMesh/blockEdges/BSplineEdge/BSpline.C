@@ -134,7 +134,7 @@ Foam::point Foam::BSpline::position
 Foam::scalar Foam::BSpline::length() const
 {
     NotImplemented;
-    return 1.0;
+    return 1;
 }
 
 

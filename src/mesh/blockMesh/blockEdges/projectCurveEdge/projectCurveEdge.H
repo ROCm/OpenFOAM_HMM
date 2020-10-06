@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,6 +46,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class pointConstraint;
 
 /*---------------------------------------------------------------------------*\
@@ -81,13 +82,13 @@ public:
 
     // Constructors
 
-        //- Construct from Istream setting pointsList
+        //- Construct from Istream and point field.
         projectCurveEdge
         (
             const dictionary& dict,
             const label index,
             const searchableSurfaces& geometry,
-            const pointField& points,
+            const pointField& points,   //!< Referenced point field
             Istream& is
         );
 
@@ -98,24 +99,18 @@ public:
 
     // Member Functions
 
-        //- Return the point positions corresponding to the curve parameters
+        //- The point position corresponding to the curve parameter
         //  0 <= lambda <= 1
-        virtual point position(const scalar) const
-        {
-            NotImplemented;
-            return point::max;
-        }
+        //  \note NotImplemented
+        virtual point position(const scalar) const;
 
-        //- Return the point positions corresponding to the curve parameters
+        //- The point positions corresponding to the curve parameters
         //  0 <= lambda <= 1
         virtual tmp<pointField> position(const scalarList&) const;
 
-        //- Return the length of the curve
-        virtual scalar length() const
-        {
-            NotImplemented;
-            return 1;
-        }
+        //- The length of the curve
+        //  \note NotImplemented
+        virtual scalar length() const;
 };
 
 

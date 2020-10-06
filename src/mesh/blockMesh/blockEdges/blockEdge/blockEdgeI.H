@@ -49,10 +49,8 @@ inline int Foam::blockEdge::compare(const label start, const label end) const
     {
         return -1;
     }
-    else
-    {
-        return 0;
-    }
+
+    return 0;
 }
 
 

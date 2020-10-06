@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,19 +77,19 @@ public:
         //- Construct from components
         polyLineEdge
         (
-            const pointField&,
-            const label start,
-            const label end,
-            const pointField& otherPoints
+            const pointField& points,       //!< Referenced point field
+            const label start,      //!< Start point in referenced point field
+            const label end,        //!< End point in referenced point field
+            const pointField& intermediate  //!< The intermediate points
         );
 
-        //- Construct from Istream
+        //- Construct from Istream and point field.
         polyLineEdge
         (
             const dictionary& dict,
             const label index,
             const searchableSurfaces& geometry,
-            const pointField&,
+            const pointField& points,       //!< Referenced point field
             Istream& is
         );
 
@@ -100,11 +100,11 @@ public:
 
     // Member Functions
 
-        //- Return the point position corresponding to the curve parameter
+        //- The point position corresponding to the curve parameter
         //  0 <= lambda <= 1
         point position(const scalar lambda) const;
 
-        //- Return the length of the curve
+        //- The length of the curve
         scalar length() const;
 };
 
