@@ -25,7 +25,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::projectCurveEdge
+    Foam::blockEdges::projectCurveEdge
 
 Description
     Defines the edge from the projection onto a surface (single surface)
@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef projectCurveEdge_H
-#define projectCurveEdge_H
+#ifndef blockEdges_projectCurveEdge_H
+#define blockEdges_projectCurveEdge_H
 
 #include "blockEdge.H"
 
@@ -48,6 +48,9 @@ namespace Foam
 
 // Forward Declarations
 class pointConstraint;
+
+namespace blockEdges
+{
 
 /*---------------------------------------------------------------------------*\
                       Class projectCurveEdge Declaration
@@ -116,6 +119,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace blockEdges
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

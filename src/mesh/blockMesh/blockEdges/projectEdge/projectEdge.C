@@ -37,14 +37,16 @@ License
 
 namespace Foam
 {
+namespace blockEdges
+{
     defineTypeNameAndDebug(projectEdge, 0);
     addToRunTimeSelectionTable(blockEdge, projectEdge, Istream);
 }
-
+}
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::projectEdge::findNearest
+void Foam::blockEdges::projectEdge::findNearest
 (
     const point& pt,
     point& near,
@@ -80,7 +82,7 @@ void Foam::projectEdge::findNearest
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::projectEdge::projectEdge
+Foam::blockEdges::projectEdge::projectEdge
 (
     const dictionary& dict,
     const label index,
@@ -110,7 +112,7 @@ Foam::projectEdge::projectEdge
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::point Foam::projectEdge::position(const scalar lambda) const
+Foam::point Foam::blockEdges::projectEdge::position(const scalar lambda) const
 {
     // Initial guess
     const point start(points_[start_] + lambda*(points_[end_]-points_[start_]));
@@ -128,7 +130,7 @@ Foam::point Foam::projectEdge::position(const scalar lambda) const
 
 
 Foam::tmp<Foam::pointField>
-Foam::projectEdge::position(const scalarList& lambdas) const
+Foam::blockEdges::projectEdge::position(const scalarList& lambdas) const
 {
     // For debugging to tag the output
     static label eIter = 0;
@@ -270,7 +272,7 @@ Foam::projectEdge::position(const scalarList& lambdas) const
 }
 
 
-Foam::scalar Foam::projectEdge::length() const
+Foam::scalar Foam::blockEdges::projectEdge::length() const
 {
     NotImplemented;
     return 1;

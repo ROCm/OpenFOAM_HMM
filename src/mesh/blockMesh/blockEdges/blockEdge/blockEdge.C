@@ -124,8 +124,8 @@ Foam::pointField Foam::blockEdge::appendEndPoints
 Foam::tmp<Foam::pointField>
 Foam::blockEdge::position(const scalarList& lambdas) const
 {
-    tmp<pointField> tpoints(new pointField(lambdas.size()));
-    pointField& points = tpoints.ref();
+    auto tpoints = tmp<pointField>::New(lambdas.size());
+    auto& points = tpoints.ref();
 
     forAll(lambdas, i)
     {
@@ -135,20 +135,20 @@ Foam::blockEdge::position(const scalarList& lambdas) const
 }
 
 
-void Foam::blockEdge::write(Ostream& os, const dictionary& d) const
+void Foam::blockEdge::write(Ostream& os, const dictionary& dict) const
 {
-    blockVertex::write(os, start_, d);
+    blockVertex::write(os, start_, dict);
     os << tab;
-    blockVertex::write(os, end_, d);
+    blockVertex::write(os, end_, dict);
     os << endl;
 }
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const blockEdge& p)
+Foam::Ostream& Foam::operator<<(Ostream& os, const blockEdge& e)
 {
-    os << p.start_ << tab << p.end_ << endl;
+    os << e.start_ << tab << e.end_ << endl;
 
     return os;
 }

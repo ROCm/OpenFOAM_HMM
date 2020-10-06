@@ -271,13 +271,13 @@ Foam::blockEdges::arcEdge::arcEdge
         calcFromMidPoint(points_[start_], points_[end_], p);
     }
 
-    // Debug information
-    #if 0
-    Info<< "arc " << start_ << ' ' << end_
-        << ' ' << position(0.5) << ' ' << cs_
-        // << " radius=" << radius_ << " angle=" << radToDeg(angle_)
-        << nl;
-    #endif
+    if (debug)
+    {
+        Info<< "arc " << start_ << ' ' << end_ << ' '
+            << position(0.5) << " origin " << cs_.origin() << " // ";
+        cs_.rotation().write(Info);
+        Info<< nl;
+    }
 }
 
 
@@ -288,8 +288,8 @@ Foam::point Foam::blockEdges::arcEdge::position(const scalar lambda) const
     #ifdef FULLDEBUG
     if (lambda < -SMALL || lambda > 1 + SMALL)
     {
-        WarningInFunction
-            << "Parameter out of range, lambda = " << lambda << nl;
+        InfoInFunction
+            << "Limit parameter to [0-1] range: " << lambda << nl;
     }
     #endif
 

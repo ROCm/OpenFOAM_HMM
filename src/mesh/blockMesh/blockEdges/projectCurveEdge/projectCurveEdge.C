@@ -39,14 +39,17 @@ License
 
 namespace Foam
 {
+namespace blockEdges
+{
     defineTypeNameAndDebug(projectCurveEdge, 0);
     addToRunTimeSelectionTable(blockEdge, projectCurveEdge, Istream);
+}
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::projectCurveEdge::projectCurveEdge
+Foam::blockEdges::projectCurveEdge::projectCurveEdge
 (
     const dictionary& dict,
     const label index,
@@ -84,7 +87,7 @@ Foam::projectCurveEdge::projectCurveEdge
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::point
-Foam::projectCurveEdge::position(const scalar) const
+Foam::blockEdges::projectCurveEdge::position(const scalar) const
 {
     NotImplemented;
     return point::max;
@@ -92,7 +95,7 @@ Foam::projectCurveEdge::position(const scalar) const
 
 
 Foam::tmp<Foam::pointField>
-Foam::projectCurveEdge::position(const scalarList& lambdas) const
+Foam::blockEdges::projectCurveEdge::position(const scalarList& lambdas) const
 {
     // For debugging to tag the output
     static label eIter = 0;
@@ -267,7 +270,7 @@ Foam::projectCurveEdge::position(const scalarList& lambdas) const
 }
 
 
-Foam::scalar Foam::projectCurveEdge::length() const
+Foam::scalar Foam::blockEdges::projectCurveEdge::length() const
 {
     NotImplemented;
     return 1;

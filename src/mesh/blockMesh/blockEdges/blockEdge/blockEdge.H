@@ -35,7 +35,7 @@ Class
 
 Description
     Define a curved edge that is parameterized for 0<lambda<1
-    between the start and end point.
+    between the start/end points.
 
 SourceFiles
     blockEdge.C
@@ -54,7 +54,7 @@ namespace Foam
 
 // Forward Declarations
 class blockEdge;
-Ostream& operator<<(Ostream&, const blockEdge&);
+Ostream& operator<<(Ostream& os, const blockEdge& e);
 
 /*---------------------------------------------------------------------------*\
                          Class blockEdge Declaration
@@ -188,21 +188,21 @@ public:
         //- Index of end point
         inline label end() const;
 
-        //- Compare the given start and end points with this curve
+        //- Compare the given start/end points with this block edge
         //  Return:
         //  -  0: different
         //  - +1: identical
         //  - -1: same edge, but different orientation
-        inline int compare(const blockEdge&) const;
+        inline int compare(const blockEdge& e) const;
 
-        //- Compare the given start and end points with this curve
+        //- Compare the given start/end points with this block edge
         //  Return:
         //  -  0: different
         //  - +1: identical
         //  - -1: same edge, but different orientation
-        inline int compare(const edge&) const;
+        inline int compare(const edge& e) const;
 
-        //- Compare the given start and end points with this curve
+        //- Compare the given start/end points with this block edge
         //  Return:
         //  -  0: different
         //  - +1: identical
@@ -211,22 +211,22 @@ public:
 
         //- The point position corresponding to the curve parameter
         //  0 <= lambda <= 1
-        virtual point position(const scalar) const = 0;
+        virtual point position(const scalar lambda) const = 0;
 
         //- The point positions corresponding to the curve parameters
         //  0 <= lambda <= 1
-        virtual tmp<pointField> position(const scalarList&) const;
+        virtual tmp<pointField> position(const scalarList& lambdas) const;
 
         //- The length of the curve
         virtual scalar length() const = 0;
 
-        //- Write edge with variable backsubstitution
-        void write(Ostream&, const dictionary&) const;
+        //- Write edge with variable back-substitution
+        void write(Ostream& os, const dictionary& dict) const;
 
 
     // Ostream Operator
 
-        friend Ostream& operator<<(Ostream&, const blockEdge&);
+        friend Ostream& operator<<(Ostream& os, const blockEdge& e);
 };
 
 
