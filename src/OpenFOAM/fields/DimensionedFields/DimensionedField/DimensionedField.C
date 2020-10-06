@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -437,7 +437,7 @@ Foam::DimensionedField<Type, GeoMesh>::T() const
         dimensions_
     );
 
-    Foam::T(tresult(), *this);
+    Foam::T(tresult.ref(), *this);
 
     return tresult;
 }

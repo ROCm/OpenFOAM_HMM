@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,20 @@ Application
 #include "fvCFD.H"
 #include "GeometricFields.H"
 #include "transformGeometricField.H"
+
+// #undef TEST_UINT8_FIELD
+
+#ifdef TEST_UINT8_FIELD
+namespace Foam
+{
+    // Something like a state field. Probably only dimensionless
+    // - still needs some basic boundary conditions!!
+    typedef GeometricField<uint8_t, fvPatchField, volMesh> volUint8Field;
+
+    defineTemplate2TypeNameAndDebug(volUint8Field, 0);
+
+} // End namespace Foam
+#endif
 
 
 template<class GeoField>
@@ -159,7 +173,7 @@ int main(int argc, char *argv[])
 
     #include "createPhi.H"
 
-    GeometricField<symmTensor, fvPatchField, volMesh> st
+    volSymmTensorField st
     (
         IOobject
         (
@@ -170,11 +184,11 @@ int main(int argc, char *argv[])
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensioned<symmTensor>("st", dimless, symmTensor::one),
+        dimensioned<symmTensor>(dimless, symmTensor::one),
         zeroGradientFvPatchSymmTensorField::typeName
     );
 
-    GeometricField<tensor, fvPatchField, volMesh> tensf
+    volTensorField tensf
     (
         IOobject
         (
@@ -185,7 +199,7 @@ int main(int argc, char *argv[])
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensioned<tensor>("tf", dimless, tensor(1,2,3,4,5,6,7,8,9)),
+        dimensioned<tensor>(dimless, tensor(1,2,3,4,5,6,7,8,9)),
         zeroGradientFvPatchScalarField::typeName
     );
 
@@ -275,6 +289,31 @@ int main(int argc, char *argv[])
         }
     }
 
+
+    // Note: this is definitely not working, but added to help diagnose
+    // what is missing if we wish to proceed with this idea
+    #ifdef TEST_UINT8_FIELD
+    {
+        Info<< "uint8 field\n" << endl;
+        GeometricField<uint8_t, fvPatchField, volMesh> statefld
+        (
+            IOobject
+            (
+                "state",
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            dimensioned<uint8_t>(dimless, uint8_t{100})
+        );
+
+        Info().beginBlock("stateField")
+            << statefld << nl;
+        Info().endBlock();
+    }
+    #endif
 
     Info<< "\nEnd\n" << nl;
 
