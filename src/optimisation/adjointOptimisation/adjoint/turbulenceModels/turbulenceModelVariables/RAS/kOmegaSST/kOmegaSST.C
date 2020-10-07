@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,34 +54,12 @@ kOmegaSST::kOmegaSST
 :
     RASModelVariables(mesh, SolverControl)
 {
-    hasTMVar1_ = true;
-    TMVar1Ptr_.reset
-    (
-        new tmp<volScalarField>
-        (
-            mesh_.lookupObjectRef<volScalarField>("k")
-        )
-    );
     TMVar1BaseName_ = "k";
-
-    hasTMVar2_ = true;
-    TMVar2Ptr_.reset
-    (
-        new tmp<volScalarField>
-        (
-            mesh_.lookupObjectRef<volScalarField>("omega")
-        )
-    );
     TMVar2BaseName_ = "omega";
 
-    hasNut_ = true;
-    nutPtr_.reset
-    (
-        new tmp<volScalarField>
-        (
-            mesh_.lookupObjectRef<volScalarField>("nut")
-        )
-    );
+    TMVar1Ptr_.ref(mesh_.lookupObjectRef<volScalarField>(TMVar1BaseName_));
+    TMVar2Ptr_.ref(mesh_.lookupObjectRef<volScalarField>(TMVar2BaseName_));
+    nutPtr_.ref(mesh_.lookupObjectRef<volScalarField>(nutBaseName_));
 
     allocateInitValues();
     allocateMeanFields();
@@ -96,8 +74,9 @@ void kOmegaSST::correctBoundaryConditions
 )
 {
     // The presence of G is required to update the boundary value of omega
-    const volVectorField& U(turbulence.U());
+    const volVectorField& U = turbulence.U();
     const volScalarField S2(2*magSqr(symm(fvc::grad(U))));
+
     volScalarField G(turbulence.GName(), nutRef() * S2);
     RASModelVariables::correctBoundaryConditions(turbulence);
 }

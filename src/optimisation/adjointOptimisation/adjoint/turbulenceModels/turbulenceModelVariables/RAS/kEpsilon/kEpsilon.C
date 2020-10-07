@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,34 +54,12 @@ kEpsilon::kEpsilon
 :
     RASModelVariables(mesh, SolverControl)
 {
-    hasTMVar1_ = true;
-    TMVar1Ptr_.reset
-    (
-        new tmp<volScalarField>
-        (
-            mesh_.lookupObjectRef<volScalarField>("k")
-        )
-    );
     TMVar1BaseName_ = "k";
-
-    hasTMVar2_ = true;
-    TMVar2Ptr_.reset
-    (
-        new tmp<volScalarField>
-        (
-            mesh_.lookupObjectRef<volScalarField>("epsilon")
-        )
-    );
     TMVar2BaseName_ = "epsilon";
 
-    hasNut_ = true;
-    nutPtr_.reset
-    (
-        new tmp<volScalarField>
-        (
-            mesh_.lookupObjectRef<volScalarField>("nut")
-        )
-    );
+    TMVar1Ptr_.ref(mesh_.lookupObjectRef<volScalarField>(TMVar1BaseName_));
+    TMVar2Ptr_.ref(mesh_.lookupObjectRef<volScalarField>(TMVar2BaseName_));
+    nutPtr_.ref(mesh_.lookupObjectRef<volScalarField>(nutBaseName_));
 
     allocateInitValues();
     allocateMeanFields();

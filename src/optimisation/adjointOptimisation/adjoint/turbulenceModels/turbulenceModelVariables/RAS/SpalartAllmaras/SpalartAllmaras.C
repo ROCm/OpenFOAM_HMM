@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,54 +55,35 @@ SpalartAllmaras::SpalartAllmaras
 :
     RASModelVariables(mesh, SolverControl)
 {
-    hasTMVar1_ = true;
-    TMVar1Ptr_.reset
-    (
-        new tmp<volScalarField>
-        (
-            mesh_.lookupObjectRef<volScalarField>("nuTilda")
-        )
-    );
     TMVar1BaseName_ = "nuTilda";
+
+    TMVar1Ptr_.ref(mesh_.lookupObjectRef<volScalarField>(TMVar1BaseName_));
 
     TMVar2Ptr_.reset
     (
-        new tmp<volScalarField>
+        new volScalarField
         (
-            new volScalarField
+            IOobject
             (
-                IOobject
-                (
-                    "dummySpalartAllmarasVar2",
-                    mesh.time().timeName(),
-                    mesh,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
+                "dummySpalartAllmarasVar2",
+                mesh.time().timeName(),
                 mesh,
-                dimensionedScalar(dimless, Zero)
-            )
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            dimensionedScalar(dimless, Zero)
         )
     );
 
-    hasNut_ = true;
-    nutPtr_.reset
-    (
-        new tmp<volScalarField>
-        (
-            mesh_.lookupObjectRef<volScalarField>("nut")
-        )
-    );
+    nutPtr_.ref(mesh_.lookupObjectRef<volScalarField>(nutBaseName_));
 
-    hasDist_ = true;
-    dPtr_.reset
+    // The wall dist name can vary depending on how wallDist was
+    // constructed. Grab the field directly from wallDist
+
+    distPtr_.ref
     (
-        new tmp<volScalarField>
-        (
-            // The wall dist name can vary depending on how wallDist was
-            // constructed. Grab the field directly from wallDist
-            const_cast<volScalarField&>(wallDist::New(mesh_).y())
-        )
+        const_cast<volScalarField&>(wallDist::New(mesh_).y())
     );
 
     allocateInitValues();
@@ -117,32 +98,32 @@ tmp<volScalarField> SpalartAllmaras::nutJacobianVar1
     const singlePhaseTransportModel& laminarTransport
 ) const
 {
-    tmp<volScalarField> tnutJacobian
+    auto tnutJacobian = tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "nutJacobianVar1",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            "nutJacobianVar1",
+            mesh_.time().timeName(),
             mesh_,
-            dimensionedScalar(dimless, Zero)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar(dimless, Zero)
     );
-    volScalarField& nutJacobian = tnutJacobian.ref();
+    auto& nutJacobian = tnutJacobian.ref();
 
     const volScalarField& nu = laminarTransport.nu();
     const volScalarField& nuTilda = TMVar1();
+
     volScalarField chi(nuTilda/nu);
     volScalarField chi3(pow3(chi));
-    scalar Cv13 = pow3(7.1);
+
+    const scalar Cv13 = pow3(7.1);
     volScalarField fv1(chi3/(chi3 + Cv13));
     volScalarField fv1ByChi2Sqr(sqr(chi/(chi3 + Cv13)));
     volScalarField Cdfv1(3.0*Cv13*fv1ByChi2Sqr);
+
     nutJacobian = Cdfv1*chi + fv1;
 
     return tnutJacobian;

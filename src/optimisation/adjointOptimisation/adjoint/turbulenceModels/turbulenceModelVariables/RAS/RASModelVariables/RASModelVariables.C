@@ -42,6 +42,7 @@ namespace incompressible
 defineTypeNameAndDebug(RASModelVariables, 0);
 defineRunTimeSelectionTable(RASModelVariables, dictionary);
 
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void RASModelVariables::allocateInitValues()
@@ -49,36 +50,28 @@ void RASModelVariables::allocateInitValues()
     if (solverControl_.storeInitValues())
     {
         Info<< "Storing initial values of turbulence variables" << endl;
-        if (hasTMVar1_)
+
+        if (hasTMVar1())
         {
             TMVar1InitPtr_.reset
             (
-                new volScalarField
-                (
-                    TMVar1Inst().name()+"Init",TMVar1Inst()
-                )
+                new volScalarField(TMVar1Inst().name()+"Init", TMVar1Inst())
             );
         }
 
-        if (hasTMVar2_)
+        if (hasTMVar2())
         {
             TMVar2InitPtr_.reset
             (
-                new volScalarField
-                (
-                    TMVar2Inst().name()+"Init",TMVar2Inst()
-                )
+                new volScalarField(TMVar2Inst().name()+"Init", TMVar2Inst())
             );
         }
 
-        if (hasNut_)
+        if (hasNut())
         {
             nutInitPtr_.reset
             (
-                new volScalarField
-                (
-                    nutRefInst().name()+"Init",nutRefInst()
-                )
+                new volScalarField(nutRefInst().name()+"Init", nutRefInst())
             );
         }
     }
@@ -90,7 +83,8 @@ void RASModelVariables::allocateMeanFields()
     if (solverControl_.average())
     {
         Info<< "Allocating mean values of turbulence variables" << endl;
-        if (hasTMVar1_)
+
+        if (hasTMVar1())
         {
             TMVar1MeanPtr_.reset
             (
@@ -108,7 +102,8 @@ void RASModelVariables::allocateMeanFields()
                 )
             );
         }
-        if (hasTMVar2_)
+
+        if (hasTMVar2())
         {
             TMVar2MeanPtr_.reset
             (
@@ -127,7 +122,7 @@ void RASModelVariables::allocateMeanFields()
             );
         }
 
-        if (hasNut_)
+        if (hasNut())
         {
             nutMeanPtr_.reset
             (
@@ -149,25 +144,19 @@ void RASModelVariables::allocateMeanFields()
 }
 
 
-RASModelVariables::autoTmp
-RASModelVariables::cloneAutoTmp(const autoTmp& source) const
+Foam::refPtr<Foam::volScalarField>
+RASModelVariables::cloneRefPtr(const refPtr<volScalarField>& obj) const
 {
-    autoTmp returnField(nullptr);
-    if (source && source->valid())
+    if (obj)
     {
-        const volScalarField& sf = source()();
-        DebugInfo
-            << "Cloning " << sf.name() << endl;
+        const volScalarField& sf = obj();
+
         const word timeName = mesh_.time().timeName();
-        returnField.reset
-        (
-            new tmp<volScalarField>
-            (
-                new volScalarField(sf.name() + timeName, sf)
-            )
-        );
+
+        return refPtr<volScalarField>::New(sf.name() + timeName, sf);
     }
-    return returnField;
+
+    return nullptr;
 }
 
 
@@ -198,20 +187,20 @@ RASModelVariables::RASModelVariables
 :
     mesh_(mesh),
     solverControl_(SolverControl),
-    hasTMVar1_(false),
-    hasTMVar2_(false),
-    hasNut_(false),
-    hasDist_(false),
+
+    TMVar1BaseName_(),
+    TMVar2BaseName_(),
+    nutBaseName_("nut"),
+
     TMVar1Ptr_(nullptr),
     TMVar2Ptr_(nullptr),
     nutPtr_(nullptr),
-    dPtr_(nullptr),
-    TMVar1BaseName_(word::null),
-    TMVar2BaseName_(word::null),
-    nutBaseName_("nut"),
+    distPtr_(nullptr),
+
     TMVar1InitPtr_(nullptr),
     TMVar2InitPtr_(nullptr),
     nutInitPtr_(nullptr),
+
     TMVar1MeanPtr_(nullptr),
     TMVar2MeanPtr_(nullptr),
     nutMeanPtr_(nullptr)
@@ -225,31 +214,31 @@ RASModelVariables::RASModelVariables
 :
     mesh_(rmv.mesh_),
     solverControl_(rmv.solverControl_),
-    hasTMVar1_(rmv.hasTMVar1_),
-    hasTMVar2_(rmv.hasTMVar2_),
-    hasNut_(rmv.hasNut_),
-    hasDist_(rmv.hasDist_),
-    TMVar1Ptr_(cloneAutoTmp(rmv.TMVar1Ptr_)),
-    TMVar2Ptr_(cloneAutoTmp(rmv.TMVar2Ptr_)),
-    nutPtr_(cloneAutoTmp(rmv.nutPtr_)),
-    dPtr_(cloneAutoTmp(rmv.dPtr_)),
+
     TMVar1BaseName_(rmv.TMVar1BaseName_),
     TMVar2BaseName_(rmv.TMVar2BaseName_),
     nutBaseName_(rmv.nutBaseName_),
+
+    TMVar1Ptr_(cloneRefPtr(rmv.TMVar1Ptr_)),
+    TMVar2Ptr_(cloneRefPtr(rmv.TMVar2Ptr_)),
+    nutPtr_(cloneRefPtr(rmv.nutPtr_)),
+    distPtr_(cloneRefPtr(rmv.distPtr_)),
+
     TMVar1InitPtr_(nullptr),
     TMVar2InitPtr_(nullptr),
     nutInitPtr_(nullptr),
+
     TMVar1MeanPtr_(nullptr),
     TMVar2MeanPtr_(nullptr),
     nutMeanPtr_(nullptr)
-{
-}
+{}
 
 
 autoPtr<RASModelVariables> RASModelVariables::clone() const
 {
     return autoPtr<RASModelVariables>::New(*this);
 }
+
 
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
@@ -307,172 +296,6 @@ autoPtr<RASModelVariables> RASModelVariables::New
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool RASModelVariables::hasTMVar1() const
-{
-    return hasTMVar1_;
-}
-
-
-bool RASModelVariables::hasTMVar2() const
-{
-    return hasTMVar2_;
-}
-
-
-bool RASModelVariables::hasNut() const
-{
-    return hasNut_;
-}
-
-
-bool RASModelVariables::hasDist() const
-{
-    return hasDist_;
-}
-
-
-const word& RASModelVariables::TMVar1BaseName() const
-{
-    return TMVar1BaseName_;
-}
-
-
-const word& RASModelVariables::TMVar2BaseName() const
-{
-    return TMVar2BaseName_;
-}
-
-
-const word& RASModelVariables::nutBaseName() const
-{
-    return nutBaseName_;
-}
-
-
-const volScalarField& RASModelVariables::TMVar1() const
-{
-    if (solverControl_.useAveragedFields())
-    {
-        return TMVar1MeanPtr_();
-    }
-    else
-    {
-        return TMVar1Ptr_()();
-    }
-}
-
-
-volScalarField& RASModelVariables::TMVar1()
-{
-    if (solverControl_.useAveragedFields())
-    {
-        return TMVar1MeanPtr_();
-    }
-    else
-    {
-        return TMVar1Ptr_().constCast();
-    }
-}
-
-
-const volScalarField& RASModelVariables::TMVar2() const
-{
-    if (solverControl_.useAveragedFields())
-    {
-        return TMVar2MeanPtr_();
-    }
-    else
-    {
-        return TMVar2Ptr_()();
-    }
-}
-
-volScalarField& RASModelVariables::TMVar2()
-{
-    if (solverControl_.useAveragedFields())
-    {
-        return TMVar2MeanPtr_();
-    }
-    else
-    {
-        return TMVar2Ptr_().constCast();
-    }
-}
-
-const volScalarField& RASModelVariables::nutRef() const
-{
-    if (solverControl_.useAveragedFields() && hasNut_)
-    {
-        return nutMeanPtr_();
-    }
-    else
-    {
-        return nutPtr_()();
-    }
-}
-
-
-volScalarField& RASModelVariables::nutRef()
-{
-    if (solverControl_.useAveragedFields() && hasNut_)
-    {
-        return  nutMeanPtr_();
-    }
-    else
-    {
-        return nutPtr_().constCast();
-    }
-}
-
-
-const volScalarField& RASModelVariables::d() const
-{
-    return dPtr_()();
-}
-
-
-volScalarField& RASModelVariables::d()
-{
-    return dPtr_().constCast();
-}
-
-
-const volScalarField& RASModelVariables::TMVar1Inst() const
-{
-    return TMVar1Ptr_()();
-}
-
-
-volScalarField& RASModelVariables::TMVar1Inst()
-{
-    return TMVar1Ptr_().constCast();
-}
-
-
-const volScalarField& RASModelVariables::TMVar2Inst() const
-{
-    return TMVar2Ptr_()();
-}
-
-
-volScalarField& RASModelVariables::TMVar2Inst()
-{
-    return TMVar2Ptr_().constCast();
-}
-
-
-const volScalarField& RASModelVariables::nutRefInst() const
-{
-    return nutPtr_()();
-}
-
-
-volScalarField& RASModelVariables::nutRefInst()
-{
-    return nutPtr_().constCast();
-}
-
-
 tmp<volScalarField> RASModelVariables::nutJacobianVar1
 (
     const singlePhaseTransportModel& laminarTransport
@@ -482,23 +305,19 @@ tmp<volScalarField> RASModelVariables::nutJacobianVar1
         << "jutJacobianVar1 not implemented for the current turbulence model."
         << "Returning zero field" << endl;
 
-    tmp<volScalarField> nutJacobian
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "nutJacobianVar1",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            "nutJacobianVar1",
+            mesh_.time().timeName(),
             mesh_,
-            dimensionedScalar(dimless, Zero)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar(dimless, Zero)
     );
-    return nutJacobian;
 }
 
 
@@ -511,38 +330,35 @@ tmp<volScalarField> RASModelVariables::nutJacobianVar2
         << "nutJacobianVar2 not implemented for the current turbulence model."
         << "Returning zero field" << endl;
 
-    tmp<volScalarField> nutJacobian
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "nutJacobianVar2",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            "nutJacobianVar2",
+            mesh_.time().timeName(),
             mesh_,
-            dimensionedScalar(dimless, Zero)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar(dimless, Zero)
     );
-    return nutJacobian;
 }
+
 
 void RASModelVariables::restoreInitValues()
 {
     if (solverControl_.storeInitValues())
     {
-        if (hasTMVar1_)
+        if (hasTMVar1())
         {
             TMVar1Inst() == TMVar1InitPtr_();
         }
-        if (hasTMVar2_)
+        if (hasTMVar2())
         {
             TMVar2Inst() == TMVar2InitPtr_();
         }
-        if (hasNut_)
+        if (hasNut())
         {
             nutRefInst() == nutInitPtr_();
         }
@@ -557,19 +373,20 @@ void RASModelVariables::resetMeanFields()
         Info<< "Resetting mean turbulent fields to zero" << endl;
 
         // Reset fields to zero
-        if (hasTMVar1_)
+        if (TMVar1Ptr_)
         {
-            TMVar1MeanPtr_() ==
+            TMVar1MeanPtr_.ref() ==
                 dimensionedScalar(TMVar1Inst().dimensions(), Zero);
         }
-        if (hasTMVar2_)
+        if (TMVar2Ptr_)
         {
-            TMVar2MeanPtr_() ==
+            TMVar2MeanPtr_.ref() ==
                 dimensionedScalar(TMVar2Inst().dimensions(), Zero);
         }
-        if (hasNut_)
+        if (nutPtr_)
         {
-            nutMeanPtr_() == dimensionedScalar(nutRefInst().dimensions(), Zero);
+            nutMeanPtr_.ref() ==
+                dimensionedScalar(nutRefInst().dimensions(), Zero);
         }
     }
 }
@@ -580,22 +397,24 @@ void RASModelVariables::computeMeanFields()
     if (solverControl_.doAverageIter())
     {
         const label iAverageIter = solverControl_.averageIter();
-        scalar avIter(iAverageIter);
-        scalar oneOverItP1 = 1./(avIter + 1);
-        scalar mult = avIter*oneOverItP1;
-        if (hasTMVar1_)
+        const scalar avIter(iAverageIter);
+        const scalar oneOverItP1 = 1./(avIter + 1);
+        const scalar mult = avIter*oneOverItP1;
+
+        if (hasTMVar1())
         {
-            TMVar1MeanPtr_() ==
-                TMVar1MeanPtr_()*mult + TMVar1Inst()*oneOverItP1;
+            TMVar1MeanPtr_.ref() ==
+                (TMVar1MeanPtr_()*mult + TMVar1Inst()*oneOverItP1);
         }
-        if (hasTMVar2_)
+        if (hasTMVar2())
         {
-            TMVar2MeanPtr_() ==
-                TMVar2MeanPtr_()*mult + TMVar2Inst()*oneOverItP1;
+            TMVar2MeanPtr_.ref() ==
+                (TMVar2MeanPtr_()*mult + TMVar2Inst()*oneOverItP1);
         }
-        if (hasNut_)
+        if (hasNut())
         {
-            nutMeanPtr_() == nutMeanPtr_()*mult + nutRefInst()*oneOverItP1;
+            nutMeanPtr_.ref() ==
+                (nutMeanPtr_()*mult + nutRefInst()*oneOverItP1);
         }
     }
 }
@@ -607,20 +426,17 @@ tmp<volSymmTensorField> RASModelVariables::devReff
     const volVectorField& U
 ) const
 {
-    return tmp<volSymmTensorField>
+    return tmp<volSymmTensorField>::New
     (
-        new volSymmTensorField
+        IOobject
         (
-            IOobject
-            (
-                "devRhoReff",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-           -(laminarTransport.nu() + nutRef())*dev(twoSymm(fvc::grad(U)))
-        )
+            "devRhoReff",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        -(laminarTransport.nu() + nutRef())*dev(twoSymm(fvc::grad(U)))
     );
 }
 
@@ -632,28 +448,28 @@ void RASModelVariables::correctBoundaryConditions
 {
     if (hasTMVar1())
     {
-        TMVar1Ptr_().constCast().correctBoundaryConditions();
+        TMVar1Inst().correctBoundaryConditions();
         if (solverControl_.average())
         {
-            TMVar1MeanPtr_().correctBoundaryConditions();
+            TMVar1MeanPtr_.ref().correctBoundaryConditions();
         }
     }
 
     if (hasTMVar2())
     {
-        TMVar2Ptr_().constCast().correctBoundaryConditions();
+        TMVar2Inst().correctBoundaryConditions();
         if (solverControl_.average())
         {
-            TMVar2MeanPtr_().correctBoundaryConditions();
+            TMVar2MeanPtr_.ref().correctBoundaryConditions();
         }
     }
 
     if (hasNut())
     {
-        nutPtr_().constCast().correctBoundaryConditions();
+        nutRefInst().correctBoundaryConditions();
         if (solverControl_.average())
         {
-            nutMeanPtr_().correctBoundaryConditions();
+            nutMeanPtr_.ref().correctBoundaryConditions();
         }
     }
 }
@@ -661,22 +477,22 @@ void RASModelVariables::correctBoundaryConditions
 
 void RASModelVariables::transfer(RASModelVariables& rmv)
 {
-    if (rmv.hasTMVar1() && hasTMVar1_)
+    if (rmv.hasTMVar1() && hasTMVar1())
     {
         copyAndRename(TMVar1Inst(), rmv.TMVar1Inst());
     }
 
-    if (rmv.hasTMVar2() && hasTMVar2_)
+    if (rmv.hasTMVar2() && hasTMVar2())
     {
         copyAndRename(TMVar2Inst(), rmv.TMVar2Inst());
     }
 
-    if (rmv.hasNut() && hasNut_)
+    if (rmv.hasNut() && hasNut())
     {
-        copyAndRename(nutRef(), rmv.nutRef());
+        copyAndRename(nutRefInst(), rmv.nutRefInst());
     }
 
-    if (rmv.hasDist() && hasDist_)
+    if (rmv.hasDist() && hasDist())
     {
         copyAndRename(d(), rmv.d());
     }
