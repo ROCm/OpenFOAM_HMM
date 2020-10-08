@@ -1686,8 +1686,7 @@ Foam::fileOperations::masterUncollatedFileOperation::readObjects
     {
         // Avoid fileOperation::readObjects from triggering parallel ops
         // (through call to filePath which triggers parallel )
-        const bool oldParRun = UPstream::parRun();
-        UPstream::parRun() = false;
+        const bool oldParRun = UPstream::parRun(false);
 
         //- Use non-time searching version
         objectNames = fileOperation::readObjects
@@ -1731,7 +1730,7 @@ Foam::fileOperations::masterUncollatedFileOperation::readObjects
             }
         }
 
-        UPstream::parRun() = oldParRun;
+        UPstream::parRun(oldParRun);  // Restore parallel state
     }
 
     Pstream::scatter(newInstance);  //, Pstream::msgType(), comm_);
@@ -2111,13 +2110,12 @@ bool Foam::fileOperations::masterUncollatedFileOperation::read
         if (Pstream::master())  // comm_))
         {
             // Do master-only reading always.
-            const bool oldParRun = UPstream::parRun();
-            UPstream::parRun() = false;
+            const bool oldParRun = UPstream::parRun(false);
 
             ok = io.readData(io.readStream(typeName));
             io.close();
 
-            UPstream::parRun() = oldParRun;
+            UPstream::parRun(oldParRun);  // Restore parallel state
         }
 
         Pstream::scatter(ok);   //, Pstream::msgType(), comm_);
@@ -2257,10 +2255,11 @@ Foam::instantList Foam::fileOperations::masterUncollatedFileOperation::findTimes
         if (Pstream::master())  // comm_))
         {
             // Do master-only reading always.
-            const bool oldParRun = UPstream::parRun();
-            UPstream::parRun() = false;
+            const bool oldParRun = UPstream::parRun(false);
+
             times = fileOperation::findTimes(directory, constantName);
-            UPstream::parRun() = oldParRun;
+
+            UPstream::parRun(oldParRun);  // Restore parallel state
         }
         Pstream::scatter(times);    //, Pstream::msgType(), comm_);
 

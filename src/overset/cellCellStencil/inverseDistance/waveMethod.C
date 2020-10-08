@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,8 +55,7 @@ void Foam::waveMethod::calculate
 
     // The actual matching is only w.r.t local cells so cannot be run in
     // parallel.
-    const bool oldParRun = Pstream::parRun();
-    Pstream::parRun() = false;
+    const bool oldParRun = Pstream::parRun(false);
 
     label nSeeds = 0;
 
@@ -144,7 +143,7 @@ void Foam::waveMethod::calculate
         }
     }
 
-    Pstream::parRun() = oldParRun;
+    Pstream::parRun(oldParRun);  // Restore parallel state
 
     if (debug)
     {

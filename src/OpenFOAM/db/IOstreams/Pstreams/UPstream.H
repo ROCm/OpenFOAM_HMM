@@ -412,6 +412,15 @@ public:
             static void freeTag(const word&, const int tag);
 
 
+        //- Set as parallel run on/off.
+        //  \return the previous value
+        static bool parRun(const bool on)
+        {
+            bool old(parRun_);
+            parRun_ = on;
+            return old;
+        }
+
         //- Is this a parallel run?
         static bool& parRun()
         {

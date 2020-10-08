@@ -88,9 +88,9 @@ if (doLagrangian)
                 // but that combination does not work.
                 // So check the header and sync globally
 
-                fieldExists =
-                    fieldObject.typeHeaderOk<IOField<scalar>>(false);
-
+                const bool oldParRun = Pstream::parRun(false);
+                fieldExists = fieldObject.typeHeaderOk<IOField<scalar>>(false);
+                Pstream::parRun(oldParRun);  // Restore parallel state
                 reduce(fieldExists, orOp<bool>());
             }
 

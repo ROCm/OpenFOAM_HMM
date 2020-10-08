@@ -1951,8 +1951,8 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     // What to send to neighbouring domains
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    bool oldParRun = UPstream::parRun();
-    UPstream::parRun() = false;
+    // Disable parallel.
+    const bool oldParRun = UPstream::parRun(false);
 
     forAll(nSendCells, recvProc)
     {
@@ -2162,7 +2162,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     }
 
 
-    UPstream::parRun() = oldParRun;
+    UPstream::parRun(oldParRun);  // Restore parallel state
 
 
     // Start sending&receiving from buffers
@@ -2279,8 +2279,8 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     // Receive and add what was sent
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    oldParRun = UPstream::parRun();
-    UPstream::parRun() = false;
+    // Disable parallel. Original state already known.
+    UPstream::parRun(false);
 
     forAll(nRevcCells, sendProc)
     {
@@ -2697,7 +2697,8 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
         }
     }
 
-    UPstream::parRun() = oldParRun;
+    UPstream::parRun(oldParRun);  // Restore parallel state
+
 
     // Print a bit.
     if (debug)

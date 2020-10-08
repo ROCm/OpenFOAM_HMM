@@ -362,6 +362,9 @@ bool Foam::UPstream::parRun_(false);
 
 bool Foam::UPstream::haveThreads_(false);
 
+int Foam::UPstream::msgType_(1);
+
+
 Foam::LIFOStack<Foam::label> Foam::UPstream::freeComms_;
 
 Foam::DynamicList<int> Foam::UPstream::myProcNo_(10);
@@ -369,8 +372,6 @@ Foam::DynamicList<int> Foam::UPstream::myProcNo_(10);
 Foam::DynamicList<Foam::List<int>> Foam::UPstream::procIDs_(10);
 
 Foam::DynamicList<Foam::label> Foam::UPstream::parentCommunicator_(10);
-
-int Foam::UPstream::msgType_(1);
 
 
 Foam::DynamicList<Foam::List<Foam::UPstream::commsStruct>>

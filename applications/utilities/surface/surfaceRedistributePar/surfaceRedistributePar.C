@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -240,10 +240,9 @@ int main(int argc, char *argv[])
         if (Pstream::master())
         {
             // Actually load the surface
-            const bool oldParRun = Pstream::parRun();
-            Pstream::parRun() = false;
+            const bool oldParRun = Pstream::parRun(false);
             triSurfaceMesh surf(io);
-            Pstream::parRun() = oldParRun;
+            Pstream::parRun(oldParRun);  // Restore parallel state
             s = surf;
             bbs = List<treeBoundBox>(1, treeBoundBox(boundBox::greatBox));
         }

@@ -157,8 +157,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
 
     if (!haveMesh)
     {
-        const bool oldParRun = Pstream::parRun();
-        Pstream::parRun() = false;
+        const bool oldParRun = Pstream::parRun(false);
 
 
         // Create dummy mesh. Only used on procs that don't have mesh.
@@ -241,7 +240,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
         //    << endl;
         dummyMesh.write();
 
-        Pstream::parRun() = oldParRun;
+        Pstream::parRun(oldParRun);  // Restore parallel state
     }
 
 

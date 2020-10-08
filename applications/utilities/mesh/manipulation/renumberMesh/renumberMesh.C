@@ -575,8 +575,7 @@ labelList regionRenumber
         Info<< "    region " << regioni << " starts at " << celli << endl;
 
         // Make sure no parallel comms
-        const bool oldParRun = UPstream::parRun();
-        UPstream::parRun() = false;
+        const bool oldParRun = UPstream::parRun(false);
 
         // Per region do a reordering.
         fvMeshSubset subsetter(mesh, regioni, cellToRegion);
@@ -589,8 +588,8 @@ labelList regionRenumber
             subMesh.cellCentres()
         );
 
-        // Restore state
-        UPstream::parRun() = oldParRun;
+        UPstream::parRun(oldParRun);  // Restore parallel state
+
 
         const labelList& cellMap = subsetter.cellMap();
 
@@ -914,8 +913,7 @@ int main(int argc, char *argv[])
         dictionary decomposeDict(renumberDictPtr().subDict("blockCoeffs"));
         decomposeDict.set("numberOfSubdomains", nBlocks);
 
-        bool oldParRun = UPstream::parRun();
-        UPstream::parRun() = false;
+        const bool oldParRun = UPstream::parRun(false);
 
         autoPtr<decompositionMethod> decomposePtr = decompositionMethod::New
         (
@@ -931,8 +929,8 @@ int main(int argc, char *argv[])
             )
         );
 
-        // Restore state
-        UPstream::parRun() = oldParRun;
+        UPstream::parRun(oldParRun);  // Restore parallel state
+
 
         // For debugging: write out region
         createScalarField

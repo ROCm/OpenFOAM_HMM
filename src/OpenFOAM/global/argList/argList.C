@@ -1249,8 +1249,7 @@ void Foam::argList::parse
                 // Disable any parallel comms happening inside the fileHandler
                 // since we are on master. This can happen e.g. inside
                 // the masterUncollated/collated handler.
-                const bool oldParRun = Pstream::parRun();
-                Pstream::parRun() = false;
+                const bool oldParRun = Pstream::parRun(false);
 
                 autoPtr<ISstream> decompDictStream
                 (
@@ -1266,9 +1265,7 @@ void Foam::argList::parse
 
                 dictionary decompDict(*decompDictStream);
 
-                // Restore parallel behaviour
-                Pstream::parRun() = oldParRun;
-
+                Pstream::parRun(oldParRun);  // Restore parallel state
 
                 decompDict.readEntry("numberOfSubdomains", dictNProcs);
 

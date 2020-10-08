@@ -1691,10 +1691,9 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
             calcFaceFaces(s, pointFaces, faceFaces);
 
             // Do the actual decomposition
-            const bool oldParRun = UPstream::parRun();
-            UPstream::parRun() = false;
+            const bool oldParRun = UPstream::parRun(false);
             distribution = decomposer_().decompose(faceFaces, triCentres);
-            UPstream::parRun() = oldParRun;
+            UPstream::parRun(oldParRun);  // Restore parallel state
         }
         else
         {
@@ -2023,10 +2022,9 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
                 UIndirectList<point>(mergedPoints, allToMerged) = allCentres;
 
                 // Decompose merged centres
-                const bool oldParRun = UPstream::parRun();
-                UPstream::parRun() = false;
+                const bool oldParRun = UPstream::parRun(false);
                 labelList mergedDist(decomposer_().decompose(mergedPoints));
-                UPstream::parRun() = oldParRun;
+                UPstream::parRun(oldParRun);  // Restore parallel state
 
                 // Convert to all
                 allDistribution = UIndirectList<label>
