@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,39 +57,34 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-class triSurface;
-
-
-// Forward declaration of friend functions and operators
-
+// Forward Declarations
 class surfaceLocation;
+class triSurface;
 
 Istream& operator>>(Istream&, surfaceLocation&);
 Ostream& operator<<(Ostream&, const surfaceLocation&);
 Ostream& operator<<(Ostream&, const InfoProxy<surfaceLocation>&);
 
-
 /*---------------------------------------------------------------------------*\
-                           Class surfaceLocation Declaration
+                       Class surfaceLocation Declaration
 \*---------------------------------------------------------------------------*/
 
 class surfaceLocation
 :
     public pointIndexHit
 {
-    // Private data
+    // Private Data
 
         triPointRef::proxType elementType_;
 
         label triangle_;
 
-public:
 
+public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         surfaceLocation()
         :
             pointIndexHit(),
@@ -99,18 +95,18 @@ public:
         //- Construct from components
         surfaceLocation
         (
-            const pointIndexHit& pih,
+            const pointIndexHit& pHit,
             const triPointRef::proxType elementType,
             const label triangle
         )
         :
-            pointIndexHit(pih),
+            pointIndexHit(pHit),
             elementType_(elementType),
             triangle_(triangle)
         {}
 
         //- Construct from Istream
-        surfaceLocation(Istream& is)
+        explicit surfaceLocation(Istream& is)
         :
             pointIndexHit(is),
             elementType_(triPointRef::proxType(readLabel(is))),
@@ -120,22 +116,22 @@ public:
 
     // Member Functions
 
-        triPointRef::proxType& elementType()
+        triPointRef::proxType& elementType() noexcept
         {
             return elementType_;
         }
 
-        triPointRef::proxType elementType() const
+        triPointRef::proxType elementType() const noexcept
         {
             return elementType_;
         }
 
-        label& triangle()
+        label& triangle() noexcept
         {
             return triangle_;
         }
 
-        label triangle() const
+        label triangle() const noexcept
         {
             return triangle_;
         }
@@ -143,14 +139,13 @@ public:
         //- Normal. Approximate for points.
         vector normal(const triSurface& s) const;
 
-        //- Return info proxy.
-        //  Used to print token information to a stream
+        //- Return info proxy, to print information to a stream
         InfoProxy<surfaceLocation> info() const
         {
             return *this;
         }
 
-        //- Write info to os
+        //- Write info about selected face index to a stream
         void write(Ostream& os, const triSurface& s) const;
 
 
@@ -162,8 +157,8 @@ public:
 
         friend Ostream& operator<<
         (
-            Ostream&,
-            const InfoProxy<surfaceLocation>&
+            Ostream& os,
+            const InfoProxy<surfaceLocation>& ip
         );
 };
 

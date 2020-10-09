@@ -27,6 +27,7 @@ Typedef
     Foam::pointHit
 
 Description
+    A PointIndexHit for 3D points.
 
 \*---------------------------------------------------------------------------*/
 

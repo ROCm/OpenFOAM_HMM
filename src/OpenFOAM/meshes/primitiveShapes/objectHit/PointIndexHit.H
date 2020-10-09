@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,20 +49,29 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
+template<class PointType> class PointIndexHit;
+
+template<class PointType>
+inline Istream& operator>>(Istream& is, PointIndexHit<PointType>& pHit);
+
+template<class PointType>
+inline Ostream& operator<<(Ostream& os, const PointIndexHit<PointType>& pHit);
+
 /*---------------------------------------------------------------------------*\
                            Class PointIndexHit Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Point>
+template<class PointType>
 class PointIndexHit
 {
-    // Private data
+    // Private Data
 
         //- Hit success
         bool hit_;
 
         //- Point of hit; invalid for misses
-        Point hitPoint_;
+        PointType point_;
 
         //- Label of face hit
         label index_;
@@ -69,34 +79,45 @@ class PointIndexHit
 
 public:
 
+    // Public Typedefs
+
+        //- The point type
+        typedef PointType point_type;
+
+
     // Constructors
 
-        //- Construct from components
-        PointIndexHit(const bool success, const Point& p, const label index)
-        :
-            hit_(success),
-            hitPoint_(p),
-            index_(index)
-        {}
-
-        //- Construct from point. Hit and distance set later
-        PointIndexHit(const Point& p)
-        :
-            hit_(false),
-            hitPoint_(p),
-            index_(-1)
-        {}
-
-        //- Construct null
+        //- Default construct. A zero point, with no hit and index = -1
         PointIndexHit()
         :
             hit_(false),
-            hitPoint_(Zero),
+            point_(Zero),
             index_(-1)
         {}
 
+        //- Construct from a point, with no hit and index = -1
+        explicit PointIndexHit(const point_type& p)
+        :
+            hit_(false),
+            point_(p),
+            index_(-1)
+        {}
+
+        //- Construct from components
+        PointIndexHit
+        (
+            const bool success,
+            const point_type& p,
+            const label index
+        )
+        :
+            hit_(success),
+            point_(p),
+            index_(index)
+        {}
+
         //- Construct from Istream
-        PointIndexHit(Istream& is)
+        explicit PointIndexHit(Istream& is)
         {
             is >> *this;
         }
@@ -104,106 +125,142 @@ public:
 
     // Member Functions
 
-        //- Is there a hit
-        bool hit() const
+    // Access
+
+        //- Is there a hit?
+        bool hit() const noexcept
         {
             return hit_;
         }
 
-        //- Return index
-        label index() const
+        //- Return the hit index
+        label index() const noexcept
         {
             return index_;
         }
 
-        //- Return hit point
-        const Point& hitPoint() const
+        //- Return point, no checks
+        const point_type& point() const noexcept
+        {
+            return point_;
+        }
+
+        //- Access the point, no checks
+        point_type& point() noexcept
+        {
+            return point_;
+        }
+
+        //- Return hit point. Fatal if not hit.
+        const point_type& hitPoint() const
         {
             if (!hit_)
             {
                 FatalErrorInFunction
-                    << "requested a hit point for a miss"
+                    << "Requested a hit point, but it was not hit"
                     << abort(FatalError);
             }
-
-            return hitPoint_;
+            return point_;
         }
 
-        //- Return miss point
-        const Point& missPoint() const
+        //- Return miss point. Fatal if hit.
+        const point_type& missPoint() const
         {
             if (hit_)
             {
                 FatalErrorInFunction
-                    << "requested a miss point for a hit"
+                    << "Requested a miss point, but it was hit"
                     << abort(FatalError);
             }
-
-            return hitPoint_;
+            return point_;
         }
 
-        //- Return point with no checking
-        const Point& rawPoint() const
+        //- The point, no checks. Same as point()
+        const point_type& rawPoint() const noexcept
         {
-            return hitPoint_;
+            return point_;
         }
 
-        Point& rawPoint()
+        //- The point, no checks. Same as point()
+        point_type& rawPoint() noexcept
         {
-            return hitPoint_;
+            return point_;
         }
 
-        void setHit()
+
+    // Edit
+
+        //- Set the hit status \em on
+        void setHit() noexcept
         {
             hit_ = true;
         }
 
-        void setMiss()
+        //- Set the hit status \em off
+        void setMiss() noexcept
         {
             hit_ = false;
         }
 
-        void setPoint(const Point& p)
+        //- Set the point
+        void setPoint(const point_type& p)
         {
-            hitPoint_ = p;
+            point_ = p;
         }
 
-        void setIndex(const label index)
+        //- Set the index
+        void setIndex(const label index) noexcept
         {
             index_ = index;
         }
 
-        bool operator==(const PointIndexHit& rhs) const
+        //- Set the point as \em hit and the hit-index
+        void hitPoint(const point_type& p, const label index)
         {
-            return
-                hit_ == rhs.hit()
-             && hitPoint_ == rhs.rawPoint()
-             && index_ == rhs.index();
+            point_ = p;
+            hit_ = true;
+            index_ = index;
         }
 
-        bool operator!=(const PointIndexHit& rhs) const
-        {
-            return !operator==(rhs);
-        }
+
+    // Write
 
         void write(Ostream& os)
         {
-            if (hit())
-            {
-                os << "hit:" << hitPoint() << " index:" << index();
-            }
-            else
-            {
-                os << "miss:" << missPoint() << " index:" << index();
-            }
+            os  << (hit_ ? "hit:" : "miss:")
+                << point_ << " index:" << index_;
         }
 
-        friend Ostream& operator<< (Ostream& os, const PointIndexHit& pHit)
+
+    // Member Operators
+
+        //- Test for equality of all components
+        bool operator==(const PointIndexHit& rhs) const
+        {
+            return
+            (
+                hit_ == rhs.hit_
+             && index_ == rhs.index_
+             && point_ == rhs.point_
+            );
+         }
+
+        //- Test for inequality of components
+        bool operator!=(const PointIndexHit& rhs) const
+        {
+            return !(*this == rhs);
+        }
+
+
+    // IO Operators
+
+        friend Ostream& operator<<(Ostream& os, const PointIndexHit& pHit)
         {
             if (os.format() == IOstream::ASCII)
             {
-                os  << pHit.hit_ << token::SPACE << pHit.hitPoint_
-                    << token::SPACE << pHit.index_;
+                os  << pHit.hit_ << token::SPACE
+                    << pHit.point_ << token::SPACE
+                    << pHit.index_;
             }
             else
             {
@@ -223,7 +280,7 @@ public:
         {
             if (is.format() == IOstream::ASCII)
             {
-                return is >> pHit.hit_ >> pHit.hitPoint_ >> pHit.index_;
+                return is >> pHit.hit_ >> pHit.point_ >> pHit.index_;
             }
             else
             {
@@ -241,7 +298,6 @@ public:
             is.check(FUNCTION_NAME);
             return is;
         }
-
 };
 
 

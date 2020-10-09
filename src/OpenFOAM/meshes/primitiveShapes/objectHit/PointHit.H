@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,8 +28,8 @@ Class
     Foam::PointHit
 
 Description
-    This class describes the interaction of a face and a point. It
-    carries the info of a successful hit and (if successful), returns
+    Describes the interaction of a face and a point.
+    It carries the info of a successful hit and (if successful)
     the interaction point.
 
 \*---------------------------------------------------------------------------*/
@@ -37,6 +38,7 @@ Description
 #define PointHit_H
 
 #include "bool.H"
+#include "point.H"
 #include "token.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -44,36 +46,23 @@ Description
 namespace Foam
 {
 
-// Forward declaration of classes
-
-class Ostream;
-
-
-// Forward declaration of friend functions and operators
-
-template<class Point> class PointHit;
-
-template<class Point>
-inline Ostream& operator<<(Ostream&, const PointHit<Point>&);
-
-
 /*---------------------------------------------------------------------------*\
                            Class PointHit Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Point>
+template<class PointType>
 class PointHit
 {
-    // Private data
-
-        //- Hit success
-        bool hit_;
+    // Private Data
 
         //- Point of hit; for miss holds best estimate outside the object
-        Point hitPoint_;
+        PointType point_;
 
         //- Distance to hit point
         scalar distance_;
+
+        //- Hit success
+        bool hit_;
 
         //- Eligible miss
         bool eligibleMiss_;
@@ -81,14 +70,31 @@ class PointHit
 
 public:
 
+    // Public Typedefs
+
+        //- The point type
+        typedef PointType point_type;
+
+
     // Constructors
 
-        //- Construct null
+        //- Default construct. A zero point with a large distance,
+        //- no hit, no eligible misses
         PointHit()
         :
-            hit_(false),
-            hitPoint_(Zero),
+            point_(Zero),
             distance_(GREAT),
+            hit_(false),
+            eligibleMiss_(false)
+        {}
+
+        //- Construct from point with a large distance,
+        //- no hit, no eligible misses
+        explicit PointHit(const point_type& p)
+        :
+            point_(p),
+            distance_(GREAT),
+            hit_(false),
             eligibleMiss_(false)
         {}
 
@@ -96,123 +102,129 @@ public:
         PointHit
         (
             const bool hit,
-            const Point& p,
+            const point_type& p,
             const scalar dist,
-            const bool eligibleMiss
+            const bool eligibleMiss = false
         )
         :
-            hit_(hit),
-            hitPoint_(p),
+            point_(p),
             distance_(dist),
+            hit_(hit),
             eligibleMiss_(eligibleMiss)
-        {}
-
-        //- Construct from point. Hit and distance set later
-        PointHit(const Point& p)
-        :
-            hit_(false),
-            hitPoint_(p),
-            distance_(GREAT),
-            eligibleMiss_(false)
         {}
 
 
     // Member Functions
 
-      // Access
+    // Access
 
         //- Is there a hit
-        bool hit() const
+        bool hit() const noexcept
         {
             return hit_;
         }
 
-        //- Return hit point
-        const Point& hitPoint() const
-        {
-            if (!hit_)
-            {
-                FatalErrorInFunction
-                    << "requested a hit point for a miss"
-                    << abort(FatalError);
-            }
-
-            return hitPoint_;
-        }
-
-        //- Return distance to hit
-        scalar distance() const
-        {
-            return distance_;
-        }
-
-        //- Return miss point
-        const Point& missPoint() const
-        {
-            if (hit_)
-            {
-                FatalErrorInFunction
-                    << "requested a miss point for a hit"
-                    << abort(FatalError);
-            }
-
-            return hitPoint_;
-        }
-
-        //- Return point with no checking
-        const Point& rawPoint() const
-        {
-            return hitPoint_;
-        }
-
         //- Is this an eligible miss
-        bool eligibleMiss() const
+        bool eligibleMiss() const noexcept
         {
             return eligibleMiss_;
         }
 
-      // Edit
+        //- Return the point, no checks
+        const point_type& point() const noexcept
+        {
+            return point_;
+        }
 
-        void setHit()
+        //- Return distance to hit
+        scalar distance() const noexcept
+        {
+            return distance_;
+        }
+
+        //- Return the hit point. Fatal if not hit.
+        const point_type& hitPoint() const
+        {
+            if (!hit_)
+            {
+                FatalErrorInFunction
+                    << "Requested a hit point, but it was not hit"
+                    << abort(FatalError);
+            }
+
+            return point_;
+        }
+
+        //- Return the miss point. Fatal if hit.
+        const point_type& missPoint() const
+        {
+            if (hit_)
+            {
+                FatalErrorInFunction
+                    << "Requested a miss point, but it was hit"
+                    << abort(FatalError);
+            }
+
+            return point_;
+        }
+
+        //- The point, no checks
+        //  \deprecated(2020-10) use point()
+        const point_type& rawPoint() const noexcept
+        {
+            return point_;
+        }
+
+
+    // Edit
+
+        //- Set the hit status \em on
+        void setHit() noexcept
         {
             hit_ = true;
             eligibleMiss_ = false;
         }
 
-        void setMiss(const bool eligible)
+        //- Set the hit status \em off and set the eligible miss status
+        void setMiss(const bool eligible) noexcept
         {
             hit_ = false;
             eligibleMiss_ = eligible;
         }
 
-        void setPoint(const Point& p)
+        //- Set the point
+        void setPoint(const point_type& p)
         {
-            hitPoint_ = p;
+            point_ = p;
         }
 
-        void setDistance(const scalar d)
+        //- Set the distance
+        void setDistance(const scalar d) noexcept
         {
             distance_ = d;
         }
 
 
-    // Ostream operator
+    // Member Operators
 
-        friend Ostream& operator<< <Point>
-        (
-            Ostream& os,
-            const PointHit<Point>& b
-        );
+        //- Distance comparision operator, for sorting
+        template<class AnyPointType>
+        bool operator<(const PointHit<AnyPointType>& rhs) const noexcept
+        {
+            return distance_ < rhs.distance_;
+        }
 };
 
 
-template<class Point>
-inline Ostream& operator<<(Ostream& os, const PointHit<Point>& b)
+// Ostream Operator
+
+template<class PointType>
+inline Ostream& operator<<(Ostream& os, const PointHit<PointType>& pHit)
 {
-    os  << b.hit() << token::SPACE
-        << b.rawPoint() << token::SPACE
-        << b.distance() << token::SPACE
-        << b.eligibleMiss();
+    os  << pHit.hit() << token::SPACE
+        << pHit.point() << token::SPACE
+        << pHit.distance() << token::SPACE
+        << pHit.eligibleMiss();
 
     return os;
 }

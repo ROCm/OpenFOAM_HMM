@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,16 +49,18 @@ Foam::vector Foam::surfaceLocation::normal(const triSurface& s) const
         }
         else
         {
+            // Average edge normal
             vector edgeNormal(Zero);
 
-            forAll(eFaces, i)
+            for (const label facei : eFaces)
             {
-                edgeNormal += n[eFaces[i]];
+                edgeNormal += n[facei];
             }
+
             return edgeNormal/(mag(edgeNormal) + VSMALL);
         }
     }
-    else
+    else  // triPointRef::POINT
     {
         return s.pointNormals()[index()];
     }
@@ -78,7 +81,7 @@ void Foam::surfaceLocation::write(Ostream& os, const triSurface& s) const
 
         os  << "edgecoords:" << e.line(s.localPoints());
     }
-    else
+    else  // triPointRef::POINT
     {
         os  << "pointcoord:" << s.localPoints()[index()];
     }
@@ -90,6 +93,7 @@ Foam::Istream& Foam::operator>>(Istream& is, surfaceLocation& sl)
     label elType;
     is  >> static_cast<pointIndexHit&>(sl)
         >> elType >> sl.triangle_;
+
     sl.elementType_ = triPointRef::proxType(elType);
     return is;
 }
@@ -112,24 +116,23 @@ Foam::Ostream& Foam::operator<<
 {
     const surfaceLocation& sl = ip.t_;
 
+    os  << "coord:" << sl.point();
+
     if (sl.elementType() == triPointRef::NONE)
     {
-        os  << "coord:" << sl.rawPoint()
-            << " inside triangle:" << sl.index()
-            << " excludeTriangle:" << sl.triangle();
+        os  << " inside triangle:";
     }
     else if (sl.elementType() == triPointRef::EDGE)
     {
-        os  << "coord:" << sl.rawPoint()
-            << " on edge:" << sl.index()
-            << " excludeTriangle:" << sl.triangle();
+        os  << " on edge:";
     }
-    else
+    else  // triPointRef::POINT
     {
-        os  << "coord:" << sl.rawPoint()
-            << " on point:" << sl.index()
-            << " excludeTriangle:" << sl.triangle();
+        os  << " on point:";
     }
+
+    os  << sl.index()
+        << " excludeTriangle:" << sl.triangle();
 
     if (sl.hit())
     {
