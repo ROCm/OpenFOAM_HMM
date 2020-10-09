@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -321,7 +321,7 @@ bool Foam::treeBoundBox::contains(const vector& dir, const point& pt) const
 {
     // Compare all components against min and max of bb
 
-    for (direction cmpt=0; cmpt<3; ++cmpt)
+    for (direction cmpt=0; cmpt < point::nComponents; ++cmpt)
     {
         if (pt[cmpt] < min()[cmpt])
         {
@@ -357,68 +357,71 @@ bool Foam::treeBoundBox::contains(const vector& dir, const point& pt) const
 
 Foam::direction Foam::treeBoundBox::faceBits(const point& pt) const
 {
-    direction faceBits = 0;
+    direction octant = 0;
+
     if (pt.x() == min().x())
     {
-        faceBits |= LEFTBIT;
+        octant |= LEFTBIT;
     }
     else if (pt.x() == max().x())
     {
-        faceBits |= RIGHTBIT;
+        octant |= RIGHTBIT;
     }
 
     if (pt.y() == min().y())
     {
-        faceBits |= BOTTOMBIT;
+        octant |= BOTTOMBIT;
     }
     else if (pt.y() == max().y())
     {
-        faceBits |= TOPBIT;
+        octant |= TOPBIT;
     }
 
     if (pt.z() == min().z())
     {
-        faceBits |= BACKBIT;
+        octant |= BACKBIT;
     }
     else if (pt.z() == max().z())
     {
-        faceBits |= FRONTBIT;
+        octant |= FRONTBIT;
     }
-    return faceBits;
+
+    return octant;
 }
 
 
 Foam::direction Foam::treeBoundBox::posBits(const point& pt) const
 {
-    direction posBits = 0;
+    direction octant = 0;
 
     if (pt.x() < min().x())
     {
-        posBits |= LEFTBIT;
+        octant |= LEFTBIT;
     }
     else if (pt.x() > max().x())
     {
-        posBits |= RIGHTBIT;
+        octant |= RIGHTBIT;
     }
 
     if (pt.y() < min().y())
     {
-        posBits |= BOTTOMBIT;
+        octant |= BOTTOMBIT;
     }
     else if (pt.y() > max().y())
     {
-        posBits |= TOPBIT;
+        octant |= TOPBIT;
     }
 
     if (pt.z() < min().z())
     {
-        posBits |= BACKBIT;
+        octant |= BACKBIT;
     }
     else if (pt.z() > max().z())
     {
-        posBits |= FRONTBIT;
+        octant |= FRONTBIT;
     }
-    return posBits;
+
+    return octant;
 }
 
 
@@ -429,44 +432,23 @@ void Foam::treeBoundBox::calcExtremities
     point& furthest
 ) const
 {
-    scalar nearX, nearY, nearZ;
-    scalar farX, farY, farZ;
-
-    if (Foam::mag(min().x() - pt.x()) < Foam::mag(max().x() - pt.x()))
+    for (direction cmpt=0; cmpt < point::nComponents; ++cmpt)
     {
-        nearX = min().x();
-        farX = max().x();
+        if
+        (
+            Foam::mag(min()[cmpt] - pt[cmpt])
+          < Foam::mag(max()[cmpt] - pt[cmpt])
+        )
+        {
+            nearest[cmpt] = min()[cmpt];
+            furthest[cmpt] = max()[cmpt];
+        }
+        else
+        {
+            nearest[cmpt] = max()[cmpt];
+            furthest[cmpt] = min()[cmpt];
+        }
     }
-    else
-    {
-        nearX = max().x();
-        farX = min().x();
-    }
-
-    if (Foam::mag(min().y() - pt.y()) < Foam::mag(max().y() - pt.y()))
-    {
-        nearY = min().y();
-        farY = max().y();
-    }
-    else
-    {
-        nearY = max().y();
-        farY = min().y();
-    }
-
-    if (Foam::mag(min().z() - pt.z()) < Foam::mag(max().z() - pt.z()))
-    {
-        nearZ = min().z();
-        farZ = max().z();
-    }
-    else
-    {
-        nearZ = max().z();
-        farZ = min().z();
-    }
-
-    nearest = point(nearX, nearY, nearZ);
-    furthest = point(farX, farY, farZ);
 }
 
 

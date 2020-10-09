@@ -128,13 +128,15 @@ class face
 
 public:
 
-    //- Return types for classify
-    enum proxType
-    {
-        NONE,
-        POINT,  // Close to point
-        EDGE    // Close to edge
-    };
+    // Public Typedefs
+
+        //- The proximity classifications
+        enum proxType
+        {
+            NONE = 0,   //!< Unknown proximity
+            POINT,      //!< Close to point
+            EDGE        //!< Close to edge
+        };
 
 
     // Static Data Members

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,13 +81,19 @@ class pyramid
 
 public:
 
+    // Public Typedefs
+
+        //- The point type
+        typedef Point point_type;
+
+
     // Constructors
 
         //- Construct from base polygon and apex point
         inline pyramid(polygonRef base, const Point& apex);
 
         //- Construct from Istream
-        inline pyramid(Istream& is);
+        inline explicit pyramid(Istream& is);
 
 
     // Member Functions
@@ -112,7 +119,7 @@ public:
             inline scalar mag(const UList<point>& points) const;
 
 
-    // IOstream operators
+    // IOstream Operators
 
         friend Istream& operator>> <Point, PointRef, polygonRef>
         (

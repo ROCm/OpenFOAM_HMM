@@ -48,7 +48,7 @@ void Foam::triangleFuncs::setIntersection
     point& pt
 )
 {
-    scalar denom = oppositeSign - thisSign;
+    const scalar denom = oppositeSign - thisSign;
 
     if (mag(denom) < tol)
     {
@@ -62,29 +62,8 @@ void Foam::triangleFuncs::setIntersection
 }
 
 
-void Foam::triangleFuncs::selectPt
-(
-    const bool select0,
-    const point& p0,
-    const point& p1,
-    point& min
-)
-{
-    if (select0)
-    {
-        min = p0;
-    }
-    else
-    {
-        min = p1;
-    }
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Intersect triangle with parallel edges aligned with axis i0.
-// Returns true (and intersection in pInter) if any of them intersects triangle.
 bool Foam::triangleFuncs::intersectAxesBundle
 (
     const point& V0,
@@ -169,9 +148,6 @@ bool Foam::triangleFuncs::intersectAxesBundle
 }
 
 
-// Intersect triangle with bounding box. Return true if
-// any of the faces of bb intersect triangle.
-// Note: so returns false if triangle inside bb.
 bool Foam::triangleFuncs::intersectBb
 (
     const point& p0,

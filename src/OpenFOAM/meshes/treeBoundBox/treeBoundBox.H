@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,7 +80,6 @@ class treeBoundBox;
 Istream& operator>>(Istream& is, treeBoundBox& bb);
 Ostream& operator<<(Ostream& os, const treeBoundBox& bb);
 
-
 /*---------------------------------------------------------------------------*\
                         Class treeBoundBox Declaration
 \*---------------------------------------------------------------------------*/
@@ -89,18 +88,17 @@ class treeBoundBox
 :
     public boundBox
 {
-
 public:
 
-    // Static Data Members
+    // Enumerations
 
         //- Bits used for octant/point encoding.
-        //  Every octant/corner point is the combination of three faces.
+        //  Every octant/corner point is the combination of three directions.
         enum octantBit : direction
         {
-            RIGHTHALF = 0x1,
-            TOPHALF   = 0x2,
-            FRONTHALF = 0x4
+            RIGHTHALF = 0x1,  //!< 1: positive x-direction
+            TOPHALF   = 0x2,  //!< 2: positive y-direction
+            FRONTHALF = 0x4   //!< 4: positive z-direction
         };
 
         //- Face codes. Identical order and meaning as per hex cellmodel
@@ -146,6 +144,9 @@ public:
             E37 = 10,
             E26 = 11
         };
+
+
+    // Static Data Members
 
         //- Face to point addressing
         static const faceList faces;

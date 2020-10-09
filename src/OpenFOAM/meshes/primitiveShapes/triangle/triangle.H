@@ -53,29 +53,24 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-
+// Forward Declarations
 class Istream;
 class Ostream;
-class triPoints;
 class plane;
+class triPoints;
 
 template<class Point, class PointRef> class triangle;
 
 template<class Point, class PointRef>
-inline Istream& operator>>
-(
-    Istream&,
-    triangle<Point, PointRef>&
-);
+inline Istream& operator>>(Istream&, triangle<Point, PointRef>&);
 
 template<class Point, class PointRef>
-inline Ostream& operator<<
-(
-    Ostream&,
-    const triangle<Point, PointRef>&
-);
+inline Ostream& operator<<(Ostream&, const triangle<Point, PointRef>&);
 
+
+// Common Typedefs
+
+//- A triangle using referred points
 typedef triangle<point, const point&> triPointRef;
 
 
@@ -88,18 +83,21 @@ class triangle
 {
 public:
 
-    // Public typedefs
+    // Public Typedefs
+
+        //- The point type
+        typedef Point point_type;
 
         //- Storage type for triangles originating from intersecting triangle
-        //  with another triangle
+        //- with another triangle
         typedef FixedList<triPoints, 27> triIntersectionList;
 
-        //- Return types for classify
+        //- The proximity classifications
         enum proxType
         {
-            NONE,
-            POINT,  // Close to point
-            EDGE    // Close to edge
+            NONE = 0,   //!< Unknown proximity
+            POINT,      //!< Close to point
+            EDGE        //!< Close to edge
         };
 
 
@@ -141,7 +139,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         PointRef a_, b_, c_;
 
@@ -187,7 +185,7 @@ public:
         );
 
         //- Construct from Istream
-        inline triangle(Istream& is);
+        inline explicit triangle(Istream& is);
 
 
     // Member Functions
