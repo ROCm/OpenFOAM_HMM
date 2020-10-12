@@ -90,6 +90,7 @@ search_scotch()
     then
         header=$(findFirstFile \
             "$prefix/include/$localDir/$incName" \
+            "$prefix/include/scotch/$incName" \
             "$prefix/include/$incName" \
         )
         library=$(findExtLib "$libName")
@@ -201,12 +202,15 @@ search_ptscotch()
         header=$(findFirstFile  \
             "$prefix/include/$FOAM_MPI/$incName" \
             "$prefix/include/$localDir/$incName" \
+            "$prefix/include/ptscotch/$incName" \
+            "$prefix/include/scotch/$incName" \
             "$prefix/include/$incName"
         )
         library="$(findExtLib $FOAM_MPI/$libName $libName)"
     elif isSystem "$prefix"
     then
         header=$(findFirstFile \
+            "/usr/local/include/$localDir/$incName" \
             "/usr/local/include/ptscotch/$incName" \
             "/usr/local/include/scotch/$incName" \
             "/usr/local/include/$incName" \

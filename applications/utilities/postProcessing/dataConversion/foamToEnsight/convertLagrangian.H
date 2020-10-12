@@ -67,10 +67,10 @@ if (doLagrangian)
             }
         }
 
-        forAllConstIters(theseCloudFields, fieldIter)
+        // Field order may differ on individual processors, so sort by name
+        for (const word& fieldName : theseCloudFields.sortedToc())
         {
-            const word& fieldName = fieldIter.key();
-            const word& fieldType = fieldIter.val();
+            const word& fieldType = theseCloudFields[fieldName];
 
             IOobject fieldObject
             (
