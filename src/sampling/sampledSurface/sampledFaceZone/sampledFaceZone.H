@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,43 +24,11 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::sampledMeshedSurface
+    Foam::sampledFaceZone
 
 Description
-    A sampledSurface from a meshed surface.
-    It samples on the points/faces of the meshed surface.
-
-    - it either samples cells or (non-coupled) boundary faces
-
-    - 6 different modes:
-        - source=cells, interpolate=false:
-            finds per triangle centre the \em nearest cell centre and uses its value
-        - source=cells, interpolate=true:
-            finds per triangle centre the \em nearest cell centre.
-            Per surface point checks if this nearest cell is the one containing
-            point; otherwise projects the point onto the nearest point on
-            the boundary of the cell (to make sure interpolateCellPoint
-            gets a valid location)
-
-        - source=insideCells, interpolate=false:
-            finds per triangle centre the cell containing it and uses its value.
-            Trims triangles outside mesh.
-        - source=insideCells, interpolate=true:
-            Per surface point interpolate cell containing it.
-
-        - source=boundaryFaces, interpolate=false:
-            finds per triangle centre the nearest point on the boundary
-            (uncoupled faces only) and uses the value (or 0 if the nearest
-            is on an empty boundary)
-        - source=boundaryFaces, interpolate=true:
-            finds per triangle centre the nearest point on the boundary
-            (uncoupled faces only).
-            Per surface point projects the point onto this boundary face
-            (to make sure interpolateCellPoint gets a valid location)
-
-    - since it finds a nearest per triangle each triangle is guaranteed
-    to be on one processor only. So after stitching (by sampledSurfaces)
-    the original surface should be complete.
+    A sampledSurface defined by the cell faces corresponding to a threshold
+    value.
 
     This is often embedded as part of a sampled surfaces function object.
 
@@ -69,143 +36,127 @@ Usage
     Example of function object partial specification:
     \verbatim
     surfaces
-    {
+    (
         surface1
         {
-            type    meshedSurface;
-            surface something.obj;
-            source  cells;
+            type    faceZones;
+            zones   (zone1 "sides.*");
         }
-    }
+    );
     \endverbatim
 
     Where the sub-entries comprise:
     \table
-        Property | Description                              | Required | Default
-        type     | meshedSurface                            | yes |
-        surface  | surface name in triSurface/              | yes |
-        patches  | Limit to named surface regions (wordRes) | no  |
-        source   | cells/insideCells/boundaryFaces          | yes |
-        keepIds  | pass through id numbering                | no  | true
-        file     | Alternative file name                    | no  |
-        fileType | The surface format                       | no  | (extension)
-        scale    | Surface scaling factor                   | no  | 0
+        Property | Description                             | Required | Default
+        type     | faceZones                               | yes |
+        zones    | zone selection as word/regex list       | yes |
+        triangulate | triangulate faces                    | no  | false
     \endtable
 
 SourceFiles
-    sampledMeshedSurface.C
-    sampledMeshedSurfaceTemplates.C
+    sampledFaceZone.C
+    sampledFaceZoneTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sampledMeshedSurface_H
-#define sampledMeshedSurface_H
+#ifndef sampledFaceZone_H
+#define sampledFaceZone_H
 
 #include "sampledSurface.H"
-#include "MeshedSurface.H"
-#include "MeshedSurfacesFwd.H"
+#include "MeshedSurfaces.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward Declarations
-class meshSearch;
-
 /*---------------------------------------------------------------------------*\
-                       Class sampledMeshedSurface Declaration
+                       Class sampledFaceZone Declaration
 \*---------------------------------------------------------------------------*/
 
-class sampledMeshedSurface
+class sampledFaceZone
 :
-    public sampledSurface,
-    public meshedSurface
+    public meshedSurface,
+    public sampledSurface
 {
-public:
-        //- Types of sampling regions
-        enum class samplingSource
-        {
-            cells,          //!< Use nearest cell value
-            insideCells,    //!< Face within a cell
-            boundaryFaces   //!< Use boundary face values
-        };
-
-private:
-
-        //- Private typedefs for convenience
-        typedef meshedSurface MeshStorage;
+    //- Mesh storage type
+    typedef meshedSurface Mesh;
 
 
     // Private Data
 
-        static const Enum<samplingSource> samplingSourceNames_;
+        //- Selection (word/regex) of face zones
+        const wordRes selectionNames_;
 
-        //- The name of the input surface
-        word surfaceName_;
+        //- IDs for selected face zones (sorted)
+        mutable labelList zoneIds_;
 
-        //- Surface to sample on
-        meshedSurface surface_;
-
-        //- Whether to sample internal cell values or boundary values
-        const samplingSource sampleSource_;
+        //- Triangulated faces or keep faces as is
+        bool triangulate_;
 
         //- Track if the surface needs an update
         mutable bool needsUpdate_;
 
-        //- Retain element ids/order of original surface
-        bool keepIds_;
+        //- Local list of face IDs
+        labelList faceId_;
 
-        //- For compatibility with the meshSurf interface
-        labelList zoneIds_;
-
-        //- From local surface triangle to mesh cell/face.
-        labelList sampleElements_;
-
-        //- Local points to sample per point
-        pointField samplePoints_;
+        //- Local list of patch ID per face. Is -1 for internal face
+        labelList facePatchId_;
 
 
     // Private Member Functions
 
-        //- Set zoneIds list based on the surfZone information
-        void setZoneMap();
-
-        //- Sample volume field onto surface faces
+        //- Sample volume/boundary field onto surface faces
         template<class Type>
         tmp<Field<Type>> sampleOnFaces
         (
             const interpolation<Type>& sampler
         ) const;
 
-        //- Interpolate volume field onto surface points
+        //- Sample surface field onto surface faces
+        template<class Type>
+        tmp<Field<Type>> sampleOnFaces
+        (
+            const GeometricField<Type, fvsPatchField, surfaceMesh>& sField
+        ) const;
+
+        //- Interpolate volume/boundary field onto surface points
         template<class Type>
         tmp<Field<Type>> sampleOnPoints
         (
             const interpolation<Type>& interpolator
         ) const;
 
-        bool update(const meshSearch& meshSearcher);
+
+        //- Re-map action on triangulation or cleanup
+        virtual void remapFaces(const labelUList& faceMap);
+
+
+protected:
+
+        //- The selected face zones (sorted)
+        const labelList& zoneIDs() const;
+
 
 public:
 
-    //- Declare type-name, virtual type (with debug switch)
-    TypeName("sampledMeshedSurface");
+    //- Runtime type information
+    TypeName("faceZone");
 
 
     // Constructors
 
         //- Construct from components
-        sampledMeshedSurface
+        sampledFaceZone
         (
             const word& name,
             const polyMesh& mesh,
-            const word& surfaceName,
-            const samplingSource sampleSource
+            const UList<wordRe>& zoneNames,
+            const bool triangulate = false
         );
 
         //- Construct from dictionary
-        sampledMeshedSurface
+        sampledFaceZone
         (
             const word& name,
             const polyMesh& mesh,
@@ -214,7 +165,7 @@ public:
 
 
     //- Destructor
-    virtual ~sampledMeshedSurface() = default;
+    virtual ~sampledFaceZone() = default;
 
 
     // Member Functions
@@ -231,63 +182,40 @@ public:
         //  Do nothing (and return false) if no update was needed
         virtual bool update();
 
-        //- Update the surface using a bound box to limit the searching.
-        //  For direct use, i.e. not through sample.
-        //  Do nothing (and return false) if no update was needed
-        bool update(const treeBoundBox& bb);
-
         //- Points of surface
         virtual const pointField& points() const
         {
-            return MeshStorage::points();
+            return Mesh::points();
         }
 
         //- Faces of surface
         virtual const faceList& faces() const
         {
-            return MeshStorage::surfFaces();
+            return Mesh::surfFaces();
         }
 
         //- Per-face zone/region information
         virtual const labelList& zoneIds() const
         {
-            return zoneIds_;
+            return labelList::null();
         }
 
-        //- Per-face identifier (eg, element Id)
-        virtual const labelList& faceIds() const
-        {
-            return MeshStorage::faceIds();
-        }
-
-        //- Face area vectors
+        //- Face area vectors (normals)
         virtual const vectorField& Sf() const
         {
-            return MeshStorage::Sf();
+            return Mesh::Sf();
         }
 
         //- Face area magnitudes
         virtual const scalarField& magSf() const
         {
-            return MeshStorage::magSf();
+            return Mesh::magSf();
         }
 
         //- Face centres
         virtual const vectorField& Cf() const
         {
-            return MeshStorage::Cf();
-        }
-
-        //- If element ids/order of the original surface are kept
-        virtual bool hasFaceIds() const
-        {
-            return keepIds_ && !MeshStorage::faceIds().empty();
-        }
-
-        //- Sampling boundary values instead of cell values
-        bool onBoundary() const
-        {
-            return sampleSource_ == samplingSource::boundaryFaces;
+            return Mesh::Cf();
         }
 
 
@@ -322,6 +250,42 @@ public:
         (
             const interpolation<tensor>& sampler
         ) const;
+
+
+        //- Can it sample surface-fields?
+        virtual bool withSurfaceFields() const;
+
+
+        //- Sample surface field on face zone
+        virtual tmp<scalarField> sample
+        (
+            const surfaceScalarField&
+        ) const;
+
+        //- Sample surface field on face zone
+        virtual tmp<vectorField> sample
+        (
+            const surfaceVectorField&
+        ) const;
+
+        //- Sample surface field on face zone
+        virtual tmp<sphericalTensorField> sample
+        (
+            const surfaceSphericalTensorField&
+        ) const;
+
+        //- Sample surface field on face zone
+        virtual tmp<symmTensorField> sample
+        (
+            const surfaceSymmTensorField&
+        ) const;
+
+        //- Sample surface field on face zone
+        virtual tmp<tensorField> sample
+        (
+            const surfaceTensorField&
+        ) const;
+
 
 
     // Interpolate
@@ -359,7 +323,7 @@ public:
 
     // Output
 
-        //- Write
+        //- Print information
         virtual void print(Ostream& os) const;
 };
 
@@ -371,7 +335,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "sampledMeshedSurfaceTemplates.C"
+    #include "sampledFaceZoneTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

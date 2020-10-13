@@ -172,7 +172,7 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
 
     List<nearInfo> nearest(fc.size(), nearInfo(GREAT, labelMax));
 
-    if (sampleSource_ == cells)
+    if (sampleSource_ == samplingSource::cells)
     {
         // Search for nearest cell
 
@@ -191,7 +191,7 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
             }
         }
     }
-    else if (sampleSource_ == insideCells)
+    else if (sampleSource_ == samplingSource::insideCells)
     {
         // Search for cell containing point
 
@@ -212,11 +212,11 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
             }
         }
     }
-    else
+    else  // samplingSource::boundaryFaces
     {
-        // Search for nearest boundaryFace
+        // Search for nearest boundary face
+        // on all non-coupled boundary faces
 
-        //- Search on all non-coupled boundary faces
         const auto& bndTree = meshSearcher.nonCoupledBoundaryTree();
 
         forAll(fc, facei)
@@ -312,7 +312,7 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
         }
 
 
-        if (sampleSource_ == cells)
+        if (sampleSource_ == samplingSource::cells)
         {
             // samplePoints_   : per surface point a location inside the cell
             // sampleElements_ : per surface point the cell
@@ -359,7 +359,7 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
                 }
             }
         }
-        else if (sampleSource_ == insideCells)
+        else if (sampleSource_ == samplingSource::insideCells)
         {
             // samplePoints_   : per surface point a location inside the cell
             // sampleElements_ : per surface point the cell
@@ -374,7 +374,7 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
                 samplePoints_[pointi] = pt;
             }
         }
-        else
+        else  // samplingSource::boundaryFaces
         {
             // samplePoints_   : per surface point a location on the boundary
             // sampleElements_ : per surface point the boundary face containing
@@ -406,6 +406,7 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
         // else:
         //      sampleElements_ : per surface triangle the boundary face
         //      samplePoints_   : n/a
+
         sampleElements_.transfer(cellOrFaceLabels);
         samplePoints_.clear();
     }
