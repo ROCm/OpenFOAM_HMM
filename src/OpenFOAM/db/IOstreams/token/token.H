@@ -62,7 +62,6 @@ namespace Foam
 class token;
 Ostream& operator<<(Ostream& os, const token& tok);
 
-
 /*---------------------------------------------------------------------------*\
                             Class token Declaration
 \*---------------------------------------------------------------------------*/
@@ -178,39 +177,40 @@ public:
         // Constructors
 
             //- Default construct
-            compound()
+            constexpr compound() noexcept
             :
                 empty_(false)
             {}
 
-
-        // Selectors
-
-            //- Select null constructed
+            //- Construct compound from Istream
             static autoPtr<compound> New(const word& type, Istream& is);
-
-            //- Return true if name is a known (registered) compound type
-            static bool isCompound(const word& name);
 
 
         //- Destructor
-        virtual ~compound() = default;
+        virtual ~compound() noexcept = default;
 
 
         // Member Functions
 
-            bool empty() const
+            //- Test if name is a known (registered) compound type
+            static bool isCompound(const word& name);
+
+            //- Has compound been transferred?
+            bool empty() const noexcept
             {
                 return empty_;
             }
 
-            bool& empty()
+            //- Access to empty
+            bool& empty() noexcept
             {
                 return empty_;
             }
 
+            //- The size of the underlying content
             virtual label size() const = 0;
 
+            //- Redirect write to underlying content
             virtual void write(Ostream& os) const = 0;
 
 
@@ -233,20 +233,43 @@ public:
         //- Declare type-name, virtual type (with debug switch)
         TypeName("Compound<T>");
 
-        Compound(Istream& is)
-        :
-            T(is)
-        {}
+        // Constructors
 
-        label size() const
-        {
-            return T::size();
-        }
+            //- Copy construct
+            explicit Compound(const T& val)
+            :
+                T(val)
+            {}
 
-        void write(Ostream& os) const
-        {
-            operator<<(os, static_cast<const T&>(*this));
-        }
+            //- Move construct
+            explicit Compound(T&& val)
+            :
+                T(std::move(val))
+            {}
+
+            //- Read construct from Istream
+            explicit Compound(Istream& is)
+            :
+                T(is)
+            {}
+
+
+        // Member Functions
+
+            //- Using empty from compound refCount
+            using token::compound::empty;
+
+            //- The size of the underlying content
+            virtual label size() const
+            {
+                return T::size();
+            }
+
+            //- Redirect write to underlying content
+            virtual void write(Ostream& os) const
+            {
+                operator<<(os, static_cast<const T&>(*this));
+            }
     };
 
 
@@ -286,13 +309,13 @@ private:
         tokenType type_;
 
         //- Line number in the file the token was read from
-        label lineNumber_;
+        label line_;
 
 
     // Private Member Functions
 
         //- Set as UNDEFINED and zero the union content without any checking
-        inline void setUndefined();
+        inline void setUndefined() noexcept;
 
         // Parse error, expected 'expected', found ...
         void parseError(const char* expected) const;
@@ -315,31 +338,34 @@ public:
         inline token(const token& t);
 
         //- Move construct. The original token is left as UNDEFINED.
-        inline token(token&& t);
+        inline token(token&& t) noexcept;
 
         //- Construct punctuation character token
-        inline explicit token(punctuationToken p, label lineNumber=0);
+        inline explicit token(punctuationToken p, label lineNum=0) noexcept;
 
         //- Construct label token
-        inline explicit token(const label val, label lineNumber=0);
+        inline explicit token(const label val, label lineNum=0) noexcept;
 
         //- Construct float token
-        inline explicit token(const floatScalar val, label lineNumber=0);
+        inline explicit token(const floatScalar val, label lineNum=0) noexcept;
 
         //- Construct double token
-        inline explicit token(const doubleScalar val, label lineNumber=0);
+        inline explicit token(const doubleScalar val, label lineNum=0) noexcept;
 
         //- Copy construct word token
-        inline explicit token(const word& w, label lineNumber=0);
+        inline explicit token(const word& w, label lineNum=0);
 
         //- Copy construct string token
-        inline explicit token(const string& str, label lineNumber=0);
+        inline explicit token(const string& str, label lineNum=0);
 
         //- Move construct word token
-        inline explicit token(word&& w, label lineNumber=0);
+        inline explicit token(word&& w, label lineNum=0);
 
         //- Move construct string token
-        inline explicit token(string&& str, label lineNumber=0);
+        inline explicit token(string&& str, label lineNum=0);
+
+        //- Construct from a compound pointer, taking ownership
+        inline explicit token(token::compound* ptr, label lineNum=0);
 
         //- Construct from Istream
         explicit token(Istream& is);
@@ -352,12 +378,12 @@ public:
     // Static Functions
 
         //- Create a bool token.
-        inline static token boolean(bool on);
+        inline static token boolean(bool on) noexcept;
 
         //- Create a token with stream flags, no sanity check
         //
         //  \param bitmask the flags to set
-        inline static token flag(int bitmask);
+        inline static token flag(int bitmask) noexcept;
 
         //- True if the character is a punctuation separator (eg, in ISstream).
         //  Since it could also start a number, SUBTRACT is not included as
@@ -365,7 +391,7 @@ public:
         //
         //  \param c the character to test, passed as int for consistency with
         //      isdigit, isspace etc.
-        inline static bool isseparator(int c);
+        inline static bool isseparator(int c) noexcept;
 
 
     // Member Functions
@@ -376,7 +402,7 @@ public:
         word name() const;
 
         //- Return the token type
-        inline tokenType type() const;
+        inline tokenType type() const noexcept;
 
         //- Change the token type, for similar types.
         //  This can be used to change between string-like variants
@@ -385,70 +411,70 @@ public:
         //  use the corresponding assignment operator.
         //
         //  \return true if the change was successful or no change was required
-        inline bool setType(const tokenType tokType);
+        inline bool setType(const tokenType tokType) noexcept;
 
         //- The line number for the token
-        inline label lineNumber() const;
+        inline label lineNumber() const noexcept;
 
         //- The line number for the token
-        inline label& lineNumber();
+        inline label& lineNumber() noexcept;
 
         //- True if token is not UNDEFINED or ERROR
-        inline bool good() const;
+        inline bool good() const noexcept;
 
         //- Token is UNDEFINED
-        inline bool undefined() const;
+        inline bool undefined() const noexcept;
 
         //- Token is ERROR
-        inline bool error() const;
+        inline bool error() const noexcept;
 
         //- Token is BOOL
-        inline bool isBool() const;
+        inline bool isBool() const noexcept;
 
         //- Token is FLAG
-        inline bool isFlag() const;
+        inline bool isFlag() const noexcept;
 
         //- Token is PUNCTUATION
-        inline bool isPunctuation() const;
+        inline bool isPunctuation() const noexcept;
 
         //- Token is PUNCTUATION and isseparator
-        inline bool isSeparator() const;
+        inline bool isSeparator() const noexcept;
 
         //- Token is LABEL
-        inline bool isLabel() const;
+        inline bool isLabel() const noexcept;
 
         //- Token is FLOAT
-        inline bool isFloat() const;
+        inline bool isFloat() const noexcept;
 
         //- Token is DOUBLE
-        inline bool isDouble() const;
+        inline bool isDouble() const noexcept;
 
         //- Token is FLOAT or DOUBLE
-        inline bool isScalar() const;
+        inline bool isScalar() const noexcept;
 
         //- Token is LABEL, FLOAT or DOUBLE
-        inline bool isNumber() const;
+        inline bool isNumber() const noexcept;
 
         //- Token is WORD or DIRECTIVE word
-        inline bool isWord() const;
+        inline bool isWord() const noexcept;
 
         //- Token is DIRECTIVE (word variant)
-        inline bool isDirective() const;
+        inline bool isDirective() const noexcept;
 
         //- Token is STRING, VARIABLE or VERBATIM string
-        inline bool isString() const;
+        inline bool isString() const noexcept;
 
         //- Token is VARIABLE (string variant)
-        inline bool isVariable() const;
+        inline bool isVariable() const noexcept;
 
         //- Token is VERBATIM string (string variant)
-        inline bool isVerbatim() const;
+        inline bool isVerbatim() const noexcept;
 
         //- Token is WORD, DIRECTIVE, STRING, VARIABLE or VERBATIM
-        inline bool isStringType() const;
+        inline bool isStringType() const noexcept;
 
         //- Token is COMPOUND
-        inline bool isCompound() const;
+        inline bool isCompound() const noexcept;
 
 
     // Access
@@ -500,8 +526,10 @@ public:
         //- Read access for compound token
         inline const compound& compoundToken() const;
 
-        //- Return reference to compound token and decrease its internal
-        //- refCount accordingly.
+        //- Return reference to compound and mark internally as \em released.
+        compound& transferCompoundToken();
+
+        //- Return reference to compound and mark internally as \em released.
         //  The Istream is used for reference error messages only.
         compound& transferCompoundToken(const Istream& is);
 
@@ -562,7 +590,10 @@ public:
         inline void operator=(string&& str);
 
         //- Assign compound with reference counting to token
-        inline void operator=(compound* compoundPtr);
+        inline void operator=(token::compound* ptr);
+
+        //- Move assign from compound pointer
+        inline void operator=(autoPtr<token::compound>&& ptr);
 
 
     // Equality

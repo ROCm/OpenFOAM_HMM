@@ -30,7 +30,7 @@ License
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-inline Foam::token Foam::token::boolean(bool on)
+inline Foam::token Foam::token::boolean(bool on) noexcept
 {
     token tok;
     tok.type_ = tokenType::BOOL;
@@ -40,7 +40,7 @@ inline Foam::token Foam::token::boolean(bool on)
 }
 
 
-inline Foam::token Foam::token::flag(int bitmask)
+inline Foam::token Foam::token::flag(int bitmask) noexcept
 {
     token tok;
     tok.type_ = tokenType::FLAG;
@@ -50,7 +50,7 @@ inline Foam::token Foam::token::flag(int bitmask)
 }
 
 
-inline bool Foam::token::isseparator(int c)
+inline bool Foam::token::isseparator(int c) noexcept
 {
     // NOTE: keep synchronized with ISstream::read(token&)
 
@@ -84,7 +84,7 @@ inline bool Foam::token::isseparator(int c)
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-inline void Foam::token::setUndefined()
+inline void Foam::token::setUndefined() noexcept
 {
     type_ = tokenType::UNDEFINED;
     data_.int64Val = 0; // bit-wise zero for union content
@@ -98,7 +98,7 @@ inline constexpr Foam::token::token() noexcept
 :
     data_(), // bit-wise zero for union content
     type_(tokenType::UNDEFINED),
-    lineNumber_(0)
+    line_(0)
 {}
 
 
@@ -106,7 +106,7 @@ inline Foam::token::token(const token& tok)
 :
     data_(tok.data_), // bit-wise copy of union content
     type_(tok.type_),
-    lineNumber_(tok.lineNumber_)
+    line_(tok.line_)
 {
     // Fundamental: values already handled by bit-wise copy
     // Pointer: duplicate content or increase refCount
@@ -142,94 +142,104 @@ inline Foam::token::token(const token& tok)
 }
 
 
-inline Foam::token::token(token&& tok)
+inline Foam::token::token(token&& tok) noexcept
 :
     data_(tok.data_), // bit-wise copy of union content
     type_(tok.type_),
-    lineNumber_(tok.lineNumber_)
+    line_(tok.line_)
 {
     tok.setUndefined(); // zero the union content without any checking
-    tok.lineNumber_ = 0;
+    tok.line_ = 0;
 }
 
 
-inline Foam::token::token(punctuationToken p, label lineNumber)
+inline Foam::token::token(punctuationToken p, label lineNum) noexcept
 :
     data_(),
     type_(tokenType::PUNCTUATION),
-    lineNumber_(lineNumber)
+    line_(lineNum)
 {
     data_.punctuationVal = p;
 }
 
 
-inline Foam::token::token(const label val, label lineNumber)
+inline Foam::token::token(const label val, label lineNum) noexcept
 :
     data_(),
     type_(tokenType::LABEL),
-    lineNumber_(lineNumber)
+    line_(lineNum)
 {
     data_.labelVal = val;
 }
 
 
-inline Foam::token::token(const floatScalar val, label lineNumber)
+inline Foam::token::token(const floatScalar val, label lineNum) noexcept
 :
     data_(),
     type_(tokenType::FLOAT),
-    lineNumber_(lineNumber)
+    line_(lineNum)
 {
     data_.floatVal = val;
 }
 
 
-inline Foam::token::token(const doubleScalar val, label lineNumber)
+inline Foam::token::token(const doubleScalar val, label lineNum) noexcept
 :
     data_(),
     type_(tokenType::DOUBLE),
-    lineNumber_(lineNumber)
+    line_(lineNum)
 {
     data_.doubleVal = val;
 }
 
 
-inline Foam::token::token(const word& w, label lineNumber)
+inline Foam::token::token(const word& w, label lineNum)
 :
     data_(),
     type_(tokenType::WORD),
-    lineNumber_(lineNumber)
+    line_(lineNum)
 {
     data_.wordPtr = new word(w);
 }
 
 
-inline Foam::token::token(const string& str, label lineNumber)
+inline Foam::token::token(const string& str, label lineNum)
 :
     data_(),
     type_(tokenType::STRING),
-    lineNumber_(lineNumber)
+    line_(lineNum)
 {
     data_.stringPtr = new string(str);
 }
 
 
-inline Foam::token::token(word&& w, label lineNumber)
+inline Foam::token::token(word&& w, label lineNum)
 :
     data_(),
     type_(tokenType::WORD),
-    lineNumber_(lineNumber)
+    line_(lineNum)
 {
     data_.wordPtr = new word(std::move(w));
 }
 
 
-inline Foam::token::token(string&& str, label lineNumber)
+inline Foam::token::token(string&& str, label lineNum)
 :
     data_(),
     type_(tokenType::STRING),
-    lineNumber_(lineNumber)
+    line_(lineNum)
 {
     data_.stringPtr = new string(std::move(str));
+}
+
+
+inline Foam::token::token(token::compound* ptr, label lineNum)
+:
+    data_(),
+    type_(tokenType::COMPOUND),
+    line_(lineNum)
+{
+    data_.compoundPtr = ptr;
 }
 
 
@@ -292,17 +302,17 @@ inline void Foam::token::swap(token& tok)
 
     std::swap(data_, tok.data_);
     std::swap(type_, tok.type_);
-    std::swap(lineNumber_, tok.lineNumber_);
+    std::swap(line_, tok.line_);
 }
 
 
-inline Foam::token::tokenType Foam::token::type() const
+inline Foam::token::tokenType Foam::token::type() const noexcept
 {
     return type_;
 }
 
 
-inline bool Foam::token::setType(token::tokenType tokType)
+inline bool Foam::token::setType(token::tokenType tokType) noexcept
 {
     if (type_ == tokType)
     {
@@ -374,37 +384,37 @@ inline bool Foam::token::setType(token::tokenType tokType)
 }
 
 
-inline Foam::label Foam::token::lineNumber() const
+inline Foam::label Foam::token::lineNumber() const noexcept
 {
-    return lineNumber_;
+    return line_;
 }
 
 
-inline Foam::label& Foam::token::lineNumber()
+inline Foam::label& Foam::token::lineNumber() noexcept
 {
-    return lineNumber_;
+    return line_;
 }
 
 
-inline bool Foam::token::good() const
+inline bool Foam::token::good() const noexcept
 {
     return (type_ != tokenType::UNDEFINED && type_ != tokenType::ERROR);
 }
 
 
-inline bool Foam::token::undefined() const
+inline bool Foam::token::undefined() const noexcept
 {
     return (type_ == tokenType::UNDEFINED);
 }
 
 
-inline bool Foam::token::error() const
+inline bool Foam::token::error() const noexcept
 {
     return (type_ == tokenType::ERROR);
 }
 
 
-inline bool Foam::token::isBool() const
+inline bool Foam::token::isBool() const noexcept
 {
     return (type_ == tokenType::BOOL);
 }
@@ -422,7 +432,7 @@ inline bool Foam::token::boolToken() const
 }
 
 
-inline bool Foam::token::isFlag() const
+inline bool Foam::token::isFlag() const noexcept
 {
     return (type_ == tokenType::FLAG);
 }
@@ -440,7 +450,7 @@ inline int Foam::token::flagToken() const
 }
 
 
-inline bool Foam::token::isPunctuation() const
+inline bool Foam::token::isPunctuation() const noexcept
 {
     return (type_ == tokenType::PUNCTUATION);
 }
@@ -458,7 +468,7 @@ inline Foam::token::punctuationToken Foam::token::pToken() const
 }
 
 
-inline bool Foam::token::isSeparator() const
+inline bool Foam::token::isSeparator() const noexcept
 {
     return
     (
@@ -468,7 +478,7 @@ inline bool Foam::token::isSeparator() const
 }
 
 
-inline bool Foam::token::isLabel() const
+inline bool Foam::token::isLabel() const noexcept
 {
     return (type_ == tokenType::LABEL);
 }
@@ -486,7 +496,7 @@ inline Foam::label Foam::token::labelToken() const
 }
 
 
-inline bool Foam::token::isFloat() const
+inline bool Foam::token::isFloat() const noexcept
 {
     return (type_ == tokenType::FLOAT);
 }
@@ -504,7 +514,7 @@ inline Foam::floatScalar Foam::token::floatToken() const
 }
 
 
-inline bool Foam::token::isDouble() const
+inline bool Foam::token::isDouble() const noexcept
 {
     return (type_ == tokenType::DOUBLE);
 }
@@ -522,7 +532,7 @@ inline Foam::doubleScalar Foam::token::doubleToken() const
 }
 
 
-inline bool Foam::token::isScalar() const
+inline bool Foam::token::isScalar() const noexcept
 {
     return
     (
@@ -548,7 +558,7 @@ inline Foam::scalar Foam::token::scalarToken() const
 }
 
 
-inline bool Foam::token::isNumber() const
+inline bool Foam::token::isNumber() const noexcept
 {
     return (type_ == tokenType::LABEL || isScalar());
 }
@@ -570,7 +580,7 @@ inline Foam::scalar Foam::token::number() const
 }
 
 
-inline bool Foam::token::isWord() const
+inline bool Foam::token::isWord() const noexcept
 {
     return
     (
@@ -580,7 +590,7 @@ inline bool Foam::token::isWord() const
 }
 
 
-inline bool Foam::token::isDirective() const
+inline bool Foam::token::isDirective() const noexcept
 {
     return (type_ == tokenType::DIRECTIVE);
 }
@@ -602,7 +612,7 @@ inline const Foam::word& Foam::token::wordToken() const
 }
 
 
-inline bool Foam::token::isString() const
+inline bool Foam::token::isString() const noexcept
 {
     return
     (
@@ -613,19 +623,19 @@ inline bool Foam::token::isString() const
 }
 
 
-inline bool Foam::token::isVariable() const
+inline bool Foam::token::isVariable() const noexcept
 {
     return (type_ == tokenType::VARIABLE);
 }
 
 
-inline bool Foam::token::isVerbatim() const
+inline bool Foam::token::isVerbatim() const noexcept
 {
     return (type_ == tokenType::VERBATIM);
 }
 
 
-inline bool Foam::token::isStringType() const
+inline bool Foam::token::isStringType() const noexcept
 {
     return (isWord() || isString());
 }
@@ -657,7 +667,7 @@ inline const Foam::string& Foam::token::stringToken() const
 }
 
 
-inline bool Foam::token::isCompound() const
+inline bool Foam::token::isCompound() const noexcept
 {
     return (type_ == tokenType::COMPOUND);
 }
@@ -695,7 +705,7 @@ inline void Foam::token::operator=(const token& tok)
 
     type_ = tok.type_;
     data_ = tok.data_;  // bit-wise copy of union content
-    lineNumber_ = tok.lineNumber_;
+    line_ = tok.line_;
 
     // Fundamental: values already handled by bit-wise copy
     // Pointer: duplicate content or increase refCount
@@ -739,7 +749,7 @@ inline void Foam::token::operator=(token&& tok)
     }
 
     reset();
-    lineNumber_ = 0;
+    line_ = 0;
     swap(tok);
 }
 
@@ -808,11 +818,19 @@ inline void Foam::token::operator=(string&& s)
 }
 
 
-inline void Foam::token::operator=(Foam::token::compound* compoundPtr)
+inline void Foam::token::operator=(Foam::token::compound* ptr)
 {
     reset();
     type_ = tokenType::COMPOUND;
-    data_.compoundPtr = compoundPtr;
+    data_.compoundPtr = ptr;
+}
+
+
+inline void Foam::token::operator=(autoPtr<token::compound>&& ptr)
+{
+    reset();
+    type_ = tokenType::COMPOUND;
+    data_.compoundPtr = ptr.release();
 }
 
 

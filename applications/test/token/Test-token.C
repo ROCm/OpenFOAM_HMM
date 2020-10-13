@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,6 +33,7 @@ Description
 #include "IFstream.H"
 #include "StringStream.H"
 #include "cpuTime.H"
+#include "labelList.H"
 #include "DynamicList.H"
 
 using namespace Foam;
@@ -70,6 +71,47 @@ int main(int argc, char *argv[])
     tok3 = tok4;
     Info<< "assign token: " << tok3.info() << endl;
     Info<< "orig: " << tok4.info() << endl;
+
+    //
+    // Compound
+    //
+
+    {
+        // This version is good
+
+        token ctok1(new token::Compound<labelList>(identity(10)));
+
+        Info<< "compound token: " << ctok1.info() << nl << ctok1 << endl;
+    }
+
+    {
+        // This also works, but not actually using the autoPtr directly
+
+        autoPtr<token::Compound<labelList>> ptr
+        (
+            new token::Compound<labelList>(identity(10, -9))
+        );
+
+        token ctok1(ptr.release());  // release() not get()!
+
+        Info<< "compound token: " << ctok1.info() << nl << ctok1 << endl;
+    }
+
+    #if 0
+    {
+        // This version will segfault.
+        // The implicit pointer cast from autoPtr to pointer wracks havoc
+
+        autoPtr<token::Compound<labelList>> ptr
+        (
+            new token::Compound<labelList>(identity(10))
+        );
+
+        token ctok1(ptr);
+
+        Info<< "compound token: " << ctok1.info() << nl << ctok1 << endl;
+    }
+    #endif
 
     return 0;
 }

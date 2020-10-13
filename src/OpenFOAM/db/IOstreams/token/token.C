@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,25 +87,46 @@ bool Foam::token::compound::isCompound(const word& name)
 }
 
 
-Foam::token::compound& Foam::token::transferCompoundToken(const Istream& is)
+Foam::token::compound& Foam::token::transferCompoundToken()
 {
-    if (type_ == tokenType::COMPOUND)
+    if (type_ != tokenType::COMPOUND)
     {
-        if (data_.compoundPtr->empty())
-        {
-            FatalIOErrorInFunction(is)
-                << "compound has already been transferred from token\n    "
-                << info() << abort(FatalIOError);
-        }
-        else
-        {
-            data_.compoundPtr->empty() = true;
-        }
-
-        return *data_.compoundPtr;
+        parseError("compound");
     }
 
-    parseError("compound");
+    if (data_.compoundPtr->empty())
+    {
+        FatalErrorInFunction
+            << "compound has already been transferred from token\n    "
+            << info() << abort(FatalError);
+    }
+    else
+    {
+        data_.compoundPtr->empty() = true;
+    }
+
+    return *data_.compoundPtr;
+}
+
+
+Foam::token::compound& Foam::token::transferCompoundToken(const Istream& is)
+{
+    if (type_ != tokenType::COMPOUND)
+    {
+        parseError("compound");
+    }
+
+    if (data_.compoundPtr->empty())
+    {
+        FatalIOErrorInFunction(is)
+            << "compound has already been transferred from token\n    "
+            << info() << abort(FatalIOError);
+    }
+    else
+    {
+        data_.compoundPtr->empty() = true;
+    }
+
     return *data_.compoundPtr;
 }
 
