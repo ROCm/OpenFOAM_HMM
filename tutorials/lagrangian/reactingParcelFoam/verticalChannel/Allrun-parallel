@@ -9,6 +9,8 @@ runApplication blockMesh
 
 runApplication potentialFoam
 
-runApplication $(getApplication)
+runApplication decomposePar
+
+runParallel $(getApplication)
 
 #------------------------------------------------------------------------------

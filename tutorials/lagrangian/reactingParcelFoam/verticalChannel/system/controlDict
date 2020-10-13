@@ -53,7 +53,27 @@ maxDeltaT       1e-03;
 
 functions
 {
-    surfaceFieldValue1
+    avgInlets
+    {
+        type            surfaceFieldValue;
+        libs            (fieldFunctionObjects);
+        enabled         yes;
+        writeControl    writeTime;
+        log             yes;
+        writeFields     off;
+        surfaceFormat   vtk;
+        regionType      patch;
+        // name            inlet;
+        names           (inlet "inlet.*");
+        operation       weightedAverage;
+        weightField     phi;
+        fields
+        (
+            T
+        );
+    }
+
+    avgOutlets
     {
         type            surfaceFieldValue;
         libs            (fieldFunctionObjects);

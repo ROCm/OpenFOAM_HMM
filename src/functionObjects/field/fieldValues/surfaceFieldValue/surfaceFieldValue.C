@@ -32,7 +32,7 @@ License
 #include "coupledPolyPatch.H"
 #include "sampledSurface.H"
 #include "mergePoints.H"
-#include "indirectPrimitivePatch.H"
+#include "uindirectPrimitivePatch.H"
 #include "PatchTools.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -130,115 +130,225 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::obr() const
 
 void Foam::functionObjects::fieldValues::surfaceFieldValue::setFaceZoneFaces()
 {
-    const label zoneId = mesh_.faceZones().findZoneID(regionName_);
+    // Indices for all matches, already sorted
+    const labelList zoneIds
+    (
+        mesh_.faceZones().indices(selectionNames_)
+    );
 
-    if (zoneId < 0)
+    // Total number of faces selected
+    label numFaces = 0;
+    for (const label zoneId : zoneIds)
     {
-        FatalErrorInFunction
-            << type() << " " << name() << ": "
-            << regionTypeNames_[regionType_] << '(' << regionName_ << "):" << nl
-            << "    Unknown face zone name: " << regionName_
-            << ". Valid face zones are: " << mesh_.faceZones().names()
-            << nl << exit(FatalError);
+        numFaces += mesh_.faceZones()[zoneId].size();
     }
 
-    const faceZone& fZone = mesh_.faceZones()[zoneId];
-
-    DynamicList<label> faceIds(fZone.size());
-    DynamicList<label> facePatchIds(fZone.size());
-    DynamicList<bool> faceFlip(fZone.size());
-
-    forAll(fZone, i)
+    if (zoneIds.empty())
     {
-        const label facei = fZone[i];
+        FatalErrorInFunction
+            << type() << ' ' << name() << ": "
+            << regionTypeNames_[regionType_] << '(' << regionName_ << "):" << nl
+            << "    No matching face zone(s): "
+            << flatOutput(selectionNames_)  << nl
+            << "    Known face zones: "
+            << flatOutput(mesh_.faceZones().names()) << nl
+            << exit(FatalError);
+    }
 
-        label faceId = -1;
-        label facePatchId = -1;
-        if (mesh_.isInternalFace(facei))
+    // Could also check this
+    #if 0
+    if (!returnReduce(bool(numFaces), orOp<bool>()))
+    {
+        WarningInFunction
+            << type() << ' ' << name() << ": "
+            << regionTypeNames_[regionType_] << '(' << regionName_ << "):" << nl
+            << "    The faceZone specification: "
+            << flatOutput(selectionNames_) << nl
+            << "    resulted in 0 faces" << nl
+            << exit(FatalError);
+    }
+    #endif
+
+    faceId_.resize(numFaces);
+    facePatchId_.resize(numFaces);
+    faceFlip_.resize(numFaces);
+
+    numFaces = 0;
+
+    for (const label zoneId : zoneIds)
+    {
+        const faceZone& fZone = mesh_.faceZones()[zoneId];
+
+        forAll(fZone, i)
         {
-            faceId = facei;
-            facePatchId = -1;
-        }
-        else
-        {
-            facePatchId = mesh_.boundaryMesh().whichPatch(facei);
-            const polyPatch& pp = mesh_.boundaryMesh()[facePatchId];
-            if (isA<coupledPolyPatch>(pp))
+            const label meshFacei = fZone[i];
+            const bool isFlip = fZone.flipMap()[i];
+
+            // Internal faces
+            label faceId = meshFacei;
+            label facePatchId = -1;
+
+            // Boundary faces
+            if (!mesh_.isInternalFace(meshFacei))
             {
-                if (refCast<const coupledPolyPatch>(pp).owner())
+                facePatchId = mesh_.boundaryMesh().whichPatch(meshFacei);
+                const polyPatch& pp = mesh_.boundaryMesh()[facePatchId];
+
+                if (isA<coupledPolyPatch>(pp))
                 {
-                    faceId = pp.whichFace(facei);
+                    if (refCast<const coupledPolyPatch>(pp).owner())
+                    {
+                        faceId = pp.whichFace(meshFacei);
+                    }
+                    else
+                    {
+                        faceId = -1;
+                    }
+                }
+                else if (!isA<emptyPolyPatch>(pp))
+                {
+                    faceId = meshFacei - pp.start();
                 }
                 else
                 {
                     faceId = -1;
+                    facePatchId = -1;
                 }
             }
-            else if (!isA<emptyPolyPatch>(pp))
-            {
-                faceId = facei - pp.start();
-            }
-            else
-            {
-                faceId = -1;
-                facePatchId = -1;
-            }
-        }
 
-        if (faceId >= 0)
-        {
-            faceIds.append(faceId);
-            facePatchIds.append(facePatchId);
-            faceFlip.append(fZone.flipMap()[i] ? true : false);
+            if (faceId >= 0)
+            {
+                faceId_[numFaces] = faceId;
+                facePatchId_[numFaces] = facePatchId;
+                faceFlip_[numFaces] = isFlip;
+
+                ++numFaces;
+            }
         }
     }
 
-    faceId_.transfer(faceIds);
-    facePatchId_.transfer(facePatchIds);
-    faceFlip_.transfer(faceFlip);
+    // Shrink to size used
+    faceId_.resize(numFaces);
+    facePatchId_.resize(numFaces);
+    faceFlip_.resize(numFaces);
     nFaces_ = returnReduce(faceId_.size(), sumOp<label>());
-
-    if (debug)
-    {
-        Pout<< "Original face zone size = " << fZone.size()
-            << ", new size = " << faceId_.size() << endl;
-    }
 }
 
 
 void Foam::functionObjects::fieldValues::surfaceFieldValue::setPatchFaces()
 {
-    const label patchid = mesh_.boundaryMesh().findPatchID(regionName_);
+    // Patch indices for all matches
+    labelList patchIds;
 
-    if (patchid < 0)
+    // Total number of faces selected
+    label numFaces = 0;
+
+    labelList selected
+    (
+        mesh_.boundaryMesh().patchSet
+        (
+            selectionNames_,
+            false  // warnNotFound - we do that ourselves
+        ).sortedToc()
+    );
+
+    DynamicList<label> bad;
+    for (const label patchi : selected)
+    {
+        const polyPatch& pp = mesh_.boundaryMesh()[patchi];
+
+        if (isA<emptyPolyPatch>(pp))
+        {
+            bad.append(patchi);
+        }
+        else
+        {
+            numFaces += pp.size();
+        }
+    }
+
+    if (bad.size())
+    {
+        label nGood = (selected.size() - bad.size());
+
+        auto& os = (nGood > 0 ? WarningInFunction : FatalErrorInFunction);
+
+        os  << "Cannot sample an empty patch" << nl;
+
+        for (const label patchi : bad)
+        {
+            os  << "    "
+                << mesh_.boundaryMesh()[patchi].name() << nl;
+        }
+
+        if (nGood)
+        {
+            os  << "No non-empty patches selected" << endl
+                << exit(FatalError);
+        }
+        else
+        {
+            os  << "Selected " << nGood << " non-empty patches" << nl;
+        }
+
+        patchIds.resize(nGood);
+        nGood = 0;
+        for (const label patchi : selected)
+        {
+            if (!bad.found(patchi))
+            {
+                patchIds[nGood] = patchi;
+                ++nGood;
+            }
+        }
+    }
+    else
+    {
+        patchIds = std::move(selected);
+    }
+
+    if (patchIds.empty())
     {
         FatalErrorInFunction
-            << type() << " " << name() << ": "
+            << type() << ' ' << name() << ": "
             << regionTypeNames_[regionType_] << '(' << regionName_ << "):" << nl
-            << "    Unknown patch name: " << regionName_
-            << ". Valid patch names are: "
+            << "    No matching patch name(s): "
+            << flatOutput(selectionNames_)  << nl
+            << "    Known patch names:" << nl
             << mesh_.boundaryMesh().names() << nl
             << exit(FatalError);
     }
 
-    const polyPatch& pp = mesh_.boundaryMesh()[patchid];
-
-    label nFaces = pp.size();
-    if (isA<emptyPolyPatch>(pp))
+    // Could also check this
+    #if 0
+    if (!returnReduce(bool(numFaces), orOp<bool>()))
     {
-        nFaces = 0;
+        WarningInFunction
+            << type() << ' ' << name() << ": "
+            << regionTypeNames_[regionType_] << '(' << regionName_ << "):" << nl
+            << "    The patch specification: "
+            << flatOutput(selectionNames_) << nl
+            << "    resulted in 0 faces" << nl
+            << exit(FatalError);
     }
+    #endif
 
-    faceId_.setSize(nFaces);
-    facePatchId_.setSize(nFaces);
-    faceFlip_.setSize(nFaces);
+    faceId_.resize(numFaces);
+    facePatchId_.resize(numFaces);
+    faceFlip_.resize(numFaces);
     nFaces_ = returnReduce(faceId_.size(), sumOp<label>());
 
-    forAll(faceId_, facei)
+    numFaces = 0;
+    for (const label patchi : patchIds)
     {
-        faceId_[facei] = facei;
-        facePatchId_[facei] = patchid;
-        faceFlip_[facei] = false;
+        const polyPatch& pp = mesh_.boundaryMesh()[patchi];
+        const label len = pp.size();
+
+        SubList<label>(faceId_, len, numFaces) = identity(len);
+        SubList<label>(facePatchId_, len, numFaces) = patchi;
+        SubList<bool>(faceFlip_, len, numFaces) = false;
+
+        numFaces += len;
     }
 }
 
@@ -252,24 +362,25 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::combineMeshGeometry
     List<faceList> allFaces(Pstream::nProcs());
     List<pointField> allPoints(Pstream::nProcs());
 
-    labelList globalFacesIs(faceId_);
-    forAll(globalFacesIs, i)
     {
-        if (facePatchId_[i] != -1)
+        IndirectList<face> selectedFaces(mesh_.faces(), labelList(faceId_));
+        labelList& meshFaceIds = selectedFaces.addressing();
+
+        forAll(meshFaceIds, i)
         {
             const label patchi = facePatchId_[i];
-            globalFacesIs[i] += mesh_.boundaryMesh()[patchi].start();
+            if (patchi != -1)
+            {
+                meshFaceIds[i] += mesh_.boundaryMesh()[patchi].start();
+            }
         }
-    }
 
-    // Add local faces and points to the all* lists
-    indirectPrimitivePatch pp
-    (
-        IndirectList<face>(mesh_.faces(), globalFacesIs),
-        mesh_.points()
-    );
-    allFaces[Pstream::myProcNo()] = pp.localFaces();
-    allPoints[Pstream::myProcNo()] = pp.localPoints();
+        // Add local faces and points to the all* lists
+        uindirectPrimitivePatch pp(selectedFaces, mesh_.points());
+
+        allFaces[Pstream::myProcNo()] = pp.localFaces();
+        allPoints[Pstream::myProcNo()] = pp.localPoints();
+    }
 
     Pstream::gatherList(allFaces);
     Pstream::gatherList(allPoints);
@@ -283,53 +394,41 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::combineMeshGeometry
         nPoints += allPoints[proci].size();
     }
 
-    faces.setSize(nFaces);
-    points.setSize(nPoints);
+    faces.resize(nFaces);
+    points.resize(nPoints);
 
     nFaces = 0;
     nPoints = 0;
 
-    // My own data first
+    // My data first
     {
-        const faceList& fcs = allFaces[Pstream::myProcNo()];
-        for (const face& f : fcs)
+        for (const face& f : allFaces[Pstream::myProcNo()])
         {
-            face& newF = faces[nFaces++];
-            newF.setSize(f.size());
-            forAll(f, fp)
-            {
-                newF[fp] = f[fp] + nPoints;
-            }
+            faces[nFaces++] = offsetOp<face>()(f, nPoints);
         }
 
-        const pointField& pts = allPoints[Pstream::myProcNo()];
-        for (const point& pt : pts)
+        for (const point& p : allPoints[Pstream::myProcNo()])
         {
-            points[nPoints++] = pt;
+            points[nPoints++] = p;
         }
     }
 
     // Other proc data follows
     forAll(allFaces, proci)
     {
-        if (proci != Pstream::myProcNo())
+        if (proci == Pstream::myProcNo())
         {
-            const faceList& fcs = allFaces[proci];
-            for (const face& f : fcs)
-            {
-                face& newF = faces[nFaces++];
-                newF.setSize(f.size());
-                forAll(f, fp)
-                {
-                    newF[fp] = f[fp] + nPoints;
-                }
-            }
+            continue;
+        }
 
-            const pointField& pts = allPoints[proci];
-            for (const point& pt : pts)
-            {
-                points[nPoints++] = pt;
-            }
+        for (const face& f : allFaces[proci])
+        {
+            faces[nFaces++] = offsetOp<face>()(f, nPoints);
+        }
+
+        for (const point& p : allPoints[proci])
+        {
+            points[nPoints++] = p;
         }
     }
 
@@ -383,11 +482,7 @@ combineSurfaceGeometry
             PatchTools::gatherAndMerge
             (
                 mergeDim,
-                primitivePatch
-                (
-                    SubList<face>(s.faces(), s.faces().size()),
-                    s.points()
-                ),
+                primitivePatch(SubList<face>(s.faces()), s.points()),
                 points,
                 faces,
                 pointsMap
@@ -413,11 +508,7 @@ combineSurfaceGeometry
             PatchTools::gatherAndMerge
             (
                 mergeDim,
-                primitivePatch
-                (
-                    SubList<face>(s.faces(), s.faces().size()),
-                    s.points()
-                ),
+                primitivePatch(SubList<face>(s.faces()), s.points()),
                 points,
                 faces,
                 pointsMap
@@ -522,7 +613,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::update()
     if (nFaces_ == 0)
     {
         FatalErrorInFunction
-            << type() << " " << name() << ": "
+            << type() << ' ' << name() << ": "
             << regionTypeNames_[regionType_] << '(' << regionName_ << "):" << nl
             << "    Region has no faces" << exit(FatalError);
     }
@@ -548,7 +639,7 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::writeFileHeader
     if (canWriteHeader() && (operation_ != opNone))
     {
         writeCommented(os, "Region type : ");
-        os << regionTypeNames_[regionType_] << " " << regionName_ << endl;
+        os << regionTypeNames_[regionType_] << ' ' << regionName_ << nl;
 
         writeHeaderValue(os, "Faces", nFaces_);
         writeHeaderValue(os, "Area", totalArea_);
@@ -570,7 +661,7 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::writeFileHeader
         for (const word& fieldName : fields_)
         {
             os  << tab << operationTypeNames_[operation_]
-                << "(" << fieldName << ")";
+                << '(' << fieldName << ')';
         }
 
         os  << endl;
@@ -821,9 +912,10 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::surfaceFieldValue
             true  // Failsafe behaviour
         )
     ),
-    weightFieldName_("none"),
     needsUpdate_(true),
     writeArea_(false),
+    selectionNames_(),
+    weightFieldName_("none"),
     totalArea_(0),
     nFaces_(0),
     faceId_(),
@@ -854,9 +946,10 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::surfaceFieldValue
             true  // Failsafe behaviour
         )
     ),
-    weightFieldName_("none"),
     needsUpdate_(true),
     writeArea_(false),
+    selectionNames_(),
+    weightFieldName_("none"),
     totalArea_(0),
     nFaces_(0),
     faceId_(),
@@ -876,18 +969,54 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
 {
     fieldValue::read(dict);
 
-    weightFieldName_ = "none";
     needsUpdate_ = true;
     writeArea_ = dict.getOrDefault("writeArea", false);
+    weightFieldName_ = "none";
     totalArea_ = 0;
     nFaces_ = 0;
     faceId_.clear();
     facePatchId_.clear();
     faceFlip_.clear();
-    sampledPtr_.clear();
-    surfaceWriterPtr_.clear();
+    sampledPtr_.reset(nullptr);
+    surfaceWriterPtr_.reset(nullptr);
 
-    dict.readEntry("name", regionName_);
+    // Can have "name" (word) and/or "names" (wordRes)
+    //
+    // If "names" exists AND contains a literal (non-regex) that can be used
+    // as a suitable value for "name", the "name" entry becomes optional.
+
+    regionName_.clear();
+    selectionNames_.clear();
+
+    {
+        dict.readIfPresent("names", selectionNames_);
+
+        for (const auto& item : selectionNames_)
+        {
+            if (item.isLiteral())
+            {
+                regionName_ = item;
+                break;
+            }
+        }
+
+        // Mandatory if we didn't pick up a value from selectionNames_
+        dict.readEntry
+        (
+            "name",
+            regionName_,
+            keyType::LITERAL,
+            regionName_.empty()
+        );
+
+        // Ensure there is always content for selectionNames_
+        if (selectionNames_.empty())
+        {
+            selectionNames_.resize(1);
+            selectionNames_.first() = regionName_;
+        }
+    }
+
 
     // Create sampled surface, but leave 'expired' (ie, no update) since it
     // may depend on fields or data that do not yet exist
@@ -901,7 +1030,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
         );
     }
 
-    Info<< type() << " " << name() << ":" << nl
+    Info<< type() << ' ' << name() << ':' << nl
         << "    operation     = ";
 
     if (postOperation_ != postOpNone)

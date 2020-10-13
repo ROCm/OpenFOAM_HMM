@@ -31,17 +31,17 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Provides a 'face regionType' variant of the \c fieldValues function object.
+    A \c face regionType variant of the \c fieldValues function object.
 
     Given a list of user-specified fields and a selection of mesh (or general
     surface) faces, a number of operations can be performed, such as sums,
     averages and integrations.
 
     For example, to calculate the volumetric or mass flux across a patch,
-    apply the 'sum' operator to the flux field (typically \c phi).
+    apply the \c sum operator to the flux field (typically \c phi).
 
 Usage
-    Minimal example by using \c system/controlDict.functions:
+    A minimal example:
     \verbatim
     surfaceFieldValuePatch1
     {
@@ -56,6 +56,8 @@ Usage
         name            <patch>;
 
         // Optional entries (runtime modifiable)
+        names           (<patch-name> <patch-regex>);
+
         postOperation   none;
         weightField     alpha1;
         scaleFactor     1.0;
@@ -79,6 +81,8 @@ Usage
         name            <faceZone>;
 
         // Optional entries (runtime modifiable)
+        names           (<zone-name> <zone-regex>);
+
         postOperation   none;
         weightField     alpha1;
         scaleFactor     1.0;
@@ -92,12 +96,13 @@ Usage
 
     where the entries mean:
     \table
-      Property     | Description                        | Type | Req'd | Dflt
+      Property     | Description                        | Type | Reqd | Dflt
       type         | Type name: surfaceFieldValue       | word |  yes  | -
-      libs         | Library name: fieldFunctionObjects | word |  yes  | -
-      fields       | Names of operand fields            | wordList | yes | -
+      libs         | Libraries: fieldFunctionObjects    | wordList |  yes  | -
       regionType   | Face regionType: see below         | word |  yes  | -
-      name         | Name for regionType                | word |  yes  | -
+      fields       | Names of operand fields            | wordList | yes | -
+      name         | Name of the regionType             | word |  yes  | -
+      names        | Extended selection                 | word/regex list | no | -
       operation    | Operation type: see below          | word |  yes  | -
       postOperation | Post-operation type: see below    | word |  no   | none
       weightField  | Name of field to apply weighting   | word |  no   | none
@@ -112,9 +117,9 @@ Usage
 
     Options for the \c regionType entry:
     \plaintable
-      faceZone              | The \b name entry to specify the faceZone
-      patch                 | The \b name entry to specify the patch
-      functionObjectSurface | The \b name entry to specify a polySurface
+      faceZone      | The \b name entry specifies a faceZone. Supports \b names
+      patch         | The \b name entry specifies a patch. Supports \b names
+      functionObjectSurface | The \b name entry specifies a polySurface
       sampledSurface        | A \b sampledSurfaceDict sub-dictionary and \b name
     \endplaintable
 
@@ -156,12 +161,16 @@ Usage
     Usage by the \c postProcess utility is not available.
 
 Note
+    - Some types (eg, patch or faceZone) support the selection of multiple
+      entries, which can be specified as list of words or regular expressions
+      by \b names entry.<br>
+      If the \b names enty exists \em and contains a literal that can be used
+      as a suitable value for \b name, the \b name entry becomes optional
+      instead of being mandatory.
     - The values reported by the \c areaNormalAverage and \c areaNormalIntegrate
       operations are written as the first component of a field with the same
       rank as the input field.
-    - Faces on empty patches get ignored.
-    - If the field is a volField the \c faceZone
-      can only consist of boundary faces.
+    - Faces on empty patches are ignored.
     - Using \c functionObjectSurface:
       - The keyword %subRegion should not be used to select surfaces.
         Instead specify the regionType 'functionObjectSurface' and provide
@@ -242,8 +251,8 @@ public:
         //- Region type enumeration
         enum regionTypes
         {
-            stFaceZone = 0x01,   //!< Calculate on a faceZone
-            stPatch    = 0x02,   //!< Calculate on a patch
+            stFaceZone = 0x01,   //!< Calculate with faceZone(s)
+            stPatch    = 0x02,   //!< Calculate with patch(es)
             stObject   = 0x11,   //!< Calculate with function object surface
             stSampled  = 0x12    //!< Sample onto surface and calculate
         };
@@ -385,14 +394,17 @@ protected:
         //- Optional post-evaluation operation
         postOperationType postOperation_;
 
-        //- Weight field name - optional
-        word weightFieldName_;
-
         //- Track if the surface needs an update
         bool needsUpdate_;
 
         //- Optionally write the area of the surfaceFieldValue
         bool writeArea_;
+
+        //- Extended selections
+        wordRes selectionNames_;
+
+        //- Weight field name - optional
+        word weightFieldName_;
 
         //- Total area of the surfaceFieldValue
         scalar totalArea_;
@@ -401,17 +413,20 @@ protected:
         label nFaces_;
 
 
-        // If operating on mesh faces (faceZone, patch)
+    // If operating on mesh faces (faceZone, patch)
 
-            //- Local list of face IDs
-            labelList faceId_;
+        //- Local list of face IDs
+        labelList faceId_;
 
-            //- Local list of patch ID per face
-            labelList facePatchId_;
+        //- Local list of patch ID per face
+        labelList facePatchId_;
 
-            //- List representing the face flip map
-            //  (false: use as-is, true: negate)
-            boolList faceFlip_;
+        //- List representing the face flip map
+        //  (false: use as-is, true: negate)
+        boolList faceFlip_;
+
+
+    // Demand-driven
 
         //- The sampledSurface (when operating on sampledSurface)
         autoPtr<sampledSurface> sampledPtr_;
