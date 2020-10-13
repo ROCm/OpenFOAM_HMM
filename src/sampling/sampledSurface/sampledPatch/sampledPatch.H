@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,8 +62,7 @@ SourceFiles
 #define sampledPatch_H
 
 #include "sampledSurface.H"
-#include "MeshedSurface.H"
-#include "wordRes.H"
+#include "MeshedSurfaces.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -76,19 +75,19 @@ namespace Foam
 
 class sampledPatch
 :
-    public MeshedSurface<face>,
+    public meshedSurface,
     public sampledSurface
 {
-    //- Private typedefs for convenience
-    typedef MeshedSurface<face> MeshStorage;
+    //- Mesh storage type
+    typedef meshedSurface Mesh;
 
 
-    // Private data
+    // Private Data
 
-        //- Name of patches
-        const wordRes patchNames_;
+        //- Selection (word/regex) of patches
+        const wordRes selectionNames_;
 
-        //- Corresponding patchIDs
+        //- The IDs for selected patches. Sorted and no emptyPolyPatch
         mutable labelList patchIDs_;
 
         //- Triangulated faces or keep faces as is
@@ -97,14 +96,14 @@ class sampledPatch
         //- Track if the surface needs an update
         mutable bool needsUpdate_;
 
+        //- Start indices (in patchFaceLabels_) of patches
+        labelList patchStart_;
+
         //- For every face (or triangle) the originating patch
         labelList patchIndex_;
 
         //- For every face (or triangle) the index in the originating patch
         labelList patchFaceLabels_;
-
-        //- Start indices (in patchFaceLabels_) of patches
-        labelList patchStart_;
 
 
     // Private Member Functions
@@ -137,23 +136,28 @@ class sampledPatch
 
 protected:
 
+        //- The selection (word/regex) of patches
         const wordRes& patchNames() const
         {
-            return patchNames_;
+            return selectionNames_;
         }
 
+        //- The patches selected
         const labelList& patchIDs() const;
 
+        //- The offset into patchIndex, patchFaceLabels
         const labelList& patchStart() const
         {
             return patchStart_;
         }
 
+        //- For each face, the patch ID
         const labelList& patchIndex() const
         {
             return patchIndex_;
         }
 
+        //- For each face, the patch local face ID
         const labelList& patchFaceLabels() const
         {
             return patchFaceLabels_;
@@ -208,13 +212,13 @@ public:
         //- Points of surface
         virtual const pointField& points() const
         {
-            return MeshStorage::points();
+            return Mesh::points();
         }
 
         //- Faces of surface
         virtual const faceList& faces() const
         {
-            return MeshStorage::surfFaces();
+            return Mesh::surfFaces();
         }
 
         //- Per-face zone/region information
@@ -226,19 +230,19 @@ public:
         //- Face area vectors
         virtual const vectorField& Sf() const
         {
-            return MeshStorage::Sf();
+            return Mesh::Sf();
         }
 
         //- Face area magnitudes
         virtual const scalarField& magSf() const
         {
-            return MeshStorage::magSf();
+            return Mesh::magSf();
         }
 
         //- Face centres
         virtual const vectorField& Cf() const
         {
-            return MeshStorage::Cf();
+            return Mesh::Cf();
         }
 
 

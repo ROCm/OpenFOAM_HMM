@@ -32,6 +32,7 @@ License
 #include "polyPatch.H"
 #include "volFields.H"
 #include "surfaceFields.H"
+#include "uindirectPrimitivePatch.H"
 
 #include "addToRunTimeSelectionTable.H"
 
@@ -55,7 +56,7 @@ Foam::sampledPatch::sampledPatch
 )
 :
     sampledSurface(name, mesh),
-    patchNames_(patchNames),
+    selectionNames_(patchNames),
     triangulate_(triangulate),
     needsUpdate_(true)
 {}
@@ -69,7 +70,7 @@ Foam::sampledPatch::sampledPatch
 )
 :
     sampledSurface(name, mesh, dict),
-    patchNames_(dict.get<wordRes>("patches")),
+    selectionNames_(dict.get<wordRes>("patches")),
     triangulate_(dict.getOrDefault("triangulate", false)),
     needsUpdate_(true)
 {}
@@ -81,8 +82,63 @@ const Foam::labelList& Foam::sampledPatch::patchIDs() const
 {
     if (patchIDs_.empty())
     {
-        patchIDs_ = mesh().boundaryMesh().patchSet(patchNames_).sortedToc();
+        labelList selected
+        (
+            mesh().boundaryMesh().patchSet(selectionNames_).sortedToc()
+        );
+
+        DynamicList<label> bad;
+        for (const label patchi : selected)
+        {
+            const polyPatch& pp = mesh().boundaryMesh()[patchi];
+
+            if (isA<emptyPolyPatch>(pp))
+            {
+                bad.append(patchi);
+            }
+        }
+
+        if (bad.size())
+        {
+            label nGood = (selected.size() - bad.size());
+
+            auto& os = nGood > 0 ? WarningInFunction : FatalErrorInFunction;
+
+            os  << "Cannot sample an empty patch" << nl;
+
+            for (const label patchi : bad)
+            {
+                os  << "    "
+                    << mesh().boundaryMesh()[patchi].name() << nl;
+            }
+
+            if (nGood)
+            {
+                os  << "No non-empty patches selected" << endl
+                    << exit(FatalError);
+            }
+            else
+            {
+                os  << "Selected " << nGood << " non-empty patches" << nl;
+            }
+
+            patchIDs_.resize(nGood);
+            nGood = 0;
+            for (const label patchi : selected)
+            {
+                if (!bad.found(patchi))
+                {
+                    patchIDs_[nGood] = patchi;
+                    ++nGood;
+                }
+            }
+        }
+        else
+        {
+            patchIDs_ = std::move(selected);
+        }
     }
+
     return patchIDs_;
 }
 
@@ -102,11 +158,13 @@ bool Foam::sampledPatch::expire()
     }
 
     sampledSurface::clearGeom();
-    MeshStorage::clear();
+    Mesh::clear();
+
     patchIDs_.clear();
+    patchStart_.clear();
+
     patchIndex_.clear();
     patchFaceLabels_.clear();
-    patchStart_.clear();
 
     needsUpdate_ = true;
     return true;
@@ -120,52 +178,45 @@ bool Foam::sampledPatch::update()
         return false;
     }
 
-    label sz = 0;
+    // Total number of faces selected
+    label numFaces = 0;
     for (const label patchi : patchIDs())
     {
         const polyPatch& pp = mesh().boundaryMesh()[patchi];
-
-        if (isA<emptyPolyPatch>(pp))
-        {
-            FatalErrorInFunction
-                << "Cannot sample an empty patch. Patch " << pp.name()
-                << exit(FatalError);
-        }
-
-        sz += pp.size();
+        numFaces += pp.size();
     }
 
-    // For every face (or triangle) the originating patch and local face in the
-    // patch.
-    patchIndex_.setSize(sz);
-    patchFaceLabels_.setSize(sz);
-    patchStart_.setSize(patchIDs().size());
-    labelList meshFaceLabels(sz);
+    patchStart_.resize(patchIDs().size());
 
-    sz = 0;
+    // The originating patch and local face in the patch.
+    patchIndex_.resize(numFaces);
+    patchFaceLabels_.resize(numFaces);
 
-    forAll(patchIDs(), i)
+    IndirectList<face> selectedFaces(mesh().faces(), labelList());
+    labelList& meshFaceIds = selectedFaces.addressing();
+    meshFaceIds.resize(numFaces);
+
+    numFaces = 0;
+
+    forAll(patchIDs(), idx)
     {
-        const label patchi = patchIDs()[i];
-
-        patchStart_[i] = sz;
-
+        const label patchi = patchIDs()[idx];
         const polyPatch& pp = mesh().boundaryMesh()[patchi];
+        const label len = pp.size();
 
-        forAll(pp, j)
-        {
-            patchIndex_[sz] = i;
-            patchFaceLabels_[sz] = j;
-            meshFaceLabels[sz] = pp.start()+j;
-            ++sz;
-        }
+        patchStart_[idx] = numFaces;
+
+        SubList<label>(patchIndex_, len, numFaces) = idx;
+
+        SubList<label>(patchFaceLabels_, len, numFaces) = identity(len);
+
+        SubList<label>(meshFaceIds, len, numFaces) = identity(len, pp.start());
+
+        numFaces += len;
     }
 
-    indirectPrimitivePatch allPatches
-    (
-        IndirectList<face>(mesh().faces(), meshFaceLabels),
-        mesh().points()
-    );
+
+    uindirectPrimitivePatch allPatches(selectedFaces, mesh().points());
 
     this->storedPoints() = allPatches.localPoints();
     this->storedFaces()  = allPatches.localFaces();
@@ -177,7 +228,7 @@ bool Foam::sampledPatch::update()
     // too often anyhow.
     if (triangulate_)
     {
-        MeshStorage::triangulate();
+        Mesh::triangulate();
     }
 
     if (debug)
@@ -194,10 +245,9 @@ bool Foam::sampledPatch::update()
 // remap action on triangulation
 void Foam::sampledPatch::remapFaces(const labelUList& faceMap)
 {
-    // Recalculate the cells cut
     if (!faceMap.empty())
     {
-        MeshStorage::remapFaces(faceMap);
+        Mesh::remapFaces(faceMap);
         patchFaceLabels_ = labelList
         (
             labelUIndList(patchFaceLabels_, faceMap)
@@ -207,11 +257,11 @@ void Foam::sampledPatch::remapFaces(const labelUList& faceMap)
             labelUIndList(patchIndex_, faceMap)
         );
 
-        // Redo patchStart.
-        if (patchIndex_.size() > 0)
+        // Update patchStart
+        if (patchIndex_.size())
         {
             patchStart_[patchIndex_[0]] = 0;
-            for (label i = 1; i < patchIndex_.size(); i++)
+            for (label i = 1; i < patchIndex_.size(); ++i)
             {
                 if (patchIndex_[i] != patchIndex_[i-1])
                 {
@@ -367,7 +417,7 @@ Foam::tmp<Foam::tensorField> Foam::sampledPatch::interpolate
 void Foam::sampledPatch::print(Ostream& os) const
 {
     os  << "sampledPatch: " << name() << " :"
-        << "  patches:" << patchNames()
+        << "  patches: " << flatOutput(selectionNames_)
         << "  faces:" << faces().size()
         << "  points:" << points().size();
 }

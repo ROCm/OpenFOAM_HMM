@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -93,20 +93,21 @@ Foam::sampledPatch::sampleOnPoints
 
     bitSet pointDone(points().size());
 
-    forAll(faces(), cutFacei)
+    forAll(faces(), i)
     {
-        const label patchi = patchIDs_[patchIndex_[cutFacei]];
+        const face& f = faces()[i];
+        const label patchi = patchIDs_[patchIndex_[i]];
+        const label patchFacei = patchFaceLabels_[i];
+
         const polyPatch& pp = mesh().boundaryMesh()[patchi];
-        const label patchFacei = patchFaceLabels()[cutFacei];
-        const face& f = faces()[cutFacei];
+
+        const label facei = patchFacei + pp.start();
+        const label celli = own[facei];
 
         for (const label pointi : f)
         {
             if (pointDone.set(pointi))
             {
-                const label facei = patchFacei + pp.start();
-                const label celli = own[facei];
-
                 values[pointi] = interpolator.interpolate
                 (
                     points()[pointi],
