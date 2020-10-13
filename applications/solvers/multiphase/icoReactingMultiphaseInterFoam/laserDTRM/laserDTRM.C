@@ -593,8 +593,6 @@ void Foam::radiation::laserDTRM::calculate()
 
     labelField reflectingCells(mesh_.nCells(), -1);
 
-    autoPtr<interpolationCellPoint<vector>> nHatIntrPtr;
-
     UPtrList<reflectionModel> reflectionUPtr;
 
     if (reflectionSwitch_)
@@ -653,10 +651,7 @@ void Foam::radiation::laserDTRM::calculate()
         }
     }
 
-    nHatIntrPtr.reset
-    (
-        new interpolationCellPoint<vector>(nHat)
-    );
+    interpolationCellPoint<vector> nHatInterp(nHat);
 
     DTRMParticle::trackingData td
     (
@@ -665,7 +660,7 @@ void Foam::radiation::laserDTRM::calculate()
         eInterp,
         EInterp,
         TInterp,
-        nHatIntrPtr,
+        nHatInterp,
         reflectingCells,
         reflectionUPtr,
         Q_

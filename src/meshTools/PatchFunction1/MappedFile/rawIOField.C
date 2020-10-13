@@ -107,8 +107,9 @@ Foam::rawIOField<Type>::rawIOField(const IOobject& io, const bool readAverage)
             {
                 if (io.readOpt() != IOobject::READ_IF_PRESENT)
                 {
-                    FatalIOErrorInFunction(isPtr)
-                        << "Trying to read raw field" << exit(FatalIOError);
+                    FatalIOErrorInFunction(*isPtr)
+                        << "Trying to read raw field" << endl
+                        << exit(FatalIOError);
                 }
             }
             else

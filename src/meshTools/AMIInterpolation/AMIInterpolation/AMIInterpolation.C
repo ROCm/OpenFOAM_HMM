@@ -288,7 +288,7 @@ void Foam::AMIInterpolation::agglomerate
     // Agglomerate weights and indices
     if (targetMapPtr)
     {
-        const mapDistribute& map = targetMapPtr();
+        const mapDistribute& map = *targetMapPtr;
 
         // Get all restriction addressing.
         labelList allRestrict(targetRestrictAddressing);
@@ -828,8 +828,8 @@ void Foam::AMIInterpolation::reset
         tgtWeightsSum_[facei] = sum(tgtWeights_[facei]);
     }
 
-    srcMapPtr_ = srcToTgtMap;
-    tgtMapPtr_ = tgtToSrcMap;
+    srcMapPtr_ = std::move(srcToTgtMap);
+    tgtMapPtr_ = std::move(tgtToSrcMap);
 
     upToDate_ = true;
 }

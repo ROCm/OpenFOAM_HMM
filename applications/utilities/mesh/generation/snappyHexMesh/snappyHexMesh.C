@@ -1754,7 +1754,7 @@ int main(int argc, char *argv[])
             distributor,
             globalToMasterPatch,
             globalToSlavePatch,
-            setFormatter,
+            setFormatter(),
             dryRun
         );
 
