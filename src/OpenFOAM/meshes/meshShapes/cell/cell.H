@@ -89,13 +89,13 @@ public:
         inline cell(const labelUList& list, const FixedList<label, N>& indices);
 
         //- Construct from Istream
-        inline cell(Istream& is);
+        inline explicit cell(Istream& is);
 
 
     // Member Functions
 
         //- Return number of faces
-        inline label nFaces() const;
+        inline label nFaces() const noexcept;
 
         //- Return unordered list of cell vertices given the list of faces
         labelList labels(const faceUList& meshFaces) const;

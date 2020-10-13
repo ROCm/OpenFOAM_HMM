@@ -28,43 +28,43 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::word& Foam::cellModel::name() const
+inline const Foam::word& Foam::cellModel::name() const noexcept
 {
     return name_;
 }
 
 
-inline Foam::label Foam::cellModel::index() const
+inline Foam::label Foam::cellModel::index() const noexcept
 {
     return index_;
 }
 
 
-inline Foam::label Foam::cellModel::nPoints() const
+inline Foam::label Foam::cellModel::nPoints() const noexcept
 {
     return nPoints_;
 }
 
 
-inline Foam::label Foam::cellModel::nEdges() const
+inline Foam::label Foam::cellModel::nEdges() const noexcept
 {
     return edges_.size();
 }
 
 
-inline Foam::label Foam::cellModel::nFaces() const
+inline Foam::label Foam::cellModel::nFaces() const noexcept
 {
     return faces_.size();
 }
 
 
-inline const Foam::edgeList& Foam::cellModel::modelEdges() const
+inline const Foam::edgeList& Foam::cellModel::modelEdges() const noexcept
 {
     return edges_;
 }
 
 
-inline const Foam::faceList& Foam::cellModel::modelFaces() const
+inline const Foam::faceList& Foam::cellModel::modelFaces() const noexcept
 {
     return faces_;
 }
@@ -80,15 +80,21 @@ inline Foam::edgeList Foam::cellModel::edges
     forAll(edges_, edgei)
     {
         // From model labels to global labels
-        theEdges[edgei] =
-            edge
-            (
-                pointLabels[edges_[edgei].first()],
-                pointLabels[edges_[edgei].second()]
-            );
+        theEdges[edgei] = Foam::edge(pointLabels, edges_[edgei]);
     }
 
     return theEdges;
+}
+
+
+inline Foam::edge Foam::cellModel::edge
+(
+    const label modelEdgei,
+    const labelUList& pointLabels
+) const
+{
+    // From model labels to global labels
+    return Foam::edge(pointLabels, edges_[modelEdgei]);
 }
 
 
@@ -122,13 +128,21 @@ inline Foam::face Foam::cellModel::face
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
-inline bool Foam::operator==(const cellModel& lhs, const cellModel& rhs)
+inline bool Foam::operator==
+(
+    const cellModel& lhs,
+    const cellModel& rhs
+) noexcept
 {
     return (&lhs == &rhs);
 }
 
 
-inline bool Foam::operator!=(const cellModel& lhs, const cellModel& rhs)
+inline bool Foam::operator!=
+(
+    const cellModel& lhs,
+    const cellModel& rhs
+) noexcept
 {
     return (&lhs != &rhs);
 }

@@ -78,7 +78,7 @@ inline Foam::cell::cell(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::label Foam::cell::nFaces() const
+inline Foam::label Foam::cell::nFaces() const noexcept
 {
     return size();
 }

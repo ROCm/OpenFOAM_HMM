@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,6 +92,15 @@ public:
             const bool doCollapse = false
         );
 
+        //- Copy construct from components
+        template<unsigned N>
+        inline cellShape
+        (
+            const cellModel& model,
+            const FixedList<label, N>& labels,
+            const bool doCollapse = false
+        );
+
         //- Move construct from components
         inline cellShape
         (
@@ -99,7 +109,7 @@ public:
             const bool doCollapse = false
         );
 
-        //- Copy construct from components
+        //- Copy construct from components, using lookup cellModel by name
         inline cellShape
         (
             const word& modelName,
@@ -108,7 +118,7 @@ public:
         );
 
         //- Construct from Istream
-        inline cellShape(Istream& is);
+        inline explicit cellShape(Istream& is);
 
         //- Clone
         inline autoPtr<cellShape> clone() const;

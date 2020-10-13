@@ -173,31 +173,38 @@ public:
     // Member Functions
 
         //- Return model name
-        inline const word& name() const;
+        inline const word& name() const noexcept;
 
         //- Return index of model in the model list
-        inline label index() const;
+        inline label index() const noexcept;
 
         //- Return number of points
-        inline label nPoints() const;
+        inline label nPoints() const noexcept;
 
         //- Return number of edges
-        inline label nEdges() const;
+        inline label nEdges() const noexcept;
 
         //- Return number of faces
-        inline label nFaces() const;
+        inline label nFaces() const noexcept;
 
         //- Return a raw list of model edges
-        inline const edgeList& modelEdges() const;
+        inline const edgeList& modelEdges() const noexcept;
 
         //- Return a raw list of model faces
-        inline const faceList& modelFaces() const;
+        inline const faceList& modelFaces() const noexcept;
 
         //- Return list of cell edges
         inline edgeList edges(const labelUList& pointLabels) const;
 
         //- Return list of cell faces
         inline faceList faces(const labelUList& pointLabels) const;
+
+        //- Return the cell edge for specified model edge
+        inline Foam::edge edge
+        (
+            const label modelEdgei,
+            const labelUList& pointLabels
+        ) const;
 
         //- Return the cell face for specified model face
         inline Foam::face face
@@ -251,10 +258,10 @@ Ostream& operator<<(Ostream& os, const InfoProxy<cellModel>& ip);
 // Global Operators
 
 //- Equality: true when model pointers are identical
-inline bool operator==(const cellModel& lhs, const cellModel& rhs);
+inline bool operator==(const cellModel& lhs, const cellModel& rhs) noexcept;
 
 //- Inequality: true when model pointers are not identical
-inline bool operator!=(const cellModel& lhs, const cellModel& rhs);
+inline bool operator!=(const cellModel& lhs, const cellModel& rhs) noexcept;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

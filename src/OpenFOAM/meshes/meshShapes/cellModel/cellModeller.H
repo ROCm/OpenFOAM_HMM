@@ -10,13 +10,16 @@
 License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 
-Namespace
+Class
     Foam::cellModeller
 
 Description
     Compatibility definitions of static cellModel lookups.
 
     Superseded (NOV-2017) by cellModel methods.
+
+See Also
+    Foam::cellModel
 
 \*---------------------------------------------------------------------------*/
 
@@ -29,9 +32,9 @@ Description
 
 namespace Foam
 {
-namespace cellModeller
-{
 
+struct cellModeller
+{
     //- Deprecated(2017-11) equivalent to cellModel::ptr static method.
     //  \deprecated(2017-11) use cellModel::ptr instead
     FOAM_DEPRECATED_FOR(2017-11, "cellModel::ptr() static method")
@@ -47,8 +50,8 @@ namespace cellModeller
     {
         return cellModel::ptr(modelIndex);
     }
+};
 
-} // End namespace cellModeller
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
