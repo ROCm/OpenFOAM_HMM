@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,11 +53,14 @@ inline scalar readNasScalar(const std::string& str)
 // As a function
 inline Switch readSwitch(const std::string& str)
 {
-    Switch sw(str);
+    Switch sw(Switch::find(str));
 
-    if (sw.type() == Switch::ON)
+    // Trap bad input and raise as exit error, not abort
+    if (sw.bad())
     {
-        Info<< "Was 'on'" << nl;
+        FatalErrorInFunction
+            << "Unknown switch " << str << nl
+            << exit(FatalError);
     }
 
     return sw;
@@ -180,6 +183,8 @@ int main(int argc, char *argv[])
                 { true,  "false" },
                 { true,  "on" },
                 { false, "None" },
+                { true,  "yes" },
+                { true,  "none" },
                 { false, "default" },
             }
         );
@@ -189,17 +194,23 @@ int main(int argc, char *argv[])
         dictionary dict;
         dict.add("key1" , "true");
         dict.add("key2" , "off");
+        dict.add("key3" , "any");
 
-        for (const word& k : { "key", "key1", "key2" })
+        for (const word& k : { "key", "key1", "key2" , "key3" })
         {
             Switch sw1(k, dict, Switch::YES);
             Switch sw2(k, dict, Switch::NO);
 
-            bool sw3(Switch(k, dict, Switch::YES));
-
+            Info<< nl;
             printInfo(sw1);
             printInfo(sw2);
-            Info<<"bool " << sw3 << nl;
+            Info<< "bool " << bool(sw1) << nl;
+
+            sw1.negate();
+            sw2.negate();
+            Info<< "negated" << nl;
+            printInfo(sw1);
+            printInfo(sw2);
         }
     }
 

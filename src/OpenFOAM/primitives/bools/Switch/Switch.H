@@ -91,7 +91,7 @@ public:
             NO      = 2 /*!< "no" */,    YES  = 3 /*!< "yes" */,
             OFF     = 4 /*!< "off" */,   ON   = 5 /*!< "on" */,
             NONE    = 6 /*!< "none" */,  ANY  = 7 /*!< "any" */,
-            INVALID = 8 /*!< "invalid" */,
+            INVALID = 8 /*!< "invalid" (output only) */,
         };
 
 
@@ -226,6 +226,10 @@ public:
 
         //- The underlying enumeration value
         switchType type() const noexcept;
+
+        //- Flip the type, so OFF becomes ON, etc.
+        //  Ignored if the Switch is INVALID
+        void negate() noexcept;
 
         //- A C-string representation of the Switch value
         const char* c_str() const noexcept;

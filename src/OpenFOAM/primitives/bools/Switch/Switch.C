@@ -309,6 +309,16 @@ Foam::Switch::switchType Foam::Switch::type() const noexcept
 }
 
 
+void Foam::Switch::negate() noexcept
+{
+    if (value_ < switchType::INVALID)
+    {
+        // Toggle final bit. So NO <-> YES, OFF <-> ON ...
+        value_ ^= 0x1;
+    }
+}
+
+
 const char* Foam::Switch::c_str() const noexcept
 {
     return names[(value_ & 0x0F)];
