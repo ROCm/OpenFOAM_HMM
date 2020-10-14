@@ -62,7 +62,6 @@ class powerLaw
 
         dictionary powerLawCoeffs_;
 
-        dimensionedScalar k_;
         dimensionedScalar n_;
         dimensionedScalar nuMin_;
         dimensionedScalar nuMax_;
