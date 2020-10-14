@@ -50,7 +50,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class dictionary;
 template<class EnumType> class Enum;
 
@@ -85,8 +85,8 @@ public:
 
     // Constructors
 
-        //- Construct null (empty list)
-        Enum() = default;
+        //- Default construct, an empty list
+        Enum() noexcept = default;
 
         //- Construct from a values/names list.
         //  Duplicate values are permitted (eg, for aliases).
@@ -205,7 +205,7 @@ public:
         //  Default search: non-recursive with patterns.
         //
         //  \return true if the entry was found.
-        bool readIfPresent
+        inline bool readIfPresent
         (
             const word& key,        //!< Lookup key. Uses LITERAL (not REGEX)
             const dictionary& dict, //!< dictionary
@@ -231,9 +231,10 @@ public:
         //  A noop if the enumeration wasn't found.
         inline void write(const EnumType e, Ostream& os) const;
 
-        //- Write the names as a list to an Ostream.
-        //  Default is without line-breaks.
-        inline Ostream& writeList(Ostream& os, const label shortLen=0) const;
+        //- Write enumeration names as a list without line-breaks
+        //- to an output stream.
+        template<class OS>
+        inline OS& writeList(OS& os, const label ununsed=0) const;
 
 
     // Member Operators

@@ -138,7 +138,7 @@ template<class EnumType>
 bool Foam::Enum<EnumType>::read
 (
     Istream& is,
-    EnumType& e,
+    EnumType& val,
     const bool mandatory
 ) const
 {
@@ -148,7 +148,7 @@ bool Foam::Enum<EnumType>::read
 
     if (idx >= 0)
     {
-        e = EnumType(vals_[idx]);
+        val = EnumType(vals_[idx]);
         return true;
     }
 
@@ -263,19 +263,6 @@ bool Foam::Enum<EnumType>::readEntry
     }
 
     return false;
-}
-
-
-template<class EnumType>
-bool Foam::Enum<EnumType>::readIfPresent
-(
-    const word& key,
-    const dictionary& dict,
-    EnumType& val
-) const
-{
-    // Reading is non-mandatory
-    return readEntry(key, dict, val, false);
 }
 
 

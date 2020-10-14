@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -113,13 +113,15 @@ inline const Foam::word& Foam::Enum<EnumType>::get(const EnumType e) const
 
 
 template<class EnumType>
-inline Foam::Ostream& Foam::Enum<EnumType>::writeList
+inline bool Foam::Enum<EnumType>::readIfPresent
 (
-    Ostream& os,
-    const label shortLen
+    const word& key,
+    const dictionary& dict,
+    EnumType& val
 ) const
 {
-    return keys_.writeList(os, shortLen);
+    // Reading is non-mandatory
+    return readEntry(key, dict, val, false);
 }
 
 
@@ -132,6 +134,24 @@ inline void Foam::Enum<EnumType>::write(const EnumType e, Ostream& os) const
     {
         os << keys_[idx];
     }
+}
+
+
+template<class EnumType>
+template<class OS>
+inline OS& Foam::Enum<EnumType>::writeList(OS& os, const label) const
+{
+    unsigned i = 0;
+
+    os << '(';
+    for (const word& k : keys_)
+    {
+        if (i++) os << ' ';
+        os << k;
+    }
+    os << ')';
+
+    return os;
 }
 
 
@@ -194,7 +214,7 @@ inline Foam::Ostream& Foam::operator<<
     const Enum<EnumType>& list
 )
 {
-    return list.names().writeList(os, 0);
+    return list.writeList(os);
 }
 
 
@@ -205,19 +225,7 @@ inline std::ostream& Foam::operator<<
     const Enum<EnumType>& list
 )
 {
-    os << '(';
-
-    unsigned i = 0;
-
-    for (const word& k : list.names())
-    {
-        if (i++) os << ' ';
-        os << k;
-    }
-
-    os << ')';
-
-    return os;
+    return list.writeList(os);
 }
 
 
