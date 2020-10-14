@@ -48,7 +48,6 @@ SourceFiles
 
 // Transitional features/misfeatures
 #define Foam_autoPtr_copyConstruct
-#define Foam_autoPtr_copyAssign
 #define Foam_autoPtr_castOperator
 
 #include "stdFoam.H"
@@ -227,6 +226,18 @@ public:
         //  FatalError if no pointer is managed
         inline const T& operator()() const;
 
+
+    // Casting
+
+        //- True if the managed pointer is non-null
+        explicit operator bool() const noexcept { return bool(ptr_); }
+
+        //- Cast to pointer type
+        operator const T*() const noexcept { return ptr_; }
+
+        //- Cast to pointer type
+        operator T*() noexcept { return ptr_; }
+
         //- Deprecated(2019-01) Automatic cast conversion to underlying type
         //  FatalError if no pointer is managed
         //  \deprecated(2019-01) Can result in inadvertent conversions
@@ -238,14 +249,8 @@ public:
         operator const T&() const = delete;
         #endif
 
-        //- Cast to pointer type
-        operator const T*() const noexcept { return get(); }
 
-        //- Cast to pointer type
-        operator T*() noexcept { return get(); }
-
-        //- True if the managed pointer is non-null
-        explicit operator bool() const noexcept { return ptr_; }
+    // Assignment
 
         //- Transfer object ownership from parameter
         inline void operator=(autoPtr<T>&& ap) noexcept;
@@ -254,16 +259,9 @@ public:
         template<class U>
         inline void operator=(autoPtr<U>&& ap) noexcept;
 
-        #ifdef Foam_autoPtr_copyAssign
-        //- A move assignment disguised as a copy assignment
-        //  \remark Non-standard definition - should just be movable
-        void operator=(const autoPtr<T>& ap) noexcept
-        {
-            operator=(std::move(const_cast<autoPtr<T>&>(ap)));
-        }
-        #else
+        //- No move assignment disguised as a copy assignment
+        //  \deprecated(2018-02) can have unintended behaviour
         void operator=(const autoPtr<T>& ap) = delete;
-        #endif
 
         //- Reset via assignment from literal nullptr
         inline void operator=(std::nullptr_t) noexcept;
