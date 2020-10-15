@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,9 +34,12 @@ Description
     \heading Dictionary parameters
     \table
         Property    | Description                       | Required | Default
-        type        | searchableSurfaceCollection       | selector |
+        type        | collection                        | selector |
         mergeSubRegions | boolean                       | yes   |
     \endtable
+
+Note
+    Longer type name : \c searchableSurfaceCollection
 
 SourceFiles
     searchableSurfaceCollection.C

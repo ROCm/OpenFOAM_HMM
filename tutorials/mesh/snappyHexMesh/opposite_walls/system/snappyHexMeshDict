@@ -40,7 +40,7 @@ geometry
     }
     all
     {
-        type searchableBox;
+        type box;
         min (-1000 -1000 -1000);
         max (1000 1000 1000);
     }

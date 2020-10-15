@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +55,8 @@ namespace Foam
 Foam::searchableRotatedBox::searchableRotatedBox
 (
     const IOobject& io,
-    const dictionary& dict
+    const vector& span,
+    const coordSystem::cartesian& csys
 )
 :
     searchableSurface(io),
@@ -69,19 +70,34 @@ Foam::searchableRotatedBox::searchableRotatedBox
             io.db(),
             io.readOpt(),
             io.writeOpt(),
-            false      //io.registerObject(),
+            false      // never register
         ),
-        treeBoundBox(Zero, dict.get<vector>("span"))
+        treeBoundBox(Zero, span)
     ),
-    transform_
-    (
-        dict.get<point>("origin"),
-        dict.get<vector>("e3"),
-        dict.get<vector>("e1")
-    )
+    transform_(csys.origin(), csys.e3(), csys.e1())
 {
     points_ = transform_.globalPosition(box_.points());
 }
+
+
+Foam::searchableRotatedBox::searchableRotatedBox
+(
+    const IOobject& io,
+    const dictionary& dict
+)
+:
+    searchableRotatedBox
+    (
+        io,
+        dict.get<vector>("span"),
+        coordSystem::cartesian
+        (
+            dict.get<point>("origin"),
+            dict.get<vector>("e3"),
+            dict.get<vector>("e1")
+        )
+    )
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -125,14 +141,10 @@ bool Foam::searchableRotatedBox::overlaps(const boundBox& bb) const
         return false;
     }
 
-    // 2. Check if one or more face points inside
-    const faceList& fcs = treeBoundBox::faces;
-    forAll(fcs, faceI)
+    // 2. Check if any corner points inside
+    if (bb.containsAny(points_))
     {
-        if (bb.containsAny(points_))
-        {
-            return true;
-        }
+        return true;
     }
 
     // 3. Difficult case: all points are outside but connecting edges might
@@ -141,8 +153,7 @@ bool Foam::searchableRotatedBox::overlaps(const boundBox& bb) const
     const treeBoundBox treeBb(bb);
 
     // 3a. my edges through bb faces
-    const edgeList& edges = treeBoundBox::edges;
-    for (const edge& e : edges)
+    for (const edge& e : treeBoundBox::edges)
     {
         point inter;
         if (treeBb.intersects(points_[e[0]], points_[e[1]], inter))
@@ -155,11 +166,11 @@ bool Foam::searchableRotatedBox::overlaps(const boundBox& bb) const
 
     const pointField bbPoints(bb.points());
 
-    for (const face& f : fcs)
+    for (const face& f : treeBoundBox::faces)
     {
-        point fc = f.centre(points_);
+        const point fc = f.centre(points_);
 
-        for (const edge& e : edges)
+        for (const edge& e : treeBoundBox::edges)
         {
             pointHit inter = f.intersection
             (

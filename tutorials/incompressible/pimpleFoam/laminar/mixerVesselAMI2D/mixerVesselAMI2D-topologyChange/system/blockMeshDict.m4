@@ -1083,7 +1083,7 @@ boundary
 /* optional
         surface
         {
-            type            searchableCylinder; // none
+            type            cylinder; // none
             point1          (0 0 -1);
             point2          (0 0 1);
             radius          0.5;
@@ -1111,7 +1111,7 @@ boundary
 /* optional
         surface
         {
-            type            searchableCylinder; // none
+            type            cylinder; // none
             point1          (0 0 -1);
             point2          (0 0 1);
             radius          0.5;

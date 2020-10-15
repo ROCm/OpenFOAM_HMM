@@ -33,10 +33,13 @@ Description
     \heading Dictionary parameters
     \table
         Property    | Description                       | Required | Default
-        type        | box / searchableBox               | selector |
+        type        | box                               | selector |
         min         | minimum point for bounding box    | yes   |
         max         | maximum point for bounding box    | yes   |
     \endtable
+
+Note
+    Longer type name : \c searchableBox
 
 SourceFiles
     searchableBox.C
@@ -114,6 +117,7 @@ public:
             const IOobject& io,
             const dictionary& dict
         );
+
 
     //- Destructor
     virtual ~searchableBox() = default;

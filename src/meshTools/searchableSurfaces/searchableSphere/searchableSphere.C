@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,6 +50,95 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+// General handling
+namespace Foam
+{
+
+// Dictionary entry with single scalar or vector quantity
+inline static vector getRadius(const word& name, const dictionary& dict)
+{
+    if (token(dict.lookup(name)).isNumber())
+    {
+        return vector::uniform(dict.get<scalar>(name));
+    }
+
+    return dict.get<vector>(name);
+}
+
+
+// Test point for negative components, return the sign-changes
+inline static unsigned getOctant(const point& p)
+{
+    unsigned octant = 0;
+
+    if (p.x() < 0) { octant |= 1; }
+    if (p.y() < 0) { octant |= 2; }
+    if (p.z() < 0) { octant |= 4; }
+
+    return octant;
+}
+
+
+// Apply sign-changes to point
+inline static void applyOctant(point& p, unsigned octant)
+{
+    if (octant & 1) { p.x() = -p.x(); }
+    if (octant & 2) { p.y() = -p.y(); }
+    if (octant & 4) { p.z() = -p.z(); }
+}
+
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+inline Foam::searchableSphere::componentOrder
+Foam::searchableSphere::getOrdering(const vector& radii)
+{
+    #ifdef FULLDEBUG
+    for (direction cmpt = 0; cmpt < vector::nComponents; ++cmpt)
+    {
+        if (radii[cmpt] <= 0)
+        {
+            FatalErrorInFunction
+                << "Radii must be positive, non-zero: " << radii << endl
+                << exit(FatalError);
+        }
+    }
+    #endif
+
+    std::array<direction, 3> idx{0, 1, 2};
+
+    // Reverse sort by magnitude (largest first...)
+    // Radii are positive (checked above, or just always true)
+    std::stable_sort
+    (
+        idx.begin(),
+        idx.end(),
+        [&](direction a, direction b){ return radii[a] > radii[b]; }
+    );
+
+    componentOrder order{idx[0], idx[1], idx[2], shapeType::GENERAL};
+
+    if (equal(radii[order.major], radii[order.minor]))
+    {
+        order.shape = shapeType::SPHERE;
+    }
+    else if (equal(radii[order.major], radii[order.mezzo]))
+    {
+        order.shape = shapeType::OBLATE;
+    }
+    else if (equal(radii[order.mezzo], radii[order.minor]))
+    {
+        order.shape = shapeType::PROLATE;
+    }
+
+    return order;
+}
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 Foam::pointIndexHit Foam::searchableSphere::findNearest
@@ -60,22 +149,32 @@ Foam::pointIndexHit Foam::searchableSphere::findNearest
 {
     pointIndexHit info(false, sample, -1);
 
-    const vector n(sample - origin_);
-    scalar magN = mag(n);
+    // Handle special cases first
 
-    if (nearestDistSqr >= sqr(magN - radius_))
+    // if (order_.shape == shapeType::SPHERE)
+    if (true)
     {
-        if (magN < ROOTVSMALL)
+        // Point relative to origin, simultaneously the normal on the sphere
+        const vector n(sample - origin_);
+        const scalar magN = mag(n);
+
+        // It is a sphere, all radii are identical
+
+        if (nearestDistSqr >= sqr(magN - radii_[0]))
         {
-            info.rawPoint() = origin_ + vector(1,0,0)*radius_;
+            info.setPoint
+            (
+                origin_
+              + (magN < ROOTVSMALL ? vector(radii_[0],0,0) : (radii_[0]*n/magN))
+            );
+            info.setHit();
+            info.setIndex(0);
         }
-        else
-        {
-            info.rawPoint() = origin_ + n/magN*radius_;
-        }
-        info.setHit();
-        info.setIndex(0);
+
+        return info;
     }
+
+    //[code]
 
     return info;
 }
@@ -93,43 +192,47 @@ void Foam::searchableSphere::findLineAll
     near.setMiss();
     far.setMiss();
 
-    vector dir(end-start);
-    scalar magSqrDir = magSqr(dir);
-
-    if (magSqrDir > ROOTVSMALL)
+    // if (order_.shape == shapeType::SPHERE)
+    if (true)
     {
-        const vector toCentre(origin_ - start);
-        scalar magSqrToCentre = magSqr(toCentre);
+        vector dir(end-start);
+        const scalar magSqrDir = magSqr(dir);
 
-        dir /= Foam::sqrt(magSqrDir);
-
-        scalar v = (toCentre & dir);
-
-        scalar disc = sqr(radius_) - (magSqrToCentre - sqr(v));
-
-        if (disc >= 0)
+        if (magSqrDir > ROOTVSMALL)
         {
-            scalar d = Foam::sqrt(disc);
+            dir /= Foam::sqrt(magSqrDir);
 
-            scalar nearParam = v-d;
+            const vector relStart(start - origin_);
 
-            if (nearParam >= 0 && sqr(nearParam) <= magSqrDir)
+            const scalar v = -(relStart & dir);
+
+            const scalar disc = sqr(radius()) - (magSqr(relStart) - sqr(v));
+
+            if (disc >= 0)
             {
-                near.setHit();
-                near.setPoint(start + nearParam*dir);
-                near.setIndex(0);
-            }
+                const scalar d = Foam::sqrt(disc);
 
-            scalar farParam = v+d;
+                const scalar nearParam = v - d;
+                const scalar farParam = v + d;
 
-            if (farParam >= 0 && sqr(farParam) <= magSqrDir)
-            {
-                far.setHit();
-                far.setPoint(start + farParam*dir);
-                far.setIndex(0);
+                if (nearParam >= 0 && sqr(nearParam) <= magSqrDir)
+                {
+                    near.setHit();
+                    near.setPoint(start + nearParam*dir);
+                    near.setIndex(0);
+                }
+
+                if (farParam >= 0 && sqr(farParam) <= magSqrDir)
+                {
+                    far.setHit();
+                    far.setPoint(start + farParam*dir);
+                    far.setIndex(0);
+                }
             }
         }
     }
+
+    //[code]
 }
 
 
@@ -142,15 +245,25 @@ Foam::searchableSphere::searchableSphere
     const scalar radius
 )
 :
+    searchableSphere(io, origin, vector::uniform(radius))
+{}
+
+
+Foam::searchableSphere::searchableSphere
+(
+    const IOobject& io,
+    const point& origin,
+    const vector& radii
+)
+:
     searchableSurface(io),
     origin_(origin),
-    radius_(radius)
+    // radii_(radii),
+    radii_(vector::uniform(cmptMax(radii))) /* Transition */,
+    order_{getOrdering(radii_)}
 {
-    bounds() = boundBox
-    (
-        origin_ - radius_*vector::one,
-        origin_ + radius_*vector::one
-    );
+    bounds().min() = (centre() - radii_);
+    bounds().max() = (centre() + radii_);
 }
 
 
@@ -164,16 +277,61 @@ Foam::searchableSphere::searchableSphere
     (
         io,
         dict.getCompat<vector>("origin", {{"centre", -1806}}),
-        dict.get<scalar>("radius")
+        getRadius("radius", dict)
     )
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+Foam::point Foam::searchableSphere::surfacePoint
+(
+    const scalar theta,
+    const scalar phi
+) const
+{
+    return point
+    (
+        origin_.x() + radii_.x() * cos(theta)*sin(phi),
+        origin_.y() + radii_.y() * sin(theta)*sin(phi),
+        origin_.z() + radii_.z() * cos(phi)
+    );
+}
+
+
+Foam::vector Foam::searchableSphere::surfaceNormal
+(
+    const scalar theta,
+    const scalar phi
+) const
+{
+    // Normal is (x0/r0^2, x1/r1^2, x2/r2^2)
+
+    return vector
+    (
+        cos(theta)*sin(phi) / radii_.x(),
+        sin(theta)*sin(phi) / radii_.y(),
+        cos(phi) / radii_.z()
+    ).normalise();
+}
+
+
 bool Foam::searchableSphere::overlaps(const boundBox& bb) const
 {
-    return bb.overlaps(origin_, sqr(radius_));
+    // if (order_.shape == shapeType::SPHERE)
+    if (true)
+    {
+        return bb.overlaps(origin_, sqr(radius()));
+    }
+
+    if (!bb.valid())
+    {
+        return false;
+    }
+
+    //[code]
+
+    return true;
 }
 
 
@@ -188,7 +346,6 @@ const Foam::wordList& Foam::searchableSphere::regions() const
 }
 
 
-
 void Foam::searchableSphere::boundingSpheres
 (
     pointField& centres,
@@ -196,10 +353,10 @@ void Foam::searchableSphere::boundingSpheres
 ) const
 {
     centres.resize(1);
-    centres[0] = origin_;
-
     radiusSqr.resize(1);
-    radiusSqr[0] = Foam::sqr(radius_);
+
+    centres[0] = origin_;
+    radiusSqr[0] = Foam::sqr(radius());
 
     // Add a bit to make sure all points are tested inside
     radiusSqr += Foam::sqr(SMALL);
@@ -213,7 +370,7 @@ void Foam::searchableSphere::findNearest
     List<pointIndexHit>& info
 ) const
 {
-    info.setSize(samples.size());
+    info.resize(samples.size());
 
     forAll(samples, i)
     {
@@ -229,14 +386,17 @@ void Foam::searchableSphere::findLine
     List<pointIndexHit>& info
 ) const
 {
-    info.setSize(start.size());
+    info.resize(start.size());
 
     pointIndexHit b;
 
     forAll(start, i)
     {
-        // Pick nearest intersection. If none intersected take second one.
+        // Pick nearest intersection.
+        // If none intersected take second one.
+
         findLineAll(start[i], end[i], info[i], b);
+
         if (!info[i].hit() && b.hit())
         {
             info[i] = b;
@@ -252,14 +412,17 @@ void Foam::searchableSphere::findLineAny
     List<pointIndexHit>& info
 ) const
 {
-    info.setSize(start.size());
+    info.resize(start.size());
 
     pointIndexHit b;
 
     forAll(start, i)
     {
+        // Pick nearest intersection.
         // Discard far intersection
+
         findLineAll(start[i], end[i], info[i], b);
+
         if (!info[i].hit() && b.hit())
         {
             info[i] = b;
@@ -275,24 +438,25 @@ void Foam::searchableSphere::findLineAll
     List<List<pointIndexHit>>& info
 ) const
 {
-    info.setSize(start.size());
+    info.resize(start.size());
 
     forAll(start, i)
     {
         pointIndexHit near, far;
+
         findLineAll(start[i], end[i], near, far);
 
         if (near.hit())
         {
             if (far.hit())
             {
-                info[i].setSize(2);
+                info[i].resize(2);
                 info[i][0] = near;
                 info[i][1] = far;
             }
             else
             {
-                info[i].setSize(1);
+                info[i].resize(1);
                 info[i][0] = near;
             }
         }
@@ -300,7 +464,7 @@ void Foam::searchableSphere::findLineAll
         {
             if (far.hit())
             {
-                info[i].setSize(1);
+                info[i].resize(1);
                 info[i][0] = far;
             }
             else
@@ -318,7 +482,7 @@ void Foam::searchableSphere::getRegion
     labelList& region
 ) const
 {
-    region.setSize(info.size());
+    region.resize(info.size());
     region = 0;
 }
 
@@ -329,18 +493,18 @@ void Foam::searchableSphere::getNormal
     vectorField& normal
 ) const
 {
-    normal.setSize(info.size());
-    normal = Zero;
+    normal.resize(info.size());
 
     forAll(info, i)
     {
         if (info[i].hit())
         {
-            normal[i] = normalised(info[i].hitPoint() - origin_);
+            normal[i] = normalised(info[i].point() - origin_);
         }
         else
         {
             // Set to what?
+            normal[i] = Zero;
         }
     }
 }
@@ -352,20 +516,26 @@ void Foam::searchableSphere::getVolumeType
     List<volumeType>& volType
 ) const
 {
-    volType.setSize(points.size());
+    volType.resize(points.size());
 
-    const scalar rad2 = sqr(radius_);
-
-    forAll(points, pointi)
+    // if (order_.shape == shapeType::SPHERE)
+    if (true)
     {
-        const point& pt = points[pointi];
+        const scalar rad2 = sqr(radius());
 
-        volType[pointi] =
-        (
-            (magSqr(pt - origin_) <= rad2)
-          ? volumeType::INSIDE : volumeType::OUTSIDE
-        );
+        forAll(points, pointi)
+        {
+            const point& p = points[pointi];
+
+            volType[pointi] =
+            (
+                (magSqr(p - origin_) <= rad2)
+              ? volumeType::INSIDE : volumeType::OUTSIDE
+            );
+        }
     }
+
+    //[code]
 }
 
 

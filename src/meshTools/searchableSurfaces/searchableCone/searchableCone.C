@@ -122,11 +122,11 @@ void Foam::searchableCone::findNearestAndNormal
 
     // Nearest and normal on cone. Initialise to far-away point so if not
     // set it picks one of the disk points
-    point nearCone(GREAT, GREAT, GREAT);
+    point nearCone(point::uniform(GREAT));
     vector normalCone(1, 0, 0);
 
     // Nearest and normal on inner cone. Initialise to far-away point
-    point iCnearCone(GREAT, GREAT, GREAT);
+    point iCnearCone(point::uniform(GREAT));
     vector iCnormalCone(1, 0, 0);
 
     point projPt1 = point1_+ radius1_*v;

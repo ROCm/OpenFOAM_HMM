@@ -46,12 +46,15 @@ Description
     \heading Dictionary parameters
     \table
         Property    | Description                       | Required | Default
-        type        | rotatedBox / searchableRotatedBox | selector |
+        type        | rotatedBox                        | selector |
         span        | The box dimensions                | yes   |
         origin      | The box corner                    | yes   |
         e1          | Local x-axis of the box           | yes   |
         e3          | Local z-axis of the box           | yes   |
     \endtable
+
+Note
+    Longer type name : \c searchableRotatedBox
 
 SourceFiles
     searchableRotatedBox.C
@@ -78,8 +81,6 @@ class searchableRotatedBox
 :
     public searchableSurface
 {
-private:
-
     // Private Member Data
 
         //- Box in local coordinate system
@@ -108,6 +109,14 @@ public:
 
 
     // Constructors
+
+        //- Construct from components
+        searchableRotatedBox
+        (
+            const IOobject& io,
+            const vector& span,
+            const coordSystem::cartesian& csys = coordSystem::cartesian{}
+        );
 
         //- Construct from dictionary (used by searchableSurface)
         searchableRotatedBox

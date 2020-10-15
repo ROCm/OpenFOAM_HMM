@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,10 +43,13 @@ Description
     \heading Dictionary parameters
     \table
         Property    | Description                       | Required | Default
-        type        | plate / searchablePlate           | selector |
-        origin      | centre of the plate               | yes   |
-        span        | The plate dimensions              | yes   |
+        type        | plate                             | selector |
+        origin      | The minimum corner of the plate   | yes |
+        span        | The plate dimensions              | yes |
     \endtable
+
+Note
+    Longer type name : \c searchablePlate
 
 SourceFiles
     searchablePlate.C
@@ -72,12 +75,12 @@ class searchablePlate
 :
     public searchableSurface
 {
-private:
-
     // Private Member Data
 
+        //- The minimum corner of the plate
         const point origin_;
 
+        //- The span size of the plate
         const vector span_;
 
         //- Coordinate direction which is normal
@@ -143,6 +146,12 @@ public:
 
 
     // Member Functions
+
+        //- The centre (origin) of the plate
+        inline const point& centre() const noexcept
+        {
+             return origin_;
+        }
 
         //- Names of regions
         virtual const wordList& regions() const;

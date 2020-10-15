@@ -32,7 +32,7 @@ Description
     \heading Dictionary parameters
     \table
         Property    | Description                       | Required | Default
-        type        | cone / searchableCone             | selector |
+        type        | cone                              | selector |
         point1      | coordinate of endpoint            | yes   |
         radius1     | radius at point1                  | yes   |
         innerRadius1| inner radius at point1            | no    | 0
@@ -43,6 +43,9 @@ Description
 
 Note
     Initial implementation, might suffer from robustness (e.g. radius1==radius2)
+
+Note
+    Longer type name : \c searchableCone
 
 SourceFiles
     searchableCone.C

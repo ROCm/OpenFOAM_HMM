@@ -34,11 +34,14 @@ Description
     \heading Dictionary parameters
     \table
         Property    | Description                       | Required | Default
-        type        | disk / searchableDisk             | selector |
+        type        | disk                              | selector |
         origin      | centre of disk                    | yes   |
         normal      | normal vector                     | yes   |
         radius      | disk radius                       | yes   |
     \endtable
+
+Note
+    Longer type name : \c searchableDisk
 
 SourceFiles
     searchableDisk.C

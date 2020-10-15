@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,7 +77,8 @@ void Foam::searchableBox::projectOntoCoordPlane
         FatalErrorInFunction
             << "Point on plane " << planePt
             << " is not on coordinate " << min()[dir]
-            << " nor " << max()[dir] << abort(FatalError);
+            << " nor " << max()[dir] << nl
+            << abort(FatalError);
     }
 }
 
@@ -135,31 +136,26 @@ Foam::pointIndexHit Foam::searchableBox::findNearest
     // using the three near distances. Project onto the nearest plane.
     if (!outside)
     {
-        vector dist(cmptMag(info.rawPoint() - near));
+        const vector dist(cmptMag(info.point() - near));
+
+        direction projNorm(vector::Z);
 
         if (dist.x() < dist.y())
         {
             if (dist.x() < dist.z())
             {
-                // Project onto x plane
-                projectOntoCoordPlane(vector::X, near, info);
-            }
-            else
-            {
-                projectOntoCoordPlane(vector::Z, near, info);
+                projNorm = vector::X;
             }
         }
         else
         {
             if (dist.y() < dist.z())
             {
-                projectOntoCoordPlane(vector::Y, near, info);
-            }
-            else
-            {
-                projectOntoCoordPlane(vector::Z, near, info);
+                projNorm = vector::Y;
             }
         }
+
+        projectOntoCoordPlane(projNorm, near, info);
     }
 
 
@@ -194,7 +190,7 @@ Foam::searchableBox::searchableBox
             << exit(FatalError);
     }
 
-    bounds() = static_cast<boundBox>(*this);
+    bounds() = static_cast<treeBoundBox>(*this);
 }
 
 
@@ -204,19 +200,12 @@ Foam::searchableBox::searchableBox
     const dictionary& dict
 )
 :
-    searchableSurface(io),
-    treeBoundBox(dict.get<point>("min"), dict.get<point>("max"))
-{
-    if (!treeBoundBox::valid())
-    {
-        FatalErrorInFunction
-            << "Illegal bounding box specification : "
-            << static_cast<const treeBoundBox>(*this) << nl
-            << exit(FatalError);
-    }
-
-    bounds() = static_cast<boundBox>(*this);
-}
+    searchableBox
+    (
+        io,
+        treeBoundBox(dict.get<point>("min"), dict.get<point>("max"))
+    )
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -257,7 +246,7 @@ void Foam::searchableBox::boundingSpheres
 {
     centres.setSize(size());
     radiusSqr.setSize(size());
-    radiusSqr = 0.0;
+    radiusSqr = Zero;
 
     const pointField pts(treeBoundBox::points());
     const faceList& fcs = treeBoundBox::faces;
@@ -527,8 +516,7 @@ void Foam::searchableBox::findLineAll
     const scalarField magSqrDirVec(magSqr(dirVec));
     const vectorField smallVec
     (
-        ROOTSMALL*dirVec
-      + vector(ROOTVSMALL,ROOTVSMALL,ROOTVSMALL)
+        ROOTSMALL*dirVec + vector::uniform(ROOTVSMALL)
     );
 
     forAll(start, pointi)

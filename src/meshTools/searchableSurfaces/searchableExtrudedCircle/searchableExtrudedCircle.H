@@ -32,7 +32,7 @@ Description
     \heading Dictionary parameters
     \table
         Property    | Description                       | Required | Default
-        type        | extrudedCircle / searchableExtrudedCircle | selector |
+        type        | extrudedCircle                    | selector |
         file        | The name of the edge mesh         | yes   |
         radius      | Search radius around the edges    | yes   |
     \endtable
@@ -41,6 +41,9 @@ Note
     - The edge mesh file is to be located in the constant/geometry directory.
     - Can not be used with snappyHexMesh since only implements nearest
       searching.
+
+Note
+    Longer type name : \c searchableExtrudedCircle
 
 SourceFiles
     searchableExtrudedCircle.C

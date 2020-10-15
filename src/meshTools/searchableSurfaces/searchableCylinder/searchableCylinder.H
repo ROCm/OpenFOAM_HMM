@@ -33,11 +33,14 @@ Description
     \heading Dictionary parameters
     \table
         Property    | Description                       | Required | Default
-        type        | cylinder / searchableCylinder     | selector |
+        type        | cylinder                          | selector |
         point1      | coordinate of endpoint            | yes   |
         point2      | coordinate of endpoint            | yes   |
         radius      | cylinder radius                   | yes   |
     \endtable
+
+Note
+    Longer type name : \c searchableCylinder
 
 SourceFiles
     searchableCylinder.C

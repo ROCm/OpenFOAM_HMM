@@ -61,30 +61,29 @@ Foam::direction Foam::searchablePlate::calcNormal(const point& span)
     {
         if (span[dir] < 0)
         {
-            FatalErrorInFunction
-                << "Span should have two positive and one zero entry. Now:"
-                << span << exit(FatalError);
+            // Negative entry. Flag and exit.
+            normalDir = 3;
+            break;
         }
         else if (span[dir] < VSMALL)
         {
-            if (normalDir == 3)
-            {
-                normalDir = dir;
-            }
-            else
+            if (normalDir != 3)
             {
                 // Multiple zero entries. Flag and exit.
                 normalDir = 3;
                 break;
             }
+
+            normalDir = dir;
         }
     }
 
     if (normalDir == 3)
     {
         FatalErrorInFunction
-            << "Span should have two positive and one zero entry. Now:"
-            << span << exit(FatalError);
+            << "Span should have two positive and one zero entry: "
+            << span << nl
+            << exit(FatalError);
     }
 
     return normalDir;
@@ -246,18 +245,8 @@ Foam::searchablePlate::searchablePlate
     const dictionary& dict
 )
 :
-    searchableSurface(io),
-    origin_(dict.get<point>("origin")),
-    span_(dict.get<vector>("span")),
-    normalDir_(calcNormal(span_))
-{
-    DebugInFunction
-        << " origin:" << origin_
-        << " origin+span:" << origin_+span_
-        << " normal:" << vector::componentNames[normalDir_] << nl;
-
-    bounds() = boundBox(origin_, origin_ + span_);
-}
+    searchablePlate(io, dict.get<point>("origin"), dict.get<vector>("span"))
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -266,8 +255,8 @@ const Foam::wordList& Foam::searchablePlate::regions() const
 {
     if (regions_.empty())
     {
-        regions_.setSize(1);
-        regions_[0] = "region0";
+        regions_.resize(1);
+        regions_.first() = "region0";
     }
     return regions_;
 }
@@ -285,10 +274,10 @@ void Foam::searchablePlate::boundingSpheres
     scalarField& radiusSqr
 ) const
 {
-    centres.setSize(1);
-    centres[0] = origin_ + 0.5*span_;
+    centres.resize(1);
+    radiusSqr.resize(1);
 
-    radiusSqr.setSize(1);
+    centres[0] = origin_ + 0.5*span_;
     radiusSqr[0] = Foam::magSqr(0.5*span_);
 
     // Add a bit to make sure all points are tested inside
@@ -298,26 +287,25 @@ void Foam::searchablePlate::boundingSpheres
 
 Foam::tmp<Foam::pointField> Foam::searchablePlate::points() const
 {
-    auto tpts = tmp<pointField>::New(4);
+    auto tpts = tmp<pointField>::New(4, origin_);
     auto& pts = tpts.ref();
 
-    pts[0] = origin_;
-    pts[2] = origin_ + span_;
+    pts[2] += span_;
 
     if (span_.x() < span_.y() && span_.x() < span_.z())
     {
-        pts[1] = origin_ + point(0, span_.y(), 0);
-        pts[3] = origin_ + point(0, 0, span_.z());
+        pts[1].y() += span_.y();
+        pts[3].z() += span_.z();
     }
     else if (span_.y() < span_.z())
     {
-        pts[1] = origin_ + point(span_.x(), 0, 0);
-        pts[3] = origin_ + point(0, 0, span_.z());
+        pts[1].x() += span_.x();
+        pts[3].z() += span_.z();
     }
     else
     {
-        pts[1] = origin_ + point(span_.x(), 0, 0);
-        pts[3] = origin_ + point(0, span_.y(), 0);
+        pts[1].x() += span_.x();
+        pts[3].y() += span_.y();
     }
 
     return tpts;
@@ -326,15 +314,7 @@ Foam::tmp<Foam::pointField> Foam::searchablePlate::points() const
 
 bool Foam::searchablePlate::overlaps(const boundBox& bb) const
 {
-    return
-    (
-        (origin_.x() + span_.x()) >= bb.min().x()
-     && origin_.x() <= bb.max().x()
-     && (origin_.y() + span_.y()) >= bb.min().y()
-     && origin_.y() <= bb.max().y()
-     && (origin_.z() + span_.z()) >= bb.min().z()
-     && origin_.z() <= bb.max().z()
-    );
+    return bb.overlaps(bounds());
 }
 
 

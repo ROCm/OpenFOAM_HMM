@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,11 +33,14 @@ Description
     \heading Dictionary parameters
     \table
         Property    | Description                           | Required | Default
-        type        | sphere / searchableSphere             | selector |
-        origin      | The origin (centre) of the sphere     | yes   |
-        radius      | The (outside) radius of sphere        | yes   |
-        centre      | Alternative for 'origin'              | no    |
+        type        | sphere                                | selector |
+        origin      | The origin (centre) of the sphere     | yes |
+        radius      | The (outside) radius of sphere        | yes |
+        centre      | Alternative name for 'origin'         | no  |
     \endtable
+
+Note
+    Longer type name : \c searchableSphere
 
 SourceFiles
     searchableSphere.C
@@ -63,21 +66,53 @@ class searchableSphere
 :
     public searchableSurface
 {
+public:
+
+    // Public Types
+
+        //- The type of shape
+        enum shapeType : uint8_t
+        {
+            SPHERE = 0,     //!< Sphere (all components equal)
+            OBLATE = 1,     //!< Oblate (major = mezzo > minor)
+            PROLATE = 2,    //!< Prolate (major > mezzo = minor)
+            GENERAL = 3     //!< General spheroid
+        };
+
+
 private:
 
-    // Private Member Data
+    // Private Types
+
+        //- Component order (largest to smallest)
+        struct componentOrder
+        {
+            uint8_t major;      //!< Component with major radius
+            uint8_t mezzo;      //!< Component with intermediate radius
+            uint8_t minor;      //!< Component with minor radius
+            shapeType shape;    //!< The type of shape
+        };
+
+
+    // Private Data
 
         //- Centre point of the sphere
         const point origin_;
 
-        //- The outer radius of the sphere
-        const scalar radius_;
+        //- The outer radii of the spheroid
+        const vector radii_;
+
+        //- The canonical (sorted) order and shape
+        const struct componentOrder order_;
 
         //- Names of regions
         mutable wordList regions_;
 
 
     // Private Member Functions
+
+        //- Determine sorted order and classify the shape
+        inline static componentOrder getOrdering(const vector& radii);
 
         //- Inherit findNearest from searchableSurface
         using searchableSurface::findNearest;
@@ -114,12 +149,20 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct a sphere from components
+        searchableSphere
+        (
+            const IOobject& io,
+            const point& origin,
+            const scalar radius
+        );
+
+        //- Construct a spheroid from components
         searchableSphere
         (
             const IOobject& io,
             const point& centre,
-            const scalar radius
+            const vector& radii
         );
 
         //- Construct from dictionary (used by searchableSurface)
@@ -135,6 +178,44 @@ public:
 
 
     // Member Functions
+
+    // Geometric
+
+        //- The centre (origin) of the sphere
+        const point& centre() const noexcept
+        {
+             return origin_;
+        }
+
+        //- The radius of the sphere, or major radius of the spheroid
+        scalar radius() const noexcept
+        {
+            return radii_[order_.major];
+        }
+
+        //- The radii of the spheroid
+        const vector& radii() const noexcept
+        {
+            return radii_;
+        }
+
+        //- The type of shape
+        enum shapeType shape() const noexcept
+        {
+            return shapeType::SPHERE;
+        }
+
+        //- A point on the sphere at given location
+        //  theta [-pi,pi], phi [0,pi]
+        point surfacePoint(const scalar theta, const scalar phi) const;
+
+        //- Surface normal on the sphere at given location
+        //  theta [-pi,pi], phi [0,pi]
+        vector surfaceNormal(const scalar theta, const scalar phi) const;
+
+
+
+    // Searching
 
         //- Names of regions
         virtual const wordList& regions() const;
@@ -228,7 +309,6 @@ public:
             ) const;
 
             //- Determine type (inside/outside/mixed) for point.
-            //  Unknown if cannot be determined (e.g. non-manifold surface)
             virtual void getVolumeType
             (
                 const pointField& points,
@@ -236,14 +316,14 @@ public:
             ) const;
 
 
-        // regIOobject implementation
+    // Output
 
-            bool writeData(Ostream&) const
-            {
-                NotImplemented;
-                return false;
-            }
-
+        // Implementation for regIOobject. NotImplemented
+        bool writeData(Ostream&) const
+        {
+            NotImplemented;
+            return false;
+        }
 };
 
 

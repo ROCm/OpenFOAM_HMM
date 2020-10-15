@@ -80,21 +80,19 @@ Foam::pointIndexHit Foam::searchablePlane::findLine
 
 Foam::boundBox Foam::searchablePlane::calcBounds() const
 {
-    point max(VGREAT, VGREAT, VGREAT);
+    boundBox bb(boundBox::greatBox);
 
     for (direction dir = 0; dir < vector::nComponents; dir++)
     {
         if (mag(normal()[dir]) - 1 < SMALL)
         {
-            max[dir] = 0;
-
+            bb.min()[dir] = 0;
+            bb.max()[dir] = 0;
             break;
         }
     }
 
-    point min = -max;
-
-    return boundBox(min, max);
+    return bb;
 }
 
 
@@ -146,10 +144,10 @@ void Foam::searchablePlane::boundingSpheres
     scalarField& radiusSqr
 ) const
 {
-    centres.setSize(1);
-    centres[0] = origin();
+    centres.resize(1);
+    radiusSqr.resize(1);
 
-    radiusSqr.setSize(1);
+    centres[0] = origin();
     radiusSqr[0] = Foam::sqr(GREAT);
 }
 

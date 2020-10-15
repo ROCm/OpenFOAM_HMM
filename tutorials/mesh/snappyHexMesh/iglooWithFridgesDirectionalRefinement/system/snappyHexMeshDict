@@ -30,21 +30,21 @@ geometry
 {
     igloo
     {
-        type searchableSphere;
+        type   sphere;
         origin (3 3 0);
         radius 4;
     }
 
     box1
     {
-        type searchableBox;
-        min (0 0 0);
-        max (1 1 1);
+        type box;
+        min  (0 0 0);
+        max  (1 1 1);
     }
 
     twoFridgeFreezers
     {
-        type searchableSurfaceCollection;
+        type collection;
 
         mergeSubRegions true;
 
@@ -87,13 +87,13 @@ geometry
     // For directional refinement
     dirRefineBox1
     {
-        type searchableBox;
+        type box;
         min (-10 -10 -10);
         max ( 10  10  0.5);
     }
     dirRefineBox2
     {
-        type searchableBox;
+        type box;
         min (-10 -10 -10);
         max ( 10  10  0.25);
     }
