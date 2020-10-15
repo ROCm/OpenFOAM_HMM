@@ -78,7 +78,7 @@ void Foam::regionToFace::markZone
     const indirectPrimitivePatch& patch,
     const label proci,
     const label facei,
-    const label zoneI,
+    const label zonei,
     labelList& faceZone
 ) const
 {
@@ -100,7 +100,7 @@ void Foam::regionToFace::markZone
                 edgeTopoDistanceData<label>
                 (
                     0,          // distance
-                    zoneI
+                    zonei
                 )
             );
         }
@@ -124,9 +124,13 @@ void Foam::regionToFace::markZone
 
     forAll(allFaceInfo, facei)
     {
-        if (allFaceInfo[facei].data() == zoneI)
+        if
+        (
+            allFaceInfo[facei].valid(calc.data())
+         && allFaceInfo[facei].data() == zonei
+        )
         {
-            faceZone[facei] = zoneI;
+            faceZone[facei] = zonei;
         }
     }
 }
