@@ -55,6 +55,7 @@ namespace Foam
 // Largest and smallest scalar values allowed in certain parts of the code.
 // See std::numeric_limits max(), min(), epsilon()
 constexpr doubleScalar doubleScalarGREAT = 1.0e+15;
+constexpr doubleScalar doubleScalarROOTGREAT = 3.0e+8;
 constexpr doubleScalar doubleScalarVGREAT = 1.0e+300;
 constexpr doubleScalar doubleScalarROOTVGREAT = 1.0e+150;
 constexpr doubleScalar doubleScalarSMALL = 1.0e-15;

@@ -1297,20 +1297,6 @@ public:
             return lookup(keyword);
         }
 
-        //- Deprecated(2018-10) find and return a T.
-        //  \deprecated(2018-10) - use get() method
-        template<class T>
-        FOAM_DEPRECATED_FOR(2018-10, "get() method")
-        T lookupType
-        (
-            const word& keyword,
-            bool recursive = false,
-            bool patternMatch = true
-        ) const
-        {
-            return get<T>(keyword, matchOpt(recursive, patternMatch));
-        }
-
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use keyType::option version
         FOAM_DEPRECATED_FOR(2018-10, "found(keyType::option)")
@@ -1459,6 +1445,39 @@ public:
                 readIfPresent
                 (keyword, val, matchOpt(recursive, patternMatch));
         }
+
+
+    // More compatibility
+
+        //- Deprecated(2018-10) find and return a T.
+        //  \deprecated(2018-10) - use get() method
+        template<class T>
+        FOAM_DEPRECATED_FOR(2018-10, "get() method")
+        T lookupType
+        (
+            const word& keyword,
+            bool recursive = false,
+            bool patternMatch = true
+        ) const
+        {
+            return get<T>(keyword, matchOpt(recursive, patternMatch));
+        }
+
+        #ifdef COMPAT_OPENFOAM_ORG
+        //! \cond compat_openfoam_org
+        //  Accommodate name changes from 2019-11
+        template<class T>
+        FOAM_DEPRECATED_FOR(2019-11, "get(). openfoam.org compatibility")
+        T lookup
+        (
+            const word& keyword,
+            bool recursive = false,
+            bool patternMatch = true
+        ) const
+        {
+            return get<T>(keyword, matchOpt(recursive, patternMatch));
+        }
+        #endif
 
 
     // Shortcuts - when a templated classes also inherits from a dictionary

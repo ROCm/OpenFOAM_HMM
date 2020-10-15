@@ -410,6 +410,30 @@ int main(int argc, char *argv[])
             // try_getScalar(dict2.findEntry("bad"), "bad");
             try_getScalar(dict2.findEntry("empty"), "empty");
         }
+
+        #ifdef COMPAT_OPENFOAM_ORG
+        {
+            Info<< nl
+                << "Test openfoam.org compatibility" << nl;
+
+            dictionary mydict
+            (
+                IStringStream
+                (
+                    "scalar 3.14159;\n"
+                    "label 10;\n"
+                )()
+            );
+
+            Info<<"get<scalar> : " << mydict.get<scalar>("scalar") << nl;
+            Info<<"get<label> : " << mydict.get<label>("label") << nl;
+
+            Info<<"lookup<scalar> : " << mydict.lookup<scalar>("scalar") << nl;
+            Info<<"lookup<label> : " << mydict.lookup<label>("label") << nl;
+        }
+        #else
+        Info<< "No openfoam.org compatibility methods" << nl;
+        #endif
     }
 
 

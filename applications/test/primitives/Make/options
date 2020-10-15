@@ -1,4 +1,5 @@
 EXE_INC = \
+    -DCOMPAT_OPENFOAM_ORG \
     -I$(LIB_SRC)/fileFormats/lnInclude
 
 EXE_LIBS = \

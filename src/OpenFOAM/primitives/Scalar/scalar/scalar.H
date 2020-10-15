@@ -53,6 +53,7 @@ SourceFiles
 namespace Foam
 {
     constexpr scalar GREAT = floatScalarGREAT;
+    constexpr scalar ROOTGREAT = floatScalarROOTGREAT;
     constexpr scalar VGREAT = floatScalarVGREAT;
     constexpr scalar ROOTVGREAT = floatScalarROOTVGREAT;
     constexpr scalar SMALL = floatScalarSMALL;
@@ -60,21 +61,40 @@ namespace Foam
     constexpr scalar VSMALL = floatScalarVSMALL;
     constexpr scalar ROOTVSMALL = floatScalarROOTVSMALL;
 
+    #ifdef COMPAT_OPENFOAM_ORG
+    //! \cond compat_openfoam_org
+    //  Accommodate name changes from 2018-01
+    constexpr scalar great = floatScalarGREAT;
+    constexpr scalar rootGreat = floatScalarROOTGREAT;
+    constexpr scalar vGreat = floatScalarVGREAT;
+    constexpr scalar rootVGreat = floatScalarROOTVGREAT;
+    constexpr scalar small = floatScalarSMALL;
+    constexpr scalar rootSmall = floatScalarROOTSMALL;
+    constexpr scalar vSmall = floatScalarVSMALL;
+    constexpr scalar rootVSmall = floatScalarROOTVSMALL;
+    //! \endcond
+    #endif
+
+
+    //- Read scalar from c-string and return value
     inline scalar readScalar(const char* buf)
     {
         return readFloat(buf);
     }
 
+    //- Read scalar from c-string into argument. Return true on success.
     inline bool readScalar(const char* buf, scalar& val)
     {
         return readFloat(buf, val);
     }
 
+    //- Read scalar from string and return value
     inline scalar readScalar(const std::string& str)
     {
         return readFloat(str);
     }
 
+    //- Read scalar from string into argument. Return true on success.
     inline bool readScalar(const std::string& str, scalar& val)
     {
         return readFloat(str, val);
@@ -101,6 +121,7 @@ namespace Foam
 namespace Foam
 {
     constexpr scalar GREAT = doubleScalarGREAT;
+    constexpr scalar ROOTGREAT = doubleScalarROOTGREAT;
     constexpr scalar VGREAT = doubleScalarVGREAT;
     constexpr scalar ROOTVGREAT = doubleScalarROOTVGREAT;
     constexpr scalar SMALL = doubleScalarSMALL;
@@ -108,21 +129,40 @@ namespace Foam
     constexpr scalar VSMALL = doubleScalarVSMALL;
     constexpr scalar ROOTVSMALL = doubleScalarROOTVSMALL;
 
+    #ifdef COMPAT_OPENFOAM_ORG
+    //! \cond compat_openfoam_org
+    //  Accommodate name changes from 2018-01
+    constexpr scalar great = doubleScalarGREAT;
+    constexpr scalar rootGreat = doubleScalarROOTGREAT;
+    constexpr scalar vGreat = doubleScalarVGREAT;
+    constexpr scalar rootVGreat = doubleScalarROOTVGREAT;
+    constexpr scalar small = doubleScalarSMALL;
+    constexpr scalar rootSmall = doubleScalarROOTSMALL;
+    constexpr scalar vSmall = doubleScalarVSMALL;
+    constexpr scalar rootVSmall = doubleScalarROOTVSMALL;
+    //! \endcond
+    #endif
+
+
+    //- Read scalar from c-string and return value
     inline scalar readScalar(const char* buf)
     {
         return readDouble(buf);
     }
 
+    //- Read scalar from c-string into argument. Return true on success.
     inline bool readScalar(const char* buf, scalar& val)
     {
         return readDouble(buf, val);
     }
 
+    //- Read scalar from string and return value
     inline scalar readScalar(const std::string& str)
     {
         return readDouble(str);
     }
 
+    //- Read scalar from string into argument. Return true on success.
     inline bool readScalar(const std::string& str, scalar& val)
     {
         return readDouble(str, val);

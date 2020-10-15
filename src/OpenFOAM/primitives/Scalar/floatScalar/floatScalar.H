@@ -55,6 +55,7 @@ namespace Foam
 // Largest and smallest scalar values allowed in certain parts of the code.
 // See std::numeric_limits max(), min(), epsilon()
 constexpr floatScalar floatScalarGREAT = 1.0e+6;
+constexpr floatScalar floatScalarROOTGREAT = 1.0e+3;
 constexpr floatScalar floatScalarVGREAT = 1.0e+37;
 constexpr floatScalar floatScalarROOTVGREAT = 1.0e+18;
 constexpr floatScalar floatScalarSMALL = 1.0e-6;

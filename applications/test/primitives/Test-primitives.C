@@ -69,7 +69,7 @@ inline Switch readSwitch(const std::string& str)
 
 void printInfo(const Switch& sw)
 {
-    Info<<"Switch " << sw.c_str() << " (enum=" << label(sw.type()) << ")\n";
+    Info<< "Switch " << sw.c_str() << " (enum=" << label(sw.type()) << ")\n";
 }
 
 
@@ -83,6 +83,13 @@ Ostream& toString(Ostream& os, const UList<char>& list)
     os << '"';
 
     return os;
+}
+
+
+template<class T1, class T2>
+void printValPair(const char* desc, const T1& val1, const T2& val2)
+{
+    Info<< desc << ' ' << val1 << ' ' << val2 << nl;
 }
 
 
@@ -359,6 +366,21 @@ int main(int argc, char *argv[])
         Info<< "Wrote " << flatOutput(srcList) << nl
             << "Read " << flatOutput(dstList) << nl;
     }
+
+    #ifdef COMPAT_OPENFOAM_ORG
+    Info<< nl << "compatibility sizes" << nl
+        << "name  com  org" << nl
+        << "----  ---  ---" << nl;
+
+    printValPair("SMALL", SMALL, small);
+    printValPair("GREAT", GREAT, great);
+    printValPair("VSMALL", VSMALL, vSmall);
+    printValPair("VGREAT", VGREAT, vGreat);
+    printValPair("ROOTSMALL", ROOTSMALL, rootSmall);
+    printValPair("ROOTGREAT", ROOTGREAT, rootGreat);
+    #else
+    Info<< nl << "no compatibility sizes" << nl;
+    #endif
 
     if (nFail)
     {
