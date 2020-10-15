@@ -98,7 +98,7 @@ public:
 
     // Static Data
 
-        //- Control the output verbosity of messageStream
+        //- The output level (verbosity) of messages
         //
         //  - level == 0 : suppress all output
         //  - level == 1 : normal output
@@ -106,6 +106,11 @@ public:
         //
         // \note The default level is normally 2.
         static int level;
+
+        //- The output redirection of messages
+        //
+        //  - redirect == 2 : use stderr instead of stdout
+        static int redirect;
 
 
     // Constructors

@@ -35,6 +35,8 @@ License
 // Default is 2 : report source file name and line number if available
 int Foam::messageStream::level(Foam::debug::debugSwitch("level", 2));
 
+int Foam::messageStream::redirect(0);
+
 // Default is 1 : report to Info
 int Foam::infoDetailLevel(1);
 
@@ -212,22 +214,12 @@ Foam::messageStream::operator Foam::OSstream&()
 {
     if (level)
     {
-        // stderr instead of stdout
-        // - INFO_STDERR
-        // - WARNING when infoDetailLevel == 0
-        const bool useSerr =
-        (
-            (severity_ == INFO_STDERR)
-         || (severity_ == WARNING && Foam::infoDetailLevel == 0)
-        );
-
         const bool collect =
         (
             severity_ == INFO
          || severity_ == WARNING
-         || useSerr
+         || severity_ == INFO_STDERR
         );
-
 
         // Could add guard with parRun
         if (collect && !Pstream::master())
@@ -235,12 +227,20 @@ Foam::messageStream::operator Foam::OSstream&()
             return Snull;
         }
 
+        // Use stderr instead of stdout
+        // - INFO_STDERR
+        // - WARNING when infoDetailLevel == 0
+        const bool useStderr =
+        (
+            (severity_ == INFO_STDERR)
+         || (severity_ == WARNING && Foam::infoDetailLevel == 0)
+        );
 
         OSstream& os =
         (
             (collect || !Pstream::parRun())
-          ? (useSerr ? Serr : Sout)
-          : Pout
+          ? (useStderr ? Serr : Sout)
+          : (useStderr ? Perr : Pout)
         );
 
 

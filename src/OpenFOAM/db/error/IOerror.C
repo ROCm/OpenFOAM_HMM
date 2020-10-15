@@ -268,9 +268,16 @@ void Foam::IOerror::write(Ostream& os, const bool includeTitle) const
     os  << nl;
     if (includeTitle && !title().empty())
     {
-        os  << title().c_str() << nl;
-    }
+        os  << title().c_str()
+            << "(openfoam-" << foamVersion::api;
 
+        if (foamVersion::patched())
+        {
+            // Patch-level, when defined
+            os  << " patch=" << foamVersion::patch.c_str();
+        }
+        os  << ')' << nl;
+    }
     os  << message().c_str();
 
 
