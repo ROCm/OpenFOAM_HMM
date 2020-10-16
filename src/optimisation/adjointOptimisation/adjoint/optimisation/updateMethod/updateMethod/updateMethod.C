@@ -376,7 +376,7 @@ Foam::scalar Foam::updateMethod::computeMeritFunction()
 
 Foam::scalar Foam::updateMethod::meritFunctionDirectionalDerivative()
 {
-    return sum(objectiveDerivatives_*correction_);
+    return globalSum(objectiveDerivatives_*correction_);
 }
 
 
