@@ -495,6 +495,9 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::filterField
     const GeometricField<Type, fvPatchField, volMesh>& field
 ) const
 {
+    const labelList& own = field.mesh().faceOwner();
+    const labelList& nei = field.mesh().faceNeighbour();
+
     auto tvalues = tmp<Field<Type>>::New(faceId_.size());
     auto& values = tvalues.ref();
 
@@ -502,18 +505,16 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::filterField
     {
         const label facei = faceId_[i];
         const label patchi = facePatchId_[i];
+
         if (patchi >= 0)
         {
+            // Boundary face - face id is the patch-local face id
             values[i] = field.boundaryField()[patchi][facei];
         }
         else
         {
-            FatalErrorInFunction
-                << type() << " " << name() << ": "
-                << regionTypeNames_[regionType_] << "(" << regionName_ << "):"
-                << nl
-                << "    Unable to process internal faces for volume field "
-                << field.name() << nl << abort(FatalError);
+            // Internal face
+            values[i] = 0.5*(field[own[facei]] + field[nei[facei]]);
         }
     }
 
@@ -537,6 +538,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::filterField
     {
         const label facei = faceId_[i];
         const label patchi = facePatchId_[i];
+
         if (patchi >= 0)
         {
             values[i] = field.boundaryField()[patchi][facei];
