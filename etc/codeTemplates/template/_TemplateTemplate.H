@@ -45,7 +45,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class someClass;
 
 template<TemplateClassArgument>
@@ -90,7 +90,7 @@ public:
 
     // Generated Methods
 
-//        //- Construct null
+//        //- Default construct
 //        CLASSNAME() = default;
 //
 //        //- Copy construct
@@ -102,22 +102,22 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         CLASSNAME();
 
         //- Construct from components
         CLASSNAME(const dataType& data);
 
-        //- Construct from Istream
-        CLASSNAME(Istream& is);
-
         //- Construct as copy
         CLASSNAME(const CLASSNAME<TemplateArgument>&);
+
+        //- Construct from Istream
+        explicit CLASSNAME(Istream& is);
 
 
     // Selectors
 
-        //- Select null constructed
+        //- Select default constructed
         static autoPtr<CLASSNAME<TemplateArgument>> New();
 
 

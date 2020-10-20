@@ -46,7 +46,7 @@ ${codeInclude}
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class fvMesh;
 
 /*---------------------------------------------------------------------------*\

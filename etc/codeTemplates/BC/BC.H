@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) YEAR YEAR AUTHOR,AFFILIATION
+    Copyright (C) YEAR AUTHOR,AFFILIATION
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,12 +47,12 @@ Description
 
 Usage
     \table
-        Property   | Description                  | Req'd? | Default
-        scalarData | single scalar value          | yes    |
-        data       | single TYPE value          | yes    |
-        fieldData  | TYPE field across patch    | yes    |
-        timeVsData | TYPE function of time      | yes    |
-        wordData   | word, eg name of data object | no     | wordDefault
+        Property   | Description                  | Req'd | Default
+        scalarData | single scalar value          | yes |
+        data       | single TYPE value          | yes |
+        fieldData  | TYPE field across patch    | yes |
+        timeVsData | TYPE function of time      | yes |
+        wordData   | word, eg name of data object | no  | wordDefault
     \endtable
 
     Example of the boundary condition specification:
@@ -97,7 +97,7 @@ class CONSTRUCT
 :
     public PARENT
 {
-    // Private data
+    // Private Data
 
         //- Single valued scalar quantity, e.g. a coefficient
         scalar scalarData_;
@@ -152,8 +152,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given BASETypeFvPatchField
-        //  onto a new patch
+        //- Construct by mapping onto a new patch
         CONSTRUCT
         (
             const CLASS&,
@@ -162,7 +161,7 @@ public:
             const fvPatchFieldMapper&
         );
 
-        //- Construct as copy
+        //- Copy construct
         CONSTRUCT
         (
             const CLASS&
@@ -201,7 +200,7 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         // Mapping functions
 
@@ -226,7 +225,7 @@ public:
 
 
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 };
 
 

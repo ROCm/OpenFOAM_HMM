@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) YEAR YEAR AUTHOR,AFFILIATION
+    Copyright (C) YEAR AUTHOR,AFFILIATION
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +51,7 @@ CONSTRUCT
 )
 :
     PARENT(p, iF),
-    scalarData_(0.0),
+    scalarData_(0),
     data_(Zero),
     fieldData_(p.size(), Zero),
     timeVsData_(),
@@ -61,7 +61,7 @@ CONSTRUCT
 {
     this->refValue() = Zero;
     this->refGrad() = Zero;
-    this->valueFraction() = 0.0;
+    this->valueFraction() = Zero;
 }
 
 
@@ -84,7 +84,7 @@ CONSTRUCT
     boolData_(false)
 {
     this->refGrad() = Zero;
-    this->valueFraction() = 0.0;
+    this->valueFraction() = Zero;
 
     this->refValue() = FIELD("fieldData", dict, p.size());
     FVPATCHF::operator=(this->refValue());
@@ -116,7 +116,7 @@ CONSTRUCT
     scalarData_(ptf.scalarData_),
     data_(ptf.data_),
     fieldData_(ptf.fieldData_, mapper),
-    timeVsData_(ptf.timeVsData_, false),
+    timeVsData_(ptf.timeVsData_.clone()),
     wordData_(ptf.wordData_),
     labelData_(-1),
     boolData_(ptf.boolData_)
@@ -134,7 +134,7 @@ CONSTRUCT
     scalarData_(ptf.scalarData_),
     data_(ptf.data_),
     fieldData_(ptf.fieldData_),
-    timeVsData_(ptf.timeVsData_, false),
+    timeVsData_(ptf.timeVsData_.clone()),
     wordData_(ptf.wordData_),
     labelData_(-1),
     boolData_(ptf.boolData_)
@@ -153,7 +153,7 @@ CONSTRUCT
     scalarData_(ptf.scalarData_),
     data_(ptf.data_),
     fieldData_(ptf.fieldData_),
-    timeVsData_(ptf.timeVsData_, false),
+    timeVsData_(ptf.timeVsData_.clone()),
     wordData_(ptf.wordData_),
     labelData_(-1),
     boolData_(ptf.boolData_)
