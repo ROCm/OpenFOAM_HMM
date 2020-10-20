@@ -64,7 +64,6 @@ HerschelBulkley
     (
         viscosityProperties.optionalSubDict(typeName + "Coeffs")
     ),
-    k_("k", dimViscosity, HerschelBulkleyCoeffs_),
     n_("n", dimless, HerschelBulkleyCoeffs_),
     tau0_("tau0", dimViscosity/dimTime, HerschelBulkleyCoeffs_)
 {
@@ -85,7 +84,6 @@ HerschelBulkley::read
     HerschelBulkleyCoeffs_ =
         viscosityProperties.optionalSubDict(typeName + "Coeffs");
 
-    HerschelBulkleyCoeffs_.readEntry("k", k_);
     HerschelBulkleyCoeffs_.readEntry("n", n_);
     HerschelBulkleyCoeffs_.readEntry("tau0", tau0_);
 
@@ -109,7 +107,7 @@ nu
         min
         (
             nu0,
-            (tau0_ + k_*rtone*pow(tone*strainRate, n_))
+            (tau0_ + nu0*rtone*pow(tone*strainRate, n_))
            /max
             (
                 strainRate,

@@ -62,7 +62,6 @@ class HerschelBulkley
 
         dictionary HerschelBulkleyCoeffs_;
 
-        dimensionedScalar k_;
         dimensionedScalar n_;
         dimensionedScalar tau0_;
 
