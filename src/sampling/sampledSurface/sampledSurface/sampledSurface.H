@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -132,14 +132,16 @@ protected:
 
     // Protected Member Functions
 
-        //- General loop for sampling elements to faces
+        //- General loop for sampling elements to faces.
+        //  The defaultValue is used for invalid (negative) elements
         template<class Type>
         static tmp<Field<Type>> sampleOnFaces
         (
             const interpolation<Type>& sampler,
             const labelUList& elements,
             const faceList& fcs,
-            const pointField& pts
+            const pointField& pts,
+            const Type& defaultValue = Type(Zero)
         );
 
 

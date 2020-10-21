@@ -35,33 +35,35 @@ Description
 
     - 6 different modes:
         - source=cells, interpolate=false:
-            finds per triangle centre the \em nearest cell centre and uses its value
+            finds per surface face centre the \em nearest cell centre
+            and uses its value
         - source=cells, interpolate=true:
-            finds per triangle centre the \em nearest cell centre.
+            finds per surface face centre the \em nearest cell centre.
             Per surface point checks if this nearest cell is the one containing
             point; otherwise projects the point onto the nearest point on
             the boundary of the cell (to make sure interpolateCellPoint
             gets a valid location)
 
         - source=insideCells, interpolate=false:
-            finds per triangle centre the cell containing it and uses its value.
-            Trims triangles outside mesh.
+            finds per surface face centre the cell containing it
+            and uses its value.
+            Trims surface faces outside of the mesh.
         - source=insideCells, interpolate=true:
             Per surface point interpolate cell containing it.
 
         - source=boundaryFaces, interpolate=false:
-            finds per triangle centre the nearest point on the boundary
+            finds per surface face centre the \em nearest point on the boundary
             (uncoupled faces only) and uses the value (or 0 if the nearest
             is on an empty boundary)
         - source=boundaryFaces, interpolate=true:
-            finds per triangle centre the nearest point on the boundary
+            finds per surface face centre the \em nearest point on the boundary
             (uncoupled faces only).
             Per surface point projects the point onto this boundary face
             (to make sure interpolateCellPoint gets a valid location)
 
-    - since it finds a nearest per triangle each triangle is guaranteed
-    to be on one processor only. So after stitching (by sampledSurfaces)
-    the original surface should be complete.
+    - since it finds the nearest per surface face, each surface face
+      is guaranteed to be on one processor only.
+      So after stitching the original surface should be complete.
 
     This is often embedded as part of a sampled surfaces function object.
 
@@ -75,6 +77,16 @@ Usage
             type    meshedSurface;
             surface something.obj;
             source  cells;
+
+            //- Max sampling distance
+            maxDistance 0.005;
+
+            //- Fallback for missed sampling in 'cells' mode
+            defaultValue
+            {
+                "p.*"   1e5;
+                T       273.15;
+            }
         }
     }
     \endverbatim
@@ -90,7 +102,10 @@ Usage
         file     | Alternative file name                    | no  |
         fileType | The surface format                       | no  | (extension)
         scale    | Surface scaling factor                   | no  | 0
+        maxDistance | Max search distance                   | no  | GREAT
+        defaultValue | Value beyond max distance (dictionary) | no  | empty
     \endtable
+
 
 SourceFiles
     sampledMeshedSurface.C
@@ -102,8 +117,7 @@ SourceFiles
 #define sampledMeshedSurface_H
 
 #include "sampledSurface.H"
-#include "MeshedSurface.H"
-#include "MeshedSurfacesFwd.H"
+#include "MeshedSurfaces.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -123,18 +137,19 @@ class sampledMeshedSurface
     public meshedSurface
 {
 public:
+
         //- Types of sampling regions
-        enum class samplingSource
+        enum class samplingSource : unsigned char
         {
             cells,          //!< Use nearest cell value
-            insideCells,    //!< Face within a cell
-            boundaryFaces   //!< Use boundary face values
+            insideCells,    //!< Surface face within a cell, or trim
+            boundaryFaces   //!< Use nearest boundary face values
         };
 
 private:
 
-        //- Private typedefs for convenience
-        typedef meshedSurface MeshStorage;
+    //- The concrete storage type for faces and points
+    typedef meshedSurface Mesh;
 
 
     // Private Data
@@ -164,6 +179,12 @@ private:
 
         //- Local points to sample per point
         pointField samplePoints_;
+
+        //- Max search distance squared
+        scalar maxDistanceSqr_;
+
+        //- Out-of-range fallback values (when beyond the max search distance)
+        dictionary defaultValues_;
 
 
     // Private Member Functions
@@ -239,13 +260,13 @@ public:
         //- Points of surface
         virtual const pointField& points() const
         {
-            return MeshStorage::points();
+            return Mesh::points();
         }
 
         //- Faces of surface
         virtual const faceList& faces() const
         {
-            return MeshStorage::surfFaces();
+            return Mesh::surfFaces();
         }
 
         //- Per-face zone/region information
@@ -257,31 +278,31 @@ public:
         //- Per-face identifier (eg, element Id)
         virtual const labelList& faceIds() const
         {
-            return MeshStorage::faceIds();
+            return Mesh::faceIds();
         }
 
         //- Face area vectors
         virtual const vectorField& Sf() const
         {
-            return MeshStorage::Sf();
+            return Mesh::Sf();
         }
 
         //- Face area magnitudes
         virtual const scalarField& magSf() const
         {
-            return MeshStorage::magSf();
+            return Mesh::magSf();
         }
 
         //- Face centres
         virtual const vectorField& Cf() const
         {
-            return MeshStorage::Cf();
+            return Mesh::Cf();
         }
 
         //- If element ids/order of the original surface are kept
         virtual bool hasFaceIds() const
         {
-            return keepIds_ && !MeshStorage::faceIds().empty();
+            return keepIds_ && !Mesh::faceIds().empty();
         }
 
         //- Sampling boundary values instead of cell values

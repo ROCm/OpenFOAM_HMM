@@ -121,6 +121,44 @@ sampled
 }
 
 
+// Sample and write for meshed surfaces
+sampleMesh
+{
+    type    surfaces;
+    libs    (sampling);
+    log     true;
+
+    writeControl    writeTime;
+    writeInterval   1;
+
+    surfaceFormat   vtk;
+
+    fields      (p rho U T);
+
+    surfaces
+    {
+        // Oversized sampling - for general testing
+        meshed_sample
+        {
+            type        meshedSurface;
+            surface     oversized_sample.obj;
+            source      cells;
+            maxDistance 0.0025;
+            defaultValue
+            {
+                T     273;
+            }
+        }
+
+        meshed_interpolate
+        {
+            $meshed_sample;
+            interpolate true;
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Calculations  * * * * * * * * * * * * * * * //
 
 massflow
