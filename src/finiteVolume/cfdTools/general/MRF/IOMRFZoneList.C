@@ -8,6 +8,7 @@
     Copyright (C) 2012-2017 OpenFOAM Foundation
     Copyright (C) 2019 OpenCFD Ltd.
     Copyright (C) 2020 PCOpt/NTUA
+    Copyright (C) 2020 FOSS GP
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.

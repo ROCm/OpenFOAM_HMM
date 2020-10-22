@@ -280,6 +280,7 @@ void Foam::adjointSimple::mainIter()
 
             addPressureSource(paEqn);
 
+            fvOptions.constrain(paEqn);
             paEqn.setReference(paRefCell, paRefValue);
 
             paEqn.solve();
