@@ -93,6 +93,84 @@ static bool hasReadWriteTypes(const word& readType, const word& writeType)
 }
 
 
+// Retrieve scaling option
+// - size 0 : no scaling
+// - size 1 : uniform scaling
+// - size 3 : non-uniform scaling
+List<scalar> getScalingOpt(const word& optName, const argList& args)
+{
+    // readListIfPresent handles single or multiple values
+    // - accept 1 or 3 values
+
+    List<scalar> scaling;
+    args.readListIfPresent(optName, scaling);
+
+    if (scaling.size() == 1)
+    {
+        // Uniform scaling
+    }
+    else if (scaling.size() == 3)
+    {
+        // Non-uniform, but may actually be uniform
+        if
+        (
+            equal(scaling[0], scaling[1])
+         && equal(scaling[0], scaling[2])
+        )
+        {
+            scaling.resize(1);
+        }
+    }
+    else if (!scaling.empty())
+    {
+        FatalError
+            << "Incorrect number of components, must be 1 or 3." << nl
+            << "    -" << optName << ' ' << args[optName].c_str() << endl
+            << exit(FatalError);
+    }
+
+    if (scaling.size() == 1 && equal(scaling[0], 1))
+    {
+        // Scale factor 1 == no scaling
+        scaling.clear();
+    }
+
+    for (const scalar scale : scaling)
+    {
+        if (scale <= 0)
+        {
+            FatalError
+                << "Invalid scaling value, must be positive." << nl
+                << "    -" << optName << ' ' << args[optName].c_str() << endl
+                << exit(FatalError);
+        }
+    }
+
+    return scaling;
+}
+
+
+void applyScaling(pointField& points, const List<scalar>& scaling)
+{
+    if (scaling.size() == 1)
+    {
+        Info<< "Scaling points uniformly by " << scaling[0] << nl;
+        points *= scaling[0];
+    }
+    else if (scaling.size() == 3)
+    {
+        Info<< "Scaling points by ("
+            << scaling[0] << ' '
+            << scaling[1] << ' '
+            << scaling[2] << ')' << nl;
+
+        points.replace(vector::X, scaling[0]*points.component(vector::X));
+        points.replace(vector::Y, scaling[1]*points.component(vector::Y));
+        points.replace(vector::Z, scaling[2]*points.component(vector::Z));
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
@@ -106,11 +184,21 @@ int main(int argc, char *argv[])
     argList::noParallel();
     argList::addArgument("input", "The input surface file");
     argList::addArgument("output", "The output surface file");
+    argList::addBoolOption
+    (
+        "recentre",
+        "Recentre the bounding box before other operations"
+    );
     argList::addOption
     (
         "translate",
         "vector",
-        "Translate by specified <vector> - eg, '(1 0 0)' before rotations"
+        "Translate by specified <vector> before rotations"
+    );
+    argList::addBoolOption
+    (
+        "auto-origin",
+        "Use bounding box centre as origin for rotations"
     );
     argList::addOption
     (
@@ -144,10 +232,15 @@ int main(int argc, char *argv[])
     );
     argList::addOption
     (
-        "scale",
+        "read-scale",
         "scalar | vector",
-        "Scale by the specified amount - Eg, for uniform [mm] to [m] scaling "
-        "use either '(0.001 0.001 0.001)' or simply '0.001'"
+        "Uniform or non-uniform input scaling"
+    );
+    argList::addOption
+    (
+        "write-scale",
+        "scalar | vector",
+        "Uniform or non-uniform output scaling"
     );
     argList::addOption
     (
@@ -162,18 +255,23 @@ int main(int argc, char *argv[])
         "Output format (default: use file extension)"
     );
 
+    // Backward compatibility and with transformPoints
+    argList::addOptionCompat("write-scale", {"scale", -2006});
+
     argList args(argc, argv);
 
     // Verify that an operation has been specified
     {
         const List<word> operationNames
         {
+            "recentre",
             "translate",
             "rotate",
             "rotate-angle",
             "rollPitchYaw",
             "yawPitchRoll",
-            "scale"
+            "read-scale",
+            "write-scale"
         };
 
         if (!args.count(operationNames))
@@ -225,16 +323,34 @@ int main(int argc, char *argv[])
 
     pointField points(surf1.points());
 
+
+    // Begin operations
+
+    // Input scaling
+    applyScaling(points, getScalingOpt("read-scale", args));
+
     vector v;
+    if (args.found("recentre"))
+    {
+        v = boundBox(points).centre();
+        Info<< "Adjust centre " << v << " -> (0 0 0)" << endl;
+        points -= v;
+    }
+
     if (args.readIfPresent("translate", v))
     {
         Info<< "Translating points by " << v << endl;
-
         points += v;
     }
 
-    vector origin(Zero);
-    const bool useOrigin = args.readIfPresent("origin", origin);
+    vector origin;
+    bool useOrigin = args.readIfPresent("origin", origin);
+    if (args.found("auto-origin") && !useOrigin)
+    {
+        useOrigin = true;
+        origin = boundBox(points).centre();
+    }
+
     if (useOrigin)
     {
         Info<< "Set origin for rotations to " << origin << endl;
@@ -262,8 +378,8 @@ int main(int argc, char *argv[])
             args.lookup("rotate-angle")()
         );
 
-        const vector& axis  = rotAxisAngle.first();
-        const scalar& angle = rotAxisAngle.second();
+        const vector& axis = rotAxisAngle.first();
+        const scalar angle = rotAxisAngle.second();
 
         Info<< "Rotating points " << nl
             << "    about " << axis << nl
@@ -299,44 +415,8 @@ int main(int argc, char *argv[])
         points = transform(rot, points);
     }
 
-    List<scalar> scaling;
-    if (args.readListIfPresent("scale", scaling))
-    {
-        // readListIfPresent handles single or multiple values
-
-        if
-        (
-            scaling.size() == 1
-         ||
-            (
-                scaling.size() == 3
-             && equal(scaling[0], scaling[1])
-             && equal(scaling[0], scaling[2])
-            )
-        )
-        {
-            Info<< "Scaling points uniformly by " << scaling[0] << nl;
-            points *= scaling[0];
-        }
-        else if (scaling.size() == 3)
-        {
-            Info<< "Scaling points by ("
-                << scaling[0] << ' '
-                << scaling[1] << ' '
-                << scaling[2] << ')' << nl;
-
-            points.replace(vector::X, scaling[0]*points.component(vector::X));
-            points.replace(vector::Y, scaling[1]*points.component(vector::Y));
-            points.replace(vector::Z, scaling[2]*points.component(vector::Z));
-        }
-        else
-        {
-            FatalError
-                << "-scale with 1 or 3 components only" << nl
-                << "given: " << args["scale"] << endl
-                << exit(FatalError);
-        }
-    }
+    // Output scaling
+    applyScaling(points, getScalingOpt("write-scale", args));
 
     if (useOrigin)
     {

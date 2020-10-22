@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,33 +64,52 @@ int main(int argc, char *argv[])
     argList::noParallel();
     argList::addArgument("input", "The input surface file");
     argList::addArgument("output", "The output surface file");
+    argList::addOption
+    (
+        "steps",
+        "N",
+        "Number of refinement steps (default: 1)"
+    );
     argList args(argc, argv);
 
-    const fileName surfFileName = args[1];
-    const fileName outFileName  = args[2];
+    const fileName surfFileName(args[1]);
+    const fileName outFileName(args[2]);
 
     Info<< "Reading surface from " << surfFileName << " ..." << endl;
 
-    triSurface surf1(surfFileName);
+    triSurface surf(surfFileName);
 
-    // Refine
-    triSurface surf2 = triSurfaceTools::redGreenRefine
-    (
-        surf1,
-        identity(surf1.size())  //Hack: refine all
-    );
-
-    Info<< "Original surface:" << endl
-        << "    triangles     :" << surf1.size() << endl
-        << "    vertices(used):" << surf1.nPoints() << endl
-        << "Refined surface:" << endl
-        << "    triangles     :" << surf2.size() << endl
-        << "    vertices(used):" << surf2.nPoints() << endl << endl;
+    Info<< "Original surface:" << nl
+        << "    triangles     :" << surf.size() << nl
+        << "    vertices(used):" << surf.nPoints() << endl;
 
 
-    Info<< "Writing refined surface to " << outFileName << " ..." << endl;
+    const label nsteps =
+        args.getCheckOrDefault<label>("steps", 1, labelMinMax::ge(1));
 
-    surf2.write(outFileName);
+
+    Info<< "Refining " << nsteps << " times" << flush;
+
+    for (label step = 0; step < nsteps; ++step)
+    {
+        Info<< '.' << flush;
+
+        surf = triSurfaceTools::redGreenRefine
+        (
+            surf,
+            identity(surf.size())  // Refine all
+        );
+    }
+    Info<< endl;
+
+    Info<< "Refined surface:" << nl
+        << "    triangles     :" << surf.size() << nl
+        << "    vertices(used):" << surf.nPoints() << endl;
+
+    Info<< nl
+        << "Writing refined surface to " << outFileName << " ..." << endl;
+
+    surf.write(outFileName);
 
     Info<< "End\n" << endl;
 

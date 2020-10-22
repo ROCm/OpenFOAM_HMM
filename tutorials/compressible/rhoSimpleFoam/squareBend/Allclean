@@ -1,0 +1,11 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
+#------------------------------------------------------------------------------
+
+cleanCase
+
+rm -f constant/triSurface/inlet_sample*.obj
+rm -f constant/triSurface/oversized_sample.obj
+
+#------------------------------------------------------------------------------
