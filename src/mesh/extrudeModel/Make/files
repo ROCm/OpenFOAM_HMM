@@ -10,5 +10,6 @@ sigmaRadial/sigmaRadial.C
 sector/sector.C
 cyclicSector/cyclicSector.C
 wedge/wedge.C
+polyline/polyline.C
 
 LIB = $(FOAM_LIBBIN)/libextrudeModel

@@ -8,6 +8,7 @@ It is likely incomplete...
 - William Bainbridge
 - Gabriel Barajas
 - Kutalmis Bercin
+- Ivor Clifford
 - Greg Collecutt
 - Jonathan Cranford
 - Sergio Ferraris
