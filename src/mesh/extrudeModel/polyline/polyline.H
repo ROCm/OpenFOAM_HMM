@@ -62,7 +62,7 @@ class polyline
 :
     public extrudeModel
 {
-    // Private data
+    // Private Data
 
         //- Dummy object needed to use blockEdge
         searchableSurfaces geometry_;
@@ -97,14 +97,15 @@ public:
     //- Runtime type information
     TypeName("polyline");
 
+
     // Constructors
 
         //- Construct from dictionary
-        polyline(const dictionary& dict);
+        explicit polyline(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~polyline();
+    virtual ~polyline() = default;
 
 
     // Member Operators

@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
-| \\      /  F ield         | foam-extend: Open Source CFD                    |
-|  \\    /   O peration     | Version:     3.1                                |
-|   \\  /    A nd           | Web:         http://www.extend-project.de       |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2012                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     simpleFoam;
+application     extrudeMesh;
 
 startFrom       latestTime;
 
@@ -24,11 +24,11 @@ stopAt          endTime;
 
 endTime         5;
 
-deltaT          0.0001;
+deltaT          0;
 
-writeControl    runTime;
+writeControl    timeStep;
 
-writeInterval   0.1;
+writeInterval   1;
 
 purgeWrite      0;
 
@@ -36,12 +36,12 @@ writeFormat     binary;
 
 writePrecision  8;
 
-writeCompression uncompressed;
+writeCompression off;
 
 timeFormat      general;
 
 timePrecision   6;
 
-runTimeModifiable yes;
+runTimeModifiable true;
 
 // ************************************************************************* //

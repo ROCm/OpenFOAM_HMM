@@ -33,12 +33,13 @@ It is likely incomplete...
 - Haakan Nilsson
 - Niklas Nordin
 - Mark Olesen
-- Vaggelis Papoutsis
+- Evangelos Papoutsis-Kiachagias
 - Juho Peltola
 - Johan Roenby
 - Henrik Rusche
 - Bruno Santos
 - Henning Scheufler
+- Richard Smith
 - Prashant Sonakar
 - Hilary Spencer
 - Gavin Tabor
@@ -48,4 +49,3 @@ It is likely incomplete...
 - Norbert Weber
 - Henry Weller
 - Niklas Wikstrom
-

@@ -4,7 +4,12 @@ cd "${0%/*}" || exit                                # Run from this directory
 #------------------------------------------------------------------------------
 
 runApplication extrudeMesh
-mkdir 0
+
+# For output fields from checkMesh
+mkdir -p 1
+
 runApplication checkMesh -writeAllFields
+
+paraFoam -touch -vtk
 
 #------------------------------------------------------------------------------

@@ -58,14 +58,14 @@ polyline::polyline(const dictionary& dict)
     ),
     x_(segments_.size() + 1),
     y_(segments_.size() + 1),
-    relTol_(coeffDict_.lookupOrDefault("toleranceCheck", SMALL))
+    relTol_(coeffDict_.getOrDefault<scalar>("toleranceCheck", SMALL))
 {
     // Check continuity and smoothness of the supplied polyline
-    for(label i=1; i < segments_.size(); i++)
+    for (label i=1; i < segments_.size(); ++i)
     {
         // Check continuity
-        vector x0 = segments_[i-1].position(1);
-        vector x1 = segments_[i].position(0);
+        const vector x0 = segments_[i-1].position(1);
+        const vector x1 = segments_[i].position(0);
 
         if (mag(x1-x0) > SMALL)
         {
@@ -75,12 +75,19 @@ polyline::polyline(const dictionary& dict)
         }
 
         // Check smoothness
-        vector v0 = (segments_[i-1].position(1)
-                   - segments_[i-1].position(1-DELTA));
-        v0 /= mag(v0);
-        vector v1 = (segments_[i].position(DELTA)
-                   - segments_[i].position(0));
-        v1 /= mag(v1);
+        const vector v0 =
+            normalised
+            (
+                segments_[i-1].position(1)
+              - segments_[i-1].position(1-DELTA)
+            );
+
+        const vector v1 =
+            normalised
+            (
+                segments_[i].position(DELTA)
+              - segments_[i].position(0)
+            );
 
         if ((v1 & v0) < (1 - relTol_))
         {
@@ -91,9 +98,9 @@ polyline::polyline(const dictionary& dict)
     }
 
     // Calculate cumulative length along polyline
-    x_[0] = 0.0;
-    y_[0] = 0.0;
-    scalar totalLength = 0.0;
+    x_[0] = 0;
+    y_[0] = 0;
+    scalar totalLength = 0;
     forAll(segments_, i)
     {
         totalLength += segments_[i].length();
@@ -109,19 +116,14 @@ polyline::polyline(const dictionary& dict)
 
     if (debug)
     {
-        Info<< tab << "Polyline start: " << p0_ << nl
+        Info
+            << tab << "Polyline start: " << p0_ << nl
             << tab << "Polyline normal at start: " << n0_ << nl
             << tab << "Polyline end: "
-            << segments_[segments_.size()-1].position(1.0) << nl
+            << segments_.last().position(1) << nl
             << tab << "Total length: " << totalLength << endl;
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-polyline::~polyline()
-{}
 
 
 // * * * * * * * * * * * * * * * * Operators * * * * * * * * * * * * * * * * //
@@ -160,8 +162,7 @@ point polyline::operator()
     // Rotate point to align with current normal vector
     if (cosTheta < (1-SMALL))
     {
-        vector axis = (n0_^n);
-        axis /= mag(axis);
+        const vector axis = normalised(n0_ ^ n);
 
         dp = quaternion(axis, cosTheta, true).transform(dp);
     }
@@ -193,9 +194,12 @@ void polyline::positionAndDirection
     // Normal vector at current position
     // Estimated normal vector using numerical differencing since
     // blockEdge doesn't include a normal function
-    n = segments_[i].position(min(s + DELTA, 1))
-      - segments_[i].position(max(s - DELTA, 0));
-    n /= mag(n);
+
+    n = normalised
+    (
+        segments_[i].position(min(s + DELTA, 1))
+      - segments_[i].position(max(s - DELTA, 0))
+    );
 }
 
 
