@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      epsilon;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -21,16 +20,12 @@ internalField   uniform 0.00754;
 
 boundaryField
 {
-    movingWall
+    "(movingWall|fixedWalls)"
     {
         type            epsilonWallFunction;
         value           uniform 0.00754;
     }
-    fixedWalls
-    {
-        type            epsilonWallFunction;
-        value           uniform 0.00754;
-    }
+
     frontAndBack
     {
         type            empty;

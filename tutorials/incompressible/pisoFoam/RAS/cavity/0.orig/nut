@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      nut;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -21,16 +20,12 @@ internalField   uniform 0;
 
 boundaryField
 {
-    movingWall
+    "(movingWall|fixedWalls)"
     {
         type            nutkWallFunction;
         value           uniform 0;
     }
-    fixedWalls
-    {
-        type            nutkWallFunction;
-        value           uniform 0;
-    }
+
     frontAndBack
     {
         type            empty;

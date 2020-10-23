@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      omega;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -21,16 +20,12 @@ internalField   uniform 22.4;
 
 boundaryField
 {
-    movingWall
+    "(movingWall|fixedWalls)"
     {
         type            omegaWallFunction;
         value           uniform 22.4;
     }
-    fixedWalls
-    {
-        type            omegaWallFunction;
-        value           uniform 22.4;
-    }
+
     frontAndBack
     {
         type            empty;
