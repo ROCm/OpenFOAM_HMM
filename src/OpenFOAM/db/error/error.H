@@ -215,6 +215,9 @@ public:
         //- Helper function to print a stack
         static void printStack(Ostream& os);
 
+        //- True if FOAM_ABORT is on.
+        static bool useAbort();
+
         //- Exit : can be called for any error to exit program.
         //  Redirects to abort() when FOAM_ABORT is on.
         void exit(const int errNo = 1);

@@ -177,7 +177,7 @@ void Foam::IOerror::exitOrAbort(const int errNo, const bool isAbort)
     if (!throwing_ && JobInfo::constructed)
     {
         jobInfo.add("FatalIOError", operator dictionary());
-        if (isAbort || hasEnv("FOAM_ABORT"))
+        if (isAbort || error::useAbort())
         {
             jobInfo.abort();
         }
@@ -197,7 +197,7 @@ void Foam::IOerror::exitOrAbort(const int errNo, const bool isAbort)
 
         throw errorException;
     }
-    else if (hasEnv("FOAM_ABORT"))
+    else if (error::useAbort())
     {
         Perr<< nl << *this << nl
             << "\nFOAM aborting (FOAM_ABORT set)\n" << endl;

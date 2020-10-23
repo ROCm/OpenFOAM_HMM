@@ -71,7 +71,7 @@ namespace Foam
     //- Mimic exit handling of the error class
     static void exitNow(const error& err)
     {
-        if (hasEnv("FOAM_ABORT"))
+        if (error::useAbort())
         {
             Perr<< nl << err << nl
                 << "\nFOAM aborting (FOAM_ABORT set)\n" << endl;

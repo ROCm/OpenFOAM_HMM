@@ -129,6 +129,10 @@ projectDir="$HOME/OpenFOAM/OpenFOAM-$WM_PROJECT_VERSION"
 # = true | false
 #export FOAM_SETNAN=false
 
+# [FOAM_ABORT] - Treat exit() on FatalError as abort()
+# = true | false
+#export FOAM_ABORT=false
+
 # [FOAM_CODE_TEMPLATES] - dynamicCode templates
 # - unset: uses 'foamEtcFile -list codeTemplates/dynamicCode'
 ##export FOAM_CODE_TEMPLATES="$WM_PROJECT_DIR/etc/codeTemplates/dynamicCode"

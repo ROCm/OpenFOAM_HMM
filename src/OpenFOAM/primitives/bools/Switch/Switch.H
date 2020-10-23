@@ -29,7 +29,8 @@ Class
 
 Description
     A simple wrapper around bool so that it can be read as a word:
-    true/false, on/off, yes/no, y/n, t/f, or none.
+    true/false, on/off, yes/no, any/none.
+    Also accepts 0/1 as a string and shortcuts t/f, y/n.
 
 SourceFiles
     Switch.C

@@ -34,6 +34,7 @@ License
 #include "Pstream.H"
 #include "foamVersion.H"
 #include "OSspecific.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -67,6 +68,13 @@ void Foam::error::warnAboutAge(const char* what, const int version)
     }
     // No warning for (foamVersion::api < version).
     // We use this to denote future expiry dates of transition features.
+}
+
+
+bool Foam::error::useAbort()
+{
+    // FOAM_ABORT env set and contains bool-type value
+    return static_cast<bool>(Switch::find(Foam::getEnv("FOAM_ABORT")));
 }
 
 
@@ -197,7 +205,7 @@ void Foam::error::exitOrAbort(const int errNo, const bool isAbort)
     if (!throwing_ && JobInfo::constructed)
     {
         jobInfo.add("FatalError", operator dictionary());
-        if (isAbort || hasEnv("FOAM_ABORT"))
+        if (isAbort || error::useAbort())
         {
             jobInfo.abort();
         }
@@ -217,7 +225,7 @@ void Foam::error::exitOrAbort(const int errNo, const bool isAbort)
 
         throw errorException;
     }
-    else if (hasEnv("FOAM_ABORT"))
+    else if (error::useAbort())
     {
         Perr<< nl << *this << nl
             << "\nFOAM aborting (FOAM_ABORT set)\n" << endl;

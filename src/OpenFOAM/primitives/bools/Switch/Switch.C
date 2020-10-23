@@ -92,13 +92,13 @@ Foam::Switch::switchType Foam::Switch::parse
 {
     switch (str.size())
     {
-        case 1: // (f|n|t|y) - single-character forms
+        case 1: // (0|1|f|t|n|y)
         {
             switch (str[0])
             {
-                case 'f': return switchType::FALSE;
+                case '0': case 'f': return switchType::FALSE;
+                case '1': case 't': return switchType::TRUE;
                 case 'n': return switchType::NO;
-                case 't': return switchType::TRUE;
                 case 'y': return switchType::YES;
             }
             break;
