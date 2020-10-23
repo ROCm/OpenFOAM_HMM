@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2010-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -261,7 +261,14 @@ Foam::tmp<GeomField> Foam::expressions::fvExprDriver::getOrReadFieldImpl
 
         tfield.reset
         (
-            GeomField::New(name, meshRef, dimensioned<Type>(Zero))
+            GeomField::New
+            (
+                name,
+                meshRef,
+                dimensioned<Type>(Zero),
+                // Patch is zeroGradient (volFields) or calculated (other)
+                defaultBoundaryType(GeomField::null())
+            )
         );
 
         GeomField& fld = tfield.ref();
