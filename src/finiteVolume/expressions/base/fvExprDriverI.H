@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2010-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,14 +73,14 @@ template<class Type>
 inline bool Foam::expressions::fvExprDriver::isVariable
 (
     const word& name,
-    bool isPointVal,
-    label expectedSize
+    const bool wantPointData,
+    const label expectedSize
 ) const
 {
     return
     (
-        this->isLocalVariable<Type>(name, isPointVal, expectedSize)
-     || this->isGlobalVariable<Type>(name, isPointVal, expectedSize)
+        this->isLocalVariable<Type>(name, wantPointData, expectedSize)
+     || this->isGlobalVariable<Type>(name, wantPointData, expectedSize)
     );
 }
 
@@ -89,15 +89,15 @@ template<class Type>
 inline bool Foam::expressions::fvExprDriver::isVariableOrField
 (
     const word& name,
-    bool isPointVal,
-    label expectedSize
+    const bool wantPointData,
+    const label expectedSize
 )
 const
 {
     return
     (
-        this->isVariable<Type>(name, isPointVal, expectedSize)
-     || this->isField<Type>(name, isPointVal)
+        this->isVariable<Type>(name, wantPointData, expectedSize)
+     || this->isField<Type>(name, wantPointData)
     );
 }
 
@@ -107,8 +107,8 @@ inline Foam::tmp<GeomField>
 Foam::expressions::fvExprDriver::getOrReadField
 (
     const word& name,
-    bool mandatory,
-    bool getOldTime
+    const bool mandatory,
+    const bool getOldTime
 )
 {
     return this->getOrReadFieldImpl<GeomField>
@@ -126,8 +126,8 @@ inline Foam::tmp<GeomField>
 Foam::expressions::fvExprDriver::getOrReadPointField
 (
     const word& name,
-    bool mandatory,
-    bool getOldTime
+    const bool mandatory,
+    const bool getOldTime
 )
 {
     return this->getOrReadFieldImpl<GeomField>

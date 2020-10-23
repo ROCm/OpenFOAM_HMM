@@ -99,7 +99,7 @@ private:
         (
             const dictionary& dict,
             enum expectedTypes expectedType,
-            bool isPointVal = false
+            bool wantPointData = false
         );
 
 
@@ -118,7 +118,7 @@ public:
         (
             const dictionary& dict,
             enum expectedTypes expectedType = expectedTypes::VALUE_TYPE,
-            bool isPointVal = false
+            bool wantPointData = false
         );
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2010-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,12 +75,12 @@ template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::expressions::exprDriver::evaluate
 (
     const expressions::exprString& expr,
-    bool isPointVal
+    bool wantPointData
 )
 {
     parse(expr);
 
-    return getResult<Type>(isPointVal);
+    return getResult<Type>(wantPointData);
 }
 
 
@@ -89,7 +89,7 @@ template<class Type>
 inline Type Foam::expressions::exprDriver::evaluateUniform
 (
     const expressions::exprString& expr,
-    bool isPointVal
+    bool wantPointData
 )
 {
     parse(expr);

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2010-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -145,13 +145,13 @@ Type Foam::expressions::exprDriver::exprDriver::weightedSum
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::expressions::exprDriver::getResult(bool isPointVal)
+Foam::expressions::exprDriver::getResult(bool wantPointData)
 {
-    if (!result_.isPointValue(isPointVal))
+    if (!result_.isPointData(wantPointData))
     {
         FatalErrorInFunction
-            << "Expected a" << (isPointVal ? " point" : "")
-            << " field,  but found a" << (!isPointVal ? " point" : "")
+            << "Expected a" << (wantPointData ? " point" : "")
+            << " field,  but found a" << (!wantPointData ? " point" : "")
             << " field" << nl
             << exit(FatalError);
     }
@@ -166,14 +166,15 @@ template<class Type>
 bool Foam::expressions::exprDriver::isLocalVariable
 (
     const word& name,
-    bool isPointVal,
+    bool wantPointData,
     label expectedSize
 ) const
 {
     DebugInfo
-        << "Looking for local" << (isPointVal ? " point" : "")
+        << "Looking for local" << (wantPointData ? " point" : "")
         << " field name:" << name << " type:"
         << pTraits<Type>::typeName << " size:" << expectedSize;
+
 
     bool good = hasVariable(name);
 
@@ -182,10 +183,11 @@ bool Foam::expressions::exprDriver::isLocalVariable
         const exprResult& var = variable(name);
 
         DebugInfo
-            << " - found (" << var.valueType() << ' ' << var.isPointValue() << ')';
+            << " - found (" << var.valueType() << ' '
+            << var.isPointData() << ')';
 
 
-        good = (var.isType<Type>() && var.isPointValue(isPointVal));
+        good = (var.isType<Type>() && var.isPointData(wantPointData));
 
         // Do size checking if requested
         if (good && expectedSize >= 0)

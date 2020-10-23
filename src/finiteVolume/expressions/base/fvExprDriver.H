@@ -163,6 +163,7 @@ protected:
         }
 
         //- Default boundary type for volume fields is zeroGradient
+        //- since they are essentially just internal fields.
         template<class Type>
         static inline word defaultBoundaryType
         (
@@ -211,8 +212,8 @@ protected:
         bool isGlobalVariable
         (
             const word& name,
-            bool isPointVal,
-            label expectedSize = -1
+            const bool wantPointData = false,
+            const label expectedSize = -1
         ) const;
 
         //- Return the global variable if available or a null result
@@ -226,8 +227,8 @@ protected:
         bool isField
         (
             const word& name,
-            bool isPointVal = false,
-            label expectSize = -1  //!< ignored
+            const bool wantPointData = false,
+            const label expectSize = -1  //!< ignored
         ) const;
 
 
@@ -236,8 +237,8 @@ protected:
         inline tmp<GeomField> getOrReadField
         (
             const word& name,
-            bool mandatory = true,
-            bool getOldTime = false
+            const bool mandatory = true,
+            const bool getOldTime = false
         );
 
         //- Retrieve point field from memory or disk
@@ -245,8 +246,8 @@ protected:
         inline tmp<GeomField> getOrReadPointField
         (
             const word& name,
-            bool mandatory = true,
-            bool getOldTime = false
+            const bool mandatory = true,
+            const bool getOldTime = false
         );
 
         //- Retrieve field from memory or disk (implementation)
@@ -255,8 +256,8 @@ protected:
         (
             const word& name,
             const MeshRef& meshRef,
-            bool mandatory = true,
-            bool getOldTime = false
+            const bool mandatory = true,
+            const bool getOldTime = false
         );
 
         //- Helper function for getOrReadField
@@ -461,8 +462,8 @@ public:
         inline bool isVariableOrField
         (
             const word& name,
-            bool isPointVal = false,
-            label expectSize = -1
+            const bool wantPointData = false,
+            const label expectSize = -1
         ) const;
 
         //- Retrieve local/global variable as a tmp field
@@ -475,7 +476,7 @@ public:
         tmp<Field<Type>> getVariable
         (
             const word& name,
-            label expectSize,
+            const label expectSize,
             const bool mandatory = true
         ) const;
 
@@ -568,7 +569,7 @@ public:
         inline bool isVariable
         (
             const word& name,
-            bool isPointVal = false,
+            bool wantPointData = false,
             label expectSize = -1
         ) const;
 

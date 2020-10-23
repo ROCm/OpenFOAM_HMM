@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2010-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,21 +36,23 @@ template<class Type>
 bool Foam::expressions::fvExprDriver::isGlobalVariable
 (
     const word& name,
-    bool isPointVal,
-    label expectedSize
+    const bool wantPointData,
+    const label expectedSize
 ) const
 {
     DebugInfo
-        << "Looking for global" << (isPointVal ? " point" : "")
+        << "Looking for global" << (wantPointData ? " point" : "")
         << " field name:" << name;
 
-    const exprResult& result = lookupGlobal(name);
+    const expressions::exprResult& result = lookupGlobal(name);
 
     DebugInfo
-        << " - found (" << result.valueType() << ' ' << result.isPointValue() << ')';
+        << " - found (" << result.valueType() << ' '
+        << result.isPointData() << ')';
 
 
-    bool good = (result.isType<Type>() && result.isPointValue(isPointVal));
+    bool good =
+        (result.isType<Type>() && result.isPointData(wantPointData));
 
     // Do size checking if requested
     if (good && expectedSize >= 0)
@@ -75,48 +77,47 @@ Foam::tmp<Foam::Field<Type>>
 Foam::expressions::fvExprDriver::getVariable
 (
     const word& name,
-    label expectedSize,
+    const label expectedSize,
     const bool mandatory
 ) const
 {
-    tmp<Field<Type>> tresult;
-
-    bool isSingleValue = false;
+    refPtr<expressions::exprResult> tvar;
 
     if (hasVariable(name) && variable(name).isType<Type>())
     {
-        isSingleValue = variable(name).isUniform();
-        tresult = variable(name).cref<Type>().clone();
+        tvar.cref(variable(name));
     }
-    else if (isGlobalVariable<Type>(name, false))
+    else if (isGlobalVariable<Type>(name))
     {
-        const exprResult& var = lookupGlobal(name);
-
-        isSingleValue = var.isUniform();
-
-        tresult = var.cref<Type>().clone();
+        tvar.cref(lookupGlobal(name));
     }
 
-    if (tresult.valid())
+
+    if (tvar.valid())
     {
+        const auto& var = tvar.cref();
+
+        const Field<Type>& vals = var.cref<Type>();
+
         if
         (
             expectedSize < 0
-         || returnReduce((tresult->size() == expectedSize), andOp<bool>())
+         || returnReduce((vals.size() == expectedSize), andOp<bool>())
         )
         {
-            return tresult;
+            // Return a copy of the field
+            return tmp<Field<Type>>::New(vals);
         }
 
-        if (!isSingleValue)
+        if (!var.isUniform())
         {
             WarningInFunction
                 << "Variable " << name
-                << " is not a single value and does not fit the size "
+                << " is nonuniform and does not fit the size "
                 << expectedSize << ". Using average" << endl;
         }
 
-        return tmp<Field<Type>>::New(expectedSize, gAverage(tresult()));
+        return tmp<Field<Type>>::New(expectedSize, gAverage(vals));
     }
 
     if (mandatory)
@@ -197,7 +198,7 @@ template<class Type>
 bool Foam::expressions::fvExprDriver::isField
 (
     const word& name,
-    bool isPointVal,
+    bool wantPointData,
     label
 ) const
 {
@@ -212,7 +213,7 @@ bool Foam::expressions::fvExprDriver::isField
 
     return
     (
-        isPointVal
+        wantPointData
       ? this->foundField<pfieldType>(name)
       :
         (
@@ -240,17 +241,29 @@ Foam::tmp<GeomField> Foam::expressions::fvExprDriver::getOrReadFieldImpl
             << "> Type: " << GeomField::typeName << endl;
     }
 
+    refPtr<expressions::exprResult> tvar;
+
+    if (hasVariable(name) && variable(name).isType<Type>())
+    {
+        tvar.cref(variable(name));
+    }
+    else if (isGlobalVariable<Type>(name))
+    {
+        tvar.cref(lookupGlobal(name));
+    }
+
+
     tmp<GeomField> tfield;
 
-    if
-    (
-        (hasVariable(name) && variable(name).isType<Type>())
-     || isGlobalVariable<Type>(name, false)
-    )
+    if (tvar.valid())
     {
+        const auto& var = tvar.cref();
+        const Type deflt(var.getValue<Type>());
+
         if (debug)
         {
-            Info<< "Getting " << name << " from variables" << endl;
+            Info<< "Getting " << name << " from variables. Default: "
+                << deflt << endl;
         }
 
         if (debug)
@@ -259,12 +272,15 @@ Foam::tmp<GeomField> Foam::expressions::fvExprDriver::getOrReadFieldImpl
                 << GeomField::typeName << nl;
         }
 
-        tfield.reset
+        tfield = GeomField::New
         (
-            GeomField::New(name, meshRef, dimensioned<Type>(Zero))
+            name,
+            meshRef,
+            dimensioned<Type>(deflt),
+            // Patch is zeroGradient (volFields) or calculated (other)
+            defaultBoundaryType(GeomField::null())
         );
-
-        GeomField& fld = tfield.ref();
+        auto& fld = tfield.ref();
 
         if (debug)
         {
@@ -272,16 +288,7 @@ Foam::tmp<GeomField> Foam::expressions::fvExprDriver::getOrReadFieldImpl
                 << fld.ownedByRegistry() << endl;
         }
 
-        Field<Type> vals;
-
-        if (hasVariable(name) && variable(name).isType<Type>())
-        {
-            vals = variable(name).cref<Type>();
-        }
-        else
-        {
-            vals = lookupGlobal(name).cref<Type>();
-        }
+        const Field<Type>& vals = var.cref<Type>();
 
         if (debug)
         {
@@ -294,7 +301,7 @@ Foam::tmp<GeomField> Foam::expressions::fvExprDriver::getOrReadFieldImpl
         }
         else
         {
-            Type avg = gAverage(vals);
+            const Type avg = gAverage(vals);
 
             bool noWarn = false;
 
@@ -321,21 +328,23 @@ Foam::tmp<GeomField> Foam::expressions::fvExprDriver::getOrReadFieldImpl
 
     const objectRegistry& obr = meshRef.thisDb();
 
-    if (searchInMemory() && obr.foundObject<GeomField>(name))
+    const GeomField* origFldPtr;
+
+    if
+    (
+        searchInMemory()
+     && (origFldPtr = obr.cfindObject<GeomField>(name)) != nullptr
+    )
     {
         if (debug)
         {
             Info<< "Retrieve registered: " << name << nl;
         }
 
-        const GeomField& origFld = obr.lookupObject<GeomField>(name);
+        const GeomField& origFld = *origFldPtr;
 
         // Avoid shadowing the original object
-
-        tfield.reset
-        (
-            GeomField::New(name + "_exprDriverCopy", origFld)
-        );
+        tfield = GeomField::New(name + "_exprDriverCopy", origFld);
 
         if (getOldTime)
         {
@@ -369,9 +378,10 @@ Foam::tmp<GeomField> Foam::expressions::fvExprDriver::getOrReadFieldImpl
         // oldTime automatically read
     }
 
+
     if (debug)
     {
-        Info<< "field: valid()=" << tfield.valid() << endl;
+        Info<< "field: valid()=" << Switch::name(tfield.valid()) << endl;
     }
 
     if (tfield.valid())

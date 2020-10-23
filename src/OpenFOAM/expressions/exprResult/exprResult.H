@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,8 +89,8 @@ class exprResult
         //- Is single, uniform value (can be a non-field)
         bool isUniform_;
 
-        //- Is a point value
-        bool isPointVal_;
+        //- Represents point data
+        bool isPointData_;
 
         //- Whether or not the variable will be reset
         bool noReset_;
@@ -98,7 +98,7 @@ class exprResult
         //- Allow override of noReset_, but only accessible for subclasses
         bool needsReset_;
 
-        //- Size of field or object
+        //- Size (length) of field or object
         label size_;
 
         //- A %union of single values, including standard VectorSpace types
@@ -112,7 +112,7 @@ class exprResult
             symmTensor symmTensor_;
             sphericalTensor sphTensor_;
 
-            //- Construct null, zero-initialized
+            //- Default construct, zero-initialized
             singleValue();
 
             //- Copy construct
@@ -126,21 +126,24 @@ class exprResult
             inline const T& get() const
             {
                 WarningInFunction
-                    << "Not implemented for type " << pTraits<T>::typeName << nl;
+                    << "Not implemented for type "
+                    << pTraits<T>::typeName << nl;
                 return pTraits<T>::zero;
             }
 
-            //- Set new value for specified type. Returns updated value.
+            //- Set new value for specified type.
+            //  \return updated value
             template<class T>
             inline const T& set(const T& val)
             {
                 WarningInFunction
-                    << "Not implemented for type " << pTraits<T>::typeName << nl;
+                    << "Not implemented for type "
+                    << pTraits<T>::typeName << nl;
                 return val;
             }
         };
 
-        //- The single value
+        //- The single value representation
         singleValue single_;
 
         //- Allocated plain field (eg, scalarField)
@@ -182,7 +185,7 @@ class exprResult
             const bool parRun
         ) const;
 
-        //- Type-checked retrieval of uniform field from current results
+        //- Type-checked retrieval of \c bool uniform field from current result
         //  \return True if the type check was satisfied
         bool getUniformCheckedBool
         (
@@ -233,13 +236,13 @@ class exprResult
 
 
         template<class Type>
-        inline void setResultImpl(Field<Type>*, bool isPointVal=false);
+        inline void setResultImpl(Field<Type>*, bool wantPointData=false);
 
         template<class Type>
-        inline void setResultImpl(const Field<Type>&, bool isPointVal=false);
+        inline void setResultImpl(const Field<Type>&, bool wantPointData=false);
 
         template<class Type>
-        inline void setResultImpl(Field<Type>&&, bool isPointVal=false);
+        inline void setResultImpl(Field<Type>&&, bool wantPointData=false);
 
         template<class Type>
         inline void setResultImpl(const Type& val, const label len);
@@ -250,19 +253,13 @@ class exprResult
         template<class Type>
         inline void setObjectResultImpl(Type* ptr);
 
-        template<class Type>
-        inline void setObjectResultImpl(autoPtr<Type>& ap);
-
-        template<class Type>
-        inline void setObjectResultImpl(autoPtr<Type>&& ap);
-
 
 protected:
 
     // Protected Member Functions
 
         //- Simulate virtual templated methods
-        inline virtual exprResult& target() { return *this; }
+        inline virtual expressions::exprResult& target() { return *this; }
 
         //- Reset at new timestep according to the derived class type
         virtual void resetImpl();
@@ -309,7 +306,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         exprResult();
 
         //- Copy construct
@@ -328,23 +325,19 @@ public:
 
         //- Construct by copying a field
         template<class Type>
-        exprResult(const Field<Type>& f);
+        explicit exprResult(const Field<Type>& fld);
 
         //- Construct by moving a field
         template<class Type>
-        exprResult(Field<Type>&& f);
+        explicit exprResult(Field<Type>&& fld);
 
         //- Construct for an IOobject
         template<class Type>
-        exprResult(autoPtr<Type>& ap);
-
-        //- Construct for an IOobject
-        template<class Type>
-        exprResult(autoPtr<Type>&& ap);
+        explicit exprResult(autoPtr<Type>&& obj);
 
         //- Construct from a dimensioned value
         template<class Type>
-        exprResult(const dimensioned<Type>& f);
+        explicit exprResult(const dimensioned<Type>& dt);
 
         #undef exprResult_Construct
         #define exprResult_Construct(Type)                                \
@@ -390,8 +383,9 @@ public:
         //- Basic type for the field or single value
         inline const word& valueType() const;
 
-        //- True if representing point values, or test if same as isPointVal
-        inline bool isPointValue(const bool isPointVal = true) const;
+        //- True if representing point data,
+        //- or test for same value as wantPointData argument
+        inline bool isPointData(const bool wantPointData=true) const;
 
         //- True if single, uniform value
         inline bool isUniform() const;
@@ -399,6 +393,12 @@ public:
         //- True if valueType corresponds to the given Type
         template<class Type>
         inline bool isType() const;
+
+        //- Return a single value when isUniform() is true,
+        //- or Zero when it is non-uniform or if the type mismatches,
+        //- which means that it can generally be considered as failsafe.
+        template<class Type>
+        inline Type getValue() const;
 
         //- True if valueType is a bool
         inline bool isBool() const;
@@ -436,15 +436,15 @@ public:
 
         //- Set result field, taking ownership of the pointer
         template<class Type>
-        inline void setResult(Field<Type>*, bool isPointVal=false);
+        inline void setResult(Field<Type>*, bool wantPointData=false);
 
         //- Set result field, taking copy of the field contents
         template<class Type>
-        inline void setResult(const Field<Type>& fld, bool isPointVal=false);
+        inline void setResult(const Field<Type>&, bool wantPointData=false);
 
         //- Set result field, moving field contents
         template<class Type>
-        inline void setResult(Field<Type>&&, bool isPointVal=false);
+        inline void setResult(Field<Type>&&, bool wantPointData=false);
 
         //- Set uniform result field of given size
         template<class Type>
@@ -454,11 +454,9 @@ public:
         template<class Type>
         inline void setSingleValue(const Type& val);
 
+        //- Set result object
         template<class Type>
-        inline void setObjectResult(autoPtr<Type>& o);
-
-        template<class Type>
-        inline void setObjectResult(autoPtr<Type>&& o);
+        inline void setObjectResult(autoPtr<Type>&& obj);
 
 
     // Access/Get results

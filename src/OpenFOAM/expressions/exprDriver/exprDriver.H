@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2010-2018 Bernhard Gschaider
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -284,7 +284,7 @@ public:
 
         //- Return the expression result as a tmp field
         template<class Type>
-        tmp<Field<Type>> getResult(bool isPointVal=false);
+        tmp<Field<Type>> getResult(bool wantPointData=false);
 
         //- The result type as word - same as result().valueType()
         virtual word getResultType() const
@@ -388,7 +388,7 @@ public:
         bool isLocalVariable
         (
             const word& name,
-            bool isPointVal,
+            bool wantPointData = false,
             label expectedSize = -1
         ) const;
 
@@ -424,7 +424,7 @@ public:
         evaluate
         (
             const expressions::exprString& expr,
-            bool isPointVal = false
+            bool wantPointData = false
         );
 
         //- Evaluate the expression and return a single value
@@ -432,7 +432,7 @@ public:
         inline Type evaluateUniform
         (
             const expressions::exprString& expr,
-            bool isPointVal = false
+            bool wantPointData = false
         );
 
 

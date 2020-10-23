@@ -33,18 +33,18 @@ namespace Foam
 namespace expressions
 {
     #undef  defineExpressionMethod
-    #define defineExpressionMethod(Type, Var)                                 \
+    #define defineExpressionMethod(Type, Member)                              \
         template<>                                                            \
         inline const Type& exprResult::singleValue::get<Type>() const         \
         {                                                                     \
-            return Var;                                                       \
+            return Member;                                                    \
         }                                                                     \
                                                                               \
         template<>                                                            \
         inline const Type& exprResult::singleValue::set(const Type& val)      \
         {                                                                     \
-            Var = val;                                                        \
-            return Var;                                                       \
+            Member = val;                                                     \
+            return Member;                                                    \
         }
 
     defineExpressionMethod(bool, bool_);
@@ -67,6 +67,7 @@ template<class Type>
 inline bool Foam::expressions::exprResult::deleteChecked()
 {
     const bool ok = isType<Type>();
+
     if (ok && fieldPtr_ != nullptr)
     {
         delete static_cast<Field<Type>*>(fieldPtr_);
@@ -88,6 +89,7 @@ inline bool Foam::expressions::exprResult::readChecked
 )
 {
     const bool ok = isType<Type>();
+
     if (ok)
     {
         uglyDelete();
@@ -190,52 +192,43 @@ bool Foam::expressions::exprResult::multiplyEqChecked
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::expressions::exprResult::exprResult(const Field<Type>& f)
+Foam::expressions::exprResult::exprResult(const Field<Type>& fld)
 :
     exprResult()
 {
     DebugInFunction << nl;
 
-    setResult(f);
+    setResult(fld);
 }
 
 
 template<class Type>
-Foam::expressions::exprResult::exprResult(Field<Type>&& f)
+Foam::expressions::exprResult::exprResult(Field<Type>&& fld)
 :
     exprResult()
 {
     DebugInFunction << nl;
 
-    setResult(std::move(f));
+    setResult(std::move(fld));
 }
 
 
 template<class Type>
-Foam::expressions::exprResult::exprResult(autoPtr<Type>& o)
+Foam::expressions::exprResult::exprResult(autoPtr<Type>&& obj)
 :
     exprResult()
 {
-    setObjectResult(o);
+    setObjectResult(std::move(obj));
 }
 
 
 template<class Type>
-Foam::expressions::exprResult::exprResult(autoPtr<Type>&& o)
-:
-    exprResult()
-{
-    setObjectResult(o);
-}
-
-
-template<class Type>
-Foam::expressions::exprResult::exprResult(const dimensioned<Type>& f)
+Foam::expressions::exprResult::exprResult(const dimensioned<Type>& dt)
 :
     exprResult()
 {
     DebugInFunction << nl;
-    setSingleValue(f.value());
+    setSingleValue(dt.value());
 }
 
 
@@ -253,12 +246,12 @@ inline const Foam::word& Foam::expressions::exprResult::valueType() const
 }
 
 
-inline bool Foam::expressions::exprResult::isPointValue
+inline bool Foam::expressions::exprResult::isPointData
 (
-    const bool isPointVal
+    const bool wantPointData
 ) const
 {
-    return isPointVal_ == isPointVal;
+    return isPointData_ == wantPointData;
 }
 
 
@@ -272,6 +265,18 @@ template<class Type>
 inline bool Foam::expressions::exprResult::isType() const
 {
     return valType_ == pTraits<Type>::typeName;
+}
+
+
+template<class Type>
+inline Type Foam::expressions::exprResult::getValue() const
+{
+    if (!isUniform_ || !isType<Type>())
+    {
+        return Zero;
+    }
+
+    return single_.get<Type>();
 }
 
 
@@ -297,12 +302,12 @@ template<class Type>
 void Foam::expressions::exprResult::setResult
 (
     const Field<Type>& val,
-    bool isPointVal
+    bool wantPointData
 )
 {
     DebugInFunction << nl;
 
-    target().setResultImpl(val, isPointVal);
+    target().setResultImpl(val, wantPointData);
 }
 
 
@@ -310,12 +315,12 @@ template<class Type>
 void Foam::expressions::exprResult::setResult
 (
     Field<Type>&& val,
-    bool isPointVal
+    bool wantPointData
 )
 {
     DebugInFunction << nl;
 
-    target().setResultImpl(val, isPointVal);
+    target().setResultImpl(val, wantPointData);
 }
 
 
@@ -323,7 +328,7 @@ template<class Type>
 void Foam::expressions::exprResult::setResultImpl
 (
     const Field<Type>& fld,
-    bool isPointVal
+    bool wantPointData
 )
 {
     DebugInFunction << nl;
@@ -331,7 +336,7 @@ void Foam::expressions::exprResult::setResultImpl
     clear();
 
     isUniform_ = false;
-    isPointVal_ = isPointVal;
+    isPointData_ = wantPointData;
 
     size_ = fld.size();
     valType_ = pTraits<Type>::typeName;
@@ -345,7 +350,7 @@ template<class Type>
 void Foam::expressions::exprResult::setResultImpl
 (
     Field<Type>&& fld,
-    bool isPointVal
+    bool wantPointData
 )
 {
     DebugInFunction << nl;
@@ -353,7 +358,7 @@ void Foam::expressions::exprResult::setResultImpl
     clear();
 
     isUniform_ = false;
-    isPointVal_ = isPointVal;
+    isPointData_ = wantPointData;
 
     size_ = fld.size();
     valType_ = pTraits<Type>::typeName;
@@ -364,44 +369,26 @@ void Foam::expressions::exprResult::setResultImpl
 
 
 template<class Type>
-void Foam::expressions::exprResult::setObjectResult(autoPtr<Type>& ap)
+void Foam::expressions::exprResult::setObjectResult(autoPtr<Type>&& obj)
 {
-    target().setObjectResultImpl(ap.ptr());
-}
-
-
-template<class Type>
-void Foam::expressions::exprResult::setObjectResult(autoPtr<Type>&& ap)
-{
-    target().setObjectResultImpl(ap.ptr());
+    target().setObjectResultImpl(obj.ptr());  // release()
 }
 
 
 template<class T>
 void Foam::expressions::exprResult::setObjectResultImpl(T* ptr)
 {
-    DebugInFunction << nl;
+    clear();
 
     isUniform_ = false;
-    isPointVal_ = false;
+    isPointData_ = false;
 
-    size_ = ptr->size();
-    valType_ = ptr->typeName;
-    objectPtr_.reset(ptr);
-}
-
-
-template<class T>
-void Foam::expressions::exprResult::setObjectResultImpl(autoPtr<T>& o)
-{
-    setObjectResultImpl(o.ptr());
-}
-
-
-template<class T>
-void Foam::expressions::exprResult::setObjectResultImpl(autoPtr<T>&& o)
-{
-    setObjectResultImpl(o.ptr());
+    if (ptr != nullptr)
+    {
+        size_ = ptr->size();
+        valType_ = ptr->typeName;
+        objectPtr_.reset(ptr);
+    }
 }
 
 
@@ -409,10 +396,10 @@ template<class Type>
 void Foam::expressions::exprResult::setResult
 (
     Field<Type>* fldPtr,
-    bool isPointVal
+    bool wantPointData
 )
 {
-    target().setResultImpl(fldPtr, isPointVal);
+    target().setResultImpl(fldPtr, wantPointData);
 }
 
 
@@ -420,19 +407,20 @@ template<class Type>
 void Foam::expressions::exprResult::setResultImpl
 (
     Field<Type>* fldPtr,
-    bool isPointVal
+    bool wantPointData
 )
 {
-    DebugInFunction << nl;
-
     clear();
 
-    isPointVal_ = isPointVal;
     isUniform_ = false;
+    isPointData_ = wantPointData;
 
-    size_ = fldPtr->size();
-    valType_ = pTraits<Type>::typeName;
-    fieldPtr_ = fldPtr;
+    if (fldPtr != nullptr)
+    {
+        size_ = fldPtr->size();
+        valType_ = pTraits<Type>::typeName;
+        fieldPtr_ = fldPtr;
+    }
 }
 
 
@@ -458,7 +446,7 @@ void Foam::expressions::exprResult::setResultImpl
 
     clear();
 
-    isPointVal_ = false;
+    isPointData_ = false;
 
     size_ = len;
     valType_ = pTraits<Type>::typeName;
@@ -653,8 +641,8 @@ void Foam::expressions::exprResult::setSingleValueImpl(const Type& val)
 
     clear();
 
-    isPointVal_ = false;
     isUniform_ = true;
+    isPointData_ = false;
 
     single_.set(val);
     size_ = 1;

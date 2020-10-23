@@ -166,7 +166,7 @@ bool Foam::expressions::exprResult::getUniformCheckedBool
         // TODO?
     }
 
-    result.setResult(avg, size);
+    result.setResult<Type>(avg, size);
 
     return true;
 }
@@ -207,7 +207,7 @@ Foam::expressions::exprResult::exprResult()
     refCount(),
     valType_(),
     isUniform_(false),
-    isPointVal_(false),
+    isPointData_(false),
     noReset_(false),
     needsReset_(false),
     size_(0),
@@ -245,7 +245,7 @@ Foam::expressions::exprResult::exprResult
     refCount(),
     valType_(dict.getOrDefault<word>("valueType", "")),
     isUniform_(dict.getOrDefault("isSingleValue", uniform)),
-    isPointVal_(dict.getOrDefault("isPointValue", false)),
+    isPointData_(dict.getOrDefault("isPointValue", false)),
     noReset_(dict.getOrDefault("noReset", false)),
     needsReset_(false),
     size_(0),
@@ -268,20 +268,21 @@ Foam::expressions::exprResult::exprResult
 
         const bool ok =
         (
-            readChecked<bool>("value", dict, len, uniform)
-         || readChecked<scalar>("value", dict, len, uniform)
+            // Just use <scalar> for <label>?
+            readChecked<scalar>("value", dict, len, uniform)
          || readChecked<vector>("value", dict, len, uniform)
          || readChecked<tensor>("value", dict, len, uniform)
          || readChecked<symmTensor>("value", dict, len, uniform)
          || readChecked<sphericalTensor>("value", dict, len, uniform)
+         || readChecked<bool>("value", dict, len, uniform)
         );
 
         if (!ok)
         {
             if (valType_.empty())
             {
-                // For the error message only
-                valType_ = "None";
+                // For error message only
+                valType_ = "none";
             }
 
             FatalErrorInFunction
@@ -316,12 +317,13 @@ Foam::expressions::exprResult::New
 
         if (!cstrIter.found())
         {
-            FatalErrorInLookup
+            FatalIOErrorInLookup
             (
+                dict,
                 "resultType",
                 resultType,
                 *emptyConstructorTablePtr_
-            ) << exit(FatalError);
+            ) << exit(FatalIOError);
         }
 
         DebugInfo
@@ -335,12 +337,13 @@ Foam::expressions::exprResult::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "resultType",
             resultType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     DebugInfo
@@ -384,7 +387,7 @@ void Foam::expressions::exprResult::clear()
 {
     uglyDelete();
     valType_.clear();
-    objectPtr_.reset();
+    objectPtr_.reset(nullptr);
     size_ = 0;
 }
 
@@ -496,7 +499,7 @@ void Foam::expressions::exprResult::operator=(const exprResult& rhs)
 
     valType_ = rhs.valType_;
     isUniform_ = rhs.isUniform_;
-    isPointVal_ = rhs.isPointVal_;
+    isPointData_ = rhs.isPointData_;
     single_ = rhs.single_;
 
     if (rhs.fieldPtr_)
@@ -538,7 +541,7 @@ void Foam::expressions::exprResult::operator=(exprResult&& rhs)
 
     valType_ = rhs.valType_;
     isUniform_ = rhs.isUniform_;
-    isPointVal_ = rhs.isPointVal_;
+    isPointData_ = rhs.isPointData_;
     noReset_ = rhs.noReset_;
     needsReset_ = rhs.needsReset_;
     size_ = rhs.size_;
@@ -596,7 +599,7 @@ void Foam::expressions::exprResult::writeDict
     }
 
     os.writeEntry("resultType", valueType());
-    os.writeEntryIfDifferent<Switch>("noReset_", false, noReset_);
+    os.writeEntryIfDifferent<Switch>("noReset", false, noReset_);
 
     if (fieldPtr_ == nullptr)
     {
@@ -606,7 +609,7 @@ void Foam::expressions::exprResult::writeDict
     {
         os.writeEntry("valueType", valType_);
 
-        os.writeEntryIfDifferent<Switch>("isPointValue", false, isPointVal_);
+        os.writeEntryIfDifferent<Switch>("isPointValue", false, isPointData_);
         os.writeEntry<Switch>("isSingleValue", isUniform_);
 
         const bool ok =

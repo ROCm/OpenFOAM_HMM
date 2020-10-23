@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,51 +36,46 @@ Foam::expressions::patchExpr::parseDriver::getVariableIfAvailable
     const word& name
 ) const
 {
-    bool isPointVal = false;
-    bool isUniformVal = false;
+    bool hasPointData = false;
 
-    tmp<Field<Type>> tfield;
+    refPtr<expressions::exprResult> tvar;
 
     if (hasVariable(name) && variable(name).isType<Type>())
     {
-        const expressions::exprResult& var = variable(name);
-
-        isPointVal = var.isPointValue();
-        isUniformVal = var.isUniform();
-
-        tfield = var.cref<Type>().clone();
+        tvar.cref(variable(name));
+        hasPointData = tvar().isPointData();
     }
-    else if (isGlobalVariable<Type>(name, false))
+    else if (isGlobalVariable<Type>(name))
     {
-        const expressions::exprResult& var = lookupGlobal(name);
-
-        isUniformVal = var.isUniform();
-
-        tfield = var.cref<Type>().clone();
+        tvar.cref(lookupGlobal(name));
     }
 
-    if (tfield.valid())
-    {
-        const label fldLen = tfield().size();
-        const label len = (isPointVal ? this->pointSize() : this->size());
 
-        if (returnReduce((fldLen == len), andOp<bool>()))
+    if (tvar.valid())
+    {
+        const auto& var = tvar.cref();
+        const Field<Type>& vals = var.cref<Type>();
+
+        const label len = (hasPointData ? this->pointSize() : this->size());
+
+        if (returnReduce((vals.size() == len), andOp<bool>()))
         {
-            return tfield;
+            // Return a copy of the field
+            return tmp<Field<Type>>::New(vals);
         }
 
-        if (!isUniformVal)
+        if (!var.isUniform())
         {
             WarningInFunction
                 << "Variable " << name
-                << " does not fit the size and is not a uniform value." << nl
-                << "Using average value" << endl;
+                << " is nonuniform and does not fit the size"
+                << ". Using average" << endl;
         }
 
-        return tmp<Field<Type>>::New(this->size(), gAverage(tfield));
+        return tmp<Field<Type>>::New(this->size(), gAverage(vals));
     }
 
-    return tfield;
+    return nullptr;
 }
 
 

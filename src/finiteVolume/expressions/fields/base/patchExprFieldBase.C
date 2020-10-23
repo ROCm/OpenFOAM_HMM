@@ -39,7 +39,7 @@ void Foam::expressions::patchExprFieldBase::readExpressions
 (
     const dictionary& dict,
     enum expectedTypes expectedType,
-    bool isPointVal
+    bool wantPointData
 )
 {
     if (debug_)
@@ -108,7 +108,7 @@ void Foam::expressions::patchExprFieldBase::readExpressions
         else if (!exprFrac.empty())
         {
             evalFrac = true;
-            if (isPointVal)
+            if (wantPointData)
             {
                 exprFrac = "toPoint(" + exprFrac + ")";
             }
@@ -149,7 +149,7 @@ Foam::expressions::patchExprFieldBase::patchExprFieldBase
 (
     const dictionary& dict,
     enum expectedTypes expectedType,
-    bool isPointVal
+    bool wantPointData
 )
 :
     debug_(dict.getOrDefault("debug", false)),
@@ -158,7 +158,7 @@ Foam::expressions::patchExprFieldBase::patchExprFieldBase
     gradExpr_(),
     fracExpr_()
 {
-    readExpressions(dict, expectedType, isPointVal);
+    readExpressions(dict, expectedType, wantPointData);
 }
 
 
