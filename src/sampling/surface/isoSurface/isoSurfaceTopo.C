@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2019 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1326,7 +1326,7 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
     }
 
 
-    surfZoneList allZones(one(), surfZone("allFaces", allTris.size()));
+    surfZoneList allZones(one{}, surfZone("allFaces", allTris.size()));
 
     MeshStorage::clear();
     MeshStorage updated

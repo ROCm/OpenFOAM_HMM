@@ -209,7 +209,7 @@ void Foam::flowRateInletVelocityFvPatchVectorField::updateCoeffs()
 
     if (volumetric_ || rhoName_ == "none")
     {
-        updateValues(one());
+        updateValues(one{});
     }
     else
     {

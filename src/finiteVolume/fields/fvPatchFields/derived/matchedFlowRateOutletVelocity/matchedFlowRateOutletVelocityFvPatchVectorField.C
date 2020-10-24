@@ -211,7 +211,7 @@ void Foam::matchedFlowRateOutletVelocityFvPatchVectorField::updateCoeffs()
 
     if (volumetric_)
     {
-        updateValues(inletPatchID, one(), one());
+        updateValues(inletPatchID, one{}, one{});
     }
     else
     {

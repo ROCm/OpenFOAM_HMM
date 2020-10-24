@@ -497,7 +497,7 @@ Foam::polyBoundaryMesh::groupPatchIDs() const
                 }
                 else
                 {
-                    groupPatchIDs.insert(groupName, labelList(one(), patchi));
+                    groupPatchIDs.insert(groupName, labelList(one{}, patchi));
                 }
             }
         }

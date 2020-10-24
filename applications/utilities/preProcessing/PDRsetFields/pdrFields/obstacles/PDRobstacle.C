@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -571,7 +571,7 @@ Foam::meshedSurface Foam::PDRobstacle::surface() const
 
             // pts += obs.pt;
 
-            faceList fcs(one(), face(identity(4)));
+            faceList fcs(one{}, face(identity(4)));
 
             surf.transfer(pts, fcs);
 

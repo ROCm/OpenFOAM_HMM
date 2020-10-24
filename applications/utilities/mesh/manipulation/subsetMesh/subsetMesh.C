@@ -446,7 +446,7 @@ int main(int argc, char *argv[])
 
 
     // Default exposed patch id
-    labelList exposedPatchIDs(one(), -1);
+    labelList exposedPatchIDs(one{}, -1);
 
     if (args.found("patches"))
     {

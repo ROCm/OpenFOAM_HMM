@@ -534,7 +534,7 @@ Foam::PDRblock::PDRblock
         bentry.name_ = "patch" + Foam::name(patchi);
         bentry.type_ = "patch";
         bentry.size_ = 0;
-        bentry.faces_ = labelList(one(), patchi);
+        bentry.faces_ = labelList(one{}, patchi);
     }
 
     reset(xgrid, ygrid, zgrid);

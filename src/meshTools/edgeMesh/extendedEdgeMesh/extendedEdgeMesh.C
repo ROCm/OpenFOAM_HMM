@@ -484,7 +484,7 @@ Foam::extendedEdgeMesh::extendedEdgeMesh
     const boolList& surfBaffleRegions
 )
 :
-    extendedEdgeMesh(one::minus())
+    extendedEdgeMesh(one::minus{})
 {
     // Extract and reorder the data from surfaceFeatures
     const triSurface& surf = sFeat.surface();
@@ -547,7 +547,7 @@ Foam::extendedEdgeMesh::extendedEdgeMesh
     const labelUList& featurePoints
 )
 :
-    extendedEdgeMesh(one::minus())
+    extendedEdgeMesh(one::minus{})
 {
     sortPointsAndEdges
     (

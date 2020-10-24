@@ -457,7 +457,7 @@ bool Foam::functionObjects::vtkWrite::write()
                 auto writer = autoPtr<vtk::patchWriter>::New
                 (
                     meshProxy.mesh(),
-                    labelList(one(), pp.index()),
+                    labelList(one{}, pp.index()),
                     writeOpts_,
                     // Output name for patch: "boundary"/name
                     (

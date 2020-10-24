@@ -616,7 +616,7 @@ bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
                 regionToGroups_.insert
                 (
                     regionGroupNames_.last(),
-                    labelList(one(), nGroups)
+                    labelList(one{}, nGroups)
                 );
             }
             groupNames_.append(groupName);

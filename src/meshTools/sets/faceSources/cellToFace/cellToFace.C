@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -161,7 +161,7 @@ Foam::cellToFace::cellToFace
 )
 :
     topoSetFaceSource(mesh),
-    names_(one(), setName),
+    names_(one{}, setName),
     option_(option)
 {}
 
@@ -192,7 +192,7 @@ Foam::cellToFace::cellToFace
 )
 :
     topoSetFaceSource(mesh),
-    names_(one(), word(checkIs(is))),
+    names_(one{}, word(checkIs(is))),
     option_(cellActionNames_.read(checkIs(is)))
 {}
 

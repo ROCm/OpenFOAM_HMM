@@ -258,7 +258,7 @@ Foam::labelList Foam::faBoundaryMesh::indices
 
         if (patchId >= 0)
         {
-            return labelList(one(), patchId);
+            return labelList(one{}, patchId);
         }
     }
 

@@ -122,7 +122,7 @@ HashTable<wordList> extractPatchGroups(const dictionary& boundaryDict)
             }
             else
             {
-                groupToPatch.insert(groupName, wordList(one(), patchName));
+                groupToPatch.insert(groupName, wordList(one{}, patchName));
             }
         }
     }

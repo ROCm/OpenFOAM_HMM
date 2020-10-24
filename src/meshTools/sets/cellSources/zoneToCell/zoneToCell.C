@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,7 +116,7 @@ Foam::zoneToCell::zoneToCell
 )
 :
     topoSetCellSource(mesh),
-    selectedZones_(one(), zoneName)
+    selectedZones_(one{}, zoneName)
 {}
 
 
@@ -146,7 +146,7 @@ Foam::zoneToCell::zoneToCell
 )
 :
     topoSetCellSource(mesh),
-    selectedZones_(one(), wordRe(checkIs(is)))
+    selectedZones_(one{}, wordRe(checkIs(is)))
 {}
 
 

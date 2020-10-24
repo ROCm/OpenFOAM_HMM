@@ -195,7 +195,7 @@ Description
             auto writer = autoPtr<vtk::patchWriter>::New
             (
                 meshProxy.mesh(),
-                labelList(one(), pp.index()),
+                labelList(one{}, pp.index()),
                 writeOpts,
                 nearCellValue,
                 // Output patch: "boundary"/name

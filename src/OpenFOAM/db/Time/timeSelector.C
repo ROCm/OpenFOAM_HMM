@@ -287,7 +287,7 @@ Foam::instantList Foam::timeSelector::selectIfPresent
     }
 
     // No timeSelector option specified. Do not change runTime.
-    return instantList(one(), instant(runTime.value(), runTime.timeName()));
+    return instantList(one{}, instant(runTime.value(), runTime.timeName()));
 }
 
 
