@@ -621,7 +621,7 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::Boundary::operator==
     Boundary& bf
 )
 {
-    forAll((*this), patchi)
+    forAll(*this, patchi)
     {
         this->operator[](patchi) == bf[patchi];
     }
@@ -634,7 +634,7 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::Boundary::operator==
     const FieldField<PatchField, Type>& ptff
 )
 {
-    forAll((*this), patchi)
+    forAll(*this, patchi)
     {
         this->operator[](patchi) == ptff[patchi];
     }
@@ -647,7 +647,7 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::Boundary::operator==
     const Type& t
 )
 {
-    forAll((*this), patchi)
+    forAll(*this, patchi)
     {
         this->operator[](patchi) == t;
     }

@@ -54,7 +54,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class dictionary;
 
 template<class Type, template<class> class PatchField, class GeoMesh>
@@ -95,7 +95,7 @@ class GeometricField
 
 public:
 
-    // Public typedefs
+    // Public Typedefs
 
         //- Type of mesh on which this GeometricField is instantiated
         typedef typename GeoMesh::Mesh Mesh;
@@ -112,11 +112,12 @@ public:
         typedef PatchField<Type> Patch;
 
 
+    //- The boundary fields
     class Boundary
     :
         public FieldField<PatchField, Type>
     {
-        // Private data
+        // Private Data
 
             //- Reference to BoundaryMesh for which this field is defined
             const BoundaryMesh& bmesh_;
@@ -126,8 +127,8 @@ public:
 
         // Constructors
 
-            //- Construct from a BoundaryMesh
-            Boundary(const BoundaryMesh& bmesh);
+            //- Construct from a BoundaryMesh, setting patches later
+            explicit Boundary(const BoundaryMesh& bmesh);
 
             //- Construct from a BoundaryMesh, reference to the internal field
             //- and a patch type
@@ -135,7 +136,7 @@ public:
             (
                 const BoundaryMesh& bmesh,
                 const Internal& field,
-                const word& patchFieldType
+                const word& patchFieldType = PatchField<Type>::calculatedType()
             );
 
             //- Construct from a BoundaryMesh, reference to the internal field
@@ -175,15 +176,12 @@ public:
                 const word& patchFieldName
             );
 
-            //- Construct as copy
+            //- Copy construct
             //  Dangerous because Field may be set to a field which gets deleted
             //  Need new type of BoundaryField, one which is part of a geometric
             //  field for which snGrad etc. may be called and a free standing
             //  BoundaryField for which such operations are unavailable.
-            Boundary
-            (
-                const Boundary& btf
-            );
+            Boundary(const Boundary& btf);
 
             //- Construct from dictionary
             Boundary
@@ -231,7 +229,7 @@ public:
             void writeEntries(Ostream& os) const;
 
 
-        // Member operators
+        // Member Operators
 
             //- Assignment to BoundaryField<Type, PatchField, BoundaryMesh>
             void operator=(const Boundary&);
