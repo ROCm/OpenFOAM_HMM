@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,7 +79,7 @@ inline Foam::MinMax<T>::MinMax(const Pair<T>& range)
 
 
 template<class T>
-inline Foam::MinMax<T>::MinMax(const zero)
+inline Foam::MinMax<T>::MinMax(const Foam::zero)
 :
     Tuple2<T,T>(pTraits<T>::zero, pTraits<T>::zero)
 {}

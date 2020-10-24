@@ -81,7 +81,7 @@ public:
 
         //- Construct for given size (rows == cols)
         //- initializing all elements to zero
-        inline SymmetricSquareMatrix(const label n, const zero);
+        inline SymmetricSquareMatrix(const label n, const Foam::zero);
 
         //- Construct for given size (rows == cols)
         //- initializing all elements to the given value
@@ -102,7 +102,7 @@ public:
     // Member Operators
 
         //- Assign all elements to zero
-        inline void operator=(const zero);
+        inline void operator=(const Foam::zero);
 
         //- Assign all elements to value
         inline void operator=(const Type& val);

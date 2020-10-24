@@ -31,7 +31,7 @@ Description
     A List with indirect addressing.
 
 See also
-    Foam::UIndirectList for a version without any addressing allocation.
+    Foam::UIndirectList for a version without addressing allocation.
 
 SourceFiles
     IndirectListI.H
@@ -63,19 +63,22 @@ public:
 
     // Constructors
 
-        //- Copy construct addressing, shallow copy values list reference
+        //- Copy construct addressing, shallow copy values reference
         inline IndirectList(const UList<T>& values, const labelUList& addr);
 
-        //- Move construct addressing, shallow copy values list reference
+        //- Move construct addressing, shallow copy values reference
         inline IndirectList(const UList<T>& values, labelList&& addr);
 
-        //- Copy construct addressing, shallow copy values list reference
+        //- Zero-sized addressing, shallow copy values reference
+        inline IndirectList(const UList<T>& values, const Foam::zero);
+
+        //- Copy construct addressing, shallow copy values reference
         inline IndirectList(const IndirectList<T>& list);
 
-        //- Move construct addressing, shallow copy values list reference
+        //- Move construct addressing, shallow copy values reference
         inline IndirectList(IndirectList<T>&& list);
 
-        //- Copy construct addressing, shallow copy values list reference
+        //- Copy construct addressing, shallow copy values reference
         inline explicit IndirectList(const UIndirectList<T>& list);
 
 

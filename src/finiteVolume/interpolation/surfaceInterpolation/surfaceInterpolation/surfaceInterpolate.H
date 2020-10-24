@@ -189,9 +189,9 @@ namespace fvc
     );
 
     //- Interpolate 'one' returning 'one'
-    inline one interpolate(const one&)
+    inline Foam::one interpolate(const Foam::one&)
     {
-        return one();
+        return Foam::one{};
     }
 
 

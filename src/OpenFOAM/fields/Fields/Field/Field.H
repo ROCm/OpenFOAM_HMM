@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,7 +81,6 @@ class Field
     public FieldBase,
     public List<Type>
 {
-
 public:
 
     //- Component type
@@ -114,7 +113,16 @@ public:
         inline Field(const label len, const Type& val);
 
         //- Construct given size and initial values of zero
-        inline Field(const label len, const zero);
+        inline Field(const label len, const Foam::zero);
+
+        //- Construct with length=1, copying the value as the only content
+        inline Field(const Foam::one, const Type& val);
+
+        //- Construct with length=1, moving the value as the only content
+        inline Field(const Foam::one, Type&& val);
+
+        //- Construct with length=1, initializing content to zero
+        inline Field(const Foam::one, const Foam::zero);
 
         //- Copy construct
         inline Field(const Field<Type>& fld);
@@ -379,7 +387,7 @@ public:
 
         //- Value assignment
         inline void operator=(const Type& val);
-        inline void operator=(const zero);
+        inline void operator=(const Foam::zero);
 
         template<class Form, class Cmpt, direction nCmpt>
         void operator=(const VectorSpace<Form,Cmpt,nCmpt>&);

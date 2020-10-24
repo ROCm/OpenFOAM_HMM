@@ -61,6 +61,22 @@ inline Foam::IndirectList<T>::IndirectList
 
 
 template<class T>
+inline Foam::IndirectList<T>::IndirectList
+(
+    const UList<T>& values,
+    const Foam::zero
+)
+:
+    IndirectListAddressing<labelList>(labelList()),  // zero-size addressing
+    UIndirectList<T>
+    (
+        values,
+        IndirectListAddressing<labelList>::addressing()
+    )
+{}
+
+
+template<class T>
 inline Foam::IndirectList<T>::IndirectList(const IndirectList<T>& list)
 :
     // Copy addressing

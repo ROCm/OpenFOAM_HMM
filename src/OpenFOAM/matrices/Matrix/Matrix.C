@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -119,7 +119,7 @@ Foam::Matrix<Form, Type>::Matrix(const label m, const label n)
 
 
 template<class Form, class Type>
-Foam::Matrix<Form, Type>::Matrix(const label m, const label n, const zero)
+Foam::Matrix<Form, Type>::Matrix(const label m, const label n, const Foam::zero)
 :
     mRows_(m),
     nCols_(n),
@@ -538,7 +538,7 @@ void Foam::Matrix<Form, Type>::operator=(const Type& val)
 
 
 template<class Form, class Type>
-void Foam::Matrix<Form, Type>::operator=(const zero)
+void Foam::Matrix<Form, Type>::operator=(const Foam::zero)
 {
     std::fill(begin(), end(), Zero);
 }

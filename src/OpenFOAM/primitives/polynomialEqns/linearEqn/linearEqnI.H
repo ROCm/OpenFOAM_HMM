@@ -34,7 +34,7 @@ inline Foam::linearEqn::linearEqn()
 
 inline Foam::linearEqn::linearEqn(const Foam::zero)
 :
-    VectorSpace<linearEqn, scalar, 2>(Foam::zero())
+    VectorSpace<linearEqn, scalar, 2>(Foam::zero{})
 {}
 
 

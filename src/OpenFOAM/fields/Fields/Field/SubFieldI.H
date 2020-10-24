@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -161,7 +161,7 @@ inline void Foam::SubField<Type>::operator=(const Type& val)
 
 
 template<class Type>
-inline void Foam::SubField<Type>::operator=(const zero)
+inline void Foam::SubField<Type>::operator=(const Foam::zero)
 {
     SubList<Type>::operator=(Zero);
 }

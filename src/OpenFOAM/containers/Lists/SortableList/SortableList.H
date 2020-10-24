@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,7 +81,7 @@ public:
 
         //- Construct zero-initialized with given size, sort later.
         //  The indices remain empty until the list is sorted
-        inline SortableList(const label size, const zero);
+        inline SortableList(const label size, const Foam::zero);
 
         //- Construct given size and initial value, sorting later.
         //  The indices remain empty until the list is sorted

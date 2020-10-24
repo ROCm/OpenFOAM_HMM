@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,78 +57,73 @@ class geometricOneField
 :
     public one
 {
-
 public:
 
-    // Public typedefs
+    // Public Typedefs
 
         typedef oneField Internal;
         typedef oneField Patch;
         typedef oneFieldField Boundary;
         typedef one cmptType;
 
+
     // Constructors
 
-        //- Construct null
-        geometricOneField()
-        {}
+        //- Default construct
+        geometricOneField() noexcept = default;
+
+
+    // Member Functions
+
+        const dimensionSet& dimensions() const noexcept
+        {
+            return dimless;
+        }
+
+        oneField field() const noexcept
+        {
+            return oneField{};
+        }
+
+        oneField oldTime() const noexcept
+        {
+            return oneField{};
+        }
+
+        Internal internalField() const noexcept
+        {
+            return Internal{};
+        }
+
+        Internal primitiveField() const noexcept
+        {
+            return Internal{};
+        }
+
+        Boundary boundaryField() const noexcept
+        {
+            return Boundary{};
+        }
+
+        // Same as internalField()
+        Internal v() const noexcept
+        {
+            return Internal{};
+        }
 
 
     // Member Operators
 
-        inline const dimensionSet& dimensions() const;
+        one operator[](const label) const noexcept
+        {
+            return one{};
+        }
 
-        inline one operator[](const label) const;
-
-        inline oneField field() const;
-
-        inline oneField oldTime() const;
-
-        inline Internal operator()() const;
-
-        inline Internal v() const;
-
-        inline typename Internal::FieldType primitiveField() const;
-
-        inline Boundary boundaryField() const;
+        Internal operator()() const noexcept
+        {
+            return Internal{};
+        }
 };
-
-
-inline const geometricOneField& operator*
-(
-    const geometricOneField&,
-    const geometricOneField&
-);
-
-inline const geometricOneField::Internal& operator*
-(
-    const geometricOneField::Internal&,
-    const geometricOneField&
-);
-
-inline const geometricOneField::Internal& operator*
-(
-    const geometricOneField&,
-    const geometricOneField::Internal&
-);
-
-inline const geometricOneField& operator/
-(
-    const geometricOneField&,
-    const geometricOneField&
-);
-
-inline const geometricOneField::Internal& operator/
-(
-    const geometricOneField::Internal&,
-    const geometricOneField&
-);
-
-inline const geometricOneField::Internal& operator/
-(
-    const geometricOneField&,
-    const geometricOneField::Internal&
-);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -135,6 +131,8 @@ inline const geometricOneField::Internal& operator/
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Global Operators
 
 #include "geometricOneFieldI.H"
 

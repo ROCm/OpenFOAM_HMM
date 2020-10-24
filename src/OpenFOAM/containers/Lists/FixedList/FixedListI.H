@@ -53,7 +53,7 @@ inline Foam::FixedList<T, N>::FixedList(const T& val)
 
 
 template<class T, unsigned N>
-inline Foam::FixedList<T, N>::FixedList(const zero)
+inline Foam::FixedList<T, N>::FixedList(const Foam::zero)
 {
     for (unsigned i=0; i<N; ++i)
     {

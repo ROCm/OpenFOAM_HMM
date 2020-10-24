@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
 
         tensorField tf1(2, tensor(1, 2, 3, 4, 5, 6, 7, 8, 9));
         tf1.last() = tf1.last().T();
-        scalarField f1(2, one());
+        scalarField f1(2, one{});
 
         symmTensorField sf1(2, symmTensor::one);
         symmTensorField sf2(2, symmTensor::one);
@@ -210,9 +210,9 @@ int main(int argc, char *argv[])
     {
         Info<< nl << "sphericalTensorField" << nl;
 
-        scalarField f1(2, one());
-        sphericalTensorField sf1(2, 1);
-        sphericalTensorField sf2(2, 2);
+        scalarField f1(2, one{});
+        sphericalTensorField sf1(2, sphericalTensor(1));
+        sphericalTensorField sf2(2, sphericalTensor(2));
         tensorField tf1(2, tensor::one);
 
         Info<< (tf1 & sf2) << nl;

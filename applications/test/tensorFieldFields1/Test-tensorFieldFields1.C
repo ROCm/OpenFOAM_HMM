@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
         Info<< nl << "tensorFieldField" << nl;
 
         FieldField<Field, tensor> tff1(1);
-        tff1.set(0, new tensorField(1, t19));
+        tff1.set(0, new tensorField(one{}, t19));
 
         FixedList<FieldField<Field, scalar>, 9> cmpts;
         allocComponents(cmpts, 1);
@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
         Info<< nl << "symmTensorField" << nl;
 
         FieldField<Field, symmTensor> sf1(1);
-        sf1.set(0, new symmTensorField(1, symmTensor(1, 2, 3, 4, 5, 6)));
+        sf1.set(0, new symmTensorField(one{}, symmTensor(1, 2, 3, 4, 5, 6)));
 
         FixedList<FieldField<Field, scalar>, 6> cmpts;
         allocComponents(cmpts, 1);
@@ -224,7 +224,7 @@ int main(int argc, char *argv[])
         Info<< nl << "sphericalTensorField" << nl;
 
         FieldField<Field, sphericalTensor> sf1(1);
-        sf1.set(0, new sphericalTensorField(1, sphericalTensor(4)));
+        sf1.set(0, new sphericalTensorField(one{}, sphericalTensor(4)));
 
         FixedList<FieldField<Field, scalar>, 1> cmpts;
         allocComponents(cmpts, 1);

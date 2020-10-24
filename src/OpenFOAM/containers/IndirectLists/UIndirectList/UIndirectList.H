@@ -71,13 +71,13 @@ public:
 
     // Constructors
 
-        //- Shallow copy values and addressing arrays
+        //- Shallow copy values and addressing
         UIndirectList(const UList<T>& values, const labelUList& addr)
         :
             IndirectListBase<T, labelUList>(values, addr)
         {}
 
-        //- Copy construct (shallow copy of values and addressing arrays)
+        //- Copy construct (shallow copy values and addressing)
         UIndirectList(const UIndirectList<T>& list)
         :
             UIndirectList<T>(list.values(), list.addressing())

@@ -150,7 +150,7 @@ public:
         inline explicit FixedList(const T& val);
 
         //- Construct and initialize all entries to zero
-        inline explicit FixedList(const zero);
+        inline explicit FixedList(const Foam::zero);
 
         //- Copy construct from C-array
         inline explicit FixedList(const T list[N]);

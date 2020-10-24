@@ -59,33 +59,33 @@ public:
 
     // Constructors
 
-        //- Construct null
-        zeroField() = default;
+        //- Default construct
+        zeroField() noexcept = default;
 
 
     // Member Functions
 
-        zeroField field() const
+        zeroField field() const noexcept
         {
-            return zeroField();
+            return zeroField{};
         }
 
 
     // Member Operators
 
-        scalar operator[](const label) const
+        scalar operator[](const label) const noexcept
         {
             return scalar(0);
         }
 
-        zeroField operator()() const
+        zeroField operator()() const noexcept
         {
-            return zeroField();
+            return zeroField{};
         }
 
-        zeroField operator-() const
+        zeroField operator-() const noexcept
         {
-            return zeroField();
+            return zeroField{};
         }
 };
 
@@ -95,6 +95,8 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Global Operators
 
 #include "zeroFieldI.H"
 

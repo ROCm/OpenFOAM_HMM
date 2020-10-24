@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,7 +81,7 @@ public:
         inline IjkField(const labelVector& ijk, const Type& val);
 
         //- Construct with sizing information and initial values of zero
-        inline IjkField(const labelVector& ijk, const zero);
+        inline IjkField(const labelVector& ijk, const Foam::zero);
 
         //- Copy construct from components
         inline IjkField(const labelVector& ijk, const UList<Type>& list);
@@ -161,7 +161,7 @@ public:
 
         //- Value assignment
         inline void operator=(const Type& val);
-        inline void operator=(const zero);
+        inline void operator=(const Foam::zero);
 
 };
 

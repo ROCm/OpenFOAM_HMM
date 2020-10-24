@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,15 +59,15 @@ public:
 
     // Constructors
 
-        //- Construct null
-        oneFieldField() = default;
+        //- Default construct
+        oneFieldField() noexcept = default;
 
 
     // Member Operators
 
-        oneField operator[](const label) const
+        oneField operator[](const label) const noexcept
         {
-            return oneField();
+            return oneField{};
         }
 };
 

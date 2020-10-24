@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -172,7 +172,7 @@ void Foam::UList<T>::operator=(const T& val)
 
 
 template<class T>
-void Foam::UList<T>::operator=(const zero)
+void Foam::UList<T>::operator=(const Foam::zero)
 {
     const label len = this->size();
 

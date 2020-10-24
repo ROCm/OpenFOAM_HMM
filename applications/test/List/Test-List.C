@@ -606,14 +606,14 @@ int main(int argc, char *argv[])
         }
 
         {
-            labelListList listlist(one(), identity(5));
+            labelListList listlist(one{}, identity(5));
             Info<<"list-list 1/val:" << listlist << nl;
         }
 
         {
             labelList content = identity(5);
 
-            labelListList listlist(one(), content);
+            labelListList listlist(one{}, content);
             Info<<"list-list 1/copy val:" << listlist
                 <<" - from " << content << nl;
         }
@@ -621,13 +621,13 @@ int main(int argc, char *argv[])
         {
             labelList content = identity(5);
 
-            labelListList listlist(one(), std::move(content));
+            labelListList listlist(one{}, std::move(content));
             Info<<"list-list 1/move val:" << listlist
                 <<" - from " << content << nl;
         }
 
         {
-            labelListList listlist(one(), Zero);
+            labelListList listlist(one{}, Zero);
             Info<<"list-list 1/move val:" << listlist
                 << nl;
         }

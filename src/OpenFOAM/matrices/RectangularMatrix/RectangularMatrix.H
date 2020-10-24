@@ -84,7 +84,12 @@ public:
 
         //- Construct given number of rows/columns
         //- initializing all elements to zero
-        inline RectangularMatrix(const label m, const label n, const zero);
+        inline RectangularMatrix
+        (
+            const label m,
+            const label n,
+            const Foam::zero
+        );
 
         //- Construct given number of rows/columns
         //- initializing all elements to the given value
@@ -93,14 +98,18 @@ public:
         //- Construct for given number of rows/columns
         //- initializing all elements to zero, and diagonal to one
         template<class AnyType>
-        inline RectangularMatrix(const labelPair& dims, const Identity<AnyType>);
+        inline RectangularMatrix
+        (
+            const labelPair& dims,
+            const Identity<AnyType>
+        );
 
         //- Construct given number of rows/columns by using a label pair
         inline explicit RectangularMatrix(const labelPair& dims);
 
         //- Construct given number of rows/columns by using a label pair
         //- and initializing all elements to zero
-        inline RectangularMatrix(const labelPair& dims, const zero);
+        inline RectangularMatrix(const labelPair& dims, const Foam::zero);
 
         //- Construct given number of rows/columns by using a label pair
         //- and initializing all elements to the given value
@@ -127,7 +136,7 @@ public:
     // Member Operators
 
         //- Assign all elements to zero
-        inline void operator=(const zero);
+        inline void operator=(const Foam::zero);
 
         //- Assign all elements to value
         inline void operator=(const Type& val);

@@ -82,7 +82,7 @@ public:
         explicit DiagonalMatrix<Type>(const label n);
 
         //- Construct from size and initialise all elems to zero
-        DiagonalMatrix<Type>(const label n, const zero);
+        DiagonalMatrix<Type>(const label n, const Foam::zero);
 
         //- Construct from size and initialise all elems to value
         DiagonalMatrix<Type>(const label n, const Type& val);

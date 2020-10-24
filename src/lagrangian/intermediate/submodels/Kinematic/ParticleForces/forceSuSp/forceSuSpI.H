@@ -28,7 +28,7 @@ License
 
 // * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * * //
 
-inline Foam::forceSuSp::forceSuSp(const zero)
+inline Foam::forceSuSp::forceSuSp(const Foam::zero)
 :
     Tuple2<vector, scalar>(vector::zero, 0)
 {}

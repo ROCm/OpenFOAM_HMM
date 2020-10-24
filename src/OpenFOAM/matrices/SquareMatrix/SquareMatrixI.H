@@ -48,7 +48,7 @@ template<class Type>
 inline Foam::SquareMatrix<Type>::SquareMatrix
 (
     const label n,
-    const zero
+    const Foam::zero
 )
 :
     Matrix<SquareMatrix<Type>, Type>(n, n, Zero)
@@ -118,7 +118,7 @@ template<class Type>
 inline Foam::SquareMatrix<Type>::SquareMatrix
 (
     const labelPair& dims,
-    const zero
+    const Foam::zero
 )
 :
     Matrix<SquareMatrix<Type>, Type>(dims, Zero)
@@ -145,7 +145,7 @@ inline Foam::SquareMatrix<Type>::SquareMatrix
 (
     const label m,
     const label n,
-    const zero
+    const Foam::zero
 )
 :
     Matrix<SquareMatrix<Type>, Type>(m, n, Zero)
@@ -291,7 +291,7 @@ inline bool Foam::SquareMatrix<Type>::tridiagonal() const
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Type>
-inline void Foam::SquareMatrix<Type>::operator=(const zero)
+inline void Foam::SquareMatrix<Type>::operator=(const Foam::zero)
 {
     Matrix<SquareMatrix<Type>, Type>::operator=(Zero);
 }

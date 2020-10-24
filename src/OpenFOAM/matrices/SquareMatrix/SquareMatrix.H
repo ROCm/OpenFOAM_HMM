@@ -87,7 +87,7 @@ public:
 
         //- Construct for given size (rows == cols)
         //- initializing all elements to zero
-        inline SquareMatrix(const label n, const zero);
+        inline SquareMatrix(const label n, const Foam::zero);
 
         //- Construct for given size (rows == cols)
         //- initializing all elements to the given value
@@ -112,7 +112,7 @@ public:
         //- by using a labelPair (checked to be equal)
         //- and initializing all elements to zero
         //  For constructor consistency with rectangular matrices
-        inline SquareMatrix(const labelPair& dims, const zero);
+        inline SquareMatrix(const labelPair& dims, const Foam::zero);
 
         //- Construct given number of rows/columns
         //- by using a labelPair (checked to be equal)
@@ -122,7 +122,7 @@ public:
 
         //- Construct given number of rows/columns (checked to be equal)
         //- initializing all elements to zero
-        inline SquareMatrix(const label m, const label n, const zero);
+        inline SquareMatrix(const label m, const label n, const Foam::zero);
 
         //- Construct from const sub-matrix block
         template<class MatrixType>
@@ -182,7 +182,7 @@ public:
     // Member Operators
 
         //- Assign all elements to zero
-        inline void operator=(const zero);
+        inline void operator=(const Foam::zero);
 
         //- Assign all elements to value
         inline void operator=(const Type& val);

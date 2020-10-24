@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,60 +23,41 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::zeroFieldField
+Application
+    Test-constantields
 
 Description
-    A class representing the concept of a field of zeroFields used to
-    avoid unnecessary manipulations for objects which are known to be zero at
-    compile-time.
-
-    Used for example as the density argument to a function written for
-    compressible to be used for incompressible flow.
+    Simple compilation tests for constant fields
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef zeroFieldField_H
-#define zeroFieldField_H
-
-#include "zeroField.H"
+#include "fvCFD.H"
+#include "geometricOneField.H"
+#include "geometricZeroField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
 
-/*---------------------------------------------------------------------------*\
-                       Class zeroFieldField Declaration
-\*---------------------------------------------------------------------------*/
+    {
+        geometricZeroField fld0;
+        geometricOneField fld1;
 
-class zeroFieldField
-:
-    public zero
-{
-public:
+        Info<< "dims 0: " << fld0.dimensions() << nl;
+        Info<< "internal 0: " << scalar(fld0.internalField()[0]) << nl;
+        Info<< "boundary 0: " << scalar(fld0.boundaryField()[0][0]) << nl;
 
-    // Constructors
+        Info<< "dims 1: " << fld1.dimensions() << nl;
+        Info<< "internal 1: " << scalar(fld1.internalField()[0]) << nl;
+        Info<< "boundary 1: " << scalar(fld1.boundaryField()[0][0]) << nl;
+    }
 
-        //- Default construct
-        zeroFieldField() noexcept = default;
+    Info<< "\nDone\n" << endl;
 
+    return 0;
+}
 
-    // Member Operators
-
-        zeroField operator[](const label) const noexcept
-        {
-            return zeroField{};
-        }
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

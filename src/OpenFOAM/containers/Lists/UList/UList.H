@@ -365,7 +365,7 @@ public:
         void operator=(const T& val);
 
         //- Assignment of all entries to zero
-        void operator=(const zero);
+        void operator=(const Foam::zero);
 
 
     // Random access iterator (non-const)

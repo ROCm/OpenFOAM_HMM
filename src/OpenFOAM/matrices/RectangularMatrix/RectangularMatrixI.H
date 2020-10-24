@@ -54,7 +54,7 @@ inline Foam::RectangularMatrix<Type>::RectangularMatrix
 (
     const label m,
     const label n,
-    const zero
+    const Foam::zero
 )
 :
     Matrix<RectangularMatrix<Type>, Type>(m, n, Zero)
@@ -104,7 +104,7 @@ template<class Type>
 inline Foam::RectangularMatrix<Type>::RectangularMatrix
 (
     const labelPair& dims,
-    const zero
+    const Foam::zero
 )
 :
     RectangularMatrix<Type>(dims.first(), dims.second(), Zero)
@@ -172,7 +172,7 @@ Foam::RectangularMatrix<Type>::clone() const
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Type>
-inline void Foam::RectangularMatrix<Type>::operator=(const zero)
+inline void Foam::RectangularMatrix<Type>::operator=(const Foam::zero)
 {
     Matrix<RectangularMatrix<Type>, Type>::operator=(Zero);
 }

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,9 +49,30 @@ inline Foam::Field<Type>::Field(const label len, const Type& val)
 
 
 template<class Type>
-inline Foam::Field<Type>::Field(const label len, const zero)
+inline Foam::Field<Type>::Field(const label len, const Foam::zero)
 :
     List<Type>(len, Zero)
+{}
+
+
+template<class Type>
+inline Foam::Field<Type>::Field(const Foam::one, const Type& val)
+:
+    List<Type>(Foam::one{}, val)
+{}
+
+
+template<class Type>
+inline Foam::Field<Type>::Field(const Foam::one, Type&& val)
+:
+    List<Type>(Foam::one{}, std::move(val))
+{}
+
+
+template<class Type>
+inline Foam::Field<Type>::Field(const Foam::one, const Foam::zero)
+:
+    List<Type>(Foam::one{}, Zero)
 {}
 
 
@@ -181,7 +202,7 @@ inline void Foam::Field<Type>::operator=(const Type& val)
 
 
 template<class Type>
-inline void Foam::Field<Type>::operator=(const zero)
+inline void Foam::Field<Type>::operator=(const Foam::zero)
 {
     List<Type>::operator=(Zero);
 }

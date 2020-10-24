@@ -74,7 +74,7 @@ public:
         forceSuSp() = default;
 
         //- Construct zero-initialized content
-        inline forceSuSp(const zero);
+        inline forceSuSp(const Foam::zero);
 
         //- Construct given Tuple2
         inline forceSuSp(const Tuple2<vector, scalar>& susp);

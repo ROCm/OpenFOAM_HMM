@@ -33,7 +33,7 @@ inline Foam::cubicEqn::cubicEqn()
 
 inline Foam::cubicEqn::cubicEqn(const Foam::zero)
 :
-    VectorSpace<cubicEqn, scalar, 4>(Foam::zero())
+    VectorSpace<cubicEqn, scalar, 4>(Foam::zero{})
 {}
 
 

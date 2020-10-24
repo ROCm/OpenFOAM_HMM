@@ -38,7 +38,7 @@ Foam::DiagonalMatrix<Type>::DiagonalMatrix(const label n)
 
 
 template<class Type>
-Foam::DiagonalMatrix<Type>::DiagonalMatrix(const label n, const zero)
+Foam::DiagonalMatrix<Type>::DiagonalMatrix(const label n, const Foam::zero)
 :
     List<Type>(n, Zero)
 {}

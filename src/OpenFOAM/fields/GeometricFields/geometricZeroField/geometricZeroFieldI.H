@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,39 +25,16 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "geometricZeroField.H"
+namespace Foam
+{
+
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
+
+// None defined
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline const Foam::dimensionSet& Foam::geometricZeroField::dimensions() const
-{
-    return dimless;
-}
-
-inline Foam::scalar Foam::geometricZeroField::operator[](const label) const
-{
-    return scalar(0);
-}
-
-inline Foam::zeroField Foam::geometricZeroField::field() const
-{
-    return zeroField();
-}
-
-inline Foam::zeroField Foam::geometricZeroField::operator()() const
-{
-    return zeroField();
-}
-
-inline Foam::zeroField Foam::geometricZeroField::oldTime() const
-{
-    return zeroField();
-}
-
-inline Foam::zeroFieldField Foam::geometricZeroField::boundaryField() const
-{
-    return zeroFieldField();
-}
+} // End namespace Foam
 
 
 // ************************************************************************* //

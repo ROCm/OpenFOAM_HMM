@@ -33,7 +33,7 @@ inline Foam::quadraticEqn::quadraticEqn()
 
 inline Foam::quadraticEqn::quadraticEqn(const Foam::zero)
 :
-    VectorSpace<quadraticEqn, scalar, 3>(Foam::zero())
+    VectorSpace<quadraticEqn, scalar, 3>(Foam::zero{})
 {}
 
 

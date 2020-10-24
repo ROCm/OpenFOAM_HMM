@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -153,7 +153,7 @@ public:
         inline MinMax(const Pair<T>& range);
 
         //- Construct with a single zero value
-        inline explicit MinMax(const zero);
+        inline explicit MinMax(const Foam::zero);
 
         //- Construct with a single initial value
         inline explicit MinMax(const T& val);

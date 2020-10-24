@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -152,7 +152,7 @@ typename outerProduct1<Type>::type mySumSqr(const UList<Type>& f)
 
 int main(int argc, char *argv[])
 {
-    scalarField sfield(10, one());
+    scalarField sfield(10, one{});
 
     forAll(sfield, i)
     {
@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
     Info<< "negated: " << sfield << nl;
 
     // Does not compile (ambiguous)
-    // boolField lfield(10, one());
+    // boolField lfield(10, one{});
 
     boolField lfield(10, true);
 

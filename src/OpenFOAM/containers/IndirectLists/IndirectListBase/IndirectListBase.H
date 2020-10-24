@@ -215,7 +215,7 @@ public:
         inline void operator=(const T& val);
 
         //- Assignment of all entries to zero
-        inline void operator=(const zero);
+        inline void operator=(const Foam::zero);
 
         //- Deep copy values from a list of the addressed elements
         //  Fatal if list sizes are not identical

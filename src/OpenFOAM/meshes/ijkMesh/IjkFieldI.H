@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,7 +75,7 @@ template<class Type>
 inline Foam::IjkField<Type>::IjkField
 (
     const labelVector& ijk,
-    const zero
+    const Foam::zero
 )
 :
     Field<Type>(cmptProduct(ijk), Zero),
@@ -245,7 +245,7 @@ inline void Foam::IjkField<Type>::operator=(const Type& val)
 
 
 template<class Type>
-inline void Foam::IjkField<Type>::operator=(const zero)
+inline void Foam::IjkField<Type>::operator=(const Foam::zero)
 {
     Field<Type>::operator=(Zero);
 }

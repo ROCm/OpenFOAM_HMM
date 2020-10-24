@@ -131,7 +131,7 @@ public:
 
         //- Construct with given number of rows/columns
         //- initializing all elements to zero
-        Matrix(const label m, const label n, const zero);
+        Matrix(const label m, const label n, const Foam::zero);
 
         //- Construct with given number of rows/columns
         //- initializing all elements to the given value
@@ -142,7 +142,7 @@ public:
 
         //- Construct given number of rows/columns
         //- initializing all elements to zero
-        inline Matrix(const labelPair& dims, const zero);
+        inline Matrix(const labelPair& dims, const Foam::zero);
 
         //- Construct with given number of rows/columns
         //- initializing all elements to the given value
@@ -417,7 +417,7 @@ public:
         void operator=(const MatrixBlock<MatrixType>& Mb);
 
         //- Assignment of all elements to zero
-        void operator=(const zero);
+        void operator=(const Foam::zero);
 
         //- Assignment of all elements to the given value
         void operator=(const Type& val);

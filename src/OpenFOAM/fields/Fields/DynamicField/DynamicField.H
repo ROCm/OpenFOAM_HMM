@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -112,7 +112,7 @@ public:
         inline DynamicField(const label len, const T& val);
 
         //- Construct given size and initial value of zero
-        inline DynamicField(const label len, const zero);
+        inline DynamicField(const label len, const Foam::zero);
 
         //- Copy construct
         inline DynamicField(const DynamicField<T, SizeMin>& list);

@@ -135,7 +135,7 @@ public:
         inline void operator=(const T& val);
 
         //- Assign all entries to zero
-        inline void operator=(const zero);
+        inline void operator=(const Foam::zero);
 };
 
 
