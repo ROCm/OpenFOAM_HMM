@@ -60,7 +60,7 @@ Foam::pointFile::pointFile
         cellShapeControls,
         decomposition
     ),
-    pointFileName_(detailsDict().get<fileName>("pointFile")),
+    pointFileName_(detailsDict().get<fileName>("pointFile").expand()),
     insideOutsideCheck_(detailsDict().get<Switch>("insideOutsideCheck")),
     randomiseInitialGrid_(detailsDict().get<Switch>("randomiseInitialGrid")),
     randomPerturbationCoeff_

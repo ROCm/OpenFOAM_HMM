@@ -15,7 +15,7 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 constructFrom patch;
-sourceCase "$FOAM_CASE";
+sourceCase    "<case>";
 
 sourcePatches (front);
 exposedPatchName back;

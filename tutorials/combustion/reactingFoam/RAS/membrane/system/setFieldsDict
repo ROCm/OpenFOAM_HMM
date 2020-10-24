@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "../0.orig/include"
+#include "<case>/0.orig/include"
 
 defaultFieldValues
 (

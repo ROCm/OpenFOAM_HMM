@@ -58,7 +58,7 @@ initialPoints
 
     pointFileCoeffs
     {
-        pointFile               "constant/internalDelaunayVertices";
+        pointFile               "<constant>/internalDelaunayVertices";
     }
 }
 

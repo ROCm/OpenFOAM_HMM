@@ -30,9 +30,9 @@ inertSpecie N2;
 
 chemistryReader foamChemistryReader;
 
-foamChemistryFile "$FOAM_CASE/constant/gas/reactions";
+foamChemistryFile "<constant>/gas/reactions";
 
-foamChemistryThermoFile "$FOAM_CASE/constant/gas/thermo.compressibleGas";
+foamChemistryThermoFile "<constant>/gas/thermo.compressibleGas";
 
 
 // ************************************************************************* //

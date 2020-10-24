@@ -31,7 +31,7 @@ sourcePatches (movingWall);
 exposedPatchName movingWall;
 
 // If construct from surface:
-surface "constant/triSurface/cylinder.vtk";
+surface "<constant>/triSurface/cylinder.vtk";
 
 // Flip surface normals before usage. Valid only for extrude from surface or
 // patch.

@@ -72,7 +72,7 @@ surface2.nas
     extractionMethod    extractFromFile;
 
     // Load from an existing feature edge file
-    featureEdgeFile     "constant/triSurface/featureEdges.nas";
+    featureEdgeFile     "<constant>/triSurface/featureEdges.nas";
 
     trimFeatures
     {

@@ -238,7 +238,7 @@ initialPoints
         // Reads points from file. Still rejects points that are too
         // close to the surface (minimumSurfaceDistanceCoeff) or on the
         // wrong side of the surfaces.
-        pointFile              "constant/internalDelaunayVertices";
+        pointFile              "<constant>/internalDelaunayVertices";
     }
 }
 

@@ -60,7 +60,7 @@ functions
         libs            (utilityFunctionObjects);
         enabled         yes;
         deltaT          tableFile;
-        file            "system/deltaTvalues";
+        file            "<system>/deltaTvalues";
     }
 
     minMaxp
