@@ -214,7 +214,7 @@ public:
         ) const;
 
 
-        //- Vector centroid
+        //- Centroid of the cell
         vector centre
         (
             const labelList& pointLabels,

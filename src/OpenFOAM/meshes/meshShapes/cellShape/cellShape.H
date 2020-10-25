@@ -126,11 +126,20 @@ public:
 
     // Member Functions
 
-        //- Return the points corresponding to this cellShape
-        inline pointField points(const UList<point>& meshPoints) const;
-
         //- Model reference
         inline const cellModel& model() const;
+
+        //- Number of points
+        inline label nPoints() const;
+
+        //- Number of edges
+        inline label nEdges() const;
+
+        //- Number of faces
+        inline label nFaces() const;
+
+        //- The points corresponding to this shape
+        inline pointField points(const UList<point>& meshPoints) const;
 
         //- Mesh face labels of this cell (in order of model)
         inline labelList meshFaces
@@ -146,29 +155,25 @@ public:
             const labelList& cEdges
         ) const;
 
+        //- The face for the specified model face
+        inline Foam::face face(const label modelFacei) const;
+
         //- Faces of this cell
         inline faceList faces() const;
 
         //- Collapsed faces of this cell
         inline faceList collapsedFaces() const;
 
-        //- Number of faces
-        inline label nFaces() const;
+        //- The edge for the specified model edge
+        inline Foam::edge edge(const label modelEdgei) const;
 
-        //- Edges of this cellShape
+        //- Edges of this shape
         inline edgeList edges() const;
-
-        //- Number of edges
-        inline label nEdges() const;
-
-        //- Number of points
-        inline label nPoints() const;
 
         //- Centroid of the cell
         inline point centre(const UList<point>& points) const;
 
-        //- Return info proxy.
-        //  Used to print token information to a stream
+        //- Return info proxy, to print information to a stream
         Foam::InfoProxy<cellShape> info() const
         {
             return *this;

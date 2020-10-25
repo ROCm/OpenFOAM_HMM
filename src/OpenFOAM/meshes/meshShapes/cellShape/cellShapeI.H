@@ -29,6 +29,7 @@ License
 #include "Istream.H"
 #include "cell.H"
 #include "cellModel.H"
+#include "UIndirectList.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -122,29 +123,36 @@ inline Foam::autoPtr<Foam::cellShape> Foam::cellShape::clone() const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+inline const Foam::cellModel& Foam::cellShape::model() const
+{
+    return *m;
+}
+
+
+inline Foam::label Foam::cellShape::nPoints() const
+{
+    return size();
+}
+
+
+inline Foam::label Foam::cellShape::nEdges() const
+{
+    return m->nEdges();
+}
+
+
+inline Foam::label Foam::cellShape::nFaces() const
+{
+    return m->nFaces();
+}
+
+
 inline Foam::pointField Foam::cellShape::points
 (
     const UList<point>& meshPoints
 ) const
 {
-    // There are as many points as there labels for them
-    pointField p(size());
-
-    // For each point in list, set it to the point in 'pnts' addressed
-    // by 'labs'
-    forAll(p, i)
-    {
-        p[i] = meshPoints[operator[](i)];
-    }
-
-    // Return list
-    return p;
-}
-
-
-inline const Foam::cellModel& Foam::cellShape::model() const
-{
-    return *m;
+    return pointField(UIndirectList<point>(meshPoints, *this));
 }
 
 
@@ -163,16 +171,13 @@ inline Foam::labelList Foam::cellShape::meshFaces
 
     forAll(localFaces, i)
     {
-        const face& localF = localFaces[i];
+        const Foam::face& localF = localFaces[i];
 
-        forAll(cFaces, j)
+        for (const label meshFacei : cFaces)
         {
-            label meshFacei = cFaces[j];
-
             if (allFaces[meshFacei] == localF)
             {
                 modelToMesh[i] = meshFacei;
-
                 break;
             }
         }
@@ -197,22 +202,25 @@ inline Foam::labelList Foam::cellShape::meshEdges
 
     forAll(localEdges, i)
     {
-        const edge& e = localEdges[i];
+        const Foam::edge& e = localEdges[i];
 
-        forAll(cEdges, j)
+        for (const label edgei : cEdges)
         {
-            label edgeI = cEdges[j];
-
-            if (allEdges[edgeI] == e)
+            if (allEdges[edgei] == e)
             {
-                modelToMesh[i] = edgeI;
-
+                modelToMesh[i] = edgei;
                 break;
             }
         }
     }
 
     return modelToMesh;
+}
+
+
+inline Foam::face Foam::cellShape::face(const label modelFacei) const
+{
+    return m->face(modelFacei, *this);
 }
 
 
@@ -224,31 +232,25 @@ inline Foam::faceList Foam::cellShape::faces() const
 
 inline Foam::faceList Foam::cellShape::collapsedFaces() const
 {
-    faceList oldFaces(faces());
+    const faceList oldFaces(faces());
 
     faceList newFaces(oldFaces.size());
     label newFacei = 0;
 
-    forAll(oldFaces, oldFacei)
+    for (const Foam::face& f : oldFaces)
     {
-        const face& f = oldFaces[oldFacei];
-
-        face& newF = newFaces[newFacei];
-
-        newF.setSize(f.size());
+        Foam::face& newF = newFaces[newFacei];
+        newF.resize(f.size());
 
         label newFp = 0;
-        label prevVertI = -1;
+        label prevVerti = -1;
 
-        forAll(f, fp)
+        for (const label verti : f)
         {
-            label vertI = f[fp];
-
-            if (vertI != prevVertI)
+            if (verti != prevVerti)
             {
-                newF[newFp++] = vertI;
-
-                prevVertI = vertI;
+                newF[newFp++] = verti;
+                prevVerti = verti;
             }
         }
 
@@ -260,38 +262,25 @@ inline Foam::faceList Foam::cellShape::collapsedFaces() const
         if (newFp > 2)
         {
             // Size face and go to next one
-            newF.setSize(newFp);
-
-            newFacei++;
+            newF.resize(newFp);
+            ++newFacei;
         }
     }
-    newFaces.setSize(newFacei);
+    newFaces.resize(newFacei);
 
     return newFaces;
 }
 
 
-inline Foam::label Foam::cellShape::nFaces() const
+inline Foam::edge Foam::cellShape::edge(const label modelEdgei) const
 {
-    return m->nFaces();
+    return m->edge(modelEdgei, *this);
 }
 
 
 inline Foam::edgeList Foam::cellShape::edges() const
 {
     return m->edges(*this);
-}
-
-
-inline Foam::label Foam::cellShape::nEdges() const
-{
-    return m->nEdges();
-}
-
-
-inline Foam::label Foam::cellShape::nPoints() const
-{
-    return size();
 }
 
 

@@ -69,9 +69,11 @@ int main(int argc, char *argv[])
 
     argList::addBoolOption
     (
-        "noClean",
+        "no-clean",
         "Suppress surface checking/cleanup on the input surface"
     );
+    argList::addOptionCompat("no-clean", {"noClean", -2006});
+
     argList::addOption
     (
         "scale",
@@ -101,7 +103,7 @@ int main(int argc, char *argv[])
     );
     surf.writeStats(Info);
 
-    if (!args.found("noClean"))
+    if (!args.found("no-clean"))
     {
         Info<< "Removing duplicate and illegal triangles ..." << nl << endl;
         surf.cleanup(true);

@@ -313,12 +313,6 @@ public:
 
         //- Create polyMesh, with cell zones
         autoPtr<polyMesh> mesh(const IOobject& io) const;
-
-
-    // Write
-
-        //- Writes edges of blockMesh in OBJ format.
-        void writeTopology(Ostream& os) const;
 };
 
 

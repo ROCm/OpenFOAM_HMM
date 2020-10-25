@@ -61,8 +61,8 @@ Usage
       - \par -sets
         Write cellZones as cellSets too (for processing purposes)
 
-      - \par -noClean
-        Do not remove any existing polyMesh/ directory or files
+      - \par -no-clean
+        Do not remove polyMesh/ directory or files
 
       - \par -time
         Write resulting mesh to a time directory (instead of constant)
@@ -141,9 +141,11 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
-        "noClean",
-        "Do not remove any existing polyMesh/ directory or files"
+        "no-clean",
+        "Do not remove polyMesh/ directory or files"
     );
+    argList::addOptionCompat("no-clean", {"noClean", -2006});
+
     argList::addOption("dict", "file", "Alternative blockMeshDict");
     argList::addBoolOption
     (
@@ -162,7 +164,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
 
     // Remove old files, unless disabled
-    const bool removeOldFiles = !args.found("noClean");
+    const bool removeOldFiles = !args.found("no-clean");
 
     // Write cellSets
     const bool writeCellSets = args.found("sets");
@@ -232,66 +234,20 @@ int main(int argc, char *argv[])
     if (args.found("write-obj"))
     {
         quickExit = true;
-
         Info<< nl;
-
-        // Write mesh as edges
-        {
-            OFstream os(runTime.path()/"blockTopology.obj");
-
-            Info<< "Writing block structure in obj format: "
-                << os.name().name() << endl;
-
-            blocks.writeTopology(os);
-        }
-
-        // Write centres of blocks
-        {
-            OFstream os(runTime.path()/"blockCentres.obj");
-
-            Info<< "Writing block centres in obj format: "
-                << os.name().name() << endl;
-
-            for (const point& cc : blocks.topology().cellCentres())
-            {
-                os << "v " << cc.x() << ' ' << cc.y() << ' ' << cc.z() << nl;
-            }
-        }
+        #include "blockMeshOBJ.H"
     }
 
     if (args.found("write-vtk"))
     {
         quickExit = true;
-
-        // non-legacy and ASCII (mesh is small, want readable output)
-        const vtk::outputOptions writeOpts = vtk::formatType::INLINE_ASCII;
-
         Info<< nl;
-
-        const polyMesh& topoMesh = blocks.topology();
-        const vtk::vtuCells topoCells(topoMesh, writeOpts);
-
-        vtk::internalMeshWriter writer
-        (
-            topoMesh,
-            topoCells,
-            writeOpts,
-            runTime.path()/"blockTopology"
-        );
-
-        Info<< "Writing block topology in vtk format: "
-            << args.relativePath(writer.output()).c_str() << endl;
-
-        writer.writeGeometry();
-        writer.beginCellData();
-        writer.writeCellIDs();
+        #include "blockMeshVTK.H"
     }
-
 
     if (quickExit)
     {
         Info<< "\nEnd\n" << endl;
-
         return 0;
     }
 
@@ -309,26 +265,7 @@ int main(int argc, char *argv[])
 
     if (removeOldFiles)
     {
-        const fileName polyMeshPath
-        (
-            runTime.path()/meshInstance/regionPath/polyMesh::meshSubDir
-        );
-
-        if (exists(polyMeshPath))
-        {
-            if (exists(polyMeshPath/dictName))
-            {
-                Info<< "Not deleting polyMesh directory "
-                    << runTime.relativePath(polyMeshPath) << nl
-                    << "    because it contains " << dictName << endl;
-            }
-            else
-            {
-                Info<< "Deleting polyMesh directory "
-                    << runTime.relativePath(polyMeshPath) << endl;
-                rmDir(polyMeshPath);
-            }
-        }
+        #include "cleanMeshDirectory.H"
     }
 
 
@@ -377,30 +314,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    // Write summary
-    {
-        Info<< "----------------" << nl
-            << "Mesh Information" << nl
-            << "----------------" << nl
-            << "  " << "boundingBox: " << boundBox(mesh.points()) << nl
-            << "  " << "nPoints: " << mesh.nPoints() << nl
-            << "  " << "nCells: " << mesh.nCells() << nl
-            << "  " << "nFaces: " << mesh.nFaces() << nl
-            << "  " << "nInternalFaces: " << mesh.nInternalFaces() << nl;
-
-        Info<< "----------------" << nl
-            << "Patches" << nl
-            << "----------------" << nl;
-
-        for (const polyPatch& p : mesh.boundaryMesh())
-        {
-            Info<< "  " << "patch " << p.index()
-                << " (start: " << p.start()
-                << " size: " << p.size()
-                << ") name: " << p.name()
-                << nl;
-        }
-    }
+    #include "printMeshSummary.H"
 
     Info<< "\nEnd\n" << endl;
 

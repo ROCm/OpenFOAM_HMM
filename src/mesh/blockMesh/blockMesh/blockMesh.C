@@ -240,17 +240,4 @@ Foam::label Foam::blockMesh::numZonedBlocks() const
 }
 
 
-void Foam::blockMesh::writeTopology(Ostream& os) const
-{
-    for (const point& p : topology().points())
-    {
-        os << "v " << p.x() << ' ' << p.y() << ' ' << p.z() << nl;
-    }
-
-    for (const edge& e : topology().edges())
-    {
-        os << "l " << e.start() + 1 << ' ' << e.end() + 1 << nl;
-    }
-}
-
 // ************************************************************************* //

@@ -6,11 +6,10 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2015-2019 OpenCFD Ltd.
+#     Copyright (C) 2015-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     CleanFunctions
@@ -115,6 +114,9 @@ cleanCase()
     rm -rf graphs*
     rm -rf sets
     rm -rf system/machines
+
+    # Possible blockMesh output
+    rm -f blockTopology.vtu blockTopology.obj blockCentres.obj
 
     # From mpirunDebug
     rm -f gdbCommands  mpirun.schema

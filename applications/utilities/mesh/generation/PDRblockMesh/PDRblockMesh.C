@@ -43,8 +43,8 @@ Usage
       - \par -dict \<filename\>
         Alternative dictionary for the mesh description.
 
-      - \par -noClean
-        Do not remove any existing polyMesh/ directory or files
+      - \par -no-clean
+        Do not remove polyMesh/ directory or files
 
       - \par -time
         Write resulting mesh to a time directory (instead of constant)
@@ -92,9 +92,11 @@ int main(int argc, char *argv[])
 
     argList::addBoolOption
     (
-        "noClean",
-        "Do not remove any existing polyMesh/ directory or files"
+        "no-clean",
+        "Do not remove polyMesh/ directory or files"
     );
+    argList::addOptionCompat("no-clean", {"noClean", -2006});
+
     argList::addOption("dict", "file", "Alternative PDRblockMeshDict");
     argList::addOption
     (
@@ -107,7 +109,11 @@ int main(int argc, char *argv[])
     #include "createTime.H"
 
     // Remove old files, unless disabled
-    const bool removeOldFiles = !args.found("noClean");
+    const bool removeOldFiles = !args.found("no-clean");
+
+    const word regionName(polyMesh::defaultRegion);
+    const word regionPath;
+
 
     // Instance for resulting mesh
     bool useTime = false;
@@ -134,8 +140,8 @@ int main(int argc, char *argv[])
     }
 
 
+    // Locate appropriate PDRblockMeshDict
     const word dictName("PDRblockMeshDict");
-
     #include "setSystemRunTimeDictionaryIO.H"
 
     IOdictionary meshDict(dictIO);
@@ -159,34 +165,17 @@ int main(int argc, char *argv[])
 
     if (removeOldFiles)
     {
-        const fileName polyMeshPath
-        (
-            runTime.path()/meshInstance/polyMesh::meshSubDir
-        );
-
-        if (exists(polyMeshPath))
-        {
-            Info<< "Deleting polyMesh directory "
-                << runTime.relativePath(polyMeshPath) << endl;
-            rmDir(polyMeshPath);
-        }
+        #include "cleanMeshDirectory.H"
     }
 
 
     Info<< nl << "Creating polyMesh from PDRblockMesh" << endl;
 
-    auto meshPtr = blkMesh.mesh
-    (
-        IOobject
+    autoPtr<polyMesh> meshPtr =
+        blkMesh.mesh
         (
-            polyMesh::defaultRegion,
-            meshInstance,
-            runTime,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        )
-    );
-
+            IOobject(regionName, meshInstance, runTime)
+        );
 
     const polyMesh& mesh = *meshPtr;
 
@@ -204,30 +193,7 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    // Mesh summary
-    {
-        Info<< "----------------" << nl
-            << "Mesh Information" << nl
-            << "----------------" << nl
-            << "  " << "boundingBox: " << boundBox(mesh.points()) << nl
-            << "  " << "nPoints: " << mesh.nPoints() << nl
-            << "  " << "nCells: " << mesh.nCells() << nl
-            << "  " << "nFaces: " << mesh.nFaces() << nl
-            << "  " << "nInternalFaces: " << mesh.nInternalFaces() << nl;
-
-        Info<< "----------------" << nl
-            << "Patches" << nl
-            << "----------------" << nl;
-
-        for (const polyPatch& p : mesh.boundaryMesh())
-        {
-            Info<< "  " << "patch " << p.index()
-                << " (start: " << p.start()
-                << " size: " << p.size()
-                << ") name: " << p.name()
-                << nl;
-        }
-    }
+    #include "printMeshSummary.H"
 
     Info<< "\nEnd\n" << endl;
 
