@@ -41,10 +41,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::blockVertex::blockVertex()
-{}
-
-
 Foam::autoPtr<Foam::blockVertex> Foam::blockVertex::clone() const
 {
     NotImplemented;
@@ -103,7 +99,11 @@ Foam::autoPtr<Foam::blockVertex> Foam::blockVertex::New
 }
 
 
-Foam::label Foam::blockVertex::read(Istream& is, const dictionary& dict)
+Foam::label Foam::blockVertex::read
+(
+    Istream& is,
+    const dictionary& dict
+)
 {
     const dictionary* varDictPtr = dict.findDict("namedVertices");
     if (varDictPtr)

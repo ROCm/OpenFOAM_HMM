@@ -969,7 +969,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
 
         if (debug)
         {
-            surfaceWriterPtr_->verbose() = true;
+            surfaceWriterPtr_->verbose(true);
         }
 
         if (surfaceWriterPtr_->enabled())

@@ -169,7 +169,7 @@ bool Foam::functionObjects::Curle::read(const dictionary& dict)
             );
 
             // Use outputDir/TIME/surface-name
-            surfaceWriterPtr_->useTimeDir() = true;
+            surfaceWriterPtr_->useTimeDir(true);
         }
     }
 

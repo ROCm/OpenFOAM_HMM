@@ -474,7 +474,7 @@ void Foam::ParticleCollector<CloudType>::write()
 
         if (debug)
         {
-            writer->verbose() = true;
+            writer->verbose(true);
         }
 
         writer->open

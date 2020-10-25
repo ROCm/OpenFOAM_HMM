@@ -369,7 +369,7 @@ Foam::autoPtr<Foam::polyMesh> Foam::blockMesh::createTopology
     // Read the block edges
     if (meshDescription.found("edges"))
     {
-        if (verboseOutput)
+        if (verbose_)
         {
             Info<< "Creating block edges" << endl;
         }
@@ -382,7 +382,7 @@ Foam::autoPtr<Foam::polyMesh> Foam::blockMesh::createTopology
 
         edges_.transfer(edges);
     }
-    else if (verboseOutput)
+    else if (verbose_)
     {
         Info<< "No non-linear block edges defined" << endl;
     }
@@ -391,7 +391,7 @@ Foam::autoPtr<Foam::polyMesh> Foam::blockMesh::createTopology
     // Read the block faces
     if (meshDescription.found("faces"))
     {
-        if (verboseOutput)
+        if (verbose_)
         {
             Info<< "Creating block faces" << endl;
         }
@@ -404,14 +404,14 @@ Foam::autoPtr<Foam::polyMesh> Foam::blockMesh::createTopology
 
         faces_.transfer(faces);
     }
-    else if (verboseOutput)
+    else if (verbose_)
     {
         Info<< "No non-planar block faces defined" << endl;
     }
 
 
     // Create the blocks
-    if (verboseOutput)
+    if (verbose_)
     {
         Info<< "Creating topology blocks" << endl;
     }
@@ -430,7 +430,7 @@ Foam::autoPtr<Foam::polyMesh> Foam::blockMesh::createTopology
 
     // Create the patches
 
-    if (verboseOutput)
+    if (verbose_)
     {
         Info<< "Creating topology patches" << endl;
     }

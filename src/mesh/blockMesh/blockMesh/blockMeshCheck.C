@@ -143,7 +143,7 @@ void Foam::blockMesh::check(const polyMesh& bm, const dictionary& dict) const
     }
 
 
-    if (verboseOutput)
+    if (verbose_)
     {
         Info<< nl << tab << "Basic statistics" << nl
             << tab << tab << "Number of internal faces : "
@@ -219,7 +219,7 @@ void Foam::blockMesh::check(const polyMesh& bm, const dictionary& dict) const
         }
     }
 
-    if (verboseOutput)
+    if (verbose_)
     {
         Info<< endl;
     }

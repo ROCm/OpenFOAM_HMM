@@ -308,7 +308,7 @@ void Foam::blockMesh::calcTopologicalMerge()
 
     const blockList& blocks = *this;
 
-    if (verboseOutput)
+    if (verbose_)
     {
         Info<< "Creating block offsets" << endl;
     }
@@ -326,7 +326,7 @@ void Foam::blockMesh::calcTopologicalMerge()
         nCells_  += blocks[blocki].nCells();
     }
 
-    if (verboseOutput)
+    if (verbose_)
     {
         Info<< "Creating merge list (topological search).." << flush;
     }
@@ -547,7 +547,7 @@ void Foam::blockMesh::calcTopologicalMerge()
             }
         }
 
-        if (verboseOutput)
+        if (verbose_)
         {
             Info<< '.' << flush;
         }
@@ -561,7 +561,7 @@ void Foam::blockMesh::calcTopologicalMerge()
 
     } while (changedPointMerge);
 
-    if (verboseOutput)
+    if (verbose_)
     {
         Info<< endl;
     }

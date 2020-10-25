@@ -391,13 +391,21 @@ public:
         //- Should a time directory be spliced into the output path?
         inline bool useTimeDir() const;
 
+        //- Enable/disable use of spliced output path
+        //  \return old value
+        inline bool useTimeDir(const bool on);
+
         //- Change handling of spliced output path.
         inline bool& useTimeDir();
 
         //- Get output verbosity
         inline bool verbose() const;
 
-        //- Set output verbosity
+        //- Enable/disable verbose output
+        //  \return old value
+        inline bool verbose(const bool on);
+
+        //- Access output verbosity
         inline bool& verbose();
 
         //- The current value of the point merge dimension (metre)

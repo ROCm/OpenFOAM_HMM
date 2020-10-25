@@ -456,7 +456,7 @@ bool surfaceNoise::read(const dictionary& dict)
         );
 
         // Use outputDir/TIME/surface-name
-        writerPtr_->useTimeDir() = true;
+        writerPtr_->useTimeDir(true);
 
         return true;
     }

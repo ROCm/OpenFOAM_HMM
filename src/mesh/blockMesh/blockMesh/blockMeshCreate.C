@@ -36,7 +36,7 @@ void Foam::blockMesh::createPoints() const
 {
     const blockList& blocks = *this;
 
-    if (verboseOutput)
+    if (verbose_)
     {
         Info<< "Creating points with scale " << scaleFactor_ << endl;
     }
@@ -47,7 +47,7 @@ void Foam::blockMesh::createPoints() const
     {
         const pointField& blockPoints = blocks[blocki].points();
 
-        if (verboseOutput)
+        if (verbose_)
         {
             const label nx = blocks[blocki].density().x();
             const label ny = blocks[blocki].density().y();
@@ -102,7 +102,7 @@ void Foam::blockMesh::createCells() const
     const blockList& blocks = *this;
     const cellModel& hex = cellModel::ref(cellModel::HEX);
 
-    if (verboseOutput)
+    if (verbose_)
     {
         Info<< "Creating cells" << endl;
     }
@@ -257,7 +257,7 @@ void Foam::blockMesh::createPatches() const
 {
     const polyPatchList& topoPatches = topology().boundaryMesh();
 
-    if (verboseOutput)
+    if (verbose_)
     {
         Info<< "Creating patches" << endl;
     }
@@ -278,7 +278,7 @@ Foam::blockMesh::mesh(const IOobject& io) const
 {
     const blockMesh& blkMesh = *this;
 
-    if (verboseOutput)
+    if (verbose_)
     {
         Info<< nl << "Creating polyMesh from blockMesh" << endl;
     }
@@ -303,7 +303,7 @@ Foam::blockMesh::mesh(const IOobject& io) const
     {
         polyMesh& pmesh = *meshPtr;
 
-        if (verboseOutput)
+        if (verbose_)
         {
             Info<< "Adding cell zones" << endl;
         }
@@ -340,7 +340,7 @@ Foam::blockMesh::mesh(const IOobject& io) const
                     zoneMap.insert(zoneName, zonei);
                     ++freeZonei;
 
-                    if (verboseOutput)
+                    if (verbose_)
                     {
                         Info<< "    " << zonei << '\t' << zoneName << endl;
                     }

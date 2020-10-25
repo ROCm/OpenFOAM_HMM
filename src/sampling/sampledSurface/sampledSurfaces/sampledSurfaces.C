@@ -270,9 +270,11 @@ Foam::sampledSurfaces::sampledSurfaces
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::sampledSurfaces::verbose(const bool verbosity)
+bool Foam::sampledSurfaces::verbose(const bool on)
 {
-    verbose_ = verbosity;
+    bool old(verbose_);
+    verbose_ = on;
+    return old;
 }
 
 
@@ -361,8 +363,8 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
             writers_[surfi].isPointData() = surfs[surfi].interpolate();
 
             // Use outputDir/TIME/surface-name
-            writers_[surfi].useTimeDir() = true;
-            writers_[surfi].verbose() = verbose_;
+            writers_[surfi].useTimeDir(true);
+            writers_[surfi].verbose(verbose_);
 
             ++surfi;
         }
@@ -427,8 +429,8 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
             writers_[surfi].isPointData() = surfs[surfi].interpolate();
 
             // Use outputDir/TIME/surface-name
-            writers_[surfi].useTimeDir() = true;
-            writers_[surfi].verbose() = verbose_;
+            writers_[surfi].useTimeDir(true);
+            writers_[surfi].verbose(verbose_);
 
             ++surfi;
         }

@@ -34,7 +34,7 @@ void Foam::blockMesh::calcGeometricalMerge()
 {
     const blockList& blocks = *this;
 
-    if (verboseOutput)
+    if (verbose_)
     {
         Info<< "Creating block offsets" << endl;
     }
@@ -53,7 +53,7 @@ void Foam::blockMesh::calcGeometricalMerge()
     }
 
 
-    if (verboseOutput)
+    if (verbose_)
     {
         Info<< "Creating merge list (geometric search).." << flush;
     }
@@ -407,7 +407,7 @@ void Foam::blockMesh::calcGeometricalMerge()
                 }
             }
         }
-        if (verboseOutput)
+        if (verbose_)
         {
             Info<< '.' << flush;
         }
@@ -421,7 +421,7 @@ void Foam::blockMesh::calcGeometricalMerge()
     }
     while (changedPointMerge);
 
-    if (verboseOutput)
+    if (verbose_)
     {
         Info<< endl;
     }

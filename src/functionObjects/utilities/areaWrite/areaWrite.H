@@ -205,8 +205,9 @@ public:
 
     // Member Functions
 
-        //- Set verbosity level
-        void verbose(const bool verbosity = true);
+        //- Enable/disable verbose output
+        //  \return old value
+        bool verbose(const bool on);
 
         //- Read the areaWrite dictionary
         virtual bool read(const dictionary& dict);

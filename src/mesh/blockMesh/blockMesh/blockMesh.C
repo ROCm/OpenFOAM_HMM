@@ -36,6 +36,8 @@ namespace Foam
     defineDebugSwitch(blockMesh, 0);
 }
 
+bool Foam::blockMesh::verboseOutput = true;
+
 
 const Foam::Enum<Foam::blockMesh::mergeStrategy>
 Foam::blockMesh::strategyNames_
@@ -55,7 +57,7 @@ Foam::blockMesh::blockMesh
 )
 :
     meshDict_(dict),
-    verboseOutput(meshDict_.getOrDefault("verbose", true)),
+    verbose_(meshDict_.getOrDefault("verbose", verboseOutput)),
     checkFaceCorrespondence_
     (
         meshDict_.getOrDefault("checkFaceCorrespondence", true)
@@ -117,14 +119,14 @@ bool Foam::blockMesh::valid() const noexcept
 
 bool Foam::blockMesh::verbose() const noexcept
 {
-    return verboseOutput;
+    return verbose_;
 }
 
 
 bool Foam::blockMesh::verbose(const bool on) noexcept
 {
-    bool old(verboseOutput);
-    verboseOutput = on;
+    bool old(verbose_);
+    verbose_ = on;
     return old;
 }
 

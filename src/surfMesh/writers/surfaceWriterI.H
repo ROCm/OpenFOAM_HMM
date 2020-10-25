@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,6 +57,14 @@ inline bool Foam::surfaceWriter::useTimeDir() const
 }
 
 
+inline bool Foam::surfaceWriter::useTimeDir(const bool on)
+{
+    bool old(useTimeDir_);
+    useTimeDir_ = on;
+    return old;
+}
+
+
 inline bool& Foam::surfaceWriter::useTimeDir()
 {
     return useTimeDir_;
@@ -66,6 +74,14 @@ inline bool& Foam::surfaceWriter::useTimeDir()
 inline bool Foam::surfaceWriter::verbose() const
 {
     return verbose_;
+}
+
+
+inline bool Foam::surfaceWriter::verbose(const bool on)
+{
+    bool old(verbose_);
+    verbose_ = on;
+    return old;
 }
 
 

@@ -63,7 +63,8 @@ SourceFiles
 #define blockMesh_H
 
 #include "Enum.H"
-#include "blockList.H"
+#include "block.H"
+#include "PtrList.H"
 #include "searchableSurfaces.H"
 #include "polyMesh.H"
 #include "IOdictionary.H"
@@ -82,9 +83,15 @@ namespace Foam
 
 class blockMesh
 :
-    public blockList
+    public PtrList<block>
 {
 public:
+
+    // Typedefs
+
+        //- The list of blocks is stored as a PtrList
+        typedef PtrList<block> blockList;
+
 
     // Data Types
 
@@ -110,8 +117,8 @@ private:
         //- Reference to mesh dictionary
         const IOdictionary& meshDict_;
 
-        //- Switch for verbose output
-        bool verboseOutput;
+        //- Output verbosity
+        bool verbose_;
 
         //- Switch checking face consistency (defaults to true)
         bool checkFaceCorrespondence_;
@@ -218,6 +225,12 @@ private:
 
 public:
 
+    // Static Data
+
+        //- The default verbosity (true)
+        static bool verboseOutput;
+
+
     //- Runtime type information
     ClassName("blockMesh");
 
@@ -301,10 +314,10 @@ public:
 
     // Verbosity
 
-        //- Verbose information?
+        //- Verbose output
         bool verbose() const noexcept;
 
-        //- Enable/disable verbose information about the progress
+        //- Enable/disable verbose output
         //  \return old value
         bool verbose(const bool on) noexcept;
 

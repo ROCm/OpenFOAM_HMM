@@ -76,8 +76,8 @@ public:
 
     // Constructors
 
-        //- Construct null
-        blockVertex();
+        //- Default construct
+        blockVertex() noexcept = default;
 
         //- Clone function
         virtual autoPtr<blockVertex> clone() const;

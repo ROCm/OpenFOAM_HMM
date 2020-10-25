@@ -109,9 +109,11 @@ Foam::areaWrite::areaWrite
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::areaWrite::verbose(const bool verbosity)
+bool Foam::areaWrite::verbose(const bool on)
 {
-    verbose_ = verbosity;
+    bool old(verbose_);
+    verbose_ = on;
+    return old;
 }
 
 
@@ -188,8 +190,8 @@ bool Foam::areaWrite::read(const dictionary& dict)
         auto surfWriter = surfaceWriter::New(writerType, writerOptions);
 
         // Use outputDir/TIME/surface-name
-        surfWriter->useTimeDir() = true;
-        surfWriter->verbose() = verbose_;
+        surfWriter->useTimeDir(true);
+        surfWriter->verbose(verbose_);
 
         writers_.set(areaName, surfWriter);
     }
