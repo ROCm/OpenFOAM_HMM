@@ -32,7 +32,7 @@ geometry
     {
         type   sphere;
         origin (3 3 0);
-        radius 4;
+        radius (3.5 3.5 4);
     }
 
     box1
@@ -51,7 +51,7 @@ geometry
         seal
         {
             surface box1;
-            scale (1.0 1.0 2.1);
+            scale   (1.0 1.0 2.1);
 
             // Old syntax
             transform

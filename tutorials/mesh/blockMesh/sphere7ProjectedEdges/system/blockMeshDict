@@ -31,16 +31,15 @@ geometry
 {
     sphere
     {
-        type   sphere;
-        origin (0 0 0);
-        radius $outerRadius;
+        type    sphere;
+        origin  (0 0 0);
+        radius  $outerRadius;
     }
 
     innerSphere
     {
-        type   sphere;
-        origin (0 0 0);
-        radius #eval{ $innerRatio * $outerRadius };
+        $sphere
+        radius  #eval{ $outerRadius * $innerRatio };
     }
 }
 
@@ -50,8 +49,8 @@ vo   #eval{ sqrt($outerRadius/3) };
 mvo  #eval{ -$vo };
 
 // Inner box sizes - % of overall dimension
-vi   #eval{ $innerRatio*$vo };
-mvi  #eval{ $innerRatio*$mvo };
+vi   #eval{ $vo * $innerRatio };
+mvi  #eval{ -$mvo };
 
 vertices
 (

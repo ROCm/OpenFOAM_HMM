@@ -32,7 +32,7 @@ geometry
     {
         type    sphere;
         origin  (3 3 0);
-        radius  4;
+        radius  (3.5 3.5 4);
     }
 
     box1

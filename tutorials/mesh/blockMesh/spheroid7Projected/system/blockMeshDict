@@ -18,54 +18,73 @@ scale   1;
 verbose no;
 
 // Geometric parameters
+rxo 2;
+ryo 3;
+rzo 4;
+
+// Geometric parameters
 outerRadius 1;
-innerRatio  0.7;
+innerRatio  0.75;
 
 // Divisions in x/y/z and radial directions. Can be unequal.
-nx   10;
-ny   $nx;
-nz   $nx;
+nx   30;
+ny   24;
+nz   20;
 nr   6;
 
 geometry
 {
     sphere
     {
-        type   sphere;
-        origin (0 0 0);
-        radius $outerRadius;
+        type    sphere;
+        origin  (0 0 0);
+        radius  ($rxo $ryo $rzo);
+    }
+
+    innerSphere
+    {
+        $sphere
+        radius
+        (
+            #eval{ $rxo * $innerRatio }
+            #eval{ $ryo * $innerRatio }
+            #eval{ $rzo * $innerRatio }
+        );
     }
 }
 
-// Outer box sizes
-vo   #eval{ sqrt($outerRadius/3) };
-mvo  #eval{ -$vo };
+
+// Outer box sizes (approximate)
+vxo #eval{ sqrt(1.0/3.0) * $rxo };  mvxo #eval{ -$vxo };
+vyo #eval{ sqrt(1.0/3.0) * $ryo };  mvyo #eval{ -$vyo };
+vzo #eval{ sqrt(1.0/3.0) * $rzo };  mvzo #eval{ -$vzo };
 
 // Inner box sizes - % of overall dimension
-vi   #eval{ $vo * $innerRatio };
-mvi  #eval{ -$vi };
+vxi #eval{ $vxo * $innerRatio };  mvxi #eval{ -$vxi };
+vyi #eval{ $vyo * $innerRatio };  mvyi #eval{ -$vyi };
+vzi #eval{ $vzo * $innerRatio };  mvzi #eval{ -$vzi };
 
 vertices
 (
-    // Inner block
-    ($mvi $mvi $mvi)
-    ( $vi $mvi $mvi)
-    ( $vi  $vi $mvi)
-    ($mvi  $vi $mvi)
-    ($mvi $mvi  $vi)
-    ( $vi $mvi  $vi)
-    ( $vi  $vi  $vi)
-    ($mvi  $vi  $vi)
+    // Inner block points
+    project ($mvxi $mvyi $mvzi) (innerSphere)
+    project ( $vxi $mvyi $mvzi) (innerSphere)
+    project ( $vxi  $vyi $mvzi) (innerSphere)
+    project ($mvxi  $vyi $mvzi) (innerSphere)
+    project ($mvxi $mvyi  $vzi) (innerSphere)
+    project ( $vxi $mvyi  $vzi) (innerSphere)
+    project ( $vxi  $vyi  $vzi) (innerSphere)
+    project ($mvxi  $vyi  $vzi) (innerSphere)
 
-    // Outer blocks
-    ($mvo $mvo $mvo)
-    ( $vo $mvo $mvo)
-    ( $vo  $vo $mvo)
-    ($mvo  $vo $mvo)
-    ($mvo $mvo  $vo)
-    ( $vo $mvo  $vo)
-    ( $vo  $vo  $vo)
-    ($mvo  $vo  $vo)
+    // Outer block points
+    project ($mvxo $mvyo $mvzo) (sphere)
+    project ( $vxo $mvyo $mvzo) (sphere)
+    project ( $vxo  $vyo $mvzo) (sphere)
+    project ($mvxo  $vyo $mvzo) (sphere)
+    project ($mvxo $mvyo  $vzo) (sphere)
+    project ( $vxo $mvyo  $vzo) (sphere)
+    project ( $vxo  $vyo  $vzo) (sphere)
+    project ($mvxo  $vyo  $vzo) (sphere)
 );
 
 blocks
@@ -81,40 +100,39 @@ blocks
     hex ( 4  5  6  7 12 13 14 15) ($nx $ny $nr) grading (1 1 1)  // z-max
 );
 
-
 edges
 (
     // Outer blocks
-    arc  8  9 origin (0 0 0)
-    arc 10 11 origin (0 0 0)
-    arc 14 15 origin (0 0 0)
-    arc 12 13 origin (0 0 0)
+    project  8  9 (sphere)
+    project 10 11 (sphere)
+    project 14 15 (sphere)
+    project 12 13 (sphere)
 
-    arc  8 11 origin (0 0 0)
-    arc  9 10 origin (0 0 0)
-    arc 13 14 origin (0 0 0)
-    arc 12 15 origin (0 0 0)
+    project  8 11 (sphere)
+    project  9 10 (sphere)
+    project 13 14 (sphere)
+    project 12 15 (sphere)
 
-    arc  8 12 origin (0 0 0)
-    arc  9 13 origin (0 0 0)
-    arc 10 14 origin (0 0 0)
-    arc 11 15 origin (0 0 0)
+    project  8 12 (sphere)
+    project  9 13 (sphere)
+    project 10 14 (sphere)
+    project 11 15 (sphere)
 
-    // Inner block - flattened by factor 1.1
-    arc 0 1 origin 1.1 (0 0 0)
-    arc 2 3 origin 1.1 (0 0 0)
-    arc 6 7 origin 1.1 (0 0 0)
-    arc 4 5 origin 1.1 (0 0 0)
+    // Inner block
+    project 0 1 (innerSphere)
+    project 2 3 (innerSphere)
+    project 6 7 (innerSphere)
+    project 4 5 (innerSphere)
 
-    arc 0 3 origin 1.1 (0 0 0)
-    arc 1 2 origin 1.1 (0 0 0)
-    arc 5 6 origin 1.1 (0 0 0)
-    arc 4 7 origin 1.1 (0 0 0)
+    project 0 3 (innerSphere)
+    project 1 2 (innerSphere)
+    project 5 6 (innerSphere)
+    project 4 7 (innerSphere)
 
-    arc 0 4 origin 1.1 (0 0 0)
-    arc 1 5 origin 1.1 (0 0 0)
-    arc 2 6 origin 1.1 (0 0 0)
-    arc 3 7 origin 1.1 (0 0 0)
+    project 0 4 (innerSphere)
+    project 1 5 (innerSphere)
+    project 2 6 (innerSphere)
+    project 3 7 (innerSphere)
 );
 
 faces
