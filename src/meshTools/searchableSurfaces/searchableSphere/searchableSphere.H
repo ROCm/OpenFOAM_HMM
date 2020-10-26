@@ -28,18 +28,21 @@ Class
     Foam::searchableSphere
 
 Description
-    Searching on sphere
+    Searching on general spheroid.
 
     \heading Dictionary parameters
     \table
         Property    | Description                           | Required | Default
         type        | sphere                                | selector |
         origin      | The origin (centre) of the sphere     | yes |
-        radius      | The (outside) radius of sphere        | yes |
+        radius      | The (outside) radius/radiii of sphere | yes |
         centre      | Alternative name for 'origin'         | no  |
     \endtable
 
 Note
+    The \c radius can be specified as a single \em scalar (for a sphere)
+    or a \em vector of three values (for a general spheroid).
+
     Longer type name : \c searchableSphere
 
 SourceFiles
@@ -114,17 +117,42 @@ private:
         //- Determine sorted order and classify the shape
         inline static componentOrder getOrdering(const vector& radii);
 
+        //- Shift point relative to origin
+        //- and scale relative to spheroid dimensions
+        inline point scalePoint(const point& p) const
+        {
+            return point
+            (
+                (p.x() - origin_.x()) / radii_.x(),
+                (p.y() - origin_.y()) / radii_.y(),
+                (p.z() - origin_.z()) / radii_.z()
+            );
+        }
+
+        //- Undo scalePoint(): unscale point and unshift relative to origin
+        inline point unscalePoint(const point& p) const
+        {
+            return point
+            (
+                p.x() * radii_.x() + origin_.x(),
+                p.y() * radii_.y() + origin_.y(),
+                p.z() * radii_.z() + origin_.z()
+            );
+        }
+
+
         //- Inherit findNearest from searchableSurface
         using searchableSurface::findNearest;
 
-        //- Find nearest point on sphere.
+        //- Find nearest point on general spheroid.
+        //  With some optimization for special shapes
         pointIndexHit findNearest
         (
             const point& sample,
             const scalar nearestDistSqr
         ) const;
 
-        //- Find intersection with sphere
+        //- Find intersection with general spheroid
         void findLineAll
         (
             const point& start,
@@ -202,7 +230,7 @@ public:
         //- The type of shape
         enum shapeType shape() const noexcept
         {
-            return shapeType::SPHERE;
+            return order_.shape;
         }
 
         //- A point on the sphere at given location

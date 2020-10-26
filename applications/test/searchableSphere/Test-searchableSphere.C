@@ -219,6 +219,26 @@ int main(int argc, char *argv[])
         )
     );
 
+    doTest1
+    (
+        searchableSphere
+        (
+            io,
+            point(0.5, 0.5, 0.5),
+            vector(1.999, 2, 2.001)
+        )
+    );
+
+    doTest1
+    (
+        searchableSphere
+        (
+            io,
+            point(0, 0, 0),
+            vector(3, 3, 4)
+        )
+    );
+
     Info<< "\nDone\n" << endl;
     return 0;
 }
