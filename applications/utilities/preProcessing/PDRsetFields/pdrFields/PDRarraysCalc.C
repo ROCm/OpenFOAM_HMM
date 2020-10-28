@@ -52,9 +52,25 @@ License
 #endif
 #include <cassert>
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace
+{
+
+// A good ijk index has all components >= 0
+static inline bool isGoodIndex(const Foam::labelVector& idx)
+{
+    return (idx.x() >= 0 && idx.y() >= 0 && idx.z() >= 0);
+}
+
+} // End anonymous namespace
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 using namespace Foam;
 
-HashTable<string> fieldNotes
+static Foam::HashTable<Foam::string> fieldNotes
 ({
     { "Lobs", "" },
     { "Aw", "surface area per unit volume" },
@@ -1255,7 +1271,7 @@ void write_scalarField
     {
         const labelVector& cellIdx = meshIndexing.cellIndex[celli];
 
-        if (cmptMin(cellIdx) < 0)
+        if (!isGoodIndex(cellIdx))
         {
             os  << deflt << nl;
             continue;
@@ -1529,7 +1545,7 @@ void write_symmTensorField
     {
         const labelVector& cellIdx = meshIndexing.cellIndex[celli];
 
-        if (cmptMin(cellIdx) < 0)
+        if (!isGoodIndex(cellIdx))
         {
             os  << deflt << nl;
             continue;
@@ -1591,7 +1607,7 @@ void write_symmTensorFieldV
     {
         const labelVector& cellIdx = meshIndexing.cellIndex[celli];
 
-        if (cmptMin(cellIdx) < 0)
+        if (!isGoodIndex(cellIdx))
         {
             os  << deflt << nl;
             continue;
@@ -1657,7 +1673,7 @@ void write_blocked_face_list
         // The related i-j-k face index for the mesh face
         const labelVector& faceIdx = meshIndexing.faceIndex[facei];
 
-        if (cmptMin(faceIdx) < 0)
+        if (!isGoodIndex(faceIdx))
         {
             continue;
         }
@@ -1923,7 +1939,7 @@ void write_blockedCellsSet
     {
         const labelVector& cellIdx = meshIndexing.cellIndex[celli];
 
-        if (cmptMin(cellIdx) < 0)
+        if (!isGoodIndex(cellIdx))
         {
             continue;
         }

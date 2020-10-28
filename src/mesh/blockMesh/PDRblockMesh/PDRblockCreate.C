@@ -328,14 +328,19 @@ Foam::autoPtr<Foam::polyMesh> Foam::PDRblock::mesh(const IOobject& io) const
         }
     }
 
+
+    IOobject iomesh(io);
+    iomesh.writeOpt() = IOobject::AUTO_WRITE;
+
     auto meshPtr = autoPtr<polyMesh>::New
     (
-        io,
+        iomesh,
         std::move(pts),
         std::move(faces),
         std::move(own),
         std::move(nei)
     );
+    polyMesh& pmesh = *meshPtr;
 
     PtrList<polyPatch> patches(patches_.size());
 
@@ -355,7 +360,7 @@ Foam::autoPtr<Foam::polyMesh> Foam::PDRblock::mesh(const IOobject& io) const
                 bentry.size_,
                 startFace,
                 patchi,  // index
-                meshPtr->boundaryMesh()
+                pmesh.boundaryMesh()
             )
         );
 
@@ -365,7 +370,7 @@ Foam::autoPtr<Foam::polyMesh> Foam::PDRblock::mesh(const IOobject& io) const
         ++patchi;
     }
 
-    meshPtr->addPatches(patches);
+    pmesh.addPatches(patches);
 
     return meshPtr;
 }

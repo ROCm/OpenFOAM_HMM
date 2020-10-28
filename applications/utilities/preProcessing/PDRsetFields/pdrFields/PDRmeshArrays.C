@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 Shell Research Ltd.
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,6 +57,20 @@ License
 Foam::scalar Foam::PDRmeshArrays::gridPointRelTol = 0.02;
 
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace
+{
+
+// A good ijk index has all components >= 0
+static inline bool isGoodIndex(const Foam::labelVector& idx)
+{
+    return (idx.x() >= 0 && idx.y() >= 0 && idx.z() >= 0);
+}
+
+} // End anonymous namespace
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::PDRmeshArrays::classify
@@ -77,16 +91,73 @@ void Foam::PDRmeshArrays::classify
         << "  nFaces:" << mesh.nFaces() << nl;
 
     Info<< "PDRblock" << nl
-        << "  minEdgeLen:" << pdrBlock.minEdgeLen() << nl;
+        << "  nPoints:" << pdrBlock.nPoints()
+        << "  nCells:" << pdrBlock.nCells()
+        << "  nFaces:" << pdrBlock.nFaces() << nl
+        << "  min-edge:" << pdrBlock.minEdgeLen() << nl;
+
+    Info<< "Classifying ijk indexing... " << nl;
 
 
-    // Bin points into i-j-k locations
+    // Bin cells into i-j-k locations with the PDRblock::findCell()
+    // method, which combines a bounding box rejection and binary
+    // search in the three directions.
+
+    cellIndex.resize(mesh.nCells());
+    {
+        const pointField& cc = mesh.cellCentres();
+
+        for (label celli = 0; celli < mesh.nCells(); ++celli)
+        {
+            cellIndex[celli] = pdrBlock.findCell(cc[celli]);
+        }
+    }
+
+    // Verify that all i-j-k cells were indeed found
+    {
+        // This could be more efficient - but we want to be picky
+        IjkField<bool> cellFound(pdrBlock.sizes(), false);
+
+        for (label celli=0; celli < cellIndex.size(); ++celli)
+        {
+            const labelVector& cellIdx = cellIndex[celli];
+
+            if (isGoodIndex(cellIdx))
+            {
+                cellFound(cellIdx) = true;
+            }
+        }
+
+        const label firstMiss = cellFound.find(false);
+
+        if (firstMiss >= 0)
+        {
+            label nMissing = 0;
+            for (label celli = firstMiss; celli < cellFound.size(); ++celli)
+            {
+                if (!cellFound[celli])
+                {
+                    ++nMissing;
+                }
+            }
+
+            FatalErrorInFunction
+                << "No ijk location found for "
+                << nMissing << " cells.\nFirst miss at: "
+                << pdrBlock.index(firstMiss)
+                << " indexing" << nl
+                << exit(FatalError);
+        }
+    }
+
+
+    // Bin all mesh points into i-j-k locations
     List<labelVector> pointIndex(mesh.nPoints());
 
-    for (label pointi=0; pointi < mesh.nPoints(); ++pointi)
+    for (label pointi = 0; pointi < mesh.nPoints(); ++pointi)
     {
-        const point& pt = mesh.points()[pointi];
-        pointIndex[pointi] = pdrBlock.gridIndex(pt, gridPointRelTol);
+        const point& p = mesh.points()[pointi];
+        pointIndex[pointi] = pdrBlock.gridIndex(p, gridPointRelTol);
     }
 
     // Min x,y,z index
@@ -105,6 +176,26 @@ void Foam::PDRmeshArrays::classify
 
     for (label facei=0; facei < mesh.nFaces(); ++facei)
     {
+        labelVector& faceIdx = faceIndex[facei];
+
+        // Check faces that are associated with i-j-k cells
+        const label own = mesh.faceOwner()[facei];
+        const label nei =
+        (
+            facei < mesh.nInternalFaces()
+          ? mesh.faceNeighbour()[facei]
+          : own
+        );
+
+        if (!isGoodIndex(cellIndex[own]) && !isGoodIndex(cellIndex[nei]))
+        {
+            // Invalid
+            faceIdx.x() = faceIdx.y() = faceIdx.z() = -1;
+            faceOrient[facei] = vector::X;
+            continue;
+        }
+
+
         faceLimits.x() = faceLimits.y() = faceLimits.z() = invertedLimits;
 
         for (const label pointi : mesh.faces()[facei])
@@ -135,6 +226,8 @@ void Foam::PDRmeshArrays::classify
                 FatalErrorInFunction
                     << "Face " << facei << " contains non-grid point in "
                     << vector::componentNames[cmpt] << "-direction" << nl
+                    << mesh.faces()[facei] << ' '
+                    << mesh.faces()[facei].points(mesh.points())
                     << exit(FatalError);
             }
             else if (limits.min() == limits.max())
@@ -145,8 +238,8 @@ void Foam::PDRmeshArrays::classify
             else if (limits.min() + 1 != limits.max())
             {
                 FatalErrorInFunction
-                    << "Face " << facei
-                    << " not in " << vector::componentNames[cmpt] << "-plane" << nl
+                    << "Face " << facei << " not in "
+                    << vector::componentNames[cmpt] << "-plane" << nl
                     << exit(FatalError);
             }
         }
@@ -172,78 +265,9 @@ void Foam::PDRmeshArrays::classify
                 break;
         }
 
-        faceIndex[facei] =
-            labelVector
-            (
-                faceLimits.x().min(),
-                faceLimits.y().min(),
-                faceLimits.z().min()
-            );
-    }
-
-
-    // Bin cells into i-j-k locations
-    cellIndex = std::move(pointIndex);
-    cellIndex = labelVector::uniform(maxPointId);
-    cellIndex.resize(mesh.nCells(), labelVector::uniform(maxPointId));
-
-    // Option 1: use PDRblock.findCell() method
-    if (true)
-    {
-        const pointField& cc = mesh.cellCentres();
-
-        for (label celli=0; celli < mesh.nCells(); ++celli)
-        {
-            cellIndex[celli] = pdrBlock.findCell(cc[celli]);
-        }
-    }
-
-    // Option 2: walk cell faces and use faceIndex information
-    if (false)
-    {
-        for (label celli=0; celli < mesh.nCells(); ++celli)
-        {
-            labelVector& cellIdx = cellIndex[celli];
-
-            for (const label facei : mesh.cells()[celli])
-            {
-                cellIdx.x() = min(cellIdx.x(), faceIndex[facei].x());
-                cellIdx.y() = min(cellIdx.y(), faceIndex[facei].y());
-                cellIdx.z() = min(cellIdx.z(), faceIndex[facei].z());
-            }
-
-            if (cmptMin(cellIdx) < 0)
-            {
-                cellIdx = labelVector(-1,-1,-1);
-            }
-        }
-    }
-
-
-    // Verify that all i-j-k cells were found
-    {
-        // This could be more efficient - but we want to be picky
-        IjkField<bool> cellFound(pdrBlock.sizes(), false);
-
-        for (label celli=0; celli < cellIndex.size(); ++celli)
-        {
-            const labelVector& cellIdx = cellIndex[celli];
-
-            if (cmptMin(cellIdx) >= 0)
-            {
-                cellFound(cellIdx) = true;
-            }
-        }
-
-        label firstMissing = cellFound.find(false);
-
-        if (firstMissing >= 0)
-        {
-            FatalErrorInFunction
-                << "No cell found for " << pdrBlock.index(firstMissing)
-                << " indexing"
-                << exit(FatalError);
-        }
+        faceIdx.x() = faceLimits.x().min();
+        faceIdx.y() = faceLimits.y().min();
+        faceIdx.z() = faceLimits.z().min();
     }
 }
 

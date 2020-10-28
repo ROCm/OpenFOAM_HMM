@@ -88,7 +88,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         PDRmeshArrays() = default;
 
 
@@ -116,7 +116,6 @@ public:
 
         //- Read OpenFOAM mesh and determine i-j-k indices for faces/cells
         void read(const Time& runTime, const PDRblock& pdrBlock);
-
 };
 
 
