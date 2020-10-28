@@ -94,7 +94,7 @@ void Foam::PDRmeshArrays::classify
         << "  nPoints:" << pdrBlock.nPoints()
         << "  nCells:" << pdrBlock.nCells()
         << "  nFaces:" << pdrBlock.nFaces() << nl
-        << "  min-edge:" << pdrBlock.minEdgeLen() << nl;
+        << "  min-edge:" << pdrBlock.edgeLimits().min() << nl;
 
     Info<< "Classifying ijk indexing... " << nl;
 

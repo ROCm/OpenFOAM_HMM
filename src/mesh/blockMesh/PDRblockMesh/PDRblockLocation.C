@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,13 +26,211 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "PDRblock.H"
-#include "ListOps.H"
+#include "gradingDescriptors.H"
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Prepend a value by shifting contents
+template<class T>
+static void prependList(List<T>& list, const T& val)
+{
+    const label oldLen = list.size();
+    list.resize(oldLen + 1);
+
+    for (label i = oldLen; i > 0; --i)
+    {
+        list[i] = std::move(list[i-1]);
+    }
+
+    list[0] = val;
+}
+
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::boundBox Foam::PDRblock::bounds
+(
+    const scalarList& x,
+    const scalarList& y,
+    const scalarList& z
+)
+{
+    return boundBox
+    (
+        point(x.first(), y.first(), z.first()),
+        point(x.last(),  y.last(),  z.last())
+    );
+}
+
+
+Foam::Vector<Foam::gradingDescriptors>
+Foam::PDRblock::grading(const Vector<gridControl>& ctrl)
+{
+    return Vector<gradingDescriptors>
+    (
+        ctrl.x().grading(),
+        ctrl.y().grading(),
+        ctrl.z().grading()
+    );
+}
+
+Foam::labelVector
+Foam::PDRblock::sizes(const Vector<gridControl>& ctrl)
+{
+    return labelVector
+    (
+        ctrl.x().nCells(),
+        ctrl.y().nCells(),
+        ctrl.z().nCells()
+    );
+}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+Foam::label Foam::PDRblock::gridControl::nCells() const
+{
+    label nTotal = 0;
+    for (const label nDiv : divisions_)
+    {
+        nTotal += nDiv;
+    }
+
+    return nTotal;
+}
+
+
+Foam::gradingDescriptors Foam::PDRblock::gridControl::grading() const
+{
+    // Begin/end nodes for each segment
+    const scalarList& knots = *this;
+
+    gradingDescriptors gds(divisions_.size());
+
+    forAll(gds, i)
+    {
+        //- Construct from components
+        gds[i] = gradingDescriptor
+        (
+            knots[i+1] - knots[i],  // blockFraction from delta
+            divisions_[i],          // nDivFraction  from nDivs
+            expansion_[i]
+        );
+    }
+
+    gds.normalise();
+
+    return gds;
+}
+
+
+void Foam::PDRblock::gridControl::append
+(
+    const scalar p,
+    const label nDiv,
+    scalar expRatio
+)
+{
+    // Begin/end nodes for each segment
+    scalarList& knots = *this;
+
+    // Is monotonic?
+    if (knots.size() && (p <= knots.last()))
+    {
+        WarningInFunction
+            << "Cannot append point " << p
+            << " which is <= last value " << knots.last() << endl;
+        return;
+    }
+
+    if (nDiv < 1)
+    {
+        WarningInFunction
+            << "Negative or zero divisions " << nDiv << endl;
+        return;
+    }
+
+    // Correct expansion ratios - negative is the same as inverse.
+    if (expRatio < 0)
+    {
+        expRatio = 1.0/(-expRatio);
+    }
+    else if (equal(expRatio, 0))
+    {
+        expRatio = 1;
+    }
+
+    // Now append (push_back)
+    knots.append(p);
+    divisions_.append(nDiv);
+    expansion_.append(expRatio);
+}
+
+
+void Foam::PDRblock::gridControl::prepend
+(
+    const scalar p,
+    const label nDiv,
+    scalar expRatio
+)
+{
+    // Begin/end nodes for each segment
+    scalarList& knots = static_cast<scalarList&>(*this);
+
+    // Is monotonic?
+    if (knots.size() && (p >= knots.first()))
+    {
+        WarningInFunction
+            << "Cannot prepend point " << p
+            << " which is >= first value " << knots.first() << endl;
+        return;
+    }
+
+    if (nDiv < 1)
+    {
+        WarningInFunction
+            << "Negative or zero divisions " << nDiv << endl;
+        return;
+    }
+
+    // Correct expansion ratios - negative is the same as inverse.
+    if (expRatio < 0)
+    {
+        expRatio = 1.0/(-expRatio);
+    }
+    else if (equal(expRatio, 0))
+    {
+        expRatio = 1;
+    }
+
+    // Now prepend (push_front)
+    prependList(knots, p);
+    prependList(divisions_, nDiv);
+    prependList(expansion_, expRatio);
+}
+
+
+Foam::scalarMinMax Foam::PDRblock::location::edgeLimits() const
+{
+    scalarMinMax limits;
+
+    for (label edgei = 0; edgei < this->nCells(); ++edgei)
+    {
+        limits.add(width(edgei));
+    }
+
+    return limits;
+}
+
+
 Foam::label Foam::PDRblock::location::findCell(const scalar p) const
 {
-    if (scalarList::empty())
+    if (scalarList::empty() || p < first() || p > last())
     {
         return -1;
     }

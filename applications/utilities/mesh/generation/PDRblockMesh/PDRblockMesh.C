@@ -57,7 +57,6 @@ Usage
 #include "Time.H"
 #include "IOdictionary.H"
 #include "OSspecific.H"
-#include "OFstream.H"
 
 using namespace Foam;
 
@@ -97,6 +96,22 @@ int main(int argc, char *argv[])
     );
     argList::addOptionCompat("no-clean", {"noClean", -2006});
 
+    argList::addBoolOption
+    (
+        "no-outer",
+        "Create without any other region"
+    );
+    argList::addBoolOption
+    (
+        "print-dict",
+        "Print blockMeshDict equivalent and exit"
+    );
+    argList::addBoolOption
+    (
+        "write-dict",
+        "Write system/blockMeshDict.PDRblockMesh and exit"
+    );
+
     argList::addOption("dict", "file", "Alternative PDRblockMeshDict");
     argList::addOption
     (
@@ -110,6 +125,9 @@ int main(int argc, char *argv[])
 
     // Remove old files, unless disabled
     const bool removeOldFiles = !args.found("no-clean");
+
+    // Suppress creation of the outer region
+    const bool noOuterRegion = args.found("no-outer");
 
     const word regionName(polyMesh::defaultRegion);
     const word regionPath;
@@ -149,8 +167,38 @@ int main(int argc, char *argv[])
     Info<< "Creating PDRblockMesh from "
         << runTime.relativePath(dictIO.objectPath()) << endl;
 
+    // Always start from a PDRblock
     PDRblock blkMesh(meshDict, true);
 
+    if (args.found("print-dict"))
+    {
+        Info<< nl << "Equivalent blockMeshDict" << nl << nl;
+
+        blkMesh.blockMeshDict(Info, true);
+
+        Info<< "\nEnd\n" << endl;
+        return 0;
+    }
+
+    if (args.found("write-dict"))
+    {
+        // Generate system/blockMeshDict and exit
+        blkMesh.writeBlockMeshDict
+        (
+            IOobject
+            (
+                "blockMeshDict.PDRblockMesh",
+                runTime.system(),   // instance
+                runTime,            // registry
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false  // Do not register
+            )
+        );
+
+        Info<< "\nEnd\n" << endl;
+        return 0;
+    }
 
     // Instance for resulting mesh
     if (useTime)
@@ -170,14 +218,19 @@ int main(int argc, char *argv[])
 
 
     Info<< nl << "Creating polyMesh from PDRblockMesh" << endl;
+    if (noOuterRegion)
+    {
+        Info<< "Outer region disabled, using ijk generation" << nl;
+    }
 
     autoPtr<polyMesh> meshPtr =
-        blkMesh.mesh
-        (
-            IOobject(regionName, meshInstance, runTime)
-        );
+    (
+        args.found("no-outer")
+      ? blkMesh.innerMesh(IOobject(regionName, meshInstance, runTime))
+      : blkMesh.mesh(IOobject(regionName, meshInstance, runTime))
+    );
 
-    const polyMesh& mesh = *meshPtr;
+    polyMesh& mesh = *meshPtr;
 
     // Set the precision of the points data to 10
     IOstream::defaultPrecision(max(10u, IOstream::defaultPrecision()));

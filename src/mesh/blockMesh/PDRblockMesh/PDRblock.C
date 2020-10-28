@@ -28,6 +28,7 @@ License
 #include "PDRblock.H"
 #include "ListOps.H"
 #include "emptyPolyPatch.H"
+#include "gradingDescriptors.H"
 
 // Output when verbosity is enabled
 #undef  Log
@@ -52,21 +53,22 @@ Foam::PDRblock::expansionNames_
 
 namespace Foam
 {
-    //- Calculate geometric expansion factor from expansion ratio
-    inline scalar calcGexp(const scalar expRatio, const label nDiv)
-    {
-        return nDiv > 1 ? pow(expRatio, 1.0/(nDiv - 1)) : 0.0;
-    }
 
-    //- Calculate geometric ratio from relative ratio
-    inline scalar relativeToGeometricRatio
-    (
-        const scalar expRatio,
-        const label nDiv
-    )
-    {
-        return nDiv > 1 ? pow(expRatio, (nDiv - 1)) : 1.0;
-    }
+//- Calculate geometric expansion factor from expansion ratio
+inline scalar calcGexp(const scalar expRatio, const label nDiv)
+{
+    return nDiv > 1 ? pow(expRatio, 1.0/(nDiv - 1)) : 0.0;
+}
+
+//- Calculate geometric ratio from relative ratio
+inline scalar relativeToGeometricRatio
+(
+    const scalar expRatio,
+    const label nDiv
+)
+{
+    return nDiv > 1 ? pow(expRatio, (nDiv - 1)) : 1.0;
+}
 
 } // End namespace Foam
 
@@ -129,32 +131,20 @@ void Foam::PDRblock::adjustSizes()
         grid_.z().clear();
 
         bounds_ = boundBox::invertedBox;
-        minEdgeLen_ = Zero;
+        edgeLimits_.min() = 0;
+        edgeLimits_.max() = 0;
         return;
     }
 
     // Adjust boundBox
-    bounds_.min().x() = grid_.x().first();
-    bounds_.min().y() = grid_.y().first();
-    bounds_.min().z() = grid_.z().first();
+    bounds_ = bounds(grid_.x(), grid_.y(), grid_.z());
 
-    bounds_.max().x() = grid_.x().last();
-    bounds_.max().y() = grid_.y().last();
-    bounds_.max().z() = grid_.z().last();
+    // Min/max edge lengths
+    edgeLimits_.clear();
 
-    // Min edge length
-    minEdgeLen_ = GREAT;
-
-    for (direction cmpt=0; cmpt < vector::nComponents; ++cmpt)
-    {
-        const label nEdge = grid_[cmpt].nCells();
-
-        for (label edgei=0; edgei < nEdge; ++edgei)
-        {
-            const scalar len = grid_[cmpt].width(edgei);
-            minEdgeLen_ = min(minEdgeLen_, len);
-        }
-    }
+    edgeLimits_.add(grid_.x().edgeLimits());
+    edgeLimits_.add(grid_.y().edgeLimits());
+    edgeLimits_.add(grid_.z().edgeLimits());
 }
 
 
@@ -166,14 +156,18 @@ void Foam::PDRblock::readGridControl
     expansionType expandType
 )
 {
-    //- The begin/end nodes for each segment
-    scalarList knots;
+    gridControl& ctrl = control_[cmpt];
+
+    // Begin/end nodes for each segment
+    scalarList& knots = static_cast<scalarList&>(ctrl);
 
     // The number of division per segment
-    labelList divisions;
+    labelList& divisions = ctrl.divisions_;
 
     // The expansion ratio per segment
-    scalarList expansion;
+    scalarList& expansion = ctrl.expansion_;
+
+    expansion.clear();  // expansion is optional
 
     Log << "Reading grid control for "
         << vector::componentNames[cmpt] << " direction" << nl;
@@ -514,6 +508,12 @@ void Foam::PDRblock::readBoundary(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::PDRblock::PDRblock()
+:
+    PDRblock(dictionary::null, false)
+{}
+
+
 Foam::PDRblock::PDRblock
 (
     const UList<scalar>& xgrid,
@@ -521,7 +521,7 @@ Foam::PDRblock::PDRblock
     const UList<scalar>& zgrid
 )
 :
-    PDRblock()
+    PDRblock(dictionary::null, false)
 {
     // Default boundaries with patchi == shapeFacei
     patches_.resize(6);
@@ -541,13 +541,21 @@ Foam::PDRblock::PDRblock
 }
 
 
-Foam::PDRblock::PDRblock(const dictionary& dict, bool verbose)
+Foam::PDRblock::PDRblock(const dictionary& dict, bool verboseOutput)
 :
-    PDRblock()
+    ijkMesh(),
+    meshDict_(dict),
+    grid_(),
+    outer_(),
+    bounds_(),
+    patches_(),
+    edgeLimits_(0,0),
+    verbose_(verboseOutput)
 {
-    verbose_ = verbose;
-
-    read(dict);
+    if (&dict != &dictionary::null)
+    {
+        read(dict);
+    }
 }
 
 
@@ -574,6 +582,16 @@ bool Foam::PDRblock::read(const dictionary& dict)
     adjustSizes();
 
     readBoundary(dict);
+
+    // Outer treatment: (none | extend | box | sphere)
+    outer_.clear();
+
+    const dictionary* outerDictPtr = dict.findDict("outer");
+    if (outerDictPtr)
+    {
+        outer_.read(*outerDictPtr);
+    }
+    outer_.report(Info);
 
     return true;
 }
@@ -644,7 +662,7 @@ bool Foam::PDRblock::gridIndex
     const scalar relTol
 ) const
 {
-    const scalar tol = relTol * minEdgeLen_;
+    const scalar tol = relTol * edgeLimits_.min();
 
     for (direction cmpt=0; cmpt < labelVector::nComponents; ++cmpt)
     {
@@ -685,6 +703,35 @@ Foam::labelVector Foam::PDRblock::gridIndex
     }
 
     return labelVector(-1,-1,-1);
+}
+
+
+Foam::Vector<Foam::gradingDescriptors> Foam::PDRblock::grading() const
+{
+    return grading(control_);
+}
+
+
+Foam::gradingDescriptors Foam::PDRblock::grading(const direction cmpt) const
+{
+    switch (cmpt)
+    {
+        case vector::X :
+        case vector::Y :
+        case vector::Z :
+        {
+            return control_[cmpt].grading();
+            break;
+        }
+
+        default :
+            FatalErrorInFunction
+                << "Not gridControl for direction " << label(cmpt) << endl
+                << exit(FatalError);
+            break;
+    }
+
+    return gradingDescriptors();
 }
 
 

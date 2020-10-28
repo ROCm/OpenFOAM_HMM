@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,20 +25,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-inline Foam::PDRblock::PDRblock()
-:
-    ijkMesh(),
-    verbose_(false),
-    grid_(),
-    bounds_(),
-    patches_(),
-    minEdgeLen_(Zero)
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// Location
 
 inline bool Foam::PDRblock::location::valid() const
 {
@@ -79,6 +67,12 @@ inline const Foam::scalar& Foam::PDRblock::location::max() const
 inline Foam::scalar Foam::PDRblock::location::centre() const
 {
     return scalarList::empty() ? 0 : (0.5*first() + 0.5*last());
+}
+
+
+inline Foam::scalar Foam::PDRblock::location::length() const
+{
+    return scalarList::empty() ? 0 : mag(last() - first());
 }
 
 
@@ -148,6 +142,8 @@ Foam::PDRblock::location::clip(const scalar& val) const
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 inline const Foam::Vector<Foam::PDRblock::location>&
 Foam::PDRblock::grid() const
 {
@@ -155,9 +151,9 @@ Foam::PDRblock::grid() const
 }
 
 
-inline const Foam::scalar& Foam::PDRblock::minEdgeLen() const
+inline const Foam::scalarMinMax& Foam::PDRblock::edgeLimits() const
 {
-    return minEdgeLen_;
+    return edgeLimits_;
 }
 
 
