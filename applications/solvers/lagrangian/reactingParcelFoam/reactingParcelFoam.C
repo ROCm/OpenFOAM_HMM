@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2011-2020 OpenFOAM Foundation
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,8 +37,8 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "dynamicFvMesh.H"
 #include "turbulentFluidThermoModel.H"
-
 #include "surfaceFilmModel.H"
 #include "rhoReactionThermo.H"
 #include "CombustionModel.H"
@@ -47,6 +47,7 @@ Description
 #include "fvOptions.H"
 #include "pimpleControl.H"
 #include "pressureControl.H"
+#include "CorrectPhi.H"
 #include "localEulerDdtScheme.H"
 #include "fvcSmooth.H"
 #include "cloudMacros.H"
@@ -76,13 +77,13 @@ int main(int argc, char *argv[])
     #include "addCheckCaseOptions.H"
     #include "setRootCaseLists.H"
     #include "createTime.H"
-    #include "createMesh.H"
-    #include "createControl.H"
-    #include "createTimeControls.H"
+    #include "createDynamicFvMesh.H"
+    #include "createDyMControls.H"
     #include "createFields.H"
     #include "createFieldRefs.H"
     #include "createRegionControls.H"
     #include "initContinuityErrs.H"
+    #include "createRhoUfIfPresent.H"
 
     turbulence->validate();
 
@@ -98,7 +99,23 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-        #include "readTimeControls.H"
+        #include "readDyMControls.H"
+
+        // Store divrhoU from the previous mesh
+        // so that it can be mapped and used in correctPhi
+        // to ensure the corrected phi has the same divergence
+        autoPtr<volScalarField> divrhoU;
+        if (solvePrimaryRegion && correctPhi)
+        {
+            divrhoU.reset
+            (
+                new volScalarField
+                (
+                    "divrhoU",
+                    fvc::div(fvc::absolute(phi, rho, U))
+                )
+            );
+        }
 
         if (LTS)
         {
@@ -113,6 +130,44 @@ int main(int argc, char *argv[])
         ++runTime;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
+
+        // Store momentum to set rhoUf for introduced faces.
+        autoPtr<volVectorField> rhoU;
+        if (solvePrimaryRegion && rhoUf.valid())
+        {
+            rhoU.reset(new volVectorField("rhoU", rho*U));
+        }
+
+        // Store the particle positions
+        parcels.storeGlobalPositions();
+
+        // Do any mesh changes
+        mesh.update();
+
+        if (solvePrimaryRegion && mesh.changing())
+        {
+            gh = (g & mesh.C()) - ghRef;
+            ghf = (g & mesh.Cf()) - ghRef;
+
+            MRF.update();
+
+            if (correctPhi)
+            {
+                // Calculate absolute flux
+                // from the mapped surface velocity
+                phi = mesh.Sf() & rhoUf();
+
+                #include "../../compressible/rhoPimpleFoam/correctPhi.H"
+
+                // Make the fluxes relative to the mesh-motion
+                fvc::makeRelative(phi, rho, U);
+            }
+
+            if (checkMeshCourantNo)
+            {
+                #include "meshCourantNo.H"
+            }
+        }
 
         parcels.evolve();
         surfaceFilm.evolve();

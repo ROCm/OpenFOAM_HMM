@@ -103,7 +103,7 @@ License
         );
     }
 
-    // Update tho boundary values of the reciprocal time-step
+    // Update the boundary values of the reciprocal time-step
     rDeltaT.correctBoundaryConditions();
 
     // Spatially smooth the time scale field
