@@ -24,20 +24,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::Detail::dummyLib
+    Foam::Detail::dummy
 
 Description
-    This class serves little useful purpose, but can be used to compile
-    into a dummy library and link against for a minimal application
-    that uses the wmake framework
+    No useful purpose other than to use the wmake framework to generate
+    a dummy library for testing/packaging purposes
+
+Note
+    Pure C++ without any OpenFOAM classes or libraries.
 
 SourceFiles
     dummyLib.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dummyLib_H
-#define dummyLib_H
+#ifndef testing_dummyLib_H
+#define testing_dummyLib_H
 
 #include <string>
 
@@ -80,6 +82,12 @@ struct dummyLib
 
     //- DIY Compile-time value of WM_OPTIONS
     static const std::string archCompFull;
+
+    //- Compiled/linked with mpi?
+    static bool hasMPI();
+
+    //- Print ranks (trivial mpi test). Return true for master only.
+    static bool printMPI();
 };
 
 

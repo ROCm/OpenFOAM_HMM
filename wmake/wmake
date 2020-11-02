@@ -195,7 +195,7 @@ allCores()
 #------------------------------------------------------------------------------
 
 # Default to compiling the local target only
-unset optAll optUpdate optDebug optQuiet optShow optPwd
+unset optAll optUpdate optCxx optDebug optQuiet optShow optPwd
 
 # Consistency with inherited values
 if [ "$WM_QUIET" = true ]
@@ -231,7 +231,7 @@ do
             export WM_QUIET=true
             ;;
         -debug)
-            optDebug="-DFULLDEBUG -g -O0"
+            optDebug=true
             ;;
 
         -module-prefix=*)
@@ -489,13 +489,29 @@ unset exitCode
 # Recurse the source tree to compile "all" targets
 #------------------------------------------------------------------------------
 
+if [ -n "$optDebug" ]
+then
+    # Convey -debug via FOAM_EXTRA_CXXFLAGS
+    optDebug="-DFULLDEBUG -g"
+    oldFlags="$FOAM_EXTRA_CXXFLAGS"
+
+    case "$oldFlags" in
+    (*-DFULLDEBUG*)
+        # Already there
+    ;;
+    (*)
+        export FOAM_EXTRA_CXXFLAGS="$oldFlags${oldFlags:+ }$optDebug"
+    ;;
+    esac
+fi
+
 if [ "$optAll" = all ]
 then
     if [ -e Allwmake.override ]
     then
         if [ -x Allwmake.override ]
         then
-            ./Allwmake.override -fromWmake ${optDebug:+-debug} $targetType
+            ./Allwmake.override -fromWmake $targetType
             exitCode="$?"
         else
             # Allow empty or non-executable file (eg, touch Allwmake.override)
@@ -503,7 +519,7 @@ then
         fi
     elif [ -e Allwmake ]
     then
-        ./Allwmake -fromWmake ${optDebug:+-debug} $targetType
+        ./Allwmake -fromWmake $targetType
         exitCode="$?"
     fi
 
@@ -531,7 +547,6 @@ then
         # Compile all applications in sub-directories
         $make ${WM_CONTINUE_ON_ERROR:+-k} \
               -f $WM_DIR/makefiles/apps \
-              ${optDebug:+c++DBUG="$optDebug"} \
               TARGET="$targetType" FOAM_APPS="$FOAM_APPS"
         exitCode=$?
     fi
@@ -558,7 +573,7 @@ then
         "$WM_SCHEDULER" -clean \
      && wmake -all objects   \
      && "$WM_SCHEDULER"
-    ) && wmake -all ${optDebug:+-debug}
+    ) && wmake -all
     exit $?
 fi
 
@@ -678,7 +693,6 @@ fi
 #------------------------------------------------------------------------------
 
 exec $make -f $WM_DIR/makefiles/general \
-     ${optDebug:+c++DBUG="$optDebug"} \
      MAKE_DIR=$MakeDir OBJECTS_DIR=$objectsDir $targetType
 
 exit 0 # clean exit

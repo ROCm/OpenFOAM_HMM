@@ -40,44 +40,49 @@ unset WM_SHELL_FUNCTIONS
 # [WM_THIRD_PARTY_DIR] - Location of third-party software components
 # \- This may be installed in a directory parallel to the OpenFOAM project
 #    directory, with the same version name or using the API value.
-#    It may also not be required at all, in which case a dummy "ThirdParty"
-#    directory inside of the OpenFOAM project directory.
+#    It may also not be required at all, in which case use a dummy
+#    "ThirdParty" inside of the OpenFOAM project directory.
 #
-# Note: only accept if the directory exists and contains either
-#   a "Allwmake" file (source) or a "platforms" directory (runtime-only)
+# Test out-of-source directories for an "Allwmake" file (source)
+# or a "platforms/" directory (runtime-only)
 
-export WM_THIRD_PARTY_DIR
-unset foundDir
+export WM_THIRD_PARTY_DIR=""  # Empty value (before detection)
 
-_foamEcho "Locating ThirdParty directory"
-
-for WM_THIRD_PARTY_DIR in \
-    "$WM_PROJECT_DIR/ThirdParty" \
-    "$prefixDir/ThirdParty-$WM_PROJECT_VERSION" \
-    "$prefixDir/ThirdParty-v$FOAM_API" \
-    "$prefixDir/ThirdParty-$FOAM_API" \
-    "$prefixDir/ThirdParty-common" \
-    ;
-do
-    _foamEcho "... $WM_THIRD_PARTY_DIR"
-    if [ -d "$WM_THIRD_PARTY_DIR" ]
-    then
-        if [ -f "$WM_THIRD_PARTY_DIR/Allwmake" ] || \
-           [ -d "$WM_THIRD_PARTY_DIR/platforms" ]
-        then
-            foundDir=true
-            break
-        fi
-    fi
-done
-
-if [ -n "$foundDir" ]
+if [ -e "$WM_PROJECT_DIR/ThirdParty" ]
 then
-    _foamEcho "Using $WM_THIRD_PARTY_DIR"
+    # Directory or file (masks use of ThirdParty entirely)
+    WM_THIRD_PARTY_DIR="$WM_PROJECT_DIR/ThirdParty"
 else
+    _foamEcho "Locating ThirdParty directory"
+    for foundDir in \
+        "$prefixDir/ThirdParty-$WM_PROJECT_VERSION" \
+        "$prefixDir/ThirdParty-v$FOAM_API" \
+        "$prefixDir/ThirdParty-$FOAM_API" \
+        "$prefixDir/ThirdParty-common" \
+        ;
+    do
+        _foamEcho "... $foundDir"
+        if [ -d "$foundDir" ]
+        then
+            if [ -f "$foundDir/Allwmake" ] || \
+               [ -d "$foundDir/platforms" ]
+            then
+                WM_THIRD_PARTY_DIR="$foundDir"
+                break
+            else
+                _foamEcho "    does not have Allwmake or platforms/"
+            fi
+        fi
+    done
+fi
+
+if [ -z "$WM_THIRD_PARTY_DIR" ]
+then
     # Dummy fallback value
     WM_THIRD_PARTY_DIR="$WM_PROJECT_DIR/ThirdParty"
-    _foamEcho "Dummy $WM_THIRD_PARTY_DIR"
+    _foamEcho "Dummy ThirdParty $WM_THIRD_PARTY_DIR"
+else
+    _foamEcho "ThirdParty $WM_THIRD_PARTY_DIR"
 fi
 # Done with ThirdParty discovery
 

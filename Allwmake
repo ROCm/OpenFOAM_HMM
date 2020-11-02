@@ -18,7 +18,7 @@ fi
 #------------------------------------------------------------------------------
 # Preamble. Report tools or at least the mpirun location
 if [ -f "$WM_PROJECT_DIR"/wmake/scripts/list_tools ]
-then  . "$WM_PROJECT_DIR"/wmake/scripts/list_tools
+then sh "$WM_PROJECT_DIR"/wmake/scripts/list_tools || true
 else
     echo "mpirun=$(command -v mpirun || true)"
 fi

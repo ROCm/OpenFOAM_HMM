@@ -8,4 +8,4 @@ EXE_INC = \
     -DWM_COMPILE_OPTION=\"$(WM_COMPILE_OPTION)\" \
     -DWM_OPTIONS=\"$(WM_OPTIONS)\"
 
-/* LIB_LIBS = */
+LIB_LIBS =

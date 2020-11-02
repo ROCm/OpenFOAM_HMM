@@ -32,6 +32,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "dummyLib.H"
+
 #include <cstring>
 #include <iostream>
 
@@ -42,7 +43,7 @@ constexpr const char* const norm = "\\fR";  // nroff
 constexpr const char* const website = "www.openfoam.com";
 
 using std::cout;
-using wmake = Foam::Detail::dummyLib;
+using dummyLib = Foam::Detail::dummyLib;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -72,34 +73,44 @@ static void printMan(const char* exeName)
     cout
         << ".SH OPTIONS" << nl
         << ".TP" << nl
+        << "-parallel" << nl
+        << "Run parallel and provide simple report" << nl;
+
+    if (!Foam::Detail::dummyLib::hasMPI())
+    {
+        cout << "[warning: no mpi]" << nl;
+    }
+
+    cout
+        << ".TP" << nl
         << "-help-man" << nl
         << "Display manpage" << nl;
 
     cout
         << ".SH INFORMATION" << nl
         << ".nf" << nl
-        << "label    = " << wmake::label_size << nl
-        << "scalar   = " << wmake::scalar_size;
+        << "label    = " << dummyLib::label_size << nl
+        << "scalar   = " << dummyLib::scalar_size;
 
     if
     (
-        wmake::solveScalar_size
-     && wmake::solveScalar_size != wmake::scalar_size
+        dummyLib::solveScalar_size
+     && dummyLib::solveScalar_size != dummyLib::scalar_size
     )
     {
         cout
-            << " [solve=" << wmake::solveScalar_size << "]";
+            << " [solve=" << dummyLib::solveScalar_size << "]";
     }
     cout
-        << " (" << wmake::precision << ')' << nl
-        << "arch     = " << wmake::arch << nl
-        << "compiler = " << wmake::compiler << nl;
+        << " (" << dummyLib::precision << ')' << nl
+        << "arch     = " << dummyLib::arch << nl
+        << "compiler = " << dummyLib::compiler << nl;
 
     cout
         << nl
-        << "archComp     = " << wmake::archComp << nl
-        << "archCompBase = " << wmake::archCompBase << nl
-        << "archCompFull = " << wmake::archCompFull << nl;
+        << "archComp     = " << dummyLib::archComp << nl
+        << "archCompBase = " << dummyLib::archCompBase << nl
+        << "archCompFull = " << dummyLib::archCompFull << nl;
     cout
         << ".fi" << nl;
 
@@ -110,43 +121,61 @@ static void printMan(const char* exeName)
 }
 
 
-int main(int argc, char *argv[])
+static void printInfo()
 {
-    // Process -help-man
-    if (argc > 1 && strcmp(argv[1], "-help-man") == 0)
-    {
-        printMan("Test-dummyLib");
-        return 0;
-    }
-
     cout
         << nl
         << "OPENFOAM  = " << OPENFOAM << nl
-        << "label     = " << wmake::label_size << nl
-        << "scalar    = " << wmake::scalar_size
-        << " (" << wmake::precision << ')' << nl;
+        << "label     = " << dummyLib::label_size << nl
+        << "scalar    = " << dummyLib::scalar_size
+        << " (" << dummyLib::precision << ')' << nl;
 
     if
     (
-        wmake::solveScalar_size
-     && wmake::solveScalar_size != wmake::scalar_size
+        dummyLib::solveScalar_size
+     && dummyLib::solveScalar_size != dummyLib::scalar_size
     )
     {
         cout
-            << "solve     = " << wmake::solveScalar_size << nl;
+            << "solve     = " << dummyLib::solveScalar_size << nl;
     }
 
     cout
-        << "arch      = " << wmake::arch << nl
-        << "compiler  = " << wmake::compiler << nl;
+        << "arch      = " << dummyLib::arch << nl
+        << "compiler  = " << dummyLib::compiler << nl;
 
     cout
         << nl
-        << "archComp     = " << wmake::archComp << nl
-        << "archCompBase = " << wmake::archCompBase << nl
-        << "archCompFull = " << wmake::archCompFull << nl;
+        << "archComp     = " << dummyLib::archComp << nl
+        << "archCompBase = " << dummyLib::archCompBase << nl
+        << "archCompFull = " << dummyLib::archCompFull << nl;
 
     cout<< nl;
+}
+
+
+int main(int argc, char *argv[])
+{
+    bool master = true;
+
+    if (argc > 1)
+    {
+        if (strcmp(argv[1], "-help-man") == 0)
+        {
+            printMan("Test-dummyLib");
+            return 0;
+        }
+
+        if (strcmp(argv[1], "-parallel") == 0)
+        {
+            master = dummyLib::printMPI();
+        }
+    }
+
+    if (master)
+    {
+        printInfo();
+    }
 
     return 0;
 }
