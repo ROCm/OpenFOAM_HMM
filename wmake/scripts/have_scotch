@@ -37,6 +37,50 @@
 #     PTSCOTCH_INC_DIR
 #     PTSCOTCH_LIB_DIR
 #
+#
+# System files can be hiding in a large variety of locations.
+# For x86_64 system:
+#
+# ArchLinux
+# ---------
+#     scotch   include: /usr/include/scotch
+#     scotch   library: /usr/lib64
+#
+#     ptscotch include: /usr/include/ptscotch
+#     ptscotch library: /usr/lib64
+#
+#
+# Debian/Ubuntu
+# -------------
+#     scotch   include: /usr/include/scotch-int32
+#     scotch   library: /usr/lib/x86_64-linux-gnu
+#
+#     ptscotch include: /usr/include/scotch-int32
+#     ptscotch library: /usr/lib/x86_64-linux-gnu
+#
+#
+# RedHat
+# ------
+#     scotch   include: /usr/include
+#     scotch   library: /usr/lib64
+#
+#     ptscotch include: /usr/include/openmpi-x86_64
+#     ptscotch library: /usr/lib64/openmpi/lib
+#
+# when MPI_ARCH_PATH=/usr/lib64/openmpi
+# and mpicc --showme:compile -> -I/usr/include/openmpi-x86_64
+#
+#
+# openSUSE
+# --------
+#     scotch   include: /usr/include
+#     scotch   library: /usr/lib64
+#
+#     ptscotch include: /usr/lib64/mpi/gcc/openmpi2/include
+#     ptscotch library: /usr/lib64/mpi/gcc/openmpi2/lib64
+#
+# when MPI_ARCH_PATH=/usr/lib64/mpi/gcc/openmpi2
+#
 #------------------------------------------------------------------------------
 . ${WM_PROJECT_DIR:?}/wmake/scripts/sysFunctions    # General system functions
 
@@ -192,6 +236,9 @@ search_ptscotch()
     local prefix="${1:-system}"
     local header library
 
+    local mpiPrefix="$MPI_ARCH_PATH"
+    local mpiName="${MPI_ARCH_PATH##*/}"
+
     # ----------------------------------
     if isNone "$prefix"
     then
@@ -204,7 +251,10 @@ search_ptscotch()
             "$prefix/include/$localDir/$incName" \
             "$prefix/include/ptscotch/$incName" \
             "$prefix/include/scotch/$incName" \
-            "$prefix/include/$incName"
+            "$prefix/include/$incName" \
+            "$mpiPrefix/include/$incName" \
+            "$prefix/include/$mpiName/$incName" \
+            "$prefix/include/${mpiName}-$(uname -m)/$incName" \
         )
         library="$(findExtLib $FOAM_MPI/$libName $libName)"
     elif isSystem "$prefix"
@@ -218,6 +268,9 @@ search_ptscotch()
             "/usr/include/ptscotch/$incName" \
             "/usr/include/scotch/$incName" \
             "/usr/include/$incName" \
+            "$mpiPrefix/include/$incName" \
+            "/usr/include/$mpiName/$incName" \
+            "$prefix/include/${mpiName}-$(uname -m)/$incName" \
         )
         prefix=$(sysPrefix "$header")
     else
@@ -235,6 +288,7 @@ search_ptscotch()
     # Library
     [ -n "$library" ] \
     || library=$(findLibrary -prefix="$prefix" -name="$libName" -local="$localDir") \
+    || library=$(findLibrary -prefix="$mpiPrefix" -name="$libName" -local="$localDir") \
     || {
         [ -n "$warn" ] && echo "$warn (no library)"
         return 2
