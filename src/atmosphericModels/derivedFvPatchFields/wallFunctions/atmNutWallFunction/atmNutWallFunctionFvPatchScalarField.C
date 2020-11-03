@@ -44,14 +44,15 @@ tmp<scalarField> atmNutWallFunctionFvPatchScalarField::calcNut() const
 {
     const label patchi = patch().index();
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
-    (
-        IOobject::groupName
+    const auto& turbModel =
+        db().lookupObject<turbulenceModel>
         (
-            turbulenceModel::propertiesName,
-            internalField().group()
-        )
-    );
+            IOobject::groupName
+            (
+                turbulenceModel::propertiesName,
+                internalField().group()
+            )
+        );
     const scalarField& y = turbModel.y()[patchi];
 
     const tmp<volScalarField> tk = turbModel.k();
@@ -60,8 +61,8 @@ tmp<scalarField> atmNutWallFunctionFvPatchScalarField::calcNut() const
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
-    tmp<scalarField> tnutw(new scalarField(*this));
-    scalarField& nutw = tnutw.ref();
+    auto tnutw = tmp<scalarField>::New(*this);
+    auto& nutw = tnutw.ref();
 
     const scalar Cmu25 = pow025(Cmu_);
 
@@ -72,14 +73,14 @@ tmp<scalarField> atmNutWallFunctionFvPatchScalarField::calcNut() const
     const scalarField z0(z0_->value(t));
 
     #ifdef FULLDEBUG
-    for (const auto& z : z0)
+    for (const scalar z : z0)
     {
         if (z < VSMALL)
         {
             FatalErrorInFunction
                 << "z0 field can only contain positive values. "
                 << "Please check input field z0."
-                << exit(FatalIOError);
+                << exit(FatalError);
         }
     }
     #endif
@@ -211,7 +212,8 @@ void atmNutWallFunctionFvPatchScalarField::rmap
 
 void atmNutWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
-    nutkWallFunctionFvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
+    nutWallFunctionFvPatchScalarField::writeLocalEntries(os);
     os.writeEntry("z0Min", z0Min_);
     z0_->writeData(os);
     writeEntry("value", os);

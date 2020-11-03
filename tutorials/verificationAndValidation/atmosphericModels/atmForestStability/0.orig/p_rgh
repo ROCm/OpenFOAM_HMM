@@ -20,18 +20,17 @@ internalField   uniform 0.0;
 
 boundaryField
 {
-    "bottom|top"
+    "(bottom|top)"
     {
        type             fixedFluxPressure;
        rho              rhok;
        value            uniform 0;
     }
 
-    "inlet|outlet|left|right"
+    "(inlet|outlet|left|right)"
     {
         type            cyclic;
     }
-
 }
 
 

@@ -195,7 +195,7 @@ void atmTurbulentHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
     {
         FatalErrorInFunction
             << "Cp0 = " << Cp0 << " must be positive."
-            << exit(FatalIOError);
+            << exit(FatalError);
     }
 
     const scalarField q(q_->value(t));
@@ -220,7 +220,7 @@ void atmTurbulentHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
             FatalErrorInFunction
                 << "Unknown heat source type. Valid types are: "
                 << heatSourceTypeNames << nl
-                << exit(FatalIOError);
+                << exit(FatalError);
         }
     }
 

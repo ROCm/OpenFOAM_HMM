@@ -32,8 +32,8 @@ Group
 
 Description
     This boundary condition provides a log-law type ground-normal inlet
-    boundary condition for the streamwise component of wind velocity,
-    i.e. \c u, for homogeneous, two-dimensional, dry-air, equilibrium
+    boundary condition for the streamwise component of wind velocity
+    (i.e. \c u) for homogeneous, two-dimensional, dry-air, equilibrium
     and neutral atmospheric boundary layer modelling.
 
     The ground-normal streamwise flow speed profile expression:
@@ -78,8 +78,8 @@ Usage
 
     where the entries mean:
     \table
-      Property  | Description                            | Type | Req'd | Deflt
-      type      | Type name: atmBoundaryLayerInletVelocity | word | yes   | -
+      Property  | Description                              | Type | Reqd | Deflt
+      type      | Type name: atmBoundaryLayerInletVelocity | word | yes  | -
     \endtable
 
     The inherited entries are elaborated in:
@@ -186,7 +186,8 @@ public:
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();
 
-        // Mapping functions
+
+        // Mapping
 
             //- Map (and resize as needed) from self given a mapping object
             virtual void autoMap

@@ -32,7 +32,7 @@ Group
 
 Description
     This boundary condition provides a wall constraint on the kinematic
-    turbulent thermal conductivity, i.e. \c alphat, for atmospheric boundary
+    turbulent thermal conductivity (i.e. \c alphat) for atmospheric boundary
     layer modelling.  It assumes a logarithmic distribution of the potential
     temperature within the first cell.
 
@@ -65,8 +65,8 @@ Usage
 
     where the entries mean:
     \table
-      Property | Description                      | Type   | Req'd     | Dflt
-      type     | Type name: atmAlphatkWallFunction | word   | yes       | -
+      Property | Description                       | Type   | Reqd     | Dflt
+      type     | Type name: atmAlphatkWallFunction | word   | yes      | -
       Pr       | Molecular Prandtl number     | TimeFunction1<scalar>  | yes | -
       Prt      | Turbulent Prandtl number     | PatchFunction1<scalar> | yes | -
       z0       | Surface roughness length [m] | PatchFunction1<scalar> | yes | -
@@ -212,13 +212,13 @@ public:
 
     // Member Functions
 
-        // Evaluation functions
+        // Evaluation
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
 
 
-        // Mapping functions
+        // Mapping
 
             //- Map (and resize as needed) from self given a mapping object
             virtual void autoMap(const fvPatchFieldMapper&);

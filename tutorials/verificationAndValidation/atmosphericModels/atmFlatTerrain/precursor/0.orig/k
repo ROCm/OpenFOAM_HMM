@@ -31,7 +31,7 @@ boundaryField
         type            slip;
     }
 
-    "inlet|outlet|left|right"
+    "(inlet|outlet|left|right)"
     {
         type            cyclic;
     }

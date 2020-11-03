@@ -156,7 +156,7 @@ Usage
 
     where the entries mean:
     \table
-      Property  | Description              | Type          | Req'd | Deflt
+      Property  | Description              | Type          | Reqd  | Deflt
       flowDir   | Flow direction           | TimeFunction1<vector> | yes | -
       zDir      | Ground-normal direction  | TimeFunction1<vector> | yes | -
       Uref      | Reference mean streamwise flow speed being used in <!--
@@ -237,7 +237,7 @@ protected:
 
         //- Flag to initialise profiles with the theoretical ABL expressions,
         //- otherwise initialises by using "value" entry content
-        Switch initABL_;
+        bool initABL_;
 
 
 private:
@@ -325,7 +325,7 @@ public:
             tmp<scalarField> Ustar(const scalarField& z0) const;
 
 
-        // Mapping functions
+        // Mapping
 
             //- Map (and resize as needed) from self given a mapping object
             void autoMap(const fvPatchFieldMapper&);
@@ -334,7 +334,7 @@ public:
             void rmap(const atmBoundaryLayer&, const labelList&);
 
 
-        // Evaluate functions
+        // Evaluation
 
             //- Return the velocity distribution for the ATM
             tmp<vectorField> U(const vectorField& pCf) const;
@@ -347,6 +347,7 @@ public:
 
             //- Return the specific dissipation rate distribution for the ATM
             tmp<scalarField> omega(const vectorField& pCf) const;
+
 
         //- Write
         void write(Ostream&) const;

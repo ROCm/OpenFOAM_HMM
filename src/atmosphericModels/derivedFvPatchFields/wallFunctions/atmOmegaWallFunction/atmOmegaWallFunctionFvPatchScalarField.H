@@ -32,8 +32,8 @@ Group
 
 Description
     This boundary condition provides a wall constraint on the specific
-    dissipation rate, i.e. \c omega, and the turbulent kinetic energy
-    production contribution, i.e. \c G, for atmospheric boundary
+    dissipation rate (i.e. \c omega) and the turbulent kinetic energy
+    production contribution (i.e. \c G) for atmospheric boundary
     layer modelling.
 
     References:
@@ -74,7 +74,7 @@ Usage
 
     where the entries mean:
     \table
-      Property | Description                      | Type   | Req'd  | Dflt
+      Property | Description                      | Type   | Reqd   | Dflt
       type     | Type name: atmOmegaWallFunction  | word   | yes    | -
       z0    | Surface roughness length [m] | PatchFunction1<scalar> | yes | -
     \endtable
@@ -206,7 +206,7 @@ public:
 
     // Member Functions
 
-        // Mapping functions
+        // Mapping
 
             //- Map (and resize as needed) from self given a mapping object
             virtual void autoMap(const fvPatchFieldMapper&);

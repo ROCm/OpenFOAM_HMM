@@ -40,7 +40,7 @@ boundaryField
         type            slip;
     }
 
-    "upperInterface|lowerInterface"
+    "(upperInterface|lowerInterface)"
     {
         type            cyclicAMI;
         value           $internalField;

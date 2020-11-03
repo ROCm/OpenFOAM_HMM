@@ -61,7 +61,7 @@ atmBoundaryLayer::atmBoundaryLayer
     const dictionary& dict
 )
 :
-    initABL_(dict.getOrDefault<Switch>("initABL", true)),
+    initABL_(dict.getOrDefault<bool>("initABL", true)),
     kappa_
     (
         dict.getCheckOrDefault<scalar>("kappa", 0.41, scalarMinMax::ge(SMALL))

@@ -69,7 +69,6 @@ relaxationFactors
 cache
 {
     grad(U);
-    grad(T);
 }
 
 

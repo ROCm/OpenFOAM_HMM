@@ -38,7 +38,7 @@ boundaryField
         value           uniform 10.123;
     }
 
-    "upperInterface|lowerInterface"
+    "(upperInterface|lowerInterface)"
     {
         type            cyclicAMI;
         value           $internalField;

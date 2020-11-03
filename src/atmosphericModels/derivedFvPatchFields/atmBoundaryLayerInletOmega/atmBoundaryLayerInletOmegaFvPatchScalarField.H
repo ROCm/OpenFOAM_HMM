@@ -30,7 +30,7 @@ Group
 
 Description
     This boundary condition provides a log-law type ground-normal inlet
-    boundary condition for the specific dissipation rate, i.e. \c omega,
+    boundary condition for the specific dissipation rate (i.e. \c omega)
     for homogeneous, two-dimensional, dry-air, equilibrium and neutral
     atmospheric boundary layer modelling.
 
@@ -71,8 +71,8 @@ Usage
 
     where the entries mean:
     \table
-      Property  | Description                            | Type | Req'd | Deflt
-      type      | Type name: atmBoundaryLayerInletOmega  | word | yes   | -
+      Property  | Description                            | Type | Reqd | Deflt
+      type      | Type name: atmBoundaryLayerInletOmega  | word | yes  | -
     \endtable
 
     The inherited entries are elaborated in:
@@ -180,7 +180,7 @@ public:
         virtual void updateCoeffs();
 
 
-        // Mapping functions
+        // Mapping
 
             //- Map (and resize as needed) from self given a mapping object
             virtual void autoMap

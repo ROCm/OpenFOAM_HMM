@@ -32,8 +32,8 @@ Group
 
 Description
     This boundary condition provides a wall constraint on the turbulent
-    viscosity, i.e. \c nut, based on the turbulent kinetic energy, \c k,
-    and velocity, i.e. \c U, for atmospheric boundary layer modelling.
+    viscosity (i.e. \c nut) based on the turbulent kinetic energy (i.e. \c k)
+    and velocity (i.e. \c U) for atmospheric boundary layer modelling.
 
     The governing equation of the boundary condition:
 
@@ -114,9 +114,9 @@ Usage
 
     where the entries mean:
     \table
-      Property | Description                       | Type   | Req'd  | Dflt
-      type     | Type name: nutAtmWallFunction     | word   | yes    | -
-      z0Min | Minimum surface roughness length [m] | scalar | yes    | -
+      Property | Description                       | Type   | Reqd  | Dflt
+      type     | Type name: nutAtmWallFunction     | word   | yes   | -
+      z0Min | Minimum surface roughness length [m] | scalar | yes   | -
       z0    | Surface roughness length [m] | PatchFunction1<scalar> | yes | -
     \endtable
 
@@ -242,7 +242,7 @@ public:
 
     // Member Functions
 
-        // Mapping functions
+        // Mapping
 
             //- Map (and resize as needed) from self given a mapping object
             virtual void autoMap(const fvPatchFieldMapper&);
