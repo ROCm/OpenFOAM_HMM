@@ -524,7 +524,7 @@ Foam::searchableSphere::getOrdering(const vector& radii)
     }
     #endif
 
-    std::array<direction, 3> idx{0, 1, 2};
+    std::array<uint8_t, 3> idx{0, 1, 2};
 
     // Reverse sort by magnitude (largest first...)
     // Radii are positive (checked above, or just always true)
@@ -532,7 +532,7 @@ Foam::searchableSphere::getOrdering(const vector& radii)
     (
         idx.begin(),
         idx.end(),
-        [&](direction a, direction b){ return radii[a] > radii[b]; }
+        [&](uint8_t a, uint8_t b){ return radii[a] > radii[b]; }
     );
 
     componentOrder order{idx[0], idx[1], idx[2], shapeType::GENERAL};
@@ -797,7 +797,7 @@ Foam::searchableSphere::searchableSphere
     searchableSurface(io),
     origin_(origin),
     radii_(radii),
-    order_{getOrdering(radii_)}
+    order_(getOrdering(radii_))  // NB: use () not {} for copy initialization
 {
     bounds().min() = (centre() - radii_);
     bounds().max() = (centre() + radii_);

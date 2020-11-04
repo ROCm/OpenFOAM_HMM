@@ -52,8 +52,10 @@ wmake $targetType meshTools
 wmake $targetType finiteArea
 wmake $targetType finiteVolume
 wmake $targetType genericPatchFields
-wmake $targetType mesh/extrudeModel
-wmake $targetType dynamicMesh
+
+wmake $targetType mesh/blockMesh
+wmake $targetType mesh/extrudeModel  # Requires: blockMesh
+wmake $targetType dynamicMesh  # Requires: extrudeModel
 
 wmake $targetType parallel/decompose/decompositionMethods
 
@@ -87,8 +89,6 @@ lagrangian/Allwmake $targetType $*
 wmake $targetType fvOptions
 wmake $targetType fvMotionSolver
 
-# Ensure we have block.H accessible before building overset
-wmake $targetType mesh/blockMesh
 wmake $targetType overset
 
 # snappyHexMesh uses overset voxelMesh
