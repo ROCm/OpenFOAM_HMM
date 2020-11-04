@@ -75,6 +75,7 @@ search_adios2()
     local warn # warn="==> skip adios2"
     local incName="adios2.h"
     local libName="libadios2"
+    local libName2="libadios2_cxx11_mpi"
 
     local prefix="${1:-system}"
     local header library
@@ -106,6 +107,7 @@ search_adios2()
     # Library
     [ -n "$library" ] \
     || library=$(findLibrary -prefix="$prefix" -name="$libName") \
+    || library=$(findLibrary -prefix="$prefix" -name="$libName2") \
     || {
         [ -n "$warn" ] && echo "$warn (no library)"
         return 2

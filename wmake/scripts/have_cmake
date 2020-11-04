@@ -60,16 +60,15 @@ search_cmake()
     # Treat previous queries as "sticky"
     if [ -n "$CMAKE_EXE" ]
     then
-        test "$CMAKE_EXE" != "false"
+        [ "$CMAKE_EXE" != "false" ]
         return $?
     fi
 
-    local prefix="$1"
-    local candidate foundExe
+    local prefix="${1:-/usr}"
+    local candidate="$prefix"/bin/cmake
+    local foundExe
 
-    candidate="$prefix"/bin/cmake
-
-    if [ -d "$prefix" ] && [ -f "$candidate" ] && [ -x "$candidate" ]
+    if [ -f "$candidate" ] && [ -x "$candidate" ]
     then
         foundExe="$candidate"
     elif candidate="$(command -v cmake 2>/dev/null)"
@@ -77,17 +76,17 @@ search_cmake()
         # Resolved from PATH
         foundExe="$candidate"
     fi
+    # ----------------------------------
 
-    if [ -n "$foundExe" ]
+    if [ -z "$foundExe" ]
     then
-        # OK
-        export HAVE_CMAKE=true
-        export CMAKE_EXE="$foundExe"
-    else
-        # Failure
         export CMAKE_EXE="false"  # Avoid repeated calls?
         return 2
     fi
+
+    # OK
+    export HAVE_CMAKE=true
+    export CMAKE_EXE="$foundExe"
 }
 
 
@@ -97,7 +96,7 @@ have_cmake()
     # Treat previous queries as "sticky"
     if [ -n "$CMAKE_EXE" ]
     then
-        test "$CMAKE_EXE" != "false"
+        [ "$CMAKE_EXE" != "false" ]
         return $?
     fi
 

@@ -46,17 +46,20 @@ then
         DEB_TARGET_MULTIARCH=$(dpkg-architecture -qDEB_TARGET_MULTIARCH 2>/dev/null || true)
     fi
 
-    # True if OS is Darwin.
+    # True if OS is <darwin>.
+    # Test WM_ARCH for "darwin*" (lowercase) - avoid uname system call
     isDarwin()
     {
-        test Darwin = "$(uname -s 2>/dev/null || true)"
+        [ "${WM_ARCH#darwin}" != "${WM_ARCH}" ]
     }
 
-    # True if target OS is Windows
+    # True if target OS is <windows>
+    # Test WM_OSTYPE for or '*windows' (or '*Windows')
     isWindows()
     {
-        test MSwindows = "$WM_OSTYPE"
+        [ "${WM_OSTYPE%indows}" != "${WM_OSTYPE}" ]
     }
+
 
     # Static, dynamic library extensions
     extLibraries=".a .so"
@@ -69,26 +72,27 @@ then
         extLibraries=".a .dll .dll.a"  # including cross-compiling
     fi
 
+
     # True if '$1' begins with '/'
     isAbsdir()
     {
-        test "$1" = "/${1#/}"
+        [ "$1" = "/${1#/}" ]
     }
 
 
     # True if '$1' begins with '/' and also exists as a directory
     hasAbsdir()
     {
-        test "$1" = "/${1#/}" -a -d "$1"
+        [ "$1" = "/${1#/}" ] && [ -d "$1" ]
     }
 
 
     # True if '$1' is an empty string, "none" or ends in "-none"
     # Eg,
-    #    if isNone "$BOOST_ARCH_PATH" ...
+    #    if isNone "$BOOST_ARCH_PATH"
     isNone()
     {
-        test -z "$1" -o "${1##*-}" = none
+        [ -z "$1" ] || [ "${1##*-}" = none ]
     }
 
 
@@ -97,7 +101,7 @@ then
     #    if isSystem "$BOOST_ARCH_PATH"
     isSystem()
     {
-        test "${1##*-}" = system
+        [ "${1##*-}" = system ]
     }
 
 
@@ -106,7 +110,7 @@ then
     #    equalBaseName "/usr/include/scotch-int32" "scotch-int32"
     equalBaseName()
     {
-        test "${1##*/}" = "${2##*/}"
+        [ "${1##*/}" = "${2##*/}" ]
     }
 
 

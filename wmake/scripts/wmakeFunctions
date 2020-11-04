@@ -310,7 +310,7 @@ wmakeLibMpi()
         sentinel=$(sameDependency "$libName" "MPLIB=$WM_MPLIB" "MPI=$FOAM_MPI" $@) || \
             wclean "$libName"
 
-        echo "wmake $targetType $libName (mpi=$WM_MPLIB)"
+        echo "wmake $targetType $libName (mpi=$WM_MPLIB:$FOAM_MPI)"
         wmake $targetType "$libName" && \
         storeDependency "$sentinel" "MPLIB=$WM_MPLIB" "MPI=$FOAM_MPI" $@
     )
