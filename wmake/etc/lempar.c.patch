@@ -1,11 +1,10 @@
---- lempar.c.orig	2020-07-09 14:55:42.000000000 +0200
-+++ lempar.c	2020-07-10 11:04:51.991472607 +0200
-@@ -93,6 +93,12 @@
+--- lempar.c.orig	2020-11-05 19:44:09.412097759 +0100
++++ lempar.c	2020-11-06 09:03:57.932738075 +0100
+@@ -89,6 +89,11 @@
  /************* End control #defines *******************************************/
  #define YY_NLOOKAHEAD ((int)(sizeof(yy_lookahead)/sizeof(yy_lookahead[0])))
  
-+/* Default linkage for exposed parser routines is global
-+*/
++/* Default linkage for exposed parser routines is global */
 +#ifndef YYFUNCAPI
 +# define YYFUNCAPI
 +#endif
@@ -13,7 +12,7 @@
  /* Define the yytestcase() macro to be a no-op if is not already defined
  ** otherwise.
  **
-@@ -251,6 +257,7 @@
+@@ -248,6 +253,7 @@
  ** Outputs:
  ** None.
  */
@@ -21,7 +20,7 @@
  void ParseTrace(FILE *TraceFILE, char *zTracePrompt){
    yyTraceFILE = TraceFILE;
    yyTracePrompt = zTracePrompt;
-@@ -320,6 +327,7 @@
+@@ -317,6 +323,7 @@
  
  /* Initialize a new parser that has already been allocated.
  */
@@ -29,7 +28,7 @@
  void ParseInit(void *yypRawParser ParseCTX_PDECL){
    yyParser *yypParser = (yyParser*)yypRawParser;
    ParseCTX_STORE
-@@ -359,6 +367,7 @@
+@@ -356,6 +363,7 @@
  ** A pointer to a parser.  This pointer is used in subsequent calls
  ** to Parse and ParseFree.
  */
@@ -37,7 +36,7 @@
  void *ParseAlloc(void *(*mallocProc)(YYMALLOCARGTYPE) ParseCTX_PDECL){
    yyParser *yypParser;
    yypParser = (yyParser*)(*mallocProc)( (YYMALLOCARGTYPE)sizeof(yyParser) );
-@@ -427,6 +436,7 @@
+@@ -424,6 +432,7 @@
  /*
  ** Clear all secondary memory allocations from the parser
  */
@@ -45,7 +44,7 @@
  void ParseFinalize(void *p){
    yyParser *pParser = (yyParser*)p;
    while( pParser->yytos>pParser->yystack ) yy_pop_parser_stack(pParser);
-@@ -444,6 +454,7 @@
+@@ -441,6 +450,7 @@
  ** is defined in a %include section of the input grammar) then it is
  ** assumed that the input pointer is never NULL.
  */
@@ -53,7 +52,7 @@
  void ParseFree(
    void *p,                    /* The parser to be deleted */
    void (*freeProc)(void*)     /* Function used to reclaim memory */
-@@ -460,6 +471,7 @@
+@@ -457,6 +467,7 @@
  ** Return the peak depth of the stack for a parser.
  */
  #ifdef YYTRACKMAXSTACKDEPTH
@@ -61,7 +60,7 @@
  int ParseStackPeak(void *p){
    yyParser *pParser = (yyParser*)p;
    return pParser->yyhwm;
-@@ -484,6 +496,7 @@
+@@ -481,6 +492,7 @@
  ** Return the number of missed state/lookahead combinations.
  */
  #if defined(YYCOVERAGE)
@@ -69,7 +68,7 @@
  int ParseCoverage(FILE *out){
    int stateno, iLookAhead, i;
    int nMissed = 0;
-@@ -891,6 +904,7 @@
+@@ -889,6 +901,7 @@
  ** Outputs:
  ** None.
  */
@@ -77,7 +76,7 @@
  void Parse(
    void *yyp,                   /* The parser */
    int yymajor,                 /* The major token code number */
-@@ -1065,6 +1079,7 @@
+@@ -1063,6 +1076,7 @@
  ** Return the fallback token corresponding to canonical token iToken, or
  ** 0 if iToken has no fallback.
  */
