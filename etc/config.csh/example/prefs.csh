@@ -13,14 +13,15 @@
 #
 # File
 #     config.csh/example/prefs.csh
-#     - sourced by OpenFOAM-*/etc/cshrc
 #
 # Description
-#     Example of preset variables for the OpenFOAM configuration (C-Shell shell)
+#     Example of preset variables for configuring OpenFOAM (C-shell)
+#
+#     Copy to OpenFOAM-*/etc (or ~/.OpenFOAM) and it will be sourced by
+#     OpenFOAM-*/etc/cshrc
 #
 # See also
-#     'foamEtcFile -help' or 'foamEtcFile -list' for information about the
-#     paths searched
+#     'foamEtcFile -help' or 'foamEtcFile -list' for the paths searched
 #
 #------------------------------------------------------------------------------
 

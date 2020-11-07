@@ -36,9 +36,16 @@ case ThirdParty:
     set default_mpfr_version=mpfr-system
     set default_mpc_version=mpc-system
 
+    # Clear any old values
+    set gcc_version=''
+    set clang_version=''
+
     switch ("$WM_COMPILER")
     case Gcc:
         set gcc_version="$default_gcc_version"
+        breaksw
+    case Gcc102*:
+        set gcc_version=gcc-10.2.0
         breaksw
     case Gcc101*:
         set gcc_version=gcc-10.1.0
@@ -121,8 +128,11 @@ case ThirdParty:
     case Clang:
         set clang_version="$default_clang_version"
         breaksw
+    case Clang110*:
+        set clang_version=llvm-11.0.0
+        breaksw
     case Clang100*:
-        set clang_version=llvm-10.0.0
+        set clang_version=llvm-10.0.1
         breaksw
     case Clang90*:
         set clang_version=llvm-9.0.1
@@ -155,7 +165,13 @@ case ThirdParty:
         set clang_version=llvm-3.7.1
         breaksw
 
-    default:
+    endsw
+
+    _foamEtc -config prefs.compiler             ## Optional adjustments
+    _foamEtc -config "compiler-$WM_COMPILER"    ## Per-compiler override
+
+    # Trap errors
+    if ( "${gcc_version}${clang_version}" == "" ) then
         /bin/cat << UNKNOWN_COMPILER
 ===============================================================================
 Warning in $WM_PROJECT_DIR/etc/config.csh/compiler:
@@ -164,13 +180,10 @@ Unknown ThirdParty compiler type/version - '$WM_COMPILER'
 Please check your settings
 ===============================================================================
 UNKNOWN_COMPILER
-        breaksw
-    endsw
-
-    # Per-compiler overrides in "compiler-$WM_COMPILER" files
-    _foamEtc -config "compiler-$WM_COMPILER"
+    endif
     breaksw
 endsw
+
 
 unset default_gcc_version default_clang_version
 unset default_gmp_version default_mpfr_version default_mpc_version

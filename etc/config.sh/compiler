@@ -40,8 +40,12 @@ ThirdParty)
     mpfr_version="$default_mpfr_version"
     mpc_version="$default_mpc_version"
 
+    # Clear any old values
+    unset gcc_version clang_version
+
     case "$WM_COMPILER" in
     Gcc)    gcc_version="$default_gcc_version" ;;
+    Gcc102*) gcc_version=gcc-10.2.0 ;;
     Gcc101*) gcc_version=gcc-10.1.0 ;;
     Gcc93*) gcc_version=gcc-9.3.0 ;;
     Gcc92*) gcc_version=gcc-9.2.0 ;;
@@ -70,7 +74,8 @@ ThirdParty)
     Gcc48*) gcc_version=gcc-4.8.5 ;;
 
     Clang)    clang_version="$default_clang_version" ;;
-    Clang100*) clang_version=llvm-10.0.0 ;;
+    Clang110*) clang_version=llvm-11.0.0 ;;
+    Clang100*) clang_version=llvm-10.0.1 ;;
     Clang90*) clang_version=llvm-9.0.1 ;;
     Clang80*) clang_version=llvm-8.0.1 ;;
     Clang71*) clang_version=llvm-7.1.0 ;;
@@ -82,7 +87,14 @@ ThirdParty)
     Clang38*) clang_version=llvm-3.8.1 ;;
     Clang37*) clang_version=llvm-3.7.1 ;;
 
-    *)
+    esac
+
+    _foamEtc -config prefs.compiler             ## Optional adjustments
+    _foamEtc -config "compiler-$WM_COMPILER"    ## Per-compiler override
+
+    # Trap errors
+    if [ -z "$gcc_version$clang_version" ]
+    then
         /bin/cat << UNKNOWN_COMPILER 1>&2
 ===============================================================================
 Warning in $WM_PROJECT_DIR/etc/config.sh/compiler:
@@ -91,13 +103,10 @@ Unknown ThirdParty compiler type/version - '$WM_COMPILER'
 Please check your settings
 ===============================================================================
 UNKNOWN_COMPILER
-        ;;
-    esac
-
-    # Per-compiler overrides in "compiler-$WM_COMPILER" files
-    _foamEtc -config "compiler-$WM_COMPILER"
+    fi
     ;;
 esac
+
 
 unset default_gcc_version default_clang_version
 unset default_gmp_version default_mpfr_version default_mpc_version
