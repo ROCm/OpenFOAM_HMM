@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,7 @@ unsigned int Foam::IOstream::precision_
 Foam::ISstream Foam::Sin(std::cin, "Sin");
 Foam::OSstream Foam::Sout(std::cout, "Sout");
 Foam::OSstream Foam::Serr(std::cerr, "Serr");
-Foam::OFstream Foam::Snull("/dev/null");
+Foam::OFstream Foam::Snull(nullptr);  // A "/dev/null" equivalent
 
 Foam::prefixOSstream Foam::Pout(std::cout, "Pout");
 Foam::prefixOSstream Foam::Perr(std::cerr, "Perr");

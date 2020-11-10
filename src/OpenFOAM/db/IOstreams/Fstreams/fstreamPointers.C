@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "fstreamPointer.H"
+#include "OCountStream.H"
 #include "OSspecific.H"
 
 // HAVE_LIBZ defined externally
@@ -131,6 +132,12 @@ Foam::ifstreamPointer::ifstreamPointer
 }
 
 
+Foam::ofstreamPointer::ofstreamPointer(std::nullptr_t)
+:
+    ptr_(new Foam::ocountstream)
+{}
+
+
 Foam::ofstreamPointer::ofstreamPointer
 (
     const fileName& pathname,
@@ -184,7 +191,7 @@ Foam::ofstreamPointer::ofstreamPointer
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::ifstreamPointer::reopen_gz(const fileName& pathname_gz)
+void Foam::ifstreamPointer::reopen_gz(const std::string& pathname_gz)
 {
     #ifdef HAVE_LIBZ
     igzstream* gz = dynamic_cast<igzstream*>(ptr_.get());

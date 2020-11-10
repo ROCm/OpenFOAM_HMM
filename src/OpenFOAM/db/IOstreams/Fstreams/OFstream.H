@@ -64,6 +64,10 @@ public:
 
     // Constructors
 
+        //- Construct a null output file stream.
+        //  Behaves like \c /dev/null and is named accordingly
+        explicit OFstream(std::nullptr_t);
+
         //- Construct from pathname
         explicit OFstream
         (

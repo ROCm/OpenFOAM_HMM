@@ -82,7 +82,7 @@ protected:
     // Protected Member Functions
 
         //- Special 'rewind' method for compressed stream
-        void reopen_gz(const fileName& pathname_gz);
+        void reopen_gz(const std::string& pathname_gz);
 
 public:
 
@@ -164,7 +164,7 @@ class ofstreamPointer
 {
     // Private Data
 
-        //- The stream pointer (ofstream or ogzstream)
+        //- The stream pointer (ofstream | ogzstream | ocountstream)
         std::unique_ptr<std::ostream> ptr_;
 
 public:
@@ -191,6 +191,9 @@ public:
 
 
     // Constructors
+
+        //- Construct as null output stream using Foam::ocountstream
+        explicit ofstreamPointer(std::nullptr_t);
 
         //- Construct from pathname, with specified append option
         ofstreamPointer(const fileName& pathname, const bool append)

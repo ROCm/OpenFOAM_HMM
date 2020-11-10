@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,44 +24,88 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
+    Test null and counting output streams
 
 \*---------------------------------------------------------------------------*/
 
 #include "OCountStream.H"
 #include "StringStream.H"
+#include "Fstream.H"
 #include "IOstreams.H"
 #include "argList.H"
 
 using namespace Foam;
+
+template<class OS>
+void generateOutput(OS& os)
+{
+    for (label i = 0; i < 50; ++i)
+    {
+        os  << 1002 << " " << "abcd" << " "
+            << "def" << " " << 3.14159 << ";\n";
+    }
+}
+
+
+void printInfo(OSstream& os)
+{
+    Info<< "name: " << os.name() << " : " << os.stdStream().tellp() << nl;
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
 int main(int argc, char *argv[])
 {
+    argList::addOption("write", "file", "test writing to file");
+
+    #include "setRootCase.H"
+
     OCountStream cnt;
     OStringStream str;
-
     ocountstream plain;
 
-    for (label i = 0; i < 50; ++i)
-    {
-        str
-            << 1002 << " " << "abcd" << " "
-            << "def" << " " << 3.14159 << ";\n";
-
-        cnt
-            << 1002 << " " << "abcd" << " "
-            << "def" << " " << 3.14159 << ";\n";
-
-        plain
-            << 1002 << " " << "abcd" << " "
-            << "def" << " " << 3.14159 << ";\n";
-    }
+    generateOutput(str);
+    generateOutput(cnt);
+    generateOutput(plain);
 
     cnt.print(Info);
-    Info<< "via string-stream: " << str.str().size() << " chars" << endl;
-    Info<< "via ocountstream: " << plain.size() << " chars" << endl;
+
+    Info<< "counter state: " << (cnt.stdStream().rdstate()) << nl
+        << "via string-stream: " << str.str().size() << " chars" << nl
+        << "via ocountstream: " << plain.size() << " chars" << endl;
+
+    fileName outputName;
+    args.readIfPresent("write", outputName);
+
+    if (outputName.size())
+    {
+        IOstreamOption streamOpt;
+
+        if (outputName.hasExt("gz"))
+        {
+            outputName.removeExt();
+            streamOpt.compression(IOstreamOption::COMPRESSED);
+        }
+
+
+        OFstream os1(outputName, streamOpt);
+        OFstream os2(nullptr);   // A /dev/null equivalent
+        OFstream os3("/dev/null");
+
+        // Doubled output
+        generateOutput(os1); generateOutput(os1);
+        generateOutput(os2); generateOutput(os2);
+        generateOutput(os3); generateOutput(os3);
+
+        Info<< nl
+            << "doubled output" << nl;
+
+        printInfo(os1);
+        printInfo(os2);
+        printInfo(os3);
+    }
 
     Info<< "\nEnd\n" << endl;
 

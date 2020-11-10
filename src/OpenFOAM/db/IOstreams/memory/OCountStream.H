@@ -56,6 +56,48 @@ class countstreambuf
 
 protected:
 
+    //- Set position pointer to relative position
+    virtual std::streampos seekoff
+    (
+        std::streamoff off,
+        std::ios_base::seekdir way,
+        std::ios_base::openmode which = std::ios_base::in|std::ios_base::out
+    )
+    {
+        if (which & std::ios_base::out)
+        {
+            if (way == std::ios_base::beg)
+            {
+                size_ = off;
+            }
+            else if (way == std::ios_base::cur)
+            {
+                size_ += off;
+            }
+            else if (way == std::ios_base::end)
+            {
+                // not really possible
+            }
+
+            return size_; // tellp()
+        }
+
+        return -1;
+    }
+
+
+    //- Set position pointer to absolute position
+    //  For the counter, adjust the count accordingly.
+    virtual std::streampos seekpos
+    (
+        std::streampos pos,
+        std::ios_base::openmode which = std::ios_base::in|std::ios_base::out
+    )
+    {
+        return seekoff(pos, std::ios_base::beg, which);
+    }
+
+
     //- Handle output counting via overflow
     virtual int overflow(int c = EOF)
     {
@@ -66,35 +108,31 @@ protected:
         return c;
     }
 
-    //- Set position pointer to absolute position
-    //  For the counter, any positioning is ignored and it always acts like
-    //  seekpos(0), which resets the count.
-    virtual std::streampos seekpos
-    (
-        std::streampos,
-        std::ios_base::openmode which = std::ios_base::in|std::ios_base::out
-    )
+
+    //- Put sequence of characters
+    virtual std::streamsize xsputn(const char* s, std::streamsize n)
     {
-        size_ = 0;
-        return 0;
+        size_ += n;
+        return n;
     }
+
 
 public:
 
     //- Default construct, or with precount size
-    countstreambuf(std::streamsize precount=0)
+    explicit countstreambuf(std::streamsize precount=0)
     :
         size_(precount)
     {}
 
-    //- \return The number of bytes counted
-    std::streamsize size() const
+    //- \return The buffer put position == number of bytes counted.
+    std::streamsize tellp() const
     {
         return size_;
     }
 
     //- Some information about the number of bytes counted
-    inline void printBufInfo(Ostream& os) const
+    void printBufInfo(Ostream& os) const
     {
         os << "count=" << size_;
     }
@@ -124,8 +162,14 @@ public:
     {}
 
 
+    //- \return The buffer put position == number of bytes counted.
+    using countstreambuf::tellp;
+
     //- \return The number of bytes counted
-    using countstreambuf::size;
+    std::streamsize size() const
+    {
+        return countstreambuf::tellp();
+    }
 
     //- Rewind the stream, reset the count
     void rewind()
@@ -183,7 +227,7 @@ public:
         //- The number of bytes counted
         std::streamsize size() const
         {
-            return buf_.size();
+            return buf_.tellp();
         }
 
         //- Rewind the stream, reset the count

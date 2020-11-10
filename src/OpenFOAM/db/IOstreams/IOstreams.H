@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,19 +50,19 @@ Description
 
 namespace Foam
 {
-    //- An Istream wrapper for std::cin
+    //- ISstream wrapped stdin (std::cin)
     extern ISstream Sin;
 
-    //- An Ostream wrapper for std::cout
+    //- OSstream wrapped stdout (std::cout)
     extern OSstream Sout;
 
-    //- An Ostream wrapper for std::cerr
+    //- OSstream wrapped stderr (std::cerr)
     extern OSstream Serr;
 
-    //- An Ostream wrapper for parallel output to std::cout
+    //- OSstream wrapped stdout (std::cout) with parallel prefix
     extern prefixOSstream Pout;
 
-    //- An Ostream wrapper for parallel output to std::cerr
+    //- OSstream wrapped stderr (std::cerr) with parallel prefix
     extern prefixOSstream Perr;
 }
 

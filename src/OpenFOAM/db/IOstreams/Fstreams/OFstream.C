@@ -41,6 +41,21 @@ namespace Foam
 
 Foam::OFstream::OFstream
 (
+    std::nullptr_t
+)
+:
+    Foam::ofstreamPointer(nullptr),
+    OSstream(*(ofstreamPointer::get()), "/dev/null")
+{
+    setState(ofstreamPointer::get()->rdstate());
+    setOpened();
+
+    lineNumber_ = 1;
+}
+
+
+Foam::OFstream::OFstream
+(
     const fileName& pathname,
     IOstreamOption streamOpt,
     const bool append
